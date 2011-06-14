@@ -1,5 +1,3 @@
-# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----
-
 # Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
 __ignore__: junk
@@ -42,475 +40,475 @@ ru_RU: Русский
 # COMMON WORDS AND PHRASES
 
 # Object titles, all nouns.
-COMMENT:  Comment
-comment:  comment
-COMMENTS:  Comments
-comments:  comments
-DESCRIPTION:  Description
-description:  description
-DESCRIPTIONS:  Descriptions
-descriptions:  descriptions
-DRAFT:  Draft
-draft:  draft
-DRAFTS:  Drafts
-drafts:  drafts
-IMAGE:  Image
-image:  image
-IMAGES:  Images
-images:  images
-LICENSE:  License
-license:  license
-LICENSES:  Licenses
-licenses:  licenses
-LOCATION:  Location
-location:  location
-LOCATIONS:  Locations
-locations:  locations
-LOCATION_DESCRIPTION:  Location Description
-location_description:  location description
-LOCATION_DESCRIPTIONS:  Location Descriptions
-location_descriptions:  location descriptions
-LOG:  Log
-log:  log
-LOGS:  Logs
-logs:  logs
-MAP:  Map
-map:  map
-MAPS:  Maps
-maps:  maps
-NAME:  Name
-name:  name
-NAMES:  Names
-names:  names
-NAME_DESCRIPTION:  Name Description
-name_description:  name description
-NAME_DESCRIPTIONS:  Name Descriptions
-name_descriptions:  name descriptions
-NAMING:  Proposed Name
-naming:  proposed name
-NAMINGS:  Proposed Names
-namings:  proposed names
-NOTIFICATION:  Notification
-notification:  notification
-NOTIFICATIONS:  Notifications
-notifications:  notifications
-OBSERVATION:  Observation
-observation:  observation
-OBSERVATIONS:  Observations
-observations:  observations
-PAST_LOCATION:  Location Change
-past_location:  location change
-PAST_LOCATIONS:  Location Changes
-past_locations:  location changes
-PAST_NAME:  Name Change
-past_name:  name change
-PAST_NAMES:  Name Changes
-past_names:  name changes
-PROJECT:  Project
-project:  project
-PROJECTS:  Projects
-projects:  projects
-RSS_LOG:  Activity Log
-rss_log:  activity log
-RSS_LOGS:  Activity Logs
-rss_logs:  activity logs
-SOURCE:  Source
-source:  source
-SOURCES:  Sources
-sources:  sources
-SPECIES_LIST:  Species List
-species_list:  species list
-SPECIES_LISTS:  Species Lists
-species_lists:  species lists
-USER:  User
-user:  user
-USERS:  Users
-users:  users
-USER_GROUP:  User Group
-user_group:  user group
-USER_GROUPS:  User Groups
-user_groups:  user groups
-VOTE:  Vote
-vote:  vote
-VOTES:  Votes
-votes:  votes
+COMMENT: Commentaire
+comment: commentaire
+COMMENTS: Commentaires
+comments: commentaires
+DESCRIPTION: Description
+description: description
+DESCRIPTIONS: Descriptions
+descriptions: descriptions
+DRAFT: Brouillon
+draft: brouillon
+DRAFTS: Brouillons
+drafts: brouillons
+IMAGE: Image
+image: image
+IMAGES: Images
+images: images
+LICENSE: Licence
+license: licence
+LICENSES: Licences
+licenses: licences
+LOCATION: Endroit
+location: endroit
+LOCATIONS: Endroits
+locations: endroits
+LOCATION_DESCRIPTION: Description d'endroit
+location_description: description d'endroit
+LOCATION_DESCRIPTIONS: Descriptions d'endroit
+location_descriptions: descriptions d'endroit
+LOG: Log
+log: log
+LOGS: Logs
+logs: logs
+MAP: Carte
+map: carte
+MAPS: Cartes
+maps: cartes
+NAME: Nom
+name: nom
+NAMES: Noms
+names: noms
+NAME_DESCRIPTION: Description de nom
+name_description: description de nom
+NAME_DESCRIPTIONS: Descriptions de nom
+name_descriptions: descriptions de nom
+NAMING: Nom Proposé
+naming: nom proposé
+NAMINGS: Noms Proposés
+namings: noms proposés
+NOTIFICATION: Notification
+notification: notification
+NOTIFICATIONS: Notifications
+notifications: notifications
+OBSERVATION: Observation
+observation: observation
+OBSERVATIONS: Observations
+observations: observations
+PAST_LOCATION: Changement d'endroit
+past_location: changement d'endroit
+PAST_LOCATIONS: Changements d'endroit
+past_locations: changements d'endroit
+PAST_NAME: Changement de nom
+past_name: changement de nom
+PAST_NAMES: Changements de nom
+past_names: changements de nom
+PROJECT: Projet
+project: projet
+PROJECTS: Projets
+projects: projets
+RSS_LOG: Journal d'activité
+rss_log: journals d'activité
+RSS_LOGS: Journal d'activité
+rss_logs: journals d'activité
+SOURCE: Source
+source: source
+SOURCES: Sources
+sources: sources
+SPECIES_LIST: Liste d'observations
+species_list: liste d'observations
+SPECIES_LISTS: Listes d'observations
+species_lists: listes d'observations
+USER: Utilisateur
+user: utilisateur
+USERS: Utilisateurs
+users: utilisateurs
+USER_GROUP: Groupe d'utilisateurs
+user_group: groupe d'utilisateurs
+USER_GROUPS: Groupes d'utilisateurs
+user_groups: groupes d'utilisateurs
+VOTE: Vote
+vote: vote
+VOTES: Votes
+votes: votes
 
 # Other common nouns:
-ACCOUNT:  Account
-account:  account
-ACCOUNTS:  Accounts
-accounts:  accounts
-ADMIN:  Admin
-admin:  admin
-ADMINS:  Admins
-admins:  admins
-ADMIN_GROUP:  Admin Group
-admin_group:  admin group
-ADMIN_GROUPS:  Admin Groups
-admin_groups:  admin groups
+ACCOUNT: Compte
+account: compte
+ACCOUNTS: Comptes
+accounts: comptes
+ADMIN: Admin
+admin: admin
+ADMINS: Admins
+admins: admins
+ADMIN_GROUP: Groupe d'administrateurs
+admin_group: groupe d'administrateurs
+ADMIN_GROUPS: Groupes d'administrateurs
+admin_groups: groupes d'administrateurs
 # ("Author" is person who wrote a book or description.)
-AUTHOR:  Author
-author:  author
-AUTHORS:  Authors
-authors:  authors
+AUTHOR: Auteur
+author: auteur
+AUTHORS: Auteurs
+authors: auteurs
 # ("Authority" is authority on a scientific name.)
-AUTHORITY:  Author
-authority:  author
-AUTHORITYS:  Authors
-authoritys:  authors
-CHANGE:  Change
-change:  change
-CHANGES:  Changes
-changes:  changes
-CITATION:  Citation
-citation:  citation
-CITATIONS:  Citations
-citations:  citations
-CONFIDENCE_LEVEL:  Confidence Level
-confidence_level:  confidence level
-CONFIDENCE_LEVELS:  Confidence Levels
-confidence_levels:  confidence levels
-COPYRIGHT_HOLDER:  Copyright Holder
-copyright_holder:  copyright holder
-COPYRIGHT_HOLDERS:  Copyright Holders
-copyright_holders:  copyright holders
-CORRECT_SPELLING:  Correct Spelling
-correct_spelling:  correct spelling
-CORRECT_SPELLINGS:  Correct Spellings
-correct_spellings:  correct spellings
-DATE:  Date
-date:  date
-DATES:  Dates
-dates:  dates
-EDITOR:  Editor
-editor:  editor
-EDITORS:  Editors
-editors:  editors
-EMAIL:  Email
-email:  email
-EMAILS:  Emails
-emails:  emails
-EMAIL_ADDRESS:  Email Address
-email_address:  email address
-EMAIL_ADDRESSS:  Email Addresses
-email_addresss:  email addresses
-FULL_NAME:  Full Name
-full_name:  full name
-FULL_NAMES:  Full Names
-full_names:  full names
-IDENTIFIER:  Identifier
-identifier:  identifier
-IDENTIFIERS:  Identifiers
-identifiers:  identifiers
-INDEX: Índice
-index: Índice
-INDEXES: Índices
-indexes: Índices
-LATITUDE:  Latitude
-latitude:  latitude
-LATITUDES:  Latitudes
-latitudes:  latitudes
-LOGIN_NAME:  Login Name
-login_name:  login name
-LOGIN_NAMES:  Login Names
-login_names:  login names
-LONGITUDE:  Longitude
-longitude:  longitude
-LONGITUDES:  Longitudes
-longitudes:  longitudes
-MEMBER:  Member
-member:  member
-MEMBERS:  Members
-members:  members
-MESSAGE:  Message
-message:  message
-MESSAGES:  Messages
-messages:  messages
-NOTE:  Note
-note:  note
-NOTES:  Notes
-notes:  notes
-OBSERVER:  Observer
-observer:  observer
-OBSERVERS:  Observers
-observers:  observers
-OWNER:  Owner
-owner:  owner
-OWNERS:  Owners
-owners:  owners
-PASSWORD:  Password
-password:  password
-PASSWORDS:  Passwords
-passwords:  passwords
+AUTHORITY: Auteur
+authority: auteur
+AUTHORITYS: Auteurs
+authoritys: auteurs
+CHANGE: Changement
+change: changement
+CHANGES: Changements
+changes: changements
+CITATION: Citation
+citation: citation
+CITATIONS: Citations
+citations: citations
+CONFIDENCE_LEVEL: Niveau de confiance
+confidence_level: niveau de confiance
+CONFIDENCE_LEVELS: Niveaux de confiance
+confidence_levels: niveaux de confiance
+COPYRIGHT_HOLDER: Titulaire du droit d'auteur
+copyright_holder: Titulaire du droit d'auteur
+COPYRIGHT_HOLDERS: Titulaires du droit d'auteur
+copyright_holders: Titulaires du droit d'auteur
+CORRECT_SPELLING: Orthographe correcte
+correct_spelling: orthographe correcte
+CORRECT_SPELLINGS: Orthographes correctes
+correct_spellings: orthographes correctes
+DATE: Date
+date: date
+DATES: Dates
+dates: dates
+EDITOR: Rédacteur
+editor: rédacteur
+EDITORS: Rédacteurs
+editors: rédacteurs
+EMAIL: E-mail
+email: e-mail
+EMAILS: E-mails
+emails: e-mails
+EMAIL_ADDRESS: Addresse électronique
+email_address: addresse électronique
+EMAIL_ADDRESSS: Addresses électronique
+email_addresss: addresses électronique
+FULL_NAME: Nom complet
+full_name: nom complets
+FULL_NAMES: Noms complet
+full_names: noms complets
+IDENTIFIER: Indentificateur
+identifier: indentificateur
+IDENTIFIERS: Indentificateurs
+identifiers: indentificateurs
+INDEX: Index
+index: index
+INDEXES: Indices
+indexes: indices
+LATITUDE: Latitude
+latitude: latitude
+LATITUDES: Latitudes
+latitudes: latitudes
+LOGIN_NAME: Nom d'utilisateur
+login_name: nom d'utilisateur
+LOGIN_NAMES: Noms d'utilisateur
+login_names: noms d'utilisateur
+LONGITUDE: Longitude
+longitude: longitude
+LONGITUDES: Longitudes
+longitudes: longitudes
+MEMBER: Membre
+member: membre
+MEMBERS: Membres
+members: membres
+MESSAGE: Message
+message: message
+MESSAGES: Messages
+messages: messages
+NOTE: Note
+note: note
+NOTES: Notes
+notes: notes
+OBSERVER: Observateur
+observer: observateur
+OBSERVERS: Observateurs
+observers: observateurs
+OWNER: Propriétaire
+owner: propriétaire
+OWNERS: Propriétaires
+owners: propriétaires
+PASSWORD: Mot de passe
+password: mot de passe
+PASSWORDS: Mots de passe
+passwords: mots de passe
 # (Only used by validation errors, I think.)
-PASSWORD_CONFIRMATION:  Password Confirmation
-password_confirmation:  password confirmation
-PASSWORD_CONFIRMATIONS:  Password Confirmations
-password_confirmations:  password confirmations
-PREFERENCES:  Preferences
-preferences:  preferences
-PREFERRED_NAME:  Preferred Name
-preferred_name:  preferred name
-PREFERRED_NAMES:  Preferred Names
-preferred_names:  preferred names
-PROFILE:  Profile
-profile:  profile
-PROFILES:  Profiles
-profiles:  profiles
-QUALITY:  Quality
-quality:  quality
-RANK:  Rank
-rank:  rank
-RANKS:  Ranks
-ranks:  ranks
-REVIEWER:  Reviewer
-reviewer:  reviewer
-REVIEWERS:  Reviewers
-reviewers:  reviewers
-SIZE:  Size
-size:  size
-STATUS:  Status
-status:  status
-STATUSS:  Statuses
-statuss:  statuses
-SUBJECT:  Subject
-subject:  subject
-SUBJECTS:  Subjects
-subjects:  subjects
-SUMMARY:  Summary
-summary:  summary
-SUMMARYS:  Summaries
-summarys:  summaries
+PASSWORD_CONFIRMATION: Confirmation de mot de passe
+password_confirmation: confirmation de mot de passe
+PASSWORD_CONFIRMATIONS: Confirmations de mot de passe
+password_confirmations: confirmations de mot de passe
+PREFERENCES: Préférences
+preferences: préférences
+PREFERRED_NAME: Nom préféré
+preferred_name: nom préféré
+PREFERRED_NAMES: Noms préférés
+preferred_names: noms préférés
+PROFILE: Profil
+profile: profil
+PROFILES: Profils
+profiles: profils
+QUALITY: Qualité
+quality: qualité
+RANK: Rang
+rank: rang
+RANKS: Rangs
+ranks: rangs
+REVIEWER: Évaluateur
+reviewer: évaluateur
+REVIEWERS: Évaluateurs
+reviewers: évaluateurs
+SIZE: Taille
+size: taille
+STATUS: État
+status: état
+STATUSS: États
+statuss: états
+SUBJECT: Sujet
+subject: sujet
+SUBJECTS: Sujets
+subjects: sujets
+SUMMARY: Résumé
+summary: résumé
+SUMMARYS: Résumés
+summarys: résumés
 # ("Tag" refers to a keyword, will be used to tag names and images.)
-TAG:  Tag
-tag:  tag
-TAGS:  Tags
-tags:  tags
-TIME:  Time
-time:  time
-TIMES:  Times
-times:  times
-TITLE:  Title
-title:  title
-TITLES:  Titles
-titles:  titles
-VERSION:  Version
-version:  version
-VERSIONS:  Versions
-versions:  versions
+TAG: Tag
+tag: tag
+TAGS: Tags
+tags: tags
+TIME: Temps
+time: temps
+TIMES: Temps
+times: Temps
+TITLE: Titre
+title: titre
+TITLES: Titres
+titles: titres
+VERSION: Version
+version: version
+VERSIONS: Versions
+versions: versions
 
 # Common nouns/adjectives used as labels, never pluralized:
-ALL:  All
-all:  all
-NONE:  None
-none:  none
-HIGH:  High
-high:  high
-LOW:  Low
-low:  low
-LESS:  Less
-less:  less
-MORE:  More
-more:  more
-PREV:  Prev
-prev:  prev
-NEXT:  Next
-next:  next
-BACK:  Prev
-back:  prev
-FORWARD:  Next
-forward:  next
-EAST:  East
-east:  east
-NORTH:  North
-north:  north
-SOUTH:  South
-south:  south
-WEST:  West
-west:  west
+ALL: Tous
+all: tous
+NONE: Rien
+none: rien
+HIGH: Haute
+high: haute
+LOW: Basse
+low: basse
+LESS: Moins
+less: moins
+MORE: Plus
+more: plus
+PREV: Précédent
+prev: précédent
+NEXT: Suivant
+next: suivant
+BACK: Dernier
+back: dernier
+FORWARD: Prochain
+forward: prochain
+EAST: Est
+east: est
+NORTH: Nord
+north: nord
+SOUTH: Sud
+south: sud
+WEST: Ouest
+west: ouest
 
-# Labels for fields answering: "What did you observer", "When did you observe
+# Labels for fields answering: "What did you observe?", "When did you observe
 # it?", "Where did you observe it?", and "Who observed it?".
-WHAT:  What
-what:  what
-WHEN:  When
-when:  when
-WHERE:  Where
-where:  where
-WHO:  Who
-who:  who
+WHAT: Quelle
+what: quelle
+WHEN: Quand
+when: quand
+WHERE: Où
+where: où
+WHO: Qui
+who: qui
 
 # Common verbs/actions used as button labels:
-ADD:  Add
-add:  add
-APPROVE:  Approve
-approve:  approve
-CANCEL:  Cancel
-cancel:  cancel
-CLOSE:  Close
-close:  close
-CREATE:  Create
-create:  create
-DEPRECATE:  Deprecate
-deprecate:  deprecate
-DESTROY:  Destroy
-destroy:  destroy
-DISABLE:  Disable
-disable:  disable
-EDIT:  Edit
-edit:  edit
-ENABLE:  Enable
-enable:  enable
-MERGE:  Merge
-merge:  merge
-OKAY:  Okay
-okay:  okay
-REMOVE:  Remove
-remove:  remove
-SAVE:  Save
-save:  save
-SAVE_CHANGES:  Save Changes
-save_changes:  save changes
-SAVE_EDITS:  Save Edits
-save_edits:  save edits
-SEARCH:  Search
-search:  search
-SEND:  Send
-send:  send
-SUBMIT:  Submit
-submit:  submit
-UPDATE:  Update
-update:  update
-UPLOAD:  Upload
-upload:  upload
+ADD: Ajouter
+add: ajouter
+APPROVE: Approuver
+approve: approuver
+CANCEL: Annuler
+cancel: annuler
+CLOSE: Fermer
+close: fermer
+CREATE: Créer
+create: créer
+DEPRECATE: Déprécier
+deprecate: déprécier
+DESTROY: Détruire
+destroy: détruire
+DISABLE: Désactiver
+disable: désactiver
+EDIT: Modifier
+edit: modifier
+ENABLE: Activer
+enable: activer
+MERGE: Fusionner
+merge: fusionner
+OKAY: Bien
+okay: bien
+REMOVE: Supprimer
+remove: supprimer
+SAVE: Enregistrer
+save: enregistrer
+SAVE_CHANGES: Enregistrer les modifications
+save_changes: enregistrer les modifications
+SAVE_EDITS: Enregistrer les modifications
+save_edits: enregistrer les modifications
+SEARCH: Rechercher
+search: rechercher
+SEND: Envoyer
+send: envoyer
+SUBMIT: Envoyer
+submit: envoyer
+UPDATE: Mise à jour
+update: mise à jour
+UPLOAD: Télécharger
+upload: télécharger
 
 # Common adjectives.
-BY:  By
-by:  by
-CREATED:  Created
-created:  created
-DESTROYED:  Destroyed
-destroyed:  destroyed
-MODIFIED:  Modified
-modified:  modified
-OPTIONAL:  Optional
-optional:  optional
-REQUIRED:  Required
-required:  required
-WATCHING:  Watching
-watching:  watching
-IGNORING:  Ignoring
-ignoring:  ignoring
-TRACKING:  Tracking
-tracking:  tracking
-VIEWED:  Viewed
-viewed:  viewed
+BY: Par
+by: par
+CREATED: Créé
+created: cree
+DESTROYED: Détruite
+destroyed: détruite
+MODIFIED: Mise à jour
+modified: mise à jour
+OPTIONAL: En option
+optional: en option
+REQUIRED: Nécessaire
+required: nécessaire
+WATCHING: Regardé
+watching: regardé
+IGNORING: Ignoré
+ignoring: ignoré
+TRACKING: Suivi
+tracking: suivi
+VIEWED: Vu
+viewed: vu
 
 # Common adjectives describing species names. (Note: "approved" seems to be
 # interchangable with "accepted" in our site -- both indicate that the
 # scientific community accepts this name as correct.  "Reviewed" on the
 # other hand indicates that a user in the "reviewers" group has looked at
 # an object and didn't see any obvious mistakes.)
-APPROVED:  Approved
-approved:  approved
-ACCEPTED:  Accepted
-accepted:  accepted
-DEPRECATED:  Deprecated
-deprecated:  deprecated
-MISSPELLED:  Misspelt
-misspelled:  misspelt
-NOT_MISSPELLED:  Spelled Correctly
-not_misspelled:  spelled correctly
-REVIEWED:  Reviewed
-reviewed:  reviewed
-UNKNOWN:  Unknown
-unknown:  unknown
+APPROVED: Approuvé
+approved: approuvé
+ACCEPTED: Correcte
+accepted: Correcte
+DEPRECATED: Obsolète
+deprecated: obsolète
+MISSPELLED: Mal orthographié
+misspelled: mal orthographié
+NOT_MISSPELLED: Correctement orthographié
+not_misspelled: correctement orthographié
+REVIEWED: Évalué
+reviewed: évalué
+UNKNOWN: Inconnue
+unknown: inconnue
 
 # Permissions: restricted means access is restricted but the current user has
 # access; private means the current user does not have access; default means
 # this is the default description that shows up on the show_name/location page
 # (synonyms that might work better are "principle" or "main" or "official").
-PRIVATE:  Private
-private:  private
-PUBLIC:  Public
-public:  public
-RESTRICTED:  Restricted
-restricted:  restricted
-DEFAULT:  Default
-default:  default
+PRIVATE: Privé
+private: privé
+PUBLIC: Publique
+public: publique
+RESTRICTED: Restreint
+restricted: restreint
+DEFAULT: Par défaut
+default: par défaut
 
 # Common verbs/actions with objects:
-add_object:  Add [TYPE]
-add_objects:  Add [TYPES]
-all_objects:  All [TYPES]
-cancel_and_show:  Cancel (Show [TYPE])
-create_object:  Create [TYPE]
-destroy_object:  Destroy [TYPE]
-edit_object:  Edit [TYPE]
-list_objects:  List [TYPES]
-remove_object:  Remove [TYPE]
-remove_objects:  Remove [TYPES]
-show_all:  Show All
-show_name:  About [NAME]
-show_object:  Show [TYPE]
-show_objects:  Show [TYPES]
-sort_by_object: Ordenado por [TYPE]
+add_object: Ajouter [type]
+add_objects: Ajouter les [types]
+all_objects: Tous/Toutes les [types]
+cancel_and_show: Annuler (afficher [type])
+create_object: Créer [type]
+destroy_object: Détruire [type]
+edit_object: Modifier [type]
+list_objects: Énumérer les [types]
+remove_object: Supprimer [type]
+remove_objects: Supprimer les [types]
+show_all: Afficher tous
+show_name: A propos de [name]
+show_object: Afficher [type]
+show_objects: Afficher les [types]
+sort_by_object: Trier par [type]
 
 # Other generic phrases.
-and_num_more:  And [num] more...
-are_you_sure:  Are you sure?
-click_for_map:  Click for map
-google_images:  Google Images
-many_times:  "[num] times"
-one_time:  once
-permission_denied:  Permission denied.
-"YES": "Yes"
-"NO": "No"
-"yes": "yes"
-"no": "no"
+and_num_more: et plus [num]
+are_you_sure: Etes-vous sûr?
+click_for_map: Cliquez pour voir la carte
+google_images: Google images
+many_times: "[num] fois"
+one_time: un fois
+permission_denied: Autorisation refusée.
+"YES": "Oui"
+"NO": "Non"
+"yes": "oui"
+"no": "non"
 
 ################################################################################
 
 # ENUMERATED SETS OF VALUES
 
 # Units.
-units_meters:  meters
+units_meters: mètres
 
 # Quality values.
-image_vote_long_0:  No opinion.
-image_vote_long_1:  **Okay** but not so useful.
-image_vote_long_2:  **Useful** for identification.
-image_vote_long_3:  **Good** enough for a field guide.
-image_vote_long_4:  **Great!** Beyond the work of mortals.
+image_vote_long_0: Sans opinion.
+image_vote_long_1: **Pas mal**, mais pas très utile.
+image_vote_long_2: **Utile** pour l'identification.
+image_vote_long_3: **Bon**, convient pour un guide.
+image_vote_long_4: **Super!** Au-delà des travaux de mortels.
 
-image_vote_help_0:  No opinion.
-image_vote_help_1:  Okay but not so useful.
-image_vote_help_2:  Useful for identification.
-image_vote_help_3:  Good enough for a field guide.
-image_vote_help_4:  Great! Beyond the work of mortals.
+image_vote_help_0: Sans opinion.
+image_vote_help_1: Pas mal, mais pas très utile.
+image_vote_help_2: Utile pour l'identification.
+image_vote_help_3: Bon, convient pour un guide.
+image_vote_help_4: Super! Au-delà des travaux de mortels.
 
-image_vote_short_0:  Unrated
-image_vote_short_1:  Okay
-image_vote_short_2:  Useful
-image_vote_short_3:  Good
-image_vote_short_4:  Great
+image_vote_short_0: Pas noté
+image_vote_short_1: Pas mal
+image_vote_short_2: Utile
+image_vote_short_3: Bon
+image_vote_short_4: Super
 
 # Review statuses. (Note: "unvetted" means it's been looked at but the reviewer
 # doesn't feel comfortable declaring it "accurate"; thus "unvetted" means
 # "reviewed" and "vetted" means "approved".  Sorry, we inherited these odd
 # terms from EOL; they weren't my choice!)
-review_unreviewed:  Unreviewed
-review_unvetted:  Reviewed
-review_vetted:  Approved
-review_inaccurate:  Inaccurate/Incomplete
-review_no_export:  Not for Export
-review_ok_for_export:  Okay for Export
+review_unreviewed: Pas évalué
+review_unvetted: Évalué
+review_vetted: Approuvé
+review_inaccurate: Inexactes / incomplète
+review_no_export: Non pour l'exportation
+review_ok_for_export: Okay pour l'exportation
 
 # Naming reasons.
-naming_reason_label_1:  Recognized by sight
-naming_reason_label_2:  Used references
-naming_reason_label_3:  Based on microscopic features
-naming_reason_label_4:  Based on chemical features
+naming_reason_label_1: Reconnu par la vue.
+naming_reason_label_2: Utilisant des références.
+naming_reason_label_3: Basé sur des caractéristiques microscopiques.
+naming_reason_label_4: Basé sur des caractéristiques chimiques.
 
 # Description types, note full_title combines the titles below with the title
 # of the object the description is describing, e.g. "User's [:description] of
@@ -518,133 +516,133 @@ naming_reason_label_4:  Based on chemical features
 
 # These are used as page title and in index results: must include both the type
 # of description and the title of the object ([object]) they're describing.
-description_full_title_public:  "Public [:DESCRIPTION] of [object]"
-description_full_title_foreign:  "[:DESCRIPTION] of [object] from [text]"
-description_full_title_project:  "Draft of [object] for [text] by [user]"
-description_full_title_source:  "[:DESCRIPTION] of [object] from [text]"
-description_full_title_user:  "[USER]'s [:DESCRIPTION] of [object]"
+description_full_title_public: "Description publique de: [object]"
+description_full_title_foreign: "Description de [text] de: [object]"
+description_full_title_project: "Brouillon pour [text] par [user] de: [object]"
+description_full_title_source: "Description de [text] de: [object]"
+description_full_title_user: "Description de [user] de: [object]"
 
 # These are used when listing the available descriptions in the show_name page.
-description_part_title_public:  "Public [:DESCRIPTION]"
-description_part_title_user:  "[USER]'s [:DESCRIPTION]"
+description_part_title_public: "Description publique"
+description_part_title_user: "Description de [user]"
 
 # Same thing, but this time the optional text field was filled in.  Note that
 # the text field is not optional for half of the source types.
-description_part_title_public_with_text:  "[TEXT]"
-description_part_title_foreign_with_text:  "[:DESCRIPTION] From [TEXT]"
-description_part_title_project_with_text:  "Draft for [TEXT] by [USER]"
-description_part_title_source_with_text:  "[:DESCRIPTION] From [TEXT]"
-description_part_title_user_with_text:  "[TEXT] by [USER]"
+description_part_title_public_with_text: "[TEXT]"
+description_part_title_foreign_with_text: "Description de [text]"
+description_part_title_project_with_text: "Brouillon pour [text] (par [user])"
+description_part_title_source_with_text: "Description de [text]"
+description_part_title_user_with_text: "[TEXT] (par [USER])"
 
 # Footers: "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
-footer_created_at:  "*[:Created]:* [date]"
-footer_created_by:  "*[:Created]:* [date] *by* [user]"
-footer_modified_at:  "*[:Modified]:* [date]"
-footer_modified_by:  "*[:Modified]:* [date] *by* [user]"
-footer_last_modified_at:  "*Last [:modified]:* [date]"
-footer_last_modified_by:  "*Last [:modified]:* [date] *by* [user]"
-footer_viewed:  "*[:Viewed]:* [times], *last [:viewed]:* [date]"
-footer_version_out_of:  "*[:Version]:* [num] *of* [total]"
+footer_created_at: "*Créé:* [date]"
+footer_created_by: "*Créé:* [date] *par* [user]"
+footer_modified_at: "*Mise à jour:* [date]"
+footer_modified_by: "*Mise à jour:* [date] *par* [user]"
+footer_last_modified_at: "*Dernier changement:* [date]"
+footer_last_modified_by: "*Dernier changement:* [date] *par* [user]"
+footer_viewed: "*Vu:* [times], *dernier vu:* [date]"
+footer_version_out_of: "*Version:* [num] *de* [total]"
 
 # Taxonomic ranks.
-RANK_CLASS:  Class
-rank_class:  class
-RANK_FAMILY:  Family
-rank_family:  family
-RANK_FORM:  Form
-rank_form:  form
-RANK_GENUS:  Genus
-rank_genus:  genus
-RANK_GROUP:  Group
-rank_group:  group
-RANK_DOMAIN:  Domain
-rank_domain: Domain
-RANK_KINGDOM:  Kingdom
-rank_kingdom:  kingdom
-RANK_ORDER:  Order
-rank_order:  order
-RANK_PHYLUM:  Phylum
-rank_phylum:  phylum
-RANK_SPECIES:  Species
-rank_species:  species
-RANK_SUBSPECIES:  Subspecies
-rank_subspecies:  subspecies
-RANK_VARIETY:  Variety
-rank_variety:  variety
-RANK_PLURAL_CLASS:  Classes
-rank_plural_class:  classes
-RANK_PLURAL_FAMILY:  Families
-rank_plural_family:  families
-RANK_PLURAL_FORM:  Forms
-rank_plural_form:  forms
-RANK_PLURAL_GENUS:  Genera
-rank_plural_genus:  genera
-RANK_PLURAL_GROUP:  Groups
-rank_plural_group:  groups
-RANK_PLURAL_KINGDOM:  Kingdoms
-rank_plural_kingdom:  kingdoms
-RANK_PLURAL_ORDER:  Orders
-rank_plural_order:  orders
-RANK_PLURAL_PHYLUM:  Phyla
-rank_plural_phylum:  phyla
-RANK_PLURAL_SPECIES:  Species
-rank_plural_species:  species
-RANK_PLURAL_SUBSPECIES:  Subspecies
-rank_plural_subspecies:  subspecies
-RANK_PLURAL_VARIETY:  Varieties
-rank_plural_variety:  varieties
+RANK_CLASS: Classe
+rank_class: classe
+RANK_FAMILY: Famille
+rank_family: famille
+RANK_FORM: Forme
+rank_form: forme
+RANK_GENUS: Genre
+rank_genus: genre
+RANK_GROUP: Groupe
+rank_group: groupe
+RANK_DOMAIN: Domaine
+rank_domain: domaine
+RANK_KINGDOM: Règne
+rank_kingdom: règne
+RANK_ORDER: Ordre
+rank_order: ordre
+RANK_PHYLUM: Division
+rank_phylum: division
+RANK_SPECIES: Espèce
+rank_species: espèce
+RANK_SUBSPECIES: Sous-espèce
+rank_subspecies: sous-espèce
+RANK_VARIETY: Variété
+rank_variety: variété
+RANK_PLURAL_CLASS: Classes
+rank_plural_class: classes
+RANK_PLURAL_FAMILY: Familles
+rank_plural_family: familles
+RANK_PLURAL_FORM: Formes
+rank_plural_form: formes
+RANK_PLURAL_GENUS: Genres
+rank_plural_genus: genres
+RANK_PLURAL_GROUP: Groupes
+rank_plural_group: groupes
+RANK_PLURAL_KINGDOM: Règnes
+rank_plural_kingdom: règnes
+RANK_PLURAL_ORDER: Ordres
+rank_plural_order: ordres
+RANK_PLURAL_PHYLUM: Divisions
+rank_plural_phylum: divisions
+RANK_PLURAL_SPECIES: Espèces
+rank_plural_species: espèces
+RANK_PLURAL_SUBSPECIES: Sous-espèces
+rank_plural_subspecies: Sous-espèces
+RANK_PLURAL_VARIETY: Variétés
+rank_plural_variety: variétés
 
 # user statistics field names
-user_stats_comments:  "[:COMMENTS]"
-user_stats_images:  "[:IMAGES]"
-user_stats_location_descriptions_authors:  "[:LOCATION_DESCRIPTIONS] Authored"
-user_stats_location_descriptions_editors:  "[:LOCATION_DESCRIPTIONS] Edited"
-user_stats_locations:  "[:LOCATIONS] Created"
-user_stats_locations_versions:  "[:LOCATIONS] Edited"
-user_stats_name_descriptions_authors:  "[:NAME_DESCRIPTIONS] Authored"
-user_stats_name_descriptions_editors:  "[:NAME_DESCRIPTIONS] Edited"
-user_stats_names:  "[:NAMES] Created"
-user_stats_names_versions:  "[:NAMES] Edited"
-user_stats_namings:  Proposed IDs
-user_stats_observations:  "[:OBSERVATIONS]"
-user_stats_species_list_entries:  "[:SPECIES_LIST] Entries"
-user_stats_species_lists:  "[:SPECIES_LISTS]"
-user_stats_votes:  "[:VOTES]"
+user_stats_comments: "[:COMMENTS]"
+user_stats_images: "[:IMAGES]"
+user_stats_location_descriptions_authors: Descriptions d'endroit créées
+user_stats_location_descriptions_editors: Descriptions d'endroit modifiées
+user_stats_locations: Endroits creés
+user_stats_locations_versions: Endroits modifiés
+user_stats_name_descriptions_authors: Descriptions de nom créées
+user_stats_name_descriptions_editors: Descriptions de nom modifiées
+user_stats_names: Noms créés
+user_stats_names_versions: Noms
+user_stats_namings: Noms proposés
+user_stats_observations: "[:OBSERVATIONS]"
+user_stats_species_list_entries: Entrées de [:species_list]
+user_stats_species_lists: "[:SPECIES_LISTS]"
+user_stats_votes: "[:VOTES]"
 
 # site statistics field names
-site_stats_comments:  "[:COMMENTS]"
-site_stats_images:  "[:IMAGES]"
-site_stats_listed_taxa:  "Listed Taxa"
-site_stats_location_descriptions_authors:  "Authored [:LOCATION_DESCRIPTIONS]"
-site_stats_location_descriptions_editors:  ""
-site_stats_locations:  "Defined [:LOCATIONS]"
-site_stats_locations_versions:  ""
-site_stats_name_descriptions_authors:  "Authored [:NAME_DESCRIPTIONS]"
-site_stats_name_descriptions_editors:  ""
-site_stats_names:  ""
-site_stats_names_versions:  ""
-site_stats_namings:  Proposed IDs
-site_stats_observations:  "[:OBSERVATIONS]"
-site_stats_observed_taxa:  "Observed Taxa"
-site_stats_species_list_entries:  "[:SPECIES_LIST] Entries"
-site_stats_species_lists:  "[:SPECIES_LISTS]"
-site_stats_users:  "Members"
-site_stats_votes:  "[:VOTES]"
+site_stats_comments: "[:COMMENTS]"
+site_stats_images: "[:IMAGES]"
+site_stats_listed_taxa: Taxons figurants
+site_stats_location_descriptions_authors: Descriptions d'endroit
+site_stats_location_descriptions_editors: ""
+site_stats_locations: Endroits définis
+site_stats_locations_versions: ""
+site_stats_name_descriptions_authors: Descriptions de nom
+site_stats_name_descriptions_editors: ""
+site_stats_names: ""
+site_stats_names_versions: ""
+site_stats_namings: Noms proposés
+site_stats_observations: "[:OBSERVATIONS]"
+site_stats_observed_taxa: Taxons
+site_stats_species_list_entries: Entrées de [:species_list]
+site_stats_species_lists: "[:SPECIES_LISTS]"
+site_stats_users: Membres
+site_stats_votes: "[:VOTES]"
 
 # vote descriptions
-vote_no_opinion:  No Opinion
-vote_confidence_100:  I'd Call It That
-vote_confidence_80:  Promising
-vote_confidence_60:  Could Be
-vote_confidence_40:  Doubtful
-vote_confidence_20:  Not Likely
-vote_confidence_0:  As If!
-vote_agreement_100:  I'd Call It That
-vote_agreement_80:  Promising
-vote_agreement_60:  Could Be
-vote_agreement_40:  Doubtful
-vote_agreement_20:  Not Likely
-vote_agreement_0:  As If!
+vote_no_opinion: Sans opinion
+vote_confidence_100: Je dirais que
+vote_confidence_80: Prometteur
+vote_confidence_60: Peut-être
+vote_confidence_40: Douteux
+vote_confidence_20: Peu probable
+vote_confidence_0: Comme si!
+vote_agreement_100: Je dirais que
+vote_agreement_80: Prometteur
+vote_agreement_60: Peut-être
+vote_agreement_40: Douteux
+vote_agreement_20: Peu probable
+vote_agreement_0: Comme si!
 
 # Query titles. Notes on [args]:
 #
@@ -653,246 +651,246 @@ vote_agreement_0:  As If!
 # [order] is sort order (singular), e.g., "Name" or "Date"
 # [name], [location], [where], [pattern], etc. are un-translatable strings
 #
-query_title_advanced_search:  "[:app_advanced_search]"
-query_title_all:  "[TYPE] Index"
-query_title_all_by:  "[TYPES] by [ORDER]"
-query_title_at_location:  "[TYPES] from [LOCATION]"
-query_title_at_where:  "[TYPES] from '[USER_WHERE]'"
-query_title_by_author:  "[TYPES] Authored by [USER]"
-query_title_by_editor:  "[TYPES] Edited by [USER]"
-query_title_by_rss_log:  "[TYPES] in Activity Log"
-query_title_by_user:  "[TYPES] created by [USER]"
-query_title_for_object:  "[TYPES] on [OBJECT]"
-query_title_for_user:  "[TYPES] for [USER]"
-query_title_in_set:  "Selected [TYPES]"
-query_title_in_species_list:  "[TYPES] in [SPECIES_LIST]"
-query_title_inside_observation:  "[TYPES] of [OBSERVATION]"
-query_title_of_children:  "Lower Taxa under [NAME]"
-query_title_of_name:  "[TYPES] of [NAME]"
-query_title_of_name_synonym:  "[TYPES] of Synonyms of [NAME]"
-query_title_of_name_nonconsensus:  "[TYPES] That Might Be [NAME]"
-query_title_of_parents:  "Higher Taxa Containing [NAME]"
-query_title_pattern_search:  "[TYPES] Matching '[pattern]'"
-query_title_with_descriptions:  "[TYPES] with [:DESCRIPTIONS]"
-query_title_with_descriptions_by_author:  "[TYPES] with [:query_title_by_author(type=:description)]"
-query_title_with_descriptions_by_editor:  "[TYPES] with [:query_title_by_editor(type=:description)]"
-query_title_with_descriptions_by_user:  "[TYPES] with [:query_title_by_user(type=:description)]"
-query_title_with_descriptions_in_set:  "[TYPES] with [descriptions]"
-query_title_with_observations:  "[TYPES] with [:OBSERVATIONS]"
-query_title_with_observations_at_location:  "[TYPES] with [:query_title_at_location(type=:observation)]"
-query_title_with_observations_at_where:  "[TYPES] with [:query_title_at_where(type=:observation)]"
-query_title_with_observations_by_user:  "[TYPES] with [:query_title_by_user(type=:observation)]"
-query_title_with_observations_in_set:  "[TYPES] with [observations]"
-query_title_with_observations_in_species_list:  "[TYPES] with [:query_title_in_species_list(type=:observation)]"
-query_title_with_observations_of_children:  "[TYPES] with [:query_title_of_children(type=:observation)]"
-query_title_with_observations_of_name:  "[TYPES] with [:query_title_of_name(type=:observation)]"
-query_title_with_observations_of_name_synonym:  "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
-query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
+query_title_advanced_search: "[:app_advanced_search]"
+query_title_all: Index des [types]
+query_title_all_by: "[TYPES] par [order]"
+query_title_at_location: "[TYPES] à: [location]"
+query_title_at_where: "[TYPES] à: '[user_where]'"
+query_title_by_author: "[TYPES] écrites par [user]"
+query_title_by_editor: "[TYPES] modifiées par [user]"
+query_title_by_rss_log: "[TYPES] dans le journal d'activité"
+query_title_by_user: "[TYPES] créé(e)s par [user]"
+query_title_for_object: "[TYPES] sur [object]"
+query_title_for_user: "[TYPES] pour [user]"
+query_title_in_set: "[TYPES] choisi(e)s"
+query_title_in_species_list: "[TYPES] dans: [species_list]"
+query_title_inside_observation: "[TYPES] de: [observation]"
+query_title_of_children: "[TYPES] de taxons inférieurs de: [name]"
+query_title_of_name: "[TYPES] de: [name]"
+query_title_of_name_synonym: "[TYPES] de synonymes de: [name]"
+query_title_of_name_nonconsensus: "[TYPES] qui pourraient être: [name]"
+query_title_of_parents: "Taxons supérieurs contenant: [name]"
+query_title_pattern_search: "[TYPES] correspondant: '[pattern]'"
+query_title_with_descriptions: "[TYPES] avec des [:descriptions]"
+query_title_with_descriptions_by_author: "[TYPES] avec des descriptions écrites par [user]"
+query_title_with_descriptions_by_editor: "[TYPES] avec des descriptions modifiées par [user]"
+query_title_with_descriptions_by_user: "[TYPES] avec des descriptions créées par [user]"
+query_title_with_descriptions_in_set: "[TYPES] avec des [descriptions]"
+query_title_with_observations: "[TYPES] avec des observations"
+query_title_with_observations_at_location: "[TYPES] avec des observations à: [location]"
+query_title_with_observations_at_where: "[TYPES] avec des observations à: '[user_where]'"
+query_title_with_observations_by_user: "[TYPES] avec des observations créées par [user]"
+query_title_with_observations_in_set: "[TYPES] avec des observations"
+query_title_with_observations_in_species_list: "[TYPES] avec des observations dans: [species_list]"
+query_title_with_observations_of_children: "[TYPES] avec des observations de taxons inférieurs de: [name]"
+query_title_with_observations_of_name: "[TYPES] avec des observations de: [name]"
+query_title_with_observations_of_name_synonym: "[TYPES] avec des observations de synonymes de: [name]"
+query_title_with_observations_of_name_nonconsensus: "[TYPES] avec des observations qui pourraient être: [name]"
 
 # Brief description of each query flavor.
-query_help_comment_all:  all comments
-query_help_comment_by_user:  comments created by a given user
-query_help_comment_in_set:  comments in a given set
-query_help_comment_for_object:  comments about a given object
-query_help_comment_for_user:  comments sent to a given user
-query_help_comment_pattern_search:  comments matching a search string
-query_help_image_advanced_search:  images of observations matching advanced search criteria
-query_help_image_all:  all images
-query_help_image_by_user:  images created by a given user
-query_help_image_in_set:  images in a given set
-query_help_image_inside_observation:  images belonging to an outer observation query
-query_help_image_pattern_search:  images matching a search_string
-query_help_image_with_observations:  images of observations
-query_help_image_with_observations_at_location:  images of observations at a defined location
-query_help_image_with_observations_at_where:  images of observations at an undefined location
-query_help_image_with_observations_by_user:  images of observations by a given user
-query_help_image_with_observations_in_set:  images of observations in a given set
-query_help_image_with_observations_in_species_list:  images of observations in a given species list
-query_help_image_with_observations_of_children:  images of observations of children a given name
-query_help_image_with_observations_of_name:  images of observations of a given name
-query_help_location_advanced_search:  locations of observations matching advanced search criteria
-query_help_location_all:  all locations
-query_help_location_by_user:  locations created by a given user
-query_help_location_by_editor:  locations modified by a given user
-query_help_location_by_rss_log:  locations with recent activity
-query_help_location_in_set:  locations in a given set
-query_help_location_pattern_search:  locations matching a search string
-query_help_location_with_descriptions:  locations with descriptions
-query_help_location_with_descriptions_by_author:  locations with descriptions authored by a given user
-query_help_location_with_descriptions_by_editor:  locations with descriptions edited by a given user
-query_help_location_with_descriptions_by_user:  locations with descriptions created by a given user
-query_help_location_with_descriptions_in_set:  locations with descriptions in a given set
-query_help_location_with_observations:  locations of observations
-query_help_location_with_observations_by_user:  locations of observations by a given user
-query_help_location_with_observations_in_set:  locations of observations in a given set
-query_help_location_with_observations_in_species_list:  locations of observations in a given species list
-query_help_location_with_observations_of_children:  locations of observations of children of a given name
-query_help_location_with_observations_of_name:  locations of observations of a given name
-query_help_location_description_all:  all location descriptions
-query_help_location_description_by_author:  location descriptions that list given user as an author
-query_help_location_description_by_editor:  location descriptions that list given user as an editor
-query_help_location_description_by_user:  location descriptions created by a given user
-query_help_location_description_in_set:  location descriptions in a given set
-query_help_name_advanced_search:  names of observations matching advanced search criteria
-query_help_name_all:  all names
-query_help_name_by_user:  names created by a given user
-query_help_name_by_editor:  names modified by a given user
-query_help_name_by_rss_log:  names with recent activity
-query_help_name_in_set:  names in a given set
-query_help_name_of_children:  names of children of a name
-query_help_name_of_parents:  names of parents of a name
-query_help_name_pattern_search:  names matching a search string
-query_help_name_with_descriptions:  names with descriptions
-query_help_name_with_descriptions_by_author:  names with descriptions authored by a given user
-query_help_name_with_descriptions_by_editor:  names with descriptions edited by a given user
-query_help_name_with_descriptions_by_user:  names with descriptions created by a given user
-query_help_name_with_descriptions_in_set:  names with descriptions in a given set
-query_help_name_with_observations:  names of observations, alphabetically
-query_help_name_with_observations_at_location:  names of observations at a defined location
-query_help_name_with_observations_at_where:  names of observations at an undefined location
-query_help_name_with_observations_by_user:  names of observations by a given user
-query_help_name_with_observations_in_set:  names of observations in a given set
-query_help_name_with_observations_in_species_list:  names of observations in a given species list
-query_help_name_description_all:  all name descriptions
-query_help_name_description_by_author:  name descriptions that list a given user as an author
-query_help_name_description_by_editor:  name descriptions that list a given user as an editor
-query_help_name_description_by_user:  name descriptions created by a given user
-query_help_name_description_in_set:  name descriptions in a given set
-query_help_observation_advanced_search:  observations matching advanced search criteria
-query_help_observation_all:  all observations
-query_help_observation_at_location:  observations at a defined location
-query_help_observation_at_where:  observations at an undefined location
-query_help_observation_by_rss_log:  observations with recent activity
-query_help_observation_by_user:  observations created by a given user
-query_help_observation_in_set:  observations in a given set
-query_help_observation_in_species_list:  observations in a given species list
-query_help_observation_of_children:  observations of children of a given name
-query_help_observation_of_name:  observations of a given name
-query_help_observation_pattern_search:  observations matching a search string
-query_help_project_all:  all projects
-query_help_project_by_rss_log:  projects with recent activity
-query_help_project_in_set:  projects in a given set
-query_help_project_pattern_search:  projects matching a search string
-query_help_rss_log_all:  all recent activity logs
-query_help_rss_log_in_set:  activity logs in a given set
-query_help_species_list_all:  all species lists
-query_help_species_list_at_location:  species lists at a defined location
-query_help_species_list_at_where:  species lists at an undefined location
-query_help_species_list_by_rss_log:  species lists with recent activity
-query_help_species_list_by_user:  species lists created by a given user
-query_help_species_list_in_set:  species lists in a given set
-query_help_species_list_pattern_search:  species lists matching a search string
-query_help_user_all:  all users
-query_help_user_in_set:  users in a given set
-query_help_user_pattern_search:  users matching a search string
+query_help_comment_all: tous les commentaires
+query_help_comment_by_user: les commentaires créées par un utilisateur particulier
+query_help_comment_in_set: les commentaires dans une ensemble particulière
+query_help_comment_for_object: les commentaires sur un objet particulier
+query_help_comment_for_user: les commentaires envoyés à un utilisateur particulier
+query_help_comment_pattern_search: les commentaires correspondant à une chaîne de recherche
+query_help_image_advanced_search: les images d'observations correspondant à des critères de recherche avancée
+query_help_image_all: toutes les images
+query_help_image_by_user: les images créées par un utilisateur particulier
+query_help_image_in_set: les images dans une ensemble particulière
+query_help_image_inside_observation: les images appartenant à une requête d'observation externe
+query_help_image_pattern_search: les images correspondant à une chaîne de recherche
+query_help_image_with_observations: iles mages appartenant à des observations
+query_help_image_with_observations_at_location: les images appartenant à des observations à un endroit défini
+query_help_image_with_observations_at_where: les images appartenant à des observations à un endroit indéfini
+query_help_image_with_observations_by_user: les images appartenant à des observations d'un utilisateur particulier
+query_help_image_with_observations_in_set: les images appartenant à des observations dans une ensemble particulière
+query_help_image_with_observations_in_species_list: les images appartenant à des observations dans une liste particulière
+query_help_image_with_observations_of_children: les images appartenant à des observations d'enfants d'un nom particulier
+query_help_image_with_observations_of_name: les images appartenant à des observations d'un nom particulier
+query_help_location_advanced_search: les endroits des observations correspondant à des critères de recherche avancée
+query_help_location_all: tous les endroits
+query_help_location_by_user: les endroits créés par un utilisateur particulier
+query_help_location_by_editor: les endroits modifiés par un utilisateur particulier
+query_help_location_by_rss_log: les endroits avec activité récent
+query_help_location_in_set: les endroits dans une ensemble particulière
+query_help_location_pattern_search: les endroits correspondant à une chaîne de recherche
+query_help_location_with_descriptions: les endroits avec des descriptions
+query_help_location_with_descriptions_by_author: les endroits avec des descriptions écrites par un utilisateur particulier
+query_help_location_with_descriptions_by_editor: les endroits avec des descriptions modifiées par un utilisateur particulier
+query_help_location_with_descriptions_by_user: les endroits avec des descriptions créées par un utilisateur particulier
+query_help_location_with_descriptions_in_set: les endroits avec des descriptions dans une ensemble particulière
+query_help_location_with_observations: les endroits appartenant à des observations
+query_help_location_with_observations_by_user: les endroits appartenant à des observations d'un utilisateur particulier
+query_help_location_with_observations_in_set: les endroits appartenant à des observations dans une ensemble particulière
+query_help_location_with_observations_in_species_list: les endroits appartenant à des observations dans une liste particulière
+query_help_location_with_observations_of_children: les endroits appartenant à des observations d'enfants d'un nom particulier
+query_help_location_with_observations_of_name: les endroits appartenant à des observations d'un nom particulier
+query_help_location_description_all: toutes les descriptions d'endroit
+query_help_location_description_by_author: les descriptions d'endroit écrites par un utilisateur particulier
+query_help_location_description_by_editor: les descriptions d'endroit modifiées par un utilisateur particulier
+query_help_location_description_by_user: les descriptions d'endroit créées par un utilisateur particulier
+query_help_location_description_in_set: les descriptions d'endroit dans une ensemble particulière
+query_help_name_advanced_search: les noms avec observations correspondant à des critères de recherche avancée
+query_help_name_all: tous les noms
+query_help_name_by_user: les noms créés par un utilisateur particulier
+query_help_name_by_editor: les noms modifiéés par un utilisateur particulier
+query_help_name_by_rss_log: les noms avec activité récent
+query_help_name_in_set: les noms dans une ensemble particulière
+query_help_name_of_children: les enfants d'un nom particulier
+query_help_name_of_parents: les parents d'un nom particulier
+query_help_name_pattern_search: les noms correspondant à une chaîne de recherche
+query_help_name_with_descriptions: les noms avec des descriptions
+query_help_name_with_descriptions_by_author: les noms avec des descriptions écrites par un utilisateur particulier
+query_help_name_with_descriptions_by_editor: les noms avec des descriptions modifiées par un utilisateur particulier
+query_help_name_with_descriptions_by_user: les noms avec des descriptions créées par un utilisateur particulier
+query_help_name_with_descriptions_in_set: les noms avec des descriptions dans une ensemble particulière
+query_help_name_with_observations: les noms avec des observations
+query_help_name_with_observations_at_location: les noms avec des observations à un endroit défini
+query_help_name_with_observations_at_where: les noms avec des observations à un endroit indéfini
+query_help_name_with_observations_by_user: les noms avec des observations d'un utilisateur particulier
+query_help_name_with_observations_in_set: les noms avec des observations dans une ensemble particulière
+query_help_name_with_observations_in_species_list: les noms avec des observations dans une liste particulière
+query_help_name_description_all: toutes les descriptions de nom
+query_help_name_description_by_author: les descriptions de nom écrites par un utilisateur particulier
+query_help_name_description_by_editor: les descriptions de nom modifiées par un utilisateur particulier
+query_help_name_description_by_user: les descriptions de nom créées par un utilisateur particulier
+query_help_name_description_in_set: les descriptions de nom dans une ensemble particulière
+query_help_observation_advanced_search: les observations correspondant à des critères de recherche avancée
+query_help_observation_all: toutes les observations
+query_help_observation_at_location: les observations à un endroit défini
+query_help_observation_at_where: les observations à un endroit indéfini
+query_help_observation_by_rss_log: les observations avec activité récent
+query_help_observation_by_user: les observations créées par un utilisateur particulier 
+query_help_observation_in_set: les observations dans une ensemble particulière
+query_help_observation_in_species_list: les observations dans une liste particulière
+query_help_observation_of_children: les observations d'enfants d'un nom particulier
+query_help_observation_of_name: les observations d'un nom particulier
+query_help_observation_pattern_search: les observations correspondant à une chaîne de recherche
+query_help_project_all: tous les projets
+query_help_project_by_rss_log: les projets avec activité récent
+query_help_project_in_set: les projets dans une ensemble particulière
+query_help_project_pattern_search: les projets correspondant à une chaîne de recherche
+query_help_rss_log_all: Log d'activité récent
+query_help_rss_log_in_set: Log d'activité récent dans une ensemble particulière
+query_help_species_list_all: toutes les listes d'observation
+query_help_species_list_at_location: les listes d'observation à un endroit défini
+query_help_species_list_at_where: les listes d'observation à un endroit indéfini
+query_help_species_list_by_rss_log: les listes d'observation avec activité récent
+query_help_species_list_by_user: les listes d'observation par un utilisateur particulier
+query_help_species_list_in_set: les listes d'observation dans une ensemble particulière
+query_help_species_list_pattern_search: les listes d'observation correspondant à une chaîne de recherche
+query_help_user_all: tous les utilisateurs
+query_help_user_in_set: les utilisateurs dans une ensemble particulière
+query_help_user_pattern_search: les utilisateurs correspondant à une chaîne de recherche
 
 # Sorting criteria.
-sort_by_header:  "Sort by:"
-sort_by_id:  ID
-sort_by_name:  "[:NAME]"
-sort_by_title:  "[:TITLE]"
-sort_by_summary:  "[:SUMMARY]"
-sort_by_date:  "[:DATE]"
-sort_by_posted:  Date Posted
-sort_by_created:  Date Created
-sort_by_modified:  Time Last Modified
-sort_by_rss_log:  "[:sort_by_modified]"
-sort_by_last_login:  Last Login
-sort_by_user:  "[:USER]"
-sort_by_login:  "[:LOGIN_NAME]"
-sort_by_copyright_holder:  "[:COPYRIGHT_HOLDER]"
-sort_by_where:  "[:LOCATION]"
-sort_by_location:  "[:LOCATION]"
-sort_by_confidence:  "[:CONFIDENCE_LEVEL]"
-sort_by_image_quality:  Image Quality
-sort_by_thumbnail_quality:  Thumbnail Quality
-sort_by_num_views:  Popularity
-sort_by_contribution:  Contribution
-sort_by_reverse:  Reverse Order
+sort_by_header: "Trier par:"
+sort_by_id: ID
+sort_by_name: nom
+sort_by_title: titre
+sort_by_summary: résumé
+sort_by_date: date
+sort_by_posted: date de publication
+sort_by_created: date de création
+sort_by_modified: date de dernière modification
+sort_by_rss_log: date de dernière modification
+sort_by_last_login: date de dernière connexion
+sort_by_user: utilisateur
+sort_by_login: nom d'utilisateur
+sort_by_copyright_holder: titulaire du droit d'auteur
+sort_by_where: endroit
+sort_by_location: endroit
+sort_by_confidence: niveau de confiance
+sort_by_image_quality: qualité d'image
+sort_by_thumbnail_quality: qualité de la vignette
+sort_by_num_views: popularité
+sort_by_contribution: contribution
+sort_by_reverse: Inverser l'ordre
 
 # RSS log messages.
-log_ancient:  "[String]"
-log_approved_by:  Approved by [user].
+log_ancient: "[String]"
+log_approved_by: Approuvé par [user].
 log_approved_by_with_comment: "[:log_approved_by] [comment]"
-log_consensus_changed:  Consensus rejected [old] in favor of [new].
-log_consensus_reached:  "Consensus established: [name]"
-log_deprecated_by:  Deprecated by [user].
+log_consensus_changed: "Consensus rejeté [old] en faveur de: [new]"
+log_consensus_reached: "Consensus a été établi: [name]"
+log_deprecated_by: Désapprouvé par [user].
 log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
-log_changed_default_description:  "Default description changed to [name] by [user]."
-log_changed_permissions:  "Permissions modified by [user]: [name]"
-log_name_approved:  Approved by [user] over [other].
+log_changed_default_description: "Description par défaut a été changé par [user] en: [name]"
+log_changed_permissions: "Autorisations modifié par [user]: [name]"
+log_name_approved: "Approuvé par [user] sur: [other]"
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
-log_name_deprecated:  Deprecated by [user] in favor of [other].
+log_name_deprecated: "Desapprouvé par [user] en faveur de: [other]"
 log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
-log_name_merged:  "[This] merged with [that]."
-log_object_added_by_user:  "[Type] added by [user]."
-log_object_added_by_user_with_name:  "[Type] added by [user]: [name]"
-log_object_added_no_user:  "[Type] added."
-log_object_created_by_user:  "[Type] created by [user]."
-log_object_created_by_user_with_name:  "[Type] created by [user]: [name]"
-log_object_created_no_user:  "[Type] created."
-log_object_destroyed_by_user:  "[Type] destroyed by [user]."
-log_object_destroyed_by_user_with_name:  "[Type] destroyed by [user]: [name]"
-log_object_destroyed_no_user:  "[Type] destroyed."
-log_object_merged_by_user:  "Merged [from] into [to] by [user]."
-log_object_merged_no_user:  "Merged [from] into [to]."
-log_object_moved_by_user:  "Moved [from] into [to] by [user]."
-log_object_moved_no_user:  "Moved [from] into [to]."
-log_object_removed_by_user:  "[Type] removed by [user]."
-log_object_removed_by_user_with_name:  "[Type] removed by [user]: [name]"
-log_object_removed_no_user:  "[Type] removed."
-log_object_updated_by_user:  "[Type] updated by [user]."
-log_object_updated_by_user_with_name:  "[Type] updated by [user]: [name]"
-log_object_updated_no_user:  "[Type] updated."
-log_orphan:  "[Title]"
-log_published_description:  "Description published by [user]: [name]"
-log_updated_by:  Updated by [user].
+log_name_merged: "[This] a fusionné avec [that]."
+log_object_added_by_user: "[Type] a été ajouté par [user]."
+log_object_added_by_user_with_name: "[Type] a été ajouté par [user]: [name]"
+log_object_added_no_user: "[Type] a été ajouté."
+log_object_created_by_user: "[Type] a été créé par [user]."
+log_object_created_by_user_with_name: "[Type] a été créé par [user]: [name]"
+log_object_created_no_user: "[Type] a été créé."
+log_object_destroyed_by_user: "[Type] a été détruit par [user]."
+log_object_destroyed_by_user_with_name: "[Type] a été détruit par [user]: [name]"
+log_object_destroyed_no_user: "[Type] a été détruit."
+log_object_merged_by_user: "[FROM] a été fusionné avec [to] par [user]."
+log_object_merged_no_user: "[FROM] a été fusionné avec [to]."
+log_object_moved_by_user: "[FROM] a été déplacé dans [to] par [user]."
+log_object_moved_no_user: "[FROM] a été déplacé dans [to]."
+log_object_removed_by_user: "[Type] a été éliminé par [user]."
+log_object_removed_by_user_with_name: "[Type] a été éliminé par [user]: [name]"
+log_object_removed_no_user: "[Type] a été éliminé."
+log_object_updated_by_user: "[Type] a été mis à jour par [user]."
+log_object_updated_by_user_with_name: "[Type] a été mis à jour par [user]: [name]"
+log_object_updated_no_user: "[Type] a été mis à jour."
+log_orphan: "[Title]"
+log_published_description: "Description a été publié par [user]: [name]"
+log_updated_by: Mis à jour par [user].
 
 # These should not need any translation.
-log_comment_added:  "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
-log_comment_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
-log_comment_updated:  "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
-log_description_created:  "[:log_object_created_by_user_with_name(type=:description)]"
-log_description_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:description)]"
-log_description_updated:  "[:log_object_updated_by_user_with_name(type=:description)]"
-log_image_created0:  "[:log_object_added_no_user(type=:image)]"
-log_image_created:  "[:log_object_added_by_user_with_name(type=:image)]"
-log_image_destroyed0:  "[:log_object_destroyed_no_user(type=:image)]"
-log_image_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:image)]"
-log_image_removed0:  "[:log_object_removed_no_user(type=:image)]"
-log_image_removed:  "[:log_object_removed_by_user_with_name(type=:image)]"
-log_image_reused0:  "[:log_object_added_no_user(type=:image)]"
-log_image_reused:  "[:log_object_added_by_user_with_name(type=:image)]"
-log_image_updated0:  "[:log_object_updated_no_user(type=:image)]"
-log_image_updated:  "[:log_object_updated_by_user_with_name(type=:image)]"
-log_location_created:  "[:log_object_created_by_user(type=:location)]"
-log_location_destroyed:  "[:log_object_destroyed_by_user(type=:location)]"
-log_location_updated:  "[:log_object_updated_by_user(type=:location)]"
-log_name_created:  "[:log_object_created_by_user(type=:name)]"
-log_name_destroyed:  "[:log_object_destroyed_by_user(type=:name)]"
-log_name_updated:  "[:log_object_updated_by_user(type=:name)]"
-log_naming_created:  "[:log_object_created_by_user_with_name(type=:naming)]"
-log_naming_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:naming)]"
-log_naming_updated:  "[:log_object_updated_by_user_with_name(type=:naming)]"
-log_observation_created:  "[:log_object_created_by_user(type=:observation)]"
-log_observation_destroyed2:  "[:log_object_destroyed_by_user_with_name(type=:observation)]"
-log_observation_destroyed:  "[:log_object_destroyed_by_user(type=:observation)]"
-log_observation_updated:  "[:log_object_updated_by_user(type=:observation)]"
-log_project_added_admin:  "[:log_object_added_by_user_with_name(type=:admin)]"
-log_project_added_member:  "[:log_object_added_by_user_with_name(type=:member)]"
-log_project_created:  "[:log_object_created_by_user(type=:project)]"
-log_project_destroyed:  "[:log_object_destroyed_by_user(type=:project)]"
-log_project_removed_admin:  "[:log_object_removed_by_user_with_name(type=:admin)]"
-log_project_removed_member:  "[:log_object_removed_by_user_with_name(type=:member)]"
-log_project_updated:  "[:log_object_updated_by_user(type=:project)]"
-log_species_list_created:  "[:log_object_created_by_user(type=:species_list)]"
-log_species_list_destroyed:  "[:log_object_destroyed_by_user(type=:species_list)]"
-log_species_list_updated:  "[:log_object_updated_by_user(type=:species_list)]"
-log_object_added:  "[:log_object_added_by_user]"
-log_object_created:  "[:log_object_created_by_user]"
-log_object_destroyed:  "[:log_object_destroyed_by_user]"
-log_object_removed:  "[:log_object_removed_by_user]"
-log_object_updated:  "[:log_object_updated_by_user]"
+log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
+log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
+log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+log_description_created: "[:log_object_created_by_user_with_name(type=:description)]"
+log_description_destroyed: "[:log_object_destroyed_by_user_with_name(type=:description)]"
+log_description_updated: "[:log_object_updated_by_user_with_name(type=:description)]"
+log_image_created0: "[:log_object_added_no_user(type=:image)]"
+log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
+log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
+log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
+log_image_removed0: "[:log_object_removed_no_user(type=:image)]"
+log_image_removed: "[:log_object_removed_by_user_with_name(type=:image)]"
+log_image_reused0: "[:log_object_added_no_user(type=:image)]"
+log_image_reused: "[:log_object_added_by_user_with_name(type=:image)]"
+log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
+log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
+log_location_created: "[:log_object_created_by_user(type=:location)]"
+log_location_destroyed: "[:log_object_destroyed_by_user(type=:location)]"
+log_location_updated: "[:log_object_updated_by_user(type=:location)]"
+log_name_created: "[:log_object_created_by_user(type=:name)]"
+log_name_destroyed: "[:log_object_destroyed_by_user(type=:name)]"
+log_name_updated: "[:log_object_updated_by_user(type=:name)]"
+log_naming_created: "[:log_object_created_by_user_with_name(type=:naming)]"
+log_naming_destroyed: "[:log_object_destroyed_by_user_with_name(type=:naming)]"
+log_naming_updated: "[:log_object_updated_by_user_with_name(type=:naming)]"
+log_observation_created: "[:log_object_created_by_user(type=:observation)]"
+log_observation_destroyed2: "[:log_object_destroyed_by_user_with_name(type=:observation)]"
+log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
+log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
+log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
+log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
+log_project_created: "[:log_object_created_by_user(type=:project)]"
+log_project_destroyed: "[:log_object_destroyed_by_user(type=:project)]"
+log_project_removed_admin: "[:log_object_removed_by_user_with_name(type=:admin)]"
+log_project_removed_member: "[:log_object_removed_by_user_with_name(type=:member)]"
+log_project_updated: "[:log_object_updated_by_user(type=:project)]"
+log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
+log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
+log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
+log_object_added: "[:log_object_added_by_user]"
+log_object_created: "[:log_object_created_by_user]"
+log_object_destroyed: "[:log_object_destroyed_by_user]"
+log_object_removed: "[:log_object_removed_by_user]"
+log_object_updated: "[:log_object_updated_by_user]"
 
 ################################################################################
 
@@ -900,82 +898,82 @@ log_object_updated:  "[:log_object_updated_by_user]"
 
 # This goes in the title bar of the browser.  You don't need to translate this,
 # it's up to you.
-app_title: Observação de Cogumelo
+app_title: Mushroom Observer
 
 # This goes in the left-hand column.  The "<br/>" forces a line-break.
-app_banner: Observação<br/>de<br/>Cogumelo
+app_banner: Mushroom<br/>Observer
 
 # These are the controls/links in the left-hand panel.
-app_intro: Introdução
-app_how_to_use: Como Usar
-app_how_to_help:  How To Help
-app_send_a_comment: Enviar Comentário
-app_index_a_z: Índice A->Z
-app_list_locations:  "[:list_objects(type=:location)]"
-app_list_projects:  "[:list_objects(type=:project)]"
-app_latest:  Latest
-app_latest_changes:  "Changes by Users"
-app_newest_images: Imagens
-app_comments: Comentários
-app_news: Notícias
-app_observations_left: Observações
-app_create_observation: Criar Observação
-app_sort_by_date_obs: Ordenado por Data
-app_sort_by: Ordenado por [order]
-app_species_list: Lista de Espécies
-app_create_list: Criar Lista
-app_sort_by_date_spl: Ordenado por Data
-app_sort_by_title: Ordenado por Título
-app_account: Contas
-app_login: Login
-app_create_account: Novo Usuário
-app_current_user: Usuário Atual
-app_comments_for_you: Comentários para mim
-app_your_observations: Minhas Observações
-app_your_interests:  Your Interests
-app_your_summary: Meu Resumo
-app_preferences: Preferências
-app_join_mailing_list: Lista de Discussão
-app_logout: Sair
-app_admin: Administração
-app_users: Usuários
-app_email_all_users: Preferências de Email
-app_add_to_group:  Add to Group
-app_turn_admin_on:  Turn on Admin Mode
-app_turn_admin_off:  Turn off Admin Mode
-app_languages:  Languages
-app_contributors: Contribuidores
-app_site_stats: Estatísticas do site
-app_colors_from: Cores do(a) [theme]
-app_powered_by: Feito com
-app_preferred_browser: Melhor visto com
+app_intro: Introduction
+app_how_to_use: Comment utiliser
+app_how_to_help: Comment aider
+app_send_a_comment: Envoyer commentaire
+app_index_a_z: Index A->Z
+app_list_locations: Énumérer les endroits
+app_list_projects: Énumérer les projets
+app_latest: La plus réciente
+app_latest_changes: Activité
+app_newest_images: Images
+app_comments: Commentaires
+app_news: Fonctionnalités
+app_observations_left: Observations
+app_create_observation: Créer observation
+app_sort_by_date_obs: Trier par date
+app_sort_by: "[:sort_by_object(type=order)]"
+app_species_list: Listes d'observation
+app_create_list: Créer une liste
+app_sort_by_date_spl: Trier par date
+app_sort_by_title: Trier par titre
+app_account: Compte
+app_login: Connexion
+app_create_account: Créer un compte
+app_current_user: Utilisateur en cours
+app_comments_for_you: Commentaires pour vous
+app_your_observations: Vos observations
+app_your_interests: Vos intérêts
+app_your_summary: Votre profil
+app_preferences: Votre préférences
+app_join_mailing_list: Rejoindre liste de diffusion
+app_logout: Déconnexion
+app_admin: Admin
+app_users: Énumérer les utilisateurs
+app_email_all_users: E-mail tous les utilisateurs
+app_add_to_group: Ajouter au groupe
+app_turn_admin_on: Activer le mode admin
+app_turn_admin_off: Désactiver le mode admin
+app_languages: Autres langues
+app_contributors: Contributeurs
+app_site_stats: Stats du site
+app_colors_from: Couleurs selon [theme]
+app_powered_by: Construite sur
+app_preferred_browser: Navigateur préféré
 
 # This is for the search bar at the top of every page.
-app_find: Pesquisar
-app_search:  Search
-app_search_google:  Site (via google)
-app_refine_search:  Refine Search
-app_advanced_search:  Advanced Search
-app_timer:  "time: [seconds] sec"
-app_index_timer:  "[num] results in [seconds] sec"
+app_find: Trouver
+app_search: Rechercher
+app_search_google: Site (via google)
+app_refine_search: Affiner la recherche
+app_advanced_search: Recherche avancée
+app_timer: "durée: [seconds] sec"
+app_index_timer: "[num] résultats dans [seconds] sec"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
-app_translators_credit: Traduzido para Português por Everaldo e Lu.
+app_translators_credit: Traduit en français (mal) par _user jason_
 
 # These are general alerts that appear near the top of the page.
-app_no_ajax:  Your Browser Is Out of Date
-app_no_browser:  We Don't Recognize Your Browser
-app_no_javascript:  Javascript Is Disabled
-app_no_session:  You Have Cookies Disabled
+app_no_ajax: Votre navigateur est obsolète
+app_no_browser: Nous ne reconnaissons pas votre navigateur
+app_no_javascript: Javascript est désactivé
+app_no_session: Vous avez désactivé les cookies
 
 # Title of the RSS auto-discovery link in the HTML header section.
-app_rss: RSS Observações de Cogumelo
+app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-# app_donate_banner:  '"Thank you for your donations!  We have reached our 2011 goal and are now working on improvements.":/support/donate'
+# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
 app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
-app_donate:  Donate
+app_donate: Faire un don
 
 ################################################################################
 
@@ -1738,11 +1736,11 @@ reverify_note:  >
 
 
 # observer/rss
-rss_description: Lista de alterações nas observações de cogumelo na ordem em que acontecem.
+rss_description:  List of changes to [:app_title] as they happen.
 rss_log_of_deleted_item:  Log of\nDeleted\nItem
-rss_log_title: Registro de Atividades
+rss_log_title:  Activity Log
 rss_by:  by [user]
-rss_title: Observação de Cogumelo
+rss_title:  "[:app_title]"
 rss_show:  "Show:"
 rss_hide:  "Hide:"
 rss_all:  Everything
@@ -2297,8 +2295,8 @@ pivotal_head_started:  areas developers are actively working
 pivotal_head_unstarted:  scheduled for work soon
 pivotal_head_unscheduled:  for the indefinite future
 pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week 
-pivotal_head_month:  has comments within last month  
+pivotal_head_week:  has comments within last week
+pivotal_head_month:  has comments within last month
 pivotal_head_none:  has no recent comments
 pivotal_head_all:  show everything
 
@@ -2325,11 +2323,11 @@ pivotal_label_open:  open
 pivotal_label_day:  day
 pivotal_label_week:  week
 pivotal_label_month:  month
-pivotal_label_none:  none 
-pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
-pivotal_label_unstarted: "[:pivotal_state_unstarted]"
-pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  all
+pivotal_label_none:  none
+pivotal_label_unscheduled:  "[:pivotal_state_unscheduled]"
+pivotal_label_unstarted:  "[:pivotal_state_unstarted]"
+pivotal_label_started:  "[:pivotal_state_started]"
+pivotal_label_all:  "[:all]"
 
 ################################################################################
 
@@ -2381,7 +2379,7 @@ advanced_search_result_type_help:  >
 
 
 # observer/license_updater
-bulk_license_link: Bulk License Updater
+bulk_license_link:  Bulk License Updater
 
 
 # observer/color_themes
@@ -2496,7 +2494,7 @@ image_updater_help:  >
   Listed below are all the different licenses you've posted images under, along
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
-  "[:UPDATE]" to submit changes. 
+  "[:UPDATE]" to submit changes.
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.
@@ -3477,9 +3475,9 @@ change_member_status_title:  Changing [:user] Status of [name] for [title]
 
 
 # observer/change_user_bonuses
-change_user_bonuses_title: Contribution Bonuses for [user]
-change_user_bonuses: Award Bonus
-change_user_bonuses_help: >
+change_user_bonuses_title:  Contribution Bonuses for [user]
+change_user_bonuses:  Award Bonus
+change_user_bonuses_help:  >
   List one bonus per line, each specifiying a number of points and reason, like
   this:
   \n\n
@@ -3810,67 +3808,66 @@ email_verify_intro:  >
 # INTRO PAGE
 
 # observer/intro
-intro_title: Introdução
-intro_purpose: >
-  *Propósito:* O propósito deste site é registrar observações de
-  cogumelos, ajudar pessoas a identificar cogumelos que lhes são familiar e
-  expandir a comunidade de exploração científica de cogumelos (micologia).
-  Alguns perguntam o que é considerado cogumelo. Este site tem uma visão bem
-  ampla. Mesmo com ênfase em fungos carnudos e grandes, outros fundos como
-  líquens, uredinales e mofos, assim como organismos parecidos com fungos como
-  mofo-limo são bem-vindos. Últimamente eu tenho esperado que este site se
-  torne uma fonte valiosa de conhecimento tanto para micologistas amadores
-  como para profissionais. Eu gosto de pensar nele como um guia vivo de
-  cogumelos ou como um jornal colaborativo sobre cogumelos.
+intro_title:  Introduction
+intro_purpose:  >
+  *Purpose:* The purpose of this site is to record observations about
+  mushrooms, help people identify mushrooms they aren't familiar with, and
+  expand the community around the scientific exploration of mushrooms
+  (mycology).  Some have asked what counts as a mushroom.  This site takes a
+  very broad view.  While the emphasis is on the large fleshy fungi, other
+  fungi such as lichens, rust and molds as well as fungus-like organisms such
+  as slime-molds are all welcome.  Ultimately, I hope this site will become a
+  valuable resource for both amateur and professional mycologists.  I like to
+  think of it as a living field guide for mushrooms or a collaborative mushroom
+  field journal.
   \n\n
-  Para os iniciantes na micologia, existe um grande montante de pesquisas
-  básicas que precisam ser feitas. As estimativas são de que menos de 5% das
-  espécies de fungos do planeta são conhecidos pela ciência. Enquanto as coisas
-  são ligeiramente melhores para os grandes e carnudos fungos conhecidos como
-  cogumelos, continua sendo comum a experiência de cruzar cogumelos que não
-  são facilmente identificáveis nos livros disponíveis ou que simplesmente não
-  combinam completamente com a definição de qualquer espécie catalogada. Este
-  site tem o intuito de preencher essa lacuna criando um lugar para
-  discutirmos e registrarmos o que encontramos, bem como nos conectar à
-  corrente literatura sobre cogumelos. Por favor, não se sinta intimidado pela
-  encurvatura ciêntifica do site. Todos são bem-vindos a compartilhar suas
-  próprias observações, colocar suas fotos e a fazer comentários nas
-  observações de outras pessoas.
+  For those new to mycology, there is a huge amount of basic research that
+  still needs to be done.  By some estimates less that 5% of the world's
+  species of fungi are known to science.  While things are slightly better for
+  the large fleshy fungi known as mushrooms, it is still a common experience to
+  come across a mushroom that cannot be easily identified in the available
+  books or which doesn't really fit the definition of any recognized species.
+  This site is intended to address that gap by creating a place for us to talk
+  about and record what we've found, as well as connect to the existing
+  literature about mushrooms.  Please do not feel intimidated by the scientific
+  bent of the site.  Everyone is welcome to dive in and add their own mushroom
+  observations, upload mushroom photos and make [:comments] on other people's
+  observations.
 
-intro_image_sharing: >
-  *Compartilhando Imagens:* Este site segue os mesmos princípios
-  cooperativos iniciados pela "Free Software Foundation":http://fsf.org,
-  futuramente expressados pelo "Open Source software movement":http://opensource.org,
-  e expandidos para outros esforços criativos pela "Creative Commons":http://creativecommons.org.
-  Conseqüentemente todas as imagens estão disponíveis em uma das licenças
-  Creative Commons.  Isso quer dizer que quando alguém coloca suas imagens no
-  site, eles estão dando aos outros permissão explícita e perpétua para usar
-  essas imagens sob certas "condições":/observer/how_to_use#licens.  Este tipo
-  de permissão é muito importante para certos tipos de pesquisa. Isto permite
-  que futuros pesquisadores possam usar livremente essas informações para
-  expandir o conhecimento sobre cogumelos.  Além disso, aumenta a probabilidade
-  de que essas informações continuem disponíveis num futuro distante.
+intro_image_sharing:  >
+  *Image Sharing:* This site follows the principles of cooperative sharing
+  pioneered by the "Free Software Foundation":http://fsf.org, further expressed
+  by the "Open Source software movement":http://opensource.org, and expanded to
+  other creative efforts by the "Creative Commons":http://creativecommons.org.
+  Consequently all images are made available under one of the Creative Commons
+  licenses.  In short this means that when anyone uploads one of their images
+  to the site, they are giving others explicit permission to use those images
+  under certain "conditions":/observer/how_to_use#license in perpetuity.  This
+  type of permission is very important for basic research.  It allows future
+  researchers to freely use these data to expand our understanding of
+  mushrooms.  It also significantly increases the likelihood that the data will
+  continue to be available into the distant future.
   \n\n
-  Se você coloca uma de suas imagens, não quer dizer que você está abrindo mão de seu
-  direito autoral ou da sua possibilidade de fazer dinheiro com as imagens.
-  Dependendo da licença que você escolher, você pode continuar exigindo que
-  qualquer um que quiser usar essas imagens para fins comerciais, entre em
-  contato com o mantenedor dos direitos autorais e trabalhe em uma condição de
-  uso. Este site inclui alguns atalhos especiais nas páginas de imagens para
-  ajudar a criar esses relacionamentos.
+  If you upload your own images, this license does not mean you are giving up
+  your copyright or your ability to make money off your images.  Depending on
+  which license you choose, you can still require that anyone who wishes to use
+  any of these images for commercial purposes, get in touch with the copyright
+  holder and work out the conditions for that use.  The site includes special
+  links on the image pages to help create those relationships.
 
-intro_source_code: >
-  *Código Fonte:* O código fonte desse site está disponível em:
-  "[repo]":[repo] e está licenciado nos termos da
-  "Open Source MIT License":http://www.opensource.org/licenses/mit-license.php.
-  Contribuições são bem-vindas ("README":[readme]).  Aqui você encontra a lista de "recursos planejados":[todo_list].
-  Sugestões e comentários são bem-vindos.  Se você quiser contribuir, por
-  favor envie uma mensagem para: *nathan at collectivesource.com* e assim
-  poderemos coordenar nossos esforços.
+intro_source_code:  >
+  *Source Code:* Source code for the site is available at: "[repo]":[repo] and
+  is licensed under the "Open Source MIT
+  License":http://www.opensource.org/licenses/mit-license.php.  Source code
+  contributions are welcome ("README":[readme]). Here's a list of "planned features":[todo_list].
+  All suggestions and comments are welcome.  If you would like to contribute,
+  please send mail to *nathan at collectivesource.com* so we can coordinate
+  our efforts.
 
-intro_note: >
-  Nota: Os administradores desse site se reservam o direito de remover
-  qualquer material que julguem inapropriado ou fora do propósito desse site.
+intro_note:  >
+  *Note:* The administrators of this site reserve the right to remove any
+  material they deem inappropriate or not in keeping with the purpose of this
+  site.
 
 intro_talks:  >
   *Talks:*
@@ -4911,7 +4908,7 @@ runtime_no_more_search_objects:  "[:runtime_no_more]"
 runtime_no_save_naming:  "[:runtime_no_save(type=:naming)]"
 runtime_no_save_observation:  "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match:  "[:runtime_no_match_name(value=match)]"
-runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
+runtime_observation_success:  "[:runtime_created_id(type=:observation,value=id)]"
 runtime_prefs_success:  "[:runtime_updated(type=:preferences)]"
 runtime_profile_invalid_image:  "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image:  "[:runtime_removed_from(type=:image,name=:profile)]"
@@ -5057,96 +5054,96 @@ runtime_species_list_need_to_use_bulk:  >
 # DEBUGGING STUFF -- this doesn't need translating
 
 # observer/recalc
-observer_recalc_old_name: 'old_name: [name]'
-observer_recalc_new_name: 'new_name: [name]'
-observer_recalc_caught_error: 'Caught exception: [error]'
+observer_recalc_old_name:  "old_name: [name]"
+observer_recalc_new_name:  "new_name: [name]"
+observer_recalc_caught_error:  "Caught exception: [error]"
 
 # observer/status
-system_status_browser_status_size: Browser status cache size
-system_status_clear_caches: Clear Caches
-system_status_gc: GC
-system_status_textile_name_size: Textile name cache size
-system_status_title: Server Status
+system_status_browser_status_size:  Browser status cache size
+system_status_clear_caches:  Clear Caches
+system_status_gc:  GC
+system_status_textile_name_size:  Textile name cache size
+system_status_title:  Server Status
 
 ################################################################################
 
 # DISABLE SYNTAX CHECKER
 
 # Don't translate this, just correct the order in which dates are given.
-date_helper_order: [:day, :month, :year] #default Rails is US ordered: :order => [:year, :month, :day]
+date_helper_order:  [:year, :month, :day]
 
 # These two use UNIX date format codes.  Ask MO developers for help if you
 # aren't familiar with the syntax.
 date_helper_date_formats:
   default: "%Y-%m-%d"
   short: "%e %b"
-  long: "%e %B, %Y"
+  long: "%e %B %Y"
 
 date_helper_time_formats:
   default: "%a, %d %b %Y %H:%M:%S %z"
   short: "%d %b %H:%M"
-  long: "%B %d, %Y %H:%M"
+  long: "%d %B %Y %H:%M"
 
 # Added at the end of date if not using a 24 hours system.
-date_helper_am: am
-date_helper_pm: pm
+date_helper_am:  am
+date_helper_pm:  pm
 
 # How to render a number.
-number_helper_separator: ","  # Between integer part and fraction.
-number_helper_delimiter: "."  # Between each group of thousands.
+number_helper_separator:  "."  # Between integer part and fraction.
+number_helper_delimiter:  ","  # Between each group of thousands.
 
 # How to render a list.
-array_connector: 'e'           # Word between final two items.
-array_skip_last_comma: 'true'  # Include comma between final two items?
+array_connector:  'and'          # Word between final two items.
+array_skip_last_comma:  'false'  # Include comma between final two items?
 
 # Month and day names.  Be careful not to change spacing or delete any lines.
 date_helper_month_names:
   -
     -
-  - Janeiro
-  - Fevereiro
-  - Março
-  - Abril
-  - Maio
-  - Junho
-  - Julho
-  - Augosto
-  - Setembro
-  - Outubro
-  - Novembro
-  - Dezembro
+  - January
+  - February
+  - March
+  - April
+  - May
+  - June
+  - July
+  - August
+  - September
+  - October
+  - November
+  - December
 
 date_helper_abbr_month_names:
   -
     -
   - Jan
-  - Fev
+  - Feb
   - Mar
-  - Abr
-  - Mai
+  - Apr
+  - May
   - Jun
   - Jul
-  - Agp
-  - Set
-  - Out
+  - Aug
+  - Sep
+  - Oct
   - Nov
-  - Dez
+  - Dec
 
 date_helper_day_names:
-  - Domingo
-  - Segunda-feira
-  - Terça-feira
-  - Quarta-feira
-  - Quinta-feira
-  - Sexta-feira
-  - Sábado
+  - Sunday
+  - Monday
+  - Tuesday
+  - Wednesday
+  - Thursday
+  - Friday
+  - Saturday
 
 date_helper_abbr_day_names:
-  - Dom
-  - Seg
-  - Ter
-  - Qua
-  - Qui
-  - Sex
-  - Sab
+  - Sun
+  - Mon
+  - Tue
+  - Wed
+  - Thu
+  - Fri
+  - Sat
 
