@@ -375,10 +375,10 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_observation, :id => obs.id)
     assert_response('show_observation')
 
-    # Make sure no queries created for show_image links.  (Well, okay, six
+    # Make sure no queries created for show_image links.  (Well, okay, four
     # queries are created for Darvin's new "show species" and "show similar
-    # observations" links.) 
-    assert_equal(6, Query.count)
+    # observations" links...)
+    assert_equal(4, Query.count)
   end
 
   def test_show_user_no_id
@@ -680,7 +680,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = assigns(:observation)
     assert_equal(where, obs.place_name)
   end
-  
+
   def test_construct_observation
 
     # Test a simple observation creation with an approved unique name
@@ -832,7 +832,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_nil(obs.rss_log)
 
   end
-  
+
   def test_construct_observation_dubious_place_names
     # Test a reversed name with a scientific user
     where = "USA, Massachusetts, Reversed"

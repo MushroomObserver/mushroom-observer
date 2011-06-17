@@ -1,36 +1,4 @@
-<%
-  questions_ok = observation.user.email_general_question
-%>
-
-<div style="margin-top:1em">
-  <%= :show_observation_header.t %>:
-  <%=
-    links = []
-    if questions_ok
-      links << link_to(:show_observation_send_question.t,
-                       :controller => 'observer',
-                       :action => 'ask_observation_question',
-                       :id => observation.id,
-                       :params => query_params)
-    end
-    if check_permission(observation.user_id)
-      links << link_to(:show_observation_edit_observation.t,
-                       :controller => 'observer',
-                       :action => 'edit_observation',
-                       :id => observation.id,
-                       :params => query_params)
-      links << link_to(:DESTROY.t, {
-                         :controller => 'observer',
-                         :action => 'destroy_observation',
-                         :id => observation.id,
-                         :params => query_params
-                       }, { :confirm => :are_you_sure.l })
-    end
-    links.join(' | ')
-  %>
-</div>
-
-<div class="ThinBox">
+<div class="ThinBox" style="margin-top:1em">
   <%= :WHEN.t %>: <span class="Data"><%= observation.when.web_date %></span><br/>
 
   <%= if observation.is_collection_location

@@ -1781,8 +1781,6 @@ show_comments_and_more:  And [num] more...
 
 # observation/_show_consensus
 show_consensus_list_of_species:  "List of species in [name]"
-show_consensus_similar_observations:  Similar Observations
-show_consensus_include_synonyms:  include synonyms
 
 
 
@@ -1871,6 +1869,8 @@ show_name_latest_review:  "Latest review: [date] by [user]"
 show_name_previous_version:  Previous Version
 show_name_other_versions:  Other Versions
 show_name_observations:  "More [:OBSERVATIONS]"
+show_name_observations_of:  "More [:OBSERVATIONS] of [name]"
+show_name_all_observations:  "More [:OBSERVATIONS] (all synonyms)"
 show_name_synonym_observations:  "Synonym [:OBSERVATIONS]"
 show_name_other_observations:  "Similar [:OBSERVATIONS]"
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"

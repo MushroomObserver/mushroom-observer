@@ -359,6 +359,9 @@ class NameController < ApplicationController
       # Create search queries for observation lists.
       @consensus_query = create_query(:Observation, :of_name, :name => @name,
                                       :by => :confidence)
+      @consensus2_query = create_query(:Observation, :of_name, :name => @name,
+                                       :synonyms => :all,
+                                       :by => :confidence)
       @synonym_query = create_query(:Observation, :of_name, :name => @name,
                                     :synonyms => :exclusive,
                                     :by => :confidence)
@@ -373,10 +376,11 @@ class NameController < ApplicationController
       # Determine which queries actually have results and instantiate the ones we'll use
       @first_child = @children_query.results(:limit => 1)[0]
       @first_consensus = @consensus_query.results(:limit => 1)[0]
-      @has_synonym = @synonym_query.select_one()
-      @has_other = @other_query.select_one()
+      @has_consensus2 = @consensus2_query.select_count
+      @has_synonym = @synonym_query.select_count
+      @has_other = @other_query.select_count
       if @subtaxa_query
-        @has_subtaxa = @subtaxa_query.select_one()
+        @has_subtaxa = @subtaxa_query.select_count
       end
     end
   end

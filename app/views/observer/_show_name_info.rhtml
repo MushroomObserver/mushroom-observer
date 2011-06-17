@@ -1,0 +1,84 @@
+<%=
+  lines = []
+
+  if name = observation.name
+    lines << link_to(:show_name.t(:name => name.display_name), :controller => 'name',
+                     :action => 'show_name', :id => name.id)
+  end
+
+  if name && !name.unknown? && !is_robot?
+    approved_synonyms, deprecated_synonyms = name.sort_synonyms
+    if approved_synonyms.any?
+      links = approved_synonyms.map {|n| name_link(n)}
+      if name.deprecated
+        label = links.length > 1 ? :show_observation_preferred_names.t : :show_observation_preferred_name.t
+      else
+        label = links.length > 1 ? :show_observation_alternative_names.t : :show_observation_alternative_name.t
+      end
+      lines << "#{label}: <span class='Data'>#{links.join(', ')}</span>"
+    end
+
+    data = []
+    sum = 0
+    for name2 in [name] + approved_synonyms
+      query = Query.lookup(:Observation, :of_name, :name => name2, :by => :confidence)
+      count = query.select_count
+      if count > 0
+        sum += count
+        query.save
+        data << { :count => count, :name => name2, :query => query }
+      end
+    end
+
+    if data.length > 1
+      for datum in data
+        name2 = datum[:name]
+        query = datum[:query]
+        count = datum[:count]
+        lines << link_to(:show_name_observations_of.t(:name => name2.display_name),
+                         :controller => 'observer',
+                         :action => 'index_observation', :params => query_params(query)) +
+                 " (#{count})"
+      end
+    end
+
+    query = Query.lookup(:Observation, :of_name, :name => name, :by => :confidence,
+                         :synonyms => :all)
+    count = query.select_count
+    query.save
+    if data.length > 1
+      lines << link_to(:show_name_all_observations.t, :controller => 'observer',
+                       :action => 'index_observation', :params => query_params(query)) +
+               " (#{count})"
+    else
+      lines << link_to(:show_name_observations.t, :controller => 'observer',
+                       :action => 'index_observation', :params => query_params(query)) +
+               " (#{count})"
+    end
+
+    query = Query.lookup(:Observation, :of_name, :name => name, :by => :confidence,
+                         :synonyms => :all, :nonconsensus => :exclusive)
+    count = query.select_count
+    if count > 0
+      query.save
+      lines << link_to(:show_name_other_observations.t, :controller => 'observer',
+                       :action => 'index_observation', :params => query_params(query)) +
+               " (#{count})"
+    end
+
+    if genus = name.genus
+      query = Query.lookup(:Name, :of_children, :name => genus, :all => true)
+      count = query.select_count
+      query.save if !is_robot?
+      if count > 1
+        lines << link_to(:show_consensus_list_of_species.t(:name => genus.display_name.t),
+                         :controller => 'name', :action => 'index_name',
+                         :params => query_params(query)) + " (#{count})"
+      end
+    end
+  end
+
+  lines += list_descriptions(name) if name
+
+  lines.join("<br/>\n")
+%>

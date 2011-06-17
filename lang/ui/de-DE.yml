@@ -1780,8 +1780,6 @@ show_comments_and_more:  And [num] more...
 
 # observation/_show_consensus
 show_consensus_list_of_species:  "List of species in [name]"
-show_consensus_similar_observations:  Similar Observations
-show_consensus_include_synonyms:  include synonyms
 
 
 
@@ -1870,6 +1868,8 @@ show_name_latest_review: "Zuletzt bearbeitet: am [date] von [user]"
 show_name_previous_version: Vorige Version
 show_name_other_versions: Andere Versionen
 show_name_observations: Funde
+show_name_observations_of:  "More [:OBSERVATIONS] of [name]"
+show_name_all_observations:  "More [:OBSERVATIONS] (all synonyms)"
 show_name_synonym_observations: Funde unter Synonymen
 show_name_other_observations: Ähnliche Funde
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"

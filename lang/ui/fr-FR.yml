@@ -1787,8 +1787,6 @@ show_comments_and_more:  And [num] more...
 
 # observation/_show_consensus
 show_consensus_list_of_species:  "List of species in [name]"
-show_consensus_similar_observations:  Similar Observations
-show_consensus_include_synonyms:  include synonyms
 
 
 
@@ -1877,6 +1875,8 @@ show_name_latest_review:  "Latest review: [date] by [user]"
 show_name_previous_version:  Previous Version
 show_name_other_versions:  Other Versions
 show_name_observations:  "More [:OBSERVATIONS]"
+show_name_observations_of:  "More [:OBSERVATIONS] of [name]"
+show_name_all_observations:  "More [:OBSERVATIONS] (all synonyms)"
 show_name_synonym_observations:  "Synonym [:OBSERVATIONS]"
 show_name_other_observations:  "Similar [:OBSERVATIONS]"
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"
@@ -2323,8 +2323,8 @@ pivotal_head_started:  areas developers are actively working
 pivotal_head_unstarted:  scheduled for work soon
 pivotal_head_unscheduled:  for the indefinite future
 pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week
-pivotal_head_month:  has comments within last month
+pivotal_head_week:  has comments within last week 
+pivotal_head_month:  has comments within last month  
 pivotal_head_none:  has no recent comments
 pivotal_head_all:  show everything
 
@@ -2351,7 +2351,7 @@ pivotal_label_open:  open
 pivotal_label_day:  day
 pivotal_label_week:  week
 pivotal_label_month:  month
-pivotal_label_none:  none
+pivotal_label_none:  none 
 pivotal_label_unscheduled:  "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted:  "[:pivotal_state_unstarted]"
 pivotal_label_started:  "[:pivotal_state_started]"
