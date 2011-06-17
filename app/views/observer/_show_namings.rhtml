@@ -4,26 +4,29 @@
   javascript_include 'vote_popup'
 
   logged_in = !@user.nil? && @user.verified
-  consensus = @observation.consensus_naming
-  any_names = @observation.namings && @observation.namings.length > 0
+  consensus = observation.consensus_naming
+  any_names = observation.namings && observation.namings.length > 0
   popups = []
 %>
 
-<% form_tag(:action => 'show_observation', :id => @observation,
+<% form_tag(:action => 'show_observation', :id => observation,
             :params => query_params) do %>
-  <p>
-    <% if any_names %>
-      <%= :show_namings_proposed_names.t %>:
-    <% else %>
-      <%= :show_namings_no_names_yet.t %>
-    <% end %>&nbsp;
-    <%= link_to(:show_namings_propose_new_name.t, :action => 'create_naming',
-                :id => @observation, :params => query_params) %>
-    <% if logged_in && any_names && can_do_ajax? %>
-      &nbsp;<%= submit_tag(:show_namings_update_votes.l,
-                           :onclick => "set_changed(0)") %><br/>
-    <% end %>
-  </p>
+  <div style="margin-top:1em">
+    <%= if any_names
+      :show_namings_proposed_names.t + ':'
+    else
+      :show_namings_no_names_yet.t
+    end %><%=
+      '&nbsp;' + link_to(:show_namings_propose_new_name.t,
+        :action => 'create_naming', :id => observation, :params => query_params)
+    %><%= if is_in_admin_mode?
+      '&nbsp;|&nbsp;' + link_to(:show_observation_debug_consensus.t,
+        :action => 'recalc', :id => @observation.id)
+    end %><%= if logged_in && any_names && can_do_ajax?
+      '&nbsp;' + submit_tag(:show_namings_update_votes.l,
+        :onclick => "set_changed(0)")
+    end %>
+  </div>
 
   <% if any_names %>
     <div class="ThinBox">
@@ -43,7 +46,7 @@
           <th></th>
         </tr>
 
-        <% for naming in @observation.namings.sort_by(&:created) %>
+        <% for naming in observation.namings.sort_by(&:created) %>
           <tr>
             <td>
               <div>
@@ -104,7 +107,7 @@
 
             <td width="20">&nbsp;</td>
             <td><%=
-              (@observation.is_owners_favorite?(naming) ? image_tag("eye3.png") : "") +
+              (observation.is_owners_favorite?(naming) ? image_tag("eye3.png") : "") +
               (naming == consensus ? image_tag("eyes3.png") : "")
             %></td>
           </tr>
@@ -169,11 +172,11 @@
 
   <%= javascript_tag %(
     var CHANGED = false;
-    var POPUPS = { #{@observation.namings.map {|n|
+    var POPUPS = { #{observation.namings.map {|n|
       id = n.id.to_s
       "#{id}: $('show_votes_' + #{id})"
     }.join(", ")} };
-    var VOTES = { #{@observation.namings.map {|n|
+    var VOTES = { #{observation.namings.map {|n|
       id = n.id.to_s
       "#{id}: $('vote_' + #{id} + '_value')"
     }.join(", ")} };

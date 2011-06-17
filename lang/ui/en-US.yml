@@ -971,6 +971,7 @@ app_no_session: You Have Cookies Disabled
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
+# CHANGED: 20110601
 # app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
 app_donate_banner: 'Check out our new and improved "feature tracker":/pivotal/index.'
 app_donate: Donate
@@ -982,9 +983,9 @@ app_donate: Donate
 # observer/ask_observation_question
 ask_observation_question_title: Question about [name]
 ask_observation_question_label: >
-  Enter your question below.  When you hit send it will be emailed to [user].
-  The email will automatically include a link to this observation as well as
-  your email address.
+  Enter your question below.  When you hit "[:SEND]" it will be emailed to
+  [user].  The email will automatically include a link to this observation as
+  well as your email address. 
 
 
 
@@ -999,17 +1000,22 @@ ask_user_question_subject: "[:Subject]"
 ask_webmaster_title: Email Question or Comment
 ask_webmaster_your_email: Your email address
 ask_webmaster_question: Question or Comment
+# CHANGED: 20110615
 ask_webmaster_note: >
-  Thanks for your interest in the [:app_title] website.  This website was
-  first launched in mid-2006.  I am currently the primary (but no longer only!)
-  developer and maintainer.  I welcome any questions you might have about using
-  the site or comments on how the site might be improved.  I keep my "to do
-  list":[todo_list] online so you can get a peek into what I have planned and a
-  rough order.  However, this is always subject to change, especially if there
-  is some type of bug or someone submits a really great idea.
+  Thanks for your interest in the Mushroom Observer website.  This website was
+  first launched in mid-2006.  Jason and I are currently the primary developers
+  and maintainers.  We welcome any questions you might have about using the
+  site or comments on how the site might be improved.  Please have a look at
+  our "feature tracker":/pivotal/index or our "account on Pivotal
+  Tracker":https://www.pivotaltracker.com/projects/224629 to see what we have
+  planned.  You can vote and comment on all the various suggestions for future
+  development there.  However, they are only rough guides, subject to bugs or
+  others issues that may come up and, of course, the availability of our own
+  time to work on the site. 
   \n\n
   Nathan Wilson\n
-  [:app_title] WebMaster
+  Jason Hollinger\n
+  Mushroom Observer WebMasters
 
 
 
@@ -1045,9 +1051,9 @@ comment_show_destroy: "[:DESTROY]"
 # observer/commercial_inquiry
 commercial_inquiry_title: Commercial Inquiry About [name]
 commercial_inquiry_header: >
-  Enter your commercial inquiry about this image.  When you hit send it will be
-  emailed to [user].  The email will automatically include a link to this
-  image.
+  Enter your commercial inquiry about this image.  When you hit "[:SEND]" it
+  will be emailed to [user].  The email will automatically include a link to
+  this image. 
 
 
 
@@ -1354,10 +1360,12 @@ form_observations_is_collection_location_help: >
   is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id
   table where collection location is unknown etc.).
 
+# CHANGED: 20110616
 form_observations_notes_help: >
-  Please include comments about how you arrived at the given name, any unusual
-  features and any features that are not clear from a photograph such as
-  habitat or distinctive scent or taste.
+  Please include any additional information you can think of about this
+  observation that isn't clear from the photographs, e.g., habitat, substrate
+  or nearby trees; distinctive texture, scent, taste, staining or bruising;
+  results of chemical or microscopic analyses, etc. 
 
 form_observations_remove_image_confirm: >
   Are you sure you want to remove this image?  This will only remove this image
@@ -1629,7 +1637,6 @@ news_header: >
 
 
 # shared/_observation_list
-observation_made: Observation made
 observation_made_confidence: Community confidence
 
 
@@ -1770,6 +1777,13 @@ show_comments_and_more: And [num] more...
 
 
 
+# observation/_show_consensus
+show_consensus_list_of_species: "List of species in [name]"
+show_consensus_similar_observations: Similar Observations
+show_consensus_include_synonyms: include synonyms
+
+
+
 # name/show_name_description or location/show_location_description
 show_description_empty: Nothing has been written for this description yet.
 show_description_destroy: "[:DESTROY]"
@@ -1803,6 +1817,11 @@ show_description_adjust_permissions_help: >
 # observer/_show_images
 show_images_small_thumbs: "(small thumbnails)"
 show_images_large_thumbs: "(large thumbnails)"
+
+
+
+# observer/_show_lists
+show_lists_header: "[:SPECIES_LISTS]"
 
 
 
@@ -1893,6 +1912,7 @@ show_namings_please_login: >
 
 # observer/show_observation
 show_observation_title: "[:OBSERVATION]: [name]"
+show_observation_header: "[:OBSERVATION]"
 show_observation_edit_observation: "[:edit_object(type=:observation)]"
 show_observation_propose_new_name: "[:show_namings_propose_new_name]"
 show_observation_debug_consensus: Debug Consensus

@@ -375,8 +375,10 @@ class ObserverControllerTest < FunctionalTestCase
     get(:show_observation, :id => obs.id)
     assert_response('show_observation')
 
-    # Make sure no queries created for show_image links.
-    assert_equal(0, Query.count)
+    # Make sure no queries created for show_image links.  (Well, okay, six
+    # queries are created for Darvin's new "show species" and "show similar
+    # observations" links.) 
+    assert_equal(6, Query.count)
   end
 
   def test_show_user_no_id

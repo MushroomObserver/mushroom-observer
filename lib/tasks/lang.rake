@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :lang do
 
   desc "Re-sort translations according to English one, filling in missing ones, and moving extras to the end."
@@ -21,15 +23,22 @@ namespace :lang do
         strings = {}
         dups = {}
         undone = {}
+        footer = ''
         File.open(filename) do |fh|
           key = nil
           at_top = true
+          at_end = false
           fh.each_line do |line|
             line.sub!(/^\xEF\xBB\xBF/, '')  # (remove stupid UTF-8 marker)
             if line.match(/^#\s*----/)
               at_top = false
             elsif at_top
               comments_at_top += line
+            elsif line.match(/^# DISABLE SYNTAX CHECKER/)
+              at_end = true
+              footer += line
+            elsif at_end
+              footer += line
             elsif line.match(/^(\w+):(\s+)/)
               key = $1
               # Keep track of things that haven't been translated yet.
@@ -65,7 +74,9 @@ namespace :lang do
         keys_in_english = {}
         for line in template
           # Comment: assume this ends previous value.
-          if line.match(/^#/)
+          if line.match(/^# DISABLE SYNTAX CHECKER/)
+            break
+          elsif line.match(/^#/)
             result += "\n" * blanks if blanks > 0
             result += line
             blanks = 0
@@ -112,6 +123,9 @@ namespace :lang do
             blanks = -1
           end
         end
+
+        # Add the stuff the comes after "DISABLE SYNTAX CHECKER".
+        result += "\n" + footer
 
         # Check if there are any translations still in strings -- these are
         # extras.  Stick them at end of file in alphabetical order.

@@ -329,7 +329,7 @@ south: sud
 WEST: Oeste
 west: oeste
 
-# Labels for fields answering: "What did you observer", "When did you observe
+# Labels for fields answering: "What did you observe?", "When did you observe
 # it?", "Where did you observe it?", and "Who observed it?".
 WHAT: Cuál
 what: cuál
@@ -973,7 +973,8 @@ app_no_session: Usted Ha Deshabilitado las Cookies
 app_rss: Mushroom Observer RSS
 
 # Donation stuff.
-# app_donate_banner: '"¡Gracias a los donantes! Hemos logrado nuestro objetivo para 2011 y han comenzado a trabajar en las mejoras.":/support/donate'
+# CHANGED: 20110601
+# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
 app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
 app_donate: Donar
 
@@ -1002,6 +1003,7 @@ ask_user_question_subject: Asunto
 ask_webmaster_title: Enviar Pregunta o Comentario
 ask_webmaster_your_email: Su dirección e-mail
 ask_webmaster_question: Pregunta o Comentario
+# CHANGED: 20110615
 ask_webmaster_note: >
   Gracias por su interés en el sitio web de Mushroom Observer.  Este sitio web
   fue lanzado a mediados de 2006.  Actualmente soy el primero (¡pero no sólo
@@ -1375,6 +1377,7 @@ form_observations_is_collection_location_help: >
   feria de hongos, supermercado, o mesa de identificación de incursión, donde
   la ubicación de colección se desconoce).
 
+# CHANGED: 20110616
 form_observations_notes_help: >
   Por favor, incluir comentarios acerca de cómo se llegó al nombre dado,
   cualquier inusuales características, y cualquier características que no puede
@@ -1651,7 +1654,6 @@ news_header: >
 
 
 # shared/_observation_list
-observation_made: Se observó
 observation_made_confidence: La confianza de la comunidad
 
 
@@ -1794,6 +1796,13 @@ show_comments_and_more: Y [num] más...
 
 
 
+# observation/_show_consensus
+show_consensus_list_of_species:  "List of species in [name]"
+show_consensus_similar_observations:  Similar Observations
+show_consensus_include_synonyms:  include synonyms
+
+
+
 # name/show_name_description or location/show_location_description
 show_description_empty: Nada ha sido escrito para esta descripción todavía.
 show_description_destroy: "[:DESTROY]"
@@ -1827,6 +1836,11 @@ show_description_adjust_permissions_help: >
 # observer/_show_images
 show_images_small_thumbs: "(miniaturas pequeñas)"
 show_images_large_thumbs: "(miniaturas grandes)"
+
+
+
+# observer/_show_lists
+show_lists_header:  "[:SPECIES_LISTS]"
 
 
 
@@ -1920,6 +1934,7 @@ show_namings_please_login: >
 
 # observer/show_observation
 show_observation_title: "Observación: [name]"
+show_observation_header:  "[:OBSERVATION]"
 show_observation_edit_observation: Editar Observación
 show_observation_propose_new_name: Proponer Otro Nombre
 show_observation_debug_consensus: Depurar Consenso
@@ -2387,7 +2402,7 @@ pivotal_label_none:  none
 pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted: "[:pivotal_state_unstarted]"
 pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  all
+pivotal_label_all:  "[:all]"
 
 ################################################################################
 
@@ -2559,7 +2574,7 @@ image_updater_help: >
   publicar imágenes bajo, junto con el número de imágenes que utilizan esa
   licencia.  A continuación realice los cambios que desee en la licencia o el
   nombre que figura como titular de derechos de autor, y entonces haga clic en
-  «[:UPDATE]» para enviar los cambios. 
+  «[:UPDATE]» para enviar los cambios.
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.

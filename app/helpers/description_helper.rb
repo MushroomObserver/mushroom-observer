@@ -110,33 +110,8 @@ module ApplicationHelper::Description
     result
   end
 
-  # Show list of alternate descriptions for show_object page.
-  #
-  #   <%= show_alt_descriptions(name, projects) %>
-  #
-  #   # Renders something like this:
-  #   <p>
-  #     Alternate Descriptions: Create Your Own
-  #       Main Description
-  #       EOL Project Draft
-  #       Rolf's Draft (private)
-  #   </p>
-  #
-  #   <p>
-  #     Create New Draft For:
-  #       Another Project
-  #       One More Project
-  #   </p>
-  #
-  def show_alt_descriptions(obj, projects=nil)
+  def list_descriptions(obj, fake_default=false)
     type = obj.type_tag
-
-    # Show existing drafts, with link to create new one.
-    head = "<big>#{:show_name_descriptions.t}:</big> "
-    head += link_to(:show_name_create_description.t,
-                    :action => "create_#{type}_description",
-                    :id => obj.id, :params => query_params)
-    any = false
 
     # Filter out empty descriptions (unless it's public or one you own).
     list = obj.descriptions.select do |desc|
@@ -174,17 +149,62 @@ module ApplicationHelper::Description
       if writer || admin
         links = []
         links << link_to(:EDIT.t, :id => desc.id, :params => query_params,
+                         :controller => obj.show_controller,
                          :action => "edit_#{type}_description") if writer
         links << link_to(:DESTROY.t, { :id => desc.id,
                          :action => "destroy_#{type}_description",
+                         :controller => obj.show_controller,
                          :params => query_params },
                          { :confirm => :are_you_sure.t }) if admin
         item += indent + "[#{links.join(' | ')}]" if links.any?
       end
-      indent + item
+      item
     end
 
+    if fake_default && !obj.descriptions.select {|d| d.source_type == :public} != []
+      str = :description_part_title_public.t
+      link = link_to(:CREATE.t,
+                    :controller => obj.show_controller,
+                    :action => "create_#{type}_description",
+                    :id => obj.id, :params => query_params)
+      str += indent + '[' + link + ']'
+      list.unshift(str)
+    end
+
+    return list
+  end
+
+  # Show list of alternate descriptions for show_object page.
+  #
+  #   <%= show_alt_descriptions(name, projects) %>
+  #
+  #   # Renders something like this:
+  #   <p>
+  #     Alternate Descriptions: Create Your Own
+  #       Main Description
+  #       EOL Project Draft
+  #       Rolf's Draft (private)
+  #   </p>
+  #
+  #   <p>
+  #     Create New Draft For:
+  #       Another Project
+  #       One More Project
+  #   </p>
+  #
+  def show_alt_descriptions(obj, projects=nil)
+    type = obj.type_tag
+
+    # Show existing drafts, with link to create new one.
+    head = "<big>#{:show_name_descriptions.t}:</big> "
+    head += link_to(:show_name_create_description.t,
+                    :controller => obj.show_controller,
+                    :action => "create_#{type}_description",
+                    :id => obj.id, :params => query_params)
+    any = false
+
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
+    list = list_descriptions(obj).map {|link| indent + link}
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
     html = list.join("<br/>\n")

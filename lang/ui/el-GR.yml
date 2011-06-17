@@ -329,7 +329,7 @@ south: νότια
 WEST: Δυτικά
 west: δυτικά
 
-# Labels for fields answering: "What did you observer", "When did you observe
+# Labels for fields answering: "What did you observe?", "When did you observe
 # it?", "Where did you observe it?", and "Who observed it?".
 WHAT: Τι
 what: τι
@@ -973,7 +973,8 @@ app_no_session: Έχετε Απενεργοποιήσει τα Cookies
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-# app_donate_banner: '"Ευχαριστούμε τους δωρητές μας! Ο στόχος μας για το 2011 επιτεύχθηκε και έχουμε ήδη ξεκινήσει τις εργασίες βελτίωσης.":/support/donate'
+# CHANGED: 20110601
+# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
 app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
 app_donate:  Donate
 
@@ -1000,6 +1001,7 @@ ask_user_question_subject: "[:Subject]"
 ask_webmaster_title: Στείλτε Email με Ερώτημα ή Σχόλιο
 ask_webmaster_your_email: Η Διεύθυνση του Email Σας
 ask_webmaster_question: Ερώτημα ή Σχόλιο
+# CHANGED: 20110615
 ask_webmaster_note: >
   Ευχαριστούμε για το ενδιαφέρον σας για την ιστοσελίδα [:app_title]. Αυτή η ιστοσελίδα πρωτοεμφανίστηκε στα μέσα του 2006. Αυτή τη στιγμή είμαι ο κύριος (αλλά όχι πια ο μόνος!)
   βελτιωτής και συντηρητής της. Δέχομαι ευχαρίστως όποια ερωτήματα μπορεί να έχετε όσον αφορά τη χρήση της ιστοσελίδας ή σχόλια για το πώς θα μπορούσε να βελτιωθεί η ιστοσελίδα. Διατηρώ έναν κατάλογο με τα "προς εκτέλεση":[todo_list] online, οπότε μπορείτε να ρίξετε μια ματιά σ’ αυτά που έχω προγραμματίσει, καθώς και τη σειρά που πρέπει να γίνουν χονδρικά. Πάντως, μπορούν να γίνουν αλλαγές ανά πάσα στιγμή στον κατάλογο, ιδιαίτερα αν υπάρξει κάποιο πρόβλημα με το λογισμικό ή αν κάποιος προτείνει μια πραγματικά θαυμάσια ιδέα.
@@ -1312,6 +1314,7 @@ form_observations_log_change: Αλλαγή Καταγραφής
 form_observations_is_collection_location_help: >
   Τσεκάρετε όταν η τοποθεσία είναι η ίδια με το μέρος που αναπτυσσόταν το μανιτάρι. Ξετσεκάρετε όταν είναι μόνο το μέρος όπου είδατε το μανιτάρι (π.χ. εκθέσεις μανιταριών, οπωροπωλείο, τραπέζι έκθεσης δειγμάτων όπου η τοποθεσία δεν είναι γνωστή κ.λπ.).
 
+# CHANGED: 20110616
 form_observations_notes_help: >
   Παρακαλούμε περιλάβετε σχόλια σχετικά με το πώς καταλήξατε στο συγκεκριμένο όνομα, οποιαδήποτε ασυνήθιστα χαρακτηριστικά, καθώς και όσα χαρακτηριστικά δεν φαίνονται καθαρά στη φωτογραφία, όπως ο βιότοπος ή κάποια χαρακτηριστική οσμή ή γεύση.
 
@@ -1565,7 +1568,6 @@ news_header: >
 
 
 # shared/_observation_list
-observation_made: Η παρατήρηση έγινε
 observation_made_confidence: Βεβαιότητα της κοινότητας
 
 
@@ -1700,6 +1702,13 @@ show_comments_and_more: Και [num] ακόμη...
 
 
 
+# observation/_show_consensus
+show_consensus_list_of_species:  "List of species in [name]"
+show_consensus_similar_observations:  Similar Observations
+show_consensus_include_synonyms:  include synonyms
+
+
+
 # name/show_name_description or location/show_location_description
 show_description_empty: Τίποτε δεν έχει γραφτεί γι’ αυτή την περιγραφή ακόμη.
 show_description_destroy: "[:DESTROY]"
@@ -1731,6 +1740,11 @@ show_description_adjust_permissions_help: >
 # observer/_show_images
 show_images_small_thumbs: "(μικρές ενδεικτικές εικόνες)"
 show_images_large_thumbs: "(μεγάλες ενδεικτικές εικόνες)"
+
+
+
+# observer/_show_lists
+show_lists_header:  "[:SPECIES_LISTS]"
 
 
 
@@ -1816,6 +1830,7 @@ show_namings_please_login: >
 
 # observer/show_observation
 show_observation_title: "[:OBSERVATION]: [name]"
+show_observation_header:  "[:OBSERVATION]"
 show_observation_edit_observation: "[:edit_object(type=:observation)]"
 show_observation_propose_new_name: "[:show_namings_propose_new_name]"
 show_observation_debug_consensus: Αποσφαλμάτωση Κοινής Αποδοχής
@@ -2189,7 +2204,7 @@ pivotal_label_none:  none
 pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted: "[:pivotal_state_unstarted]"
 pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  all
+pivotal_label_all:  "[:all]"
 
 ################################################################################
 
@@ -2310,7 +2325,7 @@ image_updater_help:  >
   Listed below are all the different licenses you've posted images under, along
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
-  "[:UPDATE]" to submit changes. 
+  "[:UPDATE]" to submit changes.
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.

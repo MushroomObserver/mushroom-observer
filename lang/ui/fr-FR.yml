@@ -1,3 +1,5 @@
+# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----
+
 # Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
 __ignore__: junk
@@ -188,10 +190,10 @@ EMAIL: E-mail
 email: e-mail
 EMAILS: E-mails
 emails: e-mails
-EMAIL_ADDRESS: Addresse électronique
-email_address: addresse électronique
-EMAIL_ADDRESSS: Addresses électronique
-email_addresss: addresses électronique
+EMAIL_ADDRESS: Adresse électronique
+email_address: adresse électronique
+EMAIL_ADDRESSS: Adresses électronique
+email_addresss: adresses électronique
 FULL_NAME: Nom complet
 full_name: nom complets
 FULL_NAMES: Noms complet
@@ -761,7 +763,7 @@ query_help_observation_all: toutes les observations
 query_help_observation_at_location: les observations à un endroit défini
 query_help_observation_at_where: les observations à un endroit indéfini
 query_help_observation_by_rss_log: les observations avec activité récent
-query_help_observation_by_user: les observations créées par un utilisateur particulier 
+query_help_observation_by_user: les observations créées par un utilisateur particulier
 query_help_observation_in_set: les observations dans une ensemble particulière
 query_help_observation_in_species_list: les observations dans une liste particulière
 query_help_observation_of_children: les observations d'enfants d'un nom particulier
@@ -939,8 +941,8 @@ app_admin: Admin
 app_users: Énumérer les utilisateurs
 app_email_all_users: E-mail tous les utilisateurs
 app_add_to_group: Ajouter au groupe
-app_turn_admin_on: Activer le mode admin
-app_turn_admin_off: Désactiver le mode admin
+app_turn_admin_on: Activer la mode admin
+app_turn_admin_off: Désactiver la mode admin
 app_languages: Autres langues
 app_contributors: Contributeurs
 app_site_stats: Stats du site
@@ -971,8 +973,9 @@ app_no_session: Vous avez désactivé les cookies
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
+# CHANGED: 20110601
 # app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
-app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
+app_donate_banner: Consultez notre "«tracker de fonction»":/pivotal/index nouveau et amélioré.
 app_donate: Faire un don
 
 ################################################################################
@@ -980,205 +983,213 @@ app_donate: Faire un don
 # MOST POPULAR PAGES
 
 # observer/ask_observation_question
-ask_observation_question_title:  Question about [name]
-ask_observation_question_label:  >
-  Enter your question below.  When you hit send it will be emailed to [user].
-  The email will automatically include a link to this observation as well as
-  your email address.
+ask_observation_question_title: Question sur [name]
+ask_observation_question_label: >
+  Entrez votre question ci-dessous.  Lorsque vous cliquez sur «[:SEND]», il
+  sera envoyé par courriel à [user].  L'email contiendra automatiquement un
+  lien vers cette observation ainsi que votre adresse e-mail.
 
 
 
 # observer/ask_user_question
-ask_user_question_title:  Email Message for [user]
-ask_user_question_message:  "[:Message]"
-ask_user_question_subject:  "[:Subject]"
+ask_user_question_title: Envoyer un email à [user]
+ask_user_question_message: "[:Message]"
+ask_user_question_subject: "[:Subject]"
 
 
 
 # observer/ask_webmaster_question
-ask_webmaster_title:  Email Question or Comment
-ask_webmaster_your_email:  Your email address
-ask_webmaster_question:  Question or Comment
-ask_webmaster_note:  >
-  Thanks for your interest in the [:app_title] website.  This website was
-  first launched in mid-2006.  I am currently the primary (but no longer only!)
-  developer and maintainer.  I welcome any questions you might have about using
-  the site or comments on how the site might be improved.  I keep my "to do
-  list":[todo_list] online so you can get a peek into what I have planned and a
-  rough order.  However, this is always subject to change, especially if there
-  is some type of bug or someone submits a really great idea.
+ask_webmaster_title: Nous envoyer une question ou une commentaire
+ask_webmaster_your_email: Votre addresse électronique
+ask_webmaster_question: La question ou commentaire
+# CHANGED: 20110615
+ask_webmaster_note: >
+  Merci de votre intérêt pour le Mushroom Observer.  Ce site a été lancé à la
+  mi-2006.  Jason et moi sommes actuellement les développeurs principaux et les
+  responsables.  Nous accueillons toutes les questions que vous pourriez avoir
+  sur l'utilisation du site ou des commentaires sur la façon dont le site
+  pourrait être améliorée.  S'il vous plaît jeter un oeil à notre "tracker de
+  fonction":/pivotal/index ou notre "compte sur Pivotal
+  Tracker":https://www.pivotaltracker.com/projects/224629 pour voir ce que nous
+  avons prévu.  Vous pouvez voter et commenter sur toutes les suggestions
+  diverses pour le développement futur.  Toutefois, ils ne sont que des
+  guides bruts, soumis à des bugs ou autres problèmes qui pourraient surgir et,
+  bien sûr, la disponibilité de notre temps à travailler sur le site.
   \n\n
   Nathan Wilson\n
-  [:app_title] WebMaster
+  Jason Hollinger\n
+  WebMasters du Mushroom Observer
 
 
 
 # comment/add_comment
-comment_add_title:  Add Comment to [name]
-comment_add_create:  "[:CREATE]"
+comment_add_title: Ajouter une commentaire sur [name]
+comment_add_create: "[:CREATE]"
 
 
 
 # comment/edit_comment
-comment_edit_title:  Edit Comment on [name]
+comment_edit_title: Modifier votre commentaire sur [name]
 
 
 
 # comment/list_comments (This is used to describe the object the comment is
 # about if the object has been deleted, orphaning the comment.)
-comment_list_deleted:  object deleted
+comment_list_deleted: objet a été supprimé
 
 
 
 # comment/show_comment
-comment_show_title:  "Comment on [Name]"
-comment_show_created:  "[:Created]"
-comment_show_by:  "[:By]"
-comment_show_summary:  "[:Summary]"
-comment_show_comment:  "[:Comment]"
-comment_show_show:  "[:show_object]"
-comment_show_edit:  "[:EDIT]"
-comment_show_destroy:  "[:DESTROY]"
+comment_show_title: "Commentaire sur [Name]"
+comment_show_created: "[:Created]"
+comment_show_by: "[:By]"
+comment_show_summary: "[:Summary]"
+comment_show_comment: "[:Comment]"
+comment_show_show: "[:show_object]"
+comment_show_edit: "[:EDIT]"
+comment_show_destroy: "[:DESTROY]"
 
 
 
 # observer/commercial_inquiry
-commercial_inquiry_title:  Commercial Inquiry About [name]
-commercial_inquiry_header:  >
-  Enter your commercial inquiry about this image.  When you hit send it will be
-  emailed to [user].  The email will automatically include a link to this
-  image.
+commercial_inquiry_title: Enquête de commerce relatives à [name]
+commercial_inquiry_header: >
+  Entrez votre demande commerciale de cette image.  Lorsque vous cliquez sur
+  «[:SEND]», il sera envoyé par courriel à [user].  L'email contiendra
+  automatiquement un lien vers cette image.
 
 
 
 # location/create_location_description
-create_location_description_title:  "[:create_name_description_title]"
+create_location_description_title: "[:create_name_description_title]"
 
 
 
 # location/create_location
-create_location_title:  "[:create_object(type=:location)]"
+create_location_title: Créer un endroit
 
 
 
 # name/create_name_description
-create_name_description_title:  Create Description for [name]
+create_name_description_title: Créer une description pour [name]
 
 
 
 # name/create_name
-create_name_title:  "[:create_object(type=:name)]"
+create_name_title: Créer un nom
 
 
 
 # observer/create_naming
-create_naming_title:  "Propose Name for Observation #[id]"
+create_naming_title: "Proposer un nom pour l'observation #[id]"
 
 
 
 # observer/create_observation
-create_observation_title:  "[:create_object(type=:observation)]"
+create_observation_title: Créer une observation"
 
 
 
 # location/edit_location
-edit_location_title:  "[:edit_object(type=:location)]"
+edit_location_title: Modifier un endroit
 
 
 
 # location/edit_location_description
-edit_location_description_title:  Edit [name]
+edit_location_description_title: Modifier la description de [name]
 
 
 
 # name/edit_name_description
-edit_name_description_title:  Edit [name]
+edit_name_description_title: Modifier [name]
 
 
 
 # name/edit_name
-edit_name_title:  Edit Description of [name]
+edit_name_title: Modifier la description de [name]
 
 
 
 # observer/edit_naming
-edit_naming_title:  "Edit [:NAMING] for Observation #[id]"
+edit_naming_title: "Modifier votre nom proposé pour l'observation #[id]"
 
 
 
 # observer/edit_observation
-edit_observation_title:  "[:edit_object(type=:observation)]: [name]"
+edit_observation_title: "Modifier votre observation: [name]"
 
 
 
 # account/email_new_password
-email_new_password_title:  Email New Password
-email_new_password_login:  Login
+email_new_password_title: Réinitialiser le mot de passe
+email_new_password_login: Connexion
 
 
 
 # observer/_form_comments
-form_comments_comment:  "[:Comment]"
-form_comments_summary:  "[:Summary]"
+form_comments_comment: "[:Comment]"
+form_comments_summary: "[:Summary]"
 
 
 
 # shared/_form_description
-form_description_source:  "[:SOURCE]"
-form_description_source_public:  Public [:app_title] Description
-form_description_source_foreign:  From Another [:app_title] Server
-form_description_source_project:  "[:PROJECT]"
-form_description_source_source:  Independent Source
-form_description_source_user:  "[:USER]"
-form_description_permissions:  Permissions
-form_description_public_writable:  Modifiable by the general public.
-form_description_public_readable:  Visible to the general public.
-form_description_source_help:  >
-  There are three kinds of descriptions you can create:\n
-  1. *Public:* These are wikipedia-style documents that are editable by
-  everyone on the site.  The default title is
-  "[:description_part_title_public]". Use the text field above to customize
-  this.\n
-  2. *Source:* These descriptions come from a third-party source, and typically
-  are not meant to be modifiable.  Enter the name of the source in the text
-  field above.  Note, if you are posting a description that derives from
-  copyrighted material, please be sure to rewrite it in your own words.\n
-  3. *User:* Use this to create your own personalized description.  The default
-  title will be "[:description_part_title_user(user=:name)]".  Use the text
-  field above to customize this.  In both this and the 'Source' type above, you
-  will have exclusive rights to choose who can view and modify this description
-  (see the check-boxes below).
+form_description_source: Source
+form_description_source_public: La description publique du [:app_title]
+form_description_source_foreign: Fourni par un autre serveur du [:app_title]
+form_description_source_project: Projet
+form_description_source_source: Source indépendante
+form_description_source_user: Utilisateur
+form_description_permissions: Autorisations
+form_description_public_writable: Modifiable par le grand public.
+form_description_public_readable: Visible au grand public.
+form_description_source_help: >
+  Il y a trois sortes de descriptions que vous pouvez créer.\n
+  1. *Publique:* Ce sont des documents que vous pouvez trouber sur wikipedia.
+  Ils sont modifiables par tout le monde.  Le titre par défaut est
+  «[:description_part_title_public]».  Utilisez le champ texte ci-dessus pour
+  le personnaliser.\n
+  2. *Source:* Ces descriptions proviennent d'une source tierce partie,
+  et ne sont généralement pas destinés à être modifiable.  Entrez le nom
+  de la source dans le champ texte ci-dessus.  Notez bien, si vous postez
+  une description que dérive de matériel protégé, s'il vous plaît n'oubliez
+  pas de le réécrire dans vos propres mots.\n
+  3. *Utilisateur:* Utilisez cette option pour créer votre propre description
+  personalisée.  Le titre par défaut est
+  «[:description_part_title_user(user=:name)]».  Utilisez le champ texte
+  ci-dessus pour le personnaliser.  Dans ce cas et celle ci-dessus, «Source»,
+  vous aurez droit exclusif de choisir qui peut voir et modifier cette
+  description (voir les cases ci-dessous).\n
 
-form_description_permissions_help:  >
-  Is the general public is allowed to view or make modifications to this
-  description?  If you wish to have more control over read, write and admin
-  permissions, please use the '[:show_description_adjust_permissions]' link
-  above.
+form_description_permissions_help: >
+  Est-ce que le grand public est autorisé à afficher ou apporter des
+  modifications à cette description?  Si vous souhaitez avoir plus de contrôle
+  sur les autorisations lire, écrire, et admin, s'il vous plaît utiliser le
+  lien «[:show_description_adjust_permissions]» ci-dessus.
 
-form_description_license_help:  >
-  Please select "license":/observer/how_to_use#license you want to use for this
-  description.
+form_description_license_help: >
+  S'il vous plaît sélectionnez «la license»:/observer/how_to_use#license à
+  utiliser pour cette description.
 
 
 
 # observer/_form_images
-form_images_when_taken:  When Was It Taken
-form_images_when_help:  Date the photograph or drawing was created.
-form_images_notes_help:  Enter notes that are specific to this particular image.
-form_images_copyright_holder:  "[:COPYRIGHT_HOLDER]"
-form_images_select_license:  Select a "License":/observer/how_to_use#license
-form_images_license_help:  >
-  Select "license":/observer/how_to_use#license you want to give for this image.
+form_images_when_taken: Quand a-t-elle pris?
+form_images_when_help: La date que l'image ou le dessin a été créé.
+form_images_notes_help: Entrez les notes que sont spécifique à cette image particulière.
+form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
+form_images_select_license: Sélectionnez la license
+form_images_license_help: >
+  «La license»:/observer/how_to_use#license que vous souhaitez utiliser pour cette image.
 
 
 
 # observer/_form_list_feedback
-form_list_feedback_missing_names:  The following names could not be found.
-form_list_feedback_missing_names_help:  >
-  Click 'Save'/'Update' to create these names.  If you want to correct any you
-  entered by hand, do so in the area below and click 'Save' to re-evaluate the
-  list.  If the names came from an uploaded species list, create a correct file
-  and select it for upload.
+form_list_feedback_missing_names: Les noms suivants n'ont pas pu être trouvé.
+form_list_feedback_missing_names_help: >
+  Cliquez sur «[:SAVE]» / «[:UPDATE]» pour créer ces noms. Si vous voulez corriger
+  ceux que vous avez entré à la main, faites-le dans le champs ci-dessous et
+  soumettez à nouveau le formulaire. Si les noms proviennent d'une liste téléchargé,
+  corrigez le fichier et le téléchargez à nouveau.
 
 
 
@@ -1337,50 +1348,55 @@ form_naming_confidence_help:  >
 
 
 # observer/_form_observations
-form_observations_specimen_available:  Herbarium Specimen Available
-form_observations_is_collection_location:  Is Collection Location
-form_observations_upload_images:  Upload Images
-form_observations_upload_another:  Upload Another...
-form_observations_edit_image:  Edit Image
-form_observations_remove_image:  Remove Image
-form_observations_lat_long_help:  >
-  Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and
-  longitude between -180.0 and 180.0.  If you choose to provide this data please
-  make it as accurate as possible.
+form_observations_specimen_available: Spécimen d'herbier est disponible
+form_observations_is_collection_location: L'endroit de collection
+form_observations_upload_images: Images à télécharger
+form_observations_upload_another: Télécharger une autre...
+form_observations_edit_image: Modifier l'image
+form_observations_remove_image: Supprimer l'image
+form_observations_lat_long_help: >
+  Localisation GPS facultatif.  La latitude doit être comprise entre -90,0 et
+  90,0 et la longitude entre -180,0 et 180,0.  Si vous choisissez de fournir
+  ces données, s'il vous plaît le rendre aussi précis que possible.
 
-form_observations_log_change:  Log Change
-form_observations_is_collection_location_help:  >
-  Check when the location is where the mushroom was growing.  Uncheck when it
-  is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id
-  table where collection location is unknown etc.).
+form_observations_log_change: Enregistrez les changements dans le journal.
+form_observations_is_collection_location_help: >
+  Cochez cette case si c'est l'endroit où le champignon a été croissant.
+  Décochez quand il a été recuelli ailleurs, par exemple, pour les faires aux
+  champignons, à l'épicerie, sur la table d'une incursion où l'endroit de
+  collection est inconnue, etc.
 
-form_observations_notes_help:  >
-  Please include comments about how you arrived at the given name, any unusual
-  features and any features that are not clear from a photograph such as
-  habitat or distinctive scent or taste.
+# CHANGED: 20110616
+form_observations_notes_help: >
+  S'il vous plaît incluir toute information supplémentaire que vous pouvez
+  penser à propos de cette observation que n'est pas clair à partir des
+  photographies: habitat, substrat, arbers à proximité; texture, scent ou goût
+  particulière; réaction de color ou contusion; les résultats des analyses
+  chimiques ou microscopiques; etc.
 
-form_observations_remove_image_confirm:  >
-  Are you sure you want to remove this image?  This will only remove this image
-  from this observation.  If it is attached to other observations, it will
-  remain attached to them.
+form_observations_remove_image_confirm: >
+  Etes-vous sûr de vouloir supprimer cette image?  Cela ne fera que retirer
+  cette image à partir de cette observation, et non pas le détruire.  Si elle
+  est attachée à d'autres observations, il restera attaché à eux.
 
-form_observations_specimen_available_help:  >
-  Check when there is a dried specimen available for further study.  This can
-  either be at an official herbarium or part of a personal herbarium.  Please
-  note where the specimen is in the notes.
+form_observations_specimen_available_help: >
+  Cochez cette case quand il y a un spécimen séché disponible pour une étude
+  plus approfondie.  Cela peut être soit un herbier officiel ou partie d'une
+  collection personnelle.  S'il vous plaît notez où le spécimen est dans notes.
 
-form_observations_upload_help:  >
-  Use the checkboxes on the left to select the image you would like to use as
-  the thumbnail for this observation.
+form_observations_upload_help: >
+  Utilisez les cases sur la gauche pour sélectionner l'image que vous souhaitez
+  utiliser comme la vignette pour cette observation.
 
-form_observations_where_help:  >
-  Where the observation was made.  In the US this should be at least accurate
-  to the county.  Examples:\n
+form_observations_where_help: >
+  C'est là où l'observation a été faite.  Aux E.E.U.U. cela devrait au moins
+  être exante dans le comté.  Exemples:\n
   Albion, Mendocino Co., California, USA\n
   Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
 
-form_observations_dubious_help:  >
-  Click '[button]' to use this location name or edit the text below to correct any typo.
+form_observations_dubious_help: >
+  Cliquez sur «[button]» d'utilizer ce nom d'endroit, sinon modifiez le text
+  ci-dessous pour corriger les fautes de frappe.
 
 
 
@@ -1436,94 +1452,95 @@ form_synonyms_missing_names_help:  >
 
 
 # image/add_image
-image_add_title:  Add an Image for [name]
-image_add_edit:  "[:edit_object(type=:observation)]"
-image_add_default:  default thumbnail
-image_add_image:  "[:Image]"
-image_add_optional:  "[:optional]"
-image_add_upload:  "[:UPLOAD]"
-image_add_warning:  >
-  Please only upload images that you created or which you own the copyright of.
-  By uploading images you are giving us permission to distribute this image to
-  other users ("legalese":http://creativecommons.org/licenses/by-nc-sa/2.5/).
-  You are also giving us permission to display this image along side
-  advertisements or other fund-raising tools that may be used to support this
-  site.
+image_add_title: "Téléchargez une image pour: [name]"
+image_add_edit: Modifier l'observation
+image_add_default: vignette par défaut
+image_add_image: Image
+image_add_optional: facultatif
+image_add_upload: Télécharger
+image_add_warning: >
+  S'il vous plaît ne téléchargez les images que vous créez ou pour lesquels
+  voud détenez les droits d'auteur.  Par télécharger des images vous nous
+  donnez la permission de les distribuer aux autres utilisateurs ("jargon
+  juridique":http://creativecommons.org/licenses/by-nc-sa/2.5/).  Vous êtes
+  également nous donner la permission de les afficher le long côté des
+  publicités ou d'autres outils de collecte de fonds qui peuvent être utilisés
+  pour soutenir ce site.
 
 
 
 # image/reuse_image_for_user
-image_reuse_all_users:  Include other users' images.
-image_reuse_just_yours:  Only show your images.
+image_reuse_all_users: Incluir les images des utres utilisateurs.
+image_reuse_just_yours: Afficher seulement vos images.
 
 
 
 # image/edit_image
-image_edit_title:  "Editing Image: [name]"
+image_edit_title: "Modifier l'image: [name]"
 
 
 
 # image/remove_images
-image_remove_edit:  "[:edit_object(type=:observation)]"
-image_remove_remove:  Remove
-image_remove_title:  Remove Images from [name]
+image_remove_edit: Modifier l'observation
+image_remove_remove: Supprimer
+image_remove_title: "Supprimer des images de: [name]"
 
 
 
 # image/reuse_images
-image_reuse_title:  Reuse Image for [name]
-image_reuse_edit:  "[:edit_object(type=:observation)]"
-image_reuse_id:  Image ID
-image_reuse_reuse:  Reuse
-image_reuse_id_help:  >
-  Either click one of the images below, or if you know the image ID, just
-  enter it here and click '[:image_reuse_reuse]'.
+image_reuse_title: "Partager une image pour: [name]"
+image_reuse_edit: Modifier l'observation
+image_reuse_id: ID de l'image
+image_reuse_reuse: Partager
+image_reuse_id_help: >
+  Soit cliquez sur une des images ci-dessous, ou si vous connaissez l'ID de
+  l'image, il suffit d'entrez-le ici et cliquez sur «[:image_reuse_reuse]'.».
 
 
 
 # image/show_image
-image_show_title:  "[:IMAGE]: [name]"
-image_show_inquiry:  Send Commercial Inquiry About Image
-image_show_edit:  "[:edit_object(type=:image)]"
-image_show_destroy:  "[:DESTROY]"
-image_show_when:  "[:WHEN]"
-image_show_notes:  "[:NOTES]"
-image_show_copyright:  Copyright
-image_show_quality:  Quality
-image_show_your_vote:  Your Vote
-image_show_vote_and_next:  "Vote & [:NEXT]"
-image_show_comments:  "[num] comment(s)"
-image_show_observations:  "[:OBSERVATIONS]"
-image_show_thumbnail:  Thumbnail
-image_show_small:  Small
-image_show_medium:  Medium
-image_show_large:  Large
-image_show_huge:  Huge
-image_show_full_size:  Full Size
-image_show_original:  Show Original Image
-image_show_make_default:  Make this the default size
+image_show_title: "Image: [name]"
+image_show_inquiry: Envoyer une enquête de commerce relatives à cette image
+image_show_edit: Modifier l'image
+image_show_destroy: Détruire
+image_show_when: Quand
+image_show_notes: Notes
+image_show_copyright: Droits d'auteur
+image_show_quality: Qualité
+image_show_your_vote: Votre vote
+image_show_vote_and_next: Voter et Suivant
+image_show_comments: "[num] commentaire(s)"
+image_show_observations: Observations
+image_show_thumbnail: Vignette
+image_show_small: Petit
+image_show_medium: Moyen
+image_show_large: Grande
+image_show_huge: Énorme
+image_show_full_size: Taille entière
+image_show_original: Afficher l'image originale
+image_show_make_default: Faire de cette la taille par défaut.
 
 
 
 # observation/list_observations
-list_observations_location_all:  All Locations
-list_observations_location_define:  Define This Location
-list_observations_location_merge:  Merge With A Defined Location
+list_observations_location_all: Tous les endroits
+list_observations_location_define: Definer c'endroit
+list_observations_location_merge: Fusionner avec un endroit definé
 
 
 
 # location/list_place_names
-list_place_names_known:  Known Locations
-list_place_names_known_order:  '(by name)'
-list_place_names_undef:  Undefined Locations
-list_place_names_undef_order:  '(by frequency)'
-list_place_names_map:  Map Locations
-list_place_names_merge:  Merge
+list_place_names_known: Endroits definés
+list_place_names_known_order: '(par nom)'
+list_place_names_undef: Endroits undefinés
+list_place_names_undef_order: '(par fréquence)'
+list_place_names_map: Afficher sur une carte
+list_place_names_merge: Fusionner
 
 
 
 # _location (RSS log display)
-location_change:  Change to Location
+location_change: Changement dans endroit
 
 
 # model/location
@@ -1539,28 +1556,27 @@ location_dubious_unknown_state:  Unknown state '[state]', '[country]'
 
 
 # account/login
-login_please_login:  Please login
-login_login:  Login
-login_user:  User name or Email address
-login_password:  Password
-login_remember_me:  Remember me at this computer.
-login_forgot_password:  >
-  I forgot my password.  "Email me a new one.":/account/email_new_password
+login_please_login: S'il vous plaît vous connectez.
+login_login: Connexion
+login_user: Nom d'utilisateur ou addresse électronique
+login_password: Mot de passe
+login_remember_me: Rester connecté.
+login_forgot_password: >
+  J'ai oublié mon mot de passe. "Envoyez-moi un nouveau.":/account/email_new_password
 
-login_no_account:  >
-  I don't have an account.  "Create a new account.":/account/signup
+login_no_account: >
+  Je n'ai pas un compte.  "Créer un nouveau compte.":/account/signup
 
-login_having_problems:  >
-  If you are having problems logging into your account, send "email to the
-  webmaster":/observer/ask_webmaster_question.
+login_having_problems: >
+  Si vous avez des problèmes pour vous connecter à votre compte, "envoyez-nous
+  us message":/observer/ask_webmaster_question.
 
 
 
 # account/logout
-logout_title:  Logout
-logout_note:  >
-  You are now logged out of the [:app_title] website.  Editing functions are
-  disabled.
+logout_title: Déconnexion
+logout_note: >
+  Vous êtes maintenant déconnecté du [:app_title].  Fonctions d'édition sont désactivées.
 
 
 
@@ -1629,8 +1645,7 @@ news_header:  >
 
 
 # shared/_observation_list
-observation_made:  Observation made
-observation_made_confidence:  Community confidence
+observation_made_confidence: La confiance de la communauté
 
 
 
@@ -1736,21 +1751,21 @@ reverify_note:  >
 
 
 # observer/rss
-rss_description:  List of changes to [:app_title] as they happen.
-rss_log_of_deleted_item:  Log of\nDeleted\nItem
-rss_log_title:  Activity Log
-rss_by:  by [user]
-rss_title:  "[:app_title]"
-rss_show:  "Show:"
-rss_hide:  "Hide:"
-rss_all:  Everything
-rss_all_help:  Show all object types.
-rss_one:  "[TYPES]"
-rss_one_help:  Show only [types].
-rss_make_default:  Make This My Default
-rss_this_is_default:  This Is Your Default
-rss_created:  "[TYPE] Created"
-rss_changed:  "Change to [TYPE]"
+rss_description: Liste des modifications apportées à [:app_title] mesure qu'ils surviennent.
+rss_log_of_deleted_item: Record\nd'objet\nsupprimé
+rss_log_title: Journal d'activité
+rss_by: "par [user]"
+rss_title: "[:app_title]"
+rss_show: "Afficher:"
+rss_hide: "Masquer:"
+rss_all: Tous
+rss_all_help: Afficher tous les types d'objets.
+rss_one: "[TYPES]"
+rss_one_help: Afficher seulement les [types].
+rss_make_default: Faire de cette mes défaut
+rss_this_is_default: Ceci est votre défaut
+rss_created: "[TYPE] a été créé(e)"
+rss_changed: "[TYPE] a été modifié(e)"
 
 
 
@@ -1767,6 +1782,13 @@ shared_textile_help:  >
 show_comments_add_comment:  "[:add_object(type=:comment)]"
 show_comments_no_comments_yet:  No one has commented yet.
 show_comments_and_more:  And [num] more...
+
+
+
+# observation/_show_consensus
+show_consensus_list_of_species:  "List of species in [name]"
+show_consensus_similar_observations:  Similar Observations
+show_consensus_include_synonyms:  include synonyms
 
 
 
@@ -1801,8 +1823,13 @@ show_description_adjust_permissions_help:  >
 
 
 # observer/_show_images
-show_images_small_thumbs:  "(small thumbnails)"
-show_images_large_thumbs:  "(large thumbnails)"
+show_images_small_thumbs: "(vignettes petites)"
+show_images_large_thumbs: "(vignettes grandes)"
+
+
+
+# observer/_show_lists
+show_lists_header:  "[:SPECIES_LISTS]"
 
 
 
@@ -1892,28 +1919,29 @@ show_namings_please_login:  >
 
 
 # observer/show_observation
-show_observation_title:  "[:OBSERVATION]: [name]"
-show_observation_edit_observation:  "[:edit_object(type=:observation)]"
-show_observation_propose_new_name:  "[:show_namings_propose_new_name]"
-show_observation_debug_consensus:  Debug Consensus
-show_observation_alternative_name:  Alternative Name
-show_observation_alternative_names:  Alternative Names
-show_observation_preferred_name:  Preferred Name
-show_observation_preferred_names:  Preferred Names
-show_observation_observation_created:  Observation created
+show_observation_title: "Observation: [name]"
+show_observation_header:  "[:OBSERVATION]"
+show_observation_edit_observation: Modifier l'observation
+show_observation_propose_new_name: "[:show_namings_propose_new_name]"
+show_observation_debug_consensus: Déboguer le consensus
+show_observation_alternative_name: Nom alternatif
+show_observation_alternative_names: Noms alternatifs
+show_observation_preferred_name: Nom préféré
+show_observation_preferred_names: Noms préférés
+show_observation_observation_created: Observation créé
 # This is used if this is the location where the thing was growing.
-show_observation_collection_location:  Collection location
+show_observation_collection_location: L'endroit de collection
 # This is used if this is NOT the location where the thing was growing.
-show_observation_seen_at:  Seen at
-show_observation_specimen_available:  Herbarium specimen available
-show_observation_specimen_not_available:  No herbarium specimen
-show_observation_remove_images:  "[:remove_objects(type=:image)]"
-show_observation_reuse_image:  Reuse Image
-show_observation_add_images:  "[:add_objects(type=:image)]"
-show_observation_species_lists:  "[:SPECIES_LISTS]"
-show_observation_manage_species_lists:  Manage Species Lists
-show_observation_send_question:  Send Observer a Question
-show_observation_view_notifications:  View Notifications
+show_observation_seen_at: L'endroit où il a été vu
+show_observation_specimen_available: Spécimen d'herbier est disponible
+show_observation_specimen_not_available: Aucun spécimen disponible.
+show_observation_remove_images: Supprimer des images
+show_observation_reuse_image: Partager une image
+show_observation_add_images: Télécharger des images
+show_observation_species_lists: "[:SPECIES_LISTS]"
+show_observation_manage_species_lists: Gérer vos listes d'observation
+show_observation_send_question: Envoyer une question à l'observateur
+show_observation_view_notifications: Afficher notifications
 
 
 
@@ -5070,80 +5098,80 @@ system_status_title:  Server Status
 # DISABLE SYNTAX CHECKER
 
 # Don't translate this, just correct the order in which dates are given.
-date_helper_order:  [:year, :month, :day]
+date_helper_order: [:day, :month, :year]
 
 # These two use UNIX date format codes.  Ask MO developers for help if you
 # aren't familiar with the syntax.
 date_helper_date_formats:
   default: "%Y-%m-%d"
   short: "%e %b"
-  long: "%e %B %Y"
+  long: "%e %B, %Y"
 
 date_helper_time_formats:
   default: "%a, %d %b %Y %H:%M:%S %z"
-  short: "%d %b %H:%M"
-  long: "%d %B %Y %H:%M"
+  short: "%d %b, %H:%M"
+  long: "%d %B, %Y %H:%M"
 
 # Added at the end of date if not using a 24 hours system.
-date_helper_am:  am
-date_helper_pm:  pm
+date_helper_am: am
+date_helper_pm: pm
 
 # How to render a number.
-number_helper_separator:  "."  # Between integer part and fraction.
-number_helper_delimiter:  ","  # Between each group of thousands.
+number_helper_separator: ","  # Between integer part and fraction.
+number_helper_delimiter: "."  # Between each group of thousands.
 
 # How to render a list.
-array_connector:  'and'          # Word between final two items.
-array_skip_last_comma:  'false'  # Include comma between final two items?
+array_connector: 'et'           # Word between final two items.
+array_skip_last_comma: 'false'  # Include comma between final two items?
 
 # Month and day names.  Be careful not to change spacing or delete any lines.
 date_helper_month_names:
   -
     -
-  - January
-  - February
-  - March
-  - April
-  - May
-  - June
-  - July
-  - August
-  - September
-  - October
-  - November
-  - December
+  - Janvier
+  - Février
+  - Mars
+  - Avril
+  - Mai
+  - Juin
+  - Juillet
+  - Août
+  - Septembre
+  - Octobre
+  - Novembre
+  - Décembre
 
 date_helper_abbr_month_names:
   -
     -
   - Jan
-  - Feb
+  - Fev
   - Mar
-  - Apr
-  - May
-  - Jun
+  - Avr
+  - Mai
+  - Jui
   - Jul
-  - Aug
+  - Aoû
   - Sep
   - Oct
   - Nov
-  - Dec
+  - Déc
 
 date_helper_day_names:
-  - Sunday
-  - Monday
-  - Tuesday
-  - Wednesday
-  - Thursday
-  - Friday
-  - Saturday
+  - Dimanche
+  - Lundi
+  - Mardi
+  - Mercredi
+  - Jeudi
+  - Vendredi
+  - Samedi
 
 date_helper_abbr_day_names:
-  - Sun
-  - Mon
-  - Tue
-  - Wed
-  - Thu
-  - Fri
-  - Sat
+  - Dim
+  - Lun
+  - Mar
+  - Mer
+  - Jeu
+  - Ven
+  - Sam
 

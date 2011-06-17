@@ -126,7 +126,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select('a[href*=edit_comment], a[href*=destroy_comment]', false)
 
-    click(:label => 'Add Comment', :in => :tabs)
+    click(:label => 'Add Comment')
     assert_template('account/login')
     current_session.login!('katrina')
     assert_template('comment/add_comment')

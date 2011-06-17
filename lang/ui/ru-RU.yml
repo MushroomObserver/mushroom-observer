@@ -1,4 +1,6 @@
-﻿# Please see README in this same directory for notes on syntax and general
+# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----
+
+# Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
 __ignore__: junk
 
@@ -246,11 +248,11 @@ password_confirmation: подтверждение пароля
 PASSWORD_CONFIRMATIONS: Подтверждения пароля
 password_confirmations: подтверждения пароля
 PREFERENCES: Настройки
-preferences: настройки 
-PREFERRED_NAME: Предпочтительное имя 
-preferred_name: предпочтительное имя 
-PREFERRED_NAMES: Предпочтительные имена 
-preferred_names: предпочтительные имена 
+preferences: настройки
+PREFERRED_NAME: Предпочтительное имя
+preferred_name: предпочтительное имя
+PREFERRED_NAMES: Предпочтительные имена
+preferred_names: предпочтительные имена
 PROFILE: Профиль
 profile: профиль
 PROFILES: Профили
@@ -267,8 +269,8 @@ REVIEWERS: Рецензенты
 reviewers: рецензенты
 SIZE: Размер
 size: размер
-status: статус
 STATUS: Статус
+status: статус
 STATUSS: Статусы
 statuss: статусы
 SUBJECT: Тема
@@ -286,7 +288,7 @@ TAGS: Теги
 tags: теги
 TIME: раз
 time: раз
-TIMES: раз(а)	
+TIMES: раз(а)
 times: раз(а)
 TITLE: Заголовок
 title: заголовок
@@ -327,7 +329,7 @@ south: юг
 WEST: Запад
 west: запад
 
-# Labels for fields answering: "What did you observer", "When did you observe
+# Labels for fields answering: "What did you observe?", "When did you observe
 # it?", "Where did you observe it?", and "Who observed it?".
 WHAT: Что
 what: что
@@ -384,7 +386,7 @@ upload: загрузить
 
 # Common adjectives.
 BY: (Действие выполнил)
-by: (действие выполнил) 
+by: (действие выполнил)
 CREATED: Создано
 created: создано
 DESTROYED: Уничтожено
@@ -710,7 +712,7 @@ query_help_image_with_observations_of_children: изображения набл�
 query_help_image_with_observations_of_name: изображения наблюдений данного названия
 query_help_location_advanced_search: местонахождения наблюдений, соответствующих критериям расширенного поиска
 query_help_location_all: все местонахождения
-query_help_location_by_user: местонахождения, созданные данным пользователем 
+query_help_location_by_user: местонахождения, созданные данным пользователем
 query_help_location_by_editor: местонахождения, изменённые данным пользователем
 query_help_location_by_rss_log: местонахождения с недавней активностью
 query_help_location_in_set: местонахождения в данной подборке
@@ -729,8 +731,8 @@ query_help_location_with_observations_of_name: местонахождения н
 query_help_location_description_all: все описания наблюдений
 query_help_location_description_by_author: описания наблюдений, для которых данный пользователь является автором
 query_help_location_description_by_editor: описания наблюдений, для которых данный пользователь является редактором
-query_help_location_description_in_set: описания наблюдений в данной подборке
 query_help_location_description_by_user: описания наблюдений, которые создал данный пользователь
+query_help_location_description_in_set: описания наблюдений в данной подборке
 query_help_name_advanced_search: названия наблюдений, соответствующих критериям расширенного поиска
 query_help_name_all: все названия
 query_help_name_by_user: все названия, созданные данным пользователем
@@ -971,7 +973,8 @@ app_no_session: Cookies отключены
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-# app_donate_banner: '"Спасибо всем, сделавшим пожертвования!  Мы достигли нашей цели на 2011 год и приступили к работе над улучшением сайта.":/support/donate'
+# CHANGED: 20110601
+# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
 app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
 app_donate: Пожертвовать
 
@@ -984,10 +987,8 @@ ask_observation_question_title: Вопрос о [name]
 ask_observation_question_label: >
   Напишите свой вопрос. После нажатия кнопки 'Отправить' он будет направлен пользователю [user] по e-mail. В письме будет автоматически включена ссылка на это наблюдение и Ваш e-mail адрес.
 
- 
- 
-  
-  
+
+
 # observer/ask_user_question
 ask_user_question_title: E-mail сообщение для пользователя [user]
 ask_user_question_message: "[:Message]"
@@ -999,10 +1000,12 @@ ask_user_question_subject: "[:Subject]"
 ask_webmaster_title: Отправить вопрос или комментарий по e-mail
 ask_webmaster_your_email: Ваш e-mail адрес
 ask_webmaster_question: Вопрос или комментарий
+# CHANGED: 20110615
 ask_webmaster_note: >
   Спасибо за Ваш интерес к веб-сайту [:app_title]. Наш сайт был впервые запущен в середине 2006 годаю. В настоящий момент я являюсь главным (но не единственным!) разработчиком и техническим работником. Я буду рад любым вопросам по использованию сайта и идеям по его улучшению. Мой список дел размещён онлайн, и можно посмотреть, что и в каком порядке планируется делать. Разумеется, список может меняться, особенно если мы находим баг, или если кто-нибудь предложит что-то совершенно замечательное.  \n\n
   Нэйтан Уилсон\n
   [:app_title] вебмастер
+
 
 
 # comment/add_comment
@@ -1125,7 +1128,7 @@ form_description_public_writable: Право на изменение - обще�
 form_description_public_readable: Видимость - общедоступно.
 form_description_source_help: >
   Вы можете создавать три типа описаний:\n
-  1. *Общедоступное:* Это документы формата wikipedia, которые может редактировать любой человек на сайте. По умолчанию название таких описаний - 
+  1. *Общедоступное:* Это документы формата wikipedia, которые может редактировать любой человек на сайте. По умолчанию название таких описаний -
   "[:description_part_title_public]". Это название можно заменить на собственное с помощью текстового поля, расположенного выше.\n
   2. *Из источника:* Эти описания взяты из источника от третьей стороны и в норме не подлежат изменениям. Введите название источника в расположенное выше текстовое поле.  Заметьте, что, размещая описание, основанное на защищённом авторским правом материале, необходимо перефразировать использованный текст собственными словами..\n
   will have exclusive rights to choose who can view and modify this description
@@ -1133,7 +1136,6 @@ form_description_source_help: >
 
 form_description_permissions_help: >
   Можно ли публике просматривать и менять это описание? Если вы хотите получить расширенный доступ к настройкам прав на запись, чтение и администрирование, пожалуйста, пройдите по ссылке '[:show_description_adjust_permissions]', расположенной выше.
-  
 
 form_description_license_help: >
   Пожалуйста, определите, какая "лицензия":/observer/how_to_use#license будет указана для этого описания.
@@ -1310,6 +1312,7 @@ form_observations_log_change: Изменение записи в логе
 form_observations_is_collection_location_help: >
   Проставьте метку, если выше вы указали место сбора гриба. Уберите метку, если вы лишь увидели гриб в этом месте (например, на грибной ярмарке, в магазине, в микологическом кружке и т.д.)..
 
+# CHANGED: 20110616
 form_observations_notes_help: >
   Пожалуйста, расскажите, как вы пришли к определению, а также опишите любые необычные признаки и признаки, которые неочевидны на фотографии, например, вкус, запах.
 
@@ -1378,6 +1381,8 @@ form_synonyms_missing_names: Следующие названия не были �
 form_synonyms_missing_names_help: >
   Нажмите 'Добавить', чтобы создать эти названия. Если вы хотите исправить какие-то из названий, это можно сделать в поле, расположенном ниже, нажав затем 'Добавить' для переоценки списка.
 
+
+
 # image/add_image
 image_add_title: Добавить изображение для [name]
 image_add_edit: "[:edit_object(type=:observation)]"
@@ -1388,6 +1393,7 @@ image_add_upload: "[:UPLOAD]"
 image_add_warning: >
   Пожалуйста, добавляйте только изображения, для которых вы являетесь автором или правообладателем. Загружая изображения на сайт, вы даёте нам разрешение распространять эти изображения
   среди других пользователей (юридические детали объяснены здесь :http://creativecommons.org/licenses/by-nc-sa/2.5/). Вы также разрешаете нам показывать это изображение рядом с рекламой и иными средствами для сбора финансовых средств, необходимых для поддержания работы этого сайта.
+
 
 
 # image/reuse_image_for_user
@@ -1516,8 +1522,8 @@ name_approve_comments_help: >
 name_approve_deprecate: Объявить следующие синонимы устаревшими
 name_approve_deprecate_help: >
   Чтобы разбить на части набор синонимов, нажмите 'Одобрить' или 'Отменить', а затем нажмите на ссылку 'Изменить синонимы'.
-  
-  
+
+
 
 # name/change_synonyms
 name_change_synonyms_title: "Синонимы [name]"
@@ -1563,7 +1569,6 @@ news_header: >
 
 
 # shared/_observation_list
-observation_made: Сделано наблюдение
 observation_made_confidence: Уверенность сообщества
 
 
@@ -1698,6 +1703,13 @@ show_comments_and_more: Ещё [num]...
 
 
 
+# observation/_show_consensus
+show_consensus_list_of_species:  "List of species in [name]"
+show_consensus_similar_observations:  Similar Observations
+show_consensus_include_synonyms:  include synonyms
+
+
+
 # name/show_name_description or location/show_location_description
 show_description_empty:  Nothing has been written for this description yet.
 show_description_destroy:  "[:DESTROY]"
@@ -1731,6 +1743,11 @@ show_description_adjust_permissions_help:  >
 # observer/_show_images
 show_images_small_thumbs:  "(small thumbnails)"
 show_images_large_thumbs:  "(large thumbnails)"
+
+
+
+# observer/_show_lists
+show_lists_header:  "[:SPECIES_LISTS]"
 
 
 
@@ -1821,6 +1838,7 @@ show_namings_please_login:  >
 
 # observer/show_observation
 show_observation_title:  "[:OBSERVATION]: [name]"
+show_observation_header:  "[:OBSERVATION]"
 show_observation_edit_observation:  "[:edit_object(type=:observation)]"
 show_observation_propose_new_name:  "[:show_namings_propose_new_name]"
 show_observation_debug_consensus:  Debug Consensus
@@ -2109,14 +2127,14 @@ thanks_title:  Thanks for Your Support!
 thanks_no_amount:  Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
 thanks_note:  >
   Thank you for helping to support the Mushroom Observer.  Your support is
-  greatly appreciated and will help Mushroom Observer continue its mission. 
+  greatly appreciated and will help Mushroom Observer continue its mission.
   \n\n
   Your donation will be acknowledged by name on the "Mushroom Observer Donors
   Page":/support/donors once the funds are received unless you have requested
   special arrangements for your acknowledgement.  Examples of special
   arrangements might be to make the donation anonymously or to leave it in
   someone else's name.  If you would like special arrangements for your
-  acknowledgement please "send us a comment":/observer/ask_webmaster_question. 
+  acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 
 
 
@@ -2138,23 +2156,23 @@ letter_body:  >
   I will soon not be able to afford it.  As a result, I would like to start
   asking for donations from the community.  Those of you who have gotten a lot
   out of the site and want to see it continue to grow and expand, now is your
-  chance to give a little back and help with the financial support of the site. 
+  chance to give a little back and help with the financial support of the site.
   \n\n
   To that end, we have setup a "donation page":/support/donate that can
-  securely accept money from a PayPal account or a regular credit card. 
+  securely accept money from a PayPal account or a regular credit card.
   \n\n
   I would like to raise at least $2000 to cover basic server costs.  The more
   we get, the more we can expand our capacity for traffic and growth.  And the
-  fewer times you will encounter server down time and failed uploads. 
+  fewer times you will encounter server down time and failed uploads.
   \n\n
   When you make a donation, your name by default will be added to our "donors
   page":/support/donors as soon as we confirm the donation.  If you would
   prefer to donate anonymously or make other special arrangements for your
   acknowledgement, "send a comment":/observer/ask_webmaster_question after you
-  make your donation. 
+  make your donation.
   \n\n
   Please help support this active internet community of people who enjoy
-  sharing and learning more about the mushrooms around us. 
+  sharing and learning more about the mushrooms around us.
   \n\n
   Thanks,\n
   -Nathan
@@ -2255,7 +2273,7 @@ pivotal_label_none:  none
 pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted: "[:pivotal_state_unstarted]"
 pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  all
+pivotal_label_all:  "[:all]"
 
 ################################################################################
 
@@ -2417,12 +2435,12 @@ image_updater_count:  Count
 image_updater_license:  "[:LICENSE]"
 image_updater_holder:  "[:COPYRIGHT_HOLDER]"
 image_updater_title:  Updating Licenses for [user]
-image_updater_update:  Update
+image_updater_update:  "[:UPDATE]"
 image_updater_help:  >
   Listed below are all the different licenses you've posted images under, along
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
-  "[:UPDATE]" to submit changes. 
+  "[:UPDATE]" to submit changes.
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.
@@ -3264,7 +3282,7 @@ theme_random: случайное
 
 # observer/translators_note
 translators_note: >
-  Пожалуйста, помогите сделать сайт доступным всему миру! Это просто. Сейчас на сайте около 1600 строк, или около 11000 слов, но, пожалуйста, не пугайтесь. Мы упорядочили их так, что даже очень занятой человек сможет в свободную минуту перевести хотя бы основные разделы с наиболее употребимыми терминами и фразами. По мере сил и возможностей вы (или другой человек) сможете продолжить работу над переводом, пока, наконец, перевод не будет готов. В любой момент Вы можете скачать копию "файлов для перевода":[repo] и с помощью текстового редактора сразу же начать над 
+  Пожалуйста, помогите сделать сайт доступным всему миру! Это просто. Сейчас на сайте около 1600 строк, или около 11000 слов, но, пожалуйста, не пугайтесь. Мы упорядочили их так, что даже очень занятой человек сможет в свободную минуту перевести хотя бы основные разделы с наиболее употребимыми терминами и фразами. По мере сил и возможностей вы (или другой человек) сможете продолжить работу над переводом, пока, наконец, перевод не будет готов. В любой момент Вы можете скачать копию "файлов для перевода":[repo] и с помощью текстового редактора сразу же начать над
   \n\n
   переводом. Затем просто "напишите нам":/observer/ask_webmaster_question, и мы расскажем, как передать результаты перевода разработчикам. В ответ мы обещаем должным образом отметить Ваш вклад на страницах сайта... ну и, конечно, мы будем невыразимо благодарны!
 
@@ -3499,7 +3517,7 @@ review_donations_update: обновить
 review_donations_tab: просмотреть пожертвования
 review_reviewed: просмотрено
 review_id: Id
-review_who: кто	
+review_who: кто
 review_anon: анонимно
 review_amount: сумма
 review_email: E-mail
@@ -3524,7 +3542,7 @@ email_subject_observation_change: "внесены изменения в [:OBSERV
 email_subject_observation_destroy: "[:OBSERVATION] удалено, [name]"
 email_subject_observation_question: вопрос о [name]
 email_subject_publish_name: опубликовано название
-email_subject_verify: e-mail подтверждение 
+email_subject_verify: e-mail подтверждение
 email_subject_webmaster_question: вопрос от [user]
 
 # Field labels in the "object_change" emails.
@@ -4098,7 +4116,7 @@ how_projects:  >
   will become the official description if no official description exists yet.
 
 how_maps:  >
-  *Работа с картами* - Currently there are three types of maps available on
+  *Working with Maps* - Currently there are three types of maps available on
   [:app_title]: Occurrence Maps (e.g., "Occurrence map for
   **__Craterellus cornucopioides__**":/name/map/284), Location Maps (e.g.,
   "Salt Point State Park":/location/show_location/4) and the

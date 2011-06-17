@@ -304,18 +304,10 @@ ALL:  All
 all:  all
 NONE:  None
 none:  none
-EAST: Osten
-east: Osten
-NORTH: Norden
-north: Norden
-SOUTH: Süden
-south: Süden
-WEST: Westen
-west: Westen
-LOW: Tief
-low: tief
 HIGH: Hoch
 high: hoch
+LOW: Tief
+low: tief
 LESS: Weniger
 less: weniger
 MORE: Mehr
@@ -328,8 +320,16 @@ BACK: Zurück
 back: zurück
 FORWARD: Weiter
 forward: weiter
+EAST: Osten
+east: Osten
+NORTH: Norden
+north: Norden
+SOUTH: Süden
+south: Süden
+WEST: Westen
+west: Westen
 
-# Labels for fields answering: "What did you observer", "When did you observe
+# Labels for fields answering: "What did you observe?", "When did you observe
 # it?", "Where did you observe it?", and "Who observed it?".
 WHAT: Was
 what: was
@@ -973,7 +973,8 @@ app_no_session: Dein Browser nimmt einen Cookie nicht an
 app_rss: Mushroom Observer RSS
 
 # Donation stuff.
-# app_donate_banner:  '"Thank you for your donations!  We have reached our 2011 goal and are now working on improvements.":/support/donate'
+# CHANGED: 20110601
+# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
 app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
 app_donate:  Donate
 
@@ -1001,6 +1002,7 @@ ask_user_question_subject: Thema
 ask_webmaster_title: Frage oder Anregung schicken
 ask_webmaster_your_email: Deine Email-Adresse
 ask_webmaster_question: Frage oder Anregung
+# CHANGED: 20110615
 ask_webmaster_note: >
   Danke für dein Interesse an der Mushroom Observer Webseite. Diese Webseite wurde
   Mitte 2006 eröffnet. Derzeit bin ich der Hauptentwickler (aber nicht mehr
@@ -1359,6 +1361,7 @@ form_observations_is_collection_location_help: >
   den Pilz am Fundort bloß gesehen hast (z.B. Pilz-Messen, Supermarkt,
   ein Auslagetisch bei einer Pilzwanderung, wo man den Fundort nicht kennt).
 
+# CHANGED: 20110616
 form_observations_notes_help: >
   Bitte beschreib, wieso du den angegebenen Namen ausgesucht hast, sowie
   ungewöhnliche Kennzeichen oder solche Beobachtungen, die man dem Bild nicht
@@ -1637,7 +1640,6 @@ news_header: >
 
 
 # shared/_observation_list
-observation_made: Fund gemacht
 observation_made_confidence: Community-Gewissheit
 
 
@@ -1776,6 +1778,13 @@ show_comments_and_more:  And [num] more...
 
 
 
+# observation/_show_consensus
+show_consensus_list_of_species:  "List of species in [name]"
+show_consensus_similar_observations:  Similar Observations
+show_consensus_include_synonyms:  include synonyms
+
+
+
 # name/show_name_description or location/show_location_description
 show_description_empty:  Nothing has been written for this description yet.
 show_description_destroy: "[:DESTROY]"
@@ -1809,6 +1818,11 @@ show_description_adjust_permissions_help:  >
 # observer/_show_images
 show_images_small_thumbs:  "(small thumbnails)"
 show_images_large_thumbs:  "(large thumbnails)"
+
+
+
+# observer/_show_lists
+show_lists_header:  "[:SPECIES_LISTS]"
 
 
 
@@ -1897,6 +1911,7 @@ show_namings_please_login: >
 
 # observer/show_observation
 show_observation_title: "Fund: [name]"
+show_observation_header:  "[:OBSERVATION]"
 show_observation_edit_observation: Fund bearbeiten
 show_observation_propose_new_name: Einen anderen Namen vorschlagen
 show_observation_debug_consensus: Fehlersuche Mehrheitsmeinung
@@ -2331,7 +2346,7 @@ pivotal_label_none:  none
 pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted: "[:pivotal_state_unstarted]"
 pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  all
+pivotal_label_all:  "[:all]"
 
 ################################################################################
 
@@ -2498,7 +2513,7 @@ image_updater_help:  >
   Listed below are all the different licenses you've posted images under, along
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
-  "[:UPDATE]" to submit changes. 
+  "[:UPDATE]" to submit changes.
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.

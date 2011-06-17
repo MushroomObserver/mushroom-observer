@@ -150,6 +150,7 @@
 #  below_species?::          Is ranked below species?
 #  is_lichen::               Is this a lichen or lichenicolous fungus?
 #  all_parents::             Array of all parents.
+#  genus::                   Name of genus above this taxon (or nil).
 #  parents::                 Array of immediate parents.
 #  children::                Array of immediate children.
 #  all_children::            Array of all children.
@@ -330,6 +331,11 @@ class Name < AbstractModel
     Name.find(:first, :conditions => ['text_name = ?', 'Fungi'])
   end
 
+  # Is this the "unknown" name?
+  def unknown?
+    self.text_name == 'Fungi'
+  end
+
   # Add itallics and (optionally) boldface to a String.  This is used
   # throughout this file and nowhere else.
   def self.format_string(str, deprecated=false)
@@ -468,6 +474,18 @@ class Name < AbstractModel
   #
   def all_children
     children(:all)
+  end
+
+  # Returns the Name of the genus above this taxon.  If there are multiple
+  # matching genera, it chooses the first accepted one arbitrarily.  If this
+  # name is at or above genus already, it returns nil.
+  def genus
+    result = nil
+    if self.below_genus?
+      genera = Name.find_all_by_text_name(self.text_name.split(' ').first)
+      result = genera.reject(&:deprecated).first || genera.first
+    end
+    return result
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.

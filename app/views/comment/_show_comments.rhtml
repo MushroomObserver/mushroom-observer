@@ -6,17 +6,21 @@
   end
 %>
 
-<% if controls
-  link = link_to(:"show_comments_add_comment".t, :controller => 'comment',
-                 :action => 'add_comment', :id => object.id,
-                 :type => object.class.name, :params => query_params)
-  if comments.empty? %>
-    <p><%= :"show_comments_no_comments_yet".t + indent + link %></p>
-  <% else %>
-    <p><%= :COMMENTS.t + ':' + indent + link %></p>
-  <% end
-elsif comments.any? %>
-  <p><%= :COMMENTS.t %>:</p>
+<% if controls or comments.any? %>
+  <div style="margin-top:1em; margin-bottom:0.5em">
+    <%= if controls
+      link = link_to(:"show_comments_add_comment".t, :controller => 'comment',
+                     :action => 'add_comment', :id => object.id,
+                     :type => object.class.name, :params => query_params)
+      if comments.empty?
+        :"show_comments_no_comments_yet".t + indent + link
+      else
+        :COMMENTS.t + ':' + indent + link
+      end
+    elsif comments.any?
+      :COMMENTS.t + ':'
+    end %>
+  </div>
 <% end %>
 
 <table cellpadding="5" cellspacing="0" width="100%">
