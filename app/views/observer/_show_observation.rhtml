@@ -21,9 +21,11 @@
     <% end %>
   </span>
 
-  <% if !observation.notes.blank?
+  <%= if !observation.notes.blank?
     Textile.register_name(observation.namings.map {|n| n.name})
-    Textile.register_name(observation.name) %>
-    <%= sanitize(:NOTES.l + ': ' + observation.notes.to_s).tpl %>
-  <% end %>
+    Textile.register_name(observation.name)
+    '<div style="margin-top:1em; margin-bottom:-1em">' +
+      sanitize(:NOTES.l + ': ' + observation.notes.to_s).tpl +
+    '</div>'
+  end %>
 </div>
