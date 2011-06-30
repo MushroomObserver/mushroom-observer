@@ -1505,21 +1505,16 @@ class Query < AbstractQuery
     set = clean_id_set(name_ids)
 
     if nonconsensus == :no
-      self.where << "observations.name_id IN (#{set})"
-      self.where << "COALESCE(observations.vote_cache,0) >= 0"
+      self.where << "observations.name_id IN (#{set}) AND " +
+                    "COALESCE(observations.vote_cache,0) >= 0"
       self.order = "COALESCE(observations.vote_cache,0) DESC, observations.when DESC"
     elsif nonconsensus == :all
-      self.where << "observations.name_id IN (#{set}) AND " +
-                    "observations.vote_cache >= 0 OR " +
-                    "namings.name_id IN (#{set}) AND " +
-                    "COALESCE(namings.vote_cache,0) >= 0"
-      self.order = "IF(COALESCE(observations.vote_cache,0) > COALESCE(namings.vote_cache,0), " +
-                   "COALESCE(observations.vote_cache,0), COALESCE(namings.vote_cache,0)) DESC, " +
-                   "observations.when DESC"
-    elsif nonconsensus == :exclusive
       self.where << "namings.name_id IN (#{set})"
-      self.where << "COALESCE(namings.vote_cache,0) >= 0"
-      self.where << "observations.name_id NOT IN (#{set})"
+      self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
+    elsif nonconsensus == :exclusive
+      self.where << "namings.name_id IN (#{set}) AND " +
+                    "(observations.name_id NOT IN (#{set}) OR " +
+                    "COALESCE(observations.vote_cache,0) < 0)"
       self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
     else
       raise "Invalid nonconsensus inclusion mode: '#{nonconsensus}'"

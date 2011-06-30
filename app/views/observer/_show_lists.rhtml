@@ -1,16 +1,10 @@
 <%
   lists = observation.species_lists
-  user_has_lists = @user && !@user.species_lists.empty?
 %>
 
-<% if !lists.empty? or user_has_lists %>
+<% if !lists.empty? %>
   <div style="margin-top:1em; margin-bottom:0.5em">
     <%= :show_lists_header.t %>:
-    <%= if user_has_lists
-      link_to(:show_observation_manage_species_lists.t,
-              :controller => 'species_list', :action => 'manage_species_lists',
-              :id => observation.id, :params => query_params)
-    end %>
   </div>
 
   <% if !lists.empty? %>
