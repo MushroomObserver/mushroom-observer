@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 echo
 echo Preparing database using old mysql adapter...
 perl -pi -e 's/ mysql2$/ mysql/; $_' config/database.yml
-/usr/local/bin/rake db:test:prepare
+rake db:test:prepare
 perl -pi -e 's/ mysql$/ mysql2/; $_' config/database.yml
 
 echo
 echo Running tests using new mysql2 adapter...
-/usr/local/bin/ruby -Ilib:test /usr/local/lib/ruby/1.9.2/rake/rake_test_loader.rb \
+ruby -Ilib:test /Users/velosa/.rvm/rubies/ruby-1.9.2-p180/lib/ruby/1.9.1/rake/rake_test_loader.rb \
   test/unit/*_test.rb test/functional/*_test.rb test/integration/*_test.rb
