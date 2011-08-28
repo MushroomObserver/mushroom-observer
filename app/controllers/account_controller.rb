@@ -594,8 +594,11 @@ class AccountController < ApplicationController
     if is_in_admin_mode?
       id = params['id']
       if !id.blank?
-        Transaction.delete_user(:id => user)
-        User.erase_user(id)
+        user = User.safe_find(id)
+        if user
+          Transaction.delete_user(:id => user)
+          User.erase_user(id)
+        end
       end
     end
     redirect_back_or_default('/')

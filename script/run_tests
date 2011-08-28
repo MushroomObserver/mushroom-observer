@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ $USER == 'velosa' ]]; then
+  loader=/Users/velosa/.rvm/rubies/ruby-1.9.2-p180/lib/ruby/1.9.1/rake/rake_test_loader.rb
+else
+  loader=/usr/local/lib/ruby/1.9.2/rake/rake_test_loader.rb
+fi
+
 echo
 echo Preparing database using old mysql adapter...
 perl -pi -e 's/ mysql2$/ mysql/; $_' config/database.yml
@@ -8,5 +14,4 @@ perl -pi -e 's/ mysql$/ mysql2/; $_' config/database.yml
 
 echo
 echo Running tests using new mysql2 adapter...
-ruby -Ilib:test /Users/velosa/.rvm/rubies/ruby-1.9.2-p180/lib/ruby/1.9.1/rake/rake_test_loader.rb \
-  test/unit/*_test.rb test/functional/*_test.rb test/integration/*_test.rb
+ruby -Ilib:test $loader test/{unit,functional,integration}/*_test.rb
