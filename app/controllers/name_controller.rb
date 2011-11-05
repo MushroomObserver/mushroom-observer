@@ -148,14 +148,14 @@ class NameController < ApplicationController
     # NOTE!! -- all this extra info and help will be lost if user re-sorts.
     data = Name.connection.select_rows %(
       SELECT names.id, name_counts.count
-      FROM names LEFT OUTER JOIN descriptions ON names.id = descriptions.name_id,
+      FROM names LEFT OUTER JOIN name_descriptions ON names.id = name_descriptions.name_id,
            (SELECT count(*) AS count, name_id
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
         AND names.rank = 'Species'
         AND name_counts.count > 1
-        AND descriptions.name_id IS NULL
-        AND CURRENT_TIMESTAMP - modified > #{1.week.to_i}
+        AND name_descriptions.name_id IS NULL
+        AND CURRENT_TIMESTAMP - names.modified > #{1.week.to_i}
       ORDER BY name_counts.count DESC, names.search_name ASC
       LIMIT 100
     )

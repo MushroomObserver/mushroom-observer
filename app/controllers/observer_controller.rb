@@ -1676,7 +1676,7 @@ class ObserverController < ApplicationController
 
     # Add some extra stats.
     @site_data[:observed_taxa] = Name.connection.select_value %(
-      SELECT COUNT(DISTINCT name_id) FROM observations
+      SELECT COUNT(DISTINCT name_id) FROM observations WHERE user_id != 0
     )
     @site_data[:listed_taxa] = Name.connection.select_value %(
       SELECT COUNT(*) FROM names

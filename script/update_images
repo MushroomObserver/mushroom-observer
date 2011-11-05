@@ -475,7 +475,7 @@ def upload_files(files, local, remote)
     end
   end
 
-  cmd = "tar -T #{tempfile} -cf - | ssh #{url} \\(cd #{path}\\; tar -xvf -\\)"
+  cmd = "tar -T #{tempfile} -cf - | ssh #{url} \\(cd #{path}\\; tar -xvPf -\\)"
   verbose cmd
 
   save = Dir.getwd
@@ -507,7 +507,7 @@ def download_files(files, local, remote)
     end
   end
 
-  cmd = "cat #{tempfile} | ssh #{url} \\(cd #{path}\\; tar -T - -cf -\\) | tar -xvf -"
+  cmd = "cat #{tempfile} | ssh #{url} \\(cd #{path}\\; tar -T - -cf -\\) | tar -xvPf -"
   verbose cmd
 
   save = Dir.getwd
