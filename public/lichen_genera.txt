@@ -1,3 +1,10 @@
+# This is a list of genera known to contain at least one lichenized or
+# lichenicolous species.  It was seeded with the genera in Esslinger's
+# checklist of North American lichens (probably the 2008 or 2009 version).
+# It was supplmented by additional tropical, European, Asian and southern
+# hemisphere genera by Jason Hollinger.  It is almost certainly incomplete,
+# and it may contain one or two genera which no longer contain lichens due
+# to recent synonymy. -Jason Hollinger, 5 Nov 2011 
 Abrothallus
 Absconditella
 Acanthothecis

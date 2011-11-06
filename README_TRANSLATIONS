@@ -55,7 +55,8 @@ site.  But note that internal links like _Agaricus_ will *not* work.
   key: You can use "Textile":/observer/textile mark-up in these files.
 
 4) Many translations allow on-the-fly substitutions.  We use [brackets] to hold
-the place of an arbitrary string that will be inserted at run-time:
+the place of an arbitrary string that will be inserted at run-time.  Do not change
+the word(s) inside the square brackets!
 
   key: Editing Observation #[id]
   key: Please check our "todo list":[svn_repo]/trunk/TODO.
@@ -64,7 +65,8 @@ the place of an arbitrary string that will be inserted at run-time:
 
 5) We use a dorky convention to make it easy to see which values have not been
 translated yet.  If the colon is followed by one space it has been translated,
-if it is followed by more than one it has not.
+if it is followed by more than one it has not.  I know it seems stupid, but this
+is really important to help us keep things straight.
 
   key: translated
   key:  untranslated
@@ -97,6 +99,11 @@ Right now, the way to tell which keys were inserted from the English is to
 search for colons followed by *two* spaces, instead of one.  If you decide to
 follow this convention, remove the extra space from each entry you translate.
 This way we can easily find the ones that still need to be translated. 
+
+(**NOTE**: If you don't follow this two-space convention, "rake lang:clean"
+could potentially clobber any translations which have two or more spaces.  It
+will overwrite them with the updated English translation.  You have been
+warned.) 
 
 In the future we plan to insert comments before all the lines that need
 translation, or for which the English has changed and might need updating.

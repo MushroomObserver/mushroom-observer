@@ -7,10 +7,16 @@ class CreateTriples < ActiveRecord::Migration
     end
     lichen_list = SpeciesList.find_by_title("lichens")
     if lichen_list
-      ids = Set.new(lichen_list.observations.map {|o| o.name_id})
-      ids.each do |id|
-        Triple.create(:subject => ":name/#{id}", :predicate => ":lichenAuthority", :object => '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI')
-      end
+      vals = lichen_list.observations.map do |o|
+        "(':name/#{o.name_id}')"
+      end.join(',')
+      Triple.connection.insert(%(
+        INSERT INTO triples (`subject`) VALUES #{vals}
+      ))
+      Triple.connection.update(%(
+        UPDATE triples SET `predicate` = ':lichenAuthority',
+          `object` = '"http://mushroomobserver.org/lichen_genera.txt"^^xsd:anyURI'
+      ))
     end
   end
 

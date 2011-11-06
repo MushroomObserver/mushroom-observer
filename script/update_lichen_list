@@ -39,7 +39,9 @@ now = Time.now
 genera = {}
 file = "#{RAILS_ROOT}/public/lichen_genera.txt"
 for genus in File.readlines(file).map(&:chomp)
-  genera[genus] = true
+  if !genus.match(/#/)
+    genera[genus] = true
+  end
 end
 puts "found #{genera.keys.length.inspect} genera" if verbose
 
