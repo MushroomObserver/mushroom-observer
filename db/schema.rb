@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110214110100) do
+ActiveRecord::Schema.define(:version => 20111105210213) do
 
   create_table "authors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
@@ -609,6 +609,12 @@ ActiveRecord::Schema.define(:version => 20110214110100) do
   create_table "transactions", :force => true do |t|
     t.datetime "modified"
     t.text     "query"
+  end
+
+  create_table "triples", :force => true do |t|
+    t.string "subject",   :limit => 1024
+    t.string "predicate", :limit => 1024
+    t.string "object",    :limit => 1024
   end
 
   create_table "user_groups", :force => true do |t|

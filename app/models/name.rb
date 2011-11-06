@@ -413,7 +413,7 @@ class Name < AbstractModel
     RANKS_BELOW_SPECIES.include?(self.rank)
   end
 
-  def is_lichen?
+  def is_lichen_list_based
     # Check both this and genus, just in case I'm missing some species.
     ids = [id]
     if below_genus?
@@ -432,7 +432,7 @@ class Name < AbstractModel
     ))
   end
 
-  def is_lichen_new
+  def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
     result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != [])
     if !result and below_genus?
