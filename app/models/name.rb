@@ -413,25 +413,6 @@ class Name < AbstractModel
     RANKS_BELOW_SPECIES.include?(self.rank)
   end
 
-  def is_lichen_list_based
-    # Check both this and genus, just in case I'm missing some species.
-    ids = [id]
-    if below_genus?
-      genus = self.class.find_by_text_name(text_name.split.first)
-      ids << genus.id if genus
-    end
-    ids = ids.map(&:to_s).join(',')
-
-    (spl = SpeciesList.find_by_title('lichens')) and
-    !!self.connection.select_value(%(
-      SELECT names.id FROM observations_species_lists os
-      JOIN observations o ON os.observation_id = o.id
-      JOIN names ON names.id = o.name_id
-      WHERE os.species_list_id = #{spl.id}
-        AND o.name_id IN (#{ids})
-    ))
-  end
-
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
     result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != [])

@@ -134,22 +134,3 @@ amateur_observation:
   notes:     'A friend showed me this.'
   lat: 34.1622
   long: -118.3521
-
-tremella_mesenterica_is_a_lichen_obs:
-  id:        12
-  sync_id:   12x1
-  when:      2011-11-05
-  user_id:   0
-  where:     North Falmouth, MA
-  name_id:   45
-  notes:     ''
-
-tremella_is_a_lichen_obs:
-  id:        13
-  sync_id:   13x1
-  when:      2011-11-05
-  user_id:   0
-  where:     North Falmouth, MA
-  name_id:   46
-  notes:     ''
-

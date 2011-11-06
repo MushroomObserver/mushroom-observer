@@ -1568,8 +1568,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_specieslist_by_user
-    assert_query([1,2], :SpeciesList, :by_user, :user => @rolf)
-    assert_query([3,4], :SpeciesList, :by_user, :user => @mary, :by => :id)
+    assert_query([1,2], :SpeciesList, :by_user, :user => @rolf, :by => :id)
+    assert_query([3], :SpeciesList, :by_user, :user => @mary, :by => :id)
     assert_query([], :SpeciesList, :by_user, :user => @dick)
   end
 
