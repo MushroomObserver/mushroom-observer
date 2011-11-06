@@ -938,4 +938,11 @@ class NameTest < UnitTestCase
     File.delete(NAME_PRIMER_CACHE_FILE)
     assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end
+  
+  def test_lichen
+    assert(names(:tremella_mesenterica).is_lichen?)
+    assert(names(:tremella).is_lichen?)
+    assert(names(:tremella_justpublished).is_lichen?)
+    assert(!names(:agaricus_campestris).is_lichen?)
+  end
 end

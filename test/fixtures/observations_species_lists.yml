@@ -5,3 +5,11 @@ minimal_unknown_in_unknown_sl:
 detailed_unknown_in_unknown_sl:
   observation_id: 2
   species_list_id: 3
+
+tremella_mesenterica_is_a_lichen_sl:
+  observation_id: 12
+  species_list_id: 4
+
+tremella_is_a_lichen_sl:
+  observation_id: 13
+  species_list_id: 4

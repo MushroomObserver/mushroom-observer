@@ -413,8 +413,6 @@ class Name < AbstractModel
     RANKS_BELOW_SPECIES.include?(self.rank)
   end
 
-  # Is this Name in the "lichens" SpeciesList?  This is a temporary kludge
-  # until RDF allows me to explicitly tag things as "lichenized".
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
     ids = [id]
@@ -432,6 +430,16 @@ class Name < AbstractModel
       WHERE os.species_list_id = #{spl.id}
         AND o.name_id IN (#{ids})
     ))
+  end
+
+  def is_lichen_new
+    # Check both this and genus, just in case I'm missing some species.
+    result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != [])
+    if !result and below_genus?
+      genus = self.class.find_by_text_name(text_name.split.first)
+      result = genus.is_lichen? if genus
+    end
+    result
   end
 
   # Returns an Array of all of this Name's ancestors, starting with its

@@ -32,3 +32,14 @@ unknown_species_list:
   where: Burbank, CA
   title: List of mysteries
   notes: Things I don't know
+
+lichen_species_list:
+  id: 4
+  sync_id: 4xx1
+  created: 2011-11-05 21:14:0018:01:00
+  modified: 2011-11-05 21:14:0018:01:00
+  when: 2011-11-05
+  user_id: 2
+  where: North Falmouth, MA
+  title: lichens
+  notes: Original when of identifying lichens

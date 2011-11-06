@@ -282,14 +282,14 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_observation_search
-    get_with_dump(:observation_search, :pattern => '12')
+    get_with_dump(:observation_search, :pattern => '120')
     assert_response('list_observations')
-    assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '12'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '120'),
                  @controller.instance_variable_get('@title'))
 
-    get_with_dump(:observation_search, :pattern => '12', :page => 2)
+    get_with_dump(:observation_search, :pattern => '120', :page => 2)
     assert_response('list_observations')
-    assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '12'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '120'),
                  @controller.instance_variable_get('@title'))
   end
 

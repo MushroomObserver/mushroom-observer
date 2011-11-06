@@ -1477,7 +1477,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_all
-    expect = Observation.all(:order => '`when` DESC, id DESC')
+    expect = Observation.all(:conditions => ['user_id != 0'], :order => '`when` DESC, id DESC')
     assert_query(expect, :Observation, :all)
   end
 
@@ -1569,7 +1569,7 @@ class QueryTest < UnitTestCase
 
   def test_specieslist_by_user
     assert_query([1,2], :SpeciesList, :by_user, :user => @rolf)
-    assert_query([3], :SpeciesList, :by_user, :user => @mary)
+    assert_query([3,4], :SpeciesList, :by_user, :user => @mary, :by => :id)
     assert_query([], :SpeciesList, :by_user, :user => @dick)
   end
 
