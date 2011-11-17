@@ -763,6 +763,10 @@ class ObserverController < ApplicationController
     end
   end
 
+  def show_obs
+    redirect_to(:action => 'show_observation', :id => params[:id])
+  end
+  
   # Go to next observation: redirects to show_observation.
   def next_observation # :nologin: :norobots:
     redirect_to_next_object(:next, Observation, params[:id])

@@ -1296,6 +1296,49 @@ class NameController < ApplicationController
     @timer_end = Time.now
   end
 
+  def eol_description_conditions(review_status_list)
+    # name descriptions that are exportable.
+    rsl = review_status_list.join("', '")
+    "review_status IN ('#{rsl}') AND " +
+                 "gen_desc IS NOT NULL AND " +
+                 "ok_for_export = 1 AND " +
+                 "public = 1"
+  end
+  
+  def eol_expanded_review
+    @names = Name.connection.select_all(%(
+    SELECT DISTINCT names.id, names.display_name
+    FROM observations, images_observations, images, names
+    WHERE observations.name_id = names.id
+    AND observations.vote_cache >= 2.4
+    AND observations.id = images_observations.observation_id
+    AND images_observations.image_id = images.id
+    AND images.vote_cache >= 2
+    AND images.ok_for_export
+    AND names.ok_for_export
+    AND names.rank IN ('Form','Variety','Subspecies','Species', 'Genus')
+    ORDER BY names.search_name)).map { |row| [row['id'], row['display_name']] }
+  end
+  
+  def eol_for_taxon
+    # need name_id and review_status_list
+    id = params[:id]
+    @name = Name.find(id)
+    
+    # Get corresponding images.
+    @images = Name.connection.select_all(%(
+      SELECT images.id
+      FROM observations, images_observations, images
+      WHERE observations.name_id = #{id}
+      AND observations.vote_cache >= 2.4
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.vote_cache >= 2
+      AND images.ok_for_export
+      ORDER BY observations.vote_cache
+    )).map { |row| row['id'].to_i }
+  end
+  
   # Show the data not getting sent to EOL
   def eol_need_review # :norobots:
     eol_data(['unreviewed'])
@@ -1312,13 +1355,7 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-    # Get name descriptions that are exportable.
-    rsl = review_status_list.join("', '")
-    conditions = "review_status IN ('#{rsl}') AND " +
-                 "gen_desc IS NOT NULL AND " +
-                 "ok_for_export = 1 AND " +
-                 "public = 1"
-    descs = NameDescription.all(:conditions => conditions)
+    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list))
 
     # Fill in @descs, @users, @authors, @licenses.
     for desc in descs

@@ -1,0 +1,20 @@
+<% @title ||= :eol_for_taxon_title.t(:name => @name.text_name) %>
+
+<div>
+  <%= link_to(:show_name.t(:name => @name.display_name), :controller => 'name',
+             :action => 'show_name', :id => @name.id) %>
+  <br/>
+  <%= link_to(:eol_preview_title.t, :action => 'eol_preview') %>
+</div>
+<br/>
+<table cellpadding="5" cellspacing="0" width="100%">
+  <% odd_or_even = 0
+  for id in @images
+    odd_or_even = 1 - odd_or_even %>
+    <tr valign="top" class="ListLine<%= odd_or_even %>">
+      <td width="110" align="center" valign="middle">
+        <%= thumbnail(id, :border => 0, :votes => true) %>
+      </td>
+    </tr>
+  <% end %>
+</table>

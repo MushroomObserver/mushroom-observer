@@ -1,12 +1,12 @@
 # encoding: utf-8
 ActionController::Routing::Routes.draw do |map|
   # The priority is based upon order of creation: first created -> highest priority.
-  
+
   # Route / to /observer/index
   map.connect '', :controller => 'observer'
   
   # Route /123 to /observer/show_observation/123.
-  map.connect ':id', :controller => 'observer', :action => 'show_observation'
+  map.connect ':id', :controller => 'observer', :action => 'show_obs'
 
   # Route /ajax/method to /api/ajax/method.
   map.connect 'ajax/:method', :controller => 'api', :action => 'ajax'

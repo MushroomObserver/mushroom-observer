@@ -1,0 +1,17 @@
+<% @title ||= :eol_expanded_review_title.t %>
+
+<p>
+  <%= :eol_preview_name_count.t :count => @names.length %><br/>
+</p>
+
+<% odd_or_even = 0
+for id, display_name in @names
+  if id and display_name
+    odd_or_even = 1 - odd_or_even %>
+    <div class="ListLine<%= odd_or_even %>"
+         style="padding-top:10px; padding-bottom:10px;">
+        <%= link_to(display_name.t, :controller => "name",
+                    :action => "eol_for_taxon", :id => id) %>
+    </div>
+  <% end %>
+<% end %>
