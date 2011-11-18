@@ -2291,6 +2291,14 @@ email_tracking_title: Παρακολούθηση email για το [name]
 email_tracking_updated_messages: Ενημέρωση μηνυμάτων παρακολούθησης.
 
 
+# name/eol_expanded_review_title
+eol_expanded_review_title:  EOL Preview
+
+
+# name/eol_for_taxon
+eol_for_taxon_title:  EOL Review for [name]
+
+
 # name/eol_need_review
 eol_need_review_title: Ανάγκη Ανασκόπησης EOL
 

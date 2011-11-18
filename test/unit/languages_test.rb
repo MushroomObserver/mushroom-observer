@@ -199,7 +199,7 @@ class LanguagesTest < UnitTestCase
       end
     end
 
-    # No go through all source files looking for tag refs.
+    # Now go through all source files looking for tag refs.
     errors = []
     source_files("#{RAILS_ROOT}/app") do |file|
       n = 0

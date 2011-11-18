@@ -11,7 +11,7 @@ class LurkerTest < IntegrationTestCase
     assert_template('observer/list_rss_logs')
 
     # Click on first observation.
-    click(:href => /^\/\d+\?/, :in => :results)
+    click(:href => /^\/observer\/show_observation\/\d+\?/, :in => :results)
     assert_template('observer/show_observation')
     push_page
 
@@ -46,7 +46,7 @@ class LurkerTest < IntegrationTestCase
 
   def test_show_observation
     # Start with Observation #2 since it has everything.
-    get('/2')
+    get('observer/show_observation/2')
     push_page
 
     # Check out the RSS log.
@@ -71,7 +71,7 @@ class LurkerTest < IntegrationTestCase
     click(:label => 'List of mysteries')
     assert_template('species_list/show_species_list')
     # (Make sure observation #2 is shown somewhere.)
-    assert_select('a[href^=/2?]')
+    assert_select('a[href^=/observer/show_observation/2?]')
 
     # Click on name.
     go_back
@@ -86,7 +86,7 @@ class LurkerTest < IntegrationTestCase
     assert_select('a[href^=/image/show_image]', :minimum => 2)
     click(:label => :image, :href => /show_image/)
     # (Make sure observation #2 is shown somewhere.)
-    assert_select('a[href^=/2?]')
+    assert_select('a[href^=/observer/show_observation/2?]')
   end
 
   def test_search
@@ -102,7 +102,7 @@ class LurkerTest < IntegrationTestCase
     # Search for observations of that name.  (Only one.)
     form.select('type', 'Observations')
     form.submit('Search')
-    assert_match(/^.3\?/, path)
+    assert_match(/^\/observer\/show_observation\/3\?/, path)
 
     # Search for images of the same thing.  (Still only one.)
     form.select('type', 'Images')
@@ -146,7 +146,7 @@ class LurkerTest < IntegrationTestCase
     # Get a list of observations from there.  (Several so goes to index.)
     click(:label => 'Observations at this Location', :in => :tabs)
     assert_template('observer/list_observations')
-    save_results = get_links('div.results a[href^=?]', /^.\d+/)
+    save_results = get_links('div.results a[href^=/observer/show_observation/?]', /^.\d+/)
 
     # Try sorting differently.
     click(:label => 'Date', :in => :tabs)

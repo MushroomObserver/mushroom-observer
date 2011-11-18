@@ -2517,6 +2517,14 @@ email_tracking_title: Correo Seguimiento para [name]
 email_tracking_updated_messages: Los mensajes se han realizado.
 
 
+# name/eol_expanded_review_title
+eol_expanded_review_title:  EOL Preview
+
+
+# name/eol_for_taxon
+eol_for_taxon_title:  EOL Review for [name]
+
+
 # name/eol_need_review
 eol_need_review_title: EOL Necesidad de Revisión
 
