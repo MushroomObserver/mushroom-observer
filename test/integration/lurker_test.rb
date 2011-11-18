@@ -146,26 +146,26 @@ class LurkerTest < IntegrationTestCase
     # Get a list of observations from there.  (Several so goes to index.)
     click(:label => 'Observations at this Location', :in => :tabs)
     assert_template('observer/list_observations')
-    save_results = get_links('div.results a[href^=/observer/show_observation/?]', /^.\d+/)
+    save_results = get_links('div.results a[href^=?]', /\/observer\/show_observation\/\d+/)
 
     # Try sorting differently.
     click(:label => 'Date', :in => :tabs)
-    results = get_links('div.results a[href^=?]', /^.\d+/)
+    results = get_links('div.results a[href^=?]', /\/observer\/show_observation\/\d+/)
     assert_equal(save_results.length, results.length)
     click(:label => 'User', :in => :tabs)
-    results = get_links('div.results a[href^=?]', /^.\d+/)
+    results = get_links('div.results a[href^=?]', /\/observer\/show_observation\/\d+/)
     assert_equal(save_results.length, results.length)
     click(:label => 'Reverse Order', :in => :tabs)
-    results = get_links('div.results a[href^=?]', /^.\d+/)
+    results = get_links('div.results a[href^=?]', /\/observer\/show_observation\/\d+/)
     assert_equal(save_results.length, results.length)
     click(:label => 'Name', :in => :tabs)
-    results = get_links('div.results a[href^=?]', /^.\d+/)
+    results = get_links('div.results a[href^=?]', /\/observer\/show_observation\/\d+/)
     assert_equal(save_results.length, results.length)
     save_results = results
     query_params = parse_query_params(save_results.first)
 
     # Go to first observation, and try stepping back and forth.
-    click(:href => /^\/\d+\?/, :in => :results)
+    click(:href => /^\/observer\/show_observation\/\d+\?/, :in => :results)
     save_path = path
     assert_equal(query_params, parse_query_params)
     click(:label => '« Prev', :in => :tabs)
@@ -185,7 +185,7 @@ class LurkerTest < IntegrationTestCase
     assert_equal(save_path, path,
                  "Went next then prev, should be back where we started.")
     click(:label => 'Index', :href => /index/, :in => :tabs)
-    results = get_links('div.results a[href^=?]', /^.\d+/)
+    results = get_links('div.results a[href^=?]', /\/observer\/show_observation\/\d+/)
     assert_equal(query_params, parse_query_params(results.first))
     assert_equal(save_results, results,
                  "Went to show_obs, screwed around, then back to index. " +
