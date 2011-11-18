@@ -194,6 +194,9 @@ class ObserverController < ApplicationController
   #
   ##############################################################################
 
+  def test
+  end
+
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
   def index # :nologin:

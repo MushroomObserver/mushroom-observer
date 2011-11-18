@@ -202,6 +202,17 @@ class ApiController < ApplicationController
           ORDER BY text_name ASC
         )
 
+      when 'name2'
+        @items = Name.connection.select_values(%(
+          SELECT text_name FROM names
+          WHERE text_name LIKE '#{instr}%'
+          AND correct_spelling_id IS NULL
+          ORDER BY text_name ASC
+        )).sort_by {|x| (x.match(' ') ? 'b' : 'a') + x}
+        # This sort puts genera and higher on top, everything else on bottom,
+        # and sorts alphabetically within each group.
+        letter = ''
+
       when 'project'
         @items = Project.connection.select_values %(
           SELECT title FROM projects
@@ -232,9 +243,8 @@ class ApiController < ApplicationController
 
     # Result is the letter requested followed by results, one per line.  (It
     # truncates any results that have newlines in them -- that's an error.)
-    render(:layout => false, :inline => letter + %(
-      <%= @items.uniq.map {|n| h(n.gsub(/[\r\n].*/,'')) + "\n"}.join('') %>
-    ))
+    render(:layout => false, :inline => letter +
+      %(<%= @items.uniq.map {|n| h(n.gsub(/[\r\n].*/,'')) + "\n"}.join('') %>))
   end
 
   # Process AJAX request for casting votes.
