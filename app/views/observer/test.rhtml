@@ -1,0 +1,50 @@
+<form>
+  <table><tr><td valign="top">
+    Name: <input type="text_field" size="40" id="tester"/>
+  </td><td valign="top">
+    <div id="log"></div>
+  </td></tr></table>
+
+  <style>
+    div.autocompleter {
+      position: absolute;
+      background: white;
+      color: black;
+      border: 1px solid black;
+      margin: 0px;
+      padding: 0px;
+      display: none;
+    }
+    div.autocompleter ul {
+      margin: 0px;
+      border: 0px;
+      padding: 0px;
+      list-style: none;
+    }
+    div.autocompleter ul li {
+      margin: 0px;
+      border: 0px;
+      padding: 2px 10px 2px 10px;
+    }
+    div.autocompleter ul li.hot, div.autocompleter ul li:hover {
+      background: yellow;
+    }
+  </style>
+
+  <script src="/javascripts/prototype.js"></script>
+  <script src="/javascripts/effects.js"></script>
+  <script src="/javascripts/controls.js"></script>
+  <script src="/javascripts/autocomplete.js"></script>
+  <script src="/javascripts/element_extensions.js"></script>
+  <script>
+    new MOAutocompleter({
+      input_id: 'tester',
+      collapse: 1,
+      ajax_url: '/ajax/auto_complete/name2/@',
+      // options: "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\n",
+      // options: "Acroscyphus\nAhtiana\nAlectoria\nAnaptychia\nAnzia\nBryocaulon\nBryoria\nAcroscyphus sphaerophoroides\nAhtiana aurescens\nAhtiana pallidula\nAhtiana sphaerosporella\nAlectoria fallacina\nAlectoria imshaugii\nAlectoria lata\nAlectoria sarmentosa\nAlectoria vancouverensis\nAnaptychia crinalis\nAnaptychia palmulata\nAnzia americana\nAnzia colpodes\nAnzia ornata\nBryocaulon pseudosatoanum\nBryoria bicolor\nBryoria capillaris\nBryoria carlottae\nBryoria cervinula\nBryoria fremontii\nBryoria friabilis\nBryoria furcellata\nBryoria fuscescens\nBryoria glabra\nBryoria implexa\nBryoria lanestris\nBryoria nadvornikiana\nBryoria pikei\nBryoria pseudocapillaris\nBryoria pseudofuscescens\nBryoria salazinica\nBryoria simplicior\nBryoria spiralifera\nBryoria subcana\nBryoria tenuis\nBryoria trichodes\nBryoria trichodes ssp. americana\nBryoria trichodes ssp. trichodes\n",
+    });
+  </script>
+
+</form>
+
