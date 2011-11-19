@@ -58,7 +58,6 @@ var MOAutocompleter = Class.create({
 
     Event.observe(this.input_elem, 'keydown', this.on_keydown.bindAsEventListener(this));
     Event.observe(this.input_elem, 'keyup',   this.on_keyup.bindAsEventListener(this));
-    // Event.observe(this.input_elem, 'change',  this.on_change.bindAsEventListener(this));
     Event.observe(this.input_elem, 'blur',    this.on_blur.bindAsEventListener(this));
   },
 
@@ -129,11 +128,11 @@ var MOAutocompleter = Class.create({
   // User has released a key.
   on_keyup: function (event) {
     this.clear_key();
-    this.on_change(event);
+    this.on_change();
   },
 
   // Input field has changed.
-  on_change: function (event) {
+  on_change: function () {
     var new_val = this.input_elem.value;
     if (this.old_value != new_val) {
       if (this.ajax_url)
@@ -295,7 +294,7 @@ var MOAutocompleter = Class.create({
     for (var i=rows.length; i<matches.length; i++) {
       var row = document.createElement('li');
       row.innerHTML = matches[i];
-      Event.observe(row, 'click', function () { this.select_row(i) });
+      this.attach_onclick(row, i+1);
       ul.appendChild(row);
       if (matches[i] == old_val) {
         new_row = i+1;
@@ -341,6 +340,17 @@ var MOAutocompleter = Class.create({
       menu.style.display = "none";
       this.active = false;
     }
+  },
+
+  // Add "on click" event to a row of the pulldown menu.
+  // Need to do this in a separate method, otherwise row doesn't get
+  // a separate value for each row!  Something to do with scope of
+  // variables inside for loops.
+  attach_onclick: function (e, row) {
+    Event.observe(e, 'click', (function () {
+      this.select_row(row);
+      this.on_change();
+    }).bind(this));
   },
 
   // Hide pulldown options.
