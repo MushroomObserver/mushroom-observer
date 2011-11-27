@@ -1326,8 +1326,8 @@ class NameController < ApplicationController
     @name = Name.find(id)
     
     # Get corresponding images.
-    @images = Name.connection.select_all(%(
-      SELECT images.id
+    @images = Name.connection.select_rows(%(
+      SELECT images.id, images.votes
       FROM observations, images_observations, images
       WHERE observations.name_id = #{id}
       AND observations.vote_cache >= 2.4
@@ -1336,7 +1336,7 @@ class NameController < ApplicationController
       AND images.vote_cache >= 2
       AND images.ok_for_export
       ORDER BY observations.vote_cache
-    )).map { |row| row['id'].to_i }
+    ))
   end
   
   # Show the data not getting sent to EOL

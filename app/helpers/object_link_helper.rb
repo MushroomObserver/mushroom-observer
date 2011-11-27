@@ -153,6 +153,7 @@ module ApplicationHelper::ObjectLink
   # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
   # append::    HTML to tack on after +img+ tag; will be included in the link.
   # votes::     Add AJAX vote links below image?
+  # vote_data:: If passing in image id instead of Image instance, you need to supply the image votes explicitly (this is image.votes).
   def thumbnail(image, args={})
     if image.is_a?(Image)
       id = image.id

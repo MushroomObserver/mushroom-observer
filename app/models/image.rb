@@ -638,7 +638,7 @@ class Image < AbstractModel
   end
 
   # Calculate the average vote given the raw vote data.
-  def self.users_vote(raw_data)
+  def self.vote_cache(raw_data)
     sum = num = 0
     for user, value in vote_hash(raw_data)
       sum += value.to_f

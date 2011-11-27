@@ -9,11 +9,11 @@
 <br/>
 <table cellpadding="5" cellspacing="0" width="100%">
   <% odd_or_even = 0
-  for id in @images
+  for id, votes in @images
     odd_or_even = 1 - odd_or_even %>
     <tr valign="top" class="ListLine<%= odd_or_even %>">
       <td width="110" align="center" valign="middle">
-        <%= thumbnail(id, :border => 0, :votes => true) %>
+        <%= thumbnail(id.to_i, :border => 0, :votes => true, :vote_data => votes) %>
       </td>
     </tr>
   <% end %>
