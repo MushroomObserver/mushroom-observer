@@ -13,7 +13,7 @@ var MOAutocompleter = Class.create({
                                             // 1 = autocomplete first word, then the rest
                                             // 2 = autocomplete first word, then second word, then the rest
                                             // N = etc.
-      max_matches:        100,              // maximum number of options shown at a time
+      max_matches:        10,               // maximum number of options shown at a time
       token:              null,             // separator between options
       primer:             null,             // initial list of options
       options:            '',               // list of all options
@@ -65,7 +65,7 @@ var MOAutocompleter = Class.create({
   create_pulldown: function () {
     var div = document.createElement('div');
     var ul = document.createElement('ul');
-    div.addClassName(this.pulldown_class);
+    div.className = this.pulldown_class;
     div.appendChild(ul);
     this.input_elem.parentNode.appendChild(div);
     this.pulldown_elem = div;
@@ -75,6 +75,7 @@ var MOAutocompleter = Class.create({
 
   // User pressed a key in the text field.
   on_keydown: function (event) {
+    // $("log").innerHTML += "keydown(" + event.keyCode + ")<br/>";
     this.clear_key();
     this.focused = true;
     switch (event.keyCode) {
@@ -127,6 +128,7 @@ var MOAutocompleter = Class.create({
 
   // User has released a key.
   on_keyup: function (event) {
+    // $("log").innerHTML += "keyup()<br/>";
     this.clear_key();
     this.on_change();
   },
@@ -134,6 +136,7 @@ var MOAutocompleter = Class.create({
   // Input field has changed.
   on_change: function () {
     var new_val = this.input_elem.value;
+    // $("log").innerHTML += "on_change(" + new_val + ")<br/>";
     if (this.old_value != new_val) {
       if (this.ajax_url)
         this.schedule_refresh();
@@ -144,6 +147,7 @@ var MOAutocompleter = Class.create({
 
   // User left the text field.
   on_blur: function (event) {
+    // $("log").innerHTML += "on_blur()<br/>";
     this.schedule_hide();
   },
 
@@ -474,9 +478,6 @@ var MOAutocompleter = Class.create({
       onComplete: (function (response) {
         var new_opts = "\n" + response.responseText;
         this.ajax_request = null;
-        if (this.log)
-          $("log").innerHTML += "Got response for " + this.last_ajax_request +
-            ": " + (new_opts.split("\n").length-2) + " strings.<br/>";
         if (new_opts.charAt(new_opts.length-1) != "\n")
           new_opts += "\n";
         if (new_opts.substr(new_opts.length-5, 5) == "\n...\n") {
@@ -486,6 +487,10 @@ var MOAutocompleter = Class.create({
         } else {
           this.last_ajax_incomplete = false;
         }
+        if (this.log)
+          $("log").innerHTML += "Got response for " + this.last_ajax_request +
+            ": " + (new_opts.split("\n").length-2) + " strings (" +
+            (this.last_ajax_incomplete ? "incomplete" : "complete") + ").<br/>";
         if (this.primer)
           new_opts = "\n" + this.primer + new_opts;
         if (this.options != new_opts) {
@@ -502,7 +507,7 @@ Ajax.Request.prototype.abort = function() {
   // prevent and state change callbacks from being issued
   this.transport.onreadystatechange = Prototype.emptyFunction;
   // abort the XHR (if implemented by browser!)
-  if (this.transport.abort)
+  if ("abort" in this.transport)
     this.transport.abort();
   // update the request counter
   if (Ajax.activeRequestCount > 0)

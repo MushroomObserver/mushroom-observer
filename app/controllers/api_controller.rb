@@ -203,12 +203,14 @@ class ApiController < ApplicationController
         )
 
       when 'name2'
+        limit = 1000
         @items = Name.connection.select_values(%(
           SELECT text_name FROM names
           WHERE text_name LIKE '#{instr}%'
           AND correct_spelling_id IS NULL
           ORDER BY text_name ASC
-        )).sort_by {|x| (x.match(' ') ? 'b' : 'a') + x}
+        )).sort_by {|x| (x.match(' ') ? 'b' : 'a') + x}.uniq[0..limit]
+        @items[limit] = '...' if @items.length > limit
         # This sort puts genera and higher on top, everything else on bottom,
         # and sorts alphabetically within each group.
         letter = ''
