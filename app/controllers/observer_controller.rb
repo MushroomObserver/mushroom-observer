@@ -1453,9 +1453,15 @@ class ObserverController < ApplicationController
     elsif obj = find_or_goto_index(model, id)
       obj.ok_for_export = (value == '1')
       obj.save_without_our_callbacks
-      redirect_to(:controller => obj.show_controller,
-                  :action => obj.show_action, :id => id,
-                  :params => query_params)
+      if params[:return]
+        redirect_back_or_default('/')
+      else
+        controller = params[:return_controller] || obj.show_controller
+        action = params[:return_action] || obj.show_action
+        redirect_to(:controller => controller,
+                    :action => action, :id => id,
+                    :params => query_params)
+      end
     end
   end
 

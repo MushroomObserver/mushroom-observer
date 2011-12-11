@@ -7,6 +7,7 @@ ActionController::Routing::Routes.draw do |map|
   
   # Route /123 to /observer/show_observation/123.
   map.connect ':id', :controller => 'observer', :action => 'show_obs'
+  map.connect 'obs/:id', :controller => 'observer', :action => 'show_observation'
 
   # Route /ajax/method to /api/ajax/method.
   map.connect 'ajax/:method', :controller => 'api', :action => 'ajax'

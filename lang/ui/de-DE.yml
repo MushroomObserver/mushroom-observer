@@ -2458,11 +2458,15 @@ email_tracking_updated_messages: Beobachtungs-Benachrichtigung geändert.
 
 # name/eol_expanded_review_title
 eol_expanded_review_title:  EOL Preview
-
+eol_expanded_review_count:  >
+  [count] taxa
 
 # name/eol_for_taxon
+eol_for_taxon_images:  Images for EOL
+eol_for_taxon_observation:  Observation [id]
 eol_for_taxon_title:  EOL Review for [name]
-
+eol_for_taxon_voteless_images:  Images with No Votes
+eol_for_taxon_voteless_observations:  Observations with No Votes
 
 # name/eol_need_review
 eol_need_review_title: EOL muss durchesehen werden
@@ -3626,7 +3630,7 @@ review_email:  Email
 # Subject lines.
 email_subject_comment: Kommentar zu [name]
 email_subject_commercial_inquiry: Gewerbliche Anfrage zu [name]
-email_subject_consensus_change:  Consensus Rejected [old] in Favor of [new]
+email_subject_consensus_change:  Consensus Changed from [old] to [new]
 email_subject_denied: Nutzer-Registrierung abgelehnt
 email_subject_features: Neue Mushroom-Observer-Funktionalitäten
 email_subject_location_change:  "[name] Has Been Changed"

@@ -299,6 +299,44 @@ class ApiController < ApplicationController
     end
   end
 
+  # Process AJAX request for marking things as for export or not.
+  # type::   Type of object.
+  # id::     ID of object.
+  # value::  Value of vote.
+  #
+  # Valid types are:
+  # image::  Vote on an image -- only reviewers.
+  #
+  # Examples:
+  #
+  #   /ajax/export/image/1234?value=0  - Not for export
+  #   /ajax/export/image/1234?value=1  - For export
+  #
+  def ajax_export
+    type  = params[:type].to_s
+    id    = params[:id].to_s
+    value = params[:value].to_s
+
+    result = nil
+    if user = login_for_ajax
+      case type
+
+      when 'image'
+        if (value == '0' or value == '1') and
+           (image = Image.safe_find(id) and
+           user.in_group?('reviewers'))
+          image.ok_for_export = (value == '1')
+          image.save_without_our_callbacks
+          # Should this have a Transation?
+          @image, @user = image, user
+          render(:inline => '<%= image_exporter(@image.id, @image.ok_for_export) %>')
+        else
+          render(:text => '')
+        end
+      end
+    end
+  end
+
   # Process AJAX request for geocoding and location name.
   # name::   Name of location
   #

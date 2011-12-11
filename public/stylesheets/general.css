@@ -545,3 +545,7 @@ div.pivotal_popup, span.pivotal_loading {
   color: black;
 }
 
+div.floatthumb {
+  float: left;
+  padding: 1em 1em 1em 1em;
+}

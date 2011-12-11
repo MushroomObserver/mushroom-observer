@@ -2293,11 +2293,15 @@ email_tracking_updated_messages: Ενημέρωση μηνυμάτων παρα�
 
 # name/eol_expanded_review_title
 eol_expanded_review_title:  EOL Preview
-
+eol_expanded_review_count:  >
+  [count] taxa
 
 # name/eol_for_taxon
+eol_for_taxon_images:  Images for EOL
+eol_for_taxon_observation:  Observation [id]
 eol_for_taxon_title:  EOL Review for [name]
-
+eol_for_taxon_voteless_images:  Images with No Votes
+eol_for_taxon_voteless_observations:  Observations with No Votes
 
 # name/eol_need_review
 eol_need_review_title: Ανάγκη Ανασκόπησης EOL

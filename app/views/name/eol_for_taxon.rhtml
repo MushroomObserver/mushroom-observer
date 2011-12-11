@@ -7,14 +7,35 @@
   <%= link_to(:eol_preview_title.t, :action => 'eol_preview') %>
 </div>
 <br/>
-<table cellpadding="5" cellspacing="0" width="100%">
-  <% odd_or_even = 0
-  for id, votes in @images
-    odd_or_even = 1 - odd_or_even %>
-    <tr valign="top" class="ListLine<%= odd_or_even %>">
-      <td width="110" align="center" valign="middle">
-        <%= thumbnail(id.to_i, :border => 0, :votes => true, :vote_data => votes) %>
-      </td>
-    </tr>
-  <% end %>
-</table>
+
+<% if @voteless_obs.length > 0 %>
+  <div class="SubTitle"><%= :eol_for_taxon_voteless_observations.t %></div>
+  <div>
+    <% for ob_id in @voteless_obs
+      id = ob_id[0] %>
+      <%= link_to(:eol_for_taxon_observation.t(:id => id), :controller => 'observer', :action => 'show_observation', :id => ob_id[0]) %><br/>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @images.length > 0 %>
+  <div class="SubTitle"><%= :eol_for_taxon_images.t %></div>
+  <div>
+    <% make_matrix(@images, :width => '100%') do |item|
+      image_id, votes = item %>
+      <%= image_exporter(image_id.to_i, true) %>
+      <%= thumbnail(image_id.to_i, :votes => true, :vote_data => votes, :nodiv => false, :class => "floatthumb") %>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @voteless_images.length > 0 %>
+  <div class="SubTitle"><%= :eol_for_taxon_voteless_images.t %></div>
+  <div>
+    <% make_matrix(@voteless_images) do |item|
+      image_id, votes = item %>
+      <%= image_exporter(image_id.to_i, true) %>
+      <%= thumbnail(image_id.to_i, :votes => true, :vote_data => votes, :nodiv => false, :class => "floatthumb") %>
+    <% end %>
+  </div>
+<% end %>

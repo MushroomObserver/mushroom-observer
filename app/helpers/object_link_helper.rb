@@ -231,6 +231,21 @@ module ApplicationHelper::ObjectLink
     "<div id=\"copyright\"> #{:image_show_copyright.t} &copy;#{year} #{link} </div>"
   end
 
+  def export_link(image_id, exported)
+    if exported
+      link_to_function('Not for Export', "image_export(#{image_id},0)")
+    else
+      link_to_function('For Export', "image_export(#{image_id},1)")
+    end
+  end
+  
+  def image_exporter(image_id, exported)
+    javascript_include('prototype')
+    javascript_include('image_export')
+
+    content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
+  end
+  
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
     javascript_include('prototype')

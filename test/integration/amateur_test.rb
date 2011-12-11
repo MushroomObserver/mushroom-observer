@@ -121,7 +121,7 @@ class AmateurTest < IntegrationTestCase
     message2 = 'This may be _Xylaria polymorpha_, no?'
 
     # Start by showing the observation...
-    get("/observer/show_observation/#{obs.id}")
+    get("/obs/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing comments.)
     assert_select('a[href*=edit_comment], a[href*=destroy_comment]', false)
@@ -134,7 +134,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
     # (Make sure there is a tab to go back to show_observation.)
-    assert_select("div#left_tabs a[href=/observer/show_observation/#{obs.id}]")
+    assert_select("div#left_tabs a[href=/obs/#{obs.id}]")
 
     open_form do |form|
       form.submit
@@ -212,7 +212,7 @@ class AmateurTest < IntegrationTestCase
     fungi = obs.name
 
     # Start by showing the observation...
-    get("/observer/show_observation/#{obs.id}")
+    get("/obs/#{obs.id}")
 
     # (Make sure there are no edit or destroy controls on existing namings.)
     assert_select('a[href*=edit_naming], a[href*=destroy_naming]', false)
@@ -225,7 +225,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:observation))
     # (Make sure there is a tab to go back to show_observation.)
-    assert_select("div#left_tabs a[href=/observer/show_observation/#{obs.id}]")
+    assert_select("div#left_tabs a[href=/obs/#{obs.id}]")
 
     open_form do |form|
       form.assert_value('reason_1_check', false)
@@ -324,7 +324,7 @@ class AmateurTest < IntegrationTestCase
 
     # Have Rolf join in the fun and vote for this naming.
     rolf = login!(@rolf)
-    get("/observer/show_observation/#{obs.id}")
+    get("/obs/#{obs.id}")
     open_form do |form|
       form.assert_value("vote_#{naming.id}_value", 0)
       form.select("vote_#{naming.id}_value", /call it that/i)
@@ -442,7 +442,7 @@ class AmateurTest < IntegrationTestCase
 
       def sess.evaluate_observation_on_index
         reload_results
-        assert_select("a[href^=/observer/show_observation/#{@new_observation.id}?]", :minimum => 1)
+        assert_select("a[href^=/obs/#{@new_observation.id}?]", :minimum => 1)
       end
 
       def sess.evaluate_destruction

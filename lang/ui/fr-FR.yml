@@ -2468,11 +2468,15 @@ email_tracking_updated_messages:  Updated tracking messages.
 
 # name/eol_expanded_review_title
 eol_expanded_review_title:  EOL Preview
-
+eol_expanded_review_count:  >
+  [count] taxa
 
 # name/eol_for_taxon
+eol_for_taxon_images:  Images for EOL
+eol_for_taxon_observation:  Observation [id]
 eol_for_taxon_title:  EOL Review for [name]
-
+eol_for_taxon_voteless_images:  Images with No Votes
+eol_for_taxon_voteless_observations:  Observations with No Votes
 
 # name/eol_need_review
 eol_need_review_title:  EOL Need Review
@@ -3629,7 +3633,7 @@ review_email:  Email
 # Subject lines.
 email_subject_comment:  "[:COMMENT] About [name]"
 email_subject_commercial_inquiry:  Commercial Inquiry About [Name]
-email_subject_consensus_change:  Consensus Rejected [old] in Favor of [new]
+email_subject_consensus_change:  Consensus Changed from [old] to [new]
 email_subject_denied:  "[:USER] Creation Blocked"
 email_subject_features:  New [:app_title] Features
 email_subject_location_change:  "[name] Has Been Changed"

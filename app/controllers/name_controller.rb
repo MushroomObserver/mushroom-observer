@@ -1319,11 +1319,14 @@ class NameController < ApplicationController
     AND names.rank IN ('Form','Variety','Subspecies','Species', 'Genus')
     ORDER BY names.search_name)).map { |row| [row['id'], row['display_name']] }
   end
-  
+
   def eol_for_taxon
+    store_location
+    
     # need name_id and review_status_list
     id = params[:id]
     @name = Name.find(id)
+    @layout = calc_layout_params
     
     # Get corresponding images.
     @images = Name.connection.select_rows(%(
@@ -1335,7 +1338,30 @@ class NameController < ApplicationController
       AND images_observations.image_id = images.id
       AND images.vote_cache >= 2
       AND images.ok_for_export
+      ORDER BY images.vote_cache DESC
+    ))
+    
+    @voteless_images = Name.connection.select_rows(%(
+      SELECT images.id, images.votes
+      FROM observations, images_observations, images
+      WHERE observations.name_id = #{id}
+      AND observations.vote_cache >= 2.4
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.vote_cache IS NULL
+      AND images.ok_for_export
       ORDER BY observations.vote_cache
+    ))
+    
+    @voteless_obs = Name.connection.select_rows(%(
+      SELECT DISTINCT observations.id
+      FROM observations, images_observations, images
+      WHERE observations.name_id = #{id}
+      AND observations.vote_cache IS NULL
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.ok_for_export
+      ORDER BY observations.id
     ))
   end
   
