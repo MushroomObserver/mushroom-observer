@@ -6,14 +6,13 @@ var MOAutocompleter = Class.create({
       input_id:           null,             // id of text field
       input_elem:         null,             // DOM element of text field
       pulldown_id:        null,             // id of pulldown div
-      pulldown_elem:      null,             // DOM element of pulldown div
       pulldown_class:     'autocompleter',  // class of pulldown div
       hot_class:          'hot',            // class of <li> when highlighted
       collapse:           0,                // 0 = normal mode
                                             // 1 = autocomplete first word, then the rest
                                             // 2 = autocomplete first word, then second word, then the rest
                                             // N = etc.
-      max_matches:        10,               // maximum number of options shown at a time
+      pulldown_size:      10,               // maximum number of options shown at a time
       token:              null,             // separator between options
       primer:             null,             // initial list of options
       options:            '',               // list of all options
@@ -29,11 +28,15 @@ var MOAutocompleter = Class.create({
 
     // These are internal state variables the user should leave alone.
     Object.extend(this, {
+      pulldown_elem:        null,           // DOM element of pulldown div
+      list_elem:            null,           // DOM element of pulldown ul
       active:               false,          // is pulldown visible and active?
       old_value:            '',             // previous value of input field
       matches:              [],             // list of options currently showing
       current_row:          0,              // number of option currently highlighted (0 = none)
       current_value:        null,           // value currently highlighted (null = none)
+      current_highlight:    -1,             // row of view highlighted (-1 = none)
+      scroll_offset:        0,              // scroll offset
       focused:              false,          // do we have input focus?
       last_ajax_request:    null,           // last ajax request we got results for
       last_ajax_incomplete: true,           // did we get all the results we requested last time?
@@ -47,28 +50,19 @@ var MOAutocompleter = Class.create({
       this.input_elem = $(this.input_id);
     if (!this.input_elem)
       alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
-    if (!this.pulldown_id)
-      this.create_pulldown();
-    if (!this.pulldown_elem)
-      this.pulldown_elem = $(this.pulldown_id);
-    if (!this.pulldown_elem)
-      alert("MOAutocompleter: Invalid pulldown id: \"" + this.pulldown_id + "\"");
+
+    // Disable native browser autocomplete.  Old Firefox might need to turn it off
+    // for entire form, not sure.
+    this.input_elem.setAttribute('autocomplete','off');
+    // this.input_elem.form.setAttribute('autocomplete','off');
+
+    this.create_pulldown();
 
     this.options = "\n" + this.primer + "\n" + this.options;
 
     Event.observe(this.input_elem, 'keydown', this.on_keydown.bindAsEventListener(this));
     Event.observe(this.input_elem, 'keyup',   this.on_keyup.bindAsEventListener(this));
     Event.observe(this.input_elem, 'blur',    this.on_blur.bindAsEventListener(this));
-  },
-
-  // Create div for pulldown if user hasn't already done so.
-  create_pulldown: function () {
-    var div = document.createElement('div');
-    var ul = document.createElement('ul');
-    div.className = this.pulldown_class;
-    div.appendChild(ul);
-    this.input_elem.parentNode.appendChild(div);
-    this.pulldown_elem = div;
   },
 
 // ------------------------------ Events ------------------------------ 
@@ -82,47 +76,48 @@ var MOAutocompleter = Class.create({
       case Event.KEY_ESC:
         this.schedule_hide();
         this.active = false;
-      case Event.KEY_TAB:
-      case Event.KEY_RETURN:
+        break;
+      case Event.KEY_RETURN, Event.KEY_TAB:
         if (this.active) {
-          this.select_row(this.current_row);
+          if (this.current_row > this.scroll_offset)
+            this.select_row(this.current_row - this.scroll_offset - 1);
           Event.stop(event);
-          return;
         }
+        break;
       case Event.KEY_ESC:
         if (this.active) {
           this.lose_focus();
           Event.stop(event);
-          return;
         }
+        break;
       case Event.KEY_PAGEUP:
         if (this.active) {
           this.page_up();
           this.schedule_key(this.page_up);
           Event.stop(event);
-          return;
         }
+        break;
       case Event.KEY_UP:
         if (this.active) {
           this.arrow_up();
           this.schedule_key(this.arrow_up);
           Event.stop(event);
-          return;
         }
+        break;
       case Event.KEY_DOWN:
         if (this.active) {
           this.arrow_down();
           this.schedule_key(this.arrow_down);
           Event.stop(event);
-          return;
         }
+        break;
       case Event.KEY_PAGEDOWN:
         if (this.active) {
           this.page_down();
           this.schedule_key(this.page_down);
           Event.stop(event);
-          return;
         }
+        break;
     }
   },
 
@@ -135,14 +130,9 @@ var MOAutocompleter = Class.create({
 
   // Input field has changed.
   on_change: function () {
-    var new_val = this.input_elem.value;
-    // $("log").innerHTML += "on_change(" + new_val + ")<br/>";
-    if (this.old_value != new_val) {
-      if (this.ajax_url)
-        this.schedule_refresh();
-      this.update_pulldown();
-      this.old_value = new_val;
-    }
+    // $("log").innerHTML += "on_change(" + this.input_elem.value + ")<br/>";
+    if (this.input_elem.value != this.old_value)
+      this.schedule_refresh();
   },
 
   // User left the text field.
@@ -156,7 +146,15 @@ var MOAutocompleter = Class.create({
   // Schedule options to be refreshed after polite delay.
   schedule_refresh: function () {
     this.clear_refresh();
-    this.refresh_timer = setTimeout(this.refresh_options.bind(this), this.refresh_delay*1000);
+    this.refresh_timer = setTimeout((function() {
+      // $("log").innerHTML += "refresh_timer(" + this.input_elem.value + ")<br/>";
+      this.old_value = this.input_elem.value;
+      if (this.ajax_url)
+        this.refresh_options();
+      this.update_matches();
+      this.update_cursor();
+      this.draw_pulldown();
+    }).bind(this), this.refresh_delay*1000);
   },
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
@@ -219,46 +217,33 @@ var MOAutocompleter = Class.create({
   move_cursor: function (rows) {
     var old_row = this.current_row;
     var new_row = old_row + rows;
+    var scroll = this.scroll_offset;
+
+    // Move cursor, but keep in bounds.
     if (new_row < 1)
       new_row = old_row > 0 ? 1 : 0;
     if (new_row > this.matches.length)
       new_row = this.matches.length;
-    if (old_row > 0 && old_row != new_row)
-      this.highlight_row(old_row, false);
-    if (new_row != old_row)
-      this.highlight_row(new_row, true);
     this.current_row = new_row;
     this.current_value = new_row > 0 ? this.matches[new_row-1] : null;
-  },
 
-  // Change highlight state of row.
-  highlight_row: function (row, state) {
-    var e = this.pulldown_elem.firstChild.childNodes[row-1];
-    if (!state) {
-      e.removeClassName('hot');
-    } else {
-      e.addClassName('hot');
-      this.warp_to_row(e);
-    }
-  },
+    // Scroll view so new row is visible.
+    if (new_row - 1 < scroll)
+      scroll = new_row - 1;
+    if (scroll < 0)
+      scroll = 0;
+    if (new_row > scroll + this.pulldown_size)
+      scroll = new_row - this.pulldown_size;
+    this.scroll_offset = scroll;
 
-  // Ensure div is scrolled so that e is visible.
-  warp_to_row: function(e) {
-    var s = this.pulldown_elem;
-    var ey = e.y || e.offsetTop;
-    var eh = e.offsetHeight;
-    var sy = s.scrollTop;
-    var sh = s.offsetHeight;
-    var ny = ey+eh > sy+sh ? ey+eh - sh : sy;
-    ny = ey < ny ? ey : ny;
-    if (sy != ny)
-      s.scrollTop = ny;
+    this.draw_pulldown();
   },
 
   // User has selected a value, either pressing return or clicking on an option.
   select_row: function (row) {
     var old_val = this.input_elem.value;
-    var new_val = this.matches[row-1];
+    var new_val = this.matches[this.scroll_offset+row];
+    this.input_elem.focus();
     if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse)
       new_val += ' ';
     if (this.token) {
@@ -271,49 +256,96 @@ var MOAutocompleter = Class.create({
     this.schedule_hide();
   },
 
+  // Attempt to locate old value in new set of matches.
+  update_cursor: function () {
+    var matches = this.matches;
+    var scroll = this.scroll_offset;
+    var val = this.last_token(this.old_value);
+    for (var i=0; i<matches.length; i++) {
+      if (matches[i].toLowerCase() == val.toLowerCase()) {
+        if (scroll > i)
+          scroll = i;
+        if (scroll + this.pulldown_size <= i)
+          scroll = i - this.pulldown_size + 1;
+        this.scroll_offset = scroll;
+        this.current_row = i + 1;
+        return;
+      }
+    }
+    if (matches.length > 0) {
+      this.scroll_offset = 0;
+      this.current_row = 1;
+    } else {
+      this.scroll_offset = 0;
+      this.current_row = 0;
+    }
+  },
+
 // ------------------------------ Pulldown ------------------------------ 
+
+  // Create div for pulldown.
+  create_pulldown: function () {
+    var div = document.createElement('div');
+    var list = document.createElement('ul');
+    var i, row;
+    div.className = this.pulldown_class;
+    div.appendChild(list);
+    for (i=0; i<this.pulldown_size; i++) {
+      row = document.createElement('li');
+      row.style.display = 'none';
+      if (Prototype.Browser.IE) {
+        Event.observe(row, 'mouseover', function() {this.addClassName('hover')});
+        Event.observe(row, 'mouseout', function() {this.removeClassName('hover')});
+      }
+      this.attach_onclick(row, i);
+      list.appendChild(row);
+    }
+    this.input_elem.parentNode.appendChild(div);
+    this.pulldown_elem = div;
+    this.list_elem = list;
+  },
 
   // Redraw the pulldown options.
   draw_pulldown: function () {
     var menu    = this.pulldown_elem;
-    var old_row = this.current_row;
-    var old_val = this.current_value;
-    var new_row = 1;
+    var list    = this.list_elem;
+    var rows    = list.childNodes;
+    var scroll  = this.scroll_offset;
+    var cur     = this.current_row;
     var matches = this.matches;
-    var ul      = menu.firstChild;
-    var rows    = ul.childNodes;
+    var old_hl  = this.current_highlight;
+    var new_hl  = 0;
+    var i, x;
 
-    // Remove old highlight.
-    if (old_row > 0 && old_row <= rows.length)
-      rows[old_row-1].removeClassName('hot');
-
-    // Draw text in menu first.
-    for (var i=0; i<rows.length; i++) {
-      if (i < matches.length) {
-        rows[i].innerHTML = matches[i];
-        if (matches[i] == old_val)
-          new_row = i+1;
+    // Update menu text first.
+    for (i=0; i<rows.length; i++) {
+      x = rows[i].innerHTML;
+      if (i+scroll < matches.length) {
+        if (x != matches[i+scroll]) {
+          if (x == '') {
+            rows[i].style.display = 'block';
+          }
+          rows[i].innerHTML = matches[i+scroll];
+        }
+      } else {
+        if (x != '') {
+          rows[i].innerHTML = '';
+          rows[i].style.display = 'none';
+        }
       }
     }
-    for (var i=rows.length; i<matches.length; i++) {
-      var row = document.createElement('li');
-      row.innerHTML = matches[i];
-      this.attach_onclick(row, i+1);
-      ul.appendChild(row);
-      if (matches[i] == old_val) {
-        new_row = i+1;
-        row.addClassName('hot');
-      }
-    }
-    for (var i=rows.length-1; i>=matches.length; i--) {
-      ul.removeChild(rows[i]);
-    }
 
-    // Choose new row to highlight, if any.
-    if (new_row <= rows.length)
-      rows[new_row-1].addClassName('hot');
-    this.current_row = new_row;
-    this.current_value = new_row > 0 ? matches[new_row-1] : null;
+    // Highlight that row.
+    new_hl = cur - scroll - 1;
+    if (new_hl < 0 || new_hl >= rows.length)
+      new_hl = -1;
+    this.current_highlight = new_hl;
+    if (new_hl != old_hl) {
+      if (old_hl >= 0)
+        rows[old_hl].removeClassName('hot');
+      if (new_hl >= 0)
+        rows[new_hl].addClassName('hot');
+    }
 
     // Make menu visible if nonempty.
     if (matches.length > 0) {
@@ -322,21 +354,10 @@ var MOAutocompleter = Class.create({
         setWidth: true,
         offsetTop: this.input_elem.offsetHeight
       });
-      if (this.matches.length > this.scroll_height) {
-        var w = menu.offsetWidth;
-        var h = ul.firstChild.offsetHeight;
-        if (!h || h == 0) h = this.input_elem.offsetHeight;
-        menu.style.overflowY = 'scroll';
-        menu.style.height = h * this.scroll_height + 'px';
-      } else {
-        menu.style.overflowY = 'hidden';
-        menu.style.height = 'auto';
-      }
       menu.style.display = "block";
       Element.ensureVisible(menu);
       this.clear_hide();
       this.active = true;
-      this.warp_to_row(ul.childNodes[new_row-1])
     }
 
     // Else hide it if now empty.
@@ -359,24 +380,26 @@ var MOAutocompleter = Class.create({
 
   // Hide pulldown options.
   hide_pulldown: function () {
-    this.pulldown_elem.hide();
+    this.pulldown_elem.style.display = 'none';
   },
 
+// ------------------------------ Matches ------------------------------ 
+
   // Update content of pulldown.
-  update_pulldown: function () {
+  update_matches: function () {
     if (this.collapse > 0)
       this.update_collapsed();
     else
       this.update_normal();
-    this.draw_pulldown();
   },
 
   // Grab first matches, ignoring number of words, etc.
   update_normal: function () {
-    var val = "\n" + this.last_token();
-    var options = this.options;
+    var val = "\n" + this.last_token(this.input_elem.value).toLowerCase();
+    var options  = this.options;
+    var options2 = this.options.toLowerCase();
     var matches = [];
-    for (var i=options.indexOf(val); i>=0; i=options.indexOf(val, i+1)) {
+    for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
       var j = options.indexOf("\n", i+1);
       var s = options.substring(i+1, j>0 ? j : options.length);
       if (s.length > 0) {
@@ -391,11 +414,12 @@ var MOAutocompleter = Class.create({
   // Grab all matches, preferring the ones with no additional words.
   // Note: order of options must have genera first, then species, then varieties.
   update_collapsed: function (val) {
-    var val = "\n" + this.last_token();
+    var val = "\n" + this.last_token(this.input_elem.value).toLowerCase();
     var options  = this.options;
+    var options2 = this.options.toLowerCase();
     var matches  = [];
     var the_rest = (val.match(/ /g) || []).length >= this.collapse;
-    for (var i=options.indexOf(val); i>=0; i=options.indexOf(val, i+1)) {
+    for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
       var j = options.indexOf("\n", i+1);
       var s = options.substring(i+1, j>0 ? j : options.length);
       if (s.length > 0) {
@@ -421,8 +445,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Get last token, the one being auto-completed.
-  last_token: function () {
-    var val = this.input_elem.value;
+  last_token: function (val) {
     if (this.token) {
       var i = val.last_IndexOf(this.token);
       if (i >= 0)
@@ -435,7 +458,7 @@ var MOAutocompleter = Class.create({
 
   // Send request for updated options.
   refresh_options: function () {
-    var val = this.last_token();
+    var val = this.last_token(this.input_elem.value).toLowerCase();
     var url;
 
     // Don't make request on empty string!
@@ -462,10 +485,19 @@ var MOAutocompleter = Class.create({
         this.last_ajax_request == val.substr(0, this.last_ajax_request.length))
       return;
 
+    // Make request.
+    this.send_ajax_request(val);
+  },
+
+  // Send AJAX request for more matching strings.
+  send_ajax_request: function(val) {
+    url = this.ajax_url.replace('@', encodeURIComponent(val));
+
+    this.last_ajax_request = val;
+
     if (this.ajax_request)
       this.ajax_request.abort();
-    this.last_ajax_request = val;
-    url = this.ajax_url.replace('@', encodeURIComponent(val));
+
     this.ajax_request = new Ajax.Request(url, {
       asynchronous: true,
 
@@ -476,29 +508,40 @@ var MOAutocompleter = Class.create({
       }).bind(this),
 
       onComplete: (function (response) {
-        var new_opts = "\n" + response.responseText;
-        this.ajax_request = null;
-        if (new_opts.charAt(new_opts.length-1) != "\n")
-          new_opts += "\n";
-        if (new_opts.substr(new_opts.length-5, 5) == "\n...\n") {
-          this.last_ajax_incomplete = true;
-          new_opts = new_opts.substr(0, new_opts.length - 4);
-          this.schedule_refresh(); // (just in case we need to refine the request)
-        } else {
-          this.last_ajax_incomplete = false;
-        }
-        if (this.log)
-          $("log").innerHTML += "Got response for " + this.last_ajax_request +
-            ": " + (new_opts.split("\n").length-2) + " strings (" +
-            (this.last_ajax_incomplete ? "incomplete" : "complete") + ").<br/>";
-        if (this.primer)
-          new_opts = "\n" + this.primer + new_opts;
-        if (this.options != new_opts) {
-          this.options = new_opts;
-          this.update_pulldown();
-        }
+        this.process_ajax_response(response.responseText);
       }).bind(this)
     });
+  },
+
+  
+  // Process response from server.
+  process_ajax_response: function(response) {
+    var new_opts = "\n" + response;
+    this.ajax_request = null;
+    if (new_opts.charAt(new_opts.length-1) != "\n") {
+      new_opts += "\n";
+    }
+    if (new_opts.substr(new_opts.length-5, 5) == "\n...\n") {
+      this.last_ajax_incomplete = true;
+      new_opts = new_opts.substr(0, new_opts.length - 4);
+      this.schedule_refresh(); // (just in case we need to refine the request)
+    } else {
+      this.last_ajax_incomplete = false;
+    }
+    if (this.log) {
+      $("log").innerHTML += "Got response for " + this.last_ajax_request +
+        ": " + (new_opts.split("\n").length-2) + " strings (" +
+        (this.last_ajax_incomplete ? "incomplete" : "complete") + ").<br/>";
+    }
+    if (this.primer) {
+      new_opts = "\n" + this.primer + new_opts;
+    }
+    if (this.options != new_opts) {
+      this.options = new_opts;
+      this.update_matches();
+      this.update_cursor();
+      this.draw_pulldown();
+    }
   }
 });
 
