@@ -69,7 +69,7 @@ var MOAutocompleter = Class.create({
 
   // User pressed a key in the text field.
   on_keydown: function (event) {
-    // $("log").innerHTML += "keydown(" + event.keyCode + ")<br/>";
+    $("log").innerHTML += "keydown(" + event.keyCode + ")<br/>";
     this.clear_key();
     this.focused = true;
     switch (event.keyCode) {
@@ -87,6 +87,18 @@ var MOAutocompleter = Class.create({
       case Event.KEY_ESC:
         if (this.active) {
           this.lose_focus();
+          Event.stop(event);
+        }
+        break;
+      case Event.KEY_HOME:
+        if (this.active) {
+          this.go_home();
+          Event.stop(event);
+        }
+        break;
+      case Event.KEY_END:
+        if (this.active) {
+          this.go_end();
           Event.stop(event);
         }
         break;
@@ -235,7 +247,20 @@ var MOAutocompleter = Class.create({
     if (new_row > scroll + this.pulldown_size)
       scroll = new_row - this.pulldown_size;
     this.scroll_offset = scroll;
+    this.draw_pulldown();
+  },
 
+  // Go to first / last match.
+  go_home: function () {
+    this.current_row = this.matches.length > 0 ? 1 : 0;
+    this.scroll_offset = 0;
+    this.draw_pulldown();
+  },
+  go_end: function () {
+    this.current_row = this.matches.length;
+    this.scroll_offset = this.matches.length - this.pulldown_size;
+    if (this.current_row < 0) this.current_row = 0;
+    if (this.scroll_offset < 0) this.scroll_offset = 0;
     this.draw_pulldown();
   },
 
