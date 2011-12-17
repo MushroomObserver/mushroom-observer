@@ -1,3 +1,8 @@
+// From some post on stackoverflow...
+Prototype.Browser.IE6 = Prototype.Browser.IE && parseInt(navigator.userAgent.substring(navigator.userAgent.indexOf("MSIE")+5)) == 6;
+Prototype.Browser.IE7 = Prototype.Browser.IE && parseInt(navigator.userAgent.substring(navigator.userAgent.indexOf("MSIE")+5)) == 7;
+Prototype.Browser.IE8 = Prototype.Browser.IE && !Prototype.Browser.IE6 && !Prototype.Browser.IE7;
+
 var MOAutocompleter = Class.create({
   initialize: function(opts) {
 
@@ -22,7 +27,9 @@ var MOAutocompleter = Class.create({
       key_delay1:         0.50,             // initial key repeat delay (seconds)
       key_delay2:         0.03,             // subsequent key repeat delay (seconds)
       page_size:          10,               // amount to move cursor on page up and down
-      scroll_height:      10                // number of rows to show before adding scrollbar
+      scroll_height:      10,               // number of rows to show before adding scrollbar
+      row_height:         20,               // approximate height of a row in pixels (updates automatically when exact value known)
+      max_request_length: 50                // max length of string to send via AJAX
     });
     Object.extend(this, opts);
 
@@ -43,33 +50,37 @@ var MOAutocompleter = Class.create({
       ajax_request:         null,           // ajax request while underway
       refresh_timer:        null,           // timer used to delay update after typing
       hide_timer:           null,           // timer used to delay hiding of pulldown
-      key_timer:            null            // timer used to emulate key repeat
+      key_timer:            null,           // timer used to emulate key repeat
+      do_scrollbar:         null            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
     });
+
+    // Check if browser can handle doing scrollbar.
+    this.do_scrollbar =
+      Prototype.Browser.IE ? Prototype.Browser.IE8 : true;
 
     if (!this.input_elem)
       this.input_elem = $(this.input_id);
     if (!this.input_elem)
       alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
 
-    // Disable native browser autocomplete.  Old Firefox might need to turn it off
-    // for entire form, not sure.
+    // Disable default browser autocomplete.
     this.input_elem.setAttribute('autocomplete','off');
-    // this.input_elem.form.setAttribute('autocomplete','off');
 
     this.create_pulldown();
 
     this.options = "\n" + this.primer + "\n" + this.options;
 
-    Event.observe(this.input_elem, 'keydown', this.on_keydown.bindAsEventListener(this));
-    Event.observe(this.input_elem, 'keyup',   this.on_keyup.bindAsEventListener(this));
-    Event.observe(this.input_elem, 'blur',    this.on_blur.bindAsEventListener(this));
+    Event.observe(this.input_elem, 'keydown',  this.on_keydown.bindAsEventListener(this));
+    Event.observe(this.input_elem, 'keyup',    this.on_keyup.bindAsEventListener(this));
+    Event.observe(this.input_elem, 'keypress', this.on_keypress.bindAsEventListener(this));
+    Event.observe(this.input_elem, 'blur',     this.on_blur.bindAsEventListener(this));
   },
 
 // ------------------------------ Events ------------------------------ 
 
   // User pressed a key in the text field.
   on_keydown: function (event) {
-    $("log").innerHTML += "keydown(" + event.keyCode + ")<br/>";
+    // $("log").innerHTML += "keydown(" + event.keyCode + ")<br/>";
     this.clear_key();
     this.focused = true;
     switch (event.keyCode) {
@@ -77,9 +88,10 @@ var MOAutocompleter = Class.create({
         this.schedule_hide();
         this.active = false;
         break;
-      case Event.KEY_RETURN, Event.KEY_TAB:
+      case Event.KEY_RETURN:
+      case Event.KEY_TAB:
         if (this.active) {
-          if (this.current_row > this.scroll_offset)
+          if (this.current_row > 0)
             this.select_row(this.current_row - this.scroll_offset - 1);
           Event.stop(event);
         }
@@ -130,6 +142,17 @@ var MOAutocompleter = Class.create({
           Event.stop(event);
         }
         break;
+    }
+  },
+
+  // Need to prevent these keys from being processed by form.
+  on_keypress: function (event) {
+    // $("log").innerHTML += "keypress(" + event.keyCode + ")<br/>";
+    switch (event.keyCode) {
+      case Event.KEY_RETURN:
+      case Event.KEY_TAB:
+        if (this.active)
+          Event.stop(event);
     }
   },
 
@@ -264,21 +287,19 @@ var MOAutocompleter = Class.create({
     this.draw_pulldown();
   },
 
-  // User has selected a value, either pressing return or clicking on an option.
-  select_row: function (row) {
-    var old_val = this.input_elem.value;
-    var new_val = this.matches[this.scroll_offset+row];
+  // Mouse has moved over a menu item.
+  highlight_row: function (new_hl) {
+    var rows = this.list_elem.childNodes;
+    var old_hl = this.current_highlight;
+    this.current_highlight = new_hl;
+    this.current_row = this.scroll_offset + new_hl + 1;
+    if (old_hl != new_hl) {
+      if (old_hl >= 0)
+        rows[old_hl].removeClassName('hot');
+      if (new_hl >= 0)
+        rows[new_hl].addClassName('hot');
+    } 
     this.input_elem.focus();
-    if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse)
-      new_val += ' ';
-    if (this.token) {
-      var i = old_val.lastIndexOf(this.token);
-      if (i > 0)
-        new_val = old_val.substring(0, i + this.token.length) + new_val;
-    }
-    if (old_val != new_val)
-      this.input_elem.value = new_val;
-    this.schedule_hide();
   },
 
   // Attempt to locate old value in new set of matches.
@@ -306,33 +327,62 @@ var MOAutocompleter = Class.create({
     }
   },
 
+  // Called when users scrolls via scrollbar.
+  on_scroll: function () {
+    this.scroll_offset = Math.round(this.pulldown_elem.scrollTop / this.row_height);
+    if (this.current_row < this.scroll_offset + 1)
+      this.current_row = this.scroll_offset + 1;
+    if (this.current_row > this.scroll_offset + this.pulldown_size)
+      this.current_row = this.scroll_offset + this.pulldown_size;
+    this.draw_pulldown();
+  },
+
+  // User has selected a value, either pressing tab/return or clicking on an option.
+  select_row: function (row) {
+    var old_val = this.input_elem.value;
+    var new_val = this.matches[this.scroll_offset+row];
+    this.input_elem.focus();
+    if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse)
+      new_val += ' ';
+    if (this.token) {
+      var i = old_val.lastIndexOf(this.token);
+      if (i > 0)
+        new_val = old_val.substring(0, i + this.token.length) + new_val;
+    }
+    if (old_val != new_val)
+      this.input_elem.value = new_val;
+    this.schedule_hide();
+  },
+
 // ------------------------------ Pulldown ------------------------------ 
 
   // Create div for pulldown.
   create_pulldown: function () {
-    var div = document.createElement('div');
+    var div1 = document.createElement('div');
+    var div2 = document.createElement('div');
     var list = document.createElement('ul');
     var i, row;
-    div.className = this.pulldown_class;
-    div.appendChild(list);
+    div1.className = this.pulldown_class;
+    div2.style.overflowY = 'hidden';
+    div1.appendChild(div2);
+    div2.appendChild(list);
     for (i=0; i<this.pulldown_size; i++) {
       row = document.createElement('li');
       row.style.display = 'none';
-      if (Prototype.Browser.IE) {
-        Event.observe(row, 'mouseover', function() {this.addClassName('hover')});
-        Event.observe(row, 'mouseout', function() {this.removeClassName('hover')});
-      }
-      this.attach_onclick(row, i);
+      this.attach_row_events(row, i);
       list.appendChild(row);
     }
-    this.input_elem.parentNode.appendChild(div);
-    this.pulldown_elem = div;
+    if (this.do_scrollbar)
+      Event.observe(div1, 'scroll', this.on_scroll.bind(this));
+    this.input_elem.parentNode.appendChild(div1);
+    this.pulldown_elem = div1;
     this.list_elem = list;
   },
 
   // Redraw the pulldown options.
   draw_pulldown: function () {
     var menu    = this.pulldown_elem;
+    var inner   = menu.firstChild;
     var list    = this.list_elem;
     var rows    = list.childNodes;
     var scroll  = this.scroll_offset;
@@ -340,17 +390,30 @@ var MOAutocompleter = Class.create({
     var matches = this.matches;
     var old_hl  = this.current_highlight;
     var new_hl  = 0;
-    var i, x;
+    var i, x, y;
+
+    if (this.do_scrollbar) {
+      // Make sure row height is accurate.
+      if (rows[0].innerHTML != '')
+        this.row_height = rows[0].getHeight();
+
+      // Update size and offset of visible part.
+      menu.style.overflowY  = matches.length > rows.length ? 'scroll' : 'hidden';
+      menu.style.height     = '' + this.row_height * (rows.length < matches.length - scroll ? rows.length : matches.length - scroll) + 'px';
+      inner.style.marginTop = '' + this.row_height * scroll + 'px';
+      inner.style.height    = '' + this.row_height * (matches.length - scroll) + 'px';
+      menu.scrollTop        = this.row_height * scroll;
+    }
 
     // Update menu text first.
     for (i=0; i<rows.length; i++) {
       x = rows[i].innerHTML;
       if (i+scroll < matches.length) {
-        if (x != matches[i+scroll]) {
-          if (x == '') {
+        y = matches[i+scroll].replace(/ /g, '&nbsp;');
+        if (x != y) {
+          if (x == '')
             rows[i].style.display = 'block';
-          }
-          rows[i].innerHTML = matches[i+scroll];
+          rows[i].innerHTML = y;
         }
       } else {
         if (x != '') {
@@ -381,8 +444,10 @@ var MOAutocompleter = Class.create({
       });
       menu.style.display = "block";
       Element.ensureVisible(menu);
-      this.clear_hide();
-      this.active = true;
+      if (matches.length > 1 || this.input_elem.value != matches[0]) {
+        this.clear_hide();
+        this.active = true;
+      }
     }
 
     // Else hide it if now empty.
@@ -390,22 +455,29 @@ var MOAutocompleter = Class.create({
       menu.style.display = "none";
       this.active = false;
     }
+
+    // Make sure input focus stays on text field!
+    this.input_elem.focus();
   },
 
-  // Add "on click" event to a row of the pulldown menu.
+  // Add "click" and "mouseover" events to a row of the pulldown menu.
   // Need to do this in a separate method, otherwise row doesn't get
   // a separate value for each row!  Something to do with scope of
   // variables inside for loops.
-  attach_onclick: function (e, row) {
+  attach_row_events: function (e, row) {
     Event.observe(e, 'click', (function () {
       this.select_row(row);
       this.on_change();
+    }).bind(this));
+    Event.observe(e, 'mouseover', (function() {
+      this.highlight_row(row);
     }).bind(this));
   },
 
   // Hide pulldown options.
   hide_pulldown: function () {
     this.pulldown_elem.style.display = 'none';
+    this.active = false;
   },
 
 // ------------------------------ Matches ------------------------------ 
@@ -516,6 +588,8 @@ var MOAutocompleter = Class.create({
 
   // Send AJAX request for more matching strings.
   send_ajax_request: function(val) {
+    if (val.length > this.max_request_length)
+      val = val.substr(0, this.max_request_length);
     url = this.ajax_url.replace('@', encodeURIComponent(val));
 
     this.last_ajax_request = val;
