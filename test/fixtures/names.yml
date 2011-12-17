@@ -795,3 +795,33 @@ tremella_justpublished:
   search_name: Tremella justpublished Retz.
   citation: ''
   notes: A Tremella not known to be a lichen
+
+hygrocybe_russocoriacea_bad_author:
+  id: 48
+  sync_id: 48x1
+  version: 1
+  created: 2007-01-10 05:06:08
+  modified: 2011-12-15 18:35:28
+  user_id: 1
+  rank: Species
+  text_name: Hygrocybe russocoriacea
+  search_name: Hygrocybe russocoriacea (Berk. & T.K. Mill.) P.D. Orton & Watling
+  display_name: **__Hygrocybe russocoriacea__** (Berk. & T.K. Mill.) P.D. Orton & Watling
+  observation_name: **__Hygrocybe russocoriacea__** (Berk. & T.K. Mill.) P.D. Orton & Watling
+  author: (Berk. & T.K. Mill.) P.D. Orton & Watling
+  notes: '__Camarophyllus russocoriaceus__ is a synonym.  According to the Index Fungorum __Camarophyllus__ is now considered to be a synonym of __Hygrocybe__.'
+
+hygrocybe_russocoriacea_good_author:
+  id: 49
+  sync_id: 49x1
+  version: 1
+  created: 2011-12-10 03:50:48
+  modified: 2011-12-10 03:50:48
+  user_id: 4
+  rank: Species
+  text_name: Hygrocybe russocoriacea
+  search_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
+  display_name: **__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling
+  observation_name: **__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling
+  author: (Berk. & Jos.K. Mill.) P.D. Orton & Watling
+  notes: NULL

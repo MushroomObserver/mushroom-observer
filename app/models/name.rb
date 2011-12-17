@@ -1120,19 +1120,15 @@ class Name < AbstractModel
     end
 
     # Save any notes the old name had.
-    if old_name.has_notes?
-      do_save if !changed?
+    if old_name.has_notes? and (old_name.notes != self.notes)
       if has_notes?
-        notes += "\n\nThese notes came from #{old_name.format_name} " +
-                 "when it was merged with this name:\n\n"
-        notes += old_name.notes
+        self.notes += "\n\nThese notes come from #{old_name.format_name} when it was merged with this name:\n\n" +
+          old_name.notes
       else
-        notes = old_name.notes
+        self.notes = old_name.notes
       end
-      if do_save
-        log(:log_name_updated, :touch => true)
-        self.save
-      end
+      log(:log_name_updated, :touch => true)
+      self.save
     end
 
     # Finally destroy the name.

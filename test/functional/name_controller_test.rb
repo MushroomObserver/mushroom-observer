@@ -1094,6 +1094,38 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_text_name, name.text_name)
   end
 
+  def test_edit_name_merge_author_with_notes
+    bad_name = names(:hygrocybe_russocoriacea_bad_author)
+    bad_id = bad_name.id
+    bad_notes = bad_name.notes
+    assert(bad_notes)
+    good_name = names(:hygrocybe_russocoriacea_good_author)
+    good_id = good_name.id
+    assert_nil(good_name.notes)
+    good_author = good_name.author
+    assert(good_author)
+    params = {
+      :id => bad_name.id,
+      :name => {
+        :text_name => bad_name.text_name,
+        :author => good_author,
+        :notes => bad_notes,
+        :rank => :Species
+      },
+    }
+    login('rolf')
+    make_admin
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(bad_id)
+    end
+    reload_name = Name.find(good_id)
+    assert(reload_name)
+    assert_equal(good_author, reload_name.author)
+    assert_equal(bad_notes, reload_name.notes)
+  end
+
   # ----------------------------
   #  Bulk names.
   # ----------------------------
