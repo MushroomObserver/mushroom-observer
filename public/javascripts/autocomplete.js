@@ -35,6 +35,7 @@ var MOAutocompleter = Class.create({
 
     // These are internal state variables the user should leave alone.
     Object.extend(this, {
+      datalist_elem:        null,           // DOM element of datalist
       pulldown_elem:        null,           // DOM element of pulldown div
       list_elem:            null,           // DOM element of pulldown ul
       active:               false,          // is pulldown visible and active?
@@ -51,13 +52,15 @@ var MOAutocompleter = Class.create({
       refresh_timer:        null,           // timer used to delay update after typing
       hide_timer:           null,           // timer used to delay hiding of pulldown
       key_timer:            null,           // timer used to emulate key repeat
-      do_scrollbar:         null            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+      do_scrollbar:         null,           // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+      do_datalist:          null            // implement using <datalist> instead of doing pulldown ourselves
     });
 
     // Check if browser can handle doing scrollbar.
     this.do_scrollbar =
       Prototype.Browser.IE ? Prototype.Browser.IE8 : true;
 
+    // Get the DOM element of the input field.
     if (!this.input_elem)
       this.input_elem = $(this.input_id);
     if (!this.input_elem)
@@ -66,14 +69,33 @@ var MOAutocompleter = Class.create({
     // Disable default browser autocomplete.
     this.input_elem.setAttribute('autocomplete','off');
 
-    this.create_pulldown();
-
+    // Initialize options.
     this.options = "\n" + this.primer + "\n" + this.options;
 
-    Event.observe(this.input_elem, 'keydown',  this.on_keydown.bindAsEventListener(this));
-    Event.observe(this.input_elem, 'keyup',    this.on_keyup.bindAsEventListener(this));
-    Event.observe(this.input_elem, 'keypress', this.on_keypress.bindAsEventListener(this));
-    Event.observe(this.input_elem, 'blur',     this.on_blur.bindAsEventListener(this));
+    // Create datalist if browser is capable.
+    if (this.do_datalist) {
+      this.create_datalist();
+    }
+
+    // Create pulldown and attach events if we have to do it ourselves.
+    else {
+      this.create_pulldown();
+      Event.observe(this.input_elem, 'keydown',  this.on_keydown.bindAsEventListener(this));
+      Event.observe(this.input_elem, 'keyup',    this.on_keyup.bindAsEventListener(this));
+      Event.observe(this.input_elem, 'keypress', this.on_keypress.bindAsEventListener(this));
+      Event.observe(this.input_elem, 'blur',     this.on_blur.bindAsEventListener(this));
+    }
+
+    // Restore field value when user "goes back" to this page.  Only really need
+    // this for firefox browsers which handle the autocomplete="off" attribute,
+    // but it shouldn't hurt to do it for all browsers.  Problem is, if
+    // autocomplete="off" is set, Firefox deliberately *erases* the field value to
+    // prevent potentially sensitive information from being visible to random
+    // people walking by a terminal and pressing "back" button.  This fix just
+    // sets it right back to the old value.  So there. 
+    Event.observe(document, 'focus', (function () {
+      this.input_elem.value = this.old_value;
+    }).bind(this));
   },
 
 // ------------------------------ Events ------------------------------ 
@@ -187,8 +209,10 @@ var MOAutocompleter = Class.create({
       if (this.ajax_url)
         this.refresh_options();
       this.update_matches();
-      this.update_cursor();
-      this.draw_pulldown();
+      if (this.do_datalist)
+        this.update_datalist();
+      else
+        this.draw_pulldown();
     }).bind(this), this.refresh_delay*1000);
   },
 
@@ -300,31 +324,6 @@ var MOAutocompleter = Class.create({
         rows[new_hl].addClassName('hot');
     } 
     this.input_elem.focus();
-  },
-
-  // Attempt to locate old value in new set of matches.
-  update_cursor: function () {
-    var matches = this.matches;
-    var scroll = this.scroll_offset;
-    var val = this.last_token(this.old_value);
-    for (var i=0; i<matches.length; i++) {
-      if (matches[i].toLowerCase() == val.toLowerCase()) {
-        if (scroll > i)
-          scroll = i;
-        if (scroll + this.pulldown_size <= i)
-          scroll = i - this.pulldown_size + 1;
-        this.scroll_offset = scroll;
-        this.current_row = i + 1;
-        return;
-      }
-    }
-    if (matches.length > 0) {
-      this.scroll_offset = 0;
-      this.current_row = 1;
-    } else {
-      this.scroll_offset = 0;
-      this.current_row = 0;
-    }
   },
 
   // Called when users scrolls via scrollbar.
@@ -478,6 +477,31 @@ var MOAutocompleter = Class.create({
   hide_pulldown: function () {
     this.pulldown_elem.style.display = 'none';
     this.active = false;
+  },
+
+// ------------------------------ Datalist ------------------------------ 
+
+  // This is a fancy new feature in HTML 5.  You can supply a list of
+  // acceptable values to a textfield via a <datalist> object:
+  //
+  //   <input type="textfield" list="possible_values"/>
+  //   <datalist id="possible_values">
+  //     <option>value one</option>
+  //     <option>value two</option>
+  //     ...
+  //   </datalist>
+  //
+  // In theory this should be much more efficient than doing it ourselves.
+  // But for now, I have no pressing reason to bother, since browsers
+  // capable of doing this are also more than capable of handling the old
+  // dynamic popup pulldown menu.
+
+  create_datalist: function() {
+    // XXX Create (empty) datalist element with specific id, then attach that to the input field.
+  },
+
+  update_datalist: function() {
+    // XXX Update the list of children (<option> elements) inside the datalist.
   },
 
 // ------------------------------ Matches ------------------------------ 
@@ -638,8 +662,10 @@ var MOAutocompleter = Class.create({
     if (this.options != new_opts) {
       this.options = new_opts;
       this.update_matches();
-      this.update_cursor();
-      this.draw_pulldown();
+      if (this.do_datalist)
+        this.update_datalist();
+      else
+        this.draw_pulldown();
     }
   }
 });
