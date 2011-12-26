@@ -14,12 +14,14 @@
     if is_in_admin_mode?
       css = 'Admin'
     elsif is_robot?
-      css = 'Agaricus'
+      css = 'BlackOnWhite'
     else
       if CSS.member?(controller.action_name)
         css = controller.action_name
       else
-        unless @user.nil?
+        if @user.nil?
+          css = 'BlackOnWhite'
+        else
           css = @user.theme
         end
       end
@@ -51,7 +53,7 @@
     </div>
   <% end %>
   <div id="columns" style="height:100%">
-    <table cellpadding="0" cellspacing="0" border="0" style="height:100%">
+    <table cellpadding="0" cellspacing="0" style="height:100%">
       <tr>
 
         <td valign="top">
@@ -231,8 +233,10 @@
 
             <div id="Title"><%= @title %></div>
 
-            <%= @content_for_layout %>
-
+            <div class="TextContent">
+              <%= @content_for_layout %>
+            </div>
+            
             <br/><br/><br/>
             <% if Locale.code.to_s != 'en-US' %>
               <div id="translators_credit">

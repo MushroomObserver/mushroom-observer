@@ -71,7 +71,7 @@ NAME_LISTER_CACHE_FILE = "#{RAILS_ROOT}/public/javascripts/name_list_data.js" if
 IMAGE_UPLOAD_MAX_SIZE = 20000000                         if !defined? IMAGE_UPLOAD_MAX_SIZE
 
 # Stylesheets available.
-CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe)     if !defined? CSS
+CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite)     if !defined? CSS
 
 # URL of the subversion source repository.
 SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings" if !defined? SVN_REPOSITORY

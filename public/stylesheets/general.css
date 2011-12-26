@@ -288,6 +288,10 @@ div.HelpNoteIndent {
   line-height: 36px;
 }
 
+.TextContent {
+   padding: 10px;
+}
+
 .SubmitButton {
   padding-top: 10px;
   padding-bottom: 10px;
