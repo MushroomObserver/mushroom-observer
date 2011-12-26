@@ -2413,12 +2413,12 @@ bulk_license_link:  Bulk License Updater
 # observer/color_themes
 color_themes_text:  >
   **General Concept:** The [:app_title] website provides a number of color
-  themes based on different groups of mushrooms.  By default each page gets a
-  randomly selected theme.  However, a [:user] can choose to use a particular
+  themes, some based on different groups of mushrooms.  By default the simple
+  clean "Black on White" theme is used.  However, a [:user] can choose to use a particular
   theme throughout the site by selecting the theme on the [:user] preference page.
   \n\n
   The idea of using mushrooms for color follows in the tradition of using
-  mushrooms to dye fabrics.  Each color in a theme was pulled from a photograph
+  mushrooms to dye fabrics.  Each color in a mushroom theme was pulled from a photograph
   included in the site from the given group.  The colors attempt to express the
   characteristic colors of the group.  In a few cases, the [:images] were adjusted
   using an automatic color balance operation in order to get a more
@@ -3373,6 +3373,7 @@ theme_amanita:  _Amanita_ Theme
 theme_cantharellaceae:  _Cantharellaceae_ Theme
 theme_hygrocybe:  _Hygrocybe_ Theme
 theme_random:  Random
+theme_white_on_black:  White On Black
 
 
 # observer/translators_note

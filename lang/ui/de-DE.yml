@@ -3368,6 +3368,7 @@ theme_amanita: _Amanita_ Schema
 theme_cantharellaceae: _Cantharellaceae_ Schema
 theme_hygrocybe: _Hygrocybe_ Schema
 theme_random: Zufällig
+theme_white_on_black:  White On Black
 
 
 # observer/translators_note
