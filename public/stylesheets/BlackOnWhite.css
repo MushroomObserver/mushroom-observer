@@ -42,6 +42,10 @@ li.selected { background-color: #FFFFFF ! important }
   background-color: #FFFFFF;  
 }
 
+.MatrixLine TD, .MatrixLine TR {
+  height: 1px;
+}
+
 /* Colors for even lines */
 .ListLine0 {
       background-color: #FFFFFF;

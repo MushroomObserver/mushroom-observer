@@ -1,17 +1,18 @@
 <% @title = :theme_amanita.tl %>
 
+<%= :theme_amanita_pachycolea.tp(:link => link_to('**__Amanita pachycolea__**'.t, :controller => 'image', :action => "show_image", :id => 644)) %>
+
+<%= :theme_amanita_muscaria.tp(:link => link_to('**__Amanita muscaria__**'.t, :controller => 'image', :action => "show_image", :id => 651)) %>
+
+<%= :theme_amanita_velosa.tp(:link => link_to('**__Amanita velosa__**'.t, :controller => 'image', :action => "show_image", :id => 623)) %>
+
 <p>
-  <%= link_to('**__Amanita pachycolea__**'.t, :controller => 'image', :action => "show_image", :id => 644) %> is used for the primary background, the default text and default unvisited links.
+  <span class="ListLine0">
+    <%= :theme_amanita_calyptroderma.t(:link => link_to('The fall form of **__Amanita calyptroderma__**'.t, :controller => 'image', :action => "show_image", :id => 669)) %>
 </p>
+
 <p>
-  <%= link_to('**__Amanita muscaria__**'.t, :controller => 'image', :action => "show_image", :id => 651) %> is used for the banner background and text, the default visited link and link hover colors as well as the text for the left-hand panel.
-</p>
-<p>
-  <%= link_to('**__Amanita velosa__**'.t, :controller => 'image', :action => "show_image", :id => 623) %> is used for the left-hand panel's background color and the left-hand panel's visited and unvisited link colors.
-</p>
-<p>
-  <span class="ListLine0"><%= link_to('The fall form of **__Amanita calyptroderma__**'.t, :controller => 'image', :action => "show_image", :id => 669) %> is used for all the colors of half the rows on the list pages.</span>
-</p>
-<p>
-  <span class="ListLine1"><%= link_to('**__Amanita phalloides__**'.t, :controller => 'image', :action => "show_image", :id => 636) %> is used for all the colors of the other half of the rows on the list pages.</span>
+  <span class="ListLine1">
+    <%= :theme_amanita_phalloides.t(:link => link_to('**__Amanita phalloides__**'.t, :controller => 'image', :action => "show_image", :id => 636)) %>
+  </span>
 </p>

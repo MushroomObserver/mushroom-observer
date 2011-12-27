@@ -45,6 +45,12 @@ li.selected { background-color: #eccf95 ! important }
 }
 
 
+/* Hide the new separator line */
+.MatrixLine TD, .MatrixLine TR {
+  display: none;
+}
+
+
 /* Colors for the left hand panel */
 .LeftSide {
     background-color: #eccf95; /* augustus */

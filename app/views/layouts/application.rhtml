@@ -136,7 +136,7 @@
                 <br/>
 
                 <div id="color_note">
-                  <%= link_to(:app_colors_from.t(:theme => css), :controller => 'observer', :action => 'color_themes') %><br/><br/>
+                  <%= link_to(:app_colors_from.t(:theme => css.to_sym.l), :controller => 'observer', :action => 'color_themes') %><br/><br/>
                   <%= :app_powered_by.t %>:<br/>
                   <a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a><br/>
                   <%= :app_preferred_browser.t %>:<br/>

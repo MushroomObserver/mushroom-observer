@@ -4,6 +4,6 @@
 
 <p>
   <% for name in CSS %>
-    <%= indent + link_to(name, :action => name) %><br/>
+    <%= indent + link_to(name.to_sym.l, :action => name) %><br/>
   <% end %>
 </p>

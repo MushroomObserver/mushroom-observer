@@ -1,14 +1,17 @@
 <% @title = :theme_cantharellaceae.tl %>
 
+<%= :theme_cantharellaceae_californicus.tp(:link => link_to('**__Cantharellus californicus__**'.t, :controller => 'image', :action => "show_image", :id => 557)) %>
+
+<%= :theme_cantharellaceae_cinnabarinus.tp(:link => link_to('**__Cantharellus cinnabarinus__**'.t, :controller => 'image', :action => "show_image", :id => 551)) %>
+
 <p>
-  <%= link_to('**__Cantharellus "californicus"__**'.t, :controller => 'image', :action => "show_image", :id => 557) %> is used for the primary, banner and left-hand panel backgrounds.
+  <span class="ListLine1">
+    <%= :theme_cantharellaceae_cornucopioides.t(:link => link_to('**__Craterellus cornucopioides__**'.t, :controller => 'image', :action => "show_image", :id => 465)) %>
+  </span>
 </p>
+
 <p>
-  <%= link_to('**__Cantharellus cinnabarinus__**'.t, :controller => 'image', :action => "show_image", :id => 551) %> is used for the default link and visited link colors.
-</p>
-<p>
-  <span class="ListLine1"><%= link_to('**__Craterellus cornucopioides__**'.t, :controller => 'image', :action => "show_image", :id => 465) %> is used for the default text and all the colors of half the rows on the list pages.</span>
-</p>
-<p>
-  <span class="ListLine0"><%= link_to('**__Craterellus tubaeformis__**'.t, :controller => 'image', :action => "show_image", :id => 462) %> is used for all the colors of the other half of the rows on the list pages.</span>
+  <span class="ListLine0">
+    <%= :theme_cantharellaceae_tubaeformis.t(:link => link_to('**__Craterellus tubaeformis__**'.t, :controller => 'image', :action => "show_image", :id => 462)) %>
+  </span>
 </p>

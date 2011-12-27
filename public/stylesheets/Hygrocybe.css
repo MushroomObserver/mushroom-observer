@@ -35,6 +35,12 @@ li.selected { background-color: #f19c05 ! important }
 }
 
 
+/* Hide the new separator line */
+.MatrixLine TD, .MatrixLine TR {
+  display: none;
+}
+
+
 /* Colors for the left hand panel */
 .LeftSide {
     background-color: #f19c05; /* miniata cap-yellow */

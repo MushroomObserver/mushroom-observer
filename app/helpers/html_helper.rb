@@ -74,19 +74,38 @@ module ApplicationHelper::HTML
   def make_table(rows, table_opts={}, tr_opts={}, td_opts={})
     content_tag(:table, table_opts) do
       rows.map do |row|
-        content_tag(:tr, tr_opts) do
-          if !row.is_a?(Array)
-            row
-          else
-            row.map do |cell|
-              content_tag(:td, cell.to_s, td_opts)
-            end.join
-          end
-        end
+        make_row(row, tr_opts, td_opts) + make_line(row, td_opts)
       end.join
     end
   end
+  
+  def make_row(row, tr_opts={}, td_opts={})
+    content_tag(:tr, tr_opts) do
+      if !row.is_a?(Array)
+        row
+      else
+        row.map do |cell|
+          make_cell(cell, td_opts)
+        end.join
+      end
+    end
+  end
+  
+  def make_cell(cell, td_opts={})
+    content_tag(:td, cell.to_s, td_opts)
+  end
 
+  def make_line(row, td_opts)
+    colspan = td_opts[:colspan]
+    if colspan
+      content_tag(:tr, {:class => 'MatrixLine'}) do
+        content_tag(:td, '<hr/>', {:class => 'MatrixLine', :colspan => colspan})
+      end
+    else
+      ''
+    end
+  end
+  
   # Draw the fancy check-board matrix of objects used, e.g., in list_rss_log.
   # Just pass in a list of objects (and make sure @layout is initialized).
   # It yields for each object, then renders the whole thing.
@@ -114,7 +133,8 @@ module ApplicationHelper::HTML
       end
     end
     rows << cols.join('') if cols.any?
-    table = make_table(rows, {:cellspacing => 0}.merge(table_opts), row_opts)
+    table = make_table(rows, {:cellspacing => 0, :class => "Matrix"}.merge(table_opts),
+                       row_opts, {:colspan => @layout["columns"]})
     concat(table, block.binding)
   end
 

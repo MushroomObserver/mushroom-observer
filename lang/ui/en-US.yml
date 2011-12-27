@@ -3361,12 +3361,45 @@ show_notifications_title: New Notifications for [user]
 
 # observer/<Theme>
 theme_agaricus: _Agaricus_ Theme
-theme_amanita: _Amanita_ Theme
-theme_cantharellaceae: _Cantharellaceae_ Theme
-theme_hygrocybe: _Hygrocybe_ Theme
-theme_random: Random
-theme_white_on_black: White On Black
+theme_agaricus_augustus: "[link] is used for the left-hand panel's background color."
+theme_agaricus_campestris: "[link] is used for the primary background and the default link hover background color."
+theme_agaricus_cupreobrunneus: "[link] is used for the default text color and the visited link color."
+theme_agaricus_lilaceps: "[link] is used for the background color for the some rows on the list pages and the unvisited link color for the other rows."
+theme_agaricus_semotus: "[link] is used for the banner background color."
+theme_agaricus_subrufescens: "[link] is used for most unvisited links."
+theme_agaricus_xanthodermus: "[link] is used for the background color for some rows on the list pages and the unvisited link color for the other rows."
 
+theme_amanita: _Amanita_ Theme
+theme_amanita_calyptroderma: "[link] is used for all the colors of half the rows on the list pages."
+theme_amanita_muscaria: "[link] is used for the banner background and text, the default visited link and link hover colors as well as the text for the left-hand panel."
+theme_amanita_pachycolea: "[link] is used for the primary background, the default text and default unvisited links."
+theme_amanita_phalloides: "[link] is used for all the colors of the other half of the rows on the list pages."
+theme_amanita_velosa: "[link] is used for the left-hand panel's background color and the left-hand panel's visited and unvisited link colors."
+
+theme_cantharellaceae: _Cantharellaceae_ Theme
+theme_cantharellaceae_californicus: "[link] is used for the primary, banner and left-hand panel backgrounds."
+theme_cantharellaceae_cinnabarinus: "[link] is used for the default link and visited link colors."
+theme_cantharellaceae_cornucopioides: "[link] is used for the default text and all the colors of half the rows on the list pages."
+theme_cantharellaceae_tubaeformis: "[link] is used for all the colors of the other half of the rows on the list pages."
+
+theme_hygrocybe: _Hygrocybe_ Theme
+theme_hygrocybe_conica: "[link] is used for the default text and all the colors of half the rows on the list pages."
+theme_hygrocybe_miniata: "[link] is used for the left-hand panel background and link text colors."
+theme_hygrocybe_pittacina: "[link] is used for the default link text colors."
+theme_hygrocybe_punicea: "[link] is used for the default background color, the banner background color, and all the colors of the other half of the rows on the list pages."
+
+theme_random: Random
+
+theme_black_on_white: Black on White Theme
+theme_black_on_white_description: >
+  This is just a simple Black on White theme that attempts to be as readable as possible.
+  The logo colors come from the [link] theme.
+
+Agaricus: Agaricus
+Amanita: Amanita
+Cantharellaceae: Cantharellaceae
+Hygrocybe: Hygrocybe
+BlackOnWhite: Black on White
 
 # observer/translators_note
 translators_note: >

@@ -31,6 +31,12 @@ li.selected { background-color: #dd9d5f ! important }
 }
 
 
+/* Hide the new separator line */
+.MatrixLine TD, .MatrixLine TR {
+  display: none;
+}
+
+
 /* Colors for the left hand panel */
 .LeftSide {
     background-color: #dd9d5f; /* velosa cap */

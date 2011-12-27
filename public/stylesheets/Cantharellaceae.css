@@ -27,6 +27,12 @@ li.selected { background-color: #f6ae4a ! important }
 }
 
 
+/* Hide the new separator line */
+.MatrixLine TD, .MatrixLine TR {
+  display: none;
+}
+
+
 /* Colors for the left hand panel */
 .LeftSide {
     background-color: #f6ae4a; /* californicus cap */
