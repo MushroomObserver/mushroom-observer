@@ -3504,6 +3504,7 @@ theme_black_on_white:  Black on White Theme
 theme_black_on_white_description:  >
   This is a simple Black on White theme that attempts to be as readable and clean as possible.
   The logo colors come from the [link] theme.
+
 theme_switch:  'To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme'
 
 Agaricus:  Agaricus
