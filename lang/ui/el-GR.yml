@@ -2139,7 +2139,7 @@ wrapup_2011_body:  >
   \n\n
   There have been a few notable new features added to Mushroom Observer over the
   last year.  Jason did a great job developing
-  the "MO Feature Tracker":/pivotal/tracker interface that interacts with our
+  the "MO Feature Tracker":/pivotal/index interface that interacts with our
   new freely accessible "Pivotal Tracker account":https://www.pivotaltracker.com/projects/224629
   for tracking bugs and feature requests.  In addition,
   I have been working quite a bit behind the scenes to prepare for a roughly 10 fold
