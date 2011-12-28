@@ -1,4 +1,12 @@
-<% @title = :theme_hygrocybe.tl %>
+<%
+  @title = :theme_hygrocybe.tl
+  new_tab_set do
+    add_tab(:theme_list.t,
+            :controller => 'observer', :action => 'color_themes')
+    add_tab(:app_preferences.t,
+            :controller => 'account', :action => 'prefs')
+  end
+%>
 
 <%= :theme_hygrocybe_miniata.tp(:link => link_to('**__Hygrocybe miniata__**'.t, :controller => 'image', :action => "show_image", :id => 369)) %>
 
@@ -15,3 +23,5 @@
     <%= :theme_hygrocybe_punicea.t(:link => link_to('**__Hygrocybe punicea__**'.t, :controller => 'image', :action => "show_image", :id => 366)) %>
   </span>
 </p>
+
+<%= :theme_switch.tp(:theme => :Hygrocybe.t) %>

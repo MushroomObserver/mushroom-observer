@@ -45,10 +45,12 @@
       DANGER: You are in administrator mode. Proceed with caution.
     </div>
   <% end %>
-  <% if :app_donate_banner.t != "" %>
+  <%
+    banner = :app_donate_banner.t
+    if banner != "" %>
     <div>
       <center class="MessageBanner">
-        <%= :app_donate_banner.t %>
+        <%= banner %>
       </center>
     </div>
   <% end %>
@@ -69,6 +71,7 @@
                 <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use') %><br/>
                 <%= link_to(:app_how_to_help.t, :controller => 'observer', :action => 'how_to_help') %><br/>
                 <%= link_to(:app_donate.t, :controller => 'support', :action => 'donate') %><br/>
+                <%= link_to(:app_feature_tracker.t, :controller => 'pivotal', :action => 'tracker') %><br/>
                 <%= link_to(:app_send_a_comment.t, :controller => 'observer', :action => 'ask_webmaster_question') %><br/>
                 <br/>
 

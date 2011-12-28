@@ -1,4 +1,12 @@
-<% @title = :theme_cantharellaceae.tl %>
+<%
+  @title = :theme_cantharellaceae.tl
+  new_tab_set do
+    add_tab(:theme_list.t,
+            :controller => 'observer', :action => 'color_themes')
+    add_tab(:app_preferences.t,
+            :controller => 'account', :action => 'prefs')
+  end
+%>
 
 <%= :theme_cantharellaceae_californicus.tp(:link => link_to('**__Cantharellus californicus__**'.t, :controller => 'image', :action => "show_image", :id => 557)) %>
 
@@ -15,3 +23,5 @@
     <%= :theme_cantharellaceae_tubaeformis.t(:link => link_to('**__Craterellus tubaeformis__**'.t, :controller => 'image', :action => "show_image", :id => 462)) %>
   </span>
 </p>
+
+<%= :theme_switch.tp(:theme => :Cantharellaceae.t) %>

@@ -1,3 +1,13 @@
-<% @title = :theme_black_on_white.tl %>
+<%
+  @title = :theme_black_on_white.tl
+  new_tab_set do
+    add_tab(:theme_list.t,
+            :controller => 'observer', :action => 'color_themes')
+    add_tab(:app_preferences.t,
+            :controller => 'account', :action => 'prefs')
+  end
+%>
 
-<%= :theme_black_on_white_description.t(:link => link_to('**__Amanita__**'.t, :action => "Amanita")) %>
+<%= :theme_black_on_white_description.tp(:link => link_to('**__Amanita__**'.t, :action => "Amanita")) %>
+
+<%= :theme_switch.tp(:theme => :BlackOnWhite.t) %>

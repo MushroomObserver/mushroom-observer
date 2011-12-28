@@ -949,6 +949,7 @@ app_site_stats: Website-Statistik
 app_colors_from: Farben von [theme]
 app_powered_by: Hergestellt mit
 app_preferred_browser: Lieblings-Browser
+app_feature_tracker:  Feature Tracker
 
 # This is for the search bar at the top of every page.
 app_find: Suchen
@@ -975,7 +976,7 @@ app_rss: Mushroom Observer RSS
 # Donation stuff.
 # CHANGED: 20110601
 # app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
-app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
+app_donate_banner:  '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
 app_donate:  Donate
 
 ################################################################################
@@ -2161,8 +2162,9 @@ donors_title:  The Mushroom Observer Community Thanks Our Donors
 donors_tab:  Show Donors
 
 donate_thanks:  >
-  Thank you for your interest in donating to Mushroom Observer!  Check out this "open letter to the Mushroom Observer Community":/support/letter
-  if you are curious why we have started asking for donations.
+  Thank you for your interest in donating to Mushroom Observer!  Check out this
+  "2011 wrapup letter to the Mushroom Observer Community":/support/wrapup_2011
+  if you are curious what we are using your donations for.
 
 donate_explanation:  >
   Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below.
@@ -2248,6 +2250,105 @@ letter_body:  >
   sharing and learning more about the mushrooms around us.
   \n\n
   Thanks,\n
+  -Nathan
+
+
+
+# support/wrapup_2011
+wrapup_2011_title:  2011 Wrapup to the Mushroom Observer Community
+wrapup_2011_body:  >
+  To the Mushroom Observer Community,
+  \n\n
+  2011 has been a relatively quiet year for Mushroom Observer at least from
+  the perspective of new development.  I have personally been working overtime
+  on a new version of the Encyclopedia of Life and Jason has been working hard
+  on a new lichen related website and book.
+  \n\n
+  Even so the site has continued to grow.  We now have over 180,000 images, 80,000
+  observations and we are very close to 3,000 registered users.  This continues
+  our trend of nearly doubling every year.  Fortunately, due to generous
+  donations from all of you, Jason was able to substantially upgrade our
+  server configuration and to the best of our knowledge the system has been
+  working very well despite the ever growing demand.  While we still have some
+  money in the bank, we will continue to need "additional donations":/support/donate
+  to keep the system going.
+  \n\n
+  As was true last year, the donations are made through a not-for-profit corporation
+  called The Consortium for Digital Mycology Resources (CDMR).  The CDMR is recognized
+  as a non-profit by the state of California, but is still not an official federal
+  501c3 non-profit.  However, the application process has moved forward and for
+  now we continue to act as a non-profit and donations are tax deductible.  For anyone
+  interested in the details of that process please visit the "CDMR website":http://digitalmycology.org.
+  \n\n
+  There have been a few notable new features added to Mushroom Observer over the
+  last year.  Jason did a great job developing
+  the "MO Feature Tracker":/pivotal/tracker interface that interacts with our
+  new freely accessible "Pivotal Tracker account":https://www.pivotaltracker.com/projects/224629
+  for tracking bugs and feature requests.  In addition,
+  I have been working quite a bit behind the scenes to prepare for a roughly 10 fold
+  increase in the number of Mushroom Observer images that will be sharable with
+  the broader biodiversity community and EOL in particular.
+  \n\n
+  Along with this note, we are also releasing the newly developed
+  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am 
+  trying to provide a more current and professional look for the site.
+  "Feedback on the theme or suggestions for improvements":/observer/ask_webmaster_question
+  are very welcome.
+  \n\n
+  While there have not been a lot of new features released this year, there have
+  been a number of important discussions going on about potential future development.
+  These have included discussions of better ways of managing naming and voting
+  so they align better with standard herbarium practices, improving the expressiveness of the voting
+  system, and rearranging the interface to be more workflow driven.
+  \n\n
+  Which brings us to the biggest news.  I have begun doing some of my own research
+  with the data from the Mushroom Observer and I have received several
+  inquiries from other scientists interested in either using Mushroom
+  Observer as it is to support their own research or to support additional
+  development of the Mushroom Obsever to expand the connections between
+  Mushroom Observer and the scientific community.
+  \n\n
+  My own research has included some prelimimary analysis of the data in
+  the Mushroom Observer database.  The most interesting finding has been that
+  "users who collect in the Western US on average find more species there than users who collect in the Eastern US":/images/fungal_biogeography.png.
+  I am currently in the process of developing funding and collaborators to
+  more fully pursue this and other interesting questions that can be answered
+  using our data.  Another area of research development has been with some of
+  the computer scientists at Rensselaer Polytechnic Institute.  The group I
+  am working with are focused on the emerging "semantic web":http://en.wikipedia.org/wiki/Semantic_web.
+  We are developing a system for creating a new naming system for amateur/citizen mycologists.
+  It will include a global, web-based registration system for names that are then associated with
+  rigorous definitions that computers can reason about.  We have plans to support a summer internship
+  through the EOL to help develop this idea.
+  \n\n
+  In addition, as many of you are aware Tom Bruns at UC Berkeley has already
+  been using Mushroom Observer to catalog the collections his collaborators (including
+  many of you all) have been finding in Yosemite National Park.  He and I have also
+  begun discussions of what features would be valuable to add Mushroom Observer
+  to support his call for developing a "North American Mycoflora":http://msafungi.org/wp-content/uploads/Inoculum/62(4).pdf.
+  Another promising development was being asked to write a letter of support for a
+  proposal that Barabara Thiers and Roy Haling have submitted to digitize the
+  fungal herbaria throughout the US.  If that gets funded, they
+  are interested in making their data available through the Mushroom Observer.
+  \n\n
+  Finally, through connections at the EOL, I was able to participate in a workshop
+  focused on citizen science biodiversity observation systems.  The workshop was
+  held in October outside of London and included representatives from "iSpot":http://www.ispot.org.uk/
+  and "iNaturalist":http://inaturalist.org along with several other significant global
+  projects.  I went to the workshop not only to represent
+  the technical side of the EOL, but also the Mushroom Observer.  As a result the group
+  of projects involved in the workshop, including Mushroom Observer, are participating in a competition
+  called "Badges for Lifelong Learning":http://www.dmlcompetition.net/Competition/4/badges-competition-cfp.php.
+  We have already successfully passed the first stage of the competition and are working on our
+  application for the second stage.
+  \n\n
+  While many of these projects promise exciting developments for MO over the next year and some
+  may even include financial support for the development of new Mushroom Observer features, the on-going
+  support for the site relies on "donations":/support/donate from you our users.
+  Please help support this active internet community of people who enjoy
+  sharing and learning more about the mushrooms around us.
+  \n\n
+  Thanks for all your contributions to the Mushroom Observer,\n
   -Nathan
 
 
@@ -3392,11 +3493,13 @@ theme_hygrocybe_pittacina:  "[link] is used for the default link text colors."
 theme_hygrocybe_punicea:  "[link] is used for the default background color, the banner background color, and all the colors of the other half of the rows on the list pages."
 
 theme_random: Zufällig
+theme_list:  List of Themes
 
 theme_black_on_white:  Black on White Theme
 theme_black_on_white_description:  >
-  This is just a simple Black on White theme that attempts to be as readable as possible.
+  This is a simple Black on White theme that attempts to be as readable and clean as possible.
   The logo colors come from the [link] theme.
+theme_switch:  'To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme'
 
 Agaricus:  Agaricus
 Amanita:  Amanita

@@ -1,4 +1,12 @@
-<% @title = :theme_amanita.tl %>
+<%
+  @title = :theme_amanita.tl
+  new_tab_set do
+    add_tab(:theme_list.t,
+            :controller => 'observer', :action => 'color_themes')
+    add_tab(:app_preferences.t,
+            :controller => 'account', :action => 'prefs')
+  end
+%>
 
 <%= :theme_amanita_pachycolea.tp(:link => link_to('**__Amanita pachycolea__**'.t, :controller => 'image', :action => "show_image", :id => 644)) %>
 
@@ -16,3 +24,5 @@
     <%= :theme_amanita_phalloides.t(:link => link_to('**__Amanita phalloides__**'.t, :controller => 'image', :action => "show_image", :id => 636)) %>
   </span>
 </p>
+
+<%= :theme_switch.tp(:theme => :Amanita.t) %>

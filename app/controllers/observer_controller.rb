@@ -223,6 +223,9 @@ class ObserverController < ApplicationController
     end
   end
 
+  def wrapup_2011
+  end
+  
   # Intro to site.
   def intro # :nologin:
   end

@@ -1,4 +1,12 @@
-<% @title = :theme_agaricus.tl %>
+<%
+  @title = :theme_agaricus.tl
+  new_tab_set do
+    add_tab(:theme_list.t,
+            :controller => 'observer', :action => 'color_themes')
+    add_tab(:app_preferences.t,
+            :controller => 'account', :action => 'prefs')
+  end
+%>
 
 <%= :theme_agaricus_campestris.tp(:link => link_to('**__Agaricus campestris__**'.t, :controller => 'image', :action => "show_image", :id => 694)) %>
 
@@ -21,3 +29,5 @@
     <%= :theme_agaricus_lilaceps.t(:link => link_to('**__Agaricus lilaceps__**'.t, :controller => 'image', :action => "show_image", :id => 690)) %>
   </span>
 </p>
+
+<%= :theme_switch.tp(:theme => :Agaricus.t) %>
