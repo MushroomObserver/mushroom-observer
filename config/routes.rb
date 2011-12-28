@@ -5,6 +5,8 @@ ActionController::Routing::Routes.draw do |map|
   # Route / to /observer/index
   map.connect '', :controller => 'observer'
   
+  map.connect 'pivotal', :controller => 'pivotal', :action => 'index'
+  
   # Route /123 to /observer/show_observation/123.
   map.connect ':id', :controller => 'observer', :action => 'show_obs'
   map.connect 'obs/:id', :controller => 'observer', :action => 'show_observation'
@@ -24,5 +26,4 @@ ActionController::Routing::Routes.draw do |map|
 
   # Redirect to observer controller by default.
   map.connect ':controller/:action/:id', :controller => 'observer'
-
 end
