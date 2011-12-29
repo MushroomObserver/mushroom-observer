@@ -14,7 +14,7 @@ a { color: #205080; }
 img { border-color: #000000; }
 a img:hover { border-color: #205080; }
 
-li.selected { background-color: #FFFFFF ! important }
+li.selected { background-color: #FFFF00 ! important }
 
 /* Banner colors */
 #banner {

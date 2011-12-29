@@ -165,6 +165,7 @@ class ObserverController < ApplicationController
     :show_site_stats,
     :show_user,
     :show_votes,
+    :test,
     :textile,
     :textile_sandbox,
     :throw_error,

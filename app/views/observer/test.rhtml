@@ -1,53 +1,39 @@
 <form>
   <table><tr><td valign="top">
-    Name: <input type="text_field" size="40" id="tester"/><br/>
-    Junk: <input type="text_field" size="40" id="blah"/>
+    <table>
+      <tr><td>Menu:        </td><td><input type="text_field" size="40" id="test_menu"/></td></tr>
+      <tr><td>Name:        </td><td><input type="text_field" size="40" id="test_name"/></td></tr>
+      <tr><td>Location:    </td><td><input type="text_field" size="40" id="test_location"/></td></tr>
+      <tr><td>Project:     </td><td><input type="text_field" size="40" id="test_project"/></td></tr>
+      <tr><td>Species List:</td><td><input type="text_field" size="40" id="test_species_list"/></td></tr>
+      <tr><td>User:        </td><td><input type="text_field" size="40" id="test_user"/></td></tr>
+    </table>
   </td><td valign="top">
-    <div id="log"></div>
+    <div id="log" style="overflow:auto; height:700px; width:400px"></div>
   </td></tr></table>
 
-  <style>
-    div.autocompleter {
-      position: absolute;
-      background: white;
-      color: black;
-      border: 1px solid black;
-      margin: 0px;
-      padding: 0px;
-      display: none;
-    }
-    div.autocompleter ul {
-      margin: 0px;
-      border: 0px;
-      padding: 0px;
-      list-style: none;
-    }
-    div.autocompleter ul li {
-      margin: 0px;
-      border: 0px;
-      padding: 2px 10px 2px 10px;
-    }
-    div.autocompleter ul li.hot {
-      background: yellow;
-    }
-  </style>
-
-  <script src="/javascripts/prototype.js"></script>
-  <script src="/javascripts/effects.js"></script>
-  <script src="/javascripts/controls.js"></script>
-  <script src="/javascripts/autocomplete.js"></script>
-  <script src="/javascripts/element_extensions.js"></script>
-  <script>
-    new MOAutocompleter({
-      input_id: 'tester',
-      collapse: 1,
-      log: true,
-      ajax_url: '/ajax/auto_complete/name2/@'
-      // options: "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\n",
-      // options: "Acroscyphus\nAhtiana\nAlectoria\nAnaptychia\nAnzia\nBryocaulon\nBryoria\nAcroscyphus sphaerophoroides\nAhtiana aurescens\nAhtiana pallidula\nAhtiana sphaerosporella\nAlectoria fallacina\nAlectoria imshaugii\nAlectoria lata\nAlectoria sarmentosa\nAlectoria vancouverensis\nAnaptychia crinalis\nAnaptychia palmulata\nAnzia americana\nAnzia colpodes\nAnzia ornata\nBryocaulon pseudosatoanum\nBryoria bicolor\nBryoria capillaris\nBryoria carlottae\nBryoria cervinula\nBryoria fremontii\nBryoria friabilis\nBryoria furcellata\nBryoria fuscescens\nBryoria glabra\nBryoria implexa\nBryoria lanestris\nBryoria nadvornikiana\nBryoria pikei\nBryoria pseudocapillaris\nBryoria pseudofuscescens\nBryoria salazinica\nBryoria simplicior\nBryoria spiralifera\nBryoria subcana\nBryoria tenuis\nBryoria trichodes\nBryoria trichodes ssp. americana\nBryoria trichodes ssp. trichodes\n",
-    });
-    $('tester').focus();
-  </script>
-
+<% if false %>
+<% end %>
+  <%= turn_into_menu_auto_completer('test_menu', :primer => ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"], :log => false) %>
+  <%= turn_into_name_auto_completer('test_name', :log => false) %>
+  <%= turn_into_location_auto_completer('test_location', :log => false) %>
+  <%= turn_into_project_auto_completer('test_project', :log => false) %>
+  <%= turn_into_species_list_auto_completer('test_species_list', :log => false) %>
+  <%= turn_into_user_auto_completer('test_user', :log => false) %>
+<% if false %>
+<% end %>
 </form>
 
+<!--
+  <div id="x1" style="margin:0px;border:0px;padding:0px;background:red;width:500px">
+    <table style="margin:0px;border:0px;padding:0px;background:#00f;border-collapse:collapse;">
+      <tr style="margin:0px;border:0px;padding:0px;background:#0f0">
+        <td style="margin:0px;border:0px;padding:0px;background:#fff">
+          <ul id="x2" style="margin:0px;border:0px;padding:0px;background:orange;list-style:none">
+            <li id="x3" style="margin:0px;border:0px;padding:0px;background:yellow">Hello</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </div>
+-->

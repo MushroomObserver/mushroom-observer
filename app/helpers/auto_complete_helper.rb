@@ -39,51 +39,30 @@ module ApplicationHelper::AutoComplete
 
   # Turn a text_field into an auto-completer.
   # id::   id of text_field
-  # opts:: arguments
-  #
-  # Valid arguments: (see prototype and cached_auto_complete.js for more)
-  # url::           URL of AJAX callback (required)
-  # div_id::        DOM ID of div (default = "<id>_auto_complete")
-  # div_class::     CSS class of div (default = "auto_complete")
-  # js_class::      JS autocompleter class (default = "CachedAutocompleter")
-  # inherit_width:: Inherit width of pulldown from text field?
-  #
+  # opts:: arguments (see autocompleter.js)
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
       javascript_include_auto_complete
-      url       = nil
-      div_id    = "#{id}_auto_complete"
-      div_class = "auto_complete"
-      js_class  = "CachedAutocompleter"
-      js_args   = ""
-      primer    = nil
+
+      js_args = []
+      opts[:input_id]   = id
+      opts[:row_height] = 22
       opts.each_pair do |key, val|
-        case key
-        when :div_id;    div_id    = val
-        when :div_class; div_class = val
-        when :url;       url       = val
-        when :js_class;  js_class  = val
-        when :primer;    primer    = val
+        if key.to_s == 'primer'
+          list = val ? val.join("\n") : ''
+          js_args << "primer: '" + escape_javascript(list) + "'"
         else
           if !key.to_s.match(/^on/) &&
-             !val.to_s.match(/^(\d+(\.\d+)?|true|false|null)$/)
+             !val.to_s.match(/^(-?\d+(\.\d+)?|true|false|null)$/)
             val = "'" + escape_javascript(val) + "'"
           end
-          js_args += ", #{key}: #{val}"
+          js_args << "#{key}: #{val}"
         end
       end
-      if primer && !primer.empty?
-        js_args += ', primer: [' + primer.map do |val|
-          # val = val.encode('utf-8') if val.respond_to?(:encode)
-          "'" + escape_javascript(val) + "'"
-        end.join(',') + ']'
-      end
-      js_args.sub!(/^, /, '')
-      raise(ArgumentError, "Must specify url.") if !url
-      div = %(<div class="#{div_class}" id="#{div_id}"></div>)
-      script = javascript_tag \
-        %(new #{js_class}('#{id}', '#{div_id}', '#{url}', { #{js_args} }))
-      return div + script
+      js_args = js_args.join(', ')
+
+      script = javascript_tag("new MOAutocompleter({ #{js_args} })")
+      return script
     end
   end
 
@@ -91,67 +70,47 @@ module ApplicationHelper::AutoComplete
   def turn_into_menu_auto_completer(id, opts={})
     raise "Missing primer for menu auto-completer!" if !opts[:primer]
     turn_into_auto_completer(id, {
-      :url           => '/ajax/auto_complete/name',
-      :frequency     => 0.1,
-      :js_class      => 'CachedAutocompleter',
-      :noAjax        => true,
-    }.merge(opts))
-  end
-
-  # Make text_field auto-complete for Location display name.
-  def turn_into_location_auto_completer(id, opts={})
-    turn_into_auto_completer(id, {
-      :url           => '/ajax/auto_complete/location',
-      :indicator     => 'indicator',
-      :frequency     => 0.1,
-      :wordMatch     => true,
-      :js_class      => 'CachedAutocompleter',
+      :unordered => false
     }.merge(opts))
   end
 
   # Make text_field auto-complete for Name text_name.
   def turn_into_name_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :url           => '/ajax/auto_complete/name',
-      :indicator     => 'indicator',
-      :frequency     => 0.1,
-      :collapse      => true,
-      :js_class      => 'CachedAutocompleter',
-      :inherit_width => (@ua == :ie ? 1 : 0),
+      :ajax_url => '/ajax/auto_complete/name/@',
+      :collapse => 1
+    }.merge(opts))
+  end
+
+  # Make text_field auto-complete for Location display name.
+  def turn_into_location_auto_completer(id, opts={})
+    turn_into_auto_completer(id, {
+      :ajax_url => '/ajax/auto_complete/location/@',
+      :unordered => true
     }.merge(opts))
   end
 
   # Make text_field auto-complete for Project title.
   def turn_into_project_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :url           => '/ajax/auto_complete/project',
-      :indicator     => 'indicator',
-      :frequency     => 0.1,
-      :wordMatch     => true,
-      :js_class      => 'CachedAutocompleter',
+      :ajax_url => '/ajax/auto_complete/project/@',
+      :unordered => true
     }.merge(opts))
   end
 
   # Make text_field auto-complete for SpeciesList title.
   def turn_into_species_list_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :url           => '/ajax/auto_complete/species_list',
-      :indicator     => 'indicator',
-      :frequency     => 0.1,
-      :wordMatch     => true,
-      :js_class      => 'CachedAutocompleter',
+      :ajax_url => '/ajax/auto_complete/species_list/@',
+      :unordered => true
     }.merge(opts))
   end
 
   # Make text_field auto-complete for User name/login.
   def turn_into_user_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :url           => '/ajax/auto_complete/user',
-      :indicator     => 'indicator',
-      :frequency     => 0.1,
-      :wordMatch     => true,
-      :js_class      => 'CachedAutocompleter',
-      :inherit_width => (@ua == :ie ? 1 : 0),
+      :ajax_url => '/ajax/auto_complete/user/@',
+      :unordered => true
     }.merge(opts))
   end
 
@@ -161,7 +120,8 @@ module ApplicationHelper::AutoComplete
       javascript_include 'prototype'
       javascript_include 'effects'
       javascript_include 'controls'
-      javascript_include 'cached_auto_complete'
+      javascript_include 'autocomplete'
+      javascript_include 'element_extensions'
     end
   end
 end

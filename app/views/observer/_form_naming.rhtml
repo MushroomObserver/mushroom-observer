@@ -16,7 +16,7 @@
 <% end %>
 <span class="HelpNote"><%= :form_naming_name_help.t %></span><br/>
 <%= turn_into_name_auto_completer('name_name', :primer => @name_primer,
-  :onChange => %( function(v) { if (v && v != "") Element.show('reasons_div') } )) %>
+  :on_change => %( function(v) { v && v != '' ? Element.show('reasons_div') : Element.hide('reasons_div') } )) %>
  
 <%# -------------------- Naming Reasons -------------------- %>
 <%=

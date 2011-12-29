@@ -1,7 +1,15 @@
 // This module provides a few useful extensions to the Element class:
-//   [w,h] = Element.windowSize;        # Get size of visible window.
-//   Element.ensureVisible(elem);       # Make sure DOM element is visible.
+//   [w,h] = Element.windowSize        # Get size of visible window.
+//   Element.ensureVisible(elem)       # Make sure element is visible.
+//   Element.center(elem)              # Center an element in browser window.
+//   Element.getScrollBarWidth()       # Calculate size of scrollbar in this browser.
+//   ajax_request.abort()              # Abort active AJAX request.
 //------------------------------------------------------------------------------
+
+// From some post on stackoverflow...
+Prototype.Browser.IE6 = Prototype.Browser.IE && parseInt(navigator.userAgent.substring(navigator.userAgent.indexOf("MSIE")+5)) == 6;
+Prototype.Browser.IE7 = Prototype.Browser.IE && parseInt(navigator.userAgent.substring(navigator.userAgent.indexOf("MSIE")+5)) == 7;
+Prototype.Browser.IE8 = Prototype.Browser.IE && !Prototype.Browser.IE6 && !Prototype.Browser.IE7;
 
 // Get inner size of browser window.  This is a bit tricky.
 // Apparently it can fail on Safari: if the document height
@@ -91,3 +99,49 @@ Element.center = function(e) {
   e.style.top  = (y + sy) + "px";
 };
 
+// Sniff out width of scrollbar in browser-independent manner.
+// (Taken from: http://www.alexandre-gomes.com/?p=115)
+var scroll_bar_width = null;
+Element.getScrollBarWidth = function() {
+  var inner, outer, w1, w2;
+
+  if (scroll_bar_width != null)
+    return scroll_bar_width;
+  
+  var inner = document.createElement('p');
+  inner.style.width = "100%";
+  inner.style.height = "200px";
+
+  var outer = document.createElement('div');
+  outer.style.position = "absolute";
+  outer.style.top = "0px";
+  outer.style.left = "0px";
+  outer.style.visibility = "hidden";
+  outer.style.width = "200px";
+  outer.style.height = "150px";
+  outer.style.overflow = "hidden";
+  outer.appendChild(inner);
+
+  document.body.appendChild(outer);
+  var w1 = inner.offsetWidth;
+  outer.style.overflow = 'scroll';
+  var w2 = inner.offsetWidth;
+  if (w1 == w2) w2 = outer.clientWidth;
+  document.body.removeChild(outer);
+
+  scroll_bar_width = w1 - w2;
+  return scroll_bar_width;
+}
+
+// Abort an active AJAX request.
+// (taken from: The Pothoven Post, 19 December 2007)
+Ajax.Request.prototype.abort = function() {
+  // prevent and state change callbacks from being issued
+  this.transport.onreadystatechange = Prototype.emptyFunction;
+  // abort the XHR (if implemented by browser!)
+  if ("abort" in this.transport)
+    this.transport.abort();
+  // update the request counter
+  if (Ajax.activeRequestCount > 0)
+    Ajax.activeRequestCount--;
+}

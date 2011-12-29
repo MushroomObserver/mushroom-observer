@@ -361,24 +361,30 @@ table.vote_meter div.on {
 }
 
 div.auto_complete {
-  background-color:#fff;
-  border:1px solid #888;
-  overflow-x:hidden;
-}
-div.auto_complete ul {
+  position:absolute;
   background-color:#fff;
   color:black;
-  margin:0;
-  padding:0;
-  width:100%;
-  list-style-type:none;
+  margin:0px;
+  border:1px solid #888;
+  padding:0px;
+  overflow-x:hidden;
+  display:none;
+}
+div.auto_complete ul {
+  margin:0px;
+  border:0px;
+  padding:0px;
+  list-style:none;
+  overflow-x:hidden;
 }
 div.auto_complete ul li {
-  margin:0;
-  padding:3px;
+  margin:0px;
+  border:0px;
+  padding:2px 4px 2px 4px;
+  white-space:nowrap;
 }
 div.auto_complete ul li.selected {
-  background-color:#ffb;
+  background-color:#ff0;
 }
 div.indicator {
   position:absolute;
