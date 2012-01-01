@@ -89,6 +89,12 @@ class LurkerTest < IntegrationTestCase
     assert_select('a[href^=/obs/2?]')
   end
 
+  def test_pivotal
+    get('/')
+    click(:label => 'Feature Tracker')
+    assert_template('pivotal/index')
+  end
+  
   def test_search
     get('/')
 

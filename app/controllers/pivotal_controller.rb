@@ -28,6 +28,10 @@ require_dependency 'pivotal'
 
 class PivotalController < ApplicationController
   def index
-    @stories = Pivotal.get_stories.sort_by(&:story_order).select(&:active?)
+    if PIVOTAL_PROJECT == 'project_id'
+      @stories = []
+    else
+      @stories = Pivotal.get_stories.sort_by(&:story_order).select(&:active?)
+    end
   end
 end

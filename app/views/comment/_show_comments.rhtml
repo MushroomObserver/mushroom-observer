@@ -24,12 +24,14 @@
 <% end %>
 
 <table cellpadding="5" cellspacing="0" width="100%">
+  <tr class="MatrixLine"><td class="MatrixLine" colspan='2'><hr/></td></tr>
   <% odd_or_even = 0
   for comment in comments
     odd_or_even = 1 - odd_or_even %>
     <tr valign="top" class="ListLine<%= odd_or_even %>">
       <%= render(:partial => 'comment/comment', :object => comment) %>
     </tr>
+    <tr class="MatrixLine"><td class="MatrixLine" colspan='2'><hr/></td></tr>
   <% end %>
 </table>
 
