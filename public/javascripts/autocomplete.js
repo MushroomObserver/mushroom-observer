@@ -136,7 +136,8 @@ var MOAutocompleter = Class.create({
     // people walking by a terminal and pressing "back" button.  This fix just
     // sets it right back to the old value.  So there.
     Event.observe(document, 'focus', (function () {
-      this.input_elem.value = this.old_value;
+      if (this.old_value && this.old_value != "")
+        this.input_elem.value = this.old_value;
     }).bind(this));
   },
 
