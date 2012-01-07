@@ -42,13 +42,14 @@ li.selected { background-color: #FFFF00 ! important }
   background-color: #FFFFFF;  
 }
 
+/* Hide the new separator line */
 .MatrixLine TD, .MatrixLine TR {
-  height: 1px;
+  display: none;
 }
 
 /* Colors for even lines */
 .ListLine0 {
-      background-color: #FFFFFF;
+      background-color: #F0F0F0;
 }
 
 .ListLine0 div.textile table         { background: #FFFFFF; }
