@@ -5254,11 +5254,11 @@ date_helper_date_formats:
   long: "%B %e, %Y"
 
 date_helper_time_formats:
-  default: "%a, %d %b %Y %H:%M:%S %z"
-  short: "%d %b %H:%M"
+  default: "%a, %b %d %Y %H:%M:%S %z"
+  short: "%b %d %H:%M"
   long: "%B %d, %Y %H:%M"
 
-# Added at the end of date if not using a 24 hours system.
+# Added at the end of date if not using a 24 hours system. (not used)
 date_helper_am: am
 date_helper_pm: pm
 
