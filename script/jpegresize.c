@@ -30,6 +30,7 @@
 #define M_SET_AREA  4
 #define M_MAX_AREA  5
 #define M_MIN_AREA  6
+#define M_CROP      7
 
 #define PI 3.14159265358979
 
@@ -79,6 +80,8 @@ int main(int argc, char **argv) {
     int y1, n1;    /* first row and number of rows loaded into input buffer */
     int yc;        /* last row loaded from input file */
     int x2, y2;    /* current location in output image */
+    float ox, oy;  /* offset of origin in input image */
+    float sx, sy;  /* amount to scale horizontal and vertical */
     float xf, yf;  /* corresponding location in input image */
     float ax, ay;  /* constants needed for Lanczos kernel */
     float extra;   /* multiply kernel radius by this to get extra lobes */
@@ -108,6 +111,7 @@ int main(int argc, char **argv) {
         printf("    --max-area          Keep aspect ratio, reducing to area of given box.\n");
         printf("    --min-size          Keep aspect ratio, enlarging to contain given box.\n");
         printf("    --min-area          Keep aspect ratio, enlarging to area of given box.\n");
+        printf("    --crop              Reduce/enlarge, cropping to get correct ratio.\n");
         printf("\n");
         printf("    -q --quality <pct>  JPEG quality of output image; default depends on size.\n");
         printf("    -r --radius <n>     Radius of convolution kernel, > 0; default is 1.0.\n");
@@ -142,7 +146,8 @@ int main(int argc, char **argv) {
            get_flag(argv, &argc, "--min-size", 0) ? M_MIN_SIZE :
            get_flag(argv, &argc, "--set-area", 0) ? M_SET_AREA :
            get_flag(argv, &argc, "--max-area", 0) ? M_MAX_AREA :
-           get_flag(argv, &argc, "--min-area", 0) ? M_MIN_AREA : M_SET_SIZE;
+           get_flag(argv, &argc, "--min-area", 0) ? M_MIN_AREA :
+           get_flag(argv, &argc, "--crop",     0) ? M_CROP     : M_SET_SIZE;
 
     /* Each filter type takes different arguments. */
     if (get_filter(argv, &argc, "--flat", 0, 0, 0)) {
@@ -198,46 +203,68 @@ int main(int argc, char **argv) {
     /* Choose output size. */
     if (mode == M_SET_SIZE) {
         /* leave as is */
+        sx = (double)w2 / w1;
+        sy = (double)h2 / h1;
+        ox = oy = 0.0;
     } else if (mode == M_MAX_SIZE) {
         if (w1 > w2 && h1 * w2 / w1 < h2) {
-            h2 = h1 * w2 / w1 + 0.5;
+            sx = sy = (double)w2 / w1;
+            h2 = sy * h1 + 0.5;
         } else if (h1 > h2) {
-            w2 = w1 * h2 / h1 + 0.5;
+            sx = sy = (double)h2 / h1;
+            w2 = sx * w1 + 0.5;
         } else {
+            sx = sy = 1.0;
             w2 = w1;
             h2 = h1;
         }
+        ox = oy = 0.0;
     } else if (mode == M_MIN_SIZE) {
         if (w1 < w2 && h1 * w2 / w1 > h2) {
-            h2 = h1 * w2 / w1 + 0.5;
+            sx = sy = (double)w2 / w1;
+            h2 = sy * h1 + 0.5;
         } else if (h1 < h2) {
-            w2 = w1 * h2 / h1 + 0.5;
+            sx = sy = (double)h2 / h1;
+            w2 = sx * w1 + 0.5;
         } else {
+            sx = sy = 1.0;
             w2 = w1;
             h2 = h1;
         }
+        ox = oy = 0.0;
     } else if (mode == M_SET_AREA) {
-        double f = sqrt(((double)w2) * h2 / w1 / h1);
-        w2 = w1 * f + 0.5;
-        h2 = h1 * f + 0.5;
+        sx = sy = sqrt(((double)w2) * h2 / w1 / h1);
+        w2 = sx * w1 + 0.5;
+        h2 = sy * h1 + 0.5;
+        ox = oy = 0.0;
     } else if (mode == M_MAX_AREA) {
         if (w1 * h1 > w2 * h2) {
-            double f = sqrt(((double)w2) * h2 / w1 / h1);
-            w2 = w1 * f + 0.5;
-            h2 = h1 * f + 0.5;
+            sx = sy = sqrt(((double)w2) * h2 / w1 / h1);
+            w2 = sx * w1 + 0.5;
+            h2 = sy * h1 + 0.5;
         } else {
+            sx = sy = 1.0;
             w2 = w1;
             h2 = h1;
         }
+        ox = oy = 0.0;
     } else if (mode == M_MIN_AREA) {
         if (w1 * h1 < w2 * h2) {
-            double f = sqrt(((double)w2) * h2 / w1 / h1);
-            w2 = w1 * f + 0.5;
-            h2 = h1 * f + 0.5;
+            sx = sy = sqrt(((double)w2) * h2 / w1 / h1);
+            w2 = sx * w1 + 0.5;
+            h2 = sy * h1 + 0.5;
         } else {
+            sx = sy = 1.0;
             w2 = w1;
             h2 = h1;
         }
+        ox = oy = 0.0;
+    } else if (mode == M_CROP) {
+        sx = (double)w2 / w1;
+        sy = (double)h2 / h1;
+        sx = sy = sx > sy ? sx : sy;
+        ox = ((double)w1 - (double)w2 / sx) * 0.5;
+        oy = ((double)h1 - (double)h2 / sy) * 0.5;
     } else {
         fprintf(stderr, "invalid mode: %d!", mode);
         exit(1);
@@ -246,6 +273,11 @@ int main(int argc, char **argv) {
     if (verbose) {
         fprintf(stderr, "input:   %dx%d (%d) %s\n", w1, h1, z1, file1);
         fprintf(stderr, "output:  %dx%d (%d) %s\n", w2, h2, z1, file2);
+        if (sx > 1.0 && sy > 1.0)
+            fprintf(stderr, "enlarge: %.2f %.2f\n", sx*1.0, sy*1.0);
+        else
+            fprintf(stderr, "reduce:  %.2f %.2f\n", 1.0/sx, 1.0/sy);
+        fprintf(stderr, "origin:  %.2f %.2f\n", ox, oy);
         fprintf(stderr, "quality: %d\n", quality);
         fprintf(stderr, "radius:  %f\n", radius);
         fprintf(stderr, "sharp:   %f\n", sharp);
@@ -258,8 +290,8 @@ int main(int argc, char **argv) {
     }
 
     /* Calculate size of convolution kernel. */
-    ax = w1 > w2 ? radius * w1 / w2 : radius;
-    ay = h1 > h2 ? radius * h1 / h2 : radius;
+    ax = sx < 1 ? radius / sx : radius;
+    ay = sy < 1 ? radius / sy : radius;
     xo = (int)(ax * extra + 0.5);
     yo = (int)(ay * extra + 0.5);
     w3 = xo + xo + 1;
@@ -320,13 +352,13 @@ int main(int argc, char **argv) {
 
     /* Cache horizontal and vertical components of kernel. */
     for (x2=0, ptr3=fx; x2<w2; x2++) {
-        xf = ((float)x2) * w1 / w2;
+        xf = ((float)x2) / sx + ox;
         for (i=0, x=(int)xf-xo; i<w3; i++, x++) {
             *ptr3++ = calc_factor(fabs(xf-x) / ax);
         }
     }
     for (y2=0, ptr3=fy; y2<h2; y2++) {
-        yf = ((float)y2) * h1 / h2;
+        yf = ((float)y2) / sy + oy;
         for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
             *ptr3++ = calc_factor(fabs(yf-y) / ay);
         }
@@ -365,7 +397,7 @@ int main(int argc, char **argv) {
     n1 = 0;  /* (num lines in buffer) */
     yc = -1; /* (last line loaded) */
     for (y2=0; y2<h2; y2++) {
-        yf = ((float)y2) * h1 / h2;
+        yf = ((float)y2) / sy + oy;
 
         /* Make sure we have the 'yo' rows above and below this row. */
         y = (int)yf - yo;
@@ -397,7 +429,7 @@ int main(int argc, char **argv) {
                 switch (z1) {
                 case 1:
                     for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
-                        xf = ((float)x2) * w1 / w2;
+                        xf = ((float)x2) / sx + ox;
                         r = s = 0;
                         for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
                             f = *ptr3++;
@@ -421,7 +453,7 @@ int main(int argc, char **argv) {
 
                 case 3:
                     for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
-                        xf = ((float)x2) * w1 / w2;
+                        xf = ((float)x2) / sx + ox;
                         r = g = b = s = 0;
                         for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
                             f = *ptr3++;
@@ -451,7 +483,7 @@ int main(int argc, char **argv) {
 
                 default:
                     for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
-                        xf = ((float)x2) * w1 / w2;
+                        xf = ((float)x2) / sx + ox;
                         for (s=k=0; k<z1; k++)
                             accum[k] = 0;
                         for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
@@ -493,7 +525,7 @@ int main(int argc, char **argv) {
         switch (z1) {
         case 1:
             for (x2=0, ptr4=line; x2<w2; x2++) {
-                xf = ((float)x2) * w1 / w2;
+                xf = ((float)x2) / sx + ox;
                 r = s = 0;
                 ptr3 = fy + y2 * h3;
                 for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
@@ -517,7 +549,7 @@ int main(int argc, char **argv) {
 
         case 3:
             for (x2=0, ptr4=line; x2<w2; x2++) {
-                xf = ((float)x2) * w1 / w2;
+                xf = ((float)x2) / sx + ox;
                 r = g = b = s = 0;
                 ptr3 = fy + y2 * h3;
                 for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
@@ -547,7 +579,7 @@ int main(int argc, char **argv) {
 
         default:
             for (x2=0, ptr4=line; x2<w2; x2++) {
-                xf = ((float)x2) * w1 / w2;
+                xf = ((float)x2) / sx + ox;
                 for (s=k=0; k<z1; k++)
                     accum[k] = 0;
                 ptr3 = fy + y2 * h3;
