@@ -963,7 +963,7 @@ app_index_timer: "[num] wyników w [seconds] sek."
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
-app_translators_credit:  ""
+app_translators_credit: "Tłumaczenie: Piotr Dulik"
 
 # These are general alerts that appear near the top of the page.
 app_no_ajax:  Your Browser Is Out of Date
