@@ -1307,7 +1307,7 @@ class NameController < ApplicationController
   
   def eol_expanded_review
     @names = Name.connection.select_all(%(
-    SELECT DISTINCT names.id, names.display_name
+    SELECT DISTINCT names.id, names.display_name, names.synonym_id
     FROM observations, images_observations, images, names
     WHERE observations.name_id = names.id
     AND observations.vote_cache >= 2.4
@@ -1317,7 +1317,13 @@ class NameController < ApplicationController
     AND images.ok_for_export
     AND names.ok_for_export
     AND names.rank IN ('Form','Variety','Subspecies','Species', 'Genus')
-    ORDER BY names.search_name)).map { |row| [row['id'], row['display_name']] }
+    ORDER BY names.search_name)).map { |row| [row['id'], row['display_name'], row['synonym_id']] }
+    @synonyms = Hash.new{|h, k| h[k] = []}
+    for id, display_name, synonym_id in @names
+      if synonym_id
+        @synonyms[synonym_id] << [id, display_name]
+      end
+    end
   end
 
   def eol_for_taxon

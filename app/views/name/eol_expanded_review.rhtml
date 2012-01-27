@@ -5,14 +5,16 @@
 </p>
 
 <% odd_or_even = 0
-for id, display_name in @names
+for id, display_name, synonym_id in @names
   if id and display_name
     display_name += ' [deprecated]' if display_name[0] != '*'
     odd_or_even = 1 - odd_or_even %>
     <div class="ListLine<%= odd_or_even %>"
          style="padding-top:10px; padding-bottom:10px;">
-        <%= link_to(display_name.t, :controller => "name",
-                    :action => "eol_for_taxon", :id => id) %>
+        <%= eol_for_taxon_link(id, display_name) %>
+        <% if @synonyms[synonym_id].length > 1 %>
+          [<%= @synonyms[synonym_id].map{|x| (x[0] != id) ? "= #{eol_for_taxon_link(x[0], x[1])}, " : ''}.join[0..-3] %>)]
+        <% end %>
     </div>
   <% end %>
 <% end %>
