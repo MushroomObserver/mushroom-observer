@@ -421,7 +421,7 @@ class Image < AbstractModel
         self.upload_length = file.size
         self.upload_type   = file.content_type if file.respond_to?(:content_type)
         self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
-        self.upload_original_name = file.original_name if file.respond_to?(:original_name)
+        self.upload_original_name = file.original_filename.to_s if file.respond_to?(:original_filename)
 
       # Image is given as an input stream.  We need to save it to a temp file
       # before we can do anything useful with it.
@@ -432,7 +432,7 @@ class Image < AbstractModel
         self.upload_length = file.size           if file.respond_to?(:size)
         self.upload_type   = file.content_type   if file.respond_to?(:content_type)
         self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
-        self.upload_original_name = file.original_name if file.respond_to?(:original_name)
+        self.upload_original_name = file.original_filename.to_s if file.respond_to?(:original_filename)
     end
   end
 
@@ -442,6 +442,7 @@ class Image < AbstractModel
     validate_image_length
     validate_image_type
     validate_image_md5sum
+    validate_image_name
   end
 
   # Check to make sure the image isn't too egregiously large.  (Large images
@@ -496,6 +497,18 @@ class Image < AbstractModel
       end
     end
     return result
+  end
+
+  # Check if we received the name of the original file on the users's computer.
+  # Strip out any directories, or drive letters (just in case, don't think this
+  # ever actually happens).  Provide default name if not provided.
+  def validate_image_name
+    name = self.upload_original_name.to_s
+    name.sub!(/^[a-zA-Z]:/, '')
+    name.sub!(/^.*[\/\\]/, '')
+    # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
+    name = name[0..119] if name.length > 120
+    self.original_name = name
   end
 
   # Save upload to temp file if haven't already done so.  Any errors are added

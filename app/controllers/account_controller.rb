@@ -401,8 +401,9 @@ class AccountController < ApplicationController
           flash_object_errors(image)
         elsif !image.process_image
           logger.error('Unable to upload image')
-          flash_error(:runtime_profile_invalid_image.
-            t(:name => (name ? "'#{name}'" : '???')))
+          name = image.original_name
+          name = '???' if name.empty?
+          flash_error(:runtime_profile_invalid_image.t(:name => name))
           flash_object_errors(image)
         else
           Transaction.post_image(
@@ -414,8 +415,9 @@ class AccountController < ApplicationController
           )
           @user.image = image
           xargs[:set_image] = image
-          flash_notice :runtime_profile_uploaded_image.
-            t(:name => name ? "'#{name}'" : "##{image.id}")
+          name = image.original_name
+          name = "##{image.id}" if name.empty?
+          flash_notice(:runtime_profile_uploaded_image.t(:name => name))
         end
       end
 

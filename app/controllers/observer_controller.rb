@@ -2218,7 +2218,9 @@ class ObserverController < ApplicationController
               :copyright_holder => image.copyright_holder.to_s,
               :license          => image.license || 0
             )
-            flash_notice(:runtime_image_uploaded.t(:name => (name ? "'#{name}'" : "##{image.id}")))
+            name = image.original_name
+            name = "##{image.id}" if name.empty?
+            flash_notice(:runtime_image_uploaded.t(:name => name))
             good_images.push(image)
             if observation.thumb_image_id == -i
               observation.thumb_image_id = image.id

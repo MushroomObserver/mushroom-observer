@@ -309,7 +309,6 @@ class ImageController < ApplicationController
 
   def process_image(args, upload)
     if !upload.blank?
-      name = upload.full_original_filename if upload.respond_to? :full_original_filename
       @image = Image.new(args)
       @image.created  = Time.now
       @image.modified = @image.created
@@ -319,8 +318,9 @@ class ImageController < ApplicationController
         flash_object_errors(@image)
       elsif !@image.process_image
         logger.error("Unable to upload image")
-        flash_error(:runtime_image_invalid_image.
-                      t(:name => (name ? "'#{name}'" : '???')))
+        name = @image.original_name
+        name = '???' if name.empty?
+        flash_error(:runtime_image_invalid_image.t(:name => name))
         flash_object_errors(@image)
       else
         @observation.add_image(@image)
@@ -334,8 +334,9 @@ class ImageController < ApplicationController
           :license          => @image.license,
           :observation      => @observation
         )
-        flash_notice(:runtime_image_uploaded_image.
-                       t(:name => name ? "'#{name}'" : "##{@image.id}"))
+        name = @image.original_name
+        name = "##{@image.id}" if name.empty?
+        flash_notice(:runtime_image_uploaded_image.t(:name => name))
       end
     end
   end
