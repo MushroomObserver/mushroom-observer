@@ -244,16 +244,16 @@ password: hasło
 PASSWORDS: Hasła
 passwords: hasła
 # (Only used by validation errors, I think.)
-PASSWORD_CONFIRMATION:  Password Confirmation
-password_confirmation:  password confirmation
-PASSWORD_CONFIRMATIONS:  Password Confirmations
-password_confirmations:  password confirmations
+PASSWORD_CONFIRMATION: Potwierdzenie hasła
+password_confirmation: potwierdzenie hasła
+PASSWORD_CONFIRMATIONS: Potwierdzenia hasła
+password_confirmations: potwierdzenia hasła
 PREFERENCES: Preferencje
 preferences: preferencje
-PREFERRED_NAME:  Preferred Name
-preferred_name:  preferred name
-PREFERRED_NAMES:  Preferred Names
-preferred_names:  preferred names
+PREFERRED_NAME: Preferowana nazwa
+preferred_name: preferowana nazwa
+PREFERRED_NAMES: Preferowane nazwy
+preferred_names: Preferowane nazwy
 PROFILE: Profil
 profile: profil
 PROFILES: Profile
@@ -274,10 +274,10 @@ STATUS: Status
 status: status
 STATUSS: Statusy
 statuss: statusy
-SUBJECT:  Subject
-subject:  subject
-SUBJECTS:  Subjects
-subjects:  subjects
+SUBJECT: Temat
+subject: temat
+SUBJECTS: Tematy
+subjects: tematy
 SUMMARY: Podsumowanie
 summary: podsumowanie
 SUMMARYS: Podsumowania
@@ -431,14 +431,14 @@ unknown: nieznany
 # access; private means the current user does not have access; default means
 # this is the default description that shows up on the show_name/location page
 # (synonyms that might work better are "principle" or "main" or "official").
-PRIVATE:  Private
-private:  private
-PUBLIC:  Public
-public:  public
-RESTRICTED:  Restricted
-restricted:  restricted
-DEFAULT:  Default
-default:  default
+PRIVATE: Prywatne
+private: prywatne
+PUBLIC: Publiczne
+public: publiczne
+RESTRICTED: Ograniczone
+restricted: ograniczone
+DEFAULT: Domyślne
+default: domyślne
 
 # Common verbs/actions with objects:
 add_object: Dodaj [TYPE]
@@ -448,7 +448,7 @@ cancel_and_show:  Cancel (Show [TYPE])
 create_object: Utwórz [TYPE]
 destroy_object: Zniszcz [TYPE]
 edit_object: Edytuj [TYPE]
-list_objects:  List [TYPES]
+list_objects: Lista [TYPES]
 remove_object: Usuń [TYPE]
 remove_objects: Usuń [TYPES]
 show_all: Pokaż wszystkie
@@ -500,10 +500,10 @@ image_vote_short_4: Świetne
 # doesn't feel comfortable declaring it "accurate"; thus "unvetted" means
 # "reviewed" and "vetted" means "approved".  Sorry, we inherited these odd
 # terms from EOL; they weren't my choice!)
-review_unreviewed:  Unreviewed
-review_unvetted:  Reviewed
-review_vetted:  Approved
-review_inaccurate:  Inaccurate/Incomplete
+review_unreviewed: Nieprzejrzany
+review_unvetted: Przejrzany
+review_vetted: Zaaprobowany
+review_inaccurate: Niedokładny/Niekompletny
 review_no_export:  Not for Export
 review_ok_for_export:  Okay for Export
 
@@ -578,8 +578,8 @@ RANK_PLURAL_FAMILY: Rodziny
 rank_plural_family: rodziny
 RANK_PLURAL_FORM: Formy
 rank_plural_form: formy
-RANK_PLURAL_GENUS:  Genera
-rank_plural_genus:  genera
+RANK_PLURAL_GENUS: Rodzaje
+rank_plural_genus: rodzaje
 RANK_PLURAL_GROUP: Grupy
 rank_plural_group: grupy
 RANK_PLURAL_KINGDOM: Królestwa
@@ -691,15 +691,15 @@ query_title_with_observations_of_name_synonym:  "[TYPES] with [:query_title_of_n
 query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
 
 # Brief description of each query flavor.
-query_help_comment_all:  all comments
-query_help_comment_by_user:  comments created by a given user
+query_help_comment_all: wszystkie komentarze
+query_help_comment_by_user: komentarze utworzone przed danego użytkownika
 query_help_comment_in_set:  comments in a given set
-query_help_comment_for_object:  comments about a given object
-query_help_comment_for_user:  comments sent to a given user
+query_help_comment_for_object: komentarze o danym obiekcie
+query_help_comment_for_user: komentarze wysłane do danego użytkownika
 query_help_comment_pattern_search:  comments matching a search string
 query_help_image_advanced_search:  images of observations matching advanced search criteria
-query_help_image_all:  all images
-query_help_image_by_user:  images created by a given user
+query_help_image_all: wszystkie zdjęcia
+query_help_image_by_user: zdjęcia utworzone przez danego użytkownika
 query_help_image_in_set:  images in a given set
 query_help_image_inside_observation:  images belonging to an outer observation query
 query_help_image_pattern_search:  images matching a search_string
@@ -723,7 +723,7 @@ query_help_location_with_descriptions_by_author:  locations with descriptions au
 query_help_location_with_descriptions_by_editor:  locations with descriptions edited by a given user
 query_help_location_with_descriptions_by_user: miejsca z opisami utworzonymi przez danego użytkownika
 query_help_location_with_descriptions_in_set:  locations with descriptions in a given set
-query_help_location_with_observations:  locations of observations
+query_help_location_with_observations: miejsca obserwacji
 query_help_location_with_observations_by_user:  locations of observations by a given user
 query_help_location_with_observations_in_set:  locations of observations in a given set
 query_help_location_with_observations_in_species_list:  locations of observations in a given species list
@@ -808,7 +808,7 @@ sort_by_confidence:  "[:CONFIDENCE_LEVEL]"
 sort_by_image_quality: Jakość zdjęcia
 sort_by_thumbnail_quality: Jakość miniatury
 sort_by_num_views: Popularność
-sort_by_contribution:  Contribution
+sort_by_contribution: Wkład
 sort_by_reverse: Odwrócona kolejność
 
 # RSS log messages.
@@ -953,11 +953,11 @@ app_preferred_browser: Preferowana przeglądarka
 app_feature_tracker:  Feature Tracker
 
 # This is for the search bar at the top of every page.
-app_find:  Find
-app_search:  Search
+app_find: Znajdź
+app_search: Szukaj
 app_search_google:  Site (via google)
-app_refine_search:  Refine Search
-app_advanced_search:  Advanced Search
+app_refine_search: Zawęź wyszukiwanie
+app_advanced_search: Wyszukiwanie zaawansowane
 app_timer: "czas: [seconds] sek."
 app_index_timer: "[num] wyników w [seconds] sek."
 
@@ -966,13 +966,13 @@ app_index_timer: "[num] wyników w [seconds] sek."
 app_translators_credit: "Tłumaczenie: Piotr Dulik"
 
 # These are general alerts that appear near the top of the page.
-app_no_ajax:  Your Browser Is Out of Date
-app_no_browser:  We Don't Recognize Your Browser
+app_no_ajax: Twoja przeglądarka jest nieaktualna
+app_no_browser: Nie rozpoznajemy Twojej przeglądarki
 app_no_javascript: Javascript jest wyłączony
 app_no_session: Masz wyłączone ciasteczka (cookies)
 
 # Title of the RSS auto-discovery link in the HTML header section.
-app_rss:  "[:app_title] RSS"
+app_rss: "[:app_title] RSS"
 
 # Donation stuff.
 # CHANGED: 20110601
@@ -1001,7 +1001,7 @@ ask_user_question_subject:  "[:Subject]"
 
 
 # observer/ask_webmaster_question
-ask_webmaster_title:  Email Question or Comment
+ask_webmaster_title: E-mail z pytaniem lub komentarzem
 ask_webmaster_your_email: Twój adres e-mail
 ask_webmaster_question: Pytanie lub komentarz
 # CHANGED: 20110615
@@ -1172,8 +1172,8 @@ form_description_license_help:  >
 
 
 # observer/_form_images
-form_images_when_taken:  When Was It Taken
-form_images_when_help:  Date the photograph or drawing was created.
+form_images_when_taken: Kiedy zostało zrobione
+form_images_when_help: Data utworzenia zdjęcia lub rysunku.
 form_images_notes_help:  Enter notes that are specific to this particular image.
 form_images_copyright_holder:  "[:COPYRIGHT_HOLDER]"
 form_images_select_license:  Select a "License":/observer/how_to_use#license
@@ -1240,7 +1240,7 @@ form_names_look_alikes:  Look Alikes
 form_names_habitat: Siedlisko
 form_names_distribution:  Distribution
 form_names_uses:  Uses
-form_names_notes:  Notes
+form_names_notes: Notatki
 form_names_refs: Odniesienia
 form_names_text_name_help:  >
   Unformatted version of the name without any author info.\n
@@ -1349,10 +1349,10 @@ form_naming_confidence_help:  >
 # observer/_form_observations
 form_observations_specimen_available:  Herbarium Specimen Available
 form_observations_is_collection_location:  Is Collection Location
-form_observations_upload_images:  Upload Images
+form_observations_upload_images: Załaduj zdjęcia
 form_observations_upload_another:  Upload Another...
-form_observations_edit_image:  Edit Image
-form_observations_remove_image:  Remove Image
+form_observations_edit_image: Edytuj zdjęcie
+form_observations_remove_image: Usuń zdjęcie
 form_observations_lat_long_help:  >
   Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and
   longitude between -180.0 and 180.0.  If you choose to provide this data please
@@ -1398,7 +1398,7 @@ form_observations_dubious_help:  >
 
 # observer/_form_species_list
 form_species_lists_title: Tytuł
-form_species_lists_species_to_add:  Select Species to Add
+form_species_lists_species_to_add: Wybierz gatunki do dodania
 form_species_lists_write_in_species:  "Write-In Species: (enter a name on each line)"
 form_species_lists_list_notes:  Species List Notes
 form_species_lists_member_notes:  Notes for each new member
@@ -1421,16 +1421,16 @@ form_species_lists_bulk_help:  >
 
 
 # observer/_form_synonyms
-form_synonyms_names:  Names
+form_synonyms_names: Nazwy
 form_synonyms_names_help:  >
   List the names you want to be synonymized with [name].
 
-form_synonyms_current_synonyms:  Current Synonyms
+form_synonyms_current_synonyms: Bieżące synonimy
 form_synonyms_current_synonyms_help:  >
   Unchecked items will no longer be synonymized with this name, but will
   remain synonymized with each other.
 
-form_synonyms_proposed_synonyms:  Proposed Synonyms
+form_synonyms_proposed_synonyms: Proponowane synonimy
 form_synonyms_proposed_synonyms_help:  >
   Unchecked items will no longer be synonymized with this name, but will retain
   their relationships with each other.
@@ -1465,8 +1465,8 @@ image_add_warning:  >
 
 
 # image/reuse_image_for_user
-image_reuse_all_users:  Include other users' images.
-image_reuse_just_yours:  Only show your images.
+image_reuse_all_users: Uwzględniaj także zdjęcia innych użytkowników.
+image_reuse_just_yours: Pokazuj tylko Twoje zdjęcia.
 
 
 
@@ -1477,7 +1477,7 @@ image_edit_title:  "Editing Image: [name]"
 
 # image/remove_images
 image_remove_edit:  "[:edit_object(type=:observation)]"
-image_remove_remove:  Remove
+image_remove_remove: Usuń
 image_remove_title:  Remove Images from [name]
 
 
@@ -1506,7 +1506,7 @@ image_show_your_vote: Twój głos
 image_show_vote_and_next:  "Vote & [:NEXT]"
 image_show_comments:  "[num] comment(s)"
 image_show_observations:  "[:OBSERVATIONS]"
-image_show_thumbnail:  Thumbnail
+image_show_thumbnail: Miniaturka
 image_show_small: Mały
 image_show_medium: Średni
 image_show_large: Duży
@@ -1519,8 +1519,8 @@ image_show_make_default:  Make this the default size
 
 # observation/list_observations
 list_observations_location_all: Wszystkie miejsca
-list_observations_location_define:  Define This Location
-list_observations_location_merge:  Merge With A Defined Location
+list_observations_location_define: Zdefiniuj to miejsce
+list_observations_location_merge: Połącz ze zdefiniowanym miejscem
 
 
 
@@ -1547,11 +1547,11 @@ location_dubious_empty:  Empty location given
 location_dubious_redundant_county:  County may be redundant
 location_dubious_redundant_state:  Both '[state]' and '[country]' are on the list of countries and continents
 location_dubious_unknown_country: Nieznany kraj '[country]'
-location_dubious_unknown_state:  Unknown state '[state]', '[country]'
+location_dubious_unknown_state: Nieznany stan '[state]', '[country]'
 
 
 # account/login
-login_please_login:  Please login
+login_please_login: Prosze zaloguj się
 login_login:  Login
 login_user: Nazwa użytkownika lub adres e-mail
 login_password: Hasło
@@ -1598,15 +1598,14 @@ name_approve_deprecate_help:  >
 
 
 # name/change_synonyms
-name_change_synonyms_title:  "Synonyms for [name]"
-name_change_synonyms_submit:  Submit Changes
-name_change_synonyms_confirm:  Please confirm that this is what you intended.
-
+name_change_synonyms_title: "Synonimy dla [name]"
+name_change_synonyms_submit: Prześlij zmiany
+name_change_synonyms_confirm: Proszę potwierdź, że to jest to co zamierzasz.
 
 
 # name/deprecate_name
 name_deprecate_title:  Deprecate [name]
-name_deprecate_preferred:  Preferred name
+name_deprecate_preferred: Preferowana nazwa
 name_deprecate_comment_summary:  "[:Deprecated]"
 name_deprecate_comments:  "[:Comments]"
 name_deprecate_submit:  "[:SUBMIT]"
@@ -1679,20 +1678,20 @@ prefs_alt_col_colors:  Alternate column colors.
 prefs_alt_row_colors:  Alternate row colors.
 prefs_text_below_images:  Put text below images.
 prefs_email_prefs: Preferencje e-mail
-prefs_email_please_notify:  Please notify me when...
+prefs_email_please_notify: Proszę powiadomić mnie kiedy...
 prefs_email_general:  General Email
-prefs_email_general_commercial:  someone is interested in using an image of mine for commercial purposes.
+prefs_email_general_commercial: ktoś jest zainteresowany użyciem moich zdjęć w celach komercyjnych.
 prefs_email_general_features:  new features come out.
-prefs_email_general_questions:  someone wants to send me a question about my observations, etc.
+prefs_email_general_questions: ktoś chce mi wysłać pytanie o moich obserwacjach itp.
 prefs_email_comments:  "[:Comment] Email"
 prefs_email_comments_all:  anyone comments on anything.
-prefs_email_comments_owner:  someone comments on my observations, names, etc.
-prefs_email_comments_response:  someone posts responses to my comments.
+prefs_email_comments_owner: ktoś skomentował moje obserwacje, nazwy itp.
+prefs_email_comments_response: ktoś wysłał odpowiedzi na moje komentarze.
 prefs_email_locations:  "[:Location] Email"
 prefs_email_locations_all:  anyone changes any location.
-prefs_email_locations_admin:  someone changes a location I administrate.
-prefs_email_locations_author:  someone changes a location I'm author on.
-prefs_email_locations_editor:  someone changes a location I've edited.
+prefs_email_locations_admin: ktoś wprowadził zmiany do miejsca którym administruję.
+prefs_email_locations_author: ktoś zmienił miejsce którego jestem autorem.
+prefs_email_locations_editor: ktoś zmienił miejsce edytowane przeze mnie.
 prefs_email_observations:  "[:Observation] Email"
 prefs_email_observations_all:  anything happens to any observation.
 prefs_email_observations_consensus:  consensus name changes for one of my observations.
@@ -1725,13 +1724,13 @@ profile_name:  "[:Name]"
 profile_notes: O sobie
 profile_location:  Primary location
 profile_mailing_address:  Mailing Address for Collections
-profile_image_create:  Upload photo
-profile_image_change:  Upload new photo
-profile_image_remove:  (Remove photo.)
+profile_image_create: Załaduj zdjęcie
+profile_image_change: Załaduj nowe zdjęcie
+profile_image_remove: (Usuń zdjęcie.)
 profile_image_reuse:  (Reuse another photo.)
-profile_copyright_holder:  Copyright holder and license for this image
-profile_copyright_warning:  >
-  Please only upload an image that you created or which you own the copyright of.
+profile_copyright_holder: Właściciel praw autorskich i licencji do tego zdjęcia
+profile_copyright_warning: >
+ Proszę wstawiać tylko zdjęcia które utworzyłeś, lub jesteś właścicielem praw autorskich do nich.
 
 
 
@@ -1920,8 +1919,8 @@ show_observation_header:  "[:OBSERVATION]"
 show_observation_edit_observation:  "[:edit_object(type=:observation)]"
 show_observation_propose_new_name:  "[:show_namings_propose_new_name]"
 show_observation_debug_consensus:  Debug Consensus
-show_observation_alternative_name:  Alternative Name
-show_observation_alternative_names:  Alternative Names
+show_observation_alternative_name: Alternatywna Nazwa
+show_observation_alternative_names: Alternatywne Nazwy
 show_observation_preferred_name: Preferowana nazwa
 show_observation_preferred_names: Preferowane nazwy
 show_observation_observation_created:  Observation created
@@ -1937,7 +1936,7 @@ show_observation_add_images:  "[:add_objects(type=:image)]"
 show_observation_species_lists:  "[:SPECIES_LISTS]"
 show_observation_manage_species_lists:  Manage Species Lists
 show_observation_send_question:  Send Observer a Question
-show_observation_view_notifications:  View Notifications
+show_observation_view_notifications: Pokaż powiadomienia
 
 
 
@@ -2392,9 +2391,9 @@ pivotal_story_loading:  Loading story details...
 pivotal_posting_comment:  Posting comment...
 pivotal_posted_by:  Posted by
 
-pivotal_state_unscheduled:  unscheduled
-pivotal_state_unstarted:  in the queue
-pivotal_state_started:  in progress
+pivotal_state_unscheduled: niezaplanowane
+pivotal_state_unstarted: w kolejce
+pivotal_state_started: w trakcie
 
 pivotal_head_critical:  serious bugs or mission-critical work
 pivotal_head_bottleneck:  stuff required by lots of other things
@@ -2433,13 +2432,13 @@ pivotal_label_email: e-mail
 pivotal_label_eol: eol
 pivotal_label_i18n: tłumaczenia
 pivotal_label_interface: interfejs
-pivotal_label_lists:  lists
+pivotal_label_lists: listy
 pivotal_label_locations: miejsca
 pivotal_label_names: nazwy
 pivotal_label_projects: projekty
-pivotal_label_search:  searching
+pivotal_label_search: wyszukiwanie
 pivotal_label_taxonomy: taksonomia
-pivotal_label_voting:  voting
+pivotal_label_voting: głosowanie
 pivotal_label_other:  other
 pivotal_label_admin:  admin
 pivotal_label_code:  code
@@ -2494,13 +2493,13 @@ advanced_search_content_notes:  >
   aaa OR bbb -> contains either "aaa" or "bbb"\n
   -aaa -bbb -> reject anything that contains "aaa" or "bbb"\n
 
-advanced_search_location_help:  Where was the mushroom found
-advanced_search_name_help:  Name of the mushroom
+advanced_search_location_help: Gdzie grzyb został znaleziony
+advanced_search_name_help: Nazwa grzyba
 advanced_search_none_found:  No matches found
-advanced_search_observer_help:  Who observed the mushroom
-advanced_search_result_type:  Result Type
-advanced_search_result_type_help:  >
-  Do you want [:observations], [:images] or [:names]/[:descriptions]?
+advanced_search_observer_help: Kto zaobserwował grzyba
+advanced_search_result_type: Rodzaj wyniku
+advanced_search_result_type_help: >
+ Chcesz [:observations], [:images] lub [:names]/[:descriptions]?
 
 
 # observer/license_updater
@@ -2524,7 +2523,7 @@ color_themes_text:  >
   The following links describe each of the available themes including links to
   the [:images] the colors were extracted from:
 
-color_themes_title:  Color Themes
+color_themes_title: Tematy kolorów
 
 
 # name/email_tracking
