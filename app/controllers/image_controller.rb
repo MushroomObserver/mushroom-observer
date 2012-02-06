@@ -106,7 +106,7 @@ class ImageController < ApplicationController
       query = find_query(:Image)
       show_selected_images(query)
     rescue => err
-      flash_error(err)
+      flash_error(err.to_s)
       redirect_to(:controller => 'observer', :action => 'advanced_search')
     end
   end
