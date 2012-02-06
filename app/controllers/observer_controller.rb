@@ -602,7 +602,7 @@ class ObserverController < ApplicationController
       query = find_query(:Observation)
       show_selected_observations(query)
     rescue => err
-      flash_error(err)
+      flash_error(err.to_s) if !err.blank?
       redirect_to(:controller => 'observer', :action => 'advanced_search_form')
     end
   end

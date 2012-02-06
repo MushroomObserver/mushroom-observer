@@ -187,7 +187,7 @@ class NameController < ApplicationController
       query = find_query(:Name)
       show_selected_names(query)
     rescue => err
-      flash_error(err)
+      flash_error(err.to_s) if !err.blank?
       redirect_to(:controller => 'observer', :action => 'advanced_search_form')
     end
   end
@@ -558,7 +558,7 @@ class NameController < ApplicationController
       # Anything causing changes not to get saved ends up here.
       rescue RuntimeError => err
         @name = Name.new
-        flash_error(err.to_s) if !err.nil?
+        flash_error(err.to_s) if !err.blank?
         flash_object_errors(@name)
         @name.attributes = params[:name]
         @can_make_changes = true
@@ -708,7 +708,7 @@ class NameController < ApplicationController
 
       rescue RuntimeError => err
         # Anything causing changes not to get saved ends up here.
-        flash_error(err.to_s) if !err.nil?
+        flash_error(err.to_s) if !err.blank?
         flash_object_errors(@name)
         @name.attributes = params[:name]
 
@@ -1183,7 +1183,7 @@ class NameController < ApplicationController
         name.change_deprecated(true)
         result = save_name(name, :log_deprecated_by)
       rescue RuntimeError => err
-        flash_error(err.to_s)
+        flash_error(err.to_s) if !err.blank?
         result = false
       end
     end

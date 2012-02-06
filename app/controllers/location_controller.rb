@@ -103,7 +103,7 @@ class LocationController < ApplicationController
       query = find_query(:Location)
       show_selected_locations(query, :link_all_sorts => true)
     rescue => err
-      flash_error(err)
+      flash_error(err.to_s) if !err.blank?
       redirect_to(:controller => 'observer', :action => 'advanced_search_form')
     end
   end
