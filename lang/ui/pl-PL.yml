@@ -444,7 +444,7 @@ default: domyślne
 add_object: Dodaj [TYPE]
 add_objects: Dodaj [TYPES]
 all_objects: Wszystkie [TYPES]
-cancel_and_show:  Cancel (Show [TYPE])
+cancel_and_show: Anuluj (Pokaż [TYPE])
 create_object: Utwórz [TYPE]
 destroy_object: Zniszcz [TYPE]
 edit_object: Edytuj [TYPE]
@@ -452,7 +452,7 @@ list_objects: Lista [TYPES]
 remove_object: Usuń [TYPE]
 remove_objects: Usuń [TYPES]
 show_all: Pokaż wszystkie
-show_name:  About [NAME]
+show_name: O [NAME]
 show_object: Pokaż [TYPE]
 show_objects: Pokaż [TYPES]
 sort_by_object: Sortuj wg [TYPE]
@@ -464,7 +464,7 @@ click_for_map: Kliknij aby zobaczyć na mapę
 google_images:  Google Images
 many_times: "[num] razy"
 one_time: raz
-permission_denied:  Permission denied.
+permission_denied: Brak prawa dostępu.
 "YES": "Yes"
 "NO": "No"
 "yes": "yes"
@@ -600,12 +600,12 @@ user_stats_comments:  "[:COMMENTS]"
 user_stats_images:  "[:IMAGES]"
 user_stats_location_descriptions_authors:  "[:LOCATION_DESCRIPTIONS] Authored"
 user_stats_location_descriptions_editors:  "[:LOCATION_DESCRIPTIONS] Edited"
-user_stats_locations:  "[:LOCATIONS] Created"
-user_stats_locations_versions:  "[:LOCATIONS] Edited"
+user_stats_locations: "[:LOCATIONS] utworzone"
+user_stats_locations_versions: "[:LOCATIONS] edytowane"
 user_stats_name_descriptions_authors:  "[:NAME_DESCRIPTIONS] Authored"
 user_stats_name_descriptions_editors:  "[:NAME_DESCRIPTIONS] Edited"
-user_stats_names:  "[:NAMES] Created"
-user_stats_names_versions:  "[:NAMES] Edited"
+user_stats_names: "[:NAMES] utworzone"
+user_stats_names_versions: "[:NAMES] edytowane"
 user_stats_namings:  Proposed IDs
 user_stats_observations:  "[:OBSERVATIONS]"
 user_stats_species_list_entries:  "[:SPECIES_LIST] Entries"
@@ -633,7 +633,7 @@ site_stats_users: "Członkowie"
 site_stats_votes:  "[:VOTES]"
 
 # vote descriptions
-vote_no_opinion:  No Opinion
+vote_no_opinion: Brak opinii
 vote_confidence_100:  I'd Call It That
 vote_confidence_80: Obiecujący
 vote_confidence_60: Może być
@@ -656,17 +656,17 @@ vote_agreement_0:  As If!
 #
 query_title_advanced_search:  "[:app_advanced_search]"
 query_title_all:  "[TYPE] Index"
-query_title_all_by:  "[TYPES] by [ORDER]"
-query_title_at_location:  "[TYPES] from [LOCATION]"
-query_title_at_where:  "[TYPES] from '[USER_WHERE]'"
+query_title_all_by: "[TYPES] wg. [ORDER]"
+query_title_at_location: "[TYPES] z [LOCATION]"
+query_title_at_where: "[TYPES] z '[USER_WHERE]'"
 query_title_by_author:  "[TYPES] Authored by [USER]"
-query_title_by_editor:  "[TYPES] Edited by [USER]"
-query_title_by_rss_log:  "[TYPES] in Activity Log"
-query_title_by_user:  "[TYPES] created by [USER]"
+query_title_by_editor: "[TYPES] edytowane przez [USER]"
+query_title_by_rss_log: "[TYPES] w Dzienniku Aktywności"
+query_title_by_user: "[TYPES] utworzone przez [USER]"
 query_title_for_object:  "[TYPES] on [OBJECT]"
 query_title_for_user:  "[TYPES] for [USER]"
-query_title_in_set:  "Selected [TYPES]"
-query_title_in_species_list:  "[TYPES] in [SPECIES_LIST]"
+query_title_in_set: "Wybrane [TYPES]"
+query_title_in_species_list: "[TYPES] w [SPECIES_LIST]"
 query_title_inside_observation:  "[TYPES] of [OBSERVATION]"
 query_title_of_children:  "Lower Taxa under [NAME]"
 query_title_of_name:  "[TYPES] of [NAME]"
@@ -763,7 +763,7 @@ query_help_observation_advanced_search:  observations matching advanced search c
 query_help_observation_all: wszystkie obserwacje
 query_help_observation_at_location: obserwacje w zdefiniowanym miejscu
 query_help_observation_at_where: obserwacje w niezdefiniowanym miejscu
-query_help_observation_by_rss_log:  observations with recent activity
+query_help_observation_by_rss_log: obserwacje z niedawną aktywnością
 query_help_observation_by_user: obserwacje utworzone przez danego użykownika
 query_help_observation_in_set:  observations in a given set
 query_help_observation_in_species_list:  observations in a given species list
@@ -813,7 +813,7 @@ sort_by_reverse: Odwrócona kolejność
 
 # RSS log messages.
 log_ancient:  "[String]"
-log_approved_by:  Approved by [user].
+log_approved_by: Zaaprobowane przez [user].
 log_approved_by_with_comment:  "[:log_approved_by] [comment]"
 log_consensus_changed:  Consensus changed from [old] to [new].
 log_consensus_reached:  "Consensus established: [name]"
@@ -826,12 +826,12 @@ log_name_approved_with_comment:  "[:log_name_approved] [comment]"
 log_name_deprecated:  Deprecated by [user] in favor of [other].
 log_name_deprecated_with_comment:  "[:log_name_deprecated] [comment]"
 log_name_merged:  "[This] merged with [that]."
-log_object_added_by_user:  "[Type] added by [user]."
-log_object_added_by_user_with_name:  "[Type] added by [user]: [name]"
-log_object_added_no_user:  "[Type] added."
-log_object_created_by_user:  "[Type] created by [user]."
-log_object_created_by_user_with_name:  "[Type] created by [user]: [name]"
-log_object_created_no_user:  "[Type] created."
+log_object_added_by_user: "[Type] dodany przez [user]."
+log_object_added_by_user_with_name: "[Type] dodany przez [user]: [name]"
+log_object_added_no_user: "[Type] dodany."
+log_object_created_by_user: "[Type] utworzony przez [user]."
+log_object_created_by_user_with_name: "[Type] utworzony przez [user]: [name]"
+log_object_created_no_user: "[Type] utworzony."
 log_object_destroyed_by_user:  "[Type] destroyed by [user]."
 log_object_destroyed_by_user_with_name:  "[Type] destroyed by [user]: [name]"
 log_object_destroyed_no_user:  "[Type] destroyed."
@@ -847,7 +847,7 @@ log_object_updated_by_user_with_name:  "[Type] updated by [user]: [name]"
 log_object_updated_no_user:  "[Type] updated."
 log_orphan:  "[Title]"
 log_published_description:  "Description published by [user]: [name]"
-log_updated_by:  Updated by [user].
+log_updated_by: Zaktualizowane przez [user].
 
 # These should not need any translation.
 log_comment_added:  "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
@@ -915,10 +915,10 @@ app_index_a_z: Indeks A->Z
 app_list_locations:  "[:list_objects(type=:location)]"
 app_list_projects:  "[:list_objects(type=:project)]"
 app_latest: Ostatnie
-app_latest_changes:  "Changes by Users"
+app_latest_changes: "Zmiany wg. użytkowników"
 app_newest_images:  "[:IMAGES]"
 app_comments:  "[:COMMENTS]"
-app_news:  Features and Fixes
+app_news: Nowości i poprawki
 app_observations_left:  "[:OBSERVATIONS]"
 app_create_observation:  "[:create_object(type=:observation)]"
 app_sort_by_date_obs:  "[:sort_by_object(type=:date)]"
@@ -931,7 +931,7 @@ app_account: Konto
 app_login:  Login
 app_create_account: Utwórz konto
 app_current_user: Bieżący użytkownik
-app_comments_for_you:  "Comments for You"
+app_comments_for_you: "Komentarze dla Ciebie"
 app_your_observations: Twoje obserwacje
 app_your_interests: Twoje zainteresowania
 app_your_summary: Twoje podsumowanie
@@ -986,10 +986,9 @@ app_donate:  Donate
 
 # observer/ask_observation_question
 ask_observation_question_title: Pytanie o [name]
-ask_observation_question_label:  >
-  Enter your question below.  When you hit "[:SEND]" it will be emailed to
-  [user].  The email will automatically include a link to this observation as
-  well as your email address. 
+ask_observation_question_label: >
+ Wprowadź swoje pytanie poniżej.  Kiedy wciśniesz "[:SEND]" zostanie wysłany e-mail do
+ [user]. Do e-maila zostanie automatycznie załączony link do obserwacji i Twój adres e-mail.
 
 
 
@@ -1041,7 +1040,7 @@ comment_list_deleted: obiekt usunięty
 
 
 # comment/show_comment
-comment_show_title:  "Comment on [Name]"
+comment_show_title: "Komentarz nt. [Name]"
 comment_show_created:  "[:Created]"
 comment_show_by:  "[:By]"
 comment_show_summary:  "[:Summary]"
@@ -1053,12 +1052,11 @@ comment_show_destroy:  "[:DESTROY]"
 
 
 # observer/commercial_inquiry
-commercial_inquiry_title:  Commercial Inquiry About [name]
-commercial_inquiry_header:  >
-  Enter your commercial inquiry about this image.  When you hit "[:SEND]" it
-  will be emailed to [user].  The email will automatically include a link to
-  this image. 
-
+commercial_inquiry_title: Komercyjne zapytanie o [name]
+commercial_inquiry_header: >
+ Wprowadź swoje komercyjne zapytanie odnośnie zdjęcia.  Kiedy wciśniesz"[:SEND]"
+ zostanie wysłany e-mail do [user]. W e-mailu będzie automatycznie załączony  
+ link do zdjęcia.
 
 
 # location/create_location_description
@@ -1072,7 +1070,7 @@ create_location_title:  "[:create_object(type=:location)]"
 
 
 # name/create_name_description
-create_name_description_title:  Create Description for [name]
+create_name_description_title: Utwórz opis dla [name]
 
 
 
@@ -1082,7 +1080,7 @@ create_name_title:  "[:create_object(type=:name)]"
 
 
 # observer/create_naming
-create_naming_title:  "Propose Name for Observation #[id]"
+create_naming_title: "Zaproponuj nazwę dla obserwacji #[id]"
 
 
 
@@ -1141,8 +1139,8 @@ form_description_source_project:  "[:PROJECT]"
 form_description_source_source: Niezależne źródło
 form_description_source_user:  "[:USER]"
 form_description_permissions: Uprawnienia
-form_description_public_writable:  Modifiable by the general public.
-form_description_public_readable:  Visible to the general public.
+form_description_public_writable: Modyfikowalne publicznie.
+form_description_public_readable: Widoczne publicznie.
 form_description_source_help:  >
   There are three kinds of descriptions you can create:\n
   1. *Public:* These are wikipedia-style documents that are editable by
@@ -1231,9 +1229,9 @@ form_locations_dubious_help:  >
 # observer/_form_name
 form_names_text_name: Nazwa naukowa
 form_names_misspelling:  This name is misspelt.
-form_names_misspelling_it_should_be:  It should be
+form_names_misspelling_it_should_be: Powinno być
 form_names_taxonomic_notes:  Notes on Taxonomy
-form_names_classification:  Taxonomic Classification
+form_names_classification: Klasyfikacja taksonomiczna
 form_names_gen_desc: Ogólny opis
 form_names_diag_desc:  Diagnostic Description
 form_names_look_alikes:  Look Alikes
@@ -1347,16 +1345,16 @@ form_naming_confidence_help:  >
 
 
 # observer/_form_observations
-form_observations_specimen_available:  Herbarium Specimen Available
-form_observations_is_collection_location:  Is Collection Location
+form_observations_specimen_available: Egzemplarz zielnikowy dostępny
+form_observations_is_collection_location: Jest miejscem zbioru
 form_observations_upload_images: Załaduj zdjęcia
-form_observations_upload_another:  Upload Another...
+form_observations_upload_another: Załaduj kolejne...
 form_observations_edit_image: Edytuj zdjęcie
 form_observations_remove_image: Usuń zdjęcie
-form_observations_lat_long_help:  >
-  Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and
-  longitude between -180.0 and 180.0.  If you choose to provide this data please
-  make it as accurate as possible.
+form_observations_lat_long_help: >
+ Opcjonalna pozycja GPS. Szerokość geograficzna musi być w przedziale -90.0 do 90.0 a
+ długość geograficzna w przedziale od -180.0 do 180.0. Jeśli zdecydujesz się wpisać te
+ dane, podaj je najdokładniej jak to możliwe.
 
 form_observations_log_change:  Log Change
 form_observations_is_collection_location_help:  >
@@ -1512,7 +1510,7 @@ image_show_medium: Średni
 image_show_large: Duży
 image_show_huge: Wielki
 image_show_full_size: Pełny rozmiar
-image_show_original:  Show Original Image
+image_show_original: Pokaż oryginał
 image_show_make_default:  Make this the default size
 
 
@@ -1556,11 +1554,11 @@ login_login:  Login
 login_user: Nazwa użytkownika lub adres e-mail
 login_password: Hasło
 login_remember_me: Pamiętaj mnie na tym komputerze
-login_forgot_password:  >
-  I forgot my password.  "Email me a new one.":/account/email_new_password
+login_forgot_password: >
+ Zapomniałem hasła.  "Wyślij mi e-mail z nowym.":/account/email_new_password
 
-login_no_account:  >
-  I don't have an account.  "Create a new account.":/account/signup
+login_no_account: >
+ Nie mam konta.  "Utwórz nowe konto.":/account/signup
 
 login_having_problems:  >
   If you are having problems logging into your account, send "email to the
@@ -1656,9 +1654,9 @@ prefs_locale: Język
 prefs_location_format: Format lokalizacji
 prefs_location_format_postal: "Pocztowy (New York, USA)"
 prefs_location_format_scientific: "Naukowy (USA, New York)"
-prefs_votes_anonymous:  Votes on proposed names
-prefs_votes_anonymous_no:  Always public
-prefs_votes_anonymous_yes:  Always anonymous
+prefs_votes_anonymous: Głosy na proponowane nazwy
+prefs_votes_anonymous_no: Zawsze publiczne
+prefs_votes_anonymous_yes: Zawsze anonimowe
 prefs_votes_anonymous_old:  "Public after [cutoff]"
 prefs_license_note:  Default "license":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size: Rozmiar miniatury
@@ -1722,7 +1720,7 @@ profile_link:  "[:edit_object(type=:profile)]"
 profile_button:  "[:SAVE_CHANGES]"
 profile_name:  "[:Name]"
 profile_notes: O sobie
-profile_location:  Primary location
+profile_location: Podstawowa lokalizacja
 profile_mailing_address:  Mailing Address for Collections
 profile_image_create: Załaduj zdjęcie
 profile_image_change: Załaduj nowe zdjęcie
@@ -1749,14 +1747,14 @@ reverify_note:  >
 rss_description:  List of changes to [:app_title] as they happen.
 rss_log_of_deleted_item:  Log of\nDeleted\nItem
 rss_log_title: Dziennik aktywności
-rss_by:  by [user]
+rss_by: przez [user]
 rss_title:  "[:app_title]"
-rss_show:  "Show:"
-rss_hide:  "Hide:"
-rss_all:  Everything
+rss_show: "Pokaż:"
+rss_hide: "Ukryj:"
+rss_all: Wszystko
 rss_all_help:  Show all object types.
 rss_one:  "[TYPES]"
-rss_one_help:  Show only [types].
+rss_one_help: Pokaż tylko [types].
 rss_make_default:  Make This My Default
 rss_this_is_default:  This Is Your Default
 rss_created:  "[TYPE] Created"
@@ -1775,13 +1773,13 @@ shared_textile_help:  >
 
 # comment/_show_comments
 show_comments_add_comment:  "[:add_object(type=:comment)]"
-show_comments_no_comments_yet:  No one has commented yet.
+show_comments_no_comments_yet: Nikt jeszcze nie skomentował.
 show_comments_and_more: I [num] więcej...
 
 
 
 # observation/_show_consensus
-show_consensus_list_of_species:  "List of species in [name]"
+show_consensus_list_of_species: "Lista gatunków w [name]"
 
 
 
@@ -1794,7 +1792,7 @@ show_description_merge:  Merge With Another
 show_description_publish: Publikuj
 show_description_make_default:  Make Default
 show_description_adjust_permissions:  Adjust Permissions
-show_description_read_permissions:  View
+show_description_read_permissions: Pokaż
 show_description_write_permissions: Edytuj
 show_description_clone_help:  >
   Create your own description based on this description.
@@ -1816,8 +1814,8 @@ show_description_adjust_permissions_help:  >
 
 
 # observer/_show_images
-show_images_small_thumbs:  "(small thumbnails)"
-show_images_large_thumbs:  "(large thumbnails)"
+show_images_small_thumbs: "(małe miniatury)"
+show_images_large_thumbs: "(duże miniatury)"
 
 
 
@@ -1834,7 +1832,7 @@ show_location_destroy:  "[:destroy_object(type=:location)]"
 show_location_observations:  "Observations at this Location"
 show_location_highest: Najwyższa wysokość
 show_location_lowest: Najniższa wysokość
-show_location_no_descriptions:  There are no descriptions for this location yet.
+show_location_no_descriptions: Nie ma jeszcze opisów dla tego miejsca.
 show_location_create_description:  "[:CREATE]"
 show_location_creator: Użytkownik który zdefiniował to miejsce
 show_location_editor:  "[:Editors]"
@@ -1851,7 +1849,7 @@ show_name_distribution_map: Mapa występowania
 show_name_change_synonyms:  Change Synonyms
 show_name_email_tracking:  Email Tracking
 show_name_create_description:  "[:CREATE]"
-show_name_synonyms:  Synonym(s)
+show_name_synonyms: Synonim(y)
 show_name_preferred_synonyms:  Preferred Synonym(s)
 show_name_deprecated_synonyms:  Deprecated Synonym(s)
 show_name_misspelling:  This name is misspelled.
@@ -1867,15 +1865,15 @@ show_name_description_editors:  "[:Description] editors"
 show_name_author_request:  Request Authorship Credit
 show_name_content_status:  Description status
 show_name_latest_review:  "Latest review: [date] by [user]"
-show_name_previous_version:  Previous Version
-show_name_other_versions:  Other Versions
+show_name_previous_version: Poprzednia wersja
+show_name_other_versions: Inne wersje
 show_name_observations:  "More [:OBSERVATIONS]"
 show_name_observations_of:  "More [:OBSERVATIONS] of [name]"
 show_name_all_observations:  "More [:OBSERVATIONS] (all synonyms)"
 show_name_synonym_observations:  "Synonym [:OBSERVATIONS]"
 show_name_other_observations:  "Similar [:OBSERVATIONS]"
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"
-show_name_creator:  First person to use this name on MO
+show_name_creator: Pierwsza osoba która użyła tej nazwy na MO
 show_name_editor:  "[:Editors]"
 show_name_editors:  "[:Editors]"
 show_name_other_observations_notes:  >
@@ -1889,14 +1887,14 @@ show_name_other_observations_notes:  >
 show_namings_proposed_name:  "[:NAMING]"
 show_namings_proposed_names:  "[:NAMINGS]"
 show_namings_no_names_yet:  No names have been proposed yet.
-show_namings_propose_new_name:  Propose Another Name
-show_namings_eye_help:  Observer's choice
+show_namings_propose_new_name: Zaproponuj inną nazwę
+show_namings_eye_help: Wybór obserwatora
 show_namings_eyes_help:  Current consensus
 show_namings_community_favorite:  This is the community favorite.
 show_namings_consensus: Głos społeczności
 show_namings_no_votes: brak głosów
 show_namings_your_vote: Twój głos
-show_namings_update_votes:  Update Votes
+show_namings_update_votes: Aktualizuj głosy
 show_namings_cast:  Cast Vote
 show_namings_user:  "[:User]"
 show_namings_consensus_help:  >
@@ -1923,9 +1921,9 @@ show_observation_alternative_name: Alternatywna Nazwa
 show_observation_alternative_names: Alternatywne Nazwy
 show_observation_preferred_name: Preferowana nazwa
 show_observation_preferred_names: Preferowane nazwy
-show_observation_observation_created:  Observation created
+show_observation_observation_created: Obserwacja utworzona
 # This is used if this is the location where the thing was growing.
-show_observation_collection_location:  Collection location
+show_observation_collection_location: Miejsce zbioru
 # This is used if this is NOT the location where the thing was growing.
 show_observation_seen_at:  Seen at
 show_observation_specimen_available:  Herbarium specimen available
@@ -1980,9 +1978,9 @@ show_site_stats_title: Statystyki strony
 show_votes_title: Pokaż głosy dla [name]
 show_votes_users:  "[:Users]"
 show_votes_vote:  "[:Vote]"
-show_votes_weight:  Weight
+show_votes_weight: Waga
 show_votes_average: Średnia
-show_votes_score:  Score
+show_votes_score: Punkty
 show_votes_go_public:  Make all of my votes public.
 show_votes_go_private:  Make all of my votes anonymous.
 show_votes_total:  >
@@ -2091,7 +2089,7 @@ species_list_show_set_source_help:  >
 species_list_by_title_title:  "[:SPECIES_LISTS] by Title"
 species_list_by_title_created:  "[:Created]"
 species_list_by_title_list_name:  List Name
-species_list_by_title_owner:  Owner
+species_list_by_title_owner: Właściciel
 species_list_by_title_size: Rozmiar
 
 
@@ -2112,7 +2110,7 @@ users_by_contribution_2b:  "[:name]"
 users_by_contribution_2c:  "[:observation]"
 users_by_contribution_2d:  "[:naming]"
 users_by_contribution_2e:  "[:vote]"
-users_by_contribution_2f:  points
+users_by_contribution_2f: punktów
 users_by_contribution_1:  >
   The order is currently based on an automated estimation of what each person
   has contributed to the site.  The purpose of creating this order is to
@@ -2155,7 +2153,7 @@ welcome_note: Jesteś teraz zalogowany do systemu...
 # support/donate
 donate_title:  Donate to Mushroom Observer
 donate_tab:  Donate
-donate_other:  Other Amount
+donate_other: Inna kwota
 donate_anonymous:  Anonymous donation
 donate_who:  Name for Donors Page
 donate_email:  Email (to ensure uniqueness)
@@ -2405,13 +2403,13 @@ pivotal_head_i18n:  translation text and all the associated machinery
 pivotal_head_interface:  web interface
 pivotal_head_lists:  species lists, checklists, etc.
 pivotal_head_locations:  'location descriptions and/or geocoding'
-pivotal_head_names:  species descriptions
+pivotal_head_names: opisy gatunków
 pivotal_head_projects:  group projects
 pivotal_head_search:  search capabilities and data mining
 pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
 pivotal_head_voting:  voting on observations, their names, images, etc.
-pivotal_head_other:  uncategorized
-pivotal_head_admin:  administration tasks
+pivotal_head_other: nieskategoryzowane
+pivotal_head_admin: zadania administracyjne
 pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
 pivotal_head_server:  server installation, configuration, and diagnostics
 pivotal_head_open:  areas we are actively soliciting feedback
@@ -2424,7 +2422,7 @@ pivotal_head_month:  has comments within last month
 pivotal_head_none:  has no recent comments
 pivotal_head_all: pokaż wszystko
 
-pivotal_label_critical:  critical
+pivotal_label_critical: krytyczny
 pivotal_label_bottleneck:  bottleneck
 pivotal_label_api: api
 pivotal_label_design: projekt
@@ -2439,11 +2437,11 @@ pivotal_label_projects: projekty
 pivotal_label_search: wyszukiwanie
 pivotal_label_taxonomy: taksonomia
 pivotal_label_voting: głosowanie
-pivotal_label_other:  other
+pivotal_label_other: inne
 pivotal_label_admin:  admin
 pivotal_label_code:  code
 pivotal_label_server: serwer
-pivotal_label_open:  open
+pivotal_label_open: otwarte
 pivotal_label_day: dzień
 pivotal_label_week: tydzień
 pivotal_label_month: miesiąc
@@ -2781,9 +2779,9 @@ name_lister_help:  >
   are not available yet.  Reports should automatically download in a separate
   tab or window; if not, go to your browser's File menu and click 'Save As'.
 
-name_lister_names:  Selected
+name_lister_names: Wybrane
 name_lister_no_js:  This page will not work if javascript is disabled.
-name_lister_species:  Species
+name_lister_species: Gatunki
 name_lister_submit_csv:  Save as Spreadsheet
 name_lister_submit_rtf:  Save as Rich Text
 name_lister_submit_spl:  Create [:species_list]
@@ -2809,23 +2807,23 @@ no_ajax_body:  >
   scientific names and locations, the new version of the [:species_list] creator,
   and more.
 
-no_ajax_browsers:  >
-  Browsers that we recommend (and test the site on regularly) are:
-  \n\n
-  * Firefox / Iceweasel 1.0 or higher
-  \n\n
-  * Internet Explorer 5.5 or higher
-  \n\n
-  * Netscape 7.0 or higher
-  \n\n
-  * Safari 1.2 or higher
-  \n\n
-  * Opera (we know 8.0 works)
-  \n\n
-  * Chrome
-  \n\n
-  If you know that your browser supports AJAX but it's not listed here,
-  please "send us an e-mail":/observer/ask_webmaster_question.
+no_ajax_browsers: >
+ Przeglądarki które rekomendujemy (i regularnie testujemy na stronie) to:
+ \n\n
+ * Firefox / Iceweasel 1.0 lub nowszy
+ \n\n
+ * Internet Explorer 5.5 lub nowszy
+ \n\n
+ * Netscape 7.0 lub nowszy
+ \n\n
+ * Safari 1.2 lub nowsze
+ \n\n
+ * Opera (wiemy że 8.0 działa)
+ \n\n
+ * Chrome
+ \n\n
+ Jeśli wiesz że Twoja przeglądarka obsługuje AJAX ale nie jest tu wymieniona,
+ prosimy "wyślij nam e-mail":/observer/ask_webmaster_question.
 
 no_ajax_dont_care:  >
   If you don't care and you're tired of seeing the "Your Browser is Out of
@@ -2833,7 +2831,7 @@ no_ajax_dont_care:  >
   here":/observer/turn_javascript_off.  (Login and go to preferences to
   re-enable auto-detection.)
 
-no_ajax_title:  Your Browser is Out of Date
+no_ajax_title: Twoja przeglądarka jest nieaktualna
 
 
 # observer/no_browser
@@ -3003,7 +3001,7 @@ refine_search_title:  "Refine [TYPE] Search"
 refine_search_query:  Query
 refine_search_model:  Data type
 refine_search_flavor:  Basic flavor
-refine_search_order:  Sort order
+refine_search_order: Kolejność sortowania
 refine_search_num_results:  Matches
 refine_search_joins:  Joined tables
 refine_search_success:  Modified query now matches [num] objects.
@@ -3011,7 +3009,7 @@ refine_search_goto_index:  "[:show_object(type=:index)]"
 refine_search_conditions:  Parameters
 refine_search_unknown_object:  "Unknown [TYPE] #[id]"
 refine_search_help:  "[[Help]]"
-refine_search_max_size:  Max Size
+refine_search_max_size: Maksymalny rozmiar
 
 refine_search_advanced_search_content:  "[:refine_search_pattern_search]"
 refine_search_advanced_search_location:  "[:Location]"
@@ -3075,7 +3073,7 @@ refine_search_misspellings_either:  doesn't matter
 refine_search_misspellings_no:  only correct names
 refine_search_misspellings_only:  only misspelt names
 refine_search_model_flavor:  Query flavor
-refine_search_modified:  Date last modified
+refine_search_modified: Data ostatniej modyfikacji
 refine_search_name:  Species name
 refine_search_names:  Restrict to these species
 refine_search_nonconsensus:  Include "other" observations?
@@ -3577,30 +3575,30 @@ user_alert_message_other:  "[notes]"
 # ADMIN-TYPE PAGES
 
 # project/add_members
-add_members_change_status:  Change Status
-add_members_denied:  >
-  Permission denied: only admins for a project can add new members.
+add_members_change_status: Zmień status
+add_members_denied: >
+ Brak prawa dostępu: tylko administratorzy projektu mogą dodawać nowych uczestników.
 
-add_members_title:  Add [:users] to [title]
+add_members_title: Dodaj [:users] do [title]
 
 
 # project/add_project
-add_project_already_exists:  A project named '[title]' already exists.
-add_project_group_exists:  >
-  Unable to create project because a [:user_group] named '[group]' already exists.
+add_project_already_exists: Projekt o nazwie '[title]' już istnieje.
+add_project_group_exists: >
+ Nie można utworzyć projektu ponieważ [:user_group] nazwana '[group]' już istnieje.
 
-add_project_need_title:  Projects must have a title.
-add_project_success:  Project was successfully created.
-add_project_title:  Create New Project
+add_project_need_title: Projekty muszą mieć tytuł.
+add_project_success: Projekt utworzony.
+add_project_title: Utwórz nowy projekt
 
 
 # account/add_user_to_group
 add_user_to_group_already:  "[user] is already a member of [group]."
-add_user_to_group_group:  Group name
-add_user_to_group_no_group:  Unable to find the group, '[group]'.
-add_user_to_group_no_user:  Unable to find the [:user], '[user]'.
-add_user_to_group_success:  "[user] added to [group]."
-add_user_to_group_title:  Add [:user] to Group
+add_user_to_group_group: Nazwa grupy
+add_user_to_group_no_group: Nie można znaleźć grupy, '[group]'.
+add_user_to_group_no_user: Nie można znaleźć [:user], '[user]'.
+add_user_to_group_success: "[user] dodany(a) do [group]."
+add_user_to_group_title: Dodaj [:user] do grupy
 add_user_to_group_user:  "[:user] name"
 
 
@@ -3610,16 +3608,16 @@ admin_request_success:  Successfully sent admin request for [title]
 admin_request_title:  Admin Request for [title]
 author_request_add_author:  Make sender an author
 author_request_title:  Authorship Request for [title]
-request_message:  Message
+request_message: Wiadomość
 request_show_user:  Show details on sender
-request_subject:  Subject
+request_subject: Temat
 request_success:  Delivered email.
 
 
 # project/change_member_status
-change_member_status_admins:  Current Project Admins
-change_member_status_change_status:  Change Status
-change_member_status_edit:  Edit Project
+change_member_status_admins: Aktualni administratorzy projektu
+change_member_status_change_status: Zmień status
+change_member_status_edit: Edytuj Projekt
 change_member_status_make_admin:  Make Admin
 change_member_status_make_admin_help:  >
   Make Admin - Allows [:user] to perform admin functions.  They will be able to
@@ -3634,8 +3632,8 @@ change_member_status_make_member_help:  >
   draft names for this project.  They will be the only non-admin members able
   to edit their drafts.
 
-change_member_status_members:  Current Project Members
-change_member_status_remove_member:  Remove Member
+change_member_status_members: Aktualni uczestnicy projektu
+change_member_status_remove_member: Usuń uczestnika
 change_member_status_remove_member_help:  >
   Remove Member - Removes all member and admin priviledges for a project.  [:user]
   will no longer be able view or create draft names for this project.  They
@@ -3663,8 +3661,8 @@ change_user_bonuses_help:  >
 
 
 # project/destroy_project
-destroy_project_failed:  Failed to destroy project.
-destroy_project_success:  Project destroyed.
+destroy_project_failed: Nie udało się zniszczyć projektu.
+destroy_project_success: Projekt zniszczony.
 
 
 # project/edit_project
@@ -3692,7 +3690,7 @@ refresh_vote_cache:  Refreshed vote caches.
 
 
 # project/review_authors
-review_authors_add_author:  Add
+review_authors_add_author: Dodaj
 review_authors_authors:  Current [:description] Authors
 review_authors_denied:  >
   Only existing authors and reviewers can change the description authors.
@@ -3703,7 +3701,7 @@ review_authors_note:  >
   publishing author of the taxon.
 
 review_authors_review_authors:  Review Authors
-review_authors_other_users:  Other [:users]
+review_authors_other_users: Inni [:users]
 review_authors_remove_author:  Remove
 review_authors_title:  Reviewing Author(s) for [name]
 
@@ -3718,32 +3716,32 @@ show_project_add_members:  Add Members
 show_project_admin_group:  Admin Group
 show_project_admin_request:  Admin Request
 show_project_by:  Owned By
-show_project_created:  Created
+show_project_created: Utworzony
 show_project_destroy:  Destroy Project
 show_project_drafts:  Drafts
-show_project_edit:  Edit Project
+show_project_edit: Edytuj Projekt
 show_project_published:  Reviewed Published Names
-show_project_summary:  Summary
+show_project_summary: Podsumowanie
 show_project_title:  "Project: [title]"
 show_project_user_group:  User Group
 
 
 # observer/users_by_name
-users_by_name_title:  Users by Name
-users_by_name_created:  Created
-users_by_name_groups:  Groups
+users_by_name_title: Użytkownicy wg. nazwy
+users_by_name_created: Utworzony
+users_by_name_groups: Grupy
 users_by_name_id:  ID
-users_by_name_last_login:  Last login
+users_by_name_last_login: Ostatnie logowanie
 users_by_name_login:  Login
-users_by_name_name:  Name
+users_by_name_name: Nazwa
 users_by_name_theme:  Theme
-users_by_name_verified:  Verified
+users_by_name_verified: Zweryfikowany
 
 
 # support/create_donation
 create_donation_title:  Record Mushroom Observer Donation
 create_donation_not_allowed:  Only admins can record donations
-create_donation_add:  Add
+create_donation_add: Dodaj
 create_donation_tab:  Record Donation
 
 
@@ -3754,10 +3752,10 @@ review_donations_update:  Update
 review_donations_tab:  Review Donations
 review_reviewed:  Reviewed
 review_id:  Id
-review_who:  Who
+review_who: Kto
 review_anon:  Anon
-review_amount:  Amount
-review_email:  Email
+review_amount: Kwota
+review_email: E-mail
 
 ################################################################################
 
@@ -3800,7 +3798,7 @@ email_field_specimen_available:  Specimen is now available
 email_field_west:  "[:West] edge"
 
 # This is used like this: "<Label>: <old_value> changed to <new_value>"
-email_field_is_now:  changed to
+email_field_is_now: zmienione na
 
 # "Helpful" links at the bottom of the email.
 email_links_change_prefs:  Change your preferences
@@ -3821,8 +3819,8 @@ email_can_respond:  >
   It is entirely up to you whether you want to reply to [name] ([email]) by
   replying directly to this email.
 
-email_handy_links:  "Here are some handy links:"
-email_no_respond:  Please do not reply to this email!
+email_handy_links: "Tutaj trochę przydatnych linków:"
+email_no_respond: Proszę nie odpowiadać na ten e-mail!
 email_report_abuse:  >
   If you feel this user is abusing this service please forward this entire
   email message to: [email]
@@ -3830,7 +3828,7 @@ email_report_abuse:  >
 email_respond_via_comment:  >
   Use the link below to respond via your own public comment.
 
-email_welcome:  Welcome, [user]
+email_welcome: Witaj, [user]
 
 
 # Main message contents.
@@ -3981,7 +3979,7 @@ email_verify_intro:  >
 # INTRO PAGE
 
 # observer/intro
-intro_title:  Introduction
+intro_title: Wprowadzenie
 intro_purpose:  >
   *Purpose:* The purpose of this site is to record observations about
   mushrooms, help people identify mushrooms they aren't familiar with, and
@@ -4656,7 +4654,7 @@ location_help_example_help:  These are cases that are not detected automatically
 location_help_example_title:  Some examples
 location_help_bad:  Bad
 location_help_good:  Good
-location_help_explanation:  Explanation
+location_help_explanation: Wyjaśnienie
 location_help_rules_title:  The Current "Rules"
 
 location_help_rule_reversible:  >
