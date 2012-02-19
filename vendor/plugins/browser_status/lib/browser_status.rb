@@ -133,7 +133,7 @@ module BrowserStatus
       <head>
         <script>
           #{JAVASCRIPT_THAT_SETS_TIMEZONE}
-          window.location = '%s';
+          window.location.replace('%s');
         </script>
       </head>
       <body>
