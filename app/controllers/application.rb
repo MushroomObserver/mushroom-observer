@@ -632,7 +632,7 @@ class ApplicationController < ActionController::Base
   def flash_notice(str)
     session[:notice] += '<br/>' if session[:notice]
     session[:notice] ||= '0'
-    session[:notice] += str
+    session[:notice] += str.to_s
   end
   helper_method :flash_notice
 
