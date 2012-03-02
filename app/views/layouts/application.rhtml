@@ -206,7 +206,7 @@
             <div id="flashes">
               <% if flash_notices? %>
                   <% boxify(flash_notice_level) do %>
-                    <%= flash_get_notices %>
+                    <%= flash_get_notices.to_s.encode %>
                   <% end %>
               <% end
               flash_clear %>

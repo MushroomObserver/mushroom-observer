@@ -382,8 +382,8 @@ class AccountController < ApplicationController
       # Check if we need to upload an image.
       upload = params['user']['upload_image']
       if !upload.blank?
-        if upload.respond_to?(:full_original_filename)
-          name = upload.full_original_filename
+        if upload.respond_to?(:original_filename)
+          name = upload.original_filename.force_encoding('utf-8')
         else
           name = nil
         end

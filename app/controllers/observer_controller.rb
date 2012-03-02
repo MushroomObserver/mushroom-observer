@@ -2195,7 +2195,9 @@ class ObserverController < ApplicationController
       i = 0
       while args2 = args[i.to_s]
         if !(upload = args2[:image]).blank?
-          name = upload.full_original_filename if upload.respond_to?(:full_original_filename)
+          if upload.respond_to?(:original_filename)
+            name = upload.original_filename.force_encoding('utf-8')
+          end
           image = Image.new(args2)
           image.created = Time.now
           image.modified = image.created

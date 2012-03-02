@@ -421,7 +421,8 @@ class Image < AbstractModel
         self.upload_length = file.size
         self.upload_type   = file.content_type if file.respond_to?(:content_type)
         self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
-        self.upload_original_name = file.original_filename.to_s if file.respond_to?(:original_filename)
+        self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
+          if file.respond_to?(:original_filename)
 
       # Image is given as an input stream.  We need to save it to a temp file
       # before we can do anything useful with it.
@@ -432,7 +433,8 @@ class Image < AbstractModel
         self.upload_length = file.size           if file.respond_to?(:size)
         self.upload_type   = file.content_type   if file.respond_to?(:content_type)
         self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
-        self.upload_original_name = file.original_filename.to_s if file.respond_to?(:original_filename)
+        self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
+          if file.respond_to?(:original_filename)
     end
   end
 
