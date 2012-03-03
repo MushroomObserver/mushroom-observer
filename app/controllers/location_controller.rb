@@ -441,7 +441,7 @@ class LocationController < ApplicationController
 
   # Go to previous location: redirects to show_location.
   def prev_location_description # :nologin: :norobots:
-    redirect_to_next_object(:prev, LocatioDescriptionn, params[:id])
+    redirect_to_next_object(:prev, LocationDescription, params[:id])
   end
 
   ##############################################################################
