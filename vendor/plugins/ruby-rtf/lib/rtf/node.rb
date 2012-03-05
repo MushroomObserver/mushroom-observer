@@ -1673,7 +1673,8 @@ module RTF
 
          # Protect non-ASCII characters using "\uNNNx" notation.
          x = text.string
-         x = x.encode('UTF-8') if x.respond_to?(:encode)
+         # (For some reason the encoding is getting set to US-ASCII erroneously.)
+         x = x.force_encoding('UTF-8') if x.respond_to?(:force_encoding)
          x.gsub(/[^ -~\t\r\n]/) do |char|
             safe = ASCII_EQUIVALENTS[char] || '?'
             begin

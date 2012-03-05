@@ -1,8 +1,8 @@
 <%
   observation_url = "#{HTTP_DOMAIN}/#{@observation.id}"
   name_url        = "#{HTTP_DOMAIN}/name/show_name/#{@naming.name_id}"
-  observer_url    = "#{HTTP_DOMAIN}/observer/observer/show_user/#{@observation.user_id}"
-  identifier_url  = "#{HTTP_DOMAIN}/observer/observer/show_user/#{@naming.user_id}"
+  observer_url    = "#{HTTP_DOMAIN}/observer/show_user/#{@observation.user_id}"
+  identifier_url  = "#{HTTP_DOMAIN}/observer/show_user/#{@naming.user_id}"
 
   intro = :email_naming_for_tracker_intro.l(
     :obs  => link_to(:observation.l, observation_url),
