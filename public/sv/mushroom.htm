@@ -2,29 +2,34 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<script language="JavaScript" src="jquery-1.7.js">
+<script type="text/javascript" language="JavaScript" src="jquery-1.7.js">
 </script>
-<script language="JavaScript" src="query.js">
+<script type="text/javascript" language="JavaScript" src="query.js">
 </script>
 
 <script type="text/javascript" src="Interact.js"></script>
     <title>Untitled Page</title>
+</head>
 
 <body>
-   <div></div>
-    <form name="drops" method="get" action="#">
-<table border=0 bgcolor="#ffeecc">
+   <div>
+     This is prototype page that is exploring using semantic web technology to describe Fungi.
+   </div>
+   <form name="drops" method="get" action="#">
+<table border="0" bgcolor="#ffeecc">
 
 <tr>
 <td>Select a Feature</td>
-<td><select name="master" id="Primary" size=1 >
+<td><select name="master" id="Primary" size="1">
+    <option value="No Options Found">
 </select>
 </td>
 </tr>
 <tr>
 <td>Select a Value</td>
 <td>
-<select name="slave" id="Secondary" size=1>
+<select name="slave" id="Secondary" size="1">
+    <option value="No Options Found">
 </select>
 </td>
 
@@ -43,33 +48,33 @@
 
 <div style="position:absolute;top:100px; left:0px">
 <p><b>Vernacular:</b></p>
-<ul id="Vernacular" type="disc">
-      
-    </ul>
+  <ul id="Vernacular" type="disc">
+      <li></li>
+  </ul>
 
 </div>
 <div style="position:absolute;top:100px; left:200px">
 <p><b>Species:</b></p>
-<ul id="Species" type="disc">
-      
-    </ul>
+  <ul id="Species" type="disc">
+      <li></li>
+  </ul>
 
 </div>
 
 <div style="position:absolute;top:100px; left:500px">
 <p><b>Selection History:</b></p>
-<ul id="History" type="1">
-      
-    </ul>
+  <ol id="History" type="1">
+      <li></li>
+  </ol>
 
 </div>
 
 
 <div style="position:absolute;top:300px; left:500px">
 <p><b>Related Feature - Values:</b></p>
-<ul id="Related_features" type="1">
-      
-    </ul>
+  <ol id="Related_features" type="1">
+      <li></li>
+  </ol>
 
 </div>
 
@@ -101,6 +106,5 @@
 </div>
 
 </body>
-</head>
 
 </html>
