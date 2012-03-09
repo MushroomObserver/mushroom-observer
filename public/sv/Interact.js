@@ -225,7 +225,7 @@ function list_primary_on_change(){
         setCurrentlyViewedOptions();
 	if(list_Primary_List.length==0) list_Secondary_List=new Array();
 	set_selection_options(form_Secondary_List,list_Secondary_List);
-	getElement("new Value").innerHTML="Enter Unseen Value for "+element_Primary_Feature.text;
+	getElement("new-value").innerHTML="Enter Unseen Value for "+element_Primary_Feature.text;
 	clearStateInfo();
 	save_queries[3]=undefined;
 	
