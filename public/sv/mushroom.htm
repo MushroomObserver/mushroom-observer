@@ -1,15 +1,12 @@
 ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<script type="text/javascript" language="JavaScript" src="jquery-1.7.js">
-</script>
-<script type="text/javascript" language="JavaScript" src="query.js">
-</script>
-
-<script type="text/javascript" src="Interact.js"></script>
+  <head>
+    <script type="text/javascript" language="JavaScript" src="jquery-1.7.js"></script>
+    <script type="text/javascript" language="JavaScript" src="query.js"></script>
+    <script type="text/javascript" src="Interact.js"></script>
     <title>Untitled Page</title>
-</head>
+  </head>
 
 <body>
    <div>
@@ -37,24 +34,22 @@
 </tr>
 </table>
 
+<div>
+  <button type="button" id="Main_Button" value="tinybutton"> Submit Choice
+  </button>
+</div>
 
 </form>
 
-<div>
-
-<button type="button" id="Main_Button" value="tinybutton"> Submit Choice
-</button>
-</div>
-
-
-<div style="position:absolute;top:100px; left:0px">
+<div style="width: 300px; height: 200px; float: left;">
 <p><b>Vernacular:</b></p>
   <ul id="Vernacular" type="disc">
       <li></li>
   </ul>
 
 </div>
-<div style="position:absolute;top:100px; left:200px">
+
+<div style="width: 300px; height: 200px; float: left;">
 <p><b>Species:</b></p>
   <ul id="Species" type="disc">
       <li></li>
@@ -62,7 +57,7 @@
 
 </div>
 
-<div style="position:absolute;top:100px; left:500px">
+<div style="height: 200px;">
 <p><b>Selection History:</b></p>
   <ol id="History" type="1">
       <li></li>
@@ -71,40 +66,38 @@
 </div>
 
 
-<div style="position:absolute;top:300px; left:500px">
-<p><b>Related Feature - Values:</b></p>
-  <ol id="Related_features" type="1">
-      <li></li>
-  </ol>
-
-</div>
-
-<div id="user-input" style="position:absolute;top:300px; left:00px">
+<div id="user-input" style="width: 500px; height: 200px; float: left;">
 <p><b>Add User Content:</b></p>
-<form> 
 
+<form action="#"> 
+  <p id="new-feature">Enter Unseen Feature</p>
+  <input type="text" name="test" />
 
-<p id="new-feature">Enter Unseen Feature</p>
- <input type="text" name="test" />
+  <p id="new-value">Enter Unseen Value</p>
+  <input type="text" name="test" />
+
+  <div style="position:relative;top:0x; left:0x">
+    <p>Enter basis for entry:</p>
+    <textarea rows="5" cols="20">
+    </textarea> 
+  </div>
+  <div>
+    <button type="button" id="fakeB" value="tinybutton"> Submit
+    </button>
+  </div>
 </form> 
-<form> 
-<p id="new-value">Enter Unseen Value</p>
- <input type="text" name="test" />
-</form> 
-<div style="position:relative;top:0x; left:0x">
-<p> Enter basis for entry:</p>
-<textarea rows="5" cols="20">
-
-</textarea> 
-
 </div>
-<div><button type="button" id="fakeB" value="tinybutton"> Submit
-</button></div>
 
 <div>
-<p id="txtHint" style="position:absolute;top:900x; left:900x"></p>
-</div>
-</div>
+  <div>
+  <p><b>Related Feature - Values:</b></p>
+    <ol id="Related_features" type="1">
+        <li></li>
+    </ol>
+
+  </div>
+
+<p id="txtHint"></p>
 </div>
 
 </body>
