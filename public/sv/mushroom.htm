@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script language="JavaScript" src="jquery-1.7.js">
+</script>
+<script language="JavaScript" src="query.js">
+</script>
+
+<script type="text/javascript" src="Interact.js"></script>
+    <title>Untitled Page</title>
+
+<body>
+   <div></div>
+    <form name="drops" method="get" action="#">
+<table border=0 bgcolor="#ffeecc">
+
+<tr>
+<td>Select a Feature</td>
+<td><select name="master" id="Primary" size=1 >
+</select>
+</td>
+</tr>
+<tr>
+<td>Select a Value</td>
+<td>
+<select name="slave" id="Secondary" size=1>
+</select>
+</td>
+
+</tr>
+</table>
+
+
+</form>
+
+<div>
+
+<button type="button" id="Main_Button" value="tinybutton"> Submit Choice
+</button>
+</div>
+
+
+<div style="position:absolute;top:100px; left:0px">
+<p><b>Vernacular:</b></p>
+<ul id="Vernacular" type="disc">
+      
+    </ul>
+
+</div>
+<div style="position:absolute;top:100px; left:200px">
+<p><b>Species:</b></p>
+<ul id="Species" type="disc">
+      
+    </ul>
+
+</div>
+
+<div style="position:absolute;top:100px; left:500px">
+<p><b>Selection History:</b></p>
+<ul id="History" type="1">
+      
+    </ul>
+
+</div>
+
+
+<div style="position:absolute;top:300px; left:500px">
+<p><b>Related Feature - Values:</b></p>
+<ul id="Related_features" type="1">
+      
+    </ul>
+
+</div>
+
+<div id="User input" style="position:absolute;top:300px; left:00px">
+<p><b>Add User Content:</b></p>
+<form> 
+
+
+<p id="new Feature">Enter Unseen Feature</p>
+ <input type="text" name="test" />
+</form> 
+<form> 
+<p id="new Value">Enter Unseen Value</p>
+ <input type="text" name="test" />
+</form> 
+<div style="position:relative;top:0x; left:0x">
+<p> Enter basis for entry:</p>
+<textarea rows="5" cols="20">
+
+</textarea> 
+
+</div>
+<div><button type="button" id="fakeB" value="tinybutton"> Submit
+</button></div>
+<div>
+<p id="txtHint" style="position:absolute;top:900x; left:900x"></p>
+</div>
+</div>
+</div>
+
+</body>
+</head>
+
+</html>
