@@ -284,7 +284,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     params = { "id" => name.id.to_s }
     requires_login(:edit_name, params)
-    assert_form_action(:action => 'edit_name')
+    assert_form_action(:action => 'edit_name', :id => name.id.to_s)
   end
 
   def test_create_name
@@ -322,21 +322,21 @@ class NameControllerTest < FunctionalTestCase
     name = names(:chlorophyllum_rachodes)
     params = { :id => name.id }
     requires_login(:change_synonyms, params)
-    assert_form_action(:action => 'change_synonyms', :approved_synonyms => [])
+    assert_form_action(:action => 'change_synonyms', :approved_synonyms => [], :id => name.id)
   end
 
   def test_deprecate_name
     name = names(:chlorophyllum_rachodes)
     params = { :id => name.id }
     requires_login(:deprecate_name, params)
-    assert_form_action(:action => 'deprecate_name', :approved_name => '')
+    assert_form_action(:action => 'deprecate_name', :approved_name => '', :id => name.id)
   end
 
   def test_approve_name
     name = names(:lactarius_alpigenes)
     params = { :id => name.id }
     requires_login(:approve_name, params)
-    assert_form_action(:action => 'approve_name')
+    assert_form_action(:action => 'approve_name', :id => name.id)
   end
 
   def test_eol
@@ -2208,7 +2208,7 @@ class NameControllerTest < FunctionalTestCase
     params = { :id => name.id.to_s }
     requires_login(:email_tracking, params)
     assert_response('email_tracking')
-    assert_form_action(:action => 'email_tracking')
+    assert_form_action(:action => 'email_tracking', :id => name.id.to_s)
   end
 
   def test_email_tracking_enable_no_note

@@ -1142,7 +1142,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("rolf", obs.user.login)
     params = { :id => obs.id.to_s }
     requires_user(:edit_observation, ["observer", "show_observation"], params)
-    assert_form_action(:action => 'edit_observation')
+    assert_form_action(:action => 'edit_observation', :id => obs.id.to_s)
   end
 
   def test_edit_observation
@@ -1235,7 +1235,7 @@ class ObserverControllerTest < FunctionalTestCase
       :id => obs.id.to_s
     }
     requires_login(:create_naming, params)
-    assert_form_action(:action => 'create_naming', :approved_name => '')
+    assert_form_action(:action => 'create_naming', :approved_name => '', :id => obs.id.to_s)
   end
 
   # Now test the naming part of it.
@@ -1245,7 +1245,7 @@ class ObserverControllerTest < FunctionalTestCase
       :id => nam.id.to_s
     }
     requires_user(:edit_naming, ["observer", "show_observation"], params)
-    assert_form_action(:action => 'edit_naming', :approved_name => nam.text_name)
+    assert_form_action(:action => 'edit_naming', :approved_name => nam.text_name, :id => nam.id.to_s)
   end
 
   def test_update_observation_new_name

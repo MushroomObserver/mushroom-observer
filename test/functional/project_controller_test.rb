@@ -23,7 +23,7 @@ class ProjectControllerTest < FunctionalTestCase
       }
     }
     post_requires_user(:edit_project, :show_project, params)
-    assert_form_action(:action => 'edit_project') # Failure
+    assert_form_action(:action => 'edit_project', :id => project.id) # Failure
   end
 
   def destroy_project_helper(project, changer)
@@ -116,9 +116,9 @@ class ProjectControllerTest < FunctionalTestCase
 
   def test_edit_project
     project = projects(:eol_project)
-    params = { "id" => project.id.to_s }
+    params = { :id => project.id.to_s }
     requires_user(:edit_project, :show_project, params)
-    assert_form_action(:action => 'edit_project')
+    assert_form_action(:action => 'edit_project', :id => project.id.to_s)
   end
 
   def test_edit_project_post
@@ -225,7 +225,7 @@ class ProjectControllerTest < FunctionalTestCase
       :candidate => @mary.id
     }
     requires_login(:change_member_status, params)
-    assert_form_action(:action => 'change_member_status', :candidate => @mary.id)
+    assert_form_action(:action => 'change_member_status', :candidate => @mary.id, :id => project.id)
   end
 
   # non-admin member -> non-admin member (should be a no-op)

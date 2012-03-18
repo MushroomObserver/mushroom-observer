@@ -399,6 +399,7 @@ module BrowserStatus
   #   url = url_for(:action => "blah", ...)
   #   new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)
   def add_args_to_url(url, new_args)
+    new_args = new_args.clone
     args = {}
 
     # Parse parameters off of current URL.
@@ -412,14 +413,12 @@ module BrowserStatus
       end
     end
 
-    # Deal with the special "/object/45" => "/object/show?id=45" case.
-    if match = addr.match(/\/(\d+)$/)
-      # The "pseudo" arg takes precedence over "real" arg... that is, in the
-      # url "/page/4?id=5", empirically Rails chooses the 4.  In fact, it seems
-      # always to choose the left-most where there is redundancy.
-      args['id'] = match[1]
-      addr.sub!(/\/\d+$/, '')
-      addr += '/show' if addr.match(/\/\/[^\/]+\/[^\/]+$/)
+    # Deal with the special "/xxx/id" case.
+    if addr.match(/\/(\d+)$/)
+      new_id = new_args[:id] || new_args['id']
+      addr.sub!(/\d+$/, new_id.to_s) if new_id
+      new_args.delete(:id)
+      new_args.delete('id')
     end
 
     # Merge in new arguments, deleting where new values are nil.

@@ -180,7 +180,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_add_image
     requires_login(:add_image, :id => observations(:coprinus_comatus_obs).id)
-    assert_form_action(:action => 'add_image')
+    assert_form_action(:action => 'add_image', :id => observations(:coprinus_comatus_obs).id)
     # Check that image cannot be added to an observation the user doesn't own.
     get_with_dump(:add_image, :id => observations(:minimal_unknown).id)
     assert_response(:controller => "observer", :action => "show_observation")
@@ -308,7 +308,7 @@ class ImageControllerTest < FunctionalTestCase
     params = { "id" => image.id.to_s }
     assert("rolf" == image.user.login)
     requires_user(:edit_image, ['image', 'show_image'], params)
-    assert_form_action :action => 'edit_image'
+    assert_form_action(:action => 'edit_image', :id => image.id.to_s)
   end
 
   def test_update_image
@@ -342,7 +342,7 @@ class ImageControllerTest < FunctionalTestCase
     params = { :id => obs.id }
     assert_equal('rolf', obs.user.login)
     requires_user(:remove_images, [:observer, :show_observation], params)
-    assert_form_action(:action => 'remove_images')
+    assert_form_action(:action => 'remove_images', :id => obs.id)
   end
 
   def test_reuse_image

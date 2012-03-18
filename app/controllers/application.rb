@@ -141,6 +141,15 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # This should move the error templates 404.html and 500.html so that
+  # Passenger will no longer try to serve them instead of observations
+  # if the user requests mo.org/404 or mo.org/500.
+  def rescue_action_in_public(exception)
+    status = interpret_status(response_code_for_rescue(exception))
+    path = "#{Rails.public_path}/error_#{status[0,3]}.html"
+    render(:file => path, :status => status)
+  end
+
   ##############################################################################
   #
   #  :section: User authentication

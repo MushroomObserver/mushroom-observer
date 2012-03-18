@@ -449,7 +449,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal('rolf', spl.user.login)
     requires_user(:edit_species_list, :show_species_list, params)
     assert_response('edit_species_list')
-    assert_form_action(:action => 'edit_species_list')
+    assert_form_action(:action => 'edit_species_list', :id => spl.id.to_s)
   end
 
   def test_update_species_list_nochange
@@ -702,7 +702,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :id => spl.id
     }
     requires_user(:upload_species_list, :show_species_list, params)
-    assert_form_action(:action => 'upload_species_list')
+    assert_form_action(:action => 'upload_species_list', :id => spl.id)
   end
 
   def test_read_species_list

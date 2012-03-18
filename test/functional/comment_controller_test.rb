@@ -34,7 +34,7 @@ class CommentControllerTest < FunctionalTestCase
     params = { "id" => comment.id.to_s }
     assert_equal("rolf", comment.user.login)
     requires_user(:edit_comment, ['observer', 'show_observation'], params)
-    assert_form_action(:action => 'edit_comment')
+    assert_form_action(:action => 'edit_comment', :id => comment.id.to_s)
   end
 
   def test_destroy_comment

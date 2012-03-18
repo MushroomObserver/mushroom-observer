@@ -198,6 +198,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   def test
+    raise "#{RAILS_ENV} kaboom!"
   end
 
   # Default page.  Just displays latest happenings.  The actual action is
