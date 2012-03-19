@@ -175,6 +175,28 @@ end
 # See http://www.deathy.net/blog/2007/06/26/rails-asset-timestamping-and-why-its-bad/ for more details.
 ENV['RAILS_ASSET_ID'] = ''
 
+# This should move the error templates 404.html and 500.html so that Passenger will no longer
+# try to serve them instead of observations if the user requests mo.org/404 or mo.org/500.
+# Copied from lines 146-164 in action_controller/rescue.rb.  Seems hacky, but if you read
+# the comments at the head of this file, this was the expected method of customizing error
+# handling in Rails(!)
+module ActionController
+  module Rescue
+    module ClassMethods
+    protected
+      def rescue_action_in_public(exception)
+        status = interpret_status(response_code_for_rescue(exception))
+        path = ERROR_PAGE_FILES.sub(/NNN/, status[0,3])
+        if File.exist?(path)
+          render :file => path, :status => status
+        else
+          head status
+        end
+      end
+    end
+  end
+end
+
 # RedCloth 4.x has quite a few bugs still. This should roughly fix them until
 # Jason Garber has time to fix them properly in the parser rules. :stopdoc:
 module RedCloth

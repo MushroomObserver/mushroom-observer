@@ -67,6 +67,9 @@ USER_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/user_primer.#{RAILS_ENV}" if !define
 # File where we keep name_lister data cache.
 NAME_LISTER_CACHE_FILE = "#{RAILS_ROOT}/public/javascripts/name_list_data.js" if !defined? NAME_LISTER_CACHE_FILE
 
+# Location of HTML pages to serve on error.
+ERROR_PAGE_FILES = "#{RAILS_ROOT}/public/error_NNN.html" if !defined? ERROR_PAGE_FILES
+
 # Limit size of image uploads (ImageMagick bogs down on large images).
 IMAGE_UPLOAD_MAX_SIZE = 20000000                         if !defined? IMAGE_UPLOAD_MAX_SIZE
 
