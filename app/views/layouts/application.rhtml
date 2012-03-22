@@ -133,6 +133,17 @@
                 <% end %>
                 <br/>
 
+                <% if DEVELOPMENT || is_reviewer? %>
+                  Layouts:<br/>
+                  <% for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+                    if file.match(/(\w+)\.rhtml/)
+                      layout = $1  %>
+                      <%= indent %><a href="javascript:document.cookie = 'mo_layout=<%=layout%>'; window.location.reload()"><%=layout%></a><br/>
+                    <% end %>
+                  <% end %>
+                  <br/>
+                <% end %>
+
                 <%= link_to(:app_contributors.t, :controller => 'observer', :action => 'users_by_contribution') %><br/>
                 <%= link_to(:app_site_stats.t, :controller => 'observer', :action => 'show_site_stats') %><br/>
                 <%= link_to(:translators_note_title.t, :controller => 'observer', :action => 'translators_note') %><br/>

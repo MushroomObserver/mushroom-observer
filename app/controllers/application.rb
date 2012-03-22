@@ -111,7 +111,12 @@ class ApplicationController < ActionController::Base
   # after_filter  :log_memory_usage
 
   # Enable this to test other layouts...
-  # layout 'test'
+  layout :choose_layout
+  def choose_layout
+    name = cookies[:mo_layout].to_s
+    name = 'application' if name.blank?
+    return name
+  end
 
   # Catch errors for integration tests.
   def catch_errors

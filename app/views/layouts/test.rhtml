@@ -340,16 +340,16 @@
       <%= link_to(:app_login.t, :controller => 'account', :action => 'login') %> |
       <%= link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %>
     <% else %>
-      <%= :app_current_user.t %> |
+      <%= h(@user.login) %> |
       <%= link_to(:app_account.t, :controller => 'account', :action => 'prefs') %> |
       <%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %>
     <% end %>
 
     <% form_tag({ :controller => 'observer', :action => 'pattern_search' }, { :id => 'search_form' }) do %>
+      <%= :app_find.t %>:
       <%= text_field(:search, :pattern, :size => 15, :value => session[:pattern],
                      :onfocus => 'enter_search()', :onblur => 'leave_search()')%>
       <input type="hidden" id="search_type" name="search[type]"/>
-      <%= :app_find.t %>
     <% end %>
 
     <% if @timer_start %>
@@ -485,6 +485,17 @@
         <li onclick="window.location = '<%= url_for(h(reload_with_args(:user_locale => locale))) %>'"><%= locale.sub('-','_').to_sym.t %></li>
       <% end %>
     </ul>
+    <% if DEVELOPMENT || is_reviewer? %>
+      <hr/>
+      <ul>
+        <% for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+          if file.match(/(\w+)\.rhtml/)
+            layout = $1  %>
+            <li onclick="document.cookie = 'mo_layout=<%=layout%>'; window.location.reload()"><%=layout%> layout</li>
+          <% end %>
+        <% end %>
+      </ul>
+    <% end %>
   </div>
 
   <div id="body_div">
