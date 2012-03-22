@@ -6,7 +6,6 @@
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
   <%= "<link rel=\"SHORTCUT ICON\" href=\"#{HTTP_DOMAIN}/favicon.ico\" />"%>
-  <script src="/design_test/jquery-1.5.2.min.js"></script>
 
   <%= check_if_user_turned_javascript_on %>
 
@@ -34,6 +33,8 @@
   %>
 
   <%= sort_javascript_includes.map {|m| javascript_include_tag(m).sub(/\.js/,'.js?v=2')}.join('') %>
+  <script src="/design_test/jquery-1.5.2.min.js"></script>
+  <script>jQuery.noConflict()</script>
 
   <% if @header %>
     <%= @header %>
@@ -256,25 +257,37 @@
 
     function show_pulldown(menu, field, opts) {
       var pos = field.offset();
-      var x = pos.left;
-      var y = pos.top;
-      var fw = field.outerWidth();
-      var fh = field.outerHeight();
-      var mw = menu.outerWidth();
+      var x   = pos.left;
+      var y   = pos.top;
+      var fw  = field.outerWidth();
+      var fh  = field.outerHeight();
+      var mw  = menu.outerWidth();
+      var mh  = menu.outerHeight();
+      var sx  = jQuery(document).scrollLeft();
+      var sy  = jQuery(document).scrollTop();
+      var sw  = jQuery(window).width();
+      var sh  = jQuery(window).height();
       if (fw > mw) {
         mw = fw;
         menu.css("min-width", mw + "px");
       }
       if (opts["justify"] == "right")
-        menu.css("left", (x + fw - mw) + "px");
+        x += fw - mw;
       else if (opts["offx"])
-        menu.css("left", (x + opts["offx"]) + "px");
-      else
-        menu.css("left", x + "px");
+        x += opts["offx"];
       if (opts["offy"])
-        menu.css("top", (y + fh + opts["offy"]) + "px");
+        y += fh + opts["offy"];
       else
-        menu.css("top", (y + fh) + "px");
+        y += fh;
+      if (x + mw > sx + sw)
+        x = sx + sw - mw;
+      if (x < sx)
+        x = sx;
+      if (y + mh > sy + sh)
+        y = sy + sh - mh;
+      if (y < sy)
+        y = sy;
+      menu.css({ top: y + "px", left: x + "px" });
       menu.show();
     }
 
@@ -348,7 +361,8 @@
     <% form_tag({ :controller => 'observer', :action => 'pattern_search' }, { :id => 'search_form' }) do %>
       <%= :app_find.t %>:
       <%= text_field(:search, :pattern, :size => 15, :value => session[:pattern],
-                     :onfocus => 'enter_search()', :onblur => 'leave_search()')%>
+                     :onfocus => 'enter_search()', :onblur => 'leave_search()',
+                     :autocomplete => :off) %>
       <input type="hidden" id="search_type" name="search[type]"/>
     <% end %>
 
@@ -526,7 +540,7 @@
     <div class="TextContent">
       <%= @content_for_layout %>
     </div>
-    
+
     <br/><br/><br/>
     <% if Locale.code.to_s != 'en-US' %>
       <div id="translators_credit">
