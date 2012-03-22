@@ -113,8 +113,10 @@ class ApplicationController < ActionController::Base
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
-    name = cookies[:mo_layout].to_s
+    name = params[:layout].to_s
+    name = session[:layout].to_s if name.blank?
     name = 'application' if name.blank?
+    session[:layout] = name
     return name
   end
 

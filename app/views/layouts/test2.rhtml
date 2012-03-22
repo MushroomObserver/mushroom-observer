@@ -71,7 +71,7 @@
       border: 2px solid #FE0;
     }
     div#notify_body {
-      padding: 2px 10px 7px 10px;
+      padding: 2px 10px 2px 10px;
     }
 
     div#login_div {
@@ -137,7 +137,7 @@
 
     div.close_button {
       float: right;
-      margin: 5px 5px 0px 0px;
+      margin: 2px 2px 0px 0px;
       width: 16px;
       height: 16px;
       z-index: 11;
@@ -202,6 +202,8 @@
       var menu = jQuery("#left_menu_" + n);
       var x = head.outerWidth();
       var y = head.outerHeight();
+      var h1 = head.outerHeight();
+      var h2 = menu.outerHeight();
       head.mouseover(function () {
         in_head[n] = true;
         if (leaving[n]) {
@@ -209,7 +211,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_pulldown(menu, head, { offx: x, offy: -y });
+          show_pulldown(menu, head, { offx: x, offy: -y - Math.round((h2-h1)/2) });
           hide_others();
           menu_up[n] = true;
         }
@@ -221,7 +223,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_pulldown(menu, head, { offx: x, offy: -y });
+          show_pulldown(menu, head, { offx: x, offy: -y - Math.round((h2-h1)/2) });
           hide_others();
           menu_up[n] = true;
         }
@@ -506,13 +508,14 @@
         <li onclick="window.location = '<%= url_for(h(reload_with_args(:user_locale => locale))) %>'"><%= locale.sub('-','_').to_sym.t %></li>
       <% end %>
     </ul>
-    <% if DEVELOPMENT || is_reviewer? %>
+    <% if true %>
       <hr/>
       <ul>
         <% for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
           if file.match(/(\w+)\.rhtml/)
-            layout = $1  %>
-            <li onclick="document.cookie = 'mo_layout=<%=layout%>'; window.location.reload()"><%=layout%> layout</li>
+            layout = layout2 = $1
+            layout2 = 'old' if layout == 'application' %>
+            <li onclick="window.location = '<%= url_for(h(reload_with_args(:layout => layout))) %>'"><%= layout2 %> layout</li>
           <% end %>
         <% end %>
       </ul>

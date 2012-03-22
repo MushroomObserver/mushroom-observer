@@ -198,7 +198,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   def test
-    raise "#{RAILS_ENV} kaboom!"
+    flash_notice "Testing warning message."
   end
 
   # Default page.  Just displays latest happenings.  The actual action is
