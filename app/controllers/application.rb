@@ -110,6 +110,9 @@ class ApplicationController < ActionController::Base
   # after_filter  :extra_gc
   # after_filter  :log_memory_usage
 
+  # Enable this to test other layouts...
+  # layout 'test'
+
   # Catch errors for integration tests.
   def catch_errors
     yield
