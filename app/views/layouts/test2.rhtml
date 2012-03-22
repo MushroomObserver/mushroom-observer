@@ -1,0 +1,574 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => :app_rss.l}) %>
+  <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
+  <%= "<link rel=\"SHORTCUT ICON\" href=\"#{HTTP_DOMAIN}/favicon.ico\" />"%>
+  <script src="/design_test/jquery-1.5.2.min.js"></script>
+
+  <%= check_if_user_turned_javascript_on %>
+
+  <%=
+    css = nil
+    if is_in_admin_mode?
+      css = 'Admin'
+    elsif is_robot?
+      css = 'BlackOnWhite'
+    else
+      if CSS.member?(controller.action_name)
+        css = controller.action_name
+      else
+        if @user.nil?
+          css = 'BlackOnWhite'
+        else
+          css = @user.theme
+        end
+      end
+      unless CSS.member?(css)
+        css = CSS[rand(CSS.length)]
+      end
+    end
+    stylesheet_link_tag('general.css?v=1', "#{css}.css?v=1")
+  %>
+
+  <%= sort_javascript_includes.map {|m| javascript_include_tag(m).sub(/\.js/,'.js?v=2')}.join('') %>
+
+  <% if @header %>
+    <%= @header %>
+  <% end %>
+
+  <!-- #################################################################### -->
+
+  <style>
+    body, div, p, img, table, tr, td, ul, li {
+      margin: 0px;
+      border: 0px;
+      padding: 0px;
+    }
+
+    div#banner_div {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 141px;
+      background: url("/design_test/banner2_color.png") no-repeat;
+      z-index: 1;
+    }
+
+    div#notify_div {
+      position: absolute;
+      top: 5px;
+      left: 265px;
+      width: 500px;
+      opacity: 0.90;
+      z-index: 3;
+    }
+    div#notify_border {
+      border: 2px solid #FE0;
+    }
+    div#notify_body {
+      padding: 2px 10px 7px 10px;
+    }
+
+    div#login_div {
+      position: absolute;
+      top: 2px;
+      left: 0px;
+      width: 995px;
+      text-align: right;
+      font-size: 85%;
+      line-height: 170%;
+      z-index: 2;
+    }
+
+    div.left_tabs {
+      position: absolute;
+      top: 140px;
+      left: 0px;
+      z-index: 0;
+    }
+    div.left_tab {
+      margin-bottom: -2px;
+      border: 2px solid black;
+      padding: 10px 5px 10px 5px;
+      font-weight: bold;
+      line-height: 90%;
+      text-align: center;
+      background: #DDD;
+    }
+    div.left_tab:hover {
+      background: #FFE;
+    }
+
+    div#body_div {
+      position: absolute;
+      top: 100px;
+      left: 30px;
+      width: 950px;
+      height: 100%;
+      z-index: 0;
+      padding: 10px;
+    }
+
+    div.popup_menu {
+      position: absolute;
+      display: none;
+      background: white;
+      border: 1px solid black;
+      text-align: left;
+      z-index: 10;
+    }
+    div.popup_menu ul {
+      list-style: none;
+    }
+    div.popup_menu li {
+      padding: 1px 5px 1px 5px;
+    }
+    div.popup_menu li:hover {
+      background: #FF7;
+    }
+    div#search_menu li {
+      padding-left: 20px;
+    }
+
+    div.close_button {
+      float: right;
+      margin: 5px 5px 0px 0px;
+      width: 16px;
+      height: 16px;
+      z-index: 11;
+      border: 1px outset #777;
+      background: url("/design_test/close_button.png");
+      opacity: 0.70;
+    }
+    div.close_button:hover {
+      background: #CCC url("/design_test/close_button.png");
+      border: 1px inset #777;
+      opacity: 1.00;
+    }
+
+    h1 {
+      font-size: 150%;
+      font-weight: normal;
+      text-align: center;
+    }
+  </style>
+
+  <!-- #################################################################### -->
+
+  <script>
+    jQuery.noConflict();
+
+    var in_search = false;
+    var search_on = false;
+
+    function keypress() {
+      if (in_search)
+        show_search();
+    }
+
+    function enter_search() {
+      in_search = true;
+    }
+    function leave_search() {
+      in_search = false;
+      search_on = false;
+      jQuery("#search_menu").fadeOut(200);
+    }
+    function show_search() {
+      if (!search_on) {
+        var menu = jQuery("#search_menu");
+        var field = jQuery("#search_pattern");
+        show_pulldown(menu, field, { justify: "right" });
+        search_on;
+      }
+    }
+    function do_search(type) {
+      jQuery("#search_type").attr("value", type);
+      jQuery("#search_form").submit();
+    }
+
+    var in_head = [];
+    var in_menu = [];
+    var menu_up = [];
+    var leaving = [];
+
+    function activate_menu(n) {
+      var head = jQuery("#left_tab_" + n);
+      var menu = jQuery("#left_menu_" + n);
+      var x = head.outerWidth();
+      var y = head.outerHeight();
+      head.mouseover(function () {
+        in_head[n] = true;
+        if (leaving[n]) {
+          clearTimeout(leaving[n]);
+          leaving[n] = false;
+        }
+        if (!menu_up[n]) {
+          show_pulldown(menu, head, { offx: x, offy: -y });
+          hide_others();
+          menu_up[n] = true;
+        }
+      });
+      menu.mouseover(function () {
+        in_menu[n] = true;
+        if (leaving[n]) {
+          clearTimeout(leaving[n]);
+          leaving[n] = false;
+        }
+        if (!menu_up[n]) {
+          show_pulldown(menu, head, { offx: x, offy: -y });
+          hide_others();
+          menu_up[n] = true;
+        }
+      });
+      head.mouseout(function () {
+        in_head[n] = false;
+        if (menu_up[n] && !leaving[n]) {
+          leaving[n] = setTimeout(function () {
+            leaving[n] = menu_up[n] = false;
+            if (!in_head[n] && !in_menu[n])
+              menu.fadeOut(100);
+          }, 250);
+        }
+      });
+      menu.mouseout(function () {
+        in_menu[n] = false;
+        if (menu_up[n] && !leaving[n]) {
+          leaving[n] = setTimeout(function () {
+            leaving[n] = menu_up[n] = false;
+            if (!in_head[n] && !in_menu[n])
+              menu.fadeOut(100);
+          }, 250);
+        }
+      });
+    }
+    function hide_others() {
+      for (var i=1; i<=menu_up.length; i++) {
+        if (leaving[i]) {
+          clearTimeout(leaving[i]);
+          leaving[i] = false;
+        }
+        if (menu_up[i]) {
+          jQuery("#left_menu_" + i).fadeOut(100);
+          menu_up[i] = false;
+        }
+      }
+    }
+
+    function show_pulldown(menu, field, opts) {
+      var pos = field.offset();
+      var x = pos.left;
+      var y = pos.top;
+      var fw = field.outerWidth();
+      var fh = field.outerHeight();
+      var mw = menu.outerWidth();
+      if (fw > mw) {
+        mw = fw;
+        menu.css("min-width", mw + "px");
+      }
+      if (opts["justify"] == "right")
+        menu.css("left", (x + fw - mw) + "px");
+      else if (opts["offx"])
+        menu.css("left", (x + opts["offx"]) + "px");
+      else
+        menu.css("left", x + "px");
+      if (opts["offy"])
+        menu.css("top", (y + fh + opts["offy"]) + "px");
+      else
+        menu.css("top", (y + fh) + "px");
+      menu.show();
+    }
+
+    function initialize() {
+      jQuery(document).keypress(keypress);
+      activate_menu(1,   0,  70);
+      activate_menu(2,  70, 152);
+      activate_menu(3, 152, 292);
+      activate_menu(4, 292, 380);
+      activate_menu(5, 380, 444);
+      activate_menu(6, 444, 594);
+      activate_menu(7, 594, 693);
+      activate_menu(8, 693, 825);
+    }
+  </script>
+
+  <!-- #################################################################### -->
+
+</head>
+<body onload="initialize()">
+
+  <div id="banner_div"></div>
+
+  <%
+    message = ""
+    color1 = color2 = ""
+
+    banner = :app_donate_banner.t
+    if !banner.blank? and cookies[:mo_banner] != '1'
+      message += banner + "<br/>"
+      cookies[:mo_banner] = {
+        :value => "1",
+        :expires => 1.hour.from_now
+      }
+      color1 = "#FFF4C0"
+      color2 = "#FFD000"
+    end
+
+    if flash_notices?
+      message += flash_get_notices.to_s.encode + "<br/>"
+      color1 = flash_notice_level == 0 ? "#C0FFC0" : flash_notice_level == 1 ? "#FFFFC0" : "#FFC0C0"
+      color2 = flash_notice_level == 0 ? "#00E000" : flash_notice_level == 1 ? "#FFFF00" : "#FF0000"
+      flash_clear
+    end
+
+    if is_in_admin_mode?
+      message = "DANGER: You are in administrator mode. Proceed with caution.<br/>" + message
+      color1 = "#FFC0FF"
+      color2 = "#FF00FF"
+    end
+
+    if !message.blank? %>
+    <div id="notify_div" style="background:<%=color1%>">
+      <div id="notify_border" style="border-color:<%=color2%>">
+        <div class="close_button" onclick="jQuery('#notify_div').fadeOut(200)"></div>
+        <div id="notify_body"><%= message %></div>
+      </div>
+    </div>
+  <% end %>
+
+  <div id="login_div">
+    <% if @user.nil? %>
+      <%= link_to(:app_login.t, :controller => 'account', :action => 'login') %> |
+      <%= link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %>
+    <% else %>
+      <%= h(@user.login) %> |
+      <%= link_to(:app_account.t, :controller => 'account', :action => 'prefs') %> |
+      <%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %>
+    <% end %>
+
+    <% form_tag({ :controller => 'observer', :action => 'pattern_search' }, { :id => 'search_form' }) do %>
+      <%= :app_find.t %>:
+      <%= text_field(:search, :pattern, :size => 15, :value => session[:pattern],
+                     :onfocus => 'enter_search()', :onblur => 'leave_search()')%>
+      <input type="hidden" id="search_type" name="search[type]"/>
+    <% end %>
+
+    <% if @timer_start %>
+      <div id="timer">
+        <%= @timer_end ||= Time.now
+        secs = '%.2f' % (@timer_end.to_f - @timer_start.to_f)
+        @timer_start = nil
+        if @num_results
+          '(' + :app_index_timer.t(:seconds => secs,
+                                   :num => @num_results.to_i) + ')'
+        else
+          '(' + :app_timer.t(:seconds => secs) + ')'
+        end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="popup_menu" id="search_menu">
+    <span style="padding:2px 5px 2px 5px"><%= :app_find.t %>...</span>
+    <ul>
+      <li onclick="do_search('observation')"><%= :OBSERVATIONS.l %></li>
+      <li onclick="do_search('image')"><%= :IMAGES.l %></li>
+      <li onclick="do_search('name')"><%= :NAMES.l %></li>
+      <li onclick="do_search('location')"><%= :LOCATIONS.l %></li>
+      <li onclick="do_search('species_list')"><%= :SPECIES_LISTS.l %></li>
+      <li onclick="do_search('comment')"><%= :COMMENTS.l %></li>
+      <li onclick="do_search('user')"><%= :USERS.l %></li>
+      <li onclick="do_search('project')"><%= :PROJECTS.l %></li>
+      <li onclick="do_search('google')"><%= :app_search_google.l %></li>
+    </ul>
+    <hr/>
+    <ul>
+      <% if (DEVELOPMENT || is_reviewer?) && query_params != {} %>
+        <% url = url_for(:controller => 'observer', :action => 'refine_search', :params => query_params) %>
+        <li onclick="window.location = '<%=url%>'"><%= :app_refine_search.l.nowrap %></li>
+      <% end %>
+      <% url = url_for(:controller => 'observer', :action => 'advanced_search_form') %>
+      <li onclick="window.location = '<%=url%>'"><%= :app_advanced_search.l.nowrap %></li>
+    </ul>
+  </div>
+
+  <div class="left_tabs">
+    <div class="left_tab" id="left_tab_1">H<br/>E<br/>L<br/>P<br/></div>
+    <div class="left_tab" id="left_tab_2">L<br/>A<br/>T<br/>E<br/>S<br/>T<br/></div>
+    <div class="left_tab" id="left_tab_3">I<br/>N<br/>D<br/>E<br/>X<br/></div>
+    <div class="left_tab" id="left_tab_4">O<br/>B<br/>S<br/></div>
+    <div class="left_tab" id="left_tab_5">L<br/>I<br/>S<br/>T<br/>S<br/></div>
+    <div class="left_tab" id="left_tab_6">A<br/>C<br/>C<br/>O<br/>U<br/>N<br/>T<br/></div>
+    <div class="left_tab" id="left_tab_7">S<br/>I<br/>T<br/>E<br/></div>
+    <div class="left_tab" id="left_tab_8">L<br/>A<br/>N<br/>G<br/>U<br/>A<br/>G<br/>E<br/></div>
+  </div>
+
+  <div id="left_menu_1" class="popup_menu">
+    <ul>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'intro') %>'"><%= :app_intro.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'how_to_use') %>'"><%= :app_how_to_use.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'how_to_help') %>'"><%= :app_how_to_help.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'support', :action => 'donate') %>'"><%= :app_donate.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'pivotal', :action => 'index') %>'"><%= :app_feature_tracker.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'ask_webmaster_question') %>'"><%= :app_send_a_comment.t %></li>
+    </ul>
+  </div>
+
+  <div id="left_menu_2" class="popup_menu">
+    <ul>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'list_rss_logs') %>'"><%= :app_latest_changes.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'image', :action => 'list_images') %>'"><%= :app_newest_images.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'comment', :action => 'list_comments') %>'"><%= :app_comments.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'news') %>'"><%= :app_news.t %></li>
+    </ul>
+  </div>
+
+  <div id="left_menu_3" class="popup_menu">
+    <ul>
+      <li onclick="window.location = '<%= url_for(:controller => 'name', :action => 'observation_index') %>'"><%= :app_index_a_z.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'location', :action => 'list_locations') %>'"><%= :app_list_locations.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'project', :action => 'list_projects') %>'"><%= :app_list_projects.t %></li>
+    </ul>
+  </div>
+
+  <div id="left_menu_4" class="popup_menu">
+    <ul>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'create_observation') %>'"><%= :app_create_observation.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'list_observations') %>'"><%= :app_sort_by_date_obs.t %></li>
+    </ul>
+  </div>
+
+  <div id="left_menu_5" class="popup_menu">
+    <ul>
+      <li onclick="window.location = '<%= url_for(:controller => 'species_list', :action => 'name_lister') %>'"><%= :app_create_list.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'species_list', :action => 'list_species_lists') %>'"><%= :app_sort_by_date_spl.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'species_list', :action => 'species_lists_by_title') %>'"><%= :app_sort_by_title.t %></li>
+    </ul>
+  </div>
+
+  <div id="left_menu_6" class="popup_menu">
+    <ul>
+      <% if @user.nil? %>
+        <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'login') %>'"><%= :app_login.t %></li>
+        <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'signup') %>'"><%= :app_create_account.t %></li>
+      <% else %>
+        <li onclick="window.location = '<%= url_for(:controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %>'"><%= :app_comments_for_you.t %></li>
+        <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'observations_by_user', :id => @user.id) %>'"><%= :app_your_observations.t %></li>
+        <li onclick="window.location = '<%= url_for(:controller => 'interest', :action => 'list_interests') %>'"><%= :app_your_interests.t %></li>
+        <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'show_user', :id => @user.id) %>'"><%= :app_your_summary.t %></li>
+        <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'prefs') %>'"><%= :app_preferences.t %></li>
+        <li onclick="window.location = 'http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org'"><%= :app_join_mailing_list.t %></li>
+        <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'logout_user') %>'"><%= :app_logout.t %></li>
+        <% if @user.admin %>
+          <hr/>
+          <% if is_in_admin_mode? %>
+            <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'users_by_name') %>'"><%= :app_users.t %></li>
+            <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'email_features') %>'"><%= :app_email_all_users.t %></li>
+            <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'add_user_to_group') %>'"><%= :app_add_to_group.t %></li>
+            <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'turn_admin_off') %>'"><%= :app_turn_admin_off.t %></li>
+          <% else %>
+            <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'turn_admin_on') %>'"><%= :app_turn_admin_on.t %></li>
+          <% end %>
+        <% end %>
+      <% end %>
+    </ul>
+  </div>
+
+  <div id="left_menu_7" class="popup_menu">
+    <ul>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'users_by_contribution') %>'"><%= :app_contributors.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'show_site_stats') %>'"><%= :app_site_stats.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'translators_note') %>'"><%= :translators_note_title.t %></li>
+    </ul>
+  </div>
+
+  <div id="left_menu_8" class="popup_menu">
+    <ul>
+      <% for locale in all_locales %>
+        <li onclick="window.location = '<%= url_for(h(reload_with_args(:user_locale => locale))) %>'"><%= locale.sub('-','_').to_sym.t %></li>
+      <% end %>
+    </ul>
+    <% if DEVELOPMENT || is_reviewer? %>
+      <hr/>
+      <ul>
+        <% for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+          if file.match(/(\w+)\.rhtml/)
+            layout = $1  %>
+            <li onclick="document.cookie = 'mo_layout=<%=layout%>'; window.location.reload()"><%=layout%> layout</li>
+          <% end %>
+        <% end %>
+      </ul>
+    <% end %>
+  </div>
+
+  <div id="body_div">
+    <% if @right_tabs %>
+      <div id="right_tabs">
+        <%= @right_tabs.join('<br/>') %>
+      </div>
+    <% end %>
+
+    <div id="left_tabs">
+      <%= no_session = !session_working?
+      no_javascript = !javascript_enabled? && session[:js_override] != :off
+      no_ajax       = can_do_ajax? == false && javascript_enabled? && session[:js_override] != :on
+      no_browser    = can_do_ajax? == nil   && javascript_enabled? && session[:js_override] != :on
+      if no_session || no_javascript || no_ajax || no_browser
+        new_tab_set do
+          add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if no_session
+          add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if no_javascript
+          add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
+          add_tab(:app_no_browser.t,    :controller => 'observer', :action => 'no_browser')    if no_browser
+        end
+      end
+      render_tab_sets %>
+    </div>
+
+    <div id="Title"><%= @title %></div>
+
+    <div class="TextContent">
+      <%= @content_for_layout %>
+    </div>
+    
+    <br/><br/><br/>
+    <% if Locale.code.to_s != 'en-US' %>
+      <div id="translators_credit">
+        <hr width="250" align="left" />
+        <%= :app_translators_credit.tpl %>
+      </div>
+    <% end %>
+
+    <div id="color_note" style="text-align:left">
+      <%= link_to(:app_colors_from.t(:theme => css.to_sym.l), :controller => 'observer', :action => 'color_themes') %><br/>
+      <%= :app_powered_by.t %>:
+        <a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a><br/>
+      <%= :app_preferred_browser.t %>:
+        <a href='http://www.mozilla.com/firefox/'>FireFox</a>
+      <% if @invalid.nil? %>
+        <p>
+          <a href="http://validator.w3.org/check?uri=referer"><img
+              src="http://www.w3.org/Icons/valid-xhtml10"
+              alt="Valid XHTML 1.0 Transitional" height="31" width="88" border="0"/></a>
+        </p>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @javascripts && @javascripts.include?('cached_auto_complete') %>
+    <div id="indicator" class="indicator" style="display:none">
+      <%= image_tag('indicator.gif') %>
+    </div>
+  <% end %>
+
+  <script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    _uacct = "UA-1916187-1";
+    if (typeof urchinTracker != 'undefined') urchinTracker();
+  </script>
+
+</body>
+</html>
