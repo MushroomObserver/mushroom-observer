@@ -54,8 +54,8 @@
       top: 0px;
       left: 0px;
       width: 100%;
-      height: 141px;
-      background: url("/design_test/banner2_color.png") no-repeat;
+      height: 114px;
+      background: url("/design_test/banner2_drab.png") no-repeat;
       z-index: 1;
     }
     div#banner_cover {
@@ -93,30 +93,35 @@
       z-index: 2;
     }
 
-    div.left_tabs {
+    div#dock {
       position: absolute;
-      top: 140px;
-      left: 0px;
-      z-index: 0;
+      display: none;
+      top: 120px;
+      z-index: 1;
     }
     div.left_tab {
       margin-bottom: -2px;
       border: 2px solid black;
-      padding: 10px 5px 10px 5px;
+      padding: 5px 5px 5px 5px;
       font-weight: bold;
       line-height: 90%;
       text-align: center;
       background: #DDD;
+      z-index: 2;
     }
     div.left_tab:hover {
       background: #FFE;
     }
 
+    div#right_tabs {
+      width: 100px;
+    }
+
     div#body_div {
       position: absolute;
       top: 100px;
-      left: 30px;
-      width: 950px;
+      left: 25px;
+      width: 975px;
       height: 100%;
       z-index: 0;
       padding: 10px;
@@ -204,14 +209,15 @@
     var in_menu = [];
     var menu_up = [];
     var leaving = [];
+    var dock_animation = null;
 
     function activate_menu(n) {
+      var dock = jQuery("#dock");
       var head = jQuery("#left_tab_" + n);
       var menu = jQuery("#left_menu_" + n);
-      var x = head.outerWidth();
+      var x = dock.outerWidth();
       var y = head.outerHeight();
-      var h1 = head.outerHeight();
-      var h2 = menu.outerHeight();
+      dock.css({ left: (25 - x) + "px", display: "block" });
       head.mouseover(function () {
         in_head[n] = true;
         if (leaving[n]) {
@@ -219,7 +225,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_pulldown(menu, head, { offx: x, offy: -y - Math.round((h2-h1)/2) });
+          show_dock(dock, head, menu, x, y);
           hide_others();
           menu_up[n] = true;
         }
@@ -231,7 +237,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_pulldown(menu, head, { offx: x, offy: -y - Math.round((h2-h1)/2) });
+          show_dock(dock, head, menu, x, y);
           hide_others();
           menu_up[n] = true;
         }
@@ -241,9 +247,11 @@
         if (menu_up[n] && !leaving[n]) {
           leaving[n] = setTimeout(function () {
             leaving[n] = menu_up[n] = false;
-            if (!in_head[n] && !in_menu[n])
+            if (!in_head[n] && !in_menu[n]) {
               menu.fadeOut(100);
-          }, 250);
+              hide_dock(dock, x);
+            }
+          }, 500);
         }
       });
       menu.mouseout(function () {
@@ -251,9 +259,11 @@
         if (menu_up[n] && !leaving[n]) {
           leaving[n] = setTimeout(function () {
             leaving[n] = menu_up[n] = false;
-            if (!in_head[n] && !in_menu[n])
+            if (!in_head[n] && !in_menu[n]) {
               menu.fadeOut(100);
-          }, 250);
+              hide_dock(dock, x);
+            }
+          }, 500);
         }
       });
     }
@@ -268,6 +278,19 @@
           menu_up[i] = false;
         }
       }
+    }
+    function show_dock(dock, head, menu, x, y) {
+      if (dock_animation)
+        dock_animation.stop();
+      show_pulldown(menu, head, { offx: x, offy: -y });
+      dock_animation = dock.animate({ left: "0px" }, 100);
+      menu.animate({ left: x + "px" }, 100);
+    }
+    function hide_dock(dock, w) {
+      if (dock_animation)
+        dock_animation.stop();
+      dock_animation = dock.animate({ left: (25 - w) + "px" }, 100);
+      menu.animate({ left: (25 - w + x) + "px" }, 100);
     }
 
     function show_pulldown(menu, field, opts) {
@@ -446,15 +469,15 @@
     </ul>
   </div>
 
-  <div class="left_tabs">
-    <div class="left_tab" id="left_tab_1">H<br/>E<br/>L<br/>P<br/></div>
-    <div class="left_tab" id="left_tab_2">L<br/>A<br/>T<br/>E<br/>S<br/>T<br/></div>
-    <div class="left_tab" id="left_tab_3">I<br/>N<br/>D<br/>E<br/>X<br/></div>
-    <div class="left_tab" id="left_tab_4">O<br/>B<br/>S<br/>E<br/>R<br/>V<br/>A<br/>T<br/>I<br/>O<br/>N<br/>S<br/></div>
-    <div class="left_tab" id="left_tab_5">L<br/>I<br/>S<br/>T<br/>S<br/></div>
-    <div class="left_tab" id="left_tab_6">A<br/>C<br/>C<br/>O<br/>U<br/>N<br/>T<br/></div>
-    <div class="left_tab" id="left_tab_7">S<br/>I<br/>T<br/>E<br/></div>
-    <div class="left_tab" id="left_tab_8">L<br/>A<br/>N<br/>G<br/>U<br/>A<br/>G<br/>E<br/></div>
+  <div id="dock">
+    <div class="left_tab" id="left_tab_1">HELP</div>
+    <div class="left_tab" id="left_tab_2">LATEST</div>
+    <div class="left_tab" id="left_tab_3">INDEX</div>
+    <div class="left_tab" id="left_tab_4">OBSERVATIONS</div>
+    <div class="left_tab" id="left_tab_5">LISTS</div>
+    <div class="left_tab" id="left_tab_6">ACCOUNT</div>
+    <div class="left_tab" id="left_tab_7">OUR SITE</div>
+    <div class="left_tab" id="left_tab_8">LANGUAGES</div>
   </div>
 
   <div id="left_menu_1" class="popup_menu">

@@ -135,12 +135,13 @@
 
                 <% if DEVELOPMENT || is_reviewer? %>
                   Layouts:<br/>
-                  <% for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
-                    if file.match(/(\w+)\.rhtml/)
-                      layout = layout2 = $1
-                      layout2 = 'old' if layout == 'application' %>
+                  <% layouts = []
+                    for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+                      layouts << $1 if file.match(/(\w+)\.rhtml/)
+                    end
+                    for layout in layouts.sort
+                      layout2 = layout == 'application' ? 'old' : layout %>
                       <%= indent + link_to(layout2, h(reload_with_args(:layout => layout))) %><br/>
-                    <% end %>
                   <% end %>
                   <br/>
                 <% end %>

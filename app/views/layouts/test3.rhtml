@@ -54,9 +54,17 @@
       top: 0px;
       left: 0px;
       width: 100%;
-      height: 141px;
-      background: url("/design_test/banner2_color.png") no-repeat;
+      height: 114px;
+      background: url("/design_test/banner2_drab.png") no-repeat;
       z-index: 1;
+    }
+    div#banner_cover {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 800px;
+      height: 100px;
+      z-index: 3;
     }
 
     div#notify_div {
@@ -71,7 +79,7 @@
       border: 2px solid #FE0;
     }
     div#notify_body {
-      padding: 2px 10px 7px 10px;
+      padding: 2px 10px 2px 10px;
     }
 
     div#login_div {
@@ -85,21 +93,33 @@
       z-index: 2;
     }
 
-    div.left_tab {
+    div.left_tabs {
       position: absolute;
+      top: 120px;
       left: 0px;
-      width: 57px;
       z-index: 0;
-      background: url("/design_test/tabs.png");
+    }
+    div.left_tab {
+      margin-bottom: -2px;
+      border: 2px solid black;
+      padding: 5px 5px 5px 5px;
+      font-weight: bold;
+      line-height: 90%;
+      text-align: center;
+      background: #DDD;
     }
     div.left_tab:hover {
-      background: url("/design_test/tabs_hot.png");
+      background: #FFE;
+    }
+
+    div#right_tabs {
+      width: 100px;
     }
 
     div#body_div {
       position: absolute;
       top: 100px;
-      left: 50px;
+      left: 60px;
       width: 950px;
       height: 100%;
       z-index: 0;
@@ -129,7 +149,7 @@
 
     div.close_button {
       float: right;
-      margin: 5px 5px 0px 0px;
+      margin: 2px 2px 0px 0px;
       width: 16px;
       height: 16px;
       z-index: 11;
@@ -189,14 +209,11 @@
     var menu_up = [];
     var leaving = [];
 
-    function activate_menu(n, y1, y2) {
+    function activate_menu(n) {
       var head = jQuery("#left_tab_" + n);
       var menu = jQuery("#left_menu_" + n);
-      head.css({
-        top: (130 + y1) + "px",
-        height: (y2 - y1) + "px",
-        "background-position": "0px -" + y1 + "px",
-      });
+      var x = head.outerWidth();
+      var y = head.outerHeight();
       head.mouseover(function () {
         in_head[n] = true;
         if (leaving[n]) {
@@ -204,7 +221,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_pulldown(menu, head, { offx: 30, offy: Math.round((y1-y2)/2) });
+          show_pulldown(menu, head, { offx: x, offy: -y });
           hide_others();
           menu_up[n] = true;
         }
@@ -216,7 +233,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_pulldown(menu, head, { offx: 30, offy: Math.round((y1-y2)/2) });
+          show_pulldown(menu, head, { offx: x, offy: -y });
           hide_others();
           menu_up[n] = true;
         }
@@ -249,7 +266,7 @@
           leaving[i] = false;
         }
         if (menu_up[i]) {
-          jQuery("#left_menu_" + i).hide();
+          jQuery("#left_menu_" + i).fadeOut(100);
           menu_up[i] = false;
         }
       }
@@ -309,7 +326,33 @@
 </head>
 <body onload="initialize()">
 
+  <map id="banner_map" name="banner_map">
+    <area href="/observer/lookup_name/Inocybe sororia" title="Inocybe sororia, Pungent Fiber Head" shape="poly" coords="248,64, 264,93, 288,83, 274,51" />
+    <area href="/observer/lookup_name/Clitocybe nuda" title="Clitocybe nuda, Blewit" shape="poly" coords="274,51, 288,83, 318,80, 305,39" />
+    <area href="/observer/lookup_name/Agaricus augustus" title="Agaricus augustus, The Prince" shape="poly" coords="318,80, 305,39, 343,32, 350,75" />
+    <area href="/observer/lookup_name/Amanita muscaria" title="Amanita muscaria, Fly Agaric" shape="poly" coords="350,75, 343,32, 369,25, 374,73" />
+    <area href="/observer/lookup_name/Amanita phalloides" title="Amanita phalloides, Death Cap" shape="poly" coords="369,25, 374,73, 409,71, 396,23" />
+    <area href="/observer/lookup_name/Armillaria mellea" title="Armillaria mellea, Honey Mushroom" shape="poly" coords="409,71, 396,23, 452,14, 455,69" />
+    <area href="/observer/lookup_name/Boletus edulis" title="Boletus edulis, King Bolete" shape="poly" coords="452,14, 455,69, 494,68, 495,13" />
+    <area href="/observer/lookup_name/Coprinellus micaceus" title="Coprinellus micaceus, Mica Cap" shape="poly" coords="494,68, 495,13, 529,22, 529,69" />
+    <area href="/observer/lookup_name/Coprinopsis lagopus" title="Coprinopsis lagopus, Woolly Inky Cap" shape="poly" coords="529,22, 529,69, 555,70, 554,22" />
+    <area href="/observer/lookup_name/Coprinus comatus" title="Coprinus comatus, Shaggy Mane" shape="poly" coords="555,70, 554,13, 575,13, 571,71" />
+    <area href="/observer/lookup_name/Hygrocybe conica" title="Hygrocybe conica, Witch's Cap" shape="poly" coords="574,29, 571,71, 597,73, 601,30" />
+    <area href="/observer/lookup_name/Hypholoma fasciculare" title="Hypholoma fasciculare, Sulphur Tuft" shape="poly" coords="597,73, 601,30, 636,38, 638,77" />
+    <area href="/observer/lookup_name/Psathyrella candolleana" title="Psathyrella candolleana, Suburban Psathyrella" shape="poly" coords="636,38, 638,77, 671,80, 673,54, 656,38" />
+    <area href="/observer/lookup_name/Lactarius volemus" title="Lactarius volemus, Weeping Milky Cap" shape="poly" coords="671,80, 673,54, 656,38, 674,33, 705,39, 705,84" />
+    <area href="/observer/lookup_name/Russula cremoricolor" title="Russula cremoricolor, Creamy Russula" shape="poly" coords="705,39, 705,84, 730,87, 732,63, 750,57, 750,39" />
+    <area href="/observer/lookup_name/Mycena haematopus" title="Mycena haematopus, Bleeding Mycena" shape="poly" coords="730,87, 732,63, 750,57, 758,57, 759,90" />
+    <area href="/observer/lookup_name/Pluteus cervinus" title="Pluteus cervinus, Deer Mushroom" shape="poly" coords="758,50, 759,90, 793,92, 795,52" />
+    <area href="/observer/lookup_name/Lycoperdon perlatum" title="Lycoperdon perlatum, Gem-Studded Puffball" shape="poly" coords="793,92, 795,68, 819,70, 818,96" />
+    <area href="/observer/lookup_name/Pleurotus ostreatus" title="Pleurotus ostreatus, Oyster Mushroom" shape="poly" coords="818,96, 818,77, 862,78, 861,97" />
+    <area href="/observer/lookup_name/Morchella esculenta" title="Morchella esculenta, Common Morel" shape="poly" coords="925,97, 924,61, 950,60, 952,96" />
+    <area href="/observer/lookup_name/Helvella lacunosa" title="Helvella lacunosa, Black Elfin Saddle" shape="poly" coords="950,60, 952,96, 972,94, 969,73, 974,60" />
+    <area href="/observer/lookup_name/Craterellus cornucopioides" title="Craterellus cornucopioides, Black Chanterelle" shape="poly" coords="972,94, 969,73, 974,60, 996,55, 996,93" />
+  </map>
+
   <div id="banner_div"></div>
+  <div id="banner_cover"><img width="1000" height="100" src="/design_test/empty.png" usemap="#banner_map" /></div>
 
   <%
     message = ""
@@ -317,26 +360,26 @@
 
     banner = :app_donate_banner.t
     if !banner.blank? and cookies[:mo_banner] != '1'
-      message += banner + "<br/>"
+      message += '<span style="font-weight:bold; font-size:120%">' + banner + '</span><br/>'
       cookies[:mo_banner] = {
-        :value => "1",
+        :value => '1',
         :expires => 1.hour.from_now
       }
-      color1 = "#FFF4C0"
-      color2 = "#FFD000"
+      color1 = '#FFF4C0'
+      color2 = '#FFD000'
     end
 
     if flash_notices?
-      message += flash_get_notices.to_s.encode + "<br/>"
-      color1 = flash_notice_level == 0 ? "#C0FFC0" : flash_notice_level == 1 ? "#FFFFC0" : "#FFC0C0"
-      color2 = flash_notice_level == 0 ? "#00E000" : flash_notice_level == 1 ? "#FFFF00" : "#FF0000"
+      message += flash_get_notices.to_s.encode + '<br/>'
+      color1 = flash_notice_level == 0 ? '#C0FFC0' : flash_notice_level == 1 ? '#FFFFC0' : '#FFC0C0'
+      color2 = flash_notice_level == 0 ? '#00E000' : flash_notice_level == 1 ? '#FFFF00' : '#FF0000'
       flash_clear
     end
 
     if is_in_admin_mode?
-      message = "DANGER: You are in administrator mode. Proceed with caution.<br/>" + message
-      color1 = "#FFC0FF"
-      color2 = "#FF00FF"
+      message = 'DANGER: You are in administrator mode. Proceed with caution.<br/>' + message
+      color1 = '#FFC0FF'
+      color2 = '#FF00FF'
     end
 
     if !message.blank? %>
@@ -405,14 +448,16 @@
     </ul>
   </div>
 
-  <div class="left_tab" id="left_tab_1"></div>
-  <div class="left_tab" id="left_tab_2"></div>
-  <div class="left_tab" id="left_tab_3"></div>
-  <div class="left_tab" id="left_tab_4"></div>
-  <div class="left_tab" id="left_tab_5"></div>
-  <div class="left_tab" id="left_tab_6"></div>
-  <div class="left_tab" id="left_tab_7"></div>
-  <div class="left_tab" id="left_tab_8"></div>
+  <div class="left_tabs">
+    <div class="left_tab" id="left_tab_1">HELP</div>
+    <div class="left_tab" id="left_tab_2">LATEST</div>
+    <div class="left_tab" id="left_tab_3">INDEX</div>
+    <div class="left_tab" id="left_tab_4">POSTS</div>
+    <div class="left_tab" id="left_tab_5">LISTS</div>
+    <div class="left_tab" id="left_tab_6">USER</div>
+    <div class="left_tab" id="left_tab_7">SITE</div>
+    <div class="left_tab" id="left_tab_8">THEME</div>
+  </div>
 
   <div id="left_menu_1" class="popup_menu">
     <ul>
@@ -436,16 +481,16 @@
 
   <div id="left_menu_3" class="popup_menu">
     <ul>
-      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'create_observation') %>'"><%= :app_create_observation.t %></li>
-      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'list_observations') %>'"><%= :app_sort_by_date_obs.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'name', :action => 'observation_index') %>'"><%= :app_index_a_z.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'location', :action => 'list_locations') %>'"><%= :app_list_locations.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'project', :action => 'list_projects') %>'"><%= :app_list_projects.t %></li>
     </ul>
   </div>
 
   <div id="left_menu_4" class="popup_menu">
     <ul>
-      <li onclick="window.location = '<%= url_for(:controller => 'name', :action => 'observation_index') %>'"><%= :app_index_a_z.t %></li>
-      <li onclick="window.location = '<%= url_for(:controller => 'location', :action => 'list_locations') %>'"><%= :app_list_locations.t %></li>
-      <li onclick="window.location = '<%= url_for(:controller => 'project', :action => 'list_projects') %>'"><%= :app_list_projects.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'create_observation') %>'"><%= :app_create_observation.t %></li>
+      <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'list_observations') %>'"><%= :app_sort_by_date_obs.t %></li>
     </ul>
   </div>
 
@@ -502,12 +547,13 @@
     <% if true %>
       <hr/>
       <ul>
-        <% for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
-          if file.match(/(\w+)\.rhtml/)
-            layout = layout2 = $1
-            layout2 = 'old' if layout == 'application' %>
+        <% layouts = []
+          for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+            layouts << $1 if file.match(/(\w+)\.rhtml/)
+          end
+          for layout in layouts.sort
+            layout2 = layout == 'application' ? 'old' : layout %>
             <li onclick="window.location = '<%= url_for(h(reload_with_args(:layout => layout))) %>'"><%= layout2 %> layout</li>
-          <% end %>
         <% end %>
       </ul>
     <% end %>
@@ -541,7 +587,7 @@
     <div class="TextContent">
       <%= @content_for_layout %>
     </div>
-
+    
     <br/><br/><br/>
     <% if Locale.code.to_s != 'en-US' %>
       <div id="translators_credit">
