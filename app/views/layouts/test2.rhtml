@@ -58,6 +58,14 @@
       background: url("/design_test/banner2_color.png") no-repeat;
       z-index: 1;
     }
+    div#banner_cover {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 800px;
+      height: 100px;
+      z-index: 2;
+    }
 
     div#notify_div {
       position: absolute;
@@ -316,7 +324,33 @@
 </head>
 <body onload="initialize()">
 
+  <map id="banner_map" name="banner_map">
+    <area href="/observer/lookup_name/Inocybe sororia" alt="Inocybe sororia" title="Inocybe sororia" shape="poly"                                  coords="248,64, 264,93, 288,83, 274,51" />
+    <area href="/observer/lookup_name/Clitocybe nuda" alt="Clitocybe nuda" title="Clitocybe nuda" shape="poly"                                     coords="274,51, 288,83, 318,80, 305,39" />
+    <area href="/observer/lookup_name/Agaricus augustus" alt="Agaricus augustus" title="Agaricus augustus" shape="poly"                            coords="318,80, 305,39, 343,32, 350,75" />
+    <area href="/observer/lookup_name/Amanita muscaria" alt="Amanita muscaria" title="Amanita muscaria" shape="poly"                               coords="350,75, 343,32, 369,25, 374,73" />
+    <area href="/observer/lookup_name/Amanita phalloides" alt="Amanita phalloides" title="Amanita phalloides" shape="poly"                         coords="369,25, 374,73, 409,71, 396,23" />
+    <area href="/observer/lookup_name/Armillaria mellea" alt="Armillaria mellea" title="Armillaria mellea" shape="poly"                            coords="409,71, 396,23, 452,14, 455,69" />
+    <area href="/observer/lookup_name/Boletus edulis" alt="Boletus edulis" title="Boletus edulis" shape="poly"                                     coords="452,14, 455,69, 494,68, 495,13" />
+    <area href="/observer/lookup_name/Coprinellus micaceus" alt="Coprinellus micaceus" title="Coprinellus micaceus" shape="poly"                   coords="494,68, 495,13, 529,22, 429,69" />
+    <area href="/observer/lookup_name/Coprinopsis lagopus" alt="Coprinopsis lagopus" title="Coprinopsis lagopus" shape="poly"                      coords="529,22, 429,69, 555,70, 554,22" />
+    <area href="/observer/lookup_name/Coprinus comatus" alt="Coprinus comatus" title="Coprinus comatus" shape="poly"                               coords="555,70, 554,13, 575,13, 571,71" />
+    <area href="/observer/lookup_name/Hygrocybe conica" alt="Hygrocybe conica" title="Hygrocybe conica" shape="poly"                               coords="574,29, 571,71, 597,73, 601,30" />
+    <area href="/observer/lookup_name/Hypholoma fasciculare" alt="Hypholoma fasciculare" title="Hypholoma fasciculare" shape="poly"                coords="597,73, 601,30, 636,38, 638,77" />
+    <area href="/observer/lookup_name/Psathyrella candolleana" alt="Psathyrella candolleana" title="Psathyrella candolleana" shape="poly"          coords="636,38, 638,77, 671,80, 673,54, 656,38" />
+    <area href="/observer/lookup_name/Lactarius volemus" alt="Lactarius volemus" title="Lactarius volemus" shape="poly"                            coords="671,80, 673,54, 656,38, 674,33, 705,39, 705,84" />
+    <area href="/observer/lookup_name/Russula cremoricolor" alt="Russula cremoricolor" title="Russula cremoricolor" shape="poly"                   coords="705,39, 705,84, 730,87, 732,63, 750,57, 750,39" />
+    <area href="/observer/lookup_name/Mycena hematopus" alt="Mycena hematopus" title="Mycena hematopus" shape="poly"                               coords="730,87, 732,63, 750,57, 758,57, 759,90" />
+    <area href="/observer/lookup_name/Pluteus cervinus" alt="Pluteus cervinus" title="Pluteus cervinus" shape="poly"                               coords="758,50, 759,90, 793,92, 795,52" />
+    <area href="/observer/lookup_name/Lycoperdon perlatum" alt="Lycoperdon perlatum" title="Lycoperdon perlatum" shape="poly"                      coords="793,92, 795,68, 819,70, 818,96" />
+    <area href="/observer/lookup_name/Pleurotus ostreatus" alt="Pleurotus ostreatus" title="Pleurotus ostreatus" shape="poly"                      coords="818,96, 818,77, 862,78, 861,97" />
+    <area href="/observer/lookup_name/Morchella esculenta" alt="Morchella esculenta" title="Morchella esculenta" shape="poly"                      coords="925,97, 924,61, 950,60, 952,96" />
+    <area href="/observer/lookup_name/Helvella lacunosa" alt="Helvella lacunosa" title="Helvella lacunosa" shape="poly"                            coords="950,60, 952,96, 972,94, 969,73, 974,60" />
+    <area href="/observer/lookup_name/Craterellus cornucopioides" alt="Craterellus cornucopioides" title="Craterellus cornucopioides" shape="poly" coords="972,94, 969,73, 974,60, 996,55, 996,93" />
+  </map>
+
   <div id="banner_div"></div>
+  <div id="banner_cover"><img width="1000" height="100" src="/design_test/empty.png" usemap="#banner_map" /></div>
 
   <%
     message = ""
