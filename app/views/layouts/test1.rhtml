@@ -483,6 +483,7 @@
             <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'users_by_name') %>'"><%= :app_users.t %></li>
             <li onclick="window.location = '<%= url_for(:controller => 'observer', :action => 'email_features') %>'"><%= :app_email_all_users.t %></li>
             <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'add_user_to_group') %>'"><%= :app_add_to_group.t %></li>
+            <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'manager') %>'"><%= :account_manager_title.t %></li>
             <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'turn_admin_off') %>'"><%= :app_turn_admin_off.t %></li>
           <% else %>
             <li onclick="window.location = '<%= url_for(:controller => 'account', :action => 'turn_admin_on') %>'"><%= :app_turn_admin_on.t %></li>

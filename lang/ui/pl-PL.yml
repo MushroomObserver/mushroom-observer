@@ -199,6 +199,10 @@ FULL_NAME: Pełna nazwa
 full_name: pełna nazwa
 FULL_NAMES: Pełne nazwy
 full_names: pełne nazwy
+ID:  ID
+id:  ID
+IDS:  IDs
+ids:  IDs
 IDENTIFIER: Identyfikator
 identifier: identyfikator
 IDENTIFIERS: Identyfikatory
@@ -1055,8 +1059,9 @@ comment_show_destroy:  "[:DESTROY]"
 commercial_inquiry_title: Komercyjne zapytanie o [name]
 commercial_inquiry_header: >
  Wprowadź swoje komercyjne zapytanie odnośnie zdjęcia.  Kiedy wciśniesz"[:SEND]"
- zostanie wysłany e-mail do [user]. W e-mailu będzie automatycznie załączony  
+ zostanie wysłany e-mail do [user]. W e-mailu będzie automatycznie załączony
  link do zdjęcia.
+
 
 
 # location/create_location_description
@@ -1599,6 +1604,7 @@ name_approve_deprecate_help:  >
 name_change_synonyms_title: "Synonimy dla [name]"
 name_change_synonyms_submit: Prześlij zmiany
 name_change_synonyms_confirm: Proszę potwierdź, że to jest to co zamierzasz.
+
 
 
 # name/deprecate_name
@@ -3600,6 +3606,23 @@ add_user_to_group_no_user: Nie można znaleźć [:user], '[user]'.
 add_user_to_group_success: "[user] dodany(a) do [group]."
 add_user_to_group_title: Dodaj [:user] do grupy
 add_user_to_group_user:  "[:user] name"
+
+
+# account/manager
+account_manager_title:  Account Manager
+account_manager_not_found:  Unable to find user [str].
+account_manager_changed_email:  Changed [user]'s email address to "[email]".
+account_manager_changed_password:  Changed [user]'s password to "[password]".
+account_manager_verified_user:  Verified [user].
+account_manager_ids:  "ID or IDs:"
+account_manager_login:  "Login like:"
+account_manager_name:  "Name like:"
+account_manager_email:  "Email like:"
+account_manager_last_login:  Last Login
+account_manager_verified:  Verified
+account_manager_alert:  Alert
+account_manager_bonus:  Bonus
+account_manager_actions:  Actions
 
 
 # admin_request/author_request emails

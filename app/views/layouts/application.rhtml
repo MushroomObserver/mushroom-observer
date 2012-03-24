@@ -119,6 +119,7 @@
                       <%= indent + link_to(:app_users.t, :controller => 'observer', :action => 'users_by_name') %><br/>
                       <%= indent + link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %><br/>
                       <%= indent + link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %><br/>
+                      <%= indent + link_to(:account_manager_title.t, :controller => 'account', :action => 'manager') %><br/>
                       <%= indent + link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %><br/>
                     <% else %>
                       <%= indent + link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %><br/>

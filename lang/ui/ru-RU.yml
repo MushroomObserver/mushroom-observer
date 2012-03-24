@@ -199,6 +199,10 @@ FULL_NAME: Полное имя
 full_name: полное имя
 FULL_NAMES: Полные имена
 full_names: полные имена
+ID:  ID
+id:  ID
+IDS:  IDs
+ids:  IDs
 IDENTIFIER: Идентификатор
 identifier: идентификатор
 IDENTIFIERS: Идентификаторы
@@ -3517,6 +3521,23 @@ add_user_to_group_no_user:  Unable to find the [:user], '[user]'.
 add_user_to_group_success:  "[user] added to [group]."
 add_user_to_group_title:  Add [:user] to Group
 add_user_to_group_user:  "[:user] name"
+
+
+# account/manager
+account_manager_title:  Account Manager
+account_manager_not_found:  Unable to find user [str].
+account_manager_changed_email:  Changed [user]'s email address to "[email]".
+account_manager_changed_password:  Changed [user]'s password to "[password]".
+account_manager_verified_user:  Verified [user].
+account_manager_ids:  "ID or IDs:"
+account_manager_login:  "Login like:"
+account_manager_name:  "Name like:"
+account_manager_email:  "Email like:"
+account_manager_last_login:  Last Login
+account_manager_verified:  Verified
+account_manager_alert:  Alert
+account_manager_bonus:  Bonus
+account_manager_actions:  Actions
 
 
 # admin_request/author_request emails

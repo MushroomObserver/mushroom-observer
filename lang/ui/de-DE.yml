@@ -199,6 +199,10 @@ FULL_NAME: Richtige Name
 full_name: richtige Name
 FULL_NAMES: Richtigen Namen
 full_names: richtigen Namen
+ID:  ID
+id:  ID
+IDS:  IDs
+ids:  IDs
 IDENTIFIER:  Identifier
 identifier:  identifier
 IDENTIFIERS:  Identifiers
@@ -3605,6 +3609,23 @@ add_user_to_group_no_user: Kann den Nutzer '[user]' nicht finden.
 add_user_to_group_success: "[user] zu [group] hinzugefügt."
 add_user_to_group_title: Nutzer zu Gruppe hinzufügen
 add_user_to_group_user: Nutzer-Name
+
+
+# account/manager
+account_manager_title:  Account Manager
+account_manager_not_found:  Unable to find user [str].
+account_manager_changed_email:  Changed [user]'s email address to "[email]".
+account_manager_changed_password:  Changed [user]'s password to "[password]".
+account_manager_verified_user:  Verified [user].
+account_manager_ids:  "ID or IDs:"
+account_manager_login:  "Login like:"
+account_manager_name:  "Name like:"
+account_manager_email:  "Email like:"
+account_manager_last_login:  Last Login
+account_manager_verified:  Verified
+account_manager_alert:  Alert
+account_manager_bonus:  Bonus
+account_manager_actions:  Actions
 
 
 # admin_request/author_request emails
