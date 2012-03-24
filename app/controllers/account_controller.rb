@@ -616,6 +616,7 @@ class AccountController < ApplicationController
       end
       # Modify user records.
       for user in @users
+        id = user.id
         any_changes = false
         # Correct typos in an email address.
         old_email = user.email.to_s
