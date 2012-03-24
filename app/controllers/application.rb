@@ -113,6 +113,11 @@ class ApplicationController < ActionController::Base
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
+    theme = params[:theme].to_s
+    if @user && !theme.blank?
+      @user.theme = theme
+      @user.save
+    end
     name = params[:layout].to_s
     name = session[:layout].to_s if name.blank?
     name = 'application' if name.blank?

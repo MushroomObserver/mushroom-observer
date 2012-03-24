@@ -218,9 +218,8 @@
       var dock = jQuery("#dock");
       var head = jQuery("#left_tab_" + n);
       var menu = jQuery("#left_menu_" + n);
-      var x = dock.outerWidth();
-      var y = head.outerHeight();
-      dock.css({ left: (25 - x) + "px", display: "block" });
+      var w = dock.outerWidth();
+      dock.css({ left: (25 - w) + "px", display: "block" });
       head.mouseover(function () {
         in_head[n] = true;
         if (leaving[n]) {
@@ -228,7 +227,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_dock(dock, head, menu, x, y);
+          show_dock(dock, head, menu);
           hide_others();
           menu_up[n] = true;
         }
@@ -240,7 +239,7 @@
           leaving[n] = false;
         }
         if (!menu_up[n]) {
-          show_dock(dock, head, menu, x, y);
+          show_dock(dock, head, menu);
           hide_others();
           menu_up[n] = true;
         }
@@ -252,7 +251,7 @@
             leaving[n] = menu_up[n] = false;
             if (!in_head[n] && !in_menu[n]) {
               menu.fadeOut(100);
-              hide_dock(dock, x);
+              hide_dock(dock, head, menu);
             }
           }, 500);
         }
@@ -264,7 +263,7 @@
             leaving[n] = menu_up[n] = false;
             if (!in_head[n] && !in_menu[n]) {
               menu.fadeOut(100);
-              hide_dock(dock, x);
+              hide_dock(dock, head, menu);
             }
           }, 500);
         }
@@ -282,18 +281,21 @@
         }
       }
     }
-    function show_dock(dock, head, menu, x, y) {
+    function show_dock(dock, head, menu) {
+      var w = head.outerWidth();
+      var h = head.outerHeight();
       if (dock_animation)
         dock_animation.stop();
-      show_pulldown(menu, head, { offx: x, offy: -y });
+      show_pulldown(menu, head, { offx: w, offy: -h });
       dock_animation = dock.animate({ left: "0px" }, 100);
-      menu.animate({ left: x + "px" }, 100);
+      menu.animate({ left: w + "px" }, 100);
     }
-    function hide_dock(dock, w) {
+    function hide_dock(dock, head, menu) {
+      var w = dock.outerWidth();
       if (dock_animation)
         dock_animation.stop();
       dock_animation = dock.animate({ left: (25 - w) + "px" }, 100);
-      menu.animate({ left: (25 - w + x) + "px" }, 100);
+      menu.animate({ left: "25px" }, 100);
     }
 
     function show_pulldown(menu, field, opts) {
@@ -334,14 +336,8 @@
 
     function initialize() {
       jQuery(document).keypress(keypress);
-      activate_menu(1,   0,  70);
-      activate_menu(2,  70, 152);
-      activate_menu(3, 152, 292);
-      activate_menu(4, 292, 380);
-      activate_menu(5, 380, 444);
-      activate_menu(6, 444, 594);
-      activate_menu(7, 594, 693);
-      activate_menu(8, 693, 825);
+      for (var i=1; i<=9; i++)
+        activate_menu(i);
     }
   </script>
 
@@ -481,6 +477,7 @@
     <div class="left_tab" id="left_tab_6">ACCOUNT</div>
     <div class="left_tab" id="left_tab_7">OUR SITE</div>
     <div class="left_tab" id="left_tab_8">LANGUAGES</div>
+    <div class="left_tab" id="left_tab_9">THEMES</div>
   </div>
 
   <div id="left_menu_1" class="popup_menu">
@@ -568,19 +565,25 @@
         <li onclick="window.location = '<%= url_for(h(reload_with_args(:user_locale => locale))) %>'"><%= locale.sub('-','_').to_sym.t %></li>
       <% end %>
     </ul>
-    <% if true %>
-      <hr/>
-      <ul>
-        <% layouts = []
-          for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
-            layouts << $1 if file.match(/(\w+)\.rhtml/)
-          end
-          for layout in layouts.sort
-            layout2 = layout == 'application' ? 'old' : layout %>
-            <li onclick="window.location = '<%= url_for(h(reload_with_args(:layout => layout))) %>'"><%= layout2 %> layout</li>
-        <% end %>
-      </ul>
-    <% end %>
+  </div>
+
+  <div id="left_menu_9" class="popup_menu">
+    <ul>
+      <% for theme in CSS %>
+        <li onclick="window.location = '<%= url_for(h(reload_with_args(:theme => theme))) %>'"><%= theme %></li>
+      <% end %>
+    </ul>
+    <hr/>
+    <ul>
+      <% layouts = []
+        for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+          layouts << $1 if file.match(/(\w+)\.rhtml/)
+        end
+        for layout in layouts.sort
+          layout2 = layout == 'application' ? 'old' : layout %>
+          <li onclick="window.location = '<%= url_for(h(reload_with_args(:layout => layout))) %>'"><%= layout2 %> layout</li>
+      <% end %>
+    </ul>
   </div>
 
   <div id="body_div">
