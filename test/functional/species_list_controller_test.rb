@@ -726,6 +726,30 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(list_data, @controller.instance_variable_get('@list_members'))
   end
 
+  def test_read_species_list_two
+    spl = species_lists(:first_species_list)
+    assert_equal(0, spl.observations.length)
+    filename = "#{RAILS_ROOT}/test/fixtures/species_lists/foray_notes.txt"
+    file = File.new(filename)
+    list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
+    file = FilePlus.new(filename)
+    file.content_type = 'text/plain'
+    params = {
+      "id" => spl.id,
+      "species_list" => {
+        "file" => file
+      }
+    }
+    post_requires_login(:upload_species_list, params)
+    assert_response('edit_species_list')
+    assert_equal(10, @rolf.reload.contribution)
+    # Doesn't preserve order yet.  Have to resort in order to compare.
+    # assert_equal(list_data, @controller.instance_variable_get('@list_members'))
+    new_data = @controller.instance_variable_get('@list_members')
+    new_data = new_data.split("\r\n").sort.join("\r\n")
+    assert_equal(list_data, new_data)
+  end
+
   # ----------------------------
   #  Name lister and reports.
   # ----------------------------

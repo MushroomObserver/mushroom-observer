@@ -12,6 +12,7 @@ ActionController::Routing::Routes.draw do |map|
 
   # Route /123 to /observer/show_observation/123.
   map.connect ':id', :controller => 'observer', :action => 'show_observation', :id => /\d+/
+  map.connect 'obs', :controller => 'observer', :action => 'show_observation'
   map.connect 'obs/:id', :controller => 'observer', :action => 'show_observation', :id => /\d+/
   # was: map.connect ':id', :controller => 'observer', :action => 'show_obs'
   # was: map.connect 'obs/:id', :controller => 'observer', :action => 'show_observation'

@@ -206,9 +206,13 @@ class SpeciesList < AbstractModel
   #   names = sorter.xxx
   #
   def file=(file_field)
-    if file_field.kind_of?(StringIO)
+    if file_field.respond_to?(:read) and
+       file_field.respond_to?(:content_type)
       content_type = file_field.content_type.chomp
-      if ('application/text' == content_type or 'text/plain' == content_type or 'application/octet-stream' == content_type)
+      case content_type
+      when 'text/plain',
+           'application/text',
+           'application/octet-stream'
         self.data = file_field.read
       else
         raise sprintf("Unrecognized content_type: %s\n", content_type)
