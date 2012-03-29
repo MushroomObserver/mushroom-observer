@@ -54,6 +54,8 @@
 #
 ################################################################################
 
+require 'smtp_tls'
+
 class AccountMailer < ActionMailer::Base
 
   # Ask project admins for admin privileges on project.
