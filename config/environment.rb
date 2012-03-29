@@ -181,17 +181,14 @@ ENV['RAILS_ASSET_ID'] = ''
 # the comments at the head of this file, this was the expected method of customizing error
 # handling in Rails(!)
 module ActionController
-  module Rescue
-    module ClassMethods
-    protected
-      def rescue_action_in_public(exception)
-        status = interpret_status(response_code_for_rescue(exception))
-        path = ERROR_PAGE_FILES.sub(/NNN/, status[0,3])
-        if File.exist?(path)
-          render :file => path, :status => status
-        else
-          head status
-        end
+  class Base
+    def rescue_action_in_public(exception)
+      status = interpret_status(response_code_for_rescue(exception))
+      path = ERROR_PAGE_FILES.sub(/NNN/, status[0,3])
+      if File.exist?(path)
+        render :file => path, :status => status
+      else
+        head status
       end
     end
   end
