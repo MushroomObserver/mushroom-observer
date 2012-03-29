@@ -104,6 +104,9 @@ require file if File.exists?(file + '.rb')
 # Now provide defaults for the rest.
 require File.join(File.dirname(__FILE__), 'consts')
 
+# This should be included elsewhere, but I don't know where to put it yet.
+require "smtp_tls"
+
 # --------------------------------------------------------------------
 #  General non-mode-specific, non-site-specific configurations here.
 # --------------------------------------------------------------------
@@ -520,3 +523,4 @@ module ActionView
 end
 
 ################################################################################
+
