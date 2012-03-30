@@ -230,14 +230,14 @@ mo> vi config/consts-site.rb
   # Set timezone?
   ENV['TZ'] = 'Eastern Time (US & Canada)'
 
-  # Use CDMR mail server for ActionMailer.
+  # Use Gmail mail server for ActionMailer.
   config.action_mailer.smtp_settings = {
-    :address        => 'mail.digitalmycology.com',
-    :port           => 587,
-    :domain         => 'digitalmycology.com',
-    :authentication => :login,
-    :user_name      => 'mo@digitalmycology.com',
-    :password       => '$MAIL_PASSWORD',
+    :address              => "smtp.gmail.com",
+    :port                 => 587,
+    :authentication       => :plain,
+    :enable_starttls_auto => true,
+    :user_name            => "webmaster@mushroomobserver.org",
+    :password             => "Amanita1"
   }
 mo> exit
 
@@ -327,6 +327,10 @@ root> vi /etc/aliases
   # Change where root's mail goes.
   root: $USER,...
 root> newaliases
+
+# NOTE: After moving mail.mo.org to gmail, had to tweak postfix configuration:
+root> vi /etc/postfix/main.cf
+  # change myhostname to "$DOMAIN" (instead of "mail.$DOMAIN")
 
 # Test mail server.
 root> su $USER
