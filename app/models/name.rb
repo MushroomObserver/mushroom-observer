@@ -971,6 +971,34 @@ class Name < AbstractModel
     end
   end
 
+  def observation_count
+    return observations.length
+  end
+  
+  def more_popular(name)
+    result = self
+    if not name.deprecated
+      if self.deprecated
+        result = name
+      elsif self.observation_count < name.observation_count
+        result = name
+      elsif self.time_of_last_naming < name.time_of_last_naming
+        result = name
+      end
+    end
+    return result
+  end
+  
+  def time_of_last_naming
+    t = self.created
+    for n in namings
+      if n.created > t
+        t = n.created
+      end
+    end
+    return t
+  end
+  
   ################################################################################
   #
   #  :section: Misspellings
