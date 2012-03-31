@@ -1,11 +1,3 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-
-# one:
-#   column: value
-#
-# two:
-#   column: value
-
 njw_at_msa:
   id: 1
   conference_event_id: 1
