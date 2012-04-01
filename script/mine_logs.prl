@@ -3812,8 +3812,12 @@ foreach my $file (glob $glob) {
       my ($type)   = /"type"=>"(\w+)"/;
       if ($type) {
         $page = "ajax/$method/$type";
+        $ALL_PAGES{$page}++;
+        $NONROBOT_PAGES{$page}++;
       } elsif ($method) {
         $page = "ajax/$method";
+        $ALL_PAGES{$page}++;
+        $NONROBOT_PAGES{$page}++;
       }
     }
   }

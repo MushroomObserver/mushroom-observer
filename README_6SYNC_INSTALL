@@ -169,6 +169,8 @@ root> gem install rails --version=2.1.1 --verbose --no-rdoc --no-ri
 root> gem install mysql2 --verbose --no-rdoc --no-ri
 root> gem install test-unit --verbose --no-rdoc --no-ri
 root> gem install RedCloth --verbose --no-rdoc --no-ri
+# (not sure if this is necessary, it got installed when working on getting rails to play with gmail nicely)
+root> gem install openrain-action_mailer_tls -s http://gems.github.com
 
 # Install passenger.
 root> gem install passenger --verbose --no-rdoc --no-ri

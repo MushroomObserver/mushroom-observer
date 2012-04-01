@@ -354,7 +354,7 @@ class AccountMailer < ActionMailer::Base
     @body['notification'] = notification
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = sender ? sender.email : NEWS_EMAIL_ADDRESS
+    @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender ? sender.email : NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
@@ -537,8 +537,9 @@ class AccountMailer < ActionMailer::Base
     @subject             = :email_subject_webmaster_question.l(:user => sender)
     @body['question']    = question
     @recipients          = WEBMASTER_EMAIL_ADDRESS
-    @bcc	             = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = sender
+    @bcc	               = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = WEBMASTER_EMAIL_ADDRESS
+    @headers['Reply-To'] = sender
     @subject             = '[MO] ' + @subject.to_ascii
   end
 

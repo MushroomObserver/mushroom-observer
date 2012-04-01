@@ -54,11 +54,11 @@ QUEUE_DELAY        = 5                                   if !defined? QUEUE_DELA
 # Important email addresses.
 NEWS_EMAIL_ADDRESS        = "news@#{DOMAIN}"             if !defined? NEWS_EMAIL_ADDRESS
 NOREPLY_EMAIL_ADDRESS     = "no-reply@#{DOMAIN}"         if !defined? NOREPLY_EMAIL_ADDRESS
-ACCOUNTS_EMAIL_ADDRESS    = "accounts@#{DOMAIN}"         if !defined? ACCOUNTS_EMAIL_ADDRESS
-ERROR_EMAIL_ADDRESS       = "errors@#{DOMAIN}"           if !defined? ERROR_EMAIL_ADDRESS
+ACCOUNTS_EMAIL_ADDRESS    = "webmaster@#{DOMAIN}"        if !defined? ACCOUNTS_EMAIL_ADDRESS
+ERROR_EMAIL_ADDRESS       = "webmaster@#{DOMAIN}"        if !defined? ERROR_EMAIL_ADDRESS
 WEBMASTER_EMAIL_ADDRESS   = "webmaster@#{DOMAIN}"        if !defined? WEBMASTER_EMAIL_ADDRESS
-EXTRA_BCC_EMAIL_ADDRESSES = ""                           if !defined? EXTRA_BCC_EMAIL_ADDRESSES
 EXCEPTION_RECIPIENTS      = "webmaster@#{DOMAIN}"        if !defined? EXCEPTION_RECIPIENTS
+EXTRA_BCC_EMAIL_ADDRESSES = ""                           if !defined? EXTRA_BCC_EMAIL_ADDRESSES
 
 # File where the list of most commonly used names lives.
 NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.#{RAILS_ENV}" if !defined? NAME_PRIMER_CACHE_FILE
