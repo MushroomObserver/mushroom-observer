@@ -34,12 +34,18 @@
     for image in @observation.images.
              sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
       <p>
-        <%= thumbnail(image, :border => 0, :obs => @observation.id,
-                      :votes => true) %>
-        <% if !image.notes.blank? %>
+        <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true) %>
+        <% notes = []
+          if image.copyright_holder != @observation.user.legal_name
+            notes << "&copy;#{image.when.year} #{image.copyright_holder}"
+          end
+          if !image.notes.blank?
+            notes << image.notes.tl.truncate_html(300)
+          end
+          notes = notes.join('<br/>')
+          if !notes.blank? %>
           <small>
-            <%= content_tag(:span, image.notes.tl.truncate_html(300),
-                            :title => image.notes.tp.html_to_ascii) %>
+            <%= content_tag(:span, notes, :title => image.notes.tp.html_to_ascii) %>
           </small>
         <% end %>
       </p>

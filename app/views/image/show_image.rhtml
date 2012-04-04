@@ -63,6 +63,10 @@
       </div>
     </td>
 
+  <% if [:huge, :full_size].member?(@size) %>
+    </tr><tr>
+  <% end %>
+
     <td>
       <% if check_permission(@image.user_id) %>
         <p>
