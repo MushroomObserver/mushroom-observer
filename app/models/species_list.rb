@@ -383,13 +383,13 @@ protected
 
     if self.title.to_s.blank?
       errors.add(:title, :validate_species_list_title_missing.t)
-    elsif self.title.length > 100
+    elsif self.title.binary_length > 100
       errors.add(:title, :validate_species_list_title_too_long.t)
     end
 
     if self.place_name.to_s.blank? and !self.location
       errors.add(:place_name, :validate_species_list_where_missing.t)
-    elsif self.where.to_s.length > 100
+    elsif self.where.to_s.binary_length > 100
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 

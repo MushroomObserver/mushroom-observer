@@ -779,7 +779,7 @@ protected
   def validate # :nodoc:
     if self.login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
-    elsif self.login.length < 3 or self.login.length > 40
+    elsif self.login.length < 3 or self.login.binary_length > 40
       errors.add(:login, :validate_user_login_too_long.t)
     elsif (other = User.find_by_login(self.login)) && (other.id != self.id)
       errors.add(:login, :validate_user_login_taken.t)
@@ -787,20 +787,20 @@ protected
 
     if self.password.to_s.blank?
       errors.add(:password, :validate_user_password_missing.t)
-    elsif self.password.length < 5 or password.length > 40
+    elsif self.password.length < 5 or password.binary_length > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
     if self.email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
-    elsif self.email.length > 80
+    elsif self.email.binary_length > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
 
-    if self.theme.to_s.length > 40
+    if self.theme.to_s.binary_length > 40
       errors.add(:theme, :validate_user_theme_too_long.t)
     end
-    if self.name.to_s.length > 80
+    if self.name.to_s.binary_length > 80
       errors.add(:name, :validate_user_name_too_long.t)
     end
   end

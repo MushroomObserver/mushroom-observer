@@ -82,7 +82,7 @@ protected
       errors.add(:user, :validate_interest_user_missing.t)
     end
 
-    if self.target_type.to_s.length > 30
+    if self.target_type.to_s.binary_length > 30
       errors.add(:target_type, :validate_interest_object_type_too_long.t)
     end
   end

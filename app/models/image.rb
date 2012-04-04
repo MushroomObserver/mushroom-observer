@@ -509,7 +509,7 @@ class Image < AbstractModel
     name.sub!(/^[a-zA-Z]:/, '')
     name.sub!(/^.*[\/\\]/, '')
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
-    name = name[0..119] if name.length > 120
+    name.truncate_binary_length!(120) if name.binary_length > 120
     self.original_name = name
   end
 
@@ -774,12 +774,12 @@ protected
     # end
 
     # Who cares?
-    # id self.content_type.to_s.length > 100
+    # id self.content_type.to_s.binary_length > 100
     #   errors.add(:content_type, :validate_image_content_type_too_long.t)
     # end
 
     # Who cares?
-    # if self.copyright_holder.to_s.length > 100
+    # if self.copyright_holder.to_s.binary_length > 100
     #   errors.add(:copyright_holder, :validate_image_copyright_holder_too_long.t)
     # end
   end

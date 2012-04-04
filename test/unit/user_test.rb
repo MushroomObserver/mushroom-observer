@@ -128,4 +128,19 @@ class UserTest < UnitTestCase
     assert_user_list_equal(all, group1.users)
     assert_user_list_equal([], group2.users)
   end
+
+  # Bug seen in the wild: myxomop created a username which was just under 80
+  # characters long, but which had a few accents, so it was > 80 *bytes* long,
+  # and it truncated right in the middle of a utf-8 sequence.  Broke the front
+  # page of the site for several minutes. 
+  def test_myxomops_debacle
+    name = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"
+    name2 = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Sim."
+    @mary.name = name
+    assert(!@mary.save)
+    @mary.name = name2
+    assert(@mary.save)
+    @mary.reload
+    assert_equal(name2, @mary.name)
+  end
 end

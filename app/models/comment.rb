@@ -213,11 +213,11 @@ protected
 
     if self.summary.to_s.blank?
       errors.add(:summary, :validate_comment_summary_missing.t)
-    elsif self.summary.length > 100
+    elsif self.summary.binary_length > 100
       errors.add(:summary, :validate_comment_summary_too_long.t)
     end
 
-    if self.target_type.to_s.length > 30
+    if self.target_type.to_s.binary_length > 30
       errors.add(:target_type, :validate_comment_object_type_too_long.t)
     end
   end

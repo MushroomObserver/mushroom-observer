@@ -24,6 +24,7 @@
 #  capitalize_first:: Capitalize first letter, leaving the rest alone.
 #  rand_char::      Pick a single random character from the string.
 #  dealphabetize::  Reverse Fixnum#alphabetize.
+#  binary_length::  Return length in bytes instead of characters.
 #
 ################################################################################
 
@@ -544,6 +545,36 @@ class String
       raise "Character not in alphabet: '#{char}'" if i.nil?
       num = num * len + i
     end
+  end
+
+  # Return length in bytes.  If there are accents, this will differ from plain
+  # old <tt>length</tt>.  Very useful when validating ActiveRecord records,
+  # because mysql limits the number of bytes, not characters.
+  def binary_length
+    return self.dup.force_encoding('binary').length
+  end
+
+  # Truncate a string so that its *binary* length is within a given limit.
+  def truncate_binary_length!(len)
+    self.replace(truncate_binary_length(len))
+  end
+  def truncate_binary_length(len)
+    result = self
+    if result.binary_length > len
+      if result.encoding == 'UTF-8'
+        result = result.force_encoding('binary')[0..len]
+        while result[-1].ord & 0xC0 == 0x80
+          result = result[0..-2]
+        end
+        result = result[0..-2].force_encoding('UTF-8')
+      else
+        result = result[0..len-1]
+        while result.binary_length > len
+          result = result[0..-2]
+        end
+      end
+    end
+    return result
   end
 
   # This method is missing from ruby 1.9.

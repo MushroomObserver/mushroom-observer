@@ -919,10 +919,10 @@ protected
       errors.add(:user, :validate_location_user_missing.t)
     end
 
-    if self.name.to_s.length > 1024
+    if self.name.to_s.binary_length > 1024
       errors.add(:name, :validate_location_name_too_long.t)
     end
-    # if self.search_name.to_s.length > 200
+    # if self.search_name.to_s.binary_length > 200
     #   errors.add(:search_name, :validate_location_search_name_too_long.t)
     # end
   end
