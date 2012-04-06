@@ -11,7 +11,7 @@
 <% form_tag(:action => 'edit_species_list', :id => @species_list.id) do %>
   <% if !@new_names.blank?
     val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>
-    <input id="approved_names" id="approved_names" type="hidden"
+    <input id="approved_names" name="approved_names" type="hidden"
            value="<%= val %>"/>
   <% end %>
   <% if !@deprecated_names.blank?
