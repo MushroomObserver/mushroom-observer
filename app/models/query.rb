@@ -799,6 +799,11 @@ class Query < AbstractQuery
       if model_symbol == :User
         'users.contribution DESC'
       end
+
+    when 'original_name'
+      if model_symbol == :Image
+        "images.original_name ASC"
+      end
     end
   end
 

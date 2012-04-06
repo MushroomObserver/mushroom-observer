@@ -30,6 +30,7 @@
 #  reuse_image::           Choose images to add to observation.
 #  remove_images::         Choose images to remove from observation.
 #  license_updater::       Change copyright of many images.
+#  vote_anonymity::        Change anonymity of image votes in bulk.
 #  process_image::         (helper for add_image)
 #
 #  ==== Test Actions
@@ -128,15 +129,16 @@ class ImageController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',     :sort_by_name.t],
-      ['date',     :sort_by_date.t],
-      ['user',     :sort_by_user.t],
+      ['name',          :sort_by_name.t],
+      ['original_name', :sort_by_filename.t],
+      ['date',          :sort_by_date.t],
+      ['user',          :sort_by_user.t],
       # ['copyright_holder', :sort_by_copyright_holder.t],
-      ['created',  :sort_by_posted.t],
-      ['modified', :sort_by_modified.t],
-      ['confidence', :sort_by_confidence.t],
+      ['created',       :sort_by_posted.t],
+      ['modified',      :sort_by_modified.t],
+      ['confidence',    :sort_by_confidence.t],
       ['image_quality', :sort_by_image_quality.t],
-      ['num_views', :sort_by_num_views.t],
+      ['num_views',     :sort_by_num_views.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
@@ -217,8 +219,9 @@ class ImageController < ApplicationController
         val = nil if val == '0'
         cur = @image.users_vote
         if cur != val
-          @image.change_vote(@user, val)
-          Transaction.put_images(:id => @image, :set_vote => val)
+          anon = @user.votes_anonymous == :yes
+          @image.change_vote(@user, val, anon)
+          Transaction.put_images(:id => @image, :set_vote => val, :set_anonymous => anon)
         end
         
         # Advance to next image automatically if 'next' parameter set.
@@ -230,6 +233,11 @@ class ImageController < ApplicationController
             @image = query.current
           end
         end
+      end
+
+      # Grab list of votes.
+      @votes = @image.image_votes(:include => :user).sort_by do |v|
+        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
       end
 
       # Update view stats on image we're actually showing.
@@ -360,6 +368,7 @@ class ImageController < ApplicationController
       xargs[:set_date]             = @image.when             if @image.when_changed?
       xargs[:set_notes]            = @image.notes            if @image.notes_changed?
       xargs[:set_copyright_holder] = @image.copyright_holder if @image.copyright_holder_changed?
+      xargs[:set_original_name]    = @image.original_name    if @image.original_name_changed?
       xargs[:set_license]          = @image.license          if @image.license_id_changed?
       if xargs.empty?
         flash_notice(:runtime_no_changes.t)
@@ -599,6 +608,38 @@ class ImageController < ApplicationController
       license = License.find(datum['license_id'].to_i)
       datum['license_name'] = license.display_name
       datum['licenses']     = License.current_names_and_ids(license)
+    end
+  end
+
+  # Bulk update anonymity of user's image votes.
+  # Input: params[:commit] - which button user pressed
+  # Outputs:
+  #   @num_anonymous - number of existing anonymous votes
+  #   @num_public    - number of existing puclic votes
+  def vote_anonymity
+    if request.method == :post
+      submit = params[:commit]
+      if submit == :image_vote_anonymity_make_anonymous.l
+        ImageVote.connection.update %(
+          UPDATE image_votes SET anonymous = TRUE WHERE user_id = #{@user.id}
+        )
+        flash_notice(:image_vote_anonymity_made_anonymous.t)
+      elsif submit == :image_vote_anonymity_make_public.l
+        ImageVote.connection.update %(
+          UPDATE image_votes SET anonymous = FALSE WHERE user_id = #{@user.id}
+        )
+        flash_notice(:image_vote_anonymity_made_public.t)
+      else
+        flash_error(:image_vote_anonymity_invalid_submit_button.l(:label => submit))
+      end
+      redirect_to(:controller => 'account', :action => 'prefs')
+    else
+      @num_anonymous = ImageVote.connection.select_value %(
+        SELECT count(id) FROM image_votes WHERE user_id = #{@user.id} AND anonymous
+      )
+      @num_public = ImageVote.connection.select_value %(
+        SELECT count(id) FROM image_votes WHERE user_id = #{@user.id} AND !anonymous
+      )
     end
   end
 end

@@ -432,4 +432,38 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal(@rolf.id, session[:user_id])
     assert_equal(image.id, @rolf.reload.image_id)
   end
+
+  # Test setting anonymity of all image votes.
+  def test_bulk_image_vote_anonymity_thingy
+    img1 = images(:in_situ)
+    img2 = images(:commercial_inquiry_image)
+    img1.change_vote(@mary, 1, false)
+    img2.change_vote(@mary, 2, true)
+    img1.change_vote(@rolf, 3, true)
+    img2.change_vote(@rolf, 4, false)
+
+    assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
+
+    requires_login(:vote_anonymity)
+    assert_response('vote_anonymity')
+
+    login('mary')
+    post(:vote_anonymity, :commit => :image_vote_anonymity_make_anonymous.l)
+    assert_response(:controller => :account, :action => :prefs)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
+    
+    login('rolf')
+    post(:vote_anonymity, :commit => :image_vote_anonymity_make_public.l)
+    assert_response(:controller => :account, :action => :prefs)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
+  end
 end

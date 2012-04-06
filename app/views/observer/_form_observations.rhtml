@@ -24,7 +24,9 @@
 <label for="observation_lat"><%= :LATITUDE.t %>:</label>
 <%= text_field('observation', 'lat', :size => 12) %>&nbsp;&nbsp;
 <label for="observation_long"><%= :LONGITUDE.t %>:</label>
-<%= text_field('observation', 'long', :size => 12) %><br/>
+<%= text_field('observation', 'long', :size => 12) %>&nbsp;&nbsp;
+<label for="observation_alt"><%= :ALTITUDE.t %>:</label>
+<%= text_field('observation', 'alt', :size => 12) %><br/>
 <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span><br/><br/>
 
 <%= if include_naming
@@ -64,18 +66,28 @@ end %>
     <% for image in @good_images %>
       <div class="form_image">
         <table><tr>
-          <td style="white-space:nowrap">
+          <td valign="middle" style="white-space:nowrap">
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
-            <%= thumbnail(image, :border => 0, :obs => @observation.id,
-                          :votes => false, :nodiv => true) %>
           </td>
-          <td width="10"></td>
-          <td>
-            <label for="image_<%= image.id %>_notes"><%= :NOTES.t %>:</label>
-            <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
-            <%= text_area_tag("image_#{image.id}_notes", image.notes,
-                              :cols => 60, :rows => 2) %><br/>
-            <%= :Vote.t %>: <%= image_vote_tabs(image) %>
+          <td valign="middle" align="center" style="padding-right:10px">
+            <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true, :original => false) %>
+          </td>
+          <td valign="middle" style="white-space:nowrap">
+              <label for="image_<%= image.id %>_notes"><%= :NOTES.t %>:</label>
+              <% if @user.thumbnail_size == :thumbnail %>
+                <%= text_field(:image, :notes, :value => image.notes, :index => image.id, :size => 40) %><br/>
+              <% else %><br/>
+                <%= text_area(:image, :notes, :value => image.notes, :index => image.id, :cols => 60, :rows => 3) %><br/>
+              <% end %>
+            <label for="image_<%= image.id %>_original_name"><%= :form_observations_original_name.t %>:</label>
+              <%= text_field(:image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %><br/>
+            <label for="image_<%= image.id %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>
+              <%= text_field_tag(:image, :copyright_holder, :value => image.copyright_holder, :index => image.id, :size => 30) %><br/>
+            <label for="image_<%= image.id %>_when_1i"><%= :form_images_when_taken.t %>:</label>
+              <%= date_select(:image, :when, { :value => image.when, :index => image.id, :start_year => 1980, :end_year => Time.now.year },
+                  { :onchange => "CHANGED_DATES[#{image.id}] = true" }) %><br/>
+            <label for="image_<%= image.id %>_license_id"><%= :form_images_select_license.t %>:</label>
+              <%= select(:image, :license_id, @licenses, :value => image.license_id, :index => image.id) %><br/>
           </td>
         </tr></table>
       </div>
@@ -126,14 +138,15 @@ end %>
         str.gsub(']', '"+y+"')
       }";
 
+      function auto_image_new(i) {
+        if (NEXT_IMAGE_INDEX == i+1) image_new();
+        $('image_' + i + '_notes').focus();
+      }
+
       function image_new() {
         var form = IMAGE_FORM.replace(/XXX/g, NEXT_IMAGE_INDEX++);
         Insertion.Bottom('image_forms', form);
         Element.ensureVisible($('new_image_button'));
-        if (NEXT_IMAGE_INDEX == 5)
-          alert("Be careful uploading too many images at once.  Sometimes" +
-            " browsers will timeout and cause you to lose everything. " +
-            " I'd recommend doing no more than four or five at a time. ");
         return false;
       }
 
@@ -174,7 +187,5 @@ end %>
   <%= check_box('log_change', 'checked', :checked => '1') %>
   <label for="log_change_checked"><%= :form_observations_log_change.t %></label>
 <% end %>
-
-<%= focus_on('observation_place_name') %>
 
 <!--[eoform:observation]-->

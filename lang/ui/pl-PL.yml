@@ -155,6 +155,8 @@ author: autor
 AUTHORS: Autorzy
 authors: autorzy
 # ("Authority" is authority on a scientific name.)
+ALTITUDE:  Altitude
+altitude:  altitude
 AUTHORITY: Autor
 authority: autor
 AUTHORITYS: Autorzy
@@ -390,6 +392,8 @@ UPLOAD: Załaduj
 upload: załaduj
 
 # Common adjectives.
+ANONYMOUS:  Anonymous
+anonymous:  anonymous
 BY: Przez
 by: przez
 CREATED: Stworzony
@@ -795,6 +799,7 @@ query_help_user_pattern_search:  users matching a search string
 sort_by_header: "Sortuj wg.:"
 sort_by_id:  ID
 sort_by_name:  "[:NAME]"
+sort_by_filename:  File Name
 sort_by_title:  "[:TITLE]"
 sort_by_summary:  "[:SUMMARY]"
 sort_by_date:  "[:DATE]"
@@ -1018,7 +1023,7 @@ ask_webmaster_note:  >
   planned.  You can vote and comment on all the various suggestions for future
   development there.  However, they are only rough guides, subject to bugs or
   others issues that may come up and, of course, the availability of our own
-  time to work on the site. 
+  time to work on the site.
   \n\n
   Nathan Wilson\n
   Jason Hollinger\n
@@ -1179,6 +1184,7 @@ form_images_when_taken: Kiedy zostało zrobione
 form_images_when_help: Data utworzenia zdjęcia lub rysunku.
 form_images_notes_help:  Enter notes that are specific to this particular image.
 form_images_copyright_holder:  "[:COPYRIGHT_HOLDER]"
+form_images_original_name:  Original File Name
 form_images_select_license:  Select a "License":/observer/how_to_use#license
 form_images_license_help:  >
   Select "license":/observer/how_to_use#license you want to give for this image.
@@ -1352,6 +1358,7 @@ form_naming_confidence_help:  >
 # observer/_form_observations
 form_observations_specimen_available: Egzemplarz zielnikowy dostępny
 form_observations_is_collection_location: Jest miejscem zbioru
+form_observations_original_name:  Original File Name
 form_observations_upload_images: Załaduj zdjęcia
 form_observations_upload_another: Załaduj kolejne...
 form_observations_edit_image: Edytuj zdjęcie
@@ -1372,7 +1379,7 @@ form_observations_notes_help:  >
   Please include any additional information you can think of about this
   observation that isn't clear from the photographs, e.g., habitat, substrate
   or nearby trees; distinctive texture, scent, taste, staining or bruising;
-  results of chemical or microscopic analyses, etc. 
+  results of chemical or microscopic analyses, etc.
 
 form_observations_remove_image_confirm:  >
   Are you sure you want to remove this image?  This will only remove this image
@@ -1516,6 +1523,7 @@ image_show_large: Duży
 image_show_huge: Wielki
 image_show_full_size: Pełny rozmiar
 image_show_original: Pokaż oryginał
+image_show_original_name:  Original File Name
 image_show_make_default:  Make this the default size
 
 
@@ -1660,10 +1668,11 @@ prefs_locale: Język
 prefs_location_format: Format lokalizacji
 prefs_location_format_postal: "Pocztowy (New York, USA)"
 prefs_location_format_scientific: "Naukowy (USA, New York)"
-prefs_votes_anonymous: Głosy na proponowane nazwy
+prefs_votes_anonymous: Głosy na proponowane nazwy i zdjęcia
 prefs_votes_anonymous_no: Zawsze publiczne
 prefs_votes_anonymous_yes: Zawsze anonimowe
 prefs_votes_anonymous_old:  "Public after [cutoff]"
+prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
 prefs_license_note:  Default "license":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size: Rozmiar miniatury
 prefs_thumbnail_small:  "[:image_show_small]"
@@ -2297,7 +2306,7 @@ wrapup_2011_body:  >
   the broader biodiversity community and EOL in particular.
   \n\n
   Along with this note, we are also releasing the newly developed
-  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am 
+  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am
   trying to provide a more current and professional look for the site.
   "Feedback on the theme or suggestions for improvements":/observer/ask_webmaster_question
   are very welcome.
@@ -2423,8 +2432,8 @@ pivotal_head_started:  areas developers are actively working
 pivotal_head_unstarted:  scheduled for work soon
 pivotal_head_unscheduled:  for the indefinite future
 pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week 
-pivotal_head_month:  has comments within last month  
+pivotal_head_week:  has comments within last week
+pivotal_head_month:  has comments within last month
 pivotal_head_none:  has no recent comments
 pivotal_head_all: pokaż wszystko
 
@@ -2451,7 +2460,7 @@ pivotal_label_open: otwarte
 pivotal_label_day: dzień
 pivotal_label_week: tydzień
 pivotal_label_month: miesiąc
-pivotal_label_none:  none 
+pivotal_label_none:  none
 pivotal_label_unscheduled:  "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted:  "[:pivotal_state_unstarted]"
 pivotal_label_started:  "[:pivotal_state_started]"
@@ -2624,6 +2633,7 @@ eol_preview_explanation:  >
   you care about and work to expand the descriptive paragraphs for this taxon.
 
 
+
 # image/license_updater
 image_updater_count:  Count
 image_updater_license:  "[:LICENSE]"
@@ -2635,6 +2645,26 @@ image_updater_help:  >
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
   "[:UPDATE]" to submit changes.
+
+
+
+# image/vote_anonymity
+image_vote_anonymity_title:  Change Anonymity of Your Image Votes
+image_vote_anonymity_num_anonymous:  Number of anonymous votes
+image_vote_anonymity_num_public:  Number of public votes
+image_vote_anonymity_make_anonymous:  Make all votes anonymous
+image_vote_anonymity_make_public:  Make all votes public
+image_vote_anonymity_made_anonymous:  >
+  Made all of your image votes anonymous.  Please also check your vote preference
+  below to ensure that future votes are also anonymous.
+
+image_vote_anonymity_made_public:  >
+  Made all of your image votes public.  Please also check your vote preference
+  below to ensure that future votes are also public.
+
+image_vote_anonymity_invalid_submit_button: >
+  Invalid submit button "[label]", please "contact us":/observer/ask_webmaster_question for help.
+
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.
@@ -4940,6 +4970,7 @@ runtime_destroyed_id:  "Successfully destroyed [type] #[value]."
 runtime_destroyed_name:  "Successfully destroyed [type] '[value]'."
 runtime_invalid:  "[Type] is invalid: '[value]'"
 runtime_lat_long_error:  "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
+runtime_altitude_error:  Altitude must be real number in feet or meters.  Default is meters.  Indicate units with "m", "ft" or "'" (apostrophe).
 runtime_merge_success:  Successfully merged [type] [this] into [that].
 runtime_missing:  Missing [field].
 runtime_no_changes:  "No changes made."

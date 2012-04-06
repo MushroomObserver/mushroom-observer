@@ -155,6 +155,8 @@ author: συντάκτης
 AUTHORS: Συντάκτες
 authors: συντάκτες
 # ("Authority" is authority on a scientific name.)
+ALTITUDE:  Altitude
+altitude:  altitude
 AUTHORITY: Δημιουργός
 authority: δημιουργός
 AUTHORITYS: Δημιουργοί
@@ -390,6 +392,8 @@ UPLOAD: Ανέβασμα
 upload: ανέβασμα
 
 # Common adjectives.
+ANONYMOUS:  Anonymous
+anonymous:  anonymous
 BY: Από
 by: από
 CREATED: Δημιουργήθηκε
@@ -795,6 +799,7 @@ query_help_user_pattern_search: χρήστες που ταιριάζουν με 
 sort_by_header: "Ταξινόμηση κατά:"
 sort_by_id: Ταυτοποίηση
 sort_by_name: "[:NAME]"
+sort_by_filename:  File Name
 sort_by_title: "[:TITLE]"
 sort_by_summary: "[:SUMMARY]"
 sort_by_date: "[:DATE]"
@@ -1155,6 +1160,7 @@ form_images_when_taken: Πότε Έγινε Η Λήψη
 form_images_when_help: Ημερομηνία δημιουργίας της φωτογραφίας ή του σκίτσου.
 form_images_notes_help: Εισαγωγή σημειώσεων που αφορούν ειδικά αυτή τη συγκεκριμένη εικόνα.
 form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
+form_images_original_name:  Original File Name
 form_images_select_license: Επιλέξτε μία "Άδεια":/observer/how_to_use#license
 form_images_license_help: >
   Select "license":/observer/how_to_use#license you want to give for this image.
@@ -1309,6 +1315,7 @@ form_naming_confidence_help: >
 # observer/_form_observations
 form_observations_specimen_available: Δείγμα Ερμπαρίου Διαθέσιμο
 form_observations_is_collection_location: Είναι η Τοποθεσία Συλλογής
+form_observations_original_name:  Original File Name
 form_observations_upload_images: Ανεβάστε Εικόνες
 form_observations_upload_another: Ανεβάστε κι Άλλη...
 form_observations_edit_image: Επεξεργασία Εικόνας
@@ -1448,6 +1455,7 @@ image_show_large: Μεγάλη
 image_show_huge: Τεράστια
 image_show_full_size: Πλήρες Μέγεθος
 image_show_original: Εμφάνιση Αρχικής Εικόνας
+image_show_original_name:  Original File Name
 image_show_make_default: Να οριστεί αυτό το μέγεθος ως προεπιλογή
 
 
@@ -1590,10 +1598,11 @@ prefs_locale: Γλώσσα
 prefs_location_format: Μορφή Τοποθεσίας
 prefs_location_format_postal: "Ταχυδρομική (New York, USA)"
 prefs_location_format_scientific: "Επιστημονική (USA, New York)"
-prefs_votes_anonymous: Ψήφοι επί των προτεινόμενων ονομάτων
+prefs_votes_anonymous: Ψήφοι επί των προτεινόμενων ονομάτων και Φωτογραφίες
 prefs_votes_anonymous_no: Πάντα δημόσιεςAlways public
 prefs_votes_anonymous_yes: Πάντα ανώνυμες
 prefs_votes_anonymous_old: "Δημόσιες μετά από [cutoff]"
+prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
 prefs_license_note: Προεπιλεγμένη "άδεια":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size: Μέγεθος ενδεικτικής εικόνας
 prefs_thumbnail_small: "[:image_show_small]"
@@ -2152,7 +2161,7 @@ wrapup_2011_body:  >
   the broader biodiversity community and EOL in particular.
   \n\n
   Along with this note, we are also releasing the newly developed
-  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am 
+  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am
   trying to provide a more current and professional look for the site.
   "Feedback on the theme or suggestions for improvements":/observer/ask_webmaster_question
   are very welcome.
@@ -2278,8 +2287,8 @@ pivotal_head_started:  areas developers are actively working
 pivotal_head_unstarted:  scheduled for work soon
 pivotal_head_unscheduled:  for the indefinite future
 pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week 
-pivotal_head_month:  has comments within last month  
+pivotal_head_week:  has comments within last week
+pivotal_head_month:  has comments within last month
 pivotal_head_none:  has no recent comments
 pivotal_head_all:  show everything
 
@@ -2306,7 +2315,7 @@ pivotal_label_open:  open
 pivotal_label_day:  day
 pivotal_label_week:  week
 pivotal_label_month:  month
-pivotal_label_none:  none 
+pivotal_label_none:  none
 pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted: "[:pivotal_state_unstarted]"
 pivotal_label_started: "[:pivotal_state_started]"
@@ -2433,6 +2442,7 @@ eol_preview_explanation: >
   Ο καλύτερος τρόπος να συμμετάσχετε σ' αυτή τη θαυμάσια ευκαιρία είναι να βρείτε ένα τάξιο που σας ενδιαφέρει και να εργαστείτε για την επέκταση των παραγράφων περιγραφής αυτού του τάξιου.
 
 
+
 # image/license_updater
 image_updater_count: Μέτρηση
 image_updater_license: Άδεια
@@ -2444,6 +2454,26 @@ image_updater_help:  >
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
   "[:UPDATE]" to submit changes.
+
+
+
+# image/vote_anonymity
+image_vote_anonymity_title:  Change Anonymity of Your Image Votes
+image_vote_anonymity_num_anonymous:  Number of anonymous votes
+image_vote_anonymity_num_public:  Number of public votes
+image_vote_anonymity_make_anonymous:  Make all votes anonymous
+image_vote_anonymity_make_public:  Make all votes public
+image_vote_anonymity_made_anonymous:  >
+  Made all of your image votes anonymous.  Please also check your vote preference
+  below to ensure that future votes are also anonymous.
+
+image_vote_anonymity_made_public:  >
+  Made all of your image votes public.  Please also check your vote preference
+  below to ensure that future votes are also public.
+
+image_vote_anonymity_invalid_submit_button: >
+  Invalid submit button "[label]", please "contact us":/observer/ask_webmaster_question for help.
+
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.
@@ -4012,6 +4042,7 @@ runtime_destroyed_id: "Επιτυχής καταστροφή [type] #[value]."
 runtime_destroyed_name: "Επιτυχής καταστροφή [type] '[value]'."
 runtime_invalid: "[Type] είναι άκυρο: '[value]'"
 runtime_lat_long_error: "Το γεωγραφικό πλάτος και μήκος πρέπει να είναι αριθμοί κινητής υποδιαστολής μεταξύ -90 και 90, και -180 και 180 αντίστοιχα."
+runtime_altitude_error:  Altitude must be real number in feet or meters.  Default is meters.  Indicate units with "m", "ft" or "'" (apostrophe).
 runtime_merge_success: Επιτυχής συγχώνευση [type] [this] στο [that].
 runtime_missing: Λείπει το [field].
 runtime_no_changes: "Δεν έγινε καμία αλλαγή."

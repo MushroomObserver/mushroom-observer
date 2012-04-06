@@ -113,16 +113,22 @@ class ApplicationController < ActionController::Base
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
-    theme = params[:theme].to_s
-    if @user && !theme.blank?
-      @user.theme = theme
-      @user.save
+    change = params[:user_theme].to_s
+    if !change.blank?
+      if CSS.member?(change)
+        if @user
+          @user.theme = change
+          @user.save
+        else
+          session[:theme] = change
+        end
+      else
+        session[:layout] = change
+      end
     end
-    name = params[:layout].to_s
-    name = session[:layout].to_s if name.blank?
-    name = 'application' if name.blank?
-    session[:layout] = name
-    return name
+    layout = session[:layout].to_s
+    layout = 'application' if layout.blank?
+    return layout
   end
 
   # Catch errors for integration tests.
@@ -203,6 +209,8 @@ class ApplicationController < ActionController::Base
             (split[1] == user.auth_code) &&
             (user.verified)
         @user = set_session_user(user)
+        @user.last_login = Time.now
+        @user.save
 
         # Reset cookie to push expiry forward.  This way it will continue to
         # remember the user until they are inactive for over a month.  (Else
@@ -218,6 +226,15 @@ class ApplicationController < ActionController::Base
       # Make currently logged-in user available to everyone.
       User.current = @user
       logger.warn("user=#{@user ? @user.id : '0'} robot=#{is_robot? ? 'Y' : 'N'}")
+
+      # Keep track of last time user requested a page, but only update at most once an hour.
+      if @user and (
+        !@user.last_activity or
+        @user.last_activity.to_s('%Y%m%d%H') != Time.now.to_s('%Y%m%d%H')
+      )
+        @user.last_activity = Time.now
+        @user.save
+      end
     end
 
     # Tell Rails to continue to process.

@@ -155,6 +155,8 @@ author: auteur
 AUTHORS: Auteurs
 authors: auteurs
 # ("Authority" is authority on a scientific name.)
+ALTITUDE:  Altitude
+altitude:  altitude
 AUTHORITY: Auteur
 authority: auteur
 AUTHORITYS: Auteurs
@@ -390,6 +392,8 @@ UPLOAD: Télécharger
 upload: télécharger
 
 # Common adjectives.
+ANONYMOUS:  Anonymous
+anonymous:  anonymous
 BY: Par
 by: par
 CREATED: Créé
@@ -795,6 +799,7 @@ query_help_user_pattern_search: les utilisateurs correspondant à une chaîne de
 sort_by_header: "Trier par:"
 sort_by_id: ID
 sort_by_name: nom
+sort_by_filename:  File Name
 sort_by_title: titre
 sort_by_summary: résumé
 sort_by_date: date
@@ -1183,6 +1188,7 @@ form_images_when_taken: Quand a-t-elle pris?
 form_images_when_help: La date que l'image ou le dessin a été créé.
 form_images_notes_help: Entrez les notes que sont spécifique à cette image particulière.
 form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
+form_images_original_name:  Original File Name
 form_images_select_license: Sélectionnez la license
 form_images_license_help: >
   «La license»:/observer/how_to_use#license que vous souhaitez utiliser pour cette image.
@@ -1356,6 +1362,7 @@ form_naming_confidence_help:  >
 # observer/_form_observations
 form_observations_specimen_available: Spécimen d'herbier est disponible
 form_observations_is_collection_location: L'endroit de collection
+form_observations_original_name:  Original File Name
 form_observations_upload_images: Images à télécharger
 form_observations_upload_another: Télécharger une autre...
 form_observations_edit_image: Modifier l'image
@@ -1524,6 +1531,7 @@ image_show_large: Grande
 image_show_huge: Énorme
 image_show_full_size: Taille entière
 image_show_original: Afficher l'image originale
+image_show_original_name:  Original File Name
 image_show_make_default: Faire de cette la taille par défaut.
 
 
@@ -1667,10 +1675,11 @@ prefs_locale:  Language
 prefs_location_format:  Location Format
 prefs_location_format_postal:  "Postal (New York, USA)"
 prefs_location_format_scientific:  "Scientific (USA, New York)"
-prefs_votes_anonymous:  Votes on proposed names
+prefs_votes_anonymous:  Votes on proposed names and images
 prefs_votes_anonymous_no:  Always public
 prefs_votes_anonymous_yes:  Always anonymous
 prefs_votes_anonymous_old:  "Public after [cutoff]"
+prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
 prefs_license_note:  Default "license":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size:  Thumbnail size
 prefs_thumbnail_small:  "[:image_show_small]"
@@ -2304,7 +2313,7 @@ wrapup_2011_body:  >
   the broader biodiversity community and EOL in particular.
   \n\n
   Along with this note, we are also releasing the newly developed
-  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am 
+  "Black on White":/observer/BlackOnWhite color theme.  With this theme I am
   trying to provide a more current and professional look for the site.
   "Feedback on the theme or suggestions for improvements":/observer/ask_webmaster_question
   are very welcome.
@@ -2430,8 +2439,8 @@ pivotal_head_started:  areas developers are actively working
 pivotal_head_unstarted:  scheduled for work soon
 pivotal_head_unscheduled:  for the indefinite future
 pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week 
-pivotal_head_month:  has comments within last month  
+pivotal_head_week:  has comments within last week
+pivotal_head_month:  has comments within last month
 pivotal_head_none:  has no recent comments
 pivotal_head_all:  show everything
 
@@ -2458,7 +2467,7 @@ pivotal_label_open:  open
 pivotal_label_day:  day
 pivotal_label_week:  week
 pivotal_label_month:  month
-pivotal_label_none:  none 
+pivotal_label_none:  none
 pivotal_label_unscheduled:  "[:pivotal_state_unscheduled]"
 pivotal_label_unstarted:  "[:pivotal_state_unstarted]"
 pivotal_label_started:  "[:pivotal_state_started]"
@@ -2631,6 +2640,7 @@ eol_preview_explanation:  >
   you care about and work to expand the descriptive paragraphs for this taxon.
 
 
+
 # image/license_updater
 image_updater_count:  Count
 image_updater_license:  "[:LICENSE]"
@@ -2642,6 +2652,26 @@ image_updater_help:  >
   with the number of your images which use that license.  Make any changes you
   want to the license or the name listed as the copyright holder, then click
   "[:UPDATE]" to submit changes.
+
+
+
+# image/vote_anonymity
+image_vote_anonymity_title:  Change Anonymity of Your Image Votes
+image_vote_anonymity_num_anonymous:  Number of anonymous votes
+image_vote_anonymity_num_public:  Number of public votes
+image_vote_anonymity_make_anonymous:  Make all votes anonymous
+image_vote_anonymity_make_public:  Make all votes public
+image_vote_anonymity_made_anonymous:  >
+  Made all of your image votes anonymous.  Please also check your vote preference
+  below to ensure that future votes are also anonymous.
+
+image_vote_anonymity_made_public:  >
+  Made all of your image votes public.  Please also check your vote preference
+  below to ensure that future votes are also public.
+
+image_vote_anonymity_invalid_submit_button: >
+  Invalid submit button "[label]", please "contact us":/observer/ask_webmaster_question for help.
+
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.
@@ -4947,6 +4977,7 @@ runtime_destroyed_id:  "Successfully destroyed [type] #[value]."
 runtime_destroyed_name:  "Successfully destroyed [type] '[value]'."
 runtime_invalid:  "[Type] is invalid: '[value]'"
 runtime_lat_long_error:  "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
+runtime_altitude_error:  Altitude must be real number in feet or meters.  Default is meters.  Indicate units with "m", "ft" or "'" (apostrophe).
 runtime_merge_success:  Successfully merged [type] [this] into [that].
 runtime_missing:  Missing [field].
 runtime_no_changes:  "No changes made."

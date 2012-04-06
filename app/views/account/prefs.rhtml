@@ -1,9 +1,12 @@
 <%
   @title = :prefs_title.t
 
+
   new_tab_set do
     add_tab(:bulk_license_link.t,
             :controller => 'image', :action => 'license_updater')
+    add_tab(:prefs_change_image_vote_anonymity.t,
+            :controller => 'image', :action => 'vote_anonymity')
     add_tab(:profile_link.t,
             :controller => 'account', :action => 'profile')
     add_tab(:show_user_your_notifications.t,

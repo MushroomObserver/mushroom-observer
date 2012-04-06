@@ -229,7 +229,7 @@ class ObserverController < ApplicationController
 
   def wrapup_2011
   end
-  
+
   # Intro to site.
   def intro # :nologin:
   end
@@ -776,7 +776,7 @@ class ObserverController < ApplicationController
   def show_obs
     redirect_to(:action => 'show_observation', :id => params[:id])
   end
-  
+
   # Go to next observation: redirects to show_observation.
   def next_observation # :nologin: :norobots:
     redirect_to_next_object(:next, Observation, params[:id])
@@ -834,7 +834,7 @@ class ObserverController < ApplicationController
       create_observation_post(params)
     end
   end
-  
+
   def create_observation_post(params)
     rough_cut(params)
     success = validate_name(params)
@@ -868,7 +868,7 @@ class ObserverController < ApplicationController
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image], @observation, @good_images)
   end
-  
+
   def validate_name(params)
     # Validate name.
     given_name  = params[:name][:name].to_s           rescue ''
@@ -878,7 +878,7 @@ class ObserverController < ApplicationController
     @naming.name = @name if @name
     return success
   end
-  
+
   def validate_place_name(params, success)
     @place_name = @observation.raw_place_name
     @dubious_where_reasons = []
@@ -886,10 +886,15 @@ class ObserverController < ApplicationController
       @dubious_where_reasons = Location.dubious_name?(@place_name, true)
       success = false if @dubious_where_reasons != []
     end
-    lat = (params[:observation][:lat] or "")
-    long = (params[:observation][:long] or "")
+    lat  = params[:observation][:lat].to_s
+    long = params[:observation][:long].to_s
+    alt  = params[:observation][:alt].to_s
     if not valid_lat_long?(lat, long)
       flash_error(:runtime_lat_long_error.l)
+      success = false
+    end
+    if not valid_altitude(alt)
+      flash_error(:runtime_altitude_error.l)
       success = false
     end
     return success
@@ -946,6 +951,7 @@ class ObserverController < ApplicationController
       @observation.location = last_observation.location
       @observation.lat      = last_observation.lat
       @observation.long     = last_observation.long
+      @observation.alt      = last_observation.alt
     end
   end
 
@@ -967,7 +973,7 @@ class ObserverController < ApplicationController
   #
   def edit_observation # :prefetch: :norobots:
     pass_query_params
-    
+
     @observation = Observation.find(params[:id], :include =>
                                     [:name, :images, :location])
     @licenses = License.current_names_and_ids(@user.license)
@@ -985,16 +991,20 @@ class ObserverController < ApplicationController
 
     else
       # Check lat long.  It's OK for both of them to be blank.
-      lat = params[:observation][:lat]
-      long = params[:observation][:long]
+      lat  = params[:observation][:lat].to_s
+      long = params[:observation][:long].to_s
+      alt  = params[:observation][:alt].to_s
       good_lat_long = valid_lat_long?(lat, long)
+      good_altitude = valid_altitude(alt)
       flash_error(:runtime_lat_long_error.l) if not good_lat_long
+      flash_error(:runtime_altitude_error.l) if not good_altitude
       @where = Location.user_name(@user, params[:observation][:place_name])
       @dubious_where_reasons = []
       @dubious_where_reasons = Location.dubious_name?(@where, true) if @where != params[:approved_where]
 
       # Update observation attributes
       @observation.attributes = params[:observation]
+      @observation.alt = convert_altitude(alt)
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
@@ -1002,7 +1012,7 @@ class ObserverController < ApplicationController
       attach_good_images(@observation, @good_images)
 
       done = false
-      if good_lat_long and (@dubious_where_reasons == [])
+      if good_lat_long and good_altitude and (@dubious_where_reasons == [])
 
         # Only save observation if there are changes.
         if @observation.changed?
@@ -1033,11 +1043,28 @@ class ObserverController < ApplicationController
   def valid_lat_long?(lat, long)
     (is_empty?(lat) and is_empty?(long)) or Location.check_lat_long(lat, long)
   end
-  
+
+  ALTITUDE_REGEX = /^ *(-?\d+(.\d+)?) *((m|ft|')\.?)? *$/
+
+  def valid_altitude(alt)
+    alt.blank? or alt.match(ALTITUDE_REGEX)
+  end
+
+  def convert_altitude(alt)
+    result = nil
+    match = alt.match(ALTITUDE_REGEX)
+    if match and match[3].match(/ft|'/)
+      result = match[1].to_f * 0.3048
+    elsif match
+      result = match[1].to_f
+    end
+    return result
+  end
+
   def is_empty?(str)
     str.nil? or (str == "")
   end
-  
+
   # Callback to destroy an observation (and associated namings, votes, etc.)
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
@@ -2251,15 +2278,23 @@ class ObserverController < ApplicationController
 
     # Now check for edits.
     for image in images
-      notes = params["image_#{image.id}_notes"]
-      if image.notes != notes
-        image.notes = notes
+      image.when             = params["image_#{image.id}_when"]             if !params["image_#{image.id}_when"].nil?
+      image.notes            = params["image_#{image.id}_notes"]            if !params["image_#{image.id}_notes"].nil?
+      image.copyright_holder = params["image_#{image.id}_copyright_holder"] if !params["image_#{image.id}_copyright_holder"].nil?
+      image.license_id       = params["image_#{image.id}_license"]          if !params["image_#{image.id}_license"].nil?
+      image.original_name    = params["image_#{image.id}_original_name"]    if !params["image_#{image.id}_original_name"].nil?
+      if image.when_changed? or
+         image.notes_changed? or
+         image.copyright_holder_changed? or
+         image.license_id_changed? or
+         image.original_name_changed?
         image.modified = Time.now
         args = { :id => image }
         args[:set_date]             = image.when             if image.when_changed?
         args[:set_notes]            = image.notes            if image.notes_changed?
         args[:set_copyright_holder] = image.copyright_holder if image.copyright_holder_changed?
         args[:set_license]          = image.license          if image.license_id_changed?
+        args[:set_original_name]    = image.original_name    if image.original_name_changed?
         if !image.save
           flash_object_errors(image)
         else

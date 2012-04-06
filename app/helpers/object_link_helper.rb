@@ -147,13 +147,14 @@ module ApplicationHelper::ObjectLink
   # size::      Size of image.  (default is user's default thumbnail size)
   # link::      :show_image, :show_observation, :show_user, :none, or Hash of +link_to+ args.  (default is :show_image)
   # obs::       Add <tt>:obs => id</tt> to the show_image link args.
-  # user::      Add <tt>:obs => id</tt> to the show_image link args.
+  # user::      ???
   # border::    Set +border+ attribute, e.g. <tt>:border => 0</tt>.
   # style::     Add +style+ attribute, e.g. <tt>:style => 'float:right'</tt>.
   # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
   # append::    HTML to tack on after +img+ tag; will be included in the link.
   # votes::     Add AJAX vote links below image?
   # vote_data:: If passing in image id instead of Image instance, you need to supply the image votes explicitly (this is image.votes).
+  # original::  If passing in image id instead of Image instance, and you want the original name to be displayed, you will need to supply it explicitly.
   def thumbnail(image, args={})
     if image.is_a?(Image)
       id = image.id
@@ -210,8 +211,23 @@ module ApplicationHelper::ObjectLink
     if @js && @user && args[:votes]
       table = image_vote_tabs(image || id, args[:vote_data])
       result += '<br/>' + content_tag(:div, table, :id => "image_votes_#{id}")
+      did_vote_div = true
     end
 
+    # Include original filename (linked direct to original image).
+    original = args[:original]
+    original = image.original_name if original.nil?
+    if original != false
+      if image && !image.original_name.blank?
+        result += '<br/>' unless did_vote_div
+        result += link_to(h(image.original_name), image.original_url)
+      elsif !original.blank?
+        result += '<br/>' unless did_vote_div
+        result += link_to(h(original), Image(:full_size, id))
+      end
+    end
+
+    # Wrap result in div.
     if args[:nodiv]
       result
     else

@@ -78,9 +78,10 @@ class ApiController
         if (value == '0' or (value = Image.validate_vote(value))) and
            (image = Image.safe_find(id))
           value = nil if value == '0'
-          image.change_vote(user, value)
+          anon = user.votes_anonymous == :yes
+          image.change_vote(user, value, anon)
           Transaction.put_image(:id => image, :_user => user,
-                                :set_vote => value)
+                                :set_vote => value, :set_anonymous => anon)
           @image, @user = image, user
           render(:inline => '<%= image_vote_tabs(@image) %>')
         else

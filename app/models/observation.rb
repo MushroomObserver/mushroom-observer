@@ -42,6 +42,9 @@
 #  when::                   Date it was seen.
 #  where::                  Where it was seen (just a String).
 #  location::               Where it was seen (Location).
+#  lat::                    Exact latitude of location.
+#  long::                   Exact longitude of location.
+#  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
 #  name::                   Consenus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.

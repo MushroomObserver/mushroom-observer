@@ -210,6 +210,7 @@ require 'fileutils'
 class Image < AbstractModel
   has_and_belongs_to_many :observations
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
+  has_many :image_votes
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
@@ -665,16 +666,33 @@ class Image < AbstractModel
   # Change a user's vote to the given value.  Pass in either the numerical vote
   # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
   # integers.  Returns value of new vote.
-  def change_vote(user, value)
+  def change_vote(user, value=nil, anon=false)
+    user_id = user.is_a?(User) ? user.id : user.to_i
     save_changes = !self.changed?
 
-    hash = self.vote_hash
+    # Modify image_votes table first.
+    vote = ImageVote.find_by_image_id_and_user_id(self.id, user_id)
     if value = self.class.validate_vote(value)
-      hash[user.id] = value.to_i
-    else
-      hash.delete(user.id)
+      if vote
+        vote.value = value
+        vote.anonymous = anon
+        vote.save
+      else
+        ImageVote.create(
+          :image_id  => self.id,
+          :user_id   => user_id,
+          :value     => value,
+          :anonymous => !!anon
+        )
+      end
+    elsif vote
+      vote.destroy
     end
-    self.vote_hash = hash
+
+    # Update the cached data in images table next. (The "true" forces rails
+    # to reload the association.)
+    self.votes = self.image_votes(true).map {|v| "#{v.user_id} #{v.value}"}.join(' ')
+    self.vote_cache = Image.vote_cache(votes)
 
     # Save changes unless there were already pending changes to be saved
     # (meaning the caller is presumably about to save the changes anyway so
@@ -697,29 +715,9 @@ class Image < AbstractModel
   # Used in the case that you don't have an Image instance, and just have the
   # raw votes string instead.
   def self.vote_hash(votes) # :nodoc:
-    if votes.blank?
-      {}
-    else
-      Hash[*votes.split(' ').map(&:to_i)]
-    end
+    Hash[*votes.to_s.split(' ').map(&:to_i)]
   rescue
     {}
-  end
-
-  # Update +votes+ and +vote_cache+.  Pass in Hash mapping user ids to
-  # numerical vote values.
-  def vote_hash=(hash) # :nodoc:
-    vals = []
-    sum = 0
-    num = 0
-    for user_id, value in hash
-      vals << user_id.to_s
-      vals << value.to_s
-      sum += value.to_f
-      num += 1
-    end
-    self.votes = vals.join(' ')
-    self.vote_cache = num > 0 ? sum / num : nil
   end
 
   ##############################################################################
