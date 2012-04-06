@@ -630,37 +630,11 @@ class Image < AbstractModel
     end
   end
 
-  # Count number of votes at a given level.  Returns all votes if no +value+.
-  def self.num_votes(raw_data, value=nil)
-    if value
-      vote_hash(raw_data).values.select {|v| v == value.to_i}.length
-    else
-      vote_hash(raw_data).values.length
-    end
-  end
-
   # Retrieve the given User's vote for this Image.  Returns a Fixnum from
   # 1 to 4, or nil if the User hasn't voted.
   def users_vote(user=User.current)
     user_id = user.is_a?(User) ? user.id : user.to_i
     vote_hash[user_id]
-  end
-
-  # Retrieve the given User's vote for this Image.  Returns a Fixnum from
-  # 1 to 4, or nil if the User hasn't voted.
-  def self.users_vote(raw_data, user=User.current)
-    user_id = user.is_a?(User) ? user.id : user.to_i
-    vote_hash(raw_data)[user_id]
-  end
-
-  # Calculate the average vote given the raw vote data.
-  def self.vote_cache(raw_data)
-    sum = num = 0
-    for user, value in vote_hash(raw_data)
-      sum += value.to_f
-      num += 1
-    end
-    num > 0 ? sum / num : nil
   end
 
   # Change a user's vote to the given value.  Pass in either the numerical vote
@@ -671,28 +645,26 @@ class Image < AbstractModel
     save_changes = !self.changed?
 
     # Modify image_votes table first.
-    vote = ImageVote.find_by_image_id_and_user_id(self.id, user_id)
+    vote = image_votes.find_by_user_id(user_id)
     if value = self.class.validate_vote(value)
       if vote
         vote.value = value
         vote.anonymous = anon
         vote.save
       else
-        ImageVote.create(
-          :image_id  => self.id,
+        image_votes.create(
           :user_id   => user_id,
           :value     => value,
           :anonymous => !!anon
         )
       end
     elsif vote
-      vote.destroy
+      image_votes.delete(vote)
     end
 
     # Update the cached data in images table next. (The "true" forces rails
     # to reload the association.)
-    self.votes = self.image_votes(true).map {|v| "#{v.user_id} #{v.value}"}.join(' ')
-    self.vote_cache = Image.vote_cache(votes)
+    refresh_vote_cache!
 
     # Save changes unless there were already pending changes to be saved
     # (meaning the caller is presumably about to save the changes anyway so
@@ -706,18 +678,27 @@ class Image < AbstractModel
     return value
   end
 
+  # Calculate the average vote given the raw vote data.
+  def refresh_vote_cache!
+    @vote_hash = nil
+    sum = num = 0
+    for user, value in vote_hash
+      sum += value.to_f
+      num += 1
+    end
+    self.vote_cache = num > 0 ? sum / num : nil
+  end
+
   # Retrieve list of users who have voted as a Hash mapping user ids to
   # numerical vote values (Fixnum).  (Forces all votes to be integers.)
   def vote_hash # :nodoc:
-    self.class.vote_hash(votes)
-  end
-
-  # Used in the case that you don't have an Image instance, and just have the
-  # raw votes string instead.
-  def self.vote_hash(votes) # :nodoc:
-    Hash[*votes.to_s.split(' ').map(&:to_i)]
-  rescue
-    {}
+    unless @vote_hash
+      @vote_hash = {}
+      for vote in self.image_votes
+        @vote_hash[vote.user_id.to_i] = vote.value.to_i
+      end
+    end
+    return @vote_hash
   end
 
   ##############################################################################

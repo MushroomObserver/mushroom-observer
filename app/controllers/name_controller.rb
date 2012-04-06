@@ -1482,8 +1482,8 @@ class NameController < ApplicationController
     @layout = calc_layout_params
     
     # Get corresponding images.
-    @images = Name.connection.select_rows(%(
-      SELECT images.id, images.votes
+    ids = Name.connection.select_values(%(
+      SELECT images.id
       FROM observations, images_observations, images
       WHERE observations.name_id = #{id}
       AND observations.vote_cache >= 2.4
@@ -1493,9 +1493,10 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY images.vote_cache DESC
     ))
+    @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
     
-    @voteless_images = Name.connection.select_rows(%(
-      SELECT images.id, images.votes
+    ids = Name.connection.select_values(%(
+      SELECT images.id
       FROM observations, images_observations, images
       WHERE observations.name_id = #{id}
       AND observations.vote_cache >= 2.4
@@ -1505,8 +1506,9 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY observations.vote_cache
     ))
+    @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
     
-    @voteless_obs = Name.connection.select_rows(%(
+    ids = Name.connection.select_values(%(
       SELECT DISTINCT observations.id
       FROM observations, images_observations, images
       WHERE observations.name_id = #{id}
@@ -1516,6 +1518,7 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY observations.id
     ))
+    @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids])
   end
   
   # Show the data not getting sent to EOL

@@ -11,9 +11,8 @@
 <% if @voteless_obs.length > 0 %>
   <div class="SubTitle"><%= :eol_for_taxon_voteless_observations.t %></div>
   <div>
-    <% for ob_id in @voteless_obs
-      id = ob_id[0] %>
-      <%= link_to(:eol_for_taxon_observation.t(:id => id), :controller => 'observer', :action => 'show_observation', :id => ob_id[0]) %><br/>
+    <% for obs in @voteless_obs %>
+      <%= link_to(:eol_for_taxon_observation.t(:id => obs.id), :controller => 'observer', :action => 'show_observation', :id => obs.id) %><br/>
     <% end %>
   </div>
 <% end %>
@@ -21,10 +20,9 @@
 <% if @images.length > 0 %>
   <div class="SubTitle"><%= :eol_for_taxon_images.t %></div>
   <div>
-    <% make_matrix(@images, :width => '100%') do |item|
-      image_id, votes = item %>
-      <%= image_exporter(image_id.to_i, true) %>
-      <%= thumbnail(image_id.to_i, :votes => true, :vote_data => votes, :nodiv => false, :class => "floatthumb") %>
+    <% make_matrix(@images, :width => '100%') do |img| %>
+      <%= image_exporter(img.id, true) %>
+      <%= thumbnail(img, :votes => true, :original => false, :nodiv => false, :class => "floatthumb") %>
     <% end %>
   </div>
 <% end %>
@@ -32,10 +30,9 @@
 <% if @voteless_images.length > 0 %>
   <div class="SubTitle"><%= :eol_for_taxon_voteless_images.t %></div>
   <div>
-    <% make_matrix(@voteless_images) do |item|
-      image_id, votes = item %>
-      <%= image_exporter(image_id.to_i, true) %>
-      <%= thumbnail(image_id.to_i, :votes => true, :vote_data => votes, :nodiv => false, :class => "floatthumb") %>
+    <% make_matrix(@voteless_images) do |img| %>
+      <%= image_exporter(img.id, true) %>
+      <%= thumbnail(img, :votes => true, :original => false, :nodiv => false, :class => "floatthumb") %>
     <% end %>
   </div>
 <% end %>

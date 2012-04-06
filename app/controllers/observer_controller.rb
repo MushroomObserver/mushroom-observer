@@ -1631,7 +1631,7 @@ class ObserverController < ApplicationController
       query = Query.lookup(:Observation, :by_user, :user => @show_user,
                            :by => :thumbnail_quality,
                            :where => "images.user_id = #{id}")
-      @observations = query.results(:limit => 6, :include => :thumb_image)
+      @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
     end
   end
 
@@ -1733,7 +1733,7 @@ class ObserverController < ApplicationController
     query = Query.lookup(:Observation, :all, :by => :modified,
                          :where => 'images.vote_cache >= 3',
                          :join => :'images.thumb_image')
-    @observations = query.results(:limit => 6, :include => :thumb_image)
+    @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
   end
 
   # server_status.rhtml
@@ -1892,8 +1892,9 @@ class ObserverController < ApplicationController
       :action => 'list_rss_logs',
       :matrix => true,
       :include => {
-        :observation  => [:location, :name, :thumb_image, :user],
+        :location     => :user,
         :name         => :user,
+        :observation  => [:location, :name, {:thumb_image => :image_votes}, :user],
         :species_list => [:location, :user],
       },
     }.merge(args)

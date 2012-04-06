@@ -153,8 +153,6 @@ module ApplicationHelper::ObjectLink
   # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
   # append::    HTML to tack on after +img+ tag; will be included in the link.
   # votes::     Add AJAX vote links below image?
-  # vote_data:: If passing in image id instead of Image instance, you need to supply the image votes explicitly (this is image.votes).
-  # original::  If passing in image id instead of Image instance, and you want the original name to be displayed, you will need to supply it explicitly.
   def thumbnail(image, args={})
     if image.is_a?(Image)
       id = image.id
@@ -215,16 +213,9 @@ module ApplicationHelper::ObjectLink
     end
 
     # Include original filename (linked direct to original image).
-    original = args[:original]
-    original = image.original_name if original.nil?
-    if original != false
-      if image && !image.original_name.blank?
-        result += '<br/>' unless did_vote_div
-        result += link_to(h(image.original_name), image.original_url)
-      elsif !original.blank?
-        result += '<br/>' unless did_vote_div
-        result += link_to(h(original), Image(:full_size, id))
-      end
+    if image and args[:original] != false and !image.original_name.blank?
+      result += '<br/>' unless did_vote_div
+      result += link_to(h(image.original_name), image.original_url)
     end
 
     # Wrap result in div.
@@ -272,11 +263,6 @@ module ApplicationHelper::ObjectLink
       cur = image.users_vote(@user)
       avg = image.vote_cache
       num = image.num_votes
-    elsif data
-      id  = image.to_i
-      cur = Image.users_vote(data, @user)
-      avg = Image.vote_cache(data)
-      num = Image.num_votes(data)
     else
       id  = image.to_i
       cur = nil

@@ -169,8 +169,7 @@ class SpeciesListController < ApplicationController
       store_query_in_session(@query) if !params[:set_source].blank?
       @query.need_letters = 'names.text_name'
       @pages = paginate_letters(:letter, :page, 100)
-      @objects = @query.paginate(@pages, :include => [:user, :name, :location,
-                                                      :thumb_image])
+      @objects = @query.paginate(@pages, :include => [:user, :name, :location, {:thumb_image => :image_votes}])
     end
   end
 
