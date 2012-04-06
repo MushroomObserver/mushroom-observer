@@ -34,7 +34,7 @@
     for image in @observation.images.
              sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
       <p>
-        <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true) %>
+        <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true, :original => true) %>
         <% notes = []
           if image.copyright_holder != @observation.user.legal_name
             notes << "&copy;#{image.when.year} #{image.copyright_holder}"

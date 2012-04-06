@@ -1052,11 +1052,11 @@ class ObserverController < ApplicationController
 
   def convert_altitude(alt)
     result = nil
-    match = alt.match(ALTITUDE_REGEX)
-    if match and match[3].match(/ft|'/)
-      result = match[1].to_f * 0.3048
+    match = alt.to_s.match(ALTITUDE_REGEX)
+    if match and alt.match(/ft|'/)
+      result = (match[1].to_f * 0.3048).round
     elsif match
-      result = match[1].to_f
+      result = (match[1].to_f).round
     end
     return result
   end
@@ -1983,6 +1983,7 @@ class ObserverController < ApplicationController
     observation.modified = now
     observation.user     = @user
     observation.name     = Name.unknown
+    observation.alt      = convert_altitude(args[:alt])
     return observation
   end
 
@@ -2274,33 +2275,32 @@ class ObserverController < ApplicationController
   def update_good_images(arg)
     # Get list of images first.
     images = (arg || '').split(' ').map do |id|
-      Image.find(id.to_i)
-    end
+      Image.safe_find(id.to_i)
+    end.reject(&:nil?)
 
     # Now check for edits.
     for image in images
-      image.when             = params["image_#{image.id}_when"]             if !params["image_#{image.id}_when"].nil?
-      image.notes            = params["image_#{image.id}_notes"]            if !params["image_#{image.id}_notes"].nil?
-      image.copyright_holder = params["image_#{image.id}_copyright_holder"] if !params["image_#{image.id}_copyright_holder"].nil?
-      image.license_id       = params["image_#{image.id}_license"]          if !params["image_#{image.id}_license"].nil?
-      image.original_name    = params["image_#{image.id}_original_name"]    if !params["image_#{image.id}_original_name"].nil?
-      if image.when_changed? or
-         image.notes_changed? or
-         image.copyright_holder_changed? or
-         image.license_id_changed? or
-         image.original_name_changed?
-        image.modified = Time.now
-        args = { :id => image }
-        args[:set_date]             = image.when             if image.when_changed?
-        args[:set_notes]            = image.notes            if image.notes_changed?
-        args[:set_copyright_holder] = image.copyright_holder if image.copyright_holder_changed?
-        args[:set_license]          = image.license          if image.license_id_changed?
-        args[:set_original_name]    = image.original_name    if image.original_name_changed?
-        if !image.save
-          flash_object_errors(image)
-        else
-          Transaction.put_image(args)
-          flash_notice(:runtime_image_updated_notes.t(:id => image.id))
+      args = params[:good_image][image.id.to_s] rescue nil
+      if args
+        image.attributes = args
+        if image.when_changed? or
+           image.notes_changed? or
+           image.copyright_holder_changed? or
+           image.license_id_changed? or
+           image.original_name_changed?
+          image.modified = Time.now
+          args = { :id => image }
+          args[:set_date]             = image.when             if image.when_changed?
+          args[:set_notes]            = image.notes            if image.notes_changed?
+          args[:set_copyright_holder] = image.copyright_holder if image.copyright_holder_changed?
+          args[:set_license]          = image.license          if image.license_id_changed?
+          args[:set_original_name]    = image.original_name    if image.original_name_changed?
+          if !image.save
+            flash_object_errors(image)
+          else
+            Transaction.put_image(args)
+            flash_notice(:runtime_image_updated_notes.t(:id => image.id))
+          end
         end
       end
     end

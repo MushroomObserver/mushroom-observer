@@ -482,6 +482,30 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(sp_count + 2, spl.reload.observations.size)
   end
 
+  # This was intended to catch a bug seen in the wild, but it doesn't.
+  # The problem was in the HTML, and it requires integration test to show(?)
+  def test_update_species_list_add_unknown
+    new_name = 'Agaricus nova'
+    spl = species_lists(:unknown_species_list)
+    sp_count = spl.observations.size
+    old_contribution = @mary.contribution
+    params = spl_params(spl)
+    params[:list][:members] = new_name
+    owner = spl.user.login
+    assert_equal('mary', owner)
+    login('mary')
+    post(:edit_species_list, params)
+    assert_response('edit_species_list')
+    spl.reload
+    assert_equal(sp_count, spl.observations.size)
+    params[:approved_names] = new_name
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    spl.reload
+    assert_equal(sp_count + 1, spl.observations.size)
+    assert_equal(old_contribution + v_nam + v_obs, @mary.reload.contribution)
+  end
+
   def test_update_species_list_text_add
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size

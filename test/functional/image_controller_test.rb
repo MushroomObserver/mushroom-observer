@@ -316,6 +316,7 @@ class ImageControllerTest < FunctionalTestCase
     obs = image.observations.first
     assert(obs)
     assert(obs.rss_log.nil?)
+    new_name = 'new nāme.jpg'
 
     params = {
       "id" => image.id,
@@ -324,7 +325,8 @@ class ImageControllerTest < FunctionalTestCase
         "when(2i)" => "5",
         "when(3i)" => "12",
         "copyright_holder" => "Rolf Singer",
-        "notes"    => ""
+        "notes"    => "",
+        "original_name" => new_name
       }
     }
     post_requires_login(:edit_image, params)
@@ -335,6 +337,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(obs.rss_log.notes.include?('log_image_updated'))
     assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
     assert(obs.rss_log.notes.include?("name #{RssLog.escape("Image ##{image.id}")}"))
+    assert_equal(new_name, image.reload.original_name)
   end
 
   def test_remove_images
@@ -457,7 +460,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
     assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
     assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
-    
+
     login('rolf')
     post(:vote_anonymity, :commit => :image_vote_anonymity_make_public.l)
     assert_response(:controller => :account, :action => :prefs)

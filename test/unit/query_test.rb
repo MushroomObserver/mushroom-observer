@@ -1164,6 +1164,10 @@ class QueryTest < UnitTestCase
     assert_query([6], :Image, :with_observations_of_children, :name => names(:agaricus))
   end
 
+  def test_image_sorted_by_original_name
+    assert_query([2,5,4,1,3,6], :Image, :in_set, :ids => [1,2,3,4,5,6], :by => :original_name)
+  end
+
   def test_image_with_observations_of_name
     assert_query([2,1], :Image, :with_observations_of_name, :name => 1)
     assert_query([5], :Image, :with_observations_of_name, :name => 2)

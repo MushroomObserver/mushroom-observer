@@ -63,7 +63,7 @@
         <%= thumbnail(@image, :size => @size, :votes => false,
                       :link => { :action => 'show_image', :id => @image.id,
                       :size => (@size == @default_size ? :full_size : @default_size),
-                      :params => query_params }) %><br/>
+                      :params => query_params }, :original => true) %><br/>
 
         <p>
           <%= render(:partial => "shared/form_#{@image.license.form_name}") %>

@@ -14,13 +14,12 @@ class ObserverControllerTest < FunctionalTestCase
       :place_name     => 'Right Here, Massachusetts, USA',
       :lat            => '',
       :long           => '',
+      :alt            => '',
       'when(1i)'      => '2007',
       'when(2i)'      => '10',
       'when(3i)'      => '31',
       :specimen       => '0',
       :thumb_image_id => '0',
-      :lat => "",
-      :long => "",
     }.merge(params[:observation] || {})
     params[:vote] = {
       :value => '3',
@@ -831,6 +830,46 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
 
+    # Test a simple observation creation of an unknown with various altitudes
+    for input, output in [
+        [ '500',     500 ],
+        [ '500m',    500 ],
+        [ '500 ft.', 152 ],
+        [ ' 500\' ', 152 ]
+      ]
+      where = 'Unknown, Massachusetts, USA'
+      generic_construct_observation({
+        :observation => { :place_name => where, :alt => input },
+        :name => { :name => 'Unknown' },
+      }, 1,0,0)
+      obs = assigns(:observation)
+      assert_equal(output, obs.alt)
+      assert_equal(where, obs.where) # Make sure it's the right observation
+      assert_not_nil(obs.rss_log)
+    end
+  end
+
+  def test_valid_altitude
+    assert_true(@controller.valid_altitude(''))
+    assert_false(@controller.valid_altitude('blah'))
+    assert_true(@controller.valid_altitude('123'))
+    assert_true(@controller.valid_altitude('-123.456'))
+    assert_true(@controller.valid_altitude('123m'))
+    assert_true(@controller.valid_altitude(' 123 m. '))
+    assert_true(@controller.valid_altitude('123ft'))
+    assert_true(@controller.valid_altitude('123\''))
+  end
+
+  def test_convert_altitude
+    assert_equal(nil,  @controller.convert_altitude(''))
+    assert_equal(nil,  @controller.convert_altitude('blah'))
+    assert_equal(123,  @controller.convert_altitude('123'))
+    assert_equal(-123, @controller.convert_altitude('-123.456'))
+    assert_equal(-124, @controller.convert_altitude('-123.567'))
+    assert_equal(123,  @controller.convert_altitude('123m'))
+    assert_equal(123,  @controller.convert_altitude(' 123 m. '))
+    assert_equal(37,   @controller.convert_altitude('123ft'))
+    assert_equal(38,   @controller.convert_altitude('124\''))
   end
 
   def test_construct_observation_dubious_place_names
@@ -1162,6 +1201,18 @@ class ObserverControllerTest < FunctionalTestCase
         :specimen => new_specimen,
         :thumb_image_id => "0",
       },
+      :good_images => '1 2',
+      :good_image => {
+        '1' => {
+          :notes => 'new notes',
+          :original_name => 'new name',
+          :copyright_holder => 'someone else',
+          'when(1i)' => '2012',
+          'when(2i)' => '4',
+          'when(3i)' => '6',
+          :license_id => '3',
+        },
+      },
       :log_change => { :checked => '1' }
     }
     post_requires_user(:edit_observation, ["observer", "show_observation"],
@@ -1175,6 +1226,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(new_specimen, obs.specimen)
     assert_not_equal(modified, obs.rss_log.modified)
     assert_not_equal(0, obs.thumb_image_id)
+    img = images(:in_situ).reload
+    assert_equal('new notes', img.notes)
+    assert_equal('new name', img.original_name)
+    assert_equal('someone else', img.copyright_holder)
+    assert_equal('2012-04-06', img.when.to_s)
+    assert_equal(licenses(:ccwiki30), img.license)
   end
 
   def test_edit_observation_no_logging
@@ -2024,6 +2081,9 @@ class ObserverControllerTest < FunctionalTestCase
       :modified => week_ago
     )
 
+    assert(new_image_1.modified < 1.day.ago)
+    assert(new_image_2.modified < 1.day.ago)
+
     post(:create_observation,
       :observation => {
         :place_name => 'Zzyzx, Japan',
@@ -2031,16 +2091,23 @@ class ObserverControllerTest < FunctionalTestCase
         :thumb_image_id => 0,   # (make new image the thumbnail)
         :notes => 'blah',
       },
-      :image => { '0' => {
-        :image => file3,
-        :copyright_holder => 'holder_3',
-        :when => time3,
-        :notes => 'notes_3'
-      }},
+      :image => {
+        '0' => {
+          :image => file3,
+          :copyright_holder => 'holder_3',
+          :when => time3,
+          :notes => 'notes_3',
+        },
+      },
+      :good_image => {
+        new_image_1.id.to_s => {
+        },
+        new_image_2.id.to_s => {
+          :notes => 'notes_2_new',
+        },
+      },
       # (attach these two images once observation created)
       :good_images => "#{new_image_1.id} #{new_image_2.id}",
-      "image_#{new_image_1.id}_notes" => 'notes_1',
-      "image_#{new_image_2.id}_notes" => 'notes_2_new'
     )
     assert_response(:redirect) # redirected = successfully created
 
@@ -2049,6 +2116,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(time0, obs.when)
     assert_equal('Zzyzx, Japan', obs.place_name)
 
+    new_image_1.reload
+    new_image_2.reload
     imgs = obs.images.sort_by(&:id)
     img_ids = imgs.map(&:id)
     assert_equal([new_image_1.id, new_image_2.id, new_image_2.id+1], img_ids)
@@ -2062,8 +2131,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('notes_1',     imgs[0].notes)
     assert_equal('notes_2_new', imgs[1].notes)
     assert_equal('notes_3',     imgs[2].notes)
-    assert(imgs[0].modified < 1.minute.ago) # notes not changed
-    assert(imgs[1].modified > 1.minute.ago) # notes changed
+    assert(imgs[0].modified < 1.day.ago) # notes not changed
+    assert(imgs[1].modified > 1.day.ago) # notes changed
   end
 
   def test_image_upload_when_create_fails

@@ -11,6 +11,7 @@ in_situ:
   copyright_holder: Bob Dobbs
   width: 1000
   height: 1000
+  original_name: DSCN8835.JPG
 
 turned_over:
   id: 2
@@ -22,6 +23,7 @@ turned_over:
   when: 2006-05-11
   notes: What it looked like when I turned it over
   copyright_holder: Bob Dobbs
+  original_name: 1.jpg
 
 commercial_inquiry_image:
   id: 3
@@ -33,6 +35,7 @@ commercial_inquiry_image:
   when: 2007-02-25
   notes: Some Notes
   copyright_holder: Bob Dobbs
+  original_name: Location 2007-02-25 b.jpg
 
 disconnected_coprinus_comatus_image:
   id: 4
@@ -44,6 +47,7 @@ disconnected_coprinus_comatus_image:
   when: 2007-03-07
   notes: Some Notes
   copyright_holder: Bob Dobbs
+  original_name: Coprinus comatus.tiff
 
 connected_coprinus_comatus_image:
   id: 5
@@ -55,6 +59,7 @@ connected_coprinus_comatus_image:
   when: 2007-03-07
   notes: Some Notes
   copyright_holder: Bob Dobbs
+  original_name: Coprinus comatus close-up.tiff
 
 agaricus_campestris_image:
   id: 6
@@ -66,6 +71,7 @@ agaricus_campestris_image:
   when: 2007-03-19
   notes: Some Notes
   copyright_holder: Bob Dobbs
+  original_name: Name with áč€εиts.gif
 
 amateur_image:
   id: 7
