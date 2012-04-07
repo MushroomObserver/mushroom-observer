@@ -830,6 +830,18 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
 
+    lat2 = '34°9’43.92”N'
+    long2 = '118°21′7.56″W'
+    generic_construct_observation({
+      :observation => { :place_name => where, :lat => lat2, :long => long2 },
+      :name => { :name => "Unknown" },
+    }, 1,0,0)
+    obs = assigns(:observation)
+    assert_equal(lat, obs.lat)
+    assert_equal(long, obs.long)
+    assert_equal(where, obs.where) # Make sure it's the right observation
+    assert_not_nil(obs.rss_log)
+
     # Test a simple observation creation of an unknown with various altitudes
     for input, output in [
         [ '500',     500 ],
@@ -847,29 +859,6 @@ class ObserverControllerTest < FunctionalTestCase
       assert_equal(where, obs.where) # Make sure it's the right observation
       assert_not_nil(obs.rss_log)
     end
-  end
-
-  def test_valid_altitude
-    assert_true(@controller.valid_altitude(''))
-    assert_false(@controller.valid_altitude('blah'))
-    assert_true(@controller.valid_altitude('123'))
-    assert_true(@controller.valid_altitude('-123.456'))
-    assert_true(@controller.valid_altitude('123m'))
-    assert_true(@controller.valid_altitude(' 123 m. '))
-    assert_true(@controller.valid_altitude('123ft'))
-    assert_true(@controller.valid_altitude('123\''))
-  end
-
-  def test_convert_altitude
-    assert_equal(nil,  @controller.convert_altitude(''))
-    assert_equal(nil,  @controller.convert_altitude('blah'))
-    assert_equal(123,  @controller.convert_altitude('123'))
-    assert_equal(-123, @controller.convert_altitude('-123.456'))
-    assert_equal(-124, @controller.convert_altitude('-123.567'))
-    assert_equal(123,  @controller.convert_altitude('123m'))
-    assert_equal(123,  @controller.convert_altitude(' 123 m. '))
-    assert_equal(37,   @controller.convert_altitude('123ft'))
-    assert_equal(38,   @controller.convert_altitude('124\''))
   end
 
   def test_construct_observation_dubious_place_names

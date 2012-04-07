@@ -1747,7 +1747,7 @@ class Query < AbstractQuery
         self.join << {:images_observations => {:observations =>
           [:locations!, :names] }}
         self.where += google_conditions(search,
-          'CONCAT(names.search_name,' +
+          'CONCAT(names.search_name,COALESCE(images.original_name,""),' +
           'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
           'IF(locations.id,locations.name,observations.where))')
 

@@ -47,6 +47,10 @@
 #  south_west::         [south, west]
 #  south_east::         [south, east]
 #  center::             [n+s/2, e+w/2]
+#  tweak::              Expand extents to include the given point.
+#  parse_latitude::     Validate and parse latitude from a string.
+#  parse_longitude::    Validate and parse longitude from a string.
+#  parse_altitude::     Validate and parse altitude from a string.
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -153,7 +157,7 @@ class Location < AbstractModel
     west_east += 180 if (west > east)
     [(self.north + self.south)/2, west_east]
   end
-  
+
   # Update rectangle to include lat and long
   def tweak(lat, long)
     # Latitude is easy...
@@ -162,7 +166,7 @@ class Location < AbstractModel
     else
       self.south = lat
     end
-    
+
     # Longitude requires we deal with wrap around
     east_diff = (long - self.east).abs
     if east_diff > 180 # Go the other way around the globe
@@ -177,21 +181,65 @@ class Location < AbstractModel
     else
       self.west = long
     end
-    
+
     save
   end
-  
-  # Functions for validation latitude and longitude
-  # lat and long are expected to be strings that will be converted to floating point numbers.
-  # Returns true if these are reasonable values.
-  def self.check_lat_long(lat, long)
-    check_value(lat, -90, 90) and check_value(long, -180, 180)
+
+  LXXXITUDE_REGEX = /^\s*
+       (-?\d+(?:\.\d+)?) (?:°|°|o|d|deg)?     \s*
+    (?:  (\d*(?:\.\d+)?) (?:'|‘|’|′|′|m|min)? \s* )?
+    (?:  (\d*(?:\.\d+)?) (?:"|“|”|″|″|s|sec)? \s* )?
+    ([NSEW]?)
+  \s*$/x
+
+  ALTITUDE_REGEX = /^\s*
+    (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′′]*)
+  \s*$/x
+
+  # Check if a string contains a valid latitude, parse it, and convert it
+  # to standard decimal form with 4 places of precision.
+  # Returns nil if invalid.
+  def self.parse_latitude(lat)
+    result = nil
+    match = lat.to_s.match(LXXXITUDE_REGEX)
+    if match and (match[4].blank? or ['N','S'].member?(match[4]))
+      val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
+      val = -val if match[4] == 'S'
+      if val >= -90 and val <= 90
+        result = (val * 10000).round.to_f / 10000
+      end
+    end
+    return result
   end
 
-  # Only allow 0.0 if v is "0" or "0.0"
-  def self.check_value(v, min, max)
-    num = v.to_f
-    (num != 0.0 or v == "0" or v == "0.0") and (min <= num) and (num <= max)
+  # Check if a string contains a valid longitude, parse it, and convert it
+  # to standard decimal form with 4 places of precision.
+  # Returns nil if invalid.
+  def self.parse_longitude(long)
+    result = nil
+    match = long.to_s.match(LXXXITUDE_REGEX)
+    if match and (match[4].blank? or ['E','W'].member?(match[4]))
+      val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
+      val = -val if match[4] == 'W'
+      if val >= -180 and val <= 180
+        result = (val * 10000).round.to_f / 10000
+      end
+    end
+    return result
+  end
+
+  # Check if a string contains a valid altitude, parse it, and convert it
+  # to an integral number of meters.
+  # Returns nil if invalid.
+  def self.parse_altitude(alt)
+    result = nil
+    match = alt.to_s.match(ALTITUDE_REGEX)
+    if match and alt.match(/ft|'/)
+      result = (match[1].to_f * 0.3048).round
+    elsif match
+      result = (match[1].to_f).round
+    end
+    return result
   end
 
   ##############################################################################
@@ -215,7 +263,7 @@ class Location < AbstractModel
       self.name = val
     end
   end
-  
+
   # Plain text version of +display_name+.
   def text_name
     self.display_name.t.html_to_ascii
@@ -299,7 +347,7 @@ class Location < AbstractModel
     end
     result
   end
-  
+
   def self.user_name(user, name)
     if user and (user.location_format == :scientific)
       Location.reverse_name(name)
@@ -307,7 +355,7 @@ class Location < AbstractModel
       name
     end
   end
-  
+
   UNDERSTOOD_COUNTRIES = {
     "Africa" => 0,
     "Albania" => 0,
@@ -377,7 +425,7 @@ class Location < AbstractModel
     "Unknown" => 0,
     "Wales" => 0
   }
-  
+
   UNDERSTOOD_STATES = {
     "USA" => {
       "Alabama" => 0,
@@ -470,7 +518,7 @@ class Location < AbstractModel
       "Yukon" => 0,
     },
   }
-  
+
   # Handling of '.'s
   BAD_TERMS = {
     "Hwy" => "Highway",
@@ -567,9 +615,9 @@ class Location < AbstractModel
     "“" => "\"",
     "”" => "\"",
   }
-  
+
   BAD_CHARS = "({[;:|]})"
-  
+
   OK_PREFIXES = ['Central', 'Interior', 'Northern', 'Southern', 'Eastern', 'Western', 'Northeastern', 'Northwestern', 'Southeastern', 'Southwestern']
 
   # Returns a member of understood_places if the candidate is either a member or
@@ -600,7 +648,7 @@ class Location < AbstractModel
   def self.has_known_states?(a_country)
     UNDERSTOOD_STATES.member?(a_country)
   end
-  
+
   def self.understood_state?(candidate, a_country)
     understood_with_prefixes(candidate, UNDERSTOOD_STATES[a_country])
   end
@@ -629,7 +677,7 @@ class Location < AbstractModel
       false
     end
   end
-  
+
   def self.comma_test(name)
     tokens = name.split(',').map { |x| x.strip() }
     tokens.delete("")
@@ -692,23 +740,23 @@ class Location < AbstractModel
     return false if !provide_reasons
     reasons
   end
-  
+
   def self.country(name)
     result = name.split(',')[-1]
     result = result.strip() if result
     result
   end
-  
+
   def self.state(name)
     result = name.split(',')[-2]
     result = result.strip() if result
     result
   end
-  
+
   def self.dubious_country?(name)
     not understood_country?(country(name))
   end
-  
+
   def self.has_dubious_county?(name)
     tokens = name.split(", ")
     alt = [tokens[0]]
@@ -722,13 +770,13 @@ class Location < AbstractModel
       result
     end
   end
-    
+
   def self.fix_country(name)
     c = country(name)
-    new_country = 
+    new_country =
     name[0..(name.rindex(c)-1)] + COUNTRY_FIXES[c]
   end
-  
+
   ##############################################################################
   #
   #  :section: Merging
@@ -743,7 +791,7 @@ class Location < AbstractModel
 
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
-  # +old_loc+ are updated and saved. 
+  # +old_loc+ are updated and saved.
   def merge(old_loc, log = true)
     # Move observations over first.
     for obs in old_loc.observations
@@ -774,7 +822,7 @@ class Location < AbstractModel
     # Add note to explain the merge
     # Intentionally not translated
     add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: North: #{old_loc.north}, South: #{old_loc.south}, West: #{old_loc.west}, East: #{old_loc.east}")
-    
+
     # Merge the two "main" descriptions if it can.
     if self.description and old_loc.description and
        (self.description.source_type == :public) and

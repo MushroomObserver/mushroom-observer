@@ -1365,8 +1365,8 @@ form_observations_remove_image: Remove Image
 form_observations_lat_long_help: >
   Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and
   longitude between -180.0 and 180.0.  Altitude will be converted to meters.
-  Indicate units like this: 123 m, 123 ft or 123'.  If you choose to
-  provide this data please make it as accurate as possible. 
+  If you choose to provide this data please make it as accurate as possible.
+  Examples: "34.1330", "34°6&apos;59&quot;N", "-118.1459", "118 8.754 W", "239 m", "784 ft."
 
 form_observations_log_change: Log Change
 form_observations_is_collection_location_help: >
@@ -4969,8 +4969,23 @@ runtime_destroyed: "Successfully destroyed [type]."
 runtime_destroyed_id: "Successfully destroyed [type] #[value]."
 runtime_destroyed_name: "Successfully destroyed [type] '[value]'."
 runtime_invalid: "[Type] is invalid: '[value]'"
-runtime_lat_long_error: "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
-runtime_altitude_error: Altitude must be real number in feet or meters.  Default is meters.  Indicate units with "m", "ft" or "'" (apostrophe).
+runtime_lat_long_error: >
+  Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively.
+  Use decimal notation or degrees/minutes/seconds. Examples:
+    -123.4567
+    123.4567 N
+    123 27.402 N
+    123 24 24.12 N
+    123° 24’ 24.12” N
+    123deg 24min 24.12sec N
+
+runtime_altitude_error: >
+  Altitude must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:
+    1234
+    1234m
+    4049'
+    4049 ft.
+
 runtime_merge_success: Successfully merged [type] [this] into [that].
 runtime_missing: Missing [field].
 runtime_no_changes: "No changes made."

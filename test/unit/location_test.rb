@@ -4,16 +4,6 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class LocationTest < UnitTestCase
 
-  def test_lat_long
-    assert(Location.check_lat_long("34.16", "-118.35"))
-    assert(Location.check_lat_long("90", "180"))
-    assert(Location.check_lat_long("-90", "-180"))
-    assert(Location.check_lat_long("0", "0.0"))
-    assert_equal(false, Location.check_lat_long("0", ""))
-    assert_equal(false, Location.check_lat_long("90.1", "0"))
-    assert_equal(false, Location.check_lat_long("0", "-180.1"))
-  end
-  
   def tweak_lat(loc, value, expect_north)
     north = loc.north
     south = loc.south
@@ -28,7 +18,7 @@ class LocationTest < UnitTestCase
       loc.tweak(south, east)
     end
   end
-  
+
   def tweak_long(loc, value, east, west, expect_east)
     north = loc.north
     south = loc.south
@@ -44,7 +34,7 @@ class LocationTest < UnitTestCase
       loc.tweak(north, west)
     end
   end
-  
+
   def test_tweak
     User.current = @mary
     loc = Location.create!(
@@ -59,7 +49,7 @@ class LocationTest < UnitTestCase
     tweak_lat(loc, 55, true)
     tweak_lat(loc, 51, false)
     tweak_lat(loc, 45, false)
-    
+
     tweak_long(loc, 50, 40, 30, true)
     tweak_long(loc, 36, 40, 30, true)
     tweak_long(loc, 35, 40, 30, true)
@@ -78,11 +68,11 @@ class LocationTest < UnitTestCase
   def bad_location(str)
     assert(Location.dubious_name?(str, true) != [])
   end
-  
+
   def good_location(str)
     assert(!Location.dubious_name?(str))
   end
-  
+
   def test_dubious_name
     bad_location("Albion,California,  USA")
     bad_location("Albion, California")
@@ -125,7 +115,7 @@ class LocationTest < UnitTestCase
     good_location("10th Ave. and Lincoln Way, San Francisco, California, USA")
     good_location("near Chester, California, USA")
   end
-  
+
   def test_versioning
     User.current = @mary
     loc = Location.create!(
@@ -346,7 +336,7 @@ class LocationTest < UnitTestCase
       :new_description_version => desc.version
     )
 
-    # Have Mary and Dick express interest, Rolf express disinterest, 
+    # Have Mary and Dick express interest, Rolf express disinterest,
     # then have Dick change it again.  Mary should get an email.
     Interest.create(:target => loc, :user => @rolf, :state => false)
     Interest.create(:target => loc, :user => @mary, :state => true)
@@ -379,5 +369,42 @@ class LocationTest < UnitTestCase
       :new_description_version => desc.version
     )
     assert_equal(4, QueuedEmail.count)
+  end
+
+  def test_parse_latitude
+    assert_equal(     nil, Location.parse_latitude(''))
+    assert_equal( 12.3456, Location.parse_latitude('12.3456'))
+    assert_equal(-12.3456, Location.parse_latitude(' -12.3456 '))
+    assert_equal(     nil, Location.parse_latitude('123.456'))
+    assert_equal( 12.3456, Location.parse_latitude('12.3456N'))
+    assert_equal(     nil, Location.parse_latitude('12.3456E'))
+    assert_equal( 12.5824, Location.parse_latitude('12°34\'56.789"N'))
+    assert_equal( 12.5760, Location.parse_latitude('12 34.56'))
+    assert_equal(-12.5822, Location.parse_latitude(' 12deg 34min 56sec S '))
+  end
+
+  def test_parse_longitude
+    assert_equal(     nil, Location.parse_longitude(''))
+    assert_equal( 12.3456, Location.parse_longitude('12.3456'))
+    assert_equal(-12.3456, Location.parse_longitude(' -12.3456 '))
+    assert_equal(     nil, Location.parse_longitude('190.456'))
+    assert_equal(170.4560, Location.parse_longitude('170.456'))
+    assert_equal( 12.3456, Location.parse_longitude('12.3456E'))
+    assert_equal(     nil, Location.parse_longitude('12.3456S'))
+    assert_equal( 12.5824, Location.parse_longitude('12°34\'56.789"E'))
+    assert_equal( 12.5760, Location.parse_longitude('12 34.56'))
+    assert_equal(-12.5822, Location.parse_longitude(' 12deg 34min 56sec W '))
+  end
+
+  def test_convert_altitude
+    assert_equal( nil, Location.parse_altitude(''))
+    assert_equal( nil, Location.parse_altitude('blah'))
+    assert_equal( 123, Location.parse_altitude('123'))
+    assert_equal(-123, Location.parse_altitude('-123.456'))
+    assert_equal(-124, Location.parse_altitude('-123.567'))
+    assert_equal( 123, Location.parse_altitude('123m'))
+    assert_equal( 123, Location.parse_altitude(' 123 m. '))
+    assert_equal(  37, Location.parse_altitude('123ft'))
+    assert_equal(  38, Location.parse_altitude('124\''))
   end
 end

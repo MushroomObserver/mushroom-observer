@@ -893,7 +893,7 @@ class ObserverController < ApplicationController
       flash_error(:runtime_lat_long_error.l)
       success = false
     end
-    if not valid_altitude(alt)
+    if not valid_altitude?(alt)
       flash_error(:runtime_altitude_error.l)
       success = false
     end
@@ -995,7 +995,7 @@ class ObserverController < ApplicationController
       long = params[:observation][:long].to_s
       alt  = params[:observation][:alt].to_s
       good_lat_long = valid_lat_long?(lat, long)
-      good_altitude = valid_altitude(alt)
+      good_altitude = valid_altitude?(alt)
       flash_error(:runtime_lat_long_error.l) if not good_lat_long
       flash_error(:runtime_altitude_error.l) if not good_altitude
       @where = Location.user_name(@user, params[:observation][:place_name])
@@ -1004,7 +1004,9 @@ class ObserverController < ApplicationController
 
       # Update observation attributes
       @observation.attributes = params[:observation]
-      @observation.alt = convert_altitude(alt)
+      @observation.lat  = Location.parse_latitude(lat)
+      @observation.long = Location.parse_longitude(long)
+      @observation.alt  = Location.parse_altitude(alt)
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
@@ -1041,28 +1043,12 @@ class ObserverController < ApplicationController
   end
 
   def valid_lat_long?(lat, long)
-    (is_empty?(lat) and is_empty?(long)) or Location.check_lat_long(lat, long)
+    (lat.blank? and long.blank?) or
+    (Location.parse_latitude(lat) and Location.parse_longitude(long))
   end
 
-  ALTITUDE_REGEX = /^ *(-?\d+(.\d+)?) *((m|ft|')\.?)? *$/
-
-  def valid_altitude(alt)
-    alt.blank? or alt.match(ALTITUDE_REGEX)
-  end
-
-  def convert_altitude(alt)
-    result = nil
-    match = alt.to_s.match(ALTITUDE_REGEX)
-    if match and alt.match(/ft|'/)
-      result = (match[1].to_f * 0.3048).round
-    elsif match
-      result = (match[1].to_f).round
-    end
-    return result
-  end
-
-  def is_empty?(str)
-    str.nil? or (str == "")
+  def valid_altitude?(alt)
+    alt.blank? or Location.parse_altitude(alt)
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
@@ -1983,7 +1969,9 @@ class ObserverController < ApplicationController
     observation.modified = now
     observation.user     = @user
     observation.name     = Name.unknown
-    observation.alt      = convert_altitude(args[:alt])
+    observation.lat      = Location.parse_latitude(args[:lat])
+    observation.long     = Location.parse_longitude(args[:long])
+    observation.alt      = Location.parse_altitude(args[:alt])
     return observation
   end
 

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120405175300) do
+ActiveRecord::Schema.define(:version => 20120406015700) do
 
   create_table "authors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
@@ -146,7 +146,6 @@ ActiveRecord::Schema.define(:version => 20120405175300) do
     t.string   "sync_id",          :limit => 16
     t.integer  "width"
     t.integer  "height"
-    t.text     "votes"
     t.float    "vote_cache"
     t.boolean  "ok_for_export",                   :default => true, :null => false
     t.string   "original_name",    :limit => 120, :default => ""
