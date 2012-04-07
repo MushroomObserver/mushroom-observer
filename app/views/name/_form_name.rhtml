@@ -4,6 +4,9 @@
 <label for="name_rank"><%= :Rank.t %>:</label>
 <%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}) %><br/><br/>
 
+<label for="name_deprecated"><%= :Status.t %>:</label>
+<%= form.select(:deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]]) %><br/><br/>
+
 <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
 <% if @can_make_changes %>
   <%= form.text_field(:text_name) %><br/>

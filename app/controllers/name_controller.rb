@@ -676,6 +676,8 @@ class NameController < ApplicationController
 
         # Not merging.
         else
+          old_deprecated = @name.deprecated
+
           # Text_name is blank if the name is in use (therefore not editable).
           if !text_name.blank? ||
              # However let user fill in missing authority, even if in use.
@@ -696,13 +698,25 @@ class NameController < ApplicationController
           end
 
           # Save any changes.
+          no_changes = false
           if !@name.changed?
-            flash_warning(:runtime_edit_name_no_change.t)
+            no_changes = true
           elsif !save_name(@name, :log_name_updated)
+            @name.deprecated = (params[:name][:deprecated] == 'true')
             raise(:runtime_unable_to_save_changes.t)
           else
-            flash_notice(:runtime_edit_name_success.t(
-                         :name => @name.search_name))
+            flash_notice(:runtime_edit_name_success.t(:name => @name.search_name))
+          end
+
+          # Chain on to approve/deprecate name if changed status.
+          if params[:name][:deprecated].to_s == 'true' && !old_deprecated
+            redirect_to(:action => 'deprecate_name', :id => @name.id, :params => query_params)
+            any_errors = true # don't re-redirect!
+          elsif params[:name][:deprecated].to_s == 'false' && old_deprecated
+            redirect_to(:action => 'approve_name', :id => @name.id, :params => query_params)
+            any_errors = true # don't re-redirect!
+          elsif no_changes
+            flash_warning(:runtime_edit_name_no_change.t)
           end
         end
 

@@ -608,7 +608,8 @@ class NameControllerTest < FunctionalTestCase
         :text_name => 'Conocybe filaris',
         :author => '(Fr.) Kühner',
         :rank => :Species,
-        :citation => '__Le Genera Galera__, 139. 1935.'
+        :citation => '__Le Genera Galera__, 139. 1935.',
+        :deprecated => (name.deprecated ? "true" : "false")
       },
     }
     post_requires_login(:edit_name, params)
@@ -630,7 +631,9 @@ class NameControllerTest < FunctionalTestCase
       :id => name.id,
       :name => {
         :rank => :Species,
-        :citation => '__Le Genera Galera__, 139. 1935.'
+        :citation => '__Le Genera Galera__, 139. 1935.',
+        :deprecated => (name.deprecated ? "true" : "false")
+
       },
     }
     post_requires_login(:edit_name, params)
@@ -654,7 +657,9 @@ class NameControllerTest < FunctionalTestCase
         :author => '',
         :rank => :Species,
         :citation => '',
-        :notes => new_notes
+        :notes => new_notes,
+        :deprecated => (name.deprecated ? "true" : "false")
+
       },
     }
     post_requires_login(:edit_name, params)
@@ -675,7 +680,8 @@ class NameControllerTest < FunctionalTestCase
         :text_name => name.text_name,
         :author => '',
         :rank => :Species,
-        :citation => 'new citation'
+        :citation => 'new citation',
+        :deprecated => (name.deprecated ? "true" : "false")
       },
     }
     login('mary')
@@ -699,7 +705,8 @@ class NameControllerTest < FunctionalTestCase
         :text_name => name.text_name,
         :author => name.author,
         :rank => :Species,
-        :citation => name.citation
+        :citation => name.citation,
+        :deprecated => (name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -729,7 +736,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => agaricus_campestris.text_name,
         :author => '',
-        :rank => :Species
+        :rank => :Species,
+        :deprecated => (old_name.deprecated ? "true" : "false")
       },
     }
 
@@ -775,7 +783,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => old_name.text_name,
         :author => new_name.author,
-        :rank => :Species
+        :rank => :Species,
+        :deprecated => (old_name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -804,7 +813,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => wrong_author_name.text_name,
         :author => new_name.author,
-        :rank => new_name.rank
+        :rank => new_name.rank,
+        :deprecated => (wrong_author_name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -835,7 +845,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => new_name.text_name,
         :author => new_name.author,
-        :rank => :Species
+        :rank => :Species,
+        :deprecated => (old_name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -870,7 +881,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => new_name.text_name,
         :author => new_name.author,
-        :rank => :Species
+        :rank => :Species,
+        :deprecated => (old_name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -905,6 +917,7 @@ class NameControllerTest < FunctionalTestCase
         :author => old_name.author,
         :rank => old_name.rank,
         :citation => '',
+        :deprecated => (old_name.deprecated ? "true" : "false"),
       },
     }
     login('rolf')
@@ -935,6 +948,7 @@ class NameControllerTest < FunctionalTestCase
         :author => '',
         :rank => old_name.rank,
         :citation => '',
+        :deprecated => (old_name.deprecated ? "true" : "false"),
       },
     }
     login('rolf')
@@ -960,6 +974,7 @@ class NameControllerTest < FunctionalTestCase
         :author => new_name.author,
         :rank => old_name.rank,
         :citation => '',
+        :deprecated => (old_name.deprecated ? "true" : "false"),
       },
     }
     login('rolf')
@@ -982,6 +997,7 @@ class NameControllerTest < FunctionalTestCase
         :author => new_name.author,
         :rank => old_name.rank,
         :citation => '',
+        :deprecated => (old_name.deprecated ? "true" : "false"),
       },
     }
     login('rolf')
@@ -1010,7 +1026,8 @@ class NameControllerTest < FunctionalTestCase
         :text_name => old_name.text_name,
         :citation => '',
         :author => old_name.author,
-        :rank => old_name.rank
+        :rank => old_name.rank,
+        :deprecated => (old_name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -1043,7 +1060,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => new_name.text_name,
         :author => old_name.author,
-        :rank => old_name.rank
+        :rank => old_name.rank,
+        :deprecated => (old_name.deprecated ? "true" : "false")
       },
     }
 
@@ -1082,7 +1100,8 @@ class NameControllerTest < FunctionalTestCase
       :name => {
         :text_name => old_text_name,
         :author => new_author,
-        :rank => :Species
+        :rank => :Species,
+        :deprecated => (name.deprecated ? "true" : "false")
       },
     }
     login('mary')
@@ -1110,7 +1129,8 @@ class NameControllerTest < FunctionalTestCase
         :text_name => bad_name.text_name,
         :author => good_author,
         :notes => bad_notes,
-        :rank => :Species
+        :rank => :Species,
+        :deprecated => (bad_name.deprecated ? "true" : "false")
       },
     }
     login('rolf')
@@ -1124,6 +1144,42 @@ class NameControllerTest < FunctionalTestCase
     assert(reload_name)
     assert_equal(good_author, reload_name.author)
     assert_equal(bad_notes, reload_name.notes)
+  end
+
+  def test_edit_name_chain_to_approve_and_deprecate
+    login('rolf')
+    name = names(:lactarius_alpigenes)
+    params = {
+      :id => name.id,
+      :name => {
+        :rank      => name.rank,
+        :text_name => name.text_name,
+        :author    => name.author,
+        :citation  => name.citation,
+        :notes     => name.notes,
+      },
+    }
+    assert(name.deprecated)
+
+    # No change: go to show_name, warning.
+    params[:name][:deprecated] = 'true'
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_flash_warning
+
+    # Change to accepted: go to approve_name, no flash.
+    params[:name][:deprecated] = 'false'
+    post(:edit_name, params)
+    assert_response(:action => :approve_name)
+    assert_no_flash
+
+    # Change to deprecated: go to deprecate_name, no flash.
+    name.change_deprecated(false)
+    name.save
+    params[:name][:deprecated] = 'true'
+    post(:edit_name, params)
+    assert_response(:action => :deprecate_name)
+    assert_no_flash
   end
 
   # ----------------------------
@@ -2646,7 +2702,7 @@ class NameControllerTest < FunctionalTestCase
       )
     }
 
-    # No desc yet -> make new desc default. 
+    # No desc yet -> make new desc default.
     name = names(:conocybe_filaris)
     assert_equal(0, name.descriptions.length)
     post(:create_name_description, params)
