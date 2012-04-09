@@ -1356,6 +1356,7 @@ form_species_lists_species_to_add: Επιλέξτε Είδη για Προσθή
 form_species_lists_write_in_species: "Εγγραφή Ειδών: (γράψτε ένα όνομα σε κάθε γραμμή)"
 form_species_lists_list_notes: Σημειώσεις Καταλόγου Ειδών
 form_species_lists_member_notes: Σημειώσεις για κάθε νέο μέλος
+form_species_lists_confidence:  Confidence in identifications
 form_species_lists_deprecated: Τα ακόλουθα ονόματα έχουν αποδοκιμαστεί
 form_species_lists_deprecated_help: >
   Επιλέξτε όσα ονόματα θα θέλατε να χρησιμοποιήσετε. Αν προτιμάτε κάποιο όνομα που έχετε εισαγάγει εσείς, τότε μην επιλέξετε κάποιο από τα προτεινόμενα συνώνυμα.
@@ -4042,7 +4043,13 @@ runtime_destroyed_id: "Επιτυχής καταστροφή [type] #[value]."
 runtime_destroyed_name: "Επιτυχής καταστροφή [type] '[value]'."
 runtime_invalid: "[Type] είναι άκυρο: '[value]'"
 runtime_lat_long_error: "Το γεωγραφικό πλάτος και μήκος πρέπει να είναι αριθμοί κινητής υποδιαστολής μεταξύ -90 και 90, και -180 και 180 αντίστοιχα."
-runtime_altitude_error:  Altitude must be real number in feet or meters.  Default is meters.  Indicate units with "m", "ft" or "'" (apostrophe).
+runtime_altitude_error:  >
+  Altitude must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:
+    1234
+    1234m
+    4049'
+    4049 ft.
+
 runtime_merge_success: Επιτυχής συγχώνευση [type] [this] στο [that].
 runtime_missing: Λείπει το [field].
 runtime_no_changes: "Δεν έγινε καμία αλλαγή."
@@ -4425,6 +4432,32 @@ date_helper_abbr_day_names:
   - Παρ
   - Σάβ
 
+_unit_test_a: '[:_unit_test_b]'
+_unit_test_b: '[:_unit_test_c]'
+_unit_test_c: '[:_unit_test_d]'
+_unit_test_d: '[:_unit_test_e]'
+_unit_test_e: '[:_unit_test_f]'
+_unit_test_f: '[:_unit_test_g]'
+_unit_test_g: '[:_unit_test_h]'
+_unit_test_h: '[:_unit_test_i]'
+_unit_test_i: '[:_unit_test_j]'
+_unit_test_j: '[:_unit_test_k]'
+_unit_test_k: '[:_unit_test_l]'
+_unit_test_l: '[:_unit_test_m]'
+_unit_test_m: '[:_unit_test_n]'
+_unit_test_n: '[:_unit_test_o]'
+_unit_test_o: '[:_unit_test_p]'
+_unit_test_p: '[:_unit_test_q]'
+_unit_test_q: '[:_unit_test_r]'
+_unit_test_r: '[:_unit_test_s]'
+_unit_test_s: '[:_unit_test_t]'
+_unit_test_t: '[:_unit_test_u]'
+_unit_test_u: '[:_unit_test_v]'
+_unit_test_v: '[:_unit_test_w]'
+_unit_test_w: '[:_unit_test_x]'
+_unit_test_x: '[:_unit_test_y]'
+_unit_test_y: '[:_unit_test_z]'
+_unit_test_z: bob
 
 ################################################################################
 

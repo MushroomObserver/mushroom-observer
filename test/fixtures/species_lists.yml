@@ -6,7 +6,8 @@ first_species_list:
   modified: 2006-03-01 21:14:00
   when: 2006-03-01
   user_id: 1
-  where: Burbank, CA
+  where: nil
+  location_id: 2 # Burbank
   title: A Species List
   notes: Got Skunked!
   rss_log_id: 2
@@ -18,7 +19,8 @@ another_species_list:
   modified: 2006-03-02 21:14:00
   when: 2006-03-02
   user_id: 1
-  where: Burbank, CA
+  where: nil
+  location_id: 2 # Burbank
   title: Another Species List
   notes: Got Skunked Again!
 
@@ -29,6 +31,7 @@ unknown_species_list:
   modified: 2006-03-09 21:14:00
   when: 2006-03-09
   user_id: 2
-  where: Burbank, CA
+  where: nil
+  location_id: 2 # Burbank
   title: List of mysteries
   notes: Things I don't know

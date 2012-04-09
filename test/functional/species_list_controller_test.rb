@@ -21,7 +21,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       :id => spl.id,
       :species_list => {
-        :place_name => spl.where,
+        :place_name => spl.place_name,
         :title => spl.title,
         "when(1i)" => spl.when.year.to_s,
         "when(2i)" => spl.when.month.to_s,
@@ -134,7 +134,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => names(:coprinus_comatus).text_name },
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -148,6 +148,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
     assert(spl.name_included(names(:coprinus_comatus)))
+    obs = spl.observations.first
+    assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
+    assert_equal('', obs.notes.to_s)
+    assert_equal(nil, obs.lat)
+    assert_equal(nil, obs.long)
+    assert_equal(nil, obs.alt)
+    assert_equal(false, obs.is_collection_location)
+    assert_equal(false, obs.specimen)
   end
 
   def test_construct_species_list_existing_genus
@@ -158,7 +166,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -186,7 +194,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -220,7 +228,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -245,7 +253,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -269,7 +277,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => new_name_str },
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -302,7 +310,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -362,7 +370,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => checklist_data,
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "6",
@@ -399,7 +407,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => "\n Warnerbros  bugs-bunny " },
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => "Testing nonalphas",
         "when(1i)" => "2008",
         "when(2i)" => "1",
@@ -423,7 +431,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => "Warnerbros bugs-bunny\r\n" },
       :member => { :notes => "" },
       :species_list => {
-        :place_name => "Burbank, California",
+        :place_name => "Burbank, California, USA",
         :title => "Testing nonalphas",
         "when(1i)" => "2008",
         "when(2i)" => "1",
@@ -433,10 +441,49 @@ class SpeciesListControllerTest < FunctionalTestCase
       :chosen_multiple_names => { names(:bugs_bunny_one).id.to_s => names(:bugs_bunny_two).id },
     }
     post(:create_species_list, params)
-    assert_response(:action => "show_species_list")
+    assert_response(:action => :show_species_list)
     assert_equal(10 + v_spl + v_obs, @rolf.reload.contribution)
     spl = SpeciesList.last
     assert(spl.name_included(names(:bugs_bunny_two)))
+  end
+
+  # Test constructing species lists, tweaking member fields.
+  def test_construct_species_list_with_member_fields
+    list_title = "List Title"
+    params = {
+      :list => { :members => names(:coprinus_comatus).text_name },
+      :member => {
+        :vote  => Vote.minimum_vote,
+        :notes => 'member notes',
+        :lat   => '12 34 56 N',
+        :long  => '78 9 12 W',
+        :alt   => '345 ft',
+        :is_collection_location => '1',
+        :specimen => '1',
+      },
+      :species_list => {
+        :place_name => 'Burbank, California, USA',
+        :title => list_title,
+        'when(1i)' => '2007',
+        'when(2i)' => '3',
+        'when(3i)' => '14',
+        :notes => 'List Notes'
+      }
+    }
+    post_requires_login(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
+    assert_not_nil(spl)
+    assert(spl.name_included(names(:coprinus_comatus)))
+    obs = spl.observations.first
+    assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
+    assert_equal('member notes', obs.notes)
+    assert_equal(12.5822, obs.lat)
+    assert_equal(-78.1533, obs.long)
+    assert_equal(105, obs.alt)
+    assert_equal(true, obs.is_collection_location)
+    assert_equal(true, obs.specimen)
   end
 
   # -----------------------------------------------
@@ -449,7 +496,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal('rolf', spl.user.login)
     requires_user(:edit_species_list, :show_species_list, params)
     assert_response('edit_species_list')
-    assert_form_action(:action => 'edit_species_list', :id => spl.id.to_s)
+    assert_form_action(:action => 'edit_species_list', :id => spl.id.to_s,
+                       :approved_where => 'Burbank, California, USA')
   end
 
   def test_update_species_list_nochange
@@ -477,7 +525,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(sp_count, spl.reload.observations.size)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_response(:action => "show_species_list")
+    assert_response(:action => :show_species_list)
     assert_equal(10 + v_obs*2, spl.user.reload.contribution)
     assert_equal(sp_count + 2, spl.reload.observations.size)
   end
@@ -511,7 +559,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus"
-    params[:species_list][:place_name] = "New Place"
+    params[:species_list][:place_name] = "New Place, California, USA"
     params[:species_list][:title] = "New Title"
     params[:species_list][:notes] = "New notes."
     owner = spl.user.login
@@ -523,10 +571,10 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(spl.reload.observations.size == sp_count)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_response(:action => "show_species_list")
+    assert_response(:controller => :location, :action => :create_location)
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert_equal("New Place", spl.where)
+    assert_equal("New Place, California, USA", spl.where)
     assert_equal("New Title", spl.title)
     assert_equal("New notes.", spl.notes)
   end
@@ -859,7 +907,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       :species_list => {
         :when  => Time.now,
-        :place_name => 'somewhere',
+        :place_name => 'Somewhere, California, USA',
         :title => 'title',
         :notes => 'notes',
       },
@@ -889,7 +937,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       'Lepiota sp Author',
     ].join("\r\n")
     post(:create_species_list, params)
-    assert_response(:action => "show_species_list")
+    assert_response(:controller => :location, :action => :create_location)
     assert_equal([
       'Fungi sp.',
       'Agaricus sp.',
@@ -918,7 +966,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       'Psalliota sp.',
     ].join("\r\n")
     post(:create_species_list, params)
-    assert_response(:action => "show_species_list")
+    assert_response(:controller => :location, :action => :create_location)
     assert_equal([
       'Fungi sp.',
       'Agaricus sp.',
@@ -931,5 +979,165 @@ class SpeciesListControllerTest < FunctionalTestCase
       '"Three" sp.',
       'Agaricus "blah"',
     ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}.sort)
+  end
+
+  # ----------------------------
+  #  Bulk observation editor.
+  # ----------------------------
+
+  def test_bulk_editor
+    now = Time.now
+
+    obs1 = observations(:minimal_unknown)
+    obs2 = observations(:detailed_unknown)
+    obs3 = observations(:coprinus_comatus_obs)
+    old_vote1 = obs1.namings.first.users_vote(obs1.user).value rescue nil
+    old_vote2 = obs2.namings.first.users_vote(obs2.user).value rescue nil
+    old_vote3 = obs3.namings.first.users_vote(obs3.user).value rescue nil
+
+    spl = species_lists(:unknown_species_list)
+    spl.observations << obs3
+    spl.reload
+
+    assert_equal([obs1, obs2, obs3], spl.observations)
+    assert_equal(@mary, spl.user)
+    assert_equal(@mary, obs1.user)
+    assert_equal(@mary, obs2.user)
+    assert_equal(@rolf, obs3.user)
+
+    params = { :id => spl.id }
+    login('dick')
+    get(:bulk_editor, params)
+    assert_response(:action => :show_species_list)
+
+    login('mary')
+    get(:bulk_editor, params)
+    assert_response('bulk_editor')
+
+    # # No changes.
+    # params = {
+    #   :id => spl.id,
+    #   :observation => {
+    #     obs1.id.to_s => obs1.attributes.merge(
+    #       :place_name => (obs1.location.name rescue obs1.where),
+    #       :vote       => old_vote1,
+    #     ),
+    #     obs2.id.to_s => obs2.attributes.merge(
+    #       :place_name => (obs2.location.name rescue obs2.where),
+    #       :vote       => old_vote2,
+    #     )
+    #   },
+    # }
+    # post_requires_user(:bulk_editor, :show_species_list, params, 'mary')
+    # assert_response(:show_species_list, :id => spl.id)
+    # assert_flash_warning
+    # for old_obs, old_vote in [ [obs1,old_vote1], [obs2,old_vote2], [obs3,old_vote3] ]
+    #   new_obs = Observation.find(old_obs.id)
+    #   assert_equal(old_vote, new_obs.namings.first.users_vote(new_obs.user).value rescue nil)
+    #   assert_equal(old_obs.when,                   new_obs.when)
+    #   assert_equal(old_obs.where,                  new_obs.where)
+    #   assert_equal(old_obs.location_id             new_obs.location_id)
+    #   assert_equal(old_obs.notes,                  new_obs.notes)
+    #   assert_equal(old_obs.lat,                    new_obs.lat)
+    #   assert_equal(old_obs.long,                   new_obs.long)
+    #   assert_equal(old_obs.alt,                    new_obs.alt)
+    #   assert_equal(old_obs.is_collection_location, new_obs.is_collection_location)
+    #   assert_equal(old_obs.specimen,               new_obs.specimen)
+    # end
+    #
+    # # Make legal changes.
+    # params = {
+    #   :id => spl.id,
+    #   :observation => {
+    #     obs1.id.to_s => obs1.attributes.merge(
+    #       :when       => now,
+    #       :place_name => 'new location',
+    #       :notes      => 'new notes',
+    #       :vote       => Vote.minimum_vote,
+    #     ),
+    #     obs2.id.to_s => obs2.attributes.merge(
+    #       :place_name => (obs2.location.name rescue obs2.where),
+    #       :lat      => '12 34 56 N',
+    #       :long     => '78 9 12 W',
+    #       :alt      => '345 ft',
+    #       :is_collection_location => '1',
+    #       :specimen => '0',
+    #     ),
+    #   },
+    # }
+    # login('mary')
+    # post(:bulk_editor, params)
+    # assert_response(:show_species_list, :id => spl.id)
+    # assert_flash_success
+    # obs1_new = Observation.find(obs1.id)
+    # obs2_new = Observation.find(obs2.id)
+    # new_vote1 = obs1_new.namings.first.users_vote(obs1.user).value rescue nil
+    # new_vote2 = obs2_new.namings.first.users_vote(obs2.user).value rescue nil
+    # assert_not_equal(Vote.minimum_vote, old_vote1)
+    # assert_equal(Vote.minimum_vote, new_vote1)
+    # assert_equal(now,            new_obs1.when)
+    # assert_equal('new location', new_obs1.where)
+    # assert_equal(nil,            new_obs1.location)
+    # assert_equal('new notes',    new_obs1.notes)
+    # assert_equal(obs1.lat,       new_obs1.lat)
+    # assert_equal(obs1.long,      new_obs1.long)
+    # assert_equal(obs1.alt,       new_obs1.alt)
+    # assert_equal(obs1.is_collection_location, new_obs1.is_collection_location)
+    # assert_equal(obs1.specimen,  new_obs1.specimen)
+    # assert_equal(old_vote2, new_vote2)
+    # assert_equal(obs2.when,        new_obs2.when)
+    # assert_equal(obs2.where,       new_obs2.where)
+    # assert_equal(obs2.location_id, new_obs2.location_id)
+    # assert_equal(obs2.notes,       new_obs2.notes)
+    # assert_equal(12.5822,          new_obs2.lat)
+    # assert_equal(-78.1533,         new_obs2.long)
+    # assert_equal(105,              new_obs2.alt)
+    # assert_equal(true,             new_obs2.is_collection_location)
+    # assert_equal(true,             new_obs2.specimen)
+    #
+    # # Make illegal change.
+    # params = {
+    #   :id => spl.id,
+    #   :observation => {
+    #     obs3.id.to_s => obs3.attributes.merge(
+    #       :place_name => (obs3.location.name rescue obs3.where),
+    #       :vote       => old_vote3,
+    #       :notes      => 'new notes',
+    #     ),
+    #   },
+    # }
+    # login('mary')
+    # post(:bulk_editor, params)
+    # assert_response(:show_species_list, :id => spl.id)
+    # assert_flash_error
+    # new_obs3 = Observation.find(obs3.id)
+    # assert_equal(old_vote3, new_obs3.namings.first.users_vote(obs3.user).value rescue nil)
+    # assert_equal(obs3.when,                   new_obs3.when)
+    # assert_equal(obs3.where,                  new_obs3.where)
+    # assert_equal(obs3.location_id             new_obs3.location_id)
+    # assert_equal(obs3.notes,                  new_obs3.notes)
+    # assert_equal(obs3.lat,                    new_obs3.lat)
+    # assert_equal(obs3.long,                   new_obs3.long)
+    # assert_equal(obs3.alt,                    new_obs3.alt)
+    # assert_equal(obs3.is_collection_location, new_obs3.is_collection_location)
+    # assert_equal(obs3.specimen,               new_obs3.specimen)
+    #
+    # # But let Rolf edit his own observations in someone else's list(?)
+    # params = {
+    #   :id => spl.id,
+    #   :observation => {
+    #     obs3.id.to_s => obs3.attributes.merge(
+    #       :place_name => (obs3.location.name rescue obs3.where),
+    #       :vote       => old_vote3,
+    #       :notes      => 'new notes',
+    #     ),
+    #   },
+    # }
+    # login('rolf')
+    # post(:bulk_editor, params)
+    # assert_response(:show_species_list, :id => spl.id)
+    # assert_flash_success
+    # new_obs3 = Observation.find(obs3.id)
+    # assert_equal('new notes', new_obs3.notes)
   end
 end

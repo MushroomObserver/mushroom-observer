@@ -1,5 +1,11 @@
 Image votes are no longer anonymous. (visible on show_image, see "Change Image Vote Anonymity" in prefs, uses same pref as for name votes)
 Original filename of images now visible. (visible in observation and image index, can sort by it in image index, can search for it when searching for images)
-You can enter altitude directly in observation now. (not used, converts feet to meters)
-You can enter lat/long in degrees/minutes/seconds now.  (will convert to decimal format)
+You can now enter altitude directly in observation. (not used, converts feet to meters)
+You can now enter lat/long in degrees/minutes/seconds.  (will convert to decimal format)
 Some tweaks to create/edit observation form regarding images. (can always edit copyright and original file name now)
+You can now specify confidence, lat/long/alt in create/edit_species_list.
+The create/edit_species list write-in text area now autocompletes.
+All four of create/edit_observation/species_list now chain automatically to create_location, and give appropriate "dubious location" warnings.
+The location nazi no longer complains about dubious names of defined locations, only undefined locations.
+When linked to from create/edit_observation/species_list, create_location now updates *all* observations and species_lists with the *original* location name (that way user can change their mind when defining an undefined location and still have it update all observations with the original name).
+Added form to let you bulk-edit observations in a species list.

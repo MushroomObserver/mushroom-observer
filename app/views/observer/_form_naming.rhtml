@@ -44,7 +44,7 @@
   end
   if can_do_ajax? && !show_reasons && @what.blank?
     html = "<div id='reasons_div'>#{html}</div>"
-    html += javascript_tag("Element.hide('reasons_div')");
+    # html += javascript_tag("Element.hide('reasons_div')");
   end
   html
 %>

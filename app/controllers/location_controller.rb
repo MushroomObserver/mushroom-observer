@@ -454,18 +454,25 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
 
-    # (Used when linked from "define this location".)
-    @display_name = params[:where]
+    # Original name passed in when arrive here with express purpose of defining a given location.
+    # (e.g., clicking on "define this location", or after create_observation with unknown location)
+    # (Note: all names are in user's preferred order unless explicitly otherwise.)
+    @original_name = params[:where]
 
-    # (Used when linked from user profile: sets primary location after done.)
-    @set_user = (params[:set_user] == "1")
+    # Previous value of place name: ignore warnings if unchanged (i.e., resubmit same name).
+    @approved_name = params[:approved_where]
 
-    # (Used when linked from create observation.)
-    @set_observation = params[:set_observation]
+    # This is the latest value of place name.
+    @display_name = params[:location][:display_name].strip_squeeze rescue @original_name
+
+    # Where to return after successfully creating location.
+    @set_observation  = params[:set_observation]
+    @set_species_list = params[:set_observation]
+    @set_user         = params[:set_user]
 
     # Render a blank form.
-    user_name = Location.user_name(@user, @display_name)
     if request.method != :post
+      user_name = Location.user_name(@user, @display_name)
       @dubious_where_reasons = Location.dubious_name?(user_name, true) if @display_name
       @location = Location.new
       geocoder = Geocoder.new(user_name)
@@ -482,9 +489,9 @@ class LocationController < ApplicationController
         @location.east = 89
         @location.west = -89
       end
+
+    # Submit form.
     else
-      @display_name = params[:location][:display_name].strip_squeeze rescue ''
-      
       # Set to true below if created successfully, or if a matching location
       # already exists.  In either case, we're done with this form.
       done = false
@@ -492,7 +499,8 @@ class LocationController < ApplicationController
       # Look to see if the display name is already in use.  If it is then just use
       # that location and ignore the other values.  Probably should be smarter
       # with warnings and merges and such...
-      @location = Location.search_by_name(@display_name)
+      db_name = Location.user_name(@user, @display_name)
+      @location = Location.search_by_name(db_name)
 
       # Location already exists.
       if @location
@@ -502,65 +510,66 @@ class LocationController < ApplicationController
       # Need to create location.
       else
         @location = Location.new(params[:location])
+
         # Validate name.
         @dubious_where_reasons = []
-        if @display_name != params[:approved_where]
-          @dubious_where_reasons = Location.dubious_name?(Location.user_name(@user, @display_name), true)
+        if @display_name != @approved_name
+          @dubious_where_reasons = Location.dubious_name?(db_name, true)
         end
-        if (@dubious_where_reasons == []) and @location.save
-          Transaction.post_location(
-            :id      => @location,
-            :created => @location.created,
-            :name    => @location.name,
-            :north   => @location.north,
-            :south   => @location.south,
-            :east    => @location.east,
-            :west    => @location.west,
-            :low     => @location.low,
-            :high    => @location.high
-          )
-          flash_notice(:runtime_location_success.t(:id => @location.id))
-          done = true
-        # Failed to create location
-        else
-          flash_object_errors @location
+
+        if @dubious_where_reasons.empty?
+          if @location.save
+            Transaction.post_location(
+              :id      => @location,
+              :created => @location.created,
+              :name    => @location.name,
+              :north   => @location.north,
+              :south   => @location.south,
+              :east    => @location.east,
+              :west    => @location.west,
+              :low     => @location.low,
+              :high    => @location.high
+            )
+            flash_notice(:runtime_location_success.t(:id => @location.id))
+            done = true
+          else
+            # Failed to create location
+            flash_object_errors @location
+          end
         end
       end
 
       # If done, update any observations at @display_name,
       # and set user's primary location if called from profile.
       if done
-        action = 'show_location'
-        controller = 'location'
-        id = @location.id
-        if !@display_name.blank?
-          update_observations_by_where(@location, @display_name)
+        if !@original_name.blank?
+          db_name = Location.user_name(@user, @original_name)
+          Observation.define_a_location(@location, db_name)
+          SpeciesList.define_a_location(@location, db_name)
         end
         if @set_observation
-          obs = Observation.find(@set_observation)
-          if obs
-            obs.location_id = @location.id
-            obs.where = nil
-            obs.save
-            controller = 'observer'
-            id = @set_observation
-            if has_unshown_notifications?(@user, :naming)
-              action = 'show_notifications'
-            else
-              action = 'show_observation'
-            end
-            # Is there some Transation that's supposed to happen here?
+          if has_unshown_notifications?(@user, :naming)
+            redirect_to(:controller => 'observer', :action => 'show_notifications')
+          else
+            redirect_to(:controller => 'observer', :action => 'show_observation',
+                        :id => @set_observation)
           end
+        elsif @set_species_list
+          redirect_to(:controller => 'species_list', :action => 'show_species_list',
+                      :id => @set_species_list)
+        elsif @set_user
+          if user = User.safe_find(@set_user)
+            user.location = @location
+            user.save
+            Transaction.put_user(
+              :id           => @user,
+              :set_location => @location
+            )
+            redirect_to(:controller => 'observer', :action => 'show_user', :id => @set_user)
+          end
+        else
+          redirect_to(:controller => 'location', :action => 'show_location', :id => @location.id)
         end
-        if @set_user
-          @user.location = @location
-          @user.save
-          Transaction.put_user(
-            :id           => @user,
-            :set_location => @location
-          )
-        end
-        redirect_to(:controller => controller, :action => action, :id => id)
       end
     end
   end
@@ -569,11 +578,11 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     @location = Location.find(params[:id])
+    @display_name = params[:location][:display_name].strip_squeeze rescue ''
     done = false
     if request.method == :post
 
       # First check if user changed the name to one that already exists.
-      @display_name = params[:location][:display_name].strip_squeeze rescue ''
       db_name = Location.user_name(@user, @display_name)
       merge = Location.search_by_name(db_name)
 
@@ -601,12 +610,13 @@ class LocationController < ApplicationController
 
       # Otherwise it is safe to change the name.
       else
-        # Validate name.
         @location.display_name = @display_name
       end
 
-      # Just update this location.
+      # Update this location.
       if !done
+
+        # Update all fields except display_name.
         for key, val in params[:location]
           if key != 'display_name'
             @location.send("#{key}=", val)
@@ -614,20 +624,21 @@ class LocationController < ApplicationController
         end
 
         args = {}
-        args[:set_name]  = @location.name         if @location.name_changed?
-        args[:set_north] = @location.north        if @location.north_changed?
-        args[:set_south] = @location.south        if @location.south_changed?
-        args[:set_west]  = @location.west         if @location.west_changed?
-        args[:set_east]  = @location.east         if @location.east_changed?
-        args[:set_high]  = @location.high         if @location.high_changed?
-        args[:set_low]   = @location.low          if @location.low_changed?
+        args[:set_name]  = @location.name  if @location.name_changed?
+        args[:set_north] = @location.north if @location.north_changed?
+        args[:set_south] = @location.south if @location.south_changed?
+        args[:set_west]  = @location.west  if @location.west_changed?
+        args[:set_east]  = @location.east  if @location.east_changed?
+        args[:set_high]  = @location.high  if @location.high_changed?
+        args[:set_low]   = @location.low   if @location.low_changed?
 
+        # Validate name.
         @dubious_where_reasons = []
         if @display_name != params[:approved_where]
           @dubious_where_reasons = Location.dubious_name?(db_name, true)
         end
 
-        if @dubious_where_reasons == []
+        if @dubious_where_reasons.empty?
           # No changes made.
           if !@location.changed?
             flash_warning(:runtime_edit_location_no_change.t)
@@ -635,7 +646,7 @@ class LocationController < ApplicationController
 
           # There were error(s).
           elsif !@location.save
-            flash_object_errors @location
+            flash_object_errors(@location)
 
           # Updated successfully.
           else

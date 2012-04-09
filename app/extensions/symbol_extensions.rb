@@ -49,15 +49,6 @@ class Symbol
     @@missing_tags = x
   end
 
-  # Run +localize+ in test mode.
-  def test_localize(*args) # :nodoc:
-    @@test = true
-    result = localize(*args)
-    @@test = false
-    return result
-  end
-  @@test = false
-
   # Wrapper on the old +localize+ method that:
   # 1. converts '\n' into newline throughout
   # 2. maps '[arg]' via optional hash you can pass in
@@ -122,160 +113,145 @@ class Symbol
   # That would make the parsing non-trivial and potentially slow.
   #
   def localize(args={}, level=[])
-    capitalize_result = false
-
-    found = false
-    if @@test
-      if result = args[self]
-        found = true
-      elsif result = args[downcase]
-        capitalize_result = true
-        found = true
-      end
+    result = nil
+    if val = Globalite.localize(self, nil, {})
+      result = localize_postprocessing(val, args, level)
+    elsif val = Globalite.localize(downcase, nil, {})
+      result = localize_postprocessing(val, args, level, :captialize)
     else
-      if result = Globalite.localize(self, nil, {})
-        found = true
-      elsif result = Globalite.localize(downcase, nil, {})
-        capitalize_result = true
-        found = true
-      end
-    end
-
-    if !found
       if TESTING
         @@missing_tags << self if defined?(@@missing_tags)
       end
       result = "[:#{self}]"
     end
+    return result
+  end
 
+  # Run +localize+ in test mode.
+  def self.test_localize(val, args={}, level=[]) # :nodoc:
+    :test.localize_postprocessing(val, args, level)
+  end
+
+  def localize_postprocessing(val, args, level, capitalize_result=false) # :nodoc:
+    result = val
     if result.is_a?(String)
-      # Replacing "\n" with newlines is easy...
-      result.gsub!(/ *\\n */, "\n")
-
-      # Expand arguments.  (See comments above.)
+      result = result.gsub(/ *\\n */, "\n")
       if args.is_a?(Hash)
-        result.gsub!(/\[(\[?\w+?)\]/) do
-          x = y = $1
+        result = localize_expand_arguments(result, args, level)
+      end
+      if level.length < 8
+        result = localize_recursive_expansion(result, args, level)
+      end
+    end
+    if result.is_a?(String)
+      # Allow literal square brackets by doubling them.
+      result = result.gsub(/\[\[/,'[').gsub(/\]\]/,']')
+    end
+    if capitalize_result
+      # Make token attempt to capitalize result if requested [:TAG] for :tag.
+      result = result.capitalize_first 
+    end
+    return result
+  end
 
-          # Ignore double-brackets.
-          if x[0,1] == '['
-            x
+  def localize_expand_arguments(val, args, level) # :nodoc:
+    val.gsub(/\[(\[?\w+?)\]/) do
+      x = y = $1
 
-          # Want :type, given :type.
-          elsif args.has_key?(arg = x.to_sym)
-            val = args[arg]
-            val.is_a?(Symbol) ?
-              val.l :
-              val.to_s
+      # Ignore double-brackets.
+      if x[0,1] == '['
+        x
 
-          # Want :types, given :type.
-          elsif (y = x.sub(/s$/i,'')) and
-                args.has_key?(arg = y.to_sym)
-            val = args[arg]
-            val.is_a?(Symbol) ?
-              "#{val}s".to_sym.l :
-              val.to_s
+      # Want :type, given :type.
+      elsif args.has_key?(arg = x.to_sym)
+        val = args[arg]
+        val.is_a?(Symbol) ?
+          val.l :
+          val.to_s
 
-          # Want :TYPE, given :type.
-          elsif args.has_key?(arg = x.downcase.to_sym) and
-                (x == x.upcase)
-            val = args[arg]
-            val.is_a?(Symbol) ?
-              val.to_s.upcase.to_sym.l :
-              val.to_s.capitalize_first
+      # Want :types, given :type.
+      elsif (y = x.sub(/s$/i,'')) and
+            args.has_key?(arg = y.to_sym)
+        val = args[arg]
+        val.is_a?(Symbol) ?
+          "#{val}s".to_sym.l :
+          val.to_s
 
-          # Want :TYPES, given :type.
-          elsif args.has_key?(arg = y.downcase.to_sym) and
-                (y == y.upcase)
-            val = args[arg]
-            val.is_a?(Symbol) ?
-              "#{val.to_s.upcase}S".to_sym.l :
-              val.to_s.capitalize_first
+      # Want :TYPE, given :type.
+      elsif args.has_key?(arg = x.downcase.to_sym) and
+            (x == x.upcase)
+        val = args[arg]
+        val.is_a?(Symbol) ?
+          val.to_s.upcase.to_sym.l :
+          val.to_s.capitalize_first
 
-          # Want :Type, given :type.
-          elsif args.has_key?(arg = x.downcase.to_sym)
-            val = args[arg]
-            val.is_a?(Symbol) ?
-              val.l.capitalize_first :
-              val.to_s.capitalize_first
+      # Want :TYPES, given :type.
+      elsif args.has_key?(arg = y.downcase.to_sym) and
+            (y == y.upcase)
+        val = args[arg]
+        val.is_a?(Symbol) ?
+          "#{val.to_s.upcase}S".to_sym.l :
+          val.to_s.capitalize_first
 
-          # Want :Types, given :type.
-          elsif args.has_key?(arg = y.downcase.to_sym)
-            val = args[arg]
-            val.is_a?(Symbol) ?
-              "#{val}s".to_sym.l.capitalize_first :
-              val.to_s.capitalize_first
+      # Want :Type, given :type.
+      elsif args.has_key?(arg = x.downcase.to_sym)
+        val = args[arg]
+        val.is_a?(Symbol) ?
+          val.l.capitalize_first :
+          val.to_s.capitalize_first
 
+      # Want :Types, given :type.
+      elsif args.has_key?(arg = y.downcase.to_sym)
+        val = args[arg]
+        val.is_a?(Symbol) ?
+          "#{val}s".to_sym.l.capitalize_first :
+          val.to_s.capitalize_first
+
+      else
+        raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
+          "#{Locale.code} localization for " +
+          ([self] + level).map(&:inspect).join(' --> '))
+      end
+    end
+  end
+
+  def localize_recursive_expansion(val, args, level) # :nodoc:
+    val.gsub(/ \[ :(\w+?) (?:\( ([^\(\)\[\]]+) \))? \] /x) do
+      tag = $1.to_sym
+      args2 = $2.to_s
+      hash = args.dup
+      if !args2.blank?
+        args2.split(',').each do |pair|
+          if pair.match(/^:?([a-z]+)=(.*)$/)
+            key = $1.to_sym
+            val = $2.to_s
+            if val.match(/^:(\w+)$/)
+              val = $1.to_sym
+            elsif val.match(/^"(.*)"$/) ||
+                  val.match(/^'(.*)'$/) ||
+                  val.match(/^(-?\d+(\.\d+)?)$/)
+              val = $1
+            elsif !val.match(/^([a-z][a-z_]*\d*)$/)
+              raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
+                "#{Locale.code} localization for " +
+                ([self] + level).map(&:inspect).join(' --> '))
+            elsif !args.has_key?(val.to_sym)
+              raise(ArgumentError, "Forgot to pass :#{val} into " +
+                "#{Locale.code} localization for " +
+                ([self] + level).map(&:inspect).join(' --> '))
+            else
+              val = args[val.to_sym]
+            end
+            hash[key] = val
           else
-            raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
-              "#{Locale.code} localization for " +
+            raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
+              "arguments for #{Locale.code} tag :#{tag} embedded in " +
               ([self] + level).map(&:inspect).join(' --> '))
           end
         end
       end
-
-      # Expand recursively-embedded tags.  Matches anything of these two types:
-      #
-      #   [:alpha]
-      #   [:alpha(alpha=almost_anything,alpha=almost_anything,...)]
-      #
-      # Where "almost_anything" is anything but , = () [] or \n.  If it looks
-      # like a symbol (i.e. is ":alpha"), then it is converted into one.  If
-      # it is just alphanumeric, then it is assumed to be an arg from the
-      # parent's hash.  Otherwise it must start and end with single-quotes.
-      # Any additional single quotes inside are preserved as-is.
-      #
-      #   [:tag(type=:name)]                 ==  :tag.l(:type => :name)
-      #   [:tag(type=parent_arg)]            ==  :tag.l(:type => args[:parent_arg])
-      #   [:tag(type='Literal Value')]       ==  :tag.l(:type => "Literal Value")
-      #   [:tag(type=''Quote's Are Kept'')]  ==  :tag.l(:type => "'Quote's Are Kept'")
-      #
-      # NOTE: Square brackets are NOT allowed in the literals, even if quoted!
-      # That would make the parsing non-trivial and potentially slow.
-      #
-      result.gsub!(/ \[ :(\w+?) (?:\( ([^\(\)\[\]]+) \))? \] /x) do
-        tag = $1.to_sym
-        args2 = $2.to_s
-        hash = args.dup
-        if !args2.blank?
-          args2.split(',').each do |pair|
-            if pair.match(/^:?([a-z]+)=(.*)$/)
-              key = $1.to_sym
-              val = $2.to_s
-              if val.match(/^:(\w+)$/)
-                val = $1.to_sym
-              elsif val.match(/^"(.*)"$/) ||
-                    val.match(/^'(.*)'$/) ||
-                    val.match(/^(-?\d+(\.\d+)?)$/)
-                val = $1
-              elsif !val.match(/^([a-z][a-z_]*\d*)$/)
-                raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
-                  "#{Locale.code} localization for " +
-                  ([self] + level).map(&:inspect).join(' --> '))
-              elsif !args.has_key?(val.to_sym)
-                raise(ArgumentError, "Forgot to pass :#{val} into " +
-                  "#{Locale.code} localization for " +
-                  ([self] + level).map(&:inspect).join(' --> '))
-              else
-                val = args[val.to_sym]
-              end
-              hash[key] = val
-            else
-              raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
-                "arguments for #{Locale.code} tag :#{tag} embedded in " +
-                ([self] + level).map(&:inspect).join(' --> '))
-            end
-          end
-        end
-        tag.l(hash, level+[self])
-      end if level.length < 8
+      tag.l(hash, level+[self])
     end
-
-    # Allow literal square brackets by doubling them.
-    result = result.gsub(/\[\[/,'[').gsub(/\]\]/,']') if result.is_a?(String)
-
-    # Make token attempt to capitalize result if requested [:TAG] for :tag.
-    capitalize_result ? result.capitalize_first : result
   end
 
   alias l localize

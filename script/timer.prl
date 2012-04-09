@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+use strict;
+
+my $TIMER = '/usr/bin/time -f %e';
+$| = 1;
+
+# test('/', 25);
+test('/name/eol_for_taxon/16015', 25);
+
+sub test {
+  my ($url, $n) = @_;
+  my @data;
+  for (my $i=0; $i<$n; $i++) {
+    my $time = run_one($url);
+    push(@data, $time);
+    printf "%-20.20s\r", "$i / $n ($time)";
+  }
+  print "%-20.20s\r";
+  my ($mean, $sigma) = stats(\@data);
+  printf "mean: %10.4f %10.4f\n", $mean, $sigma;
+}
+
+sub run_one {
+  my $url = shift;
+  system("$TIMER -o x.out wget -q 'http://localhost.localdomain$url'");
+  my $time = `cat x.out`;
+  chomp($time);
+  sleep 1;
+  return $time;
+}
+
+sub stats {
+  my $data = shift;
+  my ($sum, $ssq, $num);
+  foreach (@$data) {
+    $sum += $_;
+    $ssq += $_ * $_;
+    $num += 1;
+  }
+  return($$data[0], 0) if $num < 2;
+  my $mean = $sum / $num;
+  my $sigma = sqrt(($ssq - $sum * $sum / $num) / ($num - 1));
+  return($mean, $sigma);
+}

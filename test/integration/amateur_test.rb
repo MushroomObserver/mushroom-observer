@@ -361,8 +361,25 @@ class AmateurTest < IntegrationTestCase
 
   # ------------------------------------------------------
   #  Test posting, editing, and destroying observations.
+  #
+  #  General plan:
+  #    login
+  #    create_observation
+  #    create_location
+  #    edit_observation
+  #    destroy_observation
+  #
+  #  Variables:
+  #    katrina, rolf  - integration test sessions
+  #    @katrina       - User instance
+  #    @expectations  - set of objects to compare against in evaluate_xxx() methods
+  #
+  #  Methods added to sessions by the "constructor" regular_user():
+  #    login_required - get page, assert redirect to login, login, assert redirect to page
+  #    fills_in_form  - check starting values, make any changes, upload any images, return new values
+  #    evaluate_xxx   - just assertions: checks state at various stages
   # ------------------------------------------------------
-  
+
   def test_posting_observation_rewrite
     @expectations = {
       :observation => observations(:amateur_observation),
@@ -372,10 +389,10 @@ class AmateurTest < IntegrationTestCase
     }
     katrina = regular_user(@expectations)
     katrina.login_required(@katrina, 'observer/create_observation')
-    
+
     observation_fields = katrina.fills_in_form(observation_form_defaults, observation_form_no_location)
     katrina.evaluate_no_location
-    
+
     observation_fields = katrina.fills_in_form(observation_fields, observation_form_location,
       [['image_0_image', "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"]])
     katrina.evaluate_new_location_observation
@@ -383,46 +400,46 @@ class AmateurTest < IntegrationTestCase
     katrina.fills_in_form(location_form_defaults)
     katrina.evaluate_new_location
     katrina.evaluate_show_observation
-    
+
     katrina.click(:label => /edit observation/i)
     katrina.fills_in_form(edit_observation_form_defaults(katrina.new_observation), observation_form_change_location)
     katrina.evaluate_change_location
-    
+
     rolf = regular_user(@expectations)
     rolf.get('/')
     rolf.evaluate_observation_on_index
 
     katrina.click(:label => /destroy/i, :href => /destroy_observation/)
     katrina.evaluate_destruction
-  
+
     rolf.get('/')
     rolf.evaluate_orphan
   end
-  
+
   def regular_user(expectations)
     open_session do |sess|
       def sess.set_expectations(expectations)
         @expectations = expectations
       end
       sess.set_expectations(expectations)
-      
+
       def sess.login_required(user, page)
         get(page)
         assert_template('account/login')
         login!(user)
         assert_template(page)
       end
-      
+
       def sess.reload_results
         @new_observation = Observation.last
         @new_image = Image.last
         @new_location = Location.last
       end
-      
+
       def sess.new_observation
         @new_observation
       end
-      
+
       def sess.fills_in_form(expected, new_values={}, images=[])
         open_form do |form|
           for key, value in expected
@@ -450,7 +467,7 @@ class AmateurTest < IntegrationTestCase
         assert_flash(/destroyed/i)
         assert_template('observer/list_observations')
       end
-      
+
       def sess.evaluate_orphan
         assert_select("a[href^=/#{@new_observation.id}?]", 0)
         assert_select('a[href*=show_rss_log]') do |elems|
@@ -489,12 +506,12 @@ class AmateurTest < IntegrationTestCase
         assert_equal(@expectations[:image].notes, @new_image.notes)
         assert(assigns(:location))
       end
-    
+
       def sess.evaluate_new_location
         assert_flash(/success/i)
         assert_flash(/created location/i)
         assert_template('observer/show_observation')
-        
+
         reload_results
         assert_equal(@expectations[:observation].where, @new_location.name)
         assert_equal(@new_observation.location_id, @new_location.id)
@@ -503,7 +520,7 @@ class AmateurTest < IntegrationTestCase
         assert_match(EXPECTED_PASADENA_GPS['location_east'], @new_location.east.to_s)
         assert_match(EXPECTED_PASADENA_GPS['location_south'], @new_location.south.to_s)
       end
-  
+
       def sess.evaluate_show_observation
         # Make sure important bits show up somewhere on page.
         assert_match(@new_observation.when.web_date, response.body)

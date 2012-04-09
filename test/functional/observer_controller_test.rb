@@ -825,8 +825,8 @@ class ObserverControllerTest < FunctionalTestCase
       :name => { :name => "Unknown" },
     }, 1,0,0)
     obs = assigns(:observation)
-    assert_equal(lat, obs.lat)
-    assert_equal(long, obs.long)
+    assert_equal(lat.to_s, obs.lat.to_s)
+    assert_equal(long.to_s, obs.long.to_s)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
 
@@ -837,8 +837,8 @@ class ObserverControllerTest < FunctionalTestCase
       :name => { :name => "Unknown" },
     }, 1,0,0)
     obs = assigns(:observation)
-    assert_equal(lat, obs.lat)
-    assert_equal(long, obs.long)
+    assert_equal(lat.to_s, obs.lat.to_s)
+    assert_equal(long.to_s, obs.long.to_s)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
 
@@ -1204,9 +1204,8 @@ class ObserverControllerTest < FunctionalTestCase
       },
       :log_change => { :checked => '1' }
     }
-    post_requires_user(:edit_observation, ["observer", "show_observation"],
-                       params, 'mary')
-    assert_response(:action => :show_observation)
+    post_requires_user(:edit_observation, ["observer", "show_observation"], params, 'mary')
+    assert_response(:controller => :location, :action => :create_location)
     assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
@@ -1237,9 +1236,8 @@ class ObserverControllerTest < FunctionalTestCase
       },
       :log_change => { :checked => '0' }
     }
-    post_requires_user(:edit_observation, ["observer", "show_observation"],
-                       params, 'mary')
-    assert_response(:action => :show_observation)
+    post_requires_user(:edit_observation, ["observer", "show_observation"], params, 'mary')
+    assert_response(:controller => :location, :action => :create_location)
     assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)
@@ -1265,8 +1263,7 @@ class ObserverControllerTest < FunctionalTestCase
       },
       :log_change => { :checked => '1' }
     }
-    post_requires_user(:edit_observation, ["observer", "show_observation"],
-                       params, 'mary')
+    post_requires_user(:edit_observation, ["observer", "show_observation"], params, 'mary')
     assert_response(:success) # Which really means failure
   end
 

@@ -9,9 +9,12 @@
 
 <% form_for(:location, :url => {
                :action => :create_location,
-               :params => query_params.merge({:approved_where => @display_name}),
-               :set_user => @set_user ? 1 : 0,
-               :set_observation => @set_observation
+               :params => query_params,
+               :where => @original_name,
+               :approved_where => @display_name,
+               :set_observation => @set_observation,
+               :set_species_list => @set_species_list,
+               :set_user => @set_user
             }) do |form| %>
   <center><%= submit_tag(:CREATE.l) %></center>
 

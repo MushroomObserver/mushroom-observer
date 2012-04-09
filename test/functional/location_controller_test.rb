@@ -116,7 +116,7 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_create_location
     requires_login(:create_location)
-    assert_form_action(:action => 'create_location', :set_user => 0)
+    assert_form_action(:action => 'create_location')
   end
 
   # Test a simple location creation.
@@ -191,7 +191,7 @@ class LocationControllerTest < FunctionalTestCase
     loc = locations(:albion)
     params = { :id => loc.id.to_s }
     requires_login(:edit_location, params)
-    assert_form_action(:action => 'edit_location', :id => loc.id.to_s)
+    assert_form_action(:action => 'edit_location', :id => loc.id.to_s, :approved_where => '')
   end
 
   def test_update_location

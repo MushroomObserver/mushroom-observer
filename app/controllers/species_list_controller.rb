@@ -39,7 +39,7 @@
 #  list of Observation's, not Name's.  However, creation and editing is
 #  generally accomplished via Name's alone (although see manage_species_lists
 #  for the one exception).  In the end all these Name's cause rudimentary
-#  Observation's to spring into existence. 
+#  Observation's to spring into existence.
 #
 ################################################################################
 
@@ -143,7 +143,7 @@ class SpeciesListController < ApplicationController
     else
       args[:letters] = 'species_lists.title'
     end
-    
+
     show_index_of_objects(query, args)
   end
 
@@ -194,6 +194,7 @@ class SpeciesListController < ApplicationController
   #   @multiple_names
   #   @deprecated_names
   #   @member_notes
+  #   @place_name
   #   session[:checklist_source]
   def create_species_list # :prefetch: :norobots:
     @species_list = SpeciesList.new
@@ -206,8 +207,12 @@ class SpeciesListController < ApplicationController
       @multiple_names    = []
       @deprecated_names  = []
       @list_members      = nil
+      @member_vote       = Vote.maximum_vote
       @member_notes      = nil
-      @member_is_col_loc = true
+      @member_lat        = nil
+      @member_long       = nil
+      @member_alt        = nil
+      @member_is_collection_location = true
       @member_specimen   = false
       if !params[:clone].blank? and
          (clone = SpeciesList.safe_find(params[:clone]))
@@ -238,6 +243,7 @@ class SpeciesListController < ApplicationController
   #   @multiple_names
   #   @deprecated_names
   #   @member_notes
+  #   @place_name
   #   session[:checklist_source]
   def edit_species_list # :prefetch: :norobots:
     if @species_list = find_or_goto_index(SpeciesList, params[:id])
@@ -246,16 +252,25 @@ class SpeciesListController < ApplicationController
       elsif request.method != :post
         @checklist_names   = {}
         @list_members      = nil
+        @member_vote       = Vote.maximum_vote
         @member_notes      = nil
-        @member_is_col_loc = true
+        @member_lat        = nil
+        @member_long       = nil
+        @member_alt        = nil
+        @member_is_collection_location = true
         @member_specimen   = false
         @new_names         = []
         @multiple_names    = []
         @deprecated_names  = @species_list.names.select(&:deprecated)
         @checklist         = calc_checklist
+        @place_name        = @species_list.place_name
         if obs = @species_list.observations.last
+          @member_vote       = obs.namings.first.users_vote(@user).value rescue Vote.maximum_vote
           @member_notes      = obs.notes
-          @member_is_col_loc = obs.is_collection_location
+          @member_lat        = obs.lat
+          @member_long       = obs.long
+          @member_alt        = obs.alt
+          @member_is_collection_location = obs.is_collection_location
           @member_specimen   = obs.specimen
         end
       else
@@ -371,6 +386,84 @@ class SpeciesListController < ApplicationController
           flash_notice(:runtime_species_list_add_observation_success.t(
             :name => species_list.unique_format_name, :id => observation.id))
           redirect_to(:action => 'manage_species_lists', :id => observation.id)
+        end
+      end
+    end
+  end
+
+  # Bulk-edit observations (at least the ones owned by this user) in a (any) species list.
+  # Linked from: show_species_lists
+  # Inputs:
+  #   params[:id]
+  #   params[:observation][id][:vote]
+  #   params[:observation][id][:when]
+  #   params[:observation][id][:place_name]
+  #   params[:observation][id][:notes]
+  #   params[:observation][id][:lat]
+  #   params[:observation][id][:long]
+  #   params[:observation][id][:alt]
+  #   params[:observation][id][:is_collection_location]
+  #   params[:observation][id][:specimen]
+  # Redirects back to show_species_lists.
+  def bulk_editor # :norobots:
+    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+      @query = create_query(:Observation, :in_species_list, :by => :id, :species_list => @species_list,
+                            :where => "observations.user_id = #{@user.id}")
+      @observations = @query.results(:include => [:location, :name => :namings])
+      @observation = {}
+      @votes = {}
+      for obs in @observations
+        @observation[obs.id] = obs
+        @votes[obs.id] = obs.consensus_naming.users_vote(@user).value rescue nil
+      end
+      if @observation.empty?
+        flash_error(:species_list_bulk_editor_you_own_no_observations.t)
+        redirect_to(:action => 'show_species_list', :id => @species_list.id)
+      elsif request.method == :post
+        updates = 0
+        stay_on_page = false
+        for obs in @observation
+          args = params[:observation][obs.id.to_s] || {}
+          any_changes = false
+          if !args[:vote].nil? and !obs.namings.empty? and
+             args[:vote].to_s != @votes[obs.id].to_s
+            if naming = obs.consensus_naming
+              obs.change_users_vote(naming, value, @user)
+              @votes[obs.id] = value
+            end
+            any_changes = true
+          end
+          for method in [:when, :place_name, :notes, :lat, :long, :alt,
+                         :is_collection_location, :specimen]
+            if !args[method].nil?
+              old_val = obs.send(method)
+              old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
+              new_val = args[method]
+              new_val = (new_val == '1') if [:is_collection_location, :specimen].member?(method)
+              if old_val != new_val
+                obs.method = new_val
+                any_changes = true
+              end
+            end
+          end
+          if any_changes
+            if obs.save
+              updates += 1
+            else
+              flash_error('') if stay_on_page
+              flash_error("#{:Observation.t} ##{obs.id}:")
+              flash_object_errors(obs)
+              stay_on_page = true
+            end
+          end
+        end
+        if !stay_on_page
+          if updates == 0
+            flash_warning(:runtime_no_changes.t)
+          else
+            flash_notice(:species_list_bulk_editor_success.t(:n => updates))
+          end
+          redirect_to(:action => :show_species_list, :id => @species_list.id)
         end
       end
     end
@@ -540,7 +633,13 @@ class SpeciesListController < ApplicationController
   #   params[:species_list][:where]
   #   params[:species_list][:title]
   #   params[:species_list][:notes]
+  #   params[:member][:vote]
   #   params[:member][:notes]
+  #   params[:member][:lat]
+  #   params[:member][:long]
+  #   params[:member][:alt]
+  #   params[:member][:is_collection_location]
+  #   params[:member][:specimen]
   #   params[:list][:members]               String that user typed in in big text area on right side (squozen and stripped).
   #   params[:approved_names]               List of new names from prev post.
   #   params[:approved_deprecated_names]    List of deprecated names from prev post.
@@ -563,6 +662,14 @@ class SpeciesListController < ApplicationController
     @species_list.modified   = now
     @species_list.user       = @user
     @species_list.attributes = args
+
+    # Validate place name.
+    @place_name = @species_list.place_name
+    @dubious_where_reasons = []
+    if @place_name != params[:approved_where] and @species_list.location.nil?
+      db_name = Location.user_name(@user, @place_name)
+      @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    end
 
     # This just makes sure all the names (that have been approved) exist.
     list = params[:list][:members].gsub('_', ' ').strip_squeeze
@@ -599,7 +706,7 @@ class SpeciesListController < ApplicationController
       failed = true
     end
 
-    # Are there and deprecated names that haven't been approved?
+    # Are there any deprecated names which haven't been approved?
     if sorter.has_unapproved_deprecated_names
       flash_error("Found deprecated names: #{sorter.deprecated_names.map(&:display_name).join(', ').t}") if TESTING
       failed = true
@@ -609,7 +716,7 @@ class SpeciesListController < ApplicationController
     # Save the OTHER changes to the species list, then let this other method
     # (construct_observations) update the members.  This always succeeds, so
     # we can redirect to show_species_list.
-    if !failed
+    if !failed and @dubious_where_reasons == []
       if !@species_list.save
         flash_object_errors(@species_list)
       else
@@ -637,7 +744,10 @@ class SpeciesListController < ApplicationController
 
         construct_observations(@species_list, params, type_str, @user, sorter)
 
-        if has_unshown_notifications?(@user, :naming)
+        if @species_list.location.nil?
+          redirect_to(:controller => 'location', :action => 'create_location',
+                      :where => @species_list.where, :set_species_list => @species_list.id)
+        elsif has_unshown_notifications?(@user, :naming)
           redirect_to(:controller => 'observer', :action => 'show_notifications')
         else
           redirect_to(:action => 'show_species_list', :id => @species_list)
@@ -653,8 +763,12 @@ class SpeciesListController < ApplicationController
       @multiple_names    = sorter.multiple_names.uniq.sort_by(&:text_name)
       @deprecated_names  = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @checklist_names   = params[:checklist_data] || {}
+      @member_vote       = (params[:member][:vote].to_s) rescue ''
       @member_notes      = (params[:member][:notes].to_s) rescue ''
-      @member_is_col_loc = (params[:member][:is_col_loc] == '1') rescue true
+      @member_lat        = (params[:member][:lat].to_s) rescue ''
+      @member_long       = (params[:member][:long].to_s) rescue ''
+      @member_alt        = (params[:member][:alt].to_s) rescue ''
+      @member_is_collection_location = (params[:member][:is_collection_location] == '1') rescue true
       @member_specimen   = (params[:member][:specimen] == '1') rescue false
     end
   end
@@ -727,7 +841,13 @@ class SpeciesListController < ApplicationController
   #   type_str          For diagnostics: "created" or "updated".
   #   user              Owner of list.
   #   sorter            Names from the text list.
-  #   params[:member][:notes]           Notes to use for new observations.
+  #   params[:member][:vote]            Notes, etc. to use for new observations.
+  #   params[:member][:notes]           
+  #   params[:member][:lat]
+  #   params[:member][:long]
+  #   params[:member][:alt]
+  #   params[:member][:is_collection_location]
+  #   params[:member][:specimen]
   #   params[:chosen_approved_names]    Names from radio boxes.
   #   params[:checklist_data]           Names from LHS check boxes.
   def construct_observations(spl, params, type_str, user, sorter)
@@ -745,9 +865,13 @@ class SpeciesListController < ApplicationController
       :user     => user,
       :location => spl.location,
       :where    => spl.where,
+      :vote     => params[:member][:vote],
+      :notes    => params[:member][:notes].to_s,
+      :lat      => params[:member][:lat].to_s,
+      :long     => params[:member][:long].to_s,
+      :alt      => params[:member][:alt].to_s,
+      :is_collection_location => (params[:member][:is_collection_location] == '1'),
       :specimen => (params[:member][:specimen] == '1'),
-      :is_collection_location => (params[:member][:is_col_loc] == '1'),
-      :notes    => params[:member][:notes].to_s
     }
 
     # This updates certain observation namings already in the list.  It looks
@@ -773,7 +897,7 @@ class SpeciesListController < ApplicationController
 
     # Add all names from text box into species_list.  Creates a new observation
     # for each name.  ("single names" are names that matched a single name
-    # uniquely.) 
+    # uniquely.)
     for name, timestamp in sorter.single_names
       sp_args[:when] = timestamp || spl.when
       sp_args2 = sp_args.dup.merge(:what => name)

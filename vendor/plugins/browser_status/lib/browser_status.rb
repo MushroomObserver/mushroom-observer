@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = BrowserStatus
 #
@@ -401,6 +402,9 @@ module BrowserStatus
   def add_args_to_url(url, new_args)
     new_args = new_args.clone
     args = {}
+
+    # Garbage in, garbage out...
+    return url if !url.valid_encoding?
 
     # Parse parameters off of current URL.
     addr, parms = url.split('?')

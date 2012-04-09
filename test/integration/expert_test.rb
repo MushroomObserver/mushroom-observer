@@ -345,7 +345,7 @@ class ExpertTest < IntegrationTestCase
       form.change('place_name', albion.name)
       form.change('species_list_notes', 'List notes.')
       form.change('member_notes', 'Member notes.')
-      form.check('member_is_col_loc')
+      form.check('member_is_collection_location')
       form.check('member_specimen')
       form.submit
     end
@@ -399,14 +399,14 @@ class ExpertTest < IntegrationTestCase
       form.assert_value('place_name', albion.name)
       form.assert_value('species_list_notes', 'List notes.')
       form.assert_value('member_notes', 'Member notes.')
-      form.assert_value('member_is_col_loc', true)
+      form.assert_value('member_is_collection_location', true)
       form.assert_value('member_specimen', true)
       form.change('list_members', "Agaricus nova\r\nAmanita baccata\r\n")
       form.change('title', 'Something New')
       form.change('place_name', 'Somewhere New')
       form.change('species_list_notes', 'New list notes.')
       form.change('member_notes', 'New member notes.')
-      form.uncheck('member_is_col_loc')
+      form.uncheck('member_is_collection_location')
       form.uncheck('member_specimen')
       form.submit
     end
@@ -423,7 +423,7 @@ class ExpertTest < IntegrationTestCase
       form.submit
     end
     assert_flash_success
-    assert_template('species_list/show_species_list')
+    assert_template('location/create_location')
 
     spl.reload
     obs = spl.observations

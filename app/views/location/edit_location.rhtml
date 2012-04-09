@@ -12,7 +12,8 @@
 <% form_for(:location, :url => {
               :action => :edit_location,
               :id => @location.id,
-              :params => query_params.merge({:approved_where => @display_name}),
+              :params => query_params,
+              :approved_where => @display_name
             }) do |form| %>
   <br/><center><%= submit_tag(:UPDATE.l) %></center>
 

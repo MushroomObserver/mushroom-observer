@@ -46,7 +46,7 @@
 #
 #  == Class methods
 #
-#  None.
+#  define_a_location::     Update any lists using the old "where" name.
 #
 #  == Instance methods
 #
@@ -196,6 +196,16 @@ class SpeciesList < AbstractModel
     self.observations.map(&:name_id).include?(name.id)
   end
 
+  # After defining a location, update any lists using old "where" name.
+  def self.define_a_location(location, old_name)
+    connection.update(%(
+      UPDATE species_lists SET `where` = NULL, location_id = #{location.id}
+      WHERE `where` = "#{old_name.gsub('"', '\\"')}"
+    ))
+    # (no transactions necessary: creating location on foreign server
+    # should initiate identical action)
+  end
+
 ################################################################################
 
   # Upload file into internal "data" attribute.
@@ -289,10 +299,13 @@ class SpeciesList < AbstractModel
   #     :when     => spl.when,
   #     :where    => spl.where,
   #     :what     => name,  # (no default)
+  #     :vote     => Vote.maximum_vote,
   #     :notes    => '',
-  #     :is_collection_location => false,
-  #     :specimen => false,
-  #     :vote     => nil
+  #     :lat      => '',
+  #     :long     => '',
+  #     :alt      => '',
+  #     :is_collection_location => true,
+  #     :specimen => false
   #   )
   #
   def construct_observation(args)
@@ -303,17 +316,17 @@ class SpeciesList < AbstractModel
     args[:modified] ||= now        
     args[:user]     ||= user       
     args[:when]     ||= self.when  
-    args[:notes]    ||= ''
     args[:vote]     ||= Vote.maximum_vote
+    args[:notes]    ||= ''
     if !args[:where] && !args[:location]
       args[:where]    = where      
       args[:location] = location   
     end
-    if args[:specimen].nil?
-      args[:specimen] = false
-    end
     if args[:is_collection_location].nil?
       args[:is_collection_location] = true
+    end
+    if args[:specimen].nil?
+      args[:specimen] = false
     end
 
     if !args[:what].blank?
@@ -328,8 +341,11 @@ class SpeciesList < AbstractModel
         :location => args[:location],
         :name_id  => name,
         :notes    => args[:notes],
+        :lat      => args[:lat],
+        :long     => args[:long],
+        :alt      => args[:alt],
+        :is_collection_location => args[:is_collection_location],
         :specimen => args[:specimen],
-        :is_collection_location => args[:is_collection_location]
       )
 
       naming = Naming.create(

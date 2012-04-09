@@ -800,7 +800,7 @@ class ObserverController < ApplicationController
   #   params[:observation][...]         observation args
   #   params[:name][:name]              name
   #   params[:approved_name]            old name
-  #   params[:approved_where]           old where
+  #   params[:approved_where]           old place name
   #   params[:chosen_name][:name_id]    name radio boxes
   #   params[:vote][...]                vote args
   #   params[:reason][n][...]           naming_reason args
@@ -836,27 +836,27 @@ class ObserverController < ApplicationController
   end
 
   def create_observation_post(params)
-    rough_cut(params)
-    success = validate_name(params)
-    success = validate_place_name(params, success)
-    success = validate_observation(@observation) if success
-    success = validate_naming(@naming) if @name && success
-    success = validate_vote(@vote)     if @name && success
-    success = false                    if @bad_images != []
-    if success &&
-      (success = save_observation(@observation))
-      flash_notice(:runtime_observation_success.t(:id => @observation.id))
-      @observation.log(:log_observation_created)
-    end
+    rough_cut(params)  # creates @observation, @naming, @vote, @good/bad_images,
+                       # flashes errors associated with image updates
+    success = true
+    success = false  if !validate_name(params)  # sets @name, @names, @valid_names, @what, etc.
+    success = false  if !validate_place_name(params)         # sets @dubious_xxx, @place_name
+    success = false  if !validate_observation(@observation)  # flashes errors
+    success = false  if @name and !validate_naming(@naming)  # flashes errors
+    success = false  if @name and !validate_vote(@vote)      # flashes errors
+    success = false  if @bad_images != []
+    success = false  if success and !save_observation(@observation) # should always succeed
 
     # Once observation is saved we can save everything else.
     if success
-      save_everything_else(params[:reason])
-      decide_on_next_page
+      save_everything_else(params[:reason]) # should always succeed
+      flash_notice(:runtime_observation_success.t(:id => @observation.id))
+      @observation.log(:log_observation_created)
+      redirect_to_next_page                 # just redirects
 
     # If anything failed reload the form.
     else
-      reload_the_form(params[:reason])
+      reload_the_form(params[:reason]) # sets @reason, @images, @new_image, @location_primer, etc.
     end
   end
 
@@ -870,7 +870,6 @@ class ObserverController < ApplicationController
   end
 
   def validate_name(params)
-    # Validate name.
     given_name  = params[:name][:name].to_s           rescue ''
     chosen_name = params[:chosen_name][:name_id].to_s rescue ''
     (success, @what, @name, @names, @valid_names) =
@@ -879,23 +878,14 @@ class ObserverController < ApplicationController
     return success
   end
 
-  def validate_place_name(params, success)
-    @place_name = @observation.raw_place_name
+  def validate_place_name(params)
+    success = true
+    @place_name = @observation.place_name
     @dubious_where_reasons = []
-    if @place_name != params[:approved_place_name]
-      @dubious_where_reasons = Location.dubious_name?(@place_name, true)
+    if @place_name != params[:approved_where] and @observation.location.nil?
+      db_name = Location.user_name(@user, @place_name)
+      @dubious_where_reasons = Location.dubious_name?(db_name, true)
       success = false if @dubious_where_reasons != []
-    end
-    lat  = params[:observation][:lat].to_s
-    long = params[:observation][:long].to_s
-    alt  = params[:observation][:alt].to_s
-    if not valid_lat_long?(lat, long)
-      flash_error(:runtime_lat_long_error.l)
-      success = false
-    end
-    if not valid_altitude?(alt)
-      flash_error(:runtime_altitude_error.l)
-      success = false
     end
     return success
   end
@@ -910,10 +900,10 @@ class ObserverController < ApplicationController
     attach_good_images(@observation, @good_images)
   end
 
-  def decide_on_next_page
+  def redirect_to_next_page
     if @observation.location.nil?
       redirect_to(:controller => 'location', :action => 'create_location',
-        :where => Location.user_name(@user, @place_name), :set_observation => @observation.id)
+                  :where => @observation.place_name, :set_observation => @observation.id)
     elsif has_unshown_notifications?(@user, :naming)
       redirect_to(:action => 'show_notifications', :id => @observation.id)
     else
@@ -990,33 +980,25 @@ class ObserverController < ApplicationController
       @good_images = @observation.images
 
     else
-      # Check lat long.  It's OK for both of them to be blank.
-      lat  = params[:observation][:lat].to_s
-      long = params[:observation][:long].to_s
-      alt  = params[:observation][:alt].to_s
-      good_lat_long = valid_lat_long?(lat, long)
-      good_altitude = valid_altitude?(alt)
-      flash_error(:runtime_lat_long_error.l) if not good_lat_long
-      flash_error(:runtime_altitude_error.l) if not good_altitude
-      @where = Location.user_name(@user, params[:observation][:place_name])
-      @dubious_where_reasons = []
-      @dubious_where_reasons = Location.dubious_name?(@where, true) if @where != params[:approved_where]
-
       # Update observation attributes
       @observation.attributes = params[:observation]
-      @observation.lat  = Location.parse_latitude(lat)
-      @observation.long = Location.parse_longitude(long)
-      @observation.alt  = Location.parse_altitude(alt)
+
+      # Validate place name.
+      @place_name = @observation.place_name
+      @dubious_where_reasons = []
+      if @place_name != params[:approved_where] and @observation.location.nil?
+        db_name = Location.user_name(@user, @place_name)
+        @dubious_where_reasons = Location.dubious_name?(db_name, true)
+      end
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
       @bad_images  = create_image_objects(params[:image], @observation, @good_images)
       attach_good_images(@observation, @good_images)
 
+      # Only save observation if there are changes.
       done = false
-      if good_lat_long and good_altitude and (@dubious_where_reasons == [])
-
-        # Only save observation if there are changes.
+      if @dubious_where_reasons == []
         if @observation.changed?
           @observation.modified = Time.now
           if done = save_observation(@observation)
@@ -1027,28 +1009,24 @@ class ObserverController < ApplicationController
         else
           done = true
         end
+      end
 
-        # Redirect to show_observation on success.
-        if done && (@bad_images == [])
-          redirect_to(:action => 'show_observation', :id => @observation.id,
-                    :params => query_params)
+      # Redirect to show_observation or create_location on success.
+      if done && @bad_images.empty?
+        if @observation.location.nil?
+          redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.where,
+                      :set_observation => @observation.id, :params => query_params)
+        else
+          redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)
         end
       end
+
       # Reload form if anything failed.
       if not done
         @images = @bad_images
         @new_image.when = @observation.when
       end
     end
-  end
-
-  def valid_lat_long?(lat, long)
-    (lat.blank? and long.blank?) or
-    (Location.parse_latitude(lat) and Location.parse_longitude(long))
-  end
-
-  def valid_altitude?(alt)
-    alt.blank? or Location.parse_altitude(alt)
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
@@ -1969,9 +1947,6 @@ class ObserverController < ApplicationController
     observation.modified = now
     observation.user     = @user
     observation.name     = Name.unknown
-    observation.lat      = Location.parse_latitude(args[:lat])
-    observation.long     = Location.parse_longitude(args[:long])
-    observation.alt      = Location.parse_altitude(args[:alt])
     return observation
   end
 
@@ -2027,15 +2002,6 @@ class ObserverController < ApplicationController
     success = true
     if !vote.valid?
       flash_object_errors(vote)
-      success = false
-    end
-    return success
-  end
-
-  # Make sure there are no warnings for where.
-  def ignore_validate_where(where)
-    success = true
-    if Location.dubious_name?(where)
       success = false
     end
     return success

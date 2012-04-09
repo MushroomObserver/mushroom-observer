@@ -61,6 +61,7 @@
 #  == Class methods
 #
 #  refresh_vote_cache::     Refresh cache for all Observation's.
+#  define_a_location::      Update any observations using the old "where" name.
 #
 #  == Instance methods
 #
@@ -186,6 +187,7 @@ class Observation < AbstractModel
   # the given +display_name+.  (Fills the other in with +nil+.)
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
+    place_name = place_name.strip_squeeze
     where = if User.current_location_format == :scientific
       Location.reverse_name(place_name)
     else
@@ -198,6 +200,45 @@ class Observation < AbstractModel
       self.where = where
       self.location = nil
     end
+  end
+
+  # Useful for forms in which date is entered in YYYYMMDD format: When form tag
+  # helper creates input field, it reads obs.when_str and gets date in
+  # YYYYMMDD.  When form submits, assigning string to obs.when_str saves string
+  # verbatim in @when_str, and if it is valid, sets the actual when field.
+  # When you go to save the observation, it detects invalid format and prevents
+  # save.  When it renders form again, it notes the error, populates the input
+  # field with the old invalid string for editing, and colors it red. 
+  def when_str
+    if @when_str
+      @when_str
+    else
+      self.when.to_s
+    end
+  end
+  def when_str=(x)
+    @when_str = x
+    date = Date.parse(x)
+    self.when = date if date
+    return x
+  end
+
+  def lat=(x)
+    val = Location.parse_latitude(x)
+    val = x if val.nil? and !x.blank?
+    write_attribute(:lat, val)
+  end
+
+  def long=(x)
+    val = Location.parse_longitude(x)
+    val = x if val.nil? and !x.blank?
+    write_attribute(:long, val)
+  end
+
+  def alt=(x)
+    val = Location.parse_altitude(x)
+    val = x if val.nil? and !x.blank?
+    write_attribute(:alt, val)
   end
 
   ##############################################################################
@@ -947,6 +988,16 @@ return result if debug
     end
   end
 
+  # After defining a location, update any lists using old "where" name.
+  def self.define_a_location(location, old_name)
+    connection.update(%(
+      UPDATE observations SET `where` = NULL, location_id = #{location.id}
+      WHERE `where` = "#{old_name.gsub('"', '\\"')}"
+    ))
+    # (no transactions necessary: creating location on foreign server
+    # should initiate identical action)
+  end
+
 ################################################################################
 
 protected
@@ -973,6 +1024,22 @@ protected
       errors.add(:where, :validate_observation_where_missing.t)
     elsif self.where.to_s.binary_length > 1024
       errors.add(:where, :validate_observation_where_too_long.t)
+    end
+
+    if self.lat.blank? and !self.long.blank? or
+       !self.lat.blank? and !Location.parse_latitude(self.lat)
+      errors.add(:lat, :runtime_lat_long_error.t)
+    end
+    if !self.lat.blank? and self.long.blank? or
+       !self.long.blank? and !Location.parse_longitude(self.long)
+      errors.add(:long, :runtime_lat_long_error.t)
+    end
+    if !self.alt.blank? and !Location.parse_altitude(self.alt)
+      errors.add(:alt, :runtime_altitude_error.t)
+    end
+
+    if @when_str and !Date.parse(@when_str)
+      errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
     end
   end
 end

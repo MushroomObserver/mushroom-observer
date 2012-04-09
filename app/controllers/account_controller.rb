@@ -435,7 +435,7 @@ class AccountController < ApplicationController
         if need_to_create_location
           flash_notice(:runtime_profile_must_define.t)
           redirect_to(:controller => 'location', :action => 'create_location',
-            :where => @place_name, :set_user => 1)
+                      :where => @place_name, :set_user => @user.id)
         else
           flash_notice(:runtime_profile_success.t)
           redirect_to(:controller => 'observer', :action => 'show_user', :id => @user.id)

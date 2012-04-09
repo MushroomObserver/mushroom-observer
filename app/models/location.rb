@@ -206,7 +206,7 @@ class Location < AbstractModel
       val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
       val = -val if match[4] == 'S'
       if val >= -90 and val <= 90
-        result = (val * 10000).round.to_f / 10000
+        result = val.round(4)
       end
     end
     return result
@@ -222,7 +222,7 @@ class Location < AbstractModel
       val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
       val = -val if match[4] == 'W'
       if val >= -180 and val <= 180
-        result = (val * 10000).round.to_f / 10000
+        result = val.round(4)
       end
     end
     return result
@@ -234,7 +234,7 @@ class Location < AbstractModel
   def self.parse_altitude(alt)
     result = nil
     match = alt.to_s.match(ALTITUDE_REGEX)
-    if match and alt.match(/ft|'/)
+    if match and alt.to_s.match(/ft|'/)
       result = (match[1].to_f * 0.3048).round
     elsif match
       result = (match[1].to_f).round
@@ -970,8 +970,5 @@ protected
     if self.name.to_s.binary_length > 1024
       errors.add(:name, :validate_location_name_too_long.t)
     end
-    # if self.search_name.to_s.binary_length > 200
-    #   errors.add(:search_name, :validate_location_search_name_too_long.t)
-    # end
   end
 end

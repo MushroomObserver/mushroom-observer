@@ -13,9 +13,8 @@
 <table width="1">
   <tr>
     <td>
-      <% form_tag({ :action => 'edit_observation', :id => @observation,
-                  :approved_name => @what, :params => query_params.merge({:approved_where => @where}) },
-                  { :multipart => true }) do %>
+      <% form_tag({ :action => 'edit_observation', :id => @observation, :approved_name => @what,
+                    :approved_where => @place_name, :params => query_params }, { :multipart => true }) do %>
         <br/><center><%= submit_tag :SAVE_EDITS.l %></center><br/>
 
         <%= render(:partial => 'form_observations', :locals => {

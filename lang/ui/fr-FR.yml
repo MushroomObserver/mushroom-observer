@@ -1419,6 +1419,7 @@ form_species_lists_species_to_add:  Select Species to Add
 form_species_lists_write_in_species:  "Write-In Species: (enter a name on each line)"
 form_species_lists_list_notes:  Species List Notes
 form_species_lists_member_notes:  Notes for each new member
+form_species_lists_confidence:  Confidence in identifications
 form_species_lists_deprecated:  The following names are deprecated
 form_species_lists_deprecated_help:  >
   Select any names you would prefer to use.  If you prefer a name you entered
@@ -4976,8 +4977,23 @@ runtime_destroyed:  "Successfully destroyed [type]."
 runtime_destroyed_id:  "Successfully destroyed [type] #[value]."
 runtime_destroyed_name:  "Successfully destroyed [type] '[value]'."
 runtime_invalid:  "[Type] is invalid: '[value]'"
-runtime_lat_long_error:  "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
-runtime_altitude_error:  Altitude must be real number in feet or meters.  Default is meters.  Indicate units with "m", "ft" or "'" (apostrophe).
+runtime_lat_long_error:  >
+  Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively.
+  Use decimal notation or degrees/minutes/seconds. Examples:
+    -123.4567
+    123.4567 N
+    123 27.402 N
+    123 24 24.12 N
+    123° 24’ 24.12” N
+    123deg 24min 24.12sec N
+
+runtime_altitude_error:  >
+  Altitude must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:
+    1234
+    1234m
+    4049'
+    4049 ft.
+
 runtime_merge_success:  Successfully merged [type] [this] into [that].
 runtime_missing:  Missing [field].
 runtime_no_changes:  "No changes made."
@@ -5379,6 +5395,32 @@ date_helper_abbr_day_names:
   - Ven
   - Sam
 
+_unit_test_a: '[:_unit_test_b]'
+_unit_test_b: '[:_unit_test_c]'
+_unit_test_c: '[:_unit_test_d]'
+_unit_test_d: '[:_unit_test_e]'
+_unit_test_e: '[:_unit_test_f]'
+_unit_test_f: '[:_unit_test_g]'
+_unit_test_g: '[:_unit_test_h]'
+_unit_test_h: '[:_unit_test_i]'
+_unit_test_i: '[:_unit_test_j]'
+_unit_test_j: '[:_unit_test_k]'
+_unit_test_k: '[:_unit_test_l]'
+_unit_test_l: '[:_unit_test_m]'
+_unit_test_m: '[:_unit_test_n]'
+_unit_test_n: '[:_unit_test_o]'
+_unit_test_o: '[:_unit_test_p]'
+_unit_test_p: '[:_unit_test_q]'
+_unit_test_q: '[:_unit_test_r]'
+_unit_test_r: '[:_unit_test_s]'
+_unit_test_s: '[:_unit_test_t]'
+_unit_test_t: '[:_unit_test_u]'
+_unit_test_u: '[:_unit_test_v]'
+_unit_test_v: '[:_unit_test_w]'
+_unit_test_w: '[:_unit_test_x]'
+_unit_test_x: '[:_unit_test_y]'
+_unit_test_y: '[:_unit_test_z]'
+_unit_test_z: bob
 
 ################################################################################
 

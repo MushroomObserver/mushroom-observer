@@ -16,23 +16,10 @@
   <%= render(:partial => 'shared/form_list_feedback') %>
 
   <p>
-  	<label for="list_members"><%= :form_species_lists_write_in_species.t
-      %>:</label><br/>
-  	<%= text_area('list', 'members', :value => @list_members) %>
+  	<label for="list_members"><%= :form_species_lists_write_in_species.t %></label><br/>
+  	<%= text_area('list', 'members', :value => @list_members, :rows => 20, :cols => 80) %>
+    <%= turn_into_name_auto_completer('list_members', :primer => @name_primer, :token => "\n") %>
   </p>
-
-  <p>
-  	<label for="species_list_when_1i"><%= :WHEN.t %></label>:<br/>
-  	<%= date_select('species_list', 'when', :start_year => 1980,
-                    :end_year => Time.now.year) %>
-  </p>
-
-  <p>
-  	<label for="species_list_place_name"><%= :WHERE.t %>:
-      (<%= :required.t %>)</label><br/>
-    <%= text_field('species_list', 'place_name', :size => 60) %>
-  </p>
-  <%= turn_into_location_auto_completer('species_list_place_name') %>
 
   <p>
   	<label for="species_list_title"><%= :form_species_lists_title.t %>:
@@ -43,18 +30,55 @@
   <p>
   	<label for="species_list_notes"><%= :form_species_lists_list_notes.t
       %></label>:<br/>
-  	<%= text_area('species_list', 'notes', :cols => 80) %>
+  	<%= text_area('species_list', 'notes', :rows => 6, :cols => 80) %>
   </p>
   <%= render(:partial => 'shared/textilize_help') %><br/>
 
+  <hr/><br/>
+
   <p>
-  	<label for="member_notes"><%= :form_species_lists_member_notes.t %></label>:<br/>
-  	<%= text_area('member', 'notes', :value => @member_notes, :rows => 5, :cols => 80) %>
+  	<label for="species_list_when_1i"><%= :WHEN.t %></label>:<br/>
+  	<%= date_select('species_list', 'when', :start_year => 1980,
+                    :end_year => Time.now.year) %>
+  </p>
+
+  <% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
+    <div class="Warnings">
+      <%= @dubious_where_reasons.join('<br/>') %>
+      <br/>
+      <span class="HelpNote">
+        <%= :form_observations_dubious_help.t(:button => button_name) %>
+      </span><br/>
+    </div>
+  <% end %>
+
+  <p>
+  	<label for="species_list_place_name"><%= :WHERE.t %>:
+      (<%= :required.t %>)</label><br/>
+    <%= text_field('species_list', 'place_name', :size => 60) %>
+  </p>
+  <%= turn_into_location_auto_completer('species_list_place_name') %>
+
+  <p>
+    <label for="vote_value"><%= :form_species_lists_confidence.t %>:</label>
+    <%= select('member', 'value', translate_menu(Vote.confidence_menu)) %>
   </p>
 
   <p>
-    <%= check_box('member', 'is_col_loc', :checked => @member_is_col_loc) %>
-      <label for="member_is_col_loc"><%=
+  	<label for="member_notes"><%= :form_species_lists_member_notes.t %></label>:<br/>
+  	<%= text_area('member', 'notes', :value => @member_notes, :rows => 3, :cols => 80) %>
+  </p>
+
+  <p>
+    <label for="member_lat"><%= :LATITUDE.t %>:</label>&nbsp;<%= text_field('member', 'lat', :size => 12) %>
+    <label for="member_long"><%= :LONGITUDE.t %>:</label>&nbsp;<%= text_field('member', 'long', :size => 12) %>
+    <label for="member_alt"><%= :ALTITUDE.t %>:</label>&nbsp;<%= text_field('member', 'alt', :size => 12) %>
+    <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span>
+  </p>
+
+  <p>
+    <%= check_box('member', 'is_collection_location', :checked => @member_is_collection_location) %>
+      <label for="member_is_collection_location"><%=
       :form_observations_is_collection_location.t %></label><br/>
     <span class="HelpNote"><%=
       :form_observations_is_collection_location_help.t %></span>
@@ -67,6 +91,8 @@
     <span class="HelpNote"><%=
       :form_observations_specimen_available_help.t %></span>
   </p>
+
+  <hr/><br/>
 
   <span class="HelpNote"><%= :form_species_lists_bulk_help.t %></span>
 
