@@ -395,7 +395,7 @@ class SpeciesListController < ApplicationController
   # Linked from: show_species_lists
   # Inputs:
   #   params[:id]
-  #   params[:observation][id][:vote]
+  #   params[:observation][id][:value]
   #   params[:observation][id][:when]
   #   params[:observation][id][:place_name]
   #   params[:observation][id][:notes]
@@ -409,13 +409,17 @@ class SpeciesListController < ApplicationController
     if @species_list = find_or_goto_index(SpeciesList, params[:id])
       @query = create_query(:Observation, :in_species_list, :by => :id, :species_list => @species_list,
                             :where => "observations.user_id = #{@user.id}")
-      @observations = @query.results(:include => [:location, :name => :namings])
+      @pages = paginate_numbers(:page, 100)
+      @observations = @query.paginate(@pages, :include => [:location, :namings => :votes])
       @observation = {}
       @votes = {}
       for obs in @observations
         @observation[obs.id] = obs
-        @votes[obs.id] = obs.consensus_naming.users_vote(@user).value rescue nil
+        @votes[obs.id] = obs.consensus_naming.users_vote(@user) rescue nil
       end
+      @vote_menu = translate_menu(Vote.confidence_menu)
+      @no_vote = Vote.new
+      @no_vote.value = 0
       if @observation.empty?
         flash_error(:species_list_bulk_editor_you_own_no_observations.t)
         redirect_to(:action => 'show_species_list', :id => @species_list.id)
@@ -425,11 +429,11 @@ class SpeciesListController < ApplicationController
         for obs in @observation
           args = params[:observation][obs.id.to_s] || {}
           any_changes = false
-          if !args[:vote].nil? and !obs.namings.empty? and
-             args[:vote].to_s != @votes[obs.id].to_s
+          if !args[:value].nil? and !obs.namings.empty? and
+             args[:value].to_s != @votes[obs.id].value.to_s
             if naming = obs.consensus_naming
-              obs.change_users_vote(naming, value, @user)
-              @votes[obs.id] = value
+              obs.change_users_vote(naming, args[:value], @user)
+              @votes[obs.id].value = args[:value]
             end
             any_changes = true
           end

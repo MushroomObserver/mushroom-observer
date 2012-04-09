@@ -9,40 +9,157 @@
   end
 %>
 
+<div class="HelpNote"><%= :species_list_bulk_editor_help.tp %></div>
+
 <% form_tag(:action => 'bulk_editor', :id => @species_list.id) do %>
-  <table cellpadding="5" cellspacing="0">
-    <% odd_or_even = 0
-    for obs in @observations
-      odd_or_even = 1 - odd_or_even %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
-        <td style="white-space:nowrap">
-          <div style="float:right">
-            <%= select(:observation, :vote, translate_menu(Vote.confidence_menu),
-                       { :selected => @votes[obs.id] }, { :index => obs.id }) %> &nbsp;
-          </div>
-          <%= text_field(:observation, :when_str, :index => obs.id, :object => obs, :size => 8) %>
-          <%= link_to("#{obs.id}: #{obs.format_name.t}", :controller => :observer,
-                      :action => :show_observation, :id => obs.id, :params => @query.params) %>
-          <br/>
+  <center><%= submit_tag(:UPDATE.l) %></center><br/>
 
-          Location: <%= text_field(:observation, :place_name, :index => obs.id, :object => obs, :size => 60) %>
-          <br/>
+  <% paginate_block(@pages) do %>
+    <table id="observation_table" cellpadding="0" cellspacing="0">
+      <% odd_or_even = 0
+      for obs in @observations
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td align="right" class="cold" style="white-space:nowrap;"
+              id="row_<%=obs.id%>" onmouseover="enter_row(<%=obs.id%>)">
+            <div style="float:left" title="show observation">
+              <%= obs.id %>: <%= obs.format_name.t %>
+            </div>
+            <%= text_field(:observation, :notes, :index => obs.id, :object => obs, :size => 80, :title => 'notes') %><br/>
+            <%= text_field(:observation, :when_str, :index => obs.id, :object => obs, :size => 8, :title => 'date') %>
+            <%= text_field(:observation, :place_name, :index => obs.id, :object => obs, :size => 60, :title => 'location') %>
+            <%= text_field(:observation, :lat, :index => obs.id, :object => obs, :size => 10, :title => 'latitude') %>
+            <%= text_field(:observation, :long, :index => obs.id, :object => obs, :size => 10, :title => 'longitude') %>
+            <%= text_field(:observation, :alt, :index => obs.id, :object => obs, :size => 7, :title => 'altitude') %>
+            <%= check_box(:observation, :is_collection_location, :index => obs.id, :object => obs, :title => 'is this where it was collected?') %>
+            <%= check_box(:observation, :specimen, :index => obs.id, :object => obs, :title => 'specimen available?') %>
+            <%= menu = @vote_menu
+                vote = @votes[obs.id] || @no_vote
+                menu << [ :vote_no_opinion.t, 0 ] if vote.value == 0
+                select(:observation, :value, menu, { :object => vote }, { :index => obs.id, :title => 'confidence' }) %> &nbsp;
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
 
-          <%= check_box(:observation, :is_collection_location, :index => obs.id, :object => obs) %>
-            Where collected? &nbsp;
-          <%= check_box(:observation, :specimen, :index => obs.id, :object => obs) %>
-            Specimen? &nbsp;
-          Lat: <%= text_field(:observation, :lat, :index => obs.id, :object => obs, :size => 10) %>
-          Long: <%= text_field(:observation, :long, :index => obs.id, :object => obs, :size => 10) %>
-          Alt: <%= text_field(:observation, :alt, :index => obs.id, :object => obs, :size => 7) %>
-          <br/>
+  <div id="row_controls" class="row_controls">
+    Observation:
+      <%= url = url_for(:controller => :observer, :action => :show_observation, :id => 'XXX', :params => query_params(@query))
+          link_to("Show", "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :observer, :action => :edit_observation, :id => 'XXX', :params => query_params(@query))
+          link_to("Edit", "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :observer, :action => :destroy_observation, :id => 'XXX', :params => query_params(@query))
+          link_to("Destroy", "javascript:row_button('#{url}')", :confirm => "Are you sure?") %>
+    &nbsp;
+    Names:
+      <%= url = url_for(:controller => :observer, :action => :edit_naming, :observation_id => 'XXX')
+          link_to("Edit", "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :observer, :action => :create_naming, :id => 'XXX')
+          link_to("Another", "javascript:row_button('#{url}')") %>
+    &nbsp;
+    Comments:
+      <%= url = url_for(:controller => :comment, :action => :add_comment, :id => 'XXX', :type => 'Observation')
+          link_to("Post", "javascript:row_button('#{url}')") %>
+    &nbsp;
+    Images:
+      <%= url = url_for(:controller => :image, :action => :add_image, :id => 'XXX')
+          link_to("Upload", "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :image, :action => :reuse_image, :obs_id => 'XXX', :mode => 'observation')
+          link_to("Reuse", "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :image, :action => :remove_images, :id => 'XXX')
+          link_to("Remove", "javascript:row_button('#{url}')") %>
+  </div>
 
-          <table><tr>
-            <td valign="top">Notes:</td>
-            <td><%= text_area(:observation, :notes, :index => obs.id, :object => obs, :rows => 1, :cols => 80) %></td>
-          </tr></table>
-        </td>
-      </tr>
-    <% end %>
-  </table>
+  <%= first_id = @observations.first.id
+    turn_into_location_auto_completer("observation_#{first_id}_place_name", :update_primer_on_blur => true) +
+    turn_into_menu_auto_completer("observation_#{first_id}_notes",    :primer => @observations.map(&:notes),    :update_primer_on_blur => true) +
+    turn_into_menu_auto_completer("observation_#{first_id}_when_str", :primer => @observations.map(&:when_str), :update_primer_on_blur => true) +
+    turn_into_menu_auto_completer("observation_#{first_id}_lat",      :primer => @observations.map(&:lat),      :update_primer_on_blur => true) +
+    turn_into_menu_auto_completer("observation_#{first_id}_long",     :primer => @observations.map(&:long),     :update_primer_on_blur => true) +
+    turn_into_menu_auto_completer("observation_#{first_id}_alt",      :primer => @observations.map(&:alt),      :update_primer_on_blur => true)
+  %>
+  <% for obs in @observations %>
+    <%= if obs.id != first_id
+      reuse_auto_completer("observation_#{first_id}_place_name", "observation_#{obs.id}_place_name") +
+      reuse_auto_completer("observation_#{first_id}_notes",      "observation_#{obs.id}_notes") +
+      reuse_auto_completer("observation_#{first_id}_when_str",   "observation_#{obs.id}_when_str") +
+      reuse_auto_completer("observation_#{first_id}_lat",        "observation_#{obs.id}_lat") +
+      reuse_auto_completer("observation_#{first_id}_long",       "observation_#{obs.id}_long") +
+      reuse_auto_completer("observation_#{first_id}_alt",        "observation_#{obs.id}_alt")
+    end %>
+  <% end %>
+
+  <style>
+    td.cold {
+      border: 0px;
+      padding: 5px;
+      background: none;
+    }
+    td.hot {
+      border: 1px solid black;
+      padding: 4px;
+      background: white;
+      color: black
+    }
+    td.hot a, div.row_controls a {
+      background: none;
+      color: #00C;
+    }
+    td.hot a:hover, div.row_controls a:hover {
+      background: none;
+      color: #C00;
+    }
+    div.row_controls {
+      display: none;
+      position: absolute;
+      text-align: left;
+      margin-top: -1px;
+      padding: 2px 5px 2px 5px;
+      border: 1px solid black;
+      border-top: none;
+      background: white;
+      color: black;
+      z-index: 10;
+    }
+  </style>
+
+  <%= javascript_tag(%(
+    var current_id = null;
+    var ignore_click = false;
+    function enter_row(i) {
+      if (i != current_id) {
+        var old_row = $("row_" + current_id);
+        var row = $("row_" + i);
+        var div = $("row_controls");
+        Position.clone(row, div, {
+          setHeight: false,
+          setWidth: true,
+          offsetTop: row.offsetHeight
+        });
+        div.style.display = "block";
+        row.addClassName("hot");
+        if (old_row) old_row.removeClassName("hot");
+        current_id = i;
+      }
+    }
+    Event.observe($("observation_table"), 'click', function() { ignore_click = true });
+    Event.observe($("row_controls"),      'click', function() { ignore_click = true });
+    Event.observe(document, 'click', function () {
+      if (current_id != null && !ignore_click) {
+        var row = $("row_" + current_id);
+        var div = $("row_controls");
+        row.removeClassName("hot");
+        div.style.display = "none";
+        current_id = null;
+      }
+      ignore_click = false;
+    });
+    function row_button(url) {
+      window.open(url.replace("XXX", current_id));
+      current_id = null;
+    }
+  )) %>
+
+  <br/><center><%= submit_tag(:UPDATE.l) %></center>
 <% end %>

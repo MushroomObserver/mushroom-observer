@@ -1158,6 +1158,7 @@ class ObserverController < ApplicationController
   #
   # Inputs:
   #   params[:id]                       naming id
+  #   params[:observation_id]           (alternate way to enter)
   #   params[:name][:name]              name
   #   params[:approved_name]            old name
   #   params[:chosen_name][:name_id]    name radio boxes
@@ -1173,8 +1174,13 @@ class ObserverController < ApplicationController
   #
   def edit_naming # :prefetch: :norobots:
     pass_query_params
-    @naming = Naming.find(params[:id])
-    @observation = @naming.observation
+    if !params[:id].blank?
+      @naming = Naming.find(params[:id])
+      @observation = @naming.observation
+    else
+      @observation = Observation.find(params[:observation_id])
+      @naming = @observation.consensus_naming
+    end
     @vote = Vote.find(:first, :conditions =>
       ['naming_id = ? AND user_id = ?', @naming.id, @naming.user_id])
     @confidence_menu = translate_menu(Vote.confidence_menu)

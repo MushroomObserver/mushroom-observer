@@ -1,5 +1,7 @@
+var AUTOCOMPLETERS = {};
+
 var MOAutocompleter = Class.create({
-  initialize: function(opts) {
+  initialize: function (opts) {
 
     // How to Use:
     //   <input type="text_field" id="field"/>
@@ -54,7 +56,8 @@ var MOAutocompleter = Class.create({
                                              // 2 = autocomplete first word, then second word, then the rest
                                              // N = etc.
       token:                null,            // separator between options
-      primer:               null,            // initial list of options
+      primer:               null,            // initial list of options (one string per line)
+      update_primer_on_blur: false,          // add each entered value into primer (useful if auto-completing a column of fields)
       ajax_url:             null,            // where to request options from
       refresh_delay:        0.10,            // how long to wait before sending AJAX request (seconds)
       hide_delay:           0.25,            // how long to wait before hiding pulldown (seconds)
@@ -73,7 +76,7 @@ var MOAutocompleter = Class.create({
       pulldown_elem:        null,            // DOM element of pulldown div
       list_elem:            null,            // DOM element of pulldown ul
       active:               false,           // is pulldown visible and active?
-      old_value:            '',              // previous value of input field
+      old_value:            {},              // previous value of input field
       options:              '',              // list of all options
       matches:              [],              // list of options currently showing
       current_row:          -1,              // number of option currently highlighted (0 = none)
@@ -104,9 +107,6 @@ var MOAutocompleter = Class.create({
     if (!this.input_elem)
       alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
 
-    // Disable default browser autocomplete.
-    this.input_elem.setAttribute('autocomplete','off');
-
     // Figure out a few browser-dependent dimensions.
     this.scrollbar_width = Element.getScrollBarWidth();
 
@@ -116,17 +116,49 @@ var MOAutocompleter = Class.create({
     // Create datalist if browser is capable.
     if (this.do_datalist) {
       this.create_datalist();
+    } else {
+      this.create_pulldown();
     }
 
-    // Create pulldown and attach events if we have to do it ourselves.
-    else {
-      this.create_pulldown();
-      Event.observe(this.input_elem, 'keydown',  this.our_keydown.bindAsEventListener(this));
-      Event.observe(this.input_elem, 'keyup',    this.our_keyup.bindAsEventListener(this));
-      Event.observe(this.input_elem, 'keypress', this.our_keypress.bindAsEventListener(this));
-      Event.observe(this.input_elem, 'focus',    this.our_focus.bindAsEventListener(this));
-      Event.observe(this.input_elem, 'blur',     this.our_blur.bindAsEventListener(this));
+    // Attach events, etc. to input element.
+    this.prepare_input_element(this.input_elem);
+
+    // Keep catalog of autocompleter objects so we can reuse them as needed.
+    AUTOCOMPLETERS[this.input_id] = this;
+  },
+
+  // Prepare another input element to share an existing autocompleter instance.
+  reuse: function (other_id) {
+    var other_elem = $(other_id);
+    this.prepare_input_element(other_elem);
+  },
+
+  switch_inputs: function (event, elem) {
+    if (this.input_id != elem.id) {
+      this.input_id   = elem.id;
+      this.input_elem = elem;
+      this.input_elem.parentNode.appendChild(this.pulldown_elem);
     }
+    this.our_focus(event);
+  },
+
+  // Prepare input element: attach elements, set properties.
+  prepare_input_element: function (elem) {
+    this.old_value[elem.id] = null;
+
+    // Attach events if we aren't using datalist thingy.
+    if (!this.do_datalist) {
+      Event.observe(elem, 'focus', (function (event) {
+        this.switch_inputs(event, elem);
+      }).bindAsEventListener(this));
+      Event.observe(elem, 'blur',     this.our_blur.bindAsEventListener(this));
+      Event.observe(elem, 'keydown',  this.our_keydown.bindAsEventListener(this));
+      Event.observe(elem, 'keyup',    this.our_keyup.bindAsEventListener(this));
+      Event.observe(elem, 'keypress', this.our_keypress.bindAsEventListener(this));
+    }
+
+    // Disable default browser autocomplete.
+    elem.setAttribute('autocomplete','off');
 
     // Restore field value when user "goes back" to this page.  Only really need
     // this for firefox browsers which handle the autocomplete="off" attribute,
@@ -136,8 +168,8 @@ var MOAutocompleter = Class.create({
     // people walking by a terminal and pressing "back" button.  This fix just
     // sets it right back to the old value.  So there.
     Event.observe(document, 'focus', (function () {
-      if (this.old_value && this.old_value != "")
-        this.input_elem.value = this.old_value;
+      if (this.old_value[elem.id] != null)
+        elem.value = this.old_value[elem.id];
     }).bind(this));
   },
 
@@ -234,7 +266,7 @@ var MOAutocompleter = Class.create({
   // Input field has changed.
   our_change: function () {
     // $('log').innerHTML += "our_change(" + this.input_elem.value + ")<br/>";
-    if (this.input_elem.value != this.old_value)
+    if (this.input_elem.value != this.old_value[this.input_id])
       this.schedule_refresh();
     if (this.on_change) this.on_change(this.input_elem.value);
   },
@@ -263,7 +295,7 @@ var MOAutocompleter = Class.create({
     this.refresh_timer = setTimeout((function() {
     this.verbose("doing_refresh()");
       // $('log').innerHTML += "refresh_timer(" + this.input_elem.value + ")<br/>";
-      this.old_value = this.input_elem.value;
+      this.old_value[this.input_id] = this.input_elem.value;
       if (this.ajax_url)
         this.refresh_options();
       this.update_matches();
@@ -278,6 +310,8 @@ var MOAutocompleter = Class.create({
   schedule_hide: function () {
     this.clear_hide();
     this.hide_timer = setTimeout(this.hide_pulldown.bind(this), this.hide_delay*1000);
+    if (this.update_primer_on_blur)
+      this.update_primer();
   },
 
   // Schedule a method to be called after key stays pressed for some time.
@@ -920,6 +954,23 @@ var MOAutocompleter = Class.create({
       else
         this.draw_pulldown();
     }
+  },
+
+// ------------------------------ Primer ------------------------------
+
+  update_primer: function () {
+    var val = this.input_elem.value.replace(/^\s+/,'').replace(/\s+$/,'');
+    if (val == "") return;
+    var primer = this.primer;
+    var j, s;
+    for (var i=primer.indexOf("\n"); i>=0; i=j) {
+      j = primer.indexOf("\n", i+1);
+      s = primer.substring(i+1, j>0 ? j : primer.length);
+      if (s == val)
+        return;
+    }
+    this.primer += "\n" + val;
+    this.options += "\n" + val;
   },
 
   verbose: function (str) {

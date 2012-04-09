@@ -357,14 +357,7 @@ class SpeciesList < AbstractModel
       )
 
       if args[:vote] && (args[:vote].to_i != 0)
-        vote = Vote.create(
-          :created     => args[:created],
-          :modified    => args[:modified],
-          :user        => args[:user],
-          :value       => args[:vote],
-          :observation => obs,
-          :naming      => naming
-        )
+        obs.change_vote(naming, args[:vote], args[:user])
       end
 
       self.observations << obs

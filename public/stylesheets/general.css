@@ -369,6 +369,7 @@ div.auto_complete {
   padding:0px;
   overflow-x:hidden;
   display:none;
+  text-align:left;
 }
 div.auto_complete ul {
   margin:0px;

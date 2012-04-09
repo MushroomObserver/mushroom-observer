@@ -25,6 +25,7 @@
 #  == Methods
 #
 #  turn_into_auto_completer::          Turn text field into auto-completer.
+#  reuse_auto_completer::              Share an auto-completer with a new field.
 #  turn_into_menu_auto_completer::     Turn into auto-completer for set menu.
 #  turn_into_location_auto_completer:: Turn into Location name auto-completer.
 #  turn_into_name_auto_completer::     Turn into Name auto-completer.
@@ -36,6 +37,11 @@
 ################################################################################
 
 module ApplicationHelper::AutoComplete
+
+  # Add another input field onto an existing auto-completer.
+  def reuse_auto_completer(first_id, new_id)
+    javascript_tag("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
+  end
 
   # Turn a text_field into an auto-completer.
   # id::   id of text_field
@@ -49,7 +55,7 @@ module ApplicationHelper::AutoComplete
       opts[:row_height] = 22
       opts.each_pair do |key, val|
         if key.to_s == 'primer'
-          list = val ? val.join("\n") : ''
+          list = val ? val.reject(&:blank?).map(&:to_s).uniq.join("\n") : ''
           js_args << "primer: '" + escape_javascript(list) + "'"
         else
           if !key.to_s.match(/^on/) &&
