@@ -35,4 +35,67 @@ class ImageTest < UnitTestCase
     assert_nil(img.users_vote(@mary))
     assert_nil(img.users_vote(@rolf))
   end
+
+  def test_copyright_logging
+    User.current = @mary
+
+    license_one = License.find(1)
+    license_two = License.find(3)
+    name_one = 'Bobby Singer'
+    name_two = 'Robert H. Singer'
+    date_one = Date.parse('2007-12-31')
+    date_two = Date.parse('2008-01-01')
+
+    now1 = 4.weeks.ago
+    now2 = 3.weeks.ago
+    now3 = 2.week.ago
+    now4 = 1.week.ago
+
+    img = Image.create(
+      :created          => now1,
+      :modified         => now1,
+      :user             => @mary,
+      :when             => date_one,
+      :license          => license_one,
+      :copyright_holder => name_one
+    )
+    assert_equal(date_one.year, img.when.year)
+    assert_equal(license_one, img.license)
+    assert_equal(name_one, img.copyright_holder)
+    assert_equal(0, img.copyright_changes.length)
+
+    img.original_name = 'blah blah'
+    img.modified = now2
+    img.save
+    img.reload
+    assert_equal(0, img.copyright_changes.length)
+
+    img.when     = date_two
+    img.modified = now3
+    img.save
+    img.reload
+    assert_equal(date_two.year, img.when.year)
+    assert_not_equal(date_one.year, date_two.year)
+    assert_equal(1, img.copyright_changes.length)
+
+    img.copyright_holder = name_two
+    img.license  = license_two
+    img.modified = now4
+    img.save
+    img.reload
+    assert_equal(name_two, img.copyright_holder)
+    assert_equal(license_two, img.license)
+    assert_equal(2, img.copyright_changes.length)
+
+    changes = img.copyright_changes
+    assert_equal(2, changes.length)
+    assert_equal(now3.to_s,     changes[0].modified.to_s)
+    assert_equal(date_one.year, changes[0].year)
+    assert_equal(name_one,      changes[0].name)
+    assert_equal(license_one,   changes[0].license)
+    assert_equal(now4.to_s,     changes[1].modified.to_s)
+    assert_equal(date_two.year, changes[1].year)
+    assert_equal(name_one,      changes[1].name)
+    assert_equal(license_one,   changes[1].license)
+  end
 end

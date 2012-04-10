@@ -359,6 +359,17 @@ class AmateurTest < IntegrationTestCase
     assert_not_match(text_name, response.body)
   end
 
+  # ------------------------------------------------------------------------
+  #  Quick test to try to catch a bug that the functional tests can't seem
+  #  to catch.  (Functional tests can survive undefined local variables in
+  #  partials, but not integration tests.)
+  # ------------------------------------------------------------------------
+
+  def test_edit_image
+    login('mary')
+    get('image/edit_image/1')
+  end
+
   # ------------------------------------------------------
   #  Test posting, editing, and destroying observations.
   #

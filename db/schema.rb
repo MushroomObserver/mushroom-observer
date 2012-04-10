@@ -54,6 +54,16 @@ ActiveRecord::Schema.define(:version => 20120409180900) do
     t.datetime "updated_at"
   end
 
+  create_table "copyright_changes", :force => true do |t|
+    t.integer  "user_id",                   :null => false
+    t.datetime "modified",                  :null => false
+    t.string   "target_type", :limit => 30, :null => false
+    t.integer  "target_id",                 :null => false
+    t.integer  "year"
+    t.string   "name"
+    t.integer  "license_id"
+  end
+
   create_table "descriptions", :force => true do |t|
     t.integer  "name_id",                                                               :null => false
     t.integer  "source_id"
@@ -149,7 +159,6 @@ ActiveRecord::Schema.define(:version => 20120409180900) do
     t.float    "vote_cache"
     t.boolean  "ok_for_export",                   :default => true,  :null => false
     t.string   "original_name",    :limit => 120, :default => ""
-    t.string   "license_history"
     t.boolean  "transferred",                     :default => false, :null => false
   end
 

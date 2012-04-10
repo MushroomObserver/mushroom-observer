@@ -239,7 +239,7 @@ module ApplicationHelper::ObjectLink
   def image_copyright(image)
     year = image.when
     year = image.when.year if year
-    link = if image.copyright_holder == image.user.name
+    link = if image.copyright_holder == image.user.legal_name
       link = user_link(image.user)
     else
       link = image.copyright_holder.to_s.t

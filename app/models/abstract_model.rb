@@ -195,7 +195,7 @@ class AbstractModel < ActiveRecord::Base
   # either of these things.
   def before_update
     if !@save_without_our_callbacks
-      self.modified = Time.now if respond_to?('modified=')
+      self.modified = Time.now if respond_to?('modified=') && !self.modified_changed?
       autolog_updated          if has_rss_log?
     end
   end

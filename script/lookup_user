@@ -1,0 +1,9 @@
+#!/bin/bash
+
+db_config=config/database.yml
+username=`grep -A 20 production: $db_config | grep username: | head -1 | sed 's/.*: *//'`
+database=`grep -A 20 production: $db_config | grep database: | head -1 | sed 's/.*: *//'`
+password=`grep -A 20 production: $db_config | grep password: | head -1 | sed 's/.*: *//'`
+
+mysql -u "$username" -p"$password" "$database" \
+  -e "SELECT id, login, name, email, verified, last_login, last_activity FROM users WHERE id='$1' AND id != 0 OR login LIKE '%$1%' OR name LIKE '%$1%' or email LIKE '%$1%';"

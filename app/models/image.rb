@@ -211,6 +211,7 @@
 #
 #  ==== Callbacks and Logging
 #  update_thumbnails::  Change thumbnails before destroy.
+#  track_copyright_changes:: Log changes in copyright info.
 #  log_update::         Log update in assocaited Observation's.
 #  log_destroy::        Log destroy in assocaited Observation's.
 #
@@ -220,13 +221,15 @@ require 'fileutils'
 
 class Image < AbstractModel
   has_and_belongs_to_many :observations
-  has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
+  has_many :thumb_clients, :class_name => 'Observation', :foreign_key => 'thumb_image_id'
   has_many :image_votes
   belongs_to :user
   belongs_to :license
-  belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
+  belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
+  has_many :copyright_changes, :as => :target, :dependent => :destroy
 
   before_destroy :update_thumbnails
+  after_update :track_copyright_changes
 
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
@@ -739,6 +742,24 @@ class Image < AbstractModel
   def log_destroy
     for obs in observations
       obs.log_destroy_image(self)
+    end
+  end
+
+  def track_copyright_changes
+    if when_changed? and when_change[0].year != when_change[1].year or
+       license_id_changed? or
+       copyright_holder_changed?
+      old_year       = when_change[0].year        rescue self.when.year
+      old_name       = copyright_holder_change[0] rescue self.copyright_holder
+      old_license_id = license_id_change[0]       rescue self.license_id
+      CopyrightChange.create!(
+        :user       => User.current,
+        :modified   => self.modified,
+        :target     => self,
+        :year       => old_year,
+        :name       => old_name,
+        :license_id => old_license_id
+      )
     end
   end
 
