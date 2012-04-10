@@ -67,8 +67,11 @@ module ApplicationHelper::Map
       marker.info_window = info
       map.overlay_init(marker)
     end
-    west_east = (loc.east + loc.west)/2
-    west_east = west_east + 180 if (loc.west > loc.east)
+    begin
+      west_east = (loc.east + loc.west)/2
+      west_east = west_east + 180 if (loc.west > loc.east)
+    rescue
+    end
     box = GPolyline.new([
         [loc.north, loc.west],
         [loc.north, west_east],

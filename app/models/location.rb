@@ -153,9 +153,13 @@ class Location < AbstractModel
 
   # Return center as [lat, long].
   def center
-    west_east = (east + west)/2
-    west_east += 180 if (west > east)
-    [(self.north + self.south)/2, west_east]
+    begin
+      west_east = (east + west)/2
+      west_east += 180 if (west > east)
+      [(self.north + self.south)/2, west_east]
+    rescue
+      [nil, nil]
+    end
   end
 
   # Update rectangle to include lat and long

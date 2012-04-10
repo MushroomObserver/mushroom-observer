@@ -177,7 +177,7 @@
         </table>
       <% end %>
 
-      <% chgs = @image.copyright_changes
+      <% chgs = @image.copyright_changes(:order => 'id ASC')
          unless chgs.empty? %>
         <table style="margin-top:1em; margin-bottom:1em">
           <tr>
@@ -185,7 +185,7 @@
             <th><%= :COPYRIGHT_HOLDER.t %></th>
             <th><%= :LICENSE.t %></th>
           </tr>
-          <% for i in (chgs.length-1 .. 0) %>
+          <% for i in (0..chgs.length-1) %>
             <tr>
               <td style="white-space:nowrap; padding-right:10px">
                 <%= i > 0 ? chgs[i-1].modified.web_date : @image.created.web_date %> &rarr;

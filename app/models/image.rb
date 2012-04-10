@@ -745,6 +745,7 @@ class Image < AbstractModel
     end
   end
 
+  # Create CopyrightChange entry whenever year, name or license changes.
   def track_copyright_changes
     if when_changed? and when_change[0].year != when_change[1].year or
        license_id_changed? or
@@ -761,6 +762,27 @@ class Image < AbstractModel
         :license_id => old_license_id
       )
     end
+  end
+
+  # Whenever a user changes their name, update all their images.
+  def self.update_copyright_holder(old_name, new_name, user)
+    # This is orders of magnitude faster than doing via active-record.
+    old_name = old_name.gsub("'","\\'")
+    new_name = new_name.gsub("'","\\'")
+    data = Image.connection.select_rows %(
+      SELECT id, YEAR(`when`), license_id FROM images
+      WHERE user_id = #{user.id} AND copyright_holder = '#{old_name}'
+    )
+    Image.connection.insert %(
+      INSERT INTO copyright_changes
+        (user_id, modified, target_type, target_id, year, name, license_id)
+      VALUES
+        #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},'#{old_name}',#{lic})"}.join(",\n") }
+    )
+    Image.connection.update %(
+      UPDATE images SET copyright_holder = '#{new_name}'
+      WHERE user_id = #{user.id} AND copyright_holder = '#{old_name}'
+    )
   end
 
 ################################################################################

@@ -376,6 +376,22 @@ class User < AbstractModel
     end
   end
 
+  def legal_name_changed?
+    !!legal_name_change
+  end
+
+  def legal_name_change
+    old_name  = name_change[0]  rescue name
+    old_login = login_change[0] rescue login
+    old_legal_name = old_name.blank? ? old_login : old_name
+    new_legal_name = legal_name
+    if old_legal_name != new_legal_name
+      return [old_legal_name, new_legal_name]
+    else
+      return nil
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Authentication

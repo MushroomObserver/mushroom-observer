@@ -330,12 +330,16 @@ class AccountController < ApplicationController
         end
       end
 
+      legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
         redirect_back_or_default(:action => 'welcome')
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
       else
+        if legal_name_change
+          Image.update_copyright_holder(*legal_name_change, @user)
+        end
         if !xargs.empty?
           xargs[:id] = @user
           Transaction.put_user(xargs)
@@ -422,12 +426,16 @@ class AccountController < ApplicationController
         end
       end
 
+      legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
         redirect_to(:controller => 'observer', :action => 'show_user', :id => @user.id)
       elsif !@user.save
         flash_object_errors(@user)
       else
+        if legal_name_change
+          Image.update_copyright_holder(*legal_name_change, @user)
+        end
         if !xargs.empty?
           xargs[:id] = @user
           Transaction.put_user(xargs)

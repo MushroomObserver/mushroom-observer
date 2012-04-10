@@ -119,6 +119,18 @@ class LocationControllerTest < FunctionalTestCase
     assert_form_action(:action => 'create_location')
   end
 
+  # This was causing a crash in live server.
+  def test_construct_location_empty_form
+    login('mary')
+    post(:create_location,
+      :where => '',
+      :approved_where => '',
+      :location => {
+        :display_name => ''
+      }
+    )
+  end
+
   # Test a simple location creation.
   def test_construct_location_simple
     count = Location.count

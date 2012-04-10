@@ -142,7 +142,7 @@
                     end
                     for layout in layouts.sort
                       layout2 = layout == 'application' ? 'old' : layout %>
-                      <%= indent + link_to(layout2, h(reload_with_args(:layout => layout))) %><br/>
+                      <%= indent + link_to(layout2, h(reload_with_args(:user_theme => layout))) %><br/>
                   <% end %>
                   <br/>
                 <% end %>
