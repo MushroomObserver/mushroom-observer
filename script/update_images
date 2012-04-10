@@ -477,7 +477,7 @@ def upload_files(files, local, remote)
   verbose cmd
 
   cmd = "(#{cmd}) > /dev/null" if !@@verbose
-  cmd = "#{cmd}; rm #{tempfile}"
+  cmd = "cd #{local}; #{cmd}; rm #{tempfile}"
   exec(cmd)
 
   # This causes a fork and runs out of memory.
@@ -514,7 +514,7 @@ def download_files(files, local, remote)
   verbose cmd
 
   cmd = "(#{cmd}) > /dev/null" if !@@verbose
-  cmd = "#{cmd}; rm #{tempfile}"
+  cmd = "cd #{local}; #{cmd}; rm #{tempfile}"
   exec(cmd)
 
   # This causes a fork and runs out of memory.
