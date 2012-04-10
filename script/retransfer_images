@@ -1,0 +1,80 @@
+#!/bin/bash
+
+server=cdmr@digitalmycology.com:images.digitalmycology.com
+images=public/images
+
+db_config=config/database.yml
+username=`grep -A 20 production: $db_config | grep username: | head -1 | sed 's/.*: *//'`
+database=`grep -A 20 production: $db_config | grep database: | head -1 | sed 's/.*: *//'`
+password=`grep -A 20 production: $db_config | grep password: | head -1 | sed 's/.*: *//'`
+
+path=(. /bin /usr/bin /usr/local/bin)
+
+errors=0
+
+# ----------------------------
+#  Help message.
+# ----------------------------
+
+if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
+
+	USAGE:
+	    script/retransfer_images
+
+	DESCRIPTION:
+	    This is used by the webserver to try to re-transfer images
+      which failed to transfer when script/process_image ran.
+      It sets the "transferred" bit in the images database table
+      if successful.  It aborts at the first sign of any trouble.
+      It throws away all error messages and runs totally silent.
+
+	FILES:
+	    image server    $server
+
+	EOH
+fi
+
+# --------------------------------------------------
+#  Run a command, logging both command and result.
+#  Sets errors to true if anything fails.
+# --------------------------------------------------
+
+function run() {
+  if !($* 2>&1 > /dev/null); then
+    exit 1
+  fi
+}
+
+# --------------------------------------------
+#  Get list of images that still need to go.
+# --------------------------------------------
+
+ids=`mysql -q -u "$username" -p"$password" "$database" -e "SELECT id FROM images WHERE transferred=FALSE;"`
+if [[ $ids == "" ]]; then
+  exit 0
+fi
+
+# ----------------------------
+#  Transfer images.
+# ----------------------------
+
+for id in $ids
+do
+  # Assume update_images has done our job for us if the files are missing.
+  if [[ -e $images/320/$id.jpg ]]; then
+
+    # Wait between ids for other transfers to finish.
+    while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
+
+    run scp $images/320/$id.jpg  $server/320
+    run scp $images/640/$id.jpg  $server/640
+    run scp $images/960/$id.jpg  $server/960
+    run scp $images/1280/$id.jpg $server/1280
+    run scp $images/orig/$id.*   $server/orig
+  fi
+    
+  # Update database to say that image has transferred successfully.
+  mysql -q -u "$username" -p"$password" "$database" -e "UPDATE images SET transferred=TRUE WHERE id=$id;"
+done
+
+exit 0
