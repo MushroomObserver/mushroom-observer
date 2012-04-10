@@ -171,7 +171,12 @@ module ApplicationHelper::ObjectLink
     else
       file = Image.file_name(size, id)
     end
-    if DEVELOPMENT and !File.exists?("#{IMG_DIR}/#{file}")
+    if image && !image.transferred && size != :thumbnail
+      # Serve image from web server if it hasn't transferred yet.  Since apache can't know
+      # about this, we have to fake it into thinking it's not serving an image.  Route it
+      # through ajax controller to reduce overhead to minimum.
+      file = "/ajax/image/#{file.sub(/\.jpg$/,'')}"
+    elsif DEVELOPMENT and !File.exists?("#{IMG_DIR}/#{file}")
       # Serve images I'm locally missing directly from image server.
       file = Image.url(size, id)
     end

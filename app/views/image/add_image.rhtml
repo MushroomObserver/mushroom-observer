@@ -27,7 +27,7 @@
   </p><br/>
 
   <%= render(:partial => 'form_images',
-             :locals => { :form => form, :width => 80 }) %>
+             :locals => { :form => form, :width => 80, :leave_out_original_file_name => true }) %>
 
   <center><%= submit_tag(:image_add_upload.l) %></center>
 <% end %>

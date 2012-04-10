@@ -3,8 +3,10 @@
 <p><label for="image_copyright_holder"><%= :form_images_copyright_holder.t %>:</label><br/>
 <%= form.text_field('copyright_holder') %></p>
 
-<p><label for="image_original_name"><%= :form_images_original_name.t %>:</label><br/>
-<%= form.text_field('original_name') %></p>
+<% if !leave_out_original_file_name %>
+  <p><label for="image_original_name"><%= :form_images_original_name.t %>:</label><br/>
+  <%= form.text_field('original_name') %></p>
+<% end %>
 
 <p><label for="image_when_1i"><%= :WHEN.t %>:</label>
   <span class="HelpNote">

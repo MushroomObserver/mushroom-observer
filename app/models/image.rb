@@ -98,12 +98,21 @@
 #     (If any errors occur in +script/process_image+ they get emailed to the
 #     webmasters.)
 #
-#  8. A nightly process runs to check for mistakes and remove any images that
+#  8. If all is successful, it sets the +transferred+ bit in the database record.
+#     Until this bit is set, MO knows to serve the image off of the web server
+#     instead, however inefficient this may be.
+#
+#  9. A regular process (every 5 minutes?) tries to re-transfer any images
+#     whose transfer failed.  Bailing at the first sign of trouble.
+# 
+#  10. A nightly process runs to check for mistakes and remove any images that
 #     have been successfully transferred:
 #
 #       script/update_images --clean
 #
-#     Currently it only removes ones over 640, leaving the rest local.
+#     Currently it only removes ones over 320, leaving the rest local.  Note
+#     that images remain on the web server until this verification process
+#     happens.
 #
 #  == Low Level Details
 #
@@ -134,10 +143,12 @@
 #  content_type::       MIME type of original image (the rest are 'image/jpeg').
 #  copyright_holder::   Copyright holder (defaults to legal name of owner).
 #  license::            License.
+#  license_history::    Accounting history of any license changes (started using April 2012).
 #  quality::            Quality (e.g., :low, :medium, :high).
 #  reviewer::           User that reviewed it.
 #  num_views::          Number of times normal-size image has been viewed.
 #  last_view::          Last time normal-size image was viewed.
+#  transferred::        Has this image been successfully transferred to the image server yet?
 #
 #  ==== Temporary attributes
 #
@@ -562,7 +573,7 @@ class Image < AbstractModel
       set = width.nil? ? 'set' : ''
       if !move_original
         result = false
-      elsif PRODUCTION && !system("script/process_image #{id} #{ext} #{set}&")
+      elsif !system("script/process_image #{id} #{ext} #{set}&")
         # Spawn process to resize and transfer images to image server.
         errors.add(:image, :runtime_image_process_failed.t(:id => id))
         result = false

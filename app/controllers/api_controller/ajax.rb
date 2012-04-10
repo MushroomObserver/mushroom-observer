@@ -12,6 +12,7 @@
 #  ajax_export::  Change export status.
 #  ajax_geocode:: Look up extents for geographic location by name.
 #  ajax_pivotal:: Pivotal requests: look up, vote, or comment on story.
+#  ajax_image::   Serve image from web server until transferred to image server.
 #
 ################################################################################
 
@@ -181,5 +182,21 @@ class ApiController
     else
       raise("Invalid type \"#{type}\" in Pivotal AJAX controller.")
     end
+  end
+
+  # Serve image from web server, bypassing apache and passenger.  (This is only
+  # used when an image hasn't been transferred to the image server successfully.)
+  def ajax_image
+    size = params[:type].to_s
+    id   = params[:id].to_s
+    file = "#{IMG_DIR}/#{size}/#{id}.jpg"
+    if !File.exists?(file)
+      if size == 'thumb'
+        file = "#{IMG_DIR}/place_holder_thumb.jpg"
+      else
+        file = "#{IMG_DIR}/place_holder_320.jpg"
+      end
+    end
+    send_file(file, :type => 'image/jpeg', :disposition => 'inline')
   end
 end

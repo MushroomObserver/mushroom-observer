@@ -37,6 +37,6 @@
 
 <%= if limit and (and_more > 0)
   link_to(:show_comments_and_more.t(:num => and_more),
-          :controller => 'comment', :action => 'show_comments_for_object',
+          :controller => 'comment', :action => 'show_comments_for_target',
           :id => object.id, :type => object.class.name)
 end %>

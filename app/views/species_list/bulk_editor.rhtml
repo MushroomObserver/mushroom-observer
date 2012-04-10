@@ -51,7 +51,7 @@
   <% end %>
 
   <div id="row_controls" class="row_controls">
-    <%= :OBSERVATION.t %>
+    <%= :OBSERVATION.t %>:
       <%= url = url_for(:controller => :observer, :action => :show_observation, :id => 'XXX', :params => query_params(@query))
           link_to(:SHOW.l, "javascript:row_button('#{url}')") %> |
       <%= url = url_for(:controller => :observer, :action => :edit_observation, :id => 'XXX', :params => query_params(@query))
@@ -59,17 +59,19 @@
       <%= url = url_for(:controller => :observer, :action => :destroy_observation, :id => 'XXX', :params => query_params(@query))
           link_to(:DESTROY.l, "javascript:row_button('#{url}')", :confirm => :are_you_sure.l) %>
     &nbsp;
-    <%= :NAMES.t %> (<span id="number_of_names"></span>)
+    <%= :NAMES.t %>: (<span id="number_of_names"></span>)
       <%= url = url_for(:controller => :observer, :action => :edit_naming, :observation_id => 'XXX', :params => query_params(@query))
           link_to(:EDIT.l, "javascript:row_button('#{url}')") %> |
       <%= url = url_for(:controller => :observer, :action => :create_naming, :id => 'XXX', :params => query_params(@query))
           link_to(:species_list_bulk_editor_another.l, "javascript:row_button('#{url}')") %>
     &nbsp;
-    <%= :COMMENTS.t %> (<span id="number_of_comments"></span>)
+    <%= :COMMENTS.t %>: (<span id="number_of_comments"></span>)
+      <%= url = url_for(:controller => :comment, :action => :show_comments_for_target, :id => 'XXX', :type => 'Observation', :params => query_params(@query))
+          link_to(:SHOW.l, "javascript:row_button('#{url}')") %> |
       <%= url = url_for(:controller => :comment, :action => :add_comment, :id => 'XXX', :type => 'Observation', :params => query_params(@query))
           link_to(:CREATE.l, "javascript:row_button('#{url}')") %>
     &nbsp;
-    <%= :IMAGES.t %> (<span id="number_of_images"></span>)
+    <%= :IMAGES.t %>: (<span id="number_of_images"></span>)
       <%= url = url_for(:controller => :image, :action => :add_image, :id => 'XXX', :params => query_params(@query))
           link_to(:UPLOAD.l, "javascript:row_button('#{url}')") %> |
       <%= url = url_for(:controller => :image, :action => :reuse_image, :obs_id => 'XXX', :mode => 'observation', :params => query_params(@query))
@@ -127,6 +129,7 @@
       background: white;
       color: black;
       z-index: 2;
+      white-space: nowrap;
     }
     div.tiny img {
       height: 50px;

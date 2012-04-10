@@ -7,6 +7,11 @@ set_size=$3
 server=cdmr@digitalmycology.com:images.digitalmycology.com
 images=public/images
 
+db_config=config/database.yml
+username=`grep -A 20 production: $db_config | grep username: | head -1 | sed 's/.*: *//'`
+database=`grep -A 20 production: $db_config | grep database: | head -1 | sed 's/.*: *//'`
+password=`grep -A 20 production: $db_config | grep password: | head -1 | sed 's/.*: *//'`
+
 orig=$images/orig/$id.$ext
 orig_layers=$images/orig/$id-'*'.jpg
 full=$images/orig/$id.jpg
@@ -15,10 +20,6 @@ large=$images/960/$id.jpg
 medium=$images/640/$id.jpg
 small=$images/320/$id.jpg
 thumb=$images/thumb/$id.jpg
-
-icon_640=$images/place_holder2_640.jpg
-icon_320=$images/place_holder2_320.jpg
-icon_160=$images/place_holder2_160.jpg
 
 log=log/process_image.$$
 log2=log/process_image.log
@@ -60,9 +61,6 @@ if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 	FILES:
 	    webmaster       $email
 	    image server    $server
-	    place-holders   $icon_640
-	                    $icon_320
-	                    $icon_160
 	    error log       $log2
 
 	EOH
@@ -74,24 +72,12 @@ fi
 # --------------------------------------------------
 
 function run() {
-echo $*
     echo "`date`>" $* >> $log
     if !($* >> $log 2>&1); then
         errors=1
         echo '**** FAILED ****' >> $log
     fi
 }
-
-# -----------------------------------------------
-#  Create links to stock image as place-holders
-#  until smaller images are done.
-# -----------------------------------------------
-
-run cp $icon_160 $thumb
-run cp $icon_320 $small
-run cp $icon_640 $medium
-run cp $icon_640 $large
-run cp $icon_640 $huge
 
 # ----------------------------
 #  Resize images.
@@ -138,12 +124,11 @@ run jpegresize 160x160 -q 90 --max-size $small $thumb
 #  Transfer images.
 # ----------------------------
 
+# Wait for other transfers to finish first.
+while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
+
 # Careful!  Don't do this in test mode!
 if (( $production )); then
-
-  # Wait for other transfers to finish first.
-  while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
-
   run scp $thumb  $server/thumb/$id.jpg
   run scp $small  $server/320/$id.jpg
   run scp $medium $server/640/$id.jpg
@@ -160,8 +145,12 @@ fi
 # ------------------------------
 
 cat $log >> $log2
-if (( $errors && $production )); then
+if (( $production )); then
+  if (( $errors )); then
     mutt -s '[MO] process_image' $email < $log
+  else
+    mysql -q -u "$username" -p"$password" "$database" -e "UPDATE images SET transferred=TRUE WHERE id=$id;"
+  fi
 fi
 rm -f $log
 

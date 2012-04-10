@@ -49,7 +49,7 @@ function run() {
 #  Get list of images that still need to go.
 # --------------------------------------------
 
-ids=`mysql -q -u "$username" -p"$password" "$database" -e "SELECT id FROM images WHERE transferred=FALSE;"`
+ids=`mysql -q -u "$username" -p"$password" "$database" -e "SELECT id FROM images WHERE transferred=FALSE;" | grep -v id`
 if [[ $ids == "" ]]; then
   exit 0
 fi
@@ -74,7 +74,7 @@ do
   fi
     
   # Update database to say that image has transferred successfully.
-  mysql -q -u "$username" -p"$password" "$database" -e "UPDATE images SET transferred=TRUE WHERE id=$id;"
+  mysql -q -u "$username" -p"$password" "$database" -e "UPDATE images SET transferred=TRUE WHERE id=$id;" 2>&1 > /dev/null
 done
 
 exit 0
