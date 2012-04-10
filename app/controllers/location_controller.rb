@@ -467,7 +467,7 @@ class LocationController < ApplicationController
 
     # Where to return after successfully creating location.
     @set_observation  = params[:set_observation]
-    @set_species_list = params[:set_observation]
+    @set_species_list = params[:set_species_list]
     @set_user         = params[:set_user]
 
     # Render a blank form.

@@ -2,7 +2,7 @@
   @title = :comment_add_title.t(:name => @target.unique_format_name)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => @comment.target_type.to_sym),
+    add_tab(:cancel_and_show.t(:type => @comment.target_type.underscore.upcase.to_sym),
             :controller => @target.show_controller,
             :action => @target.show_action, :id => @target.id,
             :params => query_params)

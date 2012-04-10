@@ -1014,7 +1014,7 @@ class ObserverController < ApplicationController
       # Redirect to show_observation or create_location on success.
       if done && @bad_images.empty?
         if @observation.location.nil?
-          redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.where,
+          redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.place_name,
                       :set_observation => @observation.id, :params => query_params)
         else
           redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)

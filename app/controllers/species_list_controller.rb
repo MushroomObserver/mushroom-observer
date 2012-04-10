@@ -750,7 +750,7 @@ class SpeciesListController < ApplicationController
 
         if @species_list.location.nil?
           redirect_to(:controller => 'location', :action => 'create_location',
-                      :where => @species_list.where, :set_species_list => @species_list.id)
+                      :where => @place_name, :set_species_list => @species_list.id)
         elsif has_unshown_notifications?(@user, :naming)
           redirect_to(:controller => 'observer', :action => 'show_notifications')
         else
