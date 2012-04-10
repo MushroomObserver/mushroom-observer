@@ -39,8 +39,7 @@ SERVER_ALIASES = {
 
 # List of official image servers to keep updated from main webserver.
 OFFICIAL_SERVERS = [
-  'dreamhost/bin/bash: dreamhost: command not found
-'
+  'dreamhost'
 ]
 
 # Default image server to use for --sync mode.
@@ -480,11 +479,13 @@ def upload_files(files, local, remote)
 
   save = Dir.getwd
   Dir.chdir(local)
-  open("|#{cmd}") do |fh|
-    fh.each_line do |line|
-      verbose line
-    end
-  end
+  cmd = "(#{cmd}) > /dev/null" if !@@verbose
+  system(cmd)
+  # open("|#{cmd}") do |fh|
+  #   fh.each_line do |line|
+  #     verbose line
+  #   end
+  # end
   Dir.chdir(save)
 
   File.delete(tempfile)
@@ -512,11 +513,13 @@ def download_files(files, local, remote)
 
   save = Dir.getwd
   Dir.chdir(local)
-  open("|#{cmd}") do |fh|
-    fh.each_line do |line|
-      verbose line
-    end
-  end
+  cmd = "(#{cmd}) > /dev/null" if !@@verbose
+  system(cmd)
+  # open("|#{cmd}") do |fh|
+  #   fh.each_line do |line|
+  #     verbose line
+  #   end
+  # end
   Dir.chdir(save)
 
   File.delete(tempfile)
