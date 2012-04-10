@@ -475,11 +475,11 @@ def upload_files(files, local, remote)
   end
 
   cmd = "tar -T #{tempfile} -cf - | ssh #{url} \\(cd #{path}\\; tar -xvPf -\\)"
+  cmd = "(#{cmd}) > /dev/null" if !@@verbose
   verbose cmd
 
   save = Dir.getwd
   Dir.chdir(local)
-  cmd = "(#{cmd}) > /dev/null" if !@@verbose
   system(cmd)
   # open("|#{cmd}") do |fh|
   #   fh.each_line do |line|
@@ -509,11 +509,11 @@ def download_files(files, local, remote)
   end
 
   cmd = "cat #{tempfile} | ssh #{url} \\(cd #{path}\\; tar -T - -cf -\\) | tar -xvPf -"
+  cmd = "(#{cmd}) > /dev/null" if !@@verbose
   verbose cmd
 
   save = Dir.getwd
   Dir.chdir(local)
-  cmd = "(#{cmd}) > /dev/null" if !@@verbose
   system(cmd)
   # open("|#{cmd}") do |fh|
   #   fh.each_line do |line|
@@ -533,7 +533,7 @@ end
 @@verbose = get_flag('-v') || get_flag('--verbose')
 
 # Tell it not to refresh listings (speeds things up for debugging.
-@@use_cache = get_flag('-u') || get_flag('--user_cache')
+@@use_cache = get_flag('-u') || get_flag('--use_cache')
 
 # Let user override some of the defaults.
 @@root       = get_parm('-R') || get_parm('--root')       || ROOT
