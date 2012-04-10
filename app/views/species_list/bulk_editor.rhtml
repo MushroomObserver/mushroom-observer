@@ -9,7 +9,7 @@
   end
 %>
 
-<div class="HelpNote"><%= :species_list_bulk_editor_help.tp %></div>
+<div class="HelpNote" style="width:800px"><%= :species_list_bulk_editor_help.tp %></div>
 
 <% form_tag(:action => 'bulk_editor', :id => @species_list.id) do %>
   <center><%= submit_tag(:UPDATE.l) %></center><br/>
@@ -19,56 +19,63 @@
       <% odd_or_even = 0
       for obs in @observations
         odd_or_even = 1 - odd_or_even %>
-        <tr valign="top" class="ListLine<%= odd_or_even %>">
-          <td align="right" class="cold" style="white-space:nowrap;"
+        <tr valign="top">
+          <td align="right" class="cold ListLine<%= odd_or_even %>" style="white-space:nowrap;"
               id="row_<%=obs.id%>" onmouseover="enter_row(<%=obs.id%>)">
-            <div style="float:left" title="show observation">
+            <div style="float:left">
               <%= obs.id %>: <%= obs.format_name.t %>
             </div>
-            <%= text_field(:observation, :notes, :index => obs.id, :object => obs, :size => 80, :title => 'notes') %><br/>
-            <%= text_field(:observation, :when_str, :index => obs.id, :object => obs, :size => 8, :title => 'date') %>
-            <%= text_field(:observation, :place_name, :index => obs.id, :object => obs, :size => 60, :title => 'location') %>
-            <%= text_field(:observation, :lat, :index => obs.id, :object => obs, :size => 10, :title => 'latitude') %>
-            <%= text_field(:observation, :long, :index => obs.id, :object => obs, :size => 10, :title => 'longitude') %>
-            <%= text_field(:observation, :alt, :index => obs.id, :object => obs, :size => 7, :title => 'altitude') %>
-            <%= check_box(:observation, :is_collection_location, :index => obs.id, :object => obs, :title => 'is this where it was collected?') %>
-            <%= check_box(:observation, :specimen, :index => obs.id, :object => obs, :title => 'specimen available?') %>
+            <%= text_field(:observation, :notes,                 :index => obs.id, :object => obs, :style => "width:40em", :title => :Notes.l) %><br/>
+            <%= text_field(:observation, :when_str,              :index => obs.id, :object => obs, :style => "width:6em",  :title => :Date.l) %>
+            <%= text_field(:observation, :place_name,            :index => obs.id, :object => obs, :style => "width:40em", :title => :Location.l) %>
+            <%= text_field(:observation, :lat,                   :index => obs.id, :object => obs, :style => "width:5em",  :title => :Latitude.l) %>
+            <%= text_field(:observation, :long,                  :index => obs.id, :object => obs, :style => "width:5em",  :title => :Longitude.l) %>
+            <%= text_field(:observation, :alt,                   :index => obs.id, :object => obs, :style => "width:4em",  :title => :Altitude.l) %>
+            <%= check_box(:observation, :is_collection_location, :index => obs.id, :object => obs, :title => :form_observations_is_collection_location_help.l) %>
+            <%= check_box(:observation, :specimen,               :index => obs.id, :object => obs, :title => :form_observations_specimen_available_help.l) %>
             <%= menu = @vote_menu
                 vote = @votes[obs.id] || @no_vote
                 menu << [ :vote_no_opinion.t, 0 ] if vote.value == 0
-                select(:observation, :value, menu, { :object => vote }, { :index => obs.id, :title => 'confidence' }) %> &nbsp;
+                select(:observation, :value, menu, { :object => vote }, { :index => obs.id, :title => :Confidence_level.l}) %> &nbsp;
           </td>
+          <% imgs = obs.images.select {|i| i.id == obs.thumb_image_id}
+          imgs += obs.images
+          for img in imgs.uniq %>
+            <td valign="middle">
+              <%= thumbnail(img, :size => :thumbnail, :obs => obs.id, :class => 'tiny', :target => '_blank') %>
+            </td>
+          <% end %>
         </tr>
       <% end %>
     </table>
   <% end %>
 
   <div id="row_controls" class="row_controls">
-    Observation:
+    <%= :OBSERVATION.t %>
       <%= url = url_for(:controller => :observer, :action => :show_observation, :id => 'XXX', :params => query_params(@query))
-          link_to("Show", "javascript:row_button('#{url}')") %> |
+          link_to(:SHOW.l, "javascript:row_button('#{url}')") %> |
       <%= url = url_for(:controller => :observer, :action => :edit_observation, :id => 'XXX', :params => query_params(@query))
-          link_to("Edit", "javascript:row_button('#{url}')") %> |
+          link_to(:EDIT.l, "javascript:row_button('#{url}')") %> |
       <%= url = url_for(:controller => :observer, :action => :destroy_observation, :id => 'XXX', :params => query_params(@query))
-          link_to("Destroy", "javascript:row_button('#{url}')", :confirm => "Are you sure?") %>
+          link_to(:DESTROY.l, "javascript:row_button('#{url}')", :confirm => :are_you_sure.l) %>
     &nbsp;
-    Names:
-      <%= url = url_for(:controller => :observer, :action => :edit_naming, :observation_id => 'XXX')
-          link_to("Edit", "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :observer, :action => :create_naming, :id => 'XXX')
-          link_to("Another", "javascript:row_button('#{url}')") %>
+    <%= :NAMES.t %> (<span id="number_of_names"></span>)
+      <%= url = url_for(:controller => :observer, :action => :edit_naming, :observation_id => 'XXX', :params => query_params(@query))
+          link_to(:EDIT.l, "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :observer, :action => :create_naming, :id => 'XXX', :params => query_params(@query))
+          link_to(:species_list_bulk_editor_another.l, "javascript:row_button('#{url}')") %>
     &nbsp;
-    Comments:
-      <%= url = url_for(:controller => :comment, :action => :add_comment, :id => 'XXX', :type => 'Observation')
-          link_to("Post", "javascript:row_button('#{url}')") %>
+    <%= :COMMENTS.t %> (<span id="number_of_comments"></span>)
+      <%= url = url_for(:controller => :comment, :action => :add_comment, :id => 'XXX', :type => 'Observation', :params => query_params(@query))
+          link_to(:CREATE.l, "javascript:row_button('#{url}')") %>
     &nbsp;
-    Images:
-      <%= url = url_for(:controller => :image, :action => :add_image, :id => 'XXX')
-          link_to("Upload", "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :image, :action => :reuse_image, :obs_id => 'XXX', :mode => 'observation')
-          link_to("Reuse", "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :image, :action => :remove_images, :id => 'XXX')
-          link_to("Remove", "javascript:row_button('#{url}')") %>
+    <%= :IMAGES.t %> (<span id="number_of_images"></span>)
+      <%= url = url_for(:controller => :image, :action => :add_image, :id => 'XXX', :params => query_params(@query))
+          link_to(:UPLOAD.l, "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :image, :action => :reuse_image, :obs_id => 'XXX', :mode => 'observation', :params => query_params(@query))
+          link_to(:species_list_bulk_editor_reuse.l, "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(:controller => :image, :action => :remove_images, :id => 'XXX', :params => query_params(@query))
+          link_to(:REMOVE.l, "javascript:row_button('#{url}')") %>
   </div>
 
   <%= first_id = @observations.first.id
@@ -94,7 +101,6 @@
     td.cold {
       border: 0px;
       padding: 5px;
-      background: none;
     }
     td.hot {
       border: 1px solid black;
@@ -120,11 +126,18 @@
       border-top: none;
       background: white;
       color: black;
-      z-index: 10;
+      z-index: 2;
+    }
+    div.tiny img {
+      height: 50px;
+      margin: 2px;
     }
   </style>
 
   <%= javascript_tag(%(
+    var NUMBER_OF_NAMES    = {#{@observations.map {|o| "#{o.id}:#{o.namings.length}"}.join(',')}};
+    var NUMBER_OF_COMMENTS = {#{@observations.map {|o| "#{o.id}:#{o.comments.length}"}.join(',')}};
+    var NUMBER_OF_IMAGES   = {#{@observations.map {|o| "#{o.id}:#{o.images.length}"}.join(',')}};
     var current_id = null;
     var ignore_click = false;
     function enter_row(i) {
@@ -134,12 +147,15 @@
         var div = $("row_controls");
         Position.clone(row, div, {
           setHeight: false,
-          setWidth: true,
+          setWidth: false,
           offsetTop: row.offsetHeight
         });
         div.style.display = "block";
         row.addClassName("hot");
         if (old_row) old_row.removeClassName("hot");
+        $('number_of_names').innerHTML    = NUMBER_OF_NAMES[i];
+        $('number_of_comments').innerHTML = NUMBER_OF_COMMENTS[i];
+        $('number_of_images').innerHTML   = NUMBER_OF_IMAGES[i];
         current_id = i;
       }
     }

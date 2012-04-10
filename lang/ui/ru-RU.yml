@@ -384,6 +384,8 @@ SEARCH: Поиск
 search: поиск
 SEND: Отправить
 send: отправить
+SHOW:  Show
+show:  show
 SUBMIT: Отправить
 submit: отправить
 UPDATE: Обновить
@@ -2015,6 +2017,7 @@ species_list_show_save_as_csv:  Save as Spreadsheet
 species_list_show_edit:  Edit Species List
 species_list_show_clone_list:  Clone Species List
 species_list_show_set_source:  Save for Later
+species_list_show_bulk_edit:  Bulk Editor
 species_list_show_members:  Members
 species_list_show_no_members:  This list contains no observations.
 species_list_show_clone_list_help:  >
@@ -2023,6 +2026,10 @@ species_list_show_clone_list_help:  >
 species_list_show_set_source_help:  >
   Save this species list for the next time you create or edit a species list.
   It will display a list of the species in this list for you to choose from.
+
+species_list_show_bulk_edit_help:  >
+  Bulk-edit any observations you own in this species list.
+
 
 
 
@@ -3420,6 +3427,21 @@ set_interest_user_mismatch:  Another [:user] is logged on at this machine.  Plea
 
 # observer/show_notifications
 show_notifications_title: Новые оповещения для [user]
+
+
+# species_list/bulk_editor
+species_list_bulk_editor_title:  Species List Bulk Editor
+species_list_bulk_editor_another:  Another
+species_list_bulk_editor_reuse:  Reuse
+species_list_bulk_editor_you_own_no_observations:  You don't own any observations in this species list.
+species_list_bulk_editor_success:  Successfully updated [n] observation(s).
+species_list_bulk_editor_help:  >
+  Hold your mouse over any of the fields in the table below to see what the
+  field is supposed to be.  The text fields are, in order: notes (top right),
+  date, location, latitude, longitude, altitude (second row).  Check boxes
+  indicate, respectively, if location is where collected, and specimen.  All
+  links open in new tabs.
+
 
 
 # observer/<Theme>
@@ -4859,6 +4881,7 @@ runtime_already_used: "[Type] уже используется: '[value]'"
 runtime_created: "Получилось создать [type]."
 runtime_created_id: "Получилось создать [type] #[value]."
 runtime_created_name: "Получилось создать [type] '[value]'."
+runtime_date_should_be_yyyymmdd:  "Date should be in year-month-day format."
 runtime_delivered_message: Сообщение успешно доставлено.
 runtime_delivered_question: Вопрос успешно доставлен.
 runtime_delivered_request: Запрос успешно доставлен.

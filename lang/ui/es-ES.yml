@@ -384,6 +384,8 @@ SEARCH: Buscar
 search: buscar
 SEND: Enviar
 send: enviar
+SHOW:  Show
+show:  show
 SUBMIT: Enviar
 submit: enviar
 UPDATE: Actualizar
@@ -2115,6 +2117,7 @@ species_list_show_save_as_csv: Guardar como Hoja de Cálculo
 species_list_show_edit: Editar Listas de Especies
 species_list_show_clone_list: Clonar Lista de Especies
 species_list_show_set_source: Guardar para Más Tarde
+species_list_show_bulk_edit:  Bulk Editor
 species_list_show_members: Miembros
 species_list_show_no_members: Esta lista no tiene observaciones.
 species_list_show_clone_list_help: >
@@ -2124,6 +2127,10 @@ species_list_show_set_source_help: >
   Guardar esta lista de especies para la próxima vez que crear o editar una
   lista de especies. Se mostrará una lista de los nombres de esta lista para
   que usted pueda elegir.
+
+species_list_show_bulk_edit_help:  >
+  Bulk-edit any observations you own in this species list.
+
 
 
 
@@ -3614,6 +3621,21 @@ set_interest_user_mismatch: >
 
 # observer/show_notifications
 show_notifications_title: Neuva Notificación para [user]
+
+
+# species_list/bulk_editor
+species_list_bulk_editor_title:  Species List Bulk Editor
+species_list_bulk_editor_another:  Another
+species_list_bulk_editor_reuse:  Reuse
+species_list_bulk_editor_you_own_no_observations:  You don't own any observations in this species list.
+species_list_bulk_editor_success:  Successfully updated [n] observation(s).
+species_list_bulk_editor_help:  >
+  Hold your mouse over any of the fields in the table below to see what the
+  field is supposed to be.  The text fields are, in order: notes (top right),
+  date, location, latitude, longitude, altitude (second row).  Check boxes
+  indicate, respectively, if location is where collected, and specimen.  All
+  links open in new tabs.
+
 
 
 # observer/<Theme>
@@ -5169,6 +5191,7 @@ runtime_already_used: "[Type] ya está en uso: «[value]»"
 runtime_created: "[Type] fue creado con éxito."
 runtime_created_id: "[Type] #[value] fue creado con éxito."
 runtime_created_name: "[Type] «[value]» fue creado con éxito."
+runtime_date_should_be_yyyymmdd:  "Date should be in year-month-day format."
 runtime_delivered_message: Mensaje fue entregado con éxito.
 runtime_delivered_question: Pregunta fue entregado con éxito.
 runtime_delivered_request: Solicitud fue entregado con éxito.

@@ -147,12 +147,14 @@ module ApplicationHelper::ObjectLink
   # size::      Size of image.  (default is user's default thumbnail size)
   # link::      :show_image, :show_observation, :show_user, :none, or Hash of +link_to+ args.  (default is :show_image)
   # obs::       Add <tt>:obs => id</tt> to the show_image link args.
-  # user::      ???
+  # user::      (used with :link => :show_user)
   # border::    Set +border+ attribute, e.g. <tt>:border => 0</tt>.
   # style::     Add +style+ attribute, e.g. <tt>:style => 'float:right'</tt>.
   # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
   # append::    HTML to tack on after +img+ tag; will be included in the link.
   # votes::     Add AJAX vote links below image?
+  # nodiv::     Tell it not to wrap it in a div.
+  # target::    Add target to anchor-link.
   def thumbnail(image, args={})
     if image.is_a?(Image)
       id = image.id
@@ -203,7 +205,9 @@ module ApplicationHelper::ObjectLink
     end
 
     # Enclose image in a link?
-    result = link ? link_to(str, link) : str
+    link_args = {}
+    link_args[:target] = args[:target] if args[:target]
+    result = link ? link_to(str, link, link_args) : str
 
     # Include AJAX vote links below image?
     if @js && @user && args[:votes]

@@ -136,6 +136,8 @@ class Query < AbstractQuery
       :title_has?      => :string,
       :has_notes?      => :boolean,
       :notes_has?      => :string,
+      :has_comments?   => {:string => [:yes]},
+      :comments_has?   => :string,
     },
     :User => {
       :created?  => [:time],
@@ -374,6 +376,7 @@ class Query < AbstractQuery
       :names         => :target,
       :observations  => :target,
       :projects      => :target,
+      :species_lists => :target,
       :users         => :user_id,
     },
     :images => {
@@ -1084,6 +1087,14 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(species_lists.notes,"")) > 0',
       'LENGTH(COALESCE(species_lists.notes,"")) = 0'
     )
+    if params[:has_comments]
+      self.join << :comments
+    end
+    if !params[:comments_has].blank?
+      initialize_model_do_search(:comments_has,
+        'CONCAT(comments.summary,comments.notes)')
+      self.join << :comments
+    end
   end
 
   def initialize_user

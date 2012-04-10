@@ -98,7 +98,7 @@ class Comment < AbstractModel
 
   # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_types
-    [ Location, Name, Observation, Project ]
+    [ Location, Name, Observation, Project, SpeciesList ]
   end
 
   # Returns +summary+ for debugging.

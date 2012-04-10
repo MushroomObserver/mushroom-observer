@@ -410,7 +410,7 @@ class SpeciesListController < ApplicationController
       @query = create_query(:Observation, :in_species_list, :by => :id, :species_list => @species_list,
                             :where => "observations.user_id = #{@user.id}")
       @pages = paginate_numbers(:page, 100)
-      @observations = @query.paginate(@pages, :include => [:location, :namings => :votes])
+      @observations = @query.paginate(@pages, :include => [:comments, :images, :location, :namings => :votes])
       @observation = {}
       @votes = {}
       for obs in @observations
@@ -426,18 +426,18 @@ class SpeciesListController < ApplicationController
       elsif request.method == :post
         updates = 0
         stay_on_page = false
-        for obs in @observation
+        for obs in @observations
           args = params[:observation][obs.id.to_s] || {}
           any_changes = false
-          if !args[:value].nil? and !obs.namings.empty? and
-             args[:value].to_s != @votes[obs.id].value.to_s
+          old_vote = @votes[obs.id].value rescue 0
+          if !args[:value].nil? and !obs.namings.empty? and args[:value].to_s != old_vote.to_s
             if naming = obs.consensus_naming
-              obs.change_users_vote(naming, args[:value], @user)
+              obs.change_vote(naming, args[:value].to_i, @user)
               @votes[obs.id].value = args[:value]
             end
             any_changes = true
           end
-          for method in [:when, :place_name, :notes, :lat, :long, :alt,
+          for method in [:when_str, :place_name, :notes, :lat, :long, :alt,
                          :is_collection_location, :specimen]
             if !args[method].nil?
               old_val = obs.send(method)
@@ -445,7 +445,7 @@ class SpeciesListController < ApplicationController
               new_val = args[method]
               new_val = (new_val == '1') if [:is_collection_location, :specimen].member?(method)
               if old_val != new_val
-                obs.method = new_val
+                obs.send("#{method}=", new_val)
                 any_changes = true
               end
             end

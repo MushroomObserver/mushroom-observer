@@ -33,6 +33,7 @@
   end
 
   draw_prev_next_tabs(@species_list)
+  draw_interest_icons(@species_list)
 %>
 
 <p><%= :WHEN.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
@@ -86,5 +87,8 @@
   <%= :species_list_show_no_members.tp %>
 <% end %>
 <br/>
+
+<%= render(:partial => 'comment/show_comments', :locals =>
+           { :object => @species_list, :controls => true, :limit => nil }) %>
 
 <%= show_object_footer(@species_list) %>

@@ -213,13 +213,12 @@ class Observation < AbstractModel
     if @when_str
       @when_str
     else
-      self.when.to_s
+      self.when.strftime('%Y-%m-%d')
     end
   end
   def when_str=(x)
     @when_str = x
-    date = Date.parse(x)
-    self.when = date if date
+    self.when = x if Date.parse(x)
     return x
   end
 

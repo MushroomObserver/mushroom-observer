@@ -384,6 +384,8 @@ SEARCH: Αναζήτηση
 search: αναζήτηση
 SEND: Αποστολή
 send: αποστολή
+SHOW:  Show
+show:  show
 SUBMIT: Υποβολή
 submit: υποβολή
 UPDATE: Ενημέρωση
@@ -1996,6 +1998,7 @@ species_list_show_save_as_csv: Αποθήκευση ως Λογιστικό Φύ
 species_list_show_edit: Επεξεργασία Καταλόγου Ειδών
 species_list_show_clone_list: Κλωνοποίηση Καταλόγου Ειδών
 species_list_show_set_source: Αποθήκευση για Αργότερα
+species_list_show_bulk_edit:  Bulk Editor
 species_list_show_members: Μέλη
 species_list_show_no_members: Αυτός ο κατάλογος δεν περιέχει παρατηρήσεις.
 species_list_show_clone_list_help: >
@@ -2003,6 +2006,10 @@ species_list_show_clone_list_help: >
 
 species_list_show_set_source_help: >
   Αποθηκεύστε αυτόν τον κατάλογο ειδών για την επόμενη φορά που θα δημιουργήσετε ή θα επεξεργαστείτε έναν κατάλογο ειδών. Θα εμφανιστεί ένας κατάλογος των ειδών αυτού του καταλόγου για να διαλέξετε.
+
+species_list_show_bulk_edit_help:  >
+  Bulk-edit any observations you own in this species list.
+
 
 
 
@@ -3146,6 +3153,21 @@ set_interest_user_mismatch: Ένας άλλος [:user] έχει συνδεθε�
 show_notifications_title: Νέες Ειδοποιήσεις για τον/την [user]
 
 
+# species_list/bulk_editor
+species_list_bulk_editor_title:  Species List Bulk Editor
+species_list_bulk_editor_another:  Another
+species_list_bulk_editor_reuse:  Reuse
+species_list_bulk_editor_you_own_no_observations:  You don't own any observations in this species list.
+species_list_bulk_editor_success:  Successfully updated [n] observation(s).
+species_list_bulk_editor_help:  >
+  Hold your mouse over any of the fields in the table below to see what the
+  field is supposed to be.  The text fields are, in order: notes (top right),
+  date, location, latitude, longitude, altitude (second row).  Check boxes
+  indicate, respectively, if location is where collected, and specimen.  All
+  links open in new tabs.
+
+
+
 # observer/<Theme>
 theme_agaricus: Χρωματισμοί _Agaricus_
 theme_agaricus_augustus:  "[link] is used for the left-hand panel's background color."
@@ -4035,6 +4057,7 @@ runtime_already_used: "[Type] χρησιμοποιείται ήδη: '[value]'"
 runtime_created: "Επιτυχής δημιουργία [type]."
 runtime_created_id: "Επιτυχής δημιουργία [type] #[value]."
 runtime_created_name: "Επιτυχής δημιουργία [type] '[value]'."
+runtime_date_should_be_yyyymmdd:  "Date should be in year-month-day format."
 runtime_delivered_message: Επιτυχής παράδοση μηνύματος.
 runtime_delivered_question: Επιτυχής διαβίβαση ερωτήματος.
 runtime_delivered_request: Επιτυχής διαβίβαση αιτήματος.

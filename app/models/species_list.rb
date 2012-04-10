@@ -80,6 +80,9 @@ class SpeciesList < AbstractModel
   has_and_belongs_to_many :observations, :after_add => :add_obs_callback,
                                          :before_remove => :remove_obs_callback
 
+  has_many :comments,  :as => :target, :dependent => :destroy
+  has_many :interests, :as => :target, :dependent => :destroy
+
   attr_accessor :data
 
   # Automatically (but silently) log destruction.

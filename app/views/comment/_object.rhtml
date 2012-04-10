@@ -26,6 +26,9 @@
   when 'Project'
     render(:partial => 'project/project', :object => object)
 
+  when 'SpeciesList'
+    render(:partial => 'species_list/species_list', :object => object)
+
   else
     raise("We appear to have forgotten to tell add/edit_comment " +
           "how to display objects of type \"#{object.class.name}\".")
