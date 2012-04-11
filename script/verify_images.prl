@@ -24,6 +24,8 @@ my @ALL_SIZES = qw( thumb 320 640 960 1280 orig );
 # List of sizes we don't want to keep on web server.
 my @DELETE_SIZES = qw( 640 960 1280 orig );
 
+################################################################################
+
 # Command line arguments.
 my $OPT_CACHE = get_flag('-c', '--use_cache', '--use-cache');
 my $OPT_TEST  = get_flag('-t', '--test');
@@ -84,13 +86,16 @@ sub refresh_local_cache {
   local $_;
   open(my $fh, "| sort > $file") or die("Couldn't write $file: $!\n");
   foreach my $size (@ALL_SIZES) {
-    print "Getting local $size files...\n" if $OPT_V;
+    print "Getting local $size...\n" if $OPT_V;
     opendir(my $dh, "$path/$size") or die("Couldn't list $path/$size: $!\n");
-    while (readdir $dh) {
+    my $n = 0;
+    while ($_ = readdir $dh) {
       next if !/^\d+\.\w+$/;
-      print $fh "$size/$_ ", -s "$path/$size/$_", "\n";
+      print $fh "$size/$_ ", (-s "$path/$size/$_"), "\n";
+      $n++;
     }
     close($dh);
+    print "  $n files\n" if $OPT_V;
   }
   close($fh);
 }
@@ -101,16 +106,19 @@ sub refresh_remote_cache {
   my ($url, $path2) = split(':', $path);
   open(my $fh, "| sort > $file") or die("Couldn't write $file: $!\n");
   foreach my $size (@ALL_SIZES) {
-    print "Getting remote $size files...\n" if $OPT_V;
+    print "Getting remote $size...\n" if $OPT_V;
     my $cmd = "ssh $url ls -lU --color=never $path2/$size";
-    open(my $fh, "$cmd |") or die("Couldn't list $path/$size: $!\n");
-    while (<$fh>) {
+    open(my $fh2, "$cmd |") or die("Couldn't list $path/$size: $!\n");
+    my $n = 0;
+    while (<$fh2>) {
       chomp;
       my ($size2, $file2) = (split)[4, 7];
       next if $file2 !~ /^\d+\.\w+$/;
       print $fh "$size/$file2 $size2\n";
+      $n++;
     }
-    close($fh);
+    close($fh2);
+    print "  $n files\n" if $OPT_V;
   }
   close($fh);
 }
@@ -122,7 +130,7 @@ sub get_list_to_upload {
   print "Getting files to upload...\n" if $OPT_V;
   open(my $fh, "diff $listing1 $listing2 |") or die("Couldn't diff $listing1 and $listing2: $!\n");
   while (<$fh>) {
-    push(@result, $1) if !/^< (\S+)/;
+    push(@result, $1) if /^< (\S+)/;
   }
   close($fh);
   return \@result;
@@ -135,11 +143,16 @@ sub get_list_to_delete {
   foreach (@$uploads) {
     $uploading{$_} = 1;
   }
+  my %delete_sizes;
+  foreach (@DELETE_SIZES) {
+    $delete_sizes{$_} = 1;
+  }
   my @result;
   print "Getting files to delete...\n" if $OPT_V;
   open(my $fh, "<$listing") or die("Couldn't read $listing: $!\n");
   while (<$fh>) {
-    my ($file) = split;
+    my ($file, $size) = /^((\w+)\/\S+)/;
+    next if !$delete_sizes{$size};
     push(@result, $file) if !$uploading{$file};
   }
   close($fh);
