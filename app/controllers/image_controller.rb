@@ -580,11 +580,25 @@ class ImageController < ApplicationController
            old_holder != new_holder
           old_license = License.find(old_id)
           new_license = License.find(new_id)
+          old_holder = Image.connection.quote(old_holder);
+          new_holder = Image.connection.quote(new_holder);
+          data = Image.connection.select_rows(%(
+            SELECT id, YEAR(`when`) FROM images
+            WHERE user_id = #{@user.id}
+              AND license_id = #{old_id}
+              AND copyright_holder = #{old_holder}
+          ))
+          Image.connection.insert(%(
+            INSERT INTO copyright_changes
+              (user_id, modified, target_type, target_id, year, name, license_id)
+            VALUES
+              #{data.map {|id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})"}.join(",\n") }
+          ))
           Image.connection.update(%(
-            UPDATE images SET license_id = #{new_id},
-              copyright_holder = #{Image.connection.quote(new_holder)}
-            WHERE copyright_holder = #{Image.connection.quote(old_holder)}
-              AND license_id = #{old_id} AND user_id = #{@user.id}
+            UPDATE images SET license_id = #{new_id}, copyright_holder = #{new_holder}
+            WHERE user_id = #{@user.id}
+              AND license_id = #{old_id}
+              AND copyright_holder = #{old_holder}
           ))
           Transaction.put_image(
             :user                 => @user,

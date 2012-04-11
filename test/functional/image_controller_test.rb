@@ -206,10 +206,12 @@ class ImageControllerTest < FunctionalTestCase
     example_image    = images(:agaricus_campestris_image)
     user_id          = example_image.user_id
     copyright_holder = example_image.copyright_holder
+    old_license      = example_image.license
 
     target_license = example_image.license
     new_license    = licenses(:ccwiki30)
     assert_not_equal(target_license, new_license)
+    assert_equal(0, example_image.copyright_changes.length)
 
     target_count = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
     new_count    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
@@ -218,11 +220,11 @@ class ImageControllerTest < FunctionalTestCase
 
     params = {
       :updates => {
-        "1" => {
-          "old_id" => target_license.id.to_s,
-          "new_id" => new_license.id.to_s,
-          "old_holder" => copyright_holder,
-          "new_holder" => copyright_holder
+        '1' => {
+          'old_id' => target_license.id.to_s,
+          'new_id' => new_license.id.to_s,
+          'old_holder' => copyright_holder,
+          'new_holder' => copyright_holder
         }
       }
     }
@@ -235,25 +237,34 @@ class ImageControllerTest < FunctionalTestCase
     assert(target_count_after < target_count)
     assert(new_count_after > new_count)
     assert_equal(target_count_after + new_count_after, target_count + new_count)
+    example_image.reload
+    assert_equal(new_license.id, example_image.license_id)
+    assert_equal(copyright_holder, example_image.copyright_holder)
+    assert_equal(1, example_image.copyright_changes.length)
+    assert_equal(old_license.id, example_image.copyright_changes.last.license_id)
 
     # This empty string caused it to crash in the wild.
     example_image.reload
     example_image.copyright_holder = ''
     example_image.save
+    # (note: the above creates a new entry in copyright_changes!!)
     params = {
       :updates => {
-        "1" => {
-          "old_id" => new_license.id.to_s,
-          "new_id" => new_license.id.to_s,
-          "old_holder" => "",
-          "new_holder" => "A. H. Smith"
+        '1' => {
+          'old_id' => new_license.id.to_s,
+          'new_id' => new_license.id.to_s,
+          'old_holder' => '',
+          'new_holder' => 'A. H. Smith'
         }
       }
     }
     post_requires_login(:license_updater, params)
     assert_response('license_updater')
     example_image.reload
-    assert_equal("A. H. Smith", example_image.copyright_holder)
+    assert_equal('A. H. Smith', example_image.copyright_holder)
+    assert_equal(3, example_image.copyright_changes.length)
+    assert_equal(new_license.id, example_image.copyright_changes.last.license_id)
+    assert_equal('', example_image.copyright_changes.last.name)
   end
 
   def test_delete_images

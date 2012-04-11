@@ -767,22 +767,22 @@ class Image < AbstractModel
   # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
     # This is orders of magnitude faster than doing via active-record.
-    old_name = old_name.gsub("'","\\'")
-    new_name = new_name.gsub("'","\\'")
-    data = Image.connection.select_rows %(
+    old_name = Image.connection.quote(old_name)
+    new_name = Image.connection.quote(new_name)
+    data = Image.connection.select_rows(%(
       SELECT id, YEAR(`when`), license_id FROM images
-      WHERE user_id = #{user.id} AND copyright_holder = '#{old_name}'
-    )
-    Image.connection.insert %(
+      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+    ))
+    Image.connection.insert(%(
       INSERT INTO copyright_changes
         (user_id, modified, target_type, target_id, year, name, license_id)
       VALUES
-        #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},'#{old_name}',#{lic})"}.join(",\n") }
-    )
-    Image.connection.update %(
-      UPDATE images SET copyright_holder = '#{new_name}'
-      WHERE user_id = #{user.id} AND copyright_holder = '#{old_name}'
-    )
+        #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"}.join(",\n") }
+    ))
+    Image.connection.update(%(
+      UPDATE images SET copyright_holder = #{new_name}
+      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+    ))
   end
 
 ################################################################################
