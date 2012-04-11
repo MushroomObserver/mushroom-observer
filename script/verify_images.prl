@@ -174,9 +174,8 @@ sub upload_files {
   print "\nUploading:\n";
   if (!$OPT_TEST) {
     my ($url, $path) = split(':', $REMOTE_PATH);
-    my $cmd = $OPT_V ? "tar -T $TEMP_FILE -cf - | ssh $url \\(cd $path}\\; tar -xvPf -\\)" :
-                       "tar -T $TEMP_FILE -cf - | ssh $url \\(cd $path}\\; tar -xPf -\\)";
-    system($cmd);
+    my $flags = $OPT_V ? '-xvPf' : '-xPf';
+    system("cd $LOCAL_PATH; tar -T $TEMP_FILE -cf - | ssh $url \\(cd $path\\; tar $flags -\\)");
   } elsif ($OPT_V) {
     system("cat $TEMP_FILE");
   }
