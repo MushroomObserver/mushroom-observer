@@ -1049,6 +1049,7 @@ class ApplicationController < ActionController::Base
   # This stores the latest search/index used for use by create_species_list.
   # (Stores the Query id in <tt>session[:checklist_source]</tt>.)
   def store_query_in_session(query)
+    query.save if !query.id
     session[:checklist_source] = query.id
   end
 
@@ -1064,7 +1065,8 @@ class ApplicationController < ActionController::Base
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query=nil)
-    if query && query.id
+    if query
+      query.save if !query.id
       {:q => query.id.alphabetize}
     else
       @query_params || {}
@@ -1083,7 +1085,10 @@ class ApplicationController < ActionController::Base
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
     @query_params = {}
-    @query_params[:q] = query.id.alphabetize if query && query.id
+    if query
+      query.save if !query.id
+      @query_params[:q] = query.id.alphabetize
+    end
     @query_params
   end
   helper_method :set_query_params

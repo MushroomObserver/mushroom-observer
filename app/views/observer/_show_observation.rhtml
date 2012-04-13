@@ -22,7 +22,8 @@
   </span>
 
   <%= if !observation.notes.blank?
-    Textile.register_name(observation.namings.map {|n| n.name})
+    Textile.clear_textile_cache
+    Textile.register_name(*observation.namings.map(&:name))
     Textile.register_name(observation.name)
     '<div style="margin-top:1em; margin-bottom:-1em">' +
       sanitize(:NOTES.l + ': ' + observation.notes.to_s).tpl +

@@ -342,43 +342,57 @@ class ObserverController < ApplicationController
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
   def lookup_general(model)
-    obj = nil
+    objs = []
     id = params[:id].to_s.gsub('_',' ').strip_squeeze
     begin
       if id.match(/^\d+$/)
-        obj = model.find(id)
+        objs = [model.find(id)]
       else
         case model.to_s
 
+          when 'Location'
+            pattern1 = "%#{id}%"
+            pattern2 = "%#{Location.reverse_name(id)}%"
+            objs = Location.find(:all, :limit => 100, :conditions =>
+                                 [ 'name LIKE ? OR name LIKE ?', pattern1, pattern2 ])
+
           when 'Name'
             if parse = Name.parse_name(id)
-              obj = Name.find_by_search_name(parse[3]) ||
-                    Name.find_by_text_name(parse[0])
+              objs = Name.find_all_by_search_name(parse[3])
+              objs = Name.find_all_by_text_name(parse[0]) if objs.empty?
             end
 
-          when 'Location'
-            pattern = id.downcase.gsub(/\W+/, '%')
-            ids = Location.connection.select_values %(
-              SELECT id FROM locations
-              WHERE LOWER(locations.name) LIKE '%#{pattern}%'
-            )
-            obj = Location.find(ids.first) if ids.length == 1
+          when 'Project'
+            pattern = "%#{id}%"
+            objs = Project.find(:all, :limit => 100, :conditions =>
+                                [ 'title LIKE ?', pattern ])
+
+          when 'SpeciesList'
+            pattern = "%#{id}%"
+            objs = SpeciesList.find(:all, :limit => 100, :conditions =>
+                                    [ 'title LIKE ?', pattern ])
 
           when 'User'
-            obj = User.find_by_login(id) ||
-                  User.find_by_name(id)
+            objs = User.find_all_by_login(id)
+            objs = User.find_all_by_name(id) if objs.empty?
 
         end
       end
     rescue
     end
-    if obj
-      redirect_to(:controller => obj.show_controller,
-                  :action => obj.show_action, :id => obj.id)
-    else
+    if objs.empty?
       type = model.type_tag
       flash_error(:runtime_object_no_match.t(:match => id, :type => type))
       goto_index(model)
+    elsif objs.length == 1
+      obj = objs.first
+      redirect_to(:controller => obj.show_controller, :action => obj.show_action, :id => obj.id)
+    else
+      obj = objs.first
+      query = Query.lookup(model, :in_set, :ids => objs)
+      flash_warning(:runtime_object_multiple_matches.t(:match => id, :type => type))
+      redirect_to(:controller => obj.show_controller, :action => obj.index_action,
+                  :params => query_params(query))
     end
   end
 

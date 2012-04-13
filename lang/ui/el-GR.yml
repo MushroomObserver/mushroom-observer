@@ -4150,6 +4150,7 @@ runtime_no_conditions: Δεν καθορίσατε όρους!
 runtime_no_upload_image: Παρουσιάστηκε πρόβλημα κατά το ανέβασμα της εικόνας '[name]'.
 runtime_object_deleted: Αυτό το αντικείμενο έχει διαγραφεί.
 runtime_object_not_in_index: "Δεν βρέθηκε το [type] #[id] στα αποτελέσματα της τρέχουσας αναζήτησης ή ευρετηρίου."
+runtime_object_multiple_matches:  Multiple [types] match "[match]".
 runtime_pivotal_getting_token:  Couldn't get access token from Pivotal.
 runtime_pivotal_getting_stories:  Couldn't get stories from Pivotal.
 runtime_pivotal_parsing_story:  Error parsing one or more stories from Pivotal.  Ignored them.

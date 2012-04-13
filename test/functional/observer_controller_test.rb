@@ -2197,4 +2197,84 @@ class ObserverControllerTest < FunctionalTestCase
       :type => 'Observation', :id => minimal_unknown.id, :state => 1
     )
   end
+
+  # ----------------------------
+  #  Lookup name.
+  # ----------------------------
+  
+  def test_lookup_name
+    get(:lookup_comment, :id => 1)
+    assert_response(:controller => :comment, :action => :show_comment, :id => 1)
+    get(:lookup_comment, :id => 10000)
+    assert_response(:controller => :comment, :action => :index_comment)
+    assert_flash_error
+
+    get(:lookup_image, :id => 1)
+    assert_response(:controller => :image, :action => :show_image, :id => 1)
+    get(:lookup_image, :id => 10000)
+    assert_response(:controller => :image, :action => :index_image)
+    assert_flash_error
+
+    get(:lookup_location, :id => 1)
+    assert_response(:controller => :location, :action => :show_location, :id => 1)
+    get(:lookup_location, :id => 'Burbank, California')
+    assert_response(:controller => :location, :action => :show_location, :id => locations(:burbank).id)
+    get(:lookup_location, :id => 'California, Burbank')
+    assert_response(:controller => :location, :action => :show_location, :id => locations(:burbank).id)
+    get(:lookup_location, :id => 'Zyzyx, Califonria')
+    assert_response(:controller => :location, :action => :index_location)
+    assert_flash_error
+    get(:lookup_location, :id => 'California')
+    assert_response(:controller => :location, :action => :index_location)
+    assert_flash_warning
+
+    get(:lookup_name, :id => 1)
+    assert_response(:controller => :name, :action => :show_name, :id => 1)
+    get(:lookup_name, :id => names(:coprinus_comatus).id)
+    assert_response(:controller => :name, :action => :show_name, :id => names(:coprinus_comatus).id)
+    get(:lookup_name, :id => 'Agaricus campestris')
+    assert_response(:controller => :name, :action => :show_name, :id => names(:agaricus_campestris).id)
+    get(:lookup_name, :id => 'Agaricus newname')
+    assert_response(:controller => :name, :action => :index_name)
+    assert_flash_error
+    get(:lookup_name, :id => 'Amanita baccata sensu Borealis')
+    assert_response(:controller => :name, :action => :show_name, :id => names(:amanita_baccata_borealis).id)
+    get(:lookup_name, :id => 'Amanita baccata')
+    assert_response(:controller => :name, :action => :index_name)
+    assert_flash_warning
+    get(:lookup_name, :id => 'Agaricus campestris L.')
+    assert_response(:controller => :name, :action => :show_name, :id => names(:agaricus_campestris).id)
+    get(:lookup_name, :id => 'Agaricus campestris Linn.')
+    assert_response(:controller => :name, :action => :show_name, :id => names(:agaricus_campestris).id)
+
+    get(:lookup_project, :id => 1)
+    assert_response(:controller => :project, :action => :show_project, :id => 1)
+    get(:lookup_project, :id => 'Bolete')
+    assert_response(:controller => :project, :action => :show_project, :id => projects(:bolete_project).id)
+    get(:lookup_project, :id => 'Bogus')
+    assert_response(:controller => :project, :action => :index_project)
+    assert_flash_error
+    get(:lookup_project, :id => 'project')
+    assert_response(:controller => :project, :action => :index_project)
+    assert_flash_warning
+
+    get(:lookup_species_list, :id => 1)
+    assert_response(:controller => :species_list, :action => :show_species_list, :id => 1)
+    get(:lookup_species_list, :id => 'Mysteries')
+    assert_response(:controller => :species_list, :action => :show_species_list, :id => species_lists(:unknown_species_list).id)
+    get(:lookup_species_list, :id => 'species list')
+    assert_response(:controller => :species_list, :action => :index_species_list)
+    assert_flash_warning
+    get(:lookup_species_list, :id => 'Flibbertygibbets')
+    assert_response(:controller => :species_list, :action => :index_species_list)
+    assert_flash_error
+
+    get(:lookup_user, :id => 1)
+    assert_response(:controller => :observer, :action => :show_user, :id => 1)
+    get(:lookup_user, :id => 'mary')
+    assert_response(:controller => :observer, :action => :show_user, :id => @mary.id)
+    get(:lookup_user, :id => 'Einstein')
+    assert_response(:controller => :observer, :action => :index_rss_log)
+    assert_flash_error
+  end
 end

@@ -151,16 +151,37 @@ class Textile < String
   # can refer to them by abbreviation.
   def self.register_name(*names)
     for name in names
-      if name && name.respond_to?('text_name') && !name.above_genus?
-        @@name_lookup ||= {}
-        name.text_name.match(/([A-Z])/)
-        @@name_lookup[$1] = name.text_name.split.first
-        @@last_species    = name.text_name if name.rank == :Species
-        @@last_subspecies = name.text_name if name.rank == :Subspecies
-        @@last_variety    = name.text_name if name.rank == :Variety
+      if !name.above_genus?
+        Textile.private_register_name(name.text_name, name.rank)
       end
     end
   end
+
+  def self.private_register_name(name, rank)
+    @@name_lookup ||= {}
+    if name.match(/([A-Z])/)
+      @@name_lookup[$1] = name.split.first
+    end
+    if rank == :Species
+      @@last_species    = name
+      @@last_subspecies = nil
+      @@last_variety    = nil
+    elsif rank == :Subspecies
+      @@last_species    = name.sub(/ ssp\. .*/, '')
+      @@last_subspecies = name
+      @@last_variety    = nil
+    elsif rank == :Variety
+      @@last_species    = name.sub(/ (ssp|var)\. .*/, '')
+      @@last_subspecies = name.sub(/ var\. .*/, '')
+      @@last_variety    = name
+    end
+  end
+
+  # Give unit test access to these internals.
+  def self.name_lookup;     @@name_lookup;     end
+  def self.last_species;    @@last_species;    end
+  def self.last_subspecies; @@last_subspecies; end
+  def self.last_variety;    @@last_variety;    end
 
   # Report the current size of the name lookup cache.
   def self.textile_name_size
@@ -170,12 +191,16 @@ class Textile < String
 
   # Flush the name lookup cache.
   def self.clear_textile_cache
-    @@name_lookup = {}
+    @@name_lookup     = {}
+    @@last_species    = nil
+    @@last_subspecies = nil
+    @@last_variety    = nil
   end
 
 ##############################################################################
 
-private
+# Privacy adds nothing of value to code, and just makes it a pain in the ass to test.
+# private 
 
   # Convert __Names__ to links in a textile string.
   def check_name_links!
@@ -188,125 +213,103 @@ private
       (^|\W)
         (?:\**_+)
         (
-          "?[A-Z](?:[a-z\-]*|\.)"?
-            (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\. ) |
+          "?[A-Z](?:\.|[a-z\-]*)"?
+            (?: \s+ "?[a-zë\-]+"? (?:\s+ (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"? )* |
+                \s+ sp\. )? |
           (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"?
         ) (
           \s+
           (?: "?[^a-z"\s_] | in\s?ed\.? | auct\.? | van\sd[a-z]+\s[A-Z] |
-              s[\.\s] | sensu\s )
+              s[\.\s] | sens[u\.]\s | group\s )
           [^_]*
         )?
         (?:_+\**)
-      (?= (?:s|ish|like)? (?:\W|’|\Z) )
+      (?= (?:s|ish|like)? (?:\W|\Z) )
     /x) do |orig|
-      result = orig
       prefix = $1.to_s
       name   = $2.to_s
       author = $3.to_s
-
-      # Remove any formatting.
-      str1 = (name + author).gsub(/[_*]/, '')
-
-      # Expand abbreviated genus (but only if followed by species epithet!).
-      str2 = str1.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
-        (n = @@name_lookup[$1]) ? n + ' ' : x
-      end
-
-      # Expand bare variety, etc.  For example, after using Amanita muscaria:
-      #   _var alba_  -->  Amanita muscaria var. alba
-      # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
-      if str2.sub!(/^(subsp|ssp)\.? +/, '')
-        str2 = @@last_species    ? @@last_species  + ' subsp. ' + str2 : ''
-      elsif str2.sub!(/^(var|v)\.? +/, '')
-        str2 = @@last_subspecies ? @@last_subspecies + ' var. ' + str2 :
-               @@last_species    ? @@last_species    + ' var. ' + str2 : ''
-      elsif str2.sub!(/^(forma?|f)\.? +/, '')
-        str2 = @@last_variety    ? @@last_variety    + ' f. ' + str2 :
-               @@last_subspecies ? @@last_subspecies + ' f. ' + str2 :
-               @@last_species    ? @@last_species    + ' f. ' + str2 : ''
-      end
-
-      # Allow a number of author-like syntaxes that aren't normally allowed.
-      # Remove them and match the rest.  Examples:
-      #   _Laccaria cf. laccata_      -->  <a>**__Laccaria__**</a> __cf. laccata__
-      #   _Peltigera aphthosa group_  -->  <a>**__Peltigera aphthosa__**</a> __group__
-      #   _Parmelia s. lat._          -->  <a>**__Parmelia__**</a> __s. lat.__
-      postfix = ''
-      if str2.sub!(/ cf\.? (.*)/, '')
-        postfix = ' cf. __%s__' % $1
-      elsif str2.sub!(/ group$/, '')
-        postfix = ' group'
-      elsif str2.sub!(/ (s|sensu)\.? ?(l|lato|s|str|stricto)\.?$/, '')
-        postfix = $2[0,1] == 's' ? ' s. str.' : ' s. lato'
-      end
-
-      # Allow "sensu Authors" that aren't in database.  Example:
-      #   _S. riparia sensu A.H.Smith_  -->  <a>**__S. riparia__**</a> __sensu A.H.Smith__
-      if !author.match(/sensu/) && str2.sub!(/ (sensu .*)/ ,'')
-        postfix = ' ' + $1 + postfix
-      end
-
-      # Make sure the rest parses normally.
-      if (parse = Name.parse_name(str2)) &&
-        # Allowing arbitrary authors on Genera and higher makes it impossible to
-        # distinguish between publication titles and taxa, e.g., "Lichen Flora
-        # of the Greater Sonoran Region".  I'm sure it can still break with species
-        # but it should be very infrequent (I don't see it in current tests). -JPH
-        (author.blank? || parse[5] != :Genus)
-
-        # Update which genus this first letter would mean in an abbrev.
-        if parse[0].match(/([A-Z])/)
-          @@name_lookup[$1] = parse[0] if parse[5] == :Genus
-          @@last_species    = parse[0] if parse[5] == :Species
-          @@last_subspecies = parse[0] if parse[5] == :Subspecies
-          @@last_variety    = parse[0] if parse[5] == :Variety
-        end
-
-        # # Format name starting with bare text_name (no "sp." or author).
-        # label = '__%s__' % parse[0]
-        #
-        # # Re-abbreviate genus if started that way.
-        # label.sub!(/([A-Z])[a-zë\-]*/, '\\1.') if str1.match(/^[A-Z]\.? /)
-        #
-        # # De-itallicize "var.", "ssp.", etc.
-        # label.gsub!(/ (var|subsp|f)\. /, '__ \\1. __')
-        #
-        # # Tack author on to end (if any).
-        # label += ' ' + parse[6] if !parse[6].blank?
-
-        # Hmmm... better not to reformat what the user entered at all.
-        label = "__#{str1}__"
-
-        # Put it all together.
-        result = "#{prefix}x{NAME #{label} }{ #{str2} }x#{postfix}"
-      end
-      result
+      prefix + process_name_link(name, author)
     end
+  end
+
+  # Process the insides of a single __Name__ construct.
+  def process_name_link(name, author)
+    result = name + author
+
+    # Remove any formatting. This will be the "label" of the link.
+    str1 = (name + author).gsub(/[_*]/, '').gsub(/\s+/, ' ').strip
+
+    # Expand abbreviated genus (but only if followed by species epithet!).
+    # This will be sent to lookup_name.
+    str2 = str1.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
+      (n = @@name_lookup[$1]) ? n + ' ' : x
+    end
+
+    # Expand bare variety, etc.  For example, after using Amanita muscaria:
+    #   _var alba_  -->  Amanita muscaria var. alba
+    # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
+    if str2.sub!(/^(subsp|ssp)\.? +/, '')
+      str2 = @@last_species    ? @@last_species  + ' subsp. ' + str2 : ''
+    elsif str2.sub!(/^(var|v)\.? +/, '')
+      str2 = @@last_subspecies ? @@last_subspecies + ' var. ' + str2 :
+             @@last_species    ? @@last_species    + ' var. ' + str2 : ''
+    elsif str2.sub!(/^(forma?|f)\.? +/, '')
+      str2 = @@last_variety    ? @@last_variety    + ' f. ' + str2 :
+             @@last_subspecies ? @@last_subspecies + ' f. ' + str2 :
+             @@last_species    ? @@last_species    + ' f. ' + str2 : ''
+    end
+
+    # Allow a number of author-like syntaxes that aren't normally allowed.
+    # Remove them and match the rest.  Examples:
+    #   _Laccaria cf. laccata_     -->  Laccaria laccata
+    #   _Parmelia s. lat/str._     -->  Parmelia
+    str2.sub!(/ cfr?\.? /, ' ')
+    str2.sub!(/ ((s|sensu)\.? ?(l|lato|s|str|stricto)\.?)$/, '')
+    str2.sub!(/ sp\.$/, '')
+
+    # Make sure the rest parses normally.
+    if (parse = Name.parse_name(str2)) &&
+      # Allowing arbitrary authors on Genera and higher makes it impossible to
+      # distinguish between publication titles and taxa, e.g., "Lichen Flora
+      # of the Greater Sonoran Region".  I'm sure it can still break with species
+      # but it should be very infrequent (I don't see it in current tests). -JPH
+      (author.blank? || parse[5] != :Genus)
+
+      # Update which genus this first letter would mean in an abbrev.
+      Textile.private_register_name(parse[0], parse[5])
+
+      # Put it all together.
+      result = "x{NAME __#{str1}__ }{ #{str2} }x"
+    end
+
+    result
   end
 
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
     self.gsub!(/
-      (^|\W) (?:_+) ([a-z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
+      (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
     /x) do |orig|
       result = orig
       prefix, type, id = $1, $2, $3
-      if ['comment',
-          'image',
-          'location',
-          'name',
-          'observation',
-          'project',
-          'species_list',
-          'user'
-         ].include?(type.downcase)
+      matches = [
+        ['comment'],
+        ['image', 'img'],
+        ['location', 'loc'],
+        ['name'],
+        ['observation', 'obs', 'ob'],
+        ['project', 'proj'],
+        ['species_list', 'spl'],
+        ['user']
+      ].select {|x| x[0] == type.downcase || x[1] == type.downcase}
+      if matches.length == 1
         if id.match(/^\d+$/)
-          label = "#{type.downcase.capitalize_first.to_sym.l} ##{id}"
+          label = "#{type} #{id}"
         else
           label = id
         end
-        result = "#{prefix}x{#{type.upcase} __#{label}__ }{ #{id} }x"
+        result = "#{prefix}x{#{matches.first.first.upcase} __#{label}__ }{ #{id} }x"
       end
       result
     end

@@ -5087,6 +5087,7 @@ runtime_no_conditions: You didn't specify any conditions!
 runtime_no_upload_image: Had problems uploading image '[name]'.
 runtime_object_deleted: This object has been deleted.
 runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
+runtime_object_multiple_matches: Multiple [types] match "[match]".
 runtime_pivotal_getting_token: Couldn't get access token from Pivotal.
 runtime_pivotal_getting_stories: Couldn't get stories from Pivotal.
 runtime_pivotal_parsing_story: Error parsing one or more stories from Pivotal.  Ignored them.
