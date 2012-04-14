@@ -25,7 +25,7 @@
 #  A SpeciesList can belong to either a defined Location (+location+, a
 #  Location instance) or an undefined one (+where+, just a String), but not
 #  both.  To make this a little easier, you can refer to +place_name+ instead,
-#  which returns the name of whichever is present. 
+#  which returns the name of whichever is present.
 #
 #  == Attributes
 #
@@ -77,6 +77,7 @@ class SpeciesList < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
+  has_and_belongs_to_many :projects
   has_and_belongs_to_many :observations, :after_add => :add_obs_callback,
                                          :before_remove => :remove_obs_callback
 
@@ -97,6 +98,12 @@ class SpeciesList < AbstractModel
   def remove_obs_callback(o)
     SiteData.update_contribution(:del, :species_list_entries, user_id)
   end
+
+  ################################################################################
+  #
+  #  :section: Names
+  #
+  ################################################################################
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
@@ -209,7 +216,11 @@ class SpeciesList < AbstractModel
     # should initiate identical action)
   end
 
-################################################################################
+  ################################################################################
+  #
+  #  :section: Construction
+  #
+  ################################################################################
 
   # Upload file into internal "data" attribute.
   #
@@ -315,15 +326,15 @@ class SpeciesList < AbstractModel
     now  = Time.now
     user = User.current
 
-    args[:created]  ||= now        
-    args[:modified] ||= now        
-    args[:user]     ||= user       
-    args[:when]     ||= self.when  
+    args[:created]  ||= now
+    args[:modified] ||= now
+    args[:user]     ||= user
+    args[:when]     ||= self.when
     args[:vote]     ||= Vote.maximum_vote
     args[:notes]    ||= ''
     if !args[:where] && !args[:location]
-      args[:where]    = where      
-      args[:location] = location   
+      args[:where]    = where
+      args[:location] = location
     end
     if args[:is_collection_location].nil?
       args[:is_collection_location] = true
@@ -384,7 +395,21 @@ class SpeciesList < AbstractModel
     end
   end
 
-################################################################################
+  ################################################################################
+  #
+  #  :section: Projects
+  #
+  ################################################################################
+
+  def has_edit_permission?(user=User.current)
+    Project.has_edit_permission?(self, user)
+  end
+
+  ################################################################################
+  #
+  #  :section: Validation
+  #
+  ################################################################################
 
 protected
 

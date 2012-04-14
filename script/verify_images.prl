@@ -171,7 +171,7 @@ sub delete_files {
 sub upload_files {
   my $files = shift;
   write_file_list($TEMP_FILE, $files);
-  print "\nUploading:\n";
+  print "\nUploading:\n" if $OPT_V;
   if (!$OPT_TEST) {
     my ($url, $path) = split(':', $REMOTE_PATH);
     my $flags = $OPT_V ? '-xvPf' : '-xPf';

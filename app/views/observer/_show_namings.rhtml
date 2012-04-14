@@ -54,7 +54,7 @@
                             :controller => 'name', :action => 'show_name',
                             :id => naming.name, :params => query_params) %>
               </div>
-              <% if check_permission(naming.user_id) %>
+              <% if check_permission(naming) %>
                 <div>
                   (<%= link_to(:EDIT.t, :action => 'edit_naming',
                                :id => naming, :params => query_params) %>
@@ -93,10 +93,10 @@
               <td width="20">&nbsp;</td>
               <td>
                 <% @vote = @votes[naming.id]
-                menu = check_permission(naming.user_id) ? @confidence_menu : @agreement_menu
+                menu = check_permission(naming) ? @confidence_menu : @agreement_menu
                 # It *is* still possible for the owner not to have voted.  In which case I
                 # need to explicitly add the "No Opinion" option to their menu.
-                if check_permission(naming.user_id) && (!@vote || @vote.value == 0)
+                if check_permission(naming) && (!@vote || @vote.value == 0)
                   menu = menu.clone.unshift(@agreement_menu.first)
                 end %>
                 <%= select('vote', 'value', menu, {}, { :index => naming.id,

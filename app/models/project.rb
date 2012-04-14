@@ -24,6 +24,7 @@
 #  is_member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
 #  text_name::      Alias for +title+ for debugging.
+#  Proj.has_edit_permission?:: Check if User has permission to edit an Observation/Image/etc.
 #
 #  ==== Logging
 #  log_create::        Log creation.
@@ -73,6 +74,26 @@ class Project < AbstractModel
   # Is +user+ an admin for this Project?
   def is_admin?(user)
     user and (self.admin_group.users.member?(user) or user.admin)
+  end
+
+  # Check if user has permission to edit a given object.
+  def self.has_edit_permission?(obj, user)
+    result = false
+    if user
+      if user.id == obj.user_id
+        result = true
+      elsif !obj.projects.empty?
+        # group_ids = user.user_groups_singular_ids # Rails 3 only
+        group_ids = user.user_groups.map(&:id)
+        for project in obj.projects
+          if group_ids.member?(project.user_group_id)
+            result = true
+            break
+          end
+        end
+      end
+    end
+    return result
   end
 
   ##############################################################################

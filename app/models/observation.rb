@@ -100,6 +100,9 @@
 #  add_image::              Attach an Image.
 #  remove_image::           Remove an Image.
 #
+#  ==== Projects
+#  has_edit_permission?::   Check if user has permission to edit this observation.
+#
 #  ==== Logging
 #  log_create_image::       Log addition of new Image.
 #  log_reuse_image::        Log reuse of old Image.
@@ -135,6 +138,7 @@ class Observation < AbstractModel
   has_many :namings
 
   has_and_belongs_to_many :images
+  has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, :after_add => :add_spl_callback,
                                           :before_remove => :remove_spl_callback
 
@@ -169,7 +173,7 @@ class Observation < AbstractModel
       self.where
     end
   end
-  
+
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
   # Also applies the location_format of the current user (defaults to :postal).
@@ -208,7 +212,7 @@ class Observation < AbstractModel
   # verbatim in @when_str, and if it is valid, sets the actual when field.
   # When you go to save the observation, it detects invalid format and prevents
   # save.  When it renders form again, it notes the error, populates the input
-  # field with the old invalid string for editing, and colors it red. 
+  # field with the old invalid string for editing, and colors it red.
   def when_str
     if @when_str
       @when_str
@@ -817,6 +821,16 @@ return result if debug
       notify_users(:removed_image)
     end
     return img
+  end
+
+  ################################################################################
+  #
+  #  :section: Projects
+  #
+  ################################################################################
+
+  def has_edit_permission?(user=User.current)
+    Project.has_edit_permission?(self, user)
   end
 
   ##############################################################################

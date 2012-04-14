@@ -229,7 +229,7 @@ class ProjectController < ApplicationController
   def edit_project # :prefetch: :norobots:
     pass_query_params
     @project = Project.find(params[:id])
-    if !check_permission!(@project.user_id)
+    if !check_permission!(@project)
       redirect_to(:action => 'show_project', :id => @project.id,
                   :params => query_params)
     elsif request.method == :post
@@ -265,7 +265,7 @@ class ProjectController < ApplicationController
   def destroy_project # :norobots:
     pass_query_params
     @project = Project.find(params[:id])
-    if !check_permission!(@project.user_id)
+    if !check_permission!(@project)
       redirect_to(:action => 'show_project', :id => @project.id,
                   :params => query_params)
     elsif !@project.destroy

@@ -56,6 +56,39 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response('show_species_list')
   end
 
+  def test_show_species_list_edit_links
+    spl = species_lists(:unknown_species_list)
+    proj = projects(:bolete_project)
+    assert_equal(@mary.id, spl.user_id)                       # owned by mary
+    assert(spl.projects.include?(proj))                       # owned by bolete project
+    assert_equal([@dick.id], proj.user_group.users.map(&:id)) # dick is only member of project
+
+    login('rolf')
+    get(:show_species_list, :id => spl.id)
+    assert_select('a[href*=edit_species_list]', :count => 0)
+    assert_select('a[href*=destroy_species_list]', :count => 0)
+    get(:edit_species_list, :id => spl.id)
+    assert_response(:redirect)
+    get(:destroy_species_list, :id => spl.id)
+    assert_flash_error
+
+    login('mary')
+    get(:show_species_list, :id => spl.id)
+    assert_select('a[href*=edit_species_list]', :minimum => 1)
+    assert_select('a[href*=destroy_species_list]', :minimum => 1)
+    get(:edit_species_list, :id => spl.id)
+    assert_response(:success)
+
+    login('dick')
+    get(:show_species_list, :id => spl.id)
+    assert_select('a[href*=edit_species_list]', :minimum => 1)
+    assert_select('a[href*=destroy_species_list]', :minimum => 1)
+    get(:edit_species_list, :id => spl.id)
+    assert_response(:success)
+    get(:destroy_species_list, :id => spl.id)
+    assert_flash_success
+  end
+
   def test_species_lists_by_title
     get_with_dump(:species_lists_by_title)
     assert_response('list_species_lists')

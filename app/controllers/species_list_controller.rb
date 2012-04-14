@@ -247,7 +247,7 @@ class SpeciesListController < ApplicationController
   #   session[:checklist_source]
   def edit_species_list # :prefetch: :norobots:
     if @species_list = find_or_goto_index(SpeciesList, params[:id])
-      if !check_permission!(@species_list.user_id)
+      if !check_permission!(@species_list)
         redirect_to(:action => 'show_species_list', :id => @species_list)
       elsif request.method != :post
         @checklist_names   = {}
@@ -287,7 +287,7 @@ class SpeciesListController < ApplicationController
   # Post: goes to edit_species_list
   def upload_species_list # :norobots:
     if @species_list = find_or_goto_index(SpeciesList, params[:id])
-      if !check_permission!(@species_list.user_id)
+      if !check_permission!(@species_list)
         redirect_to(:action => 'show_species_list', :id => @species_list)
       elsif request.method == :get
         query = create_query(:Observation, :in_species_list, :by => :name,
@@ -315,7 +315,7 @@ class SpeciesListController < ApplicationController
   # Redirects to list_species_lists.
   def destroy_species_list # :norobots:
     if @species_list = find_or_goto_index(SpeciesList, params[:id])
-      if check_permission!(@species_list.user_id)
+      if check_permission!(@species_list)
         @species_list.destroy
         Transaction.delete_species_list(:id => @species_list)
         flash_notice(:runtime_species_list_destroy_success.t(:id => params[:id]))
@@ -347,7 +347,7 @@ class SpeciesListController < ApplicationController
     if species_list = find_or_goto_index(SpeciesList, params[:species_list],
                                          :include => :observations)
       if observation = find_or_goto_index(Observation, params[:observation])
-        if check_permission!(species_list.user_id)
+        if check_permission!(species_list)
           if species_list.observations.include?(observation)
             species_list.observations.delete(observation)
             Transaction.put_species_list(
@@ -375,7 +375,7 @@ class SpeciesListController < ApplicationController
     if species_list = find_or_goto_index(SpeciesList, params[:species_list],
                                          :include => :observations)
       if observation = find_or_goto_index(Observation, params[:observation])
-        if check_permission!(species_list.user_id)
+        if check_permission!(species_list)
           if !species_list.observations.include?(observation)
             species_list.observations << observation
             Transaction.put_species_list(

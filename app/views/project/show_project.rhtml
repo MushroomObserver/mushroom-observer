@@ -6,7 +6,7 @@
     add_tab(:app_list_projects.t, :action => 'list_projects')
     add_tab(:show_project_admin_request.t, :action => 'admin_request',
             :id => @project.id, :params => query_params)
-    if check_permission(@project.user_id)
+    if check_permission(@project)
       add_tab(:show_project_destroy.t, { :action => 'destroy_project',
               :id => @project.id, :params => query_params },
               { :confirm => :are_you_sure.l })

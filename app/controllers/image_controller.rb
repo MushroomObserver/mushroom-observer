@@ -293,7 +293,7 @@ class ImageController < ApplicationController
   def add_image # :prefetch: :norobots:
     pass_query_params
     @observation = Observation.find(params[:id])
-    if !check_permission!(@observation.user_id)
+    if !check_permission!(@observation)
       redirect_to(:controller => 'observer', :action => 'show_observation',
                   :id => @observation.id, :params => query_params)
     elsif request.method != :post
@@ -359,7 +359,7 @@ class ImageController < ApplicationController
     pass_query_params
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
-    if !check_permission!(@image.user_id)
+    if !check_permission!(@image)
       redirect_to(:action => 'show_image', :id => @image,
                   :params => query_params)
     elsif request.method == :post
@@ -400,7 +400,7 @@ class ImageController < ApplicationController
       next_state = this_state.next
     end
 
-    if !check_permission!(@image.user_id)
+    if !check_permission!(@image)
       redirect_to(:action => 'show_image', :id => @image.id,
                   :params => query_params)
     else
@@ -425,7 +425,7 @@ class ImageController < ApplicationController
     pass_query_params
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
-    if !check_permission!(@observation.user_id)
+    if !check_permission!(@observation)
       flash_error(:runtime_image_remove_denied.t(:id => @image.id))
     elsif !@observation.images.include?(@image)
       flash_error(:runtime_image_remove_missing.t(:id => @image.id))
@@ -466,7 +466,7 @@ class ImageController < ApplicationController
 
     # Make sure user owns the observation.
     if (@mode == :observation) and
-       !check_permission!(@observation.user_id)
+       !check_permission!(@observation)
       redirect_to(:controller => 'observer', :action => 'show_observation',
                   :id => @observation.id, :params => query_params)
       done = true
@@ -529,7 +529,7 @@ class ImageController < ApplicationController
     @observation = Observation.find(params[:id], :include => :images)
 
     # Make sure user owns the observation.
-    if !check_permission!(@observation.user_id)
+    if !check_permission!(@observation)
       redirect_to(:controller => 'observer', :action => 'show_observation',
                   :id => @observation.id, :params => query_params)
 

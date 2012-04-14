@@ -380,6 +380,48 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, Query.count)
   end
 
+  def test_show_observation_edit_links
+    obs = observations(:detailed_unknown)
+    proj = projects(:bolete_project)
+    assert_equal(@mary.id, obs.user_id)                        # owned by mary
+    assert(obs.projects.include?(proj))                        # owned by bolete project
+    assert_equal([@dick.id], proj.user_group.users.map(&:id))  # dick is only member of bolete project
+
+    login('rolf')
+    get(:show_observation, :id => obs.id)
+    assert_select('a[href*=edit_observation]', :count => 0)
+    assert_select('a[href*=destroy_observation]', :count => 0)
+    assert_select('a[href*=add_image]', :count => 0)
+    assert_select('a[href*=remove_image]', :count => 0)
+    assert_select('a[href*=reuse_image]', :count => 0)
+    get(:edit_observation, :id => obs.id)
+    assert_response(:redirect)
+    get(:destroy_observation, :id => obs.id)
+    assert_flash_error
+
+    login('mary')
+    get(:show_observation, :id => obs.id)
+    assert_select('a[href*=edit_observation]', :minimum => 1)
+    assert_select('a[href*=destroy_observation]', :minimum => 1)
+    assert_select('a[href*=add_image]', :minimum => 1)
+    assert_select('a[href*=remove_image]', :minimum => 1)
+    assert_select('a[href*=reuse_image]', :minimum => 1)
+    get(:edit_observation, :id => obs.id)
+    assert_response(:success)
+
+    login('dick')
+    get(:show_observation, :id => obs.id)
+    assert_select('a[href*=edit_observation]', :minimum => 1)
+    assert_select('a[href*=destroy_observation]', :minimum => 1)
+    assert_select('a[href*=add_image]', :minimum => 1)
+    assert_select('a[href*=remove_image]', :minimum => 1)
+    assert_select('a[href*=reuse_image]', :minimum => 1)
+    get(:edit_observation, :id => obs.id)
+    assert_response(:success)
+    get(:destroy_observation, :id => obs.id)
+    assert_flash_success
+  end
+
   def test_show_user_no_id
     get_with_dump(:show_user)
     assert_response(:action => 'index_user')
@@ -1267,6 +1309,51 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success) # Which really means failure
   end
 
+  def test_edit_observation_with_another_users_image
+    img1 = images(:in_situ)
+    img2 = images(:turned_over)
+    img3 = images(:commercial_inquiry_image)
+
+    obs = observations(:detailed_unknown)
+    obs.images << img3
+    obs.save
+    obs.reload
+
+    assert_equal(img1.user_id, obs.user_id)
+    assert_equal(img2.user_id, obs.user_id)
+    assert_not_equal(img3.user_id, obs.user_id)
+
+    img_ids = obs.images.map(&:id)
+    assert_equal([1, 2, 3], img_ids)
+
+    old_img1_notes = img1.notes
+    old_img2_notes = img2.notes
+    old_img3_notes = img3.notes
+
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :place_name => obs.place_name,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen,
+        :thumb_image_id => "0",
+      },
+      :good_images => img_ids.map(&:to_s).join(' '),
+      :good_image => {
+        img2.id.to_s => { :notes => 'new notes for two', },
+        img3.id.to_s => { :notes => 'new notes for three', },
+      },
+    }
+    login('mary')
+    post(:edit_observation, params)
+    assert_response(:action => :show_observation)
+    assert_flash_success
+    assert_equal(old_img1_notes, img1.reload.notes)
+    assert_equal('new notes for two', img2.reload.notes)
+    assert_equal(old_img3_notes, img3.reload.notes)
+  end
+
   # ----------------------------
   #  Test namings.
   # ----------------------------
@@ -2060,7 +2147,7 @@ class ObserverControllerTest < FunctionalTestCase
       :copyright_holder => 'holder_2',
       :when => time2,
       :notes => 'notes_2',
-      :user_id => 2,
+      :user_id => 1,
       :image => file2,
       :content_type => 'image/jpeg',
       :created => week_ago,
@@ -2201,7 +2288,7 @@ class ObserverControllerTest < FunctionalTestCase
   # ----------------------------
   #  Lookup name.
   # ----------------------------
-  
+
   def test_lookup_name
     get(:lookup_comment, :id => 1)
     assert_response(:controller => :comment, :action => :show_comment, :id => 1)

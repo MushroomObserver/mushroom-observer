@@ -234,7 +234,7 @@ class CommentController < ApplicationController
     @target = @comment.target
     if !allowed_to_see!(@target)
       # redirected already
-    elsif !check_permission!(@comment.user_id)
+    elsif !check_permission!(@comment)
       redirect_to(:controller => @target.show_controller,
                   :action => @target.show_action, :id => @target.id,
                   :params => query_params)
@@ -272,7 +272,7 @@ class CommentController < ApplicationController
     pass_query_params
     @comment = Comment.find(params[:id])
     @target = @comment.target
-    if !check_permission!(@comment.user_id)
+    if !check_permission!(@comment)
       # all cases redirect to object show page
     elsif !@comment.destroy
       flash_error(:runtime_form_comments_destroy_failed.t(:id => params[:id]))

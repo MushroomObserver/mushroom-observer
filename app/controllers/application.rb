@@ -255,13 +255,25 @@ class ApplicationController < ActionController::Base
   # Is the current User the correct User (or is admin mode on)?  Returns true
   # or false.  (*NOTE*: this is available to views.)
   #
-  #   <% if check_permission(@object.user)
+  #   <% if check_permission(@object)
   #     link_to('Destroy', :action => :destroy_object)
   #   end %>
   #
-  def check_permission(user)
-    id = user.is_a?(ActiveRecord::Base) ? user.id : user.to_i rescue 0
-    @user && (@user.id.to_i == id || is_in_admin_mode?) rescue false
+  def check_permission(obj)
+    result = false
+    if is_in_admin_mode?
+      result = true
+    elsif obj.respond_to?(:user_id) and
+          User.current_id == obj.user_id
+      result = true
+    elsif obj.respond_to?(:has_edit_permission?) and
+          obj.has_edit_permission?(User.current)
+      result = true
+    elsif (obj.is_a?(String) or obj.is_a?(Fixnum)) and
+          obj.to_i == User.current_id
+      result = true
+    end
+    return result
   end
   helper_method :check_permission
 
@@ -270,18 +282,18 @@ class ApplicationController < ActionController::Base
   #
   #   def destroy_thing
   #     @thing = Thing.find(params[:id])
-  #     if check_permission!(@thing.user)
+  #     if check_permission!(@thing)
   #       @thing.destroy
   #       flash_notice "Success!"
   #     end
   #     redirect_to(:action => :show_thing)
   #   end
   #
-  def check_permission!(user)
-    unless result = check_permission(user)
+  def check_permission!(obj)
+    unless result = check_permission(obj)
       flash_error :permission_denied.t
     end
-    result
+    return result
   end
   alias check_user_id check_permission!
 
@@ -1159,9 +1171,7 @@ class ApplicationController < ActionController::Base
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
   def create_query(model, flavor=:default, args={})
-    result = Query.lookup(model, flavor, args)
-    result.save if !is_robot?
-    return result
+    Query.lookup(model, flavor, args)
   end
 
   # This is the common code for all the 'prev/next_object' actions.  Pass in

@@ -12,7 +12,7 @@
     end %>
   <% end %>
 
-  <% if check_permission(@observation.user_id) %>
+  <% if check_permission(@observation) %>
     <%= link_to(:show_observation_add_images.t, :controller => 'image',
                 :action => 'add_image', :id => @observation.id,
                 :params => query_params) %><br/>

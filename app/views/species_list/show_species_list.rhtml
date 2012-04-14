@@ -14,7 +14,7 @@
       add_tab(:species_list_show_bulk_edit.t, { :action => 'bulk_editor',
               :id => @species_list.id }, { :help => :species_list_show_bulk_edit_help.l })
     end
-    if check_permission(@species_list.user_id)
+    if check_permission(@species_list)
       add_tab(:species_list_show_edit.t, :action => 'edit_species_list',
               :id => @species_list.id, :params => query_params)
       add_tab(:DESTROY.t, { :action => 'destroy_species_list',

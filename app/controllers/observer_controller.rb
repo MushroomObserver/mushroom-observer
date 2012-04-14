@@ -984,7 +984,7 @@ class ObserverController < ApplicationController
     @new_image = init_image(@observation.when)
 
     # Make sure user owns this observation!
-    if !check_permission!(@observation.user_id)
+    if !check_permission!(@observation)
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params)
 
@@ -1057,7 +1057,7 @@ class ObserverController < ApplicationController
       next_state = this_state.next
     end
 
-    if !check_permission!(@observation.user_id)
+    if !check_permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(:id => @observation.id))
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params(this_state))
@@ -1200,7 +1200,7 @@ class ObserverController < ApplicationController
     @confidence_menu = translate_menu(Vote.confidence_menu)
 
     # Make sure user owns this naming!
-    if !check_permission!(@naming.user_id)
+    if !check_permission!(@naming)
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params)
 
@@ -1312,7 +1312,7 @@ class ObserverController < ApplicationController
     pass_query_params
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
-    if !check_permission!(@naming.user_id)
+    if !check_permission!(@naming)
       flash_error(:runtime_destroy_naming_denied.t(:id => @naming.id))
     elsif !@naming.deletable?
       flash_warning(:runtime_destroy_naming_someone_else.t)
@@ -2258,26 +2258,28 @@ class ObserverController < ApplicationController
 
     # Now check for edits.
     for image in images
-      args = params[:good_image][image.id.to_s] rescue nil
-      if args
-        image.attributes = args
-        if image.when_changed? or
-           image.notes_changed? or
-           image.copyright_holder_changed? or
-           image.license_id_changed? or
-           image.original_name_changed?
-          image.modified = Time.now
-          args = { :id => image }
-          args[:set_date]             = image.when             if image.when_changed?
-          args[:set_notes]            = image.notes            if image.notes_changed?
-          args[:set_copyright_holder] = image.copyright_holder if image.copyright_holder_changed?
-          args[:set_license]          = image.license          if image.license_id_changed?
-          args[:set_original_name]    = image.original_name    if image.original_name_changed?
-          if !image.save
-            flash_object_errors(image)
-          else
-            Transaction.put_image(args)
-            flash_notice(:runtime_image_updated_notes.t(:id => image.id))
+      if check_permission(image)
+        args = params[:good_image][image.id.to_s] rescue nil
+        if args
+          image.attributes = args
+          if image.when_changed? or
+             image.notes_changed? or
+             image.copyright_holder_changed? or
+             image.license_id_changed? or
+             image.original_name_changed?
+            image.modified = Time.now
+            args = { :id => image }
+            args[:set_date]             = image.when             if image.when_changed?
+            args[:set_notes]            = image.notes            if image.notes_changed?
+            args[:set_copyright_holder] = image.copyright_holder if image.copyright_holder_changed?
+            args[:set_license]          = image.license          if image.license_id_changed?
+            args[:set_original_name]    = image.original_name    if image.original_name_changed?
+            if !image.save
+              flash_object_errors(image)
+            else
+              Transaction.put_image(args)
+              flash_notice(:runtime_image_updated_notes.t(:id => image.id))
+            end
           end
         end
       end

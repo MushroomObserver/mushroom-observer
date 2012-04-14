@@ -33,7 +33,7 @@
             <span class="ListWho"><%= user_link(species_list.user) %></span>
           </td>
           <td valign='middle' class="ListActions">
-            <% if check_permission(species_list.user_id) %>
+            <% if check_permission(species_list) %>
                <%= link_to(:REMOVE.t, { :action => 'remove_observation_from_species_list',
                            :observation => @observation.id, :species_list => species_list.id },
                            :confirm => :are_you_sure.l) %>
@@ -61,7 +61,7 @@
           <span class="ListWho"><%= user_link(species_list.user) %></span>
         </td>
         <td valign='middle' class="ListActions">
-          <% if check_permission(species_list.user_id) %>
+          <% if check_permission(species_list) %>
             <%= link_to(:ADD.t, { :action => 'add_observation_to_species_list',
                         :observation => @observation.id, :species_list => species_list.id }) %>
           <% end %>

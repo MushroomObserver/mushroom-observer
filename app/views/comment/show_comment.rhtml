@@ -23,7 +23,7 @@
             :controller => @target.show_controller,
             :action => @target.show_action, :id => @target.id,
             :params => query_params)
-    if check_permission(@comment.user_id)
+    if check_permission(@comment)
       add_tab(:comment_show_edit.t,
               :action => 'edit_comment', :id => @comment.id,
               :params => query_params)

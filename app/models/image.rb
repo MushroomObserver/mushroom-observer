@@ -221,6 +221,7 @@ require 'fileutils'
 
 class Image < AbstractModel
   has_and_belongs_to_many :observations
+  has_and_belongs_to_many :projects
   has_many :thumb_clients, :class_name => 'Observation', :foreign_key => 'thumb_image_id'
   has_many :image_votes
   belongs_to :user
@@ -713,6 +714,16 @@ class Image < AbstractModel
       end
     end
     return @vote_hash
+  end
+
+  ################################################################################
+  #
+  #  :section: Projects
+  #
+  ################################################################################
+
+  def has_edit_permission?(user=User.current)
+    Project.has_edit_permission?(self, user)
   end
 
   ##############################################################################

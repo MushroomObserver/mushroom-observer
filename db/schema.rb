@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120409180900) do
+ActiveRecord::Schema.define(:version => 20120413175000) do
 
   create_table "authors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
@@ -165,6 +165,11 @@ ActiveRecord::Schema.define(:version => 20120409180900) do
   create_table "images_observations", :id => false, :force => true do |t|
     t.integer "image_id",       :default => 0, :null => false
     t.integer "observation_id", :default => 0, :null => false
+  end
+
+  create_table "images_projects", :force => true do |t|
+    t.integer "image_id",   :null => false
+    t.integer "project_id", :null => false
   end
 
   create_table "interests", :force => true do |t|
@@ -448,6 +453,11 @@ ActiveRecord::Schema.define(:version => 20120409180900) do
     t.float    "alt"
   end
 
+  create_table "observations_projects", :force => true do |t|
+    t.integer "observation_id", :null => false
+    t.integer "project_id",     :null => false
+  end
+
   create_table "observations_species_lists", :id => false, :force => true do |t|
     t.integer "observation_id",  :default => 0, :null => false
     t.integer "species_list_id", :default => 0, :null => false
@@ -463,6 +473,11 @@ ActiveRecord::Schema.define(:version => 20120409180900) do
     t.datetime "created"
     t.datetime "modified"
     t.integer  "rss_log_id"
+  end
+
+  create_table "projects_species_lists", :force => true do |t|
+    t.integer "project_id",      :null => false
+    t.integer "species_list_id", :null => false
   end
 
   create_table "queries", :force => true do |t|

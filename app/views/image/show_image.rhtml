@@ -21,7 +21,7 @@
               :action => 'commercial_inquiry', :id => @image.id,
               :params => query_params)
     end
-    if check_permission(@image.user_id)
+    if check_permission(@image)
       add_tab(:image_show_edit.t, :action => 'edit_image', :id => @image.id,
               :params => query_params)
       add_tab(:image_show_destroy.t, { :action => 'destroy_image', :id => @image.id,
@@ -76,7 +76,7 @@
   <% end %>
 
     <td>
-      <% if check_permission(@image.user_id) %>
+      <% if check_permission(@image) %>
         <p>
           <%= link_to(:image_show_edit.t, :action => 'edit_image',
                       :id => @image.id, :params => query_params) %> |

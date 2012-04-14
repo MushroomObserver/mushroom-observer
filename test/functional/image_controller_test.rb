@@ -146,6 +146,39 @@ class ImageControllerTest < FunctionalTestCase
     end
   end
 
+  def test_show_image_edit_links
+    img = images(:in_situ)
+    proj = projects(:bolete_project)
+    assert_equal(@mary.id, img.user_id)                       # owned by mary
+    assert(img.projects.include?(proj))                       # owned by bolete project
+    assert_equal([@dick.id], proj.user_group.users.map(&:id)) # dick is only member of project
+
+    login('rolf')
+    get(:show_image, :id => img.id)
+    assert_select('a[href*=edit_image]', :count => 0)
+    assert_select('a[href*=destroy_image]', :count => 0)
+    get(:edit_image, :id => img.id)
+    assert_response(:redirect)
+    get(:destroy_image, :id => img.id)
+    assert_flash_error
+
+    login('mary')
+    get(:show_image, :id => img.id)
+    assert_select('a[href*=edit_image]', :minimum => 1)
+    assert_select('a[href*=destroy_image]', :minimum => 1)
+    get(:edit_image, :id => img.id)
+    assert_response(:success)
+
+    login('dick')
+    get(:show_image, :id => img.id)
+    assert_select('a[href*=edit_image]', :minimum => 1)
+    assert_select('a[href*=destroy_image]', :minimum => 1)
+    get(:edit_image, :id => img.id)
+    assert_response(:success)
+    get(:destroy_image, :id => img.id)
+    assert_flash_success
+  end
+
   def test_image_search
     get_with_dump(:image_search, :pattern => 'Notes')
     assert_response('list_images')
