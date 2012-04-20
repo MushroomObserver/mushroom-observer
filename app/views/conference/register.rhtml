@@ -1,11 +1,20 @@
-<% @title = "MSA 2012 Foray Registration" %>
+<%
+  @title = :register_event_title.t + ' ' + @event.name
+  new_tab_set do
+    add_tab(:register_show_event.t, :action => 'show_event', :id => @event.id)
+    add_tab(:event_index.t, :action => 'index')
+  end
+%>
 
-Register to participate in the Mycological Society of America foray
+<%= @event.description %>
 
-$10 for lunch<br/>
-
-Name:<br/>
-
-Email:<br/>
-
-Directions:<br/>
+<% form_tag({:action => 'register', :conference_event => @event.id}) do %>
+  <p>
+    <%= :conference_registration_name.t %>: <%= text_field('registration', 'name', :size => 100) %>
+  </p>
+  <p>
+    <%= :conference_registration_email.t %>: <%= text_field('registration', 'email', :size => 100) %>
+  </p>
+  <center><%= submit_tag :register_save.t %><br/></center>
+<% end %>
+</p>

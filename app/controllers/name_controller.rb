@@ -1486,7 +1486,7 @@ class NameController < ApplicationController
     end
     return synonyms
   end
-
+  
   def eol_for_taxon
     store_location
     

@@ -1,0 +1,2 @@
+class ConferenceEvent < AbstractModel
+end

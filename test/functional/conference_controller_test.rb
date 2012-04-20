@@ -5,9 +5,108 @@ class ConferenceControllerTest < FunctionalTestCase
   def test_truth
     assert true
   end
+
+  def test_show_event
+    msa = conference_events(:msa_annual_meeting)
+    get_with_dump(:show_event, :id => msa.id)
+    assert_response('show_event')
+  end
+
+  def test_index
+    get_with_dump(:index)
+    assert_response('index')
+  end
   
+  def test_create_event
+    get(:create_event)
+    assert_response(:redirect)
+
+    make_admin
+    get_with_dump(:create_event)
+    assert_response('create_event')
+  end
+  
+  def create_event_params
+    return {
+      :event => {
+        :name => 'Cape Cod Foray',
+        :location => 'Cape Cod, MA, USA',
+        :description => 'Find 555 fungal friends for $50',
+        'start(1i)'      => '2012',
+        'start(2i)'      => '09',
+        'start(3i)'      => '28',
+        'end(1i)'      => '2012',
+        'end(2i)'      => '09',
+        'end(3i)'      => '28',
+      }
+    }
+  end
+  
+  def test_create_event_post
+    make_admin
+    user = @rolf
+    params = create_event_params
+    post(:create_event, params)
+    event = ConferenceEvent.find(:all, :order => "created_at DESC")[0]
+    assert_equal(params[:event][:name], event.name)
+    assert_equal(params[:event][:location], event.location)
+    assert_equal(params[:event][:description], event.description)
+    assert(event.start)
+    assert(event.end)
+    assert_response(:redirect)
+  end
+  
+  def test_edit_event
+    msa = conference_events(:msa_annual_meeting)
+    get_with_dump(:edit_event, :id => msa.id)
+    assert_response(:redirect)
+
+    make_admin
+    get_with_dump(:edit_event, :id => msa.id)
+    assert_response('edit_event')
+  end
+  
+  def test_edit_event_post
+    msa = conference_events(:msa_annual_meeting)
+    make_admin
+    user = @rolf
+
+    params = create_event_params
+    params[:id] = msa.id
+    post(:edit_event, params)
+    event = ConferenceEvent.find(:all, :order => "created_at DESC")[0]
+    assert_equal(params[:event][:name], event.name)
+    assert_equal(params[:event][:location], event.location)
+    assert_equal(params[:event][:description], event.description)
+    assert(event.start)
+    assert(event.end)
+    assert_response(:redirect)
+  end
+
   def test_register
-    get_with_dump(:register)
+    msa = conference_events(:msa_annual_meeting)
+    get_with_dump(:register, :id => msa.id)
     assert_response('register')
   end
+
+  def create_registration_params
+    return {
+      :id => conference_events(:msa_annual_meeting).id,
+      :registration => {
+        :name => 'Rolf Singer',
+        :email => 'rolf@mo.com',
+      }
+    }
+  end
+  
+  def test_register_post
+    registrations = ConferenceRegistration.count
+    params = create_registration_params
+    post(:register, params)
+    assert_equal(registrations + 1, ConferenceRegistration.count)
+    registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0]
+    assert_equal(params[:registration][:name], registration.name)
+    assert_equal(params[:registration][:email], registration.email)
+  end
+
 end
