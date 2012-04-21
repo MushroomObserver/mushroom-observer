@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120418094537) do
+ActiveRecord::Schema.define(:version => 20120421105106) do
 
   create_table "authors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(:version => 20120418094537) do
     t.string   "email",               :limit => 1024
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "how_many"
   end
 
   create_table "copyright_changes", :force => true do |t|

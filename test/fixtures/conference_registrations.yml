@@ -3,5 +3,6 @@ njw_at_msa:
   conference_event_id: 1
   name: Nathan Wilson
   email: nathan@example.com
+  how_many: 4
   created_at: 2012-03-31 09:07:30
   updated_at: 2012-03-31 09:07:38

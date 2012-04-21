@@ -8,17 +8,24 @@ class ConferenceController < ApplicationController
       registration = ConferenceRegistration.new(params[:registration])
       registration.conference_event = event
       registration.save
-      flash_notice(:register_success.l + ' ' + event.name)
+      flash_notice(:register_success.l(:name => event.name, :how_many => registration.how_many))
       redirect_to(:action => 'show_event', :id => event.id)
     else
       @event = event
     end
   end
+
+  # list_registrations
+  # allow editing of registration based on email address
+  # send confirmation email upon creation and edit
+  # Have users own ConferenceEvents rather than admin
+  # Owners can delete ConferenceEvents
   
   # Creating a conference event should be RESTful, but I'm not sure what our conventions are at this point
   def show_event
     store_location
     @event = ConferenceEvent.find(params[:id])
+    @registration_count = @event.how_many
   end
 
   def index

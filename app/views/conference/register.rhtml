@@ -8,12 +8,15 @@
 
 <%= @event.description %>
 
-<% form_tag({:action => 'register', :conference_event => @event.id}) do %>
+<% form_tag({:action => 'register', :id => @event.id}) do %>
   <p>
     <%= :conference_registration_name.t %>: <%= text_field('registration', 'name', :size => 100) %>
   </p>
   <p>
     <%= :conference_registration_email.t %>: <%= text_field('registration', 'email', :size => 100) %>
+  </p>
+  <p>
+    <%= :conference_registration_how_many.t %>: <%= text_field('registration', 'how_many', :size => 7, :value => 1) %>
   </p>
   <center><%= submit_tag :register_save.t %><br/></center>
 <% end %>

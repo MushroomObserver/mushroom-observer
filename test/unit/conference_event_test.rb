@@ -1,8 +1,8 @@
-# require 'test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
-class ConferenceEventTest < ActiveSupport::TestCase
-  # Replace this with your real tests.
-  def test_truth
-    assert true
+class ConferenceEventTest < UnitTestCase
+  def test_registration_count
+    msa = conference_events(:msa_annual_meeting)
+    assert_equal(4, msa.how_many)
   end
 end

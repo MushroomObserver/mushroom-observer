@@ -95,6 +95,7 @@ class ConferenceControllerTest < FunctionalTestCase
       :registration => {
         :name => 'Rolf Singer',
         :email => 'rolf@mo.com',
+        :how_many => 4
       }
     }
   end
@@ -107,6 +108,8 @@ class ConferenceControllerTest < FunctionalTestCase
     registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0]
     assert_equal(params[:registration][:name], registration.name)
     assert_equal(params[:registration][:email], registration.email)
+    assert_equal(params[:registration][:how_many], registration.how_many)
   end
 
+  # test_list_registrations
 end

@@ -14,15 +14,15 @@
     <%= :conference_event_location.t %>: <%= text_field('event', 'location', :size => 150) %>
   </p>
   <p>
-    <%= :conference_event_description.t %>: <%= text_area('event', 'description', :size => 150) %>
-  </p>
-  <p>
     <%= :conference_event_start.t %>: <%= date_select('event', 'start', :start_year => Time.now.year, 
       :end_year => Time.now.year + 10) %><br/><br/>
   </p>
   <p>
     <%= :conference_event_end.t %>: <%= date_select('event', 'end', :start_year => Time.now.year, 
       :end_year => Time.now.year + 10) %><br/><br/>
+  </p>
+  <p>
+    <%= :conference_event_description.t %>:<br/><%= text_area('event', 'description', :cols => 100) %>
   </p>
   <center><%= submit_tag :create_event_add.t %><br/></center>
 <% end %>
