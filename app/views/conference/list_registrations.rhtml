@@ -1,0 +1,36 @@
+<%
+  @title = :list_registrations_title.t(:name => @event.name)
+  new_tab_set do
+    add_tab(:show_event.t, :action => 'show_event', :id => @event.id)
+    add_tab(:event_index.t, :action => 'index')
+    add_tab(:register_event.t, :action => 'register', :id => @event.id)
+    if is_in_admin_mode?
+      add_tab(:edit_event.t, :action => 'edit_event', :id => @event.id)
+      add_tab(:create_event.t, :action => 'create_event')
+    end
+  end
+%>
+
+<table border="1">
+  <tr>
+    <% for label in [:conference_registration_id, :conference_registration_name, :conference_registration_email, :conference_registration_how_many] %>
+      <td class="TableColumn"><%= label.t %></td>
+    <% end %>
+  </tr>
+  <% for r in @event.conference_registrations %>
+    <tr>
+      <td>
+        <%= r.id %>
+      </td>
+      <td>
+        <%= r.name %>
+      </td>
+      <td>
+        <%= r.email %>
+      </td>
+      <td>
+        <%= r.how_many %>
+      </td>
+    </tr>
+  <% end %>
+</table>

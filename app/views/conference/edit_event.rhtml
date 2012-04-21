@@ -1,6 +1,7 @@
 <%
   @title = :edit_event_title.l
   new_tab_set do
+    add_tab(:cancel_and_show.t(:TYPE => 'Conference Event'), :action => 'show_event', :id => @event.id)
     add_tab(:event_index.t, :action => 'index')
   end
 %>

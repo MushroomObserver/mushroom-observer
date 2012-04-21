@@ -2183,9 +2183,9 @@ conference_event_start:  Start
 conference_event_end:  End
 conference_event_created_at:  Created At
 conference_event_updated_at:  Updated At
-conference_registration_how_many:  How many?
 
 # conference/show_event
+show_event:  Show Conference Event
 show_event_title:  "[name] Conference Event"
 show_event_how_many:  "How many attending: [how_many]"
 
@@ -2205,16 +2205,20 @@ edit_event_title:  Editing Conference Event
 edit_event_save:  Save
 edit_event_not_allowed:  Only admins can edit conference events
 
+# conference/list_registrations
+list_registrations:  List Registrations
+list_registrations_title:  Registrations for [name]
+list_registrations_not_allowed:  Only admins can list registrations
 
 # ConferenceRegistration Fields
-conference_registration_name:  Your name
-conference_registration_email:  Your email
-conference_registration_count:  How many?
+conference_registration_id:  ID
+conference_registration_name:  Name
+conference_registration_email:  Email
+conference_registration_how_many:  How many?
 
 # conference/register
 register_event:  Register
 register_event_title:  Register for
-register_show_event:  Show Event
 register_save:  Save
 register_success:  Successfully registered [how_many] for [name]
 
@@ -5484,11 +5488,3 @@ _unit_test_w: '[:_unit_test_x]'
 _unit_test_x: '[:_unit_test_y]'
 _unit_test_y: '[:_unit_test_z]'
 _unit_test_z: bob
-
-################################################################################
-
-# Extra/unnecessary translations:
-
-################################################################################
-
-# Extra/unnecessary translations:

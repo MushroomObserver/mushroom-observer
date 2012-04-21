@@ -111,5 +111,13 @@ class ConferenceControllerTest < FunctionalTestCase
     assert_equal(params[:registration][:how_many], registration.how_many)
   end
 
-  # test_list_registrations
+  def test_list_registrations
+    msa = conference_events(:msa_annual_meeting)
+    get(:list_registrations, :id => msa.id)
+    assert_response(:redirect)
+
+    make_admin
+    get_with_dump(:list_registrations, :id => msa.id)
+    assert_response('list_registrations')
+  end
 end

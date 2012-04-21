@@ -1,7 +1,7 @@
 <%
   @title = :register_event_title.t + ' ' + @event.name
   new_tab_set do
-    add_tab(:register_show_event.t, :action => 'show_event', :id => @event.id)
+    add_tab(:cancel_and_show.t(:TYPE => 'Conference Event'), :action => 'show_event', :id => @event.id)
     add_tab(:event_index.t, :action => 'index')
   end
 %>

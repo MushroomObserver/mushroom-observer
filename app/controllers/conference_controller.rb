@@ -15,7 +15,16 @@ class ConferenceController < ApplicationController
     end
   end
 
-  # list_registrations
+  def list_registrations
+    if is_in_admin_mode?
+      @event = ConferenceEvent.find(params[:id])
+      @hello = "Hello"
+    else
+      flash_error(:list_registrations_not_allowed.l)
+      redirect_to(:action => 'index')
+    end
+  end
+
   # allow editing of registration based on email address
   # send confirmation email upon creation and edit
   # Have users own ConferenceEvents rather than admin

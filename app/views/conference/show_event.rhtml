@@ -4,6 +4,7 @@
     add_tab(:event_index.t, :action => 'index')
     add_tab(:register_event.t, :action => 'register', :id => @event.id)
     if is_in_admin_mode?
+      add_tab(:list_registrations.t, :action => 'list_registrations', :id => @event.id)
       add_tab(:edit_event.t, :action => 'edit_event', :id => @event.id)
       add_tab(:create_event.t, :action => 'create_event')
     end
