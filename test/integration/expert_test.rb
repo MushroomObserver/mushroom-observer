@@ -29,70 +29,82 @@ class ExpertTest < IntegrationTestCase
 
     show_name = "/name/show_name/#{name.id}"
 
-    admin    = login!(@dick)     # we'll make him admin
-    reviewer = login!(@rolf)     # reviewer
-    owner    = login!(@mary)     # random user
-    user     = login!(@katrina)  # another random user
-    lurker   = open_session      # nobody
+    admin    = new_user_session(@dick)     # we'll make him admin
+    reviewer = new_user_session(@rolf)     # reviewer
+    owner    = new_user_session(@mary)     # random user
+    user     = new_user_session(@katrina)  # another random user
+    lurker   = new_session                 # nobody
 
     # Make Dick an admin.
     admin.click(:href => /turn_admin_on/)
 
     # Have random user create a public description.
-    owner.get(show_name)
-    owner.click(:href => /create_name_description/)
-    owner.assert_template('name/create_name_description')
-    owner.open_form do |form|
-      form.assert_value('source_type', 'public')
-      form.assert_value('source_name', '')
-      form.assert_value('public_write', true)
-      form.assert_value('public', true)
-      form.assert_enabled('source_type')
-      form.assert_enabled('source_name')
-      # (have to be enabled because user could switch to :source or :user,
-      # instead must used javascript to disable these when :public)
-      form.assert_enabled('public_write')
-      form.assert_enabled('public')
-      form.change('notes', 'I like this mushroom.')
-      form.submit
+    in_session(owner) do
+      get(show_name)
+      click(:href => /create_name_description/)
+      assert_template('name/create_name_description')
+      open_form do |form|
+        form.assert_value('source_type', 'public')
+        form.assert_value('source_name', '')
+        form.assert_value('public_write', true)
+        form.assert_value('public', true)
+        form.assert_enabled('source_type')
+        form.assert_enabled('source_name')
+        # (have to be enabled because user could switch to :source or :user,
+        # instead must used javascript to disable these when :public)
+        form.assert_enabled('public_write')
+        form.assert_enabled('public')
+        form.change('notes', 'I like this mushroom.')
+        form.submit
+      end
+      assert_flash_success
+      assert_template('name/show_name_description')
     end
-    owner.assert_flash_success
-    owner.assert_template('name/show_name_description')
 
     # Admin of course can do anything.
-    admin.get(show_name)
-    admin.assert_select('a[href*=edit_name_description]')
-    admin.assert_select('a[href*=destroy_name_description]')
-    admin.click(:href => /edit_name_description/)
+    in_session(admin) do
+      get(show_name)
+      assert_select('a[href*=edit_name_description]')
+      assert_select('a[href*=destroy_name_description]')
+      click(:href => /edit_name_description/)
+    end
 
     # Reviewer is an admin for public descs, and can edit and destroy.
-    reviewer.get(show_name)
-    reviewer.assert_select('a[href*=edit_name_description]')
-    reviewer.assert_select('a[href*=destroy_name_description]')
-    reviewer.click(:href => /edit_name_description/)
+    in_session(reviewer) do
+      get(show_name)
+      assert_select('a[href*=edit_name_description]')
+      assert_select('a[href*=destroy_name_description]')
+      click(:href => /edit_name_description/)
+    end
 
     # Owner, surprisingly, is NOT an admin for public descs, and cannot
     # destroy.  But can edit.
-    owner.get(show_name)
-    owner.assert_select('a[href*=edit_name_description]')
-    owner.assert_select('a[href*=destroy_name_description]', 0)
-    owner.click(:href => /edit_name_description/)
-    owner.assert_template('name/edit_name_description')
+    in_session(owner) do
+      get(show_name)
+      assert_select('a[href*=edit_name_description]')
+      assert_select('a[href*=destroy_name_description]', 0)
+      click(:href => /edit_name_description/)
+      assert_template('name/edit_name_description')
+    end
 
     # Other random users end up with the same permissions.
-    user.get(show_name)
-    user.assert_select('a[href*=edit_name_description]')
-    user.assert_select('a[href*=destroy_name_description]', 0)
-    user.click(:href => /edit_name_description/)
-    user.assert_template('name/edit_name_description')
+    in_session(user) do
+      get(show_name)
+      assert_select('a[href*=edit_name_description]')
+      assert_select('a[href*=destroy_name_description]', 0)
+      click(:href => /edit_name_description/)
+      assert_template('name/edit_name_description')
+    end
 
     # The lurker appears to have same permissions, but will need to login in
     # order to actually do anything.
-    lurker.get(show_name)
-    lurker.assert_select('a[href*=edit_name_description]')
-    lurker.assert_select('a[href*=destroy_name_description]', 0)
-    lurker.click(:href => /edit_name_description/)
-    lurker.assert_template('account/login')
+    in_session(lurker) do
+      get(show_name)
+      assert_select('a[href*=edit_name_description]')
+      assert_select('a[href*=destroy_name_description]', 0)
+      click(:href => /edit_name_description/)
+      assert_template('account/login')
+    end
 
     # Check that all editors can edit the "source_name".
     admin.open_form do |form|
@@ -143,38 +155,40 @@ class ExpertTest < IntegrationTestCase
 
     show_name = "/name/show_name/#{name.id}"
 
-    admin    = login!(@dick)     # we'll make him admin
-    reviewer = login!(@rolf)     # reviewer
-    owner    = login!(@mary)     # random user
-    user     = login!(@katrina)  # another random user
-    lurker   = open_session      # nobody
+    admin    = new_user_session(@dick)     # we'll make him admin
+    reviewer = new_user_session(@rolf)     # reviewer
+    owner    = new_user_session(@mary)     # random user
+    user     = new_user_session(@katrina)  # another random user
+    lurker   = new_session                 # nobody
 
     # Make Dick an admin.
     admin.click(:href => /turn_admin_on/)
 
     # Have random user create a personal description.
-    owner.get(show_name)
-    owner.click(:href => /create_name_description/)
-    owner.assert_template('name/create_name_description')
-    owner.open_form do |form|
-      form.assert_value('source_type', 'public')
-      form.assert_value('source_name', '')
-      form.assert_value('public_write', true)
-      form.assert_value('public', true)
-      form.assert_enabled('source_type')
-      form.assert_enabled('source_name')
-      form.assert_enabled('public_write')
-      form.assert_enabled('public')
-      form.select('source_type', /user/i)
-      form.change('source_name', "Mary's Corner")
-      form.uncheck('public_write')
-      form.change('gen_desc', 'Leafy felt lichens.')
-      form.change('diag_desc', 'Usually with veins and tomentum below.')
-      form.change('look_alikes', '_Solorina_ maybe, but not much else.')
-      form.submit
+    in_session(owner) do
+      get(show_name)
+      click(:href => /create_name_description/)
+      assert_template('name/create_name_description')
+      open_form do |form|
+        form.assert_value('source_type', 'public')
+        form.assert_value('source_name', '')
+        form.assert_value('public_write', true)
+        form.assert_value('public', true)
+        form.assert_enabled('source_type')
+        form.assert_enabled('source_name')
+        form.assert_enabled('public_write')
+        form.assert_enabled('public')
+        form.select('source_type', /user/i)
+        form.change('source_name', "Mary's Corner")
+        form.uncheck('public_write')
+        form.change('gen_desc', 'Leafy felt lichens.')
+        form.change('diag_desc', 'Usually with veins and tomentum below.')
+        form.change('look_alikes', '_Solorina_ maybe, but not much else.')
+        form.submit
+      end
+      assert_flash_success
+      assert_template('name/show_name_description')
     end
-    owner.assert_flash_success
-    owner.assert_template('name/show_name_description')
 
     desc = NameDescription.last
     assert_equal(:user, desc.source_type)
@@ -196,34 +210,43 @@ class ExpertTest < IntegrationTestCase
     destroy_name = "/name/destroy_name_description/#{desc.id}"
 
     # Admin of course can do anything.
-    admin.get(show_name)
-    admin.assert_select("a[href*=#{edit_name}]")
-    admin.assert_select("a[href*=#{destroy_name}]")
-    admin.click(:href => edit_name)
+    in_session(admin) do
+      admin.get(show_name)
+      admin.assert_select("a[href*=#{edit_name}]")
+      admin.assert_select("a[href*=#{destroy_name}]")
+      admin.click(:href => edit_name)
+    end
 
     # Reviewer is nothing in this case.
-    reviewer.get(show_name)
-    reviewer.assert_select("a[href*=#{edit_name}]", 0)
-    reviewer.assert_select("a[href*=#{destroy_name}]", 0)
+    in_session(reviewer) do
+      get(show_name)
+      assert_select("a[href*=#{edit_name}]", 0)
+      assert_select("a[href*=#{destroy_name}]", 0)
+    end
 
     # Owner, is an admin and can do anything.
     # destroy.  But can edit.
-    owner.get(show_name)
-    owner.assert_select("a[href*=#{edit_name}]")
-    owner.assert_select("a[href*=#{destroy_name}]")
-    owner.click(:href => edit_name)
-    owner.assert_template('name/edit_name_description')
+    in_session(owner) do
+      get(show_name)
+      assert_select("a[href*=#{edit_name}]")
+      assert_select("a[href*=#{destroy_name}]")
+      click(:href => edit_name)
+      assert_template('name/edit_name_description')
+    end
 
     # Other random users are also nobodies.
-    user.get(show_name)
-    user.assert_select("a[href*=#{edit_name}]", 0)
-    user.assert_select("a[href*=#{destroy_name}]", 0)
+    in_session(user) do
+      get(show_name)
+      assert_select("a[href*=#{edit_name}]", 0)
+      assert_select("a[href*=#{destroy_name}]", 0)
+    end
 
     # The lurker is nobody.
-    lurker.get(show_name)
-    lurker.assert_select("a[href*=#{edit_name}]", 0)
-    lurker.assert_select("a[href*=#{destroy_name}]", 0)
-
+    in_session(lurker) do
+      get(show_name)
+      assert_select("a[href*=#{edit_name}]", 0)
+      assert_select("a[href*=#{destroy_name}]", 0)
+    end
   end
 
   # --------------------------------------------------------

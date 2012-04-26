@@ -40,7 +40,8 @@
 #
 #  class YourTest < IntegrationTestCase
 #
-#    # Most basic test doesn't even need to know about session.
+#    # Most basic test doesn't even need to know about session: all session methods
+#    # are automatically delegated to a default session created at setup.
 #    def test_simplest
 #      get('/controller/action?args=...')
 #      assert_template('controller/action')
@@ -54,37 +55,45 @@
 #    # More complicated session management.
 #    def test_multiple_session
 #
-#      # Rolf's session is current throughout the block.
-#      rolf = open_session do
-#        get('/login')
-#        open_form do |form|
-#          form.edit_field('login', 'rolf')
-#          form.edit_field('password', 'password')
-#          form.submit('Login')
-#        end
+#      # Create two sessions: think "browser" - each session represents the
+#      # actions of a single user in one or more tabs of a single browser.
+#      rolf = new_session
+#      mary = new_user_session('mary')
+#
+#      # Have Rolf do some stuff.
+#      rolf.login!('rolf')
+#      rolf.get('/edit_rolfs_stuff')
+#      rolf.assert_success
+#
+#      # Mave Mary do stuff.
+#      mary.get('/edit_rolfs_stuff')
+#      mary.assert_redirect
+#
+#      # Bind a block of code to a given session.
+#      in_session(rolf) do
+#        click(:label => 'Destroy It')
+#        assert_flash_success
 #      end
 #
-#      # Now create Mary's session; it becomes current.
-#      mary = login('mary')
+#      # You can also create anonymous sessions.
+#      open_session do
+#        get('/show_index')
+#        assert_select('span', :text => 'Rolfs Thing', :count => 0)
+#      end
 #
-#      # The following are identical since Mary's is current.
-#      get('/index')
-#      mary.get('/index')
-#
-#      # All assertions and helpers automatically get delegated to the current
-#      # session by default.  (This asserts that there are at least 10
-#      # "show_object" links on the last page Mary requested.)
-#      assert_select('a[href*=show_object]', :minimum => 10)
-#
-#      # Addressing session explicitly helps when mixing queries.
-#      mary.get('/show_object/1')
-#      rolf.get('/show_object/2')
-#      mary.logout
-#
-#      # Now that Mary is gone, we can make Rolf's "current".
-#      current_session = rolf
-#      get('/show_object/3')
-#      ...
+#      # Lastly, you can nest things.
+#      in_session(rolf) do
+#        get('/rolfs_page')
+#        mary.get('marys_page')
+#        open_session do
+#          login('dick')
+#          in_session('mary')
+#            get('/mary_is_now_confused')
+#          end
+#          logout # dick
+#        end
+#        post('/rolfs_page')
+#      end
 #    end
 #  end
 #
@@ -97,26 +106,42 @@ class IntegrationTestCase < Test::Unit::TestCase
 
   # Open a default session.
   def setup
-    open_session
+    @current_session = new_session
   end
 
   # Instantiate a new session.
   def new_session
-    IntegrationSession.new
+    session = IntegrationSession.new
+    session.test_case = self
+    return session
   end
 
-  # Open new session.  I've redefined this instead of using
-  # ActionController::IntegrationTest because I could not figure out which
-  # session it was using at any given time.  This makes it more explicit.
+  # Instantiate a new session with user already logged in.
+  def new_user_session(user)
+    session = new_session
+    session.login!(user)
+    return session
+  end
+
+  # Run an enclosed block of code in a temporary, new session.
   def open_session
+    old_session = @current_session
     @current_session = new_session
-    @current_session.test_case = self
-    yield @current_session if block_given?
-    @current_session
+    result = yield @current_session
+    @current_session = old_session
+    return result
   end
 
-  # Automatically delegate everything we don't recognize to the current
-  # session.
+  # Bind all the actions in the enclosed block of code to another session.
+  def in_session(another_session)
+    old_session = @current_session
+    @current_session = another_session
+    result = yield @current_session
+    @current_session = old_session
+    return result
+  end
+
+  # Automatically delegate everything we don't recognize to the current session.
   def method_missing(name, *args, &block)
     @current_session.send(name, *args, &block)
   end

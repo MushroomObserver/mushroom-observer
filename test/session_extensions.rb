@@ -149,7 +149,7 @@ module SessionExtensions
     end
   end
 
-  # Logion the given user, testing to make sure it was successful.
+  # Login the given user, testing to make sure it was successful.
   def login!(user, *args)
     login(user, *args)
     assert_flash(/success/i)
@@ -161,6 +161,33 @@ module SessionExtensions
   def logout
     click(:label => 'Logout')
     assert_flash(/success/i)
+  end
+
+  ################################################################################
+  #
+  #  :section: Form Helpers
+  #
+  ################################################################################
+
+  def assert_form_has_correct_values(expected_values)
+    clean_our_backtrace do
+      open_form do |form|
+        for key, value in expected_values
+          form.assert_value(key, value)
+        end
+      end
+    end
+  end
+
+  def submit_form_with_changes(changes)
+    clean_our_backtrace do
+      open_form do |form|
+        for key, value in changes
+          form.change(key, value)
+        end
+        form.submit
+      end
+    end
   end
 
   # Look up a given form, initialize a Hash of parameters for it, and wrap up
@@ -287,6 +314,48 @@ module SessionExtensions
       end
 
       assert_block("Expected a link matching: #{args.inspect}") { done }
+    end
+  end
+
+  ################################################################################
+  #
+  #  :section: assert_select Wrappers
+  #
+  ################################################################################
+
+  def assert_link_exists(url)
+    assert_link_exists_general_case(url, '')
+  end
+
+  def assert_no_link_exists(url)
+    assert_no_link_exists_general_case(url, '')
+  end
+
+  def assert_link_exists_containing(url)
+    assert_link_exists_general_case(url, '*')
+  end
+
+  def assert_no_link_exists_containing(url)
+    assert_no_link_exists_general_case(url, '*')
+  end
+
+  def assert_link_exists_beginning_with(url)
+    assert_link_exists_general_case(url, '^')
+  end
+
+  def assert_no_link_exists_beginning_with(url)
+    assert_no_link_exists_general_case(url, '^')
+  end
+
+  def assert_link_exists_general_case(url, mod)
+    clean_our_backtrace do
+      assert_select("a[href#{mod}=#{url}]", { :minimum => 1 }, "Expected to find link to #{url}")
+    end
+  end
+
+  def assert_no_link_exists_general_case(url, mod)
+    clean_our_backtrace do
+      assert_select("a[href#{mod}=#{url}]", { :count => 0 }, "Shouldn't be any links to #{url}")
     end
   end
 end

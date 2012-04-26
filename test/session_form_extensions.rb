@@ -39,6 +39,8 @@
 #
 ################################################################################
 
+require 'session_upload'
+
 class SessionExtensions::Form
 
   # Instance of the session that this form came from.
@@ -310,7 +312,7 @@ class SessionExtensions::Form
   def upload(id, file, type)
     field = assert_enabled(id)
     context.assert_equal(:file, field.type)
-    field.value = ActionController::TestUploadedFile.new(file, type, :binary)
+    field.value = FileUpload.new(file, type)
   end
 
   # Change selection of pulldown menu.
@@ -346,6 +348,14 @@ class SessionExtensions::Form
         hash[field.name] = field.value ? field.on_value : '0'
       elsif field.type == :radio
         hash[field.name] = field.on_value if field.value
+      elsif field.type == :file
+        if field.value
+          file = field.value.filename
+          type = field.value.content_type
+          hash[field.name] = ActionController::TestUploadedFile.new(file, type, :binary)
+        else
+          hash[field.name] = nil
+        end
       elsif field.value.to_s != ''
         hash[field.name] = field.value
       end
