@@ -164,7 +164,7 @@ sub delete_files {
   print "\nDeleting:\n" if $OPT_V;
   foreach my $file (@$files) {
     print "$file\n" if $OPT_V;
-    unlink($file) if !$OPT_TEST;
+    unlink("$LOCAL_PATH/$file") if !$OPT_TEST;
   }
 }
 
@@ -174,7 +174,7 @@ sub upload_files {
   print "\nUploading:\n" if $OPT_V;
   if (!$OPT_TEST) {
     my ($url, $path) = split(':', $REMOTE_PATH);
-    my $flags = $OPT_V ? '-xvPf' : '-xPf';
+    my $flags = $OPT_V ? '-xvPf' : '-xvPf';
     system("cd $LOCAL_PATH; tar -T $TEMP_FILE -cf - | ssh $url \\(cd $path\\; tar $flags -\\)");
   } elsif ($OPT_V) {
     system("cat $TEMP_FILE");
