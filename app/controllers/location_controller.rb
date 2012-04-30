@@ -603,7 +603,7 @@ class LocationController < ApplicationController
         # Non-admins just send email-request to admins.
         else
           flash_warning(:runtime_merge_locations_warning.t)
-          content = :email_location_merge.t(:user => @user.login,
+          content = :email_location_merge.l(:user => @user.login,
                   :this => @location.name, :that => merge.name)
           AccountMailer.deliver_webmaster_question(@user.email, content)
         end
