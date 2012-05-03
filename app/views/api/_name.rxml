@@ -28,7 +28,7 @@ xml.name(
 
   if refs && object.synonym
     xml.synonyms(:number => object.synonym.names.length - 1) do
-      for synonym in object.synonym.names - [name]
+      for synonym in object.synonym.names - [object]
         render_xml_partial(xml, :name, :locals => {
           :object => synonym,
           :detail => false,

@@ -47,7 +47,7 @@ xml.image(
       xml.content_type object.content_type
     end
     xml.normal_file do
-      xml.url          object.big_url
+      xml.url          object.large_url
       xml.content_type object.content_type
     end
     xml.thumbnail_file do

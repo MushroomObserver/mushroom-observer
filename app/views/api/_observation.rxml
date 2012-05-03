@@ -10,8 +10,27 @@ xml.observation(
   :id  => object.id,
   :url => "#{HTTP_DOMAIN}/observer/show_observation/#{object.id}"
 ) do
+  xml.created  object.created.api_time
+  xml.modified object.modified.api_time
   xml.date  xml_date(object.when)
+  xml.specimen_available object.specimen ? 'true' : 'false'
+  xml.is_collection_location object.is_collection_location ? 'true' : 'false'
   xml.notes object.notes.to_s.tpl_nodiv
+
+  if !object.lat.blank?
+    xml.latitude '%.4f' % object.lat
+    xml.latitude_units 'degrees north'
+  end
+
+  if !object.lat.blank?
+    xml.longitude '%.4f' % object.long
+    xml.longitude_units 'degrees east'
+  end
+
+  if !object.alt.blank?
+    xml.altitude '%d' % object.alt
+    xml.altitude_units 'meters'
+  end
 
   if object.location
     render_xml_partial(xml, :location, :locals => {
@@ -28,16 +47,11 @@ xml.observation(
     render_xml_partial(xml, :name, :locals => {
       :object => object.name,
       :detail => false,
-      :refs   => detail,
+      :refs   => false,
     })
   end
 
   if detail
-    xml.created  object.created.api_time
-    xml.modified object.modified.api_time
-    xml.specimen_available object.specimen ? 'true' : 'false'
-    xml.is_collection_location object.is_collection_location ? 'true' : 'false'
-
     render_xml_partial(xml, :user, :locals => {
       :object => object.user,
       :detail => false,
@@ -48,7 +62,7 @@ xml.observation(
         render_xml_partial(xml, :naming, :locals => {
           :object => naming,
           :detail => false,
-          :refs    => false,
+          :refs   => false,
         })
       end
     end
