@@ -10,9 +10,9 @@ xml.location(
 ) do
   xml.title object.display_name
 
-  xml.elevation_maximum '%d' % object.high
-  xml.elevation_minimum '%d' % object.low
-  xml.elevation_units   'meters'
+  xml.elevation_maximum '%d' % object.high  if !object.high.blank?
+  xml.elevation_minimum '%d' % object.low   if !object.low.blank?
+  xml.elevation_units   'meters'            if !object.high.blank? || !object.low.blank?
 
   xml.latitude_south  '%.4f' % object.south
   xml.latitude_north  '%.4f' % object.north

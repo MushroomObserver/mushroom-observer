@@ -267,6 +267,10 @@ class API
   def self.version; API_VERSION; end
   def version; API_VERSION; end
 
+  # Short hand.
+  def method; args[:method]; end
+  def action; args[:action]; end
+
   ##############################################################################
   #
   #  :section: Public interface.
@@ -376,11 +380,11 @@ class API
     instantiate_results(detail == :high ? joins : nil)
 
     # Count total number of results available.
-    if page > 1 || ids.length >= page_len
+    if page > 1 || results.length >= page_len
       self.number = model.connection.select_value(count_query).to_i
       self.pages  = (number.to_f / page_len).ceil
     else
-      self.number = ids.length
+      self.number = results.length
       self.pages  = 1
     end
   end
@@ -640,13 +644,14 @@ class API
     conds += sql_id(:editor, 'names_versions.user_id')
     conds += sql_date(:created, 'names.created')
     conds += sql_date(:modified, 'names.modified')
+    conds += sql_search(:name, 'names.search_name')
     conds += sql_search(:author, 'names.author')
     conds += sql_search(:citation, 'names.citation')
     conds += sql_search(:classification, 'names.classification')
     conds += sql_enum(:rank, 'names.rank', Name.all_ranks)
     conds += sql_boolean(:deprecated, 'names.deprecated')
-    conds += sql_boolean(:misspelling, '(names.correct_spelling_id NOT NULL)')
-    conds += sql_boolean(:has_description, '(names.description_id NOT NULL)')
+    conds += sql_boolean(:misspelling, '(names.correct_spelling_id IS NOT NULL)')
+    conds += sql_boolean(:has_description, '(names.description_id IS NOT NULL)')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'names.id')
 
@@ -2388,7 +2393,7 @@ private
         result << "#{column} IS TRUE"
       else
         raise error(102, "invalid #{arg}: '#{x}' (expect '0', '1', 'false', " +
-                         "'true', 'no', 'yes')
+                         "'true', 'no', 'yes'")
       end
     end
     return result

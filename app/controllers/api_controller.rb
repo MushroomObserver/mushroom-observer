@@ -14,6 +14,7 @@
 ################################################################################
 
 class ApiController < ApplicationController
+  require_dependency 'classes/api'
   require_dependency 'controllers/api_controller/api'
   require_dependency 'controllers/api_controller/ajax'
   require_dependency 'controllers/api_controller/auto_complete'

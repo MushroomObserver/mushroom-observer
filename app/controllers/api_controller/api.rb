@@ -31,7 +31,7 @@ class ApiController
       end
       args = args.first
       args[:method] = method
-      args[:_safe] = false
+      # args[:_safe] = false
       xact = Transaction.new(args)
       xact.validate_args
       api = xact.execute
@@ -76,7 +76,7 @@ class ApiController
     args[:method] = request.method.to_s
     args[:action] = type.to_s
     args[:http_request_body] = request if request.content_length.to_i > 0
-    args[:_safe] = false
+    # args[:_safe] = false
 
     api = API.execute(args)
     render_results(api)
@@ -85,7 +85,7 @@ class ApiController
   def render_results(api)
     headers['Content-Type'] = 'application/xml'
 
-    @results = api.results
+    @objects = api.results
     @errors  = api.errors
     @user    = api.user
     @query   = api.query
