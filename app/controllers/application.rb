@@ -136,6 +136,7 @@ class ApplicationController < ActionController::Base
     yield
   rescue => e
     @error = e
+    raise e
   end
 
   # Redirect from www.mo.org to mo.org.

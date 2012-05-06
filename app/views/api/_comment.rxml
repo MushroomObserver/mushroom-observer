@@ -1,31 +1,17 @@
-# Locals:
-#   :object             Comment instance.
-#   :detail             Boolean: include details?
-#   :refs               Boolean: include ref'd object?
-
-detail ||= false
-refs   ||= false
-
-xml.comment(
-  :id  => object.id,
-  :url => "#{HTTP_DOMAIN}/comment/show_comment/#{object.id}"
+xml.send(tag,
+  :id => object.id,
+  :url => object.show_url,
+  :type => 'comment'
 ) do
-  xml.created object.created.api_time
-  xml.summary object.summary.to_s.tl
-  xml.content object.comment.to_s.tpl_nodiv
-
-  render_xml_partial(xml, :user, :locals => {
-    :object => object.user,
-    :detail => false,
-  })
-
-  if refs
-    xml.object do
-      type = object.target_type.to_s.underscore.to_sym
-      render_xml_partial(xml, type, :locals => {
-        :object => object.target,
-        :detail => false,
-      })
-    end
+  xml_html_string(xml, :summary, object.summary.to_s.tl)
+  xml_html_string(xml, :content, object.comment.to_s.tpl_nodiv)
+  if !detail
+    xml_minimal_object(xml, :owner, User, object.user_id)
+    xml_minimal_object(xml, :object, object.target_type, object.target_id)
+  else
+    xml_detailed_object(xml, :owner, object.user)
+    xml_detailed_object(xml, :object, object.target)
+    xml_datetime(xml, :created, object.created)
+    xml_datetime(xml, :modified, object.modified)
   end
 end

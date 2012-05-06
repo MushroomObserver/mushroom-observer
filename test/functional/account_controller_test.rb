@@ -247,7 +247,8 @@ class AccountControllerTest < FunctionalTestCase
     # First make sure it can serve the form to start with.
     requires_login(:profile)
 
-    # Now change everything.
+    # Now change everything. (Note that this user owns no images, so this tests
+    # the bulk copyright_holder updater in the boundary case of no images.)
     params = {
       :user => {
         :name       => "new_name",

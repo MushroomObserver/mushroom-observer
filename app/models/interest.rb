@@ -52,6 +52,16 @@ class Interest < AbstractModel
   belongs_to :target, :polymorphic => true
   belongs_to :user
 
+  # Returns Array of all models (Classes) which take interests.
+  def self.all_types
+    [ Location, Name, Observation, Project, SpeciesList ]
+  end
+
+  # Returns Array of all valid +target_type+ values (Symbol's).
+  def self.all_type_tags
+    [ :location, :name, :observation, :project, :species_list ]
+  end
+
   # Find all Interests associated with a given object.  This should really be
   # created magically like all the other find_all_by_xxx methods, but the
   # polymorphism messes it up.

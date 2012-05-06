@@ -1029,20 +1029,6 @@ class SpeciesListControllerTest < FunctionalTestCase
     old_vote2 = obs2.namings.first.users_vote(obs2.user).value rescue nil
     old_vote3 = obs3.namings.first.users_vote(obs3.user).value rescue nil
 
-    def obs_params(obs, vote)
-      {
-        :when_str   => obs.when_str,
-        :place_name => obs.place_name,
-        :notes      => obs.notes,
-        :lat        => obs.lat,
-        :long       => obs.long,
-        :alt        => obs.alt,
-        :is_collection_location => obs.is_collection_location ? '1' : '0',
-        :specimen   => obs.specimen ? '1' : '0',
-        :value      => vote,
-      }
-    end
-
     obs_params1 = obs_params(obs1, old_vote1)
     obs_params2 = obs_params(obs2, old_vote2)
     obs_params3 = obs_params(obs3, old_vote3)
@@ -1189,5 +1175,39 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_flash_success
     new_obs3 = Observation.find(obs3.id)
     assert_equal('new notes', new_obs3.notes)
+  end
+
+  def test_bulk_editor_change_vote_on_observation_with_no_votes
+    # Make sure species list has an old-style observation with no namings or votes.
+    spl = species_lists(:unknown_species_list)
+    obs = observations(:unknown_with_no_naming)
+    spl.observations << obs
+    spl.save!
+    spl.reload
+    vote = Vote.next_best_vote
+    params = {
+      :id => spl.id,
+      :observation => {
+        obs.id.to_s => obs_params(obs, vote)
+      },
+    }
+    login('mary')
+    post(:bulk_editor, params)
+    obs.reload
+    assert_equal(vote, obs.owners_votes.first.value)
+  end
+
+  def obs_params(obs, vote)
+    {
+      :when_str   => obs.when_str,
+      :place_name => obs.place_name,
+      :notes      => obs.notes,
+      :lat        => obs.lat,
+      :long       => obs.long,
+      :alt        => obs.alt,
+      :is_collection_location => obs.is_collection_location ? '1' : '0',
+      :specimen   => obs.specimen ? '1' : '0',
+      :value      => vote,
+    }
   end
 end

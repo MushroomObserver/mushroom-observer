@@ -1,37 +1,25 @@
-# Locals:
-#   :object             Location instance.
-#   :detail             Boolean: include details?
-
-detail ||= false
-
-xml.location(
-  :id  => object.id,
-  :url => "#{HTTP_DOMAIN}/location/show_location/#{object.id}"
+xml.send(tag,
+  :id => object.id,
+  :url => object.show_url,
+  :type => 'location'
 ) do
-  xml.title object.display_name
-
-  xml.elevation_maximum '%d' % object.high  if !object.high.blank?
-  xml.elevation_minimum '%d' % object.low   if !object.low.blank?
-  xml.elevation_units   'meters'            if !object.high.blank? || !object.low.blank?
-
-  xml.latitude_south  '%.4f' % object.south
-  xml.latitude_north  '%.4f' % object.north
-  xml.latitude_center '%.4f' % ((object.north + object.south) / 2)
-  xml.latitude_units  'degrees north'
-
-  xml.longitude_east   '%.4f' % object.east
-  xml.longitude_west   '%.4f' % object.west
-  xml.longitude_center '%.4f' % ((object.east  + object.west)  / 2)
-  xml.longitude_units  'degrees east'
-
+  xml_string(xml, :name, object.text_name)
+  xml_latitude(xml, :latitude_north, object.north)
+  xml_latitude(xml, :latitude_south, object.south)
+  xml_longitude(xml, :longitude_east, object.east)
+  xml_longitude(xml, :longitude_west, object.west)
+  xml_altitude(xml, :altitude_maximum, object.high)
+  xml_altitude(xml, :altitude_minimum, object.low)
   if detail
-    xml.created  object.created.api_time
-    xml.modified object.modified.api_time
-    xml.notes    object.notes.to_s.tpl_nodiv
-
-    # authors
-    # editors
-    # observations
-    # ...
+    xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+    xml_datetime(xml, :created, object.created)
+    xml_datetime(xml, :modified, object.modified)
+    xml_integer(xml, :number_of_views, object.num_views)
+    xml_datetime(xml, :last_viewed, object.last_view)
+    xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
+    # TODO: descriptions
+    # TODO: rss_log
+    # TODO: editors, authors
+    # TODO: comments
   end
 end

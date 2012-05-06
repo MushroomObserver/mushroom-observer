@@ -505,7 +505,7 @@ class API
     conds += sql_date(:created, 'comments.created')
     conds += sql_date(:modified, 'comments.modified')
     conds += sql_id_or_name(:user, 'comments.user_id', 'users.login', 'users.name')
-    conds += sql_enum(:target_type, 'comments.target_type')
+    conds += sql_enum(:target_type, 'comments.target_type', Comment.all_type_tags)
     conds += sql_id(:target_id, 'comments.target_id')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'comments.id')
@@ -565,8 +565,7 @@ class API
     conds += build_sql(["interests.user_id = ?", user.id])
     conds += sql_date(:created, 'interests.created')
     conds += sql_date(:modified, 'interests.modified')
-    conds += sql_enum(:target_type, 'interests.target_type',
-                      [ :location, :name, :obsercation ])
+    conds += sql_enum(:target_type, 'interests.target_type', Interest.all_type_tags)
     conds += sql_id(:target_id, 'interests.target_id')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'interests.id')
@@ -594,7 +593,7 @@ class API
     conds += sql_id(:editor, 'locations_versions.user_id')
     conds += sql_date(:created, 'locations.created')
     conds += sql_date(:modified, 'locations.modified')
-    conds += sql_search(:name, 'locations.display_name')
+    conds += sql_search(:name, 'locations.name')
     # conds += sql_xxx(:latitude, 'locations.north', 'locations.south')
     # conds += sql_xxx(:longitude, 'locations.west', 'locations.east')
     # conds += sql_xxx(:elevation, 'locations.high', 'locations.low')
@@ -727,7 +726,7 @@ class API
     conds += build_sql(["notifications.user_id = ?", user.id])
     conds += sql_date(:created, 'notifications.created')
     conds += sql_date(:modified, 'notifications.modified')
-    conds += sql_enum(:target_type, 'notifications.flavor', [:name])
+    conds += sql_enum(:target_type, 'notifications.flavor', Notification.all_flavors)
     conds += sql_id(:target_id, 'notifications.obj_id')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'notifications.id')

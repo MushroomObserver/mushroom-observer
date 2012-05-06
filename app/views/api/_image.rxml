@@ -1,58 +1,30 @@
-# Locals:
-#   :object             Image instance.
-#   :detail             Boolean: include details?
-#   :refs               Boolean: include observations?
-#   :files              Boolean: include image files/urls?
-
-detail ||= false
-refs   ||= false
-files  ||= false
-
-xml.image(
-  :id  => object.id,
-  :url => "#{HTTP_DOMAIN}/image/show_image/#{object.id}"
+xml.send(tag,
+  :id => object.id,
+  :url => object.show_url,
+  :type => 'image'
 ) do
-  xml.date xml_date(object.when)
-
+  xml_date(xml, :date, object.when)
+  xml_string(xml, :copyright_holder, object.copyright_holder)
+  xml_detailed_object(xml, :license, object.license)
+  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_image_quality(xml, :quality, object.vote_cache)
   if detail
-    xml.created          object.created.api_time
-    xml.modified         object.modified.api_time
-    xml.notes            object.notes.to_s.tpl_nodiv
-    xml.copyright_holder object.copyright_holder
-
-    render_xml_partial(xml, :license, :locals => {
-      :object => object.license,
-    })
-
-    render_xml_partial(xml, :user, :locals => {
-      :object => object.user,
-      :detail => false,
-    })
-  end
-
-  if refs
+    xml_datetime(xml, :created, object.created)
+    xml_datetime(xml, :modified, object.modified)
+    xml_detailed_object(xml, :owner, object.user)
+    xml_string(xml, :original_name, object.original_name)
+    xml_integer(xml, :number_of_views, object.num_views)
+    xml_datetime(xml, :last_viewed, object.last_view)
+    xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
     xml.observations(:number => object.observations.length) do
-      for obs in object.observations
-        render_xml_partial(xml, :observation, :locals => {
-          :object => obs,
-          :detail => false,
-        })
+      for id in object.observation_ids
+        xml_minimal_object(xml, :observation, Observation, id)
       end
     end
-  end
-
-  if files
-    xml.original_file do
-      xml.url          object.original_url
-      xml.content_type object.content_type
-    end
-    xml.normal_file do
-      xml.url          object.large_url
-      xml.content_type object.content_type
-    end
-    xml.thumbnail_file do
-      xml.url          object.thumbnail_url
-      xml.content_type object.content_type
+    xml.files(:number => Image.all_sizes.length + 1) do
+      for size in Image.all_sizes + [:original]
+        xml_image_file(xml, object, size)
+      end
     end
   end
 end

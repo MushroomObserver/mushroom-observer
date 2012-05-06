@@ -784,16 +784,18 @@ class Image < AbstractModel
       SELECT id, YEAR(`when`), license_id FROM images
       WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
     ))
-    Image.connection.insert(%(
-      INSERT INTO copyright_changes
-        (user_id, modified, target_type, target_id, year, name, license_id)
-      VALUES
-        #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"}.join(",\n") }
-    ))
-    Image.connection.update(%(
-      UPDATE images SET copyright_holder = #{new_name}
-      WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
-    ))
+    if data.any?
+      Image.connection.insert(%(
+        INSERT INTO copyright_changes
+          (user_id, modified, target_type, target_id, year, name, license_id)
+        VALUES
+          #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"}.join(",\n") }
+      ))
+      Image.connection.update(%(
+        UPDATE images SET copyright_holder = #{new_name}
+        WHERE user_id = #{user.id} AND copyright_holder = #{old_name}
+      ))
+    end
   end
 
 ################################################################################

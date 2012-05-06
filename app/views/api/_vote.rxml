@@ -1,23 +1,14 @@
-# Locals:
-#   :object             Vote instance.
-#   :detail             Include details?
-
-detail ||= false
-
-xml.vote(
-  :id => object.id
+xml.send(tag,
+  :id => object.id,
+  :url => object.show_url,
+  :type => 'vote'
 ) do
-  xml.value object.value
-
+  xml_confidence_level(xml, :confidence, object.value)
   if detail
-    xml.created  object.created.api_time
-    xml.modified object.modified.api_time
-    xml.naming(:id => object.naming_id)
-    xml.observation(:id => object.observation_id)
-
-    render_xml_partial(xml, :user, :locals => {
-      :object => object.user,
-      :detail => false,
-    })
+    xml_datetime(xml, :created, object.created)
+    xml_datetime(xml, :modified, object.modified)
+    xml_minimal_object(xml, :owner, User, object.user_id)
+    xml_minimal_object(xml, :naming, Naming, object.naming_id)
+    xml_minimal_object(xml, :observation, Observation, object.observation_id)
   end
 end

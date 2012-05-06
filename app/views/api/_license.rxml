@@ -1,9 +1,8 @@
-# Locals:
-#   :object             License instance.
-
-xml.license(
-  :id  => object.id,
-  :url => object.url
+xml.send(tag,
+  :id => object.id,
+  :url => object.url,
+  :type => 'license'
 ) do
-  xml.type object.display_name
+  xml_string(xml, :name, object.display_name)
+  xml_boolean(xml, :deprecated, true) if object.deprecated
 end

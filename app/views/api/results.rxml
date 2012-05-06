@@ -1,0 +1,9 @@
+xml.results(:number => @objects.length) do
+  for object in @objects
+    if @detail == :none
+      xml_minimal_object(xml, :result, object.class, object.id)
+    else
+      xml_detailed_object(xml, :result, object, @detail == :high)
+    end
+  end
+end

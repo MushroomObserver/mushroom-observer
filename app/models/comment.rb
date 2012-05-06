@@ -96,9 +96,14 @@ class Comment < AbstractModel
 
   after_create :notify_users
 
-  # Returns Array of all valid +target_type+ values (Symbol's).
+  # Returns Array of all models (Classes) which take comments.
   def self.all_types
     [ Location, Name, Observation, Project, SpeciesList ]
+  end
+
+  # Returns Array of all valid +target_type+ values (Symbol's).
+  def self.all_type_tags
+    [ :location, :name, :observation, :project, :species_list ]
   end
 
   # Returns +summary+ for debugging.

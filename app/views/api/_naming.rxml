@@ -1,53 +1,26 @@
-# Locals:
-#   :object             Naming instance.
-#   :detail             Include details?
-#   :refs               Include observation and votes?
-
-detail ||= false
-refs   ||= false
-
-xml.naming(
-  :id => object.id
+xml.send(tag,
+  :id => object.id,
+  :url => object.show_url,
+  :type => 'naming'
 ) do
-  xml.vote object.vote_cache
-
-  render_xml_partial(xml, :name, :locals => {
-    :object => object.name,
-    :detail => false,
-  })
-
-  for reason in object.get_reasons
-    if reason.used?
-      if reason.notes.blank?
-        xml.reason(:num => reason.num, :label => reason.label.l)
-      else
-        xml.reason({:num => reason.num, :label => reason.label.l}, reason.notes) 
+  xml_detailed_object(xml, :name, object.name)
+  xml_confidence_level(xml, :confidence, object.vote_cache)
+  reasons = object.get_reasons.select(&:used?)
+  if reasons.any?
+    xml.reasons(:number => reasons.length) do
+      for reason in reasons
+        xml_naming_reason(xml, :reason, reason)
       end
     end
   end
-
   if detail
-    xml.created  object.created.api_time
-    xml.modified object.modified.api_time
-
-    render_xml_partial(xml, :user, :locals => {
-      :object => object.user,
-      :detail => false,
-    })
-  end
-
-  if refs
-    render_xml_partial(xml, :observation, :locals => {
-      :object => object.observation,
-      :detail => detail,
-    })
-
+    xml_datetime(xml, :created, object.created)
+    xml_datetime(xml, :modified, object.modified)
+    xml_minimal_object(xml, :owner, User, object.user_id)
+    xml_minimal_object(xml, :observation, Observation, object.observation_id)
     xml.votes(:number => object.votes.length) do
       for vote in object.votes
-        render_xml_partial(xml, :vote, :locals => {
-          :object => vote,
-          :detail => detail,
-        })
+        xml_detailed_object(xml, :vote, vote)
       end
     end
   end

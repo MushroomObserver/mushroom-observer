@@ -1,24 +1,17 @@
 xml.instruct!(:xml, :version => '1.0')
 xml.response(:xmlns => "#{HTTP_DOMAIN}/response.xsd") do
-  xml.version  @version
-  xml.run_date xml_date(@start_time)
-
+  xml_string(xml, :version, @version)
+  xml_datetime(xml, :run_date, @start_time)
   if @user
-    render_xml_partial(xml, :user, :locals => {
-      :object => @user,
-      :detail => false,
-    })
+    render_minimal_object(xml, :user, User, @user.id)
   end
-
   if @query
-    xml.query       @query
-    xml.num_records @number
-    xml.num_pages   @pages
-    xml.page        @page
+    xml_sql_string(xml, :query, @query)
+    xml_integer(xml, :number_of_records, @number)
+    xml_integer(xml, :number_of_pages, @pages)
+    xml_integer(xml, :page_number, @page)
   end
-
   xml.target! << @content_for_layout
-
   if @errors.length > 0
     xml.errors(:number => @errors.length) do
       i = 1
@@ -33,8 +26,7 @@ xml.response(:xmlns => "#{HTTP_DOMAIN}/response.xsd") do
       end
     end
   end
-
   end_time = Time.now
   total_time = end_time - @start_time
-  xml.run_time '%.4f' % total_time
+  xml_ellapsed_time(xml, :run_time, total_time)
 end

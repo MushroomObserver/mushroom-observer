@@ -73,6 +73,64 @@ class ApiControllerTest < FunctionalTestCase
     end
   end
 
+  # ----------------------------
+  #  API tests.
+  # ----------------------------
+
+  def test_get_comment
+    get(:comments, :detail => :none)
+    get(:comments, :detail => :low)
+    get(:comments, :detail => :high)
+  end
+
+  def test_get_images
+    get(:images, :detail => :none)
+    get(:images, :detail => :low)
+    get(:images, :detail => :high)
+  end
+
+  def test_get_licenses
+    get(:licenses, :detail => :none)
+    get(:licenses, :detail => :low)
+    get(:licenses, :detail => :high)
+  end
+
+  def test_get_locations
+    get(:locations, :detail => :none)
+    get(:locations, :detail => :low)
+    get(:locations, :detail => :high)
+  end
+
+  def test_get_names
+    get(:names, :detail => :none)
+    get(:names, :detail => :low)
+    get(:names, :detail => :high)
+  end
+
+  def test_get_namings
+    get(:namings, :detail => :none)
+    get(:namings, :detail => :low)
+    get(:namings, :detail => :high)
+  end
+
+  def test_get_observations
+    get(:observations, :detail => :none)
+    get(:observations, :detail => :low)
+    get(:observations, :detail => :high)
+  end
+
+  def test_get_users
+    get(:users, :detail => :none)
+    get(:users, :detail => :low)
+    get(:users, :detail => :high)
+  end
+
+  def test_get_votes
+    get(:votes, :detail => :none)
+    get(:votes, :detail => :low)
+    get(:votes, :detail => :high)
+  end
+
 #   # Basic comment request.
 #   def test_get_comments
 #
@@ -107,38 +165,6 @@ class ApiControllerTest < FunctionalTestCase
 #     assert_xml_attr(2,         '/response/results/2/id')
 #
 #     assert_xml_none('/response/errors')
-#   end
-#
-#   def test_get_images
-#     get(:images, :detail => :high)
-#   end
-#
-#   def test_get_licenses
-#     get(:licenses, :detail => :high)
-#   end
-#
-#   def test_get_locations
-#     get(:locations, :detail => :high)
-#   end
-#
-#   def test_get_names
-#     get(:names, :detail => :high)
-#   end
-#
-#   def test_get_namings
-#     get(:namings, :detail => :high)
-#   end
-#
-#   def test_get_observations
-#     get(:observations, :detail => :high)
-#   end
-#
-#   def test_get_users
-#     get(:users, :detail => :high)
-#   end
-#
-#   def test_get_votes
-#     get(:votes, :detail => :high)
 #   end
 #
 #   # This is how to stuff an image into the (test) request body.

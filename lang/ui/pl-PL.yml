@@ -3556,8 +3556,14 @@ show_notifications_title:  New Notifications for [user]
 species_list_bulk_editor_title:  Species List Bulk Editor
 species_list_bulk_editor_another:  Another
 species_list_bulk_editor_reuse:  Reuse
-species_list_bulk_editor_you_own_no_observations:  You don't own any observations in this species list.
 species_list_bulk_editor_success:  Successfully updated [n] observation(s).
+species_list_bulk_editor_you_own_no_observations:  >
+  You don't own any observations in this species list.
+
+species_list_bulk_editor_ambiguous_namings:  >
+  The proposed names are confusing for observation [id]: [name]. Please
+  "go to that observation":/[id] and make your changes there.
+
 species_list_bulk_editor_help:  >
   Hold your mouse over any of the fields in the table below to see what the
   field is supposed to be.  The text fields are, in order: notes (top right),
@@ -4002,7 +4008,10 @@ email_features_intro:  >
   The following new features have been released at the [:app_title] website:
 
 email_location_merge:  >
-  User [user] wants to merge the location [this] into [that].
+  User tried to merge to locations, both with observations:
+  user: [user]
+  source: [this]
+  destination: [that]
 
 email_name_merge:  >
   User [user] wants to merge the name [this] into [that].

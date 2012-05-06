@@ -36,7 +36,7 @@ WEB_TIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z (%z)'            if !defined? WEB_TIME_F
 
 # Date/time formats for API XML responses.
 API_DATE_FORMAT = '%Y-%m-%d'                             if !defined? API_DATE_FORMAT
-API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'                    if !defined? API_TIME_FORMAT
+API_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'                    if !defined? API_TIME_FORMAT
 
 # Date/time formats for emails.
 EMAIL_DATE_FORMAT = '%Y-%m-%d'                           if !defined? EMAIL_DATE_FORMAT

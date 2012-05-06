@@ -1,64 +1,53 @@
-# Locals:
-#   :object             Name instance.
-#   :detail             Boolean: include details?
-#   :refs               Boolean: include synonyms and ancestors?
-
-detail ||= false
-refs   ||= false
-
-xml.name(
-  :id  => object.id,
-  :url => "#{HTTP_DOMAIN}/name/show_name/#{object.id}"
+xml.send(tag,
+  :id => object.id,
+  :url => object.show_url,
+  :type => 'name'
 ) do
-  xml.text_name  object.text_name
-  xml.author     object.author
-  xml.citation   object.citation
-  xml.rank       object.rank.to_s.downcase
-  xml.deprecated object.deprecated ? 'true' : 'false'
-
+  xml_string(xml, :name, object.text_name)
+  xml_string(xml, :author, object.author)
+  xml_string(xml, :rank, object.rank.to_s.downcase)
+  xml_boolean(xml, :deprecated, true) if object.deprecated
+  xml_boolean(xml, :misspelled, true) if object.is_misspelling?
   if detail
-    xml.created  object.created.api_time
-    xml.modified object.modified.api_time
-
-    # authors
-    # editors
-    # descriptions
-    # ...
-  end
-
-  if refs && object.synonym
-    xml.synonyms(:number => object.synonym.names.length - 1) do
-      for synonym in object.synonym.names - [object]
-        render_xml_partial(xml, :name, :locals => {
-          :object => synonym,
-          :detail => false,
-        })
-      end
-    end
-  end
-
-  if refs && !object.classification.blank?
-
-    # This is less complete but doesn't require any additional queries.
-    parse = Name.parse_classification(object.classification)
-    xml.classification(:number => parse.length) do
-      for rank, name in parse
-        xml.name do
-          xml.rank rank.to_s
-          xml.text_name name
+    xml_html_string(xml, :citation, object.citation.to_s.tl)
+    xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+    xml_datetime(xml, :created, object.created)
+    xml_datetime(xml, :modified, object.modified)
+    xml_integer(xml, :number_of_views, object.num_views)
+    xml_datetime(xml, :last_viewed, object.last_view)
+    xml_boolean(xml, :ok_for_export, true) if object.ok_for_export
+    if object.synonym
+      xml.synonyms(:number => object.synonym.names.length - 1) do
+        for synonym in object.synonym.names - [object]
+          xml_detailed_object(xml, :synonym, synonym)
         end
       end
     end
-
-    # This requires extra database queries.
-    # all_parents = object.all_parents
-    # xml.classification(:number => all_parents.length) do
-    #   for parent in all_parents
-    #     render_xml_partial(xml, :name, :locals => {
-    #       :object => parent,
-    #       :detail => false,
-    #     })
-    #   end
-    # end
+    unless object.classification.blank?
+      # This is less complete but doesn't require any additional queries.
+      parse = Name.parse_classification(object.classification)
+      xml.parents(:number => parse.length) do
+        for rank, name in parse
+          xml.parent do
+            xml_string(xml, :name, name)
+            xml_string(xml, :rank, rank.to_s.downcase)
+          end
+        end
+      end
+      # This requires extra database queries.
+      # all_parents = object.all_parents
+      # xml.parents(:number => all_parents.length) do
+      #   for parent in all_parents
+      #     xml_detailed_object(xml, :parent, parent)
+      #   end
+      # end
+    end
+    # TODO: descriptions
+    # TODO: rss_logs
+    # TODO: editors, authors
+    # TODO: comments
+    # TODO: children
+    # TODO: observations
+    # TODO: images
   end
 end

@@ -415,7 +415,8 @@ class SpeciesListController < ApplicationController
       @votes = {}
       for obs in @observations
         @observation[obs.id] = obs
-        @votes[obs.id] = obs.consensus_naming.users_vote(@user) rescue nil
+        vote = obs.consensus_naming.users_vote(@user) rescue nil
+        @votes[obs.id] = vote || Vote.new
       end
       @vote_menu = translate_menu(Vote.confidence_menu)
       @no_vote = Vote.new
@@ -430,12 +431,17 @@ class SpeciesListController < ApplicationController
           args = params[:observation][obs.id.to_s] || {}
           any_changes = false
           old_vote = @votes[obs.id].value rescue 0
-          if !args[:value].nil? and !obs.namings.empty? and args[:value].to_s != old_vote.to_s
+          if !args[:value].nil? and args[:value].to_s != old_vote.to_s
+            if obs.namings.empty?
+              obs.namings.create!(:user => @user, :name_id => obs.name_id)
+            end
             if naming = obs.consensus_naming
               obs.change_vote(naming, args[:value].to_i, @user)
+              any_changes = true
               @votes[obs.id].value = args[:value]
+            else
+              flash_warning(:species_list_bulk_editor_ambiguous_namings.t(:id => obs.id, :name => obs.name.display_name.t))
             end
-            any_changes = true
           end
           for method in [:when_str, :place_name, :notes, :lat, :long, :alt,
                          :is_collection_location, :specimen]

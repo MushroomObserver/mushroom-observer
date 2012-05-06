@@ -18,6 +18,7 @@
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
 #  show_action::        Page used to display this object.
+#  show_url::           "Official" URL for this database object.
 #  index_action::       Page used to display index of these objects.
 #
 #  ==== Callbacks
@@ -388,6 +389,24 @@ class AbstractModel < ActiveRecord::Base
   #
   def show_action
     self.class.show_action
+  end
+
+  # Return the URL of the "show_<object>" action
+  #
+  #   User.show_action(123) => 'http://mushroomobserver.org/observer/show_user/123'
+  #   Name.show_action(123) => 'http://mushroomobserver.org/name/show_name/123'
+  #
+  def self.show_url(id)
+    "#{HTTP_DOMAIN}/#{show_controller}/#{show_action}/#{id}"
+  end
+
+  # Return the URL of the "show_<object>" action
+  #
+  #   user.show_action => 'http://mushroomobserver.org/observer/show_user/123'
+  #   name.show_action => 'http://mushroomobserver.org/name/show_name/123'
+  #
+  def show_url
+    self.class.show_url(id)
   end
 
   ##############################################################################

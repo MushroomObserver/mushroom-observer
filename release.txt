@@ -9,3 +9,11 @@ All four of create/edit_observation/species_list now chain automatically to crea
 The location nazi no longer complains about dubious names of defined locations, only undefined locations.
 When linked to from create/edit_observation/species_list, create_location now updates *all* observations and species_lists with the *original* location name (that way user can change their mind when defining an undefined location and still have it update all observations with the original name).
 Added form to let you bulk-edit observations in a species list.
+Allow comments in species_lists.
+Handles failed image transfers better, and can now serve from the rails server until transfer is successful.
+Keeps track of changes to image copyright settings.
+Automatically updates copyright holder name on all of your images when you change your name in your profile.
+
+--------------------------------------------------------------------------------
+
+

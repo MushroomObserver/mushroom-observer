@@ -97,7 +97,7 @@ class ApiController
 
     begin
       if [:get, :post].include?(request.method)
-        render(:layout => 'api')
+        render(:layout => 'api', :template => '/api/results.rxml')
       else
         render(:layout => 'api', :text => '')
       end
