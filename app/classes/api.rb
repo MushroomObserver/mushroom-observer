@@ -2293,49 +2293,87 @@ private
   end
 
   # Parse date argument and build an SQL condition to process it.
-  # Valid syntaxes:
-  #   YYYYMMDD
-  #   YYYY-MM-DD
   def sql_date(arg, column) # :doc:
     result = []
     if x = parse_arg(arg)
-      if x.match(/^\d\d\d\d-?\d\d-?\d\d$/)
-        y = Date.parse(x)
-        result << build_sql(["#{column} = ?", y])
-      else
-        raise error(102, "invalid #{arg}: '#{x}' (expect 'YYYY-MM-DD')")
+      for y in x.split(/\s+OR\s+/i)
+        if y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)-?(\d\d)$/i)
+          result << build_sql("#{column} >= #{$1}-#{$2}-#{$3} AND #{column} <= #{$4}-#{$5}-#{$6}")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)$/i)
+          result << build_sql("#{column} >= #{$1}-#{$2}-01 AND #{column} <= #{$3}-#{$4}-31")
+        elsif y.match(/^(\d\d\d\d)\s+TO\s+(\d\d\d\d)$/i)
+          result << build_sql("YEAR(#{column}) >= #{$1} AND YEAR(#{column}) <= #{$2}")
+        elsif y.match(/^(\d\d)\s+TO\s+(\d\d)$/i)
+          a = $1.to_i
+          b = $2.to_i
+          if a > b
+            result << build_sql("MONTH(#{column}) >= #{a} OR MONTH(#{column}) <= #{b}")
+          else
+            result << build_sql("MONTH(#{column}) >= #{a} AND MONTH(#{column}) <= #{b}")
+          end
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d)$/)
+          result << build_sql("#{column} = #{$1}-#{$2}-#{$3}")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)$/)
+          result << build_sql("#{column} >= #{$1}-#{$2}-01 AND #{column} <= #{$1}-#{$2}-31")
+        elsif y.match(/^(\d\d\d\d)$/)
+          result << build_sql("YEAR(#{column}) = #{$1}")
+        elsif y.match(/^(\d\d)$/)
+          result << build_sql("MONTH(#{column}) = #{$1.to_i}")
+        else
+          raise error(102, "invalid #{arg}: '#{x}' (expect 'MM', 'YYYY', 'YYYY-MM', 'YYYY-MM-DD', 'MM to MM', 'YYYY to YYYY', etc.")
+        end
       end
     end
     return result
   end
 
   # Parse date/time argument and build an SQL condition to process it.
-  # Valid syntaxes:
-  #   YYYYMMDDHHMMDD
-  #   YYYY-MM-DD:HH:MM:SS
-  #   YYYY-MM-DD HH:MM:SS
-  #   YYYY-MM-DD-HH-MM-SS
   def sql_time(arg, column) # :doc:
     result = []
     if x = parse_arg(arg)
-      if x.match(/^\d\d\d\d-?\d\d-?\d\d[-: ]?\d\d[-:]?\d\d[-:]?\d\d?$/)
-        y = Time.parse(x)
-        result << build_sql(["#{column} = ?", y])
-      else
-        raise error(102, "invalid #{arg}: '#{x}' (expect 'YYYY-MM-DD HH:MM:SS')")
+      for y in x.split(/\s+OR\s+/i)
+        if y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d):?(\d\d):?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d):?(\d\d):?(\d\d)$/i)
+          result << build_sql("#{column} >= '#{$1}-#{$2}-#{$3} #{$4}:#{$5}:#{$6}' AND #{column} <= '#{$7}-#{$8}-#{$9} #{$10}:#{$11}:#{$12}'")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d):?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d):?(\d\d)$/i)
+          result << build_sql("#{column} >= '#{$1}-#{$2}-#{$3} #{$4}:#{$5}:01' AND #{column} <= '#{$6}-#{$7}-#{$8} #{$9}:#{$10}:59'")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d)$/i)
+          result << build_sql("#{column} >= '#{$1}-#{$2}-#{$3} #{$4}:01:01' AND #{column} <= '#{$5}-#{$6}-#{$7} #{$8}:23:59'")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)-?(\d\d)$/i)
+          result << build_sql("#{column} >= #{$1}-#{$2}-#{$3} AND #{column} <= #{$4}-#{$5}-#{$6}")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)\s+TO\s+(\d\d\d\d)-?(\d\d)$/i)
+          result << build_sql("#{column} >= #{$1}-#{$2}-01 AND #{column} <= #{$3}-#{$4}-31")
+        elsif y.match(/^(\d\d\d\d)\s+TO\s+(\d\d\d\d)$/i)
+          result << build_sql("YEAR(#{column}) >= #{$1} AND YEAR(#{column}) <= #{$2}")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d):?(\d\d):?(\d\d)$/i)
+          result << build_sql("#{column} = '#{$1}-#{$2}-#{$3} #{$4}:#{$5}:#{$6}'")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d):?(\d\d)$/i)
+          result << build_sql("#{column} >= '#{$1}-#{$2}-#{$3} #{$4}:#{$5}:01' AND #{column} <= '#{$1}-#{$2}-#{$3} #{$4}:#{$5}:59'")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d) ?(\d\d)$/i)
+          result << build_sql("#{column} >= '#{$1}-#{$2}-#{$3} #{$4}:01:01' AND #{column} <= '#{$1}-#{$2}-#{$3} #{$4}:23:59'")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)-?(\d\d)$/)
+          result << build_sql("#{column} = #{$1}-#{$2}-#{$3}")
+        elsif y.match(/^(\d\d\d\d)-?(\d\d)$/)
+          result << build_sql("#{column} >= #{$1}-#{$2}-01 AND #{column} <= #{$1}-#{$2}-31")
+        elsif y.match(/^(\d\d\d\d)$/)
+          result << build_sql("YEAR(#{column}) = #{$1}")
+        elsif y.match(/^(\d\d)$/)
+          result << build_sql("MONTH(#{column}) = #{$1.to_i}")
+        else
+          raise error(102, "invalid #{arg}: '#{x}' (expect 'YYYY', 'YYYY-MM', 'YYYY-MM-DD', 'YYYY-MM-DD HH', 'YYYY-MM-DD HH:MM', 'YYYY-MM-DD HH:MM:SS', 'YYYY to YYYY', etc.")
+        end
       end
     end
     return result
   end
 
   # Parse text-search argument and build an SQL condition to process it.
-  # Valid syntaxes:
-  #   string
   def sql_search(arg, *columns) # :doc:
     result = []
     if x = parse_arg(arg)
-      for col in columns
-        result << build_sql(["#{col} LIKE ?", "%#{x}%"])
+      for y in x.split(/\s+OR\s+/i)
+        for col in columns
+          result << build_sql(["#{col} LIKE ?", "%#{x}%"])
+        end
       end
     end
     return result

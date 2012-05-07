@@ -494,11 +494,11 @@ class ImageControllerTest < FunctionalTestCase
     assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
     assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
 
-    requires_login(:vote_anonymity)
-    assert_response('vote_anonymity')
+    requires_login(:bulk_vote_anonymity_updater)
+    assert_response('bulk_vote_anonymity_updater')
 
     login('mary')
-    post(:vote_anonymity, :commit => :image_vote_anonymity_make_anonymous.l)
+    post(:bulk_vote_anonymity_updater, :commit => :image_vote_anonymity_make_anonymous.l)
     assert_response(:controller => :account, :action => :prefs)
     assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
     assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
@@ -506,7 +506,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
 
     login('rolf')
-    post(:vote_anonymity, :commit => :image_vote_anonymity_make_public.l)
+    post(:bulk_vote_anonymity_updater, :commit => :image_vote_anonymity_make_public.l)
     assert_response(:controller => :account, :action => :prefs)
     assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
     assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)

@@ -30,7 +30,7 @@
 #  reuse_image::           Choose images to add to observation.
 #  remove_images::         Choose images to remove from observation.
 #  license_updater::       Change copyright of many images.
-#  vote_anonymity::        Change anonymity of image votes in bulk.
+#  bulk_vote_anonymity_updater:: Change anonymity of image votes in bulk.
 #  process_image::         (helper for add_image)
 #
 #  ==== Test Actions
@@ -630,7 +630,7 @@ class ImageController < ApplicationController
   # Outputs:
   #   @num_anonymous - number of existing anonymous votes
   #   @num_public    - number of existing puclic votes
-  def vote_anonymity
+  def bulk_vote_anonymity_updater
     if request.method == :post
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
