@@ -478,7 +478,7 @@ def upload_files(files, local, remote)
 
   cmd = "(#{cmd}) > /dev/null" if !@@verbose
   cmd = "cd #{local}; #{cmd}; rm #{tempfile}"
-  exec(cmd)
+  system cmd
 
   # This causes a fork and runs out of memory.
   # save = Dir.getwd
@@ -515,7 +515,7 @@ def download_files(files, local, remote)
 
   cmd = "(#{cmd}) > /dev/null" if !@@verbose
   cmd = "cd #{local}; #{cmd}; rm #{tempfile}"
-  exec(cmd)
+  system cmd
 
   # This causes a fork and runs out of memory.
   # save = Dir.getwd
@@ -607,7 +607,9 @@ case get_next_arg
     end
 
     # Do sizes one at a time.
+    puts "ALL_SIZES = #{ALL_SIZES}\n"
     for size in (ALL_SIZES & do_size.keys)
+      puts "size = #{size}\n"
       sync_command(local,remote, do_upload,do_download, size)
     end
 

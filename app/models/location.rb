@@ -200,36 +200,30 @@ class Location < AbstractModel
     (-?\d+(?:.\d+)?) \s* (m\.?|ft\.?|['‘’′′]*)
   \s*$/x
 
-  # Check if a string contains a valid latitude, parse it, and convert it
-  # to standard decimal form with 4 places of precision.
-  # Returns nil if invalid.
-  def self.parse_latitude(lat)
+  # Shared logic between latitude and longitude
+  def self.parse_lxxxitude(value, direction1, direction2, max_degrees)
     result = nil
-    match = lat.to_s.match(LXXXITUDE_REGEX)
-    if match and (match[4].blank? or ['N','S'].member?(match[4]))
+    match = value.to_s.match(LXXXITUDE_REGEX)
+    if match and (match[4].blank? or [direction1, direction2].member?(match[4]))
       val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
-      val = -val if match[4] == 'S'
-      if val >= -90 and val <= 90
+      val = -val if match[4] == direction2
+      if val >= -max_degrees and val <= max_degrees
         result = val.round(4)
       end
     end
     return result
   end
+    
+  # Convert latitude string to standard decimal form with 4 places of precision.
+  # Returns nil if invalid.
+  def self.parse_latitude(lat)
+    return parse_lxxxitude(lat, 'N', 'S', 90)
+  end
 
-  # Check if a string contains a valid longitude, parse it, and convert it
-  # to standard decimal form with 4 places of precision.
+  # Convert longitude string to standard decimal form with 4 places of precision.
   # Returns nil if invalid.
   def self.parse_longitude(long)
-    result = nil
-    match = long.to_s.match(LXXXITUDE_REGEX)
-    if match and (match[4].blank? or ['E','W'].member?(match[4]))
-      val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
-      val = -val if match[4] == 'W'
-      if val >= -180 and val <= 180
-        result = val.round(4)
-      end
-    end
-    return result
+    return parse_lxxxitude(long, 'E', 'W', 180)
   end
 
   # Check if a string contains a valid altitude, parse it, and convert it
@@ -363,6 +357,7 @@ class Location < AbstractModel
   UNDERSTOOD_COUNTRIES = {
     "Africa" => 0,
     "Albania" => 0,
+    "Algeria" => 0,
     "Antarctica" => 0,
     "Argentina" => 0,
     "Asia" => 0,

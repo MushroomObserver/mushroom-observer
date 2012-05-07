@@ -9,22 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120425174100) do
-
-  create_table "authors_descriptions", :id => false, :force => true do |t|
-    t.integer "description_id", :default => 0, :null => false
-    t.integer "user_id",        :default => 0, :null => false
-  end
-
-  create_table "authors_locations", :id => false, :force => true do |t|
-    t.integer "location_id", :default => 0, :null => false
-    t.integer "user_id",     :default => 0, :null => false
-  end
-
-  create_table "authors_names", :id => false, :force => true do |t|
-    t.integer "name_id", :default => 0, :null => false
-    t.integer "user_id", :default => 0, :null => false
-  end
+ActiveRecord::Schema.define(:version => 20120426005425) do
 
   create_table "comments", :force => true do |t|
     t.datetime "created"
@@ -54,6 +39,7 @@ ActiveRecord::Schema.define(:version => 20120425174100) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "how_many"
+    t.datetime "verified"
   end
 
   create_table "copyright_changes", :force => true do |t|
@@ -66,29 +52,6 @@ ActiveRecord::Schema.define(:version => 20120425174100) do
     t.integer  "license_id"
   end
 
-  create_table "descriptions", :force => true do |t|
-    t.integer  "name_id",                                                               :null => false
-    t.integer  "source_id"
-    t.integer  "version",                                             :default => 0,    :null => false
-    t.string   "locale"
-    t.integer  "num_views",                                           :default => 0,    :null => false
-    t.datetime "last_view"
-    t.integer  "license_id"
-    t.enum     "permission",    :limit => [:All, :Editors, :Authors], :default => :All, :null => false
-    t.enum     "visibility",    :limit => [:All, :Editors, :Authors], :default => :All, :null => false
-    t.boolean  "ok_for_export",                                       :default => true, :null => false
-    t.text     "gen_desc"
-    t.text     "diag_desc"
-    t.text     "distribution"
-    t.text     "habitat"
-    t.text     "look_alikes"
-    t.text     "uses"
-    t.text     "refs"
-    t.text     "notes"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "donations", :force => true do |t|
     t.decimal  "amount",                    :precision => 12, :scale => 2
     t.string   "who",        :limit => 100
@@ -98,43 +61,6 @@ ActiveRecord::Schema.define(:version => 20120425174100) do
     t.boolean  "anonymous",                                                :default => false, :null => false
     t.boolean  "reviewed",                                                 :default => true,  :null => false
     t.integer  "user_id"
-  end
-
-  create_table "draft_names", :force => true do |t|
-    t.integer  "user_id",                                                                  :default => 0,           :null => false
-    t.integer  "project_id",                                                               :default => 0,           :null => false
-    t.integer  "name_id",                                                                  :default => 0,           :null => false
-    t.integer  "version",                                                                  :default => 0,           :null => false
-    t.text     "gen_desc"
-    t.text     "diag_desc"
-    t.text     "distribution"
-    t.text     "habitat"
-    t.text     "look_alikes"
-    t.text     "uses"
-    t.text     "notes"
-    t.enum     "review_status",  :limit => [:unreviewed, :unvetted, :vetted, :inaccurate], :default => :unreviewed, :null => false
-    t.integer  "reviewer_id"
-    t.datetime "last_review"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "license_id"
-    t.text     "classification"
-    t.text     "refs"
-  end
-
-  create_table "editors_descriptions", :id => false, :force => true do |t|
-    t.integer "description_id", :default => 0, :null => false
-    t.integer "user_id",        :default => 0, :null => false
-  end
-
-  create_table "editors_locations", :id => false, :force => true do |t|
-    t.integer "location_id", :default => 0, :null => false
-    t.integer "user_id",     :default => 0, :null => false
-  end
-
-  create_table "editors_names", :id => false, :force => true do |t|
-    t.integer "name_id", :default => 0, :null => false
-    t.integer "user_id", :default => 0, :null => false
   end
 
   create_table "image_votes", :force => true do |t|
@@ -510,10 +436,10 @@ ActiveRecord::Schema.define(:version => 20120425174100) do
 
   create_table "queued_emails", :force => true do |t|
     t.integer  "user_id"
-    t.integer  "to_user_id",                 :default => 0, :null => false
     t.datetime "queued"
     t.integer  "num_attempts"
     t.string   "flavor",       :limit => 40
+    t.integer  "to_user_id"
   end
 
   create_table "rss_logs", :force => true do |t|

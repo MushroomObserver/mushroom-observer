@@ -2227,6 +2227,10 @@ register_event_title:  Register for
 register_save:  Save
 register_success:  Successfully registered [how_many] for [name]
 
+# conference/verify
+conference_verify_success:  Registration of [registrant] for [how_many] to [event] has been verified
+conference_verify_warning:  That registration has already been verified
+
 # support/donate
 donate_title:  Donate to Mushroom Observer
 donate_tab:  Donate
@@ -3913,6 +3917,7 @@ email_subject_observation_change:  "[:OBSERVATION] Changed, [name]"
 email_subject_observation_destroy:  "[:OBSERVATION] Destroyed, [name]"
 email_subject_observation_question:  Question About [name]
 email_subject_publish_name:  Name Published
+email_subject_registration:  "[name] Registration Verification"
 email_subject_verify:  Email Verification
 email_subject_webmaster_question:  Question From [user]
 
@@ -4098,6 +4103,14 @@ email_publish_name_intro:  >
   A description of a name has been published on the [:app_title] website.
   You are receiving this email since you are listed as either an author for
   this taxon or as a reviewer on the site.
+
+email_registration_intro:  >
+  h2. *Hello [user]*
+  \n\n
+  Please click the following link to verify that you received this email and
+  intended to register [how_many] attendee(s) for the [name]:
+  \n\n
+  [link]
 
 email_user_question_intro:  >
   h2. *Question from Another User*

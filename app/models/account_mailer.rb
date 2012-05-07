@@ -17,6 +17,7 @@
 #  consensus_change::       Notify user of name change of their obs.
 #  denied::                 Email sent to Nathan when sign-up is denied.
 #  email_features::         Mass-mailing about new features.
+#  email_registration::     Verify a conference event registration.
 #  location_change::        Notify user of change in location description.
 #  name_change::            Notify user of change in name description.
 #  name_proposal::          Notify user of name proposal for their obs.
@@ -225,6 +226,28 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+  end
+
+  # Notify email given in registration of the registration
+  # user::         User we're sending announcment to.  Defaults to admin.
+  # registration:: ConferenceRegistration object
+  def email_registration(user, registration)
+    event = registration.conference_event
+    @user                = user
+    Locale.code          = DEFAULT_LOCALE
+    Locale.code          = @user.locale if @user and @user.locale
+    @subject             = :email_subject_registration.l(:name => event.name)
+    @body['registration'] = registration
+    @body['subject']     = @subject
+    @body['user']        = user
+    @recipients          = registration.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = WEBMASTER_EMAIL_ADDRESS
+    @content_type        = 'text/html'
+    @content_type        = 'text/plain' if @user and not @user.email_html
+    @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL registration " +
+                          "to=#{registration.email} ")
   end
 
   # Notify user of change in location description.

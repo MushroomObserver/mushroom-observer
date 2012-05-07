@@ -1,32 +1,9 @@
 class ConferenceController < ApplicationController
-  
-  # TODO: Add count to ConferenceRegistration
-  def register
-    store_location
-    event = ConferenceEvent.find(params[:id])
-    if request.method == :post
-      registration = ConferenceRegistration.new(params[:registration])
-      registration.conference_event = event
-      registration.save
-      flash_notice(:register_success.l(:name => event.name, :how_many => registration.how_many))
-      redirect_to(:action => 'show_event', :id => event.id)
-    else
-      @event = event
-    end
-  end
-
-  def list_registrations
-    if is_in_admin_mode?
-      @event = ConferenceEvent.find(params[:id])
-      @hello = "Hello"
-    else
-      flash_error(:list_registrations_not_allowed.l)
-      redirect_to(:action => 'index')
-    end
-  end
-
+  # TODO:
   # allow editing of registration based on email address
-  # send confirmation email upon creation and edit
+  # send confirmation email upon edit of a registration
+  # no robots and pulldown for how_many
+  
   # Have users own ConferenceEvents rather than admin
   # Owners can delete ConferenceEvents
   
@@ -68,6 +45,45 @@ class ConferenceController < ApplicationController
     else
       flash_error(:edit_event_not_allowed.l)
       redirect_to(:action => 'index')
+    end
+  end
+  
+  def register
+    store_location
+    event = ConferenceEvent.find(params[:id])
+    if request.method == :post
+      registration = ConferenceRegistration.new(params[:registration])
+      registration.conference_event = event
+      registration.save
+      flash_notice(:register_success.l(:name => event.name, :how_many => registration.how_many))
+      QueuedEmail::Registration.create_email(@user, registration)
+      redirect_to(:action => 'show_event', :id => event.id)
+    else
+      @event = event
+    end
+  end
+
+  def list_registrations
+    if is_in_admin_mode?
+      @event = ConferenceEvent.find(params[:id])
+      @hello = "Hello"
+    else
+      flash_error(:list_registrations_not_allowed.l)
+      redirect_to(:action => 'index')
+    end
+  end
+  
+  def verify
+    registration = ConferenceRegistration.find(params[:id])
+    if registration.verified == nil
+      registration.verified = Time.now
+      registration.save
+      event = registration.conference_event
+      flash_notice(:conference_verify_success.l(:event => event.name, :registrant => registration.name, :how_many => registration.how_many))
+      redirect_to(:action => 'show_event', :id => event.id)
+    else
+      flash_warning(:conference_verify_warning.l)
+      redirect_to(:action => :index)
     end
   end
 end

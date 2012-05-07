@@ -225,4 +225,10 @@ class AccountMailerTest < UnitTestCase
       AccountMailer.create_webmaster_question(@mary.email, 'A question')
     end
   end
+
+  def test_email_22
+    run_mail_test('email_registration') do
+      AccountMailer.create_email_registration(nil, conference_registrations(:njw_at_msa))
+    end
+  end
 end

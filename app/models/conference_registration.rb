@@ -1,3 +1,3 @@
-class ConferenceRegistration < ActiveRecord::Base
+class ConferenceRegistration < AbstractModel
   belongs_to :conference_event
 end
