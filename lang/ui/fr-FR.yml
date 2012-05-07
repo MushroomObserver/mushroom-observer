@@ -988,6 +988,7 @@ app_rss: "[:app_title] RSS"
 # Donation stuff.
 # CHANGED: 20110601
 # app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
+# app_donate_banner: '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
 app_donate_banner: Consultez notre "«tracker de fonction»":/pivotal/index nouveau et amélioré.
 app_donate: Faire un don
 

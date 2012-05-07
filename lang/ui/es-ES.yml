@@ -988,7 +988,8 @@ app_rss: Mushroom Observer RSS
 # Donation stuff.
 # CHANGED: 20110601
 # app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
-app_donate_banner:  '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
+# app_donate_banner: '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
+app_donate_banner:  '"NEW FEATURES!  Read about them here.":/new_features_20120507.txt'
 app_donate: Donar
 
 ################################################################################
