@@ -13,7 +13,8 @@
 
 <table border="1">
   <tr>
-    <% for label in [:conference_registration_id, :conference_registration_name, :conference_registration_email, :conference_registration_how_many] %>
+    <% for label in [:conference_registration_id, :conference_registration_name,
+        :conference_registration_email, :conference_registration_how_many, :conference_registration_notes] %>
       <td class="TableColumn"><%= label.t %></td>
     <% end %>
   </tr>
@@ -30,6 +31,9 @@
       </td>
       <td>
         <%= r.how_many %>
+      </td>
+      <td>
+        <%= r.notes %>
       </td>
     </tr>
   <% end %>

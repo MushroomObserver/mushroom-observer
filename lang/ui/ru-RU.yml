@@ -2134,10 +2134,11 @@ list_registrations_title:  Registrations for [name]
 list_registrations_not_allowed:  Only admins can list registrations
 
 # ConferenceRegistration Fields
-conference_registration_id:  ID
-conference_registration_name:  Name
 conference_registration_email:  Email
 conference_registration_how_many:  How many?
+conference_registration_id:  ID
+conference_registration_name:  Name
+conference_registration_notes:  Notes
 
 # conference/register
 register_event:  Register

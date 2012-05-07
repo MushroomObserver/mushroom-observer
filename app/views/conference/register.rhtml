@@ -18,6 +18,9 @@
   <p>
     <%= :conference_registration_how_many.t %>: <%= text_field('registration', 'how_many', :size => 7, :value => 1) %>
   </p>
+  <p>
+    <%= :conference_registration_notes.t %>:<br/><%= text_area('registration', 'notes', :cols => 100) %>
+  </p>
   <center><%= submit_tag :register_save.t %><br/></center>
 <% end %>
 </p>

@@ -95,7 +95,8 @@ class ConferenceControllerTest < FunctionalTestCase
       :registration => {
         :name => 'Rolf Singer',
         :email => 'rolf@mo.com',
-        :how_many => 4
+        :how_many => 4,
+        :notes => "I like to eat meat!"
       }
     }
   end
@@ -109,6 +110,7 @@ class ConferenceControllerTest < FunctionalTestCase
     assert_equal(params[:registration][:name], registration.name)
     assert_equal(params[:registration][:email], registration.email)
     assert_equal(params[:registration][:how_many], registration.how_many)
+    assert_equal(params[:registration][:notes], registration.notes)
     assert_response(:redirect)
   end
 

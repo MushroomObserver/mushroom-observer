@@ -558,6 +558,7 @@ class String
   def truncate_binary_length!(len)
     self.replace(truncate_binary_length(len))
   end
+  
   def truncate_binary_length(len)
     result = self
     if result.binary_length > len

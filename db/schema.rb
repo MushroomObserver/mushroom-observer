@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120426005425) do
+ActiveRecord::Schema.define(:version => 20120507023420) do
 
   create_table "comments", :force => true do |t|
     t.datetime "created"
@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(:version => 20120426005425) do
     t.datetime "updated_at"
     t.integer  "how_many"
     t.datetime "verified"
+    t.text     "notes"
   end
 
   create_table "copyright_changes", :force => true do |t|
