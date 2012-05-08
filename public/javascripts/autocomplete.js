@@ -971,8 +971,10 @@ var MOAutocompleter = Class.create({
       if (token.end < old_str.length)
         new_str += old_str.substring(token.end);
       if (old_str != new_str) {
+        var old_scroll = this.input_elem.scrollTop;
         this.input_elem.value = new_str;
         setCursorPosition(this.input_elem, token.start + new_val.length);
+        this.input_elem.scrollTop = old_scroll;
       }
     } else {
       if (old_str != new_val)
