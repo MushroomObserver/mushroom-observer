@@ -46,10 +46,11 @@ class LurkerTest < IntegrationTestCase
 
   def test_show_observation
     # Start with Observation #2 since it has everything.
+    login('mary')
     get('/2')
     push_page
-    # (make sure we're NOT displaying original names of images for non-logged-in users)
-    assert_select('a', :text => /DSCN8835.JPG/u, :count => 0)
+    # (make sure we're displaying original names of images)
+    assert_select('a', :text => /DSCN8835.JPG/u)
 
     # Check out the RSS log.
     save_path = path
