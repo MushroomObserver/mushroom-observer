@@ -293,7 +293,7 @@ var MOAutocompleter = Class.create({
     this.verbose("schedule_refresh()");
     this.clear_refresh();
     this.refresh_timer = setTimeout((function() {
-    this.verbose("doing_refresh()");
+      this.verbose("doing_refresh()");
       // $('log').innerHTML += "refresh_timer(" + this.input_elem.value + ")<br/>";
       this.old_value[this.input_id] = this.input_elem.value;
       if (this.ajax_url)
@@ -442,13 +442,7 @@ var MOAutocompleter = Class.create({
     this.input_elem.focus();
     if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse)
       new_val += ' ';
-    if (this.token) {
-      var i = old_val.lastIndexOf(this.token);
-      if (i > 0)
-        new_val = old_val.substring(0, i + this.token.length) + new_val;
-    }
-    if (old_val != new_val)
-      this.input_elem.value = new_val;
+    this.set_token(new_val);
     this.schedule_hide();
   },
 
@@ -574,7 +568,7 @@ var MOAutocompleter = Class.create({
       Position.clone(this.input_elem, menu, {
         setHeight: false,
         setWidth: false,
-        offsetTop: this.input_elem.offsetHeight
+        offsetTop: this.input_elem.offsetHeight + this.input_elem.scrollTop
       });
       menu.style.display = 'block';
 
@@ -696,17 +690,19 @@ var MOAutocompleter = Class.create({
 
   // Grab all matches, doing exact match, ignoring number of words.
   update_normal: function () {
-    var val = "\n" + this.last_token(this.input_elem.value).toLowerCase();
+    var val = "\n" + this.get_token().toLowerCase();
     var options  = this.options;
     var options2 = this.options.toLowerCase();
     var matches = [];
-    for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
-      var j = options.indexOf("\n", i+1);
-      var s = options.substring(i+1, j>0 ? j : options.length);
-      if (s.length > 0) {
-        matches.push(s);
-        if (matches.length >= this.max_matches)
-          break;
+    if (val != "\n") {
+      for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
+        var j = options.indexOf("\n", i+1);
+        var s = options.substring(i+1, j>0 ? j : options.length);
+        if (s.length > 0) {
+          matches.push(s);
+          if (matches.length >= this.max_matches)
+            break;
+        }
       }
     }
     this.matches = matches;
@@ -714,32 +710,34 @@ var MOAutocompleter = Class.create({
 
   // Grab matches ignoring order of words.
   update_unordered: function () {
-    var val = this.last_token(this.input_elem.value).toLowerCase().
+    var val = this.get_token().toLowerCase().
                    replace(/^ */, '').replace(/  +/g, ' ');
     var vals = val.split(' ');
     var options  = this.options;
     var options2 = this.options.toLowerCase();
     var matches = [];
-    var j, j1, j2;
-    var k, s, s2;
-    for (var i=0; i>=0; i=j) {
-      j1 = options2.indexOf("\n" + vals[0], i) + 1;
-      j2 = options2.indexOf(" " + vals[0], i) + 1;
-      if (!j1 && !j2) break;
-      j = j1 && j1 < j2 || !j2 ? j1 : j2;
-      i = options2.lastIndexOf("\n", j);
-      j = options2.indexOf("\n", i+1);
-      s = options.substring(i+1, j>0 ? j : options.length);
-      if (s.length > 0) {
-        s2 = ' ' + options2.substring(i+1, j>0 ? j : options.length);
-        for (k=1; k<vals.length; k++) {
-          if (s2.indexOf(' ' + vals[k]) < 0)
-            break;
-        }
-        if (k >= vals.length) {
-          matches.push(s);
-          if (matches.length >= this.max_matches)
-            break;
+    if (val != '') {
+      var j, j1, j2;
+      var k, s, s2;
+      for (var i=0; i>=0; i=j) {
+        j1 = options2.indexOf("\n" + vals[0], i) + 1;
+        j2 = options2.indexOf(" " + vals[0], i) + 1;
+        if (!j1 && !j2) break;
+        j = j1 && j1 < j2 || !j2 ? j1 : j2;
+        i = options2.lastIndexOf("\n", j);
+        j = options2.indexOf("\n", i+1);
+        s = options.substring(i+1, j>0 ? j : options.length);
+        if (s.length > 0) {
+          s2 = ' ' + options2.substring(i+1, j>0 ? j : options.length);
+          for (k=1; k<vals.length; k++) {
+            if (s2.indexOf(' ' + vals[k]) < 0)
+              break;
+          }
+          if (k >= vals.length) {
+            matches.push(s);
+            if (matches.length >= this.max_matches)
+              break;
+          }
         }
       }
     }
@@ -748,34 +746,37 @@ var MOAutocompleter = Class.create({
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order of options must have genera first, then species, then varieties.
-  update_collapsed: function (val) {
-    var val = "\n" + this.last_token(this.input_elem.value).toLowerCase();
+  update_collapsed: function () {
+    var val = "\n" + this.get_token().toLowerCase();
     var options  = this.options;
     var options2 = this.options.toLowerCase();
     var matches  = [];
-    var the_rest = (val.match(/ /g) || []).length >= this.collapse;
-    for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
-      var j = options.indexOf("\n", i+1);
-      var s = options.substring(i+1, j>0 ? j : options.length);
-      if (s.length > 0) {
-        if (the_rest || s.indexOf(' ', val.length-1) < val.length-1) {
-          matches.push(s);
-          if (matches.length >= this.max_matches)
+    if (val != "\n") {
+      var the_rest = (val.match(/ /g) || []).length >= this.collapse;
+      for (var i=options2.indexOf(val); i>=0; i=options2.indexOf(val, i+1)) {
+        var j = options.indexOf("\n", i+1);
+        var s = options.substring(i+1, j>0 ? j : options.length);
+        if (s.length > 0) {
+          if (the_rest || s.indexOf(' ', val.length-1) < val.length-1) {
+            matches.push(s);
+            if (matches.length >= this.max_matches)
+              break;
+          } else if (matches.length > 1) {
             break;
-        } else if (matches.length > 1) {
-          break;
-        } else {
-          if ("\n" + matches[0] == val)
-            matches.pop();
-          matches.push(s);
-          if (matches.length >= this.max_matches)
-            break;
-          the_rest = true;
+          } else {
+            if ("\n" + matches[0] == val)
+              matches.pop();
+            matches.push(s);
+            if (matches.length >= this.max_matches)
+              break;
+            the_rest = true;
+          }
         }
       }
+      if (matches.length == 1 &&
+          (val == "\n" + matches[0].toLowerCase() || val == "\n" + matches[0].toLowerCase() + " "))
+        matches.pop();
     }
-    if (matches.length == 1 && "\n" + matches[0] == val)
-      matches.pop();
     this.matches = matches;
   },
 
@@ -789,16 +790,6 @@ var MOAutocompleter = Class.create({
     if (++i < list.length)
       list.splice(i, list.length - i);
     return list;
-  },
-
-  // Get last token, the one being auto-completed.
-  last_token: function (val) {
-    if (this.token) {
-      var i = val.lastIndexOf(this.token);
-      if (i >= 0)
-        val = val.substring(i + this.token.length, val.length);
-    }
-    return val;
   },
 
   // Look for 'val' in list of matches and highlight it, otherwise highlight first.
@@ -839,7 +830,7 @@ var MOAutocompleter = Class.create({
   // Send request for updated options.
   refresh_options: function () {
     this.verbose("refresh_options()");
-    var val = this.last_token(this.input_elem.value).toLowerCase();
+    var val = this.get_token().toLowerCase();
     var url;
 
     // Don't make request on empty string!
@@ -956,6 +947,57 @@ var MOAutocompleter = Class.create({
     }
   },
 
+// ------------------------------ Tokens ------------------------------
+
+  // Get token under or immediately in front of cursor.
+  get_token: function () {
+    var val = this.input_elem.value;
+    if (this.token) {
+      var token = this.token_extents();
+      val = val.substring(token.start, token.end);
+    }
+    return val;
+  },
+
+  // Change the token under or immediately in front of the cursor.
+  set_token: function (new_val) {
+    var old_str = this.input_elem.value;
+    if (this.token) {
+      var new_str = "";
+      var token = this.token_extents();
+      if (token.start > 0)
+        new_str += old_str.substring(0, token.start);
+      new_str += new_val;
+      if (token.end < old_str.length)
+        new_str += old_str.substring(token.end);
+      if (old_str != new_str) {
+        this.input_elem.value = new_str;
+        setCursorPosition(this.input_elem, token.start + new_val.length);
+      }
+    } else {
+      if (old_str != new_val)
+        this.input_elem.value = new_val;
+    }
+  },
+
+  // Get index of first character and character after last of current token.
+  token_extents: function () {
+    var start, end, sel = getInputSelection(this.input_elem);
+    var val = this.input_elem.value;
+    if (sel.start > 0)
+      start = val.lastIndexOf(this.token, sel.start - 1);
+    else
+      start = 0
+    if (start < 0)
+      start = 0;
+    else
+      start += this.token.length;
+    end = val.indexOf(this.token, start);
+    if (end <= start || end > sel.length)
+      end = sel.len;
+    return { start: start, end: end };
+  },
+
 // ------------------------------ Primer ------------------------------
 
   update_primer: function () {
@@ -973,7 +1015,74 @@ var MOAutocompleter = Class.create({
     this.options += "\n" + val;
   },
 
+  debug: function (str) {
+    $('log').innerHTML += str + "<br/>";
+  },
+
   verbose: function (str) {
     // $('log').innerHTML += str + "<br/>";
   }
 });
+
+// --------------------------------------------------------------------
+// written by Tim Down
+// http://stackoverflow.com/questions/3053542/how-to-get-the-start-and-end-points-of-selection-in-text-area/3053640#3053640
+
+function getInputSelection(el) {
+  var start, end, len, normalizedValue, range, textInputRange, len, endRange;
+  start = end = len = el.value.length;
+
+  if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+    start = el.selectionStart;
+    end = el.selectionEnd;
+  } else {
+    range = document.selection.createRange();
+
+    if (range && range.parentElement() == el) {
+      normalizedValue = el.value.replace(/\r\n/g, "\n");
+
+      // Create a working TextRange that lives only in the input
+      textInputRange = el.createTextRange();
+      textInputRange.moveToBookmark(range.getBookmark());
+
+      // Check if the start and end of the selection are at the very end
+      // of the input, since moveStart/moveEnd doesn't return what we want
+      // in those cases
+      endRange = el.createTextRange();
+      endRange.collapse(false);
+
+      if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
+        start = end = len;
+      } else {
+        start = -textInputRange.moveStart("character", -len);
+        start += normalizedValue.slice(0, start).split("\n").length - 1;
+
+        if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
+          end = len;
+        } else {
+          end = -textInputRange.moveEnd("character", -len);
+          end += normalizedValue.slice(0, end).split("\n").length - 1;
+        }
+      }
+    }
+  }
+
+  return {
+    start: start,
+    end: end,
+    len: len
+  };
+}
+
+function setCursorPosition(el, pos) {
+  if (el.setSelectionRange) {
+    el.setSelectionRange(pos, pos);
+  } else if (el.createTextRange) {
+    var range = el.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', pos);
+    range.moveStart('character', pos);
+    range.select();
+  }
+}
+
