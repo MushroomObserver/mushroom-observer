@@ -70,9 +70,12 @@
   </p>
 
   <p>
-    <label for="member_lat"><%= :LATITUDE.t %>:</label>&nbsp;<%= text_field('member', 'lat', :size => 12) %>
-    <label for="member_long"><%= :LONGITUDE.t %>:</label>&nbsp;<%= text_field('member', 'long', :size => 12) %>
-    <label for="member_alt"><%= :ALTITUDE.t %>:</label>&nbsp;<%= text_field('member', 'alt', :size => 12) %>
+    <label for="member_lat"><%= :LATITUDE.t %>:</label>&nbsp;<%=
+      text_field('member', 'lat', :size => 12, :value => @member_lat) %>
+    <label for="member_long"><%= :LONGITUDE.t %>:</label>&nbsp;<%=
+      text_field('member', 'long', :size => 12, :value => @member_long) %>
+    <label for="member_alt"><%= :ALTITUDE.t %>:</label>&nbsp;<%=
+      text_field('member', 'alt', :size => 12, :value => @member_alt) %>
     <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span>
   </p>
 
