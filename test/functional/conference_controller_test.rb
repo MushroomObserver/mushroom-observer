@@ -113,6 +113,22 @@ class ConferenceControllerTest < FunctionalTestCase
     assert_equal(params[:registration][:notes], registration.notes)
     assert_response(:redirect)
   end
+  
+  def test_reregister_post
+    registrations = ConferenceRegistration.count
+    previous_registration = conference_registrations(:njw_at_msa)
+    params = create_registration_params
+    params[:registration][:name] = previous_registration.name
+    params[:registration][:email] = previous_registration.email
+    post(:register, params)
+    assert_equal(registrations, ConferenceRegistration.count)
+    registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0]
+    assert_equal(params[:registration][:name], registration.name)
+    assert_equal(params[:registration][:email], registration.email)
+    assert_equal(params[:registration][:how_many], registration.how_many)
+    assert_equal(params[:registration][:notes], registration.notes)
+    assert_response(:redirect)
+  end
 
   def test_list_registrations
     msa = conference_events(:msa_annual_meeting)

@@ -20,18 +20,20 @@
 #
 ################################################################################
 
-class QueuedEmail::Registered < QueuedEmail
+class QueuedEmail::UpdateRegistration < QueuedEmail
   def registration; get_object(:registration, ::ConferenceRegistration); end
+  def before;       get_string(:before);     end
 
-  def self.create_email(receiver, registration)
+  def self.create_email(receiver, registration, before)
     result = create(nil, receiver)
     raise "Missing regisration!" if !registration
     result.add_integer(:registration, registration.id)
+    result.add_string(:before, before)
     result.finish
     return result
   end
   
   def deliver_email
-    AccountMailer.deliver_email_registration(to_user, registration)
+    AccountMailer.deliver_update_registration(to_user, registration, before)
   end
 end

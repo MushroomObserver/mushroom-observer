@@ -511,6 +511,30 @@ class AccountMailer < ActionMailer::Base
                           "name=#{name.id rescue nil}")
   end
 
+  # Notify email given in registration of a change in the registration
+  # user::         User we're sending announcment to.  Defaults to admin.
+  # before::       String describing the registration before the change.
+  # after::        String describing the registration after the change.
+  def update_registration(user, registration, before)
+    event = registration.conference_event
+    @user                = user
+    Locale.code          = DEFAULT_LOCALE
+    Locale.code          = @user.locale if @user and @user.locale
+    @subject             = :email_subject_update_registration.l(:name => event.name)
+    @body['registration'] = registration
+    @body['before']      = before
+    @body['subject']     = @subject
+    @body['user']        = user
+    @recipients          = registration.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = WEBMASTER_EMAIL_ADDRESS
+    @content_type        = 'text/html'
+    @content_type        = 'text/plain' if @user and not @user.email_html
+    @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL update_registration " +
+                          "to=#{registration.email} ")
+  end
+
   # User asking user about anything else.
   # sender::    User asking the question.
   # user::      User receiving the question.

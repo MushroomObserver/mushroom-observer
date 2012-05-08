@@ -231,4 +231,15 @@ class AccountMailerTest < UnitTestCase
       AccountMailer.create_email_registration(nil, conference_registrations(:njw_at_msa))
     end
   end
+
+  def test_email_23
+    run_mail_test('update_registration') do
+      reg = conference_registrations(:njw_at_msa)
+      before = reg.describe
+      reg.how_many = 5
+      reg.notes = "5 is better than 4"
+      reg.save
+      AccountMailer.create_update_registration(nil, reg, before)
+    end
+  end
 end

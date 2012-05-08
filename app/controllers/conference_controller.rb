@@ -1,25 +1,24 @@
 class ConferenceController < ApplicationController
   # TODO:
-  # allow editing of registration based on email address
-  # send confirmation email upon edit of a registration
-  # no robots and pulldown for how_many
+  # Need to watch for non-verified registrations
+  # Links to events
   
   # Have users own ConferenceEvents rather than admin
   # Owners can delete ConferenceEvents
   
   # Creating a conference event should be RESTful, but I'm not sure what our conventions are at this point
-  def show_event
+  def show_event # :nologin:
     store_location
     @event = ConferenceEvent.find(params[:id])
     @registration_count = @event.how_many
   end
 
-  def index
+  def index # :nologin:
     store_location
     @events = ConferenceEvent.find(:all)
   end
   
-  def create_event
+  def create_event # :norobots:
     if is_in_admin_mode? # Probably should be expanded to any MO user
       if request.method == :post
         event = ConferenceEvent.new(params[:event])
@@ -32,7 +31,8 @@ class ConferenceController < ApplicationController
     end
   end
   
-  def edit_event # Expand to any MO user, but make them owned and editable only by that user or an admin
+  def edit_event # :norobots:
+    # Expand to any MO user, but make them owned and editable only by that user or an admin
     if is_in_admin_mode?
       if request.method == :post
         event = ConferenceEvent.find(params[:id])
@@ -48,22 +48,40 @@ class ConferenceController < ApplicationController
     end
   end
   
-  def register
+  def register # :nologin: :norobots:
     store_location
     event = ConferenceEvent.find(params[:id])
     if request.method == :post
-      registration = ConferenceRegistration.new(params[:registration])
-      registration.conference_event = event
-      registration.save
-      flash_notice(:register_success.l(:name => event.name, :how_many => registration.how_many))
-      QueuedEmail::Registration.create_email(@user, registration)
+      registration = find_previous_registration(params)
+      if registration.nil?
+        registration = ConferenceRegistration.new(params[:registration])
+        registration.conference_event = event
+        registration.save
+        flash_notice(:register_success.l(:name => event.name, :how_many => registration.how_many))
+        QueuedEmail::Registered.create_email(@user, registration)
+      end
       redirect_to(:action => 'show_event', :id => event.id)
     else
       @event = event
     end
   end
 
-  def list_registrations
+  def find_previous_registration(params)
+    result = nil
+    all_registrations = ConferenceRegistration.find(:all,
+      :conditions => "email = '#{params[:registration][:email]}' and conference_event_id = #{params[:id]}")
+    if not all_registrations.empty?
+      result = all_registrations[0]
+      before = result.describe
+      flash_warning(:register_update_warning.t(:description => before))
+      result.update_from_params(params[:registration])
+      result.save
+      QueuedEmail::UpdateRegistration.create_email(@user, result, before)
+    end
+    return result
+  end
+  
+  def list_registrations # :norobots:
     if is_in_admin_mode?
       @event = ConferenceEvent.find(params[:id])
       @hello = "Hello"
@@ -73,7 +91,7 @@ class ConferenceController < ApplicationController
     end
   end
   
-  def verify
+  def verify # :nologin: :norobots:
     registration = ConferenceRegistration.find(params[:id])
     if registration.verified == nil
       registration.verified = Time.now

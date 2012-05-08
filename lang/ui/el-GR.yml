@@ -2116,6 +2116,9 @@ register_event:  Register
 register_event_title:  Register for
 register_save:  Save
 register_success:  Successfully registered [how_many] for [name]
+register_update_warning:  >
+  Updating previous registration for:
+  [description]
 
 # conference/verify
 conference_verify_success:  Registration of [registrant] for [how_many] to [event] has been verified
@@ -3536,6 +3539,7 @@ email_subject_observation_destroy: "[:OBSERVATION] Καταστράφηκε, [na
 email_subject_observation_question: Ερώτημα Για [name]
 email_subject_publish_name: Δημοσίευση Ονόματος
 email_subject_registration:  "[name] Registration Verification"
+email_subject_update_registration:  "[name] Registration Update"
 email_subject_verify: Επαλήθευση Email
 email_subject_webmaster_question: Ερώτημα Από [user]
 
@@ -3709,6 +3713,15 @@ email_registration_intro:  >
   intended to register [how_many] attendee(s) for the [name]:
   \n\n
   [link]
+
+email_update_registration_intro:  >
+  h2. *Hello [user]*
+  \n\n
+  Your regisration for the [name] has been updated from
+  \n\n
+  [before]
+  \n\nto\n\n
+  [after]
 
 email_user_question_intro: >
   h2. *Ερώτημα από Άλλο Χρήστη*
