@@ -701,6 +701,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(true, name.reload.ok_for_export)
   end
 
+  def test_original_filename_visibility
+    login('rolf')
+    get(:show_observation, :id => 4)
+    assert_true(@response.body.include?('áč€εиts'))
+
+    login('mary')
+    get(:show_observation, :id => 4)
+    assert_false(@response.body.include?('áč€εиts'))
+
+    login('rolf')
+    @rolf.update_attributes(:keep_filenames => false)
+    get(:show_observation, :id => 4)
+    assert_false(@response.body.include?('áč€εиts'))
+  end
+
   # ------------------------------
   #  Test creating observations.
   # ------------------------------

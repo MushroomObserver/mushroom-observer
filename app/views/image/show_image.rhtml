@@ -86,12 +86,14 @@
         </p>
       <% end %>
 
-      <p>
-        <%= :image_show_original_name.t %>:
-        <span class="Data">
-          “<%= h(@image.original_name) %>”
-        </span>
-      </p>
+      <% if @image.user == @user and @user.keep_filenames %>
+        <p>
+          <%= :image_show_original_name.t %>:
+          <span class="Data">
+            “<%= h(@image.original_name) %>”
+          </span>
+        </p>
+      <% end %>
 
       <p>
         <%= :image_show_quality.t %>:

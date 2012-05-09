@@ -14,8 +14,11 @@
   <table cellpadding="10">
     <tr>
       <td valign="top">
-        <%= render(:partial => 'form_images',
-                   :locals => { :form => form, :width => 30 }) %>
+        <%= render(:partial => 'form_images', :locals => {
+          :form => form,
+          :width => 30,
+          :leave_out_original_file_name => false
+        }) %>
       </td>
       <td align="center">
         <%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %>

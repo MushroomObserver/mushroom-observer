@@ -513,4 +513,30 @@ class ImageControllerTest < FunctionalTestCase
     assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
     assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
   end
+
+  def test_original_filename_visibility
+    login('rolf')
+    get(:show_image, :id => 6)
+    assert_true(@response.body.include?('áč€εиts'))
+
+    login('mary')
+    get(:show_image, :id => 6)
+    assert_false(@response.body.include?('áč€εиts'))
+
+    login('rolf')
+    @rolf.update_attributes(:keep_filenames => false)
+    get(:show_image, :id => 6)
+    assert_false(@response.body.include?('áč€εиts'))
+  end
+
+  def test_bulk_original_filename_purge
+    assert_equal(1, @rolf.id)
+    imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1')
+    assert(imgs.any?)
+
+    login('rolf')
+    get(:bulk_filename_purge)
+    imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1')
+    assert(imgs.empty?)
+  end
 end
