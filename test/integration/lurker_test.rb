@@ -50,7 +50,7 @@ class LurkerTest < IntegrationTestCase
     get('/2')
     push_page
     # (make sure we're displaying original names of images)
-    assert_select('a', :text => /DSCN8835.JPG/u)
+    assert_match(/DSCN8835.JPG/u, response.body)
 
     # Check out the RSS log.
     save_path = path

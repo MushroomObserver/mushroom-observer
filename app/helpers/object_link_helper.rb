@@ -221,10 +221,13 @@ module ApplicationHelper::ObjectLink
       did_vote_div = true
     end
 
-    # Include original filename (linked direct to original image).
-    if image and args[:original] and !image.original_name.blank? and image.user == User.current
+    # Include original filename.
+    if args[:original] and
+       image and !image.original_name.blank? and
+       image.user_id == User.current_id and
+       @user.keep_filenames
       result += '<br/>' unless did_vote_div
-      result += link_to(h(image.original_name), image.original_url)
+      result += h(image.original_name)
     end
 
     # Wrap result in div.

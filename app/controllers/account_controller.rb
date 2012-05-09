@@ -83,7 +83,7 @@ class AccountController < ApplicationController
           # to automate creation of accounts?
           AccountMailer.deliver_denied(params['new_user'])
         end
-        redirect_back_or_default(:action => "welcome")
+        redirect_back_or_default(:action => :welcome)
       else
         @new_user = User.new(params['new_user'])
         @new_user.created         = now = Time.now
@@ -108,7 +108,7 @@ class AccountController < ApplicationController
           )
           flash_notice :runtime_signup_success.t
           AccountMailer.deliver_verify(@new_user)
-          redirect_back_or_default(:action => "welcome")
+          redirect_back_or_default(:action => :welcome)
         end
       end
     end
@@ -162,7 +162,7 @@ class AccountController < ApplicationController
     user = User.find(params[:id])
     AccountMailer.deliver_verify(user)
     flash_notice :runtime_reverify_sent.t
-    redirect_back_or_default(:action => "welcome")
+    redirect_back_or_default(:action => :welcome)
   end
 
   # This is the welcome page for new users who just created an account.
@@ -203,7 +203,7 @@ class AccountController < ApplicationController
         else
           clear_autologin_cookie
         end
-        redirect_back_or_default(:action => 'welcome')
+        redirect_back_or_default(:action => :welcome)
       end
     end
   end
@@ -287,6 +287,7 @@ class AccountController < ApplicationController
         [ :str,  :locale,          true ],
         [ :int,  :license_id,      true ],
         [ :str,  :votes_anonymous, true ],
+        [ :bool, :keep_filenames,  true ],
         [ :str,  :location_format, true ],
         [ :bool, :email_html,      true ],
         [ :str,  :theme ],
@@ -333,7 +334,7 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_back_or_default(:action => 'welcome')
+        redirect_back_or_default(:controller => :observer, :action => :index)
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
       else
@@ -345,7 +346,7 @@ class AccountController < ApplicationController
           Transaction.put_user(xargs)
         end
         flash_notice(:runtime_prefs_success.t)
-        redirect_back_or_default(:action => 'welcome')
+        redirect_back_or_default(:controller => :observer, :action => :index)
       end
     end
   end
@@ -521,12 +522,12 @@ class AccountController < ApplicationController
     if @user && @user.admin && !is_in_admin_mode?
       session[:admin] = true
     end
-    redirect_back_or_default(:action => :welcome)
+    redirect_back_or_default(:controller => :observer, :action => :index)
   end
 
   def turn_admin_off # :root:
     session[:admin] = nil
-    redirect_back_or_default(:action => :welcome)
+    redirect_back_or_default(:controller => :observer, :action => :index)
   end
 
   def add_user_to_group # :root:

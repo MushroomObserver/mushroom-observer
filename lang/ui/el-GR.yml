@@ -1593,21 +1593,18 @@ observation_made_confidence: Βεβαιότητα της κοινότητας
 # account/prefs
 prefs_title: Αλλαγή Προτιμήσεων
 prefs_link: Επεξεργασία Προτιμήσεων
+
 prefs_login: Σύνδεση
 prefs_email: Διεύθυνση email
 prefs_password_new: Νέος κωδικός
 prefs_password_confirm: Επιβεβαίωση νέου κωδικού
+
+prefs_appearance:  Appearance
 prefs_theme: Προτιμώμενο θέμα
 prefs_locale: Γλώσσα
 prefs_location_format: Μορφή Τοποθεσίας
 prefs_location_format_postal: "Ταχυδρομική (New York, USA)"
 prefs_location_format_scientific: "Επιστημονική (USA, New York)"
-prefs_votes_anonymous: Ψήφοι επί των προτεινόμενων ονομάτων και Φωτογραφίες
-prefs_votes_anonymous_no: Πάντα δημόσιεςAlways public
-prefs_votes_anonymous_yes: Πάντα ανώνυμες
-prefs_votes_anonymous_old: "Δημόσιες μετά από [cutoff]"
-prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
-prefs_license_note: Προεπιλεγμένη "άδεια":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size: Μέγεθος ενδεικτικής εικόνας
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"
@@ -1624,7 +1621,24 @@ prefs_columns: στήλες
 prefs_alt_col_colors: Εναλλακτικά χρώματα στηλών.
 prefs_alt_row_colors: Εναλλακτικά χρώματα σειρών.
 prefs_text_below_images: Τοποθέτηση κειμένου κάτω από τις εικόνες.
-prefs_email_prefs: Προτιμήσεις Email
+
+prefs_privacy:  Privacy settings
+prefs_votes_anonymous: Ψήφοι επί των προτεινόμενων ονομάτων και Φωτογραφίες
+prefs_votes_anonymous_no: Πάντα δημόσιεςAlways public
+prefs_votes_anonymous_yes: Πάντα ανώνυμες
+prefs_votes_anonymous_old: "Δημόσιες μετά από [cutoff]"
+prefs_keep_image_filenames:  Keep original file name of uploaded images?
+prefs_keep_image_filenames_help:  Only you will be able to see them.
+prefs_bulk_filename_purge:  Purge All Filenames from Database
+prefs_bulk_filename_purge_confirm:  >
+  Are you sure you want to purge all image filenames from our database?
+  This action cannot be undone.  Please note that no one but you is able
+  to see these filenames, anyway.
+
+prefs_bulk_filename_purge_success:  Successfully purged all image filenames from our database.
+prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
+prefs_license_note: Προεπιλεγμένη "άδεια":/observer/how_to_use#license you want for new images.
+
 prefs_email_please_notify: Παρακαλώ να ειδοποιούμαι όταν...
 prefs_email_general: Γενικό Email
 prefs_email_general_commercial: κάποιος ενδιαφέρεται να χρησιμοποιήσει μια φωτογραφία μου για εμπορικούς σκοπούς.
@@ -1649,6 +1663,7 @@ prefs_email_names_admin: κάποιος αλλάζει ένα όνομα του 
 prefs_email_names_author: κάποιος αλλάζει ένα όνομα του οποίου είμαι συντάκτης.
 prefs_email_names_editor: κάποιος αλλάζει ένα όνομα που έχω επεξεργαστεί.
 prefs_email_names_reviewer: κάποιος αλλάζει ένα όνομα που έχω επισκοπήσει.
+prefs_email_prefs: Προτιμήσεις Email
 prefs_email_html: Επιτρέπεται η χρήση HTML στα email μου.
 prefs_email_digest_daily: Να μου αποστέλλεται περίληψη στο τέλος της ημέρας.
 prefs_email_digest_immediate: Να ειδοποιούμαι για τα γεγονότα καθώς αυτά συμβαίνουν.

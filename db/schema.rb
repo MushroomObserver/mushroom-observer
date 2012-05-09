@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120507023420) do
+ActiveRecord::Schema.define(:version => 20120508143700) do
 
   create_table "comments", :force => true do |t|
     t.datetime "created"
@@ -546,6 +546,7 @@ ActiveRecord::Schema.define(:version => 20120507023420) do
     t.enum     "votes_anonymous",              :limit => [:no, :yes, :old],                                        :default => :no
     t.enum     "location_format",              :limit => [:postal, :scientific],                                   :default => :postal
     t.datetime "last_activity"
+    t.boolean  "keep_filenames",                                                                                   :default => true,       :null => false
   end
 
   create_table "votes", :force => true do |t|

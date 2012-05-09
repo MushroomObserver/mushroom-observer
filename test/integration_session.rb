@@ -40,4 +40,14 @@ class IntegrationSession < ActionController::Integration::Session
 
   # Rails makes this read-only for no apparent reason.
   attr_accessor :cookies
+
+  # Not sure what's going on yet, but integration test assert_select is
+  # crashing when this fails:
+  #   assert_select('a', :text => /expression/)
+  # Complains about missing method filter_backtrace.  Acts like it's calling
+  # assert on the wrong object.  This work-around might be approximately correct(?)
+  def assert(val, msg=nil, &block)
+    msg = msg.to_s if msg
+    test_case.assert(val, msg, &block)
+  end
 end

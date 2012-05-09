@@ -526,7 +526,9 @@ class Image < AbstractModel
     name.sub!(/^.*[\/\\]/, '')
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name.truncate_binary_length!(120) if name.binary_length > 120
-    self.original_name = name
+    if User.current && User.current.keep_filenames
+      self.original_name = name
+    end
   end
 
   # Save upload to temp file if haven't already done so.  Any errors are added

@@ -1663,21 +1663,18 @@ observation_made_confidence: Community confidence
 # account/prefs
 prefs_title: Change Preferences
 prefs_link: Edit Preferences
+
 prefs_login: Login
 prefs_email: Email address
 prefs_password_new: New password
 prefs_password_confirm: Confirm new password
+
+prefs_appearance: Appearance
 prefs_theme: Preferred theme
 prefs_locale: Language
 prefs_location_format: Location Format
 prefs_location_format_postal: "Postal (New York, USA)"
 prefs_location_format_scientific: "Scientific (USA, New York)"
-prefs_votes_anonymous: Votes on proposed names and images
-prefs_votes_anonymous_no: Always public
-prefs_votes_anonymous_yes: Always anonymous
-prefs_votes_anonymous_old: "Public after [cutoff]"
-prefs_change_image_vote_anonymity: Change Image Vote Anonymity
-prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size: Thumbnail size
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"
@@ -1689,12 +1686,29 @@ prefs_image_large: "[:image_show_large] (960 x 960)"
 prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
 prefs_image_full_size: "[:image_show_full_size]"
 prefs_layout_title: List page layout
-prefs_rows_by: rows x
+prefs_rows_by: rows ×
 prefs_columns: columns
 prefs_alt_col_colors: Alternate column colors.
 prefs_alt_row_colors: Alternate row colors.
 prefs_text_below_images: Put text below images.
-prefs_email_prefs: Email preferences
+
+prefs_privacy: Privacy settings
+prefs_votes_anonymous: Votes on proposed names and images
+prefs_votes_anonymous_no: Always public
+prefs_votes_anonymous_yes: Always anonymous
+prefs_votes_anonymous_old: "Public after [cutoff]"
+prefs_keep_image_filenames: Keep original file name of uploaded images?
+prefs_keep_image_filenames_help: Only you will be able to see them.
+prefs_bulk_filename_purge: Purge All Filenames from Database
+prefs_bulk_filename_purge_confirm: >
+  Are you sure you want to purge all image filenames from our database?
+  This action cannot be undone.  Please note that no one but you is able
+  to see these filenames, anyway.
+
+prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
+prefs_change_image_vote_anonymity: Change Image Vote Anonymity
+prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
+
 prefs_email_please_notify: Please notify me when...
 prefs_email_general: General Email
 prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
@@ -1712,13 +1726,14 @@ prefs_email_locations_editor: someone changes a location I've edited.
 prefs_email_observations: "[:Observation] Email"
 prefs_email_observations_all: anything happens to any observation.
 prefs_email_observations_consensus: consensus name changes for one of my observations.
-prefs_email_observations_naming: someone propose a name for one of my observations.
+prefs_email_observations_naming: someone proposes a name for one of my observations.
 prefs_email_names: "[:Name] Email"
 prefs_email_names_all: anyone changes any name.
-prefs_email_names_admin: someone changes a name I administate.
+prefs_email_names_admin: someone changes a name I administrate.
 prefs_email_names_author: someone changes a name I'm author on.
 prefs_email_names_editor: someone changes a name I've edited.
 prefs_email_names_reviewer: someone changes a name I've reviewed.
+prefs_email_prefs: Email preferences
 prefs_email_html: It's okay to use HTML in my emails.
 prefs_email_digest_daily: Send me summary at the end of the day.
 prefs_email_digest_immediate: Notify me of events as they happen.

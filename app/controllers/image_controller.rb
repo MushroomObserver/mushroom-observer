@@ -31,6 +31,7 @@
 #  remove_images::         Choose images to remove from observation.
 #  license_updater::       Change copyright of many images.
 #  bulk_vote_anonymity_updater:: Change anonymity of image votes in bulk.
+#  bulk_filename_purge::   Purge all the original image filenames from the database.
 #  process_image::         (helper for add_image)
 #
 #  ==== Test Actions
@@ -655,5 +656,13 @@ class ImageController < ApplicationController
         SELECT count(id) FROM image_votes WHERE user_id = #{@user.id} AND !anonymous
       )
     end
+  end
+
+  def bulk_filename_purge
+    Image.connection.update(%(
+      UPDATE images SET original_name = '' WHERE user_id = #{User.current_id}
+    ))
+    flash_notice(:prefs_bulk_filename_purge_success.t)
+    redirect_to(:controller => :account, :action => :prefs)
   end
 end

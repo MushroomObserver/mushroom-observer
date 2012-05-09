@@ -195,7 +195,7 @@ class Vote < AbstractModel
   end
 
   # ----------------------------
-  #  :section: Weights
+  #  :section: Other
   # ----------------------------
 
   LOG10 = Math.log(10)
@@ -211,6 +211,14 @@ class Vote < AbstractModel
     contrib = contrib < 1 ? 0 : Math.log(contrib) / LOG10
     contrib += 1 if observation && user == observation.user
     return contrib
+  end
+
+  # I want to turn this silly logic into an explicit boolean in the table.
+  # This is the first step: abstracting it as a method on Vote instance.
+  # Now we are free to change the implementation later.
+  def anonymous?
+    (user.votes_anonymous == :no) or
+    (user.votes_anonymous == :old and modified > Time.parse(VOTE_CUTOFF))
   end
 
 ################################################################################

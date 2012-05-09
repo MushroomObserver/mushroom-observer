@@ -7,7 +7,7 @@ xml.send(tag,
   if detail
     xml_datetime(xml, :created, object.created)
     xml_datetime(xml, :modified, object.modified)
-    xml_minimal_object(xml, :owner, User, object.user_id)
+    xml_minimal_object(xml, :owner, User, object.user_id) if object.user == User.current or !object.anonymous?
     xml_minimal_object(xml, :naming, Naming, object.naming_id)
     xml_minimal_object(xml, :observation, Observation, object.observation_id)
   end

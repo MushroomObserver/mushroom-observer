@@ -32,11 +32,8 @@
         <td>&nbsp;</td>
         <td align="center"><%= num %></td>
         <td align="left"><small><%=
-          vote_cutoff = Time.parse(VOTE_CUTOFF)
-          votes = table[str][:votes].select do |vote|
-            (vote.user.votes_anonymous == :no) or
-            (vote.user.votes_anonymous == :old and vote.modified > vote_cutoff)
-          end.sort_by {rand}[0..3]
+          votes = table[str][:votes].select(&:anonymous?) \
+            .sort_by {|v| v.id.to_s.reverse} # pseudorandom but deterministic order
           if votes.length > 0
             n = 0
             '(' + votes.map do |vote|

@@ -29,6 +29,7 @@ mary:
   locale: en-US
   thumbnail_size: :thumbnail
   image_size: :medium
+  keep_filenames: true
 
 # Junk gets denied
 junk:
