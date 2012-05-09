@@ -224,8 +224,7 @@ module ApplicationHelper::ObjectLink
     # Include original filename.
     if args[:original] and
        image and !image.original_name.blank? and
-       image.user_id == User.current_id and
-       @user.keep_filenames
+       check_permission(image)
       result += '<br/>' unless did_vote_div
       result += h(image.original_name)
     end

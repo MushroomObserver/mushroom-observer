@@ -522,11 +522,6 @@ class ImageControllerTest < FunctionalTestCase
     login('mary')
     get(:show_image, :id => 6)
     assert_false(@response.body.include?('áč€εиts'))
-
-    login('rolf')
-    @rolf.update_attributes(:keep_filenames => false)
-    get(:show_image, :id => 6)
-    assert_false(@response.body.include?('áč€εиts'))
   end
 
   def test_bulk_original_filename_purge

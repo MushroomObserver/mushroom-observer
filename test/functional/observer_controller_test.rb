@@ -709,11 +709,6 @@ class ObserverControllerTest < FunctionalTestCase
     login('mary')
     get(:show_observation, :id => 4)
     assert_false(@response.body.include?('áč€εиts'))
-
-    login('rolf')
-    @rolf.update_attributes(:keep_filenames => false)
-    get(:show_observation, :id => 4)
-    assert_false(@response.body.include?('áč€εиts'))
   end
 
   # ------------------------------

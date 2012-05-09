@@ -12,7 +12,7 @@ xml.send(tag,
     xml_datetime(xml, :created, object.created)
     xml_datetime(xml, :modified, object.modified)
     xml_detailed_object(xml, :owner, object.user)
-    xml_string(xml, :original_name, object.original_name)
+    xml_string(xml, :original_name, object.original_name) if check_permission(object)
     xml_integer(xml, :number_of_views, object.num_views)
     xml_datetime(xml, :last_viewed, object.last_view)
     xml_boolean(xml, :ok_for_export, true) if object.ok_for_export

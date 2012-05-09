@@ -86,7 +86,7 @@
         </p>
       <% end %>
 
-      <% if @image.user == @user and @user.keep_filenames %>
+      <% if check_permission(@image) %>
         <p>
           <%= :image_show_original_name.t %>:
           <span class="Data">
