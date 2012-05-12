@@ -4,8 +4,9 @@
 #
 #  == Instance Methods
 #
-#  none?::    Same as <tt>!any?</tt>.
-#  all?::     Same as <tt>!any?</tt> with the block negated.
+#  none?::             Same as <tt>!any?</tt>.
+#  all?::              Same as <tt>!any?</tt> with the block negated.
+#  to_boolean_hash::   Convert Array to Hash mapping elements to +true+.
 #
 ################################################################################
 
@@ -34,5 +35,15 @@ class Array
       return false if !proc.call(x)
     end
     return true
+  end
+
+  # Convert Array instance to Hash whose keys are the elements of the Array,
+  # and whose values are all +true+.
+  def to_boolean_hash
+    hash = {}
+    for item in self
+      hash[item] = true
+    end
+    return hash
   end
 end

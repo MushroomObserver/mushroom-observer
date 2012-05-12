@@ -7,17 +7,16 @@
     add_tab(:show_objects.t(:type => :location),
             :controller => 'location', :action => 'index_location',
             :params => query_params(@query))
-  end
-
-  if !@locations.empty?
-    gmap = make_map(@locations, query_params(@query))
-    add_header(GMap.header)
-    add_header(finish_map(gmap))
+    add_tab(:show_objects.t(:type => :observation),
+            :controller => 'observer', :action => 'index_observation',
+            :params => query_params(@query))
   end
 %>
 
 <center>
-  <%= if gmap
+  <%= if @observations.any?
+    gmap = make_map(@observations, :query_params => query_params(@query))
+    finish_map(gmap)
     gmap.div(:width => 800, :height => 550)
   else
     :name_map_no_maps.tp(:name => @name.display_name)

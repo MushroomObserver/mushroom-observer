@@ -174,10 +174,13 @@ class LocationController < ApplicationController
 
   # Map results of a search or index.
   def map_locations # :nologin: :norobots:
-    query = find_or_create_query(:Location)
-    @title = query.flavor == :all ? :map_locations_global_map.t :
-                             :map_locations_title.t(:locations => query.title)
-    @locations = query.results
+    @query = find_or_create_query(:Location)
+    if @query.flavor == :all
+      @title = :map_locations_global_map.t
+    else
+      @title = :map_locations_title.t(:locations => @query.title)
+    end
+    @locations = @query.results
   end
 
   # Try to turn this into a query on observations.where instead.

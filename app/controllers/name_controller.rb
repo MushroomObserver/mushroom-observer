@@ -1642,8 +1642,8 @@ class NameController < ApplicationController
   def map # :nologin: :norobots:
     pass_query_params
     @name = Name.find(params[:id])
-    @query = create_query(:Location, :with_observations_of_name, :name => @name)
-    @locations = @query.results
+    @query = create_query(:Observation, :of_name, :name => @name)
+    @observations = @query.results
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications

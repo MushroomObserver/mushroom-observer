@@ -133,60 +133,49 @@ class Location < AbstractModel
 
   # Return [north, west].
   def north_west
-    [self.north, self.west]
+    [north, west]
   end
 
   # Return [north, east].
   def north_east
-    [self.north, self.east]
+    [north, east]
   end
 
   # Return [south, west].
   def south_west
-    [self.south, self.west]
+    [south, west]
   end
 
   # Return [south, east].
   def south_east
-    [self.south, self.east]
+    [south, east]
+  end
+
+  # Return center latitude.
+  def lat
+    (north + south) / 2 rescue nil
+  end
+
+  # Return center longitude.
+  def long
+    long = (east + west) / 2
+    long += 180 if west > east
+    return long
+  rescue
+    nil
   end
 
   # Return center as [lat, long].
   def center
-    begin
-      west_east = (east + west)/2
-      west_east += 180 if (west > east)
-      [(self.north + self.south)/2, west_east]
-    rescue
-      [nil, nil]
-    end
+    [lat, long]
   end
 
-  # Update rectangle to include lat and long
-  def tweak(lat, long)
-    # Latitude is easy...
-    if lat >= (self.north + self.south)/2
-      self.north = lat
-    else
-      self.south = lat
-    end
+  def north_south_distance
+    north - south
+  end
 
-    # Longitude requires we deal with wrap around
-    east_diff = (long - self.east).abs
-    if east_diff > 180 # Go the other way around the globe
-      east_diff = 360 - east_diff
-    end
-    west_diff = (long - self.west).abs
-    if west_diff > 180 # Go the other way around the globe
-      west_diff = 360 - west_diff
-    end
-    if east_diff <= west_diff
-      self.east = long
-    else
-      self.west = long
-    end
-
-    save
+  def east_west_distance
+    west > east ? east - west + 360 : east - west
   end
 
   LXXXITUDE_REGEX = /^\s*
@@ -213,7 +202,7 @@ class Location < AbstractModel
     end
     return result
   end
-    
+
   # Convert latitude string to standard decimal form with 4 places of precision.
   # Returns nil if invalid.
   def self.parse_latitude(lat)
@@ -238,6 +227,15 @@ class Location < AbstractModel
       result = (match[1].to_f).round
     end
     return result
+  end
+
+  # Useful if invalid lat/longs cause crash, e.g., in mapping code.
+  def force_valid_lat_longs!
+    self.north = Location.parse_latitude(north) || 45
+    self.south = Location.parse_latitude(south) || -45
+    self.east = Location.parse_longitude(east) || 90
+    self.west = Location.parse_longitude(west) || -90
+    self.north, self.south = south, north if north < south
   end
 
   ##############################################################################

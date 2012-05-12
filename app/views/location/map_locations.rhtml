@@ -1,19 +1,20 @@
 <%
   new_tab_set do
-    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
-  end
-
-  if !@locations.empty?
-    gmap = make_map(@locations)
-    add_header(GMap.header)
-    add_header(finish_map(gmap))
+    add_tab(:all_objects.t(:type => :location), :controller => :location,
+            :action => 'list_locations')
+    add_tab(:show_objects.t(:type => :observation), :controller => :observer,
+            :action => 'index_observation', :params => query_params(@query))
+    add_tab(:show_objects.t(:type => :location), :controller => :location,
+            :action => 'index_location', :params => query_params(@query))
   end
 %>
 
 <center>
-  <%= if gmap
+  <%= if @locations.any?
+    gmap = make_map(@locations)
+    finish_map(gmap)
     gmap.div(:width => 800, :height => 550)
   else
-    :runtime_map_locations_no_matches.t(:pattern => @pattern)
+    :runtime_map_nothing_to_map.t
   end %>
 </center>

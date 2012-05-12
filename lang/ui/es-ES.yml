@@ -462,6 +462,7 @@ list_objects: Registrar [TYPES]
 remove_object: Eliminar [TYPE]
 remove_objects: Eliminar [TYPES]
 show_all: Mostrar Todos
+map_all:  Map All
 show_name: Acerca de [NAME]
 show_object: Mostrar [TYPE]
 show_objects: Mostrar [TYPES]
@@ -4250,10 +4251,10 @@ email_registration_intro:  >
 email_update_registration_intro:  >
   h2. *Hello [user]*
   \n\n
-  Your regisration for the [name] has been updated from
+  Your registration for the [name] has been updated from
   \n\n
   [before]
-  \n\nto\n\n
+  \n\n\nto\n\n\n
   [after]
 
 email_user_question_intro: >
@@ -5384,6 +5385,7 @@ runtime_invalid_rank: El rango «[line_rank]» no está por encima de «[rank]»
 runtime_location_merge_failed: No se ha podido fusionar la observación [name].
 runtime_login_failed: No se ha podido iniciar sesión.
 runtime_login_success: Su sesión se ha iniciado con éxito.
+runtime_map_nothing_to_map:  Nothing to map.
 runtime_name_in_use_with_notes: El nombre «[name]» ya está en uso y «[other]» ha notas.
 runtime_no_conditions: ¡Usted no ha indicado sus condiciones!
 runtime_no_upload_image: No se ha podido subir la imagen «[name]».
@@ -5456,7 +5458,6 @@ runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(ty
 runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
 runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
-runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
 runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
 runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
 runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
@@ -5744,3 +5745,4 @@ _unit_test_w: '[:_unit_test_x]'
 _unit_test_x: '[:_unit_test_y]'
 _unit_test_y: '[:_unit_test_z]'
 _unit_test_z: bob
+

@@ -244,6 +244,22 @@ class Observation < AbstractModel
     write_attribute(:alt, val)
   end
 
+  # Is lat/long more than 10% outside of location extents?
+  def lat_long_dubious?
+    result = false
+    if lat and location
+      delta_lat = location.north_south_distance / 10
+      delta_long = location.east_west_distance / 10
+      if lat > location.north + delta_lat or
+         lat < location.south - delta_lat or
+         long > location.east + delta_long or
+         long < location.west - delta_long
+        result = true
+      end
+    end
+    return result
+  end
+
   ##############################################################################
   #
   #  :section: Namings and Votes

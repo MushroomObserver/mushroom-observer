@@ -702,6 +702,13 @@ class ObserverController < ApplicationController
     show_index_of_objects(query, args)
   end
 
+  # Map results of a search or index.
+  def map_observations # :nologin: :norobots:
+    @query = find_or_create_query(:Observation)
+    @title = :map_locations_title.t(:locations => @query.title)
+    @observations = @query.results
+  end
+
   ##############################################################################
   #
   #  :section: Show Observation

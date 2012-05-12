@@ -4,67 +4,6 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class LocationTest < UnitTestCase
 
-  def tweak_lat(loc, value, expect_north)
-    north = loc.north
-    south = loc.south
-    east = loc.east
-    west = loc.west
-    loc.tweak(value, east)
-    if expect_north
-      assert_equal([value, south, east, west], [loc.north, loc.south, loc.east, loc.west])
-      loc.tweak(north, east)
-    else
-      assert_equal([north, value, east, west], [loc.north, loc.south, loc.east, loc.west])
-      loc.tweak(south, east)
-    end
-  end
-
-  def tweak_long(loc, value, east, west, expect_east)
-    north = loc.north
-    south = loc.south
-    loc.east = east
-    loc.west = west
-    loc.save
-    loc.tweak(north, value)
-    if expect_east
-      assert_equal([north, south, value, west], [loc.north, loc.south, loc.east, loc.west])
-      loc.tweak(north, east)
-    else
-      assert_equal([north, south, east, value], [loc.north, loc.south, loc.east, loc.west])
-      loc.tweak(north, west)
-    end
-  end
-
-  def test_tweak
-    User.current = @mary
-    loc = Location.create!(
-      :name => 'Unknown',
-      :north        => 60,
-      :south        => 50,
-      :east         => 40,
-      :west         => 30
-    )
-    tweak_lat(loc, 65, true)
-    tweak_lat(loc, 59, true)
-    tweak_lat(loc, 55, true)
-    tweak_lat(loc, 51, false)
-    tweak_lat(loc, 45, false)
-
-    tweak_long(loc, 50, 40, 30, true)
-    tweak_long(loc, 36, 40, 30, true)
-    tweak_long(loc, 35, 40, 30, true)
-    tweak_long(loc, 34, 40, 30, false)
-    tweak_long(loc, -35, 40, 30, false)
-    tweak_long(loc, 159, -160, 150, false)
-    tweak_long(loc, 151, -160, 150, false)
-    tweak_long(loc, 175, -160, 140, true)
-    tweak_long(loc, -175, 160, -140, true)
-    tweak_long(loc, 91, -89, -91, false)
-    tweak_long(loc, 91, -91, -89, true)
-    tweak_long(loc, 89, -91, -89, false)
-    tweak_long(loc, 50, 40, 30, true)
-  end
-
   def bad_location(str)
     assert(Location.dubious_name?(str, true) != [])
   end

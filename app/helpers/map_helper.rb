@@ -2,165 +2,278 @@
 #
 #  = Google Maps Helpers
 #
-#  XXX
+#  make_map::     Create a GMap.
+#  finish_map::   Render the actual HTML needed for the given GMap.
 #
-#  *NOTE*: These are all included in ApplicationHelper.
+#  == Typical Usage
 #
-#  == Methods
-#
-#  make_map::       Create a map of the given Locations.
-#  finish_map::     Render the header needed for the given map.
-#  map_loc::        Add a dot to the map.
-#
-#  == Usage
-#
-#    <%
-#      # Create the map first.
-#      gmap = make_map(@locations)
-#      # (tweak gmap here)
-#      # map_loc(gmap, location)
-#      # etc.
-#   
-#      # Install some necessary header fields.
-#      add_header(GMap.header)
-#      add_header(finish_map(gmap))
-#    %>
-#   
-#    ...
-#   
 #    <%=
-#      # Place this object where you want the map to appear.
+#      gmap = make_map(@locations)
+#      # (can tweak gmap here)
+#      finish_map(gmap)
 #      gmap.div(:width => 400, :height => 400)
 #    %>
 #
 ##############################################################################
 
+require_dependency 'map_analysis'
+require_dependency 'map_set'
+
 module ApplicationHelper::Map
-
-  def overlay_init(map, marker, name)
-    map.overlay_global_init(marker, 'mo_marker_' + name)
-    map.event_init(marker, 'dragend', "function(latlng) {dragEndLatLng(latlng, '#{name}')}")
-  end
-  
-  # Draw a single Location on the given GMap.
-  def map_loc(map, loc, query_params={}, marker_name = nil, box_name = nil)
-    link = link_to(loc.display_name.t, :controller => :location,
-                   :action => :show_location, :id => loc.id,
-                   :params => query_params)
-    marker = GMarker.new(
-      loc.center(),
-      :title => loc.display_name,
-      :draggable => (marker_name != nil))
-    if marker_name
-      overlay_init(map, marker, 'ct')
-      overlay_init(map, GMarker.new(loc.north_west, :draggable => true), 'nw')
-      overlay_init(map, GMarker.new(loc.north_east, :draggable => true), 'ne')
-      overlay_init(map, GMarker.new(loc.south_east, :draggable => true), 'se')
-      overlay_init(map, GMarker.new(loc.south_west, :draggable => true), 'sw')
-    else
-      table = make_table([
-        ['', h(loc.north), ''],
-        [h(loc.west), '', h(loc.east)],
-        ['', h(loc.south), '']
-      ])
-      info = '<span class="gmap">' + link + table + '</span>'
-      marker.info_window = info
-      map.overlay_init(marker)
+  def make_map(objects, args={})
+    args = provide_defaults(args, :info_window => true)
+    analysis = MapAnalysis.new(objects)
+    gmap = init_map(args)
+    gmap.center_zoom_on_points_init(*analysis.extents)
+    for mapset in analysis.mapsets
+      draw_mapset(gmap, mapset, args)
     end
-    begin
-      west_east = (loc.east + loc.west)/2
-      west_east = west_east + 180 if (loc.west > loc.east)
-    rescue
-    end
-    box = GPolyline.new([
-        [loc.north, loc.west],
-        [loc.north, west_east],
-        [loc.north, loc.east],
-        [loc.south, loc.east],
-        [loc.south, west_east],
-        [loc.south, loc.west],
-        [loc.north, loc.west],
-      ], "#00ff88", 3, 1.0)
-    if box_name
-      map.overlay_global_init(box, box_name)
-    else
-      map.overlay_init(box)
-    end
+    return gmap
   end
 
-  # Create a map of a given Array of Location's.  It creates the map, centers
-  # and zooms it, then draws all the locations on it.  Returns a GMap instance.
-  def make_map(locs, query_params={})
-    gmap = GMap.new("map_div")
-    gmap.control_init(:large_map => true, :map_type => true)
-
-    # Center on a given location?
-    if respond_to?(:start_lat) && respond_to?(:start_long)
-      map.center_zoom_init( [start_lat, start_long], Constants::GM_ZOOM )
-      map.overlay_init(
-        GMarker.new( [start_lat, start_long],
-          :icon => icon_start,
-          :title => name + " start",
-          :info_window => "start"
-      ))
-    end
-
-    # Center based on the points we're drawing on it.
-    gmap.center_zoom_on_points_init(
-      *(locs.map(&:south_west) + locs.map(&:north_east))
-    )
-
-    # Started playing with icons and the following got something to show up, but I decide
-    # not to pursue it further right now.
-    # gmap.icon_global_init(
-    #   GIcon.new(
-    #     :image => "/images/blue-dot.png",
-    #     :icon_size => GSize.new( 24,38 ),
-    #     :icon_anchor => GPoint.new(12,38),
-    #     :info_window_anchor => GPoint.new(9,2)
-    #   ), "blue_dot")
-    # blue_dot = Variable.new("blue_dot")
-
-    # Map locations.
-    for l in locs
-      # map_loc(gmap, l, query_params, blue_dot)
-      map_loc(gmap, l, query_params)
-    end
-    
-    gmap
-  end
-
-  # Create a map of a single Location.  It creates the map, centers
-  # and zooms it, then draws the locations on it.  The Marker for the
-  # location is named 'mo_center_marker' and the surrounding rectangle is named
-  # 'mo_box'.  Returns a GMap instance.
-  def make_editable_map(loc, query_params={})
-    gmap = GMap.new("map_div")
-    gmap.control_init(:large_map => true, :map_type => true)
-
-    # Center on a given location?
-    if respond_to?(:start_lat) && respond_to?(:start_long)
-      map.center_zoom_init( [start_lat, start_long], Constants::GM_ZOOM )
-      map.overlay_init(
-        GMarker.new( [start_lat, start_long],
-          :icon => icon_start,
-          :title => name + " start",
-          :info_window => "start"
-      ))
-    end
-    gmap.center_zoom_on_points_init(loc.north_west, loc.center, loc.south_east)
-    map_loc(gmap, loc, query_params, "mo_center_marker", "mo_box")
+  def make_editable_map_of_location(location, args={})
+    args = provide_defaults(args, :editable => true)
+    gmap = init_map(args)
+    gmap.center_zoom_on_points_init(location.north_west, location.center, location.south_east)
+    draw_mapset(gmap, MapSet.new(location), args)
     gmap.event_init(gmap, 'click', 'function(overlay, latlng) {
       clickLatLng(latlng);
     }')
     gmap.event_init(gmap, 'dblclick', 'function(overlay, latlng) {
       dblClickLatLng(latlng);
     }')
-    gmap
+    return gmap
   end
 
-  # Render the given GMap.
-  def finish_map(map)
-    javascript_tag(map.to_html(:no_script_tag => 1))
+  def make_thumbnail_map_of_location(location, args={})
+    args = provide_defaults(args,
+      :controls => [ :small_map ],
+      :info_window => true
+    )
+    gmap = init_map(args)
+    gmap.center_zoom_init(location.center, 2)
+    draw_mapset(gmap, MapSet.new(location), args)
+    return gmap
   end
+
+  def make_thumbnail_map_of_observation(observation, args={})
+    args = provide_defaults(args,
+      :controls => [ :small_map ],
+      :info_window => true
+    )
+    gmap = init_map(args)
+    gmap.center_zoom_init([observation.lat, observation.long], 2)
+    draw_mapset(gmap, MapSet.new(observation), args)
+    return gmap
+  end
+
+  def provide_defaults(args, default_args)
+    default_args.merge(args)
+  end
+
+  def init_map(args={})
+    map_div = args[:map_div] || 'map_div'
+    gmap = GMap.new(map_div)
+    controls = args[:controls] || [ :large_map, :map_type ]
+    gmap.control_init(controls.to_boolean_hash)
+    return gmap
+  end
+
+  def finish_map(gmap)
+    ensure_global_header_is_added
+    html = gmap.to_html(:no_script_tag => 1)
+    js = javascript_tag(html)
+    add_header(js)
+  end
+
+  def ensure_global_header_is_added
+    if !@done_gmap_header_yet
+      add_header(GMap.header)
+      @done_gmap_header_yet = true
+    end
+  end
+
+  def draw_mapset(gmap, set, args={})
+    title = mapset_marker_title(set)
+    marker = GMarker.new(set.center,
+      :draggable => args[:editable],
+      :title => title
+    )
+    if args[:info_window]
+      marker.info_window = mapset_info_window(set, args)
+    end
+    if args[:editable]
+      map_control_init(gmap, marker, args)
+      map_box_control_init(gmap, set, args) if set.is_box?
+    else
+      gmap.overlay_init(marker)
+    end
+    if set.is_box?
+      draw_box_on_gmap(gmap, set, args)
+    end
+  end
+
+  def draw_box_on_gmap(gmap, set, args)
+    box = GPolyline.new([
+      set.north_west,
+      set.north_east,
+      set.south_east,
+      set.south_west,
+      set.north_west,
+    ], "#00ff88", 3, 1.0)
+    if args[:editable]
+      box_name = args[:box_name] || 'mo_box'
+      gmap.overlay_global_init(box, box_name)
+    else
+      gmap.overlay_init(box)
+    end
+  end
+
+  def mapset_marker_title(set)
+    result = ''
+    strings = map_location_strings(set.objects)
+    if strings.length > 1
+      result = "#{strings.length} #{:locations.t}"
+    else
+      result = strings.first
+    end
+    num_obs = set.observations.length
+    if num_obs > 1 and num_obs != strings.length
+      num_str = "#{num_obs} #{:observations.t}"
+      if strings.length > 1
+        result += ", #{num_str}"
+      else
+        result += " (#{num_str})"
+      end
+    end
+    return result
+  end
+
+  def map_location_strings(objects)
+    objects.map do |obj|
+      if obj.is_a?(Location)
+        obj.display_name
+      elsif obj.is_a?(Observation)
+        if obj.location
+          obj.location.display_name
+        elsif obj.lat
+          "#{format_latitude(obj.lat)} #{format_longitude(obj.long)}"
+        end
+      end
+    end.reject(&:blank?).uniq
+  end
+
+  def mapset_info_window(set, args)
+    lines = []
+    observations = set.observations
+    locations = set.underlying_locations
+    lines << mapset_observation_header(observations, args) if observations.length > 1
+    lines << mapset_location_header(locations, args) if locations.length > 1
+    lines << mapset_observation_link(observations.first, args) if observations.length == 1
+    lines << mapset_location_link(locations.first, args) if locations.length == 1
+    lines << mapset_coords(set)
+    return lines.join('<br/>')
+  end
+
+  def mapset_observation_header(observations, args)
+    query = Query.lookup(:Observation, :in_set, :ids => observations.map(&:id))
+    show = link_to(:show_all.t, :controller => :observer, :action => :index_observation,
+                   :params => query_params(query))
+    map = link_to(:map_all.t, :controller => :observer, :action => :map_observations,
+                  :params => query_params(query))
+    return "#{:Observations.t}: #{observations.length} (#{show} | #{map})"
+  end
+
+  def mapset_location_header(locations, args)
+    query = Query.lookup(:Location, :in_set, :ids => locations.map(&:id))
+    show = link_to(:show_all.t, :controller => :location, :action => :index_location,
+                   :params => query_params(query))
+    map = link_to(:map_all.t, :controller => :location, :action => :map_locations,
+                  :params => query_params(query))
+    return "#{:Locations.t}: #{locations.length} (#{show} | #{map})"
+  end
+
+  def mapset_observation_link(obs, args)
+    link_to(obs.unique_format_name.t, :controller => :observer, :action => :show_observation,
+            :id => obs.id, :params => args[:query_params] || {})
+  end
+
+  def mapset_location_link(loc, args)
+    link_to(loc.display_name.t, :controller => :location, :action => :show_location,
+            :id => loc.id, :params => args[:query_params] || {})
+  end
+
+  def mapset_coords(set)
+    if set.is_point?
+      "#{format_latitude(set.lat)} #{format_longitude(set.long)}"
+    else
+      content_tag(:center,
+        "#{format_latitude(set.north)}<br/>" +
+        "#{format_longitude(set.west)} &nbsp; #{format_longitude(set.east)}<br/>" +
+        "#{format_latitude(set.south)}"
+      )
+    end
+  end
+
+  def format_latitude(val)
+    format_lxxxitude(val, 'N', 'S')
+  end
+
+  def format_longitude(val)
+    format_lxxxitude(val, 'E', 'W')
+  end
+
+  def format_lxxxitude(val, dir1, dir2)
+    deg = val.abs.round(4)
+    return "#{deg}°#{val < 0 ? dir2 : dir1}"
+
+    # sec = (val.abs * 3600).round
+    # min = (sec / 60).truncate
+    # deg = (min / 60).truncate
+    # sec -= min * 60
+    # min -= deg * 60
+    # return "#{deg}°#{min}′#{sec}″#{val < 0 ? dir2 : dir1}"
+  end
+
+  def map_control_init(gmap, marker, args, type='ct')
+    name = args[:marker_name] || 'mo_marker'
+    gmap.overlay_global_init(marker, name + '_' + type)
+    gmap.event_init(marker, 'dragend', "function(latlng) {
+      dragEndLatLng(latlng, '#{type}')
+    }")
+  end
+
+  def map_box_control_init(gmap, set, args)
+    for point, type in [
+      [set.north_west, 'nw'],
+      [set.north_east, 'ne'],
+      [set.south_west, 'sw'],
+      [set.south_east, 'se'],
+    ]
+      marker = GMarker.new(point, :draggable => true)
+      map_control_init(gmap, marker, args, type)
+    end
+  end
+
+  # Center on a given location? (This is never used: -JPH 20120510)
+  # if respond_to?(:start_lat) && respond_to?(:start_long)
+  #   gmap.center_zoom_init( [start_lat, start_long], Constants::GM_ZOOM )
+  #   gmap.overlay_init(
+  #     GMarker.new( [start_lat, start_long],
+  #       :icon => icon_start,
+  #       :title => name + " start",
+  #       :info_window => "start"
+  #   ))
+  # end
+
+  # Started playing with icons and the following got something to show up,
+  # but I decide not to pursue it further right now.
+  # gmap.icon_global_init(
+  #   GIcon.new(
+  #     :image => "/images/blue-dot.png",
+  #     :icon_size => GSize.new( 24,38 ),
+  #     :icon_anchor => GPoint.new(12,38),
+  #     :info_window_anchor => GPoint.new(9,2)
+  #   ), "blue_dot")
+  # blue_dot = Variable.new("blue_dot")
 end

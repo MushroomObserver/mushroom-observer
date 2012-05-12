@@ -7,8 +7,12 @@
     :show_observation_seen_at.t
   end %>:
   <%= location_link(observation.place_name, observation.location, nil, true) %>
-  <%= if observation.lat
-    "(#{observation.lat}, #{observation.long})"
+  <%= if observation.lat and observation.alt
+    "(#{observation.lat}° #{observation.long}° #{observation.alt}m)"
+  elsif observation.lat
+    "(#{observation.lat}° #{observation.long}°)"
+  elsif observation.alt
+    "(#{observation.alt}m)"
   end %><br/>
 
   <%= :WHO.t %>: <span class="Data"><%= user_link(observation.user) %></span><br/>

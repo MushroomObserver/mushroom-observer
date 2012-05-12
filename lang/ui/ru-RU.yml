@@ -462,6 +462,7 @@ list_objects: "[TYPES] - показать список"
 remove_object: Удалить [TYPE]
 remove_objects: Удалить [TYPES]
 show_all: Показать все
+map_all:  Map All
 show_name: Подробнее о [NAME]
 show_object: Показать [TYPE]
 show_objects: Показать [TYPES]
@@ -4043,10 +4044,10 @@ email_registration_intro:  >
 email_update_registration_intro:  >
   h2. *Hello [user]*
   \n\n
-  Your regisration for the [name] has been updated from
+  Your registration for the [name] has been updated from
   \n\n
   [before]
-  \n\nto\n\n
+  \n\n\nto\n\n\n
   [after]
 
 email_user_question_intro:  >
@@ -5068,6 +5069,7 @@ runtime_invalid_rank:  "Ranks are out of order: '[line_rank]' is the same as or 
 runtime_location_merge_failed:  Failed to merge observation [name].
 runtime_login_failed:  Login unsuccessful.
 runtime_login_success:  Login successful.
+runtime_map_nothing_to_map:  Nothing to map.
 runtime_name_in_use_with_notes:  The name '[name]' is already in use and [other] has notes.
 runtime_no_conditions:  You didn't specify any conditions!
 runtime_no_upload_image:  Had problems uploading image '[name]'.
@@ -5140,7 +5142,6 @@ runtime_location_descriptions_by_author_error:  "[:runtime_user_hasnt_authored(t
 runtime_location_descriptions_by_editor_error:  "[:runtime_user_hasnt_edited(type=:location_description)]"
 runtime_location_merge_success:  "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success:  "[:runtime_created_id(type=:location,value=id)]"
-runtime_map_locations_no_matches:  "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
 runtime_merge_locations_warning:  "[:runtime_merge_warning(type=:location)]"
 runtime_merge_names_warning:  "[:runtime_merge_warning(type=:name)]"
 runtime_name_already_used:  "[:runtime_already_used(type=:name,value=name)]"
@@ -5420,3 +5421,4 @@ _unit_test_w: '[:_unit_test_x]'
 _unit_test_x: '[:_unit_test_y]'
 _unit_test_y: '[:_unit_test_z]'
 _unit_test_z: bob
+
