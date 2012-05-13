@@ -16,16 +16,16 @@
 #
 ##############################################################################
 
-require_dependency 'map_analysis'
+require_dependency 'map_collapsible'
 require_dependency 'map_set'
 
 module ApplicationHelper::Map
   def make_map(objects, args={})
     args = provide_defaults(args, :info_window => true)
-    analysis = MapAnalysis.new(objects)
+    collection = CollapsibleCollectionOfMappableObjects.new(objects)
     gmap = init_map(args)
-    gmap.center_zoom_on_points_init(*analysis.extents)
-    for mapset in analysis.mapsets
+    gmap.center_zoom_on_points_init(*collection.extents)
+    for mapset in collection.mapsets
       draw_mapset(gmap, mapset, args)
     end
     return gmap

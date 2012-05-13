@@ -30,7 +30,9 @@ class ObserverControllerTest < FunctionalTestCase
     # either_requires_either(:post, :create_observation, nil, params, :username => user.login)
     if o_num == 0
       assert_response(:success)
-    elsif Location.find_by_name(params[:observation][:place_name])
+    elsif Location.find_by_name(params[:observation][:place_name]) or
+          Location.is_unknown?(params[:observation][:place_name]) or
+          params[:observation][:place_name].blank?
       assert_response(:action => :show_observation)
     else
       assert_response(:action => :create_location)
@@ -869,30 +871,41 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(count_before+2, count_after)
 
     # Test a simple observation creation of an unknown with a lat/long
-    where = "Unknown, Massachusetts, USA"
     lat = 34.1622
     long = -118.3521
     generic_construct_observation({
-      :observation => { :place_name => where, :lat => lat, :long => long },
+      :observation => { :place_name => '', :lat => lat, :long => long },
       :name => { :name => "Unknown" },
     }, 1,0,0)
     obs = assigns(:observation)
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(long.to_s, obs.long.to_s)
-    assert_equal(where, obs.where) # Make sure it's the right observation
+    assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
 
     lat2 = '34°9’43.92”N'
     long2 = '118°21′7.56″W'
     generic_construct_observation({
-      :observation => { :place_name => where, :lat => lat2, :long => long2 },
+      :observation => { :place_name => '', :lat => lat2, :long => long2 },
       :name => { :name => "Unknown" },
     }, 1,0,0)
     obs = assigns(:observation)
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(long.to_s, obs.long.to_s)
-    assert_equal(where, obs.where) # Make sure it's the right observation
+    assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
+
+    # Make sure it doesn't accept no location AND no lat/long.
+    generic_construct_observation({
+      :observation => { :place_name => '', :lat => '', :long => '' },
+      :name => { :name => "Unknown" },
+    }, 0,0,0)
+
+    # ... unless explicitly tell it "unknown" location.
+    generic_construct_observation({
+      :observation => { :place_name => 'Earth', :lat => '', :long => '' },
+      :name => { :name => "Unknown" },
+    }, 1,0,0)
 
     # Test a simple observation creation of an unknown with various altitudes
     for input, output in [

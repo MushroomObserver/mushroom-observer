@@ -672,6 +672,11 @@ class SpeciesListController < ApplicationController
     @species_list.modified   = now
     @species_list.user       = @user
     @species_list.attributes = args
+    if Location.is_unknown?(@species_list.place_name) or
+       @species_list.place_name.blank?
+      @species_list.location = Location.unknown
+      @species_list.where = nil
+    end
 
     # Validate place name.
     @place_name = @species_list.place_name

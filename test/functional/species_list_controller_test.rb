@@ -192,6 +192,26 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(false, obs.specimen)
   end
 
+  def test_construct_species_list_without_location
+    list_title = "List Title"
+    params = {
+      :list => { :members => names(:coprinus_comatus).text_name },
+      :member => { :notes => "" },
+      :species_list => {
+        :place_name => "",
+        :title => list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        :notes => "List Notes"
+      }
+    }
+    post_requires_login(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    spl = SpeciesList.last
+    assert_objs_equal(Location.unknown, spl.location)
+  end
+
   def test_construct_species_list_existing_genus
     agaricus = names(:agaricus)
     list_title = "List Title"

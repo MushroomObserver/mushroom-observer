@@ -1198,7 +1198,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_by_user
-    assert_query(Location.all, :Location, :by_user, :user => @rolf, :by => :id)
+    # Rolf appears to have created every one except "unknown" (created by admin).
+    assert_query(Location.all - [Location.unknown], :Location, :by_user,
+                 :user => @rolf, :by => :id)
     assert_query([], :Location, :by_user, :user => @mary)
   end
 

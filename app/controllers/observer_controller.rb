@@ -845,7 +845,7 @@ class ObserverController < ApplicationController
     @new_image = init_image(Time.now)
     @confidence_menu = translate_menu(Vote.confidence_menu)
 
-    # Clear search list.
+    # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
 
     # Create empty instances first time through.
@@ -1978,6 +1978,11 @@ class ObserverController < ApplicationController
     observation.modified = now
     observation.user     = @user
     observation.name     = Name.unknown
+    if Location.is_unknown?(observation.place_name) or
+       (observation.lat and observation.long and observation.place_name.blank?)
+      observation.location = Location.unknown
+      observation.where = nil
+    end
     return observation
   end
 

@@ -244,6 +244,32 @@ class Location < AbstractModel
   #
   ##############################################################################
 
+  # Array of strings that mean "unknown" in the local language:
+  #
+  #   "unknown", "earth", "world", etc.
+  #
+  def self.names_for_unknown
+    :unknown_locations.l.split(/, */)
+  end
+
+  # Get an instance of the Name that means "unknown".
+  def self.unknown
+    for name in names_for_unknown
+      location = Location.find(:first, :conditions => ['name like ?', name])
+      return location if location
+    end
+    raise "There is no \"unknown\" location!"
+  end
+
+  # Is this one of the names we recognize for the "unknown" location?
+  def self.is_unknown?(name)
+    name = name.strip_squeeze.downcase
+    for unknown_name in names_for_unknown
+      return true if name == unknown_name.downcase
+    end
+    return false
+  end
+
   def display_name()
     if User.current_location_format == :scientific
       Location.reverse_name(self.name())

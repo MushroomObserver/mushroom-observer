@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-#  = Map Analysis Class
+#  = Collapsible Map Collection Class
 #
 #  This class takes a bunch of mappable objects and collapses them into a more
 #  manageable number of points and boxes.  Resulting points and boxes each may
@@ -8,15 +8,15 @@
 #
 #  == Typical Usage
 #
-#    analysis = MapAnalysis.new(query.results)
-#    gmap.center_on_points(*analysis.extents)
-#    for mapset in analysis.mapsets
+#    collection = CollapsibleCollectionOfMappableObjects.new(query.results)
+#    gmap.center_on_points(*collection.extents)
+#    for mapset in collection.mapsets
 #      draw_mapset(gmap, mapset)
 #    end
 #
 ################################################################################
 
-class MapAnalysis
+class CollapsibleCollectionOfMappableObjects
   MAX_OBJECTS = 200
 
   def initialize(objects)

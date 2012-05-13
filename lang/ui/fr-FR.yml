@@ -488,6 +488,9 @@ permission_denied: Autorisation refusée.
 # Units.
 units_meters: mètres
 
+# Names we recognize for the "unknown" location: comma-separated list.
+unknown_locations:  Unknown, Earth, World, Worldwide, Anywhere, Everywhere
+
 # Quality values.
 image_vote_long_0: Sans opinion.
 image_vote_long_1: **Pas mal**, mais pas très utile.

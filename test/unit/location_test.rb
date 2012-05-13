@@ -346,4 +346,15 @@ class LocationTest < UnitTestCase
     assert_equal(  37, Location.parse_altitude('123ft'))
     assert_equal(  38, Location.parse_altitude('124\''))
   end
+
+  def test_unknown
+    loc = locations(:unknown_location)
+    assert_objs_equal(loc, Location.unknown)
+    assert(Location.names_for_unknown.include?('Unknown'))
+    assert(Location.names_for_unknown.include?('Earth'))
+    assert_true(Location.is_unknown?('Unknown'))
+    assert_true(Location.is_unknown?('Earth'))
+    assert_true(Location.is_unknown?('Worldwide'))
+    assert_true(Location.is_unknown?('Anywhere'))
+  end
 end

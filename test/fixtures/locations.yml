@@ -129,3 +129,16 @@ howarth_park:
   east: -122.6632
   south: 38.4496
 
+unknown_location:
+  id: 10
+  sync_id: 10xx1
+  created: 2012-01-01 15:24:18
+  modified: 2012-01-01 15:24:18
+  user_id: 0
+  version: 1
+  name: Unknown
+  north: 90
+  west: -180
+  east: 180
+  south: -90
+  
