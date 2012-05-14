@@ -34,8 +34,9 @@ class CollapsibleCollectionOfMappableObjects
   end
 
 private
-
   def init_sets(objects)
+    objects = [objects] if !objects.is_a?(Array)
+    raise "Tried to create empty map!" if objects.empty?
     @sets = {}
     for obj in objects
       if obj.is_a?(Location)
@@ -54,7 +55,7 @@ private
 
   def group_objects_into_sets
     prec = 3
-    while @sets.length > MAX_OBJECTS
+    while @sets.length > max_objects
       old_sets = @sets.values
       @sets = {}
       for set in old_sets
@@ -62,6 +63,11 @@ private
       end
       prec -= 1
     end
+  end
+
+  # need to be able to override this in test suite
+  def max_objects
+    MAX_OBJECTS
   end
 
   def add_point_set(loc, objs, prec)

@@ -22,8 +22,7 @@ class MapSet
   attr_reader :objects, :north, :south, :east, :west
 
   def initialize(objects=[])
-    objects = [objects] if !objects.is_a?(Array)
-    @objects = objects
+    @objects = objects.is_a?(Array) ? objects : [objects]
     @north = @south = @east = @west = nil
     init_objects
   end

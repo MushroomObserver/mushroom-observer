@@ -170,10 +170,17 @@ class Location < AbstractModel
     [lat, long]
   end
 
+  # Returns [north, south, east, west].
+  def edges
+    [north, south, east, west]
+  end
+
+  # Returns north - south.
   def north_south_distance
     north - south
   end
 
+  # Returns east - west (adjusting if straddles dateline).
   def east_west_distance
     west > east ? east - west + 360 : east - west
   end

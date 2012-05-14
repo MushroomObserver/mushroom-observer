@@ -161,7 +161,7 @@ module GeneralExtensions
   #
   def assert_obj_list_equal(expect, got, msg=nil)
     clean_our_backtrace do
-      assert_list_equal(expect, got, msg, &:id)
+      assert_list_equal(expect, got, msg) {|o| o.nil? ? nil : "#{o.class.name} ##{o.id}"}
     end
   end
 
