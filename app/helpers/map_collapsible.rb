@@ -6,6 +6,8 @@
 #  manageable number of points and boxes.  Resulting points and boxes each may
 #  contain one or more Observation's and Location's.
 #
+#  Note: Uses the global +MAX_MAP_OBJECTS+ to limit the number of objects.
+#
 #  == Typical Usage
 #
 #    collection = CollapsibleCollectionOfMappableObjects.new(query.results)
@@ -17,8 +19,6 @@
 ################################################################################
 
 class CollapsibleCollectionOfMappableObjects
-  MAX_OBJECTS = 100
-
   def initialize(objects)
     init_sets(objects)
     group_objects_into_sets
@@ -71,20 +71,30 @@ private
 
   # need to be able to override this in test suite
   def max_objects
-    MAX_OBJECTS
+    MAX_MAP_OBJECTS
   end
 
   def add_point_set(loc, objs, prec)
-    y = loc.lat.round(prec)
-    x = loc.long.round(prec)
+    if prec > -2
+      y = loc.lat.round(prec)
+      x = loc.long.round(prec)
+    else
+      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? 90 : 0
+      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(-2)
+    end
     set = @sets["#{x} #{y} 0 0"] ||= MapSet.new
     set.add_objects(objs)
     set.update_extents_with_point(loc)
   end
 
   def add_box_set(loc, objs, prec)
-    y = loc.lat.round(prec)
-    x = loc.long.round(prec)
+    if prec > -2
+      y = loc.lat.round(prec)
+      x = loc.long.round(prec)
+    else
+      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? 90 : 0
+      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(-2)
+    end
     h = loc.north_south_distance.round(prec)
     w = loc.east_west_distance.round(prec)
     set = @sets["#{x} #{y} #{w} #{h}"] ||= MapSet.new

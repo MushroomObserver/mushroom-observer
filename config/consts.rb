@@ -73,6 +73,9 @@ ERROR_PAGE_FILES = "#{RAILS_ROOT}/public/error_NNN.html" if !defined? ERROR_PAGE
 # Limit size of image uploads (ImageMagick bogs down on large images).
 IMAGE_UPLOAD_MAX_SIZE = 20000000                         if !defined? IMAGE_UPLOAD_MAX_SIZE
 
+# Limit the number of objects we draw on a google map.
+MAX_MAP_OBJECTS = 1000                                   if !defined? MAX_MAP_OBJECTS
+
 # Stylesheets available.
 CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite)     if !defined? CSS
 

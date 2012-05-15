@@ -95,6 +95,10 @@ class MapSet
     [lat, long]
   end
 
+  def edges
+    [north, south, east, west]
+  end
+
   def north_south_distance
     north - south
   end
