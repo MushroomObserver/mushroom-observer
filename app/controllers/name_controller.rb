@@ -1643,7 +1643,7 @@ class NameController < ApplicationController
     pass_query_params
     @name = Name.find(params[:id])
     @query = create_query(:Observation, :of_name, :name => @name)
-    @observations = @query.results
+    @observations = @query.results.select {|o| o.lat or o.location}
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications

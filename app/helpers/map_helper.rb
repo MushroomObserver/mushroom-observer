@@ -21,21 +21,30 @@ require_dependency 'map_set'
 
 module ApplicationHelper::Map
   def make_map(objects, args={})
-    args = provide_defaults(args, :info_window => true)
+    args = provide_defaults(args,
+      :map_div => 'map_div',
+      :controls => [ :large_map, :map_type ],
+      :info_window => true
+    )
     collection = CollapsibleCollectionOfMappableObjects.new(objects)
     gmap = init_map(args)
-    gmap.center_zoom_on_points_init(*collection.extents)
+    if args[:zoom]
+      gmap.center_zoom_init(collection.extents.center, args[:zoom])
+    else
+      gmap.center_zoom_on_points_init(*collection.representative_points)
+    end
     for mapset in collection.mapsets
       draw_mapset(gmap, mapset, args)
     end
     return gmap
   end
 
-  def make_editable_map_of_location(location, args={})
-    args = provide_defaults(args, :editable => true)
-    gmap = init_map(args)
-    gmap.center_zoom_on_points_init(location.north_west, location.center, location.south_east)
-    draw_mapset(gmap, MapSet.new(location), args)
+  def make_editable_map(object, args={})
+    args = provide_defaults(args,
+      :editable => true,
+      :info_window => false
+    )
+    gmap = make_map(object, args)
     gmap.event_init(gmap, 'click', 'function(overlay, latlng) {
       clickLatLng(latlng);
     }')
@@ -45,26 +54,13 @@ module ApplicationHelper::Map
     return gmap
   end
 
-  def make_thumbnail_map_of_location(location, args={})
+  def make_thumbnail_map(objects, args={})
     args = provide_defaults(args,
       :controls => [ :small_map ],
-      :info_window => true
+      :info_window => true,
+      :zoom => 2
     )
-    gmap = init_map(args)
-    gmap.center_zoom_init(location.center, 2)
-    draw_mapset(gmap, MapSet.new(location), args)
-    return gmap
-  end
-
-  def make_thumbnail_map_of_observation(observation, args={})
-    args = provide_defaults(args,
-      :controls => [ :small_map ],
-      :info_window => true
-    )
-    gmap = init_map(args)
-    gmap.center_zoom_init([observation.lat, observation.long], 2)
-    draw_mapset(gmap, MapSet.new(observation), args)
-    return gmap
+    return make_map(objects)
   end
 
   def provide_defaults(args, default_args)
@@ -72,10 +68,8 @@ module ApplicationHelper::Map
   end
 
   def init_map(args={})
-    map_div = args[:map_div] || 'map_div'
-    gmap = GMap.new(map_div)
-    controls = args[:controls] || [ :large_map, :map_type ]
-    gmap.control_init(controls.to_boolean_hash)
+    gmap = GMap.new(args[:map_div])
+    gmap.control_init(args[:controls].to_boolean_hash)
     return gmap
   end
 
@@ -228,8 +222,8 @@ module ApplicationHelper::Map
     return "#{deg}°#{val < 0 ? dir2 : dir1}"
 
     # sec = (val.abs * 3600).round
-    # min = (sec / 60).truncate
-    # deg = (min / 60).truncate
+    # min = (sec / 60.0).truncate
+    # deg = (min / 60.0).truncate
     # sec -= min * 60
     # min -= deg * 60
     # return "#{deg}°#{min}′#{sec}″#{val < 0 ? dir2 : dir1}"

@@ -473,19 +473,19 @@ class NameControllerTest < FunctionalTestCase
   #  Maps
   # ----------------------------
 
-  # test_map - name with Observations that have Locations
+  # name with Observations that have Locations
   def test_map
     get_with_dump(:map, :id => names(:agaricus_campestris).id)
     assert_response('map')
   end
 
-  # test_map_no_loc - name with Observations that don't have Locations
+  # name with Observations that don't have Locations
   def test_map_no_loc
     get_with_dump(:map, :id => names(:coprinus_comatus).id)
     assert_response('map')
   end
 
-  # test_map_no_obs - name with no Observations
+  # name with no Observations
   def test_map_no_obs
     get_with_dump(:map, :id => names(:conocybe_filaris).id)
     assert_response('map')

@@ -153,12 +153,12 @@ class Location < AbstractModel
 
   # Return center latitude.
   def lat
-    (north + south) / 2 rescue nil
+    (north + south) / 2.0 rescue nil
   end
 
   # Return center longitude.
   def long
-    long = (east + west) / 2
+    long = (east + west) / 2.0
     long += 180 if west > east
     return long
   rescue

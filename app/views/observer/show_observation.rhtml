@@ -55,9 +55,9 @@
     <td width="25%" valign="top">
       <%= gmap = nil
       if @observation.lat and @observation.long
-        gmap = make_thumbnail_map_of_observation(@observation)
+        gmap = make_thumbnail_map(@observation)
       elsif @observation.location
-        gmap = make_thumbnail_map_of_location(@observation.location)
+        gmap = make_thumbnail_map(@observation.location)
       end
       if gmap
         finish_map(gmap)

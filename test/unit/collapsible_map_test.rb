@@ -4,67 +4,39 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 require 'map_collapsible'
 require 'map_set'
 
+class BigDecimal
+  # Make this class dump out easier-to-read diagnostics when tests fail.
+  def inspect
+    str = '%f' % self
+    str.sub(/0+$/,'').  # remove trailing zeros
+        sub(/\.$/,'')
+  end
+end
+
 class CollapsibleMapTest < UnitTestCase
 
   def assert_mapset_is_point(mapset, lat, long)
     assert_true(mapset.is_point?)
     assert_false(mapset.is_box?)
-    assert_in_delta(lat, mapset.lat, 0.0001)
-    assert_in_delta(long, mapset.long, 0.0001)
-    assert_in_delta(lat, mapset.north, 0.0001)
-    assert_in_delta(lat, mapset.south, 0.0001)
-    assert_in_delta(long, mapset.east, 0.0001)
-    assert_in_delta(long, mapset.west, 0.0001)
-    assert_in_delta(lat, mapset.center[0], 0.0001)
-    assert_in_delta(long, mapset.center[1], 0.0001)
-    assert_in_delta(lat, mapset.north_west[0], 0.0001)
-    assert_in_delta(long, mapset.north_west[1], 0.0001)
-    assert_in_delta(lat, mapset.north_east[0], 0.0001)
-    assert_in_delta(long, mapset.north_east[1], 0.0001)
-    assert_in_delta(lat, mapset.south_west[0], 0.0001)
-    assert_in_delta(long, mapset.south_west[1], 0.0001)
-    assert_in_delta(lat, mapset.south_east[0], 0.0001)
-    assert_in_delta(long, mapset.south_east[1], 0.0001)
-    assert_in_delta(0, mapset.north_south_distance, 0.0001)
-    assert_in_delta(0, mapset.east_west_distance, 0.0001)
+    assert_mapset(mapset, lat, long, lat, lat, long, long, 0, 0)
   end
 
   def assert_mapset_is_box(mapset, north, south, east, west)
-    lat = (north + south) / 2
-    long = (east + west) / 2
+    lat = (north + south) / 2.0
+    long = (east + west) / 2.0
     assert_false(mapset.is_point?)
     assert_true(mapset.is_box?)
-    assert_in_delta(lat, mapset.lat, 0.0001)
-    assert_in_delta(long, mapset.long, 0.0001)
-    assert_in_delta(north, mapset.north, 0.0001)
-    assert_in_delta(south, mapset.south, 0.0001)
-    assert_in_delta(east, mapset.east, 0.0001)
-    assert_in_delta(west, mapset.west, 0.0001)
-    assert_in_delta(lat, mapset.center[0], 0.0001)
-    assert_in_delta(long, mapset.center[1], 0.0001)
-    assert_in_delta(north, mapset.north_west[0], 0.0001)
-    assert_in_delta(west, mapset.north_west[1], 0.0001)
-    assert_in_delta(north, mapset.north_east[0], 0.0001)
-    assert_in_delta(east, mapset.north_east[1], 0.0001)
-    assert_in_delta(south, mapset.south_west[0], 0.0001)
-    assert_in_delta(west, mapset.south_west[1], 0.0001)
-    assert_in_delta(south, mapset.south_east[0], 0.0001)
-    assert_in_delta(east, mapset.south_east[1], 0.0001)
-    assert_in_delta(north - south, mapset.north_south_distance, 0.0001)
-    assert_in_delta(east - west, mapset.east_west_distance, 0.0001)
+    if east >= west
+      assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
+    else
+      assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
+    end
   end
 
-  def assert_mapset_is_box_straddling_dateline(mapset, north, south, east, west)
-    lat = (north + south) / 2
-    long = (east + west) / 2 + 180
-    assert_false(mapset.is_point?)
-    assert_true(mapset.is_box?)
-    assert_in_delta(lat, mapset.lat, 0.0001)
+  def assert_mapset(mapset, lat, long, north, south, east, west, north_south, east_west)
+    assert_extents(mapset, north, south, east, west)
+    assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
     assert_in_delta(long, mapset.long, 0.0001)
-    assert_in_delta(north, mapset.north, 0.0001)
-    assert_in_delta(south, mapset.south, 0.0001)
-    assert_in_delta(east, mapset.east, 0.0001)
-    assert_in_delta(west, mapset.west, 0.0001)
     assert_in_delta(lat, mapset.center[0], 0.0001)
     assert_in_delta(long, mapset.center[1], 0.0001)
     assert_in_delta(north, mapset.north_west[0], 0.0001)
@@ -75,9 +47,38 @@ class CollapsibleMapTest < UnitTestCase
     assert_in_delta(west, mapset.south_west[1], 0.0001)
     assert_in_delta(south, mapset.south_east[0], 0.0001)
     assert_in_delta(east, mapset.south_east[1], 0.0001)
-    assert_in_delta(north - south, mapset.north_south_distance, 0.0001)
-    assert_in_delta(east - west + 360, mapset.east_west_distance, 0.0001)
+    assert_in_delta(north_south, mapset.north_south_distance, 0.0001)
+    assert_in_delta(east_west, mapset.east_west_distance, 0.0001)
   end
+
+  def assert_extents(mapset, north, south, east, west)
+    errors = []
+    errors << 'north' if north.round(4) != mapset.north.round(4)
+    errors << 'south' if south.round(4) != mapset.south.round(4)
+    errors << 'east' if east.round(4) != mapset.east.round(4)
+    errors << 'west' if west.round(4) != mapset.west.round(4)
+    if errors.any?
+      expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
+      actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
+      message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
+      assert_block(message) {false}
+    end
+  end
+
+  def do_overlapping_box_extension_test(w1,e1, w2,e2, w3,e3)
+    loc = Location.new
+    loc.north = 50
+    loc.south = 40
+    loc.east = e1
+    loc.west = w1
+    mapset = MapSet.new(loc)
+    loc.east = e2
+    loc.west = w2
+    mapset.update_extents_with_box(loc)
+    assert_mapset_is_box(mapset, 50, 40, e3, w3)
+  end
+
+  # ------------------------------------------------------------
 
   def test_mapset_with_one_observation
     obs = observations(:unknown_with_lat_long)
@@ -99,34 +100,39 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_extending_mapset_with_points
     obs = observations(:unknown_with_lat_long)
-    lat1, long1 = obs.lat, obs.long
+    n = s = obs.lat
+    e = w = obs.long
     mapset = MapSet.new(obs)
 
     # Make sure this doesn't change anything first.
     mapset.update_extents_with_point(obs)
-    assert_mapset_is_point(mapset, lat1, long1)
+    assert_mapset_is_point(mapset, n, w)
 
-    # Now this should expand it into a small box.
-    lat2 = obs.lat += 0.2
-    long2 = obs.long += 0.4
+    # Extend northern edge.
+    n = obs.lat = n + 0.2
     mapset.update_extents_with_point(obs)
-    assert_mapset_is_box(mapset, lat2, lat1, long2, long1)
+    assert_mapset_is_box(mapset, n, s, e, w)
 
-    # This is contained inside the box, so should do nothing.
-    obs.lat -= 0.1
-    obs.long -= 0.2
+    # Extend eastern edge
+    e = obs.long = e + 0.2
     mapset.update_extents_with_point(obs)
-    assert_mapset_is_box(mapset, lat2, lat1, long2, long1)
+    assert_mapset_is_box(mapset, n, s, e, w)
 
-    # Now extend southern edge.
-    lat3 = obs.lat -= 0.5
+    # Extend southern edge.
+    s = obs.lat = s - 0.2
     mapset.update_extents_with_point(obs)
-    assert_mapset_is_box(mapset, lat2, lat3, long2, long1)
+    assert_mapset_is_box(mapset, n, s, e, w)
 
-    # Now extend western edge all the way across the dateline(!)
-    # long3 = obs.long = 170
-    # mapset.update_extents_with_point(obs)
-    # assert_mapset_is_box_straddling_dateline(mapset, lat2, lat3, long2, long3)
+    # Extend western edge.
+    w = obs.long = w - 0.2
+    mapset.update_extents_with_point(obs)
+    assert_mapset_is_box(mapset, n, s, e, w)
+
+    # This is inside, so does nothing.
+    obs.lat = (n + s) / 2.0
+    obs.long = (e + w) / 2.0
+    mapset.update_extents_with_point(obs)
+    assert_mapset_is_box(mapset, n, s, e, w)
   end
 
   def test_extending_mapset_with_boxes
@@ -255,30 +261,77 @@ class CollapsibleMapTest < UnitTestCase
     w = loc.west = w - 0.1
     mapset.update_extents_with_box(loc)
     assert_mapset_is_box(mapset, n, s, e, w)
+  end
 
-    # Now extend eastern edge over the dateline(!)
-    # loc.north = 81
-    # loc.south = 80
-    # loc.east = -170
-    # loc.west = 170
-    # mapset.update_extents_with_box(loc)
-    # assert_mapset_is_box_straddling_dateline(mapset, 81, s, -170, w)
+  def test_extending_mapset_with_points_over_dateline
+    obs = Observation.new
+    n = s = obs.lat = 45
+    e = w = obs.long = -170
+    mapset = MapSet.new(obs)
+    assert_mapset_is_point(mapset, n, w)
+
+    n = obs.lat = 50
+    w = obs.long = 170
+    mapset.update_extents_with_point(obs)
+    assert_mapset_is_box(mapset, n, s, e, w)
+
+    obs.lat = 48
+    w = obs.long = 10
+    mapset.update_extents_with_point(obs)
+    assert_mapset_is_box(mapset, n, s, e, w)
+
+    obs.lat = 48
+    w = obs.long = -10
+    mapset.update_extents_with_point(obs)
+    assert_mapset_is_box(mapset, n, s, e, w)
+
+    obs.lat = 48
+    e = obs.long = -160
+    mapset.update_extents_with_point(obs)
+    assert_mapset_is_box(mapset, n, s, e, w)
+  end
+
+  def test_extending_mapset_with_boxes_over_dateline
+    # Neither old nor new box straddling dateline:
+    do_overlapping_box_extension_test(-170,-150, 150,170, 150,-150)   # | ▀▀▀▀▀       ▄▄▄▄▄ |
+    do_overlapping_box_extension_test(-50,-10, 10,50, -50,50)         # |    ▀▀▀▀▀ ▄▄▄▄▄    |
+    do_overlapping_box_extension_test(-30,10, -10,30, -30,30)         # |      ▀▀███▄▄      |
+    do_overlapping_box_extension_test(-10,10, -20,20, -20,20)         # |       ▄███▄       |
+    do_overlapping_box_extension_test(-20,20, -10,10, -20,20)         # |       ▀███▀       |
+    do_overlapping_box_extension_test(-10,30, -30,10, -30,30)         # |      ▄▄███▀▀      |
+    do_overlapping_box_extension_test(10,50, -50,-10, -50,50)         # |    ▄▄▄▄▄ ▀▀▀▀▀    |
+    do_overlapping_box_extension_test(150,170, -170,-150, 150,-150)   # | ▄▄▄▄▄       ▀▀▀▀▀ |
+
+    # New straddling dateline, but not old:
+    do_overlapping_box_extension_test(-170,-160, 150,-150, 150,-150)  # |▄█▄             ▄▄▄|
+    do_overlapping_box_extension_test(-170,-120, 150,-150, 150,-120)  # |▄██▀▀           ▄▄▄|
+    do_overlapping_box_extension_test(-140,-100, 150,-150, 150,-100)  # |▄▄▄ ▀▀▀▀        ▄▄▄|
+    do_overlapping_box_extension_test(100,140, 150,-150, 100,-150)    # |▄▄▄        ▀▀▀▀ ▄▄▄|
+    do_overlapping_box_extension_test(120,170, 150,-150, 120,-150)    # |▄▄▄           ▀▀██▄|
+    do_overlapping_box_extension_test(160,170, 150,-150, 150,-150)    # |▄▄▄             ▄█▄|
+
+    # Old straddling dateline, but not new:
+    do_overlapping_box_extension_test(170,-170, 80,90, 80,-170)       # |▀█▀             ▀▀▀|
+    do_overlapping_box_extension_test(165,-170, 160,170, 160,-170)    # |▀██▄▄           ▀▀▀|
+    do_overlapping_box_extension_test(150,-170, 160,170, 150,-170)    # |▀▀▀ ▄▄▄▄        ▀▀▀|
+    do_overlapping_box_extension_test(170,-170, -80,-70, 170,-70)     # |▀▀▀        ▄▄▄▄ ▀▀▀|
+    do_overlapping_box_extension_test(170,-165, -170,-160, 170,-160)  # |▀▀▀           ▄▄██▀|
+    do_overlapping_box_extension_test(170,-150, -170,-160, 170,-150)  # |▀▀▀             ▀█▀|
+
+    # Both straddling dateline:
+    do_overlapping_box_extension_test(150,-170, 170,-150, 150,-150)   # |██▄             ▀██|
+    do_overlapping_box_extension_test(170,-170, 150,-150, 150,-150)   # |██▄             ▄██|
+    do_overlapping_box_extension_test(150,-150, 170,-170, 150,-150)   # |██▀             ▀██|
+    do_overlapping_box_extension_test(170,-150, 150,-170, 150,-150)   # |██▀             ▄██|
   end
 
   def test_mapping_one_observation
     obs = observations(:amateur_observation)
     coll = CollapsibleCollectionOfMappableObjects.new(obs)
-    # need to test coll.extents... but not sure what it should be to start with!
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
-    assert_true(mapset.is_point?)
-    assert_false(mapset.is_box?)
-    assert_equal(obs.lat, mapset.lat)
-    assert_equal(obs.long, mapset.long)
-    assert_equal(obs.lat, mapset.north)
-    assert_equal(obs.lat, mapset.south)
-    assert_equal(obs.long, mapset.east)
-    assert_equal(obs.long, mapset.west)
+    assert_mapset_is_point(mapset, obs.lat, obs.long)
+    assert_extents(coll.extents, obs.lat, obs.lat, obs.long, obs.long)
     assert_obj_list_equal([obs], mapset.observations)
     assert_obj_list_equal([], mapset.locations)
     assert_obj_list_equal([], mapset.underlying_locations)
@@ -287,17 +340,10 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_location
     loc = locations(:albion)
     coll = CollapsibleCollectionOfMappableObjects.new(loc)
-    # need to test coll.extents... but not sure what it should be to start with!
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
-    assert_false(mapset.is_point?)
-    assert_true(mapset.is_box?)
-    assert_equal((loc.north+loc.south)/2, mapset.lat)
-    assert_equal((loc.east+loc.west)/2, mapset.long)
-    assert_equal(loc.north, mapset.north)
-    assert_equal(loc.south, mapset.south)
-    assert_equal(loc.east, mapset.east)
-    assert_equal(loc.west, mapset.west)
+    assert_mapset_is_box(mapset, *loc.edges)
+    assert_extents(coll.extents, *loc.edges)
     assert_obj_list_equal([], mapset.observations)
     assert_obj_list_equal([loc], mapset.locations)
     assert_obj_list_equal([loc], mapset.underlying_locations)

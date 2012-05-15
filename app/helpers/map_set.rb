@@ -3,7 +3,7 @@
 #  = Map Set Class
 #
 #  This class is used to hold a set of mappable objects, and provide the
-#  information needed to map these as a single point or box. 
+#  information needed to map these as a single point or box.
 #
 #  == Typical Usage
 #
@@ -82,11 +82,11 @@ class MapSet
   def south_east; [south, east]; end
 
   def lat
-    (north + south) / 2
+    ((north + south) / 2.0).round(4)
   end
 
   def long
-    long = (east + west) / 2
+    long = ((east + west) / 2.0).round(4)
     long += 180 if @west > @east
     return long
   end
@@ -104,25 +104,32 @@ class MapSet
   end
 
   def update_extents_with_point(loc)
-    lat, long = loc.lat, loc.long
+    lat = loc.lat.to_f.round(4)
+    long = loc.long.to_f.round(4)
     if !@north
       @north = @south = lat
       @east = @west = long
     else
       @north = lat if lat > @north
       @south = lat if lat < @south
-      if @east >= @west
-        @east = long if long > @east
-        @west = long if long < @west
-      else
-        @east = long if long < @east
-        @west = long if long > @west
+      # point not contained within existing extents
+      if (@east >= @west) ? (long > @east or long < @west) : (long > @east and long < @west)
+        east_dist = long > @east ? long - @east : long - @east + 360
+        west_dist = long < @west ? @west - long : @west - long + 360
+        if east_dist <= west_dist
+          @east = long
+        else
+          @west = long
+        end
       end
     end
   end
 
   def update_extents_with_box(loc)
-    n, s, e, w = loc.north, loc.south, loc.east, loc.west
+    n = loc.north.to_f.round(4)
+    s = loc.south.to_f.round(4)
+    e = loc.east.to_f.round(4)
+    w = loc.west.to_f.round(4)
     if !@north
       @north = n
       @south = s
@@ -131,12 +138,31 @@ class MapSet
     else
       @north = n if n > @north
       @south = s if s < @south
-      if @east >= @west
-        @east = e if e > @east
-        @west = w if w < @west
-      else
-        @east = e if e < @east
-        @west = w if w > @west
+      # new box not completely contained within old box
+      if (@east >= @west) ? (e < w or w < @west or e > @east) : (e >= w or w < @west or e > @east)
+        # overlap, neither or both straddle dateline
+        if (@east >= @west and e >= w and w <= @east and e >= @west) or
+           (@east < @west and e < w)
+          @east = e if e > @east
+          @west = w if w < @west
+        # overlap, old straddles dateline
+        elsif @east < @west and e >= w and (w <= @east or e >= @west)
+          @east = e if e > @east and w < @east
+          @west = w if w < @west and e > @west
+        # overlap, new straddles dateline
+        elsif @east >= @west and e < w and (w <= @east or e >= @west)
+          @east = e if e > @east or w < @east
+          @west = w if w < @west or e > @west
+        # no overlap
+        else
+          east_dist = w > @east ? w - @east : w - @east + 360
+          west_dist = e < @west ? @west - e : @west - e + 360
+          if east_dist < west_dist
+            @east = e
+          else
+            @west = w
+          end
+        end
       end
     end
   end

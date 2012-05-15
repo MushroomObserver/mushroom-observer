@@ -9,7 +9,7 @@
 #  == Typical Usage
 #
 #    collection = CollapsibleCollectionOfMappableObjects.new(query.results)
-#    gmap.center_on_points(*collection.extents)
+#    gmap.center_on_points(*collection.representative_points)
 #    for mapset in collection.mapsets
 #      draw_mapset(gmap, mapset)
 #    end
@@ -17,7 +17,7 @@
 ################################################################################
 
 class CollapsibleCollectionOfMappableObjects
-  MAX_OBJECTS = 200
+  MAX_OBJECTS = 100
 
   def initialize(objects)
     init_sets(objects)
@@ -29,11 +29,15 @@ class CollapsibleCollectionOfMappableObjects
   end
 
   def extents
-    @sets.values.map(&:north_west) +
-    @sets.values.map(&:south_east)
+    @extents ||= calc_extents
+  end
+
+  def representative_points
+    [extents.north_west, extents.center, extents.south_east]
   end
 
 private
+
   def init_sets(objects)
     objects = [objects] if !objects.is_a?(Array)
     raise "Tried to create empty map!" if objects.empty?
@@ -86,5 +90,13 @@ private
     set = @sets["#{x} #{y} #{w} #{h}"] ||= MapSet.new
     set.add_objects(objs)
     set.update_extents_with_box(loc)
+  end
+
+  def calc_extents
+    result = MapSet.new
+    for mapset in mapsets
+      result.update_extents_with_box(mapset)
+    end
+    return result
   end
 end

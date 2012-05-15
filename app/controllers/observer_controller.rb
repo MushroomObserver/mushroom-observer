@@ -706,7 +706,7 @@ class ObserverController < ApplicationController
   def map_observations # :nologin: :norobots:
     @query = find_or_create_query(:Observation)
     @title = :map_locations_title.t(:locations => @query.title)
-    @observations = @query.results
+    @observations = @query.results.select {|o| o.lat or o.location}
   end
 
   ##############################################################################
