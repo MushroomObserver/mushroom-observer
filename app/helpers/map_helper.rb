@@ -60,7 +60,7 @@ module ApplicationHelper::Map
       :info_window => true,
       :zoom => 2
     )
-    return make_map(objects)
+    return make_map(objects, args)
   end
 
   def provide_defaults(args, default_args)
