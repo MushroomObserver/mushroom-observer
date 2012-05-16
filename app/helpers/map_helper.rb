@@ -82,7 +82,7 @@ module ApplicationHelper::Map
 
   def ensure_global_header_is_added
     if !@done_gmap_header_yet
-      add_header(GMap.header)
+      add_header(GMap.header(:host => DOMAIN))
       @done_gmap_header_yet = true
     end
   end
