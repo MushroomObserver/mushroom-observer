@@ -2273,7 +2273,7 @@ register_event_title:  Register for
 register_save:  Save
 register_success:  Successfully registered [how_many] for [name]
 register_update_warning:  >
-  Updating previous registration for:
+  Updated previous registration for:<br/>
   [description]
 
 # conference/verify
