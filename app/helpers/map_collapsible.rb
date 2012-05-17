@@ -38,18 +38,21 @@ class CollapsibleCollectionOfMappableObjects
 
 private
 
+  MAX_PRECISION = 4
+  MIN_PRECISION = -1
+  
   def init_sets(objects)
     objects = [objects] if !objects.is_a?(Array)
     raise "Tried to create empty map!" if objects.empty?
     @sets = {}
     for obj in objects
       if obj.is_a?(Location)
-        add_box_set(obj, [obj], 4)
+        add_box_set(obj, [obj], MAX_PRECISION)
       elsif obj.is_a?(Observation)
         if obj.lat and !obj.lat_long_dubious?
-          add_point_set(obj, [obj], 4)
+          add_point_set(obj, [obj], MAX_PRECISION)
         elsif loc = obj.location
-          add_box_set(loc, [obj], 4)
+          add_box_set(loc, [obj], MAX_PRECISION)
         end
       else
         raise "Tried to map #{obj.class}!"
@@ -58,7 +61,7 @@ private
   end
 
   def group_objects_into_sets
-    prec = 3
+    prec = MAX_PRECISION - 1
     while @sets.length > max_objects
       old_sets = @sets.values
       @sets = {}
@@ -75,26 +78,14 @@ private
   end
 
   def add_point_set(loc, objs, prec)
-    if prec > -2
-      y = loc.lat.round(prec)
-      x = loc.long.round(prec)
-    else
-      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? 90 : 0
-      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(-2)
-    end
+    x, y = round_loc_to_precision(loc, prec)
     set = @sets["#{x} #{y} 0 0"] ||= MapSet.new
     set.add_objects(objs)
     set.update_extents_with_point(loc)
   end
 
   def add_box_set(loc, objs, prec)
-    if prec > -2
-      y = loc.lat.round(prec)
-      x = loc.long.round(prec)
-    else
-      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? 90 : 0
-      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(-2)
-    end
+    x, y = round_loc_to_precision(loc, prec)
     h = loc.north_south_distance.round(prec)
     w = loc.east_west_distance.round(prec)
     set = @sets["#{x} #{y} #{w} #{h}"] ||= MapSet.new
@@ -102,6 +93,17 @@ private
     set.update_extents_with_box(loc)
   end
 
+  def round_loc_to_precision(loc, prec)
+    if prec >= MIN_PRECISION
+      y = loc.lat.round(prec)
+      x = loc.long.round(prec)
+    else
+      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? 90 : 0
+      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(-2)
+    end
+    return x, y
+  end
+  
   def calc_extents
     result = MapSet.new
     for mapset in mapsets
