@@ -49,6 +49,7 @@ class SpeciesListController < ApplicationController
     :species_list_search,
     :species_lists_by_title,
     :species_lists_by_user,
+    :species_lists_for_project,
   ]
 
   before_filter :disable_link_prefetching, :except => [
@@ -83,6 +84,14 @@ class SpeciesListController < ApplicationController
     if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
       query = create_query(:SpeciesList, :by_user, :user => user)
       show_selected_species_lists(query)
+    end
+  end
+
+  # Display list of SpeciesList's attached to a given project.
+  def species_lists_for_project
+    if project = find_or_goto_index(Project, params[:id])
+      query = create_query(:SpeciesList, :for_project, :project => project)
+      show_selected_species_lists(query, {:always_index => 1})
     end
   end
 
@@ -598,6 +607,13 @@ class SpeciesListController < ApplicationController
           end
         end
 
+        @species_list.log("log_species_list_#{created_or_updated}".to_sym)
+        if created_or_updated == :created
+          flash_notice(:runtime_species_list_create_success.t(:id => @species_list.id))
+        else
+          flash_notice(:runtime_species_list_edit_success.t(:id => @species_list.id))
+        end
+
         update_projects(@species_list, params[:project])
         construct_observations(@species_list, sorter, created_or_updated)
 
@@ -626,12 +642,6 @@ class SpeciesListController < ApplicationController
   #   params[:chosen_approved_names]    Names from radio boxes.
   #   params[:checklist_data]           Names from LHS check boxes.
   def construct_observations(spl, sorter, created_or_updated)
-    spl.log("log_species_list_#{created_or_updated}".to_sym)
-    if created_or_updated == :created
-      flash_notice(:runtime_species_list_create_success.t(:id => spl.id))
-    else
-      flash_notice(:runtime_species_list_edit_success.t(:id => spl.id))
-    end
 
     # Put together a list of arguments to use when creating new observations.
     member_args = params[:member] || {}
@@ -861,10 +871,10 @@ class SpeciesListController < ApplicationController
         if before != after
           if after
             project.add_species_list(spl)
-            flash_notice(:attached_to_project.t(:project => project.title))
+            flash_notice(:attached_to_project.t(:object => :species_list, :project => project.title))
           else
             project.remove_species_list(spl)
-            flash_notice(:removed_from_project.t(:project => project.title))
+            flash_notice(:removed_from_project.t(:object => :species_list, :project => project.title))
           end
         end
       end

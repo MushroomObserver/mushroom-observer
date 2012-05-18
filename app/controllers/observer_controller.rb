@@ -3,7 +3,7 @@
 #  = Main Controller
 #
 #  == Actions
-
+#
 #  ==== RssLog's
 #  list_rss_logs::
 #  index_rss_log::
@@ -150,6 +150,7 @@ class ObserverController < ApplicationController
     :observation_search,
     :observations_by_name,
     :observations_by_user,
+    :observations_for_project,
     :observations_at_where,
     :observations_at_location,
     :pattern_search,
@@ -593,6 +594,14 @@ class ObserverController < ApplicationController
     query = create_query(:Observation, :at_where,
       :user_where => where, :location => Location.user_name(@user, where))
     show_selected_observations(query, {:always_index => 1})
+  end
+
+  # Display matrix of Observation's attached to a given project.
+  def observations_for_project
+    if project = find_or_goto_index(Project, params[:id])
+      query = create_query(:Observation, :for_project, :project => project)
+      show_selected_observations(query, {:always_index => 1})
+    end
   end
 
   # Display matrix of Observation's whose notes, etc. match a string pattern.
@@ -2127,10 +2136,10 @@ class ObserverController < ApplicationController
         if before != after
           if after
             project.add_observation(obs)
-            flash_notice(:attached_to_project.t(:project => project.title))
+            flash_notice(:attached_to_project.t(:object => :observation, :project => project.title))
           else
             project.remove_observation(obs)
-            flash_notice(:removed_from_project.t(:project => project.title))
+            flash_notice(:removed_from_project.t(:object => :observation, :project => project.title))
           end
         end
       end

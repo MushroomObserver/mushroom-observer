@@ -45,6 +45,7 @@ class ImageController < ApplicationController
     :advanced_search,
     :image_search,
     :images_by_user,
+    :images_for_project,
     :index_image,
     :list_images,
     :next_image,
@@ -83,6 +84,14 @@ class ImageController < ApplicationController
     if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
       query = create_query(:Image, :by_user, :user => user)
       show_selected_images(query)
+    end
+  end
+
+  # Display matrix of Image's attached to a given project.
+  def images_for_project
+    if project = find_or_goto_index(Project, params[:id])
+      query = create_query(:Image, :for_project, :project => project)
+      show_selected_images(query, {:always_index => 1})
     end
   end
 
@@ -448,10 +457,10 @@ class ImageController < ApplicationController
         if before != after
           if after
             project.add_image(img)
-            flash_notice(:attached_to_project.t(:project => project.title))
+            flash_notice(:attached_to_project.t(:object => :image, :project => project.title))
           else
             project.remove_image(img)
-            flash_notice(:removed_from_project.t(:project => project.title))
+            flash_notice(:removed_from_project.t(:object => :image, :project => project.title))
           end
           any_changes = true
         end

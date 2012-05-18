@@ -132,9 +132,23 @@
   <% end %>
 
   <p>
-    <%= :image_show_when.t %>:
+    <%= :WHEN.t %>:
       <span class="Data"><%= @image.when.web_date %></span>
   </p>
+
+  <p>
+    <%= :OWNER.t %>:
+      <span class="Data"><%= user_link(@image.user) %></span>
+  </p>
+
+  <% if @image.projects.any? %>
+    <p>
+      <% for proj in @image.projects %>
+        <%= :PROJECT.t %>:
+          <span class="Data"><%= project_link(proj) %></span><br/>
+      <% end %>
+    </p>
+  <% end %>
 
   <p>
     <%= :image_show_observations.t %>:<br/>

@@ -120,6 +120,11 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response('list_species_lists')
   end
 
+  def test_species_lists_for_project
+    get_with_dump(:species_lists_for_project, :id => 3)
+    assert_response('list_species_lists')
+  end
+
   def test_destroy_species_list
     spl = species_lists(:first_species_list)
     assert(spl)

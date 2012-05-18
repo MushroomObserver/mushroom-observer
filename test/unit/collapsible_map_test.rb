@@ -453,7 +453,7 @@ class CollapsibleMapTest < UnitTestCase
       [-10, -175],    # 6 -----.__/
       [-12, -177],    # 7 -----'    
       [-90, -135],    # 8 -----------
-      [-70, 145],     # 9 -----------
+      [70, -145],     # 9 -----------
     ]
     observations = data.map do |lat, long|
       Observation.new(:lat => lat, :long => long)

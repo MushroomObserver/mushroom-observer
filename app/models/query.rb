@@ -171,6 +171,9 @@ class Query < AbstractQuery
     :by_user => {
       :user => User,
     },
+    :for_project => {
+      :project => Project,
+    },
     :for_target => {
       :target => AbstractModel,
       :type   => :string,
@@ -260,6 +263,7 @@ class Query < AbstractQuery
       :advanced_search,       # Advanced search results.
       :all,                   # All images, by created.
       :by_user,               # Images created by user, by modified.
+      :for_project,           # Images attached to a given project.
       :in_set,                # Images in a given set.
       :inside_observation,    # Images belonging to outer observation query.
       :pattern_search,        # Images matching a pattern, by ???.
@@ -335,6 +339,7 @@ class Query < AbstractQuery
       :at_where,              # Observations at an undefined location, by modified.
       :by_rss_log,            # Observations with RSS log, in RSS order.
       :by_user,               # Observations created by user, by modified.
+      :for_project,           # Observations attached to a given project.
       :in_set,                # Observations in a given set.
       :in_species_list,       # Observations in a given species list, by modified.
       :of_children,           # Observations of children of a given name.
@@ -357,6 +362,7 @@ class Query < AbstractQuery
       :at_where,              # Species lists at an undefined location, by modified.
       :by_rss_log,            # Species lists with RSS log, in RSS order
       :by_user,               # Species lists created by user, alphabetically.
+      :for_project,           # Species lists attached to a given project.
       :in_set,                # Species lists in a given set.
       :pattern_search,        # Species lists matching a pattern, alphabetically.
     ],
@@ -386,6 +392,10 @@ class Query < AbstractQuery
     :images_observations => {
       :images        => :image_id,
       :observations  => :observation_id,
+    },
+    :images_projects => {
+      :images        => :image_id,
+      :projects      => :project_id,
     },
     :interests => {
       :locations     => :target,
@@ -482,6 +492,10 @@ class Query < AbstractQuery
       :users         => :user_id,
       :'images.thumb_image' => :thumb_image_id,
     },
+    :observations_projects => {
+      :observations  => :observation_id,
+      :projects      => :project_id,
+    },
     :observations_species_lists => {
       :observations  => :observation_id,
       :species_lists => :species_list_id,
@@ -490,6 +504,10 @@ class Query < AbstractQuery
       :users         => :user_id,
       :user_groups   => :user_group_id,
       :'user_groups.admin_group' => :admin_group_id,
+    },
+    :projects_species_lists => {
+      :projects      => :project_id,
+      :species_lists => :species_list_id,
     },
     :rss_logs => {
       :locations     => :location_id,
@@ -1419,6 +1437,14 @@ class Query < AbstractQuery
     when :Comment
       params[:by] ||= 'created'
     end
+  end
+
+  def initialize_for_project
+    project = find_cached_parameter_instance(Project, :project)
+    title_args[:project] = project.title
+    join_table = [model.table_name, 'projects'].sort.join('_')
+    self.where << "#{join_table}.project_id = '#{params[:project]}'"
+    self.join << join_table
   end
 
   def initialize_for_target

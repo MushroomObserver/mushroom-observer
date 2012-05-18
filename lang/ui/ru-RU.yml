@@ -469,8 +469,8 @@ show_objects: Показать [TYPES]
 sort_by_object: "Сортировка: [TYPE]"
 
 # Other generic phrases.
-added_to_list:  Added to species list "[list]".
-attached_to_project:  Attached to project "[project]".
+added_to_list:  Added observation to "[list]".
+attached_to_project:  Attached [object] to "[project]".
 and_num_more: Ещё [num] ...
 are_you_sure: Вы уверены?
 click_for_map: Нажмите для просмотра карты
@@ -483,8 +483,8 @@ permission_denied: У Вас нет прав на это действие.
 "yes": "да"
 "no": "нет"
 
-removed_from_list:  Removed from species list "[list]".
-removed_from_project:  Removed from project "[project]".
+removed_from_list:  Removed observation from "[list]".
+removed_from_project:  Removed [object] from "[project]".
 "YES": "Yes"
 "NO": "No"
 "yes": "yes"
@@ -686,6 +686,7 @@ query_title_by_author: "[TYPES], автор которых [USER]"
 query_title_by_editor: "[TYPES], отредактированные пользователем [USER]"
 query_title_by_rss_log: "[TYPES] в логе активности"
 query_title_by_user: "[TYPES], созданные [USER]"
+query_title_for_project:  "[TYPES] attached to [PROJECT]"
 query_title_for_target: "[TYPES], параметр сортировки - [TARGET]"
 query_title_for_user: "[TYPES] для пользователя [USER]"
 query_title_in_set: "Выбранные [TYPES]"

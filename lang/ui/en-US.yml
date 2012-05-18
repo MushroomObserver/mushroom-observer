@@ -467,8 +467,8 @@ show_objects: Show [TYPES]
 sort_by_object: Sort by [TYPE]
 
 # Other generic phrases.
-added_to_list: Added to species list "[list]".
-attached_to_project: Attached to project "[project]".
+added_to_list: Added observation to "[list]".
+attached_to_project: Attached [object] to "[project]".
 and_num_more: And [num] more...
 are_you_sure: Are you sure?
 click_for_map: Click for map
@@ -476,8 +476,8 @@ google_images: Google Images
 many_times: "[num] times"
 one_time: once
 permission_denied: Permission denied.
-removed_from_list: Removed from species list "[list]".
-removed_from_project: Removed from project "[project]".
+removed_from_list: Removed observation from "[list]".
+removed_from_project: Removed [object] from "[project]".
 "YES": "Yes"
 "NO": "No"
 "yes": "yes"
@@ -679,6 +679,7 @@ query_title_by_author: "[TYPES] Authored by [USER]"
 query_title_by_editor: "[TYPES] Edited by [USER]"
 query_title_by_rss_log: "[TYPES] in Activity Log"
 query_title_by_user: "[TYPES] created by [USER]"
+query_title_for_project: "[TYPES] attached to [PROJECT]"
 query_title_for_target: "[TYPES] on [TARGET]"
 query_title_for_user: "[TYPES] for [USER]"
 query_title_in_set: "Selected [TYPES]"

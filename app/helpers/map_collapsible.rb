@@ -38,10 +38,10 @@ class CollapsibleCollectionOfMappableObjects
 
 private
 
-  # "Precision" refers to the number of decimal places.  Algorithm, such as it is,
-  # works by rounding to fewer and fewer places, each time combining points and boxes
-  # which are the same.  In the end, it combines practically everything in the same
-  # hemisphere, so it is guaranteed(?) to reach the target minimum number of objects.
+  # "Precision" refers to the number of decimal places.  Algorithm, such as it
+  # is, works by rounding to fewer and fewer places, each time combining points
+  # and boxes which are the same.  In the end, it rounds to nearest 90°, so it
+  # is guaranteed(?) to reach the target minimum number of objects. 
   MAX_PRECISION = 4
   MIN_PRECISION = -2
 
@@ -83,7 +83,7 @@ private
 
   def add_point_set(loc, objs, prec)
     x, y = round_lat_long_to_precision(loc, prec)
-    set = @sets["#{x} #{y} 0 0"] ||= MapSet.new
+    set = @sets[[x, y, 0, 0]] ||= MapSet.new
     set.add_objects(objs)
     set.update_extents_with_point(loc)
   end
@@ -92,7 +92,7 @@ private
     x, y = round_lat_long_to_precision(loc, prec)
     h = loc.north_south_distance.round(prec)
     w = loc.east_west_distance.round(prec)
-    set = @sets["#{x} #{y} #{w} #{h}"] ||= MapSet.new
+    set = @sets[[x, y, w, h]] ||= MapSet.new
     set.add_objects(objs)
     set.update_extents_with_box(loc)
   end
