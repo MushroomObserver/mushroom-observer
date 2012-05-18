@@ -1,0 +1,29 @@
+MAPS:
+
+"Thumbnail" maps are shown on the observation page.
+
+Maps with lots and lots of observations and/or locations are now simplified to
+reduce the stress on your browser.  In such cases, if you click on a pin, you
+can ask it to map the subset of observations and/or locations in that area.
+Let us know if you think we've over-simplified these maps.  (We limit it to 100
+observations presently.) 
+
+
+
+PROJECTS:
+
+Observations, images and species lists can now belong to projects.  A
+preliminary interface is ready for testing.  Note the checkboxes at the bottom
+of the forms for creating and editing observations, images, and species lists. 
+
+Attaching an observation, say, to a project gives all members of that project
+the ability to edit your observation.  This is, then, a mechanism for giving
+groups of users the ability to collaborate on entering data from forays,
+herbaria, etc. 
+
+To create a project, go to "List Projects" (from the left side of the page),
+and look for "Add Project" at the top of the list of existing projects.  Users
+can request to be added to a project by sending an "Admin Request" to that
+project.
+
+Please let us know what you think.

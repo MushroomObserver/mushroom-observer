@@ -121,7 +121,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   def test_species_lists_for_project
-    get_with_dump(:species_lists_for_project, :id => 3)
+    get_with_dump(:species_lists_for_project, :id => projects(:bolete_project).id)
     assert_response('list_species_lists')
   end
 
