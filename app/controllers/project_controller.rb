@@ -122,8 +122,6 @@ class ProjectController < ApplicationController
           AND n.id = nd.name_id
         ORDER BY n.text_name ASC, n.author ASC
       )
-
-      @name_data = @draft_data.map {|d| d['display_name']}.uniq.length
     end
   end
 

@@ -10,6 +10,7 @@
 #  user_link::            Wrap user name in link to show_user.
 #  user_list::            Render list of users.
 #  project_link::         Wrap project name in link to show_project.
+#  species_list_link::    Wrap species_list name in link to show_species_list.
 #  description_title::    Create a meaningful title for a Description.
 #  description_link::     Create a link to show a given Description.
 #  thumbnail::            Draw thumbnail image linked to show_image.
@@ -102,10 +103,20 @@ module ApplicationHelper::ObjectLink
   #
   #   Project: <%= project_link(draft_name.project) %>
   def project_link(project, name=nil)
-    begin
+    if project
       name ||= sanitize(project.title).t
       link_to(name, :controller => 'project', :action => 'show_project', :id => project.id)
-    rescue
+    end
+  end
+
+  # Wrap species_list name in link to show_species_list.
+  #
+  #   Species List: <%= species_list_link(observation.species_lists.first) %>
+  def species_list_link(species_list, name=nil)
+    if species_list
+      name ||= sanitize(species_list.title).t
+      link_to(name, :controller => 'species_list', :action => 'show_species_list',
+              :id => species_list.id)
     end
   end
 

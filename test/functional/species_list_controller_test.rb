@@ -56,6 +56,27 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response('show_species_list')
   end
 
+  def test_show_species_lists_attached_to_projects
+    proj1 = Project.find(1)
+    proj2 = Project.find(2)
+    spl = SpeciesList.first
+    assert_obj_list_equal([], spl.projects)
+
+    get(:show_species_list, :id => spl.id)
+    assert_not_match(proj1.title.t, @response.body)
+    assert_not_match(proj2.title.t, @response.body)
+
+    proj1.add_species_list(spl)
+    get(:show_species_list, :id => spl.id)
+    assert_match(proj1.title.t, @response.body)
+    assert_not_match(proj2.title.t, @response.body)
+
+    proj2.add_species_list(spl)
+    get(:show_species_list, :id => spl.id)
+    assert_match(proj1.title.t, @response.body)
+    assert_match(proj2.title.t, @response.body)
+  end
+
   def test_show_species_list_edit_links
     spl = species_lists(:unknown_species_list)
     proj = projects(:bolete_project)
@@ -149,6 +170,48 @@ class SpeciesListControllerTest < FunctionalTestCase
     get_with_dump(:remove_observation_from_species_list, params)
     assert_response(:action => "manage_species_lists")
     assert(!spl.reload.observations.member?(obs))
+  end
+
+  def test_manage_species_list_with_projects
+    proj = projects(:bolete_project)
+    spl1 = species_lists(:unknown_species_list)
+    spl2 = species_lists(:first_species_list)
+    spl3 = species_lists(:another_species_list)
+    spl2.user = @dick; spl2.save; spl2.reload
+    obs1 = observations(:detailed_unknown)
+    obs2 = observations(:coprinus_comatus_obs)
+    assert_obj_list_equal([@dick], proj.user_group.users)
+    assert_obj_list_equal([proj], spl1.projects)
+    assert_obj_list_equal([], spl2.projects)
+    assert_obj_list_equal([], spl3.projects)
+    assert_true(spl1.observations.include?(obs1))
+    assert_false(spl1.observations.include?(obs2))
+    assert_obj_list_equal([], spl2.observations)
+    assert_obj_list_equal([], spl3.observations)
+    assert_users_equal(@mary, spl1.user)
+    assert_users_equal(@dick, spl2.user)
+    assert_users_equal(@rolf, spl3.user)
+
+    login('dick')
+    get(:manage_species_lists, :id => obs1.id)
+    assert_select("a[href*=species_list=#{spl1.id}]", :text => :REMOVE.t, :count => 1)
+    assert_select("a[href*=species_list=#{spl2.id}]", :text => :ADD.t, :count => 1)
+    assert_select("a[href*=species_list=#{spl3.id}]", :count => 0)
+
+    get(:manage_species_lists, :id => obs2.id)
+    assert_select("a[href*=species_list=#{spl1.id}]", :text => :ADD.t, :count => 1)
+    assert_select("a[href*=species_list=#{spl2.id}]", :text => :ADD.t, :count => 1)
+    assert_select("a[href*=species_list=#{spl3.id}]", :count => 0)
+
+    params = { :species_list => spl1.id, :observation => obs2.id }
+    post(:add_observation_to_species_list, :observation => obs2.id, :species_list => spl1.id)
+    assert_response(:action => :manage_species_lists)
+    assert_true(spl1.reload.observations.include?(obs2))
+
+    params = { :species_list => spl1.id, :observation => obs2.id }
+    post(:remove_observation_from_species_list, :observation => obs2.id, :species_list => spl1.id)
+    assert_response(:action => :manage_species_lists)
+    assert_false(spl1.reload.observations.include?(obs2))
   end
 
   # ----------------------------
@@ -901,10 +964,10 @@ class SpeciesListControllerTest < FunctionalTestCase
       :user     => @rolf,
       :specimen => false,
     }
-    list.construct_observation(args.merge(:what => tapinella))
-    list.construct_observation(args.merge(:what => names(:fungi)))
-    list.construct_observation(args.merge(:what => names(:coprinus_comatus)))
-    list.construct_observation(args.merge(:what => names(:lactarius_alpigenes)))
+    list.construct_observation(tapinella, args)
+    list.construct_observation(names(:fungi), args)
+    list.construct_observation(names(:coprinus_comatus), args)
+    list.construct_observation(names(:lactarius_alpigenes), args)
     list.save # just in case
 
     get(:make_report, :id => list.id, :type => 'txt')
@@ -936,7 +999,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     @request.session[:user_id] = 1
     post(:name_lister, params.merge(:commit => :name_lister_submit_spl.l))
-    ids = @controller.instance_variable_get('@objs').map {|n| n.id}
+    ids = @controller.instance_variable_get('@names').map {|n| n.id}
     assert_equal([6, 2, 1, 14], ids)
     assert_response('create_species_list')
 
@@ -1229,5 +1292,85 @@ class SpeciesListControllerTest < FunctionalTestCase
       :specimen   => obs.specimen ? '1' : '0',
       :value      => vote,
     }
+  end
+
+  def test_project_checkboxes_in_create_species_list_form
+    init_for_project_checkbox_tests
+
+    login('mary')
+    get(:create_species_list)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+
+    login('dick')
+    get(:create_species_list)
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
+
+    login('rolf')
+    get(:create_species_list)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    post(:create_species_list, :project => { "id_#{@proj1.id}" => 'checked' })
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+
+    # (should have different default if recently create list attached to project)
+    obs = Observation.create!
+    @proj1.add_observation(obs)
+    get(:create_species_list)
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    post(:create_species_list, :project => { "id_#{@proj1.id}" => '' })
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+  end
+
+  def test_project_checkboxes_in_edit_species_list_form
+    init_for_project_checkbox_tests
+
+    login('rolf')
+    get(:edit_species_list, :id => @spl1.id)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    get(:edit_species_list, :id => @spl2.id)
+    assert_response(:redirect)
+
+    login('mary')
+    get(:edit_species_list, :id => @spl1.id)
+    assert_response(:redirect)
+    # Mary is allowed to remove her list from a project she's not on.
+    get(:edit_species_list, :id => @spl2.id)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
+    post(:edit_species_list, :id => @spl2.id,
+      :species_list => { :title => '' },  # (this causes it to fail)
+      :project => {
+        "id_#{@proj1.id}" => 'checked',
+        "id_#{@proj2.id}" => '',
+      }
+    )
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
+
+    login('dick')
+    get(:edit_species_list, :id => @spl1.id)
+    assert_response(:redirect)
+    get(:edit_species_list, :id => @spl2.id)
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
+    @proj1.add_species_list(@spl2)
+    # Disk is not allowed to remove Mary's list from a project he's not on.
+    get(:edit_species_list, :id => @spl2.id)
+    assert_project_checks(@proj1.id => :checked_but_disabled, @proj2.id => :checked)
+  end
+
+  def init_for_project_checkbox_tests
+    @proj1 = projects(:eol_project)
+    @proj2 = projects(:bolete_project)
+    @spl1 = species_lists(:first_species_list)
+    @spl2 = species_lists(:unknown_species_list)
+    assert_users_equal(@rolf, @spl1.user)
+    assert_users_equal(@mary, @spl2.user)
+    assert_obj_list_equal([],      @spl1.projects)
+    assert_obj_list_equal([@proj2], @spl2.projects)
+    assert_obj_list_equal([@rolf, @mary, @katrina], @proj1.user_group.users)
+    assert_obj_list_equal([@dick], @proj2.user_group.users)
+  end
+
+  def assert_project_checks(project_states)
+    for id, state in project_states
+      assert_checkbox_state("project_id_#{id}", state)
+    end
   end
 end

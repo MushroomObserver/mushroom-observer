@@ -216,6 +216,30 @@ class SpeciesList < AbstractModel
     # should initiate identical action)
   end
 
+  # Add observation to list (if not already) and set modified.  Saves it.
+  def add_observation(obs)
+    unless observations.include?(obs)
+      observations.push(obs)
+      update_attribute(:modified, Time.now)
+      Transaction.put_species_list(
+        :id              => self,
+        :add_observation => obs
+      )
+    end
+  end
+
+  # Remove observation from list and set modified.  Saves it.
+  def remove_observation(obs)
+    if observations.include?(obs)
+      observations.delete(obs)
+      update_attribute(:modified, Time.now)
+      Transaction.put_species_list(
+        :id              => self,
+        :del_observation => obs
+      )
+    end
+  end
+
   ################################################################################
   #
   #  :section: Construction
@@ -301,40 +325,36 @@ class SpeciesList < AbstractModel
   end
 
   # Create and add a minimal Observation (with associated Naming and optional
-  # Vote objects), and add it to the SpeciesList.
-  #
-  #   name = 'Agaricus campestris' or
-  #          Name.find_by_text_name('Agaricus campestris')
+  # Vote objects), and add it to the SpeciesList. Allowed parameters and their
+  # default values are:
   #
   #   spl.construct_observation(
-  #     :created  => Time.now,
-  #     :modified => Time.now,
-  #     :user     => User.current,
-  #     :when     => spl.when,
-  #     :where    => spl.where,
-  #     :what     => name,  # (no default)
-  #     :vote     => Vote.maximum_vote,
-  #     :notes    => '',
-  #     :lat      => '',
-  #     :long     => '',
-  #     :alt      => '',
+  #     name,                   #  **NO DEFAULT **
+  #     :user                   => User.current,
+  #     :projects               => spl.projects,
+  #     :when                   => spl.when,
+  #     :where                  => spl.where,
+  #     :location               => spl.location,
+  #     :vote                   => Vote.maximum_vote,
+  #     :notes                  => '',
+  #     :lat                    => nil,
+  #     :long                   => nil,
+  #     :alt                    => nil,
   #     :is_collection_location => true,
-  #     :specimen => false
+  #     :specimen               => false
   #   )
   #
-  def construct_observation(args)
-    now  = Time.now
-    user = User.current
+  def construct_observation(name, args={})
+    raise "missing or invalid name: #{name.inspect}" unless name.is_a?(Name)
 
-    args[:created]  ||= now
-    args[:modified] ||= now
-    args[:user]     ||= user
+    args[:user]     ||= User.current
     args[:when]     ||= self.when
     args[:vote]     ||= Vote.maximum_vote
     args[:notes]    ||= ''
+    args[:projects] ||= self.projects
     if !args[:where] && !args[:location]
-      args[:where]    = where
-      args[:location] = location
+      args[:where]    = self.where
+      args[:location] = self.location
     end
     if args[:is_collection_location].nil?
       args[:is_collection_location] = true
@@ -343,56 +363,55 @@ class SpeciesList < AbstractModel
       args[:specimen] = false
     end
 
-    if !args[:what].blank?
-      name = args[:what]
-      name = name.id if name.is_a?(Name)
-      obs = Observation.create(
-        :created  => args[:created],
-        :modified => args[:modified],
-        :user     => args[:user],
-        :when     => args[:when],
-        :where    => args[:where],
-        :location => args[:location],
-        :name_id  => name,
-        :notes    => args[:notes],
-        :lat      => args[:lat],
-        :long     => args[:long],
-        :alt      => args[:alt],
-        :is_collection_location => args[:is_collection_location],
-        :specimen => args[:specimen],
-      )
-
-      naming = Naming.create(
-        :created     => args[:created],
-        :modified    => args[:modified],
-        :user        => args[:user],
-        :name_id     => name,
-        :observation => obs
-      )
-
-      if args[:vote] && (args[:vote].to_i != 0)
-        obs.change_vote(naming, args[:vote], args[:user])
-      end
-
-      self.observations << obs
-
-      Transaction.post_observation(
-        :id           => obs,
-        :date         => args[:when],
-        :location     => obs.location || obs.where,
-        :name         => args[:what],
-        :notes        => args[:notes],
-        :specimen     => args[:specimen],
-        :is_collection_location => args[:is_collection_location],
-        :species_list => self
-      )
-
-      Transaction.post_naming(
-        :observation => obs,
-        :name        => args[:what],
-        :vote        => args[:vote]
-      )
+    obs = Observation.create(
+      :user     => args[:user],
+      :when     => args[:when],
+      :where    => args[:where],
+      :location => args[:location],
+      :name     => name,
+      :notes    => args[:notes],
+      :lat      => args[:lat],
+      :long     => args[:long],
+      :alt      => args[:alt],
+      :is_collection_location => args[:is_collection_location],
+      :specimen => args[:specimen],
+    )
+    for project in args[:projects]
+      project.add_observation(obs)
     end
+
+    naming = Naming.create(
+      :user        => args[:user],
+      :name        => name,
+      :observation => obs
+    )
+
+    if args[:vote] && (args[:vote].to_i != 0)
+      obs.change_vote(naming, args[:vote], args[:user])
+    end
+
+    self.observations << obs
+
+    Transaction.post_observation(
+      :id           => obs,
+      :date         => args[:when],
+      :location     => obs.location || obs.where,
+      :name         => name,
+      :notes        => args[:notes],
+      :lat          => args[:lat],
+      :long         => args[:long],
+      :alt          => args[:alt],
+      :is_collection_location => args[:is_collection_location],
+      :specimen     => args[:specimen],
+      :projects     => args[:projects],
+      :species_list => self
+    )
+
+    Transaction.post_naming(
+      :observation => obs,
+      :name        => name,
+      :vote        => args[:vote]
+    )
   end
 
   ################################################################################

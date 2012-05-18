@@ -75,7 +75,7 @@
     <label for="member_long"><%= :LONGITUDE.t %>:</label>&nbsp;<%=
       text_field('member', 'long', :size => 12, :value => @member_long) %>
     <label for="member_alt"><%= :ALTITUDE.t %>:</label>&nbsp;<%=
-      text_field('member', 'alt', :size => 12, :value => @member_alt) %>
+      text_field('member', 'alt', :size => 12, :value => @member_alt) %><br/>
     <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span>
   </p>
 
@@ -95,9 +95,18 @@
       :form_observations_specimen_available_help.t %></span>
   </p>
 
-  <hr/><br/>
+  <hr/>
+  <br/>
 
-  <span class="HelpNote"><%= :form_species_lists_bulk_help.t %></span>
+  <% if @projects.any? %>
+    <%= :PROJECTS.t %>: <span class="HelpNote">(<%= :form_species_lists_project_help.t %>)</span><br/>
+    <% for project in @projects %>
+      <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
+                    :disabled => @species_list.user != @user && !project.is_member?(@user)) %>
+      <label for="project_id_<%= project.id %>"><%= project_link(project) %></label><br/>
+    <% end %>
+    <br/>
+  <% end %>
 
   <%= focus_on('list_members') %>
 </td>

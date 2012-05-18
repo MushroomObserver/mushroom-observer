@@ -3,10 +3,6 @@
 #  = Image Controller
 #
 #  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
 #
 #  ==== Searches and Indexes
 #  list_images::
@@ -224,7 +220,7 @@ class ImageController < ApplicationController
           @image.change_vote(@user, val, anon)
           Transaction.put_images(:id => @image, :set_vote => val, :set_anonymous => anon)
         end
-        
+
         # Advance to next image automatically if 'next' parameter set.
         if params[:next]
           query = find_or_create_query(Image)
@@ -301,16 +297,19 @@ class ImageController < ApplicationController
       @image = Image.new
       @image.license = @user.license
       @image.copyright_holder = @user.legal_name
+      @image.user = @user
       # Set the default date to the date of the observation
       # Don't know how to correctly test this.
       @image.when = @observation.when
       @licenses = License.current_names_and_ids(@image.license)
+      init_project_vars_for_add_or_edit(@observation)
     else
       args = params[:image]
-      process_image(args, params[:upload][:image1])
-      process_image(args, params[:upload][:image2])
-      process_image(args, params[:upload][:image3])
-      process_image(args, params[:upload][:image4])
+      i = 1
+      while i < 5 or !params[:upload]["image#{i}"].blank?
+        process_image(args, params[:upload]["image#{i}"])
+        i += 1
+      end
       redirect_to(:controller => 'observer', :action => 'show_observation',
                   :id => @observation.id, :params => query_params)
     end
@@ -346,6 +345,7 @@ class ImageController < ApplicationController
         name = @image.original_name
         name = "##{@image.id}" if name.empty?
         flash_notice(:runtime_image_uploaded_image.t(:name => name))
+        update_projects(@image, params[:project])
       end
     end
   end
@@ -363,7 +363,9 @@ class ImageController < ApplicationController
     if !check_permission!(@image)
       redirect_to(:action => 'show_image', :id => @image,
                   :params => query_params)
-    elsif request.method == :post
+    elsif request.method != :post
+      init_project_vars_for_add_or_edit(@image)
+    else
       @image.attributes = params[:image]
       xargs = {}
       xargs[:set_date]             = @image.when             if @image.when_changed?
@@ -371,8 +373,14 @@ class ImageController < ApplicationController
       xargs[:set_copyright_holder] = @image.copyright_holder if @image.copyright_holder_changed?
       xargs[:set_original_name]    = @image.original_name    if @image.original_name_changed?
       xargs[:set_license]          = @image.license          if @image.license_id_changed?
+      done = false
       if xargs.empty?
-        flash_notice(:runtime_no_changes.t)
+        if update_projects(@image, params[:project])
+          flash_notice :runtime_image_edit_success.t(:id => @image.id)
+        else
+          flash_notice(:runtime_no_changes.t)
+        end
+        done = true
       elsif !@image.save
         flash_object_errors(@image)
       else
@@ -380,10 +388,74 @@ class ImageController < ApplicationController
         Transaction.put_image(xargs)
         @image.log_update
         flash_notice :runtime_image_edit_success.t(:id => @image.id)
-        redirect_to(:action => 'show_image', :id => @image.id,
-                    :params => query_params)
+        update_projects(@image, params[:project])
+        done = true
+      end
+      if done
+        redirect_to(:action => 'show_image', :id => @image.id, :params => query_params)
+      else
+        init_project_vars_for_reload(@image)
       end
     end
+  end
+
+  def init_project_vars_for_add_or_edit(obs_or_img)
+    @projects = User.current.projects_member.sort_by(&:title)
+    @project_checks = {}
+    for proj in obs_or_img.projects
+      @projects << proj unless @projects.include?(proj)
+      @project_checks[proj.id] = true
+    end
+  end
+
+  def init_project_vars_for_reload(obs_or_img)
+    # (Note: In practice, this is never called for add_image, so obs_or_img is always an image.)
+    @projects = User.current.projects_member.sort_by(&:title)
+    @project_checks = {}
+    for proj in obs_or_img.projects
+      @projects << proj unless @projects.include?(proj)
+    end
+    for proj in @projects
+      @project_checks[proj.id] = !params[:project]["id_#{proj.id}"].blank? rescue false
+    end
+  end
+
+  def update_projects(img, checks)
+    any_changes = false
+    if checks
+
+      # Here's the problem: User can add image to obs he doesn't own if it is attached
+      # to one of his projects.  Observation can be attached to other projects, too,
+      # though, including ones the user isn't a member of.  We want the image to be
+      # attached even to these projects by default, however we want to give the user
+      # the ability NOT to attach his images to these projects which he doesn't belong
+      # to.  This means we need to consider checkboxes not only of the user's projects,
+      # but also all the projects of the observation, as well.  Once it is dettached
+      # from one of these projects the user isn't on, the checkbox will no longer show
+      # up on the edit_image form, preventing a user from attaching images to projects
+      # he doesn't belong to... except in the very strict case of uploading images for
+      # an observation which belongs to a project he doesn't belong to.
+      projects = @user.projects_member 
+      for obs in img.observations
+        for project in obs.projects
+          projects << project unless projects.include?(project)
+        end
+      end
+
+      for project in projects
+        before = img.projects.include?(project)
+        after = !checks["id_#{project.id}"].blank?
+        if before != after
+          if after
+            project.add_image(img)
+          else
+            project.remove_image(img)
+          end
+          any_changes = true
+        end
+      end
+    end
+    return any_changes
   end
 
   # Callback to destroy an image.

@@ -2260,6 +2260,193 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal([img.id], @controller.instance_variable_get('@good_images').map(&:id))
   end
 
+  def test_project_checkboxes_in_create_observation
+    init_for_project_checkbox_tests
+
+    login('rolf')
+    get(:create_observation)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+
+    login('dick')
+    get(:create_observation)
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
+
+    # Should have different default if recently posted observation attached to project.
+    obs = Observation.create!
+    @proj2.add_observation(obs)
+    get(:create_observation)
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
+
+    # Make sure it remember state of checks if submit fails.
+    post(:create_observation,
+      :name => {:name => 'Screwy Name'},    # (ensures it will fail)
+      :project => {"id_#{@proj1.id}" => ''}
+    )
+    assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
+  end
+
+  def test_project_checkboxes_in_edit_observation
+    init_for_project_checkbox_tests
+
+    login('rolf')
+    get(:edit_observation, :id => @obs1.id)
+    assert_response(:redirect)
+    get(:edit_observation, :id => @obs2.id)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    post(:edit_observation, :id => @obs2.id,
+      :observation => { :place_name => 'blah blah blah' },  # (ensures it will fail)
+      :project => { "id_#{@proj1.id}" => 'checked' }
+    )
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    post(:edit_observation, :id => @obs2.id,
+      :project => { "id_#{@proj1.id}" => 'checked' }
+    )
+    assert_response(:redirect)
+    assert_obj_list_equal([@proj1], @obs2.reload.projects)
+    assert_obj_list_equal([@proj1], @img2.reload.projects)
+
+    login('mary')
+    get(:edit_observation, :id => @obs2.id)
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
+    get(:edit_observation, :id => @obs1.id)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :checked)
+    post(:edit_observation, :id => @obs1.id,
+      :observation => { :place_name => 'blah blah blah' },  # (ensures it will fail)
+      :project => {
+        "id_#{@proj1.id}" => 'checked',
+        "id_#{@proj2.id}" => '',
+      }
+    )
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
+    post(:edit_observation, :id => @obs1.id,
+      :project => {
+        "id_#{@proj1.id}" => 'checked',
+        "id_#{@proj2.id}" => 'checked',
+      }
+    )
+    assert_response(:redirect)
+    assert_obj_list_equal([@proj1, @proj2], @obs1.reload.projects.sort_by(&:id))
+    assert_obj_list_equal([@proj1, @proj2], @img1.reload.projects.sort_by(&:id))
+
+    login('dick')
+    get(:edit_observation, :id => @obs2.id)
+    assert_response(:redirect)
+    get(:edit_observation, :id => @obs1.id)
+    assert_project_checks(@proj1.id => :checked_but_disabled, @proj2.id => :checked)
+  end
+
+  def init_for_project_checkbox_tests
+    @proj1 = projects(:eol_project)
+    @proj2 = projects(:bolete_project)
+    @obs1 = observations(:detailed_unknown)
+    @obs2 = observations(:coprinus_comatus_obs)
+    @img1 = @obs1.images.first
+    @img2 = @obs2.images.first
+    assert_users_equal(@mary, @obs1.user)
+    assert_users_equal(@rolf, @obs2.user)
+    assert_users_equal(@mary, @img1.user)
+    assert_users_equal(@rolf, @img2.user)
+    assert_obj_list_equal([@proj2], @obs1.projects)
+    assert_obj_list_equal([], @obs2.projects)
+    assert_obj_list_equal([@proj2], @img1.projects)
+    assert_obj_list_equal([], @img2.projects)
+    assert_obj_list_equal([@rolf, @mary, @katrina], @proj1.user_group.users)
+    assert_obj_list_equal([@dick], @proj2.user_group.users)
+  end
+
+  def assert_project_checks(project_states)
+    for id, state in project_states
+      assert_checkbox_state("project_id_#{id}", state)
+    end
+  end
+
+  def test_list_checkboxes_in_create_observation
+    init_for_list_checkbox_tests
+
+    login('rolf')
+    get(:create_observation)
+    assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
+
+    login('mary')
+    get(:create_observation)
+    assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
+
+    login('katrina')
+    get(:create_observation)
+    assert_list_checks(@spl1.id => :no_field, @spl2.id => :no_field)
+
+    # Dick is on project that owns @spl2.
+    login('dick')
+    get(:create_observation)
+    assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
+
+    # Should have different default if recently posted observation attached to project.
+    obs = Observation.create!
+    @spl1.add_observation(obs) # (shouldn't affect anything for create)
+    @spl2.add_observation(obs)
+    get(:create_observation)
+    assert_list_checks(@spl1.id => :no_field, @spl2.id => :checked)
+
+    # Make sure it remember state of checks if submit fails.
+    post(:create_observation,
+      :name => {:name => 'Screwy Name'},    # (ensures it will fail)
+      :list => {"id_#{@spl2.id}" => ''}
+    )
+    assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
+  end
+
+  def test_list_checkboxes_in_edit_observation
+    init_for_list_checkbox_tests
+
+    login('rolf')
+    get(:edit_observation, :id => @obs1.id)
+    assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
+    post(:edit_observation, :id => @obs1.id,
+      :observation => { :place_name => 'blah blah blah' },  # (ensures it will fail)
+      :list => { "id_#{@spl1.id}" => 'checked' }
+    )
+    assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
+    post(:edit_observation, :id => @obs1.id,
+      :list => { "id_#{@spl1.id}" => 'checked' }
+    )
+    assert_response(:redirect)
+    assert_obj_list_equal([@spl1], @obs1.reload.species_lists)
+    get(:edit_observation, :id => @obs2.id)
+    assert_response(:redirect)
+
+    login('mary')
+    get(:edit_observation, :id => @obs1.id)
+    assert_response(:redirect)
+    get(:edit_observation, :id => @obs2.id)
+    assert_list_checks(@spl1.id => :no_field, @spl2.id => :checked)
+    @spl1.add_observation(@obs2)
+    get(:edit_observation, :id => @obs2.id)
+    assert_list_checks(@spl1.id => :checked_but_disabled, @spl2.id => :checked)
+
+    login('dick')
+    get(:edit_observation, :id => @obs2.id)
+    assert_list_checks(@spl1.id => :checked_but_disabled, @spl2.id => :checked)
+  end
+
+  def init_for_list_checkbox_tests
+    @spl1 = species_lists(:first_species_list)
+    @spl2 = species_lists(:unknown_species_list)
+    @obs1 = observations(:coprinus_comatus_obs)
+    @obs2 = observations(:detailed_unknown)
+    assert_users_equal(@rolf, @spl1.user)
+    assert_users_equal(@mary, @spl2.user)
+    assert_users_equal(@rolf, @obs1.user)
+    assert_users_equal(@mary, @obs2.user)
+    assert_obj_list_equal([], @obs1.species_lists)
+    assert_obj_list_equal([@spl2], @obs2.species_lists)
+  end
+
+  def assert_list_checks(list_states)
+    for id, state in list_states
+      assert_checkbox_state("list_id_#{id}", state)
+    end
+  end
+
   # ----------------------------
   #  Interest.
   # ----------------------------

@@ -196,6 +196,7 @@
 #  edited_locations::   Location's they've edited.
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
+#  all_editable_species_lists:: Species Lists they own or that are attached to projects they're on.
 #
 #  ==== Alerts
 #  all_alert_types::    List of accepted alert types.
@@ -338,6 +339,15 @@ class User < AbstractModel
     @@user = x
   end
 
+  # Clear cached data structures when reload.
+  def reload
+    @projects_admin = nil
+    @projects_member = nil
+    @all_editable_species_lists = nil
+    @interests = nil
+    super
+  end
+
   ##############################################################################
   #
   #  :section: Names
@@ -454,7 +464,7 @@ class User < AbstractModel
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    Project.find_by_sql %(
+    @projects_admin ||= Project.find_by_sql %(
       SELECT projects.* FROM projects, user_groups_users
       WHERE projects.admin_group_id = user_groups_users.user_group_id
         AND user_groups_users.user_id = #{id}
@@ -463,11 +473,29 @@ class User < AbstractModel
 
   # Return an Array of Project's that this User is a member of.
   def projects_member
-    Project.find_by_sql %(
+    @projects_member ||= Project.find_by_sql %(
       SELECT projects.* FROM projects, user_groups_users
       WHERE projects.user_group_id = user_groups_users.user_group_id
         AND user_groups_users.user_id = #{id}
     )
+  end
+
+  # Return an Array of SpeciesList's that User owns or that are attached to a
+  # Project that the User is a member of.
+  def all_editable_species_lists
+    @all_editable_species_lists ||= begin
+      results = species_lists 
+      if projects_member.any?
+        project_ids = projects_member.map(&:id).join(',')
+        results += SpeciesList.find_by_sql %(
+          SELECT species_lists.* FROM species_lists, projects_species_lists
+          WHERE species_lists.user_id != #{id}
+            AND projects_species_lists.project_id IN (#{project_ids})
+            AND projects_species_lists.species_list_id = species_lists.id
+        )
+      end
+      results
+    end
   end
 
   ################################################################################

@@ -14,7 +14,7 @@
   </span><br/>
 <%= date_select(:image, :when, :start_year => 1980, :end_year => Time.now.year) %></p>
 
-<p><label for="image_license_id"><%= :license.t %>:</label>
+<p><label for="image_license_id"><%= :LICENSE.t %>:</label>
   <span class="HelpNote">
     <%= :form_images_license_help.t %>
   </span><br/>
@@ -26,6 +26,17 @@
   </span><br/>
 <%= form.text_area('notes', "cols" => width) %></p>
 <%= render(:partial => 'shared/textilize_help') %>
+
+<% if @projects.any? %>
+  <p>
+  <%= :PROJECTS.t %>: <span class="HelpNote">(<%= :form_images_project_help.t %>)</span><br/>
+  <% for project in @projects %>
+    <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
+                  :disabled => @image.user != @user && !project.is_member?(@user)) %>
+    <label for="project_id_<%= project.id %>"><%= project_link(project) %></label><br/>
+  <% end %>
+  </p>
+<% end %>
 
 <%= focus_on('image_notes') %>
 

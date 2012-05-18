@@ -1200,6 +1200,9 @@ form_images_license_help: >
   Elegir "la licencia":/observer/how_to_use#license que desea utilizar para
   esta imagen.
 
+form_images_project_help:  >
+  Check any projects you wish to attach this image to.
+
 
 
 # observer/_form_list_feedback
@@ -1427,6 +1430,13 @@ form_observations_dubious_help: >
   Haga clic «[button]» a utilizar este nombre de la ubicación o editar a
   continuación el texto para corregir cualquier error tipográfico.
 
+form_observations_project_help:  >
+  Check any projects you wish to attach this observation to.  All images
+  you upload will also automatically be attached to these projects, too.
+
+form_observations_list_help:  >
+  Check and species lists you would like to add this observation to.
+
 
 
 # observer/_form_species_list
@@ -1448,9 +1458,10 @@ form_species_lists_multiple_names_help: >
   En cada caso, seleccione el nombre que le prefiere.  El número después de
   cada nombre es el número de observaciones que están utilizando ese nombre.
 
-form_species_lists_bulk_help: >
-  La creación a granel de nombre se ha trasladado a la página "Editor de
-  Nombre a Granel":/name/bulk_name_edit.
+form_species_lists_project_help:  >
+  Check any projects you wish to attach this species list to.  Any observations
+  you create for this species list will also automatically be attached to these
+  projects, too.  (But not pre-existing observations.)
 
 
 

@@ -113,4 +113,27 @@ class ImageTest < UnitTestCase
     assert_true(img.has_edit_permission?(@mary))
     assert_true(img.has_edit_permission?(@dick))
   end
+
+  def test_validation
+    img = Image.new
+    assert_false(img.valid?)
+    img.user = @rolf
+    assert_true(img.valid?)
+    do_truncate_test(img, :content_type, 100)
+    do_truncate_test(img, :copyright_holder, 100)
+  end
+
+  def do_truncate_test(img, var, len)
+    exes = 'x' * (len - 1)
+    assert_truncated_right(img, var, exes, exes)
+    assert_truncated_right(img, var, exes+'a', exes+'a')
+    assert_truncated_right(img, var, exes+'å', exes)
+    assert_truncated_right(img, var, exes+'aå', exes+'a')
+  end
+
+  def assert_truncated_right(img, var, set, get)
+    img.send("#{var}=", set)
+    img.valid?
+    assert_equal(get, img.send(var))
+  end
 end

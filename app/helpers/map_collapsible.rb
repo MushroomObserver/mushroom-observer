@@ -38,9 +38,13 @@ class CollapsibleCollectionOfMappableObjects
 
 private
 
+  # "Precision" refers to the number of decimal places.  Algorithm, such as it is,
+  # works by rounding to fewer and fewer places, each time combining points and boxes
+  # which are the same.  In the end, it combines practically everything in the same
+  # hemisphere, so it is guaranteed(?) to reach the target minimum number of objects.
   MAX_PRECISION = 4
-  MIN_PRECISION = -1
-  
+  MIN_PRECISION = -2
+
   def init_sets(objects)
     objects = [objects] if !objects.is_a?(Array)
     raise "Tried to create empty map!" if objects.empty?
@@ -62,7 +66,7 @@ private
 
   def group_objects_into_sets
     prec = MAX_PRECISION - 1
-    while @sets.length > max_objects
+    while @sets.length > max_objects and prec >= MIN_PRECISION
       old_sets = @sets.values
       @sets = {}
       for set in old_sets
@@ -78,14 +82,14 @@ private
   end
 
   def add_point_set(loc, objs, prec)
-    x, y = round_loc_to_precision(loc, prec)
+    x, y = round_lat_long_to_precision(loc, prec)
     set = @sets["#{x} #{y} 0 0"] ||= MapSet.new
     set.add_objects(objs)
     set.update_extents_with_point(loc)
   end
 
   def add_box_set(loc, objs, prec)
-    x, y = round_loc_to_precision(loc, prec)
+    x, y = round_lat_long_to_precision(loc, prec)
     h = loc.north_south_distance.round(prec)
     w = loc.east_west_distance.round(prec)
     set = @sets["#{x} #{y} #{w} #{h}"] ||= MapSet.new
@@ -93,17 +97,17 @@ private
     set.update_extents_with_box(loc)
   end
 
-  def round_loc_to_precision(loc, prec)
-    if prec >= MIN_PRECISION
+  def round_lat_long_to_precision(loc, prec)
+    if prec > MIN_PRECISION
       y = loc.lat.round(prec)
       x = loc.long.round(prec)
     else
-      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? 90 : 0
-      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(-2)
+      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0
+      x = loc.long >= 150 || loc.long <= -150 ? 180 : loc.long.round(prec)
     end
     return x, y
   end
-  
+
   def calc_extents
     result = MapSet.new
     for mapset in mapsets

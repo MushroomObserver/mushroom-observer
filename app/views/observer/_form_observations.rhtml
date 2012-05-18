@@ -185,6 +185,32 @@ end %>
 
 <% ########################################################################## %>
 
+<% if @projects.any? or @lists.any? %>
+  <center><%= submit_tag(button_name) %></center><br/>
+<% end %>
+
+<% if @projects.any? %>
+  <br/>
+  <%= :PROJECTS.t %>: <span class="HelpNote">(<%= :form_observations_project_help.t %>)</span><br/>
+  <% for project in @projects %>
+    <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
+                  :disabled => @observation.user != @user && !project.is_member?(@user)) %>
+    <label for="project_id_<%= project.id %>"><%= project_link(project) %></label><br/>
+  <% end %>
+  <br/>
+<% end %>
+
+<% if @lists.any? %>
+  <br/>
+  <%= :SPECIES_LISTS.t %>: <span class="HelpNote">(<%= :form_observations_list_help.t %>)</span><br/>
+  <% for list in @lists  %>
+    <%= check_box('list', "id_#{list.id}", :checked => @list_checks[list.id],
+                  :disabled => !check_permission(list)) %>
+    <label for="list_id_<%= list.id %>"><%= species_list_link(list) %></label><br/>
+  <% end %>
+  <br/>
+<% end %>
+
 <% if logging_optional %>
   <br/>
   <%= check_box('log_change', 'checked', :checked => '1') %>

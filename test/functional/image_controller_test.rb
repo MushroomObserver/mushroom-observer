@@ -425,6 +425,8 @@ class ImageControllerTest < FunctionalTestCase
   def test_upload_image
     setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
+    proj = projects(:bolete_project)
+    proj.observations << obs
     img_count = obs.images.size
     file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg")
     file.content_type = 'image/jpeg'
@@ -442,6 +444,12 @@ class ImageControllerTest < FunctionalTestCase
         :image2 => '',
         :image3 => '',
         :image4 => ''
+      },
+      :project => {
+        # This is a good test, because Rolf doesn't belong to the Bolete project,
+        # but we still want this image to attach to that project by default,
+        # because the *observation* is attached to that project.
+        "id_#{proj.id}" => 'checked'
       }
     }
     post_requires_user(:add_image, [:observer, :show_observation], params)
@@ -449,6 +457,9 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal(20, @rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
     assert_flash(:runtime_image_uploaded_image.t(:name => "##{obs.images.last.id}"))
+    img = Image.last
+    assert_obj_list_equal([obs], img.observations)
+    assert_obj_list_equal([proj], img.projects)
   end
 
   # This is what would happen when user first opens form.
@@ -533,5 +544,64 @@ class ImageControllerTest < FunctionalTestCase
     get(:bulk_filename_purge)
     imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1')
     assert(imgs.empty?)
+  end
+
+  def test_project_checkboxes
+    proj1 = projects(:eol_project)
+    proj2 = projects(:bolete_project)
+    obs1 = observations(:minimal_unknown)
+    obs2 = observations(:detailed_unknown)
+    img1 = images(:in_situ)
+    img2 = images(:commercial_inquiry_image)
+    assert_users_equal(@mary, obs1.user)
+    assert_users_equal(@mary, obs2.user)
+    assert_users_equal(@mary, img1.user)
+    assert_users_equal(@rolf, img2.user)
+    assert_obj_list_equal([],      obs1.projects)
+    assert_obj_list_equal([proj2], obs2.projects)
+    assert_obj_list_equal([proj2], img1.projects)
+    assert_obj_list_equal([],      img2.projects)
+    assert_obj_list_equal([@rolf, @mary, @katrina], proj1.user_group.users)
+    assert_obj_list_equal([@dick], proj2.user_group.users)
+
+    # NOTE: It is impossible, apparently, to get edit_image to fail,
+    # so there is no way to test init_project_vars_for_reload().
+
+    login('rolf')
+    get(:add_image, :id => obs1.id)
+    assert_response(:redirect)
+    get(:add_image, :id => obs2.id)
+    assert_response(:redirect)
+    get(:edit_image, :id => img1.id)
+    assert_response(:redirect)
+    get(:edit_image, :id => img2.id)
+    assert_project_checks(proj1.id => :unchecked, proj2.id => :no_field)
+
+    login('mary')
+    get(:add_image, :id => obs1.id)
+    assert_project_checks(proj1.id => :unchecked, proj2.id => :no_field)
+    get(:add_image, :id => obs2.id)
+    assert_project_checks(proj1.id => :unchecked, proj2.id => :checked)
+    get(:edit_image, :id => img1.id)
+    assert_project_checks(proj1.id => :unchecked, proj2.id => :checked)
+    get(:edit_image, :id => img2.id)
+    assert_response(:redirect)
+
+    login('dick')
+    get(:add_image, :id => obs2.id)
+    assert_project_checks(proj1.id => :no_field, proj2.id => :checked)
+    get(:edit_image, :id => img1.id)
+    assert_project_checks(proj1.id => :no_field, proj2.id => :checked)
+    get(:edit_image, :id => img2.id)
+    assert_response(:redirect)
+    proj1.add_image(img1)
+    get(:edit_image, :id => img1.id)
+    assert_project_checks(proj1.id => :checked_but_disabled, proj2.id => :checked)
+  end
+
+  def assert_project_checks(project_states)
+    for id, state in project_states
+      assert_checkbox_state("project_id_#{id}", state)
+    end
   end
 end

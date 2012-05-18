@@ -49,6 +49,10 @@ class Project < AbstractModel
   has_many :comments,  :as => :target, :dependent => :destroy
   has_many :interests, :as => :target, :dependent => :destroy
 
+  has_and_belongs_to_many :images
+  has_and_belongs_to_many :observations
+  has_and_belongs_to_many :species_lists
+
   before_destroy :orphan_drafts
 
   # Various debugging things require all models respond to +text_name+.  Just
@@ -96,21 +100,112 @@ class Project < AbstractModel
     return result
   end
 
+  # Add observation (and its images) to this project if not already done so.  Saves it.
+  def add_observation(obs)
+    unless observations.include?(obs)
+      imgs = obs.images.select {|img| img.user_id == obs.user_id}
+      observations.push(obs)
+      for img in imgs
+        images.push(img)
+      end
+      Transaction.put_project(
+        :id => self,
+        :add_observation => obs,
+        :add_images => imgs
+      )
+    end
+  end
+
+  # Remove observation (and its images) from this project. Saves it.
+  def remove_observation(obs)
+    if observations.include?(obs)
+      imgs = obs.images.select {|img| img.user_id == obs.user_id}
+      if imgs.any?
+        img_ids = imgs.map(&:id).map(&:to_s).join(',')
+        # Leave images which are attached to other observations still attached to this project.
+        leave_these_img_ids = Image.connection.select_values(%(
+          SELECT io.image_id FROM images_observations io, observations_projects op
+          WHERE io.image_id IN (#{img_ids})
+            AND io.observation_id != #{obs.id}
+            AND io.observation_id = op.observation_id
+            AND op.project_id = #{id}
+        )).map(&:to_i)
+        imgs.reject! {|img| leave_these_img_ids.include?(img.id)}
+      end
+      observations.delete(obs)
+      for img in imgs
+        images.delete(img)
+      end
+      update_attribute(:modified, Time.now)
+      Transaction.put_project(
+        :id => self,
+        :del_observation => obs,
+        :del_images => imgs
+      )
+    end
+  end
+
+  # Add image this project if not already done so.  Saves it.
+  def add_image(img)
+    unless images.include?(img)
+      images.push(img)
+      Transaction.put_project(
+        :id => self,
+        :add_image => img
+      )
+    end
+  end
+
+  # Remove image this project. Saves it.
+  def remove_image(img)
+    if images.include?(img)
+      images.delete(img)
+      update_attribute(:modified, Time.now)
+      Transaction.put_project(
+        :id => self,
+        :del_image => img
+      )
+    end
+  end
+
+  # Add species_list to this project if not already done so.  Saves it.
+  def add_species_list(spl)
+    unless species_lists.include?(spl)
+      species_lists.push(spl)
+      Transaction.put_project(
+        :id => self,
+        :add_species_list => spl
+      )
+    end
+  end
+
+  # Remove species_list from this project. Saves it.
+  def remove_species_list(spl)
+    if species_lists.include?(spl)
+      species_lists.delete(spl)
+      update_attribute(:modified, Time.now)
+      Transaction.put_project(
+        :id => self,
+        :del_species_list => spl
+      )
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Logging
   #
   ##############################################################################
 
-  def log_create; dolog(:log_project_created, true); end
-  def log_update; dolog(:log_project_updated, true); end
-  def log_destroy; dolog(:log_project_destroyed, true); end
-  def log_add_member(user); dolog(:log_project_added_member, true, user); end
-  def log_remove_member(user); dolog(:log_project_removed_member, false, user); end
-  def log_add_admin(user); dolog(:log_project_added_admin, false, user); end
-  def log_remove_admin(user); dolog(:log_project_removed_admin, false, user); end
+  def log_create; do_log(:log_project_created, true); end
+  def log_update; do_log(:log_project_updated, true); end
+  def log_destroy; do_log(:log_project_destroyed, true); end
+  def log_add_member(user); do_log(:log_project_added_member, true, user); end
+  def log_remove_member(user); do_log(:log_project_removed_member, false, user); end
+  def log_add_admin(user); do_log(:log_project_added_admin, false, user); end
+  def log_remove_admin(user); do_log(:log_project_removed_admin, false, user); end
 
-  def dolog(tag, touch, user=nil)
+  def do_log(tag, touch, user=nil)
     args = {}
     args[:name]  = user.login if user
     args[:touch] = touch

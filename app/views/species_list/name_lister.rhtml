@@ -51,7 +51,7 @@
             <%= submit_tag(:name_lister_submit_rtf.l) %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_csv.l) %>
           </center>
-          <%= hidden_field_tag('results', @names.join("\n")) %>
+          <%= hidden_field_tag('results', @name_strings.join("\n")) %>
           <% if false %>
             <br/>
             <label for='charset'><%= :name_lister_charset.t %>:</label>

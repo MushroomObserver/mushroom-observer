@@ -270,7 +270,7 @@ class Location < AbstractModel
 
   # Is this one of the names we recognize for the "unknown" location?
   def self.is_unknown?(name)
-    name = name.strip_squeeze.downcase
+    name = name.to_s.strip_squeeze.downcase
     for unknown_name in names_for_unknown
       return true if name == unknown_name.downcase
     end

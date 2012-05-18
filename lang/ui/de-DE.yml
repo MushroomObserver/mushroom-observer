@@ -1192,6 +1192,9 @@ form_images_select_license: Wähl eine "Lizenz":/observer/how_to_use#license
 form_images_license_help: >
   Siehe "Lizenz":/observer/how_to_use#license für dieses Bild
 
+form_images_project_help:  >
+  Check any projects you wish to attach this image to.
+
 
 
 # observer/_form_list_feedback
@@ -1374,7 +1377,7 @@ form_observations_lat_long_help:  >
   Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and
   longitude between -180.0 and 180.0.  Altitude will be converted to meters.
   If you choose to provide this data please make it as accurate as possible.
-  Examples: "34.1330", "34°6&apos;59&quot;N", "-118.1459", "118 8.754 W", "239 m", "784 ft."
+  Examples: "34.1330" = "34°6&apos;59&quot;N", "-118.1459" = "118 8.754 W", "239 m" = "784 ft."
 
 form_observations_log_change: Logbuch der Änderungen
 form_observations_is_collection_location_help: >
@@ -1413,6 +1416,13 @@ form_observations_where_help: >
 form_observations_dubious_help:  >
   Click '[button]' to use this location name or edit the text below to correct any typo.
 
+form_observations_project_help:  >
+  Check any projects you wish to attach this observation to.  All images
+  you upload will also automatically be attached to these projects, too.
+
+form_observations_list_help:  >
+  Check and species lists you would like to add this observation to.
+
 
 
 # observer/_form_species_list
@@ -1436,8 +1446,10 @@ form_species_lists_multiple_names_help: >
   Wähl jeweils den Namen, der gemeint war. Die Zahl hinter jedem Namen gibt
   an, wie viele Funde derzeit mit diesem Namen verknüpft sind.
 
-form_species_lists_bulk_help: >
-  Viele Namen auf einmal erzeugen ist jetzt auf der Seite "Viele Namen auf einmal":/name/bulk_name_edit.
+form_species_lists_project_help:  >
+  Check any projects you wish to attach this species list to.  Any observations
+  you create for this species list will also automatically be attached to these
+  projects, too.  (But not pre-existing observations.)
 
 
 

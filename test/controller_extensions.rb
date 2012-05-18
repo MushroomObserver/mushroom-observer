@@ -32,10 +32,11 @@
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
 #  assert_response::            Check that last request resulted in a given redirect / render.
+#  assert_checkbox_state::      Check state of checkbox.
 #
 ################################################################################
 
-module ControllerExtensions 
+module ControllerExtensions
 
   ##############################################################################
   #
@@ -640,6 +641,40 @@ module ControllerExtensions
           end
         end
       end
+    end
+  end
+
+  # Check the state of a checkbox.  Parameters: +id+ is element id,
+  # +state+ can be:
+  #
+  #   :no_field
+  #   :checked
+  #   :unchecked
+  #   :checked_but_disabled
+  #   :unchecked_but_disabled
+  #
+  def assert_checkbox_state(id, state)
+    case state
+    when :checked_but_disabled
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 1)
+      assert_select("input##{id}[disabled=disabled]", 1)
+    when :unchecked_but_disabled
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 0)
+      assert_select("input##{id}[disabled=disabled]", 1)
+    when :checked
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 1)
+      assert_select("input##{id}[disabled=disabled]", 0)
+    when :unchecked
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 0)
+      assert_select("input##{id}[disabled=disabled]", 0)
+    when :no_field
+      assert_select("input##{id}", 0)
+    else
+      raise "Invalid state in check_project_checks: #{state.inspect}"
     end
   end
 end

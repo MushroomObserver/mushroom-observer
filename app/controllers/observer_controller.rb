@@ -3,11 +3,7 @@
 #  = Main Controller
 #
 #  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
-#
+
 #  ==== RssLog's
 #  list_rss_logs::
 #  index_rss_log::
@@ -917,6 +913,8 @@ class ObserverController < ApplicationController
       save_naming(@naming)
       @observation.reload
       @observation.change_vote(@naming, @vote.value)
+      update_projects(@observation, params[:project])
+      update_species_lists(@observation, params[:list])
     end
     attach_good_images(@observation, @good_images)
   end
@@ -938,6 +936,8 @@ class ObserverController < ApplicationController
     @new_image.when  = @observation.when
     @location_primer = Location.primer
     @name_primer     = Name.primer
+    init_project_vars_for_reload(@observation)
+    init_list_vars_for_reload(@observation)
   end
 
   def create_observation_get
@@ -952,17 +952,31 @@ class ObserverController < ApplicationController
     @good_images     = []
     @location_primer = Location.primer
     @name_primer     = Name.primer
+    init_project_vars_for_create
+    init_list_vars_for_create
+    get_defaults_from_last_observation_created
+  end
 
+  def get_defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
     # edited if it was less than an hour ago.
-    last_observation = Observation.find_by_user_id(@user.id, :order => 'modified DESC')
-    if last_observation && last_observation.modified > Time.now - 1.hour
+    last_observation = Observation.find_by_user_id(@user.id, :order => 'created DESC')
+    if last_observation && last_observation.created > 1.hour.ago
       @observation.when     = last_observation.when
       @observation.where    = last_observation.where
       @observation.location = last_observation.location
       @observation.lat      = last_observation.lat
       @observation.long     = last_observation.long
       @observation.alt      = last_observation.alt
+      for project in last_observation.projects
+        @project_checks[project.id] = true
+      end
+      for list in last_observation.species_lists
+        if check_permission(list)
+          @lists << list unless @lists.include?(list)
+          @list_checks[list.id] = true
+        end
+      end
     end
   end
 
@@ -999,6 +1013,8 @@ class ObserverController < ApplicationController
     elsif request.method != :post
       @images      = []
       @good_images = @observation.images
+      init_project_vars_for_edit(@observation)
+      init_list_vars_for_edit(@observation)
 
     else
       # Update observation attributes
@@ -1027,10 +1043,14 @@ class ObserverController < ApplicationController
             touch = (params[:log_change][:checked] == '1' rescue false)
             @observation.log(:log_observation_updated, :touch => touch)
           end
-        else
+       else
           done = true
         end
       end
+
+      # Update project and species_list attachments.
+      update_projects(@observation, params[:project])
+      update_species_lists(@observation, params[:list])
 
       # Redirect to show_observation or create_location on success.
       if done && @bad_images.empty?
@@ -1044,8 +1064,10 @@ class ObserverController < ApplicationController
 
       # Reload form if anything failed.
       if not done
-        @images = @bad_images
+        @images         = @bad_images
         @new_image.when = @observation.when
+        init_project_vars_for_reload(@observation)
+        init_list_vars_for_reload(@observation)
       end
     end
   end
@@ -2041,6 +2063,92 @@ class ObserverController < ApplicationController
       success = false
     end
     return success
+  end
+
+  def init_project_vars
+    @projects = User.current.projects_member.sort_by(&:title)
+    @project_checks = {}
+  end
+
+  def init_project_vars_for_create
+    init_project_vars
+  end
+
+  def init_project_vars_for_edit(obs)
+    init_project_vars
+    for proj in obs.projects
+      @projects << proj unless @projects.include?(proj)
+      @project_checks[proj.id] = true
+    end
+  end
+
+  def init_project_vars_for_reload(obs)
+    init_project_vars
+    for proj in obs.projects
+      @projects << proj unless @projects.include?(proj)
+    end
+    for proj in @projects
+      @project_checks[proj.id] = !params[:project]["id_#{proj.id}"].blank? rescue false
+    end
+  end
+
+  def init_list_vars
+    @lists = User.current.all_editable_species_lists.sort_by(&:modified).reverse[0..9]
+    @list_checks = {}
+  end
+
+  def init_list_vars_for_create
+    init_list_vars
+  end
+
+  def init_list_vars_for_edit(obs)
+    init_list_vars
+    for list in obs.species_lists
+      @lists << list unless @lists.include?(list)
+      @list_checks[list.id] = true
+    end
+  end
+
+  def init_list_vars_for_reload(obs)
+    init_list_vars
+    for list in obs.species_lists
+      @lists << list unless @lists.include?(list)
+    end
+    for list in @lists
+      @list_checks[list.id] = !params[:list]["id_#{list.id}"].blank? rescue false
+    end
+  end
+
+  def update_projects(obs, checks)
+    if checks
+      for project in User.current.projects_member
+        before = obs.projects.include?(project)
+        after = !checks["id_#{project.id}"].blank?
+        if before != after
+          if after
+            project.add_observation(obs)
+          else
+            project.remove_observation(obs)
+          end
+        end
+      end
+    end
+  end
+
+  def update_species_lists(obs, checks)
+    if checks
+      for list in User.current.all_editable_species_lists
+        before = obs.species_lists.include?(list)
+        after = !checks["id_#{list.id}"].blank?
+        if before != after
+          if after
+            list.add_observation(obs)
+          else
+            list.remove_observation(obs)
+          end
+        end
+      end
+    end
   end
 
   # Save observation now that everything is created successfully.

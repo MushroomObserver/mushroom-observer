@@ -26,29 +26,51 @@
 <table cellpadding="10" width="100%">
   <tr>
     <td valign="top" width="50%">
-      <p><%= "#{:show_project_created.t}: #{@project.created.web_time}"%></p>
-      <p><%= "#{:show_project_published.t}: #{@name_count}"%></p>
+      <p><%= "#{:show_project_created.t}: #{@project.created.web_date}"%></p>
+      <% if false %><p><%= "#{:show_project_published.t}: #{@name_count}"%></p><% end %>
       <p><%= "#{:show_project_by.t}: #{user_link(@project.user)}" %></p>
       <p><%= "#{:show_project_user_group.t}: #{@project.user_group.name.t}" %></p>
       <p><%= "#{:show_project_admin_group.t}: #{@project.admin_group.name.t}" %></p>
       <%= sanitize(:show_project_summary.l + ': ' + @project.summary.to_s).tpl %>
-
       <% if @user and @project.user_group.users.member?(@user) %>
         <%= render(:partial => 'show_groups', :locals => { :project => @project,
                    :user => @user }) %>
       <% end %>
     </td>
-    <% if @draft_data %>
-      <td valign="top" width="50%">
-        <%= :show_project_drafts.t %>:<br/>
-        <% for datum in @draft_data %>
-          <%= indent + link_to(datum['display_name'].t, :controller => 'name',
-                               :action => 'show_name_description',
-                               :id => datum['id'], :params => query_params) %>
-          (<%= user_link(User.find(datum['user_id'])) %>)<br/>
-        <% end %>
-      </td>
-    <% end %>
+
+    <td valign="top" width="50%">
+      <%= :OBSERVATIONS.t %>: <% if @project.observations.any? %>
+        <%= @project.observations.length %>
+        (<%= link_to(:SHOW.t, :controller => :observer, :action => :observations_for_project,
+                     :id => @project.id) %>)
+      <% else %>
+        <%= :NONE.t %>
+      <% end %><br/>
+
+      <%= :IMAGES.t %>: <% if @project.images.any? %>
+        <%= @project.images.length %>
+        (<%= link_to(:SHOW.t, :controller => :image, :action => :images_for_project,
+                     :id => @project.id) %>)
+      <% else %>
+        <%= :NONE.t %>
+      <% end %><br/>
+
+      <%= :SPECIES_LISTS.t %>: <% if @project.species_lists.any? %>
+        <%= @project.species_lists.length %>
+        (<%= link_to(:SHOW.t, :controller => :species_list,
+                     :action => :species_lists_for_project, :id => @project.id) %>)
+      <% else %>
+        <%= :NONE.t %>
+      <% end %><br/>
+
+      <%= :show_project_drafts.t %>: <%= @draft_data.any? ? @draft_data.length : :NONE.t %><br/>
+      <% for datum in @draft_data %>
+        <%= indent + link_to(datum['display_name'].t, :controller => 'name',
+                             :action => 'show_name_description',
+                             :id => datum['id'], :params => query_params) %>
+        (<%= user_link(User.find(datum['user_id'])) %>)<br/>
+      <% end %>
+    </td>
   </tr>
 </table>
 

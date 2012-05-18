@@ -810,25 +810,20 @@ protected
     end
 
     # I guess this is kind of serious -- uploading with no one logged in??!
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_image_user_missing.t)
     end
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.
     self.when ||= Time.now
-    # if !self.when
-    #   errors.add(:when, :validate_image_when_missing.t)
-    # end
 
-    # Who cares?
-    # id self.content_type.to_s.binary_length > 100
-    #   errors.add(:content_type, :validate_image_content_type_too_long.t)
-    # end
+    if content_type.to_s.binary_length > 100
+      self.content_type = content_type.to_s.truncate_binary_length(100)
+    end
 
-    # Who cares?
-    # if self.copyright_holder.to_s.binary_length > 100
-    #   errors.add(:copyright_holder, :validate_image_copyright_holder_too_long.t)
-    # end
+    if copyright_holder.to_s.binary_length > 100
+      self.copyright_holder = copyright_holder.to_s.truncate_binary_length(100)
+    end
   end
 end

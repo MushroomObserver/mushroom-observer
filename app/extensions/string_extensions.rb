@@ -25,6 +25,8 @@
 #  rand_char::      Pick a single random character from the string.
 #  dealphabetize::  Reverse Fixnum#alphabetize.
 #  binary_length::  Return length in bytes instead of characters.
+#  truncate_binary_length::  Truncate so that *binary* length in within given limit
+#  truncate_binary_length!:: Truncate so that *binary* length in within given limit
 #
 ################################################################################
 
@@ -559,6 +561,7 @@ class String
     self.replace(truncate_binary_length(len))
   end
   
+  # Truncate a string so that its *binary* length is within a given limit.
   def truncate_binary_length(len)
     result = self
     if result.binary_length > len

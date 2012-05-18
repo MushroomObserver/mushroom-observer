@@ -1037,7 +1037,8 @@ protected
     self.where = nil if self.where == ''
 
     if !self.when
-      errors.add(:when, :validate_observation_when_missing.t)
+      self.when ||= Time.now
+      # errors.add(:when, :validate_observation_when_missing.t)
     elsif self.when.is_a?(Date) && self.when > Date.today + 1.day
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Date.today=#{Date.today}")
       errors.add(:when, :validate_observation_future_time.t)
@@ -1045,25 +1046,26 @@ protected
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Time.now=#{Time.now+6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
     end
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_observation_user_missing.t)
     end
 
     if self.where.to_s.blank? && !location_id
-      errors.add(:where, :validate_observation_where_missing.t)
+      self.location = Location.unknown
+      # errors.add(:where, :validate_observation_where_missing.t)
     elsif self.where.to_s.binary_length > 1024
       errors.add(:where, :validate_observation_where_too_long.t)
     end
 
-    if self.lat.blank? and !self.long.blank? or
-       !self.lat.blank? and !Location.parse_latitude(self.lat)
+    if lat.blank? and !long.blank? or
+       !lat.blank? and !Location.parse_latitude(lat)
       errors.add(:lat, :runtime_lat_long_error.t)
     end
-    if !self.lat.blank? and self.long.blank? or
-       !self.long.blank? and !Location.parse_longitude(self.long)
+    if !lat.blank? and long.blank? or
+       !long.blank? and !Location.parse_longitude(long)
       errors.add(:long, :runtime_lat_long_error.t)
     end
-    if !self.alt.blank? and !Location.parse_altitude(self.alt)
+    if !alt.blank? and !Location.parse_altitude(alt)
       errors.add(:alt, :runtime_altitude_error.t)
     end
 

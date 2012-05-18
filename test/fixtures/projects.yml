@@ -1,5 +1,7 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
+# admins: rolf (1), mary (2)
+# members: rolf (1), mary (2), katrina (5)
 eol_project:
   id: 1
   sync_id: 1xx1
@@ -11,6 +13,11 @@ eol_project:
   created: 2008-09-24 21:33:30
   modified: 2008-09-24 21:33:30
 
+# admins: dick (4)
+# members: dick (4)
+# observations: 2 (detailed_unknown - owned by mary)
+# images: 1 and 2 (detailed_unknown's images - owned by mary)
+# species_lists: 3 (unknown_species_list - owned by mary)
 bolete_project:
   id: 2
   sync_id: 2xx1

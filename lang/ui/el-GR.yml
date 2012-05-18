@@ -1172,6 +1172,9 @@ form_images_select_license: Επιλέξτε μία "Άδεια":/observer/how_t
 form_images_license_help: >
   Select "license":/observer/how_to_use#license you want to give for this image.
 
+form_images_project_help:  >
+  Check any projects you wish to attach this image to.
+
 
 
 # observer/_form_list_feedback
@@ -1355,6 +1358,13 @@ form_observations_where_help: >
 form_observations_dubious_help: >
   Κάντε κλικ στο '[button]' για να χρησιμοποιήσετε αυτή την τοποθεσία ή για να επεξεργαστείτε το κείμενο παρακάτω προκειμένου να διορθώσετε τυχόν ορθογραφικά λάθη.
 
+form_observations_project_help:  >
+  Check any projects you wish to attach this observation to.  All images
+  you upload will also automatically be attached to these projects, too.
+
+form_observations_list_help:  >
+  Check and species lists you would like to add this observation to.
+
 
 
 # observer/_form_species_list
@@ -1374,8 +1384,10 @@ form_species_lists_multiple_names: >
 form_species_lists_multiple_names_help: >
   Στην περίπτωση αυτή, επιλέξτε το όνομα που θέλετε. Ο αριθμός μετά από κάθε όνομα δηλώνει πόσες παρατηρήσεις χρησιμοποιούν αυτή τη στιγμή αυτό το όνομα.
 
-form_species_lists_bulk_help: >
-  Η ομαδική δημιουργία ονομάτων έχει μεταφερθεί στη σελίδα "[:name_bulk_title]":/name/bulk_name_edit
+form_species_lists_project_help:  >
+  Check any projects you wish to attach this species list to.  Any observations
+  you create for this species list will also automatically be attached to these
+  projects, too.  (But not pre-existing observations.)
 
 
 
