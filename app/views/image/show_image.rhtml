@@ -194,7 +194,7 @@
     </table>
   <% end %>
 
-  <% chgs = @image.copyright_changes(:order => 'id ASC')
+  <% chgs = @image.copyright_changes.sort_by(&:id)
      unless chgs.empty? %>
     <table style="margin-top:1em; margin-bottom:1em">
       <tr>

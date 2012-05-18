@@ -185,8 +185,14 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image # :nologin: :prefetch:
     store_location
-    if @image = find_or_goto_index(Image, params[:id],
-                        :include => [:user, {:observations => :name}])
+    if @image = find_or_goto_index(Image, params[:id], :include => [
+                                     :copyright_changes,
+                                     :image_votes,
+                                     :license,
+                                     {:observations => [:comments, :name]},
+                                     :projects,
+                                     :user,
+                                   ])
       @is_reviewer = is_reviewer
       pass_query_params
 

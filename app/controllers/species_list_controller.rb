@@ -155,8 +155,12 @@ class SpeciesListController < ApplicationController
     store_location
     clear_query_in_session
     pass_query_params
-    if @species_list = find_or_goto_index(SpeciesList, params[:id],
-                                          :include => :user)
+    if @species_list = find_or_goto_index(SpeciesList, params[:id], :include => [
+                                            {:comments => :user},
+                                            :location,
+                                            :projects,
+                                            :user,
+                                          ])
       @query = create_query(:Observation, :in_species_list, :by => :name,
                             :species_list => @species_list)
       store_query_in_session(@query) if !params[:set_source].blank?

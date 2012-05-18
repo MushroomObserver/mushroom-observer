@@ -52,7 +52,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_response('show_species_list')
 
     # Show non-empty list with owner logged in.
-    get_with_dump(:show_species_list, :id => 3)
+    get_with_dump(:show_species_list, :id => projects(:bolete_project).id)
     assert_response('show_species_list')
   end
 

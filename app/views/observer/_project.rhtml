@@ -1,8 +1,8 @@
 <%
   tag, args, time = rss_log.parse_log.first
   if !time || time < project.created + 10.seconds
-    title = :rss_created.t(:type => :location)
-    detail = :rss_by.t(:user => project.user.legal_name)
+    title = :rss_created.t(:type => :project)
+    detail = :rss_by.t(:user => user_link(project.user))
   else
     title = :rss_changed.t(:type => :project)
     detail = tag.t(args)

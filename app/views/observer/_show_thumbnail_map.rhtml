@@ -1,0 +1,17 @@
+<%=
+  gmap = nil
+  if observation.lat and observation.long
+    gmap = make_thumbnail_map(observation)
+  elsif observation.location
+    gmap = make_thumbnail_map(observation.location)
+  end
+  if gmap
+    finish_map(gmap)
+    width, height = 180, 120
+    if @user and @user.thumbnail_size == :small
+      width, height = 320, 200
+    end
+    content_tag(:center, gmap.div(:width => width, :height => height),
+                { :style => 'border:1px solid black; margin-bottom:1em' })
+  end
+%>

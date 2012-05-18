@@ -14,7 +14,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_images_for_project
-    get_with_dump(:images_for_project, :id => 3)
+    get_with_dump(:images_for_project, :id => projects(:bolete_project).id)
     assert_response('list_images')
   end
 

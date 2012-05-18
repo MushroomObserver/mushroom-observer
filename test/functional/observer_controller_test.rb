@@ -88,7 +88,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:list_observations, :id => 4)
     assert_response('list_observations')
 
-    get(:observations_for_project, :id => 3)
+    get(:observations_for_project, :id => projects(:bolete_project).id)
     assert_response('list_observations')
 
     get_with_dump(:list_rss_logs)

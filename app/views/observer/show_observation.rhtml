@@ -45,31 +45,13 @@
       <%= render(:partial => 'show_observation', :locals => { :observation => @observation }) %>
       <%= render(:partial => 'show_lists', :locals => { :observation => @observation }) %>
       <%= render(:partial => 'show_namings', :locals => { :observation => @observation }) %>
-      <%= render(:partial => 'comment/show_comments', :locals => {
-            :object => @observation,
-            :controls => true,
-            :limit => nil
-          }) %><br/>
+      <%= render(:partial => 'comment/show_comments', :locals => { :object => @observation,
+                 :controls => true, :limit => nil }) %><br/>
       <%= show_object_footer(@observation) %>
     </td>
     <td width="25%" valign="top">
-      <%= gmap = nil
-      if @observation.lat and @observation.long
-        gmap = make_thumbnail_map(@observation)
-      elsif @observation.location
-        gmap = make_thumbnail_map(@observation.location)
-      end
-      if gmap
-        finish_map(gmap)
-        width, height = 180, 120
-        if @user and @user.thumbnail_size == :small
-          width, height = 320, 200
-        end
-        content_tag(:center, gmap.div(:width => width, :height => height),
-                    { :style => 'border:1px solid black; margin-bottom:1em' })
-      end %>
-      <%= render(:partial => 'show_images', :locals =>
-                 { :thumb_size_control => true }) %>
+      <%= render(:partial => 'show_thumbnail_map', :locals => { :observation => @observation }) unless is_robot? %>
+      <%= render(:partial => 'show_images', :locals => { :thumb_size_control => true }) %>
     </td>
   </tr>
 </table>

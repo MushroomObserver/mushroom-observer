@@ -757,10 +757,11 @@ class ObserverController < ApplicationController
 
     if @observation = find_or_goto_index(Observation, params[:id], :include => [
                         {:comments => :user},
-                        :images,
+                        {:images => :image_votes},
                         :location,
                         :name,
                         {:namings => [:name, :user, {:votes => :user}]},
+                        :projects,
                         {:species_lists => :location},
                         :user,
                      ])
@@ -1921,6 +1922,7 @@ class ObserverController < ApplicationController
         :location     => :user,
         :name         => :user,
         :observation  => [:location, :name, {:thumb_image => :image_votes}, :user],
+        :project      => :user,
         :species_list => [:location, :user],
       },
     }.merge(args)

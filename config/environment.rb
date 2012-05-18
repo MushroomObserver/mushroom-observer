@@ -271,6 +271,34 @@ module ActiveRecord
   end
 end
 
+# This fixes a long-known bug in eager-loading mechanism in Active Record.
+module ActiveRecord
+  module AssociationPreload
+    module ClassMethods
+      def preload_associations(records, associations, preload_options={})
+        records = [records].flatten.compact.uniq
+        return if records.empty?
+        case associations
+        when Array then associations.each {|association| preload_associations(records, association, preload_options)}
+        when Symbol, String then preload_one_association(records, associations.to_sym, preload_options)
+        when Hash then
+          associations.each do |parent, child|
+            raise "parent must be an association name" unless parent.is_a?(String) || parent.is_a?(Symbol)
+            preload_one_association(records, parent.to_sym, preload_options)
+            ########## WAS: preload_associations(records, parent, preload_options) ##########
+            reflection = reflections[parent]
+            parents = records.map {|record| record.send(reflection.name)}.flatten.reject(&:nil?)
+            ########## WAS: parents = records.map {|record| record.send(reflection.name)}.flatten ##########
+            unless parents.empty? || parents.first.nil?
+              parents.first.class.preload_associations(parents, child)
+            end
+          end
+        end
+      end
+    end
+  end
+end
+
 ################################################################################
 # Stuff to get rails 2.1.1 working with ruby 1.9. -Jason, Feb 2011
 
