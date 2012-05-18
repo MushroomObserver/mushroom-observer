@@ -469,6 +469,8 @@ show_objects: Mostrar [TYPES]
 sort_by_object: Ordenar por [TYPE]
 
 # Other generic phrases.
+added_to_list:  Added to species list "[list]".
+attached_to_project:  Attached to project "[project]".
 and_num_more: Y [num] más...
 are_you_sure: ¿Estás seguro?
 click_for_map: Hacer clic para mapa
@@ -479,6 +481,13 @@ permission_denied: Permiso denegado.
 "YES": "Sí"
 "NO": "No"
 "yes": "sí"
+"no": "no"
+
+removed_from_list:  Removed from species list "[list]".
+removed_from_project:  Removed from project "[project]".
+"YES": "Yes"
+"NO": "No"
+"yes": "yes"
 "no": "no"
 
 ################################################################################

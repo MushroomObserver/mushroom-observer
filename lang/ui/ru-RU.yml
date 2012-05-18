@@ -469,6 +469,8 @@ show_objects: Показать [TYPES]
 sort_by_object: "Сортировка: [TYPE]"
 
 # Other generic phrases.
+added_to_list:  Added to species list "[list]".
+attached_to_project:  Attached to project "[project]".
 and_num_more: Ещё [num] ...
 are_you_sure: Вы уверены?
 click_for_map: Нажмите для просмотра карты
@@ -480,6 +482,13 @@ permission_denied: У Вас нет прав на это действие.
 "NO": "Нет"
 "yes": "да"
 "no": "нет"
+
+removed_from_list:  Removed from species list "[list]".
+removed_from_project:  Removed from project "[project]".
+"YES": "Yes"
+"NO": "No"
+"yes": "yes"
+"no": "no"
 
 ################################################################################
 

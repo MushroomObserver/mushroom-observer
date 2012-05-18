@@ -467,6 +467,8 @@ show_objects: Show [TYPES]
 sort_by_object: Sort by [TYPE]
 
 # Other generic phrases.
+added_to_list: Added to species list "[list]".
+attached_to_project: Attached to project "[project]".
 and_num_more: And [num] more...
 are_you_sure: Are you sure?
 click_for_map: Click for map
@@ -474,6 +476,8 @@ google_images: Google Images
 many_times: "[num] times"
 one_time: once
 permission_denied: Permission denied.
+removed_from_list: Removed from species list "[list]".
+removed_from_project: Removed from project "[project]".
 "YES": "Yes"
 "NO": "No"
 "yes": "yes"

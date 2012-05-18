@@ -416,7 +416,7 @@ class ImageController < ApplicationController
       @projects << proj unless @projects.include?(proj)
     end
     for proj in @projects
-      @project_checks[proj.id] = !params[:project]["id_#{proj.id}"].blank? rescue false
+      @project_checks[proj.id] = params[:project]["id_#{proj.id}"] == '1' rescue false
     end
   end
 
@@ -444,12 +444,14 @@ class ImageController < ApplicationController
 
       for project in projects
         before = img.projects.include?(project)
-        after = !checks["id_#{project.id}"].blank?
+        after = checks["id_#{project.id}"] == '1'
         if before != after
           if after
             project.add_image(img)
+            flash_notice(:attached_to_project.t(:project => project.title))
           else
             project.remove_image(img)
+            flash_notice(:removed_from_project.t(:project => project.title))
           end
           any_changes = true
         end

@@ -2280,7 +2280,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure it remember state of checks if submit fails.
     post(:create_observation,
       :name => {:name => 'Screwy Name'},    # (ensures it will fail)
-      :project => {"id_#{@proj1.id}" => ''}
+      :project => {"id_#{@proj1.id}" => '0'}
     )
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
@@ -2295,11 +2295,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(:edit_observation, :id => @obs2.id,
       :observation => { :place_name => 'blah blah blah' },  # (ensures it will fail)
-      :project => { "id_#{@proj1.id}" => 'checked' }
+      :project => { "id_#{@proj1.id}" => '1' }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
     post(:edit_observation, :id => @obs2.id,
-      :project => { "id_#{@proj1.id}" => 'checked' }
+      :project => { "id_#{@proj1.id}" => '1' }
     )
     assert_response(:redirect)
     assert_obj_list_equal([@proj1], @obs2.reload.projects)
@@ -2313,15 +2313,15 @@ class ObserverControllerTest < FunctionalTestCase
     post(:edit_observation, :id => @obs1.id,
       :observation => { :place_name => 'blah blah blah' },  # (ensures it will fail)
       :project => {
-        "id_#{@proj1.id}" => 'checked',
-        "id_#{@proj2.id}" => '',
+        "id_#{@proj1.id}" => '1',
+        "id_#{@proj2.id}" => '0',
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
     post(:edit_observation, :id => @obs1.id,
       :project => {
-        "id_#{@proj1.id}" => 'checked',
-        "id_#{@proj2.id}" => 'checked',
+        "id_#{@proj1.id}" => '1',
+        "id_#{@proj2.id}" => '1',
       }
     )
     assert_response(:redirect)
@@ -2390,7 +2390,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure it remember state of checks if submit fails.
     post(:create_observation,
       :name => {:name => 'Screwy Name'},    # (ensures it will fail)
-      :list => {"id_#{@spl2.id}" => ''}
+      :list => {"id_#{@spl2.id}" => '0'}
     )
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
   end
@@ -2403,11 +2403,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :unchecked, @spl2.id => :no_field)
     post(:edit_observation, :id => @obs1.id,
       :observation => { :place_name => 'blah blah blah' },  # (ensures it will fail)
-      :list => { "id_#{@spl1.id}" => 'checked' }
+      :list => { "id_#{@spl1.id}" => '1' }
     )
     assert_list_checks(@spl1.id => :checked, @spl2.id => :no_field)
     post(:edit_observation, :id => @obs1.id,
-      :list => { "id_#{@spl1.id}" => 'checked' }
+      :list => { "id_#{@spl1.id}" => '1' }
     )
     assert_response(:redirect)
     assert_obj_list_equal([@spl1], @obs1.reload.species_lists)

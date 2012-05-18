@@ -1308,7 +1308,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login('rolf')
     get(:create_species_list)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
-    post(:create_species_list, :project => { "id_#{@proj1.id}" => 'checked' })
+    post(:create_species_list, :project => { "id_#{@proj1.id}" => '1' })
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # (should have different default if recently create list attached to project)
@@ -1316,7 +1316,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     @proj1.add_observation(obs)
     get(:create_species_list)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:create_species_list, :project => { "id_#{@proj1.id}" => '' })
+    post(:create_species_list, :project => { "id_#{@proj1.id}" => '0' })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end
 
@@ -1338,8 +1338,8 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:edit_species_list, :id => @spl2.id,
       :species_list => { :title => '' },  # (this causes it to fail)
       :project => {
-        "id_#{@proj1.id}" => 'checked',
-        "id_#{@proj2.id}" => '',
+        "id_#{@proj1.id}" => '1',
+        "id_#{@proj2.id}" => '0',
       }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)

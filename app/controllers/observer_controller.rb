@@ -913,10 +913,10 @@ class ObserverController < ApplicationController
       save_naming(@naming)
       @observation.reload
       @observation.change_vote(@naming, @vote.value)
-      update_projects(@observation, params[:project])
-      update_species_lists(@observation, params[:list])
     end
     attach_good_images(@observation, @good_images)
+    update_projects(@observation, params[:project])
+    update_species_lists(@observation, params[:list])
   end
 
   def redirect_to_next_page
@@ -2088,7 +2088,7 @@ class ObserverController < ApplicationController
       @projects << proj unless @projects.include?(proj)
     end
     for proj in @projects
-      @project_checks[proj.id] = !params[:project]["id_#{proj.id}"].blank? rescue false
+      @project_checks[proj.id] = params[:project]["id_#{proj.id}"] == '1' rescue false
     end
   end
 
@@ -2115,7 +2115,7 @@ class ObserverController < ApplicationController
       @lists << list unless @lists.include?(list)
     end
     for list in @lists
-      @list_checks[list.id] = !params[:list]["id_#{list.id}"].blank? rescue false
+      @list_checks[list.id] = params[:list]["id_#{list.id}"] == '1' rescue false
     end
   end
 
@@ -2123,12 +2123,14 @@ class ObserverController < ApplicationController
     if checks
       for project in User.current.projects_member
         before = obs.projects.include?(project)
-        after = !checks["id_#{project.id}"].blank?
+        after = checks["id_#{project.id}"] == '1'
         if before != after
           if after
             project.add_observation(obs)
+            flash_notice(:attached_to_project.t(:project => project.title))
           else
             project.remove_observation(obs)
+            flash_notice(:removed_from_project.t(:project => project.title))
           end
         end
       end
@@ -2139,12 +2141,14 @@ class ObserverController < ApplicationController
     if checks
       for list in User.current.all_editable_species_lists
         before = obs.species_lists.include?(list)
-        after = !checks["id_#{list.id}"].blank?
+        after = checks["id_#{list.id}"] == '1'
         if before != after
           if after
             list.add_observation(obs)
+            flash_notice(:added_to_list.t(:list => list.title))
           else
             list.remove_observation(obs)
+            flash_notice(:removed_from_list.t(:list => list.title))
           end
         end
       end

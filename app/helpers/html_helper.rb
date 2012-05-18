@@ -204,7 +204,7 @@ module ApplicationHelper::HTML
     type = "Warnings" if lvl == 1
     type = "Errors"   if lvl == 2
     msg = capture(&block) if block_given?
-    msg = "<div style='width:500px'>
+    msg = "<div style='min-width:400px; max-width:800px'>
       <table class='#{type}'><tr><td>
         #{msg}
       </td></tr></table>

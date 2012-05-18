@@ -449,14 +449,15 @@ class ImageControllerTest < FunctionalTestCase
         # This is a good test, because Rolf doesn't belong to the Bolete project,
         # but we still want this image to attach to that project by default,
         # because the *observation* is attached to that project.
-        "id_#{proj.id}" => 'checked'
+        "id_#{proj.id}" => '1'
       }
     }
     post_requires_user(:add_image, [:observer, :show_observation], params)
     assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(20, @rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
-    assert_flash(:runtime_image_uploaded_image.t(:name => "##{obs.images.last.id}"))
+    message = :runtime_image_uploaded_image.t(:name => '#' + obs.images.last.id.to_s)
+    assert_flash(/#{message}/)
     img = Image.last
     assert_obj_list_equal([obs], img.observations)
     assert_obj_list_equal([proj], img.projects)
