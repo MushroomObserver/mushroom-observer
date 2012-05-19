@@ -768,6 +768,8 @@ class ImageController < ApplicationController
     target_height = params[:target_height].blank? ? 600 : params[:target_height]
     minimum_width = params[:minimum_width].blank? ? target_width : params[:minimum_width]
     minimum_height = params[:minimum_height].blank? ? target_height : params[:minimum_height]
+    confidence_reward = params[:confidence_reward].blank? ? 2.0 : params[:confidence_reward]
+    quality_reward = params[:quality_reward].blank? ? 1.0 : params[:quality_reward]
     ratio_penalty = params[:ratio_penalty].blank? ? 0.5 : params[:ratio_penalty]
 
     # Last term in ORDER BY spec below penalizes images of the wrong aspect ratio.
@@ -792,8 +794,10 @@ class ImageController < ApplicationController
           AND o.vote_cache >= #{minimum_confidence}
           AND i.vote_cache >= #{minimum_quality}
           AND i.width >= #{minimum_width} AND i.height >= #{minimum_height}
-        ORDER BY o.vote_cache * 2 + i.vote_cache
-          - ABS(LOG(width/height) - #{Math.log10(target_width.to_f/target_height)}) * #{ratio_penalty} DESC
+        ORDER BY
+          o.vote_cache * #{confidence_reward} +
+          i.vote_cache * #{quality_reward} -
+          ABS(LOG(width/height) - #{Math.log10(target_width.to_f/target_height)}) * #{ratio_penalty} DESC
       ) AS y
       GROUP BY y.name
     ))
