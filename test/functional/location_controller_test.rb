@@ -142,7 +142,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(10 + @new_pts, @rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
-    loc = Location.search_by_name(display_name)
+    loc = Location.find_by_name_or_reverse_name(display_name)
     assert_nil(loc.description)
   end
 
@@ -152,7 +152,7 @@ class LocationControllerTest < FunctionalTestCase
     params[:location][:display_name] = "Somewhere Dubious"
     construct_location_error(params)
   end
-  
+
   def test_construct_location_errors
     # Test for north > 90
     params = barton_flats_params
@@ -203,7 +203,9 @@ class LocationControllerTest < FunctionalTestCase
     loc = locations(:albion)
     params = { :id => loc.id.to_s }
     requires_login(:edit_location, params)
-    assert_form_action(:action => 'edit_location', :id => loc.id.to_s, :approved_where => '')
+    assert_form_action(:action => 'edit_location', :id => loc.id.to_s,
+                       :approved_where => loc.display_name)
+    assert_input_value(:location_display_name, loc.display_name)
   end
 
   def test_update_location

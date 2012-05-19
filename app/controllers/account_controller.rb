@@ -372,7 +372,7 @@ class AccountController < ApplicationController
       # Make sure the given location exists before accepting it.
       @place_name = params['user']['place_name'].to_s
       if !@place_name.blank?
-        location = Location.search_by_name(@place_name)
+        location = Location.find_by_name_or_reverse_name(@place_name)
         if !location
           need_to_create_location = true
         elsif @user.location != location

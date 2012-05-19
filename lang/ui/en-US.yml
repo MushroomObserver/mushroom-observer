@@ -4055,10 +4055,10 @@ email_features_intro: >
   The following new features have been released at the [:app_title] website:
 
 email_location_merge: >
-  User tried to merge to locations, both with observations:
-  user: [user]
-  source: [this]
-  destination: [that]
+  User tried to merge to locations, both with observation.:\n\n
+  user: [user]\n
+  source: [this]\n
+  destination: [that]\n
 
 email_name_merge: >
   User [user] wants to merge the name [this] into [that].

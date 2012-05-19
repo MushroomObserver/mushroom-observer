@@ -503,7 +503,7 @@ class LocationController < ApplicationController
       # that location and ignore the other values.  Probably should be smarter
       # with warnings and merges and such...
       db_name = Location.user_name(@user, @display_name)
-      @location = Location.search_by_name(db_name)
+      @location = Location.find_by_name_or_reverse_name(db_name)
 
       # Location already exists.
       if @location
@@ -581,13 +581,14 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     @location = Location.find(params[:id])
-    @display_name = params[:location][:display_name].strip_squeeze rescue ''
+    @display_name = @location.name
     done = false
     if request.method == :post
+      @display_name = params[:location][:display_name].strip_squeeze rescue ''
 
       # First check if user changed the name to one that already exists.
       db_name = Location.user_name(@user, @display_name)
-      merge = Location.search_by_name(db_name)
+      merge = Location.find_by_name_or_reverse_name(db_name)
 
       # Merge with another location.
       if merge && merge != @location

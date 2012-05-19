@@ -32,6 +32,7 @@
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
 #  assert_response::            Check that last request resulted in a given redirect / render.
+#  assert_input_value::         Check default value of a form field.
 #  assert_checkbox_state::      Check state of checkbox.
 #
 ################################################################################
@@ -642,6 +643,11 @@ module ControllerExtensions
         end
       end
     end
+  end
+
+  # Check default value of a form field.
+  def assert_input_value(id, val)
+    assert_select("input##{id}[value='#{val.gsub(/'/,'\\\'')}']")
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,
