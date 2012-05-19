@@ -172,6 +172,10 @@ class NameControllerTest < FunctionalTestCase
     assert_response('list_names')
   end
 
+  def test_mushroom_app_report
+    get(:names_for_mushroom_app)
+  end
+
   def test_show_name
     assert_equal(0, Query.count)
     get_with_dump(:show_name, :id => 2)

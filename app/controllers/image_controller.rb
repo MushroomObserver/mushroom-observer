@@ -450,7 +450,7 @@ class ImageController < ApplicationController
       # up on the edit_image form, preventing a user from attaching images to projects
       # he doesn't belong to... except in the very strict case of uploading images for
       # an observation which belongs to a project he doesn't belong to.
-      projects = @user.projects_member 
+      projects = @user.projects_member
       for obs in img.observations
         for project in obs.projects
           projects << project unless projects.include?(project)
@@ -753,5 +753,127 @@ class ImageController < ApplicationController
     ))
     flash_notice(:prefs_bulk_filename_purge_success.t)
     redirect_to(:controller => :account, :action => :prefs)
+  end
+
+  ################################################################################
+  #
+  #  :section: Stuff for Mushroom App
+  #
+  ################################################################################
+
+  def images_for_mushroom_app # :nologin: :norobots:
+    minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
+    minimum_quality = params[:minimum_quality].blank? ? 2.0 : params[:minimum_quality]
+    target_width = params[:target_width].blank? ? 400 : params[:target_width]
+    target_height = params[:target_height].blank? ? 600 : params[:target_height]
+    minimum_width = params[:minimum_width].blank? ? target_width : params[:minimum_width]
+    minimum_height = params[:minimum_height].blank? ? target_height : params[:minimum_height]
+    ratio_penalty = params[:ratio_penalty].blank? ? 0.5 : params[:ratio_penalty]
+
+    # Last term in ORDER BY spec below penalizes images of the wrong aspect ratio.
+    # If we wanted 600x400 it will penalize 400x400 images by 'ratio_penalty'.
+    ratio_penalty = ratio_penalty.to_f / Math.log10(600.0/400)
+
+    names = get_list_of_names(params[:names])
+    names = names.map {|n| "'" + n.gsub(/'/, '\\\'') + "'"}.join(',')
+
+    data = Name.connection.select_rows(%(
+      SELECT y.name, y.id, y.width, y.height
+      FROM (
+        SELECT x.text_name AS name, i.id AS id, i.width AS width, i.height AS height
+        FROM (
+          SELECT DISTINCT n1.text_name AS text_name, n2.id AS name_id
+          FROM names n1
+          JOIN names n2 ON IF(n1.synonym_id IS NULL, n2.id = n1.id, n2.synonym_id = n1.synonym_id)
+          WHERE n1.rank = 'Species' AND n1.text_name IN (#{names})
+        ) AS x, observations o, images i
+        WHERE o.name_id = x.name_id
+          AND i.id = o.thumb_image_id
+          AND o.vote_cache >= #{minimum_confidence}
+          AND i.vote_cache >= #{minimum_quality}
+          AND i.width >= #{minimum_width} AND i.height >= #{minimum_height}
+        ORDER BY o.vote_cache * 2 + i.vote_cache
+          - ABS(LOG(width/height) - #{Math.log10(target_width.to_f/target_height)}) * #{ratio_penalty} DESC
+      ) AS y
+      GROUP BY y.name
+    ))
+
+    if params[:test]
+      render_test_image_report(data)
+    else
+      render_image_csv_file(data)
+    end
+  rescue => e
+    render(:text => e.to_s, :layout => false, :status => 500)
+  end
+
+  def render_test_image_report(data)
+    report = data.map do |name, id|
+      "<img src='/images/320/#{id}.jpg'/><br/><i>#{name}</i><br/>"
+    end.join("<br/>\n")
+    render(:text => report)
+  end
+
+  def render_image_csv_file(data)
+    report = FasterCSV.generate(:col_sep => "\t") do |csv|
+      csv << ['name', 'image id', 'image width', 'image height']
+      data.each do |name, id, width, height|
+        csv << [name, id.to_s, width.to_s, height.to_s]
+      end
+    end
+    send_data(report,
+      :type => 'text/csv',
+      :charset => 'UTF-8',
+      :header => 'present',
+      :disposition => 'attachment',
+      :filename => "#{action_name}.csv"
+    )
+  end
+
+  def get_list_of_names(file)
+    results = []
+    if file.respond_to?(:read) and
+       file.respond_to?(:content_type)
+      get_list_of_names_from_file(file)
+    elsif file.is_a?(String)
+      get_list_of_names_from_string(file)
+    elsif !file.blank?
+      raise "Names file came in as an unexpected class: #{file.class.name.inspect}"
+    else
+      raise "Missing names file!"
+    end
+  end
+
+  def get_list_of_names_from_file(file)
+    case file.content_type.chomp
+    when 'text/plain',
+         'application/text',
+         'application/octet-stream'
+      get_list_of_names_from_plain_text_file(file)
+    when 'text/csv'
+      get_list_of_names_from_csv_file(file)
+    else
+      raise "Names file has unrecognized content_type: #{content_type.inspect}"
+    end
+  end
+
+  def get_list_of_names_from_csv_file(file)
+    results = FasterCSV.parse(file.read).map do |row|
+      row.first.to_s.strip_squeeze
+    end.reject(:blank?)
+    if results.first.downcase == 'name'
+      results.shift
+    else
+      raise "Expected names file to have names in first column with the label \"name\" in the first row."
+    end
+    return results
+  end
+
+  def get_list_of_names_from_plain_text_file(file)
+    file.read.split(/[\r\n]+/)
+  end
+
+  def get_list_of_names_from_string(str)
+    str.split(/\s*,\s*/)
   end
 end

@@ -40,6 +40,7 @@
 #  deprecate_name::              Deprecate name in favor of another.
 #  approve_name::                Flag given name as "accepted" (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
+#  names_for_mushroom_app::      Display list of most common names in plain text.
 #
 #  ==== Helpers
 #  deprecate_synonym::         (used by change_synonyms)
@@ -931,7 +932,7 @@ class NameController < ApplicationController
   #
   # All changes are made (but not saved) to +name+.  It returns true if
   # everything went well.  If it couldn't recognize the correct name, it
-  # changes nothing, flashes and error message, and returns false. 
+  # changes nothing, flashes and error message, and returns false.
   #
   def update_correct_spelling(name, misspelling, correct_spelling)
     result = true
@@ -1328,7 +1329,7 @@ class NameController < ApplicationController
     @image_data = eol_find_images(@names)
     # @users, @licenses & @authors may be better picked up while figuring out the names, descs or images
   end
-  
+
   def eol_find_names()
     names = eol_expanded_names()
     before = names.length
@@ -1345,7 +1346,7 @@ class NameController < ApplicationController
       result.push()
     end
   end
-  
+
   def most_desirable_name(names)
     most_desirable = Name.find(names[0][0])
     for id, display_name in names[1..-1]
@@ -1354,7 +1355,7 @@ class NameController < ApplicationController
     end
     return most_desirable.id
   end
-  
+
   def eol_ignore(review_status_list)
     @names      = []
     @descs      = {} # name.id    -> [NameDescription, NmeDescription, ...]
@@ -1419,7 +1420,7 @@ class NameController < ApplicationController
     @names = eol_find_names()
     @synonyms = Hash.new{|h, k| h[k] = []}
   end
-  
+
   def eol_descs
     return Name.connection.select_all(%(
     SELECT ns.id, nds.id, nds.modified, nds.locale, nds.refs, nds.gen_desc, nds.diag_desc, nds.distribution,
@@ -1433,7 +1434,7 @@ class NameController < ApplicationController
     AND nds.public
     ORDER BY ns.id))
   end
-  
+
   def eol_desc_authors
     return Name.connection.select_all(%(
     SELECT nds.id, us.name, us.login
@@ -1447,7 +1448,7 @@ class NameController < ApplicationController
     AND nds.ok_for_export
     AND nds.public))
   end
-  
+
   def eol_desc_licenses
     return Name.connection.select_all(%(
     SELECT nds.id, ls.url
@@ -1460,7 +1461,7 @@ class NameController < ApplicationController
     AND nds.ok_for_export
     AND nds.public))
   end
-  
+
   def eol_expanded_names
     # returns a list of (id, display_name, synonym_id) of qualified rows in names
     return Name.connection.select_all(%(
@@ -1477,7 +1478,7 @@ class NameController < ApplicationController
     AND names.rank IN ('Form','Variety','Subspecies','Species', 'Genus')
     ORDER BY names.search_name)).map { |row| [row['id'], row['display_name'], row['synonym_id']] }
   end
-  
+
   def eol_find_synonyms(names)
     synonyms = Hash.new{|h, k| h[k] = []}
     for id, display_name, synonym_id in names
@@ -1487,15 +1488,15 @@ class NameController < ApplicationController
     end
     return synonyms
   end
-  
+
   def eol_for_taxon
     store_location
-    
+
     # need name_id and review_status_list
     id = params[:id]
     @name = Name.find(id)
     @layout = calc_layout_params
-    
+
     # Get corresponding images.
     ids = Name.connection.select_values(%(
       SELECT images.id
@@ -1509,7 +1510,7 @@ class NameController < ApplicationController
       ORDER BY images.vote_cache DESC
     ))
     @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
-    
+
     ids = Name.connection.select_values(%(
       SELECT images.id
       FROM observations, images_observations, images
@@ -1522,7 +1523,7 @@ class NameController < ApplicationController
       ORDER BY observations.vote_cache
     ))
     @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
-    
+
     ids = Name.connection.select_values(%(
       SELECT DISTINCT observations.id
       FROM observations, images_observations, images
@@ -1535,7 +1536,7 @@ class NameController < ApplicationController
     ))
     @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids])
   end
-  
+
   # Show the data not getting sent to EOL
   def eol_need_review # :norobots:
     eol_data(['unreviewed'])
@@ -1694,5 +1695,64 @@ class NameController < ApplicationController
       end
       redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
     end
+  end
+
+  ################################################################################
+  #
+  #  :section: Stuff for Mushroom App
+  #
+  ################################################################################
+
+  def names_for_mushroom_app # :nologin: :norobots:
+    number_of_names = params[:number].blank? ? 1000 : params[:number_of_names]
+    minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
+    minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
+    rank_condition = params[:include_higher_taxa].blank? ?
+      'IN ("Family", "Genus", "Species")' :
+      'NOT IN ("Subspecies", "Variety", "Form", "Group")'
+
+    data = Name.connection.select_rows(%(
+      SELECT y.name, y.rank, SUM(y.number)
+      FROM (
+        SELECT n.text_name AS name,
+               n.rank AS rank,
+               x.number AS number
+        FROM (
+          SELECT n.id AS name_id,
+                 n.synonym_id AS synonym_id,
+                 COUNT(o.id) AS number
+          FROM names n, observations o
+          WHERE o.name_id = n.id
+            AND o.vote_cache >= #{minimum_confidence}
+          GROUP BY IF(n.synonym_id IS NULL, n.id, -n.synonym_id)
+        ) AS x
+        LEFT OUTER JOIN names n ON IF(x.synonym_id IS NULL, n.id = x.name_id, n.synonym_id = x.synonym_id)
+        WHERE n.deprecated = FALSE
+          AND n.author NOT LIKE '(s%'   # get rid of sections and subgenera)
+          AND x.number >= #{minimum_observations}
+          AND n.rank #{rank_condition}
+        GROUP BY IF(n.synonym_id IS NULL, n.id, -n.synonym_id)
+      ) AS y
+      GROUP BY y.name
+      ORDER BY SUM(y.number) DESC
+      LIMIT #{number_of_names}
+    ))
+
+    report = FasterCSV.generate(:col_sep => "\t") do |csv|
+      csv << ['name', 'rank', 'number_observations']
+      data.each do |name, rank, number|
+        csv << [name, rank, number.round.to_s]
+      end
+    end
+    send_data(report,
+      :type => 'text/csv',
+      :charset => 'UTF-8',
+      :header => 'present',
+      :disposition => 'attachment',
+      :filename => "#{action_name}.csv"
+    )
+
+  rescue => e
+    render(:text => e.to_s, :layout => false, :status => 500)
   end
 end

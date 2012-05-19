@@ -18,6 +18,10 @@ class ImageControllerTest < FunctionalTestCase
     assert_response('list_images')
   end
 
+  def test_mushroom_app_report
+    get(:images_for_mushroom_app, :names => names(:agaricus_campestris).text_name)
+  end
+
   def test_next_image
     get_with_dump(:next_image, :id => 2)
     assert_response(:action => "show_image", :id => 1)

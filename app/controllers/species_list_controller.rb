@@ -221,8 +221,10 @@ class SpeciesListController < ApplicationController
       else str.iconv(charset)
     end
     send_data(str,
-      :type => "text/plain; charset=#{charset}",
-      :disposition => 'attachment; filename="report.txt"'
+      :type => 'text/plain',
+      :charset => charset,
+      :disposition => 'attachment',
+      :filename => 'report.txt'
     )
   end
 
@@ -247,8 +249,11 @@ class SpeciesListController < ApplicationController
         str.iconv(charset)
     end
     send_data(str,
-      :type => "text/csv; charset=#{charset}; header=present",
-      :disposition => 'attachment; filename="report.csv"'
+      :type => 'text/csv',
+      :charset => charset,
+      :header => 'present',
+      :disposition => 'attachment',
+      :filename => 'report.csv'
     )
   end
 
@@ -271,8 +276,10 @@ class SpeciesListController < ApplicationController
       doc.line_break
     end
     send_data(doc.to_rtf,
-      :type => 'text/rtf; charset=ISO-8859-1',
-      :disposition => 'attachment; filename="report.rtf"'
+      :type => 'text/rtf',
+      :charset => 'ISO-8859-1',
+      :disposition => 'attachment',
+      :filename => 'report.rtf'
     )
   end
 
