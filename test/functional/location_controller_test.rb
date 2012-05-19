@@ -114,6 +114,36 @@ class LocationControllerTest < FunctionalTestCase
     assert_response('list_location_descriptions')
   end
 
+  def test_show_location_description
+    desc = location_descriptions(:albion_desc)
+    get_with_dump(:show_location_description, :id => desc.id)
+    assert_response('show_location_description')
+  end
+
+  def test_show_past_location_description
+    login('dick')
+    desc = location_descriptions(:albion_desc)
+    old_versions = desc.versions.length
+    desc.update_attributes(:gen_desc => 'something new')
+    desc.reload
+    new_versions = desc.versions.length
+    assert(new_versions > old_versions)
+    get_with_dump(:show_past_location_description, :id => desc.id)
+    assert_response('show_past_location_description')
+  end
+
+  def test_create_location_description
+    loc = locations(:albion)
+    requires_login(:create_location_description, :id => loc.id)
+    assert_form_action(:action => :create_location_description, :id => loc.id)
+  end
+
+  def test_edit_location_description
+    desc = location_descriptions(:albion_desc)
+    requires_login(:edit_location_description, :id => desc.id)
+    assert_form_action(:action => :edit_location_description, :id => desc.id)
+  end
+
   def test_create_location
     requires_login(:create_location)
     assert_form_action(:action => 'create_location')

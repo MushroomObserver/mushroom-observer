@@ -151,7 +151,7 @@ class Textile < String
   # can refer to them by abbreviation.
   def self.register_name(*names)
     for name in names
-      if !name.above_genus?
+      if name and !name.above_genus?
         Textile.private_register_name(name.text_name, name.rank)
       end
     end

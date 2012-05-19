@@ -445,6 +445,7 @@ class NameController < ApplicationController
     pass_query_params
     store_location
     if @description = find_or_goto_index(NameDescription, params[:id])
+      @name = @description.name
       if params[:merge_source_id].blank?
         @description.revert_to(params[:version].to_i)
       else

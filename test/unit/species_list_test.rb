@@ -62,8 +62,8 @@ class SpeciesListTest < UnitTestCase
     n = Naming.last
     v = Vote.last
     assert_objs_equal(o, spl.observations.last)
-    assert(o.created <= now)
-    assert(o.modified <= now)
+    assert(o.created >= 1.minute.ago)
+    assert(o.modified >= 1.minute.ago)
     assert_users_equal(@dick, o.user)
     assert_obj_list_equal([proj], o.projects)
     assert_equal(spl.when, o.when)

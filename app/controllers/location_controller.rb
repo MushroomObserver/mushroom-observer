@@ -410,6 +410,7 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     if @description = find_or_goto_index(LocationDescription, params[:id])
+      @location = @description.location
       if params[:merge_source_id].blank?
         @description.revert_to(params[:version].to_i)
       else

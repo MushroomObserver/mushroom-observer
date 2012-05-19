@@ -299,6 +299,18 @@ class NameControllerTest < FunctionalTestCase
     assert_response('show_name_description')
   end
 
+  def test_show_past_name_description
+    login('dick')
+    desc = name_descriptions(:peltigera_desc)
+    old_versions = desc.versions.length
+    desc.update_attributes(:gen_desc => 'something new which refers to _P. aphthosa_')
+    desc.reload
+    new_versions = desc.versions.length
+    assert(new_versions > old_versions)
+    get_with_dump(:show_past_name_description, :id => desc.id)
+    assert_response('show_past_name_description')
+  end
+
   def test_create_name_description
     name = names(:peltigera)
     params = { "id" => name.id.to_s }
