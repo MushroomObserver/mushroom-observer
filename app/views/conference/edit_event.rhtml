@@ -25,6 +25,9 @@
   <p>
     <%= :conference_event_description.t %>:<br/><%= text_area('event', 'description', :cols => 100, :value => @event.description) %>
   </p>
+  <p>
+    <%= :conference_event_registration_note.t %>:<br/><%= text_area('event', 'registration_note', :cols => 100, :value => @event.registration_note) %>
+  </p>
   <center><%= submit_tag :edit_event_save.t %><br/></center>
 <% end %>
 </p>

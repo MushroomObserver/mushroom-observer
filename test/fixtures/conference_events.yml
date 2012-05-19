@@ -3,7 +3,8 @@ msa_annual_meeting:
   id: 1
   name: MSA Annual Meeting 2012
   location: Yale University, New Haven, Connecticut, USA
-  description: A delightful foray followed by lunch for $10
+  description: A delightful foray followed by lunch.
+  registration_note: Bring $10 and state your lunch preference.
   start: 2012-07-15
   end: 2012-07-21
   created_at: 2012-03-31 09:01:46

@@ -2217,7 +2217,8 @@ welcome_note: >
 # ConferenceEvent Fields
 conference_event_name:  Name
 conference_event_location:  Location
-conference_event_description:  Description
+conference_event_description:  Event Description
+conference_event_registration_note:  Note for Registration Page
 conference_event_start:  Start
 conference_event_end:  End
 conference_event_created_at:  Created At
