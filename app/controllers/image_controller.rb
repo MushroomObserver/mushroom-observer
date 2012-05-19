@@ -862,15 +862,19 @@ class ImageController < ApplicationController
   end
 
   def get_list_of_names_from_csv_file(file)
-    results = FasterCSV.parse(file.read).map do |row|
-      row.first.to_s.strip_squeeze
-    end.reject(:blank?)
-    if results.first.downcase == 'name'
-      results.shift
-    else
-      raise "Expected names file to have names in first column with the label \"name\" in the first row."
+    results = FasterCSV.parse(file.read)
+    headings = results.shift.map(&:to_s).map(&:downcase)
+    name_column = headings.index_of('name')
+    rank_column = headings.index_of('rank')
+    if !name_column
+      raise "Expected names file to have a \"name\" column, with column label in the first row."
     end
-    return results
+    if rank_column
+      results.reject! {|row| row[rank_column].to_s.downcase != 'species'}
+    end
+    results.map do |row|
+      row[name_column].to_s.strip_squeeze
+    end.reject(:blank?)
   end
 
   def get_list_of_names_from_plain_text_file(file)
