@@ -1,474 +1,533 @@
-Last Revised: April 2009
-
-This contains notes on how the MushroomObserver website was setup on the
-slicehost servers and should help anyone wanting to move the site to another
-server at some point in the future. 
-
-The target slicehost configuration is a clean Fedora Core 10 512Mb slice.
-
-Estimated time: An hour or two
-
+#
+#  This is a log of the installation of a production server in early 2011.
+#
+#  It starts out fairly generic, and becomes increasingly specific to Mushroom
+#  Observer.  Look for the following "variables:
+#
+#    IP_ADDR            ip address of new server
+#    OTHER_IP_ADDR      ip address of old server
+#    DOMAIN             mushroomobserver.org
+#    SITE               mo
+#    USER               jason
+#    USER_PASSWORD      xxx
+#    DATA_PASSWORD      xxx
+#    MAIL_PASSWORD      xxx
+#    $YOUR_EMAIL        pellaea@gmail.com
+#    $FULL_NAME         Jason Hollinger
+#
+#  Tested from scratch, Mar 14, 2011. -Jason
+#
+#  (Many changes have been made since that test, though. I hope to test it
+#  again in the next week or two, Mar 17, 2011. -Jason)
+#
+#  NOTE: I have added the yum equivalents to apt-get for Fedora / CentOS in
+#  comments next to each apt-get line.  I can't guarantee these are all the ones
+#  required.  Also note that a few configuration files will be in different
+#  locations, and you will need to use chkconfig instead of update-rc.d.
+#
+#  ubuntu 10.10
+#  ruby 1.9.2-p180
+#  rubygems 1.6.2
+#  passenger 3.0.5
+#  apache2 2.2.16
+#  postfix 2.7.1
+#  mysql 14.14
+#
 ################################################################################
 
-# Basic installation.
-# When running yum respond 'y' to all questions.
-root> yum update
-root> yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
-root> yum install ImageMagick subversion httpd mysql-devel mysql-server monit
-root> yum install ruby ruby-devel rubygem-mongrel libjpeg-devel
+# Initial set up.
+local> ssh root@$IP_ADDR
+root> passwd
+root> apt-get upgrade
+root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
+                      build-essential iptables bison
+root> # yum update
+root> # yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
 
-# Setup clock to PDT (actually did this at the end so it might have to happen later)
-root> cp /etc/localtime /etc/localtime-orig
-root> cp /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-
-# Check that this installs the currently supported version of rails 2.1.1.
-# This can be done with: gem list
-# If not see below...
-root> yum install rubygem-rails
-
-root> gem install rake mongrel_cluster RedCloth mysql --no-ri --no-rdoc
-# This is expected fail.  See below...
-
-# We need to be sure to get the right version of rails.
-# Only run this if yum didn't get the right version.
-root> gem install rails --version 2.1.1 --no-ri --no-rdoc
-
-# When mysql fails to build...
-root> cd /usr/lib/ruby/gems/1.8/gems/mysql*
-root> ruby extconf.rb --with-mysql-config=/usr/bin/mysql_config
-root> make install
-
-# Add user "mo" which will run MO production server.
-root> useradd mo
-
-# Don't allow people to login directly as mo.
-root> vi /etc/shadow
-    (replace mo:!!:... with mo:*:...)
-
-# Allow members of group "mo" ability to "sudo su mo".
+# Create account for webserver.
+root> useradd -m -s /bin/tcsh $SITE
+root> passwd -l $SITE
 root> visudo
-    (add "%mo ALL = NOPASSWD: /bin/su mo" to end)
+  # Add these lines to end. Allows users in "mo" group to "sudo su mo".
+  %$SITE ALL = NOPASSWD: /bin/su $SITE
+  %$SITE ALL = NOPASSWD: /bin/su - $SITE
 
-# Add users.
-root> useradd -G mo -s /bin/tcsh xxx
-root> useradd -G mo -s /bin/tcsh yyy
-root> passwd xxx
-root> passwd yyy
+# Create account for yourself.
+root> useradd -m -G $SITE -s /bin/tcsh $USER
+root> passwd $USER_PASSWORD
+root> logout
 
-# Allow tcp through firewall.
-root> iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-root> system-config-firewall-tui
-  (enable WWW (HTTP))
+# Password-less ssh.
+local> ssh-keygen -t rsa   # (if not already done)
+local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
 
-# Test apache (ignore the warning message for now):
-root> service httpd start
-    (point your external browser at http://174.143.24.209/)
+# Set up your user account however you like.
+local> ssh $IP_ADDR
+user> vi .tcshrc
+  alias root sudo
+  alias cls clear
+  alias cd.. cd ..
+  alias dirf ls -alF
+  alias dirt ls -alFrt
+  alias md mkdir
+  alias rd rmdir
+  alias del rm
+  alias mv mv -i
+  alias cp cp -i
+  alias grep grep -s
+  alias +x chmod a+x
+  alias -x chmod a-x
+  alias $SITE 'cd /var/web/$SITE; sudo su - $SITE'
+user> vi .vimrc
+  syntax off
+  set nohlsearch
+  set ts=2
+  set sw=2
+  set et
+  set nowrap
+user> source .tcshrc
 
-# Setup apache properly.
-root> vi /etc/httpd/conf/httpd.conf
-    (add the content given below)
-root> chkconfig --level 345 httpd on
-    (restart it later after mongrel and rails configured)
+# Set up root's and website's accounts.
+user> su root
+root> cp .tcshrc /root
+root> cp .tcshrc /home/$SITE
+root> cp .vimrc /root
+root> cp .vimrc /home/$SITE
+root> chmod 660 /home/*/.tcshrc
+root> vi /root/.tcshrc
+  # Add this line to improve performance of custom-built packages.
+  # (Check lscpu and /proc/cpuinfo for cpu type.)
+  setenv CFLAGS "-O3 -m64 -march=core2"
+root> vi /home/$SITE/.tcshrc
+  # Add these aliases to the end.
+  alias $SITE 'cd /var/web/$SITE'
+  alias ${SITE}sql  "mysql -u $SITE -p'$DATA_PASSWORD' ${SITE}_production"
+  alias ${SITE}sqle "mysql -u $SITE -p'$DATA_PASSWORD' ${SITE}_production -e 'source \!^'"
+root> vi /home/$SITE/.login
+  setenv TZ 'Eastern Time (US & Canada)'
+  setenv RAILS_ENV production
+  cd /var/web/$SITE
+root> chown -R $SITE:$SITE /home/$SITE
+root> tcsh
 
-# Tell mysql to start up on boot.
-root> chkconfig --level 345 mysqld on
-root> service mysqld start
+# Disable direct root login for security purposes.
+root> vi /etc/ssh/sshd_config
+  PermitRootLogin no
 
-# Install MO.
-root> mkdir -p /var/web/mo
-root> chown mo /var/web/mo
-root> chgrp mo /var/web/mo
-root> su mo
-mo> cd /var/web/mo
-mo> svn checkout http://svn.collectivesource.com/mushroom_sightings/trunk /var/web/mo
+# Configure firewall.
+root> iptables -F
+root> iptables -P INPUT ACCEPT
+root> iptables -P OUTPUT ACCEPT
+root> iptables -P FORWARD ACCEPT
+root> iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+root> iptables -A INPUT -i lo -j ACCEPT
+root> iptables -A INPUT -p icmp -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 22   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 80   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 25   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 3306 -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 53   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p udp --dport 53   -j ACCEPT
+root> iptables -A INPUT   -j REJECT --reject-with icmp-host-prohibited
+root> iptables -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+root> iptables-save > /etc/firewall.conf
+root> chmod 600 /etc/firewall.conf
+root> vi /etc/rc.local
+  iptables-restore < /etc/firewall.conf
 
-# Get Database.
-mo> mkdir sql
-mo> cd sql
-mo> scp xxx:mo/db/checkpoint dump.sql
+# Install most of the modules that we will need (except ruby).
+root> apt-get install apache2 libapache2-mod-passenger \
+        mysql-server mysql-client libmysqlclient-dev \
+        subversion subversion-tools \
+        libcurl4-openssl-dev libssl-dev libopenssl-ruby \
+        apache2-prefork-dev libapr1-dev libaprutil1-dev
+root> # yum install httpd-devel mysql-devel mysql-server svn curl-devel
 
-# Setup mongrel cluster.
+# Build and install ruby from source to get good version.
+root> cd
+root> mkdir build
+root> cd build
+root> wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p180.tar.bz2
+root> tar -xjf ruby*.bz2
+root> cd ruby-1.9.2-p180
+root> ./configure --with-ruby-version=1.9.2
+root> make install
+root> rehash
+root> cd
+
+# Ditto for rubygems.
+root> cd ~/build
+root> wget http://production.cf.rubygems.org/rubygems/rubygems-1.6.2.tgz
+root> tar -xzf rubygems*.tgz
+root> cd rubygems-1.6.2
+root> ruby setup.rb --prefix=/usr/local --verbose
+root> rehash
+root> cd
+
+# Now we can install ruby gems properly.
+root> gem install rails --version=2.1.1 --verbose --no-rdoc --no-ri
+root> gem install mysql2 --verbose --no-rdoc --no-ri
+root> gem install test-unit --verbose --no-rdoc --no-ri
+root> gem install RedCloth --verbose --no-rdoc --no-ri
+# (not sure if this is necessary, it got installed when working on getting rails to play with gmail nicely)
+root> gem install openrain-action_mailer_tls -s http://gems.github.com
+
+# Install passenger.
+root> gem install passenger --verbose --no-rdoc --no-ri
+root> rehash
+root> passenger-install-apache2-module
+  # Pay attention to output at end and make sure values below are right.
+root> vi /etc/apache2/mods-available/passenger.conf
+  # Change root to /usr/local/lib/ruby/gems/1.9.2/gems/passenger-3.0.5
+  # Change ruby to /usr/local/bin/ruby
+root> vi /etc/apache2/mods-available/passenger.load
+  # Change to /usr/local/lib/ruby/gems/1.9.2/gems/passenger-3.0.5/ext/apache2/mod_passenger.so
+root> service apache2 stop
+root> service apache2 start
+# (For some reason reload and restart don't always work.)
+
+# Install ImageMagick.
+root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev
+root> # yum install ImageMagick-devel
+root> gem install rmagick --verbose --no-rdoc --no-ri
+root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+
+# Create directory for rails app.
+root> mkdir /var/web
+root> mkdir /var/web/$SITE
+root> mkdir /var/web/$SITE/{tmp,log}
+root> touch /var/web/$SITE/tmp/restart.txt
+root> chown -R $SITE:$SITE /var/web/$SITE
+root> chmod 750 /var/web/$SITE
+
+# Make sure apache user has access to rails directories.
+root> usermod -a -G $SITE www-data
+
+--------------------------------------------------------------------------------
+
+# Now we're done with the generic installation.  Start installing Mushroom
+# Observer in particular.
+
+# Install rails apps.
+root> mo
+mo> svn co http://svn.collectivesource.com/mushroom_sightings/trunk/ .
+mo> mkdir public/images/{thumb,320,640,960,1280,orig}
+mo> vi config/consts-site.rb
+  # Override these defaults.
+  DOMAIN         = 'mushroomobserver.org'
+  HTTP_DOMAIN    = 'http://mushroomobserver.org'
+  SERVER_CODE    = 'us1'
+  DEFAULT_LOCALE = 'en-US'
+  BAD_DOMAINS    = ["www.#{DOMAIN}"]
+
+  # Use queued email mechanism.
+  QUEUE_EMAIL = true
+
+  # Nathan wants to be BCC'ed on every single email.
+  EXTRA_BCC_EMAIL_ADDRESSES = "mo@collectivesource.com"
+
+  # Date after which votes become public.
+  VOTE_CUTOFF = '20100405'
+
+  # Set timezone?
+  ENV['TZ'] = 'Eastern Time (US & Canada)'
+
+  # Use Gmail mail server for ActionMailer.
+  config.action_mailer.smtp_settings = {
+    :address              => "smtp.gmail.com",
+    :port                 => 587,
+    :authentication       => :plain,
+    :enable_starttls_auto => true,
+    :user_name            => "webmaster@mushroomobserver.org",
+    :password             => "Amanita1"
+  }
 mo> exit
-root> cd /var/web/mo
-root> mongrel_rails cluster::configure -e production -p 3000 -a 127.0.0.1 -N 2 -c /var/web/mo
-root> chmod +x /usr/lib/ruby/gems/1.8/gems/mongrel_cluster-1.0.5/resources/mongrel_cluster
-root> ln -s /usr/lib/ruby/gems/1.8/gems/mongrel_cluster-1.0.5/resources/mongrel_cluster /etc/init.d/mongrel_cluster
-root> mkdir /etc/mongrel_cluster
-root> ln -s /var/web/mo/config/mongrel_cluster.yml /etc/mongrel_cluster/mo.yml
-root> chkconfig --level 345 mongrel_cluster on
-root> vi /var/web/mo/config/mongrel_cluster.yml
-    (see below)
 
-# Tweak environment.
-root> su mo
-mo> vi config/environments/development.rb
-    (remove ruby-debug include at bottom)
-mo> vi config/environments/production.rb
-    (enable IMAGE_TRANSFER -- tells production server to copy uploaded images
-    over to the image server via ssh)
+# Configure apache.
+root> vi /etc/apache2/sites-available/mo
+  <VirtualHost *:80>
+    ServerName mushroomobserver.org
+    DocumentRoot /var/web/mo/public
+    RailsEnv production
+    SetEnv TZ 'Eastern Time (US & Canada)'
 
-# Setup password-less ssh to image server.
-mo> ssh-keygen -t rsa
-  (just press return three times, tell it to overwrite id_rsa.pub if it asks)
-mo> ssh-copy-id -i ~/.ssh/id_rsa.pub xxx@images.mushroomobserver.org
-  (enter password)
-mo> ssh xxx@images.mushroomobserver.org
-  (just a test to make sure it doesn't ask for password, then quit)
+    # Chris Parrish might need this for his Chrome browser to work right?
+    Header set Accept-Ranges none
 
-# Get Images.
-mo> cd public/images
-mo> mkdir thumb 640 orig
-mo> cd thumb
-mo> ssh -f xxx@images \(cd images.mushroomobserver.org/thumb\; ls \*.jpg \> x\; tar -T x -cf -\) | tar -xf -
-mo> cd ../640
-mo> ssh -f xxx@images \(cd images.mushroomobserver.org/640\; ls \*.jpg \> x\; tar -T x -cf -\) | tar -xf -
+    # This was necessary for my local installation on Fedora Core 13.
+    # RailsBaseURI /
 
-# Create database for testing.
-mo> mysql -u root
-mysql> delete from mysql.user where user != 'root' or host != 'localhost';
-mysql> grant all privileges on *.* to 'mo'@'localhost' identified by 'password' with grant option;
-mysql> set password for 'root'@'localhost' = password('xxx');
-mysql> set password for 'mo'@'localhost' = password('xxx');
-mysql> flush privileges;
-mysql> quit;
-mo> mysql -u mo -p
-mysql> create database observer_production;
-mysql> create database observer_development;
-mysql> create database observer_test;
-mysql> quit;
+    <Directory /var/web/mo/public>
+      Options FollowSymLinks
+      AllowOverride limit
+      Order allow,deny
+      Allow from all
+    </Directory>
 
-# Configure MO database.
-mo> cp config/database.yml{-template,}
+    RewriteEngine on
+
+    # Redirect Chris Parrish's lichens pages at CDMR.
+    RewriteRule ^/lichens/(.*)$ http://lichens.digitalmycology.com/$1 [QSA]
+
+    # Explicitly tell apache where to find static content in /public.
+    # (Applies to several specific subdirs and any URL like /blah.ext.)
+    # (This is apparently only required for the old fedora installation?)
+    # RewriteRule ^/(stylesheets|javascripts|[\w\-\.]+\.\w+)(.*)$ /public/$1$2 [QSA]
+
+    # Redirect all but thumbnails to image server.
+    # RewriteRule ^/images/thumb/(.*)$ http://images.digitalmycology.com/thumb/$1 [QSA]
+    # RewriteRule ^/images/320/(.*)$ http://images.digitalmycology.com/320/$1 [QSA]
+    RewriteRule ^/images/640/(.*)$ http://images.digitalmycology.com/640/$1 [QSA]
+    RewriteRule ^/images/960/(.*)$ http://images.digitalmycology.com/960/$1 [QSA]
+    RewriteRule ^/images/1280/(.*)$ http://images.digitalmycology.com/1280/$1 [QSA]
+    RewriteRule ^/images/orig/(.*)$ http://images.digitalmycology.com/orig/$1 [QSA]
+  </VirtualHost>
+root> a2dissite default
+root> a2ensite mo
+root> a2enmod rewrite
+root> a2enmod headers
+
+# Create database.
+root> mo
+mo> mysql -u root -p
+  create database mo_production;
+  create user 'mo'@'localhost' identified by '$DATA_PASSWORD';
+  # set password for 'mo'@'localhost' = password('$DATA_PASSWORD');
+  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
+mo> cp config/database.yml-template config/database.yml
 mo> vi config/database.yml
-    (set database names, usernames, passwords, sockets)
+  # Change these values in production section: (other sections aren't needed)
+  adapter:  mysql2
+  database: mo
+  password: $DATA_PASSWORD
+  socket:   /var/run/mysqld/mysqld.sock    # ubuntu/debian
+  # socket:   /var/lib/mysql/mysql.sock    # fedora/centos?
+  encoding: utf8
+mo> cd db
+mo> scp $USER@$OLD_SERVER:/var/web/mo/db/checkpoint.gz .
+mo> gunzip checkpoint.gz
+mo> mosqle checkpoint
 
-# Populate database (from snapshot).
-mo> mysql -u mo -p observer_development -e 'source sql/dump.sql'
-mo> mysql -u mo -p observer_production -e 'source sql/dump.sql'
-mo> rake db:migrate
-    (this is the first time you actually run rails, lots of potential
-    bugs might show up here having to do with environment, rails version
-    mismatch, etc., not necessarily having anything to do with database)
+# Set up password-less ssh for image transfers.
+mo> ssh-keygen -t rsa
+  # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
+mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
+  # Enter password.
+mo> ssh cdmr@images.digitalmycology.com
+  # (just make sure it works)
 
-# Test server real quick.
-mo> script/server
-    (you can test it with "lynx localhost:3000" in another login)
-    (control-C out to stop it)
+--------------------------------------------------------------------------------
 
-# You can also run the tests now if you want.
-mo> rake test |& tee test.log
+# This section deals with setting up email.  It's mostly generic.
 
-# Place server into development mode.
-mo> exit
-root> vi /etc/httpd/conf/httpd.conf
-    (change RAILS_ENV from production to development)
-root> vi /var/web/mo/config/mongrel_cluster.yml
-    (change environment from production to development)
-
-# Start server and test.
-root> service mongrel_cluster start
-root> service httpd restart
-    (point your external browser at http://174.143.24.209/)
-
-# Install process monitor.
-root> vi /etc/monit.d/mo
-    (see below)
-root> chkconfig --level 345 monit on
-root> service monit start
-
-# Install mailserver.
-root> yum install postfix mutt cyrus-sasl-md5 cyrus-sasl-ntlm cyrus-sasl-plain
-root> vi /etc/postfix/main.cf
-    myhostname = mail.mushroomobserver.org
-    mydomain = mushroomobserver.org
-    myorigin = $mydomain
-    inet_interfaces = $myhostname, localhost
-    mydestination = $myhostname, localhost.$mydomain, localhost,
-            mail.$mydomain, www.$mydomain, ftp.$mydomain, $mydomain
-    relayhost =
-    smtpd_recipient_restrictions = \
-      permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination
-    (I just stick these at the end and comment out the defaults)
+# Set up simple mailserver using postfix.
+root> apt-get install postfix mutt
+  # Select "internet site" when it prompts you.
+  # Enter the proper hostname as "system mail name" (should resolve back with reverse DNS).
+root> # yum install postfix mutt
 root> vi /etc/aliases
-    mailer-daemon:  root
-    postmaster:     root
-    root:           xxx,yyy
-    xxx:            xxx@xxx.com
-    yyy:            yyy@yyy.com
-# If DNS doesn't point here yet, need to override the IP address:
-root> vi /etc/hosts
-    174.143.24.209  mail.mushroomobserver.org mushroomobserver.org
+  # Change where root's mail goes.
+  root: $USER,...
 root> newaliases
-root> service postfix start
-root> chkconfig --level 345 postfix on
 
-# # Configure SMTP AUTH:
-# root> cat > /etc/pam.d/smtp << __END__
-#   #%PAM-1.0
-#   auth required pam_permit.so
-#   account required pam_permit.so
-#   session required pam_permit.so
-#   password required pam_permit.so
-#   __END__
-# root> vi /etc/sysconfig/saslauthd
-#   (make sure MECH=pam)
-# root> cat > /usr/lib64/sasl2/smtpd.conf << __END__
-#   pwcheck_method: auxprop
-#   auxprop_plugin: sasldb
-#   mech_list: plain login cram-md5 digest-md5 ntlm
-#   __END__
-# root> saslpasswd2 -c mo
-#   <password>
-# root> chmod 640 /etc/sasldb2
-# root> chown root:mail /etc/sasldb2
-# root> service saslauthd restart
-# root> testsaslauthd -u mo -p tst -s smtp
-# root> telnet 127.0.0.1 25
-#   EHLO localhost
-#   AUTH LOGIN
-#   ...
-#   MAIL FROM: from@email.address
-#   RCPT TO: to@email.address
-#   DATA
-#   Subject: Test
-#
-#   Testing...
-#   .
-#   QUIT
-# ...
-# root> iptables -A INPUT -p tcp --dport 587 -j ACCEPT
-# root> chkconfig --level 345 saslauthd on
-# This does not work yet...
+# NOTE: After moving mail.mo.org to gmail, had to tweak postfix configuration:
+root> vi /etc/postfix/main.cf
+  # change myhostname to "$DOMAIN" (instead of "mail.$DOMAIN")
+
+# Test mail server.
+root> su $USER
+user> cd
+user> echo $YOUR_EMAIL > .forward
+user> vi .muttrc
+  set realname="$FULL_NAME"
+  set from="$USER@$DOMAIN"
+  set use_from=yes
+  set envelope_from=yes
+user> echo "This is a test." | mutt -s test $YOUR_EMAIL
+  # (Check /var/log/mail.log and /var/log/mail.err.)
+user> exit
+
+# Configure mail for MO.
+root> mo
+mo> cd
+mo> vi .muttrc
+  set realname="Mushroom Observer"
+  set from="no-reply@mushroomobserver.org"
+  set use_from=yes
+  set envelope_from=yes
+mo> vi .forward
+  root
+mo> echo "This is another test." | mutt -s test $YOUR_EMAIL
+mo> exit
+
+# Configure mail for rails.
+# Should come configured "out of the box".
+# Ask yourself a question via the website, e.g.:
+#   http://$IP_ADDR/observer/ask_user_question/252
+# Probably want to tail -f log/production.log if it's throwing errors.
 
 # Configure no-reply to bounce correctly.
-root> useradd no-reply
-root> cp /var/web/mo/script/autoreply          /usr/bin/autoreply
+root> useradd -m no-reply
+root> passwd -l no-reply
+root> cp /var/web/mo/script/autoreply          /usr/local/bin/autoreply
 root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
 root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
 root> cp /var/web/mo/config/no-reply.forward   /home/no-reply/.forward
-root> chown no-reply:no-reply /home/no-reply/.[maf]*
 root> chmod 644 /home/no-reply/.[maf]*
-root> chmod 755 /usr/bin/autoreply
+root> chmod 755 /usr/local/bin/autoreply
 
-# Configure email setting for rails.
-root> vi /var/web/mo/config/environment.rb
-    ActionMailer::Base.smtp_settings = {
-        :address => "mail.mushroomobserver.org",
-        :domain => "mushroomobserver.org",
-        :port => 25
-        # I haven't figured out security yet.
-        # :authentication => :login,
-        # :user_name => "<username>",
-        # :password => "<password>"
-    }
-root> service monit restart
-    (there should be a way to tell the monit daemon to refresh
-    its rules without restarting it...)
-root> vi /home/mo/.muttrc
-    set from="no-reply@mushroomobserver.org"
+--------------------------------------------------------------------------------
 
-# Test email.
-jason> vi /home/jason/.muttrc
-    set from="jason@mushroomobserver.org"
-    set use_from=yes
-    set envelope_from=yes
-    set editor=vi
-jason> echo "This is a test." | mutt -s test pellaea@gmail.com
-    (note yahoo "deferred" the test email, citing some problem
-    with reply-to address?, but gmail accepts it)
-    (make sure /etc/nsswitch.conf has "hosts: files dns" in it
-    so that it looks at /etc/hosts before looking up ip on dns)
-    (note also that /etc/hosts is cached via nscd, try
-    "service nscd reload")
+# Now the site should be mostly working.  We need to do some configuration to
+# get image uploads to work, though.
 
-# Build jpegresize
-jason> cd /var/web/mo/script
-jason> gcc jpegresize.c -ljpeg -lm -O2 -o jpegresize
-root> cp jpegresize /usr/bin
+# Make sure these have the correct image server(s).
+mo> vim script/process_image
+mo> vim script/update_images
 
-# Place server into production mode.
-root> vi /etc/httpd/conf/httpd.conf
-    (change RAILS_ENV back)
-root> vi /var/web/mo/config/mongrel_cluster.yml
-    (change environment back)
+# Test image upload on server:
+#   http://$IP_ADDR/observer/create_observation
+# Might need to run process_image once by hand before it will be fully automatic.
+mo> ls public/images/orig
+mo> script/process_image NNNNN jpg 0
 
-# Restart server and done.
-root> service mongrel_cluster restart
-root> service httpd restart
+# Grab thumbnails from image server.  (This takes hours!)
+mo> script/update_images -v --sync dreamhost --download --thumb --320
 
-################################################################################
+--------------------------------------------------------------------------------
 
-# Specific notes on making the official transition.
-1) Do not remove the subdomain on the old host before DNS propogates!
-2) Don't forget to generate a new gmaps api key.
-3) Set IMAGE_SERVER to use the explicit IP address until DNS propogates.
-4) Nslookup is failing on the new host(??)
+# Install cron jobs.
 
-# Order if moving database:
-1) Shut down old and new servers.
-2) Dump database and copy over to new database.
-3) Copy images over to new server and new images server as necessary.
-4) Change NS records at registrar to point to new server.
-5) Add all DNS records at new server (see below).
-6) Test email, ssh to images server, ...
-7) Start new server.
-8) Add redirection code to old server (see below).
-9) Start old server.
+# They're all already present, just need to stick them in the crontab.
+mo> crontab -e
+  */5 * * * * /var/web/mo/script/run_rake email:send
+  23  * * * * /var/web/mo/script/parse_log
+  13  3 * * * /var/web/mo/script/run_script refresh_name_lister_cache
+  43  3 * * * /var/web/mo/script/run_script update_lichen_list
+  13  4 * * * /var/web/mo/script/run_script update_images --clean
+  33 21 * * * /var/web/mo/script/makexml /var/web/mo/public/eol.xml
 
-# Order if just moving server:
-1) Start new server
-2) Copy images over.
-3) Change NS records at registrar to point to new server.
-4) Add all DNS records at new server (see below).
-5) Add redirection code to old server (see below).
-6) Restart old server.
-7) Copy over any last-minute images.
+--------------------------------------------------------------------------------
 
-# DNS records:
-A blah.com. IP1
-A www       IP1
-A mail      IP1
-A images    IP2
-A lists     IP3
-MX blah.com. mail.blah.com. (aux=0)
-NS blah.com. ns1.webhost.com.
-NS blah.com. ns2.webhost.com.
-NS blah.com. ns3.webhost.com.
+# This section deals with creating all the additional user accounts for
+# members of CDMR to give them access to the server in case of emergency.
 
-IP1 = IP of new server
-IP2 = IP of image server (208.113.185.204 on dreamhost)
-IP3 = IP of list server (66.33.216.120 on dreamhost)
+# Create an email to send to CDMR members explaining what we're doing.
+root> cd
+root> cat > password_email <<EOB
+      I've created an account on the new mushroomobserver.org server for you.
+      Please log in using an ssh (Secure Shell) client and change your
+      password at your earliest convenience: 
 
-################################################################################
+        ssh USER@$IP_ADDR
+        (password = PASS)
 
-# Adding new users:
-root> useradd -G mo -s /bin/tcsh xxx
-root> passwd xxx
+      If you don't have an ssh client, or if you have any problems logging
+      in, please let me know by replying to this email. 
 
-# Adding another server instance:
-root> vi /etc/httpd/conf/httpd.conf
-    (search for BalancerMember.*3000 and add another line)
-root> vi /var/web/mo/config/mongrel_cluster.yml
-    (increment the number of "servers:" near bottom)
-root> vi /etc/monit.d/mo
-    (duplicate the mo1 section, changing "mo1" to "moN" and "3000" to "300N-1")
-root> service monit stop
-root> service httpd stop
-root> service mongrel_cluster restart
-root> service httpd start
-root> service monit start
-    (may be able to simply restart httpd and monit...)
+      As a member of CDMR, you should have already received a copy of the
+      administrative details for Mushroom Observer, including the root
+      password for this new server.  However, for security reasons, we do not
+      allow direct ssh log-in as root, so in the unlikely event that you need
+      to access the server, you will need to login using your individual
+      account, instead.  Once logged in you can switch to root via "su root". 
 
-################################################################################
+      If you prefer, you do not need to do any of this (let me know), but we
+      would like at least a few members of CDMR to maintain active accounts
+      on our servers, in case of emergency. 
 
-# /etc/httpd/conf/httpd.conf
-ServerName agaricus
-ServerTokens Prod
+      Thank you for your time,
+      Jason Hollinger
+      Mushroom Observer System Administrator
+      EOB
 
-NameVirtualHost *:80
-<VirtualHost *:80>
-    ServerName    mushroomobserver.org
-    ServerAlias   mushroomobserver.org *.mushroomobserver.org
-    ServerAdmin   nathan@mushroomobserver.org
-    DocumentRoot  "/var/web/mo"
-    ErrorLog      logs/mo-error_log
-    CustomLog     logs/mo-access_log combined
-    SetEnv        RAILS_ENV      production
+# Create user accounts, initialize with random password, mail password to root.
+root> foreach user (anne darv mgwood mike velosa)
+        set pass=`cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c8`
+        useradd -m -s /bin/tcsh $user
+        echo "$user":"$pass" | chpasswd
+        passwd -e $user
+        cat password_email | sed "s/USER/$user/g" | sed "s/PASS/$pass/" | \
+          mail -s "account on mushroomobserver.org" root
+      end
 
-    <Directory /var/web/mo>
-        Options FollowSymLinks
-        AllowOverride limit
-        Order allow,deny
-        Allow from all
-    </Directory>
+# If you need to remove a user completely (e.g., a test user).
+# root> userdel -r $user
 
-    ProxyPass /images      !
-    ProxyPass /stylesheets !
-    ProxyPass /javascripts !
-    ProxyPass /robots.txt  !
-    ProxyPass /favicon.ico !
-    ProxyPass / balancer://mo_cluster/
-    ProxyPreserveHost on
+# To copy over login information from another server instance.
+# (NOTE: this doesn't seem to work going from Fedora to Ubuntu,
+# it may only work if both are running the same distribution.)
+# root> vi /etc/shadow
+#   # (copy lines from the same file on the other server)
 
-    <Proxy balancer://mo_cluster>
-        BalancerMember http://127.0.0.1:3000
-        BalancerMember http://127.0.0.1:3001
-        BalancerMember http://127.0.0.1:3002
-    </Proxy>
+--------------------------------------------------------------------------------
 
-    RewriteEngine on
-    RewriteRule ^/$ /index.html [QSA]
+# This section deals with sharing databases between multiple servers.
+# NOTE: This is also useful for running two servers in parallel while testing
+# a new installation
 
-    # Redirect *all* image requests to image server.
-    # RewriteRule ^/images/(.*)$ http://images.mushroomobserver.org/$1 [QSA]
+# Configure database to accept remote connections.
+root> vi /etc/mysql/my/cnf
+  # Comment out this line to allow remote connections.
+  # bind-address = 127.0.0.1
+root> mysql -u root -p
+  create user 'mo'@'$OTHER_IP_ADDR' identified by '$DATA_PASSWORD';
+  grant all privileges on mo_production.* to 'mo'@'$OTHER_IP_ADDR' with grant option;
+root> ssh $USER@$OTHER_IP_ADDR
+user> mysqladmin --protocol=tcp -u mo -p'$DATA_PASSWORD' --host=$IP_ADDR ping
+user> exit
 
-    # Redirect only originals to image server.
-    RewriteRule ^/images/orig/(.*)$ http://images.mushroomobserver.org/orig/$1 [QSA]
+# To switch databases from old server to new server.
+# First set up new server as above.
+# Make sure everyone can connect to the new server's database.
 
-    # Rewrite to check for Rails cached page
-    RewriteRule ^([^.]+)$ $1.html [QSA]
+# Shut down apache2 on all servers.
+xxx_root> service apache2 stop
 
-    # Redirect all non-static requests to cluster
-    RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
-    RewriteRule ^/(.*)$ balancer://mo_cluster%{REQUEST_URI} [P,QSA,L]
+# Make snapshot of old database.
+old_root> mo
+old_mo> cd db
+old_mo> ./dump
 
-    AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css text/javascript application/xml application/xhtml+
-    BrowserMatch ^Mozilla/4 gzip-only-text/html
-    BrowserMatch ^Mozilla/4.0[678] no-gzip
-    BrowserMatch bMSIE !no-gzip !gzip-only-text/html
-</VirtualHost>
+# Copy snapshot to new server.
+new_root> mo
+new_mo> cd db
+new_mo> scp $USER@$OLD_IP_ADDR:/var/web/mo/db/checkpoint.gz .
+new_mo> gunzip checkpoint.gz
+new_mo> mosqle checkpoint
 
-################################################################################
+# Reconfigure and restart all servers.
+xxx_root> mo
+xxx_mo> vi config/database.yml
+  production:
+    database: mo_production
+    host:     $IP_ADDR
+    username: mo
+    password: $DATA_PASSWORD
+xxx_mo> rake db:version   # (just a simple test)
+xxx_mo> exit
+xxx_root> service apache2 start
 
-# /var/web/mo/config/mongrel_cluster.yml
----
-cwd: /var/web/mo
-pid_file: tmp/pids/mongrel.pid
-log_file: log/mongrel.log
-user: mo
-group: mo
-port: "3000"
-environment: production
-address: 127.0.0.1
-servers: 3
-docroot: public
+--------------------------------------------------------------------------------
 
-################################################################################
+# A few post-installation sanity-checks.  Reboot after everything is done,
+# then check the following.
 
-# /etc/monit.d/mo
-set mailserver localhost
-set mail-format { from: monitor@mushroomobserver.org }
-set alert root@mushroomobserver.org
+# Make sure firewall is working.  If there are more than a few lines it is
+# probably correct, but you can also compare it with another server.
+root> iptables-save
 
-check system mushroomobserver.org
-  if memory usage > 90% then alert
-  if cpu usage (user) > 90% then alert
-  group mo
+# Make sure all the critical processes started automatically.
+# Look for sshd, apache2, Passenger, mysqld, postfix.
+root> ps -ef
 
-check process mo1
-  with pidfile /var/web/mo/tmp/pids/mongrel.3000.pid
-  start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3000"
-  stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3000"
-  if cpu > 80% for 5 cycles then restart
-  if totalmem > 115.0 MB for 5 cycles then restart
-  if 20 restarts within 20 cycles then timeout
-  group mo
+# If any are missing, do this on ubuntu/debian:
+root> update-rc.d apache2 defaults
+root> update-rc.d mysql   defaults
+root> update-rc.d postfix defaults
 
-check process mo2
-  with pidfile /var/web/mo/tmp/pids/mongrel.3001.pid
-  start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3001"
-  stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3001"
-  if cpu > 80% for 5 cycles then restart
-  if totalmem > 115.0 MB for 5 cycles then restart
-  if 20 restarts within 20 cycles then timeout
-  group mo
-
-check process mo3
-  with pidfile /var/web/mo/tmp/pids/mongrel.3002.pid
-  start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3002"
-  stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3002"
-  if cpu > 80% for 5 cycles then restart
-  if totalmem > 115.0 MB for 5 cycles then restart
-  if 20 restarts within 20 cycles then timeout
-  group mo
+# Or this on fedora/centos:
+# root> chkconfig --level 345 httpd   on
+# root> chkconfig --level 345 mysqld  on
+# root> chkconfig --level 345 postfix on
 
