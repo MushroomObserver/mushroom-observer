@@ -545,4 +545,6 @@ module ActionView
 end
 
 ################################################################################
+# Stuff to get rails 2.1.1 working with ruby 1.9.3 -Jason, May 2012
 
+MissingSourceFile::REGEXPS.push([/^cannot load such file -- (.+)$/i, 1])

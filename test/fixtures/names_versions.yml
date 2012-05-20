@@ -8,8 +8,8 @@ fungi_version_1:
   version: 1
   rank: Kingdom
   text_name: Fungi
-  display_name: **__Fungi__**
-  observation_name: **__Fungi sp.__**
+  display_name: '**__Fungi__**'
+  observation_name: '**__Fungi sp.__**'
   search_name: Fungi sp.
   citation: ''
 
@@ -33,9 +33,9 @@ coprinus_comatus_version_2:
   version: 2
   rank: Species
   text_name: Coprinus comatus
-  author: (O.F. Müll.) Pers.
-  display_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
-  observation_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
+  author: '(O.F. Müll.) Pers.'
+  display_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
+  observation_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
   search_name: Coprinus comatus (O.F. Müll.) Pers.
   citation: ''
 
@@ -48,8 +48,8 @@ agaricus_campestris_version_1:
   rank: Species
   text_name: Agaricus campestris
   author: L.
-  display_name: **__Agaricus campestris__** L.
-  observation_name: **__Agaricus campestris__** L.
+  display_name: '**__Agaricus campestris__** L.'
+  observation_name: '**__Agaricus campestris__** L.'
   search_name: Agaricus campestris L.
   citation: ''
 
@@ -62,8 +62,8 @@ conocybe_filaris_version_1:
   rank: Species
   text_name: Conocybe filaris
   author: 
-  display_name: **__Conocybe filaris__**
-  observation_name: **__Conocybe filaris__**
+  display_name: '**__Conocybe filaris__**'
+  observation_name: '**__Conocybe filaris__**'
   search_name: Conocybe filaris
   citation: ''
 
@@ -76,8 +76,8 @@ amanita_baccata_arora_version_1:
   rank: Species
   text_name: Amanita baccata
   author: sensu Arora
-  display_name: **__Amanita baccata__** sensu Arora
-  observation_name: **__Amanita baccata__** sensu Arora
+  display_name: '**__Amanita baccata__** sensu Arora'
+  observation_name: '**__Amanita baccata__** sensu Arora'
   search_name: Amanita baccata sensu Arora
   citation: ''
 
@@ -90,8 +90,8 @@ amanita_baccata_borealis_version_1:
   rank: Species
   text_name: Amanita baccata
   author: sensu Borealis
-  display_name: **__Amanita baccata__** sensu Borealis
-  observation_name: **__Amanita baccata__** sensu Borealis
+  display_name: '**__Amanita baccata__** sensu Borealis'
+  observation_name: '**__Amanita baccata__** sensu Borealis'
   search_name: Amanita baccata sensu Borealis
   citation: ''
 
@@ -104,8 +104,8 @@ lepiota_rachodes_version_1:
   rank: Species
   text_name: Lepiota rachodes
   author: Vittad.
-  display_name: **__Lepiota rachodes__** Vittad.
-  observation_name: **__Lepiota rachodes__** Vittad.
+  display_name: '**__Lepiota rachodes__** Vittad.'
+  observation_name: '**__Lepiota rachodes__** Vittad.'
   search_name: Lepiota rachodes Vittad.
   citation: ''
 
@@ -118,8 +118,8 @@ lepiota_rhacodes_version_1:
   rank: Species
   text_name: Lepiota rhacodes
   author: Vittad.
-  display_name: **__Lepiota rhacodes__** Vittad.
-  observation_name: **__Lepiota rhacodes__** Vittad.
+  display_name: '**__Lepiota rhacodes__** Vittad.'
+  observation_name: '**__Lepiota rhacodes__** Vittad.'
   search_name: Lepiota rhacodes Vittad.
   citation: ''
 
@@ -131,9 +131,9 @@ macrolepiota_rachodes_version_1:
   version: 1
   rank: Species
   text_name: Macrolepiota rachodes
-  author: (Vittad.) Singer
-  display_name: **__Macrolepiota rachodes__** (Vittad.) Singer
-  observation_name: **__Macrolepiota rachodes__** (Vittad.) Singer
+  author: '(Vittad.) Singer'
+  display_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
+  observation_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
   search_name: Macrolepiota rachodes (Vittad.) Singer
   citation: ''
 
@@ -145,9 +145,9 @@ macrolepiota_rhacodes_version_1:
   version: 1
   rank: Species
   text_name: Macrolepiota rhacodes
-  author: (Vittad.) Singer
-  display_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
-  observation_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
+  author: '(Vittad.) Singer'
+  display_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
+  observation_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
   search_name: Macrolepiota rhacodes (Vittad.) Singer
   citation: ''
 
@@ -159,9 +159,9 @@ chlorophyllum_rachodes_version_1:
   version: 1
   rank: Species
   text_name: Chlorophyllum rachodes
-  author: (Vittad.) Vellinga
-  display_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
-  observation_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
+  author: '(Vittad.) Vellinga'
+  display_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
+  observation_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rachodes (Vittad.) Vellinga
   citation: ''
 
@@ -173,9 +173,9 @@ chlorophyllum_rhacodes_version_1:
   version: 1
   rank: Species
   text_name: Chlorophyllum rhacodes
-  author: (Vittad.) Vellinga
-  display_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
-  observation_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
+  author: '(Vittad.) Vellinga'
+  display_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
+  observation_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
   citation: ''
 
@@ -188,8 +188,8 @@ lactarius_alpinus_version_1:
   rank: Species
   text_name: Lactarius alpinus
   author: Peck
-  display_name: **__Lactarius alpinus__** Peck
-  observation_name: **__Lactarius alpinus__** Peck
+  display_name: '**__Lactarius alpinus__** Peck'
+  observation_name: '**__Lactarius alpinus__** Peck'
   search_name: Lactarius alpinus Peck
   citation: ''
 
@@ -246,8 +246,8 @@ psalliota_version_1:
   version: 1
   rank: Genus
   text_name: Psalliota
-  display_name: **__Psalliota__**
-  observation_name: **__Psalliota sp.__**
+  display_name: '**__Psalliota__**'
+  observation_name: '**__Psalliota sp.__**'
   search_name: Psalliota sp.
   citation: ''
 
@@ -259,8 +259,8 @@ agaricus_version_1:
   version: 1
   rank: Genus
   text_name: Agaricus
-  display_name: **__Agaricus__**
-  observation_name: **__Agaricus sp.__**
+  display_name: '**__Agaricus__**'
+  observation_name: '**__Agaricus sp.__**'
   search_name: Agaricus sp.
   citation: ''
 
@@ -273,8 +273,8 @@ agaricus_campestrus_version_1:
   rank: Species
   text_name: Agaricus campestrus
   author: L.
-  display_name: **__Agaricus campestrus__** L.
-  observation_name: **__Agaricus campestrus__** L.
+  display_name: '**__Agaricus campestrus__** L.'
+  observation_name: '**__Agaricus campestrus__** L.'
   search_name: Agaricus campestrus L.
   citation: ''
 
@@ -287,8 +287,8 @@ agaricus_campestras_version_1:
   rank: Species
   text_name: Agaricus campestras
   author: L.
-  display_name: **__Agaricus campestras__** L.
-  observation_name: **__Agaricus campestras__** L.
+  display_name: '**__Agaricus campestras__** L.'
+  observation_name: '**__Agaricus campestras__** L.'
   search_name: Agaricus campestras L.
   citation: ''
 
@@ -301,8 +301,8 @@ agaricus_campestros_version_1:
   rank: Species
   text_name: Agaricus campestros
   author: L.
-  display_name: **__Agaricus campestros__** L.
-  observation_name: **__Agaricus campestros__** L.
+  display_name: '**__Agaricus campestros__** L.'
+  observation_name: '**__Agaricus campestros__** L.'
   search_name: Agaricus campestros L.
   citation: ''
 
@@ -326,9 +326,9 @@ coprinellus_micaceus_version_2:
   version: 2
   rank: Species
   text_name: Coprinellus micaceus
-  author: (Bull.) Vilgalys, Hopple & Jacq. Johnson
-  display_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
-  observation_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  author: '(Bull.) Vilgalys, Hopple & Jacq. Johnson'
+  display_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
+  observation_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
   citation: ''
 
@@ -341,8 +341,8 @@ coprinellus_micaceus_no_author_version_1:
   rank: Species
   text_name: Coprinellus micaceus
   author: ""
-  display_name: **__Coprinellus micaceus__**
-  observation_name: **__Coprinellus micaceus__**
+  display_name: '**__Coprinellus micaceus__**'
+  observation_name: '**__Coprinellus micaceus__**'
   search_name: Coprinellus micaceus
   citation: ''
 
@@ -354,8 +354,8 @@ strobilurus_diminutivus_no_author_version_1:
   version: 1
   rank: Species
   text_name: Strobilurus diminutivus
-  display_name: **__Strobilurus diminutivus__**
-  observation_name: **__Strobilurus diminutivus__**
+  display_name: '**__Strobilurus diminutivus__**'
+  observation_name: '**__Strobilurus diminutivus__**'
   search_name: Strobilurus diminutivus
   citation: ''
 
@@ -367,9 +367,9 @@ pluteus_petasatus_approved_version_1:
   version: 1
   rank: Species
   text_name: Pluteus petasatus
-  author: (Fr.) Gillet
-  display_name: **__Pluteus petasatus__** (Fr.) Gillet
-  observation_name: **__Pluteus petasatus__** (Fr.) Gillet
+  author: '(Fr.) Gillet'
+  display_name: '**__Pluteus petasatus__** (Fr.) Gillet'
+  observation_name: '**__Pluteus petasatus__** (Fr.) Gillet'
   search_name: Pluteus petasatus (Fr.) Gillet
   citation: ''
 
@@ -381,7 +381,7 @@ pluteus_petasatus_deprecated_version_1:
   version: 1
   rank: Species
   text_name: Pluteus petasatus
-  author: (Fries) Gillet
+  author: '(Fries) Gillet'
   display_name: __Pluteus petasatus__ (Fries) Gillet
   observation_name: __Pluteus petasatus__ (Fries) Gillet
   search_name: Pluteus petasatus (Fries) Gillet
@@ -396,8 +396,8 @@ lepiota_version_1:
   version: 1
   rank: Genus
   text_name: Lepiota
-  display_name: **__Lepiota__**
-  observation_name: **__Lepiota sp.__**
+  display_name: '**__Lepiota__**'
+  observation_name: '**__Lepiota sp.__**'
   search_name: Lepiota sp.
   citation: ''
 
@@ -409,8 +409,8 @@ chlorophyllum_version_1:
   version: 1
   rank: Genus
   text_name: Chlorophyllum
-  display_name: **__Chlorophyllum__**
-  observation_name: **__Chlorophyllum sp.__**
+  display_name: '**__Chlorophyllum__**'
+  observation_name: '**__Chlorophyllum sp.__**'
   search_name: Chlorophyllum sp.
   citation: ''
 
@@ -423,8 +423,8 @@ bugs_bunny_one_version_1:
   rank: Species
   author: One
   text_name: Warnerbros bugs-bunny
-  display_name: **__Warnerbros bugs-bunny__** One
-  observation_name: **__Warnerbros bugs-bunny__** One
+  display_name: '**__Warnerbros bugs-bunny__** One'
+  observation_name: '**__Warnerbros bugs-bunny__** One'
   search_name: Warnerbros bugs-bunny One
   citation: ''
 
@@ -437,8 +437,8 @@ bugs_bunny_two_version_1:
   rank: Species
   author: Two
   text_name: Warnerbros bugs-bunny
-  display_name: **__Warnerbros bugs-bunny__** Two
-  observation_name: **__Warnerbros bugs-bunny__** Two
+  display_name: '**__Warnerbros bugs-bunny__** Two'
+  observation_name: '**__Warnerbros bugs-bunny__** Two'
   search_name: Warnerbros bugs-bunny Two
   citation: ''
 
@@ -450,8 +450,8 @@ russula_brevipes_no_author_version_1:
   version: 1
   rank: Species
   text_name: Russula brevipes
-  display_name: **__Russula brevipes__**
-  observation_name: **__Russula brevipes__**
+  display_name: '**__Russula brevipes__**'
+  observation_name: '**__Russula brevipes__**'
   search_name: Russula brevipes
   citation: ''
 
@@ -464,8 +464,8 @@ russula_brevipes_author_notes_version_1:
   rank: Species
   text_name: Russula brevipes
   author: Peck
-  display_name: **__Russula brevipes__** Peck
-  observation_name: **__Russula brevipes__** Peck
+  display_name: '**__Russula brevipes__** Peck'
+  observation_name: '**__Russula brevipes__** Peck'
   search_name: Russula brevipes Peck
   citation: ''
 
@@ -477,8 +477,8 @@ russula_cremoricolor_no_author_notes_version_1:
   version: 1
   rank: Species
   text_name: Russula cremoricolor
-  display_name: **__Russula cremoricolor__**
-  observation_name: **__Russula cremoricolor__**
+  display_name: '**__Russula cremoricolor__**'
+  observation_name: '**__Russula cremoricolor__**'
   search_name: Russula cremoricolor
   citation: ''
 
@@ -491,8 +491,8 @@ russula_cremoricolor_author_notes_version_1:
   rank: Species
   text_name: Russula cremoricolor
   author: Earle
-  display_name: **__Russula cremoricolor__** Earle
-  observation_name: **__Russula cremoricolor__** Earle
+  display_name: '**__Russula cremoricolor__** Earle'
+  observation_name: '**__Russula cremoricolor__** Earle'
   search_name: Russula cremoricolor Earle
   citation: ''
 
@@ -505,8 +505,8 @@ lentinellus_ursinus_author1_version_1:
   rank: Species
   text_name: Lentinellus ursinus
   author: Kühner
-  display_name: **__Lentinellus ursinus__** Kühner
-  observation_name: **__Lentinellus ursinus__** Kühner
+  display_name: '**__Lentinellus ursinus__** Kühner'
+  observation_name: '**__Lentinellus ursinus__** Kühner'
   search_name: Lentinellus ursinus Kühner
   citation: ''
 
@@ -519,8 +519,8 @@ lentinellus_ursinus_author2_version_1:
   rank: Species
   text_name: Lentinellus ursinus
   author: Kuhner
-  display_name: **__Lentinellus ursinus__** Kuhner
-  observation_name: **__Lentinellus ursinus__** Kuhner
+  display_name: '**__Lentinellus ursinus__** Kuhner'
+  observation_name: '**__Lentinellus ursinus__** Kuhner'
   search_name: Lentinellus ursinus Kuhner
   citation: ''
 
@@ -532,9 +532,9 @@ macrocybe_pegler_version_1:
   version: 1
   rank: Genus
   text_name: Macrocybe
-  author: (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
-  display_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
-  observation_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
+  display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
+  observation_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   search_name: Macrocybe sp.
   citation: ''
 
@@ -547,8 +547,8 @@ macrocybe_titans_version_1:
   rank: Genus
   text_name: Macrocybe
   author: Titans
-  display_name: **__Macrocybe__** Titans
-  observation_name: **__Macrocybe__** Titans
+  display_name: '**__Macrocybe__** Titans'
+  observation_name: '**__Macrocybe__** Titans'
   search_name: Macrocybe sp. Titans
   citation: ''
 
@@ -561,8 +561,8 @@ boletus_edulis_version_1:
   rank: Species
   text_name: Boletus edulis
   author: Bull.
-  display_name: **__Boletus edulis__** Bull.
-  observation_name: **__Boletus edulis__** Bull.
+  display_name: '**__Boletus edulis__** Bull.'
+  observation_name: '**__Boletus edulis__** Bull.'
   search_name: Boletus edulis Bull.
   citation: ''
 
@@ -587,10 +587,10 @@ peltigera_version_2:
   version: 2
   rank: Genus
   text_name: Peltigera
-  author: (Old) New Auth.
+  author: '(Old) New Auth.'
   citation: Ye Auld Manual of Lichenes, 1800.
-  display_name: **__Peltigera__** (Old) New Auth.
-  observation_name: **__Peltigera sp.__** (Old) New Auth.
+  display_name: '**__Peltigera__** (Old) New Auth.'
+  observation_name: '**__Peltigera sp.__** (Old) New Auth.'
   search_name: Peltigera sp. (Old) New Auth.
 
 petigera_version_1:
@@ -617,8 +617,8 @@ suillus_version_1:
   rank: Genus
   text_name: Suillus
   author: Gray
-  display_name: **__Suillus__** Gray
-  observation_name: **__Suillus sp.__** Gray
+  display_name: '**__Suillus__** Gray'
+  observation_name: '**__Suillus sp.__** Gray'
   search_name: Suillus sp. Gray
   citation: ''
 
@@ -631,8 +631,8 @@ suillus_by_white_version_1:
   rank: Genus
   text_name: Suillus
   author: E.B. White
-  display_name: **__Suillus__** E.B. White
-  observation_name: **__Suillus sp.__** E.B. White
+  display_name: '**__Suillus__** E.B. White'
+  observation_name: '**__Suillus sp.__** E.B. White'
   search_name: Suillus sp. E.B. White
   citation: ''
 
@@ -645,8 +645,8 @@ suilus_version_1:
   rank: Genus
   text_name: Suilus
   author: E.B. White
-  display_name: **__Suilus__** E.B. White
-  observation_name: **__Suilus sp.__** E.B. White
+  display_name: '**__Suilus__** E.B. White'
+  observation_name: '**__Suilus sp.__** E.B. White'
   search_name: Suilus sp. E.B. White
   correct_spelling_id: 43
   deprecated: true

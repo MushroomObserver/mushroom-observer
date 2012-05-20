@@ -19,18 +19,21 @@ date_helper_less_than_x_seconds: meno di %d secondi
 date_helper_half_a_minute: mezzo minuto
 date_helper_less_than_a_minute: meno di un minuto
 date_helper_one_minute: un minuto
-date_helper_x_minutes: %d minuti
+date_helper_x_minutes: '%d minuti'
 date_helper_one_hour: circa un'ora
 date_helper_x_hours: circa %d ore
 date_helper_one_day: un giorno
-date_helper_x_days: %d giorni
-date_helper_one_month: %d mesi
-date_helper_x_months: %d mois
+date_helper_x_days: '%d giorni'
+date_helper_one_month: '%d mesi'
+date_helper_x_months: '%d mois'
 date_helper_one_year: un anno
-date_helper_x_years: %d anni
+date_helper_x_years: '%d anni'
 
 # DON'T TRANSLATE, just order
-date_helper_order: [:day, :month, :year] #default Rails is US ordered: :order => [:year, :month, :day]
+date_helper_order:
+- :day
+- :month
+- :year
 
 date_helper_date_formats: # DON'T  TRANSLATE, RE ORDER
   default: "%Y-%m-%d"
@@ -50,8 +53,9 @@ date_helper_pm: pm
 number_helper_unit: "€"
 number_helper_separator: "," #unit separator (between integer part and fraction part)
 number_helper_delimiter: "." #delimiter between each group of thousands. Example: 1.234.567 
-number_helper_order: [number, unit] #order is at present unsupported in Rails
-#to support for instance French format, the order is different: Unit comes last (ex. "1.234,00 €")
+number_helper_order:
+- number
+- unit
 
 # use by +Array#to_sentence()+
 array_connector: 'e'

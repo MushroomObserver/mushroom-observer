@@ -22,18 +22,21 @@ date_helper_less_than_x_seconds: 少於 %d 秒
 date_helper_half_a_minute: 30 秒
 date_helper_less_than_a_minute: 少於一分钟
 date_helper_one_minute: 一分钟
-date_helper_x_minutes: %d 分钟
+date_helper_x_minutes: '%d 分钟'
 date_helper_one_hour: 约 1 小时
 date_helper_x_hours: 约 %d 小时
 date_helper_one_day: 1 天
-date_helper_x_days: %d 天
+date_helper_x_days: '%d 天'
 date_helper_one_month: 1 个月
-date_helper_x_months: %d 个月
+date_helper_x_months: '%d 个月'
 date_helper_one_year: 1 年
-date_helper_x_years: %d 年
+date_helper_x_years: '%d 年'
 
 # DON'T TRANSLATE, just order
-date_helper_order: [:day, :month, :year] #default Rails is US ordered: :order => [:year, :month, :day]
+date_helper_order:
+- :day
+- :month
+- :year
 
 date_helper_date_formats: # DON'T  TRANSLATE, RE ORDER
   default: "%Y/%m/%d"
@@ -53,8 +56,9 @@ date_helper_pm: pm
 number_helper_unit: "¥"
 number_helper_separator: "." #unit separator (between integer part and fraction part)
 number_helper_delimiter: "," #delimiter between each group of thousands. Example: 1.234.567
-number_helper_order: [ unit, number ]
-#to support for instance French format, the order is different: Unit comes last (ex. "1.234,00 €")
+number_helper_order:
+- unit
+- number 
 
 # use by +Array#to_sentence()+
 array_connector: '和'

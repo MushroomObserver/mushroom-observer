@@ -2,71 +2,71 @@
 
 # Rolf is pretty confident of his naming.
 coprinus_comatus_owner_vote:
-  id:        1
-  sync_id:   1xx1
-  created:   2007-03-19 20:20:00
-  modified:  2007-03-19 20:21:00
-  user_id:   1
+  id: 1
+  sync_id: 1xx1
+  created: 2007-03-19 20:20:00
+  modified: 2007-03-19 20:21:00
+  user_id: 1
   naming_id: 3
-  value:     2
-  favorite:  true
+  value: 2
+  favorite: true
   observation_id: 3
 
 # Mary is not so much.
 coprinus_comatus_other_vote:
-  id:        2
-  sync_id:   2xx1
-  created:   2007-03-19 20:20:00
-  modified:  2007-03-19 20:21:00
-  user_id:   2
+  id: 2
+  sync_id: 2xx1
+  created: 2007-03-19 20:20:00
+  modified: 2007-03-19 20:21:00
+  user_id: 2
   naming_id: 3
-  value:     1
-  favorite:  true
+  value: 1
+  favorite: true
   observation_id: 3
 
 # Rolf hates Mary's naming.
 coprinus_comatus_other_naming_rolf_vote:
-  id:        3
-  sync_id:   3xx1
-  created:   2007-02-27 20:20:00
-  modified:  2007-02-27 20:21:00
-  user_id:   1
+  id: 3
+  sync_id: 3xx1
+  created: 2007-02-27 20:20:00
+  modified: 2007-02-27 20:21:00
+  user_id: 1
   naming_id: 9
-  value:     -3
-  favorite:  false
+  value: -3
+  favorite: false
   observation_id: 3
 
 # Mary's absolutely positive, though.
 coprinus_comatus_other_naming_mary_vote:
-  id:        4
-  sync_id:   4xx1
-  created:   2007-02-27 20:20:00
-  modified:  2007-02-27 20:21:00
-  user_id:   2
+  id: 4
+  sync_id: 4xx1
+  created: 2007-02-27 20:20:00
+  modified: 2007-02-27 20:21:00
+  user_id: 2
   naming_id: 9
-  value:     3
-  favorite:  true
+  value: 3
+  favorite: true
   observation_id: 3
 
 # Rolf has no opinion about his own naming.
 strobilurus_diminutivus_no_opinion_vote:
-  id:        5
-  sync_id:   5xx1
-  created:   2008-02-09 09:15:00
-  modified:  2008-02-09 09:15:00
-  user_id:   1
+  id: 5
+  sync_id: 5xx1
+  created: 2008-02-09 09:15:00
+  modified: 2008-02-09 09:15:00
+  user_id: 1
   naming_id: 8
-  value:     0
-  favorite:  false
+  value: 0
+  favorite: false
   observation_id: 8
 
 amateur_vote:
-  id:        6
-  sync_id:   6xx1
-  created:   2010-12-31 06:46:00
-  modified:  2010-12-31 06:46:00
-  user_id:   5
+  id: 6
+  sync_id: 6xx1
+  created: 2010-12-31 06:46:00
+  modified: 2010-12-31 06:46:00
+  user_id: 5
   naming_id: 2
-  value:     2
-  favorite:  true
+  value: 2
+  favorite: true
   observation_id: 11

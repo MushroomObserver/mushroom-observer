@@ -1,10 +1,10 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
 detailed_unknown_interest:
-  id:          1
-  sync_id:     1xx1
-  modified:    2008-03-02 21:14:00
-  user_id:     3
+  id: 1
+  sync_id: 1xx1
+  modified: 2008-03-02 21:14:00
+  user_id: 3
   target_type: Observation
-  target_id:   2
-  state:       true
+  target_id: 2
+  state: true

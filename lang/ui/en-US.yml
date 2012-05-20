@@ -495,10 +495,10 @@ unknown_locations: Unknown, Earth, World, Worldwide, Anywhere, Everywhere
 
 # Quality values.
 image_vote_long_0: No opinion.
-image_vote_long_1: **Okay** but not so useful.
-image_vote_long_2: **Useful** for identification.
-image_vote_long_3: **Good** enough for a field guide.
-image_vote_long_4: **Great!** Beyond the work of mortals.
+image_vote_long_1: '**Okay** but not so useful.'
+image_vote_long_2: '**Useful** for identification.'
+image_vote_long_3: '**Good** enough for a field guide.'
+image_vote_long_4: '**Great!** Beyond the work of mortals.'
 
 image_vote_help_0: No opinion.
 image_vote_help_1: Okay but not so useful.
@@ -5455,7 +5455,10 @@ system_status_title: Server Status
 # DISABLE SYNTAX CHECKER
 
 # Don't translate this, just correct the order in which dates are given.
-date_helper_order: [:year, :month, :day]
+date_helper_order:
+- :year
+- :month
+- :day
 
 # These two use UNIX date format codes.  Ask MO developers for help if you
 # aren't familiar with the syntax.
