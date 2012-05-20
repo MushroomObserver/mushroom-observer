@@ -548,3 +548,52 @@ end
 # Stuff to get rails 2.1.1 working with ruby 1.9.3 -Jason, May 2012
 
 MissingSourceFile::REGEXPS.push([/^cannot load such file -- (.+)$/i, 1])
+
+# Ruby 1.8.6 introduced new! and deprecated new0.
+# Ruby 1.9.0 removed new0.
+# Ruby trunk revision 31668 removed the new! method.
+if !DateTime.respond_to?(:new!) and
+   !DateTime.respond_to?(:new0)
+  class DateTime
+    HALF_DAYS_IN_DAY = Rational.new!(1, 2)
+    def self.new!(ajd = 0, of = 0, sg = Date::ITALY)
+      jd = ajd + of + HALF_DAYS_IN_DAY
+      jd_i = jd.to_i
+      jd_i -= 1 if jd < 0
+      hours = (jd - jd_i) * 24
+      hours_i = hours.to_i
+      minutes = (hours - hours_i) * 60
+      minutes_i = minutes.to_i
+      seconds = (minutes - minutes_i) * 60
+      DateTime.jd(jd_i, hours_i, minutes_i, seconds, of, sg)
+    end
+  end
+end
+
+# Without this, queries like current_account.tickets.recent.count would
+# instantiate AR objects for all (!!) tickets in the account, not merely
+# return a count of the recent ones.  See:
+# https://rails.lighthouseapp.com/projects/8994/tickets/5410-multiple-database-queries-when-chaining-named-scopes-with-rails-238-and-ruby-192
+# (The patch in that lighthouse bug was not, in fact, merged in).
+module ActiveRecord
+  module Associations
+    class AssociationProxy
+      def respond_to_missing?(meth, incl_priv)
+        false
+      end
+    end
+  end
+end
+
+# Make sure the flash sets the encoding to UTF-8. (I must have missed this. Found it at:
+# http://developer.uservoice.com/entries/how-to-upgrade-a-rails-2.3.14-app-to-ruby-1.9.3/)
+module ActionController
+  module Flash
+    class FlashHash
+      def [](k)
+        v = super
+        v.is_a?(String) ? v.force_encoding("UTF-8") : v
+      end
+    end
+  end
+end
