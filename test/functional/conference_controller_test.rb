@@ -31,7 +31,8 @@ class ConferenceControllerTest < FunctionalTestCase
       :event => {
         :name => 'Cape Cod Foray',
         :location => 'Cape Cod, MA, USA',
-        :description => 'Find 555 fungal friends for $50',
+        :description => 'Find 555 fungal friends!',
+        :registration_note => 'Bring $5 and a sack lunch',
         'start(1i)'      => '2012',
         'start(2i)'      => '09',
         'start(3i)'      => '28',
@@ -51,6 +52,7 @@ class ConferenceControllerTest < FunctionalTestCase
     assert_equal(params[:event][:name], event.name)
     assert_equal(params[:event][:location], event.location)
     assert_equal(params[:event][:description], event.description)
+    assert_equal(params[:event][:registration_note], event.registration_note)
     assert(event.start)
     assert(event.end)
     assert_response(:redirect)
@@ -78,6 +80,7 @@ class ConferenceControllerTest < FunctionalTestCase
     assert_equal(params[:event][:name], event.name)
     assert_equal(params[:event][:location], event.location)
     assert_equal(params[:event][:description], event.description)
+    assert_equal(params[:event][:registration_note], event.registration_note)
     assert(event.start)
     assert(event.end)
     assert_response(:redirect)

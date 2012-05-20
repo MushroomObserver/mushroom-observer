@@ -23,6 +23,8 @@
 <br/>
 <%= :conference_event_description.t + ': ' +  @event.description %><br/>
 <br/>
+<%= link_to(:register_event.t, :action => 'register', :id => @event.id) %><br/>
+<br/>
 <% if @event.created_at %>
   <%= :conference_event_created_at.t + ': ' +  @event.created_at.web_date %><br/>
 <% end %>
