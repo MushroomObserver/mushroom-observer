@@ -1,16 +1,16 @@
 #
-#  This is a log of the installation of a development server 19-20 May 2012.
+#  This is a log of the installation of a development server 20 May 2012.
 #
-#  Started: 11:13pm
-#  Ended... yikes, major trouble patching rails to work with ruby 1.9.3
+#  Started: 14:30
+#  Ended: 14:58
 #
 #  ubuntu 11.10
 #  ruby 1.9.3-p194
 #  rubygems 1.8.24
 #  rails 2.1.1
-#  passenger xxx
-#  apache2 xxx
-#  mysql xxx
+#  apache2 2.2.20
+#  mysql 5.1.62
+#  passenger 3.0.12
 #
 ################################################################################
 
@@ -18,9 +18,9 @@
 local> ssh root@80.77.87.179
 # (asks for intial root password)
 root> passwd
-# (asks for new root password)
+# (asks for new root password twice)
+root> apt-get update
 root> apt-get upgrade
-# (that failed, so I had to run "apt-get update" then reran "apt-get upgrade")
 root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
               build-essential bison libyaml-dev
 
@@ -174,6 +174,7 @@ jason> sudo a2dissite default
 jason> sudo a2ensite mo
 jason> sudo a2enmod rewrite
 jason> sudo a2enmod headers
+jason> sudo service apache2 reload
 
 # Create database.
 jason> mysql -u root -p
@@ -186,22 +187,33 @@ jason> mysql -u root -p
   grant all privileges on mo_test.* to 'mo'@'localhost' with grant option;
 mo> cp config/database.yml-template config/database.yml
 mo> vi config/database.yml
-  # Change these values in development section: (other sections aren't needed)
-  adapter:  mysql2
-  database: mo_development
-  password: xxx
-  socket:   /var/run/mysqld/mysqld.sock
-  encoding: utf8
-  # Change these values in test section: (other sections aren't needed)
-  adapter:  mysql2
-  database: mo_test
-  password: xxx
-  socket:   /var/run/mysqld/mysqld.sock
-  encoding: utf8
+  development:
+    adapter: mysql
+    database: mo_development
+    username: mo
+    password: xxx
+    # Default (works for MacOS X)
+    # socket: /tmp/mysql.sock
+    # For Ubuntu/Debian
+    socket: /var/run/mysqld/mysqld.sock
+    # For Fedora
+    # socket: /var/lib/mysql/mysql.sock
+  test:
+    adapter: mysql
+    database: mo_test
+    username: mo
+    password: xxx
+    # Default (works for MacOS X)
+    # socket: /tmp/mysql.sock
+    # For Ubuntu/Debian
+    socket: /var/run/mysqld/mysqld.sock
+    # For Fedora
+    # socket: /var/lib/mysql/mysql.sock
 mo> cd db
 mo> scp jason@mushroomobserver.org:/var/web/mo/db/checkpoint.gz .
 mo> gunzip checkpoint.gz
 mo> mysql -u mo -pxxx mo_development -e "source checkpoint"
+mo> cd ..
 
 # Test it using webrick:
 mo> script/server
