@@ -30,6 +30,7 @@
 #  AUTHOR_PAT::         (Any-of-the-above) (Author...)
 #  SENSU_PAT::          (Whatever...) (sensu Whatever...)
 #  GROUP_PAT::          (Whatever...) (group|gr|gp.)
+#  SECTION_PAT::        \((sect.|subgenus|stirps) (xxx)\)
 #  COMMENT_PAT::        (...) [(comment)]
 #
 #  * Results are grouped according to the parentheses shown above.
@@ -989,7 +990,7 @@ class Name < AbstractModel
   def observation_count
     return observations.length
   end
-  
+
   def more_popular(name)
     result = self
     if not name.deprecated
@@ -1003,7 +1004,7 @@ class Name < AbstractModel
     end
     return result
   end
-  
+
   def time_of_last_naming
     t = self.created
     for n in namings
@@ -1013,7 +1014,7 @@ class Name < AbstractModel
     end
     return t
   end
-  
+
   ################################################################################
   #
   #  :section: Misspellings
@@ -1186,14 +1187,15 @@ class Name < AbstractModel
   ##############################################################################
 
   ABOVE_SPECIES_PAT = /^\s* ("?[A-Z][a-zë\-]+"?) \s*$/x
-  SP_PAT            = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ (sp\.?|species) \s*$/x
+  SP_PAT            = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ ([Ss][Pp]\.?|species) \s*$/x
   SPECIES_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ ([a-zë\-\"]+) \s*$/x
   SUBSPECIES_PAT    = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+)    \s+ (?:subspecies|subsp|ssp|s)\.? \s+ ([a-zë\-\"]+) \s*$/x
   VARIETY_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)?)    \s+ (?:variety|var|v)\.? \s+ ([a-zë\-\"]+) \s*$/x
   FORM_PAT          = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)? (?: \s+ (?:variety|var|v)\.? \s+ [a-zë\-\"]+)?) \s+ (?:forma|form|fo|f)\.? \s+ ([a-zë\-\"]+) \s*$/x
-  AUTHOR_PAT        = /^\s* ("?[A-Z][a-zë\-\s\.\"]+?[a-zë\"](?:\s+sp\.)?) \s+ (("?[^a-z"\s]|in\s?ed\.?|auct\.?|van\sd[a-z]+\s[A-Z]).*) $/x   # (may have trailing space)
+  AUTHOR_PAT        = /^\s* ("?[A-Z][a-zë\-\s\.\"]+?[a-zë\"](?:\s+[Ss][Pp]\.)?) \s+ (("?[^a-z"\s]|in\s?ed\.?|auct\.?|van\sd[a-z]+\s[A-Z]).*) $/x   # (may have trailing space)
   SENSU_PAT         = /^\s* ("?[A-Z].*) \s+ (sens[u\.]\s+\S.*\S) \s*$/x
-  GROUP_PAT         = /^\s* ("?[A-Z].*) \s+ (group|gr|gp)\.?     \s*$/x
+  GROUP_PAT         = /^\s* ("?[A-Z].*) \s+ ([Gg]roup|gr|gp)\.?     \s*$/x
+  SECTION_PAT       = /^\s* \(?([Ss]ect\.?|[Ss]ection|[Ss]ubg\.?|[Ss]ubgenus|[Ss]tirps) \s+ ([A-Za-zë]+)\)? \s* (.*)$/x
   COMMENT_PAT       = /^\s* ([^\[\]]*)  \s+ \[(.*)\] \s*$/x
 
   # Parse a name given no additional information.  Returns an Array or nil:
@@ -1207,6 +1209,7 @@ class Name < AbstractModel
   #   6: author            "Author"                "Author"        "Author"
   #
   def self.parse_name(str)
+    str = str.strip_squeeze.gsub(/“|”/, '"').gsub(/‘|’/, "'")
     (name, author) = parse_author(str)
     if parse = parse_group(name)
       rank = :Group
@@ -1280,9 +1283,36 @@ class Name < AbstractModel
     end
     if match
       name = match[1]
-      author = match[2].strip # Due to possible trailing \s
+      author = match[2]
+      name += ' sp.' if author.sub!(/^sp\.\s*/i, '')
+      author = nil if author == ''
+    end
+    unless author.blank?
+      name, author = standardize_section(name, author)
     end
     [name, author]
+  end
+
+  def self.standardize_section(name_str, author_str)
+    # These get interpreted as a species epithet, so need to make special exception here.
+    if name_str.sub!(/ (sect|section|subg|subgenus|stirps)$/, '')
+      author_str = $1 + ' ' + author_str
+    end
+    match = SECTION_PAT.match(author_str)
+    if match
+      type, name, author = match[1..3]
+      type = case type.downcase[0..3]
+      when 'sect'; 'sect.'
+      when 'subg'; 'subgenus'
+      when 'stir'; 'stirps'
+      end
+      if author.blank?
+        author_str = "(#{type} #{name})"
+      else
+        author_str = "(#{type} #{name}) #{author}"
+      end
+    end
+    return name_str, author_str
   end
 
   # The following methods all return the following array:
@@ -1328,7 +1358,7 @@ class Name < AbstractModel
   def self.parse_species(in_str, deprecated=false)
     results = nil
     match = SPECIES_PAT.match(in_str)
-    if match and (match[2] != 'section')
+    if match
       name = match[1] + ' ' + match[2]
       results = [
         name.gsub('ë', 'e'),
@@ -1447,109 +1477,56 @@ class Name < AbstractModel
   # is worth bearing in mind.
   #
   def self.find_names(in_str, rank=nil, deprecated=false)
-    in_str = in_str.to_s.strip_squeeze
+    results = []
 
-    # Standardize "ssp", "var" and "f".
-    in_str.sub!(/ (subsp|ssp)\.? /, ' subsp. ')
-    in_str.sub!(/ (var|v)\.? /, ' var. ')
-    in_str.sub!(/ (forma|f)\.? /, ' f. ')
+    parse = parse_name(in_str)
+    if parse
+      text_name = parse[0]
+      search_name = parse[3]
+      author = parse[6]
 
-    # This removes the "sp" or "sp." in "Lactarius sp" and "Lactarius sp Author".
-    if m = SP_PAT.match(in_str)
-      in_str = m[1]
-    elsif (m1 = AUTHOR_PAT.match(in_str)) and (m2 = SP_PAT.match(m1[1])) and (ABOVE_SPECIES_PAT.match(m2[1]))
-      in_str = "#{m2[1]} #{m1[2]}"
-    end
-
-    name = in_str.strip_squeeze # (again?!)
-    if names_for_unknown.member?(name.downcase)
-      name = "Fungi"
-    end
-
-    deprecated_condition = ''
-    unless deprecated
-      deprecated_condition = 'deprecated = 0 and '
-    end
-
-    # Look up the name.  Can get multiple matches if there are multiple names
-    # with the same name but different authors.  (found via searching on
-    # text_name).  However, if the user provides an explicit author, there
-    # should be no way to get multiple matches.
-    if rank
-      result = Name.all(:conditions => [
-        "#{deprecated_condition}rank = :rank AND
-        (search_name = :name OR text_name = :name)",
-        { :rank => rank, :name => name }
-      ])
-
-      if result.empty? and Name.ranks_above_species.member?(rank.to_sym)
-        # I think this serves the purpose of allowing user to search on "Genus
-        # Author", in which case (I believe) the desired matching name will
-        # have text_name="Genus" and search_name="Genus sp. Author", neither
-        # of which would match the above statement without the "sp." being
-        # added. [-JPH 20080227]
-        name.sub!(' ', ' sp. ')
-        result = Name.all(:conditions => [
-          "#{deprecated_condition}rank = :rank AND
-          (search_name = :name OR text_name = :name)",
-          { :rank => rank, :name => name }
-        ])
+      if names_for_unknown.member?(name.downcase)
+        name = 'Fungi'
       end
 
-    else
-      result = Name.all(:conditions => [
-        "#{deprecated_condition}(search_name = :name OR text_name = :name)",
-         { :name => name }
-      ])
-
-      if result.empty? and
-         (m = AUTHOR_PAT.match(name)) and
-         ABOVE_SPECIES_PAT.match(m[1])
-        # (see comments above)
-        name = m[1] + ' sp. ' + m[2]
-        result = Name.all(:conditions => [
-          "#{deprecated_condition}(search_name = :name OR text_name = :name)",
-          { :name => name }
-        ])
-      end
-    end
-
-    if result.empty?
-
-      # If provided a name complete with author, then check if that name exists
-      # in the database without the author.
-      name, author = Name.parse_author(in_str)
-
+      conditions = []
+      conditions_args = {}
       if author
-        # Don't check text_name because we don't want to match a name that has
-        # a different author.  (Note that name already has the "sp." inserted
-        # in the case of ranks above species.)
-        if rank
-          result = Name.all(:conditions => [
-            "#{deprecated_condition}rank = :rank AND search_name = :name",
-            { :rank => rank, :name => name }
-          ])
-        else
-          result = Name.all(:conditions => [
-            "#{deprecated_condition}search_name = :name",
-            { :name => name }
-          ])
-        end
+        conditions << 'search_name = :name'
+        conditions_args[:name] = search_name
+      else
+        conditions << 'text_name = :name'
+        conditions_args[:name] = text_name
+      end
+      unless deprecated
+        conditions << 'deprecated = 0'
+      end
+      if rank
+        conditions << 'rank = :rank'
+        conditions_args[:rank] = rank
+      end
 
-        # If we find it, add the author to it.  Probably should ask the user
-        # for confirmation, but that looks really tricky.
-        if result.length == 1
-          result.first.change_author(author)
-          result.first.save
+      results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
+
+      # If user provided author, check if name already exists without author.
+      # If so, add author to that name automatically.
+      if results.empty? and author
+        conditions_args[:name] = text_name
+        results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
+        # (this should never return more than one result)
+        if results.length == 1
+          results.first.change_author(author)
+          results.first.save
         end
+      end
+
+      # No names that aren't deprecated, so try for ones that are deprecated.
+      if results.empty? and not deprecated
+        results = find_names(in_str, rank, true)
       end
     end
 
-    # No names that aren't deprecated, so try for ones that are deprecated.
-    if result.empty? and not deprecated
-      result = find_names(in_str, rank, true)
-    end
-    result
+    return results
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't

@@ -14,7 +14,26 @@ class NameTest < UnitTestCase
 
   def do_name_parse_test(*args)
     parse = Name.parse_name(args.shift)
-    assert_equal(args, parse)
+    any_errors = false
+    msg = ['Name is wrong; expected -vs- actual:']
+    i = 0
+    for var in [
+      'text_name',
+      'display_name',
+      'observation_name',
+      'search_name',
+      'parent_name',
+      'rank',
+      'author',
+    ]
+      if args[i].to_s != parse[i].to_s 
+        any_errors = true
+        var = var + ' (*)'
+      end
+      msg << '%-20s %-40s %-40s' % [var, '['+args[i].to_s+']', '['+parse[i].to_s+']']
+      i += 1
+    end
+    assert_block(msg.join("\n")) { !any_errors }
   end
 
   def do_parse_classification_test(text, expected)
@@ -350,6 +369,71 @@ class NameTest < UnitTestCase
       'Boletus',
       :Species,
       'Arora & Simonini'
+    )
+  end
+
+  def test_name_parse_21
+    do_name_parse_test(
+      'Genus “quoted”',
+      'Genus "quoted"',
+      '**__Genus "quoted"__**',
+      '**__Genus "quoted"__**',
+      'Genus "quoted"',
+      'Genus',
+      :Species,
+      ''
+    )
+  end
+
+  def test_name_parse_22
+    do_name_parse_test(
+      'Genus Sp.',
+      'Genus',
+      '**__Genus__**',
+      '**__Genus sp.__**',
+      'Genus sp.',
+      '',
+      :Genus,
+      ''
+    )
+  end
+
+  def test_name_parse_23
+    do_name_parse_test(
+      'Genus Sect. Vaginatae (L.) Ach.',
+      'Genus',
+      '**__Genus__** (sect. Vaginatae) (L.) Ach.',
+      '**__Genus sp.__** (sect. Vaginatae) (L.) Ach.',
+      'Genus sp. (sect. Vaginatae) (L.) Ach.',
+      '',
+      :Genus,
+      '(sect. Vaginatae) (L.) Ach.'
+    )
+  end
+
+  def test_name_parse_24
+    do_name_parse_test(
+      'Genus (subg Vaginatae)',
+      'Genus',
+      '**__Genus__** (subgenus Vaginatae)',
+      '**__Genus sp.__** (subgenus Vaginatae)',
+      'Genus sp. (subgenus Vaginatae)',
+      '',
+      :Genus,
+      '(subgenus Vaginatae)'
+    )
+  end
+
+  def test_name_parse_25
+    do_name_parse_test(
+      'Genus stirps Vaginatae Ach. & Fr.',
+      'Genus',
+      '**__Genus__** (stirps Vaginatae) Ach. & Fr.',
+      '**__Genus sp.__** (stirps Vaginatae) Ach. & Fr.',
+      'Genus sp. (stirps Vaginatae) Ach. & Fr.',
+      '',
+      :Genus,
+      '(stirps Vaginatae) Ach. & Fr.'
     )
   end
 

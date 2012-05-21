@@ -46,7 +46,7 @@
         <div id="word">&nbsp;</div>
         <%= form_tag({:action => 'name_lister'}, {}) %>
           <center>
-            <%= submit_tag(:name_lister_submit_spl.l) %>&nbsp;&nbsp;
+            <%= submit_tag(:name_lister_submit_spl.l, :disabled => !@user) %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_txt.l) %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_rtf.l) %>&nbsp;&nbsp;
             <%= submit_tag(:name_lister_submit_csv.l) %>

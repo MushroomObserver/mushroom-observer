@@ -307,14 +307,16 @@ class SpeciesListController < ApplicationController
       end.select {|n| !n.nil?}
       case params[:commit]
       when :name_lister_submit_spl.l
-        @species_list = SpeciesList.new
-        clear_query_in_session
-        init_name_vars_for_create()
-        init_member_vars_for_create()
-        init_project_vars_for_create()
-        @checklist ||= []
-        @list_members = params[:results].gsub('|',' ').gsub('*','')
-        render(:action => 'create_species_list')
+        if @user
+          @species_list = SpeciesList.new
+          clear_query_in_session
+          init_name_vars_for_create()
+          init_member_vars_for_create()
+          init_project_vars_for_create()
+          @checklist ||= []
+          @list_members = params[:results].gsub('|',' ').gsub('*','')
+          render(:action => 'create_species_list')
+        end
       when :name_lister_submit_txt.l
         render_name_list_as_txt(@names)
       when :name_lister_submit_rtf.l

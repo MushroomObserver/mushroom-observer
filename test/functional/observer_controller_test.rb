@@ -784,12 +784,12 @@ class ObserverControllerTest < FunctionalTestCase
       :approved_name => new_name + "  "
     }, 1,1,2)
 
-    # Test an observation creation with an approved section (should fail)
+    # Test an observation creation with an approved section (this is now supported nominally)
     new_name = "Argus section Argus"
     generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name
-    }, 0,0,0)
+    }, 1,1,2)
 
     # Test an observation creation with an approved junk name
     new_name = "This is a bunch of junk"
