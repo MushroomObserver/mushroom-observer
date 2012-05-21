@@ -1,10 +1,11 @@
 #
 #  This is a log of the installation of a development server 20 May 2012.
+#  I used a fresh "nano" virtual machine at 6sync.com with 256MB ram.
 #
 #  Started: 14:30
 #  Ended: 14:58
 #
-#  ubuntu 11.10
+#  ubuntu 11.10 (64bit)
 #  ruby 1.9.3-p194
 #  rubygems 1.8.24
 #  rails 2.1.1

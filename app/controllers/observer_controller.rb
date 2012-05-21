@@ -1028,6 +1028,8 @@ class ObserverController < ApplicationController
       init_list_vars_for_edit(@observation)
 
     else
+      any_errors = false
+
       # Update observation attributes
       @observation.attributes = params[:observation]
 
@@ -1037,25 +1039,26 @@ class ObserverController < ApplicationController
       if @place_name != params[:approved_where] and @observation.location.nil?
         db_name = Location.user_name(@user, @place_name)
         @dubious_where_reasons = Location.dubious_name?(db_name, true)
+        any_errors = true if @dubious_where_reasons.any?
       end
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
       @bad_images  = create_image_objects(params[:image], @observation, @good_images)
       attach_good_images(@observation, @good_images)
+      any_errors = true if @bad_images.any?
 
       # Only save observation if there are changes.
-      done = false
       if @dubious_where_reasons == []
         if @observation.changed?
           @observation.modified = Time.now
-          if done = save_observation(@observation)
+          if save_observation(@observation)
             flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
             touch = (params[:log_change][:checked] == '1' rescue false)
             @observation.log(:log_observation_updated, :touch => touch)
+          else
+            any_errors = true
           end
-       else
-          done = true
         end
       end
 
@@ -1063,22 +1066,19 @@ class ObserverController < ApplicationController
       update_projects(@observation, params[:project])
       update_species_lists(@observation, params[:list])
 
-      # Redirect to show_observation or create_location on success.
-      if done && @bad_images.empty?
-        if @observation.location.nil?
-          redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.place_name,
-                      :set_observation => @observation.id, :params => query_params)
-        else
-          redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)
-        end
-      end
-
       # Reload form if anything failed.
-      if not done
+      if any_errors
         @images         = @bad_images
         @new_image.when = @observation.when
         init_project_vars_for_reload(@observation)
         init_list_vars_for_reload(@observation)
+
+      # Redirect to show_observation or create_location on success.
+      elsif @observation.location.nil?
+        redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.place_name,
+                    :set_observation => @observation.id, :params => query_params)
+      else
+        redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)
       end
     end
   end

@@ -492,7 +492,9 @@ class Image < AbstractModel
       if upload_type.match(/^image\//)
         result = true
       else
-        errors.add(:image, :validate_image_wrong_type.t(:type => upload_type))
+        file = upload_original_name.to_s
+        file = '?' if file.blank?
+        errors.add(:image, :validate_image_wrong_type.t(:type => upload_type, :file => file))
         result = false
       end
     end

@@ -1380,6 +1380,34 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(old_img3_notes, img3.reload.notes)
   end
 
+  def test_edit_observation_with_non_image
+    obs = observations(:minimal_unknown)
+    file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/projects.yml")
+    file.content_type = 'text/plain'
+    params = {
+      :id => obs.id,
+      :observation => {
+        :place_name => obs.place_name,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen,
+        :thumb_image_id => '0',
+      },
+      :good_images => '',
+      :good_image => {},
+      :image => {
+        '0' => {
+          :image => file,
+          :when => Time.now,
+        },
+      },
+    }
+    login('mary')
+    post(:edit_observation, params)
+    assert_response(:success) # means failure!
+    assert_flash_error
+  end
+
   # ----------------------------
   #  Test namings.
   # ----------------------------

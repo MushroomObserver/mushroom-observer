@@ -5029,7 +5029,7 @@ validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:im
 validate_observation_where_missing: Please tell us where it was seen or collected.
 validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
 validate_user_login_taken: Sorry, that login name is already taken.
-validate_image_wrong_type: The file you tried to upload is not recognized as an image.  It is of type '[type]'.
+validate_image_wrong_type: The file "[file]" is not a valid image; it is comes through as '[type]'.
 
 # These shouldn't need translating, but you are free to override if you need to.
 validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"

@@ -183,6 +183,22 @@ class LocationControllerTest < FunctionalTestCase
     construct_location_error(params)
   end
 
+  def test_construct_location_screwy_names
+    login('dick')
+    loc = locations(:burbank)
+    params = update_params_from_loc(loc)
+    params.delete(:id)
+
+    params[:location][:display_name] = ''
+    post(:create_location, params)
+    assert_response(:success) # means failure!
+
+    params[:location][:display_name] = ' Strip  This,  Maine,  USA '
+    post(:create_location, params)
+    assert_response(:redirect)
+    assert_equal('Strip This, Maine, USA', Location.last.display_name)
+  end
+
   def test_construct_location_errors
     # Test for north > 90
     params = barton_flats_params
@@ -292,6 +308,21 @@ class LocationControllerTest < FunctionalTestCase
     params = update_params_from_loc(locations(:albion))
     params[:location][:display_name] = "Somewhere Dubious"
     update_location_error(params)
+  end
+
+  def test_update_location_screwy_names
+    login('dick')
+    loc = locations(:burbank)
+    params = update_params_from_loc(loc)
+
+    params[:location][:display_name] = ''
+    post(:edit_location, params)
+    assert_response(:success) # means failure!
+
+    params[:location][:display_name] = ' Strip  This,  Maine,  USA '
+    post(:edit_location, params)
+    assert_response(:redirect)
+    assert_equal('Strip This, Maine, USA', loc.reload.display_name)
   end
 
   # Burbank has observations so it stays.

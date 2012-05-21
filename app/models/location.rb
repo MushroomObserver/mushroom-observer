@@ -996,6 +996,8 @@ protected
 
     if self.name.to_s.binary_length > 1024
       errors.add(:name, :validate_location_name_too_long.t)
+    elsif self.name.empty?
+      errors.add(:name, :validate_missing.t(:field => :name))
     end
   end
 end

@@ -514,6 +514,7 @@ class LocationController < ApplicationController
       # Need to create location.
       else
         @location = Location.new(params[:location])
+        @location.display_name = @display_name # (strip_squozen)
 
         # Validate name.
         @dubious_where_reasons = []

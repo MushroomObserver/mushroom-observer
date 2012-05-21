@@ -205,6 +205,7 @@ module ApplicationHelper::Description
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
     list = list_descriptions(obj).map {|link| indent + link}
+    any = list.any?
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
     html = list.join("<br/>\n")
