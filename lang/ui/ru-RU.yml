@@ -1631,6 +1631,9 @@ prefs_locale: Язык
 prefs_location_format: Формат описания местонахождений
 prefs_location_format_postal: "Почтовый США (Москва, Россия)"
 prefs_location_format_scientific: "Научный (Россия, Москва)"
+prefs_hide_authors:  [:AUTHORITYS]
+prefs_hide_authors_none:  "show all authorities (default)"
+prefs_hide_authors_above_species:  "hide authorities for genera and higher ranks"
 prefs_thumbnail_size: Размер превью
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"

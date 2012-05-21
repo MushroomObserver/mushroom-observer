@@ -1700,6 +1700,9 @@ prefs_locale: Język
 prefs_location_format: Format lokalizacji
 prefs_location_format_postal: "Pocztowy (New York, USA)"
 prefs_location_format_scientific: "Naukowy (USA, New York)"
+prefs_hide_authors:  [:AUTHORITYS]
+prefs_hide_authors_none:  "show all authorities (default)"
+prefs_hide_authors_above_species:  "hide authorities for genera and higher ranks"
 prefs_thumbnail_size: Rozmiar miniatury
 prefs_thumbnail_small:  "[:image_show_small]"
 prefs_thumbnail_large:  "[:image_show_large]"
@@ -5034,7 +5037,7 @@ validate_observation_thumb_image_id_invalid:  Unable to find a corresponding [:i
 validate_observation_where_missing:  Please tell us where it was seen or collected.
 validate_user_email_missing:  Please give us a valid email address so we can verify your [:account].
 validate_user_login_taken:  Sorry, that login name is already taken.
-validate_image_wrong_type:  The file you tried to upload is not recognized as an image.  It is of type '[type]'.
+validate_image_wrong_type:  The file "[file]" is not a valid image; it is comes through as '[type]'.
 
 # These shouldn't need translating, but you are free to override if you need to.
 validate_comment_object_type_too_long:  "[:validate_too_long(field=''object_type'',max=30)]"

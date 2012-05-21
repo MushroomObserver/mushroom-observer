@@ -680,8 +680,8 @@ class NameTest < UnitTestCase
     # Start with no reviewers, editors or authors.
     User.current = nil
     desc.gen_desc = ''
-    desc.review_status = :unreviewed;
-    desc.reviewer = nil;
+    desc.review_status = :unreviewed
+    desc.reviewer = nil
     Name.without_revision do
       desc.save
     end
@@ -734,7 +734,7 @@ class NameTest < UnitTestCase
     )
 
     # Katrina wisely reconsiders requesting notifications of all name changes.
-    @katrina.email_names_all = false;
+    @katrina.email_names_all = false
     @katrina.save
 
     # email types:  author  editor  review  all     interest
@@ -938,11 +938,52 @@ class NameTest < UnitTestCase
     File.delete(NAME_PRIMER_CACHE_FILE)
     assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end
-  
+
   def test_lichen
     assert(names(:tremella_mesenterica).is_lichen?)
     assert(names(:tremella).is_lichen?)
     assert(names(:tremella_justpublished).is_lichen?)
     assert(!names(:agaricus_campestris).is_lichen?)
+  end
+
+  def test_hiding_authors
+    @dick.hide_authors = :above_species
+    @mary.hide_authors = :none
+
+    name = names(:agaricus_campestris)
+    User.current = @mary; assert_equal('**__Agaricus campestris__** L.', name.display_name)
+    User.current = @dick; assert_equal('**__Agaricus campestris__** L.', name.display_name)
+    User.current = @mary; assert_equal('**__Agaricus campestris__** L.', name.observation_name)
+    User.current = @dick; assert_equal('**__Agaricus campestris__** L.', name.observation_name)
+
+    name = names(:macrocybe_titans)
+    User.current = @mary; assert_equal('**__Macrocybe__** Titans', name.display_name)
+    User.current = @dick; assert_equal('**__Macrocybe__**', name.display_name)
+    User.current = @mary; assert_equal('**__Macrocybe__** Titans', name.observation_name)
+    User.current = @dick; assert_equal('**__Macrocybe__**', name.observation_name)
+
+    name.display_name = '__Macrocybe sp.__ (Author) Author'
+    assert_equal('__Macrocybe sp.__', name.display_name)
+
+    name.display_name = '__Macrocybe sp.__ (van Helsing) Author'
+    assert_equal('__Macrocybe sp.__', name.display_name)
+
+    name.display_name = '__Macrocybe sp.__ (sect. Helsing) Author'
+    assert_equal('__Macrocybe sp.__ (sect. Helsing)', name.display_name)
+
+    name.display_name = '__Macrocybe sp.__ (sect. Helsing)'
+    assert_equal('__Macrocybe sp.__ (sect. Helsing)', name.display_name)
+
+    name.display_name = '**__Macrocybe sp.__** (van Helsing) Author'
+    assert_equal('**__Macrocybe sp.__**', name.display_name)
+
+    name.display_name = '**__Macrocybe sp.__** (sect. Helsing) Author'
+    assert_equal('**__Macrocybe sp.__** (sect. Helsing)', name.display_name)
+
+    name.display_name = '**__Macrocybe sp.__** (sect. Helsing)'
+    assert_equal('**__Macrocybe sp.__** (sect. Helsing)', name.display_name)
+
+    name.display_name = '**__Macrocybe sp.__** (subgenus Blah)'
+    assert_equal('**__Macrocybe sp.__** (subgenus Blah)', name.display_name)
   end
 end

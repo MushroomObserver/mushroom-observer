@@ -73,6 +73,11 @@
   <br/><center><input type="submit" value="<%= :SAVE_EDITS.l %>" class="primary" /></center>
   <p><b><%= :prefs_appearance.t %></b></p>
 
+  <p><label for="user_hide_authors"><%= :prefs_hide_authors.t %></label>:<br/>
+    <%= form.select(:hide_authors, [
+    [:prefs_hide_authors_none.l, :none],
+    [:prefs_hide_authors_above_species.l, :above_species]]) %></p>
+
   <p><label for="user_location_format"><%= :prefs_location_format.t %></label>:<br/>
     <%= form.select(:location_format, [
     [:prefs_location_format_postal.l, :postal],

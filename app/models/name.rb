@@ -343,6 +343,21 @@ class Name < AbstractModel
     "#{boldness}__#{str}__#{boldness}"
   end
 
+  def display_name
+    hide_authors_in_formatted_name(self[:display_name])
+  end
+
+  def observation_name
+    hide_authors_in_formatted_name(self[:observation_name])
+  end
+
+  def hide_authors_in_formatted_name(str)
+    if User.current and User.current.hide_authors == :above_species and RANKS_ABOVE_SPECIES.include?(rank)
+      str = str.sub(/^(\**__.*__\**( \(s[a-z]+\.? [^\(\)]+\))?).*/, '\\1')
+    end
+    return str
+  end
+
   ##############################################################################
   #
   #  :section: Taxonomy
