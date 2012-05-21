@@ -1700,7 +1700,7 @@ prefs_locale: Język
 prefs_location_format: Format lokalizacji
 prefs_location_format_postal: "Pocztowy (New York, USA)"
 prefs_location_format_scientific: "Naukowy (USA, New York)"
-prefs_hide_authors:  [:AUTHORITYS]
+prefs_hide_authors:  "[:AUTHORITYS]"
 prefs_hide_authors_none:  "show all authorities (default)"
 prefs_hide_authors_above_species:  "hide authorities for genera and higher ranks"
 prefs_thumbnail_size: Rozmiar miniatury

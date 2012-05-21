@@ -1716,7 +1716,7 @@ prefs_locale: Idioma
 prefs_location_format: Formato de la ubicación
 prefs_location_format_postal: "Postal: (Santiago, Chile)"
 prefs_location_format_scientific: "Científica: (Chile, Santiago)"
-prefs_hide_authors:  [:AUTHORITYS]
+prefs_hide_authors:  "[:AUTHORITYS]"
 prefs_hide_authors_none:  "show all authorities (default)"
 prefs_hide_authors_above_species:  "hide authorities for genera and higher ranks"
 prefs_thumbnail_size: Tamaño de las miniaturas
