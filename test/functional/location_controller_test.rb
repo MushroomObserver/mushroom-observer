@@ -325,6 +325,32 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal('Strip This, Maine, USA', loc.reload.display_name)
   end
 
+  def test_update_location_with_scientific_names
+    @rolf.update_attributes(:location_format => :scientific)
+    @rolf.reload
+    login('rolf')
+    loc = locations(:burbank)
+    normal_name = loc.name
+    scientific_name = loc.display_name
+    assert_not_equal(normal_name, scientific_name)
+    get(:edit_location, :id => loc.id)
+    assert_input_value(:location_display_name, scientific_name)
+
+    new_normal_name = 'Undefined Town, California, USA'
+    new_scientific_name = 'USA, California, Undefined Town'
+    params = update_params_from_loc(loc)
+    params[:location][:display_name] = new_normal_name
+    post(:edit_location, params)
+    assert_response(:success) # means failure
+
+    params[:location][:display_name] = new_scientific_name
+    post(:edit_location, params)
+    assert_response(:redirect) # means success
+    loc.reload
+    assert_equal(new_normal_name, loc.name)
+    assert_equal(new_scientific_name, loc.display_name)
+  end
+
   # Burbank has observations so it stays.
   def test_update_location_user_merge
     to_go = locations(:burbank)

@@ -583,7 +583,7 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     @location = Location.find(params[:id])
-    @display_name = @location.name
+    @display_name = @location.display_name
     done = false
     if request.method == :post
       @display_name = params[:location][:display_name].strip_squeeze rescue ''
