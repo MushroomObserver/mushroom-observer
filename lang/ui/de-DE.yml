@@ -2048,7 +2048,7 @@ show_votes_go_private:  Make all of my votes anonymous.
 show_votes_total: Gesamtpunktzahl<br/>Summe(Punkte * Gewichtung) /<br/>(Gesamtgewichtung + 1)
 show_votes_descript: >
   Stimmen der Nutzer werden bewertet entsprechend deren Beitrag zur Webseite
-  (log<span style='font-size:50%'>10</span> Beitrag).
+  (log<small>10</small> Beitrag).
   Außerdem hat der Nutzer, der den Fund einträgt, eine Zusatzstimme.
 
 show_votes_go_public_confirm:  >

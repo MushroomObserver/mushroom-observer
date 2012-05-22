@@ -372,16 +372,36 @@ class String
   end
   # :startdoc:
 
-  def t; Textile.textilize_without_paragraph(self, false); end
-  def tl; Textile.textilize_without_paragraph(self, true); end
-  def tp; '<div class="textile">' + Textile.textilize(self, false) + '</div>'; end
-  def tpl; '<div class="textile">' + Textile.textilize(self, true) + '</div>'; end
-  def tp_nodiv; Textile.textilize(self, false); end
-  def tpl_nodiv; Textile.textilize(self, true); end
+  # This should safely match anything that could possibly be interpreted as an HTML tag.
+  HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
+
+  def t(sanitize=true)
+    Textile.textilize_without_paragraph(self, false, sanitize)
+  end
+
+  def tl(sanitize=true)
+    Textile.textilize_without_paragraph(self, true, sanitize)
+  end
+
+  def tp(sanitize=true)
+    '<div class="textile">' + Textile.textilize(self, false, sanitize) + '</div>'
+  end
+
+  def tpl(sanitize=true)
+    '<div class="textile">' + Textile.textilize(self, true, sanitize) + '</div>'
+  end
+
+  def tp_nodiv(sanitize=true)
+    Textile.textilize(self, false, sanitize)
+  end
+
+  def tpl_nodiv(sanitize=true)
+    Textile.textilize(self, true, sanitize)
+  end
 
   # Convert string (assumed to be in UTF-8) to plain ASCII.
   def to_ascii
-    self.to_s.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
+    to_s.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
       UTF8_TO_ASCII[c] || ' '
     end
   end
@@ -408,7 +428,7 @@ class String
   # Remove HTML tags (not entities) from string.  Used to make sure title is
   # safe for HTML header field.
   def strip_html
-    self.gsub(/<[^>]*>/, '')
+    gsub(HTML_TAG_PATTERN, '')
   end
 
   # Truncate an HTML string, being careful to close off any open formatting
@@ -464,11 +484,12 @@ class String
          gsub(/<\/td> */, "\t").        # put tabs between table columns
          gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
          gsub(/\n+\Z/, '').             # remove superfluous newlines at end
-         gsub(/<[^>]*>/, '').           # remove all <tags>
+         gsub(HTML_TAG_PATTERN, '').    # remove all <tags>
          gsub(/^ +|[ \t]+$/, '').       # remove leading/trailing space on each line
          gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
                                         # convert &xxx; and &#nnn; to ascii
   end
+
 
   # Surround HTML string with a span that prevents long strings from being
   # broken.
@@ -560,7 +581,7 @@ class String
   def truncate_binary_length!(len)
     self.replace(truncate_binary_length(len))
   end
-  
+
   # Truncate a string so that its *binary* length is within a given limit.
   def truncate_binary_length(len)
     result = self

@@ -1201,7 +1201,7 @@ form_locations_species: Ενδιαφέροντα Είδη
 form_locations_notes: "[:Notes]"
 form_locations_refs: "[:form_names_refs]"
 form_locations_refs_help: "[:form_names_refs_help]"
-form_locations_help: <a href="/location/help" target="_new">Βοήθεια</a>
+form_locations_help: '<a href="/location/help" target="_new">Βοήθεια</a>'
 form_locations_find_on_map: Εύρεση στο Χάρτη =>
 
 form_locations_lat_long_help: >
@@ -1969,7 +1969,7 @@ show_votes_total: >
   (συνολικό βάρος + 1)
 
 show_votes_descript: >
-  Το βάρος των ψήφων κάθε χρήστη υπολογίζεται ανάλογα με τη συνεισφορά του στην ιστοσελίδα (log<span style='font-size:50%'>10</span> συνεισφορά). Επίσης, ο χρήστης που δημιούργησε την παρατήρηση παίρνει μία επιπλέον ψήφο.
+  Το βάρος των ψήφων κάθε χρήστη υπολογίζεται ανάλογα με τη συνεισφορά του στην ιστοσελίδα (log<small>10</small> συνεισφορά). Επίσης, ο χρήστης που δημιούργησε την παρατήρηση παίρνει μία επιπλέον ψήφο.
 
 show_votes_go_public_confirm: >
   Τώρα θα γίνουν όλες σας οι ψήφοι για όλες τις παρατηρήσεις δημόσιες, όχι μόνο η ψήφος σας γι' αυτό το όνομα. Αυτό θέλετε να κάνετε;

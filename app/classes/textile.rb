@@ -45,21 +45,20 @@ class Textile < String
     }
   end
 
-  # Convenience wrapper on the instance method
-  # Textile#textilize_without_paragraph.
-  def self.textilize_without_paragraph(str, do_object_links=false)
-    new(str).textilize_without_paragraph(do_object_links)
+  # Convenience wrapper on the instance method Textile#textilize_without_paragraph.
+  def self.textilize_without_paragraph(str, do_object_links=false, sanitize=true)
+    new(str).textilize_without_paragraph(do_object_links, sanitize)
   end
 
   # Convenience wrapper on the instance method Textile#textilize.
-  def self.textilize(str, do_object_links=false)
-    new(str).textilize(do_object_links)
+  def self.textilize(str, do_object_links=false, sanitize=true)
+    new(str).textilize(do_object_links, sanitize)
   end
 
   # Wrapper on textilize that returns only the body of the first paragraph of
   # the result.
-  def textilize_without_paragraph(do_object_links=false)
-    textilize(do_object_links).sub(/\A<p[^>]*>(.*?)<\/p>.*/m, '\\1')
+  def textilize_without_paragraph(do_object_links=false, sanitize=true)
+    textilize(do_object_links, sanitize).sub(/\A<p[^>]*>(.*?)<\/p>.*/m, '\\1')
   end
 
   # Textilizes the string using RedCloth, doing a little extra processing:
@@ -81,7 +80,7 @@ class Textile < String
   # tl::   Do 't' and check for links.
   # tp::   Wrap 't' in a <p> block.
   # tpl::  Wrap 't' in a <p> block AND do links.
-  def textilize(do_object_links=false)
+  def textilize(do_object_links=false, sanitize=true)
 
     # This converts the "_object blah_" constructs into "x{OBJECT id label}x".
     # (The "x"s prevent Textile from interpreting the curlies as style info.)
@@ -92,7 +91,9 @@ class Textile < String
     end
 
     # Let Textile munge the thing up now.
-    replace(RedCloth.new(self).to_html)
+    red = RedCloth.new(self)
+    red.sanitize_html = sanitize
+    replace(red.to_html)
 
     # Remove pre-existing links first, replacing with "<XXXnn>".
     hrefs = []

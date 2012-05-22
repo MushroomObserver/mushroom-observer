@@ -29,7 +29,7 @@ if @user.email_html %>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-  <%= sanitize(@message).tp %>
+  <%= @message.tp %>
 </div>
 <%= handy_links.tp %>
 <ul type=none>

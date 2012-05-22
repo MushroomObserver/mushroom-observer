@@ -40,7 +40,7 @@ for field in NameDescription.all_note_fields
     even = !even
     any = true %>
     <%= "form_names_#{field}".to_sym.t %>:
-    <%= colored_notes_box(even, sanitize(value).tpl) %>
+    <%= colored_notes_box(even, value.tpl) %>
     <br/>
   <% end %>
 <% end %>

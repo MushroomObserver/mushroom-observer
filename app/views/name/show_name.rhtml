@@ -93,7 +93,7 @@
 %>
 <% if @name.has_notes? %>
   <p><%= :show_name_notes.t %>:</p>
-  <%= colored_notes_box(true, sanitize(@name.notes).tpl) %>
+  <%= colored_notes_box(true, @name.notes.tpl) %>
 <% end %>
 
 <center>

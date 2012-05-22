@@ -8,9 +8,9 @@
       <% if !@code.nil? %>
         <b><%= :sandbox_look_like.t %>:</b><br/>
         <% if @submit == :sandbox_test.l %>
-          <div class="sandbox"><%= sanitize(@code).tpl %></div><br/>
+          <div class="sandbox"><%= @code.tpl %></div><br/>
         <% else %>
-          <div class="sandbox"><%= h(sanitize(@code).tpl) %></div><br/>
+          <div class="sandbox"><%= h(@code.tpl) %></div><br/>
         <% end %>
       <% end %>
 

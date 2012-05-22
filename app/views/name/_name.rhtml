@@ -4,8 +4,8 @@
     (<%= :MISSPELLED.t %>)
   <% end %><br/>
 <%= :NAME.t %>: <%= h(name.text_name) %><br/>
-<%= :AUTHORITY.t %>: <%= sanitize(name.author.to_s).t %><br/>
-<%= :CITATION.t %>: <%= sanitize(name.citation.to_s).t %><br/>
+<%= :AUTHORITY.t %>: <%= name.author.to_s.t %><br/>
+<%= :CITATION.t %>: <%= name.citation.to_s.t %><br/>
 <% if name.is_misspelling? %>
   <%= :show_name_misspelling_correct.t %>:
     <%= link_to((correct_spelling rescue name.correct_spelling.display_name.t),

@@ -174,7 +174,7 @@
   </p>
 
   <% if !@image.notes.blank? %>
-    <%= sanitize(:image_show_notes.l + ': ' + @image.notes.to_s).tpl %>
+    <%= (:image_show_notes.l + ': ' + @image.notes.to_s).tpl %>
   <% end %>
 
   <% if !@votes.empty? %>

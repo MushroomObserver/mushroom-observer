@@ -1224,7 +1224,7 @@ form_locations_species:  Interesting Species
 form_locations_notes:  "[:Notes]"
 form_locations_refs:  "[:form_names_refs]"
 form_locations_refs_help:  "[:form_names_refs_help]"
-form_locations_help:  <a href="/location/help" target="_new">Help</a>
+form_locations_help:  '<a href="/location/help" target="_new">Help</a>'
 form_locations_find_on_map:  Find on Map =>
 
 form_locations_lat_long_help:  >
@@ -2049,7 +2049,7 @@ show_votes_total:  >
 
 show_votes_descript:  >
   User's votes are weighted by their contribution to the site
-  (log<span style='font-size:50%'>10</span> contribution).
+  (log<small>10</small> contribution).
   In addition, the user who created the observation gets an extra vote.
 
 show_votes_go_public_confirm:  >

@@ -50,7 +50,7 @@
           <tr>
             <td>
               <div>
-                <%= link_to(sanitize(naming.format_name).t,
+                <%= link_to(naming.format_name.t,
                             :controller => 'name', :action => 'show_name',
                             :id => naming.name, :params => query_params) %>
               </div>
@@ -120,7 +120,7 @@
                   <% if reason.notes.blank? %>
                     <%= reason.label.t %>
                   <% else %>
-                    <%= sanitize(reason.label.l + ": " + reason.notes).tl %>
+                    <%= (reason.label.l + ": " + reason.notes).tl %>
                   <% end %><br/>
                 <% end %>
               <% end %>

@@ -84,7 +84,7 @@ end %>
   <br/>
 <% end %>
 <%= if !@show_user.notes.empty?
-  sanitize(@show_user.notes).tpl
+  @show_user.notes.tpl
 end %>
 
 <center>

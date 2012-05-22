@@ -26,7 +26,7 @@ module ApplicationHelper::ObjectLink
   #   Where: <%= where_string(obs.place_name) %>
   #
   def where_string(where, count=nil)
-    result = sanitize(where).t
+    result = where.t
     result += " (#{count})" if count
     result = "<span class=\"Data\">#{result}</span>"
   end
@@ -104,7 +104,7 @@ module ApplicationHelper::ObjectLink
   #   Project: <%= project_link(draft_name.project) %>
   def project_link(project, name=nil)
     if project
-      name ||= sanitize(project.title).t
+      name ||= project.title.t
       link_to(name, :controller => 'project', :action => 'show_project', :id => project.id)
     end
   end
@@ -114,7 +114,7 @@ module ApplicationHelper::ObjectLink
   #   Species List: <%= species_list_link(observation.species_lists.first) %>
   def species_list_link(species_list, name=nil)
     if species_list
-      name ||= sanitize(species_list.title).t
+      name ||= species_list.title.t
       link_to(name, :controller => 'species_list', :action => 'show_species_list',
               :id => species_list.id)
     end

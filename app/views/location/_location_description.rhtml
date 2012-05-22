@@ -11,7 +11,7 @@ for f in LocationDescription.all_note_fields
     even = !even
     any = true %>
     <%= "form_locations_#{f}".to_sym.t %>:
-    <%= colored_notes_box(even, sanitize(value).tpl) %>
+    <%= colored_notes_box(even, value.tpl) %>
     <br/>
   <% end %>
 <% end %>

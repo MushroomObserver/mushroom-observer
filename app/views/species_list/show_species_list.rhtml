@@ -37,7 +37,7 @@
 %>
 
 <p><%= :WHEN.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
-<p><%= :WHERE.t %>: <span class="Data"><%= sanitize(@species_list.place_name).t %></span></p>
+<p><%= :WHERE.t %>: <span class="Data"><%= @species_list.place_name.t %></span></p>
 <p><%= :WHO.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
 <% if @species_list.projects.any? %>
   <p><%= :PROJECTS.t %>: <span class="Data">
@@ -45,7 +45,7 @@
   </span></p>
 <% end %>
 <p><%= :NOTES.t %>:</p>
-<%= sanitize(@species_list.notes.to_s).tpl %>
+<%= @species_list.notes.to_s.tpl %>
 
 <% if @pages && @pages.length > 0
   set_query_params(@query) %>

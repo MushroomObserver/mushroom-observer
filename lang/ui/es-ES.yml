@@ -2073,7 +2073,7 @@ show_votes_total: >
 
 show_votes_descript: >
   Los votos del usuario son ponderados por su contribución a la cita web
-  (log<span style='font-size:50%'>10</span> contribución).  Además, el usuario
+  (log<small>10</small> contribución).  Además, el usuario
   que ha creado la observación recibe una votación extra.
 
 show_votes_go_public_confirm: >

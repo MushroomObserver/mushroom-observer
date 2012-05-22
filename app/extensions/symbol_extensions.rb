@@ -61,6 +61,10 @@ class Symbol
   # tp::  Wrap 't' in a <p> block.
   # tpl:: Wrap 't' in a <p> block AND do links.
   #
+  # Note that these are guaranteed to be "sanitary".  The strings in the translation
+  # files are assumed to be same, even if they contain HTML.  Strings passed in via
+  # the '[arg]' syntax have any HTML stripped from them.
+  #
   # ==== Argument expansion
   #
   # It supports some limited attempts to get case and number correct.  This
@@ -167,7 +171,7 @@ class Symbol
         val = args[arg]
         val.is_a?(Symbol) ?
           val.l :
-          val.to_s
+          val.to_s.strip_html
 
       # Want :types, given :type.
       elsif (y = x.sub(/s$/i,'')) and
@@ -175,7 +179,7 @@ class Symbol
         val = args[arg]
         val.is_a?(Symbol) ?
           "#{val}s".to_sym.l :
-          val.to_s
+          val.to_s.strip_html
 
       # Want :TYPE, given :type.
       elsif args.has_key?(arg = x.downcase.to_sym) and
@@ -183,7 +187,7 @@ class Symbol
         val = args[arg]
         val.is_a?(Symbol) ?
           val.to_s.upcase.to_sym.l :
-          val.to_s.capitalize_first
+          val.to_s.strip_html.capitalize_first
 
       # Want :TYPES, given :type.
       elsif args.has_key?(arg = y.downcase.to_sym) and
@@ -191,21 +195,21 @@ class Symbol
         val = args[arg]
         val.is_a?(Symbol) ?
           "#{val.to_s.upcase}S".to_sym.l :
-          val.to_s.capitalize_first
+          val.to_s.strip_html.capitalize_first
 
       # Want :Type, given :type.
       elsif args.has_key?(arg = x.downcase.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
           val.l.capitalize_first :
-          val.to_s.capitalize_first
+          val.to_s.strip_html.capitalize_first
 
       # Want :Types, given :type.
       elsif args.has_key?(arg = y.downcase.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
           "#{val}s".to_sym.l.capitalize_first :
-          val.to_s.capitalize_first
+          val.to_s.strip_html.capitalize_first
 
       else
         raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
@@ -256,8 +260,8 @@ class Symbol
 
   alias l localize
 
-  def t(*args); localize(*args).t; end
-  def tl(*args); localize(*args).tl; end
-  def tp(*args); localize(*args).tp; end
-  def tpl(*args); localize(*args).tpl; end
+  def t(*args); localize(*args).t(false); end
+  def tl(*args); localize(*args).tl(false); end
+  def tp(*args); localize(*args).tp(false); end
+  def tpl(*args); localize(*args).tpl(false); end
 end

@@ -11,7 +11,7 @@
                  { :synonyms => true })
     if object.has_notes?
       str += '<p>' + :show_name_notes.t + ':</p>'
-      str += colored_notes_box(true, sanitize(object.notes).tpl)
+      str += colored_notes_box(true, object.notes.tpl)
     end
     str
 
