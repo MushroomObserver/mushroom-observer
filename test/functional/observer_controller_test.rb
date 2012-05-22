@@ -27,7 +27,6 @@ class ObserverControllerTest < FunctionalTestCase
     params[:username] = user.login
 
     post_requires_login(:create_observation, params)
-    # either_requires_either(:post, :create_observation, nil, params, :username => user.login)
     if o_num == 0
       assert_response(:success)
     elsif Location.find_by_name(params[:observation][:place_name]) or
@@ -785,11 +784,13 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1,1,2)
 
     # Test an observation creation with an approved section (this is now supported nominally)
-    new_name = "Argus section Argus"
+    # (Use Macrocybe because it already exists and has an author.  That way we know it is
+    # actually creating a name for this section.)
+    new_name = "Macrocybe section Fakesection"
     generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name
-    }, 1,1,2)
+    }, 1,1,1)
 
     # Test an observation creation with an approved junk name
     new_name = "This is a bunch of junk"
