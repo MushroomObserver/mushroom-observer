@@ -367,7 +367,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash('dont lose me!')
 
     # Now make sure our test suite is clearing out the flash automatically
-    # between requests like it should. 
+    # between requests like it should.
     get(:test_flash, :error => 'tweedle')
     assert_flash('tweedle')
 
@@ -387,5 +387,89 @@ class AccountControllerTest < FunctionalTestCase
     get(:test_flash, :error => 'and others', :redirect => 1)
     get(:test_flash, :redirect => 1)
     assert_flash(nil)
+  end
+
+  def test_api_key_manager
+    assert_equal(0, MoApiKey.count)
+
+    # Get initial (empty) form.
+    requires_login(:api_keys)
+    assert_select('a[href*=edit_api_key]', :count => 0)
+    assert_input_value(:key_notes, '')
+
+    # Try to create key with no name.
+    login('mary')
+    post(:api_keys, :commit => :account_api_keys_create_button.l)
+    assert_flash_error
+    assert_equal(0, MoApiKey.count)
+    assert_select('a[href*=edit_api_key]', :count => 0)
+
+    # Create good key.
+    post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'app name'})
+    assert_flash_success
+    assert_equal(1, MoApiKey.count)
+    assert_equal(1, @mary.reload.api_keys.length)
+    key1 = @mary.api_keys.first
+    assert_equal('app name', key1.notes)
+    assert_select('a[href*=edit_api_key]', :count => 1)
+
+    # Create another key.
+    post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'another name'})
+    assert_flash_success
+    assert_equal(2, MoApiKey.count)
+    assert_equal(2, @mary.reload.api_keys.length)
+    key2 = @mary.api_keys.last
+    assert_equal('another name', key2.notes)
+    assert_select('a[href*=edit_api_key]', :count => 2)
+
+    # Press "remove" without selecting anything.
+    post(:api_keys, :commit => :account_api_keys_remove_button.l)
+    assert_flash_warning
+    assert_equal(2, MoApiKey.count)
+    assert_select('a[href*=edit_api_key]', :count => 2)
+
+    # Remove first key.
+    post(:api_keys, :commit => :account_api_keys_remove_button.l, "key_#{key1.id}" => '1')
+    assert_flash_success
+    assert_equal(1, MoApiKey.count)
+    assert_equal(1, @mary.reload.api_keys.length)
+    key = @mary.api_keys.last
+    assert_objs_equal(key, key2)
+    assert_select('a[href*=edit_api_key]', :count => 1)
+  end
+
+  def test_edit_api_key
+    key = @mary.api_keys.create(:notes => 'app name')
+
+    # Try without logging in.
+    get(:edit_api_key, :id => key.id)
+    assert_response(:redirect)
+
+    # Try to edit another user's key.
+    login('dick')
+    get(:edit_api_key, :id => key.id)
+    assert_response(:redirect)
+
+    # Have Mary edit her own key.
+    login('mary')
+    get(:edit_api_key, :id => key.id)
+    assert_response(:success)
+    assert_input_value(:key_notes, 'app name')
+
+    # Cancel form.
+    post(:edit_api_key, :commit => :CANCEL.l, :id => key.id)
+    assert_response(:redirect)
+    assert_equal('app name', key.reload.notes)
+
+    # Try to change notes to empty string.
+    post(:edit_api_key, :commit => :UPDATE.l, :id => key.id, :key => {:notes => ''})
+    assert_flash_error
+    assert_response(:success) # means failure
+
+    # Change notes correctly.
+    post(:edit_api_key, :commit => :UPDATE.l, :id => key.id, :key => {:notes => 'new name'})
+    assert_flash_success
+    assert_response(:action => :api_keys)
+    assert_equal('new name', key.reload.notes)
   end
 end

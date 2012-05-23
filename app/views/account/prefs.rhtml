@@ -10,6 +10,8 @@
             :controller => 'account', :action => 'profile')
     add_tab(:show_user_your_notifications.t,
             :controller => 'interest', :action => 'list_interests')
+    add_tab(:account_api_keys_link.t,
+            :controller => 'account', :action => 'api_keys')
     add_tab(:turn_javascript_nil_title.t,
             :controller => 'observer', :action => 'turn_javascript_nil') if session[:js_override] != nil
     add_tab(:turn_javascript_on_title.t,

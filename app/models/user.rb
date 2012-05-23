@@ -265,12 +265,13 @@ class User < AbstractModel
   has_many :namings
   has_many :notifications
   has_many :observations
-  has_many :projects_created, :class_name => "Project"
+  has_many :projects_created, :class_name => 'Project'
   has_many :queued_emails
   has_many :species_lists
   has_many :test_add_image_logs
   has_many :votes
   has_many :donations
+  has_many :api_keys, :class_name => 'MoApiKey', :dependent => :destroy
 
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
   has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"

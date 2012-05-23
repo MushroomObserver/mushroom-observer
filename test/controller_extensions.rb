@@ -646,8 +646,22 @@ module ControllerExtensions
   end
 
   # Check default value of a form field.
-  def assert_input_value(id, val)
-    assert_select("input##{id}[value='#{val.gsub(/'/,'\\\'')}']")
+  def assert_input_value(id, expect_val)
+    message = "Didn't find any inputs '#{id}'."
+    assert_select("input##{id}") do |elements|
+      if elements.length > 1
+        message = "Found more than one input '#{id}'."
+      elsif elements.length == 1
+        match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
+        actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ''
+        if actual_val != expect_val.to_s
+          message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
+        else
+          message = nil
+        end
+      end
+    end
+    assert_block(message) { message.nil? }
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,

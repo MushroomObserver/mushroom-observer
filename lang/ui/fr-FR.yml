@@ -43,6 +43,10 @@ ru_RU: Русский
 # COMMON WORDS AND PHRASES
 
 # Object titles, all nouns.
+API_KEY:  API Key
+api_key:  API key
+API_KEYS:  API Keys
+api_keys:  API keys
 COMMENT: Commentaire
 comment: commentaire
 COMMENTS: Commentaires
@@ -2584,6 +2588,36 @@ pivotal_label_all:  "[:all]"
 ################################################################################
 
 # LESS POPULAR PAGES
+
+# account/api_keys
+account_api_keys_link:  API Key Manager
+account_api_keys_title:  API Key Manager
+account_api_keys_last_used_column_label:  Last Used
+account_api_keys_num_uses_column_label:  Uses
+account_api_keys_notes_label:  "Enter the name or a brief description of the application that will use this key:"
+account_api_keys_remove_button:  Remove the Selected Keys
+account_api_keys_create_button:  Create a New Key
+account_api_keys_help:  >
+  API Keys are used by third-party applications to access the Mushroom Observer
+  database directly.  You may request as many API Keys as you like, and no
+  restrictions are placed on these keys.
+  \n\n 
+  Each key is attached to a single user.  When posting observations or images,
+  for example, your application will send this API Key in lieu of logging in.
+  Therefore you should take some care to prevent other people or malicious
+  agents from using your API Keys.
+  \n\n 
+  Note that no key is required if you are only interested in _reading_ data;
+  keys are only required if you wish to post or modify data. 
+
+account_api_keys_create_success:  Sucessfully created a new API Key.
+account_api_keys_create_failed:  "Failed to create a new API Key: [msg]"
+account_api_keys_removed_some:  "Successfully removed [num] selected API Key(s)."
+account_api_keys_removed_none:  "No API Keys were selected."
+account_api_keys_updated:  "Successfully updated API Key notes."
+account_api_keys_no_notes:  "You left name/description field empty."
+
+
 
 # description/adjust_permissions
 adjust_permissions_user_header:  User or Group

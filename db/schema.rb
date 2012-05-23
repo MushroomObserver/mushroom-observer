@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120521132200) do
+ActiveRecord::Schema.define(:version => 20120522131900) do
 
   create_table "comments", :force => true do |t|
     t.datetime "created"
@@ -216,6 +216,15 @@ ActiveRecord::Schema.define(:version => 20120521132200) do
     t.float    "high"
     t.float    "low"
     t.string   "name",        :limit => 200
+    t.text     "notes"
+  end
+
+  create_table "mo_api_keys", :force => true do |t|
+    t.datetime "created"
+    t.datetime "last_used"
+    t.integer  "num_uses",                 :default => 0
+    t.integer  "user_id",                                 :null => false
+    t.string   "key",       :limit => 128,                :null => false
     t.text     "notes"
   end
 

@@ -1,0 +1,50 @@
+<%
+  @title = :account_api_keys_title.t
+
+  new_tab_set do
+    add_tab(:prefs_link.t,
+            :controller => 'account', :action => 'prefs')
+    add_tab(:profile_link.t,
+            :controller => 'account', :action => 'profile')
+  end
+%>
+
+<%= :account_api_keys_help.tp %>
+<br/><br/>
+
+<% if @user.api_keys.any? %>
+  <%= form_tag %>
+    <table>
+      <tr class="ListLine1">
+        <th></th>
+        <th style="padding:0em 1em 0em 1em"><%= :CREATED.t %></th>
+        <th style="padding:0em 1em 0em 1em"><%= :account_api_keys_last_used_column_label.t %></th>
+        <th style="padding:0em 1em 0em 1em"><%= :account_api_keys_num_uses_column_label.t %></th>
+        <th style="padding:0em 1em 0em 1em"><%= :API_KEY.t %></th>
+        <th style="padding:0em 1em 0em 1em"><%= :NOTES.t %></th>
+      </tr>
+      <% odd_or_even = 1
+      for key in @user.api_keys
+        odd_or_even = 1 - odd_or_even %>
+        <tr class="ListLine<%= odd_or_even %>">
+          <td><%= check_box_tag("key_#{key.id}") %></td>
+          <td style="padding:0em 1em 0em 1em"><%= key.created.web_date %></td>
+          <td style="padding:0em 1em 0em 1em"><%= key.last_used ? key.last_used.web_date : '--' %></td>
+          <td style="padding:0em 1em 0em 1em"><%= key.num_uses > 0 ? key.num_uses : '--' %></td>
+          <td style="padding:0em 1em 0em 1em"><%= h(key.key) %></td>
+          <td style="padding:0em 1em 0em 1em"><%= key.notes.t %> &nbsp;
+            [<%= link_to(:EDIT.t, :action => :edit_api_key, :id => key.id) %>]</td>
+        </tr>
+      <% end %>
+    </table>
+  <%= submit_tag(:account_api_keys_remove_button.l) %>
+  </form>
+  <br/><br/>
+<% end %>
+
+<% form_for(:key) do |form| %>
+  <label for="notes"><%= :account_api_keys_notes_label.t %></label><br/>
+  <%= form.text_field(:notes, :size => 80) %><br/>
+  <%= submit_tag(:account_api_keys_create_button.l) %>
+<% end %>
+<br/>

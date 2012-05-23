@@ -26,6 +26,7 @@
 #  profile::            <tt>(L V P)</tt>
 #  remove_image::       <tt>(L . .)</tt>
 #  no_email::           <tt>(L V .)</tt>
+#  api_keys::           <tt>(L V .)</tt>
 #
 #  ==== Admin utilities
 #  turn_admin_on::      <tt>(R . .)</tt>
@@ -511,6 +512,58 @@ class AccountController < ApplicationController
     else
       redirect_to(:controller => :observer, :action => :list_rss_logs)
     end
+  end
+
+  def api_keys # :login: :norobots:
+    @key = MoApiKey.new
+    if request.method == :post
+      if params[:commit] == :account_api_keys_create_button.l
+        create_api_key()
+      else
+        remove_api_keys()
+      end
+    end
+  end
+
+  def create_api_key()
+    @key = MoApiKey.new(params[:key])
+    @key.save!
+    @key = MoApiKey.new # blank out form for if theu want to create another key
+    flash_notice(:account_api_keys_create_success.t)
+  rescue => e
+    flash_error(:account_api_keys_create_failed.t(:msg => e.to_s))
+  end
+
+  def remove_api_keys()
+    num_destroyed = 0
+    for key in @user.api_keys
+      if params["key_#{key.id}"] == '1'
+        @user.api_keys.delete(key)
+        num_destroyed += 1
+      end
+    end
+    if num_destroyed > 0
+      flash_notice(:account_api_keys_removed_some.t(:num => num_destroyed))
+    else
+      flash_warning(:account_api_keys_removed_none.t)
+    end
+  end
+
+  def edit_api_key # :login: :norobots:
+    @key = MoApiKey.find(params[:id])
+    if check_permission!(@key)
+      if request.method == :post
+        if params[:commit] == :UPDATE.l
+          @key.update_attributes!(params[:key])
+          flash_notice(:account_api_keys_updated.t)
+        end
+        redirect_to(:action => :api_keys)
+      end
+    else
+      redirect_to(:action => :api_keys)
+    end
+  rescue => e
+    flash_error(e.to_s)
   end
 
   ##############################################################################
