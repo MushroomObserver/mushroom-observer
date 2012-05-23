@@ -21,10 +21,19 @@ class MoApiKey < ActiveRecord::Base
   end 
 
   def self.new_key
-    String.random(KEY_LENGTH)
+    result = String.random(KEY_LENGTH) 
+    while find_by_key(result)
+      key = String.random(KEY_LENGTH) 
+    end
+    return result
   end
 
   def validate
+    other = self.class.find_by_key(key)
+    if other and other.id != self.id
+      # This should never happen.
+      errors.add(:key, 'api keys must be unique')
+    end
     if notes.blank?
       errors.add(:notes, :account_api_keys_no_notes.t)
     end

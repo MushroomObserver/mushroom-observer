@@ -24,7 +24,9 @@
         <th style="padding:0em 1em 0em 1em"><%= :NOTES.t %></th>
       </tr>
       <% odd_or_even = 1
-      for key in @user.api_keys
+      for key in @user.api_keys.sort_by {|k| k.num_uses > 0 ?
+                   [-k.num_uses, Time.now - k.last_used, k.id] :
+                   [0, 0, k.id] }
         odd_or_even = 1 - odd_or_even %>
         <tr class="ListLine<%= odd_or_even %>">
           <td><%= check_box_tag("key_#{key.id}") %></td>
