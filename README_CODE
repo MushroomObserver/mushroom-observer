@@ -1,11 +1,10 @@
-Last Revised: July 11, 2010
+Last Revised: May 25, 2012
 
 = MushroomObserver
 
 The following is an overview of the code for the Mushroom Observer website for
 prospective developers.  See http://mushroomobserver.org/observer/intro for an
-introduction to the website itself.  This version of the README is not completely
-up to date, but I've added some notes where I know there are inconsistencies.
+introduction to the website itself.
 
 
 
@@ -34,11 +33,10 @@ below), find a plugin you like, then run:
 
 Rails applications run in one of three different modes: development, production
 and test.  Each has its own entirely separate database (named appropriately
-+observer_development+, +observer_production+ and +observer_test+).  Otherwise
-it doesn't *really* matter which you use, but there are subtle differences: 
++observer_development+, +observer_production+ and +observer_test+).
 
 development
-  Automatically reloads any code that has been changed.  (Only modules that
+  Server automatically reloads any code that has been changed.  (Only modules that
   have been required using +require_dependency+.)  Doesn't cache data the same
   way as the production server does.
 
@@ -49,10 +47,10 @@ production
 
 test
   Used by the testing framework.  All changes are thrown away between each
-  test.  And probably a host of other technical things.
+  test.  And various Rails inner modules are swapped out with test mock-ups.
 
-For more information (note that most of these no longer discuss Rails 2.1,
-but you should be able to find the docs for this version by digging a bit):
+For more information: (Note that most of these no longer discuss Rails 2.1,
+but you should be able to find the docs for this version by digging a bit.)
 
 Ruby Documentation:: http://www.ruby-doc.org/core/
 Ruby Quick Ref:: http://www.zenspider.com/Languages/Ruby/QuickRef.html
@@ -71,92 +69,76 @@ MO uses MySQL.  The current schema is <tt>db/schema.rb</tt>.  All modifications
 of the structure, such as adding tables or changing existing columns, are
 handled using the handy migrations in <tt>db/migrate</tt>.
 
-  rake db:migrate                   # Create or update database.
-  rake db:migrate VERSION=0nn       # Rollback to previous version.
+  rake db:migrate                          # Create or update database.
+  rake db:migrate VERSION=YYYYMMDDHHMMSS   # Rollback to previous version.
 
-Access is all done via subclasses of ActiveRecord::Base. These are generally
-called Models. Models are in essence classes that can be saved to the database.
-Look for observations in the class Observation, user/account settings in User,
-taxonomy in Name and Synonym, and so on.  These are all found in
-<tt>app/models</tt>.  Here are the major ones [Note: As of April 2010, we've
-broken up Names and Locations to add NameDescriptions and LocationDescriptions,
-so the following is not completely accurate, but you'll get the idea]:
+Access is all done via subclasses of ActiveRecord::Base.  These are generally
+called models.  Each instance of a model represents a single row in the
+corresponding database table.  Look for observations in the class Observation,
+user/account settings in User, taxonomy in Name and Synonym, and so on.  These
+are all found in <tt>app/models</tt>.  Here are the major ones:
 
-User::              Users: name, email, password, prefs, etc.
-Observation::       Observations: where, when, what, notes.
-Name::              Scientific name bundled with notes, citation, etc.
-Location::          Locations: lat/long/elev, notes, etc.
-Image::             Images: mostly mushrooms, but also mugshots or anything else.
-Comment::           Comments: attached to an Observation now, later will attach to other things, too.
-SpeciesList::       Set of Observations (*_not_* Names).
+User::                Users: name, email, password, prefs, etc.
+Observation::         Observations: where, when, what, notes, etc.
+Image::               Images: mostly mushrooms, but also mugshots, etc.
+Name::                Scientific name bundled with notes, citation, etc.
+NameDescription::     Description of species: diagnostics, habitat, references, etc.
+Location::            Locations: lat/long/elev, notes, etc.
+LocationDescription:: Description of locations: description, ecology, etc.
+SpeciesList::         Set of Observation's (*_not_* Name's).
+Comment::             Comments: attached to various objects.
 
 These are used in naming and voting on observations:
 
-Naming::            Proposed Name for a given Observation.
-NamingReason::      Reasons for proposing a name: appearance, literature, etc.
-Vote::              Votes on a given Naming for a given Observation.
+Naming::              Proposed Name for a given Observation.
+NamingReason::        Reasons for proposing a name: appearance, literature, etc.
+Vote::                Votes on a given Naming for a given Observation.
 
 Emails use several:
 
-QueuedEmail::        Implements a template for emails that will get queued and then sent
-QueuedEmailInteger:: Provides integer values that get queued along for a template
-QueuedEmailNote::    Provides text blocks (more than 100 characters) for a template
-QueuedEmailString::  Provides strings (up to 100 characters) for a template
+QueuedEmail::         Implements a template for emails that will get queued and then sent
+QueuedEmailInteger::  Provides integer values that get queued along for a template
+QueuedEmailNote::     Provides text blocks (more than 100 characters) for a template
+QueuedEmailString::   Provides strings (up to 100 characters) for a template
 
-And a few other random database classes:
+We keep track of edits to communal objects using these classes:
 
-Synonym::           Group of synonymized Name's.
-PastName::          Old versions of Name's. (deprecated: using the acts_as_version plugin now)
-PastLocation::      Old versions of Location's. (deprecated: using the acts_as_version plugin now)
-License::           Types of licenses available for Image's to use.
+NameVersion::                 Old versions of Name's.
+LocationVersion::             Old versions of Location's.
+NameDescriptionVersion::      Old versions of NameDescription's.
+LocationDescriptionVersion::  Old versions of LocationDescription's.
+
+And several other random database classes:
+
+ApiKey::            Used to authenticate user for API requests.
+CopyrightChange::   Tracks changes in copyright of Image's (later will include Name/LocationDescription's, too).
+Donation::          Records User's financial donations to MO.
+ImageVote::         Votes on quality of Image's.
+Interest::          Registers User's interest in various objects (for email notification of activity in those objects).
+License::           Types of licenses available for Image's and Name/LocationDescription's to use.
+Notification::      Used to generate notification emails under more complex conditions, like use of Name's a User is interested in.
+Query::             Saves the description of an arbitrary query of one of the major objects (above), allows prev/next/index and refining searches.
 RssLog::            Used to report changes via RSS feed.
+Synonym::           Used to group synonymized Name's.
+Triple::            RDF database.
+UserGroup::         Used to keep track of which User's are members or admins of Project's.
 
 The following non-database-related classes are also found in
 <tt>app/models</tt>:
 
 AccountMailer::     Used to actually send an email
 NameParse::         Used by Name to parse scientific names.
-NameSorter::        Used by Name to... I don't remember.
-SearchState::       Used to keep track of search queries. (Note: Jason totally rewrote this stuff.)
-SequenceState::     Used to keep track of prev/next position. (Note: Jason totally rewrote this stuff.)
-SiteData::          Used to calculate number of objects people have created.
+NameSorter::        Used to parse and deal with synonymy, etc. in a list of names.
+Query::             Used to keep track of search queries.
 
-For those who prefer a graphical representation: (Arrow denotes "belongs to".)
-(Dotted line represents proposal to let users comment on objects other than
-observations.)
+For those who prefer a graphical representation, see DATA_STRUCTURE.gif.  It is
+a standard Bachman diagram where arrows indicate cardinality (see below).  The
+version-tracking classes (NameVersion, CopyrightChange, etc.) are all
+abbreviated to just "Ver" to help reduce clutter. 
 
-    User
-     ^
-     |--- Image --> License       < - - - - - -
-     |                                          |
-     |
-     |--- Location                < - - - - - - |
-     |       ^
-     |       '-- PastLocations                  |
-     |
-     |                                          |
-     |   Synonym -------------.
-     |      ^                 |                 |
-     |--- Names --------------|   < - - - - - -
-     |      ^                 |                 |
-     |      '-- PastNames     |--> RssLog
-     |                        |                 |
-     |                        |
-     |--- SpeciesList --------|   < - - - - - - |
-     |         ^              |
-     |--- Observations -------'   <-------------|
-     |         ^                                |
-     |----- Namings --> Name                 Comment --> User
-     |         ^
-     |         |-- NamingReasons
-     |------ Votes
-     |
-     |
-     '--- QueuedEmail
-              ^
-              |-- QueuedEmailIntegers
-              |-- QueuedEmailNotes
-              `-- QueuedEmailStrings
+  X ---- Y          one-to-one relationship
+  X ---> Y          one-to-many relationship, X has many Y
+  X <--> Y          many-to-many relationship
 
 For more information:
 
@@ -172,36 +154,40 @@ Migration Cheatsheet:: http://garrettsnider.backpackit.com/pub/367902
 There are only a few controllers (in <tt>app/controllers</tt>), roughly one for
 each of the major data types:
 
-ObserverController::    Deals with observations, namings, votes, and everything else.
-AccountController::     Deals with user account stuff.
-NameController::        Deals with names.
-LocationController::    Deals with locations.
-ImageController::       Deals with images.
-CommentController::     Deals with comments.
-SpeciesListController:: Deals with species lists.
+ObserverController::    Deals with Observation's, Naming's, Vote's, and everything else.
+AccountController::     Deals with User's.
+NameController::        Deals with Name's and NameDescription's.
+LocationController::    Deals with Location's and LocationDescription's.
+ImageController::       Deals with Image's and ImageVote's.
+CommentController::     Deals with Comment's.
+SpeciesListController:: Deals with SpeciesList's.
+ProjectController::     Deals with Project's.
+InterestController::    Deals with Interest's.
+SupportController::     Deals with Donation's.
+ConferenceController::  Deals with ConferenceEvent's and ConferenceRegistration's.
+ApiController::         Handles AJAX and API requests.
+PivotalController::     Handles minimal interface with Pivotal Tracker website.
 
-These controllers are just subclasses of ActionController.  Actions are just
+These controllers are all subclasses of ActionController.  Actions are just
 instance methods.  These correspond directly to the URL of the request:
 
   http://mushroomobserver.org/controller/action
 
-Note that the default controller is "observer", the default action is "show",
-and the "id" parameter is shortened to a bare integer:
+Note that the default controller is "observer" and the "id" parameter is
+shortened to a bare integer: 
 
   http://mo.org/42                      Show observation #42.
-  http://mo.org/image/123               Show image #123.
-  http://mo.org/observer/show_user/3    Show summary for user #3.
+  http://mo.org/observer/show_user/252  Show summary for user #3.
 
 Controller methods -- that is, actions -- have access to quite a number of
 helpers and data.  Here are just a few, see ActionController for more:
 
-<tt>session['user']</tt>:: Session: hash of data that follows the user around from request to request.
+<tt>session[:user]</tt>::    Session: hash of data that follows the user around from request to request.
+<tt>flash[:notice]</tt>::    Temporary storage: this hash persists only until the next request.
 <tt>cookies[:mo_user]</tt>:: It is trivial to read or write cookies on the user's browser.
-<tt>request.method</tt>:: You have access to the full CGI request object.
-<tt>flash[:notice]</tt>:: Temporary storage: this hash persists only until the next request.
-<tt>@user</tt>:: If user is logged in this will be their User object.
-<tt>@js</tt>:: True if javascript is enabled on the user's browser.
-<tt>@ua[:ie7]</tt>:: Quick way to tell what browser the user is running.
+<tt>request.method</tt>::    You have access to the full CGI request object.
+<tt>@user</tt>::             If user is logged in this will be their User instance.
+<tt>@js</tt>::               True if javascript is enabled on the user's browser.
 
 Controller methods are very deeply interconnected with views.  I've never quite
 understood the underlying mechanics, but views have access to all the
@@ -209,10 +195,13 @@ controller's instance variables (e.g. <tt>@user</tt> and any others you set in
 the action).  This is how actions pass information to the view for rendering as
 HTML.
 
-By default a template of the same name as the action is rendered
-(<tt>app/views/#{controller}/#{action}.rhtml</tt>), however this can be
-overridden in a number of ways.  This can get quite complicated, and you must
-be careful not to accidentally attempt to render two templates.  Example:
+By default a template of the same name as the action is rendered:
+
+  app/views/controller/action.rhtml
+
+however this can be overridden in a number of ways.  This can get quite
+complicated, and you must be careful not to accidentally attempt to render two
+templates.  Example: 
 
   class ExampleController << ActionController
 
@@ -223,25 +212,25 @@ be careful not to accidentally attempt to render two templates.  Example:
       case params[:mode]
 
       # Mode not set: Render "my_action.rhtml" implicitly.
-      when ""
+      when ''
         @choices = %w(show index)
 
       # Show mode: Lookup object and render "show.rhtml".
       # Note that it does NOT call the show() method!!
-      when "show"
+      when 'show'
         @object = Model.find(params[:id])
-        render :action => "show"
+        render :action => :show
 
       # Index mode: Get list of all objects and render "index.rhtml".
       # Note that it does NOT call the index() method!!
-      when "index"
+      when 'index'
         @objects = Model.find(:all)
-        render :action => "index"
+        render :action => :index
 
       # Error: Redirect browser to another action.
       # Note, no templates will be rendered at all.
       else
-        redirect_to :action => "error"
+        redirect_to :action => :error
       end
     end
   end
@@ -259,16 +248,16 @@ Views, unlike models and controllers, are not classes, or strictly speaking
 even ruby code at all.  They are templates in which you may (and frequently
 will) embed Ruby code.  All the views are found in:
 
-  app/views/#{controller}/#{action}.rhtml
+  app/views/controller/action.rhtml
 
 Some templates that are shared between controllers can be stored in:
 
   app/views/shared
 
-And "partial" views (see <tt>render :partial</tt>) are prefixed with an
-underscore:
+And "partial" views (see <tt>render :partial => 'subview'</tt>) are prefixed
+with an underscore: 
 
-  app/views/#{controller}/_#{partial}.rhtml
+  app/views/controller/_subview.rhtml
 
 Syntax is all HTML with two new mark-ups:
 
@@ -297,22 +286,33 @@ You have access to hundreds of amazing helper methods in these view templates,
 from simple tag helpers like image_tag() and link_to() to complicated things
 like text_field_with_autocomplete() and paginate().  And, as mentioned in the
 section on controllers, you have access to a number of things from the
-controller.  You can also "publish" controller methods for use in view by
+controller.  You can also "publish" controller methods for use in views by
 using the +helper_method+ directive:
 
   class SomeController
+    # give access to both controller and views
     helper_method :my_helper
     def my_helper(args)
       ...
     end
   end
 
-I still to this day have no idea what the actual class context ruby code in
-these templates is run under.  It has something to do with ERb and (obviously)
-ActionView, but it also has access to ActionController instance variables and
-some (but not most) ActionController methods.  If you really want to fry your
-brain, check out the contorted hoops you must jump through to write a helper
-that takes a block (as in <tt><% form(:action) do %>...<% end %></tt>).
+I still to this day have no idea what the actual class context is that ruby
+code in these templates is run under.  It has something to do with ERb and
+(obviously) ActionView, but it also has access to ActionController instance
+variables and some (but not most) ActionController methods.
+
+A particularly useful and difficult construct to get right involves helpers
+that take a block.  See +boxify+ in helpers/html_helper.rb.  Simplified:
+
+  def wrap_with_div(&block)
+    output = '<div>' + capture(&block) + '</div'>
+    concat(output, block.binding)
+  end
+
+  <% wrap_with_div do %>
+    Contents of div here.  Note the lack of "=" above!!
+  <% end %>
 
 For more information:
 
@@ -328,22 +328,19 @@ There are a number of helper files scattered about that magically appear in
 various contexts.  I found this extremely confusing at first (actually I still
 do, but don't tell anyone).
 
+app/controllers/application.rb
+  This is magically loaded and made available to all controllers.
+  Note that many of these utilities are also made available to views.
+
 app/helpers/application_helper.rb
   This is magically loaded and made available to all view templates.
 
-app/helpers/#{controller}_helper.rb
+app/helpers/controller_helper.rb
   This is magically loaded and made available to all view templates rendered
   by a given controller.
 
-app/controllers/application.rb
-  This is magically loaded and made available to all controllers.
-
-(Technically, only the first two are really "helpers" in the "view helper"
-sense, but they all function the same, just for different customers.)
-
-The only tricky part really is making sure you include your methods in the
-correct modules or classes, and know when and how often initialization is
-performed.
+app/helpers/other_helper.rb
+  Thse are all loaded explicitly by application_helper.rb
 
 For more information:
 
@@ -355,68 +352,33 @@ Understanding Helpers:: http://wiki.rubyonrails.org/rails/pages/UnderstandingHel
 == Testing
 
 Nathan has been very diligent writing unit tests for everything.  Just run
-<tt>rake test</tt> and go get something to eat.  There are several files and
-directories involved, so it's worth an overview:
+<tt>rake test</tt> and go get something to eat.
 
-test/unit/#{model}_test.rb:: Model tests.
-test/functional/#{controller}_controller_test.rb:: Controller tests.
-test/test_helper.rb:: Handy helpers mostly used by functional tests.
-test/fixtures/#{model}.yml:: These define sample objects for use in the tests.
+(TEMPORARY NOTE: due to a deficiency in +mysql2+ adapter, <tt>rake
+db:test:prepare</tt> must still be run with the old +myslq+ adapter.  To
+facilitate this, we've written a script, script/run_tests, to run the tests
+properly.  The complementary utility, script/run_test, runs a single unit test
+file.  We do not, however, have any clever utilty for running a single unit
+test, sorry.) 
 
-You can tell it to run only a single test script like this:
+There are several files and directories involved, so it's worth an overview: 
 
-  rake test TEST=test/functional/observer_controller_test.rb
+test/unit/xxx_test.rb::           Low-level tests of individual classes.
+test/functional/xxx_test.rb::     Mid-level tests in the context of a mock-up controller.
+test/integration/xxx_test.rb::    High-level tests in the context of a mock-up browser session.
 
-Actually, that command runs your test twice for some reason, this works better:
+test/fixtures/xxx.yml::           These define sample objects for use in unit tests.
+test/fixtures/xxx/xxx::           Images, reports, and other files used in unit tests.
 
-  ruby -Ilib:test test/functional/observer_controller_test.rb
+test/boot.rb::                    Boots the application in test mode.
+test/test_case.rb::               Configures Rails test environment.
+test/functional_xxx.rb::          Utilities available to functional tests.
+test/controller_xxx.rb::          Utilities available to functional tests.
+test/integration_xxx.rb::         Utilities available to integration tests.
+test/session_xxx.rb::             Utilities available to integration tests.
+test/other_extensions.rb::        Utilities available to all tests.
 
-(That will save you *a lot* of time!)
-
-For more information:  (I can't find any good documentation of this.)
+For more information:
 
 Cheatsheet:: http://nubyonrails.com/articles/ruby-rails-test-rails-cheat-sheet
 Longwinded Intro:: http://www.nullislove.com/2007/11/10/testing-in-rails-introduction/
-
-
-
-
-== Standards
-
-There are a number of standards the code conforms to.  I'll just list a few
-that I can think of off the top of my head:
-
-* RedCloth
-
-This simple mark-up is used throughout the site, e.g. in user-supplied notes,
-in scientific names, and in "internationalization" strings (see below).
-
-* sanitize or html_escape
-
-All user-supplied text should be run through +sanitize+ or +html_escape+ to
-strip out any potentially harmful HTML.  (Note +h+ is an alias for
-+html_escape+.)
-
-* internationalization
-
-Slowly but surely we are abstractifying all text on the site.  Going forward
-it's very easy: instead of printing a string, print <tt>:some_tag.l</tt>
-instead and insert that string into <tt>lang/ui/*.yml</tt>.
-
-* no Model.method() calls in views!
-
-This is a violation of the MVC architecture.  Ask Nathan about it.  Or check
-out the link under the *Ruby on Rails* section near the top of this document.
-
-* rdoc
-
-Try to remember to comment your code in such a way that *rdoc* can understand
-it.  There is a huge amount of work to do to comment old code, but going
-forward it would be nice if we started to do this.  Wouldn't it?
-
-* unit tests
-
-Write tests for every bug you fix!  Better yet, write tests for every new
-feature you add.  Some people suggest testing new code in *test* before even
-trying it out on the website.  Okay, maybe you can go too far...
-
