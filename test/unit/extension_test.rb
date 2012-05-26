@@ -3,11 +3,9 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class ExtensionTest < UnitTestCase
 
-  ##############################################################################
-  #
+  # ----------------------------
   #  :section: Symbol Tests
-  #
-  ##############################################################################
+  # ----------------------------
 
   def test_localize_postprocessing
     assert_equal('',             Symbol.test_localize(''))
@@ -49,11 +47,9 @@ class ExtensionTest < UnitTestCase
     assert_not_equal('bob', :_unit_test_a.l)
   end
 
-  ##############################################################################
-  #
+  # ----------------------------
   #  :section: String Tests
-  #
-  ##############################################################################
+  # ----------------------------
 
   def test_string_truncate_html
     assert_equal('123', '123'.truncate_html(5))
@@ -63,5 +59,20 @@ class ExtensionTest < UnitTestCase
     assert_equal('<i>12<b>3</b>4...</i>', '<i>12<b>3</b>456</i>'.truncate_html(5))
     assert_equal('<i>12<b>3<hr/></b>4...</i>', '<i>12<b>3<hr/></b>456</i>'.truncate_html(5))
     assert_equal('<i>12</i>3<b>4...</b>', '<i>12</i>3<b>456</b>'.truncate_html(5))
+  end
+
+  # ----------------------------
+  #  :section: Hash Tests
+  # ----------------------------
+
+  def test_flatten
+    assert_equal( {:a => 1, :b => 2, :c => 3},
+                  {:a => 1, :bb => {:b => 2, :cc => {:c => 3}}}.flatten )
+  end
+
+  def test_remove_nils
+    hash = { :a => 1, :b => nil, :c => 3, :d => nil }
+    hash.remove_nils!
+    assert_equal({ :a => 1, :c => 3 }, hash)
   end
 end

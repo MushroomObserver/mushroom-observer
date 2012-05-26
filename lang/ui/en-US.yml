@@ -4092,13 +4092,16 @@ email_features_intro: >
   The following new features have been released at the [:app_title] website:
 
 email_location_merge: >
-  User tried to merge to locations, both with observation.:\n\n
+  User wants to merge two locations, both with observations:\n\n
   user: [user]\n
-  source: [this]\n
-  destination: [that]\n
+  this: [this]\n
+  into: [that]\n
 
 email_name_merge: >
-  User [user] wants to merge the name [this] into [that].
+  User wants to merge two names, both with observations:\n\n
+  user: [user]\n
+  this: [this]\n
+  into: [that]\n
 
 email_name_proposal_intro: >
   h2. *Name Proposal*

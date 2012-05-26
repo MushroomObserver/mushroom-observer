@@ -515,7 +515,7 @@ class AccountController < ApplicationController
   end
 
   def api_keys # :login: :norobots:
-    @key = MoApiKey.new
+    @key = ApiKey.new
     if request.method == :post
       if params[:commit] == :account_api_keys_create_button.l
         create_api_key()
@@ -526,9 +526,9 @@ class AccountController < ApplicationController
   end
 
   def create_api_key()
-    @key = MoApiKey.new(params[:key])
+    @key = ApiKey.new(params[:key])
     @key.save!
-    @key = MoApiKey.new # blank out form for if theu want to create another key
+    @key = ApiKey.new # blank out form for if theu want to create another key
     flash_notice(:account_api_keys_create_success.t)
   rescue => e
     flash_error(:account_api_keys_create_failed.t(:msg => e.to_s))
@@ -550,7 +550,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key # :login: :norobots:
-    @key = MoApiKey.find(params[:id])
+    @key = ApiKey.find(params[:id])
     if check_permission!(@key)
       if request.method == :post
         if params[:commit] == :UPDATE.l

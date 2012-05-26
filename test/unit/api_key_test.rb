@@ -1,13 +1,13 @@
 require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
-class MoApiKeyTest < UnitTestCase
+class ApiKeyTest < UnitTestCase
   def test_create
     User.current = @dick
-    MoApiKey.create
-    assert_equal(0, MoApiKey.count)
+    ApiKey.create
+    assert_equal(0, ApiKey.count)
 
-    MoApiKey.create(:notes => 'app name')
-    key = MoApiKey.last
+    ApiKey.create(:notes => 'app name')
+    key = ApiKey.last
     assert(key.created > 1.minute.ago)
     assert_nil(key.last_used)
     assert_equal(0, key.num_uses)
@@ -16,7 +16,7 @@ class MoApiKeyTest < UnitTestCase
     assert_equal('app name', key.notes)
 
     key.touch!
-    key = MoApiKey.last
+    key = ApiKey.last
     assert(key.last_used > 1.minute.ago)
     assert_equal(1, key.num_uses)
   end

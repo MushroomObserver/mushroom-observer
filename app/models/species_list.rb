@@ -445,7 +445,7 @@ protected
 
     if self.place_name.to_s.blank? and !self.location
       errors.add(:place_name, :validate_species_list_where_missing.t)
-    elsif self.where.to_s.binary_length > 100
+    elsif self.where.to_s.binary_length > 1024
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 

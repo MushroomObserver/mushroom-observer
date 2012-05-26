@@ -671,8 +671,8 @@ class NameController < ApplicationController
           # Non-admins just send email-request to admins.
           else
             flash_warning(:runtime_merge_names_warning.t)
-            content = :email_name_merge.t(:user => @user.login,
-                      :this => @name.display_name, :that => merge.display_name)
+            content = :email_name_merge.l(:user => @user.login,
+                      :this => @name.search_name, :that => merge.search_name)
             AccountMailer.deliver_webmaster_question(@user.email, content)
           end
 

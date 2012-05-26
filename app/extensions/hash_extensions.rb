@@ -4,7 +4,8 @@
 #
 #  == Instance Methods
 #
-#  flatten::    Flatten multi-dimensional hash.
+#  flatten::        Flatten multi-dimensional hash.
+#  remove_nils!::   Remove keys whose value is nil.
 #
 ################################################################################
 
@@ -26,5 +27,10 @@ class Hash
       end
     end
     return result
+  end
+
+  # Remove keys whose value is nil.
+  def remove_nils!
+    delete_if {|k,v| v.nil?}
   end
 end

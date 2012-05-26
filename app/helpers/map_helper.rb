@@ -19,6 +19,10 @@
 require_dependency 'map_collapsible'
 require_dependency 'map_set'
 
+module GM
+  include Ym4r::GmPlugin
+end
+
 module ApplicationHelper::Map
   def make_map(objects, args={})
     args = provide_defaults(args,
@@ -68,7 +72,7 @@ module ApplicationHelper::Map
   end
 
   def init_map(args={})
-    gmap = GMap.new(args[:map_div])
+    gmap = GM::GMap.new(args[:map_div])
     gmap.control_init(args[:controls].to_boolean_hash)
     return gmap
   end
@@ -82,14 +86,14 @@ module ApplicationHelper::Map
 
   def ensure_global_header_is_added
     if !@done_gmap_header_yet
-      add_header(GMap.header(:host => DOMAIN))
+      add_header(GM::GMap.header(:host => DOMAIN))
       @done_gmap_header_yet = true
     end
   end
 
   def draw_mapset(gmap, set, args={})
     title = mapset_marker_title(set)
-    marker = GMarker.new(set.center,
+    marker = GM::GMarker.new(set.center,
       :draggable => args[:editable],
       :title => title
     )
@@ -108,7 +112,7 @@ module ApplicationHelper::Map
   end
 
   def draw_box_on_gmap(gmap, set, args)
-    box = GPolyline.new([
+    box = GM::GPolyline.new([
       set.north_west,
       set.north_east,
       set.south_east,
@@ -244,16 +248,16 @@ module ApplicationHelper::Map
       [set.south_west, 'sw'],
       [set.south_east, 'se'],
     ]
-      marker = GMarker.new(point, :draggable => true)
+      marker = GM::GMarker.new(point, :draggable => true)
       map_control_init(gmap, marker, args, type)
     end
   end
 
   # Center on a given location? (This is never used: -JPH 20120510)
   # if respond_to?(:start_lat) && respond_to?(:start_long)
-  #   gmap.center_zoom_init( [start_lat, start_long], Constants::GM_ZOOM )
+  #   gmap.center_zoom_init( [start_lat, start_long], GM::Constants::GM_ZOOM )
   #   gmap.overlay_init(
-  #     GMarker.new( [start_lat, start_long],
+  #     GM::GMarker.new( [start_lat, start_long],
   #       :icon => icon_start,
   #       :title => name + " start",
   #       :info_window => "start"
@@ -263,11 +267,11 @@ module ApplicationHelper::Map
   # Started playing with icons and the following got something to show up,
   # but I decide not to pursue it further right now.
   # gmap.icon_global_init(
-  #   GIcon.new(
+  #   GM::GIcon.new(
   #     :image => "/images/blue-dot.png",
-  #     :icon_size => GSize.new( 24,38 ),
-  #     :icon_anchor => GPoint.new(12,38),
-  #     :info_window_anchor => GPoint.new(9,2)
+  #     :icon_size => GM::GSize.new( 24,38 ),
+  #     :icon_anchor => GM::GPoint.new(12,38),
+  #     :info_window_anchor => GM::GPoint.new(9,2)
   #   ), "blue_dot")
-  # blue_dot = Variable.new("blue_dot")
+  # blue_dot = GM::Variable.new("blue_dot")
 end

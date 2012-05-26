@@ -89,12 +89,6 @@ class ApiControllerTest < FunctionalTestCase
     get(:images, :detail => :high)
   end
 
-  def test_get_licenses
-    get(:licenses, :detail => :none)
-    get(:licenses, :detail => :low)
-    get(:licenses, :detail => :high)
-  end
-
   def test_get_locations
     get(:locations, :detail => :none)
     get(:locations, :detail => :low)
@@ -107,28 +101,28 @@ class ApiControllerTest < FunctionalTestCase
     get(:names, :detail => :high)
   end
 
-  def test_get_namings
-    get(:namings, :detail => :none)
-    get(:namings, :detail => :low)
-    get(:namings, :detail => :high)
-  end
-
   def test_get_observations
     get(:observations, :detail => :none)
     get(:observations, :detail => :low)
     get(:observations, :detail => :high)
   end
 
+#   def test_get_projects
+#     get(:projects, :detail => :none)
+#     get(:projects, :detail => :low)
+#     get(:projects, :detail => :high)
+#   end
+# 
+#   def test_get_species_lists
+#     get(:species_lists, :detail => :none)
+#     get(:species_lists, :detail => :low)
+#     get(:species_lists, :detail => :high)
+#   end
+
   def test_get_users
     get(:users, :detail => :none)
     get(:users, :detail => :low)
     get(:users, :detail => :high)
-  end
-
-  def test_get_votes
-    get(:votes, :detail => :none)
-    get(:votes, :detail => :low)
-    get(:votes, :detail => :high)
   end
 
 #   # Basic comment request.

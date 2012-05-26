@@ -1,4 +1,4 @@
-class MoApiKey < ActiveRecord::Base
+class ApiKey < ActiveRecord::Base
   belongs_to :user
   before_create :provide_defaults
 

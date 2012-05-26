@@ -100,6 +100,53 @@ class Project < AbstractModel
     return result
   end
 
+  def add_images(imgs)
+    imgs.each {|x| add_image(x)}
+  end
+
+  def remove_images(imgs)
+    imgs.each {|x| remove_image(x)}
+  end
+
+  def add_observations(imgs)
+    imgs.each {|x| add_observation(x)}
+  end
+
+  def remove_observations(imgs)
+    imgs.each {|x| remove_observation(x)}
+  end
+
+  def add_species_lists(imgs)
+    imgs.each {|x| add_species_list(x)}
+  end
+
+  def remove_species_lists(imgs)
+    imgs.each {|x| remove_species_list(x)}
+  end
+
+  # Add image this project if not already done so.  Saves it.
+  def add_image(img)
+    unless images.include?(img)
+      images.push(img)
+      Transaction.put_project(
+        :id => self,
+        :add_image => img
+      )
+    end
+  end
+
+  # Remove image this project. Saves it.
+  def remove_image(img)
+    if images.include?(img)
+      images.delete(img)
+      update_attribute(:modified, Time.now)
+      Transaction.put_project(
+        :id => self,
+        :del_image => img
+      )
+    end
+  end
+
   # Add observation (and its images) to this project if not already done so.  Saves it.
   def add_observation(obs)
     unless observations.include?(obs)
@@ -141,29 +188,6 @@ class Project < AbstractModel
         :id => self,
         :del_observation => obs,
         :del_images => imgs
-      )
-    end
-  end
-
-  # Add image this project if not already done so.  Saves it.
-  def add_image(img)
-    unless images.include?(img)
-      images.push(img)
-      Transaction.put_project(
-        :id => self,
-        :add_image => img
-      )
-    end
-  end
-
-  # Remove image this project. Saves it.
-  def remove_image(img)
-    if images.include?(img)
-      images.delete(img)
-      update_attribute(:modified, Time.now)
-      Transaction.put_project(
-        :id => self,
-        :del_image => img
       )
     end
   end

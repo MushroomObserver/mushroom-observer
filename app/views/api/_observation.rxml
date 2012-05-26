@@ -29,6 +29,7 @@ xml.send(tag,
       end
     end
     for image in object.images
+      # Do it this way, else will not use eager-loaded image instance.
       if image.id == object.thumb_image_id
         xml_detailed_object(xml, :primary_image, image)
       end

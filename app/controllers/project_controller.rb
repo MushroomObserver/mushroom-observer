@@ -189,20 +189,12 @@ class ProjectController < ApplicationController
         elsif !@project.save
           flash_object_errors(@project)
         else
-          Transaction.post_user_group(
-            :id   => admin_group,
-            :name => admin_name
-          )
-          Transaction.post_user_group(
-            :id   => user_group,
-            :name => title
-          )
           Transaction.post_project(
-            :id          => @project,
-            :title       => @project.title,
-            :summary     => @project.summary,
-            :admin_group => admin_group,
-            :user_group  => user_group
+            :id      => @project,
+            :title   => @project.title,
+            :summary => @project.summary,
+            :admins  => [@user],
+            :members => [@user],
           )
           @project.log_create
           flash_notice(:add_project_success.t)
