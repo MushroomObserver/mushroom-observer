@@ -302,6 +302,12 @@ end
 ################################################################################
 # Stuff to get rails 2.1.1 working with ruby 1.9. -Jason, Feb 2011
 
+# No longer allowing Ruby 1.8. Sorry. Pain in the ass to get the database
+# adapter to work for it.
+if RUBY_VERSION < '1.9'
+  raise "MO requires ruby version 1.9"
+end
+
 # Need this to force encoding of views to all be utf-8.  (Rails 3 makes this
 # globally configurable using 'config.encoding'.)
 module ActionView
@@ -313,21 +319,6 @@ module ActionView
         result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
         return result
       end
-    end
-  end
-end
-
-# Easier to make ruby 1.8 forward-compatible in this case.
-#   old: str[0] --> new: str[0].ord
-if RUBY_VERSION < '1.9'
-  class String
-    def ord
-      self[0]
-    end
-  end
-  class Fixnum
-    def ord
-      self
     end
   end
 end
@@ -352,7 +343,7 @@ end
 
 # Near as I can tell there is simply a bug in the Rails 2.1.1 handling of
 # encodings in assert_select.  It forces the text it's validating to be the
-# same encoding as the selector.  This is fine of the selector is a string,
+# same encoding as the selector.  This is fine if the selector is a string,
 # because the selector takes on the source encoding of the caller's file, so
 # we have control over it.  But Ruby second-guesses us when it creates regexen.
 # They do NOT take on the encoding of the source file -- they are implictly
@@ -360,27 +351,25 @@ end
 # force the encoding of the text to US-ASCII, as well, causing it to crash.
 # I can find no way to solve this problem without recasting the regexen with
 # the following sleight of hand.  Ugly, but it works.
-if RUBY_VERSION >= '1.9'
-  require 'action_controller'
-  require 'action_controller/assertions'
-  module ActionController
-    module Assertions
-      module SelectorAssertions
-        alias __old_assert_select assert_select
-        def assert_select(*args, &block)
-          args = args.map do |arg|
-            case arg
-            when Regexp ; /#{arg}/u
-            when String ; arg.force_encoding('UTF-8')
-            else        ; arg
-            end
+require 'action_controller'
+require 'action_controller/assertions'
+module ActionController
+  module Assertions
+    module SelectorAssertions
+      alias __old_assert_select assert_select
+      def assert_select(*args, &block)
+        args = args.map do |arg|
+          case arg
+          when Regexp ; /#{arg}/u
+          when String ; arg.force_encoding('UTF-8')
+          else        ; arg
           end
-          __old_assert_select(*args, &block)
         end
+        __old_assert_select(*args, &block)
       end
     end
-  end 
-end
+  end
+end 
 
 # This is used by passenger?
 module ActionController
@@ -389,102 +378,16 @@ module ActionController
   end
 end
 
-# This is a temporary fix to allow ruby 1.9 to read the old (corrupt) database
-# correctly.  When we release the new server, we'll fix the database encoding,
-# and this will change to allow ruby 1.8 to read the new (correct) database.
-if RUBY_VERSION >= '1.9'
-  require 'mysql2' unless defined? Mysql2
-  module ActiveRecord
-    module ConnectionAdapters
-      class Mysql2Adapter < AbstractAdapter
-        alias :_old_execute_ :execute
-        def execute(sql, name = nil)
-          _old_execute_(convert_to_old_encoding(sql), name)
-        end
-        #
-        def select(sql, name = nil)
-          result = execute(sql, name).each(:as => :hash)
-          result.each do |hash|
-            for v in hash.values
-              v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
-            end
-          end
-          return result
-        end
-        #
-        def select_rows(sql, name = nil)
-          result = execute(sql, name).to_a
-          result.each do |a|
-            for v in a
-              v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
-            end
-          end
-          return result
-        end
-        #
-        def convert_to_old_encoding(str)
-          str.force_encoding('windows-1252')
-          begin
-            str.encode('utf-8')
-          rescue Encoding::UndefinedConversionError
-            result = ""
-            result.force_encoding('binary')
-            str.each_char do |c|
-              c = begin
-                c.encode('utf-8')
-              rescue
-                c.force_encoding('binary')
-                d = "\xc2"
-                d.force_encoding('binary')
-                d + c
-              end
-              c.force_encoding('binary')
-              result += c
-            end
-            result.force_encoding('utf-8')
-            result
-          end
-        end
-        #
-        def convert_from_old_encoding(str)
-          begin
-            result = str.encode('windows-1252')
-            result.force_encoding('utf-8')
-            result
-          rescue Encoding::UndefinedConversionError
-            result = ""
-            result.force_encoding('binary')
-            str.each_char do |c|
-              c = begin
-                c.encode('windows-1252')
-              rescue
-                c.force_encoding('binary')
-                c[1,1]
-              end
-              c.force_encoding('binary')
-              result += c
-            end
-            result.force_encoding('utf-8')
-            result
-          end
-        end
-      end
-    end
-  end
-end
-
 # This is a known bug in old ActionMailer versions.
-if RUBY_VERSION >= '1.9'
-  module ActionMailer
-    class Base
-      def perform_delivery_smtp(mail)
-        destinations = mail.destinations
-        mail.ready_to_send
-        sender = mail['return-path'] || mail['from'] # <-- instead of "mail.from"
-        Net::SMTP.start(smtp_settings[:address], smtp_settings[:port], smtp_settings[:domain],
-            smtp_settings[:user_name], smtp_settings[:password], smtp_settings[:authentication]) do |smtp|
-          smtp.sendmail(mail.encoded, sender, destinations)
-        end
+module ActionMailer
+  class Base
+    def perform_delivery_smtp(mail)
+      destinations = mail.destinations
+      mail.ready_to_send
+      sender = mail['return-path'] || mail['from'] # <-- instead of "mail.from"
+      Net::SMTP.start(smtp_settings[:address], smtp_settings[:port], smtp_settings[:domain],
+          smtp_settings[:user_name], smtp_settings[:password], smtp_settings[:authentication]) do |smtp|
+        smtp.sendmail(mail.encoded, sender, destinations)
       end
     end
   end
@@ -493,18 +396,16 @@ end
 # The test-unit plugin now provides this, but fails to give it all the same
 # functionality of assert_match (ability to pass String instead of Regexp, in
 # particular). 
-if RUBY_VERSION >= '1.9'
-  gem 'test-unit'
-  require 'test/unit/assertions.rb' unless defined? Unit::Test::Assertions
-  module Test
-    module Unit
-      module Assertions
-        def assert_not_match(expect, actual, msg=nil)
-          _wrap_assertion do
-            expect = Regexp.new(expect) if expect.is_a?(String)
-            msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
-            assert_block(msg) { actual !~ expect }
-          end
+gem 'test-unit'
+require 'test/unit/assertions.rb' unless defined? Unit::Test::Assertions
+module Test
+  module Unit
+    module Assertions
+      def assert_not_match(expect, actual, msg=nil)
+        _wrap_assertion do
+          expect = Regexp.new(expect) if expect.is_a?(String)
+          msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
+          assert_block(msg) { actual !~ expect }
         end
       end
     end
@@ -514,16 +415,14 @@ end
 # Multipart form data is read in as ASCII-8BIT / BINARY.  Apparently we can
 # usually assume that it is actually UTF-8, so we just need to force the
 # correct encoding.
-if RUBY_VERSION >= '1.9'
-  module ActionController
-    class AbstractRequest
-      class << self
-        alias __get_typed_value get_typed_value
-        def get_typed_value(value)
-          result = __get_typed_value(value)
-          result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
-          return result
-        end
+module ActionController
+  class AbstractRequest
+    class << self
+      alias __get_typed_value get_typed_value
+      def get_typed_value(value)
+        result = __get_typed_value(value)
+        result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
+        return result
       end
     end
   end
@@ -597,3 +496,4 @@ module ActionController
     end
   end
 end
+
