@@ -681,8 +681,7 @@ class Image < AbstractModel
       image_votes.delete(vote)
     end
 
-    # Update the cached data in images table next. (The "true" forces rails
-    # to reload the association.)
+    # Update the cached data in images table next.
     refresh_vote_cache!
 
     # Save changes unless there were already pending changes to be saved
@@ -718,6 +717,11 @@ class Image < AbstractModel
       end
     end
     return @vote_hash
+  end
+
+  def reload(*args)
+    @vote_hash = nil
+    super(*args)
   end
 
   ################################################################################

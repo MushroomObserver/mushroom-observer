@@ -30,18 +30,29 @@ require 'cgi'
 
 class AjaxController < ApplicationController
   disable_filters
+  around_filter :catch_ajax_errors
+  layout false
   
-  def around_filter
+  def catch_ajax_errors
     yield
   rescue => e
-    msg = e.to_s
-    msg += "\n" + e.backtrace.join("\n") if DEVELOPMENT
-    render(:text => msg, :layout => false, :status => 500)
+    msg = e.to_s + "\n"
+    if TESTING or DEVELOPMENT
+      for line in e.backtrace
+        break if line.match(/action_controller.*`perform_action'/)
+        msg += line + "\n"
+      end
+    end
+    render(:text => msg, :status => 500)
+  end
+
+  def get_session_user!
+    get_session_user or raise "Must be logged in."
   end
 
   # Used by unit tests.
   def test
-    render(:text => 'test', :layout => false)
+    render(:text => 'test')
   end
 
   # Auto-complete string as user types. Renders list of strings in plain text.
@@ -53,18 +64,15 @@ class AjaxController < ApplicationController
     type = params[:type].to_s
     string = CGI.unescape(params[:id].to_s).strip_squeeze
     if string.blank?
-      render(:layout => false, :inline => "\n\n")
+      render(:text => "\n\n")
     else
       auto = AutoComplete.subclass(type).new(string, params)
       results = auto.matching_strings.join("\n") + "\n"
-      render(:layout => false, :inline => results)
+      render(:text => results)
     end
-  rescue => e
-    render(:layout => false, :inline => e.to_s, :status => 500)
   end
 
   # Mark an object for export. Renders updated export controls.
-  # [Apparently unused? -JPH 20120530]
   # type::  Type of object.
   # id::    Object id.
   # value:: '0' or '1'
@@ -74,7 +82,7 @@ class AjaxController < ApplicationController
     value = params[:value].to_s
     if value != '0' and value != '1'
       raise "Invalid value for export: #{value.inspect}"
-    elsif @user = login_for_ajax
+    elsif @user = get_session_user!
       case type
       when 'image'
         export_image(id, value)
@@ -104,8 +112,8 @@ class AjaxController < ApplicationController
     name = params[:name].to_s
     if params[:format]
       name = Location.reverse_name(name) if params[:format] == "scientific"
-    else
-      name = Location.reverse_name(name) if login_for_ajax.location_format == :scientific
+    elsif @user = get_session_user!
+      name = Location.reverse_name(name) if @user.location_format == :scientific
     end
     render(:inline => Geocoder.new(name).ajax_response)
   end
@@ -125,6 +133,7 @@ class AjaxController < ApplicationController
         file = "#{IMG_DIR}/place_holder_320.jpg"
       end
     end
+    file ="#{RAILS_ROOT}/test/fixtures/images/sticky.jpg" if TESTING
     send_file(file, :type => 'image/jpeg', :disposition => 'inline')
   end
 
@@ -141,11 +150,11 @@ class AjaxController < ApplicationController
       @story = Pivotal.get_story(id)
       render(:inline => '<%= pivotal_story(@story) %>')
     when 'vote'
-      @user = login_for_ajax
+      @user = get_session_user!
       @story = Pivotal.cast_vote(id, @user, value)
       render(:inline => '<%= pivotal_vote_controls(@story) %>')
     when 'comment'
-      @user = login_for_ajax
+      @user = get_session_user!
       story = Pivotal.get_story(id)
       @comment = Pivotal.post_comment(id, @user, value)
       @num = story.comments.length + 1
@@ -163,7 +172,7 @@ class AjaxController < ApplicationController
     type  = params[:type].to_s
     id    = params[:id].to_s
     value = params[:value].to_s
-    if @user = login_for_ajax
+    if @user = get_session_user!
       case type
       when 'naming'
         cast_naming_vote(id, value)
@@ -183,7 +192,7 @@ class AjaxController < ApplicationController
     elsif not @naming
       raise "Invalid id for vote/naming: #{id.inspect}"
     else
-      naming.observation.change_vote(@naming, value, @user)
+      @naming.change_vote(value, @user)
       Transaction.put_naming(:id => @naming, :user => @user, :set_vote => value)
       render(:text => '')
     end

@@ -33,7 +33,6 @@ module ApplicationHelper::Javascript
     prototype
     effects
     controls
-    cached_auto_complete
     window
   )
 

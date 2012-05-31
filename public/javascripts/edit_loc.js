@@ -91,7 +91,7 @@ function findOnMap() {
           map.centerAndZoomOnPoints([new GLatLng(north, east),new GLatLng(south, west)]);
         };
       },
-      onFailure: function(){ alert('Something went wrong...') }
+      onFailure: function(transport){ alert(transport.responseText) }
     });  
 }
 

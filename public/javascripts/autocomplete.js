@@ -65,7 +65,8 @@ var MOAutocompleter = Class.create({
       key_delay2:           0.03,            // subsequent key repeat delay (seconds)
       pulldown_size:        10,              // maximum number of options shown at a time
       page_size:            10,              // amount to move cursor on page up and down
-      max_request_length:   50               // max length of string to send via AJAX
+      max_request_length:   50,              // max length of string to send via AJAX
+      show_errors:          false            // show error messages returned via AJAX?
     });
     Object.extend(this, opts);
 
@@ -883,10 +884,11 @@ var MOAutocompleter = Class.create({
 
       onFailure: (function (response) {
         this.ajax_request = null;
-        alert(response.responseText);
+        if (this.show_errors)
+          alert(response.responseText);
       }).bind(this),
 
-      onComplete: (function (response) {
+      onSuccess: (function (response) {
         this.process_ajax_response(response.responseText);
       }).bind(this)
     });

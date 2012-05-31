@@ -267,13 +267,6 @@ class ApplicationController < ActionController::Base
     return true
   end
 
-  # Much-streamlined login "filter" used by AJAX methods that require login.
-  # Just calls get_session_user, requires that the user already be logged in
-  # and has user id stored in the session.
-  def login_for_ajax
-    get_session_user
-  end
-
   # ----------------------------
   #  "Public" methods.
   # ----------------------------
@@ -402,11 +395,7 @@ class ApplicationController < ActionController::Base
   # Retrieve the User from session.  Returns User object or nil.  (Does not
   # check verified status or anything.)
   def get_session_user
-    result = nil
-    if id = session[:user_id]
-      result = User.find(id) rescue nil
-    end
-    result
+    User.safe_find(session[:user_id])
   end
 
   ##############################################################################

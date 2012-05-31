@@ -37,6 +37,7 @@
 #  user_voted?::            Has a given User voted on this Naming?
 #  users_vote::             Get a given User's Vote on this Naming.
 #  is_users_favorite?::     Is this Naming the given User's favorite?
+#  change_vote::            Call Observation#change_vote.
 #  editable?::              Can owner change this Naming's Name?
 #  deletable?::             Can owner delete this Naming?
 #  calc_vote_table::        (Used by show_votes.rhtml.)
@@ -216,6 +217,11 @@ class Naming < AbstractModel
       end
     end
     return result
+  end
+
+  # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
+  def change_vote(value, user=User.current)
+    observation.change_vote(self, value, user)
   end
 
   # Has anyone voted (positively) on this?  We don't want people changing

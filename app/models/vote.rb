@@ -123,8 +123,8 @@ class Vote < AbstractModel
     self.class.percent(value)
   end
 
-  # Validate a vote value.  Returns type-cast value if valid, nil otherwise.
-  def validate_value(v)
+  # Validate a vote value.  Returns Float value if valid, nil otherwise.
+  def self.validate_value(val)
     val = val.to_f
     val && val >= MINIMUM_VOTE && val <= MAXIMUM_VOTE ? val : nil
   rescue

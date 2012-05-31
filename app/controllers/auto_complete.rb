@@ -107,18 +107,6 @@ class AutoCompleteByWord < AutoComplete
   end
 end
 
-class AutoCompleteName < AutoCompleteByString
-  def rough_matches(letter)
-    return Name.connection.select_values(%(
-      SELECT DISTINCT text_name FROM names
-      WHERE text_name LIKE '#{letter}%'
-      AND correct_spelling_id IS NULL
-    )).sort_by {|x| (x.match(' ') ? 'b' : 'a') + x}.uniq
-    # (this sort puts genera and higher on top, everything else
-    # on bottom, and sorts alphabetically within each group)
-  end
-end
-
 class AutoCompleteLocation < AutoCompleteByWord
   attr_accessor :reverse
 
@@ -141,6 +129,18 @@ class AutoCompleteLocation < AutoCompleteByWord
       matches.map! {|m| Location.reverse_name(m)}
     end
     return matches.sort.uniq
+  end
+end
+
+class AutoCompleteName < AutoCompleteByString
+  def rough_matches(letter)
+    return Name.connection.select_values(%(
+      SELECT DISTINCT text_name FROM names
+      WHERE text_name LIKE '#{letter}%'
+      AND correct_spelling_id IS NULL
+    )).sort_by {|x| (x.match(' ') ? 'b' : 'a') + x}.uniq
+    # (this sort puts genera and higher on top, everything else
+    # on bottom, and sorts alphabetically within each group)
   end
 end
 

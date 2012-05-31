@@ -1,9 +1,12 @@
 function image_export(id, value) {
   new Ajax.Request("/ajax/export/image/" + id + "?value=" + value, {
     asynchronous: true,
-    onComplete: function(request) {
+    onFailure: function (response) {
+      alert(response.responseText);
+    },
+    onSuccess: function(response) {
       var div = $("image_export_" + id);
-      div.innerHTML = request.responseText;
+      div.innerHTML = response.responseText;
     }
   })
 }
