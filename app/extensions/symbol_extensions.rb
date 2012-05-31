@@ -118,6 +118,7 @@ class Symbol
   #
   def localize(args={}, level=[])
     result = nil
+    Language.note_usage_of_tag(self)
     if val = Globalite.localize(self, nil, {})
       result = localize_postprocessing(val, args, level)
     elsif val = Globalite.localize(downcase, nil, {})

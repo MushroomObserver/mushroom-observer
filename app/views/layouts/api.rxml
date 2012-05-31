@@ -5,13 +5,15 @@ xml.response(:xmlns => "#{HTTP_DOMAIN}/response.xsd") do
   if @api.user
     render_minimal_object(xml, :user, User, @api.user.id)
   end
-  if @api.query
-    xml_sql_string(xml, :query, @api.query.query)
-    xml_integer(xml, :number_of_records, @api.num_results)
-    xml_integer(xml, :number_of_pages, @api.num_pages)
-    xml_integer(xml, :page_number, @api.page_number)
+  unless @content_for_layout.blank?
+    if @api.query
+      xml_sql_string(xml, :query, @api.query.query)
+      xml_integer(xml, :number_of_records, @api.num_results)
+      xml_integer(xml, :number_of_pages, @api.num_pages)
+      xml_integer(xml, :page_number, @api.page_number)
+    end
+    xml.target! << @content_for_layout
   end
-  xml.target! << @content_for_layout
   if @api.errors.length > 0
     xml.errors(:number => @api.errors.length) do
       i = 1

@@ -105,10 +105,24 @@ class ApplicationController < ActionController::Base
   before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
+  before_filter :track_translations
   before_filter :check_user_alert
   # before_filter :extra_gc
   # after_filter  :extra_gc
   # after_filter  :log_memory_usage
+
+  # Disable all filters except set_locale. (For API and Ajax controllers.)
+  def self.disable_filters
+    skip_filter   :fix_bad_domains
+    skip_filter   :browser_status
+    skip_filter   :autologin
+    skip_filter   :track_translations
+    skip_filter   :check_user_alert
+    skip_filter   :extra_gc
+    skip_filter   :log_memory_usage
+    before_filter :disable_link_prefetching
+    before_filter { User.current = nil }
+  end
 
   # Enable this to test other layouts...
   layout :choose_layout
@@ -137,6 +151,17 @@ class ApplicationController < ActionController::Base
   rescue => e
     @error = e
     raise e
+  end
+
+  # Keep track of localization strings so that users can edit them (sort of) in situ.
+  def track_translations
+    @language = Language.find_by_locale(Locale.code)
+    if @user and @language and
+       (!@language.official or is_reviewer?)
+      Language.track_usage
+    else
+      Language.ignore_usage
+    end
   end
 
   # Redirect from www.mo.org to mo.org.
@@ -454,13 +479,6 @@ class ApplicationController < ActionController::Base
     if Locale.code.to_s != code
       Locale.code = code
       session[:locale] = code
-    end
-
-    # One last sanity check.  (All translation YML files should have :en_US
-    # defined.)
-    if :en_US.l != 'English'
-      logger.warn("No translation exists for: #{Locale.code}")
-      Locale.code = DEFAULT_LOCALE
     end
 
     # Update user preference.

@@ -85,6 +85,14 @@ module ApiHelper
   rescue
   end
 
+  def xml_undefined_location(xml, tag, val)
+    if @user && @user.location_format == :scientific
+      val = Location.reverse_name(val)
+    end
+    xml.send(tag, val, :type => 'string')
+  rescue
+  end
+
   def xml_naming_reason(xml, tag, val)
     if val.notes.blank?
       xml.send(tag, :category => val.label.l)

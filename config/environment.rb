@@ -443,6 +443,18 @@ module ActionView
   end
 end
 
+# It will crash when rendering the error template in development mode if there
+# is any non-ASCII text in the source code.
+require 'action_view/template_error'
+module ActionView
+  class TemplateError
+    alias __source_extract source_extract
+    def source_extract(*args)
+      __source_extract(*args).force_encoding('utf-8')
+    end
+  end
+end
+
 ################################################################################
 # Stuff to get rails 2.1.1 working with ruby 1.9.3 -Jason, May 2012
 

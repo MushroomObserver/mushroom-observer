@@ -1,16 +1,4 @@
-# Please see README in this same directory for notes on syntax and general
-# guidelines on how to translate text.
-__ignore__: junk
-
-# Do not translate these!
-de_DE: Deutsch
-el_GR: Ελληνικά
-en_US: English
-es_ES: Español
-fr_FR: Français
-pl_PL: Polski
-pt_BR: Português
-ru_RU: Русский
+---
 
 ################################################################################
 #
@@ -985,7 +973,10 @@ app_index_timer: "[num] results in [seconds] sec"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
-app_translators_credit: ""
+app_translators_credit: Translated into English by
+app_translators_credit_and_others: and others
+app_edit_translations: Edit All Translations
+app_edit_translations_on_page: Edit Translations on this Page
 
 # These are general alerts that appear near the top of the page.
 app_no_ajax: Your Browser Is Out of Date

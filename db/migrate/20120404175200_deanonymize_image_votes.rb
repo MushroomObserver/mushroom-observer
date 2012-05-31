@@ -10,7 +10,7 @@ class DeanonymizeImageVotes < ActiveRecord::Migration
       end
     end
 
-    create_table :image_votes do |t|
+    create_table :image_votes, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column "image_id",  :integer, :null => false
       t.column "user_id",   :integer, :null => false
       t.column "value",     :integer, :null => false

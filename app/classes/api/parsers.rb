@@ -5,6 +5,7 @@ class API
 
   self.initializers << lambda do
     self.expected_params = {}
+    parse_string(:action)
   end
 
   # Automatically give clients the ability to call the following parsers:

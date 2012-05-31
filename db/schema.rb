@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120524000700) do
+ActiveRecord::Schema.define(:version => 20120527125200) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -118,6 +118,14 @@ ActiveRecord::Schema.define(:version => 20120524000700) do
     t.boolean  "state"
     t.string   "sync_id",     :limit => 16
     t.datetime "modified"
+  end
+
+  create_table "languages", :force => true do |t|
+    t.string  "locale",   :limit => 40
+    t.string  "name",     :limit => 100
+    t.string  "order",    :limit => 100
+    t.boolean "official",                :null => false
+    t.boolean "beta",                    :null => false
   end
 
   create_table "licenses", :force => true do |t|
@@ -483,6 +491,23 @@ ActiveRecord::Schema.define(:version => 20120524000700) do
   create_table "transactions", :force => true do |t|
     t.datetime "modified"
     t.text     "query"
+  end
+
+  create_table "translation_strings", :force => true do |t|
+    t.integer  "version"
+    t.integer  "language_id",                :null => false
+    t.string   "tag",         :limit => 100
+    t.text     "text"
+    t.datetime "modified"
+    t.integer  "user_id"
+  end
+
+  create_table "translation_strings_versions", :force => true do |t|
+    t.integer  "version"
+    t.integer  "translation_string_id"
+    t.text     "text"
+    t.datetime "modified"
+    t.integer  "user_id"
   end
 
   create_table "triples", :force => true do |t|

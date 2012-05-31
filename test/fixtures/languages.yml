@@ -1,0 +1,31 @@
+english:
+  id: 1
+  locale: en-US
+  name: English
+  order: English
+  official: true
+  beta: false
+
+french:
+  id: 2
+  locale: fr-FR
+  name: Français
+  order: Francais
+  official: false
+  beta: false
+
+greek:
+  id: 3
+  locale: el-GR
+  name: Ελληνικά
+  order: Ellenika
+  official: false
+  beta: true
+
+russian:
+  id: 4
+  locale: ru-RU
+  name: Русский
+  order: Russkii
+  official: false
+  beta: true

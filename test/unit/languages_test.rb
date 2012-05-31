@@ -72,7 +72,9 @@ class LanguagesTest < UnitTestCase
 
 ################################################################################
 
-  # Make sure language tags files exist.
+  # ---------------------------------------
+  #  Make sure language tags files exist.
+  # ---------------------------------------
   def test_language_files
     assert File.directory?(LANGUAGE_PATH)
     assert(Dir.glob(LANGUAGE_FILES).any?)
@@ -84,88 +86,46 @@ class LanguagesTest < UnitTestCase
   def test_language_tags
     files = Dir.glob(LANGUAGE_FILES)
 
-    tags = {}
-    this_tags = {}
+    all_tags = {}
+    tags_by_file = {}
 
     errors = []
-    for file in files
-      h = this_tags[file] = {}
-      x = {}
-      y = {}
-      for line in IO.readlines(file)
-        file2 = file.sub(/.*\//, '')
-        if line.match(/^(\w+):/)
-          if h[$1]
-            errors << "#{file2} [:#{$1}]\n"
-          end
-          x = tags[$1] ||= {}
-          y = h[$1]    ||= {}
-        end
-        if !line.match(/^\s*#/)
-          line.gsub(/\[(\w+)\]/) do
-            x[$1] = y[$1] = nil
-          end
-        end
-      end
-      assert(h["app_banner"])
-    end
-    assert_true(errors.empty?, "Found #{errors.length} duplicate(s) in " +
-      "language files:\n" + errors.join(''))
-
-    errors = []
-    mismatches = {}
     for file in files
       file2 = file.sub(/.*\//, '')
-      h = this_tags[file]
-      missing = tags.keys - h.keys
-      if !missing.empty?
-        errors += missing.map {|x| "#{file2} [:#{x}]\n"}
-      else
-        for key in h.keys
-          missing = tags[key].keys - h[key].keys
-          if !missing.empty?
-            mismatches[key] = nil
-          end
+      data = YAML::load_file(file)
+      this_tags = tags_by_file[file] = {}
+      for tag in data.keys
+        if this_tags[tag]
+          errors << "#{file2} [:#{tag}]\n"
         end
+        all_tags[tag] ||= {}
+        this_tags[tag] ||= {}
+      end
+      assert(this_tags["app_banner"])
+    end
+    assert_block("Found #{errors.length} duplicate(s) in " +
+      "language files:\n" + errors.join('')) { errors.empty? }
+
+    errors = []
+    for file in files
+      file2 = file.sub(/.*\//, '')
+      this_tags = tags_by_file[file]
+      missing = all_tags.keys - this_tags.keys
+      if missing.any?
+        errors += missing.map {|x| "#{file2} [:#{x}]\n"}
       end
     end
-    assert_true(errors.empty?, "Found #{errors.length} missing tag(s) in " +
-      "language files:\n" + errors.join(''))
-
-    # The translataions are too free-form now for this test to be meaningful.
-    # # These are known to have argument mismatches.
-    # mismatches.delete('query_title_all')
-    # assert_equal([], mismatches.keys.sort, "Arguments don't agree for these keys in all the files.")
+    assert_block("Found #{errors.length} missing tag(s) in " +
+      "language files:\n" + errors.join('')) { errors.empty? }
   end
 
   # ----------------------------------
   #  Check syntax of language files.
   # ----------------------------------
   def test_language_syntax
-    errors = []
     for file in Dir.glob(LANGUAGE_FILES)
-      lines = File.readlines(file)
-      num = lines.length
-      while !lines.empty?
-        case line = lines.shift
-        when /DISABLE SYNTAX CHECK/
-          lines = []
-        when /^﻿?#/, /^ *$/
-        when /^(?:\w+|"\w+"):  ?(?!>)(\S(.*\S)?)/
-          validate_one_liner($1) do
-            errors << "#{file} line #{num - lines.length}: #{line}"
-          end
-        when /^(?:\w+|"\w+"):  ?> *$/
-          validate_multiliner(lines) do |line|
-            errors << "#{file} line #{num - lines.length}: #{line}"
-          end
-        else
-          errors << "#{file} line #{num - lines.length}: #{line}"
-        end
-      end
+      YAML::load_file(file)
     end
-    assert_true(errors.empty?, "Found #{errors.length} error(s) in " +
-      "language files:\n" + errors.join(''))
   end
 
   # -------------------------------------------------------
@@ -174,12 +134,10 @@ class LanguagesTest < UnitTestCase
   def test_application_language_tags
 
     # First get list of tags defined in the main language file.
+    data = YAML::load_file(LANGUAGE_MAIN_FILE)
     tags = {}
-    for line in File.readlines(LANGUAGE_MAIN_FILE)
-      if line.match(/^(\w+):/) ||
-         line.match(/^"(\w+)":/)
-        tags[$1.downcase] = true
-      end
+    for tag in data.keys
+      tags[tag.to_s.downcase] = true
     end
 
     # Really, we should include the Globalite translations, too, but for now
@@ -224,26 +182,21 @@ class LanguagesTest < UnitTestCase
   def test_embedded_refs
     errors = []
     for file in Dir.glob(LANGUAGE_FILES)
-
-      # Gather list of tags defined first.
+      data = YAML::load_file(file)
       tags = {}
-      for line in File.readlines(file)
-        tags[$1.downcase] = true if line.match(/^(\w+):/)
+      for tag in data.keys
+        tags[tag.to_s.downcase] = true
       end
-
-      # Now look for embedded refs.
-      n = 0
-      for line in File.readlines(file)
-        break if line.match(/DISABLE SYNTAX CHECK/)
-        n += 1
-        line.gsub(/[\[=]:(\w+)/) do
-          if !tags.has_key?($1.downcase)
-            errors << "#{file} line #{n} [:#{$1}]\n"
+      for tag, str in data
+        if str.is_a?(String)
+          str.gsub(/[\[=]:(\w+)/) do
+            unless tags.has_key?($1.downcase)
+              errors << "#{file} :#{tag} [:#{$1}]\n"
+            end
           end
         end
       end
     end
-
     assert_true(errors.empty?, "Found #{errors.length} undefined tag " +
       "reference(s) in language files:\n" + errors.join(''))
   end

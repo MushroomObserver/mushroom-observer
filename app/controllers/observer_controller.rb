@@ -195,7 +195,20 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   def test
-    flash_notice "Testing warning message."
+    str = 'Ελληνικά'
+    Comment.create(
+      :summary => str,
+      :comment => '',
+      :target => Observation.find(95224)
+    )
+    Language.create(
+      :locale => 'el-GR',
+      :name => str,
+      :official => false,
+      :beta => false
+    )
+    flash_notice str.valid_encoding?
+    # flash_notice "Testing warning message."
   end
 
   # Default page.  Just displays latest happenings.  The actual action is
@@ -2105,7 +2118,8 @@ class ObserverController < ApplicationController
   end
 
   def init_list_vars
-    @lists = User.current.all_editable_species_lists.sort_by(&:modified).reverse[0..9]
+    @lists = User.current.all_editable_species_lists.sort_by(&:title)
+    # @lists = User.current.all_editable_species_lists.sort_by(&:modified).reverse[0..9]
     @list_checks = {}
   end
 

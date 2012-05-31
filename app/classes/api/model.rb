@@ -47,6 +47,7 @@ class API
     def build_query
       params = query_params
       params.remove_nils!
+      params.merge!(:by => :id)
       Query.lookup(model.name.to_sym, :all, params)
     end
 

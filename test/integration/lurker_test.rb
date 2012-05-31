@@ -13,35 +13,34 @@ class LurkerTest < IntegrationTestCase
     # Click on first observation.
     click(:href => /^\/\d+\?/, :in => :results)
     assert_template('observer/show_observation')
-    push_page
 
-    # Click on next (catches a bug ween in the wild).
+    # Click on next (catches a bug seen in the wild).
     push_page
     click(:label => '« Prev', :in => 'div#left_tabs')
     go_back
 
     # Click on the first image.
+    push_page
     click(:label => :image, :in => 'div.show_images')
     click(:label => :image, :href => /show_image.*full_size/)
+    go_back
 
     # Go back to observation and click on "About...".
-    go_back
     click(:label => 'About', :href => /show_name/)
     assert_template('name/show_name')
-    push_page(:name)
 
     # Take a look at the occurrence map.
     click(:label => 'Occurrence Map', :in => :tabs)
     assert_template('name/map')
 
     # Check out a few links from left-hand panel.
-    click(:label => 'How To Use',     :in => :left_panel)
-    click(:label => 'Español',        :in => :left_panel)
-    click(:label => 'Contribuidores', :in => :left_panel)
-    click(:label => 'English',        :in => :left_panel)
-    click(:label => 'List Projects',  :in => :left_panel)
-    click(:label => 'Comments',       :in => :left_panel)
-    click(:label => 'Site Stats',     :in => :left_panel)
+    click(:label => 'How To Use',    :in => :left_panel)
+    click(:label => 'Français',      :in => :left_panel)
+    click(:label => 'Contributeurs', :in => :left_panel)
+    click(:label => 'English',       :in => :left_panel)
+    click(:label => 'List Projects', :in => :left_panel)
+    click(:label => 'Comments',      :in => :left_panel)
+    click(:label => 'Site Stats',    :in => :left_panel)
   end
 
   def test_show_observation

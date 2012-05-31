@@ -91,8 +91,12 @@
         <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS.map {|t| [t.to_sym.l, t]}) %></td>
       <td width="20"></td>
       <td><label for="user_locale"><%= :prefs_locale.t %>:</label><br/>
-        <% locales = all_locales.map { |x| [x.sub('-','_').to_sym.t, x] } %>
-        <%= form.select(:locale, locales) %></td>
+        <%= locales = Language.all.map do |lang|
+          name = lang.name
+          name += ' (beta)' if lang.beta
+          [name, lang.locale]
+        end
+        form.select(:locale, locales) %></td>
     </tr>
   </table><br/>
 

@@ -129,8 +129,8 @@
                 <br/>
 
                 <%= :app_languages.t %>:<br/>
-                <% for locale in all_locales %>
-                  <%= indent + link_to(locale.sub('-','_').to_sym.t, h(reload_with_args(:user_locale => locale))) %><br/>
+                <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
+                  <%= indent + link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %><br/>
                 <% end %>
                 <br/>
 
@@ -255,11 +255,29 @@
             </div>
             
             <br/><br/><br/>
-            <% if Locale.code.to_s != 'en-US' %>
+            <% lang = Language.find_by_locale(Locale.code)
+            if !lang.official or Language.tracking_usage %>
               <div id="translators_credit">
                 <hr width="250" align="left" />
-                <%= :app_translators_credit.tpl %>
-              </div>
+                <% if !lang.official %>
+                  <%= :app_translators_credit.t %>:
+                  <%= ids_and_names = lang.top_contributors(5)
+                  user_links = ids_and_names.map do |id, name|
+                    user_link(id, name)
+                  end.join(', ')
+                  if ids_and_names.length == 5
+                    user_links += ', ' + :app_translators_credit_and_others.t
+                  end
+                  user_links %><br/>
+                <% end %>
+                <% if Language.tracking_usage
+                  file = Language.save_tags %>
+                  <%= link_to(:app_edit_translations_on_page.t, :controller => :translation,
+                        :action => :edit_translations_on_page, :page => file) %> |
+                  <%= link_to(:app_edit_translations.t, :controller => :translation,
+                        :action => :edit_translations) %>
+                <% end %>
+              </div><br/>
             <% end %>
           </div>
         </td>

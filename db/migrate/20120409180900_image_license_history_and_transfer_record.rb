@@ -3,7 +3,7 @@ class ImageLicenseHistoryAndTransferRecord < ActiveRecord::Migration
     add_column :images, :transferred, :boolean, :null => false, :default => false
     Image.connection.update 'UPDATE images SET transferred = TRUE;'
 
-    create_table :copyright_changes do |t|
+    create_table :copyright_changes, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column "user_id",      :integer,  :null => false
       t.column "modified",     :datetime, :null => false
       t.column "target_type",  :string,   :null => false, :limit => 30

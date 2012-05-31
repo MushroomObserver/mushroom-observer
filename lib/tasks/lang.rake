@@ -1,152 +1,363 @@
 # encoding: utf-8
 
+require 'yaml'
+begin
+  # This engine does a better job with Greek and Cyrillic characters.
+  YAML::ENGINE.yamler = 'psych'
+rescue
+end
+
 namespace :lang do
+  desc 'Check syntax of official YAML file, integrate changes into database, refresh other YAML files.'
+  task :update => [
+    :check_official,
+    :update_database,
+    :update_files,
+    'export:all'
+  ]
 
-  desc "Re-sort translations according to English one, filling in missing ones, and moving extras to the end."
-  task(:clean) do
+  def export_file(lang)
+    "#{RAILS_ROOT}/lang/ui/#{lang.locale}.txt"
+  end
 
-    # Use English translations as the template.  Will write the other languages
-    # in the same order, with the same comments.
-    english = 'lang/ui/en-US.yml'
-    template = ''
-    File.open(english) do |fh|
-      template = fh.readlines
+  def yaml_file(lang)
+    "#{RAILS_ROOT}/lang/ui/#{lang.locale}.yml"
+  end
+
+  def official_yaml_file
+    yaml_file(Language.official)
+  end
+
+  def load_file(file)
+    YAML::load_file(file)
+  end
+
+  def write_file(file, data)
+    File.open(file, 'w') do |fh|
+      YAML::dump(data, fh)
     end
+  end
 
-    # Loop through other languages (skipping English of course).
-    dups_in_english = {}
-    for filename in Dir.glob('lang/ui/*.yml').sort
-      if filename != english
+  # This one has to be done without access to Language because it is used
+  # to declare tasks before the MO environment has been loaded.
+  def all_locales
+    locales = []
+    for file in Dir.glob("#{RAILS_ROOT}/lang/ui/*.yml")
+      if file.match(/(\w+-\w+).yml$/)
+        locales << $1
+      end
+    end
+    return locales
+  end
 
-        # Get a hash mapping keys to translations.
-        comments_at_top = ''
-        strings = {}
-        dups = {}
-        undone = {}
-        footer = ''
-        File.open(filename) do |fh|
-          key = nil
-          at_top = true
-          at_end = false
-          fh.each_line do |line|
-            line.sub!(/^\xEF\xBB\xBF/, '')  # (remove stupid UTF-8 marker)
-            if line.match(/^#\s*----/)
-              at_top = false
-            elsif at_top
-              comments_at_top += line
-            elsif line.match(/^# DISABLE SYNTAX CHECKER/)
-              at_end = true
-              footer += line
-            elsif at_end
-              footer += line
-            elsif line.match(/^(\w+):(\s+)/)
-              key = $1
-              # Keep track of things that haven't been translated yet.
-              undone[key] = true if $2.length > 1
-              # Keep list of keys that are used more than once.
-              dups[key] = true if strings[key]
-              strings[key] = line
-            elsif line.match(/^#/)
-              key = nil
-            elsif key
-              strings[key] += line
-            end
-          end
-        end
+################################################################################
 
-        # Clean up translations: remove excess trailing whitespace.
-        strings.keys.each do |key|
-          lines = strings[key]
-          lines.gsub!(/[^\S\n]+\n/, "\n")
-          lines.sub!(/\s+\Z/, "\n")
-          # (make sure there is one trailing blank line for multi-line values)
-          lines += "\n" if lines.match(/\n./)
-          strings[key] = lines
-        end
+  desc 'Check syntax of official YAML file.'
+  task(:check_official => :environment) do
+    file = official_yaml_file
+    puts "Checking #{file}"
+    check_for_duplicates(file)
+    load_file(file)
+  end
 
-        # Create new file by copying the English template and replacing all the
-        # string values with their corresponding translations.
-        result = comments_at_top
-        result.sub!(/\n+\Z/, "\n\n")
-        result += "# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----\n\n"
-        blanks = 0
-        missing = {}
-        keys_in_english = {}
-        for line in template
-          # Comment: assume this ends previous value.
-          if line.match(/^# DISABLE SYNTAX CHECKER/)
-            break
-          elsif line.match(/^#/)
-            result += "\n" * blanks if blanks > 0
-            result += line
-            blanks = 0
-            doing_missing = false
-          # Blank line: hold on to these until we know what to do with them.
-          elsif !line.match(/\S/)
-            blanks += 1
-          # New key: if recognized insert translation, else copy English one.
-          elsif line.match(/^(\w+):/)
-            key = $1
-            # (check for duplicates in English translation, too)
-            if keys_in_english[key]
-              print "Duplicate key in English: #{key}\n" if !dups_in_english[key]
-              dups_in_english[key] = true
-            end
-            keys_in_english[key] = true
-            result += "\n" * blanks if blanks > 0
-            # Only keep translations, throw away ones not translated yet.
-            if strings[key] && !undone[key]
-              result += strings[key]
-              strings.delete(key)
-              doing_missing = false
-            else
-              # (use two spaces after colon for missing translations)
-              result += line.sub(/:\s*/, ':  ')
-              missing[key] = true
-              doing_missing = true
-              # (Untranslated keys will still be in strings. Remove them or
-              # they will get written again at the bottom as an "unneeded"
-              # translation.  Better make sure your translations have that
-              # second space removed or this will clobber them!!!)
-              strings.delete(key) if strings.has_key?(key)
-            end
-            blanks = 0
-          # All other lines must be "folded lines" from "key: >" constructs.
-          elsif doing_missing
-            result += "\n" * blanks if blanks > 0
-            result += line
-            blanks = 0
-          else
-            # (this has the effect of suppressing the extra blank line after
-            # multi-line values, which is already in result if translation
-            # needed it)
-            blanks = -1
-          end
-        end
+  desc 'Check syntax of all YAML files.'
+  task(:check_all => :environment) do
+    for lang in Language.all
+      file = yaml_file(lang)
+      puts "Checking #{file}"
+      check_for_duplicates(file)
+      load_file(file)
+    end
+  end
 
-        # Add the stuff the comes after "DISABLE SYNTAX CHECKER".
-        result += "\n" + footer
-
-        # Check if there are any translations still in strings -- these are
-        # extras.  Stick them at end of file in alphabetical order.
-        if strings.length > 0
-          result += "\n" + ("#" * 80) + "\n\n"
-          result += "# Extra/unnecessary translations:\n"
-          strings.keys.sort.each do |key|
-            result += strings[key]
-          end
-        end
-
-        # Let user know how many keys were missing, as an "executive summary".
-        print "#{filename}: Missing #{missing.keys.length} keys.\n"
-
-        # Write resulting file.
-        File.delete("#{filename}.old") if File.exists?("#{filename}.old")
-        File.rename(filename, "#{filename}.old")
-        File.open(filename, 'w') do |fh|
-          fh.write(result)
+  def check_for_duplicates(file)
+    once = {}
+    twice = {}
+    File.open(file, 'r') do |fh|
+      for line in fh.each_line
+        if line.match(/^(\w+):/)
+          twice[$1] = true if once[$1]
+          once[$1] = true
         end
       end
     end
+    if twice.any?
+      puts "DUPLICATE TAGS IN: #{file}"
+      for tag in twice.keys.sort
+        puts tag
+      end
+      puts
+    end
+  end
+
+################################################################################
+
+  desc 'Update database with any changes in the official YAML file.'
+  task(:update_database => :environment) do
+    puts 'Updating database'
+    @now = Time.now
+    @admin = User.find(0)
+    @lang = Language.official
+    @tag_lookup = build_tag_lookup(@lang)
+    @ignore = get_tags_to_ignore(yaml_file(@lang))
+    @data = load_file(yaml_file(@lang))
+    update_official_translation_strings
+  end
+
+  def build_tag_lookup(lang)
+    tag_lookup = {}
+    for str in lang.translation_strings
+      tag_lookup[str.tag] = str
+    end
+    return tag_lookup
+  end
+
+  def get_tags_to_ignore(file)
+    tags = {}
+    File.open(file, 'r') do |fh|
+      in_meat = false
+      for line in fh.each_line
+        in_meat = true  if line.match(/COMMON WORDS AND PHRASES/)
+        in_meat = false if line.match(/DISABLE SYNTAX CHECKER/)
+        tags[$1] = true if not in_meat and line.match(/^(\w+):/)
+      end
+    end
+    return tags
+  end
+
+  def update_official_translation_strings
+    for tag, new_val in @data
+      if new_val.is_a?(String) and not @ignore[tag]
+        new_val = clean_string(new_val)
+        unless str = @tag_lookup[tag]
+          puts "  adding :#{tag}"
+          create_translation_string(tag, new_val)
+        else
+          old_val = clean_string(str.text)
+          if new_val != old_val
+            puts "  updating :#{tag}"
+            puts "    was #{old_val.inspect}"
+            puts "    was #{new_val.inspect}"
+            update_translation_string(str, new_val)
+          end
+        end
+      end
+    end
+  end
+
+  def create_translation_string(tag, val)
+    TranslationString.create(
+      :language => @lang,
+      :tag => tag,
+      :text => val,
+      :modified => @now,
+      :user => @admin
+    )
+  end
+
+  def update_translation_string(str, val)
+    str.update_attributes(
+      :text => val,
+      :modified => @now
+    )
+  end
+
+################################################################################
+
+  desc 'Refresh unofficial YAML files from database.'
+  task(:update_files => :environment) do
+    for lang in Language.unofficial
+      puts "Refreshing #{lang.locale}"
+      refresh_file(lang)
+    end
+  end
+
+  def refresh_file(lang)
+    file = yaml_file(lang)
+    data = load_file(file)
+    merge_database_strings(data, Language.official)
+    merge_database_strings(data, lang)
+    # save_old_file(file)
+    write_file(file, data)
+  end
+
+  def merge_database_strings(data, lang)
+    for str in lang.translation_strings
+      data[str.tag] = str.text
+    end
+  end
+
+  def save_old_file(file)
+    File.delete("#{file}.old") if File.exists?("#{file}.old")
+    File.rename(file, "#{file}.old")
+  end
+
+################################################################################
+
+  desc 'Strip unused tags in unofficial locales from database.'
+  task(:strip => :environment) do
+    okay_tags = build_tag_lookup(Language.official)
+    for lang in Language.unofficial
+      puts "Stripping #{lang.locale}"
+      for str in lang.translation_strings
+        if !okay_tags[str.tag]
+          puts "  deleting :#{str.tag}"
+          str.destroy
+        end
+      end
+    end
+  end
+
+################################################################################
+
+  namespace :import do
+    desc 'Import all unofficial locales from text files (debug only, really).'
+    task(:all => :environment) do
+      for lang in Language.unofficial
+        import_from_file(lang)
+      end
+    end
+
+    for locale in all_locales
+      desc('Import unofficial locale from hand-editable text file.')
+      task(locale => :environment) do |task|
+        lang = Language.find_by_locale(task.name.sub(/.*:/, ''))
+        raise 'Can only import unofficial languages!' if !lang or lang.official
+        import_from_file(lang)
+      end
+    end
+  end
+
+  def import_from_file(lang)
+    file = export_file(lang)
+    puts "Importing #{file}"
+    @now = Time.now
+    @admin = User.find(0)
+    @lang = lang
+    @tag_lookup = build_tag_lookup(lang)
+    @ignore = get_tags_to_ignore(official_yaml_file)
+    @new_data = load_file(file)
+    @old_data = {}
+    merge_database_strings(@old_data, Language.official)
+    merge_database_strings(@old_data, lang)
+    update_unofficial_translation_strings
+  end
+
+  def update_unofficial_translation_strings
+    for tag, new_val in @new_data
+      new_val = clean_string(new_val)
+      old_val = clean_string(@old_data[tag])
+      if not new_val.is_a?(String)
+        puts "BAD_CLASS: #{tag} #{new_val.class.name}"
+      elsif not old_val
+        puts "UNEXPECTED: #{tag}"
+      elsif @ignore[tag]
+        puts "IGNORING: #{tag}"
+      elsif old_val != new_val
+        unless str = @tag_lookup[tag]
+          puts "  adding :#{tag}"
+          puts  "    was #{old_val.inspect}"
+          puts  "    now #{new_val.inspect}"
+          # create_translation_string(tag, new_val)
+        else
+          puts "  updating :#{tag}"
+          puts  "    was #{old_val.inspect}"
+          puts  "    now #{new_val.inspect}"
+          # update_translation_string(str, new_val)
+        end
+      end
+    end
+  end
+
+################################################################################
+
+  namespace :export do
+    desc 'Export all unofficial locales to text files in hand-editable form.'
+    task(:all => :environment) do
+      for lang in Language.unofficial
+        export_to_file(lang)
+      end
+    end
+
+    for locale in all_locales
+      desc 'Export locale to text file in hand-editable form.'
+      task(locale => :environment) do |task|
+        lang = Language.find_by_locale(task.name.sub(/.*:/, ''))
+        raise 'Can only export unofficial languages!' if !lang or lang.official
+        export_to_file(lang)
+      end
+    end
+  end
+
+  def export_to_file(lang)
+    file = export_file(lang)
+    puts "Exporting #{file}"
+    all_tags = {}
+    merge_database_strings(all_tags, Language.official)
+    merge_database_strings(all_tags, lang)
+    translated_tags = {}
+    merge_database_strings(translated_tags, lang)
+    write_editable_file(file, all_tags, translated_tags)
+  end
+
+  def read_template
+    File.open(official_yaml_file, 'r').readlines
+  end
+
+  def write_editable_file(file, all_tags, translated_tags)
+    template = read_template
+    File.open(file, 'w') do |fh|
+      in_tag = false
+      for line in template
+        if line.match(/^(['"]?(\w+)['"]?:)/)
+          out, tag = $1, $2
+          out += translated_tags[tag] ? ' ' : '  '
+          out += format_string(all_tags[tag])
+          fh.puts(out)
+          in_tag = true if line.match(/ >\s*$/)
+        elsif in_tag
+          in_tag = false unless line.match(/\S/)
+        elsif line.match(/DISABLE SYNTAX CHECKER/)
+          break
+        else
+          fh.write(line)
+        end
+      end
+    end
+  end
+
+  def format_string(val)
+    if val.match(/\\n|\n/)
+      format_multiline_string(val)
+    elsif val.match(/[:#\[\]]/) or
+          val.match(/^(no|yes)$/i) or
+          (val.match(/^\W/) and val.force_encoding('binary')[0].ord < 128)
+      escape_string(val)
+    elsif val == ''
+      '""'
+    else
+      val
+    end
+  end
+
+  def format_multiline_string(val)
+    val = val.sub(/(\\n|\n)+\Z/, '')
+    out = ">\n"
+    for line in val.split(/\\n|\n/)
+      out += '  ' + line + "\\n\n"
+    end.join
+    return out
+  end
+
+  def escape_string(val)
+    '"' + val.gsub(/([\"\\])/, '\\\\\\1') + '"'
+  end
+
+  def clean_string(val)
+    val.gsub(/\\n/, "\n").
+        gsub(/[ \t]+\n/, "\n").
+        gsub(/\n[ \t]+/, "\n").
+        sub(/\A\s+/, '').
+        sub(/\s+\Z/, '')
   end
 end

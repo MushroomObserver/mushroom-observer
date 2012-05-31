@@ -1323,6 +1323,7 @@ class Query < AbstractQuery
                     "DAY(#{col}) #{dir}= #{d})"
     elsif !val.blank?
       self.where << "MONTH(#{col}) #{dir}= #{val}"
+      # XXX This fails if start month > end month XXX
     end
   end
 

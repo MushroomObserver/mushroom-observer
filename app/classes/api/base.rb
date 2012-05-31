@@ -36,9 +36,7 @@ class API
     action = params[:action].to_s
     subclass = "API::#{action.camelize}"
     subclass = subclass.constantize
-    api = subclass.new(params)
-    api.action = action
-    return api
+    subclass.new(params)
   rescue
     raise BadAction.new(action)
   end
