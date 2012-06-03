@@ -1,0 +1,16 @@
+greek_one_version1:
+  id: 1
+  version: 1
+  translation_string_id: 13
+  text: один
+  modified: 2012-03-31
+  user_id: 2
+
+greek_one_version2:
+  id: 2
+  version: 2
+  translation_string_id: 13
+  text: ένα
+  modified: 2012-04-30
+  user_id: 4
+

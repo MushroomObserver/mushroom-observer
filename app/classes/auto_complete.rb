@@ -2,10 +2,13 @@
 #
 #  = AutoComplete base class
 #
-#    auto = AutoCompleteName.new('Agaricus')
+#    auto = AutoCompleteName.new('Agaricus') # ...or...
+#    auto = AutoComplete.subclass('name').new('Agaricus')
 #    render(:inline => auto.matching_strings.join("\n"))
 #
 ################################################################################
+
+PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 
 class AutoComplete
   attr_accessor :string, :matches
@@ -19,18 +22,19 @@ class AutoComplete
     raise "Invalid auto-complete type: #{type.inspect}"
   end
 
-  def initialize(string, params)
-    self.string = string
+  def initialize(string, params={})
+    self.string = string.to_s.strip_squeeze
   end
 
   def matching_strings
     self.matches = rough_matches(string[0])
+    clean_matches
     minimal_string = refine_matches
     truncate_matches
-    ensure_matches_are_one_line
     [minimal_string] + matches
   end
 
+private
   def truncate_matches
     if matches.length > limit
       matches.slice!(limit..-1)
@@ -38,10 +42,11 @@ class AutoComplete
     end
   end
 
-  def ensure_matches_are_one_line
+  def clean_matches
     matches.map! do |str|
-      str.sub(/\s*[\r\n].*/m, '')
+      str.sub(/\s*[\r\n]\s*.*/m,'').sub(/\A\s+/,'').sub(/\s+\Z/,'')
     end
+    matches.uniq!
   end
 end
 
@@ -65,7 +70,7 @@ class AutoCompleteByString < AutoComplete
     used = ''
     for letter in string.split('')
       used += letter
-      regex = /(^|[ ,])#{used}/i;
+      regex = /(^|#{PUNCTUATION})#{used}/i;
       matches.select! { |m| m.match(regex) }
       break if matches.length <= limit
     end
@@ -90,13 +95,13 @@ class AutoCompleteByWord < AutoComplete
       part = ''
       for letter in word.split('')
         part += letter
-        regex = /(^|[ ,])#{part}/i;
+        regex = /(^|#{PUNCTUATION})#{part}/i;
         matches.select! { |m| m.match(regex) }
         return used + part if matches.length <= limit
       end
       if n < words.length
         used += word + ' '
-        regex = /(^|[ ,])#{word}([ ,]|$)/i;
+        regex = /(^|#{PUNCTUATION})#{word}(#{PUNCTUATION}|$)/i;
         matches.select! { |m| m.match(regex) }
         return used if matches.length <= limit
       else

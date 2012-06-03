@@ -1,0 +1,133 @@
+# Synopsis:
+# 0 admin: English: one, two/twos/TWO/TWOS, three, four
+# 1 rolf:  French:  twos, TWOS
+# 2 mary:  French:  one, two, TWO   (and a past version of Greek one)
+# 4 dick:  Greek:   one, two
+# (English "one" has changed since Mary translated it.)
+
+english_one:
+  id: 1
+  version: 1
+  language_id: 1
+  tag: one
+  text: one
+  modified: 2012-05-30
+  user_id: 0
+
+english_two:
+  id: 2
+  version: 1
+  language_id: 1
+  tag: two
+  text: two
+  modified: 2012-05-24
+  user_id: 0
+
+english_TWO:
+  id: 3
+  version: 1
+  language_id: 1
+  tag: TWO
+  text: Two
+  modified: 2012-05-24
+  user_id: 0
+
+english_twos:
+  id: 4
+  version: 1
+  language_id: 1
+  tag: twos
+  text: twos
+  modified: 2012-05-24
+  user_id: 0
+
+english_TWOS:
+  id: 5
+  version: 1
+  language_id: 1
+  tag: TWOS
+  text: Twos
+  modified: 2012-05-24
+  user_id: 0
+
+english_three:
+  id: 6
+  version: 1
+  language_id: 1
+  tag: three
+  text: three
+  modified: 2012-05-24
+  user_id: 0
+
+english_four:
+  id: 7
+  version: 1
+  language_id: 1
+  tag: four
+  text: four
+  modified: 2012-05-24
+  user_id: 0
+
+french_one:
+  id: 8
+  version: 1
+  language_id: 2
+  tag: one
+  text: une
+  modified: 2012-05-24
+  user_id: 2
+
+french_two:
+  id: 9
+  version: 1
+  language_id: 2
+  tag: two
+  text: deux
+  modified: 2012-05-24
+  user_id: 2
+
+french_TWO:
+  id: 10
+  version: 1
+  language_id: 2
+  tag: TWO
+  text: Deux
+  modified: 2012-05-24
+  user_id: 2
+
+french_twos:
+  id: 11
+  version: 1
+  language_id: 2
+  tag: twos
+  text: deux
+  modified: 2012-05-30
+  user_id: 1
+
+french_TWOS:
+  id: 12
+  version: 1
+  language_id: 2
+  tag: TWOS
+  text: Deux
+  modified: 2012-05-30
+  user_id: 1
+
+greek_one:
+  id: 13
+  version: 2
+  language_id: 3
+  tag: one
+  text: ένα
+  modified: 2012-05-31
+  user_id: 4
+
+greek_two:
+  id: 14
+  version: 1
+  language_id: 3
+  tag: two
+  text: δύο
+  modified: 2012-05-31
+  user_id: 4
+

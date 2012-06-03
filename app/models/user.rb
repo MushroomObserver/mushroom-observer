@@ -303,6 +303,11 @@ class User < AbstractModel
   # password.
   attr_accessor :password_confirmation
 
+  # Find admin's record.
+  def self.admin
+    User.first
+  end
+
   # Report which User is currently logged in. Returns +nil+ if none.  This is
   # the same instance as is in the controllers' +@user+ instance variable.
   #

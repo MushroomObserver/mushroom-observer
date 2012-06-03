@@ -56,7 +56,7 @@
   handy_links = :email_handy_links
   if email_type
     tag = :"email_object_change_reason_#{email_type}".to_sym
-    handy_links = tag.l(:type => :location) + ' ' + handy_links.l
+    handy_links = tag.l(:type => :location).sub(/\n*\Z/, "\n" + handy_links.l)
   end
 
   links = []

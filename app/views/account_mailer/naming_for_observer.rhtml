@@ -24,7 +24,7 @@
     :name  => @notification.user.legal_name,
     :email => @notification.user.email
   )
-  handy_links += ' ' + :email_handy_links.l
+  handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
   links.push([:email_links_show_object.l(:type => type),

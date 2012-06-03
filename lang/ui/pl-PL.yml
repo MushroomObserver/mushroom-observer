@@ -4104,7 +4104,7 @@ runtime_index_no_by_rss_log: No [types] have had any recent activity.
 runtime_index_no_for_object: No [types] for this object.
 runtime_index_no_for_user: No [types] for [user].
 runtime_index_no_in_species_list: No [types] in [name].
-runtime_index_no_inside_observation: Observation
+runtime_index_no_inside_observation: ! 'Observation #[id] has no [types].'
 runtime_index_no_of_children: There are no [types] for children of [name].
 runtime_index_no_of_name: There are no [types] of [name].
 runtime_index_no_of_parents: There are no [types] for parents of [name].

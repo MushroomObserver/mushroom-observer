@@ -162,6 +162,11 @@ class AccountControllerTest < FunctionalTestCase
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
 
+    # Make sure "beta" languages are present.
+    for lang in Language.all
+      assert_select("option[value=#{lang.locale}]")
+    end
+
     # Now change everything.
     params = {
       :user => {

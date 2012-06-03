@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-#  = LanguageTracking
+#  = Tracking Usage of Translations
 #
 #  Simple global mechanism for tracking which localization strings get used on
 #  a given page.  You would enable it in a +before_filter+ in your controller,
@@ -78,7 +78,9 @@ module LanguageTracking
   end
 
   def tag_file(name)
-    "#{RAILS_ROOT}/tmp/tags.#{name}"
+    path = "#{RAILS_ROOT}/tmp/language_tracking"
+    Dir.mkdir(path) unless File.exists?(path)
+    return "#{path}/#{name}.txt"
   end
 
   def periodically_clean_up

@@ -12,19 +12,25 @@
 #  official::   Set to true for English: this is the fall-back language for missing translations.
 #  beta::       If true, this will not be shown in the list of available languages.
 #
-#  == Tracking
+#  == Localization and export files
 #
-#  Very simple global mechanism for keeping track of which localization
-#  strings are used on each page.  See LanguageTracking module.
+#  Translation strings are exported to two sets of files.  See LanguageExporter
+#  module for more information.
+#
+#  == Tracking translations used on a page
+#
+#  Very simple global mechanism for keeping track of which localization strings
+#  are used on each page.  See LanguageTracking module for more info.
 #
 ################################################################################
 
 class Language < AbstractModel
+  include LanguageExporter
   class << self
     include LanguageTracking
   end
 
-  has_many :translation_strings
+  has_many :translation_strings, :dependent => :destroy
 
   # Look up the official Language.
   def self.official
@@ -38,7 +44,7 @@ class Language < AbstractModel
 
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
-  def top_contributors(num)
+  def top_contributors(num=10)
     user_ids = self.class.connection.select_rows %(
       SELECT user_id
       FROM translation_strings
@@ -52,6 +58,7 @@ class Language < AbstractModel
         SELECT id, login
         FROM users
         WHERE id IN (#{user_ids.join(',')})
+        ORDER BY FIND_IN_SET(id, '#{user_ids.join(',')}')
       )
     end
     return user_ids
