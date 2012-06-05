@@ -21,17 +21,16 @@
 #
 #  These are the sorts of things the regular expressions match:
 #
-#  ABOVE_SPECIES_PAT::  (Xxx)
-#  SPECIES_PAT::        (Xxx) (yyy)
-#  SUBSPECIES_PAT::     (Xxx yyy) subspecies|subsp|ssp|s. (yyy)
-#  VARIETY_PAT::        (Species|Subspecies) variety|var|v. (yyy)
-#  FORM_PAT::           (Species|Subspecies|Variety) forma|form|f. (yyy)
-#  SP_PAT::             (Xxx) (species|sp.)
-#  AUTHOR_PAT::         (Any-of-the-above) (Author...)
-#  SENSU_PAT::          (Whatever...) (sensu Whatever...)
-#  GROUP_PAT::          (Whatever...) (group|gr|gp.)
-#  SECTION_PAT::        \((sect.|subgenus|stirps) (xxx)\)
-#  COMMENT_PAT::        (...) [(comment)]
+#  GENUS_OR_UP_PAT::    (Xxx) sp? (Author)
+#  SUBGENUS_PAT::       (Xxx subgenus yyy) (Author)
+#  SECTION_PAT::        (Xxx ... sect. yyy) (Author)
+#  STIRPS_PAT::         (Xxx ... stirps yyy) (Author)
+#  SPECIES_PAT::        (Xxx yyy) (Author)
+#  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
+#  VARIETY_PAT::        (Xxx yyy ... var. zzz) (Author)
+#  FORM_PAT::           (Xxx yyy ... f. zzz) (Author)
+#  GROUP_PAT::          (Xxx yyy ...) group
+#  AUTHOR_PAT:          (any of the above) (Author)
 #
 #  * Results are grouped according to the parentheses shown above.
 #  * Extra whitespace allowed on ends and in middle.
@@ -121,14 +120,16 @@
 #  names_from_string::       Look up Name, create it, return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
 #  parse_by_rank::           Parse taxon of given rank, return parts.
+#  parse_author::            Grab the author from the end of a name.
 #  parse_group::             Parse "Whatever group".
-#  parse_sp::                Parse "Xxx sp.".
+#  parse_genus_or_up::       Parse "Xxx".
+#  parse_subgenus::          Parse "Xxx subgenus yyy".
+#  parse_section::           Parse "Xxx sect. yyy".
+#  parse_stirps::            Parse "Xxx stirps yyy".
 #  parse_species::           Parse "Xxx yyy".
 #  parse_subspecies::        Parse "Xxx yyy subsp. zzz".
 #  parse_variety::           Parse "Xxx yyy var. zzz".
 #  parse_form::              Parse "Xxx yyy f. zzz".
-#  parse_above_species::     Parse "Xxx".
-#  parse_author::            Extract author from string.
 #
 #  ==== Other
 #  primer::                  List of names used for priming auto-completer.
@@ -147,6 +148,7 @@
 #  ==== Taxonomy
 #  above_genus?::            Is ranked above genus?
 #  below_genus?::            Is ranked below genus?
+#  at_or_below_genus?::      Is ranked at or below genus?
 #  above_species?::          Is ranked above species?
 #  below_species?::          Is ranked below species?
 #  is_lichen::               Is this a lichen or lichenicolous fungus?
@@ -337,13 +339,6 @@ class Name < AbstractModel
     self.text_name == 'Fungi'
   end
 
-  # Add itallics and (optionally) boldface to a String.  This is used
-  # throughout this file and nowhere else.
-  def self.format_string(str, deprecated=false)
-    boldness = deprecated ? '' : '**'
-    "#{boldness}__#{str}__#{boldness}"
-  end
-
   def display_name
     hide_authors_in_formatted_name(self[:display_name])
   end
@@ -354,7 +349,7 @@ class Name < AbstractModel
 
   def hide_authors_in_formatted_name(str)
     if User.current and User.current.hide_authors == :above_species and RANKS_ABOVE_SPECIES.include?(rank)
-      str = str.sub(/^(\**__.*__\**( \(s[a-z]+\.? [^\(\)]+\))?).*/, '\\1')
+      str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end
     return str
   end
@@ -367,9 +362,9 @@ class Name < AbstractModel
 
   RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
   RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
-  RANKS_ABOVE_SPECIES = [:Genus] + RANKS_ABOVE_GENUS
-  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species]
-  ALL_RANKS =  RANKS_BELOW_GENUS + RANKS_ABOVE_SPECIES + [:Group]
+  RANKS_ABOVE_SPECIES = [:Stirps, :Section, :Subgenus, :Genus] + RANKS_ABOVE_GENUS
+  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species, :Stirps, :Section, :Subgenus]
+  ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
   EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
   ALT_RANKS = {:Division => :Phylum}
 
@@ -411,22 +406,27 @@ class Name < AbstractModel
 
   # Is this Name a family or higher?
   def above_genus?
-    RANKS_ABOVE_GENUS.include?(self.rank)
+    RANKS_ABOVE_GENUS.include?(rank)
   end
 
-  # Is this Name a species or lower?
+  # Is this Name a subgenus or lower?
   def below_genus?
-    RANKS_BELOW_GENUS.include?(self.rank)
+    RANKS_BELOW_GENUS.include?(rank)
   end
 
-  # Is this Name a genus or higher?
+  # Is this Name a genus or lower?
+  def at_or_below_genus?
+    RANKS_BELOW_GENUS.include?(rank) or rank == :Genus
+  end
+
+  # Is this Name a stirps or higher?
   def above_species?
-    RANKS_ABOVE_SPECIES.include?(self.rank)
+    RANKS_ABOVE_SPECIES.include?(rank)
   end
 
   # Is this Name a subspecies or lower?
   def below_species?
-    RANKS_BELOW_SPECIES.include?(self.rank)
+    RANKS_BELOW_SPECIES.include?(rank)
   end
 
   def is_lichen?
@@ -1186,17 +1186,42 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  ABOVE_SPECIES_PAT = /^\s* ("?[A-Z][a-zë\-]+"?) \s*$/x
-  SP_PAT            = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ ([Ss][Pp]\.?|species) \s*$/x
-  SPECIES_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ ([a-zë\-\"]+) \s*$/x
-  SUBSPECIES_PAT    = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+)    \s+ (?:subspecies|subsp|ssp|s)\.? \s+ ([a-zë\-\"]+) \s*$/x
-  VARIETY_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)?)    \s+ (?:variety|var|v)\.? \s+ ([a-zë\-\"]+) \s*$/x
-  FORM_PAT          = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)? (?: \s+ (?:variety|var|v)\.? \s+ [a-zë\-\"]+)?) \s+ (?:forma|form|fo|f)\.? \s+ ([a-zë\-\"]+) \s*$/x
-  AUTHOR_PAT        = /^\s* ("?[A-Z][a-zë\-\s\.\"]+?[a-zë\"](?:\s+[Ss][Pp]\.)?) \s+ (("?[^a-z"\s]|in\s?ed\.?|auct\.?|van\sd[a-z]+\s[A-Z]).*) $/x   # (may have trailing space)
-  SENSU_PAT         = /^\s* ("?[A-Z].*) \s+ (sens[u\.]\s+\S.*\S) \s*$/x
-  GROUP_PAT         = /^\s* ("?[A-Z].*) \s+ ([Gg]roup|gr|gp)\.?     \s*$/x
-  SECTION_PAT       = /^\s* \(?([Ss]ect\.?|[Ss]ection|[Ss]ubg\.?|[Ss]ubgenus|[Ss]tirps) \s+ ([A-Za-zë]+)\)? \s* (.*)$/x
-  COMMENT_PAT       = /^\s* ([^\[\]]*)  \s+ \[(.*)\] \s*$/x
+  SUBG_ABBR   = / subgenus | subg\.? /xi
+  SECT_ABBR   = / section | sect\.? /xi
+  STIRPS_ABBR = / stirps /xi
+  SP_ABBR     = / species | sp\.? /xi
+  SSP_ABBR    = / subspecies | subsp\.? | ssp\.? | s\.? /xi
+  VAR_ABBR    = / variety | var\.? | v\.? /xi
+  F_ABBR      = / forma | form\.? | fo\.? | f\.? /xi
+  GROUP_ABBR  = / group | gr\.? | gp\.? /xi
+  AUCT_ABBR   = / auct\.? /xi
+  INED_ABBR   = / in\s?ed\.? /xi
+  NOM_ABBR    = / nomen | nom\.? /xi
+  SENSU_ABBR  = / sensu?\.? /xi
+
+  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{STIRPS_ABBR} /x
+  ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
+  ANY_NAME_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{STIRPS_ABBR} | #{SP_ABBR} | #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} | #{GROUP_ABBR} /x
+  ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
+
+  UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
+  LOWER_WORD = / [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
+
+  # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
+  LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
+
+  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÁÀÅČÉÈÖØŠŚ\(] | "[^a-z\s] /x
+
+  AUTHOR_PAT      = /^ ("? #{UPPER_WORD} (?: \(? (?:\s #{ANY_SUBG_ABBR} \s #{UPPER_WORD})+ \)? | \s (?!#{AUTHOR_START}|#{ANY_SUBG_ABBR}) #{LOWER_WORD} (?:\s #{ANY_SSP_ABBR} \s #{LOWER_WORD})* | \s #{SP_ABBR} )? "?) (\s (?!#{ANY_NAME_ABBR}\s) #{AUTHOR_START}.*) $/x
+  GENUS_OR_UP_PAT = /^ ("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )? (\s #{AUTHOR_START}.*)? $/x
+  SUBGENUS_PAT    = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)  (\s #{AUTHOR_START}.*)? $/x
+  SECTION_PAT     = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
+  STIRPS_PAT      = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
+  SPECIES_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} "?) (\s #{AUTHOR_START}.*)? $/x
+  SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
+  VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
+  FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
+  GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
 
   # Parse a name given no additional information.  Returns an Array or nil:
   #
@@ -1208,243 +1233,195 @@ class Name < AbstractModel
   #   5: rank              :Variety                :Species        :Genus
   #   6: author            "Author"                "Author"        "Author"
   #
-  def self.parse_name(str)
-    str = str.strip_squeeze.gsub(/“|”/, '"').gsub(/‘|’/, "'")
-    (name, author) = parse_author(str)
-    if parse = parse_group(name)
-      rank = :Group
-    elsif parse = parse_sp(name)
-      rank = :Genus
-    elsif parse = parse_species(name)
-      rank = :Species
-    elsif parse = parse_subspecies(name)
-      rank = :Subspecies
-    elsif parse = parse_variety(name)
-      rank = :Variety
-    elsif parse = parse_form(name)
-      rank = :Form
-    elsif parse = parse_above_species(name)
-      rank = :Genus
-    end
-    if parse
-      if author
-        author_str = " " + author
-        parse[1] += author_str
-        parse[2] += author_str
-        parse[3] += author_str
-      end
-      parse += [rank, author]
-    end
-    return parse
+  def self.parse_name(str, deprecated=false)
+    str = clean_incoming_string(str)
+    parse_group(str, deprecated)       ||
+    parse_subgenus(str, deprecated)    ||
+    parse_section(str, deprecated)     ||
+    parse_stirps(str, deprecated)      ||
+    parse_subspecies(str, deprecated)  ||
+    parse_variety(str, deprecated)     ||
+    parse_form(str, deprecated)        ||
+    parse_genus_or_up(str, deprecated) ||
+    parse_species(str, deprecated)
   end
 
   # Parse a name given its rank.  Raises a RuntimeError if there are any
-  # problems.  Used by +change_text_name+.  Returns an Array:
-  #
-  #   0: text_name
-  #   1: display_name
-  #   2: observation_name
-  #   3; search_name
-  #   4: parent_name
-  #
-  def self.parse_by_rank(in_str, in_rank, in_deprecated)
-    results = nil
-    rank = in_rank.to_sym
-    if ranks_above_species.member?(rank)
-      results = parse_above_species(in_str, in_deprecated)
-    elsif :Species == rank
-      results = parse_species(in_str, in_deprecated)
-    elsif :Subspecies == rank
-      results = parse_subspecies(in_str, in_deprecated)
-    elsif :Variety == rank
-      results = parse_variety(in_str, in_deprecated)
-    elsif :Form == rank
-      results = parse_form(in_str, in_deprecated)
-    elsif :Group == rank
-      results = parse_group(in_str, in_deprecated)
-    elsif
-      raise :runtime_unrecognized_rank.t(:rank => :"rank_#{rank.to_s.downcase}")
+  # problems.  Used by +change_text_name+.  Returns same thing as parse_name.
+  def self.parse_by_rank(str, rank, deprecated)
+    str = clean_incoming_string(str)
+    results = case rank.to_sym
+    when :Group      ; parse_group(str, deprecated)
+    when :Form       ; parse_form(str, deprecated)
+    when :Variety    ; parse_variety(str, deprecated)
+    when :Subspecies ; parse_subspecies(str, deprecated)
+    when :Species    ; parse_species(str, deprecated)
+    when :Stirps     ; parse_stirps(str, deprecated)
+    when :Section    ; parse_section(str, deprecated)
+    when :Subgenus   ; parse_subgenus(str, deprecated)
+    else             ; parse_genus_or_up(str, deprecated, rank.to_sym)
     end
     if !results
-      raise :runtime_invalid_for_rank.t(:rank => :"rank_#{rank.to_s.downcase}",
-                                        :name => in_str)
+      raise :runtime_invalid_for_rank.t(:rank => :"rank_#{rank.to_s.downcase}", :name => str)
     end
     return results
   end
 
-  # :stopdoc:
-  # Pick off author, return [name, author]
-  def self.parse_author(in_str)
-    name = in_str
-    author = nil
-    match = SENSU_PAT.match(in_str)
-    if match.nil?
-      match = AUTHOR_PAT.match(in_str)
+  def self.parse_author(str)
+    str = clean_incoming_string(str)
+    results = [str, nil]
+    if match = AUTHOR_PAT.match(str)
+      results = [match[1].strip, match[2].strip]
     end
-    if match
+    results
+  end
+
+  def self.parse_group(str, deprecated=false)
+    results = nil
+    if match = GROUP_PAT.match(str)
       name = match[1]
-      author = match[2]
-      name += ' sp.' if author.sub!(/^sp\.\s*/i, '')
-      author = nil if author == ''
+      parent = name.sub(LAST_PART, '')
+      results = [
+        name.gsub('ë', 'e') + ' group',
+        format_string(name, deprecated) + ' group',
+        format_string(name, deprecated) + ' group',
+        name.gsub('ë', 'e') + ' group',
+        parent,
+        :Group,
+        ''
+      ]
     end
-    unless author.blank?
-      name, author = standardize_section(name, author)
-    end
-    [name, author]
+    results
   end
 
-  def self.standardize_section(name_str, author_str)
-    # These get interpreted as a species epithet, so need to make special exception here.
-    if name_str.sub!(/ (sect|section|subg|subgenus|stirps)$/, '')
-      author_str = $1 + ' ' + author_str
+  def self.parse_genus_or_up(str, deprecated=false, rank=:Genus)
+    results = nil
+    if match = GENUS_OR_UP_PAT.match(str)
+      name = match[1]
+      author = standardize_author(match[2])
+      author2 = author.blank? ? '' : ' ' + author
+      results = [
+        name.gsub('ë', 'e'),
+        format_string(name, deprecated) + author2,
+        format_string(name + ' sp.', deprecated) + author2,
+        name.gsub('ë', 'e') + ' sp.' + author2,
+        nil,
+        rank,
+        author
+      ]
     end
-    match = SECTION_PAT.match(author_str)
-    if match
-      type, name, author = match[1..3]
-      type = case type.downcase[0..3]
-      when 'sect'; 'sect.'
-      when 'subg'; 'subgenus'
-      when 'stir'; 'stirps'
-      end
-      if author.blank?
-        author_str = "(#{type} #{name})"
+    results
+  end
+
+  def self.parse_below_genus(str, deprecated, rank, pattern)
+    results = nil
+    if match = pattern.match(str)
+      name = standardize_name(match[1])
+      author = standardize_author(match[2])
+      author2 = author.blank? ? '' : ' ' + author
+      parent = name.sub(LAST_PART, '')
+      results = [
+        name.gsub('ë', 'e'),
+        format_string(name, deprecated) + author2,
+        format_string(name, deprecated) + author2,
+        name.gsub('ë', 'e') + author2,
+        parent,
+        rank,
+        author
+      ]
+    end
+    results
+  end
+
+  def self.parse_subgenus(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Subgenus, SUBGENUS_PAT)
+  end
+
+  def self.parse_section(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Section, SECTION_PAT)
+  end
+
+  def self.parse_stirps(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Stirps, STIRPS_PAT)
+  end
+
+  def self.parse_species(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Species, SPECIES_PAT)
+  end
+
+  def self.parse_subspecies(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Subspecies, SUBSPECIES_PAT)
+  end
+
+  def self.parse_variety(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Variety, VARIETY_PAT)
+  end
+
+  def self.parse_form(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Form, FORM_PAT)
+  end
+
+  def self.standardize_name(str)
+    str = str.sub(/ \((.*)\)$/, ' \\1')
+    words = str.split(' ')
+    i = words.length - 2
+    while i > 0
+      if words[i][0] == 'f'
+        words[i] = 'f.'
+      elsif words[i][0] == 'v'
+        words[i] = 'var.'
+      elsif words[i][1] == 'e'
+        words[i] = 'sect.'
+      elsif words[i][1] == 't'
+        words[i] = 'stirps'
+      elsif words[i][3] == 'g'
+        words[i] = 'subgenus'
       else
-        author_str = "(#{type} #{name}) #{author}"
+        words[i] = 'subsp.'
       end
+      i -= 2
     end
-    return name_str, author_str
+    return words.join(' ')
   end
 
-  # The following methods all return the following array:
-  #  0: text_name
-  #  1: display_name
-  #  2: observation_name
-  #  3; search_name
-  #  4: parent_name
-
-  # <Genus> (or other higher rank)
-  def self.parse_above_species(in_str, deprecated=false)
-    results = nil
-    match = ABOVE_SPECIES_PAT.match(in_str)
-    if match
-      results = [
-        match[1].gsub('ë', 'e'),
-        format_string(match[1], deprecated),
-        format_string(match[1] + ' sp.', deprecated),
-        match[1].gsub('ë', 'e') + ' sp.',
-        nil
-      ]
-    end
-    results
+  def self.standardize_author(str)
+    str = str.to_s.
+      sub(/^#{AUCT_ABBR}/, 'auct. ').
+      sub(/^#{INED_ABBR}/, 'ined. ').
+      sub(/^#{NOM_ABBR}/, 'nom. ').
+      sub(/^#{SENSU_ABBR}/, 'sensu ').
+      strip
+    squeeze_author(str)
   end
 
-  # <Genus> sp. (or other higher rank)
-  def self.parse_sp(in_str, deprecated=false)
-    results = nil
-    match = SP_PAT.match(in_str)
-    if match
-      results = [
-        match[1].gsub('ë', 'e'),
-        format_string(match[1], deprecated),
-        format_string(match[1] + ' sp.', deprecated),
-        match[1].gsub('ë', 'e') + ' sp.',
-        nil
-      ]
-    end
-    results
+  # Squeeze "A. H. Smith" into "A.H. Smith".
+  def self.squeeze_author(str)
+    str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
-  # <Genus> <species> (but reject <Genus> section -- unsupported right now)
-  def self.parse_species(in_str, deprecated=false)
-    results = nil
-    match = SPECIES_PAT.match(in_str)
-    if match
-      name = match[1] + ' ' + match[2]
-      results = [
-        name.gsub('ë', 'e'),
-        format_string(name, deprecated),
-        format_string(name, deprecated),
-        name.gsub('ë', 'e'),
-        match[1]
-      ]
+  # Add itallics and (optionally) boldface to a String.  This is used
+  # throughout this file and nowhere else.
+  def self.format_string(str, deprecated=false)
+    boldness = deprecated ? '' : '**'
+    words = str.split(' ')
+    if (words.length & 1) == 0
+      genus = words.shift
+      words[0] = genus + ' ' + words[0]
     end
-    results
+    i = words.length - 1
+    while i >= 0
+      words[i] = "#{boldness}__#{words[i]}__#{boldness}"
+      i -= 2
+    end
+    return words.join(' ')
   end
 
-  # <Genus> <species> subsp. <subspecies>
-  def self.parse_subspecies(in_str, deprecated=false)
-    results = nil
-    match = SUBSPECIES_PAT.match(in_str)
-    if match
-      parent = match[1]
-      child  = match[2]
-      results = parse_species(parent, deprecated)
-      results[0] += ' subsp. ' + child.gsub('ë', 'e')
-      results[1] += ' subsp. ' + format_string(child, deprecated)
-      results[2] += ' subsp. ' + format_string(child, deprecated)
-      results[3] += ' subsp. ' + child.gsub('ë', 'e')
-      results[4] = parent
-    end
-    results
+  def self.clean_incoming_string(str)
+    str.gsub(/“|”/,'"').   # let RedCloth format quotes
+        gsub(/‘|’/,"'").
+        gsub(/\u2028/,''). # line separator that we see occasionally
+        strip_squeeze
   end
-
-  # <Genus> <species> [subsp. <subspecies>] var. <variety>
-  def self.parse_variety(in_str, deprecated=false)
-    results = nil
-    match = VARIETY_PAT.match(in_str)
-    if match
-      parent = match[1]
-      child  = match[2]
-      results = parse_subspecies(parent, deprecated) ||
-                parse_species(parent, deprecated)
-      results[0] += ' var. ' + child.gsub('ë', 'e')
-      results[1] += ' var. ' + format_string(child, deprecated)
-      results[2] += ' var. ' + format_string(child, deprecated)
-      results[3] += ' var. ' + child.gsub('ë', 'e')
-      results[4] = parent
-    end
-    results
-  end
-
-  # <Genus> <species> [subsp. <subspecies] [var. <subspecies>] f. <form>
-  def self.parse_form(in_str, deprecated=false)
-    results = nil
-    match = FORM_PAT.match(in_str)
-    if match
-      parent = match[1]
-      child  = match[2]
-      results = parse_variety(parent, deprecated) ||
-                parse_subspecies(parent, deprecated) ||
-                parse_species(parent, deprecated)
-      results[0] += ' f. ' + child.gsub('ë', 'e')
-      results[1] += ' f. ' + format_string(child, deprecated)
-      results[2] += ' f. ' + format_string(child, deprecated)
-      results[3] += ' f. ' + child.gsub('ë', 'e')
-      results[4] = parent
-    end
-    results
-  end
-
-  # <Taxon> group
-  def self.parse_group(in_str, deprecated=false)
-    results = nil
-    match = GROUP_PAT.match(in_str)
-    if match
-      name_str = match[1]
-      results = parse_above_species(name_str, deprecated)
-      results = parse_species(name_str, deprecated) if results.nil?
-      results = parse_subspecies(name_str, deprecated) if results.nil?
-      results = parse_variety(name_str, deprecated) if results.nil?
-      results = parse_form(name_str, deprecated) if results.nil?
-    end
-    if results
-      text_name, display_name, observation_name, search_name, parent_name = results
-      results = [text_name + " group", display_name + " group",
-                 observation_name + " group", search_name + "group", text_name]
-    end
-    results
-  end
-  # :startdoc:
 
   ##############################################################################
   #
@@ -1491,7 +1468,7 @@ class Name < AbstractModel
 
       conditions = []
       conditions_args = {}
-      if author
+      if not author.blank?
         conditions << 'search_name = :name'
         conditions_args[:name] = search_name
       else
@@ -1510,7 +1487,7 @@ class Name < AbstractModel
 
       # If user provided author, check if name already exists without author.
       # If so, add author to that name automatically.
-      if results.empty? and author
+      if results.empty? and not author.blank?
         conditions_args[:name] = text_name
         results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
         # (this should never return more than one result)
@@ -1578,8 +1555,7 @@ class Name < AbstractModel
         else
           matches = Name.all(:conditions => ["search_name = ?", search_name])
           if matches.empty?
-            matches = Name.all(:conditions => ["text_name = ? AND
-                                (author IS NULL OR author = '')", text_name])
+            matches = Name.all(:conditions => ["text_name = ? AND author = ''", text_name])
           end
         end
 
@@ -1596,7 +1572,7 @@ class Name < AbstractModel
         elsif matches.length == 1
           name = matches.first
           if name.author.blank? and !author.blank?
-            name.change_author author
+            name.change_author(author)
           end
           result << name
 
@@ -1621,7 +1597,7 @@ class Name < AbstractModel
   def self.make_genus(text_name, deprecated = false)
     Name.make_name(:Genus, text_name,
                    :display_name => format_string(text_name, deprecated),
-                   :observation_name => format_string("#{text_name} sp.", deprecated),
+                   :observation_name => format_string("#{text_name}", deprecated) + ' sp.',
                    :search_name => text_name + ' sp.')
   end
 
@@ -1634,7 +1610,7 @@ class Name < AbstractModel
     result.modified         = now
     result.rank             = rank
     result.text_name        = text_name
-    result.author           = author
+    result.author           = author.to_s
     result.display_name     = display_name
     result.observation_name = observation_name
     result.search_name      = search_name
@@ -1655,7 +1631,7 @@ class Name < AbstractModel
     display_name = params[:display_name] || text_name
     observation_name = params[:observation_name] || display_name
     search_name = params[:search_name] || text_name
-    author = params[:author]
+    author = params[:author].to_s
     result = nil
     if rank
       matches = Name.find(:all, :conditions => ['search_name = ?', search_name])
@@ -1681,24 +1657,24 @@ class Name < AbstractModel
   #   name.save
   #
   def change_author(new_author)
-    old_author = self.author
-    self.author = new_author
-    self.display_name     = Name.replace_author(self.display_name,     old_author, new_author)
-    self.observation_name = Name.replace_author(self.observation_name, old_author, new_author)
-    self.search_name      = Name.replace_author(self.search_name,      old_author, new_author)
+    old_author = author
+    self.author = new_author.to_s
+    self.display_name     = Name.replace_author(display_name,     old_author, new_author)
+    self.observation_name = Name.replace_author(observation_name, old_author, new_author)
+    self.search_name      = Name.replace_author(search_name,      old_author, new_author)
   end
 
   # Used by change_author().
   def self.replace_author(str, old_author, new_author) # :nodoc:
-    result = str
-    if old_author
-      ri = result.rindex " " + old_author
+    result = str.strip
+    unless old_author.blank?
+      ri = result.rindex(' ' + old_author)
       if ri and (ri + old_author.length + 1 == result.length)
         result = result[0..ri].strip
       end
     end
-    if new_author
-      result += " " + new_author
+    unless new_author.blank?
+      result += ' ' + new_author
     end
     return result
   end
@@ -1859,8 +1835,7 @@ class Name < AbstractModel
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
         if recipient.created_here
-          QueuedEmail::NameChange.create_email(sender, recipient, self, nil,
-                                               false)
+          QueuedEmail::NameChange.create_email(sender, recipient, self, nil, false)
         end
       end
     end

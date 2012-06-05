@@ -208,7 +208,7 @@ class NameDescription < Description
     # to notify authors of that change.  (review_status_changed? is an implicit
     # method created by ActiveRecord)
     if altered? || review_status_changed?
-      sender = User.current
+      sender = User.current || User.admin
       recipients = []
 
       # Tell admins of the change.

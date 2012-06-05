@@ -615,7 +615,7 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_post
     name = names(:conocybe_filaris)
     assert_equal('Conocybe filaris', name.text_name)
-    assert_nil(name.author)
+    assert(name.author.blank?)
     past_names = name.versions.size
     assert_equal(1, name.version)
     params = {
@@ -655,7 +655,7 @@ class NameControllerTest < FunctionalTestCase
     post_requires_login(:edit_name, params)
     assert_flash_success
     assert_equal(10, @rolf.reload.contribution)
-    assert_equal(nil, name.reload.author)
+    assert_equal('', name.reload.author)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
     assert_equal(@rolf, name.user)
   end
@@ -921,9 +921,9 @@ class NameControllerTest < FunctionalTestCase
     new_name = names(:russula_brevipes_author_notes)
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
-    assert_nil(old_name.author)
+    assert(old_name.author.blank?)
     assert_nil(old_name.description)
-    assert_not_nil(new_name.author)
+    assert(!new_name.author.blank?)
     notes = new_name.description.notes
     assert_not_nil(new_name.description)
     params = {
@@ -952,10 +952,10 @@ class NameControllerTest < FunctionalTestCase
     new_name = names(:russula_brevipes_no_author)
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
-    assert_not_nil(old_name.author)
+    assert(!old_name.author.blank?)
     assert_not_nil(old_name.description)
     notes = old_name.description.notes
-    assert_nil(new_name.author)
+    assert(new_name.author.blank?)
     assert_nil(new_name.description)
     params = {
       :id => old_name.id,
@@ -1031,8 +1031,8 @@ class NameControllerTest < FunctionalTestCase
     new_name = names(:russula_cremoricolor_author_notes)
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
-    assert_nil(old_name.author)
-    assert_not_nil(new_name.author)
+    assert(old_name.author.blank?)
+    assert(!new_name.author.blank?)
     assert_not_nil(old_notes = old_name.description.notes)
     assert_not_nil(new_notes = new_name.description.notes)
     assert_not_equal(old_notes, new_notes)

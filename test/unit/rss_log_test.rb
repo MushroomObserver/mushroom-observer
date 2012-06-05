@@ -32,7 +32,8 @@ class RssLogTest < UnitTestCase
           :display_name     => '**__Test sp.__**',
           :observation_name => '**__Test sp.__**',
           :search_name      => 'Test sp.',
-          :rank             => :Genus
+          :rank             => :Genus,
+          :author           => ''
         )
       when 'Observation'
         obj = Observation.new(

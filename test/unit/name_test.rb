@@ -26,7 +26,7 @@ class NameTest < UnitTestCase
       'rank',
       'author',
     ]
-      if args[i].to_s != parse[i].to_s 
+      if args[i].to_s != parse[i].to_s
         any_errors = true
         var = var + ' (*)'
       end
@@ -34,6 +34,38 @@ class NameTest < UnitTestCase
       i += 1
     end
     assert_block(msg.join("\n")) { !any_errors }
+  end
+
+  def assert_name_match_author_required(pattern, string, first_match=string)
+    assert_block("Expected #{string.inspect} not to match #{@pat}.") { !pattern.match(string) }
+    assert_name_match_various_authors(pattern, string, first_match)
+  end
+
+  def assert_name_match_author_optional(pattern, string, first_match=string)
+    assert_name_match(pattern, string, first_match, '')
+    assert_name_match_various_authors(pattern, string, first_match)
+  end
+
+  def assert_name_match_various_authors(pattern, string, first_match)
+    assert_name_match(pattern, string + ' Author', first_match, ' Author')
+    assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
+    assert_name_match(pattern, string + ' (One) Two', first_match, ' (One) Two')
+    assert_name_match(pattern, string + ' auct', first_match, ' auct')
+    assert_name_match(pattern, string + ' auct non Aurora', first_match, ' auct non Aurora')
+    assert_name_match(pattern, string + ' auct Borealis', first_match, ' auct Borealis')
+    assert_name_match(pattern, string + ' auct. N. Amer.', first_match, ' auct. N. Amer.')
+    assert_name_match(pattern, string + ' ined', first_match, ' ined')
+    assert_name_match(pattern, string + ' in ed.', first_match, ' in ed.')
+    assert_name_match(pattern, string + ' sensu Author', first_match, ' sensu Author')
+    assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
+    assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
+  end
+
+  def assert_name_match(pattern, string, first, second='')
+    match = pattern.match(string)
+    assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
+    assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
+    assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
   end
 
   def do_parse_classification_test(text, expected)
@@ -74,7 +106,7 @@ class NameTest < UnitTestCase
     assert_equal "Coprinus", result[0].text_name
     assert_equal "Coprinus comatus", result[1].text_name
     assert_equal "Coprinus comatus var. bogus", result[2].text_name
-    assert_equal nil, result[0].author
+    assert_equal "", result[0].author
     assert_equal "(O.F. Müll.) Pers.", result[1].author
     assert_equal "(With) Author", result[2].author
 
@@ -87,8 +119,8 @@ class NameTest < UnitTestCase
     assert_equal "Conocybe", result[0].text_name
     assert_equal "Conocybe filaris", result[1].text_name
     assert_equal "Conocybe filaris var. bogus", result[2].text_name
-    assert_equal nil, result[0].author
-    assert_equal nil, result[1].author
+    assert_equal "", result[0].author
+    assert_equal "", result[1].author
     assert_equal "(With) Author", result[2].author
 
     # Agaricus does not have an author.
@@ -107,9 +139,204 @@ class NameTest < UnitTestCase
     assert_equal "Agaricus", result[0].text_name
     assert_equal "Agaricus abra", result[1].text_name
     assert_equal "Agaricus abra f. cadabra", result[2].text_name
-    assert_equal nil, result[0].author
-    assert_equal nil, result[1].author
+    assert_equal "", result[0].author
+    assert_equal "", result[1].author
     assert_equal "(With) Another Author", result[2].author
+  end
+
+  def test_upper_word_pats
+    pat = /^#{Name::UPPER_WORD}$/
+    assert_no_match(pat, '')
+    assert_no_match(pat, 'A')
+    assert_no_match(pat, 'A-')
+    assert_match(pat, 'Ab')
+    assert_match(pat, '"Ab"')
+    assert_no_match(pat, '"Sp-ABC"')
+    assert_no_match(pat, '"S01"')
+    assert_no_match(pat, '"Abc\'')
+    assert_no_match(pat, '\'Abc\'')
+    assert_no_match(pat, '\'"Abc"')
+    assert_match(pat, 'Abc-def')
+    assert_no_match(pat, 'Abcdef-')
+    assert_no_match(pat, '-Abcdef')
+    assert_no_match(pat, 'Abc1def')
+    assert_no_match(pat, 'AbcXdef')
+    assert_match(pat, 'Abcëdef')
+  end
+
+  def test_lower_word_pats
+    pat = /^#{Name::LOWER_WORD}$/
+    assert_no_match(pat, '')
+    assert_no_match(pat, 'a')
+    assert_no_match(pat, 'a-')
+    assert_match(pat, 'ab')
+    assert_match(pat, '"ab"')
+    assert_match(pat, '"sp-ABC"')
+    assert_match(pat, '"sp-S01"')
+    assert_match(pat, '"sp.S01"')
+    assert_no_match(pat, '"sp. S01"')
+    assert_no_match(pat, '"S01"')
+    assert_no_match(pat, '"abc\'')
+    assert_no_match(pat, '\'abc\'')
+    assert_no_match(pat, '\'"abc"')
+    assert_match(pat, 'abc-def')
+    assert_no_match(pat, 'abcdef-')
+    assert_no_match(pat, '-abcdef')
+    assert_no_match(pat, 'abc1def')
+    assert_no_match(pat, 'abcXdef')
+    assert_match(pat, 'abcëdef')
+  end
+
+  def test_author_pat
+    @pat = 'AUTHOR_PAT'
+    pat = Name::AUTHOR_PAT
+    assert_no_match(pat, '')
+    assert_no_match(pat, 'fails')
+    assert_no_match(pat, 'Amanita spuh.')
+    assert_no_match(pat, 'Amanita vaginata fails')
+    assert_no_match(pat, 'Amanita vaginata "author"')
+    assert_no_match(pat, 'Amanita sec. Vaginatae')
+    assert_no_match(pat, 'Amanita sect. "Mismatch\'')
+    assert_name_match_author_required(pat, 'Amanita')
+    assert_name_match_author_required(pat, 'Amanita sp.')
+    assert_name_match_author_required(pat, 'Amanita vaginata')
+    assert_name_match_author_required(pat, 'Amanita "vaginata"')
+    assert_name_match_author_required(pat, 'Amanita Subgenus Vaginatae')
+    assert_name_match_author_required(pat, 'Amanita subg Vaginatae')
+    assert_name_match_author_required(pat, 'Amanita subg "Vaginatae"')
+    # Not worth making a mess of the regular expressions to get these legacy constructs to work here.
+    # assert_name_match_author_required(pat, 'Amanita (subg "Vaginatae")')
+    # assert_name_match_author_required(pat, 'Amanita (sect. Vaginatae stirps Vaginatae)')
+    assert_name_match_author_required(pat, 'Amanita subg Vaginatae sect Vaginatae stirps Vaginatae')
+    assert_name_match_author_required(pat, 'Amanita Stirps Vaginatae')
+    assert_name_match_author_required(pat, 'Amanita vaginata SUBSP grisea')
+    assert_name_match_author_required(pat, 'Amanita vaginata ssp. "ssp-S01"')
+    assert_name_match_author_required(pat, 'Amanita vaginata s grisea v negra f alba')
+    assert_name_match_author_required(pat, 'Amanita vaginata ssp grisea var negra form alba')
+    assert_name_match_author_required(pat, 'Amanita vaginata forma alba')
+    assert_no_match(pat, 'Amanita vaginata group')
+    assert_no_match(pat, 'Amanita vaginata v. grisea group')
+    assert_no_match(pat, 'Amanita vaginata group Author')
+    assert_no_match(pat, 'Amanita vaginata v. grisea group Author')
+  end
+
+  def test_genus_or_up_pat
+    @pat = 'GENUS_OR_UP_PAT'
+    pat = Name::GENUS_OR_UP_PAT
+    assert_name_match_author_optional(pat, 'Amanita')
+    assert_name_match_author_optional(pat, 'Amanita sp.', 'Amanita')
+    assert_name_match_author_optional(pat, '"Amanita"')
+    assert_name_match_author_optional(pat, '"Amanita" sp.', '"Amanita"')
+  end
+
+  def test_subgenus_pat
+    @pat = 'SUBGENUS_PAT'
+    pat = Name::SUBGENUS_PAT
+    assert_name_match_author_optional(pat, 'Amanita subgenus Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita Subg. Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (SUBG Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita subg Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (subg Vaginatae)')
+    assert_name_match_author_optional(pat, '"Amanita subg. Vaginatae"')
+  end
+
+  def test_section_pat
+    @pat = 'SECTION_PAT'
+    pat = Name::SECTION_PAT
+    assert_name_match_author_optional(pat, 'Amanita section Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita Sect. Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (SECT Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita sect Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita subg. Vaginatae sect. Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (sect Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita (subg Vaginatae sect Vaginatae)')
+    assert_name_match_author_optional(pat, '"Amanita sect. Vaginatae"')
+  end
+
+  def test_stirps_pat
+    @pat = 'STIRPS_PAT'
+    pat = Name::STIRPS_PAT
+    assert_name_match_author_optional(pat, 'Amanita stirps Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita Stirps Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita subg. Vaginatae sect. Vaginatae stirps Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (STIRPS Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita (stirps Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita (subgenus Vaginatae section Vaginatae stirps Vaginatae)')
+    assert_name_match_author_optional(pat, '"Amanita stirps Vaginatae"')
+  end
+
+  def test_species_pat
+    @pat = 'SPECIES_PAT'
+    pat = Name::SPECIES_PAT
+    assert_name_match_author_optional(pat, 'Amanita vaginata')
+    assert_name_match_author_optional(pat, 'Amanita "vaginata"')
+    assert_name_match_author_optional(pat, 'Amanita vag-inata')
+    assert_name_match_author_optional(pat, 'Amanita vaginëta')
+    assert_name_match_author_optional(pat, 'Amanita "sp-S01"')
+    assert_name_match_author_optional(pat, '"Amanita vaginata"')
+  end
+
+  def test_subspecies_pat
+    @pat = 'SUBSPECIES_PAT'
+    pat = Name::SUBSPECIES_PAT
+    assert_name_match_author_optional(pat, 'Amanita vaginata subspecies grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata subsp grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata Subsp grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata subsp. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata SSP grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata Ssp grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata ssp grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata ssp. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata S grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata s grisea')
+    assert_name_match_author_optional(pat, 'Amanita "sp-1" s. "ssp-1"')
+    assert_name_match_author_optional(pat, '"Amanita vaginata ssp. grisea"')
+  end
+
+  def test_variety_pat
+    @pat = 'VARIETY_PAT'
+    pat = Name::VARIETY_PAT
+    assert_name_match_author_optional(pat, 'Amanita vaginata variety grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata var grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata v grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata var. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata v. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata VAR grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata V grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata ssp. grisea var. grisea')
+    assert_name_match_author_optional(pat, 'Amanita "sp-1" ssp. "ssp-1" var. "v-1"')
+    assert_name_match_author_optional(pat, '"Amanita vaginata var. grisea"')
+  end
+
+  def test_form_pat
+    @pat = 'FORM_PAT'
+    pat = Name::FORM_PAT
+    assert_name_match_author_optional(pat, 'Amanita vaginata forma grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata form grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata f grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata form. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata f. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata ssp. grisea f. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata var. grisea f. grisea')
+    assert_name_match_author_optional(pat, 'Amanita vaginata ssp. grisea var. grisea f. grisea')
+    assert_name_match_author_optional(pat, 'Amanita "sp-1" ssp. "ssp-1" var. "v-1" f. "f-1"')
+    assert_name_match_author_optional(pat, '"Amanita vaginata f. grisea"')
+  end
+
+  def test_group_pat
+    @pat = 'GROUP_PAT'
+    pat = Name::GROUP_PAT
+    assert_name_match(pat, 'Amanita group', 'Amanita')
+    assert_name_match(pat, 'Amanita Group', 'Amanita')
+    assert_name_match(pat, 'Amanita Gr', 'Amanita')
+    assert_name_match(pat, 'Amanita Gp.', 'Amanita')
+    assert_name_match(pat, 'Amanita vaginata group', 'Amanita vaginata')
+    assert_name_match(pat, 'Amanita vaginata ssp. grisea group', 'Amanita vaginata ssp. grisea')
+    assert_name_match(pat, 'Amanita vaginata var. grisea group', 'Amanita vaginata var. grisea')
+    assert_name_match(pat, 'Amanita vaginata f. grisea group', 'Amanita vaginata f. grisea')
+    assert_name_match(pat, 'Amanita vaginata ssp. grisea f. grisea group', 'Amanita vaginata ssp. grisea f. grisea')
+    assert_name_match(pat, 'Amanita vaginata var. grisea f. grisea group', 'Amanita vaginata var. grisea f. grisea')
+    assert_name_match(pat, 'Amanita vaginata ssp. grisea var. grisea f. grisea group', 'Amanita vaginata ssp. grisea var. grisea f. grisea')
   end
 
   def test_name_parse_1
@@ -353,7 +580,7 @@ class NameTest < UnitTestCase
       '**__Does this__** subsp. **__ever__** var. **__happen__** f. **__for__** Real?',
       '**__Does this__** subsp. **__ever__** var. **__happen__** f. **__for__** Real?',
       'Does this subsp. ever var. happen f. for Real?',
-      'Does this ssp. ever var. happen',
+      'Does this subsp. ever var. happen',
       :Form,
       'Real?'
     )
@@ -401,39 +628,91 @@ class NameTest < UnitTestCase
   def test_name_parse_23
     do_name_parse_test(
       'Genus Sect. Vaginatae (L.) Ach.',
+      'Genus sect. Vaginatae',
+      '**__Genus__** sect. **__Vaginatae__** (L.) Ach.',
+      '**__Genus__** sect. **__Vaginatae__** (L.) Ach.',
+      'Genus sect. Vaginatae (L.) Ach.',
       'Genus',
-      '**__Genus__** (sect. Vaginatae) (L.) Ach.',
-      '**__Genus sp.__** (sect. Vaginatae) (L.) Ach.',
-      'Genus sp. (sect. Vaginatae) (L.) Ach.',
-      '',
-      :Genus,
-      '(sect. Vaginatae) (L.) Ach.'
+      :Section,
+      '(L.) Ach.'
     )
   end
 
   def test_name_parse_24
     do_name_parse_test(
       'Genus (subg Vaginatae)',
+      'Genus subgenus Vaginatae',
+      '**__Genus__** subgenus **__Vaginatae__**',
+      '**__Genus__** subgenus **__Vaginatae__**',
+      'Genus subgenus Vaginatae',
       'Genus',
-      '**__Genus__** (subgenus Vaginatae)',
-      '**__Genus sp.__** (subgenus Vaginatae)',
-      'Genus sp. (subgenus Vaginatae)',
-      '',
-      :Genus,
-      '(subgenus Vaginatae)'
+      :Subgenus,
+      ''
     )
   end
 
   def test_name_parse_25
     do_name_parse_test(
       'Genus stirps Vaginatae Ach. & Fr.',
+      'Genus stirps Vaginatae',
+      '**__Genus__** stirps **__Vaginatae__** Ach. & Fr.',
+      '**__Genus__** stirps **__Vaginatae__** Ach. & Fr.',
+      'Genus stirps Vaginatae Ach. & Fr.',
       'Genus',
-      '**__Genus__** (stirps Vaginatae) Ach. & Fr.',
-      '**__Genus sp.__** (stirps Vaginatae) Ach. & Fr.',
-      'Genus sp. (stirps Vaginatae) Ach. & Fr.',
+      :Stirps,
+      'Ach. & Fr.'
+    )
+  end
+
+  def test_name_parse_26
+    do_name_parse_test(
+      'Genus subgenus Vaginatae stirps Vaginatae',
+      'Genus subgenus Vaginatae stirps Vaginatae',
+      '**__Genus__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
+      '**__Genus__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
+      'Genus subgenus Vaginatae stirps Vaginatae',
+      'Genus subgenus Vaginatae',
+      :Stirps,
+      ''
+    )
+  end
+
+  def test_name_parse_27
+    do_name_parse_test(
+      'Amanita "sp-S01"',
+      'Amanita "sp-S01"',
+      '**__Amanita "sp-S01"__**',
+      '**__Amanita "sp-S01"__**',
+      'Amanita "sp-S01"',
+      'Amanita',
+      :Species,
+      ''
+    )
+  end
+
+  def test_name_parse_28
+    do_name_parse_test(
+      'Amanita "sp-S01" Tulloss',
+      'Amanita "sp-S01"',
+      '**__Amanita "sp-S01"__** Tulloss',
+      '**__Amanita "sp-S01"__** Tulloss',
+      'Amanita "sp-S01" Tulloss',
+      'Amanita',
+      :Species,
+      'Tulloss'
+    )
+  end
+
+  def test_name_parse_29
+    do_name_parse_test(
+      'Amanita "Wrong Author"',
+      'Amanita',
+      '**__Amanita__** "Wrong Author"',
+      '**__Amanita sp.__** "Wrong Author"',
+      'Amanita sp. "Wrong Author"',
       '',
       :Genus,
-      '(stirps Vaginatae) Ach. & Fr.'
+      '"Wrong Author"'
     )
   end
 
@@ -1052,22 +1331,22 @@ class NameTest < UnitTestCase
     name.display_name = '__Macrocybe sp.__ (van Helsing) Author'
     assert_equal('__Macrocybe sp.__', name.display_name)
 
-    name.display_name = '__Macrocybe sp.__ (sect. Helsing) Author'
-    assert_equal('__Macrocybe sp.__ (sect. Helsing)', name.display_name)
+    name.display_name = '__Macrocybe__ sect. __Helsing__ Author'
+    assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
 
-    name.display_name = '__Macrocybe sp.__ (sect. Helsing)'
-    assert_equal('__Macrocybe sp.__ (sect. Helsing)', name.display_name)
+    name.display_name = '__Macrocybe__ sect. __Helsing__'
+    assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
 
     name.display_name = '**__Macrocybe sp.__** (van Helsing) Author'
     assert_equal('**__Macrocybe sp.__**', name.display_name)
 
-    name.display_name = '**__Macrocybe sp.__** (sect. Helsing) Author'
-    assert_equal('**__Macrocybe sp.__** (sect. Helsing)', name.display_name)
+    name.display_name = '**__Macrocybe__** sect. **__Helsing__** Author'
+    assert_equal('**__Macrocybe__** sect. **__Helsing__**', name.display_name)
 
-    name.display_name = '**__Macrocybe sp.__** (sect. Helsing)'
-    assert_equal('**__Macrocybe sp.__** (sect. Helsing)', name.display_name)
+    name.display_name = '**__Macrocybe__** sect. **__Helsing__**'
+    assert_equal('**__Macrocybe__** sect. **__Helsing__**', name.display_name)
 
-    name.display_name = '**__Macrocybe sp.__** (subgenus Blah)'
-    assert_equal('**__Macrocybe sp.__** (subgenus Blah)', name.display_name)
+    name.display_name = '**__Macrocybe__** subgenus **__Blah__**'
+    assert_equal('**__Macrocybe__** subgenus **__Blah__**', name.display_name)
   end
 end

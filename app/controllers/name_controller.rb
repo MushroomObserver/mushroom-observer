@@ -369,7 +369,7 @@ class NameController < ApplicationController
       @other_query = create_query(:Observation, :of_name, :name => @name,
                                   :synonyms => :all, :nonconsensus => :exclusive,
                                   :by => :confidence)
-      if @name.below_genus?
+      if @name.at_or_below_genus?
         @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
                                       :all => true, :by => :confidence)
       end

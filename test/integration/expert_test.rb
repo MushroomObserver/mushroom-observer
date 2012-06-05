@@ -330,7 +330,7 @@ class ExpertTest < IntegrationTestCase
 
     names = Name.find_all_by_text_name(name5)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
-    assert_equal(nil, names.first.author)
+    assert_equal('', names.first.author)
     assert_equal(true, names.first.deprecated)
 
     # I guess this is left alone, even though you would probably

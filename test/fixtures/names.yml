@@ -9,6 +9,7 @@ fungi:
   version: 1
   rank: Kingdom
   text_name: Fungi
+  author: ''
   display_name: '**__Fungi__**'
   observation_name: '**__Fungi sp.__**'
   search_name: Fungi sp.
@@ -58,7 +59,7 @@ conocybe_filaris:
   version: 1
   rank: Species
   text_name: Conocybe filaris
-  author: 
+  author: ''
   display_name: '**__Conocybe filaris__**'
   observation_name: '**__Conocybe filaris__**'
   search_name: Conocybe filaris
@@ -288,6 +289,7 @@ psalliota:
   version: 1
   rank: Genus
   text_name: Psalliota
+  author: ''
   display_name: '**__Psalliota__**'
   observation_name: '**__Psalliota sp.__**'
   search_name: Psalliota sp.
@@ -304,6 +306,7 @@ agaricus:
   version: 1
   rank: Genus
   text_name: Agaricus
+  author: ''
   display_name: '**__Agaricus__**'
   observation_name: '**__Agaricus sp.__**'
   search_name: Agaricus sp.
@@ -407,6 +410,7 @@ strobilurus_diminutivus_no_author:
   version: 1
   rank: Species
   text_name: Strobilurus diminutivus
+  author: ''
   display_name: '**__Strobilurus diminutivus__**'
   observation_name: '**__Strobilurus diminutivus__**'
   search_name: Strobilurus diminutivus
@@ -458,6 +462,7 @@ lepiota:
   version: 1
   rank: Genus
   text_name: Lepiota
+  author: ''
   display_name: '**__Lepiota__**'
   observation_name: '**__Lepiota sp.__**'
   search_name: Lepiota sp.
@@ -474,6 +479,7 @@ chlorophyllum:
   version: 1
   rank: Genus
   text_name: Chlorophyllum
+  author: ''
   display_name: '**__Chlorophyllum__**'
   observation_name: '**__Chlorophyllum sp.__**'
   search_name: Chlorophyllum sp.
@@ -522,6 +528,7 @@ russula_brevipes_no_author:
   version: 1
   rank: Species
   text_name: Russula brevipes
+  author: ''
   display_name: '**__Russula brevipes__**'
   observation_name: '**__Russula brevipes__**'
   search_name: Russula brevipes
@@ -555,6 +562,7 @@ russula_cremoricolor_no_author_notes:
   version: 1
   rank: Species
   text_name: Russula cremoricolor
+  author: ''
   display_name: '**__Russula cremoricolor__**'
   observation_name: '**__Russula cremoricolor__**'
   search_name: Russula cremoricolor
@@ -688,6 +696,7 @@ petigera:
   version: 1
   rank: Genus
   text_name: Petigera
+  author: ''
   display_name: __Petigera__
   observation_name: __Petigera sp.__
   search_name: Petigera sp.
