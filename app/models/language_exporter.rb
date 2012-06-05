@@ -142,6 +142,25 @@ module LanguageExporter
     merge_localization_strings_into({})
   end
 
+  # Return Hash mapping tag (String) to TranslationString (ActiveRecord instance).
+  def translation_strings_hash
+    hash = {}
+    for str in translation_strings
+      hash[str.tag] = str
+    end
+    return hash
+  end
+
+  # Clean excess whitespace out of a string.
+  def clean_string(val)
+    val.to_s.gsub(/\\r|\r/, '').
+             gsub(/\\n/, "\n").
+             gsub(/[ \t]+\n/, "\n").
+             gsub(/\n[ \t]+/, "\n").
+             sub(/\A\s+/, '').
+             sub(/\s+\Z/, '')
+  end
+
 ################################################################################
 
 private
@@ -164,15 +183,6 @@ private
         fh.write(line)
       end
     end
-  end
-
-  # Return Hash mapping tag (String) to TranslationString (ActiveRecord instance).
-  def translation_strings_hash
-    hash = {}
-    for str in translation_strings
-      hash[str.tag] = str
-    end
-    return hash
   end
 
   def merge_localization_strings_into(data)
@@ -261,14 +271,6 @@ private
 
   def escape_string(val)
     '"' + val.gsub(/([\"\\])/, '\\\\\\1') + '"'
-  end
-
-  def clean_string(val)
-    val.to_s.gsub(/\\n/, "\n").
-             gsub(/[ \t]+\n/, "\n").
-             gsub(/\n[ \t]+/, "\n").
-             sub(/\A\s+/, '').
-             sub(/\s+\Z/, '')
   end
 
   # ----------------------------

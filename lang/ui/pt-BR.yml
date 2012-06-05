@@ -872,8 +872,7 @@ app_no_browser: We Don't Recognize Your Browser
 app_no_javascript: Javascript Is Disabled
 app_no_session: You Have Cookies Disabled
 app_rss: RSS Observações de Cogumelo
-app_donate_banner: ! 'NEW FEATURES!  Read about them here: "May 7th releases":/new_features_20120507.txt
-  and "May 18th releases":/new_features_20120518.txt'
+app_donate_banner: ! '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
 app_donate: Donate
 ask_observation_question_title: Question about [name]
 ask_observation_question_label: Enter your question below.  When you hit "[:SEND]"
@@ -4391,3 +4390,16 @@ _unit_test_z: bob
 app_translators_credit_and_others: and others
 app_edit_translations: Edit All Translations
 app_edit_translations_on_page: Edit Translations on this Page
+edit_translations_title: Edit Translations
+edit_translations_login_required: Must be logged in to edit translations.
+edit_translations_reviewer_required: Only reviewers have permission to edit the English
+  translations.
+edit_translations_created: Created translation for [tag].
+edit_translations_changed: Changed translation for [tag].
+edit_translations_page_expired: The page you were working on has expired.  Please
+  go back and reload it, then click on "[:app_edit_translations_on_page]" again.
+edit_translations_help: On the left is a list of translation strings, arranged thematically
+  according to how they appear in the main translation file.  If you click on one
+  of the underlined labels, it will allow you to edit the corresponding string in
+  the panel on the right.  Click "[:SAVE]" to save your changes.
+edit_translations_no_changes: Nothing changed.

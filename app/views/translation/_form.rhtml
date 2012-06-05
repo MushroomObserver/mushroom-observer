@@ -1,0 +1,13 @@
+<%= hidden_field_tag(:tag, @tag) %>
+<% for tag in @edit_tags
+  str = @strings[tag].gsub(/\\n/, "\n")
+  rows = 1
+  for line in str.each_line
+    rows += (line.length / 80).truncate + 1
+  end
+  rows = 5 if rows < 5
+  %>
+  <label for="tag_<%=tag%>"><%= h(tag) %>:</label><br/>
+  <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80) %><br/><br/>
+<% end %>
+<center><%= submit_tag(:SAVE.l) %></center>

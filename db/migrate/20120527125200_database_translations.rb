@@ -4,6 +4,13 @@ require 'yaml'
 
 class DatabaseTranslations < ActiveRecord::Migration
   def self.up
+    begin
+      drop_table :languages
+      drop_table :translation_strings
+      drop_table :translation_strings_versions
+    rescue
+    end
+
     create_table :languages, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.string  :locale, :limit => 40
       t.string  :name, :limit => 100
@@ -82,11 +89,11 @@ class DatabaseTranslations < ActiveRecord::Migration
     end
 
     def translation_files
-      Dir.glob("#{RAILS_ROOT}/lang/ui/*.yml")
+      Dir.glob("#{RAILS_ROOT}/lang/ui/*.txt")
     end
 
     def parse_locale_from_translation_file(file)
-      return $1 if file.match(/(\w+-\w+)\.yml$/)
+      return $1 if file.match(/(\w+-\w+)\.txt$/)
       raise "Bad regex!"
     end
 
@@ -166,6 +173,7 @@ class DatabaseTranslations < ActiveRecord::Migration
           tags << $1     if in_meat and line.match(/^"?(\w+)"?: [^ ]/)
         end
       end
+      return tags
     end
   end
 end

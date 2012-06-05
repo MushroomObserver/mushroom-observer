@@ -126,7 +126,7 @@ vote: голос
 VOTES: Голоса
 votes: голоса
 
-# Other common nouns:
+# Other common nouns.
 ACCOUNT: Учётная запись
 account: Учётная запись
 ACCOUNTS: Учётные записи
@@ -296,7 +296,7 @@ version: версия
 VERSIONS: Версии
 versions: версии
 
-# Common nouns/adjectives used as labels, never pluralized:
+# Common nouns/adjectives used as labels, never pluralized.
 ALL: Все
 all: все
 NONE: Нет
@@ -337,7 +337,7 @@ where: где
 WHO: Кто
 who: кто
 
-# Common verbs/actions used as button labels:
+# Common verbs/actions used as button labels.
 ADD: Добавить
 add: добавить
 APPROVE: Одобрить
@@ -440,7 +440,7 @@ restricted: с ограниченным доступом
 DEFAULT: По умолчанию
 default: по умолчанию
 
-# Common verbs/actions with objects:
+# Common verbs/actions with objects.
 add_object: Добавить [TYPE]
 add_objects: Добавить [TYPES]
 all_objects: Все [TYPES]
@@ -491,13 +491,11 @@ image_vote_long_1: "**Пойдёт**, но вряд ли пригодится."
 image_vote_long_2: "**Полезно** для определения."
 image_vote_long_3: "**Хорошо**, подойдёт для полевого определителя."
 image_vote_long_4: "**Великолепно!**, такое не под силу простым смертным."
-
 image_vote_help_0: Без оценки.
 image_vote_help_1: Пойдёт, но вряд ли пригодится.
 image_vote_help_2: Полезно для определения.
 image_vote_help_3: Подойдёт для полевого определителя.
 image_vote_help_4: Совершенно замечательно!
-
 image_vote_short_0: Без оценки
 image_vote_short_1: Пойдёт
 image_vote_short_2: Полезно
@@ -521,24 +519,24 @@ naming_reason_label_2: Использована литература
 naming_reason_label_3: На базе микроскопических признаков
 naming_reason_label_4: На базе химических реакций
 
-# Description types, note full_title combines the titles below with the title
-# of the object the description is describing, e.g. "User's [:description] of
-# Agaricus campestris" or "Draft for EOL Initiative by login of Amanita lanei".
-
-# These are used as page title and in index results: must include both the type
-# of description and the title of the object ([object]) they're describing.
+# Name/location description types.  These are used as page title and in index
+# results: must include both the type of description and the title of the
+# object ([object]) they're describing.
 description_full_title_public: Общедоступный [:DESCRIPTION] - [object]
 description_full_title_foreign: "[:DESCRIPTION] - [object]; из [text]"
 description_full_title_project: "[user] составил(а) черновик - [object] для [text]"
 description_full_title_source: "[object] - [:DESCRIPTION] из [text]"
 description_full_title_user: "[:DESCRIPTION] - [object]; выполнил(а) [USER]"
 
-# These are used when listing the available descriptions in the show_name page.
+# Name/location description types.  These are used when listing the available
+# descriptions in the show_name page.
 description_part_title_public: Общедоступное [:DESCRIPTION]
 description_part_title_user: Выполненное пользователем [USER] [:DESCRIPTION]
 
-# Same thing, but this time the optional text field was filled in.  Note that
-# the text field is not optional for half of the source types.
+# Name/location description types.  These are used when listing the available
+# descriptions in the show_name page, but this time the optional text field was
+# filled in.  Note that the text field is not optional for half of the source
+# types.
 description_part_title_public_with_text: "[TEXT]"
 description_part_title_foreign_with_text: "[:DESCRIPTION] из [TEXT]"
 description_part_title_project_with_text: "[TEXT] - черновик, выполнен  пользователем [USER]"
@@ -603,7 +601,7 @@ rank_plural_subspecies: подвиды
 RANK_PLURAL_VARIETY: Разновидности
 rank_plural_variety: разновидности
 
-# user statistics field names
+# User statistics field names.
 user_stats_comments: "[:COMMENTS]"
 user_stats_images: "[:IMAGES]"
 user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] - автор"
@@ -620,7 +618,7 @@ user_stats_species_list_entries: "[:SPECIES_LIST] - число записей"
 user_stats_species_lists: "[:SPECIES_LISTS]"
 user_stats_votes: "[:VOTES]"
 
-# site statistics field names
+# Site statistics field names.
 site_stats_comments: "[:COMMENTS]"
 site_stats_images: "[:IMAGES]"
 site_stats_listed_taxa: Таксоны в списке
@@ -640,7 +638,7 @@ site_stats_species_lists: "[:SPECIES_LISTS]"
 site_stats_users: Участники
 site_stats_votes: "[:VOTES]"
 
-# vote descriptions
+# Vote descriptions.
 vote_no_opinion: Нет мнения
 vote_confidence_100: Скорее всего
 vote_confidence_80: Обещающе
@@ -655,13 +653,11 @@ vote_agreement_40: Под сомнением
 vote_agreement_20: Вряд ли
 vote_agreement_0: Точно не оно!
 
-# Query titles. Notes on [args]:
-#
-# [type] is type of object being indexed / searched for (singular)
-# [types], [Type] and [Types] are the same thing but capitalized and/or plural
-# [order] is sort order (singular), e.g., "Name" or "Date"
-# [name], [location], [where], [pattern], etc. are un-translatable strings
-#
+# Query titles. Notes on [args]: \n
+# [type] is type of object being indexed / searched for (singular) \n
+# [types], [Type] and [Types] are the same thing but capitalized and/or plural \n
+# [order] is sort order (singular), e.g., "Name" or "Date" \n
+# [name], [location], [where], [pattern], etc. are un-translatable strings \n
 query_title_advanced_search: "[:app_advanced_search]"
 query_title_all: "[TYPE] Индекс"
 query_title_all_by: "[TYPES], параметр сортировки - [ORDER]"
@@ -971,7 +967,7 @@ app_advanced_search: Расширенный поиск
 app_timer: "время: [seconds] сек."
 app_index_timer: "[num] за [seconds] сек."
 
-# This shows up at the bottom of every page.  We recommend something like:
+# This shows up at the bottom of every page.  We recommend something like: \n
 # "Translated into <Language> by _user your-login_"
 app_translators_credit: ""
 app_translators_credit_and_others:  and others
@@ -988,10 +984,7 @@ app_no_session: Cookies отключены
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-# CHANGED: 20110601
-# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
-# app_donate_banner: '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
-app_donate_banner:  "NEW FEATURES!  Read about them here: \"May 7th releases\":/new_features_20120507.txt and \"May 18th releases\":/new_features_20120518.txt"
+app_donate_banner:  "\"2011 Wrap-Up for Mushroom Observer\":/support/wrapup_2011"
 app_donate: Пожертвовать
 
 ################################################################################
@@ -1014,7 +1007,6 @@ ask_user_question_subject: "[:Subject]"
 ask_webmaster_title: Отправить вопрос или комментарий по e-mail
 ask_webmaster_your_email: Ваш e-mail адрес
 ask_webmaster_question: Вопрос или комментарий
-# CHANGED: 20110615
 ask_webmaster_note: >
   Спасибо за Ваш интерес к веб-сайту [:app_title]. Наш сайт был впервые запущен в середине 2006 годаю. В настоящий момент я являюсь главным (но не единственным!) разработчиком и техническим работником. Я буду рад любым вопросам по использованию сайта и идеям по его улучшению. Мой список дел размещён онлайн, и можно посмотреть, что и в каком порядке планируется делать. Разумеется, список может меняться, особенно если мы находим баг, или если кто-нибудь предложит что-то совершенно замечательное.\n
   \n
@@ -1248,7 +1240,6 @@ form_observations_remove_image: Убрать изображение
 form_observations_lat_long_help: Факультативно - координаты GPS.  Широта указывается в диапазоне между -90.0 и 90.0, а долгота - в диапазоне между -180.0 и 180.0.  Если вы решили добавить эти данные, пожалуйста, позаботьтесь об их максимальной точности.
 form_observations_log_change: Изменение записи в логе
 form_observations_is_collection_location_help: Проставьте метку, если выше вы указали место сбора гриба. Уберите метку, если вы лишь увидели гриб в этом месте (например, на грибной ярмарке, в магазине, в микологическом кружке и т.д.)..
-# CHANGED: 20110616
 form_observations_notes_help: Пожалуйста, расскажите, как вы пришли к определению, а также опишите любые необычные признаки и признаки, которые неочевидны на фотографии, например, вкус, запах.
 form_observations_remove_image_confirm: Вы точно хотите удалить изображение? Изображение будет удалено только из этого наблюдения. Если оно используется в других наблюдениях, то в них оно будет отображаться и дальше.
 form_observations_specimen_available_help: Проставьте метку, если для этого наблюдения сохранён гербарный образец для последующего изучения. Такой образец может находиться как в официальном гербрии, так и в частной коллекции. Пожалуйста, укажите в примечании, где находится образец.
@@ -1374,6 +1365,7 @@ list_place_names_merge: Соединить
 location_change: Изменить местонахождение
 
 
+
 # model/location
 location_dubious_ambiguous_country: Неоднозначно определённая страна или регион (штат), '[country]'
 location_dubious_bad_char: Содержит недопустимый символ '[char]'
@@ -1384,6 +1376,7 @@ location_dubious_redundant_county: Указанный район/графств�
 location_dubious_redundant_state: И '[state]', и '[country]' в списке стран и континентов
 location_dubious_unknown_country: Неизвестная страна'[country]'
 location_dubious_unknown_state: Неизвестный штат/регион '[state]', '[country]'
+
 
 
 # account/login
@@ -1860,7 +1853,6 @@ species_list_show_set_source_help:  Save this species list for the next time you
 species_list_show_bulk_edit_help:  Bulk-edit any observations you own in this species list.
 
 
-
 # species_list/species_lists_by_title
 species_list_by_title_title:  "[:SPECIES_LISTS] by Title"
 species_list_by_title_created:  "[:Created]"
@@ -1964,6 +1956,8 @@ register_update_warning:  Updated previous registration for:<br/> [description]
 conference_verify_success:  Registration of [registrant] for [how_many] to [event] has been verified
 conference_verify_warning:  That registration has already been verified
 
+
+
 # support/donate
 donate_title:  Donate to Mushroom Observer
 donate_tab:  Donate
@@ -2060,92 +2054,6 @@ wrapup_2011_body:  >
   Thanks for all your contributions to the Mushroom Observer,\n
   -Nathan\n
 
-
-# pivotal/index
-pivotal_index_title:  Directions for Future Development
-pivotal_post_comment:  Post Comment
-pivotal_index_header:  Use this page to browse through the many features requested by users and developers.  Some are very specific bug fixes or requests for new capabilities.  Others are just general areas people are interested in seeing Mushroom Observer grow.  Features are organized by use of the following set of labels.  Click on a label to see a list of features with that label. Click on a feature to see more detail and discussion.  If you are logged in, you will be able to vote features up or down, and you can add your own comments to the discussion.  If you would like to request a new feature, for now we request that you "send us an email":/observer/ask_webmaster_question describing what it is you'd like to do.  Please try to be as detailed as possible; concrete examples are generally the best.
-pivotal_vote_failed:  >
-  We were unable to process your vote.\n
-  If the problem persists please notify to admins.\n
-  Sorry for the inconvenience!\n
-
-pivotal_story_failed:  >
-  We were unable to get the story you requested.\n
-  If the problem persists please notify to admins.\n
-  Sorry for the inconvenience!\n
-
-pivotal_comment_failed:  >
-  We were unable to post your comment.\n
-  If the problem persists please notify to admins.\n
-  Sorry for the inconvenience!\n
-
-pivotal_story_loading:  Loading story details...
-pivotal_posting_comment:  Posting comment...
-pivotal_posted_by:  Posted by
-
-pivotal_state_unscheduled:  unscheduled
-pivotal_state_unstarted:  in the queue
-pivotal_state_started:  in progress
-
-pivotal_head_critical:  serious bugs or mission-critical work
-pivotal_head_bottleneck:  stuff required by lots of other things
-pivotal_head_api:  programmer's interface via XML-RPC, etc.
-pivotal_head_design:  web layout and graphic design
-pivotal_head_email:  notification emails
-pivotal_head_eol:  EOL content sharing
-pivotal_head_i18n:  translation text and all the associated machinery
-pivotal_head_interface:  web interface
-pivotal_head_lists:  species lists, checklists, etc.
-pivotal_head_locations:  location descriptions and/or geocoding
-pivotal_head_names:  species descriptions
-pivotal_head_projects:  group projects
-pivotal_head_search:  search capabilities and data mining
-pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
-pivotal_head_voting:  voting on observations, their names, images, etc.
-pivotal_head_other:  uncategorized
-pivotal_head_admin:  administration tasks
-pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
-pivotal_head_server:  server installation, configuration, and diagnostics
-pivotal_head_open:  areas we are actively soliciting feedback
-pivotal_head_started:  areas developers are actively working
-pivotal_head_unstarted:  scheduled for work soon
-pivotal_head_unscheduled:  for the indefinite future
-pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week
-pivotal_head_month:  has comments within last month
-pivotal_head_none:  has no recent comments
-pivotal_head_all:  show everything
-
-pivotal_label_critical:  critical
-pivotal_label_bottleneck:  bottleneck
-pivotal_label_api:  api
-pivotal_label_design:  design
-pivotal_label_email:  email
-pivotal_label_eol:  eol
-pivotal_label_i18n:  translations
-pivotal_label_interface:  interface
-pivotal_label_lists:  lists
-pivotal_label_locations:  locations
-pivotal_label_names:  names
-pivotal_label_projects:  projects
-pivotal_label_search:  searching
-pivotal_label_taxonomy:  taxonomy
-pivotal_label_voting:  voting
-pivotal_label_other:  other
-pivotal_label_admin:  admin
-pivotal_label_code:  code
-pivotal_label_server:  server
-pivotal_label_open:  open
-pivotal_label_day:  day
-pivotal_label_week:  week
-pivotal_label_month:  month
-pivotal_label_none:  none
-pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
-pivotal_label_unstarted: "[:pivotal_state_unstarted]"
-pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  "[:all]"
-
 ################################################################################
 
 # LESS POPULAR PAGES
@@ -2183,6 +2091,7 @@ adjust_permissions_all_users:  All Users
 adjust_permissions_site_admin:  site admin
 
 
+
 # observer/advanced_search
 advanced_search_at_least_one:  Please provide at least one search parameter
 advanced_search_caveat:  >
@@ -2206,8 +2115,10 @@ advanced_search_observer_help:  Who observed the mushroom
 advanced_search_result_type:  Result Type
 advanced_search_result_type_help:  Do you want [:observations], [:images] or [:names]/[:descriptions]?
 
+
 # observer/license_updater
 bulk_license_link:  Bulk License Updater
+
 
 
 # observer/color_themes
@@ -2219,6 +2130,7 @@ color_themes_text:  >
   The following links describe each of the available themes including links to the [:images] the colors were extracted from:\n
 
 color_themes_title:  Color Themes
+
 
 
 # name/email_tracking
@@ -2245,9 +2157,12 @@ email_tracking_title:  Email Tracking for [name]
 email_tracking_updated_messages:  Updated tracking messages.
 
 
+
 # name/eol_expanded_review_title
 eol_expanded_review_title:  EOL Preview
 eol_expanded_review_count:  "[count] taxa"
+
+
 # name/eol_for_taxon
 eol_for_taxon_images:  Images for EOL
 eol_for_taxon_observation:  Observation [id]
@@ -2255,8 +2170,11 @@ eol_for_taxon_title:  EOL Review for [name]
 eol_for_taxon_voteless_images:  Images with No Votes
 eol_for_taxon_voteless_observations:  Observations with No Votes
 
+
+
 # name/eol_need_review
 eol_need_review_title:  EOL Need Review
+
 
 
 # name/eol_preview
@@ -2305,10 +2223,12 @@ interest_default_help:  Click here if you want to go back to the default -- havi
 interest_watching:  You have told us to email you about changes in this [object].  Click one of the small icons below to change.
 interest_ignoring:  You have told us never to email you about changes in this [object].  Click one of the small icons below to change.
 
+
 # interest/list_interests
 list_interests_title:  Your Notification Requests
 list_interests_turn_on:  Change to Watch
 list_interests_turn_off:  Change to Ignore
+
 
 
 # location/list_merge_options
@@ -2318,8 +2238,10 @@ list_merge_options_others:  Other Available [:locations]
 list_merge_options_title:  Merge Options for [where]
 
 
+
 # observer/list_notifications
 list_notifications_title:  Email Alerts for [user]
+
 
 
 # observer/list_users
@@ -2327,12 +2249,15 @@ list_users_joined:  Joined
 list_users_contribution:  Contribution
 
 
+
 # location/add_to_location
 location_merge_success:  Successfully merged [this] with [that].
 
 
+
 # species_list/make_report
 make_report_not_supported:  We don't support report filetype *.[type].
+
 
 
 # description/merge_descriptions
@@ -2379,6 +2304,7 @@ name_bulk_success:  All names are now in the database.
 name_bulk_title:  Bulk Name Edit
 
 
+
 # species_list/name_lister
 name_lister_bad_browser:  This page will not work on your browser, sorry!
 name_lister_bad_submit:  Invalid commit button '[button]'.
@@ -2403,9 +2329,11 @@ name_lister_submit_txt:  Save as Plain Text
 name_lister_title:  Name List Generator
 
 
+
 # name/needed_descriptions
 needed_descriptions_help:  The following species names are the ones that have the most [:observations], but do not have a general description in the [:app_title].  Adding a general description to these common species would be a big help.
 needed_descriptions_title:  Top 100 Needed Species [:descriptions]
+
 
 
 # observer/no_ajax
@@ -2431,6 +2359,7 @@ no_ajax_dont_care:  If you don't care and you're tired of seeing the "Your Brows
 no_ajax_title:  Your Browser is Out of Date
 
 
+
 # observer/no_browser
 no_browser_body:  >
   We have not seen your browser before.  This means we don't know if it supports the full capabilities of this site.  Since there are pages that won't work if we guess wrong (like voting on [:observation] names), we have to assume the worst.  However this means that a number of useful features are not available, like dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.\n
@@ -2438,6 +2367,7 @@ no_browser_body:  >
   If you would like to override this decision, "click here to turn javascript on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't Recognize Your Browser" tab at the top of every page, please "click here to turn javascript off":/observer/turn_javascript_off.  (Login and go to preferences to re-enable auto-detection.)\n
 
 no_browser_title:  We Don't Recognize Your Browser
+
 
 
 # account/no_email
@@ -2481,6 +2411,7 @@ no_email_general_commercial_success:  Commercial inquiries disabled for [name].
 no_email_general_question_success:  Question email disabled for [name].
 
 
+
 # observer/no_javascript
 no_javascript_body:  >
   It looks like you have javascript disabled on your browser.  You will still have access to all of the capabilities of this site, however unless you enable javascript we will not be able to make use of some very useful features that modern browsers support.  This includes dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.\n
@@ -2489,6 +2420,7 @@ no_javascript_body:  >
 
 no_javascript_dont_care:  If you *do* have javascript enabled, but our auto-detection algorithm is failing to detect it correctly, "please click here":/observer/turn_javascript_on.  If you don't care and you're tired of seeing the "Javascript Disabled" tab at the top of every page, "please click here":/observer/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)
 no_javascript_title:  You Have Javascript Disabled
+
 
 
 # observer/no_session
@@ -2500,6 +2432,90 @@ no_session_body:  >
   If you would like to turn cookies on, but aren't sure how, try looking it up on google with this search: "How do I enable cookies in my browser?":http://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search Note that most browsers will let you enable cookies for individual sites, allowing you to protect your privacy everywhere else.  For example, in Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions.\n
 
 no_session_title:  You Have Cookies Disabled
+
+
+
+# pivotal/index
+pivotal_index_title:  Directions for Future Development
+pivotal_post_comment:  Post Comment
+pivotal_index_header:  Use this page to browse through the many features requested by users and developers.  Some are very specific bug fixes or requests for new capabilities.  Others are just general areas people are interested in seeing Mushroom Observer grow.  Features are organized by use of the following set of labels.  Click on a label to see a list of features with that label. Click on a feature to see more detail and discussion.  If you are logged in, you will be able to vote features up or down, and you can add your own comments to the discussion.  If you would like to request a new feature, for now we request that you "send us an email":/observer/ask_webmaster_question describing what it is you'd like to do.  Please try to be as detailed as possible; concrete examples are generally the best.
+pivotal_vote_failed:  >
+  We were unable to process your vote.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_story_failed:  >
+  We were unable to get the story you requested.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_comment_failed:  >
+  We were unable to post your comment.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_story_loading:  Loading story details...
+pivotal_posting_comment:  Posting comment...
+pivotal_posted_by:  Posted by
+pivotal_state_unscheduled:  unscheduled
+pivotal_state_unstarted:  in the queue
+pivotal_state_started:  in progress
+pivotal_head_critical:  serious bugs or mission-critical work
+pivotal_head_bottleneck:  stuff required by lots of other things
+pivotal_head_api:  programmer's interface via XML-RPC, etc.
+pivotal_head_design:  web layout and graphic design
+pivotal_head_email:  notification emails
+pivotal_head_eol:  EOL content sharing
+pivotal_head_i18n:  translation text and all the associated machinery
+pivotal_head_interface:  web interface
+pivotal_head_lists:  species lists, checklists, etc.
+pivotal_head_locations:  location descriptions and/or geocoding
+pivotal_head_names:  species descriptions
+pivotal_head_projects:  group projects
+pivotal_head_search:  search capabilities and data mining
+pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
+pivotal_head_voting:  voting on observations, their names, images, etc.
+pivotal_head_other:  uncategorized
+pivotal_head_admin:  administration tasks
+pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
+pivotal_head_server:  server installation, configuration, and diagnostics
+pivotal_head_open:  areas we are actively soliciting feedback
+pivotal_head_started:  areas developers are actively working
+pivotal_head_unstarted:  scheduled for work soon
+pivotal_head_unscheduled:  for the indefinite future
+pivotal_head_day:  has comments within last day
+pivotal_head_week:  has comments within last week
+pivotal_head_month:  has comments within last month
+pivotal_head_none:  has no recent comments
+pivotal_head_all:  show everything
+pivotal_label_critical:  critical
+pivotal_label_bottleneck:  bottleneck
+pivotal_label_api:  api
+pivotal_label_design:  design
+pivotal_label_email:  email
+pivotal_label_eol:  eol
+pivotal_label_i18n:  translations
+pivotal_label_interface:  interface
+pivotal_label_lists:  lists
+pivotal_label_locations:  locations
+pivotal_label_names:  names
+pivotal_label_projects:  projects
+pivotal_label_search:  searching
+pivotal_label_taxonomy:  taxonomy
+pivotal_label_voting:  voting
+pivotal_label_other:  other
+pivotal_label_admin:  admin
+pivotal_label_code:  code
+pivotal_label_server:  server
+pivotal_label_open:  open
+pivotal_label_day:  day
+pivotal_label_week:  week
+pivotal_label_month:  month
+pivotal_label_none:  none
+pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
+pivotal_label_unstarted: "[:pivotal_state_unstarted]"
+pivotal_label_started: "[:pivotal_state_started]"
+pivotal_label_all:  "[:all]"
 
 
 
@@ -2517,7 +2533,6 @@ refine_search_conditions:  Parameters
 refine_search_unknown_object:  "Unknown [TYPE] #[id]"
 refine_search_help:  "[[Help]]"
 refine_search_max_size:  Max Size
-
 refine_search_advanced_search_content:  "[:refine_search_pattern_search]"
 refine_search_advanced_search_location:  "[:Location]"
 refine_search_advanced_search_name:  "[:Name]"
@@ -2613,7 +2628,6 @@ refine_search_synonyms_no:  just this name
 refine_search_text_name_has:  Search taxon name
 refine_search_title_has:  Search title
 refine_search_users:  Restrict to these user(s)
-
 refine_search_advanced_search_content_help:  Search text of observations' notes and comments. [:refine_search_google_help]
 refine_search_advanced_search_location_help:  Where the mushroom was found. [:refine_search_locations_help]
 refine_search_advanced_search_name_help:  Name of the mushroom.  [:refine_search_names_help]
@@ -2750,6 +2764,7 @@ sandbox_title:  Textile Sandbox
 sandbox_web_refs:  Web References
 
 
+
 # interest/set_interest
 set_interest_already_deleted:  You have expressed no interest in [name].
 set_interest_already_off:  You have already told us to ignore [name].
@@ -2763,8 +2778,10 @@ set_interest_success_on:  You will now be notified of any changes in [name].
 set_interest_user_mismatch:  Another [:user] is logged on at this machine.  Please log them off, log back in as you, and try again.
 
 
+
 # observer/show_notifications
 show_notifications_title: Новые оповещения для [user]
+
 
 
 # species_list/bulk_editor
@@ -2777,6 +2794,7 @@ species_list_bulk_editor_ambiguous_namings:  "The proposed names are confusing f
 species_list_bulk_editor_help:  "Hold your mouse over any of the fields in the table below to see what the field is supposed to be.  The text fields are, in order: notes (top right), date, location, latitude, longitude, altitude (second row).  Check boxes indicate, respectively, if location is where collected, and specimen.  All links open in new tabs."
 
 
+
 # observer/<Theme>
 theme_agaricus:  _Agaricus_ Theme
 theme_agaricus_augustus:  "[link] is used for the left-hand panel's background color."
@@ -2786,38 +2804,36 @@ theme_agaricus_lilaceps:  "[link] is used for the background color for the some 
 theme_agaricus_semotus:  "[link] is used for the banner background color."
 theme_agaricus_subrufescens:  "[link] is used for most unvisited links."
 theme_agaricus_xanthodermus:  "[link] is used for the background color for some rows on the list pages and the unvisited link color for the other rows."
-
 theme_amanita:  _Amanita_ Theme
 theme_amanita_calyptroderma:  "[link] is used for all the colors of half the rows on the list pages."
 theme_amanita_muscaria:  "[link] is used for the banner background and text, the default visited link and link hover colors as well as the text for the left-hand panel."
 theme_amanita_pachycolea:  "[link] is used for the primary background, the default text and default unvisited links."
 theme_amanita_phalloides:  "[link] is used for all the colors of the other half of the rows on the list pages."
 theme_amanita_velosa:  "[link] is used for the left-hand panel's background color and the left-hand panel's visited and unvisited link colors."
-
 theme_cantharellaceae:  _Cantharellaceae_ Theme
 theme_cantharellaceae_californicus:  "[link] is used for the primary, banner and left-hand panel backgrounds."
 theme_cantharellaceae_cinnabarinus:  "[link] is used for the default link and visited link colors."
 theme_cantharellaceae_cornucopioides:  "[link] is used for the default text and all the colors of half the rows on the list pages."
 theme_cantharellaceae_tubaeformis:  "[link] is used for all the colors of the other half of the rows on the list pages."
-
 theme_hygrocybe:  _Hygrocybe_ Theme
 theme_hygrocybe_conica:  "[link] is used for the default text and all the colors of half the rows on the list pages."
 theme_hygrocybe_miniata:  "[link] is used for the left-hand panel background and link text colors."
 theme_hygrocybe_pittacina:  "[link] is used for the default link text colors."
 theme_hygrocybe_punicea:  "[link] is used for the default background color, the banner background color, and all the colors of the other half of the rows on the list pages."
-
 theme_random: случайное
 theme_list:  List of Themes
-
 theme_black_on_white:  Black on White Theme
 theme_black_on_white_description:  This is a simple Black on White theme that attempts to be as readable and clean as possible. The logo colors come from the [link] theme.
 theme_switch:  To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme
 
+# Theme names.
 Agaricus:  Agaricus
 Amanita:  Amanita
 Cantharellaceae:  Cantharellaceae
 Hygrocybe:  Hygrocybe
 BlackOnWhite:  Black on White
+
+
 
 # observer/translators_note
 translators_note: >
@@ -2828,9 +2844,22 @@ translators_note: >
 translators_note_title: На заметку переводчикам
 
 
+
+# translation/edit_translations
+edit_translations_title:  Edit Translations
+edit_translations_login_required:  Must be logged in to edit translations.
+edit_translations_reviewer_required:  Only reviewers have permission to edit the English translations.
+edit_translations_created:  Created translation for [tag].
+edit_translations_changed:  Changed translation for [tag].
+edit_translations_no_changes:  Nothing changed.
+edit_translations_page_expired:  The page you were working on has expired.  Please go back and reload it, then click on "[:app_edit_translations_on_page]" again.
+edit_translations_help:  On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file.  If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right.  Click "[:SAVE]" to save your changes.
+
+
 # observer/turn_javascript_nil
 turn_javascript_nil_body: javascript оопределяется автоматически.
 turn_javascript_nil_title: Автоматическое определение Javascript
+
 
 
 # observer/turn_javascript_off
@@ -2838,9 +2867,11 @@ turn_javascript_off_body: javascript теперь игнорируется.
 turn_javascript_off_title: Отключить Javascript
 
 
+
 # observer/turn_javascript_on
 turn_javascript_on_body: По умолчанию Javascript включён
 turn_javascript_on_title: Включить Javascript
+
 
 
 # account/create_alert and show_alert
@@ -2889,12 +2920,14 @@ add_members_denied:  "Permission denied: only admins for a project can add new m
 add_members_title:  Add [:users] to [title]
 
 
+
 # project/add_project
 add_project_already_exists:  A project named '[title]' already exists.
 add_project_group_exists:  Unable to create project because a [:user_group] named '[group]' already exists.
 add_project_need_title:  Projects must have a title.
 add_project_success:  Project was successfully created.
 add_project_title:  Create New Project
+
 
 
 # account/add_user_to_group
@@ -2905,6 +2938,7 @@ add_user_to_group_no_user:  Unable to find the [:user], '[user]'.
 add_user_to_group_success:  "[user] added to [group]."
 add_user_to_group_title:  Add [:user] to Group
 add_user_to_group_user:  "[:user] name"
+
 
 
 # account/manager
@@ -2924,6 +2958,7 @@ account_manager_bonus:  Bonus
 account_manager_actions:  Actions
 
 
+
 # admin_request/author_request emails
 admin_request_change_member_status:  Change [:user]'s status
 admin_request_success:  Successfully sent admin request for [title]
@@ -2934,6 +2969,7 @@ request_message:  Message
 request_show_user:  Show details on sender
 request_subject:  Subject
 request_success:  Delivered email.
+
 
 
 # project/change_member_status
@@ -2964,9 +3000,11 @@ change_user_bonuses_help:  >
   These will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page.\n
 
 
+
 # project/destroy_project
 destroy_project_failed:  Failed to destroy project.
 destroy_project_success:  Project destroyed.
+
 
 
 # project/edit_project
@@ -2974,8 +3012,10 @@ edit_project_destroy:  "[:destroy_object(type=:project)]"
 edit_project_title:  "[:edit_object(type=:project)]: [title]"
 
 
+
 # project/_form_projects
 form_projects_title:  "[:Title]"
+
 
 
 # project/list_projects
@@ -2983,11 +3023,14 @@ list_projects_title:  "[:list_objects(type=:project)]"
 list_projects_add_project:  "[:add_object(type=:project)]"
 
 
+
 # draft/publish_draft
 publish_draft_denied:  "Permission denied: Only the creator of a draft or a project admin can publish a draft."
 
+
 # observer/refresh_vote_cache
 refresh_vote_cache:  Refreshed vote caches.
+
 
 
 # project/review_authors
@@ -3001,9 +3044,11 @@ review_authors_remove_author:  Remove
 review_authors_title:  Reviewing Author(s) for [name]
 
 
+
 # observer/send_feature_email
 send_feature_email_success: специальная почта доставлена.
 send_feature_email_denied: только админ может отправлять специальную почту.
+
 
 
 # project/show_project
@@ -3021,6 +3066,7 @@ show_project_title:  "Project: [title]"
 show_project_user_group:  User Group
 
 
+
 # observer/users_by_name
 users_by_name_title:  Users by Name
 users_by_name_created:  Created
@@ -3033,11 +3079,13 @@ users_by_name_theme: оформление
 users_by_name_verified: подтверждено
 
 
+
 # support/create_donation
 create_donation_title:  Record Mushroom Observer Donation
 create_donation_not_allowed:  Only admins can record donations
 create_donation_add:  Add
 create_donation_tab:  Record Donation
+
 
 
 # support/review_donations
@@ -3118,7 +3166,6 @@ email_no_respond: Пожалуйста, не отвечайте на это пи
 email_report_abuse: "If you feel this user is abusing this service please forward this entire email message to: [email]"
 email_respond_via_comment:  Use the link below to respond via your own public comment.
 email_welcome:  Welcome, [user]
-
 
 # Main message contents.
 email_admin_request_intro:  >
@@ -3449,7 +3496,6 @@ location_help_bad: "'плохое'"
 location_help_good: "'хорошее'"
 location_help_explanation: Пояснение
 location_help_rules_title: Текущие "правила"
-
 location_help_rule_reversible:  >
   *Consistent and Reversible Order* - You can now ask for location names to appear in the reverse order from the default. Thus, you can see a location as either:\n
   \n

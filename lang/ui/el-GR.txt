@@ -126,7 +126,7 @@ vote: ψήφος
 VOTES: Ψήφοι
 votes: ψήφοι
 
-# Other common nouns:
+# Other common nouns.
 ACCOUNT: Λογαριασμός
 account: λογαριασμός
 ACCOUNTS: Λογαριασμοί
@@ -296,7 +296,7 @@ version: έκδοση
 VERSIONS: Εκδόσεις
 versions: εκδόσεις
 
-# Common nouns/adjectives used as labels, never pluralized:
+# Common nouns/adjectives used as labels, never pluralized.
 ALL: Όλα
 all: όλα
 NONE: Κανένα
@@ -337,7 +337,7 @@ where: πού
 WHO: Ποιος
 who: ποιος
 
-# Common verbs/actions used as button labels:
+# Common verbs/actions used as button labels.
 ADD: Προσθήκη
 add: προσθήκη
 APPROVE: Επιβεβαίωση
@@ -440,7 +440,7 @@ restricted: περιορισμένο
 DEFAULT: Προεπιλογή
 default: προεπιλογή
 
-# Common verbs/actions with objects:
+# Common verbs/actions with objects.
 add_object: Προσθήκη [Type]
 add_objects: Προσθήκη [Types]
 all_objects: Όλα [types]
@@ -491,13 +491,11 @@ image_vote_long_1: "**Εντάξει** αλλά όχι πολύ χρήσιμη."
 image_vote_long_2: "**Χρήσιμη** για ταυτοποίηση."
 image_vote_long_3: "**Καλή** για οδηγό πεδίου."
 image_vote_long_4: "**Εξαιρετική!** Έργο αθανάτων."
-
 image_vote_help_0: Δεν έχω γνώμη.
 image_vote_help_1: Εντάξει, αλλά όχι πολύ χρήσιμη.
 image_vote_help_2: Χρήσιμη για ταυτοποίηση.
 image_vote_help_3: Καλή για οδηγό πεδίου.
 image_vote_help_4: Εξαιρετική! Έργο αθανάτων.
-
 image_vote_short_0: Αδιαβάθμητη
 image_vote_short_1: Εντάξει
 image_vote_short_2: Χρήσιμη
@@ -521,24 +519,24 @@ naming_reason_label_2: Με χρήση αναφορών
 naming_reason_label_3: Βάσει μικροσκοπικών στοιχείων
 naming_reason_label_4: Βάσει χημικών στοιχείων
 
-# Description types, note full_title combines the titles below with the title
-# of the object the description is describing, e.g. "User's [:description] of
-# Agaricus campestris" or "Draft for EOL Initiative by login of Amanita lanei".
-
-# These are used as page title and in index results: must include both the type
-# of description and the title of the object ([object]) they're describing.
+# Name/location description types.  These are used as page title and in index
+# results: must include both the type of description and the title of the
+# object ([object]) they're describing.
 description_full_title_public: Δημόσια [:DESCRIPTION] του [object]
 description_full_title_foreign: "[:DESCRIPTION] του [object] από [text]"
 description_full_title_project: Προσχέδιο [object] για [text] από [user]
 description_full_title_source: "[:DESCRIPTION] του [object] από [text]"
 description_full_title_user: "[USER]'s [:DESCRIPTION] του [object]"
 
-# These are used when listing the available descriptions in the show_name page.
+# Name/location description types.  These are used when listing the available
+# descriptions in the show_name page.
 description_part_title_public: Δημόσια [:DESCRIPTION]
 description_part_title_user: "[USER]'s [:DESCRIPTION]"
 
-# Same thing, but this time the optional text field was filled in.  Note that
-# the text field is not optional for half of the source types.
+# Name/location description types.  These are used when listing the available
+# descriptions in the show_name page, but this time the optional text field was
+# filled in.  Note that the text field is not optional for half of the source
+# types.
 description_part_title_public_with_text: "[TEXT]"
 description_part_title_foreign_with_text: "[:DESCRIPTION] Από [TEXT]"
 description_part_title_project_with_text: Προσχέδιο για [TEXT] από [USER]
@@ -603,7 +601,7 @@ rank_plural_subspecies: υποείδη
 RANK_PLURAL_VARIETY: Ποικιλίες
 rank_plural_variety: ποικιλίες
 
-# user statistics field names
+# User statistics field names.
 user_stats_comments: "[:COMMENTS]"
 user_stats_images: "[:IMAGES]"
 user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] Συντάχθηκαν"
@@ -620,7 +618,7 @@ user_stats_species_list_entries: "[:SPECIES_LIST] Εγγραφές"
 user_stats_species_lists: "[:SPECIES_LISTS]"
 user_stats_votes: "[:VOTES]"
 
-# site statistics field names
+# Site statistics field names.
 site_stats_comments: "[:COMMENTS]"
 site_stats_images: "[:IMAGES]"
 site_stats_listed_taxa: Καταγεγραμμένα τάξια
@@ -640,7 +638,7 @@ site_stats_species_lists: "[:SPECIES_LISTS]"
 site_stats_users: «Μέλη»
 site_stats_votes: "[:VOTES]"
 
-# vote descriptions
+# Vote descriptions.
 vote_no_opinion: Δεν έχω γνώμη
 vote_confidence_100: Έτσι θα το Έλεγα
 vote_confidence_80: Υποσχόμενο
@@ -655,13 +653,11 @@ vote_agreement_40: Αμφίβολο
 vote_agreement_20: Απίθανο
 vote_agreement_0: Σιγά μην είναι!
 
-# Query titles. Notes on [args]:
-#
-# [type] is type of object being indexed / searched for (singular)
-# [types], [Type] and [Types] are the same thing but capitalized and/or plural
-# [order] is sort order (singular), e.g., "Name" or "Date"
-# [name], [location], [where], [pattern], etc. are un-translatable strings
-#
+# Query titles. Notes on [args]: \n
+# [type] is type of object being indexed / searched for (singular) \n
+# [types], [Type] and [Types] are the same thing but capitalized and/or plural \n
+# [order] is sort order (singular), e.g., "Name" or "Date" \n
+# [name], [location], [where], [pattern], etc. are un-translatable strings \n
 query_title_advanced_search: "[:app_advanced_search]"
 query_title_all: "[TYPE] Ευρετήριο"
 query_title_all_by: "[TYPES] κατά [ORDER]"
@@ -971,7 +967,7 @@ app_advanced_search: Προχωρημένη Αναζήτηση
 app_timer: "χρόνος: [seconds] δευτερόλεπτα"
 app_index_timer: "[num] αποτελέσματα σε [seconds] δευτερόλεπτα"
 
-# This shows up at the bottom of every page.  We recommend something like:
+# This shows up at the bottom of every page.  We recommend something like: \n
 # "Translated into <Language> by _user your-login_"
 app_translators_credit: Μεταφράστηκε στα ελληνικά από Άγγελος Παπαδημητρίου
 app_translators_credit_and_others:  and others
@@ -988,10 +984,7 @@ app_no_session: Έχετε Απενεργοποιήσει τα Cookies
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-# CHANGED: 20110601
-# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
-# app_donate_banner: '"2011 Wrap-Up for Mushroom Observer":/support/wrapup_2011'
-app_donate_banner:  "NEW FEATURES!  Read about them here: \"May 7th releases\":/new_features_20120507.txt and \"May 18th releases\":/new_features_20120518.txt"
+app_donate_banner:  "\"2011 Wrap-Up for Mushroom Observer\":/support/wrapup_2011"
 app_donate:  Donate
 
 ################################################################################
@@ -1014,7 +1007,6 @@ ask_user_question_subject: "[:Subject]"
 ask_webmaster_title: Στείλτε Email με Ερώτημα ή Σχόλιο
 ask_webmaster_your_email: Η Διεύθυνση του Email Σας
 ask_webmaster_question: Ερώτημα ή Σχόλιο
-# CHANGED: 20110615
 ask_webmaster_note: >
   Ευχαριστούμε για το ενδιαφέρον σας για την ιστοσελίδα [:app_title]. Αυτή η ιστοσελίδα πρωτοεμφανίστηκε στα μέσα του 2006. Αυτή τη στιγμή είμαι ο κύριος (αλλά όχι πια ο μόνος!) βελτιωτής και συντηρητής της. Δέχομαι ευχαρίστως όποια ερωτήματα μπορεί να έχετε όσον αφορά τη χρήση της ιστοσελίδας ή σχόλια για το πώς θα μπορούσε να βελτιωθεί η ιστοσελίδα. Διατηρώ έναν κατάλογο με τα "προς εκτέλεση":[todo_list] online, οπότε μπορείτε να ρίξετε μια ματιά σ’ αυτά που έχω προγραμματίσει, καθώς και τη σειρά που πρέπει να γίνουν χονδρικά. Πάντως, μπορούν να γίνουν αλλαγές ανά πάσα στιγμή στον κατάλογο, ιδιαίτερα αν υπάρξει κάποιο πρόβλημα με το λογισμικό ή αν κάποιος προτείνει μια πραγματικά θαυμάσια ιδέα.\n
   \n
@@ -1248,7 +1240,6 @@ form_observations_remove_image: Αφαίρεση Εικόνας
 form_observations_lat_long_help: Προαιρετική τοποθεσία GPS. Το γεωγραφικό πλάτος πρέπει να είναι μεταξύ -90.0 και 90.0 και το γεωγραφικό μήκος μεταξύ -180.0 και 180.0. Αν επιλέξετε να δώσετε αυτά τα δεδομένα, παρακαλούμε να είναι όσο το δυνατό πιο ακριβή.
 form_observations_log_change: Αλλαγή Καταγραφής
 form_observations_is_collection_location_help: Τσεκάρετε όταν η τοποθεσία είναι η ίδια με το μέρος που αναπτυσσόταν το μανιτάρι. Ξετσεκάρετε όταν είναι μόνο το μέρος όπου είδατε το μανιτάρι (π.χ. εκθέσεις μανιταριών, οπωροπωλείο, τραπέζι έκθεσης δειγμάτων όπου η τοποθεσία δεν είναι γνωστή κ.λπ.).
-# CHANGED: 20110616
 form_observations_notes_help: Παρακαλούμε περιλάβετε σχόλια σχετικά με το πώς καταλήξατε στο συγκεκριμένο όνομα, οποιαδήποτε ασυνήθιστα χαρακτηριστικά, καθώς και όσα χαρακτηριστικά δεν φαίνονται καθαρά στη φωτογραφία, όπως ο βιότοπος ή κάποια χαρακτηριστική οσμή ή γεύση.
 form_observations_remove_image_confirm: Είστε βέβαιοι ότι θέλετε να αφαιρέσετε αυτή την εικόνα; Η ενέργεια αυτή θα αφαιρέσει μόνο την εικόνα από αυτή την παρατήρηση. Αν η εικόνα είναι προσαρτημένη σε άλλες παρατηρήσεις, θα παραμείνει προσαρτημένη σ’ αυτές.
 form_observations_specimen_available_help: Τσεκάρετε όταν υπάρχει διαθέσιμο αποξηραμένο δείγμα για περαιτέρω μελέτη. Αυτό μπορεί να βρίσκεται σε κάποιο επίσημο ερμπάριο ή να ανήκει σε ιδιωτικό ερμπάριο. Παρακαλούμε αναφέρετε στις σημειώσεις πού βρίσκεται το δείγμα.
@@ -1372,6 +1363,7 @@ list_place_names_merge: Συγχώνευση
 location_change: Αλλαγή σε Τοποθεσία
 
 
+
 # model/location
 location_dubious_ambiguous_country: Ακαθόριστη χώρα ή πολιτεία, '[country]'
 location_dubious_bad_char: Περιέχει μη αναμενόμενο χαρακτήρα '[char]'
@@ -1382,6 +1374,7 @@ location_dubious_redundant_county: Η κομητεία ίσως είναι πε�
 location_dubious_redundant_state: Τόσο η '[state]' όσο και η '[country]' βρίσκονται στον κατάλογο χωρών και ηπείρων
 location_dubious_unknown_country: Άγνωστη Χώρα '[country]'
 location_dubious_unknown_state: Άγνωστη Πολιτεία '[state]', '[country]'
+
 
 
 # account/login
@@ -1858,7 +1851,6 @@ species_list_show_set_source_help: Αποθηκεύστε αυτόν τον κα
 species_list_show_bulk_edit_help:  Bulk-edit any observations you own in this species list.
 
 
-
 # species_list/species_lists_by_title
 species_list_by_title_title: "[:SPECIES_LISTS] κατά Title"
 species_list_by_title_created: "[:Created]"
@@ -1962,6 +1954,8 @@ register_update_warning:  Updated previous registration for:<br/> [description]
 conference_verify_success:  Registration of [registrant] for [how_many] to [event] has been verified
 conference_verify_warning:  That registration has already been verified
 
+
+
 # support/donate
 donate_title: Δωρίστε στον Παρατηρητή Μανιταριών
 donate_tab: Δωρίστε
@@ -2026,92 +2020,6 @@ wrapup_2011_body:  >
   Thanks for all your contributions to the Mushroom Observer,\n
   -Nathan\n
 
-
-# pivotal/index
-pivotal_index_title:  Directions for Future Development
-pivotal_post_comment:  Post Comment
-pivotal_index_header:  Use this page to browse through the many features requested by users and developers.  Some are very specific bug fixes or requests for new capabilities.  Others are just general areas people are interested in seeing Mushroom Observer grow.  Features are organized by use of the following set of labels.  Click on a label to see a list of features with that label. Click on a feature to see more detail and discussion.  If you are logged in, you will be able to vote features up or down, and you can add your own comments to the discussion.  If you would like to request a new feature, for now we request that you "send us an email":/observer/ask_webmaster_question describing what it is you'd like to do.  Please try to be as detailed as possible; concrete examples are generally the best.
-pivotal_vote_failed:  >
-  We were unable to process your vote.\n
-  If the problem persists please notify to admins.\n
-  Sorry for the inconvenience!\n
-
-pivotal_story_failed:  >
-  We were unable to get the story you requested.\n
-  If the problem persists please notify to admins.\n
-  Sorry for the inconvenience!\n
-
-pivotal_comment_failed:  >
-  We were unable to post your comment.\n
-  If the problem persists please notify to admins.\n
-  Sorry for the inconvenience!\n
-
-pivotal_story_loading:  Loading story details...
-pivotal_posting_comment:  Posting comment...
-pivotal_posted_by:  Posted by
-
-pivotal_state_unscheduled:  unscheduled
-pivotal_state_unstarted:  in the queue
-pivotal_state_started:  in progress
-
-pivotal_head_critical:  serious bugs or mission-critical work
-pivotal_head_bottleneck:  stuff required by lots of other things
-pivotal_head_api:  programmer's interface via XML-RPC, etc.
-pivotal_head_design:  web layout and graphic design
-pivotal_head_email:  notification emails
-pivotal_head_eol:  EOL content sharing
-pivotal_head_i18n:  translation text and all the associated machinery
-pivotal_head_interface:  web interface
-pivotal_head_lists:  species lists, checklists, etc.
-pivotal_head_locations:  location descriptions and/or geocoding
-pivotal_head_names:  species descriptions
-pivotal_head_projects:  group projects
-pivotal_head_search:  search capabilities and data mining
-pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
-pivotal_head_voting:  voting on observations, their names, images, etc.
-pivotal_head_other:  uncategorized
-pivotal_head_admin:  administration tasks
-pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
-pivotal_head_server:  server installation, configuration, and diagnostics
-pivotal_head_open:  areas we are actively soliciting feedback
-pivotal_head_started:  areas developers are actively working
-pivotal_head_unstarted:  scheduled for work soon
-pivotal_head_unscheduled:  for the indefinite future
-pivotal_head_day:  has comments within last day
-pivotal_head_week:  has comments within last week
-pivotal_head_month:  has comments within last month
-pivotal_head_none:  has no recent comments
-pivotal_head_all:  show everything
-
-pivotal_label_critical:  critical
-pivotal_label_bottleneck:  bottleneck
-pivotal_label_api:  api
-pivotal_label_design:  design
-pivotal_label_email:  email
-pivotal_label_eol:  eol
-pivotal_label_i18n:  translations
-pivotal_label_interface:  interface
-pivotal_label_lists:  lists
-pivotal_label_locations:  locations
-pivotal_label_names:  names
-pivotal_label_projects:  projects
-pivotal_label_search:  searching
-pivotal_label_taxonomy:  taxonomy
-pivotal_label_voting:  voting
-pivotal_label_other:  other
-pivotal_label_admin:  admin
-pivotal_label_code:  code
-pivotal_label_server:  server
-pivotal_label_open:  open
-pivotal_label_day:  day
-pivotal_label_week:  week
-pivotal_label_month:  month
-pivotal_label_none:  none
-pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
-pivotal_label_unstarted: "[:pivotal_state_unstarted]"
-pivotal_label_started: "[:pivotal_state_started]"
-pivotal_label_all:  "[:all]"
-
 ################################################################################
 
 # LESS POPULAR PAGES
@@ -2149,6 +2057,7 @@ adjust_permissions_all_users: Όλοι οι Χρήστες
 adjust_permissions_site_admin: διαχειριστής ιστοχώρου
 
 
+
 # observer/advanced_search
 advanced_search_at_least_one: Παρακαλούμε δώστε τουλάχιστον μία παράμετρο αναζήτησης
 advanced_search_caveat: >
@@ -2172,8 +2081,10 @@ advanced_search_observer_help: Ποιος παρατήρησε το μανιτά
 advanced_search_result_type: Τύπος Αποτελέσματος
 advanced_search_result_type_help: Θέλετε [:observations], [:images] ή [:names]/[:descriptions]?
 
+
 # observer/license_updater
 bulk_license_link: Ομαδική Ενημέρωση Αδειών
+
 
 
 # observer/color_themes
@@ -2185,6 +2096,7 @@ color_themes_text: >
   Οι ακόλουθοι σύνδεσμοι περιγράφουν κάθε ένα από τα διαθέσιμα πρότυπα, συμπεριλαμβάνοντας και συνδέσμους προς τις [:images] από τις οποίες προήλθαν τα χρώματα:\n
 
 color_themes_title: Πρότυπα Χρωμάτων
+
 
 
 # name/email_tracking
@@ -2211,9 +2123,12 @@ email_tracking_title: Παρακολούθηση email για το [name]
 email_tracking_updated_messages: Ενημέρωση μηνυμάτων παρακολούθησης.
 
 
+
 # name/eol_expanded_review_title
 eol_expanded_review_title:  EOL Preview
 eol_expanded_review_count:  "[count] taxa"
+
+
 # name/eol_for_taxon
 eol_for_taxon_images:  Images for EOL
 eol_for_taxon_observation:  Observation [id]
@@ -2221,8 +2136,11 @@ eol_for_taxon_title:  EOL Review for [name]
 eol_for_taxon_voteless_images:  Images with No Votes
 eol_for_taxon_voteless_observations:  Observations with No Votes
 
+
+
 # name/eol_need_review
 eol_need_review_title: Ανάγκη Ανασκόπησης EOL
+
 
 
 # name/eol_preview
@@ -2271,10 +2189,12 @@ interest_default_help:  Click here if you want to go back to the default -- havi
 interest_watching: Μας έχετε ζητήσει να σας στέλνουμε email σχετικά με αλλαγές σ' αυτό το [object]. Κάντε κλικ σε ένα από τα μικρά εικονίδια για αλλαγή.
 interest_ignoring: Μας έχετε ζητήσει να μην σας στέλνουμε ποτέ email σχετικά με αλλαγές σ' αυτό το [object]. Κάντε κλικ σε ένα από τα μικρά εικονίδια για αλλαγή.
 
+
 # interest/list_interests
 list_interests_title: Τα Αιτήματά σας για Ειδοποιήσεις
 list_interests_turn_on: Αλλάξτε σε Παρακολούθηση
 list_interests_turn_off: Αλλάξτε σε Παράβλεψη
+
 
 
 # location/list_merge_options
@@ -2284,8 +2204,10 @@ list_merge_options_others: Άλλες Διαθέσιμες [:locations]
 list_merge_options_title: Συγχώνευση Επιλογών [where]
 
 
+
 # observer/list_notifications
 list_notifications_title: Ειδοποιήσεις Email για τον/την [user]
+
 
 
 # observer/list_users
@@ -2293,12 +2215,15 @@ list_users_joined: Εγγραφή
 list_users_contribution: Συνεισφορά
 
 
+
 # location/add_to_location
 location_merge_success: Επιτυχής συγχώνευση [this] με [that].
 
 
+
 # species_list/make_report
 make_report_not_supported: Δεν υποστηρίζεται ο τύπος αρχείου *.[type].
+
 
 
 # description/merge_descriptions
@@ -2345,6 +2270,7 @@ name_bulk_success: Όλα τα ονόματα βρίσκονται τώρα στ
 name_bulk_title: Ομαδική Επεξεργασία Ονομάτων
 
 
+
 # species_list/name_lister
 name_lister_bad_browser: Η σελίδα αυτή δεν μπορεί να λειτουργήσει στον φυλλομετρητή σας, λυπόμαστε!
 name_lister_bad_submit: Άκυρο πλήκτρο εκτέλεσης '[button]'.
@@ -2369,9 +2295,11 @@ name_lister_submit_txt: Αποθήκευση ως Απλό Κείμενο
 name_lister_title: Παραγωγός Καταλόγου Ονομάτων
 
 
+
 # name/needed_descriptions
 needed_descriptions_help: Τα ακόλουθα ονόματα ειδών είναι αυτά που έχουν τις περισσότερες [:observations], αλλά δεν έχουν γενική περιγραφή στον [:app_title]. Η προσθήκη μιας γενικής περιγραφής στα συνηθισμένα αυτά είδη θα ήταν μεγάλη βοήθεια.
 needed_descriptions_title: Τα 100 Πιο Αναζητούμενα Είδη [:descriptions]
+
 
 
 # observer/no_ajax
@@ -2397,6 +2325,7 @@ no_ajax_dont_care: Αν δεν σας ενδιαφέρει και έχετε κ�
 no_ajax_title: Ο Φυλλομετρητής Σας είναι Απαρχαιωμένος
 
 
+
 # observer/no_browser
 no_browser_body: >
   Δεν έχουμε ξαναδεί τον φυλλομετρητή σας. Αυτό σημαίνει ότι δεν γνωρίζουμε αν υποστηρίζει πλήρως τις δυνατότητες αυτού του ιστοχώρου. Επειδή υπάρχουν σελίδες που δεν θα λειτουργήσουν αν δεν μαντέψουμε σωστά (όπως η ψηφοφορία για τα ονόματα των [:observation]), θα πρέπει να υποθέσουμε το χειρότερο. Αυτό όμως σημαίνει ότι αρκετά χρήσιμα χαρακτηριστικά δεν θα είναι διαθέσιμα, όπως οι δυναμικές φόρμες, η αυτοσυμπλήρωση επιστημονικών ονομάτων και τοποθεσιών, η νέα έκδοση του δημιουργού [:species_list] και άλλα.\n
@@ -2404,6 +2333,7 @@ no_browser_body: >
   Αν θέλετε να υπερβείτε την παραπάνω απόφαση, "κάντε κλικ εδώ για να ενεργοποιήσετε το javascript":/observer/turn_javascript_on. Αν έχετε κουραστεί να βλέπετε το μήνυμα "Ο Φυλλομετρητής σας δεν αναγνωρίζεται" στην κορυφή κάθε σελίδας, παρακαλούμε "κάντε κλικ εδώ για να απενεργοποιήσετε το javascript":/observer/turn_javascript_off. (Συνδεθείτε και πηγαίνετε στις προτιμήσεις για να επανενεργοποιήσετε τον αυτοεντοπισμό.)\n
 
 no_browser_title: Ο Φυλλομετρητής σας δεν αναγνωρίζεται
+
 
 
 # account/no_email
@@ -2447,6 +2377,7 @@ no_email_general_commercial_success: Τα εμπορικά ερωτήματα έ
 no_email_general_question_success: Τα email με ερωτήματα έχουν απενεργοποιηθεί για το [name].
 
 
+
 # observer/no_javascript
 no_javascript_body: >
   Φαίνεται ότι έχετε απενεργοποιήσει το javascript στον φυλλομετρητή σας. Θα εξακολουθήσετε να έχετε πρόσβαση σε όλες τις δυνατότητες αυτού του ιστοχώρου, ωστόσο, αν δεν ενεργοποιήσετε το javascript, δεν θα μπορούν να χρησιμοποιηθούν κάποια πολύ χρήσιμα χαρακτηριστικά που υποστηρίζουν οι σύγχρονοι φυλλομετρητές. Σ' αυτά περιλαμβάνονται οι δυναμικές φόρμες, η αυτοσυμπλήρωση επιστημονικών ονομάτων και τοποθεσιών, η νέα έκδοση του δημιουργού [:species_list] και άλλα.\n
@@ -2455,6 +2386,7 @@ no_javascript_body: >
 
 no_javascript_dont_care: Αν *όντως* έχετε ενεργοποιήσει το javascript, αλλά ο αλγόριθμός μας αυτόματου εντοπισμού δεν καταφέρνει να τον εντοπίσει σωστά, "παρακαλούμε κάντε κλικ εδώ":/observer/turn_javascript_on. Αν δεν σας ενδιαφέρει και έχετε κουραστεί να βλέπετε το μήνυμα "Javascript Απενεργοποιημένο" στην κορυφή κάθε σελίδας, "παρακαλούμε κάντε κλικ εδώ":/observer/turn_javascript_off. (Συνδεθείτε και πηγαίνετε στις Προτιμήσεις για να επανενεργοποιήσετε τον αυτοεντοπισμό.)
 no_javascript_title: Έχετε Απενεργοποιήσει το Javascript
+
 
 
 # observer/no_session
@@ -2466,6 +2398,90 @@ no_session_body: >
   Αν θέλετε να ενεργοποιήσετε τα cookies, αλλά δεν είστε σίγουροι πώς γίνεται αυτό, δοκιμάστε να το ψάξετε στο Google με την εξής αναζήτηση: "Πώς μπορώ να ενεργοποιήσω τα cookies στον φυλλομετρητή μου;":http://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search Να σημειωθεί ότι οι περισσότεροι φυλλομετρητές σας επιτρέπουν να ενεργοποιήσετε cookies για συγκεκριμένους ιστοχώρους, επιτρέποντάς σας έτσι να διαφυλάξετε την ιδιωτικότητά σας σε όλους τους άλλους. Για παράδειγμα, στο Firefox, πηγαίνετε στο Επεξεργασία -> Προτιμήσεις -> ετικέτα Ιδιωτικότητα -> Εξαιρέσεις.\n
 
 no_session_title: Τα Cookies Είναι Απενεργοποιημένα
+
+
+
+# pivotal/index
+pivotal_index_title:  Directions for Future Development
+pivotal_post_comment:  Post Comment
+pivotal_index_header:  Use this page to browse through the many features requested by users and developers.  Some are very specific bug fixes or requests for new capabilities.  Others are just general areas people are interested in seeing Mushroom Observer grow.  Features are organized by use of the following set of labels.  Click on a label to see a list of features with that label. Click on a feature to see more detail and discussion.  If you are logged in, you will be able to vote features up or down, and you can add your own comments to the discussion.  If you would like to request a new feature, for now we request that you "send us an email":/observer/ask_webmaster_question describing what it is you'd like to do.  Please try to be as detailed as possible; concrete examples are generally the best.
+pivotal_vote_failed:  >
+  We were unable to process your vote.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_story_failed:  >
+  We were unable to get the story you requested.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_comment_failed:  >
+  We were unable to post your comment.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_story_loading:  Loading story details...
+pivotal_posting_comment:  Posting comment...
+pivotal_posted_by:  Posted by
+pivotal_state_unscheduled:  unscheduled
+pivotal_state_unstarted:  in the queue
+pivotal_state_started:  in progress
+pivotal_head_critical:  serious bugs or mission-critical work
+pivotal_head_bottleneck:  stuff required by lots of other things
+pivotal_head_api:  programmer's interface via XML-RPC, etc.
+pivotal_head_design:  web layout and graphic design
+pivotal_head_email:  notification emails
+pivotal_head_eol:  EOL content sharing
+pivotal_head_i18n:  translation text and all the associated machinery
+pivotal_head_interface:  web interface
+pivotal_head_lists:  species lists, checklists, etc.
+pivotal_head_locations:  location descriptions and/or geocoding
+pivotal_head_names:  species descriptions
+pivotal_head_projects:  group projects
+pivotal_head_search:  search capabilities and data mining
+pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
+pivotal_head_voting:  voting on observations, their names, images, etc.
+pivotal_head_other:  uncategorized
+pivotal_head_admin:  administration tasks
+pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
+pivotal_head_server:  server installation, configuration, and diagnostics
+pivotal_head_open:  areas we are actively soliciting feedback
+pivotal_head_started:  areas developers are actively working
+pivotal_head_unstarted:  scheduled for work soon
+pivotal_head_unscheduled:  for the indefinite future
+pivotal_head_day:  has comments within last day
+pivotal_head_week:  has comments within last week
+pivotal_head_month:  has comments within last month
+pivotal_head_none:  has no recent comments
+pivotal_head_all:  show everything
+pivotal_label_critical:  critical
+pivotal_label_bottleneck:  bottleneck
+pivotal_label_api:  api
+pivotal_label_design:  design
+pivotal_label_email:  email
+pivotal_label_eol:  eol
+pivotal_label_i18n:  translations
+pivotal_label_interface:  interface
+pivotal_label_lists:  lists
+pivotal_label_locations:  locations
+pivotal_label_names:  names
+pivotal_label_projects:  projects
+pivotal_label_search:  searching
+pivotal_label_taxonomy:  taxonomy
+pivotal_label_voting:  voting
+pivotal_label_other:  other
+pivotal_label_admin:  admin
+pivotal_label_code:  code
+pivotal_label_server:  server
+pivotal_label_open:  open
+pivotal_label_day:  day
+pivotal_label_week:  week
+pivotal_label_month:  month
+pivotal_label_none:  none
+pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
+pivotal_label_unstarted: "[:pivotal_state_unstarted]"
+pivotal_label_started: "[:pivotal_state_started]"
+pivotal_label_all:  "[:all]"
 
 
 
@@ -2483,7 +2499,6 @@ refine_search_conditions: Παράμετροι
 refine_search_unknown_object: "Άγνωστός [TYPE] #[id]"
 refine_search_help: "[[Help]]"
 refine_search_max_size: Μέγιστο μέγεθος
-
 refine_search_advanced_search_content: "[:refine_search_pattern_search]"
 refine_search_advanced_search_location: "[:Location]"
 refine_search_advanced_search_name: "[:Name]"
@@ -2579,7 +2594,6 @@ refine_search_synonyms_no: μόνο αυτό το όνομα
 refine_search_text_name_has: Αναζήτηση ονόματος τάξιου
 refine_search_title_has: Αναζήτηση τίτλου
 refine_search_users: Περιορισμός σ' αυτόν(-ούς) τον/τους χρήστη(-ες)
-
 refine_search_advanced_search_content_help: Αναζήτηση σε κείμενο σημειώσεων και σχολίων των παρατηρήσεων. [:refine_search_google_help]
 refine_search_advanced_search_location_help: Πού βρέθηκε το μανιτάρι. [:refine_search_locations_help]
 refine_search_advanced_search_name_help: Όνομα του μανιταριού. [:refine_search_names_help]
@@ -2715,6 +2729,7 @@ sandbox_title: Χώρος πειραματισμού του Textile
 sandbox_web_refs: Αναφορές Ιστού
 
 
+
 # interest/set_interest
 set_interest_already_deleted: Δεν έχετε εκφράσει ενδιαφέρον για το [name].
 set_interest_already_off: Μας έχετε ήδη ζητήσει να αγνοείται το [name].
@@ -2728,8 +2743,10 @@ set_interest_success_on: Στο εξής θα ειδοποιείστε για α
 set_interest_user_mismatch: Ένας άλλος [:user] έχει συνδεθεί στη συσκευή. Παρακαλούμε φροντίστε για την αποσύνδεσή του, συνδεθείτε με τα δικά σας στοιχεία και προσπαθήστε πάλι.
 
 
+
 # observer/show_notifications
 show_notifications_title: Νέες Ειδοποιήσεις για τον/την [user]
+
 
 
 # species_list/bulk_editor
@@ -2742,6 +2759,7 @@ species_list_bulk_editor_ambiguous_namings:  "The proposed names are confusing f
 species_list_bulk_editor_help:  "Hold your mouse over any of the fields in the table below to see what the field is supposed to be.  The text fields are, in order: notes (top right), date, location, latitude, longitude, altitude (second row).  Check boxes indicate, respectively, if location is where collected, and specimen.  All links open in new tabs."
 
 
+
 # observer/<Theme>
 theme_agaricus: Χρωματισμοί _Agaricus_
 theme_agaricus_augustus:  "[link] is used for the left-hand panel's background color."
@@ -2751,42 +2769,52 @@ theme_agaricus_lilaceps:  "[link] is used for the background color for the some 
 theme_agaricus_semotus:  "[link] is used for the banner background color."
 theme_agaricus_subrufescens:  "[link] is used for most unvisited links."
 theme_agaricus_xanthodermus:  "[link] is used for the background color for some rows on the list pages and the unvisited link color for the other rows."
-
 theme_amanita: Χρωματισμοί _Amanita_
 theme_amanita_calyptroderma:  "[link] is used for all the colors of half the rows on the list pages."
 theme_amanita_muscaria:  "[link] is used for the banner background and text, the default visited link and link hover colors as well as the text for the left-hand panel."
 theme_amanita_pachycolea:  "[link] is used for the primary background, the default text and default unvisited links."
 theme_amanita_phalloides:  "[link] is used for all the colors of the other half of the rows on the list pages."
 theme_amanita_velosa:  "[link] is used for the left-hand panel's background color and the left-hand panel's visited and unvisited link colors."
-
 theme_cantharellaceae: Χρωματισμοί _Cantharellaceae_
 theme_cantharellaceae_californicus:  "[link] is used for the primary, banner and left-hand panel backgrounds."
 theme_cantharellaceae_cinnabarinus:  "[link] is used for the default link and visited link colors."
 theme_cantharellaceae_cornucopioides:  "[link] is used for the default text and all the colors of half the rows on the list pages."
 theme_cantharellaceae_tubaeformis:  "[link] is used for all the colors of the other half of the rows on the list pages."
-
 theme_hygrocybe: Χρωματισμοί _Hygrocybe_
 theme_hygrocybe_conica:  "[link] is used for the default text and all the colors of half the rows on the list pages."
 theme_hygrocybe_miniata:  "[link] is used for the left-hand panel background and link text colors."
 theme_hygrocybe_pittacina:  "[link] is used for the default link text colors."
 theme_hygrocybe_punicea:  "[link] is used for the default background color, the banner background color, and all the colors of the other half of the rows on the list pages."
-
 theme_random: Τυχαίο
 theme_list:  List of Themes
-
 theme_black_on_white:  Black on White Theme
 theme_black_on_white_description:  This is a simple Black on White theme that attempts to be as readable and clean as possible. The logo colors come from the [link] theme.
 theme_switch:  To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme
 
+# Theme names.
 Agaricus:  Agaricus
 Amanita:  Amanita
 Cantharellaceae:  Cantharellaceae
 Hygrocybe:  Hygrocybe
 BlackOnWhite:  Black on White
 
+
+
 # observer/translators_note
 translators_note: Παρακαλούμε βοηθήστε μας να κάνουμε αυτό τον ιστοχώρο διαθέσιμο σε όλο τον κόσμο! Είναι εύκολο. Υπάρχουν περίπου 1600 γραμμές ή 11000 λέξεις κειμένου σ' αυτόν το χώρο αυτή τη στιγμή, αλλά ας μην σας τρομάζει αυτό. Έχουν οργανωθεί έτσι ώστε κάποιος με περιορισμένο χρόνο να μπορεί να επικεντρωθεί μόνο στα λίγα πρώτα τμήματα και να τελειώσει πρώτα τα κείμενα που χρησιμοποιούνται πιο συχνά. Έπειτα, ανάλογα με τον χρόνο και τη διάθεση, ο ίδιος ή κάποιος άλλος μπορεί να συνεχίσει τη δουλειά καλύπτοντας όλο και περισσότερο μέρος του καταλόγου, έως ότου μια μέρα να ολοκληρωθεί το έργο. Παρακαλούμε μη διστάσετε να κατεβάσετε ένα αντίγραφο των "αρχείων μετάφρασης":[repo] και να αρχίσετε να τα επεξεργάζεστε σε όποια γλώσσα θέλετε. Στη συνέχεια, απλά "στείλτε μας ένα email":/observer/ask_webmaster_question όταν θα έχετε τελειώσει ό,τι μπορείτε και θα σας πούμε πώς μπορείτε να υποβάλετε την εργασία σας. Θα πιστωθείτε με διακεκριμένη αναγνώριση της συνεισφοράς σας και θα έχετε, φυσικά, την απέραντη ευγνωμοσύνη μας.
 translators_note_title: Πληροφορίες για μεταφραστές
+
+
+
+# translation/edit_translations
+edit_translations_title:  Edit Translations
+edit_translations_login_required:  Must be logged in to edit translations.
+edit_translations_reviewer_required:  Only reviewers have permission to edit the English translations.
+edit_translations_created:  Created translation for [tag].
+edit_translations_changed:  Changed translation for [tag].
+edit_translations_no_changes:  Nothing changed.
+edit_translations_page_expired:  The page you were working on has expired.  Please go back and reload it, then click on "[:app_edit_translations_on_page]" again.
+edit_translations_help:  On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file.  If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right.  Click "[:SAVE]" to save your changes.
 
 
 # observer/turn_javascript_nil
@@ -2794,14 +2822,17 @@ turn_javascript_nil_body: Θα γίνει επαναφορά του αυτόμα
 turn_javascript_nil_title: Αυτόματος Εντοπισμός του Javascript
 
 
+
 # observer/turn_javascript_off
 turn_javascript_off_body: Τώρα θα αγνοηθεί το javascript.
 turn_javascript_off_title: Απενεργοποίηση του Javascript
 
 
+
 # observer/turn_javascript_on
 turn_javascript_on_body: Τώρα θα θεωρηθεί ότι το javascript είναι ενεργοποιημένο.
 turn_javascript_on_title: Ενεργοποίηση του Javascript
+
 
 
 # account/create_alert and show_alert
@@ -2850,12 +2881,14 @@ add_members_denied: "Permission denied: μόνο οι διαχειριστές �
 add_members_title: Προσθήκη [:users] στον [title]
 
 
+
 # project/add_project
 add_project_already_exists: Ένα έργο με το όνομα '[title]' υπάρχει ήδη.
 add_project_group_exists: Δεν στάθηκε δυνατή η δημιουργία του έργου επειδή μία [:user_group] με το όνομα '[group]' υπάρχει ήδη.
 add_project_need_title: Τα έργα πρέπει να έχουν τίτλο.
 add_project_success: Το έργο δημιουργήθηκε επιτυχώς.
 add_project_title: Δημιουργία Νέου Έργου
+
 
 
 # account/add_user_to_group
@@ -2866,6 +2899,7 @@ add_user_to_group_no_user: Δεν βρέθηκε ο/η [:user], '[user]'.
 add_user_to_group_success: Ο/Η [user] προστέθηκε στην [group].
 add_user_to_group_title: Προσθήκη του/της [:user] στην Ομάδα
 add_user_to_group_user: Όνομα [:user]
+
 
 
 # account/manager
@@ -2885,6 +2919,7 @@ account_manager_bonus:  Bonus
 account_manager_actions:  Actions
 
 
+
 # admin_request/author_request emails
 admin_request_change_member_status: Αλλαγή κατάστασης του/της [:user]
 admin_request_success: Επιτυχής αποστολή αιτήματος διαχειριστή για [title]
@@ -2895,6 +2930,7 @@ request_message: Μήνυμα
 request_show_user: Εμφάνιση λεπτομερειών για τον αποστολέα
 request_subject: Θέμα
 request_success: Το email παραδόθηκε.
+
 
 
 # project/change_member_status
@@ -2925,9 +2961,11 @@ change_user_bonuses_help: >
   Αυτά θα εμφανίζονται στη σελίδα εμφάνιση_χρήστη (show_user) κάτω από τις συνηθισμένες επιδόσεις συνεισφοράς. Φροντίστε οι αιτιολογίες να είναι περιληπτικές, ειδάλλως μπορεί να προκληθεί χάος στη διαμόρφωση του πίνακα στη συγκεκριμένη σελίδα.\n
 
 
+
 # project/destroy_project
 destroy_project_failed: Αδυναμία καταστροφής έργου.
 destroy_project_success: Το έργο καταστράφηκε.
+
 
 
 # project/edit_project
@@ -2935,8 +2973,10 @@ edit_project_destroy: "[:destroy_object(type=:project)]"
 edit_project_title: "[:edit_object(type=:project)]: [title]"
 
 
+
 # project/_form_projects
 form_projects_title: "[:Title]"
+
 
 
 # project/list_projects
@@ -2944,11 +2984,14 @@ list_projects_title: "[:list_objects(type=:project)]"
 list_projects_add_project: "[:add_object(type=:project)]"
 
 
+
 # draft/publish_draft
 publish_draft_denied: "Permission denied: Μόνο ο δημιουργός ενός προσχεδίου ή έργου μπορεί να δημοσιεύσει προσχέδια."
 
+
 # observer/refresh_vote_cache
 refresh_vote_cache: Ανανεώθηκε η μνήμη ψήφων.
+
 
 
 # project/review_authors
@@ -2962,9 +3005,11 @@ review_authors_remove_author: Αφαίρεση
 review_authors_title: Επιθεωρητής(-ές) Συντάκτης(-ες) για το [name]
 
 
+
 # observer/send_feature_email
 send_feature_email_success: Το mail νέων χαρακτηριστικών παραδόθηκε.
 send_feature_email_denied: Μόνο ο διαχειριστής μπορεί να στείλει mail νέων χαρακτηριστικών.
+
 
 
 # project/show_project
@@ -2982,6 +3027,7 @@ show_project_title: "Έργο: [title]"
 show_project_user_group: Ομάδα Χρηστών
 
 
+
 # observer/users_by_name
 users_by_name_title: Χρήστες κατά Όνομα
 users_by_name_created: Δημιουργήθηκε
@@ -2994,11 +3040,13 @@ users_by_name_theme: Θέμα
 users_by_name_verified: Επαληθεύτηκε
 
 
+
 # support/create_donation
 create_donation_title: Καταγραφή Δωρεάς στον Παρατηρητή Μανιταριών
 create_donation_not_allowed: Μόνο διαχειριστές μπορούν να καταγράψουν δωρεές
 create_donation_add: Προσθήκη
 create_donation_tab: Καταγραφή Δωρεάς
+
 
 
 # support/review_donations
@@ -3079,7 +3127,6 @@ email_no_respond: Παρακαλούμε μην απαντήσετε σ’ αυ�
 email_report_abuse: "Αν πιστεύετε ότι αυτός ο χρήστης κάνει κατάχρηση αυτής της υπηρεσίας, παρακαλούμε προωθήστε ολόκληρο αυτό το email στο: [email]"
 email_respond_via_comment: Χρησιμοποιήστε τον παρακάτω σύνδεσμο για να απαντήσετε με δικό σας δημόσιο σχόλιο.
 email_welcome: Καλωσόρισες, [user]
-
 
 # Main message contents.
 email_admin_request_intro: >
@@ -3398,7 +3445,6 @@ location_help_bad: Λάθος
 location_help_good: Σωστή
 location_help_explanation: Εξήγηση
 location_help_rules_title: Οι Τρέχοντες "Κανόνες"
-
 location_help_rule_reversible: >
   *Συνεπής και Αντιστρέψιμη Σειρά* - Μπορείτε τώρα να ζητήσετε να εμφανιστούν τα ονόματα τοποθεσιών με αντίστροφη σειρά από εκείνη της προεπιλογής. Έτσι, μπορείτε να δείτε μια τοποθεσία είτε ως:\n
   \n

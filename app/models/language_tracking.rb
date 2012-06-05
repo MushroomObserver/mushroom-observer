@@ -29,6 +29,8 @@
 ################################################################################
 
 module LanguageTracking
+  require 'fileutils'
+
   @@tags_used = nil
   @@last_clean = nil
 
@@ -45,7 +47,7 @@ module LanguageTracking
   end
 
   def note_usage_of_tag(tag)
-    @@tags_used[tag] = true if @@tags_used
+    @@tags_used[tag.to_s] = true if @@tags_used
   end
 
   def tags_used
@@ -66,10 +68,11 @@ module LanguageTracking
 
   def load_tags(name)
     file = tag_file(name)
+    FileUtils.touch(file)
     tags = []
     File.open(file, 'r') do |fh|
       fh.each_line do |line|
-        tags << line.chomp.to_sym
+        tags << line.chomp
       end
     end
     return tags
@@ -77,6 +80,7 @@ module LanguageTracking
     return nil
   end
 
+private
   def tag_file(name)
     path = "#{RAILS_ROOT}/tmp/language_tracking"
     Dir.mkdir(path) unless File.exists?(path)

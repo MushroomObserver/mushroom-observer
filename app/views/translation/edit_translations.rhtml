@@ -1,0 +1,145 @@
+<%
+  @title = :edit_translations_title.t
+  javascript_include('prototype.js')
+%>
+
+<style>
+  table.translation td {
+    margin: 0px;
+    border: 1px solid black;
+    padding: 5px 10px 5px 10px;
+  }
+
+  table.translation td div {
+    height: 1000px;
+    overflow-y: auto;
+  }
+
+  p.form_div {
+    margin: 0px;
+  }
+
+  p.major_header {
+    font-size: 150%;
+    font-weight: bold;
+    margin: 2em 0em 1em 0em;
+    padding: 0px;
+  }
+
+  p.minor_header {
+    font-size: 130%;
+    margin: 1em 0em 0.5em 0em;
+    padding: 0px;
+  }
+
+  p.comment {
+    font-size: 85%;
+    margin: 0px;
+    padding: 0px;
+  }
+
+  p.tag_field {
+    margin: 0em 0em 0em 1em;
+    padding: 0px;
+    text-indent: -1em
+  }
+
+  span.translated {
+  }
+
+  span.untranslated {
+    font-style: italic;
+  }
+
+  span.tag {
+  }
+
+  iframe#hidden_frame {
+    width: 0px;
+    height: 0px;
+    border: 0px;
+  }
+</style>
+
+<script>
+  function show_tag(tag) {
+    new Ajax.Request("edit_translations_ajax_get?tag=" + tag, {
+      asynchronous: true,
+      onFailure: function (response) {
+        alert(response.responseText);
+      },
+      onSuccess: function(response) {
+        var div = $("form_div");
+        div.innerHTML = response.responseText;
+      }
+    })
+  }
+
+  function iframe_load() {
+    var tag = window.hidden_frame.tag;
+    var str = window.hidden_frame.str;
+    if (tag != undefined) {
+      var span = $("str_" + tag);
+      span.innerHTML = str;
+      span.className = "translated";
+    }
+  }
+</script>
+
+<div class="HelpNote"><%= :edit_translations_help.t %></div>
+
+<table class="translation" cellspacing="10">
+  <tr>
+    <td width="50%" valign="top" align="left">
+      <div>
+
+<% for item in @form %>
+  <%= case item
+  when TranslationFormMajorHeader
+    content_tag(:p, h(item.string), :class => 'major_header')
+  when TranslationFormMinorHeader
+    content_tag(:p, h(item.string), :class => 'minor_header')
+  when TranslationFormComment
+    content_tag(:p, h(item.string), :class => 'comment')
+  when TranslationFormTagField
+    tag = item.tag
+    str = preview_string(@strings[tag])
+    span_class = @translated[tag] ? 'translated' : 'untranslated faint'
+    str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
+    label = content_tag(:span, h(tag) + ':', :class => 'tag')
+    label = if @js
+      link_to_function(label, "show_tag('#{tag}')")
+    else
+      link_to(label, :page => @page, :tag => tag)
+    end
+    content_tag(:p, label + ' ' + str, :class => 'tag_field')
+  else
+    raise "Unexpected form item type: #{line.class.name}"
+  end %>
+<% end %>
+
+      </div>
+    </td>
+    <td width="50%" valign="top" align="left">
+      <div>
+
+<%= if @js
+  form_tag({ :action => :edit_translations_ajax_post },
+           { :target => :hidden_frame })
+else
+  form_tag(:action => :edit_translations, :page => @page)
+end %>
+  <p id="form_div">
+    <%= if @edit_tags.any?
+      render(:partial => 'form')
+    end %>
+  </p>
+</form>
+<% if @js %>
+  <iframe id="hidden_frame" name="hidden_frame" onload="iframe_load()" src=""></iframe>
+<% end %>
+
+      </div>
+    </td>
+  </tr>
+</table>
