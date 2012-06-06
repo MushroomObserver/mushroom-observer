@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120606110100) do
+ActiveRecord::Schema.define(:version => 20120606152700) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -318,21 +318,21 @@ ActiveRecord::Schema.define(:version => 20120606110100) do
     t.integer  "user_id"
     t.integer  "description_id"
     t.integer  "rss_log_id"
-    t.integer  "num_views",                                                                                                                                                                  :default => 0
+    t.integer  "num_views",                                                                                                                                                                               :default => 0
     t.datetime "last_view"
-    t.enum     "rank",                :limit => [:Form, :Variety, :Subspecies, :Species, :Stirps, :Section, :Subgenus, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
+    t.enum     "rank",                :limit => [:Form, :Variety, :Subspecies, :Species, :Stirps, :Subsection, :Section, :Subgenus, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
     t.string   "text_name",           :limit => 100
     t.string   "search_name",         :limit => 200
     t.string   "display_name",        :limit => 200
     t.string   "observation_name",    :limit => 200
-    t.string   "author",              :limit => 100,                                                                                                                                                            :null => false
+    t.string   "author",              :limit => 100,                                                                                                                                                                         :null => false
     t.text     "citation"
-    t.boolean  "deprecated",                                                                                                                                                                 :default => false, :null => false
+    t.boolean  "deprecated",                                                                                                                                                                              :default => false, :null => false
     t.integer  "synonym_id"
     t.integer  "correct_spelling_id"
     t.text     "notes"
     t.text     "classification"
-    t.boolean  "ok_for_export",                                                                                                                                                              :default => true,  :null => false
+    t.boolean  "ok_for_export",                                                                                                                                                                           :default => true,  :null => false
   end
 
   create_table "names_versions", :force => true do |t|

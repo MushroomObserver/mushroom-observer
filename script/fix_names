@@ -41,44 +41,6 @@ for row in Name.connection.select_rows %(
       rank2 = rank
     end
 
-    # Convert old ad hoc sections into bona fide sections.
-    if rank == :Genus and [:Subgenus, :Section, :Stirps].include?(rank2)
-      genus, section = search_name2.split(' ', 2)
-      old_search_name = "#{genus} (#{section}) #{author2}".strip
-      correct_name = Name.find_by_search_name(old_search_name)
-      if correct_name and correct_name.id != id
-        puts "SECTION NAME NEEDS TO BE MERGED: #{id} #{str.inspect} (#{rank2})"
-        next
-      end
-    end
-
-    # Suppress some common errors for the first run.
-    if true
-      text_name = text_name.strip_squeeze
-      search_name = search_name.strip_squeeze.sub(/ sp\./, '')
-      display_name = display_name.strip_squeeze.sub(/ sp\./, '')
-      observation_name = observation_name.strip_squeeze.sub(/ sp\./, '')
-      author = author.strip_squeeze
-      if deprecated and display_name.match(/\*/)
-        display_name.gsub!(/\*/, '')
-        observation_name.gsub!(/\*/, '')
-      end
-      if not author.blank? and display_name.match(/[\*\_]$/)
-        display_name += ' ' + author
-        search_name += ' ' + author if !search_name.match(/ #{author}$/)
-      end
-      if not author.blank? and observation_name.match(/[\*\_]$/)
-        observation_name += ' ' + author
-        search_name += ' ' + author if !search_name.match(/ #{author}$/)
-      end
-      if author != Name.squeeze_author(author)
-        author = Name.squeeze_author(author)
-        search_name = Name.squeeze_author(search_name)
-        display_name = Name.squeeze_author(display_name)
-        observation_name = Name.squeeze_author(observation_name)
-      end
-    end
-
     if text_name        != text_name2        or
        search_name      != search_name2      or
        observation_name != observation_name2 or

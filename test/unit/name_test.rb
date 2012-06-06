@@ -160,7 +160,7 @@ class NameTest < UnitTestCase
     assert_equal('Amanita subgenus Vaginatae', Name.standardize_name('Amanita (subg. Vaginatae)'))
     assert_equal('Amanita subgenus Vaginatae', Name.standardize_name('Amanita SUBG. Vaginatae'))
     assert_equal('Amanita sect. Vaginatae', Name.standardize_name('Amanita (section Vaginatae)'))
-    assert_equal('Amanita sect. Vaginatae', Name.standardize_name('Amanita sect Vaginatae'))
+    assert_equal('Amanita subsect. Vaginatae', Name.standardize_name('Amanita subsect Vaginatae'))
     assert_equal('Amanita stirps Vaginatae', Name.standardize_name('Amanita Stirps Vaginatae'))
     assert_equal('Amanita subgenus One sect. Two stirps Three', Name.standardize_name('Amanita Subg One Sect Two Stirps Three'))
     assert_equal('Amanita vaginata', Name.standardize_name('Amanita vaginata'))
@@ -199,7 +199,7 @@ class NameTest < UnitTestCase
     assert_equal('**__Amanita__**', Name.format_name('Amanita'))
     assert_equal('**__Amanita' + SP + '__**', Name.format_name('Amanita' + SP))
     assert_equal('**__Amanita__** sect. **__Vaginatae__**', Name.format_name('Amanita sect. Vaginatae'))
-    assert_equal('**__Amanita__** subg. **__One__** sect. **__Two__** stirps **__Three__**', Name.format_name('Amanita subg. One sect. Two stirps Three'))
+    assert_equal('**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**', Name.format_name('Amanita subg. One subsect. Two stirps Three'))
     assert_equal('**__Amanita vaginata__**', Name.format_name('Amanita vaginata'))
     assert_equal('**__Amanita vaginata__** subsp. **__grisea__**', Name.format_name('Amanita vaginata subsp. grisea'))
     assert_equal('**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**', Name.format_name('Amanita vaginata subsp. one var. two f. three'))
@@ -259,7 +259,7 @@ class NameTest < UnitTestCase
     assert_no_match(pat, 'Amanita vaginata fails')
     assert_no_match(pat, 'Amanita vaginata "author"')
     assert_no_match(pat, 'Amanita sec. Vaginatae')
-    assert_no_match(pat, 'Amanita sect. "Mismatch\'')
+    assert_no_match(pat, 'Amanita subsect. "Mismatch\'')
     assert_name_match_author_required(pat, 'Amanita')
     assert_name_match_author_required(pat, 'Amanita sp.')
     assert_name_match_author_required(pat, 'Amanita vaginata')
@@ -267,10 +267,7 @@ class NameTest < UnitTestCase
     assert_name_match_author_required(pat, 'Amanita Subgenus Vaginatae')
     assert_name_match_author_required(pat, 'Amanita subg Vaginatae')
     assert_name_match_author_required(pat, 'Amanita subg "Vaginatae"')
-    # Not worth making a mess of the regular expressions to get these legacy constructs to work here.
-    # assert_name_match_author_required(pat, 'Amanita (subg "Vaginatae")')
-    # assert_name_match_author_required(pat, 'Amanita (sect. Vaginatae stirps Vaginatae)')
-    assert_name_match_author_required(pat, 'Amanita subg Vaginatae sect Vaginatae stirps Vaginatae')
+    assert_name_match_author_required(pat, 'Amanita subg Vaginatae subsect Vaginatae stirps Vaginatae')
     assert_name_match_author_required(pat, 'Amanita Stirps Vaginatae')
     assert_name_match_author_required(pat, 'Amanita vaginata SUBSP grisea')
     assert_name_match_author_required(pat, 'Amanita vaginata ssp. "ssp-S01"')
@@ -316,12 +313,26 @@ class NameTest < UnitTestCase
     assert_name_match_author_optional(pat, '"Amanita sect. Vaginatae"')
   end
 
+  def test_subsection_pat
+    @pat = 'SUBSECTION_PAT'
+    pat = Name::SUBSECTION_PAT
+    assert_name_match_author_optional(pat, 'Amanita subsection Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita SubSect. Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (SUBSECT Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita subsect Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita subg. Vaginatae subsect. Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita (subsect Vaginatae)')
+    assert_name_match_author_optional(pat, 'Amanita (subg Vaginatae sect Vaginatae subsect Vaginatae)')
+    assert_name_match_author_optional(pat, '"Amanita subsect. Vaginatae"')
+  end
+
   def test_stirps_pat
     @pat = 'STIRPS_PAT'
     pat = Name::STIRPS_PAT
     assert_name_match_author_optional(pat, 'Amanita stirps Vaginatae')
     assert_name_match_author_optional(pat, 'Amanita Stirps Vaginatae')
     assert_name_match_author_optional(pat, 'Amanita subg. Vaginatae sect. Vaginatae stirps Vaginatae')
+    assert_name_match_author_optional(pat, 'Amanita subg. Vaginatae sect. Vaginatae subsect. Vaginatae stirps Vaginatae')
     assert_name_match_author_optional(pat, 'Amanita (STIRPS Vaginatae)')
     assert_name_match_author_optional(pat, 'Amanita (stirps Vaginatae)')
     assert_name_match_author_optional(pat, 'Amanita (subgenus Vaginatae section Vaginatae stirps Vaginatae)')
@@ -679,12 +690,12 @@ class NameTest < UnitTestCase
 
   def test_name_parse_21
     do_name_parse_test(
-      'Genus “quoted”',
-      'Genus "quoted"',
-      '**__Genus "quoted"__**',
-      '**__Genus "quoted"__**',
-      'Genus "quoted"',
-      'Genus',
+      'Amanita “quoted”',
+      'Amanita "quoted"',
+      '**__Amanita "quoted"__**',
+      '**__Amanita "quoted"__**',
+      'Amanita "quoted"',
+      'Amanita',
       :Species,
       ''
     )
@@ -692,11 +703,11 @@ class NameTest < UnitTestCase
 
   def test_name_parse_22
     do_name_parse_test(
-      'Genus Sp.',
-      'Genus',
-      '**__Genus__**',
-      '**__Genus' + SP + '__**',
-      'Genus' + SP,
+      'Amanita Sp.',
+      'Amanita',
+      '**__Amanita__**',
+      '**__Amanita' + SP + '__**',
+      'Amanita' + SP,
       '',
       :Genus,
       ''
@@ -705,12 +716,12 @@ class NameTest < UnitTestCase
 
   def test_name_parse_23
     do_name_parse_test(
-      'Genus Sect. Vaginatae (L.) Ach.',
-      'Genus sect. Vaginatae',
-      '**__Genus__** sect. **__Vaginatae__** (L.) Ach.',
-      '**__Genus__** sect. **__Vaginatae__** (L.) Ach.',
-      'Genus sect. Vaginatae (L.) Ach.',
-      'Genus',
+      'Amanita Sect. Vaginatae (L.) Ach.',
+      'Amanita sect. Vaginatae',
+      '**__Amanita__** sect. **__Vaginatae__** (L.) Ach.',
+      '**__Amanita__** sect. **__Vaginatae__** (L.) Ach.',
+      'Amanita sect. Vaginatae (L.) Ach.',
+      'Amanita',
       :Section,
       '(L.) Ach.'
     )
@@ -718,12 +729,12 @@ class NameTest < UnitTestCase
 
   def test_name_parse_24
     do_name_parse_test(
-      'Genus (subg Vaginatae)',
-      'Genus subgenus Vaginatae',
-      '**__Genus__** subgenus **__Vaginatae__**',
-      '**__Genus__** subgenus **__Vaginatae__**',
-      'Genus subgenus Vaginatae',
-      'Genus',
+      'Amanita (subg Vaginatae)',
+      'Amanita subgenus Vaginatae',
+      '**__Amanita__** subgenus **__Vaginatae__**',
+      '**__Amanita__** subgenus **__Vaginatae__**',
+      'Amanita subgenus Vaginatae',
+      'Amanita',
       :Subgenus,
       ''
     )
@@ -731,12 +742,12 @@ class NameTest < UnitTestCase
 
   def test_name_parse_25
     do_name_parse_test(
-      'Genus stirps Vaginatae Ach. & Fr.',
-      'Genus stirps Vaginatae',
-      '**__Genus__** stirps **__Vaginatae__** Ach. & Fr.',
-      '**__Genus__** stirps **__Vaginatae__** Ach. & Fr.',
-      'Genus stirps Vaginatae Ach. & Fr.',
-      'Genus',
+      'Amanita stirps Vaginatae Ach. & Fr.',
+      'Amanita stirps Vaginatae',
+      '**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.',
+      '**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.',
+      'Amanita stirps Vaginatae Ach. & Fr.',
+      'Amanita',
       :Stirps,
       'Ach. & Fr.'
     )
@@ -744,12 +755,12 @@ class NameTest < UnitTestCase
 
   def test_name_parse_26
     do_name_parse_test(
-      'Genus subgenus Vaginatae stirps Vaginatae',
-      'Genus subgenus Vaginatae stirps Vaginatae',
-      '**__Genus__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
-      '**__Genus__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
-      'Genus subgenus Vaginatae stirps Vaginatae',
-      'Genus subgenus Vaginatae',
+      'Amanita subgenus Vaginatae stirps Vaginatae',
+      'Amanita subgenus Vaginatae stirps Vaginatae',
+      '**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
+      '**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
+      'Amanita subgenus Vaginatae stirps Vaginatae',
+      'Amanita subgenus Vaginatae',
       :Stirps,
       ''
     )
@@ -803,6 +814,19 @@ class NameTest < UnitTestCase
       'Amanita vaginata',
       'Amanita',
       :Species,
+      ''
+    )
+  end
+
+  def test_name_parse_31
+    do_name_parse_test(
+      'Amanita (subsect Vaginatae)',
+      'Amanita subsect. Vaginatae',
+      '**__Amanita__** subsect. **__Vaginatae__**',
+      '**__Amanita__** subsect. **__Vaginatae__**',
+      'Amanita subsect. Vaginatae',
+      'Amanita',
+      :Subsection,
       ''
     )
   end

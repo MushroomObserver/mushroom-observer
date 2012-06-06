@@ -1728,7 +1728,6 @@ class NameController < ApplicationController
         ) AS x
         LEFT OUTER JOIN names n ON IF(x.synonym_id IS NULL, n.id = x.name_id, n.synonym_id = x.synonym_id)
         WHERE n.deprecated = FALSE
-          AND n.author NOT LIKE '(s%'   # get rid of sections and subgenera)
           AND x.number >= #{minimum_observations}
           AND n.rank #{rank_condition}
         GROUP BY IF(n.synonym_id IS NULL, n.id, -n.synonym_id)

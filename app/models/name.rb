@@ -24,6 +24,7 @@
 #  GENUS_OR_UP_PAT::    (Xxx) sp? (Author)
 #  SUBGENUS_PAT::       (Xxx subgenus yyy) (Author)
 #  SECTION_PAT::        (Xxx ... sect. yyy) (Author)
+#  SUBSECTION_PAT::     (Xxx ... subsect. yyy) (Author)
 #  STIRPS_PAT::         (Xxx ... stirps yyy) (Author)
 #  SPECIES_PAT::        (Xxx yyy) (Author)
 #  SUBSPECIES_PAT::     (Xxx yyy ssp. zzz) (Author)
@@ -365,9 +366,10 @@ class Name < AbstractModel
   ##############################################################################
 
   RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
+  RANKS_INSIDE_GENUS  = [:Stirps, :Subsection, :Section, :Subgenus]
   RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
-  RANKS_ABOVE_SPECIES = [:Stirps, :Section, :Subgenus, :Genus] + RANKS_ABOVE_GENUS
-  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species, :Stirps, :Section, :Subgenus]
+  RANKS_ABOVE_SPECIES = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
+  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species] + RANKS_INSIDE_GENUS
   ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
   EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
   ALT_RANKS = {:Division => :Phylum}
@@ -1195,22 +1197,23 @@ class Name < AbstractModel
   SP = ''           # Enable this to omit the "sp." after all names.
   # SP = ' sp.'       # Enable this to include "sp." after genera and higher taxa.
 
-  SUBG_ABBR   = / subgenus | subg\.? /xi
-  SECT_ABBR   = / section | sect\.? /xi
-  STIRPS_ABBR = / stirps /xi
-  SP_ABBR     = / species | sp\.? /xi
-  SSP_ABBR    = / subspecies | subsp\.? | ssp\.? | s\.? /xi
-  VAR_ABBR    = / variety | var\.? | v\.? /xi
-  F_ABBR      = / forma | form\.? | fo\.? | f\.? /xi
-  GROUP_ABBR  = / group | gr\.? | gp\.? /xi
-  AUCT_ABBR   = / auct\.? /xi
-  INED_ABBR   = / in\s?ed\.? /xi
-  NOM_ABBR    = / nomen | nom\.? /xi
-  SENSU_ABBR  = / sensu?\.? /xi
+  SUBG_ABBR    = / subgenus | subg\.? /xi
+  SECT_ABBR    = / section | sect\.? /xi
+  SUBSECT_ABBR = / subsection | subsect\.? /xi
+  STIRPS_ABBR  = / stirps /xi
+  SP_ABBR      = / species | sp\.? /xi
+  SSP_ABBR     = / subspecies | subsp\.? | ssp\.? | s\.? /xi
+  VAR_ABBR     = / variety | var\.? | v\.? /xi
+  F_ABBR       = / forma | form\.? | fo\.? | f\.? /xi
+  GROUP_ABBR   = / group | gr\.? | gp\.? /xi
+  AUCT_ABBR    = / auct\.? /xi
+  INED_ABBR    = / in\s?ed\.? /xi
+  NOM_ABBR     = / nomen | nom\.? /xi
+  SENSU_ABBR   = / sensu?\.? /xi
 
-  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{STIRPS_ABBR} /x
+  ANY_SUBG_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} /x
   ANY_SSP_ABBR    = / #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} /x
-  ANY_NAME_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{STIRPS_ABBR} | #{SP_ABBR} | #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} | #{GROUP_ABBR} /x
+  ANY_NAME_ABBR   = / #{SUBG_ABBR} | #{SECT_ABBR} | #{SUBSECT_ABBR} | #{STIRPS_ABBR} | #{SP_ABBR} | #{SSP_ABBR} | #{VAR_ABBR} | #{F_ABBR} | #{GROUP_ABBR} /x
   ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
@@ -1225,7 +1228,8 @@ class Name < AbstractModel
   GENUS_OR_UP_PAT = /^ ("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )? (\s #{AUTHOR_START}.*)? $/x
   SUBGENUS_PAT    = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD}) \)? "?)  (\s #{AUTHOR_START}.*)? $/x
   SECTION_PAT     = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  STIRPS_PAT      = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
+  SUBSECTION_PAT  = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
+  STIRPS_PAT      = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} "?) (\s #{AUTHOR_START}.*)? $/x
   SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
@@ -1247,6 +1251,7 @@ class Name < AbstractModel
     parse_group(str, deprecated)       ||
     parse_subgenus(str, deprecated)    ||
     parse_section(str, deprecated)     ||
+    parse_subsection(str, deprecated)  ||
     parse_stirps(str, deprecated)      ||
     parse_subspecies(str, deprecated)  ||
     parse_variety(str, deprecated)     ||
@@ -1266,6 +1271,7 @@ class Name < AbstractModel
     when :Subspecies ; parse_subspecies(str, deprecated)
     when :Species    ; parse_species(str, deprecated)
     when :Stirps     ; parse_stirps(str, deprecated)
+    when :Subsection ; parse_subsection(str, deprecated)
     when :Section    ; parse_section(str, deprecated)
     when :Subgenus   ; parse_subgenus(str, deprecated)
     else             ; parse_genus_or_up(str, deprecated, rank.to_sym)
@@ -1350,6 +1356,10 @@ class Name < AbstractModel
     parse_below_genus(str, deprecated, :Section, SECTION_PAT)
   end
 
+  def self.parse_subsection(str, deprecated=false)
+    parse_below_genus(str, deprecated, :Subsection, SUBSECTION_PAT)
+  end
+
   def self.parse_stirps(str, deprecated=false)
     parse_below_genus(str, deprecated, :Stirps, STIRPS_PAT)
   end
@@ -1387,6 +1397,8 @@ class Name < AbstractModel
         words[i] = 'stirps'
       elsif words[i].match(/^subg/i)
         words[i] = 'subgenus'
+      elsif words[i].match(/^subsect/i)
+        words[i] = 'subsect.'
       else
         words[i] = 'subsp.'
       end

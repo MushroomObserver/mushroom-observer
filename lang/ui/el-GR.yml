@@ -4580,3 +4580,7 @@ RANK_PLURAL_STIRPS: Stirps
 rank_plural_stirps: stirps
 RANK_PLURAL_SUBGENUS: Subgenera
 rank_plural_subgenus: subgenera
+RANK_SUBSECTION: Subsection
+rank_subsection: subsection
+RANK_PLURAL_SUBSECTION: Subsections
+rank_plural_subsection: subsections

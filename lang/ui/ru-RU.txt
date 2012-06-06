@@ -580,6 +580,8 @@ RANK_STIRPS:  Stirps
 rank_stirps:  stirps
 RANK_SUBGENUS:  Subgenus
 rank_subgenus:  subgenus
+RANK_SUBSECTION:  Subsection
+rank_subsection:  subsection
 RANK_SUBSPECIES: Подвид
 rank_subspecies: подвид
 RANK_VARIETY: Разновидность
@@ -608,6 +610,8 @@ RANK_PLURAL_STIRPS:  Stirps
 rank_plural_stirps:  stirps
 RANK_PLURAL_SUBGENUS:  Subgenera
 rank_plural_subgenus:  subgenera
+RANK_PLURAL_SUBSECTION:  Subsections
+rank_plural_subsection:  subsections
 RANK_PLURAL_SUBSPECIES: Подвиды
 rank_plural_subspecies: подвиды
 RANK_PLURAL_VARIETY: Разновидности
