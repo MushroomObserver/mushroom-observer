@@ -11,8 +11,8 @@ fungi:
   text_name: Fungi
   author: ''
   display_name: '**__Fungi__**'
-  observation_name: '**__Fungi sp.__**'
-  search_name: Fungi sp.
+  observation_name: '**__Fungi__**'
+  search_name: Fungi
   citation: ''
   notes: ''
   rss_log_id: 3
@@ -291,8 +291,8 @@ psalliota:
   text_name: Psalliota
   author: ''
   display_name: '**__Psalliota__**'
-  observation_name: '**__Psalliota sp.__**'
-  search_name: Psalliota sp.
+  observation_name: '**__Psalliota__**'
+  search_name: Psalliota
   citation: ''
   notes: ''
 
@@ -308,8 +308,8 @@ agaricus:
   text_name: Agaricus
   author: ''
   display_name: '**__Agaricus__**'
-  observation_name: '**__Agaricus sp.__**'
-  search_name: Agaricus sp.
+  observation_name: '**__Agaricus__**'
+  search_name: Agaricus
   citation: ''
   notes: ''
 
@@ -464,8 +464,8 @@ lepiota:
   text_name: Lepiota
   author: ''
   display_name: '**__Lepiota__**'
-  observation_name: '**__Lepiota sp.__**'
-  search_name: Lepiota sp.
+  observation_name: '**__Lepiota__**'
+  search_name: Lepiota
   citation: ''
   notes: ''
 
@@ -481,8 +481,8 @@ chlorophyllum:
   text_name: Chlorophyllum
   author: ''
   display_name: '**__Chlorophyllum__**'
-  observation_name: '**__Chlorophyllum sp.__**'
-  search_name: Chlorophyllum sp.
+  observation_name: '**__Chlorophyllum__**'
+  search_name: Chlorophyllum
   citation: ''
   notes: ''
 
@@ -631,7 +631,7 @@ macrocybe_pegler:
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   observation_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
-  search_name: Macrocybe sp.
+  search_name: Macrocybe
   citation: ''
   notes: ''
 
@@ -648,7 +648,7 @@ macrocybe_titans:
   author: Titans
   display_name: '**__Macrocybe__** Titans'
   observation_name: '**__Macrocybe__** Titans'
-  search_name: Macrocybe sp. Titans
+  search_name: Macrocybe Titans
   citation: ''
   notes: ''
 
@@ -681,8 +681,8 @@ peltigera:
   author: '(Old) New Auth.'
   citation: Ye Auld Manual of Lichenes, 1800.
   display_name: '**__Peltigera__** (Old) New Auth.'
-  observation_name: '**__Peltigera sp.__** (Old) New Auth.'
-  search_name: Peltigera sp. (Old) New Auth.
+  observation_name: '**__Peltigera__** (Old) New Auth.'
+  search_name: Peltigera (Old) New Auth.
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   synonym_id: 4
   notes: ''
@@ -698,8 +698,8 @@ petigera:
   text_name: Petigera
   author: ''
   display_name: __Petigera__
-  observation_name: __Petigera sp.__
-  search_name: Petigera sp.
+  observation_name: __Petigera__
+  search_name: Petigera
   correct_spelling_id: 40
   deprecated: true
   synonym_id: 4
@@ -718,8 +718,8 @@ suillus:
   text_name: Suillus
   author: Gray
   display_name: '**__Suillus__** Gray'
-  observation_name: '**__Suillus sp.__** Gray'
-  search_name: Suillus sp. Gray
+  observation_name: '**__Suillus__** Gray'
+  search_name: Suillus Gray
   citation: ''
   notes: ''
 
@@ -734,8 +734,8 @@ suillus_by_white:
   text_name: Suillus
   author: E.B. White
   display_name: '**__Suillus__** E.B. White'
-  observation_name: '**__Suillus sp.__** E.B. White'
-  search_name: Suillus sp. E.B. White
+  observation_name: '**__Suillus__** E.B. White'
+  search_name: Suillus E.B. White
   citation: ''
   notes: ''
 
@@ -750,8 +750,8 @@ suilus:
   text_name: Suilus
   author: E.B. White
   display_name: '**__Suilus__** E.B. White'
-  observation_name: '**__Suilus sp.__** E.B. White'
-  search_name: Suilus sp. E.B. White
+  observation_name: '**__Suilus__** E.B. White'
+  search_name: Suilus E.B. White
   correct_spelling_id: 43
   deprecated: true
   citation: ''

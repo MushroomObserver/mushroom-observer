@@ -1190,8 +1190,8 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  # SP = ''           # Enable this to omit the "sp." after all names.
-  SP = ' sp.'       # Enable this to include "sp." after genera and higher taxa.
+  SP = ''           # Enable this to omit the "sp." after all names.
+  # SP = ' sp.'       # Enable this to include "sp." after genera and higher taxa.
 
   SUBG_ABBR   = / subgenus | subg\.? /xi
   SECT_ABBR   = / section | sect\.? /xi
