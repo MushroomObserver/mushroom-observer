@@ -3,6 +3,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class NameTest < UnitTestCase
+  SP = Name::SP
 
   def create_test_name(string, force_rank=nil)
     User.current = @rolf
@@ -12,8 +13,9 @@ class NameTest < UnitTestCase
     return name
   end
 
-  def do_name_parse_test(*args)
-    parse = Name.parse_name(args.shift)
+  def do_name_parse_test(str, *args)
+    parse = Name.parse_name(str)
+    assert_block("Expected #{str.inspect} to parse!") { parse }
     any_errors = false
     msg = ['Name is wrong; expected -vs- actual:']
     i = 0
@@ -48,7 +50,9 @@ class NameTest < UnitTestCase
 
   def assert_name_match_various_authors(pattern, string, first_match)
     assert_name_match(pattern, string + ' Author', first_match, ' Author')
+    assert_name_match(pattern, string + ' Śliwa', first_match, ' Śliwa')
     assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
+    assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
     assert_name_match(pattern, string + ' (One) Two', first_match, ' (One) Two')
     assert_name_match(pattern, string + ' auct', first_match, ' auct')
     assert_name_match(pattern, string + ' auct non Aurora', first_match, ' auct non Aurora')
@@ -56,6 +60,8 @@ class NameTest < UnitTestCase
     assert_name_match(pattern, string + ' auct. N. Amer.', first_match, ' auct. N. Amer.')
     assert_name_match(pattern, string + ' ined', first_match, ' ined')
     assert_name_match(pattern, string + ' in ed.', first_match, ' in ed.')
+    assert_name_match(pattern, string + ' nomen nudum', first_match, ' nomen nudum')
+    assert_name_match(pattern, string + ' nom. prov.', first_match, ' nom. prov.')
     assert_name_match(pattern, string + ' sensu Author', first_match, ' sensu Author')
     assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
     assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
@@ -66,6 +72,11 @@ class NameTest < UnitTestCase
     assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
     assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
     assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
+  end
+
+  def assert_name_parse_fails(str)
+    parse = Name.parse_name(str)
+    assert_block("Expected #{str.inspect} to fail to parse!") { !parse }
   end
 
   def do_parse_classification_test(text, expected)
@@ -142,6 +153,58 @@ class NameTest < UnitTestCase
     assert_equal "", result[0].author
     assert_equal "", result[1].author
     assert_equal "(With) Another Author", result[2].author
+  end
+
+  def test_standardize_name
+    assert_equal('Amanita', Name.standardize_name('Amanita'))
+    assert_equal('Amanita subgenus Vaginatae', Name.standardize_name('Amanita (subg. Vaginatae)'))
+    assert_equal('Amanita subgenus Vaginatae', Name.standardize_name('Amanita SUBG. Vaginatae'))
+    assert_equal('Amanita sect. Vaginatae', Name.standardize_name('Amanita (section Vaginatae)'))
+    assert_equal('Amanita sect. Vaginatae', Name.standardize_name('Amanita sect Vaginatae'))
+    assert_equal('Amanita stirps Vaginatae', Name.standardize_name('Amanita Stirps Vaginatae'))
+    assert_equal('Amanita subgenus One sect. Two stirps Three', Name.standardize_name('Amanita Subg One Sect Two Stirps Three'))
+    assert_equal('Amanita vaginata', Name.standardize_name('Amanita vaginata'))
+    assert_equal('Amanita vaginata subsp. grisea', Name.standardize_name('Amanita vaginata ssp grisea'))
+    assert_equal('Amanita vaginata subsp. grisea', Name.standardize_name('Amanita vaginata s grisea'))
+    assert_equal('Amanita vaginata subsp. grisea', Name.standardize_name('Amanita vaginata SUBSP grisea'))
+    assert_equal('Amanita vaginata var. grisea', Name.standardize_name('Amanita vaginata V grisea'))
+    assert_equal('Amanita vaginata var. grisea', Name.standardize_name('Amanita vaginata var grisea'))
+    assert_equal('Amanita vaginata var. grisea', Name.standardize_name('Amanita vaginata Var. grisea'))
+    assert_equal('Amanita vaginata f. grisea', Name.standardize_name('Amanita vaginata Forma grisea'))
+    assert_equal('Amanita vaginata f. grisea', Name.standardize_name('Amanita vaginata form grisea'))
+    assert_equal('Amanita vaginata f. grisea', Name.standardize_name('Amanita vaginata F grisea'))
+    assert_equal('Amanita vaginata subsp. one var. two f. three', Name.standardize_name('Amanita vaginata s one v two f three'))
+  end
+
+  def test_standardize_author
+    assert_equal('auct.', Name.standardize_author('AUCT'))
+    assert_equal('auct. N. Amer.', Name.standardize_author('auct. N. Amer.'))
+    assert_equal('ined. Xxx', Name.standardize_author('IN ED Xxx'))
+    assert_equal('ined.', Name.standardize_author('ined.'))
+    assert_equal('nom. prov', Name.standardize_author('nom prov'))
+    assert_equal('nom. nudum', Name.standardize_author('Nomen nudum'))
+    assert_equal('nom.', Name.standardize_author('nomen'))
+    assert_equal('sensu Borealis', Name.standardize_author('SENS Borealis'))
+    assert_equal('sensu "Aurora"', Name.standardize_author('sEnSu. "Aurora"'))
+  end
+
+  def test_squeeze_author
+    assert_equal('A.H. Smith', Name.squeeze_author('A. H. Smith'))
+    assert_equal('A.-H. Smith', Name.squeeze_author('A.-H. Smith'))
+    assert_equal('AA.H. Sm.', Name.squeeze_author('AA. H. Sm.'))
+    assert_equal('A.B.C. de Not, Brodo, I., Rowlings, J.K.', Name.squeeze_author('A. B. C. de Not, Brodo, I., Rowlings, J.K.'))
+  end
+
+  def test_format_string
+    assert_equal('**__Amanita__**', Name.format_name('Amanita'))
+    assert_equal('**__Amanita' + SP + '__**', Name.format_name('Amanita' + SP))
+    assert_equal('**__Amanita__** sect. **__Vaginatae__**', Name.format_name('Amanita sect. Vaginatae'))
+    assert_equal('**__Amanita__** subg. **__One__** sect. **__Two__** stirps **__Three__**', Name.format_name('Amanita subg. One sect. Two stirps Three'))
+    assert_equal('**__Amanita vaginata__**', Name.format_name('Amanita vaginata'))
+    assert_equal('**__Amanita vaginata__** subsp. **__grisea__**', Name.format_name('Amanita vaginata subsp. grisea'))
+    assert_equal('**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**', Name.format_name('Amanita vaginata subsp. one var. two f. three'))
+    assert_equal('__Amanita__', Name.format_name('Amanita', :deprecated))
+    assert_equal('__Amanita vaginata__ s __one__ v __two__ f __three__', Name.format_name('Amanita vaginata s one v two f three', :deprecated))
   end
 
   def test_upper_word_pats
@@ -339,6 +402,21 @@ class NameTest < UnitTestCase
     assert_name_match(pat, 'Amanita vaginata ssp. grisea var. grisea f. grisea group', 'Amanita vaginata ssp. grisea var. grisea f. grisea')
   end
 
+  def test_some_bad_names
+    assert_name_parse_fails('Physica stellaris or aipolia')
+    assert_name_parse_fails('Physica stellaris / aipolia')
+    assert_name_parse_fails('Physica adscendens & Xanthoria elegans')
+    assert_name_parse_fails('Physica adscendens + Xanthoria elegans')
+    assert_name_parse_fails('Physica adscendens ß Xanthoria elegans')
+    assert_name_parse_fails('Physica ?')
+    assert_name_parse_fails('Physica adscendens .')
+    assert_name_parse_fails('Physica adscendens nom.temp (Tulloss)')
+    assert_name_parse_fails('Physica adscendens [nom. ined.]')
+    assert_name_parse_fails('Physica sp-1 Tulloss')
+    assert_name_parse_fails('Physica sp-2')
+    assert_name_parse_fails('Agaricus sp-K placomyces sensu Krieger')
+  end
+
   def test_name_parse_1
     do_name_parse_test(
       'Lecania ryaniana van den Boom',
@@ -435,8 +513,8 @@ class NameTest < UnitTestCase
       '"Toninia"',
       '"Toninia"',
       '**__"Toninia"__**',
-      '**__"Toninia" sp.__**',
-      '"Toninia" sp.',
+      '**__"Toninia"' + SP + '__**',
+      '"Toninia"' + SP,
       nil,
       :Genus,
       nil
@@ -448,8 +526,8 @@ class NameTest < UnitTestCase
       '"Toninia" sp.',
       '"Toninia"',
       '**__"Toninia"__**',
-      '**__"Toninia" sp.__**',
-      '"Toninia" sp.',
+      '**__"Toninia"' + SP + '__**',
+      '"Toninia"' + SP,
       nil,
       :Genus,
       nil
@@ -487,8 +565,8 @@ class NameTest < UnitTestCase
       'Anema',
       'Anema',
       '**__Anema__**',
-      '**__Anema sp.__**',
-      'Anema sp.',
+      '**__Anema' + SP + '__**',
+      'Anema' + SP,
       nil,
       :Genus,
       nil
@@ -500,8 +578,8 @@ class NameTest < UnitTestCase
       'Anema sp',
       'Anema',
       '**__Anema__**',
-      '**__Anema sp.__**',
-      'Anema sp.',
+      '**__Anema' + SP + '__**',
+      'Anema' + SP,
       nil,
       :Genus,
       nil
@@ -513,8 +591,8 @@ class NameTest < UnitTestCase
       'Anema sp.',
       'Anema',
       '**__Anema__**',
-      '**__Anema sp.__**',
-      'Anema sp.',
+      '**__Anema' + SP + '__**',
+      'Anema' + SP,
       nil,
       :Genus,
       nil
@@ -526,8 +604,8 @@ class NameTest < UnitTestCase
       'Anema Nyl. ex Forss.',
       'Anema',
       '**__Anema__** Nyl. ex Forss.',
-      '**__Anema sp.__** Nyl. ex Forss.',
-      'Anema sp. Nyl. ex Forss.',
+      '**__Anema' + SP + '__** Nyl. ex Forss.',
+      'Anema' + SP + ' Nyl. ex Forss.',
       nil,
       :Genus,
       'Nyl. ex Forss.'
@@ -539,8 +617,8 @@ class NameTest < UnitTestCase
       'Anema sp Nyl. ex Forss.',
       'Anema',
       '**__Anema__** Nyl. ex Forss.',
-      '**__Anema sp.__** Nyl. ex Forss.',
-      'Anema sp. Nyl. ex Forss.',
+      '**__Anema' + SP + '__** Nyl. ex Forss.',
+      'Anema' + SP + ' Nyl. ex Forss.',
       nil,
       :Genus,
       'Nyl. ex Forss.'
@@ -552,8 +630,8 @@ class NameTest < UnitTestCase
       'Anema sp. Nyl. ex Forss.',
       'Anema',
       '**__Anema__** Nyl. ex Forss.',
-      '**__Anema sp.__** Nyl. ex Forss.',
-      'Anema sp. Nyl. ex Forss.',
+      '**__Anema' + SP + '__** Nyl. ex Forss.',
+      'Anema' + SP + ' Nyl. ex Forss.',
       nil,
       :Genus,
       'Nyl. ex Forss.'
@@ -617,8 +695,8 @@ class NameTest < UnitTestCase
       'Genus Sp.',
       'Genus',
       '**__Genus__**',
-      '**__Genus sp.__**',
-      'Genus sp.',
+      '**__Genus' + SP + '__**',
+      'Genus' + SP,
       '',
       :Genus,
       ''
@@ -708,11 +786,24 @@ class NameTest < UnitTestCase
       'Amanita "Wrong Author"',
       'Amanita',
       '**__Amanita__** "Wrong Author"',
-      '**__Amanita sp.__** "Wrong Author"',
-      'Amanita sp. "Wrong Author"',
+      '**__Amanita' + SP + '__** "Wrong Author"',
+      'Amanita' + SP + ' "Wrong Author"',
       '',
       :Genus,
       '"Wrong Author"'
+    )
+  end
+
+  def test_name_parse_30
+    do_name_parse_test(
+      "Amanita vaginata \u2028",
+      'Amanita vaginata',
+      '**__Amanita vaginata__**',
+      '**__Amanita vaginata__**',
+      'Amanita vaginata',
+      'Amanita',
+      :Species,
+      ''
     )
   end
 
@@ -1325,11 +1416,11 @@ class NameTest < UnitTestCase
     User.current = @mary; assert_equal('**__Macrocybe__** Titans', name.observation_name)
     User.current = @dick; assert_equal('**__Macrocybe__**', name.observation_name)
 
-    name.display_name = '__Macrocybe sp.__ (Author) Author'
-    assert_equal('__Macrocybe sp.__', name.display_name)
+    name.display_name = '__Macrocybe' + SP + '__ (Author) Author'
+    assert_equal('__Macrocybe' + SP + '__', name.display_name)
 
-    name.display_name = '__Macrocybe sp.__ (van Helsing) Author'
-    assert_equal('__Macrocybe sp.__', name.display_name)
+    name.display_name = '__Macrocybe' + SP + '__ (van Helsing) Author'
+    assert_equal('__Macrocybe' + SP + '__', name.display_name)
 
     name.display_name = '__Macrocybe__ sect. __Helsing__ Author'
     assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
@@ -1337,8 +1428,8 @@ class NameTest < UnitTestCase
     name.display_name = '__Macrocybe__ sect. __Helsing__'
     assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
 
-    name.display_name = '**__Macrocybe sp.__** (van Helsing) Author'
-    assert_equal('**__Macrocybe sp.__**', name.display_name)
+    name.display_name = '**__Macrocybe' + SP + '__** (van Helsing) Author'
+    assert_equal('**__Macrocybe' + SP + '__**', name.display_name)
 
     name.display_name = '**__Macrocybe__** sect. **__Helsing__** Author'
     assert_equal('**__Macrocybe__** sect. **__Helsing__**', name.display_name)

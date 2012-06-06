@@ -1061,14 +1061,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:create_species_list, params)
     assert_response(:controller => :location, :action => :create_location)
     assert_equal([
-      'Fungi sp.',
-      'Agaricus sp.',
-      'Psalliota sp.',
-      'Chlorophyllum sp. Author',
-      'Lepiota sp. Author',
-      '"One" sp.',
-      '"Two" sp.',
-      '"Three" sp.',
+      'Fungi' + Name::SP,
+      'Agaricus' + Name::SP,
+      'Psalliota' + Name::SP,
+      'Chlorophyllum' + Name::SP + ' Author',
+      'Lepiota' + Name::SP + ' Author',
+      '"One"' + Name::SP,
+      '"Two"' + Name::SP,
+      '"Three"' + Name::SP,
       'Agaricus "blah"',
     ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}. sort)
 
@@ -1090,15 +1090,15 @@ class SpeciesListControllerTest < FunctionalTestCase
     post(:create_species_list, params)
     assert_response(:controller => :location, :action => :create_location)
     assert_equal([
-      'Fungi sp.',
-      'Agaricus sp.',
-      'Psalliota sp.',
-      'Chlorophyllum sp. Author',
-      'Lepiota sp. Author',
-      'Lepiota sp. Author',
-      '"One" sp.',
-      '"Two" sp.',
-      '"Three" sp.',
+      'Fungi' + Name::SP,
+      'Agaricus' + Name::SP,
+      'Psalliota' + Name::SP,
+      'Chlorophyllum' + Name::SP + ' Author',
+      'Lepiota' + Name::SP + ' Author',
+      'Lepiota' + Name::SP + ' Author',
+      '"One"' + Name::SP,
+      '"Two"' + Name::SP,
+      '"Three"' + Name::SP,
       'Agaricus "blah"',
     ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}.sort)
   end

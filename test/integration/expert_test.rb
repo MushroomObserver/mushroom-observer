@@ -414,9 +414,9 @@ class ExpertTest < IntegrationTestCase
     obs = spl.observations
     assert_equal(5, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
-      'Petigera sp.',
+      'Petigera' + Name::SP,
       'Lactarius alpigenes Kühn.',
-      'Suillus sp. E.B. White',
+      'Suillus' + Name::SP + ' E.B. White',
       'Amanita baccata sensu Arora',
       'Caloplaca arnoldii subsp. obliterate',
     ].sort, obs.map(&:name).map(&:search_name).sort)
@@ -467,9 +467,9 @@ class ExpertTest < IntegrationTestCase
     obs = spl.observations
     assert_equal(7, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
-      'Petigera sp.',
+      'Petigera' + Name::SP,
       'Lactarius alpigenes Kühn.',
-      'Suillus sp. E.B. White',
+      'Suillus' + Name::SP + ' E.B. White',
       'Amanita baccata sensu Arora',
       'Caloplaca arnoldii subsp. obliterate',
       'Agaricus nova',

@@ -133,7 +133,11 @@
 #
 #  ==== Other
 #  primer::                  List of names used for priming auto-completer.
-#  format_string::           Add itallics and/or boldness to string.
+#  format_name::             Add itallics and/or boldness to string.
+#  clean_incoming_string::   Preprocess string from user before parsing.
+#  standardize_name::        Standardize abbreviations in parsed name string.
+#  standardize_author::      Standardize special abbreviations at start of parsed author.
+#  squeeze_author::          Squeeze out space between initials, such as in "A. H. Smith".
 #
 #  == Instance methods
 #
@@ -1186,6 +1190,9 @@ class Name < AbstractModel
   #
   ##############################################################################
 
+  # SP = ''           # Enable this to omit the "sp." after all names.
+  SP = ' sp.'       # Enable this to include "sp." after genera and higher taxa.
+
   SUBG_ABBR   = / subgenus | subg\.? /xi
   SECT_ABBR   = / section | sect\.? /xi
   STIRPS_ABBR = / stirps /xi
@@ -1210,7 +1217,7 @@ class Name < AbstractModel
   # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
   LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
 
-  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÁÀÅČÉÈÖØŠŚ\(] | "[^a-z\s] /x
+  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
 
   AUTHOR_PAT      = /^ ("? #{UPPER_WORD} (?: \(? (?:\s #{ANY_SUBG_ABBR} \s #{UPPER_WORD})+ \)? | \s (?!#{AUTHOR_START}|#{ANY_SUBG_ABBR}) #{LOWER_WORD} (?:\s #{ANY_SSP_ABBR} \s #{LOWER_WORD})* | \s #{SP_ABBR} )? "?) (\s (?!#{ANY_NAME_ABBR}\s) #{AUTHOR_START}.*) $/x
   GENUS_OR_UP_PAT = /^ ("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )? (\s #{AUTHOR_START}.*)? $/x
@@ -1283,8 +1290,8 @@ class Name < AbstractModel
       parent = name.sub(LAST_PART, '')
       results = [
         name.gsub('ë', 'e') + ' group',
-        format_string(name, deprecated) + ' group',
-        format_string(name, deprecated) + ' group',
+        format_name(name, deprecated) + ' group',
+        format_name(name, deprecated) + ' group',
         name.gsub('ë', 'e') + ' group',
         parent,
         :Group,
@@ -1302,9 +1309,9 @@ class Name < AbstractModel
       author2 = author.blank? ? '' : ' ' + author
       results = [
         name.gsub('ë', 'e'),
-        format_string(name, deprecated) + author2,
-        format_string(name + ' sp.', deprecated) + author2,
-        name.gsub('ë', 'e') + ' sp.' + author2,
+        format_name(name, deprecated) + author2,
+        format_name(name + SP, deprecated) + author2,
+        name.gsub('ë', 'e') + SP + author2,
         nil,
         rank,
         author
@@ -1322,8 +1329,8 @@ class Name < AbstractModel
       parent = name.sub(LAST_PART, '')
       results = [
         name.gsub('ë', 'e'),
-        format_string(name, deprecated) + author2,
-        format_string(name, deprecated) + author2,
+        format_name(name, deprecated) + author2,
+        format_name(name, deprecated) + author2,
         name.gsub('ë', 'e') + author2,
         parent,
         rank,
@@ -1362,19 +1369,21 @@ class Name < AbstractModel
   end
 
   def self.standardize_name(str)
+    # remove old-style "(sect. Vaginatae)"
     str = str.sub(/ \((.*)\)$/, ' \\1')
     words = str.split(' ')
+    # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i > 0
-      if words[i][0] == 'f'
+      if words[i].match(/^f/i)
         words[i] = 'f.'
-      elsif words[i][0] == 'v'
+      elsif words[i].match(/^v/i)
         words[i] = 'var.'
-      elsif words[i][1] == 'e'
+      elsif words[i].match(/^sect/i)
         words[i] = 'sect.'
-      elsif words[i][1] == 't'
+      elsif words[i].match(/^stirps/i)
         words[i] = 'stirps'
-      elsif words[i][3] == 'g'
+      elsif words[i].match(/^subg/i)
         words[i] = 'subgenus'
       else
         words[i] = 'subsp.'
@@ -1390,7 +1399,7 @@ class Name < AbstractModel
       sub(/^#{INED_ABBR}/, 'ined. ').
       sub(/^#{NOM_ABBR}/, 'nom. ').
       sub(/^#{SENSU_ABBR}/, 'sensu ').
-      strip
+      strip_squeeze
     squeeze_author(str)
   end
 
@@ -1399,9 +1408,8 @@ class Name < AbstractModel
     str.gsub(/([A-Z]\.) (?=[A-Z]\.)/, '\\1')
   end
 
-  # Add itallics and (optionally) boldface to a String.  This is used
-  # throughout this file and nowhere else.
-  def self.format_string(str, deprecated=false)
+  # Add itallics and boldface to a standardized name (without author).
+  def self.format_name(str, deprecated=false)
     boldness = deprecated ? '' : '**'
     words = str.split(' ')
     if (words.length & 1) == 0
@@ -1589,16 +1597,17 @@ class Name < AbstractModel
   # Lookup a species by genus and species, creating it if necessary.  Returns a
   # Name instance, *UNSAVED*!!  (This is not used anywhere that I can see.)
   def self.make_species(genus, species, deprecated = false)
-    Name.make_name :Species, sprintf('%s %s', genus, species), :display_name => format_string("#{genus} #{species}", deprecated)
+    Name.make_name(:Species, sprintf('%s %s', genus, species),
+                   :display_name => format_name("#{genus} #{species}", deprecated))
   end
 
   # Lookup a genus, creating it if necessary.  Returns a Name instance,
   # *UNSAVED*!!  (This is not used anywhere that I can see.)
   def self.make_genus(text_name, deprecated = false)
     Name.make_name(:Genus, text_name,
-                   :display_name => format_string(text_name, deprecated),
-                   :observation_name => format_string("#{text_name}", deprecated) + ' sp.',
-                   :search_name => text_name + ' sp.')
+                   :display_name => format_name(text_name, deprecated),
+                   :observation_name => format_name("#{text_name}", deprecated) + SP,
+                   :search_name => text_name + SP)
   end
 
   # Create a Name given all the various name formats, etc.
@@ -1657,7 +1666,7 @@ class Name < AbstractModel
   #   name.save
   #
   def change_author(new_author)
-    old_author = author
+    old_author = self.author
     self.author = new_author.to_s
     self.display_name     = Name.replace_author(display_name,     old_author, new_author)
     self.observation_name = Name.replace_author(observation_name, old_author, new_author)
@@ -1686,8 +1695,8 @@ class Name < AbstractModel
   #
   def change_deprecated(value)
     # Remove any boldness that might be there
-    dname = self.display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
-    oname = self.observation_name.gsub(/\*\*([^*]+)\*\*/, '\1')
+    dname = display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
+    oname = observation_name.gsub(/\*\*([^*]+)\*\*/, '\1')
     unless value
       # Add boldness
       dname.gsub!(/(__[^_]+__)/, '**\1**')
@@ -1710,40 +1719,43 @@ class Name < AbstractModel
   # update any parents (and caller has requested it), _those_ do get saved.
   #
   def change_text_name(in_str, new_author, new_rank, save_parents=false)
-
-    # Clean up inputs.
     in_str     = in_str.to_s.strip_squeeze
     new_author = new_author.to_s.strip_squeeze
 
-    self.class.common_errors(in_str)
+    Name.check_for_common_errors(in_str)
 
     new_text_name, new_display_name, new_observation_name, new_search_name,
-      parent_name = Name.parse_by_rank(in_str, new_rank, deprecated)
+      new_parent_name, new_rank2, new_author2 = Name.parse_by_rank(in_str, new_rank, deprecated)
 
-    # Make sure its parent(s) exist.
-    if parent_name and not Name.find_by_text_name(parent_name)
-      names = Name.names_from_string(parent_name)
+    # Don't know what to do with the case where user has entered an author in both
+    # the text_name field and the author field.
+    if !new_author.blank? and !new_author2.blank? and new_author != new_author2
+      raise :runtime_invalid_name.t(:name => in_str)
+    end
+
+    if new_parent_name and
+       not Name.find_by_text_name(new_parent_name)
+      names = Name.names_from_string(new_parent_name)
       if names.last.nil?
-        raise :runtime_unable_to_create_name.t(:name => parent_name)
+        raise :runtime_unable_to_create_name.t(:name => new_parent_name)
       elsif save_parents
-        # Make sure everything is saved.
         for n in names
           n.save
         end
       end
     end
 
-    # What was this supposed to do??
-    # Name.check_for_repeats(new_text_name, new_author)
-
-    # Add author to all the appropriate name formats.
-    if new_author
-      new_display_name     = "%s %s" % [new_display_name, new_author]
-      new_observation_name = "%s %s" % [new_observation_name, new_author]
-      new_search_name      = "%s %s" % [new_search_name, new_author]
+    if !new_author.blank?
+      new_display_name     += ' ' + new_author
+      new_observation_name += ' ' + new_author
+      new_search_name      += ' ' + new_author
     end
 
-    # Update everything.
+    # In case user adds an author in the text_name field.
+    if new_author.blank? and !new_author.blank?
+      new_author = new_author2
+    end
+
     self.rank             = new_rank
     self.author           = new_author
     self.text_name        = new_text_name
@@ -1753,25 +1765,9 @@ class Name < AbstractModel
   end
 
   # Used by +change_text_name+.
-  def self.common_errors(in_str) # :nodoc:
-    result = true
-    if /^[Uu]nknown|\sspecies$|\ssp.?\s*$|\ssensu\s/.match(in_str)
-      raise :runtime_invalid_name.t(:name => in_str)
-    end
-  end
-
-  # This was used by +change_text_name+, but apparently no longer.
-  def self.check_for_repeats(text_name, author) # :nodoc:
-    matches = []
-    if !author.blank?
-      matches = Name.all(:conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
-    else
-      matches = Name.all(:conditions => "text_name = '%s'" % text_name)
-    end
-    for m in matches
-      if m.id != self.id
-        raise :runtime_name_already_used.t(:name => text_name)
-      end
+  def self.check_for_common_errors(str) # :nodoc:
+    if /^[Uu]nknown|\sspecies$|\ssp.?\s*$|\ssensu\s/.match(str)
+      raise :runtime_invalid_name.t(:name => str)
     end
   end
 

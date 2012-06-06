@@ -55,9 +55,9 @@ for row in Name.connection.select_rows %(
     # Suppress some common errors for the first run.
     if true
       text_name = text_name.strip_squeeze
-      search_name = search_name.strip_squeeze
-      display_name = display_name.strip_squeeze
-      observation_name = observation_name.strip_squeeze
+      search_name = search_name.strip_squeeze.sub(/ sp\./, '')
+      display_name = display_name.strip_squeeze.sub(/ sp\./, '')
+      observation_name = observation_name.strip_squeeze.sub(/ sp\./, '')
       author = author.strip_squeeze
       if deprecated and display_name.match(/\*/)
         display_name.gsub!(/\*/, '')

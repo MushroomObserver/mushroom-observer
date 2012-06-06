@@ -1064,9 +1064,9 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
-    assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
+    assert_equal('Agaricus' + Name::SP + ' Author', agaricus.reload.search_name)
     agaricus.author = nil
-    agaricus.search_name = 'Agaricus sp.'
+    agaricus.search_name = 'Agaricus' + Name::SP
     agaricus.save
 
     params[:name][:name] = 'Agaricus sp Author'
@@ -1074,9 +1074,9 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
-    assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
+    assert_equal('Agaricus' + Name::SP + ' Author', agaricus.reload.search_name)
     agaricus.author = nil
-    agaricus.search_name = 'Agaricus sp.'
+    agaricus.search_name = 'Agaricus' + Name::SP
     agaricus.save
 
     params[:name][:name] = 'Agaricus sp. Author'
@@ -1084,7 +1084,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
-    assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
+    assert_equal('Agaricus' + Name::SP + ' Author', agaricus.reload.search_name)
 
     # Can we create observation with genus specifying author?
     params[:name][:name] = 'Agaricus Author'
@@ -1131,9 +1131,9 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
-    assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
+    assert_equal('Psalliota' + Name::SP + ' Author', psalliota.reload.search_name)
     psalliota.author = nil
-    psalliota.search_name = 'Psalliota sp.'
+    psalliota.search_name = 'Psalliota' + Name::SP
     psalliota.save
 
     params[:name][:name] = 'Psalliota sp Author'
@@ -1141,9 +1141,9 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
-    assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
+    assert_equal('Psalliota' + Name::SP + ' Author', psalliota.reload.search_name)
     psalliota.author = nil
-    psalliota.search_name = 'Psalliota sp.'
+    psalliota.search_name = 'Psalliota' + Name::SP
     psalliota.save
 
     params[:name][:name] = 'Psalliota sp. Author'
@@ -1151,7 +1151,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
-    assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
+    assert_equal('Psalliota' + Name::SP + ' Author', psalliota.reload.search_name)
 
     # Can we create new quoted genus?
     params[:name][:name] = '"One"'
@@ -1159,21 +1159,21 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" sp.', assigns(:observation).name.search_name)
+    assert_equal('"One"' + Name::SP, assigns(:observation).name.search_name)
 
     params[:name][:name] = '"Two" sp'
     params[:approved_name] = '"Two" sp'
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal('"Two"', assigns(:observation).name.text_name)
-    assert_equal('"Two" sp.', assigns(:observation).name.search_name)
+    assert_equal('"Two"' + Name::SP, assigns(:observation).name.search_name)
 
     params[:name][:name] = '"Three" sp.'
     params[:approved_name] = '"Three" sp.'
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal('"Three"', assigns(:observation).name.text_name)
-    assert_equal('"Three" sp.', assigns(:observation).name.search_name)
+    assert_equal('"Three"' + Name::SP, assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One"'
     params[:approved_name] = nil
@@ -1211,21 +1211,21 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
+    assert_equal('"One"' + Name::SP + ' Author', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One" sp Author'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
+    assert_equal('"One"' + Name::SP + ' Author', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One" sp. Author'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
+    assert_equal('"One"' + Name::SP + ' Author', assigns(:observation).name.search_name)
   end
 
   # ----------------------------------------------------------------

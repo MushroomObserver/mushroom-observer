@@ -142,9 +142,9 @@ class AbstractModelTest < UnitTestCase
       when 'Name'
         obj = Name.new(
           :text_name        => 'Test',
-          :display_name     => '**__Test sp.__**',
-          :observation_name => '**__Test sp.__**',
-          :search_name      => 'Test sp.',
+          :display_name     => '**__Test' + Name::SP + '__**',
+          :observation_name => '**__Test' + Name::SP + '__**',
+          :search_name      => 'Test' + Name::SP,
           :rank             => :Genus,
           :author           => ''
         )
