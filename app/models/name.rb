@@ -1097,14 +1097,16 @@ class Name < AbstractModel
 
     # Move all misspellings over to the new name.
     for name in old_name.misspellings
-      if name != self
+      if name == self
+        name.correct_spelling = nil
+      else
         name.correct_spelling = self
-        name.save
-        Transaction.put_name(
-          :id               => name,
-          :correct_spelling => self
-        )
       end
+      name.save
+      Transaction.put_name(
+        :id                   => name,
+        :set_correct_spelling => self
+      )
     end
 
     # Move over any interest in the old name.
