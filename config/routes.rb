@@ -20,6 +20,16 @@ ActionController::Routing::Routes.draw do |map|
   # Short-hand notation for AJAX methods.
   map.connect 'ajax/:action/:type/:id', :controller => 'ajax'
 
+  # Short-hand for show_xxx actions, useful for resource URLs.
+  map.connect 'comment/:id',      :id => /\d+/, :controller => 'comment',      :action => 'show_comment'
+  map.connect 'image/:id',        :id => /\d+/, :controller => 'image',        :action => 'show_image'
+  map.connect 'location/:id',     :id => /\d+/, :controller => 'location',     :action => 'show_location'
+  map.connect 'name/:id',         :id => /\d+/, :controller => 'name',         :action => 'show_name'
+  map.connect 'observation/:id',  :id => /\d+/, :controller => 'observer',     :action => 'show_observation'
+  map.connect 'project/:id',      :id => /\d+/, :controller => 'project',      :action => 'show_project'
+  map.connect 'species_list/:id', :id => /\d+/, :controller => 'species_list', :action => 'show_species_list'
+  map.connect 'user/:id',         :id => /\d+/, :controller => 'observer',     :action => 'show_user'
+
   # Standard routes.
   map.connect ':controller/:action'
   map.connect ':controller/:action/:id', :id => /\d+/

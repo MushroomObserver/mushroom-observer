@@ -4409,3 +4409,15 @@ prefs_thumbnail_maps: Show thumbnail map on observation page?
 show_observation_hide_map: Hide thumbnail map.
 show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature,
   go to your "[:app_preferences]":/account/prefs page.
+RANK_SECTION: Section
+rank_section: section
+RANK_STIRPS: Stirps
+rank_stirps: stirps
+RANK_SUBGENUS: Subgenus
+rank_subgenus: subgenus
+RANK_PLURAL_SECTION: Sections
+rank_plural_section: sections
+RANK_PLURAL_STIRPS: Stirps
+rank_plural_stirps: stirps
+RANK_PLURAL_SUBGENUS: Subgenera
+rank_plural_subgenus: subgenera
