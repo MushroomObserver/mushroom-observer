@@ -1446,12 +1446,10 @@ observation_made_confidence: La confianza de la comunidad
 # account/prefs
 prefs_title: Cambiar Preferencias
 prefs_link: Editar Preferencias
-
 prefs_login: Nombre de usuario
 prefs_email: Dirección de Correo Electrónico
 prefs_password_new: Nueva contraseña
 prefs_password_confirm: Confirmar nueva contraseña
-
 prefs_appearance:  Appearance
 prefs_theme: Tema preferido
 prefs_locale: Idioma
@@ -1464,6 +1462,7 @@ prefs_hide_authors_above_species:  hide authorities for genera and higher ranks
 prefs_thumbnail_size: Tamaño de las miniaturas
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"
+prefs_thumbnail_maps:  Show thumbnail map on observation page?
 prefs_image_size: Tamaño de las imágenes
 prefs_image_size_help: Tamaño de la muestra al hacer clic en una imagen.
 prefs_image_small: "[:image_show_small] (320 x 320)"
@@ -1477,7 +1476,6 @@ prefs_columns: columnas
 prefs_alt_col_colors: Alternar los colores de las columnas.
 prefs_alt_row_colors: Alternar los colores de las filas.
 prefs_text_below_images: Poner texto debajo de las imágenes.
-
 prefs_privacy:  Privacy settings
 prefs_votes_anonymous: Votos sobre nombres propuestas y imágenes
 prefs_votes_anonymous_no: Siempre públicos
@@ -1490,7 +1488,6 @@ prefs_bulk_filename_purge_confirm:  Are you sure you want to purge all image fil
 prefs_bulk_filename_purge_success:  Successfully purged all image filenames from our database.
 prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
 prefs_license_note: "\"La licencia\":/observer/how_to_use#license por defecto que desea para nuevas imágenes."
-
 prefs_email_please_notify: Por favor, enviarme notificaciones por e-mail cuando...
 prefs_email_general: Notificaciones por E-mail Generales
 prefs_email_general_commercial: otros usuarios están interesados en el uso de una de mis imágenes para fines comerciales.
@@ -1716,7 +1713,8 @@ show_observation_species_lists: Listas de Especies
 show_observation_manage_species_lists: Gestionar listas de especies
 show_observation_send_question: Enviar pregunta al observador
 show_observation_view_notifications: Ver Notificaciones
-
+show_observation_hide_map:  Hide thumbnail map.
+show_observation_thumbnail_map_hidden:  Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
 
 
 # location/show_past_location

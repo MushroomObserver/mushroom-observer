@@ -120,6 +120,9 @@
     </tr>
   </table><br/>
 
+  <p><%= form.check_box('thumbnail_maps') %>
+    <%= :prefs_thumbnail_maps.t %></p>
+
   <p><%= :prefs_layout_title.t %>:<br/>
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
     <label for="user_rows"><%= :prefs_rows_by.t %></label>

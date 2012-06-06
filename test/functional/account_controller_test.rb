@@ -170,36 +170,42 @@ class AccountControllerTest < FunctionalTestCase
     # Now change everything.
     params = {
       :user => {
-        :login             => "new_login",
-        :email             => "new_email",
-        :theme             => "Agaricus",
-        :notes             => "",
-        :mailing_address   => "",
-        :license_id        => "1",
-        :rows              => "10",
-        :columns           => "10",
-        :alternate_rows    => "",
-        :alternate_columns => "",
-        :vertical_layout   => "",
-        :email_comments_owner         => "1",
-        :email_comments_response      => "1",
-        :email_comments_all           => "",
-        :email_observations_consensus => "1",
-        :email_observations_naming    => "1",
-        :email_observations_all       => "",
-        :email_names_admin            => "1",
-        :email_names_author           => "1",
-        :email_names_editor           => "",
-        :email_names_reviewer         => "1",
-        :email_names_all              => "",
-        :email_locations_admin        => "1",
-        :email_locations_author       => "1",
-        :email_locations_editor       => "",
-        :email_locations_all          => "",
-        :email_general_feature        => "1",
-        :email_general_commercial     => "1",
-        :email_general_question       => "1",
-        :email_html                   => "1",
+        :alternate_columns             => '',
+        :alternate_rows                => '',
+        :columns                       => '10',
+        :email                         => 'new_email',
+        :email_comments_all            => '',
+        :email_comments_owner          => '1',
+        :email_comments_response       => '1',
+        :email_general_commercial      => '1',
+        :email_general_feature         => '1',
+        :email_general_question        => '1',
+        :email_html                    => '1',
+        :email_locations_admin         => '1',
+        :email_locations_all           => '',
+        :email_locations_author        => '1',
+        :email_locations_editor        => '',
+        :email_names_admin             => '1',
+        :email_names_all               => '',
+        :email_names_author            => '1',
+        :email_names_editor            => '',
+        :email_names_reviewer          => '1',
+        :email_observations_all        => '',
+        :email_observations_consensus  => '1',
+        :email_observations_naming     => '1',
+        :hide_authors                  => 'above_species',
+        :image_size                    => 'small',
+        :keep_filenames                => '',
+        :license_id                    => '1',
+        :locale                        => 'el-GR',
+        :location_format               => 'scientific',
+        :login                         => 'new_login',
+        :rows                          => '10',
+        :theme                         => 'Agaricus',
+        :thumbnail_maps                => '',
+        :thumbnail_size                => 'small',
+        :vertical_layout               => '',
+        :votes_anonymous               => 'yes',
       }
     }
     post_with_dump(:prefs, params)
@@ -207,34 +213,42 @@ class AccountControllerTest < FunctionalTestCase
 
     # Make sure changes were made.
     user = @rolf.reload
-    assert_equal("new_login",  user.login)
-    assert_equal("new_email",  user.email)
-    assert_equal("Agaricus",   user.theme)
-    assert_equal(licenses(:ccnc25),      user.license)
-    assert_equal(10,           user.rows)
-    assert_equal(10,           user.columns)
-    assert_equal(false,        user.alternate_rows)
-    assert_equal(false,        user.alternate_columns)
-    assert_equal(false,        user.vertical_layout)
-    assert_equal(true,         user.email_comments_owner)
-    assert_equal(true,         user.email_comments_response)
-    assert_equal(false,        user.email_comments_all)
-    assert_equal(true,         user.email_observations_consensus)
-    assert_equal(true,         user.email_observations_naming)
-    assert_equal(false,        user.email_observations_all)
-    assert_equal(true,         user.email_names_admin)
-    assert_equal(true,         user.email_names_author)
-    assert_equal(false,        user.email_names_editor)
-    assert_equal(true,         user.email_names_reviewer)
-    assert_equal(false,        user.email_names_all)
-    assert_equal(true,         user.email_locations_admin)
-    assert_equal(true,         user.email_locations_author)
-    assert_equal(false,        user.email_locations_editor)
-    assert_equal(false,        user.email_locations_all)
-    assert_equal(true,         user.email_general_feature)
-    assert_equal(true,         user.email_general_commercial)
-    assert_equal(true,         user.email_general_question)
-    assert_equal(true,         user.email_html)
+    assert_equal(false,       user.alternate_columns)
+    assert_equal(false,       user.alternate_rows)
+    assert_equal(10,          user.columns)
+    assert_equal('new_email', user.email)
+    assert_equal(false,       user.email_comments_all)
+    assert_equal(true,        user.email_comments_owner)
+    assert_equal(true,        user.email_comments_response)
+    assert_equal(true,        user.email_general_commercial)
+    assert_equal(true,        user.email_general_feature)
+    assert_equal(true,        user.email_general_question)
+    assert_equal(true,        user.email_html)
+    assert_equal(true,        user.email_locations_admin)
+    assert_equal(false,       user.email_locations_all)
+    assert_equal(true,        user.email_locations_author)
+    assert_equal(false,       user.email_locations_editor)
+    assert_equal(true,        user.email_names_admin)
+    assert_equal(false,       user.email_names_all)
+    assert_equal(true,        user.email_names_author)
+    assert_equal(false,       user.email_names_editor)
+    assert_equal(true,        user.email_names_reviewer)
+    assert_equal(false,       user.email_observations_all)
+    assert_equal(true,        user.email_observations_consensus)
+    assert_equal(true,        user.email_observations_naming)
+    assert_equal(:above_species, user.hide_authors)
+    assert_equal(:small,      user.image_size)
+    assert_equal(false,       user.keep_filenames)
+    assert_equal(licenses(:ccnc25), user.license)
+    assert_equal('el-GR',     user.locale)
+    assert_equal(:scientific, user.location_format)
+    assert_equal('new_login', user.login)
+    assert_equal(10,          user.rows)
+    assert_equal('Agaricus',  user.theme)
+    assert_equal(false,       user.thumbnail_maps)
+    assert_equal(:small,      user.thumbnail_size)
+    assert_equal(false,       user.vertical_layout)
+    assert_equal(:yes,        user.votes_anonymous)
   end
 
   def test_edit_prefs_login_already_exists

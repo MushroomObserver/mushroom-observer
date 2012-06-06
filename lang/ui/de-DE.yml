@@ -4453,3 +4453,7 @@ edit_translations_help: On the left is a list of translation strings, arranged t
   of the underlined labels, it will allow you to edit the corresponding string in
   the panel on the right.  Click "[:SAVE]" to save your changes.
 edit_translations_no_changes: Nothing changed.
+prefs_thumbnail_maps: Show thumbnail map on observation page?
+show_observation_hide_map: Hide thumbnail map.
+show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature,
+  go to your "[:app_preferences]":/account/prefs page.

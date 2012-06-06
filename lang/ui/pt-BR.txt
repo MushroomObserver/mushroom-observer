@@ -1458,12 +1458,10 @@ observation_made_confidence:  Community confidence
 # account/prefs
 prefs_title:  Change Preferences
 prefs_link:  Edit Preferences
-
 prefs_login:  Login
 prefs_email:  Email address
 prefs_password_new:  New password
 prefs_password_confirm:  Confirm new password
-
 prefs_appearance:  Appearance
 prefs_theme:  Preferred theme
 prefs_locale:  Language
@@ -1476,6 +1474,7 @@ prefs_hide_authors_above_species:  hide authorities for genera and higher ranks
 prefs_thumbnail_size:  Thumbnail size
 prefs_thumbnail_small:  "[:image_show_small]"
 prefs_thumbnail_large:  "[:image_show_large]"
+prefs_thumbnail_maps:  Show thumbnail map on observation page?
 prefs_image_size:  Image size
 prefs_image_size_help:  Size shown when you click on an image.
 prefs_image_small:  "[:image_show_small] (320 x 320)"
@@ -1489,7 +1488,6 @@ prefs_columns:  columns
 prefs_alt_col_colors:  Alternate column colors.
 prefs_alt_row_colors:  Alternate row colors.
 prefs_text_below_images:  Put text below images.
-
 prefs_privacy:  Privacy settings
 prefs_votes_anonymous:  Votes on proposed names and images
 prefs_votes_anonymous_no:  Always public
@@ -1502,7 +1500,6 @@ prefs_bulk_filename_purge_confirm:  Are you sure you want to purge all image fil
 prefs_bulk_filename_purge_success:  Successfully purged all image filenames from our database.
 prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
 prefs_license_note:  Default "license":/observer/how_to_use#license you want for new images.
-
 prefs_email_please_notify:  Please notify me when...
 prefs_email_general:  General Email
 prefs_email_general_commercial:  someone is interested in using an image of mine for commercial purposes.
@@ -1728,7 +1725,8 @@ show_observation_species_lists:  "[:SPECIES_LISTS]"
 show_observation_manage_species_lists:  Manage Species Lists
 show_observation_send_question:  Send Observer a Question
 show_observation_view_notifications:  View Notifications
-
+show_observation_hide_map:  Hide thumbnail map.
+show_observation_thumbnail_map_hidden:  Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
 
 
 # location/show_past_location

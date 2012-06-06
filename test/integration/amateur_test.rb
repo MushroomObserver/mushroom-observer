@@ -367,4 +367,31 @@ class AmateurTest < IntegrationTestCase
     login('mary')
     get('image/edit_image/1')
   end
+
+  # -------------------------------------------------------------------------
+  #  Need integration test to make sure session and actions are all working
+  #  together correctly.
+  # -------------------------------------------------------------------------
+
+  def test_thumbnail_maps
+    get('/1')
+    assert_template('observer/show_observation')
+    assert_select('div#map_div', 1)
+
+    click(:label => 'Hide thumbnail map.')
+    assert_template('observer/show_observation')
+    assert_select('div#map_div', 0)
+
+    login('dick')
+    assert_template('observer/show_observation')
+    assert_select('div#map_div', 1)
+    
+    click(:label => 'Hide thumbnail map.')
+    assert_template('observer/show_observation')
+    assert_select('div#map_div', 0)
+
+    get('/2')
+    assert_template('observer/show_observation')
+    assert_select('div#map_div', 0)
+  end
 end

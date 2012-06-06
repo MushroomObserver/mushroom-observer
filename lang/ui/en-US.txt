@@ -521,7 +521,7 @@ naming_reason_label_4: Based on chemical features
 
 # Name/location description types.  These are used as page title and in index
 # results: must include both the type of description and the title of the
-# object ([object]) they're describing. 
+# object ([object]) they're describing.
 description_full_title_public: "Public [:DESCRIPTION] of [object]"
 description_full_title_foreign: "[:DESCRIPTION] of [object] from [text]"
 description_full_title_project: "Draft of [object] for [text] by [user]"
@@ -529,14 +529,14 @@ description_full_title_source: "[:DESCRIPTION] of [object] from [text]"
 description_full_title_user: "[USER]'s [:DESCRIPTION] of [object]"
 
 # Name/location description types.  These are used when listing the available
-# descriptions in the show_name page. 
+# descriptions in the show_name page.
 description_part_title_public: "Public [:DESCRIPTION]"
 description_part_title_user: "[USER]'s [:DESCRIPTION]"
 
 # Name/location description types.  These are used when listing the available
 # descriptions in the show_name page, but this time the optional text field was
 # filled in.  Note that the text field is not optional for half of the source
-# types. 
+# types.
 description_part_title_public_with_text: "[TEXT]"
 description_part_title_foreign_with_text: "[:DESCRIPTION] From [TEXT]"
 description_part_title_project_with_text: "Draft for [TEXT] by [USER]"
@@ -1671,12 +1671,10 @@ observation_made_confidence: Community confidence
 # account/prefs
 prefs_title: Change Preferences
 prefs_link: Edit Preferences
-
 prefs_login: Login
 prefs_email: Email address
 prefs_password_new: New password
 prefs_password_confirm: Confirm new password
-
 prefs_appearance: Appearance
 prefs_theme: Preferred theme
 prefs_locale: Language
@@ -1689,6 +1687,7 @@ prefs_hide_authors_above_species: "hide authorities for genera and higher ranks"
 prefs_thumbnail_size: Thumbnail size
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"
+prefs_thumbnail_maps: Show thumbnail map on observation page?
 prefs_image_size: Image size
 prefs_image_size_help: Size shown when you click on an image.
 prefs_image_small: "[:image_show_small] (320 x 320)"
@@ -1702,7 +1701,6 @@ prefs_columns: columns
 prefs_alt_col_colors: Alternate column colors.
 prefs_alt_row_colors: Alternate row colors.
 prefs_text_below_images: Put text below images.
-
 prefs_privacy: Privacy settings
 prefs_votes_anonymous: Votes on proposed names and images
 prefs_votes_anonymous_no: Always public
@@ -1719,7 +1717,6 @@ prefs_bulk_filename_purge_confirm: >
 prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
 prefs_change_image_vote_anonymity: Change Image Vote Anonymity
 prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
-
 prefs_email_please_notify: Please notify me when...
 prefs_email_general: General Email
 prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
@@ -1980,6 +1977,10 @@ show_observation_species_lists: "[:SPECIES_LISTS]"
 show_observation_manage_species_lists: Manage Species Lists
 show_observation_send_question: Send Observer a Question
 show_observation_view_notifications: View Notifications
+show_observation_hide_map: Hide thumbnail map.
+show_observation_thumbnail_map_hidden: >
+  Thumbnail map hidden.  To re-enable this feature, go to your
+  "[:app_preferences]":/account/prefs page.
 
 
 
@@ -2476,14 +2477,14 @@ account_api_keys_help: >
   API Keys are used by third-party applications to access the Mushroom Observer
   database directly.  You may request as many API Keys as you like, and no
   restrictions are placed on these keys.
-  \n\n 
+  \n\n
   Each key is attached to a single user.  When posting observations or images,
   for example, your application will send this API Key in lieu of logging in.
   Therefore you should take some care to prevent other people or malicious
   agents from using your API Keys.
-  \n\n 
+  \n\n
   Note that no key is required if you are only interested in _reading_ data;
-  keys are only required if you wish to post or modify data. 
+  keys are only required if you wish to post or modify data.
 
 account_api_keys_create_success: Sucessfully created a new API Key.
 account_api_keys_create_failed: "Failed to create a new API Key: [msg]"

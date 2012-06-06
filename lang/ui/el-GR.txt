@@ -1457,12 +1457,10 @@ observation_made_confidence: Βεβαιότητα της κοινότητας
 # account/prefs
 prefs_title: Αλλαγή Προτιμήσεων
 prefs_link: Επεξεργασία Προτιμήσεων
-
 prefs_login: Σύνδεση
 prefs_email: Διεύθυνση email
 prefs_password_new: Νέος κωδικός
 prefs_password_confirm: Επιβεβαίωση νέου κωδικού
-
 prefs_appearance:  Appearance
 prefs_theme: Προτιμώμενο θέμα
 prefs_locale: Γλώσσα
@@ -1475,6 +1473,7 @@ prefs_hide_authors_above_species:  hide authorities for genera and higher ranks
 prefs_thumbnail_size: Μέγεθος ενδεικτικής εικόνας
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"
+prefs_thumbnail_maps:  Show thumbnail map on observation page?
 prefs_image_size: Μέγεθος εικόνας
 prefs_image_size_help: Μέγεθος που θα φαίνεται όταν κάνετε κλικ σε μια εικόνα.
 prefs_image_small: "[:image_show_small] (320 x 320)"
@@ -1488,7 +1487,6 @@ prefs_columns: στήλες
 prefs_alt_col_colors: Εναλλακτικά χρώματα στηλών.
 prefs_alt_row_colors: Εναλλακτικά χρώματα σειρών.
 prefs_text_below_images: Τοποθέτηση κειμένου κάτω από τις εικόνες.
-
 prefs_privacy:  Privacy settings
 prefs_votes_anonymous: Ψήφοι επί των προτεινόμενων ονομάτων και Φωτογραφίες
 prefs_votes_anonymous_no: Πάντα δημόσιεςAlways public
@@ -1501,7 +1499,6 @@ prefs_bulk_filename_purge_confirm:  Are you sure you want to purge all image fil
 prefs_bulk_filename_purge_success:  Successfully purged all image filenames from our database.
 prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
 prefs_license_note: Προεπιλεγμένη "άδεια":/observer/how_to_use#license you want for new images.
-
 prefs_email_please_notify: Παρακαλώ να ειδοποιούμαι όταν...
 prefs_email_general: Γενικό Email
 prefs_email_general_commercial: κάποιος ενδιαφέρεται να χρησιμοποιήσει μια φωτογραφία μου για εμπορικούς σκοπούς.
@@ -1727,7 +1724,8 @@ show_observation_species_lists: "[:SPECIES_LISTS]"
 show_observation_manage_species_lists: Διαχείριση Καταλόγων Ειδών
 show_observation_send_question: Αποστολή Ερωτήματος στον Παρατηρητή
 show_observation_view_notifications: Δείτε τις Ενημερώσεις
-
+show_observation_hide_map:  Hide thumbnail map.
+show_observation_thumbnail_map_hidden:  Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
 
 
 # location/show_past_location

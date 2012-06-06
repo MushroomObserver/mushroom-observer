@@ -96,11 +96,11 @@
 <% for item in @form %>
   <%= case item
   when TranslationFormMajorHeader
-    content_tag(:p, h(item.string), :class => 'major_header')
+    content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'major_header')
   when TranslationFormMinorHeader
-    content_tag(:p, h(item.string), :class => 'minor_header')
+    content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'minor_header')
   when TranslationFormComment
-    content_tag(:p, h(item.string), :class => 'comment')
+    content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'comment')
   when TranslationFormTagField
     tag = item.tag
     str = preview_string(@strings[tag])

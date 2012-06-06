@@ -318,6 +318,7 @@ class AccountController < ApplicationController
         [ :bool, :email_general_question ],
         # [ :str,  :email_digest ],
         [ :str,  :thumbnail_size ],
+        [ :bool, :thumbnail_maps ],
         [ :str,  :image_size ],
       ]
         val = params[:user][arg]

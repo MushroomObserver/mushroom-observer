@@ -124,6 +124,7 @@ class ObserverController < ApplicationController
     :advanced_search_form,
     :ask_webmaster_question,
     :color_themes,
+    :hide_thumbnail_map,
     :how_to_help,
     :how_to_use,
     :index,
@@ -2562,6 +2563,18 @@ class ObserverController < ApplicationController
     end
 
     return [success, what, name, names, valid_names]
+  end
+
+  def hide_thumbnail_map # :nologin:
+    pass_query_params
+    id = params[:id]
+    if @user
+      @user.update_attribute(:thumbnail_maps, false)
+      flash_notice(:show_observation_thumbnail_map_hidden.t)
+    else
+      session[:hide_thumbnail_maps] = true
+    end
+    redirect_to(:action => :show_observation, :id => id, :params => query_params)
   end
 
   ##############################################################################
