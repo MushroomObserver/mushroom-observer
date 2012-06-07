@@ -2138,9 +2138,14 @@ email_tracking_updated_messages: Ενημέρωση μηνυμάτων παρα�
 
 
 
-# name/eol_expanded_review_title
-eol_expanded_review_title:  EOL Preview
-eol_expanded_review_count:  "[count] taxa"
+# name/eol_expanded_review
+eol_expanded_review_title:  EOL Name List
+eol_expanded_review_count:  "[count] names"
+eol_expanded_review_total_image_count:  "[count] images"
+eol_expanded_review_total_description_count:  "[count] descriptions"
+eol_expanded_review_image_count:  "Images: [count]"
+eol_expanded_review_description_count:  "Descriptions: [count]"
+
 
 
 # name/eol_for_taxon

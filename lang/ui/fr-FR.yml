@@ -2091,8 +2091,8 @@ email_tracking_note_template: ! 'Dear :observer,
 email_tracking_now_tracking: Now tracking [name].
 email_tracking_title: Email Tracking for [name]
 email_tracking_updated_messages: Updated tracking messages.
-eol_expanded_review_title: EOL Preview
-eol_expanded_review_count: ! '[count] taxa'
+eol_expanded_review_title: EOL Name List
+eol_expanded_review_count: ! '[count] names'
 eol_for_taxon_images: Images for EOL
 eol_for_taxon_observation: Observation [id]
 eol_for_taxon_title: EOL Review for [name]
@@ -4451,3 +4451,15 @@ RANK_SUBSECTION: Subsection
 rank_subsection: subsection
 RANK_PLURAL_SUBSECTION: Subsections
 rank_plural_subsection: subsections
+eol_get_names_title: EOL Name List
+eol_get_names_count: ! '[count] names'
+eol_get_names_image_count: ! 'Images: [count]'
+eol_get_names_description_count: ! 'Descriptions: [count]'
+eol_get_names_total_images: ! '[count] images'
+eol_get_names_total_descriptions: ! '[count] descriptions'
+eol_get_names_total_image_count: ! '[count] images'
+eol_get_names_total_description_count: ! '[count] descriptions'
+eol_expanded_review_total_image_count: ! '[count] images'
+eol_expanded_review_total_description_count: ! '[count] descriptions'
+eol_expanded_review_image_count: ! 'Images: [count]'
+eol_expanded_review_description_count: ! 'Descriptions: [count]'

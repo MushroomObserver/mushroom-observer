@@ -269,6 +269,10 @@ class Name < AbstractModel
     end
   end
 
+  def <=>(x)
+    self.search_name <=> x.search_name
+  end
+  
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
     Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
@@ -371,7 +375,10 @@ class Name < AbstractModel
   RANKS_ABOVE_SPECIES = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
   RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species] + RANKS_INSIDE_GENUS
   ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
-  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
+  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom] # Why doesn't this have :Species?
+  EOL_RANKS_FOR_EXPORT = [:Form, :Variety, :Subspecies, :Species, :Genus]
+  EOL_MIN_IMAGE_VOTE = 2
+  EOL_MIN_OBSERVATION_VOTE = 2.4
   ALT_RANKS = {:Division => :Phylum}
 
   # Returns an Array of Symbol's from :Form to :Domain, then :Group.
@@ -445,6 +452,26 @@ class Name < AbstractModel
     result
   end
 
+  def has_eol_data?
+    if self.ok_for_export and not self.deprecated and EOL_RANKS_FOR_EXPORT.member?(self.rank)
+      for o in self.observations
+        if o.vote_cache and (o.vote_cache >= EOL_MIN_OBSERVATION_VOTE)
+          for i in o.images
+            if i.ok_for_export and i.vote_cache and (i.vote_cache >= EOL_MIN_IMAGE_VOTE)
+              return true
+            end
+          end
+        end
+      end
+      for d in self.descriptions
+        if (d.review_status == :vetted) and d.ok_for_export and d.public
+          return true
+        end
+      end
+    end
+    return false
+  end
+  
   # Returns an Array of all of this Name's ancestors, starting with its
   # immediate parent, running back to Eukarya.  It ignores misspellings.  It
   # chooses at random if there are more than one accepted parent taxa at a

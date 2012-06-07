@@ -78,6 +78,10 @@ PRODUCTION  = (RAILS_ENV == 'production')
 DEVELOPMENT = (RAILS_ENV == 'development')
 TESTING     = (RAILS_ENV == 'test')
 
+# Make YAML fast...
+require 'yaml'
+YAML::ENGINE.yamler = 'syck'
+
 # Should be one of [:normal, :silent]
 # :silent turns off event logging and email notifications
 class RunLevel

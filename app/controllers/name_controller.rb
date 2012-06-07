@@ -1297,13 +1297,14 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Send stuff to eol.
-  def eol # :nologin: :norobots:
+  def eol_old # :nologin: :norobots:
     headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
     eol_data(['unvetted', 'vetted'])
     render(:action => "eol", :layout => false)
   end
+
 
   # Show the data getting sent to EOL
   def eol_preview # :nologin: :norobots:
@@ -1319,222 +1320,6 @@ class NameController < ApplicationController
                  "gen_desc IS NOT NULL AND " +
                  "ok_for_export = 1 AND " +
                  "public = 1"
-  end
-
-
-  # Gather data for EOL feed.
-  def eol_expanded_data(review_status_list)
-    @names = eol_find_names()
-    @descs = eol_find_descs(@names)
-    @image_data = eol_find_images(@names)
-    # @users, @licenses & @authors may be better picked up while figuring out the names, descs or images
-  end
-
-  def eol_find_names()
-    names = eol_expanded_names()
-    before = names.length
-    synonyms = eol_find_synonyms(names)
-    names_to_keep = []
-    synonyms.each {|synonym| names_to_keep.push(most_desirable_name(synonym[1]))}
-    names.delete_if {|n| n[2] and not names_to_keep.member?(n[0])}
-    return names
-  end
-
-  def eol_find_descs(names)
-    result = []
-    for n in names
-      result.push()
-    end
-  end
-
-  def most_desirable_name(names)
-    most_desirable = Name.find(names[0][0])
-    for id, display_name in names[1..-1]
-      new_name = Name.find(id)
-      most_desirable = most_desirable.more_popular(new_name)
-    end
-    return most_desirable.id
-  end
-
-  def eol_ignore(review_status_list)
-    @names      = []
-    @descs      = {} # name.id    -> [NameDescription, NmeDescription, ...]
-    @image_data = {} # name.id    -> [img.id, obs.id, user.id, lic.id, date]
-    @users      = {} # user.id    -> user.legal_name
-    @licenses   = {} # license.id -> license.url
-    @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
-
-    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list))
-
-    # Fill in @descs, @users, @authors, @licenses.
-    for desc in descs
-      name_id = desc.name_id.to_i
-      @descs[name_id] ||= []
-      @descs[name_id] << desc
-      authors = Name.connection.select_values(%(
-        SELECT user_id FROM name_descriptions_authors
-        WHERE name_description_id = #{desc.id}
-      )).map(&:to_i)
-      authors = [desc.user_id] if authors.empty?
-      for author in authors
-        @users[author.to_i] ||= User.find(author).legal_name
-      end
-      @authors[desc.id] = authors.map {|id| @users[id.to_i]}.join(', ')
-      @licenses[desc.license_id] ||= desc.license.url if desc.license_id
-    end
-
-    # Get corresponding names.
-    name_ids = @descs.keys.map(&:to_s).join(',')
-    @names = Name.all(:conditions => "id IN (#{name_ids})",
-                      :order => 'text_name ASC, author ASC')
-
-    # Get corresponding images.
-    image_data = Name.connection.select_all %(
-      SELECT name_id, image_id, observation_id, images.user_id,
-             images.license_id, images.created
-      FROM observations, images_observations, images
-      WHERE observations.name_id IN (#{name_ids})
-      AND observations.vote_cache >= 2.4
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.vote_cache >= 2
-      AND images.ok_for_export
-      ORDER BY observations.vote_cache
-    )
-
-    # Fill in @image_data, @users, and @licenses.
-    for row in image_data
-      name_id    = row['name_id'].to_i
-      user_id    = row['user_id'].to_i
-      license_id = row['license_id'].to_i
-      image_datum = row.values_at('image_id', 'observation_id', 'user_id',
-                                  'license_id', 'created')
-      @image_data[name_id] ||= []
-      @image_data[name_id].push(image_datum)
-      @users[user_id]       ||= User.find(user_id).legal_name
-      @licenses[license_id] ||= License.find(license_id).url
-    end
-  end
-
-  def eol_expanded_review
-    @names = eol_find_names()
-    @synonyms = Hash.new{|h, k| h[k] = []}
-  end
-
-  def eol_descs
-    return Name.connection.select_all(%(
-    SELECT ns.id, nds.id, nds.modified, nds.locale, nds.refs, nds.gen_desc, nds.diag_desc, nds.distribution,
-    nds.habitat, nds.look_alikes, nds.uses
-    FROM names ns, name_descriptions nds
-    WHERE ns.id = nds.name_id
-    AND ns.ok_for_export
-    AND NOT ns.deprecated
-    AND nds.review_status = 'vetted'
-    AND nds.ok_for_export
-    AND nds.public
-    ORDER BY ns.id))
-  end
-
-  def eol_desc_authors
-    return Name.connection.select_all(%(
-    SELECT nds.id, us.name, us.login
-    FROM names ns, name_descriptions nds, name_descriptions_authors ndas, users us
-    WHERE ns.id = nds.name_id
-    AND nds.id = ndas.name_description_id
-    AND ndas.user_id = us.id
-    AND ns.ok_for_export
-    AND NOT ns.deprecated
-    AND nds.review_status = 'vetted'
-    AND nds.ok_for_export
-    AND nds.public))
-  end
-
-  def eol_desc_licenses
-    return Name.connection.select_all(%(
-    SELECT nds.id, ls.url
-    FROM names ns, name_descriptions nds, licenses ls
-    WHERE ns.id = nds.name_id
-    AND nds.license_id = ls.id
-    AND ns.ok_for_export
-    AND NOT ns.deprecated
-    AND nds.review_status = 'vetted'
-    AND nds.ok_for_export
-    AND nds.public))
-  end
-
-  def eol_expanded_names
-    # returns a list of (id, display_name, synonym_id) of qualified rows in names
-    return Name.connection.select_all(%(
-    SELECT DISTINCT names.id, names.display_name, names.synonym_id
-    FROM observations, images_observations, images, names
-    WHERE observations.name_id = names.id
-    AND observations.vote_cache >= 2.4
-    AND observations.id = images_observations.observation_id
-    AND images_observations.image_id = images.id
-    AND images.vote_cache >= 2
-    AND images.ok_for_export
-    AND names.ok_for_export
-    AND NOT names.deprecated
-    AND names.rank IN ('Form','Variety','Subspecies','Species', 'Genus')
-    ORDER BY names.search_name)).map { |row| [row['id'], row['display_name'], row['synonym_id']] }
-  end
-
-  def eol_find_synonyms(names)
-    synonyms = Hash.new{|h, k| h[k] = []}
-    for id, display_name, synonym_id in names
-      if synonym_id
-        synonyms[synonym_id] << [id, display_name]
-      end
-    end
-    return synonyms
-  end
-
-  def eol_for_taxon
-    store_location
-
-    # need name_id and review_status_list
-    id = params[:id]
-    @name = Name.find(id)
-    @layout = calc_layout_params
-
-    # Get corresponding images.
-    ids = Name.connection.select_values(%(
-      SELECT images.id
-      FROM observations, images_observations, images
-      WHERE observations.name_id = #{id}
-      AND observations.vote_cache >= 2.4
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.vote_cache >= 2
-      AND images.ok_for_export
-      ORDER BY images.vote_cache DESC
-    ))
-    @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
-
-    ids = Name.connection.select_values(%(
-      SELECT images.id
-      FROM observations, images_observations, images
-      WHERE observations.name_id = #{id}
-      AND observations.vote_cache >= 2.4
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.vote_cache IS NULL
-      AND images.ok_for_export
-      ORDER BY observations.vote_cache
-    ))
-    @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
-
-    ids = Name.connection.select_values(%(
-      SELECT DISTINCT observations.id
-      FROM observations, images_observations, images
-      WHERE observations.name_id = #{id}
-      AND observations.vote_cache IS NULL
-      AND observations.id = images_observations.observation_id
-      AND images_observations.image_id = images.id
-      AND images.ok_for_export
-      ORDER BY observations.id
-    ))
-    @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids])
   end
 
   # Show the data not getting sent to EOL
@@ -1603,6 +1388,70 @@ class NameController < ApplicationController
       @users[user_id]       ||= User.find(user_id).legal_name
       @licenses[license_id] ||= License.find(license_id).url
     end
+  end
+  
+  def eol_expanded_review
+    @data = EolData.new()
+  end
+  # TODO: Add ability to preview synonyms?
+  # TODO: List stuff that's almost ready.
+  # TODO: Add EOL logo on pages getting exported
+
+  # Send stuff to eol.
+  def eol # :nologin: :norobots:
+    headers["Content-Type"] = "application/xml"
+    @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
+    @timer_start = Time.now()
+    @data = EolData.new()
+    render(:action => "eol", :layout => false)
+  end
+
+  def eol_for_taxon
+    store_location
+
+    # need name_id and review_status_list
+    id = params[:id]
+    @name = Name.find(id)
+    @layout = calc_layout_params
+
+    # Get corresponding images.
+    ids = Name.connection.select_values(%(
+      SELECT images.id
+      FROM observations, images_observations, images
+      WHERE observations.name_id = #{id}
+      AND observations.vote_cache >= 2.4
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.vote_cache >= 2
+      AND images.ok_for_export
+      ORDER BY images.vote_cache DESC
+    ))
+    @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
+
+    ids = Name.connection.select_values(%(
+      SELECT images.id
+      FROM observations, images_observations, images
+      WHERE observations.name_id = #{id}
+      AND observations.vote_cache >= 2.4
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.vote_cache IS NULL
+      AND images.ok_for_export
+      ORDER BY observations.vote_cache
+    ))
+    @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
+
+    ids = Name.connection.select_values(%(
+      SELECT DISTINCT observations.id
+      FROM observations, images_observations, images
+      WHERE observations.name_id = #{id}
+      AND observations.vote_cache IS NULL
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.ok_for_export
+      ORDER BY observations.id
+    ))
+    @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids])
   end
 
   ################################################################################

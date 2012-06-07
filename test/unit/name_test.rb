@@ -1424,6 +1424,11 @@ class NameTest < UnitTestCase
     assert(!names(:agaricus_campestris).is_lichen?)
   end
 
+  def test_has_eol_data
+    assert(names(:peltigera).has_eol_data?)
+    assert(not(names(:lactarius_alpigenes).has_eol_data?))
+  end
+  
   def test_hiding_authors
     @dick.hide_authors = :above_species
     @mary.hide_authors = :none
