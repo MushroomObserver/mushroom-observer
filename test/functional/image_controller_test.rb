@@ -78,7 +78,7 @@ class ImageControllerTest < FunctionalTestCase
 
     # Create simple index.
     query = Query.lookup_and_save(:Image, :by_user, :user => @rolf)
-    assert_equal([6, 5, 4, 3], query.result_ids)
+    assert_equal([8, 6, 5, 4, 3], query.result_ids)
 
     # See what should happen if we look up an Image search and go to next.
     query.current = image

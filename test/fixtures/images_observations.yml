@@ -13,3 +13,7 @@ coprinus_comatus_connection:
 agaricus_campestris_connection:
   image_id: 6
   observation_id: 4
+
+peltigera_connection:
+  image_id: 8
+  observation_id: 12

@@ -134,3 +134,17 @@ amateur_observation:
   notes: 'A friend showed me this.'
   lat: 34.1622
   long: -118.3521
+
+peltigera_observation:
+  id: 12
+  sync_id: 12x1
+  created: 2012-06-07 16:31:40
+  modified: 2012-06-07 16:31:40
+  when: 2012-06-07
+  user_id: 1
+  where: 'Briceland, California, USA'
+  is_collection_location: 1
+  name_id: 40
+  specimen: 1
+  notes: 'Growing on a hardwood'
+  vote_cache: 3

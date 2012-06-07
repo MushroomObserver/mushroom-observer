@@ -619,6 +619,7 @@ class QueryTest < UnitTestCase
     # obs 2: imgs 1, 2
     # obs 3: imgs 5
     # obs 4: imgs 6
+    # obs 12: imgs 8
 
     outer = Query.lookup_and_save(:Observation, :all, :by => :id)
 
@@ -630,6 +631,8 @@ class QueryTest < UnitTestCase
     assert_equal([5], inner2.result_ids)
     inner3 = Query.lookup_and_save(:Image, :inside_observation, :outer => outer, :observation => 4, :by => :id)
     assert_equal([6], inner3.result_ids)
+    inner4 = Query.lookup_and_save(:Image, :inside_observation, :outer => outer, :observation => 12, :by => :id)
+    assert_equal([8], inner4.result_ids)
 
     q = inner1
     assert(q.has_outer?)
@@ -637,12 +640,13 @@ class QueryTest < UnitTestCase
     assert_equal(2, inner1.get_outer_current_id)
     assert_equal(3, inner2.get_outer_current_id)
     assert_equal(4, inner3.get_outer_current_id)
+    assert_equal(12, inner4.get_outer_current_id)
 
     q = q.outer
-    assert_equal([2,3,4], q.result_ids)
+    assert_equal([2, 3, 4, 12], q.result_ids)
     q.current_id = 3
     assert_equal(q, q.first); assert_equal(2, q.current_id)
-    assert_equal(q, q.last); assert_equal(4, q.current_id)
+    assert_equal(q, q.last); assert_equal(12, q.current_id)
 
     q = inner1
     q.current_id = 1
@@ -652,12 +656,14 @@ class QueryTest < UnitTestCase
     assert_equal(inner1, (q=q.next));  assert_equal(2, q.current_id)
     assert_equal(inner2, (q=q.next));  assert_equal(5, q.current_id)
     assert_equal(inner3, (q=q.next));  assert_equal(6, q.current_id)
+    assert_equal(inner4, (q=q.next));  assert_equal(8, q.current_id)
     assert_nil(q.next)
+    assert_equal(inner3, (q=q.prev));  assert_equal(6, q.current_id)
     assert_equal(inner2, (q=q.prev));  assert_equal(5, q.current_id)
     assert_equal(inner1, (q=q.prev));  assert_equal(2, q.current_id)
     assert_equal(inner2, (q=q.next));  assert_equal(5, q.current_id)
     assert_equal(inner1, (q=q.first)); assert_equal(1, q.current_id)
-    assert_equal(inner3, (q=q.last));  assert_equal(6, q.current_id)
+    assert_equal(inner4, (q=q.last));  assert_equal(8, q.current_id)
   end
 
   ##############################################################################
@@ -1124,19 +1130,19 @@ class QueryTest < UnitTestCase
 
   def test_image_pattern
     assert_query([6], :Image, :pattern_search, :pattern => 'agaricus') # name
-    assert_query([6,5,2,1], :Image, :pattern_search, :pattern => 'bob dob') # copyright holder
+    assert_query([6, 5, 2, 1], :Image, :pattern_search, :pattern => 'bob dob') # copyright holder
     assert_query([1], :Image, :pattern_search, :pattern => 'looked gorilla OR original') # notes
-    assert_query([6,5], :Image, :pattern_search, :pattern => 'notes some') # notes
-    assert_query([2,1], :Image, :pattern_search, :pattern => 'dobbs -notes') # copyright and not notes
+    assert_query([6, 5], :Image, :pattern_search, :pattern => 'notes some') # notes
+    assert_query([2, 1], :Image, :pattern_search, :pattern => 'dobbs -notes') # copyright and not notes
     assert_query([1], :Image, :pattern_search, :pattern => 'DSCN8835') # original filename
   end
 
   def test_image_with_observations
-    assert_query([6,5,2,1], :Image, :with_observations)
+    assert_query([6, 5, 2, 1, 8], :Image, :with_observations)
   end
 
   def test_image_with_observations_at_location
-    assert_query([6,2,1], :Image, :with_observations_at_location, :location => 2)
+    assert_query([6, 2, 1], :Image, :with_observations_at_location, :location => 2)
     assert_query([], :Image, :with_observations_at_location, :location => 3)
   end
 
@@ -1146,13 +1152,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_by_user
-    assert_query([6,5], :Image, :with_observations_by_user, :user => @rolf)
+    assert_query([6, 5, 8], :Image, :with_observations_by_user, :user => @rolf)
     assert_query([2,1], :Image, :with_observations_by_user, :user => @mary)
     assert_query([], :Image, :with_observations_by_user, :user => @dick)
   end
 
   def test_image_with_observations_in_set
-    assert_query([6,2,1], :Image, :with_observations_in_set, :ids => [2,4])
+    assert_query([6, 2, 1], :Image, :with_observations_in_set, :ids => [2,4])
     assert_query([], :Image, :with_observations_in_set, :ids => [1])
   end
 
@@ -1431,7 +1437,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_at_location
-    assert_query([20,3,21,19,1], :Name, :with_observations_at_location, :location => 2)
+    assert_query([20, 3, 21, 19, 1], :Name, :with_observations_at_location, :location => 2)
   end
 
   def test_name_with_observations_at_where
@@ -1439,13 +1445,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_by_user
-    assert_query([20,3,21,19,2,24], :Name, :with_observations_by_user, :user => @rolf)
+    assert_query([20, 3, 21, 19, 2, 40, 24], :Name, :with_observations_by_user, :user => @rolf)
     assert_query([1], :Name, :with_observations_by_user, :user => @mary)
     assert_query([], :Name, :with_observations_by_user, :user => @dick)
   end
 
   def test_name_with_observations_in_set
-    assert_query([20,3,1], :Name, :with_observations_in_set, :ids => [2,4,6])
+    assert_query([20, 3, 1], :Name, :with_observations_in_set, :ids => [2,4,6])
   end
 
   def test_name_with_observations_in_species_list
@@ -1459,8 +1465,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_by_user
-    assert_query([9,13], :NameDescription, :by_user, :user => @mary, :by => :id)
-    assert_query([8,11,14], :NameDescription, :by_user, :user => @katrina, :by => :id)
+    assert_query([9, 13], :NameDescription, :by_user, :user => @mary, :by => :id)
+    assert_query([8, 11, 14], :NameDescription, :by_user, :user => @katrina, :by => :id)
     assert_query([], :NameDescription, :by_user, :user => @junk, :by => :id)
   end
 

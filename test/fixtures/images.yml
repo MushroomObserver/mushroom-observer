@@ -83,3 +83,15 @@ amateur_image:
   when: 2010-12-30
   notes: 'A friend took this photo.'
   copyright_holder: Nathan Wilson
+
+peltigera_image:
+  id: 8
+  sync_id: 8xx1
+  created: 2012-06-07 16:28:20
+  modified: 2012-06-07 16:28:20
+  content_type: image/jpeg
+  user_id: 1
+  when: 2012-06-07
+  notes: 'Pretty lichen'
+  vote_cache: 3
+  copyright_holder: Nathan Wilson
