@@ -606,8 +606,8 @@ RANK_PLURAL_SECTION: Sections
 rank_plural_section: sections
 RANK_PLURAL_SPECIES: Species
 rank_plural_species: species
-RANK_PLURAL_STIRPS: Stirps
-rank_plural_stirps: stirps
+RANK_PLURAL_STIRPS: Stirpes
+rank_plural_stirps: stirpes
 RANK_PLURAL_SUBGENUS: Subgenera
 rank_plural_subgenus: subgenera
 RANK_PLURAL_SUBSECTION: Subsections

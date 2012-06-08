@@ -1024,6 +1024,7 @@ class Name < AbstractModel
     return observations.length
   end
 
+  # Returns either self or name, whichever has more observations or was last used.
   def more_popular(name)
     result = self
     if not name.deprecated
@@ -1038,14 +1039,12 @@ class Name < AbstractModel
     return result
   end
 
+  # (if no namings, returns created)
   def time_of_last_naming
-    t = self.created
-    for n in namings
-      if n.created > t
-        t = n.created
-      end
+    @time_of_last_naming ||= begin
+      last_use = Name.connection.select_value("SELECT MAX(created) FROM namings WHERE name_id = #{id}")
+      last_use || created
     end
-    return t
   end
 
   ################################################################################

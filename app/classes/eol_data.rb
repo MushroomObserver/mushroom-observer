@@ -95,14 +95,19 @@ class EolData
 private    
   def prune_synonyms(names)
     synonyms = Hash.new{|h, k| h[k] = []}
-    for n in names
-      if n.synonym_id
-        synonyms[n.synonym_id] << n
+    for name in names
+      if name.synonym_id
+        synonyms[name.synonym_id] << name
       end
     end
-    names_to_keep = []
-    synonyms.each {|s| names_to_keep.push(most_desirable_name(s[1]))}
-    names.delete_if {|n| n.synonym_id and not names_to_keep.member?(n)}
+    names_to_keep = {}
+    for synonym_id, name_list in synonyms
+      name = most_desirable_name(name_list)
+      names_to_keep[name.id] = true
+    end
+    names.delete_if do |name|
+      name.synonym_id and not names_to_keep.has_key?(name.id)
+    end
     names
   end
 
@@ -178,15 +183,27 @@ private
   def user_id_to_legal_name()
     # Just grab the ones with contribution > 0 (1621) since we're going to use at least 400 of them
     result = {}
-    User.find(:all, :conditions => "contribution > 0").each {|o| result[o.id] = o.legal_name }
+    data = User.connection.select_rows %(
+      SELECT id, IF(COALESCE(name,'') = '', login, name) AS name
+      FROM users WHERE contribution > 0
+    )
+    for id, legal_name in data
+      result[id] = legal_name
+    end
     result
   end
-  
+
   def description_id_to_authors()
-    result = make_list_hash_from_pairs(Name.connection.select_all("SELECT * FROM name_descriptions_authors").map{
-      |row| [row['name_descriptions_id'].to_i, @user_id_to_legal_name[row['user_id'].to_i]]
-    })
-    all_descriptions.each {|d| result[d.id] = [@user_id_to_legal_name[d.user_id]] if !result.member?(d.id)}
+    data = Name.connection.select_rows %(
+      SELECT name_description_id, user_id FROM name_descriptions_authors
+    )
+    pairs = data.map do |name_description_id, user_id|
+      [ name_description_id.to_i, @user_id_to_legal_name[user_id.to_i] ]
+    end
+    result = make_list_hash_from_pairs(pairs)
+    all_descriptions.each do |d|
+      result[d.id] = [@user_id_to_legal_name[d.user_id]] if !result.member?(d.id)
+    end
     result
   end
   

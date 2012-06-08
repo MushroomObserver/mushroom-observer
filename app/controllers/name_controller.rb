@@ -1391,6 +1391,7 @@ class NameController < ApplicationController
   end
   
   def eol_expanded_review
+    @timer_start = Time.now
     @data = EolData.new()
   end
   # TODO: Add ability to preview synonyms?
