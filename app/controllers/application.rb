@@ -823,7 +823,7 @@ class ApplicationController < ActionController::Base
   # This is called by +create_name_helper+ (used by +create_observation+,
   # +create_naming+, and +edit_naming+) and +deprecate_name+.  It creates a new
   # name, first checking if it is a valid name, and that it has been approved
-  # by the user.  Uses <tt>Name.names_from_string(@what)</tt> to do the
+  # by the user.  Uses <tt>Name.find_or_create_name_and_parents(@what)</tt> to do the
   # parsing.
   #
   # input_what::   params[:approved_name] (name that user typed before
@@ -842,7 +842,7 @@ class ApplicationController < ActionController::Base
       # applicable).  New names are created for any that don't exist... but
       # they need to be saved if they are new (just check if any is missing
       # an id).
-      names = Name.names_from_string(output_what)
+      names = Name.find_or_create_name_and_parents(output_what)
       if names.last.nil?
         flash_error :runtime_no_create_name.t(:type => :name,
                                               :value => output_what)
@@ -899,7 +899,7 @@ class ApplicationController < ActionController::Base
     if approved_names.member?(name_parse.name)
 
       # Create name object for this name (and any parents, such as genus).
-      names = Name.names_from_string(name_parse.search_name)
+      names = Name.find_or_create_name_and_parents(name_parse.search_name)
 
       # Parse must have failed.
       if names.last.nil?
@@ -941,7 +941,7 @@ class ApplicationController < ActionController::Base
        approved_names.member?(name_parse.synonym)
 
       # Create the synonym.
-      synonyms = Name.names_from_string(name_parse.synonym_search_name)
+      synonyms = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
 
       # Parse must have failed.
       if synonyms.last.nil?

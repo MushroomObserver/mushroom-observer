@@ -369,8 +369,8 @@ class ObserverController < ApplicationController
 
           when 'Name'
             if parse = Name.parse_name(id)
-              objs = Name.find_all_by_search_name(parse[3])
-              objs = Name.find_all_by_text_name(parse[0]) if objs.empty?
+              objs = Name.find_all_by_search_name(parse.search_name)
+              objs = Name.find_all_by_text_name(parse.text_name) if objs.empty?
             end
 
           when 'Project'
@@ -454,11 +454,7 @@ class ObserverController < ApplicationController
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
-    if request.method != :post
-      @location_primer = Location.primer
-      @name_primer     = Name.primer
-      @user_primer     = User.primer
-    else
+    if request.method == :post
       model = params[:search][:type].to_s.camelize.constantize
 
       # Pass along all given search fields (remove angle-bracketed user name,
@@ -898,7 +894,7 @@ class ObserverController < ApplicationController
 
     # If anything failed reload the form.
     else
-      reload_the_form(params[:reason]) # sets @reason, @images, @new_image, @location_primer, etc.
+      reload_the_form(params[:reason]) # sets @reason, @images, @new_image, etc.
     end
   end
 
@@ -959,8 +955,6 @@ class ObserverController < ApplicationController
     @reason          = init_naming_reasons(@naming, reason)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @location_primer = Location.primer
-    @name_primer     = Name.primer
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
   end
@@ -975,8 +969,6 @@ class ObserverController < ApplicationController
     @reason          = init_naming_reasons(@naming)
     @images          = []
     @good_images     = []
-    @location_primer = Location.primer
-    @name_primer     = Name.primer
     init_project_vars_for_create
     init_list_vars_for_create
     get_defaults_from_last_observation_created
@@ -1673,6 +1665,7 @@ class ObserverController < ApplicationController
       query = Query.lookup(:Observation, :by_user, :user => @show_user,
                            :by => :thumbnail_quality,
                            :where => "images.user_id = #{id}")
+      @num_genera, @num_species = @show_user.num_genera_and_species_seen
       @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
     end
   end

@@ -585,6 +585,66 @@ class User < AbstractModel
     end
   end
 
+  # Counts number of species and genera observed, taking synonymy into account.
+  # Only considers observations id'ed down to species or better, excludes groups.
+  def num_genera_and_species_seen
+    @genera = {}
+    @species = {}
+    synonyms = count_nonsynonyms_and_gather_synonyms
+    count_synonyms(synonyms)
+    return @genera.length, @species.length
+  end
+    
+  def count_nonsynonyms_and_gather_synonyms # :nodoc:
+    synonyms = {}
+    ranks = [:Species] + Name::RANKS_BELOW_SPECIES
+    for text_name, syn_id, deprecated in User.connection.select_rows %(
+      SELECT n.text_name, n.synonym_id, n.deprecated
+      FROM names n, observations o
+      WHERE n.id = o.name_id
+        AND o.user_id = #{id}
+        AND n.rank IN (#{ranks_to_consider})
+    )
+      if syn_id and deprecated == 1
+        # wait until we find an accepted synonym
+        text_name = synonyms[syn_id] ||= nil
+      elsif syn_id
+        # use the first accepted synonym we encounter
+        text_name = synonyms[syn_id] ||= text_name
+      else
+        # count non-synonyms immediately
+        count_species(text_name)
+      end
+    end
+    return synonyms
+  end
+
+  def count_synonyms(synonyms) # :nodoc:
+    ranks = [:Species] + Name::RANKS_BELOW_SPECIES
+    for syn_id, text_name in synonyms
+      text_name ||= Name.connection.select_values(%(
+        SELECT text_name FROM names
+        WHERE synonym_id = #{syn_id}
+          AND rank IN (#{ranks_to_consider})
+        ORDER BY deprecated ASC
+      )).first
+      count_species(text_name)
+    end
+  end
+
+  def count_species(text_name) # :nodoc:
+    unless text_name.blank?
+      g, s = text_name.split(' ', 3)
+      @genera[g] = true
+      @species[[g, s]] = true
+    end
+  end
+
+  def ranks_to_consider # :nodoc:
+    ranks = [:Species] + Name::RANKS_BELOW_SPECIES
+    ranks.map {|x| User.connection.quote(x.to_s)}.join(', ')
+  end
+
   ##############################################################################
   #
   #  :section: Alerts

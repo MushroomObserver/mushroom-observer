@@ -4413,8 +4413,8 @@ RANK_SUBGENUS: Subgenus
 rank_subgenus: subgenus
 RANK_PLURAL_SECTION: Sections
 rank_plural_section: sections
-RANK_PLURAL_STIRPS: Stirps
-rank_plural_stirps: stirps
+RANK_PLURAL_STIRPS: Stirpes
+rank_plural_stirps: stirpes
 RANK_PLURAL_SUBGENUS: Subgenera
 rank_plural_subgenus: subgenera
 RANK_SUBSECTION: Subsection
@@ -4433,3 +4433,4 @@ eol_expanded_review_total_image_count: ! '[count] images'
 eol_expanded_review_total_description_count: ! '[count] descriptions'
 eol_expanded_review_image_count: ! 'Images: [count]'
 eol_expanded_review_description_count: ! 'Descriptions: [count]'
+site_stats_life_list: ! 'Life List: [species] species in [genera] genera'

@@ -549,8 +549,8 @@ russula_brevipes_author_notes:
   display_name: '**__Russula brevipes__** Peck'
   observation_name: '**__Russula brevipes__** Peck'
   search_name: Russula brevipes Peck
-  citation: ''
-  notes: ''
+  citation: 'blah'
+  notes: 'blah blah blah'
 
 russula_cremoricolor_no_author_notes:
   id: 33

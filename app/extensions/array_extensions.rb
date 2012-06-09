@@ -46,4 +46,22 @@ class Array
     end
     return hash
   end
+
+  # Return value before the given value (or +nil+).
+  def value_before(val)
+    if i = index(val) and i > 0
+      self[i-1]
+    else
+      nil
+    end
+  end
+
+  # Return value after the given value (or +nil+).
+  def value_after(val)
+    if i = index(val) and i < length - 1
+      self[i+1]
+    else
+      nil
+    end
+  end
 end

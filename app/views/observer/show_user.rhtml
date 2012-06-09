@@ -182,6 +182,12 @@ end %>
             </tr>
           <% end %>
         </table>
+
+        <% num_genera, num_species = @show_user.num_genera_and_species_seen
+        if num_genera > 0 %>
+          <br/>
+          <%= :site_stats_life_list.t(:genera => num_genera, :species => num_species) %>
+        <% end %>
       </td>
 
       <% if obs_length > 0 %>

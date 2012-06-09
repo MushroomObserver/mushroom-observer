@@ -13,6 +13,8 @@
 #  assert_fail::                Make sure an assertion fails.
 #  assert_true::                Make sure something is true.
 #  assert_false::               Make sure something is false.
+#  assert_blank::               Make sure something is blank.
+#  assert_not_blank::           Make sure something is not blank.
 #  assert_not_match::           Make sure a string does NOT match.
 #  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone instances as dates.
 #  assert_objs_equal::          Compare two model instances.
@@ -70,23 +72,42 @@ module GeneralExtensions
   ##############################################################################
 
   # Assert that an assertion fails.
-  def assert_fail(*msg, &block)
+  def assert_fail(msg=nil, &block)
     clean_our_backtrace do
-      assert_raises(Test::Unit::AssertionFailedError, *msg, &block)
+      msg ||= 'Expected assertion to fail.'
+      assert_raises(Test::Unit::AssertionFailedError, msg, &block)
     end
   end
 
   # Assert that something is true.
-  def assert_true(got, *msg)
+  def assert_true(value, msg=nil)
     clean_our_backtrace do
-      assert_equal(true, !!got, *msg)
+      msg ||= "Expected #{value.inspect} to be true."
+      assert_block(msg) { value }
     end
   end
 
   # Assert that something is false.
-  def assert_false(got, *msg)
+  def assert_false(value, msg=nil)
     clean_our_backtrace do
-      assert_equal(false, !!got, *msg)
+      msg ||= "Expected #{value.inspect} to be false."
+      assert_block(msg) { not value }
+    end
+  end
+
+  # Assert that something is blank.
+  def assert_blank(value, msg=nil)
+    clean_our_backtrace do
+      msg ||= "Expected #{value.inspect} to be blank."
+      assert_block(msg) { value.blank? }
+    end
+  end
+
+  # Assert that something is not blank.
+  def assert_not_blank(value, msg=nil)
+    clean_our_backtrace do
+      msg ||= "Expected #{value.inspect} not to be blank."
+      assert_block(msg) { not value.blank? }
     end
   end
 

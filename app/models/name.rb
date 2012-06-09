@@ -118,9 +118,8 @@
 #
 #  ==== Name Parsing
 #  find_names::              Look up Names by text_name and search_name.
-#  names_from_string::       Look up Name, create it, return it and parents.
+#  find_or_create_name_and_parents:: Look up Name, create it, return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
-#  parse_by_rank::           Parse taxon of given rank, return parts.
 #  parse_author::            Grab the author from the end of a name.
 #  parse_group::             Parse "Whatever group".
 #  parse_genus_or_up::       Parse "Xxx".
@@ -200,7 +199,7 @@
 #  reviewed_observations::   Observation's that have > 80% confidence.
 #
 #  ==== Merging
-#  mergable?::               Is it safe to merge this Name into another.
+#  mergeable?::               Is it safe to merge this Name into another.
 #  merge::                   Merge old name into this one and remove old one.
 #
 #  == Callbacks
@@ -1091,7 +1090,7 @@ class Name < AbstractModel
 
   # Is it safe to merge this Name with another?  If any information will get
   # lost we return false.  In practice only if it has Namings.
-  def mergable?
+  def mergeable?
     namings.length == 0
   end
 
@@ -1138,8 +1137,7 @@ class Name < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_target_type_and_target_id('Name',
-                                                              old_name.id)
+    for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
       int.target = self
       int.save
     end
@@ -1262,17 +1260,35 @@ class Name < AbstractModel
   FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
 
-  # Parse a name given no additional information.  Returns an Array or nil:
-  #
-  #   0: text_name         "Xx yy var. zz"         "Xx yy"         "Xx"
-  #   1: display_name      "Xx yy var. zz Author"  "Xx yy Author"  "Xx sp. Author"
-  #   2: observation_name  "Xx yy var. zz Author"  "Xx yy Author"  "Xx Author"
-  #   3; search_name       "Xx yy var. zz Author"  "Xx yy Author"  "Xx sp. Author"
-  #   4: parent_name
-  #   5: rank              :Variety                :Species        :Genus
-  #   6: author            "Author"                "Author"        "Author"
-  #
-  def self.parse_name(str, deprecated=false)
+  class ParsedName
+    attr_accessor :text_name, :search_name, :display_name, :observation_name
+    attr_accessor :rank, :author, :parent_name
+
+    def initialize(params)
+      @text_name = params[:text_name]
+      @search_name = params[:search_name]
+      @display_name = params[:display_name]
+      @observation_name = params[:observation_name]
+      @parent_name = params[:parent_name]
+      @rank = params[:rank]
+      @author = params[:author]
+    end
+
+    # Values required to create/modify attributes of Name instance.
+    def params
+      {
+        :text_name => @text_name,
+        :search_name => @search_name,
+        :display_name => @display_name,
+        :observation_name => @observation_name,
+        :author => @author,
+        :rank => @rank,
+      }
+    end
+  end
+
+  # Parse a name given no additional information.  Returns a ParsedName instance.
+  def self.parse_name(str, rank=:Genus, deprecated=false)
     str = clean_incoming_string(str)
     parse_group(str, deprecated)       ||
     parse_subgenus(str, deprecated)    ||
@@ -1282,30 +1298,8 @@ class Name < AbstractModel
     parse_subspecies(str, deprecated)  ||
     parse_variety(str, deprecated)     ||
     parse_form(str, deprecated)        ||
-    parse_genus_or_up(str, deprecated) ||
+    parse_genus_or_up(str, deprecated, rank) ||
     parse_species(str, deprecated)
-  end
-
-  # Parse a name given its rank.  Raises a RuntimeError if there are any
-  # problems.  Used by +change_text_name+.  Returns same thing as parse_name.
-  def self.parse_by_rank(str, rank, deprecated)
-    str = clean_incoming_string(str)
-    results = case rank.to_sym
-    when :Group      ; parse_group(str, deprecated)
-    when :Form       ; parse_form(str, deprecated)
-    when :Variety    ; parse_variety(str, deprecated)
-    when :Subspecies ; parse_subspecies(str, deprecated)
-    when :Species    ; parse_species(str, deprecated)
-    when :Stirps     ; parse_stirps(str, deprecated)
-    when :Subsection ; parse_subsection(str, deprecated)
-    when :Section    ; parse_section(str, deprecated)
-    when :Subgenus   ; parse_subgenus(str, deprecated)
-    else             ; parse_genus_or_up(str, deprecated, rank.to_sym)
-    end
-    if !results
-      raise :runtime_invalid_for_rank.t(:rank => :"rank_#{rank.to_s.downcase}", :name => str)
-    end
-    return results
   end
 
   def self.parse_author(str)
@@ -1321,16 +1315,18 @@ class Name < AbstractModel
     results = nil
     if match = GROUP_PAT.match(str)
       name = match[1]
-      parent = name.sub(LAST_PART, '')
-      results = [
-        name.gsub('ë', 'e') + ' group',
-        format_name(name, deprecated) + ' group',
-        format_name(name, deprecated) + ' group',
-        name.gsub('ë', 'e') + ' group',
-        parent,
-        :Group,
-        ''
-      ]
+      text_name = name.gsub('ë', 'e') + ' group'
+      display_name = format_name(name, deprecated) + ' group',
+      parent_name = name.sub(LAST_PART, '')
+      results = ParsedName.new(
+        :text_name        => text_name,
+        :search_name      => text_name,
+        :display_name     => display_name,
+        :observation_name => display_name,
+        :parent_name      => parent_name,
+        :rank             => :Group,
+        :author           => ''
+      )
     end
     results
   end
@@ -1341,15 +1337,17 @@ class Name < AbstractModel
       name = match[1]
       author = standardize_author(match[2])
       author2 = author.blank? ? '' : ' ' + author
-      results = [
-        name.gsub('ë', 'e'),
-        format_name(name, deprecated) + author2,
-        format_name(name + SP, deprecated) + author2,
-        name.gsub('ë', 'e') + SP + author2,
-        nil,
-        rank,
-        author
-      ]
+      text_name = name.gsub('ë', 'e')
+      rank = :Genus unless RANKS_ABOVE_GENUS.include?(rank)
+      results = ParsedName.new(
+        :text_name        => text_name,
+        :search_name      => text_name + SP + author2,
+        :display_name     => format_name(name, deprecated) + author2,
+        :observation_name => format_name(name + SP, deprecated) + author2,
+        :parent_name      => nil,
+        :rank             => rank,
+        :author           => author
+      )
     end
     results
   end
@@ -1360,16 +1358,18 @@ class Name < AbstractModel
       name = standardize_name(match[1])
       author = standardize_author(match[2])
       author2 = author.blank? ? '' : ' ' + author
-      parent = name.sub(LAST_PART, '')
-      results = [
-        name.gsub('ë', 'e'),
-        format_name(name, deprecated) + author2,
-        format_name(name, deprecated) + author2,
-        name.gsub('ë', 'e') + author2,
-        parent,
-        rank,
-        author
-      ]
+      text_name = name.gsub('ë', 'e')
+      display_name = format_name(name, deprecated)
+      parent_name = name.sub(LAST_PART, '')
+      results = ParsedName.new(
+        :text_name        => text_name,
+        :search_name      => text_name + author2,
+        :display_name     => display_name + author2,
+        :observation_name => display_name + author2,
+        :parent_name      => parent_name,
+        :rank             => rank,
+        :author           => author
+      )
     end
     results
   end
@@ -1465,7 +1465,8 @@ class Name < AbstractModel
   end
 
   def self.clean_incoming_string(str)
-    str.gsub(/“|”/,'"').   # let RedCloth format quotes
+    str.to_s.
+        gsub(/“|”/,'"').   # let RedCloth format quotes
         gsub(/‘|’/,"'").
         gsub(/\u2028/,''). # line separator that we see occasionally
         strip_squeeze
@@ -1506,9 +1507,9 @@ class Name < AbstractModel
 
     parse = parse_name(in_str)
     if parse
-      text_name = parse[0]
-      search_name = parse[3]
-      author = parse[6]
+      text_name = parse.text_name
+      search_name = parse.search_name
+      author = parse.author
 
       if names_for_unknown.member?(name.downcase)
         name = 'Fungi'
@@ -1555,115 +1556,97 @@ class Name < AbstractModel
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
-  # already exist), returns it in an Array (genus first, then species and
-  # variety).  If there is ambiguity (due to different authors), then nil is
-  # returned in that slot.  (Ancestors only go back to genus.)
+  # already exist), returns it in an Array (genus first, then species, etc.  If
+  # there is ambiguity (due to different authors), then +nil+ is returned in
+  # the last slot.  Returns an Array of Name instances, *UNSAVED*!! 
   #
-  # Returns an Array of Name instances, *UNSAVED*!!, with highest-level parents
-  # coming first.  (Can contain both new and pre-existing Name's, any of which
-  # could potentially have changes such as in the author.)
+  #   names = Name.find_or_create_name_and_parents('Letharia vulpina (L.) Hue')
+  #   names.each(&:save)
   #
-  #   names = Name.names_from_string('Letharia vulpina (L.) Hue')
-  #   # names = [
-  #   #   Name: Letharia
-  #   #   Name: Letharia vulpina (L.) Hue
-  #   # ]
-  #
-  #   for name in names
-  #     puts "new!" if name.new_record?
-  #     save if name.changed?
-  #   end
-  #
-  def self.names_from_string(in_str)
+  def self.find_or_create_name_and_parents(in_str)
     result = []
-    in_str = in_str.to_s.strip_squeeze
+    if parsed_name = parse_name(in_str)
+      result = find_or_create_parsed_name_and_parents(parsed_name)
+    end
+    return result
+  end
 
-    # Check for unknown first.
-    if names_for_unknown.member?(in_str.downcase)
+  def self.find_or_create_parsed_name_and_parents(parsed_name)
+    result = []
+    if names_for_unknown.member?(parsed_name.search_name.downcase)
       result << Name.unknown
-
     else
-      # What is this all about??!! [-JPH 20100116]
-      str = in_str.gsub(" near ", " ")
+      if parsed_name.parent_name
+        result = find_or_create_name_and_parents(parsed_name.parent_name)
+      end
+      result << find_or_create_parsed_name(parsed_name)
+    end
+    return result
+  end
 
-      if parse = parse_name(str)
-        text_name, display_name, observation_name, search_name, parent_name,
-          rank, author = parse
-
-        # Fill in ancestors recursively first.
-        if parent_name
-          result = Name.names_from_string(parent_name)
-        end
-
-        # Look up name, trying to match author if supplied.
-        matches = []
-        name = text_name
-        if author.blank?
-          matches = Name.all(:conditions => ["text_name = ?", text_name])
-        else
-          matches = Name.all(:conditions => ["search_name = ?", search_name])
-          if matches.empty?
-            matches = Name.all(:conditions => ["text_name = ? AND author = ''", text_name])
-          end
-        end
-
-        # If not found, create a new name.  (It's unsaved, don't worry!)
-        if matches.empty?
-          name = Name.make_name(rank, text_name,
-                                :display_name => display_name,
-                                :observation_name => observation_name,
-                                :search_name => search_name,
-                                :author => author)
-          result << name
-
-        # If found a unique match, take it.  Add author if one supplied.
-        elsif matches.length == 1
-          name = matches.first
-          if name.author.blank? and !author.blank?
-            name.change_author(author)
-          end
-          result << name
-
-        # If ambiguous matches, fail.
-        else
-          result << nil
-        end
+  def self.find_or_create_parsed_name(parsed_name)
+    result = nil
+    matches = find_matching_names(parsed_name)
+    if matches.empty?
+      result = Name.make_name(parsed_name.params)
+    elsif matches.length == 1
+      result = matches.first
+      # Fill in author automatically if we can.
+      if result.author.blank? and not parsed_name.author.blank?
+        result.change_author(parsed_name.author)
+      end
+    else
+      # Try to resolve ambiguity by taking the one with author.
+      matches.reject! {|name| name.author.blank?}
+      if matches.length == 1
+        result = matches.first
       end
     end
+    return result
+  end
 
-    result
+  def self.find_matching_names(parsed_name)
+    result = []
+    if parsed_name.author.blank?
+      result = Name.all(:conditions => ['text_name = ?', parsed_name.text_name])
+    else
+      result = Name.all(:conditions => ['search_name = ?', parsed_name.search_name])
+      if result.empty?
+        result = Name.all(:conditions => ['text_name = ? AND author = ""', parsed_name.text_name])
+      end
+    end
+    return result
   end
 
   # Lookup a species by genus and species, creating it if necessary.  Returns a
   # Name instance, *UNSAVED*!!  (This is not used anywhere that I can see.)
-  def self.make_species(genus, species, deprecated = false)
-    Name.make_name(:Species, sprintf('%s %s', genus, species),
-                   :display_name => format_name("#{genus} #{species}", deprecated))
+  def self.make_species(genus, species, deprecated=false)
+    text_name = "#{genus} #{species}"
+    display_name = format_name(text_name, deprecated)
+    Name.make_name(
+      :rank => :Species, 
+      :author => '',
+      :text_name => text_name,
+      :search_name => text_name,
+      :display_name => display_name,
+      :observation_name => display_name,
+      :deprecated => deprecated
+    )
   end
 
   # Lookup a genus, creating it if necessary.  Returns a Name instance,
   # *UNSAVED*!!  (This is not used anywhere that I can see.)
-  def self.make_genus(text_name, deprecated = false)
-    Name.make_name(:Genus, text_name,
-                   :display_name => format_name(text_name, deprecated),
-                   :observation_name => format_name("#{text_name}", deprecated) + SP,
-                   :search_name => text_name + SP)
-  end
-
-  # Create a Name given all the various name formats, etc.
-  # Used only by +make_name+.  (And +create_test_name+ in unit test.)
-  # Returns a Name instance, *UNSAVED*!!
-  def self.create_name(rank, text_name, author, display_name, observation_name, search_name)
-    result = Name.new
-    result.created          = now = Time.now
-    result.modified         = now
-    result.rank             = rank
-    result.text_name        = text_name
-    result.author           = author.to_s
-    result.display_name     = display_name
-    result.observation_name = observation_name
-    result.search_name      = search_name
-    result
+  def self.make_genus(text_name, deprecated=false)
+    display_name = format_name(text_name, deprecated)
+    Name.make_name(
+      :rank => :Genus,
+      :author => '',
+      :text_name => text_name,
+      :search_name => text_name + SP,
+      :display_name => display_name,
+      :observation_name => display_name + SP,
+      :deprecated => deprecated
+    )
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,
@@ -1674,24 +1657,28 @@ class Name < AbstractModel
   # zero or one matches:: a Name instance, *UNSAVED*!!
   # multiple matches::    nil
   #
-  # Used by +make_species+, +make_genus+, and +names_from_string+.
+  # Used by +make_species+, +make_genus+, and +find_or_create_name_and_parents+.
   #
-  def self.make_name(rank, text_name, params)
-    display_name = params[:display_name] || text_name
-    observation_name = params[:observation_name] || display_name
-    search_name = params[:search_name] || text_name
-    author = params[:author].to_s
+  def self.make_name(params)
     result = nil
-    if rank
-      matches = Name.find(:all, :conditions => ['search_name = ?', search_name])
-      if matches == []
-        result = Name.create_name(rank, text_name, author, display_name,
-                                  observation_name, search_name)
-      elsif matches.length == 1
-        result = matches.first
-      end
+    search_name = params[:search_name]
+    matches = Name.find(:all, :conditions => ['search_name = ?', search_name])
+    if matches.empty?
+      result = Name.create_name(params)
+    elsif matches.length == 1
+      result = matches.first
     end
     result
+  end
+
+  # Create a Name given all the various name formats, etc.
+  # Used only by +make_name+, and +create_test_name+ in unit test.
+  # Returns a Name instance, *UNSAVED*!!
+  def self.create_name(params)
+    result = Name.new(params)
+    result.created  = now = Time.now
+    result.modified = now
+    return result
   end
 
   ################################################################################
@@ -1699,6 +1686,32 @@ class Name < AbstractModel
   #  :section: Changing Name
   #
   ################################################################################
+
+  # Changes the name, and creates parents as necessary.  Throws a RuntimeError
+  # with error message if unsuccessful in any way.  Returns nothing. *UNSAVED*!!
+  #
+  # *NOTE*: It does not save the changes to itself, but if it has to create or
+  # update any parents (and caller has requested it), _those_ do get saved.
+  #
+  def change_text_name(in_text_name, in_author, in_rank, save_parents=false)
+    in_str = Name.clean_incoming_string("#{in_text_name} #{in_author}")
+    parse = Name.parse_name(in_str, in_rank, deprecated)
+    if not parse or parse.rank != in_rank
+      raise :runtime_invalid_for_rank.t(:rank => :"rank_#{in_rank.to_s.downcase}", :name => in_str)
+    end
+    if parse.parent_name and
+       not Name.find_by_text_name(parse.parent_name)
+      parents = Name.find_or_create_name_and_parents(parse.parent_name)
+      if parents.last.nil?
+        raise :runtime_unable_to_create_name.t(:name => parse.parent_name)
+      elsif save_parents
+        for n in parents
+          n.save
+        end
+      end
+    end
+    self.attributes = parse.params
+  end
 
   # Changes author.  Updates formatted names, as well.  *UNSAVED*!!
   #
@@ -1708,13 +1721,13 @@ class Name < AbstractModel
   def change_author(new_author)
     old_author = self.author
     self.author = new_author.to_s
-    self.display_name     = Name.replace_author(display_name,     old_author, new_author)
-    self.observation_name = Name.replace_author(observation_name, old_author, new_author)
-    self.search_name      = Name.replace_author(search_name,      old_author, new_author)
+    self.display_name     = replace_author(display_name,     old_author, new_author)
+    self.observation_name = replace_author(observation_name, old_author, new_author)
+    self.search_name      = replace_author(search_name,      old_author, new_author)
   end
 
   # Used by change_author().
-  def self.replace_author(str, old_author, new_author) # :nodoc:
+  def replace_author(str, old_author, new_author) # :nodoc:
     result = str.strip
     unless old_author.blank?
       ri = result.rindex(' ' + old_author)
@@ -1733,82 +1746,19 @@ class Name < AbstractModel
   #   name.change_deprecated(true)
   #   name.save
   #
-  def change_deprecated(value)
-    # Remove any boldness that might be there
+  def change_deprecated(deprecated)
+    # Remove existing boldness
     dname = display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
     oname = observation_name.gsub(/\*\*([^*]+)\*\*/, '\1')
-    unless value
-      # Add boldness
+    if not deprecated
+      # Add new boldness
       dname.gsub!(/(__[^_]+__)/, '**\1**')
-      if dname != oname
-        oname.gsub!(/(__[^_]+__)/, '**\1**')
-      end
+      oname.gsub!(/(__[^_]+__)/, '**\1**')
+      self.correct_spelling = nil
     end
     self.display_name = dname
     self.observation_name = oname
-    if !value
-      self.correct_spelling = nil
-    end
-    self.deprecated = value
-  end
-
-  # Changes the name, and creates parents as necessary.  Throws a RuntimeError
-  # with the error message if unsuccessful in any way.  Returns nothing.
-  #
-  # *NOTE*: It does not save the changes to itself, but if it has to create or
-  # update any parents (and caller has requested it), _those_ do get saved.
-  #
-  def change_text_name(in_str, new_author, new_rank, save_parents=false)
-    in_str     = in_str.to_s.strip_squeeze
-    new_author = new_author.to_s.strip_squeeze
-
-    Name.check_for_common_errors(in_str)
-
-    new_text_name, new_display_name, new_observation_name, new_search_name,
-      new_parent_name, new_rank2, new_author2 = Name.parse_by_rank(in_str, new_rank, deprecated)
-
-    # Don't know what to do with the case where user has entered an author in both
-    # the text_name field and the author field.
-    if !new_author.blank? and !new_author2.blank? and new_author != new_author2
-      raise :runtime_invalid_name.t(:name => in_str)
-    end
-
-    if new_parent_name and
-       not Name.find_by_text_name(new_parent_name)
-      names = Name.names_from_string(new_parent_name)
-      if names.last.nil?
-        raise :runtime_unable_to_create_name.t(:name => new_parent_name)
-      elsif save_parents
-        for n in names
-          n.save
-        end
-      end
-    end
-
-    if !new_author.blank?
-      new_display_name     += ' ' + new_author
-      new_observation_name += ' ' + new_author
-      new_search_name      += ' ' + new_author
-    end
-
-    # In case user adds an author in the text_name field.
-    if new_author.blank? and !new_author.blank?
-      new_author = new_author2
-    end
-
-    self.rank             = new_rank
-    self.author           = new_author
-    self.text_name        = new_text_name
-    self.display_name     = new_display_name
-    self.observation_name = new_observation_name
-    self.search_name      = new_search_name
-  end
-
-  # Used by +change_text_name+.
-  def self.check_for_common_errors(str) # :nodoc:
-    if /^[Uu]nknown|\sspecies$|\ssp.?\s*$|\ssensu\s/.match(str)
-      raise :runtime_invalid_name.t(:name => str)
-    end
+    self.deprecated = deprecated
   end
 
   ################################################################################

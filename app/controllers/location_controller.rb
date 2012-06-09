@@ -610,7 +610,8 @@ class LocationController < ApplicationController
         else
           flash_warning(:runtime_merge_locations_warning.t)
           content = :email_location_merge.l(:user => @user.login,
-                  :this => @location.name, :that => merge.name)
+                                            :this => "##{@location.id}: " + @location.name,
+                                            :that => "##{merge.id}: " + merge.name)
           AccountMailer.deliver_webmaster_question(@user.email, content)
         end
 

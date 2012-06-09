@@ -275,10 +275,10 @@ class Textile < String
       # distinguish between publication titles and taxa, e.g., "Lichen Flora
       # of the Greater Sonoran Region".  I'm sure it can still break with species
       # but it should be very infrequent (I don't see it in current tests). -JPH
-      (author.blank? || parse[5] != :Genus)
+      (author.blank? || parse.rank != :Genus)
 
       # Update which genus this first letter would mean in an abbrev.
-      Textile.private_register_name(parse[0], parse[5])
+      Textile.private_register_name(parse.text_name, parse.rank)
 
       # Put it all together.
       result = "x{NAME __#{str1}__ }{ #{str2} }x"

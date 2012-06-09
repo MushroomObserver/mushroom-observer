@@ -75,7 +75,7 @@ class API
       raise NameAlreadyExists.new(name_str, match) if match
 
       # Make sure the name parses.
-      names = ::Name.names_from_string(name_str2)
+      names = ::Name.find_or_create_name_and_parents(name_str2)
       name  = names.last
       raise NameDoesntParse.new(name_str2) if name.nil?
 

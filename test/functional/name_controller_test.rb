@@ -548,11 +548,11 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:create_name, params)
-    assert_response(:action => :show_name, :id => name.id)
+    assert_response(:success)
+    assert_equal(count, Name.count, "Shouldn't have created a name; created #{Name.last.search_name.inspect}.")
+    names = Name.find_all_by_text_name(text_name)
+    assert_obj_list_equal([names(:conocybe_filaris)], names)
     assert_equal(10, @rolf.reload.contribution)
-    name = Name.find_by_text_name(text_name)
-    assert_equal(names(:conocybe_filaris), name)
-    assert_equal(count, Name.count)
   end
 
   def test_create_name_bad_name
@@ -615,7 +615,7 @@ class NameControllerTest < FunctionalTestCase
   def test_edit_name_post
     name = names(:conocybe_filaris)
     assert_equal('Conocybe filaris', name.text_name)
-    assert(name.author.blank?)
+    assert_blank(name.author)
     past_names = name.versions.size
     assert_equal(1, name.version)
     params = {
@@ -640,7 +640,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # This catches a bug that was happening when editing a name that was in use.
-  # In this case text_name and author are missing, confusing edit_name
+  # In this case text_name and author are missing, confusing edit_name.
   def test_edit_name_post_not_changeable
     name = names(:conocybe_filaris)
     params = {
@@ -649,15 +649,15 @@ class NameControllerTest < FunctionalTestCase
         :rank => :Species,
         :citation => '__Le Genera Galera__, 139. 1935.',
         :deprecated => (name.deprecated ? "true" : "false")
-
       },
     }
     post_requires_login(:edit_name, params)
     assert_flash_success
-    assert_equal(10, @rolf.reload.contribution)
     assert_equal('', name.reload.author)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
     assert_equal(@rolf, name.user)
+    assert_equal('Conocybe', Name.last.search_name)
+    assert_equal(20, @rolf.reload.contribution) # created Conocybe
   end
 
   def test_edit_name_post_just_change_notes
@@ -739,7 +739,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_edit_name_destructive_merge
     old_name = agaricus_campestrus = names(:agaricus_campestrus)
-    new_name  = agaricus_campestris = names(:agaricus_campestris)
+    new_name = agaricus_campestris = names(:agaricus_campestris)
     assert_not_equal(old_name, new_name)
     new_versions = new_name.versions.size
     assert_equal(1, new_name.version)
@@ -747,13 +747,15 @@ class NameControllerTest < FunctionalTestCase
     old_obs = old_name.namings[0].observation
     assert_equal(2, new_name.namings.size)
     new_obs = new_name.namings[0].observation
+    assert_false(old_name.mergeable?)
+    assert_false(new_name.mergeable?)
     params = {
       :id => old_name.id,
       :name => {
         :text_name => agaricus_campestris.text_name,
         :author => '',
         :rank => :Species,
-        :deprecated => (old_name.deprecated ? "true" : "false")
+        :deprecated => (old_name.deprecated ? "true" : "false"),
       },
     }
 
@@ -787,7 +789,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_edit_name_author_merge
     old_name = names(:amanita_baccata_borealis)
-    new_name  = names(:amanita_baccata_arora)
+    new_name = names(:amanita_baccata_arora)
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
     new_author = new_name.author
@@ -807,7 +809,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_response(:action => :show_name)
     assert_raises(ActiveRecord::RecordNotFound) do
-      old_name = Name.find(old_name.id)
+      Name.find(old_name.id)
     end
     assert(new_name.reload)
     assert_equal(new_author, new_name.author)
@@ -878,41 +880,101 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(new_versions, new_name.versions.size)
   end
 
-  # Test that merged names end up as not deprecated even if the
-  # new name is deprecated but the old name is not deprecated
+  # Test that merged name doesn't change deprecated status
+  # unless the user explicitly changes status in form.
   def test_edit_name_deprecated2_merge
-    old_name = names(:lactarius_alpinus)
-    assert(!old_name.deprecated)
-    new_name = names(:lactarius_alpigenes)
-    assert(new_name.deprecated)
-    assert_not_equal(old_name, new_name)
-    assert_not_equal(old_name.text_name, new_name.text_name)
-    new_author = new_name.author
-    new_text_name = new_name.text_name
-    assert_not_equal(old_name.author, new_author)
-    new_versions = new_name.versions.size
-    assert_equal(1, new_name.version)
+    good_name = names(:lactarius_alpinus)
+    bad_name1 = names(:lactarius_alpigenes)
+    bad_name2 = names(:lactarius_kuehneri)
+    bad_name3 = names(:lactarius_subalpinus)
+    bad_name4 = names(:pluteus_petasatus_approved)
+    assert_equal(1, good_name.version)
+    assert_equal(1, good_name.versions.size)
+    good_text_name = good_name.text_name
+    good_author = good_name.author
+
+    # First: merge deprecated into accepted, no change.
+    assert(!good_name.deprecated)
+    assert(bad_name1.deprecated)
     params = {
-      :id => old_name.id,
+      :id => bad_name1.id,
       :name => {
-        :text_name => new_name.text_name,
-        :author => new_name.author,
+        :text_name => good_name.text_name,
+        :author => good_name.author,
         :rank => :Species,
-        :deprecated => (old_name.deprecated ? "true" : "false")
+        :deprecated => 'false',
       },
     }
     login('rolf')
     post(:edit_name, params)
     assert_response(:action => :show_name)
     assert_raises(ActiveRecord::RecordNotFound) do
-      old_name = Name.find(old_name.id)
+      bad_name1 = Name.find(bad_name1.id)
     end
-    assert(new_name.reload)
-    assert(!new_name.deprecated)
-    assert_equal(new_author, new_name.author)
-    assert_equal(new_text_name, new_name.text_name)
-    assert_equal(2, new_name.version)
-    assert_equal(new_versions+1, new_name.versions.size)
+    assert(good_name.reload)
+    assert(!good_name.deprecated)
+    assert_equal(good_author, good_name.author)
+    assert_equal(good_text_name, good_name.text_name)
+    assert_equal(1, good_name.version)
+    assert_equal(1, good_name.versions.size)
+
+    # Second: merge accepted into deprecated, no change.
+    good_name.change_deprecated(true)
+    bad_name2.change_deprecated(false)
+    good_name.save
+    bad_name2.save
+    assert_equal(2, good_name.version)
+    assert_equal(2, good_name.versions.size)
+
+    assert(good_name.deprecated)
+    assert(!bad_name2.deprecated)
+    params[:id] = bad_name2.id
+    params[:name][:deprecated] = 'true'
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      bad_name2 = Name.find(bad_name2.id)
+    end
+    assert(good_name.reload)
+    assert(good_name.deprecated)
+    assert_equal(good_author, good_name.author)
+    assert_equal(good_text_name, good_name.text_name)
+    assert_equal(2, good_name.version)
+    assert_equal(2, good_name.versions.size)
+
+    # Third: merge deprecated into deprecated, but change to accepted.
+    assert(good_name.deprecated)
+    assert(bad_name3.deprecated)
+    params[:id] = bad_name3.id
+    params[:name][:deprecated] = 'false'
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      bad_name3 = Name.find(bad_name3.id)
+    end
+    assert(good_name.reload)
+    assert(!good_name.deprecated)
+    assert_equal(good_author, good_name.author)
+    assert_equal(good_text_name, good_name.text_name)
+    assert_equal(3, good_name.version)
+    assert_equal(3, good_name.versions.size)
+
+    # Fourth: merge accepted into accepted, but change to deprecated.
+    assert(!good_name.deprecated)
+    assert(!bad_name4.deprecated)
+    params[:id] = bad_name4.id
+    params[:name][:deprecated] = 'true'
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      bad_name4 = Name.find(bad_name4.id)
+    end
+    assert(good_name.reload)
+    assert(good_name.deprecated)
+    assert_equal(good_author, good_name.author)
+    assert_equal(good_text_name, good_name.text_name)
+    assert_equal(4, good_name.version)
+    assert_equal(4, good_name.versions.size)
   end
 
   # Test merge two names where the new name has notes.
@@ -921,9 +983,9 @@ class NameControllerTest < FunctionalTestCase
     new_name = names(:russula_brevipes_author_notes)
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
-    assert(old_name.author.blank?)
+    assert_blank(old_name.author)
     assert_nil(old_name.description)
-    assert(!new_name.author.blank?)
+    assert_not_blank(new_name.author)
     notes = new_name.description.notes
     assert_not_nil(new_name.description)
     params = {
@@ -949,18 +1011,25 @@ class NameControllerTest < FunctionalTestCase
   # Test merge two names where the old name had notes.
   def test_edit_name_merge_matching_notes_2
     old_name = names(:russula_brevipes_author_notes)
-    new_name = names(:russula_brevipes_no_author)
+    new_name = names(:conocybe_filaris)
     assert_not_equal(old_name, new_name)
-    assert_equal(old_name.text_name, new_name.text_name)
-    assert(!old_name.author.blank?)
-    assert_not_nil(old_name.description)
-    notes = old_name.description.notes
-    assert(new_name.author.blank?)
-    assert_nil(new_name.description)
+    assert_not_equal(old_name.text_name, new_name.text_name)
+    assert_not_blank(old_name.author)
+    assert_not_blank(old_name.citation)
+    assert_not_blank(old_name.notes)
+    assert_not_blank(old_name.description)
+    assert_blank(new_name.author)
+    assert_blank(new_name.citation)
+    assert_blank(new_name.notes)
+    assert_blank(new_name.description)
+    old_author = old_name.author
+    old_citation = old_name.citation
+    old_notes = old_name.notes
+    old_desc = old_name.description.notes
     params = {
       :id => old_name.id,
       :name => {
-        :text_name => old_name.text_name,
+        :text_name => new_name.text_name,
         :author => '',
         :rank => old_name.rank,
         :citation => '',
@@ -974,7 +1043,11 @@ class NameControllerTest < FunctionalTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(old_name.id)
     end
-    assert_equal(notes, new_name.description.notes)
+    assert_equal(old_author, new_name.author)
+    assert_equal(old_citation, new_name.citation)
+    assert_equal(old_notes, new_name.notes)
+    assert_not_nil(new_name.description)
+    assert_equal(old_desc, new_name.description.notes)
   end
 
   # Test merging two names, only one with observations.  Should work either
@@ -1031,19 +1104,19 @@ class NameControllerTest < FunctionalTestCase
     new_name = names(:russula_cremoricolor_author_notes)
     assert_not_equal(old_name, new_name)
     assert_equal(old_name.text_name, new_name.text_name)
-    assert(old_name.author.blank?)
-    assert(!new_name.author.blank?)
-    assert_not_nil(old_notes = old_name.description.notes)
-    assert_not_nil(new_notes = new_name.description.notes)
+    assert_blank(old_name.author)
+    assert_not_blank(new_name.author)
+    assert_not_blank(old_notes = old_name.description.notes)
+    assert_not_blank(new_notes = new_name.description.notes)
     assert_not_equal(old_notes, new_notes)
     params = {
       :id => old_name.id,
       :name => {
         :text_name => old_name.text_name,
-        :citation => '',
         :author => old_name.author,
         :rank => old_name.rank,
-        :deprecated => (old_name.deprecated ? "true" : "false")
+        :deprecated => (old_name.deprecated ? "true" : "false"),
+        :citation => '',
       },
     }
     login('rolf')

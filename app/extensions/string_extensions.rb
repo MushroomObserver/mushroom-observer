@@ -602,6 +602,43 @@ class String
     return result
   end
 
+  # Returns number of character edits required to transform +self+ into +other+.
+  # http://en.wikipedia.org/wiki/Levenshtein_distance
+  def levenshtein_distance_to(other, add=1, del=1, chg=1)
+    s, t = self, other.to_s
+    m = s.length + 1
+    n = t.length + 1
+    return del * (m-1) if n == 1
+    return add * (n-1) if m == 1
+    d = []
+    for i in 0..m-1
+      d[i] = [del * i]
+    end
+    for j in 0..n-1
+      d[0][j] = add * j
+    end
+    for j in 1..n-1
+      for i in 1..m-1
+        if s[i-1] == t[j-1]
+          d[i][j] = d[i-1][j-1]
+        else
+          x = d[i-1][j-0] + del
+          y = d[i-0][j-1] + add
+          z = d[i-1][j-1] + chg
+          d[i][j] = x < y ? (x < z ? x : z) : (y < z ? y : z)
+        end
+      end
+    end
+    return d[m-1][n-1]
+  end
+
+  # Returns percentage match between +self+ and +other+, where 1.0 means the two
+  # strings are equal, and 0.0 means every character is different.
+  def percent_match(other)
+    max = [length, other.length].max
+    1.0 - levenshtein_distance_to(other).to_f / max
+  end
+
   # This method is missing from ruby 1.9.
   if RUBY_VERSION >= '1.9'
     def each

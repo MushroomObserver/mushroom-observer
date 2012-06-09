@@ -29,14 +29,14 @@ class CreateNames < ActiveRecord::Migration
     end
     add_column :observations, "name_id", :integer
     
-    # Name.names_from_string "Amanita baccata senu Arora"
+    # Name.find_or_create_name_and_parents "Amanita baccata senu Arora"
     user = User.find(1)
     fungi = Name.make_name :Kingdom, 'Fungi', :display_name => 'Kingdom of __Fungi__', :observation_name => '__Fungi sp.__', :search_name => 'Fungi sp.'
     fungi.user = user
     fungi.save
     obs = Observation.find :all
     for o in obs
-      names = Name.names_from_string o.what.squeeze(' ')
+      names = Name.find_or_create_name_and_parents o.what.squeeze(' ')
       if names.last.nil?
         print sprintf("Unable to create Name for %s\n", o.what)
       else

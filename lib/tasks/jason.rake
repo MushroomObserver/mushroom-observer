@@ -208,7 +208,7 @@ namespace :jason do
           print $1
 
           name_parse = NameParse.new(name)
-          results = Name.names_from_string(name_parse.search_name)
+          results = Name.find_or_create_name_and_parents(name_parse.search_name)
           if results.last.nil?
             print "\nError: #{name_parse.name}\n"
             name = nil
@@ -225,7 +225,7 @@ namespace :jason do
           end
 
           if name_parse.has_synonym
-            results = Name.names_from_string(name_parse.synonym_search_name)
+            results = Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
             if results.last.nil?
               print "\nError: = #{name_parse.synonym}\n"
             else

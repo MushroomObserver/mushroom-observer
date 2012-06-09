@@ -20,20 +20,20 @@
   <label for="search_name"><%= :NAME.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_name_help.t %></span><br/>
   <%= text_field('search', 'name', :size => 70) %><br/><br/>
-  <%= turn_into_name_auto_completer('search_name', :primer => @name_primer,
+  <%= turn_into_name_auto_completer('search_name', :primer => Name.primer,
                                     :token => ' OR ') %>
   
   <label for="search_user"><%= :OBSERVER.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_observer_help.t %></span><br/>
   <%= text_field('search', 'user', :size => 70) %><br/><br/>
-  <%= turn_into_user_auto_completer('search_user', :primer => @user_primer,
+  <%= turn_into_user_auto_completer('search_user', :primer => User.primer,
                                     :token => ' OR ') %>
   
   <label for="search_location"><%= :LOCATION.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_location_help.t %></span><br/>
   <%= text_field('search', 'location', :size => 70) %><br/><br/>
   <%= turn_into_location_auto_completer('search_location',
-                                        :primer => @location_primer,
+                                        :primer => Location.primer,
                                         :token => ' OR ') %>
   
   <label for="search_content"><%= :advanced_search_content.t %>:</label><br/>
