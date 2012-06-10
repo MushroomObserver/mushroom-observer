@@ -6,9 +6,9 @@ require File.expand_path('../../config/environment.rb', __FILE__)
 SAFE_MODE = false
 
 for row in Name.connection.select_rows %(
-    SELECT id, rank, text_name, search_name, observation_name, display_name, author, rank, deprecated, correct_spelling_id, synonym_id FROM names
+    SELECT id, rank, text_name, search_name, sort_name, display_name, author, rank, deprecated, correct_spelling_id, synonym_id FROM names
   )
-  id, rank, text_name, search_name, observation_name, display_name, author, rank, deprecated, correct_spelling_id, synonym_id = *row
+  id, rank, text_name, search_name, sort_name, display_name, author, rank, deprecated, correct_spelling_id, synonym_id = *row
   rank = rank.to_sym
   deprecated = deprecated2 = (deprecated == 1)
 
@@ -36,27 +36,27 @@ for row in Name.connection.select_rows %(
   if not parse
     puts "INVALID NAME: #{id} #{str.inspect} (#{rank})"
   else
-    text_name2, display_name2, observation_name2, search_name2, parent_name, rank2, author2 = *parse
+    text_name2, display_name2, sort_name2, search_name2, parent_name, rank2, author2 = *parse
     if rank2 == :Genus and Name::RANKS_ABOVE_GENUS.include?(rank)
       rank2 = rank
     end
 
-    if text_name        != text_name2        or
-       search_name      != search_name2      or
-       observation_name != observation_name2 or
-       display_name     != display_name2     or
-       author           != author2           or
-       rank             != rank2             or
-       deprecated       != deprecated2
+    if text_name    != text_name2    or
+       search_name  != search_name2  or
+       sort_name    != sort_name2    or
+       display_name != display_name2 or
+       author       != author2       or
+       rank         != rank2         or
+       deprecated   != deprecated2
 
       puts "[NAME CHANGE]: #{id} #{str.inspect} (#{rank})#{deprecated ? ' (deprecated)' : ''}"
-      puts "  text_name:        #{text_name.inspect}\t#{text_name2.inspect}"               if text_name        != text_name2
-      puts "  search_name:      #{search_name.inspect}\t#{search_name2.inspect}"           if search_name      != search_name2
-      puts "  observation_name: #{observation_name.inspect}\t#{observation_name2.inspect}" if observation_name != observation_name2
-      puts "  display_name:     #{display_name.inspect}\t#{display_name2.inspect}"         if display_name     != display_name2
-      puts "  author:           #{author.inspect}\t#{author2.inspect}"                     if author           != author2
-      puts "  rank:             #{rank}\t#{rank2}"                                         if rank             != rank2
-      puts "  deprecated:       #{deprecated.inspect}\t#{deprecated2.inspect}"             if deprecated       != deprecated2
+      puts "  text_name:    #{text_name.inspect}\t#{text_name2.inspect}"       if text_name    != text_name2
+      puts "  search_name:  #{search_name.inspect}\t#{search_name2.inspect}"   if search_name  != search_name2
+      puts "  sort_name:    #{sort_name.inspect}\t#{sort_name2.inspect}"       if sort_name    != sort_name2
+      puts "  display_name: #{display_name.inspect}\t#{display_name2.inspect}" if display_name != display_name2
+      puts "  author:       #{author.inspect}\t#{author2.inspect}"             if author       != author2
+      puts "  rank:         #{rank}\t#{rank2}"                                 if rank         != rank2
+      puts "  deprecated:   #{deprecated.inspect}\t#{deprecated2.inspect}"     if deprecated   != deprecated2
 
       other = Name.find_by_search_name(search_name2)
       if other and other.id != id
@@ -64,13 +64,13 @@ for row in Name.connection.select_rows %(
       elsif not SAFE_MODE
         Name.connection.update %(
           UPDATE names SET
-            text_name        = #{Name.connection.quote(text_name2)},
-            search_name      = #{Name.connection.quote(search_name2)},
-            observation_name = #{Name.connection.quote(observation_name2)},
-            display_name     = #{Name.connection.quote(display_name2)},
-            author           = #{Name.connection.quote(author2)},
-            rank             = #{Name.connection.quote(rank2)},
-            deprecated       = #{deprecated2 ? 1 : 0}
+            text_name    = #{Name.connection.quote(text_name2)},
+            search_name  = #{Name.connection.quote(search_name2)},
+            sort_name    = #{Name.connection.quote(sort_name2)},
+            display_name = #{Name.connection.quote(display_name2)},
+            author       = #{Name.connection.quote(author2)},
+            rank         = #{Name.connection.quote(rank2)},
+            deprecated   = #{deprecated2 ? 1 : 0}
           WHERE id = #{id}
         )
       end

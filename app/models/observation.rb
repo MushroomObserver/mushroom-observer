@@ -278,12 +278,12 @@ class Observation < AbstractModel
 
   # Textile-marked-up name, never nil.
   def format_name
-    name.observation_name
+    name.display_name
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
-    "%s (%s)" % [name.observation_name, id]
+    "%s (%s)" % [name.display_name, id]
   end
 
   # Look up the corresponding instance in our namings association.  If we are
@@ -984,10 +984,10 @@ return result if debug
   #
   def announce_consensus_change(old_name, new_name)
     if old_name
-      log(:log_consensus_changed, :old => old_name.observation_name,
-                                  :new => new_name.observation_name)
+      log(:log_consensus_changed, :old => old_name.display_name,
+                                  :new => new_name.display_name)
     else
-      log(:log_consensus_created, :name => new_name.observation_name)
+      log(:log_consensus_created, :name => new_name.display_name)
     end
 
     # Change can trigger emails.

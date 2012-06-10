@@ -8,8 +8,8 @@
 <%= form.select(:deprecated, [[:ACCEPTED.t, false], [:Deprecated.t, true]]) %><br/><br/>
 
 <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
-<% if @can_make_changes %>
-  <%= form.text_field(:text_name) %><br/>
+<% if true %>
+  <%= form.text_field(:text_name, :value => @name_string, :size => 60) %><br/>
   <div class="HelpNote"><%= :form_names_text_name_help.tp %></div>
 <% else %>
   <%= @name.text_name %><br/>
@@ -17,8 +17,8 @@
 <% end %>
 
 <label for="name_author"><%= :Authority.t %>:</label>
-<% if @can_make_changes or @name.author.blank? %>
-  <%= form.text_field(:author) %><br/>
+<% if true or @name.author.blank? %>
+  <%= form.text_field(:author, :size => 60) %><br/>
   <div class="HelpNote"><%= :form_names_author_help.tp %></div>
 <% else %>
   <%= h(@name.author) %><br/>

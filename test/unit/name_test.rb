@@ -3,8 +3,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class NameTest < UnitTestCase
-  SP = Name::SP
-
   def create_test_name(string, force_rank=nil)
     User.current = @rolf
     parse = Name.parse_name(string)
@@ -24,8 +22,8 @@ class NameTest < UnitTestCase
     for var in [
       :text_name,
       :search_name,
+      :sort_name,
       :display_name,
-      :observation_name,
       :parent_name,
       :rank,
       :author,
@@ -201,7 +199,7 @@ class NameTest < UnitTestCase
 
   def test_format_string
     assert_equal('**__Amanita__**', Name.format_name('Amanita'))
-    assert_equal('**__Amanita' + SP + '__**', Name.format_name('Amanita' + SP))
+    assert_equal('**__Amanita sp.__**', Name.format_name('Amanita sp.'))
     assert_equal('**__Amanita__** sect. **__Vaginatae__**', Name.format_name('Amanita sect. Vaginatae'))
     assert_equal('**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**', Name.format_name('Amanita subg. One subsect. Two stirps Three'))
     assert_equal('**__Amanita vaginata__**', Name.format_name('Amanita vaginata'))
@@ -435,403 +433,429 @@ class NameTest < UnitTestCase
   def test_name_parse_1
     do_name_parse_test(
       'Lecania ryaniana van den Boom',
-      :text_name        => 'Lecania ryaniana',
-      :search_name      => 'Lecania ryaniana van den Boom',
-      :display_name     => '**__Lecania ryaniana__** van den Boom',
-      :observation_name => '**__Lecania ryaniana__** van den Boom',
-      :parent_name      => 'Lecania',
-      :rank             => :Species,
-      :author           => 'van den Boom'
+      :text_name    => 'Lecania ryaniana',
+      :search_name  => 'Lecania ryaniana van den Boom',
+      :sort_name    => 'Lecania ryaniana van den Boom',
+      :display_name => '**__Lecania ryaniana__** van den Boom',
+      :parent_name  => 'Lecania',
+      :rank         => :Species,
+      :author       => 'van den Boom'
     )
   end
 
   def test_name_parse_2
     do_name_parse_test(
       'Lecidea sanguineoatra sens. Nyl',
-      :text_name        => 'Lecidea sanguineoatra',
-      :search_name      => 'Lecidea sanguineoatra sens. Nyl',
-      :display_name     => '**__Lecidea sanguineoatra__** sens. Nyl',
-      :observation_name => '**__Lecidea sanguineoatra__** sens. Nyl',
-      :parent_name      => 'Lecidea',
-      :rank             => :Species,
-      :author           => 'sens. Nyl'
+      :text_name    => 'Lecidea sanguineoatra',
+      :search_name  => 'Lecidea sanguineoatra sens. Nyl',
+      :sort_name    => 'Lecidea sanguineoatra sens. Nyl',
+      :display_name => '**__Lecidea sanguineoatra__** sens. Nyl',
+      :parent_name  => 'Lecidea',
+      :rank         => :Species,
+      :author       => 'sens. Nyl'
     )
   end
 
   def test_name_parse_3
     do_name_parse_test(
       'Acarospora squamulosa sensu Th. Fr.',
-      :text_name        => 'Acarospora squamulosa',
-      :search_name      => 'Acarospora squamulosa sensu Th. Fr.',
-      :display_name     => '**__Acarospora squamulosa__** sensu Th. Fr.',
-      :observation_name => '**__Acarospora squamulosa__** sensu Th. Fr.',
-      :parent_name      => 'Acarospora',
-      :rank             => :Species,
-      :author           => 'sensu Th. Fr.'
+      :text_name    => 'Acarospora squamulosa',
+      :search_name  => 'Acarospora squamulosa sensu Th. Fr.',
+      :sort_name    => 'Acarospora squamulosa sensu Th. Fr.',
+      :display_name => '**__Acarospora squamulosa__** sensu Th. Fr.',
+      :parent_name  => 'Acarospora',
+      :rank         => :Species,
+      :author       => 'sensu Th. Fr.'
     )
   end
 
   def test_name_parse_4
     do_name_parse_test(
       'Cladina portentosa subsp. pacifica f. decolorans auct.',
-      :text_name        => 'Cladina portentosa subsp. pacifica f. decolorans',
-      :search_name      => 'Cladina portentosa subsp. pacifica f. decolorans auct.',
-      :display_name     => '**__Cladina portentosa__** subsp. **__pacifica__** f. **__decolorans__** auct.',
-      :observation_name => '**__Cladina portentosa__** subsp. **__pacifica__** f. **__decolorans__** auct.',
-      :parent_name      => 'Cladina portentosa subsp. pacifica',
-      :rank             => :Form ,
-      :author           => 'auct.'
+      :text_name    => 'Cladina portentosa subsp. pacifica f. decolorans',
+      :search_name  => 'Cladina portentosa subsp. pacifica f. decolorans auct.',
+      :sort_name    => 'Cladina portentosa subsp. pacifica f. decolorans auct.',
+      :display_name => '**__Cladina portentosa__** subsp. **__pacifica__** f. **__decolorans__** auct.',
+      :parent_name  => 'Cladina portentosa subsp. pacifica',
+      :rank         => :Form ,
+      :author       => 'auct.'
     )
   end
 
   def test_name_parse_5
     do_name_parse_test(
       'Japewia tornoënsis Somloë',
-      :text_name        => 'Japewia tornoensis',
-      :search_name      => 'Japewia tornoensis Somloë',
-      :display_name     => '**__Japewia tornoënsis__** Somloë',
-      :observation_name => '**__Japewia tornoënsis__** Somloë',
-      :parent_name      => 'Japewia',
-      :rank             => :Species,
-      :author           => 'Somloë'
+      :text_name    => 'Japewia tornoensis',
+      :search_name  => 'Japewia tornoensis Somloë',
+      :sort_name    => 'Japewia tornoensis Somloë',
+      :display_name => '**__Japewia tornoënsis__** Somloë',
+      :parent_name  => 'Japewia',
+      :rank         => :Species,
+      :author       => 'Somloë'
     )
   end
 
   def test_name_parse_6
     do_name_parse_test(
       'Micarea globularis "(Ach. ex Nyl.) Hedl."',
-      :text_name        => 'Micarea globularis',
-      :search_name      => 'Micarea globularis "(Ach. ex Nyl.) Hedl."',
-      :display_name     => '**__Micarea globularis__** "(Ach. ex Nyl.) Hedl."',
-      :observation_name => '**__Micarea globularis__** "(Ach. ex Nyl.) Hedl."',
-      :parent_name      => 'Micarea',
-      :rank             => :Species,
-      :author           => '"(Ach. ex Nyl.) Hedl."'
+      :text_name    => 'Micarea globularis',
+      :search_name  => 'Micarea globularis "(Ach. ex Nyl.) Hedl."',
+      :sort_name    => 'Micarea globularis (Ach. ex Nyl.) Hedl."',
+      :display_name => '**__Micarea globularis__** "(Ach. ex Nyl.) Hedl."',
+      :parent_name  => 'Micarea',
+      :rank         => :Species,
+      :author       => '"(Ach. ex Nyl.) Hedl."'
     )
   end
 
   def test_name_parse_7
     do_name_parse_test(
       'Synechoblastus aggregatus ("Ach.") Th. Fr.',
-      :text_name        => 'Synechoblastus aggregatus',
-      :search_name      => 'Synechoblastus aggregatus ("Ach.") Th. Fr.',
-      :display_name     => '**__Synechoblastus aggregatus__** ("Ach.") Th. Fr.',
-      :observation_name => '**__Synechoblastus aggregatus__** ("Ach.") Th. Fr.',
-      :parent_name      => 'Synechoblastus',
-      :rank             => :Species,
-      :author           => '("Ach.") Th. Fr.'
+      :text_name    => 'Synechoblastus aggregatus',
+      :search_name  => 'Synechoblastus aggregatus ("Ach.") Th. Fr.',
+      :sort_name    => 'Synechoblastus aggregatus (Ach.") Th. Fr.',
+      :display_name => '**__Synechoblastus aggregatus__** ("Ach.") Th. Fr.',
+      :parent_name  => 'Synechoblastus',
+      :rank         => :Species,
+      :author       => '("Ach.") Th. Fr.'
     )
   end
 
   def test_name_parse_8
     do_name_parse_test(
       '"Toninia"',
-      :text_name        => '"Toninia"',
-      :search_name      => '"Toninia"' + SP,
-      :display_name     => '**__"Toninia"__**',
-      :observation_name => '**__"Toninia"' + SP + '__**',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => ''
+      :text_name    => '"Toninia"',
+      :search_name  => '"Toninia"',
+      :sort_name    => 'Toninia"',
+      :display_name => '**__"Toninia"__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
     )
   end
 
   def test_name_parse_9
     do_name_parse_test(
       '"Toninia" sp.',
-      :text_name        => '"Toninia"',
-      :search_name      => '"Toninia"' + SP,
-      :display_name     => '**__"Toninia"__**',
-      :observation_name => '**__"Toninia"' + SP + '__**',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => ''
+      :text_name    => '"Toninia"',
+      :search_name  => '"Toninia"',
+      :sort_name    => 'Toninia"',
+      :display_name => '**__"Toninia"__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
     )
   end
 
   def test_name_parse_10
     do_name_parse_test(
       '"Toninia" squalescens',
-      :text_name        => '"Toninia" squalescens',
-      :search_name      => '"Toninia" squalescens',
-      :display_name     => '**__"Toninia" squalescens__**',
-      :observation_name => '**__"Toninia" squalescens__**',
-      :parent_name      => '"Toninia"',
-      :rank             => :Species,
-      :author           => ''
+      :text_name    => '"Toninia" squalescens',
+      :search_name  => '"Toninia" squalescens',
+      :sort_name    => 'Toninia" squalescens',
+      :display_name => '**__"Toninia" squalescens__**',
+      :parent_name  => '"Toninia"',
+      :rank         => :Species,
+      :author       => ''
     )
   end
 
   def test_name_parse_11
     do_name_parse_test(
       'Anaptychia "leucomelaena" auct.',
-      :text_name        => 'Anaptychia "leucomelaena"',
-      :search_name      => 'Anaptychia "leucomelaena" auct.',
-      :display_name     => '**__Anaptychia "leucomelaena"__** auct.',
-      :observation_name => '**__Anaptychia "leucomelaena"__** auct.',
-      :parent_name      => 'Anaptychia',
-      :rank             => :Species,
-      :author           => 'auct.'
+      :text_name    => 'Anaptychia "leucomelaena"',
+      :search_name  => 'Anaptychia "leucomelaena" auct.',
+      :sort_name    => 'Anaptychia leucomelaena" auct.',
+      :display_name => '**__Anaptychia "leucomelaena"__** auct.',
+      :parent_name  => 'Anaptychia',
+      :rank         => :Species,
+      :author       => 'auct.'
     )
   end
 
   def test_name_parse_12
     do_name_parse_test(
       'Anema',
-      :text_name        => 'Anema',
-      :search_name      => 'Anema' + SP,
-      :display_name     => '**__Anema__**',
-      :observation_name => '**__Anema' + SP + '__**',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => ''
+      :text_name    => 'Anema',
+      :search_name  => 'Anema',
+      :sort_name    => 'Anema',
+      :display_name => '**__Anema__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
     )
   end
 
   def test_name_parse_13
     do_name_parse_test(
       'Anema sp',
-      :text_name        => 'Anema',
-      :search_name      => 'Anema' + SP,
-      :display_name     => '**__Anema__**',
-      :observation_name => '**__Anema' + SP + '__**',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => ''
+      :text_name    => 'Anema',
+      :search_name  => 'Anema',
+      :sort_name    => 'Anema',
+      :display_name => '**__Anema__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
     )
   end
 
   def test_name_parse_14
     do_name_parse_test(
       'Anema sp.',
-      :text_name        => 'Anema',
-      :search_name      => 'Anema' + SP,
-      :display_name     => '**__Anema__**',
-      :observation_name => '**__Anema' + SP + '__**',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => ''
+      :text_name    => 'Anema',
+      :search_name  => 'Anema',
+      :sort_name    => 'Anema',
+      :display_name => '**__Anema__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
     )
   end
 
   def test_name_parse_15
     do_name_parse_test(
       'Anema Nyl. ex Forss.',
-      :text_name        => 'Anema',
-      :search_name      => 'Anema' + SP + ' Nyl. ex Forss.',
-      :display_name     => '**__Anema__** Nyl. ex Forss.',
-      :observation_name => '**__Anema' + SP + '__** Nyl. ex Forss.',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => 'Nyl. ex Forss.'
+      :text_name    => 'Anema',
+      :search_name  => 'Anema Nyl. ex Forss.',
+      :sort_name    => 'Anema Nyl. ex Forss.',
+      :display_name => '**__Anema__** Nyl. ex Forss.',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => 'Nyl. ex Forss.'
     )
   end
 
   def test_name_parse_16
     do_name_parse_test(
       'Anema sp Nyl. ex Forss.',
-      :text_name        => 'Anema',
-      :search_name      => 'Anema' + SP + ' Nyl. ex Forss.',
-      :display_name     => '**__Anema__** Nyl. ex Forss.',
-      :observation_name => '**__Anema' + SP + '__** Nyl. ex Forss.',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => 'Nyl. ex Forss.'
+      :text_name    => 'Anema',
+      :search_name  => 'Anema Nyl. ex Forss.',
+      :sort_name    => 'Anema Nyl. ex Forss.',
+      :display_name => '**__Anema__** Nyl. ex Forss.',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => 'Nyl. ex Forss.'
     )
   end
 
   def test_name_parse_17
     do_name_parse_test(
       'Anema sp. Nyl. ex Forss.',
-      :text_name        => 'Anema',
-      :search_name      => 'Anema' + SP + ' Nyl. ex Forss.',
-      :display_name     => '**__Anema__** Nyl. ex Forss.',
-      :observation_name => '**__Anema' + SP + '__** Nyl. ex Forss.',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => 'Nyl. ex Forss.'
+      :text_name    => 'Anema',
+      :search_name  => 'Anema Nyl. ex Forss.',
+      :sort_name    => 'Anema Nyl. ex Forss.',
+      :display_name => '**__Anema__** Nyl. ex Forss.',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => 'Nyl. ex Forss.'
     )
   end
 
   def test_name_parse_18
     do_name_parse_test(
       'Japewia tornoënsis var. tornoënsis',
-      :text_name        => 'Japewia tornoensis var. tornoensis',
-      :search_name      => 'Japewia tornoensis var. tornoensis',
-      :display_name     => '**__Japewia tornoënsis__** var. **__tornoënsis__**',
-      :observation_name => '**__Japewia tornoënsis__** var. **__tornoënsis__**',
-      :parent_name      => 'Japewia tornoënsis',
-      :rank             => :Variety,
-      :author           => ''
+      :text_name    => 'Japewia tornoensis var. tornoensis',
+      :search_name  => 'Japewia tornoensis var. tornoensis',
+      :sort_name    => 'Japewia tornoensis var. tornoensis',
+      :display_name => '**__Japewia tornoënsis__** var. **__tornoënsis__**',
+      :parent_name  => 'Japewia tornoënsis',
+      :rank         => :Variety,
+      :author       => ''
     )
   end
 
   def test_name_parse_19
     do_name_parse_test(
       'Does this ssp. ever var. happen f. for Real?',
-      :text_name        => 'Does this subsp. ever var. happen f. for',
-      :search_name      => 'Does this subsp. ever var. happen f. for Real?',
-      :display_name     => '**__Does this__** subsp. **__ever__** var. **__happen__** f. **__for__** Real?',
-      :observation_name => '**__Does this__** subsp. **__ever__** var. **__happen__** f. **__for__** Real?',
-      :parent_name      => 'Does this subsp. ever var. happen',
-      :rank             => :Form,
-      :author           => 'Real?'
+      :text_name    => 'Does this subsp. ever var. happen f. for',
+      :search_name  => 'Does this subsp. ever var. happen f. for Real?',
+      :sort_name    => 'Does this subsp. ever var. happen f. for Real?',
+      :display_name => '**__Does this__** subsp. **__ever__** var. **__happen__** f. **__for__** Real?',
+      :parent_name  => 'Does this subsp. ever var. happen',
+      :rank         => :Form,
+      :author       => 'Real?'
     )
   end
 
   def test_name_parse_20
     do_name_parse_test(
       'Boletus  rex-veris Arora & Simonini',
-      :text_name        => 'Boletus rex-veris',
-      :search_name      => 'Boletus rex-veris Arora & Simonini',
-      :display_name     => '**__Boletus rex-veris__** Arora & Simonini',
-      :observation_name => '**__Boletus rex-veris__** Arora & Simonini',
-      :parent_name      => 'Boletus',
-      :rank             => :Species,
-      :author           => 'Arora & Simonini'
+      :text_name    => 'Boletus rex-veris',
+      :search_name  => 'Boletus rex-veris Arora & Simonini',
+      :sort_name    => 'Boletus rex-veris Arora & Simonini',
+      :display_name => '**__Boletus rex-veris__** Arora & Simonini',
+      :parent_name  => 'Boletus',
+      :rank         => :Species,
+      :author       => 'Arora & Simonini'
     )
   end
 
   def test_name_parse_21
     do_name_parse_test(
       'Amanita “quoted”',
-      :text_name        => 'Amanita "quoted"',
-      :search_name      => 'Amanita "quoted"',
-      :display_name     => '**__Amanita "quoted"__**',
-      :observation_name => '**__Amanita "quoted"__**',
-      :parent_name      => 'Amanita',
-      :rank             => :Species,
-      :author           => ''
+      :text_name    => 'Amanita "quoted"',
+      :search_name  => 'Amanita "quoted"',
+      :sort_name    => 'Amanita quoted"',
+      :display_name => '**__Amanita "quoted"__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Species,
+      :author       => ''
     )
   end
 
   def test_name_parse_22
     do_name_parse_test(
       'Amanita Sp.',
-      :text_name        => 'Amanita',
-      :search_name      => 'Amanita' + SP,
-      :display_name     => '**__Amanita__**',
-      :observation_name => '**__Amanita' + SP + '__**',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => ''
+      :text_name    => 'Amanita',
+      :search_name  => 'Amanita',
+      :sort_name    => 'Amanita',
+      :display_name => '**__Amanita__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
     )
   end
 
   def test_name_parse_23
     do_name_parse_test(
       'Amanita Sect. Vaginatae (L.) Ach.',
-      :text_name        => 'Amanita sect. Vaginatae',
-      :search_name      => 'Amanita sect. Vaginatae (L.) Ach.',
-      :display_name     => '**__Amanita__** sect. **__Vaginatae__** (L.) Ach.',
-      :observation_name => '**__Amanita__** sect. **__Vaginatae__** (L.) Ach.',
-      :parent_name      => 'Amanita',
-      :rank             => :Section,
-      :author           => '(L.) Ach.'
+      :text_name    => 'Amanita sect. Vaginatae',
+      :search_name  => 'Amanita sect. Vaginatae (L.) Ach.',
+      :sort_name    => 'Amanita sect. Vaginatae (L.) Ach.',
+      :display_name => '**__Amanita__** sect. **__Vaginatae__** (L.) Ach.',
+      :parent_name  => 'Amanita',
+      :rank         => :Section,
+      :author       => '(L.) Ach.'
     )
   end
 
   def test_name_parse_24
     do_name_parse_test(
       'Amanita (subg Vaginatae)',
-      :text_name        => 'Amanita subgenus Vaginatae',
-      :search_name      => 'Amanita subgenus Vaginatae',
-      :display_name     => '**__Amanita__** subgenus **__Vaginatae__**',
-      :observation_name => '**__Amanita__** subgenus **__Vaginatae__**',
-      :parent_name      => 'Amanita',
-      :rank             => :Subgenus,
-      :author           => ''
+      :text_name    => 'Amanita subgenus Vaginatae',
+      :search_name  => 'Amanita subgenus Vaginatae',
+      :sort_name    => 'Amanita subgenus Vaginatae',
+      :display_name => '**__Amanita__** subgenus **__Vaginatae__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Subgenus,
+      :author       => ''
     )
   end
 
   def test_name_parse_25
     do_name_parse_test(
       'Amanita stirps Vaginatae Ach. & Fr.',
-      :text_name        => 'Amanita stirps Vaginatae',
-      :search_name      => 'Amanita stirps Vaginatae Ach. & Fr.',
-      :display_name     => '**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.',
-      :observation_name => '**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.',
-      :parent_name      => 'Amanita',
-      :rank             => :Stirps,
-      :author           => 'Ach. & Fr.'
+      :text_name    => 'Amanita stirps Vaginatae',
+      :search_name  => 'Amanita stirps Vaginatae Ach. & Fr.',
+      :sort_name    => 'Amanita stirps Vaginatae Ach. & Fr.',
+      :display_name => '**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.',
+      :parent_name  => 'Amanita',
+      :rank         => :Stirps,
+      :author       => 'Ach. & Fr.'
     )
   end
 
   def test_name_parse_26
     do_name_parse_test(
       'Amanita subgenus Vaginatae stirps Vaginatae',
-      :text_name        => 'Amanita subgenus Vaginatae stirps Vaginatae',
-      :search_name      => 'Amanita subgenus Vaginatae stirps Vaginatae',
-      :display_name     => '**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
-      :observation_name => '**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
-      :parent_name      => 'Amanita subgenus Vaginatae',
-      :rank             => :Stirps,
-      :author           => ''
+      :text_name    => 'Amanita subgenus Vaginatae stirps Vaginatae',
+      :search_name  => 'Amanita subgenus Vaginatae stirps Vaginatae',
+      :sort_name    => 'Amanita subgenus Vaginatae stirps Vaginatae',
+      :display_name => '**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
+      :parent_name  => 'Amanita subgenus Vaginatae',
+      :rank         => :Stirps,
+      :author       => ''
     )
   end
 
   def test_name_parse_27
     do_name_parse_test(
       'Amanita "sp-S01"',
-      :text_name        => 'Amanita "sp-S01"',
-      :search_name      => 'Amanita "sp-S01"',
-      :display_name     => '**__Amanita "sp-S01"__**',
-      :observation_name => '**__Amanita "sp-S01"__**',
-      :parent_name      => 'Amanita',
-      :rank             => :Species,
-      :author           => ''
+      :text_name    => 'Amanita "sp-S01"',
+      :search_name  => 'Amanita "sp-S01"',
+      :sort_name    => 'Amanita {sp-S01"',
+      :display_name => '**__Amanita "sp-S01"__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Species,
+      :author       => ''
     )
   end
 
   def test_name_parse_28
     do_name_parse_test(
       'Amanita "sp-S01" Tulloss',
-      :text_name        => 'Amanita "sp-S01"',
-      :search_name      => 'Amanita "sp-S01" Tulloss',
-      :display_name     => '**__Amanita "sp-S01"__** Tulloss',
-      :observation_name => '**__Amanita "sp-S01"__** Tulloss',
-      :parent_name      => 'Amanita',
-      :rank             => :Species,
-      :author           => 'Tulloss'
+      :text_name    => 'Amanita "sp-S01"',
+      :search_name  => 'Amanita "sp-S01" Tulloss',
+      :sort_name    => 'Amanita {sp-S01" Tulloss',
+      :display_name => '**__Amanita "sp-S01"__** Tulloss',
+      :parent_name  => 'Amanita',
+      :rank         => :Species,
+      :author       => 'Tulloss'
     )
   end
 
   def test_name_parse_29
     do_name_parse_test(
       'Amanita "Wrong Author"',
-      :text_name        => 'Amanita',
-      :search_name      => 'Amanita' + SP + ' "Wrong Author"',
-      :display_name     => '**__Amanita__** "Wrong Author"',
-      :observation_name => '**__Amanita' + SP + '__** "Wrong Author"',
-      :parent_name      => nil,
-      :rank             => :Genus,
-      :author           => '"Wrong Author"'
+      :text_name    => 'Amanita',
+      :search_name  => 'Amanita "Wrong Author"',
+      :sort_name    => 'Amanita Wrong Author"',
+      :display_name => '**__Amanita__** "Wrong Author"',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => '"Wrong Author"'
     )
   end
 
   def test_name_parse_30
     do_name_parse_test(
       "Amanita vaginata \u2028",
-      :text_name        => 'Amanita vaginata',
-      :search_name      => 'Amanita vaginata',
-      :display_name     => '**__Amanita vaginata__**',
-      :observation_name => '**__Amanita vaginata__**',
-      :parent_name      => 'Amanita',
-      :rank             => :Species,
-      :author           => ''
+      :text_name    => 'Amanita vaginata',
+      :search_name  => 'Amanita vaginata',
+      :sort_name    => 'Amanita vaginata',
+      :display_name => '**__Amanita vaginata__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Species,
+      :author       => ''
     )
   end
 
   def test_name_parse_31
     do_name_parse_test(
       'Amanita (subsect Vaginatae)',
-      :text_name        => 'Amanita subsect. Vaginatae',
-      :search_name      => 'Amanita subsect. Vaginatae',
-      :display_name     => '**__Amanita__** subsect. **__Vaginatae__**',
-      :observation_name => '**__Amanita__** subsect. **__Vaginatae__**',
-      :parent_name      => 'Amanita',
-      :rank             => :Subsection,
-      :author           => ''
+      :text_name    => 'Amanita subsect. Vaginatae',
+      :search_name  => 'Amanita subsect. Vaginatae',
+      :sort_name    => 'Amanita subsect. Vaginatae',
+      :display_name => '**__Amanita__** subsect. **__Vaginatae__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Subsection,
+      :author       => ''
+    )
+  end
+
+  def test_name_parse_32
+    do_name_parse_test(
+      'Pleurotus djamor (Fr.) Boedijn var. djamor',
+      :text_name    => 'Pleurotus djamor var. djamor',
+      :search_name  => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
+      :sort_name    => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
+      :display_name => '**__Pleurotus djamor__** var. **__djamor__** (Fr.) Boedijn',
+      :parent_name  => 'Pleurotus djamor',
+      :rank         => :Variety,
+      :author       => '(Fr.) Boedijn'
+    )
+  end
+
+  def test_name_parse_33
+    do_name_parse_test(
+      'Pleurotus sp. T44 Tulloss',
+      :text_name    => 'Pleurotus "sp-T44"',
+      :search_name  => 'Pleurotus "sp-T44" Tulloss',
+      :sort_name    => 'Pleurotus {sp-T44" Tulloss',
+      :display_name => '**__Pleurotus "sp-T44"__** Tulloss',
+      :parent_name  => 'Pleurotus',
+      :rank         => :Species,
+      :author       => 'Tulloss'
     )
   end
 
@@ -1440,20 +1464,16 @@ class NameTest < UnitTestCase
     name = names(:agaricus_campestris)
     User.current = @mary; assert_equal('**__Agaricus campestris__** L.', name.display_name)
     User.current = @dick; assert_equal('**__Agaricus campestris__** L.', name.display_name)
-    User.current = @mary; assert_equal('**__Agaricus campestris__** L.', name.observation_name)
-    User.current = @dick; assert_equal('**__Agaricus campestris__** L.', name.observation_name)
 
     name = names(:macrocybe_titans)
     User.current = @mary; assert_equal('**__Macrocybe__** Titans', name.display_name)
     User.current = @dick; assert_equal('**__Macrocybe__**', name.display_name)
-    User.current = @mary; assert_equal('**__Macrocybe__** Titans', name.observation_name)
-    User.current = @dick; assert_equal('**__Macrocybe__**', name.observation_name)
 
-    name.display_name = '__Macrocybe' + SP + '__ (Author) Author'
-    assert_equal('__Macrocybe' + SP + '__', name.display_name)
+    name.display_name = '__Macrocybe__ (Author) Author'
+    assert_equal('__Macrocybe__', name.display_name)
 
-    name.display_name = '__Macrocybe' + SP + '__ (van Helsing) Author'
-    assert_equal('__Macrocybe' + SP + '__', name.display_name)
+    name.display_name = '__Macrocybe__ (van Helsing) Author'
+    assert_equal('__Macrocybe__', name.display_name)
 
     name.display_name = '__Macrocybe__ sect. __Helsing__ Author'
     assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
@@ -1461,8 +1481,8 @@ class NameTest < UnitTestCase
     name.display_name = '__Macrocybe__ sect. __Helsing__'
     assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
 
-    name.display_name = '**__Macrocybe' + SP + '__** (van Helsing) Author'
-    assert_equal('**__Macrocybe' + SP + '__**', name.display_name)
+    name.display_name = '**__Macrocybe__** (van Helsing) Author'
+    assert_equal('**__Macrocybe__**', name.display_name)
 
     name.display_name = '**__Macrocybe__** sect. **__Helsing__** Author'
     assert_equal('**__Macrocybe__** sect. **__Helsing__**', name.display_name)

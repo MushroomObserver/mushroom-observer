@@ -31,7 +31,7 @@ genera = Name.connection.select_all %(
   SELECT text_name as n, deprecated as d
   FROM names
   WHERE rank = 'Genus' AND correct_spelling_id IS NULL
-  ORDER BY text_name
+  ORDER BY sort_name
 )
 
 species = Name.connection.select_all %(
@@ -39,7 +39,7 @@ species = Name.connection.select_all %(
   FROM names
   WHERE (rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form')
         AND correct_spelling_id IS NULL
-  ORDER BY text_name
+  ORDER BY sort_name
 )
 
 # Place "*" after all accepted genera.

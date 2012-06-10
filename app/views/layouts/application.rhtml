@@ -220,7 +220,11 @@
             <div id="flashes">
               <% if flash_notices? %>
                   <% boxify(flash_notice_level) do %>
-                    <%= flash_get_notices.to_s.encode %>
+                    <%= begin
+                      flash_get_notices.to_s.encode('utf-8')
+                    rescue
+                      flash_get_notices.to_s.force_encoding('utf-8')
+                    end %>
                   <% end %>
               <% end
               flash_clear %>

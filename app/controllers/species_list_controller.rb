@@ -729,7 +729,7 @@ class SpeciesListController < ApplicationController
   # list of names to list with checkboxes in the left-hand column of the form.
   # By default it looks up a query stored in the session (you can, for example,
   # "save" another species list "for later" for this purpose).  The result is
-  # an Array of names where the values are [observation_name, name_id].  This
+  # an Array of names where the values are [display_name, name_id].  This
   # is destined for the instance variable @checklist.
   def calc_checklist(query=nil)
     results = []
@@ -737,30 +737,30 @@ class SpeciesListController < ApplicationController
       case query.model_symbol
       when :Name
         results = query.select_rows(
-          :select => 'DISTINCT names.observation_name, names.id',
+          :select => 'DISTINCT names.display_name, names.id',
           :limit  => 1000
         )
       when :Observation
         results = query.select_rows(
-          :select => 'DISTINCT names.observation_name, names.id',
+          :select => 'DISTINCT names.display_name, names.id',
           :join   => :names,
           :limit  => 1000
         )
       when :Image
         results = query.select_rows(
-          :select => 'DISTINCT names.observation_name, names.id',
+          :select => 'DISTINCT names.display_name, names.id',
           :join   => {:images_observations => {:observations => :names}},
           :limit  => 1000
         )
       when :Location
         results = query.select_rows(
-          :select => 'DISTINCT names.observation_name, names.id',
+          :select => 'DISTINCT names.display_name, names.id',
           :join   => {:observations => :names},
           :limit  => 1000
         )
       when :RssLog
         results = query.select_rows(
-          :select => 'DISTINCT names.observation_name, names.id',
+          :select => 'DISTINCT names.display_name, names.id',
           :join   => {:observations => :names},
           :where  => 'rss_logs.observation_id > 0',
           :limit  => 1000

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120606152700) do
+ActiveRecord::Schema.define(:version => 20120609230300) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -324,7 +324,7 @@ ActiveRecord::Schema.define(:version => 20120606152700) do
     t.string   "text_name",           :limit => 100
     t.string   "search_name",         :limit => 200
     t.string   "display_name",        :limit => 200
-    t.string   "observation_name",    :limit => 200
+    t.string   "sort_name",           :limit => 200
     t.string   "author",              :limit => 100,                                                                                                                                                                         :null => false
     t.text     "citation"
     t.boolean  "deprecated",                                                                                                                                                                              :default => false, :null => false
@@ -344,7 +344,7 @@ ActiveRecord::Schema.define(:version => 20120606152700) do
     t.string   "text_name",           :limit => 100
     t.string   "search_name",         :limit => 200
     t.string   "display_name",        :limit => 200
-    t.string   "observation_name",    :limit => 200
+    t.string   "sort_name",           :limit => 200
     t.string   "author",              :limit => 100
     t.text     "citation"
     t.boolean  "deprecated",                                                                                                                                   :default => false, :null => false

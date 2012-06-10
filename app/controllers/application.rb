@@ -1497,7 +1497,7 @@ class ApplicationController < ActionController::Base
   #
   #   # In controller:
   #   query  = create_query(:Name, :by_user, :user => params[:id])
-  #   query.need_letters('names.observation_name')
+  #   query.need_letters('names.display_name')
   #   @pages = paginate_letters(:letter, :page, 50)
   #   @names = query.paginate(@pages)
   #

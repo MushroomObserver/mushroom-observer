@@ -752,7 +752,7 @@ class Query < AbstractQuery
       if model == Image
         self.join << {:images_observations => {:observations => :names}}
         self.group = 'images.id'
-        'MIN(names.search_name) ASC, images.when DESC'
+        'MIN(names.sort_name) ASC, images.when DESC'
       elsif model == Location
         'locations.name ASC'
       elsif model == LocationDescription
@@ -766,8 +766,8 @@ class Query < AbstractQuery
       elsif model == Observation
         self.join << :names
         'names.text_name ASC, names.author ASC, observations.when DESC'
-      elsif model.column_names.include?('search_name')
-        "#{table}.search_name ASC"
+      elsif model.column_names.include?('sort_name')
+        "#{table}.sort_name ASC"
       elsif model.column_names.include?('name')
         "#{table}.name ASC"
       elsif model.column_names.include?('title')

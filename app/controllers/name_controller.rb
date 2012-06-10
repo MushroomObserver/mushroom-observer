@@ -525,7 +525,7 @@ class NameController < ApplicationController
     store_location
     pass_query_params
     @name = Name.find(params[:id])
-    init_misspelling_fields
+    init_edit_name_form
     if request.method == :post
       @parse = parse_name
       new_name, @parents = find_or_create_name_and_parents
@@ -554,6 +554,7 @@ class NameController < ApplicationController
   def init_create_name_form
     @name = Name.new
     @name.rank = :Species
+    @name_string = ''
   end
 
   def reload_create_name_form_on_error(err)
@@ -561,16 +562,10 @@ class NameController < ApplicationController
     flash_object_errors(@name)
     init_create_name_form
     @name.attributes = params[:name]
+    @name_string = params[:name][:text_name]
   end
 
-  def reload_edit_name_form_on_error(err)
-    flash_error(err.to_s) if !err.blank?
-    flash_object_errors(@name)
-    @name.attributes = params[:name]
-    @name.deprecated = (params[:name][:deprecated] == 'true')
-  end
-
-  def init_misspelling_fields
+  def init_edit_name_form
     if !params[:name]
       @misspelling = @name.is_misspelling?
       @correct_spelling = @misspelling ? @name.correct_spelling.search_name : ''
@@ -578,6 +573,15 @@ class NameController < ApplicationController
       @misspelling = (params[:name][:misspelling] == '1')
       @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
+    @name_string = @name.text_name_with_umlauts
+  end
+
+  def reload_edit_name_form_on_error(err)
+    flash_error(err.to_s) if !err.blank?
+    flash_object_errors(@name)
+    @name.attributes = params[:name]
+    @name.deprecated = (params[:name][:deprecated] == 'true')
+    @name_string = params[:name][:text_name]
   end
 
   # Only allowed to make substantive changes to name if you own all the references to it.
@@ -627,7 +631,7 @@ class NameController < ApplicationController
 
   def find_or_create_name_and_parents
     parents = Name.find_or_create_parsed_name_and_parents(@parse)
-    unless name = parents.last
+    unless name = parents.pop
       raise(:runtime_unable_to_create_name.t(:name => @parse.search_name))
     end
     return name, parents
@@ -644,7 +648,10 @@ class NameController < ApplicationController
     @name.change_deprecated(true) if params[:name][:deprecated] == 'true'
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
-    @parents.each(&:save)
+    for name in @parents + [@name]
+      save_name(name, :log_name_created) if name.new_record?
+    end
+    flash_notice(:runtime_create_name_success.t(:name => @name.search_name))
   end
 
   def update_existing_name
@@ -659,35 +666,30 @@ class NameController < ApplicationController
       flash_notice(:runtime_edit_name_success.t(:name => @name.search_name))
       any_changes = true
     end
-    @parents.each(&:save)
+    # This name itself might have been a parent when we called
+    # find_or_create... last time(!)
+    for name in Name.find_or_create_parsed_name_and_parents(@parse)
+      save_name(name, :log_name_created) if name.new_record?
+    end
     return any_changes
   end
 
   def merge_name_into(new_name)
-    # Only change deprecation status of target if user explicity requested it.
+    # First update this name (without saving).
+    @name.attributes = @parse.params
+    @name.citation = params[:name][:citation].to_s.strip_squeeze
+    @name.notes = params[:name][:notes].to_s.strip
+    # Only change deprecation status if user explicity requested it.
     if @name.deprecated != (params[:name][:deprecated] == 'true')
       change_deprecated = !@name.deprecated
     end
+    # Automatically swap names if that's a safer merge.
     if not @name.mergeable? and new_name.mergeable?
       @name, new_name = new_name, @name
     end
-    if new_name.author.blank? and not @name.author.blank?
-      new_name.change_author(@name.author)
-    end
-    if new_name.author.blank? and not parse.author.blank?
-      new_name.change_author(parse.author)
-    end
-    if new_name.citation.blank? and not @name.citation.blank?
-      new_name.citation = @name.citation.strip_squeeze
-    end
-    if new_name.citation.blank? and not params[:name][:citation].blank?
-      new_name.citation = params[:name][:citation].strip_squeeze
-    end
-    if new_name.notes.blank? and not @name.notes.blank?
-      new_name.notes = @name.notes.strip
-    end
-    if new_name.notes.blank? and not params[:name][:notes].blank?
-      new_name.notes = params[:name][:notes].strip
+    # Fill in author if other has one.
+    if new_name.author.blank? and not @parse.author.blank?
+      new_name.change_author(@parse.author)
     end
     if change_deprecated != nil
       new_name.change_deprecated(change_deprecated)

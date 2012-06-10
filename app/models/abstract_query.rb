@@ -59,9 +59,9 @@
 #
 #  You also have access to lower-level operations:
 #
-#    ids   = query.select_values(:where => 'names.observation_name LIKE "A%"')
-#    ids   = query.select_values(:order => 'names.search_name ASC')
-#    names = query.select_values(:select => 'names.observation_name')
+#    ids   = query.select_values(:where => 'names.display_name LIKE "A%"')
+#    ids   = query.select_values(:order => 'names.sort_name ASC')
+#    names = query.select_values(:select => 'names.display_name')
 #
 #    # This is the most efficient way to make Query work with ActiveRecord --
 #    # This lets you customize the query, then automatically tells it to select

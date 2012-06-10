@@ -167,7 +167,7 @@ class SpeciesList < AbstractModel
     # (Methods that call this don't need the description, review status, etc.)
     Name.find_by_sql %(
       SELECT DISTINCT n.id, n.rank, n.deprecated, n.text_name, n.search_name,
-             n.author, n.observation_name, n.display_name, n.synonym_id,
+             n.author, n.display_name, n.display_name, n.synonym_id,
              n.correct_spelling_id, n.citation
       FROM names n, observations o, observations_species_lists os
       WHERE n.id = o.name_id

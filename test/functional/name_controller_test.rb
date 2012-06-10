@@ -633,7 +633,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(20, @rolf.reload.contribution)
     assert_equal('(Fr.) Kühner', name.reload.author)
     assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.display_name)
-    assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.observation_name)
     assert_equal('Conocybe filaris (Fr.) Kühner', name.search_name)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
     assert_equal(@rolf, name.user)
@@ -1032,7 +1031,8 @@ class NameControllerTest < FunctionalTestCase
         :text_name => new_name.text_name,
         :author => '',
         :rank => old_name.rank,
-        :citation => '',
+        :citation => old_name.citation,
+        :notes => old_name.notes,
         :deprecated => (old_name.deprecated ? "true" : "false"),
       },
     }
@@ -1043,7 +1043,7 @@ class NameControllerTest < FunctionalTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(old_name.id)
     end
-    assert_equal(old_author, new_name.author)
+    assert_equal('', new_name.author) # user explicitly set author to ''
     assert_equal(old_citation, new_name.citation)
     assert_equal(old_notes, new_name.notes)
     assert_not_nil(new_name.description)
@@ -1269,6 +1269,383 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_response(:action => :deprecate_name)
     assert_no_flash
+  end
+
+  # Test that misspellings are handle right when merging.
+  def test_merge_with_misspellings
+    login('rolf')
+    name1 = names(:lactarius_alpinus)
+    name2 = names(:lactarius_alpigenes)
+    name3 = names(:lactarius_kuehneri)
+    name4 = names(:lactarius_subalpinus)
+    name5 = names(:pluteus_petasatus_approved)
+
+    # First: merge Y into X, where Y is misspelling of X
+    name2.correct_spelling = name1
+    name2.change_deprecated(true)
+    name2.save
+    assert(!name1.correct_spelling)
+    assert(!name1.deprecated)
+    assert(name2.correct_spelling == name1)
+    assert(name2.deprecated)
+    params = {
+      :id => name2.id,
+      :name => {
+        :text_name => name1.text_name,
+        :author => name1.author,
+        :rank => :Species,
+        :deprecated => 'true',
+      },
+    }
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(name2.id)
+    end
+    assert(name1.reload)
+    assert(!name1.correct_spelling)
+    assert(!name1.deprecated)
+
+    # Second: merge Y into X, where X is misspelling of Y
+    name1.correct_spelling = name3
+    name1.change_deprecated(true)
+    name1.save
+    name3.correct_spelling = nil
+    name3.change_deprecated(false)
+    name3.save
+    assert(name1.correct_spelling == name3)
+    assert(name1.deprecated)
+    assert(!name3.correct_spelling)
+    assert(!name3.deprecated)
+    params = {
+      :id => name3.id,
+      :name => {
+        :text_name => name1.text_name,
+        :author => name1.author,
+        :rank => :Species,
+        :deprecated => 'false',
+      },
+    }
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(name3.id)
+    end
+    assert(name1.reload)
+    assert(!name1.correct_spelling)
+    assert(name1.deprecated)
+
+    # Third: merge Y into X, where X is misspelling of Z
+    name1.correct_spelling = Name.first
+    name1.change_deprecated(true)
+    name1.save
+    name4.correct_spelling = nil
+    name4.change_deprecated(false)
+    name4.save
+    assert(name1.correct_spelling)
+    assert(name1.correct_spelling != name4)
+    assert(name1.deprecated)
+    assert(!name4.correct_spelling)
+    assert(!name4.deprecated)
+    params = {
+      :id => name4.id,
+      :name => {
+        :text_name => name1.text_name,
+        :author => name1.author,
+        :rank => :Species,
+        :deprecated => 'false',
+      },
+    }
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(name4.id)
+    end
+    assert(name1.reload)
+    assert(name1.correct_spelling == Name.first)
+    assert(name1.deprecated)
+  end
+
+  # Found this in the wild, it seems to have been fixed already, though...
+  def test_weird_merge
+    login('rolf')
+
+    name2 = Name.create!(
+      :text_name => 'Russula sect. Compactae',
+      :search_name => 'Russula sect. Compactae',
+      :sort_name => 'Russula sect. Compactae',
+      :display_name => '**__Russula__** sect. **__Compactae__**',
+      :author => '',
+      :rank => :Section,
+      :deprecated => false,
+      :correct_spelling => nil
+    )
+    name1 = Name.create!(
+      :text_name => 'Russula sect. Compactae',
+      :search_name => 'Russula sect. Compactae Fr.',
+      :sort_name => 'Russula sect. Compactae Fr.',
+      :display_name => '__Russula__ sect. __Compactae__ Fr.',
+      :author => 'Fr.',
+      :rank => :Section,
+      :deprecated => true,
+      :correct_spelling => name2
+    )
+
+    assert_equal('Russula sect. Compactae', name1.text_name)
+    assert_equal('Russula sect. Compactae', name2.text_name)
+    assert_equal('Fr.', name1.author)
+    assert_equal('', name2.author)
+    assert(name1.deprecated)
+    assert(!name2.deprecated)
+    assert(name1.correct_spelling == name2)
+    assert(!name2.correct_spelling)
+
+    params = {
+      :id => name2.id,
+      :name => {
+        :text_name => name1.text_name,
+        :author => name1.author,
+        :rank => :Section,
+        :deprecated => 'false',
+      },
+    }
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(name2.id)
+    end
+    assert(name1.reload)
+    assert(!name1.correct_spelling)
+    assert(name1.deprecated)
+    assert_equal('Russula sect. Compactae', name1.text_name)
+    assert_equal('Fr.', name1.author)
+  end
+
+  # Another one found in the wild, probably already fixed.
+  def test_weird_merge_2
+    login('rolf')
+    name1 = Name.create!(
+      :text_name => 'Amanita sect. Vaginatae',
+      :search_name => 'Amanita sect. Vaginatae (Fr.) Quél.',
+      :sort_name => 'Amanita sect. Vaginatae (Fr.) Quél.',
+      :display_name => '**__Amanita__** sect. **__Vaginatae__** (Fr.) Quél.',
+      :author => '(Fr.) Quél.',
+      :rank => :Section,
+      :deprecated => false,
+      :correct_spelling => nil
+    )
+    name2 = Name.create!(
+      :text_name => 'Amanita',
+      :search_name => 'Amanita (sect. Vaginatae)',
+      :sort_name => 'Amanita (sect. Vaginatae)',
+      :display_name => '**__Amanita__** (sect. Vaginatae)',
+      :author => '(sect. Vaginatae)',
+      :rank => :Genus,
+      :deprecated => false,
+      :correct_spelling => nil
+    )
+
+    params = {
+      :id => name2.id,
+      :name => {
+        :text_name => 'Amanita sect. Vaginatae',
+        :author => '',
+        :rank => :Section,
+        :deprecated => 'false',
+      },
+    }
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(name2.id)
+    end
+    assert(name1.reload)
+    assert(!name1.correct_spelling)
+    assert(!name1.deprecated)
+    assert_equal('Amanita sect. Vaginatae', name1.text_name)
+    assert_equal('(Fr.) Quél.', name1.author)
+  end
+
+  # Another one found in the wild, probably already fixed.
+  def test_weird_merge_3
+    login('rolf')
+    syn = Synonym.create
+    name1 = Name.create!(
+      :text_name => 'Cortinarius subgenus Sericeocybe',
+      :search_name => 'Cortinarius subgenus Sericeocybe',
+      :sort_name => 'Cortinarius subgenus Sericeocybe',
+      :display_name => '**__Cortinarius__** subg. **__Sericeocybe__**',
+      :author => '',
+      :rank => :Subgenus,
+      :deprecated => false,
+      :correct_spelling => nil,
+      :synonym => syn
+    )
+    name2 = Name.create!(
+      :text_name => 'Cortinarius',
+      :search_name => 'Cortinarius (sub Genus Sericeocybe)',
+      :sort_name => 'Cortinarius (sub Genus Sericeocybe)',
+      :display_name => '__Cortinarius__ (sub Genus Sericeocybe)',
+      :author => '(sub Genus Sericeocybe)',
+      :rank => :Genus,
+      :deprecated => true,
+      :correct_spelling => nil,
+      :synonym => syn
+    )
+
+    params = {
+      :id => name2.id,
+      :name => {
+        :text_name => 'Cortinarius subg. Sericeocybe',
+        :author => '',
+        :rank => :Subgenus,
+        :deprecated => 'false',
+      },
+    }
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(name2.id)
+    end
+    assert(name1.reload)
+    assert(!name1.correct_spelling)
+    assert(!name1.deprecated)
+    assert_equal('Cortinarius subgenus Sericeocybe', name1.text_name)
+    assert_equal('', name1.author)
+  end
+
+  def test_edit_name_with_umlaut
+    login('dick')
+    names = Name.find_or_create_name_and_parents('Xanthoparmelia coloradoensis')
+    names.each(&:save)
+    name = names.last
+    assert_equal('Xanthoparmelia coloradoensis', name.text_name)
+    assert_equal('Xanthoparmelia coloradoensis', name.search_name)
+    assert_equal('**__Xanthoparmelia coloradoensis__**', name.display_name)
+
+    get(:edit_name, :id => name.id)
+    assert_input_value('name_text_name', 'Xanthoparmelia coloradoensis')
+    assert_input_value('name_author', '')
+
+    params = {
+      :id => name.id,
+      :name => {
+        # (test what happens if user puts author in wrong field)
+        :text_name => 'Xanthoparmelia coloradoënsis (Gyelnik) Hale',
+        :author => '',
+        :rank => :Species,
+        :deprecated => 'false',
+      },
+    }
+    post(:edit_name, params)
+    assert_flash_success
+    assert_response(:action => :show_name)
+    name.reload
+    assert_equal('Xanthoparmelia coloradoensis', name.text_name)
+    assert_equal('Xanthoparmelia coloradoensis (Gyelnik) Hale', name.search_name)
+    assert_equal('**__Xanthoparmelia coloradoënsis__** (Gyelnik) Hale', name.display_name)
+
+    get(:edit_name, :id => name.id)
+    assert_input_value('name_text_name', 'Xanthoparmelia coloradoënsis')
+    assert_input_value('name_author', '(Gyelnik) Hale')
+
+    params[:name][:text_name] = 'Xanthoparmelia coloradoensis'
+    params[:name][:author] = ''
+    post(:edit_name, params)
+    assert_flash_success
+    assert_response(:action => :show_name)
+    name.reload
+    assert_equal('Xanthoparmelia coloradoensis', name.text_name)
+    assert_equal('Xanthoparmelia coloradoensis', name.search_name)
+    assert_equal('**__Xanthoparmelia coloradoensis__**', name.display_name)
+  end
+
+  def test_create_variety
+    login('katrina')
+    params = {
+      :name => {
+        :text_name => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
+        :author => '',
+        :rank => :Variety,
+        :deprecated => 'false',
+      }
+    }
+    post(:create_name, params)
+    assert_flash_success
+    assert_response(:action => :show_name)
+    name = Name.last
+    assert_equal(:Variety, name.rank)
+    assert_equal('Pleurotus djamor var. djamor', name.text_name)
+    assert_equal('Pleurotus djamor var. djamor (Fr.) Boedijn', name.search_name)
+    assert_equal('(Fr.) Boedijn', name.author)
+    assert(Name.find_by_text_name('Pleurotus djamor'))
+    assert(Name.find_by_text_name('Pleurotus'))
+  end
+
+  def test_fixing_variety
+    login('katrina')
+    name = Name.create!(
+      :text_name => 'Pleurotus djamor',
+      :search_name => 'Pleurotus djamor (Fr.) Boedijn var. djamor',
+      :sort_name => 'Pleurotus djamor (Fr.) Boedijn var. djamor',
+      :display_name => '**__Pleurotus djamor__** (Fr.) Boedijn var. djamor',
+      :author => '(Fr.) Boedijn var. djamor',
+      :rank => :Species,
+      :deprecated => false,
+      :correct_spelling => nil
+    )
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
+        :author => '',
+        :rank => :Variety,
+        :deprecated => 'false',
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_success
+    assert_response(:action => :show_name)
+    name.reload
+    assert_equal(:Variety, name.rank)
+    assert_equal('Pleurotus djamor var. djamor', name.text_name)
+    assert_equal('Pleurotus djamor var. djamor (Fr.) Boedijn', name.search_name)
+    assert_equal('(Fr.) Boedijn', name.author)
+    # In the bug in the wild, it was failing to create the parents.
+    assert(Name.find_by_text_name('Pleurotus djamor'))
+    assert(Name.find_by_text_name('Pleurotus'))
+  end
+
+  def test_changing_to_group
+    login('mary')
+    name = Name.create!(
+      :text_name => 'Lepiota echinatae',
+      :search_name => 'Lepiota echinatae Group',
+      :sort_name => 'Lepiota echinatae Group',
+      :display_name => '**__Lepiota echinatae__** Group',
+      :author => 'Group',
+      :rank => :Species,
+      :deprecated => false,
+      :correct_spelling => nil
+    )
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => 'Lepiota echinatae',
+        :author => 'Group',
+        :rank => :Group,
+        :deprecated => 'false',
+      }
+    }
+    post(:edit_name, params)
+    assert_flash_success
+    assert_response(:action => :show_name)
+    name.reload
+    assert_equal(:Group, name.rank)
+    assert_equal('Lepiota echinatae group', name.text_name)
+    assert_equal('Lepiota echinatae group', name.search_name)
+    assert_equal('**__Lepiota echinatae__** group', name.display_name)
+    assert_equal('', name.author)
   end
 
   # ----------------------------

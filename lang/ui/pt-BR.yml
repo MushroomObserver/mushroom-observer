@@ -4450,3 +4450,4 @@ email_name_change: ! 'User made nontrivial change to a name:
   namings: [namings]
 
   name: [url]'
+validate_name_sort_name_too_long: ! '[:validate_too_long(field=''''sort_name'''',max=100)]'

@@ -10,12 +10,10 @@
 #
 #  == Name Formats
 #
-#    Method             Species              Genus                Kingdom
-#   ----------------   ------------------   ------------------   --------------------
-#    text_name          Xxx yyy              Xxx                  Fungi
-#    search_name        Xxx yyy Author       Xxx sp. Author       Fungi sp.
-#    display_name       __Xxx yyy__ Author   __Xxx__ Author       Kingdom of __Fungi__
-#    observation_name   __Xxx yyy__ Author   __Xxx__ sp. Author   __Fungi__ sp.
+#    text_name          Xxx yyy                "Xxx yyy"
+#    search_name        Xxx yyy Author         "Xxx yyy" Author
+#    sort_name          Xxx yyy Author         Xxx yyy" Author
+#    display_name       __Xxx yyy__ Author     __"Xxx yyy"__ Author
 #
 #  == Regular Expressions
 #
@@ -88,9 +86,9 @@
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
 #  text_name::        (V) "Xxx"
-#  display_name::     (V) "Xxx sp. Author"
-#  observation_name:: (V) "__Xxx__ Author"
-#  search_name::      (V) "__Xxx__ sp. Author"
+#  search_name::      (V) "__Xxx__ Author"
+#  sort_name::        (V) "__Xxx__ Author"
+#  display_name::     (V) "Xxx Author"
 #  author::           (V) "Author"
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
@@ -227,8 +225,8 @@ class Name < AbstractModel
     :if_changed => [
       'rank',
       'text_name',
+      'sort_name',
       'display_name',
-      'observation_name',
       'search_name',
       'author',
       'citation',
@@ -271,7 +269,7 @@ class Name < AbstractModel
   def <=>(x)
     self.search_name <=> x.search_name
   end
-  
+
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
     Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
@@ -329,6 +327,15 @@ class Name < AbstractModel
     "#{display_name} (#{id})"
   end
 
+  def text_name_with_umlauts
+    result = display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+    return result[0..text_name.length-1]
+  end
+
+  def search_name_with_umlauts
+    display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+  end
+
   # Array of strings that mean "unknown" in the local language:
   #
   #   "unknown", ""
@@ -348,15 +355,10 @@ class Name < AbstractModel
   end
 
   def display_name
-    hide_authors_in_formatted_name(self[:display_name])
-  end
-
-  def observation_name
-    hide_authors_in_formatted_name(self[:observation_name])
-  end
-
-  def hide_authors_in_formatted_name(str)
-    if User.current and User.current.hide_authors == :above_species and RANKS_ABOVE_SPECIES.include?(rank)
+    str = self[:display_name]
+    if User.current and
+       User.current.hide_authors == :above_species and
+       RANKS_ABOVE_SPECIES.include?(rank)
       str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end
     return str
@@ -470,7 +472,7 @@ class Name < AbstractModel
     end
     return false
   end
-  
+
   # Returns an Array of all of this Name's ancestors, starting with its
   # immediate parent, running back to Eukarya.  It ignores misspellings.  It
   # chooses at random if there are more than one accepted parent taxa at a
@@ -1195,6 +1197,11 @@ class Name < AbstractModel
       SiteData.update_contribution(:del, :names_versions, user_id)
     end
 
+    # Fill in citation if new name is missing one.
+    if citation.blank? and not old_name.citation.blank?
+      self.citation = old_name.citation.strip_squeeze
+    end
+
     # Save any notes the old name had.
     if old_name.has_notes? and (old_name.notes != self.notes)
       if has_notes?
@@ -1218,9 +1225,6 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  SP = ''           # Enable this to omit the "sp." after all names.
-  # SP = ' sp.'       # Enable this to include "sp." after genera and higher taxa.
-
   SUBG_ABBR    = / subgenus | subg\.? /xi
   SECT_ABBR    = / section | sect\.? /xi
   SUBSECT_ABBR = / subsection | subsect\.? /xi
@@ -1242,6 +1246,7 @@ class Name < AbstractModel
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
   LOWER_WORD = / [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
+  LOWER_WORD_OR_SP_NOV = / (?!sp\s|sp$) #{LOWER_WORD} | sp\.\s\S*\d\S* /x
 
   # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
   LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
@@ -1254,21 +1259,21 @@ class Name < AbstractModel
   SECTION_PAT     = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
   SUBSECTION_PAT  = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ ("? #{UPPER_WORD} \s \(? (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)? (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)? (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) \)? "?) (\s #{AUTHOR_START}.*)? $/x
-  SPECIES_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} "?) (\s #{AUTHOR_START}.*)? $/x
+  SPECIES_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?) (\s #{AUTHOR_START}.*)? $/x
   SUBSPECIES_PAT  = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   VARIETY_PAT     = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   FORM_PAT        = /^ ("? #{UPPER_WORD} \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?) (\s #{AUTHOR_START}.*)? $/x
   GROUP_PAT       = /^ ("? #{UPPER_WORD} (?: \s #{LOWER_WORD} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})? (?: \s #{VAR_ABBR} \s #{LOWER_WORD})? (?: \s #{F_ABBR} \s #{LOWER_WORD})? )? "?) \s #{GROUP_ABBR} $/x
 
   class ParsedName
-    attr_accessor :text_name, :search_name, :display_name, :observation_name
+    attr_accessor :text_name, :search_name, :sort_name, :display_name
     attr_accessor :rank, :author, :parent_name
 
     def initialize(params)
       @text_name = params[:text_name]
       @search_name = params[:search_name]
+      @sort_name = params[:sort_name]
       @display_name = params[:display_name]
-      @observation_name = params[:observation_name]
       @parent_name = params[:parent_name]
       @rank = params[:rank]
       @author = params[:author]
@@ -1279,8 +1284,8 @@ class Name < AbstractModel
       {
         :text_name => @text_name,
         :search_name => @search_name,
+        :sort_name => @sort_name,
         :display_name => @display_name,
-        :observation_name => @observation_name,
         :author => @author,
         :rank => @rank,
       }
@@ -1298,8 +1303,8 @@ class Name < AbstractModel
     parse_subspecies(str, deprecated)  ||
     parse_variety(str, deprecated)     ||
     parse_form(str, deprecated)        ||
-    parse_genus_or_up(str, deprecated, rank) ||
-    parse_species(str, deprecated)
+    parse_species(str, deprecated)     ||
+    parse_genus_or_up(str, deprecated, rank)
   end
 
   def self.parse_author(str)
@@ -1316,16 +1321,15 @@ class Name < AbstractModel
     if match = GROUP_PAT.match(str)
       name = match[1]
       text_name = name.gsub('ë', 'e') + ' group'
-      display_name = format_name(name, deprecated) + ' group',
       parent_name = name.sub(LAST_PART, '')
       results = ParsedName.new(
-        :text_name        => text_name,
-        :search_name      => text_name,
-        :display_name     => display_name,
-        :observation_name => display_name,
-        :parent_name      => parent_name,
-        :rank             => :Group,
-        :author           => ''
+        :text_name    => text_name,
+        :search_name  => text_name,
+        :sort_name    => remove_first_quotes(text_name),
+        :display_name => format_name(name, deprecated) + ' group',
+        :parent_name  => parent_name,
+        :rank         => :Group,
+        :author       => ''
       )
     end
     results
@@ -1340,13 +1344,13 @@ class Name < AbstractModel
       text_name = name.gsub('ë', 'e')
       rank = :Genus unless RANKS_ABOVE_GENUS.include?(rank)
       results = ParsedName.new(
-        :text_name        => text_name,
-        :search_name      => text_name + SP + author2,
-        :display_name     => format_name(name, deprecated) + author2,
-        :observation_name => format_name(name + SP, deprecated) + author2,
-        :parent_name      => nil,
-        :rank             => rank,
-        :author           => author
+        :text_name    => text_name,
+        :search_name  => text_name + author2,
+        :sort_name    => remove_first_quotes(text_name + author2),
+        :display_name => format_name(name, deprecated) + author2,
+        :parent_name  => nil,
+        :rank         => rank,
+        :author       => author
       )
     end
     results
@@ -1355,20 +1359,22 @@ class Name < AbstractModel
   def self.parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if match = pattern.match(str)
-      name = standardize_name(match[1])
-      author = standardize_author(match[2])
+      name, author = match[1], match[2].to_s
+      name = standardize_sp_nov_variants(name) if rank == :Species
+      (name, author, rank) = fix_default_variety_error(name, author, rank)
+      name = standardize_name(name)
+      author = standardize_author(author)
       author2 = author.blank? ? '' : ' ' + author
       text_name = name.gsub('ë', 'e')
-      display_name = format_name(name, deprecated)
       parent_name = name.sub(LAST_PART, '')
       results = ParsedName.new(
-        :text_name        => text_name,
-        :search_name      => text_name + author2,
-        :display_name     => display_name + author2,
-        :observation_name => display_name + author2,
-        :parent_name      => parent_name,
-        :rank             => rank,
-        :author           => author
+        :text_name    => text_name,
+        :search_name  => text_name + author2,
+        :sort_name    => remove_first_quotes(text_name + author2),
+        :display_name => format_name(name, deprecated) + author2,
+        :parent_name  => parent_name,
+        :rank         => rank,
+        :author       => author
       )
     end
     results
@@ -1404,6 +1410,34 @@ class Name < AbstractModel
 
   def self.parse_form(str, deprecated=false)
     parse_below_genus(str, deprecated, :Form, FORM_PAT)
+  end
+
+  # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
+  def self.standardize_sp_nov_variants(name)
+    words = name.split(' ')
+    if words.length > 2
+      genus, epithet = words[0], words[2]
+      epithet.sub!(/^"(.*)"$/, '\1')
+      name = "#{genus} \"sp-#{epithet}\""
+    else
+      name.sub!(/ "sp\./i, ' "sp-')
+    end
+    return name
+  end
+
+  # Fix common error: Amanita vaginatae Author var. vaginatae
+  # Convert to: Amanita vaginatae var. vaginatae Author
+  def self.fix_default_variety_error(name, author, rank)
+    if [:Species, :Subspecies, :Variety].include?(rank)
+      last_word = name.split(' ').last
+      if match = author.match(/^(.*) (#{ANY_SSP_ABBR}) (#{last_word})$/)
+        name = "#{name} #{match[2]} #{match[3]}"
+        author = match[1]
+        rank = match[2].match(/^s/i) ? :Subspecies :
+               match[2].match(/^v/i) ? :Variety : :Form
+      end
+    end
+    return name, author, rank
   end
 
   def self.standardize_name(str)
@@ -1470,6 +1504,12 @@ class Name < AbstractModel
         gsub(/‘|’/,"'").
         gsub(/\u2028/,''). # line separator that we see occasionally
         strip_squeeze
+  end
+
+  # Adjust +search_name+ string to collate correctly.
+  def self.remove_first_quotes(str)
+    str.sub(/ "(sp[\-\.])/, ' {\1'). # Amanita "sp-1" goes at end of Amanita.
+        gsub(/"([^"]*")/, '\1')      # Amanita "baccata" goes right after Amanita baccata.
   end
 
   ##############################################################################
@@ -1558,7 +1598,7 @@ class Name < AbstractModel
   # Parses a String, creates a Name for it and all its ancestors (if any don't
   # already exist), returns it in an Array (genus first, then species, etc.  If
   # there is ambiguity (due to different authors), then +nil+ is returned in
-  # the last slot.  Returns an Array of Name instances, *UNSAVED*!! 
+  # the last slot.  Returns an Array of Name instances, *UNSAVED*!!
   #
   #   names = Name.find_or_create_name_and_parents('Letharia vulpina (L.) Hue')
   #   names.each(&:save)
@@ -1624,12 +1664,12 @@ class Name < AbstractModel
     text_name = "#{genus} #{species}"
     display_name = format_name(text_name, deprecated)
     Name.make_name(
-      :rank => :Species, 
+      :rank => :Species,
       :author => '',
       :text_name => text_name,
       :search_name => text_name,
+      :sort_name => remove_first_quotes(text_name),
       :display_name => display_name,
-      :observation_name => display_name,
       :deprecated => deprecated
     )
   end
@@ -1642,16 +1682,16 @@ class Name < AbstractModel
       :rank => :Genus,
       :author => '',
       :text_name => text_name,
-      :search_name => text_name + SP,
+      :search_name => text_name,
+      :sort_name => remove_first_quotes(text_name),
       :display_name => display_name,
-      :observation_name => display_name + SP,
       :deprecated => deprecated
     )
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,
   # at least, supplying defaults for +search_name+, +display_name+, and
-  # +observation_name+, and leaving +author+ blank by default.  Requires an
+  # +sort_name+, and leaving +author+ blank by default.  Requires an
   # exact match of both +text_name+ and +author+. Returns:
   #
   # zero or one matches:: a Name instance, *UNSAVED*!!
@@ -1721,9 +1761,9 @@ class Name < AbstractModel
   def change_author(new_author)
     old_author = self.author
     self.author = new_author.to_s
-    self.display_name     = replace_author(display_name,     old_author, new_author)
-    self.observation_name = replace_author(observation_name, old_author, new_author)
-    self.search_name      = replace_author(search_name,      old_author, new_author)
+    self.search_name  = replace_author(search_name,  old_author, new_author)
+    self.sort_name    = replace_author(sort_name,    old_author, new_author)
+    self.display_name = replace_author(display_name, old_author, new_author)
   end
 
   # Used by change_author().
@@ -1747,17 +1787,14 @@ class Name < AbstractModel
   #   name.save
   #
   def change_deprecated(deprecated)
-    # Remove existing boldness
-    dname = display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
-    oname = observation_name.gsub(/\*\*([^*]+)\*\*/, '\1')
+    # remove existing boldness
+    name = display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
     if not deprecated
-      # Add new boldness
-      dname.gsub!(/(__[^_]+__)/, '**\1**')
-      oname.gsub!(/(__[^_]+__)/, '**\1**')
+      # add new boldness
+      name.gsub!(/(__[^_]+__)/, '**\1**')
       self.correct_spelling = nil
     end
-    self.display_name = dname
-    self.observation_name = oname
+    self.display_name = name
     self.deprecated = deprecated
   end
 
@@ -1839,14 +1876,14 @@ protected
     if self.text_name.to_s.binary_length > 100
       errors.add(:text_name, :validate_name_text_name_too_long.t)
     end
-    if self.display_name.to_s.binary_length > 200
-      errors.add(:display_name, :validate_name_display_name_too_long.t)
-    end
-    if self.observation_name.to_s.binary_length > 200
-      errors.add(:observation_name, :validate_name_observation_name_too_long.t)
-    end
     if self.search_name.to_s.binary_length > 200
       errors.add(:search_name, :validate_name_search_name_too_long.t)
+    end
+    if self.sort_name.to_s.binary_length > 200
+      errors.add(:sort_name, :validate_name_sort_name_too_long.t)
+    end
+    if self.display_name.to_s.binary_length > 200
+      errors.add(:display_name, :validate_name_display_name_too_long.t)
     end
 
     if self.author.to_s.binary_length > 100
