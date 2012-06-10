@@ -5,7 +5,7 @@
   # Google Images | Distribution Map | Email Tracking
   new_tab_set do
     add_tab(:google_images.t,
-            "http://images.google.com/images?q=#{@name.text_name}")
+            "http://images.google.com/images?q=#{@name.real_text_name}")
     if @data != []
       add_tab(:show_name_distribution_map.t, :action => 'map', :id => @name.id,
               :params => query_params)

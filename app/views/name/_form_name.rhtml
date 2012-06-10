@@ -12,7 +12,7 @@
   <%= form.text_field(:text_name, :value => @name_string, :size => 60) %><br/>
   <div class="HelpNote"><%= :form_names_text_name_help.tp %></div>
 <% else %>
-  <%= @name.text_name %><br/>
+  <%= @name.real_text_name %><br/>
   <div class="HelpNote"><%= :form_names_text_name_locked.tp %></div>
 <% end %>
 

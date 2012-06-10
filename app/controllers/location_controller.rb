@@ -856,8 +856,6 @@ class LocationController < ApplicationController
   def split_out_matches(list, substring)
     matches = list.select do |loc|
       (loc.name.to_s[0,substring.length] == substring)
-      # or
-      # (loc.search_name.to_s[0,substring.length] == substring)
     end
     if matches.empty?
       nil

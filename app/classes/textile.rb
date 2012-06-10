@@ -153,7 +153,7 @@ class Textile < String
   def self.register_name(*names)
     for name in names
       if name and !name.above_genus?
-        Textile.private_register_name(name.text_name, name.rank)
+        Textile.private_register_name(name.real_text_name, name.rank)
       end
     end
   end
@@ -278,7 +278,7 @@ class Textile < String
       (author.blank? || parse.rank != :Genus)
 
       # Update which genus this first letter would mean in an abbrev.
-      Textile.private_register_name(parse.text_name, parse.rank)
+      Textile.private_register_name(parse.real_text_name, parse.rank)
 
       # Put it all together.
       result = "x{NAME __#{str1}__ }{ #{str2} }x"

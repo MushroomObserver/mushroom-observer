@@ -712,7 +712,7 @@ class ObserverController < ApplicationController
       args[:letters] = 'users.login'
     # Paginate by letter if names are included in query.
     elsif query.uses_table?(:names)
-      args[:letters] = 'names.text_name'
+      args[:letters] = 'names.sort_name'
     end
 
     show_index_of_objects(query, args)
@@ -2533,7 +2533,7 @@ class ObserverController < ApplicationController
           # Fill in author, just in case user has chosen between two authors.
           # If the form fails for some other reason and we don't do this, it
           # will ask the user to choose between the authors *again* later.
-          what = name.search_name
+          what = name.real_search_name
           # (This is the only way to get out of here with success.)
           success = true
         end
@@ -2550,7 +2550,7 @@ class ObserverController < ApplicationController
           for n in names
             valid_set.merge(n.approved_synonyms)
           end
-          valid_names = valid_set.sort_by(&:search_name)
+          valid_names = valid_set.sort_by(&:sort_name)
         end
       end
     end

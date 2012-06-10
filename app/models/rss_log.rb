@@ -169,7 +169,11 @@ class RssLog < AbstractModel
   # Returns plain text title of the associated object.
   def text_name
     if target
-      target.text_name
+      if target.respond_to?(:real_text_name)
+        target.real_text_name
+      else
+        target.text_name
+      end
     else
       orphan_title.t.html_to_ascii.sub(/ (\d+)$/, '')
     end

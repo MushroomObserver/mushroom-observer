@@ -175,8 +175,8 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_consensus_change.l(:id => observation.id,
-                                :old => (old_name ? old_name.search_name : 'none'),
-                                :new => (new_name ? new_name.search_name : 'none'))
+                                :old => (old_name ? old_name.real_search_name : 'none'),
+                                :new => (new_name ? new_name.real_search_name : 'none'))
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -262,17 +262,18 @@ class AccountMailer < ActionMailer::Base
   # new_desc_ver::  Version number of the LocationDescription _after_ the change (may be the same).
   def location_change(sender, receiver, time, loc, desc, old_loc_version,
                       new_loc_version, old_desc_version, new_desc_version)
-    old_loc              = loc.versions.find_by_version(old_loc_version)
-    new_loc              = loc; loc.revert_to(new_loc_version)
-    old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
-    new_desc             = desc; desc.revert_to(new_desc_version) if desc
+    old_loc              = loc.revert_clone(old_loc_version)
+    new_loc              = loc.revert_clone(new_loc_version)
+    if desc
+      old_desc           = desc.revert_clone(old_desc_version)
+      new_desc           = desc.revert_clone(new_desc_version)
+    else
+      old_desc           = nil
+      new_desc           = nil
+    end
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-
-    # Ideally there would be an old_loc.display_name, but I don't know where that would go
-    old_loc_name = Location.user_name(@user, old_loc.name)
-
-    @subject             = :email_subject_location_change.l(:name => old_loc_name)
+    @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -307,13 +308,19 @@ class AccountMailer < ActionMailer::Base
   # review_status:: Current review status.
   def name_change(sender, receiver, time, name, desc, old_name_version,
           new_name_version, old_desc_version, new_desc_version, review_status)
-    old_name             = name.versions.find_by_version(old_name_version)
-    new_name             = name; name.revert_to(new_name_version)
-    old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
-    new_desc             = desc; desc.revert_to(new_desc_version) if desc
+    old_name             = name.revert_clone(old_name_version)
+    new_name             = name.revert_clone(new_name_version)
+    if desc 
+      old_desc           = desc.revert_clone(old_desc_version)
+      new_desc           = desc.revert_clone(new_desc_version)
+    else
+      old_desc           = nil
+      new_desc           = nil
+    end
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_subject_name_change.l(:name => (old_name ? old_name.search_name : new_name.search_name))
+    @subject             = :email_subject_name_change.l(:name =>
+                              (old_name ? old_name.real_search_name : new_name.real_search_name))
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -344,7 +351,8 @@ class AccountMailer < ActionMailer::Base
   def name_proposal(sender, receiver, naming, observation)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_subject_name_proposal.l(:name => naming.text_name, :id => observation.id)
+    @subject             = :email_subject_name_proposal.l(:name => naming.text_name,
+                                                          :id => observation.id)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['naming']      = naming

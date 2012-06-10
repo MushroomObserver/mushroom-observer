@@ -10,10 +10,12 @@
 #
 #  == Name Formats
 #
-#    text_name          Xxx yyy                "Xxx yyy"
-#    search_name        Xxx yyy Author         "Xxx yyy" Author
-#    sort_name          Xxx yyy Author         Xxx yyy" Author
-#    display_name       __Xxx yyy__ Author     __"Xxx yyy"__ Author
+#    text_name          "Xantho" algoensis
+#    real_text_name     "Xantho" algoënsis
+#    search_name        "Xantho" algoensis Fries
+#    real_search_name   "Xantho" algoënsis Fries
+#    sort_name          Xantho" algoensis Fries
+#    display_name       **__"Xantho" algoënsis__** Fries
 #
 #  == Regular Expressions
 #
@@ -85,11 +87,13 @@
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
-#  text_name::        (V) "Xxx"
-#  search_name::      (V) "__Xxx__ Author"
-#  sort_name::        (V) "__Xxx__ Author"
-#  display_name::     (V) "Xxx Author"
-#  author::           (V) "Author"
+#  text_name::        (V) "Xantho" algoensis
+#  real_text_name::   (V) "Xantho" algoënsis
+#  search_name::      (V) "Xantho" algoensis Fries
+#  real_search_name:: (V) "Xantho" algoënsis Fries
+#  sort_name::        (V) Xantho" algoensis Fries
+#  display_name::     (V) **__"Xantho" algoënsis__** Fries
+#  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
 #  synonym::          (-) Used to group synonyms.
@@ -225,9 +229,9 @@ class Name < AbstractModel
     :if_changed => [
       'rank',
       'text_name',
+      'search_name',
       'sort_name',
       'display_name',
-      'search_name',
       'author',
       'citation',
       'deprecated',
@@ -251,8 +255,8 @@ class Name < AbstractModel
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
-  # Automatically (but silently) log creation and destruction.
-  self.autolog_events = [:destroyed]
+  # (Destruction is already logged as a merge.)
+  self.autolog_events = []
 
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
@@ -267,7 +271,7 @@ class Name < AbstractModel
   end
 
   def <=>(x)
-    self.search_name <=> x.search_name
+    self.sort_name <=> x.sort_name
   end
 
   # Get an Array of Observation's for this Name that have > 80% confidence.
@@ -319,7 +323,7 @@ class Name < AbstractModel
 
   # Tack id on to end of +text_name+.
   def unique_text_name
-    "#{text_name} (#{id})"
+    "#{real_text_name} (#{id})"
   end
 
   # Tack id on to end of +format_name+.
@@ -327,13 +331,21 @@ class Name < AbstractModel
     "#{display_name} (#{id})"
   end
 
-  def text_name_with_umlauts
-    result = display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
-    return result[0..text_name.length-1]
+  def real_text_name
+    Name.display_to_real_text(self)
   end
 
-  def search_name_with_umlauts
-    display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+  def real_search_name
+    Name.display_to_real_search(self)
+  end
+
+  def self.display_to_real_text(name)
+    result = name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+    return result[0..name.text_name.length-1]
+  end
+
+  def self.display_to_real_search(name)
+    name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
   end
 
   # Array of strings that mean "unknown" in the local language:
@@ -346,7 +358,7 @@ class Name < AbstractModel
 
   # Get an instance of the Name that means "unknown".
   def self.unknown
-    Name.find(:first, :conditions => ['text_name = ?', 'Fungi'])
+    Name.find_by_text_name('Fungi')
   end
 
   # Is this the "unknown" name?
@@ -582,7 +594,7 @@ class Name < AbstractModel
           end
         end
 
-      # At and below genus, we do a database query on part of out name, e.g.,
+      # At and below genus, we do a database query on part of our name, e.g.,
       # if our name is "Xxx yyy var. zzz", we search first for species named
       # "Xxx yyy", then genera named "Xxx".)
       elsif next_rank == :Variety    && text_name.match(/^(.* var\. \S+)/)   ||
@@ -1279,6 +1291,14 @@ class Name < AbstractModel
       @author = params[:author]
     end
 
+    def real_text_name
+      Name.display_to_real_text(self)
+    end
+
+    def real_search_name
+      Name.display_to_real_search(self)
+    end
+
     # Values required to create/modify attributes of Name instance.
     def params
       {
@@ -1656,37 +1676,6 @@ class Name < AbstractModel
       end
     end
     return result
-  end
-
-  # Lookup a species by genus and species, creating it if necessary.  Returns a
-  # Name instance, *UNSAVED*!!  (This is not used anywhere that I can see.)
-  def self.make_species(genus, species, deprecated=false)
-    text_name = "#{genus} #{species}"
-    display_name = format_name(text_name, deprecated)
-    Name.make_name(
-      :rank => :Species,
-      :author => '',
-      :text_name => text_name,
-      :search_name => text_name,
-      :sort_name => remove_first_quotes(text_name),
-      :display_name => display_name,
-      :deprecated => deprecated
-    )
-  end
-
-  # Lookup a genus, creating it if necessary.  Returns a Name instance,
-  # *UNSAVED*!!  (This is not used anywhere that I can see.)
-  def self.make_genus(text_name, deprecated=false)
-    display_name = format_name(text_name, deprecated)
-    Name.make_name(
-      :rank => :Genus,
-      :author => '',
-      :text_name => text_name,
-      :search_name => text_name,
-      :sort_name => remove_first_quotes(text_name),
-      :display_name => display_name,
-      :deprecated => deprecated
-    )
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,

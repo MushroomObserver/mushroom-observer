@@ -120,7 +120,7 @@ class ProjectController < ApplicationController
         WHERE nda.user_group_id = #{@project.admin_group_id}
           AND nd.id = nda.name_description_id
           AND n.id = nd.name_id
-        ORDER BY n.text_name ASC, n.author ASC
+        ORDER BY n.sort_name ASC, n.author ASC
       )
     end
   end

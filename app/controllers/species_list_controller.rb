@@ -164,7 +164,7 @@ class SpeciesListController < ApplicationController
       @query = create_query(:Observation, :in_species_list, :by => :name,
                             :species_list => @species_list)
       store_query_in_session(@query) if !params[:set_source].blank?
-      @query.need_letters = 'names.text_name'
+      @query.need_letters = 'names.sort_name'
       @pages = paginate_letters(:letter, :page, 100)
       @objects = @query.paginate(@pages, :include => [:user, :name, :location, {:thumb_image => :image_votes}])
     end
@@ -208,13 +208,7 @@ class SpeciesListController < ApplicationController
     if !['ASCII', 'ISO-8859-1', 'UTF-8'].include?(charset)
       raise "Unsupported text report charset: #{charset}"
     end
-    str = names.map do |name|
-      if !name.author.blank?
-        name.text_name + ' ' + name.author
-      else
-        name.text_name
-      end
-    end.join("\r\n")
+    str = names.map(&:real_search_name).join("\r\n")
     str = case charset
       when 'ASCII'; str.to_ascii
       when 'UTF-8'; "\xEF\xBB\xBF" + str
@@ -237,7 +231,7 @@ class SpeciesListController < ApplicationController
     str = FasterCSV.generate do |csv|
       csv << ['name', 'author', 'citation', 'valid']
       names.each do |name|
-        csv << [name.text_name, name.author, name.citation,
+        csv << [name.real_text_name, name.author, name.citation,
           name.deprecated ? '' : '1'].map {|v| v.blank? ? nil : v}
       end
     end
@@ -261,7 +255,7 @@ class SpeciesListController < ApplicationController
     doc = RTF::Document.new(RTF::Font::SWISS)
     for name in names
       rank      = name.rank
-      text_name = name.text_name
+      text_name = name.real_text_name
       author    = name.author
       if name.deprecated
         node = doc
@@ -299,6 +293,7 @@ class SpeciesListController < ApplicationController
       @names = @name_strings.map do |str|
         str.sub!(/\*$/, '')
         name, author = str.split('|')
+        name.gsub!('ë', 'e')
         if author
           Name.find_by_text_name_and_author(name, author)
         else
@@ -802,7 +797,7 @@ class SpeciesListController < ApplicationController
   def init_name_vars_from_sorter(spl, sorter)
     @checklist_names  = params[:checklist_data] || {}
     @new_names = sorter.new_name_strs.uniq.sort
-    @multiple_names = sorter.multiple_names.uniq.sort_by(&:text_name)
+    @multiple_names = sorter.multiple_names.uniq.sort_by(&:search_name)
     @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
     @list_members = sorter.all_line_strs.join("\r\n")
     @checklist = nil

@@ -66,7 +66,7 @@ class Naming < AbstractModel
 
   # Return name in plain text.
   def text_name
-    name ? name.search_name : ''
+    name ? name.real_search_name : ''
   end
 
   # Return name in plain text (with id tacked on to make unique).

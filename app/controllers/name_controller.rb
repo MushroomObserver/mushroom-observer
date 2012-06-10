@@ -157,7 +157,7 @@ class NameController < ApplicationController
         AND name_counts.count > 1
         AND name_descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - names.modified > #{1.week.to_i}
-      ORDER BY name_counts.count DESC, names.search_name ASC
+      ORDER BY name_counts.count DESC, names.sort_name ASC
       LIMIT 100
     )
     @help = :needed_descriptions_help
@@ -208,7 +208,7 @@ class NameController < ApplicationController
     @links ||= []
     args = {
       :action => 'list_names',
-      :letters => 'names.text_name',
+      :letters => 'names.sort_name',
       :num_per_page => (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50),
     }.merge(args)
 
@@ -568,12 +568,12 @@ class NameController < ApplicationController
   def init_edit_name_form
     if !params[:name]
       @misspelling = @name.is_misspelling?
-      @correct_spelling = @misspelling ? @name.correct_spelling.search_name : ''
+      @correct_spelling = @misspelling ? @name.correct_spelling.real_search_name : ''
     else
       @misspelling = (params[:name][:misspelling] == '1')
       @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
-    @name_string = @name.text_name_with_umlauts
+    @name_string = @name.real_text_name
   end
 
   def reload_edit_name_form_on_error(err)
@@ -597,26 +597,27 @@ class NameController < ApplicationController
   end
 
   def minor_name_change?
-    old_name = @name.search_name
-    new_name = @parse.search_name
+    old_name = @name.real_search_name
+    new_name = @parse.real_search_name
     new_name.percent_match(old_name) > 0.9
   end
 
   def email_admin_name_change
     content = :email_name_change.l(
       :user => @user.login,
-      :old => @name.search_name,
-      :new => @parse.search_name,
+      :old => @name.real_search_name,
+      :new => @parse.real_search_name,
       :observations => @name.observations.length,
       :namings => @name.namings.length,
       :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
     )
     AccountMailer.deliver_webmaster_question(@user.email, content)
+    NameControllerTest.report_email(content) if TESTING
   end
 
   def parse_name
     text_name = params[:name][:text_name]
-    text_name = @name.text_name if text_name.blank?
+    text_name = @name.real_text_name if text_name.blank?
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
     in_rank = params[:name][:rank].to_sym
@@ -632,7 +633,7 @@ class NameController < ApplicationController
   def find_or_create_name_and_parents
     parents = Name.find_or_create_parsed_name_and_parents(@parse)
     unless name = parents.pop
-      raise(:runtime_unable_to_create_name.t(:name => @parse.search_name))
+      raise(:runtime_unable_to_create_name.t(:name => @parse.real_search_name))
     end
     return name, parents
   end
@@ -651,7 +652,7 @@ class NameController < ApplicationController
     for name in @parents + [@name]
       save_name(name, :log_name_created) if name.new_record?
     end
-    flash_notice(:runtime_create_name_success.t(:name => @name.search_name))
+    flash_notice(:runtime_create_name_success.t(:name => @name.real_search_name))
   end
 
   def update_existing_name
@@ -663,7 +664,7 @@ class NameController < ApplicationController
     elsif not save_name(@name, :log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     else
-      flash_notice(:runtime_edit_name_success.t(:name => @name.search_name))
+      flash_notice(:runtime_edit_name_success.t(:name => @name.real_search_name))
       any_changes = true
     end
     # This name itself might have been a parent when we called
@@ -675,6 +676,7 @@ class NameController < ApplicationController
   end
 
   def merge_name_into(new_name)
+    old_display_name_for_log = @name[:display_name]
     # First update this name (without saving).
     @name.attributes = @parse.params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
@@ -686,6 +688,7 @@ class NameController < ApplicationController
     # Automatically swap names if that's a safer merge.
     if not @name.mergeable? and new_name.mergeable?
       @name, new_name = new_name, @name
+      old_display_name_for_log = @name[:display_name]
     end
     # Fill in author if other has one.
     if new_name.author.blank? and not @parse.author.blank?
@@ -694,18 +697,20 @@ class NameController < ApplicationController
     if change_deprecated != nil
       new_name.change_deprecated(change_deprecated)
     end
+    @name.display_name = old_display_name_for_log
     new_name.merge(@name)
-    flash_notice(:runtime_edit_name_merge_success.t(:this => @name.search_name,
-                                                    :that => new_name.search_name))
+    flash_notice(:runtime_edit_name_merge_success.t(:this => @name.real_search_name,
+                                                    :that => new_name.real_search_name))
     @name = new_name
     @name.save
   end
 
   def send_name_merge_email(new_name)
     flash_warning(:runtime_merge_names_warning.t)
-    content = :email_name_merge.l(:user => @user.login, :this => @name.search_name,
-                                  :that => new_name.search_name)
+    content = :email_name_merge.l(:user => @user.login, :this => @name.real_search_name,
+                                  :that => new_name.real_search_name)
     AccountMailer.deliver_webmaster_question(@user.email, content)
+    NameControllerTest.report_email(content) if TESTING
   end
 
   # Chain on to approve/deprecate name if changed status.
@@ -1113,7 +1118,7 @@ class NameController < ApplicationController
           # Change target name to "undeprecated".
           target_name.change_deprecated(false)
           save_name(target_name, :log_name_approved,
-                    :other => @name.search_name)
+                    :other => @name.real_search_name)
 
           # Change this name to "deprecated", set correct spelling, add note.
           @name.change_deprecated(true)
@@ -1122,7 +1127,7 @@ class NameController < ApplicationController
             @name.correct_spelling = target_name
           end
           save_name(@name, :log_name_deprecated,
-                    :other => target_name.search_name)
+                    :other => target_name.real_search_name)
           if !@comment.blank?
             post_comment(:deprecate, @name, @comment)
           end
@@ -1150,8 +1155,8 @@ class NameController < ApplicationController
       if params[:deprecate][:others] == '1'
         for n in @name.approved_synonyms
           n.change_deprecated(true)
-          save_name(n, :log_name_deprecated, :other => @name.search_name)
-          others << n.search_name
+          save_name(n, :log_name_deprecated, :other => @name.real_search_name)
+          others << n.real_search_name
         end
       end
 
@@ -1344,7 +1349,7 @@ class NameController < ApplicationController
     # Get corresponding names.
     name_ids = @descs.keys.map(&:to_s).join(',')
     @names = Name.all(:conditions => "id IN (#{name_ids})",
-                      :order => 'text_name ASC, author ASC')
+                      :order => 'sort_name ASC, author ASC')
 
     # Get corresponding images.
     image_data = Name.connection.select_all %(
@@ -1501,7 +1506,7 @@ class NameController < ApplicationController
         mailing_address = @user.mailing_address.strip
         mailing_address = ':mailing_address' if mailing_address.blank?
         @note_template = :email_tracking_note_template.l(
-          :species_name => @name.text_name,
+          :species_name => @name.real_text_name,
           :mailing_address => mailing_address,
           :users_name => @user.legal_name
         )

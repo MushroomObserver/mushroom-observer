@@ -219,15 +219,22 @@ class AbstractModelTest < UnitTestCase
       end
 
       time = obj.rss_log.modified
-      obj.destroy
-      assert_equal((num+=2), obj.rss_log.notes.split("\n").length,
-                   "#{model}.rss_log should have create, test, update, destroy, orphan lines:\n" +
-                   "<#{obj.rss_log.notes}>")
-      assert_match(/log_#{model_name}_destroyed/, obj.rss_log.notes,
-                   "#{model}.rss_log should have destroy line:\n" +
-                   "<#{obj.rss_log.notes}>")
-      assert_equal(time, obj.rss_log.modified,
-                   "#{model}.rss_log shouldn't have been touched")
+      if model == Name
+        Name.first.merge(obj)
+        assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
+                     "#{model}.rss_log should have test and merge lines:\n" +
+                     "<#{obj.rss_log.notes}>")
+      else
+        obj.destroy
+        assert_equal((num+=2), obj.rss_log.notes.split("\n").length,
+                     "#{model}.rss_log should have create, test, update, destroy, orphan lines:\n" +
+                     "<#{obj.rss_log.notes}>")
+        assert_match(/log_#{model_name}_destroyed/, obj.rss_log.notes,
+                     "#{model}.rss_log should have destroy line:\n" +
+                     "<#{obj.rss_log.notes}>")
+        assert_equal(time, obj.rss_log.modified,
+                     "#{model}.rss_log shouldn't have been touched")
+      end
     end
   end
 end

@@ -166,7 +166,7 @@ class NameSorter
 
   def check_for_deprecated_name(name, name_str=nil)
     if name.deprecated
-      str = name_str || name.search_name
+      str = name_str || name.real_search_name
       @deprecated_name_strs.push(str)
       @deprecated_names.push(name)
       if @approved_deprecated_names.nil? or
@@ -278,7 +278,7 @@ class NameSorter
         name.change_deprecated(false)
         name.save
       else
-        raise TypeError.new("Unexpected ambiguity: #{names.map{|n| n.search_name}.join(', ')}")
+        raise TypeError.new("Unexpected ambiguity: #{names.map(&:real_search_name).join(', ')}")
       end
     end
   end

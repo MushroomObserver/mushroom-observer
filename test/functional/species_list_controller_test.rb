@@ -956,6 +956,8 @@ class SpeciesListControllerTest < FunctionalTestCase
       :author      => '(Batsch) Šutara',
       :text_name   => 'Tapinella atrotomentosa',
       :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
+      :sort_name   => 'Tapinella atrotomentosa (Batsch) Šutara',
+      :display_name => 'Tapinella atrotomentosa (Batsch) Šutara',
       :deprecated  => false,
       :rank        => :Species
     )

@@ -759,13 +759,13 @@ class Query < AbstractQuery
         self.join << :locations
         'locations.name ASC, location_descriptions.created ASC'
       elsif model == Name
-        'names.text_name ASC, names.author ASC'
+        'names.sort_name ASC'
       elsif model == NameDescription
         self.join << :names
-        'names.text_name ASC, names.author ASC, name_descriptions.created ASC'
+        'names.sort_name ASC, name_descriptions.created ASC'
       elsif model == Observation
         self.join << :names
-        'names.text_name ASC, names.author ASC, observations.when DESC'
+        'names.sort_name ASC, observations.when DESC'
       elsif model.column_names.include?('sort_name')
         "#{table}.sort_name ASC"
       elsif model.column_names.include?('name')

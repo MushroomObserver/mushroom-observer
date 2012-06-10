@@ -25,13 +25,9 @@ form_tag(:action => 'merge_descriptions', :id => description.id) do %>
       <span class="HelpNote"><%= :merge_descriptions_move_help.t %></span></p>
 
     <ul type="none">
-      <% for name in moves.sort(&lambda do |a,b|
-        x = ((a.deprecated ? 1 : 0) <=> (b.deprecated ? 1 : 0))
-        x = (a.text_name <=> b.text_name) if x == 0
-        x = (a.author <=> b.author) if x == 0
-        x = (a.id <=> b.id) if x == 0
-        x
-      end) %>
+      <% for name in moves.sort_by do |name|
+        [ (a.deprecated ? 1 : 0), a.sort_name, a.id ]
+      end %>
         <li><%= radio_button_tag(:target, "parent_#{name.id}",
                                  merges.length == 0 && moves.length == 1) %>
             <%= name.display_name.t %></li>

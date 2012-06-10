@@ -35,13 +35,13 @@ module ApplicationHelper::Paginator
     concat(str, block.binding)
   end
 
-  # Insert letterer pagination links.
+  # Insert letter pagination links.
   #
   #   # In controller:
   #   def action
   #     query = create_query(:Name)
   #     @pages = paginate_letters(:letter, :page, 50)
-  #     @names = query.paginate(@pages, :letter_field => 'names.text_name')
+  #     @names = query.paginate(@pages, :letter_field => 'names.sort_name')
   #   end
   #
   #   # In view:

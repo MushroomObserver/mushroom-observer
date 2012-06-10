@@ -14,6 +14,7 @@
 #                       Add limit to a SQL query, then pass it to find_by_sql.
 #  count_by_sql_wrapping_select_query::
 #                       Wrap a normal SQL query in a count query, then pass it to count_by_sql.
+#  revert_clone::       Clone and revert to old version (or return nil if version not found).
 #
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
@@ -72,6 +73,14 @@ class AbstractModel < ActiveRecord::Base
   #  :section: "Find" Extensions
   #
   ##############################################################################
+
+  # Make a full clone of the present instance, then revert it to an older version.
+  # Returns +nil+ if +version+ not found.
+  def revert_clone(version)
+    result = self.class.find(id)
+    result = nil if not result.revert_to(version)
+    return result
+  end
 
   # Extend AR.find(id) to accept either local id (integer or all-numeric
   # string) or global sync_id (alphanumeric string).  All else gets delegated

@@ -6,7 +6,7 @@
 
   new_tab_set do
     if name && !name.unknown?
-      add_tab(:google_images.t, 'http://images.google.com/images?q=%s' % name.text_name)
+      add_tab(:google_images.t, 'http://images.google.com/images?q=%s' % name.real_text_name)
       add_tab(:show_name_distribution_map.t, :controller => 'name', :action => 'map',
               :id => name.id, :params => query_params)
     end

@@ -732,8 +732,10 @@ class ApplicationController < ActionController::Base
     results = []
 
     # Do some really basic pre-parsing, stripping off author and spuh.
-    name = name.gsub('_',' ').strip_squeeze.capitalize_first
-    name = name.sub(/ sp\.?$/, '')
+    name = Name.clean_incoming_string(name).
+                gsub('ë', 'e').
+                sub(/ sp\.?$/, '').
+                gsub('_',' ').strip_squeeze.capitalize_first
     name = Name.parse_author(name).first # (strip author off)
 
     # Guess genus first, then species, and so on.
@@ -864,7 +866,7 @@ class ApplicationController < ActionController::Base
   # Inputs:
   #
   #   name_list         string, delimted by newlines (see below for syntax)
-  #   approved_names    array of search_names (or string delimited by "/")
+  #   approved_names    array of real_search_names (or string delimited by "/")
   #   deprecate?        are any created names to be deprecated?
   #
   # Syntax: (NameParse class does the actual parsing)
@@ -921,7 +923,7 @@ class ApplicationController < ActionController::Base
           elsif names.new_record?
             name.notes = comment
           else
-            flash_warning("Didn't save comment for #{name.search_name}, " +
+            flash_warning("Didn't save comment for #{name.real_search_name}, " +
                           "name already exists. (comment = \"#{comment}\")")
           end
         end
@@ -959,7 +961,7 @@ class ApplicationController < ActionController::Base
           if synonym.new_record?
             synonym.notes = comment
           else
-            flash_warning("Didn't save comment for #{synonym.search_name}, " +
+            flash_warning("Didn't save comment for #{synonym.real_search_name}, " +
                           "name already exists. (comment = \"#{comment}\")")
           end
         end

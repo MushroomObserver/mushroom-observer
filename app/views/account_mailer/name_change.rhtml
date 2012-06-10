@@ -40,7 +40,7 @@
     new_spell = @new_name.correct_spelling ? @new_name.correct_spelling.display_name : '--'
     license   = @new_desc ? @new_desc.license : nil
 
-    one_liners += "*#{:Name.l} #{is_now}:* #{@new_name.text_name}\n"     if @new_name.text_name  != @old_name.text_name
+    one_liners += "*#{:Name.l} #{is_now}:* #{@new_name.real_text_name}\n" if @new_name.real_text_name != @old_name.real_text_name
     one_liners += "*#{:Authority.l} #{is_now}:* #{@new_name.author}\n"   if @new_name.author     != @old_name.author
     one_liners += "*#{:Citation.l} #{is_now}:* #{@new_name.citation}\n"  if @new_name.citation   != @old_name.citation
     one_liners += "*#{:Rank.l} #{is_now}:* #{@new_name.rank}\n"          if @new_name.rank       != @old_name.rank

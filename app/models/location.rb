@@ -20,7 +20,6 @@
 #  version::       (V) Version number.
 #  ---
 #  name::          (V) Name, e.g.: "Lacy Park, Los Angeles Co., California, USA"
-#  search_name::   (-) Name, e.g.: "lacy park los angeles co california usa"
 #  north::         (V) North edge in degrees north, e.g. 37.8233
 #  south::         (V) South edge in degrees north, e.g. 37.8035
 #  east::          (V) East edge in degrees east, e.g. -122.173
@@ -69,7 +68,6 @@
 #
 #  == Callbacks
 #
-#  set_search_name::    Before save: update search_name.
 #  create_description:: After create: create (empty) official NameDescription.
 #  notify_users::       After save: send email notification.
 #
@@ -319,7 +317,7 @@ class Location < AbstractModel
   #
   #   pattern = Location.clean_name(pattern)
   #   locs = Location.find_all(
-  #     :conditions => ['search_name LIKE "%?%"', pattern]
+  #     :conditions => ['name LIKE "%?%"', pattern]
   #   )
   #
   def self.clean_name(str, leave_stars=false)
@@ -901,13 +899,6 @@ class Location < AbstractModel
   #  :section: Callbacks
   #
   ##############################################################################
-
-  # Callback that updates +search_name+ before saving a record.  See +clean_name+.
-  # def set_search_name
-  #   if new_record? || name_changed?
-  #     self.search_name = self.class.clean_name(name)
-  #   end
-  # end
 
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.

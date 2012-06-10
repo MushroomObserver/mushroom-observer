@@ -1,4 +1,4 @@
-<% @title ||= :eol_for_taxon_title.t(:name => @name.text_name) %>
+<% @title ||= :eol_for_taxon_title.t(:name => @name.real_text_name) %>
 
 <div>
   <%= link_to(:show_name.t(:name => @name.display_name), :controller => 'name',

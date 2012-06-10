@@ -1340,7 +1340,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_all
-    expect = Name.all(:order => 'text_name, author')
+    expect = Name.all(:order => 'sort_name')
     do_test_name_all(expect)
   rescue
     # Having problems with "Kuhner" and "Kühner" sorting correctly in all versions.

@@ -127,7 +127,7 @@ class API
     def initialize(name, others)
       super()
       args.merge!(:name => name.to_s,
-            :others => others.map(&:search_name).join(' / '))
+            :others => others.map(&:real_search_name).join(' / '))
     end
   end
 
@@ -218,7 +218,7 @@ class API
   class NameAlreadyExists < Error
     def initialize(str, name)
       super()
-      args.merge!(:new => str.to_s, :old => name.search_name)
+      args.merge!(:new => str.to_s, :old => name.real_search_name)
     end
   end
 

@@ -268,12 +268,12 @@ class Observation < AbstractModel
 
   # Name in plain text, never nil.
   def text_name
-    name.search_name
+    name.real_search_name
   end
 
   # Name in plain text with id to make it unique, never nil.
   def unique_text_name
-    "%s (%s)" % [name.search_name, id]
+    "%s (%s)" % [name.real_search_name, id]
   end
 
   # Textile-marked-up name, never nil.
@@ -298,7 +298,7 @@ class Observation < AbstractModel
   # problems with reloading requirements.
   def dump_votes
     namings.map do |n|
-      "#{n.id} #{n.name.search_name}: " +
+      "#{n.id} #{n.name.real_search_name}: " +
       (n.votes.empty? ? "no votes" : n.votes.map do |v|
         "#{v.user.login}=#{v.value}" + (v.favorite ? '(*)' : '')
       end.join(', '))
@@ -627,7 +627,7 @@ result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age
         best = Name.find(match[2].to_i)
       end
     end
-result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
+result += "unmash: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
@@ -693,7 +693,7 @@ result += "best: id=#{best_id2}, val=#{best_val2}, wgt=#{best_wgt2}, age=#{best_
         best = best_id2 ? Name.find(best_id2) : names.first
       end
     end
-result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>" if debug
+result += "unsynonymize: best=#{best ? best.real_text_name : "nil"}<br/>" if debug
 
     # This should only occur for observations created by
     # species_list.construct_observation(), which doesn't necessarily create
@@ -703,7 +703,7 @@ result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>" if debug
     # voting.)
     best = namings.first.name if !best && namings && namings.length > 0
     best = Name.unknown if !best
-result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
+result += "fallback: best=#{best ? best.real_text_name : 'nil'}" if debug
 
     # Make changes permanent.
     old = self.name

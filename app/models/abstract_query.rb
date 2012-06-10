@@ -49,7 +49,7 @@
 #    query = Query.lookup(:Observation)
 #    query.join  << :names
 #    query.where << 'names.correct_spelling_id IS NULL'
-#    query.order =  'names.search_name ASC'
+#    query.order =  'names.sort_name ASC'
 #
 #  Now you may execute it in various ways:
 #
@@ -89,7 +89,7 @@
 #
 #    # Or if you want to paginate by letter first, then page number:
 #    query = create_query(:Name)
-#    query.need_letters = 'names.search_name'
+#    query.need_letters = 'names.sort_name'
 #    @pages = paginate_letters
 #    @names = query.paginate(@pages)
 #

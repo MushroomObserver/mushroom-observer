@@ -167,7 +167,7 @@ class ImageController < ApplicationController
       args[:letters] = 'images.copyright_holder'
     # Paginate by letter if names are included in query.
     elsif query.uses_table?(:names)
-      args[:letters] = 'names.text_name'
+      args[:letters] = 'names.sort_name'
     end
 
     show_index_of_objects(query, args)
