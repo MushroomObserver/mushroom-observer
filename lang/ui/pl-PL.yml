@@ -4431,3 +4431,17 @@ eol_expanded_review_total_description_count: ! '[count] descriptions'
 eol_expanded_review_image_count: ! 'Images: [count]'
 eol_expanded_review_description_count: ! 'Descriptions: [count]'
 site_stats_life_list: ! 'Life List: [species] species in [genera] genera'
+email_name_change: ! 'User made nontrivial change to a name:
+
+
+  user: [user]
+
+  old: [old]
+
+  new: [new]
+
+  observations: [observations]
+
+  namings: [namings]
+
+  name: [url]'

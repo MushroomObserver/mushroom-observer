@@ -526,11 +526,13 @@ class NameController < ApplicationController
     pass_query_params
     @name = Name.find(params[:id])
     init_misspelling_fields
-    @can_make_changes = can_make_changes?(@name)
     if request.method == :post
       @parse = parse_name
       new_name, @parents = find_or_create_name_and_parents
       if new_name.new_record? or new_name == @name
+        unless can_make_changes? or minor_name_change?
+          email_admin_name_change
+        end
         update_correct_spelling
         any_changes = update_existing_name
         unless redirect_to_approve_or_deprecate
@@ -552,7 +554,6 @@ class NameController < ApplicationController
   def init_create_name_form
     @name = Name.new
     @name.rank = :Species
-    @can_make_changes = true
   end
 
   def reload_create_name_form_on_error(err)
@@ -579,21 +580,34 @@ class NameController < ApplicationController
     end
   end
 
-  # Only allowed to make substantive changes if you own all the references
-  # to it.  I think checking that the user owns all the namings that use it
-  # is correct.  Maybe we should also check observations?  But the
-  # observation simply caches the winning naming's name.  Actually not
-  # necessarily: obs might use the accepted name if the winning name is
-  # deprecated.  Hmmm, I'll check it to be safe.
-  def can_make_changes?(name)
+  # Only allowed to make substantive changes to name if you own all the references to it.
+  def can_make_changes?
     if not is_in_admin_mode?
-      for obj in name.namings + name.observations
+      for obj in @name.namings + @name.observations
         if obj.user_id != @user.id
           return false
         end
       end
     end
     return true
+  end
+
+  def minor_name_change?
+    old_name = @name.search_name
+    new_name = @parse.search_name
+    new_name.percent_match(old_name) > 0.9
+  end
+
+  def email_admin_name_change
+    content = :email_name_change.l(
+      :user => @user.login,
+      :old => @name.search_name,
+      :new => @parse.search_name,
+      :observations => @name.observations.length,
+      :namings => @name.namings.length,
+      :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
+    )
+    AccountMailer.deliver_webmaster_question(@user.email, content)
   end
 
   def parse_name

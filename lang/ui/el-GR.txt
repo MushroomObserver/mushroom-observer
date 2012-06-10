@@ -3190,6 +3190,16 @@ email_features_intro: >
   Τα ακόλουθα νέα χαρακτηριστικά προστέθηκαν στην ιστοσελίδα [:app_title]:\n
 
 email_location_merge: Ο χρήστης [user] θέλει να συγχωνεύσει την τοποθεσία [this] με την [that].
+email_name_change:  >
+  User made nontrivial change to a name:\n
+  \n
+  user: [user]\n
+  old: [old]\n
+  new: [new]\n
+  observations: [observations]\n
+  namings: [namings]\n
+  name: [url]\n
+
 email_name_merge: Ο χρήστης [user] θέλει να συγχωνεύσει το όνομα [this] με το [that].
 email_name_proposal_intro: >
   h2. *Πρόταση Ονόματος*\n

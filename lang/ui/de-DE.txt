@@ -3229,6 +3229,16 @@ email_location_merge:  >
   this: [this]\n
   into: [that]\n
 
+email_name_change:  >
+  User made nontrivial change to a name:\n
+  \n
+  user: [user]\n
+  old: [old]\n
+  new: [new]\n
+  observations: [observations]\n
+  namings: [namings]\n
+  name: [url]\n
+
 email_name_merge:  >
   User wants to merge two names, both with observations:\n
   \n
