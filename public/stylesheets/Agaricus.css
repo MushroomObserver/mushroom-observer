@@ -13,6 +13,7 @@ body {
     background-color: #f6f0f2; /* campestris */
     color: #3b2821; /* cupreobrunneus */
 }
+.faint { color: #988C89 }
 
 div.textile table         { background: #3b2821; } /* cupreobrunneus */
 div.textile table.noborder { background: #f6f0f2; } /* campestris */

@@ -20,12 +20,13 @@ class TranslationController < ApplicationController
     @ajax = false
     @page = params[:page]
     @tag = params[:tag]
-    @strings = @lang.localization_strings
-    @translated = @lang.translation_strings_hash
-    @edit_tags = tags_to_edit(@tag, @strings)
+    @originals = Language.official.localization_strings unless @lang.official
+    @translations = @lang.localization_strings
+    @translation_hash = @lang.translation_strings_hash
+    @edit_tags = tags_to_edit(@tag, @translations)
     update_translations(@edit_tags) if request.method == :post
-    tags_used = tags_used_on_page(@page) || @strings.keys
-    @show_tags = tags_to_show(tags_used, @strings)
+    tags_used = tags_used_on_page(@page) || @originals.keys
+    @show_tags = tags_to_show(tags_used, @translations)
     @form = build_form(@lang, @show_tags)
   end
 
@@ -33,8 +34,9 @@ class TranslationController < ApplicationController
     @ajax = true
     @lang = Language.find_by_locale(Locale.code)
     @tag = params[:tag]
-    @strings = @lang.localization_strings
-    @edit_tags = tags_to_edit(@tag, @strings)
+    @originals = Language.official.localization_strings unless @lang.official
+    @translations = @lang.localization_strings
+    @edit_tags = tags_to_edit(@tag, @translations)
     render(:partial => 'form')
   rescue => e
     render(:text => e.to_s, :status => 500)
@@ -44,11 +46,12 @@ class TranslationController < ApplicationController
     @ajax = true
     @lang = Language.find_by_locale(Locale.code)
     @tag = params[:tag]
-    @strings = @lang.localization_strings
-    @translated = @lang.translation_strings_hash
-    @edit_tags = tags_to_edit(@tag, @strings)
+    @originals = Language.official.localization_strings unless @lang.official
+    @translations = @lang.localization_strings
+    @translation_hash = @lang.translation_strings_hash
+    @edit_tags = tags_to_edit(@tag, @translations)
     update_translations(@edit_tags)
-    @new_val = @translated[@tag].text
+    @new_val = @translation_hash[@tag].text
     @new_val = preview_string(@new_val)
     render(:partial => 'ajax_post')
   rescue => e
@@ -59,11 +62,11 @@ class TranslationController < ApplicationController
   def update_translations(tags)
     any_changes = false
     for tag in tags
-      old_val = @strings[tag].to_s
+      old_val = @translations[tag].to_s
       new_val = params["tag_#{tag}"].to_s rescue ''
       old_val = @lang.clean_string(old_val)
       new_val = @lang.clean_string(new_val)
-      str = @translated[tag]
+      str = @translation_hash[tag]
       if not str
         create_translation(tag, new_val)
         any_changes = true
@@ -71,7 +74,7 @@ class TranslationController < ApplicationController
         change_translation(str, new_val)
         any_changes = true
       end
-      @strings[tag] = new_val
+      @translations[tag] = new_val
     end
     if any_changes
       @lang.update_localization_file

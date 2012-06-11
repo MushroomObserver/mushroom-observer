@@ -4446,3 +4446,9 @@ email_name_change: ! 'User made nontrivial change to a name:
 
   name: [url]'
 validate_name_sort_name_too_long: ! '[:validate_too_long(field=''''sort_name'''',max=100)]'
+edit_translations_original_text: Original Text
+edit_translations_singular: singular form
+edit_translations_plural: plural form
+edit_translations_lowercase: all lowercase as for end of sentence
+edit_translations_uppercase: all uppercase as for title
+runtime_create_name_success: ! '[:runtime_created_name(type=:name,value=name)]'

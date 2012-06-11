@@ -3,6 +3,7 @@ body {
     background-color: #F0F0F0;
     color: #000000;
 }
+.faint { color: #707070 }
 
 div.textile table         { background: #FFFFFF; }
 div.textile table.noborder { background: #FFFFFF; }

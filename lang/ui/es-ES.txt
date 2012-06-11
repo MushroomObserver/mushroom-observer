@@ -2855,6 +2855,11 @@ edit_translations_reviewer_required:  Only reviewers have permission to edit the
 edit_translations_created:  Created translation for [tag].
 edit_translations_changed:  Changed translation for [tag].
 edit_translations_no_changes:  Nothing changed.
+edit_translations_original_text:  Original Text
+edit_translations_singular:  singular form
+edit_translations_plural:  plural form
+edit_translations_lowercase:  all lowercase as for end of sentence
+edit_translations_uppercase:  all uppercase as for title
 edit_translations_page_expired:  The page you were working on has expired.  Please go back and reload it, then click on "[:app_edit_translations_on_page]" again.
 edit_translations_help:  On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file.  If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right.  Click "[:SAVE]" to save your changes.
 
@@ -3774,6 +3779,7 @@ runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
 runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
 runtime_ask_webmaster_success: "[:runtime_delivered_message]"
 runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
+runtime_create_name_success:  "[:runtime_created_name(type=:name,value=name)]"
 runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
 runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
 runtime_description_publish_denied: "[:runtime_description_must_be_admin]"

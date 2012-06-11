@@ -27,8 +27,8 @@
   }
 
   p.minor_header {
-    font-size: 130%;
-    margin: 1em 0em 0.5em 0em;
+    font-size: 100%;
+    margin: 1.7em 0em 0.3em 0em;
     padding: 0px;
   }
 
@@ -48,7 +48,7 @@
   }
 
   span.untranslated {
-    font-style: italic;
+    font-weight: bold;
   }
 
   span.tag {
@@ -81,12 +81,12 @@
     if (tag != undefined) {
       var span = $("str_" + tag);
       span.innerHTML = str;
-      span.className = "translated";
+      span.className = "translated faint";
     }
   }
 </script>
 
-<div class="HelpNote"><%= :edit_translations_help.t %></div>
+<div class="HelpNote" style="max-width:800px"><%= :edit_translations_help.t %></div>
 
 <table class="translation" cellspacing="10">
   <tr>
@@ -103,8 +103,8 @@
     content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'comment')
   when TranslationFormTagField
     tag = item.tag
-    str = preview_string(@strings[tag])
-    span_class = @translated[tag] ? 'translated' : 'untranslated faint'
+    str = preview_string(@translations[tag])
+    span_class = @translation_hash[tag] ? 'translated faint' : 'untranslated'
     str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
     label = content_tag(:span, h(tag) + ':', :class => 'tag')
     label = if @js

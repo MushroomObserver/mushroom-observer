@@ -1,13 +1,39 @@
 <%= hidden_field_tag(:tag, @tag) %>
+
+<% if not @lang.official %>
+  <big><%= :edit_translations_original_text.t %>:</big><br/><br/>
+  <% for tag in @edit_tags
+    str = @originals[tag].gsub(/\\n/, "\n")
+    str = h(str).gsub("\n", "<br/>\n") %>
+    <u><%= h(tag) %>:</u><br/>
+    <p><%= str %></p>
+  <% end %>
+  <hr/>
+  <br/>
+<% end %>
+
 <% for tag in @edit_tags
-  str = @strings[tag].gsub(/\\n/, "\n")
+  str = @translations[tag].gsub(/\\n/, "\n")
   rows = 1
   for line in str.each_line
     rows += (line.length / 80).truncate + 1
   end
-  rows = 5 if rows < 5
+  rows = @edit_tage.length > 1 ? 2 : 5 if rows < 2
+  notes = []
+  if tag.match(/s$/i) and @edit_tags.include?($`)
+    notes << :edit_translations_plural.t
+  elsif @edit_tags.include?(tag+'s') or @edit_tags.include?(tag+'S')
+    notes << :edit_translations_singular.t
+  end
+  if tag == tag.upcase and @edit_tags.include?(tag.downcase)
+    notes << :edit_translations_uppercase.t
+  elsif tag == tag.downcase and @edit_tags.include?(tag.upcase)
+    notes << :edit_translations_lowercase.t
+  end
+  note = notes.any? ? ' (' + notes.join(', ') + ')' : ''
   %>
-  <label for="tag_<%=tag%>"><%= h(tag) %>:</label><br/>
+  <label for="tag_<%=tag%>"><%= h(tag) %>:</label><%= note %><br/>
   <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80) %><br/><br/>
 <% end %>
+
 <center><%= submit_tag(:SAVE.l) %></center>

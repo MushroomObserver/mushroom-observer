@@ -10,6 +10,7 @@ pachycolea { background-color: #383138; color: #a39eb2; light-stipe: #aa9a83; da
 
 /* Global default colors */
 body { background-color: #383138; color: #bfc0bb; } /* pachycolea */
+.faint { color: #7b7879 }
 
 div.textile table         { background: #bfc0bb; } /* pachycolea */
 div.textile table.noborder { background: #383138; } /* pachycolea */

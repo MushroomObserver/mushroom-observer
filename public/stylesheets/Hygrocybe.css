@@ -5,6 +5,7 @@
 
 /* Global default colors */
 body { background-color: #e9e3af; /* punicea light-stipe */ color: #37372f; /* conica stain */ }
+.faint { color: #908d6f }
 
 div.textile table         { background: #37372f; } /* conica stain */
 div.textile table.noborder { background: #e9e3af; } /* punicea light-stipe */

@@ -6,6 +6,8 @@ body {
   background-color: #FFFF00;
 }
 
+.faint { color: #770077 }
+
 .Admin {
   font-size: 26px;
   font-weight: bold;

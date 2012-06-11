@@ -5,6 +5,7 @@
 
 /* Global default colors */
 body { background-color: #fae8b8; /* californicus */ color: #10110b; /* cornucopioides dark-hymenium */ }
+.faint { color: #857c61 }
 
 div.textile table         { background: #10110b; } /* cornucopioides dark-hymenium */
 div.textile table.noborder { background: #fae8b8; } /* californicus */
