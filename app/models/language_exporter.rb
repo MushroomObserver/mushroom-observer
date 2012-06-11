@@ -169,20 +169,24 @@ private
   end
 
   def write_localization_file(data)
-    File.open(localization_file, 'w') do |fh|
+    temp_file = localization_file + '.' + Process.pid.to_s
+    File.open(temp_file, 'w') do |fh|
       old_engine = YAML::ENGINE.yamler
       YAML::ENGINE.yamler = 'psych'
       YAML::dump(data, fh)
       YAML::ENGINE.yamler = old_engine
     end
+    File.rename(temp_file, localization_file)
   end
 
   def write_export_file_lines(output_lines)
-    File.open(export_file, 'w') do |fh|
+    temp_file = export_file + '.' + Process.pid.to_s
+    File.open(temp_file, 'w') do |fh|
       for line in output_lines
         fh.write(line)
       end
     end
+    File.rename(temp_file, export_file)
   end
 
   def merge_localization_strings_into(data)
