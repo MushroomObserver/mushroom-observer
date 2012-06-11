@@ -90,6 +90,7 @@ class TranslationController < ApplicationController
       :modified => Time.now,
       :user => @user
     )
+    @translation_hash[tag] = str
     str.update_localization
     flash_notice(:edit_translations_created.t(:tag => tag, :str => val)) if !@ajax
   end
