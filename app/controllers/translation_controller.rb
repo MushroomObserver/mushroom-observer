@@ -1,72 +1,111 @@
 # encoding: utf-8
 
 class TranslationController < ApplicationController
-  before_filter :authorize
 
-  def authorize
-    @lang = Language.find_by_locale(Locale.code)
-    if !@lang
-      raise "Can't find locale: #{Locale.code}"
-    elsif !@user
-      flash_error(:edit_translations_login_required.t)
-      redirect_back_or_default('/')
-    elsif @lang.official and !is_reviewer?
-      flash_error(:edit_translations_reviewer_required.t)
-      redirect_back_or_default('/')
-    end
-  end
+  # ----------------------------
+  #  :section: Edit Actions
+  # ----------------------------
 
   def edit_translations # :norobots:
+    @lang = get_language_and_authorize_user
     @ajax = false
     @page = params[:page]
-    @tag = params[:tag]
-    @originals = Language.official.localization_strings unless @lang.official
-    @translations = @lang.localization_strings
-    @translation_hash = @lang.translation_strings_hash
-    @edit_tags = tags_to_edit(@tag, @translations)
-    update_translations(@edit_tags) if request.method == :post
-    tags_used = tags_used_on_page(@page) || @originals.keys
-    @show_tags = tags_to_show(tags_used, @translations)
+    @tag = params[:commit] == :CANCEL.l ? nil : params[:tag]
+    @strings = @lang.localization_strings
+    @edit_tags = tags_to_edit(@tag, @strings)
+    @show_tags = tags_to_show(@page, @strings)
+    get_record_maps(@lang, @show_tags.keys + @edit_tags)
+    update_translations(@edit_tags) if params[:commit] == :SAVE.l
     @form = build_form(@lang, @show_tags)
+  rescue => e
+    raise error if TESTING and @lang
+    flash_error(*error_message(e))
+    redirect_back_or_default('/')
   end
 
   def edit_translations_ajax_get # :norobots:
+    @lang = get_language_and_authorize_user
     @ajax = true
-    @lang = Language.find_by_locale(Locale.code)
     @tag = params[:tag]
-    @originals = Language.official.localization_strings unless @lang.official
-    @translations = @lang.localization_strings
-    @edit_tags = tags_to_edit(@tag, @translations)
+    @strings = @lang.localization_strings
+    @edit_tags = tags_to_edit(@tag, @strings)
+    get_record_maps(@lang, @edit_tags)
     render(:partial => 'form')
   rescue => e
-    render(:text => e.to_s, :status => 500)
+    msg = error_message(e).join("\n")
+    render(:text => msg, :status => 500)
   end
 
   def edit_translations_ajax_post # :norobots:
+    @lang = get_language_and_authorize_user
     @ajax = true
-    @lang = Language.find_by_locale(Locale.code)
     @tag = params[:tag]
-    @originals = Language.official.localization_strings unless @lang.official
-    @translations = @lang.localization_strings
-    @translation_hash = @lang.translation_strings_hash
-    @edit_tags = tags_to_edit(@tag, @translations)
+    @strings = @lang.localization_strings
+    @edit_tags = tags_to_edit(@tag, @strings)
+    get_record_maps(@lang, @edit_tags)
     update_translations(@edit_tags)
-    @new_val = @translation_hash[@tag].text
-    @new_val = preview_string(@new_val)
     render(:partial => 'ajax_post')
   rescue => e
-    @error = e.to_s
+    @error = error_message(e).join("\n")
     render(:partial => 'ajax_error')
+  end
+
+  # -------------------------------
+  #  :section: Supporting Methods
+  # -------------------------------
+
+  def error_message(error)
+    msg = [error.to_s]
+    if DEVELOPMENT and @lang
+      for line in error.backtrace
+        break if line.match(/action_controller.*perform_action/)
+        msg << line
+      end
+    end
+    return msg
+  end
+
+  def get_language_and_authorize_user
+    locale = params[:locale] || Locale.code
+    lang = Language.find_by_locale(locale)
+    if !lang
+      raise(:edit_translations_bad_locale.t(:locale => locale))
+    elsif !@user
+      raise(:edit_translations_login_required.t)
+    elsif lang.official and !is_reviewer?
+      raise(:edit_translations_reviewer_required.t)
+    end
+    return lang
+  end
+
+  def get_record_maps(lang, tags)
+    @translated_records = build_record_map(lang, tags)
+    if lang.official
+      @official_records = @translated_records
+    else
+      @official_records = build_record_map(Language.official, tags)
+    end
+  end
+
+  def build_record_map(lang, tags)
+    result = {}
+    # (If we just get the strings for the given tags, then it doesn't update
+    # lang.translation_strings's cache correctly, and we have it end up loading
+    # all the strings later, anyway!)
+    for str in lang.translation_strings
+      result[str.tag] = str
+    end
+    return result
   end
 
   def update_translations(tags)
     any_changes = false
     for tag in tags
-      old_val = @translations[tag].to_s
+      old_val = @strings[tag].to_s
       new_val = params["tag_#{tag}"].to_s rescue ''
       old_val = @lang.clean_string(old_val)
       new_val = @lang.clean_string(new_val)
-      str = @translation_hash[tag]
+      str = @translated_records[tag]
       if not str
         create_translation(tag, new_val)
         any_changes = true
@@ -74,10 +113,11 @@ class TranslationController < ApplicationController
         change_translation(str, new_val)
         any_changes = true
       end
-      @translations[tag] = new_val
+      @strings[tag] = new_val
     end
     if any_changes
       @lang.update_localization_file
+      @lang.update_export_file
     else
       flash_warning(:edit_translations_no_changes.t) if !@ajax
     end
@@ -86,30 +126,26 @@ class TranslationController < ApplicationController
   def create_translation(tag, val)
     str = @lang.translation_strings.create(
       :tag => tag,
-      :text => val,
-      :modified => Time.now,
-      :user => @user
+      :text => val
     )
-    @translation_hash[tag] = str
+    @translated_records[tag] = str
     str.update_localization
     flash_notice(:edit_translations_created.t(:tag => tag, :str => val)) if !@ajax
   end
 
   def change_translation(str, val)
     str.update_attributes!(
-      :text => val,
-      :modified => Time.now,
-      :user => @user
+      :text => val
     )
     str.update_localization
     flash_notice(:edit_translations_changed.t(:tag => str.tag, :str => val)) if !@ajax
   end
 
-  def preview_string(str)
+  def preview_string(str, limit=250)
     str = @lang.clean_string(str)
     str = str.gsub(/\n/, ' / ')
-    if str.length > 250
-      str = str[0..250] + '...'
+    if str.length > limit
+      str = str[0..limit] + '...'
     end
     return str
   end
@@ -136,30 +172,36 @@ class TranslationController < ApplicationController
     return tag_list
   end
 
-  def tags_to_show(tags, strings)
+  def tags_to_show(page, strings)
     hash = {}
-    for tag3 in tags
-      tag2 = tag3 + 's'
-      tag1 = tag3.sub(/s$/i,'')
-      for tag in [
-        tag1.downcase,
-        tag2.downcase,
-        tag3.downcase,
-        tag1.upcase,
-        tag2.upcase,
-        tag3.upcase,
-        tag1,
-        tag2,
-        tag3,
-      ]
-        if strings[tag]
-          hash[tag] = true
-          break
-        end
-      end
+    for tag in tags_used_on_page(page) || strings.keys
+      primary = primary_tag(tag, strings)
+      hash[primary] = true
     end
     return hash
   end
+
+  def primary_tag(tag3, strings)
+    tag2 = tag3 + 's'
+    tag1 = tag3.sub(/s$/i,'')
+    for tag in [
+      tag1.downcase,
+      tag2.downcase,
+      tag3.downcase,
+      tag1.upcase,
+      tag2.upcase,
+      tag3.upcase,
+      tag1,
+      tag2
+    ]
+      return tag if strings[tag]
+    end
+    return tag3
+  end
+
+  # ----------------------------
+  #  :section: Edit Form
+  # ----------------------------
 
   def build_form(lang, tags, fh=nil)
     @form = []
@@ -250,25 +292,25 @@ class TranslationController < ApplicationController
     @major_head.clear
     @minor_head.clear
   end
-end
 
-class TranslationFormString
-  attr_accessor :string
-  def initialize(*strs)
-    self.string = strs.join("\n")
+  class TranslationFormString
+    attr_accessor :string
+    def initialize(*strs)
+      self.string = strs.join("\n")
+    end
+    alias to_s string
   end
-  alias to_s string
-end
 
-class TranslationFormMajorHeader < TranslationFormString
-end
+  class TranslationFormMajorHeader < TranslationFormString
+  end
 
-class TranslationFormMinorHeader < TranslationFormString
-end
+  class TranslationFormMinorHeader < TranslationFormString
+  end
 
-class TranslationFormComment < TranslationFormString
-end
+  class TranslationFormComment < TranslationFormString
+  end
 
-class TranslationFormTagField < TranslationFormString
-  alias tag string
+  class TranslationFormTagField < TranslationFormString
+    alias tag string
+  end
 end

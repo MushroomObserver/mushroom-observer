@@ -681,25 +681,25 @@ class ApplicationController < ActionController::Base
 
   # Report an informational message that will be displayed (in green) at the
   # top of the next page the User sees.
-  def flash_notice(str)
+  def flash_notice(*strs)
     session[:notice] += '<br/>' if session[:notice]
     session[:notice] ||= '0'
-    session[:notice] += str.to_s
+    session[:notice] += strs.map(&:to_s).join('<br/>')
   end
   helper_method :flash_notice
 
   # Report a warning message that will be displayed (in yellow) at the top of
   # the next page the User sees.
-  def flash_warning(str)
-    flash_notice(str)
+  def flash_warning(*strs)
+    flash_notice(*strs)
     session[:notice][0,1] = '1' if session[:notice][0,1] == '0'
   end
   helper_method :flash_warning
 
   # Report an error message that will be displayed (in red) at the top of the
   # next page the User sees.
-  def flash_error(str)
-    flash_notice(str)
+  def flash_error(*strs)
+    flash_notice(*strs)
     session[:notice][0,1] = '2' if session[:notice][0,1] != '2'
   end
   helper_method :flash_error

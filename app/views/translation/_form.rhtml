@@ -1,19 +1,25 @@
 <%= hidden_field_tag(:tag, @tag) %>
 
 <% if not @lang.official %>
-  <big><%= :edit_translations_original_text.t %>:</big><br/><br/>
+  <big><b><%= Language.official.name %>:</b></big><br/><br/>
   <% for tag in @edit_tags
-    str = @originals[tag].gsub(/\\n/, "\n")
-    str = h(str).gsub("\n", "<br/>\n") %>
-    <u><%= h(tag) %>:</u><br/>
-    <p><%= str %></p>
+    if record = @official_records[tag]
+      str = record.text.gsub(/\\n/, "\n") 
+      str = h(str).gsub("\n", "<br/>\n") %>
+      <u><%= h(tag) %>:</u><br/>
+      <p><%= str %></p>
+    <% end %>
   <% end %>
+
+  <br/>
   <hr/>
   <br/>
 <% end %>
 
+<big><b><%= @lang.name %>:</b></big><br/><br/>
+
 <% for tag in @edit_tags
-  str = @translations[tag].gsub(/\\n/, "\n")
+  str = @strings[tag].to_s.gsub(/\\n/, "\n")
   rows = 1
   for line in str.each_line
     rows += (line.length / 80).truncate + 1
@@ -33,7 +39,86 @@
   note = notes.any? ? ' (' + notes.join(', ') + ')' : ''
   %>
   <label for="tag_<%=tag%>"><%= h(tag) %>:</label><%= note %><br/>
-  <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80) %><br/><br/>
+  <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80,
+        :onchange => 'form_changed()', :onkeypress => 'form_changed()') %><br/><br/>
 <% end %>
 
-<center><%= submit_tag(:SAVE.l) %></center>
+<center>
+  <% if @js %>
+    <%= submit_tag(:SAVE.l, :onclick => 'submit_form()', :id => :save_button,
+                   :disabled => true) %>
+    <span style='margin-left:2em'>&nbsp;</span>
+    <%= button_to_function(:CANCEL.l, 'clear_form()', :id => :cancel_button,
+                   :disabled => true) %>
+    <span style='margin-left:2em'>&nbsp;</span>
+    <%= button_to_function(:RELOAD.l, "show_tag(LOCALE,'#{@tag}')", :id => :reload_button,
+                   :disabled => false) %>
+    <span style='margin-left:2em'>&nbsp;</span>
+    <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale),
+                   :onchange => "show_tag($('locale').value,'#{@tag}')") %>
+  <% else %>
+    <%= submit_tag(:SAVE.l) %>
+    <span style='margin-left:2em'>&nbsp;</span>
+    <%= submit_tag(:CANCEL.l) %>
+    <span style='margin-left:2em'>&nbsp;</span>
+    <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale)) %><%= submit_tag(:RELOAD.l) %>
+  <% end %>
+</center>
+
+<% any_versions = false
+user_logins = { @user.id => @user.login }
+for tag in @edit_tags
+  if record = @translated_records[tag]
+    user_logins[record.user_id] ||= record.user.login
+    last_text = record.text
+    versions_to_show = []
+    for version in record.versions.reverse
+      if version.text != last_text
+        versions_to_show << version
+        last_text = version.text
+      end
+    end
+    if versions_to_show.any?
+      if not any_versions
+        any_versions = true %>
+
+        <br/>
+        <hr/>
+        <br/>
+
+        <big><b><%= :edit_translations_old_versions.t %>:</b></big><br/><br/>
+      <% end %>
+      <u><%= h tag %>:</u><br/>
+      <table class="old_versions">
+        <% odd_or_even = 1
+        for version in versions_to_show
+          odd_or_even = 1 - odd_or_even %>
+          <tr class="ListLine<%=odd_or_even%>">
+            <td>
+              <%= user_id = version.user_id
+              login = user_logins[user_id] ||= User.find(user_id).login rescue ''
+              login.blank? ? '--' : user_link(user_id, login) %>
+            </td>
+            <td>
+              <%= version.modified.web_date %>
+            </td>
+            <td>
+              <%= h(str = preview_string(version.text, 80)) %>
+              <%= if str.length > 80
+                label = '[' + :edit_translations_full_text.t + ']'
+                if @js
+                  link_to_function(label, "show_old_version(#{version.id})")
+                else
+                  link_to(label, :controller => :ajax, :action => :old_translation,
+                          :id => version.id)
+                end
+              end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+      <br/>
+    <% end
+  end
+end %>
+ 

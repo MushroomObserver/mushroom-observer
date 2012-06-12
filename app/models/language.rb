@@ -42,6 +42,14 @@ class Language < AbstractModel
     find_all_by_official(false)
   end
 
+  # Returns an Array of pairs containing language name and locale.
+  # Useful for building pulldown menus using <tt>select_tag</tt> helper.
+  def self.menu_options
+    all.sort_by(&:order).map do |lang|
+      [ lang.name, lang.locale ]
+    end
+  end
+
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num=10)

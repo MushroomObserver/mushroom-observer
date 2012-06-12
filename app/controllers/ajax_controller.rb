@@ -16,12 +16,13 @@
 #
 #  == Actions
 #
-#  auto_complete:: Return list of strings matching a given string.
-#  export::        Change export status.
-#  geocode::       Look up extents for geographic location by name.
-#  image::         Serve image from web server until transferred to image server.
-#  pivotal::       Pivotal requests: look up, vote, or comment on story.
-#  vote::          Change vote on proposed name or image.
+#  auto_complete::    Return list of strings matching a given string.
+#  export::           Change export status.
+#  geocode::          Look up extents for geographic location by name.
+#  image::            Serve image from web server until transferred to image server.
+#  old_translation::  Return an old TranslationString by version id.
+#  pivotal::          Pivotal requests: look up, vote, or comment on story.
+#  vote::             Change vote on proposed name or image.
 #
 ################################################################################
 
@@ -39,7 +40,7 @@ class AjaxController < ApplicationController
     msg = e.to_s + "\n"
     if TESTING or DEVELOPMENT
       for line in e.backtrace
-        break if line.match(/action_controller.*`perform_action'/)
+        break if line.match(/action_controller.*perform_action/)
         msg += line + "\n"
       end
     end
@@ -135,6 +136,13 @@ class AjaxController < ApplicationController
     end
     file ="#{RAILS_ROOT}/test/fixtures/images/sticky.jpg" if TESTING
     send_file(file, :type => 'image/jpeg', :disposition => 'inline')
+  end
+
+  # Return an old TranslationString by version id.
+  def old_translation
+    id = params[:id].to_s
+    str = TranslationString::Version.find(id)
+    render(:text => str.text)
   end
 
   # Deal with Pivotal stories.  Renders updated story, vote controls, etc.

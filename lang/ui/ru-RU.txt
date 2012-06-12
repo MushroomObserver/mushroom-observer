@@ -362,6 +362,8 @@ MERGE: Соединить
 merge: соединить
 OKAY: OK
 okay: OK
+RELOAD:  Reload
+reload:  reload
 REMOVE: Удалить
 remove: удалить
 SAVE: Сохранить
@@ -670,11 +672,7 @@ vote_agreement_40: Под сомнением
 vote_agreement_20: Вряд ли
 vote_agreement_0: Точно не оно!
 
-# Query titles. Notes on [args]: \n
-# [type] is type of object being indexed / searched for (singular) \n
-# [types], [Type] and [Types] are the same thing but capitalized and/or plural \n
-# [order] is sort order (singular), e.g., "Name" or "Date" \n
-# [name], [location], [where], [pattern], etc. are un-translatable strings \n
+# Query titles.
 query_title_advanced_search: "[:app_advanced_search]"
 query_title_all: "[TYPE] Индекс"
 query_title_all_by: "[TYPES], параметр сортировки - [ORDER]"
@@ -2867,12 +2865,20 @@ translators_note_title: На заметку переводчикам
 
 # translation/edit_translations
 edit_translations_title:  Edit Translations
+edit_translations_bad_locale:  "Invalid locale code: [locale]"
 edit_translations_login_required:  Must be logged in to edit translations.
 edit_translations_reviewer_required:  Only reviewers have permission to edit the English translations.
 edit_translations_created:  Created translation for [tag].
 edit_translations_changed:  Changed translation for [tag].
 edit_translations_no_changes:  Nothing changed.
+edit_translations_saving:  Saving...
+edit_translations_loading:  Loading...
+edit_translations_will_lose_changes:  There are unsaved changes. Would you like to continue anyway?
+edit_translations_switch_language:  Switch Language
 edit_translations_original_text:  Original Text
+edit_translations_old_versions:  Old Versions
+edit_translations_full_text:  full text
+edit_translations_no_versions:  No old versions.
 edit_translations_singular:  singular form
 edit_translations_plural:  plural form
 edit_translations_lowercase:  all lowercase as for end of sentence

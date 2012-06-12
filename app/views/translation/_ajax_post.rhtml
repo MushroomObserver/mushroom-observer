@@ -1,4 +1,8 @@
-<%= javascript_tag %(
-  var tag = "#{j @tag}";
-  var str = "#{j h @new_val}";
-) %>
+<%=
+  new_val = preview_string(@translated_records[@tag].text)
+  javascript_tag %(
+    var locale = "#{j @lang.locale}";
+    var tag = "#{j @tag}";
+    var str = "#{j h new_val}";
+  )
+%>

@@ -122,7 +122,7 @@ module LanguageExporter
   end
 
   def read_export_file_lines
-    File.open(export_file, 'r').readlines
+    File.open(export_file, 'r:utf-8').readlines
   end
 
   # Return Hash mapping tag (String) to value (String), include official string
@@ -203,9 +203,7 @@ private
     unless safe_mode
       translation_strings.create(
         :tag => tag,
-        :text => new_val,
-        :modified => Time.now,
-        :user_id => User.current_id
+        :text => new_val
       )
     end
   end
@@ -216,9 +214,7 @@ private
     verbose("    now #{new_val.inspect}")
     unless safe_mode
       str.update_attributes(
-        :text => new_val,
-        :modified => Time.now,
-        :user_id => User.current_id
+        :text => new_val
       )
     end
   end

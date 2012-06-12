@@ -373,11 +373,11 @@ class AccountControllerTest < FunctionalTestCase
     flash[:rendered_notice] = nil
 
     get_without_clearing_flash(:test_flash, :error => 'error four', :redirect => 1)
-    assert_flash('error three<br/>error four')
+    assert_flash("error three\nerror four")
     flash[:rendered_notice] = nil
 
     get_without_clearing_flash(:test_flash, :error => 'error five')
-    assert_flash('error three<br/>error four<br/>error five')
+    assert_flash("error three\nerror four\nerror five")
     flash[:rendered_notice] = nil
 
     get_without_clearing_flash(:test_flash, :redirect => 1, :error => 'dont lose me!')

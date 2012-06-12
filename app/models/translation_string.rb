@@ -25,26 +25,36 @@ class TranslationString < AbstractModel
 
   acts_as_versioned(
     :table_name => 'translation_strings_versions',
-    :if_changed => [ 'text' ]
+    :if => :update_version?
   )
   non_versioned_columns.push('language_id', 'tag')
 
-  before_update do |record|
-    record.user = User.current || User.find(0)
+  # Called to determine whether or not to create a new version.
+  # Aggregate changes by the same user for up to a day.
+  def update_version?
+    result = false
+    self.user = User.current || User.admin
+    self.modified = Time.now unless modified_changed?
+    if text_changed? and text_change[0].to_s != text_change[1].to_s
+      latest = versions.latest
+      if not latest or # (for testing)
+         latest.user_id != user_id or
+         latest.modified < modified - 1.day
+        result = true
+      elsif latest.text != text or latest.modified.to_s != modified.to_s
+        latest.update_attributes(
+          :text => text,
+          :modified => modified
+        )
+      end
+    end
+    return result
   end
 
   # Update this string in the current set of translations Globalite is using.
   def update_localization
-    old_locale = Locale.code
-    new_locale = language.locale
-    if old_locale.to_s != new_locale.to_s
-      # I'd rather not switch locales frequently.  That seems an invitation
-      # for abuse in case the caller wants to update lots of strings.  Setting
-      # Locale.code is not very efficient.  I'd rather force the caller to
-      # change locale themselves, then call this method as much as they like.
-      raise "Trying to update #{new_locale} when #{old_locale} is current!"
-    end
-    Globalite.localizations[tag.to_sym] = text
+    data = Globalite.localization_data(language.locale)
+    raise "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
+    data[tag.to_sym] = text
   end
 end
-

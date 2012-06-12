@@ -1,6 +1,7 @@
 <%
   @title = :edit_translations_title.t
-  javascript_include('prototype.js')
+  javascript_include('prototype')
+  javascript_include('element_extensions')
 %>
 
 <style>
@@ -13,6 +14,14 @@
   table.translation td div {
     height: 1000px;
     overflow-y: auto;
+  }
+
+  table.old_versions td {
+    margin: 0px;
+    border: 0px;
+    padding: 1px 0.5em 1px 0.5em;
+    white-space: nowrap;
+    text-align: left;
   }
 
   p.form_div {
@@ -59,20 +68,78 @@
     height: 0px;
     border: 0px;
   }
+
+  div#whirly {
+    position: absolute;
+    border: 1px solid black;
+    padding: 1em 2em 1em 2em;
+    background: white;
+    color: black;
+    text-align: center;
+  }
 </style>
 
-<script>
-  function show_tag(tag) {
-    new Ajax.Request("edit_translations_ajax_get?tag=" + tag, {
+<%= javascript_tag %(
+  var LOCALE = "#{@lang.locale}";
+  var LOADED = false;
+  var CHANGED = false;
+  var CONFIRM_STRING = "#{:edit_translations_will_lose_changes.l}";
+  var LOADING_STRING = "#{:edit_translations_loading.l}";
+  var SAVING_STRING = "#{:edit_translations_saving.l}";
+
+  window.onbeforeunload = function() {
+    if (CHANGED)
+      return CONFIRM_STRING;
+  }
+
+  function form_changed() {
+    CHANGED = true;
+    $("save_button").disabled = "";
+    $("cancel_button").disabled = "";
+  }
+
+  function clear_form() {
+    $("form_div").innerHTML = "";
+    LOADED = false;
+    CHANGED = false;
+  }
+
+  function submit_form() {
+    CHANGED = false;
+    show_whirly(SAVING_STRING);
+    $("save_button").disabled = "disabled";
+    $("cancel_button").disabled = "disabled";
+  }
+
+  function show_old_version(id) {
+    show_whirly(LOADING_STRING);
+    new Ajax.Request("/ajax/old_translation/" + id, {
       asynchronous: true,
-      onFailure: function (response) {
+      onComplete: function (response) {
+        hide_whirly();
         alert(response.responseText);
-      },
-      onSuccess: function(response) {
-        var div = $("form_div");
-        div.innerHTML = response.responseText;
       }
-    })
+    });
+  }
+
+  function show_tag(locale, tag) {
+    LOCALE = locale;
+    if (!CHANGED || confirm(CONFIRM_STRING)) {
+      show_whirly(LOADING_STRING);
+      new Ajax.Request("edit_translations_ajax_get?locale=" + locale + "&tag=" + tag, {
+        asynchronous: true,
+        onFailure: function (response) {
+          hide_whirly();
+          alert(response.responseText);
+        },
+        onSuccess: function(response) {
+          hide_whirly();
+          $("form_div").innerHTML = response.responseText;
+          CHANGED = false;
+          LOADED = true;
+        }
+      });
+    }
   }
 
   function iframe_load() {
@@ -82,9 +149,31 @@
       var span = $("str_" + tag);
       span.innerHTML = str;
       span.className = "translated faint";
+    } else if (LOADED) {
+      CHANGED = true;
+      $("save_button").disabled = "";
+      $("cancel_button").disabled = "";
     }
+    hide_whirly();
   }
-</script>
+
+  function show_whirly(text) {
+    $("whirly_text").innerHTML = text;
+    div = $("whirly");
+    Element.center(div);
+    div.show();
+  }
+
+  function hide_whirly() {
+    var div = $("whirly");
+    div.hide();
+  }
+) if @js %>
+
+<div id="whirly" style="display:none">
+  <span id="whirly_text"></span><br/><br/>
+  <%= image_tag('indicator.gif') %>
+</div>
 
 <div class="HelpNote" style="max-width:800px"><%= :edit_translations_help.t %></div>
 
@@ -94,21 +183,24 @@
       <div>
 
 <% for item in @form %>
-  <%= case item
-  when TranslationFormMajorHeader
+  <%= case item.class.name
+  when /MajorHeader/
     content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'major_header')
-  when TranslationFormMinorHeader
+  when /MinorHeader/
     content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'minor_header')
-  when TranslationFormComment
+  when /Comment/
     content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'comment')
-  when TranslationFormTagField
+  when /TagField/
     tag = item.tag
-    str = preview_string(@translations[tag])
-    span_class = @translation_hash[tag] ? 'translated faint' : 'untranslated'
+    str = preview_string(@strings[tag])
+    official_record = @official_records[tag]
+    translated_record = @translated_records[tag]
+    up_to_date = translated_record && translated_record.modified >= official_record.modified - 1.second
+    span_class = up_to_date ? 'translated faint' : 'untranslated bright'
     str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
     label = content_tag(:span, h(tag) + ':', :class => 'tag')
     label = if @js
-      link_to_function(label, "show_tag('#{tag}')")
+      link_to_function(label, "show_tag(LOCALE,'#{tag}')")
     else
       link_to(label, :page => @page, :tag => tag)
     end
@@ -129,11 +221,11 @@
 else
   form_tag(:action => :edit_translations, :page => @page)
 end %>
-  <p id="form_div">
+  <div id="form_div">
     <%= if @edit_tags.any?
       render(:partial => 'form')
     end %>
-  </p>
+  </div>
 </form>
 <% if @js %>
   <iframe id="hidden_frame" name="hidden_frame" onload="iframe_load()" src=""></iframe>

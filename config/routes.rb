@@ -18,7 +18,7 @@ ActionController::Routing::Routes.draw do |map|
   # was: map.connect 'obs/:id', :controller => 'observer', :action => 'show_observation'
 
   # Short-hand notation for AJAX methods.
-  map.connect 'ajax/:action/:type/:id', :controller => 'ajax'
+  map.connect 'ajax/:action/:type/:id', :controller => 'ajax', :id => /\S.*/
 
   # Standard routes.
   map.connect ':controller/:action'

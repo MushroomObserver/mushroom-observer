@@ -88,7 +88,8 @@ module Globalite
     # If the country isn't unknown to the system, the country will be set as :*
     #
     def country=(country)
-      load_localization! if defined? RAILS_ENV && RAILS_ENV == 'development'
+      # XXX NO NO NO NO NO!!!! THIS DESTROYS PERFORMANCE OF DEVELOPMENT MODE!!!! XXX
+      # load_localization! if defined? RAILS_ENV && RAILS_ENV == 'development'
       country = country.to_s.upcase.to_sym if country.class == Symbol
       country = country.upcase.to_sym if country.class == String && !country.empty?
 
@@ -130,6 +131,11 @@ module Globalite
     # List localizations for the current locale
     def localizations 
       @@locales[Locale.code] || {} 
+    end
+
+    # XXX WE NEED ACCESS TO THIS HASH!!! XXX
+    def localization_data(locale)
+      @@locales[locale.to_sym]
     end
 
     # Return the translation for the key, a string can be passed to replaced a missing translation

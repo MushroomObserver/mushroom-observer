@@ -250,4 +250,11 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:vote, :type => :image, :id => 1, :value => 99)
     bad_ajax_request(:vote, :type => :image, :id => 99, :value => 0)
   end
+
+  def test_old_translation
+    str = TranslationString::Version.find(1)
+    bad_ajax_request(:old_translation, :id => 0)
+    good_ajax_request(:old_translation, :id => 1)
+    assert_equal(str.text, @response.body)
+  end
 end

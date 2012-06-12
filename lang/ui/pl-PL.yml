@@ -4452,3 +4452,14 @@ edit_translations_plural: plural form
 edit_translations_lowercase: all lowercase as for end of sentence
 edit_translations_uppercase: all uppercase as for title
 runtime_create_name_success: ! '[:runtime_created_name(type=:name,value=name)]'
+edit_translations_bad_locale: ! 'Invalid locale code: [locale]'
+edit_translations_saving: Saving...
+edit_translations_loading: Loading...
+edit_translations_will_lose_changes: There are unsaved changes. Would you like to
+  continue anyway?
+edit_translations_switch_language: Switch Language
+edit_translations_old_versions: Old Versions
+edit_translations_full_text: full text
+edit_translations_no_versions: No old versions.
+RELOAD: Reload
+reload: reload
