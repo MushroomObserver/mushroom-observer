@@ -357,4 +357,16 @@ class LocationTest < UnitTestCase
     assert_true(Location.is_unknown?('Worldwide'))
     assert_true(Location.is_unknown?('Anywhere'))
   end
+
+  def test_unknown
+    loc1 = locations(:unknown_location)
+    loc2 = Location.unknown
+    assert_objs_equal(loc1, loc2)
+    Locale.code = 'es-ES'
+    loc3 = Location.unknown
+    assert_objs_equal(loc1, loc3)
+    Globalite.localization_data(:'es-ES')[:unknown_locations] = 'Desconocido'
+    loc4 = Location.unknown
+    assert_objs_equal(loc1, loc4)
+  end
 end

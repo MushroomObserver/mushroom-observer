@@ -1617,11 +1617,15 @@ class Name < AbstractModel
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
   # already exist), returns it in an Array (genus first, then species, etc.  If
-  # there is ambiguity (due to different authors), then +nil+ is returned in
-  # the last slot.  Returns an Array of Name instances, *UNSAVED*!!
+  # there is ambiguity at any level (due to different authors), then +nil+ is
+  # returned in that slot.  Check last slot especially.  Returns an Array of
+  # Name instances, *UNSAVED*!! 
   #
   #   names = Name.find_or_create_name_and_parents('Letharia vulpina (L.) Hue')
-  #   names.each(&:save)
+  #   raise "Name is ambiguous!" if !names.last
+  #   for name in names
+  #     name.save if name and name.new_record?
+  #   end
   #
   def self.find_or_create_name_and_parents(in_str)
     result = []
@@ -1735,7 +1739,7 @@ class Name < AbstractModel
         raise :runtime_unable_to_create_name.t(:name => parse.parent_name)
       elsif save_parents
         for n in parents
-          n.save
+          n.save if n and n.new_record?
         end
       end
     end

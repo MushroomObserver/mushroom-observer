@@ -650,7 +650,7 @@ class NameController < ApplicationController
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
     for name in @parents + [@name]
-      save_name(name, :log_name_created) if name.new_record?
+      save_name(name, :log_name_created) if name and name.new_record?
     end
     flash_notice(:runtime_create_name_success.t(:name => @name.real_search_name))
   end
@@ -670,7 +670,7 @@ class NameController < ApplicationController
     # This name itself might have been a parent when we called
     # find_or_create... last time(!)
     for name in Name.find_or_create_parsed_name_and_parents(@parse)
-      save_name(name, :log_name_created) if name.new_record?
+      save_name(name, :log_name_created) if name and name.new_record?
     end
     return any_changes
   end

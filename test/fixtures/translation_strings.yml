@@ -1,5 +1,5 @@
 # Synopsis:
-# 0 admin: English: one, two/twos/TWO/TWOS, three, four
+# 0 admin: English: one, two/twos/TWO/TWOS, three, four, unknown_locations
 # 1 rolf:  French:  twos, TWOS
 # 2 mary:  French:  one, two, TWO   (and a past version of Greek one)
 # 4 dick:  Greek:   one, two
@@ -130,4 +130,13 @@ greek_two:
   text: δύο
   modified: 2012-05-31
   user_id: 4
+
+unknown_locations_string:
+  id: 15
+  version: 1
+  language_id: 1
+  tag: unknown_locations
+  text: Unknown, Everywhere, Anywhere, World
+  modified: 2012-05-31
+  user_id: 0
 

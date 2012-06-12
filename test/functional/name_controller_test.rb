@@ -636,6 +636,39 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(count + 5, Name.count)
   end
 
+  def test_create_species_under_ambiguous_genus
+    login('dick')
+    agaricus1 = names(:agaricus)
+    agaricus1.change_author('L.')
+    agaricus1.save
+    agaricus2 = Name.create!(
+      :text_name => 'Agaricus',
+      :search_name => 'Agaricus Raf.',
+      :sort_name => 'Agaricus Raf.',
+      :display_name => '**__Agaricus__** Raf.',
+      :author => 'Raf.',
+      :rank => :Genus,
+      :deprecated => false,
+      :correct_spelling => nil
+    )
+    agarici = Name.find_all_by_text_name('Agaricus')
+    assert_equal(2, agarici.length)
+    assert_equal('L.', agarici.first.author)
+    assert_equal('Raf.', agarici.last.author)
+    params = {
+      :name => {
+        :text_name => 'Agaricus endoxanthus',
+        :author => '',
+        :rank => :Species,
+        :citation => '',
+        :deprecated => 'false',
+      },
+    }
+    post(:create_name, params)
+    assert_flash_success
+    assert_response(:action => :show_name, :id => Name.last.id)
+  end
+
   # ----------------------------
   #  Edit name.
   # ----------------------------

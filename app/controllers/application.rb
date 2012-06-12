@@ -850,7 +850,7 @@ class ApplicationController < ActionController::Base
                                               :value => output_what)
       else
         for n in names
-          save_name(n, :log_updated_by) if n
+          save_name(n, :log_updated_by) if n and n.new_record?
         end
       end
       result = names.last
@@ -988,8 +988,8 @@ class ApplicationController < ActionController::Base
       end
     end
     for n in names
-      if n # Could be nil if parent is ambiguous with respect to the author
-        n.change_deprecated(deprecate) if deprecate && n.new_record?
+      if n and n.new_record? # Could be nil if parent is ambiguous with respect to the author
+        n.change_deprecated(deprecate) if deprecate
         save_name(n, log)
       end
     end

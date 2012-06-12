@@ -87,9 +87,8 @@ class API
       # Save it and any implictly-created parents (e.g. genus when creating
       # species for unrecognized genus).
       for name in names
-        if name
+        if name and name.new_record?
           name.save
-          name.add_editor(user)
         end
       end
       return name

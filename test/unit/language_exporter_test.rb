@@ -385,6 +385,7 @@ class LanguageExporterTest < UnitTestCase
       "TWOS: Twos\n",
       "three: three\n",
       "four: four\n",
+      "unknown_locations: Unknown, Everywhere, Anywhere, World\n",
     ])
     assert_false(@official.import_from_file, "Shouldn't have been any import changes.")
     assert_false(@official.strip, "Shouldn't have been any strip changes.")

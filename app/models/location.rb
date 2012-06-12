@@ -254,7 +254,14 @@ class Location < AbstractModel
   #   "unknown", "earth", "world", etc.
   #
   def self.names_for_unknown
-    :unknown_locations.l.split(/, */)
+    @@names_for_unknown ||= begin
+      # yikes! need to make sure we always include the English words for "unknown",
+      # even when viewing the site in another language
+      Language.official.translation_strings.find_by_tag('unknown_locations').text.split(/, */)
+    rescue
+      []
+    end
+    (@@names_for_unknown + :unknown_locations.l.split(/, */)).uniq
   end
 
   # Get an instance of the Name that means "unknown".
