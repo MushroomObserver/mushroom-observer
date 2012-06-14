@@ -925,7 +925,7 @@ log_object_updated: "[:log_object_updated_by_user]"
 app_title: Παρατηρητής Μανιταριών
 
 # This goes in the left-hand column.  The "<br/>" forces a line-break.
-app_banner: Mushroom<br/>Observer
+app_banner: Παρατηρητής<br/>Μανιταριών
 
 # These are the controls/links in the left-hand panel.
 app_intro: Εισαγωγή

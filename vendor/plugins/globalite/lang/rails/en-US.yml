@@ -36,13 +36,13 @@ date_helper_order:
 
 date_helper_date_formats: # DON'T  TRANSLATE, RE ORDER
   default: "%Y-%m-%d"
-  short: "%b %e"
-  long: "%B %e, %Y"
+  short: "%e %B"
+  long: "%e %B %Y"
 
 date_helper_time_formats: # DON'T  TRANSLATE, RE ORDER
   default: "%a, %d %b %Y %H:%M:%S %z"
   short: "%d %b %H:%M"
-  long: "%B %d, %Y %H:%M"
+  long: "%d %B %Y %H:%M"
 
 # added at the end of date if your date system doesn't use a 24 hours system
 date_helper_am: am

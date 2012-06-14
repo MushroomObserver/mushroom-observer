@@ -1,0 +1,62 @@
+date_helper_order:
+- :year
+- :month
+- :day
+date_helper_date_formats:
+  default: ! '%Y-%m-%d'
+  short: ! '%b %e'
+  long: ! '%B %e, %Y'
+date_helper_time_formats:
+  default: ! '%a, %b %d %Y %H:%M:%S %z'
+  short: ! '%b %d %H:%M'
+  long: ! '%B %d, %Y %H:%M'
+date_helper_am: am
+date_helper_pm: pm
+number_helper_separator: .
+number_helper_delimiter: ! ','
+array_connector: i
+array_skip_last_comma: 'false'
+date_helper_month_names:
+- - 
+- Styczeń
+- Luty
+- Marzec
+- Kwiecień
+- Maj
+- Czerwiec
+- Lipiec
+- Sierpień
+- Wrzesień
+- Październik
+- Listopad
+- Grudzień
+date_helper_abbr_month_names:
+- - 
+- Sty
+- Lut
+- Mar
+- Kwi
+- Maj
+- Cze
+- Lip
+- Sie
+- Wrz
+- Paź
+- Lis
+- Gru
+date_helper_day_names:
+- Niedziela
+- Poniedziałek
+- Wtorek
+- Środa
+- Czwartek
+- Piątek
+- Sobota
+date_helper_abbr_day_names:
+- Nie
+- Pon
+- Wto
+- Śro
+- Czw
+- Pią
+- Sob

@@ -29,10 +29,10 @@
 # COMMON WORDS AND PHRASES
 
 # Object titles, all nouns.
-API_KEY:  API Key
-api_key:  API key
-API_KEYS:  API Keys
-api_keys:  API keys
+API_KEY: API Claves
+api_key: API clave
+API_KEYS: API Claves
+api_keys: API claves
 COMMENT: Comentario
 comment: comentario
 COMMENTS: Comentarios
@@ -145,8 +145,8 @@ author: autor
 AUTHORS: Autores
 authors: autores
 # ("Authority" is authority on a scientific name.)
-ALTITUDE:  Altitude
-altitude:  altitude
+ALTITUDE: Altitud
+altitude: altitud
 AUTHORITY: Autor
 authority: autor
 AUTHORITYS: Autores
@@ -191,10 +191,10 @@ FULL_NAME: Nombre Propio
 full_name: nombre propio
 FULL_NAMES: Nombres Propios
 full_names: nombres propios
-ID:  ID
-id:  ID
-IDS:  IDs
-ids:  IDs
+ID: ID
+id: ID
+IDS: IDs
+ids: IDs
 IDENTIFIER: Identificador
 identifier: identificador
 IDENTIFIERS: Identificadores
@@ -362,8 +362,8 @@ MERGE: Fusionar
 merge: fusionar
 OKAY: Bien
 okay: bien
-RELOAD:  Reload
-reload:  reload
+RELOAD: Recargar
+reload: recargar
 REMOVE: Eliminar
 remove: eliminar
 SAVE: Guardar
@@ -376,8 +376,8 @@ SEARCH: Buscar
 search: buscar
 SEND: Enviar
 send: enviar
-SHOW:  Show
-show:  show
+SHOW: Mostrar
+show: mostrar
 SUBMIT: Enviar
 submit: enviar
 UPDATE: Actualizar
@@ -386,8 +386,8 @@ UPLOAD: Cargar
 upload: cargar
 
 # Common adjectives.
-ANONYMOUS:  Anonymous
-anonymous:  anonymous
+ANONYMOUS: Anónimo
+anonymous: anónimo
 BY: Por
 by: por
 CREATED: Creado
@@ -454,15 +454,15 @@ list_objects: Registrar [TYPES]
 remove_object: Eliminar [TYPE]
 remove_objects: Eliminar [TYPES]
 show_all: Mostrar Todos
-map_all:  Map All
+map_all: Cartografiar Todos
 show_name: Acerca de [NAME]
 show_object: Mostrar [TYPE]
 show_objects: Mostrar [TYPES]
 sort_by_object: Ordenar por [TYPE]
 
 # Other generic phrases.
-added_to_list:  Added observation to "[list]".
-attached_to_project:  Attached [object] to "[project]".
+added_to_list: Observación agregado a «[list]».
+attached_to_project: "[Object] adjunta a «[project]»."
 and_num_more: Y [num] más...
 are_you_sure: ¿Estás seguro?
 click_for_map: Hacer clic para mapa
@@ -470,8 +470,8 @@ google_images: Google Imágenes
 many_times: "[num] veces"
 one_time: una vez
 permission_denied: Permiso denegado.
-removed_from_list:  Removed observation from "[list]".
-removed_from_project:  Removed [object] from "[project]".
+removed_from_list: Observación eliminado de «[list]».
+removed_from_project: "[Object] eliminado de «[project]»."
 "YES": Sí
 "NO": "No"
 "yes": sí
@@ -485,7 +485,7 @@ removed_from_project:  Removed [object] from "[project]".
 units_meters: metros
 
 # Names we recognize for the "unknown" location: comma-separated list.
-unknown_locations:  Unknown, Earth, World, Worldwide, Anywhere, Everywhere
+unknown_locations: Desconocido, Tierra, Mundo, Todo el Mundo, Cualquier Lugar, Todas Partes
 
 # Quality values.
 image_vote_long_0: No opinion.
@@ -574,16 +574,16 @@ RANK_ORDER: Orden
 rank_order: orden
 RANK_PHYLUM: Phylum
 rank_phylum: phylum
-RANK_SECTION:  Section
-rank_section:  section
+RANK_SECTION: Sección
+rank_section: sección
 RANK_SPECIES: Especie
 rank_species: especie
-RANK_STIRPS:  Stirps
-rank_stirps:  stirps
-RANK_SUBGENUS:  Subgenus
-rank_subgenus:  subgenus
-RANK_SUBSECTION:  Subsection
-rank_subsection:  subsection
+RANK_STIRPS: Stirps
+rank_stirps: stirps
+RANK_SUBGENUS: Subgénero
+rank_subgenus: subgénero
+RANK_SUBSECTION: Subsección
+rank_subsection: subsección
 RANK_SUBSPECIES: Subespecie
 rank_subspecies: subespecie
 RANK_VARIETY: Variedad
@@ -604,16 +604,16 @@ RANK_PLURAL_ORDER: Ordenes
 rank_plural_order: ordenes
 RANK_PLURAL_PHYLUM: Phyla
 rank_plural_phylum: phyla
-RANK_PLURAL_SECTION:  Sections
-rank_plural_section:  sections
+RANK_PLURAL_SECTION: Secciones
+rank_plural_section: secciones
 RANK_PLURAL_SPECIES: Especies
 rank_plural_species: especies
-RANK_PLURAL_STIRPS:  Stirpes
-rank_plural_stirps:  stirpes
-RANK_PLURAL_SUBGENUS:  Subgenera
-rank_plural_subgenus:  subgenera
-RANK_PLURAL_SUBSECTION:  Subsections
-rank_plural_subsection:  subsections
+RANK_PLURAL_STIRPS: Stirpes
+rank_plural_stirps: stirpes
+RANK_PLURAL_SUBGENUS: Subgéneros
+rank_plural_subgenus: subgéneros
+RANK_PLURAL_SUBSECTION: Subsecciones
+rank_plural_subsection: subsecciones
 RANK_PLURAL_SUBSPECIES: Subespecies
 rank_plural_subspecies: subespecies
 RANK_PLURAL_VARIETY: Variedades
@@ -655,7 +655,7 @@ site_stats_species_list_entries: Entradas en Listas de Especies
 site_stats_species_lists: "[:SPECIES_LISTS]"
 site_stats_users: Miembros
 site_stats_votes: "[:VOTES]"
-site_stats_life_list:  "Life List: [species] species in [genera] genera"
+site_stats_life_list: "Lista de la Vida: [species] especies en [genera] géneros"
 
 # Vote descriptions.
 vote_no_opinion: Sin opinión
@@ -682,7 +682,7 @@ query_title_by_author: "[TYPES] «Autorados» por [USER]"
 query_title_by_editor: "[TYPES] Editados por [USER]"
 query_title_by_rss_log: "[TYPES] en Registro de Actividad"
 query_title_by_user: "[TYPES] por [USER]"
-query_title_for_project:  "[TYPES] attached to [PROJECT]"
+query_title_for_project: "[TYPES] Adjuntos a [PROJECT]"
 query_title_for_target: "[TYPES] sobre [TARGET]"
 query_title_for_user: "[TYPES] para [USER]"
 query_title_in_set: "[TYPES] Seleccionados"
@@ -811,7 +811,7 @@ query_help_user_pattern_search:  users matching a search string
 sort_by_header: "Ordenar por:"
 sort_by_id: ID
 sort_by_name: "[:NAME]"
-sort_by_filename:  File Name
+sort_by_filename: Nombre de Archivo
 sort_by_title: "[:TITLE]"
 sort_by_summary: "[:SUMMARY]"
 sort_by_date: "[:DATE]"
@@ -971,7 +971,7 @@ app_site_stats: Estadísticas del Sitio
 app_colors_from: Colores según [theme]
 app_powered_by: Hecho con
 app_preferred_browser: Preferencia navegador
-app_feature_tracker:  Feature Tracker
+app_feature_tracker: Desarrollo Futuro
 
 # This is for the search bar at the top of every page.
 app_find: Buscar
@@ -985,9 +985,9 @@ app_index_timer: "[num] resultados en [seconds] sec"
 # This shows up at the bottom of every page.  We recommend something like: \n
 # "Translated into <Language> by _user your-login_"
 app_translators_credit: Traducido al español por _user Jason Hollinger_
-app_translators_credit_and_others:  and others
-app_edit_translations:  Edit All Translations
-app_edit_translations_on_page:  Edit Translations on this Page
+app_translators_credit_and_others: y otros
+app_edit_translations: Editar Todas las Traducciones
+app_edit_translations_on_page: Editar las Traducciones en esta Página
 
 # These are general alerts that appear near the top of the page.
 app_no_ajax: Su Navegador No Está Actualizado
@@ -999,7 +999,7 @@ app_no_session: Usted Ha Deshabilitado las Cookies
 app_rss: Mushroom Observer RSS
 
 # Donation stuff.
-app_donate_banner:  "\"2011 Wrap-Up for Mushroom Observer\":/support/wrapup_2011"
+app_donate_banner: "\"2011 Recapitulación por Mushroom Observer\":/support/wrapup_2011"
 app_donate: Donar
 
 ################################################################################
@@ -1163,10 +1163,10 @@ form_images_when_taken: Cuando Fue Tomado
 form_images_when_help: Fecha en la que la fotografía se ha creado.
 form_images_notes_help: Escribir notas que son específicas para esta imagen.
 form_images_copyright_holder: Titular del Derecho de Autor
-form_images_original_name:  Original File Name
+form_images_original_name: Nombre de Archivo Original
 form_images_select_license: Seleccionar "Licencia":/observer/how_to_use#license
 form_images_license_help: Elegir "la licencia":/observer/how_to_use#license que desea utilizar para esta imagen.
-form_images_project_help:  Check any projects you wish to attach this image to.
+form_images_project_help: Seleccionar los proyectos que se desean adjuntar esta imagen para.
 
 
 # observer/_form_list_feedback
@@ -1246,7 +1246,7 @@ form_naming_confidence_help: ¿Cómo se confía?  Por favor, justificar cómo ll
 # observer/_form_observations
 form_observations_specimen_available: Especímen de Herbario Disponible
 form_observations_is_collection_location: ¿Es Dónde se Recolecta?
-form_observations_original_name:  Original File Name
+form_observations_original_name: Nombre de Archivo Original
 form_observations_upload_images: Subir Imágenes
 form_observations_upload_another: Subir Más...
 form_observations_edit_image: Editar Imagen
@@ -1260,8 +1260,8 @@ form_observations_specimen_available_help: Marquar esta casilla si hay un espec�
 form_observations_upload_help: Por favor, utilizar las casillas de la izquierda para seleccionar la imagen que le gustaría representar a esta observación.
 form_observations_where_help: Dónde se hizo la observación.  Esto debería, al menos, de ser exacta al estado, provincia o municipio (si aplicable). Ejemplos:<br/> Albion, Mendocino Co., California, USA<br/> Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brasil
 form_observations_dubious_help: Haga clic «[button]» a utilizar este nombre de la ubicación o editar a continuación el texto para corregir cualquier error tipográfico.
-form_observations_project_help:  Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
-form_observations_list_help:  Check and species lists you would like to add this observation to.
+form_observations_project_help: Seleccionar los proyectos que se desean adjuntar esta observación a. Todas las imágenes que subas también se adjunta a estos proyectos de forma automática.
+form_observations_list_help: Seleccione las listas de especies que le gustaría añadir esta observación.
 
 
 # observer/_form_species_list
@@ -1270,12 +1270,12 @@ form_species_lists_species_to_add: Seleccionar Especies que Agregar.
 form_species_lists_write_in_species: "Escribir Especies: (un nombre por línea)"
 form_species_lists_list_notes: Notas para la Lista de Especies
 form_species_lists_member_notes: Notas para los Nuevos Miembros
-form_species_lists_confidence:  Confidence in identifications
+form_species_lists_confidence: La confianza en las identificaciones
 form_species_lists_deprecated: Los siguientes nombres no son válidos
 form_species_lists_deprecated_help: Elija los nombres que prefiere utiizar.  Si prefiere un nombre que ha introducido, no seleccione cualquiera de los nombres sugeridos.
 form_species_lists_multiple_names: Múltiples nombres coinciden con cada uno de los siguientes nombres
 form_species_lists_multiple_names_help: En cada caso, seleccione el nombre que le prefiere.  El número después de cada nombre es el número de observaciones que están utilizando ese nombre.
-form_species_lists_project_help:  Check any projects you wish to attach this species list to.  Any observations you create for this species list will also automatically be attached to these projects, too.  (But not pre-existing observations.)
+form_species_lists_project_help: Seleccionar los proyectos que desea adjuntar esta lista de especies a. Todas las observaciones que crea para esta lista también se adjunta a estos proyectos de forma automática. (Pero no observaciones preexistentes.)
 
 
 # observer/_form_synonyms
@@ -1347,7 +1347,7 @@ image_show_large: Grande
 image_show_huge: Enorme
 image_show_full_size: Completo
 image_show_original: Mostrar la Imágen Original
-image_show_original_name:  Original File Name
+image_show_original_name: Nombre de Archivo Original
 image_show_make_default: Hacen de este el tamaño predeterminado.
 
 
@@ -1465,19 +1465,19 @@ prefs_login: Nombre de usuario
 prefs_email: Dirección de Correo Electrónico
 prefs_password_new: Nueva contraseña
 prefs_password_confirm: Confirmar nueva contraseña
-prefs_appearance:  Appearance
+prefs_appearance: Apariencia
 prefs_theme: Tema preferido
 prefs_locale: Idioma
 prefs_location_format: Formato de la ubicación
 prefs_location_format_postal: "Postal: (Santiago, Chile)"
 prefs_location_format_scientific: "Científica: (Chile, Santiago)"
-prefs_hide_authors:  "[:AUTHORITYS]"
-prefs_hide_authors_none:  show all authorities (default)
-prefs_hide_authors_above_species:  hide authorities for genera and higher ranks
+prefs_hide_authors: Autoridades
+prefs_hide_authors_none: mostrar todas las autoridades (por defecto)
+prefs_hide_authors_above_species: ocultar las autoridades para los géneros y los rangos más altos
 prefs_thumbnail_size: Tamaño de las miniaturas
 prefs_thumbnail_small: "[:image_show_small]"
 prefs_thumbnail_large: "[:image_show_large]"
-prefs_thumbnail_maps:  Show thumbnail map on observation page?
+prefs_thumbnail_maps: Mostrar mapa en miniatura en la página de observación?
 prefs_image_size: Tamaño de las imágenes
 prefs_image_size_help: Tamaño de la muestra al hacer clic en una imagen.
 prefs_image_small: "[:image_show_small] (320 x 320)"
@@ -1486,19 +1486,19 @@ prefs_image_large: "[:image_show_large] (960 x 960)"
 prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
 prefs_image_full_size: "[:image_show_full_size]"
 prefs_layout_title: Diseño de páginas de listas
-prefs_rows_by: filas x
+prefs_rows_by: filas ×
 prefs_columns: columnas
 prefs_alt_col_colors: Alternar los colores de las columnas.
 prefs_alt_row_colors: Alternar los colores de las filas.
 prefs_text_below_images: Poner texto debajo de las imágenes.
-prefs_privacy:  Privacy settings
+prefs_privacy: Privacidad
 prefs_votes_anonymous: Votos sobre nombres propuestas y imágenes
 prefs_votes_anonymous_no: Siempre públicos
 prefs_votes_anonymous_yes: Siempre anónimos
 prefs_votes_anonymous_old: Públicos después de [cutoff]
-prefs_keep_image_filenames:  Keep original file name of uploaded images?
-prefs_keep_image_filenames_help:  Only you will be able to see them.
-prefs_bulk_filename_purge:  Purge All Filenames from Database
+prefs_keep_image_filenames: ¿Deja el nombre de archivo original de las imágenes cargadas?
+prefs_keep_image_filenames_help: Sólo usted será capaz de verlos.
+prefs_bulk_filename_purge: Purgar Todos Nombres de Archivos de Base de Datos
 prefs_bulk_filename_purge_confirm:  Are you sure you want to purge all image filenames from our database? This action cannot be undone.  Please note that no one but you is able to see these filenames, anyway.
 prefs_bulk_filename_purge_success:  Successfully purged all image filenames from our database.
 prefs_change_image_vote_anonymity:  Change Image Vote Anonymity
@@ -2832,11 +2832,11 @@ theme_black_on_white_description:  This is a simple Black on White theme that at
 theme_switch:  To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme
 
 # Theme names.
-Agaricus:  Agaricus
-Amanita:  Amanita
-Cantharellaceae:  Cantharellaceae
-Hygrocybe:  Hygrocybe
-BlackOnWhite:  Black on White
+Agaricus: Agaricus
+Amanita: Amanita
+Cantharellaceae: Cantharellaceae
+Hygrocybe: Hygrocybe
+BlackOnWhite: Blanco y Negro
 
 
 

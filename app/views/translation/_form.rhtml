@@ -46,7 +46,7 @@
 <center>
   <% if @js %>
     <%= submit_tag(:SAVE.l, :onclick => 'submit_form()', :id => :save_button,
-                   :disabled => true) %>
+                   :disabled => false) %>
     <span style='margin-left:2em'>&nbsp;</span>
     <%= button_to_function(:CANCEL.l, 'clear_form()', :id => :cancel_button,
                    :disabled => true) %>

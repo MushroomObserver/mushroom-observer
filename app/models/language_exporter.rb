@@ -56,9 +56,7 @@ module LanguageExporter
 
   # Update the YAML file used by Globalite.
   def update_localization_file
-    old_data = read_localization_file
-    new_data = localization_strings
-    write_localization_file(old_data.merge(new_data))
+    write_localization_file(localization_strings)
   end
 
   # Update the editable export file.

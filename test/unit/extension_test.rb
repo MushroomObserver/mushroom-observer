@@ -39,12 +39,41 @@ class ExtensionTest < UnitTestCase
     assert_equal('Species list', Symbol.test_localize('[:Species_list]'))
     assert_equal('Species list', Symbol.test_localize('[:sPeCiEs_lIsT]'))
     assert_equal('Species List', Symbol.test_localize('[:SPECIES_LIST]'))
+  end
 
-    # Test recursion.
-    assert_equal('bob', :_unit_test_z.l)
-    assert_equal('bob', :_unit_test_y.l)
-    assert_equal('bob', :_unit_test_x.l)
-    assert_not_equal('bob', :_unit_test_a.l)
+  def test_localize_postprocessing_recursion
+# 
+# _unit_test_a: ! '[:_unit_test_b]'
+# _unit_test_b: ! '[:_unit_test_c]'
+# _unit_test_c: ! '[:_unit_test_d]'
+# _unit_test_d: ! '[:_unit_test_e]'
+# _unit_test_e: ! '[:_unit_test_f]'
+# _unit_test_f: ! '[:_unit_test_g]'
+# _unit_test_g: ! '[:_unit_test_h]'
+# _unit_test_h: ! '[:_unit_test_i]'
+# _unit_test_i: ! '[:_unit_test_j]'
+# _unit_test_j: ! '[:_unit_test_k]'
+# _unit_test_k: ! '[:_unit_test_l]'
+# _unit_test_l: ! '[:_unit_test_m]'
+# _unit_test_m: ! '[:_unit_test_n]'
+# _unit_test_n: ! '[:_unit_test_o]'
+# _unit_test_o: ! '[:_unit_test_p]'
+# _unit_test_p: ! '[:_unit_test_q]'
+# _unit_test_q: ! '[:_unit_test_r]'
+# _unit_test_r: ! '[:_unit_test_s]'
+# _unit_test_s: ! '[:_unit_test_t]'
+# _unit_test_t: ! '[:_unit_test_u]'
+# _unit_test_u: ! '[:_unit_test_v]'
+# _unit_test_v: ! '[:_unit_test_w]'
+# _unit_test_w: ! '[:_unit_test_x]'
+# _unit_test_x: ! '[:_unit_test_y]'
+# _unit_test_y: ! '[:_unit_test_z]'
+# _unit_test_z: bob
+# 
+#     assert_equal('bob', :_unit_test_z.l)
+#     assert_equal('bob', :_unit_test_y.l)
+#     assert_equal('bob', :_unit_test_x.l)
+#     assert_not_equal('bob', :_unit_test_a.l)
   end
 
   # ----------------------------

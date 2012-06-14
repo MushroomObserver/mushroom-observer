@@ -1,0 +1,62 @@
+date_helper_order:
+- :day
+- :month
+- :year
+date_helper_date_formats:
+  default: ! '%d.%m.%Y'
+  short: ! '%e. %b'
+  long: ! '%e. %B %Y'
+date_helper_time_formats:
+  default: ! '%a, %d. %b %Y, %H:%M:%S %z'
+  short: ! '%d. %b, %H:%M'
+  long: ! '%d. %B %Y, %H:%M'
+date_helper_am: am
+date_helper_pm: pm
+number_helper_separator: ! ','
+number_helper_delimiter: .
+array_connector: and
+array_skip_last_comma: 'false'
+date_helper_month_names:
+- - 
+- Ιανουάριος
+- Φεβρουάριος
+- Μάρτιος
+- Απρίλιος
+- Μάιος
+- Ιούνιος
+- Ιούλιος
+- Αύγουστος
+- Σεπτέμβριος
+- Οκτώβριος
+- Νοέμβριος
+- Δεκέμβριος
+date_helper_abbr_month_names:
+- - 
+- Ιαν
+- Φεβ
+- Μάρ
+- Απρ
+- Μάι
+- Ιού
+- Ιού
+- Αύγ
+- Σεπ
+- Οκτ
+- Νοέ
+- Δεκ
+date_helper_day_names:
+- Κυριακή
+- Δευτέρα
+- Τρίτη
+- Τετάρτη
+- Πέμπτη
+- Παρασκευή
+- Σάββατο
+date_helper_abbr_day_names:
+- Κυρ
+- Δευ
+- Τρί
+- Τετ
+- Πέμ
+- Παρ
+- Σάβ

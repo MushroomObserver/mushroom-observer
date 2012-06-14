@@ -971,7 +971,7 @@ app_site_stats: Stats du site
 app_colors_from: Couleurs selon [theme]
 app_powered_by: Construite sur
 app_preferred_browser: Navigateur préféré
-app_feature_tracker: Traceur de Characteristiques
+app_feature_tracker:  Feature Tracker
 
 # This is for the search bar at the top of every page.
 app_find: Trouver
@@ -1353,7 +1353,7 @@ image_show_large: Grande
 image_show_huge: Énorme
 image_show_full_size: Taille entière
 image_show_original: Afficher l'image originale
-image_show_original_name: Nom du fichier original
+image_show_original_name:  Original File Name
 image_show_make_default: Faire de cette la taille par défaut.
 
 
@@ -2844,8 +2844,8 @@ theme_black_on_white_description:  This is a simple Black on White theme that at
 theme_switch:  To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme
 
 # Theme names.
-Agaricus: Agaricus
-Amanita: Amanita
+Agaricus:  Agaricus
+Amanita:  Amanita
 Cantharellaceae:  Cantharellaceae
 Hygrocybe:  Hygrocybe
 BlackOnWhite:  Black on White
