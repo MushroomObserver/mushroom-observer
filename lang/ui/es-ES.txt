@@ -1674,8 +1674,8 @@ show_name_latest_review: "Última Revisión: [date] para [user]"
 show_name_previous_version: Versión Anterior
 show_name_other_versions: Otros Versiones
 show_name_observations: Observaciones
-show_name_observations_of:  More [:OBSERVATIONS] of [name]
-show_name_all_observations:  More [:OBSERVATIONS] (all synonyms)
+show_name_observations_of: Más observationes de [name]
+show_name_all_observations: Más observaciones (todos los sinónimos)
 show_name_synonym_observations: Observaciones de Sinónimos
 show_name_other_observations: Observaciones Similares
 show_name_subtaxa_observations: Observaciones de Taxones Inferiores
@@ -2841,7 +2841,17 @@ BlackOnWhite: Blanco y Negro
 
 
 # observer/translators_note
-translators_note: Por favor, ayúdenos a hacer de este sitio web disponible en todo el mundo! Es fácil.  Hay alrededor de 1.600 líneas o 11.000 palabras de texto en este sitio por el momento, pero no dejes que te asustan.  Hemos organizado a fin de que alguien con tiempo limitado puede concentrarse sólo en las primeras secciones, y obtener el más comúnmente utilizado texto hecho en primer lugar. Luego con el tiempo y la energía lo permite, él o alguien más pueda seguir trabajando por la lista hasta que un día es todos los acabados.  Por favor, siéntase libre para recoger una copia de "los archivos de traducción":[repo] y empezar a traducir en cualquier idioma que desee.  A continuación, "enviarnos un correo electrónico":/observer/ask_webmaster_question cuando termine haciendo lo que puede, y vamos a decirle cómo presentar su trabajo. Usted recibirá crédito destacado por su contribución, además, por supuesto, a nuestra eterna gratitud.
+translators_note: >
+  ¡Por favor, ayudarnos a traducir este sitio web en español! Es muy fácil.\n
+  \n
+  Hay aproximadamente 3000 líneas con 25.000 palabras del texto de este sitio por el momento, pero no dejes que esto le asusta. Lo hemos organizado de tal manera que alguien con tiempo limitado se puede concentrar en el texto más importante. Luego, cuando el tiempo lo permite, que ellos o alguien más puede continuar trabajando por la lista hasta que un día todo está terminado.\n
+  \n
+  Hay varias maneras de empezar. Usted puede recoger una copia del "archivo de traducción completa":[repo] y empezar a traducir a cualquier idioma que desee. "Envíenos un e-mail":/observer/ask_webmaster_question cuando termine de hacer lo que pueda, y le diremos la forma de presentar su trabajo.\n
+  \n
+  Es todavía más fácil trabajar en las traducciones existentes. Sólo tienes que buscar «[:app_edit_translations]» en la parte inferior de cualquier página. Usted puede ver inmediatamente cómo sus cambios aparecen en el contexto de la página. Si su idioma no está disponible, "envíenos un e-mail":/observer/ask_webmaster_question y podemos crear una versión «beta» para que usted pueda trabajar.\n
+  \n
+  Usted, por supuesto, recibir el crédito y el bono contribución para cada línea se traduce, además de la gratitud de innumerables usuarios.\n
+
 translators_note_title: Nota del Traductor
 
 
