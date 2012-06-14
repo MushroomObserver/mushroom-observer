@@ -118,38 +118,39 @@ class AccountController < ApplicationController
   def verify # :nologin:
     id        = params['id']
     auth_code = params['auth_code']
-    user = User.find(id)
+    if user = find_or_goto_index(User, id)
 
-    # This will happen legitimately whenever a non-verified user tries to
-    # login.  The user just gets redirected here instead of being properly
-    # logged in.  "auth_code" will be missing.
-    if auth_code != user.auth_code
-      @unverified_user = user
-      render(:action => "reverify")
+      # This will happen legitimately whenever a non-verified user tries to
+      # login.  The user just gets redirected here instead of being properly
+      # logged in.  "auth_code" will be missing.
+      if auth_code != user.auth_code
+        @unverified_user = user
+        render(:action => "reverify")
 
-    # If already logged in and verified, just send to "welcome" page.
-    elsif @user == user
-      redirect_to(:action => :welcome)
+      # If already logged in and verified, just send to "welcome" page.
+      elsif @user == user
+        redirect_to(:action => :welcome)
 
-    # If user is already verified, send them back to the login page.  (If
-    # someone grabs a user's verify email, they could theoretically use it to
-    # log in any time they wanted to.  This makes it a one-time use.)
-    elsif user.verified
-      flash_warning(:runtime_reverify_already_verified.t)
-      redirect_to(:action => :login)
+      # If user is already verified, send them back to the login page.  (If
+      # someone grabs a user's verify email, they could theoretically use it to
+      # log in any time they wanted to.  This makes it a one-time use.)
+      elsif user.verified
+        flash_warning(:runtime_reverify_already_verified.t)
+        redirect_to(:action => :login)
 
-    # If not already verified, and the code checks out, then mark account
-    # "verified", log user in, and display the "you're verified" page.
-    else
-      @user = user
-      @user.last_login = now = Time.now
-      @user.verified   = now
-      @user.save
-      set_session_user(@user)
-      Transaction.put_user(
-        :id         => @user,
-        :set_verify => @user.verified
-      )
+      # If not already verified, and the code checks out, then mark account
+      # "verified", log user in, and display the "you're verified" page.
+      else
+        @user = user
+        @user.last_login = now = Time.now
+        @user.verified   = now
+        @user.save
+        set_session_user(@user)
+        Transaction.put_user(
+          :id         => @user,
+          :set_verify => @user.verified
+        )
+      end
     end
   end
 
@@ -160,10 +161,11 @@ class AccountController < ApplicationController
 
   # This is used by the "reverify" page to re-send the verification email.
   def send_verify # :nologin:
-    user = User.find(params[:id])
-    AccountMailer.deliver_verify(user)
-    flash_notice :runtime_reverify_sent.t
-    redirect_back_or_default(:action => :welcome)
+    if user = find_or_goto_index(User, params[:id])
+      AccountMailer.deliver_verify(user)
+      flash_notice :runtime_reverify_sent.t
+      redirect_back_or_default(:action => :welcome)
+    end
   end
 
   # This is the welcome page for new users who just created an account.
@@ -551,17 +553,18 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key # :login: :norobots:
-    @key = ApiKey.find(params[:id])
-    if check_permission!(@key)
-      if request.method == :post
-        if params[:commit] == :UPDATE.l
-          @key.update_attributes!(params[:key])
-          flash_notice(:account_api_keys_updated.t)
+    if @key = find_or_goto_index(ApiKey, params[:id])
+      if check_permission!(@key)
+        if request.method == :post
+          if params[:commit] == :UPDATE.l
+            @key.update_attributes!(params[:key])
+            flash_notice(:account_api_keys_updated.t)
+          end
+          redirect_to(:action => :api_keys)
         end
+      else
         redirect_to(:action => :api_keys)
       end
-    else
-      redirect_to(:action => :api_keys)
     end
   rescue => e
     flash_error(e.to_s)
@@ -623,35 +626,36 @@ class AccountController < ApplicationController
   def create_alert # :root:
     redirect = true
     id = params[:id]
-    @user2 = User.find(id)
-    if is_in_admin_mode?
-      if request.method == :get
-        # render form
-        redirect = false
-      elsif request.method == :post
-        if params[:commit] == :user_alert_save.l
-          @user2.alert_type  = params[:user2][:alert_type]
-          @user2.alert_notes = params[:user2][:alert_notes]
-          if params[:user2][:alert_type].blank?
-            flash_error :user_alert_missing_type.t
-            @user2.errors.add(:alert_type)
-            redirect = false
+    if @user2 = find_or_goto_index(User, id)
+      if is_in_admin_mode?
+        if request.method == :get
+          # render form
+          redirect = false
+        elsif request.method == :post
+          if params[:commit] == :user_alert_save.l
+            @user2.alert_type  = params[:user2][:alert_type]
+            @user2.alert_notes = params[:user2][:alert_notes]
+            if params[:user2][:alert_type].blank?
+              flash_error :user_alert_missing_type.t
+              @user2.errors.add(:alert_type)
+              redirect = false
+            else
+              @user2.alert_created      = now = Time.now
+              @user2.alert_next_showing = now
+              @user2.alert_user_id      = @user.id
+              @user2.save
+              flash_notice :user_alert_saved.t(:user => @user2.login)
+            end
           else
-            @user2.alert_created      = now = Time.now
-            @user2.alert_next_showing = now
-            @user2.alert_user_id      = @user.id
+            @user2.alert = nil
             @user2.save
-            flash_notice :user_alert_saved.t(:user => @user2.login)
+            flash_notice :user_alert_deleted.t(:user => @user2.login)
           end
-        else
-          @user2.alert = nil
-          @user2.save
-          flash_notice :user_alert_deleted.t(:user => @user2.login)
         end
       end
-    end
-    if redirect
-      redirect_to(:controller => :observer, :action => :show_user, :id => id)
+      if redirect
+        redirect_to(:controller => :observer, :action => :show_user, :id => id)
+      end
     end
   end
 

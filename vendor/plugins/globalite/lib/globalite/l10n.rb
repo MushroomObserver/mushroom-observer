@@ -133,9 +133,9 @@ module Globalite
       @@locales[Locale.code] || {} 
     end
 
-    # XXX WE NEED ACCESS TO THIS HASH!!! XXX
-    def localization_data(locale)
-      @@locales[locale.to_sym]
+    # XXX WE NEED ACCESS TO THESE HASHES!!! XXX
+    def localization_data
+      @@locales
     end
 
     # Return the translation for the key, a string can be passed to replaced a missing translation

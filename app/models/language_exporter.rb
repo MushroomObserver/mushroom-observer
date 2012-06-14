@@ -117,14 +117,6 @@ module LanguageExporter
     return any_changes
   end
 
-  def read_export_file
-    YAML::load_file(export_file)
-  end
-
-  def read_export_file_lines
-    File.open(export_file, 'r:utf-8').readlines
-  end
-
   # Return Hash mapping tag (String) to value (String), include official string
   # wherever translations are missing.
   def localization_strings
@@ -161,34 +153,65 @@ module LanguageExporter
              sub(/\s+\Z/, '')
   end
 
-################################################################################
+  @@localization_files = nil
+  @@export_files = nil
 
-private
   def read_localization_file
-    YAML::load_file(localization_file)
+    if TESTING and @@localization_files
+      @@localization_files[locale]
+    else
+      YAML::load_file(localization_file)
+    end
   end
 
   def write_localization_file(data)
-    temp_file = localization_file + '.' + Process.pid.to_s
-    File.open(temp_file, 'w') do |fh|
-      old_engine = YAML::ENGINE.yamler
-      YAML::ENGINE.yamler = 'psych'
-      YAML::dump(data, fh)
-      YAML::ENGINE.yamler = old_engine
+    if TESTING
+      @@localization_files[locale] = data if @@localization_files
+    else
+      temp_file = localization_file + '.' + Process.pid.to_s
+      File.open(temp_file, 'w') do |fh|
+        old_engine = YAML::ENGINE.yamler
+        YAML::ENGINE.yamler = 'psych'
+        YAML::dump(data, fh)
+        YAML::ENGINE.yamler = old_engine
+      end
+      File.rename(temp_file, localization_file)
     end
-    File.rename(temp_file, localization_file)
+  end
+
+  def read_export_file
+    if TESTING and @@export_files
+      YAML::load(@@export_files[locale].join)
+    else
+      YAML::load_file(export_file)
+    end
+  end
+
+  def read_export_file_lines
+    if TESTING and @@export_files
+      @@export_files[locale]
+    else
+      File.open(export_file, 'r:utf-8').readlines
+    end
   end
 
   def write_export_file_lines(output_lines)
-    temp_file = export_file + '.' + Process.pid.to_s
-    File.open(temp_file, 'w') do |fh|
-      for line in output_lines
-        fh.write(line)
+    if TESTING
+      @@export_files[locale] = output_lines if @@export_files
+    else
+      temp_file = export_file + '.' + Process.pid.to_s
+      File.open(temp_file, 'w') do |fh|
+        for line in output_lines
+          fh.write(line)
+        end
       end
+      File.rename(temp_file, export_file)
     end
-    File.rename(temp_file, export_file)
   end
 
+################################################################################
+
+private
   def merge_localization_strings_into(data)
     for str in translation_strings
       data[str.tag] = str.text

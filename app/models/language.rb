@@ -71,4 +71,23 @@ class Language < AbstractModel
     end
     return user_ids
   end
+
+  # Be generous to ensure that we don't accidentally miss anything that is
+  # changed while the Rails app is booting. 
+  @@last_update = 1.minute.ago
+
+  # Update Globalite with any recent changes in translations.
+  def self.update_recent_translations
+    data = Globalite.localization_data
+    cutoff = @@last_update
+    @@last_update = Time.now
+    for locale, tag, text in Language.connection.select_rows %(
+      SELECT locale, tag, text
+      FROM translation_strings t, languages l
+      WHERE t.language_id = l.id
+        AND t.modified >= #{Language.connection.quote(cutoff)}
+    )
+      data[locale.to_sym][tag.to_sym] = text
+    end
+  end
 end

@@ -230,35 +230,36 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @object
   def edit_comment # :prefetch: :norobots:
     pass_query_params
-    @comment = Comment.find(params[:id])
-    @target = @comment.target
-    if !allowed_to_see!(@target)
-      # redirected already
-    elsif !check_permission!(@comment)
-      redirect_to(:controller => @target.show_controller,
-                  :action => @target.show_action, :id => @target.id,
-                  :params => query_params)
-    elsif request.method == :post
-      @comment.attributes = params[:comment]
-      xargs = {}
-      xargs[:summary] = @comment.summary if @comment.summary_changed?
-      xargs[:content] = @comment.comment if @comment.comment_changed?
-      if xargs.empty?
-        flash_notice(:runtime_no_changes.t)
-        done = true
-      elsif !@comment.save
-        flash_object_errors(@comment)
-      else
-        xargs[:id] = @comment
-        Transaction.put_comment(xargs)
-        @comment.log_update
-        flash_notice(:runtime_form_comments_edit_success.t(:id => @comment.id))
-        done = true
-      end
-      if done
+    if @comment = find_or_goto_index(Comment, params[:id])
+      @target = @comment.target
+      if !allowed_to_see!(@target)
+        # redirected already
+      elsif !check_permission!(@comment)
         redirect_to(:controller => @target.show_controller,
                     :action => @target.show_action, :id => @target.id,
                     :params => query_params)
+      elsif request.method == :post
+        @comment.attributes = params[:comment]
+        xargs = {}
+        xargs[:summary] = @comment.summary if @comment.summary_changed?
+        xargs[:content] = @comment.comment if @comment.comment_changed?
+        if xargs.empty?
+          flash_notice(:runtime_no_changes.t)
+          done = true
+        elsif !@comment.save
+          flash_object_errors(@comment)
+        else
+          xargs[:id] = @comment
+          Transaction.put_comment(xargs)
+          @comment.log_update
+          flash_notice(:runtime_form_comments_edit_success.t(:id => @comment.id))
+          done = true
+        end
+        if done
+          redirect_to(:controller => @target.show_controller,
+                      :action => @target.show_action, :id => @target.id,
+                      :params => query_params)
+        end
       end
     end
   end
@@ -270,20 +271,21 @@ class CommentController < ApplicationController
   # Outputs: none
   def destroy_comment # :norobots:
     pass_query_params
-    @comment = Comment.find(params[:id])
-    @target = @comment.target
-    if !check_permission!(@comment)
-      # all cases redirect to object show page
-    elsif !@comment.destroy
-      flash_error(:runtime_form_comments_destroy_failed.t(:id => params[:id]))
-    else
-      Transaction.delete_comment(:id => @comment)
-      @comment.log_destroy
-      flash_notice(:runtime_form_comments_destroy_success.t(:id => params[:id]))
+    if @comment = find_or_goto_index(Comment, params[:id])
+      @target = @comment.target
+      if !check_permission!(@comment)
+        # all cases redirect to object show page
+      elsif !@comment.destroy
+        flash_error(:runtime_form_comments_destroy_failed.t(:id => params[:id]))
+      else
+        Transaction.delete_comment(:id => @comment)
+        @comment.log_destroy
+        flash_notice(:runtime_form_comments_destroy_success.t(:id => params[:id]))
+      end
+      redirect_to(:controller => @target.show_controller,
+                  :action => @target.show_action, :id => @target.id,
+                  :params => query_params)
     end
-    redirect_to(:controller => @target.show_controller,
-                :action => @target.show_action, :id => @target.id,
-                :params => query_params)
   end
 
   # Make sure users can't see/add comments on objects they aren't allowed to

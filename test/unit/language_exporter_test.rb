@@ -1,62 +1,15 @@
 # encoding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
-class Language
-  @@verbose_messages = []
-  @@localization_files = {}
-  @@export_files = {}
-
-  def self.clear_verbose_messages
-    @@verbose_messages = []
-  end
-
-  def self.verbose_messages
-    @@verbose_messages
-  end
-
-  def verbose(msg)
-    @@verbose_messages << msg
-  end
-
-  def read_localization_file
-    @@localization_files[locale]
-  end
-
-  def write_localization_file(data)
-    @@localization_files[locale] = data
-  end
-
-  def read_export_file
-    YAML::load(@@export_files[locale].join)
-  end
-
-  def read_export_file_lines
-    @@export_files[locale]
-  end
-
-  def write_export_file_lines(data)
-    @@export_files[locale] = data
-  end
-
-  def send_private(*args)
-    send(*args)
-  end
-
-  def init_check_export_line(pass, in_tag)
-    @pass, @in_tag, @line_number = pass, in_tag, 0
-  end
-
-  def get_check_export_line_status
-    return @pass, @in_tag
-  end
-end
-
-################################################################################
-
 class LanguageExporterTest < UnitTestCase
   def setup
     @official = Language.official
     Language.clear_verbose_messages
+    Language.override_input_files
+  end
+
+  def teardown
+    Language.reset_input_file_override
   end
 
   def assert_message(msg)
@@ -397,10 +350,12 @@ class LanguageExporterTest < UnitTestCase
       "three: three\n",
       "four: four\n",
       "five: five\n",
+      "unknown_locations: bubkes\n",
     ])
     assert_true(@official.import_from_file, 'Should have been two import changes.')
     hash['two'] = 'twolian'
     hash['five'] = 'five'
+    hash['unknown_locations'] = 'bubkes'
     assert_equal(hash, @official.localization_strings)
 
     assert_true(@official.strip, 'Should have been three strip changes.')
@@ -409,7 +364,7 @@ class LanguageExporterTest < UnitTestCase
     hash.delete('TWOS')
     assert_equal(hash, @official.localization_strings)
 
-    assert_equal(2, @official.translation_strings.select {|str| str.user == @dick}.length)
+    assert_equal(3, @official.translation_strings.select {|str| str.user == @dick}.length)
   end
 
   def test_import_unofficial

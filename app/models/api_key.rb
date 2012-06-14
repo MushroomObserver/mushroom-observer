@@ -1,8 +1,16 @@
-class ApiKey < ActiveRecord::Base
+class ApiKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
   KEY_LENGTH = 32
+
+  def self.show_controller
+    :account
+  end
+
+  def self.index_action
+    :api_keys
+  end
 
   def provide_defaults
     self.created ||= Time.now

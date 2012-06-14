@@ -82,6 +82,7 @@ for file in %w(
   functional_test_case
   integration_test_case
   integration_session
+  language_extensions
 )
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end

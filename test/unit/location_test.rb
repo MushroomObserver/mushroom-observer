@@ -365,7 +365,7 @@ class LocationTest < UnitTestCase
     Locale.code = 'es-ES'
     loc3 = Location.unknown
     assert_objs_equal(loc1, loc3)
-    Globalite.localization_data(:'es-ES')[:unknown_locations] = 'Desconocido'
+    Globalite.localization_data[:'es-ES'][:unknown_locations] = 'Desconocido'
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)
   end

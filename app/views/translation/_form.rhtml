@@ -69,7 +69,7 @@
 user_logins = { @user.id => @user.login }
 for tag in @edit_tags
   if record = @translated_records[tag]
-    user_logins[record.user_id] ||= record.user.login
+    user_logins[record.user_id] ||= record.user.login rescue nil  # (can be nil in testing because admin doesn't exist)
     last_text = record.text
     versions_to_show = []
     for version in record.versions.reverse

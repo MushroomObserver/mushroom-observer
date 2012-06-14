@@ -78,7 +78,7 @@ class NameTest < UnitTestCase
 
   def assert_name_parse_fails(str)
     parse = Name.parse_name(str)
-    assert_block("Expected #{str.inspect} to fail to parse!") { !parse }
+    assert_block("Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}") { !parse }
   end
 
   def do_parse_classification_test(text, expected)
@@ -859,6 +859,19 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_34
+    do_name_parse_test(
+      'Xylaria species',
+      :text_name    => 'Xylaria',
+      :search_name  => 'Xylaria',
+      :sort_name    => 'Xylaria',
+      :display_name => '**__Xylaria__**',
+      :parent_name  => nil,
+      :rank         => :Genus,
+      :author       => ''
+    )
+  end
+
   # -----------------------------
   #  Test classification.
   # -----------------------------
@@ -1456,7 +1469,7 @@ class NameTest < UnitTestCase
     assert(names(:peltigera).has_eol_data?)
     assert(not(names(:lactarius_alpigenes).has_eol_data?))
   end
-  
+
   def test_hiding_authors
     @dick.hide_authors = :above_species
     @mary.hide_authors = :none

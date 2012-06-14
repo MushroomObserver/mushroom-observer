@@ -91,4 +91,19 @@ class LanguageTest < UnitTestCase
     assert_equal(@rolf.id, latest.user_id)
     assert_in_delta(time4, latest.modified, 1.second)
   end
+
+  def test_update_recent_translations
+    one = translation_strings(:english_one)
+    old_val = one.tag.to_sym.l
+    one.update_attributes(
+      :text => 'new_val',
+      :modified => 1.hour.ago
+    )
+    Language.last_update = 1.minute.ago
+    Language.update_recent_translations
+    assert_equal(old_val, one.tag.to_sym.l)
+    Language.last_update = 1.day.ago
+    Language.update_recent_translations
+    assert_equal('new_val', one.tag.to_sym.l)
+  end
 end

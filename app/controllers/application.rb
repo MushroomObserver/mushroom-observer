@@ -105,6 +105,7 @@ class ApplicationController < ActionController::Base
   before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
+  before_filter :refresh_translations
   before_filter :track_translations
   before_filter :check_user_alert
   # before_filter :extra_gc
@@ -151,6 +152,11 @@ class ApplicationController < ActionController::Base
   rescue => e
     @error = e
     raise e
+  end
+
+  # Update Globalite with any recent changes to translations.
+  def refresh_translations
+    Language.update_recent_translations
   end
 
   # Keep track of localization strings so that users can edit them (sort of) in situ.
@@ -348,7 +354,7 @@ class ApplicationController < ActionController::Base
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
       ints = q.get_integers(["shown", "notification"], true)
       unless ints["shown"]
-        notification = Notification.find(ints["notification"].to_i)
+        notification = Notification.safe_find(ints["notification"].to_i)
         if notification and notification.note_template
           result = true
           break

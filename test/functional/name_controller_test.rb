@@ -173,7 +173,7 @@ class NameControllerTest < FunctionalTestCase
       old_name2 = $2 if @@emails.first.match(/^(old|this): (.*)/)
       new_name2 = $2 if @@emails.first.match(/^(new|into): (.*)/)
       old_name == old_name2 and new_name == new_name2
-    }  
+    }
   ensure
     @@emails = []
   end
@@ -1772,6 +1772,41 @@ class NameControllerTest < FunctionalTestCase
     assert_equal('Lepiota echinatae group', name.search_name)
     assert_equal('**__Lepiota echinatae__** group', name.display_name)
     assert_equal('', name.author)
+  end
+
+  def test_screwy_notification_bug
+    login('mary')
+    name = Name.create!(
+      :text_name => 'Ganoderma applanatum',
+      :search_name => 'Ganoderma applanatum',
+      :sort_name => 'Ganoderma applanatum',
+      :display_name => '__Ganoderma applanatum__',
+      :author => '',
+      :rank => :Species,
+      :deprecated => true,
+      :correct_spelling => nil,
+      :citation => '',
+      :notes => ''
+    )
+    Interest.create!(
+      :target => name,
+      :user => @rolf,
+      :state => true
+    )
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => 'Ganoderma applanatum',
+        :author => '',
+        :rank => :Species,
+        :deprecated => 'true',
+        :citation => '',
+        :notes => 'Changed notes.'
+      }
+    }
+    post(:edit_name, params)
+    # was crashing while notifying rolf because new version wasn't saved yet
+    assert_flash_success
   end
 
   # ----------------------------

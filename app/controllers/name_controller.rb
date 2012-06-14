@@ -524,27 +524,28 @@ class NameController < ApplicationController
   def edit_name # :prefetch: :norobots:
     store_location
     pass_query_params
-    @name = Name.find(params[:id])
-    init_edit_name_form
-    if request.method == :post
-      @parse = parse_name
-      new_name, @parents = find_or_create_name_and_parents
-      if new_name.new_record? or new_name == @name
-        unless can_make_changes? or minor_name_change?
-          email_admin_name_change
-        end
-        update_correct_spelling
-        any_changes = update_existing_name
-        unless redirect_to_approve_or_deprecate
-          flash_warning(:runtime_edit_name_no_change.t) unless any_changes
+    if @name = find_or_goto_index(Name, params[:id])
+      init_edit_name_form
+      if request.method == :post
+        @parse = parse_name
+        new_name, @parents = find_or_create_name_and_parents
+        if new_name.new_record? or new_name == @name
+          unless can_make_changes? or minor_name_change?
+            email_admin_name_change
+          end
+          update_correct_spelling
+          any_changes = update_existing_name
+          unless redirect_to_approve_or_deprecate
+            flash_warning(:runtime_edit_name_no_change.t) unless any_changes
+            redirect_to_show_name
+          end
+        elsif is_in_admin_mode? or @name.mergeable? or new_name.mergeable?
+          merge_name_into(new_name)
+          redirect_to_show_name
+        else
+          send_name_merge_email(new_name)
           redirect_to_show_name
         end
-      elsif is_in_admin_mode? or @name.mergeable? or new_name.mergeable?
-        merge_name_into(new_name)
-        redirect_to_show_name
-      else
-        send_name_merge_email(new_name)
-        redirect_to_show_name
       end
     end
   rescue RuntimeError => err
@@ -561,7 +562,10 @@ class NameController < ApplicationController
     flash_error(err.to_s) if !err.blank?
     flash_object_errors(@name)
     init_create_name_form
-    @name.attributes = params[:name]
+    @name.rank = params[:name][:rank]
+    @name.author = params[:name][:author]
+    @name.citation = params[:name][:citation]
+    @name.notes = params[:name][:notes]
     @name_string = params[:name][:text_name]
   end
 
@@ -579,7 +583,10 @@ class NameController < ApplicationController
   def reload_edit_name_form_on_error(err)
     flash_error(err.to_s) if !err.blank?
     flash_object_errors(@name)
-    @name.attributes = params[:name]
+    @name.rank = params[:name][:rank]
+    @name.author = params[:name][:author]
+    @name.citation = params[:name][:citation]
+    @name.notes = params[:name][:notes]
     @name.deprecated = (params[:name][:deprecated] == 'true')
     @name_string = params[:name][:text_name]
   end
@@ -966,100 +973,101 @@ class NameController < ApplicationController
   # of a name, removing others, writing in new, etc.
   def change_synonyms # :prefetch: :norobots:
     pass_query_params
-    @name = Name.find(params[:id])
-    @list_members     = nil
-    @new_names        = nil
-    @synonym_name_ids = []
-    @synonym_names    = []
-    @deprecate_all    = true
-    if request.method == :post
-      list = params[:synonym][:members].strip_squeeze
-      @deprecate_all = (params[:deprecate][:all] == '1')
+    if @name = find_or_goto_index(Name, params[:id])
+      @list_members     = nil
+      @new_names        = nil
+      @synonym_name_ids = []
+      @synonym_names    = []
+      @deprecate_all    = true
+      if request.method == :post
+        list = params[:synonym][:members].strip_squeeze
+        @deprecate_all = (params[:deprecate][:all] == '1')
 
-      # Create any new names that have been approved.
-      construct_approved_names(list, params[:approved_names], @deprecate_all)
+        # Create any new names that have been approved.
+        construct_approved_names(list, params[:approved_names], @deprecate_all)
 
-      # Parse the write-in list of names.
-      sorter = NameSorter.new
-      sorter.sort_names(list)
-      sorter.append_approved_synonyms(params[:approved_synonyms])
+        # Parse the write-in list of names.
+        sorter = NameSorter.new
+        sorter.sort_names(list)
+        sorter.append_approved_synonyms(params[:approved_synonyms])
 
-      # Are any names unrecognized (only unapproved names will still be
-      # unrecognized at this point) or ambiguous?
-      if !sorter.only_single_names
-        dump_sorter(sorter)
-      # Has the user NOT had a chance to choose from among the synonyms of any
-      # names they've written in?
-      elsif !sorter.only_approved_synonyms
-        flash_notice :name_change_synonyms_confirm.t
-      else
-        now = Time.now
-
-        # Create synonym and add this name to it if this name not already
-        # associated with a synonym.
-        if !@name.synonym_id
-          @name.synonym = Synonym.create
-          @name.save
-          Transaction.post_synonym(
-            :id => @name.synonym
-          )
-          Transaction.put_name(
-            :id          => @name,
-            :set_synonym => @name.synonym
-          )
-        end
-
-        # Go through list of all synonyms for this name and written-in names.
-        # Exclude any names that have un-checked check-boxes: newly written-in
-        # names will not have a check-box yet, names written-in in previous
-        # attempt to submit this form will have checkboxes and therefore must
-        # be checked to proceed -- the default initial state.
-        proposed_synonyms = params[:proposed_synonyms] || {}
-        for n in sorter.all_synonyms
-          # Synonymize all names that have been checked, or that don't have
-          # checkboxes.
-          if proposed_synonyms[n.id.to_s] != '0'
-            if n.synonym_id != @name.synonym_id
-              @name.transfer_synonym(n)
-              Transaction.put_name(
-                :id          => n,
-                :set_synonym => @name.synonym
-              )
-            end
-          end
-        end
-
-        # De-synonymize any old synonyms in the "existing synonyms" list that
-        # have been unchecked.  This creates a new synonym to connect them if
-        # there are multiple unchecked names -- that is, it splits this
-        # synonym into two synonyms, with checked names staying in this one,
-        # and unchecked names moving to the new one.
-        check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
-
-        # Deprecate everything if that check-box has been marked.
-        success = true
-        if @deprecate_all
-          for n in sorter.all_names
-            if !deprecate_synonym(n)
-              # Already flashed error message.
-              success = false
-            end
-          end
-        end
-
-        if success
-          redirect_to(:action => 'show_name', :id => @name.id,
-                      :params => query_params)
+        # Are any names unrecognized (only unapproved names will still be
+        # unrecognized at this point) or ambiguous?
+        if !sorter.only_single_names
+          dump_sorter(sorter)
+        # Has the user NOT had a chance to choose from among the synonyms of any
+        # names they've written in?
+        elsif !sorter.only_approved_synonyms
+          flash_notice :name_change_synonyms_confirm.t
         else
-          flash_object_errors(@name)
-          flash_object_errors(@name.synonym)
-        end
-      end
+          now = Time.now
 
-      @list_members     = sorter.all_line_strs.join("\r\n")
-      @new_names        = sorter.new_name_strs.uniq
-      @synonym_name_ids = sorter.all_synonyms.map(&:id)
-      @synonym_names    = @synonym_name_ids.map {|id| Name.find(id)}
+          # Create synonym and add this name to it if this name not already
+          # associated with a synonym.
+          if !@name.synonym_id
+            @name.synonym = Synonym.create
+            @name.save
+            Transaction.post_synonym(
+              :id => @name.synonym
+            )
+            Transaction.put_name(
+              :id          => @name,
+              :set_synonym => @name.synonym
+            )
+          end
+
+          # Go through list of all synonyms for this name and written-in names.
+          # Exclude any names that have un-checked check-boxes: newly written-in
+          # names will not have a check-box yet, names written-in in previous
+          # attempt to submit this form will have checkboxes and therefore must
+          # be checked to proceed -- the default initial state.
+          proposed_synonyms = params[:proposed_synonyms] || {}
+          for n in sorter.all_synonyms
+            # Synonymize all names that have been checked, or that don't have
+            # checkboxes.
+            if proposed_synonyms[n.id.to_s] != '0'
+              if n.synonym_id != @name.synonym_id
+                @name.transfer_synonym(n)
+                Transaction.put_name(
+                  :id          => n,
+                  :set_synonym => @name.synonym
+                )
+              end
+            end
+          end
+
+          # De-synonymize any old synonyms in the "existing synonyms" list that
+          # have been unchecked.  This creates a new synonym to connect them if
+          # there are multiple unchecked names -- that is, it splits this
+          # synonym into two synonyms, with checked names staying in this one,
+          # and unchecked names moving to the new one.
+          check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
+
+          # Deprecate everything if that check-box has been marked.
+          success = true
+          if @deprecate_all
+            for n in sorter.all_names
+              if !deprecate_synonym(n)
+                # Already flashed error message.
+                success = false
+              end
+            end
+          end
+
+          if success
+            redirect_to(:action => 'show_name', :id => @name.id,
+                        :params => query_params)
+          else
+            flash_object_errors(@name)
+            flash_object_errors(@name.synonym)
+          end
+        end
+
+        @list_members     = sorter.all_line_strs.join("\r\n")
+        @new_names        = sorter.new_name_strs.uniq
+        @synonym_name_ids = sorter.all_synonyms.map(&:id)
+        @synonym_names    = @synonym_name_ids.map {|id| Name.safe_find(id)}.reject(&:nil?)
+      end
     end
   end
 
@@ -1074,107 +1082,110 @@ class NameController < ApplicationController
     params[:chosen_name] ||= {}
     params[:is]          ||= {}
 
-    @name    = Name.find(params[:id])
-    @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
-    @comment = params[:comment][:comment].to_s.strip_squeeze rescue ''
+    if @name = find_or_goto_index(Name, params[:id])
+      @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
+      @comment = params[:comment][:comment].to_s.strip_squeeze rescue ''
 
-    @list_members     = nil
-    @new_names        = []
-    @synonym_name_ids = []
-    @synonym_names    = []
-    @deprecate_all    = '1'
-    @names            = []
-    @misspelling      = (params[:is][:misspelling] == '1')
+      @list_members     = nil
+      @new_names        = []
+      @synonym_name_ids = []
+      @synonym_names    = []
+      @deprecate_all    = '1'
+      @names            = []
+      @misspelling      = (params[:is][:misspelling] == '1')
 
-    if request.method == :post
-      if @what.blank?
-        flash_error :runtime_name_deprecate_must_choose.t
+      if request.method == :post
+        if @what.blank?
+          flash_error :runtime_name_deprecate_must_choose.t
 
-      else
-        # Find the chosen preferred name.
-        if params[:chosen_name][:name_id]
-          @names = [Name.find(params[:chosen_name][:name_id])]
         else
-          @names = Name.find_names(@what)
-        end
-        if @names.empty? and
-           (new_name = create_needed_names(params[:approved_name].to_s.strip_squeeze, @what))
-          @names = [new_name]
-        end
-        target_name = @names.first
-
-        # No matches: try to guess.
-        if @names.empty?
-          @valid_names = guess_correct_name(@what)
-          @suggest_corrections = true
-
-        # If written-in name matches uniquely an existing name:
-        elsif target_name && @names.length == 1
-          now = Time.now
-
-          # Merge this name's synonyms with the preferred name's synonyms.
-          @name.merge_synonyms(target_name)
-
-          # Change target name to "undeprecated".
-          target_name.change_deprecated(false)
-          save_name(target_name, :log_name_approved,
-                    :other => @name.real_search_name)
-
-          # Change this name to "deprecated", set correct spelling, add note.
-          @name.change_deprecated(true)
-          if @misspelling
-            @name.misspelling = true
-            @name.correct_spelling = target_name
+          # Find the chosen preferred name.
+          if params[:chosen_name][:name_id] and
+             name = Name.safe_find(params[:chosen_name][:name_id])
+            @names = [name]
+          else
+            @names = Name.find_names(@what)
           end
-          save_name(@name, :log_name_deprecated,
-                    :other => target_name.real_search_name)
-          if !@comment.blank?
-            post_comment(:deprecate, @name, @comment)
+          if @names.empty? and
+             (new_name = create_needed_names(params[:approved_name].to_s.strip_squeeze, @what))
+            @names = [new_name]
+          end
+          target_name = @names.first
+
+          # No matches: try to guess.
+          if @names.empty?
+            @valid_names = guess_correct_name(@what)
+            @suggest_corrections = true
+
+          # If written-in name matches uniquely an existing name:
+          elsif target_name && @names.length == 1
+            now = Time.now
+
+            # Merge this name's synonyms with the preferred name's synonyms.
+            @name.merge_synonyms(target_name)
+
+            # Change target name to "undeprecated".
+            target_name.change_deprecated(false)
+            save_name(target_name, :log_name_approved,
+                      :other => @name.real_search_name)
+
+            # Change this name to "deprecated", set correct spelling, add note.
+            @name.change_deprecated(true)
+            if @misspelling
+              @name.misspelling = true
+              @name.correct_spelling = target_name
+            end
+            save_name(@name, :log_name_deprecated,
+                      :other => target_name.real_search_name)
+            if !@comment.blank?
+              post_comment(:deprecate, @name, @comment)
+            end
+
+            redirect_to(:action => 'show_name', :id => @name.id,
+                        :params => query_params)
           end
 
-          redirect_to(:action => 'show_name', :id => @name.id,
-                      :params => query_params)
-        end
-
-      end # @what
-    end # :post
+        end # @what
+      end # :post
+    end
   end
 
   # Form accessible from show_name that lets a user make call this an accepted
   # name, possibly deprecating its synonyms at the same time.
   def approve_name # :prefetch: :norobots:
     pass_query_params
-    @name = Name.find(params[:id])
-    @approved_names = @name.approved_synonyms
-    comment = params[:comment][:comment] rescue ''
-    comment = comment.strip_squeeze
-    if request.method == :post
+    if @name = find_or_goto_index(Name, params[:id])
+      @approved_names = @name.approved_synonyms
+      comment = params[:comment][:comment] rescue ''
+      comment = comment.strip_squeeze
+      if request.method == :post
 
-      # Deprecate others first.
-      others = []
-      if params[:deprecate][:others] == '1'
-        for n in @name.approved_synonyms
-          n.change_deprecated(true)
-          save_name(n, :log_name_deprecated, :other => @name.real_search_name)
-          others << n.real_search_name
+        # Deprecate others first.
+        others = []
+        if params[:deprecate][:others] == '1'
+          for n in @name.approved_synonyms
+            n.change_deprecated(true)
+            save_name(n, :log_name_deprecated, :other => @name.real_search_name)
+            others << n.real_search_name
+          end
         end
-      end
 
-      # Approve this now.
-      @name.change_deprecated(false)
-      tag = :log_approved_by
-      args = {}
-      if others != []
-        tag = :log_name_approved
-        args[:other] = others.join(', ')
-      end
-      save_name(@name, tag, args)
-      if !comment.blank?
-        post_comment(:approve, @name, comment)
-      end
+        # Approve this now.
+        @name.change_deprecated(false)
+        tag = :log_approved_by
+        args = {}
+        if others != []
+          tag = :log_name_approved
+          args[:other] = others.join(', ')
+        end
+        save_name(@name, tag, args)
+        if !comment.blank?
+          post_comment(:approve, @name, comment)
+        end
 
-      redirect_to(:action => 'show_name', :id => @name.id,
-                  :params => query_params)
+        redirect_to(:action => 'show_name', :id => @name.id,
+                    :params => query_params)
+      end
     end
   end
 
@@ -1482,9 +1493,10 @@ class NameController < ApplicationController
   # Draw a map of all the locations where this name has been observed.
   def map # :nologin: :norobots:
     pass_query_params
-    @name = Name.find(params[:id])
-    @query = create_query(:Observation, :of_name, :name => @name)
-    @observations = @query.results.select {|o| o.lat or o.location}
+    if @name = find_or_goto_index(Name, params[:id])
+      @query = create_query(:Observation, :of_name, :name => @name)
+      @observations = @query.results.select {|o| o.lat or o.location}
+    end
   end
 
   # Form accessible from show_name that lets a user setup tracker notifications
@@ -1492,47 +1504,47 @@ class NameController < ApplicationController
   def email_tracking # :norobots:
     pass_query_params
     name_id = params[:id]
-    @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
+    if @name = find_or_goto_index(Name, name_id)
+      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
 
-    # Initialize form.
-    if request.method != :post
-      @name = Name.find(name_id)
-      if Name.ranks_above_genus.member?(@name.rank)
-        flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
-      end
-      if @notification
-        @note_template = @notification.note_template
-      else
-        mailing_address = @user.mailing_address.strip
-        mailing_address = ':mailing_address' if mailing_address.blank?
-        @note_template = :email_tracking_note_template.l(
-          :species_name => @name.real_text_name,
-          :mailing_address => mailing_address,
-          :users_name => @user.legal_name
-        )
-      end
-
-    # Submit form.
-    else
-      name = Name.find(name_id)
-      case params[:commit]
-      when :ENABLE.l, :UPDATE.l
-        note_template = params[:notification][:note_template]
-        note_template = nil if note_template.blank?
-        if @notification.nil?
-          @notification = Notification.new(:flavor => :name, :user => @user,
-              :obj_id => name_id, :note_template => note_template)
-          flash_notice(:email_tracking_now_tracking.t(:name => name.display_name))
-        else
-          @notification.note_template = note_template
-          flash_notice(:email_tracking_updated_messages.t)
+      # Initialize form.
+      if request.method != :post
+        if Name.ranks_above_genus.member?(@name.rank)
+          flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
         end
-        @notification.save
-      when :DISABLE.l
-        @notification.destroy
-        flash_notice(:email_tracking_no_longer_tracking.t(:name => name.display_name))
+        if @notification
+          @note_template = @notification.note_template
+        else
+          mailing_address = @user.mailing_address.strip
+          mailing_address = ':mailing_address' if mailing_address.blank?
+          @note_template = :email_tracking_note_template.l(
+            :species_name => @name.real_text_name,
+            :mailing_address => mailing_address,
+            :users_name => @user.legal_name
+          )
+        end
+
+      # Submit form.
+      else
+        case params[:commit]
+        when :ENABLE.l, :UPDATE.l
+          note_template = params[:notification][:note_template]
+          note_template = nil if note_template.blank?
+          if @notification.nil?
+            @notification = Notification.new(:flavor => :name, :user => @user,
+                :obj_id => name_id, :note_template => note_template)
+            flash_notice(:email_tracking_now_tracking.t(:name => @name.display_name))
+          else
+            @notification.note_template = note_template
+            flash_notice(:email_tracking_updated_messages.t)
+          end
+          @notification.save
+        when :DISABLE.l
+          @notification.destroy
+          flash_notice(:email_tracking_no_longer_tracking.t(:name => @name.display_name))
+        end
+        redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
       end
-      redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
     end
   end
 

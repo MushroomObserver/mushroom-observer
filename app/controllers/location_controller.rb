@@ -582,94 +582,95 @@ class LocationController < ApplicationController
   def edit_location # :prefetch: :norobots:
     store_location
     pass_query_params
-    @location = Location.find(params[:id])
-    @display_name = @location.display_name
-    done = false
-    if request.method == :post
-      @display_name = params[:location][:display_name].strip_squeeze rescue ''
+    if @location = find_or_goto_index(Location, params[:id])
+      @display_name = @location.display_name
+      done = false
+      if request.method == :post
+        @display_name = params[:location][:display_name].strip_squeeze rescue ''
 
-      # First check if user changed the name to one that already exists.
-      db_name = Location.user_name(@user, @display_name)
-      merge = Location.find_by_name_or_reverse_name(db_name)
+        # First check if user changed the name to one that already exists.
+        db_name = Location.user_name(@user, @display_name)
+        merge = Location.find_by_name_or_reverse_name(db_name)
 
-      # Merge with another location.
-      if merge && merge != @location
-        # Swap order if only one is mergable.
-        if !@location.mergable? && merge.mergable?
-          @location, merge = merge, @location
-        end
-
-        # Admins can actually merge them, then redirect to other location.
-        if is_in_admin_mode? || @location.mergable?
-          merge.merge(@location)
-          merge.save if merge.changed?
-          @location = merge
-          done = true
-
-        # Non-admins just send email-request to admins.
-        else
-          flash_warning(:runtime_merge_locations_warning.t)
-          content = :email_location_merge.l(:user => @user.login,
-                                            :this => "##{@location.id}: " + @location.name,
-                                            :that => "##{merge.id}: " + merge.name)
-          AccountMailer.deliver_webmaster_question(@user.email, content)
-        end
-
-      # Otherwise it is safe to change the name.
-      else
-        @location.display_name = @display_name
-      end
-
-      # Update this location.
-      if !done
-
-        # Update all fields except display_name.
-        for key, val in params[:location]
-          if key != 'display_name'
-            @location.send("#{key}=", val)
+        # Merge with another location.
+        if merge && merge != @location
+          # Swap order if only one is mergable.
+          if !@location.mergable? && merge.mergable?
+            @location, merge = merge, @location
           end
-        end
 
-        args = {}
-        args[:set_name]  = @location.name  if @location.name_changed?
-        args[:set_north] = @location.north if @location.north_changed?
-        args[:set_south] = @location.south if @location.south_changed?
-        args[:set_west]  = @location.west  if @location.west_changed?
-        args[:set_east]  = @location.east  if @location.east_changed?
-        args[:set_high]  = @location.high  if @location.high_changed?
-        args[:set_low]   = @location.low   if @location.low_changed?
-
-        # Validate name.
-        @dubious_where_reasons = []
-        if @display_name != params[:approved_where]
-          @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        end
-
-        if @dubious_where_reasons.empty?
-          # No changes made.
-          if !@location.changed?
-            flash_warning(:runtime_edit_location_no_change.t)
-            redirect_to(:action => 'show_location', :id => @location.id)
-
-          # There were error(s).
-          elsif !@location.save
-            flash_object_errors(@location)
-
-          # Updated successfully.
-          else
-            if !args.empty?
-              args[:id] = @location
-              Transaction.put_location(args)
-            end
-            flash_notice(:runtime_edit_location_success.t(:id => @location.id))
+          # Admins can actually merge them, then redirect to other location.
+          if is_in_admin_mode? || @location.mergable?
+            merge.merge(@location)
+            merge.save if merge.changed?
+            @location = merge
             done = true
+
+          # Non-admins just send email-request to admins.
+          else
+            flash_warning(:runtime_merge_locations_warning.t)
+            content = :email_location_merge.l(:user => @user.login,
+                                              :this => "##{@location.id}: " + @location.name,
+                                              :that => "##{merge.id}: " + merge.name)
+            AccountMailer.deliver_webmaster_question(@user.email, content)
+          end
+
+        # Otherwise it is safe to change the name.
+        else
+          @location.display_name = @display_name
+        end
+
+        # Update this location.
+        if !done
+
+          # Update all fields except display_name.
+          for key, val in params[:location]
+            if key != 'display_name'
+              @location.send("#{key}=", val)
+            end
+          end
+
+          args = {}
+          args[:set_name]  = @location.name  if @location.name_changed?
+          args[:set_north] = @location.north if @location.north_changed?
+          args[:set_south] = @location.south if @location.south_changed?
+          args[:set_west]  = @location.west  if @location.west_changed?
+          args[:set_east]  = @location.east  if @location.east_changed?
+          args[:set_high]  = @location.high  if @location.high_changed?
+          args[:set_low]   = @location.low   if @location.low_changed?
+
+          # Validate name.
+          @dubious_where_reasons = []
+          if @display_name != params[:approved_where]
+            @dubious_where_reasons = Location.dubious_name?(db_name, true)
+          end
+
+          if @dubious_where_reasons.empty?
+            # No changes made.
+            if !@location.changed?
+              flash_warning(:runtime_edit_location_no_change.t)
+              redirect_to(:action => 'show_location', :id => @location.id)
+
+            # There were error(s).
+            elsif !@location.save
+              flash_object_errors(@location)
+
+            # Updated successfully.
+            else
+              if !args.empty?
+                args[:id] = @location
+                Transaction.put_location(args)
+              end
+              flash_notice(:runtime_edit_location_success.t(:id => @location.id))
+              done = true
+            end
           end
         end
       end
-    end
 
-    if done
-      redirect_to(:action => 'show_location', :id => @location.id)
+      if done
+        redirect_to(:action => 'show_location', :id => @location.id)
+      end
     end
   end
 
@@ -865,23 +866,25 @@ class LocationController < ApplicationController
   end
 
   def reverse_name_order
-    location = Location.find(params[:id])
-    location.name = Location.reverse_name(location.name())
-    location.save()
+    if location = Location.safe_find(params[:id])
+      location.name = Location.reverse_name(location.name)
+      location.save
+    end
     redirect_to(:action => 'show_location', :id => params[:id])
   end
   
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
   # into the given Location.  Linked from +list_merge_options+, I think.
   def add_to_location # :norobots:
-    location = Location.find(params[:location])
-    where = params[:where].strip_squeeze rescue ''
-    if !where.blank? and
-      update_observations_by_where(location, where)
-      flash_notice(:runtime_location_merge_success.t(:this => where,
-                   :that => location.display_name))
+    if location = find_or_goto_index(Location, params[:location])
+      where = params[:where].strip_squeeze rescue ''
+      if not where.blank? and
+         update_observations_by_where(location, where)
+        flash_notice(:runtime_location_merge_success.t(:this => where,
+                     :that => location.display_name))
+      end
+      redirect_to(:action => 'list_locations')
     end
-    redirect_to(:action => 'list_locations')
   end
 
   # Help for locations

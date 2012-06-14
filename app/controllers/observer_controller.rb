@@ -196,20 +196,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   def test
-    str = 'Ελληνικά'
-    Comment.create(
-      :summary => str,
-      :comment => '',
-      :target => Observation.find(95224)
-    )
-    Language.create(
-      :locale => 'el-GR',
-      :name => str,
-      :official => false,
-      :beta => false
-    )
-    flash_notice str.valid_encoding?
-    # flash_notice "Testing warning message."
+    flash_notice params.inspect
   end
 
   # Default page.  Just displays latest happenings.  The actual action is
@@ -357,7 +344,9 @@ class ObserverController < ApplicationController
     id = params[:id].to_s.gsub('_',' ').strip_squeeze
     begin
       if id.match(/^\d+$/)
-        objs = [model.find(id)]
+        obj = find_or_goto_index(model, id)
+        return if not obj
+        objs = [obj]
       else
         case model.to_s
 
@@ -1016,75 +1005,76 @@ class ObserverController < ApplicationController
   def edit_observation # :prefetch: :norobots:
     pass_query_params
 
-    @observation = Observation.find(params[:id], :include =>
-                                    [:name, :images, :location])
-    @licenses = License.current_names_and_ids(@user.license)
-    @new_image = init_image(@observation.when)
+    if @observation = find_or_goto_index(Observation, params[:id],
+                        :include => [:name, :images, :location])
+      @licenses = License.current_names_and_ids(@user.license)
+      @new_image = init_image(@observation.when)
 
-    # Make sure user owns this observation!
-    if !check_permission!(@observation)
-      redirect_to(:action => 'show_observation', :id => @observation.id,
-                  :params => query_params)
+      # Make sure user owns this observation!
+      if !check_permission!(@observation)
+        redirect_to(:action => 'show_observation', :id => @observation.id,
+                    :params => query_params)
 
-    # Initialize form.
-    elsif request.method != :post
-      @images      = []
-      @good_images = @observation.images
-      init_project_vars_for_edit(@observation)
-      init_list_vars_for_edit(@observation)
+      # Initialize form.
+      elsif request.method != :post
+        @images      = []
+        @good_images = @observation.images
+        init_project_vars_for_edit(@observation)
+        init_list_vars_for_edit(@observation)
 
-    else
-      any_errors = false
+      else
+        any_errors = false
 
-      # Update observation attributes
-      @observation.attributes = params[:observation]
+        # Update observation attributes
+        @observation.attributes = params[:observation]
 
-      # Validate place name.
-      @place_name = @observation.place_name
-      @dubious_where_reasons = []
-      if @place_name != params[:approved_where] and @observation.location.nil?
-        db_name = Location.user_name(@user, @place_name)
-        @dubious_where_reasons = Location.dubious_name?(db_name, true)
-        any_errors = true if @dubious_where_reasons.any?
-      end
+        # Validate place name.
+        @place_name = @observation.place_name
+        @dubious_where_reasons = []
+        if @place_name != params[:approved_where] and @observation.location.nil?
+          db_name = Location.user_name(@user, @place_name)
+          @dubious_where_reasons = Location.dubious_name?(db_name, true)
+          any_errors = true if @dubious_where_reasons.any?
+        end
 
-      # Now try to upload images.
-      @good_images = update_good_images(params[:good_images])
-      @bad_images  = create_image_objects(params[:image], @observation, @good_images)
-      attach_good_images(@observation, @good_images)
-      any_errors = true if @bad_images.any?
+        # Now try to upload images.
+        @good_images = update_good_images(params[:good_images])
+        @bad_images  = create_image_objects(params[:image], @observation, @good_images)
+        attach_good_images(@observation, @good_images)
+        any_errors = true if @bad_images.any?
 
-      # Only save observation if there are changes.
-      if @dubious_where_reasons == []
-        if @observation.changed?
-          @observation.modified = Time.now
-          if save_observation(@observation)
-            flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
-            touch = (params[:log_change][:checked] == '1' rescue false)
-            @observation.log(:log_observation_updated, :touch => touch)
-          else
-            any_errors = true
+        # Only save observation if there are changes.
+        if @dubious_where_reasons == []
+          if @observation.changed?
+            @observation.modified = Time.now
+            if save_observation(@observation)
+              flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
+              touch = (params[:log_change][:checked] == '1' rescue false)
+              @observation.log(:log_observation_updated, :touch => touch)
+            else
+              any_errors = true
+            end
           end
         end
-      end
 
-      # Update project and species_list attachments.
-      update_projects(@observation, params[:project])
-      update_species_lists(@observation, params[:list])
+        # Update project and species_list attachments.
+        update_projects(@observation, params[:project])
+        update_species_lists(@observation, params[:list])
 
-      # Reload form if anything failed.
-      if any_errors
-        @images         = @bad_images
-        @new_image.when = @observation.when
-        init_project_vars_for_reload(@observation)
-        init_list_vars_for_reload(@observation)
+        # Reload form if anything failed.
+        if any_errors
+          @images         = @bad_images
+          @new_image.when = @observation.when
+          init_project_vars_for_reload(@observation)
+          init_list_vars_for_reload(@observation)
 
-      # Redirect to show_observation or create_location on success.
-      elsif @observation.location.nil?
-        redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.place_name,
-                    :set_observation => @observation.id, :params => query_params)
-      else
-        redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)
+        # Redirect to show_observation or create_location on success.
+        elsif @observation.location.nil?
+          redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.place_name,
+                      :set_observation => @observation.id, :params => query_params)
+        else
+          redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)
+        end
       end
     end
   end
@@ -1094,31 +1084,30 @@ class ObserverController < ApplicationController
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
   def destroy_observation # :norobots:
-
-    # All of this just to decide where to redirect after deleting observation.
-    @observation = Observation.find(params[:id])
-    next_state = nil
-    if this_state = find_query(:Observation)
-      this_state.current = @observation
-      next_state = this_state.next
-    end
-
-    if !check_permission!(@observation)
-      flash_error(:runtime_destroy_observation_denied.t(:id => @observation.id))
-      redirect_to(:action => 'show_observation', :id => @observation.id,
-                  :params => query_params(this_state))
-    elsif !@observation.destroy
-      flash_error(:runtime_destroy_observation_failed.t(:id => @observation.id))
-      redirect_to(:action => 'show_observation', :id => @observation.id,
-                  :params => query_params(this_state))
-    else
-      Transaction.delete_observation(:id => @observation)
-      flash_notice(:runtime_destroy_observation_success.t(:id => params[:id]))
-      if next_state
-        redirect_to(:action => 'show_observation', :id => next_state.current_id,
-                    :params => query_params(next_state))
+    if @observation = find_or_goto_index(Observation, params[:id])
+      next_state = nil
+      # decide where to redirect after deleting observation
+      if this_state = find_query(:Observation)
+        this_state.current = @observation
+        next_state = this_state.next
+      end
+      if !check_permission!(@observation)
+        flash_error(:runtime_destroy_observation_denied.t(:id => @observation.id))
+        redirect_to(:action => 'show_observation', :id => @observation.id,
+                    :params => query_params(this_state))
+      elsif !@observation.destroy
+        flash_error(:runtime_destroy_observation_failed.t(:id => @observation.id))
+        redirect_to(:action => 'show_observation', :id => @observation.id,
+                    :params => query_params(this_state))
       else
-        redirect_to(:action => 'list_observations')
+        Transaction.delete_observation(:id => @observation)
+        flash_notice(:runtime_destroy_observation_success.t(:id => params[:id]))
+        if next_state
+          redirect_to(:action => 'show_observation', :id => next_state.current_id,
+                      :params => query_params(next_state))
+        else
+          redirect_to(:action => 'list_observations')
+        end
       end
     end
   end
@@ -1149,66 +1138,67 @@ class ObserverController < ApplicationController
   #
   def create_naming # :prefetch: :norobots:
     pass_query_params
-    @observation = Observation.find(params[:id])
-    @confidence_menu = translate_menu(Vote.confidence_menu)
+    if @observation = find_or_goto_index(Observation, params[:id])
+      @confidence_menu = translate_menu(Vote.confidence_menu)
 
-    # Create empty instances first time through.
-    if request.method != :post
-      @naming      = Naming.new
-      @vote        = Vote.new
-      @what        = '' # can't be nil else rails tries to call @name.name
-      @names       = nil
-      @valid_names = nil
-      @reason      = init_naming_reasons(@naming)
+      # Create empty instances first time through.
+      if request.method != :post
+        @naming      = Naming.new
+        @vote        = Vote.new
+        @what        = '' # can't be nil else rails tries to call @name.name
+        @names       = nil
+        @valid_names = nil
+        @reason      = init_naming_reasons(@naming)
 
-    else
-      # Create everything roughly first.
-      @naming = create_naming_object(params[:naming], @observation)
-      @vote   = create_vote_object(params[:vote], @naming)
-
-      # Validate name.
-      given_name  = params[:name][:name].to_s           rescue ''
-      chosen_name = params[:chosen_name][:name_id].to_s rescue ''
-      (success, @what, @name, @names, @valid_names) =
-        resolve_name(given_name, params[:approved_name], chosen_name)
-      if !@name
-        if !given_name.match(/\S/)
-          @naming.errors.add(:name, :validate_naming_name_missing.t)
-          flash_object_errors(@naming)
-        end
-        success = false
-      end
-
-      if success && @observation.name_been_proposed?(@name)
-        flash_warning(:runtime_create_naming_already_proposed.t)
-        success = false
-      end
-
-      # Validate objects.
-      @naming.name = @name
-      success = validate_naming(@naming) if success
-      success = validate_vote(@vote)     if success
-
-      if success
-        # Save changes now that everything checks out.
-        create_naming_reasons(@naming, params[:reason])
-        save_naming(@naming)
-        @observation.reload
-        @observation.change_vote(@naming, @vote.value)
-        @observation.log(:log_naming_created, :name => @naming.format_name)
-
-        # Check for notifications.
-        if has_unshown_notifications?(@user, :naming)
-          redirect_to(:action => 'show_notifications', :id => @observation.id,
-                      :params => query_params)
-        else
-          redirect_to(:action => 'show_observation', :id => @observation.id,
-                      :params => query_params)
-        end
-
-      # If anything failed reload the form.
       else
-        @reason = init_naming_reasons(@naming, params[:reason])
+        # Create everything roughly first.
+        @naming = create_naming_object(params[:naming], @observation)
+        @vote   = create_vote_object(params[:vote], @naming)
+
+        # Validate name.
+        given_name  = params[:name][:name].to_s           rescue ''
+        chosen_name = params[:chosen_name][:name_id].to_s rescue ''
+        (success, @what, @name, @names, @valid_names) =
+          resolve_name(given_name, params[:approved_name], chosen_name)
+        if !@name
+          if !given_name.match(/\S/)
+            @naming.errors.add(:name, :validate_naming_name_missing.t)
+            flash_object_errors(@naming)
+          end
+          success = false
+        end
+
+        if success && @observation.name_been_proposed?(@name)
+          flash_warning(:runtime_create_naming_already_proposed.t)
+          success = false
+        end
+
+        # Validate objects.
+        @naming.name = @name
+        success = validate_naming(@naming) if success
+        success = validate_vote(@vote)     if success
+
+        if success
+          # Save changes now that everything checks out.
+          create_naming_reasons(@naming, params[:reason])
+          save_naming(@naming)
+          @observation.reload
+          @observation.change_vote(@naming, @vote.value)
+          @observation.log(:log_naming_created, :name => @naming.format_name)
+
+          # Check for notifications.
+          if has_unshown_notifications?(@user, :naming)
+            redirect_to(:action => 'show_notifications', :id => @observation.id,
+                        :params => query_params)
+          else
+            redirect_to(:action => 'show_observation', :id => @observation.id,
+                        :params => query_params)
+          end
+
+        # If anything failed reload the form.
+        else
+          @reason = init_naming_reasons(@naming, params[:reason])
+        end
       end
     end
   end
@@ -1683,65 +1673,66 @@ class ObserverController < ApplicationController
   # Admin util linked from show_user page that lets admin add or change bonuses
   # for a given user.
   def change_user_bonuses # :root: :norobots:
-    @user2 = User.find(params[:id])
-    if is_in_admin_mode?
-      if request.method != :post
+    if @user2 = find_or_goto_index(User, params[:id])
+      if is_in_admin_mode?
+        if request.method != :post
 
-        # Reformat bonuses as string for editing, one entry per line.
-        @val = ''
-        if @user2.bonuses
-          @val = @user2.bonuses.map { |points, reason|
-            sprintf('%-6d %s', points, reason.gsub(/\s+/, ' '))
-          }.join("\n")
-        end
-
-      else
-        # Parse new set of values.
-        @val = params[:val]
-        line_num = 0
-        errors = false
-        bonuses = []
-        for line in @val.split("\n")
-          line_num += 1
-          if match = line.match(/^\s*(\d+)\s*(\S.*\S)\s*$/)
-            bonuses.push([match[1].to_i, match[2].to_s])
-          else
-            flash_error("Syntax error on line #{line_num}.")
-            errors = true
-          end
-        end
-
-        # Success: update user's contribution.
-        if !errors
-          contrib = @user2.contribution.to_i
-
-          # Subtract old bonuses.
+          # Reformat bonuses as string for editing, one entry per line.
+          @val = ''
           if @user2.bonuses
-            for points, reason in @user2.bonuses
-              contrib -= points
+            @val = @user2.bonuses.map { |points, reason|
+              sprintf('%-6d %s', points, reason.gsub(/\s+/, ' '))
+            }.join("\n")
+          end
+
+        else
+          # Parse new set of values.
+          @val = params[:val]
+          line_num = 0
+          errors = false
+          bonuses = []
+          for line in @val.split("\n")
+            line_num += 1
+            if match = line.match(/^\s*(\d+)\s*(\S.*\S)\s*$/)
+              bonuses.push([match[1].to_i, match[2].to_s])
+            else
+              flash_error("Syntax error on line #{line_num}.")
+              errors = true
             end
           end
 
-          # Add new bonuses
-          for points, reason in bonuses
-            contrib += points
+          # Success: update user's contribution.
+          if !errors
+            contrib = @user2.contribution.to_i
+
+            # Subtract old bonuses.
+            if @user2.bonuses
+              for points, reason in @user2.bonuses
+                contrib -= points
+              end
+            end
+
+            # Add new bonuses
+            for points, reason in bonuses
+              contrib += points
+            end
+
+            # Update database.
+            @user2.bonuses      = bonuses
+            @user2.contribution = contrib
+            @user2.save
+            Transaction.put_user(
+              :id               => @user2,
+              :set_bonuses      => bonuses,
+              :set_contribution => contrib
+            )
+
+            redirect_to(:action => 'show_user', :id => @user2.id)
           end
-
-          # Update database.
-          @user2.bonuses      = bonuses
-          @user2.contribution = contrib
-          @user2.save
-          Transaction.put_user(
-            :id               => @user2,
-            :set_bonuses      => bonuses,
-            :set_contribution => contrib
-          )
-
-          redirect_to(:action => 'show_user', :id => @user2.id)
         end
+      else
+        redirect_to(:action => 'show_user', :id => @user2.id)
       end
-    else
-      redirect_to(:action => 'show_user', :id => @user2.id)
     end
   end
 
@@ -1837,9 +1828,9 @@ class ObserverController < ApplicationController
   end
 
   def ask_user_question # :norobots:
-    @target = User.find(params[:id])
-    if email_question(@user) &&
-       (request.method == :post)
+    if @target = find_or_goto_index(User, params[:id]) and
+       email_question(@user) and
+       request.method == :post
       subject = params[:email][:subject]
       content = params[:email][:content]
       AccountMailer.deliver_user_question(@user, @target, subject, content)
@@ -1849,9 +1840,9 @@ class ObserverController < ApplicationController
   end
 
   def ask_observation_question # :norobots:
-    @observation = Observation.find(params[:id])
-    if email_question(@observation) &&
-       (request.method == :post)
+    if @observation = find_or_goto_index(Observation, params[:id]) and
+       email_question(@observation) and
+       request.method == :post
       question = params[:question][:content]
       AccountMailer.deliver_observation_question(@user, @observation, question)
       flash_notice(:runtime_ask_observation_question_success.t)
@@ -1861,9 +1852,9 @@ class ObserverController < ApplicationController
   end
 
   def commercial_inquiry # :norobots:
-    @image = Image.find(params[:id])
-    if email_question(@image, :email_general_commercial) &&
-       (request.method == :post)
+    if @image = find_or_goto_index(Image, params[:id]) and
+       email_question(@image, :email_general_commercial) and
+       request.method == :post
       commercial_inquiry = params[:commercial_inquiry][:content]
       AccountMailer.deliver_commercial_inquiry(@user, @image, commercial_inquiry)
       flash_notice(:runtime_commercial_inquiry_success.t)

@@ -77,6 +77,7 @@ class AbstractModel < ActiveRecord::Base
   # Make a full clone of the present instance, then revert it to an older version.
   # Returns +nil+ if +version+ not found.
   def revert_clone(version)
+    return self if self.version == version
     result = self.class.find(id)
     result = nil if not result.revert_to(version)
     return result

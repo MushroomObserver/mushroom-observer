@@ -274,13 +274,14 @@ class ImageController < ApplicationController
 
   # Change user's vote and go to next image.
   def cast_vote # :norobots:
-    image = Image.find(params[:id])
-    val = image.change_vote(@user, params[:value])
-    Transaction.put_images(:id => image, :set_vote => val)
-    if params[:next]
-      redirect_to_next_object(:next, Image, params[:id])
-    else
-      redirect_to(:action => 'show_image', :id => id, :params => query_params)
+    if image = find_or_goto_index(Image, params[:id])
+      val = image.change_vote(@user, params[:value])
+      Transaction.put_images(:id => image, :set_vote => val)
+      if params[:next]
+        redirect_to_next_object(:next, Image, params[:id])
+      else
+        redirect_to(:action => 'show_image', :id => id, :params => query_params)
+      end
     end
   end
 
@@ -304,29 +305,30 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def add_image # :prefetch: :norobots:
     pass_query_params
-    @observation = Observation.find(params[:id])
-    if !check_permission!(@observation)
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
-    elsif request.method != :post
-      @image = Image.new
-      @image.license = @user.license
-      @image.copyright_holder = @user.legal_name
-      @image.user = @user
-      # Set the default date to the date of the observation
-      # Don't know how to correctly test this.
-      @image.when = @observation.when
-      @licenses = License.current_names_and_ids(@image.license)
-      init_project_vars_for_add_or_edit(@observation)
-    else
-      args = params[:image]
-      i = 1
-      while i < 5 or !params[:upload]["image#{i}"].blank?
-        process_image(args, params[:upload]["image#{i}"])
-        i += 1
+    if @observation = find_or_goto_index(Observation, params[:id])
+      if !check_permission!(@observation)
+        redirect_to(:controller => 'observer', :action => 'show_observation',
+                    :id => @observation.id, :params => query_params)
+      elsif request.method != :post
+        @image = Image.new
+        @image.license = @user.license
+        @image.copyright_holder = @user.legal_name
+        @image.user = @user
+        # Set the default date to the date of the observation
+        # Don't know how to correctly test this.
+        @image.when = @observation.when
+        @licenses = License.current_names_and_ids(@image.license)
+        init_project_vars_for_add_or_edit(@observation)
+      else
+        args = params[:image]
+        i = 1
+        while i < 5 or !params[:upload]["image#{i}"].blank?
+          process_image(args, params[:upload]["image#{i}"])
+          i += 1
+        end
+        redirect_to(:controller => 'observer', :action => 'show_observation',
+                    :id => @observation.id, :params => query_params)
       end
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
     end
   end
 
@@ -373,43 +375,44 @@ class ImageController < ApplicationController
   # Outputs: @image, @licenses
   def edit_image # :prefetch: :norobots:
     pass_query_params
-    @image = Image.find(params[:id])
-    @licenses = License.current_names_and_ids(@image.license)
-    if !check_permission!(@image)
-      redirect_to(:action => 'show_image', :id => @image,
-                  :params => query_params)
-    elsif request.method != :post
-      init_project_vars_for_add_or_edit(@image)
-    else
-      @image.attributes = params[:image]
-      xargs = {}
-      xargs[:set_date]             = @image.when             if @image.when_changed?
-      xargs[:set_notes]            = @image.notes            if @image.notes_changed?
-      xargs[:set_copyright_holder] = @image.copyright_holder if @image.copyright_holder_changed?
-      xargs[:set_original_name]    = @image.original_name    if @image.original_name_changed?
-      xargs[:set_license]          = @image.license          if @image.license_id_changed?
-      done = false
-      if xargs.empty?
-        if update_projects(@image, params[:project])
-          flash_notice :runtime_image_edit_success.t(:id => @image.id)
+    if @image = find_or_goto_index(Image, params[:id])
+      @licenses = License.current_names_and_ids(@image.license)
+      if !check_permission!(@image)
+        redirect_to(:action => 'show_image', :id => @image,
+                    :params => query_params)
+      elsif request.method != :post
+        init_project_vars_for_add_or_edit(@image)
+      else
+        @image.attributes = params[:image]
+        xargs = {}
+        xargs[:set_date]             = @image.when             if @image.when_changed?
+        xargs[:set_notes]            = @image.notes            if @image.notes_changed?
+        xargs[:set_copyright_holder] = @image.copyright_holder if @image.copyright_holder_changed?
+        xargs[:set_original_name]    = @image.original_name    if @image.original_name_changed?
+        xargs[:set_license]          = @image.license          if @image.license_id_changed?
+        done = false
+        if xargs.empty?
+          if update_projects(@image, params[:project])
+            flash_notice :runtime_image_edit_success.t(:id => @image.id)
+          else
+            flash_notice(:runtime_no_changes.t)
+          end
+          done = true
+        elsif !@image.save
+          flash_object_errors(@image)
         else
-          flash_notice(:runtime_no_changes.t)
+          xargs[:id] = @image
+          Transaction.put_image(xargs)
+          @image.log_update
+          flash_notice :runtime_image_edit_success.t(:id => @image.id)
+          update_projects(@image, params[:project])
+          done = true
         end
-        done = true
-      elsif !@image.save
-        flash_object_errors(@image)
-      else
-        xargs[:id] = @image
-        Transaction.put_image(xargs)
-        @image.log_update
-        flash_notice :runtime_image_edit_success.t(:id => @image.id)
-        update_projects(@image, params[:project])
-        done = true
-      end
-      if done
-        redirect_to(:action => 'show_image', :id => @image.id, :params => query_params)
-      else
-        init_project_vars_for_reload(@image)
+        if done
+          redirect_to(:action => 'show_image', :id => @image.id, :params => query_params)
+        else
+          init_project_vars_for_reload(@image)
+        end
       end
     end
   end
@@ -480,29 +483,28 @@ class ImageController < ApplicationController
   # Inputs: params[:id] (image)
   # Redirects to list_images.
   def destroy_image # :norobots:
-
-    # All of this just to decide where to redirect after deleting image.
-    @image = Image.find(params[:id])
-    next_state = nil
-    if this_state = find_query(:Image)
-      set_query_params(this_state)
-      this_state.current = @image
-      next_state = this_state.next
-    end
-
-    if !check_permission!(@image)
-      redirect_to(:action => 'show_image', :id => @image.id,
-                  :params => query_params)
-    else
-      @image.log_destroy
-      @image.destroy
-      Transaction.delete_image(:id => @image)
-      flash_notice(:runtime_image_destroy_success.t(:id => params[:id]))
-      if next_state
-        redirect_to(:action => 'show_image', :id => next_state.current_id,
-                    :params => set_query_params(next_state))
+    if @image = find_or_goto_index(Image, params[:id])
+      next_state = nil
+      # decide where to redirect after deleting image
+      if this_state = find_query(:Image)
+        set_query_params(this_state)
+        this_state.current = @image
+        next_state = this_state.next
+      end
+      if !check_permission!(@image)
+        redirect_to(:action => 'show_image', :id => @image.id,
+                    :params => query_params)
       else
-        redirect_to(:action => 'list_images')
+        @image.log_destroy
+        @image.destroy
+        Transaction.delete_image(:id => @image)
+        flash_notice(:runtime_image_destroy_success.t(:id => params[:id]))
+        if next_state
+          redirect_to(:action => 'show_image', :id => next_state.current_id,
+                      :params => set_query_params(next_state))
+        else
+          redirect_to(:action => 'list_images')
+        end
       end
     end
   end
@@ -513,23 +515,24 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def remove_image # :norobots:
     pass_query_params
-    @image = Image.find(params[:image_id])
-    @observation = Observation.find(params[:observation_id])
-    if !check_permission!(@observation)
-      flash_error(:runtime_image_remove_denied.t(:id => @image.id))
-    elsif !@observation.images.include?(@image)
-      flash_error(:runtime_image_remove_missing.t(:id => @image.id))
-    else
-      @observation.remove_image(@image)
-      @observation.log_remove_image(@image)
-      Transaction.put_observation(
-        :id        => @observation,
-        :del_image => @image
-      )
-      flash_notice(:runtime_image_remove_success.t(:id => @image.id))
+    if @image = find_or_goto_index(Image, params[:image_id]) and
+       @observation = find_or_goto_index(Observation, params[:observation_id])
+      if !check_permission!(@observation)
+        flash_error(:runtime_image_remove_denied.t(:id => @image.id))
+      elsif !@observation.images.include?(@image)
+        flash_error(:runtime_image_remove_missing.t(:id => @image.id))
+      else
+        @observation.remove_image(@image)
+        @observation.log_remove_image(@image)
+        Transaction.put_observation(
+          :id        => @observation,
+          :del_image => @image
+        )
+        flash_notice(:runtime_image_remove_success.t(:id => @image.id))
+      end
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
     end
-    redirect_to(:controller => 'observer', :action => 'show_observation',
-                :id => @observation.id, :params => query_params)
   end
 
   # Browse through matrix of recent images to let a user reuse an image
@@ -551,7 +554,7 @@ class ImageController < ApplicationController
   def reuse_image # :norobots:
     pass_query_params
     @mode = params[:mode].to_sym
-    @observation = Observation.find(params[:obs_id]) if @mode == :observation
+    @observation = Observation.safe_find(params[:obs_id]) if @mode == :observation
     done = false
 
     # Make sure user owns the observation.
@@ -616,28 +619,29 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def remove_images # :norobots:
     pass_query_params
-    @observation = Observation.find(params[:id], :include => :images)
+    if @observation = find_or_goto_index(Observation, params[:id], :include => :images)
 
-    # Make sure user owns the observation.
-    if !check_permission!(@observation)
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
+      # Make sure user owns the observation.
+      if !check_permission!(@observation)
+        redirect_to(:controller => 'observer', :action => 'show_observation',
+                    :id => @observation.id, :params => query_params)
 
-    # POST -- remove selected images.
-    elsif request.method == :post
-      if images = params[:selected]
-        images.each do |image_id, do_it|
-          if do_it == 'yes'
-            if image = Image.find(image_id)
-              @observation.remove_image(image)
-              @observation.log_remove_image(image)
-              flash_notice(:runtime_image_remove_success.t(:id => image_id))
+      # POST -- remove selected images.
+      elsif request.method == :post
+        if images = params[:selected]
+          images.each do |image_id, do_it|
+            if do_it == 'yes'
+              if image = Image.safe_find(image_id)
+                @observation.remove_image(image)
+                @observation.log_remove_image(image)
+                flash_notice(:runtime_image_remove_success.t(:id => image_id))
+              end
             end
           end
         end
+        redirect_to(:controller => 'observer', :action => 'show_observation',
+                    :id => @observation.id, :params => query_params)
       end
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
     end
   end
 
@@ -668,8 +672,6 @@ class ImageController < ApplicationController
         new_holder = row[:new_holder].to_s
         if old_id != new_id or
            old_holder != new_holder
-          old_license = License.find(old_id)
-          new_license = License.find(new_id)
           old_holder = Image.connection.quote(old_holder);
           new_holder = Image.connection.quote(new_holder);
           data = Image.connection.select_rows(%(
@@ -692,8 +694,8 @@ class ImageController < ApplicationController
           ))
           Transaction.put_image(
             :user                 => @user,
-            :license              => old_license,
-            :set_license          => new_license,
+            :license              => old_id,
+            :set_license          => new_id,
             :copyright_holder     => old_holder,
             :set_copyright_holder => new_holder
           )
@@ -709,9 +711,10 @@ class ImageController < ApplicationController
       GROUP BY copyright_holder, license_id
     ))
     for datum in @data
-      license = License.find(datum['license_id'].to_i)
-      datum['license_name'] = license.display_name
-      datum['licenses']     = License.current_names_and_ids(license)
+      if license = License.safe_find(datum['license_id'].to_i)
+        datum['license_name'] = license.display_name
+        datum['licenses']     = License.current_names_and_ids(license)
+      end
     end
   end
 

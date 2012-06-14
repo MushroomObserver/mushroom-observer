@@ -218,31 +218,32 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def edit_project # :prefetch: :norobots:
     pass_query_params
-    @project = Project.find(params[:id])
-    if !check_permission!(@project)
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
-    elsif request.method == :post
-      @title = params[:project][:title].to_s
-      @summary = params[:project][:summary]
-      xargs = {}
-      xargs[:set_title]   = @title   if @project_title   != @title
-      xargs[:set_summary] = @summary if @project_summary != @summary
-      if @title.blank?
-        flash_error(:add_project_need_title.t)
-      elsif Project.find_by_title(@title) != @project
-        flash_error(:add_project_already_exists.t(:title => @title))
-      elsif !@project.update_attributes(params[:project])
-        flash_object_errors(@project)
-      else
-        if !xargs.empty?
-          xargs[:id] = @project
-          Transaction.put_project(xargs)
-        end
-        @project.log_update
-        flash_notice(:runtime_edit_project_success.t(:id => @project.id))
+    if @project = find_or_goto_index(Project, params[:id])
+      if !check_permission!(@project)
         redirect_to(:action => 'show_project', :id => @project.id,
                     :params => query_params)
+      elsif request.method == :post
+        @title = params[:project][:title].to_s
+        @summary = params[:project][:summary]
+        xargs = {}
+        xargs[:set_title]   = @title   if @project_title   != @title
+        xargs[:set_summary] = @summary if @project_summary != @summary
+        if @title.blank?
+          flash_error(:add_project_need_title.t)
+        elsif Project.find_by_title(@title) != @project
+          flash_error(:add_project_already_exists.t(:title => @title))
+        elsif !@project.update_attributes(params[:project])
+          flash_object_errors(@project)
+        else
+          if !xargs.empty?
+            xargs[:id] = @project
+            Transaction.put_project(xargs)
+          end
+          @project.log_update
+          flash_notice(:runtime_edit_project_success.t(:id => @project.id))
+          redirect_to(:action => 'show_project', :id => @project.id,
+                      :params => query_params)
+        end
       end
     end
   end
@@ -254,19 +255,20 @@ class ProjectController < ApplicationController
   # Outputs: none
   def destroy_project # :norobots:
     pass_query_params
-    @project = Project.find(params[:id])
-    if !check_permission!(@project)
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
-    elsif !@project.destroy
-      flash_error(:destroy_project_failed.t)
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
-    else
-      @project.log_destroy
-      Transaction.delete_project(:id => @project)
-      flash_notice(:destroy_project_success.t)
-      redirect_to(:action => :index_project, :params => query_params)
+    if @project = find_or_goto_index(Project, params[:id])
+      if !check_permission!(@project)
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
+      elsif !@project.destroy
+        flash_error(:destroy_project_failed.t)
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
+      else
+        @project.log_destroy
+        Transaction.delete_project(:id => @project)
+        flash_notice(:destroy_project_success.t)
+        redirect_to(:action => :index_project, :params => query_params)
+      end
     end
   end
 
@@ -286,17 +288,18 @@ class ProjectController < ApplicationController
   def admin_request # :prefetch: :norobots:
     sender = @user
     pass_query_params
-    @project = Project.find(params[:id])
-    if request.method == :post
-      subject = params[:email][:subject]
-      content = params[:email][:content]
-      for receiver in @project.admin_group.users
-        AccountMailer.deliver_admin_request(sender, receiver, @project,
-                                            subject, content)
+    if @project = find_or_goto_index(Project, params[:id])
+      if request.method == :post
+        subject = params[:email][:subject]
+        content = params[:email][:content]
+        for receiver in @project.admin_group.users
+          AccountMailer.deliver_admin_request(sender, receiver, @project,
+                                              subject, content)
+        end
+        flash_notice(:admin_request_success.t(:title => @project.title))
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
       end
-      flash_notice(:admin_request_success.t(:title => @project.title))
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
     end
   end
 
@@ -310,14 +313,15 @@ class ProjectController < ApplicationController
   # "Posts" to the same action.  Stays on this view until done.
   def add_members # :norobots:
     pass_query_params
-    @project = Project.find(params[:id])
-    @users = User.all(:order => "login, name")
-    if !@project.is_admin?(@user)
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
-    elsif !params[:candidate].blank?
-      @candidate = User.find(params[:candidate])
-      set_status(@project, :member, @candidate, :add)
+    if @project = find_or_goto_index(Project, params[:id])
+      @users = User.all(:order => "login, name")
+      if !@project.is_admin?(@user)
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
+      elsif !params[:candidate].blank?
+        @candidate = User.find(params[:candidate])
+        set_status(@project, :member, @candidate, :add)
+      end
     end
   end
 
@@ -331,26 +335,27 @@ class ProjectController < ApplicationController
   # Posts to same action.  Redirects to show_project when done.
   def change_member_status # :norobots:
     pass_query_params
-    @project = Project.find(params[:id])
-    @candidate = User.find(params[:candidate])
-    if !@project.is_admin?(@user)
-      flash_error(:change_member_status_denied.t)
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
-    elsif request.method == :post
-      user_group = @project.user_group
-      admin_group = @project.admin_group
-      admin = member = :remove
-      case params[:commit]
-      when :change_member_status_make_admin.l
-        admin = member = :add
-      when :change_member_status_make_member.l
-        member = :add
+    if @project = find_or_goto_index(Project, params[:id]) and
+       @candidate = find_or_goto_index(User, params[:candidate])
+      if !@project.is_admin?(@user)
+        flash_error(:change_member_status_denied.t)
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
+      elsif request.method == :post
+        user_group = @project.user_group
+        admin_group = @project.admin_group
+        admin = member = :remove
+        case params[:commit]
+        when :change_member_status_make_admin.l
+          admin = member = :add
+        when :change_member_status_make_member.l
+          member = :add
+        end
+        set_status(@project, :admin, @candidate, admin)
+        set_status(@project, :member, @candidate, member)
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
       end
-      set_status(@project, :admin, @candidate, admin)
-      set_status(@project, :member, @candidate, member)
-      redirect_to(:action => 'show_project', :id => @project.id,
-                  :params => query_params)
     end
   end
 

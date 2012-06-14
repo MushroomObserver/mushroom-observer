@@ -1258,7 +1258,7 @@ class Name < AbstractModel
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
   LOWER_WORD = / [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
-  LOWER_WORD_OR_SP_NOV = / (?!sp\s|sp$) #{LOWER_WORD} | sp\.\s\S*\d\S* /x
+  LOWER_WORD_OR_SP_NOV = / (?!sp\s|sp$|species) #{LOWER_WORD} | sp\.\s\S*\d\S* /x
 
   # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
   LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
@@ -1309,6 +1309,10 @@ class Name < AbstractModel
         :author => @author,
         :rank => @rank,
       }
+    end
+
+    def inspect
+      params.merge(:parent_name => @parent_name).inspect
     end
   end
 

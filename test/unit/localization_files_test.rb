@@ -1,20 +1,6 @@
 # encoding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
-class Language
-  def self.clear_verbose_messages
-    @@verbose_messages = []
-  end
-
-  def self.verbose_messages
-    @@verbose_messages
-  end
-
-  def verbose(msg)
-    @@verbose_messages << msg
-  end
-end
-
 class LocalizationFilesTest < UnitTestCase
   def test_localization_files_exist
     for lang in Language.all

@@ -18,7 +18,7 @@ class TranslationController < ApplicationController
     update_translations(@edit_tags) if params[:commit] == :SAVE.l
     @form = build_form(@lang, @show_tags)
   rescue => e
-    raise error if TESTING and @lang
+    raise e if TESTING and @lang
     flash_error(*error_message(e))
     redirect_back_or_default('/')
   end
@@ -157,6 +157,7 @@ class TranslationController < ApplicationController
       for t in [tag, tag+'s', tag.upcase, (tag+'s').upcase]
         tag_list << t if strings.has_key?(t)
       end
+      flash_error("Tag doesn't exist: #{tag.inspect}") if tag_list.empty?
     end
     return tag_list
   end

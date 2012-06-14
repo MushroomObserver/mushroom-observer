@@ -53,7 +53,7 @@ class TranslationString < AbstractModel
 
   # Update this string in the current set of translations Globalite is using.
   def update_localization
-    data = Globalite.localization_data(language.locale)
+    data = Globalite.localization_data[language.locale.to_sym]
     raise "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
     data[tag.to_sym] = text
   end
