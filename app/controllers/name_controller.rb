@@ -1403,6 +1403,11 @@ class NameController < ApplicationController
   # TODO: Add ability to preview synonyms?
   # TODO: List stuff that's almost ready.
   # TODO: Add EOL logo on pages getting exported
+  #   show_name and show_descriptions for description info
+  #   show_name, show_observation and show_image for images
+  # EOL preview from Name page
+  # Improve the Name page
+  # Review unapproved descriptions
 
   # Send stuff to eol.
   def eol # :nologin: :norobots:
