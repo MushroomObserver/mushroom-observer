@@ -374,7 +374,7 @@ private
   def add_language_contributions(user)
     sum = 0
     list = Language.all.map do |lang|
-      score = lang.calculate_users_contribution(user).to_i
+      score = lang.official ? 0 : lang.calculate_users_contribution(user).to_i
       sum += score
       [lang, score]
     end.select {|lang, score| score > 0}
