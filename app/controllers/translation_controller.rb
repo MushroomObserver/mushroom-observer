@@ -209,7 +209,7 @@ class TranslationController < ApplicationController
     @form = []
     @tags = tags
     @tags_used = {}
-    fh ||= File.open(lang.export_file, 'r')
+    fh ||= File.open(lang.export_file, 'r:utf-8')
     reset_everything
     fh.each_line do |line|
       line.force_encoding('utf-8')

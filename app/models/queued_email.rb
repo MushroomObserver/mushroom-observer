@@ -287,7 +287,7 @@ class QueuedEmail < AbstractModel
   # Add line to log to help keep track of what/when/why emails are being queued
   # and when they are actually sent.
   def self.debug_log(msg)
-    File.open("#{RAILS_ROOT}/log/email-debug.log", 'a') do |fh|
+    File.open("#{RAILS_ROOT}/log/email-debug.log", 'a:utf-8') do |fh|
       fh.puts("#{Time.now.api_time} #{msg}")
     end
   end

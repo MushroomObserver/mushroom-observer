@@ -66,7 +66,7 @@ module LanguageTracking
   def save_tags
     name = String.random(16)
     file = tag_file(name)
-    File.open(file, 'w') do |fh|
+    File.open(file, 'w:utf-8') do |fh|
       for tag in tags_used
         fh.puts(tag)
       end
@@ -78,7 +78,7 @@ module LanguageTracking
   def load_tags(name)
     file = tag_file(name)
     tags = []
-    File.open(file, 'r') do |fh|
+    File.open(file, 'r:utf-8') do |fh|
       fh.each_line do |line|
         tags << line.chomp
       end

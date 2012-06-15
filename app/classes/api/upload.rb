@@ -22,7 +22,7 @@ class API
     def initialize(url)
       @temp_file = "#{RAILS_ROOT}/tmp/api_upload.#{$$}"
       uri = URI.parse(url)
-      File.open(@temp_file, 'w') do |fh|
+      File.open(@temp_file, 'w:utf-8') do |fh|
         Net::HTTP.new(uri.host, uri.port).start do |http|
           http.request_get(uri.request_uri) do |response|
             response.read_body do |chunk|

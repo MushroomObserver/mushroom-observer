@@ -63,7 +63,8 @@ module SessionExtensions
       if error = controller.instance_variable_get('@error')
         msg = "#{error}\n#{error.backtrace.join("\n")}"
       else
-        msg = 'Got unknown 500 error from outside our application?!'
+        msg = "Got unknown 500 error from outside our application?!\n" +
+              "This usually means that a file failed to parse.\n"
       end
       assert_block(msg) { false }
     end

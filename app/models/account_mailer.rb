@@ -623,7 +623,7 @@ private
 
   # Log exactly who is sending email at what times.
   # def log_email
-  #   File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a') do |fh|
+  #   File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a:utf-8') do |fh|
   #     time = Time.now.strftime('%Y-%m-%d:%H:%M:%S')
   #
   #     begin

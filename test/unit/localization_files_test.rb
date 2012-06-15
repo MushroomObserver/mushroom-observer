@@ -21,7 +21,9 @@ class LocalizationFilesTest < UnitTestCase
   def test_embedded_refs
     errors = []
     for lang in Language.all
-      data = YAML::load_file(lang.localization_file)
+      data = File.open(lang.localization_file, 'r:utf-8') do |fh|
+        YAML::load(fh)
+      end
       tags = {}
       for tag in data.keys
         tags[tag.to_s.downcase] = true
@@ -44,7 +46,9 @@ class LocalizationFilesTest < UnitTestCase
 
     # First get list of tags defined in the main language file.
     lang = Language.official
-    data = YAML::load_file(lang.export_file)
+    data = File.open(lang.export_file, 'r:utf-8') do |fh|
+      YAML::load(fh)
+    end
     tags = {}
     for tag in data.keys
       tags[tag.to_s.downcase] = true

@@ -160,8 +160,10 @@ class LanguageExporterTest < UnitTestCase
 
   def test_export_round_trip
     file = @official.export_file
-    @official.write_export_file_lines(File.open(file, 'r').readlines)
-    data = YAML::load_file(file)
+    @official.write_export_file_lines(File.open(file, 'r:utf-8').readlines)
+    data = File.open(file, 'r:utf-8') do |fh|
+      YAML::load(fh)
+    end
     for tag, str in data
       assert(tag.is_a?(String), "#{file} #{tag}: tag is a #{tag.class} not a String!")
       assert(str.is_a?(String), "#{file} #{tag}: value is a #{str.class} not a String!")

@@ -158,7 +158,9 @@ module LanguageExporter
     if TESTING and @@localization_files
       @@localization_files[locale]
     else
-      YAML::load_file(localization_file)
+      File.open(localization_file, 'r:utf-8') do |fh|
+        YAML::load(fh)
+      end
     end
   end
 
@@ -167,7 +169,7 @@ module LanguageExporter
       @@localization_files[locale] = data if @@localization_files
     else
       temp_file = localization_file + '.' + Process.pid.to_s
-      File.open(temp_file, 'w') do |fh|
+      File.open(temp_file, 'w:utf-8') do |fh|
         old_engine = YAML::ENGINE.yamler
         YAML::ENGINE.yamler = 'psych'
         YAML::dump(data, fh)
@@ -181,7 +183,9 @@ module LanguageExporter
     if TESTING and @@export_files
       YAML::load(@@export_files[locale].join)
     else
-      YAML::load_file(export_file)
+      File.open(export_file, 'r:utf-8') do |fh|
+        YAML::load(fh)
+      end
     end
   end
 
@@ -198,7 +202,7 @@ module LanguageExporter
       @@export_files[locale] = output_lines if @@export_files
     else
       temp_file = export_file + '.' + Process.pid.to_s
-      File.open(temp_file, 'w') do |fh|
+      File.open(temp_file, 'w:utf-8') do |fh|
         for line in output_lines
           fh.write(line)
         end
