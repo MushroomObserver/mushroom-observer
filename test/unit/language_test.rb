@@ -106,4 +106,27 @@ class LanguageTest < UnitTestCase
     Language.update_recent_translations
     assert_equal('new_val', one.tag.to_sym.l)
   end
+
+  def test_score_lines
+    len = Language::CHARACTERS_PER_LINE
+    assert_equal(0, Language.score_lines(''))
+    assert_equal(1, Language.score_lines('x'))
+    assert_equal(1, Language.score_lines('x'*(len-1)))
+    assert_equal(2, Language.score_lines('x'*len))
+    assert_equal(1, Language.score_lines("x\nx\nx"))
+    assert_equal(3, Language.score_lines("x\ny\nz"))
+    assert_equal(2, Language.score_lines("x\n\ny\n\nx"))
+  end
+
+  def test_user_contribution
+    # These are smaller than they should be because the test fixtures doesn't
+    # include versions corresponding to the current translation strings.
+    assert_equal(0, Language.calculate_users_contribution(@rolf))
+    assert_equal(1, Language.calculate_users_contribution(@mary))
+    assert_equal(1, Language.calculate_users_contribution(@dick))
+    assert_equal(0, languages(:english).calculate_users_contribution(@mary))
+    assert_equal(1, languages(:greek).calculate_users_contribution(@mary))
+    assert_equal(0, languages(:english).calculate_users_contribution(@dick))
+    assert_equal(1, languages(:greek).calculate_users_contribution(@dick))
+  end
 end

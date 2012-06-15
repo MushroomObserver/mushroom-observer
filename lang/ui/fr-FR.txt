@@ -145,8 +145,8 @@ author: auteur
 AUTHORS: Auteurs
 authors: auteurs
 # ("Authority" is authority on a scientific name.)
-ALTITUDE: Altitude
-altitude: altitude
+ALTITUDE:  Altitude
+altitude:  altitude
 AUTHORITY: Auteur
 authority: auteur
 AUTHORITYS: Auteurs
@@ -418,8 +418,8 @@ APPROVED: Approuvé
 approved: approuvé
 ACCEPTED: Correcte
 accepted: Correcte
-DEPRECATED: Déconseillé
-deprecated: déconseillé
+DEPRECATED: Obsolète
+deprecated: obsolète
 MISSPELLED: Mal orthographié
 misspelled: mal orthographié
 NOT_MISSPELLED: Correctement orthographié
@@ -971,7 +971,7 @@ app_site_stats: Stats du site
 app_colors_from: Couleurs selon [theme]
 app_powered_by: Construite sur
 app_preferred_browser: Navigateur préféré
-app_feature_tracker: Itinéraire de développement
+app_feature_tracker:  Feature Tracker
 
 # This is for the search bar at the top of every page.
 app_find: Trouver
@@ -1082,6 +1082,7 @@ create_name_description_title: Créer une description pour [name]
 
 # name/create_name
 create_name_title: Créer un nom
+create_name_multiple_names_match:  There already multiple names matching "[str]".
 
 
 
@@ -1091,7 +1092,7 @@ create_naming_title: "Proposer un nom pour l'observation #[id]"
 
 
 # observer/create_observation
-create_observation_title: Créer une observation
+create_observation_title: Créer une observation"
 
 
 
@@ -1112,6 +1113,7 @@ edit_name_description_title: Modifier [name]
 
 # name/edit_name
 edit_name_title: Modifier la description de [name]
+edit_name_multiple_names_match:  "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
 
 
 
@@ -1162,10 +1164,10 @@ form_images_when_taken: Quand a-t-elle pris?
 form_images_when_help: La date que l'image ou le dessin a été créé.
 form_images_notes_help: Entrez les notes que sont spécifique à cette image particulière.
 form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
-form_images_original_name: Nom du fichier original
+form_images_original_name:  Original File Name
 form_images_select_license: Sélectionnez la license
 form_images_license_help: «La license»:/observer/how_to_use#license que vous souhaitez utiliser pour cette image.
-form_images_project_help: Sélectionnez tous les projets à lesquels vous souhaitez attacher cette image.
+form_images_project_help:  Check any projects you wish to attach this image to.
 
 
 # observer/_form_list_feedback
@@ -1174,22 +1176,22 @@ form_list_feedback_missing_names_help: Cliquez sur «[:SAVE]» / «[:UPDATE]» p
 
 
 # location/_form_location
-form_locations_gen_desc: Description générale
-form_locations_ecology: Description de l'habitat
-form_locations_species: Espèces intéressantes
-form_locations_notes: "[:Notes]"
-form_locations_refs: "[:form_names_refs]"
-form_locations_refs_help: "[:form_names_refs_help]"
-form_locations_help: "<a href=\"/location/help\" target=\"_new\">Secours</a>"
-form_locations_find_on_map: Trouver sur une carte =>
+form_locations_gen_desc:  General Description
+form_locations_ecology:  Habitat Description
+form_locations_species:  Interesting Species
+form_locations_notes:  "[:Notes]"
+form_locations_refs:  "[:form_names_refs]"
+form_locations_refs_help:  "[:form_names_refs_help]"
+form_locations_help:  "<a href=\"/location/help\" target=\"_new\">Help</a>"
+form_locations_find_on_map:  Find on Map =>
 
-form_locations_lat_long_help: Toutes les valeurs doivent être exprimées en degrés décimaux.
-form_locations_license_help: Sélectionnez "la licence":/observer/how_to_use#license que vous souhaitez utiliser pour le texte ci-dessus.
-form_locations_gen_desc_help: Décrivez la situation géographique de cet endroit.
-form_locations_ecology_help: Résumer le climat, la géologie, l'écologie des communautés végétales, etc.
-form_locations_species_help: Énumérer les espèces communes, rares, ou autrement intéressant trouvés ici.
-form_locations_notes_help: Entrez les notes qui sont spécifiques à cet endroit particulier. Par exemple, si elle est privée ou publique, s'il faut un permis, des itinéraires, etc.
-form_locations_dubious_help: Soumettre à nouveau à utiliser ce nom de lieu ou de modifier le texte ci-dessous pour corriger des erreurs de frappe.
+form_locations_lat_long_help:  All values should be in decimal degrees.
+form_locations_license_help:  Select "license":/observer/how_to_use#license you want to give for the above text.
+form_locations_gen_desc_help:  Describe the geographical location of this location.
+form_locations_ecology_help:  Summarize the climate, geology, ecology, plant communities, etc.
+form_locations_species_help:  List the common, rare, or otherwise interesting species found here.
+form_locations_notes_help:  Enter notes that are specific to this particular location.  For example, whether it is private or public, whether permits are required, driving directions, etc.
+form_locations_dubious_help:  Submit again to use this location name or edit the text below to correct any typo.
 
 
 # observer/_form_name
@@ -1231,24 +1233,24 @@ form_names_refs_help:  Each line is considered a separate reference, but no othe
 
 
 # observer/_form_naming
-form_naming_confidence: Confiance
-form_naming_valid_synonyms: Synonymes valides
-form_naming_deprecated: Le nom «[name]» est déconseillé.
-form_naming_not_recognized: Le nom «[name]» n'est pas reconnu.
-form_naming_name_help_create: Entrez le nom que vous appliqueriez à cette observation. Si vous ne savez pas ce que c'est, il suffit de laisser le champ vide. Si vous trouvez un meilleur nom à l'avenir, vous pouvez toujours proposer un nom plus tard.
-form_naming_name_help: Les noms scientifiques sont actuellement tenus, mais ne comprennent pas les informations sur l'auteur. Si plusieurs noms s'appliquent, vous sera donné la possibilité de choisir entre eux. Si le nom n'est pas reconnu dans la base de données, puis vous sera donné la possibilité d'ajouter le nom ou fixer l'orthographe si c'est juste une faute de frappe.
-form_naming_deprecated_help: Sélectionnez un nom valide ou cliquez sur «[button]» à utiliser «[name]».
-form_naming_correct_help: Vouliez-vous dire l'un des noms suivants? [:form_naming_deprecated_help]
-form_naming_not_recognized_help: Cliquez sur «[button]» pour créer ce nom, ou modifier le nom ci-dessous pour correcter les fautes de frappe.
-form_naming_multiple_names: Plusieurs noms correspondent à «[name]». Sélectionnez celui que vous destiné.
-form_naming_multiple_names_help: Le nombre après chaque nom indique le nombre d'observations qui utilisent actuellement ce nom.
-form_naming_confidence_help: Comment êtes-vous confiant de cette identification? S'il vous plaît expliquer comment vous êtes arrivé à votre décision dans les cases ci-dessous, ainsi.
+form_naming_confidence:  Confidence
+form_naming_valid_synonyms:  Valid synonyms are
+form_naming_deprecated:  The name '[name]' is deprecated.
+form_naming_not_recognized:  The name '[name]' was not recognized.
+form_naming_name_help_create:  The name you would apply to this observation.  If you don't know what it is, just leave it blank.  If you find a better name in the future, you can always propose a name later.
+form_naming_name_help:  Scientific names are currently required, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
+form_naming_deprecated_help:  Select a valid name or click '[button]' to use '[name]'.
+form_naming_correct_help:  Did you mean one of the following names? [:form_naming_deprecated_help]
+form_naming_not_recognized_help:  Click '[button]' to create this name or edit the name below to correct any typo.
+form_naming_multiple_names:  Multiple names match '[name]'.  Select the one you intended.
+form_naming_multiple_names_help:  The number after each name is how many observations are currently using that name.
+form_naming_confidence_help:  How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
 
 
 # observer/_form_observations
 form_observations_specimen_available: Spécimen d'herbier est disponible
 form_observations_is_collection_location: L'endroit de collection
-form_observations_original_name: Nom du fichier original
+form_observations_original_name:  Original File Name
 form_observations_upload_images: Images à télécharger
 form_observations_upload_another: Télécharger une autre...
 form_observations_edit_image: Modifier l'image
@@ -1266,8 +1268,8 @@ form_observations_where_help: >
   Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil\n
 
 form_observations_dubious_help: Cliquez sur «[button]» d'utilizer ce nom d'endroit, sinon modifiez le text ci-dessous pour corriger les fautes de frappe.
-form_observations_project_help: Sélectionnez tous les projets à lesquels vous souhaitez attacher cette observation. Toutes les images que vous téléchargez seront également attachés à ces projets automatiquement.
-form_observations_list_help: Sélectionnez les listes d'espèces à lesquelle vous souhaitez ajouter cette observation.
+form_observations_project_help:  Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
+form_observations_list_help:  Check and species lists you would like to add this observation to.
 
 
 # observer/_form_species_list
@@ -1353,7 +1355,7 @@ image_show_large: Grande
 image_show_huge: Énorme
 image_show_full_size: Taille entière
 image_show_original: Afficher l'image originale
-image_show_original_name: Nom du fichier original
+image_show_original_name:  Original File Name
 image_show_make_default: Faire de cette la taille par défaut.
 
 
@@ -1597,14 +1599,14 @@ rss_changed: "[TYPE] a été modifié(e)"
 
 
 # shared/_textile_help
-shared_textile_link: Plus de détails ici
-shared_textile_help: Les notes peuvent être formatés à l'aide du <a href="/observer/textile" target="_new">système de balisage Textile</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (liée à la page du nom)<br/> __italique__, **gras** ---> <i>italique</i>, <b>gras</b><br/>
+shared_textile_link:  More details here.
+shared_textile_help:  Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
 
 # comment/_show_comments
-show_comments_add_comment: "[:add_object(type=:comment)]"
-show_comments_no_comments_yet: Personne n'a commenté encore.
-show_comments_and_more: Et [num] de plus...
+show_comments_add_comment:  "[:add_object(type=:comment)]"
+show_comments_no_comments_yet:  No one has commented yet.
+show_comments_and_more:  And [num] more...
 
 
 
@@ -1638,87 +1640,87 @@ show_images_large_thumbs: "(vignettes grandes)"
 
 
 # observer/_show_lists
-show_lists_header: "[:SPECIES_LISTS]"
+show_lists_header:  "[:SPECIES_LISTS]"
 
 
 
 # location/show_location
-show_location_title: "[:LOCATION]: [name]"
-show_location_create: "[:create_object(type=:location)]"
-show_location_edit: "[:edit_object(type=:location)]"
-show_location_destroy: "[:destroy_object(type=:location)]"
-show_location_observations: Observations dans c'endroit
-show_location_highest: Altitude maximale
-show_location_lowest: Altitude minimale
-show_location_no_descriptions: Il n'existe aucune description de cet endroit pour le moment.
-show_location_create_description: "[:CREATE]"
-show_location_creator: L'utilisateur qui a défini cet endroit
-show_location_editor: "[:Editors]"
-show_location_editors: "[:Editors]"
-show_location_reverse: Inverser endroit
+show_location_title:  "[:LOCATION]: [name]"
+show_location_create:  "[:create_object(type=:location)]"
+show_location_edit:  "[:edit_object(type=:location)]"
+show_location_destroy:  "[:destroy_object(type=:location)]"
+show_location_observations:  Observations at this Location
+show_location_highest:  Highest Altitude
+show_location_lowest:  Lowest Altitude
+show_location_no_descriptions:  There are no descriptions for this location yet.
+show_location_create_description:  "[:CREATE]"
+show_location_creator:  User who defined this location
+show_location_editor:  "[:Editors]"
+show_location_editors:  "[:Editors]"
+show_location_reverse:  Reverse Location
 
 
 # name/show_name
-show_name_title: "[:NAME]: [name]"
-show_name_add_name: "[:add_object(type=:name)]"
-show_name_edit_name: "[:edit_object(type=:name)]"
-show_name_bulk_name_edit: "[:name_bulk_title]"
-show_name_distribution_map: Carte d'occurences
-show_name_change_synonyms: Changer synonymes
-show_name_email_tracking: Poursuite par e-mail
-show_name_create_description: "[:CREATE]"
-show_name_synonyms: Synonyme(s)
-show_name_preferred_synonyms: Synonyme(s) préféré(s)
-show_name_deprecated_synonyms: Synonyme(s) déconseillé(s)
-show_name_misspelling: Ce nom est mal orthographié.
-show_name_misspelling_correct: "[:CORRECT_SPELLING]"
-show_name_notes: Notes sur la taxonomie
-show_name_descriptions: "[:DESCRIPTIONS]"
-show_name_create_draft: Créer nouveau brouillon pour
-show_name_no_descriptions: Il n'existe aucune description de ce nom pour le moment.
-show_name_description_author: Auteur de la description
-show_name_description_authors: Auteurs de la description
-show_name_description_editor: Éditeur de la description
-show_name_description_editors: Éditeurs de la description
-show_name_author_request: Demander crédit d'auteur
-show_name_content_status: État de la description
-show_name_latest_review: "Dernière révision: [date] par [user]"
-show_name_previous_version: La version précédente
-show_name_other_versions: D'autres versions
-show_name_observations: Plus observations
-show_name_observations_of: Plus observations de [name]
-show_name_all_observations: Plus observations (toutes les synonymes)
-show_name_synonym_observations: Observations des synonymes
-show_name_other_observations: Observations similaires
-show_name_subtaxa_observations: Observations des sous-taxons
-show_name_creator: La première personne à utiliser ce nom sur MO
-show_name_editor: "[:Editors]"
-show_name_editors: "[:Editors]"
-show_name_other_observations_notes: "(Quelqu'un a proposé [name] pour ces observations, mais le consensus ne l'a pas acceptée. Valeur de confiance est pour __ce__ nom, pas le nom de consensus.)"
+show_name_title:  "[:NAME]: [name]"
+show_name_add_name:  "[:add_object(type=:name)]"
+show_name_edit_name:  "[:edit_object(type=:name)]"
+show_name_bulk_name_edit:  "[:name_bulk_title]"
+show_name_distribution_map:  Occurrence Map
+show_name_change_synonyms:  Change Synonyms
+show_name_email_tracking:  Email Tracking
+show_name_create_description:  "[:CREATE]"
+show_name_synonyms:  Synonym(s)
+show_name_preferred_synonyms:  Preferred Synonym(s)
+show_name_deprecated_synonyms:  Deprecated Synonym(s)
+show_name_misspelling:  This name is misspelled.
+show_name_misspelling_correct:  "[:CORRECT_SPELLING]"
+show_name_notes:  Notes on Taxonomy
+show_name_descriptions:  "[:DESCRIPTIONS]"
+show_name_create_draft:  Create New Draft for
+show_name_no_descriptions:  There are no descriptions for this name yet.
+show_name_description_author:  "[:Description] author"
+show_name_description_authors:  "[:Description] authors"
+show_name_description_editor:  "[:Description] editor"
+show_name_description_editors:  "[:Description] editors"
+show_name_author_request:  Request Authorship Credit
+show_name_content_status:  Description status
+show_name_latest_review:  "Latest review: [date] by [user]"
+show_name_previous_version:  Previous Version
+show_name_other_versions:  Other Versions
+show_name_observations:  More [:OBSERVATIONS]
+show_name_observations_of:  More [:OBSERVATIONS] of [name]
+show_name_all_observations:  More [:OBSERVATIONS] (all synonyms)
+show_name_synonym_observations:  Synonym [:OBSERVATIONS]
+show_name_other_observations:  Similar [:OBSERVATIONS]
+show_name_subtaxa_observations:  Subtaxa [:OBSERVATIONS]
+show_name_creator:  First person to use this name on MO
+show_name_editor:  "[:Editors]"
+show_name_editors:  "[:Editors]"
+show_name_other_observations_notes:  "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
 
 
 # observer/_show_namings
-show_namings_proposed_name: "[:NAMING]"
-show_namings_proposed_names: "[:NAMINGS]"
-show_namings_no_names_yet: Pas de noms ont été proposés pour le moment.
-show_namings_propose_new_name: Proposer un autre nom
-show_namings_eye_help: Choix de l'observateur
-show_namings_eyes_help: Le consensus actuel
-show_namings_community_favorite: C'est la favorite de la communauté.
-show_namings_consensus: Vote de la communauté
-show_namings_no_votes: pas de votes
-show_namings_your_vote: Votre vote
-show_namings_update_votes: Mise à jour votes
-show_namings_cast: Émettre la vote
-show_namings_user: "[:User]"
-show_namings_consensus_help: Pour chaque nom figurant ci-dessus, décider comment bien ce nom s'applique à cette observation. Sélectionnez «[:show_namings_propose_new_name]» si vous voulez proposer une autre option. Voir la page "[:app_how_to_use]":/observer/how_to_use#voting pour plus d'informations sur le décompte des voix.
-show_namings_lose_changes: Vous devez cliquer sur «[:show_namings_update_votes]» pour enregistrer les modifications que vous avez apportées à vos votes.
-show_namings_please_login: S'il vous plaît vous connecter à proposer vos propres noms et de voter sur les noms existants.
+show_namings_proposed_name:  "[:NAMING]"
+show_namings_proposed_names:  "[:NAMINGS]"
+show_namings_no_names_yet:  No names have been proposed yet.
+show_namings_propose_new_name:  Propose Another Name
+show_namings_eye_help:  Observer's choice
+show_namings_eyes_help:  Current consensus
+show_namings_community_favorite:  This is the community favorite.
+show_namings_consensus:  Community Vote
+show_namings_no_votes:  no votes
+show_namings_your_vote:  Your Vote
+show_namings_update_votes:  Update Votes
+show_namings_cast:  Cast Vote
+show_namings_user:  "[:User]"
+show_namings_consensus_help:  For each name listed above select your opinion of how well that name applies to this observation.  Select '[:show_namings_propose_new_name]' if you want to suggest another option.  See the "How to Use":/observer/how_to_use#voting page for more details on how the votes are tallied.
+show_namings_lose_changes:  You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
+show_namings_please_login:  Please login to propose your own names and vote on existing names.
 
 
 # observer/show_observation
 show_observation_title: "Observation: [name]"
-show_observation_header: "[:OBSERVATION]"
+show_observation_header:  "[:OBSERVATION]"
 show_observation_edit_observation: Modifier l'observation
 show_observation_propose_new_name: "[:show_namings_propose_new_name]"
 show_observation_debug_consensus: Déboguer le consensus
@@ -1740,8 +1742,8 @@ show_observation_species_lists: "[:SPECIES_LISTS]"
 show_observation_manage_species_lists: Gérer vos listes d'observation
 show_observation_send_question: Envoyer une question à l'observateur
 show_observation_view_notifications: Afficher notifications
-show_observation_hide_map: Cacher la carte vignette.
-show_observation_thumbnail_map_hidden: La carte vignette est cachée. Pour ré-activer cette fonctionnalité, accédez à votre page "[:app_preferences]":/account/prefs.
+show_observation_hide_map:  Hide thumbnail map.
+show_observation_thumbnail_map_hidden:  Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
 
 
 # location/show_past_location
@@ -1781,24 +1783,24 @@ show_site_stats_title:  Site Statistics
 
 
 # observer/_show_votes
-show_votes_title: Afficher votes pour [name]
-show_votes_users: "[:Users]"
-show_votes_vote: "[:Vote]"
-show_votes_weight: Poids
-show_votes_average: Moyenne
-show_votes_score: Compte
-show_votes_go_public: Faire toute mes votes publiques.
-show_votes_go_private: Faire tous mes votes anonymes.
-show_votes_total: >
-  Score général\n
-  somme(compte * poids) /\n
-  (poids total + 1)\n
+show_votes_title:  Show Votes for [name]
+show_votes_users:  "[:Users]"
+show_votes_vote:  "[:Vote]"
+show_votes_weight:  Weight
+show_votes_average:  Average
+show_votes_score:  Score
+show_votes_go_public:  Make all of my votes public.
+show_votes_go_private:  Make all of my votes anonymous.
+show_votes_total:  >
+  Overall Score\n
+  sum(score * weight) /\n
+  (total weight + 1)\n
 
-show_votes_descript: Votes des utilisateurs sont pondérées par leur contribution sur le site (log<small>10</small> contribution). En outre, l'utilisateur qui a créé l'observation obtient un vote supplémentaire.
-show_votes_go_public_confirm: Cela rendra publiques vos votes pour tous les observations, et pas seulement votre vote pour ce nom. Est-ce ce que vous voulez faire?
-show_votes_go_private_confirm: Cela rendra anonymes vos votes pour tous les observations, et pas seulement votre vote pour ce nom. Est-ce ce que vous voulez faire?
-show_votes_gone_public: Vous remercions! Vos préférences ont été mis à jour. Les autres utilisateurs peuvent maintenant voir vos votes.
-show_votes_gone_private: Vos préférences ont été mis à jour. Les autres utilisateurs ne peuvent plus voir vos votes.
+show_votes_descript:  User's votes are weighted by their contribution to the site (log<small>10</small> contribution). In addition, the user who created the observation gets an extra vote.
+show_votes_go_public_confirm:  This will make all your votes for all observations public, not just your vote for this name.  Is this what you want to do?
+show_votes_go_private_confirm:  This will make all your votes for all observations anonymous, not just your vote for this name.  Is this what you want to do?
+show_votes_gone_public:  Thank you!  Your preferences have been updated.  Other users can now see your votes.
+show_votes_gone_private:  Your preferences have been updated.  Other users can no longer see your votes.
 
 
 # observer/show_user
@@ -1815,6 +1817,7 @@ show_user_joined:  Joined [:app_title]
 show_user_mailing_address:  Mailing Address for Collections
 show_user_primary_location:  Primary Location
 show_user_total:  Total
+show_user_language_contribution:  "Translations: [name]"
 
 
 
@@ -2232,13 +2235,13 @@ image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", ple
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.
-interest_watch: Guetter
-interest_ignore: Ignorer
-interest_watch_help: Cliquez ici si vous souhaitez que nous vous envoyons un email chaque fois qu'il ya un changement dans ce(tte) [object].
-interest_ignore_help: Cliquez ici si vous voulez arrêter de recevoir des e-mails au sujet de ce(tte) [object].
-interest_default_help: Cliquez ici si vous souhaitez revenir à la valeur par défaut - les préférences de votre compte vont déterminer si vous obtenez email au sujet de ce(tte)[object].
-interest_watching: Vous nous avez dit de vous envoyer des changements dans ce(tte) [object]. Cliquez sur l'une des petites icônes ci-dessous pour le changer.
-interest_ignoring: Vous nous avez dit de ne jamais vous envoyer des changements dans ce(tte) [object]. Cliquez sur l'une des petites icônes ci-dessous pour le changer.
+interest_watch:  Watch
+interest_ignore:  Ignore
+interest_watch_help:  Click here if you want us to send you email whenever there is a change in this [object].
+interest_ignore_help:  Click here if you want to stop getting any emails about this [object].
+interest_default_help:  Click here if you want to go back to the default -- having your account preferences determine whether you get email about this [object].
+interest_watching:  You have told us to email you about changes in this [object].  Click one of the small icons below to change.
+interest_ignoring:  You have told us never to email you about changes in this [object].  Click one of the small icons below to change.
 
 
 # interest/list_interests
@@ -2844,11 +2847,11 @@ theme_black_on_white_description:  This is a simple Black on White theme that at
 theme_switch:  To select this as your theme, go to your "preferences":/account/prefs and select [theme] as your Preferred Theme
 
 # Theme names.
-Agaricus: Agaricus
-Amanita: Amanita
-Cantharellaceae: Cantharellaceae
-Hygrocybe: Hygrocybe
-BlackOnWhite: Noir sur blanc
+Agaricus:  Agaricus
+Amanita:  Amanita
+Cantharellaceae:  Cantharellaceae
+Hygrocybe:  Hygrocybe
+BlackOnWhite:  Black on White
 
 
 
@@ -2864,7 +2867,7 @@ translators_note:  >
   \n
   You will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users.\n
 
-translators_note_title: Note du traducteur
+translators_note_title:  Translator's Note
 
 
 
@@ -3729,7 +3732,7 @@ runtime_no_destroy_name:  Unable to destroy [type] '[value]'.
 runtime_no_match:  Can't find [type].
 runtime_no_match_id:  "Can't find [type] #[value]."
 runtime_no_match_name:  Can't find [type] matching '[value]'.
-runtime_no_matches: Pas de [types] correspondent.
+runtime_no_matches:  No matching [types] found.
 runtime_no_matches_pattern:  No [types] matching '[value]' found.
 runtime_no_more:  There are no more [types].
 runtime_no_objects:  There are no [types].

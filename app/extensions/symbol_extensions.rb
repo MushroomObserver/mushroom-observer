@@ -161,7 +161,7 @@ class Symbol
 
   def localize_expand_arguments(val, args, level) # :nodoc:
     val.gsub(/\[(\[?\w+?)\]/) do
-      x = y = $1
+      orig = x = y = $1
 
       # Ignore double-brackets.
       if x[0,1] == '['
@@ -212,10 +212,12 @@ class Symbol
           "#{val}s".to_sym.l.capitalize_first :
           val.to_s.strip_html.capitalize_first
 
-      else
+      elsif TESTING
         raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
           "#{Locale.code} localization for " +
           ([self] + level).map(&:inspect).join(' --> '))
+      else
+        "[#{orig}]"
       end
     end
   end
@@ -239,11 +241,11 @@ class Symbol
             elsif !val.match(/^([a-z][a-z_]*\d*)$/)
               raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
                 "#{Locale.code} localization for " +
-                ([self] + level).map(&:inspect).join(' --> '))
+                ([self] + level).map(&:inspect).join(' --> ')) if TESTING
             elsif !args.has_key?(val.to_sym)
               raise(ArgumentError, "Forgot to pass :#{val} into " +
                 "#{Locale.code} localization for " +
-                ([self] + level).map(&:inspect).join(' --> '))
+                ([self] + level).map(&:inspect).join(' --> ')) if TESTING
             else
               val = args[val.to_sym]
             end
@@ -251,7 +253,7 @@ class Symbol
           else
             raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
               "arguments for #{Locale.code} tag :#{tag} embedded in " +
-              ([self] + level).map(&:inspect).join(' --> '))
+              ([self] + level).map(&:inspect).join(' --> ')) if TESTING
           end
         end
       end

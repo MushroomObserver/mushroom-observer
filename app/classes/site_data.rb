@@ -234,6 +234,7 @@ private
           metric += FIELD_WEIGHTS[field] * data[field]
         end
       end
+      metric += data[:languages].to_i
       metric += data[:bonuses].to_i
       data[:metric] = metric
     end
@@ -349,6 +350,7 @@ private
         :name    => user.unique_text_name,
         :bonuses => user.sum_bonuses,
       }
+      add_language_contributions(user)
     end
 
     # Load record counts for each category.
@@ -367,5 +369,16 @@ private
         user.save
       end
     end
+  end
+
+  def add_language_contributions(user)
+    sum = 0
+    list = Language.all.map do |lang|
+      score = lang.calculate_users_contribution(user).to_i
+      sum += score
+      [lang, score]
+    end.select {|lang, score| score > 0}
+    @user_data[user.id][:languages] = sum
+    @user_data[user.id][:languages_itemized] = list
   end
 end

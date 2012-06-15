@@ -34,8 +34,17 @@ module LanguageTracking
   @@tags_used = nil
   @@last_clean = nil
 
-  def track_usage
+  # Turn on tracking.  If optional page is passed in, then it will seed the
+  # list of tags with those from the other page.  Use this if redirecting
+  # one or more times: track for page1, redirect and pass tags on to page2,
+  # and so on, until done redirecting.
+  def track_usage(last_page=nil)
     @@tags_used = {}
+    if seed_tags = load_tags(last_page)
+      for tag in seed_tags
+        @@tags_used[tag] = true
+      end
+    end
   end
 
   def ignore_usage
@@ -68,13 +77,13 @@ module LanguageTracking
 
   def load_tags(name)
     file = tag_file(name)
-    FileUtils.touch(file)
     tags = []
     File.open(file, 'r') do |fh|
       fh.each_line do |line|
         tags << line.chomp
       end
     end
+    FileUtils.touch(file)
     return tags
   rescue
     return nil

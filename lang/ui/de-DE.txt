@@ -1081,6 +1081,7 @@ create_name_description_title:  Create Description for [name]
 
 # name/create_name
 create_name_title: Namen erstellen
+create_name_multiple_names_match:  There already multiple names matching "[str]".
 
 
 
@@ -1111,6 +1112,7 @@ edit_name_description_title:  Edit [name]
 
 # name/edit_name
 edit_name_title: Ändere Beschreibung von [name]
+edit_name_multiple_names_match:  "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
 
 
 
@@ -1814,6 +1816,7 @@ show_user_joined: Ist Mushroom Observer beigetreten
 show_user_mailing_address: Postanschrift für Sammlungen
 show_user_primary_location: Hauptfundort
 show_user_total: Gesamt
+show_user_language_contribution:  "Translations: [name]"
 
 
 

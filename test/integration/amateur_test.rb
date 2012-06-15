@@ -385,7 +385,7 @@ class AmateurTest < IntegrationTestCase
     login('dick')
     assert_template('observer/show_observation')
     assert_select('div#map_div', 1)
-    
+
     click(:label => 'Hide thumbnail map.')
     assert_template('observer/show_observation')
     assert_select('div#map_div', 0)
@@ -393,5 +393,35 @@ class AmateurTest < IntegrationTestCase
     get('/2')
     assert_template('observer/show_observation')
     assert_select('div#map_div', 0)
+  end
+
+  # -----------------------------------------------------------------------
+  #  Need intrgration test to make sure tags are being tracked and passed
+  #  through redirects correctly.
+  # -----------------------------------------------------------------------
+
+  def test_language_tracking
+    login(@mary)
+    @mary.locale = Locale.code = 'el-GR'
+    @mary.save
+
+    data = Globalite.localization_data[:'el-GR']
+    data[:test_tag1] = 'test_tag1 value'
+    data[:test_tag2] = 'test_tag2 value'
+    data[:test_flash_redirection_title] = 'Testing Flash Redirection'
+
+    get('/observer/test_flash_redirection?tags=')
+    click(:label => :app_edit_translations_on_page.t)
+    assert_no_flash
+    assert_select('span.tag', :text => 'test_tag1:', :count => 0)
+    assert_select('span.tag', :text => 'test_tag2:', :count => 0)
+    assert_select('span.tag', :text => 'test_flash_redirection_title:', :count => 1)
+
+    get('/observer/test_flash_redirection?tags=test_tag1,test_tag2')
+    click(:label => :app_edit_translations_on_page.t)
+    assert_no_flash
+    assert_select('span.tag', :text => 'test_tag1:', :count => 1)
+    assert_select('span.tag', :text => 'test_tag2:', :count => 1)
+    assert_select('span.tag', :text => 'test_flash_redirection_title:', :count => 1)
   end
 end

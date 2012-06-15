@@ -176,6 +176,7 @@ class ObserverController < ApplicationController
     :user_search,
     :users_by_contribution,
     :w3c_tests,
+    :wrapup_2011,
   ]
 
   before_filter :disable_link_prefetching, :except => [
@@ -194,10 +195,6 @@ class ObserverController < ApplicationController
   #  :section: General Stuff
   #
   ##############################################################################
-
-  def test
-    flash_notice params.inspect
-  end
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
@@ -225,7 +222,28 @@ class ObserverController < ApplicationController
     end
   end
 
-  def wrapup_2011
+  def test
+    flash_notice params.inspect
+  end
+
+  def test_flash_redirection
+    tags = params[:tags].to_s.split(',')
+    if tags.any?
+      flash_notice(tags.pop.to_sym.t)
+      redirect_to(
+        :controller => :observer,
+        :action => :test_flash_redirection,
+        :tags => tags.join(',')
+      )
+    else
+      # (sleight of hand to prevent localization_file_text from complaining
+      # about missing test_flash_redirection_title tag)
+      @title = 'test_flash_redirection_title'.to_sym.t
+      render(:layout => 'application', :text => '')
+    end
+  end
+
+  def wrapup_2011 # :nologin:
   end
 
   # Intro to site.

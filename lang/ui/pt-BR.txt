@@ -1082,6 +1082,7 @@ create_name_description_title:  Create Description for [name]
 
 # name/create_name
 create_name_title:  "[:create_object(type=:name)]"
+create_name_multiple_names_match:  There already multiple names matching "[str]".
 
 
 
@@ -1112,6 +1113,7 @@ edit_name_description_title:  Edit [name]
 
 # name/edit_name
 edit_name_title:  Edit Description of [name]
+edit_name_multiple_names_match:  "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
 
 
 
@@ -1815,6 +1817,7 @@ show_user_joined:  Joined [:app_title]
 show_user_mailing_address:  Mailing Address for Collections
 show_user_primary_location:  Primary Location
 show_user_total:  Total
+show_user_language_contribution:  "Translations: [name]"
 
 
 
@@ -2853,7 +2856,17 @@ BlackOnWhite:  Black on White
 
 
 # observer/translators_note
-translators_note:  Please help us make this website available around the world!  It's easy. There is somewhere around 1600 lines or 11000 words of text on this site at the moment, but don't let that scare you.  We've organized it so someone with limited time can concentrate on just the first few sections, and get the most commonly-used text done first.  Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.  Please feel free to pick up a copy of the "translation files":[repo] and start plugging away in any language you wish.  Then just "pop us an email":/observer/ask_webmaster_question when you finish doing what you can, and we'll tell you how to submit your work.  You will receive prominant credit for your contribution, in addition to, of course, our undying gratitude.
+translators_note:  >
+  Please help us make this website available around the world!  It's easy.\n
+  \n
+  There are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you.  We've organized it so someone with limited time can concentrate on the most important text.  Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n
+  \n
+  There are several ways to get started.  You can pick up a copy of the entire "translation file":[repo] and start translating it into any language you wish.  "Send us an email":/observer/ask_webmaster_question when you finish doing what you can, and we'll tell you how to submit your work.\n
+  \n
+  It's even easier to work on existing translations.  Just look for "[:app_edit_translations]" at the bottom of any page.  You can see immediately how your changes look in the context of the page.  If your language is not available, "send us an email":/observer/ask_webmaster_question and we can create a "beta" version for you to work on.\n
+  \n
+  You will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users.\n
+
 translators_note_title:  Translator's Note
 
 

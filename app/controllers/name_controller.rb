@@ -640,7 +640,13 @@ class NameController < ApplicationController
   def find_or_create_name_and_parents
     parents = Name.find_or_create_parsed_name_and_parents(@parse)
     unless name = parents.pop
-      raise(:runtime_unable_to_create_name.t(:name => @parse.real_search_name))
+      if params[:action] == 'create_name'
+        raise(:create_name_multiple_names_match.t(:str => @parse.real_search_name))
+      else
+        others = Name.find_all_by_text_name(@parse.text_name)
+        raise(:edit_name_multiple_names_match.t(:str => @parse.real_search_name,
+              :xxx => others.map(&:search_name).join(' / ')))
+      end
     end
     return name, parents
   end

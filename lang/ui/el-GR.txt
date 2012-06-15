@@ -1081,6 +1081,7 @@ create_name_description_title: Δημιουργία Περιγραφής για 
 
 # name/create_name
 create_name_title: "[:create_object(type=:name)]"
+create_name_multiple_names_match:  There already multiple names matching "[str]".
 
 
 
@@ -1111,6 +1112,7 @@ edit_name_description_title: Επεξεργασία [name]
 
 # name/edit_name
 edit_name_title: Επεξεργασία Περιγραφής του [name]
+edit_name_multiple_names_match:  "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
 
 
 
@@ -1814,6 +1816,7 @@ show_user_joined: Έγινε Μέλος του/της [:app_title]
 show_user_mailing_address: Ταχυδρομική Διεύθυνση για Συλλογές
 show_user_primary_location: Τόπος Κύριας Κατοικίας
 show_user_total: Σύνολο
+show_user_language_contribution:  "Translations: [name]"
 
 
 

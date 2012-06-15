@@ -196,6 +196,12 @@
     official_record = @official_records[tag]
     translated_record = @translated_records[tag]
     up_to_date = translated_record && translated_record.modified >= official_record.modified - 1.second
+    if not up_to_date and
+       official_record and
+       official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
+      # Mark as translated if there is nothing to actually translate!
+      up_to_date = true
+    end
     span_class = up_to_date ? 'translated faint' : 'untranslated bright'
     str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
     label = content_tag(:span, h(tag) + ':', :class => 'tag')

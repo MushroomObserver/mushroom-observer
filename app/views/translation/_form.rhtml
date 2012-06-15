@@ -24,7 +24,7 @@
   for line in str.each_line
     rows += (line.length / 80).truncate + 1
   end
-  rows = @edit_tage.length > 1 ? 2 : 5 if rows < 2
+  rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
   notes = []
   if tag.match(/s$/i) and @edit_tags.include?($`)
     notes << :edit_translations_plural.t

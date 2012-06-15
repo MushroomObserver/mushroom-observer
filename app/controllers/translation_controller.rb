@@ -158,7 +158,7 @@ class TranslationController < ApplicationController
       for t in [tag, tag+'s', tag.upcase, (tag+'s').upcase]
         tag_list << t if strings.has_key?(t)
       end
-      flash_error("Tag doesn't exist: #{tag.inspect}") if tag_list.empty?
+      tag_list = [tag] if tag_list.empty?
     end
     return tag_list
   end
@@ -208,6 +208,7 @@ class TranslationController < ApplicationController
   def build_form(lang, tags, fh=nil)
     @form = []
     @tags = tags
+    @tags_used = {}
     fh ||= File.open(lang.export_file, 'r')
     reset_everything
     fh.each_line do |line|
@@ -215,8 +216,20 @@ class TranslationController < ApplicationController
       process_template_line(line)
     end
     process_blank_line
+    include_unlisted_tags
     fh.close if fh.respond_to?(:close)
     return @form
+  end
+
+  def include_unlisted_tags
+    unlisted_tags = @tags.keys - @tags_used.keys
+    if unlisted_tags.any?
+      @form << TranslationFormMajorHeader.new('UNLISTED STRINGS')
+      @form << TranslationFormMinorHeader.new('These tags are missing from the export files.')
+      for tag in unlisted_tags.sort
+        @form << TranslationFormTagField.new(tag)
+      end
+    end
   end
 
   def reset_everything
@@ -257,9 +270,17 @@ class TranslationController < ApplicationController
     end
     if @on_pages
       @section << TranslationFormComment.new(*@comments) if @comments.any?
-      @section << TranslationFormTagField.new(tag)
+      if @comments.any? or not secondary_tag?(tag)
+        @section << TranslationFormTagField.new(tag)
+      end
     end
+    @tags_used[tag] = true
     @comments.clear
+  end
+
+  def secondary_tag?(tag)
+    @tags_used[tag.sub(/s$/i, '')] or
+    @tags_used[tag.downcase]
   end
 
   def process_blank_line

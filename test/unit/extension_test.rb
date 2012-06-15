@@ -42,38 +42,38 @@ class ExtensionTest < UnitTestCase
   end
 
   def test_localize_postprocessing_recursion
-# 
-# _unit_test_a: ! '[:_unit_test_b]'
-# _unit_test_b: ! '[:_unit_test_c]'
-# _unit_test_c: ! '[:_unit_test_d]'
-# _unit_test_d: ! '[:_unit_test_e]'
-# _unit_test_e: ! '[:_unit_test_f]'
-# _unit_test_f: ! '[:_unit_test_g]'
-# _unit_test_g: ! '[:_unit_test_h]'
-# _unit_test_h: ! '[:_unit_test_i]'
-# _unit_test_i: ! '[:_unit_test_j]'
-# _unit_test_j: ! '[:_unit_test_k]'
-# _unit_test_k: ! '[:_unit_test_l]'
-# _unit_test_l: ! '[:_unit_test_m]'
-# _unit_test_m: ! '[:_unit_test_n]'
-# _unit_test_n: ! '[:_unit_test_o]'
-# _unit_test_o: ! '[:_unit_test_p]'
-# _unit_test_p: ! '[:_unit_test_q]'
-# _unit_test_q: ! '[:_unit_test_r]'
-# _unit_test_r: ! '[:_unit_test_s]'
-# _unit_test_s: ! '[:_unit_test_t]'
-# _unit_test_t: ! '[:_unit_test_u]'
-# _unit_test_u: ! '[:_unit_test_v]'
-# _unit_test_v: ! '[:_unit_test_w]'
-# _unit_test_w: ! '[:_unit_test_x]'
-# _unit_test_x: ! '[:_unit_test_y]'
-# _unit_test_y: ! '[:_unit_test_z]'
-# _unit_test_z: bob
-# 
-#     assert_equal('bob', :_unit_test_z.l)
-#     assert_equal('bob', :_unit_test_y.l)
-#     assert_equal('bob', :_unit_test_x.l)
-#     assert_not_equal('bob', :_unit_test_a.l)
+    data = Globalite.localization_data[:'en-US']
+    data[:_unit_test_a] = '[:_unit_test_b]'
+    data[:_unit_test_b] = '[:_unit_test_c]'
+    data[:_unit_test_c] = '[:_unit_test_d]'
+    data[:_unit_test_d] = '[:_unit_test_e]'
+    data[:_unit_test_e] = '[:_unit_test_f]'
+    data[:_unit_test_f] = '[:_unit_test_g]'
+    data[:_unit_test_g] = '[:_unit_test_h]'
+    data[:_unit_test_h] = '[:_unit_test_i]'
+    data[:_unit_test_i] = '[:_unit_test_j]'
+    data[:_unit_test_j] = '[:_unit_test_k]'
+    data[:_unit_test_k] = '[:_unit_test_l]'
+    data[:_unit_test_l] = '[:_unit_test_m]'
+    data[:_unit_test_m] = '[:_unit_test_n]'
+    data[:_unit_test_n] = '[:_unit_test_o]'
+    data[:_unit_test_o] = '[:_unit_test_p]'
+    data[:_unit_test_p] = '[:_unit_test_q]'
+    data[:_unit_test_q] = '[:_unit_test_r]'
+    data[:_unit_test_r] = '[:_unit_test_s]'
+    data[:_unit_test_s] = '[:_unit_test_t]'
+    data[:_unit_test_t] = '[:_unit_test_u]'
+    data[:_unit_test_u] = '[:_unit_test_v]'
+    data[:_unit_test_v] = '[:_unit_test_w]'
+    data[:_unit_test_w] = '[:_unit_test_x]'
+    data[:_unit_test_x] = '[:_unit_test_y]'
+    data[:_unit_test_y] = '[:_unit_test_z]'
+    data[:_unit_test_z] = 'bob'
+
+    assert_equal('bob', :_unit_test_z.l)
+    assert_equal('bob', :_unit_test_y.l)
+    assert_equal('bob', :_unit_test_x.l)
+    assert_not_equal('bob', :_unit_test_a.l)
   end
 
   # ----------------------------

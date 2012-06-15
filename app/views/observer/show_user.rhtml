@@ -134,12 +134,24 @@ end %>
             :points => count * weight,
           } end
 
+          # Add bonuses for translations.
+          if @user_data[:languages_itemized]
+            for lang, score in @user_data[:languages_itemized]
+              rows << {
+                :label => :show_user_language_contribution.t(:name => lang.name),
+                :points => score.to_i,
+              }
+            end
+          end
+
           # Add bonuses at the bottom.
           if @show_user.bonuses
-            rows += @show_user.bonuses.map do |points, reason| {
-              :label  => reason.to_s.t,
-              :points => points.to_i,
-            } end
+            rows += @show_user.bonuses.map do |points, reason|
+              {
+                :label  => reason.to_s.t,
+                :points => points.to_i,
+              }
+            end
           end
 
           # Do we want to sort by points?

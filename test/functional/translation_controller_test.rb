@@ -153,8 +153,9 @@ class TranslationControllerTest < FunctionalTestCase
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
 
     get(:edit_translations, :locale => 'en-US', :tag => 'xxx')
-    assert_flash_error
-    assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
+    assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+    assert_select("textarea[name=tag_xxx]", 1)
+    assert_textarea_value(:tag_xxx, '')
 
     get_with_dump(:edit_translations, :locale => 'en-US', :tag => 'two')
     assert_no_flash
@@ -272,5 +273,25 @@ class TranslationControllerTest < FunctionalTestCase
 
     Locale.code = 'el-GR'
     assert_equal('ichi', :one.l)
+  end
+
+  def test_page_expired
+    login('rolf')
+    make_admin
+
+    Language.track_usage
+    :one.l
+    :two.l
+    page = Language.save_tags
+
+    # Page is good, should only display the two tags used above.
+    get(:edit_translations, :locale => 'en-US', :page => page)
+    assert_no_flash
+    assert_equal(2, assigns(:show_tags).length)
+
+    # Simulate page expiration: result is it will display all tags, not just the two used above.
+    get(:edit_translations, :locale => 'en-US', :page => 'xxx')
+    assert_flash_error
+    assert(assigns(:show_tags).length > 2)
   end
 end

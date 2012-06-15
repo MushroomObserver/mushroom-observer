@@ -32,6 +32,9 @@ class Language < AbstractModel
 
   has_many :translation_strings, :dependent => :destroy
 
+  # Average characters per line; used to score contributions.
+  CHARACTERS_PER_LINE = 80
+
   # Look up the official Language.
   def self.official
     find_by_official(true)
@@ -70,6 +73,48 @@ class Language < AbstractModel
       )
     end
     return user_ids
+  end
+
+  # Count the number of lines the user has translated.  Include edits, as well.
+  # It counts paragraphs, actually, and weights them according to length.
+  def self.calculate_users_contribution(user)
+    lines = 0
+    for text in Language.connection.select_values %(
+      SELECT GROUP_CONCAT(CONCAT(text, "\n")) AS x
+      FROM translation_strings_versions
+      WHERE user_id = #{user.id}
+      GROUP BY translation_string_id
+    )
+      lines += score_lines(text)
+    end
+    return lines
+  end
+
+  def calculate_users_contribution(user)
+    lines = 0
+    for text in Language.connection.select_values %(
+      SELECT GROUP_CONCAT(CONCAT(v.text, "\n")) AS x
+      FROM translation_strings t, translation_strings_versions v
+      WHERE t.language_id = #{id}
+        AND v.translation_string_id = t.id
+        AND v.user_id = #{user.id}
+      GROUP BY t.id
+    )
+      lines += Language.score_lines(text)
+    end
+    return lines
+  end
+
+  def self.score_lines(text)
+    hash = {}
+    for str in text
+      hash[str] = true unless str.blank?
+    end
+    score = 0
+    for key in hash.keys
+      score += (key.length.to_f / CHARACTERS_PER_LINE).truncate + 1
+    end
+    return score
   end
 
   # Be generous to ensure that we don't accidentally miss anything that is

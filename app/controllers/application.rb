@@ -164,10 +164,18 @@ class ApplicationController < ActionController::Base
     @language = Language.find_by_locale(Locale.code)
     if @user and @language and
        (!@language.official or is_reviewer?)
-      Language.track_usage
+      Language.track_usage(flash[:tags_on_last_page])
     else
       Language.ignore_usage
     end
+  end
+
+  # Need to pass list of tags used in this action to next page if redirecting.
+  def redirect_to(*args)
+    if Language.tracking_usage
+      flash[:tags_on_last_page] = Language.save_tags
+    end
+    super
   end
 
   # Redirect from www.mo.org to mo.org.
