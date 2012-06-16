@@ -20,14 +20,6 @@
 ################################################################################
 
 module LanguageExporter
-  # require 'yaml'
-  # begin
-  #   # This engine does a better job with Greek and Cyrillic characters.
-  #   # Yikes!  But it slows down the unit tests by a factor of 10 or more!
-  #   YAML::ENGINE.yamler = 'psych'
-  # rescue
-  # end
-
   def self.included(base)
     base.extend(ClassMethods)
   end
@@ -170,10 +162,7 @@ module LanguageExporter
     else
       temp_file = localization_file + '.' + Process.pid.to_s
       File.open(temp_file, 'w:utf-8') do |fh|
-        old_engine = YAML::ENGINE.yamler
-        YAML::ENGINE.yamler = 'psych'
         YAML::dump(data, fh)
-        YAML::ENGINE.yamler = old_engine
       end
       File.rename(temp_file, localization_file)
     end

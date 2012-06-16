@@ -78,7 +78,9 @@ PRODUCTION  = (RAILS_ENV == 'production')
 DEVELOPMENT = (RAILS_ENV == 'development')
 TESTING     = (RAILS_ENV == 'test')
 
-# Make YAML fast...
+# The default engine for ruby 1.9.3 is 'psych', but it can't handle utf-8 any more.
+# However 'syck' is still apparently available, and even though it prints out a
+# bunch of gobbledygook for non-ascii characters, it at least works and is fast.
 require 'yaml'
 YAML::ENGINE.yamler = 'syck'
 

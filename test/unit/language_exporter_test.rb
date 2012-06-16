@@ -17,6 +17,30 @@ class LanguageExporterTest < UnitTestCase
     return msg.join("\n")
   end
 
+  def test_yaml
+    temp_file = "#{RAILS_ROOT}/tmp/yaml_test"
+    # YAML::ENGINE.yamler = 'psych' # (fails)
+    File.open(temp_file, 'w:utf-8') do |fh|
+      fh.puts '---'
+      fh.puts 'one: ενα'
+    end
+    data = File.open(temp_file, 'r:utf-8') do |fh|
+      data = YAML::load(fh)
+    end
+    assert_equal({'one' => 'ενα'}, data)
+    assert_equal('UTF-8', data['one'].encoding.to_s)
+    File.open(temp_file, 'w:utf-8') do |fh|
+      YAML::dump(data, fh)
+    end
+    data = File.open(temp_file, 'r:utf-8') do |fh|
+      data = YAML::load(fh)
+    end
+    assert_equal({'one' => 'ενα'}, data)
+    assert_equal('UTF-8', data['one'].encoding.to_s)
+  ensure
+    File.unlink(temp_file) rescue nil
+  end
+
   def test_validators
     assert_valid(:validate_tag, 'abc')
     assert_valid(:validate_tag, 'abc_2')

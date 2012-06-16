@@ -23,7 +23,7 @@ root> passwd
 root> apt-get update
 root> apt-get upgrade
 root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
-              build-essential bison libyaml-dev
+              build-essential bison libyaml-dev libxslt-dev
 
 # Create account for yourself. ("-G sudo" gives you ability to run any command via "sudo" command)
 root> useradd -m -G sudo -s /bin/tcsh jason
