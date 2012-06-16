@@ -27,6 +27,8 @@
 #  binary_length::  Return length in bytes instead of characters.
 #  truncate_binary_length::  Truncate so that *binary* length in within given limit
 #  truncate_binary_length!:: Truncate so that *binary* length in within given limit
+#  is_ascii_character?:: Does string start with ASCII character?
+#  is_nonascii_character?:: Does string start with non-ASCII character?
 #
 ################################################################################
 
@@ -410,7 +412,7 @@ class String
   # characters are degraded to their rough ASCII equivalent, then converted.
   def iconv(charset)
     iconv = Iconv.new(charset, 'UTF-8')
-    self.to_s.clone.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
+    self.dup.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
       begin
         iconv.iconv(c)
       rescue
@@ -600,6 +602,16 @@ class String
       end
     end
     return result
+  end
+
+  # Does this string start with a ASCII character?
+  def is_ascii_character?
+    self.dup.force_encoding('binary')[0].ord < 128
+  end
+
+  # Does this string start with a non-ASCII character?
+  def is_nonascii_character?
+    self.dup.force_encoding('binary')[0].ord >= 128
   end
 
   # Returns number of character edits required to transform +self+ into +other+.

@@ -747,9 +747,9 @@ class User < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      open(USER_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
+      File.open(USER_PRIMER_CACHE_FILE, 'w:utf-8').write(result.join("\n") + "\n")
     else
-      result = open(USER_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
+      result = File.open(USER_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
     end
     return result
   end

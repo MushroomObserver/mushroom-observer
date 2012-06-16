@@ -273,16 +273,15 @@ private
   def format_string(val)
     val = clean_string(val)
     if val.match(/\\n|\n/)
-      format_multiline_string(val)
+      val = format_multiline_string(val)
     elsif val.match(/:(\s|$)| #/) or
           val.match(/^(no|yes)$/i) or
-          (val.match(/^\W/) and val.force_encoding('binary')[0].ord < 128)
-      escape_string(val)
+          (val.match(/^\W/) and val[0].is_ascii_character?)
+      val = escape_string(val)
     elsif val == ''
-      '""'
-    else
-      val
-    end + "\n"
+      val = '""'
+    end
+    return val + "\n"
   end
 
   def format_multiline_string(val)
@@ -424,7 +423,7 @@ private
     elsif str.match(/^"/)
       pass = false unless str.match(/^"([^"\\]|\\.)*"$/)
     elsif str.match(/:(\s|$)| #/) or
-          (str.match(/^[^\w\(]/) and str.force_encoding('binary')[0].ord < 128)
+          (str.match(/^[^\w\(]/) and str[0].is_ascii_character?)
       pass = false
     end
     return pass
