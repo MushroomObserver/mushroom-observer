@@ -184,7 +184,8 @@ class AbstractModelTest < UnitTestCase
     rss_log.update_attribute(:modified, time)
     Location.first.merge(loc)
     rss_log.reload
-    assert_rss_log_lines(4, rss_log)
+    # (extra line for orphan title)
+    assert_rss_log_lines(5, rss_log)
     assert_rss_log_has_tag(:log_location_merged, rss_log)
     assert(rss_log.modified > time)
     assert_nil(Location.safe_find(loc_id))
@@ -228,7 +229,8 @@ class AbstractModelTest < UnitTestCase
     rss_log.update_attribute(:modified, time)
     Name.first.merge(name)
     rss_log.reload
-    assert_rss_log_lines(3, rss_log)
+    # (extra line for orphan title)
+    assert_rss_log_lines(4, rss_log)
     assert_rss_log_has_tag(:log_name_merged, rss_log)
     assert(rss_log.modified > time)
     assert_nil(Name.safe_find(name_id))
