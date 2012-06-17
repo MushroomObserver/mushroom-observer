@@ -293,7 +293,7 @@ module ApplicationHelper::ObjectLink
     end
 
     row1 = ''
-    if num && num > 0
+    if avg and num and num > 0
       num += 1
       num = 8 if num > 8
       row1 += content_tag(:td, '', :height => num) if cur.to_i > 0
