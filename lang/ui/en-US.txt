@@ -678,18 +678,18 @@ vote_agreement_20: Not Likely
 vote_agreement_0: As If!
 
 # Time quantities.
-time_just_seconds_ago: "seconds ago"
-time_one_minute_ago: "a minute ago"
+time_just_seconds_ago: seconds ago
+time_one_minute_ago: a minute ago
 time_minutes_ago: "[n] minutes ago"
-time_one_hour_ago: "an hour ago"
+time_one_hour_ago: an hour ago
 time_hours_ago: "[n] hours ago"
-time_one_day_ago: "yesterday"
+time_one_day_ago: yesterday
 time_days_ago: "[n] days ago, [date]"
-time_one_week_ago: "last week, [date]"
+time_one_week_ago: last week, [date]
 time_weeks_ago: "[n] weeks ago, [date]"
-time_one_month_ago: "last month, [date]"
+time_one_month_ago: last month, [date]
 time_months_ago: "[n] months ago, [date]"
-time_one_year_ago: "last year, [date]"
+time_one_year_ago: last year, [date]
 time_years_ago: "[n] years ago, [date]"
 
 # Query titles.
@@ -875,8 +875,8 @@ log_object_created_no_user: "[Type] created."
 log_object_destroyed_by_user: "[Type] destroyed by [user]."
 log_object_destroyed_by_user_with_name: "[Type] destroyed by [user]: [name]"
 log_object_destroyed_no_user: "[Type] destroyed."
-log_object_merged_by_user: "[Type] merged into [to] by [user]."
-log_object_merged_no_user: "[Type] merged into [to]."
+log_object_merged_by_user: "[Type] merged into [that] by [user]."
+log_object_merged_no_user: "[Type] merged into [that]."
 log_object_moved_by_user: "[Type] moved into [to] by [user]."
 log_object_moved_no_user: "[Type] moved into [to]."
 log_object_removed_by_user: "[Type] removed by [user]."
@@ -1103,7 +1103,7 @@ create_name_description_title: Create Description for [name]
 
 # name/create_name
 create_name_title: "[:create_object(type=:name)]"
-create_name_multiple_names_match: There already multiple names matching "[str]".
+create_name_multiple_names_match: There are already multiple names matching "[str]".
 
 
 
@@ -1614,9 +1614,9 @@ rss_created: "[TYPE] Created"
 rss_changed: "[TYPE] Changed"
 rss_destroyed: "[TYPE] Destroyed"
 rss_consensus_changed: "Consensus changed from: [old]"
-rss_consensus_reached: "Consensus established"
+rss_consensus_reached: Consensus established
 rss_naming_created: "Name proposed by [user]: [name]"
-rss_naming_destroyed: "Name destroyed by [user]: [name]"
+rss_naming_destroyed: "Name proposal destroyed by [user]: [name]"
 rss_naming_updated: "Name proposal updated by [user]: [name]"
 
 
