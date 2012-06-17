@@ -128,7 +128,7 @@ module SessionExtensions
   #   urls = get_links('div.results a[href^=/name/show_name]')
   #
   def get_links(*args)
-    clean_our_backtrace do
+    clean_our_backtrace('get_links') do
       results = []
       assert_select(*args) do |links|
         results = links.map {|l| l.attributes['href']}
@@ -181,7 +181,7 @@ module SessionExtensions
   end
 
   def submit_form_with_changes(changes)
-    clean_our_backtrace do
+    clean_our_backtrace('submit_form_with_changes') do
       open_form do |form|
         for key, value in changes
           form.change(key, value)
@@ -197,7 +197,7 @@ module SessionExtensions
   # for a form that posts back to the same page.)
   def open_form(*args)
     form = nil
-    clean_our_backtrace do
+    clean_our_backtrace('open_form') do
       if args == []
         action = path.sub(/\?.*/, '')
         args << "form[action*=#{action}]"
@@ -258,7 +258,7 @@ module SessionExtensions
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
   def click(args={})
-    clean_our_backtrace do
+    clean_our_backtrace('click') do
       select = 'a[href]'
       sargs  = []
 

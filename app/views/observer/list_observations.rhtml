@@ -7,7 +7,9 @@
 
 <% paginate_block(@pages) do %>
   <% make_matrix(@objects, :width => '100%') do |observation| %>
-    <%= render(:partial => 'observation', :object => observation,
-               :locals => { :rss_log => observation.rss_log }) %>
+    <%= render(:partial => 'rss_log', :locals => {
+      :rss_log => observation.rss_log,
+      :target => observation,
+    }) %>
   <% end %>
 <% end %>

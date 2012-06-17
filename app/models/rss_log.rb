@@ -144,14 +144,29 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
 
-  # List of all object types that can have RssLog's.
+  # List of all object types that can have RssLog's.  (This is the order they
+  # appear on the activity log page.)
   def self.all_types
-    ['observation', 'name', 'location', 'project', 'species_list']
+    ['observation', 'name', 'location', 'species_list', 'project']
   end
 
   # Returns the associated object, or nil if it's an orphan.
   def target
     location || name || observation || project || species_list
+  end
+
+  # Returns the associated object's id, or nil if it's an orphan.
+  def target_id
+    location_id || name_id || observation_id || project_id || species_list_id
+  end
+
+  # Return the type of object of the target, e.g., :observation.
+  def target_type
+    location_id     ? :location     :
+    name_id         ? :name         :
+    observation_id  ? :observation  :
+    project_id      ? :project      :
+    species_list_id ? :species_list : nil
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an
@@ -161,9 +176,16 @@ class RssLog < AbstractModel
     self
   end
 
-  # Get title from top line of orphaned log.  (Should be the +format_name+.)
+  # The top line of log should be the old object's name after it is destroyed.
   def orphan_title
-    RssLog.unescape(notes.to_s.split("\n", 2).first)
+    name = notes.to_s.split("\n", 2).first
+    if name.match(/^\d{14}/)
+      # This is an error, happening occasionally when a log wasn't orphaned properly.
+      tag, args, time = parse_log.first
+      args[:this] || :rss_log_of_deleted_item.l
+    else
+      RssLog.unescape(name)
+    end
   end
 
   # Returns plain text title of the associated object.
@@ -200,7 +222,11 @@ class RssLog < AbstractModel
   # Returns formatted title of the associated object, with id tacked on.
   def unique_format_name
     if target
-      target.unique_format_name
+      if target.respond_to?(:unique_format_name)
+        target.unique_format_name
+      else
+        target.format_name + " (#{target_id})"
+      end
     else
       orphan_title
     end
@@ -212,21 +238,19 @@ class RssLog < AbstractModel
   # an orphan, it returns the generic <tt>"/observer/show_rss_log/#{id}"</tt>
   # URL.
   def url
-    result = ''
     if location_id
-      result = sprintf("/location/show_location/%d?time=%d", location_id, self.modified.tv_sec)
+      sprintf("/location/show_location/%d?time=%d", location_id, self.modified.tv_sec)
     elsif name_id
-      result = sprintf("/name/show_name/%d?time=%d", name_id, self.modified.tv_sec)
+      sprintf("/name/show_name/%d?time=%d", name_id, self.modified.tv_sec)
     elsif observation_id
-      result = sprintf("/observer/show_observation/%d?time=%d", observation_id, self.modified.tv_sec)
+      sprintf("/observer/show_observation/%d?time=%d", observation_id, self.modified.tv_sec)
     elsif project_id
-      result = sprintf("/project/show_project/%d?time=%d", project_id, self.modified.tv_sec)
+      sprintf("/project/show_project/%d?time=%d", project_id, self.modified.tv_sec)
     elsif species_list_id
-      result = sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.modified.tv_sec)
+      sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.modified.tv_sec)
     else
-      result = sprintf("/observer/show_rss_log/%d?time=%d", id, self.modified.tv_sec)
+      sprintf("/observer/show_rss_log/%d?time=%d", id, self.modified.tv_sec)
     end
-    result
   end
 
   # Add entry to top of notes and save.  Pass in a localization key and a hash
@@ -274,12 +298,7 @@ class RssLog < AbstractModel
   def orphan(title, key, args={})
     args = args.merge(:save => false)
     add_with_date(key, args)
-    self.notes        = RssLog.escape(title) + "\n" + notes.to_s
-    self.location     = nil
-    self.name         = nil
-    self.observation  = nil
-    self.project      = nil
-    self.species_list = nil
+    self.notes = RssLog.escape(title) + "\n" + notes.to_s
     self.save_without_our_callbacks
   end
 

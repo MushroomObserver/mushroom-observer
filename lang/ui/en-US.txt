@@ -85,6 +85,11 @@ NOTIFICATION: Notification
 notification: notification
 NOTIFICATIONS: Notifications
 notifications: notifications
+# generic object
+OBJECT: Object
+object: object
+OBJECTS: Objects
+objects: objects
 OBSERVATION: Observation
 observation: observation
 OBSERVATIONS: Observations
@@ -672,6 +677,21 @@ vote_agreement_40: Doubtful
 vote_agreement_20: Not Likely
 vote_agreement_0: As If!
 
+# Time quantities.
+time_just_seconds_ago: "seconds ago"
+time_one_minute_ago: "a minute ago"
+time_minutes_ago: "[n] minutes ago"
+time_one_hour_ago: "an hour ago"
+time_hours_ago: "[n] hours ago"
+time_one_day_ago: "yesterday"
+time_days_ago: "[n] days ago, [date]"
+time_one_week_ago: "last week, [date]"
+time_weeks_ago: "[n] weeks ago, [date]"
+time_one_month_ago: "last month, [date]"
+time_months_ago: "[n] months ago, [date]"
+time_one_year_ago: "last year, [date]"
+time_years_ago: "[n] years ago, [date]"
+
 # Query titles.
 query_title_advanced_search: "[:app_advanced_search]"
 query_title_all: "[TYPE] Index"
@@ -846,7 +866,6 @@ log_name_approved: Approved by [user] over [other].
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
 log_name_deprecated: Deprecated by [user] in favor of [other].
 log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
-log_name_merged: "[This] merged with [that]."
 log_object_added_by_user: "[Type] added by [user]."
 log_object_added_by_user_with_name: "[Type] added by [user]: [name]"
 log_object_added_no_user: "[Type] added."
@@ -856,10 +875,10 @@ log_object_created_no_user: "[Type] created."
 log_object_destroyed_by_user: "[Type] destroyed by [user]."
 log_object_destroyed_by_user_with_name: "[Type] destroyed by [user]: [name]"
 log_object_destroyed_no_user: "[Type] destroyed."
-log_object_merged_by_user: Merged [from] into [to] by [user].
-log_object_merged_no_user: Merged [from] into [to].
-log_object_moved_by_user: Moved [from] into [to] by [user].
-log_object_moved_no_user: Moved [from] into [to].
+log_object_merged_by_user: "[Type] merged into [to] by [user]."
+log_object_merged_no_user: "[Type] merged into [to]."
+log_object_moved_by_user: "[Type] moved into [to] by [user]."
+log_object_moved_no_user: "[Type] moved into [to]."
 log_object_removed_by_user: "[Type] removed by [user]."
 log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]"
 log_object_removed_no_user: "[Type] removed."
@@ -889,9 +908,11 @@ log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
 log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
 log_location_created: "[:log_object_created_by_user(type=:location)]"
 log_location_destroyed: "[:log_object_destroyed_by_user(type=:location)]"
+log_location_merged: "[:log_object_merged_by_user(type=:location)]"
 log_location_updated: "[:log_object_updated_by_user(type=:location)]"
 log_name_created: "[:log_object_created_by_user(type=:name)]"
 log_name_destroyed: "[:log_object_destroyed_by_user(type=:name)]"
+log_name_merged: "[:log_object_merged_by_user(type=:name)]"
 log_name_updated: "[:log_object_updated_by_user(type=:name)]"
 log_naming_created: "[:log_object_created_by_user_with_name(type=:naming)]"
 log_naming_destroyed: "[:log_object_destroyed_by_user_with_name(type=:naming)]"
@@ -1577,11 +1598,7 @@ reverify_note: >
 
 # observer/rss
 rss_description: List of changes to [:app_title] as they happen.
-rss_log_of_deleted_item: >
-  Log of\n
-  Deleted\n
-  Item\n
-
+rss_log_of_deleted_item: Deleted Item
 rss_log_title: Activity Log
 rss_by: by [user]
 rss_title: "[:app_title]"
@@ -1594,7 +1611,13 @@ rss_one_help: Show only [types].
 rss_make_default: Make This My Default
 rss_this_is_default: This Is Your Default
 rss_created: "[TYPE] Created"
-rss_changed: Change to [TYPE]
+rss_changed: "[TYPE] Changed"
+rss_destroyed: "[TYPE] Destroyed"
+rss_consensus_changed: "Consensus changed from: [old]"
+rss_consensus_reached: "Consensus established"
+rss_naming_created: "Name proposed by [user]: [name]"
+rss_naming_destroyed: "Name destroyed by [user]: [name]"
+rss_naming_updated: "Name proposal updated by [user]: [name]"
 
 
 

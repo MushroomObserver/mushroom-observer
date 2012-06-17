@@ -515,3 +515,7 @@ module ActionController
   end
 end
 
+# To get rid of an annoying warning message:
+# Change actionpack-2.1.1/lib/action_view/helpers/text_helper.rb line 467 to:
+#   (?:/(?:[~\w\+@%=\(\)-]|(?:[,.;:'][^\s$]))*)*
+

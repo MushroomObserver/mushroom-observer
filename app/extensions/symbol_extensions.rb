@@ -49,6 +49,12 @@ class Symbol
     @@missing_tags = x
   end
 
+  # Does this tag have a translation?
+  def has_translation?
+    !!Globalite.localize(self, nil, {}) or
+    !!Globalite.localize(downcase, nil, {})
+  end
+
   # Wrapper on the old +localize+ method that:
   # 1. converts '\n' into newline throughout
   # 2. maps '[arg]' via optional hash you can pass in
@@ -127,7 +133,16 @@ class Symbol
       if TESTING
         @@missing_tags << self if defined?(@@missing_tags)
       end
-      result = "[:#{self}]"
+      if args.any?
+        pairs = []
+        for k, v in args
+          pairs << "#{k}=#{v.inspect}"
+        end
+        args_str = "(#{pairs.join(',')})"
+      else
+        args_str = ''
+      end
+      result = "[:#{self}#{args_str}]"
     end
     return result
   end
@@ -154,7 +169,7 @@ class Symbol
     end
     if capitalize_result
       # Make token attempt to capitalize result if requested [:TAG] for :tag.
-      result = result.capitalize_first 
+      result = result.capitalize_first
     end
     return result
   end

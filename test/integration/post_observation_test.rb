@@ -220,10 +220,10 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_exists_deleted_item_log
     found = false
-    assert_select('a[href*=show_rss_log]') do |elems|
-      found = true if elems.any? {|e| e.to_s.match(/deleted.*item/mi)}
+    assert_select("a[href*=show_rss_log]") do |elems|
+      found = true if elems.any? {|e| e.to_s.match(/Agaricus campestris/mi)}
     end
-    assert(found, 'Expected to find a "deleted item" rss log somewhere on the page.')
+    assert(found, 'Expected to find a "destroyed" rss log somewhere on the page.')
   end
 
   def create_observation_form_values_after_first_changes

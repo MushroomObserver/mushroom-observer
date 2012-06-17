@@ -46,16 +46,31 @@ module GeneralExtensions
   #
   ##############################################################################
 
-  # I lifted this from action_controller/assertions.rb.  It cleans up the
-  # backtrace so that it appears as if assertions occurred in the unit test
-  # that called the assertions in this file.
-  def clean_our_backtrace(&block)
+  # Clean up backtrace of any assertion failures so that it appears as if
+  # assertions occurred in the unit test that called the caller.  It strips
+  # out everything past and including the method name given, or everything
+  # past a method starting with "assert_".
+  def clean_our_backtrace(caller=nil, &block)
     yield
   rescue Test::Unit::AssertionFailedError => error
-    helper_path = File.expand_path(File.dirname(__FILE__))
-    regexp = Regexp.new(helper_path + '/\w+\.rb')
-    error.backtrace.reject! { |line| File.expand_path(line) =~ regexp }
-    raise
+    keepers = []
+    for line in error.backtrace
+      if line.match(/(\w+)\.rb.*`(\w+)'/)
+        file, method = $1, $2
+        if method == caller or method.match(/^assert_/)
+          keepers.clear
+        elsif file == 'setup_and_teardown' and method == 'run_with_callbacks'
+          break
+        else
+          keepers << line
+        end
+      else
+        keepers << line
+      end
+    end
+    error.backtrace.clear
+    error.backtrace.push(*keepers)
+    raise error
   end
 
   # Create test image dirs for tests that do image uploads.

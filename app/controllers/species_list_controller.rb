@@ -239,7 +239,7 @@ class SpeciesListController < ApplicationController
       when 'UTF-8'; str
       when 'ASCII'; str.to_ascii
       else
-        str.force_encoding('UTF-8') if str.respond_to?(:force_encoding)
+        str.force_encoding('UTF-8')
         str.iconv(charset)
     end
     send_data(str,

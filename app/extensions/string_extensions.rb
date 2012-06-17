@@ -411,14 +411,9 @@ class String
   # Convert string (assumed to be in UTF-8) to any other charset.  All invalid
   # characters are degraded to their rough ASCII equivalent, then converted.
   def iconv(charset)
-    iconv = Iconv.new(charset, 'UTF-8')
-    self.dup.gsub(/[^\t\n\r\x20-\x7E]/) do |c|
-      begin
-        iconv.iconv(c)
-      rescue
-        iconv.iconv(UTF8_TO_ASCII[c] || ' ')
-      end
-    end
+    encode(charset, :fallback => lambda do |c|
+      UTF8_TO_ASCII[c] || '?'
+    end)
   end
 
   # Escape a string to be safe to place in double-quotes inside javascript.

@@ -43,6 +43,37 @@ class ActiveSupport::TimeWithZone
 
   # Format as date-time for emails.
   def email_time; strftime(EMAIL_TIME_FORMAT); end
+
+  # Format time as "5 days ago", etc.
+  def fancy_time(ref=Time.now)
+    diff = ref - self
+    if -diff > 1.minute
+      web_time
+    elsif diff < 1.minute
+      :time_just_seconds_ago.l
+    elsif diff < 1.hour
+      show_time_ago(diff/60, :minute)
+    elsif diff < 1.day
+      show_time_ago(diff/60/60, :hour)
+    elsif diff < 1.week
+      show_time_ago(diff/60/60/24, :day)
+    elsif diff < 1.month
+      show_time_ago(diff/60/60/24/7, :week)
+    elsif diff < 1.year
+      show_time_ago(diff/60/60/24*12/365.24218967, :month)
+    else
+      show_time_ago(diff/60/60/24/365.24218967, :year)
+    end
+  end
+
+  def show_time_ago(diff, unit)
+    n = diff.truncate
+    if n < 2
+      :"time_one_#{unit}_ago".l(:date => web_date)
+    else
+      :"time_#{unit}s_ago".l(:n => n, :date => web_date)
+    end
+  end
 end
 
 class Time
@@ -52,6 +83,7 @@ class Time
   def api_time;   in_time_zone.api_time;   end
   def email_date; in_time_zone.email_date; end
   def email_time; in_time_zone.email_time; end
+  def fancy_time(*x); in_time_zone.fancy_time(*x); end
 end
 
 class DateTime
@@ -61,6 +93,7 @@ class DateTime
   def api_time;   in_time_zone.api_time;   end
   def email_date; in_time_zone.email_date; end
   def email_time; in_time_zone.email_time; end
+  def fancy_time(*x); in_time_zone.fancy_time(*x); end
 end
 
 class Date

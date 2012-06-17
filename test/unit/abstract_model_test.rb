@@ -21,6 +21,28 @@ class AbstractModelTest < UnitTestCase
     end
   end
 
+  def assert_rss_log_lines(num, obj)
+    clean_our_backtrace do
+      assert_equal(num, obj.rss_log.notes.split("\n").length,
+                   "Expected #{num} lines in rss log, got:\n" +
+                   "<#{obj.rss_log.notes}>")
+    end
+  end
+
+  def assert_rss_log_has_tag(expect_tag, obj)
+    clean_our_backtrace do
+      found = false
+      for tag, args, time in obj.rss_log.parse_log
+        if tag == expect_tag
+          found = true
+          break
+        end
+      end
+      assert_block("Expected to find #{tag.inspect} in rss log, got:\n" +
+                   "<#{obj.rss_log.notes}>") { found }
+    end
+  end
+
 ################################################################################
 
   # -------------------------------------------------------------------
@@ -122,119 +144,239 @@ class AbstractModelTest < UnitTestCase
   #  redundant rss_log_id in the owning objects.
   # -------------------------------------------------------------------
 
-  def test_rss_log_life_cycle
+  def test_location_rss_log_life_cycle
     User.current = @rolf
+    time = 1.minute.ago
 
-    for model in [Location, Name, Observation, SpeciesList]
-      model_name = model.type_tag
+    loc = Location.new(
+      :name => 'Test Location',
+      :north => 54,
+      :south => 53,
+      :west  => -101,
+      :east  => -100,
+      :high  => 100,
+      :low   => 0
+    )
 
-      case model.name
-      when 'Location'
-        obj = Location.new(
-          :name => 'Test Location',
-          :north => 54,
-          :south => 53,
-          :west  => -101,
-          :east  => -100,
-          :high  => 100,
-          :low   => 0
-        )
-      when 'Name'
-        obj = Name.new(
-          :text_name    => 'Test',
-          :search_name  => 'Test',
-          :sort_name    => 'Test',
-          :display_name => '**__Test__**',
-          :rank         => :Genus,
-          :author       => ''
-        )
-      when 'Observation'
-        obj = Observation.new(
-          :when    => Time.now,
-          :where   => 'Anywhere',
-          :name_id => 1
-        )
-      when 'SpeciesList'
-        obj = SpeciesList.new(
-          :when  => Time.now,
-          :where => 'Anywhere',
-          :title => 'Test List'
-        )
-      end
+    assert_nil(loc.rss_log)
+    assert_save(loc)
+    loc_id = loc.id
+    assert_not_nil(rss_log = loc.rss_log)
+    assert_equal(:location, rss_log.target_type)
+    assert_equal(loc.id, loc.rss_log.location_id)
+    assert_rss_log_lines(1, rss_log)
+    assert_rss_log_has_tag(:log_location_created, rss_log)
 
-      num = 0
-      assert_nil(obj.rss_log_id, "#{model}.rss_log shouldn't exist yet")
-      assert_save(obj, "#{model}.save failed")
-      if model == Location
-        assert_not_nil(obj.rss_log_id, "#{model}.rss_log should exist now")
-        assert_equal(obj.id, obj.rss_log.send("#{model.name.underscore}_id"),
-                     "#{model}.rss_log ids don't match")
-        assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
-                     "#{model}.rss_log should only have creation line:\n" +
-                     "<#{obj.rss_log.notes}>")
-        assert_match(/log_#{model_name}_created/, obj.rss_log.notes,
-                     "#{model}.rss_log should have creation line:\n" +
-                     "<#{obj.rss_log.notes}>")
-      else
-        assert_nil(obj.rss_log_id, "#{model}.rss_log shouldn't exist yet")
-      end
+    rss_log.update_attribute(:modified, time)
+    loc.log(:test_message, :arg => 'val')
+    rss_log.reload
+    assert_rss_log_lines(2, rss_log)
+    assert_rss_log_has_tag(:test_message, rss_log)
+    assert(rss_log.modified > time)
 
-      time = obj.rss_log.modified if obj.rss_log
-      obj.log(:test_message, :arg => 'val')
-      if model != Location
-        assert_not_nil(obj.rss_log_id, "#{model}.rss_log should exist now")
-        assert_equal(obj.id, obj.rss_log.send("#{model.name.underscore}_id"),
-                     "#{model}.rss_log ids don't match")
-      end
-      assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
-                   "#{model}.rss_log should have create and test lines:\n" +
-                   "<#{obj.rss_log.notes}>")
-      assert_match(/test_message.*arg.*val/, obj.rss_log.notes,
-                   "#{model}.rss_log should have test line:\n" +
-                   "<#{obj.rss_log.notes}>")
-      assert_not_equal(time, obj.rss_log.modified,
-                       "#{model}.rss_log wasn't touched")
+    rss_log.update_attribute(:modified, time)
+    loc.update_attribute(:display_name, 'New Location')
+    rss_log.reload
+    assert_rss_log_lines(3, rss_log)
+    assert_rss_log_has_tag(:log_location_updated, rss_log)
+    assert(rss_log.modified > time)
 
-      time = obj.rss_log.modified
-      case model
-      when Location
-        obj.display_name = 'New Location'
-      when Name
-        obj.author = 'New Author'
-      when Observation
-        obj.notes = 'New Notes'
-      when SpeciesList
-        obj.title = 'New Title'
-      end
-      obj.save
-      if model == Location
-        assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
-                     "#{model}.rss_log should have create, test, update lines:\n" +
-                     "<#{obj.rss_log.notes}>")
-        assert_match(/log_#{model_name}_updated/, obj.rss_log.notes,
-                     "#{model}.rss_log should have update line:\n" +
-                     "<#{obj.rss_log.notes}>")
-        assert_not_equal(time, obj.rss_log.modified,
-                         "#{model}.rss_log wasn't touched")
-      end
+    rss_log.update_attribute(:modified, time)
+    Location.first.merge(loc)
+    rss_log.reload
+    assert_rss_log_lines(4, rss_log)
+    assert_rss_log_has_tag(:log_location_merged, rss_log)
+    assert(rss_log.modified > time)
+    assert_nil(Location.safe_find(loc_id))
+    assert_equal(:location, rss_log.target_type)
+  end
 
-      time = obj.rss_log.modified
-      if model == Name
-        Name.first.merge(obj)
-        assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
-                     "#{model}.rss_log should have test and merge lines:\n" +
-                     "<#{obj.rss_log.notes}>")
-      else
-        obj.destroy
-        assert_equal((num+=2), obj.rss_log.notes.split("\n").length,
-                     "#{model}.rss_log should have create, test, update, destroy, orphan lines:\n" +
-                     "<#{obj.rss_log.notes}>")
-        assert_match(/log_#{model_name}_destroyed/, obj.rss_log.notes,
-                     "#{model}.rss_log should have destroy line:\n" +
-                     "<#{obj.rss_log.notes}>")
-        assert_equal(time, obj.rss_log.modified,
-                     "#{model}.rss_log shouldn't have been touched")
-      end
-    end
+  def test_name_rss_log_life_cycle
+    User.current = @rolf
+    time = 1.minute.ago
+
+    name = Name.new(
+      :text_name    => 'Test',
+      :search_name  => 'Test',
+      :sort_name    => 'Test',
+      :display_name => '**__Test__**',
+      :rank         => :Genus,
+      :author       => ''
+    )
+
+    assert_nil(name.rss_log)
+    assert_save(name)
+    name_id = name.id
+    assert_nil(name.rss_log)
+
+    name.log(:test_message, :arg => 'val')
+    assert_not_nil(rss_log = name.rss_log)
+    assert_equal(:name, rss_log.target_type)
+    assert_equal(name.id, rss_log.name_id)
+    assert_rss_log_lines(1, rss_log)
+    assert_rss_log_has_tag(:test_message, rss_log)
+
+    rss_log.update_attribute(:modified, time)
+    name.update_attribute(:author, 'New Author')
+    # This is normally done by ApplicationController#save_name.
+    name.log(:log_name_updated, :user => @rolf.login, :touch => true)
+    rss_log.reload
+    assert_rss_log_lines(2, rss_log)
+    assert_rss_log_has_tag(:log_name_updated, rss_log)
+    assert(rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    Name.first.merge(name)
+    rss_log.reload
+    assert_rss_log_lines(3, rss_log)
+    assert_rss_log_has_tag(:log_name_merged, rss_log)
+    assert(rss_log.modified > time)
+    assert_nil(Name.safe_find(name_id))
+    assert_equal(:name, rss_log.target_type)
+  end
+
+  def test_observation_rss_log_life_cycle
+    User.current = @rolf
+    time = 1.minute.ago
+
+    obs = Observation.new(
+      :when    => Time.now,
+      :where   => 'Anywhere',
+      :name_id => 1
+    )
+
+    assert_nil(obs.rss_log)
+    assert_save(obs)
+    # This is normally done by ObserverController#create_observation.
+    obs.log(:log_observation_created)
+    obs_id = obs.id
+    assert_not_nil(rss_log = obs.rss_log)
+    assert_equal(:observation, rss_log.target_type)
+    assert_equal(obs.id, rss_log.observation_id)
+    assert_rss_log_lines(1, rss_log)
+    assert_rss_log_has_tag(:log_observation_created, rss_log)
+
+    rss_log.update_attribute(:modified, time)
+    obs.log(:test_message, :arg => 'val')
+    rss_log.reload
+    assert_rss_log_lines(2, rss_log)
+    assert_rss_log_has_tag(:test_message, rss_log)
+    assert(rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    obs.update_attribute(:notes, 'New Notes')
+    # This is normally done by ObserverController#edit_observation.
+    obs.log(:log_observation_updated, :touch => true)
+    rss_log.reload
+    assert_rss_log_lines(3, rss_log)
+    assert_rss_log_has_tag(:log_observation_updated, rss_log)
+    assert(rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    obs.destroy
+    rss_log.reload
+    # (extra line for orphan title)
+    assert_rss_log_lines(5, rss_log)
+    assert_rss_log_has_tag(:log_observation_destroyed, rss_log)
+    assert_in_delta(time, rss_log.modified, 1.second)
+    assert_nil(Observation.safe_find(obs_id))
+    assert_equal(:observation, rss_log.target_type)
+  end
+
+  def test_project_rss_log_life_cycle
+    User.current = @rolf
+    time = 1.minute.ago
+
+    proj = Project.new(
+      :title => 'New Project',
+      :summary => 'Old Summary'
+    )
+
+    assert_nil(proj.rss_log)
+    assert_save(proj)
+    # Normally done by ProjectController#add_project.
+    proj.log_create
+    proj_id = proj.id
+    assert_not_nil(rss_log = proj.rss_log)
+    assert_equal(:project, rss_log.target_type)
+    assert_equal(proj.id, rss_log.project_id)
+    assert_rss_log_lines(1, rss_log)
+    assert_rss_log_has_tag(:log_project_created, rss_log)
+
+    rss_log.update_attribute(:modified, time)
+    proj.log(:test_message, :arg => 'val')
+    rss_log.reload
+    assert_rss_log_lines(2, rss_log)
+    assert_rss_log_has_tag(:test_message, proj)
+    assert(proj.rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    proj.update_attribute(:summary, 'New Summary')
+    # Normally done by ProjectController#edit_project.
+    proj.log_update
+    rss_log.reload
+    assert_rss_log_lines(3, rss_log)
+    assert_rss_log_has_tag(:log_project_updated, rss_log)
+    assert(proj.rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    proj.destroy
+    # Normally done by ProjectController#destroy_project.
+    proj.log_destroy
+    rss_log.reload
+    # (extra line for orphan title)
+    assert_rss_log_lines(5, rss_log)
+    assert_rss_log_has_tag(:log_project_destroyed, rss_log)
+    assert(proj.rss_log.modified > time)
+    assert_nil(Project.safe_find(proj_id))
+    assert_equal(:project, rss_log.target_type)
+  end
+
+  def test_species_list_rss_log_life_cycle
+    User.current = @rolf
+    time = 1.minute.ago
+
+    spl = SpeciesList.new(
+      :title => 'New List',
+      :when => Time.now,
+      :where => 'Anywhere'
+    )
+
+    assert_nil(spl.rss_log)
+    assert_save(spl)
+    # Normally done by SpeciesListController#create_species_list.
+    spl.log(:log_species_list_created)
+    spl_id = spl.id
+    assert_not_nil(rss_log = spl.rss_log)
+    assert_equal(:species_list, rss_log.target_type)
+    assert_equal(spl.id, rss_log.species_list_id)
+    assert_rss_log_lines(1, rss_log)
+    assert_rss_log_has_tag(:log_species_list_created, rss_log)
+
+    rss_log.update_attribute(:modified, time)
+    spl.log(:test_message, :arg => 'val')
+    rss_log.reload
+    assert_rss_log_lines(2, rss_log)
+    assert_rss_log_has_tag(:test_message, rss_log)
+    assert(spl.rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    spl.update_attribute(:title, 'New Title')
+    # Normally done by SpeciesListController#edit_species_list.
+    spl.log(:log_species_list_updated)
+    rss_log.reload
+    assert_rss_log_lines(3, rss_log)
+    assert_rss_log_has_tag(:log_species_list_updated, rss_log)
+    assert(spl.rss_log.modified > time)
+
+    rss_log.update_attribute(:modified, time)
+    spl.destroy
+    rss_log.reload
+    # (extra line for orphan title)
+    assert_rss_log_lines(5, rss_log)
+    assert_rss_log_has_tag(:log_species_list_destroyed, rss_log)
+    assert_in_delta(time, spl.rss_log.modified, 1.second)
+    assert_nil(SpeciesList.safe_find(spl_id))
+    assert_equal(:species_list, rss_log.target_type)
   end
 end

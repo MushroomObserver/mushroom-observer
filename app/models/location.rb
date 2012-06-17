@@ -109,7 +109,7 @@ class Location < AbstractModel
   after_update :notify_users
 
   # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!, :destroyed]
+  self.autolog_events = [:created!, :updated!]
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
