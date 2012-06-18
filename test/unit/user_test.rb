@@ -172,24 +172,4 @@ class UserTest < UnitTestCase
     assert_obj_list_equal([spl1, spl3], @mary.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal([], @dick.all_editable_species_lists)
   end
-
-  def test_life_list
-    assert_equal([3, 6], @rolf.num_genera_and_species_seen)
-    assert_equal([0, 0], @mary.num_genera_and_species_seen)
-    assert_equal([0, 0], @dick.num_genera_and_species_seen)
-    assert_equal([1, 1], @katrina.num_genera_and_species_seen)
-
-    User.current = @dick
-    Observation.create!(:name => names(:agaricus))
-    assert_names_equal(names(:agaricus), Observation.last.name)
-    assert_users_equal(@dick, Observation.last.user)
-    assert_equal([0, 0], @dick.num_genera_and_species_seen)
-
-    Observation.create!(:name => names(:lactarius_kuehneri))
-    assert_equal([1, 1], @dick.num_genera_and_species_seen)
-
-    Observation.create!(:name => names(:lactarius_subalpinus))
-    Observation.create!(:name => names(:lactarius_alpinus))
-    assert_equal([1, 1], @dick.num_genera_and_species_seen)
-  end
 end

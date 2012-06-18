@@ -196,7 +196,7 @@ class Query < AbstractQuery
       :all? => :boolean,
     },
     :of_name => {
-      :name          => Name,
+      :name          => :name,
       :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
     },
@@ -243,7 +243,7 @@ class Query < AbstractQuery
       :all? => :boolean,
     },
     :with_observations_of_name => {
-      :name          => Name,
+      :name          => :name,
       :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
     },
@@ -664,8 +664,8 @@ class Query < AbstractQuery
         if params2[:title]
           # This can spiral out of control, but so be it.
           params2[:title] = "raw " +
-            :"query_title_with_#{type1}s_in_set".
-              t(:type1 => title, :type => type2)
+            :"query_title_with_#{type2}s_in_set".
+              t(:observations => title, :type => new_model.to_s.underscore.to_sym)
         end
         if params2[:by]
           # Can't be sure old sort order will continue to work.
@@ -1349,6 +1349,23 @@ class Query < AbstractQuery
     end
   end
 
+  def validate_name(arg, val)
+    if val.is_a?(Name)
+      if !val.id
+        raise("Value for :#{arg} is an unsaved Name instance.")
+      end
+      @params_cache ||= {}
+      @params_cache[arg] = val
+      val.id
+    elsif val.is_a?(String)
+      val
+    elsif val.is_a?(Fixnum)
+      val
+    else
+      raise("Value for :#{arg} should be a Name, String or Fixnum, got: #{val.class}")
+    end
+  end
+
   def validate_date(arg, val)
     if val.acts_like?(:date)
       val = val.in_time_zone
@@ -1385,7 +1402,7 @@ class Query < AbstractQuery
   def initialize_all
     if (by = params[:by]) and
        (by = :"sort_by_#{by}")
-      title_args[:tag]   = :query_title_all_by
+      title_args[:tag] ||= :query_title_all_by
       title_args[:order] = by.t
     end
 
@@ -1526,7 +1543,17 @@ class Query < AbstractQuery
   # ----------------------------------
 
   def initialize_of_name
-    name = find_cached_parameter_instance(Name, :name)
+    if name = get_cached_parameter_instance(:name)
+      names = [name]
+    else
+      name = params[:name]
+      if name.is_a?(Fixnum) or name.match(/^\d+$/)
+        names = [Name.find(name.to_i)]
+      else
+        names = Name.find_all_by_search_name(name)
+        names = Name.find_all_by_text_name(name) if names.empty?
+      end
+    end
 
     synonyms     = params[:synonyms]     || :no
     nonconsensus = params[:nonconsensus] || :no
@@ -1534,18 +1561,18 @@ class Query < AbstractQuery
     title_args[:tag] = :query_title_of_name
     title_args[:tag] = :query_title_of_name_synonym      if synonyms != :no
     title_args[:tag] = :query_title_of_name_nonconsensus if nonconsensus != :no
-    title_args[:name] = name.display_name
+    title_args[:name] = names.length == 1 ? names.first.display_name : params[:name]
 
     if synonyms == :no
-      name_ids = [name.id] + name.misspelling_ids
+      name_ids = names.map(&:id) + names.map(&:misspelling_ids).flatten
     elsif synonyms == :all
-      name_ids = name.synonym_ids
+      name_ids = names.map(&:synonym_ids).flatten
     elsif synonyms == :exclusive
-      name_ids = name.synonym_ids - [name.id] - name.misspelling_ids
+      name_ids = names.map(&:synonym_ids).flatten - names.map(&:id) - names.map(&:misspelling_ids).flatten
     else
       raise "Invalid synonym inclusion mode: '#{synonyms}'"
     end
-    set = clean_id_set(name_ids)
+    set = clean_id_set(name_ids.uniq)
 
     if nonconsensus == :no
       self.where << "observations.name_id IN (#{set}) AND " +

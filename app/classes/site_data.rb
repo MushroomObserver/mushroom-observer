@@ -80,6 +80,8 @@ class SiteData
     :species_lists,
     :species_list_entries,
     :observations,
+#     :observations_with_voucher,
+#     :observations_without_voucher,
     :comments,
     :namings,
     :votes,
@@ -100,6 +102,8 @@ class SiteData
     :names_versions                => 10,
     :namings                       => 1,
     :observations                  => 1,
+#     :observations_with_voucher     => 10,
+#     :observations_without_voucher  => 1,
     :species_list_entries          => 1,
     :species_lists                 => 5,
     :users                         => 0,
@@ -109,49 +113,72 @@ class SiteData
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
   FIELD_TABLES = {
+    :observations_with_voucher => 'observations',
+    :observations_without_voucher => 'observations',
     :species_list_entries => 'observations_species_lists',
   }
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    :users => '`verified` IS NOT NULL'
+    :observations_with_voucher => 'specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL',
+    :observations_without_voucher => 'NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )',
+    :users => '`verified` IS NOT NULL',
   }
 
-################################################################################
-#
-# :section: Public Interface
-#
-################################################################################
+  # Call these procs to determine if a given object qualifies for a given field.
+  FIELD_STATE_PROCS = {
+    :observations_with_voucher => lambda do |obs|
+      obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0
+    end,
+    :observations_without_voucher => lambda do |obs|
+      not( obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0 )
+    end,
+  }
+
+  # -----------------------------
+  #  :section: Public Interface
+  # -----------------------------
 
   # This is called every time any object (not just one we care about) is
   # created or destroyed.  Figure out what kind of object from the class name,
-  # and then update the owner's contribution as appropriate.
+  # and then update the owner's contribution as appropriate. NOTE: This is only
+  # approximate.  There are now nontrivial calculations, such as awarding extra
+  # points for observations with vouchers, which won't be done right until
+  # someone looks at that user's summary page.
   def self.update_contribution(mode, obj, user_id=nil)
 
     # Two modes: 1) pass in object, 2) pass in field name
     if obj.is_a?(ActiveRecord::Base)
-      field = obj.class.to_s.tableize.to_sym
+      field = get_applicable_field(obj)
+      weight = FIELD_WEIGHTS[field]
       user_id ||= obj.user_id rescue nil
     else
       field = obj
+      weight = FIELD_WEIGHTS[field]
       user_id ||= User.current_id
     end
 
-    weight = FIELD_WEIGHTS[field]
-    if weight && weight > 0 && user_id
-      weight = -weight if mode == :del
-      User.connection.update %(
-        UPDATE users SET contribution =
-          IF(contribution IS NULL, #{weight}, contribution + #{weight})
-        WHERE id = #{user_id}
-      )
+    if weight && weight > 0 && user_id > 0
+      if mode == :del
+        weight = -weight
+      elsif mode == :chg
+        weight = get_weight_change(obj, field)
+      end
+      unless weight == 0
+        User.connection.update %(
+          UPDATE users SET contribution =
+            IF(contribution IS NULL, #{weight}, contribution + #{weight})
+          WHERE id = #{user_id}
+        )
+      end
     end
 
     # Debugging information: show transaction log of all objects created and
     # destroyed, plus all editors/authors added and removed.
     if false
-      desc = field.to_s
+      desc = field.inspect
       if obj.is_a?(ActiveRecord::Base)
+        desc += " #{obj.type_tag}"
         desc += " (new)"              if obj.new_record?
         desc += " ##{obj.id}"         if obj.id
         desc += " (#{obj.text_name})" if obj.respond_to?(:text_name)
@@ -161,9 +188,39 @@ class SiteData
         user = User.safe_find(user_id)
         action += " --> #{user.login} = #{user.contribution}"
       end
-      puts ">>>> #{mode} #{weight} #{desc} #{action}"
+      puts ">>>> #{mode} #{weight.inspect} #{desc} #{action}"
       puts obj.args.inspect if obj.is_a?(Transaction)
     end
+  end
+
+  def self.get_applicable_field(obj)
+    table = obj.class.to_s.tableize
+    field = table.to_sym
+    if not FIELD_WEIGHTS[field]
+      field = nil
+      for field2, table2 in FIELD_TABLES
+        if table2 == table
+          proc = FIELD_STATE_PROCS[field2]
+          if proc and proc.call(obj)
+            field = field2
+            break
+          end
+        end
+      end
+    end
+    return field
+  end
+
+  def self.get_weight_change(obj, new_field)
+    old_field = new_field
+    if FIELD_STATE_PROCS[new_field]
+      obj_copy = obj.clone
+      for attr, val_pair in obj.changes
+        obj_copy[attr] = val_pair.first
+      end
+      old_field = get_applicable_field(obj_copy)
+    end
+    return FIELD_WEIGHTS[new_field] - FIELD_WEIGHTS[old_field]
   end
 
   # Return stats for entire site.  Returns simple hash mapping category to
@@ -204,11 +261,9 @@ class SiteData
     load_user_data(nil)
   end
 
-################################################################################
-#
-# :section: Private Helpers
-#
-################################################################################
+  # ----------------------------
+  #  :section: Private Helpers
+  # ----------------------------
 
 private
 
@@ -302,6 +357,10 @@ private
       tables += ", #{parent}s p"
       conditions += " AND t.#{parent}_id = p.id"
       conditions += " AND t.user_id != p.user_id"
+    end
+
+    if extra_conditions = FIELD_CONDITIONS[field]
+      conditions += " AND (#{extra_conditions})"
     end
 
     query = %(

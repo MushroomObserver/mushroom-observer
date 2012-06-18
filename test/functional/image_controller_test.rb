@@ -339,6 +339,8 @@ class ImageControllerTest < FunctionalTestCase
     }
     post(:remove_images, params)
     assert_response(:controller => "observer", :action => "show_observation")
+    # Observation gets downgraded to 1 point because it no longer has any images.
+    # assert_equal(1, @mary.reload.contribution)
     assert_equal(10, @mary.reload.contribution)
     assert(!obs.reload.images.member?(keep))
     assert_equal(nil, obs.thumb_image_id)

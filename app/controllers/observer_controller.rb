@@ -33,6 +33,7 @@
 #  index_observation::
 #  list_observations::
 #  observations_by_name::
+#  observations_of_name::
 #  observations_by_user::
 #  observations_at_location::
 #  observations_at_where::
@@ -132,6 +133,7 @@ class ObserverController < ApplicationController
     :index_rss_log,
     :index_user,
     :intro,
+    :life_list,
     :list_observations,
     :list_rss_logs,
     :lookup_comment,
@@ -150,6 +152,7 @@ class ObserverController < ApplicationController
     :no_session,
     :observation_search,
     :observations_by_name,
+    :observations_of_name,
     :observations_by_user,
     :observations_for_project,
     :observations_at_where,
@@ -580,6 +583,24 @@ class ObserverController < ApplicationController
   # Displays matrix of all Observation's, alphabetically.
   def observations_by_name # :nologin: :norobots:
     query = create_query(:Observation, :all, :by => :name)
+    show_selected_observations(query)
+  end
+
+  # Displays matrix of Observations with the given text_name (or search_name).
+  def observations_of_name # :nologin: :norobots:
+    args = {
+      :name => params[:name],
+      :synonyms => :all,
+      :nonconsensus => :no,
+      :by => :created,
+    }
+    if not params[:user_id].blank?
+      args[:users] = params[:user_id]
+    end
+    if not params[:project_id].blank?
+      args[:projects] = params[:project_id]
+    end
+    query = create_query(:Observation, :of_name, args)
     show_selected_observations(query)
   end
 
@@ -1673,7 +1694,7 @@ class ObserverController < ApplicationController
       query = Query.lookup(:Observation, :by_user, :user => @show_user,
                            :by => :thumbnail_quality,
                            :where => "images.user_id = #{id}")
-      @num_genera, @num_species = @show_user.num_genera_and_species_seen
+      @life_list = LifeList::ForUser.new(@show_user)
       @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
     end
   end
@@ -1686,6 +1707,24 @@ class ObserverController < ApplicationController
   # Go to previous user: redirects to show_user.
   def prev_user # :norobots:
     redirect_to_next_object(:prev, User, params[:id])
+  end
+
+  # Display a simplified list of species seen by a user, project or the entire site.
+  def life_list # :nologin: :norobots:
+    store_location
+    user_id = params[:user_id]
+    proj_id = params[:project_id]
+    if not user_id.blank?
+      if @show_user = find_or_goto_index(User, user_id)
+        @data = LifeList::ForUser.new(@show_user)
+      end
+    elsif not proj_id.blank?
+      if @project = find_or_goto_index(Project, proj_id)
+        @data = LifeList::ForProject.new(@project)
+      end
+    else
+      @data = LifeList::ForSite.new
+    end
   end
 
   # Admin util linked from show_user page that lets admin add or change bonuses

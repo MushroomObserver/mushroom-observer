@@ -42,7 +42,9 @@
       <%= :OBSERVATIONS.t %>: <% if @project.observations.any? %>
         <%= @project.observations.length %>
         (<%= link_to(:SHOW.t, :controller => :observer, :action => :observations_for_project,
-                     :id => @project.id) %>)
+                     :id => @project.id) %> |
+         <%= link_to(:NAMES.t, :controller => :observer, :action => :life_list,
+                     :project_id => @project.id) %>)
       <% else %>
         <%= :NONE.t %>
       <% end %><br/>

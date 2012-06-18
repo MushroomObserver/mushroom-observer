@@ -637,6 +637,8 @@ user_stats_names: "[:NAMES] Created"
 user_stats_names_versions: "[:NAMES] Edited"
 user_stats_namings: Proposed IDs
 user_stats_observations: "[:OBSERVATIONS]"
+user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
+user_stats_observations_without_voucher: All Other Observations
 user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
 user_stats_species_lists: "[:SPECIES_LISTS]"
 user_stats_votes: "[:VOTES]"
@@ -655,12 +657,13 @@ site_stats_names: ""
 site_stats_names_versions: ""
 site_stats_namings: Proposed IDs
 site_stats_observations: "[:OBSERVATIONS]"
+site_stats_observations_with_voucher: Observations with Full Data
+site_stats_observations_without_voucher: Other Observations
 site_stats_observed_taxa: Observed Taxa
 site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
 site_stats_species_lists: "[:SPECIES_LISTS]"
 site_stats_users: Members
 site_stats_votes: "[:VOTES]"
-site_stats_life_list: "Life List: [species] species in [genera] genera"
 
 # Vote descriptions.
 vote_no_opinion: No Opinion
@@ -723,7 +726,7 @@ query_title_with_observations: "[TYPES] with [:OBSERVATIONS]"
 query_title_with_observations_at_location: "[TYPES] with [:query_title_at_location(type=:observation)]"
 query_title_with_observations_at_where: "[TYPES] with [:query_title_at_where(type=:observation)]"
 query_title_with_observations_by_user: "[TYPES] with [:query_title_by_user(type=:observation)]"
-query_title_with_observations_in_set: "[TYPES] with [observations]"
+query_title_with_observations_in_set: "[TYPES] for [observations]"
 query_title_with_observations_in_species_list: "[TYPES] with [:query_title_in_species_list(type=:observation)]"
 query_title_with_observations_of_children: "[TYPES] with [:query_title_of_children(type=:observation)]"
 query_title_with_observations_of_name: "[TYPES] with [:query_title_of_name(type=:observation)]"
@@ -978,6 +981,7 @@ app_your_observations: Your Observations
 app_your_interests: Your Interests
 app_your_summary: Your Summary
 app_preferences: Preferences
+app_life_list: Life List
 app_join_mailing_list: Join Mailing List
 app_logout: Logout
 app_admin: Admin
@@ -1841,6 +1845,7 @@ show_user_mailing_address: Mailing Address for Collections
 show_user_primary_location: Primary Location
 show_user_total: Total
 show_user_language_contribution: "Translations: [name]"
+show_user_life_list: '"Life List":[url]: [species] species in [genera] genera'
 
 
 
@@ -2246,6 +2251,7 @@ image_updater_update: "[:UPDATE]"
 image_updater_help: Listed below are all the different licenses you've posted images under, along with the number of your images which use that license.  Make any changes you want to the license or the name listed as the copyright holder, then click "[:UPDATE]" to submit changes.
 
 
+
 # image/vote_anonymity
 image_vote_anonymity_title: Change Anonymity of Your Image Votes
 image_vote_anonymity_num_anonymous: Number of anonymous votes
@@ -2257,6 +2263,7 @@ image_vote_anonymity_made_public: Made all of your image votes public.  Please a
 image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/observer/ask_webmaster_question for help.
 
 
+
 # interest-related controls in name/show_name, observation/show_observation, etc.
 interest_watch: Watch
 interest_ignore: Ignore
@@ -2265,6 +2272,15 @@ interest_ignore_help: Click here if you want to stop getting any emails about th
 interest_default_help: Click here if you want to go back to the default -- having your account preferences determine whether you get email about this [object].
 interest_watching: You have told us to email you about changes in this [object].  Click one of the small icons below to change.
 interest_ignoring: You have told us never to email you about changes in this [object].  Click one of the small icons below to change.
+
+
+
+# observer/life_list
+life_list_for_site_title: "Life List for Mushroom Observer"
+life_list_for_user_title: "Life List for [user]"
+life_list_for_project_title: "Life List for [project]"
+life_list_summary: "Summary: [species] species in [genera] genera"
+
 
 
 # interest/list_interests

@@ -31,6 +31,8 @@
                               :action => 'observations_by_user', :id => id),
     :species_lists => url_for(:controller => 'species_list',
                               :action => 'species_lists_by_user', :id => id),
+    :life_list => url_for(:controller => 'observer',
+                              :action => 'life_list', :user_id => @show_user.id),
   }
 
   new_tab_set do
@@ -44,6 +46,7 @@
       add_tab(:show_user_edit_profile.t, :controller => "account",
               :action => "profile")
       add_tab(:app_preferences.t, :controller => "account", :action => "prefs")
+      add_tab(:app_life_list.t, links[:life_list])
     else
       add_tab(:show_user_observations_by.t(:name => name), links[:observations])
       add_tab(:show_user_comments_for.t(:name => name), links[:comments_for])
@@ -110,29 +113,16 @@ end %>
           <% total = 0
 
           # These are roughly in decreasing order of importance.
-          rows = [
-            :name_descriptions_authors,
-            :name_descriptions_editors,
-            :names,
-            :names_versions,
-            :location_descriptions_authors,
-            :location_descriptions_editors,
-            :locations,
-            :locations_versions,
-            :images,
-            :species_lists,
-            :species_list_entries,
-            :observations,
-            :comments,
-            :namings,
-            :votes,
-          ].map do |field| {
-            :field  => field,
-            :label  => "user_stats_#{field}".to_sym.t,
-            :count  => (count = @user_data[field].to_i),
-            :weight => (weight = SiteData::FIELD_WEIGHTS[field]),
-            :points => count * weight,
-          } end
+          rows = []
+          for field in SiteData::ALL_FIELDS - [:users]
+            rows << {
+              :field  => field,
+              :label  => "user_stats_#{field}".to_sym.t,
+              :count  => (count = @user_data[field].to_i),
+              :weight => (weight = SiteData::FIELD_WEIGHTS[field]),
+              :points => count * weight,
+            }
+          end
 
           # Add bonuses for translations.
           if @user_data[:languages_itemized]
@@ -195,10 +185,10 @@ end %>
           <% end %>
         </table>
 
-        <% num_genera, num_species = @show_user.num_genera_and_species_seen
-        if num_genera > 0 %>
+        <% if @life_list.num_species > 0 %>
           <br/>
-          <%= :site_stats_life_list.t(:genera => num_genera, :species => num_species) %>
+          <%= :show_user_life_list.t(:genera => @life_list.num_genera,
+                :species => @life_list.num_species, :url => links[:life_list]) %>
         <% end %>
       </td>
 

@@ -2,7 +2,8 @@
   @title = :show_site_stats_title.t
 
   new_tab_set do
-    add_tab(:app_contributors.t, :action => 'users_by_contribution')
+    add_tab(:app_contributors.t, :action => :users_by_contribution)
+    add_tab(:site_stats_observed_taxa.t, :action => :life_list)
   end
 %>
 
@@ -28,7 +29,8 @@
         <table cellpadding="5" cellspacing="5" border="0">
           <% fields = [
             :images,
-            :observations,
+            :observations_with_voucher,
+            :observations_without_voucher,
             :listed_taxa,
             :observed_taxa,
             :name_descriptions_authors,

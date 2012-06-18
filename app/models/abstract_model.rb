@@ -199,12 +199,15 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # This is called just before an object's changes are saved.
-  # 1) It updates 'modified' whenever a record changes.
-  # 2) It saves a message to the RssLog.
+  # 1) It passes off to SiteData, where it will decide whether this affects a
+  #    user's contribution score, and if so update it appropriately.
+  # 2) It updates 'modified' whenever a record changes.
+  # 3) It saves a message to the RssLog.
   #
   # *NOTE*: Use +save_without_our_callbacks+ to save a record without doing
   # either of these things.
   def before_update
+    SiteData.update_contribution(:chg, self)
     if !@save_without_our_callbacks
       self.modified = Time.now if respond_to?('modified=') && !self.modified_changed?
       autolog_updated          if has_rss_log?

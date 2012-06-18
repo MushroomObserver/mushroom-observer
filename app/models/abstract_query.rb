@@ -1059,6 +1059,11 @@ class AbstractQuery < ActiveRecord::Base
     @params_cache[arg] ||= model.find(params[arg])
   end
 
+  def get_cached_parameter_instance(arg)
+    @params_cache ||= {}
+    @params_cache[arg]
+  end
+
   ##############################################################################
   #
   #  :section: Building Queries

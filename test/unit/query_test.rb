@@ -1285,9 +1285,9 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_of_name
     name = names(:agaricus_campestris)
-    assert_query([2], :Location, :with_observations_of_name, :name => name)
+    assert_query([2], :Location, :with_observations_of_name, :name => name.id)
     name = names(:peltigera)
-    assert_query([], :Location, :with_observations_of_name, :name => name)
+    assert_query([], :Location, :with_observations_of_name, :name => name.id)
   end
 
   def test_location_description_all
