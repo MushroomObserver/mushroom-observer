@@ -1,4 +1,5 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# has no obs
 first_species_list:
   id: 1
   sync_id: 1xx1
@@ -12,6 +13,7 @@ first_species_list:
   notes: Got Skunked!
   rss_log_id: 2
 
+# has no obs
 another_species_list:
   id: 2
   sync_id: 2xx1
@@ -24,6 +26,7 @@ another_species_list:
   title: Another Species List
   notes: Got Skunked Again!
 
+# has: minimal_unknown (1) and detailed_unknown (2)
 unknown_species_list:
   id: 3
   sync_id: 3xx1

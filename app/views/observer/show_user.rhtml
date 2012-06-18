@@ -32,7 +32,7 @@
     :species_lists => url_for(:controller => 'species_list',
                               :action => 'species_lists_by_user', :id => id),
     :life_list => url_for(:controller => 'observer',
-                              :action => 'life_list', :user_id => @show_user.id),
+                              :action => 'checklist', :user_id => @show_user.id),
   }
 
   new_tab_set do

@@ -1,8 +1,8 @@
 # encoding: utf-8
 #
-#  = LifeList
+#  = Checklist
 #
-#  This class calculates the "life list" of species observed by users,
+#  This class calculates a checklist of species observed by users,
 #  projects, etc.
 #
 #  == Methods
@@ -14,19 +14,19 @@
 #
 #  == Usage
 #
-#    data = LifeList::ForUser.new(user)
+#    data = Checklist::ForUser.new(user)
 #    puts "Life List: #{data.num_species} species in #{data.num_genera} genera."
 #
 ################################################################################
 
-class LifeList
+class Checklist
 
   # Build list of species observed by entire site.
-  class ForSite < LifeList
+  class ForSite < Checklist
   end
 
   # Build list of species observed by one User.
-  class ForUser < LifeList
+  class ForUser < Checklist
     def initialize(user)
       @user = user
       raise "Expected User instance, got #{user.inspect}." unless user.is_a?(User)
@@ -40,7 +40,7 @@ class LifeList
   end
 
   # Build list of species observed by one Project.
-  class ForProject < LifeList
+  class ForProject < Checklist
     def initialize(project)
       @project = project
       raise "Expected Project instance, got #{project.inspect}." unless project.is_a?(Project)
@@ -54,6 +54,21 @@ class LifeList
     end
   end
 
+  # Build list of species observed by one SpeciesList.
+  class ForSpeciesList < Checklist
+    def initialize(list)
+      @list = list
+      raise "Expected SpeciesList instance, got #{list.inspect}." unless list.is_a?(SpeciesList)
+    end
+
+    def query
+      super(
+        :tables => [ 'observations_species_lists os' ],
+        :conditions => [ 'os.observation_id = o.id', "os.species_list_id = #{@list.id}" ]
+      )
+    end
+  end
+
 ################################################################################
 
   def initialize
@@ -61,28 +76,28 @@ class LifeList
   end
 
   def num_genera
-    calc_life_list if not @genera
+    calc_checklist if not @genera
     return @genera.length
   end
 
   def num_species
-    calc_life_list if not @species
+    calc_checklist if not @species
     return @species.length
   end
 
   def genera
-    calc_life_list if not @genera
+    calc_checklist if not @genera
     return @genera.values.sort
   end
 
   def species
-    calc_life_list if not @species
+    calc_checklist if not @species
     return @species.values.sort
   end
 
 private
 
-  def calc_life_list
+  def calc_checklist
     @genera = {}
     @species = {}
     synonyms = count_nonsynonyms_and_gather_synonyms

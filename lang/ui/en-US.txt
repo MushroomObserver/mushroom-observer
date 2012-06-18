@@ -982,6 +982,7 @@ app_your_interests: Your Interests
 app_your_summary: Your Summary
 app_preferences: Preferences
 app_life_list: Life List
+app_checklist: Checklist
 app_join_mailing_list: Join Mailing List
 app_logout: Logout
 app_admin: Admin
@@ -2164,6 +2165,15 @@ bulk_license_link: Bulk License Updater
 
 
 
+# observer/checklist
+checklist_for_site_title: "Checklist for Mushroom Observer"
+checklist_for_user_title: "Checklist for [user]"
+checklist_for_project_title: "Checklist for [project]"
+checklist_for_species_list_title: "Checklist for [list]"
+checklist_summary: "Summary: [species] species in [genera] genera"
+
+
+
 # observer/color_themes
 color_themes_text: >
   **General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms.  By default the simple clean "Black on White" theme is used.  However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n
@@ -2272,14 +2282,6 @@ interest_ignore_help: Click here if you want to stop getting any emails about th
 interest_default_help: Click here if you want to go back to the default -- having your account preferences determine whether you get email about this [object].
 interest_watching: You have told us to email you about changes in this [object].  Click one of the small icons below to change.
 interest_ignoring: You have told us never to email you about changes in this [object].  Click one of the small icons below to change.
-
-
-
-# observer/life_list
-life_list_for_site_title: "Life List for Mushroom Observer"
-life_list_for_user_title: "Life List for [user]"
-life_list_for_project_title: "Life List for [project]"
-life_list_summary: "Summary: [species] species in [genera] genera"
 
 
 

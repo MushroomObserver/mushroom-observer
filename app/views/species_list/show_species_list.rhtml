@@ -54,12 +54,15 @@
     <%= link_to(:show_objects.t(:type => :observation),
                 :controller => :observer, :action => :index_observation,
                 :params => query_params) %> |
+    <%= link_to(:show_objects.t(:type => :image),
+                :controller => :image, :action => :index_image,
+                :params => query_params) %> |
     <%= link_to(:show_objects.t(:type => :name),
                 :controller => :name, :action => :index_name,
                 :params => query_params) %> |
-    <%= link_to(:show_objects.t(:type => :image),
-                :controller => :image, :action => :index_image,
-                :params => query_params) %><br/>
+    <%= link_to(:app_checklist.t,
+                :controller => :observer, :action => :checklist,
+                :species_list_id => @species_list.id) %><br/>
   <% paginate_block(@pages) do %>
     <% if @objects && @objects.length > 0 %>
       <table cellpadding="5" cellspacing="0" width="100%">

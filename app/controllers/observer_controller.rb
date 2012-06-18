@@ -124,6 +124,7 @@ class ObserverController < ApplicationController
     :advanced_search,
     :advanced_search_form,
     :ask_webmaster_question,
+    :checklist,
     :color_themes,
     :hide_thumbnail_map,
     :how_to_help,
@@ -133,7 +134,6 @@ class ObserverController < ApplicationController
     :index_rss_log,
     :index_user,
     :intro,
-    :life_list,
     :list_observations,
     :list_rss_logs,
     :lookup_comment,
@@ -599,6 +599,9 @@ class ObserverController < ApplicationController
     end
     if not params[:project_id].blank?
       args[:projects] = params[:project_id]
+    end
+    if not params[:species_list_id].blank?
+      args[:species_lists] = params[:species_list_id]
     end
     query = create_query(:Observation, :of_name, args)
     show_selected_observations(query)
@@ -1694,7 +1697,7 @@ class ObserverController < ApplicationController
       query = Query.lookup(:Observation, :by_user, :user => @show_user,
                            :by => :thumbnail_quality,
                            :where => "images.user_id = #{id}")
-      @life_list = LifeList::ForUser.new(@show_user)
+      @life_list = Checklist::ForUser.new(@show_user)
       @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
     end
   end
@@ -1709,21 +1712,26 @@ class ObserverController < ApplicationController
     redirect_to_next_object(:prev, User, params[:id])
   end
 
-  # Display a simplified list of species seen by a user, project or the entire site.
-  def life_list # :nologin: :norobots:
+  # Display a checklist of species seen by a User, Project, SpeciesList or the entire site.
+  def checklist # :nologin: :norobots:
     store_location
     user_id = params[:user_id]
     proj_id = params[:project_id]
+    list_id = params[:species_list_id]
     if not user_id.blank?
       if @show_user = find_or_goto_index(User, user_id)
-        @data = LifeList::ForUser.new(@show_user)
+        @data = Checklist::ForUser.new(@show_user)
       end
     elsif not proj_id.blank?
       if @project = find_or_goto_index(Project, proj_id)
-        @data = LifeList::ForProject.new(@project)
+        @data = Checklist::ForProject.new(@project)
+      end
+    elsif not list_id.blank?
+      if @species_list = find_or_goto_index(SpeciesList, list_id)
+        @data = Checklist::ForSpeciesList.new(@species_list)
       end
     else
-      @data = LifeList::ForSite.new
+      @data = Checklist::ForSite.new
     end
   end
 
