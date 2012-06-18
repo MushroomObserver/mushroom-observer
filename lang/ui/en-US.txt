@@ -1024,7 +1024,7 @@ app_no_session: You Have Cookies Disabled
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-app_donate_banner: "\"2011 Wrap-Up for Mushroom Observer\":/support/wrapup_2011"
+app_donate_banner: "\"Want to attend the 2012 MSA foray in New Haven, Connecticut?\":/conference/show_event/1"
 app_donate: Donate
 
 ################################################################################
