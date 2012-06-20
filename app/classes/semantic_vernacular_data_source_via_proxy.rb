@@ -11,8 +11,6 @@
 #
 ################################################################################
 
-require "json"
-
 class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 	private
 	
@@ -30,6 +28,6 @@ class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 					)
 		http = Net::HTTP.new(url.host, url.port)
 		request = Net::HTTP::Get.new(url.request_uri)
-		response = JSON.parse(http.request(request).body)["items"]
+		response = ActiveSupport::JSON.decode(http.request(request).body)["items"]
 	end
 end

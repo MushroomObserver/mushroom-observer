@@ -150,7 +150,7 @@ Rails::Initializer.run do |config|
   # in exactly the same format we gave them to it.  (NOTE: only the first line
   # should be necessary, but for whatever reason, Rails is failing to do the
   # other configs on some platforms.)
-  config.time_zone = 'UTC'
+  config.time_zone = ENV['TZ']
   if config.time_zone.nil?
     # Localization isn't loaded yet.
     raise 'TZ environment variable must be set. Run "rake -D time" for a list of tasks for finding appropriate time zone names.'
