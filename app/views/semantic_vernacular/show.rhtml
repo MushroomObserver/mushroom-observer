@@ -1,0 +1,17 @@
+<h2><%= @vernacular.to_s %></h2>
+<div>
+	<ul>
+		<li>uri: <%= @vernacular.uri %></li>
+		<li>label: <%= @vernacular.label %></li>
+		<li>
+			properties: 
+				<ul> 
+					<% @vernacular.properties.each do |property| %>
+					<li>
+						<%= property["feature"] + ": " + property["value"] %>
+					</li>
+					<% end %>
+				</ul>
+		</li>
+	</ul>
+</div>

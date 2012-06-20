@@ -1,8 +1,4 @@
-<h1>SemanticVernacular#index</h1>
-<ul>
-  <% @results.each do |result| %>
-    <li>
-    	<%= result[:s] %>
-    </li>
-  <% end %>
-</ul>
+<h2>All Semantic Vernaculars</h2>
+<div>
+	<%= build_vernacular_hierarchy(SemanticVernacularHelper::ROOT, @vernaculars) %>
+</div>
