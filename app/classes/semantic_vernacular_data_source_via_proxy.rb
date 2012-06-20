@@ -11,6 +11,8 @@
 #
 ################################################################################
 
+require "json"
+
 class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 	private
 	
