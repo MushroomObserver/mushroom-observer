@@ -2,33 +2,35 @@
 #
 #  = Semantic Vernacular Data Source
 #
-#  This class describes Semantic Vernacular data model.
+#  This class describes Semantic Vernacular data model. Relative data are retrieved directly through
+#  a triple store.
 #
 #  == Class Methods
 #  === Public
-#  index::    Returns all the available vernaculars.
+#  index::    										Returns all the available vernaculars with hierarchy.
 #  === Private
 #  query:: 												Submit a query and get responses.
-#  parse_query_response:: 				Format the query response as 
-#  		{"items" => "item" => {"key" => "value"}, "item" => {"key" => "value"}, ... ]}
-#  query_all_vernaculars:: 	Build a query to get all the available vernaculars.
+#  query_all_vernaculars:: 				Build a query to get all the available vernaculars.
+#  query_vernacular_hierarchy:: 	Build a query to get all the available vernacualrs with hierarchy.
 #
 #  == Instance Methods
 #  ==== Public
-#  to_s::           Returns the label of a semantic vernacular instance.
-#  uri_to_label::		Returns the lable for given uri.
+#  to_s::           							Returns the label of a semantic vernacular instance.
+#  uri_to_label::									Returns the lable for a given uri.
+#  uri_to_properites:: 						Returns the features for a given uri
 #  ==== Private
-#  build_query_uri_to_label:: 	Build a query to get the lable for a given uri.
+#  build_query_uri_to_label:: 		Build a query to get the lable for a given uri.
+#  query_uri_to_properties:: 			Build a query to get the features for a given uri.
 #
 ################################################################################
 
 class SemanticVernacularDataSource
-	attr_accessor :uri, :label, :properties
+	attr_accessor :uri, :label, :features
 
 	def initialize(uri)
 		@uri = uri
 		@label = uri_to_label(uri)
-		@properties = uri_to_properties(uri)
+		@features = uri_to_properties(uri)
 	end
 
 	def self.index
@@ -52,6 +54,8 @@ class SemanticVernacularDataSource
 	
 	ENDPOINT = "http://aquarius.tw.rpi.edu:2024/sparql"
 	
+	# Retrun value is in the format of
+	# [{key => value}, {key => value}, ... ]
 	def self.query(query)
 		sparql = SPARQL::Client.new(ENDPOINT)
   	response = sparql.query(query)
@@ -63,7 +67,6 @@ class SemanticVernacularDataSource
 			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 			PREFIX sv: <http://aquarius.tw.rpi.edu/ontology/mushroom.owl#>)
 
-	# Query all the available vernaculars.
 	def self.query_all_vernaculars
 		QUERY_PREFIX + 
 		%(SELECT DISTINCT ?uri ?label
@@ -73,7 +76,6 @@ class SemanticVernacularDataSource
 			})
 	end
 
-	# Query the hierarchy of all the vernaculars.
 	def self.query_vernacular_hierarchy
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?uri ?label ?parent
@@ -85,7 +87,6 @@ class SemanticVernacularDataSource
 			})
 	end
 
-	# Query the label for a given vernacular uri.
 	def query_uri_to_label(uri)
 		QUERY_PREFIX + 
 		%(SELECT DISTINCT ?label
@@ -94,7 +95,6 @@ class SemanticVernacularDataSource
 			})
 	end
 
-	# Query the properties for a given vernacular uri.
 	def query_uri_to_properties(uri)
 		QUERY_PREFIX + 
 		%(SELECT DISTINCT ?feature ?value

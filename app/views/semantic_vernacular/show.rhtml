@@ -4,11 +4,11 @@
 		<li>uri: <%= @vernacular.uri %></li>
 		<li>label: <%= @vernacular.label %></li>
 		<li>
-			properties: 
+			features: 
 				<ul> 
-					<% @vernacular.properties.each do |property| %>
+					<% @vernacular.features.each do |feature| %>
 					<li>
-						<%= property["feature"] + ": " + property["value"] %>
+						<%= feature["feature"] + ": " + feature["value"] %>
 					</li>
 					<% end %>
 				</ul>

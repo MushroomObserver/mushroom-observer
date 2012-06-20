@@ -2,32 +2,12 @@
 #
 #  = Semantic Vernacular Data Source
 #
-#  This class describes Semantic Vernacular data model.
+#  This class is a sub class of SemanticVernacularDataSource class. Method "query" is
+#  overridden to retrieve data through the RPI SparqlProxy web service.
 #
 #  == Class Methods
-#
-#  update_contribution::    Callback that keeps User contribution up to date.
-#
-#  == Instance Methods
-#  ==== Public
-#  get_site_data::           Returns stats for entire site.
-#  ==== Private
-#  load_user_data::          Populates @user_data.
-#
-#  == Internal Data Structure
-#
-#  The private method load_user_data caches its information in the instance
-#  variable +@user_data+.  Its structure is as follows:
-#
-#    @user_data = {
-#      user.id => {
-#        :id         => user.id,
-#        :name       => user.unique_text_name,
-#        :bonuses    => user.sum_bonuses,
-#        :<category> => <num_records_in_category>,
-#        :metric     => <weighted_sum_of_category_counts>,
-#      },
-#    }
+#  === Private
+#  query:: 												Submit a query and get responses.
 #
 ################################################################################
 
@@ -37,6 +17,8 @@ class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 	RPI_SPARQLPROXY = "http://logd.tw.rpi.edu/ws/sparqlproxy.php"
 	QUERY_OUTPUT_FORMAT = "exhibit"	# json
 
+	# Retrun value is in the format of
+	# [{key => value}, {key => value}, ... ]
 	def self.query(query)
 		url = URI.parse(
 						RPI_SPARQLPROXY + 

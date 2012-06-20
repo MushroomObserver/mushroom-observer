@@ -1,5 +1,8 @@
 module SemanticVernacularHelper
+	# URI of the parent class of all the vernacualr classes.
 	ROOT = "http://aquarius.tw.rpi.edu/ontology/mushroom.owl#FungusDescriptiveVernacular"
+
+	# Build a hierarchy of all vernaculars and show them in html.
 	def build_vernacular_hierarchy(parent, tree)
 		if tree != nil
 			ul = "<ul>"
