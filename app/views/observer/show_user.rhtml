@@ -86,9 +86,11 @@ end %>
 <% if !@show_user.notes.empty? %>
   <br/>
 <% end %>
-<%= if !@show_user.notes.empty?
-  @show_user.notes.tpl
-end %>
+<% if !@show_user.notes.empty? %>
+  <table><tr><td>
+    <%= @show_user.notes.tpl %>
+  </td></tr></table>
+<% end %>
 
 <center>
   <table border="0" width="100%" style="clear:right; padding:10px">
