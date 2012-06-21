@@ -200,8 +200,10 @@ class Textile < String
 
 ##############################################################################
 
-# Privacy adds nothing of value to code, and just makes it a pain in the ass to test.
-# private 
+private
+
+  NAME_LINK_PATTERN = / (^|\W) (?:\**_+) ([^_]+) (?:_+\**) (?= (?:s|ish|like)? (?:\W|\Z) ) /x
+  OTHER_LINK_PATTERN = / (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w) /x
 
   # Convert __Names__ to links in a textile string.
   def check_name_links!
@@ -210,88 +212,70 @@ class Textile < String
     # Look for __Name__ turn into "Name":name_id.  Look for "Name":name and
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
-    self.gsub!(/
-      (^|\W)
-        (?:\**_+)
-        (
-          "?[A-Z](?:\.|[a-z\-]*)"?
-            (?: \s+ "?[a-zë\-]+"? (?:\s+ (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"? )* |
-                \s+ sp\. )? |
-          (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"?
-        ) (
-          \s+
-          (?: "?[^a-z"\s_] | in\s?ed\.? | auct\.? | van\sd[a-z]+\s[A-Z] |
-              s[\.\s] | sens[u\.]\s | group\s )
-          [^_]*
-        )?
-        (?:_+\**)
-      (?= (?:s|ish|like)? (?:\W|\Z) )
-    /x) do |orig|
-      prefix = $1.to_s
-      name   = $2.to_s
-      author = $3.to_s
-      prefix + process_name_link(name, author)
+    self.gsub!(NAME_LINK_PATTERN) do |orig_str|
+      prefix = $1
+      label = remove_formatting($2)
+      name = expand_genus_abbreviation(label)
+      name = supply_implicit_species(name)
+      name = strip_out_sp_cfr_and_sensu(name)
+      if (parse = Name.parse_name(name)) &&
+        # Allowing arbitrary authors on Genera and higher makes it impossible to
+        # distinguish between publication titles and taxa, e.g., "Lichen Flora
+        # of the Greater Sonoran Region".  I'm sure it can still break with species
+        # but it should be very infrequent (I don't see it in current tests). -JPH
+        (parse.author.blank? || parse.rank != :Genus)
+        Textile.private_register_name(parse.real_text_name, parse.rank)
+        prefix + "x{NAME __#{label}__ }{ #{name} }x"
+      else
+        orig_str
+      end
     end
   end
 
-  # Process the insides of a single __Name__ construct.
-  def process_name_link(name, author)
-    result = name + author
+  # Remove any formatting. This will be the "label" of the link.
+  def remove_formatting(str)
+    Name.clean_incoming_string(str.gsub(/[_*]/, ''))
+  end
 
-    # Remove any formatting. This will be the "label" of the link.
-    str1 = (name + author).gsub(/[_*]/, '').gsub(/\s+/, ' ').strip
-
-    # Expand abbreviated genus (but only if followed by species epithet!).
-    # This will be sent to lookup_name.
-    str2 = str1.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
+  # Expand abbreviated genus (but only if followed by species epithet!).
+  # This will be sent to lookup_name.
+  def expand_genus_abbreviation(str)
+    str.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
       (n = @@name_lookup[$1]) ? n + ' ' : x
     end
+  end
 
-    # Expand bare variety, etc.  For example, after using Amanita muscaria:
-    #   _var alba_  -->  Amanita muscaria var. alba
-    # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
-    if str2.sub!(/^(subsp|ssp)\.? +/, '')
-      str2 = @@last_species    ? @@last_species  + ' subsp. ' + str2 : ''
-    elsif str2.sub!(/^(var|v)\.? +/, '')
-      str2 = @@last_subspecies ? @@last_subspecies + ' var. ' + str2 :
-             @@last_species    ? @@last_species    + ' var. ' + str2 : ''
-    elsif str2.sub!(/^(forma?|f)\.? +/, '')
-      str2 = @@last_variety    ? @@last_variety    + ' f. ' + str2 :
-             @@last_subspecies ? @@last_subspecies + ' f. ' + str2 :
-             @@last_species    ? @@last_species    + ' f. ' + str2 : ''
+  # Expand bare variety, etc.  For example, after using Amanita muscaria:
+  #   _var alba_  -->  Amanita muscaria var. alba
+  # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
+  def supply_implicit_species(str)
+    if str.sub!(/^(subsp|ssp)\.? +/, '')
+      @@last_species    ? @@last_species  + ' subsp. ' + str : ''
+    elsif str.sub!(/^(var|v)\.? +/, '')
+      @@last_subspecies ? @@last_subspecies + ' var. ' + str :
+      @@last_species    ? @@last_species    + ' var. ' + str : ''
+    elsif str.sub!(/^(forma?|f)\.? +/, '')
+      @@last_variety    ? @@last_variety    + ' f. ' + str :
+      @@last_subspecies ? @@last_subspecies + ' f. ' + str :
+      @@last_species    ? @@last_species    + ' f. ' + str : ''
+    else
+      str
     end
+  end
 
-    # Allow a number of author-like syntaxes that aren't normally allowed.
-    # Remove them and match the rest.  Examples:
-    #   _Laccaria cf. laccata_     -->  Laccaria laccata
-    #   _Parmelia s. lat/str._     -->  Parmelia
-    str2.sub!(/ cfr?\.? /, ' ')
-    str2.sub!(/ ((s|sensu)\.? ?(l|lato|s|str|stricto)\.?)$/, '')
-    str2.sub!(/ sp\.$/, '')
-
-    # Make sure the rest parses normally.
-    if (parse = Name.parse_name(str2)) &&
-      # Allowing arbitrary authors on Genera and higher makes it impossible to
-      # distinguish between publication titles and taxa, e.g., "Lichen Flora
-      # of the Greater Sonoran Region".  I'm sure it can still break with species
-      # but it should be very infrequent (I don't see it in current tests). -JPH
-      (author.blank? || parse.rank != :Genus)
-
-      # Update which genus this first letter would mean in an abbrev.
-      Textile.private_register_name(parse.real_text_name, parse.rank)
-
-      # Put it all together.
-      result = "x{NAME __#{str1}__ }{ #{str2} }x"
-    end
-
-    result
+  # Allow a number of author-like syntaxes that aren't normally allowed.
+  # Remove them and match the rest.  Examples:
+  #   _Laccaria cf. laccata_     -->  Laccaria laccata
+  #   _Parmelia s. lat/str._     -->  Parmelia
+  def strip_out_sp_cfr_and_sensu(str)
+    str.sub(/ cfr?\.? /, ' ').
+        sub(/ ((s|sensu)\.? ?(l|lato|s|str|stricto)\.?)$/, '').
+        sub(/ sp\.$/, '')
   end
 
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
-    self.gsub!(/
-      (^|\W) (?:_+) ([a-zA-Z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
-    /x) do |orig|
+    self.gsub!(OTHER_LINK_PATTERN) do |orig|
       result = orig
       prefix, type, id = $1, $2, $3
       matches = [
