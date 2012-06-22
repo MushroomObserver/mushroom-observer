@@ -610,16 +610,18 @@ class NameController < ApplicationController
   end
 
   def email_admin_name_change
-    content = :email_name_change.l(
-      :user => @user.login,
-      :old => @name.real_search_name,
-      :new => @parse.real_search_name,
-      :observations => @name.observations.length,
-      :namings => @name.namings.length,
-      :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
-    )
-    AccountMailer.deliver_webmaster_question(@user.email, content)
-    NameControllerTest.report_email(content) if TESTING
+    unless @name.author.blank? and @parse.real_text_name == @name.real_text_name
+      content = :email_name_change.l(
+        :user => @user.login,
+        :old => @name.real_search_name,
+        :new => @parse.real_search_name,
+        :observations => @name.observations.length,
+        :namings => @name.namings.length,
+        :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
+      )
+      AccountMailer.deliver_webmaster_question(@user.email, content)
+      NameControllerTest.report_email(content) if TESTING
+    end
   end
 
   def parse_name

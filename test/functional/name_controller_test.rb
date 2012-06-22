@@ -692,7 +692,8 @@ class NameControllerTest < FunctionalTestCase
     post_requires_login(:edit_name, params)
     assert_flash_success
     assert_response(:action => :show_name)
-    assert_notify_email('Conocybe filaris', 'Conocybe filaris (Fr.) Kühner')
+    # No more email for filling in author.
+    # assert_notify_email('Conocybe filaris', 'Conocybe filaris (Fr.) Kühner')
     assert_equal(20, @rolf.reload.contribution)
     assert_equal('(Fr.) Kühner', name.reload.author)
     assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.display_name)
@@ -1301,7 +1302,8 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_flash_success
     assert_response(:action => :show_name)
-    assert_notify_email(old_text_name, "#{old_text_name} #{new_author}")
+    # No more email for filling in author.
+    # assert_notify_email(old_text_name, "#{old_text_name} #{new_author}")
     # It seems to be creating Strobilurus as well?
     assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
