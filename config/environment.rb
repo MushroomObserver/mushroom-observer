@@ -78,12 +78,6 @@ PRODUCTION  = (RAILS_ENV == 'production')
 DEVELOPMENT = (RAILS_ENV == 'development')
 TESTING     = (RAILS_ENV == 'test')
 
-# The default engine for ruby 1.9.3 is 'psych', but it can't handle utf-8 any more.
-# However 'syck' is still apparently available, and even though it prints out a
-# bunch of gobbledygook for non-ascii characters, it at least works and is fast.
-require 'yaml'
-YAML::ENGINE.yamler = 'syck'
-
 # Should be one of [:normal, :silent]
 # :silent turns off event logging and email notifications
 class RunLevel
@@ -103,16 +97,32 @@ end
 
 # RUN_LEVEL = :normal # :silent
 
-# Do site-specific global constants first.
-file = File.join(File.dirname(__FILE__), 'consts-site')
-require file if File.exists?(file + '.rb')
+def import_constants(file)
+  file = File.join(File.dirname(__FILE__), file)
+  if File.exists?(file)
+    Module.new do
+      class_eval File.read(file, :encoding => 'utf-8')
+      for const in constants
+        unless Object.const_defined?(const)
+          Object.const_set(const, const_get(const))
+        end
+      end
+    end
+  end
+end
 
-# Now provide defaults for the rest.
-require File.join(File.dirname(__FILE__), 'consts')
+import_constants('consts-site.rb')
+import_constants('consts.rb')
 
 # --------------------------------------------------------------------
 #  General non-mode-specific, non-site-specific configurations here.
 # --------------------------------------------------------------------
+
+# The default engine for ruby 1.9.3 is 'psych', but it can't handle utf-8 any more.
+# However 'syck' is still apparently available, and even though it prints out a
+# bunch of gobbledygook for non-ascii characters, it at least works and is fast.
+require 'yaml'
+YAML::ENGINE.yamler = 'syck'
 
 # Sacraficial goat and rubber chicken to get Globalite to behave correctly
 # for rake tasks.
@@ -150,9 +160,8 @@ Rails::Initializer.run do |config|
   # in exactly the same format we gave them to it.  (NOTE: only the first line
   # should be necessary, but for whatever reason, Rails is failing to do the
   # other configs on some platforms.)
-  config.time_zone = ENV['TZ']
+  config.time_zone = SERVER_TIME_ZONE
   if config.time_zone.nil?
-    # Localization isn't loaded yet.
     raise 'TZ environment variable must be set. Run "rake -D time" for a list of tasks for finding appropriate time zone names.'
   end
 
@@ -214,7 +223,7 @@ module RedCloth
       apply_rules(rules)
       result = to(RedCloth::Formatters::HTML).to_s.clone
 
-      # Post-filters: not catching all the itallics, and seeing spans where
+      # Post-filters: not catching all the italics, and seeing spans where
       # they don't belong.
       result.gsub!(/(^|\W)_+([A-Z][A-Za-z0-9]+)_+(\W|$)/, '\\1<i>\\2</i>\\3')
       result.gsub!(/<span>(.*?)<\/span>/, '%\\1%')
