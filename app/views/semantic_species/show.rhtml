@@ -1,0 +1,31 @@
+<h2><%= @species.to_s %></h2>
+<div>
+	<ul>
+		<li>URI: <%= @species.uri %></li>
+		<li>Label: <%= @species.label %></li>
+		<li>
+			Properties: 
+			<ul> 
+				<% @species.refactor_properties.each do |property, values| %>
+				<li><%= property + ": " + values.join(" <i>or</i> ").to_s %></li>
+				<% end %>
+			</ul>
+		</li>
+		<li>
+			Links:
+			<ul>
+				<% @species.get_links.each do |link| %>
+				<li><%= link["link"] + ": " + link_to(link["url"], link["url"]) %></li>
+				<% end %>
+			</ul>
+		</li>
+	</ul>
+</div>
+<div>
+	<%= link_to("Go to all species", 
+							:controller => "semantic_species",
+							:action => "index") + " | " +
+			link_to("Go to all vernaculars", 
+							:controller => "semantic_vernacular",
+							:action => "index") %>
+</div>

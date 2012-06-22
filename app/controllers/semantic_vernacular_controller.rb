@@ -3,18 +3,18 @@
 #  = Semantic Vernacular Controller
 #
 #  == Actions
-#
-#  index::            List all available semantic vernaculars with hierarchy.
-#  show::             Show a specific vernacular with uri, lable and features.
+#  index::  	List all available semantic vernaculars with hierarchy.
+#  show::   	Show a specific vernacular with uri, lable, properties, and 
+# 						associated species.
 #
 ################################################################################
 
 class SemanticVernacularController < ApplicationController
   def index 
-  	@vernaculars = SemanticVernacularDataSourceViaProxy.index
+  	@all = SemanticVernacular.index
   end
   
   def show
-  	@vernacular = SemanticVernacularDataSourceViaProxy.new(URI.unescape(params[:uri]))
+  	@vernacular = SemanticVernacular.new(URI.unescape(params[:uri]))
   end
 end

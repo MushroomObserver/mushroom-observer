@@ -1,13 +1,14 @@
 # encoding: utf-8
 #
-#  = Semantic Vernacular Data Source
+#  = Semantic Vernacular Data Source Via Proxy
 #
-#  This class is a sub class of SemanticVernacularDataSource class. Method "query" is
-#  overridden to retrieve data through the RPI SparqlProxy web service.
+#  This class is a subclass of the SemanticVernacularDataSource class. Method 
+#  "query" is overridden to retrieve data through the RPI SparqlProxy web 
+#  service.
 #
 #  == Class Methods
 #  === Private
-#  query:: 												Submit a query and get responses.
+#  query::  	Submit a query to the triple store and get responses.
 #
 ################################################################################
 
@@ -17,8 +18,8 @@ class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 	RPI_SPARQLPROXY = "http://logd.tw.rpi.edu/ws/sparqlproxy.php"
 	QUERY_OUTPUT_FORMAT = "exhibit"	# json
 
-	# Retrun value is in the format of
-	# [{key => value}, {key => value}, ... ]
+	# Retrun: array of hashes: 
+	# [{"key_1" => "value_1"}, {"key_2" => "value_2"}, ...]
 	def self.query(query)
 		url = URI.parse(
 						RPI_SPARQLPROXY + 
