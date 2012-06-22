@@ -345,16 +345,23 @@ who: who
 # Common verbs/actions used as button labels.
 ADD: Add
 add: add
+# approve a name
 APPROVE: Approve
 approve: approve
+# attach an observation to a project
+ATTACH: Attach
+attach: attach
 CANCEL: Cancel
 cancel: cancel
+# close a popup window
 CLOSE: Close
 close: close
 CREATE: Create
 create: create
+# deprecate a name
 DEPRECATE: Deprecate
 deprecate: deprecate
+# destroy an observation
 DESTROY: Destroy
 destroy: destroy
 DISABLE: Disable
@@ -363,12 +370,15 @@ EDIT: Edit
 edit: edit
 ENABLE: Enable
 enable: enable
+# merge one object into another
 MERGE: Merge
 merge: merge
 OKAY: Okay
 okay: okay
+# reload a form
 RELOAD: Reload
 reload: reload
+# remove an image from an observation, or an observation from a project
 REMOVE: Remove
 remove: remove
 SAVE: Save
@@ -383,10 +393,12 @@ SEND: Send
 send: send
 SHOW: Show
 show: show
+# submit a form
 SUBMIT: Submit
 submit: submit
 UPDATE: Update
 update: update
+# upload an image or checklist
 UPLOAD: Upload
 upload: upload
 
@@ -1880,6 +1892,23 @@ species_list_manage_doesnt_contain: Lists you own that do not contain this obser
 
 
 
+# species_list/manage_projects
+species_list_projects_title: Manage Projects for [List]
+species_list_projects_which_objects: Which objects?
+species_list_projects_which_projects: Which projects?
+species_list_projects_this_list: this species list
+species_list_projects_observations: observations in this list
+species_list_projects_images: images in this list
+species_list_projects_no_add_to_project: You do not have permission to attach objects to the project "[proj]".
+species_list_projects_help: >
+  This form allows you to either attach this list or its observations or images
+  to one or more projects, or remove them from one or more projects.  Choose
+  which objects you wish to attach or remove, then choose the project or
+  projects you wish to attach them to or remove them from, then click on
+  "Attach" or "Remove" to perform the operation.  Note: It will only allow you
+  to attach or remove objects which you have permission to edit. 
+
+
 
 # species_list/show_species_list
 species_list_show_title: "[:SPECIES_LIST]: [name]"
@@ -1895,6 +1924,10 @@ species_list_show_no_members: This list contains no observations.
 species_list_show_clone_list_help: Create a new species list using this one as the template.
 species_list_show_set_source_help: Save this species list for the next time you create or edit a species list. It will display a list of the species in this list for you to choose from.
 species_list_show_bulk_edit_help: Bulk-edit any observations you own in this species list.
+species_list_show_manage_projects: Manage Projects
+species_list_show_manage_projects_help: Change which projects this list and its observations and images are attached to.
+species_list_show_manage_observations_too: If you would like to attach/remove observations or images, too, please use the "[:species_list_show_manage_projects]" link.
+
 
 
 # species_list/species_lists_by_title

@@ -121,7 +121,7 @@ module BrowserStatus
   # Short snippet of javascript that stores the browser's timezone offset
   # (in minutes from UTC) in a cookied called "tz".
   JAVASCRIPT_THAT_SETS_TIMEZONE =
-    'try { document.cookie = "tz=" + (new Date()).getTimezoneOffset(); } ' +
+    'try { document.cookie = "tz=" + jstz.determine().name() } ' +
     'catch(err) { }'
 
   # This is the minimal page that is served when a user first encounters the
@@ -132,6 +132,7 @@ module BrowserStatus
   FIRST_PAGE = %(
     <html>
       <head>
+        <script src="javascripts/jstz.min.js"></script>
         <script>
           #{JAVASCRIPT_THAT_SETS_TIMEZONE}
           window.location.replace('%s');
@@ -162,6 +163,7 @@ module BrowserStatus
       code += " window.location = '#{reload_with_args(:_js => 'on')}'"
     end
 
+    javascript_include_tag('jstz.min.js') +
     javascript_tag(code)
   end
 
@@ -263,16 +265,7 @@ module BrowserStatus
     # print "========================================\n"
 
     # Find time zone that matches the best.
-    if offset = -cookies[:tz].to_i * 60 rescue nil
-      for zone in ActiveSupport::TimeZone.all.sort_by(&:utc_offset)
-        if zone.utc_offset >= offset
-          Time.zone = zone
-          break
-        end
-      end
-    else
-      Time.zone = Time.default_zone
-    end
+    Time.zone = cookies[:tz]
 
     # If we've never seen this user before, serve a tiny page that redirects
     # immediately to tell us the state of javascript, and lets us determine

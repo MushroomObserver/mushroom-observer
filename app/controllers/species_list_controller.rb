@@ -365,7 +365,7 @@ class SpeciesListController < ApplicationController
         @observation_list = query.results
       else
         sorter = NameSorter.new
-        @species_list.file = params[:species_list][:file] 
+        @species_list.file = params[:species_list][:file]
         @species_list.process_file_data(sorter)
         init_name_vars_from_sorter(@species_list, sorter)
         init_member_vars_for_edit(@species_list)
@@ -499,6 +499,158 @@ class SpeciesListController < ApplicationController
           redirect_to(:action => :show_species_list, :id => @species_list.id)
         end
       end
+    end
+  end
+
+  # ----------------------------
+  #  :section: Manage Projects
+  # ----------------------------
+
+  def manage_projects # :norobots:
+    if @list = find_or_goto_index(SpeciesList, params[:id])
+      if not check_permission!(@list)
+        redirect_to(:action => 'show_species_list', :id => @list.id)
+      else
+        @projects = projects_to_manage
+        @object_states = manage_object_states
+        @project_states = manage_project_states
+        if request.method == :post
+          if params[:commit] == :ATTACH.l
+            if attach_objects_to_projects
+              redirect_to(:action => 'show_species_list', :id => @list.id)
+            else
+              flash_warning(:runtime_no_changes.t)
+            end
+          elsif params[:commit] == :REMOVE.l
+            if remove_objects_from_projects
+              redirect_to(:action => 'show_species_list', :id => @list.id)
+            else
+              flash_warning(:runtime_no_changes.t)
+            end
+          else
+            flash_error("Invalid submit button: #{params[:commit].inspect}")
+          end
+        end
+      end
+    end
+  end
+
+  def projects_to_manage
+    projects = @user.projects_member
+    if @list.user == @user
+      projects += @list.projects
+      projects.uniq!
+    end
+    return projects
+  end
+
+  def manage_object_states
+    {
+      :list => !params[:objects_list].blank?,
+      :obs  => !params[:objects_obs].blank?,
+      :img  => !params[:objects_img].blank?,
+    }
+  end
+
+  def manage_project_states
+    states = {}
+    for proj in @projects
+      states[proj.id] = !params["projects_#{proj.id}"].blank?
+    end
+    return states
+  end
+
+  def attach_objects_to_projects
+    @any_changes = false
+    for proj in @projects
+      if @project_states[proj.id]
+        if not @user.projects_member.include?(proj)
+          flash_error(:species_list_projects_no_add_to_project.t(:proj => proj.title))
+        else
+          attach_species_list_to_project(proj) if @object_states[:list]
+          attach_observations_to_project(proj) if @object_states[:obs]
+          attach_images_to_project(proj)       if @object_states[:img]
+        end
+      end
+    end
+    return @any_changes
+  end
+
+  def remove_objects_from_projects
+    @any_changes = false
+    for proj in @projects
+      if @project_states[proj.id]
+        remove_species_list_from_project(proj) if @object_states[:list]
+        remove_observations_from_project(proj) if @object_states[:obs]
+        remove_images_from_project(proj)       if @object_states[:img]
+      end
+    end
+    return @any_changes
+  end
+
+  def attach_species_list_to_project(proj)
+    if not @list.projects.include?(proj)
+      proj.add_species_list(@list)
+      flash_notice(:attached_to_project.t(:object => :species_list, :project => proj.title))
+      @any_changes = true
+    end
+  end
+
+  def remove_species_list_from_project(proj)
+    if @list.projects.include?(proj)
+      proj.remove_species_list(@list)
+      flash_notice(:removed_from_project.t(:object => :species_list, :project => proj.title))
+      @any_changes = true
+    end
+  end
+
+  def attach_observations_to_project(proj)
+    obs = @list.observations.select {|o| check_permission(o)}
+    obs -= proj.observations
+    if obs.any?
+      proj.add_observations(obs)
+      flash_notice(:attached_to_project.t(:object => "#{obs.length} #{:observations.l}",
+                                         :project => proj.title))
+      @any_changes = true
+    end
+  end
+
+  def remove_observations_from_project(proj)
+    obs = @list.observations.select {|o| check_permission(o)}
+    if not @user.projects_member.include?(proj)
+      obs.select! {|o| o.user == @user}
+    end
+    obs &= proj.observations
+    if obs.any?
+      proj.remove_observations(obs)
+      flash_notice(:removed_from_project.t(:object => "#{obs.length} #{:observations.l}",
+                                          :project => proj.title))
+      @any_changes = true
+    end
+  end
+
+  def attach_images_to_project(proj)
+    imgs = @list.observations.map(&:images).flatten.uniq.select {|i| check_permission(i)}
+    imgs -= proj.images
+    if imgs.any?
+      proj.add_images(imgs)
+      flash_notice(:attached_to_project.t(:object => "#{imgs.length} #{:images.l}",
+                                         :project => proj.title))
+      @any_changes = true
+    end
+  end
+
+  def remove_images_from_project(proj)
+    imgs = @list.observations.map(&:images).flatten.uniq.select {|i| check_permission(i)}
+    if not @user.projects_member.include?(proj)
+      imgs.select! {|i| i.user == @user}
+    end
+    imgs &= proj.observations
+    if imgs.any?
+      proj.remove_images(imgs)
+      flash_notice(:removed_from_project.t(:object => "#{imgs.length} #{:images.l}",
+                                          :project => proj.title))
+      @any_changes = true
     end
   end
 
@@ -873,6 +1025,7 @@ class SpeciesListController < ApplicationController
 
   def update_projects(spl, checks)
     if checks
+      any_changes = false
       for project in User.current.projects_member
         before = spl.projects.include?(project)
         after = checks["id_#{project.id}"] == '1'
@@ -880,11 +1033,16 @@ class SpeciesListController < ApplicationController
           if after
             project.add_species_list(spl)
             flash_notice(:attached_to_project.t(:object => :species_list, :project => project.title))
+            any_changes = true
           else
             project.remove_species_list(spl)
             flash_notice(:removed_from_project.t(:object => :species_list, :project => project.title))
+            any_changes = true
           end
         end
+      end
+      if any_changes
+        flash_notice(:species_list_show_manage_observations_too.t)
       end
     end
   end

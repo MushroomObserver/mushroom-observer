@@ -1380,4 +1380,209 @@ class SpeciesListControllerTest < FunctionalTestCase
       assert_checkbox_state("project_id_#{id}", state)
     end
   end
+
+  # ----------------------------
+  #  Project Manager.
+  # ----------------------------
+
+  def test_manage_projects_permission
+    proj = projects(:bolete_project)
+    list = species_lists(:unknown_species_list)
+
+    # Requires login.
+    get(:manage_projects, :id => list.id)
+    assert_response(:redirect)
+
+    # Must have permission to edit list.
+    login('rolf')
+    get(:manage_projects, :id => list.id)
+    assert_response(:redirect)
+
+    # Members of group that has list are good enough.
+    login('dick')
+    get(:manage_projects, :id => list.id)
+    assert_response(:success)
+
+    # Owner of list always can.
+    login('mary')
+    get_with_dump(:manage_projects, :id => list.id)
+    assert_response(:success)
+  end
+
+  def test_manage_projects_list
+    proj1 = projects(:eol_project)
+    proj2 = projects(:bolete_project)
+    list = species_lists(:unknown_species_list)
+
+    login('dick')
+    get(:manage_projects, :id => list.id)
+    assert_checkbox_state('objects_list', :unchecked)
+    assert_checkbox_state('objects_obs', :unchecked)
+    assert_checkbox_state('objects_img', :unchecked)
+    assert_checkbox_state('projects_1', :no_field)
+    assert_checkbox_state('projects_2', :unchecked)
+
+    login('mary')
+    get(:manage_projects, :id => list.id)
+    assert_checkbox_state('objects_list', :unchecked)
+    assert_checkbox_state('objects_obs', :unchecked)
+    assert_checkbox_state('objects_img', :unchecked)
+    assert_checkbox_state('projects_1', :unchecked)
+    assert_checkbox_state('projects_2', :unchecked)
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '',
+      :projects_2 => '',
+      :commit => :ATTACH.l
+    )
+    assert_flash_warning # no changes
+    assert_obj_list_equal([proj2], list.projects(true))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :ATTACH.l
+    )
+    assert_flash_error # no permission
+    assert_obj_list_equal([proj2], list.projects(true))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '1',
+      :projects_2 => '',
+      :commit => :ATTACH.l
+    )
+    assert_flash_success
+    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '1',
+      :projects_2 => '',
+      :commit => :ATTACH.l
+    )
+    assert_flash_warning # already attached
+    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '',
+      :projects_2 => '',
+      :commit => :REMOVE.l
+    )
+    assert_flash_warning # no changes
+    assert_obj_list_equal([proj1, proj2], list.projects(true).sort_by(&:id))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :REMOVE.l
+    )
+    assert_flash_success
+    assert_obj_list_equal([proj1], list.projects(true))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :REMOVE.l
+    )
+    assert_flash_warning # no changes
+    assert_obj_list_equal([proj1], list.projects(true))
+
+    post(:manage_projects, :id => list.id,
+      :objects_list => '1',
+      :projects_1 => '1',
+      :projects_2 => '',
+      :commit => :REMOVE.l
+    )
+    assert_flash_success
+    assert_obj_list_equal([], list.projects(true))
+  end
+
+  def test_manage_projects_obs_and_img
+    proj1 = projects(:eol_project)
+    proj2 = projects(:bolete_project)
+    list = species_lists(:unknown_species_list)
+    assert_equal(0, proj1.observations.length)
+    assert_equal(0, proj1.images.length)
+    assert_equal(1, proj2.observations.length)
+    assert_equal(2, proj2.images.length)
+
+    login('mary')
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '',
+      :projects_2 => '',
+      :commit => :ATTACH.l
+    )
+    assert_flash_warning # no changes
+
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '',
+      :projects_2 => '',
+      :commit => :REMOVE.l
+    )
+    assert_flash_warning # no changes
+
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :ATTACH.l
+    )
+    assert_flash_error # no permission
+
+    login('dick')
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :ATTACH.l
+    )
+    assert_flash_warning # already done
+
+    login('mary')
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '1',
+      :projects_2 => '',
+      :commit => :ATTACH.l
+    )
+    assert_flash_success
+    proj1.reload
+    assert_equal(2, proj1.observations.length)
+    assert_equal(2, proj1.images.length)
+  
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :REMOVE.l
+    )
+    assert_flash_success
+    proj2.reload
+    assert_equal(0, proj2.observations.length)
+    assert_equal(0, proj2.images.length)
+
+    login('dick')
+    post(:manage_projects, :id => list.id,
+      :objects_obs => '1',
+      :objects_img => '1',
+      :projects_1 => '',
+      :projects_2 => '1',
+      :commit => :REMOVE.l
+    )
+    assert_flash_warning # already done
+  end
 end
