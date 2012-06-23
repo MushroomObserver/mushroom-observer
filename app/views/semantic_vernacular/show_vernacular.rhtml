@@ -7,9 +7,7 @@
 			Properties: 
 			<ul> 
 				<% @vernacular.refactor_properties.each do |property, values| %>
-				<li>
-					<%= property + ": " + values.join(" <i>or</i> ").to_s %>
-				</li>
+				<li><%= property + ": " + values.join(" <i>or</i> ").to_s %></li>
 				<% end %>
 			</ul>
 		</li>
@@ -19,8 +17,8 @@
 				<% @vernacular.associate_species.each do |species| %>
 				<li>
 					<%= link_to(species["species"],
-											:controller => "semantic_species", 
-											:action => "show", 
+											:controller => "semantic_vernacular", 
+											:action => "show_species", 
 											:uri => species["species"]) %>
 				</li>
 				<% end %>
@@ -31,8 +29,8 @@
 <div>
 	<%= link_to("Go to all vernaculars", 
 							:controller => "semantic_vernacular",
-							:action => "index") + " | " +
+							:action => "index_vernaculars") + " | " +
 			link_to("Go to all species", 
-							:controller => "semantic_species",
-							:action => "index") %>
+							:controller => "semantic_vernacular",
+							:action => "index_species") %>
 </div>

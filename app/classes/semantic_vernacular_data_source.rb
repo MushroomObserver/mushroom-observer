@@ -29,6 +29,8 @@
 #
 ################################################################################
 
+require "sparql/client"
+
 class SemanticVernacularDataSource
 	attr_accessor :uri, :label
 
@@ -47,10 +49,10 @@ class SemanticVernacularDataSource
 
 	# Return: string
 	def get_label
-		self.class.query(query_label)[0]["label"]
+		self.class.query(query_label)[0]["label"].to_s
 	end
 
-	# Return: array of hashes 
+	# Return: array of hashes
 	# [{"property" => "property_1", "value" => "value_1"}, 
 	#  {"property" => "property_2", "value" => "value_2"}, ...]
 	def get_properties
@@ -61,8 +63,8 @@ class SemanticVernacularDataSource
 	def refactor_properties
 		properties = Hash.new
 		get_properties.each do |property|
-			key = property["property"]
-			value = property["value"]
+			key = property["property"].to_s
+			value = property["value"].to_s
 			if properties.has_key?(key) 
 				properties[key].push(value)
 			else
@@ -75,13 +77,13 @@ class SemanticVernacularDataSource
 
 	private
 	
-	ENDPOINT = "http://aquarius.tw.rpi.edu:2024/sparql"
+	ENDPOINT = "http://leo.tw.rpi.edu:2058/sparql"
 	
 	# Retrun: array of hashes
 	# [{"key_1" => "value_1"}, {"key_2" => "value_2"}, ...]
 	def self.query(query)
 		sparql = SPARQL::Client.new(ENDPOINT)
-  	response = sparql.query(query)
+  	response = sparql.query(query) # RDF::Query::Solution
   end
 
   # Prefix for all SPARQL queries.

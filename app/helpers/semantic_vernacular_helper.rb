@@ -7,13 +7,13 @@ module SemanticVernacularHelper
 		if tree != nil
 			ul = "<ul>"
 			for i in 0..(tree.length - 1)
-				if tree[i]["parent"] == parent
+				if tree[i]["parent"].to_s == parent
 					item = tree[i]
-					li = "<li>" << link_to(item["label"], 
+					li = "<li>" << link_to(item["label"].to_s, 
 																 :controller => "semantic_vernacular", 
-																 :action => "show", 
-																 :uri => item["uri"])
-					subtree = build_vernacular_hierarchy(item["uri"], tree)
+																 :action => "show_vernacular", 
+																 :uri => item["uri"].to_s)
+					subtree = build_vernacular_hierarchy(item["uri"].to_s, tree)
 					li << subtree if subtree != nil
 					li << "</li>"
 					ul << li << "</ul>"

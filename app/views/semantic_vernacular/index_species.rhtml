@@ -1,0 +1,13 @@
+<h2>All Semantic Speices</h2>
+<div>
+	<ul>
+		<% @all_species.each do |species| %>
+		<li>
+			<%= link_to(species["label"].to_s,
+									:controller => "semantic_vernacular",
+									:action => "show_species",
+									:uri => species["uri"].to_s) %>
+		</li>
+		<% end %>
+	</ul>
+</div>

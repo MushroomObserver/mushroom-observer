@@ -15,7 +15,7 @@
 			Links:
 			<ul>
 				<% @species.get_links.each do |link| %>
-				<li><%= link["link"] + ": " + link_to(link["url"], link["url"]) %></li>
+				<li><%= link["link"].to_s + ": " + link_to(link["url"].to_s, link["url"].to_s) %></li>
 				<% end %>
 			</ul>
 		</li>
@@ -23,9 +23,9 @@
 </div>
 <div>
 	<%= link_to("Go to all species", 
-							:controller => "semantic_species",
-							:action => "index") + " | " +
+							:controller => "semantic_vernacular",
+							:action => "index_species") + " | " +
 			link_to("Go to all vernaculars", 
 							:controller => "semantic_vernacular",
-							:action => "index") %>
+							:action => "index_vernaculars") %>
 </div>
