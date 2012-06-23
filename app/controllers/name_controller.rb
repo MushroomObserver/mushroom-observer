@@ -178,6 +178,7 @@ class NameController < ApplicationController
       redirect_to(:action => 'show_name', :id => name.id)
     else
       query = create_query(:Name, :pattern_search, :pattern => pattern)
+      @suggest_alternate_spellings = pattern
       show_selected_names(query)
     end
   end
@@ -766,7 +767,7 @@ class NameController < ApplicationController
       @name.correct_spelling = nil
     elsif !@correct_spelling.blank?
       # Set correct_spelling if one given.
-      name2 = Name.find_names(@correct_spelling).first
+      name2 = Name.find_names_filling_in_authors(@correct_spelling).first
       if !name2
         raise(:runtime_form_names_misspelling_bad.t)
       elsif name2.id == @name.id
@@ -1112,7 +1113,7 @@ class NameController < ApplicationController
              name = Name.safe_find(params[:chosen_name][:name_id])
             @names = [name]
           else
-            @names = Name.find_names(@what)
+            @names = Name.find_names_filling_in_authors(@what)
           end
           if @names.empty? and
              (new_name = create_needed_names(params[:approved_name].to_s.strip_squeeze, @what))
@@ -1122,7 +1123,7 @@ class NameController < ApplicationController
 
           # No matches: try to guess.
           if @names.empty?
-            @valid_names = guess_correct_name(@what)
+            @valid_names = Name.suggest_alternate_spellings(@what)
             @suggest_corrections = true
 
           # If written-in name matches uniquely an existing name:

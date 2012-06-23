@@ -9,6 +9,21 @@
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
+<% if @suggest_alternate_spellings and @objects.empty?
+  names = Name.suggest_alternate_spellings(@suggest_alternate_spellings) 
+  if names.any? %>
+    <div class="Warnings">
+      <%= :list_observations_alternate_spellings.t %><br/>
+      <ul type="none">
+        <% for name in names.sort_by(&:sort_name) %>
+          <%= link_to(name.display_name.t, :controller => :name,
+                      :action => :show_name, :id => name.id) %><br/>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+<% end %>
+
 <%= @help.tp if @help %>
 
 <% # Let test_index test passing args to pagination_links.

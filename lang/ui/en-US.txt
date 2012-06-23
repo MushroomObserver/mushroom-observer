@@ -1402,6 +1402,7 @@ image_show_make_default: Make this the default size
 list_observations_location_all: All Locations
 list_observations_location_define: Define This Location
 list_observations_location_merge: Merge With A Defined Location
+list_observations_alternate_spellings: Maybe you meant one of the following names?
 
 
 

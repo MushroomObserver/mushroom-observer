@@ -653,6 +653,7 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'show_observation', :id => observation.id)
     else
       query = create_query(:Observation, :pattern_search, :pattern => pattern)
+      @suggest_alternate_spellings = pattern
       show_selected_observations(query)
     end
   end
@@ -2558,7 +2559,7 @@ class ObserverController < ApplicationController
       else
         # Look up name: can return zero (unrecognized), one (unambiguous match),
         # or many (multiple authors match).
-        names = Name.find_names(what2)
+        names = Name.find_names_filling_in_authors(what2)
       end
 
       # Create temporary name object for it.  (This will not save anything
@@ -2571,7 +2572,7 @@ class ObserverController < ApplicationController
 
       # No matches -- suggest some correct names to make Debbie happy.
       if names.empty?
-        valid_names = guess_correct_name(what2)
+        valid_names = Name.suggest_alternate_spellings(what2)
         @suggest_corrections = true
 
       # Only one match (or we just created an approved new name).

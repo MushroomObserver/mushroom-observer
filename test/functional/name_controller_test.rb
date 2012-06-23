@@ -500,17 +500,19 @@ class NameControllerTest < FunctionalTestCase
     create_needed_names('Pluteus')
     create_needed_names('Coprinus comatus subsp. bogus var. varietus')
 
-    def guess_correct_name(str)
-      results = @controller.guess_correct_name(str)
-      assert_block("Couldn't guess #{str.inspect}.") { results.any? }
-    end
+    assert_name_suggestions('Agricus')
+    assert_name_suggestions('Ptligera')
+    assert_name_suggestions(' plutues _petastus  ')
+    assert_name_suggestions('Coprinis comatis')
+    assert_name_suggestions('Coprinis comatis blah. boggle')
+    assert_name_suggestions('Coprinis comatis blah. boggle var. varitus')
+  end
 
-    guess_correct_name('Agricus')
-    guess_correct_name('Ptligera')
-    guess_correct_name(' plutues _petastus  ')
-    guess_correct_name('Coprinis comatis')
-    guess_correct_name('Coprinis comatis blah. boggle')
-    guess_correct_name('Coprinis comatis blah. boggle var. varitus')
+  def assert_name_suggestions(str)
+    clean_our_backtrace do
+      results = Name.suggest_alternate_spellings(str)
+      assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
+    end
   end
 
   # ----------------------------

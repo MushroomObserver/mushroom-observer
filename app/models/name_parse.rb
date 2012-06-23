@@ -40,8 +40,8 @@
 #      np.has_synonym            # false
 #    end
 #
-#  The methods find_names and find_synonym_names both use Name#find_names to
-#  look up matching Name's.
+#  The methods find_names and find_synonym_names both use
+#  Name#find_names_filling_in_authors to look up matching Name's.
 #
 ################################################################################
 
@@ -101,13 +101,13 @@ class NameParse
   end
 
   def find_names()
-    Name.find_names(@search_name, @rank)
+    Name.find_names_filling_in_authors(@search_name, @rank)
   end
 
   def find_synonym_names()
     result = []
     if @synonym
-      result = Name.find_names(@synonym_search_name, @synonym_rank)
+      result = Name.find_names_filling_in_authors(@synonym_search_name, @synonym_rank)
     end
     result
   end

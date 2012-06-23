@@ -119,7 +119,8 @@
 #  parse_classification::    Parse +classification+ string.
 #
 #  ==== Name Parsing
-#  find_names::              Look up Names by text_name and search_name.
+#  find_names::              Parses string, looks up Name by search_name, falls back on text_name.
+#  find_names_filling_in_authors:: Look up Name's by text_name and search_name; fills in authors if supplied.
 #  find_or_create_name_and_parents:: Look up Name, create it, return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
 #  parse_author::            Grab the author from the end of a name.
@@ -1096,6 +1097,106 @@ class Name < AbstractModel
     end
   end
 
+  # Do some simple queries to try to find alternate spellings of the given
+  # (incorrectly-spelled) name.  Returns Array of Name instances.
+  def self.suggest_alternate_spellings(str)
+    results = []
+
+    # Do some really basic pre-parsing, stripping off author and spuh.
+    str = clean_incoming_string(str).
+                gsub('ë', 'e').
+                sub(/ sp\.?$/, '').
+                gsub('_',' ').strip_squeeze.capitalize_first
+    str = parse_author(str).first # (strip author off)
+
+    # Guess genus first, then species, and so on.
+    if not str.blank?
+      words = str.split
+      num = words.length
+      results = guess_word('', words.first)
+      for i in 2..num
+        if results.any?
+          if (i & 1) == 0
+            prefixes = results.map(&:text_name).uniq
+            results = []
+            word = (i == 2) ? words[i-1] : "#{words[i-2]} #{words[i-1]}"
+            for prefix in prefixes
+              results |= guess_word(prefix, word)
+            end
+          end
+        end
+      end
+    end
+
+    return results
+  end
+
+  private
+
+  # Guess correct name of partial string.
+  def self.guess_word(prefix, word) # :nodoc:
+    str = "#{prefix} #{word}"
+    results = guess_try(str, 1)
+    results = guess_try(str, 2) if results.empty?
+    results = guess_try(str, 3) if results.empty?
+    return results
+  end
+
+  # Look up name replacing n letters at a time with a star.
+  def self.guess_try(name, n) # :nodoc:
+    patterns = []
+
+    # Restrict search to names close in length.
+    a = name.length - 2
+    b = name.length + 2
+
+    # Create a bunch of SQL "like" patterns.
+    name = name.gsub(/ \w+\. /, ' % ')
+    words = name.split
+    for i in 0..(words.length-1)
+      word = words[i]
+      if word != '%'
+        if word.length < n
+          patterns << guess_pattern(words, i, '%')
+        else
+          for j in 0..(word.length-n)
+            sub = ''
+            sub += word[0..(j-1)] if j > 0
+            sub += '%'
+            sub += word[(j+n)..(-1)] if j + n < word.length
+            patterns << guess_pattern(words, i, sub)
+          end
+        end
+      end
+    end
+
+    # Create SQL query out of these patterns.
+    conds = patterns.map do |pat|
+      "text_name LIKE '#{pat}'"
+    end.join(' OR ')
+    conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
+    names = all(:conditions => conds, :limit => 10)
+
+    # Screen out ones way too different.
+    names = names.reject do |x|
+      (x.text_name.length < a) or
+      (x.text_name.length > b)
+    end
+
+    return names
+  end
+
+  # String words together replacing the one at index +i+ with +sub+.
+  def self.guess_pattern(words, i, sub) # :nodoc:
+    result = []
+    for j in 0..(words.length-1)
+      result << (i == j ? sub : words[j])
+    end
+    return result.join(' ')
+  end
+
+  public
+
   ################################################################################
   #
   #  :section: Merging
@@ -1542,31 +1643,24 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  # Look up Name's with a given text_name or search_name.  By default tries to
-  # weed out deprecated Name's, but if that results in an empty set, then it
-  # returns the deprecated ones.  Both deprecated and non-deprecated Name's can
-  # be returned by setting deprecated to true.
+  # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
+  def self.find_names_filling_in_authors(in_str, rank=nil, ignore_deprecated=false)
+    find_names(in_str, rank, ignore_deprecated, :fill_in_authors)
+  end
+
+  # Look up Name's with a given name.  By default tries to weed out deprecated
+  # Name's, but if that results in an empty set, then it returns the deprecated
+  # ones. Returns an Array of zero or more Name instances.
   #
-  # Returns an Array of Name instances.
-  #
-  # in_str::        String to parse name from.
-  # rank::          Tell it explicitly what the rank should be.
-  # deprecated::    If true return both accepted _and_ deprecated Name's.
+  # +in_str+::              String to parse.
+  # +rank+::                Accept only names of this rank (optional).
+  # +ignore_deprecated+::   If +true+, return all matching names, even if deprecated.
+  # +fill_in_authors+::     If +true+, will fill in author for Name's missing authors
+  #                         if +in_str+ supplies one.
   #
   #   names = Name.find_names('Letharia vulpina')
   #
-  # *NOTE*: This is an extraordinarily important method.  Whenever a User
-  # enters a Name on this site, 99% of the time it ends up going through this
-  # code at some point.
-  #
-  # *NOTE*: This can actually result in some Name's being changed.  In
-  # particular, if the User ever tries to look up a Name that is missing the
-  # author in our database, this method will insert the author the User gave
-  # us, no questions asked.  It won't even inform anybody of this.  It just
-  # magically happens.  This is the origin of some very bizarre behavior, so it
-  # is worth bearing in mind.
-  #
-  def self.find_names(in_str, rank=nil, deprecated=false)
+  def self.find_names(in_str, rank=nil, ignore_deprecated=false, fill_in_authors=false)
     results = []
 
     parse = parse_name(in_str)
@@ -1579,40 +1673,40 @@ class Name < AbstractModel
         name = 'Fungi'
       end
 
-      conditions = []
-      conditions_args = {}
-      if not author.blank?
-        conditions << 'search_name = :name'
-        conditions_args[:name] = search_name
-      else
-        conditions << 'text_name = :name'
-        conditions_args[:name] = text_name
-      end
-      unless deprecated
-        conditions << 'deprecated = 0'
-      end
-      if rank
-        conditions << 'rank = :rank'
-        conditions_args[:rank] = rank
-      end
-
-      results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
-
-      # If user provided author, check if name already exists without author.
-      # If so, add author to that name automatically.
-      if results.empty? and not author.blank?
-        conditions_args[:name] = text_name
-        results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
-        # (this should never return more than one result)
-        if results.length == 1
-          results.first.change_author(author)
-          results.first.save
+      while results.empty?
+        conditions = []
+        conditions_args = {}
+        if not author.blank?
+          conditions << 'search_name = :name'
+          conditions_args[:name] = search_name
+        else
+          conditions << 'text_name = :name'
+          conditions_args[:name] = text_name
         end
-      end
+        unless ignore_deprecated
+          conditions << 'deprecated = 0'
+        end
+        if rank
+          conditions << 'rank = :rank'
+          conditions_args[:rank] = rank
+        end
 
-      # No names that aren't deprecated, so try for ones that are deprecated.
-      if results.empty? and not deprecated
-        results = find_names(in_str, rank, true)
+        results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
+
+        # If user provided author, check if name already exists without author.
+        if results.empty? and not author.blank?
+          conditions_args[:name] = text_name
+          results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
+          # (this should never return more than one result)
+          if fill_in_authors and results.length == 1
+            results.first.change_author(author)
+            results.first.save
+          end
+        end
+
+        # Try again, looking for deprecated names if didn't find any matching approved names.
+        break if ignore_deprecated
+        ignore_deprecated = true
       end
     end
 
