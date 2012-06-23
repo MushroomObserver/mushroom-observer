@@ -301,6 +301,19 @@ class NameControllerTest < FunctionalTestCase
                  @controller.instance_variable_get('@title'))
   end
 
+  def test_name_search_with_spelling_correction
+    get_with_dump(:name_search, :pattern => 'agaricis campestrus')
+    assert_response('list_names')
+    assert_select('div.Warnings', 1)
+    assert_select('a[href*=show_name/19]', :text => Name.find(19).search_name)
+    assert_select('a[href*=show_name/20]', :text => Name.find(20).search_name)
+    assert_select('a[href*=show_name/21]', :text => Name.find(21).search_name)
+
+    get(:name_search, :pattern => 'Agaricus')
+    assert_response('list_names')
+    assert_select('div.Warnings', 0)
+  end
+
   def test_advanced_search
     query = Query.lookup_and_save(:Name, :advanced_search,
       :name => "Don't know",

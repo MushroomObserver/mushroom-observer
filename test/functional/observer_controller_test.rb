@@ -296,6 +296,24 @@ class ObserverControllerTest < FunctionalTestCase
                  @controller.instance_variable_get('@title'))
   end
 
+  def test_observation_search_with_spelling_correction
+    # Missing the stupid genus Coprinus, and that breaks the alternate name suggestions.
+    login('rolf')
+    Name.find_or_create_name_and_parents('Coprinus comatus').each(&:save!)
+    names = Name.suggest_alternate_spellings('Coprinus comatis')
+    assert_not_equal([], names.map(&:search_name))
+
+    get(:observation_search, :pattern => 'coprinis comatis')
+    assert_response('list_observations')
+    assert_equal('coprinis comatis', assigns(:suggest_alternate_spellings))
+    assert_select('div.Warnings', 1)
+    assert_select('a[href*=observation_search?pattern=Coprinus+comatus]',
+                  :text => names(:coprinus_comatus).search_name)
+
+    get(:observation_search, :pattern => 'Coprinus comatus')
+    assert_response(:redirect)
+  end
+
   # Created in response to a bug seen in the wild
   def test_where_search_next_page
     params = { :place_name => 'Burbank', :page => 2 }
