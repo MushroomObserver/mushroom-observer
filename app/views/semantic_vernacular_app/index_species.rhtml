@@ -4,7 +4,7 @@
 		<% @all_species.each do |species| %>
 		<li>
 			<%= link_to(species["label"].to_s,
-									:controller => "semantic_vernacular",
+									:controller => "semantic_vernacular_app",
 									:action => "show_species",
 									:uri => species["uri"].to_s) %>
 		</li>

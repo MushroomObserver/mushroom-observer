@@ -1,4 +1,4 @@
-module SemanticVernacularHelper
+module SemanticVernacularAppHelper
 	# URI of the parent class of all vernacualr classes.
 	ROOT = "http://aquarius.tw.rpi.edu/ontology/mushroom.owl#FungusDescriptiveVernacular"
 
@@ -10,7 +10,7 @@ module SemanticVernacularHelper
 				if tree[i]["parent"].to_s == parent
 					item = tree[i]
 					li = "<li>" << link_to(item["label"].to_s, 
-																 :controller => "semantic_vernacular", 
+																 :controller => "semantic_vernacular_app", 
 																 :action => "show_vernacular", 
 																 :uri => item["uri"].to_s)
 					subtree = build_vernacular_hierarchy(item["uri"].to_s, tree)

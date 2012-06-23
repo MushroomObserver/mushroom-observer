@@ -17,7 +17,7 @@
 				<% @vernacular.associate_species.each do |species| %>
 				<li>
 					<%= link_to(species["species"],
-											:controller => "semantic_vernacular", 
+											:controller => "semantic_vernacular_app", 
 											:action => "show_species", 
 											:uri => species["species"]) %>
 				</li>
@@ -28,9 +28,9 @@
 </div>
 <div>
 	<%= link_to("Go to all vernaculars", 
-							:controller => "semantic_vernacular",
+							:controller => "semantic_vernacular_app",
 							:action => "index_vernaculars") + " | " +
 			link_to("Go to all species", 
-							:controller => "semantic_vernacular",
+							:controller => "semantic_vernacular_app",
 							:action => "index_species") %>
 </div>

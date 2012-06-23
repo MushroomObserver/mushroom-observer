@@ -1,6 +1,6 @@
 # encoding: utf-8
 #
-#  = Semantic Vernacular Controller
+#  = Semantic Vernacular App Controller
 #
 #  == Actions
 #  index_vernaculars::  List all available semantic vernaculars with hierarchy.
@@ -12,7 +12,9 @@
 #
 ################################################################################
 
-class SemanticVernacularController < ApplicationController
+require_dependency 'classes/semantic_vernacular_app'
+
+class SemanticVernacularAppController < ApplicationController
   def index_vernaculars
   	@all_vernaculars = SemanticVernacular.index
   end

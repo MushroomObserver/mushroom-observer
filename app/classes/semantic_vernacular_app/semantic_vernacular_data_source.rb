@@ -31,7 +31,7 @@
 
 require "sparql/client"
 
-class SemanticVernacularDataSource
+class SemanticVernacularAppDataSource
 	attr_accessor :uri, :label
 
 	def initialize(uri)
