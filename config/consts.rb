@@ -14,7 +14,7 @@
 ################################################################################
 
 # Various server domains.
-DOMAIN       = 'localhost'
+DOMAIN       = 'localhost' if !defined?(DOMAIN)
 HTTP_DOMAIN  = "http://#{DOMAIN}:3000"
 IMAGE_DOMAIN = "#{HTTP_DOMAIN}/images"
 BAD_DOMAINS  = ['localhost.localdomain:3000']
