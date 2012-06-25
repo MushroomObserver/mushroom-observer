@@ -12,7 +12,7 @@
 #
 ################################################################################
 
-class SemanticVernacularAppDataSourceViaProxy < SemanticVernacularAppDataSource
+class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 	private
 	
 	RPI_SPARQLPROXY = "http://logd.tw.rpi.edu/ws/sparqlproxy.php"

@@ -22,7 +22,7 @@
 #
 ################################################################################
 
-class SemanticVernacular < SemanticVernacularAppDataSourceViaProxy
+class SemanticVernacularDescription < SemanticVernacularDataSourceViaProxy
 	
 	def self.index
 		# List all instances with hierarchy

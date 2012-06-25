@@ -22,7 +22,7 @@
 #
 ################################################################################
 
-class SemanticSpecies < SemanticVernacularAppDataSourceViaProxy
+class SemanticSpecies < SemanticVernacularDataSourceViaProxy
 
 	def self.index
 		# List all instances in a flat structure
