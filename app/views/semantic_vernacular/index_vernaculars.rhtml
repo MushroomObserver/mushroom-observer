@@ -2,3 +2,8 @@
 <div>
 	<%= build_vernacular_hierarchy(SemanticVernacularHelper::ROOT, @all_vernaculars) %>
 </div>
+<div>
+	<%= link_to("Go to all species", 
+							:controller => "semantic_vernacular",
+							:action => "index_species") %>
+</div>
