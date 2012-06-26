@@ -15,7 +15,7 @@
         <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span><br/>',
                             species_list.when, species_list.unique_text_name.t),
                     :action => 'show_species_list', :id => species_list.id) %>
-          <span class="ListWhere"><%= species_list.place_name.t %></span>
+          <span class="ListWhere"><%= species_list.place_name.t rescue :UNKNOWN.t %></span>
           <span class="ListWho"><%= user_link(species_list.user) %></span>
         </td>
       </tr>
