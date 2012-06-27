@@ -1,0 +1,12 @@
+# Allowed (prefix) modifiers to countries and states.
+---
+- Central
+- Interior
+- Northern
+- Southern
+- Eastern
+- Western
+- Northeastern
+- Northwestern
+- Southeastern
+- Southwestern

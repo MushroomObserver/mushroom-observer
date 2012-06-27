@@ -9,6 +9,7 @@ albion:
   user_id: 1
   version: 2
   name: Albion, California, USA
+  scientific_name: USA, California, Albion
   north: 39.32
   west: -123.82
   east: -123.74
@@ -24,6 +25,7 @@ burbank:
   user_id: 1
   version: 1
   name: Burbank, California, USA
+  scientific_name: USA, California, Burbank
   north: 34.22
   west: -118.37
   east: -118.29
@@ -39,6 +41,7 @@ mitrula_marsh:
   user_id: 1
   version: 1
   name: '\"Mitrula Marsh\", Sand Lake, Bassetts, Yuba Co., California, USA'
+  scientific_name: 'USA, California, Yuba Co., Bassetts, Sand Lake'
   north: 39.7184
   west: -120.687
   east: -120.487
@@ -53,6 +56,7 @@ salt_point:
   user_id: 1
   version: 1
   name: Salt Point State Park, Sonoma Co., California, USA
+  scientific_name: USA, California, Sonoma Co., Salt Point State Park
   north: 38.5923
   west: -123.343
   east: -123.283
@@ -69,6 +73,7 @@ gualala:
   user_id: 1
   version: 1
   name: Gualala, California, USA
+  scientific_name: USA, California, Gualala
   north: 38.7868
   west: -123.557
   east: -123.519
@@ -84,6 +89,7 @@ elgin_co:
   user_id: 1
   version: 1
   name: Elgin Co., Ontario, Canada
+  scientific_name: Canada, Ontario, Elgin Co.
   north: 42.876
   west: -81.8179
   east: -80.8044
@@ -97,6 +103,7 @@ brett_woods:
   user_id: 1
   version: 1
   name: Brett Woods, Fairfield Co., Connecticut, USA
+  scientific_name: USA, Connecticut, Fairfield Co., Brett Woods
   north: 41.2125
   west: -73.3295
   east: -73.3215
@@ -110,6 +117,7 @@ point_reyes:
   user_id: 1
   version: 1
   name: Point Reyes National Seashore, Marin Co., California, USA
+  scientific_name: USA, California, Marin Co., Point Reyes National Seashore
   north: 38.2441
   west: -123.0256
   east: -122.7092
@@ -124,6 +132,7 @@ howarth_park:
   user_id: 1
   version: 1
   name: Howarth Park, Santa Rosa, California, USA
+  scientific_name: USA, California, Santa Rosa, Howarth Park
   north: 38.4582
   west: -122.6712
   east: -122.6632
@@ -137,6 +146,7 @@ unknown_location:
   user_id: 0
   version: 1
   name: Unknown
+  scientific_name: Unknown
   north: 90
   west: -180
   east: 180

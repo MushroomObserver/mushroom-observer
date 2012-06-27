@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120609230300) do
+ActiveRecord::Schema.define(:version => 20120626163100) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -201,14 +201,14 @@ ActiveRecord::Schema.define(:version => 20120609230300) do
   end
 
   create_table "locations", :force => true do |t|
-    t.string   "sync_id",        :limit => 16
+    t.string   "sync_id",         :limit => 16
     t.integer  "version"
     t.datetime "created"
     t.datetime "modified"
     t.integer  "user_id"
     t.integer  "description_id"
     t.integer  "rss_log_id"
-    t.integer  "num_views",                      :default => 0
+    t.integer  "num_views",                       :default => 0
     t.datetime "last_view"
     t.float    "north"
     t.float    "south"
@@ -216,9 +216,10 @@ ActiveRecord::Schema.define(:version => 20120609230300) do
     t.float    "east"
     t.float    "high"
     t.float    "low"
-    t.boolean  "ok_for_export",                  :default => true, :null => false
+    t.boolean  "ok_for_export",                   :default => true, :null => false
     t.text     "notes"
-    t.string   "name",           :limit => 1024
+    t.string   "name",            :limit => 1024
+    t.string   "scientific_name", :limit => 1024
   end
 
   create_table "locations_versions", :force => true do |t|
@@ -232,8 +233,9 @@ ActiveRecord::Schema.define(:version => 20120609230300) do
     t.float    "east"
     t.float    "high"
     t.float    "low"
-    t.string   "name",        :limit => 200
+    t.string   "name",            :limit => 200
     t.text     "notes"
+    t.string   "scientific_name", :limit => 1024
   end
 
   create_table "name_descriptions", :force => true do |t|
@@ -333,6 +335,7 @@ ActiveRecord::Schema.define(:version => 20120609230300) do
     t.text     "notes"
     t.text     "classification"
     t.boolean  "ok_for_export",                                                                                                                                                                           :default => true,  :null => false
+    t.integer  "accepted_id"
   end
 
   create_table "names_versions", :force => true do |t|
@@ -431,7 +434,7 @@ ActiveRecord::Schema.define(:version => 20120609230300) do
     t.datetime "modified"
     t.integer  "access_count"
     t.enum     "model",        :limit => [:Comment, :Image, :Location, :LocationDescription, :Name, :NameDescription, :Observation, :Project, :RssLog, :SpeciesList, :User]
-    t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
+    t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_project, :for_target, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
     t.text     "params"
     t.integer  "outer_id"
   end

@@ -467,10 +467,6 @@ class LocationControllerTest < FunctionalTestCase
     assert_response('map_locations')
   end
 
-  # ----------------------------
-  #  Interest.
-  # ----------------------------
-
   def test_interest_in_show_location
     # No interest in this location yet.
     albion = locations(:albion)
@@ -512,5 +508,37 @@ class LocationControllerTest < FunctionalTestCase
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 1
     )
+  end
+
+  def test_update_location_scientific_name
+    loc = Location.first
+    params = {
+      :id => loc.id,
+      :location => {},
+    }
+
+    login('rolf')
+    assert_equal(:postal, @rolf.location_format)
+    postal_name = 'Missoula, Montana, USA'
+    scientific_name = 'USA, Montana, Missoula'
+    params[:location][:display_name] = postal_name
+    post(:edit_location, params)
+    assert_flash_success
+    assert_response(:redirect)
+    loc.reload
+    assert_equal(postal_name, loc.name)
+    assert_equal(scientific_name, loc.scientific_name)
+
+    login('roy')
+    assert_equal(:scientific, @roy.location_format)
+    postal_name = 'Santa Fe, New Mexico, USA'
+    scientific_name = 'USA, New Mexico, Santa Fe'
+    params[:location][:display_name] = scientific_name
+    post(:edit_location, params)
+    assert_flash_success
+    assert_response(:redirect)
+    loc.reload
+    assert_equal(postal_name, loc.name)
+    assert_equal(scientific_name, loc.scientific_name)
   end
 end

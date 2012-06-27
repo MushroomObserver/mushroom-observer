@@ -338,8 +338,7 @@ class API
     declare_parameter(key, :location, args)
     str = get_param(key) or return args[:default]
     val = try_parsing_id(str, ::Location)
-    val ||= ::Location.find(:first, :conditions =>
-                          ['name = ? OR name = ?', str, ::Location.reverse_name(str)])
+    val ||= ::Location.find_by_name_or_reverse_name(str)
     raise BadParameterValue.new(str, :location)
     return val
   end
@@ -348,8 +347,7 @@ class API
     declare_parameter(key, :place_name, args)
     str = get_param(key) or return args[:default]
     val = try_parsing_id(str, ::Location)
-    val ||= ::Location.find(:first, :conditions =>
-                          ['name = ? OR name = ?', str, ::Location.reverse_name(str)])
+    val ||= ::Location.find_by_name_or_reverse_name(str)
     val = val ? val.name : str
     raise BadParameterValue.new(str, :place_name)
     return val

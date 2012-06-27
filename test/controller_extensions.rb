@@ -16,6 +16,7 @@
 #  post_requires_login::        Send POST, login required.
 #  post_requires_user::         Send POST, certain user must be logged in.
 #  html_dump::                  Dump response body to file for W3C validation.
+#  save_response::              Dump response body to public/test.html for debugging.
 #  get_without_clearing_flash::  Wrapper: calls +get+ without clearing flash errors.
 #  post_without_clearing_flash:: Wrapper: calls +post+ without clearing flash errors.
 #
@@ -267,6 +268,13 @@ module ControllerExtensions
       hash.each {|k,v| show_params(file, v, "#{prefix}[#{k.to_s}]")}
     else
       file.write("#{prefix} = [#{hash.to_s}]<br>\n")
+    end
+  end
+
+  # This writes @response.body to the given file (relative to <tt>RAILS_ROOT</tt>).
+  def save_response(file='public/test.html')
+    File.open("#{RAILS_ROOT}/#{file}", 'w:utf-8') do |fh|
+      fh.write(@response.body)
     end
   end
 

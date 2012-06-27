@@ -246,6 +246,7 @@ class Name < AbstractModel
     'last_view',
     'ok_for_export',
     'rss_log_id',
+    # 'accepted_id',
     'synonym_id',
     'description_id',
     'classification' # (versioned in the default desc)
@@ -1486,17 +1487,18 @@ class Name < AbstractModel
     if match = pattern.match(str)
       name, author = match[1], match[2].to_s
       name = standardize_sp_nov_variants(name) if rank == :Species
-      (name, author, rank) = fix_default_variety_error(name, author, rank)
+      (name, author, rank) = fix_natural_variety(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)
       author2 = author.blank? ? '' : ' ' + author
       text_name = name.gsub('ë', 'e')
       parent_name = name.sub(LAST_PART, '')
+      display_name = format_natural_variety(name, author, rank, deprecated)
       results = ParsedName.new(
         :text_name    => text_name,
         :search_name  => text_name + author2,
         :sort_name    => remove_first_quotes(text_name + author2),
-        :display_name => format_name(name, deprecated) + author2,
+        :display_name => display_name,
         :parent_name  => parent_name,
         :rank         => rank,
         :author       => author
@@ -1552,7 +1554,7 @@ class Name < AbstractModel
 
   # Fix common error: Amanita vaginatae Author var. vaginatae
   # Convert to: Amanita vaginatae var. vaginatae Author
-  def self.fix_default_variety_error(name, author, rank)
+  def self.fix_natural_variety(name, author, rank)
     if [:Species, :Subspecies, :Variety].include?(rank)
       last_word = name.split(' ').last
       if match = author.match(/^(.*) (#{ANY_SSP_ABBR}) (#{last_word})$/)
@@ -1563,6 +1565,45 @@ class Name < AbstractModel
       end
     end
     return name, author, rank
+  end
+
+  # Format a name ranked below genus, moving the author to before the var.
+  # in natural varieties such as "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
+  def self.format_natural_variety(name, author, rank, deprecated)
+    words = name.split(' ')
+    author2 = author.blank? ? '' : ' ' + author
+    if author.blank?
+      format_name(name, deprecated)
+    elsif words[-7] == words[-1] and rank == :Form
+      [
+        format_name(words[0..-7].join(' '), deprecated),
+        author,
+        words[-6],
+        format_name(words[-5], deprecated),
+        words[-4],
+        format_name(words[-3], deprecated),
+        words[-2],
+        format_name(words[-1], deprecated),
+      ].join(' ')
+    elsif words[-5] == words[-1] and [:Variety, :Form].include?(rank)
+      [
+        format_name(words[0..-5].join(' '), deprecated),
+        author,
+        words[-4],
+        format_name(words[-3], deprecated),
+        words[-2],
+        format_name(words[-1], deprecated),
+      ].join(' ')
+    elsif words[-3] == words[-1] and [:Subspecies, :Variety, :Form].include?(rank)
+      [
+        format_name(words[0..-3].join(' '), deprecated),
+        author,
+        words[-2],
+        format_name(words[-1], deprecated),
+      ].join(' ')
+    else
+      format_name(name, deprecated) + ' ' + author
+    end
   end
 
   def self.standardize_name(str)
@@ -1852,9 +1893,9 @@ class Name < AbstractModel
   def change_author(new_author)
     old_author = self.author
     self.author = new_author.to_s
-    self.search_name  = replace_author(search_name,  old_author, new_author)
-    self.sort_name    = replace_author(sort_name,    old_author, new_author)
-    self.display_name = replace_author(display_name, old_author, new_author)
+    self.search_name  = replace_author(search_name, old_author, new_author)
+    self.sort_name    = replace_author(sort_name,   old_author, new_author)
+    self.display_name = Name.format_natural_variety(text_name, new_author, rank, deprecated)
   end
 
   # Used by change_author().

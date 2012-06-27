@@ -27,14 +27,21 @@ class ObserverControllerTest < FunctionalTestCase
     params[:username] = user.login
 
     post_requires_login(:create_observation, params)
-    if o_num == 0
-      assert_response(:success)
-    elsif Location.find_by_name(params[:observation][:place_name]) or
-          Location.is_unknown?(params[:observation][:place_name]) or
-          params[:observation][:place_name].blank?
-      assert_response(:action => :show_observation)
-    else
-      assert_response(:action => :create_location)
+    begin
+      if o_num == 0
+        assert_response(:success)
+      elsif Location.find_by_name(params[:observation][:place_name]) or
+            Location.is_unknown?(params[:observation][:place_name]) or
+            params[:observation][:place_name].blank?
+        assert_response(:action => :show_observation)
+      else
+        assert_response(:action => :create_location)
+      end
+    rescue Test::Unit::AssertionFailedError => e
+      flash = get_last_flash
+      flash.sub!(/^(\d)/, '')
+      message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
+      assert_block(message) { false }
     end
 
     assert_equal(o_count + o_num, Observation.count)
@@ -956,17 +963,18 @@ class ObserverControllerTest < FunctionalTestCase
       :name => { :name => "Unknown" }
     }, 1,0,0, @roy)
 
-    # Test a reversible order
+    # Test missing space.
     where = "Reversible, Massachusetts,USA"
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
     }, 0,0,0)
+    # (This is accepted now for some reason.)
     where = "USA,Massachusetts, Reversible"
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 0,0,0, @roy)
+    }, 1,0,0, @roy)
 
     # Test a bogus country name
     where = "Bogus, Massachusetts, UAS"

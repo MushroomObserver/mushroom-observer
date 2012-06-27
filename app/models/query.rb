@@ -754,7 +754,8 @@ class Query < AbstractQuery
         self.group = 'images.id'
         'MIN(names.sort_name) ASC, images.when DESC'
       elsif model == Location
-        'locations.name ASC'
+        User.current_location_format == :scientific ?
+          'locations.scientific_name ASC' : 'locations.name ASC'
       elsif model == LocationDescription
         self.join << :locations
         'locations.name ASC, location_descriptions.created ASC'
@@ -788,7 +789,8 @@ class Query < AbstractQuery
     when 'location'
       if model.column_names.include?('location_id')
         self.join << :locations
-        'locations.name ASC'
+        User.current_location_format == :scientific ?
+          'locations.scientific_name ASC' : 'locations.name ASC'
       end
 
     when 'rss_log'

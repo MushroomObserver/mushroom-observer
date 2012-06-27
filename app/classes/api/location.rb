@@ -42,16 +42,14 @@ class API
       raise MissingParameter.new(:east)  if params[:east].blank?
       raise MissingParameter.new(:west)  if params[:west].blank?
       name = params[:display_name].to_s
-      reverse_name = ::Location.reverse_name(name)
-      if ::Location.find(:first, :conditions => ['name = ? or name = ?', name, reverse_name])
+      if ::Location.find_by_name_or_reverse_name(name)
         raise LocationAlreadyExists.new(name)
       end
     end
 
     def update_params
       if name = parse_string(:set_name, :limit => 1024)
-        reverse_name = ::Location.reverse_name(name)
-        if ::Location.find(:first, :conditions => ['name = ? or name = ?', name, reverse_name])
+        if ::Location.find_by_name_or_reverse_name(name)
           raise LocationAlreadyExists.new(name)
         end
         if query.num_results > 1

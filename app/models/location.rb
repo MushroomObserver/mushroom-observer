@@ -284,17 +284,19 @@ class Location < AbstractModel
 
   def display_name()
     if User.current_location_format == :scientific
-      Location.reverse_name(self.name())
+      self.scientific_name
     else
-      self.name()
+      self.name
     end
   end
 
   def display_name=(val)
     if User.current_location_format == :scientific
       self.name = Location.reverse_name(val)
+      self.scientific_name = val
     else
       self.name = val
+      self.scientific_name = Location.reverse_name(val)
     end
   end
 
@@ -367,16 +369,13 @@ class Location < AbstractModel
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
-    name.split(', ').reverse.join(', ') if name
-    # tokens = name.split(',').map { |x| x.strip() }
-    # tokens.delete("")
-    # return tokens.reverse.join(', ')
+    name.split(/,\s*/).reverse.join(', ') if name
   end
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
     find_by_name(name) ||
-    find_by_name(reverse_name(name))
+    find_by_scientific_name(name)
   end
 
   def self.user_name(user, name)
@@ -387,270 +386,17 @@ class Location < AbstractModel
     end
   end
 
-  UNDERSTOOD_COUNTRIES = {
-    "Africa" => 0,
-    "Albania" => 0,
-    "Algeria" => 0,
-    "Antarctica" => 0,
-    "Argentina" => 0,
-    "Asia" => 0,
-    "Australia" => 0,
-    "Austria" => 0,
-    "Bahamas" => 0,
-    "Belize" => 0,
-    "Bolivia" => 0,
-    "Brazil" => 0,
-    "Bulgaria" => 0,
-    "Cambodia" => 0,
-    "Canada" => 0,
-    "Chile" => 0,
-    "China" => 0,
-    "Colombia" => 0,
-    "Costa Rica" => 0,
-    "Croatia" => 0,
-    "Czech Republic" => 0,
-    "Dominican Republic" => 0,
-    "Ecuador" => 0,
-    "England" => 0,
-    "Europe" => 0,
-    "Finland" => 0,
-    "France" => 0,
-    "Germany" => 0,
-    "Greece" => 0,
-    "Hungary" => 0,
-    "India" => 0,
-    "Indonesia" => 0,
-    "Iran" => 0,
-    "Ireland" => 0,
-    "Israel" => 0,
-    "Italy" => 0,
-    "Japan" => 0,
-    "Kenya" => 0,
-    "Lebanon" => 0,
-    "Macedonia" => 0,
-    "Malaysia" => 0,
-    "Mexico" => 0,
-    "Morocco" => 0,
-    "Namibia" => 0,
-    "Netherlands" => 0,
-    "New Zealand" => 0,
-    "North America" => 0,
-    "Norway" => 0,
-    "Panama" => 0,
-    "Philippines" => 0,
-    "Poland" => 0,
-    "Portugal" => 0,
-    "Russia" => 0,
-    "Scotland" => 0,
-    "Slovenia" => 0,
-    "South America" => 0,
-    "South Africa" => 0,
-    "South Korea" => 0,
-    "Spain" => 0,
-    "Sweden" => 0,
-    "Switzerland" => 0,
-    "Taiwan" => 0,
-    "Thailand" => 0,
-    "Turkey" => 0,
-    "United Kingdom" => 0,
-    "USA" => 0,
-    "Unknown" => 0,
-    "Wales" => 0
-  }
+  def self.load_param_hash(file)
+    File.open(file, 'r:utf-8') do |fh|
+      YAML::load(fh)
+    end
+  end
 
-  UNDERSTOOD_STATES = {
-    "USA" => {
-      "Alabama" => 0,
-      "Alaska" => 0,
-      "American Samoa" => 0,
-      "Arizona" => 0,
-      "Arkansas" => 0,
-      "California" => 0,
-      "Colorado" => 0,
-      "Connecticut" => 0,
-      "Delaware" => 0,
-      "Federated States of Micronesia" => 0,
-      "Florida" => 0,
-      "Georgia" => 0,
-      "Guam" => 0,
-      "Hawaii" => 0,
-      "Idaho" => 0,
-      "Illinois" => 0,
-      "Indiana" => 0,
-      "Iowa" => 0,
-      "Kansas" => 0,
-      "Kentucky" => 0,
-      "Louisiana" => 0,
-      "Maine" => 0,
-      "Marshall Islands" => 0,
-      "Maryland" => 0,
-      "Massachusetts" => 0,
-      "Michigan" => 0,
-      "Minnesota" => 0,
-      "Mississippi" => 0,
-      "Missouri" => 0,
-      "Montana" => 0,
-      "Nebraska" => 0,
-      "Nevada" => 0,
-      "New England" => 0,
-      "New Hampshire" => 0,
-      "New Jersey" => 0,
-      "New Mexico" => 0,
-      "New York" => 0,
-      "North Carolina" => 0,
-      "North Dakota" => 0,
-      "Northern Mariana Islands" => 0,
-      "Ohio" => 0,
-      "Oklahoma" => 0,
-      "Oregon" => 0,
-      "Pacific Northwest" => 0,
-      "Palau" => 0,
-      "Pennsylvania" => 0,
-      "Puerto Rico" => 0,
-      "Rhode Island" => 0,
-      "South Carolina" => 0,
-      "South Dakota" => 0,
-      "Tennessee" => 0,
-      "Texas" => 0,
-      "Utah" => 0,
-      "Vermont" => 0,
-      "Virgin Islands" => 0,
-      "Virginia" => 0,
-      "Washington" => 0,
-      "Washington DC" => 0,
-      "West Virginia" => 0,
-      "Wisconsin" => 0,
-      "Wyoming" => 0
-    },
-    "Australia" => {
-      "Australian Capital Territory" => 0,
-      "New South Wales" => 0,
-      "Northern Territory" => 0,
-      "Queensland" => 0,
-      "South Australia" => 0,
-      "Tasmania" => 0,
-      "Victoria" => 0,
-      "Western Australia" => 0
-    },
-    "Canada" => {
-      "Alberta" => 0,
-      "British Columbia" => 0,
-      "Labrador" => 0,
-      "Manitoba" => 0,
-      "New Brunswick" => 0,
-      "Newfoundland" => 0,
-      "Newfoundland and Labrador" => 0,
-      "Nova Scotia" => 0,
-      "Ontario" => 0,
-      "Prince Edward Island" => 0,
-      "Quebec" => 0,
-      "Saskatchewan" => 0,
-      "Northwest Territories" => 0,
-      "Nunavut" => 0,
-      "Yukon" => 0,
-    },
-  }
-
-  # Handling of '.'s
-  BAD_TERMS = {
-    "Hwy" => "Highway",
-    "Hwy." => "Highway",
-    "Mt" => "Mount",
-    "Mt." => "Mount",
-    "Mtn" => "Mountain",
-    "Mtn." => "Mountain",
-    " AL," => " Alabama,",
-    " AK," => " Alaska,",
-    " AS," => " American Samoa,",
-    " AZ," => " Arizona,",
-    " AR," => " Arkansas,",
-    " CA," => " California,",
-    " CT," => " Connecticut,",
-    " DE," => " Delaware,",
-    " Washington, DC," => " Washington DC,",
-    " FM," => " Federated States of Micronesia,",
-    " FL," => " Florida,",
-    " GA," => " Georgia,",
-    " GU," => " Guam,",
-    " HI," => " Hawaii,",
-    " ID," => " Idaho,",
-    " IL," => " Illinois,",
-    " IN," => " Indiana,",
-    " IA," => " Iowa,",
-    " KS," => " Kansas,",
-    " KY," => " Kentucky,",
-    " LA," => " Louisiana,",
-    " ME," => " Maine,",
-    " MH," => " Marshall Islands,",
-    " MD," => " Maryland,",
-    " MA," => " Massachusetts,",
-    " MI," => " Michigan,",
-    " MN," => " Minnesota,",
-    " MS," => " Mississippi,",
-    " MO," => " Missouri,",
-    " MT," => " Montana,",
-    " NE," => " Nebraska,",
-    " NV," => " Nevada,",
-    " NH," => " New Hampshire,",
-    " NJ," => " New Jersey,",
-    " NM," => " New Mexico,",
-    " NY," => " New York,",
-    " NC," => " North Carolina,",
-    " ND," => " North Dakota,",
-    " MP," => " Northern Mariana Islands,",
-    " OH," => " Ohio,",
-    " OK," => " Oklahoma,",
-    " OR," => " Oregon,",
-    " PW," => " Palau,",
-    " PA," => " Pennsylvania,",
-    " PR," => " Puerto Rico,",
-    " RI," => " Rhode Island,",
-    " SC," => " South Carolina,",
-    " SD," => " South Dakota,",
-    " TN," => " Tennessee,",
-    " TX," => " Texas,",
-    " UT," => " Utah,",
-    " VT," => " Vermont,",
-    " VI," => " Virgin Islands,",
-    " VA," => " Virginia,",
-    " WA," => " Washington,",
-    " WV," => " West Virginia,",
-    " WI," => " Wisconsin,",
-    " WY," => " Wyoming,",
-    " BC," => " British Columbia,",
-    " ACT," => " Australian Capital Territory,",
-    " NSW," => " New South Wales,",
-    " QLD," => " Queensland,",
-    " NP," => " National Park,",
-    "County," => "Co.,",
-    "CO" => "Co. or Colorado",
-    "Road," => "Rd.,",
-    "Street," => "St.,",
-    "Avenue" => "Ave.",
-    "Boulevard," => "Blvd.,",
-    "Rd," => "Rd.,",
-    "Rd " => "Rd. ",
-    "St," => "St.,",
-    "St " => "St. ",
-    "Ave," => "Ave.,",
-    "Ave " => "Ave. ",
-    "Blvd," => "Blvd.,",
-    "Blvd " => "Blvd. ",
-    "United States of America" => "USA",
-    "Washington, DC" => "Washington DC",
-    " area " => "near",
-    " area," => "near",
-    "Near " => "near ",
-    "&" => "and",
-    "‘" => "'",
-    "’" => "'",
-    "“" => "\"",
-    "”" => "\"",
-  }
-
-  BAD_CHARS = "({[;:|]})"
-
-  OK_PREFIXES = ['Central', 'Interior', 'Northern', 'Southern', 'Eastern', 'Western', 'Northeastern', 'Northwestern', 'Southeastern', 'Southwestern']
+  UNDERSTOOD_COUNTRIES = load_param_hash(LOCATION_COUNTRIES_FILE)
+  UNDERSTOOD_STATES    = load_param_hash(LOCATION_STATES_FILE)
+  OK_PREFIXES          = load_param_hash(LOCATION_PREFIXES_FILE)
+  BAD_TERMS            = load_param_hash(LOCATION_BAD_TERMS_FILE)
+  BAD_CHARS            = "({[;:|]})"
 
   # Returns a member of understood_places if the candidate is either a member or
   # if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
@@ -691,18 +437,24 @@ class Location < AbstractModel
 
   @@location_cache = nil
 
+  # Check if a given name (postal order) already exists as a defined
+  # or undefined location.
   def self.location_exists(name)
     if name
       if @@location_cache.nil?
-        @@location_cache =
+        @@location_cache = (
           Location.connection.select_values(%(
-            SELECT DISTINCT name FROM locations
+            SELECT name FROM locations
           )) +
 	        Location.connection.select_values(%(
-            SELECT DISTINCT `where` FROM `observations`
+            SELECT `where` FROM `observations`
             WHERE `where` is not NULL
-            ORDER BY `where`
+          )) +
+	        Location.connection.select_values(%(
+            SELECT `where` FROM `species_lists`
+            WHERE `where` is not NULL
           ))
+        ).uniq
       end
       @@location_cache.member?(name)
     else
@@ -835,9 +587,18 @@ class Location < AbstractModel
       )
     end
 
+    # Move species lists over.
+    for spl in SpeciesList.find_all_by_location_id(old_loc.id)
+      spl.update_attribute(:location, self)
+      Transaction.put_species_list(
+        :id           => spl,
+        :set_location => self
+      )
+    end
+
     # Update any users who call this location their primary location.
     for user in User.find_all_by_location_id(old_loc.id)
-      user.location_id = self.id
+      user.update_attribute(:location, self)
       Transaction.put_user(
         :id           => user,
         :set_location => self

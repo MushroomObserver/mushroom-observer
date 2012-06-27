@@ -2,6 +2,7 @@
 
 fungi:
   id: 1
+  accepted_id: 1
   sync_id: 1xx1
   created: 2007-02-26 17:20:00
   modified: 2007-02-26 17:20:00
@@ -19,6 +20,7 @@ fungi:
 
 coprinus_comatus:
   id: 2
+  accepted_id: 2
   description_id: 15
   sync_id: 2xx1
   created: 2007-02-27 20:47:00
@@ -36,6 +38,7 @@ coprinus_comatus:
 
 agaricus_campestris:
   id: 3
+  accepted_id: 3
   sync_id: 3xx1
   created: 2007-03-19 17:20:00
   modified: 2007-03-19 17:20:00
@@ -52,6 +55,7 @@ agaricus_campestris:
 
 conocybe_filaris:
   id: 4
+  accepted_id: 4
   sync_id: 4xx1
   created: 2007-03-28 15:50:00
   modified: 2007-03-19 15:51:00
@@ -68,6 +72,7 @@ conocybe_filaris:
 
 amanita_baccata_arora:
   id: 5
+  accepted_id: 5
   sync_id: 5xx1
   created: 2007-04-08 08:53:20
   modified: 2007-04-09 08:53:30
@@ -84,6 +89,7 @@ amanita_baccata_arora:
 
 amanita_baccata_borealis:
   id: 6
+  accepted_id: 6
   sync_id: 6xx1
   created: 2007-04-08 08:54:20
   modified: 2007-04-09 08:54:30
@@ -101,6 +107,7 @@ amanita_baccata_borealis:
 # No Taxon 1
 lepiota_rachodes:
   id: 7
+  accepted_id: 7
   sync_id: 7xx1
   created: 2007-04-30 21:34:00
   modified: 2007-04-30 21:34:00
@@ -118,6 +125,7 @@ lepiota_rachodes:
 # No Taxon 2
 lepiota_rhacodes:
   id: 8
+  accepted_id: 8
   sync_id: 8xx1
   created: 2007-04-30 21:34:00
   modified: 2007-04-30 21:34:00
@@ -135,6 +143,7 @@ lepiota_rhacodes:
 # Taxon 1, Name 1
 macrolepiota_rachodes:
   id: 9
+  accepted_id: 9
   sync_id: 9xx1
   created: 2007-04-30 21:34:00
   modified: 2007-04-30 21:34:00
@@ -153,6 +162,7 @@ macrolepiota_rachodes:
 # Taxon 1, Name 2
 macrolepiota_rhacodes:
   id: 10
+  accepted_id: 9
   sync_id: 10xx1
   created: 2007-04-30 21:34:00
   modified: 2007-04-30 21:34:00
@@ -171,6 +181,7 @@ macrolepiota_rhacodes:
 # Taxon 2, Name 1
 chlorophyllum_rachodes:
   id: 11
+  accepted_id: 11
   sync_id: 11xx1
   created: 2007-04-30 21:34:00
   modified: 2007-04-30 21:34:00
@@ -189,6 +200,7 @@ chlorophyllum_rachodes:
 # Taxon 2, Name 2
 chlorophyllum_rhacodes:
   id: 12
+  accepted_id: 11
   sync_id: 12xx1
   created: 2007-04-30 21:34:00
   modified: 2007-04-30 21:34:00
@@ -207,6 +219,7 @@ chlorophyllum_rhacodes:
 # Taxon 3, Name 1
 lactarius_alpinus:
   id: 13
+  accepted_id: 13
   sync_id: 13xx1
   created: 2007-05-28 15:14:00
   modified: 2007-04-30 15:14:10
@@ -225,6 +238,7 @@ lactarius_alpinus:
 # Taxon 3, Name 2
 lactarius_alpigenes:
   id: 14
+  accepted_id: 13
   sync_id: 14xx1
   created: 2007-05-28 15:14:00
   modified: 2007-04-30 15:14:10
@@ -244,6 +258,7 @@ lactarius_alpigenes:
 # Taxon 3, Name 3
 lactarius_kuehneri:
   id: 15
+  accepted_id: 13
   sync_id: 15xx1
   created: 2007-05-28 15:14:00
   modified: 2007-04-30 15:14:10
@@ -263,6 +278,7 @@ lactarius_kuehneri:
 # Taxon 3, Name 4
 lactarius_subalpinus:
   id: 16
+  accepted_id: 13
   sync_id: 16xx1
   created: 2007-05-28 15:14:00
   modified: 2007-04-30 15:14:10
@@ -282,6 +298,7 @@ lactarius_subalpinus:
 # Deprecated genus
 psalliota:
   id: 17
+  accepted_id: 17
   sync_id: 17xx1
   created: 2007-06-09 08:06:28
   modified: 2007-06-09 08:06:40
@@ -299,6 +316,7 @@ psalliota:
 # Valid genus
 agaricus:
   id: 18
+  accepted_id: 18
   sync_id: 18xx1
   created: 2007-06-09 08:06:28
   modified: 2007-06-09 08:06:40
@@ -316,6 +334,7 @@ agaricus:
 # Misspelt name for testing merging
 agaricus_campestrus:
   id: 19
+  accepted_id: 19
   sync_id: 19xx1
   created: 2007-06-23 20:04:00
   modified: 2007-06-23 20:04:00
@@ -333,6 +352,7 @@ agaricus_campestrus:
 # Name with notes
 agaricus_campestras:
   id: 20
+  accepted_id: 20
   description_id: 1
   sync_id: 20xx1
   created: 2007-06-23 20:04:00
@@ -351,6 +371,7 @@ agaricus_campestras:
 # Another name with notes
 agaricus_campestros:
   id: 21
+  accepted_id: 21
   description_id: 2
   sync_id: 21xx1
   created: 2007-06-23 20:04:00
@@ -369,6 +390,7 @@ agaricus_campestros:
 # For testing merges with existings versions
 coprinellus_micaceus:
   id: 22
+  accepted_id: 22
   sync_id: 22xx1
   created: 2007-06-24 12:45:55
   modified: 2007-06-24 12:45:55
@@ -386,6 +408,7 @@ coprinellus_micaceus:
 # For testing merges with existing versions
 coprinellus_micaceus_no_author:
   id: 23
+  accepted_id: 23
   sync_id: 23xx1
   created: 2007-06-24 12:45:55
   modified: 2007-06-24 12:45:55
@@ -403,6 +426,7 @@ coprinellus_micaceus_no_author:
 # For testing when the author is added to a name that has an observation
 strobilurus_diminutivus_no_author:
   id: 24
+  accepted_id: 24
   sync_id: 24xx1
   created: 2007-07-20 20:54:45
   modified: 2007-07-20 20:54:45
@@ -420,6 +444,7 @@ strobilurus_diminutivus_no_author:
 # For testing when there are both an approved and deprecated name with the same text name
 pluteus_petasatus_approved:
   id: 25
+  accepted_id: 25
   sync_id: 25xx1
   created: 2007-07-20 20:54:45
   modified: 2007-07-20 20:54:45
@@ -437,6 +462,7 @@ pluteus_petasatus_approved:
 # For testing the where the author is added when a name has an observation
 pluteus_petasatus_deprecated:
   id: 26
+  accepted_id: 26
   sync_id: 26xx1
   created: 2007-07-20 21:12:45
   modified: 2007-07-20 21:12:45
@@ -455,6 +481,7 @@ pluteus_petasatus_deprecated:
 # Valid genus
 lepiota:
   id: 27
+  accepted_id: 27
   sync_id: 27xx1
   created: 2007-07-30 08:06:28
   modified: 2007-07-30 08:06:40
@@ -472,6 +499,7 @@ lepiota:
 # Valid genus
 chlorophyllum:
   id: 28
+  accepted_id: 28
   sync_id: 28xx1
   created: 2007-07-30 22:06:28
   modified: 2007-07-30 22:06:40
@@ -489,6 +517,7 @@ chlorophyllum:
 # Two fake names with non-alphanumerics for severe stress-testing species lists.
 bugs_bunny_one:
   id: 29
+  accepted_id: 29
   sync_id: 29xx1
   created: 2008-01-31 01:01:01
   modified: 2008-01-31 01:01:01
@@ -505,6 +534,7 @@ bugs_bunny_one:
 
 bugs_bunny_two:
   id: 30
+  accepted_id: 30
   sync_id: 30xx1
   created: 2008-01-31 01:01:01
   modified: 2008-01-31 01:01:01
@@ -521,6 +551,7 @@ bugs_bunny_two:
 
 russula_brevipes_no_author:
   id: 31
+  accepted_id: 31
   sync_id: 31xx1
   created: 2008-03-10 22:31:25
   modified: 2008-03-10 22:31:27
@@ -537,6 +568,7 @@ russula_brevipes_no_author:
 
 russula_brevipes_author_notes:
   id: 32
+  accepted_id: 32
   description_id: 3
   sync_id: 32xx1
   created: 2008-03-10 22:33:00
@@ -554,6 +586,7 @@ russula_brevipes_author_notes:
 
 russula_cremoricolor_no_author_notes:
   id: 33
+  accepted_id: 33
   description_id: 4
   sync_id: 33xx1
   created: 2008-03-12 20:53:08
@@ -571,6 +604,7 @@ russula_cremoricolor_no_author_notes:
 
 russula_cremoricolor_author_notes:
   id: 34
+  accepted_id: 34
   description_id: 5
   sync_id: 34xx1
   created: 2008-03-12 20:53:36
@@ -588,6 +622,7 @@ russula_cremoricolor_author_notes:
 
 lentinellus_ursinus_author1:
   id: 35
+  accepted_id: 35
   sync_id: 35xx1
   created: 2008-03-19 08:35:30
   modified: 2008-03-19 08:35:37
@@ -604,6 +639,7 @@ lentinellus_ursinus_author1:
 
 lentinellus_ursinus_author2:
   id: 36
+  accepted_id: 36
   sync_id: 36xx1
   created: 2008-03-19 08:35:30
   modified: 2008-03-19 08:35:37
@@ -621,6 +657,7 @@ lentinellus_ursinus_author2:
 # Genus with correct author
 macrocybe_pegler:
   id: 37
+  accepted_id: 37
   sync_id: 37xx1
   created: 2008-09-05 22:30:00
   modified: 2008-09-05 22:30:00
@@ -638,6 +675,7 @@ macrocybe_pegler:
 # Genus with incorrect author
 macrocybe_titans:
   id: 38
+  accepted_id: 38
   sync_id: 38xx1
   created: 2008-09-05 22:30:00
   modified: 2008-09-05 22:30:00
@@ -654,6 +692,7 @@ macrocybe_titans:
 
 boletus_edulis:
   id: 39
+  accepted_id: 39
   sync_id: 39xx1
   created: 2008-10-05 16:16:50
   modified: 2008-10-05 16:17:08
@@ -670,6 +709,7 @@ boletus_edulis:
 
 peltigera:
   id: 40
+  accepted_id: 40
   description_id: 6
   sync_id: 40xx1
   created: 2009-01-01 01:01:01
@@ -689,6 +729,7 @@ peltigera:
 
 petigera:
   id: 41
+  accepted_id: 40
   sync_id: 41xx1
   created: 2009-01-01 01:01:01
   modified: 2009-01-02 01:01:01
@@ -708,6 +749,7 @@ petigera:
 
 suillus:
   id: 42
+  accepted_id: 42
   description_id: 7
   sync_id: 42xx1
   created: 2009-10-12 21:30:01
@@ -725,6 +767,7 @@ suillus:
 
 suillus_by_white:
   id: 43
+  accepted_id: 43
   sync_id: 43xx1
   created: 2009-10-12 21:30:01
   modified: 2009-10-12 21:30:01
@@ -741,6 +784,7 @@ suillus_by_white:
 
 suilus:
   id: 44
+  accepted_id: 44
   sync_id: 44xx1
   created: 2009-10-12 21:30:01
   modified: 2009-10-12 21:30:01
@@ -759,6 +803,7 @@ suilus:
 
 tremella_mesenterica:
   id: 45
+  accepted_id: 45
   sync_id: 45x1
   created: 2011-11-06 18:07:20
   modified: 2011-11-06 18:07:20
@@ -775,6 +820,7 @@ tremella_mesenterica:
   
 tremella:
   id: 46
+  accepted_id: 46
   sync_id: 46x1
   created: 2011-11-06 18:09:20
   modified: 2011-11-06 18:09:20
@@ -791,6 +837,7 @@ tremella:
 
 tremella_justpublished:
   id: 47
+  accepted_id: 47
   sync_id: 47x1
   created: 2011-11-06 18:07:20
   modified: 2011-11-06 18:07:20
@@ -807,6 +854,7 @@ tremella_justpublished:
 
 hygrocybe_russocoriacea_bad_author:
   id: 48
+  accepted_id: 48
   sync_id: 48x1
   version: 1
   created: 2007-01-10 05:06:08
@@ -822,6 +870,7 @@ hygrocybe_russocoriacea_bad_author:
 
 hygrocybe_russocoriacea_good_author:
   id: 49
+  accepted_id: 49
   sync_id: 49x1
   version: 1
   created: 2011-12-10 03:50:48

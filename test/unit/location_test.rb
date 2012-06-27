@@ -358,7 +358,7 @@ class LocationTest < UnitTestCase
     assert_true(Location.is_unknown?('Anywhere'))
   end
 
-  def test_unknown
+  def test_unknown2
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown
     assert_objs_equal(loc1, loc2)
@@ -368,5 +368,44 @@ class LocationTest < UnitTestCase
     Globalite.localization_data[:'es-ES'][:unknown_locations] = 'Desconocido'
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)
+  end
+
+  def test_merge_with_user
+    do_merge_test(@rolf)
+  end
+
+  def test_merge_with_species_lists
+    do_merge_test(SpeciesList.first)
+  end
+
+  def test_merge_with_observation
+    do_merge_test(Observation.last)
+  end
+
+  def do_merge_test(obj)
+    loc1 = Location.first
+    loc2 = Location.last
+    obj.update_attribute(:location, loc1)
+    obj.reload
+    assert_equal(loc1.id, obj.location_id)
+    loc2.merge(loc1)
+    obj.reload
+    assert_equal(loc2.id, obj.location_id)
+  end
+
+  def test_change_scientific_name
+    loc = Location.first
+
+    User.current = @rolf
+    assert_equal(:postal, User.current_location_format)
+    loc.update_attribute(:display_name, 'One, Two, Three')
+    assert_equal('One, Two, Three', loc.name)
+    assert_equal('Three, Two, One', loc.scientific_name)
+
+    User.current = @roy
+    assert_equal(:scientific, User.current_location_format)
+    loc.update_attribute(:display_name, 'Un, Deux, Trois')
+    assert_equal('Trois, Deux, Un', loc.name)
+    assert_equal('Un, Deux, Trois', loc.scientific_name)
   end
 end

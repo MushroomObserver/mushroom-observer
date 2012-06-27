@@ -372,10 +372,9 @@ class ObserverController < ApplicationController
         case model.to_s
 
           when 'Location'
-            pattern1 = "%#{id}%"
-            pattern2 = "%#{Location.reverse_name(id)}%"
+            pattern = "%#{id}%"
             objs = Location.find(:all, :limit => 100, :conditions =>
-                                 [ 'name LIKE ? OR name LIKE ?', pattern1, pattern2 ])
+                                 [ 'name LIKE ? OR scientific_name LIKE ?', pattern, pattern ])
 
           when 'Name'
             if parse = Name.parse_name(id)

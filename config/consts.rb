@@ -14,9 +14,9 @@
 ################################################################################
 
 # Various server domains.
-DOMAIN       = 'localhost' if !defined?(DOMAIN)
+DOMAIN       = 'localhost' if not defined? DOMAIN
 HTTP_DOMAIN  = "http://#{DOMAIN}:3000"
-IMAGE_DOMAIN = "#{HTTP_DOMAIN}/images"
+IMAGE_DOMAIN = "http://#{DOMAIN}:3000/images"
 BAD_DOMAINS  = ['localhost.localdomain:3000']
 
 # Where images are kept.
@@ -104,3 +104,10 @@ PIVOTAL_PROJECT  = 'project_id'
 PIVOTAL_MAX_VOTE = 1
 PIVOTAL_MIN_VOTE = -1
 PIVOTAL_CACHE    = RAILS_ROOT + '/tmp/pivotal'
+
+# Configuration files for location validator.
+LOCATION_COUNTRIES_FILE = "#{RAILS_ROOT}/config/location/countries.yml"
+LOCATION_STATES_FILE    = "#{RAILS_ROOT}/config/location/states.yml"
+LOCATION_PREFIXES_FILE  = "#{RAILS_ROOT}/config/location/prefixes.yml"
+LOCATION_BAD_TERMS_FILE = "#{RAILS_ROOT}/config/location/bad_terms.yml"
+

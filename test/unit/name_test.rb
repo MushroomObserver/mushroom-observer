@@ -839,7 +839,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Pleurotus djamor var. djamor',
       :search_name  => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
       :sort_name    => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
-      :display_name => '**__Pleurotus djamor__** var. **__djamor__** (Fr.) Boedijn',
+      :display_name => '**__Pleurotus djamor__** (Fr.) Boedijn var. **__djamor__**',
       :parent_name  => 'Pleurotus djamor',
       :rank         => :Variety,
       :author       => '(Fr.) Boedijn'
@@ -1505,5 +1505,41 @@ class NameTest < UnitTestCase
 
     name.display_name = '**__Macrocybe__** subgenus **__Blah__**'
     assert_equal('**__Macrocybe__** subgenus **__Blah__**', name.display_name)
+  end
+
+  def test_changing_author_of_natural_variety
+    name = create_test_name('Acarospora nodulosa var. nodulosa')
+    assert_equal('Acarospora nodulosa var. nodulosa', name.text_name)
+    assert_equal('Acarospora nodulosa var. nodulosa', name.search_name)
+    assert_equal('Acarospora nodulosa var. nodulosa', name.sort_name)
+    assert_equal('**__Acarospora nodulosa__** var. **__nodulosa__**', name.display_name)
+    assert_equal('', name.author)
+
+    name.change_author('(Dufour) Hue')
+    assert_equal('Acarospora nodulosa var. nodulosa', name.text_name)
+    assert_equal('Acarospora nodulosa var. nodulosa (Dufour) Hue', name.search_name)
+    assert_equal('Acarospora nodulosa var. nodulosa (Dufour) Hue', name.sort_name)
+    assert_equal('**__Acarospora nodulosa__** (Dufour) Hue var. **__nodulosa__**', name.display_name)
+    assert_equal('(Dufour) Hue', name.author)
+
+    name.change_author('Ach.')
+    assert_equal('Acarospora nodulosa var. nodulosa', name.text_name)
+    assert_equal('Acarospora nodulosa var. nodulosa Ach.', name.search_name)
+    assert_equal('Acarospora nodulosa var. nodulosa Ach.', name.sort_name)
+    assert_equal('**__Acarospora nodulosa__** Ach. var. **__nodulosa__**', name.display_name)
+    assert_equal('Ach.', name.author)
+  end
+
+  def test_format_natural_variety
+    assert_equal('**__Acarospora__**', Name.format_natural_variety('Acarospora', '', :Genus, false))
+    assert_equal('**__Acarospora__** L.', Name.format_natural_variety('Acarospora', 'L.', :Genus, false))
+    assert_equal('**__Acarospora nodulosa__** L.', Name.format_natural_variety('Acarospora nodulosa', 'L.', :Species, false))
+    assert_equal('__Acarospora nodulosa__ var. __reagens__ L.', Name.format_natural_variety('Acarospora nodulosa var. reagens', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. var. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa var. nodulosa', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa ssp. nodulosa', 'L.', :Subspecies, true))
+    assert_equal('__Acarospora nodulosa__ L. f. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa f. nodulosa', 'L.', :Form, true))
+    assert_equal('__Acarospora nodulosa__ ssp. __reagens__ L. var. __reagens__', Name.format_natural_variety('Acarospora nodulosa ssp. reagens var. reagens', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa ssp. nodulosa var. nodulosa', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__ f. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa ssp. nodulosa var. nodulosa f. nodulosa', 'L.', :Form, true))
   end
 end

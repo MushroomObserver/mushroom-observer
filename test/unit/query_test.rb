@@ -5,19 +5,25 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 class QueryTest < UnitTestCase
 
   def assert_state_exists(id)
-    assert(!id.nil? && Query.find(id))
+    clean_our_backtrace do
+      assert(!id.nil? && Query.find(id))
+    end
   end
 
   def assert_state_not_exists(id)
-    assert_nil(Query.safe_find(id))
+    clean_our_backtrace do
+      assert_nil(Query.safe_find(id))
+    end
   end
 
   def assert_query(expect, *args)
-    expect.map!(&:id) if expect.first.is_a?(AbstractModel)
-    query = Query.lookup(*args)
-    assert_equal(expect, query.result_ids, query.last_query)
-    assert_match(/#{args[0].t}|Advanced Search|(Lower|Higher) Taxa/, query.title)
-    assert(!query.title.include?('[:'), "Title contains undefined localizations: <#{query.title}>")
+    clean_our_backtrace do
+      expect.map!(&:id) if expect.first.is_a?(AbstractModel)
+      query = Query.lookup(*args)
+      assert_equal(expect, query.result_ids, query.last_query)
+      assert_match(/#{args[0].t}|Advanced Search|(Lower|Higher) Taxa/, query.title)
+      assert(!query.title.include?('[:'), "Title contains undefined localizations: <#{query.title}>")
+    end
   end
 
   def clean(str)
@@ -1609,5 +1615,31 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:User, :in_set, :ids => [1,1000,2])
     query.query
     assert_equal(2, query.results.length)
+  end
+
+  def test_location_ordering
+    loc1 = locations(:albion)
+    loc2 = locations(:elgin_co)
+
+    User.current = @rolf
+    assert_equal(:postal, User.current_location_format)
+    assert_query([loc1, loc2], :Location, :in_set, :ids => [1, 6], :by => :name)
+
+    User.current = @roy
+    assert_equal(:scientific, User.current_location_format)
+    assert_query([loc2, loc1], :Location, :in_set, :ids => [1, 6], :by => :name)
+
+    obs1 = Observation.find(1)
+    obs2 = Observation.find(2)
+    obs1.update_attribute(:location, loc1)
+    obs2.update_attribute(:location, loc2)
+
+    User.current = @rolf
+    assert_equal(:postal, User.current_location_format)
+    assert_query([obs1, obs2], :Observation, :in_set, :ids => [1, 2], :by => :location)
+
+    User.current = @roy
+    assert_equal(:scientific, User.current_location_format)
+    assert_query([obs2, obs1], :Observation, :in_set, :ids => [1, 2], :by => :location)
   end
 end
