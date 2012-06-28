@@ -3,8 +3,8 @@
 #  = Semantic Vernacular Data Source
 #
 #  This class describes the abstract data model for the semantic vernacular
-#  system. Subclasses should override some of the methods to implement 
-#  corresponding functionalities. Data are retrieved directly throug a triple 
+#  module. Subclasses should override some of the methods to implement 
+#  corresponding functionalities. Data are retrieved directly through a triple 
 #  store.
 #
 #  == Class Methods
@@ -13,25 +13,21 @@
 #  === Private
 #  query:: 								Submit a query to the triple store and get responses.
 #  query_all:: 						Build a query to get all instances.
-#  query_all_hierarchy:: 	Build a query to get all instances with hierarchy.
 #
 #  == Instance Methods
 #  ==== Public
 #  to_s::           			Returns the lable for a given instance.
 #  get_label::						Returns the lable for a given instance.
-#  get_properites:: 			Returns the properties for a given instance.
-#  refactor_properties:: 	Refactor the property array returned by 
-#  												get_properties. Combine hashes with identical keys.
+#  
 #  ==== Private
 #  query_label:: 					Build a query to get the lable for a given instance.
-#  query_properties:: 		Build a query to get the properties for a given 
-#  												instance.
 #
 ################################################################################
 
 require "sparql/client"
 
 class SemanticVernacularDataSource
+
 	attr_accessor :uri, :label
 
 	def initialize(uri)
@@ -39,8 +35,8 @@ class SemanticVernacularDataSource
 		@label = get_label # String
 	end
 
-	# For subclasses to override.
 	def self.index
+		query(query_all)
 	end
 
 	def to_s
@@ -50,29 +46,6 @@ class SemanticVernacularDataSource
 	# Return: string
 	def get_label
 		self.class.query(query_label)[0]["label"].to_s
-	end
-
-	# Return: array of hashes
-	# [{"property" => "property_1", "value" => "value_1"}, 
-	#  {"property" => "property_2", "value" => "value_2"}, ...]
-	def get_properties
-		self.class.query(query_properties)
-	end
-
-	# Return: hash {"property_1" => "values_1", "property_2" => "values_2", ...}
-	def refactor_properties
-		properties = Hash.new
-		get_properties.each do |property|
-			key = property["property"].to_s
-			value = property["value"].to_s
-			if properties.has_key?(key) 
-				properties[key].push(value)
-			else
-				properties[key] = Array.new
-				properties[key].push(value)
-			end
-		end
-		return properties
 	end
 
 	private
@@ -93,12 +66,7 @@ class SemanticVernacularDataSource
 			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 			PREFIX sv: <http://aquarius.tw.rpi.edu/ontology/fungi.owl#>\n)
 
-	# For subclasses to override.
 	def self.query_all
-	end
-
-	# For subclasses to override.
-	def self.query_all_hierarchy
 	end
 
 	def query_label
@@ -107,10 +75,6 @@ class SemanticVernacularDataSource
 			WHERE {
 				<#{@uri}> rdfs:label ?label .
 			})
-	end
-
-	# For subclasses to override.
-	def query_properties
 	end
 	
 end

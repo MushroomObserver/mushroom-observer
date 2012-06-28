@@ -4,22 +4,22 @@
 		<li>URI: <%= @vernacular.uri %></li>
 		<li>Label: <%= @vernacular.label %></li>
 		<li>
-			Properties: 
+			Features: 
 			<ul> 
-				<% @vernacular.refactor_properties.each do |property, values| %>
-				<li><%= property + ": " + values.join(" <i>or</i> ").to_s %></li>
+				<% @vernacular.refactor_features.each do |feature, values| %>
+				<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
 				<% end %>
 			</ul>
 		</li>
 		<li>
-			Associated Species:
+			Associated Taxa:
 			<ul>
-				<% @vernacular.associate_species.each do |species| %>
+				<% @vernacular.associate_taxa.each do |taxon| %>
 				<li>
-					<%= link_to(species["species"],
+					<%= link_to(taxon["uri"],
 											:controller => "semantic_vernacular", 
 											:action => "show_species", 
-											:uri => species["species"]) %>
+											:uri => taxon["uri"]) %>
 				</li>
 				<% end %>
 			</ul>
@@ -29,7 +29,7 @@
 <div>
 	<%= link_to("Go to all vernacular descriptions", 
 							:controller => "semantic_vernacular",
-							:action => "index_vernaculars") + " | " +
+							:action => "index") + " | " +
 			link_to("Go to all species", 
 							:controller => "semantic_vernacular",
 							:action => "index_species") %>

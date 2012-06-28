@@ -1,32 +1,26 @@
-# encoding: utf-8
-#
-#  = Semantic Species
-#
-#  This class is a subclass of the SemanticVernacularDataSource class. It 
-#  describes the data model of semantic species.
-#
-#  == Class Methods
-#  === Public
-#  index::  								List all instances.
-#  === Private
-#  query_all:: 							Overridden method.
-#  query_all_hierarchy:: 		Overridden method.
-#
-#  == Instance Methods
-#  ==== Public
-#  associate_species::  		Associate a vernacular to species.
-#  ==== Private
-#  query_properties:: 			Overridden method.
-#  query_links::  					Build a query to get links to external websites for
-#  													a given species instance.
-#
-################################################################################
-
 class SemanticSpecies < SemanticVernacularDataSourceViaProxy
 
-	def self.index
-		# List all instances in a flat structure
-		query(query_all)
+	# Return: array of hashes
+	# [{"feature" => "feature_1", "value" => "value_1"}, 
+	#  {"feature" => "feature_2", "value" => "value_2"}, ...]
+	def get_features
+		self.class.query(query_features)
+	end
+
+	# Return: hash {"feature_1" => "values_1", "feature_2" => "values_2", ...}
+	def refactor_features
+		features = Hash.new
+		get_features.each do |feature|
+			key = feature["feature"].to_s
+			value = feature["value"].to_s
+			if features.has_key?(key) 
+				features[key].push(value)
+			else
+				features[key] = Array.new
+				features[key].push(value)
+			end
+		end
+		return features
 	end
 
 	# Return: array of hashes
@@ -58,9 +52,9 @@ class SemanticSpecies < SemanticVernacularDataSourceViaProxy
 			})
 	end
 
-	def query_properties
+	def query_features
 		QUERY_PREFIX +
-		%(SELECT DISTINCT ?property ?value
+		%(SELECT DISTINCT ?feature ?value
 			WHERE {
 				{ <#{@uri}> rdfs:subClassOf ?class .
 					?class owl:unionOf ?list .
@@ -69,7 +63,7 @@ class SemanticSpecies < SemanticVernacularDataSourceViaProxy
 				?member a owl:Restriction .
 				?member owl:onProperty ?p .
 				?member owl:someValuesFrom ?v .
-				?p rdfs:label ?property .
+				?p rdfs:label ?feature .
 				?v rdfs:label ?value .
 			})
 	end

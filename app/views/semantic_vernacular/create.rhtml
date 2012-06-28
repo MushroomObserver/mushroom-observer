@@ -1,0 +1,18 @@
+<% javascript_include("jquery.min") %>
+<% javascript_include("semantic_vernacular") %>
+
+<div id="new-vernacular-description" style="float:left;margin-right:80px">
+  <p><b>Available Features:</b></p>
+  <form>
+    <button type="button" onclick="org.mo.sv.create.displayInput()">Submit</button>
+    <%= build_feature_hierarchy(SemanticVernacularHelper::FEATURE_ROOT, @all_features) %>
+    <button type="button" onclick="org.mo.sv.create.displayInput()">Submit</button>
+  </form>
+</div>
+<div id="input-display"></div>
+<div style="clear:both"></div>
+<div>
+  <%= link_to("Go to all vernacular descriptions", 
+              :controller => "semantic_vernacular",
+              :action => "index") %>
+</div>

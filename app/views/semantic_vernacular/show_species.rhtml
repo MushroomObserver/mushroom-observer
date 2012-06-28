@@ -4,10 +4,10 @@
 		<li>URI: <%= @species.uri %></li>
 		<li>Label: <%= @species.label %></li>
 		<li>
-			Properties: 
+			Features: 
 			<ul> 
-				<% @species.refactor_properties.each do |property, values| %>
-				<li><%= property + ": " + values.join(" <i>or</i> ").to_s %></li>
+				<% @species.refactor_features.each do |feature, values| %>
+				<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
 				<% end %>
 			</ul>
 		</li>
@@ -27,5 +27,5 @@
 							:action => "index_species") + " | " +
 			link_to("Go to all vernacular descriptions", 
 							:controller => "semantic_vernacular",
-							:action => "index_vernaculars") %>
+							:action => "index") %>
 </div>

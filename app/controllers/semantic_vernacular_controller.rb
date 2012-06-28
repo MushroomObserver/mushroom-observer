@@ -3,19 +3,21 @@
 #  = Semantic Vernacular Controller
 #
 #  == Actions
-#  index_vernaculars::  List all available semantic vernaculars with hierarchy.
-#  index_species::  		List all available semantic species.
-#  show_vernacular::   	Show a specific vernacular with uri, lable, properties, 
-#  											and associated species.
-#  show_species::   		Show a specific species with uri, lable, properties, and
-# 										  linked external websites.
+#  index::            List all semantic vernacular descriptions.
+#  index_species::  	List all semantic species.
+#  show::             Show a specific vernacular description with uri, lable, 
+#                     features, and associated taxa.
+#  show_species::   	Show a specific species with uri, lable, features, and
+# 										linked external websites.
+#  create::           Create an instance of semantic vernacular descriptions.
 #
 ################################################################################
 
 require_dependency 'classes/semantic_vernacular'
 
 class SemanticVernacularController < ApplicationController
-  def index_vernaculars
+
+  def index
   	@all_vernaculars = SemanticVernacularDescription.index
   end
 
@@ -23,11 +25,16 @@ class SemanticVernacularController < ApplicationController
   	@all_species = SemanticSpecies.index
   end
   
-  def show_vernacular
+  def show
   	@vernacular = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
   end
 
   def show_species
   	@species = SemanticSpecies.new(URI.unescape(params[:uri]))
   end
+
+  def create
+    @all_features = SemanticFungalFeature.index
+  end
+
 end
