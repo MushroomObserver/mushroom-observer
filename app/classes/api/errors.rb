@@ -16,7 +16,7 @@ class API
 
     def to_s
       # tag.l(args)
-      args.inspect
+      ":#{tag} #{args.inspect}"
     end
 
     def t
@@ -171,6 +171,9 @@ class API
   class MustHaveViewPermission < ObjectError
   end
 
+  class MustBeMember < ObjectError
+  end
+
 ################################################################################
 
   class MissingUpload < Error
@@ -206,6 +209,9 @@ class API
   end
 
   class LatLongMustBothBeSet < Error
+  end
+
+  class MustSupplyLocationOrGPS < Error
   end
 
   class LocationAlreadyExists < Error

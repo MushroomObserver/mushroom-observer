@@ -37,19 +37,19 @@
 #  :observation corresponds to API::Observation.  The primary actions each
 #  correspond to one of the main object types: 
 #
-#    :observation           Observations
-#    :comment               Comments (on observations, names, etc.)
-#    :image                 Images
+#    :observation           Observation's
+#    :comment               Comment's (on observations, names, etc.)
+#    :image                 Image's
 #    :naming                Name proposals for observations
-#    :vote                  Votes on name proposals for observations
-#    :image_vote            Votes on image quality
-#    :name                  Scientific names
-#    :name_description      Descriptions of scientific names
-#    :location              Locations
-#    :location_description  Descriptions of locations
-#    :species_list          Lists of observations
-#    :project               Projects
-#    :user                  Users
+#    :vote                  Vote's on name proposals for observations
+#    :image_vote            Vote's on image quality
+#    :name                  Scientific Name's
+#    :name_description      NameDescription's
+#    :location              Location's
+#    :location_description  LocationDescription's
+#    :species_list          SpeciesList's (list of Observation's)
+#    :project               Project's
+#    :user                  User's
 #
 #  These each have a uniform interface.  GET, PUT and DELETE requests all take
 #  a variety of standard "search" parameters, e.g.: 
@@ -91,10 +91,10 @@
 #  To find a full list of arguments allowed for each pair of (method, action)
 #  look at the documentation for that subclass.
 #
-#    API::User#get          Method used to GET users.
-#    API::Name#put          Method used to PUT names.
-#    API::Observation#post  Method used to POST observations.
-#    API::Image#delete      Method used to DELETE images.
+#    API::UserAPI#get          Method used to GET users.
+#    API::NameAPI#put          Method used to PUT names.
+#    API::ObservationAPI#post  Method used to POST observations.
+#    API::ImageAPI#delete      Method used to DELETE images.
 #
 #  == Attributes
 #
@@ -118,13 +118,13 @@ class API
   require_dependency 'api/upload'
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  require_dependency 'api/model'
-  require_dependency 'api/comment'
-  require_dependency 'api/image'
-  require_dependency 'api/location'
-  require_dependency 'api/name'
-  require_dependency 'api/observation'
-  require_dependency 'api/project'
-  require_dependency 'api/species_list'
-  require_dependency 'api/user'
+  require_dependency 'api/model_api'
+  require_dependency 'api/comment_api'
+  require_dependency 'api/image_api'
+  require_dependency 'api/location_api'
+  require_dependency 'api/name_api'
+  require_dependency 'api/observation_api'
+  require_dependency 'api/project_api'
+  require_dependency 'api/species_list_api'
+  require_dependency 'api/user_api'
 end

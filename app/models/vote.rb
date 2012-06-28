@@ -154,6 +154,23 @@ class Vote < AbstractModel
     [ :vote_agreement_0,   -3 ]
   ]
 
+  # Force unit tests to verify existence of these translations.
+  if false
+    :vote_confidence_100.l
+    :vote_confidence_80.l
+    :vote_confidence_60.l
+    :vote_confidence_40.l
+    :vote_confidence_20.l
+    :vote_confidence_0.l
+    :vote_no_opinion.l
+    :vote_agreement_100.l
+    :vote_agreement_80.l
+    :vote_agreement_60.l
+    :vote_agreement_40.l
+    :vote_agreement_20.l
+    :vote_agreement_0.l
+  end
+
   # List of options interpreted as "confidence".
   #
   #   for label, value in Vote.confidence_menu

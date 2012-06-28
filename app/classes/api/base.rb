@@ -34,7 +34,7 @@ class API
 
   def self.instantiate_subclass(params)
     action = params[:action].to_s
-    subclass = "API::#{action.camelize}"
+    subclass = "API::#{action.camelize}API"
     subclass = subclass.constantize
     subclass.new(params)
   rescue

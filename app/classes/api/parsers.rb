@@ -167,7 +167,7 @@ class API
   def parse_date(key, args={})
     declare_parameter(key, :date, args)
     str = get_param(key) or return args[:default]
-    if str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]\d\d$/)
+    if str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d$/)
       return Date.parse(str)
     else
       raise BadParameterValue.new(str, :date)
@@ -179,7 +179,7 @@ class API
   def parse_time(key, args={})
     declare_parameter(key, :time, args)
     str = get_param(key) or return args[:default]
-    if str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]\d\d[ :]?\d\d:?\d\d:?\d\d$/)
+    if str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d:?\d\d$/)
       return DateTime.parse(str)
     else
       raise BadParameterValue.new(str, :time)
@@ -294,7 +294,7 @@ class API
   def parse_latitude(key, args={})
     declare_parameter(key, :latitude, args)
     str = get_param(key) or return args[:default]
-    unless val = ::Location.parse_latitude(str)
+    unless val = Location.parse_latitude(str)
       raise BadParameterValue.new(str, :latitude)
     end
     return val
@@ -303,7 +303,7 @@ class API
   def parse_longitude(key, args={})
     declare_parameter(key, :longitude, args)
     str = get_param(key) or return args[:default]
-    unless val = ::Location.parse_longitude(str)
+    unless val = Location.parse_longitude(str)
       raise BadParameterValue.new(str, :longitude)
     end
     return val
@@ -312,7 +312,7 @@ class API
   def parse_altitude(key, args={})
     declare_parameter(key, :altitude, args)
     str = get_param(key) or return args[:default]
-    unless val = ::Location.parse_altitude(str)
+    unless val = Location.parse_altitude(str)
       raise BadParameterValue.new(str, :altitude)
     end
     return val
@@ -321,48 +321,46 @@ class API
   def parse_image(key, args={})
     declare_parameter(key, :image, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::Image)
-    raise BadParameterValue.new(str, :image)
+    val = try_parsing_id(str, Image)
+    raise BadParameterValue.new(str, :image) if !val
     return val
   end
 
   def parse_license(key, args={})
     declare_parameter(key, :license, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::License)
-    raise BadParameterValue.new(str, :license)
+    val = try_parsing_id(str, License)
+    raise BadParameterValue.new(str, :license) if !val
     return val
   end
 
   def parse_location(key, args={})
     declare_parameter(key, :location, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::Location)
-    val ||= ::Location.find_by_name_or_reverse_name(str)
-    raise BadParameterValue.new(str, :location)
+    val = try_parsing_id(str, Location)
+    val ||= Location.find_by_name_or_reverse_name(str)
+    raise BadParameterValue.new(str, :location) if !val
     return val
   end
 
   def parse_place_name(key, args={})
     declare_parameter(key, :place_name, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::Location)
-    val ||= ::Location.find_by_name_or_reverse_name(str)
-    val = val ? val.name : str
-    raise BadParameterValue.new(str, :place_name)
-    return val
+    val = try_parsing_id(str, Location)
+    val ||= Location.find_by_name_or_reverse_name(str)
+    return val ? val.name : str
   end
 
   def parse_name(key, args={})
     declare_parameter(key, :name, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::Name)
+    val = try_parsing_id(str, Name)
     unless val
-      val = ::Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
+      val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
       if val.empty?
-        val = ::Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str])
+        val = Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str])
       end
-      raise BadParameterValue.new(str, :name)
+      raise BadParameterValue.new(str, :name) if val.empty?
       raise AmbiguousName.new(str, val) if val.length > 1
       val = val.first
     end
@@ -376,35 +374,43 @@ class API
   def parse_observation(key, args={})
     declare_parameter(key, :observation, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::Observation)
-    raise BadParameterValue.new(str, :observation)
+    val = try_parsing_id(str, Observation)
+    raise BadParameterValue.new(str, :observation) if !val
     return val
   end
 
   def parse_project(key, args={})
     declare_parameter(key, :project, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::Project)
-    val ||= ::Project.find_by_title(str)
-    raise BadParameterValue.new(str, :project)
+    val = try_parsing_id(str, Project)
+    val ||= Project.find_by_title(str)
+    raise BadParameterValue.new(str, :project) if !val
+    if args[:must_be_member] and
+       not @user.projects_member.include?(val)
+      raise MustBeMember.new(val)
+    end
     return val
   end
 
   def parse_species_list(key, args={})
     declare_parameter(key, :species_list, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::SpeciesList)
-    val ||= ::SpeciesList.find_by_title(str)
-    raise BadParameterValue.new(str, :species_list)
+    val = try_parsing_id(str, SpeciesList)
+    val ||= SpeciesList.find_by_title(str)
+    raise BadParameterValue.new(str, :species_list) if !val
+    if args[:must_have_edit_permission] and
+       not val.has_edit_permission?(@user)
+      raise MustHaveEditPermission.new(val)
+    end
     return val
   end
 
   def parse_user(key, args={})
     declare_parameter(key, :user, args)
     str = get_param(key) or return args[:default]
-    val = try_parsing_id(str, ::User)
-    val ||= ::User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
-    raise BadParameterValue.new(str, :user)
+    val = try_parsing_id(str, User)
+    val ||= User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
+    raise BadParameterValue.new(str, :user) if !val
     return val
   end
 

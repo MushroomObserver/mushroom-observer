@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class Project < Model
-    self.model = ::Project
+  class ProjectAPI < ModelAPI
+    self.model = Project
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
@@ -36,17 +36,17 @@ class API
       title = params[:title].to_s
       admin_title = title + '.admin'
       raise MissingParameter.new(:title) if title.blank?
-      raise ProjectTaken.new(title) if ::Project.find_by_title(title)
-      raise UserGroupTaken.new(title) if ::UserGroup.find_by_name(title)
-      raise UserGroupTaken.new(admin_title) if ::UserGroup.find_by_name(admin_title)
+      raise ProjectTaken.new(title) if Project.find_by_title(title)
+      raise UserGroupTaken.new(title) if UserGroup.find_by_name(title)
+      raise UserGroupTaken.new(admin_title) if UserGroup.find_by_name(admin_title)
 
-      admin_group = ::UserGroup.new(
+      admin_group = UserGroup.new(
         :name  => title,
         :users => admins
       )
       admin_group.save or raise CreateFailed.new(admin_group)
 
-      member_group = ::UserGroup.new(
+      member_group = UserGroup.new(
         :name  => title,
         :users => members
       )
@@ -54,7 +54,7 @@ class API
 
       params[:admin_group] = admin_group
       params[:user_group] = member_group
-      proj = ::Project.new(params)
+      proj = Project.new(params)
       proj.save or raise CreateFailed.new(proj)
       return proj
     end

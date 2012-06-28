@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class Observation < Model
-    self.model = ::Observation
+  class ObservationAPI < ModelAPI
+    self.model = Observation
 
     self.high_detail_page_length = 10
     self.low_detail_page_length  = 100
@@ -52,8 +52,9 @@ class API
 
     def create_params
       @name = parse_name(:name)
-      @vote = parse_float(:vote, :default => ::Vote.maximum_vote)
+      @vote = parse_float(:vote, :default => Vote.maximum_vote)
 
+      loc = parse_place_name(:location, :limit => 1024)
       lat = parse_latitude(:latitude)
       long = parse_longitude(:longitude)
       alt = parse_altitude(:altitude)
@@ -61,14 +62,19 @@ class API
         errors << LatLongMustBothBeSet.new
         lat = long = nil
       end
+      if !lat && !loc
+        errors << MustSupplyLocationOrGPS.new
+      end
+      loc ||= :UNKNOWN.l
 
       images = parse_images(:images, :default => [])
       thumbnail = parse_image(:thumbnail, :default => images.first)
+      images.unshift(thumbnail) unless images.include?(thumbnail)
 
       {
         :when          => parse_date(:date, :default => Time.now),
         :notes         => parse_string(:notes, :default => ''),
-        :place_name    => parse_place_name(:location, :limit => 1024, :default => ::Location.unknown),
+        :place_name    => loc,
         :lat           => lat,
         :long          => long,
         :alt           => alt,
@@ -76,14 +82,17 @@ class API
         :is_collection_location => parse_boolean(:is_collection_location, :default => true),
         :thumb_image   => thumbnail,
         :images        => images,
-        :projects      => parse_projects(:projects, :default => []),
-        :species_lists => parse_species_lists(:species_lists, :default => []),
+        :projects      => parse_projects(:projects, :default => [], :must_be_member => true),
+        :species_lists => parse_species_lists(:species_lists, :default => [], :must_have_edit_permission => true),
       }
+    end
+
+    def validate_create_params!(params)
     end
 
     def after_create(obs)
       unless @name.blank?
-        naming = obs.naming.create(:name => name)
+        naming = obs.namings.create(:name => @name)
         obs.change_vote(naming, @vote, user)
       end
       obs.log(:log_observation_created)

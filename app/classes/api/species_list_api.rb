@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class SpeciesList < Model
-    self.model = ::SpeciesList
+  class SpeciesListAPI < ModelAPI
+    self.model = SpeciesList
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
@@ -37,7 +37,7 @@ class API
       {
         :title      => parse_string(:title, :limit => 100),
         :when       => parse_date(:date, :default => Time.now),
-        :place_name => parse_place_name(:location, :limit => 1024, :default => ::Location.unknown),
+        :place_name => parse_place_name(:location, :limit => 1024, :default => Location.unknown),
         :notes      => parse_string(:notes, :default => ''),
       }
     end

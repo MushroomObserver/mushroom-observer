@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class Location < Model
-    self.model = ::Location
+  class LocationAPI < ModelAPI
+    self.model = Location
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
@@ -42,14 +42,14 @@ class API
       raise MissingParameter.new(:east)  if params[:east].blank?
       raise MissingParameter.new(:west)  if params[:west].blank?
       name = params[:display_name].to_s
-      if ::Location.find_by_name_or_reverse_name(name)
+      if Location.find_by_name_or_reverse_name(name)
         raise LocationAlreadyExists.new(name)
       end
     end
 
     def update_params
       if name = parse_string(:set_name, :limit => 1024)
-        if ::Location.find_by_name_or_reverse_name(name)
+        if Location.find_by_name_or_reverse_name(name)
           raise LocationAlreadyExists.new(name)
         end
         if query.num_results > 1

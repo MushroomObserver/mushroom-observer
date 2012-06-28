@@ -573,68 +573,70 @@ footer_viewed: "*[:Viewed]:* [times], *last [:viewed]:* [date]"
 footer_version_out_of: "*[:Version]:* [num] *of* [total]"
 
 # Taxonomic ranks.
-RANK_CLASS: Class
-rank_class: class
-RANK_FAMILY: Family
-rank_family: family
-RANK_FORM: Form
-rank_form: form
-RANK_GENUS: Genus
-rank_genus: genus
-RANK_GROUP: Group
-rank_group: group
 RANK_DOMAIN: Domain
 rank_domain: domain
+RANK_PLURAL_DOMAIN: Domain
+rank_plural_domain: domain
 RANK_KINGDOM: Kingdom
 rank_kingdom: kingdom
-RANK_ORDER: Order
-rank_order: order
-RANK_PHYLUM: Phylum
-rank_phylum: phylum
-RANK_SECTION: Section
-rank_section: section
-RANK_SPECIES: Species
-rank_species: species
-RANK_STIRPS: Stirps
-rank_stirps: stirps
-RANK_SUBGENUS: Subgenus
-rank_subgenus: subgenus
-RANK_SUBSECTION: Subsection
-rank_subsection: subsection
-RANK_SUBSPECIES: Subspecies
-rank_subspecies: subspecies
-RANK_VARIETY: Variety
-rank_variety: variety
-RANK_PLURAL_CLASS: Classes
-rank_plural_class: classes
-RANK_PLURAL_FAMILY: Families
-rank_plural_family: families
-RANK_PLURAL_FORM: Forms
-rank_plural_form: forms
-RANK_PLURAL_GENUS: Genera
-rank_plural_genus: genera
-RANK_PLURAL_GROUP: Groups
-rank_plural_group: groups
 RANK_PLURAL_KINGDOM: Kingdoms
 rank_plural_kingdom: kingdoms
-RANK_PLURAL_ORDER: Orders
-rank_plural_order: orders
+RANK_PHYLUM: Phylum
+rank_phylum: phylum
 RANK_PLURAL_PHYLUM: Phyla
 rank_plural_phylum: phyla
-RANK_PLURAL_SECTION: Sections
-rank_plural_section: sections
-RANK_PLURAL_SPECIES: Species
-rank_plural_species: species
-RANK_PLURAL_STIRPS: Stirpes
-rank_plural_stirps: stirpes
+RANK_CLASS: Class
+rank_class: class
+RANK_PLURAL_CLASS: Classes
+rank_plural_class: classes
+RANK_ORDER: Order
+rank_order: order
+RANK_PLURAL_ORDER: Orders
+rank_plural_order: orders
+RANK_FAMILY: Family
+rank_family: family
+RANK_PLURAL_FAMILY: Families
+rank_plural_family: families
+RANK_GENUS: Genus
+rank_genus: genus
+RANK_PLURAL_GENUS: Genera
+rank_plural_genus: genera
+RANK_SUBGENUS: Subgenus
+rank_subgenus: subgenus
 RANK_PLURAL_SUBGENUS: Subgenera
 rank_plural_subgenus: subgenera
+RANK_SECTION: Section
+rank_section: section
+RANK_PLURAL_SECTION: Sections
+rank_plural_section: sections
+RANK_SUBSECTION: Subsection
+rank_subsection: subsection
 RANK_PLURAL_SUBSECTION: Subsections
 rank_plural_subsection: subsections
+RANK_STIRPS: Stirps
+rank_stirps: stirps
+RANK_PLURAL_STIRPS: Stirpes
+rank_plural_stirps: stirpes
+RANK_SPECIES: Species
+rank_species: species
+RANK_PLURAL_SPECIES: Species
+rank_plural_species: species
+RANK_SUBSPECIES: Subspecies
+rank_subspecies: subspecies
 RANK_PLURAL_SUBSPECIES: Subspecies
 rank_plural_subspecies: subspecies
+RANK_VARIETY: Variety
+rank_variety: variety
 RANK_PLURAL_VARIETY: Varieties
 rank_plural_variety: varieties
+RANK_FORM: Form
+rank_form: form
+RANK_PLURAL_FORM: Forms
+rank_plural_form: forms
+RANK_GROUP: Group
+rank_group: group
+RANK_PLURAL_GROUP: Groups
+rank_plural_group: groups
 
 # User statistics field names.
 user_stats_comments: "[:COMMENTS]"
@@ -653,6 +655,7 @@ user_stats_observations_with_voucher: Observations with Specimen, Notes and Imag
 user_stats_observations_without_voucher: All Other Observations
 user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
 user_stats_species_lists: "[:SPECIES_LISTS]"
+user_stats_users: ""
 user_stats_votes: "[:VOTES]"
 
 # Site statistics field names.
@@ -706,166 +709,6 @@ time_one_month_ago: last month, [date]
 time_months_ago: "[n] months ago, [date]"
 time_one_year_ago: last year, [date]
 time_years_ago: "[n] years ago, [date]"
-
-# Query titles.
-query_title_advanced_search: "[:app_advanced_search]"
-query_title_all: "[TYPE] Index"
-query_title_all_by: "[TYPES] by [ORDER]"
-query_title_at_location: "[TYPES] from [LOCATION]"
-query_title_at_where: "[TYPES] from '[USER_WHERE]'"
-query_title_by_author: "[TYPES] Authored by [USER]"
-query_title_by_editor: "[TYPES] Edited by [USER]"
-query_title_by_rss_log: "[TYPES] in Activity Log"
-query_title_by_user: "[TYPES] created by [USER]"
-query_title_for_project: "[TYPES] attached to [PROJECT]"
-query_title_for_target: "[TYPES] on [TARGET]"
-query_title_for_user: "[TYPES] for [USER]"
-query_title_in_set: Selected [TYPES]
-query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
-query_title_inside_observation: "[TYPES] of [OBSERVATION]"
-query_title_of_children: Lower Taxa under [NAME]
-query_title_of_name: "[TYPES] of [NAME]"
-query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
-query_title_of_name_nonconsensus: "[TYPES] That Might Be [NAME]"
-query_title_of_parents: Higher Taxa Containing [NAME]
-query_title_pattern_search: "[TYPES] Matching '[pattern]'"
-query_title_with_descriptions: "[TYPES] with [:DESCRIPTIONS]"
-query_title_with_descriptions_by_author: "[TYPES] with [:query_title_by_author(type=:description)]"
-query_title_with_descriptions_by_editor: "[TYPES] with [:query_title_by_editor(type=:description)]"
-query_title_with_descriptions_by_user: "[TYPES] with [:query_title_by_user(type=:description)]"
-query_title_with_descriptions_in_set: "[TYPES] with [descriptions]"
-query_title_with_observations: "[TYPES] with [:OBSERVATIONS]"
-query_title_with_observations_at_location: "[TYPES] with [:query_title_at_location(type=:observation)]"
-query_title_with_observations_at_where: "[TYPES] with [:query_title_at_where(type=:observation)]"
-query_title_with_observations_by_user: "[TYPES] with [:query_title_by_user(type=:observation)]"
-query_title_with_observations_in_set: "[TYPES] for [observations]"
-query_title_with_observations_in_species_list: "[TYPES] with [:query_title_in_species_list(type=:observation)]"
-query_title_with_observations_of_children: "[TYPES] with [:query_title_of_children(type=:observation)]"
-query_title_with_observations_of_name: "[TYPES] with [:query_title_of_name(type=:observation)]"
-query_title_with_observations_of_name_synonym: "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
-query_title_with_observations_of_name_nonconsensus: "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
-
-# Brief description of each query flavor.
-query_help_comment_all: all comments
-query_help_comment_by_user: comments created by a given user
-query_help_comment_in_set: comments in a given set
-query_help_comment_for_object: comments about a given object
-query_help_comment_for_user: comments sent to a given user
-query_help_comment_pattern_search: comments matching a search string
-query_help_image_advanced_search: images of observations matching advanced search criteria
-query_help_image_all: all images
-query_help_image_by_user: images created by a given user
-query_help_image_in_set: images in a given set
-query_help_image_inside_observation: images belonging to an outer observation query
-query_help_image_pattern_search: images matching a search_string
-query_help_image_with_observations: images of observations
-query_help_image_with_observations_at_location: images of observations at a defined location
-query_help_image_with_observations_at_where: images of observations at an undefined location
-query_help_image_with_observations_by_user: images of observations by a given user
-query_help_image_with_observations_in_set: images of observations in a given set
-query_help_image_with_observations_in_species_list: images of observations in a given species list
-query_help_image_with_observations_of_children: images of observations of children a given name
-query_help_image_with_observations_of_name: images of observations of a given name
-query_help_location_advanced_search: locations of observations matching advanced search criteria
-query_help_location_all: all locations
-query_help_location_by_user: locations created by a given user
-query_help_location_by_editor: locations modified by a given user
-query_help_location_by_rss_log: locations with recent activity
-query_help_location_in_set: locations in a given set
-query_help_location_pattern_search: locations matching a search string
-query_help_location_with_descriptions: locations with descriptions
-query_help_location_with_descriptions_by_author: locations with descriptions authored by a given user
-query_help_location_with_descriptions_by_editor: locations with descriptions edited by a given user
-query_help_location_with_descriptions_by_user: locations with descriptions created by a given user
-query_help_location_with_descriptions_in_set: locations with descriptions in a given set
-query_help_location_with_observations: locations of observations
-query_help_location_with_observations_by_user: locations of observations by a given user
-query_help_location_with_observations_in_set: locations of observations in a given set
-query_help_location_with_observations_in_species_list: locations of observations in a given species list
-query_help_location_with_observations_of_children: locations of observations of children of a given name
-query_help_location_with_observations_of_name: locations of observations of a given name
-query_help_location_description_all: all location descriptions
-query_help_location_description_by_author: location descriptions that list given user as an author
-query_help_location_description_by_editor: location descriptions that list given user as an editor
-query_help_location_description_by_user: location descriptions created by a given user
-query_help_location_description_in_set: location descriptions in a given set
-query_help_name_advanced_search: names of observations matching advanced search criteria
-query_help_name_all: all names
-query_help_name_by_user: names created by a given user
-query_help_name_by_editor: names modified by a given user
-query_help_name_by_rss_log: names with recent activity
-query_help_name_in_set: names in a given set
-query_help_name_of_children: names of children of a name
-query_help_name_of_parents: names of parents of a name
-query_help_name_pattern_search: names matching a search string
-query_help_name_with_descriptions: names with descriptions
-query_help_name_with_descriptions_by_author: names with descriptions authored by a given user
-query_help_name_with_descriptions_by_editor: names with descriptions edited by a given user
-query_help_name_with_descriptions_by_user: names with descriptions created by a given user
-query_help_name_with_descriptions_in_set: names with descriptions in a given set
-query_help_name_with_observations: names of observations, alphabetically
-query_help_name_with_observations_at_location: names of observations at a defined location
-query_help_name_with_observations_at_where: names of observations at an undefined location
-query_help_name_with_observations_by_user: names of observations by a given user
-query_help_name_with_observations_in_set: names of observations in a given set
-query_help_name_with_observations_in_species_list: names of observations in a given species list
-query_help_name_description_all: all name descriptions
-query_help_name_description_by_author: name descriptions that list a given user as an author
-query_help_name_description_by_editor: name descriptions that list a given user as an editor
-query_help_name_description_by_user: name descriptions created by a given user
-query_help_name_description_in_set: name descriptions in a given set
-query_help_observation_advanced_search: observations matching advanced search criteria
-query_help_observation_all: all observations
-query_help_observation_at_location: observations at a defined location
-query_help_observation_at_where: observations at an undefined location
-query_help_observation_by_rss_log: observations with recent activity
-query_help_observation_by_user: observations created by a given user
-query_help_observation_in_set: observations in a given set
-query_help_observation_in_species_list: observations in a given species list
-query_help_observation_of_children: observations of children of a given name
-query_help_observation_of_name: observations of a given name
-query_help_observation_pattern_search: observations matching a search string
-query_help_project_all: all projects
-query_help_project_by_rss_log: projects with recent activity
-query_help_project_in_set: projects in a given set
-query_help_project_pattern_search: projects matching a search string
-query_help_rss_log_all: all recent activity logs
-query_help_rss_log_in_set: activity logs in a given set
-query_help_species_list_all: all species lists
-query_help_species_list_at_location: species lists at a defined location
-query_help_species_list_at_where: species lists at an undefined location
-query_help_species_list_by_rss_log: species lists with recent activity
-query_help_species_list_by_user: species lists created by a given user
-query_help_species_list_in_set: species lists in a given set
-query_help_species_list_pattern_search: species lists matching a search string
-query_help_user_all: all users
-query_help_user_in_set: users in a given set
-query_help_user_pattern_search: users matching a search string
-
-# Sorting criteria.
-sort_by_header: "Sort by:"
-sort_by_id: ID
-sort_by_name: "[:NAME]"
-sort_by_filename: File Name
-sort_by_title: "[:TITLE]"
-sort_by_summary: "[:SUMMARY]"
-sort_by_date: "[:DATE]"
-sort_by_posted: Date Posted
-sort_by_created: Date Created
-sort_by_modified: Time Last Modified
-sort_by_rss_log: "[:sort_by_modified]"
-sort_by_last_login: Last Login
-sort_by_user: "[:USER]"
-sort_by_login: "[:LOGIN_NAME]"
-sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
-sort_by_where: "[:LOCATION]"
-sort_by_location: "[:LOCATION]"
-sort_by_confidence: "[:CONFIDENCE_LEVEL]"
-sort_by_image_quality: Image Quality
-sort_by_thumbnail_quality: Thumbnail Quality
-sort_by_num_views: Popularity
-sort_by_contribution: Contribution
-sort_by_reverse: Reverse Order
 
 # RSS log messages.
 log_ancient: "[String]"
@@ -3603,6 +3446,7 @@ how_proposed_name: "*Proposed Name* - A \"Name\":#name as proposed for a given \
 how_species_list: "*Species List* - A list of \"Observations\":#observation (not \"Names\":#name). Includes a date, a \"Location\":#location and a title for the list.  A given species list is owned by a particular \"User\":#user.  Only the owner or a site administrator can change or delete a species list.  There are no strict rules for how species lists should be used.  This is an area that is likely to change in the future as the community comes up with clearer ideas for how they should be used."
 how_user: "*User* - An account on [:app_title].  You are required to provide a valid email address when you first create an account.  This allows the system to stop automated programs from creating bogus accounts.  It also provides a way for other users to get in touch with you.  However, your email address will never be revealed unless you request an email be sent to another user and then only to that user.  If you are concerned about having your email address in our database, once you have verified your account, you can go to the '\"[:app_preferences]\":/account/prefs' page and remove your address."
 how_vote: "*Vote* - One \"User's\":#user vote on a \"Proposed Name\":#proposed_name for a given \"Observation\":#observation.  Expresses a level of confidence or agreement with that name, with half the choices (\"[min_pos_vote]\" and up) being positive and half (\"[min_neg_vote]\" and below) being negative.  Votes are owned by that user, and can only be changed or deleted by the owner or a site administrator."
+
 ################################################################################
 
 # LOCATION HELP PAGE
@@ -3667,6 +3511,7 @@ location_help_rule_other: >
   Avoid diacritics (eg é, ü etc.) - As mentioned when discussing country names, you should try to use the English version of a location name when possible and English does not include diacritics.  This is intended to encourage consistency and we are planning on providing proper support for other languages which will benefit from this consistency.  There are certainly cases where the a city or region is only know by a name that includes diacritics.  In these cases they should be used. A few simple web-searches should give you a good idea if there is a common English variation of a name (e.g., Montreal, Quebec for Montréal, Québec).\n
 
 location_help_rule_good_habits: "*Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name. Searching within Mushroom Observer can be helpful.  If you don't find anything there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org). Also feel free to use the notes section of either an observation or a location to be more specific."
+
 ################################################################################
 
 # ERROR MESSAGES
@@ -4011,6 +3856,235 @@ runtime_show_description_denied: You have not been given permission to see this 
 runtime_show_draft_denied: "Permission denied: only project members can view drafts in progress."
 runtime_signup_success: Signup successful.  Verification sent to your email account.
 runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
+
+################################################################################
+
+# LESS IMPORTANT ENUMERATED SETS OF VALUES
+
+# API error messages
+api_abort_due_to_errors: 'Aborted operation due to errors.'
+api_ambiguous_name: 'Name "[name]" is ambiguous, matches [others].'
+api_bad_action: 'Invalid request type "[action]".'
+api_bad_api_key: 'Invalid API key "[key]".'
+api_bad_limited_parameter_value: 'Expected "[val]" to be in [limit].'
+api_bad_method: 'Invalid request method "[method]".'
+api_bad_boolean_parameter_value: 'Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".'
+api_bad_integer_parameter_value: 'Invalid integer, "[val]".'
+api_bad_float_parameter_value: 'Invalid float, "[val]".'
+api_bad_date_parameter_value: 'Invalid date, "[val]", expect "YYYYMMDD".'
+api_bad_date_range_parameter_value: 'Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".'
+api_bad_time_parameter_value: 'Invalid time, "[val]", expect "YYYYMMDDHHMMSS".'
+api_bad_time_range_parameter_value: 'Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".'
+api_bad_latitude_parameter_value: >
+  Invalid latitude, "[val]", examples: "-45.6789", "45.6789°S", "45°40.73'S", "45°40'44"S".
+
+api_bad_longitude_parameter_value: >
+  Invalid longitude, "[val]", examples: "-45.6789", "45.6789°W", "45°40.73'W", "45°40'44"W".
+
+api_bad_altitude_parameter_value: >
+  Invalid altitude, "[val]", examples: "1234", "1234m", "4048'", "4048ft".
+
+api_bad_image_parameter_value: 'Invalid or unknown image, "[val]", accept only numerical id.'
+api_bad_license_parameter_value: 'Invalid or unknown license, "[val]", accept only numerical id.'
+api_bad_location_parameter_value: 'Invalid or unknown location, "[val]", accept numerical id or location name.'
+api_bad_name_parameter_value: 'Invalid or unknown name, "[val]", accept numerical id or scientific name (author not required).'
+api_bad_observation_parameter_value: 'Invalid or unknown observation, "[val]", accept only numerical id.'
+api_bad_project_parameter_value: 'Invalid or unknown project, "[val]", accept numerical id or project name.'
+api_bad_species_list_parameter_value: 'Invalid or unknown species list, "[val]", accept numerical id or species list title.'
+api_bad_user_parameter_value: 'Invalid or unknown user, "[val]", accept numerical id, login or name.'
+api_bad_object_parameter_value: 'Invalid or unknown object, "[val]", examples: "name #1234", "observation #54321", "species_list #42".'
+api_bad_version: 'Invalid version number "[version]".'
+api_couldnt_download_url: 'Failed to download the resource at the URL, "[url]": [error]'
+api_create_failed: 'Failed to create [type] "[name]".'
+api_destroy_failed: 'Failed to destroy [type] "[name]".'
+api_file_missing: 'File "[file]" is missing.'
+api_help_message: 'Usage: [help]'
+api_image_upload_failed: 'Failed to upload image: [error]'
+api_lat_long_must_both_be_set: 'Must supply both latitude and longitude, or neither.'
+api_location_already_exists: 'The location "[location]" already exists.'
+api_missing_method: 'Missing "method" parameter.'
+api_missing_parameter: 'Missing "[arg]" parameter.'
+api_missing_set_parameters: You didn't supply any "set" parameters.
+api_missing_upload: 'Expected a file upload in request data.'
+api_must_authenticate: 'Must authenticate with API key to perform this operation.'
+api_must_be_admin: 'You are not an admin for [project].'
+api_must_be_member: 'You are not a member of [type] "[name]".'
+api_must_have_edit_permission: 'You do not have permission to edit [type] "[name]".'
+api_must_have_view_permission: 'You do not have permission to view [type] "[name]".'
+api_must_supply_location_or_gps: 'You must supply either a location or GPS coordinates.'
+api_name_already_exists: 'The name, "[new]", already exists as "[old]"'
+api_name_doesnt_parse: >
+  The name, "[name]", doesn't parse as a valid scientific name.
+
+api_no_method_for_action: 'Invalid request method "[method]" for "[action]".'
+api_object_not_found: '[Type] #[id] does not exist, or someone has deleted it.'
+api_project_taken: 'The project, "[project]", already exists.'
+api_render_failed: 'There was a problem while rendering the results. [error]'
+api_string_too_long: 'The string, "[val]", has more than [limit] characters.'
+api_trying_to_set_multiple_locations_to_same_name: 'You are attempting to update multiple locations to the same name.'
+api_unused_parameters: 'Unexpected parameters: [params]'
+api_user_group_taken: 'The user group, "[title]", already exists.'
+
+# Query titles.
+query_title_advanced_search: "[:app_advanced_search]"
+query_title_all: "[TYPE] Index"
+query_title_all_by: "[TYPES] by [ORDER]"
+query_title_at_location: "[TYPES] from [LOCATION]"
+query_title_at_where: "[TYPES] from '[USER_WHERE]'"
+query_title_by_author: "[TYPES] Authored by [USER]"
+query_title_by_editor: "[TYPES] Edited by [USER]"
+query_title_by_rss_log: "[TYPES] in Activity Log"
+query_title_by_user: "[TYPES] created by [USER]"
+query_title_for_project: "[TYPES] attached to [PROJECT]"
+query_title_for_target: "[TYPES] on [TARGET]"
+query_title_for_user: "[TYPES] for [USER]"
+query_title_in_set: Selected [TYPES]
+query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
+query_title_inside_observation: "[TYPES] of [OBSERVATION]"
+query_title_of_children: Lower Taxa under [NAME]
+query_title_of_name: "[TYPES] of [NAME]"
+query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
+query_title_of_name_nonconsensus: "[TYPES] That Might Be [NAME]"
+query_title_of_parents: Higher Taxa Containing [NAME]
+query_title_pattern_search: "[TYPES] Matching '[pattern]'"
+query_title_with_descriptions: "[TYPES] with [:DESCRIPTIONS]"
+query_title_with_descriptions_by_author: "[TYPES] with [:query_title_by_author(type=:description)]"
+query_title_with_descriptions_by_editor: "[TYPES] with [:query_title_by_editor(type=:description)]"
+query_title_with_descriptions_by_user: "[TYPES] with [:query_title_by_user(type=:description)]"
+query_title_with_descriptions_in_set: "[TYPES] with [descriptions]"
+query_title_with_observations: "[TYPES] with [:OBSERVATIONS]"
+query_title_with_observations_at_location: "[TYPES] with [:query_title_at_location(type=:observation)]"
+query_title_with_observations_at_where: "[TYPES] with [:query_title_at_where(type=:observation)]"
+query_title_with_observations_by_user: "[TYPES] with [:query_title_by_user(type=:observation)]"
+query_title_with_observations_in_set: "[TYPES] for [observations]"
+query_title_with_observations_in_species_list: "[TYPES] with [:query_title_in_species_list(type=:observation)]"
+query_title_with_observations_of_children: "[TYPES] with [:query_title_of_children(type=:observation)]"
+query_title_with_observations_of_name: "[TYPES] with [:query_title_of_name(type=:observation)]"
+query_title_with_observations_of_name_synonym: "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
+query_title_with_observations_of_name_nonconsensus: "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
+
+# Brief description of each query flavor.
+query_help_comment_all: all comments
+query_help_comment_by_user: comments created by a given user
+query_help_comment_in_set: comments in a given set
+query_help_comment_for_object: comments about a given object
+query_help_comment_for_user: comments sent to a given user
+query_help_comment_pattern_search: comments matching a search string
+query_help_image_advanced_search: images of observations matching advanced search criteria
+query_help_image_all: all images
+query_help_image_by_user: images created by a given user
+query_help_image_in_set: images in a given set
+query_help_image_inside_observation: images belonging to an outer observation query
+query_help_image_pattern_search: images matching a search_string
+query_help_image_with_observations: images of observations
+query_help_image_with_observations_at_location: images of observations at a defined location
+query_help_image_with_observations_at_where: images of observations at an undefined location
+query_help_image_with_observations_by_user: images of observations by a given user
+query_help_image_with_observations_in_set: images of observations in a given set
+query_help_image_with_observations_in_species_list: images of observations in a given species list
+query_help_image_with_observations_of_children: images of observations of children a given name
+query_help_image_with_observations_of_name: images of observations of a given name
+query_help_location_advanced_search: locations of observations matching advanced search criteria
+query_help_location_all: all locations
+query_help_location_by_user: locations created by a given user
+query_help_location_by_editor: locations modified by a given user
+query_help_location_by_rss_log: locations with recent activity
+query_help_location_in_set: locations in a given set
+query_help_location_pattern_search: locations matching a search string
+query_help_location_with_descriptions: locations with descriptions
+query_help_location_with_descriptions_by_author: locations with descriptions authored by a given user
+query_help_location_with_descriptions_by_editor: locations with descriptions edited by a given user
+query_help_location_with_descriptions_by_user: locations with descriptions created by a given user
+query_help_location_with_descriptions_in_set: locations with descriptions in a given set
+query_help_location_with_observations: locations of observations
+query_help_location_with_observations_by_user: locations of observations by a given user
+query_help_location_with_observations_in_set: locations of observations in a given set
+query_help_location_with_observations_in_species_list: locations of observations in a given species list
+query_help_location_with_observations_of_children: locations of observations of children of a given name
+query_help_location_with_observations_of_name: locations of observations of a given name
+query_help_location_description_all: all location descriptions
+query_help_location_description_by_author: location descriptions that list given user as an author
+query_help_location_description_by_editor: location descriptions that list given user as an editor
+query_help_location_description_by_user: location descriptions created by a given user
+query_help_location_description_in_set: location descriptions in a given set
+query_help_name_advanced_search: names of observations matching advanced search criteria
+query_help_name_all: all names
+query_help_name_by_user: names created by a given user
+query_help_name_by_editor: names modified by a given user
+query_help_name_by_rss_log: names with recent activity
+query_help_name_in_set: names in a given set
+query_help_name_of_children: names of children of a name
+query_help_name_of_parents: names of parents of a name
+query_help_name_pattern_search: names matching a search string
+query_help_name_with_descriptions: names with descriptions
+query_help_name_with_descriptions_by_author: names with descriptions authored by a given user
+query_help_name_with_descriptions_by_editor: names with descriptions edited by a given user
+query_help_name_with_descriptions_by_user: names with descriptions created by a given user
+query_help_name_with_descriptions_in_set: names with descriptions in a given set
+query_help_name_with_observations: names of observations, alphabetically
+query_help_name_with_observations_at_location: names of observations at a defined location
+query_help_name_with_observations_at_where: names of observations at an undefined location
+query_help_name_with_observations_by_user: names of observations by a given user
+query_help_name_with_observations_in_set: names of observations in a given set
+query_help_name_with_observations_in_species_list: names of observations in a given species list
+query_help_name_description_all: all name descriptions
+query_help_name_description_by_author: name descriptions that list a given user as an author
+query_help_name_description_by_editor: name descriptions that list a given user as an editor
+query_help_name_description_by_user: name descriptions created by a given user
+query_help_name_description_in_set: name descriptions in a given set
+query_help_observation_advanced_search: observations matching advanced search criteria
+query_help_observation_all: all observations
+query_help_observation_at_location: observations at a defined location
+query_help_observation_at_where: observations at an undefined location
+query_help_observation_by_rss_log: observations with recent activity
+query_help_observation_by_user: observations created by a given user
+query_help_observation_in_set: observations in a given set
+query_help_observation_in_species_list: observations in a given species list
+query_help_observation_of_children: observations of children of a given name
+query_help_observation_of_name: observations of a given name
+query_help_observation_pattern_search: observations matching a search string
+query_help_project_all: all projects
+query_help_project_by_rss_log: projects with recent activity
+query_help_project_in_set: projects in a given set
+query_help_project_pattern_search: projects matching a search string
+query_help_rss_log_all: all recent activity logs
+query_help_rss_log_in_set: activity logs in a given set
+query_help_species_list_all: all species lists
+query_help_species_list_at_location: species lists at a defined location
+query_help_species_list_at_where: species lists at an undefined location
+query_help_species_list_by_rss_log: species lists with recent activity
+query_help_species_list_by_user: species lists created by a given user
+query_help_species_list_in_set: species lists in a given set
+query_help_species_list_pattern_search: species lists matching a search string
+query_help_user_all: all users
+query_help_user_in_set: users in a given set
+query_help_user_pattern_search: users matching a search string
+
+# Sorting criteria.
+sort_by_header: "Sort by:"
+sort_by_id: ID
+sort_by_name: "[:NAME]"
+sort_by_filename: File Name
+sort_by_title: "[:TITLE]"
+sort_by_summary: "[:SUMMARY]"
+sort_by_date: "[:DATE]"
+sort_by_posted: Date Posted
+sort_by_created: Date Created
+sort_by_modified: Time Last Modified
+sort_by_rss_log: "[:sort_by_modified]"
+sort_by_last_login: Last Login
+sort_by_user: "[:USER]"
+sort_by_login: "[:LOGIN_NAME]"
+sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_where: "[:LOCATION]"
+sort_by_location: "[:LOCATION]"
+sort_by_confidence: "[:CONFIDENCE_LEVEL]"
+sort_by_image_quality: Image Quality
+sort_by_thumbnail_quality: Thumbnail Quality
+sort_by_num_views: Popularity
+sort_by_contribution: Contribution
+sort_by_reverse: Reverse Order
+
 ################################################################################
 
 # DEBUGGING STUFF -- this doesn't need translating

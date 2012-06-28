@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class Image < Model
-    self.model = ::Image
+  class ImageAPI < ModelAPI
+    self.model = Image
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
@@ -26,7 +26,7 @@ class API
         :locations       => parse_locations(:location),
         :species_lists   => parse_species_lists(:species_lists),
         :has_observation => parse_boolean(:has_observation),
-        :size            => parse_enum_ranges(:has_size, :limit => ::Image.all_sizes - [:full_size]),
+        :size            => parse_enum_ranges(:has_size, :limit => Image.all_sizes - [:full_size]),
         :content_types   => parse_strings(:content_type),
         :has_notes       => parse_boolean(:has_notes),
         :notes_has       => parse_strings(:notes_has),

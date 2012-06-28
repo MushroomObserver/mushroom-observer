@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 class API
-  class Model < API
+  class ModelAPI < API
     def get
       self.query = build_query
       done_parsing_parameters!

@@ -335,7 +335,6 @@ ActiveRecord::Schema.define(:version => 20120626163100) do
     t.text     "notes"
     t.text     "classification"
     t.boolean  "ok_for_export",                                                                                                                                                                           :default => true,  :null => false
-    t.integer  "accepted_id"
   end
 
   create_table "names_versions", :force => true do |t|

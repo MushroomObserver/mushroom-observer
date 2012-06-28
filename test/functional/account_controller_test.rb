@@ -409,6 +409,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_api_key_manager
+    ApiKey.all.each(&:destroy)
     assert_equal(0, ApiKey.count)
 
     # Get initial (empty) form.

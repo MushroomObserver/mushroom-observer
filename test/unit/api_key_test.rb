@@ -2,9 +2,11 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class ApiKeyTest < UnitTestCase
   def test_create
+    count = ApiKey.count
+
     User.current = @dick
     ApiKey.create
-    assert_equal(0, ApiKey.count)
+    assert_equal(count, ApiKey.count)
 
     ApiKey.create(:notes => 'app name')
     key = ApiKey.last

@@ -246,7 +246,7 @@ class Name < AbstractModel
     'last_view',
     'ok_for_export',
     'rss_log_id',
-    # 'accepted_id',
+    # 'accepted_name_id',
     'synonym_id',
     'description_id',
     'classification' # (versioned in the default desc)
@@ -960,13 +960,17 @@ class Name < AbstractModel
         synonym.destroy
         for n in names
           n.synonym_id = nil
+          # n.accepted_name = n
           n.save
         end
 
       # Otherwise, just dettach this name.
       else
+        old_synonym = synonym
         self.synonym_id = nil
+        # self.accepted_name = self
         self.save
+        # old_synonym.choose_accepted_name
       end
     end
   end
@@ -1004,6 +1008,8 @@ class Name < AbstractModel
         self.transfer_synonym(n)
       end
     end
+
+    # synonym.choose_accepted_name
   end
 
   # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
@@ -1014,6 +1020,8 @@ class Name < AbstractModel
   #   correct_name.transfer_synonym(incorrect_name)
   #
   def transfer_synonym(name)
+    other_synonym = nil
+
     # Make sure this name is attached to a synonym, creating one if necessary.
     if !self.synonym_id
       self.synonym = Synonym.create
@@ -1025,15 +1033,31 @@ class Name < AbstractModel
 
       # Destroy old synonym if only one name left in it.
       if name.synonym and
-         (name.synonym_ids.length <= 2)
+         (name.synonyms.length <= 2)
         name.synonym.destroy
+        other_synonym = (name.synonyms - [name]).first
+      else
+        other_synonym = name.synonym
       end
 
       # Attach name to our synonym.
       name.synonym_id = self.synonym_id
       name.save
     end
+
+    # synonym.choose_accepted_name
+    # other_synonym.choose_accepted_name if other_synonym
   end
+
+  # Choose an accepted name for this name, saving the change.
+  # def choose_accepted_name
+  #   if synonym
+  #     synonym.choose_accepted_name
+  #   elsif accepted_name_id != id
+  #     self.accepted_name = self
+  #     self.save
+  #   end
+  # end
 
   def observation_count
     return observations.length
@@ -1758,7 +1782,7 @@ class Name < AbstractModel
   # already exist), returns it in an Array (genus first, then species, etc.  If
   # there is ambiguity at any level (due to different authors), then +nil+ is
   # returned in that slot.  Check last slot especially.  Returns an Array of
-  # Name instances, *UNSAVED*!! 
+  # Name instances, *UNSAVED*!!
   #
   #   names = Name.find_or_create_name_and_parents('Letharia vulpina (L.) Hue')
   #   raise "Name is ambiguous!" if !names.last
@@ -1928,6 +1952,7 @@ class Name < AbstractModel
     end
     self.display_name = name
     self.deprecated = deprecated
+    # synonym.choose_accepted_name if synonym
   end
 
   ################################################################################

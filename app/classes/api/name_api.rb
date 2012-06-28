@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class Name < Model
-    self.model = ::Name
+  class NameAPI < ModelAPI
+    self.model = Name
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
@@ -29,7 +29,7 @@ class API
         :has_synonyms       => parse_boolean(:has_synonyms),
         :locations          => parse_locations(:location),
         :species_lists      => parse_species_lists(:species_lists),
-        :rank               => parse_enum_ranges(:rank, :limit => ::Name.all_ranks),
+        :rank               => parse_enum_ranges(:rank, :limit => Name.all_ranks),
         :text_name_has      => parse_strings(:text_name_has),
         :has_author         => parse_boolean(:has_author),
         :author_has         => parse_strings(:author_has),
@@ -66,16 +66,16 @@ class API
       # Make sure name doesn't already exist.
       match = nil
       if author.blank?
-        match = ::Name.find_by_text_name(name_str)
+        match = Name.find_by_text_name(name_str)
         name_str2 = name_str
       else
-        match = ::Name.find_by_text_name_and_author(name_str, author)
+        match = Name.find_by_text_name_and_author(name_str, author)
         name_str2 = "#{name_str} #{author}"
       end
       raise NameAlreadyExists.new(name_str, match) if match
 
       # Make sure the name parses.
-      names = ::Name.find_or_create_name_and_parents(name_str2)
+      names = Name.find_or_create_name_and_parents(name_str2)
       name  = names.last
       raise NameDoesntParse.new(name_str2) if name.nil?
 

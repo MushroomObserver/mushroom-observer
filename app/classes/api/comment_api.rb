@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class Comment < Model
-    self.model = ::Comment
+  class CommentAPI < ModelAPI
+    self.model = Comment
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
@@ -20,8 +20,8 @@ class API
         :created     => parse_time_ranges(:created),
         :modified    => parse_time_ranges(:modified),
         :users       => parse_users(:user),
-        :types       => parse_enums(:type, :limit => ::Comment.all_type_tags),
-        :targets     => parse_objects(:target, :limit => ::Comment.all_types),
+        :types       => parse_enums(:type, :limit => Comment.all_type_tags),
+        :targets     => parse_objects(:target, :limit => Comment.all_types),
         :summary_has => parse_strings(:summary_has),
         :content_has => parse_strings(:content_has),
       }
@@ -31,7 +31,7 @@ class API
       {
         :summary => parse_string(:summary, :limit => 100),
         :comment => parse_string(:content),
-        :target  => parse_object(:target, :limit => ::Comment.all_types),
+        :target  => parse_object(:target, :limit => Comment.all_types),
       }
     end
 

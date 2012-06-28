@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 class API
-  class User < Model
-    self.model = ::User
+  class UserAPI < ModelAPI
+    self.model = User
 
     self.high_detail_page_length = 100
     self.low_detail_page_length  = 1000
