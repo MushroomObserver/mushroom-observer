@@ -26,7 +26,7 @@
 #
 ################################################################################
 
-class SemanticFungalFeature < SemanticVernacularDataSource
+class SemanticFungalFeature < SemanticVernacularDataSourceViaProxy
 
   def get_values
     self.class.query(query_values)
