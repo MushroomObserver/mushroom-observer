@@ -54,7 +54,7 @@ class API
     args[:range] = true
     if str.match(/^((\\.|[^-]+)+)-((\\.|[^-]+)+)$/)
       val1, val2 = $1, $3
-      return Range.new(send(method, val1, args, &block), send(method, val2, args, &block))
+      return Range.new(send(method, val1, args, &block), send(method, val2, args, &block), args[:leave_order])
     else
       return send(method, str, args, &block)
     end
@@ -89,9 +89,9 @@ class API
   def parse_boolean(key, args={})
     declare_parameter(key, :boolean, args)
     str = get_param(key) or return args[:default]
-    val = case str
-    when '1', 'yes', 'true' ; true
-    when '0', 'no', 'false' ; false
+    val = case str.downcase
+    when '1', 'yes', 'true', :yes.l ; true
+    when '0', 'no', 'false', :no.l ; false
     else
       raise BadParameterValue.new(str, :boolean)
     end
@@ -107,7 +107,7 @@ class API
     if val.is_a?(Range)
       limit = args[:limit]
       if limit.index(val.begin) > limit.index(val.end)
-        val.begin, val.end = val.end, val.begin
+        val = Range.new(val.end, val.begin)
       end
     end
     return val
@@ -167,7 +167,9 @@ class API
   def parse_date(key, args={})
     declare_parameter(key, :date, args)
     str = get_param(key) or return args[:default]
-    if str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d$/)
+    if str.match(/^\d\d\d\d\d\d\d\d$/) or
+       str.match(/^\d\d\d\d-\d\d?-\d\d?$/) or
+       str.match(/^\d\d\d\d\/\d\d?\/\d\d?$/)
       return Date.parse(str)
     else
       raise BadParameterValue.new(str, :date)
@@ -179,7 +181,9 @@ class API
   def parse_time(key, args={})
     declare_parameter(key, :time, args)
     str = get_param(key) or return args[:default]
-    if str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d:?\d\d$/)
+    if str.match(/^\d\d\d\d\d\d\d\d\d\d\d\d\d\d$/) or
+       str.match(/^\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?:\d\d?$/) or
+       str.match(/^\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?:\d\d?$/)
       return DateTime.parse(str)
     else
       raise BadParameterValue.new(str, :time)
@@ -191,46 +195,76 @@ class API
   def parse_date_range(key, args={})
     declare_parameter(key, :date_range, args)
     str = get_param(key) or return args[:default]
-    if str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d)\s*-\s*(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d)$/)
+    if str.match(/^(\d\d\d\d\d\d\d\d)\s*-\s*(\d\d\d\d\d\d\d\d)$/) or
+       str.match(/^(\d\d\d\d-\d\d?-\d\d?)\s*-\s*(\d\d\d\d-\d\d?-\d\d?)$/) or
+       str.match(/^(\d\d\d\d\/\d\d?\/\d\d?)\s*-\s*(\d\d\d\d\/\d\d?\/\d\d?)$/)
       from, to = $1, $2
       return Range.new(
-        Date.parse(from.gsub(/\D/,'')),
-        Date.parse(to.gsub(/\D/,''))
+        Date.parse(from),
+        Date.parse(to)
       )
-    elsif str.match(/^(\d\d\d\d[\/\-]?\d\d)\s*-\s*(\d\d\d\d[\/\-]?\d\d)$/)
+    elsif str.match(/^(\d\d\d\d\d\d)\s*-\s*(\d\d\d\d()\d\d)$/) or
+          str.match(/^(\d\d\d\d-\d\d?)\s*-\s*(\d\d\d\d(-)\d\d?)$/) or
+          str.match(/^(\d\d\d\d\/\d\d?)\s*-\s*(\d\d\d\d(\/)\d\d?)$/)
+      from, to, sep = $1, $2, $3
+      from2 = Date.parse(from + sep + '01')
+      to2 = Date.parse(to + sep + '01').next_month.prev_day
+      if from2 > to2
+        from2 = Date.parse(to + sep + '01')
+        to2 = Date.parse(from + sep + '01').next_month.prev_day
+      end
+      return Range.new(from2, to2)
+    elsif str.match(/^(\d\d\d\d)\s*-\s*(\d\d\d\d)$/) and $1 > '1500' and $2 > '1500'
       from, to = $1, $2
-      return Range.new(
-        Date.parse(from.gsub(/\D/,'') + '01'),
-        Date.parse(to.gsub(/\D/,'') + '01').next_month.prev_day
-      )
-    elsif str.match(/^(\d\d\d\d)\s*-\s*(\d\d\d\d)$/)
-      from, to = $1, $2
+      from, to = to, from if from > to
       return Range.new(
         Date.parse(from + '0101'),
         Date.parse(to + '0101').next_year.prev_day
       )
+    elsif str.match(/^(\d\d)(\d\d)\s*-\s*(\d\d)(\d\d)$/) or
+          str.match(/^(\d\d?)-(\d\d?)\s*-\s*(\d\d?)-(\d\d?)$/) or
+          str.match(/^(\d\d?)\/(\d\d?)\s*-\s*(\d\d?)\/(\d\d?)$/)
+      m1,d1, m2,d2 = $1.to_i, $2.to_i, $3.to_i, $4.to_i
+      if m1 < 1 or m1 > 12 or m2 < 1 or m2 > 12 or
+         d1 < 1 or d1 > 31 or d2 < 1 or d2 > 31
+        raise BadParameterValue.new(str, :date_range)
+      end
+      return Range.new( m1*100+d1, m2*100+d2, :leave_order )
     elsif str.match(/^(\d\d?)\s*-\s*(\d\d?)$/)
       from, to = $1.to_i, $2.to_i
       if from < 1 or from > 12 or to < 1 or to > 12
         raise BadParameterValue.new(str, :date_range)
       end
-      return Range.new( from, to )
-    elsif str.match(/^\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d$/)
-      return Date.parse( str.gsub(/\D/,'') )
-    elsif str.match(/^\d\d\d\d[\/\-]?\d\d$/)
+      return Range.new( from, to, :leave_order )
+    elsif str.match(/^\d\d\d\d\d\d\d\d$/) or
+          str.match(/^\d\d\d\d-\d\d?-\d\d?$/) or
+          str.match(/^\d\d\d\d\/\d\d?\/\d\d?$/)
+      return Date.parse(str)
+    elsif str.match(/^\d\d\d\d()\d\d$/) or
+          str.match(/^\d\d\d\d(-)\d\d?$/) or
+          str.match(/^\d\d\d\d(\/)\d\d?$/)
       return Range.new(
-        Date.parse( str.gsub(/\D/,'') + '01' ),
-        Date.parse( str.gsub(/\D/,'') + '01' ).next_month.prev_day
+        Date.parse(str + $1 + '01'),
+        Date.parse(str + $1 + '01').next_month.prev_day
       )
-    elsif str.match(/^\d\d\d\d$/)
+    elsif str.match(/^\d\d\d\d$/) and str > '1500'
       return Range.new(
         Date.parse(str + '0101'),
         Date.parse(str + '0101').next_year.prev_day
       )
+    elsif str.match(/^(\d\d?)(\d\d?)$/) or
+          str.match(/^(\d\d?)-(\d\d?)$/) or
+          str.match(/^(\d\d?)\/(\d\d?)$/)
+      m, d = $1.to_i, $2.to_i
+      if m < 1 or m > 12 or
+         d < 1 or d > 31
+        raise BadParameterValue.new(str, :date_range)
+      end
+      return m*100+d
     elsif str.match(/^\d\d?$/)
       val = str.to_i
       if val < 1 or val > 12
-        raise BadPA.new(str, args)
+        raise BadParameterValue.new(str, :date_range)
       end
       return val
     else
@@ -243,47 +277,69 @@ class API
   def parse_time_range(key, args={})
     declare_parameter(key, :time_range, args)
     str = get_param(key) or return args[:default]
-    if str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d:?\d\d)\s*-\s*(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d:?\d\d)$/)
+    if str.match(/^(\d\d\d\d\d\d\d\d\d\d\d\d\d\d)\s*-\s*(\d\d\d\d\d\d\d\d\d\d\d\d\d\d)$/) or
+       str.match(/^(\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?:\d\d?)\s*-\s*(\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?:\d\d?)$/) or
+       str.match(/^(\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?:\d\d?)\s*-\s*(\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?:\d\d?)$/)
       from, to = $1, $2
       return Range.new(
-        DateTime.parse( from.gsub(/\D/,'') ),
-        DateTime.parse( to.gsub(/\D/,'') )
+        DateTime.parse(from),
+        DateTime.parse(to),
       )
-    elsif str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d)\s*-\s*(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d)$/)
+    elsif str.match(/^(\d\d\d\d\d\d\d\d\d\d\d\d)\s*-\s*(\d\d\d\d\d\d\d\d\d\d\d\d)$/) or
+          str.match(/^(\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?)\s*-\s*(\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?)$/) or
+          str.match(/^(\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?)\s*-\s*(\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?)$/)
       from, to = $1, $2
-      return Range.new(
-        DateTime.parse( from.gsub(/\D/,'') + '01' ),
-        DateTime.parse( to.gsub(/\D/,'') + '59' )
-      )
-    elsif str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d)\s*-\s*(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d)$/)
+      sep = from.match(/\D/) ? ':' : ''
+      from2 = DateTime.parse(from + sep + '01')
+      to2 = DateTime.parse(to + sep + '59')
+      if from2 > to2
+        from2 = DateTime.parse(to + sep + '01')
+        to2 = DateTime.parse(from + sep + '59')
+      end
+      return Range.new(from2, to2)
+    elsif str.match(/^(\d\d\d\d\d\d\d\d\d\d)\s*-\s*(\d\d\d\d\d\d\d\d\d\d)$/) or
+          str.match(/^(\d\d\d\d-\d\d?-\d\d? \d\d?)\s*-\s*(\d\d\d\d-\d\d?-\d\d? \d\d?)$/) or
+          str.match(/^(\d\d\d\d\/\d\d?\/\d\d? \d\d?)\s*-\s*(\d\d\d\d\/\d\d?\/\d\d? \d\d?)$/)
       from, to = $1, $2
+      sep = from.match(/\D/) ? ':' : ''
+      from2 = DateTime.parse(from + sep + '01' + sep + '01')
+      to2 = DateTime.parse(to + sep + '59' + sep + '59')
+      if from2 > to2
+        from2 = DateTime.parse(to + sep + '01' + sep + '01')
+        to2 = DateTime.parse(from + sep + '59' + sep + '59')
+      end
+      return Range.new(from2, to2)
+    elsif str.match(/^(\d\d\d\d\d\d\d\d\d\d\d\d\d\d)$/) or
+          str.match(/^(\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?:\d\d?)$/) or
+          str.match(/^(\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?:\d\d?)$/)
+      return DateTime.parse(str)
+    elsif str.match(/^(\d\d\d\d\d\d\d\d\d\d\d\d)$/) or
+          str.match(/^(\d\d\d\d-\d\d?-\d\d? \d\d?:\d\d?)$/) or
+          str.match(/^(\d\d\d\d\/\d\d?\/\d\d? \d\d?:\d\d?)$/)
+      sep = str.match(/\D/) ? ':' : ''
       return Range.new(
-        DateTime.parse( from.gsub(/\D/,'') + '0101' ),
-        DateTime.parse( to.gsub(/\D/,'') + '5959' )
+        DateTime.parse(str + sep + '01'),
+        DateTime.parse(str + sep + '59')
       )
-    elsif str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d:?\d\d)$/)
-      return DateTime.parse( str.gsub(/\D/,'') )
-    elsif str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d:?\d\d)$/)
+    elsif str.match(/^(\d\d\d\d\d\d\d\d\d\d)$/) or
+          str.match(/^(\d\d\d\d-\d\d?-\d\d? \d\d?)$/) or
+          str.match(/^(\d\d\d\d\/\d\d?\/\d\d? \d\d?)$/)
+      sep = str.match(/\D/) ? ':' : ''
       return Range.new(
-        DateTime.parse( str.gsub(/\D/,'') + '01' ),
-        DateTime.parse( str.gsub(/\D/,'') + '59' )
-      )
-    elsif str.match(/^(\d\d\d\d[\/\-]?\d\d[\/\-]?\d\d[ :]?\d\d)$/)
-      return Range.new(
-        DateTime.parse( str.gsub(/\D/,'') + '0101' ),
-        DateTime.parse( str.gsub(/\D/,'') + '5959' )
+        DateTime.parse(str + sep + '01' + sep + '01' ),
+        DateTime.parse(str + sep + '59' + sep + '59' )
       )
     else
       val = parse_date_range(str, args)
       if val.is_a?(Range)
         return Range.new(
-          DateTime.parse( val.begin.to_s + '010101' ),
-          DateTime.parse( val.end.to_s + '235959' )
+          DateTime.parse( val.begin.to_s + ' 01:01:01' ),
+          DateTime.parse( val.end.to_s + ' 23:59:59' )
         )
       else
         return Range.new(
-          DateTime.parse( val.to_s + '010101' ),
-          DateTime.parse( val.to_s + '235959' )
+          DateTime.parse( val.to_s + ' 01:01:01' ),
+          DateTime.parse( val.to_s + ' 23:59:59' )
         )
       end
     end
@@ -298,6 +354,10 @@ class API
       raise BadParameterValue.new(str, :latitude)
     end
     return val
+  end
+
+  def parse_longitude_range(key, args={})
+    do_parse_range(:parse_longitude, key, args.merge(:leave_order => true))
   end
 
   def parse_longitude(key, args={})
@@ -337,15 +397,17 @@ class API
   def parse_location(key, args={})
     declare_parameter(key, :location, args)
     str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, Location)
     val ||= Location.find_by_name_or_reverse_name(str)
-    raise BadParameterValue.new(str, :location) if !val
+    raise ObjectNotFoundByString.new(str, Location) if !val
     return val
   end
 
   def parse_place_name(key, args={})
     declare_parameter(key, :place_name, args)
     str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, Location)
     val ||= Location.find_by_name_or_reverse_name(str)
     return val ? val.name : str
@@ -354,13 +416,17 @@ class API
   def parse_name(key, args={})
     declare_parameter(key, :name, args)
     str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, Name)
-    unless val
+    if not val
       val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
       if val.empty?
         val = Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str])
       end
-      raise BadParameterValue.new(str, :name) if val.empty?
+      if val.empty?
+        raise NameDoesntParse.new(str) if !Name.parse_name(str)
+        raise ObjectNotFoundByString.new(str, Name)
+      end
       raise AmbiguousName.new(str, val) if val.length > 1
       val = val.first
     end
@@ -382,9 +448,10 @@ class API
   def parse_project(key, args={})
     declare_parameter(key, :project, args)
     str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, Project)
     val ||= Project.find_by_title(str)
-    raise BadParameterValue.new(str, :project) if !val
+    raise ObjectNotFoundByString.new(str, Project) if !val
     if args[:must_be_member] and
        not @user.projects_member.include?(val)
       raise MustBeMember.new(val)
@@ -395,9 +462,10 @@ class API
   def parse_species_list(key, args={})
     declare_parameter(key, :species_list, args)
     str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, SpeciesList)
     val ||= SpeciesList.find_by_title(str)
-    raise BadParameterValue.new(str, :species_list) if !val
+    raise ObjectNotFoundByString.new(str, SpeciesList) if !val
     if args[:must_have_edit_permission] and
        not val.has_edit_permission?(@user)
       raise MustHaveEditPermission.new(val)
@@ -408,9 +476,10 @@ class API
   def parse_user(key, args={})
     declare_parameter(key, :user, args)
     str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, User)
     val ||= User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
-    raise BadParameterValue.new(str, :user) if !val
+    raise ObjectNotFoundByString.new(str, User) if !val
     return val
   end
 
@@ -418,7 +487,7 @@ class API
     val = nil
     if str.match(/^\d+$/)
       val = model.safe_find(str)
-      raise ObjectNotFound.new(str, model) if !val
+      raise ObjectNotFoundById.new(str, model) if !val
     end
     return val
   end
@@ -429,15 +498,17 @@ class API
     unless args.has_key?(:limit)
       raise "missing limit!"
     end
-    if str.match(/^(\w+) #?(\d+)$/)
+    if str.match(/^([a-z][ _a-z]*[a-z]) #?(\d+)$/i)
       type, id = $1, $2
+      type = type.gsub(' ','_').downcase
       for model in args[:limit]
-        if type.downcase.to_sym == model.type_tag
+        if model.type_tag.to_s == type
           val = model.safe_find(id)
           return val if val
-          raise ObjectNotFound.new(str, model)
+          raise ObjectNotFoundById.new(str, model)
         end
       end
+      raise BadLimitedParameterValue.new(str, args[:limit].map(&:type_tag))
     end
     raise BadParameterValue.new(str, :object)
   end
@@ -454,9 +525,11 @@ class API
   class Range
     attr_accessor :begin, :end
 
-    def initialize(from, to)
-      if (from > to rescue false)
-        from, to = to, from
+    def initialize(from, to, leave_order=false)
+      unless leave_order
+        if ( from.is_a?(AbstractModel) ? from.id > to.id : from > to rescue false )
+          from, to = to, from
+        end
       end
       @begin, @end = from, to
     end
@@ -467,6 +540,14 @@ class API
 
     def inspect
       "#{@begin.inspect}..#{@end.inspect}"
+    end
+
+    alias to_s inspect
+
+    def ==(other)
+      other.is_a?(Range) and
+      other.begin == self.begin and
+      other.end == self.end
     end
   end
 

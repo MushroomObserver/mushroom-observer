@@ -42,7 +42,7 @@ class API
   end
 
   # :stopdoc:
-  def initialize(params)
+  def initialize(params={})
     self.params = params
     self.errors = []
     initializers.each {|x| instance_exec(&x)}

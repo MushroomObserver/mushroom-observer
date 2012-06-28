@@ -3917,7 +3917,8 @@ api_name_doesnt_parse: >
   The name, "[name]", doesn't parse as a valid scientific name.
 
 api_no_method_for_action: 'Invalid request method "[method]" for "[action]".'
-api_object_not_found: '[Type] #[id] does not exist, or someone has deleted it.'
+api_object_not_found_by_id: '[Type] #[id] does not exist, or someone has deleted it.'
+api_object_not_found_by_string: '[Type] "[str]" does not exist, or someone has deleted it.'
 api_project_taken: 'The project, "[project]", already exists.'
 api_render_failed: 'There was a problem while rendering the results. [error]'
 api_string_too_long: 'The string, "[val]", has more than [limit] characters.'

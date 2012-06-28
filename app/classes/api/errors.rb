@@ -15,8 +15,7 @@ class API
     end
 
     def to_s
-      # tag.l(args)
-      ":#{tag} #{args.inspect}"
+      tag.l(args)
     end
 
     def t
@@ -119,7 +118,7 @@ class API
   class StringTooLong < Error
     def initialize(str, length)
       super()
-      args.merge!(:val => str.to_s, :limit => limit.inspect)
+      args.merge!(:val => str.to_s, :limit => length.inspect)
     end
   end
 
@@ -235,10 +234,17 @@ class API
     end
   end
 
-  class ObjectNotFound < Error
+  class ObjectNotFoundById < Error
+    def initialize(id, model)
+      super()
+      args.merge!(:id => id.to_s, :type => model.type_tag)
+    end
+  end
+
+  class ObjectNotFoundByString < Error
     def initialize(str, model)
       super()
-      args.merge!(:id => str.to_s, :type => model.type_tag)
+      args.merge!(:str => str.to_s, :type => model.type_tag)
     end
   end
 
