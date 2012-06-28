@@ -354,6 +354,11 @@ class User < AbstractModel
     super
   end
 
+  # User is the only one allowed to edit their own account info.
+  def has_edit_permission?(user)
+    user == self
+  end
+
   ##############################################################################
   #
   #  :section: Names
@@ -372,10 +377,10 @@ class User < AbstractModel
   #   name missing:  "fred99"
   #
   def unique_text_name
-    if !name.blank?
-      sprintf("%s (%s)", name, login)
-    else
+    if name.blank?
       login
+    else
+      name + " (#{login})"
     end
   end
 

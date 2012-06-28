@@ -149,10 +149,10 @@ class SpeciesList < AbstractModel
   # Return formatted title with id appended to make in unique.
   def unique_format_name
     title = self.title
-    if title
-      sprintf("%s (%d)", title, self.id)
+    if title.blank?
+      :SPECIES_LIST.l + " ##{id || '?'}"
     else
-      sprintf("Species List #%d", self.id)
+      title + " (#{id || '?'})"
     end
   end
 

@@ -2,15 +2,20 @@
 
 class API
   def prepare_upload
+    result = nil
     if url = parse_string(:upload_url)
-      UploadFromURL.new(url)
-    elsif file = parse_string(:upload_file)
-      UploadFromFile.new(file)
-    elsif http_request
-      UploadFromHTTPRequest.new(http_request)
-    else
-      nil
+      raise TooManyUploads.new if result
+      result = UploadFromURL.new(url)
     end
+    if file = parse_string(:upload_file)
+      raise TooManyUploads.new if result
+      result = UploadFromFile.new(file)
+    end
+    if http_request = parse_http_request
+      raise TooManyUploads.new if result
+      result = UploadFromHTTPRequest.new(http_request)
+    end
+    return result
   end
 
   class Upload
@@ -47,7 +52,7 @@ class API
   class UploadFromFile < Upload
     def initialize(file)
       raise FileMissing.new(file) unless File.exists?(file)
-      self.content = file
+      self.content = File.open(file, 'rb')
       self.content_length = File.size(file)
       self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, '')
     end

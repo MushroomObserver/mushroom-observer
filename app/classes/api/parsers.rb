@@ -64,6 +64,7 @@ class API
   # backslashes.  Returns String if parameter was given, otherwise nil.
   def get_param(key, leave_slashes=false)
     if key.is_a?(String)
+      # used when parse_range or parse_array calls parse_subtype
       str = key
     elsif params.has_key?(key)
       str = params[key].to_s
@@ -84,6 +85,13 @@ class API
       end
       expected_params[key] = ParameterDeclaration.new(key, type, args)
     end
+  end
+
+  # Simplified "parser" for getting the HTTP request -- this is passed in
+  # specially by ApiController: it should not be processed in any way.
+  def parse_http_request
+    declare_parameter(:http_request, :http_request, {})
+    params[:http_request]
   end
 
   def parse_boolean(key, args={})
@@ -383,6 +391,7 @@ class API
     str = get_param(key) or return args[:default]
     val = try_parsing_id(str, Image)
     raise BadParameterValue.new(str, :image) if !val
+    check_edit_permission!(val, args)
     return val
   end
 
@@ -442,6 +451,7 @@ class API
     str = get_param(key) or return args[:default]
     val = try_parsing_id(str, Observation)
     raise BadParameterValue.new(str, :observation) if !val
+    check_edit_permission!(val, args)
     return val
   end
 
@@ -452,10 +462,8 @@ class API
     val = try_parsing_id(str, Project)
     val ||= Project.find_by_title(str)
     raise ObjectNotFoundByString.new(str, Project) if !val
-    if args[:must_be_member] and
-       not @user.projects_member.include?(val)
-      raise MustBeMember.new(val)
-    end
+    check_if_admin!(val, args)
+    check_if_member!(val, args)
     return val
   end
 
@@ -466,10 +474,7 @@ class API
     val = try_parsing_id(str, SpeciesList)
     val ||= SpeciesList.find_by_title(str)
     raise ObjectNotFoundByString.new(str, SpeciesList) if !val
-    if args[:must_have_edit_permission] and
-       not val.has_edit_permission?(@user)
-      raise MustHaveEditPermission.new(val)
-    end
+    check_edit_permission!(val, args)
     return val
   end
 
@@ -480,16 +485,38 @@ class API
     val = try_parsing_id(str, User)
     val ||= User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
     raise ObjectNotFoundByString.new(str, User) if !val
+    check_edit_permission!(val, args)
     return val
   end
 
   def try_parsing_id(str, model)
-    val = nil
+    obj = nil
     if str.match(/^\d+$/)
-      val = model.safe_find(str)
-      raise ObjectNotFoundById.new(str, model) if !val
+      obj = model.safe_find(str)
+      raise ObjectNotFoundById.new(str, model) if !obj
     end
-    return val
+    return obj
+  end
+
+  def check_edit_permission!(obj, args)
+    if args[:must_have_edit_permission] and
+       not obj.has_edit_permission?(@user)
+      raise MustHaveEditPermission.new(obj)
+    end
+  end
+
+  def check_if_admin!(proj, args)
+    if args[:must_be_admin] and
+       not @user.projects_admin.include?(proj)
+      raise MustBeAdmin.new(proj)
+    end
+  end
+
+  def check_if_member!(proj, args)
+    if args[:must_be_member] and
+       not @user.projects_member.include?(proj)
+      raise MustBeMember.new(proj)
+    end
   end
 
   def parse_object(key, args={})
@@ -498,19 +525,21 @@ class API
     unless args.has_key?(:limit)
       raise "missing limit!"
     end
-    if str.match(/^([a-z][ _a-z]*[a-z]) #?(\d+)$/i)
-      type, id = $1, $2
-      type = type.gsub(' ','_').downcase
-      for model in args[:limit]
-        if model.type_tag.to_s == type
-          val = model.safe_find(id)
-          return val if val
-          raise ObjectNotFoundById.new(str, model)
-        end
-      end
-      raise BadLimitedParameterValue.new(str, args[:limit].map(&:type_tag))
+    if not str.match(/^([a-z][ _a-z]*[a-z]) #?(\d+)$/i)
+      raise BadParameterValue.new(str, :object)
     end
-    raise BadParameterValue.new(str, :object)
+    type, id = $1, $2
+    type = type.gsub(' ','_').downcase
+    val = nil
+    for model in args[:limit]
+      if model.type_tag.to_s == type
+        break if val = model.safe_find(id)
+        raise ObjectNotFoundById.new(str, model)
+      end
+    end
+    raise BadLimitedParameterValue.new(str, args[:limit].map(&:type_tag)) if !val
+    check_edit_permission!(val, args)
+    return val
   end
 
   def done_parsing_parameters!

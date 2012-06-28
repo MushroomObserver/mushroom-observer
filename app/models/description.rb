@@ -121,7 +121,7 @@ class Description < AbstractModel
 
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
-    text_name + " (#{id})"
+    text_name + " (#{id || '?'})"
   end
 
   # Descriptive title including parent name, in Textile-formatted text.
@@ -131,7 +131,7 @@ class Description < AbstractModel
 
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
-    format_name + " (#{id})"
+    format_name + " (#{id || '?'})"
   end
 
   # Descriptive title without parent name, in plain text.
@@ -141,7 +141,7 @@ class Description < AbstractModel
 
   # Same as +partial_text_name+ but with id tacked on.
   def unique_partial_text_name
-    partial_text_name + " (#{id})"
+    partial_text_name + " (#{id || '?'})"
   end
 
   # Descriptive title without parent name, in Textile-formatted text.
@@ -151,7 +151,7 @@ class Description < AbstractModel
 
   # Same as +partial_format_name+ but with id tacked on.
   def unique_partial_format_name
-    partial_format_name + " (#{id})"
+    partial_format_name + " (#{id || '?'})"
   end
 
   # Descriptive subtitle for this description (when it is not necessary to

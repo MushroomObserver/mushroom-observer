@@ -41,13 +41,9 @@ class ApiTest < UnitTestCase
   def assert_parse(method, expect, val, *args)
     @api ||= API.new
     clean_our_backtrace do
-      if val
-        @api.params[:var] = val
-      else
-        @api.params.delete(:var)
-      end
+      val = val.to_s if val
       begin
-        actual = @api.send(method, :var, *args)
+        actual = @api.send(method, val, *args)
       rescue API::Error => e
         actual = e
       end
@@ -78,8 +74,6 @@ class ApiTest < UnitTestCase
 
   def assert_last_observation_correct
     obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
     assert_in_delta(Time.now, obs.created, 1.minute)
     assert_in_delta(Time.now, obs.modified, 1.minute)
     assert_equal(@date.web_date, obs.when.web_date)
@@ -87,7 +81,7 @@ class ApiTest < UnitTestCase
     assert_equal(@specimen, obs.specimen)
     assert_equal(@notes.strip, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
-    assert_obj_list_equal([@img1, @img2], obs.images)
+    assert_obj_list_equal([@img1, @img2].reject(&:nil?), obs.images)
     assert_objs_equal(@loc, obs.location)
     assert_nil(obs.where)
     assert_equal(@loc.name, obs.place_name)
@@ -95,17 +89,22 @@ class ApiTest < UnitTestCase
     assert_equal(0, obs.num_views)
     assert_nil(obs.last_view)
     assert_not_nil(obs.rss_log)
-    assert_equal(@lat, obs.lat.round(4))
-    assert_equal(@long, obs.long.round(4))
-    assert_equal(@alt, obs.alt.round)
-    assert_obj_list_equal([@proj], obs.projects)
-    assert_obj_list_equal([@spl], obs.species_lists)
+    assert_equal(@lat, obs.lat)
+    assert_equal(@long, obs.long)
+    assert_equal(@alt, obs.alt)
+    assert_obj_list_equal([@proj].reject(&:nil?), obs.projects)
+    assert_obj_list_equal([@spl].reject(&:nil?), obs.species_lists)
     assert_names_equal(@name, obs.name)
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
-    assert_equal(1, obs.namings.length)
-    assert_objs_equal(naming, obs.namings.first)
-    assert_equal(1, obs.votes.length)
-    assert_objs_equal(vote, obs.votes.first)
+    if @name
+      assert_equal(1, obs.namings.length)
+      assert_objs_equal(Naming.last, obs.namings.first)
+      assert_equal(1, obs.votes.length)
+      assert_objs_equal(Vote.last, obs.votes.first)
+    else
+      assert_equal(0, obs.namings.length)
+      assert_equal(0, obs.votes.length)
+    end
   end
 
   def assert_last_naming_correct
@@ -135,6 +134,29 @@ class ApiTest < UnitTestCase
     assert_true(vote.favorite)
   end
 
+  def assert_last_image_correct
+    img = Image.last
+    assert_users_equal(@user, img.user)
+    assert_in_delta(Time.now, img.created, 1.minute)
+    assert_in_delta(Time.now, img.modified, 1.minute)
+    assert_equal('image/jpeg', img.content_type)
+    assert_equal(@date, img.when)
+    assert_equal(@notes.strip, img.notes)
+    assert_equal(@copy.strip, img.copyright_holder)
+    assert_equal(@user.license, img.license)
+    assert_equal(0, img.num_views)
+    assert_equal(nil, img.last_view)
+    assert_equal(@width, img.width)
+    assert_equal(@height, img.height)
+    assert_equal(@vote, img.vote_cache)
+    assert_equal(true, img.ok_for_export)
+    assert_equal(@orig, img.original_name)
+    assert_equal(false, img.transferred)
+    assert_obj_list_equal([@proj].reject(&:nil?), img.projects)
+    assert_obj_list_equal([@obs].reject(&:nil?), img.observations)
+    assert_equal(@vote, img.users_vote(@user))
+  end
+
 ################################################################################
 
   def test_basic_gets
@@ -147,7 +169,39 @@ class ApiTest < UnitTestCase
     end
   end
 
-  def test_post_fully_featured_observation
+  def test_post_maximal_observation
+    @user = @rolf
+    @name = nil
+    @loc = locations(:unknown_location)
+    @img1 = nil
+    @img2 = nil
+    @spl = nil
+    @proj = nil
+    @date = Date.today
+    @notes = ''
+    @vote = nil
+    @specimen = false
+    @is_col_loc = true
+    @lat = nil
+    @long = nil
+    @alt = nil
+
+    params = {
+      :method   => :post,
+      :action   => :observation,
+      :api_key  => @api_key.key,
+      :location => 'Anywhere',
+    }
+
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting observation')
+    assert_obj_list_equal([Observation.last], api.results)
+    assert_last_observation_correct
+
+    assert_api_fail(params.remove(:location))
+  end
+
+  def test_post_maximal_observation
     @user = @rolf
     @name = names(:coprinus_comatus)
     @loc = locations(:albion)
@@ -183,7 +237,6 @@ class ApiTest < UnitTestCase
       :images        => "#{@img1.id},#{@img2.id}",
     }
 
-    # First, make sure it works if everything is correct.
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting observation')
     assert_obj_list_equal([Observation.last], api.results)
@@ -191,17 +244,6 @@ class ApiTest < UnitTestCase
     assert_last_naming_correct
     assert_last_vote_correct
 
-    assert_api_pass(params.remove(:date))
-    assert_api_pass(params.remove(:notes))
-    assert_api_pass(params.remove(:location))
-    assert_api_pass(params.remove(:latitude, :longitude, :altitude))
-    assert_api_pass(params.remove(:has_specimen))
-    assert_api_pass(params.remove(:name, :vote))
-    assert_api_pass(params.remove(:vote))
-    assert_api_pass(params.remove(:projects))
-    assert_api_pass(params.remove(:species_lists))
-    assert_api_pass(params.remove(:thumbnail))
-    assert_api_pass(params.remove(:images))
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(:api_key => 'this should fail'))
     assert_api_fail(params.merge(:date => 'yesterday'))
@@ -221,6 +263,79 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(:species_lists => '1234567'))
     assert_api_fail(params.merge(:species_lists => 3)) # owned by Mary
   end
+
+  def test_posting_minimal_image
+    setup_image_dirs
+
+    @user = @rolf
+    @proj = nil
+    @date = Date.today
+    @copy = @user.legal_name
+    @notes = ''
+    @orig = nil
+    @width = 407
+    @height = 500
+    @vote = nil
+    @obs = nil
+
+    params = {
+      :method      => :post,
+      :action      => :image,
+      :api_key     => @api_key.key,
+      :upload_file => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
+    }
+
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    assert_obj_list_equal([Image.last], api.results)
+    assert_last_image_correct
+  end
+
+  def test_posting_maximal_image
+    setup_image_dirs
+
+    @user = @rolf
+    @proj = projects(:eol_project)
+    @date = Date.parse('20120626')
+    @copy = 'My Friend'
+    @notes = "These are notes.\nThey look like this.\n"
+    @orig = 'sticky.png'
+    @width = 407
+    @height = 500
+    @vote = 3
+    @obs = @user.observations.last
+
+    params = {
+      :method        => :post,
+      :action        => :image,
+      :api_key       => @api_key.key,
+      :date          => '20120626',
+      :notes         => @notes,
+      :copyright_holder => ' My Friend ',
+      :license       => @user.license.id,
+      :vote          => '3',
+      :observations  => @obs.id,
+      :projects      => @proj.id,
+      :upload_file   => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
+      :original_name => @orig,
+    }
+
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    assert_obj_list_equal([Image.last], api.results)
+    assert_last_image_correct
+
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:upload_file))
+    assert_api_fail(params.merge(:original_name => 'x'*1000))
+    assert_api_fail(params.merge(:vote => '-5'))
+    assert_api_fail(params.merge(:observations => '11')) # Katrina owns this observation
+    assert_api_fail(params.merge(:projects => '2')) # Rolf is not a member of this project
+  end
+
+  # ----------------------------
+  #  :section: Test Parsers
+  # ----------------------------
 
   def test_parse_boolean
     assert_parse(:parse_boolean, nil, nil)
@@ -630,5 +745,57 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_object, API::BadLimitedParameterValue, 'license 1', :limit => limit)
     assert_parse(:parse_object, API::ObjectNotFoundById, 'name 12345', :limit => limit)
     assert_parse(:parse_objects, [obs10, name20], 'observation 10, name 20', :limit => limit)
+  end
+
+  def test_check_edit_permission
+    @api = API.new
+    @api.user = @dick
+    proj = @dick.projects_member.first
+    assert_not_nil(img_good = proj.images.first)
+    assert_not_nil(img_bad = (Image.all - proj.images - @dick.images).first)
+    assert_not_nil(obs_good = proj.observations.first)
+    assert_not_nil(obs_bad = (Observation.all - proj.observations - @dick.observations).first)
+    assert_not_nil(spl_good = proj.species_lists.first)
+    assert_not_nil(spl_bad = (SpeciesList.all - proj.species_lists - @dick.species_lists).first)
+
+    args = { :must_have_edit_permission => true }
+    assert_parse(:parse_image, img_good, img_good.id, args)
+    assert_parse(:parse_image, API::MustHaveEditPermission, img_bad.id, args)
+    assert_parse(:parse_observation, obs_good, obs_good.id, args)
+    assert_parse(:parse_observation, API::MustHaveEditPermission, obs_bad.id, args)
+    assert_parse(:parse_species_list, spl_good, spl_good.id, args)
+    assert_parse(:parse_species_list, API::MustHaveEditPermission, spl_bad.id, args)
+    assert_parse(:parse_user, @dick, @dick.id, args)
+    assert_parse(:parse_user, API::MustHaveEditPermission, '1', args)
+
+    args[:limit] = [Image, Observation, SpeciesList, User]
+    assert_parse(:parse_object, img_good, "image #{img_good.id}", args)
+    assert_parse(:parse_object, API::MustHaveEditPermission, "image #{img_bad.id}", args)
+    assert_parse(:parse_object, obs_good, "observation #{obs_good.id}", args)
+    assert_parse(:parse_object, API::MustHaveEditPermission, "observation #{obs_bad.id}", args)
+    assert_parse(:parse_object, spl_good, "species list #{spl_good.id}", args)
+    assert_parse(:parse_object, API::MustHaveEditPermission, "species list #{spl_bad.id}", args)
+    assert_parse(:parse_object, @dick, "user #{@dick.id}", args)
+    assert_parse(:parse_object, API::MustHaveEditPermission, 'user 1', args)
+  end
+
+  def test_check_project_membership
+    @api = API.new
+    proj = projects(:eol_project)
+    assert_not_nil(admin = proj.admin_group.users.first )
+    assert_not_nil(member = (proj.user_group.users - proj.admin_group.users).first )
+    assert_not_nil(other = (User.all - proj.admin_group.users - proj.user_group.users).first)
+
+    @api.user = admin
+    assert_parse(:parse_project, proj, proj.id, :must_be_admin => true)
+    assert_parse(:parse_project, proj, proj.id, :must_be_member => true)
+
+    @api.user = member
+    assert_parse(:parse_project, API::MustBeAdmin, proj.id, :must_be_admin => true)
+    assert_parse(:parse_project, proj, proj.id, :must_be_member => true)
+
+    @api.user = other
+    assert_parse(:parse_project, API::MustBeAdmin, proj.id, :must_be_admin => true)
+    assert_parse(:parse_project, API::MustBeMember, proj.id, :must_be_member => true)
   end
 end

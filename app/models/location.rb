@@ -312,12 +312,12 @@ class Location < AbstractModel
 
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
-    "#{self.text_name} (#{self.id.to_s})"
+    text_name + " (#{id || '?'})"
   end
 
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
-    "#{self.format_name} (#{self.id.to_s})"
+    format_name + " (#{id || '?'})"
   end
 
   # Strip out special characters, punctuation, and small words from a name.

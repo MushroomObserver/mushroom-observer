@@ -225,7 +225,7 @@ class RssLog < AbstractModel
       if target.respond_to?(:unique_format_name)
         target.unique_format_name
       else
-        target.format_name + " (#{target_id})"
+        target.format_name + " (#{target_id || '?'})"
       end
     else
       orphan_title

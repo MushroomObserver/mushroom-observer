@@ -63,7 +63,7 @@ class Project < AbstractModel
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    text_name + " (#{id})"
+    text_name + " (#{id || '?'})"
   end
 
   # Need these to be compatible with Comment.

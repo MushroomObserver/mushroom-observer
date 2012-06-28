@@ -242,9 +242,9 @@ class Image < AbstractModel
   def unique_text_name
     title = observations.map(&:text_name).uniq.sort.join(' & ')
     if title.blank?
-      sprintf("%s #%d", :image.l, id)
+      :image.l + " ##{id || '?'}"
     else
-      sprintf("%s (%d)", title, id)
+      title + " (#{id || '?'})"
     end
   end
 
@@ -258,9 +258,9 @@ class Image < AbstractModel
   def unique_format_name
     title = observations.map(&:format_name).uniq.sort.join(' & ')
     if title.blank?
-      sprintf("%s #%d", :image.l, id)
+      :image.l + " ##{id || '?'}"
     else
-      sprintf("%s (%d)", title, id)
+      title + " (#{id || '?'})"
     end
   end
 
@@ -528,7 +528,7 @@ class Image < AbstractModel
     name.sub!(/^.*[\/\\]/, '')
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name.truncate_binary_length!(120) if name.binary_length > 120
-    if User.current && User.current.keep_filenames
+    if not name.blank? and User.current && User.current.keep_filenames
       self.original_name = name
     end
   end

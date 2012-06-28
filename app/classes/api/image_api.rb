@@ -40,9 +40,9 @@ class API
     end
 
     def build_object
-      observations = parse_observations(:observation, :default => [])
+      observations = parse_observations(:observations, :default => [], :must_have_edit_permission => true)
       default_date = observations.any? ? observations.first.when : Time.now
-      upload = prepare_upload or raise MissingUpload.new
+      vote = parse_enum(:vote, :limit => Image.all_votes)
 
       params = {
         :when             => parse_date(:date, :default => default_date),
@@ -50,14 +50,19 @@ class API
         :copyright_holder => parse_string(:copyright_holder, :limit => 100, :default => user.legal_name),
         :license          => parse_license(:license, :default => user.license),
         :original_name    => parse_string(:original_name, :limit => 120, :default => nil),
+        :projects         => parse_projects(:projects, :default => [], :must_be_member => true),
         :observations     => observations,
-        :projects         => parse_projects(:project, :default => []),
-        :image            => upload.content,
-        :upload_length    => upload.content_length,
-        :upload_type      => upload.content_type,
-        :upload_md5sum    => upload.content_md5,
       }
+      if upload = prepare_upload
+        params.merge!(
+          :image          => upload.content,
+          :upload_length  => upload.content_length,
+          :upload_type    => upload.content_type,
+          :upload_md5sum  => upload.content_md5
+        )
+      end
       done_parsing_parameters!
+      raise MissingUpload.new if !upload
 
       img = model.new(params)
       img.save or raise CreateFailed.new(img)
@@ -72,9 +77,13 @@ class API
         end
       end
 
-      return obs
+      if vote
+        img.change_vote(@user, vote, (@user.votes_anonymous == :yes))
+      end
+
+      return img
     ensure
-      upload.clean_up
+      upload.clean_up if upload
     end
 
     def update_params

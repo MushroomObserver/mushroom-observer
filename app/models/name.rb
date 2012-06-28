@@ -325,12 +325,12 @@ class Name < AbstractModel
 
   # Tack id on to end of +text_name+.
   def unique_text_name
-    "#{real_text_name} (#{id})"
+    real_text_name + " (#{id || '?'})"
   end
 
   # Tack id on to end of +format_name+.
   def unique_format_name
-    "#{display_name} (#{id})"
+    display_name + " (#{id || '?'})"
   end
 
   def real_text_name

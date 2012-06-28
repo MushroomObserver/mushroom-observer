@@ -71,7 +71,7 @@ class Naming < AbstractModel
 
   # Return name in plain text (with id tacked on to make unique).
   def unique_text_name
-    "%s (%s)" % [text_name, id]
+    text_name + " (#{id || '?'})"
   end
 
   # Return name in Textile format.
@@ -81,7 +81,7 @@ class Naming < AbstractModel
 
   # Return name in Textile format (with id tacked on to make unique).
   def unique_format_name
-    "%s (%s)" % [format_name, id]
+    format_name + " (#{id || '?'})"
   end
 
   ##############################################################################

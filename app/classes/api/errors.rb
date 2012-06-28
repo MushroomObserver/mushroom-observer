@@ -157,17 +157,17 @@ class API
   class MustAuthenticate < Error
   end
 
+  class MustHaveEditPermission < ObjectError
+  end
+
+  class MustHaveViewPermission < ObjectError
+  end
+
   class MustBeAdmin < Error
     def initialize(proj)
       super()
       args.merge!(:project => proj.title)
     end
-  end
-
-  class MustHaveEditPermission < ObjectError
-  end
-
-  class MustHaveViewPermission < ObjectError
   end
 
   class MustBeMember < ObjectError
@@ -176,6 +176,9 @@ class API
 ################################################################################
 
   class MissingUpload < Error
+  end
+
+  class TooManyUploads < Error
   end
 
   class FileMissing < Error
@@ -202,6 +205,10 @@ class API
 ################################################################################
 
   class CreateFailed < ObjectError
+    def initialize(obj)
+      super(obj)
+      args.merge!(:error => obj.formatted_errors.map(&:to_s).join('; '))
+    end
   end
 
   class DestroyFailed < ObjectError
