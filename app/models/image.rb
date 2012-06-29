@@ -508,7 +508,7 @@ class Image < AbstractModel
     result = true
     if upload_md5sum and save_to_temp_file
       if (sum = File.read("| /usr/bin/md5sum #{upload_temp_file}")) &&
-         (sum.split.first == content_md5)
+         (sum.split.first == upload_md5sum)
         result = true
       else
         errors.add(:image, :validate_image_md5_mismatch.

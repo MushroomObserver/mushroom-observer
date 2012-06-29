@@ -169,7 +169,7 @@ class ApiTest < UnitTestCase
     end
   end
 
-  def test_post_maximal_observation
+  def test_post_minimal_observation
     @user = @rolf
     @name = nil
     @loc = locations(:unknown_location)

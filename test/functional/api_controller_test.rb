@@ -2,60 +2,149 @@
 require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class ApiControllerTest < FunctionalTestCase
+
+  def assert_no_api_errors
+    clean_our_backtrace do
+      @api = assigns(:api)
+      msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
+      assert_block(msg) { @api.errors.empty? }
+    end
+  end
+
+  def post_and_send_file(action, file, content_type, params)
+    @request.env['RAW_POST_DATA'] = File.read(file)
+    @request.env['CONTENT_LENGTH'] = File.size(file)
+    @request.env['CONTENT_TYPE'] = content_type
+    @request.env['CONTENT_MD5'] = File.read("| /usr/bin/md5sum #{file}")
+    post(action, params)
+  end
+
+################################################################################
+
   def test_basic_get_requests
-    # for model in [Comment, Image, Location, Name, Observation, SpeciesList, User]
+    # for model in [Comment, Image, Location, Name, Observation, Project, SpeciesList User]
     for model in [Comment, Image, Location, Name, Observation, User]
       for detail in [:none, :low, :high]
         get(model.table_name.to_sym, :detail => detail)
-        api = assigns(:api)
-        assert_no_api_errors(api)
-        assert_objs_equal(model.first, api.results.first)
+        assert_no_api_errors
+        assert_objs_equal(model.first, @api.results.first)
       end
     end
   end
 
-  def assert_no_api_errors(api=nil)
-    api ||= assigns(:api)
-    msg = "Caught API Errors:\n" + api.errors.map(&:to_s).join("\n")
-    assert_block(msg) { api.errors.empty? }
+  def test_post_minimal_observation
+    post(:observations,
+      :api_key  => api_keys(:rolfs_api_key).key,
+      :location => 'Unknown',
+    )
+    assert_no_api_errors
+    obs = Observation.last
+    assert_users_equal(@rolf, obs.user)
+    assert_equal(Date.today.web_date, obs.when.web_date)
+    assert_objs_equal(Location.unknown, obs.location)
+    assert_nil(obs.where)
+    assert_nil(obs.name)
+    assert_equal(0, obs.namings.length)
+    assert_equal(0, obs.votes.length)
+    assert_equal(nil, obs.lat)
+    assert_equal(nil, obs.long)
+    assert_equal(nil, obs.alt)
+    assert_equal(false, obs.specimen)
+    assert_equal(true, obs.is_collection_location)
+    assert_equal('', obs.notes)
+    assert_obj_list_equal([], obs.images)
+    assert_nil(obs.thumb_image)
+    assert_obj_list_equal([], obs.projects)
+    assert_obj_list_equal([], obs.species_lists)
   end
 
-  # # Basic comment request.
-  # def test_get_comments
-  #
-  #   get(:comments, :detail => :high)
-  #   @doc = REXML::Document.new(@response.body)
-  #
-  #   assert_xml_exists('/response', @response.body)
-  #
-  #   assert_xml_attr(2,               '/response/results/number')
-  #   assert_xml_text(/^\d+(\.\d+)+$/, '/response/version')
-  #   assert_xml_text(/^\d+-\d+-\d+$/, '/response/run_date')
-  #   assert_xml_text(/^\d+\.\d+$/,    '/response/run_time')
-  #   assert_xml_text('SELECT DISTINCT comments.id FROM comments LIMIT 0, 100',
-  #                                    '/response/query')
-  #   assert_xml_text(2,               '/response/num_records')
-  #   assert_xml_text(1,               '/response/num_pages')
-  #   assert_xml_text(1,               '/response/page')
-  #
-  #   assert_xml_name('comment',                              '/response/results/1')
-  #   assert_xml_attr(1,                                      '/response/results/1/id')
-  #   assert_xml_attr("#{HTTP_DOMAIN}/comment/show_comment/1",'/response/results/1/url')
-  #   assert_xml_text('2006-03-02 21:14:00',                  '/response/results/1/created')
-  #   assert_xml_text('A comment on minimal unknown',         '/response/results/1/summary')
-  #   assert_xml_text('<p>Wow! That&#8217;s really cool</p>', '/response/results/1/content')
-  #   assert_xml_name('user',                                 '/response/results/1/user')
-  #   assert_xml_attr(1,                                      '/response/results/1/user/id')
-  #   assert_xml_attr("#{HTTP_DOMAIN}/observer/show_user/1",  '/response/results/1/user/url')
-  #   assert_xml_text('rolf',                                 '/response/results/1/user/login')
-  #   assert_xml_text('Rolf Singer',                          '/response/results/1/user/legal_name')
-  #
-  #   assert_xml_name('comment', '/response/results/2')
-  #   assert_xml_attr(2,         '/response/results/2/id')
-  #
-  #   assert_xml_none('/response/errors')
-  # end
-  #
-  # # This is how to stuff an image into the (test) request body.
-  # # @request.env['RAW_POST_DATA'] = File.read('test_image.jpg')
+  def test_post_maximal_observation
+    post(:observations,
+      :api_key       => api_keys(:rolfs_api_key).key,
+      :date          => '2012-06-26',
+      :location      => 'Burbank, California, USA',
+      :name          => 'Coprinus comatus',
+      :vote          => '2',
+      :latitude      => '34.5678N',
+      :longitude     => '123.4567W',
+      :altitude      => '1234 ft',
+      :has_specimen  => 'yes',
+      :is_collection_location => 'yes',
+      :notes         => "These are notes.\nThey look like this.\n",
+      :images        => '1,2',
+      :thumbnail     => '2',
+      :projects      => 'EOL Project',
+      :species_lists => 'Another Species List'
+    )
+    assert_no_api_errors
+    obs = Observation.last
+    assert_users_equal(@rolf, obs.user)
+    assert_equal('2012-06-26', obs.when.web_date)
+    assert_objs_equal(locations(:burbank), obs.location)
+    assert_nil(obs.where)
+    assert_names_equal(names(:coprinus_comatus), obs.name)
+    assert_equal(1, obs.namings.length)
+    assert_equal(1, obs.votes.length)
+    assert_equal(2.0, obs.votes.first.value)
+    assert_equal(34.5678, obs.lat)
+    assert_equal(-123.4567, obs.long)
+    assert_equal(376, obs.alt)
+    assert_equal(true, obs.specimen)
+    assert_equal(true, obs.is_collection_location)
+    assert_equal("These are notes.\nThey look like this.", obs.notes)
+    assert_obj_list_equal([Image.find(1), Image.find(2)], obs.images)
+    assert_objs_equal(Image.find(2), obs.thumb_image)
+    assert_obj_list_equal([projects(:eol_project)], obs.projects)
+    assert_obj_list_equal([species_lists(:another_species_list)], obs.species_lists)
+  end
+
+  def test_post_minimal_image
+    setup_image_dirs
+    file = "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg"
+    post_and_send_file(:images, file, 'image/jpeg',
+      :api_key => api_keys(:rolfs_api_key).key
+    )
+    assert_no_api_errors
+    img = Image.last
+    assert_users_equal(@rolf, img.user)
+    assert_equal(Date.today.web_date, img.when.web_date)
+    assert_equal('', img.notes)
+    assert_equal(@rolf.legal_name, img.copyright_holder)
+    assert_objs_equal(@rolf.license, img.license)
+    assert_nil(img.original_name)
+    assert_equal('image/jpeg', img.content_type)
+    assert_equal(407, img.width)
+    assert_equal(500, img.height)
+    assert_obj_list_equal([], img.projects)
+    assert_obj_list_equal([], img.observations)
+  end
+
+  def test_post_maximal_image
+    setup_image_dirs
+    file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
+    post_and_send_file(:images, file, 'image/jpeg',
+      :api_key       => api_keys(:rolfs_api_key).key,
+      :vote          => '3',
+      :date          => '20120626',
+      :notes         => ' Here are some notes. ',
+      :copyright_holder => 'My Friend',
+      :license       => '2',
+      :original_name => 'Coprinus_comatus.jpg',
+      :projects      => (proj = @rolf.projects_member.first).id,
+      :observations  => (obs = @rolf.observations.first).id
+    )
+    assert_no_api_errors
+    img = Image.last
+    assert_users_equal(@rolf, img.user)
+    assert_equal('2012-06-26', img.when.web_date)
+    assert_equal('Here are some notes.', img.notes)
+    assert_equal('My Friend', img.copyright_holder)
+    assert_objs_equal(License.find(2), img.license)
+    assert_equal('Coprinus_comatus.jpg', img.original_name)
+    assert_equal('image/jpeg', img.content_type)
+    assert_equal(2288, img.width)
+    assert_equal(2168, img.height)
+    assert_obj_list_equal([proj], img.projects)
+    assert_obj_list_equal([obs], img.observations)
+  end
 end

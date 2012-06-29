@@ -3,7 +3,7 @@ xml.response(:xmlns => "#{HTTP_DOMAIN}/response.xsd") do
   xml_string(xml, :version, @api.version)
   xml_datetime(xml, :run_date, @start_time)
   if @api.user
-    render_minimal_object(xml, :user, User, @api.user.id)
+    xml_minimal_object(xml, :user, User, @api.user.id)
   end
   unless @content_for_layout.blank?
     if @api.query

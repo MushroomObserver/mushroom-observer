@@ -63,7 +63,7 @@ class API
       self.content        = request.body
       self.content_length = request.content_length.to_i
       self.content_type   = request.content_type.to_s
-      self.content_md5    = request.headers['Content-MD5'].to_s
+      self.content_md5    = request.headers['Content-MD5']
     end
   end
 end

@@ -55,6 +55,7 @@ class API
       @vote = parse_float(:vote, :default => Vote.maximum_vote)
 
       loc = parse_place_name(:location, :limit => 1024)
+      loc = Location.unknown.name if Location.is_unknown?(loc)
       lat = parse_latitude(:latitude)
       long = parse_longitude(:longitude)
       alt = parse_altitude(:altitude)
@@ -69,7 +70,7 @@ class API
 
       images = parse_images(:images, :default => [])
       thumbnail = parse_image(:thumbnail, :default => images.first)
-      images.unshift(thumbnail) unless images.include?(thumbnail)
+      images.unshift(thumbnail) if thumbnail and not images.include?(thumbnail)
 
       {
         :when          => parse_date(:date, :default => Time.now),
