@@ -8,6 +8,13 @@ require 'uri'
 # PORT = 3000
 HOST = 'localhost.localdomain'
 PORT = 80
+KEY = 'tt7udys2zlp5f0fwj27blduraxgkdy329'
+
+# HOST = 'mushroomobserver.org'
+# PORT = 80
+# KEY = '7lujzo3uld8gwcy39n0e914hge1ptfxug'
+
+################################################################################
 
 # Net::HTTP.get_print(URI.parse("http://#{HOST}:#{PORT}/observer/how_to_help"))
 # exit
@@ -24,9 +31,9 @@ http = Net::HTTP.new(HOST, PORT)
 path = '/api/images?' + [
   'date=20100102',
   'notes=blah%20blah',
-  'api_key=tt7udys2zlp5f0fwj27blduraxgkdy329',
+  'api_key=' + KEY,
 ].join('&')
-data = File.open('test/fixtures/images/sticky.jpg', 'rb') {|fh| fh.read}
+data = File.open('test/fixtures/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
 head = {
   'Content-Type' => 'image/jpeg',
   'Content-Length' => data.length.to_s,
