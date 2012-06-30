@@ -65,9 +65,13 @@ class API
     if !key_str
       ::User.current = self.user = nil
     elsif key = ApiKey.find_by_key(key_str)
-      ::User.current = self.user = key.user
-      key.touch!
-      self.api_key = key
+      if key.user.verified
+        ::User.current = self.user = key.user
+        key.touch!
+        self.api_key = key
+      else
+        raise UserNotVerified.new(key.user)
+      end
     else
       raise BadApiKey.new(key_str)
     end

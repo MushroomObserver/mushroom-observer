@@ -74,6 +74,13 @@ class API
     end
   end
 
+  class UserNotVerified < Error
+    def initialize(user)
+      super()
+      args.merge!(:login => user.login)
+    end
+  end
+
   class BadVersion < Error
     def initialize(str)
       super()

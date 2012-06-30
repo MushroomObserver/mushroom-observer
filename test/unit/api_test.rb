@@ -413,6 +413,19 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(:image => '123456'))
   end
 
+  def test_unverified_user_rejected
+    params = {
+      :method   => :post,
+      :action   => :observation,
+      :api_key  => @api_key.key,
+      :location => 'Anywhere',
+    }
+    @rolf.update_attribute(:verified, nil)
+    assert_api_fail(params)
+    @rolf.update_attribute(:verified, Time.now)
+    assert_api_pass(params)
+  end
+
   # ----------------------------
   #  :section: Test Parsers
   # ----------------------------

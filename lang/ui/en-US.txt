@@ -3928,6 +3928,7 @@ api_trying_to_set_multiple_locations_to_same_name: 'You are attempting to update
 api_unused_parameters: 'Unexpected parameters: [params]'
 api_user_already_exists: 'The user "[login]" already exists or is taken.'
 api_user_group_taken: 'The user group "[title]" already exists.'
+api_user_not_verified: 'The user "[login]" is not verified yet; you can request another verification email on the website.'
 
 # Query titles.
 query_title_advanced_search: "[:app_advanced_search]"
