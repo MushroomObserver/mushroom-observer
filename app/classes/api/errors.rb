@@ -241,6 +241,13 @@ class API
     end
   end
 
+  class UserAlreadyExists < Error
+    def initialize(str)
+      super()
+      args.merge!(:login => str)
+    end
+  end
+
   class ObjectNotFoundById < Error
     def initialize(id, model)
       super()

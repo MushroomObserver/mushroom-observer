@@ -62,6 +62,12 @@ class ApiController < ApplicationController
     args[:action] = type
     args[:http_request] = request if request.content_length.to_i > 0
 
+    # Special exception to allow caller who creates new user to see that user's
+    # new API keys.  Otherwise there is no way to get that info via the API. 
+    if request.method == :post and type == :user
+      @show_api_keys_for_new_user = true
+    end
+
     @api = API.execute(args)
     render_api_results
   end

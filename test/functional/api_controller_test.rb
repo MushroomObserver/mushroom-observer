@@ -1,6 +1,8 @@
 # encoding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
+require 'rexml/document'
+
 class ApiControllerTest < FunctionalTestCase
 
   def assert_no_api_errors
@@ -22,8 +24,7 @@ class ApiControllerTest < FunctionalTestCase
 ################################################################################
 
   def test_basic_get_requests
-    # for model in [Comment, Image, Location, Name, Observation, Project, SpeciesList User]
-    for model in [Comment, Image, Location, Name, Observation, User]
+    for model in [Comment, Image, Location, Name, Observation, Project, SpeciesList, User]
       for detail in [:none, :low, :high]
         get(model.table_name.to_sym, :detail => detail)
         assert_no_api_errors
@@ -146,5 +147,28 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(2168, img.height)
     assert_obj_list_equal([proj], img.projects)
     assert_obj_list_equal([obs], img.observations)
+  end
+
+  def test_post_user
+    rolfs_key = api_keys(:rolfs_api_key)
+    post(:users,
+      :api_key => rolfs_key.key,
+      :login => 'miles',
+      :email => 'miles@davis.com',
+      :detail => :high
+    )
+    assert_no_api_errors
+    user = User.last
+    assert_equal('miles', user.login)
+    assert_false(user.verified)
+    assert_equal(1, user.api_keys.length)
+    doc = REXML::Document.new(@response.body)
+    keys = doc.root.elements['results/result/api_keys']
+    num = keys.attribute('number').value rescue nil
+    assert_equal('1', num.to_s)
+    key = keys.elements['api_key/key'].get_text rescue nil
+    notes = keys.elements['api_key/notes'].get_text rescue nil
+    assert_not_equal('', key.to_s)
+    assert_equal(rolfs_key.notes.to_s, notes.to_s)
   end
 end

@@ -45,6 +45,13 @@ class License < AbstractModel
   has_many :name_descriptions
   has_many :users
 
+  PREFERRED_LICENSE_FORM_NAME = 'ccbysa30'
+
+  # Use this license if all else equal.
+  def self.preferred
+    License.find_by_form_name(PREFERRED_LICENSE_FORM_NAME)
+  end
+
   # Various debugging things require all models respond to text_name.  Just
   # returns +display_name+.
   def text_name

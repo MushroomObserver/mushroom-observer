@@ -3871,6 +3871,7 @@ api_bad_method: 'Invalid request method "[method]".'
 api_bad_boolean_parameter_value: 'Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".'
 api_bad_integer_parameter_value: 'Invalid integer, "[val]".'
 api_bad_float_parameter_value: 'Invalid float, "[val]".'
+api_bad_email_parameter_value: 'Invalid email address, "[va]".'
 api_bad_date_parameter_value: 'Invalid date, "[val]", expect "YYYYMMDD".'
 api_bad_date_range_parameter_value: 'Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".'
 api_bad_time_parameter_value: 'Invalid time, "[val]", expect "YYYYMMDDHHMMSS".'
@@ -3925,7 +3926,8 @@ api_string_too_long: 'The string, "[val]", has more than [limit] characters.'
 api_too_many_uploads: 'Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.'
 api_trying_to_set_multiple_locations_to_same_name: 'You are attempting to update multiple locations to the same name.'
 api_unused_parameters: 'Unexpected parameters: [params]'
-api_user_group_taken: 'The user group, "[title]", already exists.'
+api_user_already_exists: 'The user "[login]" already exists or is taken.'
+api_user_group_taken: 'The user group "[title]" already exists.'
 
 # Query titles.
 query_title_advanced_search: "[:app_advanced_search]"

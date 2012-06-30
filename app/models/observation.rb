@@ -653,7 +653,7 @@ result += "Multiple synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
             wgt = user_vote[1]
             vote[0] += val * wgt
             vote[1] += wgt
-result += "vote: name_id=#{self.name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
+result += "vote: name_id=#{name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
           end
         end
 

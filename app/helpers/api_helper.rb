@@ -50,14 +50,18 @@ module ApiHelper
   end
 
   def xml_date(xml, tag, val)
-    str = val.api_date rescue ''
-    xml.send(tag, str, :type => 'date', :format => 'YYYY-MM-DD')
+    if val
+      str = val.api_date rescue ''
+      xml.send(tag, str, :type => 'date', :format => 'YYYY-MM-DD')
+    end
   rescue
   end
 
   def xml_datetime(xml, tag, val)
-    str = val.api_time
-    xml.send(tag, str, :type => 'date-time', :format => 'YYYY-MM-DD HH:MM:SS')
+    if val
+      str = val.api_time
+      xml.send(tag, str, :type => 'date-time', :format => 'YYYY-MM-DD HH:MM:SS')
+    end
   rescue
   end
 

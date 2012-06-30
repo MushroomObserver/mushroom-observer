@@ -83,7 +83,7 @@ class API
       if type.to_s.match(/^parse_/)
         type = $'.to_sym
       end
-      expected_params[key] = ParameterDeclaration.new(key, type, args)
+      expected_params[key] ||= ParameterDeclaration.new(key, type, args)
     end
   end
 
@@ -142,6 +142,15 @@ class API
       end
     end
     return str
+  end
+
+  def parse_email(key, args={})
+    declare_parameter(key, :email, args)
+    val = parse_string(key, args)
+    if val and not val.match(/^[\w\-]+@[\w\-]+(\.[\w\-]+)+$/)
+      raise BadParameterValue.new(val, :email)
+    end
+    return val
   end
 
   def parse_integer(key, args={})

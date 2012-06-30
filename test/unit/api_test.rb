@@ -157,6 +157,32 @@ class ApiTest < UnitTestCase
     assert_equal(@vote, img.users_vote(@user))
   end
 
+  def assert_last_user_correct
+    user = User.last
+    assert_equal(@login, user.login)
+    assert_equal(@name, user.name)
+    assert_equal(@email, user.email)
+    assert_not_equal(nil, user.password) # doesn't matter
+    assert_in_delta(Time.now, user.created, 1.minute)
+    assert_in_delta(Time.now, user.modified, 1.minute)
+    assert_equal(nil, user.verified)
+    assert_equal(nil, user.last_activity)
+    assert_equal(nil, user.last_login)
+    assert_equal(true, user.created_here)
+    assert_equal(false, user.admin)
+    assert_equal(0, user.contribution)
+    assert_equal(nil, user.bonuses)
+    assert_equal(nil, user.alert)
+    assert_equal(@locale, user.locale)
+    assert_equal(@notes.strip, user.notes)
+    assert_equal(@address.strip, user.mailing_address)
+    assert_objs_equal(@license, user.license)
+    assert_objs_equal(@location, user.location)
+    assert_objs_equal(@image, user.image)
+    assert_equal(1, user.api_keys.length)
+    assert_equal(@api_key.notes, user.api_keys.first.notes)
+  end
+
 ################################################################################
 
   def test_basic_gets
@@ -185,19 +211,16 @@ class ApiTest < UnitTestCase
     @lat = nil
     @long = nil
     @alt = nil
-
     params = {
       :method   => :post,
       :action   => :observation,
       :api_key  => @api_key.key,
       :location => 'Anywhere',
     }
-
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting observation')
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
-
     assert_api_fail(params.remove(:location))
   end
 
@@ -217,7 +240,6 @@ class ApiTest < UnitTestCase
     @lat = 39.229
     @long = -123.77
     @alt = 50
-
     params = {
       :method        => :post,
       :action        => :observation,
@@ -236,14 +258,12 @@ class ApiTest < UnitTestCase
       :thumbnail     => @img2.id,
       :images        => "#{@img1.id},#{@img2.id}",
     }
-
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting observation')
     assert_obj_list_equal([Observation.last], api.results)
     assert_last_observation_correct
     assert_last_naming_correct
     assert_last_vote_correct
-
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.merge(:api_key => 'this should fail'))
     assert_api_fail(params.merge(:date => 'yesterday'))
@@ -266,7 +286,6 @@ class ApiTest < UnitTestCase
 
   def test_posting_minimal_image
     setup_image_dirs
-
     @user = @rolf
     @proj = nil
     @date = Date.today
@@ -277,14 +296,12 @@ class ApiTest < UnitTestCase
     @height = 500
     @vote = nil
     @obs = nil
-
     params = {
       :method      => :post,
       :action      => :image,
       :api_key     => @api_key.key,
       :upload_file => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
     }
-
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting image')
     assert_obj_list_equal([Image.last], api.results)
@@ -293,7 +310,6 @@ class ApiTest < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
-
     @user = @rolf
     @proj = projects(:eol_project)
     @date = Date.parse('20120626')
@@ -304,7 +320,6 @@ class ApiTest < UnitTestCase
     @height = 500
     @vote = 3
     @obs = @user.observations.last
-
     params = {
       :method        => :post,
       :action        => :image,
@@ -319,18 +334,83 @@ class ApiTest < UnitTestCase
       :upload_file   => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
       :original_name => @orig,
     }
-
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting image')
     assert_obj_list_equal([Image.last], api.results)
     assert_last_image_correct
-
     assert_api_fail(params.remove(:api_key))
     assert_api_fail(params.remove(:upload_file))
     assert_api_fail(params.merge(:original_name => 'x'*1000))
     assert_api_fail(params.merge(:vote => '-5'))
     assert_api_fail(params.merge(:observations => '11')) # Katrina owns this observation
     assert_api_fail(params.merge(:projects => '2')) # Rolf is not a member of this project
+  end
+
+  def test_posting_minimal_user
+    @login = 'stephane'
+    @name = ''
+    @email = 'stephane@grappelli.com'
+    @locale = 'en-US'
+    @notes = ''
+    @license = License.preferred
+    @location = nil
+    @image = nil
+    @address = ''
+    params = {
+      :method  => :post,
+      :action  => :user,
+      :api_key => @api_key.key,
+      :login   => @login,
+      :email   => @email,
+    }
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    assert_obj_list_equal([User.last], api.results)
+    assert_last_user_correct
+    assert_api_fail(params)
+    params.merge!(:login => 'miles')
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:login))
+    assert_api_fail(params.remove(:email))
+    assert_api_fail(params.merge(:login => 'x'*1000))
+    assert_api_fail(params.merge(:email => 'x'*1000))
+    assert_api_fail(params.merge(:email => 'bogus address @ somewhere dot com'))
+  end
+
+  def test_posting_maximal_user
+    @login = 'stephane'
+    @name = 'Stephane Grappelli'
+    @email = 'stephane@grappelli.com'
+    @locale = 'el-GR'
+    @notes = " Here are some notes\nThey look like this!\n "
+    @license = (License.find_all_by_deprecated(false) - [License.preferred]).first
+    @location = Location.last
+    @image = Image.last
+    @address = ' I live here '
+    params = {
+      :method   => :post,
+      :action   => :user,
+      :api_key  => @api_key.key,
+      :login    => @login,
+      :name     => @name,
+      :email    => @email,
+      :locale   => @locale,
+      :notes    => @notes,
+      :license  => @license.id,
+      :location => @location.id,
+      :image    => @image.id,
+      :mailing_address  => @address,
+    }
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    assert_obj_list_equal([User.last], api.results)
+    assert_last_user_correct
+    params.merge!(:login => 'miles')
+    assert_api_fail(params.merge(:name => 'x'*1000))
+    assert_api_fail(params.merge(:locale => 'xx-XX'))
+    assert_api_fail(params.merge(:license => '123456'))
+    assert_api_fail(params.merge(:location => '123456'))
+    assert_api_fail(params.merge(:image => '123456'))
   end
 
   # ----------------------------

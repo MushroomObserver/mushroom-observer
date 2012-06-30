@@ -12,6 +12,7 @@ class API
   attr_accessor :action
   attr_accessor :version
   attr_accessor :user
+  attr_accessor :api_key
   attr_accessor :errors
 
   # Give other modules ability to do additional initialization.
@@ -66,6 +67,7 @@ class API
     elsif key = ApiKey.find_by_key(key_str)
       ::User.current = self.user = key.user
       key.touch!
+      self.api_key = key
     else
       raise BadApiKey.new(key_str)
     end
