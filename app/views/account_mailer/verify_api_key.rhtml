@@ -1,0 +1,23 @@
+<%
+  activate_url = "#{HTTP_DOMAIN}/account/activate_api_key/#{@api_key.id}"
+  manager_url = "#{HTTP_DOMAIN}/account/api_keys"
+  intro = :email_verify_api_key_intro.l(
+    :user => @user.login,
+    :other_user => @other_user.login,
+    :app => @api_key.notes,
+    :activate_link => link_to(activate_url, activate_url),
+    :manager_link => link_to(manager_url, manager_url)
+  )
+
+if @user.email_html %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<br/>
+</body>
+</html>
+<% else %><%= intro.tp.html_to_ascii %>
+<% end %>

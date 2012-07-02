@@ -3083,6 +3083,7 @@ email_subject_publish_name: Name Published
 email_subject_registration: "[name] Registration Verification"
 email_subject_update_registration: "[name] Registration Update"
 email_subject_verify: Email Verification
+email_subject_verify_api_key: Activate API Key
 email_subject_webmaster_question: Question From [user]
 
 # Field labels in the "object_change" emails.
@@ -3271,6 +3272,21 @@ email_verify_intro: >
   Please click the following link to verify that you received this email and activate your [:app_title] account:\n
   \n
   [link]\n
+
+email_verify_api_key_intro: >
+  h2. *Hello [user]*\n
+  \n
+  The application "[app]" (associated with user "[other_user]") has requested
+  access to your [:app_title] account.  If you recognize this application and
+  wish to give them permission to post observations, etc. in your name, all you
+  have to do is click on the activation link below to activate the API key they
+  just created.  Note that you can review your list of API keys at any time by
+  visiting the [:account_api_keys_title] from your "[:app_preferences]" page.\n
+  \n
+  Activate Key: [activate_link]\n
+  [:account_api_keys_link]: [manager_link]\n
+  \n
+  To report a suspicious access request, just respond to this email.\n
 
 ################################################################################
 

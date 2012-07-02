@@ -29,6 +29,7 @@
 #  publish_name::           Notify reviewers that a draft has been published.
 #  user_question::          User asking user about anything else.
 #  verify::                 Email sent to verify user's email.
+#  verify_api_key::         Email sent to ask user to verify and activate a new API key.
 #  webmaster_question::     User asking webmaster a question.
 #
 #  == Delivery methods
@@ -578,6 +579,28 @@ class AccountMailer < ActionMailer::Base
     @recipients          = user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = ACCOUNTS_EMAIL_ADDRESS
+    @content_type        = @user.email_html ? "text/html" : "text/plain"
+    @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL verify " +
+                          "to=#{user.id} email=#{user.email}")
+  end
+
+  # Email sent to verify and activate a new API key.
+  # user::        User that the key is for.
+  # other_user::  User that created the key.
+  # api_key::     API key in question.
+  def verify_api_key(user, other_user, api_key)
+    @user                = user
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_subject_verify_api_key.l
+    @body['subject']     = @subject
+    @body['user']        = user
+    @body['other_user']  = other_user
+    @body['api_key']     = api_key
+    @recipients          = user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = ACCOUNTS_EMAIL_ADDRESS
+    @headers['Reply-To'] = WEBMASTER_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL verify " +

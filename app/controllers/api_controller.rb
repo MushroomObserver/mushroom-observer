@@ -40,6 +40,7 @@ class ApiController < ApplicationController
   # end
 
   # Standard entry point for REST requests.
+  def api_keys;      rest_query(:api_key);      end
   def comments;      rest_query(:comment);      end
   def images;        rest_query(:image);        end
   def locations;     rest_query(:location);     end

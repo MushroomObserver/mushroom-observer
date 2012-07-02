@@ -172,4 +172,34 @@ class ApiControllerTest < FunctionalTestCase
     assert_not_equal('', key.to_s)
     assert_equal('New API Key', notes.to_s)
   end
+
+  def test_post_api_key
+    email_count = ActionMailer::Base.deliveries.size
+
+    rolfs_key = api_keys(:rolfs_api_key)
+    post(:api_keys,
+      :api_key => rolfs_key.key,
+      :app => 'Mushroom Mapper'
+    )
+    assert_no_api_errors
+    api_key = ApiKey.last
+    assert_equal('Mushroom Mapper', api_key.notes)
+    assert_users_equal(@rolf, api_key.user)
+    assert_not_nil(api_key.verified)
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+
+    post(:api_keys,
+      :api_key => rolfs_key.key,
+      :app => 'Mushroom Mapper',
+      :for_user => @mary.id
+    )
+    assert_no_api_errors
+    api_key = ApiKey.last
+    assert_equal('Mushroom Mapper', api_key.notes)
+    assert_users_equal(@mary, api_key.user)
+    assert_nil(api_key.verified)
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
+    email = ActionMailer::Base.deliveries.last
+    assert_equal(@mary.email, email.header['to'].to_s)
+  end
 end

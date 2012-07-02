@@ -187,6 +187,20 @@ class ApiTest < UnitTestCase
     end
   end
 
+  def assert_last_api_key_correct
+    api_key = ApiKey.last
+    assert_in_delta(Time.now, api_key.created, 1.minute)
+    if @verified
+      assert_in_delta(Time.now, api_key.verified, 1.minute)
+    else
+      assert_nil(api_key.verified)
+    end
+    assert_equal(nil, api_key.last_used)
+    assert_equal(0, api_key.num_uses)
+    assert_equal(@app.strip_squeeze, api_key.notes)
+    assert_users_equal(@for_user, api_key.user)
+  end
+
 ################################################################################
 
   def test_basic_gets
@@ -418,6 +432,49 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(:license => '123456'))
     assert_api_fail(params.merge(:location => '123456'))
     assert_api_fail(params.merge(:image => '123456'))
+  end
+
+  def test_posting_api_key_for_yourself
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = @rolf
+    @app = '  Mushroom  Mapper  '
+    @verified = true
+    params = {
+      :method  => :post,
+      :action  => :api_key,
+      :api_key => @api_key.key,
+      :app     => @app,
+    }
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:app))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
+  def test_posting_api_key_for_another_user
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = @katrina
+    @app = '  Mushroom  Mapper  '
+    @verified = false
+    params = {
+      :method   => :post,
+      :action   => :api_key,
+      :api_key  => @api_key.key,
+      :app      => @app,
+      :for_user => @for_user.id,
+    }
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    assert_obj_list_equal([ApiKey.last], api.results)
+    assert_last_api_key_correct
+    assert_api_fail(params.remove(:api_key))
+    assert_api_fail(params.remove(:app))
+    assert_api_fail(params.merge(:app => ''))
+    assert_api_fail(params.merge(:for_user => 123456))
+    assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
   end
 
   def test_unverified_user_rejected

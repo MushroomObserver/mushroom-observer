@@ -37,19 +37,20 @@
 #  :observation corresponds to API::Observation.  The primary actions each
 #  correspond to one of the main object types: 
 #
-#    :observation           Observation's
+#    :api_key               ApiKey's
 #    :comment               Comment's (on observations, names, etc.)
 #    :image                 Image's
-#    :naming                Name proposals for observations
-#    :vote                  Vote's on name proposals for observations
 #    :image_vote            Vote's on image quality
-#    :name                  Scientific Name's
-#    :name_description      NameDescription's
 #    :location              Location's
 #    :location_description  LocationDescription's
-#    :species_list          SpeciesList's (list of Observation's)
+#    :name                  Scientific Name's
+#    :name_description      NameDescription's
+#    :naming                Name proposals for observations
+#    :observation           Observation's
 #    :project               Project's
+#    :species_list          SpeciesList's (list of Observation's)
 #    :user                  User's
+#    :vote                  Vote's on name proposals for observations
 #
 #  These each have a uniform interface.  GET, PUT and DELETE requests all take
 #  a variety of standard "search" parameters, e.g.: 
@@ -102,6 +103,7 @@
 #  results::              List of objects found / modified.
 #  errors::               List of errors.
 #  user::                 Authenticated user making request.
+#  api_key::              ApiKey used to authenticate.
 #  version::              Version number of this request.
 #  query::                Rough copy of SQL query used.
 #  number::               Number of matching objects.
@@ -116,15 +118,12 @@ class API
   require_dependency 'api/parsers'
   require_dependency 'api/results'
   require_dependency 'api/upload'
+  require_dependency 'api/model_api'
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  require_dependency 'api/model_api'
-  require_dependency 'api/comment_api'
-  require_dependency 'api/image_api'
-  require_dependency 'api/location_api'
-  require_dependency 'api/name_api'
-  require_dependency 'api/observation_api'
-  require_dependency 'api/project_api'
-  require_dependency 'api/species_list_api'
-  require_dependency 'api/user_api'
+  for file in Dir.glob("#{RAILS_ROOT}/app/classes/api/*_api.rb")
+    if file.match(/(api\/\w+_api)\.rb$/) and $1 != 'api/model_api'
+      require_dependency $1
+    end
+  end
 end
