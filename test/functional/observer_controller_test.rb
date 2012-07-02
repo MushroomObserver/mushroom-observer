@@ -484,7 +484,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_some_admin_pages
     for (page, response, params) in [
-      [ :users_by_name,  'users_by_name',  {} ],
+      [ :users_by_name,  'list_users',  {} ],
       [ :email_features, 'email_features', {} ],
     ]
       logout
