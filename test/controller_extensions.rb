@@ -655,39 +655,43 @@ module ControllerExtensions
 
   # Check default value of a form field.
   def assert_input_value(id, expect_val)
-    message = "Didn't find any inputs '#{id}'."
-    assert_select("input##{id}") do |elements|
-      if elements.length > 1
-        message = "Found more than one input '#{id}'."
-      elsif elements.length == 1
-        match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
-        actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ''
-        if actual_val != expect_val.to_s
-          message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
-        else
-          message = nil
+    clean_our_backtrace do
+      message = "Didn't find any inputs '#{id}'."
+      assert_select("input##{id}") do |elements|
+        if elements.length > 1
+          message = "Found more than one input '#{id}'."
+        elsif elements.length == 1
+          match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
+          actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ''
+          if actual_val != expect_val.to_s
+            message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
+          else
+            message = nil
+          end
         end
       end
+      assert_block(message) { message.nil? }
     end
-    assert_block(message) { message.nil? }
   end
 
   # Check default value of a form field.
   def assert_textarea_value(id, expect_val)
-    message = "Didn't find any inputs '#{id}'."
-    assert_select("textarea##{id}") do |elements|
-      if elements.length > 1
-        message = "Found more than one input '#{id}'."
-      elsif elements.length == 1
-        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).join(''))
-        if actual_val != expect_val.to_s
-          message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
-        else
-          message = nil
+    clean_our_backtrace do
+      message = "Didn't find any inputs '#{id}'."
+      assert_select("textarea##{id}") do |elements|
+        if elements.length > 1
+          message = "Found more than one input '#{id}'."
+        elsif elements.length == 1
+          actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).join(''))
+          if actual_val != expect_val.to_s
+            message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
+          else
+            message = nil
+          end
         end
       end
+      assert_block(message) { message.nil? }
     end
-    assert_block(message) { message.nil? }
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,
@@ -700,27 +704,29 @@ module ControllerExtensions
   #   :unchecked_but_disabled
   #
   def assert_checkbox_state(id, state)
-    case state
-    when :checked_but_disabled
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 1)
-      assert_select("input##{id}[disabled=disabled]", 1)
-    when :unchecked_but_disabled
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 0)
-      assert_select("input##{id}[disabled=disabled]", 1)
-    when :checked
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 1)
-      assert_select("input##{id}[disabled=disabled]", 0)
-    when :unchecked
-      assert_select("input##{id}", 1)
-      assert_select("input##{id}[checked=checked]", 0)
-      assert_select("input##{id}[disabled=disabled]", 0)
-    when :no_field
-      assert_select("input##{id}", 0)
-    else
-      raise "Invalid state in check_project_checks: #{state.inspect}"
+    clean_our_backtrace do
+      case state
+      when :checked_but_disabled
+        assert_select("input##{id}", 1)
+        assert_select("input##{id}[checked=checked]", 1)
+        assert_select("input##{id}[disabled=disabled]", 1)
+      when :unchecked_but_disabled
+        assert_select("input##{id}", 1)
+        assert_select("input##{id}[checked=checked]", 0)
+        assert_select("input##{id}[disabled=disabled]", 1)
+      when :checked
+        assert_select("input##{id}", 1)
+        assert_select("input##{id}[checked=checked]", 1)
+        assert_select("input##{id}[disabled=disabled]", 0)
+      when :unchecked
+        assert_select("input##{id}", 1)
+        assert_select("input##{id}[checked=checked]", 0)
+        assert_select("input##{id}[disabled=disabled]", 0)
+      when :no_field
+        assert_select("input##{id}", 0)
+      else
+        raise "Invalid state in check_project_checks: #{state.inspect}"
+      end
     end
   end
 end

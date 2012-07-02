@@ -7,6 +7,7 @@ rolf:
   login: rolf
   name: Rolf Singer
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: rolf@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10
@@ -22,6 +23,7 @@ mary:
   login: mary
   name: Mary Newbie
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: mary@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10
@@ -38,6 +40,7 @@ junk:
   login: junk
   name: Junk Box
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: junk@collectivesource.com
   contribution: 10
   created_here: true
@@ -52,6 +55,7 @@ dick:
   login: dick
   name: Tricky Dick
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: dick@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10
@@ -67,6 +71,7 @@ katrina:
   login: katrina
   name: Katrina
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: katrina@collectivesource.com
   verified: 2008-03-02 21:14:00
   contribution: 10
@@ -81,6 +86,7 @@ roy:
   login: roy
   name: Roy Halling
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: roy@collectivesource.com
   verified: 2010-07-15 21:20:00
   contribution: 10

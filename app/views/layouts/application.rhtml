@@ -14,13 +14,13 @@
     if is_in_admin_mode?
       css = 'Admin'
     elsif is_robot?
-      css = 'BlackOnWhite'
+      css = DEFAULT_THEME
     else
       if CSS.member?(controller.action_name)
         css = controller.action_name
       else
         if @user.nil?
-          css = 'BlackOnWhite'
+          css = DEFAULT_THEME
         else
           css = @user.theme
         end

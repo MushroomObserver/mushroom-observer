@@ -162,7 +162,7 @@ class ApiTest < UnitTestCase
     assert_equal(@login, user.login)
     assert_equal(@name, user.name)
     assert_equal(@email, user.email)
-    assert_not_equal(nil, user.password) # doesn't matter
+    assert_equal('', user.password)
     assert_in_delta(Time.now, user.created, 1.minute)
     assert_in_delta(Time.now, user.modified, 1.minute)
     assert_equal(nil, user.verified)

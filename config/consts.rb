@@ -44,6 +44,9 @@ API_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 EMAIL_DATE_FORMAT = '%Y-%m-%d'
 EMAIL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z (%z)'
 
+# Default theme for users not logged in, new users and robots.
+DEFAULT_THEME = 'BlackOnWhite'
+
 # Queued email only gets delivered if you have run the rake task email:send.
 # script/send_email is a cron script for running email:send.  (Delay is in
 # seconds.)

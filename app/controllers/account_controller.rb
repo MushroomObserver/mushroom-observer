@@ -73,7 +73,7 @@ class AccountController < ApplicationController
 
   def signup # :nologin: :prefetch:
     if request.method != :post
-      @new_user = User.new
+      @new_user = User.new(:theme => DEFAULT_THEME)
     else
       theme = params['new_user']['theme']
       login = params['new_user']['login']
@@ -96,7 +96,11 @@ class AccountController < ApplicationController
         @new_user.columns         = 3
         @new_user.mailing_address = ''
         @new_user.notes           = ''
-        if !@new_user.save
+        if @new_user.password.blank?
+          @new_user.errors.add(:password, :validate_user_password_missing.t)
+        end
+        if @new_user.errors.any? or
+           not @new_user.save
           flash_object_errors(@new_user)
         else
           group = UserGroup.create_user(@new_user)
@@ -125,7 +129,7 @@ class AccountController < ApplicationController
       # logged in.  "auth_code" will be missing.
       if auth_code != user.auth_code
         @unverified_user = user
-        render(:action => "reverify")
+        render(:action => :reverify)
 
       # If already logged in and verified, just send to "welcome" page.
       elsif @user == user
@@ -136,25 +140,47 @@ class AccountController < ApplicationController
       # log in any time they wanted to.  This makes it a one-time use.)
       elsif user.verified
         flash_warning(:runtime_reverify_already_verified.t)
+        set_session_user(nil)
         redirect_to(:action => :login)
+
+      # If user was created via API, we need to ask the user to choose a password
+      # first before we can verify them.
+      elsif user.password.blank?
+        @user = user
+        if request.method != :post
+          flash_warning(:account_choose_password_warning.t)
+          render(:action => :choose_password)
+        else
+          password = params[:user][:password] rescue nil
+          confirmation = params[:user][:password_confirmation] rescue nil
+          if password.blank?
+            @user.errors.add(:password, :validate_user_password_missing.t)
+          elsif password != confirmation
+            @user.errors.add(:password_confirmation, :validate_user_password_no_match.t)
+          elsif password.length < 5 or password.binary_length > 40
+            @user.errors.add(:password, :validate_user_password_too_long.t)
+          else
+            set_session_user(@user)
+            @user.change_password(password)
+            @user.verify
+          end
+          if user.errors.any?
+            @user.password = password
+            flash_object_errors(user)
+            render(:action => :choose_password)
+          end
+        end
 
       # If not already verified, and the code checks out, then mark account
       # "verified", log user in, and display the "you're verified" page.
       else
-        @user = user
-        @user.last_login = now = Time.now
-        @user.verified   = now
-        @user.save
-        set_session_user(@user)
-        Transaction.put_user(
-          :id         => @user,
-          :set_verify => @user.verified
-        )
+        set_session_user(@user = user)
+        @user.verify
       end
     end
   end
 
-  # This action is never actually used.  It's template is rendered by verify.
+  # This action is never actually used.  Its template is rendered by verify.
   def reverify # :nologin:
     raise "This action should never occur!"
   end

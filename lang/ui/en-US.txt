@@ -1816,6 +1816,12 @@ verify_note: >
 
 
 
+# account/choose_password
+account_choose_password_title: Verifying Your Account
+account_choose_password_warning: You must choose a password before we can verify your account.
+
+
+
 # account/welcome
 welcome_no_user_title: User not set in session
 welcome_logout_link: Logout

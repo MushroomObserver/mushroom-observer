@@ -428,19 +428,8 @@ class User < AbstractModel
   #
   def self.authenticate(login, pass)
     find(:first, :conditions =>
-      [ "(login = ? OR name = ? OR email = ?) AND password = ?",
+      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
         login, login, login, sha1(pass) ])
-  end
-
-  # Code used to authenticate via cookie, verify email, or XML request.
-  #
-  #   id   = params[:auth_id]
-  #   code = params[:auth_code]
-  #   user = User.find(id)
-  #   raise if code != user.auth_code
-  #
-  def auth_code
-    protected_auth_code
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -452,6 +441,19 @@ class User < AbstractModel
     if !pass.blank?
       update_attribute "password", self.class.sha1(pass)
     end
+  end
+
+  # Mark a User account as "verified".
+  def verify
+    now = Time.now
+    self.verified = now
+    self.last_login = now
+    self.last_activity = now
+    self.save
+    Transaction.put_user(
+      :id         => self,
+      :set_verify => now
+    )
   end
 
   ##############################################################################
@@ -820,51 +822,56 @@ protected
   end
 
   # Encrypted code used in autologin cookie and API authentication.
-  def protected_auth_code # :nodoc:
-    Digest::SHA1.hexdigest("SdFgJwLeR#{self.password}WeRtWeRkTj")
+  def self.old_auth_code(password) # :nodoc:
+    Digest::SHA1.hexdigest("SdFgJwLeR#{password}WeRtWeRkTj")
   end
 
   # This is a +before_create+ callback that encrypts the password before saving
   # the new user record.  (Not needed for updates because we use
   # change_password for that instead.)
   def crypt_password # :nodoc:
-    write_attribute("password", self.class.sha1(password))
+    unless password.blank?
+      write_attribute("password", self.class.sha1(password))
+    end
+    write_attribute("auth_code", String.random(39))
   end
 
   def validate # :nodoc:
-    if self.login.to_s.blank?
+    if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
-    elsif self.login.length < 3 or self.login.binary_length > 40
+    elsif login.length < 3 or login.binary_length > 40
       errors.add(:login, :validate_user_login_too_long.t)
-    elsif (other = User.find_by_login(self.login)) && (other.id != self.id)
+    elsif (other = User.find_by_login(login)) && (other.id != id)
       errors.add(:login, :validate_user_login_taken.t)
     end
 
-    if self.password.to_s.blank?
-      errors.add(:password, :validate_user_password_missing.t)
-    elsif self.password.length < 5 or password.binary_length > 40
+    if password.to_s.blank?
+      # errors.add(:password, :validate_user_password_missing.t)
+    elsif password.length < 5 or password.binary_length > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
-    if self.email.to_s.blank?
+    if email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
-    elsif self.email.binary_length > 80
+    elsif email.binary_length > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
 
-    if self.theme.to_s.binary_length > 40
+    if theme.to_s.binary_length > 40
       errors.add(:theme, :validate_user_theme_too_long.t)
     end
-    if self.name.to_s.binary_length > 80
+    if name.to_s.binary_length > 80
       errors.add(:name, :validate_user_name_too_long.t)
     end
   end
 
   def validate_on_create # :nodoc:
-    if self.password_confirmation.to_s.blank?
-      errors.add(:password, :validate_user_password_confirmation_missing.t)
-    elsif self.password != self.password_confirmation
-      errors.add(:password, :validate_user_password_no_match.t)
+    unless password.blank? 
+      if password_confirmation.to_s.blank?
+        errors.add(:password, :validate_user_password_confirmation_missing.t)
+      elsif password != password_confirmation
+        errors.add(:password, :validate_user_password_no_match.t)
+      end
     end
   end
 end

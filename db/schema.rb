@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120626163100) do
+ActiveRecord::Schema.define(:version => 20120701173300) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -586,6 +586,7 @@ ActiveRecord::Schema.define(:version => 20120626163100) do
     t.boolean  "keep_filenames",                                                                                   :default => true,       :null => false
     t.enum     "hide_authors",                 :limit => [:none, :above_species],                                  :default => :none,      :null => false
     t.boolean  "thumbnail_maps",                                                                                   :default => true,       :null => false
+    t.string   "auth_code",                    :limit => 40
   end
 
   create_table "votes", :force => true do |t|

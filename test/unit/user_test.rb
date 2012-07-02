@@ -33,9 +33,10 @@ class UserTest < UnitTestCase
     assert !u.save
     assert u.errors.invalid?('password')
 
-    u.password = u.password_confirmation = ""
-    assert !u.save
-    assert u.errors.invalid?('password')
+    # This is allowed now so that API can create users without a password chosen yet.
+    # u.password = u.password_confirmation = ""
+    # assert !u.save
+    # assert u.errors.invalid?('password')
 
     u.password = u.password_confirmation = "bobs_secure_password"
     assert u.save

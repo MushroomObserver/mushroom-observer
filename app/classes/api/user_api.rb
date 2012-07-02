@@ -24,7 +24,6 @@ class API
     end
 
     def create_params
-      password = parse_string(:password, :limit => 80, :default => String.random(8))
       {
         :login           => parse_string(:login, :limit => 80),
         :name            => parse_string(:name, :limit => 80, :default => ''),
@@ -41,8 +40,6 @@ class API
         :created_here    => true,
         :rows            => 5,
         :columns         => 3,
-        :password        => password,
-        :password_confirmation => password,
       }
     end
 
