@@ -53,27 +53,87 @@ class LocalizationFilesTest < UnitTestCase
       "reference(s) in language files:\n" + errors.join(''))
   end
 
-  def test_application_language_tags
-
-    # First get list of tags defined in the main language file.
-    lang = Language.official
-    data = File.open(lang.export_file, 'r:utf-8') do |fh|
-      YAML::load(fh)
+  def test_find_missing_tags_and_duplicate_method_defs
+    tags = known_tags
+    missing_tags = []
+    duplicate_function_defs = []
+    source_files("#{RAILS_ROOT}/app", "#{RAILS_ROOT}/test") do |file|
+      missing_tags += missing_tags_in_file(file, tags)
+      duplicate_function_defs += duplicate_function_defs_in_file(file)
     end
+    assert_true(missing_tags.empty?, "Found #{missing_tags.length} undefined tag " +
+      "reference(s) in source files:\n" + missing_tags.join(''))
+    assert_true(duplicate_function_defs.empty?, "Found #{duplicate_function_defs.length} duplicate method " +
+      "definition(s) in source files:\n" + duplicate_function_defs.join(''))
+  end
+
+  # Get Hash of tags we havbe translations for already.
+  def known_tags
     tags = {}
-    for tag in data.keys
+    for tag in Globalite.localizations.keys +
+        # these are tags only used in unit tests
+        [ :one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y, :_unit_test_z ]
       tags[tag.to_s.downcase] = true
     end
+    return tags
+  end
 
-    # Really, we should include the Globalite translations, too, but for now
-    # let's just add the only two we actually use.
-    tags['date_helper_abbr_month_names'] = true
-    tags['date_helper_month_names']      = true
+  # Get Array of error messages for tags in +file+ that we don't have translations for.
+  def missing_tags_in_file(file, tags)
+    errors = []
+    n = 0
+    for line in File.readlines(file)
+      n += 1
+      line.sub!(/(^#| # ).*/, '')
+      line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
+        if !tags.has_key?($1.downcase)
+          errors << "#{file} line #{n} [:#{$1}]\n"
+        end
+      end
+    end
+    return errors
+  end
 
-    # Traverse a directory structure looking for source files.
-    def source_files(path, &block)
+  # Get Array of error messages for methods in +file+ that are defined more
+  # than once.  (I find myself copying and pasting method definitions and
+  # forgetting to change the method name frequently.  Ruby does not complain
+  # about this, and just overwrites the old method.  This is particularly
+  # insidious in the unit tests, because there's absolutely no way to know.) 
+  def duplicate_function_defs_in_file(file)
+    errors = []
+    defs = {}
+    stack = []
+    n = 0
+    for line in File.readlines(file)
+      n += 1
+      if line.match(/^(\s*)(class|module)\s/)
+        space = $1
+        stack << [{}, space]
+        defs = {}
+      elsif line.match(/^(\s*)end(\W|$)/) and stack.any?
+        space = $1
+        if space == stack[-1][1]
+          defs = stack.pop[0]
+        end
+      elsif line.match(/^\s*def ([^\s()#]+)/)
+        if defs[$1]
+          errors << "#{file} line #{n} #{$1.inspect}\n"
+        else
+          defs[$1] = true
+        end
+      end
+    end
+    if stack.any?
+      errors << "#{file} line #{n} [file didn't parse right, might be due to tabs?]\n"
+    end
+    return errors
+  end
+
+  # Traverse a directory structure looking for source files.
+  def source_files(*paths, &block)
+    for path in paths
       for file in Dir.glob("#{path}/*")
-        if file.match(/\.(rb|rhtml)$/)
+        if file.match(/\.(rb|rhtml|rxml)$/)
           block.call(file)
         elsif File.directory?(file) and
           file.match(/\/\w+$/)
@@ -81,24 +141,6 @@ class LocalizationFilesTest < UnitTestCase
         end
       end
     end
-
-    # Now go through all source files looking for tag refs.
-    errors = []
-    source_files("#{RAILS_ROOT}/app") do |file|
-      n = 0
-      for line in File.readlines(file)
-        n += 1
-        line.sub!(/(^#| # ).*/, '')
-        line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
-          if !tags.has_key?($1.downcase)
-            errors << "#{file} line #{n} [:#{$1}]\n"
-          end
-        end
-      end
-    end
-
-    assert_true(errors.empty?, "Found #{errors.length} undefined tag " +
-      "reference(s) in source files:\n" + errors.join(''))
   end
 
   def test_api_error_translations

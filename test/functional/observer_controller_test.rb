@@ -502,7 +502,7 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
-  def test_some_admin_pages
+  def test_email_features
     page = :email_features
     params = {:feature_email => {:content => 'test'}}
 

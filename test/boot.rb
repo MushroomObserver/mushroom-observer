@@ -104,7 +104,11 @@ class StringIOPlus < StringIO
 end
 
 # Re-raise errors caught by the controller.
-class ApplicationController; def rescue_action(e) raise e end; end
+class ApplicationController
+  def rescue_action(e)
+    raise e
+  end
+end
 
 require 'test/unit/ui/console/testrunner'
 

@@ -185,7 +185,7 @@ class NameControllerTest < FunctionalTestCase
     assert_response('list_names')
   end
 
-  def test_name_index
+  def test_name_description_index
     get_with_dump(:list_name_descriptions)
     assert_response('list_name_descriptions')
   end

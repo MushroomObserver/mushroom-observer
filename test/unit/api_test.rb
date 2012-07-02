@@ -490,7 +490,7 @@ class ApiTest < UnitTestCase
     assert_api_pass(params)
   end
 
-  def test_unverified_user_rejected
+  def test_unverified_api_key_rejected
     params = {
       :method   => :post,
       :action   => :observation,
