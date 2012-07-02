@@ -179,8 +179,12 @@ class ApiTest < UnitTestCase
     assert_objs_equal(@license, user.license)
     assert_objs_equal(@location, user.location)
     assert_objs_equal(@image, user.image)
-    assert_equal(1, user.api_keys.length)
-    assert_equal(@api_key.notes, user.api_keys.first.notes)
+    if @new_key
+      assert_equal(1, user.api_keys.length)
+      assert_equal(@new_key.strip_squeeze, user.api_keys.first.notes)
+    else
+      assert_equal(0, user.api_keys.length)
+    end
   end
 
 ################################################################################
@@ -356,6 +360,7 @@ class ApiTest < UnitTestCase
     @location = nil
     @image = nil
     @address = ''
+    @new_key = nil
     params = {
       :method  => :post,
       :action  => :user,
@@ -387,6 +392,7 @@ class ApiTest < UnitTestCase
     @location = Location.last
     @image = Image.last
     @address = ' I live here '
+    @new_key = '  Blah  Blah  Blah  '
     params = {
       :method   => :post,
       :action   => :user,
@@ -400,6 +406,7 @@ class ApiTest < UnitTestCase
       :location => @location.id,
       :image    => @image.id,
       :mailing_address  => @address,
+      :create_key => @new_key,
     }
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting image')
@@ -423,6 +430,19 @@ class ApiTest < UnitTestCase
     @rolf.update_attribute(:verified, nil)
     assert_api_fail(params)
     @rolf.update_attribute(:verified, Time.now)
+    assert_api_pass(params)
+  end
+
+  def test_unverified_user_rejected
+    params = {
+      :method   => :post,
+      :action   => :observation,
+      :api_key  => @api_key.key,
+      :location => 'Anywhere',
+    }
+    @api_key.update_attribute(:verified, nil)
+    assert_api_fail(params)
+    @api_key.verify!
     assert_api_pass(params)
   end
 

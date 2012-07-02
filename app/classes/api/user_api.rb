@@ -24,6 +24,7 @@ class API
     end
 
     def create_params
+      @create_key = parse_string(:create_key)
       {
         :login           => parse_string(:login, :limit => 80),
         :name            => parse_string(:name, :limit => 80, :default => ''),
@@ -32,7 +33,7 @@ class API
                                        :default => Language.official.locale),
         :notes           => parse_string(:notes, :default => ''),
         :mailing_address => parse_string(:mailing_address, :default => ''),
-        :license         => parse_license(:license, :default =>  License.preferred),
+        :license         => parse_license(:license, :default => License.preferred),
         :location        => parse_location(:location),
         :image           => parse_image(:image),
         :verified        => nil,
@@ -56,10 +57,13 @@ class API
     end
 
     def after_create(user)
-      key = ApiKey.new(:notes => @api_key.notes, :user => user)
-      key.provide_defaults
-      key.save
-      user.reload
+      if @create_key
+        key = ApiKey.new(:notes => @create_key, :user => user)
+        key.provide_defaults
+        key.verified = nil
+        key.save
+        user.reload
+      end
     end
 
     def put

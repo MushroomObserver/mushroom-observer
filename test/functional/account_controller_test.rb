@@ -519,7 +519,8 @@ class AccountControllerTest < FunctionalTestCase
 
     # Get initial (empty) form.
     requires_login(:api_keys)
-    assert_select('a[href*=edit_api_key]', :count => 0)
+    assert_select('a[onclick*=edit_key]', :count => 0)
+    assert_select('a[onclick*=activate_key]', :count => 0)
     assert_input_value(:key_notes, '')
 
     # Try to create key with no name.
@@ -527,7 +528,7 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_create_button.l)
     assert_flash_error
     assert_equal(0, ApiKey.count)
-    assert_select('a[href*=edit_api_key]', :count => 0)
+    assert_select('a[onclick*=edit_key]', :count => 0)
 
     # Create good key.
     post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'app name'})
@@ -536,7 +537,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(1, @mary.reload.api_keys.length)
     key1 = @mary.api_keys.first
     assert_equal('app name', key1.notes)
-    assert_select('a[href*=edit_api_key]', :count => 1)
+    assert_select('a[onclick*=edit_key]', :count => 1)
 
     # Create another key.
     post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'another name'})
@@ -545,13 +546,13 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(2, @mary.reload.api_keys.length)
     key2 = @mary.api_keys.last
     assert_equal('another name', key2.notes)
-    assert_select('a[href*=edit_api_key]', :count => 2)
+    assert_select('a[onclick*=edit_key]', :count => 2)
 
     # Press "remove" without selecting anything.
     post(:api_keys, :commit => :account_api_keys_remove_button.l)
     assert_flash_warning
     assert_equal(2, ApiKey.count)
-    assert_select('a[href*=edit_api_key]', :count => 2)
+    assert_select('a[onclick*=edit_key]', :count => 2)
 
     # Remove first key.
     post(:api_keys, :commit => :account_api_keys_remove_button.l, "key_#{key1.id}" => '1')
@@ -560,7 +561,42 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(1, @mary.reload.api_keys.length)
     key = @mary.api_keys.last
     assert_objs_equal(key, key2)
-    assert_select('a[href*=edit_api_key]', :count => 1)
+    assert_select('a[onclick*=edit_key]', :count => 1)
+  end
+
+  def test_activate_api_key
+    key = ApiKey.new
+    key.provide_defaults
+    key.verified = nil
+    key.notes = 'Testing'
+    key.user = @katrina
+    key.save
+    assert_nil(key.verified)
+
+    get(:activate_api_key, :id => 12345)
+    assert_response(:action => :login)
+    assert_nil(key.verified)
+
+    login('dick')
+    get(:activate_api_key, :id => key.id)
+    assert_flash_error
+    assert_response(:action => :api_keys)
+    assert_nil(key.verified)
+
+    login('katrina')
+    get(:api_keys)
+    assert_select('a[onclick*=edit_key]', :count => 1)
+    assert_select('a[onclick*=activate_key]', :count => 1)
+
+    get(:activate_api_key, :id => key.id)
+    assert_flash_success
+    assert_response(:action => :api_keys)
+    key.reload
+    assert_not_nil(key.verified)
+
+    get(:api_keys)
+    assert_select('a[onclick*=edit_key]', :count => 1)
+    assert_select('a[onclick*=activate_key]', :count => 0)
   end
 
   def test_edit_api_key

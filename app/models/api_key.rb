@@ -14,6 +14,7 @@ class ApiKey < AbstractModel
 
   def provide_defaults
     self.created ||= Time.now
+    self.verified ||= nil
     self.last_used ||= nil
     self.num_uses ||= 0
     self.user_id ||= User.current_id
@@ -27,6 +28,12 @@ class ApiKey < AbstractModel
       :num_uses => num_uses + 1
     )
   end 
+
+  def verify!
+    update_attributes!(
+      :verified => Time.now
+    )
+  end
 
   def self.new_key
     result = String.random(KEY_LENGTH) 

@@ -556,8 +556,9 @@ class AccountController < ApplicationController
 
   def create_api_key()
     @key = ApiKey.new(params[:key])
+    @key.verified = Time.now
     @key.save!
-    @key = ApiKey.new # blank out form for if theu want to create another key
+    @key = ApiKey.new # blank out form for if they want to create another key
     flash_notice(:account_api_keys_create_success.t)
   rescue => e
     flash_error(:account_api_keys_create_failed.t(:msg => e.to_s))
@@ -576,6 +577,18 @@ class AccountController < ApplicationController
     else
       flash_warning(:account_api_keys_removed_none.t)
     end
+  end
+
+  def activate_api_key # :login: :norobots:
+    if key = find_or_goto_index(ApiKey, params[:id])
+      if check_permission!(key)
+        key.verify!
+        flash_notice(:account_api_keys_activated.t(:notes => key.notes))
+      end
+      redirect_to(:action => :api_keys)
+    end
+  rescue => e
+    flash_error(e.to_s)
   end
 
   def edit_api_key # :login: :norobots:

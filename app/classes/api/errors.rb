@@ -74,6 +74,13 @@ class API
     end
   end
 
+  class ApiKeyNotVerified < Error
+    def initialize(key)
+      super()
+      args.merge!(:key => key.key.to_s, :notes => key.notes.to_s)
+    end
+  end
+
   class UserNotVerified < Error
     def initialize(user)
       super()

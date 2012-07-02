@@ -70,6 +70,55 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(:'en-US', Locale.code)
   end
 
+  def test_activate_api_key
+    key = ApiKey.new
+    key.provide_defaults
+    key.verified = nil
+    key.user = @katrina
+    key.notes = 'testing'
+    key.save!
+    assert_nil(key.reload.verified)
+
+    bad_ajax_request(:api_key, :type => :activate, :id => key.id)
+    assert_nil(key.reload.verified)
+
+    login('dick')
+    bad_ajax_request(:api_key, :type => :activate, :id => key.id)
+    assert_nil(key.reload.verified)
+
+    login('katrina')
+    bad_ajax_request(:api_key, :type => :activate)
+    bad_ajax_request(:api_key, :type => :activate, :id => 12345)
+    good_ajax_request(:api_key, :type => :activate, :id => key.id)
+    assert_equal('', @response.body)
+    assert_not_nil(key.reload.verified)
+  end
+
+  def test_edit_api_key
+    key = ApiKey.new
+    key.provide_defaults
+    key.verified = Time.now
+    key.user = @katrina
+    key.notes = 'testing'
+    key.save!
+    assert_equal('testing', key.notes)
+
+    bad_ajax_request(:api_key, :type => :edit, :id => key.id, :value => 'new notes')
+    assert_equal('testing', key.reload.notes)
+
+    login('dick')
+    bad_ajax_request(:api_key, :type => :edit, :id => key.id, :value => 'new notes')
+    assert_equal('testing', key.reload.notes)
+
+    login('katrina')
+    bad_ajax_request(:api_key, :type => :edit)
+    bad_ajax_request(:api_key, :type => :edit, :id => 12345)
+    bad_ajax_request(:api_key, :type => :edit, :id => key.id)
+    assert_equal('testing', key.reload.notes)
+    good_ajax_request(:api_key, :type => :edit, :id => key.id, :value => ' new  notes ')
+    assert_equal('new notes', key.reload.notes)
+  end
+
   def test_auto_complete_location
     mitrula = locations(:mitrula_marsh).name
     reyes = locations(:point_reyes).name

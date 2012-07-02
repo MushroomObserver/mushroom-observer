@@ -17,6 +17,7 @@
 #  == Actions
 #
 #  auto_complete::    Return list of strings matching a given string.
+#  api_key::          Activate and edit ApiKey's.
 #  export::           Change export status.
 #  geocode::          Look up extents for geographic location by name.
 #  image::            Serve image from web server until transferred to image server.
@@ -70,6 +71,40 @@ class AjaxController < ApplicationController
       auto = AutoComplete.subclass(type).new(string, params)
       results = auto.matching_strings.join("\n") + "\n"
       render(:text => results)
+    end
+  end
+
+  # Activate mode: sets verified field of given ApiKey, returns nothing.
+  # Edit mode: sets notes field of given ApiKey, returns new value.
+  # In both cases returns error message if there is an error.
+  # type::  "activate" or "edit"
+  # id::    ID of ApiKey
+  # value:: New value of the notes field (edit mode only)
+  def api_key
+    type  = params[:type].to_s
+    id    = params[:id].to_s
+    value = params[:value].to_s
+    @user = get_session_user!
+    key   = ApiKey.safe_find(id)
+    if not key
+      raise :runtime_no_match_id.l(:type => :api_key, :id => id)
+    elsif key.user != @user
+      raise :runtime_not_owner_id.l(:type => :api_key, :id => id)
+    else
+      case type
+      when 'activate'
+        key.verify!
+        render(:text => '')
+      when 'edit'
+        if value.blank?
+          raise :runtime_api_key_notes_cannot_be_blank.l
+        else
+          key.update_attribute(:notes, value.strip_squeeze)
+        end
+        render(:text => key.notes)
+      else
+        raise "Invalid type for api_key: #{type.inspect}"
+      end
     end
   end
 

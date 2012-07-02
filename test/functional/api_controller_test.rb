@@ -155,6 +155,7 @@ class ApiControllerTest < FunctionalTestCase
       :api_key => rolfs_key.key,
       :login => 'miles',
       :email => 'miles@davis.com',
+      :create_key => 'New API Key',
       :detail => :high
     )
     assert_no_api_errors
@@ -169,6 +170,6 @@ class ApiControllerTest < FunctionalTestCase
     key = keys.elements['api_key/key'].get_text rescue nil
     notes = keys.elements['api_key/notes'].get_text rescue nil
     assert_not_equal('', key.to_s)
-    assert_equal(rolfs_key.notes.to_s, notes.to_s)
+    assert_equal('New API Key', notes.to_s)
   end
 end

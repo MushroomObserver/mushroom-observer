@@ -345,6 +345,9 @@ who: who
 # Common verbs/actions used as button labels.
 ADD: Add
 add: add
+# activate an API key
+ACTIVATE: Activate
+activate: activate
 # approve a name
 APPROVE: Approve
 approve: approve
@@ -655,7 +658,7 @@ user_stats_observations_with_voucher: Observations with Specimen, Notes and Imag
 user_stats_observations_without_voucher: All Other Observations
 user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
 user_stats_species_lists: "[:SPECIES_LISTS]"
-user_stats_users: ""
+user_stats_users:  ""
 user_stats_votes: "[:VOTES]"
 
 # Site statistics field names.
@@ -1267,13 +1270,13 @@ location_change: Change to Location
 # model/location
 location_dubious_ambiguous_country: Ambiguous country or state, '[country]'
 location_dubious_bad_char: Contains unexpected character '[char]'
-location_dubious_bad_term: Contains bad term, '[bad]', rather than '[good]'
+location_dubious_bad_term: For consistency, we prefer '[good]' instead of '[bad]'.
 location_dubious_commas: All commas should be followed by a space and another word
 location_dubious_empty: Empty location given
-location_dubious_redundant_county: County may be redundant
-location_dubious_redundant_state: Both '[state]' and '[country]' are on the list of countries and continents
+location_dubious_redundant_county: County may not be required in this name; for greatest consistency we prefer that you not include the county for towns and cities.
+location_dubious_redundant_state: Both '[state]' and '[country]' are on the list of countries and continents.  A common mistake is to include the continent in addition to the country; this is unnecessary.
 location_dubious_unknown_country: Unknown country '[country]'
-location_dubious_unknown_state: Unknown state '[state]', '[country]'
+location_dubious_unknown_state: Unrecognized state or province '[state]' for '[country]'.
 
 
 
@@ -1702,7 +1705,7 @@ show_user_mailing_address: Mailing Address for Collections
 show_user_primary_location: Primary Location
 show_user_total: Total
 show_user_language_contribution: "Translations: [name]"
-show_user_life_list: '"Life List":[url]: [species] species in [genera] genera'
+show_user_life_list: "\"Life List\":[url]: [species] species in [genera] genera"
 
 
 
@@ -1744,14 +1747,7 @@ species_list_projects_this_list: this species list
 species_list_projects_observations: observations in this list
 species_list_projects_images: images in this list
 species_list_projects_no_add_to_project: You do not have permission to attach objects to the project "[proj]".
-species_list_projects_help: >
-  This form allows you to either attach this list or its observations or images
-  to one or more projects, or remove them from one or more projects.  Choose
-  which objects you wish to attach or remove, then choose the project or
-  projects you wish to attach them to or remove them from, then click on
-  "Attach" or "Remove" to perform the operation.  Note: It will only allow you
-  to attach or remove objects which you have permission to edit. 
-
+species_list_projects_help: "This form allows you to either attach this list or its observations or images to one or more projects, or remove them from one or more projects.  Choose which objects you wish to attach or remove, then choose the project or projects you wish to attach them to or remove them from, then click on \"Attach\" or \"Remove\" to perform the operation.  Note: It will only allow you to attach or remove objects which you have permission to edit."
 
 
 # species_list/show_species_list
@@ -2005,6 +2001,7 @@ account_api_keys_create_failed: "Failed to create a new API Key: [msg]"
 account_api_keys_removed_some: Successfully removed [num] selected API Key(s).
 account_api_keys_removed_none: No API Keys were selected.
 account_api_keys_updated: Successfully updated API Key notes.
+account_api_keys_activated: Successfully activated key for [notes].
 account_api_keys_no_notes: You left name/description field empty.
 
 
@@ -2049,10 +2046,10 @@ bulk_license_link: Bulk License Updater
 
 
 # observer/checklist
-checklist_for_site_title: "Checklist for Mushroom Observer"
-checklist_for_user_title: "Checklist for [user]"
-checklist_for_project_title: "Checklist for [project]"
-checklist_for_species_list_title: "Checklist for [list]"
+checklist_for_site_title: Checklist for Mushroom Observer
+checklist_for_user_title: Checklist for [user]
+checklist_for_project_title: Checklist for [project]
+checklist_for_species_list_title: Checklist for [list]
 checklist_summary: "Summary: [species] species in [genera] genera"
 
 
@@ -3686,6 +3683,7 @@ runtime_user_hasnt_created: "[user] hasn't created any [types]."
 runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
 
 # One-time-use messages.
+runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
 runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
 runtime_description_added_admin: Gave admin permission to [name].
 runtime_description_added_reader: Gave view permission to [name].
@@ -3868,73 +3866,66 @@ runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:n
 # LESS IMPORTANT ENUMERATED SETS OF VALUES
 
 # API error messages
-api_abort_due_to_errors: 'Aborted operation due to errors.'
-api_ambiguous_name: 'Name "[name]" is ambiguous, matches [others].'
-api_bad_action: 'Invalid request type "[action]".'
-api_bad_api_key: 'Invalid API key "[key]".'
-api_bad_limited_parameter_value: 'Expected "[val]" to be in [limit].'
-api_bad_method: 'Invalid request method "[method]".'
-api_bad_boolean_parameter_value: 'Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".'
-api_bad_integer_parameter_value: 'Invalid integer, "[val]".'
-api_bad_float_parameter_value: 'Invalid float, "[val]".'
-api_bad_email_parameter_value: 'Invalid email address, "[va]".'
-api_bad_date_parameter_value: 'Invalid date, "[val]", expect "YYYYMMDD".'
-api_bad_date_range_parameter_value: 'Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".'
-api_bad_time_parameter_value: 'Invalid time, "[val]", expect "YYYYMMDDHHMMSS".'
-api_bad_time_range_parameter_value: 'Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".'
-api_bad_latitude_parameter_value: >
-  Invalid latitude, "[val]", examples: "-45.6789", "45.6789°S", "45°40.73'S", "45°40'44"S".
-
-api_bad_longitude_parameter_value: >
-  Invalid longitude, "[val]", examples: "-45.6789", "45.6789°W", "45°40.73'W", "45°40'44"W".
-
-api_bad_altitude_parameter_value: >
-  Invalid altitude, "[val]", examples: "1234", "1234m", "4048'", "4048ft".
-
-api_bad_image_parameter_value: 'Invalid or unknown image, "[val]", accept only numerical id.'
-api_bad_license_parameter_value: 'Invalid or unknown license, "[val]", accept only numerical id.'
-api_bad_location_parameter_value: 'Invalid or unknown location, "[val]", accept numerical id or location name.'
-api_bad_name_parameter_value: 'Invalid or unknown name, "[val]", accept numerical id or scientific name (author not required).'
-api_bad_observation_parameter_value: 'Invalid or unknown observation, "[val]", accept only numerical id.'
-api_bad_project_parameter_value: 'Invalid or unknown project, "[val]", accept numerical id or project name.'
-api_bad_species_list_parameter_value: 'Invalid or unknown species list, "[val]", accept numerical id or species list title.'
-api_bad_user_parameter_value: 'Invalid or unknown user, "[val]", accept numerical id, login or name.'
-api_bad_object_parameter_value: 'Invalid or unknown object, "[val]", examples: "name #1234", "observation #54321", "species_list #42".'
-api_bad_version: 'Invalid version number "[version]".'
-api_couldnt_download_url: 'Failed to download the resource at the URL, "[url]": [error]'
-api_create_failed: 'Failed to create [type] "[name]": [error]'
-api_destroy_failed: 'Failed to destroy [type] "[name]".'
-api_file_missing: 'File "[file]" is missing.'
-api_help_message: 'Usage: [help]'
-api_image_upload_failed: 'Failed to upload image: [error]'
-api_lat_long_must_both_be_set: 'Must supply both latitude and longitude, or neither.'
-api_location_already_exists: 'The location "[location]" already exists.'
-api_missing_method: 'Missing "method" parameter.'
-api_missing_parameter: 'Missing "[arg]" parameter.'
+api_abort_due_to_errors: Aborted operation due to errors.
+api_ambiguous_name: Name "[name]" is ambiguous, matches [others].
+api_api_key_not_verified: 'API key for "[notes]" has not been activated yet. (key = "[key]")'
+api_bad_action: Invalid request type "[action]".
+api_bad_api_key: Invalid API key "[key]".
+api_bad_limited_parameter_value: Expected "[val]" to be in [limit].
+api_bad_method: Invalid request method "[method]".
+api_bad_boolean_parameter_value: Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".
+api_bad_integer_parameter_value: Invalid integer, "[val]".
+api_bad_float_parameter_value: Invalid float, "[val]".
+api_bad_email_parameter_value:  ""
+api_bad_date_parameter_value: Invalid date, "[val]", expect "YYYYMMDD".
+api_bad_date_range_parameter_value: Invalid date range, "[val]", expect "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
+api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
+api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
+api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
+api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
+api_bad_altitude_parameter_value: "Invalid altitude, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
+api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.
+api_bad_license_parameter_value: Invalid or unknown license, "[val]", accept only numerical id.
+api_bad_location_parameter_value: Invalid or unknown location, "[val]", accept numerical id or location name.
+api_bad_name_parameter_value: Invalid or unknown name, "[val]", accept numerical id or scientific name (author not required).
+api_bad_observation_parameter_value: Invalid or unknown observation, "[val]", accept only numerical id.
+api_bad_project_parameter_value: Invalid or unknown project, "[val]", accept numerical id or project name.
+api_bad_species_list_parameter_value: Invalid or unknown species list, "[val]", accept numerical id or species list title.
+api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
+api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
+api_bad_version: Invalid version number "[version]".
+api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
+api_create_failed: "Failed to create [type] \"[name]\": [error]"
+api_destroy_failed: Failed to destroy [type] "[name]".
+api_file_missing: File "[file]" is missing.
+api_help_message: "Usage: [help]"
+api_image_upload_failed: "Failed to upload image: [error]"
+api_lat_long_must_both_be_set: Must supply both latitude and longitude, or neither.
+api_location_already_exists: The location "[location]" already exists.
+api_missing_method: Missing "method" parameter.
+api_missing_parameter: Missing "[arg]" parameter.
 api_missing_set_parameters: You didn't supply any "set" parameters.
-api_missing_upload: 'Expected an upload file.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.'
-api_must_authenticate: 'Must authenticate with API key to perform this operation.'
-api_must_be_admin: 'You are not an admin for [project].'
-api_must_be_member: 'You are not a member of [type] "[name]".'
-api_must_have_edit_permission: 'You do not have permission to edit [type] "[name]".'
-api_must_have_view_permission: 'You do not have permission to view [type] "[name]".'
-api_must_supply_location_or_gps: 'You must supply either a location or GPS coordinates.'
-api_name_already_exists: 'The name, "[new]", already exists as "[old]"'
-api_name_doesnt_parse: >
-  The name, "[name]", doesn't parse as a valid scientific name.
-
-api_no_method_for_action: 'Invalid request method "[method]" for "[action]".'
-api_object_not_found_by_id: '[Type] #[id] does not exist, or someone has deleted it.'
-api_object_not_found_by_string: '[Type] "[str]" does not exist, or someone has deleted it.'
-api_project_taken: 'The project, "[project]", already exists.'
-api_render_failed: 'There was a problem while rendering the results. [error]'
-api_string_too_long: 'The string, "[val]", has more than [limit] characters.'
-api_too_many_uploads: 'Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.'
-api_trying_to_set_multiple_locations_to_same_name: 'You are attempting to update multiple locations to the same name.'
-api_unused_parameters: 'Unexpected parameters: [params]'
-api_user_already_exists: 'The user "[login]" already exists or is taken.'
-api_user_group_taken: 'The user group "[title]" already exists.'
-api_user_not_verified: 'The user "[login]" is not verified yet; you can request another verification email on the website.'
+api_missing_upload: Expected an upload file.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.
+api_must_authenticate: Must authenticate with API key to perform this operation.
+api_must_be_admin: You are not an admin for [project].
+api_must_be_member: You are not a member of [type] "[name]".
+api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
+api_must_have_view_permission: You do not have permission to view [type] "[name]".
+api_must_supply_location_or_gps: You must supply either a location or GPS coordinates.
+api_name_already_exists: The name, "[new]", already exists as "[old]"
+api_name_doesnt_parse: The name, "[name]", doesn't parse as a valid scientific name.
+api_no_method_for_action: Invalid request method "[method]" for "[action]".
+api_object_not_found_by_id: "[Type] #[id] does not exist, or someone has deleted it."
+api_object_not_found_by_string: "[Type] \"[str]\" does not exist, or someone has deleted it."
+api_project_taken: The project, "[project]", already exists.
+api_render_failed: There was a problem while rendering the results. [error]
+api_string_too_long: The string, "[val]", has more than [limit] characters.
+api_too_many_uploads: Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.
+api_trying_to_set_multiple_locations_to_same_name: You are attempting to update multiple locations to the same name.
+api_unused_parameters: "Unexpected parameters: [params]"
+api_user_already_exists:  ""
+api_user_group_taken: The user group "[title]" already exists.
+api_user_not_verified:  ""
 
 # Query titles.
 query_title_advanced_search: "[:app_advanced_search]"

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120701173300) do
+ActiveRecord::Schema.define(:version => 20120701222900) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -18,6 +18,7 @@ ActiveRecord::Schema.define(:version => 20120701173300) do
     t.integer  "user_id",                                 :null => false
     t.string   "key",       :limit => 128,                :null => false
     t.text     "notes"
+    t.datetime "verified"
   end
 
   create_table "comments", :force => true do |t|

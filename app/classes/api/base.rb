@@ -62,18 +62,19 @@ class API
 
   def authenticate_user
     key_str = parse_string(:api_key)
-    if !key_str
+    key = ApiKey.find_by_key(key_str)
+    if not key_str
       ::User.current = self.user = nil
-    elsif key = ApiKey.find_by_key(key_str)
-      if key.user.verified
-        ::User.current = self.user = key.user
-        key.touch!
-        self.api_key = key
-      else
-        raise UserNotVerified.new(key.user)
-      end
-    else
+    elsif not key
       raise BadApiKey.new(key_str)
+    elsif not key.verified
+      raise ApiKeyNotVerified.new(key)
+    elsif not key.user.verified
+      raise UserNotVerified.new(key.user)
+    else
+      ::User.current = self.user = key.user
+      key.touch!
+      self.api_key = key
     end
   end
 

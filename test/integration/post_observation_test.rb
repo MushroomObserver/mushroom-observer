@@ -58,7 +58,7 @@ class PostObservationTest < IntegrationTestCase
   def submit_location_form_with_errors
     submit_form_with_changes(create_location_form_first_changes)
     assert_template(CREATE_LOCATION_PAGE)
-    assert_has_location_warning(/County may be redundant/)
+    assert_has_location_warning(/County may not be required/)
     assert_form_has_correct_values(create_location_form_values_after_first_changes)
   end
 
