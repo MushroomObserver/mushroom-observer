@@ -1543,13 +1543,28 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_of_name
+    names = Name.all(:conditions => 'text_name like "Agaricus camp%"')
+    name = names.pop
+    names.each {|n| name.merge_synonyms(n)}
+    Observation.find(6).update_attribute(:user, @mary)
+    Observation.find(7).update_attribute(:user, @mary)
+    spl = SpeciesList.first
+    spl.observations << Observation.find(5)
+    spl.observations << Observation.find(7)
+    proj = Project.first
+    proj.observations << Observation.find(4)
+    proj.observations << Observation.find(6)
     assert_query([10,9,2,1], :Observation, :of_name, :name => 1)
-    assert_query([3], :Observation, :of_name, :name => 2)
-    assert_query([], :Observation, :of_name, :name => 9)
-    assert_query([], :Observation, :of_name, :name => 9, :synonyms => :all)
-    assert_query([], :Observation, :of_name, :name => 9, :synonyms => :exclusive)
-    assert_query([], :Observation, :of_name, :name => 9, :nonconsensus => :all)
-    assert_query([], :Observation, :of_name, :name => 9, :nonconsensus => :exclusive)
+    assert_query([],  :Observation, :of_name, :name => 9)
+    assert_query([4], :Observation, :of_name, :name => 3)
+    assert_query([7,6,5],  :Observation, :of_name, :name => 3, :synonyms => :exclusive)
+    assert_query([7,6,5,4], :Observation, :of_name, :name => 3, :synonyms => :all)
+    assert_query([3], :Observation, :of_name, :name => 3, :nonconsensus => :exclusive)
+    assert_query([4,3], :Observation, :of_name, :name => 3, :nonconsensus => :all)
+    assert_query([5,4], :Observation, :of_name, :name => 3, :synonyms => :all, :user => 1)
+    assert_query([7,6], :Observation, :of_name, :name => 3, :synonyms => :all, :user => 2)
+    assert_query([7,5], :Observation, :of_name, :name => 3, :synonyms => :all, :species_list => 1)
+    assert_query([6,4], :Observation, :of_name, :name => 3, :synonyms => :all, :project => 1)
   end
 
   def test_observation_pattern

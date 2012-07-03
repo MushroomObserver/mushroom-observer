@@ -8,7 +8,7 @@ require 'uri'
 # PORT = 3000
 HOST = 'localhost.localdomain'
 PORT = 80
-KEY = 'tt7udys2zlp5f0fwj27blduraxgkdy329'
+KEY = 'cahja4s81achfojjlqzgkt16qgkl2hira'
 
 # HOST = 'mushroomobserver.org'
 # PORT = 80
@@ -28,20 +28,29 @@ KEY = 'tt7udys2zlp5f0fwj27blduraxgkdy329'
 # exit
 
 http = Net::HTTP.new(HOST, PORT)
-path = '/api/images?' + [
-  'date=20100102',
-  'notes=blah%20blah',
+path = '/api/observations?' + [
   'api_key=' + KEY,
+  'help=1',
 ].join('&')
-data = File.open('test/fixtures/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
-head = {
-  'Content-Type' => 'image/jpeg',
-  'Content-Length' => data.length.to_s,
-  'Content-MD5' => Digest::MD5.hexdigest(data),
-}
-response = http.post(path, data, head)
+response = http.post(path, '')
 puts response.body
 exit
+
+# http = Net::HTTP.new(HOST, PORT)
+# path = '/api/images?' + [
+#   'date=20100102',
+#   'notes=blah%20blah',
+#   'api_key=' + KEY,
+# ].join('&')
+# data = File.open('test/fixtures/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
+# head = {
+#   'Content-Type' => 'image/jpeg',
+#   'Content-Length' => data.length.to_s,
+#   'Content-MD5' => Digest::MD5.hexdigest(data),
+# }
+# response = http.post(path, data, head)
+# puts response.body
+# exit
 
 # http = Net::HTTP.new(HOST, PORT)
 # path = '/api/images?' + [

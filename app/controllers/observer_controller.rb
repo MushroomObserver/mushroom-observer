@@ -594,13 +594,13 @@ class ObserverController < ApplicationController
       :by => :created,
     }
     if not params[:user_id].blank?
-      args[:users] = params[:user_id]
+      args[:user] = params[:user_id]
     end
     if not params[:project_id].blank?
-      args[:projects] = params[:project_id]
+      args[:project] = params[:project_id]
     end
     if not params[:species_list_id].blank?
-      args[:species_lists] = params[:species_list_id]
+      args[:species_list] = params[:species_list_id]
     end
     query = create_query(:Observation, :of_name, args)
     show_selected_observations(query)

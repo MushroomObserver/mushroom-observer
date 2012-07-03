@@ -199,6 +199,9 @@ class Query < AbstractQuery
       :name          => :name,
       :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
+      :project?      => Project,
+      :species_list? => SpeciesList,
+      :user?         => User,
     },
     :of_parents => {
       :name => Name,
@@ -246,6 +249,9 @@ class Query < AbstractQuery
       :name          => :name,
       :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
+      :project?      => Project,
+      :species_list? => SpeciesList,
+      :user?         => User,
     },
   }
 
@@ -1545,6 +1551,8 @@ class Query < AbstractQuery
   # ----------------------------------
 
   def initialize_of_name
+    extra_joins = []
+
     if name = get_cached_parameter_instance(:name)
       names = [name]
     else
@@ -1583,35 +1591,41 @@ class Query < AbstractQuery
     elsif nonconsensus == :all
       self.where << "namings.name_id IN (#{set})"
       self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
+      extra_joins << :namings
     elsif nonconsensus == :exclusive
       self.where << "namings.name_id IN (#{set}) AND " +
                     "(observations.name_id NOT IN (#{set}) OR " +
                     "COALESCE(observations.vote_cache,0) < 0)"
       self.order = "COALESCE(namings.vote_cache,0) DESC, observations.when DESC"
+      extra_joins << :namings
     else
       raise "Invalid nonconsensus inclusion mode: '#{nonconsensus}'"
     end
 
+    # Allow restriction to one project, species_list or user.
+    if params[:project]
+      project = find_cached_parameter_instance(Project, :project)
+      self.where << "observations_projects.project_id = #{project.id}"
+      extra_joins << :observations_projects
+    end
+    if params[:species_list]
+      species_list = find_cached_parameter_instance(SpeciesList, :species_list)
+      self.where << "observations_species_lists.species_list_id = #{species_list.id}"
+      extra_joins << :observations_species_lists
+    end
+    if params[:user]
+      user = find_cached_parameter_instance(User, :user)
+      self.where << "observations.user_id = #{user.id}"
+    end
+
     # Different join conditions for different models.
     if model_symbol == :Observation
-      if nonconsensus != :no
-        self.join << :namings
-      end
-
+      self.join += extra_joins
     elsif model_symbol == :Location
-      if nonconsensus != :no
-        self.join << :observations
-      else
-        self.join << {:observations => :namings}
-      end
+      self.join << {:observations => extra_joins}
       self.where << "observations.is_collection_location IS TRUE"
-
     elsif model_symbol == :Image
-      if nonconsensus == :no
-        self.join << {:images_observations => :observations}
-      else
-        self.join << {:images_observations => {:observations => :namings}}
-      end
+      self.join << {:images_observations => {:observations => extra_joins}}
     end
   end
 
