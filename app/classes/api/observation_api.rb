@@ -53,6 +53,7 @@ class API
     def create_params
       @name = parse_name(:name)
       @vote = parse_float(:vote, :default => Vote.maximum_vote)
+      @log  = parse_boolean(:log, :default => true)
 
       loc = parse_place_name(:location, :limit => 1024)
       loc = Location.unknown.name if Location.is_unknown?(loc)
@@ -85,6 +86,7 @@ class API
         :images        => images,
         :projects      => parse_projects(:projects, :default => [], :must_be_member => true),
         :species_lists => parse_species_lists(:species_lists, :default => [], :must_have_edit_permission => true),
+        :name          => @name,
       }
     end
 
@@ -96,7 +98,7 @@ class API
         naming = obs.namings.create(:name => @name)
         obs.change_vote(naming, @vote, user)
       end
-      obs.log(:log_observation_created)
+      obs.log(:log_observation_created) if @log
     end
 
     def build_setter

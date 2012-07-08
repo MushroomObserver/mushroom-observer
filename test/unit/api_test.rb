@@ -302,6 +302,21 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(:species_lists => 3)) # owned by Mary
   end
 
+  def test_post_observation_with_no_log
+    params = {
+      :method   => :post,
+      :action   => :observation,
+      :api_key  => @api_key.key,
+      :location => 'Anywhere',
+      :name     => 'Agaricus campestris',
+      :log      => 'no',
+    }
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting observation')
+    obs = Observation.last
+    assert_nil(obs.rss_log_id)
+  end
+
   def test_posting_minimal_image
     setup_image_dirs
     @user = @rolf
