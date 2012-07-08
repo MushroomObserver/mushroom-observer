@@ -428,7 +428,7 @@ class API
     raise BadParameterValue.new(str, :location) if str.blank?
     val = try_parsing_id(str, Location)
     val ||= Location.find_by_name_or_reverse_name(str)
-    return val ? val.name : str
+    return val ? val.display_name : str
   end
 
   def parse_name(key, args={})

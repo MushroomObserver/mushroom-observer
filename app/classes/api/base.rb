@@ -64,7 +64,7 @@ class API
     key_str = parse_string(:api_key)
     key = ApiKey.find_by_key(key_str)
     if not key_str
-      ::User.current = self.user = nil
+      User.current = self.user = nil
     elsif not key
       raise BadApiKey.new(key_str)
     elsif not key.verified
@@ -72,7 +72,7 @@ class API
     elsif not key.user.verified
       raise UserNotVerified.new(key.user)
     else
-      ::User.current = self.user = key.user
+      User.current = self.user = key.user
       key.touch!
       self.api_key = key
     end

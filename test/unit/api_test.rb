@@ -317,6 +317,47 @@ class ApiTest < UnitTestCase
     assert_nil(obs.rss_log_id)
   end
 
+  def test_post_observation_scientific_location
+    params = {
+      :method   => :post,
+      :action   => :observation,
+      :api_key  => @api_key.key,
+    }
+
+    assert_equal(:postal, @rolf.location_format)
+
+    params[:location] = 'New Place, California, USA'
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting observation')
+    obs = Observation.last
+    assert_nil(obs.location_id)
+    assert_equal('New Place, California, USA', obs.where)
+
+    params[:location] = 'Burbank, California, USA'
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting observation')
+    obs = Observation.last
+    assert_nil(obs.where)
+    assert_objs_equal(locations(:burbank), obs.location)
+
+    @rolf.update_attribute(:location_format, :scientific)
+    assert_equal(:scientific, @rolf.reload.location_format)
+
+    params[:location] = 'USA, California, Somewhere Else'
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting observation')
+    obs = Observation.last
+    assert_nil(obs.location_id)
+    assert_equal('Somewhere Else, California, USA', obs.where)
+
+    params[:location] = 'Burbank, California, USA'
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting observation')
+    obs = Observation.last
+    assert_nil(obs.where)
+    assert_objs_equal(locations(:burbank), obs.location)
+  end
+
   def test_posting_minimal_image
     setup_image_dirs
     @user = @rolf
