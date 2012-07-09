@@ -69,11 +69,11 @@ class ApiController < ApplicationController
       @show_api_keys_for_new_user = true
     end
 
-    @api = API.execute(args)
-    render_api_results
+    render_api_results(args)
   end
 
-  def render_api_results
+  def render_api_results(args)
+    @api = API.execute(args)
     headers['Content-Type'] = 'application/xml'
     User.current = @user = @api.user
     if @api.errors.any?(&:fatal)

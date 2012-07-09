@@ -51,7 +51,7 @@ class API
     end
 
     def create_params
-      @name = parse_name(:name)
+      @name = parse_name(:name, :default => Name.unknown)
       @vote = parse_float(:vote, :default => Vote.maximum_vote)
       @log  = parse_boolean(:log, :default => true)
 
@@ -94,10 +94,8 @@ class API
     end
 
     def after_create(obs)
-      unless @name.blank?
-        naming = obs.namings.create(:name => @name)
-        obs.change_vote(naming, @vote, user)
-      end
+      naming = obs.namings.create(:name => @name)
+      obs.change_vote(naming, @vote, user)
       obs.log(:log_observation_created) if @log
     end
 

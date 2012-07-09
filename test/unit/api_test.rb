@@ -215,7 +215,7 @@ class ApiTest < UnitTestCase
 
   def test_post_minimal_observation
     @user = @rolf
-    @name = nil
+    @name = Name.unknown
     @loc = locations(:unknown_location)
     @img1 = nil
     @img2 = nil
@@ -223,7 +223,7 @@ class ApiTest < UnitTestCase
     @proj = nil
     @date = Date.today
     @notes = ''
-    @vote = nil
+    @vote = Vote.maximum_vote
     @specimen = false
     @is_col_loc = true
     @lat = nil
