@@ -457,6 +457,10 @@ class Name < AbstractModel
     RANKS_BELOW_SPECIES.include?(rank)
   end
 
+  def self.compare_ranks(a, b)
+    ALL_RANKS.index(a.to_sym) <=> ALL_RANKS.index(b.to_sym)
+  end
+
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
     result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != [])
@@ -1489,21 +1493,27 @@ class Name < AbstractModel
     results = nil
     if match = GENUS_OR_UP_PAT.match(str)
       name = match[1]
-      author = standardize_author(match[2])
+      author = match[2]
+      rank = :Genus unless RANKS_ABOVE_GENUS.include?(rank)
+      (name, author, rank) = fix_autonym(name, author, rank)
+      author = standardize_author(author)
       author2 = author.blank? ? '' : ' ' + author
       text_name = name.gsub('ë', 'e')
-      rank = :Genus unless RANKS_ABOVE_GENUS.include?(rank)
+      parent_name = RANKS_BELOW_GENUS.include?(rank) ? name.sub(LAST_PART, '') : nil
+      display_name = format_natural_variety(name, author, rank, deprecated)
       results = ParsedName.new(
         :text_name    => text_name,
         :search_name  => text_name + author2,
         :sort_name    => remove_first_quotes(text_name + author2),
-        :display_name => format_name(name, deprecated) + author2,
-        :parent_name  => nil,
+        :display_name => display_name,
+        :parent_name  => parent_name,
         :rank         => rank,
         :author       => author
       )
     end
     results
+  rescue RankMessedUp
+    return nil
   end
 
   def self.parse_below_genus(str, deprecated, rank, pattern)
@@ -1511,7 +1521,7 @@ class Name < AbstractModel
     if match = pattern.match(str)
       name, author = match[1], match[2].to_s
       name = standardize_sp_nov_variants(name) if rank == :Species
-      (name, author, rank) = fix_natural_variety(name, author, rank)
+      (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)
       author2 = author.blank? ? '' : ' ' + author
@@ -1529,6 +1539,8 @@ class Name < AbstractModel
       )
     end
     results
+  rescue RankMessedUp
+    return nil
   end
 
   def self.parse_subgenus(str, deprecated=false)
@@ -1563,6 +1575,16 @@ class Name < AbstractModel
     parse_below_genus(str, deprecated, :Form, FORM_PAT)
   end
 
+  def self.parse_rank_abbreviation(str)
+    str.match(SUBG_ABBR)    ? :Subgenus   :
+    str.match(SECT_ABBR)    ? :Section    :
+    str.match(SUBSECT_ABBR) ? :Subsection :
+    str.match(STIRPS_ABBR)  ? :Stirps     :
+    str.match(SSP_ABBR)     ? :Subspecies :
+    str.match(VAR_ABBR)     ? :Variety    :
+    str.match(F_ABBR)       ? :Form       : nil
+  end
+
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
   def self.standardize_sp_nov_variants(name)
     words = name.split(' ')
@@ -1578,17 +1600,30 @@ class Name < AbstractModel
 
   # Fix common error: Amanita vaginatae Author var. vaginatae
   # Convert to: Amanita vaginatae var. vaginatae Author
-  def self.fix_natural_variety(name, author, rank)
-    if [:Species, :Subspecies, :Variety].include?(rank)
-      last_word = name.split(' ').last
-      if match = author.match(/^(.*) (#{ANY_SSP_ABBR}) (#{last_word})$/)
-        name = "#{name} #{match[2]} #{match[3]}"
-        author = match[1]
-        rank = match[2].match(/^s/i) ? :Subspecies :
-               match[2].match(/^v/i) ? :Variety : :Form
+  def self.fix_autonym(name, author, rank)
+    last_word = name.split(' ').last.gsub(/[()]/,'')
+    if match = author.to_s.match(/^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/)
+      name = "#{name}#{match[2]}"
+      author = match[1].strip
+      words = match[2].split(' ')
+      while words.any?
+        next_rank = parse_rank_abbreviation(words.shift)
+        words.shift
+        make_sure_ranks_ordered_right!(rank, next_rank)
+        rank = next_rank
       end
     end
     return name, author, rank
+  end
+
+  class RankMessedUp < Exception
+  end
+
+  def self.make_sure_ranks_ordered_right!(prev_rank, next_rank)
+    if compare_ranks(prev_rank, next_rank) <= 0 or
+       (RANKS_ABOVE_SPECIES.include?(prev_rank) and RANKS_BELOW_SPECIES.include?(next_rank))
+      raise RankMessedUp.new
+    end
   end
 
   # Format a name ranked below genus, moving the author to before the var.
@@ -1598,7 +1633,7 @@ class Name < AbstractModel
     author2 = author.blank? ? '' : ' ' + author
     if author.blank?
       format_name(name, deprecated)
-    elsif words[-7] == words[-1] and rank == :Form
+    elsif words[-7] == words[-1]
       [
         format_name(words[0..-7].join(' '), deprecated),
         author,
@@ -1609,7 +1644,7 @@ class Name < AbstractModel
         words[-2],
         format_name(words[-1], deprecated),
       ].join(' ')
-    elsif words[-5] == words[-1] and [:Variety, :Form].include?(rank)
+    elsif words[-5] == words[-1]
       [
         format_name(words[0..-5].join(' '), deprecated),
         author,
@@ -1618,7 +1653,7 @@ class Name < AbstractModel
         words[-2],
         format_name(words[-1], deprecated),
       ].join(' ')
-    elsif words[-3] == words[-1] and [:Subspecies, :Variety, :Form].include?(rank)
+    elsif words[-3] == words[-1]
       [
         format_name(words[0..-3].join(' '), deprecated),
         author,

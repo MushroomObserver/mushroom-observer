@@ -14,88 +14,104 @@ class NameTest < UnitTestCase
   end
 
   def do_name_parse_test(str, args)
-    parse = Name.parse_name(str)
-    assert_block("Expected #{str.inspect} to parse!") { parse }
-    any_errors = false
-    msg = ['Name is wrong; expected -vs- actual:']
-    i = 0
-    for var in [
-      :text_name,
-      :search_name,
-      :sort_name,
-      :display_name,
-      :parent_name,
-      :rank,
-      :author,
-    ]
-      expect = args[var]
-      actual = parse.send(var)
-      if actual != expect
-        any_errors = true
-        var = "#{var} (*)"
+    clean_our_backtrace('do_name_parse_test') do
+      parse = Name.parse_name(str)
+      assert_block("Expected #{str.inspect} to parse!") { parse }
+      any_errors = false
+      msg = ['Name is wrong; expected -vs- actual:']
+      i = 0
+      for var in [
+        :text_name,
+        :search_name,
+        :sort_name,
+        :display_name,
+        :parent_name,
+        :rank,
+        :author,
+      ]
+        expect = args[var]
+        actual = parse.send(var)
+        if actual != expect
+          any_errors = true
+          var = "#{var} (*)"
+        end
+        msg << '%-20s %-40s %-40s' % [var.to_s, expect.inspect, actual.inspect]
+        i += 1
       end
-      msg << '%-20s %-40s %-40s' % [var.to_s, expect.inspect, actual.inspect]
-      i += 1
+      assert_block(msg.join("\n")) { !any_errors }
     end
-    assert_block(msg.join("\n")) { !any_errors }
   end
 
   def assert_name_match_author_required(pattern, string, first_match=string)
-    assert_block("Expected #{string.inspect} not to match #{@pat}.") { !pattern.match(string) }
-    assert_name_match_various_authors(pattern, string, first_match)
+    clean_our_backtrace do
+      assert_block("Expected #{string.inspect} not to match #{@pat}.") { !pattern.match(string) }
+      assert_name_match_various_authors(pattern, string, first_match)
+    end
   end
 
   def assert_name_match_author_optional(pattern, string, first_match=string)
-    assert_name_match(pattern, string, first_match, '')
-    assert_name_match_various_authors(pattern, string, first_match)
+    clean_our_backtrace do
+      assert_name_match(pattern, string, first_match, '')
+      assert_name_match_various_authors(pattern, string, first_match)
+    end
   end
 
   def assert_name_match_various_authors(pattern, string, first_match)
-    assert_name_match(pattern, string + ' Author', first_match, ' Author')
-    assert_name_match(pattern, string + ' Śliwa', first_match, ' Śliwa')
-    assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
-    assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
-    assert_name_match(pattern, string + ' (One) Two', first_match, ' (One) Two')
-    assert_name_match(pattern, string + ' auct', first_match, ' auct')
-    assert_name_match(pattern, string + ' auct non Aurora', first_match, ' auct non Aurora')
-    assert_name_match(pattern, string + ' auct Borealis', first_match, ' auct Borealis')
-    assert_name_match(pattern, string + ' auct. N. Amer.', first_match, ' auct. N. Amer.')
-    assert_name_match(pattern, string + ' ined', first_match, ' ined')
-    assert_name_match(pattern, string + ' in ed.', first_match, ' in ed.')
-    assert_name_match(pattern, string + ' nomen nudum', first_match, ' nomen nudum')
-    assert_name_match(pattern, string + ' nom. prov.', first_match, ' nom. prov.')
-    assert_name_match(pattern, string + ' sensu Author', first_match, ' sensu Author')
-    assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
-    assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
+    clean_our_backtrace do
+      assert_name_match(pattern, string + ' Author', first_match, ' Author')
+      assert_name_match(pattern, string + ' Śliwa', first_match, ' Śliwa')
+      assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
+      assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
+      assert_name_match(pattern, string + ' (One) Two', first_match, ' (One) Two')
+      assert_name_match(pattern, string + ' auct', first_match, ' auct')
+      assert_name_match(pattern, string + ' auct non Aurora', first_match, ' auct non Aurora')
+      assert_name_match(pattern, string + ' auct Borealis', first_match, ' auct Borealis')
+      assert_name_match(pattern, string + ' auct. N. Amer.', first_match, ' auct. N. Amer.')
+      assert_name_match(pattern, string + ' ined', first_match, ' ined')
+      assert_name_match(pattern, string + ' in ed.', first_match, ' in ed.')
+      assert_name_match(pattern, string + ' nomen nudum', first_match, ' nomen nudum')
+      assert_name_match(pattern, string + ' nom. prov.', first_match, ' nom. prov.')
+      assert_name_match(pattern, string + ' sensu Author', first_match, ' sensu Author')
+      assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
+      assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
+    end
   end
 
   def assert_name_match(pattern, string, first, second='')
-    match = pattern.match(string)
-    assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
-    assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
-    assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
+    clean_our_backtrace do
+      match = pattern.match(string)
+      assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
+      assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
+      assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
+    end
   end
 
   def assert_name_parse_fails(str)
-    parse = Name.parse_name(str)
-    assert_block("Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}") { !parse }
+    clean_our_backtrace do
+      parse = Name.parse_name(str)
+      assert_block("Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}") { !parse }
+    end
   end
 
   def do_parse_classification_test(text, expected)
-    begin
-      parse = Name.parse_classification(text)
-      assert_equal(expected, parse)
-    rescue RuntimeError => err
-      raise err if expected
+    clean_our_backtrace do
+      begin
+        parse = Name.parse_classification(text)
+        assert_equal(expected, parse)
+      rescue RuntimeError => err
+        raise err if expected
+      end
     end
   end
 
   def do_validate_classification_test(rank, text, expected)
-    begin
-      result = Name.validate_classification(rank, text)
-      assert_equal(expected, result)
-    rescue RuntimeError => err
-      raise err if expected
+    clean_our_backtrace do
+      begin
+        result = Name.validate_classification(rank, text)
+        assert_equal(expected, result)
+      rescue RuntimeError => err
+        raise err if expected
+      end
     end
   end
 
@@ -428,6 +444,14 @@ class NameTest < UnitTestCase
     assert_name_parse_fails('Physica sp-1 Tulloss')
     assert_name_parse_fails('Physica sp-2')
     assert_name_parse_fails('Agaricus sp-K placomyces sensu Krieger')
+    assert_name_parse_fails('Agaricus test var. test ssp. test')
+    assert_name_parse_fails('Agaricus test var. test sect. test')
+    assert_name_parse_fails('Agaricus test Author var. test ssp. test')
+    assert_name_parse_fails('Agaricus test Author var. test sect. test')
+    assert_name_parse_fails('Agaricus sect. Agaricus subg. Agaricus')
+    assert_name_parse_fails('Agaricus sect. Agaricus ssp. Agaricus')
+    assert_name_parse_fails('Agaricus Author sect. Agaricus subg. Agaricus')
+    assert_name_parse_fails('Agaricus Author sect. Agaricus ssp. Agaricus')
   end
 
   def test_name_parse_1
@@ -869,6 +893,45 @@ class NameTest < UnitTestCase
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
+    )
+  end
+
+  def test_name_parse_35
+    do_name_parse_test(
+      'Amanita sect. Amanita Pers.',
+      :text_name    => 'Amanita sect. Amanita',
+      :search_name  => 'Amanita sect. Amanita Pers.',
+      :sort_name    => 'Amanita sect. Amanita Pers.',
+      :display_name => '**__Amanita__** Pers. sect. **__Amanita__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Section,
+      :author       => 'Pers.'
+    )
+  end
+
+  def test_name_parse_36
+    do_name_parse_test(
+      'Amanita Pers. sect. Amanita',
+      :text_name    => 'Amanita sect. Amanita',
+      :search_name  => 'Amanita sect. Amanita Pers.',
+      :sort_name    => 'Amanita sect. Amanita Pers.',
+      :display_name => '**__Amanita__** Pers. sect. **__Amanita__**',
+      :parent_name  => 'Amanita',
+      :rank         => :Section,
+      :author       => 'Pers.'
+    )
+  end
+
+  def test_name_parse_37
+    do_name_parse_test(
+      'Amanita subg. Amidella Singer sect. Amidella stirps Amidella',
+      :text_name    => 'Amanita subgenus Amidella sect. Amidella stirps Amidella',
+      :search_name  => 'Amanita subgenus Amidella sect. Amidella stirps Amidella Singer',
+      :sort_name    => 'Amanita subgenus Amidella sect. Amidella stirps Amidella Singer',
+      :display_name => '**__Amanita__** subgenus **__Amidella__** Singer sect. **__Amidella__** stirps **__Amidella__**',
+      :parent_name  => 'Amanita subgenus Amidella sect. Amidella',
+      :rank         => :Stirps,
+      :author       => 'Singer'
     )
   end
 
