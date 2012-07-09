@@ -1569,7 +1569,7 @@ class NameController < ApplicationController
   ################################################################################
 
   def names_for_mushroom_app # :nologin: :norobots:
-    number_of_names = params[:number_of_names].blank? ? 1000 : params[:number_of_names]
+    number_of_names = params[:number_of_names].blank? ? 100 : params[:number_of_names]
     minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
     minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
     rank_condition = params[:include_higher_taxa].blank? ?
@@ -1602,10 +1602,31 @@ class NameController < ApplicationController
       LIMIT #{number_of_names}
     ))
 
+    genera = data.map do |name, rank, number|
+      name.split(' ').first
+    end.uniq
+
+    families = {}
+    for genus, classification in Name.connection.select_rows(%(
+      SELECT text_name, classification FROM names
+      WHERE rank = 'Genus'
+        AND COALESCE(classification,'') != ''
+        AND text_name IN ("#{genera.join('","')}")
+    ))
+      for rank, name in Name.parse_classification(classification).reverse
+        if rank == :Family
+          families[genus] = name
+          break
+        end
+      end
+    end
+
     report = FasterCSV.generate(:col_sep => "\t") do |csv|
-      csv << ['name', 'rank', 'number_observations']
+      csv << ['name', 'rank', 'number_observations', 'family']
       data.each do |name, rank, number|
-        csv << [name, rank, number.round.to_s]
+        genus = name.split(' ').first
+        family = families[genus] || ''
+        csv << [name, rank, number.round.to_s, family]
       end
     end
     send_data(report,
