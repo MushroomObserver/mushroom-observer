@@ -10,12 +10,20 @@
 #
 #  == Name Formats
 #
-#    text_name          "Xantho" algoensis
-#    real_text_name     "Xantho" algoënsis
-#    search_name        "Xantho" algoensis Fries
-#    real_search_name   "Xantho" algoënsis Fries
-#    sort_name          Xantho" algoensis Fries
-#    display_name       **__"Xantho" algoënsis__** Fries
+#    text_name          "Xanthoparmelia" coloradoensis
+#    (real_text_name)   "Xanthoparmelia" coloradoënsis          (derived on the fly from display_name)
+#    search_name        "Xanthoparmelia" coloradoensis Fries
+#    (real_search_name) "Xanthoparmelia" coloradoënsis Fries    (derived on the fly from display_name)
+#    sort_name          Xanthoparmelia" coloradoensis Fries
+#    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
+#
+#  Note about "real" text_name and search_name: These are required by edit
+#  forms.  If the user inputs a name with an accent (ë is the only one
+#  allowed), but there is an error or warning that requires the user to
+#  resubmit the form, we need to be able to fill the field in with the correct
+#  name *including* the umlaut.  That is, if you re-parse real_search_name, it
+#  must result in the identical Name object.  This is not true of search_name,
+#  because it will lose the umlaut. 
 #
 #  == Regular Expressions
 #
@@ -87,12 +95,12 @@
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
-#  text_name::        (V) "Xantho" algoensis
-#  real_text_name::   (V) "Xantho" algoënsis
-#  search_name::      (V) "Xantho" algoensis Fries
-#  real_search_name:: (V) "Xantho" algoënsis Fries
-#  sort_name::        (V) Xantho" algoensis Fries
-#  display_name::     (V) **__"Xantho" algoënsis__** Fries
+#  text_name::        (V) "Xanthoparmelia" coloradoensis
+#  real_text_name::   (V) "Xanthoparmelia" coloradoënsis
+#  search_name::      (V) "Xanthoparmelia" coloradoensis Fries
+#  real_search_name:: (V) "Xanthoparmelia" coloradoënsis Fries
+#  sort_name::        (V) Xanthoparmelia" coloradoensis Fries
+#  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
 #  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
@@ -373,7 +381,7 @@ class Name < AbstractModel
     if User.current and
        User.current.hide_authors == :above_species and
        RANKS_ABOVE_SPECIES.include?(rank)
-      str = str.sub(/^(\**__.*__\**).*/, '\\1')
+      str = str.sub(/^(\**__.*__\**( sp\.)?).*/, '\\1')
     end
     return str
   end
@@ -1630,9 +1638,12 @@ class Name < AbstractModel
   # in natural varieties such as "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
   def self.format_natural_variety(name, author, rank, deprecated)
     words = name.split(' ')
-    author2 = author.blank? ? '' : ' ' + author
     if author.blank?
-      format_name(name, deprecated)
+      if rank == :Genus
+        format_name(name, deprecated) + ' sp.'
+      else
+        format_name(name, deprecated)
+      end
     elsif words[-7] == words[-1]
       [
         format_name(words[0..-7].join(' '), deprecated),
@@ -1660,6 +1671,8 @@ class Name < AbstractModel
         words[-2],
         format_name(words[-1], deprecated),
       ].join(' ')
+    elsif rank == :Genus
+      format_name(name, deprecated) + ' sp. ' + author
     else
       format_name(name, deprecated) + ' ' + author
     end
