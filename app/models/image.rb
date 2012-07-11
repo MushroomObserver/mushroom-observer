@@ -812,7 +812,7 @@ class Image < AbstractModel
 protected
 
   def validate # :nodoc:
-    if upload_handle
+    if upload_handle and new_record?
       validate_upload
     end
 
