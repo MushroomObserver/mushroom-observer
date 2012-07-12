@@ -18,12 +18,10 @@ class FixNameOrdering < ActiveRecord::Migration
       else
         Name.format_sort_name(text_name, author)
       end
-      puts [sort_name, data[id.to_i]].join("\t")
     end
-#     vals = data.map {|v| Name.connection.quote(v.to_s)}.join(',')
-#     Name.connection.update %(
-#       UPDATE names SET sort_name = ELT(id+1, #{vals})
-#     )
-raise 'xxx'
+    vals = data.map {|v| Name.connection.quote(v.to_s)}.join(',')
+    Name.connection.update %(
+      UPDATE names SET sort_name = ELT(id+1, #{vals})
+    )
   end
 end
