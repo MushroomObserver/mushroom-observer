@@ -343,13 +343,11 @@ class Name < AbstractModel
     display_name + " (#{id || '?'})"
   end
 
-  # Tack "sp." on to end of genera (but not higher taxa).
+  # (This gives us the ability to format names slightly differently when
+  # applied to observations.  For example, we might tack on "sp." to some
+  # higher-ranked taxa here.) 
   def observation_name
-    if rank == :Genus
-      display_name.sub(/^(\S+)/, '\1 sp.')
-    else
-      display_name
-    end
+    display_name
   end
 
   def real_text_name
