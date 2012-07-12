@@ -16,6 +16,7 @@
 #    (real_search_name) "Xanthoparmelia" coloradoënsis Fries    (derived on the fly from display_name)
 #    sort_name          Xanthoparmelia" coloradoensis Fries
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
+#    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
 #
 #  Note about "real" text_name and search_name: These are required by edit
 #  forms.  If the user inputs a name with an accent (ë is the only one
@@ -101,6 +102,7 @@
 #  real_search_name:: (V) "Xanthoparmelia" coloradoënsis Fries
 #  sort_name::        (V) Xanthoparmelia" coloradoensis Fries
 #  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
+#  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
 #  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
@@ -341,6 +343,15 @@ class Name < AbstractModel
     display_name + " (#{id || '?'})"
   end
 
+  # Tack "sp." on to end of genera (but not higher taxa).
+  def observation_name
+    if rank == :Genus
+      display_name.sub(/^(\S+)/, '\1 sp.')
+    else
+      display_name
+    end
+  end
+
   def real_text_name
     Name.display_to_real_text(self)
   end
@@ -381,7 +392,7 @@ class Name < AbstractModel
     if User.current and
        User.current.hide_authors == :above_species and
        RANKS_ABOVE_SPECIES.include?(rank)
-      str = str.sub(/^(\**__.*__\**( sp\.)?).*/, '\\1')
+      str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end
     return str
   end
@@ -1639,11 +1650,7 @@ class Name < AbstractModel
   def self.format_natural_variety(name, author, rank, deprecated)
     words = name.split(' ')
     if author.blank?
-      if rank == :Genus
-        format_name(name, deprecated) + ' sp.'
-      else
-        format_name(name, deprecated)
-      end
+      format_name(name, deprecated)
     elsif words[-7] == words[-1]
       [
         format_name(words[0..-7].join(' '), deprecated),
@@ -1671,8 +1678,6 @@ class Name < AbstractModel
         words[-2],
         format_name(words[-1], deprecated),
       ].join(' ')
-    elsif rank == :Genus
-      format_name(name, deprecated) + ' sp. ' + author
     else
       format_name(name, deprecated) + ' ' + author
     end

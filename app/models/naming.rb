@@ -26,7 +26,7 @@
 #
 #  ==== Formatting
 #  text_name::              Plain text.  (uses name.search_name)
-#  format_name::            Textilized.  (uses name.display_name)
+#  format_name::            Textilized.  (uses name.observation_name)
 #  unique_text_name::       Same as above, with id added to make unique.
 #  unique_format_name::     Same as above, with id added to make unique.
 #
@@ -76,7 +76,7 @@ class Naming < AbstractModel
 
   # Return name in Textile format.
   def format_name
-    name ? name.display_name : ''
+    name ? name.observation_name : ''
   end
 
   # Return name in Textile format (with id tacked on to make unique).

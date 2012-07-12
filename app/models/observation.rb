@@ -71,7 +71,7 @@
 #
 #  ==== Name Formats
 #  text_name::              Plain text.
-#  format_name::            Textilized.
+#  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
 #
@@ -278,12 +278,12 @@ class Observation < AbstractModel
 
   # Textile-marked-up name, never nil.
   def format_name
-    name.display_name
+    name.observation_name
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
-    name.display_name + " (#{id || '?'})"
+    name.observation_name + " (#{id || '?'})"
   end
 
   # Look up the corresponding instance in our namings association.  If we are

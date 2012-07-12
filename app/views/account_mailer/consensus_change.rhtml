@@ -5,12 +5,12 @@
 
   fields = ""
   if @old_name
-    fields += "*#{:email_field_old_name.l}:* " + link_to(@old_name.display_name, "#{HTTP_DOMAIN}/name/show_name/#{@old_name.id}") + "\n"
+    fields += "*#{:email_field_old_name.l}:* " + link_to(@old_name.observation_name, "#{HTTP_DOMAIN}/name/show_name/#{@old_name.id}") + "\n"
   else
     fields += "*#{:email_field_old_name.l}:* --\n"
   end
   if @new_name
-    fields += "*#{:email_field_new_name.l}:* " + link_to(@new_name.display_name, "#{HTTP_DOMAIN}/name/show_name/#{@new_name.id}") + "\n"
+    fields += "*#{:email_field_new_name.l}:* " + link_to(@new_name.observation_name, "#{HTTP_DOMAIN}/name/show_name/#{@new_name.id}") + "\n"
   else
     fields += "*#{:email_field_new_name.l}:* --\n"
   end
