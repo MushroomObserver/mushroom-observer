@@ -1573,7 +1573,7 @@ class NameController < ApplicationController
     minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
     minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
     rank_condition = params[:include_higher_taxa].blank? ?
-      'IN ("Family", "Genus", "Species")' :
+      '= "Species"' :
       'NOT IN ("Subspecies", "Variety", "Form", "Group")'
 
     data = Name.connection.select_rows(%(
