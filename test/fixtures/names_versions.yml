@@ -246,7 +246,7 @@ psalliota_version_1:
   version: 1
   rank: Genus
   text_name: Psalliota
-  display_name: '**__Psalliota__** sp.'
+  display_name: '**__Psalliota__**'
   search_name: Psalliota sp.
   sort_name: Psalliota sp.
   citation: ''
@@ -259,7 +259,7 @@ agaricus_version_1:
   version: 1
   rank: Genus
   text_name: Agaricus
-  display_name: '**__Agaricus__** sp.'
+  display_name: '**__Agaricus__**'
   search_name: Agaricus sp.
   sort_name: Agaricus sp.
   citation: ''
@@ -396,7 +396,7 @@ lepiota_version_1:
   version: 1
   rank: Genus
   text_name: Lepiota
-  display_name: '**__Lepiota__** sp.'
+  display_name: '**__Lepiota__**'
   search_name: Lepiota sp.
   sort_name: Lepiota sp.
   citation: ''
@@ -409,7 +409,7 @@ chlorophyllum_version_1:
   version: 1
   rank: Genus
   text_name: Chlorophyllum
-  display_name: '**__Chlorophyllum__** sp.'
+  display_name: '**__Chlorophyllum__**'
   search_name: Chlorophyllum sp.
   sort_name: Chlorophyllum sp.
   citation: ''
@@ -533,7 +533,7 @@ macrocybe_pegler_version_1:
   rank: Genus
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
-  display_name: '**__Macrocybe__** sp. (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
+  display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   search_name: Macrocybe sp.
   sort_name: Macrocybe sp.
   citation: ''
@@ -547,7 +547,7 @@ macrocybe_titans_version_1:
   rank: Genus
   text_name: Macrocybe
   author: Titans
-  display_name: '**__Macrocybe__** sp. Titans'
+  display_name: '**__Macrocybe__** Titans'
   search_name: Macrocybe sp. Titans
   sort_name: Macrocybe sp. Titans
   citation: ''
@@ -589,9 +589,9 @@ peltigera_version_2:
   text_name: Peltigera
   author: '(Old) New Auth.'
   citation: Ye Auld Manual of Lichenes, 1800.
-  display_name: '**__Peltigera__** sp. (Old) New Auth.'
-  search_name: Peltigera (Old) New Auth.
-  sort_name: Peltigera (Old) New Auth.
+  display_name: '**__Peltigera__** (Old) New Auth.'
+  search_name: Peltigera sp. (Old) New Auth.
+  sort_name: Peltigera sp. (Old) New Auth.
 
 petigera_version_1:
   id: 44
@@ -601,9 +601,9 @@ petigera_version_1:
   version: 1
   rank: Genus
   text_name: Petigera
-  display_name: __Petigera__ sp.
-  search_name: Petigera
-  sort_name: Petigera
+  display_name: __Petigera__
+  search_name: Petigera sp.
+  sort_name: Petigera sp.
   correct_spelling_id: 40
   deprecated: true
   citation: ''
@@ -617,9 +617,9 @@ suillus_version_1:
   rank: Genus
   text_name: Suillus
   author: Gray
-  display_name: '**__Suillus__** sp. Gray'
-  search_name: Suillus Gray
-  sort_name: Suillus Gray
+  display_name: '**__Suillus__** Gray'
+  search_name: Suillus sp. Gray
+  sort_name: Suillus sp. Gray
   citation: ''
 
 suillus_by_white_version_1:
@@ -631,9 +631,9 @@ suillus_by_white_version_1:
   rank: Genus
   text_name: Suillus
   author: E.B. White
-  display_name: '**__Suillus__** sp. E.B. White'
-  search_name: Suillus E.B. White
-  sort_name: Suillus E.B. White
+  display_name: '**__Suillus__** E.B. White'
+  search_name: Suillus sp. E.B. White
+  sort_name: Suillus sp. E.B. White
   citation: ''
 
 suilus_version_1:
@@ -645,9 +645,9 @@ suilus_version_1:
   rank: Genus
   text_name: Suilus
   author: E.B. White
-  display_name: '**__Suilus__** sp. E.B. White'
-  search_name: Suilus E.B. White
-  sort_name: Suilus E.B. White
+  display_name: '**__Suilus__** E.B. White'
+  search_name: Suilus sp. E.B. White
+  sort_name: Suilus sp. E.B. White
   correct_spelling_id: 43
   deprecated: true
   citation: ''

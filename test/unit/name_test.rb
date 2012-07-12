@@ -551,7 +551,7 @@ class NameTest < UnitTestCase
       :text_name    => '"Toninia"',
       :search_name  => '"Toninia"',
       :sort_name    => 'Toninia"',
-      :display_name => '**__"Toninia"__** sp.',
+      :display_name => '**__"Toninia"__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -564,7 +564,7 @@ class NameTest < UnitTestCase
       :text_name    => '"Toninia"',
       :search_name  => '"Toninia"',
       :sort_name    => 'Toninia"',
-      :display_name => '**__"Toninia"__** sp.',
+      :display_name => '**__"Toninia"__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -603,7 +603,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Anema',
       :search_name  => 'Anema',
       :sort_name    => 'Anema',
-      :display_name => '**__Anema__** sp.',
+      :display_name => '**__Anema__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -616,7 +616,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Anema',
       :search_name  => 'Anema',
       :sort_name    => 'Anema',
-      :display_name => '**__Anema__** sp.',
+      :display_name => '**__Anema__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -629,7 +629,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Anema',
       :search_name  => 'Anema',
       :sort_name    => 'Anema',
-      :display_name => '**__Anema__** sp.',
+      :display_name => '**__Anema__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -642,7 +642,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Anema',
       :search_name  => 'Anema Nyl. ex Forss.',
       :sort_name    => 'Anema Nyl. ex Forss.',
-      :display_name => '**__Anema__** sp. Nyl. ex Forss.',
+      :display_name => '**__Anema__** Nyl. ex Forss.',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => 'Nyl. ex Forss.'
@@ -655,7 +655,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Anema',
       :search_name  => 'Anema Nyl. ex Forss.',
       :sort_name    => 'Anema Nyl. ex Forss.',
-      :display_name => '**__Anema__** sp. Nyl. ex Forss.',
+      :display_name => '**__Anema__** Nyl. ex Forss.',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => 'Nyl. ex Forss.'
@@ -668,7 +668,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Anema',
       :search_name  => 'Anema Nyl. ex Forss.',
       :sort_name    => 'Anema Nyl. ex Forss.',
-      :display_name => '**__Anema__** sp. Nyl. ex Forss.',
+      :display_name => '**__Anema__** Nyl. ex Forss.',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => 'Nyl. ex Forss.'
@@ -733,7 +733,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Amanita',
       :search_name  => 'Amanita',
       :sort_name    => 'Amanita',
-      :display_name => '**__Amanita__** sp.',
+      :display_name => '**__Amanita__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -824,7 +824,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Amanita',
       :search_name  => 'Amanita "Wrong Author"',
       :sort_name    => 'Amanita Wrong Author"',
-      :display_name => '**__Amanita__** sp. "Wrong Author"',
+      :display_name => '**__Amanita__** "Wrong Author"',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => '"Wrong Author"'
@@ -889,7 +889,7 @@ class NameTest < UnitTestCase
       :text_name    => 'Xylaria',
       :search_name  => 'Xylaria',
       :sort_name    => 'Xylaria',
-      :display_name => '**__Xylaria__** sp.',
+      :display_name => '**__Xylaria__**',
       :parent_name  => nil,
       :rank         => :Genus,
       :author       => ''
@@ -1542,14 +1542,14 @@ class NameTest < UnitTestCase
     User.current = @dick; assert_equal('**__Agaricus campestris__** L.', name.display_name)
 
     name = names(:macrocybe_titans)
-    User.current = @mary; assert_equal('**__Macrocybe__** sp. Titans', name.display_name)
-    User.current = @dick; assert_equal('**__Macrocybe__** sp.', name.display_name)
+    User.current = @mary; assert_equal('**__Macrocybe__** Titans', name.display_name)
+    User.current = @dick; assert_equal('**__Macrocybe__**', name.display_name)
 
-    name.display_name = '__Macrocybe__ sp. (Author) Author'
-    assert_equal('__Macrocybe__ sp.', name.display_name)
+    name.display_name = '__Macrocybe__ (Author) Author'
+    assert_equal('__Macrocybe__', name.display_name)
 
-    name.display_name = '__Macrocybe__ sp. (van Helsing) Author'
-    assert_equal('__Macrocybe__ sp.', name.display_name)
+    name.display_name = '__Macrocybe__ (van Helsing) Author'
+    assert_equal('__Macrocybe__', name.display_name)
 
     name.display_name = '__Macrocybe__ sect. __Helsing__ Author'
     assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
@@ -1557,8 +1557,8 @@ class NameTest < UnitTestCase
     name.display_name = '__Macrocybe__ sect. __Helsing__'
     assert_equal('__Macrocybe__ sect. __Helsing__', name.display_name)
 
-    name.display_name = '**__Macrocybe__** sp. (van Helsing) Author'
-    assert_equal('**__Macrocybe__** sp.', name.display_name)
+    name.display_name = '**__Macrocybe__** (van Helsing) Author'
+    assert_equal('**__Macrocybe__**', name.display_name)
 
     name.display_name = '**__Macrocybe__** sect. **__Helsing__** Author'
     assert_equal('**__Macrocybe__** sect. **__Helsing__**', name.display_name)
@@ -1594,8 +1594,8 @@ class NameTest < UnitTestCase
   end
 
   def test_format_natural_variety
-    assert_equal('**__Acarospora__** sp.', Name.format_natural_variety('Acarospora', '', :Genus, false))
-    assert_equal('**__Acarospora__** sp. L.', Name.format_natural_variety('Acarospora', 'L.', :Genus, false))
+    assert_equal('**__Acarospora__**', Name.format_natural_variety('Acarospora', '', :Genus, false))
+    assert_equal('**__Acarospora__** L.', Name.format_natural_variety('Acarospora', 'L.', :Genus, false))
     assert_equal('**__Acarospora nodulosa__** L.', Name.format_natural_variety('Acarospora nodulosa', 'L.', :Species, false))
     assert_equal('__Acarospora nodulosa__ var. __reagens__ L.', Name.format_natural_variety('Acarospora nodulosa var. reagens', 'L.', :Variety, true))
     assert_equal('__Acarospora nodulosa__ L. var. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa var. nodulosa', 'L.', :Variety, true))

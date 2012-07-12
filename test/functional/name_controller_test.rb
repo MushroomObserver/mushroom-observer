@@ -717,37 +717,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(@rolf, name.user)
   end
 
-  def test_edit_name_change_rank_at_or_above_genus
-    name = names(:suillus)
-    assert_equal('**__Suillus__** sp. Gray', name.display_name)
-    params = {
-      :id => name.id,
-      :name => {
-        :text_name => 'Suillus',
-        :author => 'Gray',
-        :deprecated => 'false',
-      },
-    }
-
-    params[:name][:rank] = :Order
-    post_requires_login(:edit_name, params)
-    assert_flash_success
-    assert_equal(:Order, name.reload.rank)
-    assert_equal('**__Suillus__** Gray', name.display_name)
-
-    params[:name][:rank] = :Class
-    post_requires_login(:edit_name, params)
-    assert_flash_success
-    assert_equal(:Class, name.reload.rank)
-    assert_equal('**__Suillus__** Gray', name.display_name)
-
-    params[:name][:rank] = :Genus
-    post_requires_login(:edit_name, params)
-    assert_flash_success
-    assert_equal(:Genus, name.reload.rank)
-    assert_equal('**__Suillus__** sp. Gray', name.display_name)
-  end
-
   # This catches a bug that was happening when editing a name that was in use.
   # In this case text_name and author are missing, confusing edit_name.
   def test_edit_name_post_not_changeable
