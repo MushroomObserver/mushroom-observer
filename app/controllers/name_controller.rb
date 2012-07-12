@@ -1611,7 +1611,7 @@ class NameController < ApplicationController
       SELECT text_name, classification FROM names
       WHERE rank = 'Genus'
         AND COALESCE(classification,'') != ''
-        AND text_name IN ("#{genera.join('","')}")
+        AND text_name IN ('#{genera.join("','")}')
     ))
       for rank, name in Name.parse_classification(classification).reverse
         if rank == :Family
