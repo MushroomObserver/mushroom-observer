@@ -32,7 +32,7 @@ coprinus_comatus:
   author: '(O.F. Müll.) Pers.'
   display_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
   search_name: Coprinus comatus (O.F. Müll.) Pers.
-  sort_name: Coprinus comatus (O.F. Müll.) Pers.
+  sort_name: Coprinus comatus  (O.F. Müll.) Pers.
   citation: ''
   notes: ''
 
@@ -49,7 +49,7 @@ agaricus_campestris:
   author: L.
   display_name: '**__Agaricus campestris__** L.'
   search_name: Agaricus campestris L.
-  sort_name: Agaricus campestris L.
+  sort_name: Agaricus campestris  L.
   citation: ''
   notes: ''
 
@@ -83,7 +83,7 @@ amanita_baccata_arora:
   author: sensu Arora
   display_name: '**__Amanita baccata__** sensu Arora'
   search_name: Amanita baccata sensu Arora
-  sort_name: Amanita baccata sensu Arora
+  sort_name: Amanita baccata  sensu Arora
   citation: ''
   notes: ''
 
@@ -100,7 +100,7 @@ amanita_baccata_borealis:
   author: sensu Borealis
   display_name: '**__Amanita baccata__** sensu Borealis'
   search_name: Amanita baccata sensu Borealis
-  sort_name: Amanita baccata sensu Borealis
+  sort_name: Amanita baccata  sensu Borealis
   citation: ''
   notes: ''
 
@@ -118,7 +118,7 @@ lepiota_rachodes:
   author: Vittad.
   display_name: '**__Lepiota rachodes__** Vittad.'
   search_name: Lepiota rachodes Vittad.
-  sort_name: Lepiota rachodes Vittad.
+  sort_name: Lepiota rachodes  Vittad.
   citation: ''
   notes: ''
 
@@ -136,7 +136,7 @@ lepiota_rhacodes:
   author: Vittad.
   display_name: '**__Lepiota rhacodes__** Vittad.'
   search_name: Lepiota rhacodes Vittad.
-  sort_name: Lepiota rhacodes Vittad.
+  sort_name: Lepiota rhacodes  Vittad.
   citation: ''
   notes: ''
 
@@ -154,7 +154,7 @@ macrolepiota_rachodes:
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
   search_name: Macrolepiota rachodes (Vittad.) Singer
-  sort_name: Macrolepiota rachodes (Vittad.) Singer
+  sort_name: Macrolepiota rachodes  (Vittad.) Singer
   synonym_id: 1
   citation: ''
   notes: ''
@@ -173,7 +173,7 @@ macrolepiota_rhacodes:
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
   search_name: Macrolepiota rhacodes (Vittad.) Singer
-  sort_name: Macrolepiota rhacodes (Vittad.) Singer
+  sort_name: Macrolepiota rhacodes  (Vittad.) Singer
   synonym_id: 1
   citation: ''
   notes: ''
@@ -192,7 +192,7 @@ chlorophyllum_rachodes:
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rachodes (Vittad.) Vellinga
-  sort_name: Chlorophyllum rachodes (Vittad.) Vellinga
+  sort_name: Chlorophyllum rachodes  (Vittad.) Vellinga
   synonym_id: 2
   citation: ''
   notes: ''
@@ -211,7 +211,7 @@ chlorophyllum_rhacodes:
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
-  sort_name: Chlorophyllum rhacodes (Vittad.) Vellinga
+  sort_name: Chlorophyllum rhacodes  (Vittad.) Vellinga
   synonym_id: 2
   citation: ''
   notes: ''
@@ -230,7 +230,7 @@ lactarius_alpinus:
   author: Peck
   display_name: '**__Lactarius alpinus__** Peck'
   search_name: Lactarius alpinus Peck
-  sort_name: Lactarius alpinus Peck
+  sort_name: Lactarius alpinus  Peck
   synonym_id: 3
   citation: ''
   notes: ''
@@ -249,7 +249,7 @@ lactarius_alpigenes:
   author: Kühn.
   display_name: __Lactarius alpigenes__ Kühn.
   search_name: Lactarius alpigenes Kühn.
-  sort_name: Lactarius alpigenes Kühn.
+  sort_name: Lactarius alpigenes  Kühn.
   synonym_id: 3
   deprecated: 1
   citation: ''
@@ -269,7 +269,7 @@ lactarius_kuehneri:
   author: Joss.
   display_name: __Lactarius kuehneri__ Joss.
   search_name: Lactarius kuehneri Joss.
-  sort_name: Lactarius kuehneri Joss.
+  sort_name: Lactarius kuehneri  Joss.
   synonym_id: 3
   deprecated: 1
   citation: ''
@@ -289,7 +289,7 @@ lactarius_subalpinus:
   author: Kühn.
   display_name: __Lactarius subalpinus__ Kühn.
   search_name: Lactarius subalpinus Kühn.
-  sort_name: Lactarius subalpinus Kühn.
+  sort_name: Lactarius subalpinus  Kühn.
   synonym_id: 3
   deprecated: 1
   citation: ''
@@ -345,7 +345,7 @@ agaricus_campestrus:
   author: L.
   display_name: '**__Agaricus campestrus__** L.'
   search_name: Agaricus campestrus L.
-  sort_name: Agaricus campestrus L.
+  sort_name: Agaricus campestrus  L.
   citation: ''
   notes: ''
 
@@ -364,7 +364,7 @@ agaricus_campestras:
   author: L.
   display_name: '**__Agaricus campestras__** L.'
   search_name: Agaricus campestras L.
-  sort_name: Agaricus campestras L.
+  sort_name: Agaricus campestras  L.
   citation: ''
   notes: ''
 
@@ -383,7 +383,7 @@ agaricus_campestros:
   author: L.
   display_name: '**__Agaricus campestros__** L.'
   search_name: Agaricus campestros L.
-  sort_name: Agaricus campestros L.
+  sort_name: Agaricus campestros  L.
   citation: ''
   notes: ''
 
@@ -401,7 +401,7 @@ coprinellus_micaceus:
   author: '(Bull.) Vilgalys, Hopple & Jacq. Johnson'
   display_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
-  sort_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  sort_name: Coprinellus micaceus  (Bull.) Vilgalys, Hopple & Jacq. Johnson
   citation: ''
   notes: ''
 
@@ -455,7 +455,7 @@ pluteus_petasatus_approved:
   author: '(Fr.) Gillet'
   display_name: '**__Pluteus petasatus__** (Fr.) Gillet'
   search_name: Pluteus petasatus (Fr.) Gillet
-  sort_name: Pluteus petasatus (Fr.) Gillet
+  sort_name: Pluteus petasatus  (Fr.) Gillet
   citation: ''
   notes: ''
 
@@ -473,7 +473,7 @@ pluteus_petasatus_deprecated:
   author: '(Fries) Gillet'
   display_name: __Pluteus petasatus__ (Fries) Gillet
   search_name: Pluteus petasatus (Fries) Gillet
-  sort_name: Pluteus petasatus (Fries) Gillet
+  sort_name: Pluteus petasatus  (Fries) Gillet
   deprecated: 1
   citation: ''
   notes: ''
@@ -528,7 +528,7 @@ bugs_bunny_one:
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** One'
   search_name: Warnerbros bugs-bunny One
-  sort_name: Warnerbros bugs-bunny One
+  sort_name: Warnerbros bugs-bunny  One
   citation: ''
   notes: ''
 
@@ -545,7 +545,7 @@ bugs_bunny_two:
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** Two'
   search_name: Warnerbros bugs-bunny Two
-  sort_name: Warnerbros bugs-bunny Two
+  sort_name: Warnerbros bugs-bunny  Two
   citation: ''
   notes: ''
 
@@ -580,7 +580,7 @@ russula_brevipes_author_notes:
   author: Peck
   display_name: '**__Russula brevipes__** Peck'
   search_name: Russula brevipes Peck
-  sort_name: Russula brevipes Peck
+  sort_name: Russula brevipes  Peck
   citation: 'blah'
   notes: 'blah blah blah'
 
@@ -616,7 +616,7 @@ russula_cremoricolor_author_notes:
   author: Earle
   display_name: '**__Russula cremoricolor__** Earle'
   search_name: Russula cremoricolor Earle
-  sort_name: Russula cremoricolor Earle
+  sort_name: Russula cremoricolor  Earle
   citation: ''
   notes: ''
 
@@ -633,7 +633,7 @@ lentinellus_ursinus_author1:
   author: Kühner
   display_name: '**__Lentinellus ursinus__** Kühner'
   search_name: Lentinellus ursinus Kühner
-  sort_name: Lentinellus ursinus Kühner
+  sort_name: Lentinellus ursinus  Kühner
   citation: ''
   notes: ''
 
@@ -650,7 +650,7 @@ lentinellus_ursinus_author2:
   author: Kuhner
   display_name: '**__Lentinellus ursinus__** Kuhner'
   search_name: Lentinellus ursinus Kuhner
-  sort_name: Lentinellus ursinus Kuhner
+  sort_name: Lentinellus ursinus  Kuhner
   citation: ''
   notes: ''
 
@@ -686,7 +686,7 @@ macrocybe_titans:
   author: Titans
   display_name: '**__Macrocybe__** Titans'
   search_name: Macrocybe Titans
-  sort_name: Macrocybe Titans
+  sort_name: Macrocybe  Titans
   citation: ''
   notes: ''
 
@@ -703,7 +703,7 @@ boletus_edulis:
   author: Bull.
   display_name: '**__Boletus edulis__** Bull.'
   search_name: Boletus edulis Bull.
-  sort_name: Boletus edulis Bull.
+  sort_name: Boletus edulis  Bull.
   citation: ''
   notes: ''
 
@@ -722,7 +722,7 @@ peltigera:
   citation: Ye Auld Manual of Lichenes, 1800.
   display_name: '**__Peltigera__** (Old) New Auth.'
   search_name: Peltigera (Old) New Auth.
-  sort_name: Peltigera (Old) New Auth.
+  sort_name: Peltigera  (Old) New Auth.
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   synonym_id: 4
   notes: ''
@@ -761,7 +761,7 @@ suillus:
   author: Gray
   display_name: '**__Suillus__** Gray'
   search_name: Suillus Gray
-  sort_name: Suillus Gray
+  sort_name: Suillus  Gray
   citation: ''
   notes: ''
 
@@ -778,7 +778,7 @@ suillus_by_white:
   author: E.B. White
   display_name: '**__Suillus__** E.B. White'
   search_name: Suillus E.B. White
-  sort_name: Suillus E.B. White
+  sort_name: Suillus  E.B. White
   citation: ''
   notes: ''
 
@@ -795,7 +795,7 @@ suilus:
   author: E.B. White
   display_name: '**__Suilus__** E.B. White'
   search_name: Suilus E.B. White
-  sort_name: Suilus E.B. White
+  sort_name: Suilus  E.B. White
   correct_spelling_id: 43
   deprecated: true
   citation: ''
@@ -814,7 +814,7 @@ tremella_mesenterica:
   author: Retz.
   display_name: '**__Tremella mesenterica__** Retz.'
   search_name: Tremella mesenterica Retz.
-  sort_name: Tremella mesenterica Retz.
+  sort_name: Tremella mesenterica  Retz.
   citation: ''
   notes: ''
   
@@ -831,7 +831,7 @@ tremella:
   author: Pers.
   display_name: '**__Tremella__** Pers.'
   search_name: Tremella Pers.
-  sort_name: Tremella Pers.
+  sort_name: Tremella  Pers.
   citation: ''
   notes: ''
 
@@ -848,7 +848,7 @@ tremella_justpublished:
   author: Retz.
   display_name: '**__Tremella justpublished__** Retz.'
   search_name: Tremella justpublished Retz.
-  sort_name: Tremella justpublished Retz.
+  sort_name: Tremella justpublished  Retz.
   citation: ''
   notes: A Tremella not known to be a lichen
 
@@ -863,7 +863,7 @@ hygrocybe_russocoriacea_bad_author:
   rank: Species
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & T.K. Mill.) P.D. Orton & Watling
-  sort_name: Hygrocybe russocoriacea (Berk. & T.K. Mill.) P.D. Orton & Watling
+  sort_name: Hygrocybe russocoriacea  (Berk. & T.K. Mill.) P.D. Orton & Watling
   display_name: '**__Hygrocybe russocoriacea__** (Berk. & T.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & T.K. Mill.) P.D. Orton & Watling'
   notes: '__Camarophyllus russocoriaceus__ is a synonym.  According to the Index Fungorum __Camarophyllus__ is now considered to be a synonym of __Hygrocybe__.'
@@ -879,7 +879,7 @@ hygrocybe_russocoriacea_good_author:
   rank: Species
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
-  sort_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
+  sort_name: Hygrocybe russocoriacea  (Berk. & Jos.K. Mill.) P.D. Orton & Watling
   display_name: '**__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   notes: NULL

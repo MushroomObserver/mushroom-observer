@@ -4,13 +4,16 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class NameTest < UnitTestCase
   def create_test_name(string, force_rank=nil)
-    User.current = @rolf
-    parse = Name.parse_name(string)
-    params = parse.params
-    params[:rank] = force_rank if force_rank
-    name = Name.create_name(params)
-    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
-    return name
+    clean_our_backtrace do
+      User.current = @rolf
+      parse = Name.parse_name(string)
+      assert_block("Expected this to parse: #{string}") {parse}
+      params = parse.params
+      params[:rank] = force_rank if force_rank
+      name = Name.create_name(params)
+      assert_block("Error saving name \"#{string}\": [#{name.dump_errors}]") {name.save}
+      return name
+    end
   end
 
   def do_name_parse_test(str, args)
@@ -459,7 +462,7 @@ class NameTest < UnitTestCase
       'Lecania ryaniana van den Boom',
       :text_name    => 'Lecania ryaniana',
       :search_name  => 'Lecania ryaniana van den Boom',
-      :sort_name    => 'Lecania ryaniana van den Boom',
+      :sort_name    => 'Lecania ryaniana  van den Boom',
       :display_name => '**__Lecania ryaniana__** van den Boom',
       :parent_name  => 'Lecania',
       :rank         => :Species,
@@ -472,7 +475,7 @@ class NameTest < UnitTestCase
       'Lecidea sanguineoatra sens. Nyl',
       :text_name    => 'Lecidea sanguineoatra',
       :search_name  => 'Lecidea sanguineoatra sens. Nyl',
-      :sort_name    => 'Lecidea sanguineoatra sens. Nyl',
+      :sort_name    => 'Lecidea sanguineoatra  sens. Nyl',
       :display_name => '**__Lecidea sanguineoatra__** sens. Nyl',
       :parent_name  => 'Lecidea',
       :rank         => :Species,
@@ -485,7 +488,7 @@ class NameTest < UnitTestCase
       'Acarospora squamulosa sensu Th. Fr.',
       :text_name    => 'Acarospora squamulosa',
       :search_name  => 'Acarospora squamulosa sensu Th. Fr.',
-      :sort_name    => 'Acarospora squamulosa sensu Th. Fr.',
+      :sort_name    => 'Acarospora squamulosa  sensu Th. Fr.',
       :display_name => '**__Acarospora squamulosa__** sensu Th. Fr.',
       :parent_name  => 'Acarospora',
       :rank         => :Species,
@@ -498,7 +501,7 @@ class NameTest < UnitTestCase
       'Cladina portentosa subsp. pacifica f. decolorans auct.',
       :text_name    => 'Cladina portentosa subsp. pacifica f. decolorans',
       :search_name  => 'Cladina portentosa subsp. pacifica f. decolorans auct.',
-      :sort_name    => 'Cladina portentosa subsp. pacifica f. decolorans auct.',
+      :sort_name    => 'Cladina portentosa  {5subsp.  pacifica  {7f.  decolorans  auct.',
       :display_name => '**__Cladina portentosa__** subsp. **__pacifica__** f. **__decolorans__** auct.',
       :parent_name  => 'Cladina portentosa subsp. pacifica',
       :rank         => :Form ,
@@ -511,7 +514,7 @@ class NameTest < UnitTestCase
       'Japewia tornoënsis Somloë',
       :text_name    => 'Japewia tornoensis',
       :search_name  => 'Japewia tornoensis Somloë',
-      :sort_name    => 'Japewia tornoensis Somloë',
+      :sort_name    => 'Japewia tornoensis  Somloë',
       :display_name => '**__Japewia tornoënsis__** Somloë',
       :parent_name  => 'Japewia',
       :rank         => :Species,
@@ -524,7 +527,7 @@ class NameTest < UnitTestCase
       'Micarea globularis "(Ach. ex Nyl.) Hedl."',
       :text_name    => 'Micarea globularis',
       :search_name  => 'Micarea globularis "(Ach. ex Nyl.) Hedl."',
-      :sort_name    => 'Micarea globularis (Ach. ex Nyl.) Hedl."',
+      :sort_name    => 'Micarea globularis  (Ach. ex Nyl.) Hedl."',
       :display_name => '**__Micarea globularis__** "(Ach. ex Nyl.) Hedl."',
       :parent_name  => 'Micarea',
       :rank         => :Species,
@@ -537,7 +540,7 @@ class NameTest < UnitTestCase
       'Synechoblastus aggregatus ("Ach.") Th. Fr.',
       :text_name    => 'Synechoblastus aggregatus',
       :search_name  => 'Synechoblastus aggregatus ("Ach.") Th. Fr.',
-      :sort_name    => 'Synechoblastus aggregatus (Ach.") Th. Fr.',
+      :sort_name    => 'Synechoblastus aggregatus  (Ach.") Th. Fr.',
       :display_name => '**__Synechoblastus aggregatus__** ("Ach.") Th. Fr.',
       :parent_name  => 'Synechoblastus',
       :rank         => :Species,
@@ -589,7 +592,7 @@ class NameTest < UnitTestCase
       'Anaptychia "leucomelaena" auct.',
       :text_name    => 'Anaptychia "leucomelaena"',
       :search_name  => 'Anaptychia "leucomelaena" auct.',
-      :sort_name    => 'Anaptychia leucomelaena" auct.',
+      :sort_name    => 'Anaptychia leucomelaena"  auct.',
       :display_name => '**__Anaptychia "leucomelaena"__** auct.',
       :parent_name  => 'Anaptychia',
       :rank         => :Species,
@@ -641,7 +644,7 @@ class NameTest < UnitTestCase
       'Anema Nyl. ex Forss.',
       :text_name    => 'Anema',
       :search_name  => 'Anema Nyl. ex Forss.',
-      :sort_name    => 'Anema Nyl. ex Forss.',
+      :sort_name    => 'Anema  Nyl. ex Forss.',
       :display_name => '**__Anema__** Nyl. ex Forss.',
       :parent_name  => nil,
       :rank         => :Genus,
@@ -654,7 +657,7 @@ class NameTest < UnitTestCase
       'Anema sp Nyl. ex Forss.',
       :text_name    => 'Anema',
       :search_name  => 'Anema Nyl. ex Forss.',
-      :sort_name    => 'Anema Nyl. ex Forss.',
+      :sort_name    => 'Anema  Nyl. ex Forss.',
       :display_name => '**__Anema__** Nyl. ex Forss.',
       :parent_name  => nil,
       :rank         => :Genus,
@@ -667,7 +670,7 @@ class NameTest < UnitTestCase
       'Anema sp. Nyl. ex Forss.',
       :text_name    => 'Anema',
       :search_name  => 'Anema Nyl. ex Forss.',
-      :sort_name    => 'Anema Nyl. ex Forss.',
+      :sort_name    => 'Anema  Nyl. ex Forss.',
       :display_name => '**__Anema__** Nyl. ex Forss.',
       :parent_name  => nil,
       :rank         => :Genus,
@@ -680,7 +683,7 @@ class NameTest < UnitTestCase
       'Japewia tornoënsis var. tornoënsis',
       :text_name    => 'Japewia tornoensis var. tornoensis',
       :search_name  => 'Japewia tornoensis var. tornoensis',
-      :sort_name    => 'Japewia tornoensis var. tornoensis',
+      :sort_name    => 'Japewia tornoensis  {6var.  !tornoensis',
       :display_name => '**__Japewia tornoënsis__** var. **__tornoënsis__**',
       :parent_name  => 'Japewia tornoënsis',
       :rank         => :Variety,
@@ -693,7 +696,7 @@ class NameTest < UnitTestCase
       'Does this ssp. ever var. happen f. for Real?',
       :text_name    => 'Does this subsp. ever var. happen f. for',
       :search_name  => 'Does this subsp. ever var. happen f. for Real?',
-      :sort_name    => 'Does this subsp. ever var. happen f. for Real?',
+      :sort_name    => 'Does this  {5subsp.  ever  {6var.  happen  {7f.  for  Real?',
       :display_name => '**__Does this__** subsp. **__ever__** var. **__happen__** f. **__for__** Real?',
       :parent_name  => 'Does this subsp. ever var. happen',
       :rank         => :Form,
@@ -706,7 +709,7 @@ class NameTest < UnitTestCase
       'Boletus  rex-veris Arora & Simonini',
       :text_name    => 'Boletus rex-veris',
       :search_name  => 'Boletus rex-veris Arora & Simonini',
-      :sort_name    => 'Boletus rex-veris Arora & Simonini',
+      :sort_name    => 'Boletus rex-veris  Arora & Simonini',
       :display_name => '**__Boletus rex-veris__** Arora & Simonini',
       :parent_name  => 'Boletus',
       :rank         => :Species,
@@ -745,7 +748,7 @@ class NameTest < UnitTestCase
       'Amanita Sect. Vaginatae (L.) Ach.',
       :text_name    => 'Amanita sect. Vaginatae',
       :search_name  => 'Amanita sect. Vaginatae (L.) Ach.',
-      :sort_name    => 'Amanita sect. Vaginatae (L.) Ach.',
+      :sort_name    => 'Amanita  {2sect.  Vaginatae  (L.) Ach.',
       :display_name => '**__Amanita__** sect. **__Vaginatae__** (L.) Ach.',
       :parent_name  => 'Amanita',
       :rank         => :Section,
@@ -758,7 +761,7 @@ class NameTest < UnitTestCase
       'Amanita (subg Vaginatae)',
       :text_name    => 'Amanita subgenus Vaginatae',
       :search_name  => 'Amanita subgenus Vaginatae',
-      :sort_name    => 'Amanita subgenus Vaginatae',
+      :sort_name    => 'Amanita  {1subgenus  Vaginatae',
       :display_name => '**__Amanita__** subgenus **__Vaginatae__**',
       :parent_name  => 'Amanita',
       :rank         => :Subgenus,
@@ -771,7 +774,7 @@ class NameTest < UnitTestCase
       'Amanita stirps Vaginatae Ach. & Fr.',
       :text_name    => 'Amanita stirps Vaginatae',
       :search_name  => 'Amanita stirps Vaginatae Ach. & Fr.',
-      :sort_name    => 'Amanita stirps Vaginatae Ach. & Fr.',
+      :sort_name    => 'Amanita  {4stirps  Vaginatae  Ach. & Fr.',
       :display_name => '**__Amanita__** stirps **__Vaginatae__** Ach. & Fr.',
       :parent_name  => 'Amanita',
       :rank         => :Stirps,
@@ -784,7 +787,7 @@ class NameTest < UnitTestCase
       'Amanita subgenus Vaginatae stirps Vaginatae',
       :text_name    => 'Amanita subgenus Vaginatae stirps Vaginatae',
       :search_name  => 'Amanita subgenus Vaginatae stirps Vaginatae',
-      :sort_name    => 'Amanita subgenus Vaginatae stirps Vaginatae',
+      :sort_name    => 'Amanita  {1subgenus  Vaginatae  {4stirps  !Vaginatae',
       :display_name => '**__Amanita__** subgenus **__Vaginatae__** stirps **__Vaginatae__**',
       :parent_name  => 'Amanita subgenus Vaginatae',
       :rank         => :Stirps,
@@ -810,7 +813,7 @@ class NameTest < UnitTestCase
       'Amanita "sp-S01" Tulloss',
       :text_name    => 'Amanita "sp-S01"',
       :search_name  => 'Amanita "sp-S01" Tulloss',
-      :sort_name    => 'Amanita {sp-S01" Tulloss',
+      :sort_name    => 'Amanita {sp-S01"  Tulloss',
       :display_name => '**__Amanita "sp-S01"__** Tulloss',
       :parent_name  => 'Amanita',
       :rank         => :Species,
@@ -823,7 +826,7 @@ class NameTest < UnitTestCase
       'Amanita "Wrong Author"',
       :text_name    => 'Amanita',
       :search_name  => 'Amanita "Wrong Author"',
-      :sort_name    => 'Amanita Wrong Author"',
+      :sort_name    => 'Amanita  Wrong Author"',
       :display_name => '**__Amanita__** "Wrong Author"',
       :parent_name  => nil,
       :rank         => :Genus,
@@ -849,7 +852,7 @@ class NameTest < UnitTestCase
       'Amanita (subsect Vaginatae)',
       :text_name    => 'Amanita subsect. Vaginatae',
       :search_name  => 'Amanita subsect. Vaginatae',
-      :sort_name    => 'Amanita subsect. Vaginatae',
+      :sort_name    => 'Amanita  {3subsect.  Vaginatae',
       :display_name => '**__Amanita__** subsect. **__Vaginatae__**',
       :parent_name  => 'Amanita',
       :rank         => :Subsection,
@@ -862,7 +865,7 @@ class NameTest < UnitTestCase
       'Pleurotus djamor (Fr.) Boedijn var. djamor',
       :text_name    => 'Pleurotus djamor var. djamor',
       :search_name  => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
-      :sort_name    => 'Pleurotus djamor var. djamor (Fr.) Boedijn',
+      :sort_name    => 'Pleurotus djamor  {6var.  !djamor  (Fr.) Boedijn',
       :display_name => '**__Pleurotus djamor__** (Fr.) Boedijn var. **__djamor__**',
       :parent_name  => 'Pleurotus djamor',
       :rank         => :Variety,
@@ -875,7 +878,7 @@ class NameTest < UnitTestCase
       'Pleurotus sp. T44 Tulloss',
       :text_name    => 'Pleurotus "sp-T44"',
       :search_name  => 'Pleurotus "sp-T44" Tulloss',
-      :sort_name    => 'Pleurotus {sp-T44" Tulloss',
+      :sort_name    => 'Pleurotus {sp-T44"  Tulloss',
       :display_name => '**__Pleurotus "sp-T44"__** Tulloss',
       :parent_name  => 'Pleurotus',
       :rank         => :Species,
@@ -901,7 +904,7 @@ class NameTest < UnitTestCase
       'Amanita sect. Amanita Pers.',
       :text_name    => 'Amanita sect. Amanita',
       :search_name  => 'Amanita sect. Amanita Pers.',
-      :sort_name    => 'Amanita sect. Amanita Pers.',
+      :sort_name    => 'Amanita  {2sect.  !Amanita  Pers.',
       :display_name => '**__Amanita__** Pers. sect. **__Amanita__**',
       :parent_name  => 'Amanita',
       :rank         => :Section,
@@ -914,7 +917,7 @@ class NameTest < UnitTestCase
       'Amanita Pers. sect. Amanita',
       :text_name    => 'Amanita sect. Amanita',
       :search_name  => 'Amanita sect. Amanita Pers.',
-      :sort_name    => 'Amanita sect. Amanita Pers.',
+      :sort_name    => 'Amanita  {2sect.  !Amanita  Pers.',
       :display_name => '**__Amanita__** Pers. sect. **__Amanita__**',
       :parent_name  => 'Amanita',
       :rank         => :Section,
@@ -927,7 +930,7 @@ class NameTest < UnitTestCase
       'Amanita subg. Amidella Singer sect. Amidella stirps Amidella',
       :text_name    => 'Amanita subgenus Amidella sect. Amidella stirps Amidella',
       :search_name  => 'Amanita subgenus Amidella sect. Amidella stirps Amidella Singer',
-      :sort_name    => 'Amanita subgenus Amidella sect. Amidella stirps Amidella Singer',
+      :sort_name    => 'Amanita  {1subgenus  Amidella  {2sect.  !Amidella  {4stirps  !Amidella  Singer',
       :display_name => '**__Amanita__** subgenus **__Amidella__** Singer sect. **__Amidella__** stirps **__Amidella__**',
       :parent_name  => 'Amanita subgenus Amidella sect. Amidella',
       :rank         => :Stirps,
@@ -1570,39 +1573,81 @@ class NameTest < UnitTestCase
     assert_equal('**__Macrocybe__** subgenus **__Blah__**', name.display_name)
   end
 
-  def test_changing_author_of_natural_variety
+  def test_changing_author_of_autonym
     name = create_test_name('Acarospora nodulosa var. nodulosa')
     assert_equal('Acarospora nodulosa var. nodulosa', name.text_name)
     assert_equal('Acarospora nodulosa var. nodulosa', name.search_name)
-    assert_equal('Acarospora nodulosa var. nodulosa', name.sort_name)
+    assert_equal('Acarospora nodulosa  {6var.  !nodulosa', name.sort_name)
     assert_equal('**__Acarospora nodulosa__** var. **__nodulosa__**', name.display_name)
     assert_equal('', name.author)
 
     name.change_author('(Dufour) Hue')
     assert_equal('Acarospora nodulosa var. nodulosa', name.text_name)
     assert_equal('Acarospora nodulosa var. nodulosa (Dufour) Hue', name.search_name)
-    assert_equal('Acarospora nodulosa var. nodulosa (Dufour) Hue', name.sort_name)
+    assert_equal('Acarospora nodulosa  {6var.  !nodulosa  (Dufour) Hue', name.sort_name)
     assert_equal('**__Acarospora nodulosa__** (Dufour) Hue var. **__nodulosa__**', name.display_name)
     assert_equal('(Dufour) Hue', name.author)
 
     name.change_author('Ach.')
     assert_equal('Acarospora nodulosa var. nodulosa', name.text_name)
     assert_equal('Acarospora nodulosa var. nodulosa Ach.', name.search_name)
-    assert_equal('Acarospora nodulosa var. nodulosa Ach.', name.sort_name)
+    assert_equal('Acarospora nodulosa  {6var.  !nodulosa  Ach.', name.sort_name)
     assert_equal('**__Acarospora nodulosa__** Ach. var. **__nodulosa__**', name.display_name)
     assert_equal('Ach.', name.author)
   end
 
-  def test_format_natural_variety
-    assert_equal('**__Acarospora__**', Name.format_natural_variety('Acarospora', '', :Genus, false))
-    assert_equal('**__Acarospora__** L.', Name.format_natural_variety('Acarospora', 'L.', :Genus, false))
-    assert_equal('**__Acarospora nodulosa__** L.', Name.format_natural_variety('Acarospora nodulosa', 'L.', :Species, false))
-    assert_equal('__Acarospora nodulosa__ var. __reagens__ L.', Name.format_natural_variety('Acarospora nodulosa var. reagens', 'L.', :Variety, true))
-    assert_equal('__Acarospora nodulosa__ L. var. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa var. nodulosa', 'L.', :Variety, true))
-    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa ssp. nodulosa', 'L.', :Subspecies, true))
-    assert_equal('__Acarospora nodulosa__ L. f. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa f. nodulosa', 'L.', :Form, true))
-    assert_equal('__Acarospora nodulosa__ ssp. __reagens__ L. var. __reagens__', Name.format_natural_variety('Acarospora nodulosa ssp. reagens var. reagens', 'L.', :Variety, true))
-    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa ssp. nodulosa var. nodulosa', 'L.', :Variety, true))
-    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__ f. __nodulosa__', Name.format_natural_variety('Acarospora nodulosa ssp. nodulosa var. nodulosa f. nodulosa', 'L.', :Form, true))
+  def test_format_autonym
+    assert_equal('**__Acarospora__**', Name.format_autonym('Acarospora', '', :Genus, false))
+    assert_equal('**__Acarospora__** L.', Name.format_autonym('Acarospora', 'L.', :Genus, false))
+    assert_equal('**__Acarospora nodulosa__** L.', Name.format_autonym('Acarospora nodulosa', 'L.', :Species, false))
+    assert_equal('__Acarospora nodulosa__ var. __reagens__ L.', Name.format_autonym('Acarospora nodulosa var. reagens', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. var. __nodulosa__', Name.format_autonym('Acarospora nodulosa var. nodulosa', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__', Name.format_autonym('Acarospora nodulosa ssp. nodulosa', 'L.', :Subspecies, true))
+    assert_equal('__Acarospora nodulosa__ L. f. __nodulosa__', Name.format_autonym('Acarospora nodulosa f. nodulosa', 'L.', :Form, true))
+    assert_equal('__Acarospora nodulosa__ ssp. __reagens__ L. var. __reagens__', Name.format_autonym('Acarospora nodulosa ssp. reagens var. reagens', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__', Name.format_autonym('Acarospora nodulosa ssp. nodulosa var. nodulosa', 'L.', :Variety, true))
+    assert_equal('__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__ f. __nodulosa__', Name.format_autonym('Acarospora nodulosa ssp. nodulosa var. nodulosa f. nodulosa', 'L.', :Form, true))
+  end
+
+  # Just make sure mysql is collating accents and case correctly.
+  def test_mysql_sort_order
+    n1 = create_test_name('Agaricus Aehou')
+    n2 = create_test_name('Agaricus Aeiou')
+    n3 = create_test_name('Agaricus Aeiøu')
+    n4 = create_test_name('Agaricus Aëiou')
+    n5 = create_test_name('Agaricus Aéiou')
+    n6 = create_test_name('Agaricus Aejou')
+    n5.update_attribute(:author, 'aÉIOU')
+    x = Name.connection.select_values %(
+      SELECT author FROM names WHERE id >= #{n1.id} AND id <= #{n6.id}
+      ORDER BY author ASC
+    )
+    assert_equal(["Aehou", "Aeiou", "Aëiou", "aÉIOU", "Aeiøu", "Aejou"], x)
+  end
+
+  def test_name_sort_order
+    names = [
+      create_test_name('Agaricus Đorn'),
+      create_test_name('Agaricus L.'),
+      create_test_name('Agaricus Øosting'),
+      create_test_name('Agaricus Śliwa'),
+      create_test_name('Agaricus Zzyzx'),
+      create_test_name('Agaricus subgenus Dick'),
+      create_test_name('Agaricus section Charlie'),
+      create_test_name('Agaricus subsection Bob'),
+      create_test_name('Agaricus stirps Arthur'),
+      create_test_name('Agaricus aardvark'),
+      create_test_name('Agaricus "tree-beard"'),
+      create_test_name('Agaricus ugliano Zoom'),
+      create_test_name('Agaricus ugliano ssp. ugliano Zoom'),
+      create_test_name('Agaricus ugliano ssp. erik Zoom'),
+      create_test_name('Agaricus ugliano var. danny Zoom'),
+      create_test_name('Agaricus "sp-LD50"'),
+    ]
+    x = Name.connection.select_values %(
+      SELECT sort_name FROM names WHERE id >= #{names.first.id} AND id <= #{names.last.id}
+      ORDER BY sort_name ASC
+    )
+    assert_equal(names.map(&:sort_name), x)
   end
 end

@@ -24,7 +24,7 @@
 #  resubmit the form, we need to be able to fill the field in with the correct
 #  name *including* the umlaut.  That is, if you re-parse real_search_name, it
 #  must result in the identical Name object.  This is not true of search_name,
-#  because it will lose the umlaut. 
+#  because it will lose the umlaut.
 #
 #  == Regular Expressions
 #
@@ -345,7 +345,7 @@ class Name < AbstractModel
 
   # (This gives us the ability to format names slightly differently when
   # applied to observations.  For example, we might tack on "sp." to some
-  # higher-ranked taxa here.) 
+  # higher-ranked taxa here.)
   def observation_name
     display_name
   end
@@ -1410,7 +1410,7 @@ class Name < AbstractModel
   # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
   LAST_PART = / (?: \s[a-z]+\.? )? \s \S+ $/x
 
-  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
+  AUTHOR_START = / #{ANY_AUTHOR_ABBR} | van\s | de\s | [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ\(] | "[^a-z\s] /x
 
   AUTHOR_PAT      = /^ ("? #{UPPER_WORD} (?: \(? (?:\s #{ANY_SUBG_ABBR} \s #{UPPER_WORD})+ \)? | \s (?!#{AUTHOR_START}|#{ANY_SUBG_ABBR}) #{LOWER_WORD} (?:\s #{ANY_SSP_ABBR} \s #{LOWER_WORD})* | \s #{SP_ABBR} )? "?) (\s (?!#{ANY_NAME_ABBR}\s) #{AUTHOR_START}.*) $/x
   GENUS_OR_UP_PAT = /^ ("? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )? (\s #{AUTHOR_START}.*)? $/x
@@ -1491,12 +1491,12 @@ class Name < AbstractModel
     results = nil
     if match = GROUP_PAT.match(str)
       name = match[1]
-      text_name = name.gsub('ë', 'e') + ' group'
+      text_name = name.gsub('ë', 'e')
       parent_name = name.sub(LAST_PART, '')
       results = ParsedName.new(
-        :text_name    => text_name,
-        :search_name  => text_name,
-        :sort_name    => remove_first_quotes(text_name),
+        :text_name    => text_name + ' group',
+        :search_name  => text_name + ' group',
+        :sort_name    => format_sort_name(text_name, 'group'),
         :display_name => format_name(name, deprecated) + ' group',
         :parent_name  => parent_name,
         :rank         => :Group,
@@ -1517,11 +1517,11 @@ class Name < AbstractModel
       author2 = author.blank? ? '' : ' ' + author
       text_name = name.gsub('ë', 'e')
       parent_name = RANKS_BELOW_GENUS.include?(rank) ? name.sub(LAST_PART, '') : nil
-      display_name = format_natural_variety(name, author, rank, deprecated)
+      display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         :text_name    => text_name,
         :search_name  => text_name + author2,
-        :sort_name    => remove_first_quotes(text_name + author2),
+        :sort_name    => format_sort_name(text_name, author),
         :display_name => display_name,
         :parent_name  => parent_name,
         :rank         => rank,
@@ -1544,11 +1544,11 @@ class Name < AbstractModel
       author2 = author.blank? ? '' : ' ' + author
       text_name = name.gsub('ë', 'e')
       parent_name = name.sub(LAST_PART, '')
-      display_name = format_natural_variety(name, author, rank, deprecated)
+      display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         :text_name    => text_name,
         :search_name  => text_name + author2,
-        :sort_name    => remove_first_quotes(text_name + author2),
+        :sort_name    => format_sort_name(text_name, author),
         :display_name => display_name,
         :parent_name  => parent_name,
         :rank         => rank,
@@ -1645,7 +1645,7 @@ class Name < AbstractModel
 
   # Format a name ranked below genus, moving the author to before the var.
   # in natural varieties such as "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
-  def self.format_natural_variety(name, author, rank, deprecated)
+  def self.format_autonym(name, author, rank, deprecated)
     words = name.split(' ')
     if author.blank?
       format_name(name, deprecated)
@@ -1747,10 +1747,31 @@ class Name < AbstractModel
         strip_squeeze
   end
 
-  # Adjust +search_name+ string to collate correctly.
-  def self.remove_first_quotes(str)
-    str.sub(/ "(sp[\-\.])/, ' {\1'). # Amanita "sp-1" goes at end of Amanita.
-        gsub(/"([^"]*")/, '\1')      # Amanita "baccata" goes right after Amanita baccata.
+  # Adjust +search_name+ string to collate correctly.  Pass in +search_name+.
+  def self.format_sort_name(name, author)
+    str = format_name(name, :deprecated).
+      sub(/^_+/, '').
+      gsub(/_+/, ' ').             # put genus at the top
+      sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
+      gsub(/"([^"]*")/, '\1').     # collate "baccata" with baccata
+      sub(' subgenus ', ' {1subgenus ').
+      sub(' sect. ',    ' {2sect. ').
+      sub(' subsect. ', ' {3subsect. ').
+      sub(' stirps ',   ' {4stirps ').
+      sub(' subsp. ',   ' {5subsp. ').
+      sub(' var. ',     ' {6var. ').
+      sub(' f. ',       ' {7f. ').
+      strip
+    1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
+    if not author.blank?
+      str += '  ' + author.
+        gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+        gsub(/[Đđ]/, 'd').       # mysql isn't collating these right
+        gsub(/[Øø]/, 'O').
+        strip.
+        sub(/^group$/, ' group')
+    end
+    return str
   end
 
   ##############################################################################
@@ -1966,26 +1987,14 @@ class Name < AbstractModel
   #   name.save
   #
   def change_author(new_author)
-    old_author = self.author
-    self.author = new_author.to_s
-    self.search_name  = replace_author(search_name, old_author, new_author)
-    self.sort_name    = replace_author(sort_name,   old_author, new_author)
-    self.display_name = Name.format_natural_variety(text_name, new_author, rank, deprecated)
-  end
-
-  # Used by change_author().
-  def replace_author(str, old_author, new_author) # :nodoc:
-    result = str.strip
-    unless old_author.blank?
-      ri = result.rindex(' ' + old_author)
-      if ri and (ri + old_author.length + 1 == result.length)
-        result = result[0..ri].strip
-      end
+    if rank != :Group
+      old_author = self.author
+      new_author2 = new_author.blank? ? '' : ' ' + new_author
+      self.author = new_author.to_s
+      self.search_name  = text_name + new_author2
+      self.sort_name    = Name.format_sort_name(text_name, new_author)
+      self.display_name = Name.format_autonym(text_name, new_author, rank, deprecated)
     end
-    unless new_author.blank?
-      result += ' ' + new_author
-    end
-    return result
   end
 
   # Changes deprecated status.  Updates formatted names, as well. *UNSAVED*!!
