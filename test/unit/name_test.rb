@@ -1049,6 +1049,18 @@ class NameTest < UnitTestCase
     do_validate_classification_test(:Species, nil, nil)
   end
 
+  def test_validate_classification_12
+    do_validate_classification_test(:Genus, "Family: _Agaricales_", false)
+  end
+
+  def test_validate_classification_13
+    do_validate_classification_test(:Genus, "Kingdom: _Agaricales_", false)
+  end
+
+  def test_validate_classification_14
+    do_validate_classification_test(:Genus, "Kingdom: _Blubber_", "Kingdom: _Blubber_")
+  end
+
   # def dump_list_of_names(list)
   #   for n in list do
   #     print "id=#{n.id}, text_name='#{n.text_name}', author='#{n.author}'\n"
@@ -1627,6 +1639,13 @@ class NameTest < UnitTestCase
 
   def test_name_sort_order
     names = [
+      create_test_name('Agaricomycota'),
+      create_test_name('Agaricomycotina'),
+      create_test_name('Agaricomycetes'),
+      create_test_name('Agaricomycetidae'),
+      create_test_name('Agaricales'),
+      create_test_name('Agaricineae'),
+      create_test_name('Agaricaceae'),
       create_test_name('Agaricus Đorn'),
       create_test_name('Agaricus L.'),
       create_test_name('Agaricus Øosting'),
@@ -1649,5 +1668,32 @@ class NameTest < UnitTestCase
       ORDER BY sort_name ASC
     )
     assert_equal(names.map(&:sort_name), x)
+  end
+
+  def test_guess_rank
+    assert_equal(:Group, Name.guess_rank('Pleurotus djamor group'))
+    assert_equal(:Group, Name.guess_rank('Pleurotus djamor var. djamor group'))
+    assert_equal(:Form, Name.guess_rank('Pleurotus djamor var. djamor f. alba'))
+    assert_equal(:Variety, Name.guess_rank('Pleurotus djamor var. djamor'))
+    assert_equal(:Subspecies, Name.guess_rank('Pleurotus djamor subsp. djamor'))
+    assert_equal(:Species, Name.guess_rank('Pleurotus djamor'))
+    assert_equal(:Species, Name.guess_rank('Pleurotus djamor-foo'))
+    assert_equal(:Species, Name.guess_rank('Phellinus robineae'))
+    assert_equal(:Genus, Name.guess_rank('Pleurotus'))
+    assert_equal(:Stirps, Name.guess_rank('Amanita stirps Grossa'))
+    assert_equal(:Stirps, Name.guess_rank('Amanita sect. Amanita stirps Grossa'))
+    assert_equal(:Subsection, Name.guess_rank('Amanita subsect. Amanita'))
+    assert_equal(:Section, Name.guess_rank('Amanita sect. Amanita'))
+    assert_equal(:Section, Name.guess_rank('Hygrocybe sect. Coccineae'))
+    assert_equal(:Subgenus, Name.guess_rank('Amanita subgenus Amanita'))
+    assert_equal(:Family, Name.guess_rank('Amanitaceae'))
+    assert_equal(:Family, Name.guess_rank('Peltigerineae'))
+    assert_equal(:Order, Name.guess_rank('Peltigerales'))
+    assert_equal(:Order, Name.guess_rank('Lecanoromycetidae'))
+    assert_equal(:Class, Name.guess_rank('Lecanoromycetes'))
+    assert_equal(:Class, Name.guess_rank('Agaricomycotina'))
+    assert_equal(:Phylum, Name.guess_rank('Agaricomycota'))
+    assert_equal(:Genus, Name.guess_rank('Animalia'))
+    assert_equal(:Genus, Name.guess_rank('Plantae'))
   end
 end

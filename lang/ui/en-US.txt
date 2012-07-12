@@ -3751,6 +3751,7 @@ runtime_refine_search_object_not_found: Couldn't find [type] matching '[value]' 
 runtime_search_has_expired: Your query has expired, please try again.
 runtime_show_observation_success: Successfully changed vote.
 runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
+runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
 
 # These shouldn't need translating, but you are free to override if you need to.
 runtime_ask_observation_question_success: "[:runtime_delivered_question]"

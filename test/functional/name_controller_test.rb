@@ -684,6 +684,24 @@ class NameControllerTest < FunctionalTestCase
     assert_response(:action => :show_name, :id => Name.last.id)
   end
 
+  def test_create_family
+    login('dick')
+    params = {
+      :name => {
+        :text_name => 'Peltigeraceae',
+        :author => '',
+        :rank => :Genus,
+        :citation => '',
+        :deprecated => 'false',
+      },
+    }
+    post(:create_name, params)
+    assert_flash_error
+    params[:name][:rank] = :Family
+    post(:create_name, params)
+    assert_flash_success
+  end
+
   # ----------------------------
   #  Edit name.
   # ----------------------------

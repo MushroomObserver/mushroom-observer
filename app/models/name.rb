@@ -790,14 +790,24 @@ class Name < AbstractModel
     if text
       parsed_names = {}
       rank_index = Name.all_ranks.index(rank.to_sym)
+      rank_str = "rank_#{rank}".downcase.to_sym.l
       raise :runtime_user_bad_rank.t(:rank => rank) if rank_index.nil?
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
-      for (line_rank, line_name) in parse_classification(text)
+      for line_rank, line_name in parse_classification(text)
+        real_rank = Name.guess_rank(line_name)
+        real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
+        if [:Phylum, :Subphylum, :Class, :Subclass, :Order, :Suborder, :Family].include?(line_rank)
+          expect_rank = line_rank
+        else
+          expect_rank = :Genus # cannot guess Kingdom or Domain
+        end
+        line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
         line_rank_index = Name.all_ranks.index(line_rank)
-        raise :runtime_user_bad_rank.t(:rank => line_rank) if line_rank_index.nil?
-        raise :runtime_invalid_rank.t(:line_rank => line_rank, :rank => rank) if line_rank_index <= rank_index
-        raise :runtime_duplicate_rank.t(:rank => line_rank) if parsed_names[line_rank]
+        raise :runtime_user_bad_rank.t(:rank => line_rank_str) if line_rank_index.nil?
+        raise :runtime_invalid_rank.t(:line_rank => line_rank_str, :rank => rank_str) if line_rank_index <= rank_index
+        raise :runtime_duplicate_rank.t(:rank => line_rank_str) if parsed_names[line_rank]
+        raise :runtime_wrong_rank.t(:expect => line_rank_str, :actual => real_rank_str, :name => line_name) if real_rank != expect_rank
         parsed_names[line_rank] = line_name
       end
 
@@ -1478,6 +1488,27 @@ class Name < AbstractModel
     parse_genus_or_up(str, deprecated, rank)
   end
 
+  # Guess rank of +text_name+.
+  def self.guess_rank(text_name)
+    text_name.match(/ group$/)        ? :Group      :
+    text_name.include?(' f. ')        ? :Form       :
+    text_name.include?(' var. ')      ? :Variety    :
+    text_name.include?(' subsp. ')    ? :Subspecies :
+    text_name.include?(' stirps ')    ? :Stirps     :
+    text_name.include?(' subsect. ')  ? :Subsection :
+    text_name.include?(' sect. ')     ? :Section    :
+    text_name.include?(' subgenus ')  ? :Subgenus   :
+    text_name.include?(' ')           ? :Species    :
+    text_name.match(/^\w+aceae$/)     ? :Family     :
+    text_name.match(/^\w+ineae$/)     ? :Family     : # :Suborder
+    text_name.match(/^\w+ales$/)      ? :Order      :
+    text_name.match(/^\w+mycetidae$/) ? :Order      : # :Subclass
+    text_name.match(/^\w+mycetes$/)   ? :Class      :
+    text_name.match(/^\w+mycotina$/)  ? :Class      : # :Subphylum
+    text_name.match(/^\w+mycota$/)    ? :Phylum     :
+                                        :Genus
+  end
+
   def self.parse_author(str)
     str = clean_incoming_string(str)
     results = [str, nil]
@@ -1511,7 +1542,7 @@ class Name < AbstractModel
     if match = GENUS_OR_UP_PAT.match(str)
       name = match[1]
       author = match[2]
-      rank = :Genus unless RANKS_ABOVE_GENUS.include?(rank)
+      rank = guess_rank(name) unless RANKS_ABOVE_GENUS.include?(rank)
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
       author2 = author.blank? ? '' : ' ' + author
@@ -1761,8 +1792,16 @@ class Name < AbstractModel
       sub(' subsp. ',   ' {5subsp. ').
       sub(' var. ',     ' {6var. ').
       sub(' f. ',       ' {7f. ').
-      strip
+      strip.
+      sub(/(^\w+)aceae$/,        '\1!7').
+      sub(/(^\w+)ineae$/,        '\1!6').
+      sub(/(^\w+)ales$/,         '\1!5').
+      sub(/(^\w+?)o?mycetidae$/, '\1!4').
+      sub(/(^\w+?)o?mycetes$/,   '\1!3').
+      sub(/(^\w+?)o?mycotina$/,  '\1!2').
+      sub(/(^\w+?)o?mycota$/,    '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
+    
     if not author.blank?
       str += '  ' + author.
         gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
