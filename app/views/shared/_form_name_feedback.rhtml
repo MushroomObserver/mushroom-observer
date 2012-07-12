@@ -4,6 +4,9 @@ if !@what.blank?
     <div class="Warnings">
       <span class="Data"><%= if @suggest_corrections
         :form_naming_not_recognized.t(:name => @what)
+      elsif @parent_deprecated
+        :form_naming_parent_deprecated.t(:parent => @parent_deprecated.display_name,
+                                         :rank => :"rank_#{@parent_deprecated.rank.to_s.downcase}")
       else
         :form_naming_deprecated.t(:name => @what)
       end %></span><br/>
@@ -13,7 +16,7 @@ if !@what.blank?
         else
           :form_naming_deprecated_help.t(:button => button_name, :name => @what)
         end %></span><br/>
-        <% if !@suggest_corrections %>
+        <% if !@suggest_corrections and !@parent_deprecated %>
           <span class="Data"><%= :form_naming_valid_synonyms.t %>:<br/>
         <% end %>
           <% for n in @valid_names %>

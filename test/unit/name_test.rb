@@ -1696,4 +1696,56 @@ class NameTest < UnitTestCase
     assert_equal(:Genus, Name.guess_rank('Animalia'))
     assert_equal(:Genus, Name.guess_rank('Plantae'))
   end
+
+  def test_is_parent_deprecated?
+    User.current = @rolf
+    lepiota = names(:lepiota)
+    lepiota.change_deprecated(true)
+    lepiota.save
+    assert_false(Name.is_parent_deprecated?('Agaricus campestris'))
+    assert_false(Name.is_parent_deprecated?('Agaricus campestris ssp. foo'))
+    assert_false(Name.is_parent_deprecated?('Agaricus campestris ssp. foo var. bar'))
+    assert_true(Name.is_parent_deprecated?('Lactarius alpigenes'))
+    assert_true(Name.is_parent_deprecated?('Lactarius alpigenes ssp. foo'))
+    assert_true(Name.is_parent_deprecated?('Lactarius alpigenes ssp. foo var. bar'))
+    assert_false(Name.is_parent_deprecated?('Peltigera'))
+    assert_false(Name.is_parent_deprecated?('Peltigera neckeri'))
+    assert_false(Name.is_parent_deprecated?('Peltigera neckeri f. alba'))
+    assert_true(Name.is_parent_deprecated?('Lepiota'))
+    assert_true(Name.is_parent_deprecated?('Lepiota barsii'))
+    assert_true(Name.is_parent_deprecated?('Lepiota barsii f. alba'))
+  end
+
+  def test_suggest_alternate_genus
+    User.current = @rolf
+    a  = create_test_name('Agaricus')
+    a1 = create_test_name('Agaricus testus')
+    a2 = create_test_name('Agaricus testeus')
+    a3 = create_test_name('Agaricus testii')
+    a4 = create_test_name('Agaricus testus-westus')
+    b  = create_test_name('Pseudoagaricum')
+    b1 = create_test_name('Pseudoagaricum testum')
+    c  = create_test_name('Hyperagarica')
+    c1 = create_test_name('Hyperagarica testa')
+    d = names(:lepiota)
+    b.change_deprecated(true); b.save
+    c.change_deprecated(true); c.save
+    d.change_deprecated(true); d.save
+    a3.change_deprecated(true); a3.save
+    b1.change_deprecated(true); b1.save
+    c1.change_deprecated(true); c1.save
+    d.merge_synonyms(a)
+    d.merge_synonyms(b)
+    d.merge_synonyms(c)
+
+    assert_names_equal(d, Name.is_parent_deprecated?('Lepiota test'))
+    assert_obj_list_equal([], Name.suggest_alternate_genus('Lepiota test'))
+    assert_obj_list_equal([a1], Name.suggest_alternate_genus('Lepiota testa'))
+    assert_obj_list_equal([a1], Name.suggest_alternate_genus('Lepiota testus'))
+    assert_obj_list_equal([a1], Name.suggest_alternate_genus('Lepiota testum'))
+    assert_obj_list_equal([a3], Name.suggest_alternate_genus('Lepiota testii'))
+
+    a1.change_deprecated(true); a1.save
+    assert_obj_list_equal([a1,b1,c1], Name.suggest_alternate_genus('Lepiota testa'))
+  end
 end

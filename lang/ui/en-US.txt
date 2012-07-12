@@ -1121,6 +1121,7 @@ form_naming_confidence: Confidence
 form_naming_valid_synonyms: Valid synonyms are
 form_naming_deprecated: The name '[name]' is deprecated.
 form_naming_not_recognized: The name '[name]' was not recognized.
+form_naming_parent_deprecated: The [rank] [parent] is deprecated.
 form_naming_name_help_create: The name you would apply to this observation.  If you don't know what it is, just leave it blank.  If you find a better name in the future, you can always propose a name later.
 form_naming_name_help: Scientific names are currently required, but do not include any author information.  If multiple names apply, you will be given the option to select between them.  If the name is not recognized in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
 form_naming_deprecated_help: Select a valid name or click '[button]' to use '[name]'.

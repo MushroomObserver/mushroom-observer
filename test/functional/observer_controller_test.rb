@@ -38,7 +38,7 @@ class ObserverControllerTest < FunctionalTestCase
         assert_response(:action => :create_location)
       end
     rescue Test::Unit::AssertionFailedError => e
-      flash = get_last_flash
+      flash = get_last_flash.to_s
       flash.sub!(/^(\d)/, '')
       message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
       assert_block(message) { false }
@@ -953,6 +953,67 @@ class ObserverControllerTest < FunctionalTestCase
       assert_equal(where, obs.where) # Make sure it's the right observation
       assert_not_nil(obs.rss_log)
     end
+
+    # Create class.
+    generic_construct_observation({
+      :observation => { :place_name => 'Earth', :lat => '', :long => '' },
+      :name => { :name => "Lecanoromycetes L." },
+      :approved_name => "Lecanoromycetes L.",
+    }, 1,1,1)
+    name = Name.last
+    assert_equal('Lecanoromycetes', name.text_name)
+    assert_equal('L.', name.author)
+    assert_equal(:Class, name.rank)
+
+    # Create family.
+    generic_construct_observation({
+      :observation => { :place_name => 'Earth', :lat => '', :long => '' },
+      :name => { :name => "Acarosporaceae" },
+      :approved_name => "Acarosporaceae",
+    }, 1,1,1)
+    name = Name.last
+    assert_equal('Acarosporaceae', name.text_name)
+    assert_equal(:Family, name.rank)
+
+    # Create group.
+    generic_construct_observation({
+      :observation => { :place_name => 'Earth', :lat => '', :long => '' },
+      :name => { :name => "Morchella elata group" },
+      :approved_name => "Morchella elata group",
+    }, 1,1,2)
+    name = Name.last
+    assert_equal('Morchella elata group', name.text_name)
+    assert_equal('', name.author)
+    assert_equal(:Group, name.rank)
+  end
+
+  def test_prevent_creation_of_species_under_deprecated_genus
+    login('katrina')
+    cladonia = Name.find_or_create_name_and_parents('Cladonia').last
+    cladonia.save!
+    cladonia_picta = Name.find_or_create_name_and_parents('Cladonia picta').last
+    cladonia_picta.save!
+    cladina = Name.find_or_create_name_and_parents('Cladina').last
+    cladina.change_deprecated(true)
+    cladina.save!
+    cladina.merge_synonyms(cladonia)
+
+    generic_construct_observation({
+      :observation => { :place_name => 'Earth' },
+      :name => { :name => "Cladina pictum" },
+    }, 0,0,0, @roy)
+    assert_names_equal(cladina, assigns(:parent_deprecated))
+    assert_obj_list_equal([cladonia_picta], assigns(:valid_names))
+
+    generic_construct_observation({
+      :observation => { :place_name => 'Earth' },
+      :name => { :name => "Cladina pictum" },
+      :approved_name => "Cladina pictum",
+    }, 1,1,1, @roy)
+
+    name = Name.last
+    assert_equal('Cladina pictum', name.text_name)
+    assert_true(name.deprecated)
   end
 
   def test_construct_observation_dubious_place_names
@@ -1047,7 +1108,6 @@ class ObserverControllerTest < FunctionalTestCase
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
     }, 1,0,0)
-
   end
 
   def test_name_resolution

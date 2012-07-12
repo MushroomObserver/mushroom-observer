@@ -2571,8 +2571,13 @@ class ObserverController < ApplicationController
 
       # No matches -- suggest some correct names to make Debbie happy.
       if names.empty?
-        valid_names = Name.suggest_alternate_spellings(what2)
-        @suggest_corrections = true
+        if parent = Name.is_parent_deprecated?(what2)
+          valid_names = Name.suggest_alternate_genus(what2, parent)
+          @parent_deprecated = parent
+        else
+          valid_names = Name.suggest_alternate_spellings(what2)
+          @suggest_corrections = true
+        end
 
       # Only one match (or we just created an approved new name).
       elsif names.length == 1

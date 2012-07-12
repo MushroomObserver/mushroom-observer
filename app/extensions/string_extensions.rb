@@ -29,6 +29,7 @@
 #  truncate_binary_length!:: Truncate so that *binary* length in within given limit
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
+#  percent_match::  Measure how closely this String matches another String.
 #
 ################################################################################
 

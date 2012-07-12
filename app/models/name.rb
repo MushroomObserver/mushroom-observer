@@ -1253,6 +1253,59 @@ class Name < AbstractModel
 
   public
 
+  # Check if the reason that the given name (String) is unrecognized is because
+  # it's within a deprecated genus.  Use case: Cladina has been included back
+  # within Cladonia, but tons of guides use Cladonia anyway, so people like to
+  # enter novel names under Cladina, not realizing that those names already exist
+  # under Cladonia. Returns the parent in question which is deprecated (Name).
+  def self.is_parent_deprecated?(str)
+    result = nil
+    names = find_or_create_name_and_parents(str)
+    if names.any? and names.last and names.last.deprecated
+      for name in names.reverse
+        return name if name.id
+      end
+    end
+    return result
+  end
+
+  # Related to self.is_parent_deprecated?.  Checks if the deprecated parent has
+  # a synonym, and if so, checks if there is a corresponding child under the
+  # synonym.  Returns an Array of candidates (Name's).
+  def self.suggest_alternate_genus(str, parent=nil)
+    parent ||= is_parent_deprecated?(str)
+    parse = parse_name(str)
+    result = []
+    if parent and parse
+      child = parse.real_text_name.sub(/^#{parent.real_text_name}/,'').strip
+      child_pat = child.gsub(/(a|um|us)( |$)/, '%\2')
+      for synonym in parent.synonyms
+        target = synonym.text_name + ' ' + child
+        conditions = ['text_name like ? AND correct_spelling_id IS NULL',
+                      synonym.text_name + ' ' + child_pat]
+        result += Name.find(:all, :conditions => conditions).select do |n|
+          valid_alternate_genus?(n, synonym.text_name, child_pat)
+        end
+      end
+      if result.any? {|n| not n.deprecated?}
+        result.reject!(&:deprecated)
+      end
+    end
+    return result
+  end
+
+  def self.valid_alternate_genus?(n, parent, child_pat)
+    unless match = n.text_name.match(/^#{parent} #{child_pat.gsub('%','(.*)')}$/)
+      return false
+    end
+    for i in 1..child_pat.count('%')
+      unless match[i].match(/^(a|us|um)$/)
+        return false
+      end
+    end
+    return true
+  end
+
   ################################################################################
   #
   #  :section: Merging
@@ -1801,7 +1854,7 @@ class Name < AbstractModel
       sub(/(^\w+?)o?mycotina$/,  '\1!2').
       sub(/(^\w+?)o?mycota$/,    '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
-    
+
     if not author.blank?
       str += '  ' + author.
         gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
@@ -1917,16 +1970,18 @@ class Name < AbstractModel
       if parsed_name.parent_name
         result = find_or_create_name_and_parents(parsed_name.parent_name)
       end
-      result << find_or_create_parsed_name(parsed_name)
+      deprecate = result.any? && result.last && result.last.deprecated
+      result << find_or_create_parsed_name(parsed_name, deprecate)
     end
     return result
   end
 
-  def self.find_or_create_parsed_name(parsed_name)
+  def self.find_or_create_parsed_name(parsed_name, deprecate=false)
     result = nil
     matches = find_matching_names(parsed_name)
     if matches.empty?
       result = Name.make_name(parsed_name.params)
+      result.change_deprecated(true) if deprecate
     elsif matches.length == 1
       result = matches.first
       # Fill in author automatically if we can.
