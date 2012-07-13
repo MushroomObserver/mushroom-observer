@@ -24,11 +24,12 @@ class SemanticVernacularDataSourceViaProxy < SemanticVernacularDataSource
 		url = URI.parse(
 						RPI_SPARQLPROXY + 
 						"?query=" + URI.encode_www_form_component(query) + 
-						"&service-uri=" + URI.encode_www_form_component(ENDPOINT) + 
+						"&service-uri=" + URI.encode_www_form_component(QUERY_ENDPOINT) + 
 						"&output=" + URI.encode_www_form_component(QUERY_OUTPUT_FORMAT)
 					)
 		http = Net::HTTP.new(url.host, url.port)
 		request = Net::HTTP::Get.new(url.request_uri)
 		response = ActiveSupport::JSON.decode(http.request(request).body)["items"]
+		return response
 	end
 end

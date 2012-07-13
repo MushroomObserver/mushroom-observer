@@ -1,36 +1,116 @@
-<h2><%= @vernacular.to_s %></h2>
-<div>
-	<ul>
-		<li>URI: <%= @vernacular.uri %></li>
-		<li>Label: <%= @vernacular.label %></li>
-		<li>
-			Features: 
-			<ul> 
-				<% @vernacular.refactor_features.each do |feature, values| %>
-				<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
-				<% end %>
+<% javascript_include("jquery.min") %>
+<% javascript_include("semantic_vernacular/sv_lib") %>
+<% javascript_include("semantic_vernacular/sv_show") %>
+
+<h2>Semantic Vernacular Description Detail</h2>
+<div id="svd-show-detail">
+	<ul class="svd-detail-ul">
+		<li class="svd-detail-li" id="svd-uri">
+			URI: <%= @svd.uri %>
+		</li>
+		<li class="svd-detail-li">
+			Name: 
+			<% label = @svd.default_label %>
+			<ul class="svd-detail-li-item" id="svd-default-label">
+				<li>
+					<%= label["label"]["value"] %>
+					<div class="svd-meta">
+						<small>
+							<%= "Proposed by #{label["user"]["value"]} 
+									(#{label["email"]["value"]}) at 
+									#{label["dateTime"]["value"]}" %>
+						</small>
+					</div>
+				</li>
 			</ul>
 		</li>
-		<li>
-			Associated Taxa:
+		<% unless @svd.other_labels.empty? %>
+			<li class="svd-detail-li svd-other-proposals">
+				Other Name Proposals<span class="svd-expand"> [+] </span>
+				<div class="svd-other-proposals-toggle" style="display:none">
+					<% @svd.other_labels.each do |label| %>
+						<ul class="svd-detail-li-item" id="svd-other-labels">
+							<li>
+								<%= label["label"]["value"] %>
+								<div class="svd-meta">
+									<small>
+										<%= "Proposed by #{label["user"]["value"]} 
+												(#{label["email"]["value"]}) at 
+												#{label["dateTime"]["value"]}" %>
+									</small>
+								</div>
+							</li>
+						</ul>
+					<% end %>
+				</div>
+			</li>
+		<% end %>
+		<button type="button" id="svd-show-propose-label">
+			Propose a new name
+		</button>
+		<li class="svd-detail-li">
+			Definition:
+			<% definition = @svd.default_definition %>
+			<% if definition == nil %>
+				<%= "There is not any accepted definition for this semantic vernacular 
+						description yet." %>
+			<% else %>
+				<ul class="svd-detail-li-item" id="svd-default-definition">
+					<% features = @svd.get_features(definition["uri"]["value"]) %>
+					<% @svd.refactor_features(features).each do |feature, values| %>
+						<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
+					<% end %>
+					<div class="svd-meta">
+						<small>
+							<%= "Proposed by #{definition["user"]["value"]} 
+									(#{definition["email"]["value"]}) at 
+									#{definition["dateTime"]["value"]}" %>
+						 </small>
+					</div>
+				</ul>
+			<% end %>
+		</li>
+		<% unless @svd.other_definitions.empty? %>
+			<li class="svd-detail-li svd-other-proposals">
+				Other Definition Proposals<span class="svd-expand"> [+] </span>
+				<div class="svd-other-proposals-toggle" style="display:none">
+					<%@svd.other_definitions.each do |definition| %>
+						<ul class="svd-detail-li-item" id="svd-other-definitions">
+							<% features = @svd.get_features(definition["uri"]["value"]) %>
+							<% @svd.refactor_features(features).each do |feature, values| %>
+								<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
+							<% end %>
+							<div class="svd-meta">
+								<small>
+									<%= "Proposed by #{definition["user"]["value"]} 
+											(#{definition["email"]["value"]}) at 
+											#{definition["dateTime"]["value"]}" %>
+								</small>
+							</div>
+						</ul>
+					<% end %>
+				</div>
+			</li>
+		<% end %>
+		<%= link_to("<button type=\"button\" id=\"svd-show-propose-definition\">
+								Propose a new definition</button>",
+								:controller => "semantic_vernacular",
+								:action => "create",
+								:uri => @svd.uri) %>
+		<li class="svd-detail-li">
+			Associated Scientific Names:
 			<ul>
-				<% @vernacular.associate_taxa.each do |taxon| %>
-				<li>
-					<%= link_to(taxon["uri"],
-											:controller => "semantic_vernacular", 
-											:action => "show_species", 
-											:uri => taxon["uri"]) %>
-				</li>
+				<% @svd.associated_scientific_names.each do |name| %>
+					<li>
+						<%= link_to(name["label"]["value"], name["moURL"]["value"]) %>
+					</li>
 				<% end %>
 			</ul>
 		</li>
 	</ul>
 </div>
-<div>
-	<%= link_to("Go to all vernacular descriptions", 
+<div class="svd-navigation">
+	<%= link_to("Go to all Vernacular Descriptions", 
 							:controller => "semantic_vernacular",
-							:action => "index") + " | " +
-			link_to("Go to all species", 
-							:controller => "semantic_vernacular",
-							:action => "index_species") %>
+							:action => "index") %>
 </div>

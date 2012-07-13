@@ -1,12 +1,19 @@
 <h2>All Semantic Vernacular Descriptions</h2>
 <div>
-	<%= build_vernacular_hierarchy(SemanticVernacularHelper::VERNACULAR_ROOT, @all_vernaculars) %>
+	<ul>
+    <% @all.sort_by! { |hash| hash["label"]["value"]} %>
+    <% @all.each do |svd| %>
+    <li>
+      <%= link_to(svd["label"]["value"], 
+                  :controller =>  "semantic_vernacular", 
+                  :action => "show",
+                  :uri => svd["uri"]["value"]) %>
+    </li>
+    <% end %>
+  </ul>
 </div>
-<div>
-	<%= link_to("Go to all species", 
-							:controller => "semantic_vernacular",
-							:action => "index_species") + " | " +
-      link_to("Create a vernacular description", 
+<div class="svd-navigation">
+	<%= link_to("Create a new Vernacular Description", 
               :controller => "semantic_vernacular", 
               :action => "create") %>
 </div>
