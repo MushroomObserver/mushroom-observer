@@ -72,7 +72,6 @@
 #  ==== Email Questions
 #  ask_webmaster_question::
 #  email_features::
-#  send_feature_email::
 #  ask_user_question::
 #  ask_observation_question::
 #  commercial_inquiry::
@@ -337,6 +336,30 @@ class ObserverController < ApplicationController
 
   # Allow translator to enter a special note linked to from the lower left.
   def translators_note # :nologin:
+  end
+
+  # Update banner across all translations.
+  def change_banner # :root: :norobots:
+    if !is_in_admin_mode?
+      flash_error(:permission_denied.t)
+      redirect_to(:action => 'list_rss_logs')
+    elsif request.method == :post
+      @val = params[:val].to_s.strip
+      @val = 'X' if @val.blank?
+      time = Time.now
+      for str in TranslationString.find_all_by_tag('app_banner_box')
+        str.update_attributes!(
+          :text => @val,
+          # This has the effect of marking them "needs to be updated".  If we just deleted
+          # them, MO wouldn't know to update the translations in the other threads.
+          :modified => (str.language.official ? time : time - 1.minute)
+        )
+        str.update_localization
+      end
+      redirect_to(:action => 'list_rss_logs')
+    else
+      @val = :app_banner_box.l.to_s
+    end
   end
 
   ##############################################################################
@@ -1694,11 +1717,15 @@ class ObserverController < ApplicationController
     id = params[:id]
     if @show_user = find_or_goto_index(User, id, :include => :location)
       @user_data = SiteData.new.get_user_data(id)
-      query = Query.lookup(:Observation, :by_user, :user => @show_user,
-                           :by => :thumbnail_quality,
-                           :where => "images.user_id = #{id}")
       @life_list = Checklist::ForUser.new(@show_user)
-      @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
+      @query = Query.lookup(:Observation, :by_user, :user => @show_user,
+                            :by => :owners_thumbnail_quality)
+      @observations = @query.results(:limit => 6)
+      if @observations.length < 6
+        @query = Query.lookup(:Observation, :by_user, :user => @show_user,
+                              :by => :thumbnail_quality)
+        @observations = @query.results(:limit => 6)
+      end
     end
   end
 

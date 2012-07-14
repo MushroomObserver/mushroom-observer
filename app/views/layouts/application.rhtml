@@ -46,8 +46,8 @@
     </div>
   <% end %>
   <%
-    banner = :app_donate_banner.t
-    if banner != "" %>
+    banner = :app_banner_box.t
+    if banner.to_s.length > 1 %>
     <div>
       <center class="MessageBanner">
         <%= banner %>
@@ -117,6 +117,7 @@
                     <%= :app_admin.t %>:<br/>
                     <% if is_in_admin_mode? %>
                       <%= indent + link_to(:app_users.t, :controller => 'observer', :action => 'users_by_name') %><br/>
+                      <%= indent + link_to(:change_banner_title.t, :controller => 'observer', :action => 'change_banner') %><br/>
                       <%= indent + link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %><br/>
                       <%= indent + link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %><br/>
                       <%= indent + link_to(:account_manager_title.t, :controller => 'account', :action => 'manager') %><br/>

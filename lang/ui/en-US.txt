@@ -809,10 +809,14 @@ app_title: Mushroom Observer
 # This goes in the left-hand column.  The "<br/>" forces a line-break.
 app_banner: Mushroom<br/>Observer
 
+# This goes in a box at the top of the page.
+app_banner_box: X
+
 # These are the controls/links in the left-hand panel.
 app_intro: Introduction
 app_how_to_use: How To Use
 app_how_to_help: How To Help
+app_donate: Donate
 app_send_a_comment: Send a Comment
 app_index_a_z: Index A->Z
 app_list_locations: "[:list_objects(type=:location)]"
@@ -881,10 +885,6 @@ app_no_session: You Have Cookies Disabled
 
 # Title of the RSS auto-discovery link in the HTML header section.
 app_rss: "[:app_title] RSS"
-
-# Donation stuff.
-app_donate_banner: ""
-app_donate: Donate
 
 ################################################################################
 
@@ -2933,6 +2933,11 @@ request_success: Delivered email.
 
 
 
+# observer/change_banner
+change_banner_title: Change Site Banner
+
+
+
 # project/change_member_status
 change_member_status_admins: Current Project Admins
 change_member_status_change_status: Change Status
@@ -2946,6 +2951,7 @@ change_member_status_remove_member: Remove Member
 change_member_status_remove_member_help: Remove Member - Removes all member and admin priviledges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
 change_member_status_denied: Only the admins for a project can change member permissions.
 change_member_status_title: Changing [:user] Status of [name] for [title]
+
 
 
 # observer/change_user_bonuses

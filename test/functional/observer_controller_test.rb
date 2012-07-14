@@ -2692,4 +2692,49 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:controller => :observer, :action => :index_rss_log)
     assert_flash_error
   end
+
+  def test_change_banner
+    str1 = TranslationString.create!(
+      :language => languages(:english),
+      :tag => :app_banner_box,
+      :text => 'old banner',
+      :modified => 1.year.ago,
+      :user => User.admin
+    )
+    str1.update_localization
+
+    str2 = TranslationString.create!(
+      :language => languages(:french),
+      :tag => :app_banner_box,
+      :text => 'banner ancienne',
+      :modified => 1.month.ago,
+      :user => User.admin
+    )
+    str2.update_localization
+
+    get(:change_banner)
+    assert_response(:action => 'login')
+
+    login('rolf')
+    get(:change_banner)
+    assert_flash_error
+    assert_response(:action => 'list_rss_logs')
+    
+    make_admin('rolf')
+    get(:change_banner)
+    assert_no_flash
+    assert_response(:success)
+    assert_textarea_value(:val, :app_banner_box.l)
+
+    post(:change_banner, :val => 'new banner')
+    assert_no_flash
+    assert_response(:action => 'list_rss_logs')
+    assert_equal('new banner', :app_banner_box.l)
+
+    strs = TranslationString.find_all_by_tag(:app_banner_box)
+    assert_obj_list_equal([str1.reload, str2.reload], strs)
+    assert_equal('new banner', str1.text)
+    assert_equal('new banner', str2.text)
+    assert(str1.modified > str2.modified)
+  end
 end

@@ -105,7 +105,7 @@ end %>
           <% for obs in @observations[3,3] %>
             <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
                           :link => :show_observation, :obs => obs.id,
-                          :votes => true) %><br/>
+                          :votes => true, :query_params => query_params(@query)) %><br/>
           <% end %>
         </td>
       <% end %>
@@ -199,7 +199,7 @@ end %>
           <% for obs in @observations[0,3] %>
             <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
                           :link => :show_observation, :obs => obs.id,
-                          :votes => true) %><br/>
+                          :votes => true, :query_params => query_params(@query)) %><br/>
           <% end %>
         </td>
       <% end %>

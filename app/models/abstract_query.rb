@@ -1483,12 +1483,20 @@ class AbstractQuery < ActiveRecord::Base
         raise("Don't know how to join from #{from} to #{to}.")
       end
 
-      # Calculate conditions.
-      if !col.to_s.match(/_id$/)
-        conds = "#{from}.#{col}_id = #{to}.id AND " +
-                "#{from}.#{col}_type = '#{to.singularize.camelize}'"
+      # By default source table column is just 'id'; enter both target and source
+      # columns explcitly by making join table value an Array.
+      if col.is_a?(Array)
+        col1, col2 = *col
       else
-        conds = "#{from}.#{col} = #{to}.id"
+        col1, col2 = col, :id
+      end
+
+      # Calculate conditions.
+      if !col1.to_s.match(/_id$/)
+        conds = "#{from}.#{col1}_id = #{to}.id AND " +
+                "#{from}.#{col1}_type = '#{to.singularize.camelize}'"
+      else
+        conds = "#{from}.#{col1} = #{to}.#{col2}"
       end
 
       # Put the whole JOIN clause together.

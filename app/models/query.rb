@@ -391,6 +391,10 @@ class Query < AbstractQuery
       :species_lists => :target,
       :users         => :user_id,
     },
+    :image_votes => {
+      :images        => :image_id,
+      :users         => :user_id,
+    },
     :images => {
       :users         => :user_id,
       :licenses      => :license_id,
@@ -497,6 +501,7 @@ class Query < AbstractQuery
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
       :'images.thumb_image' => :thumb_image_id,
+      :'image_votes.thumb_image' => [:thumb_image_id, :image_id],
     },
     :observations_projects => {
       :observations  => :observation_id,
@@ -808,20 +813,34 @@ class Query < AbstractQuery
     when 'confidence'
       if model_symbol == :Image
         self.join << {:images_observations => :observations}
-        "observations.vote_cache DESC"
+        'observations.vote_cache DESC'
       elsif model_symbol == :Observation
-        "observations.vote_cache DESC"
+        'observations.vote_cache DESC'
       end
 
     when 'image_quality'
       if model_symbol == :Image
-        "images.vote_cache DESC"
+        'images.vote_cache DESC'
       end
 
     when 'thumbnail_quality'
       if model_symbol == :Observation
         self.join << :'images.thumb_image'
-        "images.vote_cache DESC, observations.vote_cache DESC"
+        'images.vote_cache DESC, observations.vote_cache DESC'
+      end
+
+    when 'owners_quality'
+      if model_symbol == :Image
+        self.join << :image_votes
+        self.where << 'image_votes.user_id = images.user_id'
+        'image_votes.value DESC'
+      end
+
+    when 'owners_thumbnail_quality'
+      if model_symbol == :Observation
+        self.join << :'image_votes.thumb_image'
+        self.where << 'image_votes.user_id = observations.user_id'
+        'image_votes.value DESC, observations.vote_cache DESC'
       end
 
     when 'contribution'
@@ -831,7 +850,7 @@ class Query < AbstractQuery
 
     when 'original_name'
       if model_symbol == :Image
-        "images.original_name ASC"
+        'images.original_name ASC'
       end
     end
   end
