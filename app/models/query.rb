@@ -838,9 +838,10 @@ class Query < AbstractQuery
 
     when 'owners_thumbnail_quality'
       if model_symbol == :Observation
-        self.join << :'image_votes.thumb_image'
+        self.join << { :'images.thumb_image' => :image_votes }
+        self.where << 'images.user_id = observations.user_id'
         self.where << 'image_votes.user_id = observations.user_id'
-        'image_votes.value DESC, observations.vote_cache DESC'
+        'image_votes.value DESC, images.vote_cache DESC, observations.vote_cache DESC'
       end
 
     when 'contribution'
