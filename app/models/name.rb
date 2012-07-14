@@ -794,6 +794,7 @@ class Name < AbstractModel
       raise :runtime_user_bad_rank.t(:rank => rank) if rank_index.nil?
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
+      kingdom = 'Fungi'
       for line_rank, line_name in parse_classification(text)
         real_rank = Name.guess_rank(line_name)
         real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
@@ -807,8 +808,9 @@ class Name < AbstractModel
         raise :runtime_user_bad_rank.t(:rank => line_rank_str) if line_rank_index.nil?
         raise :runtime_invalid_rank.t(:line_rank => line_rank_str, :rank => rank_str) if line_rank_index <= rank_index
         raise :runtime_duplicate_rank.t(:rank => line_rank_str) if parsed_names[line_rank]
-        raise :runtime_wrong_rank.t(:expect => line_rank_str, :actual => real_rank_str, :name => line_name) if real_rank != expect_rank
+        raise :runtime_wrong_rank.t(:expect => line_rank_str, :actual => real_rank_str, :name => line_name) if real_rank != expect_rank and kingdom == 'Fungi'
         parsed_names[line_rank] = line_name
+        kingdom = line_name if line_rank == :Kingdom
       end
 
       # Reformat output, writing out lines in correct order.

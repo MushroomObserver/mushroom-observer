@@ -1061,6 +1061,11 @@ class NameTest < UnitTestCase
     do_validate_classification_test(:Genus, "Kingdom: _Blubber_", "Kingdom: _Blubber_")
   end
 
+  def test_validate_classification_15
+    do_validate_classification_test(:Genus, "Kingdom: _Fungi_\nOrder: _Insecta_", false)
+    do_validate_classification_test(:Genus, "Kingdom: _Animalia_\nOrder: _Insecta_", "Kingdom: _Animalia_\r\nOrder: _Insecta_")
+  end
+
   # def dump_list_of_names(list)
   #   for n in list do
   #     print "id=#{n.id}, text_name='#{n.text_name}', author='#{n.author}'\n"
