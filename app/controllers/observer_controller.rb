@@ -355,6 +355,8 @@ class ObserverController < ApplicationController
           :modified => (str.language.official ? time : time - 1.minute)
         )
         str.update_localization
+        str.language.update_localization_file
+        str.language.update_export_file
       end
       redirect_to(:action => 'list_rss_logs')
     else
