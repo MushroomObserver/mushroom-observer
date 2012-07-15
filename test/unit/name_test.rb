@@ -1753,4 +1753,41 @@ class NameTest < UnitTestCase
     a1.change_deprecated(true); a1.save
     assert_obj_list_equal([a1,b1,c1], Name.suggest_alternate_genus('Lepiota testa'))
   end
+
+  def test_suggest_alternate_spelling
+    genus1 = create_test_name('Lecanora')
+    genus2 = create_test_name('Lecania')
+    genus3 = create_test_name('Lecanoropsis')
+    species1 = create_test_name('Lecanora galactina')
+    species2 = create_test_name('Lecanora galactinula')
+    species3 = create_test_name('Lecanora grantii')
+    species4 = create_test_name('Lecanora grandis')
+    species5 = create_test_name('Lecania grandis')
+
+    assert_obj_list_equal([genus1],         Name.guess_with_errors('Lecanora', 1))
+    assert_obj_list_equal([genus1, genus2], Name.guess_with_errors('Lecanoa', 1))
+    assert_obj_list_equal([],               Name.guess_with_errors('Lecanroa', 1))
+    assert_obj_list_equal([genus1, genus2], Name.guess_with_errors('Lecanroa', 2))
+    assert_obj_list_equal([genus1],         Name.guess_with_errors('Lecanosa', 1))
+    assert_obj_list_equal([genus1, genus2], Name.guess_with_errors('Lecanosa', 2))
+    assert_obj_list_equal([genus1, genus2], Name.guess_with_errors('Lecanroa', 3))
+    assert_obj_list_equal([genus1],         Name.guess_with_errors('Lacanora', 1))
+    assert_obj_list_equal([genus1],         Name.guess_with_errors('Lacanora', 2))
+    assert_obj_list_equal([genus1],         Name.guess_with_errors('Lacanora', 3))
+    assert_obj_list_equal([genus1],         Name.guess_word('', 'Lacanora'))
+    assert_obj_list_equal([genus1, genus2], Name.guess_word('', 'Lecanroa'))
+
+    assert_obj_list_equal([species1, species2], Name.guess_with_errors('Lecanora galactina', 1))
+    assert_obj_list_equal([species3],           Name.guess_with_errors('Lecanora granti', 1))
+    assert_obj_list_equal([species3, species4], Name.guess_with_errors('Lecanora granti', 2))
+    assert_obj_list_equal([],                   Name.guess_with_errors('Lecanora gran', 3))
+    assert_obj_list_equal([species3],           Name.guess_word('Lecanora', 'granti'))
+
+    assert_obj_list_equal([genus1],             Name.suggest_alternate_spellings('Lecanora'))
+    assert_obj_list_equal([genus1],             Name.suggest_alternate_spellings('Lecanora\\'))
+    assert_obj_list_equal([genus1, genus2],     Name.suggest_alternate_spellings('Lecanoa'))
+    assert_obj_list_equal([species3],           Name.suggest_alternate_spellings('Lecanora granti'))
+    assert_obj_list_equal([species3, species4], Name.suggest_alternate_spellings('Lecanora grandi'))
+    assert_obj_list_equal([species4, species5], Name.suggest_alternate_spellings('Lecanoa grandis'))
+  end
 end

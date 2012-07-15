@@ -1164,7 +1164,7 @@ class Name < AbstractModel
     str = clean_incoming_string(str).
                 gsub('ë', 'e').
                 sub(/ sp\.?$/, '').
-                gsub('_',' ').strip_squeeze.capitalize_first
+                gsub('_', ' ').strip_squeeze.capitalize_first
     str = parse_author(str).first # (strip author off)
 
     # Guess genus first, then species, and so on.
@@ -1194,14 +1194,14 @@ class Name < AbstractModel
   # Guess correct name of partial string.
   def self.guess_word(prefix, word) # :nodoc:
     str = "#{prefix} #{word}"
-    results = guess_try(str, 1)
-    results = guess_try(str, 2) if results.empty?
-    results = guess_try(str, 3) if results.empty?
+    results = guess_with_errors(str, 1)
+    results = guess_with_errors(str, 2) if results.empty?
+    results = guess_with_errors(str, 3) if results.empty?
     return results
   end
 
   # Look up name replacing n letters at a time with a star.
-  def self.guess_try(name, n) # :nodoc:
+  def self.guess_with_errors(name, n) # :nodoc:
     patterns = []
 
     # Restrict search to names close in length.
@@ -1230,7 +1230,7 @@ class Name < AbstractModel
 
     # Create SQL query out of these patterns.
     conds = patterns.map do |pat|
-      "text_name LIKE '#{pat}'"
+      "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(' OR ')
     conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
     names = all(:conditions => conds, :limit => 10)
