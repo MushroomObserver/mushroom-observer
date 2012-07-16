@@ -174,10 +174,10 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 				?c1 owl:onProperty svf:hasAssociatedScientificName .
 				?c1 owl:someValuesFrom ?sn .
 				?sn rdfs:label ?label .
-				?sn svf:hasMushroomObserverURL ?moURL .
-				?sn owl:equivalentClass ?c2 .
+				OPTIONAL { ?sn svf:hasMushroomObserverURL ?moURL } .
+				OPTIONAL { ?sn owl:equivalentClass ?c2 .
 				?c2 owl:onProperty svf:hasMONameId .
-				?c2 owl:hasValue ?moID .
+				?c2 owl:hasValue ?moID } .
 			})
 	end
 

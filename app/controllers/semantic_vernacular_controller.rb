@@ -32,11 +32,13 @@ class SemanticVernacularController < ApplicationController
     post_json = ActiveSupport::JSON.decode(params["data"])
     fill_IDs(post_json)
     fill_URIs(post_json)
-    Rails.logger.debug(post_json.inspect)
+    Rails.logger.debug(post_json)
     response = update_triple_store(post_json)
+    Rails.logger.debug(response)
     respond_to do |format|
       format.json do
         render :json => { 
+          :page_uri => post_json["svd"]["uri"],
           :status => response.class.name, 
           :message => response.message,
           :body => response.body,
@@ -48,10 +50,17 @@ class SemanticVernacularController < ApplicationController
 
   # Fill IDs into the received post data.
   def fill_IDs(data)
-    unless data["svd"]["uri"]
+    if data["svd"]["uri"]
+      data["svd"]["is_new"] = false
+      data["label"]["is_default"] = false
+      data["definition"]["is_default"] = false
+    else
       data["svd"]["id"] = allocate_ID("SemanticVernacularDescription")
+      data["svd"]["is_new"] = true
+      data["label"]["is_default"] = true
+      data["definition"]["is_default"] = true
     end
-    if data["label"]
+    if data["label"]["value"]
       data["label"]["id"] = allocate_ID("VernacularLabel")
     end
     if data["features"].length > 0
@@ -64,11 +73,11 @@ class SemanticVernacularController < ApplicationController
         id = id + 1
       end
     end
+    Rails.logger.debug(data)
   end
 
   # Allocate an ID to an individual resource by quering the triple store.
   def allocate_ID(type)
-    Rails.logger.debug(type)
     SemanticVernacularDataSource.ask_max_ID(type)[0]["id"]["value"].to_i + 1
   end
 
@@ -92,46 +101,87 @@ class SemanticVernacularController < ApplicationController
           name["id"], "ScientificName")
       end
     end
+    Rails.logger.debug(data)
   end
 
   # Generate RDF in turtle based on the received post data.
   def update_triple_store(data)
-    if data["label"]
+    if data["svd"]["is_new"]
+      response = SemanticVernacularDataSource.insert_svd(data["svd"])
+    end
+    if data["label"]["value"]
       response = SemanticVernacularDataSource.insert_label(
         data["svd"], 
         data["label"],
-        {"uri"=>"http://mushroomobserver.org/svf.owl#U2"})
+        data["user"])
     end
+    if data["definition"]["uri"]
+      response = SemanticVernacularDataSource.insert_definition(
+        data["svd"], 
+        data["definition"],
+        data["features"],
+        data["user"])
+    end
+    if data["scientific_names"].length > 0
+      response = SemanticVernacularDataSource.insert_scientific_names(
+        data["svd"], 
+        data["scientific_names"])
+    end
+    return response
   end
 
   # def test
   #   data = {
   #     "svd"=>{
   #       "id"=>nil, 
-  #       "uri"=>"http://mushroomobserver.org/svf.owl#SVD1"
+  #       "uri"=>"http://mushroomobserver.org/svf.owl#SVD14",
+  #       "is_new"=>nil
   #     }, 
   #     "label"=>{
   #       "id"=>nil, 
   #       "uri"=>nil, 
-  #       "value"=>"ReallyFakeLabel"
+  #       "value"=>"NewNewNewFakeLabel",
+  #       "is_default"=>nil
   #     }, 
   #     "definition"=>{
   #       "id"=>nil, 
-  #       "uri"=>nil
+  #       "uri"=>nil,
+  #       "is_default"=>nil
   #     }, 
-  #     "features"=>[], 
-  #     "scientific_names"=>[], 
-  #     "svds"=>[]
+  #     "features"=>[
+  #       # {
+  #       #   "feature"=>"http://FakeFeature1",
+  #       #   "values"=>["http://FakeValue1", "http://FakeValue2"]
+  #       # }, 
+  #       # {
+  #       #   "feature"=>"http://FakeFeature2",
+  #       #   "values"=>["http://FakeValue3"]
+  #       # }
+  #     ], 
+  #     "scientific_names"=>[
+  #       # {
+  #       #   "id"=>nil,
+  #       #   "uri"=>nil,
+  #       #   "label"=>"FakeSpecies3"
+  #       # },
+  #       # {
+  #       #   "id"=>nil,
+  #       #   "uri"=>nil,
+  #       #   "label"=>"FakeSpecies4"
+  #       # }
+  #     ], 
+  #     "matched_svds"=>[],
+  #     "user"=>{
+  #       "uri"=>"http://mushroomobserver.org/svf.owl#U2"
+  #     }
   #   }
   #   fill_IDs(data)
   #   Rails.logger.debug(data)
   #   fill_URIs(data)
   #   Rails.logger.debug(data)
   #   @res = update_triple_store(data)
-  #   #@res = SemanticVernacularDataSource.test_query2
-  #   #Rails.logger.debug(@res)
-  #   #@res = SemanticVernacularDataSource.test
+  #   #@res = SemanticVernacularDataSource.test(data["svd"])
   #   Rails.logger.debug(@res)
   # end
-  
+
 end

@@ -45,32 +45,52 @@ class SemanticVernacularDataSource
 	end
 
 	def self.insert_label(svd, label, user)
-		Rails.logger.debug(insert_update(label_rdf(svd, label, user)))
 		update(insert_update(label_rdf(svd, label, user)))
 	end
 
-	def self.delete_label(svd_uri, label_uri, label_id, label)
-		
+	def self.delete_label()
 	end
 
-	def self.test
-		definition_rdf("<#{svd_uri}>", "label_uri", 32, "label", "user_uri")
+	def self.insert_definition(svd, definition, features, user)
+		update(insert_update(definition_rdf(svd, definition, features, user)))
+	end
+
+	def self.delete_definition()
+	end
+
+	def self.insert_scientific_names(svd, scientific_names)
+		update(insert_update(scientific_names_rdf(svd, scientific_names)))
+	end
+
+	def self.scientific_names()
+	end
+
+	def self.insert_svd(svd)
+		update(insert_update(svd_rdf(svd)))
+	end
+
+	def self.delete_svd()
+	end
+	
+
+	def self.test(svd)
+		svd_rdf(svd)
 	end
 
 	private
 	
 	QUERY_ENDPOINT = "http://128.128.170.15:3030/svf/sparql"
-	#QUERY_ENDPOINT = "http://aquarius.tw.rpi.edu:2024/sparql"
-	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
 	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
+	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
+	#UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
 	SVF_NAMESPACE = "http://mushroomobserver.org/svf.owl#"
 
 	# Retrun: array of hashes
 	# [{"key_1" => "value_1"}, {"key_2" => "value_2"}, ...]
-	def self.query2(query)
-		sparql = SPARQL::Client.new(QUERY_ENDPOINT)
-  	response = sparql.query(query).to_a # RDF::Query::Solution
-  end
+	# def self.query(query)
+	# 	sparql = SPARQL::Client.new(QUERY_ENDPOINT)
+ 	# 	response = sparql.query(query).to_a # RDF::Query::Solution
+ 	# end
 
   def self.query(query)
 		url = URI(QUERY_ENDPOINT)
@@ -99,7 +119,8 @@ class SemanticVernacularDataSource
 	def self.query_max_ID(type)
 		query = QUERY_PREFIX + %(SELECT ?id WHERE {)
 		case type
-		when "SemanticVernacularDescription", "VernacularDefinition", "ScientificName"
+		when "SemanticVernacularDescription", "VernacularDefinition", 
+			"ScientificName"
 			query << %(?uri rdfs:subClassOf svf:#{type} . )
 		when "VernacularLabel", "User"
 			query << %(?uri a svf:#{type} . )
@@ -118,35 +139,103 @@ class SemanticVernacularDataSource
 	def self.label_rdf(svd, label, user)
 		%(<#{svd["uri"]}> 
 				rdfs:subClassOf
-				#{has_value_object_restriction_rdf("svf:hasLabel", label["uri"])} . 
+					#{has_object_value_restriction_rdf(
+						SVF_NAMESPACE + "hasLabel", label["uri"])} . 
 			<#{label["uri"]}>
 				a owl:NamedIndividual, svf:VernacularLabel;
 				rdfs:label "#{label["value"]}"^^rdfs:Literal;
 				svf:hasID "#{label["id"]}"^^xsd:positiveInteger;
-				svf:isDefault "false"^^xsd:boolean;
+				svf:isDefault "#{label["is_default"]}"^^xsd:boolean;
 				svf:proposedAt "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime;
 				svf:proposedBy <#{user["uri"]}> . )
 	end
 
-	# def self.definition_rdf(svd, label, user)
-	# 	rdf = %(
-	# 		<#{definition["uri"]}>
-	# 			a owl:class;
-	# 			rdfs:subClassOf
-	# 				#{has_value_object_restriction_rdf("svf:proposedBy", user["uri"])};
-	# 				#{has_value_datatype_restriction_rdf("svf:proposedAt", )}
-	# 			rdfs:subClassOf
-	# 				[ a owl:Restriction;
-	# 					owl:onProperty svf:proposedAt
-	# 					owl:hasValue "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime
-	# 				];
-	# 	)			
-	# end
+	def self.definition_rdf(svd, definition, features, user)
+		rdf = 
+			%(<#{svd["uri"]}> 
+					rdfs:subClassOf
+						#{some_object_values_from_restriction_rdf(
+							SVF_NAMESPACE + "hasDefinition", definition["uri"])} .
+					<#{definition["uri"]}>
+						a owl:class;
+						rdfs:subClassOf svf:VernacularDefinition;
+						rdfs:subClassOf
+							#{has_object_value_restriction_rdf(
+								SVF_NAMESPACE + "proposedBy", user["uri"])};
+						rdfs:subClassOf
+							#{has_datatype_value_restriction_rdf(
+								SVF_NAMESPACE + "proposedAt", 
+								Time.now.strftime("%FT%T%:z"), 
+								"xsd:dateTime")};
+						rdfs:subClassOf
+							#{has_datatype_value_restriction_rdf(
+								SVF_NAMESPACE + "isDefault", definition["is_default"], "xsd:boolean")};
+						svf:hasID "#{definition["id"]}"^^xsd:positiveInteger;
+						#{features_rdf(features)} . )			
+	end
 
-	def self.has_value_object_restriction_rdf(property, value)
+	def self.features_rdf(features)
+		rdf = %(owl:equivalentClass
+							[ a owl:class;
+							owl:intersectionOf \(svf:Fungus )
+		features.each do |feature|
+			if feature["values"].length > 1
+				rdf << %([ a owl:class;
+									 owl:unionOf \()
+				feature["values"].each do |value|
+					rdf << some_object_values_from_restriction_rdf(
+						feature["feature"], value)
+				end
+				rdf << %(\)])
+			end
+			if feature["values"].length == 1
+				rdf << some_object_values_from_restriction_rdf(
+					feature["feature"], feature["values"][0])
+			end
+		end
+		rdf << %(\)])
+	end
+
+	def self.has_object_value_restriction_rdf(property, value)
 		%([ a owl:Restriction;
-				owl:onProperty #{property};
+				owl:onProperty <#{property}>;
 				owl:hasValue <#{value}> ])
+	end
+
+	def self.has_datatype_value_restriction_rdf(property, value, datatype)
+		%([ a owl:Restriction;
+				owl:onProperty <#{property}>;
+				owl:hasValue "#{value}"^^#{datatype} ])
+	end
+
+	def self.some_object_values_from_restriction_rdf(property, value)
+		%([ a owl:Restriction;
+				owl:onProperty <#{property}>;
+				owl:someValuesFrom <#{value}> ])
+	end
+
+	def self.scientific_names_rdf(svd, scientific_names)
+		rdf = %()
+		scientific_names.each do |scientific_name|
+			rdf << 
+				%(<#{svd["uri"]}>
+						rdfs:subClassOf
+							#{some_object_values_from_restriction_rdf(
+								SVF_NAMESPACE + "hasAssociatedScientificName", 
+								scientific_name["uri"])} . 
+					<#{scientific_name["uri"]}>
+						rdfs:subClassOf svf:ScientificName;
+						rdfs:label "#{scientific_name["label"]}"^^rdfs:Literal;
+						svf:hasID "#{scientific_name["id"]}"^^xsd:positiveInteger . )
+		end
+		return rdf
+	end
+
+	def self.svd_rdf(svd)
+		%(<#{svd["uri"]}>
+				a owl:Class;
+				rdfs:subClassOf svf:SemanticVernacularDescription;
+				svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . )
 	end
 
 end

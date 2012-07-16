@@ -11,7 +11,8 @@ window.onload = function()
 
   // If this is a new denifination proposal, put the passed URI into inputData. 
   if (jQuery("span#svd-create-uri").length > 0) {
-    org.mo.sv.create.inputData["svd"]["uri"] = jQuery("span#svd-create-uri").text();
+    org.mo.sv.create.inputData["svd"]["uri"] 
+      = jQuery("span#svd-create-uri").text();
   }
 
   // When the user enter something in the "svd-create-label" text box, put it
@@ -41,8 +42,8 @@ window.onload = function()
     .click(org.mo.sv.create.addFeatureCallback);
 
   // When the "svd-clear-feature" button is clicked: reset the "svd-feature" 
-  // drop-down list, clear inputData["features"] and inputData["svds"], and 
-  // clear the display area.
+  // drop-down list, clear inputData["features"] and inputData["matched_svds"], 
+  // and clear the display area.
   jQuery("button#svd-clear-feature")
     .click(org.mo.sv.create.clearFeatureCallback);
 
@@ -76,8 +77,6 @@ org.mo.sv.create.setCSS = function()
     "border-spacing": "10px"
   });
   jQuery("div#svd-create-display ul").css({
-    "width": "280px",
-    "overflow": "scroll",
     "margin-top": "30px"
   });
   jQuery("div.svd-create-display-header").css({
@@ -98,20 +97,20 @@ org.mo.sv.create.setCSS = function()
 org.mo.sv.create.submitCallback = function()
 {
   // Label and definition must be filled for a new SVD creation.
-  if (org.mo.sv.create.inputData["svd"] == {} && (
-      org.mo.sv.create.inputData["label"] == {} ||
+  if (org.mo.sv.create.inputData["svd"]["uri"] == null && ( 
+      org.mo.sv.create.inputData["label"]["value"] == null ||
       org.mo.sv.create.inputData["features"].length == 0))
-    alert("\"Proposed Name\" and \"Definition\" must be filled!");
+    alert("Both \"Proposed Name\" and \"Definition\" must be filled!");
   // Definition must be filled for a new definition proposal.
-  else if (org.mo.sv.create.inputData["svd"] != {} && 
+  else if (org.mo.sv.create.inputData["svd"]["uri"] && 
       org.mo.sv.create.inputData["features"].length == 0)
     alert("\"Definition\" must be filled!");
   else {
     // When inputData["svd"] has any SVD that is currently available, remind the
     // user his/her input of definition is not a new one.
-    if (org.mo.sv.create.inputData["svds"][0] != "none")
-      alert("Your input of definition has matched one or more vernacular " +
-        "desctiptions in the database, please refine your input!");
+    if (org.mo.sv.create.inputData["matched_svds"][0] != "none")
+      alert("Your input of definition has matched one or more current" + 
+        "vernacular desctiptions in the database, please refine your input!");
     else {
       console.log(org.mo.sv.create.inputData);
       //Post inputData to backend to generate RDF.
@@ -119,9 +118,12 @@ org.mo.sv.create.submitCallback = function()
       var post_data = {"data": JSON.stringify(org.mo.sv.create.inputData)};
       var post_callback = function(response) {
         console.log(response);
-        //org.mo.sv.create.clearFeatureCallback;
-        //org.mo.sv.create.clearScientificNameCallback;
-        //window.location.href = "/semantic_vernacular/generate_rdf";
+      if(response.message == "OK")
+        alert("The new entry has been added!");
+      else
+        alert(response.value);
+      window.location.href = "/semantic_vernacular/show?uri="
+        + encodeURIComponent(response.page_uri);
       };
       org.mo.sv.ajax(post_url, "POST", post_data, post_callback);
       //Clear inputData.
@@ -168,7 +170,7 @@ org.mo.sv.create.addScientificNameCallback = function()
       ul.find("div.svd-create-display-header").show();
       ul.append("<li>" + name + "</li>");
       // Store the input into inputData["scientific_names"].
-      var obj = {"id": null, "value": name};
+      var obj = {"id": null, "uri": null, "label": name};
       org.mo.sv.create.inputData["scientific_names"].push(obj);
       // Clear the "svd-create-scientific-name" input box.
       jQuery("input#svd-create-scientific-name").val("");
@@ -187,9 +189,9 @@ org.mo.sv.create.clearFeatureCallback = function()
   org.mo.sv.submitQuery(
     org.mo.sv.create.queryIndependentFeatures(), 
     org.mo.sv.create.getFeaturesCallback);
-  // Clear inputData["features"] and inputData["svds"].
+  // Clear inputData["features"] and inputData["matched_svds"].
   org.mo.sv.create.inputData["features"] = [];
-  org.mo.sv.create.inputData["svds"] = [];
+  org.mo.sv.create.inputData["matched_svds"] = [];
   // Clear the display area.
   var ul = jQuery("ul#svd-available-svd");
   ul.find("li").remove();
@@ -257,14 +259,14 @@ org.mo.sv.create.getAvailableSVDsCallback = function(response)
   if (ul.find("div.svd-create-display-header").css("display") == "none")
       ul.find("div.svd-create-display-header").show();
   if (labels.length == 0) {
-    org.mo.sv.create.inputData["svds"] = [];
-    org.mo.sv.create.inputData["svds"][0] = "none";
+    org.mo.sv.create.inputData["matched_svds"] = [];
+    org.mo.sv.create.inputData["matched_svds"][0] = "none";
   }
   // If this is the first feature-value pair added, just show whatever SVD that 
   // mathch that pair.
-  if (org.mo.sv.create.inputData["svds"].length == 0) {
+  if (org.mo.sv.create.inputData["matched_svds"].length == 0) {
     jQuery.each(labels, function(i, val) {
-      org.mo.sv.create.inputData["svds"].push(val);
+      org.mo.sv.create.inputData["matched_svds"].push(val);
       ul.append("<li><a href=\"/semantic_vernacular/show?uri=" 
         + encodeURIComponent(uris[val]) 
         + "\">" + val + "</a></li>");
@@ -272,20 +274,20 @@ org.mo.sv.create.getAvailableSVDsCallback = function(response)
   }
   // If previously added feature-value pairs don't match any SVD, no SVD will 
   // show for the newly added pair.
-  else if (org.mo.sv.create.inputData["svds"][0] == "none") {
+  else if (org.mo.sv.create.inputData["matched_svds"][0] == "none") {
     ul.find("li").remove();
     ul.append("<li>None.</li>");
   }
   // If previously added feature-value pairs have matched SVDs, show the 
   // intersection of the previous SVDs and the SVDs matching the new pair.
   else {
-    // Remove any SVD in inputData["svds"] that doesn't match the newly added
+    // Remove any SVD in inputData["matched_svds"] that doesn't match the newly added
     // feature-value pair.
-    org.mo.sv.create.inputData["svds"] = 
-      jQuery.map(org.mo.sv.create.inputData["svds"], function(ele) {
+    org.mo.sv.create.inputData["matched_svds"] = 
+      jQuery.map(org.mo.sv.create.inputData["matched_svds"], function(ele) {
         if (jQuery.inArray(ele, labels) == -1) {
-          org.mo.sv.create.inputData["svds"] = jQuery.grep(
-            org.mo.sv.create.inputData["svds"], function(value) {
+          org.mo.sv.create.inputData["matched_svds"] = jQuery.grep(
+            org.mo.sv.create.inputData["matched_svds"], function(value) {
               return value != ele;
           });
           return null;
@@ -293,10 +295,10 @@ org.mo.sv.create.getAvailableSVDsCallback = function(response)
         else 
           return ele;
     });
-    // If nothing is left in inputData["svds"], it means no SVD match the new
-    // pair.
-    if (org.mo.sv.create.inputData["svds"].length == 0) {
-      org.mo.sv.create.inputData["svds"][0] = "none";
+    // If nothing is left in inputData["matched_svds"], it means no SVD match 
+    // the new pair.
+    if (org.mo.sv.create.inputData["matched_svds"].length == 0) {
+      org.mo.sv.create.inputData["matched_svds"][0] = "none";
       ul.find("li").remove();
       ul.append("<li>None.</li>");
     }
@@ -304,7 +306,7 @@ org.mo.sv.create.getAvailableSVDsCallback = function(response)
     else
     {
       ul.find("li").remove();
-      jQuery.each(org.mo.sv.create.inputData["svds"], function(i, val) {
+      jQuery.each(org.mo.sv.create.inputData["matched_svds"], function(i, val) {
         ul.append("<li><a href=\"/semantic_vernacular/show?uri=" 
           + encodeURIComponent(uris[val]) 
           + "\">" + val + "</a></li>");

@@ -102,7 +102,11 @@
 			<ul>
 				<% @svd.associated_scientific_names.each do |name| %>
 					<li>
-						<%= link_to(name["label"]["value"], name["moURL"]["value"]) %>
+						<% if name["moURL"] %>
+							<%= link_to(name["label"]["value"], name["moURL"]["value"]) %>
+						<% else %>
+							<%= name["label"]["value"] %>
+						<% end %>
 					</li>
 				<% end %>
 			</ul>

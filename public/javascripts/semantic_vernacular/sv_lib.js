@@ -28,20 +28,26 @@ org.mo.sv.SVFNamespace = "http://mushroomobserver.org/svf.owl#";
 org.mo.sv.create.inputData = {
   "svd": {
     "id": null,
-    "uri": null
+    "uri": null,
+    "is_new":null
   },
   "label": {
     "id": null,
     "uri": null,
     "value": null,
+    "is_default": null
   },
   "definition": {
     "id": null,
     "uri": null,
+    "is_default": null
   },
   "features": [], 
   "scientific_names": [],
-  "svds": [], 
+  "matched_svds": [],
+  "user": {
+    "uri": "http://mushroomobserver.org/svf.owl#U2"
+  }
 };
 
 // Empty inputData.
@@ -50,20 +56,26 @@ org.mo.sv.clearInputData = function()
   org.mo.sv.create.inputData = {
     "svd": {
       "id": null,
-      "uri": null
+      "uri": null,
+      "is_new":null
     },
     "label": {
       "id": null,
       "uri": null,
       "value": null,
+      "is_default": null
     },
     "definition": {
       "id": null,
       "uri": null,
+      "is_default": null
     },
     "features": [], 
     "scientific_names": [],
-    "svds": [], 
+    "matched_svds": [],
+    "user": {
+      "uri": "http://mushroomobserver.org/svf.owl#U2"
+    }
   };
 };
 

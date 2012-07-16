@@ -72,8 +72,8 @@ org.mo.sv.show.setCSS = function()
   jQuery("li.svd-detail-li").css({
     "margin": "10px 0px"
   });
-  jQuery("li.svd-detail-li-item").css({
-    "margin": "5px 0px" 
+  jQuery("ul.svd-detail-li-item").css({
+    "margin": "10px 0px" 
   });
   jQuery("li.svd-other-proposals").css({
     "cursor": "pointer"
@@ -132,7 +132,6 @@ org.mo.sv.show.submitCallback = function()
 // Callback function for asking if a label input has existed in the ontology.
 org.mo.sv.show.askLabelCallback = function(response)
 {
-  console.log(response)
   if (response["boolean"] == true) {
     alert("This name has been used. Please enter another one.");
     jQuery("div#svd-new-label-dialog input#svd-create-label").val("");
@@ -155,9 +154,9 @@ org.mo.sv.show.askLabelCallback = function(response)
         alert(response.value);
       window.location.reload();
     };
-     org.mo.sv.ajax(post_url, "POST", post_data, post_callback);
-     // Clear inputData.
-     org.mo.sv.clearInputData();  
+    org.mo.sv.ajax(post_url, "POST", post_data, post_callback);
+    // Clear inputData.
+    org.mo.sv.clearInputData();  
   }
 }
 
