@@ -79,10 +79,10 @@ class SemanticVernacularDataSource
 
 	private
 	
-	QUERY_ENDPOINT = "http://aquarius.tw.rpi.edu:2024/sparql"
-	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
+	QUERY_ENDPOINT = "http://128.128.170.15:3030/svf/sparql"
+	#QUERY_ENDPOINT = "http://aquarius.tw.rpi.edu:2024/sparql"
 	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
-	#UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
+	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
 	SVF_NAMESPACE = "http://mushroomobserver.org/svf.owl#"
 
 	# Retrun: array of hashes
