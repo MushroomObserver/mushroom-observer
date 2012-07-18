@@ -417,6 +417,7 @@ class Query < AbstractQuery
     :images_observations => {
       :images        => :image_id,
       :observations  => :observation_id,
+      :observations_projects => [:observation_id, :observation_id],
     },
     :images_projects => {
       :images        => :image_id,

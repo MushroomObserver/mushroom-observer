@@ -82,7 +82,6 @@ ActiveRecord::Schema.define(:version => 20120713171100) do
     t.boolean "anonymous", :default => false, :null => false
   end
 
-  add_index "image_votes", ["image_id"], :name => "image_id"
   add_index "image_votes", ["image_id"], :name => "index_image_votes_on_image_id"
 
   create_table "images", :force => true do |t|
@@ -437,7 +436,7 @@ ActiveRecord::Schema.define(:version => 20120713171100) do
     t.datetime "modified"
     t.integer  "access_count"
     t.enum     "model",        :limit => [:Comment, :Image, :Location, :LocationDescription, :Name, :NameDescription, :Observation, :Project, :RssLog, :SpeciesList, :User]
-    t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_project, :for_target, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
+    t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_project, :for_target, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_for_project, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
     t.text     "params"
     t.integer  "outer_id"
   end

@@ -781,10 +781,10 @@ class ObserverController < ApplicationController
 
   # Map results of a search or index.
   def map_observations # :nologin: :norobots:
-    @timer_start = Time.now
     @query = find_or_create_query(:Observation)
     @title = :map_locations_title.t(:locations => @query.title)
     @query = restrict_query_to_box(@query)
+    @timer_start = Time.now
 
     # Get matching observations.
     locations = {}
@@ -810,6 +810,7 @@ class ObserverController < ApplicationController
     end
 
     @num_results = @observations.count
+    @timer_end = Time.now
   end
 
   ##############################################################################

@@ -169,7 +169,6 @@ class LocationController < ApplicationController
 
   # Map results of a search or index.
   def map_locations # :nologin: :norobots:
-    @timer_start = Time.now
     @query = find_or_create_query(:Location)
     if @query.flavor == :all
       @title = :map_locations_global_map.t
@@ -177,12 +176,14 @@ class LocationController < ApplicationController
       @title = :map_locations_title.t(:locations => @query.title)
     end
     @query = restrict_query_to_box(@query)
+    @timer_start = Time.now
     columns = %w(name north south east west).map {|x| "locations.#{x}"}
     args = { :select => "DISTINCT(locations.id), #{columns.join(', ')}" }
     @locations = @query.select_rows(args).map do |id, name, n,s,e,w|
       MinimalMapLocation.new(id, name, n,s,e,w)
     end
     @num_results = @locations.count
+    @timer_end = Time.now
   end
 
   # Try to turn this into a query on observations.where instead.
