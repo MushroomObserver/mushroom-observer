@@ -1101,6 +1101,20 @@ class ApplicationController < ActionController::Base
     Query.lookup(model, flavor, args)
   end
 
+  # Create a new query by adding a bounding box to the given one.
+  def restrict_query_to_box(query)
+    if params[:north].blank?
+      query
+    else
+      Query.lookup(query.model_symbol, query.flavor, query.params.merge(
+        :north => params[:north],
+        :south => params[:south],
+        :east => params[:east],
+        :west => params[:west]
+      ))
+    end
+  end
+
   # This is the common code for all the 'prev/next_object' actions.  Pass in
   # the current object and direction (:prev or :next), and it looks up the
   # query, grabs the next object, and redirects to the appropriate

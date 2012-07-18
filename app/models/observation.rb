@@ -150,6 +150,14 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  def is_location?
+    false
+  end
+
+  def is_observation?
+    true
+  end
+
   # Always returns empty string.  (Used by
   # <tt>observer/reuse_image.rhtml</tt>.)
   def idstr
@@ -246,18 +254,7 @@ class Observation < AbstractModel
 
   # Is lat/long more than 10% outside of location extents?
   def lat_long_dubious?
-    result = false
-    if lat and location
-      delta_lat = location.north_south_distance / 10
-      delta_long = location.east_west_distance / 10
-      if lat > location.north + delta_lat or
-         lat < location.south - delta_lat or
-         long > location.east + delta_long or
-         long < location.west - delta_long
-        result = true
-      end
-    end
-    return result
+    lat and location and not location.lat_long_close?(lat, long)
   end
 
   ##############################################################################

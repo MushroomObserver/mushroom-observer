@@ -14,6 +14,16 @@
 #      gmap.div(:width => 400, :height => 400)
 #    %>
 #
+#  == Data needed from observations and locations
+#
+#  If you need to create a huge number of lightweight Observation and Location
+#  instances, these are all the data required of each object:
+#
+#  Observation:: id, lat, long, location_id
+#  Location::    id, name, north, south, east, west
+#
+#  (See MinimalMapObservation and MinimalMapLocation classes.)
+#
 ##############################################################################
 
 require_dependency 'map_collapsible'
@@ -149,9 +159,9 @@ module ApplicationHelper::Map
 
   def map_location_strings(objects)
     objects.map do |obj|
-      if obj.is_a?(Location)
+      if obj.is_location?
         obj.display_name
-      elsif obj.is_a?(Observation)
+      elsif obj.is_observation?
         if obj.location
           obj.location.display_name
         elsif obj.lat
@@ -165,40 +175,49 @@ module ApplicationHelper::Map
     lines = []
     observations = set.observations
     locations = set.underlying_locations
-    lines << mapset_observation_header(observations, args) if observations.length > 1
-    lines << mapset_location_header(locations, args) if locations.length > 1
+    lines << mapset_observation_header(set, args) if observations.length > 1
+    lines << mapset_location_header(set, args) if locations.length > 1
     lines << mapset_observation_link(observations.first, args) if observations.length == 1
     lines << mapset_location_link(locations.first, args) if locations.length == 1
     lines << mapset_coords(set)
     return lines.join('<br/>')
   end
 
-  def mapset_observation_header(observations, args)
-    query = Query.lookup(:Observation, :in_set, :ids => observations.map(&:id))
-    show = link_to(:show_all.t, :controller => :observer, :action => :index_observation,
-                   :params => query_params(query))
-    map = link_to(:map_all.t, :controller => :observer, :action => :map_observations,
-                  :params => query_params(query))
-    return "#{:Observations.t}: #{observations.length} (#{show} | #{map})"
+  def mapset_observation_header(set, args)
+    show, map = mapset_submap_links(set, args, :observation)
+    return "#{:Observations.t}: #{set.observations.length} (#{show} | #{map})"
   end
 
-  def mapset_location_header(locations, args)
-    query = Query.lookup(:Location, :in_set, :ids => locations.map(&:id))
-    show = link_to(:show_all.t, :controller => :location, :action => :index_location,
-                   :params => query_params(query))
-    map = link_to(:map_all.t, :controller => :location, :action => :map_locations,
-                  :params => query_params(query))
-    return "#{:Locations.t}: #{locations.length} (#{show} | #{map})"
+  def mapset_location_header(set, args)
+    show, map = mapset_submap_links(set, args, :location)
+    return "#{:Locations.t}: #{set.underlying_locations.length} (#{show} | #{map})"
+  end
+
+  def mapset_submap_links(set, args, type)
+    params = args[:query_params] || {}
+    params = params.merge(:controller => type.to_s.sub('observation','observer'))
+    params = params.merge(mapset_box_params(set))
+    [ link_to(:show_all.t, params.merge(:action => "index_#{type}")),
+      link_to(:map_all.t, params.merge(:action => "map_#{type}s")) ]
   end
 
   def mapset_observation_link(obs, args)
-    link_to(obs.unique_format_name.t, :controller => :observer, :action => :show_observation,
+    link_to("#{:Observation.t} ##{obs.id}", :controller => :observer, :action => :show_observation,
             :id => obs.id, :params => args[:query_params] || {})
   end
 
   def mapset_location_link(loc, args)
     link_to(loc.display_name.t, :controller => :location, :action => :show_location,
             :id => loc.id, :params => args[:query_params] || {})
+  end
+
+  def mapset_box_params(set)
+    {
+      :north => set.north,
+      :south => set.south,
+      :east => set.east,
+      :west => set.west,
+    }
   end
 
   def mapset_coords(set)

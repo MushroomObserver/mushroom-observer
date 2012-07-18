@@ -772,6 +772,10 @@ class ObserverController < ApplicationController
       args[:letters] = 'names.sort_name'
     end
 
+    # Restrict to subset within a geographical region (used by map
+    # if it needed to stuff multiple locations into a single marker).
+    query = restrict_query_to_box(query)
+
     show_index_of_objects(query, args)
   end
 
@@ -779,11 +783,30 @@ class ObserverController < ApplicationController
   def map_observations # :nologin: :norobots:
     @query = find_or_create_query(:Observation)
     @title = :map_locations_title.t(:locations => @query.title)
-    @observations = @query.results(
-      :include => :location,
-      # This reduces the number of observations returned to something manageable.
-      :group => "IF(observations.lat, CONCAT(observations.lat,observations.long), observations.location_id)"
-    ).select {|o| o.lat or o.location}
+    @query = restrict_query_to_box(@query)
+
+    # Get matching observations.
+    locations = {}
+    columns = %w(id lat long location_id).map {|x| "observations.#{x}"}
+    args = {
+      :select => columns.join(', '),
+      :where => "observations.lat IS NOT NULL OR observations.location_id IS NOT NULL",
+    }
+    @observations = @query.select_rows(args).map do |id, lat, long, location_id|
+      locations[location_id.to_i] = nil unless location_id.blank?
+      MinimalMapObservation.new(id, lat, long, location_id)
+    end
+
+    # Eager-load corresponding locations.
+    @locations = Location.connection.select_rows(%(
+      SELECT id, name, north, south, east, west FROM locations
+      WHERE id IN (#{locations.keys.sort.map(&:to_s).join(',')})
+    )).map do |id, name, n,s,e,w|
+      locations[id.to_i] = MinimalMapLocation.new(id, name, n,s,e,w)
+    end
+    for obs in @observations
+      obs.location = locations[obs.location_id] if obs.location_id
+    end
   end
 
   ##############################################################################

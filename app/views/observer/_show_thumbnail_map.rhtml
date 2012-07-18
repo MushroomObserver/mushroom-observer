@@ -2,7 +2,11 @@
   <%=
     gmap = nil
     if observation.lat and observation.long
-      gmap = make_thumbnail_map(observation)
+      if observation.location
+        gmap = make_thumbnail_map([observation, observation.location])
+      else
+        gmap = make_thumbnail_map(observation)
+      end
     elsif observation.location
       gmap = make_thumbnail_map(observation.location)
     end

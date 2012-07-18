@@ -79,9 +79,9 @@ private
     raise "Tried to create empty map!" if objects.empty?
     @sets = {}
     for obj in objects
-      if obj.is_a?(Location)
+      if obj.is_location?
         add_box_set(obj, [obj], MAX_PRECISION)
-      elsif obj.is_a?(Observation)
+      elsif obj.is_observation?
         if obj.lat and !obj.lat_long_dubious?
           add_point_set(obj, [obj], MAX_PRECISION)
         elsif loc = obj.location

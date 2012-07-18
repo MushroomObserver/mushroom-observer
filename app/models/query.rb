@@ -49,6 +49,10 @@ class Query < AbstractQuery
       :created?  => [:time],
       :modified? => [:time],
       :users?    => [User],
+      :north?    => :float,
+      :south?    => :float,
+      :east?     => :float,
+      :west?     => :float,
     },
     :LocationDescription => {
       :created?  => [:time],
@@ -114,6 +118,10 @@ class Query < AbstractQuery
       :has_comments?   => {:string => [:yes]},
       :notes_has?      => :string,
       :comments_has?   => :string,
+      :north?          => :float,
+      :south?          => :float,
+      :east?           => :float,
+      :west?           => :float,
     },
     :Project => {
       :created?  => [:time],
@@ -925,6 +933,7 @@ class Query < AbstractQuery
     initialize_model_do_time(:created)
     initialize_model_do_time(:modified)
     initialize_model_do_objects_by_id(:users)
+    initialize_model_do_bounding_box(:location)
   end
 
   def initialize_location_description
@@ -1097,6 +1106,7 @@ class Query < AbstractQuery
     if !params[:include_admin]
       self.where << "observations.user_id != 0"
     end
+    initialize_model_do_bounding_box(:observation)
   end
 
   def initialize_project
@@ -1265,6 +1275,47 @@ class Query < AbstractQuery
         end
       end
       self.where << str
+    end
+  end
+
+  def initialize_model_do_bounding_box(type)
+    if params[:north]
+      n, s, e, w = params.values_at(:north, :south, :east, :west)
+      if w < e
+        cond1 = [
+          "observations.lat >= #{s}",
+          "observations.lat <= #{n}",
+          "observations.long >= #{w}",
+          "observations.long <= #{e}",
+        ]
+        cond2 = [
+          "locations.south >= #{s}",
+          "locations.north <= #{n}",
+          "locations.west >= #{w}",
+          "locations.east <= #{e}",
+          "locations.west <= locations.east",
+        ]
+      else
+        cond1 = [
+          "observations.lat >= #{s}",
+          "observations.lat <= #{n}",
+          "(observations.long >= #{w} OR observations.long <= #{e})",
+        ]
+        cond2 = [
+          "locations.south >= #{s}",
+          "locations.north <= #{n}",
+          "locations.west >= #{w}",
+          "locations.east <= #{e}",
+          "locations.west > locations.east",
+        ]
+      end
+      if type == :location
+        self.where += cond2
+      else
+        # [Do we need to do outer join to use cond1??]
+        self.join << :locations unless uses_join?(:locations)
+        self.where += cond2
+      end
     end
   end
 

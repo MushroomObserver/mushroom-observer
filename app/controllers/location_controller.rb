@@ -141,6 +141,10 @@ class LocationController < ApplicationController
                 }]
     end
 
+    # Restrict to subset within a geographical region (used by map
+    # if it needed to stuff multiple locations into a single marker).
+    @query = restrict_query_to_box(@query)
+
     # Get matching *undefined* locations.
     @undef_location_format = User.current_location_format
     if query2 = coerce_query_for_undefined_locations(query)
@@ -181,7 +185,12 @@ class LocationController < ApplicationController
     else
       @title = :map_locations_title.t(:locations => @query.title)
     end
-    @locations = @query.results
+    @query = restrict_query_to_box(@query)
+    columns = %w(id name north south east west).map {|x| "locations.#{x}"}
+    args = { :select => columns.join(', ') }
+    @locations = @query.select_rows(args).map do |id, name, n,s,e,w|
+      MinimalMapLocation.new(id, name, n,s,e,w)
+    end
   end
 
   # Try to turn this into a query on observations.where instead.

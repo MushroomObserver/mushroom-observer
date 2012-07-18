@@ -29,9 +29,9 @@ class MapSet
 
   def init_objects
     for obj in @objects
-      if obj.is_a?(Location)
+      if obj.is_location?
         update_extents_with_box(obj)
-      elsif obj.is_a?(Observation)
+      elsif obj.is_observation?
         if obj.lat and !obj.lat_long_dubious?
           update_extents_with_point(obj)
         elsif loc = obj.location
@@ -49,18 +49,18 @@ class MapSet
   end
 
   def observations
-    @objects.select {|x| x.is_a? Observation}
+    @objects.select(&:is_observation?)
   end
 
   def locations
-    @objects.select {|x| x.is_a? Location}
+    @objects.select(&:is_location?)
   end
 
   def underlying_locations
     @objects.map do |obj|
-      if obj.is_a?(Location)
+      if obj.is_location?
         obj
-      elsif obj.is_a?(Observation) and obj.location
+      elsif obj.is_observation? and obj.location
         obj.location
       else
         nil

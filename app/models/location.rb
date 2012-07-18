@@ -129,59 +129,7 @@ class Location < AbstractModel
   #
   ##############################################################################
 
-  # Return [north, west].
-  def north_west
-    [north, west]
-  end
-
-  # Return [north, east].
-  def north_east
-    [north, east]
-  end
-
-  # Return [south, west].
-  def south_west
-    [south, west]
-  end
-
-  # Return [south, east].
-  def south_east
-    [south, east]
-  end
-
-  # Return center latitude.
-  def lat
-    (north + south) / 2.0 rescue nil
-  end
-
-  # Return center longitude.
-  def long
-    long = (east + west) / 2.0
-    long += 180 if west > east
-    return long
-  rescue
-    nil
-  end
-
-  # Return center as [lat, long].
-  def center
-    [lat, long]
-  end
-
-  # Returns [north, south, east, west].
-  def edges
-    [north, south, east, west]
-  end
-
-  # Returns north - south.
-  def north_south_distance
-    north - south
-  end
-
-  # Returns east - west (adjusting if straddles dateline).
-  def east_west_distance
-    west > east ? east - west + 360 : east - west
-  end
+  include BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) (?:°|°|o|d|deg)?     \s*
