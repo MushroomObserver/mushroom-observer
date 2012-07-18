@@ -663,7 +663,7 @@ class ObserverController < ApplicationController
   end
 
   # Display matrix of Observation's attached to a given project.
-  def observations_for_project
+  def observations_for_project # :nologin: :norobots:
     if project = find_or_goto_index(Project, params[:id])
       query = create_query(:Observation, :for_project, :project => project)
       show_selected_observations(query, {:always_index => 1})
@@ -779,7 +779,11 @@ class ObserverController < ApplicationController
   def map_observations # :nologin: :norobots:
     @query = find_or_create_query(:Observation)
     @title = :map_locations_title.t(:locations => @query.title)
-    @observations = @query.results.select {|o| o.lat or o.location}
+    @observations = @query.results(
+      :include => :location,
+      # This reduces the number of observations returned to something manageable.
+      :group => "IF(observations.lat, CONCAT(observations.lat,observations.long), observations.location_id)"
+    ).select {|o| o.lat or o.location}
   end
 
   ##############################################################################

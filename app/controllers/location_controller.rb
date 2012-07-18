@@ -20,6 +20,7 @@ class LocationController < ApplicationController
     :help,
     :index_location,
     :index_location_description,
+    :list_dubious_locations,
     :list_location_descriptions,
     :list_locations,
     :location_descriptions_by_author,
@@ -920,52 +921,3 @@ class LocationController < ApplicationController
   end
 end
 
-# list_locations::          . V .
-# locations_by_user::       . . .
-# locations_by_editor::     . . .
-# location_search::         . . .
-# advanced_search::         . . .
-# index_location::          . . .
-# map_locations::           . V .
-# show_selected_locations:: (helper)
-# coerce_query_for_undefined_locations::
-#                           (helper)
-# 
-# list_location_descriptions::          .
-# location_descriptions_by_author::         .
-# location_descriptions_by_editor::         .
-# index_location_description::          
-# show_selected_location_descriptions:: (helper)
-# 
-# show_location
-# show_location_description
-# show_past_location
-# show_past_location_description
-# next_location
-# prev_location
-# next_location_description
-# prev_location_description
-# create_location
-# edit_location
-# create_location_description
-# edit_location_description
-# destroy_location_description
-# list_merge_options
-# add_to_location
-# 
-# split_out_matches(list, substring)
-# update_observations_by_where(location, where)
-# 
-# adjust_permissions.rhtml
-# create_location.rhtml
-# create_location_description.rhtml
-# edit_location.rhtml
-# edit_location_description.rhtml
-# list_location_descriptions.rhtml
-# list_locations.rhtml
-# list_merge_options.rhtml
-# merge_descriptions.rhtml
-# show_location.rhtml
-# show_location_description.rhtml
-# show_past_location.rhtml
-# show_past_location_description.rhtml

@@ -1614,7 +1614,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
   # through into +select_values+.)
-  RESULTS_ARGS = [:join, :where, :limit]
+  RESULTS_ARGS = [:join, :where, :limit, :group]
 
   # Args accepted by +paginate+ and +paginate_ids+.
   PAGINATE_ARGS = []
