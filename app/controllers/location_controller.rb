@@ -192,8 +192,6 @@ class LocationController < ApplicationController
     flavor = query.flavor
     args   = query.params.dup
     result = nil
-flash_notice("flavor = #{flavor.inspect}")
-flash_notice("args = #{args.inspect}")
 
     # Select only observations with undefined location.
     if !args[:where]
@@ -243,8 +241,6 @@ flash_notice("args = #{args.inspect}")
     else
       flavor = nil
     end
-flash_notice("flavor = #{flavor.inspect}")
-flash_notice("args = #{args.inspect}")
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
     if flavor
