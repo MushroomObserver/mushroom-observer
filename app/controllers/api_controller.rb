@@ -82,6 +82,7 @@ class ApiController < ApplicationController
       render(:layout => 'api', :template => '/api/results.rxml')
     end
   rescue => e
+    @api ||= API.new
     @api.errors << API::RenderFailed.new(e)
     render(:layout => 'api', :text => '')
   end

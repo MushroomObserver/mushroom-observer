@@ -63,6 +63,7 @@ class Query < AbstractQuery
       :created?            => [:time],
       :modified?           => [:time],
       :users?              => [User],
+      :names?              => [:string],
       :synonym_names?      => [:string],
       :children_names?     => [:string],
       :misspellings?       => {:string => [:no, :either, :only]},
@@ -241,6 +242,9 @@ class Query < AbstractQuery
     :with_observations_by_user => {
       :user => User,
     },
+    :with_observations_for_project => {
+      :project => Project,
+    },
     :with_observations_in_set => {
       :ids => [Observation],
       :old_title? => :string,
@@ -285,6 +289,7 @@ class Query < AbstractQuery
       :with_observations_at_location,     # Images with observations at a defined location.
       :with_observations_at_where,        # Images with observations at an undefined 'where'.
       :with_observations_by_user,         # Images with observations by user.
+      :with_observations_for_project,     # Images with observations attached to given project.
       :with_observations_in_set,          # Images with observations in a given set.
       :with_observations_in_species_list, # Images with observations in a given species list.
       :with_observations_of_children,     # Images with observations of children a given name.
@@ -305,6 +310,7 @@ class Query < AbstractQuery
       :with_descriptions_in_set,          # Locations with descriptions in a given set, alphabetically.
       :with_observations,                 # Locations with observations, alphabetically.
       :with_observations_by_user,         # Locations with observations by user.
+      :with_observations_for_project,     # Locations with observations attached to given project.
       :with_observations_in_set,          # Locations with observations in a given set.
       :with_observations_in_species_list, # Locations with observations in a given species list.
       :with_observations_of_children,     # Locations with observations of children of a given name.
@@ -336,6 +342,7 @@ class Query < AbstractQuery
       :with_observations_at_location,     # Names with observations at a defined location.
       :with_observations_at_where,        # Names with observations at an undefined 'where'.
       :with_observations_by_user,         # Names with observations by user.
+      :with_observations_for_project,     # Names with observations attached to given project.
       :with_observations_in_set,          # Names with observations in a given set.
       :with_observations_in_species_list, # Names with observations in a given species list.
     ],
@@ -949,6 +956,9 @@ class Query < AbstractQuery
     initialize_model_do_misspellings
     initialize_model_do_deprecated
     initialize_model_do_objects_by_name(
+      Name, :names, :id
+    )
+    initialize_model_do_objects_by_name(
       Name, :synonym_names, :id, :filter => :synonyms
     )
     initialize_model_do_objects_by_name(
@@ -1238,8 +1248,14 @@ class Query < AbstractQuery
             pattern = clean_pattern(Location.clean_name(name))
             objs += model.all(:conditions => "name LIKE '%#{pattern}%'")
           when 'Name'
-            objs += model.find_all_by_search_name(name)
-            objs += model.find_all_by_text_name(name) if objs.empty?
+            if parse = Name.parse_name(name)
+              name2 = parse.search_name
+            else
+              name2 = Name.clean_incoming_string(name)
+            end
+            matches = model.find_all_by_search_name(name2)
+            matches = model.find_all_by_text_name(name2) if matches.empty?
+            objs += matches
           when 'Project', 'SpeciesList'
             objs += model.find_all_by_title(name)
           when 'User'
@@ -1312,9 +1328,22 @@ class Query < AbstractQuery
       if type == :location
         self.where += cond2
       else
-        # [Do we need to do outer join to use cond1??]
-        self.join << :locations unless uses_join?(:locations)
-        self.where += cond2
+        # Condition which returns true if the observation's lat/long is plausible.
+        # (should be identical to BoxMethods.lat_long_close?)
+        cond0 = %(
+          observations.lat >= locations.south * 1.2 - locations.north * 0.2 AND
+          observations.lat <= locations.north * 1.2 - locations.south * 0.2 AND
+          if(locations.west <= locations.east,
+            observations.long >= locations.west * 1.2 - locations.east * 0.2 AND
+            observations.long <= locations.east * 1.2 - locations.west * 0.2,
+            observations.long >= locations.west * 0.8 + locations.east * 0.2 + 72 OR
+            observations.long <= locations.east * 0.8 + locations.west * 0.2 - 72
+          )
+        )
+        cond1 = cond1.join(' AND ')
+        cond2 = cond2.join(' AND ')
+        self.join << :"locations!" unless uses_join?(:locations)
+        self.where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
       end
     end
   end
@@ -1322,6 +1351,7 @@ class Query < AbstractQuery
   def initialize_model_do_rank
     if !params[:rank].blank?
       min, max = params[:rank]
+      max ||= min
       all_ranks = Name.all_ranks
       a = all_ranks.index(min) || 0
       b = all_ranks.index(max) || (all_ranks.length - 1)
@@ -1797,6 +1827,21 @@ class Query < AbstractQuery
       self.join << :observations
     end
     self.where << "observations.user_id = '#{params[:user]}'"
+    if model_symbol == :Location
+      self.where << 'observations.is_collection_location IS TRUE'
+    end
+    params[:by] ||= 'name'
+  end
+
+  def initialize_with_observations_for_project
+    project = find_cached_parameter_instance(Project, :project)
+    title_args[:project] = project.title
+    if model_symbol == :Image
+      self.join << {:images_observations => :observations_projects}
+    else
+      self.join << {:observations => :observations_projects}
+    end
+    self.where << "observations_projects.project_id = '#{params[:project]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end

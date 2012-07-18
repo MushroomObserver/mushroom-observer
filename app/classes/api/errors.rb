@@ -144,6 +144,13 @@ class API
     end
   end
 
+  class QueryError < Error
+    def initialize(error)
+      super()
+      args.merge!(:error => error.to_s)
+    end
+  end
+
 ################################################################################
 
   class AbortDueToErrors < Error

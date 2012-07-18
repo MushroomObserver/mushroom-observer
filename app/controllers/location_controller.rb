@@ -1,14 +1,4 @@
 # encoding: utf-8
-#
-#  = Location Controller
-#
-#  == Actions
-#   L = login required
-#   R = root required
-#   V = has view
-#   P = prefetching allowed
-#
-################################################################################
 
 require 'geocoder'
 
@@ -143,7 +133,7 @@ class LocationController < ApplicationController
 
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
-    @query = restrict_query_to_box(@query)
+    query = restrict_query_to_box(query)
 
     # Get matching *undefined* locations.
     @undef_location_format = User.current_location_format
@@ -179,6 +169,7 @@ class LocationController < ApplicationController
 
   # Map results of a search or index.
   def map_locations # :nologin: :norobots:
+    @timer_start = Time.now
     @query = find_or_create_query(:Location)
     if @query.flavor == :all
       @title = :map_locations_global_map.t
@@ -186,11 +177,12 @@ class LocationController < ApplicationController
       @title = :map_locations_title.t(:locations => @query.title)
     end
     @query = restrict_query_to_box(@query)
-    columns = %w(id name north south east west).map {|x| "locations.#{x}"}
-    args = { :select => columns.join(', ') }
+    columns = %w(name north south east west).map {|x| "locations.#{x}"}
+    args = { :select => "DISTINCT(locations.id), #{columns.join(', ')}" }
     @locations = @query.select_rows(args).map do |id, name, n,s,e,w|
       MinimalMapLocation.new(id, name, n,s,e,w)
     end
+    @num_results = @locations.count
   end
 
   # Try to turn this into a query on observations.where instead.
@@ -200,6 +192,8 @@ class LocationController < ApplicationController
     flavor = query.flavor
     args   = query.params.dup
     result = nil
+flash_notice("flavor = #{flavor.inspect}")
+flash_notice("args = #{args.inspect}")
 
     # Select only observations with undefined location.
     if !args[:where]
@@ -207,7 +201,7 @@ class LocationController < ApplicationController
     elsif !args[:where].is_a?(Array)
       args[:where] = [args[:where]]
     end
-    args[:where] << 'observations.where IS NOT NULL'
+    args[:where] << 'observations.location_id IS NULL'
 
     # "By name" means something different to observation.
     if args[:by].blank? or
@@ -221,20 +215,13 @@ class LocationController < ApplicationController
     when :all, :by_user
       true
 
-    # Clearly all observations have an observation!
-    when :with_observations,
-         :with_observations_by_user
-      flavor = :all
-      args.delete(:user)
-
-    # Temporarily kludge in pattern search the old way.
-    when :pattern_search
-      flavor = :all
-      search = query.google_parse(args[:pattern])
-      args[:where] += query.google_conditions(search, 'observations.where')
-      args.delete(:pattern)
-
     # Simple coercions.
+    when :with_observations
+      flavor = :all
+    when :with_observations_by_user
+      flavor = :by_user
+    when :with_observations_for_project
+      flavor = :for_project
     when :with_observations_in_set
       flavor = :in_set
       args.delete(:old_title)
@@ -245,10 +232,19 @@ class LocationController < ApplicationController
     when :with_observations_of_name
       flavor = :of_name
 
+    # Temporarily kludge in pattern search the old way.
+    when :pattern_search
+      flavor = :all
+      search = query.google_parse(args[:pattern])
+      args[:where] += query.google_conditions(search, 'observations.where')
+      args.delete(:pattern)
+
     # None of the rest make sense.
     else
       flavor = nil
     end
+flash_notice("flavor = #{flavor.inspect}")
+flash_notice("args = #{args.inspect}")
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
     if flavor

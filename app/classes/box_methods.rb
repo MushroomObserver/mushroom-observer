@@ -61,20 +61,20 @@ module BoxMethods
 
   # Returns east - west (adjusting if straddles dateline).
   def east_west_distance
-    west > east ? east - west + 360 : east - west
+    west <= east ? east - west : east - west + 360
   end
 
   # Is a given lat/long coordinate within or close to the bounding box?
   def lat_long_close?(lat, long)
-    delta_lat = north_south_distance / 10
-    delta_long = east_west_distance / 10
+    delta_lat = north_south_distance * 0.20
+    delta_long = east_west_distance * 0.20
     return false if lat > north + delta_lat
     return false if lat < south - delta_lat
-    if west < east
+    if west <= east
       return false if long > east + delta_long
       return false if long < west - delta_long
     else
-      return false if long > west + delta_long and long < east - delta_long
+      return false if long < west + delta_long and long > east - delta_long
     end
     return true
   end

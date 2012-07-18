@@ -781,6 +781,7 @@ class ObserverController < ApplicationController
 
   # Map results of a search or index.
   def map_observations # :nologin: :norobots:
+    @timer_start = Time.now
     @query = find_or_create_query(:Observation)
     @title = :map_locations_title.t(:locations => @query.title)
     @query = restrict_query_to_box(@query)
@@ -807,6 +808,8 @@ class ObserverController < ApplicationController
     for obs in @observations
       obs.location = locations[obs.location_id] if obs.location_id
     end
+
+    @num_results = @observations.count
   end
 
   ##############################################################################

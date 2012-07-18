@@ -49,6 +49,8 @@ class API
       params.remove_nils!
       params.merge!(:by => :id)
       Query.lookup(model.name.to_sym, :all, params)
+    rescue RuntimeError => e
+      raise QueryError.new(e)
     end
 
     def build_object

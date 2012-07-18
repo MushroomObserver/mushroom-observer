@@ -1012,7 +1012,7 @@ class AbstractQuery < ActiveRecord::Base
   def validate_float(arg, val)
     if val.is_a?(Fixnum) or
        val.is_a?(Float) or
-       val.is_a?(String) and val.match(/^-?(\d+(\.\d+)?|\.\d+)$/)
+       (val.is_a?(String) and val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
       raise("Value for :#{arg} should be a float, got: #{val.inspect}")
@@ -1027,7 +1027,7 @@ class AbstractQuery < ActiveRecord::Base
        val.is_a?(Symbol)
       val.to_s
     else
-      raise("Value for :#{arg} should be a string or symbol, got: #{val.inspect}")
+      raise("Value for :#{arg} should be a string or symbol, got a #{val.class}: #{val.inspect}")
     end
   end
 
