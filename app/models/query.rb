@@ -417,7 +417,6 @@ class Query < AbstractQuery
     :images_observations => {
       :images        => :image_id,
       :observations  => :observation_id,
-      :observations_projects => [:observation_id, :observation_id],
     },
     :images_projects => {
       :images        => :image_id,
@@ -1838,7 +1837,7 @@ class Query < AbstractQuery
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
     if model_symbol == :Image
-      self.join << {:images_observations => :observations_projects}
+      self.join << {:images_observations => {:observations => :observations_projects}}
     else
       self.join << {:observations => :observations_projects}
     end
