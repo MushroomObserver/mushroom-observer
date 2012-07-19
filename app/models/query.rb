@@ -32,6 +32,7 @@ class Query < AbstractQuery
       :synonym_names?   => [:string],
       :children_names?  => [:string],
       :locations?       => [:string],
+      :projects?        => [:string],
       :species_lists?   => [:string],
       :has_observation? => {:string => [:yes]},
       :size?            => [{:string => Image.all_sizes - [:full_size]}],
@@ -106,8 +107,9 @@ class Query < AbstractQuery
       :synonym_names?  => [:string],
       :children_names? => [:string],
       :locations?      => [:string],
+      :projects?       => [:string],
       :species_lists?  => [:string],
-      :confidence?     => [:integer],
+      :confidence?     => [:float],
       :include_admin?  => :boolean,
       :is_col_loc?     => :boolean,
       :has_specimen?   => :boolean,
@@ -125,9 +127,17 @@ class Query < AbstractQuery
       :west?           => :float,
     },
     :Project => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :users?    => [User],
+      :created?           => [:time],
+      :modified?          => [:time],
+      :users?             => [User],
+      :has_images?        => {:string => [:yes]},
+      :has_observations?  => {:string => [:yes]},
+      :has_species_lists? => {:string => [:yes]},
+      :has_comments?      => {:string => [:yes]},
+      :has_notes?         => :boolean,
+      :title_has?         => :string,
+      :notes_has?         => :string,
+      :comments_has?      => :string,
     },
     :RssLog => {
       :modified? => [:time],
@@ -142,6 +152,7 @@ class Query < AbstractQuery
       :synonym_names?  => [:string],
       :children_names? => [:string],
       :locations?      => [:string],
+      :projects?       => [:string],
       :title_has?      => :string,
       :has_notes?      => :boolean,
       :notes_has?      => :string,
@@ -907,6 +918,10 @@ class Query < AbstractQuery
       :join => {:images_observations => :observations}
     )
     initialize_model_do_objects_by_name(
+      Project, :projects, 'images_projects.project_id',
+      :join => :images_projects
+    )
+    initialize_model_do_objects_by_name(
       SpeciesList, :species_lists, 'observations_species_lists.species_list_id',
       :join => {:images_observations => {:observations => :observations_species_lists}}
     )
@@ -1069,6 +1084,10 @@ class Query < AbstractQuery
     )
     initialize_model_do_locations
     initialize_model_do_objects_by_name(
+      Project, :projects, 'observations_projects.project_id',
+      :join => :observations_projects
+    )
+    initialize_model_do_objects_by_name(
       SpeciesList, :species_lists,
       'observations_species_lists.species_list_id',
       :join => :observations_species_lists
@@ -1123,6 +1142,29 @@ class Query < AbstractQuery
     initialize_model_do_time(:created)
     initialize_model_do_time(:modified)
     initialize_model_do_objects_by_id(:users)
+    if params[:has_images]
+      self.join << :images_projects
+    end
+    if params[:has_observations]
+      self.join << :observations_projects
+    end
+    if params[:has_species_lists]
+      self.join << :projects_species_lists
+    end
+    initialize_model_do_search(:title_has, :title)
+    initialize_model_do_search(:notes_has, :notes)
+    initialize_model_do_boolean(:has_notes,
+      'LENGTH(COALESCE(species_lists.notes,"")) > 0',
+      'LENGTH(COALESCE(species_lists.notes,"")) = 0'
+    )
+    if params[:has_comments]
+      self.join << :comments
+    end
+    if !params[:comments_has].blank?
+      initialize_model_do_search(:comments_has,
+        'CONCAT(comments.summary,comments.notes)')
+      self.join << :comments
+    end
   end
 
   def initialize_rss_log
@@ -1147,6 +1189,10 @@ class Query < AbstractQuery
       :join => {:observations_species_lists => :observations}
     )
     initialize_model_do_locations
+    initialize_model_do_objects_by_name(
+      Project, :projects, 'projects_species_lists.project_id',
+      :join => :projects_species_lists
+    )
     initialize_model_do_search(:title_has, :title)
     initialize_model_do_search(:notes_has, :notes)
     initialize_model_do_boolean(:has_notes,
@@ -1420,12 +1466,12 @@ class Query < AbstractQuery
 
   def initialize_model_do_date_half(min, val, col)
     dir = min ? '>' : '<'
-    if val.match(/^\d\d\d\d/)
+    if val.to_s.match(/^\d\d\d\d/)
       y, m, d = val.split('-')
       m ||= min ? 1 : 12
       d ||= min ? 1 : 31
       self.where << "#{col} #{dir}= '%04d-%02d-%02d'" % [y, m, d]
-    elsif val.match(/-/)
+    elsif val.to_s.match(/-/)
       m, d = val.split('-')
       self.where << "MONTH(#{col}) #{dir} #{m} OR " +
                     "(MONTH(#{col}) = #{m} AND " +
@@ -1477,7 +1523,6 @@ class Query < AbstractQuery
 
   def validate_date(arg, val)
     if val.acts_like?(:date)
-      val = val.in_time_zone
       '%04d-%02d-%02d' % [val.year, val.mon, val.day]
     elsif val.to_s.match(/^\d\d\d\d(-\d\d?){0,2}$/i)
       val

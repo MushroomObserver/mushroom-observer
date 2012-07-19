@@ -371,14 +371,15 @@ class ObserverController < ApplicationController
   #
   ##############################################################################
 
-  def lookup_comment;      lookup_general(Comment);     end # :nologin
-  def lookup_image;        lookup_general(Image);       end # :nologin
-  def lookup_location;     lookup_general(Location);    end # :nologin
-  def lookup_name;         lookup_general(Name);        end # :nologin
-  def lookup_observation;  lookup_general(Observation); end # :nologin
-  def lookup_project;      lookup_general(Project);     end # :nologin
-  def lookup_species_list; lookup_general(SpeciesList); end # :nologin
-  def lookup_user;         lookup_general(User);        end # :nologin
+  def lookup_comment;       lookup_general(Comment);     end # :nologin
+  def lookup_image;         lookup_general(Image);       end # :nologin
+  def lookup_location;      lookup_general(Location);    end # :nologin
+  def lookup_name;          lookup_general(Name);        end # :nologin
+  def lookup_accepted_name; lookup_general(Name, true);  end # :nologin
+  def lookup_observation;   lookup_general(Observation); end # :nologin
+  def lookup_project;       lookup_general(Project);     end # :nologin
+  def lookup_species_list;  lookup_general(SpeciesList); end # :nologin
+  def lookup_user;          lookup_general(User);        end # :nologin
 
   # Alternative to controller/show_object/id.  These were included for the
   # benefit of the textile wrapper: We don't want to be looking up all these
@@ -386,60 +387,80 @@ class ObserverController < ApplicationController
   # _object_ link to these lookup_object methods, and defer lookup until the
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
-  def lookup_general(model)
-    objs = []
+  def lookup_general(model, accepted=false)
+    matches = []
+    suggestions = []
+    type = model.type_tag
     id = params[:id].to_s.gsub('_',' ').strip_squeeze
     begin
       if id.match(/^\d+$/)
         obj = find_or_goto_index(model, id)
         return if not obj
-        objs = [obj]
+        matches = [obj]
       else
         case model.to_s
-
-          when 'Location'
-            pattern = "%#{id}%"
-            objs = Location.find(:all, :limit => 100, :conditions =>
-                                 [ 'name LIKE ? OR scientific_name LIKE ?', pattern, pattern ])
-
           when 'Name'
             if parse = Name.parse_name(id)
-              objs = Name.find_all_by_search_name(parse.search_name)
-              objs = Name.find_all_by_text_name(parse.text_name) if objs.empty?
+              matches = Name.find_all_by_search_name(parse.search_name)
+              matches = Name.find_all_by_text_name(parse.text_name) if matches.empty?
+              matches = fix_name_matches(matches, accepted)
             end
-
+            if matches.empty?
+              suggestions = Name.suggest_alternate_spellings(id)
+              suggestions = fix_name_matches(suggestions, accepted)
+            end
+          when 'Location'
+            pattern = "%#{id}%"
+            matches = Location.find(:all, :limit => 100, :conditions =>
+                               [ 'name LIKE ? OR scientific_name LIKE ?', pattern, pattern ])
           when 'Project'
             pattern = "%#{id}%"
-            objs = Project.find(:all, :limit => 100, :conditions =>
-                                [ 'title LIKE ?', pattern ])
-
+            matches = Project.find(:all, :limit => 100, :conditions =>
+                                   [ 'title LIKE ?', pattern ])
           when 'SpeciesList'
             pattern = "%#{id}%"
-            objs = SpeciesList.find(:all, :limit => 100, :conditions =>
-                                    [ 'title LIKE ?', pattern ])
-
+            matches = SpeciesList.find(:all, :limit => 100, :conditions =>
+                                       [ 'title LIKE ?', pattern ])
           when 'User'
-            objs = User.find_all_by_login(id)
-            objs = User.find_all_by_name(id) if objs.empty?
-
+            matches = User.find_all_by_login(id)
+            matches = User.find_all_by_name(id) if matches.empty?
         end
       end
-    rescue
+    rescue => e
+      flash_error(e.to_s) if not PRODUCTION
     end
-    if objs.empty?
-      type = model.type_tag
+
+    if matches.empty? and suggestions.empty?
       flash_error(:runtime_object_no_match.t(:match => id, :type => type))
-      goto_index(model)
-    elsif objs.length == 1
-      obj = objs.first
+      redirect_to(:controller => model.show_controller,
+                  :action => (model == User ? :index_rss_log : model.index_action))
+    elsif matches.length == 1 || suggestions.length == 1
+      obj = matches.first || suggestions.first
+      if suggestions.any?
+        flash_warning(:runtime_suggest_one_alternate.t(:match => id, :type => type))
+      end
       redirect_to(:controller => obj.show_controller, :action => obj.show_action, :id => obj.id)
     else
-      obj = objs.first
-      query = Query.lookup(model, :in_set, :ids => objs)
-      flash_warning(:runtime_object_multiple_matches.t(:match => id, :type => type))
+      obj = matches.first || suggestions.first
+      query = Query.lookup(model, :in_set, :ids => matches + suggestions)
+      if suggestions.any?
+        flash_warning(:runtime_suggest_multiple_alternates.t(:match => id, :type => type))
+      else
+        flash_warning(:runtime_object_multiple_matches.t(:match => id, :type => type))
+      end
       redirect_to(:controller => obj.show_controller, :action => obj.index_action,
                   :params => query_params(query))
     end
+  end
+
+  def fix_name_matches(matches, accepted)
+    matches.map do |name|
+      if accepted and name.deprecated
+        name.approved_synonyms.first 
+      else
+        name.correct_spelling || name
+      end
+    end.reject(&:nil?)
   end
 
   # This is the action the search bar commits to.  It just redirects to one of

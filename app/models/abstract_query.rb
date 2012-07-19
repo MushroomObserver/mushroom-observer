@@ -945,6 +945,9 @@ class AbstractQuery < ActiveRecord::Base
       val[0,MAX_ARRAY].map do |val2|
         scalar_validate(arg, val2, type)
       end
+    elsif val.is_a?(API::Range)
+      [ scalar_validate(arg, val.begin, type),
+        scalar_validate(arg, val.end, type) ]
     else
       [scalar_validate(arg, val, type)]
     end

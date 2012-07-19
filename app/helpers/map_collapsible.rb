@@ -132,7 +132,7 @@ private
       x = round_number(loc.long, prec)
     else
       y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0
-      x = loc.long >= 150 || loc.long <= -150 ? 180 : round.number(loc.long, prec)
+      x = loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)
     end
     return x, y
   end

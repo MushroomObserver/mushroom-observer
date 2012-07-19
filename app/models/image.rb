@@ -633,6 +633,16 @@ class Image < AbstractModel
     [1, 2, 3, 4]
   end
 
+  # Returns minimum vote.
+  def self.minimum_vote
+    all_votes.first
+  end
+
+  # Returns maximum vote.
+  def self.maximum_vote
+    all_votes.last
+  end
+
   # Validate a vote value.  Returns type-cast vote (Fixnum from 1 to 4) if
   # valid, or nil if not.
   def self.validate_vote(value)

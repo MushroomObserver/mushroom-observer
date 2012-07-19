@@ -3757,6 +3757,8 @@ runtime_refine_search_model_not_supported: Sorry, '[:app_refine_search]' doesn't
 runtime_refine_search_object_not_found: Couldn't find [type] matching '[value]' in '[field]'.
 runtime_search_has_expired: Your query has expired, please try again.
 runtime_show_observation_success: Successfully changed vote.
+runtime_suggest_one_alternate: No [types] match "[match]", maybe you meant this?
+runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
 runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
 runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
 

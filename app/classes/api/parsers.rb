@@ -277,13 +277,13 @@ class API
          d < 1 or d > 31
         raise BadParameterValue.new(str, :date_range)
       end
-      return m*100+d
+      return Range.new(m*100+d, m*100+d)
     elsif str.match(/^\d\d?$/)
       val = str.to_i
       if val < 1 or val > 12
         raise BadParameterValue.new(str, :date_range)
       end
-      return val
+      return Range.new(val, val)
     else
       raise BadParameterValue.new(str, :date_range)
     end

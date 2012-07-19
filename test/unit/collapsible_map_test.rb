@@ -26,75 +26,85 @@ end
 class CollapsibleMapTest < UnitTestCase
 
   def assert_mapset_is_point(mapset, lat, long)
-    assert_true(mapset.is_point?)
-    assert_false(mapset.is_box?)
-    assert_mapset(mapset, lat, long, lat, lat, long, long, 0, 0)
+    clean_our_backtrace do
+      assert_true(mapset.is_point?)
+      assert_false(mapset.is_box?)
+      assert_mapset(mapset, lat, long, lat, lat, long, long, 0, 0)
+    end
   end
 
   def assert_mapset_is_box(mapset, north, south, east, west)
-    lat = (north + south) / 2.0
-    long = (east + west) / 2.0
-    assert_false(mapset.is_point?)
-    assert_true(mapset.is_box?)
-    if east >= west
-      assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
-    else
-      assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
+    clean_our_backtrace do
+      lat = (north + south) / 2.0
+      long = (east + west) / 2.0
+      assert_false(mapset.is_point?)
+      assert_true(mapset.is_box?)
+      if east >= west
+        assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
+      else
+        assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
+      end
     end
   end
 
   def assert_mapset(mapset, lat, long, north, south, east, west, north_south, east_west)
-    assert_extents(mapset, north, south, east, west)
-    assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
-    assert_in_delta(long, mapset.long, 0.0001)
-    assert_in_delta(lat, mapset.center[0], 0.0001)
-    assert_in_delta(long, mapset.center[1], 0.0001)
-    assert_in_delta(north, mapset.north_west[0], 0.0001)
-    assert_in_delta(west, mapset.north_west[1], 0.0001)
-    assert_in_delta(north, mapset.north_east[0], 0.0001)
-    assert_in_delta(east, mapset.north_east[1], 0.0001)
-    assert_in_delta(south, mapset.south_west[0], 0.0001)
-    assert_in_delta(west, mapset.south_west[1], 0.0001)
-    assert_in_delta(south, mapset.south_east[0], 0.0001)
-    assert_in_delta(east, mapset.south_east[1], 0.0001)
-    assert_in_delta(north_south, mapset.north_south_distance, 0.0001)
-    assert_in_delta(east_west, mapset.east_west_distance, 0.0001)
+    clean_our_backtrace do
+      assert_extents(mapset, north, south, east, west)
+      assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
+      assert_in_delta(long, mapset.long, 0.0001)
+      assert_in_delta(lat, mapset.center[0], 0.0001)
+      assert_in_delta(long, mapset.center[1], 0.0001)
+      assert_in_delta(north, mapset.north_west[0], 0.0001)
+      assert_in_delta(west, mapset.north_west[1], 0.0001)
+      assert_in_delta(north, mapset.north_east[0], 0.0001)
+      assert_in_delta(east, mapset.north_east[1], 0.0001)
+      assert_in_delta(south, mapset.south_west[0], 0.0001)
+      assert_in_delta(west, mapset.south_west[1], 0.0001)
+      assert_in_delta(south, mapset.south_east[0], 0.0001)
+      assert_in_delta(east, mapset.south_east[1], 0.0001)
+      assert_in_delta(north_south, mapset.north_south_distance, 0.0001)
+      assert_in_delta(east_west, mapset.east_west_distance, 0.0001)
+    end
   end
 
   def assert_extents(mapset, north, south, east, west)
-    errors = []
-    errors << 'north' if north.round(4) != mapset.north.round(4)
-    errors << 'south' if south.round(4) != mapset.south.round(4)
-    errors << 'east' if east.round(4) != mapset.east.round(4)
-    errors << 'west' if west.round(4) != mapset.west.round(4)
-    if errors.any?
-      expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
-      actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
-      message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
-      assert_block(message) {false}
+    clean_our_backtrace do
+      errors = []
+      errors << 'north' if north.round(4) != mapset.north.round(4)
+      errors << 'south' if south.round(4) != mapset.south.round(4)
+      errors << 'east' if east.round(4) != mapset.east.round(4)
+      errors << 'west' if west.round(4) != mapset.west.round(4)
+      if errors.any?
+        expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
+        actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
+        message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
+        assert_block(message) {false}
+      end
     end
   end
 
   def assert_list_of_mapsets(coll, objs)
-    expect = objs.reject(&:nil?).map do |x|
-      x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
-    end.map do |x|
-      '%9.4f %9.4f %9.4f %9.4f' % x
-    end.sort
-    actual = coll.mapsets.map(&:edges).map do |x|
-      '%9.4f %9.4f %9.4f %9.4f' % x
-    end.sort
-    messages = []
-    differ = false
-    for i in 0..(expect.length > actual.length ? expect.length : actual.length)
-      message = '%39.39s    %39.39s' % [expect[i], actual[i]]
-      if expect[i] != actual[i]
-        differ = true
-        message += ' (*)'
+    clean_our_backtrace do
+      expect = objs.reject(&:nil?).map do |x|
+        x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
+      end.map do |x|
+        '%9.4f %9.4f %9.4f %9.4f' % x
+      end.sort
+      actual = coll.mapsets.map(&:edges).map do |x|
+        '%9.4f %9.4f %9.4f %9.4f' % x
+      end.sort
+      messages = []
+      differ = false
+      for i in 0..(expect.length > actual.length ? expect.length : actual.length)
+        message = '%39.39s    %39.39s' % [expect[i], actual[i]]
+        if expect[i] != actual[i]
+          differ = true
+          message += ' (*)'
+        end
+        messages << message
       end
-      messages << message
+      assert_block("Mapsets are wrong: expect -vs- actual\n" + messages.join("\n")) { !differ }
     end
-    assert_block("Mapsets are wrong: expect -vs- actual\n" + messages.join("\n")) { !differ }
   end
 
   # ------------------------------------------------------------
@@ -399,14 +409,14 @@ class CollapsibleMapTest < UnitTestCase
     data = [
       [10, 10],       # 0 --._____
       [10.1, 10.1],   # 1 --'     \
-      [20, 10],       # 2 --------|
-      [20, 20],       # 3 -----.__|__
-      [22, 22],       # 4 -----'  |
-      [0, 0],         # 5 --------|
-      [-10, 10],      # 6 -----.__/
-      [-12, 12],      # 7 -----'    
-      [-90, 50],      # 8 -----------
-      [-70, -30],     # 9 -----------
+      [20, 10],       # 2 ---------}-.
+      [20, 20],       # 3 -----.__/  |
+      [22, 22],       # 4 -----'     |_
+      [0, 0],         # 5 -----------|
+      [-10, 10],      # 6 -----._____|
+      [-12, 12],      # 7 -----'
+      [-90, 50],      # 8 -------------
+      [-70, -30],     # 9 -------------
     ]
     observations = data.map do |lat, long|
       Observation.new(:lat => lat, :long => long)
@@ -436,8 +446,18 @@ class CollapsibleMapTest < UnitTestCase
 
     TestCollapsible.max_objects = 6
     coll = TestCollapsible.new(observations)
+    data[0] = [22, 10, 22, 10]
+    data[2] = data[3] = nil
+    assert_list_of_mapsets(coll, data)
+
+    TestCollapsible.max_objects = 5
+    coll = TestCollapsible.new(observations)
+    assert_list_of_mapsets(coll, data)
+
+    TestCollapsible.max_objects = 4
+    coll = TestCollapsible.new(observations)
     data[0] = [22, -12, 22, 0]
-    data[2] = data[3] = data[5] = data[6] = nil
+    data[5] = data[6] = nil
     assert_list_of_mapsets(coll, data)
   end
 
@@ -445,15 +465,15 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_a_bunch_of_points_straddling_date_line
     data = [
       [10, -175],     # 0 --._____
-      [10.1, -175.1], # 1 --'     \
-      [20, -175],     # 2 --------|
-      [20, -165],     # 3 -----.__|__
-      [22, -167],     # 4 -----'  |
-      [0, 175],       # 5 --------|
-      [-10, -175],    # 6 -----.__/
-      [-12, -177],    # 7 -----'    
-      [-90, -135],    # 8 -----------
-      [70, -145],     # 9 -----------
+      [10.1, -175.1], # 1 --'     |_
+      [20, -175],     # 2 --------' |_
+      [-10, -175],    # 3 -----.____| |
+      [-12, -177],    # 4 -----'      |_
+      [20, -165],     # 5 -----.______|
+      [22, -167],     # 6 -----'      |
+      [0, 175],       # 7 ------------'
+      [-90, -135],    # 8 --------------
+      [70, -145],     # 9 --------------
     ]
     observations = data.map do |lat, long|
       Observation.new(:lat => lat, :long => long)
@@ -472,20 +492,32 @@ class CollapsibleMapTest < UnitTestCase
 
     TestCollapsible.max_objects = 8
     coll = TestCollapsible.new(observations)
-    data[3] = [22, 20, -165, -167]
-    data[6] = [-10, -12, -175, -177]
-    data[4] = data[7] = nil
+    data[3] = [-10, -12, -175, -177]
+    data[5] = [22, 20, -165, -167]
+    data[4] = data[6] = nil
     assert_list_of_mapsets(coll, data)
 
     TestCollapsible.max_objects = 7
     coll = TestCollapsible.new(observations)
     assert_list_of_mapsets(coll, data)
 
-    # This is the tricky one: will it combine 175°E with 175°W?
     TestCollapsible.max_objects = 6
     coll = TestCollapsible.new(observations)
+    data[0] = [20, 10, -175, -175.1]
+    data[2] = nil
+    assert_list_of_mapsets(coll, data)
+
+    TestCollapsible.max_objects = 5
+    coll = TestCollapsible.new(observations)
+    data[0] = [20, -12, -175, -177]
+    data[3] = nil
+    assert_list_of_mapsets(coll, data)
+
+    # This is the tricky one: will it combine 175°E with 175°W?
+    TestCollapsible.max_objects = 4
+    coll = TestCollapsible.new(observations)
     data[0] = [22, -12, -165, 175]
-    data[2] = data[3] = data[5] = data[6] = nil
+    data[5] = data[7] = nil
     assert_list_of_mapsets(coll, data)
   end
 end

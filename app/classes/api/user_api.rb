@@ -18,8 +18,16 @@ class API
     def query_params
       {
         :where    => sql_id_condition,
-        :created  => parse_time_ranges(:created),
-        :modified => parse_time_ranges(:modified),
+        :created  => parse_time_range(:created),
+        :modified => parse_time_range(:modified),
+        # :login        => parse_strings(:login),
+        # :name         => parse_strings(:name),
+        # :locations    => parse_strings(:location),
+        # :images       => parse_images(:image),
+        # :has_location => parse_boolean(:has_location),
+        # :has_image    => parse_boolean(:has_image),
+        # :has_notes    => parse_boolean(:has_notes),
+        # :notes_has    => parse_strings(:notes_has),
       }
     end
 

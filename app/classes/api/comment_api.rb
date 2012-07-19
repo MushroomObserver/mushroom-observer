@@ -17,13 +17,13 @@ class API
     def query_params
       {
         :where       => sql_id_condition,
-        :created     => parse_time_ranges(:created),
-        :modified    => parse_time_ranges(:modified),
+        :created     => parse_time_range(:created),
+        :modified    => parse_time_range(:modified),
         :users       => parse_users(:user),
-        :types       => parse_enums(:type, :limit => Comment.all_type_tags),
-        :targets     => parse_objects(:target, :limit => Comment.all_types),
-        :summary_has => parse_strings(:summary_has),
-        :content_has => parse_strings(:content_has),
+        :types       => parse_enum(:type, :limit => Comment.all_type_tags),
+        :summary_has => parse_string(:summary_has),
+        :content_has => parse_string(:content_has),
+        # :targets     => parse_objects(:target, :limit => Comment.all_types),
       }
     end
 

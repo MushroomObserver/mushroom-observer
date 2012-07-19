@@ -14,14 +14,15 @@ class API
     ]
 
     def query_params
-      {
-        :created   => parse_time_ranges(:created),
-        :verified  => parse_time_ranges(:verified),
-        :last_used => parse_time_ranges(:last_used),
-        :num_uses  => parse_integer_ranges(:num_uses),
-        :users     => parse_users(:user),
-        :notes     => parse_strings(:app),
-      }
+      raise NoMethodForAction.new(:get, :api_keys)
+      # {
+      #   :created   => parse_time_ranges(:created),
+      #   :verified  => parse_time_ranges(:verified),
+      #   :last_used => parse_time_ranges(:last_used),
+      #   :num_uses  => parse_integer_ranges(:num_uses),
+      #   :users     => parse_users(:user),
+      #   :notes     => parse_strings(:app),
+      # }
     end
 
     def create_params

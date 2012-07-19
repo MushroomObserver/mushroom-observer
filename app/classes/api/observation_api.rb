@@ -27,16 +27,17 @@ class API
     def query_params
       {
         :where          => sql_id_condition,
-        :created        => parse_time_ranges(:created),
-        :modified       => parse_time_ranges(:modified),
-        :date           => parse_date_ranges(:date),
+        :created        => parse_time_range(:created),
+        :modified       => parse_time_range(:modified),
+        :date           => parse_date_range(:date),
         :users          => parse_users(:user),
         :names          => parse_strings(:name),
         :synonym_names  => parse_strings(:synonyms_of),
         :children_names => parse_strings(:children_of),
-        :locations      => parse_locations(:locations),
-        :species_lists  => parse_species_lists(:species_lists),
-        :confidence     => parse_float_range(:confidence),
+        :locations      => parse_strings(:locations),
+        :projects       => parse_strings(:projects),
+        :species_lists  => parse_strings(:species_lists),
+        :confidence     => parse_float_range(:confidence, :limit => [Vote.minimum_vote..Vote.maximum_vote]),
         :is_col_loc     => parse_boolean(:is_collection_location),
         :has_specimen   => parse_boolean(:has_specimen),
         :has_location   => parse_boolean(:has_location),
@@ -47,6 +48,10 @@ class API
         :has_comments   => parse_boolean(:has_comments, :limit => true),
         :notes_has      => parse_string(:notes_has),
         :comments_has   => parse_string(:comments_has),
+        :north          => parse_latitude(:north),
+        :south          => parse_latitude(:south),
+        :east           => parse_longitude(:east),
+        :west           => parse_longitude(:west),
       }
     end
 

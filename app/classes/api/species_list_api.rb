@@ -17,19 +17,20 @@ class API
     def query_params
       {
         :where          => sql_id_condition,
-        :created        => parse_time_ranges(:created),
-        :modified       => parse_time_ranges(:modified),
+        :created        => parse_time_range(:created),
+        :modified       => parse_time_range(:modified),
+        :date           => parse_date(:date),
         :users          => parse_users(:user),
-        :date           => parse_dates(:date),
         :names          => parse_strings(:name),
         :synonym_names  => parse_strings(:synonyms_of),
         :children_names => parse_strings(:children_of),
-        :locations      => parse_locations(:location),
-        :title_has      => parse_strings(:title_has),
+        :locations      => parse_strings(:location),
+        :projects       => parse_strings(:project),
         :has_notes      => parse_boolean(:has_notes),
-        :notes_has      => parse_strings(:notes_has),
         :has_comments   => parse_boolean(:has_comments, :limit => true),
-        :comments_has   => parse_strings(:comments_has),
+        :title_has      => parse_string(:title_has),
+        :notes_has      => parse_string(:notes_has),
+        :comments_has   => parse_string(:comments_has),
       }
     end
 

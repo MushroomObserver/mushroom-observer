@@ -15,33 +15,35 @@ class API
     end
 
     def put
-      must_authenticate!
-      self.query = build_query
-      setter = build_setter
-      done_parsing_parameters!
-      abort_if_any_errors!
-      results.each do |obj|
-        begin
-          setter.call(obj)
-        rescue => e
-          errors << e
-        end
-      end
+      raise NoMethodForAction.new(:put, self.class.model.type_tag)
+      # must_authenticate!
+      # self.query = build_query
+      # setter = build_setter
+      # done_parsing_parameters!
+      # abort_if_any_errors!
+      # results.each do |obj|
+      #   begin
+      #     setter.call(obj)
+      #   rescue => e
+      #     errors << e
+      #   end
+      # end
     end
 
     def delete
-      must_authenticate!
-      self.query = build_query
-      deleter = build_deleter
-      done_parsing_parameters!
-      abort_if_any_errors!
-      results.each do |obj|
-        begin
-          setter.call(obj)
-        rescue => e
-          errors << e
-        end
-      end
+      raise NoMethodForAction.new(:delete, self.class.model.type_tag)
+      # must_authenticate!
+      # self.query = build_query
+      # deleter = build_deleter
+      # done_parsing_parameters!
+      # abort_if_any_errors!
+      # results.each do |obj|
+      #   begin
+      #     setter.call(obj)
+      #   rescue => e
+      #     errors << e
+      #   end
+      # end
     end
 
     def build_query
