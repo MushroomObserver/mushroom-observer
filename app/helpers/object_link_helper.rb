@@ -54,12 +54,16 @@ module ApplicationHelper::ObjectLink
   #   Parent: <%= name_link(name.parent) %>
   #
   def name_link(name, str=nil)
-    begin
-      str ||= name.display_name.t
-      name_id = name.is_a?(Fixnum) ? name : name.id
-      link_to(str, :controller => 'name', :action => 'show_name', :id => name_id)
-    rescue
-    end
+    str ||= name.display_name.t
+    name_id = name.is_a?(Fixnum) ? name : name.id
+    link_to(str, :controller => 'name', :action => 'show_name', :id => name_id)
+  rescue
+  end
+
+  # Create link for name to MyCoPortal website.
+  def mycoportal_url(name)
+    'http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=' +
+      name.text_name.gsub(' ','+')
   end
 
   # Wrap user name in link to show_user.

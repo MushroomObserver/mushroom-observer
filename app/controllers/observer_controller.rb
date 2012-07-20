@@ -391,7 +391,7 @@ class ObserverController < ApplicationController
     matches = []
     suggestions = []
     type = model.type_tag
-    id = params[:id].to_s.gsub('_',' ').strip_squeeze
+    id = params[:id].to_s.gsub(/[+_]/,' ').strip_squeeze
     begin
       if id.match(/^\d+$/)
         obj = find_or_goto_index(model, id)

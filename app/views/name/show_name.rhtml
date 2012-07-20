@@ -6,6 +6,7 @@
   new_tab_set do
     add_tab(:google_images.t,
             "http://images.google.com/images?q=#{@name.real_text_name}")
+    add_tab('MyCoPortal', mycoportal_url(@name))
     if @data != []
       add_tab(:show_name_distribution_map.t, :action => 'map', :id => @name.id,
               :params => query_params)

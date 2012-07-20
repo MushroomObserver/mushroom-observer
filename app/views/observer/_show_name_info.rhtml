@@ -3,7 +3,8 @@
 
   if name = observation.name
     lines << link_to(:show_name.t(:name => name.display_name), :controller => 'name',
-                     :action => 'show_name', :id => name.id)
+                     :action => 'show_name', :id => name.id) +
+             ' [' + link_to('MyCoPortal', mycoportal_url(name)) + ']'
   end
 
   if name && !name.unknown? && !is_robot?
