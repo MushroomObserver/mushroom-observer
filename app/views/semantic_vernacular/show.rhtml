@@ -1,120 +1,183 @@
 <% javascript_include("jquery.min") %>
 <% javascript_include("semantic_vernacular/sv_lib") %>
 <% javascript_include("semantic_vernacular/sv_show") %>
+<%= stylesheet_link_tag("semantic_vernacular.css") %>
 
-<h2>Semantic Vernacular Description Detail</h2>
-<div id="svd-show-detail">
-	<ul class="svd-detail-ul">
-		<li class="svd-detail-li" id="svd-uri">
-			URI: <%= @svd.uri %>
-		</li>
-		<li class="svd-detail-li">
-			Name: 
-			<% label = @svd.default_label %>
-			<ul class="svd-detail-li-item" id="svd-default-label">
-				<li>
-					<%= label["label"]["value"] %>
-					<div class="svd-meta">
-						<small>
-							<%= "Proposed by #{label["user"]["value"]} 
-									(#{label["email"]["value"]}) at 
-									#{label["dateTime"]["value"]}" %>
-						</small>
-					</div>
-				</li>
-			</ul>
-		</li>
-		<% unless @svd.other_labels.empty? %>
-			<li class="svd-detail-li svd-other-proposals">
-				Other Name Proposals<span class="svd-expand"> [+] </span>
-				<div class="svd-other-proposals-toggle" style="display:none">
-					<% @svd.other_labels.each do |label| %>
-						<ul class="svd-detail-li-item" id="svd-other-labels">
-							<li>
-								<%= label["label"]["value"] %>
-								<div class="svd-meta">
-									<small>
-										<%= "Proposed by #{label["user"]["value"]} 
-												(#{label["email"]["value"]}) at 
-												#{label["dateTime"]["value"]}" %>
-									</small>
-								</div>
-							</li>
-						</ul>
-					<% end %>
-				</div>
-			</li>
-		<% end %>
-		<button type="button" id="svd-show-propose-label">
-			Propose a new name
-		</button>
-		<li class="svd-detail-li">
-			Definition:
-			<% definition = @svd.default_definition %>
-			<% if definition == nil %>
-				<%= "There is not any accepted definition for this semantic vernacular 
-						description yet." %>
-			<% else %>
-				<ul class="svd-detail-li-item" id="svd-default-definition">
-					<% features = @svd.get_features(definition["uri"]["value"]) %>
-					<% @svd.refactor_features(features).each do |feature, values| %>
-						<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
-					<% end %>
-					<div class="svd-meta">
-						<small>
-							<%= "Proposed by #{definition["user"]["value"]} 
-									(#{definition["email"]["value"]}) at 
-									#{definition["dateTime"]["value"]}" %>
-						 </small>
-					</div>
-				</ul>
-			<% end %>
-		</li>
-		<% unless @svd.other_definitions.empty? %>
-			<li class="svd-detail-li svd-other-proposals">
-				Other Definition Proposals<span class="svd-expand"> [+] </span>
-				<div class="svd-other-proposals-toggle" style="display:none">
-					<%@svd.other_definitions.each do |definition| %>
-						<ul class="svd-detail-li-item" id="svd-other-definitions">
-							<% features = @svd.get_features(definition["uri"]["value"]) %>
-							<% @svd.refactor_features(features).each do |feature, values| %>
-								<li><%= feature + ": " + values.join(" <i>or</i> ").to_s %></li>
-							<% end %>
-							<div class="svd-meta">
-								<small>
-									<%= "Proposed by #{definition["user"]["value"]} 
-											(#{definition["email"]["value"]}) at 
-											#{definition["dateTime"]["value"]}" %>
-								</small>
-							</div>
-						</ul>
-					<% end %>
-				</div>
-			</li>
-		<% end %>
-		<%= link_to("<button type=\"button\" id=\"svd-show-propose-definition\">
-								Propose a new definition</button>",
-								:controller => "semantic_vernacular",
-								:action => "create",
-								:uri => @svd.uri) %>
-		<li class="svd-detail-li">
-			Associated Scientific Names:
-			<ul>
-				<% @svd.associated_scientific_names.each do |name| %>
-					<li>
-						<% if name["moURL"] %>
-							<%= link_to(name["label"]["value"], name["moURL"]["value"]) %>
-						<% else %>
-							<%= name["label"]["value"] %>
-						<% end %>
-					</li>
-				<% end %>
-			</ul>
-		</li>
-	</ul>
-</div>
 <div class="svd-navigation">
-	<%= link_to("Go to all Vernacular Descriptions", 
+	<%= link_to("Go to all Semantic Vernacular Descriptions", 
 							:controller => "semantic_vernacular",
 							:action => "index") %>
+</div>
+<h2>Semantic Vernacular Description (SVD) Detail</h2>
+<div id="svd-show">
+	<ul>
+		<li class="svd-show-li" id="svd-show-uri">
+			<b>URI</b>: <%= @svd.uri %>
+		</li>
+		<li class="svd-show-li" id="svd-show-name">
+			<b>Name</b>:
+			<% if @svd.name %>
+				<ul class="svd-show-li-item" id="svd-show-name">
+					<li>
+						<%= @svd.name["label"]["value"] %>
+					</li>
+				</ul>
+				<p class="svd-show-li-item-meta">
+					<%= "Proposed by #{@svd.name["user"]["value"]} at 
+							#{@svd.name["dateTime"]["value"]}" %>
+				</p>
+				<p class="svd-show-li-item-link">
+					<%= link_to("Delete this name",
+										:controller => "semantic_vernacular",
+										:action => "delete",
+										:type => "VernacularLabel",
+										:uri => @svd.name["uri"]["value"]) %>
+				</p>
+			<% else %>
+				<p class="svd-show-li-info">
+					This SVD does not have an accepted name yet.
+				</p>
+				<button type="button" id="svd-show-propose-label-button">
+					Propose a name
+				</button>
+			<% end %>
+		</li>
+		<% if @svd.label_proposals.length > 0 %>
+			<li class="svd-show-li svd-show-proposals" id="svd-show-label-proposals">
+				Name proposals:
+				<span class="svd-show-proposals-expand"> [-] </span>
+				<div class="svd-show-proposals-toggle" style="display:block">
+					<% @svd.label_proposals.each do |label| %>
+						<ul class="svd-show-li-item" id="svd-show-label-proposals">
+							<li>
+								<%= label["label"]["value"] %>
+							</li>
+						</ul>
+						<p class="svd-show-li-item-meta">
+							<%= "Proposed by #{label["user"]["value"]} at
+									#{label["dateTime"]["value"]}" %>
+						</p>
+						<p class="svd-show-li-item-link">
+							<%= link_to("Delete this proposal",
+												:controller => "semantic_vernacular",
+												:action => "delete",
+												:type => "VernacularLabel",
+												:uri => label["uri"]["value"]) %>
+						</p>
+					<% end %>
+				</div>
+			</li>
+		<% end %>	
+		<li class="svd-show-li" id="svd-show-definition">
+			<b>Definition</b>:
+			<% if @svd.definition %>
+				<ul class="svd-show-li-item" id="svd-show-definition">
+					<% @definition_features.each do |feature, values| %>
+						<% value_labels = Array.new %>
+						<% values.collect do |value| %>
+							<% value_labels.push("<span class=\"svd-show-feature-value\"
+								id=\"#{value["uri"]}\">" + value["label"] + "</span>") %>
+						<% end %>
+						<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">
+							#{feature["label"]}: #{value_labels.join(" <i>or</i> ")}</li>" %>
+					<% end %>
+				</ul>
+				<p class="svd-show-li-item-meta">
+					<%= "Proposed by #{@svd.definition["user"]["value"]} at
+							#{@svd.definition["dateTime"]["value"]}" %>
+				</p>
+				<p class="svd-show-li-item-link">
+				<%= link_to("Create a new SVD based on this definition",
+										:controller => "semantic_vernacular",
+										:action => "create",
+										:desc => @svd.definition["uri"]["value"]) %> |
+				<%= link_to("Delete this definition",
+										:controller => "semantic_vernacular",
+										:action => "delete",
+										:type => "VernacularFeatureDescription",
+										:uri => @svd.definition["uri"]["value"]) %>
+				</p>		
+			<% else %>
+				<p class="svd-show-li-info">
+					This SVD does not have an accepted definition yet.
+				</p>
+				<%= link_to("<button type=\"button\" 
+										id=\"svd-show-propose-definition-button\">
+										Propose a definition</button>",
+										:controller => "semantic_vernacular",
+										:action => "create",
+										:uri => @svd.uri) %>
+			<% end %>
+		</li>
+		<% if @svd.description_proposals.length > 0 %>
+			<li class="svd-show-li svd-show-proposals" 
+					id="svd-show-description-proposals">
+				Definition proposals:
+				<span class="svd-show-proposals-expand"> [-] </span>
+				<div class="svd-show-proposals-toggle" style="display:block">
+					<%@svd.description_proposals.each do |description| %>
+						<ul class="svd-show-li-item" id="svd-show-description-proposals">
+							<% description["features"].each do |feature, values| %>
+								<% value_labels = Array.new %>
+								<% values.collect do |value| %>
+									<% value_labels.push("<span class=\"svd-show-feature-value\" 
+										id=\"#{value["uri"]}\">" + value["label"] + "</span>") %>
+								<% end %>
+								<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">
+									#{feature["label"]}: #{value_labels.join(" <i>or</i> ")}</li>"
+								%>
+							<% end %>
+						</ul>
+						<p class="svd-show-li-item-meta">
+							<%= "Proposed by #{description["user"]["value"]} at 
+									#{description["dateTime"]["value"]}" %>
+						</p>
+						<p class="svd-show-li-item-link">
+						<%= link_to("Propose a definition based on this description",
+												:controller => "semantic_vernacular",
+												:action => "create",
+												:uri => @svd.uri,
+												:desc => description["uri"]["value"]) %> |
+						<%= link_to("Delete this proposal",
+												:controller => "semantic_vernacular",
+												:action => "delete",
+												:type => "VernacularFeatureDescription",
+												:uri => description["uri"]["value"]) %>
+						</p>
+					<% end %>
+				</div>
+			</li>
+		<% end %>
+		<li class="svd-show-li" id="svd-show-associated-scientific-names">
+			<b>Associated Scientific Names</b>:
+			<% if @svd.associated_scientific_names.length > 0 %>
+				<ul class="svd-show-li-item" id="svd-show-associated-scientific-names">
+					<% @svd.associated_scientific_names.each do |name| %>
+						<li>
+							<% if name["moURL"] %>
+								<%= link_to(name["label"]["value"], name["moURL"]["value"]) %>
+							<% else %>
+								<%= name["label"]["value"] %>
+							<% end %>
+						</li>
+						<span class="svd-show-li-item-link">
+							<%= link_to("Delete this scientific name",
+													:controller => "semantic_vernacular",
+													:action => "delete",
+													:type => "ScientificName",
+													:uri => name["uri"]["value"]) %>
+						</span>
+						<br />
+					<% end %>
+				</ul>
+			<% else %>
+				<p class="svd-show-li-info">
+					This SVD does not have any associated scientific name yet.
+				</p>
+			<% end %>
+			<button type="button" id="svd-show-propose-scientific-name-button">
+					Propose an associated scientifc name
+				</button>
+		</li>
+	</ul>
 </div>

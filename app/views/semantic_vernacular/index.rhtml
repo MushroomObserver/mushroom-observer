@@ -1,19 +1,44 @@
-<h2>All Semantic Vernacular Descriptions</h2>
-<div>
-	<ul>
-    <% @all.sort_by! { |hash| hash["label"]["value"]} %>
-    <% @all.each do |svd| %>
-    <li>
-      <%= link_to(svd["label"]["value"], 
-                  :controller =>  "semantic_vernacular", 
-                  :action => "show",
-                  :uri => svd["uri"]["value"]) %>
-    </li>
-    <% end %>
-  </ul>
-</div>
+<%= stylesheet_link_tag("semantic_vernacular.css") %>
+
 <div class="svd-navigation">
-	<%= link_to("Create a new Vernacular Description", 
+  <%= link_to("Create a new Semantic Vernacular Description", 
               :controller => "semantic_vernacular", 
               :action => "create") %>
+</div>
+<h2>All Semantic Vernacular Descriptions (SVDs)</h2>
+<div id="svd-index">
+  <table id="svd-index">
+    <tr>
+      <th>SVDs with accepted names</th>
+      <th>SVDs without accepted names</th>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <% @svds_with_name.sort_by! { |svd| svd["label"]["value"]} %>
+          <% @svds_with_name.each do |svd| %>
+            <li>
+              <%= link_to(svd["label"]["value"], 
+                          :controller =>  "semantic_vernacular", 
+                          :action => "show",
+                          :uri => svd["uri"]["value"]) %>
+            </li>
+          <% end %>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <% @svds_without_name.sort_by! { |svd| svd} %>
+          <% @svds_without_name.each do |svd| %>
+            <li>
+              <%= link_to(svd, 
+                          :controller =>  "semantic_vernacular", 
+                          :action => "show",
+                          :uri => svd) %>
+            </li>
+          <% end %>
+        </ul>
+      </td>
+    </tr>
+  </table>
 </div>

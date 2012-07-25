@@ -35,54 +35,54 @@ class SemanticVernacularDataSource
 	def self.id_to_uri(id, type)
 		uri = SVF_NAMESPACE + 
 		case type
-		when "SemanticVernacularDescription" then "SVD"
-		when "VernacularDefinition" then "VD"
-		when "ScientificName" then "SN"
-		when "VernacularLabel" then "VL"
-		when "User" then "User"
+			when "SemanticVernacularDescription" then "SVD"
+			when "VernacularFeatureDescription" then "VFD"
+			when "ScientificName" then "SN"
+			when "VernacularLabel" then "VL"
+			when "User" then "U"
 		end
 		uri << id.to_s
 	end
 
 	def self.insert_label(svd, label, user)
-		update(insert_update(label_rdf(svd, label, user)))
+		update(insert_update(insert_label_rdf(svd, label, user)))
 	end
 
-	def self.delete_label()
+	def self.delete_label(label)
+		update(delete_update(delete_label_rdf(label)))
 	end
 
-	def self.insert_definition(svd, definition, features, user)
-		update(insert_update(definition_rdf(svd, definition, features, user)))
+	def self.insert_description(svd, description, features, user)
+		update(
+			insert_update(insert_description_rdf(svd, description, features, user)))
 	end
 
-	def self.delete_definition()
+	def self.delete_description(description)
+		update(delete_update(delete_description_rdf(description)))
 	end
 
 	def self.insert_scientific_names(svd, scientific_names)
-		update(insert_update(scientific_names_rdf(svd, scientific_names)))
+		update(insert_update(insert_scientific_names_rdf(svd, scientific_names)))
 	end
 
-	def self.scientific_names()
+	def self.delete_scientific_name(scientific_name)
+		update(delete_update(delete_scientific_name_rdf(scientific_name)))
 	end
 
 	def self.insert_svd(svd)
-		update(insert_update(svd_rdf(svd)))
+		update(insert_update(insert_svd_rdf(svd)))
 	end
 
-	def self.delete_svd()
-	end
-	
-
-	def self.test(svd)
-		svd_rdf(svd)
+	def self.delete_svd(svd)
+		update(delete_update(delete_svd_rdf(svd)))
 	end
 
 	private
 	
 	QUERY_ENDPOINT = "http://128.128.170.15:3030/svf/sparql"
-	#QUERY_ENDPOINT = "http://aquarius.tw.rpi.edu:2024/sparql"
-	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
 	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
+	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
+	#UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
 	SVF_NAMESPACE = "http://mushroomobserver.org/svf.owl#"
 
 	# Retrun: array of hashes
@@ -119,7 +119,7 @@ class SemanticVernacularDataSource
 	def self.query_max_ID(type)
 		query = QUERY_PREFIX + %(SELECT ?id WHERE {)
 		case type
-		when "SemanticVernacularDescription", "VernacularDefinition", 
+		when "SemanticVernacularDescription", "VernacularFeatureDescription", 
 			"ScientificName"
 			query << %(?uri rdfs:subClassOf svf:#{type} . )
 		when "VernacularLabel", "User"
@@ -128,99 +128,99 @@ class SemanticVernacularDataSource
 		query << "?uri svf:hasID ?id } ORDER BY DESC (?id) LIMIT 1"
 	end
 
-	def self.insert_update(rdf)
-		QUERY_PREFIX + %(INSERT DATA { #{rdf} }) 
+	def self.insert_update(insert_rdf)
+		QUERY_PREFIX + %(INSERT DATA { #{insert_rdf} }) 
 	end
 
-	def self.delete_update(rdf)
-		QUERY_PREFIX + %(DELETE DATA { #{rdf} })
+	def self.delete_update(delete_rdf)
+		Rails.logger.debug(delete_rdf)
+		QUERY_PREFIX + delete_rdf
 	end
 
-	def self.label_rdf(svd, label, user)
+	def self.insert_label_rdf(svd, label, user)
 		%(<#{svd["uri"]}> 
 				rdfs:subClassOf
-					#{has_object_value_restriction_rdf(
+					#{insert_has_object_value_restriction_rdf(
 						SVF_NAMESPACE + "hasLabel", label["uri"])} . 
 			<#{label["uri"]}>
 				a owl:NamedIndividual, svf:VernacularLabel;
 				rdfs:label "#{label["value"]}"^^rdfs:Literal;
 				svf:hasID "#{label["id"]}"^^xsd:positiveInteger;
-				svf:isDefault "#{label["is_default"]}"^^xsd:boolean;
+				svf:isName "#{label["is_name"]}"^^xsd:boolean;
 				svf:proposedAt "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime;
 				svf:proposedBy <#{user["uri"]}> . )
 	end
 
-	def self.definition_rdf(svd, definition, features, user)
+	def self.delete_label_rdf(label)
+		%(DELETE WHERE {
+				?svd rdfs:subClassOf ?c .
+				?c owl:hasValue <#{label}> .
+				?c ?p1 ?o1 .
+				<#{label}> ?p2 ?o2 . 
+			})
+	end
+
+	def self.insert_description_rdf(svd, description, features, user)
 		rdf = 
 			%(<#{svd["uri"]}> 
 					rdfs:subClassOf
-						#{some_object_values_from_restriction_rdf(
-							SVF_NAMESPACE + "hasDefinition", definition["uri"])} .
-					<#{definition["uri"]}>
+						#{insert_some_object_values_from_restriction_rdf(
+							SVF_NAMESPACE + "hasDescription", description["uri"])} .
+					<#{description["uri"]}>
 						a owl:class;
-						rdfs:subClassOf svf:VernacularDefinition;
+						rdfs:subClassOf svf:VernacularFeatureDescription;
 						rdfs:subClassOf
-							#{has_object_value_restriction_rdf(
+							#{insert_has_object_value_restriction_rdf(
 								SVF_NAMESPACE + "proposedBy", user["uri"])};
 						rdfs:subClassOf
-							#{has_datatype_value_restriction_rdf(
+							#{insert_has_datatype_value_restriction_rdf(
 								SVF_NAMESPACE + "proposedAt", 
 								Time.now.strftime("%FT%T%:z"), 
 								"xsd:dateTime")};
 						rdfs:subClassOf
-							#{has_datatype_value_restriction_rdf(
-								SVF_NAMESPACE + "isDefault", definition["is_default"], "xsd:boolean")};
-						svf:hasID "#{definition["id"]}"^^xsd:positiveInteger;
-						#{features_rdf(features)} . )			
+							#{insert_has_datatype_value_restriction_rdf(
+								SVF_NAMESPACE + "isDefinition",
+								description["is_definition"], "xsd:boolean")};
+						svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
+						#{insert_features_rdf(features)} . )			
 	end
 
-	def self.features_rdf(features)
-		rdf = %(owl:equivalentClass
-							[ a owl:class;
-							owl:intersectionOf \(svf:Fungus )
-		features.each do |feature|
-			if feature["values"].length > 1
-				rdf << %([ a owl:class;
-									 owl:unionOf \()
-				feature["values"].each do |value|
-					rdf << some_object_values_from_restriction_rdf(
-						feature["feature"], value)
-				end
-				rdf << %(\)])
-			end
-			if feature["values"].length == 1
-				rdf << some_object_values_from_restriction_rdf(
-					feature["feature"], feature["values"][0])
-			end
-		end
-		rdf << %(\)])
+	def self.delete_description_rdf(description)
+		%(DELETE {
+				?svd rdfs:subClassOf ?c . 
+				?c ?p1 ?o1 . 
+				<#{description}> ?p2 ?o2 .
+				?o3 ?p4 ?o4 .
+				?list ?p6 ?o6 .
+				?z rdf:first ?head .
+				?z rdf:rest ?tail .
+				?head ?p7 ?o7 .
+			}
+			WHERE {
+				?svd rdfs:subClassOf ?c .
+				?c owl:someValuesFrom <#{description}> .
+				?c ?p1 ?o1 .
+				<#{description}> ?p2 ?o2 .
+				<#{description}> ?p3 ?o3 .
+				?o3 ?p4 ?o4 .
+				<#{description}> owl:equivalentClass ?o5 .
+				?o5 owl:intersectionOf ?list .
+				?list ?p6 ?o6 .
+				?list rdf:rest* ?z .
+				?z rdf:first ?head .
+				?head ?p7 ?o7 .
+				?z rdf:rest ?tail .
+				FILTER isBlank(?o3)
+			})
 	end
 
-	def self.has_object_value_restriction_rdf(property, value)
-		%([ a owl:Restriction;
-				owl:onProperty <#{property}>;
-				owl:hasValue <#{value}> ])
-	end
-
-	def self.has_datatype_value_restriction_rdf(property, value, datatype)
-		%([ a owl:Restriction;
-				owl:onProperty <#{property}>;
-				owl:hasValue "#{value}"^^#{datatype} ])
-	end
-
-	def self.some_object_values_from_restriction_rdf(property, value)
-		%([ a owl:Restriction;
-				owl:onProperty <#{property}>;
-				owl:someValuesFrom <#{value}> ])
-	end
-
-	def self.scientific_names_rdf(svd, scientific_names)
+	def self.insert_scientific_names_rdf(svd, scientific_names)
 		rdf = %()
 		scientific_names.each do |scientific_name|
 			rdf << 
 				%(<#{svd["uri"]}>
 						rdfs:subClassOf
-							#{some_object_values_from_restriction_rdf(
+							#{insert_some_object_values_from_restriction_rdf(
 								SVF_NAMESPACE + "hasAssociatedScientificName", 
 								scientific_name["uri"])} . 
 					<#{scientific_name["uri"]}>
@@ -231,11 +231,68 @@ class SemanticVernacularDataSource
 		return rdf
 	end
 
-	def self.svd_rdf(svd)
+	def self.delete_scientific_name_rdf(scientific_name)
+		%(DELETE WHERE {
+				?svd rdfs:subClassOf ?c . 
+				?c owl:someValuesFrom <#{scientific_name}> .
+				?c ?p1 ?o1 .
+				<#{scientific_name}> ?p2 ?o2 
+			})
+	end
+
+	def self.insert_svd_rdf(svd)
 		%(<#{svd["uri"]}>
 				a owl:Class;
 				rdfs:subClassOf svf:SemanticVernacularDescription;
 				svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . )
 	end
+
+	def self.delete_svd_rdf(svd)
+		%(DELETE WHRE {
+				<#{svd}> ?p ?o
+			})
+	end
+
+	def self.insert_features_rdf(features)
+		rdf = %(owl:equivalentClass
+							[ a owl:class;
+							owl:intersectionOf \(svf:Fungus )
+		features.each do |feature|
+			if feature["values"].length > 1
+				rdf << %([ a owl:class;
+									 owl:unionOf \()
+				feature["values"].each do |value|
+					rdf << insert_some_object_values_from_restriction_rdf(
+						feature["feature"], value)
+				end
+				rdf << %(\)])
+			end
+			if feature["values"].length == 1
+				rdf << insert_some_object_values_from_restriction_rdf(
+					feature["feature"], feature["values"][0])
+			end
+		end
+		rdf << %(\)])
+	end
+
+	def self.insert_has_object_value_restriction_rdf(property, value)
+		%([ a owl:Restriction;
+				owl:onProperty <#{property}>;
+				owl:hasValue <#{value}> ])
+	end
+
+	def self.insert_has_datatype_value_restriction_rdf(property, value, datatype)
+		%([ a owl:Restriction;
+				owl:onProperty <#{property}>;
+				owl:hasValue "#{value}"^^#{datatype} ])
+	end
+
+	def self.insert_some_object_values_from_restriction_rdf(property, value)
+		%([ a owl:Restriction;
+				owl:onProperty <#{property}>;
+				owl:someValuesFrom <#{value}> ])
+	end
+
+	
 
 end

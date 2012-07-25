@@ -15,25 +15,52 @@ require_dependency 'classes/semantic_vernacular'
 class SemanticVernacularController < ApplicationController
 
   def index
-  	@all = SemanticVernacularDescription.index
+  	@svds_with_name = SemanticVernacularDescription.index_with_name
+    @svds_without_name = SemanticVernacularDescription.index_without_name
   end
 
   def show
   	@svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
-  end
-
-  def create
-    if params[:uri]
-      @svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
+    if @svd.definition
+      definition_features = SemanticVernacularDescription.get_features(
+        @svd.definition["uri"]["value"])
+      @definition_features = SemanticVernacularDescription.refactor_features(
+        definition_features)
+    end
+    if @svd.description_proposals.length > 0
+      @svd.description_proposals.each do |description|
+        description_features = SemanticVernacularDescription.get_features(
+          description["uri"]["value"])
+        description["features"] = 
+          SemanticVernacularDescription.refactor_features(description_features)
+      end
     end
   end
 
-  def submit
+  def create
+    if params[:uri] && params[:desc]
+      @svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
+      base_description = URI.unescape(params[:desc])
+      base_features = 
+        SemanticVernacularDescription.get_features(base_description)
+      @base_features = 
+        SemanticVernacularDescription.refactor_features(base_features)
+    elsif params[:uri] && !params[:desc]
+       @svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
+    elsif !params[:uri] && params[:desc]
+      base_features = 
+        SemanticVernacularDescription.get_features(URI.unescape(params[:desc]))
+      @base_features = 
+        SemanticVernacularDescription.refactor_features(base_features)
+    end
+  end
+
+  def propose
     post_json = ActiveSupport::JSON.decode(params["data"])
     fill_IDs(post_json)
     fill_URIs(post_json)
     Rails.logger.debug(post_json)
-    response = update_triple_store(post_json)
+    response = insert_to_triple_store(post_json)
     Rails.logger.debug(response)
     respond_to do |format|
       format.json do
@@ -48,23 +75,33 @@ class SemanticVernacularController < ApplicationController
     end
   end
 
+  def delete
+    type = URI.unescape(params["type"])
+    uri = URI.unescape(params["uri"])
+    response = delete_from_triple_store(type, uri)
+    Rails.logger.debug(response)
+    respond_to do |format|
+      format.html {redirect_to :back}
+    end
+  end
+
   # Fill IDs into the received post data.
   def fill_IDs(data)
     if data["svd"]["uri"]
       data["svd"]["is_new"] = false
-      data["label"]["is_default"] = false
-      data["definition"]["is_default"] = false
+      data["label"]["is_name"] = false
+      data["description"]["is_definition"] = false
     else
       data["svd"]["id"] = allocate_ID("SemanticVernacularDescription")
       data["svd"]["is_new"] = true
-      data["label"]["is_default"] = true
-      data["definition"]["is_default"] = true
+      data["label"]["is_name"] = false
+      data["description"]["is_definition"] = false
     end
     if data["label"]["value"]
       data["label"]["id"] = allocate_ID("VernacularLabel")
     end
     if data["features"].length > 0
-      data["definition"]["id"] = allocate_ID("VernacularDefinition")
+      data["description"]["id"] = allocate_ID("VernacularFeatureDescription")
     end
     if data["scientific_names"].length > 0
       id = allocate_ID("ScientificName")
@@ -91,9 +128,9 @@ class SemanticVernacularController < ApplicationController
       data["label"]["uri"] = SemanticVernacularDataSource.id_to_uri(
         data["label"]["id"], "VernacularLabel")
     end
-    if data["definition"]["id"]
-      data["definition"]["uri"] = SemanticVernacularDataSource.id_to_uri(
-      data["definition"]["id"], "VernacularDefinition")
+    if data["description"]["id"]
+      data["description"]["uri"] = SemanticVernacularDataSource.id_to_uri(
+      data["description"]["id"], "VernacularFeatureDescription")
     end
     if data["scientific_names"].length > 0
       data["scientific_names"].each do |name|
@@ -104,9 +141,10 @@ class SemanticVernacularController < ApplicationController
     Rails.logger.debug(data)
   end
 
-  # Generate RDF in turtle based on the received post data.
-  def update_triple_store(data)
-    if data["svd"]["is_new"]
+  # Generate RDF in turtle based on the received post data, and insert them to
+  # the triple store.
+  def insert_to_triple_store(data)
+    if data["svd"]["is_new"] == true
       response = SemanticVernacularDataSource.insert_svd(data["svd"])
     end
     if data["label"]["value"]
@@ -115,10 +153,10 @@ class SemanticVernacularController < ApplicationController
         data["label"],
         data["user"])
     end
-    if data["definition"]["uri"]
-      response = SemanticVernacularDataSource.insert_definition(
+    if data["description"]["uri"]
+      response = SemanticVernacularDataSource.insert_description(
         data["svd"], 
-        data["definition"],
+        data["description"],
         data["features"],
         data["user"])
     end
@@ -130,58 +168,16 @@ class SemanticVernacularController < ApplicationController
     return response
   end
 
-  # def test
-  #   data = {
-  #     "svd"=>{
-  #       "id"=>nil, 
-  #       "uri"=>"http://mushroomobserver.org/svf.owl#SVD14",
-  #       "is_new"=>nil
-  #     }, 
-  #     "label"=>{
-  #       "id"=>nil, 
-  #       "uri"=>nil, 
-  #       "value"=>"NewNewNewFakeLabel",
-  #       "is_default"=>nil
-  #     }, 
-  #     "definition"=>{
-  #       "id"=>nil, 
-  #       "uri"=>nil,
-  #       "is_default"=>nil
-  #     }, 
-  #     "features"=>[
-  #       # {
-  #       #   "feature"=>"http://FakeFeature1",
-  #       #   "values"=>["http://FakeValue1", "http://FakeValue2"]
-  #       # }, 
-  #       # {
-  #       #   "feature"=>"http://FakeFeature2",
-  #       #   "values"=>["http://FakeValue3"]
-  #       # }
-  #     ], 
-  #     "scientific_names"=>[
-  #       # {
-  #       #   "id"=>nil,
-  #       #   "uri"=>nil,
-  #       #   "label"=>"FakeSpecies3"
-  #       # },
-  #       # {
-  #       #   "id"=>nil,
-  #       #   "uri"=>nil,
-  #       #   "label"=>"FakeSpecies4"
-  #       # }
-  #     ], 
-  #     "matched_svds"=>[],
-  #     "user"=>{
-  #       "uri"=>"http://mushroomobserver.org/svf.owl#U2"
-  #     }
-  #   }
-  #   fill_IDs(data)
-  #   Rails.logger.debug(data)
-  #   fill_URIs(data)
-  #   Rails.logger.debug(data)
-  #   @res = update_triple_store(data)
-  #   #@res = SemanticVernacularDataSource.test(data["svd"])
-  #   Rails.logger.debug(@res)
-  # end
+  # Delete a label or a description from the triple store.
+  def delete_from_triple_store(type, uri)
+    case type
+      when "VernacularLabel"
+        response = SemanticVernacularDataSource.delete_label(uri)
+      when "VernacularFeatureDescription"
+        response = SemanticVernacularDataSource.delete_description(uri)
+      when "ScientificName"
+        response = SemanticVernacularDataSource.delete_scientific_name(uri)
+    end
+  end
 
 end
