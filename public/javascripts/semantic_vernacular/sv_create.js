@@ -289,9 +289,15 @@ org.mo.sv.create.getMatchedSVDsCallback = function(response)
   var uris = {};
   var labels = [];
   jQuery.each(response["results"]["bindings"], function(i, val) {
-    var key = val["label"]["value"];
-    uris[key] = val["uri"]["value"];
-    labels.push(val["label"]["value"]);
+    var key = "";
+    if (val["isName"]["value"] == "true")
+      key = val["label"]["value"];
+    else
+      key = val["uri"]["value"].split("#")[1];
+    if (uris.hasOwnProperty(key) == false)
+      uris[key] = val["uri"]["value"];
+    if (jQuery.inArray(key, labels) == -1)
+      labels.push(key);
   });
   if (labels.length == 0)
     org.mo.sv.create.matchedSVDs[0] = "none";
