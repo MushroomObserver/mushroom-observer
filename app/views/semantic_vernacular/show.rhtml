@@ -27,11 +27,12 @@
 							#{@svd.name["dateTime"]["value"]}" %>
 				</p>
 				<p class="svd-show-li-item-link">
-					<%= link_to("Delete this name",
+					<%= link_to("Delete this name", {
 										:controller => "semantic_vernacular",
 										:action => "delete",
 										:type => "VernacularLabel",
-										:uri => @svd.name["uri"]["value"]) %>
+										:uri => @svd.name["uri"]["value"]},
+										:class => "svd-show-li-item-delete-link") %>
 				</p>
 			<% else %>
 				<p class="svd-show-li-info">
@@ -58,11 +59,12 @@
 									#{label["dateTime"]["value"]}" %>
 						</p>
 						<p class="svd-show-li-item-link">
-							<%= link_to("Delete this proposal",
+							<%= link_to("Delete this proposal", {
 												:controller => "semantic_vernacular",
 												:action => "delete",
 												:type => "VernacularLabel",
-												:uri => label["uri"]["value"]) %>
+												:uri => label["uri"]["value"]},
+												:class => "svd-show-li-item-delete-link") %>
 						</p>
 					<% end %>
 				</div>
@@ -91,11 +93,12 @@
 										:controller => "semantic_vernacular",
 										:action => "create",
 										:desc => @svd.definition["uri"]["value"]) %> |
-				<%= link_to("Delete this definition",
+				<%= link_to("Delete this definition", {
 										:controller => "semantic_vernacular",
 										:action => "delete",
 										:type => "VernacularFeatureDescription",
-										:uri => @svd.definition["uri"]["value"]) %>
+										:uri => @svd.definition["uri"]["value"]},
+										:class => "svd-show-li-item-delete-link") %>
 				</p>		
 			<% else %>
 				<p class="svd-show-li-info">
@@ -138,11 +141,12 @@
 												:action => "create",
 												:uri => @svd.uri,
 												:desc => description["uri"]["value"]) %> |
-						<%= link_to("Delete this proposal",
+						<%= link_to("Delete this proposal", {
 												:controller => "semantic_vernacular",
 												:action => "delete",
 												:type => "VernacularFeatureDescription",
-												:uri => description["uri"]["value"]) %>
+												:uri => description["uri"]["value"]},
+												:class => "svd-show-li-item-delete-link") %>
 						</p>
 					<% end %>
 				</div>
@@ -161,11 +165,12 @@
 							<% end %>
 						</li>
 						<span class="svd-show-li-item-link">
-							<%= link_to("Delete",
+							<%= link_to("Delete", {
 													:controller => "semantic_vernacular",
 													:action => "delete",
 													:type => "ScientificName",
-													:uri => name["uri"]["value"]) %>
+													:uri => name["uri"]["value"]},
+													:class => "svd-show-li-item-delete-link") %>
 						</span>
 						<br />
 					<% end %>

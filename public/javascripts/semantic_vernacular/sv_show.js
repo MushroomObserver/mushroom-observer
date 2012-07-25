@@ -6,6 +6,19 @@ jQuery.noConflict();
 
 window.onload = function()
 {
+  // Add conform dialog to the "svd-show-li-item-delete-link" links.
+  jQuery("a.svd-show-li-item-delete-link").each(function() {
+    var href = jQuery(this).attr("href");
+    jQuery(this).removeAttr("href");
+    jQuery(this).click(function() {
+      var confirm = window.confirm("This entry will be permanently deleted. "
+        + "Do you want to continue?");
+      if (confirm == true) {
+        jQuery(this).attr("href", href);
+      }
+    });
+  });
+
   // Toggle proposals for labels and definitions.
   jQuery("span.svd-show-proposals-expand")
     .click(org.mo.sv.show.toggleOtherProposalsCallback);

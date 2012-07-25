@@ -294,6 +294,7 @@ org.mo.sv.create.getMatchedSVDsCallback = function(response)
       key = val["label"]["value"];
     else
       key = val["uri"]["value"].split("#")[1];
+    // Remove duplicates.
     if (uris.hasOwnProperty(key) == false)
       uris[key] = val["uri"]["value"];
     if (jQuery.inArray(key, labels) == -1)
