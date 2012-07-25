@@ -31,7 +31,7 @@
           <% @svds_without_name.sort_by! { |svd| svd} %>
           <% @svds_without_name.each do |svd| %>
             <li>
-              <%= link_to(svd, 
+              <%= link_to(svd.split("#")[1], 
                           :controller =>  "semantic_vernacular", 
                           :action => "show",
                           :uri => svd) %>

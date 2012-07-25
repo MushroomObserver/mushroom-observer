@@ -89,7 +89,7 @@ org.mo.sv.create.submitCallback = function()
     // When postData["svd"] has any SVD that is currently available, remind the
     // user his/her input of definition is not a new one.
     if (org.mo.sv.create.matchedSVDs[0] != "none")
-      alert("Your input of definition has matched one or more current" + 
+      alert("Your input of definition has matched one or more current " + 
         "vernacular desctiptions in the database, please refine your input!");
     else {
       console.log(org.mo.sv.create.postData);
