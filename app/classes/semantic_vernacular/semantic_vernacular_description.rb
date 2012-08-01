@@ -110,30 +110,6 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 		return refactoring
 	end
 
-	# def refactor_features(features)
-	# 	refactoring = Hash.new
-	# 	features.each do |feature|
-	# 		key = feature["feature"]["value"]
-	# 		value = feature["value"]["value"]
-	# 		if refactoring.has_key?(key) 
-	# 			refactoring[key].push(value)
-	# 		else
-	# 			refactoring[key] = Array.new
-	# 			refactoring[key].push(value)
-	# 		end
-	# 	end
-	# 	return refactoring
-	# end
-
-	# Return: array of hashes {"species" => speices}
-	# def associate_taxa
-	# 	taxa = Array.new
-	# 	refactor_features.each do |feature, values|
-	# 		taxa << self.class.query(query_feature_to_taxa(feature, values))
-	# 	end
-	# return taxa.inject(:&)
-	# end
-
 	private
 
 	def self.query_svds_all
@@ -231,24 +207,5 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 				?v rdfs:label ?value .
 			})
 	end
-
-	# def query_feature_to_taxa(feature, values)
-	# 	query = QUERY_PREFIX + 
-	# 	%(SELECT DISTINCT ?uri
-	# 		WHERE {
-	# 			{ ?uri rdfs:subClassOf ?class .
-	# 				?class owl:unionOf ?list . 
-	# 				?list rdf:rest*/rdf:first ?member . } UNION 
-	# 			{ ?uri rdfs:subClassOf ?member }
-	# 			?member a owl:Restriction .
-	# 			?member owl:onProperty ?p .
-	# 			?member owl:someValuesFrom ?v .)
-	# 	q = Array.new
-	# 	values.each do |value|
-	# 		q << %({ ?p rdfs:label "#{feature}"^^rdfs:Literal .
-	# 						 ?v rdfs:label "#{value}"^^rdfs:Literal . })
-	# 	end
-	# 	query << q.join(" UNION ") << "}"
-	# end
 
 end

@@ -52,6 +52,10 @@ class SemanticVernacularDataSource
 		update(delete_update(delete_label_rdf(label)))
 	end
 
+	def self.accept_label(label)
+		update(insert_delete_update(accept_label_rdf(label)))
+	end
+
 	def self.insert_description(svd, description, features, user)
 		update(
 			insert_update(insert_description_rdf(svd, description, features, user)))
@@ -129,26 +133,31 @@ class SemanticVernacularDataSource
 	end
 
 	def self.insert_update(insert_rdf)
-		QUERY_PREFIX + %(INSERT DATA { #{insert_rdf} }) 
+		QUERY_PREFIX + insert_rdf 
 	end
 
 	def self.delete_update(delete_rdf)
-		Rails.logger.debug(delete_rdf)
 		QUERY_PREFIX + delete_rdf
 	end
 
+	def self.insert_delete_update(insert_delete_rdf)
+		QUERY_PREFIX + insert_delete_rdf
+	end
+
 	def self.insert_label_rdf(svd, label, user)
-		%(<#{svd["uri"]}> 
-				rdfs:subClassOf
-					#{insert_has_object_value_restriction_rdf(
-						SVF_NAMESPACE + "hasLabel", label["uri"])} . 
-			<#{label["uri"]}>
-				a owl:NamedIndividual, svf:VernacularLabel;
-				rdfs:label "#{label["value"]}"^^rdfs:Literal;
-				svf:hasID "#{label["id"]}"^^xsd:positiveInteger;
-				svf:isName "#{label["is_name"]}"^^xsd:boolean;
-				svf:proposedAt "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime;
-				svf:proposedBy <#{user["uri"]}> . )
+		%(INSERT DATA {
+				<#{svd["uri"]}> 
+					rdfs:subClassOf
+						#{insert_has_object_value_restriction_rdf(
+							SVF_NAMESPACE + "hasLabel", label["uri"])} . 
+				<#{label["uri"]}>
+					a owl:NamedIndividual, svf:VernacularLabel;
+					rdfs:label "#{label["value"]}"^^rdfs:Literal;
+					svf:hasID "#{label["id"]}"^^xsd:positiveInteger;
+					svf:isName "#{label["is_name"]}"^^xsd:boolean;
+					svf:proposedAt "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime;
+					svf:proposedBy <#{user["uri"]}> . 
+			})
 	end
 
 	def self.delete_label_rdf(label)
@@ -160,29 +169,34 @@ class SemanticVernacularDataSource
 			})
 	end
 
+	def accept_label_rdf(label)
+		%()
+	end
+
 	def self.insert_description_rdf(svd, description, features, user)
-		rdf = 
-			%(<#{svd["uri"]}> 
+		%(INSERT DATA {
+				<#{svd["uri"]}> 
 					rdfs:subClassOf
 						#{insert_some_object_values_from_restriction_rdf(
 							SVF_NAMESPACE + "hasDescription", description["uri"])} .
-					<#{description["uri"]}>
-						a owl:class;
-						rdfs:subClassOf svf:VernacularFeatureDescription;
-						rdfs:subClassOf
-							#{insert_has_object_value_restriction_rdf(
-								SVF_NAMESPACE + "proposedBy", user["uri"])};
-						rdfs:subClassOf
-							#{insert_has_datatype_value_restriction_rdf(
-								SVF_NAMESPACE + "proposedAt", 
-								Time.now.strftime("%FT%T%:z"), 
-								"xsd:dateTime")};
-						rdfs:subClassOf
-							#{insert_has_datatype_value_restriction_rdf(
-								SVF_NAMESPACE + "isDefinition",
-								description["is_definition"], "xsd:boolean")};
-						svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
-						#{insert_features_rdf(features)} . )			
+				<#{description["uri"]}>
+					a owl:class;
+					rdfs:subClassOf svf:VernacularFeatureDescription;
+					rdfs:subClassOf
+						#{insert_has_object_value_restriction_rdf(
+							SVF_NAMESPACE + "proposedBy", user["uri"])};
+					rdfs:subClassOf
+						#{insert_has_datatype_value_restriction_rdf(
+							SVF_NAMESPACE + "proposedAt", 
+							Time.now.strftime("%FT%T%:z"), 
+							"xsd:dateTime")};
+					rdfs:subClassOf
+						#{insert_has_datatype_value_restriction_rdf(
+							SVF_NAMESPACE + "isDefinition",
+							description["is_definition"], "xsd:boolean")};
+					svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
+					#{insert_features_rdf(features)} . 
+			})			
 	end
 
 	def self.delete_description_rdf(description)
@@ -215,7 +229,7 @@ class SemanticVernacularDataSource
 	end
 
 	def self.insert_scientific_names_rdf(svd, scientific_names)
-		rdf = %()
+		rdf = %(INSERT DATA {)
 		scientific_names.each do |scientific_name|
 			rdf << 
 				%(<#{svd["uri"]}>
@@ -228,6 +242,7 @@ class SemanticVernacularDataSource
 						rdfs:label "#{scientific_name["label"]}"^^rdfs:Literal;
 						svf:hasID "#{scientific_name["id"]}"^^xsd:positiveInteger . )
 		end
+		rdf << %(})
 		return rdf
 	end
 
@@ -241,10 +256,12 @@ class SemanticVernacularDataSource
 	end
 
 	def self.insert_svd_rdf(svd)
-		%(<#{svd["uri"]}>
-				a owl:Class;
-				rdfs:subClassOf svf:SemanticVernacularDescription;
-				svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . )
+		%(INSERT DATA {
+				<#{svd["uri"]}>
+					a owl:Class;
+					rdfs:subClassOf svf:SemanticVernacularDescription;
+					svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . 
+			})
 	end
 
 	def self.delete_svd_rdf(svd)
@@ -292,7 +309,5 @@ class SemanticVernacularDataSource
 				owl:onProperty <#{property}>;
 				owl:someValuesFrom <#{value}> ])
 	end
-
-	
 
 end

@@ -60,7 +60,7 @@ class SemanticVernacularController < ApplicationController
     fill_IDs(post_json)
     fill_URIs(post_json)
     Rails.logger.debug(post_json)
-    response = insert_to_triple_store(post_json)
+    response = insert(post_json)
     Rails.logger.debug(response)
     respond_to do |format|
       format.json do
@@ -78,7 +78,17 @@ class SemanticVernacularController < ApplicationController
   def delete
     type = URI.unescape(params["type"])
     uri = URI.unescape(params["uri"])
-    response = delete_from_triple_store(type, uri)
+    response = delete(type, uri)
+    Rails.logger.debug(response)
+    respond_to do |format|
+      format.html {redirect_to :back}
+    end
+  end
+
+  def accept
+    type = URI.unescape(params["type"])
+    uri = URI.unescape(params["uri"])
+    response = insert_delete(type, uri)
     Rails.logger.debug(response)
     respond_to do |format|
       format.html {redirect_to :back}
@@ -143,7 +153,7 @@ class SemanticVernacularController < ApplicationController
 
   # Generate RDF in turtle based on the received post data, and insert them to
   # the triple store.
-  def insert_to_triple_store(data)
+  def insert(data)
     if data["svd"]["is_new"] == true
       response = SemanticVernacularDataSource.insert_svd(data["svd"])
     end
@@ -168,8 +178,8 @@ class SemanticVernacularController < ApplicationController
     return response
   end
 
-  # Delete a label or a description from the triple store.
-  def delete_from_triple_store(type, uri)
+  # Delete triples from the triple store.
+  def delete(type, uri)
     case type
       when "VernacularLabel"
         response = SemanticVernacularDataSource.delete_label(uri)
@@ -178,6 +188,11 @@ class SemanticVernacularController < ApplicationController
       when "ScientificName"
         response = SemanticVernacularDataSource.delete_scientific_name(uri)
     end
+  end
+
+  # Insert and delete triples in the same time to/from the triple store.
+  def insert_delete(type, uri)
+
   end
 
 end
