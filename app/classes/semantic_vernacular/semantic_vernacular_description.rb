@@ -32,20 +32,20 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 
 	attr_accessor :uri,
 								:name,
-								:label_proposals,
+								:labels,
 								:definition,
-								:description_proposals,
-								:associated_scientific_names
+								:descriptions,
+								:scientific_names
 
 	def initialize(uri)
 		@uri = uri
-		@name = get_name[0]
-		@label_proposals = get_label_proposals
-		@definition = get_definition[0]
-		@description_proposals = get_description_proposals
-		@associated_scientific_names = get_associated_scientific_names
+		@name = get_attribute("name")
+		@labels = get_attribute_array("labels")
+		@definition = get_attribute("definition")
+		@descriptions = get_attribute_array("descriptions")
+		@scientific_names = get_attribute_array("scientific_names")
 	end
-	
+
 	def self.index_with_name
 		query(query_svds_with_names)
 	end
@@ -55,62 +55,34 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 			index_with_name.collect {|svd| svd["uri"]["value"]}
 	end
 
-	def get_labels
-		self.class.query(query_labels)
-	end
-
-	def get_name
-		get_labels.select { |label| label["isName"]["value"] == "true" }
-	end
-
-	def get_label_proposals
-		get_labels.select { |label| label["isName"]["value"] == "false" }
-	end
-
-	def get_descriptions
-		self.class.query(query_descriptions)
-	end
-
-	def get_definition
-		get_descriptions.select do |description| 
-			description["isDefinition"]["value"] == "true"
+	def get_attribute(type)
+		attribute = nil
+		result = self.class.query(eval("query_" + type))[0]
+		if result != nil
+			attribute_class = ATTRIBUTE_CLASS_LIST[type.to_sym].constantize
+			attribute = attribute_class.new(result["uri"]["value"])
 		end
+		return attribute
 	end
 
-	def get_description_proposals
-		get_descriptions.select do |description| 
-			description["isDefinition"]["value"] == "false"
+	def get_attribute_array(type)
+		attribute_array = Array.new()
+		attribute_class = ATTRIBUTE_CLASS_LIST[type.to_sym].constantize
+		self.class.query(eval("query_" + type)).each do |result|
+			attribute_array.push(attribute_class.new(result["uri"]["value"]))
 		end
-	end
-
-	def get_associated_scientific_names
-		self.class.query(query_associated_scientific_names)
-	end
-
-	# Return: array of hashes
-	# [{"feature" => "feature_1", "value" => "value_1"}, 
-	#  {"feature" => "feature_2", "value" => "value_2"}, ...]
-	def self.get_features(desc)
-		query(query_features(desc))
-	end
-
-	# Return: hash {"feature_1" => "values_1", "feature_2" => "values_2", ...}
-	def self.refactor_features(features)
-		refactoring = Hash.new
-		features.each do |feature|
-			key = {"uri"=>feature["f"]["value"], "label"=>feature["feature"]["value"]}
-			value = {"uri"=>feature["v"]["value"], "label"=>feature["value"]["value"]}
-			if refactoring.has_key?(key) 
-				refactoring[key].push(value)
-			else
-				refactoring[key] = Array.new
-				refactoring[key].push(value)
-			end
-		end
-		return refactoring
+		return attribute_array
 	end
 
 	private
+
+	ATTRIBUTE_CLASS_LIST = {
+		:name => "VernacularLabel",
+		:labels => "VernacularLabel",
+		:definition => "VernacularFeatureDescription",
+		:descriptions => "VernacularFeatureDescription",
+		:scientific_names => "ScientificName"
+	}
 
 	def self.query_svds_all
 		QUERY_PREFIX +
@@ -126,86 +98,82 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 			WHERE {
 				?uri rdfs:subClassOf svf:SemanticVernacularDescription .
 				?uri rdfs:subClassOf ?c .
-				?c owl:onProperty svf:hasLabel .
+				?c owl:onProperty svf:hasSVDName .
 				?c owl:hasValue ?vl .
-				?vl rdfs:label ?label .
-				?vl svf:isName "true"^^xsd:boolean . 
+				?vl rdfs:label ?label
 			})
+	end
+
+	def self.insert_rdf(svd)
+		QUERY_PREFIX +
+		%(INSERT DATA {
+				<#{svd["uri"]}>
+					a owl:Class;
+					rdfs:subClassOf svf:SemanticVernacularDescription;
+					svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . 
+			})
+	end
+
+	def self.delete_rdf(svd)
+		QUERY_PREFIX +
+		%(DELETE WHRE {
+				<#{svd}> ?p ?o
+			})
+	end
+
+	def query_name
+		QUERY_PREFIX +
+		%(SELECT DISTINCT ?uri
+			WHERE {
+				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
+				<#{@uri}> rdfs:subClassOf ?c .
+				?c owl:onProperty svf:hasSVDName .
+				?c owl:hasValue ?uri . }
+		)
 	end
 
 	def query_labels
 		QUERY_PREFIX +
-		%(SELECT DISTINCT ?uri ?label ?user ?email ?dateTime ?isName
+			%(SELECT DISTINCT ?uri
+				WHERE {
+					<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
+					<#{@uri}> rdfs:subClassOf ?c .
+					?c owl:onProperty svf:hasLabel .
+					?c owl:hasValue ?uri . }
+			)
+	end
+
+	def query_definition
+		QUERY_PREFIX +
+		%(SELECT DISTINCT ?uri
 			WHERE {
 				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
-				<#{@uri}> rdfs:subClassOf ?c1 .
-				?c1 owl:onProperty svf:hasLabel .
-				?c1 owl:hasValue ?uri .
-				?uri a svf:VernacularLabel .
-				?uri svf:isName ?isName .
-				?uri rdfs:label ?label .
-				?uri svf:proposedBy ?u .
-				?u svf:hasName ?user .
-				?u svf:hasEmail ?email .
-				?uri svf:proposedAt ?dateTime .
-			})
+				<#{@uri}> rdfs:subClassOf ?c .
+				?c owl:onProperty svf:hasDefinition .
+				?c owl:someValuesFrom ?uri . }
+		)
 	end
 
 	def query_descriptions
 		QUERY_PREFIX +
-		%(SELECT DISTINCT ?uri ?user ?email ?dateTime ?isDefinition
+		%(SELECT DISTINCT ?uri
 			WHERE {
 				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
-				<#{@uri}> rdfs:subClassOf ?c1 .
-				?c1 owl:onProperty svf:hasDescription .
-				?c1 owl:someValuesFrom ?uri .
-				?uri rdfs:subClassOf ?c2 .
-				?c2 owl:onProperty svf:isDefinition .
-				?c2 owl:hasValue ?isDefinition .
-				?uri rdfs:subClassOf ?c3 .
-				?c3 owl:onProperty svf:proposedBy .
-				?c3 owl:hasValue ?u .
-				?uri rdfs:subClassOf ?c4 .
-				?c4 owl:onProperty svf:proposedAt .
-				?c4 owl:hasValue ?dateTime .
-				?u svf:hasName ?user .
-				?u svf:hasEmail ?email .
-			})
-	end
+				<#{@uri}> rdfs:subClassOf ?c .
+				?c owl:onProperty svf:hasDescription .
+				?c owl:someValuesFrom ?uri . }
+		)
+	end	
 
-	def query_associated_scientific_names
+	def query_scientific_names
 		QUERY_PREFIX +
-		%(SELECT DISTINCT ?uri ?label ?moURL ?moID
+		%(SELECT DISTINCT ?uri
 			WHERE {
 				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
-				<#{@uri}> rdfs:subClassOf ?c1 .
-				?c1 owl:onProperty svf:hasAssociatedScientificName .
-				?c1 owl:someValuesFrom ?uri .
-				?uri rdfs:label ?label .
-				OPTIONAL { ?uri svf:hasMushroomObserverURL ?moURL } .
-				OPTIONAL { ?uri owl:equivalentClass ?c2 .
-				?c2 owl:onProperty svf:hasMONameId .
-				?c2 owl:hasValue ?moID } .
-			})
-	end
-
-	def self.query_features(desc)
-		QUERY_PREFIX +
-		%(SELECT DISTINCT ?f ?v ?feature ?value
-			WHERE {
-				<#{desc}> rdfs:subClassOf svf:VernacularFeatureDescription .
-				<#{desc}> owl:equivalentClass ?c1 .
-				?c1 owl:intersectionOf ?c2 . 
-				{ ?c2 rdf:rest+/rdf:first ?c3 . } UNION
-				{ ?c2 rdf:rest+/rdf:first ?c4 .
-				  ?c4 owl:unionOf ?c5 .
-					?c5 rdf:rest+/rdf:first ?c3 . }
-				?c3 owl:onProperty ?f .
-				?c3 owl:someValuesFrom ?v .
-				?f rdfs:subPropertyOf+ svf:hasFungalFeature .
-				?f rdfs:label ?feature .
-				?v rdfs:label ?value .
-			})
+				<#{@uri}> rdfs:subClassOf ?c . 
+				?c owl:onProperty svf:hasAssociatedScientificName .
+				?c owl:someValuesFrom ?uri . }
+		)
 	end
 
 end

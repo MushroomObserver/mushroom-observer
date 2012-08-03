@@ -99,11 +99,11 @@ org.mo.sv.askMaxID = function(type)
     case "SemanticVernacularDescription":
     case "VernacularFeatureDescription":
     case "ScientificName":
-      query += "?uri rdfs:subClassOf svf:" + type + " . ";
+      query += "?uri rdfs:subClassOf+ svf:" + type + " . ";
       break;
     case "VernacularLabel":
     case "User":
-      query+= "?uri a svf:" + type + " . ";
+      query+= "?uri a/rdfs:subClassOf* svf:" + type + " . ";
       break;
   }
   query += "?uri svf:hasID ?id }";
@@ -163,29 +163,33 @@ org.mo.sv.create.queryDependentFeatures = function(feature, values)
 org.mo.sv.create.querySVDForFeatureValue = function(feature, values)
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT DISTINCT ?uri ?label ?isName WHERE {";
+  query += "SELECT DISTINCT ?uri ?name WHERE {";
   query += "?uri rdfs:subClassOf svf:SemanticVernacularDescription . ";
-  query += "?uri rdfs:subClassOf ?c1 . ";
-  query += "?c1 owl:onProperty svf:hasLabel . ";
+  query += "OPTIONAL { ?uri rdfs:subClassOf ?c1 . ";
+  query += "?c1 owl:onProperty svf:hasSVDName . ";
   query += "?c1 owl:hasValue ?vl . ";
-  query += "?vl svf:isName ?isName . "
-  query += "?vl rdfs:label ?label . ";
-  query += "?uri rdfs:subClassOf ?c2 . ";
-  query += "?c2 owl:onProperty svf:hasDescription . ";
-  query += "?c2 owl:someValuesFrom ?desc . ";
-  query += "?desc owl:equivalentClass ?c3 . ";
-  query += "?c3 owl:intersectionOf ?c4 . "; 
-  query += "{ ?c4 rdf:rest+/rdf:first ?c5 . } UNION ";
-  query += "{ ?c4 rdf:rest+/rdf:first ?c6 . ";
-  query += "?c6 owl:unionOf ?c7 . ";
-  query += "?c7 rdf:rest+/rdf:first ?c5 . }";
-  //query += "?desc rdfs:subClassOf ?c8 . ";
-  //query += "?c8 owl:onProperty svf:isDefinition . ";
-  //query += "?c8 owl:hasValue \"true\"^^xsd:boolean . ";
+  query += "?vl rdfs:label ?name . } ";
+  // query += "OPTIONAL { ?uri rdfs:subClassOf ?c2 . ";
+  // query += "?c2 owl:onProperty svf:hasLabel . ";
+  // query += "?c2 owl:hasValue ?vl . ";
+  // query += "?vl rdfs:label ?label . } ";
+  query += "?uri rdfs:subClassOf ?c3 . ";
+  query += "{ ?c3 owl:onProperty svf:hasDefinition . } ";
+  query += "UNION { ?c3 owl:onProperty svf:hasDescription . } ";
+  query += "?c3 owl:someValuesFrom ?desc . ";
+  // query += "UNION { ?uri rdfs:subClassOf ?c4 . ";
+  // query += "?c4 owl:onProperty svf:hasDescription . ";
+  // query += "?c4 owl:someValuesFrom ?desc . } ";
+  query += "?desc owl:equivalentClass ?c5 . ";
+  query += "?c5 owl:intersectionOf ?c6 . "; 
+  query += "{ ?c6 rdf:rest+/rdf:first ?c7 . } UNION ";
+  query += "{ ?c6 rdf:rest+/rdf:first ?c8 . ";
+  query += "?c8 owl:unionOf ?c9 . ";
+  query += "?c9 rdf:rest+/rdf:first ?c7 . }";
   var arr = [];
   jQuery.each(values, function(i, val) {
-    var str = "{ ?c5 owl:onProperty <" + feature + "> . ";
-    str += "?c5 owl:someValuesFrom <" + val + "> . }";
+    var str = "{ ?c7 owl:onProperty <" + feature + "> . ";
+    str += "?c7 owl:someValuesFrom <" + val + "> . }";
     arr.push(str);
   });
   query += arr.join(" UNION ");

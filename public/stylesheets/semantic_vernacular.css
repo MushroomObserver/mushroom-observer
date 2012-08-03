@@ -1,0 +1,151 @@
+/* "index" page */
+div#svd-index table td {
+  vertical-align: top;
+}
+div#svd-index table td li {
+  margin-left: -20px;
+}
+div#svd-index table th {
+  padding-right: 80px;
+  font-weight: normal;
+}
+
+/* "show" page new proposal dialog window */
+div.svd-show-proposal-dialog {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px; 
+  background-color: #eeeeee;
+  position: absolute;
+  z-index: 5000;
+  display: none;
+  width: 780px;
+  height: 400px;
+  overflow: scroll;
+}
+div.svd-show-dialog-content {
+  padding: 30px;
+  overflow: scroll;
+}
+div.svd-show-dialog-content p {
+  margin: 15px 0px;
+}
+button.svd-show-dialog-close {
+  margin-right: 6px;
+  color: red;
+  font-size: 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  float: right;
+}
+
+/* "show" page new proposal dialog window mask */
+div.svd-show-dialog-mask { 
+  background-color: black;
+  -moz-opacity: 0.5;
+  -khtml-opacity: 0.5; 
+  opacity: 0.5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4000;
+  display: none;
+}
+
+/* "show" page list */
+div#svd-show {
+  width: 800px;
+}
+li.svd-show-li {
+  margin: 10px 0px;
+}
+ul.svd-show-li-item {
+  margin: 10px 0px 0px -20px;
+}
+p.svd-show-li-info {
+  font-style: italic;
+  margin: 5px 0px 0px 0px;
+}
+p.svd-show-li-item-meta {
+  margin-left: 20px;
+  margin-bottom: 0px;
+  font-size: 11px;
+}
+.svd-show-li-item-link {
+  font-size: 11px;
+  /*font-weight: bold;*/
+  margin-left: 20px;
+}
+a.svd-show-li-item-delete-link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+div#svd-show button {
+  margin-top: 10px;
+}
+li.svd-show-proposals {
+  list-style-type: none;
+}
+span.svd-show-proposals-expand {
+  cursor: pointer;
+}
+ul#svd-show-description-proposals {
+  margin-left: -5px;
+  padding-left: 25px;
+}
+ul#svd-show-associated-scientific-names li {
+  display: inline;
+}
+
+/* "create" page input */
+div#svd-create-input {
+  float: left;
+  margin-bottom: 50px;
+}
+div#svd-create-input table {
+  border-spacing: 10px;
+}
+div#svd-create-input input[type="text"] {
+  width: 160px;
+}
+div#svd-create-input select{
+  width: 165px;
+  height: 200px;
+  overflow: scroll;
+}
+
+/* "crate" page display */
+div#svd-create-display {
+  float: right;
+  margin-right: 100px;
+  margin-bottom: 50px;
+}
+div#svd-create-display ul {
+  margin-top: 10px;
+  width: 500px;
+  overflow: scroll;
+}
+ul#svd-matched-svd-display {
+  height: 160px;
+}
+ul#svd-feature-value-display {
+  height: 240px;
+}
+div.svd-create-display-header {
+  display: none;
+}
+div.svd-create-display-header span {
+  font-size: 14px;
+}
+button.svd-remove-feature-value {
+  color: grey;
+  font-size: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* all pages bottom navigation */
+div.svd-navigation {
+  margin-bottom: 10px;
+}

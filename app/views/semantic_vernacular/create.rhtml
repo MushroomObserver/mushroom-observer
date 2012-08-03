@@ -11,7 +11,7 @@
 <h2>
   <% if @svd %>
     <% if @svd.name %>
-      Propose a Definition for <%= @svd.name["label"]["value"] %>
+      Propose a Definition for <%= @svd.name.label %>
     <% else %>
       Propose a Definition for <%= @svd.uri %>
     <% end %>
@@ -86,8 +86,8 @@
       <span><u>Your input of features:</u></span>
       <button type="button" id="svd-clear-feature">Clear</button>
     </div>
-    <% if @base_features != nil %>
-      <% @base_features.each do |feature, values| %>
+    <% if @base_description != nil %>
+      <% @base_description.features.each do |feature, values| %>
         <% value_labels = Array.new %>
         <% values.collect do |value| %>
           <% value_labels.push("<span class=\"svd-show-feature-value\" 

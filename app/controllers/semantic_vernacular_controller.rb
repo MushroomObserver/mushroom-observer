@@ -21,37 +21,18 @@ class SemanticVernacularController < ApplicationController
 
   def show
   	@svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
-    if @svd.definition
-      definition_features = SemanticVernacularDescription.get_features(
-        @svd.definition["uri"]["value"])
-      @definition_features = SemanticVernacularDescription.refactor_features(
-        definition_features)
-    end
-    if @svd.description_proposals.length > 0
-      @svd.description_proposals.each do |description|
-        description_features = SemanticVernacularDescription.get_features(
-          description["uri"]["value"])
-        description["features"] = 
-          SemanticVernacularDescription.refactor_features(description_features)
-      end
-    end
   end
 
   def create
     if params[:uri] && params[:desc]
       @svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
-      base_description = URI.unescape(params[:desc])
-      base_features = 
-        SemanticVernacularDescription.get_features(base_description)
-      @base_features = 
-        SemanticVernacularDescription.refactor_features(base_features)
+      @base_description = VernacularFeatureDescription.new(
+        URI.unescape(params[:desc]))
     elsif params[:uri] && !params[:desc]
        @svd = SemanticVernacularDescription.new(URI.unescape(params[:uri]))
     elsif !params[:uri] && params[:desc]
-      base_features = 
-        SemanticVernacularDescription.get_features(URI.unescape(params[:desc]))
-      @base_features = 
-        SemanticVernacularDescription.refactor_features(base_features)
+      @base_description = VernacularFeatureDescription.new(
+        URI.unescape(params[:desc]))
     end
   end
 
@@ -60,7 +41,7 @@ class SemanticVernacularController < ApplicationController
     fill_IDs(post_json)
     fill_URIs(post_json)
     Rails.logger.debug(post_json)
-    response = insert(post_json)
+    response = triple_store_insert(post_json)
     Rails.logger.debug(response)
     respond_to do |format|
       format.json do
@@ -78,7 +59,7 @@ class SemanticVernacularController < ApplicationController
   def delete
     type = URI.unescape(params["type"])
     uri = URI.unescape(params["uri"])
-    response = delete(type, uri)
+    response = triple_store_delete(type, uri)
     Rails.logger.debug(response)
     respond_to do |format|
       format.html {redirect_to :back}
@@ -88,7 +69,7 @@ class SemanticVernacularController < ApplicationController
   def accept
     type = URI.unescape(params["type"])
     uri = URI.unescape(params["uri"])
-    response = insert_delete(type, uri)
+    response = triple_store_insert_delete(type, uri)
     Rails.logger.debug(response)
     respond_to do |format|
       format.html {redirect_to :back}
@@ -153,25 +134,25 @@ class SemanticVernacularController < ApplicationController
 
   # Generate RDF in turtle based on the received post data, and insert them to
   # the triple store.
-  def insert(data)
+  def triple_store_insert(data)
     if data["svd"]["is_new"] == true
-      response = SemanticVernacularDataSource.insert_svd(data["svd"])
+      response = SemanticVernacularDescription.insert(data["svd"])
     end
     if data["label"]["value"]
-      response = SemanticVernacularDataSource.insert_label(
+      response = VernacularLabel.insert(
         data["svd"], 
         data["label"],
         data["user"])
     end
     if data["description"]["uri"]
-      response = SemanticVernacularDataSource.insert_description(
+      response = VernacularFeatureDescription.insert(
         data["svd"], 
         data["description"],
         data["features"],
         data["user"])
     end
     if data["scientific_names"].length > 0
-      response = SemanticVernacularDataSource.insert_scientific_names(
+      response = ScientificName.insert(
         data["svd"], 
         data["scientific_names"])
     end
@@ -179,19 +160,20 @@ class SemanticVernacularController < ApplicationController
   end
 
   # Delete triples from the triple store.
-  def delete(type, uri)
-    case type
-      when "VernacularLabel"
-        response = SemanticVernacularDataSource.delete_label(uri)
-      when "VernacularFeatureDescription"
-        response = SemanticVernacularDataSource.delete_description(uri)
-      when "ScientificName"
-        response = SemanticVernacularDataSource.delete_scientific_name(uri)
-    end
+  def triple_store_delete(type, uri)
+    # case type
+    #   when "VernacularLabel"
+    #     response = VernacularLabel.delete(uri)
+    #   when "VernacularFeatureDescription"
+    #     response = VernacularFeatureDescription.delete(uri)
+    #   when "ScientificName"
+    #     response = ScientificName.delete(uri)
+    # end
+    type.constantize.delete(uri)
   end
 
   # Insert and delete triples in the same time to/from the triple store.
-  def insert_delete(type, uri)
+  def triple_store_insert_delete(type, uri)
 
   end
 

@@ -290,8 +290,8 @@ org.mo.sv.create.getMatchedSVDsCallback = function(response)
   var labels = [];
   jQuery.each(response["results"]["bindings"], function(i, val) {
     var key = "";
-    if (val["isName"]["value"] == "true")
-      key = val["label"]["value"];
+    if (val["name"] != null)
+      key = val["name"]["value"];
     else
       key = val["uri"]["value"].split("#")[1];
     // Remove duplicates.
