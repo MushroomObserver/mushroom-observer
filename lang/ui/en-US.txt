@@ -1897,7 +1897,9 @@ donors_tab: Show Donors
 donate_thanks: Thank you for your interest in donating to Mushroom Observer!  Check out this "2011 wrapup letter to the Mushroom Observer Community":/support/wrapup_2011 if you are curious what we are using your donations for.
 donate_explanation: Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below. Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 donate_fine_print: >
-  Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR) and will be applied to the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org. The CDMR has been incorporated in the state of California and recognized by the state as a non-profit.  In addition, the corporation has applied for 501c3 status with the US federal government and as such our understanding is that donations to Mushroom Observer are tax deductible to the full extent allowed by law.\n
+  Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR), and, subject to CDMR’s board’s supervision to assure usage under terms consistent with its charitable status, donated funds will be applied for the preservation and improvement of the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.\n
+  \n
+  CDMR is incorporated for charitable purposes under the California Nonprofit Public Benefit Corporation Law.  The specific purpose for which CDMR is organized is the preservation and development of digital resources (e.g., websites) that provide valuable scientific and educational information on mycology.   CDMR has applied for recognition as a public charity and exempt status under section 501c3 with US Internal Revenue Service, and applied for similar status under California tax law.   Assuming that the IRS approves CDMR’s application for exempt status, recognition of CDMR’s exempt status is expected to be retroactive to the date of CDMR’s formation, so that all donations made to CDMR for purposes of supporting Mushroom Observer may be recognized as tax deductible to the fullest extent allowed by law.  For more information on the status of CDMR’s application for exempt status, visit at "http://digitalmycology.org":http://digitalmycology.org.\n
   \n
   If you would prefer not to use PayPal, you are welcome to send a check or money order in US dollars payable to the "Consortium for Digital Mycology Resources" to:\n
   \n
@@ -1906,7 +1908,7 @@ donate_fine_print: >
   43 Cameron Rd.\n
   North Falmouth, MA 02556\n
   \n
-  Please indicate on the check or on an included note that the donation is intended for the Mushroom Observer.\n
+  You may indicate on the check or on an included note with your donation that you are a user of the Mushroom Observer – this will be taken by CDMR to reflect your desire that your donation be used primarily to support availability of the Mushroom Observer to the extent consistent with CDMR’s charitable purposes.\n
 
 
 

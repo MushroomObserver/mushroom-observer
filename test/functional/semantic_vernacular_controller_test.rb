@@ -5,7 +5,7 @@ class SemanticVernacularControllerTest < FunctionalTestCase
   def test_index
     get_with_dump(:index) 
     assert_response('index')
-    assert_not_nil(assigns(:all))
+    assert_not_nil(assigns(:svds_with_name))
   end
 
   def test_show
