@@ -43,21 +43,24 @@ class SemanticVernacularDataSource
 	end
 
 	def self.insert(uri)
-		update(insert_rdf(uri))
+		update(insert_triples(uri))
 	end
 
 	def self.delete(uri)
-		update(delete_rdf(uri))
+		update(delete_triples(uri))
 	end
 
 	def self.accept(uri)
-		update(accept_rdf(uri))
+		Rails.logger.debug(accept_triples(uri))
+		update(accept_triples(uri))
 	end
 
 	private
 	
+	# MBL endpoint
 	QUERY_ENDPOINT = "http://128.128.170.15:3030/svf/sparql"
 	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
+	# RPI endpoint
 	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
 	#UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
 	SVF_NAMESPACE = "http://mushroomobserver.org/svf.owl#"
@@ -100,31 +103,31 @@ class SemanticVernacularDataSource
 		query << "?uri svf:hasID ?id } ORDER BY DESC (?id) LIMIT 1"
 	end
 
-	def self.insert_has_object_value_restriction_rdf(property, value)
+	def self.insert_has_object_value_restriction_triples(property, value)
 		%([ a owl:Restriction;
 				owl:onProperty <#{property}>;
 				owl:hasValue <#{value}> ])
 	end
 
-	def self.insert_has_datatype_value_restriction_rdf(property, value, datatype)
+	def self.insert_has_datatype_value_restriction_triples(property, value, datatype)
 		%([ a owl:Restriction;
 				owl:onProperty <#{property}>;
 				owl:hasValue "#{value}"^^#{datatype} ])
 	end
 
-	def self.insert_some_object_values_from_restriction_rdf(property, value)
+	def self.insert_some_object_values_from_restriction_triples(property, value)
 		%([ a owl:Restriction;
 				owl:onProperty <#{property}>;
 				owl:someValuesFrom <#{value}> ])
 	end
 
-	def self.insert_rdf(uri)
+	def self.insert_triples(uri)
 	end
 
-	def self.delete_rdf(uri)
+	def self.delete_triples(uri)
 	end
 
-	def self.accept_rdf(uri)
+	def self.accept_triples(uri)
 	end
 
 end

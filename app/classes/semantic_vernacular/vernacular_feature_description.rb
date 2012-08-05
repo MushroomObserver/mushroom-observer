@@ -7,14 +7,14 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
 
   def initialize(uri)
     @uri = uri
-    desc = self.class.query(init_query)[0]
+    desc = self.class.query(query_attributes)[0]
     @creator = SVUser.new(desc["user"]["value"])
     @created_date_time = desc["dateTime"]["value"]
     @features = refactor_features
   end
 
   def self.insert(svd, description, features, user)
-    update(insert_rdf(svd, description, features, user))
+    update(insert_triples(svd, description, features, user))
   end
 
   private
@@ -38,7 +38,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
     return refactoring
   end
 
-  def init_query
+  def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?user ?dateTime
       WHERE {
@@ -48,8 +48,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         ?c1 owl:hasValue ?user .
         <#{@uri}> rdfs:subClassOf ?c2 .
         ?c2 owl:onProperty svf:proposedAt .
-        ?c2 owl:hasValue ?dateTime .
-      })
+        ?c2 owl:hasValue ?dateTime . })
   end
 
   def query_features
@@ -67,34 +66,32 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         ?c3 owl:someValuesFrom ?v .
         ?f rdfs:subPropertyOf+ svf:hasFungalFeature .
         ?f rdfs:label ?feature .
-        ?v rdfs:label ?value .
-      })
+        ?v rdfs:label ?value . })
   end
 
-  def self.insert_rdf(svd, description, features, user)
+  def self.insert_triples(svd, description, features, user)
     QUERY_PREFIX +
     %(INSERT DATA {
         <#{svd["uri"]}> 
           rdfs:subClassOf
-            #{insert_some_object_values_from_restriction_rdf(
+            #{insert_some_object_values_from_restriction_triples(
               SVF_NAMESPACE + "hasDescription", description["uri"])} .
         <#{description["uri"]}>
           a owl:class;
           rdfs:subClassOf svf:VernacularFeatureDescription;
           rdfs:subClassOf
-            #{insert_has_object_value_restriction_rdf(
+            #{insert_has_object_value_restriction_triples(
               SVF_NAMESPACE + "proposedBy", user["uri"])};
           rdfs:subClassOf
-            #{insert_has_datatype_value_restriction_rdf(
+            #{insert_has_datatype_value_restriction_triples(
               SVF_NAMESPACE + "proposedAt", 
               Time.now.strftime("%FT%T%:z"), 
               "xsd:dateTime")};
           svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
-          #{insert_features_rdf(features)} . 
-      })      
+          #{insert_features_triples(features)} . })      
   end
 
-  def self.delete_rdf(description)
+  def self.delete_triples(description)
     QUERY_PREFIX +
     %(DELETE {
         ?svd rdfs:subClassOf ?c . 
@@ -104,8 +101,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         ?list ?p6 ?o6 .
         ?z rdf:first ?head .
         ?z rdf:rest ?tail .
-        ?head ?p7 ?o7 .
-      }
+        ?head ?p7 ?o7 . }
       WHERE {
         ?svd rdfs:subClassOf ?c .
         ?c owl:someValuesFrom <#{description}> .
@@ -120,11 +116,28 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         ?z rdf:first ?head .
         ?head ?p7 ?o7 .
         ?z rdf:rest ?tail .
-        FILTER isBlank(?o3)
-      })
+        FILTER isBlank(?o3) . })
   end
 
-  def self.insert_features_rdf(features)
+  def self.accept_triples(uri)
+    QUERY_PREFIX +
+    %(DELETE { 
+        ?c1 owl:onProperty svf:hasDescription .
+        ?c2 owl:onProperty svf:hasDefinition . }
+      INSERT { 
+        ?c1 owl:onProperty svf:hasDefinition .
+        ?c2 owl:onProperty svf:hasDescription . }
+      WHERE {
+        ?svd rdfs:subClassOf svf:SemanticVernacularDescription .
+        ?svd rdfs:subClassOf ?c1 .
+        ?c1 owl:onProperty svf:hasDescription . 
+        ?c1 owl:someValuesFrom <#{uri}> .
+        OPTIONAL { ?svd rdfs:subClassOf ?c2 .
+        ?c2 owl:onProperty svf:hasDefinition . 
+        ?c2 owl:someValuesFrom ?name . }})
+  end
+
+  def self.insert_features_triples(features)
     rdf = %(owl:equivalentClass
               [ a owl:class;
               owl:intersectionOf \(svf:Fungus )
@@ -133,13 +146,13 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         rdf << %([ a owl:class;
                    owl:unionOf \()
         feature["values"].each do |value|
-          rdf << insert_some_object_values_from_restriction_rdf(
+          rdf << insert_some_object_values_from_restriction_triples(
             feature["feature"], value)
         end
         rdf << %(\)])
       end
       if feature["values"].length == 1
-        rdf << insert_some_object_values_from_restriction_rdf(
+        rdf << insert_some_object_values_from_restriction_triples(
           feature["feature"], feature["values"][0])
       end
     end

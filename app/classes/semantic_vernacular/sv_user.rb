@@ -6,21 +6,20 @@ class SVUser < SemanticVernacularDataSource
 
   def initialize(uri)
     @uri = uri
-    user = self.class.query(init_query)[0]
+    user = self.class.query(query_attributes)[0]
     @name = user["name"]["value"]
     @email = user["email"]["value"]
   end
 
   private
 
-  def init_query
+  def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?name ?email
       WHERE {
         <#{@uri}> a svf:User .
         <#{@uri}> svf:hasName ?name .
-        <#{@uri}> svf:hasEmail ?email .
-      })
+        <#{@uri}> svf:hasEmail ?email . })
   end
 
 end

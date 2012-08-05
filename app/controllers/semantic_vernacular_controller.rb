@@ -80,13 +80,9 @@ class SemanticVernacularController < ApplicationController
   def fill_IDs(data)
     if data["svd"]["uri"]
       data["svd"]["is_new"] = false
-      data["label"]["is_name"] = false
-      data["description"]["is_definition"] = false
     else
       data["svd"]["id"] = allocate_ID("SemanticVernacularDescription")
       data["svd"]["is_new"] = true
-      data["label"]["is_name"] = false
-      data["description"]["is_definition"] = false
     end
     if data["label"]["value"]
       data["label"]["id"] = allocate_ID("VernacularLabel")
@@ -174,7 +170,7 @@ class SemanticVernacularController < ApplicationController
 
   # Insert and delete triples in the same time to/from the triple store.
   def triple_store_insert_delete(type, uri)
-
+    type.constantize.accept(uri)
   end
 
 end
