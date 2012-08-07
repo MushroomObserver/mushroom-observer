@@ -23,7 +23,7 @@ class VernacularLabel < SemanticVernacularDataSource
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?label ?user ?dateTime
 			WHERE {
-				<#{@uri}> a/rdfs:subClassOf* svf:VernacularLabel .
+				<#{@uri}> a svf:VernacularLabel .
 				<#{@uri}> rdfs:label ?label .
 				<#{@uri}> svf:proposedBy ?user .
 				<#{@uri}> svf:proposedAt ?dateTime . })
@@ -60,7 +60,8 @@ class VernacularLabel < SemanticVernacularDataSource
 				?c2 owl:onProperty svf:hasSVDName . }
 			INSERT { 
 				?c1 owl:onProperty svf:hasSVDName .
-				?c2 owl:onProperty svf:hasLabel . }
+				?c2 owl:onProperty svf:hasLabel . 
+				}
 			WHERE {
 				?svd rdfs:subClassOf svf:SemanticVernacularDescription .
 				?svd rdfs:subClassOf ?c1 .

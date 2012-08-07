@@ -6,5 +6,6 @@ class SemanticVernacular
   require_dependency "semantic_vernacular/vernacular_label"
   require_dependency "semantic_vernacular/vernacular_feature_description"
   require_dependency "semantic_vernacular/scientific_name"
+  require_dependency "semantic_vernacular/fungal_feature"
   require_dependency "semantic_vernacular/sv_user"
 end

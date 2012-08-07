@@ -144,10 +144,10 @@ org.mo.sv.create.queryDependentFeatures = function(feature, values)
   query += "?uri rdfs:label ?label . ";
   query += "?uri rdfs:domain ?c1 . ";
   query += "?c1 owl:intersectionOf ?c2 . ";
-  query += "{ ?c2 rdf:rest+/rdf:first ?c3 } UNION "
-  query += "{ ?c2 rdf:rest+/rdf:first ?c4 . ";
+  query += "{ ?c2 rdf:rest*/rdf:first ?c3 } UNION "
+  query += "{ ?c2 rdf:rest*/rdf:first ?c4 . ";
   query += "?c4 owl:unionOf ?c5 . ";
-  query += "?c5 rdf:rest+/rdf:first ?c3 . }";
+  query += "?c5 rdf:rest*/rdf:first ?c3 . }";
   var arr = [];
   jQuery.each(values, function(i, val) {
     var str = "{?c3 owl:onProperty <" + feature + "> . ";
@@ -182,10 +182,10 @@ org.mo.sv.create.querySVDForFeatureValue = function(feature, values)
   // query += "?c4 owl:someValuesFrom ?desc . } ";
   query += "?desc owl:equivalentClass ?c5 . ";
   query += "?c5 owl:intersectionOf ?c6 . "; 
-  query += "{ ?c6 rdf:rest+/rdf:first ?c7 . } UNION ";
-  query += "{ ?c6 rdf:rest+/rdf:first ?c8 . ";
+  query += "{ ?c6 rdf:rest*/rdf:first ?c7 . } UNION ";
+  query += "{ ?c6 rdf:rest*/rdf:first ?c8 . ";
   query += "?c8 owl:unionOf ?c9 . ";
-  query += "?c9 rdf:rest+/rdf:first ?c7 . }";
+  query += "?c9 rdf:rest*/rdf:first ?c7 . }";
   var arr = [];
   jQuery.each(values, function(i, val) {
     var str = "{ ?c7 owl:onProperty <" + feature + "> . ";

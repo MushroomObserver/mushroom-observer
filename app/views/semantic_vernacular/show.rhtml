@@ -8,14 +8,14 @@
 							:controller => "semantic_vernacular",
 							:action => "index") %>
 </div>
-<h2>Semantic Vernacular Description (SVD) Detail</h2>
 <div id="svd-show">
+	<h2>Semantic Vernacular Description (SVD) Detail</h2>
 	<ul>
 		<li class="svd-show-li" id="svd-show-uri">
-			<b>URI</b>: <%= @svd.uri %>
+			<span class="svd-show-li-title">URI:</span> <%= @svd.uri %>
 		</li>
 		<li class="svd-show-li" id="svd-show-name">
-			<b>Name</b>:
+			<span class="svd-show-li-title">Name:</span>
 			<% if @svd.name %>
 				<% name = @svd.name %>
 				<ul class="svd-show-li-item" id="svd-show-name">
@@ -29,11 +29,11 @@
 				</p>
 				<p class="svd-show-li-item-link">
 					<%= link_to("Delete", {
-										:controller => "semantic_vernacular",
-										:action => "delete",
-										:type => "VernacularLabel",
-										:uri => name.uri },
-										:class => "svd-show-li-item-delete-link") %>
+											:controller => "semantic_vernacular",
+											:action => "delete",
+											:type => "VernacularLabel",
+											:uri => name.uri },
+											:class => "svd-show-li-item-delete-link") %>
 				</p>
 			<% else %>
 				<p class="svd-show-li-info">
@@ -61,24 +61,24 @@
 						</p>
 						<p class="svd-show-li-item-link">
 							<%= link_to("Accept", {
-												:controller => "semantic_vernacular",
-												:action => "accept",
-												:type => "VernacularLabel",
-												:uri => label.uri },
-												:class => "svd-show-li-item-accept-link") %> |
+													:controller => "semantic_vernacular",
+													:action => "accept",
+													:type => "VernacularLabel",
+													:uri => label.uri },
+													:class => "svd-show-li-item-accept-link") %> |
 							<%= link_to("Delete", {
-												:controller => "semantic_vernacular",
-												:action => "delete",
-												:type => "VernacularLabel",
-												:uri => label.uri },
-												:class => "svd-show-li-item-delete-link") %>
+													:controller => "semantic_vernacular",
+													:action => "delete",
+													:type => "VernacularLabel",
+													:uri => label.uri },
+													:class => "svd-show-li-item-delete-link") %>
 						</p>
 					<% end %>
 				</div>
 			</li>
 		<% end %>	
 		<li class="svd-show-li" id="svd-show-definition">
-			<b>Definition</b>:
+			<span class="svd-show-li-title">Definition:</span>
 			<% if @svd.definition %>
 				<% definition = @svd.definition %>
 				<ul class="svd-show-li-item" id="svd-show-definition">
@@ -88,8 +88,12 @@
 							<% value_labels.push("<span class=\"svd-show-feature-value\"
 								id=\"#{value["uri"]}\">" + value["label"] + "</span>") %>
 						<% end %>
-						<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">
-							#{feature["label"]}: #{value_labels.join(" <i>or</i> ")}</li>" %>
+						<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">" +
+							link_to(feature["label"],
+											:controller => "semantic_vernacular",
+											:action => "show_feature",
+											:uri => feature["uri"]) + ": " +
+							value_labels.join(" <i>or</i> ") + "</li>" %>
 					<% end %>
 				</ul>
 				<p class="svd-show-li-item-meta">
@@ -135,8 +139,13 @@
 									<% value_labels.push("<span class=\"svd-show-feature-value\" 
 										id=\"#{value["uri"]}\">" + value["label"] + "</span>") %>
 								<% end %>
-								<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">
-									#{feature["label"]}: #{value_labels.join(" <i>or</i> ")}</li>"
+								<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">" +
+									link_to(feature["label"], {
+													:controller => "semantic_vernacular",
+													:action => "show_feature",
+													:uri => feature["uri"]},
+													:target => "_blank") + ": " +
+									value_labels.join(" <i>or</i> ") + "</li>"
 								%>
 							<% end %>
 						</ul>
@@ -168,7 +177,7 @@
 			</li>
 		<% end %>
 		<li class="svd-show-li" id="svd-show-associated-scientific-names">
-			<b>Associated Scientific Names</b>:
+			<span class="svd-show-li-title">Associated Scientific Names:</span>
 			<% if @svd.scientific_names.length > 0 %>
 				<ul class="svd-show-li-item" id="svd-show-associated-scientific-names">
 					<% @svd.scientific_names.each do |scientific_name| %>

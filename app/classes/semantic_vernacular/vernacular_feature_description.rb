@@ -26,14 +26,18 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def refactor_features
     refactoring = Hash.new
     get_features.each do |feature|
-      key = {"uri"=>feature["f"]["value"], "label"=>feature["feature"]["value"]}
-      value = {"uri"=>feature["v"]["value"], "label"=>feature["value"]["value"]}
-      if refactoring.has_key?(key) 
-        refactoring[key].push(value)
-      else
+      key = {
+        "uri" => feature["f"]["value"], 
+        "label" => feature["feature"]["value"]
+      }
+      value = {
+        "uri" => feature["v"]["value"], 
+        "label" => feature["value"]["value"]
+      }
+      unless refactoring.has_key?(key) 
         refactoring[key] = Array.new
-        refactoring[key].push(value)
       end
+      refactoring[key].push(value)
     end
     return refactoring
   end
@@ -42,7 +46,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
     QUERY_PREFIX +
     %(SELECT DISTINCT ?user ?dateTime
       WHERE {
-        <#{@uri}> rdfs:subClassOf+ svf:VernacularFeatureDescription .
+        <#{@uri}> rdfs:subClassOf svf:VernacularFeatureDescription .
         <#{@uri}> rdfs:subClassOf ?c1 .
         ?c1 owl:onProperty svf:proposedBy .
         ?c1 owl:hasValue ?user .
@@ -58,10 +62,10 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         <#{@uri}> rdfs:subClassOf+ svf:VernacularFeatureDescription .
         <#{@uri}> owl:equivalentClass ?c1 .
         ?c1 owl:intersectionOf ?c2 . 
-        { ?c2 rdf:rest+/rdf:first ?c3 . } UNION
-        { ?c2 rdf:rest+/rdf:first ?c4 .
+        { ?c2 rdf:rest*/rdf:first ?c3 . } UNION
+        { ?c2 rdf:rest*/rdf:first ?c4 .
           ?c4 owl:unionOf ?c5 .
-          ?c5 rdf:rest+/rdf:first ?c3 . }
+          ?c5 rdf:rest*/rdf:first ?c3 . }
         ?c3 owl:onProperty ?f .
         ?c3 owl:someValuesFrom ?v .
         ?f rdfs:subPropertyOf+ svf:hasFungalFeature .

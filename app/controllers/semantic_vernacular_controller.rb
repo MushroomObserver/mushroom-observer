@@ -76,6 +76,14 @@ class SemanticVernacularController < ApplicationController
     end
   end
 
+  def show_feature
+    @feature = FungalFeature.new(params["uri"])
+  end
+
+  ##############################################################################
+  # Helper methods
+  ##############################################################################
+
   # Fill IDs into the received post data.
   def fill_IDs(data)
     if data["svd"]["uri"]

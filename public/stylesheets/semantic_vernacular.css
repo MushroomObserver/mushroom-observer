@@ -39,7 +39,6 @@ button.svd-show-dialog-close {
   float: right;
 }
 
-/* "show" page new proposal dialog window mask */
 div.svd-show-dialog-mask { 
   background-color: black;
   -moz-opacity: 0.5;
@@ -58,6 +57,9 @@ div#svd-show {
 }
 li.svd-show-li {
   margin: 10px 0px;
+}
+span.svd-show-li-title {
+  font-weight: bold;
 }
 ul.svd-show-li-item {
   margin: 10px 0px 0px -20px;
@@ -145,7 +147,12 @@ button.svd-remove-feature-value {
   cursor: pointer;
 }
 
-/* all pages bottom navigation */
+/* "show_feature" page */
+span.feature-domain-item {
+  text-decoration: underline;
+}
+
+/* navigation */
 div.svd-navigation {
   margin-bottom: 10px;
 }

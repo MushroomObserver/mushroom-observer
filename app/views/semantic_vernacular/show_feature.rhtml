@@ -1,0 +1,37 @@
+<%= stylesheet_link_tag("semantic_vernacular.css") %>
+
+<div id="feature-show">
+  <h2>Fungal Feature: <%= @feature.label %></h2>
+  <ul>
+    <li class="svd-show-li">
+      <span class="svd-show-li-title">Domain:</span><br />
+      <span class="feature-domain-item">
+        <%= @feature.domain.delete("base") %></span>
+      <% value_labels = Array.new %>
+      <% @feature.domain.each do |key, values| %>
+        <% values.each do |value| %>
+          <% value_labels.push(
+            "<span class=\"feature-domain-item\">#{value["label"]}</span>") %>
+        <% end %>
+        <%= "which " +
+          link_to(key["label"],
+                  :controller => "semantic_vernacular",
+                  :action => "show_feature",
+                  :uri => key["uri"]) + 
+          " of #{value_labels.join(" or ")}" %>
+      <% end %>
+    </li>
+    <li class="svd-show-li">
+      <span class="svd-show-li-title">Allowable Values:</span>
+      <ul class="svd-show-li-item">
+        <% @feature.range.each do |value| %>
+          <li><%= value["label"] %></li>
+        <% end %>
+      </ul>
+    </li>
+    <li class="svd-show-li">
+      <span class="svd-show-li-title">References:</span>
+    </li>
+  </ul>
+</div>
+
