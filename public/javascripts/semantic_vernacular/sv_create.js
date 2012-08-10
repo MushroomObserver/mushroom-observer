@@ -211,7 +211,9 @@ org.mo.sv.create.addFeatureCallback = function()
     if (ul.find("div.svd-create-display-header").css("display") == "none")
       ul.find("div.svd-create-display-header").show();
     ul.append("<li id=\"" + feature + "\" title=\"" + feature_label + "\">" 
-      + feature_label + ": " + value_labels.join(" <i>or</i> ") 
+      + "<a href=\"/semantic_vernacular/show_feature?uri=" 
+      + encodeURIComponent(feature) + "\" target=\"_blank\">" + feature_label 
+      + "</a>: " + value_labels.join(" <i>or</i> ") 
       + " <button type=\"button\" class=\"svd-remove-feature-value\">" 
       + "<u>remove</u></button></li>");
     // When the "svd-remove-feature-value" button is clicked: remove the 

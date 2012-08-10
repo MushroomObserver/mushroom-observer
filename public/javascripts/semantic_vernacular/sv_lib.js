@@ -205,7 +205,9 @@ org.mo.sv.create.queryFeatureValues = function(feature)
   query += "<" + feature + "> rdfs:range ?r . ";
   query += "?r owl:equivalentClass ?c . ";
   query += "?c owl:unionOf ?u . ";
-  query += "?u rdf:rest*/rdf:first ?uri . ";
+  query += "?u rdf:rest*/rdf:first ?c3 . ";
+  query += "?c4 rdfs:subClassOf* ?c3 . ";
+  query += "?c4 owl:equivalentClass* ?uri . ";
   query += "?uri rdfs:label ?label . }";
   return query;
 };
@@ -215,7 +217,7 @@ org.mo.sv.create.queryIndependentFeatures = function()
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT DISTINCT ?uri ?label WHERE {";
-  query += "?uri rdfs:subPropertyOf svf:hasFungalFeature . ";
+  query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature . ";
   query += "?uri rdfs:label ?label . ";
   query += "FILTER (!EXISTS ";
   query += "{ ?uri rdfs:domain ?domain . ";
@@ -227,6 +229,19 @@ org.mo.sv.create.queryIndependentFeatures = function()
   return query;
 };
 
+// Build a query to get annotations of a feature value.
+org.mo.sv.show.queryFeatureValueAnnotation = function(uri)
+{
+  var query = org.mo.sv.getQueryPrefix();
+  query += "SELECT DISTINCT ?label ?desc ?ref ?plink WHERE {";
+  query += "<" + uri + "> rdfs:subClassOf+ svf:FungalFeatureValuePartition . ";
+  query += "<" + uri + "> rdfs:label ?label . ";
+  query += "OPTIONAL { <" + uri + "> dcterms:description ?desc . }";
+  query += "OPTIONAL { <" + uri + "> dcterms:references ?ref . }";
+  query += "OPTIONAL { <" + uri + "> svf:hasPictureURL ?plink . }}";
+  return query;
+}
+
 // Get all query prefixes.
 org.mo.sv.getQueryPrefix = function()
 {
@@ -234,6 +249,7 @@ org.mo.sv.getQueryPrefix = function()
   prefix += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
   prefix += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
   prefix += "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>";
+  prefix += "PREFIX dcterms: <http://purl.org/dc/terms/>";
   prefix += "PREFIX svf: <" + org.mo.sv.SVFNamespace + ">";
   return prefix;
 };

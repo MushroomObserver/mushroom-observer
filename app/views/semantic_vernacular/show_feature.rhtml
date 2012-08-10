@@ -1,5 +1,14 @@
+<% javascript_include("jquery.min") %>
+<% javascript_include("semantic_vernacular/sv_lib") %>
+<% javascript_include("semantic_vernacular/sv_show_feature") %>
 <%= stylesheet_link_tag("semantic_vernacular.css") %>
 
+
+<div class="svd-navigation">
+  <%= link_to("Go to all Fungal Features", 
+              :controller => "semantic_vernacular", 
+              :action => "index_features") %>
+</div>
 <div id="feature-show">
   <h2>Fungal Feature: <%= @feature.label %></h2>
   <ul>
@@ -25,12 +34,13 @@
       <span class="svd-show-li-title">Allowable Values:</span>
       <ul class="svd-show-li-item">
         <% @feature.range.each do |value| %>
-          <li><%= value["label"] %></li>
+          <li id="<%= value["uri"] %>" title="<%= value["label"] %>">
+            <%= value["label"] %>
+            <span class="feature-show-value-expand"> [+] </span>
+            <div class="feature-show-value-toggle" style="display:none"></div>
+          </li>
         <% end %>
       </ul>
-    </li>
-    <li class="svd-show-li">
-      <span class="svd-show-li-title">References:</span>
     </li>
   </ul>
 </div>

@@ -76,6 +76,10 @@ class SemanticVernacularController < ApplicationController
     end
   end
 
+  def index_features
+    @features = FungalFeature.index
+  end
+
   def show_feature
     @feature = FungalFeature.new(params["uri"])
   end

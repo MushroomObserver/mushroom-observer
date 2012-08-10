@@ -13,6 +13,10 @@ class FungalFeature < SemanticVernacularDataSource
     @range = get_range
   end
 
+  def self.index
+    query(query_features_all)
+  end
+
   def get_domain
     domain = Hash.new
     attributes = self.class.query(query_domain)
@@ -53,6 +57,14 @@ class FungalFeature < SemanticVernacularDataSource
 
   private
 
+  def self.query_features_all
+    QUERY_PREFIX +
+    %(SELECT DISTINCT ?uri ?label
+      WHERE {
+        ?uri rdfs:subPropertyOf+ svf:hasFungalFeature .
+        ?uri rdfs:label ?label . })
+  end
+
   def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?label
@@ -89,7 +101,9 @@ class FungalFeature < SemanticVernacularDataSource
         <#{@uri}> rdfs:range ?range . 
         ?range owl:equivalentClass ?c1 . 
         ?c1 owl:unionOf ?c2 . 
-        ?c2 rdf:rest*/rdf:first ?uri . 
+        ?c2 rdf:rest*/rdf:first ?c3 .
+        ?c4 rdfs:subClassOf* ?c3 . 
+        ?c4 owl:equivalentClass* ?uri .
         ?uri rdfs:label ?label . })
   end
 

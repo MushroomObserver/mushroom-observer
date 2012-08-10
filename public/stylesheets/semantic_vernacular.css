@@ -90,6 +90,7 @@ li.svd-show-proposals {
 }
 span.svd-show-proposals-expand {
   cursor: pointer;
+  font-size: 10px;
 }
 ul#svd-show-description-proposals {
   margin-left: -5px;
@@ -150,6 +151,21 @@ button.svd-remove-feature-value {
 /* "show_feature" page */
 span.feature-domain-item {
   text-decoration: underline;
+}
+span.feature-show-value-expand {
+  cursor: pointer;
+  font-size: 10px;
+}
+div.feature-show-value-toggle {
+  width: 800px;
+  margin: 0px 0px 5px 0px;
+  font-size: 10px;
+}
+img.feature-show-value-img {
+  width: 96px;
+  height: 96px;
+  float: left;
+  margin-right: 20px;
 }
 
 /* navigation */

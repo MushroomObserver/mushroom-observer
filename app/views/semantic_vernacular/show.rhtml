@@ -89,10 +89,11 @@
 								id=\"#{value["uri"]}\">" + value["label"] + "</span>") %>
 						<% end %>
 						<%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">" +
-							link_to(feature["label"],
+							link_to(feature["label"], {
 											:controller => "semantic_vernacular",
 											:action => "show_feature",
-											:uri => feature["uri"]) + ": " +
+											:uri => feature["uri"]},
+											:target => "_blank") + ": " +
 							value_labels.join(" <i>or</i> ") + "</li>" %>
 					<% end %>
 				</ul>
@@ -145,8 +146,7 @@
 													:action => "show_feature",
 													:uri => feature["uri"]},
 													:target => "_blank") + ": " +
-									value_labels.join(" <i>or</i> ") + "</li>"
-								%>
+									value_labels.join(" <i>or</i> ") + "</li>" %>
 							<% end %>
 						</ul>
 						<p class="svd-show-li-item-meta">
