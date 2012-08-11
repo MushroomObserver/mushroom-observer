@@ -60,6 +60,7 @@ class FungalFeature < SemanticVernacularDataSource
   def self.query_features_all
     QUERY_PREFIX +
     %(SELECT DISTINCT ?uri ?label
+      FROM NAMED <#{SVF_GRAPH}>
       WHERE {
         ?uri rdfs:subPropertyOf+ svf:hasFungalFeature .
         ?uri rdfs:label ?label . })
@@ -68,6 +69,7 @@ class FungalFeature < SemanticVernacularDataSource
   def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?label
+      FROM NAMED <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subPropertyOf+ svf:hasFungalFeature .
         <#{@uri}> rdfs:label ?label . })
@@ -76,6 +78,7 @@ class FungalFeature < SemanticVernacularDataSource
   def query_domain
     QUERY_PREFIX +
     %(SELECT DISTINCT ?domain ?f ?v ?feature ?value
+      FROM NAMED <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subPropertyOf+ svf:hasFungalFeature .
         { <#{@uri}> rdfs:domain ?d . } UNION
@@ -102,9 +105,8 @@ class FungalFeature < SemanticVernacularDataSource
         ?range owl:equivalentClass ?c1 . 
         ?c1 owl:unionOf ?c2 . 
         ?c2 rdf:rest*/rdf:first ?c3 .
-        ?c4 rdfs:subClassOf* ?c3 . 
-        ?c4 owl:equivalentClass* ?uri .
-        ?uri rdfs:label ?label . })
+        ?uri rdfs:subClassOf* ?c3 . 
+        ?uri owl:equivalentClass*/rdfs:label ?label . })
   end
 
 end

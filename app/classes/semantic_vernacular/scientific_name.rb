@@ -36,7 +36,7 @@ class ScientificName < SemanticVernacularDataSource
   end
 
   def self.insert_triples(svd, scientific_names)
-    rdf = QUERY_PREFIX + %(INSERT DATA {)
+    rdf = QUERY_PREFIX + %(INSERT DATA { GRAPH <#{SVF_GRAPH}> {)
     scientific_names.each do |scientific_name|
       rdf << 
         %(<#{svd["uri"]}>
@@ -49,17 +49,18 @@ class ScientificName < SemanticVernacularDataSource
             rdfs:label "#{scientific_name["label"]}"^^rdfs:Literal;
             svf:hasID "#{scientific_name["id"]}"^^xsd:positiveInteger . )
     end
-    rdf << %(})
+    rdf << %(}})
     return rdf
   end
 
   def self.delete_triples(scientific_name)
     QUERY_PREFIX +
     %(DELETE WHERE {
-        ?svd rdfs:subClassOf ?c . 
-        ?c owl:someValuesFrom <#{scientific_name}> .
-        ?c ?p1 ?o1 .
-        <#{scientific_name}> ?p2 ?o2 . })
+        GRAPH <#{SVF_GRAPH}> {
+          ?svd rdfs:subClassOf ?c . 
+          ?c owl:someValuesFrom <#{scientific_name}> .
+          ?c ?p1 ?o1 .
+          <#{scientific_name}> ?p2 ?o2 . }})
   end
 
 end

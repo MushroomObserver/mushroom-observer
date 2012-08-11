@@ -90,20 +90,23 @@ class SemanticVernacularController < ApplicationController
 
   # Fill IDs into the received post data.
   def fill_IDs(data)
+    id = allocate_ID
     if data["svd"]["uri"]
       data["svd"]["is_new"] = false
     else
-      data["svd"]["id"] = allocate_ID("SemanticVernacularDescription")
+      data["svd"]["id"] = id
       data["svd"]["is_new"] = true
+      id = id + 1
     end
     if data["label"]["value"]
-      data["label"]["id"] = allocate_ID("VernacularLabel")
+      data["label"]["id"] = id
+      id = id + 1
     end
     if data["features"].length > 0
-      data["description"]["id"] = allocate_ID("VernacularFeatureDescription")
+      data["description"]["id"] = id
+      id = id + 1
     end
     if data["scientific_names"].length > 0
-      id = allocate_ID("ScientificName")
       data["scientific_names"].each do |name| 
         name["id"] = id
         id = id + 1
@@ -113,28 +116,28 @@ class SemanticVernacularController < ApplicationController
   end
 
   # Allocate an ID to an individual resource by quering the triple store.
-  def allocate_ID(type)
-    SemanticVernacularDataSource.ask_max_ID(type)[0]["id"]["value"].to_i + 1
+  def allocate_ID
+    SemanticVernacularDataSource.ask_max_ID[0]["id"]["value"].to_i + 1
   end
 
   # Fill URIs into the received post data.
   def fill_URIs(data)
     if data["svd"]["id"] 
       data["svd"]["uri"] = SemanticVernacularDataSource.id_to_uri(
-        data["svd"]["id"], "SemanticVernacularDescription")
+        data["svd"]["id"])
     end
     if data["label"]["id"]
       data["label"]["uri"] = SemanticVernacularDataSource.id_to_uri(
-        data["label"]["id"], "VernacularLabel")
+        data["label"]["id"])
     end
     if data["description"]["id"]
       data["description"]["uri"] = SemanticVernacularDataSource.id_to_uri(
-      data["description"]["id"], "VernacularFeatureDescription")
+      data["description"]["id"])
     end
     if data["scientific_names"].length > 0
       data["scientific_names"].each do |name|
         name["uri"] = SemanticVernacularDataSource.id_to_uri(
-          name["id"], "ScientificName")
+          name["id"])
       end
     end
     Rails.logger.debug(data)
@@ -169,14 +172,6 @@ class SemanticVernacularController < ApplicationController
 
   # Delete triples from the triple store.
   def triple_store_delete(type, uri)
-    # case type
-    #   when "VernacularLabel"
-    #     response = VernacularLabel.delete(uri)
-    #   when "VernacularFeatureDescription"
-    #     response = VernacularFeatureDescription.delete(uri)
-    #   when "ScientificName"
-    #     response = ScientificName.delete(uri)
-    # end
     type.constantize.delete(uri)
   end
 

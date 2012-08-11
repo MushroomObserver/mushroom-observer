@@ -33,7 +33,8 @@ org.mo.sv.show.queryFeatureValueAnnotationCallback = function(response)
   jQuery.each(response["results"]["bindings"], function(i, val) {
     if (val["plink"] != undefined) {
       var img = jQuery("<img class=\"feature-show-value-img\" src=\"" 
-        + val["plink"]["value"] + "\" alt=\"picture preview\"></img>");
+        + val["plink"]["value"] + "\" alt=\"picture preview\" title=\"" 
+        + val["plink"]["value"] + "\"></img>");
       jQuery("li[title=\"" + val["label"]["value"] + "\"]")
         .find("div.feature-show-value-toggle").append(img);
     }

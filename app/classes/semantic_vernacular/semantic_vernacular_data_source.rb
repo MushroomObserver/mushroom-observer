@@ -26,23 +26,16 @@
 
 class SemanticVernacularDataSource
 
-	def self.ask_max_ID(type)
-		query(query_max_ID(type))
+	def self.ask_max_ID
+		query(query_max_ID)
 	end
 
-	def self.id_to_uri(id, type)
-		uri = SVF_NAMESPACE +
-		case type
-			when "SemanticVernacularDescription" then "SVD"
-			when "VernacularFeatureDescription" then "VFD"
-			when "ScientificName" then "SN"
-			when "VernacularLabel" then "VL"
-			when "User" then "U"
-		end
-		uri << id.to_s
+	def self.id_to_uri(id)
+		SVF_NAMESPACE + "SV" + id.to_s
 	end
 
 	def self.insert(uri)
+		Rails.logger.debug(insert_triples(uri))
 		update(insert_triples(uri))
 	end
 
@@ -63,8 +56,9 @@ class SemanticVernacularDataSource
 	# RPI endpoint
 	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
 	#UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
-	SVF_NAMESPACE = "http://mushroomobserver.org/svf.owl#"
-
+	SVF_GRAPH = "http://mushroomobserver.org/svf.owl"
+	SVF_NAMESPACE = SVF_GRAPH + "#"
+	
 	# Build a SPARQL SELECT query
   def self.query(query)
 		url = URI(QUERY_ENDPOINT)
@@ -92,16 +86,13 @@ class SemanticVernacularDataSource
 			PREFIX dcterms: <http://purl.org/dc/terms/>
 			PREFIX svf: <#{SVF_NAMESPACE}>\n)
 
-	def self.query_max_ID(type)
-		query = QUERY_PREFIX + %(SELECT ?id WHERE {)
-		case type
-		when "SemanticVernacularDescription", "VernacularFeatureDescription", 
-			"ScientificName"
-			query << %(?uri rdfs:subClassOf+ svf:#{type} . )
-		when "VernacularLabel", "User"
-			query << %(?uri a/rdfs:subClassOf* svf:#{type} . )
-		end
-		query << "?uri svf:hasID ?id } ORDER BY DESC (?id) LIMIT 1"
+	def self.query_max_ID
+		QUERY_PREFIX + 
+		%(SELECT ?id 
+			FROM NAMED <#{SVF_GRAPH}>
+			WHERE {
+				?uri svf:hasID ?id } 
+			ORDER BY DESC (?id) LIMIT 1)
 	end
 
 	def self.insert_has_object_value_restriction_triples(property, value)

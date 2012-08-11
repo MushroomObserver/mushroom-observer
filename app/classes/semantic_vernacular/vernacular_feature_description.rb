@@ -45,6 +45,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?user ?dateTime
+      FROM NAMED <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subClassOf svf:VernacularFeatureDescription .
         <#{@uri}> rdfs:subClassOf ?c1 .
@@ -58,6 +59,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def query_features
     QUERY_PREFIX +
     %(SELECT DISTINCT ?f ?v ?feature ?value
+      FROM NAMED <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subClassOf+ svf:VernacularFeatureDescription .
         <#{@uri}> owl:equivalentClass ?c1 .
@@ -76,28 +78,30 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def self.insert_triples(svd, description, features, user)
     QUERY_PREFIX +
     %(INSERT DATA {
-        <#{svd["uri"]}> 
-          rdfs:subClassOf
-            #{insert_some_object_values_from_restriction_triples(
-              SVF_NAMESPACE + "hasDescription", description["uri"])} .
-        <#{description["uri"]}>
-          a owl:class;
-          rdfs:subClassOf svf:VernacularFeatureDescription;
-          rdfs:subClassOf
-            #{insert_has_object_value_restriction_triples(
-              SVF_NAMESPACE + "proposedBy", user["uri"])};
-          rdfs:subClassOf
-            #{insert_has_datatype_value_restriction_triples(
-              SVF_NAMESPACE + "proposedAt", 
-              Time.now.strftime("%FT%T%:z"), 
-              "xsd:dateTime")};
-          svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
-          #{insert_features_triples(features)} . })      
+        GRAPH <#{SVF_GRAPH}> {
+          <#{svd["uri"]}> 
+            rdfs:subClassOf
+              #{insert_some_object_values_from_restriction_triples(
+                SVF_NAMESPACE + "hasDescription", description["uri"])} .
+          <#{description["uri"]}>
+            a owl:class;
+            rdfs:subClassOf svf:VernacularFeatureDescription;
+            rdfs:subClassOf
+              #{insert_has_object_value_restriction_triples(
+                SVF_NAMESPACE + "proposedBy", user["uri"])};
+            rdfs:subClassOf
+              #{insert_has_datatype_value_restriction_triples(
+                SVF_NAMESPACE + "proposedAt", 
+                Time.now.strftime("%FT%T%:z"), 
+                "xsd:dateTime")};
+            svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
+            #{insert_features_triples(features)} . }})      
   end
 
   def self.delete_triples(description)
     QUERY_PREFIX +
-    %(DELETE {
+    %(WITH <#{SVF_GRAPH}>
+      DELETE {
         ?svd rdfs:subClassOf ?c . 
         ?c ?p1 ?o1 . 
         <#{description}> ?p2 ?o2 .
@@ -125,7 +129,8 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
 
   def self.accept_triples(uri)
     QUERY_PREFIX +
-    %(DELETE { 
+    %(WITH <#{SVF_GRAPH}>
+      DELETE { 
         ?c1 owl:onProperty svf:hasDescription .
         ?c2 owl:onProperty svf:hasDefinition . }
       INSERT { 

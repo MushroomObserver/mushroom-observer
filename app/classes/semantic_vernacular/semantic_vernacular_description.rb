@@ -87,6 +87,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def self.query_svds_all
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?uri
+			FROM NAMED <#{SVF_GRAPH}>
 			WHERE {
 				?uri rdfs:subClassOf svf:SemanticVernacularDescription . })
 	end
@@ -94,6 +95,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def self.query_svds_with_names
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?uri ?label
+			FROM NAMED <#{SVF_GRAPH}>
 			WHERE {
 				?uri rdfs:subClassOf svf:SemanticVernacularDescription .
 				?uri rdfs:subClassOf ?c .
@@ -105,16 +107,14 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def self.insert_triples(svd)
 		QUERY_PREFIX +
 		%(INSERT DATA {
+			GRAPH <#{SVF_GRAPH}> {
 				<#{svd["uri"]}>
 					a owl:Class;
 					rdfs:subClassOf svf:SemanticVernacularDescription;
-					svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . })
+					svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . }})
 	end
 
 	def self.delete_triples(svd)
-		QUERY_PREFIX +
-		%(DELETE WHRE {
-				<#{svd}> ?p ?o . })
 	end
 
 	def query_attribute(property, value_constraint)

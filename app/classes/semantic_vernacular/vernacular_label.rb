@@ -22,6 +22,7 @@ class VernacularLabel < SemanticVernacularDataSource
 	def query_attributes
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?label ?user ?dateTime
+			FROM NAMED <#{SVF_GRAPH}>
 			WHERE {
 				<#{@uri}> a svf:VernacularLabel .
 				<#{@uri}> rdfs:label ?label .
@@ -32,6 +33,7 @@ class VernacularLabel < SemanticVernacularDataSource
 	def self.insert_triples(svd, label, user)
 		QUERY_PREFIX +
 		%(INSERT DATA {
+				GRAPH <#{SVF_GRAPH}> {
 				<#{svd["uri"]}> 
 					rdfs:subClassOf
 						#{insert_has_object_value_restriction_triples(
@@ -41,21 +43,23 @@ class VernacularLabel < SemanticVernacularDataSource
 					rdfs:label "#{label["value"]}"^^rdfs:Literal;
 					svf:hasID "#{label["id"]}"^^xsd:positiveInteger;
 					svf:proposedAt "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime;
-					svf:proposedBy <#{user["uri"]}> . })
+					svf:proposedBy <#{user["uri"]}> . }})
 	end
 
 	def self.delete_triples(label)
 		QUERY_PREFIX +
 		%(DELETE WHERE {
-				?svd rdfs:subClassOf ?c .
-				?c owl:hasValue <#{label}> .
-				?c ?p1 ?o1 .
-				<#{label}> ?p2 ?o2 . })
+				GRAPH <#{SVF_GRAPH}> {
+					?svd rdfs:subClassOf ?c .
+					?c owl:hasValue <#{label}> .
+					?c ?p1 ?o1 .
+					<#{label}> ?p2 ?o2 . }})
 	end
 
 	def self.accept_triples(uri)
 		QUERY_PREFIX +
-		%(DELETE { 
+		%(WITH <#{SVF_GRAPH}>
+			DELETE { 
 				?c1 owl:onProperty svf:hasLabel .
 				?c2 owl:onProperty svf:hasSVDName . }
 			INSERT { 
