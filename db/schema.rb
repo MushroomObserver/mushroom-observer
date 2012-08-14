@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120713171100) do
+ActiveRecord::Schema.define(:version => 20120814111300) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -375,12 +375,13 @@ ActiveRecord::Schema.define(:version => 20120713171100) do
   end
 
   create_table "notifications", :force => true do |t|
-    t.integer  "user_id",                                                              :default => 0, :null => false
-    t.enum     "flavor",        :limit => [:name, :observation, :user, :all_comments]
+    t.integer  "user_id",                                                                 :default => 0,     :null => false
+    t.enum     "flavor",           :limit => [:name, :observation, :user, :all_comments]
     t.integer  "obj_id"
     t.text     "note_template"
-    t.string   "sync_id",       :limit => 16
+    t.string   "sync_id",          :limit => 16
     t.datetime "modified"
+    t.boolean  "require_specimen",                                                        :default => false, :null => false
   end
 
   create_table "observations", :force => true do |t|

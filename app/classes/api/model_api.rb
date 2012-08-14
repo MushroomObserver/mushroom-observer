@@ -15,7 +15,7 @@ class API
     end
 
     def put
-      raise NoMethodForAction.new(:put, self.class.model.type_tag)
+      raise NoMethodForAction.new(:put, model_tag)
       # must_authenticate!
       # self.query = build_query
       # setter = build_setter
@@ -31,7 +31,7 @@ class API
     end
 
     def delete
-      raise NoMethodForAction.new(:delete, self.class.model.type_tag)
+      raise NoMethodForAction.new(:delete, model_tag)
       # must_authenticate!
       # self.query = build_query
       # deleter = build_deleter
@@ -39,7 +39,7 @@ class API
       # abort_if_any_errors!
       # results.each do |obj|
       #   begin
-      #     setter.call(obj)
+      #     deleter.call(obj)
       #   rescue => e
       #     errors << e
       #   end
@@ -97,6 +97,10 @@ class API
       else
         raise MustHaveEditPermission.new(obj)
       end
+    end
+
+    def model_tag
+      self.class.model.type_tag
     end
 
     # This is just here until the new version of Query comes on-line.

@@ -109,9 +109,10 @@ class Naming < AbstractModel
       done_user = {}
       for taxon in taxa
         for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
-          if n.user.created_here and
-             (n.user != user)  and
-             !done_user[n.user_id]
+          if n.user.created_here   and
+             (n.user != user)      and
+             !done_user[n.user_id] and
+             (!n.require_specimen || observation.specimen)
             QueuedEmail::NameTracking.create_email(n, self)
             done_user[n.user_id] = true
           end

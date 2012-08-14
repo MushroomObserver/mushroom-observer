@@ -11,6 +11,7 @@
 #  flavor::         Type of Notification.
 #  obj_id::         Id of principle object.
 #  note_template::  Template for an email (context depends on type of Notification).
+#  require_specimen:: Require observation to have a specimen?
 #
 #  == Class methods
 #

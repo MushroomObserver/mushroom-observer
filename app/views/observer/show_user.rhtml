@@ -95,14 +95,9 @@ end %>
 <center>
   <table border="0" width="100%" style="clear:right; padding:10px">
     <tr align="center">
-      <% obs_length = 0
-      if @observations
-        obs_length = @observations.length
-      end
-
-      if obs_length > 3 %>
+      <% if @observations %>
         <td align="center">
-          <% for obs in @observations[3,3] %>
+          <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
             <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
                           :link => :show_observation, :obs => obs.id,
                           :votes => true, :query_params => query_params(@query)) %><br/>
@@ -194,9 +189,9 @@ end %>
         <% end %>
       </td>
 
-      <% if obs_length > 0 %>
+      <% if @observations %>
         <td align="center">
-          <% for obs in @observations[0,3] %>
+          <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
             <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
                           :link => :show_observation, :obs => obs.id,
                           :votes => true, :query_params => query_params(@query)) %><br/>

@@ -229,7 +229,7 @@ class SpeciesListController < ApplicationController
       raise "Unsupported CSV report charset: #{charset}"
     end
     str = FasterCSV.generate do |csv|
-      csv << ['name', 'author', 'citation', 'valid']
+      csv << ['sciname', 'author', 'citation', 'valid']
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
           name.deprecated ? '' : '1'].map {|v| v.blank? ? nil : v}
