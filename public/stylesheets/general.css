@@ -560,3 +560,7 @@ div.floatthumb {
   float: left;
   padding: 1em 1em 1em 1em;
 }
+
+.hidden {
+  display: none;
+}
