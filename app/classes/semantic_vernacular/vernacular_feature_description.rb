@@ -46,6 +46,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   end
 
   def self.insert(svd, description, features, user)
+    Rails.logger.debug(insert_triples(svd, description, features, user))
     update(insert_triples(svd, description, features, user))
   end
 
@@ -125,7 +126,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
                 SVF_NAMESPACE + "proposedAt", 
                 Time.now.strftime("%FT%T%:z"), 
                 "xsd:dateTime")};
-            svf:hasID "#{description["id"]}"^^xsd:positiveInteger;
+            svf:hasID "#{description["id"]}"^^xsd:Integer;
             #{insert_features_triples(features)} . }})      
   end
 
