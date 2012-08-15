@@ -1,3 +1,26 @@
+# encoding: utf-8
+#
+#  = Scientific Name
+#
+#  This class describes the data model for the class ScientificName, a subclass 
+#  of SemanticVernacularDataSource. An instance of ScientificName class 
+#  represents an associated scientific name for an SVD instance.
+#
+#  == Class Methods
+#  === Public
+#  insert::                   Overrdie the parent class method.
+#  delete::                   Inherit the parent class method.
+#  === Private
+#  insert_triples::           Overrdie the parent class method.
+#  delete_triples::           Override the parent class method.
+#
+#  == Instance Methods
+#  ==== Private
+#  query_attibutes::          Build a SPARQL query for getting attributes of an
+#                             instance.
+#
+################################################################################
+
 class ScientificName < SemanticVernacularDataSource
 
   attr_accessor :uri,

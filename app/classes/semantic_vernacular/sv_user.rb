@@ -1,3 +1,18 @@
+# encoding: utf-8
+#
+#  = SV User
+#
+#  This class describes the data model for the class SVUser, a subclass of 
+#  SemanticVernacularDataSource. An instance of SVUser class represents a user
+#  in the Semantic Vernacular System.
+#
+#  == Instance Methods
+#  ==== Private
+#  query_attibutes::          Build a SPARQL query for getting attributes of an
+#                             instance.
+#
+################################################################################
+
 class SVUser < SemanticVernacularDataSource
 
   attr_accessor :uri,

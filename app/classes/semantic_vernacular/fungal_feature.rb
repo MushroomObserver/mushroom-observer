@@ -1,7 +1,36 @@
+# encoding: utf-8
+#
+#  = Fungal Feature
+#
+#  This class describes the data model for the class FungalFeature, a subclass 
+#  of SemanticVernacularDataSource. An instance of FungalFeature class 
+#  represents a fungal feature included in a VernacularFeatureDescription
+#  instance.
+#
+#  == Class Methods
+#  === Public
+#  index::                    List all the available instances.
+#  === Private
+#  query_features_all::       Build a SPARQL query for the method "index".
+#
+#  == Instance Methods
+#  ==== Public
+#  get_domain::               Get the domain of an instance.
+#  get_range::                Get the range of an instance.
+#  ==== Private
+#  query_attibutes::          Build a SPARQL query for getting attributes of an
+#                             instance.
+#  query_domain::             Build a SPARQL query for the method "get_domain".
+#  query_range::              Build a SPARQL query for the method "get_range".
+#
+################################################################################
+
 class FungalFeature < SemanticVernacularDataSource
 
   attr_accessor :uri,
                 :label,
+                :description,
+                :reference,
                 :domain,
                 :range
 
@@ -9,6 +38,10 @@ class FungalFeature < SemanticVernacularDataSource
     @uri = uri
     feature = self.class.query(query_attributes)[0]
     @label = feature["label"]["value"]
+    @description = 
+      feature["description"] == nil ? nil : feature["description"]["value"]
+    @reference = 
+      feature["reference"] == nil ? nil : feature["reference"]["value"]
     @domain = get_domain
     @range = get_range
   end
@@ -68,11 +101,14 @@ class FungalFeature < SemanticVernacularDataSource
 
   def query_attributes
     QUERY_PREFIX +
-    %(SELECT DISTINCT ?label
+    %(SELECT DISTINCT ?label ?description ?reference
       FROM NAMED <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subPropertyOf+ svf:hasFungalFeature .
-        <#{@uri}> rdfs:label ?label . })
+        <#{@uri}> rdfs:label ?label . 
+        OPTIONAL { <#{@uri}> dcterms:description ?description . }
+        OPTIONAL { <#{@uri}> dcterms:references ?ref . 
+                   ?ref rdfs:label ?reference . }})
   end
 
   def query_domain

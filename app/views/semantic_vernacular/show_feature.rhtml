@@ -12,6 +12,18 @@
 <div id="feature-show">
   <h2>Fungal Feature: <%= @feature.label %></h2>
   <ul>
+    <% if @feature.description != nil %>
+      <li class="svd-show-li">
+        <span class="svd-show-li-title">Description: </span>
+        <%= @feature.description %>
+      </li>
+    <% end %>
+    <% if @feature.reference != nil %>
+      <li class="svd-show-li">
+        <span class="svd-show-li-title">Reference: </span>
+        <%= @feature.reference %>
+      </li>
+    <% end %>
     <li class="svd-show-li">
       <span class="svd-show-li-title">Domain:</span><br />
       <span class="feature-domain-item">

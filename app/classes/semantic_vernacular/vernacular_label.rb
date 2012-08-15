@@ -1,3 +1,28 @@
+# encoding: utf-8
+#
+#  = Vernacular Label
+#
+#  This class describes the data model for the class VernacularLabel, a subclass
+#  of SemanticVernacularDataSource. An instance of VernacularLabel class 
+#  represents either a name or a name proposal for an SVD instance.
+#
+#  == Class Methods
+#  === Public
+#  insert::  									Overrdie the parent class method.
+#  delete:: 									Inherit the parent class method.
+#  modify:: 									Inherit the parent class method.
+#  === Private
+#  insert_triples:: 					Overrdie the parent class method.
+#  delete_triples::  					Override the parent class method.
+#  modify_triples::  					Override the parent class method.
+#
+#  == Instance Methods
+#  ==== Private
+#  query_attibutes::  				Build a SPARQL query for getting attributes of an
+# 														instance.
+#
+################################################################################
+
 class VernacularLabel < SemanticVernacularDataSource
 
 	attr_accessor :uri,
@@ -29,7 +54,7 @@ class VernacularLabel < SemanticVernacularDataSource
 				<#{@uri}> svf:proposedBy ?user .
 				<#{@uri}> svf:proposedAt ?dateTime . })
 	end
-
+	
 	def self.insert_triples(svd, label, user)
 		QUERY_PREFIX +
 		%(INSERT DATA {
@@ -56,7 +81,7 @@ class VernacularLabel < SemanticVernacularDataSource
 					<#{label}> ?p2 ?o2 . }})
 	end
 
-	def self.accept_triples(uri)
+	def self.modify_triples(uri)
 		QUERY_PREFIX +
 		%(WITH <#{SVF_GRAPH}>
 			DELETE { 

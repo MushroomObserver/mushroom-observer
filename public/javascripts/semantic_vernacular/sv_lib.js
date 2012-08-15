@@ -17,14 +17,15 @@ if (org.mo.sv.create == undefined || typeof(org.mo.sv.create) != "object")
   org.mo.sv.create = {};
 
 // Global variables.
-// The triple store endpoint url.
-//org.mo.sv.endpoint = "http://leo.tw.rpi.edu:2058/svf/sparql";
+// The RPI triple store endpoint url.
+// org.mo.sv.endpoint = "http://leo.tw.rpi.edu:2058/svf/sparql";
+// The MBL triple store endpoint url.
 org.mo.sv.endpoint = "http://128.128.170.15:3030/svf/sparql";
 // SVF graph URI.
 org.mo.sv.SVFGraph = "http://mushroomobserver.org/svf.owl";
 // SVF ontology namespace.
 org.mo.sv.SVFNamespace = org.mo.sv.SVFGraph + "#";
-// A global object to hold all the post data.
+// A global object to hold all the post data for creating a new SVD instance.
 org.mo.sv.create.postData = {
   "svd": {},
   "label": {},
@@ -32,12 +33,13 @@ org.mo.sv.create.postData = {
   "features": [], 
   "scientific_names": [],
   "user": {
+    // Use this test user for now.
     "uri": "http://mushroomobserver.org/svf.owl#SV1091"
   }
 };
-// A global object to hold matched SVDs from queries.
+// A global array to hold matched SVDs for any input features.
 org.mo.sv.create.matchedSVDs = [];
-// A global object to hold passed base features.
+// A global array to hold passed base features.
 org.mo.sv.create.baseFeatures = [];
 
 // Empty postData.
@@ -92,7 +94,7 @@ org.mo.sv.ajax = function(url, method, data, callback)
     });
 };
 
-// Build a query to ask for the existence of an URI.
+// Build a SPARQL query to ask for the existence of an URI.
 org.mo.sv.askURI = function(uri)
 {
   var query = org.mo.sv.getQueryPrefix();
@@ -100,7 +102,7 @@ org.mo.sv.askURI = function(uri)
   return query;
 };
 
-// Build a query to ask for the existence of a label.
+// Build a SPARQL query to ask for the existence of a label.
 org.mo.sv.askLabel = function(label)
 {
   var query = org.mo.sv.getQueryPrefix();
@@ -108,31 +110,34 @@ org.mo.sv.askLabel = function(label)
   return query;
 };
 
-// Build a query to get an URI from its label.
+// Build a SPARQL query to get the URI given its label.
 org.mo.sv.getURI = function(label)
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT ?uri WHERE {?uri rdfs:label \"" + label + "\"^^rdfs:Literal }";
+  query += "SELECT ?uri\n";
+  query += "WHERE { ?uri rdfs:label \"" + label + "\"^^rdfs:Literal }";
   return query;
 };
 
-// Build a query to get features dependent on selected feature-value pairs.
+// Build a SPARQL query to get features dependent on selected feature-value 
+// pairs.
 org.mo.sv.create.queryDependentFeatures = function(feature, values)
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT DISTINCT ?uri ?label ";
-  query += "FROM NAMED <" + org.mo.sv.SVFGraph + "> WHERE {";
-  query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature . ";
-  query += "?uri rdfs:label ?label . ";
-  query += "?uri rdfs:domain ?c1 . ";
-  query += "?c1 owl:intersectionOf ?c2 . ";
+  query += "SELECT DISTINCT ?uri ?label\n";
+  query += "FROM NAMED <" + org.mo.sv.SVFGraph + ">\n";
+  query += "WHERE {\n";
+  query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature .\n";
+  query += "?uri rdfs:label ?label .\n";
+  query += "?uri rdfs:domain ?c1 .\n";
+  query += "?c1 owl:intersectionOf ?c2 .\n";
   query += "{ ?c2 rdf:rest*/rdf:first ?c3 } UNION "
   query += "{ ?c2 rdf:rest*/rdf:first ?c4 . ";
   query += "?c4 owl:unionOf ?c5 . ";
-  query += "?c5 rdf:rest*/rdf:first ?c3 . }";
+  query += "?c5 rdf:rest*/rdf:first ?c3 . }\n";
   var arr = [];
   jQuery.each(values, function(i, val) {
-    var str = "{?c3 owl:onProperty <" + feature + "> . ";
+    var str = "{ ?c3 owl:onProperty <" + feature + "> . ";
     str += "?c3 owl:someValuesFrom <" + val + "> . }";
     arr.push(str);
   });
@@ -141,38 +146,32 @@ org.mo.sv.create.queryDependentFeatures = function(feature, values)
   return query;
 };
 
-// Build a query to get available SVDs for selected feature-value pairs.
+// Build a SPARQL query to get matched SVDs for selected feature-value pairs.
 org.mo.sv.create.querySVDForFeatureValue = function(feature, values)
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT DISTINCT ?uri ?name ";
-  query += "FROM NAMED <" + org.mo.sv.SVFGraph + "> WHERE {";
-  query += "?uri rdfs:subClassOf svf:SemanticVernacularDescription . ";
-  query += "OPTIONAL { ?uri rdfs:subClassOf ?c1 . ";
-  query += "?c1 owl:onProperty svf:hasSVDName . ";
-  query += "?c1 owl:hasValue ?vl . ";
-  query += "?vl rdfs:label ?name . } ";
-  // query += "OPTIONAL { ?uri rdfs:subClassOf ?c2 . ";
-  // query += "?c2 owl:onProperty svf:hasLabel . ";
-  // query += "?c2 owl:hasValue ?vl . ";
-  // query += "?vl rdfs:label ?label . } ";
-  query += "?uri rdfs:subClassOf ?c3 . ";
-  query += "{ ?c3 owl:onProperty svf:hasDefinition . } ";
-  query += "UNION { ?c3 owl:onProperty svf:hasDescription . } ";
-  query += "?c3 owl:someValuesFrom ?desc . ";
-  // query += "UNION { ?uri rdfs:subClassOf ?c4 . ";
-  // query += "?c4 owl:onProperty svf:hasDescription . ";
-  // query += "?c4 owl:someValuesFrom ?desc . } ";
-  query += "?desc owl:equivalentClass ?c5 . ";
-  query += "?c5 owl:intersectionOf ?c6 . "; 
-  query += "{ ?c6 rdf:rest*/rdf:first ?c7 . } UNION ";
-  query += "{ ?c6 rdf:rest*/rdf:first ?c8 . ";
-  query += "?c8 owl:unionOf ?c9 . ";
-  query += "?c9 rdf:rest*/rdf:first ?c7 . }";
+  query += "SELECT DISTINCT ?uri ?name\n";
+  query += "FROM NAMED <" + org.mo.sv.SVFGraph + ">\n";
+  query += "WHERE {\n";
+  query += "?uri rdfs:subClassOf svf:SemanticVernacularDescription .\n";
+  query += "OPTIONAL { ?uri rdfs:subClassOf ?c1 .\n";
+  query += "?c1 owl:onProperty svf:hasSVDName .\n";
+  query += "?c1 owl:hasValue ?vl .\n";
+  query += "?vl rdfs:label ?name . }\n";
+  query += "?uri rdfs:subClassOf ?c2 .\n";
+  query += "{ ?c2 owl:onProperty svf:hasDefinition . } UNION ";
+  query += "{ ?c2 owl:onProperty svf:hasDescription . }\n";
+  query += "?c2 owl:someValuesFrom ?desc .\n";
+  query += "?desc owl:equivalentClass ?c3 .\n";
+  query += "?c3 owl:intersectionOf ?c4 .\n"; 
+  query += "{ ?c4 rdf:rest*/rdf:first ?c5 . } UNION ";
+  query += "{ ?c4 rdf:rest*/rdf:first ?c6 . ";
+  query += "?c6 owl:unionOf ?c7 . ";
+  query += "?c7 rdf:rest*/rdf:first ?c5 . }\n";
   var arr = [];
   jQuery.each(values, function(i, val) {
-    var str = "{ ?c7 owl:onProperty <" + feature + "> . ";
-    str += "?c7 owl:someValuesFrom <" + val + "> . }";
+    var str = "{ ?c5 owl:onProperty <" + feature + "> . ";
+    str += "?c5 owl:someValuesFrom <" + val + "> . }";
     arr.push(str);
   });
   query += arr.join(" UNION ");
@@ -180,62 +179,64 @@ org.mo.sv.create.querySVDForFeatureValue = function(feature, values)
   return query;
 };
 
-// Build a query to get values for a selected feature.
+// Build a SPARQL query to get values for a selected feature.
 org.mo.sv.create.queryFeatureValues = function(feature)
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT DISTINCT ?uri ?label WHERE {";
-  query += "<" + feature + "> rdfs:range ?r . ";
-  query += "?r owl:equivalentClass ?c . ";
-  query += "?c owl:unionOf ?u . ";
-  query += "?u rdf:rest*/rdf:first ?c3 . ";
-  query += "?c4 rdfs:subClassOf* ?c3 . ";
-  query += "?c4 owl:equivalentClass* ?uri . ";
+  query += "SELECT DISTINCT ?uri ?label\n";
+  query += "WHERE {\n";
+  query += "<" + feature + "> rdfs:range ?r .\n";
+  query += "?r owl:equivalentClass ?c .\n";
+  query += "?c owl:unionOf ?u .\n";
+  query += "?u rdf:rest*/rdf:first ?c3 .\n";
+  query += "?c4 rdfs:subClassOf* ?c3 .\n";
+  query += "?c4 owl:equivalentClass* ?uri .\n";
   query += "?uri rdfs:label ?label . }";
   return query;
 };
 
-// Build a query to get all independent features.
+// Build a SPARQL query to get all independent features.
 org.mo.sv.create.queryIndependentFeatures = function()
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT DISTINCT ?uri ?label ";
-  query += "FROM NAMED <" + org.mo.sv.SVFGraph + "> WHERE {";
-  query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature . ";
-  query += "?uri rdfs:label ?label . ";
+  query += "SELECT DISTINCT ?uri ?label\n";
+  query += "FROM NAMED <" + org.mo.sv.SVFGraph + ">\n";
+  query += "WHERE {\n";
+  query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature .\n";
+  query += "?uri rdfs:label ?label .\n";
   query += "FILTER (!EXISTS ";
   query += "{ ?uri rdfs:domain ?domain . ";
-  query += "?domain owl:intersectionOf ?c . }) ";
+  query += "?domain owl:intersectionOf ?c . })\n";
   query += "FILTER (!EXISTS ";
-  query += "{ ?uri rdfs:label \"has color\"^^rdfs:Literal . }) ";
+  query += "{ ?uri rdfs:label \"has color\"^^rdfs:Literal . })\n";
   query += "FILTER (!EXISTS ";
   query += "{ ?uri rdfs:label \"has status\"^^rdfs:Literal . })}";
-  console.log(query)
   return query;
 };
 
-// Build a query to get annotations of a feature value.
+// Build a SPARQL query to get annotations of a given feature value.
 org.mo.sv.show.queryFeatureValueAnnotation = function(uri)
 {
   var query = org.mo.sv.getQueryPrefix();
-  query += "SELECT DISTINCT ?label ?desc ?ref ?plink WHERE {";
-  query += "<" + uri + "> rdfs:subClassOf+ svf:FungalFeatureValuePartition . ";
-  query += "<" + uri + "> owl:equivalentClass*/rdfs:label ?label . ";
-  query += "OPTIONAL { <" + uri + "> dcterms:description ?desc . }";
-  query += "OPTIONAL { <" + uri + "> dcterms:references ?ref . }";
-  query += "OPTIONAL { <" + uri + "> svf:hasPictureURL ?plink . }}";
-  console.log(query)
+  query += "SELECT DISTINCT ?label ?description ?reference ?picLink\n";
+  query += "WHERE {\n";
+  query += "<" + uri + "> rdfs:subClassOf+ svf:FungalFeatureValuePartition .\n";
+  query += "<" + uri + "> owl:equivalentClass*/rdfs:label ?label .\n";
+  query += "OPTIONAL { <" + uri + "> dcterms:description ?description . }\n";
+  query += "OPTIONAL { <" + uri + "> dcterms:references ?r . ";
+  query += "?r rdfs:label ?reference . }\n";
+  query += "OPTIONAL { <" + uri + "> svf:hasPictureURL ?picLink . }}";
   return query;
 }
 
 // Get all query prefixes.
 org.mo.sv.getQueryPrefix = function()
 {
-  var prefix = "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
-  prefix += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
-  prefix += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ";
-  prefix += "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ";
-  prefix += "PREFIX dcterms: <http://purl.org/dc/terms/> ";
-  prefix += "PREFIX svf: <" + org.mo.sv.SVFNamespace + "> ";
+  var prefix = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n";
+  prefix += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n";
+  prefix += "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n";
+  prefix += "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n";
+  prefix += "PREFIX dcterms: <http://purl.org/dc/terms/>\n";
+  prefix += "PREFIX svf: <" + org.mo.sv.SVFNamespace + ">\n";
   return prefix;
 };

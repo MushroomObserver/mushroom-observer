@@ -1,3 +1,35 @@
+# encoding: utf-8
+#
+#  = Vernacular Feature Description
+#
+#  This class describes the data model for the class 
+#  VernacularFeatureDescription, a subclass of SemanticVernacularDataSource. An 
+#  instance of VernacularFeatureDescription class represents either a defintion 
+#  or a definition proposal for an SVD instance.
+#
+#  == Class Methods
+#  === Public
+#  insert::                   Overrdie the parent class method.
+#  delete::                   Inherit the parent class method.
+#  modify::                   Inherit the parent class method.
+#  === Private
+#  insert_triples::           Overrdie the parent class method.
+#  delete_triples::           Override the parent class method.
+#  modify_triples::           Override the parent class method.
+#  insert_features_triples::  A helf method for the method "insert_triples".
+#
+#  == Instance Methods
+#  ==== Public
+#  get_features::             Get all the features included in an instance.
+#  refactor_features::        Refactor the return of the method "get_features"
+#                             into a hash.
+#  ==== Private
+#  query_attibutes::          Build a SPARQL query for getting attributes of an
+#                             instance.
+#  query_features::           Build a SPAQL query for the method "get_features".
+#
+################################################################################
+
 class VernacularFeatureDescription < SemanticVernacularDataSource
 
   attr_accessor :uri,
@@ -16,8 +48,6 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def self.insert(svd, description, features, user)
     update(insert_triples(svd, description, features, user))
   end
-
-  private
 
   def get_features
     self.class.query(query_features)
@@ -41,6 +71,8 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
     end
     return refactoring
   end
+
+  private
 
   def query_attributes
     QUERY_PREFIX +
@@ -127,7 +159,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
         FILTER isBlank(?o3) . })
   end
 
-  def self.accept_triples(uri)
+  def self.modify_triples(uri)
     QUERY_PREFIX +
     %(WITH <#{SVF_GRAPH}>
       DELETE { 

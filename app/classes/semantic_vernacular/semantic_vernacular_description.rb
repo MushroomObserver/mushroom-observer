@@ -1,30 +1,39 @@
 # encoding: utf-8
 #
-#  = Semantic Vernacular Description (SVD)
+#  = Semantic Vernacular Description
 #
-#  This class is a subclass of the SemanticVernacularDataSource class. It 
-#  describes the data model of semantic vernacular descriptions.
+#  This class describes the data model for the class 
+#  SemanticVernacularDescription, a subclass of SemanticVernacularDataSource.
 #
 #  == Class Methods
 #  === Public
-#  index (inherited)::				List all SVD instances.
+#  index_with_name::					List all instances with accepted names.
+#  index_without_name::  			List all instances without accepted names.
+#  insert::  									Inherit the parent class method.
+#  delete:: 									Inherit the parent class method.
 #  === Private
-#  query (inherited)::				Submit a SPARQL query and get responses.
-#  query_all:: 								Build a query to get all SVD instances.
+#  query_svds_all::						Build a SPARQL query to get all instances.
+#  query_svds_with_names:: 		Build a SPARQL query to get all instances with
+#  														names.
+#  insert_triples:: 					Overrdie the parent class method.
+#  delete_triples::  					Override the parent class method.
 #
 #  == Instance Methods
 #  ==== Public
-#  to_s (inherited):: 				Returns the lable for a given SVD instance.
-#  get_label (inherited)::		Returns the lable for a given SVD instance.
-#  associate_taxa::						Associate a SVD instance to taxa.
-#  
+#  get_attribute:: 						Get a specific single-value attribute of an 
+# 														instance.
+#  get_attribute_array:: 			Get a specific multiple-value attribute of an 
+#  														instance.
 #  ==== Private
-#  query_label (inherited)::	Build a query to get the lable for a given SVD
-#  														instance.
-#  query_features:: 					Build a query to get the features for a given SVD
-#  														instance.
-#  query_feature_to_taxa::  	Build a query to get the associated taxa for a 
-#  														given pair of feature and values.  
+#  query_name:: 							Build a SPARQL query for getting the name.
+#  query_labels:: 						Build a SPARQL query for getting the name 
+# 														proposals.
+#  query_definition:: 				Build a SPARQL query for getting the definition.
+#  query_descriptions:: 			Build a SPARQL query for getting the definition 
+# 														proposals.
+#  query_scentific_names:: 		Build a SPARQL query for getting the scientific 
+# 														names.
+#  query_attribute:: 					A helper method for building SPARQL queries. 
 #
 ################################################################################
 
@@ -75,7 +84,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	end
 
 	private
-
+	# A hash listing the class of each attribute.
 	ATTRIBUTE_CLASS_LIST = {
 		:name => "VernacularLabel",
 		:labels => "VernacularLabel",
@@ -117,16 +126,6 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def self.delete_triples(svd)
 	end
 
-	def query_attribute(property, value_constraint)
-		QUERY_PREFIX +
-		%(SELECT DISTINCT ?uri
-			WHERE {
-				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
-				<#{@uri}> rdfs:subClassOf ?c .
-				?c owl:onProperty #{property} .
-				?c #{value_constraint} ?uri . })
-	end
-
 	def query_name
 		query_attribute("svf:hasSVDName", "owl:hasValue")
 	end
@@ -145,6 +144,17 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 
 	def query_scientific_names
 		query_attribute("svf:hasAssociatedScientificName", "owl:someValuesFrom")
+	end
+
+	def query_attribute(property, value_constraint)
+		QUERY_PREFIX +
+		%(SELECT DISTINCT ?uri
+			FROM NAMED <#{SVF_GRAPH}>
+			WHERE {
+				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
+				<#{@uri}> rdfs:subClassOf ?c .
+				?c owl:onProperty #{property} .
+				?c #{value_constraint} ?uri . })
 	end
 
 end

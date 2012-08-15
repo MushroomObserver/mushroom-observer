@@ -2,26 +2,29 @@
 #
 #  = Semantic Vernacular Data Source
 #
-#  This class describes the abstract data model for the semantic vernacular
-#  module. Subclasses should override some of the methods to implement 
-#  corresponding functionalities. Data are retrieved directly through a triple 
-#  store.
+#  This class describes the abstract data model for the Semantic Vernacular
+#  System.
 #
 #  == Class Methods
 #  === Public
-#  index::    						List all instances.
-#  === Private
-#  query:: 								Submit a query to the triple store and get responses.
-#  query_all:: 						Build a query to get all instances.
-#
-#  == Instance Methods
-#  ==== Public
-#  to_s::           			Returns the lable for a given instance.
-#  get_label::						Returns the lable for a given instance.
+#  ask_max_ID::    				Find out the current maximum ID in the triple store.
+#  id_to_uri:: 						Generate a URI based on an ID.
+#  insert::  							Insert a new instance to the triple store.
+#  delete:: 							Delete an instance from the triple store.
+#  modify:: 							Modify an instance in the triple store
 #  
-#  ==== Private
-#  query_label:: 					Build a query to get the lable for a given instance.
-#
+#  === Private
+#  query:: 								Submit a SPARQL SELECT query to the triple store and 
+#  												return responses.
+#  update:: 							Submit a SPARQL UPDATE query to the triple store.
+#  query_max_ID:: 				Build a SPARQL query for the method "ask_max_ID".
+#  insert_triples:: 			The abstract method for building a SPARQL query for
+#  												the method "insert".
+#  delete_triples:: 			The abstract method for building a SPARQL query for
+#  												the method "delete".
+#  modify_triples:: 			The abstract method for building a SPARQL query for
+#  												the method "modify".
+#  
 ################################################################################
 
 class SemanticVernacularDataSource
@@ -43,9 +46,8 @@ class SemanticVernacularDataSource
 		update(delete_triples(uri))
 	end
 
-	def self.accept(uri)
-		Rails.logger.debug(accept_triples(uri))
-		update(accept_triples(uri))
+	def self.modify(uri)
+		update(modify_triples(uri))
 	end
 
 	private
@@ -54,9 +56,11 @@ class SemanticVernacularDataSource
 	QUERY_ENDPOINT = "http://128.128.170.15:3030/svf/sparql"
 	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
 	# RPI endpoint
-	#QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
-	#UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
+	# QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
+	# UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"
+	# SVF graph URI
 	SVF_GRAPH = "http://mushroomobserver.org/svf.owl"
+	# SVF name space
 	SVF_NAMESPACE = SVF_GRAPH + "#"
 	
 	# Build a SPARQL SELECT query
@@ -95,6 +99,19 @@ class SemanticVernacularDataSource
 			ORDER BY DESC (?id) LIMIT 1)
 	end
 
+	def self.insert_triples(uri)
+	end
+
+	def self.delete_triples(uri)
+	end
+
+	def self.modify_triples(uri)
+	end
+
+	##############################################################################
+  # Helper methods
+  ##############################################################################
+
 	def self.insert_has_object_value_restriction_triples(property, value)
 		%([ a owl:Restriction;
 				owl:onProperty <#{property}>;
@@ -111,15 +128,6 @@ class SemanticVernacularDataSource
 		%([ a owl:Restriction;
 				owl:onProperty <#{property}>;
 				owl:someValuesFrom <#{value}> ])
-	end
-
-	def self.insert_triples(uri)
-	end
-
-	def self.delete_triples(uri)
-	end
-
-	def self.accept_triples(uri)
-	end
+	end	
 
 end

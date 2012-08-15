@@ -1,4 +1,4 @@
-/* Javascript helpers for the SVD "create" page.
+/* Javascript helpers for the "create" page.
 /*
 /******************************************************************************/
 
@@ -6,19 +6,21 @@ jQuery.noConflict();
 
 window.onload = function()
 {
-  // If there is an URI passed, put it into postData.
+  // If there is an URI passed (it means this is not creating a new SVD), put it
+  // into postData.
   if (jQuery("input#svd-create-uri").val() != undefined)
     org.mo.sv.create.postData["svd"]["uri"] = 
       jQuery("input#svd-create-uri").val();
 
-  // If there are base features passed, put them into baseFeatures.
+  // If there are base features passed (it means this is proposing a new 
+  // defintion based on an existing description), put them into baseFeatures.
   if (jQuery("ul#svd-feature-value-display").find("li").length > 0) {
     jQuery("ul#svd-feature-value-display")
       .find("div.svd-create-display-header").show();
     org.mo.sv.create.parseBaseFeatures();
   }
 
-  // When the user enter something in the "svd-create-label" text box, put it
+  // When the user enters some text in the "svd-create-label" text box, put them
   // into postData.
   jQuery("input#svd-create-label").change(function() {
     org.mo.sv.create.postData["label"]["value"] = jQuery(this).val();
@@ -29,8 +31,8 @@ window.onload = function()
     org.mo.sv.create.queryIndependentFeatures(), 
     org.mo.sv.create.getFeaturesCallback);
 
-  // Display all values for a selected feature in the "svd-feature-value" 
-  // multiple select box.
+  // Display all allowable values for a selected feature in the 
+  // "svd-feature-value" multiple select box.
   jQuery("select#svd-create-feature").change(function() {
     var selected = jQuery(this).find("option:selected");
     if (selected.length == 1) {
@@ -39,7 +41,7 @@ window.onload = function()
         org.mo.sv.create.queryFeatureValues(feature), 
         org.mo.sv.create.getFeatureValuesCallback);
     }
-    // The user cannot select multiple features at one time.
+    // The user should not be able to select multiple features at one time.
     else {
       alert("You should select only one feature at a time!");
       selected.attr("selected", false);
@@ -49,8 +51,8 @@ window.onload = function()
   });
 
   // When the "svd-add-feature" button is clicked: store selected feature-value
-  // pairs and matched SVDs to postData, display selected feature-value pairs
-  // and matched SVDs. 
+  // pairs and matched SVDs to postData, and display selected feature-value 
+  // pairs and matched SVDs. 
   jQuery("button#svd-add-feature")
     .click(org.mo.sv.create.addFeatureCallback);
 
@@ -78,7 +80,7 @@ window.onload = function()
 // Callback function for clicking the "svd-create-submit" button.
 org.mo.sv.create.submitCallback = function()
 {
-  // Label and definition must be filled for a new SVD creation.
+  // Name and definition must be filled for a new SVD creation.
   if (jQuery("input#svd-create-label").val() != undefined &&  
       org.mo.sv.create.postData["label"]["value"] == null)
     alert("\"Name\" must be filled!");
@@ -86,11 +88,11 @@ org.mo.sv.create.submitCallback = function()
   else if (org.mo.sv.create.postData["features"].length == 0)
     alert("\"Definition\" must be filled!");
   else {
-    // When postData["svd"] has any SVD that is currently available, remind the
+    // If there are any SVDs matching the input description, remind the
     // user his/her input of definition is not a new one.
     if (org.mo.sv.create.matchedSVDs[0] != "none")
       alert("Your input of definition has matched one or more current " + 
-        "vernacular desctiptions in the database, please refine your input!");
+        "feature desctiptions in the database, please refine your input!");
     else {
       console.log(org.mo.sv.create.postData);
       //Post postData to backend to generate RDF.
@@ -134,7 +136,7 @@ org.mo.sv.create.addScientificNameCallback = function()
   if (name == "")
     alert("You have not input any scientific name!");
   else {
-    // Check if the input is duplicated
+    // Check if the input is duplicate
     var flag = false;
     jQuery.each(org.mo.sv.create.postData["scientific_names"], 
       function(i, val) {
@@ -186,6 +188,7 @@ org.mo.sv.create.clearFeatureCallback = function()
 // Callback function for clicking the "svd-add-feature" button.
 org.mo.sv.create.addFeatureCallback = function()
 {
+  // Extract input.
   var feature = 
     jQuery("select#svd-create-feature").find("option:selected").attr("id");
   var feature_label = 
@@ -218,19 +221,19 @@ org.mo.sv.create.addFeatureCallback = function()
       + "<u>remove</u></button></li>");
     // When the "svd-remove-feature-value" button is clicked: remove the 
     // feature-value pair from the display area, delete that pair from the
-    // postData, reset matched SVDs, and reset features available in the
+    // postData, reset matched SVDs, and reset available features in the
     // "svd-create-feature" select box.
     jQuery("button.svd-remove-feature-value")
       .unbind("click").click(org.mo.sv.create.removeFeatureValueCallback);
-    // Display available SVDs based on feature selections in the display area.
+    // Display the SVDs matching the input feature description.
     org.mo.sv.create.getMatchedSVDs(
       org.mo.sv.create.postData["features"]);
-    // Add features dependent on the previously selected feature-value pairs in 
-    // the "svd-feature" select box.
+    // Add features dependent on the previously selected feature-value pairs to 
+    // the "svd-create-feature" select box.
     org.mo.sv.submitQuery(
       org.mo.sv.create.queryDependentFeatures(feature, values), 
       org.mo.sv.create.getFeaturesCallback);
-    // Clear "svd-feature-value" multiple select box. 
+    // Clear the "svd-feature-value" multiple select box. 
     jQuery("select#svd-create-feature-value")
       .find("option").not(".svd-create-select-default").remove();
   }
@@ -258,7 +261,7 @@ org.mo.sv.create.removeFeatureValueCallback = function()
   if (jQuery("ul#svd-feature-value-display").find("li").length == 0)
     jQuery("ul#svd-feature-value-display .svd-create-display-header")
       .css("display", "none");
-  // Reset the matched SVD list.
+  // Reset the matched SVDs list.
   org.mo.sv.create.getMatchedSVDs(
     org.mo.sv.create.postData["features"]);
   // Reset the "svd-create-feature" select box: remove the dependent

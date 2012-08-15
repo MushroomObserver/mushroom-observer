@@ -1,4 +1,4 @@
-/* Javascript helpers for the SVD "show" page.
+/* Javascript helpers for the "show" page.
 /*
 /******************************************************************************/
 

@@ -3,10 +3,16 @@
 #  = Semantic Vernacular Controller
 #
 #  == Actions
-#  index::            List all semantic vernacular descriptions.
-#  show::             Show a specific vernacular description with uri, lable, 
-#                     features, and associated taxa.
-#  create::           Create an instance of semantic vernacular descriptions.
+#  index::            List all Semantic Vernacular Descriptions (SVDs).
+#  show::             Show a specific SVD.
+#  create::           Create an instance of SVDs either from scratch or based on
+#                     an existing feature description.
+#  propose::          Respond to the HTTP POST request for creating a proposal.
+#  delete::           Delete a name, a description, or an associated scientific
+#                     name.
+#  accept::           Accept a proposal as the formal name or definition.
+#  index_features::   List all available features.
+#  show_feature::     Show a sepecific feature.
 #
 ################################################################################
 
@@ -69,7 +75,7 @@ class SemanticVernacularController < ApplicationController
   def accept
     type = URI.unescape(params["type"])
     uri = URI.unescape(params["uri"])
-    response = triple_store_insert_delete(type, uri)
+    response = triple_store_modify(type, uri)
     Rails.logger.debug(response)
     respond_to do |format|
       format.html {redirect_to :back}
@@ -83,6 +89,7 @@ class SemanticVernacularController < ApplicationController
   def show_feature
     @feature = FungalFeature.new(params["uri"])
   end
+
 
   ##############################################################################
   # Helper methods
@@ -115,12 +122,13 @@ class SemanticVernacularController < ApplicationController
     Rails.logger.debug(data)
   end
 
-  # Allocate an ID to an individual resource by quering the triple store.
+  # Allocate an ID to an individual resource by quering the current maximum ID
+  # in the triple store.
   def allocate_ID
     SemanticVernacularDataSource.ask_max_ID[0]["id"]["value"].to_i + 1
   end
 
-  # Fill URIs into the received post data.
+  # Fill URIs into the received post data based on the IDs acollated to them.
   def fill_URIs(data)
     if data["svd"]["id"] 
       data["svd"]["uri"] = SemanticVernacularDataSource.id_to_uri(
@@ -143,7 +151,7 @@ class SemanticVernacularController < ApplicationController
     Rails.logger.debug(data)
   end
 
-  # Generate RDF in turtle based on the received post data, and insert them to
+  # Generate RDF in .ttl based on the received post data, and insert them to
   # the triple store.
   def triple_store_insert(data)
     if data["svd"]["is_new"] == true
@@ -175,9 +183,9 @@ class SemanticVernacularController < ApplicationController
     type.constantize.delete(uri)
   end
 
-  # Insert and delete triples in the same time to/from the triple store.
-  def triple_store_insert_delete(type, uri)
-    type.constantize.accept(uri)
+  # Modify triples in the triple store.
+  def triple_store_modify(type, uri)
+    type.constantize.modify(uri)
   end
 
 end
