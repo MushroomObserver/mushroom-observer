@@ -179,12 +179,10 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
 
   def self.insert_features_triples(features)
     rdf = %(owl:equivalentClass
-              [ a owl:class;
-              owl:intersectionOf \(svf:Fungus )
+              [ owl:intersectionOf \(svf:Fungus )
     features.each do |feature|
       if feature["values"].length > 1
-        rdf << %([ a owl:class;
-                   owl:unionOf \()
+        rdf << %([ owl:unionOf \()
         feature["values"].each do |value|
           rdf << insert_some_object_values_from_restriction_triples(
             feature["feature"], value)
