@@ -116,7 +116,6 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
               #{insert_some_object_values_from_restriction_triples(
                 SVF_NAMESPACE + "hasDescription", description["uri"])} .
           <#{description["uri"]}>
-            a owl:class;
             rdfs:subClassOf svf:VernacularFeatureDescription;
             rdfs:subClassOf
               #{insert_has_object_value_restriction_triples(

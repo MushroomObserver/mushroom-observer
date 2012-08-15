@@ -51,7 +51,7 @@
         <rdfs:subPropertyOf rdf:resource="&rdfs;seeAlso"/>
     </owl:AnnotationProperty>
     <owl:AnnotationProperty rdf:about="&svf;hasID">
-        <rdfs:range rdf:resource="&xsd;positiveInteger"/>
+        <rdfs:range rdf:resource="&xsd;Interger"/>
     </owl:AnnotationProperty>
     <owl:AnnotationProperty rdf:about="&dcterms;references"/>
     <owl:AnnotationProperty rdf:about="&dcterms;date"/>
@@ -963,7 +963,7 @@
 
     <owl:Class rdf:about="&svf;FungalFeatureValuePartition">
         <rdfs:label rdf:datatype="&rdfs;Literal">Fungal Feature Value Partition</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1008</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1008</hasID>
     </owl:Class>
     
 
@@ -972,7 +972,7 @@
 
     <owl:Class rdf:about="&svf;Fungus">
         <rdfs:label rdf:datatype="&rdfs;Literal">Fungus</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1003</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1003</hasID>
     </owl:Class>
     
 
@@ -981,7 +981,7 @@
 
     <owl:Class rdf:about="&svf;GeographicPlace">
         <rdfs:label rdf:datatype="&rdfs;Literal">Geographic Place</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1100</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1100</hasID>
     </owl:Class>
     
 
@@ -991,7 +991,7 @@
     <owl:Class rdf:about="&svf;Reference">
         <rdfs:label rdf:datatype="&rdfs;Literal">Reference</rdfs:label>
         <rdfs:subClassOf rdf:resource="&owl;Thing"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1850</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1850</hasID>
     </owl:Class>
     
 
@@ -1042,7 +1042,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1110"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1010</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1010</hasID>
     </owl:Class>
     
 
@@ -1093,7 +1093,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1215"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1011</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1011</hasID>
     </owl:Class>
     
 
@@ -1126,7 +1126,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1312"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1012</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1012</hasID>
     </owl:Class>
     
 
@@ -1165,7 +1165,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1113"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1013</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1013</hasID>
     </owl:Class>
     
 
@@ -1192,7 +1192,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1314"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1014</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1014</hasID>
     </owl:Class>
     
 
@@ -1219,7 +1219,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1315"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1015</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1015</hasID>
     </owl:Class>
     
 
@@ -1246,7 +1246,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1316"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1016</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1016</hasID>
     </owl:Class>
     
 
@@ -1273,7 +1273,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1117"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1017</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1017</hasID>
     </owl:Class>
     
 
@@ -1300,7 +1300,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1318"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1018</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1018</hasID>
     </owl:Class>
     
 
@@ -1327,7 +1327,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1052"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1019</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1019</hasID>
     </owl:Class>
     
 
@@ -1354,7 +1354,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1320"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1020</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1020</hasID>
     </owl:Class>
     
 
@@ -1381,7 +1381,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1121"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1021</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1021</hasID>
     </owl:Class>
     
 
@@ -1408,7 +1408,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1322"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1022</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1022</hasID>
     </owl:Class>
     
 
@@ -1435,7 +1435,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1214"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1023</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1023</hasID>
     </owl:Class>
     
 
@@ -1462,7 +1462,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1324"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1024</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1024</hasID>
     </owl:Class>
     
 
@@ -1489,7 +1489,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1325"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1025</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1025</hasID>
     </owl:Class>
     
 
@@ -1516,7 +1516,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1217"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1026</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1026</hasID>
     </owl:Class>
     
 
@@ -1567,7 +1567,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1041"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1031</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1031</hasID>
     </owl:Class>
     
 
@@ -1606,7 +1606,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1042"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1032</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1032</hasID>
     </owl:Class>
     
 
@@ -1633,7 +1633,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1043"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1033</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1033</hasID>
     </owl:Class>
     
 
@@ -1666,7 +1666,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1034</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1034</hasID>
     </owl:Class>
     
 
@@ -1705,7 +1705,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1045"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1035</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1035</hasID>
     </owl:Class>
     
 
@@ -1738,7 +1738,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1146"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1036</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1036</hasID>
     </owl:Class>
     
 
@@ -1771,7 +1771,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1053"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1037</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1037</hasID>
     </owl:Class>
     
 
@@ -1846,7 +1846,7 @@
                 <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1038</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1038</hasID>
     </owl:Class>
     
 
@@ -1891,7 +1891,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1149"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1039</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1039</hasID>
     </owl:Class>
     
 
@@ -2027,7 +2027,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1041</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1041</hasID>
     </owl:Class>
     
 
@@ -2187,7 +2187,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1042</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1042</hasID>
     </owl:Class>
     
 
@@ -2351,7 +2351,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1043</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1043</hasID>
     </owl:Class>
     
 
@@ -2515,7 +2515,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1044</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1044</hasID>
     </owl:Class>
     
 
@@ -2651,7 +2651,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1045</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1045</hasID>
     </owl:Class>
     
 
@@ -2795,7 +2795,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1046</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1046</hasID>
     </owl:Class>
     
 
@@ -2939,7 +2939,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1047</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1047</hasID>
     </owl:Class>
     
 
@@ -2975,7 +2975,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1048</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1048</hasID>
     </owl:Class>
     
 
@@ -3015,7 +3015,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1049</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1049</hasID>
     </owl:Class>
     
 
@@ -3037,7 +3037,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1051</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1051</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/6733231/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/588</hasMushroomObserverURL>
     </owl:Class>
@@ -3061,7 +3061,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1052</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1052</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/18471660/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/935</hasMushroomObserverURL>
     </owl:Class>
@@ -3085,7 +3085,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1053</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1053</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/11969191/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/409</hasMushroomObserverURL>
     </owl:Class>
@@ -3109,7 +3109,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1054</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1054</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/158024/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/3626</hasMushroomObserverURL>
     </owl:Class>
@@ -3133,7 +3133,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1055</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1055</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/162776/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/491</hasMushroomObserverURL>
     </owl:Class>
@@ -3157,7 +3157,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1056</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1056</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/6700356/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/433</hasMushroomObserverURL>
     </owl:Class>
@@ -3181,7 +3181,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1057</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1057</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/6669313/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/556</hasMushroomObserverURL>
     </owl:Class>
@@ -3205,7 +3205,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1058</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1058</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/193958/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/324</hasMushroomObserverURL>
     </owl:Class>
@@ -3229,7 +3229,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1059</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1059</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/6669324/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/480</hasMushroomObserverURL>
     </owl:Class>
@@ -3241,7 +3241,7 @@
     <owl:Class rdf:about="&svf;SV1061">
         <rdfs:label rdf:datatype="&rdfs;Literal">black</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1061</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1061</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/9/98/Black_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -3252,7 +3252,7 @@
     <owl:Class rdf:about="&svf;SV1062">
         <rdfs:label rdf:datatype="&rdfs;Literal">blue</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1062</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1062</hasID>
     </owl:Class>
     
 
@@ -3262,7 +3262,7 @@
     <owl:Class rdf:about="&svf;SV1063">
         <rdfs:label rdf:datatype="&rdfs;Literal">brown</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1063</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1063</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/1/1a/Brown_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -3273,7 +3273,7 @@
     <owl:Class rdf:about="&svf;SV1064">
         <rdfs:label rdf:datatype="&rdfs;Literal">dark brown</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1064</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1064</hasID>
     </owl:Class>
     
 
@@ -3283,7 +3283,7 @@
     <owl:Class rdf:about="&svf;SV1065">
         <rdfs:label rdf:datatype="&rdfs;Literal">gray</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1065</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1065</hasID>
     </owl:Class>
     
 
@@ -3293,7 +3293,7 @@
     <owl:Class rdf:about="&svf;SV1066">
         <rdfs:label rdf:datatype="&rdfs;Literal">green</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1066</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1066</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/d/dd/Green_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -3304,7 +3304,7 @@
     <owl:Class rdf:about="&svf;SV1067">
         <rdfs:label rdf:datatype="&rdfs;Literal">light brown</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1067</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1067</hasID>
     </owl:Class>
     
 
@@ -3314,7 +3314,7 @@
     <owl:Class rdf:about="&svf;SV1068">
         <rdfs:label rdf:datatype="&rdfs;Literal">off-white</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1068</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1068</hasID>
     </owl:Class>
     
 
@@ -3324,7 +3324,7 @@
     <owl:Class rdf:about="&svf;SV1069">
         <rdfs:label rdf:datatype="&rdfs;Literal">orange</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1069</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1069</hasID>
     </owl:Class>
     
 
@@ -3334,7 +3334,7 @@
     <owl:Class rdf:about="&svf;SV1071">
         <owl:equivalentClass rdf:resource="&obo;ENVO_00000266"/>
         <rdfs:subClassOf rdf:resource="&svf;SV1500"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1071</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1071</hasID>
     </owl:Class>
     
 
@@ -3344,7 +3344,7 @@
     <owl:Class rdf:about="&svf;SV1072">
         <rdfs:label rdf:datatype="&rdfs;Literal">bogs</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1500"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1072</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1072</hasID>
     </owl:Class>
     
 
@@ -3354,7 +3354,7 @@
     <owl:Class rdf:about="&svf;SV1073">
         <rdfs:label rdf:datatype="&rdfs;Literal">lawns</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1500"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1073</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1073</hasID>
     </owl:Class>
     
 
@@ -3364,7 +3364,7 @@
     <owl:Class rdf:about="&svf;SV1074">
         <rdfs:label rdf:datatype="&rdfs;Literal">woods</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1500"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1074</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1074</hasID>
     </owl:Class>
     
 
@@ -3374,7 +3374,7 @@
     <owl:Class rdf:about="&svf;SV1075">
         <rdfs:label rdf:datatype="&rdfs;Literal">campanulate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1075</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1075</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">If the margin flares out and the apex of the cap is not as sharply pointed as in the conic shape, the cap is called campanulate (e.g. the narrowly campanulate pileus of Panaeolus campanulatus) because it has the appearance of a bell.</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Campanulate_cap_icon.svg/342px-Campanulate_cap_icon.svg.png</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -3387,7 +3387,7 @@
     <owl:Class rdf:about="&svf;SV1076">
         <rdfs:label rdf:datatype="&rdfs;Literal">conic</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1076</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1076</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">The shape having a relatively small pileal width compared to height is called conic (e.g. the pileal shape of Hygrophorus conicus); usually the margin is straight.</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/9/91/Conical_cap_icon.svg</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -3400,7 +3400,7 @@
     <owl:Class rdf:about="&svf;SV1077">
         <rdfs:label rdf:datatype="&rdfs;Literal">convex</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1077</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1077</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">One of the most commonly encountered pileal shapes is one that has the appearance of an inverted bowl, i.e. is regualrly rounded. This is called convex. The width of a convex cap is normally greater than its height.</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/a/a1/Convex_cap_icon.svg</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -3413,7 +3413,7 @@
     <owl:Class rdf:about="&svf;SV1078">
         <rdfs:label rdf:datatype="&rdfs;Literal">convoluted</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1078</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1078</hasID>
     </owl:Class>
     
 
@@ -3423,7 +3423,7 @@
     <owl:Class rdf:about="&svf;SV1079">
         <rdfs:label rdf:datatype="&rdfs;Literal">depressed</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1079</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1079</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">The opposite condition from a bump is the development of a depression in the center of the pileus. The shape here is called depressed and is oftern correlated with uplifting of the pileal margin.</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/6/6b/Depressed_cap_icon.svg</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -3436,7 +3436,7 @@
     <owl:Class rdf:about="&svf;SV1081">
         <rdfs:label rdf:datatype="&rdfs;Literal">birdnest fungi</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1081</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1081</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">A memeber of the Nidulariales, so called because of the resemblance of the fruit body, with the egglike periodioles within, to a nest.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1531"/>
     </owl:Class>
@@ -3448,7 +3448,7 @@
     <owl:Class rdf:about="&svf;SV1082">
         <rdfs:label rdf:datatype="&rdfs;Literal">branching</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1082</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1082</hasID>
     </owl:Class>
     
 
@@ -3458,7 +3458,7 @@
     <owl:Class rdf:about="&svf;SV1083">
         <rdfs:label rdf:datatype="&rdfs;Literal">club</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1083</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1083</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">The Clavariaceae.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1532"/>
     </owl:Class>
@@ -3470,7 +3470,7 @@
     <owl:Class rdf:about="&svf;SV1084">
         <rdfs:label rdf:datatype="&rdfs;Literal">crust fungi</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1084</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1084</hasID>
     </owl:Class>
     
 
@@ -3480,7 +3480,7 @@
     <owl:Class rdf:about="&svf;SV1085">
         <rdfs:label rdf:datatype="&rdfs;Literal">cup fungi</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1085</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1085</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">A discomycete (esp. Leotiales or Pezizales) ascoma.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1532"/>
     </owl:Class>
@@ -3492,7 +3492,7 @@
     <owl:Class rdf:about="&svf;SV1086">
         <rdfs:label rdf:datatype="&rdfs;Literal">earthstar</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1086</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1086</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">Basidioma of Geastrum</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1532"/>
     </owl:Class>
@@ -3504,7 +3504,7 @@
     <owl:Class rdf:about="&svf;SV1087">
         <rdfs:label rdf:datatype="&rdfs;Literal">gasteroid</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1087</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1087</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">Having the hymenium locellate and enclosed or becoming closed, or haveing no hymenium at all.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1531"/>
     </owl:Class>
@@ -3516,7 +3516,7 @@
     <owl:Class rdf:about="&svf;SV1088">
         <rdfs:label rdf:datatype="&rdfs;Literal">jelly fungi</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1088</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1088</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">A term sometimes applied to the tremellales s.l.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1532"/>
     </owl:Class>
@@ -3528,7 +3528,7 @@
     <owl:Class rdf:about="&svf;SV1089">
         <rdfs:label rdf:datatype="&rdfs;Literal">shelf fungi</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1089</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1089</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">One of the larger polypores, especially the woody, perennial forms (Fomes).</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1531"/>
     </owl:Class>
@@ -3540,7 +3540,7 @@
     <owl:Class rdf:about="&svf;SV1092">
         <rdfs:label rdf:datatype="&rdfs;Literal">infundibuliform</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1092</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1092</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">The depression might be so deep as to resemble a funnel, called infundibuliform (e.g. the pileus of Clitocybe infundibuliformis/Cantharellus infundibuliformis).</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/a/a8/Infundibuliform_cap_icon.svg</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -3553,7 +3553,7 @@
     <owl:Class rdf:about="&svf;SV1093">
         <rdfs:label rdf:datatype="&rdfs;Literal">parabolic</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1093</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1093</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">If the height is greater than the width, but the cap is still regularly rounded, the term parabolic is used. One of the greatest extremes of a parabolic cap is found in many species of Coprinus in which the cap resembles a darning egg.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3565,7 +3565,7 @@
     <owl:Class rdf:about="&svf;SV1094">
         <rdfs:label rdf:datatype="&rdfs;Literal">plane</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1094</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1094</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">Most convex caps continue to enlarge laterally with age, causing the sidth/height ratio to increase. Oftern this results in the cap appearing almost flat, a shape called plane or applanate (e.g. the pileal shape of Crepidotus applanatus).</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3577,7 +3577,7 @@
     <owl:Class rdf:about="&svf;SV1095">
         <rdfs:label rdf:datatype="&rdfs;Literal">umbilicate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1095</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1095</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">In some mushrooms, an umbo occurs in the depression, a condition referred to as umbilicate (e.g. of the pilues of Clitocybe umbilicatum).</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/7/7d/Umbillicate_cap_icon.svg</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -3590,7 +3590,7 @@
     <owl:Class rdf:about="&svf;SV1101">
         <rdfs:label rdf:datatype="&rdfs;Literal">Continent</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;GeographicPlace"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1101</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1101</hasID>
     </owl:Class>
     
 
@@ -3600,7 +3600,7 @@
     <owl:Class rdf:about="&svf;SV1102">
         <rdfs:label rdf:datatype="&rdfs;Literal">effuso-reflexed</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1102</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1102</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">If part of the fruiting body is closely appressed to the substrate except for the margin which flares out to form the pileus, it is called effuso-reflexed.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3612,7 +3612,7 @@
     <owl:Class rdf:about="&svf;SV1103">
         <rdfs:label rdf:datatype="&rdfs;Literal">hypogeous</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1103</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1103</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">With fruit bodies developing and maturing in the ground in contrast to epigeous where they come up out of the ground as in most mushrooms.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1533"/>
     </owl:Class>
@@ -3624,7 +3624,7 @@
     <owl:Class rdf:about="&svf;SV1104">
         <rdfs:label rdf:datatype="&rdfs;Literal">imbricate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1104</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1104</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">At times, fruiting bodies overlap one another, and this condition is called imbricate.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3636,7 +3636,7 @@
     <owl:Class rdf:about="&svf;SV1105">
         <rdfs:label rdf:datatype="&rdfs;Literal">pileate-sessile</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1105</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1105</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">If the attachment is directly to the pileus with no stipe or pseudostipe, the mushroom is referred to as sessile. Sessile fruting bodies vary in the degree to which the pileus is attached. It is called pileate and sessile if it is attached in one place in such as way that the pileus is still definitely observable.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3648,7 +3648,7 @@
     <owl:Class rdf:about="&svf;SV1106">
         <rdfs:label rdf:datatype="&rdfs;Literal">resupinate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1106</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1106</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">If the complete fruiting body is closely appressed to the substrate, it is called resupinate.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3660,7 +3660,7 @@
     <owl:Class rdf:about="&svf;SV1107">
         <rdfs:label rdf:datatype="&rdfs;Literal">stipitate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1107</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1107</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">Normally, fruiting bodies are attached to their substate by he stipe. This is termed stipitate.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3672,7 +3672,7 @@
     <owl:Class rdf:about="&svf;SV1108">
         <rdfs:label rdf:datatype="&rdfs;Literal">substipitate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1108</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1108</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">Sometimes a flap of tissue (but not the pileus) that is not distinctly a stalk serves for attaching to the substrate. This is structure is called a pseudostipe, and the condition is described as substipitate.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3684,7 +3684,7 @@
     <owl:Class rdf:about="&svf;SV1109">
         <rdfs:label rdf:datatype="&rdfs;Literal">ungulate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1800"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1109</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1109</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">If the entire fruiting body looks like a horse&#39;s hoof, it is called ungulate.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -3726,7 +3726,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1110</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1110</hasID>
     </owl:Class>
     
 
@@ -3782,7 +3782,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1111</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1111</hasID>
     </owl:Class>
     
 
@@ -3838,7 +3838,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1112</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1112</hasID>
     </owl:Class>
     
 
@@ -3946,7 +3946,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1113</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1113</hasID>
     </owl:Class>
     
 
@@ -4042,7 +4042,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-15T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1114</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1114</hasID>
     </owl:Class>
     
 
@@ -4170,7 +4170,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1115</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1115</hasID>
     </owl:Class>
     
 
@@ -4286,7 +4286,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1116</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1116</hasID>
     </owl:Class>
     
 
@@ -4358,7 +4358,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1117</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1117</hasID>
     </owl:Class>
     
 
@@ -4486,7 +4486,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1118</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1118</hasID>
     </owl:Class>
     
 
@@ -4622,7 +4622,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1119</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1119</hasID>
     </owl:Class>
     
 
@@ -4758,7 +4758,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1120</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1120</hasID>
     </owl:Class>
     
 
@@ -4858,7 +4858,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1121</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1121</hasID>
     </owl:Class>
     
 
@@ -4998,7 +4998,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1122</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1122</hasID>
     </owl:Class>
     
 
@@ -5142,7 +5142,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1123</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1123</hasID>
     </owl:Class>
     
 
@@ -5218,7 +5218,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1124</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1124</hasID>
     </owl:Class>
     
 
@@ -5290,7 +5290,7 @@
                 <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1125</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1125</hasID>
     </owl:Class>
     
 
@@ -5394,7 +5394,7 @@
                 <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <hasID rdf:datatype="&xsd;positiveInteger">1126</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1126</hasID>
     </owl:Class>
     
 
@@ -5404,7 +5404,7 @@
     <owl:Class rdf:about="&svf;SV1131">
         <owl:equivalentClass rdf:resource="&obo;ENVO_00002170"/>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1131</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1131</hasID>
     </owl:Class>
     
 
@@ -5414,7 +5414,7 @@
     <owl:Class rdf:about="&svf;SV1132">
         <owl:equivalentClass rdf:resource="&obo;ENVO_00002040"/>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1132</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1132</hasID>
     </owl:Class>
     
 
@@ -5424,7 +5424,7 @@
     <owl:Class rdf:about="&svf;SV1133">
         <rdfs:label rdf:datatype="&rdfs;Literal">coprophilous</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1133</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1133</hasID>
     </owl:Class>
     
 
@@ -5434,7 +5434,7 @@
     <owl:Class rdf:about="&svf;SV1134">
         <rdfs:label rdf:datatype="&rdfs;Literal">fungiculous</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1134</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1134</hasID>
     </owl:Class>
     
 
@@ -5444,7 +5444,7 @@
     <owl:Class rdf:about="&svf;SV1135">
         <rdfs:label rdf:datatype="&rdfs;Literal">hard packed soil</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1135</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1135</hasID>
     </owl:Class>
     
 
@@ -5454,7 +5454,7 @@
     <owl:Class rdf:about="&svf;SV1136">
         <rdfs:label rdf:datatype="&rdfs;Literal">moss</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1136</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1136</hasID>
     </owl:Class>
     
 
@@ -5464,7 +5464,7 @@
     <owl:Class rdf:about="&svf;SV1137">
         <rdfs:label rdf:datatype="&rdfs;Literal">parasitic on insects</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1137</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1137</hasID>
     </owl:Class>
     
 
@@ -5474,7 +5474,7 @@
     <owl:Class rdf:about="&svf;SV1138">
         <rdfs:label rdf:datatype="&rdfs;Literal">sandy soil</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1138</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1138</hasID>
     </owl:Class>
     
 
@@ -5484,7 +5484,7 @@
     <owl:Class rdf:about="&svf;SV1139">
         <rdfs:label rdf:datatype="&rdfs;Literal">terrestrial</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1900"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1139</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1139</hasID>
         <rdfs:comment rdf:datatype="&rdfs;Literal">growing on the ground, not on a dead tree or something.</rdfs:comment>
     </owl:Class>
     
@@ -5507,7 +5507,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1210</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1210</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/161239/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/1276</hasMushroomObserverURL>
     </owl:Class>
@@ -5531,7 +5531,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1211</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1211</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/162875/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/175</hasMushroomObserverURL>
     </owl:Class>
@@ -5555,7 +5555,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1212</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1212</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/188510/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/906</hasMushroomObserverURL>
     </owl:Class>
@@ -5579,7 +5579,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1213</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1213</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/194605/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/82</hasMushroomObserverURL>
     </owl:Class>
@@ -5603,7 +5603,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1214</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1214</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/1009576/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/414</hasMushroomObserverURL>
     </owl:Class>
@@ -5627,7 +5627,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1215</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1215</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/1029767/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/62</hasMushroomObserverURL>
     </owl:Class>
@@ -5651,7 +5651,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1216</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1216</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/6524382/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/3930</hasMushroomObserverURL>
     </owl:Class>
@@ -5675,7 +5675,7 @@
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1217</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1217</hasID>
         <hasEolURL rdf:datatype="&xsd;anyURI">http://eol.org/pages/158113/overview</hasEolURL>
         <hasMushroomObserverURL rdf:datatype="&xsd;anyURI">http://mushroomobserver.org/name/show_name/3936</hasMushroomObserverURL>
     </owl:Class>
@@ -5707,7 +5707,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1400</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1400</hasID>
     </owl:Class>
     
 
@@ -5717,7 +5717,7 @@
     <owl:Class rdf:about="&svf;SV1410">
         <rdfs:label rdf:datatype="&rdfs;Literal">pink</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1410</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1410</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/0/0d/Pink_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5728,7 +5728,7 @@
     <owl:Class rdf:about="&svf;SV1411">
         <rdfs:label rdf:datatype="&rdfs;Literal">purple</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1411</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1411</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/d/da/Purple_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5739,7 +5739,7 @@
     <owl:Class rdf:about="&svf;SV1412">
         <rdfs:label rdf:datatype="&rdfs;Literal">red</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1412</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1412</hasID>
     </owl:Class>
     
 
@@ -5749,7 +5749,7 @@
     <owl:Class rdf:about="&svf;SV1413">
         <rdfs:label rdf:datatype="&rdfs;Literal">white</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1413</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1413</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/1/1b/White_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5760,7 +5760,7 @@
     <owl:Class rdf:about="&svf;SV1414">
         <rdfs:label rdf:datatype="&rdfs;Literal">yellow</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1400"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1414</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1414</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/2/27/Yellow_spore_print_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5771,7 +5771,7 @@
     <owl:Class rdf:about="&svf;SV1415">
         <rdfs:label rdf:datatype="&rdfs;Literal">gilled</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1450"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1415</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1415</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/1/11/Gills_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5782,7 +5782,7 @@
     <owl:Class rdf:about="&svf;SV1416">
         <rdfs:label rdf:datatype="&rdfs;Literal">pored</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1450"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1416</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1416</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/f/fb/Pores_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5793,7 +5793,7 @@
     <owl:Class rdf:about="&svf;SV1417">
         <rdfs:label rdf:datatype="&rdfs;Literal">smooth</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1450"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1417</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1417</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/9/92/Smooth_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5804,7 +5804,7 @@
     <owl:Class rdf:about="&svf;SV1418">
         <rdfs:label rdf:datatype="&rdfs;Literal">spore mass</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1450"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1418</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1418</hasID>
     </owl:Class>
     
 
@@ -5814,7 +5814,7 @@
     <owl:Class rdf:about="&svf;SV1419">
         <rdfs:label rdf:datatype="&rdfs;Literal">toothed</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1450"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1419</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1419</hasID>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/d/d0/Teeth_icon.png</hasPictureURL>
     </owl:Class>
     
@@ -5825,7 +5825,7 @@
     <owl:Class rdf:about="&svf;SV1420">
         <rdfs:label rdf:datatype="&rdfs;Literal">wrinkled</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1450"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1420</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1420</hasID>
     </owl:Class>
     
 
@@ -5835,7 +5835,7 @@
     <owl:Class rdf:about="&svf;SV1421">
         <rdfs:label rdf:datatype="&rdfs;Literal">conifer</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1074"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1421</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1421</hasID>
     </owl:Class>
     
 
@@ -5845,7 +5845,7 @@
     <owl:Class rdf:about="&svf;SV1422">
         <rdfs:label rdf:datatype="&rdfs;Literal">hardwoods</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1074"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1422</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1422</hasID>
     </owl:Class>
     
 
@@ -5855,7 +5855,7 @@
     <owl:Class rdf:about="&svf;SV1423">
         <rdfs:label rdf:datatype="&rdfs;Literal">alder</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1423</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1423</hasID>
     </owl:Class>
     
 
@@ -5865,7 +5865,7 @@
     <owl:Class rdf:about="&svf;SV1424">
         <rdfs:label rdf:datatype="&rdfs;Literal">mixed woods</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1074"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1424</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1424</hasID>
     </owl:Class>
     
 
@@ -5875,7 +5875,7 @@
     <owl:Class rdf:about="&svf;SV1425">
         <rdfs:label rdf:datatype="&rdfs;Literal">redwood</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1074"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1425</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1425</hasID>
     </owl:Class>
     
 
@@ -5897,7 +5897,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1450</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1450</hasID>
     </owl:Class>
     
 
@@ -5917,7 +5917,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1500</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1500</hasID>
     </owl:Class>
     
 
@@ -5927,7 +5927,7 @@
     <owl:Class rdf:about="&svf;SV1510">
         <rdfs:label rdf:datatype="&rdfs;Literal">aspen</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1510</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1510</hasID>
     </owl:Class>
     
 
@@ -5937,7 +5937,7 @@
     <owl:Class rdf:about="&svf;SV1511">
         <rdfs:label rdf:datatype="&rdfs;Literal">birch</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1511</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1511</hasID>
     </owl:Class>
     
 
@@ -5947,7 +5947,7 @@
     <owl:Class rdf:about="&svf;SV1512">
         <rdfs:label rdf:datatype="&rdfs;Literal">eucalyptus</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1512</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1512</hasID>
     </owl:Class>
     
 
@@ -5957,7 +5957,7 @@
     <owl:Class rdf:about="&svf;SV1513">
         <rdfs:label rdf:datatype="&rdfs;Literal">hazelnut</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1513</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1513</hasID>
     </owl:Class>
     
 
@@ -5967,7 +5967,7 @@
     <owl:Class rdf:about="&svf;SV1514">
         <rdfs:label rdf:datatype="&rdfs;Literal">madrone</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1514</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1514</hasID>
     </owl:Class>
     
 
@@ -5977,7 +5977,7 @@
     <owl:Class rdf:about="&svf;SV1515">
         <rdfs:label rdf:datatype="&rdfs;Literal">manzanita</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1515</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1515</hasID>
     </owl:Class>
     
 
@@ -5987,7 +5987,7 @@
     <owl:Class rdf:about="&svf;SV1516">
         <rdfs:label rdf:datatype="&rdfs;Literal">oak</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1516</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1516</hasID>
     </owl:Class>
     
 
@@ -5997,7 +5997,7 @@
     <owl:Class rdf:about="&svf;SV1517">
         <rdfs:label rdf:datatype="&rdfs;Literal">tanoak</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1517</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1517</hasID>
     </owl:Class>
     
 
@@ -6007,7 +6007,7 @@
     <owl:Class rdf:about="&svf;SV1518">
         <rdfs:label rdf:datatype="&rdfs;Literal">willow</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1422"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1518</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1518</hasID>
     </owl:Class>
     
 
@@ -6017,7 +6017,7 @@
     <owl:Class rdf:about="&svf;SV1519">
         <rdfs:label rdf:datatype="&rdfs;Literal">cypress</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1421"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1519</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1519</hasID>
     </owl:Class>
     
 
@@ -6027,7 +6027,7 @@
     <owl:Class rdf:about="&svf;SV1520">
         <rdfs:label rdf:datatype="&rdfs;Literal">fir</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1421"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1520</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1520</hasID>
     </owl:Class>
     
 
@@ -6037,7 +6037,7 @@
     <owl:Class rdf:about="&svf;SV1521">
         <rdfs:label rdf:datatype="&rdfs;Literal">larch</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1421"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1521</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1521</hasID>
     </owl:Class>
     
 
@@ -6047,7 +6047,7 @@
     <owl:Class rdf:about="&svf;SV1522">
         <rdfs:label rdf:datatype="&rdfs;Literal">pine</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1421"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1522</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1522</hasID>
     </owl:Class>
     
 
@@ -6057,7 +6057,7 @@
     <owl:Class rdf:about="&svf;SV1523">
         <rdfs:label rdf:datatype="&rdfs;Literal">spruce</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1421"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1523</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1523</hasID>
     </owl:Class>
     
 
@@ -6067,7 +6067,7 @@
     <owl:Class rdf:about="&svf;SV1524">
         <rdfs:label rdf:datatype="&rdfs;Literal">live oak</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1516"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1524</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1524</hasID>
         <rdfs:comment rdf:datatype="&rdfs;Literal">live oaks are a western us (and other places) occuring bunch of oaks that look different than oaks that commonly grow in the east. (Nathan says) - green year around.</rdfs:comment>
     </owl:Class>
     
@@ -6078,7 +6078,7 @@
     <owl:Class rdf:about="&svf;SV1525">
         <rdfs:label rdf:datatype="&rdfs;Literal">Europe</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1101"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1525</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1525</hasID>
     </owl:Class>
     
 
@@ -6088,7 +6088,7 @@
     <owl:Class rdf:about="&svf;SV1526">
         <rdfs:label rdf:datatype="&rdfs;Literal">North America</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1101"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1526</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1526</hasID>
     </owl:Class>
     
 
@@ -6117,7 +6117,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1600</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1600</hasID>
     </owl:Class>
     
 
@@ -6127,7 +6127,7 @@
     <owl:Class rdf:about="&svf;SV1610">
         <rdfs:label rdf:datatype="&rdfs;Literal">stalked ascomycete</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1610</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1610</hasID>
     </owl:Class>
     
 
@@ -6137,7 +6137,7 @@
     <owl:Class rdf:about="&svf;SV1611">
         <rdfs:label rdf:datatype="&rdfs;Literal">stalked puffball</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1611</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1611</hasID>
     </owl:Class>
     
 
@@ -6147,7 +6147,7 @@
     <owl:Class rdf:about="&svf;SV1612">
         <rdfs:label rdf:datatype="&rdfs;Literal">stinkhorn</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1612</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1612</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">The common name for a member of the Phallaceae, because of the vile odor produced by the gleba at the apex of the fruit body as a result of an autodigestion process to attract flies for purposes of dissemination of the spores.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1531"/>
     </owl:Class>
@@ -6159,7 +6159,7 @@
     <owl:Class rdf:about="&svf;SV1613">
         <rdfs:label rdf:datatype="&rdfs;Literal">stipitate agaric</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1600"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1613</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1613</hasID>
     </owl:Class>
     
 
@@ -6185,7 +6185,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1700</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1700</hasID>
     </owl:Class>
     
 
@@ -6195,7 +6195,7 @@
     <owl:Class rdf:about="&svf;SV1710">
         <rdfs:label rdf:datatype="&rdfs;Literal">umbonate</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1710</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1710</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">A protrusion, or bump at the apex of the cap is called an umbo, and pilei that possess this struture are called umbonate (e.g. pileus of Suillus umbonatus).</dcterms:description>
         <hasPictureURL rdf:datatype="&xsd;anyURI">http://upload.wikimedia.org/wikipedia/commons/1/12/Umbonate_cap_icon.svg</hasPictureURL>
         <dcterms:references rdf:resource="&svf;SV1530"/>
@@ -6208,7 +6208,7 @@
     <owl:Class rdf:about="&svf;SV1711">
         <rdfs:label rdf:datatype="&rdfs;Literal">uplifted</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1700"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1711</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1711</hasID>
         <dcterms:description rdf:datatype="&rdfs;Literal">With age and usually also correlated with loss of water, the margin of the cap becomes turned upward, a shape called uplifted.</dcterms:description>
         <dcterms:references rdf:resource="&svf;SV1530"/>
     </owl:Class>
@@ -6221,7 +6221,7 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">obtainable</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1750"/>
         <owl:disjointWith rdf:resource="&svf;SV1713"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1712</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1712</hasID>
     </owl:Class>
     
 
@@ -6231,7 +6231,7 @@
     <owl:Class rdf:about="&svf;SV1713">
         <rdfs:label rdf:datatype="&rdfs;Literal">unobtainable</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1750"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1713</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1713</hasID>
     </owl:Class>
     
 
@@ -6242,7 +6242,7 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">absent</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1760"/>
         <owl:disjointWith rdf:resource="&svf;SV1715"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1714</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1714</hasID>
     </owl:Class>
     
 
@@ -6252,7 +6252,7 @@
     <owl:Class rdf:about="&svf;SV1715">
         <rdfs:label rdf:datatype="&rdfs;Literal">present</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1760"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1715</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1715</hasID>
     </owl:Class>
     
 
@@ -6270,7 +6270,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1750</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1750</hasID>
     </owl:Class>
     
 
@@ -6288,7 +6288,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1760</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1760</hasID>
     </owl:Class>
     
 
@@ -6312,7 +6312,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1800</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1800</hasID>
     </owl:Class>
     
 
@@ -6337,7 +6337,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1900</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1900</hasID>
     </owl:Class>
     
 
@@ -6347,7 +6347,7 @@
     <owl:Class rdf:about="&svf;SV1911">
         <rdfs:label rdf:datatype="&rdfs;Literal">acrid</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1911</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1911</hasID>
     </owl:Class>
     
 
@@ -6357,7 +6357,7 @@
     <owl:Class rdf:about="&svf;SV1912">
         <rdfs:label rdf:datatype="&rdfs;Literal">alliaceous</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1912</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1912</hasID>
     </owl:Class>
     
 
@@ -6367,7 +6367,7 @@
     <owl:Class rdf:about="&svf;SV1913">
         <rdfs:label rdf:datatype="&rdfs;Literal">bitter</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1913</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1913</hasID>
     </owl:Class>
     
 
@@ -6377,7 +6377,7 @@
     <owl:Class rdf:about="&svf;SV1914">
         <rdfs:label rdf:datatype="&rdfs;Literal">farinaceous</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1914</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1914</hasID>
     </owl:Class>
     
 
@@ -6387,7 +6387,7 @@
     <owl:Class rdf:about="&svf;SV1915">
         <rdfs:label rdf:datatype="&rdfs;Literal">mild</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1915</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1915</hasID>
     </owl:Class>
     
 
@@ -6397,7 +6397,7 @@
     <owl:Class rdf:about="&svf;SV1916">
         <rdfs:label rdf:datatype="&rdfs;Literal">skunk</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1916</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1916</hasID>
     </owl:Class>
     
 
@@ -6407,7 +6407,7 @@
     <owl:Class rdf:about="&svf;SV1917">
         <rdfs:label rdf:datatype="&rdfs;Literal">sour</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1917</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1917</hasID>
     </owl:Class>
     
 
@@ -6417,7 +6417,7 @@
     <owl:Class rdf:about="&svf;SV1918">
         <rdfs:label rdf:datatype="&rdfs;Literal">sweet</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;SV1950"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1918</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1918</hasID>
     </owl:Class>
     
 
@@ -6441,7 +6441,7 @@
             </owl:Class>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;FungalFeatureValuePartition"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1950</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1950</hasID>
     </owl:Class>
     
 
@@ -6451,7 +6451,7 @@
     <owl:Class rdf:about="&svf;ScientificName">
         <rdfs:label rdf:datatype="&rdfs;Literal">Scientific Name</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;Fungus"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1004</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1004</hasID>
     </owl:Class>
     
 
@@ -6460,7 +6460,7 @@
 
     <owl:Class rdf:about="&svf;SemanticVernacularDescription">
         <rdfs:label rdf:datatype="&rdfs;Literal">Semantic Vernacular Description</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1005</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1005</hasID>
     </owl:Class>
     
 
@@ -6511,7 +6511,7 @@
 
     <owl:Class rdf:about="&svf;User">
         <rdfs:label rdf:datatype="&rdfs;Literal">User</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1650</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1650</hasID>
     </owl:Class>
     
 
@@ -6521,7 +6521,7 @@
     <owl:Class rdf:about="&svf;VernacularDefinition">
         <rdfs:label rdf:datatype="&rdfs;Literal">Vernacular Definition</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1001</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1001</hasID>
     </owl:Class>
     
 
@@ -6530,7 +6530,7 @@
 
     <owl:Class rdf:about="&svf;VernacularFeatureDescription">
         <rdfs:label rdf:datatype="&rdfs;Literal">Vernacular Feature Description</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1000</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1000</hasID>
     </owl:Class>
     
 
@@ -6540,7 +6540,7 @@
     <owl:Class rdf:about="&svf;VernacularIndicator">
         <rdfs:label rdf:datatype="&rdfs;Literal">Vernacular Indicator</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1002</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1002</hasID>
     </owl:Class>
     
 
@@ -6549,7 +6549,7 @@
 
     <owl:Class rdf:about="&svf;VernacularLabel">
         <rdfs:label rdf:datatype="&rdfs;Literal">Vernacular Label</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1006</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1006</hasID>
     </owl:Class>
     
 
@@ -6559,7 +6559,7 @@
     <owl:Class rdf:about="&svf;VernacularName">
         <rdfs:label rdf:datatype="&rdfs;Literal">Vernacular Name</rdfs:label>
         <rdfs:subClassOf rdf:resource="&svf;VernacularLabel"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1007</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1007</hasID>
     </owl:Class>
     
 
@@ -6597,7 +6597,7 @@
 
     <owl:NamedIndividual rdf:about="&svf;SV1090">
         <rdf:type rdf:resource="&svf;User"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1090</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1090</hasID>
         <hasName rdf:datatype="&rdfs;Literal">Nathan Wilson</hasName>
         <hasEmail rdf:datatype="&rdfs;Literal">nwilson@eol.org</hasEmail>
     </owl:NamedIndividual>
@@ -6608,7 +6608,7 @@
 
     <owl:NamedIndividual rdf:about="&svf;SV1091">
         <rdf:type rdf:resource="&svf;User"/>
-        <hasID rdf:datatype="&xsd;positiveInteger">1091</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1091</hasID>
         <hasName rdf:datatype="&rdfs;Literal">Mushroom Fungus</hasName>
         <hasEmail rdf:datatype="&rdfs;Literal">fungi@mushroom.com</hasEmail>
     </owl:NamedIndividual>
@@ -6620,7 +6620,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1141">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">GenericBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1141</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1141</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6632,7 +6632,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1142">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">RedBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1142</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1142</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6644,7 +6644,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1143">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">MildRedBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1143</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1143</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6656,7 +6656,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1144">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">SpicyRedBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1144</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1144</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6668,7 +6668,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1145">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">WhiteBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1145</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1145</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6680,7 +6680,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1146">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">MildWhiteBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1146</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1146</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6692,7 +6692,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1147">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">SpicyWhiteBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1147</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1147</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6704,7 +6704,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1148">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">StomachMushroom</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1148</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1148</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6716,7 +6716,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1149">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">GenericTruffle</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1149</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1149</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6728,7 +6728,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1310">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">GenericPuffball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1310</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1310</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6740,7 +6740,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1311">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">BrownPuffball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1311</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1311</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6752,7 +6752,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1312">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">WhitePuffball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1312</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1312</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6764,7 +6764,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1313">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">PineSpike</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1313</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1313</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6776,7 +6776,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1314">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">SmoothCordedPuffball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1314</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1314</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-15T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6788,7 +6788,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1315">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">DeerTruffle</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1315</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1315</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6800,7 +6800,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1316">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">WoodlandPuffball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1316</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1316</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6812,7 +6812,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1317">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">DarkPuffball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1317</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1317</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6824,7 +6824,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1318">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">OchreAndRedSpongeTruffle</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1318</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1318</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6836,7 +6836,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1319">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">NonStainingCompactBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1319</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1319</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6848,7 +6848,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1320">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">CreamOrRedBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1320</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1320</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6860,7 +6860,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1321">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">RedSickeningBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1321</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1321</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6872,7 +6872,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1322">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">ShrimpBrittleGill</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1322</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1322</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6884,7 +6884,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1323">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">SmoothThickSkinnedEarthball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1323</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1323</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6896,7 +6896,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1324">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">ScalyThickSkinnedEarthball</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1324</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1324</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6908,7 +6908,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1325">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">SpringtimeOregonWhiteTruffle</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1325</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1325</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6920,7 +6920,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1326">
         <rdf:type rdf:resource="&svf;VernacularLabel"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">EuropeanBlackTruffle</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1326</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1326</hasID>
         <proposedAt rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</proposedAt>
         <proposedBy rdf:resource="&svf;SV1090"/>
     </owl:NamedIndividual>
@@ -6932,7 +6932,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1530">
         <rdf:type rdf:resource="&svf;Reference"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">Largent, David L.: How to Identify Mushrooms to Genus I: Macroscopic Features. Mad River Press, Inc., Eureka, CA (1986)</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1530</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1530</hasID>
         <dcterms:date rdf:datatype="&rdfs;Literal">1986</dcterms:date>
         <dcterms:title rdf:datatype="&rdfs;Literal">How to Identify Mushrooms to Genus I: Macroscopic Features</dcterms:title>
         <dcterms:creator rdf:datatype="&rdfs;Literal">Largent, David L.</dcterms:creator>
@@ -6946,7 +6946,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1531">
         <rdf:type rdf:resource="&svf;Reference"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">Snell, Walter H., and Dick, Esther A.: A Glossary of Mycology. Harvard Unversity Press, Cambridge, MA (1971)</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1531</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1531</hasID>
     </owl:NamedIndividual>
     
 
@@ -6956,7 +6956,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1532">
         <rdf:type rdf:resource="&svf;Reference"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">Kirk, Paul M., Cannon, Paul F., Minter, David W., and Stalpers, Joost: Dictionary for the Fungi, 10th Edition. CAB International, Wallingford, UK (2008)</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1532</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1532</hasID>
     </owl:NamedIndividual>
     
 
@@ -6966,7 +6966,7 @@
     <owl:NamedIndividual rdf:about="&svf;SV1533">
         <rdf:type rdf:resource="&svf;Reference"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">Smith, Alexander H.: A Field Guide to Western Mushrooms. The University of Michigan Press, Ann Arbor, MI (1975)</rdfs:label>
-        <hasID rdf:datatype="&xsd;positiveInteger">1533</hasID>
+        <hasID rdf:datatype="&xsd;Interger">1533</hasID>
     </owl:NamedIndividual>
     
 
