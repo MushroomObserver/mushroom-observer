@@ -120,7 +120,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 				<#{svd["uri"]}>
 					a owl:Class;
 					rdfs:subClassOf svf:SemanticVernacularDescription;
-					svf:hasID "#{svd["id"]}"^^xsd:positiveInteger . }})
+					svf:hasID "#{svd["id"]}"^^xsd:integer . }})
 	end
 
 	def self.delete_triples(svd)

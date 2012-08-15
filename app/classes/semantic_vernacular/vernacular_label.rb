@@ -66,7 +66,7 @@ class VernacularLabel < SemanticVernacularDataSource
 				<#{label["uri"]}>
 					a owl:NamedIndividual, svf:VernacularLabel;
 					rdfs:label "#{label["value"]}"^^rdfs:Literal;
-					svf:hasID "#{label["id"]}"^^xsd:Integer;
+					svf:hasID "#{label["id"]}"^^xsd:integer;
 					svf:proposedAt "#{Time.now.strftime("%FT%T%:z")}"^^xsd:dateTime;
 					svf:proposedBy <#{user["uri"]}> . }})
 	end

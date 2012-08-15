@@ -70,7 +70,7 @@ class ScientificName < SemanticVernacularDataSource
           <#{scientific_name["uri"]}>
             rdfs:subClassOf svf:ScientificName;
             rdfs:label "#{scientific_name["label"]}"^^rdfs:Literal;
-            svf:hasID "#{scientific_name["id"]}"^^xsd:positiveInteger . )
+            svf:hasID "#{scientific_name["id"]}"^^xsd:integer . )
     end
     rdf << %(}})
     return rdf

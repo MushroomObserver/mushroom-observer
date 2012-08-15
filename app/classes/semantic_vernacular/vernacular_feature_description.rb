@@ -126,7 +126,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
                 SVF_NAMESPACE + "proposedAt", 
                 Time.now.strftime("%FT%T%:z"), 
                 "xsd:dateTime")};
-            svf:hasID "#{description["id"]}"^^xsd:Integer;
+            svf:hasID "#{description["id"]}"^^xsd:integer;
             #{insert_features_triples(features)} . }})      
   end
 
