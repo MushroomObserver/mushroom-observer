@@ -8,7 +8,6 @@
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
     <!ENTITY svf "http://mushroomobserver.org/svf.owl#" >
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY envo "http://purl.obolibrary.org/obo/envo.owl#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
 ]>
 
@@ -21,7 +20,6 @@
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:envo="&obo;envo.owl#"
      xmlns:dcterms="http://purl.org/dc/terms/">
     <owl:Ontology rdf:about="http://mushroomobserver.org/svf.owl">
         <dcterms:title rdf:datatype="&rdfs;Literal">Semantic Vernacular for Fungi Ontology</dcterms:title>
@@ -29,7 +27,7 @@
         <dcterms:contributor xml:lang="en">Han Wang (wangh17@rpi.edu)</dcterms:contributor>
         <dcterms:contributor xml:lang="en">Kathryn Dunn (dunnk2@rpi.edu)</dcterms:contributor>
         <dcterms:contributor xml:lang="en">Nathan Wilson (nwilson@eol.org)</dcterms:contributor>
-        <owl:imports rdf:resource="&obo;envo"/>
+        <owl:imports rdf:resource="&obo;envo.owl"/>
     </owl:Ontology>
     
 
@@ -166,7 +164,6 @@
     <!-- http://mushroomobserver.org/svf.owl#hasGlebaColor -->
 
     <owl:ObjectProperty rdf:about="&svf;hasGlebaColor">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
         <rdfs:label rdf:datatype="&rdfs;Literal">has gleba color</rdfs:label>
         <dcterms:description rdf:datatype="&rdfs;Literal">The color of the gleba (the sporing tissue in an angiocarpous sporocarp, esp. of gasteromycetes and hypogeous Pezizales).</dcterms:description>
         <rdfs:range rdf:resource="&svf;SV1400"/>
@@ -1006,7 +1003,25 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1212"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1211"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1215"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1019,24 +1034,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1310"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1212"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1215"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1063,6 +1060,24 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1212"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1311"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1214"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -1075,25 +1090,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1212"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1311"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1215"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1011</hasID>
@@ -1113,6 +1110,12 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1112"/>
             </owl:Restriction>
@@ -1121,12 +1124,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1312"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1012</hasID>
@@ -1138,6 +1135,12 @@
 
     <owl:Class rdf:about="&svf;SV1013">
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1059"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
@@ -1152,20 +1155,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1113"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1059"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1058"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1113"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1013</hasID>
@@ -1179,12 +1176,6 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1314"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1114"/>
             </owl:Restriction>
@@ -1193,6 +1184,12 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1314"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1014</hasID>
@@ -1212,14 +1209,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1315"/>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1115"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1115"/>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1315"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1015</hasID>
@@ -1233,14 +1230,14 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1211"/>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1116"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1116"/>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1211"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1314,12 +1311,6 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1052"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1319"/>
             </owl:Restriction>
@@ -1328,6 +1319,12 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1119"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1052"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1019</hasID>
@@ -1341,6 +1338,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1120"/>
             </owl:Restriction>
@@ -1349,12 +1352,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1320"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1020</hasID>
@@ -1368,6 +1365,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1054"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1321"/>
             </owl:Restriction>
@@ -1376,12 +1379,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1121"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1054"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1021</hasID>
@@ -1395,6 +1392,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1055"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1122"/>
             </owl:Restriction>
@@ -1403,12 +1406,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1322"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1055"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1022</hasID>
@@ -1428,14 +1425,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1214"/>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1323"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1323"/>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1214"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1023</hasID>
@@ -1449,8 +1446,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1324"/>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1124"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1461,8 +1458,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1124"/>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1324"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1024</hasID>
@@ -1503,14 +1500,14 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1126"/>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1326"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1326"/>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1126"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1530,26 +1527,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1041"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1055"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1141"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1561,13 +1540,31 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1054"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1141"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1052"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1041"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1031</hasID>
@@ -1593,6 +1590,12 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1142"/>
             </owl:Restriction>
@@ -1601,12 +1604,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1042"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1032</hasID>
@@ -1620,12 +1617,6 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1043"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1055"/>
             </owl:Restriction>
@@ -1634,6 +1625,12 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1143"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1043"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1033</hasID>
@@ -1647,18 +1644,6 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1144"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasDefinition"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1044"/>
             </owl:Restriction>
@@ -1667,6 +1652,18 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1054"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1144"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1051"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1034</hasID>
@@ -1686,6 +1683,12 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1052"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasSVDName"/>
                 <owl:hasValue rdf:resource="&svf;SV1145"/>
             </owl:Restriction>
@@ -1694,12 +1697,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1053"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1052"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1719,6 +1716,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1046"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1053"/>
             </owl:Restriction>
@@ -1735,12 +1738,6 @@
                 <owl:hasValue rdf:resource="&svf;SV1146"/>
             </owl:Restriction>
         </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1046"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1036</hasID>
     </owl:Class>
     
@@ -1752,8 +1749,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1053"/>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1047"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1770,8 +1767,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1047"/>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1053"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1037</hasID>
@@ -1785,50 +1782,14 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
-                <owl:hasValue rdf:resource="&svf;SV1148"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1216"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1214"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1210"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1048"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1212"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1217"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1216"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1846,7 +1807,43 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1214"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1211"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1217"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasSVDName"/>
+                <owl:hasValue rdf:resource="&svf;SV1148"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1048"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1212"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1056"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1038</hasID>
@@ -1860,8 +1857,14 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1049"/>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1216"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1217"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1872,20 +1875,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&svf;hasDefinition"/>
+                <owl:someValuesFrom rdf:resource="&svf;SV1049"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <owl:someValuesFrom rdf:resource="&svf;SV1210"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1216"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <owl:someValuesFrom rdf:resource="&svf;SV1217"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -2344,14 +2341,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1043</hasID>
@@ -2508,14 +2505,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1044</hasID>
@@ -3008,14 +3005,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1049</hasID>
@@ -3053,14 +3050,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Russula albida</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">935</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:163391</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:163391</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">935</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3077,14 +3074,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Russula brevipes</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:166953</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">409</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">409</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:166953</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3173,14 +3170,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Chroogomphus ochraceus</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:328190</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">556</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">556</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:328190</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3221,14 +3218,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Chroogomphus vinicolor</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:328195</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">480</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">480</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:328195</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3719,14 +3716,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1110</hasID>
@@ -3831,14 +3828,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1112</hasID>
@@ -3939,14 +3936,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1113</hasID>
@@ -4163,14 +4160,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1115</hasID>
@@ -4479,14 +4476,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1118</hasID>
@@ -4851,14 +4848,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedAt"/>
-                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;proposedBy"/>
+                <owl:hasValue rdf:resource="&svf;SV1090"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;proposedBy"/>
-                <owl:hasValue rdf:resource="&svf;SV1090"/>
+                <owl:onProperty rdf:resource="&svf;proposedAt"/>
+                <owl:hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</owl:hasValue>
             </owl:Restriction>
         </rdfs:subClassOf>
         <hasID rdf:datatype="&xsd;positiveInteger">1121</hasID>
@@ -5499,14 +5496,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Elaphomyces muricatus</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:203760</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">1276</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">1276</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:203760</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5571,14 +5568,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Rhizopogon ochraceorubens</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">82</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:338444</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:338444</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">82</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5595,14 +5592,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Scleroderma cepa</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">414</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:191651</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:191651</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">414</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5643,14 +5640,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Tuber gibbosum</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:190404</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">3930</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">3930</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:190404</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5667,14 +5664,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Tuber melanosporum</rdfs:label>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasURI"/>
-                <owl:hasValue>urn:lsid:indexfungorum.org:names:192144</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
+                <owl:hasValue rdf:datatype="&xsd;integer">3936</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <owl:equivalentClass>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&svf;hasMONameId"/>
-                <owl:hasValue rdf:datatype="&xsd;integer">3936</owl:hasValue>
+                <owl:onProperty rdf:resource="&svf;hasURI"/>
+                <owl:hasValue>urn:lsid:indexfungorum.org:names:192144</owl:hasValue>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -6985,70 +6982,6 @@
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1911"/>
-            <rdf:Description rdf:about="&svf;SV1912"/>
-            <rdf:Description rdf:about="&svf;SV1913"/>
-            <rdf:Description rdf:about="&svf;SV1914"/>
-            <rdf:Description rdf:about="&svf;SV1915"/>
-            <rdf:Description rdf:about="&svf;SV1916"/>
-            <rdf:Description rdf:about="&svf;SV1917"/>
-            <rdf:Description rdf:about="&svf;SV1918"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1061"/>
-            <rdf:Description rdf:about="&svf;SV1062"/>
-            <rdf:Description rdf:about="&svf;SV1063"/>
-            <rdf:Description rdf:about="&svf;SV1064"/>
-            <rdf:Description rdf:about="&svf;SV1065"/>
-            <rdf:Description rdf:about="&svf;SV1066"/>
-            <rdf:Description rdf:about="&svf;SV1067"/>
-            <rdf:Description rdf:about="&svf;SV1068"/>
-            <rdf:Description rdf:about="&svf;SV1069"/>
-            <rdf:Description rdf:about="&svf;SV1410"/>
-            <rdf:Description rdf:about="&svf;SV1411"/>
-            <rdf:Description rdf:about="&svf;SV1412"/>
-            <rdf:Description rdf:about="&svf;SV1413"/>
-            <rdf:Description rdf:about="&svf;SV1414"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1131"/>
-            <rdf:Description rdf:about="&svf;SV1132"/>
-            <rdf:Description rdf:about="&svf;SV1133"/>
-            <rdf:Description rdf:about="&svf;SV1134"/>
-            <rdf:Description rdf:about="&svf;SV1135"/>
-            <rdf:Description rdf:about="&svf;SV1136"/>
-            <rdf:Description rdf:about="&svf;SV1137"/>
-            <rdf:Description rdf:about="&svf;SV1138"/>
-            <rdf:Description rdf:about="&svf;SV1139"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1081"/>
-            <rdf:Description rdf:about="&svf;SV1082"/>
-            <rdf:Description rdf:about="&svf;SV1083"/>
-            <rdf:Description rdf:about="&svf;SV1084"/>
-            <rdf:Description rdf:about="&svf;SV1085"/>
-            <rdf:Description rdf:about="&svf;SV1086"/>
-            <rdf:Description rdf:about="&svf;SV1087"/>
-            <rdf:Description rdf:about="&svf;SV1088"/>
-            <rdf:Description rdf:about="&svf;SV1089"/>
-            <rdf:Description rdf:about="&svf;SV1610"/>
-            <rdf:Description rdf:about="&svf;SV1611"/>
-            <rdf:Description rdf:about="&svf;SV1612"/>
-            <rdf:Description rdf:about="&svf;SV1613"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
             <rdf:Description rdf:about="&svf;SV1415"/>
             <rdf:Description rdf:about="&svf;SV1416"/>
             <rdf:Description rdf:about="&svf;SV1417"/>
@@ -7074,6 +7007,51 @@
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1131"/>
+            <rdf:Description rdf:about="&svf;SV1132"/>
+            <rdf:Description rdf:about="&svf;SV1133"/>
+            <rdf:Description rdf:about="&svf;SV1134"/>
+            <rdf:Description rdf:about="&svf;SV1135"/>
+            <rdf:Description rdf:about="&svf;SV1136"/>
+            <rdf:Description rdf:about="&svf;SV1137"/>
+            <rdf:Description rdf:about="&svf;SV1138"/>
+            <rdf:Description rdf:about="&svf;SV1139"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1911"/>
+            <rdf:Description rdf:about="&svf;SV1912"/>
+            <rdf:Description rdf:about="&svf;SV1913"/>
+            <rdf:Description rdf:about="&svf;SV1914"/>
+            <rdf:Description rdf:about="&svf;SV1915"/>
+            <rdf:Description rdf:about="&svf;SV1916"/>
+            <rdf:Description rdf:about="&svf;SV1917"/>
+            <rdf:Description rdf:about="&svf;SV1918"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1081"/>
+            <rdf:Description rdf:about="&svf;SV1082"/>
+            <rdf:Description rdf:about="&svf;SV1083"/>
+            <rdf:Description rdf:about="&svf;SV1084"/>
+            <rdf:Description rdf:about="&svf;SV1085"/>
+            <rdf:Description rdf:about="&svf;SV1086"/>
+            <rdf:Description rdf:about="&svf;SV1087"/>
+            <rdf:Description rdf:about="&svf;SV1088"/>
+            <rdf:Description rdf:about="&svf;SV1089"/>
+            <rdf:Description rdf:about="&svf;SV1610"/>
+            <rdf:Description rdf:about="&svf;SV1611"/>
+            <rdf:Description rdf:about="&svf;SV1612"/>
+            <rdf:Description rdf:about="&svf;SV1613"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
             <rdf:Description rdf:about="&svf;SV1071"/>
             <rdf:Description rdf:about="&svf;SV1072"/>
             <rdf:Description rdf:about="&svf;SV1073"/>
@@ -7091,6 +7069,25 @@
             <rdf:Description rdf:about="&svf;SV1107"/>
             <rdf:Description rdf:about="&svf;SV1108"/>
             <rdf:Description rdf:about="&svf;SV1109"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1061"/>
+            <rdf:Description rdf:about="&svf;SV1062"/>
+            <rdf:Description rdf:about="&svf;SV1063"/>
+            <rdf:Description rdf:about="&svf;SV1064"/>
+            <rdf:Description rdf:about="&svf;SV1065"/>
+            <rdf:Description rdf:about="&svf;SV1066"/>
+            <rdf:Description rdf:about="&svf;SV1067"/>
+            <rdf:Description rdf:about="&svf;SV1068"/>
+            <rdf:Description rdf:about="&svf;SV1069"/>
+            <rdf:Description rdf:about="&svf;SV1410"/>
+            <rdf:Description rdf:about="&svf;SV1411"/>
+            <rdf:Description rdf:about="&svf;SV1412"/>
+            <rdf:Description rdf:about="&svf;SV1413"/>
+            <rdf:Description rdf:about="&svf;SV1414"/>
         </owl:members>
     </rdf:Description>
 </rdf:RDF>
