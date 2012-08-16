@@ -137,7 +137,7 @@ jason> sudo service apache2 start
 # (For some reason reload and restart don't always work here.)
 
 # Install ImageMagick. (might only need imagemagick, not the other dev pkgs or rmagick)
-jason> sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev
+jason> sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev libjpeg-progs
 jason> sudo gem install rmagick --verbose --no-rdoc --no-ri
 # (rmagick-2.13.1)
 

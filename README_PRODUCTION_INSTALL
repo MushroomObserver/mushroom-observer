@@ -187,7 +187,7 @@ root> service apache2 start
 # (For some reason reload and restart don't always work.)
 
 # Install ImageMagick.
-root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev
+root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev libjpeg-progs
 root> # yum install ImageMagick-devel
 root> gem install rmagick --verbose --no-rdoc --no-ri
 root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
