@@ -101,6 +101,9 @@ if [[ $orig != $full ]]; then
   fi
 fi
 
+# Make sure it is oriented correctly.
+run exifautotran $full
+
 # Do we need to report the image size back to Rails?
 if (( $set_size )); then
   run script/jpegsize --set $id $full

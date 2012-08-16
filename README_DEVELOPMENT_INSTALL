@@ -153,8 +153,11 @@ jason> vi config/consts-site.rb
     IMAGE_DOMAIN = 'http://images.digitalmycology.com'
   end
 
-# Install our program that resizes JPEG images.
+# Install our programs for resizing and rotating JPEG images.
 jason> sudo gcc script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+jason> sudo gcc script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
+jason> sudo cp script/exifautotran.sh /usr/local/bin/exifautotran
+jason> sudo chmod 755 /usr/local/bin/exifautotran
 
 # Configure apache.
 jason> sudo vi /etc/apache2/sites-available/mo
