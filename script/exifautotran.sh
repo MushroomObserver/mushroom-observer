@@ -21,14 +21,19 @@ do
  *) transform="";;
  esac
  if test -n "$transform"; then
-  echo Executing: jpegtran -copy all $transform $i
-  jpegtran -copy all $transform "$i" > tempfile
+
+  # jpegtran doesn't always work right...
+  # echo Executing: jpegtran -copy all $transform $i
+  # jpegtran -copy all $transform "$i" > tempfile
+
+  echo Executing: convert $transform $i tempfile.jpg
+  convert $transform $i tempfile.jpg
+
   if test $? -ne 0; then
    echo Error while transforming $i - skipped.
   else
-   rm "$i"
-   mv tempfile "$i"
-   jpegexiforient -1 "$i" > /dev/null
+   mv -f tempfile.jpg $i
+   jpegexiforient -1 $i > /dev/null
   fi
  fi
 done
