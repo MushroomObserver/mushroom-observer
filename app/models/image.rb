@@ -314,6 +314,7 @@ class Image < AbstractModel
     when :medium;    "640/#{id}.jpg"
     when :small;     "320/#{id}.jpg"
     when :thumbnail; "thumb/#{id}.jpg"
+    else;            "thumb/#{id}.jpg"
     end
   end
 
@@ -371,7 +372,7 @@ class Image < AbstractModel
       when 'medium'    ; 640
       when 'large'     ; 960
       when 'huge'      ; 1280
-      when 'full_size', 'original' ; 1e10
+      else             ; 1e10
       end
       if max < d
         w = w * max / d
