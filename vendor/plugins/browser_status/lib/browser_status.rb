@@ -132,7 +132,7 @@ module BrowserStatus
   FIRST_PAGE = %(
     <html>
       <head>
-        <script src="javascripts/jstz.min.js"></script>
+        <script src="/javascripts/jstz.min.js"></script>
         <script>
           #{JAVASCRIPT_THAT_SETS_TIMEZONE}
           window.location.replace('%s');
