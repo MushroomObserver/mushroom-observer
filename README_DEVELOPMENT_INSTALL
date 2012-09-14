@@ -242,3 +242,11 @@ mo> lynx http://localhost:3000
 # Run unit tests:
 mo> script/run_tests
 
+# NOTE: language files have become problematic sometimes.  Usually it manifests
+# as obscure character encoding errors in app/model/language_exporter.pm. Some
+# or all of the following steps might help clean up the problem.
+mo> rm lang/ui/*.{yml,txt}
+mo> svn revert lang/ui/en-US.txt
+mo> rake lang                  # <--- this in particular helped Han on 20120913
+mo> rake lang:update
+
