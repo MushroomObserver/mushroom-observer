@@ -159,9 +159,10 @@ class Description < AbstractModel
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part) # :nodoc:
     tag = :"description_#{full_or_part}_title_#{source_type}"
+    user_name = user.legal_name rescue '?'
     args = {
       :text => source_name,
-      :user => user.legal_name,
+      :user => user_name,
     }
     if full_or_part == :full
       args[:object] = parent.format_name
