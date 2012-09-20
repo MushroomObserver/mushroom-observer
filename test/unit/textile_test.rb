@@ -32,6 +32,16 @@ class TextileTest < UnitTestCase
     return obj.to_s
   end
 
+  def assert_href_equal(url, str)
+    clean_our_backtrace do
+      result = str.tl
+      assert_match(/href=.([^"']*)/, result, "Expected an <a href='...'> tag for #{str.inspect}.\nGot: #{result.inspect}\n")
+      result.match(/href=.([^"']*)/)
+      actual = $1
+      assert_equal(url, actual, "URL for #{str.inspect} is wrong:\nurl: #{url.inspect}\nactual: #{actual}\n")
+    end
+  end
+
   def test_name_lookup
     Textile.clear_textile_cache
     assert_equal({}, Textile.name_lookup)
@@ -92,9 +102,9 @@ class TextileTest < UnitTestCase
   end
 
   def test_url_formatting
-    result = '_Amanita "sp-O01"_'.tl
-    assert_match(/href=.[^"]*observer.([^'"]*)/, result)
-    result.match(/href=.[^"]*observer.([^'"]*)/)
-    assert_equal('lookup_name/Amanita+%22sp-O01%22', $1)
+    assert_href_equal(HTTP_DOMAIN + '/observer/lookup_name/Amanita+%22sp-O01%22',
+                      '_Amanita "sp-O01"_')
+    assert_href_equal('http://www.amanitaceae.org?Amanita+sp-O01',
+                      'http://www.amanitaceae.org?Amanita+sp-O01')
   end
 end

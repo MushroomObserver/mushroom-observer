@@ -111,7 +111,9 @@ class Textile < String
       else
         url2 = url1
       end
-      url1.sub!(/([^\/]*$)/) { CGI.escape($1) }
+      # Leave as much untouched as possible, but some characters will cause the HTML
+      # to be badly formed, so we need to at least protect those.
+      url1.gsub!(/([<>"\\]+)/) { CGI.escape($1) }
       "<a href=\"#{url1}\">#{url2}</a>" + extra
     end
 
