@@ -863,69 +863,120 @@ class ObserverController < ApplicationController
                  location_id location latitude longitude altitude
                  north_edge south_edge east_edge west_edge max_altitude min_altitude
                  is_collection_location thumbnail_image_id notes ]
-    rows = [labels] +
-      query.select_rows(
-        :select => [
-            'observations.id',
-            'users.id',
-            'users.login',
-            'observations.when',
-            'observations.specimen',
-            'names.id',
-            'names.text_name',
-            'names.author',
-            'names.rank',
-            'observations.vote_cache',
-            '""',
-            'observations.where',
-            'observations.lat',
-            'observations.long',
-            'observations.alt',
-            '""',
-            '""',
-            '""',
-            '""',
-            '""',
-            '""',
-            'observations.is_collection_location',
-            'observations.thumb_image_id',
-            'observations.notes',
-          ].join(','),
-        :join => [:users, :names],
-        :where => 'observations.location_id IS NULL',
-        :order => 'observations.id ASC'
-      ) +
-      query.select_rows(
-        :select => [
-            'observations.id',
-            'users.id',
-            'users.login',
-            'observations.when',
-            'observations.specimen',
-            'names.id',
-            'names.text_name',
-            'names.author',
-            'names.rank',
-            'observations.vote_cache',
-            'locations.id',
-            'locations.name',
-            'observations.lat',
-            'observations.long',
-            'observations.alt',
-            'locations.north',
-            'locations.south',
-            'locations.east',
-            'locations.west',
-            'locations.high',
-            'locations.low',
-            'observations.is_collection_location',
-            'observations.thumb_image_id',
-            'observations.notes',
-          ].join(','),
-        :join => [:users, :locations, :names],
-        :order => 'observations.id ASC'
-      )
-    return rows
+    rows1 = query.select_rows(
+      :select => [
+          'observations.id',
+          'users.id',
+          'users.login',
+          'observations.when',
+          'observations.specimen',
+          'names.id',
+          'names.text_name',
+          'names.author',
+          'names.rank',
+          'observations.vote_cache',
+          '""',
+          'observations.where',
+          'observations.lat',
+          'observations.long',
+          'observations.alt',
+          '""',
+          '""',
+          '""',
+          '""',
+          '""',
+          '""',
+          'observations.is_collection_location',
+          'observations.thumb_image_id',
+          'observations.notes',
+        ].join(','),
+      :join => [:users, :names],
+      :where => 'observations.location_id IS NULL',
+      :order => 'observations.id ASC'
+    )
+    rows2 = query.select_rows(
+      :select => [
+          'observations.id',
+          'users.id',
+          'users.login',
+          'observations.when',
+          'observations.specimen',
+          'names.id',
+          'names.text_name',
+          'names.author',
+          'names.rank',
+          'observations.vote_cache',
+          'locations.id',
+          'locations.name',
+          'observations.lat',
+          'observations.long',
+          'observations.alt',
+          'locations.north',
+          'locations.south',
+          'locations.east',
+          'locations.west',
+          'locations.high',
+          'locations.low',
+          'observations.is_collection_location',
+          'observations.thumb_image_id',
+          'observations.notes',
+        ].join(','),
+      :join => [:users, :locations, :names],
+      :order => 'observations.id ASC'
+    )
+    return [labels] + (rows1 + rows2).map do |row|
+      [
+        clean_integer(row[0]),
+        clean_integer(row[1]),
+        clean_string(row[2]),
+        clean_string(row[3]),
+        clean_boolean(row[4]),
+        clean_integer(row[5]),
+        clean_string(row[6]),
+        clean_string(row[7]),
+        clean_rank(row[8]),
+        clean_float(row[9], 1, 100.0 / 3.0),
+        clean_integer(row[10]),
+        clean_location(row[11]),
+        clean_float(row[12], 4),
+        clean_float(row[13], 4),
+        clean_integer(row[14]),
+        clean_float(row[15], 4),
+        clean_float(row[16], 4),
+        clean_float(row[17], 4),
+        clean_float(row[18], 4),
+        clean_integer(row[19]),
+        clean_integer(row[20]),
+        clean_boolean(row[21]),
+        clean_integer(row[22]),
+        clean_string(row[23])
+      ]
+    end.sort_by {|row| row[0].to_i}
+  end
+
+  def clean_boolean(val)
+    val == 1 ? 'X' : nil
+  end
+
+  def clean_integer(val)
+    val.blank? ? nil : val.to_f.round
+  end
+
+  def clean_float(val, places, multiplier=1.0)
+    val.blank? ? nil : (val.to_f * multiplier).round(places)
+  end
+
+  def clean_string(val)
+    val.blank? ? nil : val
+  end
+
+  def clean_rank(val)
+    val.blank? ? nil : :"rank_#{val.downcase}".l
+  end
+
+  def clean_location(val)
+    val.blank? ? nil :
+    User.current_location_format == :scientific ? Location.reverse(val) : val
   end
 
   def render_as_csv(rows, filename)
