@@ -125,6 +125,7 @@ class ObserverController < ApplicationController
     :ask_webmaster_question,
     :checklist,
     :color_themes,
+    :download_observations,
     :hide_thumbnail_map,
     :how_to_help,
     :how_to_use,
@@ -456,7 +457,7 @@ class ObserverController < ApplicationController
   def fix_name_matches(matches, accepted)
     matches.map do |name|
       if accepted and name.deprecated
-        name.approved_synonyms.first 
+        name.approved_synonyms.first
       else
         name.correct_spelling || name
       end
@@ -616,8 +617,7 @@ class ObserverController < ApplicationController
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation # :nologin: :norobots:
     query = find_or_create_query(:Observation, :by => params[:by])
-    show_selected_observations(query, :id => params[:id],
-                               :always_index => true)
+    show_selected_observations(query, :id => params[:id], :always_index => true)
   end
 
   # Displays matrix of all Observation's, sorted by date.
@@ -784,6 +784,13 @@ class ObserverController < ApplicationController
                 }]
     end
 
+    @links << [:list_observations_download_as_csv.t, {
+                :controller => 'observer',
+                :action => 'download_observations',
+                :params => query_params(query),
+                :format => 'csv'
+              }]
+
     # Paginate by letter if sorting by user.
     if (query.params[:by] == 'user') or
        (query.params[:by] == 'reverse_user')
@@ -832,6 +839,126 @@ class ObserverController < ApplicationController
 
     @num_results = @observations.count
     @timer_end = Time.now
+  end
+
+  def download_observations # :nologin: :norobots:
+    query = find_or_create_query(:Observation, :by => params[:by])
+    query.save
+    filename = "observations_#{query.id.alphabetize}"
+    rows = prepare_observation_download(query)
+    case params[:format]
+    when 'csv'
+      render_as_csv(rows, filename)
+    else
+      raise("Invalid download type, #{params[:format].inspect}.")
+    end
+  rescue => e
+    flash_error("Internal error: #{e}", *e.backtrace[0..10])
+    show_selected_observations(query, :id => params[:id], :always_index => true)
+  end
+
+  def prepare_observation_download(query)
+    labels = %w[ observation_id user_id user_login date specimen
+                 name_id name author rank confidence
+                 location_id location latitude longitude altitude
+                 north_edge south_edge east_edge west_edge max_altitude min_altitude
+                 is_collection_location thumbnail_image_id notes ]
+    rows = [labels] +
+      query.select_rows(
+        :select => [
+            'observations.id',
+            'users.id',
+            'users.login',
+            'observations.when',
+            'observations.specimen',
+            'names.id',
+            'names.text_name',
+            'names.author',
+            'names.rank',
+            'observations.vote_cache',
+            '""',
+            'observations.where',
+            'observations.lat',
+            'observations.long',
+            'observations.alt',
+            '""',
+            '""',
+            '""',
+            '""',
+            '""',
+            '""',
+            'observations.is_collection_location',
+            'observations.thumb_image_id',
+            'observations.notes',
+          ].join(','),
+        :join => [:users, :names],
+        :where => 'observations.location_id IS NULL',
+        :order => 'observations.id ASC'
+      ) +
+      query.select_rows(
+        :select => [
+            'observations.id',
+            'users.id',
+            'users.login',
+            'observations.when',
+            'observations.specimen',
+            'names.id',
+            'names.text_name',
+            'names.author',
+            'names.rank',
+            'observations.vote_cache',
+            'locations.id',
+            'locations.name',
+            'observations.lat',
+            'observations.long',
+            'observations.alt',
+            'locations.north',
+            'locations.south',
+            'locations.east',
+            'locations.west',
+            'locations.high',
+            'locations.low',
+            'observations.is_collection_location',
+            'observations.thumb_image_id',
+            'observations.notes',
+          ].join(','),
+        :join => [:users, :locations, :names],
+        :order => 'observations.id ASC'
+      )
+    return rows
+  end
+
+  def render_as_csv(rows, filename)
+    report = FasterCSV.generate do |csv|
+      rows.each do |row|
+        csv << row
+      end
+    end.force_encoding('utf-8')
+    render_file(report,
+      :filename => filename + '.csv',
+      :type     => 'text/csv',
+      :charset  => 'ISO-8859-1',
+      :header   => { :header => 'present' }
+    )
+  end
+
+  def render_file(body, args={})
+    type     = args[:type]     || 'text/plain'
+    charset  = args[:charset]  || 'UTF-8'
+    filename = args[:filename] || 'report.txt'
+    headers  = args[:header]   || {}
+    body = case charset
+      when 'UTF-8'; body
+      when 'ASCII'; body.to_ascii
+      else
+        body.iconv(charset)
+    end
+    send_data(body, headers.merge(
+      :type        => type,
+      :charset     => charset,
+      :disposition => 'attachment',
+      :filename    => filename
+    ))
   end
 
   ##############################################################################

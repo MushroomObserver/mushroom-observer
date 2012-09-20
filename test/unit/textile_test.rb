@@ -90,4 +90,11 @@ class TextileTest < UnitTestCase
     assert_equal('x{IMAGE __iMg 765__ }{ 765 }x', do_other_links('_iMg 765_'))
     assert_equal('x{USER __phooey__ }{ phooey }x x{NAME __gar__ }{ gar }x', do_other_links('_user phooey_ _name gar_'))
   end
+
+  def test_url_formatting
+    result = '_Amanita "sp-O01"_'.tl
+    assert_match(/href=.[^"]*observer.([^'"]*)/, result)
+    result.match(/href=.[^"]*observer.([^'"]*)/)
+    assert_equal('lookup_name/Amanita+%22sp-O01%22', $1)
+  end
 end

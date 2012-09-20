@@ -23,26 +23,16 @@
 #
 ################################################################################
 
+require 'cgi'
+
 class Textile < String
   @@name_lookup     = {}
   @@last_species    = nil
   @@last_subspecies = nil
   @@last_variety    = nil
 
-  if !defined?(URI_ESCAPE)
+  if !defined?(URI_TRUNCATION_LENGTH)
     URL_TRUNCATION_LENGTH = 60
-
-    URI_ESCAPE = {
-      ' '  => '%20',
-      '"'  => '%22',
-      '?'  => '%3F',
-      '='  => '%3D',
-      '&'  => '%26',
-      '%'  => '%61',
-      '<'  => '%3C',
-      '>'  => '%3E',
-      '\\' => '%5C',
-    }
   end
 
   # Convenience wrapper on the instance method Textile#textilize_without_paragraph.
@@ -121,7 +111,7 @@ class Textile < String
       else
         url2 = url1
       end
-      url1.gsub!(/([ "%<>\\])/) {URI_ESCAPE[$1]}
+      url1.sub!(/([^\/]*$)/) { CGI.escape($1) }
       "<a href=\"#{url1}\">#{url2}</a>" + extra
     end
 
@@ -131,7 +121,9 @@ class Textile < String
         x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
       /x) do |orig|
         type, label, id = $1, $2, $3
-        id.gsub!(/([ "%?=&<>\\])/) {URI_ESCAPE[$1]}
+        id.gsub!(/&#822[01];/, '"')
+        id = CGI.unescapeHTML(id)
+        id = CGI.escape(id)
         url = "#{HTTP_DOMAIN}/observer/lookup_#{type.downcase}/#{id}"
         "<a href=\"#{url}\">#{label}</a>"
       end

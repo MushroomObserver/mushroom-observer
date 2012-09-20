@@ -2737,4 +2737,20 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('new banner', str2.text)
     assert(str1.modified > str2.modified)
   end
+
+  def test_download_observation_index
+    obs = Observation.find_all_by_user_id(@mary.id)
+    assert_equal(4, obs.length)
+    query = Query.lookup_and_save(:Observation, :by_user, :user => @mary.id)
+    get(:download_observations, :q => query.id.alphabetize, :format => 'csv')
+    assert_no_flash
+    assert_response(:success)
+    ids = @response.body.split("\n").map { |s| s.sub(/,.*/, '') }
+    assert_equal(['observation_id', '9', '1', '2', '10'], ids)
+    last_row = @response.body.sub(/\n\Z/,'').sub(/\A.*\n/m,'')
+    assert_equal(
+      '10,2,mary,2010-07-22,0,1,Fungi,"",Kingdom,0.0,2,"Burbank, California, USA",34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294.0,148.0,1,,""',
+      last_row.iconv('utf-8')
+    )
+  end
 end
