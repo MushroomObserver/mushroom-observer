@@ -976,7 +976,7 @@ class ObserverController < ApplicationController
 
   def clean_location(val)
     val.blank? ? nil :
-    User.current_location_format == :scientific ? Location.reverse(val) : val
+    User.current_location_format == :scientific ? Location.reverse_name(val) : val
   end
 
   def render_as_csv(rows, filename)
