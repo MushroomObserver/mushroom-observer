@@ -858,7 +858,7 @@ class ObserverController < ApplicationController
   end
 
   def prepare_observation_download(query)
-    labels = %w[ observation_id user_id user_login date specimen
+    labels = %w[ observation_id user_id user_login user_name date specimen
                  name_id name author rank confidence
                  location_id location latitude longitude altitude
                  north_edge south_edge east_edge west_edge max_altitude min_altitude
