@@ -1,0 +1,36 @@
+#!/usr/bin/env perl
+use strict;
+
+my $root = $ENV{'RAILS_ROOT'} || '/var/web/mo';
+my $file = "$root/log/top.log";
+
+my $date = `date +%Y%m%d:%H%M%S`;
+chomp $date;
+
+my $top = `top -bn 1 | head -5`;
+my ($load) = $top =~ /load average\D+(\d+\.\d+)/;
+my ($cpu) = $top =~ /Cpu\D+(\d+\.\d+)/;
+my ($mem1, $mem2, $mem3) = $top =~ /Mem:\D+(\d+)\D+(\d+)\D+(\d+)/;
+my ($swap1, $swap2, $swap3) = $top =~ /Swap:\D+(\d+)\D+(\d+)\D+(\d+)/;
+
+# Sample output:
+# top - 17:45:35 up 4 days, 23:59,  1 user,  load average: 1.16, 1.01, 0.94
+# Tasks:  96 total,   1 running,  95 sleeping,   0 stopped,   0 zombie
+# Cpu(s): 42.1%us,  3.6%sy,  0.0%ni, 53.9%id,  0.3%wa,  0.0%hi,  0.1%si,  0.0%st
+# Mem:   1536936k total,  1202188k used,   334748k free,   154732k buffers
+# Swap:   522076k total,   124080k used,   397996k free,   455532k cached
+
+my $size = -s $file;
+open(my $fh, ">>$file") or die("Couldn't append to $file: $!");
+printf $fh "date                   memory           swap         cpu    load\n" if !$size;
+printf $fh "%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%   %5.1f%%   %s\n",
+  $date,
+  $mem2 / 1e6,
+  $mem2 / $mem1 * 100,
+  $swap2 / 1e6,
+  $swap2 / $swap1 * 100,
+  $cpu,
+  $load;
+close($fh);
+exit 0;
+
