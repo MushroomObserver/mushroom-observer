@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
 use strict;
 
-my $root = $ENV{'RAILS_ROOT'} || '/var/web/mo';
-my $file = "$root/log/top.log";
+my $ROOT = $ENV{'RAILS_ROOT'} || '/var/web/mo';
+my $LOG_FILE = "$ROOT/log/top.log";
+my $RESTART_FILE = "$ROOT/tmp/restart.txt";
 
 my $date = `date +%Y%m%d:%H%M%S`;
 chomp $date;
@@ -20,8 +21,8 @@ my ($swap1, $swap2, $swap3) = $top =~ /Swap:\D+(\d+)\D+(\d+)\D+(\d+)/;
 # Mem:   1536936k total,  1202188k used,   334748k free,   154732k buffers
 # Swap:   522076k total,   124080k used,   397996k free,   455532k cached
 
-my $size = -s $file;
-open(my $fh, ">>$file") or die("Couldn't append to $file: $!");
+my $size = -s $LOG_FILE;
+open(my $fh, ">>$LOG_FILE") or die("Couldn't append to $LOG_FILE: $!");
 printf $fh "date                   memory           swap         cpu    load\n" if !$size;
 printf $fh "%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%   %5.1f%%   %s\n",
   $date,
@@ -32,5 +33,11 @@ printf $fh "%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%   %5.1f%%   %s\n",
   $cpu,
   $load;
 close($fh);
-exit 0;
 
+if ($swap2 / $swap1 > 0.5) {
+  open(my $fh, ">$RESTART_FILE") or die("Couldn't touch $RESTART_FILE: $!");
+  close($fh);
+  print STDERR "Restarted passenger!\n";
+}
+
+exit 0;
