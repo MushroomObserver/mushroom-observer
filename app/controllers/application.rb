@@ -1295,7 +1295,8 @@ class ApplicationController < ActionController::Base
 
     # Add magic links for sorting.
     if (sorts = args[:sorting_links]) and
-       (sorts.length > 1)
+       (sorts.length > 1) and
+       !is_robot?
       @sorts = add_sorting_links(query, sorts, args[:link_all_sorts])
     else
       @sorts = nil

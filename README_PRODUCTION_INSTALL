@@ -291,6 +291,12 @@ root> a2dissite default
 root> a2ensite mo
 root> a2enmod rewrite
 root> a2enmod headers
+root> vi /etc/apache2/apache2.conf
+  # Add %D (time taken to serve request in microseconds) to the end of the default LogFormat lines:
+  LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" %D" vhost_combined
+  LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" %D" combined
+  LogFormat "%h %l %u %t \"%r\" %>s %O %D" common
+root> service apache2 reload
 
 # Create database.
 root> mo

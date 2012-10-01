@@ -129,11 +129,13 @@
                 <% end %>
                 <br/>
 
-                <%= :app_languages.t %>:<br/>
-                <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-                  <%= indent + link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %><br/>
+                <% unless is_robot? %>
+                  <%= :app_languages.t %>:<br/>
+                  <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
+                    <%= indent + link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %><br/>
+                  <% end %>
+                  <br/>
                 <% end %>
-                <br/>
 
                 <% if DEVELOPMENT || is_reviewer? %>
                   Layouts:<br/>
