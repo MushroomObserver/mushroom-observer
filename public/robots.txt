@@ -114,6 +114,7 @@ Disallow: /observer/destroy_image
 Disallow: /observer/destroy_naming
 Disallow: /observer/destroy_observation
 Disallow: /observer/destroy_species_list
+Disallow: /observer/download_observations
 Disallow: /observer/edit_comment
 Disallow: /observer/edit_image
 Disallow: /observer/edit_name

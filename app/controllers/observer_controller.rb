@@ -842,6 +842,7 @@ class ObserverController < ApplicationController
   end
 
   def download_observations # :nologin: :norobots:
+    raise "no robots!" if is_robot?
     query = find_or_create_query(:Observation, :by => params[:by])
     query.save
     filename = "observations_#{query.id.alphabetize}"
