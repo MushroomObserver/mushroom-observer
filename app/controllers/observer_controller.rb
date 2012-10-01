@@ -842,8 +842,8 @@ class ObserverController < ApplicationController
   end
 
   def download_observations # :nologin: :norobots:
-    raise "no robots!" if is_robot?
     query = find_or_create_query(:Observation, :by => params[:by])
+    raise "no robots!" if is_robot?
     query.save
     filename = "observations_#{query.id.alphabetize}"
     rows = prepare_observation_download(query)
@@ -854,7 +854,7 @@ class ObserverController < ApplicationController
       raise("Invalid download type, #{params[:format].inspect}.")
     end
   rescue => e
-    flash_error("Internal error: #{e}", *e.backtrace[0..10])
+    flash_error("Internal error: #{e}") # *e.backtrace[0..10])
     show_selected_observations(query, :id => params[:id], :always_index => true)
   end
 
