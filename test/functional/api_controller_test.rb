@@ -17,7 +17,11 @@ class ApiControllerTest < FunctionalTestCase
     @request.env['RAW_POST_DATA'] = File.read(file)
     @request.env['CONTENT_LENGTH'] = File.size(file)
     @request.env['CONTENT_TYPE'] = content_type
-    @request.env['CONTENT_MD5'] = File.read("| /usr/bin/md5sum #{file}")
+    cmd = '/usr/bin/md5sum'
+    if !File.exists?('/usr/bin/md5sum') and File.exists?('/usr/bin/cksum')
+      cmd = '/usr/bin/cksum'
+    end
+    @request.env['CONTENT_MD5'] = File.read("| #{cmd} #{file}")
     post(action, params)
   end
 

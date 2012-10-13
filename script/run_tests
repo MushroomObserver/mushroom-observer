@@ -2,10 +2,8 @@
 
 if [[ $RAKE_TEST_LOADER != '' ]]; then
   loader=$RAKE_TEST_LOADER
-elif [[ $USER == 'velosa' ]]; then
-  loader=/Users/velosa/.rvm/rubies/ruby-1.9.2-p180/lib/ruby/1.9.1/rake/rake_test_loader.rb
-elif [[ $USER == 'han' ]]; then
-  loader=/Users/han/.rvm/rubies/ruby-1.9.3-p194/lib/ruby/1.9.1/rake/rake_test_loader.rb
+elif [[ $MY_RUBY_HOME != '' ]]; then
+  loader=$MY_RUBY_HOME/lib/ruby/1.9.1/rake/rake_test_loader.rb
 else
   loader=/usr/local/lib/ruby/1.9.3/rake/rake_test_loader.rb
 fi

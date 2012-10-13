@@ -1574,6 +1574,7 @@ show_name_description_editors: "[:Description] editors"
 show_name_author_request: Request Authorship Credit
 show_name_content_status: Description status
 show_name_latest_review: "Latest review: [date] by [user]"
+show_name_most_confident: "Most Confident Observations"
 show_name_previous_version: Previous Version
 show_name_other_versions: Other Versions
 show_name_observations: More [:OBSERVATIONS]
@@ -1586,7 +1587,8 @@ show_name_creator: First person to use this name on MO
 show_name_editor: "[:Editors]"
 show_name_editors: "[:Editors]"
 show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it.  Confidence value is for __this__ name, not the consensus name.)"
-
+show_name_nomenclature: Nomenclature
+show_name_classification: Classification
 
 # observer/_show_namings
 show_namings_proposed_name: "[:NAMING]"

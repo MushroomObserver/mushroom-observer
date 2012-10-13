@@ -286,6 +286,14 @@ class Name < AbstractModel
     self.sort_name <=> x.sort_name
   end
 
+  def best_gen_desc
+    self.description.gen_desc if self.description
+  end
+  
+  def best_classification
+    self.description.classification if self.description
+  end
+  
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
     Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")

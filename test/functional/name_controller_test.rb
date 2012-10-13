@@ -209,17 +209,17 @@ class NameControllerTest < FunctionalTestCase
     get_with_dump(:show_name, :id => 2)
     assert_response('show_name')
     # Creates two for children and all four observations sections, but one never used.
-    assert_equal(5, Query.count)
+    assert_equal(2, Query.count)
 
     reget(:show_name, :id => 2)
     assert_response('show_name')
     # Should re-use all the old queries.
-    assert_equal(5, Query.count)
+    assert_equal(2, Query.count)
 
     reget(:show_name, :id => 3)
     assert_response('show_name')
     # Needs new queries this time.
-    assert_equal(10, Query.count)
+    assert_equal(5, Query.count)
   end
 
   def test_show_past_name

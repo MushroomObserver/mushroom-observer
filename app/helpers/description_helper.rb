@@ -227,6 +227,42 @@ module ApplicationHelper::Description
     return html
   end
 
+  def show_boxed_descriptions(odd_even, obj)
+    type = obj.type_tag
+
+    # Show existing drafts, with link to create new one.
+    head = "#{:show_name_descriptions.t}: "
+    head += link_to(:show_name_create_description.t,
+                    :controller => obj.show_controller,
+                    :action => "create_#{type}_description",
+                    :id => obj.id, :params => query_params)
+    any = false
+
+    # Add title and maybe "no descriptions", wrapping it all up in paragraph.
+    list = list_descriptions(obj).map {|link| indent + link}
+    any = list.any?
+    # list.unshift(head)
+    list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
+    html = list.join("<br/>\n")
+    html = colored_notes_box(odd_even, html)
+    head + html
+  end
+  
+  def show_boxed_projects(odd_even, obj, projects)
+    type = obj.type_tag
+
+    # Show list of projects user is a member of.
+    head = :show_name_create_draft.t + ': '
+    list = projects.map do |project|
+      item = link_to(project.title,
+                     :action => "create_#{type}_description",
+                     :id => obj.id, :project => project.id,
+                     :source => 'project', :params => query_params)
+      indent + item
+    end
+    head + colored_notes_box(odd_even, list.join("<br/>\n"))
+  end
+
   # Just shows the current version number and a link to see the previous.
   #
   #   <%= show_previous_version(name) %>
@@ -398,7 +434,7 @@ module ApplicationHelper::Description
 end
 
 def name_section_link(title, data, query)
-  if data
+  if data and data != 0
     link_to(title,
             :controller => 'observer',
             :action => 'index_observation',

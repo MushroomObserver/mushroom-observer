@@ -352,9 +352,14 @@ class NameController < ApplicationController
         !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
       end
 
-      # Get list of immediate parents.
-      @parents = @name.parents
-
+      # Get classification
+      @classification = @name.best_classification
+      @parents = nil
+      if not @classification
+        # Get list of immediate parents.
+        @parents = @name.parents
+      end
+      
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, :name => @name)
 
@@ -370,12 +375,17 @@ class NameController < ApplicationController
       @other_query = create_query(:Observation, :of_name, :name => @name,
                                   :synonyms => :all, :nonconsensus => :exclusive,
                                   :by => :confidence)
+      @obs_with_images_query = create_query(:Observation, :of_name, :name => @name,
+                                      :by => :confidence, :has_images => :yes)
+                                  
       if @name.at_or_below_genus?
         @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
                                       :all => true, :by => :confidence)
       end
 
       # Determine which queries actually have results and instantiate the ones we'll use
+      @best_description = @name.best_gen_desc
+      @first_four = @obs_with_images_query.results(:limit => 4)
       @first_child = @children_query.results(:limit => 1)[0]
       @first_consensus = @consensus_query.results(:limit => 1)[0]
       @has_consensus2 = @consensus2_query.select_count

@@ -39,64 +39,76 @@
 %>
 
 <table cellpadding="5" width="100%">
-  <tr>
-    <%
-    # ----------------------------------------
-    #  Show the basic name information
-    # ----------------------------------------
-    %>
-    <td valign="top" width="33%">
-      <p>
-        <%= render(:partial => 'name', :object => @name, :locals =>
-                   { :synonyms => true } ) %>
+	<tr>
+	    <td valign="top" align="center" valign="middle">
+		  <% if @first_four.length > 0 %>
+			  <p>
+			    <%= :show_name_most_confident.t %>
+			  </p>
+			  <% for obs in @first_four %>
+		      	<%= show_best_image(obs) %><br/>
+			  <% end %>
+		      <br/>
+		  <% end %>
+	      <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
+	      <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
+	      <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
+	      <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
+	      <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
+	    </td>
 
-        <%= show_previous_version(@name) %>
+    	<td valign="top">
+			<% odd_even = true %>
+			<%= :show_name_nomenclature.t %>:
+			<%= colored_notes_box(odd_even, render(:partial => 'name', :object => @name, :locals =>
+		                                   			{ :synonyms => true } )) %>
+		
+			<br/>
+			<% odd_even = not(odd_even) %>
+			<%= :show_name_classification.t %>:
+			<%= colored_notes_box(odd_even, classification_section(@classification, @parents, @first_child, @children_query)) %>
 
-        <% for parent in @parents %>
-          <%= rank_as_string(@parents[0].rank) %>:
-            <%= link_to(parent.display_name.t, :action => 'show_name',
-                        :id => parent.id, :params => query_params) %><br/>
-        <% end %>
-        <% if @first_child %>
-          <%= link_to("#{:show_object.t(:type => @first_child.rank.to_s)}", :action => 'index_name',
-                      :params => query_params(@children_query)) %><br/>
-        <% end %>
+			<% if @name.has_notes? %>
+				<br/>
+				<% odd_even = not(odd_even) %>
+				<%= :show_name_notes.t %>:<br/>
+				<%= colored_notes_box(odd_even, @name.notes.tpl) %>
+			<% end %>
 
-        <%= set_export_status_controls(@name) %>
-      </p>
-    </td>
-
-    <td valign="top" width="34%" align="center" valign="middle">
-      <%= show_best_image(@first_consensus) %>
-      <br/>
-      <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
-      <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
-      <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
-      <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
-      <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
-    </td>
-    <%
-    # ----------------------------------------
-    #  Show a list of NameDescriptions.
-    # ----------------------------------------
-    %>
-    <td valign="top" width="33%">
-      <%= show_alt_descriptions(@name, @projects) %>
-    </td>
+			<% if @best_description and @best_description != "" %>
+				<br/>
+				<% odd_even = not(odd_even) %>
+				<%= :form_names_gen_desc.t %>:<br/>
+				<%= colored_notes_box(odd_even, @best_description.tpl) %>
+			<% end %>
+			
+			<br/>
+			<% odd_even = not(odd_even) %>
+			<%= show_boxed_descriptions(odd_even, @name) %>
+			
+			<% if @projects && @projects.length > 0 %>
+				<br/>
+				<% odd_even = not(odd_even) %>
+				<%= show_boxed_projects(odd_even, @name, @projects) %>
+			<% end %>
+			
+			<br/>
+			<p>
+				<%= show_previous_version(@name) %>
+			</p>
+			<p>
+				<%= set_export_status_controls(@name) %>
+			</p>
+		</td>
   </tr>
 </table>
 
 
 <%
 # ----------------------------------------
-#  Show comments and notes.
+#  Show comments
 # ----------------------------------------
 %>
-<% if @name.has_notes? %>
-  <p><%= :show_name_notes.t %>:</p>
-  <%= colored_notes_box(true, @name.notes.tpl) %>
-<% end %>
-
 <center>
   <%= show_authors_and_editors(@name) %>
 </center>
