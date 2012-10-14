@@ -1223,7 +1223,10 @@ image_reuse_id_help: Either click one of the images below, or if you know the im
 # image/show_image
 image_show_title: "[:IMAGE]: [name]"
 image_show_inquiry: Send Commercial Inquiry About Image
-image_show_edit: "[:edit_object(type=:image)]"
+image_show_rotate_left: Rotate Left
+image_show_rotate_right: Rotate Right
+image_show_mirror: Mirror
+image_show_edit: "[:EDIT]"
 image_show_destroy: "[:DESTROY]"
 image_show_when: "[:WHEN]"
 image_show_notes: "[:NOTES]"
@@ -1242,6 +1245,7 @@ image_show_full_size: Full Size
 image_show_original: Show Original Image
 image_show_original_name: Original File Name
 image_show_make_default: Make this the default size
+image_show_transform_note: Image is being processed. This may take several seconds.
 
 
 

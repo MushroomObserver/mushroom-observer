@@ -28,21 +28,6 @@ def get_size(file)
   return [w, h]
 end
 
-# --------------------------------
-#  Set size in database via API.
-# --------------------------------
-
-def set_size(id, w, h)
-  require 'net/http'
-  require 'uri'
-  if id.to_s == ''
-    puts "#{w} #{h}"
-  else
-    http = Net::HTTP.new('localhost')
-    http.put("/api/images?id=#{id}&set_width=#{w}&set_height=#{h}")
-  end
-end
-
 # ----------------------------
 #  Main program.
 # ----------------------------
@@ -66,16 +51,6 @@ when '-f', '--file'
     end
   end
   exit(any ? 0 : 1)
-
-# Given file and ID of images record.
-when '-s', '--set'
-  id, file = ARGV[1..2]
-  w, h = get_size(file)
-  if w && set_size(id, w, h)
-    exit(0)
-  else
-    exit(1)
-  end
 
 # Just given single filename.
 else
@@ -104,7 +79,6 @@ $stderr.puts %(
   OPTIONS
     -h --help             Print this message.
     -f --file <file>      Report size of all files listed in <file>.
-    -s --set <id> <file>  Set size of <file> in database for image #<id>.
 
 )
 exit(1)

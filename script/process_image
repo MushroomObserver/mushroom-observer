@@ -8,12 +8,12 @@ server=cdmr@digitalmycology.com:images.digitalmycology.com
 images=public/images
 
 db_config=config/database.yml
-username=`grep -A 20 production: $db_config | grep username: | head -1 | sed 's/.*: *//'`
-database=`grep -A 20 production: $db_config | grep database: | head -1 | sed 's/.*: *//'`
-password=`grep -A 20 production: $db_config | grep password: | head -1 | sed 's/.*: *//'`
+username=`grep -A 20 production: $db_config | grep username: | head -1 | sed "s/.*: *//"`
+database=`grep -A 20 production: $db_config | grep database: | head -1 | sed "s/.*: *//"`
+password=`grep -A 20 production: $db_config | grep password: | head -1 | sed "s/.*: *//"`
 
 orig=$images/orig/$id.$ext
-orig_layers=$images/orig/$id-'*'.jpg
+orig_layers=$images/orig/$id-"*".jpg
 full=$images/orig/$id.jpg
 huge=$images/1280/$id.jpg
 large=$images/960/$id.jpg
@@ -29,17 +29,17 @@ path=(. /bin /usr/bin /usr/local/bin)
 
 errors=0
 
-if [[ $RAILS_ENV == 'production' ]]; then
-    production=1
+if [[ $RAILS_ENV == "production" ]]; then
+  production=1
 else
-    production=0
+  production=0
 fi
 
 # ----------------------------
 #  Help message.
 # ----------------------------
 
-if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
+if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<-EOH; exit -1
 
 	USAGE:
 	    script/process_image <id> <ext> <0|1>
@@ -66,28 +66,37 @@ if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 	EOH
 fi
 
-# --------------------------------------------------
-#  Run a command, logging both command and result.
-#  Sets errors to true if anything fails.
-# --------------------------------------------------
+# ----------------------------
+#  Subroutines.
+# ----------------------------
+
+function wait_for() {
+  while (ps -e | grep " $*\$" > /dev/null); do sleep 5; done
+}
 
 function run() {
-    echo "`date`>" $* >> $log
-    if !($* >> $log 2>&1); then
-        errors=1
-        echo '**** FAILED ****' >> $log
-    fi
+  echo "`date`>" $* >> $log
+  if !($* >> $log 2>&1); then
+    errors=1
+    echo "**** FAILED ****" >> $log
+  fi
+}
+
+function run_mysql() {
+  echo "`date`>" mysql "\"$*\"" >> $log
+  if !( mysql -q -u "$username" -p"$password" "$database" -e "$*" >> $log 2>&1 ); then
+    errors=1
+    echo "**** FAILED ****" >> $log
+  fi
 }
 
 # ----------------------------
-#  Resize images.
+#  Main program.
 # ----------------------------
-
-# Wait for other conversions to finish first.
-while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
 
 # Do we need to convert the original to a JPEG?
 if [[ $orig != $full ]]; then
+  wait_for "(convert|jpegresize)"
   run convert -quality 90 $orig $full
 
   # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
@@ -104,34 +113,32 @@ fi
 # Make sure it is oriented correctly.
 run exifautotran $full
 
-# Do we need to report the image size back to Rails?
+# Set the image size in the database.
 if (( $set_size )); then
-  run script/jpegsize --set $id $full
+  size=`script/jpegsize $full | sed "s/.*: //"`
+  w=`echo $size | sed "s/ .*//"`
+  h=`echo $size | sed "s/.* //"`
+  run_mysql "UPDATE images SET width=$w, height=$h WHERE id=$id"
 fi
 
 # Create the other sizes now.  Image processing theory says that reducing
 # images by no more than 50% at a time is optimal.
-# run convert -thumbnail '1280x1280>' -quality 70 $full $huge
-# run convert -thumbnail '960x960>' -quality 70 $huge $large
-# run convert -thumbnail '640x640>' -quality 70 $huge $medium
-# run convert -thumbnail '320x320>' -quality 80 $medium $small
-# run convert -thumbnail '160x160>' -quality 90 $small $thumb
-
+wait_for "(convert|jpegresize)"
 run jpegresize 1280x1280 -q 70 --max-size $full $huge
 run jpegresize 960x960 -q 70 --max-size $huge $large
 run jpegresize 640x640 -q 70 --max-size $huge $medium
 run jpegresize 320x320 -q 80 --max-size $medium $small
 run jpegresize 160x160 -q 90 --max-size $small $thumb
 
-# ----------------------------
-#  Transfer images.
-# ----------------------------
+# run convert -thumbnail "1280x1280>" -quality 70 $full $huge
+# run convert -thumbnail "960x960>" -quality 70 $huge $large
+# run convert -thumbnail "640x640>" -quality 70 $huge $medium
+# run convert -thumbnail "320x320>" -quality 80 $medium $small
+# run convert -thumbnail "160x160>" -quality 90 $small $thumb
 
-# Wait for other transfers to finish first.
-while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
-
-# Careful!  Don't do this in test mode!
+# Transfer images.
 if (( $production )); then
+  wait_for scp
   run scp $thumb  $server/thumb/$id.jpg
   run scp $small  $server/320/$id.jpg
   run scp $medium $server/640/$id.jpg
@@ -139,22 +146,22 @@ if (( $production )); then
   run scp $huge   $server/1280/$id.jpg
   run scp $full   $server/orig/$id.jpg
   if [[ $orig != $full ]]; then
-    run scp $orig   $server/orig/$id.$ext
+    run scp $orig $server/orig/$id.$ext
   fi
 fi
 
-# ------------------------------
-#  Report errors to webmaster.
-# ------------------------------
+# Set "transferred" bit in database if everything was a success.
+if (( $production && !$errors )); then
+  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id"
+fi
 
+# Email any error messages to admins.
+if (( $production && $errors)); then
+  mutt -s "[MO] process_image" $email < $log
+fi
+
+# Add to cumulative log and clean up temporary log.
 cat $log >> $log2
-if (( $production )); then
-  if (( $errors )); then
-    mutt -s '[MO] process_image' $email < $log
-  else
-    mysql -q -u "$username" -p"$password" "$database" -e "UPDATE images SET transferred=TRUE WHERE id=$id;"
-  fi
-fi
 rm -f $log
 
 exit $errors

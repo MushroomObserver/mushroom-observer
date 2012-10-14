@@ -645,6 +645,34 @@ class ImageController < ApplicationController
     end
   end
 
+  # Used by show_image to rotate and flip image.
+  def transform_image # :norobots:
+    pass_query_params
+    if image = find_or_goto_index(Image, params[:id])
+      if check_permission!(image)
+        if params[:op] == 'rotate_left'
+          image.transform(:rotate_left)
+          flash_notice(:image_show_transform_note.t)
+        elsif params[:op] == 'rotate_right'
+          image.transform(:rotate_right)
+          flash_notice(:image_show_transform_note.t)
+        elsif params[:op] == 'mirror'
+          image.transform(:mirror)
+          flash_notice(:image_show_transform_note.t)
+        else
+          flash_error("Invalid operation #{params[:op].inspect}")
+        end
+      end
+      if params[:size].blank? or
+         params[:size].to_sym == (@user ? @user.image_size : :medium)
+        redirect_to(:action => 'show_image', :id => image, :params => query_params)
+      else
+        redirect_to(:action => 'show_image', :id => image, :params => query_params,
+                    :size => params[:size])
+      end
+    end
+  end
+
   # Tabular form that lets user change licenses of their images.  The table
   # groups all the images of a given copyright holder and license type into
   # a single row.  This lets you change all of Rolf's licenses in one stroke.

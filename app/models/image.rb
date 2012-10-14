@@ -201,6 +201,7 @@
 #  image=::             Attach an image (via IO stream or File).
 #  process_image::      Call this after saving new record to process image.
 #  validate_upload::    Perform all the checks we can on the upload.
+#  transform::          Rotate and flip image after it's already been uploaded.
 #
 #  ==== Voting
 #  all_votes::          Array of valid vote values.
@@ -621,6 +622,18 @@ class Image < AbstractModel
       self.height = h.to_i
       self.save_without_our_callbacks
     end
+  end
+
+  # Rotate or flip image.
+  def transform(op)
+    case op
+    when :rotate_left  ; op = '-90'
+    when :rotate_right ; op = '+90'
+    when :mirror       ; op = '-h'
+    else
+      raise("Invalid transform op: #{op.inspect}")
+    end
+    system("script/rotate_image #{id} #{op}&")
   end
 
   ################################################################################
