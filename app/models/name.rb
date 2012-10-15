@@ -286,8 +286,14 @@ class Name < AbstractModel
     self.sort_name <=> x.sort_name
   end
 
-  def best_gen_desc
-    self.description.gen_desc if self.description
+  def best_brief_description
+    if self.description
+      if self.description.gen_desc.blank?
+        self.description.diag_desc
+      else
+        self.description.gen_desc
+      end
+    end
   end
   
   def best_classification

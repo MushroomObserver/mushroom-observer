@@ -263,6 +263,30 @@ module ApplicationHelper::Description
     head + colored_notes_box(odd_even, list.join("<br/>\n"))
   end
 
+  def edit_desc_link(desc)
+    if desc
+      link_to(:EDIT.t, :id => desc.id, :params => query_params,
+              :controller => 'name',
+              :action => 'edit_name_description')
+    else
+      ''
+    end
+  end
+  
+  def edit_best_brief_desc_link(desc)
+    edit_desc_link(desc)
+  end
+
+  def edit_classification_link(desc)
+    edit_desc_link(desc)
+  end
+  
+  def edit_name_notes_link(name)
+    link_to(:EDIT.t, :id => name.id, :params => query_params,
+            :controller => 'name',
+            :action => 'edit_name')
+  end
+
   # Just shows the current version number and a link to see the previous.
   #
   #   <%= show_previous_version(name) %>

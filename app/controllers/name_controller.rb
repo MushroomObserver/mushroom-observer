@@ -384,7 +384,7 @@ class NameController < ApplicationController
       end
 
       # Determine which queries actually have results and instantiate the ones we'll use
-      @best_description = @name.best_gen_desc
+      @best_description = @name.best_brief_description
       @first_four = @obs_with_images_query.results(:limit => 4)
       @first_child = @children_query.results(:limit => 1)[0]
       @first_consensus = @consensus_query.results(:limit => 1)[0]

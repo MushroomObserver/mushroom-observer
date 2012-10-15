@@ -65,20 +65,24 @@
 		
 			<br/>
 			<% odd_even = not(odd_even) %>
-			<%= :show_name_classification.t %>:
+			<%= :show_name_classification.t %>: <%= edit_classification_link(@name.description) %>
 			<%= colored_notes_box(odd_even, classification_section(@classification, @parents, @first_child, @children_query)) %>
 
 			<% if @name.has_notes? %>
 				<br/>
 				<% odd_even = not(odd_even) %>
-				<%= :show_name_notes.t %>:<br/>
+				<%= :show_name_notes.t %>: <%= edit_name_notes_link(@name) %>
 				<%= colored_notes_box(odd_even, @name.notes.tpl) %>
 			<% end %>
 
 			<% if @best_description and @best_description != "" %>
 				<br/>
 				<% odd_even = not(odd_even) %>
-				<%= :form_names_gen_desc.t %>:<br/>
+				<%= :show_name_brief_description.t %>:
+				<%= link_to(:show_name_see_more.t, :id => @name.description.id, :params => query_params,
+		            :controller => 'name',
+		            :action => 'show_name_description') %> |
+				<%= edit_best_brief_desc_link(@name.description) %>
 				<%= colored_notes_box(odd_even, @best_description.tpl) %>
 			<% end %>
 			
