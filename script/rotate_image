@@ -1,0 +1,113 @@
+#!/bin/bash
+
+id=$1
+op=$2
+
+server=cdmr@digitalmycology.com:images.digitalmycology.com
+images=public/images
+orig=$images/orig/$id.jpg
+
+db_config=config/database.yml
+username=`grep -A 20 production: $db_config | grep username: | head -1 | sed "s/.*: *//"`
+database=`grep -A 20 production: $db_config | grep database: | head -1 | sed "s/.*: *//"`
+password=`grep -A 20 production: $db_config | grep password: | head -1 | sed "s/.*: *//"`
+
+path=(. /bin /usr/bin /usr/local/bin)
+
+if [[ $RAILS_ENV == "production" ]]; then
+  production=1
+else
+  production=0
+fi
+
+# ----------------------------
+#  Help message.
+# ----------------------------
+
+if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<-EOH; exit -1
+
+	USAGE:
+	    script/rotate_image [id] [0|+90|-90|180|-h|-v]
+
+	DESCRIPTION:
+	    This is designed to run on the production webserver.  It transfers the
+	    original image from the image server if it's already been moved, rotates
+	    or flips the original as requested, updates the database, then transfers
+	    execution to script/process_image.  It aborts at the first sign of
+	    trouble. 
+
+  OPERATIONS:
+      0     No transformation, just reprocess the image.
+      -90   Rotate counterclockwise 90 degrees.
+      +90   Rotate clockwise 90 degrees.
+      180   Rotate 180 degrees.
+      -h    Flip horizontally.
+      -v    Flip vertically.
+
+	EOH
+fi
+
+# ----------------------------
+#  Subroutines.
+# ----------------------------
+
+function wait_for() {
+  while (ps -e | grep " $*\$" > /dev/null); do sleep 5; done
+}
+
+function run() {
+  if !( $* ); then
+    exit 1
+  fi
+}
+
+function run_mysql() {
+  if !( mysql -q -u "$username" -p"$password" "$database" -e "$*" ); then
+    echo "*** Failed to update database! ***"
+    exit 1
+  fi
+}
+
+# ----------------------------
+#  Main program.
+# ----------------------------
+
+# Get fresh copy of original image if we need to,
+if [[ ! -e $orig ]]; then
+  wait_for scp
+  run scp $server/orig/$id.jpg $orig
+fi
+
+# Transform image.
+wait_for "(convert|jpegresize)"
+case $op in
+"-90")
+  run convert $orig -rotate 270 $orig.new
+  run mv -f $orig.new $orig
+  ;;
+"+90")
+  run convert $orig -rotate 90 $orig.new
+  run mv -f $orig.new $orig
+  ;;
+"180")
+  run convert $orig -rotate 180 $orig.new
+  run mv -f $orig.new $orig
+  ;;
+"-h")
+  run convert $orig -flop $orig.new
+  run mv -f $orig.new $orig
+  ;;
+"-v")
+  run convert $orig -flip $orig.new
+  run mv -f $orig.new $orig
+  ;;
+esac
+
+# Update size and clear "transferred" bit in database.
+size=`script/jpegsize $orig | sed "s/.*: //"`
+w=`echo $size | sed "s/ .*//"`
+h=`echo $size | sed "s/.* //"`
+run_mysql "UPDATE images SET transferred=FALSE, width=$w, height=$h WHERE id=$id"
+
+# Transfer control to process_image.
+exec script/process_image $id jpg 0
