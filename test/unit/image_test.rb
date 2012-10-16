@@ -136,4 +136,11 @@ class ImageTest < UnitTestCase
     img.valid?
     assert_equal(get, img.send(var))
   end
+
+  def test_presence_of_critical_external_scripts
+    assert(!File.exist?("#{RAILS_ROOT}/script/bogus_script"), "script/bogus_script should not exist!")
+    assert(File.exist?("#{RAILS_ROOT}/script/process_image"), "Missing script/process_image!")
+    assert(File.exist?("#{RAILS_ROOT}/script/rotate_image"), "Missing script/rotate_image!")
+    assert(File.exist?("#{RAILS_ROOT}/script/retransfer_images"), "Missing script/retransfer_images!")
+  end
 end
