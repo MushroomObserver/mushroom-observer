@@ -353,8 +353,8 @@ module ObservationReport
         country, state, county, location = split_location(row[LOC_NAME])
         location = "#{county} Co., #{location}".sub(/, $/, '') if county
         start_lat  = clean_float(row[OBS_LAT], 4)
-        start_lon  = clean_float(row[OBS_LONG], 4)
-        if !start_lat || !start_lon
+        start_long = clean_float(row[OBS_LONG], 4)
+        if !start_lat || !start_long
           start_lat  = clean_float(row[LOC_NORTH], 4)
           end_lat    = clean_float(row[LOC_SOUTH], 4)
           start_long = clean_float(row[LOC_EAST], 4)
@@ -365,7 +365,9 @@ module ObservationReport
         collector  = clean_string(row[USER_NAME]) || clean_string(row[USER_LOGIN])
         others     = "MO # " + clean_integer(row[OBS_ID]).to_s
         notes      = clean_string(row[OBS_NOTES])
-        original   = $1 if notes && notes.sub!(/original herbarium label: *(\S[^\n\r]*\S)/, '')
+        if notes && notes.sub!(/original herbarium label: *(\S[^\n\r]*\S)/i, '')
+          original = $1.gsub(/_(.*?)_/, '\\1')
+        end
         notes = notes.strip if notes
         [
           nil, nil, nil,
