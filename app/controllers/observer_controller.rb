@@ -116,6 +116,7 @@ class ObserverController < ApplicationController
   require 'find'
   require 'set'
 
+  require_dependency 'observation_report'
   require_dependency 'refine_search'
   include RefineSearch
 
@@ -787,8 +788,7 @@ class ObserverController < ApplicationController
     @links << [:list_observations_download_as_csv.t, {
                 :controller => 'observer',
                 :action => 'download_observations',
-                :params => query_params(query),
-                :format => 'csv'
+                :params => query_params(query)
               }]
 
     # Paginate by letter if sorting by user.
@@ -844,176 +844,51 @@ class ObserverController < ApplicationController
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, :by => params[:by])
     raise "no robots!" if is_robot?
-    query.save
-    filename = "observations_#{query.id.alphabetize}"
-    rows = prepare_observation_download(query)
-    case params[:format]
-    when 'csv'
-      render_as_csv(rows, filename)
+    set_query_params(query)
+    @format = params[:format] || 'raw'
+    @encoding = params[:encoding] || 'UTF-8'
+    if request.method != :post
+      # serve form
+    elsif params[:commit] == :CANCEL.l
+      redirect_to(:action => :index_observation, :always_index => true,
+                  :params => query_params)
+    elsif params[:commit] == :DOWNLOAD.l
+      report = create_observation_report(
+        :query    => query,
+        :format   => @format,
+        :encoding => @encoding
+      )
+      render_report(report)
     else
-      raise("Invalid download type, #{params[:format].inspect}.")
+      raise "Invalid submit button: #{params[:commit].inspect}"
     end
   rescue => e
-    flash_error("Internal error: #{e}") # *e.backtrace[0..10])
-    show_selected_observations(query, :id => params[:id], :always_index => true)
+    flash_error("Internal error: #{e}", *e.backtrace[0..10])
   end
 
-  def prepare_observation_download(query)
-    labels = %w[ observation_id user_id user_login user_name date specimen
-                 name_id name author rank confidence
-                 location_id location latitude longitude altitude
-                 north_edge south_edge east_edge west_edge max_altitude min_altitude
-                 is_collection_location thumbnail_image_id notes ]
-    rows1 = query.select_rows(
-      :select => [
-          'observations.id',
-          'users.id',
-          'users.login',
-          'users.name',
-          'observations.when',
-          'observations.specimen',
-          'names.id',
-          'names.text_name',
-          'names.author',
-          'names.rank',
-          'observations.vote_cache',
-          '""',
-          'observations.where',
-          'observations.lat',
-          'observations.long',
-          'observations.alt',
-          '""',
-          '""',
-          '""',
-          '""',
-          '""',
-          '""',
-          'observations.is_collection_location',
-          'observations.thumb_image_id',
-          'observations.notes',
-        ].join(','),
-      :join => [:users, :names],
-      :where => 'observations.location_id IS NULL',
-      :order => 'observations.id ASC'
-    )
-    rows2 = query.select_rows(
-      :select => [
-          'observations.id',
-          'users.id',
-          'users.login',
-          'users.name',
-          'observations.when',
-          'observations.specimen',
-          'names.id',
-          'names.text_name',
-          'names.author',
-          'names.rank',
-          'observations.vote_cache',
-          'locations.id',
-          'locations.name',
-          'observations.lat',
-          'observations.long',
-          'observations.alt',
-          'locations.north',
-          'locations.south',
-          'locations.east',
-          'locations.west',
-          'locations.high',
-          'locations.low',
-          'observations.is_collection_location',
-          'observations.thumb_image_id',
-          'observations.notes',
-        ].join(','),
-      :join => [:users, :locations, :names],
-      :order => 'observations.id ASC'
-    )
-    return [labels] + (rows1 + rows2).map do |row|
-      [
-        clean_integer(row[0]),
-        clean_integer(row[1]),
-        clean_string(row[2]),
-        clean_string(row[3]),
-        clean_string(row[4]),
-        clean_boolean(row[5]),
-        clean_integer(row[6]),
-        clean_string(row[7]),
-        clean_string(row[8]),
-        clean_rank(row[9]),
-        clean_float(row[10], 1, 100.0 / 3.0),
-        clean_integer(row[11]),
-        clean_location(row[12]),
-        clean_float(row[13], 4),
-        clean_float(row[14], 4),
-        clean_integer(row[15]),
-        clean_float(row[16], 4),
-        clean_float(row[17], 4),
-        clean_float(row[18], 4),
-        clean_float(row[19], 4),
-        clean_integer(row[20]),
-        clean_integer(row[21]),
-        clean_boolean(row[22]),
-        clean_integer(row[23]),
-        clean_string(row[24])
-      ]
-    end.sort_by {|row| row[0].to_i}
-  end
-
-  def clean_boolean(val)
-    val == 1 ? 'X' : nil
-  end
-
-  def clean_integer(val)
-    val.blank? ? nil : val.to_f.round
-  end
-
-  def clean_float(val, places, multiplier=1.0)
-    val.blank? ? nil : (val.to_f * multiplier).round(places)
-  end
-
-  def clean_string(val)
-    val.blank? ? nil : val
-  end
-
-  def clean_rank(val)
-    val.blank? ? nil : :"rank_#{val.downcase}".l
-  end
-
-  def clean_location(val)
-    val.blank? ? nil :
-    User.current_location_format == :scientific ? Location.reverse_name(val) : val
-  end
-
-  def render_as_csv(rows, filename)
-    report = FasterCSV.generate do |csv|
-      rows.each do |row|
-        csv << row
-      end
-    end.force_encoding('utf-8')
-    render_file(report,
-      :filename => filename + '.csv',
-      :type     => 'text/csv',
-      :charset  => 'ISO-8859-1',
-      :header   => { :header => 'present' }
-    )
-  end
-
-  def render_file(body, args={})
-    type     = args[:type]     || 'text/plain'
-    charset  = args[:charset]  || 'UTF-8'
-    filename = args[:filename] || 'report.txt'
-    headers  = args[:header]   || {}
-    body = case charset
-      when 'UTF-8'; body
-      when 'ASCII'; body.to_ascii
+  def create_observation_report(args)
+    format = args[:format].to_s
+    case format
+      when 'raw'
+        ObservationReport::Raw.new(args)
+      when 'adolf'
+        ObservationReport::Adolf.new(args)
+      when 'darwin'
+        ObservationReport::Darwin.new(args)
+      when 'symbiota'
+        ObservationReport::Symbiota.new(args)
       else
-        body.iconv(charset)
+        raise("Invalid download type: #{format.inspect}")
     end
-    send_data(body, headers.merge(
-      :type        => type,
-      :charset     => charset,
+  end
+
+  def render_report(report)
+    send_data(report.body, {
+      :type        => report.mime_type,
+      :charset     => report.encoding,
       :disposition => 'attachment',
-      :filename    => filename
-    ))
+      :filename    => report.filename
+    }.merge(report.header || {}))
   end
 
   ##############################################################################

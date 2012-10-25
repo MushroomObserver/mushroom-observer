@@ -980,6 +980,23 @@ create_observation_title: "[:create_object(type=:observation)]"
 
 
 
+# observation/download_observations
+download_observations_title: Download Observations
+download_observations_back: Cancel (Back to Index)
+download_observations_format: Choose format
+download_observations_raw: CSV spreadsheet
+download_observations_adolf: The Adolf Special™
+download_observations_darwin: Darwin Core
+download_observations_symbiota: Symbiota
+download_observations_what_is_this: what is this?
+download_observations_encoding: Choose character encoding
+download_observations_ascii: ASCII (no accents)
+download_observations_iso88591: ISO-8859-1 (best for Excel)
+download_observations_utf8: UTF-8 (most universal)
+download_observations_utf16: UTF-16 (best for Windows 7 and up)
+
+
+
 # location/edit_location
 edit_location_title: "[:edit_object(type=:location)]"
 
@@ -1254,7 +1271,7 @@ list_observations_location_all: All Locations
 list_observations_location_define: Define This Location
 list_observations_location_merge: Merge With A Defined Location
 list_observations_alternate_spellings: Maybe you meant one of the following names?
-list_observations_download_as_csv: Download as CSV
+list_observations_download_as_csv: Download Observations
 
 
 

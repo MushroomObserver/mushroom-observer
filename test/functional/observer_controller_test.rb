@@ -2719,7 +2719,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:change_banner)
     assert_flash_error
     assert_response(:action => 'list_rss_logs')
-    
+
     make_admin('rolf')
     get(:change_banner)
     assert_no_flash
@@ -2742,15 +2742,52 @@ class ObserverControllerTest < FunctionalTestCase
     obs = Observation.find_all_by_user_id(@mary.id)
     assert_equal(4, obs.length)
     query = Query.lookup_and_save(:Observation, :by_user, :user => @mary.id)
-    get(:download_observations, :q => query.id.alphabetize, :format => 'csv')
+
+    get(:download_observations, :q => query.id.alphabetize)
     assert_no_flash
     assert_response(:success)
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'raw',
+        :encoding => 'UTF-8', :commit => 'Cancel')
+    assert_no_flash
+    assert_response(:action => :index_observation)
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'raw',
+        :encoding => 'UTF-8', :commit => 'Download')
+    assert_no_flash
+    assert_response(:success)
+
     ids = @response.body.split("\n").map { |s| s.sub(/,.*/, '') }
     assert_equal(['observation_id', '1', '2', '9', '10'], ids)
     last_row = @response.body.sub(/\n\Z/,'').sub(/\A.*\n/m,'')
     assert_equal(
-      '10,2,mary,Mary Newbie,2010-07-22,,1,Fungi,,kingdom,0.0,2,"Burbank, California, USA",34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294,148,X,,',
+      '10,2,mary,Mary Newbie,2010-07-22,,1,Fungi,,kingdom,0.0,2,USA,California,,Burbank,34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294,148,X,,',
       last_row.iconv('utf-8')
     )
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'raw',
+        :encoding => 'ASCII', :commit => 'Download')
+    assert_no_flash
+    assert_response(:success)
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'raw',
+        :encoding => 'UTF-16', :commit => 'Download')
+    assert_no_flash
+    assert_response(:success)
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'adolf',
+        :encoding => 'UTF-8', :commit => 'Download')
+    assert_no_flash
+    assert_response(:success)
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'darwin',
+        :encoding => 'UTF-8', :commit => 'Download')
+    assert_no_flash
+    assert_response(:success)
+
+    post(:download_observations, :q => query.id.alphabetize, :format => 'symbiota',
+        :encoding => 'UTF-8', :commit => 'Download')
+    assert_no_flash
+    assert_response(:success)
   end
 end
