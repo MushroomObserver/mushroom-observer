@@ -41,7 +41,6 @@ DESCRIPTION: Description
 description: description
 DESCRIPTIONS: Descriptions
 descriptions: descriptions
-DOWNLOAD: Download
 DRAFT: Draft
 draft: draft
 DRAFTS: Drafts
@@ -370,6 +369,8 @@ DESTROY: Destroy
 destroy: destroy
 DISABLE: Disable
 disable: disable
+download: download
+DOWNLOAD: Download
 EDIT: Edit
 edit: edit
 ENABLE: Enable

@@ -363,6 +363,24 @@ mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
 mo> ssh cdmr@images.digitalmycology.com
   # (just make sure it works)
 
+# Set up logrotate to archive passenger and rails logs.
+mo> su root
+root> vi /etc/logrotate.d/passenger
+  /var/web/mo/log/*.log {
+    daily
+    missingok
+    rotate 7
+    dateext
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+      touch /var/web/mo/tmp/restart.txt
+      scp /var/web/mo/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
+      mv /var/web/mo/log/*.gz /var/web/mo/log/old/
+    endscript
+  }
+
 --------------------------------------------------------------------------------
 
 # This section deals with setting up email.  It's mostly generic.
