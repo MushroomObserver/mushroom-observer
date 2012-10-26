@@ -41,6 +41,7 @@ DESCRIPTION: Description
 description: description
 DESCRIPTIONS: Descriptions
 descriptions: descriptions
+DOWNLOAD: Download
 DRAFT: Draft
 draft: draft
 DRAFTS: Drafts
