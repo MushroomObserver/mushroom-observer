@@ -167,11 +167,14 @@ class NameControllerTest < FunctionalTestCase
     assert_block("Was only expecting one email notification, got:\n" + @@emails.inspect) \
       { @@emails.length == 1 }
     assert_block("Was expecting different email notification content.\n" +
-                 "---- Expected: --------------------\nold: #{old_name}\nnew: #{new_name}\n" +
-                 "---- Actual: ----------------------\n#{@@emails.first}\n" +
+                 "---- Expected: --------------------\n" +
+                 "old: #nnn: #{old_name}\n" +
+                 "new: #nnn: #{new_name}\n" +
+                 "---- Actual: ----------------------\n" +
+                 "#{@@emails.first}\n" +
                  "-----------------------------------\n") {
-      old_name2 = $2 if @@emails.first.match(/^(old|this): (.*)/)
-      new_name2 = $2 if @@emails.first.match(/^(new|into): (.*)/)
+      old_name2 = $2 if @@emails.first.match(/^(old|this): #\d+: (.*)/)
+      new_name2 = $2 if @@emails.first.match(/^(new|into): #\d+: (.*)/)
       old_name == old_name2 and new_name == new_name2
     }
   ensure
