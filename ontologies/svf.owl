@@ -39,19 +39,19 @@
      -->
 
     <AnnotationProperty rdf:about="&terms;creator"/>
+    <AnnotationProperty rdf:about="&terms;description"/>
     <AnnotationProperty rdf:about="&svf;hasPictureURL">
         <rdfs:label rdf:datatype="&rdfs;Literal">has picture URL</rdfs:label>
         <rdfs:subPropertyOf rdf:resource="&rdfs;seeAlso"/>
     </AnnotationProperty>
-    <AnnotationProperty rdf:about="&terms;description"/>
     <AnnotationProperty rdf:about="&svf;hasEolURL">
         <rdfs:label rdf:datatype="&rdfs;Literal">has EOL URL</rdfs:label>
         <rdfs:subPropertyOf rdf:resource="&rdfs;seeAlso"/>
     </AnnotationProperty>
+    <AnnotationProperty rdf:about="&terms;references"/>
     <AnnotationProperty rdf:about="&svf;hasID">
         <rdfs:range rdf:resource="&xsd;integer"/>
     </AnnotationProperty>
-    <AnnotationProperty rdf:about="&terms;references"/>
     <AnnotationProperty rdf:about="&terms;date"/>
     <AnnotationProperty rdf:about="&svf;hasMushroomObserverURL">
         <rdfs:label rdf:datatype="&rdfs;Literal">has MushroomObserver URL</rdfs:label>
@@ -315,6 +315,28 @@
     
 
 
+    <!-- http://mushroomobserver.org/svf.owl#hasLowerSurfaceColor -->
+
+    <ObjectProperty rdf:about="&svf;hasLowerSurfaceColor">
+        <rdfs:label rdf:datatype="&rdfs;Literal">has lower surface color</rdfs:label>
+        <obo:IAO_0000115 rdf:datatype="&rdfs;Literal">The color of the lower surface of a shelf fungi.</obo:IAO_0000115>
+        <rdfs:range rdf:resource="&svf;SV1400"/>
+        <rdfs:subPropertyOf rdf:resource="&svf;hasColor"/>
+        <rdfs:domain>
+            <Class>
+                <intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&svf;Fungus"/>
+                    <Restriction>
+                        <onProperty rdf:resource="&svf;hasOverallShape"/>
+                        <someValuesFrom rdf:resource="&svf;SV1089"/>
+                    </Restriction>
+                </intersectionOf>
+            </Class>
+        </rdfs:domain>
+    </ObjectProperty>
+    
+
+
     <!-- http://mushroomobserver.org/svf.owl#hasOverallShape -->
 
     <ObjectProperty rdf:about="&svf;hasOverallShape">
@@ -513,6 +535,17 @@
     
 
 
+    <!-- http://mushroomobserver.org/svf.owl#hasSubstrate -->
+
+    <ObjectProperty rdf:about="&svf;hasSubstrate">
+        <rdfs:label rdf:datatype="&rdfs;Literal">has substrate</rdfs:label>
+        <obo:IAO_0000115 rdf:datatype="&rdfs;Literal">The substrate the mushroom is growing on.</obo:IAO_0000115>
+        <rdfs:range rdf:resource="&svf;SV1900"/>
+        <rdfs:subPropertyOf rdf:resource="&svf;hasFungalFeature"/>
+    </ObjectProperty>
+    
+
+
     <!-- http://mushroomobserver.org/svf.owl#hasSubstrateAttachment -->
 
     <ObjectProperty rdf:about="&svf;hasSubstrateAttachment">
@@ -663,6 +696,28 @@
                     <Restriction>
                         <onProperty rdf:resource="&svf;hasUniversalVeil"/>
                         <someValuesFrom rdf:resource="&svf;SV1715"/>
+                    </Restriction>
+                </intersectionOf>
+            </Class>
+        </rdfs:domain>
+    </ObjectProperty>
+    
+
+
+    <!-- http://mushroomobserver.org/svf.owl#hasUpperSurfaceColor -->
+
+    <ObjectProperty rdf:about="&svf;hasUpperSurfaceColor">
+        <rdfs:label rdf:datatype="&rdfs;Literal">has upper surface color</rdfs:label>
+        <obo:IAO_0000115 rdf:datatype="&rdfs;Literal">The color of the upper surface of a shelf fungi.</obo:IAO_0000115>
+        <rdfs:range rdf:resource="&svf;SV1400"/>
+        <rdfs:subPropertyOf rdf:resource="&svf;hasColor"/>
+        <rdfs:domain>
+            <Class>
+                <intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&svf;Fungus"/>
+                    <Restriction>
+                        <onProperty rdf:resource="&svf;hasOverallShape"/>
+                        <someValuesFrom rdf:resource="&svf;SV1089"/>
                     </Restriction>
                 </intersectionOf>
             </Class>
@@ -1007,8 +1062,20 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1110"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1211"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1215"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1214"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1019,8 +1086,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1211"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1110"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1035,18 +1102,6 @@
                 <hasValue rdf:resource="&svf;SV1310"/>
             </Restriction>
         </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1215"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1214"/>
-            </Restriction>
-        </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1010</svf:hasID>
     </Class>
     
@@ -1058,14 +1113,20 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1311"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1212"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1214"/>
+                <someValuesFrom rdf:resource="&svf;SV1056"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1311"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1077,13 +1138,7 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1056"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1215"/>
+                <someValuesFrom rdf:resource="&svf;SV1214"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1095,7 +1150,7 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1212"/>
+                <someValuesFrom rdf:resource="&svf;SV1215"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1011</svf:hasID>
@@ -1115,14 +1170,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1211"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1312"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1312"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1211"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1142,8 +1197,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1113"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1057"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1155,19 +1210,19 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1059"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1057"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1058"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1113"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1059"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1013</svf:hasID>
@@ -1181,6 +1236,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1056"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
                 <onProperty rdf:resource="&svf;hasDefinition"/>
                 <someValuesFrom rdf:resource="&svf;SV1114"/>
             </Restriction>
@@ -1189,12 +1250,6 @@
             <Restriction>
                 <onProperty rdf:resource="&svf;hasSVDName"/>
                 <hasValue rdf:resource="&svf;SV1314"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1056"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1014</svf:hasID>
@@ -1241,14 +1296,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1211"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1116"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1116"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1211"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1016</svf:hasID>
@@ -1262,6 +1317,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1317"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1212"/>
             </Restriction>
@@ -1270,12 +1331,6 @@
             <Restriction>
                 <onProperty rdf:resource="&svf;hasDefinition"/>
                 <someValuesFrom rdf:resource="&svf;SV1117"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1317"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1017</svf:hasID>
@@ -1289,8 +1344,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1318"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1213"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1301,8 +1356,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1213"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1318"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1018</svf:hasID>
@@ -1322,14 +1377,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1052"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1119"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1119"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1052"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1019</svf:hasID>
@@ -1343,8 +1398,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1320"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1051"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1355,8 +1410,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1051"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1320"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1020</svf:hasID>
@@ -1370,6 +1425,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1321"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
                 <onProperty rdf:resource="&svf;hasDefinition"/>
                 <someValuesFrom rdf:resource="&svf;SV1121"/>
             </Restriction>
@@ -1378,12 +1439,6 @@
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1054"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1321"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1021</svf:hasID>
@@ -1403,14 +1458,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1322"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1055"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1055"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1322"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1022</svf:hasID>
@@ -1424,6 +1479,12 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1214"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
                 <onProperty rdf:resource="&svf;hasDefinition"/>
                 <someValuesFrom rdf:resource="&svf;SV1123"/>
             </Restriction>
@@ -1432,12 +1493,6 @@
             <Restriction>
                 <onProperty rdf:resource="&svf;hasSVDName"/>
                 <hasValue rdf:resource="&svf;SV1323"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1214"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1023</svf:hasID>
@@ -1451,8 +1506,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1215"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1324"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1463,8 +1518,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1324"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1215"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1024</svf:hasID>
@@ -1484,14 +1539,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1125"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1216"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1216"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1125"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1025</svf:hasID>
@@ -1511,14 +1566,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1126"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1326"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1326"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1126"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1026</svf:hasID>
@@ -1532,26 +1587,8 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1041"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
                 <onProperty rdf:resource="&svf;hasSVDName"/>
                 <hasValue rdf:resource="&svf;SV1141"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1055"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1053"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1564,6 +1601,24 @@
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1054"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1053"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1041"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1055"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1589,6 +1644,12 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1051"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
                 <onProperty rdf:resource="&svf;hasSVDName"/>
                 <hasValue rdf:resource="&svf;SV1142"/>
             </Restriction>
@@ -1596,19 +1657,13 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1055"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1051"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1054"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1055"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1032</svf:hasID>
@@ -1622,14 +1677,14 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1055"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1043"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1043"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1055"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1650,13 +1705,13 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1051"/>
+                <someValuesFrom rdf:resource="&svf;SV1054"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1144"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1051"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1667,8 +1722,8 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1054"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1144"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1034</svf:hasID>
@@ -1694,14 +1749,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1045"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1051"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1051"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1045"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1721,12 +1776,6 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1146"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1053"/>
             </Restriction>
@@ -1735,6 +1784,12 @@
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1052"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1146"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1755,7 +1810,7 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1053"/>
+                <someValuesFrom rdf:resource="&svf;SV1051"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1766,14 +1821,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1051"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1047"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1047"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1053"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1037</svf:hasID>
@@ -1788,43 +1843,13 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1217"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1212"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1056"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1148"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1214"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1213"/>
-            </Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1215"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1216"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1836,19 +1861,49 @@
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1216"/>
+                <someValuesFrom rdf:resource="&svf;SV1213"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1210"/>
+                <someValuesFrom rdf:resource="&svf;SV1056"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1217"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1212"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1148"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
                 <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
                 <someValuesFrom rdf:resource="&svf;SV1211"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1214"/>
+            </Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <Restriction>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1210"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1038</svf:hasID>
@@ -1862,14 +1917,14 @@
         <rdfs:subClassOf rdf:resource="&svf;SemanticVernacularDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasSVDName"/>
-                <hasValue rdf:resource="&svf;SV1149"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1210"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1210"/>
+                <onProperty rdf:resource="&svf;hasDefinition"/>
+                <someValuesFrom rdf:resource="&svf;SV1049"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -1880,14 +1935,14 @@
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
-                <someValuesFrom rdf:resource="&svf;SV1217"/>
+                <onProperty rdf:resource="&svf;hasSVDName"/>
+                <hasValue rdf:resource="&svf;SV1149"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasDefinition"/>
-                <someValuesFrom rdf:resource="&svf;SV1049"/>
+                <onProperty rdf:resource="&svf;hasAssociatedScientificName"/>
+                <someValuesFrom rdf:resource="&svf;SV1217"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
@@ -2022,14 +2077,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1041</svf:hasID>
@@ -2510,14 +2565,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1044</svf:hasID>
@@ -2934,14 +2989,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1047</svf:hasID>
@@ -3079,14 +3134,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Russula brevipes</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">409</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:166953</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:166953</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">409</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3127,14 +3182,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Russula xerampelina</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">491</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:211051</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:211051</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">491</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3151,14 +3206,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Bovista pila</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:209452</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">433</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">433</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:209452</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3175,14 +3230,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Chroogomphus ochraceus</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:328190</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">556</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">556</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:328190</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -3722,14 +3777,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1110</svf:hasID>
@@ -3778,14 +3833,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1111</svf:hasID>
@@ -3834,14 +3889,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1112</svf:hasID>
@@ -4282,14 +4337,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-20T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1116</svf:hasID>
@@ -4354,14 +4409,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1117</svf:hasID>
@@ -4854,14 +4909,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1121</svf:hasID>
@@ -5138,14 +5193,14 @@
         <rdfs:subClassOf rdf:resource="&svf;VernacularFeatureDescription"/>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedAt"/>
-                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
+                <onProperty rdf:resource="&svf;proposedBy"/>
+                <hasValue rdf:resource="&svf;SV1090"/>
             </Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <Restriction>
-                <onProperty rdf:resource="&svf;proposedBy"/>
-                <hasValue rdf:resource="&svf;SV1090"/>
+                <onProperty rdf:resource="&svf;proposedAt"/>
+                <hasValue rdf:datatype="&xsd;dateTime">2012-07-03T12:00:00-05:00</hasValue>
             </Restriction>
         </rdfs:subClassOf>
         <svf:hasID rdf:datatype="&xsd;integer">1123</svf:hasID>
@@ -5504,14 +5559,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Elaphomyces muricatus</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">1276</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:203760</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:203760</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">1276</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5528,14 +5583,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Lycoperdon perlatum</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:220647</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">175</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">175</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:220647</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5624,14 +5679,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Scleroderma citrinum</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">62</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:181865</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:181865</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">62</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5648,14 +5703,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Tuber gibbosum</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">3930</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:190404</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:190404</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">3930</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -5672,14 +5727,14 @@
         <rdfs:label rdf:datatype="&rdfs;Literal">Tuber melanosporum</rdfs:label>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasMONameId"/>
-                <hasValue rdf:datatype="&xsd;integer">3936</hasValue>
+                <onProperty rdf:resource="&svf;hasURI"/>
+                <hasValue>urn:lsid:indexfungorum.org:names:192144</hasValue>
             </Restriction>
         </equivalentClass>
         <equivalentClass>
             <Restriction>
-                <onProperty rdf:resource="&svf;hasURI"/>
-                <hasValue>urn:lsid:indexfungorum.org:names:192144</hasValue>
+                <onProperty rdf:resource="&svf;hasMONameId"/>
+                <hasValue rdf:datatype="&xsd;integer">3936</hasValue>
             </Restriction>
         </equivalentClass>
         <rdfs:subClassOf rdf:resource="&svf;ScientificName"/>
@@ -7077,6 +7132,45 @@
     <rdf:Description>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
         <members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1075"/>
+            <rdf:Description rdf:about="&svf;SV1076"/>
+            <rdf:Description rdf:about="&svf;SV1077"/>
+            <rdf:Description rdf:about="&svf;SV1078"/>
+            <rdf:Description rdf:about="&svf;SV1079"/>
+            <rdf:Description rdf:about="&svf;SV1092"/>
+            <rdf:Description rdf:about="&svf;SV1093"/>
+            <rdf:Description rdf:about="&svf;SV1094"/>
+            <rdf:Description rdf:about="&svf;SV1095"/>
+            <rdf:Description rdf:about="&svf;SV1710"/>
+        </members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1131"/>
+            <rdf:Description rdf:about="&svf;SV1132"/>
+            <rdf:Description rdf:about="&svf;SV1133"/>
+            <rdf:Description rdf:about="&svf;SV1134"/>
+            <rdf:Description rdf:about="&svf;SV1135"/>
+            <rdf:Description rdf:about="&svf;SV1136"/>
+            <rdf:Description rdf:about="&svf;SV1137"/>
+            <rdf:Description rdf:about="&svf;SV1138"/>
+            <rdf:Description rdf:about="&svf;SV1139"/>
+        </members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&svf;SV1415"/>
+            <rdf:Description rdf:about="&svf;SV1416"/>
+            <rdf:Description rdf:about="&svf;SV1417"/>
+            <rdf:Description rdf:about="&svf;SV1419"/>
+            <rdf:Description rdf:about="&svf;SV1420"/>
+        </members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <members rdf:parseType="Collection">
             <rdf:Description rdf:about="&svf;SV1911"/>
             <rdf:Description rdf:about="&svf;SV1912"/>
             <rdf:Description rdf:about="&svf;SV1913"/>
@@ -7118,30 +7212,14 @@
     <rdf:Description>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
         <members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1075"/>
-            <rdf:Description rdf:about="&svf;SV1076"/>
-            <rdf:Description rdf:about="&svf;SV1077"/>
-            <rdf:Description rdf:about="&svf;SV1078"/>
-            <rdf:Description rdf:about="&svf;SV1079"/>
-            <rdf:Description rdf:about="&svf;SV1092"/>
-            <rdf:Description rdf:about="&svf;SV1093"/>
-            <rdf:Description rdf:about="&svf;SV1094"/>
-            <rdf:Description rdf:about="&svf;SV1095"/>
-            <rdf:Description rdf:about="&svf;SV1710"/>
-        </members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
-        <members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1131"/>
-            <rdf:Description rdf:about="&svf;SV1132"/>
-            <rdf:Description rdf:about="&svf;SV1133"/>
-            <rdf:Description rdf:about="&svf;SV1134"/>
-            <rdf:Description rdf:about="&svf;SV1135"/>
-            <rdf:Description rdf:about="&svf;SV1136"/>
-            <rdf:Description rdf:about="&svf;SV1137"/>
-            <rdf:Description rdf:about="&svf;SV1138"/>
-            <rdf:Description rdf:about="&svf;SV1139"/>
+            <rdf:Description rdf:about="&svf;SV1102"/>
+            <rdf:Description rdf:about="&svf;SV1103"/>
+            <rdf:Description rdf:about="&svf;SV1104"/>
+            <rdf:Description rdf:about="&svf;SV1105"/>
+            <rdf:Description rdf:about="&svf;SV1106"/>
+            <rdf:Description rdf:about="&svf;SV1107"/>
+            <rdf:Description rdf:about="&svf;SV1108"/>
+            <rdf:Description rdf:about="&svf;SV1109"/>
         </members>
     </rdf:Description>
     <rdf:Description>
@@ -7160,29 +7238,6 @@
             <rdf:Description rdf:about="&svf;SV1611"/>
             <rdf:Description rdf:about="&svf;SV1612"/>
             <rdf:Description rdf:about="&svf;SV1613"/>
-        </members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
-        <members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1102"/>
-            <rdf:Description rdf:about="&svf;SV1103"/>
-            <rdf:Description rdf:about="&svf;SV1104"/>
-            <rdf:Description rdf:about="&svf;SV1105"/>
-            <rdf:Description rdf:about="&svf;SV1106"/>
-            <rdf:Description rdf:about="&svf;SV1107"/>
-            <rdf:Description rdf:about="&svf;SV1108"/>
-            <rdf:Description rdf:about="&svf;SV1109"/>
-        </members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
-        <members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&svf;SV1415"/>
-            <rdf:Description rdf:about="&svf;SV1416"/>
-            <rdf:Description rdf:about="&svf;SV1417"/>
-            <rdf:Description rdf:about="&svf;SV1419"/>
-            <rdf:Description rdf:about="&svf;SV1420"/>
         </members>
     </rdf:Description>
 </rdf:RDF>
