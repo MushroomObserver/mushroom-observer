@@ -387,6 +387,7 @@ module ObservationReport
           nil, nil, nil,
           notes,
           original,
+          nil, nil, nil, nil, nil, nil, nil, nil, nil,
           id,
           specimen
         ]
