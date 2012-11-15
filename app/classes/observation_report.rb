@@ -329,7 +329,7 @@ module ObservationReport
         "Altitude",
         "Date",
         "Collector",
-        "Other Collectors",  # <-- Adolf puts MO obs num here
+        "Other Collectors",
         "Number",
         "Determined by",
         "Notes",
@@ -342,7 +342,9 @@ module ObservationReport
         "GenBank",
         "Herbarium Notes",
         "WWW comments",
-        "Database number"
+        "Database number",
+        "MO Observation ID",
+        "Specimen Available"
       ]
     end
 
@@ -363,12 +365,13 @@ module ObservationReport
         altitude   = clean_integer(row[OBS_ALT])
         date       = clean_string(row[OBS_WHEN])
         collector  = clean_string(row[USER_NAME]) || clean_string(row[USER_LOGIN])
-        others     = "MO # " + clean_integer(row[OBS_ID]).to_s
         notes      = clean_string(row[OBS_NOTES])
         if notes && notes.sub!(/original herbarium label: *(\S[^\n\r]*\S)/i, '')
           original = $1.gsub(/_(.*?)_/, '\\1')
         end
         notes = notes.strip if notes
+        id         = clean_integer(row[OBS_ID])
+        specimen   = clean_boolean(row[OBS_SPECIMEN])
         [
           nil, nil, nil,
           genus, cf, sp, sp_author, ssp, ssp_author, var, var_author,
@@ -381,10 +384,11 @@ module ObservationReport
           altitude,
           date,
           collector,
-          others,
-          nil, nil,
+          nil, nil, nil,
           notes,
-          original
+          original,
+          id,
+          specimen
         ]
       end.sort_by {|row| row[0].to_i}
     end
