@@ -1,0 +1,19 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+nybg:
+    id: 1
+    created_at: 2012-10-21 12:14:00
+    updated_at: 2012-10-21 12:14:00
+    name: The New York Botanical Garden
+    mailing_address: The New York Botanical Garden, Bronx, New York, USA
+    location_id: 11
+    email: nybg@collectivesource.com
+    description: An awesome world famous herbarium.
+
+rolf:
+    id: 2
+    created_at: 2012-10-21 06:40:00
+    updated_at: 2012-10-21 06:41:00
+    name: "Uncle Rolf's Personal Herbarium"
+
+# Need curators, name, brief description
+

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120814111300) do
+ActiveRecord::Schema.define(:version => 20121021145904) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -73,6 +73,21 @@ ActiveRecord::Schema.define(:version => 20120814111300) do
     t.boolean  "anonymous",                                                :default => false, :null => false
     t.boolean  "reviewed",                                                 :default => true,  :null => false
     t.integer  "user_id"
+  end
+
+  create_table "herbaria", :force => true do |t|
+    t.text     "mailing_address"
+    t.integer  "location_id"
+    t.string   "email",           :limit => 80,   :default => "", :null => false
+    t.string   "name",            :limit => 1024
+    t.text     "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "herbaria_curators", :id => false, :force => true do |t|
+    t.integer "user_id",      :default => 0, :null => false
+    t.integer "herbarium_id", :default => 0, :null => false
   end
 
   create_table "image_votes", :force => true do |t|
@@ -416,6 +431,11 @@ ActiveRecord::Schema.define(:version => 20120814111300) do
     t.integer "species_list_id", :default => 0, :null => false
   end
 
+  create_table "observations_specimens", :id => false, :force => true do |t|
+    t.integer "observation_id", :default => 0, :null => false
+    t.integer "specimen_id",    :default => 0, :null => false
+  end
+
   create_table "projects", :force => true do |t|
     t.integer  "user_id",                       :default => 0,  :null => false
     t.integer  "admin_group_id",                :default => 0,  :null => false
@@ -488,6 +508,15 @@ ActiveRecord::Schema.define(:version => 20120814111300) do
     t.string   "sync_id",     :limit => 16
     t.integer  "rss_log_id"
     t.integer  "location_id"
+  end
+
+  create_table "specimens", :force => true do |t|
+    t.integer  "herbarium_id",                               :null => false
+    t.string   "label",        :limit => 80, :default => "", :null => false
+    t.date     "when",                                       :null => false
+    t.text     "notes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "synonyms", :force => true do |t|

@@ -1,4 +1,11 @@
 class ConferenceController < ApplicationController
+  before_filter :login_required, :except => [
+    :show_event,
+    :index,
+    :register,
+    :verify,
+  ]
+
   # TODO:
   # Need to watch for non-verified registrations
   # Links to events

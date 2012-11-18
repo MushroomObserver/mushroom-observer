@@ -1,0 +1,31 @@
+<%
+  @title = :create_herbarium_title.l
+  new_tab_set do
+    add_tab(:herbarium_index.t, :action => 'index')
+  end
+%>
+
+<% form_tag(:action => 'create_herbarium') do %>
+	<center><%= submit_tag :create_herbarium_add.t %><br/></center>
+  <p>
+    <%= :herbarium_name.t %>: <%= text_field('herbarium', 'name', :size => 150) %>
+  </p>
+  <p>
+    <%= :create_herbarium_email.t %>: <%= text_field('herbarium', 'email', :size => 150) %>
+  </p>
+
+  <p>
+    <%= :create_herbarium_description.t %>:<br/>
+		<%= text_area('herbarium', 'description', :cols => 100, :rows => 10) %>
+  </p>
+  <p>
+	  <p><label for="herbarium_place_name"><%= :create_herbarium_location.t %></label>:
+	  <%= text_field('herbarium', 'place_name', :size => 60) %></p>
+	  <%= turn_into_location_auto_completer("herbarium_place_name") %>
+  </p>
+  <p>
+    <%= :create_herbarium_mailing_address.t %>:<br/>
+		<%= text_area('herbarium', 'mailing_address', :cols => 50, :rows => 10) %>
+  </p>
+  <center><%= submit_tag :create_herbarium_add.t %><br/></center>
+<% end %>

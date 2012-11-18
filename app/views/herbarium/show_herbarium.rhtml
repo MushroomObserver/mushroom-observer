@@ -1,0 +1,51 @@
+<%
+  @title = @herbarium.name.t
+  new_tab_set do
+    add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id)
+    add_tab(:create_herbarium.t, :action => 'create_herbarium')
+    add_tab(:herbarium_index.t, :action => 'index')
+  end
+%>
+
+<table width="100%">
+	<tr>
+		<td>
+			<p>
+			  <%= :show_herbarium_specimen_count.t(:count => @herbarium.specimens.count) %><br/>
+				<%= user_list(:herbarium_curator, @herbarium.curators) %>
+			</p>
+
+			<% if !@herbarium.description.empty? %>
+			  <p>
+			    <%= :herbarium_description.t %>:<br/><%= @herbarium.description %>
+			  </p>
+			<% end %>
+
+			<% if !@herbarium.mailing_address.empty? %>
+			  <p>
+			    <%= :herbarium_mailing_address.t %>:<br/><%= @herbarium.mailing_address %>
+			  </p>
+			<% end %>
+		</td>
+		<% if @herbarium.location %>
+			<td>
+			<%=
+			  gmap = make_map([@herbarium.location])
+			  finish_map(gmap)
+			  gmap.div(:width => 480, :height => 480)
+			%>
+			</td>
+		<% end %>
+	</tr>
+</table>
+
+<center>
+	<p>
+		<% if @herbarium.created_at %>
+		  <%= :herbarium_created_at.t + ': ' +  @herbarium.created_at.web_date %><br/>
+		<% end %>
+		<% if @herbarium.updated_at %>
+		  <%= :herbarium_updated_at.t + ': ' +  @herbarium.updated_at.web_date %><br/>
+		<% end %>
+	</p>
+</center>

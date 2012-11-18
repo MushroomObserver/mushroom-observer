@@ -1,11 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class ConferenceControllerTest < FunctionalTestCase
-  # Replace this with your real tests.
-  def test_truth
-    assert true
-  end
-
   def test_show_event
     msa = conference_events(:msa_annual_meeting)
     get_with_dump(:show_event, :id => msa.id)

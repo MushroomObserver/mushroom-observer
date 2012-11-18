@@ -282,6 +282,7 @@ class User < AbstractModel
   has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
   has_and_belongs_to_many :authored_locations, :class_name => 'LocationDescription',  :join_table => 'location_descriptions_authors'
   has_and_belongs_to_many :edited_locations,   :class_name => 'LocationDescription',  :join_table => 'location_descriptions_editors'
+  has_and_belongs_to_many :curated_herbaria,   :class_name => 'Herbarium',            :join_table => 'herbaria_curators'
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license

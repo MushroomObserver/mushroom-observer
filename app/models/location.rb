@@ -82,6 +82,7 @@ class Location < AbstractModel
   has_many :comments,  :as => :target, :dependent => :destroy
   has_many :interests, :as => :target, :dependent => :destroy
   has_many :observations
+  has_many :herbaria # Well technically it has at most one, but we want the relationship just in the herbarium table
 
   acts_as_versioned(
     :table_name => 'locations_versions',

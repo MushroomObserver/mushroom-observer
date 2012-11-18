@@ -1,0 +1,2 @@
+module HerbariumHelper
+end

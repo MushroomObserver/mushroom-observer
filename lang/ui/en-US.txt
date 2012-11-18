@@ -1910,6 +1910,40 @@ conference_verify_warning: That registration has already been verified
 
 
 
+# Herbarium Fields
+herbarium_name: Name
+herbarium_location: Location
+herbarium_description: Herbarium Description
+herbarium_created_at: Created At
+herbarium_updated_at: Updated At
+herbarium_curator: Curator
+
+# herbarium/show_herbarium
+show_herbarium: Show Herbarium
+show_herbarium_specimen_count: This herbarium contains [count] specimen(s).
+
+# herbarium/index
+herbarium_index: Herbarium Index
+herbarium_index_title: List of All Herbaria
+
+# herbarium/create_herbarium
+create_herbarium: Create New Herbarium
+create_herbarium_title: Create New Herbarium
+create_herbarium_missing_email: An email address is required when creating an herbarium
+create_herbarium_description: Optional Description of the Herbarium (include information about whether and what sort of specimens are desired)
+create_herbarium_mailing_address: Optional Mailing Address for Specimens
+create_herbarium_email: Required Email Address for Specimen Requests
+create_herbarium_location: Optional Location of the Herbarium
+create_herbarium_add: Add
+create_herbarium_duplicate_name: Herbarium called '[name]' already exists
+herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
+
+# herbarium/edit_herbarium
+edit_herbarium: Edit
+edit_herbarium_title: Editing Herbarium
+edit_herbarium_save: Save
+
+
 # support/donate
 donate_title: Donate to Mushroom Observer
 donate_tab: Donate
