@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121021145904) do
+ActiveRecord::Schema.define(:version => 20121129170716) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -512,12 +512,12 @@ ActiveRecord::Schema.define(:version => 20121021145904) do
 
   create_table "specimens", :force => true do |t|
     t.integer  "herbarium_id",                                  :null => false
-    t.integer  "user_id",                                       :null => false
-    t.string   "herbarium_label", :limit => 80, :default => "", :null => false
     t.date     "when",                                          :null => false
     t.text     "notes"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "user_id",                                       :null => false
+    t.string   "herbarium_label", :limit => 80, :default => "", :null => false
   end
 
   create_table "synonyms", :force => true do |t|
