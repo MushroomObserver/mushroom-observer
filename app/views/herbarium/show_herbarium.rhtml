@@ -1,7 +1,7 @@
 <%
   @title = @herbarium.name.t
   new_tab_set do
-    add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id)
+    add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id) if @herbarium.is_curator?(@user)
     add_tab(:create_herbarium.t, :action => 'create_herbarium')
     add_tab(:herbarium_index.t, :action => 'index')
   end
@@ -17,13 +17,13 @@
 
 			<% if !@herbarium.description.empty? %>
 			  <p>
-			    <%= :herbarium_description.t %>:<br/><%= @herbarium.description %>
+			    <%= :herbarium_description.t %>:<br/><%= @herbarium.description.tpl %>
 			  </p>
 			<% end %>
 
 			<% if !@herbarium.mailing_address.empty? %>
 			  <p>
-			    <%= :herbarium_mailing_address.t %>:<br/><%= @herbarium.mailing_address %>
+			    <%= :herbarium_mailing_address.t %>:<br/><%= @herbarium.mailing_address.tp %>
 			  </p>
 			<% end %>
 		</td>

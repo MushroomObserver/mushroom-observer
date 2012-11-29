@@ -183,3 +183,14 @@ class AutoCompleteUser < AutoCompleteByString
     ))
   end
 end
+
+class AutoCompleteHerbarium < AutoCompleteByWord
+  def rough_matches(letter)
+    Herbarium.connection.select_values(%(
+      SELECT DISTINCT name FROM herbaria
+      WHERE name LIKE '#{letter}%'
+         OR name LIKE '% #{letter}%'
+      ORDER BY name ASC
+    ))
+  end
+end

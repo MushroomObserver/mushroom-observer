@@ -1,0 +1,32 @@
+<%
+  @title = "Specimen '#{@specimen.herbarium_label}'"
+  new_tab_set do
+    add_tab(:edit_specimen.t, :action => 'edit_specimen', :id => @specimen.id) if @specimen.can_edit?(@user)
+    add_tab(:show_herbarium.t, :action => 'show_herbarium', :id => @specimen.herbarium_id)
+  end
+%>
+
+<p>
+  <%= :specimen_herbarium.t %>: <%= @specimen.herbarium.name.strip_html %><br/>
+  <%= :specimen_herbarium_label.t %>: <%= @specimen.herbarium_label.strip_html %><br/>
+  <%= :specimen_user.t %>: <%= @specimen.user.legal_name %><br/>
+  <%= :specimen_when.t %>: <%= @specimen.when.web_date %>
+</p>
+
+<% if @specimen.notes and !@specimen.notes.empty? %>
+  <p>
+    <%= :specimen_notes.t %>:<br/>
+    <%= @specimen.notes.tpl %>
+  </p>
+<% end %>
+
+<center>
+	<p>
+		<% if @specimen.created_at %>
+		  <%= :specimen_created_at.t + ': ' +  @specimen.created_at.web_date %><br/>
+		<% end %>
+		<% if @specimen.updated_at %>
+		  <%= :specimen_updated_at.t + ': ' +  @specimen.updated_at.web_date %><br/>
+		<% end %>
+	</p>
+</center>

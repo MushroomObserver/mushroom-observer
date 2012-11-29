@@ -1,0 +1,48 @@
+<%
+  @title = :add_specimen_title.l
+  new_tab_set do
+    # Return to observation
+    add_tab(:add_specimen_cancel.t, :controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    add_tab(:herbarium_index.t, :action => 'index')
+  end
+%>
+
+<table>
+  <tr>
+    <td>
+      <% form_tag(:action => 'add_specimen') do %>
+        <%= hidden_field_tag('id', @observation.id) %>
+      	<center><%= submit_tag :add_specimen_add.t %><br/></center>
+
+        <p>
+      	  <p><label for="specimen_herbarium_name"><%= :add_specimen_herbarium.t %></label>:
+      	  <%= text_field('specimen', 'herbarium_name', :value => @herbarium_name, :size => 60) %></p>
+      	  <%= turn_into_herbarium_auto_completer("specimen_herbarium_name") %>
+        </p>
+
+        <p>
+          <%= :add_specimen_herbarium_label.t %>: <%= text_field('specimen', 'herbarium_label', :value => @herbarium_label, :size => 100) %>
+        </p>
+
+        <p>
+          <label for="specimen_when_1i"><%= :WHEN.t %>:</label>
+          <%= date_select('specimen', 'when', :start_year => 1980,
+                          :end_year => Time.now.year) %>
+        </p>
+
+        <p>
+          <%= :add_specimen_notes.t %>:<br/>
+      		<%= text_area('specimen', 'notes', :cols => 80, :rows => 10) %>
+        </p>
+
+        <center><%= submit_tag :add_specimen_add.t %><br/></center>
+      <% end %>
+    </td>
+    <td>
+      <%= render(:partial => 'observer/rss_log', :locals => {
+        :rss_log => @observation.rss_log,
+        :target => @observation,
+      }) %>
+    </td>
+  </tr>
+</table>

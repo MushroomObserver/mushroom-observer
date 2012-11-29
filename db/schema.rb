@@ -511,9 +511,10 @@ ActiveRecord::Schema.define(:version => 20121021145904) do
   end
 
   create_table "specimens", :force => true do |t|
-    t.integer  "herbarium_id",                               :null => false
-    t.string   "label",        :limit => 80, :default => "", :null => false
-    t.date     "when",                                       :null => false
+    t.integer  "herbarium_id",                                  :null => false
+    t.integer  "user_id",                                       :null => false
+    t.string   "herbarium_label", :limit => 80, :default => "", :null => false
+    t.date     "when",                                          :null => false
     t.text     "notes"
     t.datetime "created_at"
     t.datetime "updated_at"

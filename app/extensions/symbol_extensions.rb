@@ -282,4 +282,5 @@ class Symbol
   def tl(*args); localize(*args).tl(false); end
   def tp(*args); localize(*args).tp(false); end
   def tpl(*args); localize(*args).tpl(false); end
+  def strip_html(*args); localize(*args).strip_html; end
 end

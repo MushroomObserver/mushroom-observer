@@ -5,6 +5,8 @@ class Herbarium < AbstractModel
   
   # Used to allow location name to be entered as text in forms
   attr_accessor :place_name
-  
-  
+
+  def is_curator?(user)
+    user and curators.member?(user)
+  end
 end

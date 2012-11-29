@@ -133,7 +133,7 @@ class QueuedEmail < AbstractModel
   # soon as QueuedEmail is defined, we know that all subclasses are also
   # properly defined, and we no longer have to rely on autoloading. 
   Dir["#{RAILS_ROOT}/app/models/queued_email/*.rb"].each do |file|
-    if file.match(/(\w+).rb/)
+    if file.match(/(\w+)\.rb$/)
       require "queued_email/#{$1}"
     end
   end

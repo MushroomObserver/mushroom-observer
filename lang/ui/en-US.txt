@@ -1917,6 +1917,8 @@ herbarium_description: Herbarium Description
 herbarium_created_at: Created At
 herbarium_updated_at: Updated At
 herbarium_curator: Curator
+herbarium_mailing_address: Mailing Address
+herbarium_edit: New herbarium called '[name]' created.
 
 # herbarium/show_herbarium
 show_herbarium: Show Herbarium
@@ -1942,7 +1944,34 @@ herbarium_must_define_location: You must define this location before we can use 
 edit_herbarium: Edit
 edit_herbarium_title: Editing Herbarium
 edit_herbarium_save: Save
+edit_herbarium_non_curator: Attempt to edit an herbarium by a non-curator
 
+# herbarium/add_specimen
+add_specimen: Add Specimen
+add_specimen_title: Add Specimen
+add_specimen_observation_required: Valid observation required to create a new specimen
+add_specimen_add: Add
+add_specimen_herbarium: Name of Herbarium
+add_specimen_herbarium_label: Original Herbarium Label (initial determination and unique herbarium id)
+add_specimen_notes: Specimen Notes
+add_specimen_cancel: Cancel (Show Observation)
+add_specimen_already_exists: A specimen with the label '[label]' already exists for herbarium '[name]'
+user_personal_herbarium: Personal Herbarium of [name]
+
+# Specimen Fields
+specimen_herbarium: Herbarium
+specimen_herbarium_label: Herbarium Label
+specimen_user: Specimen Recorder
+specimen_when: When Submitted
+specimen_notes: Notes
+specimen_created_at: Created At
+specimen_updated_at: Updated At
+
+# herbarium/show_specimen
+show_specimen: Show Specimen
+
+#herbarium/edit_specimen
+edit_specimen: Edit Specimen
 
 # support/donate
 donate_title: Donate to Mushroom Observer

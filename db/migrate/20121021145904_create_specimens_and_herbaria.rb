@@ -2,7 +2,8 @@ class CreateSpecimensAndHerbaria < ActiveRecord::Migration
   def self.up
     create_table :specimens do |t|
       t.integer :herbarium_id, :null => false
-      t.string :label, :limit => 80, :default => "", :null => false
+      t.integer :user_id, :null => false
+      t.string :herbarium_label, :limit => 80, :default => "", :null => false
       t.date :when, :null => false
       t.text :notes
       t.timestamps
