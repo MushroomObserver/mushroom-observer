@@ -349,7 +349,9 @@ module ObservationReport
     end
 
     def rows
-      return all_rows.map do |row|
+      return all_rows.sort_by do |row|
+        row[NAME_TEXT_NAME]
+      end.map do |row|
         genus, sp, ssp, var, f, sp_author, ssp_author, var_author, f_author, cf =
           split_name(row[NAME_TEXT_NAME], row[NAME_AUTHOR], row[NAME_RANK])
         country, state, county, location = split_location(row[LOC_NAME])
@@ -391,7 +393,7 @@ module ObservationReport
           id,
           specimen
         ]
-      end.sort_by {|row| row[0].to_i}
+      end
     end
   end
 
