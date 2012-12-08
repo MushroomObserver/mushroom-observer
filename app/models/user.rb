@@ -758,18 +758,21 @@ class User < AbstractModel
 
     # Delete references to their one-user group.
     group = UserGroup.one_user(id)
-    for table, col in [
-      [:location_descriptions_admins,  :user_group_id],
-      [:location_descriptions_readers, :user_group_id],
-      [:location_descriptions_writers, :user_group_id],
-      [:name_descriptions_admins,      :user_group_id],
-      [:name_descriptions_readers,     :user_group_id],
-      [:name_descriptions_writers,     :user_group_id],
-      [:user_groups,                   :id],
-    ]
-      User.connection.delete %(
-        DELETE FROM #{table} WHERE `#{col}` = #{group.id}
-      )
+    if group
+      group_id = group.id
+      for table, col in [
+        [:location_descriptions_admins,  :user_group_id],
+        [:location_descriptions_readers, :user_group_id],
+        [:location_descriptions_writers, :user_group_id],
+        [:name_descriptions_admins,      :user_group_id],
+        [:name_descriptions_readers,     :user_group_id],
+        [:name_descriptions_writers,     :user_group_id],
+        [:user_groups,                   :id],
+      ]
+        User.connection.delete %(
+          DELETE FROM #{table} WHERE `#{col}` = #{group_id}
+        )
+      end
     end
 
     # Delete their observations' attachments.

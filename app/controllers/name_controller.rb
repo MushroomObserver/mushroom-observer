@@ -637,7 +637,7 @@ class NameController < ApplicationController
 
   def parse_name
     text_name = params[:name][:text_name]
-    text_name = @name.real_text_name if text_name.blank?
+    text_name = @name.real_text_name if text_name.blank? && @name
     author = params[:name][:author]
     in_str = Name.clean_incoming_string("#{text_name} #{author}")
     in_rank = params[:name][:rank].to_sym

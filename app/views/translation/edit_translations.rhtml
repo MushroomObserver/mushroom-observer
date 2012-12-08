@@ -109,6 +109,8 @@
     show_whirly(SAVING_STRING);
     $("save_button").disabled = "disabled";
     $("cancel_button").disabled = "disabled";
+    $("post_form").submit();
+    return(false);
   }
 
   function show_old_version(id) {
@@ -224,7 +226,7 @@
 
 <%= if @js
   form_tag({ :action => :edit_translations_ajax_post },
-           { :target => :hidden_frame })
+           { :id => :post_form, :target => :hidden_frame })
 else
   form_tag(:action => :edit_translations, :page => @page)
 end %>
