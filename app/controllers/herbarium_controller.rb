@@ -2,6 +2,7 @@ class HerbariumController < ApplicationController
   before_filter :login_required, :except => [
     :show_herbarium,
     :show_specimen,
+    :specimen_index,
     :index,
   ]
 
@@ -16,6 +17,8 @@ class HerbariumController < ApplicationController
   end
   
   def create_herbarium # :norobots:
+    name = @user.personal_herbarium
+    @herbarium_name = (@user.personal_herbarium.nil?) ? @user.preferred_herbarium_name : ""
     if request.method == :post
       if valid_herbarium_params(params[:herbarium])
         build_herbarium(params[:herbarium])
@@ -95,7 +98,7 @@ class HerbariumController < ApplicationController
   end
   
   def add_specimen
-    @observation = find_observation(params[:id])
+    @observation = Observation.find(params[:id])
     @layout = calc_layout_params
     if @observation
       @herbarium_label = "#{@observation.name.text_name} [#{@observation.id}]"
@@ -107,17 +110,7 @@ class HerbariumController < ApplicationController
       end
     end
   end
-  
-  def find_observation(id)
-    result = Observation.safe_find(id)
-    if result.nil?
-      flash_error(:add_specimen_observation_required.t)
-      redirect_to(:controller => 'observer', :action => 'observations_by_user',
-                  :id => @user.id)
-    end
-    result
-  end
-  
+ 
   def valid_specimen_params(params)
     !specimen_exists(params[:herbarium_name], params[:herbarium_label])
   end
@@ -177,6 +170,12 @@ class HerbariumController < ApplicationController
   def show_specimen  # :nologin:
     store_location
     @specimen = Specimen.find(params[:id])
+    @layout = calc_layout_params
   end
-  
+
+  def specimen_index # :nologin:
+    store_location
+    @specimens = Specimen.find_all_by_herbarium_id(params[:id])
+    @herbarium = Herbarium.find(params[:id])
+  end
 end

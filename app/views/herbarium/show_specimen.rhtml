@@ -20,6 +20,13 @@
   </p>
 <% end %>
 
+<% for observation in @specimen.observations %>
+  <%= render(:partial => 'observer/rss_log', :locals => {
+    :rss_log => observation.rss_log,
+    :target => observation,
+  }) %>
+<% end %>
+
 <center>
 	<p>
 		<% if @specimen.created_at %>

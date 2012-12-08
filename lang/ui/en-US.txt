@@ -1660,7 +1660,7 @@ show_observation_send_question: Send Observer a Question
 show_observation_view_notifications: View Notifications
 show_observation_hide_map: Hide thumbnail map.
 show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
-
+show_observation_create_specimen: Record Herbarium Specimen
 
 # location/show_past_location
 show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1949,7 +1949,6 @@ edit_herbarium_non_curator: Attempt to edit an herbarium by a non-curator
 # herbarium/add_specimen
 add_specimen: Add Specimen
 add_specimen_title: Add Specimen
-add_specimen_observation_required: Valid observation required to create a new specimen
 add_specimen_add: Add
 add_specimen_herbarium: Name of Herbarium
 add_specimen_herbarium_label: Original Herbarium Label (initial determination and unique herbarium id)
@@ -1972,6 +1971,10 @@ show_specimen: Show Specimen
 
 #herbarium/edit_specimen
 edit_specimen: Edit Specimen
+
+#herbarium/specimen_index
+specimen_index_title: "[herbarium] Specimen Index"
+
 
 # support/donate
 donate_title: Donate to Mushroom Observer

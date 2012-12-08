@@ -32,6 +32,11 @@
               :controller => 'species_list', :action => 'manage_species_lists',
               :id => @observation.id, :params => query_params)
     end
+		if check_permission(@observation) or (@user && (@user.curated_herbaria.length > 0))
+			add_tab(:show_observation_create_specimen.t,
+							:controller => 'herbarium', :action => 'add_specimen',
+							:id => @observation.id, :params => query_params)
+		end
   end
 
   draw_prev_next_tabs(@observation, @mappable)

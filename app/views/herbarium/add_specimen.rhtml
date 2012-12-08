@@ -2,8 +2,9 @@
   @title = :add_specimen_title.l
   new_tab_set do
     # Return to observation
-    add_tab(:add_specimen_cancel.t, :controller => 'observer', :action => 'show_observation', :id => @observation.id)
-    add_tab(:herbarium_index.t, :action => 'index')
+    add_tab(:add_specimen_cancel.t, :controller => 'observer', :action => 'show_observation', :id => @observation.id,
+						:params => query_params)
+    add_tab(:herbarium_index.t, :action => 'index', :params => query_params)
   end
 %>
 

@@ -499,7 +499,7 @@ class User < AbstractModel
   # Return the name of this user's "favorite" herbarium (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium_name
-    result = :user_personal_herbarium.t(:name => self.unique_text_name)
+    result = personal_herbarium_name
     preferred_herbarium = nil
     count = -1
     for herbarium in self.curated_herbaria
@@ -510,6 +510,14 @@ class User < AbstractModel
       end
     end
     result
+  end
+  
+  def personal_herbarium_name
+    :user_personal_herbarium.t(:name => self.unique_text_name)
+  end
+  
+  def personal_herbarium
+    Herbarium.find_all_by_name(personal_herbarium_name)[0]
   end
   
   # Return an Array of SpeciesList's that User owns or that are attached to a

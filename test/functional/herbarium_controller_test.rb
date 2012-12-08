@@ -217,7 +217,7 @@ class HerbariumControllerTest < FunctionalTestCase
   end
   
   def test_add_specimen
-    get(:add_specimen)
+    get(:add_specimen, :id => observations(:coprinus_comatus_obs).id)
     assert_response(:redirect)
 
     login('rolf')
@@ -226,13 +226,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert(assigns(:herbarium_label))
     assert(assigns(:herbarium_name))
   end
-  
-  def test_add_specimen_no_obs
-    login('rolf')
-    get_with_dump(:add_specimen)
-    assert_response(:redirect)
-  end
-  
+ 
   def add_specimen_params
     return {
       :id => observations(:coprinus_comatus_obs).id,
@@ -294,5 +288,10 @@ class HerbariumControllerTest < FunctionalTestCase
     assert(specimen)
     get_with_dump(:show_specimen, :id => specimen.id)
     assert_response('show_specimen')
+  end
+
+  def test_specimen_index
+    get_with_dump(:specimen_index, :id => herbaria(:nybg).id)
+    assert_response('specimen_index')
   end
 end
