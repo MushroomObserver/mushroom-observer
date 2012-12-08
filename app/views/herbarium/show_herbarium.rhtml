@@ -12,7 +12,7 @@
 		<td>
 			<p>
 			  <%= link_to(:show_herbarium_specimen_count.t(:count => @herbarium.specimens.count),
-			 							:action => "specimen_index", :id => @herbarium.id) %><br/>
+			 							:controller => "specimen", :action => "herbarium_index", :id => @herbarium.id) %><br/>
 				<%= user_list(:herbarium_curator, @herbarium.curators) %>
 			</p>
 

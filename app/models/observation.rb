@@ -46,7 +46,7 @@
 #  long::                   Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
-#  name::                   Consenus Name (never deprecated, never nil).
+#  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?

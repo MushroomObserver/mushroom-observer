@@ -1,0 +1,37 @@
+<%
+  @title = :specimen_index_title.t(:subject => @subject)
+%>
+
+<table width="100%">
+	<tr>
+		<td></td>
+		<td align="center"><%= :specimen_herbarium.t %></td>
+		<td align="center"><%= :specimen_herbarium_label.t %></td>
+		<td align="center"><%= :OBSERVATIONS.t %></td>
+	</tr>
+	<%
+	odd_or_even = 1
+	for specimen in @specimens
+    odd_or_even = 1 - odd_or_even
+ 		herbarium = specimen.herbarium
+		observation = specimen.observations %>
+    <tr class="ListLine<%= odd_or_even %>">
+	    <td>
+	    	<% if specimen.can_edit?(@user)
+					form_tag({:action => 'edit_specimen', :id => specimen.id}) do %>
+						<center><%= submit_tag :edit_specimen.t %></center>
+					<% end
+				end %>
+	    </td>
+			<td>
+				<%= link_to(herbarium.name.t, :controller => 'herbarium', :action => 'show_herbarium', :id => herbarium.id) %>
+			</td>
+			<td>
+	      <%= link_to(specimen.herbarium_label, :action => "show_specimen", :id => specimen.id) %>
+	    </td>
+			<td>
+				<%= observation_links(specimen) %>
+			</td>
+	  </tr>
+	<% end %>
+</table>

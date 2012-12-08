@@ -2,7 +2,7 @@
   @title = "Specimen '#{@specimen.herbarium_label}'"
   new_tab_set do
     add_tab(:edit_specimen.t, :action => 'edit_specimen', :id => @specimen.id) if @specimen.can_edit?(@user)
-    add_tab(:show_herbarium.t, :action => 'show_herbarium', :id => @specimen.herbarium_id)
+    add_tab(:show_herbarium.t, :controller => 'herbarium', :action => 'show_herbarium', :id => @specimen.herbarium_id)
   end
 %>
 

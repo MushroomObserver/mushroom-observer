@@ -1969,12 +1969,17 @@ specimen_updated_at: Updated At
 # herbarium/show_specimen
 show_specimen: Show Specimen
 
-#herbarium/edit_specimen
+# herbarium/edit_specimen
 edit_specimen: Edit Specimen
 
-#herbarium/specimen_index
-specimen_index_title: "[herbarium] Specimen Index"
+# herbarium/specimen_index (not a real page)
+specimen_index_title: "[subject] Specimen Index"
 
+# herbarium/herbarium_index
+herbarium_index_no_specimens: This herbarium has no specimens
+
+# herbarium/observation_index
+observation_index_no_specimens: This observation has no specimens
 
 # support/donate
 donate_title: Donate to Mushroom Observer

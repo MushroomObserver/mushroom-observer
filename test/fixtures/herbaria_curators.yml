@@ -9,3 +9,7 @@ nybg_curator_2:
 rolf_curator:
   herbarium_id: 2
   user_id: 1
+
+dick_curator:
+  herbarium_id: 3
+  user_id: 4

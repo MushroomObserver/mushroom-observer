@@ -16,7 +16,7 @@ rolf:
   thumbnail_size: :thumbnail
   image_size: :medium
 
-# Mary has no images
+# Mary has no images and no herbaria
 mary:
   id: 2
   sync_id: 2xx1

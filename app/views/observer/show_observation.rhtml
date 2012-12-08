@@ -34,7 +34,7 @@
     end
 		if check_permission(@observation) or (@user && (@user.curated_herbaria.length > 0))
 			add_tab(:show_observation_create_specimen.t,
-							:controller => 'herbarium', :action => 'add_specimen',
+							:controller => 'specimen', :action => 'add_specimen',
 							:id => @observation.id, :params => query_params)
 		end
   end
