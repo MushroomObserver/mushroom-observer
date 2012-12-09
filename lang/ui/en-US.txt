@@ -273,6 +273,7 @@ REVIEWERS: Reviewers
 reviewers: reviewers
 SIZE: Size
 size: size
+specimen: specimen
 STATUS: Status
 status: status
 STATUSS: Statuses
@@ -1653,7 +1654,6 @@ show_observation_collection_location: Collection location
 show_observation_seen_at: Seen at
 show_observation_specimen_available: Herbarium specimen reported
 show_observation_specimen_not_available: No herbarium specimen
-show_observation_specimens: View specimens
 show_observation_remove_images: "[:remove_objects(type=:image)]"
 show_observation_reuse_image: Reuse Image
 show_observation_add_images: "[:add_objects(type=:image)]"

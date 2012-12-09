@@ -366,8 +366,8 @@ module ApplicationHelper::ObjectLink
     
   def observation_specimen_link(obs)
     count = obs.specimens.count
-    if obs.specimens.count > 0
-      link_to(:show_observation_specimens.t,
+    if count > 0
+      link_to(pluralize(count, :specimen.t),
               :controller => 'specimen', :action => 'observation_index', :id => obs.id)
     else
       if obs.specimen
