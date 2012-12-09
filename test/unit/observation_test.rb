@@ -90,8 +90,8 @@ class ObservationTest < UnitTestCase
   end
 
   def test_specimens
-    assert(!observations(:coprinus_comatus_obs).specimen)
-    assert_equal(0, observations(:coprinus_comatus_obs).specimens.length)
+    assert(!observations(:strobilurus_diminutivus_obs).specimen)
+    assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
     assert(observations(:detailed_unknown).specimen)
     assert(observations(:detailed_unknown).specimens.length > 0)
   end

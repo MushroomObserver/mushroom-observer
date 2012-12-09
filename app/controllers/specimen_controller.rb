@@ -76,7 +76,7 @@ class SpecimenController < ApplicationController
     params[:user] = @user
     new_herbarium = infer_herbarium(params)
     specimen = Specimen.new(params)
-    specimen.observations.push(obs)
+    specimen.add_observation(obs)
     specimen.save
     calc_specimen_redirect(params, new_herbarium, specimen) # Need appropriate redirect
   end
@@ -112,5 +112,41 @@ class SpecimenController < ApplicationController
     else
       redirect_to(:controller => 'observer', :action => 'show_observation', :id => specimen.observations[0].id)
     end
+  end
+  
+  def edit_specimen # :norobots:
+    @specimen = Specimen.find(params[:id])
+    if can_edit?(@specimen)
+      if request.method == :post
+        if ok_to_update(@specimen, params[:specimen])
+          update_specimen(@specimen, params[:specimen])
+        end
+      end
+    else
+      redirect_to(:action => 'show_specimen', :id => @specimen.id)
+    end
+  end
+
+  def can_edit?(specimen)
+    result = specimen.can_edit?(@user)
+    flash_error(:edit_specimen_cannot_edit.l) if not result
+    result
+  end
+  
+  def ok_to_update(specimen, params)
+    new_label = params[:herbarium_label]
+    (specimen.herbarium_label == new_label) or label_free?(specimen.herbarium, new_label)
+  end
+  
+  def label_free?(herbarium, new_label)
+    result = herbarium.label_free?(new_label)
+    flash_error(:edit_herbarium_duplicate_label.l(:herbarium_label => new_label, :herbarium_name => herbarium.name)) if !result
+    result
+  end
+  
+  def update_specimen(specimen, params)
+    specimen.attributes = params
+    specimen.save
+    redirect_to(:action => 'show_specimen', :id => specimen.id)
   end
 end

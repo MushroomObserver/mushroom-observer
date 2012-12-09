@@ -359,4 +359,33 @@ module ApplicationHelper::ObjectLink
       end
     end
   end
+  
+  def observation_specimen_info(obs)
+    "<span class=\"Data\">#{observation_specimen_link(obs)}</span> #{create_specimen_link(obs)}"
+  end
+    
+  def observation_specimen_link(obs)
+    count = obs.specimens.count
+    if obs.specimens.count > 0
+      link_to(:show_observation_specimens.t,
+              :controller => 'specimen', :action => 'observation_index', :id => obs.id)
+    else
+      if obs.specimen
+        :show_observation_specimen_available.t
+      else
+        :show_observation_specimen_not_available.t
+      end
+    end
+  end
+  
+  def create_specimen_link(obs)
+    if check_permission(obs) or (@user && (@user.curated_herbaria.length > 0))
+		  " | " + link_to(:show_observation_create_specimen.t,
+						          :controller => 'specimen', :action => 'add_specimen',
+						          :id => obs.id, :params => query_params)
+		else
+		  ""
+		end
+	end
+	
 end

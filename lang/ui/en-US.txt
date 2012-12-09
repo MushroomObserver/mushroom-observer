@@ -49,6 +49,8 @@ IMAGE: Image
 image: image
 IMAGES: Images
 images: images
+herbarium: herbarium
+HERBARIUM: Herbarium
 LICENSE: License
 license: license
 LICENSES: Licenses
@@ -1649,8 +1651,9 @@ show_observation_observation_created: Observation created
 show_observation_collection_location: Collection location
 # This is used if this is NOT the location where the thing was growing.
 show_observation_seen_at: Seen at
-show_observation_specimen_available: Herbarium specimen available
+show_observation_specimen_available: Herbarium specimen reported
 show_observation_specimen_not_available: No herbarium specimen
+show_observation_specimens: View specimens
 show_observation_remove_images: "[:remove_objects(type=:image)]"
 show_observation_reuse_image: Reuse Image
 show_observation_add_images: "[:add_objects(type=:image)]"
@@ -1660,7 +1663,7 @@ show_observation_send_question: Send Observer a Question
 show_observation_view_notifications: View Notifications
 show_observation_hide_map: Hide thumbnail map.
 show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
-show_observation_create_specimen: Record Herbarium Specimen
+show_observation_create_specimen: Add Herbarium Specimen
 
 # location/show_past_location
 show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1945,6 +1948,7 @@ edit_herbarium: Edit
 edit_herbarium_title: Editing Herbarium
 edit_herbarium_save: Save
 edit_herbarium_non_curator: Attempt to edit an herbarium by a non-curator
+edit_herbarium_duplicate_label: The label '[herbarium_label]' already exists for the herbarium '[herbarium_name]'
 
 # herbarium/add_specimen
 add_specimen: Add Specimen
@@ -1971,6 +1975,9 @@ show_specimen: Show Specimen
 
 # herbarium/edit_specimen
 edit_specimen: Edit Specimen
+edit_specimen_cannot_edit: Attempt to edit specimen without permission
+edit_specimen_title: Edit Specimen [herbarium_label]
+edit_specimen_save: Save
 
 # herbarium/specimen_index (not a real page)
 specimen_index_title: "[subject] Specimen Index"

@@ -33,7 +33,7 @@ coprinus_comatus_obs:
   user_id: 1
   name_id: 2
   where: Glendale, California
-  specimen: 0
+  specimen: 1
   notes: Second fruiting in bark chips
   vote_cache: 1
 

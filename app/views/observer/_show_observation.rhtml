@@ -21,13 +21,7 @@
     <%= :PROJECT.t %>: <span class="Data"><%= project_link(project) %></span><br/>
   <% end %>
 
-  <span class="Data">
-    <% if observation.specimen %>
-      <%= :show_observation_specimen_available.t %>
-    <% else %>
-      <%= :show_observation_specimen_not_available.t %>
-    <% end %>
-  </span>
+	<%= observation_specimen_info(observation) %>
 
   <%= if !observation.notes.blank?
     Textile.clear_textile_cache

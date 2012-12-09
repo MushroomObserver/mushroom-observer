@@ -9,4 +9,8 @@ class Herbarium < AbstractModel
   def is_curator?(user)
     user and curators.member?(user)
   end
+
+  def label_free?(new_label)
+    Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
+  end
 end
