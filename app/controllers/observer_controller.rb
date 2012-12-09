@@ -1113,7 +1113,7 @@ class ObserverController < ApplicationController
   end
   
   def herbarium_label_from_params(params)
-    "#{params[:specimen][:herbarium_id]} #{params[:name][:name]}".strip_html
+    Herbarium.default_specimen_label(params[:name][:name], params[:specimen][:herbarium_id])
   end
   
   def save_everything_else(reason)

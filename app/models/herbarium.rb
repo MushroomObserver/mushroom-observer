@@ -13,4 +13,8 @@ class Herbarium < AbstractModel
   def label_free?(new_label)
     Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
   end
+  
+  def self.default_specimen_label(name, id)
+    "#{name} [#{id || '?'}]".strip_html
+  end
 end

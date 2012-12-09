@@ -48,7 +48,7 @@ class SpecimenController < ApplicationController
     @observation = Observation.find(params[:id])
     @layout = calc_layout_params
     if @observation
-      @herbarium_label = "#{@observation.name.text_name} [#{@observation.id}]"
+      @herbarium_label = @observation.default_specimen_label
       if request.method == :post
         if valid_specimen_params(params[:specimen])
           build_specimen(params[:specimen], @observation)
