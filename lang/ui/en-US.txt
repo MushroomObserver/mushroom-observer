@@ -1934,7 +1934,7 @@ herbarium_index_title: List of All Herbaria
 # herbarium/create_herbarium
 create_herbarium: Create New Herbarium
 create_herbarium_title: Create New Herbarium
-create_herbarium_missing_email: An email address is required when creating an herbarium
+create_herbarium_missing_email: Valid email address is required when creating an herbarium
 create_herbarium_description: Optional Description of the Herbarium (include information about whether and what sort of specimens are desired)
 create_herbarium_mailing_address: Optional Mailing Address for Specimens
 create_herbarium_email: Required Email Address for Specimen Requests
@@ -1954,7 +1954,7 @@ edit_herbarium_duplicate_label: The label '[herbarium_label]' already exists for
 add_specimen: Add Specimen
 add_specimen_title: Add Specimen
 add_specimen_add: Add
-add_specimen_herbarium: Name of Herbarium
+# add_specimen_herbarium: Name of Herbarium
 add_specimen_herbarium_label: Original Herbarium Label (initial determination and unique herbarium id)
 add_specimen_notes: Specimen Notes
 add_specimen_cancel: Cancel (Show Observation)
@@ -1963,7 +1963,9 @@ user_personal_herbarium: Personal Herbarium of [name]
 
 # Specimen Fields
 specimen_herbarium: Herbarium
+specimen_herbarium_name: Herbarium Name
 specimen_herbarium_label: Herbarium Label
+specimen_herbarium_id: Herbarium Id
 specimen_user: Specimen Recorder
 specimen_when: When Submitted
 specimen_notes: Notes

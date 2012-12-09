@@ -24,6 +24,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:vote] = {
       :value => '3',
     }.merge(params[:vote] || {})
+    params[:specimen] = default_specimen_fields.merge(params[:specimen] || {})
     params[:username] = user.login
 
     post_requires_login(:create_observation, params)
@@ -53,6 +54,13 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
+  def default_specimen_fields
+    {
+      :herbarium_name => '',
+      :herbarium_id => ''
+    }
+  end
+  
 ################################################################################
 
   # ----------------------------
@@ -761,6 +769,42 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(where, obs.place_name)
   end
 
+  def test_create_observation_with_herbarium
+    generic_construct_observation({
+      :observation => { :specimen => '1' },
+      :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "1234" },
+      :name => { :name => "Coprinus comatus" }
+    }, 1, 1, 0)
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.specimens.count == 1)
+  end
+
+  def test_create_observation_with_herbarium_no_id
+    name = "Coprinus comatus"
+    generic_construct_observation({
+      :observation => { :specimen => '1' },
+      :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "" },
+      :name => { :name => name }
+    }, 1, 1, 0)
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.specimens.count == 1)
+    specimen = obs.specimens[0]
+    assert(/#{obs.id}/ =~ specimen.herbarium_label)
+    assert(/#{name}/ =~ specimen.herbarium_label)
+  end
+
+  def test_create_observation_with_herbarium_but_no_specimen
+    generic_construct_observation({
+      :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "1234" },
+      :name => { :name => "Coprinus comatus" }
+    }, 1, 1, 0)
+    obs = assigns(:observation)
+    assert(!obs.specimen)
+    assert(obs.specimens.count == 0)
+  end
+  
   def test_construct_observation
 
     # Test a simple observation creation with an approved unique name

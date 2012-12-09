@@ -25,6 +25,7 @@ class HerbariumController < ApplicationController
   end
   
   def valid_herbarium_params(params)
+    params[:name] = params[:name].strip_html
     name_free?(params[:name]) and email_valid?(params[:email])
   end
 
@@ -35,7 +36,7 @@ class HerbariumController < ApplicationController
   end
   
   def email_valid?(email)
-    result = (email and (email != ""))
+    result = (email and (email != "") and (email == email.strip_html))
     flash_error(:create_herbarium_missing_email.l) if not result
     result
   end
@@ -49,8 +50,8 @@ class HerbariumController < ApplicationController
   end
   
   def infer_location(params)
-    place_name = params[:place_name].to_s
-    location = Location.find_by_name_or_reverse_name(place_name)
+    params[:place_name] = params[:place_name].strip_html
+    location = Location.find_by_name_or_reverse_name(params[:place_name])
     params[:location_id] = location ? location.id : nil
   end
 
@@ -78,7 +79,7 @@ class HerbariumController < ApplicationController
   end
   
   def ok_to_update(herbarium, params)
-    new_name = params[:name]
+    new_name = params[:name].strip_html
     return (((herbarium.name == new_name) or name_free?(new_name)) and email_valid?(params[:email]))
   end
 

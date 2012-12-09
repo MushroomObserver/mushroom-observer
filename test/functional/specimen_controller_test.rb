@@ -50,7 +50,6 @@ class SpecimenControllerTest < FunctionalTestCase
     get_with_dump(:add_specimen, :id => observations(:coprinus_comatus_obs).id)
     assert_response('add_specimen')
     assert(assigns(:herbarium_label))
-    assert(assigns(:herbarium_name))
   end
  
   def add_specimen_params

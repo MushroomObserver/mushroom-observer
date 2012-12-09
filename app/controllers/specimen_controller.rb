@@ -49,7 +49,6 @@ class SpecimenController < ApplicationController
     @layout = calc_layout_params
     if @observation
       @herbarium_label = "#{@observation.name.text_name} [#{@observation.id}]"
-      @herbarium_name = @user.preferred_herbarium_name
       if request.method == :post
         if valid_specimen_params(params[:specimen])
           build_specimen(params[:specimen], @observation)
@@ -59,6 +58,8 @@ class SpecimenController < ApplicationController
   end
  
   def valid_specimen_params(params)
+    params[:herbarium_name] = params[:herbarium_name].strip_html
+    params[:herbarium_label] = params[:herbarium_label].strip_html
     !specimen_exists(params[:herbarium_name], params[:herbarium_label])
   end
   
@@ -134,6 +135,7 @@ class SpecimenController < ApplicationController
   end
   
   def ok_to_update(specimen, params)
+    params[:herbarium_label] = params[:herbarium_label].strip_html
     new_label = params[:herbarium_label]
     (specimen.herbarium_label == new_label) or label_free?(specimen.herbarium, new_label)
   end
