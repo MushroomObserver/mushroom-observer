@@ -111,6 +111,22 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_flash(/already exists/i)    
     assert_response(:success)
   end
+  
+  # I keep thinking only curators should be able to add specimens...
+  def test_add_specimen_post_not_curator
+    user = login('mary')
+    nybg = herbaria(:nybg)
+    assert(!nybg.curators.member?(user))
+    specimen_count = Specimen.count
+    herbarium_count = Herbarium.count
+    params = add_specimen_params
+    params[:specimen][:herbarium_name] = nybg.name
+    post(:add_specimen, params)
+    nybg = Herbarium.find(nybg.id) # Reload herbarium
+    assert(!nybg.curators.member?(user))
+    assert_equal(specimen_count + 1, Specimen.count)
+    assert_response(:redirect)
+  end
 
   def test_edit_specimen
     nybg = specimens(:coprinus_comatus_nybg_spec)

@@ -486,7 +486,7 @@ class ObserverController < ApplicationController
     case type
     when :observation, :user, :google
       ctrlr = 'observer'
-    when :comment, :image, :location, :name, :project, :species_list
+    when :comment, :herbarium, :image, :location, :name, :project, :species_list, :specimen
       ctrlr = type
     else
       flash_error(:runtime_invalid.t(:type => :search, :value => type.inspect))

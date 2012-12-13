@@ -64,6 +64,11 @@ class Naming < AbstractModel
   after_save    :create_emails
   after_destroy :log_destruction
 
+  # Override the default show_controller
+  def self.show_controller
+    'observer'
+  end
+
   # Return name in plain text.
   def text_name
     name ? name.real_search_name : ''

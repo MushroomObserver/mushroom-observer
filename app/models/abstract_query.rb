@@ -1124,11 +1124,11 @@ class AbstractQuery < ActiveRecord::Base
 
       # Then provide some simple defaults.
       result ||= case by
-      when 'modified', 'created', 'date'
+      when 'modified', 'created', 'date', 'created_at', 'updated_at'
         if model.column_names.include?(by)
           "#{table}.#{by} DESC"
         end
-      when 'name', 'title', 'login'
+      when 'name', 'title', 'login', 'herbarium_label'
         if model.column_names.include?(by)
           "#{table}.#{by} ASC"
         end

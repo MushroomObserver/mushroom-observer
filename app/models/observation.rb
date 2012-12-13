@@ -152,6 +152,11 @@ class Observation < AbstractModel
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  # Override the default show_controller
+  def self.show_controller
+    'observer'
+  end
+
   def is_location?
     false
   end
@@ -1029,7 +1034,7 @@ return result if debug
     # (no transactions necessary: creating location on foreign server
     # should initiate identical action)
   end
-
+  
 ################################################################################
 
 protected

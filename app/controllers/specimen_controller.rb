@@ -1,10 +1,52 @@
 class SpecimenController < ApplicationController
   before_filter :login_required, :except => [
+    :specimen_search,
+    :list_specimens,
     :show_specimen,
     :herbarium_index,
     :observation_index,
   ]
   
+  # Display list of Specimens whose text matches a string pattern.
+  def specimen_search # :nologin: :norobots:
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (specimen = Specimen.safe_find(pattern))
+      redirect_to(:action => 'show_specimen', :id => specimen.id)
+    else
+      query = create_query(:Specimen, :pattern_search, :pattern => pattern)
+      show_selected_specimens(query)
+    end
+  end
+
+  # Show selected list of specimens.
+  def show_selected_specimens(query, args={})
+    args = {
+      :action => :list_specimens,
+      :letters => 'specimens.name',
+      :num_per_page => 10,
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name',     :sort_by_title.t],
+      ['created',  :sort_by_created.t],
+      ['modified', :sort_by_modified.t],
+    ]
+
+    args[:letters] = 'herbarium_label'
+    
+    show_index_of_objects(query, args)
+  end
+
+  # Show list of specimens.
+  def list_specimens # :nologin:
+    query = create_query(:Specimen, :all, :by => :herbarium_label)
+    show_selected_specimens(query)
+  end
+
   def show_specimen  # :nologin:
     store_location
     @specimen = Specimen.find(params[:id])
@@ -60,7 +102,20 @@ class SpecimenController < ApplicationController
   def valid_specimen_params(params)
     params[:herbarium_name] = params[:herbarium_name].strip_html
     params[:herbarium_label] = params[:herbarium_label].strip_html
+    # has_curator_permission(params[:herbarium_name], @user) and
     !specimen_exists(params[:herbarium_name], params[:herbarium_label])
+  end
+  
+  def has_curator_permission(herbarium_name, user)
+    result = true
+    herbarium = Herbarium.find_by_name(herbarium_name)
+    if herbarium
+      if not herbarium.curators.member?(user)
+        flash_error(:add_specimen_not_a_curator.t(:herbarium_name => herbarium_name))
+        result = false
+      end
+    end
+    result
   end
   
   def specimen_exists(herbarium_name, herbarium_label)
@@ -108,7 +163,7 @@ class SpecimenController < ApplicationController
   def calc_specimen_redirect(params, new_herbarium, specimen)
     if new_herbarium
       flash_notice(:herbarium_edit.t(:name => params[:herbarium_name]))
-      redirect_to(:action => 'edit_herbarium',
+      redirect_to(:controller => 'herbarium', :action => 'edit_herbarium',
                   :id => specimen.herbarium_id)
     else
       redirect_to(:controller => 'observer', :action => 'show_observation', :id => specimen.observations[0].id)

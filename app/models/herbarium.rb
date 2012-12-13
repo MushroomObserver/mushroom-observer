@@ -15,6 +15,26 @@ class Herbarium < AbstractModel
   end
   
   def self.default_specimen_label(name, id)
-    "#{name} [#{id || '?'}]".strip_html
+    "#{name}: #{id || '?'}".strip_html
+  end
+
+  # Look at the most recent Specimen's the current User has created.  Return
+  # a list of the last 100 herbarium names used in those Specimens that this user
+  # is a curator for.  This list is used to prime Herbarium auto-completers.
+  #
+  def self.primer
+    result = ''
+    if User.current
+      result = self.connection.select_values(%(
+        SELECT DISTINCT h.name AS x
+        FROM specimens s, herbaria h, herbaria_curators c
+        WHERE s.herbarium_id = h.id
+        AND h.id = c.herbarium_id
+        AND c.user_id = #{user_id}
+        ORDER BY s.modified DESC
+        LIMIT 100
+      )).sort
+    end
+    result
   end
 end

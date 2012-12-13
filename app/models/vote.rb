@@ -79,6 +79,11 @@ class Vote < AbstractModel
   NEXT_BEST_VOTE =  2
   MAXIMUM_VOTE   =  3
 
+  # Override the default show_controller
+  def self.show_controller
+    'observer'
+  end
+
   # This is used to mean "delete my vote".
   def self.delete_vote
     DELETE_VOTE

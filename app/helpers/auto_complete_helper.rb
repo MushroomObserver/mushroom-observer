@@ -127,10 +127,14 @@ module ApplicationHelper::AutoComplete
 
   # Make text_field auto-complete for Herbarium name.
   def turn_into_herbarium_auto_completer(id, opts={})
-    turn_into_auto_completer(id, {
-      :ajax_url => '/ajax/auto_complete/herbarium/@',
-      :unordered => true
-    }.merge(opts))
+    if @user
+      turn_into_auto_completer(id, {
+        :ajax_url => '/ajax/auto_complete/herbarium/@?user_id=' + @user.id.to_s,
+        :unordered => true
+      }.merge(opts))
+    else
+      ''
+    end
   end
 
   # Include everything needed for auto-completion.

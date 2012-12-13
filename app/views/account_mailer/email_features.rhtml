@@ -13,7 +13,7 @@
 if @user.email_html %>
 <html>
 <head>
-  <title>Mushroom Observer: <%= @subject %></title>
+<title><%= "#{:app_title.t}: #{@subject}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>

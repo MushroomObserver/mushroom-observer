@@ -1,8 +1,48 @@
 class HerbariumController < ApplicationController
   before_filter :login_required, :except => [
+    :herbarium_search,
+    :list_herbariums,
     :show_herbarium,
     :index,
   ]
+
+  # Display list of Herbaria whose text matches a string pattern.
+  def herbarium_search # :nologin: :norobots:
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (herbarium = Herbarium.safe_find(pattern))
+      redirect_to(:action => 'show_herbarium', :id => herbarium.id)
+    else
+      query = create_query(:Herbarium, :pattern_search, :pattern => pattern)
+      show_selected_herbaria(query)
+    end
+  end
+
+  # Show selected list of herbaria.
+  def show_selected_herbaria(query, args={})
+    args = {
+      :action => :list_herbaria,
+      :letters => 'herbaria.name',
+      :num_per_page => 10,
+    }.merge(args)
+
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name',     :sort_by_title.t],
+      ['created',  :sort_by_created.t],
+      ['modified', :sort_by_modified.t],
+    ]
+
+    show_index_of_objects(query, args)
+  end
+
+  # Show list of herbaria.
+  def list_herbariums # :nologin:
+    query = create_query(:Herbarium, :all, :by => :name)
+    show_selected_herbaria(query)
+  end
 
   def show_herbarium  # :nologin:
     store_location

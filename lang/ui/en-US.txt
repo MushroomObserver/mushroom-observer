@@ -49,8 +49,12 @@ IMAGE: Image
 image: image
 IMAGES: Images
 images: images
+herbaria: herbaria
+HERBARIA: Herbaria
 herbarium: herbarium
 HERBARIUM: Herbarium
+herbariums: herbaria
+HREBARIUMS: Herbaria
 LICENSE: License
 license: license
 LICENSES: Licenses
@@ -120,6 +124,10 @@ SPECIES_LIST: Species List
 species_list: species list
 SPECIES_LISTS: Species Lists
 species_lists: species lists
+SPECIMEN: Specimen
+specimen: specimen
+SPECIMENS: Specimens
+specimens: specimens
 USER: User
 user: user
 USERS: Users
@@ -273,7 +281,6 @@ REVIEWERS: Reviewers
 reviewers: reviewers
 SIZE: Size
 size: size
-specimen: specimen
 STATUS: Status
 status: status
 STATUSS: Statuses
@@ -797,6 +804,7 @@ log_project_updated: "[:log_object_updated_by_user(type=:project)]"
 log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
 log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
 log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
+log_specimen_added: "[:log_object_added_by_user_with_name(type=:specimen)]"
 log_object_added: "[:log_object_added_by_user]"
 log_object_created: "[:log_object_created_by_user]"
 log_object_destroyed: "[:log_object_destroyed_by_user]"
@@ -1920,6 +1928,7 @@ herbarium_description: Herbarium Description
 herbarium_created_at: Created At
 herbarium_updated_at: Updated At
 herbarium_curator: Curator
+herbarium_curators: Curators
 herbarium_mailing_address: Mailing Address
 herbarium_edit: New herbarium called '[name]' created.
 
@@ -1959,7 +1968,11 @@ add_specimen_herbarium_label: Original Herbarium Label (initial determination an
 add_specimen_notes: Specimen Notes
 add_specimen_cancel: Cancel (Show Observation)
 add_specimen_already_exists: A specimen with the label '[label]' already exists for herbarium '[name]'
-user_personal_herbarium: Personal Herbarium of [name]
+add_specimen_not_a_curator: You are not a curator of [herbarium_name]
+user_personal_herbarium: "[name]: Personal Herbarium"
+
+# herbarium/list_herbaria
+list_herbaria_title: "[:list_objects(type=:project)]"
 
 # Specimen Fields
 specimen_herbarium: Herbarium
@@ -1972,23 +1985,27 @@ specimen_notes: Notes
 specimen_created_at: Created At
 specimen_updated_at: Updated At
 
-# herbarium/show_specimen
+# specimen/show_specimen
 show_specimen: Show Specimen
 
-# herbarium/edit_specimen
+# specimen/edit_specimen
 edit_specimen: Edit Specimen
 edit_specimen_cannot_edit: Attempt to edit specimen without permission
 edit_specimen_title: Edit Specimen [herbarium_label]
 edit_specimen_save: Save
 
-# herbarium/specimen_index (not a real page)
+# specimen/specimen_index (not a real page)
 specimen_index_title: "[subject] Specimen Index"
 
-# herbarium/herbarium_index
+# specimen/herbarium_index
 herbarium_index_no_specimens: This herbarium has no specimens
 
-# herbarium/observation_index
+# specimen/observation_index
 observation_index_no_specimens: This observation has no specimens
+
+# specimen/list_specimens
+list_specimens_title: "[:list_objects(type=:project)]"
+
 
 # support/donate
 donate_title: Donate to Mushroom Observer
@@ -3182,6 +3199,7 @@ review_email: Email
 # EMAIL MESSAGES
 
 # Subject lines.
+email_subject_add_specimen_not_curator: Specimen Added to [herbarium_name]
 email_subject_comment: "[:COMMENT] About [name]"
 email_subject_commercial_inquiry: Commercial Inquiry About [Name]
 email_subject_consensus_change: Consensus Changed from [old] to [new]
@@ -3280,6 +3298,11 @@ email_consensus_change_intro: >
   h2. *Consensus Change*\n
   \n
   Consensus has changed for observation #[id]:\n
+
+email_add_specimen_not_curator_intro: >
+  h2. *Specimen Added By Non-Curator*\n
+  \n
+  The user, [login], added the specimen, [herbarium_label], to the herbarium, [herbarium_name], which you curate.\n
 
 email_features_intro: >
   h2. *New Features*\n

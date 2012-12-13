@@ -288,6 +288,10 @@ class Query < AbstractQuery
       :for_user,              # Comments sent to user, by created.
       :pattern_search,        # Comments matching a pattern, by created.
     ],
+    :Herbarium => [
+      :all,
+      :pattern_search,
+    ],
     :Image => [
       :advanced_search,       # Advanced search results.
       :all,                   # All images, by created.
@@ -397,6 +401,10 @@ class Query < AbstractQuery
       :for_project,           # Species lists attached to a given project.
       :in_set,                # Species lists in a given set.
       :pattern_search,        # Species lists matching a pattern, alphabetically.
+    ],
+    :Specimen => [
+      :all,
+      :pattern_search,
     ],
     :User => [
       :all,                   # All users, by name.
@@ -574,9 +582,10 @@ class Query < AbstractQuery
   }
 
   # Return the default order for this query.
-  def default_order
+  def default_order # This should be in each of the classes not here!
     case model_symbol
     when :Comment             ; 'created'
+    when :Herbarium           ; 'name'
     when :Image               ; 'created'
     when :Location            ; 'name'
     when :LocationDescription ; 'name'
@@ -586,6 +595,7 @@ class Query < AbstractQuery
     when :Project             ; 'title'
     when :RssLog              ; 'modified'
     when :SpeciesList         ; 'title'
+    when :Specimen            ; 'herbarium_label'
     when :User                ; 'name'
     end
   end
@@ -1985,6 +1995,10 @@ class Query < AbstractQuery
         self.where += google_conditions(search,
           'CONCAT(comments.summary,COALESCE(comments.comment,""))')
 
+      when :Herbarium
+        self.where += google_conditions(search,
+          'CONCAT(herbaria.name,COALESCE(herbaria.description,""),COALESCE(herbaria.mailing_address,""))')
+
       when :Image
         self.join << {:images_observations => {:observations =>
           [:locations!, :names] }}
@@ -2025,6 +2039,10 @@ class Query < AbstractQuery
         self.where += google_conditions(search,
           'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
           'IF(locations.id,locations.name,species_lists.where))')
+
+      when :Specimen
+        self.where += google_conditions(search,
+          'CONCAT(specimens.herbarium_label,COALESCE(specimens.notes,""))')
 
       when :User
         self.where += google_conditions(search,
