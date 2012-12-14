@@ -20,7 +20,7 @@ if (org.mo.sv.create == undefined || typeof(org.mo.sv.create) != "object")
 // The RPI triple store endpoint url.
 // org.mo.sv.endpoint = "http://leo.tw.rpi.edu:2058/svf/sparql";
 // The MBL triple store endpoint url.
-org.mo.sv.endpoint = "http://128.128.170.15:3030/svf/sparql";
+org.mo.sv.endpoint = "http://128.128.170.15:3000/svf/sparql";
 // SVF graph URI.
 org.mo.sv.SVFGraph = "http://mushroomobserver.org/svf.owl";
 // SVF ontology namespace.
@@ -115,6 +115,7 @@ org.mo.sv.getURI = function(label)
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT ?uri\n";
+  query += "FROM <" + org.mo.sv.SVFGraph + ">\n";
   query += "WHERE { ?uri rdfs:label \"" + label + "\"^^rdfs:Literal }";
   return query;
 };
@@ -125,7 +126,7 @@ org.mo.sv.create.queryDependentFeatures = function(feature, values)
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT DISTINCT ?uri ?label\n";
-  query += "FROM NAMED <" + org.mo.sv.SVFGraph + ">\n";
+  query += "FROM <" + org.mo.sv.SVFGraph + ">\n";
   query += "WHERE {\n";
   query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature .\n";
   query += "?uri rdfs:label ?label .\n";
@@ -151,7 +152,7 @@ org.mo.sv.create.querySVDForFeatureValue = function(feature, values)
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT DISTINCT ?uri ?name\n";
-  query += "FROM NAMED <" + org.mo.sv.SVFGraph + ">\n";
+  query += "FROM <" + org.mo.sv.SVFGraph + ">\n";
   query += "WHERE {\n";
   query += "?uri rdfs:subClassOf svf:SemanticVernacularDescription .\n";
   query += "OPTIONAL { ?uri rdfs:subClassOf ?c1 .\n";
@@ -184,6 +185,7 @@ org.mo.sv.create.queryFeatureValues = function(feature)
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT DISTINCT ?uri ?label\n";
+  query += "FROM <" + org.mo.sv.SVFGraph + ">\n";
   query += "WHERE {\n";
   query += "<" + feature + "> rdfs:range ?r .\n";
   query += "?r owl:equivalentClass ?c .\n";
@@ -200,7 +202,7 @@ org.mo.sv.create.queryIndependentFeatures = function()
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT DISTINCT ?uri ?label\n";
-  query += "FROM NAMED <" + org.mo.sv.SVFGraph + ">\n";
+  query += "FROM <" + org.mo.sv.SVFGraph + ">\n";
   query += "WHERE {\n";
   query += "?uri rdfs:subPropertyOf+ svf:hasFungalFeature .\n";
   query += "?uri rdfs:label ?label .\n";
@@ -219,6 +221,7 @@ org.mo.sv.show.queryFeatureValueAnnotation = function(uri)
 {
   var query = org.mo.sv.getQueryPrefix();
   query += "SELECT DISTINCT ?label ?description ?reference ?picLink\n";
+  query += "FROM <" + org.mo.sv.SVFGraph + ">\n";
   query += "WHERE {\n";
   query += "<" + uri + "> rdfs:subClassOf+ svf:FungalFeatureValuePartition .\n";
   query += "<" + uri + "> owl:equivalentClass*/rdfs:label ?label .\n";

@@ -47,7 +47,7 @@ class VernacularLabel < SemanticVernacularDataSource
 	def query_attributes
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?label ?user ?dateTime
-			FROM NAMED <#{SVF_GRAPH}>
+			FROM <#{SVF_GRAPH}>
 			WHERE {
 				<#{@uri}> a svf:VernacularLabel .
 				<#{@uri}> rdfs:label ?label .

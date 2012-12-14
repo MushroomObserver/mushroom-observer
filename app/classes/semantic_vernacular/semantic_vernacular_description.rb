@@ -40,11 +40,11 @@
 class SemanticVernacularDescription < SemanticVernacularDataSource
 
 	attr_accessor :uri,
-								:name,
-								:labels,
-								:definition,
-								:descriptions,
-								:scientific_names
+				  :name,
+				  :labels,
+				  :definition,
+				  :descriptions,
+				  :scientific_names
 
 	def initialize(uri)
 		@uri = uri
@@ -56,6 +56,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	end
 
 	def self.index_with_name
+		
 		query(query_svds_with_names)
 	end
 
@@ -96,7 +97,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def self.query_svds_all
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?uri
-			FROM NAMED <#{SVF_GRAPH}>
+			FROM <#{SVF_GRAPH}>
 			WHERE {
 				?uri rdfs:subClassOf svf:SemanticVernacularDescription . })
 	end
@@ -104,7 +105,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def self.query_svds_with_names
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?uri ?label
-			FROM NAMED <#{SVF_GRAPH}>
+			FROM <#{SVF_GRAPH}>
 			WHERE {
 				?uri rdfs:subClassOf svf:SemanticVernacularDescription .
 				?uri rdfs:subClassOf ?c .
@@ -149,7 +150,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	def query_attribute(property, value_constraint)
 		QUERY_PREFIX +
 		%(SELECT DISTINCT ?uri
-			FROM NAMED <#{SVF_GRAPH}>
+			FROM <#{SVF_GRAPH}>
 			WHERE {
 				<#{@uri}> rdfs:subClassOf svf:SemanticVernacularDescription .
 				<#{@uri}> rdfs:subClassOf ?c .

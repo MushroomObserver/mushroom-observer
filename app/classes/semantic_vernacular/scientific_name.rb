@@ -49,6 +49,7 @@ class ScientificName < SemanticVernacularDataSource
   def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?label ?moURL ?moID
+      FROM <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subClassOf svf:ScientificName .
         <#{@uri}> rdfs:label ?label .
