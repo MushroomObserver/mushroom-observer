@@ -9,7 +9,8 @@
 <% form_tag({:action => 'edit_herbarium', :id => @herbarium}) do %>
 	<center><%= submit_tag :edit_herbarium_save.t %><br/></center>
   <p>
-    <%= :herbarium_name.t %>: <%= text_field('herbarium', 'name', :size => 150, :value => @herbarium.name) %>
+		<%= :herbarium_name.t %>: <%= text_field('herbarium', 'name', :size => 150, :value => @herbarium.name) %>
+    <%= :create_herbarium_code.t %>: <%= text_field('herbarium', 'code', :size => 8, :value => @herbarium.code) %>
   </p>
   <p>
     <%= :create_herbarium_email.t %>: <%= text_field('herbarium', 'email', :size => 150, :value => @herbarium.email) %>

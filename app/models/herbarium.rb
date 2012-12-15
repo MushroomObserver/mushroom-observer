@@ -10,6 +10,20 @@ class Herbarium < AbstractModel
     user and curators.member?(user)
   end
 
+  def can_delete_curator?(user)
+    is_curator?(user) and (curators.count > 1)
+  end
+  
+  def add_curator(user)
+    if !is_curator?(user)
+      curators.push(user)
+    end
+  end
+  
+  def delete_curator(user)
+    curators.delete(user)
+  end
+  
   def label_free?(new_label)
     Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
   end

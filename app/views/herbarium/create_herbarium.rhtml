@@ -9,6 +9,7 @@
 	<center><%= submit_tag :create_herbarium_add.t %><br/></center>
   <p>
     <%= :herbarium_name.t %>: <%= text_field('herbarium', 'name', :value => @herbarium_name, :size => 150) %>
+    <%= :create_herbarium_code.t %>: <%= text_field('herbarium', 'code', :size => 8) %>
   </p>
   <p>
     <%= :create_herbarium_email.t %>: <%= text_field('herbarium', 'email', :value => @user.email, :size => 150) %>

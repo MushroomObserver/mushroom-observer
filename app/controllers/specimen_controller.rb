@@ -183,6 +183,14 @@ class SpecimenController < ApplicationController
     end
   end
 
+  def delete_specimen
+    specimen = Specimen.find(params[:id])
+    herbarium_id = specimen.herbarium_id
+    specimen.clear_observations
+    specimen.destroy
+    redirect_to(:action => 'herbarium_index', :id => herbarium_id)
+  end
+  
   def can_edit?(specimen)
     result = specimen.can_edit?(@user)
     flash_error(:edit_specimen_cannot_edit.l) if not result

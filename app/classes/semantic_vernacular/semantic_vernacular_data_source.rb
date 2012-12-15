@@ -53,8 +53,8 @@ class SemanticVernacularDataSource
 	private
 	
 	# MBL endpoint
-	QUERY_ENDPOINT = "http://128.128.170.15:3030/svf/sparql"
-	UPDATE_ENDPOINT = "http://128.128.170.15:3030/svf/update"
+	QUERY_ENDPOINT = "http://128.128.170.15:3000/svf/sparql"
+	UPDATE_ENDPOINT = "http://128.128.170.15:3000/svf/update"
 	# RPI endpoint
 	# QUERY_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/sparql"
 	# UPDATE_ENDPOINT = "http://leo.tw.rpi.edu:2058/svf/update"

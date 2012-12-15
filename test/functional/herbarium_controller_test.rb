@@ -8,6 +8,25 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_response('show_herbarium')
   end
 
+  def show_herbarium_params
+    {
+      :id => herbaria(:nybg).id,
+      :curator => {
+        :name => users(:mary).login
+      }
+    }
+  end
+  
+  def test_show_herbarium_post
+    login('rolf')
+    params = show_herbarium_params
+    herbarium = Herbarium.find(params[:id])
+    curator_count = herbarium.curators.count
+    post(:show_herbarium, params)
+    assert_equal(curator_count+1, Herbarium.find(params[:id]).curators.count)
+    assert_response(:success)
+  end
+
   def test_index
     get_with_dump(:index)
     assert_response('index')
@@ -29,7 +48,8 @@ class HerbariumControllerTest < FunctionalTestCase
         :description => 'Rolf wants Melanolucas!!!',
         :email => users(:rolf).email,
         :mailing_address => "",
-        :place_name => ""
+        :place_name => "",
+        :code => "RPH"
       }
     }
   end
@@ -43,6 +63,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
     assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:code], herbarium.code)
     assert_equal([users(:rolf)], herbarium.curators)
     assert_response(:redirect)
   end
@@ -213,6 +234,46 @@ class HerbariumControllerTest < FunctionalTestCase
     herbarium = Herbarium.find(nybg.id)
     assert_not_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(old_name, herbarium.name)
+    assert_response(:redirect)
+  end
+  
+  def delete_curator_params
+    {
+      :id => herbaria(:nybg).id,
+      :user => users(:roy).id
+    }
+  end
+  
+  def test_delete_curator
+    login('rolf')
+    params = delete_curator_params
+    herbarium = Herbarium.find(params[:id])
+    curator_count = herbarium.curators.count
+    post(:delete_curator, params)
+    assert_equal(curator_count-1, Herbarium.find(params[:id]).curators.count)
+    assert_response(:redirect)
+  end
+  
+  def test_delete_curator_you_not_curator
+    login('mary')
+    params = delete_curator_params
+    herbarium = Herbarium.find(params[:id])
+    curator_count = herbarium.curators.count
+    post(:delete_curator, params)
+    assert_equal(curator_count, Herbarium.find(params[:id]).curators.count)
+    assert_flash(/are not a curator/)
+    assert_response(:redirect)
+  end
+  
+  def test_delete_curator_they_not_curator
+    login('rolf')
+    params = delete_curator_params
+    params[:user] = users(:mary).id
+    herbarium = Herbarium.find(params[:id])
+    curator_count = herbarium.curators.count
+    post(:delete_curator, params)
+    assert_equal(curator_count, Herbarium.find(params[:id]).curators.count)
+    assert_flash(/is not a curator/)
     assert_response(:redirect)
   end
 end

@@ -1931,10 +1931,15 @@ herbarium_curator: Curator
 herbarium_curators: Curators
 herbarium_mailing_address: Mailing Address
 herbarium_edit: New herbarium called '[name]' created.
+herbarium_code: Code
 
 # herbarium/show_herbarium
 show_herbarium: Show Herbarium
 show_herbarium_specimen_count: This herbarium contains [count] specimen(s).
+show_herbarium_add_curator: Add Curator
+show_herbarium_no_user: Unable to find the user '[login]'
+delete_curator_you_not_curator: Cannot remove curator since you are not a curator
+delete_curator_they_not_curator: "[login] is not a curator"
 
 # herbarium/index
 herbarium_index: Herbarium Index
@@ -1948,6 +1953,7 @@ create_herbarium_description: Optional Description of the Herbarium (include inf
 create_herbarium_mailing_address: Optional Mailing Address for Specimens
 create_herbarium_email: Required Email Address for Specimen Requests
 create_herbarium_location: Optional Location of the Herbarium
+create_herbarium_code: Optional Code
 create_herbarium_add: Add
 create_herbarium_duplicate_name: Herbarium called '[name]' already exists
 herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
@@ -1999,6 +2005,8 @@ specimen_index_title: "[subject] Specimen Index"
 
 # specimen/herbarium_index
 herbarium_index_no_specimens: This herbarium has no specimens
+herbarium_delete_specimen: Delete
+herbarium_edit_specimen: Edit
 
 # specimen/observation_index
 observation_index_no_specimens: This observation has no specimens

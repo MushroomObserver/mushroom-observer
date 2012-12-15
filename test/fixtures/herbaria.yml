@@ -8,6 +8,7 @@ nybg:
     location_id: 11
     email: nybg@collectivesource.com
     description: An awesome world famous herbarium.
+    code: NY
 
 rolf:
     id: 2

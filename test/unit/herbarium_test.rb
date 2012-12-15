@@ -29,6 +29,7 @@ class HerbariumTest < UnitTestCase
   
   def test_fields
     assert(herbaria(:nybg).name)
-    assert(herbaria(:nybg).description)    
+    assert(herbaria(:nybg).description)
+    assert(herbaria(:nybg).code)
   end
 end

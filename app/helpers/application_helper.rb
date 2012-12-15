@@ -208,4 +208,7 @@ module ApplicationHelper
 	  #{text_field('specimen', 'herbarium_id', :size => 20)}"
   end
 
+  def table_column_title(title)
+    "<td align=\"center\" class=\"TableColumn\">#{title}</td>"
+  end
 end

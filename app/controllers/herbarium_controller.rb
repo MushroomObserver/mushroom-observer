@@ -47,8 +47,33 @@ class HerbariumController < ApplicationController
   def show_herbarium  # :nologin:
     store_location
     @herbarium = Herbarium.find(params[:id])
+    if request.method == :post
+      herbarium = Herbarium.find(params[:id])
+      login = params[:curator][:name].sub(/ <.*/, '')
+      user = User.find_by_login(login)
+      if user
+        herbarium.add_curator(user)
+      else
+        flash_error(:show_herbarium_no_user.t(:login => login))
+      end
+    end
   end
 
+  def delete_curator
+    herbarium = Herbarium.find(params[:id])
+    user = User.find(params[:user])
+    if herbarium.is_curator?(@user)
+      if herbarium.is_curator?(user)
+        herbarium.delete_curator(user)
+      else
+        flash_error(:delete_curator_they_not_curator.t(:login => user.login))
+      end
+    else
+      flash_error(:delete_curator_you_not_curator.t)
+    end
+    redirect_to(:action => :show_herbarium, :id => params[:id])
+  end
+  
   def index # :nologin:
     store_location
     @herbaria = Herbarium.find(:all)
@@ -90,7 +115,7 @@ class HerbariumController < ApplicationController
   end
   
   def infer_location(params)
-    params[:place_name] = params[:place_name].strip_html
+    params[:place_name] = params[:place_name] ? params[:place_name].strip_html : ""
     location = Location.find_by_name_or_reverse_name(params[:place_name])
     params[:location_id] = location ? location.id : nil
   end

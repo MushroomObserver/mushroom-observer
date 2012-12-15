@@ -66,6 +66,28 @@ module ApplicationHelper::ObjectLink
       name.text_name.gsub(' ','+')
   end
 
+  # Render a list of users on one line.  (Renders nothing if user list empty.)
+  # This renders the following strings:
+  #
+  #   <%= user_list('Author', name.authors) %>
+  #
+  #   empty:           ""
+  #   [bob]:           "Author: Bob"
+  #   [bob,fred,mary]: "Authors: Bob, Fred, Mary"
+  #
+  def user_list(title, users)
+    format_user_list(title, users.count, ': ',
+      users.map {|u| user_link(u, u.legal_name)}.join(', '))
+  end
+  
+  def format_user_list(title, user_count, separator, user_block)
+    result = ''
+    if user_count > 0
+      result = (user_count > 1 ? title.to_s.pluralize.to_sym.t : title.t) + separator + user_block
+    end
+    result
+  end
+  
   # Wrap user name in link to show_user.
   #
   #   Owner:   <%= user_link(name.user) %>
@@ -82,25 +104,6 @@ module ApplicationHelper::ObjectLink
     rescue
       (user || name).to_s
     end
-  end
-
-  # Render a list of users on one line.  (Renders nothing if user list empty.)
-  # This renders the following strings:
-  #
-  #   <%= user_list('Author', name.authors) %>
-  #
-  #   empty:           ""
-  #   [bob]:           "Author: Bob"
-  #   [bob,fred,mary]: "Authors: Bob, Fred, Mary"
-  #
-  def user_list(title, users)
-    result = ''
-    count = users.length
-    if count > 0
-      result = (count > 1 ? title.to_s.pluralize.to_sym.t : title.t) + ": "
-      result += users.map {|u| user_link(u, u.legal_name)}.join(', ')
-    end
-    result
   end
 
   # Wrap project name in link to show_project.

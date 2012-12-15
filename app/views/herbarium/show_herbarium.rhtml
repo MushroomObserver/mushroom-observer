@@ -1,5 +1,6 @@
 <%
   @title = @herbarium.name.t
+	@title = @title + " (#{@herbarium.code.t})" if @herbarium.code != ""
   new_tab_set do
     add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id) if @herbarium.is_curator?(@user)
     add_tab(:create_herbarium.t, :action => 'create_herbarium')
@@ -12,17 +13,26 @@
 		<td>
 			<p>
 			  <%= link_to(:show_herbarium_specimen_count.t(:count => @herbarium.specimens.count),
-			 							:controller => "specimen", :action => "herbarium_index", :id => @herbarium.id) %><br/>
-				<%= user_list(:herbarium_curator, @herbarium.curators) %>
+			 							:controller => "specimen", :action => "herbarium_index", :id => @herbarium.id) %>
+			</p>
+			<p>
+				<%= curator_table(:herbarium_curator.t, @herbarium, @herbarium.can_delete_curator?(@user)) %>
+			  <% if @herbarium.is_curator?(@user) %>
+					<% form_tag(:action => 'show_herbarium', :id => @herbarium) do %>
+						<%= text_field('curator', 'name', :size => 50) %>
+						<label for="curator_name"><%= submit_tag :show_herbarium_add_curator.t %></label>
+					  <%= turn_into_user_auto_completer("curator_name") %>
+					<% end
+				end %>
 			</p>
 
-			<% if !@herbarium.description.empty? %>
+			<% if @herbarium.description and !@herbarium.description.empty? %>
 			  <p>
 			    <%= :herbarium_description.t %>:<br/><%= @herbarium.description.tpl %>
 			  </p>
 			<% end %>
 
-			<% if !@herbarium.mailing_address.empty? %>
+			<% if @herbarium.mailing_address and !@herbarium.mailing_address.empty? %>
 			  <p>
 			    <%= :herbarium_mailing_address.t %>:<br/><%= @herbarium.mailing_address.tp %>
 			  </p>

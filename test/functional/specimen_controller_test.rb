@@ -162,4 +162,24 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(nybg.user, specimen.user)
     assert_response(:redirect)
   end
+  
+  def test_delete_specimen
+    login('rolf')
+    params = delete_specimen_params
+    specimen_count = Specimen.count
+    specimen = Specimen.find(params[:id])
+    observations = specimen.observations
+    obs_spec_count = observations.map {|o| o.specimens.count }.reduce {|a,b| a+b}
+    post(:delete_specimen, params)
+    assert_equal(specimen_count-1, Specimen.count)
+    observations.map {|o| o.reload }
+    assert_equal(obs_spec_count - observations.count, observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
+    assert_response(:redirect)
+  end
+  
+  def delete_specimen_params
+    {
+      :id => specimens(:interesting_unknown)
+    }
+  end
 end

@@ -19,6 +19,11 @@ class Specimen < AbstractModel
     obs.save
   end
 
+  def clear_observations
+    observations.clear
+    self.save
+  end
+  
   # Send email notifications when specimen created by non-curator.
   def notify_curators
     sender = User.current
