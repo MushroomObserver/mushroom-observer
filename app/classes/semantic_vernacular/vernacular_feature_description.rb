@@ -78,7 +78,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?user ?dateTime
-      FROM NAMED <#{SVF_GRAPH}>
+      FROM <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subClassOf svf:VernacularFeatureDescription .
         <#{@uri}> rdfs:subClassOf ?c1 .
@@ -92,7 +92,7 @@ class VernacularFeatureDescription < SemanticVernacularDataSource
   def query_features
     QUERY_PREFIX +
     %(SELECT DISTINCT ?f ?v ?feature ?value
-      FROM NAMED <#{SVF_GRAPH}>
+      FROM <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> rdfs:subClassOf+ svf:VernacularFeatureDescription .
         <#{@uri}> owl:equivalentClass ?c1 .

@@ -582,10 +582,10 @@ ActiveRecord::Schema.define(:version => 20121215143150) do
     t.boolean  "vertical_layout",                                                                                  :default => true,       :null => false
     t.integer  "license_id",                                                                                       :default => 3,          :null => false
     t.integer  "contribution",                                                                                     :default => 0
-    t.text     "notes",                                                                                            :default => "",         :null => false
+    t.text     "notes",                                                                                                                    :null => false
     t.integer  "location_id"
     t.integer  "image_id"
-    t.text     "mailing_address",                                                                                  :default => "",         :null => false
+    t.text     "mailing_address",                                                                                                          :null => false
     t.string   "locale",                       :limit => 5
     t.text     "bonuses"
     t.boolean  "email_comments_owner",                                                                             :default => true,       :null => false

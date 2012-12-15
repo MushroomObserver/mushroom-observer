@@ -31,7 +31,7 @@ class SVUser < SemanticVernacularDataSource
   def query_attributes
     QUERY_PREFIX +
     %(SELECT DISTINCT ?name ?email
-      FROM NAMED <#{SVF_GRAPH}>
+      FROM <#{SVF_GRAPH}>
       WHERE {
         <#{@uri}> a svf:User .
         <#{@uri}> svf:hasName ?name .

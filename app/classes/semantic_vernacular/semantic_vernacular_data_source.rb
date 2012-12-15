@@ -93,7 +93,7 @@ class SemanticVernacularDataSource
 	def self.query_max_ID
 		QUERY_PREFIX + 
 		%(SELECT ?id 
-			FROM NAMED <#{SVF_GRAPH}>
+			FROM <#{SVF_GRAPH}>
 			WHERE {
 				?uri svf:hasID ?id } 
 			ORDER BY DESC (?id) LIMIT 1)
