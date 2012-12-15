@@ -1,0 +1,62 @@
+<%
+  @title = @herbarium.name.t
+	@title = @title + " (#{@herbarium.code.t})" if @herbarium.code != ""
+  new_tab_set do
+    add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id) if @herbarium.is_curator?(@user)
+    add_tab(:create_herbarium.t, :action => 'create_herbarium')
+    add_tab(:herbarium_index.t, :action => 'index')
+  end
+%>
+
+<table width="100%">
+	<tr>
+		<td>
+			<p>
+			  <%= link_to(:show_herbarium_specimen_count.t(:count => @herbarium.specimens.count),
+			 							:controller => "specimen", :action => "herbarium_index", :id => @herbarium.id) %>
+			</p>
+			<p>
+				<%= curator_table(:herbarium_curator.t, @herbarium, @herbarium.can_delete_curator?(@user)) %>
+			  <% if @herbarium.is_curator?(@user) %>
+					<% form_tag(:action => 'show_herbarium', :id => @herbarium) do %>
+						<%= text_field('curator', 'name', :size => 50) %>
+						<label for="curator_name"><%= submit_tag :show_herbarium_add_curator.t %></label>
+					  <%= turn_into_user_auto_completer("curator_name") %>
+					<% end
+				end %>
+			</p>
+
+			<% if @herbarium.description and !@herbarium.description.empty? %>
+			  <p>
+			    <%= :herbarium_description.t %>:<br/><%= @herbarium.description.tpl %>
+			  </p>
+			<% end %>
+
+			<% if @herbarium.mailing_address and !@herbarium.mailing_address.empty? %>
+			  <p>
+			    <%= :herbarium_mailing_address.t %>:<br/><%= @herbarium.mailing_address.tp %>
+			  </p>
+			<% end %>
+		</td>
+		<% if @herbarium.location %>
+			<td>
+			<%=
+			  gmap = make_map([@herbarium.location])
+			  finish_map(gmap)
+			  gmap.div(:width => 480, :height => 480)
+			%>
+			</td>
+		<% end %>
+	</tr>
+</table>
+
+<center>
+	<p>
+		<% if @herbarium.created_at %>
+		  <%= :herbarium_created_at.t + ': ' +  @herbarium.created_at.web_date %><br/>
+		<% end %>
+		<% if @herbarium.updated_at %>
+		  <%= :herbarium_updated_at.t + ': ' +  @herbarium.updated_at.web_date %><br/>
+		<% end %>
+	</p>
+</center>

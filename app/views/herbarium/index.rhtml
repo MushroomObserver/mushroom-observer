@@ -1,0 +1,21 @@
+<%
+  @title = :herbarium_index_title.t
+   new_tab_set do
+     add_tab(:create_herbarium.t, :action => 'create_herbarium')
+  end
+%>
+
+<table>
+<% for herbarium in @herbaria %>
+  <tr>
+    <td>
+      <%= link_to(herbarium.name, :action => "show_herbarium", :id => herbarium.id) %>
+    </td>
+    <% if herbarium.is_curator?(@user) %>
+      <td>
+        <%= link_to(:edit_herbarium.t, :action => "edit_herbarium", :id => herbarium.id) %>
+      </td>
+    <% end %>
+  </tr>
+<% end %>
+</table>

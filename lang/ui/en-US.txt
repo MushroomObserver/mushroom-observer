@@ -49,6 +49,12 @@ IMAGE: Image
 image: image
 IMAGES: Images
 images: images
+herbaria: herbaria
+HERBARIA: Herbaria
+herbarium: herbarium
+HERBARIUM: Herbarium
+herbariums: herbaria
+HREBARIUMS: Herbaria
 LICENSE: License
 license: license
 LICENSES: Licenses
@@ -118,6 +124,10 @@ SPECIES_LIST: Species List
 species_list: species list
 SPECIES_LISTS: Species Lists
 species_lists: species lists
+SPECIMEN: Specimen
+specimen: specimen
+SPECIMENS: Specimens
+specimens: specimens
 USER: User
 user: user
 USERS: Users
@@ -794,6 +804,7 @@ log_project_updated: "[:log_object_updated_by_user(type=:project)]"
 log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
 log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
 log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
+log_specimen_added: "[:log_object_added_by_user_with_name(type=:specimen)]"
 log_object_added: "[:log_object_added_by_user]"
 log_object_created: "[:log_object_created_by_user]"
 log_object_destroyed: "[:log_object_destroyed_by_user]"
@@ -1649,7 +1660,7 @@ show_observation_observation_created: Observation created
 show_observation_collection_location: Collection location
 # This is used if this is NOT the location where the thing was growing.
 show_observation_seen_at: Seen at
-show_observation_specimen_available: Herbarium specimen available
+show_observation_specimen_available: Herbarium specimen reported
 show_observation_specimen_not_available: No herbarium specimen
 show_observation_remove_images: "[:remove_objects(type=:image)]"
 show_observation_reuse_image: Reuse Image
@@ -1660,7 +1671,7 @@ show_observation_send_question: Send Observer a Question
 show_observation_view_notifications: View Notifications
 show_observation_hide_map: Hide thumbnail map.
 show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/prefs page.
-
+show_observation_create_specimen: Add Herbarium Specimen
 
 # location/show_past_location
 show_past_location_title: "[:VERSION] [num]: [name]"
@@ -1908,6 +1919,100 @@ register_update_warning: Updated previous registration for:<br/> [description]
 conference_verify_success: Registration of [registrant] for [how_many] to [event] has been verified
 conference_verify_warning: That registration has already been verified
 
+
+
+# Herbarium Fields
+herbarium_name: Name
+herbarium_location: Location
+herbarium_description: Herbarium Description
+herbarium_created_at: Created At
+herbarium_updated_at: Updated At
+herbarium_curator: Curator
+herbarium_curators: Curators
+herbarium_mailing_address: Mailing Address
+herbarium_edit: New herbarium called '[name]' created.
+herbarium_code: Code
+
+# herbarium/show_herbarium
+show_herbarium: Show Herbarium
+show_herbarium_specimen_count: This herbarium contains [count] specimen(s).
+show_herbarium_add_curator: Add Curator
+show_herbarium_no_user: Unable to find the user '[login]'
+delete_curator_you_not_curator: Cannot remove curator since you are not a curator
+delete_curator_they_not_curator: "[login] is not a curator"
+
+# herbarium/index
+herbarium_index: Herbarium Index
+herbarium_index_title: List of All Herbaria
+
+# herbarium/create_herbarium
+create_herbarium: Create New Herbarium
+create_herbarium_title: Create New Herbarium
+create_herbarium_missing_email: Valid email address is required when creating an herbarium
+create_herbarium_description: Optional Description of the Herbarium (include information about whether and what sort of specimens are desired)
+create_herbarium_mailing_address: Optional Mailing Address for Specimens
+create_herbarium_email: Required Email Address for Specimen Requests
+create_herbarium_location: Optional Location of the Herbarium
+create_herbarium_code: Optional Code
+create_herbarium_add: Add
+create_herbarium_duplicate_name: Herbarium called '[name]' already exists
+herbarium_must_define_location: You must define this location before we can use it for this herbarium. Any other information you provided has been saved.
+
+# herbarium/edit_herbarium
+edit_herbarium: Edit
+edit_herbarium_title: Editing Herbarium
+edit_herbarium_save: Save
+edit_herbarium_non_curator: Attempt to edit an herbarium by a non-curator
+edit_herbarium_duplicate_label: The label '[herbarium_label]' already exists for the herbarium '[herbarium_name]'
+
+# herbarium/add_specimen
+add_specimen: Add Specimen
+add_specimen_title: Add Specimen
+add_specimen_add: Add
+# add_specimen_herbarium: Name of Herbarium
+add_specimen_herbarium_label: Original Herbarium Label (initial determination and unique herbarium id)
+add_specimen_notes: Specimen Notes
+add_specimen_cancel: Cancel (Show Observation)
+add_specimen_already_exists: A specimen with the label '[label]' already exists for herbarium '[name]'
+add_specimen_not_a_curator: You are not a curator of [herbarium_name]
+user_personal_herbarium: "[name]: Personal Herbarium"
+
+# herbarium/list_herbaria
+list_herbaria_title: "[:list_objects(type=:project)]"
+
+# Specimen Fields
+specimen_herbarium: Herbarium
+specimen_herbarium_name: Herbarium Name
+specimen_herbarium_label: Herbarium Label
+specimen_herbarium_id: Herbarium Id
+specimen_user: Specimen Recorder
+specimen_when: When Submitted
+specimen_notes: Notes
+specimen_created_at: Created At
+specimen_updated_at: Updated At
+
+# specimen/show_specimen
+show_specimen: Show Specimen
+
+# specimen/edit_specimen
+edit_specimen: Edit Specimen
+edit_specimen_cannot_edit: Attempt to edit specimen without permission
+edit_specimen_title: Edit Specimen [herbarium_label]
+edit_specimen_save: Save
+
+# specimen/specimen_index (not a real page)
+specimen_index_title: "[subject] Specimen Index"
+
+# specimen/herbarium_index
+herbarium_index_no_specimens: This herbarium has no specimens
+herbarium_delete_specimen: Delete
+herbarium_edit_specimen: Edit
+
+# specimen/observation_index
+observation_index_no_specimens: This observation has no specimens
+
+# specimen/list_specimens
+list_specimens_title: "[:list_objects(type=:project)]"
 
 
 # support/donate
@@ -3102,6 +3207,7 @@ review_email: Email
 # EMAIL MESSAGES
 
 # Subject lines.
+email_subject_add_specimen_not_curator: Specimen Added to [herbarium_name]
 email_subject_comment: "[:COMMENT] About [name]"
 email_subject_commercial_inquiry: Commercial Inquiry About [Name]
 email_subject_consensus_change: Consensus Changed from [old] to [new]
@@ -3200,6 +3306,11 @@ email_consensus_change_intro: >
   h2. *Consensus Change*\n
   \n
   Consensus has changed for observation #[id]:\n
+
+email_add_specimen_not_curator_intro: >
+  h2. *Specimen Added By Non-Curator*\n
+  \n
+  The user, [login], added the specimen, [herbarium_label], to the herbarium, [herbarium_name], which you curate.\n
 
 email_features_intro: >
   h2. *New Features*\n

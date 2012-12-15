@@ -14,6 +14,10 @@ Disallow: /comment/next_comment
 Disallow: /comment/prev_comment
 Disallow: /comment/show_comments_by_user
 Disallow: /comment/show_comments_for_user
+Disallow: /conference/create_event
+Disallow: /conference/edit_event
+Disallow: /conference/register
+Disallow: /conference/verify
 Disallow: /image/add_image
 Disallow: /image/advanced_search
 Disallow: /image/cast_vote

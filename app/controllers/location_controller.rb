@@ -476,6 +476,7 @@ class LocationController < ApplicationController
     @set_observation  = params[:set_observation]
     @set_species_list = params[:set_species_list]
     @set_user         = params[:set_user]
+    @set_herbarium    = params[:set_herbarium]
 
     # Render a blank form.
     if request.method != :post
@@ -565,6 +566,12 @@ class LocationController < ApplicationController
         elsif @set_species_list
           redirect_to(:controller => 'species_list', :action => 'show_species_list',
                       :id => @set_species_list)
+        elsif @set_herbarium
+          if herbarium = Herbarium.safe_find(@set_herbarium)
+            herbarium.location = @location
+            herbarium.save
+            redirect_to(:controller => 'herbarium', :action => 'show_herbarium', :id => @set_herbarium)
+          end
         elsif @set_user
           if user = User.safe_find(@set_user)
             user.location = @location

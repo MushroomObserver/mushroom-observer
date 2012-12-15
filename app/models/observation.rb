@@ -46,7 +46,7 @@
 #  long::                   Exact longitude of location.
 #  alt::                    Exact altitude of location. (meters)
 #  is_collection_location:: Is this where it was growing?
-#  name::                   Consenus Name (never deprecated, never nil).
+#  name::                   Consensus Name (never deprecated, never nil).
 #  vote_cache::             Cache Vote score for the winning Name.
 #  thumb_image::            Image to use as thumbnail (if any).
 #  specimen::               Does User have a specimen available?
@@ -74,6 +74,7 @@
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
+#  default_specimen_label:: 
 #
 #  ==== Namings and Votes
 #  name::                   Conensus Name instance. (never nil)
@@ -141,6 +142,7 @@ class Observation < AbstractModel
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :species_lists, :after_add => :add_spl_callback,
                                           :before_remove => :remove_spl_callback
+  has_and_belongs_to_many :specimens
 
   after_update   :notify_users_after_change
   before_destroy :notify_species_lists
@@ -149,6 +151,11 @@ class Observation < AbstractModel
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
+
+  # Override the default show_controller
+  def self.show_controller
+    'observer'
+  end
 
   def is_location?
     false
@@ -281,6 +288,10 @@ class Observation < AbstractModel
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     name.observation_name + " (#{id || '?'})"
+  end
+  
+  def default_specimen_label
+    Herbarium.default_specimen_label(name.text_name, id)
   end
 
   # Look up the corresponding instance in our namings association.  If we are
@@ -1023,7 +1034,7 @@ return result if debug
     # (no transactions necessary: creating location on foreign server
     # should initiate identical action)
   end
-
+  
 ################################################################################
 
 protected

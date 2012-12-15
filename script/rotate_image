@@ -107,7 +107,7 @@ esac
 size=`script/jpegsize $orig | sed "s/.*: //"`
 w=`echo $size | sed "s/ .*//"`
 h=`echo $size | sed "s/.* //"`
-run_mysql "UPDATE images SET transferred=FALSE, width=$w, height=$h WHERE id=$id"
+run_mysql "UPDATE images SET transferred=TRUE, width=$w, height=$h WHERE id=$id"
 
 # Transfer control to process_image.
 exec script/process_image $id jpg 0

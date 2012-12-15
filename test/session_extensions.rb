@@ -68,7 +68,7 @@ module SessionExtensions
       end
       assert_block(msg) { false }
     end
-    assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
+    assert_equal([], Symbol.missing_tags, "Language tag(s) are missing. #{url}: #{method}")
     save_page
   ensure
     @doing_with_error_checking = false

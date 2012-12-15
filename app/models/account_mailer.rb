@@ -10,6 +10,7 @@
 #
 #  == Class methods
 #
+#  add_specimen_not_curator:: Let curators know about a specimen added by a non-curator.
 #  admin_request::          Ask project admins for admin privileges on project.
 #  author_request::         Ask reviewers for authorship credit.
 #  comment::                Notify user of comment on their object.
@@ -59,6 +60,30 @@
 require 'smtp_tls'
 
 class AccountMailer < ActionMailer::Base
+
+  # Let curators know about a specimen added by a non-curator.
+  # sender::    User who created the specimen.
+  # receiver::  Curator.
+  # specimen::  Added specimen.
+  def add_specimen_not_curator(sender, receiver, specimen)
+    @user                = receiver
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_subject_add_specimen_not_curator.l(:herbarium_name => specimen.herbarium.name)
+    @body['subject']     = @subject
+    @body['user']        = @user
+    @body['sender']      = sender
+    @body['specimen']    = specimen
+    @recipients          = receiver.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = sender.email
+    @content_type        = @user.email_html ? 'text/html' : 'text/plain'
+    @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL admin_request " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "specimen=#{specimen.id}")
+  end
 
   # Ask project admins for admin privileges on project.
   # sender::    User asking for permission.

@@ -197,4 +197,18 @@ module ApplicationHelper
     html = '<p>' + html + '</p>'
   end
 
+  def herbarium_name_box(default_name="")
+	  "<label for=\"specimen_herbarium_name\">#{:specimen_herbarium_name.t}</label>:
+	  #{text_field('specimen', 'herbarium_name', :value => @user.preferred_herbarium_name, :size => 60)}
+	  #{turn_into_herbarium_auto_completer("specimen_herbarium_name")}"
+  end
+
+  def herbarium_id_box
+	  "<label for=\"specimen_herbarium_id\">#{:specimen_herbarium_id.t}</label>:
+	  #{text_field('specimen', 'herbarium_id', :size => 20)}"
+  end
+
+  def table_column_title(title)
+    "<td align=\"center\" class=\"TableColumn\">#{title}</td>"
+  end
 end

@@ -486,7 +486,7 @@ class ObserverController < ApplicationController
     case type
     when :observation, :user, :google
       ctrlr = 'observer'
-    when :comment, :image, :location, :name, :project, :species_list
+    when :comment, :herbarium, :image, :location, :name, :project, :species_list, :specimen
       ctrlr = type
     else
       flash_error(:runtime_invalid.t(:type => :search, :value => type.inspect))
@@ -1046,6 +1046,7 @@ class ObserverController < ApplicationController
     success = false  if !validate_name(params)  # sets @name, @names, @valid_names, @what, etc.
     success = false  if !validate_place_name(params)         # sets @dubious_xxx, @place_name
     success = false  if !validate_observation(@observation)  # flashes errors
+    sucesss = false  if !validate_specimen(params)
     success = false  if @name and !validate_naming(@naming)  # flashes errors
     success = false  if @name and !validate_vote(@vote)      # flashes errors
     success = false  if @bad_images != []
@@ -1094,6 +1095,27 @@ class ObserverController < ApplicationController
     return success
   end
 
+  def validate_specimen(params)
+    success = true
+    if params[:specimen]
+      herbarium_name = params[:specimen][:herbarium_name]
+      if herbarium_name
+        herbarium_name = herbarium_name.strip_html
+        herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
+        if herbarium
+          herbrium_label = herbarium_label_from_params(params)
+          success = herbarium.label_free?(herbrium_label)
+          flash_error(:edit_herbarium_duplicate_label.t(:herbarium_name => herbarium_name, :hebarium_label => herbarium_label)) if !success
+        end
+      end
+    end
+    return success
+  end
+  
+  def herbarium_label_from_params(params)
+    Herbarium.default_specimen_label(params[:name][:name], params[:specimen][:herbarium_id])
+  end
+  
   def save_everything_else(reason)
     if @name
       create_naming_reasons(@naming, reason)
@@ -1104,8 +1126,27 @@ class ObserverController < ApplicationController
     attach_good_images(@observation, @good_images)
     update_projects(@observation, params[:project])
     update_species_lists(@observation, params[:list])
+    save_specimen(@observation, params) # Need params[:specimen] and params[:name]
   end
 
+  def save_specimen(obs, params)
+    if params[:specimen] and obs.specimen
+      herbarium_name = params[:specimen][:herbarium_name]
+      if herbarium_name && !herbarium_name.empty?
+        params[:specimen][:herbarium_id] = obs.id.to_s if params[:specimen][:herbarium_id] == ''
+        herbarium_label = herbarium_label_from_params(params)
+        herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
+        if herbarium.nil?
+          herbarium = Herbarium.new(:name => herbarium_name, :email => @user.email)
+          herbarium.save
+        end
+        specimen = Specimen.new(:herbarium => herbarium, :herbarium_label => herbarium_label, :user => @user, :when => obs.when)
+        specimen.save
+        specimen.add_observation(obs)
+      end
+    end
+  end
+  
   def redirect_to_next_page
     if @observation.location.nil?
       redirect_to(:controller => 'location', :action => 'create_location',

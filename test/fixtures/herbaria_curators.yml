@@ -1,0 +1,15 @@
+nybg_curator_1:
+  herbarium_id: 1
+  user_id: 1
+
+nybg_curator_2:
+  herbarium_id: 1
+  user_id: 6
+
+rolf_curator:
+  herbarium_id: 2
+  user_id: 1
+
+dick_curator:
+  herbarium_id: 3
+  user_id: 4

@@ -341,17 +341,9 @@ class AbstractModel < ActiveRecord::Base
   #   User.show_controller => 'observer'
   #   Name.show_controller => 'name'
   #
+  # TODO: Make this a model method!  Also it's not clear why the default is an error rather than name.underscore.
   def self.show_controller
-    case name
-      when 'Observation', 'Naming', 'Vote', 'User', 'RssLog'
-        return 'observer'
-      when 'Comment', 'Image', 'Location', 'Name', 'Project', 'SpeciesList'
-        return name.underscore
-      when /Description$/
-        return $`.underscore
-      else
-        raise(ArgumentError, "Invalid object type, \"#{name.underscore}\".")
-    end
+    name.underscore
   end
 
   # Return the name of the controller (as a simple lowercase string)

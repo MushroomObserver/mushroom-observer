@@ -151,4 +151,17 @@ unknown_location:
   west: -180
   east: 180
   south: -90
-  
+
+nybg:
+  id: 11
+  sync_id: 11xx1
+  created: 2012-10-21 06:50:00
+  modified: 2012-10-21 06:50:00
+  user_id: 1
+  version: 1
+  name: The New York Botanical Garden, Bronx, New York, USA
+  scientific_name: USA, New York, Bronx, The New York Botanical Garden
+  north: 40.867
+  west: -73.879
+  east: -73.878
+  south: 40.866

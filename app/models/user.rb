@@ -196,6 +196,7 @@
 #  edited_locations::   Location's they've edited.
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
+#  preferred_herbarium_name:: User's preferred herbarium name (defaults to a new personal herbarium).
 #  all_editable_species_lists:: Species Lists they own or that are attached to projects they're on.
 #
 #  ==== Alerts
@@ -272,16 +273,18 @@ class User < AbstractModel
   has_many :votes
   has_many :donations
   has_many :api_keys, :dependent => :destroy
+  has_many :specimens
 
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
   has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"
   has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
-
+  
   has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup',            :join_table => 'user_groups_users'
   has_and_belongs_to_many :authored_names,     :class_name => 'NameDescription',      :join_table => 'name_descriptions_authors'
   has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
   has_and_belongs_to_many :authored_locations, :class_name => 'LocationDescription',  :join_table => 'location_descriptions_authors'
   has_and_belongs_to_many :edited_locations,   :class_name => 'LocationDescription',  :join_table => 'location_descriptions_editors'
+  has_and_belongs_to_many :curated_herbaria,   :class_name => 'Herbarium',            :join_table => 'herbaria_curators'
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -302,6 +305,11 @@ class User < AbstractModel
   # Used to let User enter password confirmation when signing up or changing
   # password.
   attr_accessor :password_confirmation
+
+  # Override the default show_controller
+  def self.show_controller
+    'observer'
+  end
 
   # Find admin's record.
   def self.admin
@@ -493,6 +501,30 @@ class User < AbstractModel
     )
   end
 
+  # Return the name of this user's "favorite" herbarium (meaning the one they have used the most).
+  # TODO: Make this a user preference.
+  def preferred_herbarium_name
+    result = personal_herbarium_name
+    preferred_herbarium = nil
+    count = -1
+    for herbarium in self.curated_herbaria
+      new_count = Specimen.find_all_by_herbarium_id_and_user_id(herbarium.id, self.id).count
+      if new_count > count
+        count = new_count
+        result = herbarium.name
+      end
+    end
+    result
+  end
+  
+  def personal_herbarium_name
+    :user_personal_herbarium.t(:name => self.unique_text_name)
+  end
+  
+  def personal_herbarium
+    Herbarium.find_all_by_name(personal_herbarium_name)[0]
+  end
+  
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
   def all_editable_species_lists

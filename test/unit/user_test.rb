@@ -173,4 +173,9 @@ class UserTest < UnitTestCase
     assert_obj_list_equal([spl1, spl3], @mary.all_editable_species_lists.sort_by(&:id))
     assert_obj_list_equal([], @dick.all_editable_species_lists)
   end
+  
+  def test_preferred_herbarium_name
+    assert_equal(@rolf.preferred_herbarium_name, herbaria(:nybg).name)
+    assert_equal(@mary.preferred_herbarium_name, :user_personal_herbarium.t(:name => @mary.unique_text_name))
+  end
 end

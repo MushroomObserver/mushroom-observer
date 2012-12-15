@@ -144,6 +144,11 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
 
+  # Override the default show_controller
+  def self.show_controller
+    'observer'
+  end
+
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
   def self.all_types
