@@ -62,7 +62,7 @@ org.mo.sv.show.proposeNewLabelCallback = function()
   jQuery("div.svd-show-proposal-dialog").append(content);
   org.mo.sv.show.showProposalDialog();
   // Read the URI of this SVD.
-    org.mo.sv.create.postData["svd"]["uri"] = jQuery("li#svd-show-uri a").text();
+    org.mo.sv.create.postData["svd"]["uri"] = jQuery("li#svd-show-uri p").text();
   // When the "svd-show-label-proposal-submit" button is clicked: check if the 
   // entered label has existed in the ontology, then send it to the backend to 
   // convert to RDF and insert into the triple store.
@@ -114,7 +114,7 @@ org.mo.sv.show.proposeNewScientificNameCallback = function()
   jQuery("div.svd-show-proposal-dialog").append(content);
   org.mo.sv.show.showProposalDialog();
   // Read the URI of this SVD.
-    org.mo.sv.create.postData["svd"]["uri"] = jQuery("li#svd-show-uri a").text();
+    org.mo.sv.create.postData["svd"]["uri"] = jQuery("li#svd-show-uri p").text();
   // When the "svd-show-label-proposal-submit" button is clicked: check if the 
   // entered label has existed in the ontology, then send it to the backend to 
   // convert to RDF and insert into the triple store.
