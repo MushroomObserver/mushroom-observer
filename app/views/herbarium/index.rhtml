@@ -7,26 +7,27 @@
 
 <table>
   <tr>
-    <td>
-      <%= :herbaria.t %>
-    </td>
+    <td></td>
     <td>
       <%= :herbarium_specimen_count.t %>
+    </td>
+    <td align="center">
+      <%= :herbarium_name.t %>
     </td>
   </tr>
 <% for herbarium in @herbaria %>
   <tr>
     <td>
-      <%= link_to(herbarium.name, :action => "show_herbarium", :id => herbarium.id) %>
+      <% if herbarium.is_curator?(@user) %>
+        <%= link_to(:edit_herbarium.t, :action => "edit_herbarium", :id => herbarium.id) %>
+      <% end %>
     </td>
-    <td>
+    <td align="center">
       <%= herbarium.specimen_count %>
     </td>
-    <% if herbarium.is_curator?(@user) %>
-      <td>
-        <%= link_to(:edit_herbarium.t, :action => "edit_herbarium", :id => herbarium.id) %>
-      </td>
-    <% end %>
+    <td>
+      <%= link_to(herbarium.name, :action => "show_herbarium", :id => herbarium.id) %>
+    </td>
   </tr>
 <% end %>
 </table>

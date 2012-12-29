@@ -1,5 +1,8 @@
 <%
   @title = :specimen_index_title.t(:subject => @subject)
+  new_tab_set do
+    add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
+  end
 %>
 
 <table width="100%">
