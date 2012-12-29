@@ -6,10 +6,21 @@
 %>
 
 <table>
+  <tr>
+    <td>
+      <%= :herbaria.t %>
+    </td>
+    <td>
+      <%= :herbarium_specimen_count.t %>
+    </td>
+  </tr>
 <% for herbarium in @herbaria %>
   <tr>
     <td>
       <%= link_to(herbarium.name, :action => "show_herbarium", :id => herbarium.id) %>
+    </td>
+    <td>
+      <%= herbarium.specimen_count %>
     </td>
     <% if herbarium.is_curator?(@user) %>
       <td>

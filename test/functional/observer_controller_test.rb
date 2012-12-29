@@ -804,6 +804,20 @@ class ObserverControllerTest < FunctionalTestCase
     assert(!obs.specimen)
     assert(obs.specimens.count == 0)
   end
+
+  def test_create_observation_with_new_herbarium
+    generic_construct_observation({
+      :observation => { :specimen => '1' },
+      :specimen => { :herbarium_name => "A Brand New Herbarium", :herbarium_id => "" },
+      :name => { :name => "Coprinus comatus" }
+    }, 1, 1, 0)
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert(obs.specimens.count == 1)
+    specimen = obs.specimens[0]
+    herbarium = specimen.herbarium
+    assert(herbarium.is_curator?(users(:rolf)))
+  end
   
   def test_construct_observation
 

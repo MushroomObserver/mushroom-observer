@@ -379,12 +379,14 @@ def list_remote_files(server, size=nil)
     verbose cmd
     open("|#{cmd}") do |dir|
       dir.each_line do |line|
-        size, file = line.chomp.split.values_at(4, 7)
+        size, file = line.chomp.split.values_at(4, -1)
+	verbose "#{size}, #{file}"
         if file && file.match(/^\d+\.\w+$/) && size.to_i != 0
           files["#{type}/#{file}"] = size.to_i
         end
       end
     end
+    verbose "Done: #{cmd}"
   end
   return files
 end

@@ -1138,6 +1138,7 @@ class ObserverController < ApplicationController
         herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
         if herbarium.nil?
           herbarium = Herbarium.new(:name => herbarium_name, :email => @user.email)
+          herbarium.curators.push(@user)
           herbarium.save
         end
         specimen = Specimen.new(:herbarium => herbarium, :herbarium_label => herbarium_label, :user => @user, :when => obs.when)

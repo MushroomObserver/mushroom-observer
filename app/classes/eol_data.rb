@@ -92,6 +92,10 @@ class EolData
     @description_id_to_authors[id].join(', ')
   end
   
+  def refresh_links_to_eol
+    refresh_predicate(self.names, ':eolName')
+  end
+
 private    
   def prune_synonyms(names)
     synonyms = Hash.new{|h, k| h[k] = []}
@@ -219,5 +223,21 @@ private
     result = {}
     obj_list.each {|o| result[o.id] = o}
     result
+  end
+  
+  def refresh_predicate(subjects, predicate)
+    Triple.delete_predicate_matches(predicate)
+    create_name_triples(subjects, predicates)
+  end
+
+  def create_name_triples(subjects, p)
+    url_generator = EolUrlGenerator.new()
+    for s in subjects
+      Triple.new(subject=s.uri, predicate=p, object=url_generator.calc_url(name))
+    end
+  end
+  
+  def name_url(name)
+    return "http://eol.org/search/#{name.text_name}"
   end
 end

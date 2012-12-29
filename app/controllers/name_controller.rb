@@ -1432,6 +1432,12 @@ class NameController < ApplicationController
     render(:action => "eol", :layout => false)
   end
 
+  def refresh_links_to_eol
+    data = get_eol_collection_data
+    clear_eol_data
+    load_eol_data(data)
+  end
+  
   def eol_for_taxon
     store_location
 

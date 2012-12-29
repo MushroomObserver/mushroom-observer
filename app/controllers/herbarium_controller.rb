@@ -76,7 +76,7 @@ class HerbariumController < ApplicationController
   
   def index # :nologin:
     store_location
-    @herbaria = Herbarium.find(:all)
+    @herbaria = Herbarium.find(:all, :order => :name)
   end
   
   def create_herbarium # :norobots:

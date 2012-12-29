@@ -1932,6 +1932,7 @@ herbarium_curators: Curators
 herbarium_mailing_address: Mailing Address
 herbarium_edit: New herbarium called '[name]' created.
 herbarium_code: Code
+herbarium_specimen_count: Specimen Count
 
 # herbarium/show_herbarium
 show_herbarium: Show Herbarium

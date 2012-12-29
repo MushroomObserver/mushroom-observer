@@ -286,6 +286,10 @@ class Name < AbstractModel
     self.sort_name <=> x.sort_name
   end
 
+  def url
+    return "http://mushroomobserver.org/name/#{id}"
+  end
+  
   def best_brief_description
     if self.description
       if self.description.gen_desc.blank?

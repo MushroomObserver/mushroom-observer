@@ -51,4 +51,8 @@ class Herbarium < AbstractModel
     end
     result
   end
+  
+  def specimen_count
+    specimens.count
+  end
 end
