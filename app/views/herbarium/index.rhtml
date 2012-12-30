@@ -18,7 +18,7 @@
 <% for herbarium in @herbaria %>
   <tr>
     <td>
-      <% if herbarium.is_curator?(@user) %>
+      <% if is_in_admin_mode? or herbarium.is_curator?(@user) %>
         <%= link_to(:edit_herbarium.t, :action => "edit_herbarium", :id => herbarium.id) %>
       <% end %>
     </td>

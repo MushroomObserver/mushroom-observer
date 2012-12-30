@@ -112,7 +112,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:success)
   end
   
-  # I keep thinking only curators should be able to add specimens...
+  # I keep thinking only curators should be able to add specimens.  However, for now anyone can.
   def test_add_specimen_post_not_curator
     user = login('mary')
     nybg = herbaria(:nybg)
@@ -139,6 +139,10 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     login('rolf')
+    get_with_dump(:edit_specimen, :id => nybg.id)
+    assert_response('edit_specimen')
+
+    make_admin('mary') # Non-curator, but an admin
     get_with_dump(:edit_specimen, :id => nybg.id)
     assert_response('edit_specimen')
   end
@@ -177,9 +181,33 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
   
+  def test_delete_specimen_not_curator
+    login('mary')
+    params = delete_specimen_params
+    specimen_count = Specimen.count
+    specimen = Specimen.find(params[:id])
+    observations = specimen.observations
+    obs_spec_count = observations.map {|o| o.specimens.count }.reduce {|a,b| a+b}
+    post(:delete_specimen, params)
+    assert_equal(specimen_count, Specimen.count)
+    assert_response(:redirect)
+  end
+  
+  def test_delete_specimen_admin
+    make_admin('mary')
+    params = delete_specimen_params
+    specimen_count = Specimen.count
+    specimen = Specimen.find(params[:id])
+    observations = specimen.observations
+    obs_spec_count = observations.map {|o| o.specimens.count }.reduce {|a,b| a+b}
+    post(:delete_specimen, params)
+    assert_equal(specimen_count-1, Specimen.count)
+    assert_response(:redirect)
+  end
+  
   def delete_specimen_params
     {
-      :id => specimens(:interesting_unknown)
+      :id => specimens(:interesting_unknown).id
     }
   end
 end

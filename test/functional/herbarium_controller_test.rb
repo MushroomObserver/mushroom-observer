@@ -131,6 +131,10 @@ class HerbariumControllerTest < FunctionalTestCase
     login('rolf')
     get_with_dump(:edit_herbarium, :id => nybg.id)
     assert_response('edit_herbarium')
+
+    make_admin('mary') # Non-curator but an admin
+    get_with_dump(:edit_herbarium, :id => nybg.id)
+    assert_response('edit_herbarium')
   end
   
   def test_edit_herbarium_post
@@ -262,6 +266,16 @@ class HerbariumControllerTest < FunctionalTestCase
     post(:delete_curator, params)
     assert_equal(curator_count, Herbarium.find(params[:id]).curators.count)
     assert_flash(/are not a curator/)
+    assert_response(:redirect)
+  end
+  
+  def test_delete_curator_you_admin
+    make_admin('mary')
+    params = delete_curator_params
+    herbarium = Herbarium.find(params[:id])
+    curator_count = herbarium.curators.count
+    post(:delete_curator, params)
+    assert_equal(curator_count-1, Herbarium.find(params[:id]).curators.count)
     assert_response(:redirect)
   end
   

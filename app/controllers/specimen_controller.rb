@@ -169,11 +169,31 @@ class SpecimenController < ApplicationController
       redirect_to(:controller => 'observer', :action => 'show_observation', :id => specimen.observations[0].id)
     end
   end
+
+  def delete_specimen
+    specimen = Specimen.find(params[:id])
+    herbarium_id = specimen.herbarium_id
+    if can_delete?(specimen)
+      specimen.clear_observations
+      specimen.destroy
+    end
+    redirect_to(:action => 'herbarium_index', :id => herbarium_id)
+  end
+
+  def can_delete?(specimen)
+    has_permission?(specimen, :delete_specimen_cannot_delete.l)
+  end
+  
+  def has_permission?(specimen, error_message)
+    result = (is_in_admin_mode? or specimen.can_edit?(@user))
+    flash_error(error_message) if not result
+    result
+  end
   
   def edit_specimen # :norobots:
     @specimen = Specimen.find(params[:id])
     if can_edit?(@specimen)
-      if request.method == :post
+      if (request.method == :post) and params[:specimen][:herbarium_label]
         if ok_to_update(@specimen, params[:specimen])
           update_specimen(@specimen, params[:specimen])
         end
@@ -182,19 +202,9 @@ class SpecimenController < ApplicationController
       redirect_to(:action => 'show_specimen', :id => @specimen.id)
     end
   end
-
-  def delete_specimen
-    specimen = Specimen.find(params[:id])
-    herbarium_id = specimen.herbarium_id
-    specimen.clear_observations
-    specimen.destroy
-    redirect_to(:action => 'herbarium_index', :id => herbarium_id)
-  end
   
   def can_edit?(specimen)
-    result = specimen.can_edit?(@user)
-    flash_error(:edit_specimen_cannot_edit.l) if not result
-    result
+    has_permission?(specimen, :edit_specimen_cannot_edit.l)
   end
   
   def ok_to_update(specimen, params)

@@ -19,7 +19,7 @@
 		observation = specimen.observations %>
     <tr class="ListLine<%= odd_or_even %>">
 	    <td>
-	    	<% if specimen.can_edit?(@user)
+	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
 					form_tag({:action => 'edit_specimen', :id => specimen.id}) do %>
 						<%= submit_tag :herbarium_edit_specimen.t %>
 					<% end
@@ -35,7 +35,7 @@
 				<%= observation_links(specimen) %>
 			</td>
 	    <td>
-	    	<% if specimen.can_edit?(@user)
+	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
 					form_tag({:action => 'delete_specimen', :id => specimen.id}) do %>
 						<%= submit_tag :herbarium_delete_specimen.t, :confirm => :are_you_sure.t %>
 					<% end

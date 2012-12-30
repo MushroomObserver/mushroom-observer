@@ -2015,6 +2015,8 @@ observation_index_no_specimens: This observation has no specimens
 # specimen/list_specimens
 list_specimens_title: "[:list_objects(type=:project)]"
 
+# specimen/delete_specimen
+delete_specimen_cannot_delete: Attempt to delete specimen without permission
 
 # support/donate
 donate_title: Donate to Mushroom Observer
