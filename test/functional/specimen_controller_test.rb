@@ -167,6 +167,13 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
   
+  def test_edit_specimen_post_no_specimen
+    login('rolf')
+    nybg = specimens(:coprinus_comatus_nybg_spec)
+    post(:edit_specimen, :id => nybg.id)
+    assert_response('edit_specimen')
+  end
+
   def test_delete_specimen
     login('rolf')
     params = delete_specimen_params

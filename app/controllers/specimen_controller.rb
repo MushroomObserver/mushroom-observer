@@ -193,7 +193,7 @@ class SpecimenController < ApplicationController
   def edit_specimen # :norobots:
     @specimen = Specimen.find(params[:id])
     if can_edit?(@specimen)
-      if (request.method == :post) and params[:specimen][:herbarium_label]
+      if (request.method == :post) and params[:specimen]
         if ok_to_update(@specimen, params[:specimen])
           update_specimen(@specimen, params[:specimen])
         end
