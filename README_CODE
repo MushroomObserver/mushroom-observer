@@ -218,7 +218,7 @@ templates.  Example:
       # Show mode: Lookup object and render "show.rhtml".
       # Note that it does NOT call the show() method!!
       when 'show'
-        @object = Model.find(params[:id])
+        @object = Model.find(params[:id].to_s)
         render :action => :show
 
       # Index mode: Get list of all objects and render "index.rhtml".

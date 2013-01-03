@@ -43,7 +43,7 @@ module DescriptionControllerHelpers
   # Make a description the default one.  Description must be public-readable.
   def make_description_default # :norobots:
     pass_query_params
-    if desc = find_description(params[:id])
+    if desc = find_description(params[:id].to_s)
       if !desc.public
         flash_error(:runtime_description_make_default_only_public.t)
       else
@@ -65,7 +65,7 @@ module DescriptionControllerHelpers
   # old description afterword.
   def merge_descriptions # :norobots:
     pass_query_params
-    if src = find_description(params[:id])
+    if src = find_description(params[:id].to_s)
       @description = src
 
       # Doesn't have permission to see source.
@@ -224,7 +224,7 @@ module DescriptionControllerHelpers
   # conflict bring up the edit_description form to let the user do the merge.
   def publish_description # :norobots:
     pass_query_params
-    if draft = find_description(params[:id])
+    if draft = find_description(params[:id].to_s)
       parent = draft.parent
       old = parent.description
       type = parent.type_tag
@@ -279,7 +279,7 @@ module DescriptionControllerHelpers
   # Adjust permissions on a description.
   def adjust_permissions # :norobots:
     pass_query_params
-    if @description = find_description(params[:id])
+    if @description = find_description(params[:id].to_s)
       done = false
 
       # Doesn't have permission.

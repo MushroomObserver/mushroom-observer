@@ -322,7 +322,7 @@ class ApplicationController < ActionController::Base
   # or false.  Flashes a "denied" error message if false.
   #
   #   def destroy_thing
-  #     @thing = Thing.find(params[:id])
+  #     @thing = Thing.find(params[:id].to_s)
   #     if check_permission!(@thing)
   #       @thing.destroy
   #       flash_notice "Success!"
@@ -1130,7 +1130,7 @@ class ApplicationController < ActionController::Base
   # 'show_object' action.
   #
   #   def next_image
-  #     redirect_to_next_object(:next, Image, params[:id])
+  #     redirect_to_next_object(:next, Image, params[:id].to_s)
   #   end
   #
   def redirect_to_next_object(method, model, id)
@@ -1441,7 +1441,7 @@ class ApplicationController < ActionController::Base
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
-  #   query  = create_query(:Name, :by_user, :user => params[:id])
+  #   query  = create_query(:Name, :by_user, :user => params[:id].to_s)
   #   query.need_letters('names.display_name')
   #   @pages = paginate_letters(:letter, :page, 50)
   #   @names = query.paginate(@pages)
@@ -1466,7 +1466,7 @@ class ApplicationController < ActionController::Base
   # num_per_page::  Number of results per page.  (default is 50)
   #
   #   # In controller:
-  #   query    = create_query(:Name, :by_user, :user => params[:id])
+  #   query    = create_query(:Name, :by_user, :user => params[:id].to_s)
   #   @numbers = paginate_numbers(:page, 50)
   #   @names   = query.paginate(@numbers)
   #

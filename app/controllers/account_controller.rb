@@ -187,7 +187,7 @@ class AccountController < ApplicationController
 
   # This is used by the "reverify" page to re-send the verification email.
   def send_verify # :nologin:
-    if user = find_or_goto_index(User, params[:id])
+    if user = find_or_goto_index(User, params[:id].to_s)
       AccountMailer.deliver_verify(user)
       flash_notice :runtime_reverify_sent.t
       redirect_back_or_default(:action => :welcome)
@@ -523,7 +523,7 @@ class AccountController < ApplicationController
   alias_method :no_question_email,         :no_email_general_question
 
   def no_email(type)
-    if check_permission!(params[:id])
+    if check_permission!(params[:id].to_s)
       method  = "email_#{type}="
       prefix  = "no_email_#{type}"
       success = "#{prefix}_success".to_sym
@@ -580,7 +580,7 @@ class AccountController < ApplicationController
   end
 
   def activate_api_key # :login: :norobots:
-    if key = find_or_goto_index(ApiKey, params[:id])
+    if key = find_or_goto_index(ApiKey, params[:id].to_s)
       if check_permission!(key)
         key.verify!
         flash_notice(:account_api_keys_activated.t(:notes => key.notes))
@@ -592,7 +592,7 @@ class AccountController < ApplicationController
   end
 
   def edit_api_key # :login: :norobots:
-    if @key = find_or_goto_index(ApiKey, params[:id])
+    if @key = find_or_goto_index(ApiKey, params[:id].to_s)
       if check_permission!(@key)
         if request.method == :post
           if params[:commit] == :UPDATE.l
@@ -664,7 +664,7 @@ class AccountController < ApplicationController
 
   def create_alert # :root:
     redirect = true
-    id = params[:id]
+    id = params[:id].to_s
     if @user2 = find_or_goto_index(User, id)
       if is_in_admin_mode?
         if request.method == :get

@@ -16,7 +16,7 @@ class ConferenceController < ApplicationController
   # Creating a conference event should be RESTful, but I'm not sure what our conventions are at this point
   def show_event # :nologin:
     store_location
-    @event = ConferenceEvent.find(params[:id])
+    @event = ConferenceEvent.find(params[:id].to_s)
     @registration_count = @event.how_many
   end
 
@@ -42,12 +42,12 @@ class ConferenceController < ApplicationController
     # Expand to any MO user, but make them owned and editable only by that user or an admin
     if is_in_admin_mode?
       if request.method == :post
-        event = ConferenceEvent.find(params[:id])
+        event = ConferenceEvent.find(params[:id].to_s)
         event.attributes = params[:event]
         event.save
         redirect_to(:action => 'show_event', :id => event.id)
       else
-        @event = ConferenceEvent.find(params[:id])
+        @event = ConferenceEvent.find(params[:id].to_s)
       end
     else
       flash_error(:edit_event_not_allowed.l)
@@ -57,7 +57,7 @@ class ConferenceController < ApplicationController
   
   def register # :nologin: :norobots:
     store_location
-    event = ConferenceEvent.find(params[:id])
+    event = ConferenceEvent.find(params[:id].to_s)
     if request.method == :post
       registration = find_previous_registration(params)
       if registration.nil?
@@ -90,7 +90,7 @@ class ConferenceController < ApplicationController
   
   def list_registrations # :norobots:
     if is_in_admin_mode?
-      @event = ConferenceEvent.find(params[:id])
+      @event = ConferenceEvent.find(params[:id].to_s)
       @hello = "Hello"
     else
       flash_error(:list_registrations_not_allowed.l)
@@ -99,7 +99,7 @@ class ConferenceController < ApplicationController
   end
   
   def verify # :nologin: :norobots:
-    registration = ConferenceRegistration.find(params[:id])
+    registration = ConferenceRegistration.find(params[:id].to_s)
     if registration.verified == nil
       registration.verified = Time.now
       registration.save

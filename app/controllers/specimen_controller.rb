@@ -49,18 +49,18 @@ class SpecimenController < ApplicationController
 
   def show_specimen  # :nologin:
     store_location
-    @specimen = Specimen.find(params[:id])
+    @specimen = Specimen.find(params[:id].to_s)
     @layout = calc_layout_params
   end
 
   def herbarium_index # :nologin:
     store_location
-    herbarium = Herbarium.find(params[:id])
+    herbarium = Herbarium.find(params[:id].to_s)
     @specimens = herbarium ? herbarium.specimens : []
     @subject = herbarium.name
     if !calc_specimen_index_redirect(@specimens)
       flash_warning(:herbarium_index_no_specimens.t)
-      redirect_to(:controller => 'herbarium', :action => 'show_herbarium', :id => params[:id])
+      redirect_to(:controller => 'herbarium', :action => 'show_herbarium', :id => params[:id].to_s)
     end
   end
   
@@ -77,17 +77,17 @@ class SpecimenController < ApplicationController
 
   def observation_index # :nologin:
     store_location
-    observation = Observation.find(params[:id])
+    observation = Observation.find(params[:id].to_s)
     @specimens = observation ? observation.specimens : []
     @subject = observation.format_name
     if !calc_specimen_index_redirect(@specimens)
       flash_warning(:observation_index_no_specimens.t)
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => params[:id])
+      redirect_to(:controller => 'observer', :action => 'show_observation', :id => params[:id].to_s)
     end
   end
   
   def add_specimen
-    @observation = Observation.find(params[:id])
+    @observation = Observation.find(params[:id].to_s)
     @layout = calc_layout_params
     if @observation
       @herbarium_label = @observation.default_specimen_label
@@ -171,7 +171,7 @@ class SpecimenController < ApplicationController
   end
 
   def delete_specimen
-    specimen = Specimen.find(params[:id])
+    specimen = Specimen.find(params[:id].to_s)
     herbarium_id = specimen.herbarium_id
     if can_delete?(specimen)
       specimen.clear_observations
@@ -191,7 +191,7 @@ class SpecimenController < ApplicationController
   end
   
   def edit_specimen # :norobots:
-    @specimen = Specimen.find(params[:id])
+    @specimen = Specimen.find(params[:id].to_s)
     if can_edit?(@specimen)
       if (request.method == :post) and params[:specimen]
         if ok_to_update(@specimen, params[:specimen])

@@ -577,7 +577,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Now we can be sure show_notifications is supposed to actually show a
     # non-empty list, and thus that this test is meaningful.
-    requires_login(:show_notifications, :id => observations(:coprinus_comatus_obs))
+    requires_login(:show_notifications, :id => observations(:coprinus_comatus_obs).id)
     assert_response('show_notifications')
   end
 

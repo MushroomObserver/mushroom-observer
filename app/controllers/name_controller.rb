@@ -104,7 +104,7 @@ class NameController < ApplicationController
   # Display list of names in last index/search query.
   def index_name # :nologin: :norobots:
     query = find_or_create_query(:Name, :by => params[:by])
-    show_selected_names(query, :id => params[:id], :always_index => true)
+    show_selected_names(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # Display list of all (correctly-spelled) names in the database.
@@ -127,7 +127,7 @@ class NameController < ApplicationController
 
   # Display list of names that a given user is author on.
   def names_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Name, :by_user, :user => user)
       show_selected_names(query)
     end
@@ -138,7 +138,7 @@ class NameController < ApplicationController
 
   # Display list of names that a given user is editor on.
   def names_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Name, :by_editor, :user => user)
       show_selected_names(query)
     end
@@ -271,7 +271,7 @@ class NameController < ApplicationController
   # Display list of names in last index/search query.
   def index_name_description # :nologin: :norobots:
     query = find_or_create_query(:NameDescription, :by => params[:by])
-    show_selected_name_descriptions(query, :id => params[:id],
+    show_selected_name_descriptions(query, :id => params[:id].to_s,
                                     :always_index => true)
   end
 
@@ -283,7 +283,7 @@ class NameController < ApplicationController
 
   # Display list of name_descriptions that a given user is author on.
   def name_descriptions_by_author # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:NameDescription, :by_author, :user => user)
       show_selected_name_descriptions(query)
     end
@@ -291,7 +291,7 @@ class NameController < ApplicationController
 
   # Display list of name_descriptions that a given user is editor on.
   def name_descriptions_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:NameDescription, :by_editor, :user => user)
       show_selected_name_descriptions(query)
     end
@@ -340,7 +340,7 @@ class NameController < ApplicationController
     clear_query_in_session
 
     # Load Name and NameDescription along with a bunch of associated objects.
-    name_id = params[:id]
+    name_id = params[:id].to_s
     desc_id = params[:desc]
     if @name = find_or_goto_index(Name, name_id,
                                   :include => [:user, :descriptions])
@@ -401,7 +401,7 @@ class NameController < ApplicationController
   def show_name_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(NameDescription, params[:id],
+    if @description = find_or_goto_index(NameDescription, params[:id].to_s,
                         :include => [:authors, :editors, :license, :reviewer,
                                      :user, {:name=>:descriptions}])
 
@@ -437,7 +437,7 @@ class NameController < ApplicationController
   def show_past_name # :nologin: :prefetch: :norobots:
     pass_query_params
     store_location
-    if @name = find_or_goto_index(Name, params[:id])
+    if @name = find_or_goto_index(Name, params[:id].to_s)
       @name.revert_to(params[:version].to_i)
 
       # Old correct spellings could have gotten merged with something else and no longer exist.
@@ -456,7 +456,7 @@ class NameController < ApplicationController
   def show_past_name_description # :nologin: :prefetch: :norobots:
     pass_query_params
     store_location
-    if @description = find_or_goto_index(NameDescription, params[:id])
+    if @description = find_or_goto_index(NameDescription, params[:id].to_s)
       @name = @description.name
       if params[:merge_source_id].blank?
         @description.revert_to(params[:version].to_i)
@@ -477,29 +477,29 @@ class NameController < ApplicationController
 
   # Go to next name: redirects to show_name.
   def next_name # :nologin: :norobots:
-    redirect_to_next_object(:next, Name, params[:id])
+    redirect_to_next_object(:next, Name, params[:id].to_s)
   end
 
   # Go to previous name: redirects to show_name.
   def prev_name # :nologin: :norobots:
-    redirect_to_next_object(:prev, Name, params[:id])
+    redirect_to_next_object(:prev, Name, params[:id].to_s)
   end
 
   # Go to next name: redirects to show_name.
   def next_name_description # :nologin: :norobots:
-    redirect_to_next_object(:next, NameDescription, params[:id])
+    redirect_to_next_object(:next, NameDescription, params[:id].to_s)
   end
 
   # Go to previous name_description: redirects to show_name_description.
   def prev_name_description # :nologin: :norobots:
-    redirect_to_next_object(:prev, NameDescription, params[:id])
+    redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
   end
 
   # Callback to let reviewers change the review status of a Name from the
   # show_name page.
   def set_review_status # :norobots:
     pass_query_params
-    id = params[:id]
+    id = params[:id].to_s
     desc = NameDescription.find(id)
     if is_reviewer?
       desc.update_review_status(params[:value])
@@ -535,7 +535,7 @@ class NameController < ApplicationController
   def edit_name # :prefetch: :norobots:
     store_location
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id])
+    if @name = find_or_goto_index(Name, params[:id].to_s)
       init_edit_name_form
       if request.method == :post
         @parse = parse_name
@@ -805,7 +805,7 @@ class NameController < ApplicationController
   def create_name_description # :prefetch: :norobots:
     store_location
     pass_query_params
-    @name = Name.find(params[:id])
+    @name = Name.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
     # Render a blank form.
@@ -873,7 +873,7 @@ class NameController < ApplicationController
   def edit_name_description # :prefetch: :norobots:
     store_location
     pass_query_params
-    @description = NameDescription.find(params[:id])
+    @description = NameDescription.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
     if !check_description_edit_permission(@description, params[:description])
@@ -962,7 +962,7 @@ class NameController < ApplicationController
 
   def destroy_name_description # :norobots:
     pass_query_params
-    @description = NameDescription.find(params[:id])
+    @description = NameDescription.find(params[:id].to_s)
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.name.log(:log_description_destroyed,
@@ -993,7 +993,7 @@ class NameController < ApplicationController
   # of a name, removing others, writing in new, etc.
   def change_synonyms # :prefetch: :norobots:
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id])
+    if @name = find_or_goto_index(Name, params[:id].to_s)
       @list_members     = nil
       @new_names        = nil
       @synonym_name_ids = []
@@ -1102,7 +1102,7 @@ class NameController < ApplicationController
     params[:chosen_name] ||= {}
     params[:is]          ||= {}
 
-    if @name = find_or_goto_index(Name, params[:id])
+    if @name = find_or_goto_index(Name, params[:id].to_s)
       @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
       @comment = params[:comment][:comment].to_s.strip_squeeze rescue ''
 
@@ -1174,7 +1174,7 @@ class NameController < ApplicationController
   # name, possibly deprecating its synonyms at the same time.
   def approve_name # :prefetch: :norobots:
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id])
+    if @name = find_or_goto_index(Name, params[:id].to_s)
       @approved_names = @name.approved_synonyms
       comment = params[:comment][:comment] rescue ''
       comment = comment.strip_squeeze
@@ -1442,7 +1442,7 @@ class NameController < ApplicationController
     store_location
 
     # need name_id and review_status_list
-    id = params[:id]
+    id = params[:id].to_s
     @name = Name.find(id)
     @layout = calc_layout_params
 
@@ -1524,7 +1524,7 @@ class NameController < ApplicationController
   # Draw a map of all the locations where this name has been observed.
   def map # :nologin: :norobots:
     pass_query_params
-    if @name = find_or_goto_index(Name, params[:id])
+    if @name = find_or_goto_index(Name, params[:id].to_s)
       @query = create_query(:Observation, :of_name, :name => @name)
       @observations = @query.results.select {|o| o.lat or o.location}
     end
@@ -1534,7 +1534,7 @@ class NameController < ApplicationController
   # for a name.
   def email_tracking # :norobots:
     pass_query_params
-    name_id = params[:id]
+    name_id = params[:id].to_s
     if @name = find_or_goto_index(Name, name_id)
       @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
 

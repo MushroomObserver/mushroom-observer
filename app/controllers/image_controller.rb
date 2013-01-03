@@ -70,7 +70,7 @@ class ImageController < ApplicationController
   # Display matrix of selected images, based on current Query.
   def index_image # :nologin: :norobots:
     query = find_or_create_query(:Image, :by => params[:by])
-    show_selected_images(query, :id => params[:id], :always_index => true)
+    show_selected_images(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # Display matrix of images, most recent first.
@@ -81,7 +81,7 @@ class ImageController < ApplicationController
 
   # Display matrix of images by a given user.
   def images_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Image, :by_user, :user => user)
       show_selected_images(query)
     end
@@ -89,7 +89,7 @@ class ImageController < ApplicationController
 
   # Display matrix of Image's attached to a given project.
   def images_for_project
-    if project = find_or_goto_index(Project, params[:id])
+    if project = find_or_goto_index(Project, params[:id].to_s)
       query = create_query(:Image, :for_project, :project => project)
       show_selected_images(query, {:always_index => 1})
     end
@@ -185,7 +185,7 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image # :nologin: :prefetch:
     store_location
-    if @image = find_or_goto_index(Image, params[:id], :include => [
+    if @image = find_or_goto_index(Image, params[:id].to_s, :include => [
                                      :copyright_changes,
                                      :image_votes,
                                      :license,
@@ -259,26 +259,26 @@ class ImageController < ApplicationController
 
   # For backwards compatibility.
   def show_original
-    redirect_to(:action => 'show_image', :size => 'full_size', :id => params[:id])
+    redirect_to(:action => 'show_image', :size => 'full_size', :id => params[:id].to_s)
   end
 
   # Go to next image: redirects to show_image.
   def next_image # :nologin: :norobots:
-    redirect_to_next_object(:next, Image, params[:id])
+    redirect_to_next_object(:next, Image, params[:id].to_s)
   end
 
   # Go to previous image: redirects to show_image.
   def prev_image # :nologin: :norobots:
-    redirect_to_next_object(:prev, Image, params[:id])
+    redirect_to_next_object(:prev, Image, params[:id].to_s)
   end
 
   # Change user's vote and go to next image.
   def cast_vote # :norobots:
-    if image = find_or_goto_index(Image, params[:id])
+    if image = find_or_goto_index(Image, params[:id].to_s)
       val = image.change_vote(@user, params[:value])
       Transaction.put_images(:id => image, :set_vote => val)
       if params[:next]
-        redirect_to_next_object(:next, Image, params[:id])
+        redirect_to_next_object(:next, Image, params[:id].to_s)
       else
         redirect_to(:action => 'show_image', :id => id, :params => query_params)
       end
@@ -305,7 +305,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def add_image # :prefetch: :norobots:
     pass_query_params
-    if @observation = find_or_goto_index(Observation, params[:id])
+    if @observation = find_or_goto_index(Observation, params[:id].to_s)
       if !check_permission!(@observation)
         redirect_to(:controller => 'observer', :action => 'show_observation',
                     :id => @observation.id, :params => query_params)
@@ -375,7 +375,7 @@ class ImageController < ApplicationController
   # Outputs: @image, @licenses
   def edit_image # :prefetch: :norobots:
     pass_query_params
-    if @image = find_or_goto_index(Image, params[:id])
+    if @image = find_or_goto_index(Image, params[:id].to_s)
       @licenses = License.current_names_and_ids(@image.license)
       if !check_permission!(@image)
         redirect_to(:action => 'show_image', :id => @image,
@@ -483,7 +483,7 @@ class ImageController < ApplicationController
   # Inputs: params[:id] (image)
   # Redirects to list_images.
   def destroy_image # :norobots:
-    if @image = find_or_goto_index(Image, params[:id])
+    if @image = find_or_goto_index(Image, params[:id].to_s)
       next_state = nil
       # decide where to redirect after deleting image
       if this_state = find_query(:Image)
@@ -498,7 +498,7 @@ class ImageController < ApplicationController
         @image.log_destroy
         @image.destroy
         Transaction.delete_image(:id => @image)
-        flash_notice(:runtime_image_destroy_success.t(:id => params[:id]))
+        flash_notice(:runtime_image_destroy_success.t(:id => params[:id].to_s))
         if next_state
           redirect_to(:action => 'show_image', :id => next_state.current_id,
                       :params => set_query_params(next_state))
@@ -619,7 +619,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def remove_images # :norobots:
     pass_query_params
-    if @observation = find_or_goto_index(Observation, params[:id], :include => :images)
+    if @observation = find_or_goto_index(Observation, params[:id].to_s, :include => :images)
 
       # Make sure user owns the observation.
       if !check_permission!(@observation)
@@ -648,7 +648,7 @@ class ImageController < ApplicationController
   # Used by show_image to rotate and flip image.
   def transform_image # :norobots:
     pass_query_params
-    if image = find_or_goto_index(Image, params[:id])
+    if image = find_or_goto_index(Image, params[:id].to_s)
       if check_permission!(image)
         if params[:op] == 'rotate_left'
           image.transform(:rotate_left)

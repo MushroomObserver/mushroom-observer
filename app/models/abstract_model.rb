@@ -275,7 +275,7 @@ class AbstractModel < ActiveRecord::Base
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
   #   def show_observation
-  #     @observation = Observation.find(params[:id])
+  #     @observation = Observation.find(params[:id].to_s)
   #     @observation.update_view_stats
   #     ...
   #   end

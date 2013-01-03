@@ -171,7 +171,7 @@
 #            :params => query_params(query))
 #
 #    # And this is how prev and next work:
-#    query = find_or_create_query(:Image, :current => params[:id])
+#    query = find_or_create_query(:Image, :current => params[:id].to_s)
 #    if new_query = query.next
 #      redirect_to(:action => 'show_image', :id => new_query.current_id,
 #                  :params => query_params(new_query))

@@ -69,19 +69,19 @@ class SpeciesListController < ApplicationController
   # (Linked from show_species_list, next to "prev" and "next".)
   def index_species_list # :nologin: :norobots:
     query = find_or_create_query(:SpeciesList, :by => params[:by])
-    show_selected_species_lists(query, :id => params[:id],
+    show_selected_species_lists(query, :id => params[:id].to_s,
                                 :always_index => true)
   end
 
   # Display list of all species_lists, sorted by date.  (Linked from left panel.)
   def list_species_lists # :nologin:
     query = create_query(:SpeciesList, :all, :by => :date)
-    show_selected_species_lists(query, :id => params[:id], :by => params[:by])
+    show_selected_species_lists(query, :id => params[:id].to_s, :by => params[:by])
   end
 
   # Display list of user's species_lists, sorted by date.  (Linked from left panel.)
   def species_lists_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:SpeciesList, :by_user, :user => user)
       show_selected_species_lists(query)
     end
@@ -89,7 +89,7 @@ class SpeciesListController < ApplicationController
 
   # Display list of SpeciesList's attached to a given project.
   def species_lists_for_project
-    if project = find_or_goto_index(Project, params[:id])
+    if project = find_or_goto_index(Project, params[:id].to_s)
       query = create_query(:SpeciesList, :for_project, :project => project)
       show_selected_species_lists(query, {:always_index => 1})
     end
@@ -155,7 +155,7 @@ class SpeciesListController < ApplicationController
     store_location
     clear_query_in_session
     pass_query_params
-    if @species_list = find_or_goto_index(SpeciesList, params[:id], :include => [
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s, :include => [
                                             {:comments => :user},
                                             :location,
                                             :projects,
@@ -171,11 +171,11 @@ class SpeciesListController < ApplicationController
   end
 
   def next_species_list # :nologin: :norobots:
-    redirect_to_next_object(:next, SpeciesList, params[:id])
+    redirect_to_next_object(:next, SpeciesList, params[:id].to_s)
   end
 
   def prev_species_list # :nologin: :norobots:
-    redirect_to_next_object(:prev, SpeciesList, params[:id])
+    redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
   ##############################################################################
@@ -186,7 +186,7 @@ class SpeciesListController < ApplicationController
 
   # Used by show_species_list.
   def make_report # :nologin: :norobots:
-    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       names = @species_list.names
       case params[:type]
       when 'txt'
@@ -197,7 +197,7 @@ class SpeciesListController < ApplicationController
         render_name_list_as_csv(names)
       else
         flash_error(:make_report_not_supported.t(:type => params[:type]))
-        redirect_to(:action => "show_species_list", :id => params[:id])
+        redirect_to(:action => "show_species_list", :id => params[:id].to_s)
       end
     end
   end
@@ -340,7 +340,7 @@ class SpeciesListController < ApplicationController
   end
 
   def edit_species_list # :prefetch: :norobots:
-    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if !check_permission!(@species_list)
         redirect_to(:action => 'show_species_list', :id => @species_list)
       elsif request.method != :post
@@ -356,7 +356,7 @@ class SpeciesListController < ApplicationController
 
   # Form to let user create/edit species_list from file.
   def upload_species_list # :norobots:
-    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if !check_permission!(@species_list)
         redirect_to(:action => 'show_species_list', :id => @species_list)
       elsif request.method != :post
@@ -377,11 +377,11 @@ class SpeciesListController < ApplicationController
   end
 
   def destroy_species_list # :norobots:
-    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if check_permission!(@species_list)
         @species_list.destroy
         Transaction.delete_species_list(:id => @species_list)
-        flash_notice(:runtime_species_list_destroy_success.t(:id => params[:id]))
+        flash_notice(:runtime_species_list_destroy_success.t(:id => params[:id].to_s))
         redirect_to(:action => 'list_species_lists')
       else
         redirect_to(:action => 'show_species_list', :id => @species_list)
@@ -391,7 +391,7 @@ class SpeciesListController < ApplicationController
 
   # Form to let user add/remove an observation from one of their species lists.
   def manage_species_lists # :prefetch: :norobots:
-    @observation = find_or_goto_index(Observation, params[:id], :include => :species_lists)
+    @observation = find_or_goto_index(Observation, params[:id].to_s, :include => :species_lists)
     @all_lists = @user.all_editable_species_lists
   end
 
@@ -429,7 +429,7 @@ class SpeciesListController < ApplicationController
 
   # Bulk-edit observations (at least the ones editable by this user) in a (any) species list.
   def bulk_editor # :norobots:
-    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       @query = create_query(:Observation, :in_species_list, :by => :id, :species_list => @species_list,
                             :where => "observations.user_id = #{@user.id}")
       @pages = paginate_numbers(:page, 100)
@@ -507,7 +507,7 @@ class SpeciesListController < ApplicationController
   # ----------------------------
 
   def manage_projects # :norobots:
-    if @list = find_or_goto_index(SpeciesList, params[:id])
+    if @list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if not check_permission!(@list)
         redirect_to(:action => 'show_species_list', :id => @list.id)
       else

@@ -56,7 +56,7 @@ class ProjectController < ApplicationController
   # Show list of selected projects, based on current Query.
   def index_project # :nologin: :norobots:
     query = find_or_create_query(:Project, :by => params[:by])
-    show_selected_projects(query, :id => params[:id], :always_index => true)
+    show_selected_projects(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # Show list of latest projects.  (Linked from left panel.)
@@ -110,7 +110,7 @@ class ProjectController < ApplicationController
   def show_project # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id])
+    if @project = find_or_goto_index(Project, params[:id].to_s)
       @is_member = @project.is_member?(@user)
       @is_admin = @project.is_admin?(@user)
 
@@ -127,12 +127,12 @@ class ProjectController < ApplicationController
 
   # Go to next project: redirects to show_project.
   def next_project # :nologin: :norobots:
-    redirect_to_next_object(:next, Project, params[:id])
+    redirect_to_next_object(:next, Project, params[:id].to_s)
   end
 
   # Go to previous project: redirects to show_project.
   def prev_project # :nologin: :norobots:
-    redirect_to_next_object(:prev, Project, params[:id])
+    redirect_to_next_object(:prev, Project, params[:id].to_s)
   end
 
   # Form to create a project.
@@ -218,7 +218,7 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def edit_project # :prefetch: :norobots:
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id])
+    if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
         redirect_to(:action => 'show_project', :id => @project.id,
                     :params => query_params)
@@ -255,7 +255,7 @@ class ProjectController < ApplicationController
   # Outputs: none
   def destroy_project # :norobots:
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id])
+    if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
         redirect_to(:action => 'show_project', :id => @project.id,
                     :params => query_params)
@@ -288,7 +288,7 @@ class ProjectController < ApplicationController
   def admin_request # :prefetch: :norobots:
     sender = @user
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id])
+    if @project = find_or_goto_index(Project, params[:id].to_s)
       if request.method == :post
         subject = params[:email][:subject]
         content = params[:email][:content]
@@ -313,7 +313,7 @@ class ProjectController < ApplicationController
   # "Posts" to the same action.  Stays on this view until done.
   def add_members # :norobots:
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id])
+    if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.all(:order => "login, name")
       if !@project.is_admin?(@user)
         redirect_to(:action => 'show_project', :id => @project.id,
@@ -335,7 +335,7 @@ class ProjectController < ApplicationController
   # Posts to same action.  Redirects to show_project when done.
   def change_member_status # :norobots:
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id]) and
+    if @project = find_or_goto_index(Project, params[:id].to_s) and
        @candidate = find_or_goto_index(User, params[:candidate])
       if !@project.is_admin?(@user)
         flash_error(:change_member_status_denied.t)

@@ -57,7 +57,7 @@ class CommentController < ApplicationController
   # show_comment, next to "prev" and "next"... or will be.)
   def index_comment # :nologin: :norobots:
     query = find_or_create_query(:Comment, :by => params[:by])
-    show_selected_comments(query, :id => params[:id], :always_index => true)
+    show_selected_comments(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # Show list of latest comments. (Linked from left panel.)
@@ -69,7 +69,7 @@ class CommentController < ApplicationController
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
   def show_comments_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :by_user, :user => user)
       show_selected_comments(query)
     end
@@ -78,7 +78,7 @@ class CommentController < ApplicationController
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
   def show_comments_for_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Comment, :for_user, :user => user)
       show_selected_comments(query)
     end
@@ -92,7 +92,7 @@ class CommentController < ApplicationController
       flash_error(:runtime_invalid.t(:type => '"type"',
                                      :value => params[:type].to_s))
       redirect_back_or_default(:action => :list_comments)
-    elsif target = find_or_goto_index(model, params[:id])
+    elsif target = find_or_goto_index(model, params[:id].to_s)
       query = create_query(:Comment, :for_target, :target => target.id,
                            :type => target.class.name)
       show_selected_comments(query)
@@ -158,7 +158,7 @@ class CommentController < ApplicationController
   def show_comment # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @comment = find_or_goto_index(Comment, params[:id],
+    if @comment = find_or_goto_index(Comment, params[:id].to_s,
                                      :include => [:target, :user])
       @target = @comment.target
       allowed_to_see!(@target)
@@ -167,12 +167,12 @@ class CommentController < ApplicationController
 
   # Go to next comment: redirects to show_comment.
   def next_comment # :nologin: :norobots:
-    redirect_to_next_object(:next, Comment, params[:id])
+    redirect_to_next_object(:next, Comment, params[:id].to_s)
   end
 
   # Go to previous comment: redirects to show_comment.
   def prev_comment # :nologin: :norobots:
-    redirect_to_next_object(:prev, Comment, params[:id])
+    redirect_to_next_object(:prev, Comment, params[:id].to_s)
   end
 
   # Form to create comment for an object.
@@ -189,7 +189,7 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @object
   def add_comment # :prefetch: :norobots:
     pass_query_params
-    @target = Comment.find_object(params[:type], params[:id])
+    @target = Comment.find_object(params[:type], params[:id].to_s)
     if !allowed_to_see!(@target)
       # redirected already
     elsif request.method == :get
@@ -230,7 +230,7 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @object
   def edit_comment # :prefetch: :norobots:
     pass_query_params
-    if @comment = find_or_goto_index(Comment, params[:id])
+    if @comment = find_or_goto_index(Comment, params[:id].to_s)
       @target = @comment.target
       if !allowed_to_see!(@target)
         # redirected already
@@ -271,16 +271,17 @@ class CommentController < ApplicationController
   # Outputs: none
   def destroy_comment # :norobots:
     pass_query_params
-    if @comment = find_or_goto_index(Comment, params[:id])
+    id = params[:id].to_s
+    if @comment = find_or_goto_index(Comment, id)
       @target = @comment.target
       if !check_permission!(@comment)
         # all cases redirect to object show page
       elsif !@comment.destroy
-        flash_error(:runtime_form_comments_destroy_failed.t(:id => params[:id]))
+        flash_error(:runtime_form_comments_destroy_failed.t(:id => id))
       else
         Transaction.delete_comment(:id => @comment)
         @comment.log_destroy
-        flash_notice(:runtime_form_comments_destroy_success.t(:id => params[:id]))
+        flash_notice(:runtime_form_comments_destroy_success.t(:id => id))
       end
       redirect_to(:controller => @target.show_controller,
                   :action => @target.show_action, :id => @target.id,

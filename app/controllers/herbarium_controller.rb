@@ -46,9 +46,9 @@ class HerbariumController < ApplicationController
 
   def show_herbarium  # :nologin:
     store_location
-    @herbarium = Herbarium.find(params[:id])
+    @herbarium = Herbarium.find(params[:id].to_s)
     if request.method == :post
-      herbarium = Herbarium.find(params[:id])
+      herbarium = Herbarium.find(params[:id].to_s)
       login = params[:curator][:name].sub(/ <.*/, '')
       user = User.find_by_login(login)
       if user
@@ -60,7 +60,7 @@ class HerbariumController < ApplicationController
   end
 
   def delete_curator
-    herbarium = Herbarium.find(params[:id])
+    herbarium = Herbarium.find(params[:id].to_s)
     user = User.find(params[:user])
     if is_in_admin_mode? or herbarium.is_curator?(@user)
       if herbarium.is_curator?(user)
@@ -71,7 +71,7 @@ class HerbariumController < ApplicationController
     else
       flash_error(:delete_curator_you_not_curator.t)
     end
-    redirect_to(:action => :show_herbarium, :id => params[:id])
+    redirect_to(:action => :show_herbarium, :id => params[:id].to_s)
   end
   
   def index # :nologin:
@@ -131,7 +131,7 @@ class HerbariumController < ApplicationController
   end
   
   def edit_herbarium # :norobots:
-    @herbarium = Herbarium.find(params[:id])
+    @herbarium = Herbarium.find(params[:id].to_s)
     if is_in_admin_mode? or user_is_curator?(@herbarium)
       if request.method == :post
         if ok_to_update(@herbarium, params[:herbarium])

@@ -618,7 +618,7 @@ class ObserverController < ApplicationController
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation # :nologin: :norobots:
     query = find_or_create_query(:Observation, :by => params[:by])
-    show_selected_observations(query, :id => params[:id], :always_index => true)
+    show_selected_observations(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # Displays matrix of all Observation's, sorted by date.
@@ -656,7 +656,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
-    user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     if !user
       flash_error(:runtime_missing.t(:field => 'id'))
       redirect_to(:action => 'list_rss_logs')
@@ -668,7 +668,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of Observation's at a Location, by date.
   def observations_at_location # :nologin: :norobots:
-    if location = find_or_goto_index(Location, params[:id])
+    if location = find_or_goto_index(Location, params[:id].to_s)
       query = create_query(:Observation, :at_location, :location => location)
       show_selected_observations(query)
     end
@@ -686,7 +686,7 @@ class ObserverController < ApplicationController
 
   # Display matrix of Observation's attached to a given project.
   def observations_for_project # :nologin: :norobots:
-    if project = find_or_goto_index(Project, params[:id])
+    if project = find_or_goto_index(Project, params[:id].to_s)
       query = create_query(:Observation, :for_project, :project => project)
       show_selected_observations(query, {:always_index => 1})
     end
@@ -932,7 +932,7 @@ class ObserverController < ApplicationController
       set_default_thumbnail_size(params[:set_thumbnail_size])
     end
 
-    if @observation = find_or_goto_index(Observation, params[:id], :include => [
+    if @observation = find_or_goto_index(Observation, params[:id].to_s, :include => [
                         {:comments => :user},
                         {:images => :image_votes},
                         :location,
@@ -978,17 +978,17 @@ class ObserverController < ApplicationController
   end
 
   def show_obs
-    redirect_to(:action => 'show_observation', :id => params[:id])
+    redirect_to(:action => 'show_observation', :id => params[:id].to_s)
   end
 
   # Go to next observation: redirects to show_observation.
   def next_observation # :nologin: :norobots:
-    redirect_to_next_object(:next, Observation, params[:id])
+    redirect_to_next_object(:next, Observation, params[:id].to_s)
   end
 
   # Go to previous observation: redirects to show_observation.
   def prev_observation # :nologin: :norobots:
-    redirect_to_next_object(:prev, Observation, params[:id])
+    redirect_to_next_object(:prev, Observation, params[:id].to_s)
   end
 
   ##############################################################################
@@ -1224,7 +1224,7 @@ class ObserverController < ApplicationController
   def edit_observation # :prefetch: :norobots:
     pass_query_params
 
-    if @observation = find_or_goto_index(Observation, params[:id],
+    if @observation = find_or_goto_index(Observation, params[:id].to_s,
                         :include => [:name, :images, :location])
       @licenses = License.current_names_and_ids(@user.license)
       @new_image = init_image(@observation.when)
@@ -1303,7 +1303,7 @@ class ObserverController < ApplicationController
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
   def destroy_observation # :norobots:
-    if @observation = find_or_goto_index(Observation, params[:id])
+    if @observation = find_or_goto_index(Observation, params[:id].to_s)
       next_state = nil
       # decide where to redirect after deleting observation
       if this_state = find_query(:Observation)
@@ -1320,7 +1320,7 @@ class ObserverController < ApplicationController
                     :params => query_params(this_state))
       else
         Transaction.delete_observation(:id => @observation)
-        flash_notice(:runtime_destroy_observation_success.t(:id => params[:id]))
+        flash_notice(:runtime_destroy_observation_success.t(:id => params[:id].to_s))
         if next_state
           redirect_to(:action => 'show_observation', :id => next_state.current_id,
                       :params => query_params(next_state))
@@ -1357,7 +1357,7 @@ class ObserverController < ApplicationController
   #
   def create_naming # :prefetch: :norobots:
     pass_query_params
-    if @observation = find_or_goto_index(Observation, params[:id])
+    if @observation = find_or_goto_index(Observation, params[:id].to_s)
       @confidence_menu = translate_menu(Vote.confidence_menu)
 
       # Create empty instances first time through.
@@ -1444,7 +1444,7 @@ class ObserverController < ApplicationController
   def edit_naming # :prefetch: :norobots:
     pass_query_params
     if !params[:id].blank?
-      @naming = Naming.find(params[:id])
+      @naming = Naming.find(params[:id].to_s)
       @observation = @naming.observation
     else
       @observation = Observation.find(params[:observation_id])
@@ -1565,7 +1565,7 @@ class ObserverController < ApplicationController
   # Redirects back to show_observation.
   def destroy_naming # :norobots:
     pass_query_params
-    @naming = Naming.find(params[:id])
+    @naming = Naming.find(params[:id].to_s)
     @observation = @naming.observation
     if !check_permission!(@naming)
       flash_error(:runtime_destroy_naming_denied.t(:id => @naming.id))
@@ -1575,7 +1575,7 @@ class ObserverController < ApplicationController
       flash_error(:runtime_destroy_naming_failed.t(:id => @naming.id))
     else
       Transaction.delete_naming(:id => @naming)
-      flash_notice(:runtime_destroy_naming_success.t(:id => params[:id]))
+      flash_notice(:runtime_destroy_naming_success.t(:id => params[:id].to_s))
     end
     redirect_to(:action => 'show_observation', :id => @observation.id,
                 :params => query_params)
@@ -1585,7 +1585,7 @@ class ObserverController < ApplicationController
   # I'll just leave this stupid action in and have it forward to show_observation.
   def recalc # :root: :norobots:
     pass_query_params
-    id = params[:id]
+    id = params[:id].to_s
     begin
       @observation = Observation.find(id)
       flash_notice(:observer_recalc_old_name.t(:name => @observation.name.display_name))
@@ -1613,7 +1613,7 @@ class ObserverController < ApplicationController
   # Redirects to show_observation.
   def cast_vote # :norobots:
     pass_query_params
-    naming = Naming.find(params[:id])
+    naming = Naming.find(params[:id].to_s)
     observation = naming.observation
     value = params[:value].to_i
     observation.change_vote(naming, value)
@@ -1627,7 +1627,7 @@ class ObserverController < ApplicationController
   # Outputs: @naming
   def show_votes # :nologin: :prefetch:
     pass_query_params
-    @naming = find_or_goto_index(Naming, params[:id], :include => [:name, :votes])
+    @naming = find_or_goto_index(Naming, params[:id].to_s, :include => [:name, :votes])
   end
 
   # Refresh vote cache for all observations in the database.
@@ -1650,7 +1650,7 @@ class ObserverController < ApplicationController
   # TODO: Use queued_email mechanism.
   def author_request # :norobots:
     pass_query_params
-    @object = AbstractModel.find_object(params[:type], params[:id])
+    @object = AbstractModel.find_object(params[:type], params[:id].to_s)
     if request.method == :post
       subject = params[:email][:subject] rescue ''
       content = params[:email][:content] rescue ''
@@ -1679,7 +1679,7 @@ class ObserverController < ApplicationController
   #   Outputs: @name, @authors, @users
   def review_authors # :norobots:
     pass_query_params
-    @object = AbstractModel.find_object(params[:type], params[:id])
+    @object = AbstractModel.find_object(params[:type], params[:id].to_s)
     @authors = @object.authors
     parent = @object.parent
     if @authors.member?(@user) or @user.in_group?('reviewers')
@@ -1751,7 +1751,7 @@ class ObserverController < ApplicationController
   def show_notifications # :norobots:
     pass_query_params
     data = []
-    if @observation = find_or_goto_index(Observation, params[:id])
+    if @observation = find_or_goto_index(Observation, params[:id].to_s)
       for q in QueuedEmail.find_all_by_flavor_and_to_user_id('QueuedEmail::NameTracking', @user.id)
         naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
         if shown.nil?
@@ -1788,7 +1788,7 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'list_rss_logs')
     else
       query = find_or_create_query(:User, :by => params[:by])
-      show_selected_users(query, :id => params[:id], :always_index => true)
+      show_selected_users(query, :id => params[:id].to_s, :always_index => true)
     end
   end
 
@@ -1868,7 +1868,7 @@ class ObserverController < ApplicationController
   # show_user.rhtml
   def show_user # :nologin: :prefetch:
     store_location
-    id = params[:id]
+    id = params[:id].to_s
     if @show_user = find_or_goto_index(User, id, :include => :location)
       @user_data = SiteData.new.get_user_data(id)
       @life_list = Checklist::ForUser.new(@show_user)
@@ -1885,12 +1885,12 @@ class ObserverController < ApplicationController
 
   # Go to next user: redirects to show_user.
   def next_user # :norobots:
-    redirect_to_next_object(:next, User, params[:id])
+    redirect_to_next_object(:next, User, params[:id].to_s)
   end
 
   # Go to previous user: redirects to show_user.
   def prev_user # :norobots:
-    redirect_to_next_object(:prev, User, params[:id])
+    redirect_to_next_object(:prev, User, params[:id].to_s)
   end
 
   # Display a checklist of species seen by a User, Project, SpeciesList or the entire site.
@@ -1919,7 +1919,7 @@ class ObserverController < ApplicationController
   # Admin util linked from show_user page that lets admin add or change bonuses
   # for a given user.
   def change_user_bonuses # :root: :norobots:
-    if @user2 = find_or_goto_index(User, params[:id])
+    if @user2 = find_or_goto_index(User, params[:id].to_s)
       if is_in_admin_mode?
         if request.method != :post
 
@@ -2074,7 +2074,7 @@ class ObserverController < ApplicationController
   end
 
   def ask_user_question # :norobots:
-    if @target = find_or_goto_index(User, params[:id]) and
+    if @target = find_or_goto_index(User, params[:id].to_s) and
        email_question(@user) and
        request.method == :post
       subject = params[:email][:subject]
@@ -2086,7 +2086,7 @@ class ObserverController < ApplicationController
   end
 
   def ask_observation_question # :norobots:
-    if @observation = find_or_goto_index(Observation, params[:id]) and
+    if @observation = find_or_goto_index(Observation, params[:id].to_s) and
        email_question(@observation) and
        request.method == :post
       question = params[:question][:content]
@@ -2098,7 +2098,7 @@ class ObserverController < ApplicationController
   end
 
   def commercial_inquiry # :norobots:
-    if @image = find_or_goto_index(Image, params[:id]) and
+    if @image = find_or_goto_index(Image, params[:id].to_s) and
        email_question(@image, :email_general_commercial) and
        request.method == :post
       commercial_inquiry = params[:commercial_inquiry][:content]
@@ -2145,7 +2145,7 @@ class ObserverController < ApplicationController
       query ||= create_query(:RssLog, :all,
                              :type => @user ? @user.default_rss_type : 'all')
     end
-    show_selected_rss_logs(query, :id => params[:id], :always_index => true)
+    show_selected_rss_logs(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # This is the main site index.  Nice how it's buried way down here, huh?
@@ -2198,12 +2198,12 @@ class ObserverController < ApplicationController
 
   # Go to next RssLog: redirects to show_<object>.
   def next_rss_log # :norobots:
-    redirect_to_next_object(:next, RssLog, params[:id])
+    redirect_to_next_object(:next, RssLog, params[:id].to_s)
   end
 
   # Go to previous RssLog: redirects to show_<object>.
   def prev_rss_log # :norobots:
-    redirect_to_next_object(:prev, RssLog, params[:id])
+    redirect_to_next_object(:prev, RssLog, params[:id].to_s)
   end
 
   # this is the site's rss feed.
@@ -2802,7 +2802,7 @@ class ObserverController < ApplicationController
 
   def hide_thumbnail_map # :nologin:
     pass_query_params
-    id = params[:id]
+    id = params[:id].to_s
     if @user
       @user.update_attribute(:thumbnail_maps, false)
       flash_notice(:show_observation_thumbnail_map_hidden.t)

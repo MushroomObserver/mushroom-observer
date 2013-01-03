@@ -50,7 +50,7 @@ class LocationController < ApplicationController
   # Displays a list of selected locations, based on current Query.
   def index_location # :nologin: :norobots:
     query = find_or_create_query(:Location, :by => params[:by])
-    show_selected_locations(query, :id => params[:id], :always_index => true)
+    show_selected_locations(query, :id => params[:id].to_s, :always_index => true)
   end
 
   # Displays a list of all locations.
@@ -68,7 +68,7 @@ class LocationController < ApplicationController
 
   # Display list of locations that a given user is author on.
   def locations_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Location, :by_user, :user => user)
       show_selected_locations(query, :link_all_sorts => true)
     end
@@ -76,7 +76,7 @@ class LocationController < ApplicationController
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:Location, :by_editor, :user => user)
       show_selected_locations(query)
     end
@@ -266,7 +266,7 @@ class LocationController < ApplicationController
   # Displays a list of selected locations, based on current Query.
   def index_location_description # :nologin: :norobots:
     query = find_or_create_query(:LocationDescription, :by => params[:by])
-    show_selected_location_descriptions(query, :id => params[:id],
+    show_selected_location_descriptions(query, :id => params[:id].to_s,
                                         :always_index => true)
   end
 
@@ -278,7 +278,7 @@ class LocationController < ApplicationController
 
   # Display list of location_descriptions that a given user is author on.
   def location_descriptions_by_author # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:LocationDescription, :by_author, :user => user)
       show_selected_location_descriptions(query)
     end
@@ -286,7 +286,7 @@ class LocationController < ApplicationController
 
   # Display list of location_descriptions that a given user is editor on.
   def location_descriptions_by_editor # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
       query = create_query(:LocationDescription, :by_editor, :user => user)
       show_selected_location_descriptions(query)
     end
@@ -335,7 +335,7 @@ class LocationController < ApplicationController
 
     # Load Location and LocationDescription along with a bunch of associated
     # objects.
-    loc_id = params[:id]
+    loc_id = params[:id].to_s
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id,
                                       :include => [:user, :descriptions])
@@ -366,7 +366,7 @@ class LocationController < ApplicationController
   def show_location_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(LocationDescription, params[:id],
+    if @description = find_or_goto_index(LocationDescription, params[:id].to_s,
                          :include => [ :authors, :editors, :license, :user,
                                        {:location => :descriptions} ])
 
@@ -402,7 +402,7 @@ class LocationController < ApplicationController
   def show_past_location # :nologin: :prefetch: :norobots:
     store_location
     pass_query_params
-    if @location = find_or_goto_index(Location, params[:id])
+    if @location = find_or_goto_index(Location, params[:id].to_s)
       @location.revert_to(params[:version].to_i)
     end
   end
@@ -412,7 +412,7 @@ class LocationController < ApplicationController
   def show_past_location_description # :nologin: :prefetch: :norobots:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(LocationDescription, params[:id])
+    if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
       @location = @description.location
       if params[:merge_source_id].blank?
         @description.revert_to(params[:version].to_i)
@@ -433,22 +433,22 @@ class LocationController < ApplicationController
 
   # Go to next location: redirects to show_location.
   def next_location # :nologin: :norobots:
-    redirect_to_next_object(:next, Location, params[:id])
+    redirect_to_next_object(:next, Location, params[:id].to_s)
   end
 
   # Go to previous location: redirects to show_location.
   def prev_location # :nologin: :norobots:
-    redirect_to_next_object(:prev, Location, params[:id])
+    redirect_to_next_object(:prev, Location, params[:id].to_s)
   end
 
   # Go to next location: redirects to show_location.
   def next_location_description # :nologin: :norobots:
-    redirect_to_next_object(:next, LocationDescription, params[:id])
+    redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
   end
 
   # Go to previous location: redirects to show_location.
   def prev_location_description # :nologin: :norobots:
-    redirect_to_next_object(:prev, LocationDescription, params[:id])
+    redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
   end
 
   ##############################################################################
@@ -592,7 +592,7 @@ class LocationController < ApplicationController
   def edit_location # :prefetch: :norobots:
     store_location
     pass_query_params
-    if @location = find_or_goto_index(Location, params[:id])
+    if @location = find_or_goto_index(Location, params[:id].to_s)
       @display_name = @location.display_name
       done = false
       if request.method == :post
@@ -687,7 +687,7 @@ class LocationController < ApplicationController
   def create_location_description # :prefetch: :norobots:
     store_location
     pass_query_params
-    @location = Location.find(params[:id])
+    @location = Location.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
     # Render a blank form.
@@ -739,7 +739,7 @@ class LocationController < ApplicationController
   def edit_location_description # :prefetch: :norobots:
     store_location
     pass_query_params
-    @description = LocationDescription.find(params[:id])
+    @description = LocationDescription.find(params[:id].to_s)
     @licenses = License.current_names_and_ids
 
     if !check_description_edit_permission(@description, params[:description])
@@ -814,7 +814,7 @@ class LocationController < ApplicationController
 
   def destroy_location_description # :norobots:
     pass_query_params
-    @description = LocationDescription.find(params[:id])
+    @description = LocationDescription.find(params[:id].to_s)
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.location.log(:log_description_destroyed,
@@ -876,11 +876,11 @@ class LocationController < ApplicationController
   end
 
   def reverse_name_order
-    if location = Location.safe_find(params[:id])
+    if location = Location.safe_find(params[:id].to_s)
       location.name = Location.reverse_name(location.name)
       location.save
     end
-    redirect_to(:action => 'show_location', :id => params[:id])
+    redirect_to(:action => 'show_location', :id => params[:id].to_s)
   end
   
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>

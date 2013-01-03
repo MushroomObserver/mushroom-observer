@@ -4022,7 +4022,7 @@ namespace :location do
             check_save(o)
             add_comment(o, current_name, target_name)
           end
-          # params[:id]Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE `where` = '#{current_sql_safe}'")
+          # Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE `where` = '#{current_sql_safe}'")
           print("Moved #{obs.size} observations from non-location: #{current_name} to location: #{target_name}\n")
         end
         if current_location and (current_location != target_location)
