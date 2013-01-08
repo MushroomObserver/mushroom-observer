@@ -3457,10 +3457,6 @@ intro_image_sharing: >
 
 intro_source_code: "*Source Code:* Source code for the site is available at: \"[repo]\":[repo] and is licensed under the \"Open Source MIT License\":http://www.opensource.org/licenses/mit-license.php.  Source code contributions are welcome (\"README\":[readme]). Here's a list of \"planned features\":[todo_list]. All suggestions and comments are welcome.  If you would like to contribute, please send mail to *nathan at collectivesource.com* so we can coordinate our efforts."
 intro_note: "*Note:* The administrators of this site reserve the right to remove any material they deem inappropriate or not in keeping with the purpose of this site."
-intro_talks: >
-  *Talks:*\n
-  \n
-  "[:app_title]: The First Year":/talks/MO-First-Year.html\n
 
 ################################################################################
 
