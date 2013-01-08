@@ -196,6 +196,7 @@ ENV['RAILS_ASSET_ID'] = ''
 # the comments at the head of this file, this was the expected method of customizing error
 # handling in Rails(!)
 module ActionController
+  ActionController::Base.param_parsers.delete(Mime::XML) 
   class Base
     def rescue_action_in_public(exception)
       status = interpret_status(response_code_for_rescue(exception))
