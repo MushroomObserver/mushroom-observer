@@ -13,9 +13,9 @@ development:
   username: mo
   password: mo
   # Default (works for MacOS X)
-  socket: /tmp/mysql.sock
+  # socket: /tmp/mysql.sock
   # For Ubuntu/Debian
-  # socket: /var/run/mysqld/mysqld.sock
+  socket: /var/run/mysqld/mysqld.sock
   # For Fedora
   # socket: /var/lib/mysql/mysql.sock
 
