@@ -55,6 +55,7 @@ class UserGroup < AbstractModel
     @@all_users ||= find_by_name('all users')
     if @@all_users.nil?
       # Construct the 'all users' group if it doesn't already exist
+      # Not sure if meta should be set, but it's what's in the production database
       @@all_users = UserGroup.new(:name => 'all users', :meta => 1)
     end
     @@all_users
