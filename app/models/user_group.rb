@@ -53,6 +53,11 @@ class UserGroup < AbstractModel
   # Return the meta-group that contains all users.
   def self.all_users
     @@all_users ||= find_by_name('all users')
+    if @@all_users.nil?
+      # Construct it if it doesn't already exist
+      @@all_users = UserGroup.new(:name => 'all users', :meta => 1)
+    end
+    @@all_users
   end
 
   # Return the meta-group that contains just the given users.  Takes id or User.
