@@ -333,9 +333,13 @@ class Name < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      File.open(NAME_PRIMER_CACHE_FILE, 'w:utf-8').write(result.join("\n") + "\n")
+      file = File.open(NAME_PRIMER_CACHE_FILE, 'w:utf-8')
+      file.write(result.join("\n") + "\n")
+      file.close()
     else
-      result = File.open(NAME_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
+      file = File.open(NAME_PRIMER_CACHE_FILE, "r:UTF-8")
+      file.close()
+      result = file.readlines.map(&:chomp)
     end
     return result
   end
