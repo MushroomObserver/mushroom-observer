@@ -338,8 +338,8 @@ class Name < AbstractModel
       file.close()
     else
       file = File.open(NAME_PRIMER_CACHE_FILE, "r:UTF-8")
-      file.close()
       result = file.readlines.map(&:chomp)
+      file.close()
     end
     return result
   end
