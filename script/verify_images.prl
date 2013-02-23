@@ -112,13 +112,14 @@ sub refresh_remote_cache {
     my $n = 0;
     while (<$fh2>) {
       chomp;
-      my ($size2, $file2) = (split)[4, 7];
+      my ($size2, $file2) = (split)[4, -1];
       next if $file2 !~ /^\d+\.\w+$/;
       print $fh "$size/$file2 $size2\n";
       $n++;
     }
     close($fh2);
     print "  $n files\n" if $OPT_V;
+    print STDERR "DANGER!!!! -- only $n files found in $path2/$size\n" if $n < 100;
   }
   close($fh);
 }

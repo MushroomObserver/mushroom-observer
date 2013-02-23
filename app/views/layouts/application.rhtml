@@ -73,7 +73,6 @@
                 <%= link_to(:app_intro.t, :controller => 'observer', :action => 'intro') %><br/>
                 <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use') %><br/>
                 <%= link_to(:app_how_to_help.t, :controller => 'observer', :action => 'how_to_help') %><br/>
-                <%= link_to(:app_donate.t, :controller => 'support', :action => 'donate') %><br/>
                 <%= link_to(:app_feature_tracker.t, :controller => 'pivotal', :action => 'index') %><br/>
                 <%= link_to(:app_send_a_comment.t, :controller => 'observer', :action => 'ask_webmaster_question') %><br/>
                 <br/>
@@ -268,7 +267,7 @@
             
             <br/><br/><br/>
             <% lang = Language.find_by_locale(Locale.code)
-            if !lang.official or Language.tracking_usage %>
+            if lang and (!lang.official or Language.tracking_usage) %>
               <div id="translators_credit">
                 <hr width="250" align="left" />
                 <% if !lang.official %>

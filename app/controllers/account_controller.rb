@@ -699,7 +699,7 @@ class AccountController < ApplicationController
   end
 
   def manager # :root:
-    if is_in_admin_mode?
+    if false and is_in_admin_mode?
       @users = []
       # Search for users by id(s).
       if !params[:ids].blank?

@@ -5,6 +5,7 @@ ext=$2
 set_size=$3
 
 server=cdmr@digitalmycology.com:images.digitalmycology.com
+server2=jason@174.143.24.209:/var/web/mo/public/images
 images=public/images
 
 db_config=config/database.yml
@@ -140,7 +141,9 @@ run jpegresize 160x160 -q 90 --max-size $small $thumb
 if (( $production )); then
   wait_for scp
   run scp $thumb  $server/thumb/$id.jpg
+  # run scp $thumb  $server2/thumb/$id.jpg
   run scp $small  $server/320/$id.jpg
+  # run scp $small  $server2/320/$id.jpg
   run scp $medium $server/640/$id.jpg
   run scp $large  $server/960/$id.jpg
   run scp $huge   $server/1280/$id.jpg

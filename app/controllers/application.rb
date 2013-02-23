@@ -109,6 +109,7 @@ class ApplicationController < ActionController::Base
   include LoginSystem
 
   around_filter :catch_errors if TESTING
+  before_filter :block_ip_addresses
   before_filter :fix_bad_domains
   before_filter :browser_status
   before_filter :autologin
@@ -131,6 +132,17 @@ class ApplicationController < ActionController::Base
     skip_filter   :log_memory_usage
     before_filter :disable_link_prefetching
     before_filter { User.current = nil }
+  end
+
+  # Filter to run before anything else to protect against denial-of-service attacks.
+  def block_ip_addresses
+    if [
+      '69.174.247.199',
+      '69.174.247.214'
+    ].include?(request.remote_ip.to_s)
+      render(:text => "You have been blocked from this site. Please contact the webmaster for more information.", :layout => false)
+      return false
+    end
   end
 
   # Enable this to test other layouts...
@@ -236,6 +248,11 @@ class ApplicationController < ActionController::Base
     # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
     # return false
 
+    # if is_robot?
+    #   render(:status => 503, :text => "robots are temporarily blocked from MO", :layout => false)
+    #   return false
+    # end
+
     # Guilty until proven innocent...
     @user = nil
     User.current = nil
@@ -283,6 +300,12 @@ class ApplicationController < ActionController::Base
         @user.last_activity = Time.now
         @user.save
       end
+    end
+
+    # User Innorimarlo has been spamming us.
+    if @user && [4334, 4441].include?(@user.id)
+      render(:status => 503, :text => "You have been blocked from MO because of spam.  Please contact webaster@mushroomobserver.org if you would like to appeal our decision.", :layout => false)
+      return false
     end
 
     # Tell Rails to continue to process.

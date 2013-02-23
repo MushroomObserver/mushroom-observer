@@ -123,7 +123,7 @@ if ids.any?
     WHERE os.species_list_id = #{spl.id}
       AND o.name_id IN (#{ids})
   )
-  ids2 = ids.join(',')
+  ids2 = ids2.join(',')
   Name.connection.delete %(
     DELETE FROM observations_species_lists
     WHERE observation_id IN (#{ids2})

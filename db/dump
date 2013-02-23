@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ls /var/web/mo/public/images/thumb | sort -n | tail -1
+mysqldump -u mo -pXnT8uBXC mo_production | gzip -c - > checkpoint.gz
+ls /var/web/mo/public/images/thumb | sort -n | tail -1
+chmod 640 checkpoint.gz

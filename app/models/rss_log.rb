@@ -372,7 +372,11 @@ private
       time = time2
     rescue => e
       # Caught this error in the log, not sure how/why.
-      raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
+      if PRODUCTION
+        time = Time.now # (but don't crash in production)
+      else
+        raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
+      end
     end
     [tag.to_sym, Hash[*args], time]
   end

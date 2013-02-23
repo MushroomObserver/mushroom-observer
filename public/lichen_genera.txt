@@ -42,7 +42,6 @@ Arctocetraria
 Arctomia
 Arctoparmelia
 Arctopeltis
-Arrhenia
 Arthonia
 Arthophacopsis
 Arthopyrenia
@@ -461,7 +460,6 @@ Myxotrichum
 Nadvornikia
 Naetrocymbe
 Nanostictis
-Nectria
 Nectriella
 Nectriopsis
 Neocatapyrenium
@@ -481,7 +479,6 @@ Ocellularia
 Ochrolechia
 Odontotrema
 Omphalaria
-Omphalina
 Omphalodiscus
 Omphalodium
 Omphalora
@@ -740,7 +737,6 @@ Tornabea
 Trapelia
 Trapeliopsis
 Trematosphaeriopsis
-Tremella
 Tremolecia
 Tricharia
 Trichonectria

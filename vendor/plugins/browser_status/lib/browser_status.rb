@@ -446,7 +446,7 @@ module BrowserStatus
   def parse_user_agent(ua)
     return [:other,    0.0    ] if ua.nil? || ua == '-'
     return [:text,     0.0    ] if ua.match(/^(Lynx|Links|ELinks|Dillo)/)
-    return [:robot,    0.0    ] if ua.match(/robot|crawler|spider|slurp|googlebot|surveybot|webgobbler|morfeus|linkaider|linklint|linkwalker|metalogger|page-store|network diagnostics/i)
+    return [:robot,    0.0    ] if ua.match(/robot|crawler|spider|slurp|googlebot|surveybot|webgobbler|morfeus|linkaider|linklint|linkwalker|metalogger|page-store|network diagnostics|bingbot|linguee bot|mj12bot|yandexbot|genieo/i)
     return [:opera,    $1.to_f] if ua.match(/Opera[ \/](\d+\.\d+)/)
     return [:ie,       $1.to_f] if ua.match(/ MSIE (\d+\.\d+)/)
     return [:chrome,   $1.to_f] if ua.match(/Chrome\/(\d+\.\d+)/)

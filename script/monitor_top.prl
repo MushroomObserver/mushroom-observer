@@ -34,7 +34,8 @@ printf $fh "%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%   %5.1f%%   %s\n",
   $load;
 close($fh);
 
-if ($swap2 / $swap1 > 0.5) {
+if ($swap2 / $swap1 > 0.5 &&
+    $mem2 / $mem1 > 0.99) {
   open(my $fh, ">$RESTART_FILE") or die("Couldn't touch $RESTART_FILE: $!");
   close($fh);
   print STDERR "Restarted passenger!\n";

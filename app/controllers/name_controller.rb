@@ -735,7 +735,9 @@ class NameController < ApplicationController
     flash_warning(:runtime_merge_names_warning.t)
     content = :email_name_merge.l(:user => @user.login,
                                   :this => "##{@name.id}: " + @name.real_search_name,
-                                  :that => "##{new_name.id}: " + new_name.real_search_name)
+                                  :that => "##{new_name.id}: " + new_name.real_search_name,
+                                  :this_url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}",
+                                  :that_url => "#{HTTP_DOMAIN}/name/show_name/#{new_name.id}")
     AccountMailer.deliver_webmaster_question(@user.email, content)
     NameControllerTest.report_email(content) if TESTING
   end

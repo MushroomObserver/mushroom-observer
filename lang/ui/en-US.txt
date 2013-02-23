@@ -823,6 +823,7 @@ app_title: Mushroom Observer
 app_banner: Mushroom<br/>Observer
 
 # This goes in a box at the top of the page.
+# app_banner_box: It was a busy summer and fall.  See all the <a href="/observer/news">changes</a>!
 app_banner_box: X
 
 # These are the controls/links in the left-hand panel.
@@ -1608,7 +1609,7 @@ show_name_description_editors: "[:Description] editors"
 show_name_author_request: Request Authorship Credit
 show_name_content_status: Description status
 show_name_latest_review: "Latest review: [date] by [user]"
-show_name_most_confident: "Most Confident Observations"
+show_name_most_confident: Most Confident Observations
 show_name_previous_version: Previous Version
 show_name_other_versions: Other Versions
 show_name_observations: More [:OBSERVATIONS]
@@ -2030,7 +2031,7 @@ donors_order: The donors names are ordered based first on the total amount donat
 donors_title: The Mushroom Observer Community Thanks Our Donors
 donors_tab: Show Donors
 
-donate_thanks: Thank you for your interest in donating to Mushroom Observer!  Check out this "2011 wrapup letter to the Mushroom Observer Community":/support/wrapup_2011 if you are curious what we are using your donations for.
+donate_thanks: Thank you for your interest in donating to Mushroom Observer.  At this time we cannot accept donations to support this project.  We are working to provide an effective method for accepting donations.  Please "send us a comment":/observer/ask_webmaster_question if you would like to be contacted once this has been worked out.
 donate_explanation: Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below. Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 donate_fine_print: >
   Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR), and, subject to CDMR’s board’s supervision to assure usage under terms consistent with its charitable status, donated funds will be applied for the preservation and improvement of the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.\n
@@ -3326,6 +3327,8 @@ email_location_merge: >
   user: [user]\n
   this: [this]\n
   into: [that]\n
+  loc1: [this_url]\n
+  loc2: [that_url]\n
 
 email_name_change: >
   User made nontrivial change to a name:\n
@@ -3343,6 +3346,8 @@ email_name_merge: >
   user: [user]\n
   this: [this]\n
   into: [that]\n
+  name1: [this_url]\n
+  name2: [that_url]\n
 
 email_name_proposal_intro: >
   h2. *Name Proposal*\n
@@ -3427,12 +3432,7 @@ email_verify_intro: >
 email_verify_api_key_intro: >
   h2. *Hello [user]*\n
   \n
-  The application "[app]" (associated with user "[other_user]") has requested
-  access to your [:app_title] account.  If you recognize this application and
-  wish to give them permission to post observations, etc. in your name, all you
-  have to do is click on the activation link below to activate the API key they
-  just created.  Note that you can review your list of API keys at any time by
-  visiting the [:account_api_keys_title] from your "[:app_preferences]" page.\n
+  The application "[app]" (associated with user "[other_user]") has requested access to your [:app_title] account.  If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created.  Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your "[:app_preferences]" page.\n
   \n
   Activate Key: [activate_link]\n
   [:account_api_keys_link]: [manager_link]\n
@@ -4034,7 +4034,7 @@ runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:n
 # API error messages
 api_abort_due_to_errors: Aborted operation due to errors.
 api_ambiguous_name: Name "[name]" is ambiguous, matches [others].
-api_api_key_not_verified: 'API key for "[notes]" has not been activated yet. (key = "[key]")'
+api_api_key_not_verified: API key for "[notes]" has not been activated yet. (key = "[key]")
 api_bad_action: Invalid request type "[action]".
 api_bad_api_key: Invalid API key "[key]".
 api_bad_limited_parameter_value: Expected "[val]" to be in [limit].

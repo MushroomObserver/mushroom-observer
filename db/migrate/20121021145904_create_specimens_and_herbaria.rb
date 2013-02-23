@@ -1,6 +1,6 @@
 class CreateSpecimensAndHerbaria < ActiveRecord::Migration
   def self.up
-    create_table :specimens do |t|
+    create_table :specimens, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.integer :herbarium_id, :null => false
       t.string :label, :limit => 80, :default => "", :null => false
       t.date :when, :null => false
@@ -8,12 +8,12 @@ class CreateSpecimensAndHerbaria < ActiveRecord::Migration
       t.timestamps
     end
     
-    create_table :observations_specimens, :id => false, :force => true do |t|
+    create_table :observations_specimens, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :id => false, :force => true do |t|
       t.integer :observation_id, :default => 0, :null => false
       t.integer :specimen_id, :default => 0, :null => false
     end
 
-    create_table :herbaria do |t|
+    create_table :herbaria, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.text :mailing_address
       t.integer :location_id
       t.string :email, :limit => 80, :default => "", :null => false
@@ -22,7 +22,7 @@ class CreateSpecimensAndHerbaria < ActiveRecord::Migration
       t.timestamps
     end
     
-    create_table :herbaria_curators, :id => false, :force => true do |t|
+    create_table :herbaria_curators, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :id => false, :force => true do |t|
       t.integer :user_id, :default => 0, :null => false
       t.integer :herbarium_id, :default => 0, :null => false
     end
