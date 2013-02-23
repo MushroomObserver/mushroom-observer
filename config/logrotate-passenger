@@ -1,0 +1,14 @@
+/var/web/mushroom-observer/log/*.log {
+  daily
+  missingok
+  rotate 7
+  dateext
+  compress
+  delaycompress
+  sharedscripts
+  postrotate
+    touch /var/web/mushroom-observer/tmp/restart.txt
+    scp /var/web/mushroom-observer/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
+    mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
+  endscript
+}
