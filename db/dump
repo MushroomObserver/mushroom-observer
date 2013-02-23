@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ls /var/web/mushroom-observer/public/images/thumb | sort -n | tail -1
-mysqldump -u mo -p mo_production | gzip -c - > checkpoint.gz
+PASSWORD=`grep password /var/web/mushroom-observer/config/database.yml | grep -v '#' | sed 's/.*password: *//'`
+mysqldump -u mo -p$PASSWORD mo_production | gzip -c - > checkpoint.gz
 ls /var/web/mushroom-observer/public/images/thumb | sort -n | tail -1
 chmod 640 checkpoint.gz

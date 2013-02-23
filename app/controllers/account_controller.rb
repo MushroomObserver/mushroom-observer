@@ -33,7 +33,6 @@
 #  turn_admin_off::     <tt>(R . .)</tt>
 #  add_user_to_group::  <tt>(R V .)</tt>
 #  create_alert::       <tt>(R V .)</tt>
-#  manager::            <tt>(R V .)</tt>
 #  destroy_user::       <tt>(R . .)</tt>
 #
 #  ==== Testing
@@ -695,63 +694,6 @@ class AccountController < ApplicationController
       if redirect
         redirect_to(:controller => :observer, :action => :show_user, :id => id)
       end
-    end
-  end
-
-  def manager # :root:
-    if false and is_in_admin_mode?
-      @users = []
-      # Search for users by id(s).
-      if !params[:ids].blank?
-        for id in params[:ids].split(/[, ]+/)
-          if user = User.safe_find(id.to_i)
-            @users << user
-          else
-            flash_error(:account_manager_not_found.t(:str => "##{id}"))
-          end
-        end
-      end
-      # Search for users by login, name and email.
-      if !params[:login].blank?
-        @users += User.find(:all, :conditions => "login like '%#{params[:login]}%'")
-      end
-      if !params[:name].blank?
-        @users += User.find(:all, :conditions => "name like '%#{params[:name]}%'")
-      end
-      if !params[:email].blank?
-        @users += User.find(:all, :conditions => "email like '%#{params[:email]}%'")
-      end
-      # Modify user records.
-      for user in @users
-        id = user.id
-        any_changes = false
-        # Correct typos in an email address.
-        old_email = user.email.to_s
-        new_email = params["email_#{id}"].to_s
-        if !new_email.blank? and old_email != new_email
-          user.email = new_email
-          any_changes = true
-          flash_notice(:account_manager_changed_email.t(:user => user.login, :email => new_email))
-        end
-        # Reset a password.
-        password = params["password_#{id}"].to_s
-        if !password.blank?
-          user.change_password(password)
-          flash_notice(:account_manager_changed_password.t(:user => user.login, :password => password))
-        end
-        # Verify an account.
-        old_verified = user.verified
-        new_verified = params["verified_#{id}"].to_s
-        if !old_verified && !new_verified.blank?
-          user.verified = Time.now
-          any_changes = true
-          flash_notice(:account_manager_verified_user.t(:user => user.login))
-        end
-        user.save if any_changes
-      end
-    else
-      flash_error :permission_denied.t
-      redirect_to(:controller => :observer, :action => :index)
     end
   end
 
