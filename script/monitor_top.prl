@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 
-my $ROOT = $ENV{'RAILS_ROOT'} || '/var/web/mo';
+my $ROOT = $ENV{'RAILS_ROOT'} || '/var/web/mushroom-observer';
 my $LOG_FILE = "$ROOT/log/top.log";
 my $RESTART_FILE = "$ROOT/tmp/restart.txt";
 

@@ -21,7 +21,7 @@ PROGRESS_DELAY = 10
 RETRIES = 5
 
 # Default root path for Rails.
-ROOT = '/var/web/mo'
+ROOT = '/var/web/mushroom-observer'
 # ROOT = '/home/jason/public_html/mo_trunk'
 
 # Where daemon and cronjob log stuff by default.
@@ -33,7 +33,7 @@ LOCAL_PATH = 'public/images'
 # Aliases for our image servers.
 SERVER_ALIASES = {
   'dreamhost' => 'cdmr@digitalmycology.com:images.digitalmycology.com',
-  'slicehost' => 'mushroomobserver.org:/var/web/mo/public/images',
+  # 'slicehost' => 'mushroomobserver.org:/var/web/mushroom-observer/public/images',
 }
 
 # List of official image servers to keep updated from main webserver.
@@ -631,7 +631,7 @@ MODES
 
 OPTIONS
   These can be used in any mode:
-    -R --root <path>        Override rails root path.   /var/web/mo
+    -R --root <path>        Override rails root path.   /var/web/mushroom-observer
     -L --log-file <path>    Override log file.          $root/log/$0.log
     -P --local-path <path>  Override local image path.  $root/public/images
     -v --verbose            Turn on verbose messages.
@@ -680,14 +680,14 @@ FILES
     for k, v in SERVER_ALIASES
       puts "    #{k} = #{v}\n"
       # dreamhost   velosa@images.mushroomobserver.org:images.mushroomobserver.org
-      # slicehost   mushroomobserver.org:/var/web/mo/public/images
+      # slicehost   mushroomobserver.org:/var/web/mushroom-observer/public/images
     end
     puts "
   The defaults are:
 
-    root        /var/web/mo
-    file lists  /var/web/mo/public/images/dreamhost.files
-    local path  /var/web/mo/public/images
+    root        /var/web/mushroom-observer
+    file lists  /var/web/mushroom-observer/public/images/dreamhost.files
+    local path  /var/web/mushroom-observer/public/images
     server      dreamhost
 
 EXAMPLES

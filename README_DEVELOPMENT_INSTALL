@@ -227,7 +227,7 @@ mo> vi config/database.yml
     # For Fedora
     # socket: /var/lib/mysql/mysql.sock
 mo> cd db
-mo> scp jason@mushroomobserver.org:/var/web/mo/db/checkpoint.gz .
+mo> scp jason@mushroomobserver.org:/var/web/mushroom-observer/db/checkpoint.gz .
 mo> gunzip checkpoint.gz
 mo> mysql -u mo -pxxx mo_development -e "source checkpoint"
 mo> cd ..

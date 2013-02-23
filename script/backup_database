@@ -5,7 +5,7 @@ mo_password=xxx
 mo_production=mo_production
 mo_development=mo_development
 
-mo_root=/var/web/mo
+mo_root=/var/web/mushroom-observer
 backup_server=cdmr@digitalmycology.com:mushroomobserver_backups
 
 date=`date +%Y%m%d`

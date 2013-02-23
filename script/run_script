@@ -4,7 +4,7 @@ declare -x RUBYLIB="/usr/local/lib/ruby/site_ruby/1.9.3"
 declare -x GEM_HOME="/usr/local/lib/ruby/gems/1.9.3"
 declare -x RAILS_ENV="production"
 
-dir=/var/web/mo
+dir=/var/web/mushroom-observer
 if [[ !(-d $dir) ]]; then
   dir=.
 fi

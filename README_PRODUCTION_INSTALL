@@ -228,9 +228,9 @@ root> # yum install ImageMagick-devel
 root> gem install rmagick --verbose --no-rdoc --no-ri
 
 # Install our programs for resizing and rotating JPEG images.
-root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
-root> gcc /var/web/mo/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
-root> cp /var/web/mo/script/exifautotran.sh /usr/local/bin/exifautotran
+root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+root> gcc /var/web/mushroom-observer/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
+root> cp /var/web/mushroom-observer/script/exifautotran.sh /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
 
 # Create directory for rails app.
@@ -288,7 +288,7 @@ mo> exit
 root> vi /etc/apache2/sites-available/mo
   <VirtualHost *:80>
     ServerName mushroomobserver.org
-    DocumentRoot /var/web/mo/public
+    DocumentRoot /var/web/mushroom-observer/public
     RailsEnv production
     SetEnv TZ 'Eastern Time (US & Canada)'
 
@@ -298,7 +298,7 @@ root> vi /etc/apache2/sites-available/mo
     # This was necessary for my local installation on Fedora Core 13.
     # RailsBaseURI /
 
-    <Directory /var/web/mo/public>
+    <Directory /var/web/mushroom-observer/public>
       Options FollowSymLinks
       AllowOverride limit
       Order allow,deny
@@ -351,7 +351,7 @@ mo> vi config/database.yml
   # socket:   /var/lib/mysql/mysql.sock    # fedora/centos?
   encoding: utf8
 mo> cd db
-mo> scp $USER@$OLD_SERVER:/var/web/mo/db/checkpoint.gz .
+mo> scp $USER@$OLD_SERVER:/var/web/mushroom-observer/db/checkpoint.gz .
 mo> gunzip checkpoint.gz
 mo> mosqle checkpoint
 
@@ -366,7 +366,7 @@ mo> ssh cdmr@images.digitalmycology.com
 # Set up logrotate to archive passenger and rails logs.
 mo> su root
 root> vi /etc/logrotate.d/passenger
-  /var/web/mo/log/*.log {
+  /var/web/mushroom-observer/log/*.log {
     daily
     missingok
     rotate 7
@@ -375,9 +375,9 @@ root> vi /etc/logrotate.d/passenger
     delaycompress
     sharedscripts
     postrotate
-      touch /var/web/mo/tmp/restart.txt
-      scp /var/web/mo/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
-      mv /var/web/mo/log/*.gz /var/web/mo/log/old/
+      touch /var/web/mushroom-observer/tmp/restart.txt
+      scp /var/web/mushroom-observer/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
+      mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }
 
@@ -434,10 +434,10 @@ mo> exit
 # Configure no-reply to bounce correctly.
 root> useradd -m no-reply
 root> passwd -l no-reply
-root> cp /var/web/mo/script/autoreply          /usr/local/bin/autoreply
-root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
-root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
-root> cp /var/web/mo/config/no-reply.forward   /home/no-reply/.forward
+root> cp /var/web/mushroom-observer/script/autoreply          /usr/local/bin/autoreply
+root> cp /var/web/mushroom-observer/config/no-reply.muttrc    /home/no-reply/.muttrc
+root> cp /var/web/mushroom-observer/config/no-reply.autoreply /home/no-reply/.autoreply
+root> cp /var/web/mushroom-observer/config/no-reply.forward   /home/no-reply/.forward
 root> chmod 644 /home/no-reply/.[maf]*
 root> chmod 755 /usr/local/bin/autoreply
 
@@ -465,12 +465,12 @@ mo> script/update_images -v --sync dreamhost --download --thumb --320
 
 # They're all already present, just need to stick them in the crontab.
 mo> crontab -e
-  */5 * * * * /var/web/mo/script/run_rake email:send
-  23  * * * * /var/web/mo/script/parse_log
-  13  3 * * * /var/web/mo/script/run_script refresh_name_lister_cache
-  43  3 * * * /var/web/mo/script/run_script update_lichen_list
-  13  4 * * * /var/web/mo/script/run_script update_images --clean
-  33 21 * * * /var/web/mo/script/makexml /var/web/mo/public/eol.xml
+  */5 * * * * /var/web/mushroom-observer/script/run_rake email:send
+  23  * * * * /var/web/mushroom-observer/script/parse_log
+  13  3 * * * /var/web/mushroom-observer/script/run_script refresh_name_lister_cache
+  43  3 * * * /var/web/mushroom-observer/script/run_script update_lichen_list
+  13  4 * * * /var/web/mushroom-observer/script/run_script update_images --clean
+  33 21 * * * /var/web/mushroom-observer/script/makexml /var/web/mushroom-observer/public/eol.xml
 
 --------------------------------------------------------------------------------
 
@@ -557,7 +557,7 @@ old_mo> ./dump
 # Copy snapshot to new server.
 new_root> mo
 new_mo> cd db
-new_mo> scp $USER@$OLD_IP_ADDR:/var/web/mo/db/checkpoint.gz .
+new_mo> scp $USER@$OLD_IP_ADDR:/var/web/mushroom-observer/db/checkpoint.gz .
 new_mo> gunzip checkpoint.gz
 new_mo> mosqle checkpoint
 

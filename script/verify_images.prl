@@ -2,7 +2,7 @@
 use strict;
 
 # Root path for Rails.
-my $ROOT = '/var/web/mo';
+my $ROOT = '/var/web/mushroom-observer';
 # my ROOT = '/home/jason/public_html/mo_trunk';
 
 # Path to images on web server.

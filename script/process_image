@@ -5,7 +5,7 @@ ext=$2
 set_size=$3
 
 server=cdmr@digitalmycology.com:images.digitalmycology.com
-server2=jason@174.143.24.209:/var/web/mo/public/images
+server2=jason@174.143.24.209:/var/web/mushroom-observer/public/images
 images=public/images
 
 db_config=config/database.yml
