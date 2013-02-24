@@ -1,0 +1,55 @@
+#!/usr/bin/python
+
+# Should be run from the top of the development tree which should be one directory above where
+# this script is.
+
+import os, os.path, sys, glob, time
+
+print "Dumping database..."
+f = os.popen("ssh -f velosa@mushroomobserver.org /var/web/mushroom-observer/db/dump")
+
+l1 = f.readline().strip()
+l2 = f.readline().strip()
+
+f.close()
+print "Database dumped..."
+
+if l1 != l2:
+   print "Image created during dabase dump.  Aborting."
+   sys.exit(-1)
+
+num = int(l1.split('.')[0])
+
+print "Max image number: %s" %num
+
+dir = "checkpoints"
+if not os.path.exists(dir):
+    os.makedirs(dir)
+  
+target_file = "%s/checkpoint.gz" % dir
+
+print "Copying checkpoint..."
+os.system("scp mushroomobserver.org:checkpoint.gz %s" % target_file)
+print "Unzipping checkpoint..."
+os.system("gzip -d %s" % target_file)
+files = glob.glob("%s/raw-%s.*" % (dir, num)) + glob.glob("%s/clean-%s.*" % (dir, num))
+highest = -1
+for f in files:
+    highest = max(highest, int(f.split('.')[1]))
+highest += 1
+raw_dump = "%s/raw-%s.%s" % (dir, num, highest)
+print "Moving checkpoint to %s" % raw_dump
+os.system("mv %s/checkpoint %s" % (dir, raw_dump))
+print "Recreate db..."
+os.system("mysql -u root -pWoyOqHCl < db/recreate.sql")
+print "Loading db..."
+os.system("mysql -u root -pWoyOqHCl observer_development < %s" % raw_dump)
+print "Fixing db..."
+os.system("mysql -u root -pWoyOqHCl observer_development < db/clean-email.sql")
+print "Dumping db..."
+os.system("mysqldump -u root -pWoyOqHCl observer_development > %s/clean-%s.%s" % (dir, num, highest))
+
+print "Updating images...\n"
+os.system("script/update_images --root . --sync dreamhost --download -P")
+
+print "%s UTC" % time.asctime()
