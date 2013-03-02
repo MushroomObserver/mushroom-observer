@@ -78,6 +78,10 @@ class SupportController < ApplicationController
     store_location
   end
   
+  def wrapup_2012
+    store_location
+  end
+  
   def letter
     store_location
   end

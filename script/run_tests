@@ -10,9 +10,12 @@ fi
 
 echo
 echo Preparing database using old mysql adapter...
-perl -pi -e 's/ mysql2$/ mysql/; $_' config/database.yml
+perl -p -e 's/ mysql2$/ mysql/; $_' config/database.yml > config/tmp.yml
+mv config/tmp.yml config/database.yml
 rake db:test:prepare
-perl -pi -e 's/ mysql$/ mysql2/; $_' config/database.yml
+perl -p -e 's/ mysql$/ mysql2/; $_' config/database.yml > config/tmp.yml
+mv config/tmp.yml config/database.yml
+
 
 echo
 echo Running tests using new mysql2 adapter...

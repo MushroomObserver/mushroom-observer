@@ -256,15 +256,17 @@ module ApplicationHelper::ObjectLink
   end
 
   # Provide the copyright for an image
-  def image_copyright(image)
-    year = image.when
-    year = image.when.year if year
+  def image_copyright(image, div=true)
     link = if image.copyright_holder == image.user.legal_name
       link = user_link(image.user)
     else
       link = image.copyright_holder.to_s.t
     end
-    "<div id=\"copyright\"> #{:image_show_copyright.t} &copy;#{year} #{link} </div>"
+    result = image.license.copyright_text(image.year, link)
+    if div
+      result = "<div id=\"copyright\"> #{result} </div>"
+    end
+    result
   end
 
   def export_link(image_id, exported)

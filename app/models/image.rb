@@ -807,7 +807,7 @@ class Image < AbstractModel
       )
     end
   end
-
+  
   # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
     # This is orders of magnitude faster than doing via active-record.
@@ -831,6 +831,10 @@ class Image < AbstractModel
     end
   end
 
+  def year()
+    self.when.year
+  end
+  
 ################################################################################
 
 protected

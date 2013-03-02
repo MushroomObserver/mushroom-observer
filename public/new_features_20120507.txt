@@ -48,7 +48,7 @@ observation names.  That is, you can specify whether your votes are anonymous
 or not.  Unlike name votes, though, when you change back and forth, it will not
 change all your existing votes, just future votes.  We strongly encourage all
 votes be public to help avoid disputes.  To make all your old votes public, use
-this following like (found at the top of "Your Preferences" along with the
+this link (found at the top of "Your Preferences" along with the
 copyright bulk updater): 
 
 http://mushroomobserver.org/image/bulk_vote_anonymity_updater 
