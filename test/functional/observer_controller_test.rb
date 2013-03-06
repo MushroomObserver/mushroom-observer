@@ -780,6 +780,14 @@ class ObserverControllerTest < FunctionalTestCase
     assert(obs.specimens.count == 1)
   end
 
+  def test_create_observation_with_herbarium_duplicate_label
+    generic_construct_observation({
+      :observation => { :specimen => '1' },
+      :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "NYBG 1234" },
+      :name => { :name => "Cortinarius sp." }
+    }, 0,0,0)
+  end
+
   def test_create_observation_with_herbarium_no_id
     name = "Coprinus comatus"
     generic_construct_observation({

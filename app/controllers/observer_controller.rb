@@ -1103,9 +1103,9 @@ class ObserverController < ApplicationController
         herbarium_name = herbarium_name.strip_html
         herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
         if herbarium
-          herbrium_label = herbarium_label_from_params(params)
-          success = herbarium.label_free?(herbrium_label)
-          flash_error(:edit_herbarium_duplicate_label.t(:herbarium_name => herbarium_name, :hebarium_label => herbarium_label)) if !success
+          herbarium_label = herbarium_label_from_params(params)
+          success = herbarium.label_free?(herbarium_label)
+          flash_error(:edit_herbarium_duplicate_label.t(:herbarium_name => herbarium_name, :herbarium_label => herbarium_label)) if !success
         end
       end
     end
