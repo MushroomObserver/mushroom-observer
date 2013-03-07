@@ -824,7 +824,7 @@ app_banner: Mushroom<br/>Observer
 
 # This goes in a box at the top of the page.
 # app_banner_box: It was a busy summer and fall.  See all the <a href="/observer/news">changes</a>!
-app_banner_box: X
+app_banner_box: "<a href=\"/support/wrapup_2012\">2012 Wrapup and Request for Support</a>"
 
 # These are the controls/links in the left-hand panel.
 app_intro: Introduction
@@ -2119,10 +2119,8 @@ wrapup_2011_body: >
   -Nathan\n
 
 # support/wrapup_2012
-wrapup_2012_title: 2012 Wrapup to the Mushroom Observer Community
+wrapup_2012_title: 2012 Wrapup for the Mushroom Observer Community
 wrapup_2012_body: >
-  To the Mushroom Observer Community,\n
-  \n
   2012 was a busy year for Mushroom Observer.  Many notable new features were added.  Highlights include:\n
   \n
   * Substantial revisions to the <a href="/name/show_name/383">Show Name</a> and <a href="/image/show_image/267480?size=medium">Show Image</a> pages\n
@@ -2137,7 +2135,7 @@ wrapup_2012_body: >
   \n
   One of the goals of this work has been to increase the scientific value of the site for research. The support for Herbarium and Specimen pages as well as the reciprocal links with MyCoPortal are recent steps towards this goal. This work is directly related to a new effort to digitize fungal herbaria throughout the US led by Barbara Thiers. I continue to work with Tom Bruns at UC Berkeley and Deborah McGuinness at Rensselaer Polytechnic Institute (RPI) to find funding to directly support improvements to the Mushroom Observer.  These projects continue to promise exciting developments for MO in the future.\n
   \n
-  In addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%). \n
+  In addition, the site has continued to grow.  We now have over 300,000 images, 100,000 observations, and over 3800 registered users.  This not only indicates the greatest number of images we've received in a year (106,000), but is a greater growth rate than the previous year (56% vs. 49%).\n
   \n
   Fortunately, due to generous donations from all of you, we have continued to be able to improve the site configuration.  While we do have a few more tricks up our sleeves that we expect to implement soon, it is increasingly clear that more substantial improvements are needed.  Historically, we have run the site off a single server.  To achieve the next level of performance we would like to separate the database from the application server, and add an additional application server along with a small load balancer.  We expect this to roughly triple the monthly costs of running the site to around $200/month.\n
   \n
@@ -2156,7 +2154,6 @@ wrapup_2012_body: >
   \n
   Thanks for all your contributions to the Mushroom Observer,\n
   -Nathan\n
-  \n
 
 ################################################################################
 
