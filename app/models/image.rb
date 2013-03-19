@@ -104,7 +104,7 @@
 #
 #  9. A regular process (every 5 minutes?) tries to re-transfer any images
 #     whose transfer failed.  Bailing at the first sign of trouble.
-# 
+#
 #  10. A nightly process runs to check for mistakes and remove any images that
 #     have been successfully transferred:
 #
@@ -530,7 +530,7 @@ class Image < AbstractModel
     name.sub!(/^.*[\/\\]/, '')
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name.truncate_binary_length!(120) if name.binary_length > 120
-    if not name.blank? and User.current && User.current.keep_filenames
+    if not name.blank? and User.current && User.current.keep_filenames != :toss
       self.original_name = name
     end
   end
@@ -807,7 +807,7 @@ class Image < AbstractModel
       )
     end
   end
-  
+
   # Whenever a user changes their name, update all their images.
   def self.update_copyright_holder(old_name, new_name, user)
     # This is orders of magnitude faster than doing via active-record.
@@ -834,7 +834,7 @@ class Image < AbstractModel
   def year()
     self.when.year
   end
-  
+
 ################################################################################
 
 protected

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130301051051) do
+ActiveRecord::Schema.define(:version => 20130319120600) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -567,9 +567,9 @@ ActiveRecord::Schema.define(:version => 20130301051051) do
   end
 
   create_table "users", :force => true do |t|
-    t.string   "login",                        :limit => 80,                                                       :default => "",         :null => false
-    t.string   "password",                     :limit => 40,                                                       :default => "",         :null => false
-    t.string   "email",                        :limit => 80,                                                       :default => "",         :null => false
+    t.string   "login",                        :limit => 80,                                                       :default => "",             :null => false
+    t.string   "password",                     :limit => 40,                                                       :default => "",             :null => false
+    t.string   "email",                        :limit => 80,                                                       :default => "",             :null => false
     t.string   "theme",                        :limit => 40
     t.string   "name",                         :limit => 80
     t.datetime "created"
@@ -577,34 +577,34 @@ ActiveRecord::Schema.define(:version => 20130301051051) do
     t.datetime "verified"
     t.integer  "rows"
     t.integer  "columns"
-    t.boolean  "alternate_rows",                                                                                   :default => true,       :null => false
-    t.boolean  "alternate_columns",                                                                                :default => true,       :null => false
-    t.boolean  "vertical_layout",                                                                                  :default => true,       :null => false
-    t.integer  "license_id",                                                                                       :default => 3,          :null => false
+    t.boolean  "alternate_rows",                                                                                   :default => true,           :null => false
+    t.boolean  "alternate_columns",                                                                                :default => true,           :null => false
+    t.boolean  "vertical_layout",                                                                                  :default => true,           :null => false
+    t.integer  "license_id",                                                                                       :default => 3,              :null => false
     t.integer  "contribution",                                                                                     :default => 0
-    t.text     "notes",                                                                                            :default => "",         :null => false
+    t.text     "notes",                                                                                            :default => "",             :null => false
     t.integer  "location_id"
     t.integer  "image_id"
-    t.text     "mailing_address",                                                                                  :default => "",         :null => false
+    t.text     "mailing_address",                                                                                  :default => "",             :null => false
     t.string   "locale",                       :limit => 5
     t.text     "bonuses"
-    t.boolean  "email_comments_owner",                                                                             :default => true,       :null => false
-    t.boolean  "email_comments_response",                                                                          :default => true,       :null => false
-    t.boolean  "email_comments_all",                                                                               :default => false,      :null => false
-    t.boolean  "email_observations_consensus",                                                                     :default => true,       :null => false
-    t.boolean  "email_observations_naming",                                                                        :default => true,       :null => false
-    t.boolean  "email_observations_all",                                                                           :default => false,      :null => false
-    t.boolean  "email_names_author",                                                                               :default => true,       :null => false
-    t.boolean  "email_names_editor",                                                                               :default => false,      :null => false
-    t.boolean  "email_names_reviewer",                                                                             :default => true,       :null => false
-    t.boolean  "email_names_all",                                                                                  :default => false,      :null => false
-    t.boolean  "email_locations_author",                                                                           :default => true,       :null => false
-    t.boolean  "email_locations_editor",                                                                           :default => false,      :null => false
-    t.boolean  "email_locations_all",                                                                              :default => false,      :null => false
-    t.boolean  "email_general_feature",                                                                            :default => true,       :null => false
-    t.boolean  "email_general_commercial",                                                                         :default => true,       :null => false
-    t.boolean  "email_general_question",                                                                           :default => true,       :null => false
-    t.boolean  "email_html",                                                                                       :default => true,       :null => false
+    t.boolean  "email_comments_owner",                                                                             :default => true,           :null => false
+    t.boolean  "email_comments_response",                                                                          :default => true,           :null => false
+    t.boolean  "email_comments_all",                                                                               :default => false,          :null => false
+    t.boolean  "email_observations_consensus",                                                                     :default => true,           :null => false
+    t.boolean  "email_observations_naming",                                                                        :default => true,           :null => false
+    t.boolean  "email_observations_all",                                                                           :default => false,          :null => false
+    t.boolean  "email_names_author",                                                                               :default => true,           :null => false
+    t.boolean  "email_names_editor",                                                                               :default => false,          :null => false
+    t.boolean  "email_names_reviewer",                                                                             :default => true,           :null => false
+    t.boolean  "email_names_all",                                                                                  :default => false,          :null => false
+    t.boolean  "email_locations_author",                                                                           :default => true,           :null => false
+    t.boolean  "email_locations_editor",                                                                           :default => false,          :null => false
+    t.boolean  "email_locations_all",                                                                              :default => false,          :null => false
+    t.boolean  "email_general_feature",                                                                            :default => true,           :null => false
+    t.boolean  "email_general_commercial",                                                                         :default => true,           :null => false
+    t.boolean  "email_general_question",                                                                           :default => true,           :null => false
+    t.boolean  "email_html",                                                                                       :default => true,           :null => false
     t.string   "sync_id",                      :limit => 16
     t.datetime "modified"
     t.boolean  "admin"
@@ -618,10 +618,10 @@ ActiveRecord::Schema.define(:version => 20130301051051) do
     t.enum     "votes_anonymous",              :limit => [:no, :yes, :old],                                        :default => :no
     t.enum     "location_format",              :limit => [:postal, :scientific],                                   :default => :postal
     t.datetime "last_activity"
-    t.boolean  "keep_filenames",                                                                                   :default => true,       :null => false
-    t.enum     "hide_authors",                 :limit => [:none, :above_species],                                  :default => :none,      :null => false
-    t.boolean  "thumbnail_maps",                                                                                   :default => true,       :null => false
+    t.enum     "hide_authors",                 :limit => [:none, :above_species],                                  :default => :none,          :null => false
+    t.boolean  "thumbnail_maps",                                                                                   :default => true,           :null => false
     t.string   "auth_code",                    :limit => 40
+    t.enum     "keep_filenames",               :limit => [:toss, :keep_but_hide, :keep_and_show],                  :default => :keep_and_show, :null => false
   end
 
   create_table "votes", :force => true do |t|

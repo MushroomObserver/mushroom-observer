@@ -316,7 +316,7 @@ class AccountController < ApplicationController
         [ :int,  :license_id,      true ],
         [ :str,  :votes_anonymous, true ],
         [ :bool, :email_html,      true ],
-        [ :bool, :keep_filenames ],
+        [ :str,  :keep_filenames ],
         [ :str,  :location_format ],
         [ :str,  :hide_authors ],
         [ :str,  :theme ],

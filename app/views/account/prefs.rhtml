@@ -57,12 +57,14 @@
     end
     form.select(:votes_anonymous, values) %></p>
 
-  <p><%= form.check_box('keep_filenames') %>
-    <label for="user_keep_filenames"><%= :prefs_keep_image_filenames.t %></label><br/>
-    <span class="HelpNote">(<%= :prefs_keep_image_filenames_help.t %>)</span>
+  <p><label for="user_keep_filenames"><%= :prefs_keep_image_filenames.t %></label>:
     <span class="HelpNote">(<%= link_to(:prefs_bulk_filename_purge.t,
       { :controller => 'image', :action => 'bulk_filename_purge' },
-      { :confirm => :prefs_bulk_filename_purge_confirm.l }) %>)</span></p>
+      { :confirm => :prefs_bulk_filename_purge_confirm.l }) %>)</span><br/>
+    <%= form.select(:keep_filenames, [
+    [:prefs_keep_image_filenames_toss.l, :toss],
+    [:prefs_keep_image_filenames_keep_but_hide.l, :keep_but_hide],
+    [:prefs_keep_image_filenames_keep_and_show.l, :keep_and_show]]) %></p>
 
   <p><label for="user_license_id"><%= :License.t %>:</label>
     <span class="HelpNote">(<%= :prefs_license_note.t %>)</span>

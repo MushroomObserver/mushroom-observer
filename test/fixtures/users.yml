@@ -15,6 +15,7 @@ rolf:
   locale: en-US
   thumbnail_size: :thumbnail
   image_size: :medium
+  keep_filenames: :toss
 
 # Mary has no images and no herbaria
 mary:
@@ -31,7 +32,7 @@ mary:
   locale: en-US
   thumbnail_size: :thumbnail
   image_size: :medium
-  keep_filenames: true
+  keep_filenames: :keep_and_show
 
 # Junk gets denied
 junk:
@@ -47,6 +48,7 @@ junk:
   locale: en-US
   thumbnail_size: :thumbnail
   image_size: :medium
+  keep_filenames: :toss
 
 # Need third for testing votes
 dick:
@@ -63,6 +65,7 @@ dick:
   locale: en-US
   thumbnail_size: :thumbnail
   image_size: :medium
+  keep_filenames: :toss
 
 # Need fourth for testing votes
 katrina:
@@ -78,6 +81,7 @@ katrina:
   created_here: true
   thumbnail_size: :thumbnail
   image_size: :medium
+  keep_filenames: :toss
 
 # Roy is a scientific user
 roy:
@@ -95,3 +99,4 @@ roy:
   thumbnail_size: :thumbnail
   image_size: :medium
   location_format: :scientific
+  keep_filenames: :toss

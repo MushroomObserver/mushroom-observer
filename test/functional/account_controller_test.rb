@@ -300,7 +300,7 @@ class AccountControllerTest < FunctionalTestCase
         :email_observations_naming     => '1',
         :hide_authors                  => 'above_species',
         :image_size                    => 'small',
-        :keep_filenames                => '',
+        :keep_filenames                => 'keep_but_hide',
         :license_id                    => '1',
         :locale                        => 'el-GR',
         :location_format               => 'scientific',
@@ -343,7 +343,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(true,        user.email_observations_naming)
     assert_equal(:above_species, user.hide_authors)
     assert_equal(:small,      user.image_size)
-    assert_equal(false,       user.keep_filenames)
+    assert_equal(:keep_but_hide, user.keep_filenames)
     assert_equal(licenses(:ccnc25), user.license)
     assert_equal('el-GR',     user.locale)
     assert_equal(:scientific, user.location_format)

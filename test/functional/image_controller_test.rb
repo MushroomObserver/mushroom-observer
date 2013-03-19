@@ -538,13 +538,39 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_original_filename_visibility
-    login('rolf')
+    login('mary')
+
+    @rolf.keep_filenames = :toss
+    @rolf.save
+    get(:show_image, :id => 6)
+    assert_false(@response.body.include?('áč€εиts'))
+
+    @rolf.keep_filenames = :keep_but_hide
+    @rolf.save
+    get(:show_image, :id => 6)
+    assert_false(@response.body.include?('áč€εиts'))
+
+    @rolf.keep_filenames = :keep_and_show
+    @rolf.save
     get(:show_image, :id => 6)
     assert_true(@response.body.include?('áč€εиts'))
 
-    login('mary')
+    login('rolf')
+
+    @rolf.keep_filenames = :toss
+    @rolf.save
     get(:show_image, :id => 6)
-    assert_false(@response.body.include?('áč€εиts'))
+    assert_true(@response.body.include?('áč€εиts'))
+
+    @rolf.keep_filenames = :keep_but_hide
+    @rolf.save
+    get(:show_image, :id => 6)
+    assert_true(@response.body.include?('áč€εиts'))
+
+    @rolf.keep_filenames = :keep_and_show
+    @rolf.save
+    get(:show_image, :id => 6)
+    assert_true(@response.body.include?('áč€εиts'))
   end
 
   def test_bulk_original_filename_purge

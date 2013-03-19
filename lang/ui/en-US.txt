@@ -1434,7 +1434,9 @@ prefs_votes_anonymous_no: Always public
 prefs_votes_anonymous_yes: Always anonymous
 prefs_votes_anonymous_old: Public after [cutoff]
 prefs_keep_image_filenames: Keep original file name of uploaded images?
-prefs_keep_image_filenames_help: Only you will be able to see them.
+prefs_keep_image_filenames_toss: remove from database completely
+prefs_keep_image_filenames_keep_but_hide: save but keep them private
+prefs_keep_image_filenames_keep_and_show: save and make them public
 prefs_bulk_filename_purge: Purge All Filenames from Database
 prefs_bulk_filename_purge_confirm: Are you sure you want to purge all image filenames from our database? This action cannot be undone.  Please note that no one but you is able to see these filenames, anyway.
 prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
