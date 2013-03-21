@@ -50,15 +50,17 @@ class UserGroup < AbstractModel
     name.to_s
   end
 
+  def self.get_or_construct_user(name)
+    user = find_by_name(name)
+    if user.nil?
+      user = UserGroup.new(:name => name, :meta => 1)
+    end
+    user
+  end
+  
   # Return the meta-group that contains all users.
   def self.all_users
-    @@all_users ||= find_by_name('all users')
-    if @@all_users.nil?
-      # Construct the 'all users' group if it doesn't already exist
-      # Not sure if meta should be set, but it's what's in the production database
-      @@all_users = UserGroup.new(:name => 'all users', :meta => 1)
-    end
-    @@all_users
+    @@all_users ||= get_or_construct_user('all users')
   end
 
   # Return the meta-group that contains just the given users.  Takes id or User.
@@ -70,7 +72,7 @@ class UserGroup < AbstractModel
 
   # Return the meta-group that contains all users.
   def self.reviewers
-    @@reviewers ||= find_by_name('reviewers')
+    @@reviewers ||= get_or_construct_user('reviewers')
   end
 
   # Callback that fires when a new User is created.

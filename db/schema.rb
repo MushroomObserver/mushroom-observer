@@ -76,14 +76,14 @@ ActiveRecord::Schema.define(:version => 20130319120600) do
   end
 
   create_table "herbaria", :force => true do |t|
-    t.text     "mailing_address", :limit => 16777215
+    t.text     "mailing_address"
     t.integer  "location_id"
-    t.string   "email",           :limit => 80,       :default => "", :null => false
+    t.string   "email",           :limit => 80,   :default => "", :null => false
     t.string   "name",            :limit => 1024
-    t.text     "description",     :limit => 16777215
+    t.text     "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "code",            :limit => 8,        :default => "", :null => false
+    t.string   "code",            :limit => 8,    :default => "", :null => false
   end
 
   create_table "herbaria_curators", :id => false, :force => true do |t|
@@ -512,13 +512,13 @@ ActiveRecord::Schema.define(:version => 20130319120600) do
   end
 
   create_table "specimens", :force => true do |t|
-    t.integer  "herbarium_id",                                        :null => false
-    t.date     "when",                                                :null => false
-    t.text     "notes",           :limit => 16777215
+    t.integer  "herbarium_id",                                  :null => false
+    t.date     "when",                                          :null => false
+    t.text     "notes"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "user_id",                                             :null => false
-    t.string   "herbarium_label", :limit => 80,       :default => "", :null => false
+    t.integer  "user_id",                                       :null => false
+    t.string   "herbarium_label", :limit => 80, :default => "", :null => false
   end
 
   create_table "synonyms", :force => true do |t|
