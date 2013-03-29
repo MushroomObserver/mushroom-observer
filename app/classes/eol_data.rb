@@ -26,8 +26,14 @@ class EolData
     @license_id_to_url = license_id_to_url()
     @user_id_to_legal_name = user_id_to_legal_name()
     @description_id_to_authors = description_id_to_authors()
-   end
-      
+    @image_id_to_names = image_id_to_names()
+  end
+  
+  def image_to_names(id)
+    @image_id_to_names[id].map {|n| n.real_search_name }.join(' && ')
+    # @image_id_to_names
+  end
+  
   def name_count
     self.names.count
   end
@@ -175,6 +181,12 @@ private
   
   def id_to_image
     make_id_hash(Image.find_by_sql("SELECT DISTINCT images.* #{IMAGE_CONDITIONS}"))
+  end
+  
+  def image_id_to_names
+    make_list_hash_from_pairs(names.map {
+      |n| @name_id_to_images[n.id].map { |i| [i.id, n] } }.reduce {
+      |a,b| a+b })
   end
   
   def license_id_to_url()

@@ -93,11 +93,9 @@
               <td width="20">&nbsp;</td>
               <td>
                 <% @vote = @votes[naming.id]
-                menu = check_permission(naming) ? @confidence_menu : @agreement_menu
-                # It *is* still possible for the owner not to have voted.  In which case I
-                # need to explicitly add the "No Opinion" option to their menu.
-                if check_permission(naming) && (!@vote || @vote.value == 0)
-                  menu = menu.clone.unshift(@agreement_menu.first)
+                menu = @confidence_menu
+                if !check_permission(naming) or (check_permission(naming) && (!@vote || @vote.value == 0))
+                  menu = [@no_opinion] + menu
                 end %>
                 <%= select('vote', 'value', menu, {}, { :index => naming.id,
                            :onchange => "change_vote(#{naming.id})" }) %>

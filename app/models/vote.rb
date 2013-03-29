@@ -46,14 +46,10 @@
 #
 #  ==== Vote labels
 #  confidence_menu::    Structure used by form helper +select+ to create pulldown menu.
-#  agreement_menu::     (Same thing, but for non-owner of Naming.)
 #  confidence::         Classify value as confidence level, String.
-#  agreement::          Classify value as level of agreement, String.
 #
 #  == Instance methods
 #
-#  confidence::         Classify value as confidence level, String.
-#  agreement::          Classify value as level of agreement, String.
 #  percent::            Return value as percentage.
 #  user_weight::        Calculate weight from user's contribution.
 #
@@ -149,15 +145,7 @@ class Vote < AbstractModel
     [ :vote_confidence_0,   -3 ]
   ]
 
-  AGREEMENT_VALS = [
-    [ :vote_no_opinion,     0 ],
-    [ :vote_agreement_100,  3 ],
-    [ :vote_agreement_80,   2 ],
-    [ :vote_agreement_60,   1 ],
-    [ :vote_agreement_40,  -1 ],
-    [ :vote_agreement_20,  -2 ],
-    [ :vote_agreement_0,   -3 ]
-  ]
+  NO_OPINION_VAL = [:vote_no_opinion, 0]
 
   # Force unit tests to verify existence of these translations.
   if false
@@ -168,12 +156,6 @@ class Vote < AbstractModel
     :vote_confidence_20.l
     :vote_confidence_0.l
     :vote_no_opinion.l
-    :vote_agreement_100.l
-    :vote_agreement_80.l
-    :vote_agreement_60.l
-    :vote_agreement_40.l
-    :vote_agreement_20.l
-    :vote_agreement_0.l
   end
 
   # List of options interpreted as "confidence".
@@ -186,34 +168,17 @@ class Vote < AbstractModel
     CONFIDENCE_VALS
   end
 
-  # List of options interpreted as "agreement".
-  #
-  #   for label, value in Vote.agreement_menu
-  #     puts "#{label.l} #{value}"
-  #   end
-  #
-  def self.agreement_menu
-    AGREEMENT_VALS
+  def self.no_opinion
+    :vote_no_opinion.l
   end
 
+  def self.opinion_menu
+    [NO_OPINION_VAL] + confidence_menu
+  end
+  
   # Find label of closest value in the "confidence" menu.
   def self.confidence(val)
-    lookup_value(val, CONFIDENCE_VALS)
-  end
-
-  # Find label of closest value in the "agreement" menu.
-  def self.agreement(val)
-    lookup_value(val, AGREEMENT_VALS)
-  end
-
-  # Find label of closest value in the "confidence" menu.
-  def confidence
-    self.class.lookup_value(value, CONFIDENCE_VALS)
-  end
-
-  # Find label of closest value in the "agreement" menu.
-  def agreement
-    self.class.lookup_value(value, AGREEMENT_VALS)
+    lookup_value(val, confidence_menu)
   end
 
   # ----------------------------

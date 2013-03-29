@@ -2289,8 +2289,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Now try to make somewhat sure the content is right.
     table = namings(:coprinus_comatus_naming).calc_vote_table
-    str1 = Vote.agreement(votes(:coprinus_comatus_owner_vote).value)
-    str2 = Vote.agreement(votes(:coprinus_comatus_other_vote).value)
+    str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
+    str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
     for str in table.keys
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])

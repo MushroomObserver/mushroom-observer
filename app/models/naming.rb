@@ -277,7 +277,7 @@ class Naming < AbstractModel
 
     # Initialize table.
     table = {}
-    for str, val in Vote.agreement_menu
+    for str, val in Vote.opinion_menu
       table[str] = {
         :num   => 0,
         :wgt   => 0.0,
@@ -290,7 +290,7 @@ class Naming < AbstractModel
     tot_sum = 0
     tot_wgt = 0
     for v in votes
-      str = v.agreement
+      str = Vote.confidence(v.value)
       wgt = v.user_weight
       table[str][:num] += 1
       table[str][:wgt] += wgt

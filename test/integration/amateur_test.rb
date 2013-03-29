@@ -326,7 +326,7 @@ class AmateurTest < IntegrationTestCase
     in_session(rolf) do
       get("/#{obs.id}")
       open_form do |form|
-        form.assert_value("vote_#{naming.id}_value", 0)
+        form.assert_value("vote_#{naming.id}_value", /no opinion/i)
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit
       end

@@ -261,9 +261,9 @@ class ObserverController < ApplicationController
 
   # Help page.
   def how_to_use # :nologin:
-    @min_pos_vote = Vote.agreement(Vote.min_pos_vote).l
-    @min_neg_vote = Vote.agreement(Vote.min_neg_vote).l
-    @maximum_vote = Vote.agreement(Vote.maximum_vote).l
+    @min_pos_vote = Vote.confidence(Vote.min_pos_vote).l
+    @min_neg_vote = Vote.confidence(Vote.min_neg_vote).l
+    @maximum_vote = Vote.confidence(Vote.maximum_vote).l
   end
 
   # A few ways in which users can help.
@@ -910,7 +910,8 @@ class ObserverController < ApplicationController
   # Inputs: params[:id]
   # Outputs:
   #   @observation
-  #   @confidence/agreement_menu    (used to create vote menus)
+  #   @confidence_menu    (used to create vote menus)
+  #   @no_opinion         (used to add 'No Opinion' vote)
   #   @votes                        (user's vote for each naming.id)
   def show_observation # :nologin: :prefetch:
     pass_query_params
@@ -972,7 +973,7 @@ class ObserverController < ApplicationController
           @votes[naming.id] = vote
         end
         @confidence_menu = translate_menu(Vote.confidence_menu)
-        @agreement_menu  = translate_menu(Vote.agreement_menu)
+        @no_opinion  = Vote.no_opinion
       end
     end
   end

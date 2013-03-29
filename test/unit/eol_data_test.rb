@@ -23,5 +23,6 @@ class EolDataTest < UnitTestCase
     assert_equal(name.user.legal_name, obj.legal_name(name.user.id))
     description = obj.descriptions(name_id)[0]
     assert_equal(description.user.legal_name, obj.authors(description.id))
+    assert_equal("Peltigera (Old) New Auth.", obj.image_to_names(obj.all_images[0].id))
   end
 end
