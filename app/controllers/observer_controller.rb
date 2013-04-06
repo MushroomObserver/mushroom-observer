@@ -130,6 +130,7 @@ class ObserverController < ApplicationController
     :hide_thumbnail_map,
     :how_to_help,
     :how_to_use,
+    :risd_terminology,
     :index,
     :index_observation,
     :index_rss_log,
@@ -268,6 +269,10 @@ class ObserverController < ApplicationController
 
   # A few ways in which users can help.
   def how_to_help # :nologin:
+  end
+
+  # Terminology description for RISD illustration class
+  def risd_terminology # :nologin:
   end
 
   # Info on color themes.

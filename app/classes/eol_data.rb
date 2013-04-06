@@ -30,7 +30,7 @@ class EolData
   end
   
   def image_to_names(id)
-    @image_id_to_names[id].map {|n| n.real_search_name }.join(' && ')
+    @image_id_to_names[id].map {|n| n.real_search_name }.join(' & ')
     # @image_id_to_names
   end
   
