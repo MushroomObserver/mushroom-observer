@@ -1,5 +1,12 @@
 <%
-  javascript_include 'prototype'
+  @title = :donate_title.l
+  new_tab_set do
+    add_tab(:donors_tab.t, :action => 'donors')
+    if is_in_admin_mode?
+	    add_tab(:create_donation_tab.t, :action => 'create_donation')
+	    add_tab(:review_donations_tab.t, :action => 'review_donations')
+    end
+  end
 %>
 
 <p>
