@@ -2034,22 +2034,20 @@ donors_order: The donors names are ordered based first on the total amount donat
 donors_title: The Mushroom Observer Community Thanks Our Donors
 donors_tab: Show Donors
 
-donate_thanks: Thank you for your interest in donating to Mushroom Observer.  At this time we cannot accept donations to support this project.  We are working to provide an effective method for accepting donations.  Please "send us a comment":/observer/ask_webmaster_question if you would like to be contacted once this has been worked out.
-donate_explanation: Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below. Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
-donate_fine_print: >
-  Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR), and, subject to CDMR’s board’s supervision to assure usage under terms consistent with its charitable status, donated funds will be applied for the preservation and improvement of the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.\n
+donate_thanks: >
+  Thank you for your interest in donating to Mushroom Observer.  To support Mushroom Observer, please send a personal gift to   Nathan Wilson either through <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2TGUG7TNXYF7Q">PayPal</a> or you can send your checks to:\n
   \n
-  CDMR is incorporated for charitable purposes under the California Nonprofit Public Benefit Corporation Law.  The specific purpose for which CDMR is organized is the preservation and development of digital resources (e.g., websites) that provide valuable scientific and educational information on mycology.   CDMR has applied for recognition as a public charity and exempt status under section 501c3 with US Internal Revenue Service, and applied for similar status under California tax law.   Assuming that the IRS approves CDMR’s application for exempt status, recognition of CDMR’s exempt status is expected to be retroactive to the date of CDMR’s formation, so that all donations made to CDMR for purposes of supporting Mushroom Observer may be recognized as tax deductible to the fullest extent allowed by law.  For more information on the status of CDMR’s application for exempt status, visit at "http://digitalmycology.org":http://digitalmycology.org.\n
-  \n
-  If you would prefer not to use PayPal, you are welcome to send a check or money order in US dollars payable to the "Consortium for Digital Mycology Resources" to:\n
-  \n
-  Mushroom Observer\n
-  c/o Nathan Wilson\n
+  Nathan Wilson\n
   43 Cameron Rd.\n
   North Falmouth, MA 02556\n
   \n
-  You may indicate on the check or on an included note with your donation that you are a user of the Mushroom Observer – this will be taken by CDMR to reflect your desire that your donation be used primarily to support availability of the Mushroom Observer to the extent consistent with CDMR’s charitable purposes.\n
-
+  As discussed in the <a href="/support/wrapup_2012">2012 Wrapup</a> unlike previous years, funding for the Mushroom Observer is not being handled by the Consortium for Digital Mycology Resources (CDMR).  The CDMR is still awaiting a ruling from the IRS regarding it's tax exempt status.  Based on legal advice from Mushroom Observer member John Harper, a tax lawyer with Morrison & Foerster, the CDMR’s board decided not to solicit donations until the ruling is made.  However, the CDMR board of directors is committed to creating or joining a recognized tax-exempt non-profit that can receive deductible donations to support online mycological resources such as the Mushroom Observer.  Exactly what form this will take and how soon it will happen is still up in the air.\n
+  \n
+  In the mean time Mushroom Observer is being supported directly by Nathan now in large part through personal gifts.  The gifts received so far will cover the current expenses over the next year.  However, the site has continued to grow and is once again needing a substantial performance boost.  The current estimate is that this will more than triple the current costs for hosting the site to roughly $200/month.\n
+  \n
+  This means if you would like better performance for Mushroom Observer, please donate soon.  All such gifts will be used to cover costs directly associated with running the Mushroom Observer and will continue to be recognized on the Mushroom Observer <a href="/support/donors">donors page</a>. Unfortunately, since they will be personal gifts to Nathan you will not be able to count them as tax deductible donations.\n
+  \n
+  Best regards and thanks for all your contributions to Mushroom Observer.
 
 
 # support/confirm
