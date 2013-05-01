@@ -109,4 +109,10 @@ class InterestController < ApplicationController
                                :action => 'list_interests')
     end
   end
+
+  def destroy_notification
+    pass_query_params
+    Notification.find(params[:id].to_i).destroy
+    redirect_to(:action => 'list_interests', :params => query_params)
+  end
 end

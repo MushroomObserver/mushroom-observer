@@ -93,4 +93,15 @@ class InterestControllerTest < FunctionalTestCase
     assert_flash(0)
     assert_equal(0, Interest.find_all_by_user_id(@rolf.id).length)
   end
+  
+  def test_destroy_notification
+    login('rolf')
+    n = notifications(:coprinus_comatus_notification)
+    assert(n)
+    id = n.id
+    get(:destroy_notification, :id => id)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Notification.find(id)
+    end
+  end
 end

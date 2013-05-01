@@ -1531,7 +1531,7 @@ class NameController < ApplicationController
       @observations = @query.results.select {|o| o.lat or o.location}
     end
   end
-
+  
   # Form accessible from show_name that lets a user setup tracker notifications
   # for a name.
   def email_tracking # :norobots:
