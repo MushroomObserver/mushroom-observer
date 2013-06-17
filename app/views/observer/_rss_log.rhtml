@@ -6,7 +6,7 @@
     title = :rss_destroyed.t(:type => :object)
     detail = nil
   elsif not target or
-        tag.to_s.match(/^log_[a-z]+_(merged|destroyed)/) 
+        tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/) 
     title = :rss_destroyed.t(:type => target_type)
     detail = tag.t(args) rescue nil
   elsif not time or time < target.created + 1.minute
