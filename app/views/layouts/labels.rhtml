@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
+  <%= "<link rel=\"SHORTCUT ICON\" href=\"#{HTTP_DOMAIN}/favicon.ico\" />"%>
+  <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png" />
+  <meta property="og:title" content="Mushroom Observer" />
+  <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world." />
+  <%= stylesheet_link_tag('labels.css?v=1') %>
+</head>
+<body>
+  <%= @content_for_layout %>
+</body>
+</html>

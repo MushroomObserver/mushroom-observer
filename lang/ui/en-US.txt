@@ -1812,6 +1812,7 @@ species_list_show_manage_projects: Manage Projects
 species_list_show_manage_projects_help: Change which projects this list and its observations and images are attached to.
 species_list_show_manage_observations_too: If you would like to attach/remove observations or images, too, please use the "[:species_list_show_manage_projects]" link.
 
+species_list_show_print_labels: Print Labels
 
 
 # species_list/species_lists_by_title

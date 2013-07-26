@@ -178,6 +178,11 @@ class SpeciesListController < ApplicationController
     redirect_to_next_object(:prev, SpeciesList, params[:id].to_s)
   end
 
+  def print_labels
+    @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+    render(:action => "print_labels", :layout => "labels")
+  end
+  
   ##############################################################################
   #
   #  :section: Reports
