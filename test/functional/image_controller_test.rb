@@ -74,25 +74,31 @@ class ImageControllerTest < FunctionalTestCase
 
   # Test next_image in the context of a search
   def test_next_image_search
-    image = Image.find(5)
+    rolfs_favorite_image_id = 5
+    image = Image.find(rolfs_favorite_image_id)
 
     # Create simple index.
     query = Query.lookup_and_save(:Image, :by_user, :user => @rolf)
-    assert_equal([8, 6, 5, 4, 3], query.result_ids)
+    ids = query.result_ids
+    assert(ids.length > 3)
+    rolfs_index = ids.index(rolfs_favorite_image_id)
+    assert(rolfs_index)
+    expected_next = ids[rolfs_index+1]
+    assert(expected_next)
 
     # See what should happen if we look up an Image search and go to next.
     query.current = image
     assert(new_query = query.next)
     assert_equal(query, new_query)
-    assert_equal(4, new_query.current_id)
+    assert_equal(expected_next, new_query.current_id)
 
     # Now do it for real.
     params = {
-      :id => 5,
+      :id => rolfs_favorite_image_id,
       :params => @controller.query_params(query),
     }.flatten
     get(:next_image, params)
-    assert_response(:action => "show_image", :id => 4,
+    assert_response(:action => "show_image", :id => expected_next,
                     :params => @controller.query_params(query))
   end
 

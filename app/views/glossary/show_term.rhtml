@@ -1,0 +1,25 @@
+<%
+  @title = :show_term_title.t(:name => @term.name)
+  new_tab_set do
+    add_tab(:term_index.t, :action => 'index')
+    add_tab(:create_term.t, :action => 'create_term')
+    if is_in_admin_mode?
+      add_tab(:show_term.t, :action => 'show_term', :id => @term.id)
+    end
+  end
+%>
+
+<div>
+  <%= @term.description.tpl %>
+</div>
+
+<p>
+<%= if @term.image_id
+  thumbnail(@term.image_id, :border => 0, :votes => false)
+end %>
+</p>
+
+<p class="Date">
+<%= :footer_created_at.t(:date => @term.created_at.web_time) %><br/>
+<%= :footer_last_modified_at.t(:date => @term.updated_at.web_time) %>
+</p>

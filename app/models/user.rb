@@ -392,6 +392,10 @@ class User < AbstractModel
     end
   end
 
+  def format_name
+    self.unique_text_name
+  end
+  
   # Return User's full name if present, else return login.
   #
   #   name present:  "Fred Flintstone"

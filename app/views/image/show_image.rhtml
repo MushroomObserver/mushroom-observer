@@ -114,6 +114,14 @@ end %></p>
     <%= :Observation.t %>: <%= link_to(obs.unique_format_name.t, :controller => 'observer',
       :action => 'show_observation', :id => obs.id, :params => query_params) %><br/>
   <% end %>
+  <% for subject in @image.subjects %>
+    <%= :User.t %>: <%= link_to(subject.format_name.t, :controller => 'observer',
+      :action => 'show_user', :id => subject.id, :params => query_params) %><br/>
+  <% end %>
+  <% for term in @image.terms %>
+    <%= :Term.t %>: <%= link_to(term.format_name.t, :controller => 'glossary',
+      :action => 'show_term', :id => term.id, :params => query_params) %><br/>
+  <% end %>
   <% if @image.notes.blank? %>
   <% elsif @image.notes.include?("\n") %>
     <%= (:image_show_notes.l + ': ' + @image.notes.to_s).tpl %>

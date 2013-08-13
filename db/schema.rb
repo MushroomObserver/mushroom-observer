@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130319120600) do
+ActiveRecord::Schema.define(:version => 20130804114305) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created"
@@ -523,6 +523,14 @@ ActiveRecord::Schema.define(:version => 20130319120600) do
 
   create_table "synonyms", :force => true do |t|
     t.string "sync_id", :limit => 16
+  end
+
+  create_table "terms", :force => true do |t|
+    t.string   "name",        :limit => 1024
+    t.text     "description"
+    t.integer  "image_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "transactions", :force => true do |t|

@@ -1,0 +1,24 @@
+<%
+  @title = :term_index_title.t
+  new_tab_set do
+    add_tab(:create_term.t, :action => 'create_term')
+  end
+%>
+
+<table>
+<% odd_or_even = 0
+   for term in @terms
+     odd_or_even = 1 - odd_or_even %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td>
+      <%= link_to("<b>#{term.name}</b>", :action => "show_term", :id => term.id) %>:
+      <%= term.description.tpl %>
+    </td>
+    <td>
+      <%= if term.image_id
+        thumbnail(term.image_id, :border => 0, :votes => false)
+      end %>
+    </td>
+  </tr>
+<% end %>
+</table>

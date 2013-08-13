@@ -95,3 +95,14 @@ peltigera_image:
   notes: 'Pretty lichen'
   vote_cache: 3
   copyright_holder: Nathan Wilson
+
+conic_image:
+  id: 9
+  sync_id: 9xx1
+  created: 2013-08-04 07:49:12
+  modified: 2013-08-04 07:49:12
+  content_type: image/jpeg
+  user_id: 1
+  when: 2013-08-04
+  notes: 'A scientific illustration of Conic Pileus'
+  copyright_holder: Insil Choi

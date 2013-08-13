@@ -228,11 +228,17 @@ class Image < AbstractModel
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
+  has_many :subjects, :class_name => 'User', :foreign_key => 'image_id'
+  has_many :terms
   has_many :copyright_changes, :as => :target, :dependent => :destroy
 
   before_destroy :update_thumbnails
   after_update :track_copyright_changes
 
+  def get_subjects
+    result = self.observations + self.subjects + self.terms
+  end
+  
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
   #
@@ -241,7 +247,7 @@ class Image < AbstractModel
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = observations.map(&:text_name).uniq.sort.join(' & ')
+    title = get_subjects.map(&:text_name).uniq.sort.join(' & ')
     if title.blank?
       :image.l + " ##{id || '?'}"
     else
@@ -257,7 +263,7 @@ class Image < AbstractModel
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = observations.map(&:format_name).uniq.sort.join(' & ')
+    title = get_subjects.map(&:format_name).uniq.sort.join(' & ')
     if title.blank?
       :image.l + " ##{id || '?'}"
     else
@@ -597,6 +603,7 @@ class Image < AbstractModel
   # field and returns false.
   def move_original
     raise(SystemCallError, "Don't move my test images!!") if TESTING
+    print "move_original: #{upload_temp_file}, #{original_image}\n"
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end

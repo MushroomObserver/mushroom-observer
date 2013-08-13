@@ -128,6 +128,8 @@ SPECIMEN: Specimen
 specimen: specimen
 SPECIMENS: Specimens
 specimens: specimens
+TERM: Term
+term: term
 USER: User
 user: user
 USERS: Users
@@ -1870,6 +1872,26 @@ welcome_no_user_note: If you are not a spammer, please report this as an error.
 welcome_note: You are now logged into the system...
 
 
+# Term Fields
+term_created_at: Created At
+term_updated_at: Updated At
+term_name: Name
+term_description: Description
+term_copyright_holder: Copyright holder and license for this image
+term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+
+# glossary/show_term
+show_term: Show Glossary Term
+show_term_title: "Glossary Term: [name]"
+
+# glossary/create_term
+create_term: Create New Term
+create_term_add: Add Term
+create_term_title: Create New Glossary Term
+
+# glossary/index
+term_index: Term Index
+term_index_title: Term Index
 
 # ConferenceEvent Fields
 conference_event_name: Name
