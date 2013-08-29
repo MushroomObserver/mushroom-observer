@@ -125,12 +125,12 @@ class SpeciesListController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['title',   :sort_by_title.t],
-      ['date',    :sort_by_date.t],
-      ['user',    :sort_by_user.t],
-      ['created', :sort_by_created.t],
-      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
-                  :sort_by_modified.t],
+      ['title',       :sort_by_title.t],
+      ['date',        :sort_by_date.t],
+      ['user',        :sort_by_user.t],
+      ['created_at',  :sort_by_created_at.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'updated_at'),
+                      :sort_by_updated_at.t],
     ]
 
     # Paginate by letter if sorting by user.
@@ -340,7 +340,7 @@ class SpeciesListController < ApplicationController
       end
       @checklist ||= calc_checklist
     else
-      process_species_list('created')
+      process_species_list('created_at')
     end
   end
 
@@ -683,9 +683,9 @@ class SpeciesListController < ApplicationController
 
     # Update the timestamps/user/when/where/title/notes fields.
     now = Time.now
-    @species_list.created    = now if created_or_updated == :created
-    @species_list.modified   = now
-    @species_list.user       = @user
+    @species_list.created_at = now if created_or_updated == :created_at
+    @species_list.updated_at = now
+    @species_list.user = @user
     @species_list.attributes = args
     if Location.is_unknown?(@species_list.place_name) or
        @species_list.place_name.blank?
@@ -750,7 +750,7 @@ class SpeciesListController < ApplicationController
       if !@species_list.save
         flash_object_errors(@species_list)
       else
-        if created_or_updated == :created
+        if created_or_updated == :created_at
           Transaction.post_species_list(
             :id       => @species_list,
             :date     => @species_list.when,
@@ -773,7 +773,7 @@ class SpeciesListController < ApplicationController
         end
 
         @species_list.log("log_species_list_#{created_or_updated}".to_sym)
-        if created_or_updated == :created
+        if created_or_updated == :created_at
           flash_notice(:runtime_species_list_create_success.t(:id => @species_list.id))
         else
           flash_notice(:runtime_species_list_edit_success.t(:id => @species_list.id))
@@ -811,8 +811,8 @@ class SpeciesListController < ApplicationController
     # Put together a list of arguments to use when creating new observations.
     member_args = params[:member] || {}
     sp_args = {
-      :created  => spl.modified,
-      :modified => spl.modified,
+      :created_at => spl.updated_at,
+      :updated_at => spl.updated_at,
       :user     => @user,
       :projects => spl.projects,
       :location => spl.location,
@@ -1002,8 +1002,8 @@ class SpeciesListController < ApplicationController
 
   def init_project_vars_for_create
     init_project_vars
-    last_obs = Observation.find_by_user_id(User.current_id, :order => 'created DESC')
-    if last_obs && last_obs.created > 1.hour.ago
+    last_obs = Observation.find_by_user_id(User.current_id, :order => 'created_at DESC')
+    if last_obs && last_obs.created_at > 1.hour.ago
       for proj in last_obs.projects
         @project_checks[proj.id] = true
       end

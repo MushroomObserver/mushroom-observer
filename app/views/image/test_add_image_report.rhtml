@@ -40,14 +40,14 @@
         <%= entry.user ? entry.user.login : '' %>
       </td>
       <td>
-        <%= entry.created.web_time %>
+        <%= entry.created_at.web_time %>
       </td>
       <td>
         <%= entry.upload_end.web_time %>
       </td>
       <td>
-        <% if entry.created and entry.upload_end %>
-          <%= entry.upload_end - entry.created %>
+        <% if entry.created_at and entry.upload_end %>
+          <%= entry.upload_end - entry.created_at %>
         <% end %>
       </td>
       <td>

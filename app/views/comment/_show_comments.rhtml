@@ -1,5 +1,5 @@
 <%
-  comments = object.comments.sort_by(&:created).reverse
+  comments = object.comments.sort_by(&:created_at).reverse
   if limit
     and_more = comments.length - limit
     comments = comments[0..limit-1]

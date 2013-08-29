@@ -9,7 +9,7 @@
 #
 #  == Attributes
 #
-#  modified::           Date/time it was logged.
+#  updated_at::         Date/time it was logged.
 #  query::              Stringified query.
 #
 #  == Class Methods
@@ -42,7 +42,7 @@
 #    Transaction.delete_user(:id => user_id).execute
 #
 #    # Build XML feed of all the transactions in the last day.
-#    xacts = Transaction.all(:conditions => ['`modified` > "?"', 1.day.ago])
+#    xacts = Transaction.all(:conditions => ['`updated_at` > "?"', 1.day.ago])
 #    xml.transactions(:number => xacts.length) do
 #      xacts.each do |xact|
 #        if filter_actions.include?(xact.action)

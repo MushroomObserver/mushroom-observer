@@ -1,5 +1,22 @@
-class Term < ActiveRecord::Base
-  belongs_to :image         # mug shot
+class Term < AbstractModel
+  belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
+  belongs_to :user
+  has_and_belongs_to_many :images
+
+  ALL_TERM_FIELDS = [:name, :description]
+  acts_as_versioned(
+    :table_name => 'terms_versions',
+    :if_changed => ALL_TERM_FIELDS,
+    :association_options => { :dependent => :orphan }
+  )
+  non_versioned_columns.push(
+    'thumb_image_id',
+    'created_at',
+  )
+  versioned_class.before_save {|x| x.user_id = User.current_id}
+
+  # Probably should add a user_id and a log
+  # versioned_class.before_save {|x| x.user_id = User.current_id}
 
   def text_name
     self.name
@@ -10,6 +27,9 @@ class Term < ActiveRecord::Base
   end
   
   def add_image(image)
-    self.image = image if image
+    if image
+      self.thumb_image = image if self.image.nil?
+      self.images.push(image)
+    end
   end
 end

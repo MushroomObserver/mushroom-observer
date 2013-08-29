@@ -1,0 +1,21 @@
+<%
+  @title = :edit_term_title.t(:name => @term.name)
+  
+  str = :cancel_and_show.t(:TYPE => 'Term')
+  new_tab_set do
+    add_tab(:cancel_and_show.t(:TYPE => 'Term'), :action => 'show_term', :id => @term.id)
+    add_tab(:term_index.t, :action => 'index')
+  end
+%>
+
+<p>
+<% form_tag({:action => 'edit_term', :id => @term.id}) do %>
+  <p>
+    <%= :term_name.t %>: <%= text_field('term', 'name', :size => 150, :value => @term.name) %>
+  </p>
+  <p>
+    <%= :term_description.t %>:<br/><%= text_area('term', 'description', :cols => 100, :value => @term.description) %>
+  </p>
+  <center><%= submit_tag :edit_term_save.t %><br/></center>
+<% end %>
+</p>

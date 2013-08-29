@@ -129,7 +129,7 @@
         reload_results
         assert_users_equal(@expectations[:observation].user, @new_observation.user)
         assert(@new_observation.created > Time.now - 1.minute)
-        assert(@new_observation.modified > Time.now - 1.minute)
+        assert(@new_observation.updated_at > Time.now - 1.minute)
         assert_dates_equal(@expectations[:observation].when, @new_observation.when)
         assert_equal(@expectations[:observation].where, @new_observation.where)
         assert_nil(@new_observation.location)

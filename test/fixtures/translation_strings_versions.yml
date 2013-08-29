@@ -3,7 +3,7 @@ greek_one_version1:
   version: 1
   translation_string_id: 13
   text: один
-  modified: 2012-03-31
+  updated_at: 2012-03-31
   user_id: 2
 
 greek_one_version2:
@@ -11,6 +11,13 @@ greek_one_version2:
   version: 2
   translation_string_id: 13
   text: ένα
-  modified: 2012-04-30
+  updated_at: 2012-04-30
   user_id: 4
 
+version_wizard_version1:
+  id: 3
+  version: 1
+  translation_string_id: 17
+  text: Gandalf
+  updated_at: 2013-08-22
+  user_id: 6

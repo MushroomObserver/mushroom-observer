@@ -23,7 +23,7 @@
                         :action => 'show_project', :id => project.id,
                         :params => query_params) %>:
             <br/>
-            <span class="ListWhen"><%= project.created.web_time %></span>:
+            <span class="ListWhen"><%= project.created_at.web_time %></span>:
             <span class="ListWho"><%= user_link(project.user) %></span><br/>
           </td>
         </tr>

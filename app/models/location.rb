@@ -12,21 +12,21 @@
 #
 #  == Attributes
 #
-#  id::            (-) Locally unique numerical id, starting at 1.
-#  sync_id::       (-) Globally unique alphanumeric id, used to sync with remote servers.
-#  created::       (-) Date/time it was first created.
-#  modified::      (V) Date/time it was last modified.
-#  user::          (V) User that created it.
-#  version::       (V) Version number.
+#  id::           (-) Locally unique numerical id, starting at 1.
+#  sync_id::      (-) Globally unique alphanumeric id, used to sync with remote servers.
+#  created_at::   (-) Date/time it was first created.
+#  updated_at::   (V) Date/time it was last updated.
+#  user::         (V) User that created it.
+#  version::      (V) Version number.
 #  ---
-#  name::          (V) Name, e.g.: "Lacy Park, Los Angeles Co., California, USA"
-#  north::         (V) North edge in degrees north, e.g. 37.8233
-#  south::         (V) South edge in degrees north, e.g. 37.8035
-#  east::          (V) East edge in degrees east, e.g. -122.173
-#  west::          (V) West edge in degrees east, e.g. -122.204
-#  high::          (V) Maximum elevation in meters, e.g. 100
-#  low::           (V) Minimum elevation in meters, e.g. 0
-#  notes::         (V) Arbitrary extra notes supplied by User.
+#  name::         (V) Name, e.g.: "Lacy Park, Los Angeles Co., California, USA"
+#  north::        (V) North edge in degrees north, e.g. 37.8233
+#  south::        (V) South edge in degrees north, e.g. 37.8035
+#  east::         (V) East edge in degrees east, e.g. -122.173
+#  west::         (V) West edge in degrees east, e.g. -122.204
+#  high::         (V) Maximum elevation in meters, e.g. 100
+#  low::          (V) Minimum elevation in meters, e.g. 0
+#  notes::        (V) Arbitrary extra notes supplied by User.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -98,7 +98,7 @@ class Location < AbstractModel
   ])
   non_versioned_columns.push(
     'sync_id',
-    'created',
+    'created_at',
     'num_views',
     'last_view',
     'ok_for_export',
@@ -110,7 +110,7 @@ class Location < AbstractModel
   after_update :notify_users
 
   # Automatically log standard events.
-  self.autolog_events = [:created!, :updated!]
+  self.autolog_events = [:created_at!, :updated_at!]
 
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
@@ -305,7 +305,7 @@ class Location < AbstractModel
       FROM observations
       LEFT OUTER JOIN locations ON locations.id = observations.location_id
       #{where}
-      ORDER BY observations.modified DESC
+      ORDER BY observations.updated_at DESC
       LIMIT 100
     )).sort
     if User.current_location_format == :scientific

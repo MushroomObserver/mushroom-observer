@@ -1,6 +1,8 @@
 class GlossaryController < ApplicationController
   before_filter :login_required, :except => [
-    :show_term, :index
+    :index,
+    :show_past_term,
+    :show_term
   ]
 
   def show_term # :nologin:
@@ -15,7 +17,7 @@ class GlossaryController < ApplicationController
 
   def create_term # :norobots:
     if request.method == :post
-      term = Term.new(:name => params[:term][:name], :description => params[:term][:description])
+      term = Term.new(:user => @user, :name => params[:term][:name], :description => params[:term][:description])
       image_args = {
         :copyright_holder => params[:copyright_holder],
         :when => Time.local(params[:date][:copyright_year]),
@@ -42,8 +44,6 @@ class GlossaryController < ApplicationController
       name = upload.original_filename.force_encoding('utf-8') if upload.respond_to?(:original_filename)
 
       image = Image.new(args)
-      # image.created  = Time.now
-      # image.modified = image.created
       if !image.save
         flash_object_errors(image)
       elsif !image.process_image
@@ -59,6 +59,34 @@ class GlossaryController < ApplicationController
       end
     end
     return image
+  end
+  
+  def edit_term # :norobots:
+    # Expand to any MO user, but make them owned and editable only by that user or an admin
+    if is_in_admin_mode?
+      if request.method == :post
+        term = Term.find(params[:id].to_s)
+        term.attributes = params[:term]
+        term.user = @user
+        term.save
+        redirect_to(:action => 'show_term', :id => term.id)
+      else
+        @term = Term.find(params[:id].to_s)
+      end
+    else
+      flash_error(:edit_term_not_allowed.l)
+      redirect_to(:action => 'index')
+    end
+  end
+
+
+  # Show past version of Term.  Accessible only from show_term page.
+  def show_past_term # :nologin: :prefetch: :norobots:
+    pass_query_params
+    store_location
+    if @term = find_or_goto_index(Term, params[:id].to_s)
+      @term.revert_to(params[:version].to_i)
+    end
   end
 
 end

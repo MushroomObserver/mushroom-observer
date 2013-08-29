@@ -23,7 +23,7 @@ if is_in_admin_mode? %>
         <th><%= :users_by_name_login.t %></th>
         <th><%= :users_by_name_name.t %></th>
         <th><%= :users_by_name_theme.t %></th>
-        <th><%= :users_by_name_created.t %> (<%= @objects.length %>)</th>
+        <th><%= :users_by_name_created_at.t %> (<%= @objects.length %>)</th>
       </tr>
       <tr height="2"></tr>
       <% odd_or_even = 0
@@ -37,7 +37,7 @@ if is_in_admin_mode? %>
           <td><%= user_link(user, user.login) %></td>
           <td><%= h(user.name) %></td>
           <td><%= h(user.theme) %></td>
-          <td><%= user.created.web_time rescue '--' %></td>
+          <td><%= user.created_at.web_time rescue '--' %></td>
         </tr>
       <% end %>
     </table>

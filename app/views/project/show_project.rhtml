@@ -26,7 +26,7 @@
 <table cellpadding="10" width="100%">
   <tr>
     <td valign="top" width="50%">
-      <p><%= "#{:show_project_created.t}: #{@project.created.web_date}"%></p>
+      <p><%= "#{:show_project_created_at.t}: #{@project.created_at.web_date}"%></p>
       <% if false %><p><%= "#{:show_project_published.t}: #{@name_count}"%></p><% end %>
       <p><%= "#{:show_project_by.t}: #{user_link(@project.user)}" %></p>
       <p><%= "#{:show_project_user_group.t}: #{@project.user_group.name.t}" %></p>

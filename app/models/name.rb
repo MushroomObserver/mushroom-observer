@@ -87,8 +87,8 @@
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
 #  sync_id::          (-) Globally unique alphanumeric id, used to sync with remote servers.
-#  created::          (-) Date/time it was first created.
-#  modified::         (V) Date/time it was last modified.
+#  created_at::       (-) Date/time it was first created.
+#  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
 #  notes::            (V) Discussion of taxonomy.
@@ -251,7 +251,7 @@ class Name < AbstractModel
   ])
   non_versioned_columns.push(
     'sync_id',
-    'created',
+    'created_at',
     'num_views',
     'last_view',
     'ok_for_export',
@@ -1133,11 +1133,11 @@ class Name < AbstractModel
     return result
   end
 
-  # (if no namings, returns created)
+  # (if no namings, returns created_at)
   def time_of_last_naming
     @time_of_last_naming ||= begin
-      last_use = Name.connection.select_value("SELECT MAX(created) FROM namings WHERE name_id = #{id}")
-      last_use || created
+      last_use = Name.connection.select_value("SELECT MAX(created_at) FROM namings WHERE name_id = #{id}")
+      last_use || created_at
     end
   end
 
@@ -2062,8 +2062,8 @@ class Name < AbstractModel
   # Returns a Name instance, *UNSAVED*!!
   def self.create_name(params)
     result = Name.new(params)
-    result.created  = now = Time.now
-    result.modified = now
+    result.created_at = now = Time.now
+    result.updated_at = now
     return result
   end
 

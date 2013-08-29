@@ -14,7 +14,7 @@
 #  review_as_string::       Translate review status into localized String.
 #
 #  ==== Other Stuff
-#  show_object_footer::     Show the created/modified/view dates and RSS log.
+#  show_object_footer::     Show the created_at/updated_at/view dates and RSS log.
 #
 ################################################################################
 
@@ -159,24 +159,24 @@ module ApplicationHelper
     if num_versions > 0 && obj.version < num_versions
       html << :footer_version_out_of.t(:num => obj.version,
                                     :total => num_versions)
-      html << :footer_modified_by.t(:user => user_link(obj.user),
-                                 :date => obj.modified.web_time) if obj.modified
+      html << :footer_updated_by.t(:user => user_link(obj.user),
+                                 :date => obj.updated_at.web_time) if obj.updated_at
 
     # Latest version or non-versioned object.
     else
       if num_versions > 0
         latest_user = User.safe_find(obj.versions.latest.user_id)
         html << :footer_created_by.t(:user => user_link(obj.user),
-                                  :date => obj.created.web_time) if obj.created
-        if latest_user && obj.modified
-          html << :footer_last_modified_by.t(:user => user_link(latest_user),
-                                             :date => obj.modified.web_time)
-        elsif obj.modified
-          html << :footer_last_modified_at.t(:date => obj.modified.web_time)
+                                  :date => obj.created_at.web_time) if obj.created_at
+        if latest_user && obj.updated_at
+          html << :footer_last_updated_by.t(:user => user_link(latest_user),
+                                             :date => obj.updated_at.web_time)
+        elsif obj.updated_at
+          html << :footer_last_updated_at.t(:date => obj.updated_at.web_time)
         end
       else
-        html << :footer_created_at.t(:date => obj.created.web_time) if obj.created
-        html << :footer_last_modified_at.t(:date => obj.modified.web_time) if obj.modified
+        html << :footer_created_at.t(:date => obj.created_at.web_time) if obj.created_at
+        html << :footer_last_updated_at.t(:date => obj.updated_at.web_time) if obj.updated_at
       end
       if obj.respond_to?(:num_views)
         html << :footer_viewed.t(:date => obj.last_view.web_time,

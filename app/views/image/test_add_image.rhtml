@@ -4,7 +4,7 @@ This page is strictly for testing image upload performance.  Images uploaded
 through this page are not saved and no database changes are made.<br/><br/>
 
 <% if @log_entry %>
-  Test <%= @log_entry.id %> created: <%= @log_entry.created.web_time %><br/>
+  Test <%= @log_entry.id %> created: <%= @log_entry.created_at.web_time %><br/>
 <% end %>
 
 <% form_tag({:action => 'test_upload_image', :log_id => @log_entry.id}, :multipart => true) do %>

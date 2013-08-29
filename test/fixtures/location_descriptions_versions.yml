@@ -3,7 +3,7 @@
 albion_desc_version_1:
   id: 1
   location_description_id: 1
-  modified: 2007-12-27 06:41:20
+  updated_at: 2007-12-27 06:41:20
   user_id: 1
   version: 1
   notes: nil
@@ -11,7 +11,7 @@ albion_desc_version_1:
 albion_desc_version_2:
   id: 2
   location_description_id: 1
-  modified: 2007-12-27 06:41:20
+  updated_at: 2007-12-27 06:41:20
   user_id: 1
   version: 2
   notes: Here are some new notes to play with.

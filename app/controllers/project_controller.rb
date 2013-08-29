@@ -89,9 +89,9 @@ class ProjectController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',     :sort_by_title.t],
-      ['created',  :sort_by_created.t],
-      ['modified', :sort_by_modified.t],
+      ['name',        :sort_by_title.t],
+      ['created_at',  :sort_by_created_at.t],
+      ['updated_at',  :sort_by_updated_at.t],
     ]
 
     show_index_of_objects(query, args)
@@ -177,7 +177,6 @@ class ProjectController < ApplicationController
 
         # Create project.
         @project = Project.new(params[:project])
-        # @project.created = Time.now
         @project.user = @user
         @project.user_group = user_group
         @project.admin_group = admin_group

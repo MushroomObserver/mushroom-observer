@@ -153,8 +153,12 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_show_image
+    image = Image.find(1)
+    num_views = image.num_views
     get_with_dump(:show_image, :id => 1)
     assert_response('show_image')
+    image.reload
+    assert_equal(num_views + 1, image.num_views)
     for size in Image.all_sizes + [:original]
       get(:show_image, :id => 1, :size => size)
       assert_response('show_image')

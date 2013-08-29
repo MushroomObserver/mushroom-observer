@@ -354,7 +354,7 @@ class LocationTest < UnitTestCase
     assert(Location.names_for_unknown.include?('Earth'))
     assert_true(Location.is_unknown?('Unknown'))
     assert_true(Location.is_unknown?('Earth'))
-    assert_true(Location.is_unknown?('Worldwide'))
+    assert_true(Location.is_unknown?('World'))
     assert_true(Location.is_unknown?('Anywhere'))
   end
 

@@ -13,7 +13,7 @@ class ApiKey < AbstractModel
   end
 
   def provide_defaults
-    self.created ||= Time.now
+    self.created_at ||= Time.now
     self.verified ||= nil
     self.last_used ||= nil
     self.num_uses ||= 0

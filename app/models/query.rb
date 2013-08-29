@@ -16,16 +16,16 @@ class Query < AbstractQuery
   # Parameters allowed in every query for a given model.
   self.model_params = {
     :Comment => {
-      :created?     => [:time],
-      :modified?    => [:time],
+      :created_at?  => [:time],
+      :updated_at?  => [:time],
       :users?       => [User],
       :types?       => :string,
       :summary_has? => :string,
       :content_has? => :string,
     },
     :Image => {
-      :created?         => [:time],
-      :modified?        => [:time],
+      :created_at?      => [:time],
+      :updated_at?      => [:time],
       :date?            => [:date],
       :users?           => [User],
       :names?           => [:string],
@@ -47,88 +47,88 @@ class Query < AbstractQuery
       :ok_for_export?   => :boolean,
     },
     :Location => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :users?    => [User],
-      :north?    => :float,
-      :south?    => :float,
-      :east?     => :float,
-      :west?     => :float,
+      :created_at?  => [:time],
+      :updated_at?  => [:time],
+      :users?       => [User],
+      :north?       => :float,
+      :south?       => :float,
+      :east?        => :float,
+      :west?        => :float,
     },
     :LocationDescription => {
-      :created?  => [:time],
-      :modified? => [:time],
+      :created_at?  => [:time],
+      :updated_at?  => [:time],
       :users?    => [User],
     },
     :Name => {
-      :created?            => [:time],
-      :modified?           => [:time],
-      :users?              => [User],
-      :names?              => [:string],
-      :synonym_names?      => [:string],
-      :children_names?     => [:string],
-      :misspellings?       => {:string => [:no, :either, :only]},
-      :deprecated?         => {:string => [:either, :no, :only]},
-      :has_synonyms?       => :boolean,
-      :locations?          => [:string],
-      :species_lists?      => [:string],
-      :rank?               => [{:string => Name.all_ranks}],
-      :is_deprecated?      => :boolean,
-      :text_name_has?      => :string,
-      :has_author?         => :boolean,
-      :author_has?         => :string,
-      :has_citation?       => :boolean,
-      :citation_has?       => :string,
-      :has_classification? => :boolean,
-      :classification_has? => :string,
-      :has_notes?          => :boolean,
-      :notes_has?          => :string,
-      :has_comments?       => {:string => [:yes]},
-      :comments_has?       => :string,
-      :has_default_desc?   => :boolean,
-      :join_desc?          => {:string => [:default,:any]},
-      :desc_type?          => :string,
-      :desc_project?       => [:string],
-      :desc_creator?       => [User],
-      :desc_content?       => :string,
-      :ok_for_export?      => :boolean,
+      :created_at?          => [:time],
+      :updated_at?          => [:time],
+      :users?               => [User],
+      :names?               => [:string],
+      :synonym_names?       => [:string],
+      :children_names?      => [:string],
+      :misspellings?        => {:string => [:no, :either, :only]},
+      :deprecated?          => {:string => [:either, :no, :only]},
+      :has_synonyms?        => :boolean,
+      :locations?           => [:string],
+      :species_lists?       => [:string],
+      :rank?                => [{:string => Name.all_ranks}],
+      :is_deprecated?       => :boolean,
+      :text_name_has?       => :string,
+      :has_author?          => :boolean,
+      :author_has?          => :string,
+      :has_citation?        => :boolean,
+      :citation_has?        => :string,
+      :has_classification?  => :boolean,
+      :classification_has?  => :string,
+      :has_notes?           => :boolean,
+      :notes_has?           => :string,
+      :has_comments?        => {:string => [:yes]},
+      :comments_has?        => :string,
+      :has_default_desc?    => :boolean,
+      :join_desc?           => {:string => [:default,:any]},
+      :desc_type?           => :string,
+      :desc_project?        => [:string],
+      :desc_creator?        => [User],
+      :desc_content?        => :string,
+      :ok_for_export?       => :boolean,
     },
     :NameDescription => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :users?    => [User],
+      :created_at?  => [:time],
+      :updated_at?  => [:time],
+      :users?       => [User],
     },
     :Observation => {
-      :created?        => [:time],
-      :modified?       => [:time],
-      :date?           => [:date],
-      :users?          => [User],
-      :names?          => [:string],
-      :synonym_names?  => [:string],
-      :children_names? => [:string],
-      :locations?      => [:string],
-      :projects?       => [:string],
-      :species_lists?  => [:string],
-      :confidence?     => [:float],
-      :include_admin?  => :boolean,
-      :is_col_loc?     => :boolean,
-      :has_specimen?   => :boolean,
-      :has_location?   => :boolean,
-      :has_notes?      => :boolean,
-      :has_name?       => :boolean,
-      :has_images?     => :boolean,
-      :has_votes?      => :boolean,
-      :has_comments?   => {:string => [:yes]},
-      :notes_has?      => :string,
-      :comments_has?   => :string,
-      :north?          => :float,
-      :south?          => :float,
-      :east?           => :float,
-      :west?           => :float,
+      :created_at?      => [:time],
+      :updated_at?      => [:time],
+      :date?            => [:date],
+      :users?           => [User],
+      :names?           => [:string],
+      :synonym_names?   => [:string],
+      :children_names?  => [:string],
+      :locations?       => [:string],
+      :projects?        => [:string],
+      :species_lists?   => [:string],
+      :confidence?      => [:float],
+      :include_admin?   => :boolean,
+      :is_col_loc?      => :boolean,
+      :has_specimen?    => :boolean,
+      :has_location?    => :boolean,
+      :has_notes?       => :boolean,
+      :has_name?        => :boolean,
+      :has_images?      => :boolean,
+      :has_votes?       => :boolean,
+      :has_comments?    => {:string => [:yes]},
+      :notes_has?       => :string,
+      :comments_has?    => :string,
+      :north?           => :float,
+      :south?           => :float,
+      :east?            => :float,
+      :west?            => :float,
     },
     :Project => {
-      :created?           => [:time],
-      :modified?          => [:time],
+      :created_at?        => [:time],
+      :updated_at?        => [:time],
       :users?             => [User],
       :has_images?        => {:string => [:yes]},
       :has_observations?  => {:string => [:yes]},
@@ -140,28 +140,28 @@ class Query < AbstractQuery
       :comments_has?      => :string,
     },
     :RssLog => {
-      :modified? => [:time],
+      :updated_at? => [:time],
       :type?     => :string,
     },
     :SpeciesList => {
-      :created?        => [:time],
-      :modified?       => [:time],
-      :date?           => [:date],
-      :users?          => [User],
-      :names?          => [:string],
-      :synonym_names?  => [:string],
-      :children_names? => [:string],
-      :locations?      => [:string],
-      :projects?       => [:string],
-      :title_has?      => :string,
-      :has_notes?      => :boolean,
-      :notes_has?      => :string,
-      :has_comments?   => {:string => [:yes]},
-      :comments_has?   => :string,
+      :created_at?      => [:time],
+      :updated_at?      => [:time],
+      :date?            => [:date],
+      :users?           => [User],
+      :names?           => [:string],
+      :synonym_names?   => [:string],
+      :children_names?  => [:string],
+      :locations?       => [:string],
+      :projects?        => [:string],
+      :title_has?       => :string,
+      :has_notes?       => :boolean,
+      :notes_has?       => :string,
+      :has_comments?    => {:string => [:yes]},
+      :comments_has?    => :string,
     },
     :User => {
-      :created?  => [:time],
-      :modified? => [:time],
+      :created_at?  => [:time],
+      :updated_at?  => [:time],
     },
   }
 
@@ -295,7 +295,7 @@ class Query < AbstractQuery
     :Image => [
       :advanced_search,       # Advanced search results.
       :all,                   # All images, by created.
-      :by_user,               # Images created by user, by modified.
+      :by_user,               # Images created by user, by updated.
       :for_project,           # Images attached to a given project.
       :in_set,                # Images in a given set.
       :inside_observation,    # Images belonging to outer observation query.
@@ -314,7 +314,7 @@ class Query < AbstractQuery
       :advanced_search,       # Advanced search results.
       :all,                   # All locations, alphabetically.
       :by_user,               # Locations created by a given user, alphabetically.
-      :by_editor,             # Locations modified by a given user, alphabetically.
+      :by_editor,             # Locations updated by a given user, alphabetically.
       :by_rss_log,            # Locations with RSS logs, in RSS order.
       :in_set,                # Locations in a given set.
       :pattern_search,        # Locations matching a pattern, alphabetically.
@@ -342,7 +342,7 @@ class Query < AbstractQuery
       :advanced_search,       # Advanced search results.
       :all,                   # All names, alphabetically.
       :by_user,               # Names created by a given user, alphabetically.
-      :by_editor,             # Names modified by a given user, alphabetically.
+      :by_editor,             # Names updated by a given user, alphabetically.
       :by_rss_log,            # Names with RSS logs, in RSS order.
       :in_set,                # Names in a given set.
       :of_children,           # Names of children of a name.
@@ -371,13 +371,13 @@ class Query < AbstractQuery
     :Observation => [
       :advanced_search,       # Advanced search results.
       :all,                   # All observations, by date.
-      :at_location,           # Observations at a location, by modified.
-      :at_where,              # Observations at an undefined location, by modified.
+      :at_location,           # Observations at a location, by updated_at.
+      :at_where,              # Observations at an undefined location, by updated_at.
       :by_rss_log,            # Observations with RSS log, in RSS order.
-      :by_user,               # Observations created by user, by modified.
+      :by_user,               # Observations created by user, by updated_at.
       :for_project,           # Observations attached to a given project.
       :in_set,                # Observations in a given set.
-      :in_species_list,       # Observations in a given species list, by modified.
+      :in_species_list,       # Observations in a given species list, by updated_at.
       :of_children,           # Observations of children of a given name.
       :of_name,               # Observations with a given name.
       :pattern_search,        # Observations matching a pattern, by name.
@@ -394,8 +394,8 @@ class Query < AbstractQuery
     ],
     :SpeciesList => [
       :all,                   # All species lists, alphabetically.
-      :at_location,           # Species lists at a location, by modified.
-      :at_where,              # Species lists at an undefined location, by modified.
+      :at_location,           # Species lists at a location, by updated_at.
+      :at_where,              # Species lists at an undefined location, by updated_at.
       :by_rss_log,            # Species lists with RSS log, in RSS order
       :by_user,               # Species lists created by user, alphabetically.
       :for_project,           # Species lists attached to a given project.
@@ -584,16 +584,16 @@ class Query < AbstractQuery
   # Return the default order for this query.
   def default_order # This should be in each of the classes not here!
     case model_symbol
-    when :Comment             ; 'created'
+    when :Comment             ; 'created_at'
     when :Herbarium           ; 'name'
-    when :Image               ; 'created'
+    when :Image               ; 'created_at'
     when :Location            ; 'name'
     when :LocationDescription ; 'name'
     when :Name                ; 'name'
     when :NameDescription     ; 'name'
     when :Observation         ; 'date'
     when :Project             ; 'title'
-    when :RssLog              ; 'modified'
+    when :RssLog              ; 'updated_at'
     when :SpeciesList         ; 'title'
     when :Specimen            ; 'herbarium_label'
     when :User                ; 'name'
@@ -781,7 +781,7 @@ class Query < AbstractQuery
     table = model.table_name
     case by
 
-    when 'modified', 'created', 'last_login', 'num_views'
+    when 'updated_at', 'created_at', 'last_login', 'num_views'
       if model.column_names.include?(by)
         "#{table}.#{by} DESC"
       end
@@ -791,8 +791,8 @@ class Query < AbstractQuery
         "#{table}.date DESC"
       elsif model.column_names.include?('when')
         "#{table}.when DESC"
-      elsif model.column_names.include?('created')
-        "#{table}.created DESC"
+      elsif model.column_names.include?('created_at')
+        "#{table}.created_at DESC"
       end
 
     when 'name'
@@ -805,12 +805,12 @@ class Query < AbstractQuery
           'locations.scientific_name ASC' : 'locations.name ASC'
       elsif model == LocationDescription
         self.join << :locations
-        'locations.name ASC, location_descriptions.created ASC'
+        'locations.name ASC, location_descriptions.created_at ASC'
       elsif model == Name
         'names.sort_name ASC'
       elsif model == NameDescription
         self.join << :names
-        'names.sort_name ASC, name_descriptions.created ASC'
+        'names.sort_name ASC, name_descriptions.created_at ASC'
       elsif model == Observation
         self.join << :names
         'names.sort_name ASC, observations.when DESC'
@@ -843,7 +843,7 @@ class Query < AbstractQuery
     when 'rss_log'
       if model.column_names.include?('rss_log_id')
         self.join << :rss_logs
-        'rss_logs.modified DESC'
+        'rss_logs.updated_at DESC'
       end
 
     when 'confidence'
@@ -897,8 +897,8 @@ class Query < AbstractQuery
   # ----------------------------
 
   def initialize_comment
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_type_list(:types, :target_type, Comment.all_types)
     initialize_model_do_search(:summary_has, :summary)
@@ -906,8 +906,8 @@ class Query < AbstractQuery
   end
 
   def initialize_image
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(
@@ -962,21 +962,21 @@ class Query < AbstractQuery
   end
 
   def initialize_location
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_bounding_box(:location)
   end
 
   def initialize_location_description
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
   end
 
   def initialize_name
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_misspellings
     initialize_model_do_deprecated
@@ -1075,14 +1075,14 @@ class Query < AbstractQuery
   end
 
   def initialize_name_description
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
   end
 
   def initialize_observation
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(Name, :names)
@@ -1149,8 +1149,8 @@ class Query < AbstractQuery
   end
 
   def initialize_project
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     if params[:has_images]
       self.join << :images_projects
@@ -1178,12 +1178,12 @@ class Query < AbstractQuery
   end
 
   def initialize_rss_log
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:updated_at)
   end
 
   def initialize_species_list
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(Name, :names,
@@ -1220,8 +1220,8 @@ class Query < AbstractQuery
   end
 
   def initialize_user
-    initialize_model_do_time(:created)
-    initialize_model_do_time(:modified)
+    initialize_model_do_time(:created_at)
+    initialize_model_do_time(:updated_at)
   end
 
   # -------------------------------
@@ -1609,15 +1609,15 @@ class Query < AbstractQuery
     end
     case model_symbol
     when :Observation
-      params[:by] ||= 'modified'
+      params[:by] ||= 'updated_at'
     when :Image
-      params[:by] ||= 'modified'
+      params[:by] ||= 'updated_at'
     when :Location, :Name, :LocationDescription, :NameDescription
       params[:by] ||= 'name'
     when :SpeciesList
       params[:by] ||= 'title'
     when :Comment
-      params[:by] ||= 'created'
+      params[:by] ||= 'created_at'
     end
   end
 
@@ -1638,7 +1638,7 @@ class Query < AbstractQuery
     title_args[:object] = target.unique_format_name
     self.where << "comments.target_id = '#{target.id}'"
     self.where << "comments.target_type = '#{type.name}'"
-    params[:by] ||= 'created'
+    params[:by] ||= 'created_at'
   end
 
   def initialize_for_user
@@ -1646,7 +1646,7 @@ class Query < AbstractQuery
     title_args[:user] = user.legal_name
     self.join << :observations
     self.where << "observations.user_id = '#{params[:user]}'"
-    params[:by] ||= 'created'
+    params[:by] ||= 'created_at'
   end
 
   def initialize_by_author

@@ -60,8 +60,8 @@ module RefineSearch
     :Comment => [
       :pattern,
       :user,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :users,
       :comment_types,
       :summary_has,
@@ -82,8 +82,8 @@ module RefineSearch
       :location_undefined,
       :species_list,
       :observation,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :date,
       :users,
       :names,
@@ -118,15 +118,15 @@ module RefineSearch
       :location_undefined,
       :species_list,
       :observation,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :users,
     ],
 
     :LocationDescription => [
       :user,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :users,
     ],
 
@@ -145,8 +145,8 @@ module RefineSearch
       :observation,
       :deprecated,
       :misspellings,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :users,
       :synonym_names,
       :children_names,
@@ -177,8 +177,8 @@ module RefineSearch
 
     :NameDescription => [
       :user,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :users,
     ],
 
@@ -197,8 +197,8 @@ module RefineSearch
       :location_undefined,
       :species_list,
       :observation,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :date,
       :users,
       :names,
@@ -222,14 +222,14 @@ module RefineSearch
 
     :Project => [
       :pattern,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :users,
     ],
 
     :RssLog => [
       :rss_type,
-      :modified,
+      :updated_at,
     ],
 
     :SpeciesList => [
@@ -237,8 +237,8 @@ module RefineSearch
       :user,
       :location_defined,
       :location_undefined,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
       :date,
       :users,
       :names,
@@ -252,8 +252,8 @@ module RefineSearch
 
     :User => [
       :pattern,
-      :created,
-      :modified,
+      :created_at,
+      :updated_at,
     ],
   }
 
@@ -383,10 +383,10 @@ module RefineSearch
     )
   end
 
-  def rs_field_created(model, flavor)
+  def rs_field_created_at(model, flavor)
     Field.new(
-      :name   => :created,
-      :label  => :refine_search_created,
+      :name   => :created_at,
+      :label  => :refine_search_created_at,
       :input  => :text2,
       :word   => :TIME.t,
       :or_equal => true,
@@ -722,11 +722,11 @@ module RefineSearch
     )
   end
 
-  def rs_field_modified(model, flavor)
+  def rs_field_updated_at(model, flavor)
     if model == :RssLog
       Field.new(
-        :name   => :modified,
-        :label  => :refine_search_rss_modified,
+        :name   => :updated_at,
+        :label  => :refine_search_rss_updated_at,
         :input  => :text2,
         :word   => :TIME.t,
         :or_equal => true,
@@ -734,8 +734,8 @@ module RefineSearch
       )
     else
       Field.new(
-        :name   => :modified,
-        :label  => :refine_search_modified,
+        :name   => :updated_at,
+        :label  => :refine_search_updated_at,
         :input  => :text2,
         :word   => :TIME.t,
         :or_equal => true,

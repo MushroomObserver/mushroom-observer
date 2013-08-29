@@ -100,7 +100,7 @@ for tag in @edit_tags
               login.blank? ? '--' : user_link(user_id, login) %>
             </td>
             <td>
-              <%= version.modified.web_date %>
+              <%= version.updated_at.web_date %>
             </td>
             <td>
               <%= h(str = preview_string(version.text, 80)) %>

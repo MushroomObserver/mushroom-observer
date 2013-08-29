@@ -27,8 +27,8 @@ class API
     def query_params
       {
         :where          => sql_id_condition,
-        :created        => parse_time_range(:created),
-        :modified       => parse_time_range(:modified),
+        :created_at     => parse_time_range(:created_at),
+        :updated_at     => parse_time_range(:updated_at),
         :date           => parse_date_range(:date),
         :users          => parse_users(:user),
         :names          => parse_strings(:name),
@@ -101,7 +101,7 @@ class API
     def after_create(obs)
       naming = obs.namings.create(:name => @name)
       obs.change_vote(naming, @vote, user)
-      obs.log(:log_observation_created) if @log
+      obs.log(:log_observation_created_at) if @log
     end
 
     def build_setter

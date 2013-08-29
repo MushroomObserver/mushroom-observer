@@ -129,7 +129,7 @@ class TranslationController < ApplicationController
     str = @lang.translation_strings.create(:tag => tag, :text => val)
     @translated_records[tag] = str
     str.update_localization
-    flash_notice(:edit_translations_created.t(:tag => tag, :str => val)) if !@ajax
+    flash_notice(:edit_translations_created_at.t(:tag => tag, :str => val)) if !@ajax
   end
 
   def change_translation(str, val)
@@ -139,7 +139,7 @@ class TranslationController < ApplicationController
   end
 
   def touch_translation(str)
-    str.update_attributes!(:modified => Time.now)
+    str.update_attributes!(:updated_at => Time.now)
   end
 
   def preview_string(str, limit=250)

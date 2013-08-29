@@ -22,7 +22,7 @@
   # two prefs.
   is_owner = (@user == @comment.target.user)
   recipients_comments = Comment.find_all_by_target_type_and_target_id_and_user_id(@comment.target_type, @comment.target_id, @user.id)
-  comments_before_this_comment = recipients_comments.select {|c| c.created < @comment.created}
+  comments_before_this_comment = recipients_comments.select {|c| c.created_at < @comment.created_at}
   is_response = (!is_owner && comments_before_this_comment.length > 0)
   # print "is_owner = #{is_owner}\n"
   # print "rec_coms = #{recipients_comments.length}\n"
@@ -39,7 +39,7 @@
   intro = intro.l(:type => type_sym, :name => @target.unique_format_name)
 
   fields = ""
-  fields += "*#{:Created.l}:* #{@comment.created.email_time}\n"
+  fields += "*#{:Created.l}:* #{@comment.created_at.email_time}\n"
   fields += "*#{:By.l}:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
   fields += "*#{:Summary.l}:* #{@comment.summary.to_s}\n"
   fields += "*#{:Comment.l}:*\n" if @comment.comment

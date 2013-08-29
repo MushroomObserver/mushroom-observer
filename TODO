@@ -255,7 +255,7 @@ Noticed July 14, 2008:
 Research Media RSS for use with PicLens
 
 More next/prev stuff:
-        sort by modified, created, when, name, location, observer, mod year (time of year)
+        sort by updated_at, created_at, when, name, location, observer, mod year (time of year)
         Add next/prev_location
         Add next/prev_name?
         Potential interactions between sequences if URLs are copied and pasted

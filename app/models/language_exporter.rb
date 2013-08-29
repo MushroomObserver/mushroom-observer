@@ -199,7 +199,11 @@ module LanguageExporter
       File.rename(temp_file, export_file)
     end
   end
-
+  
+  def write_hash(hash)
+    self.write_export_file_lines(hash.map {|k,v| "#{k}: #{format_string(v)}"})
+  end
+  
 ################################################################################
 
 private

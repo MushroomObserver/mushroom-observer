@@ -45,10 +45,10 @@
 #  1. Instantiate new Image record, filling in date, notes, etc.:
 #
 #       image = Image.new(
-#         :created => Time.now,
-#         :user    => @user,
-#         :when    => observation.when,
-#         :notes   => 'close-up of stipe'
+#         :created_at => Time.now,
+#         :user       => @user,
+#         :when       => observation.when,
+#         :notes      => 'close-up of stipe'
 #       )
 #
 #  2. Attach the image itself by setting the +image+ attribute, then save the
@@ -135,8 +135,8 @@
 #
 #  id::                 Locally unique numerical id, starting at 1.
 #  sync_id::            Globally unique alphanumeric id, used to sync with remote servers.
-#  created::            Date/time it was first created.
-#  modified::           Date/time it was last modified.
+#  created_at::         Date/time it was first created.
+#  updated_at::         Date/time it was last updated.
 #  user::               User that created it.
 #  when::               Date image was taken.
 #  notes::              Arbitrary notes (string of any length).
@@ -223,13 +223,14 @@ require 'fileutils'
 class Image < AbstractModel
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
+  has_and_belongs_to_many :terms
   has_many :thumb_clients, :class_name => 'Observation', :foreign_key => 'thumb_image_id'
   has_many :image_votes
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
   has_many :subjects, :class_name => 'User', :foreign_key => 'image_id'
-  has_many :terms
+  has_many :best_terms, :class_name => 'Term', :foreign_key => 'thumb_image_id'
   has_many :copyright_changes, :as => :target, :dependent => :destroy
 
   before_destroy :update_thumbnails
@@ -718,7 +719,7 @@ class Image < AbstractModel
 
     # Save changes unless there were already pending changes to be saved
     # (meaning the caller is presumably about to save the changes anyway so
-    # we don't need to do it twice).  No need to update +modified+ or do any
+    # we don't need to do it twice).  No need to update +updated_at+ or do any
     # of the other callbacks, either, since this doesn't result in emails,
     # contribution changes, or rss log entries.
     if save_changes
@@ -780,6 +781,18 @@ class Image < AbstractModel
         obs.save
       end
     end
+    for user in subjects
+      if user.image_id == id
+        user.image_id = nil
+        user.save
+      end
+    end
+    for term in terms
+      if term.image_id == id
+        term.image_id = nil
+        term.save
+      end
+    end
   end
 
   # Log update in associated Observation's.
@@ -806,7 +819,7 @@ class Image < AbstractModel
       old_license_id = license_id_change[0]       rescue self.license_id
       CopyrightChange.create!(
         :user       => User.current,
-        :modified   => self.modified,
+        :updated_at   => self.updated_at,
         :target     => self,
         :year       => old_year,
         :name       => old_name,
@@ -827,7 +840,7 @@ class Image < AbstractModel
     if data.any?
       Image.connection.insert(%(
         INSERT INTO copyright_changes
-          (user_id, modified, target_type, target_id, year, name, license_id)
+          (user_id, updated_at, target_type, target_id, year, name, license_id)
         VALUES
           #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"}.join(",\n") }
       ))

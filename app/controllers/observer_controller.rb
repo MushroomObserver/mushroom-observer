@@ -360,7 +360,7 @@ class ObserverController < ApplicationController
           :text => @val,
           # This has the effect of marking them "needs to be updated".  If we just deleted
           # them, MO wouldn't know to update the translations in the other threads.
-          :modified => (str.language.official ? time : time - 1.minute)
+          :updated_at => (str.language.official ? time : time - 1.minute)
         )
         str.update_localization
         str.language.update_localization_file
@@ -644,7 +644,7 @@ class ObserverController < ApplicationController
       :name => params[:name],
       :synonyms => :all,
       :nonconsensus => :no,
-      :by => :created,
+      :by => :created_at,
     }
     if not params[:user_id].blank?
       args[:user] = params[:user_id]
@@ -746,15 +746,15 @@ class ObserverController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',       :sort_by_name.t],
-      ['date',       :sort_by_date.t],
-      ['user',       :sort_by_user.t],
-      ['created',    :sort_by_posted.t],
-      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
-                     :sort_by_modified.t],
-      ['confidence', :sort_by_confidence.t],
+      ['name',        :sort_by_name.t],
+      ['date',        :sort_by_date.t],
+      ['user',        :sort_by_user.t],
+      ['created_at',  :sort_by_posted.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'updated_at'),
+                      :sort_by_updated_at.t],
+      ['confidence',  :sort_by_confidence.t],
       ['thumbnail_quality', :sort_by_thumbnail_quality.t],
-      ['num_views',  :sort_by_num_views.t],
+      ['num_views',   :sort_by_num_views.t],
     ]
 
     @links << [:show_object.t(:type => :map), {
@@ -1062,7 +1062,7 @@ class ObserverController < ApplicationController
     if success
       save_everything_else(params[:reason]) # should always succeed
       flash_notice(:runtime_observation_success.t(:id => @observation.id))
-      @observation.log(:log_observation_created)
+      @observation.log(:log_observation_created_at)
       redirect_to_next_page                 # just redirects
 
     # If anything failed reload the form.
@@ -1191,8 +1191,8 @@ class ObserverController < ApplicationController
   def get_defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
     # edited if it was less than an hour ago.
-    last_observation = Observation.find_by_user_id(@user.id, :order => 'created DESC')
-    if last_observation && last_observation.created > 1.hour.ago
+    last_observation = Observation.find_by_user_id(@user.id, :order => 'created_at DESC')
+    if last_observation && last_observation.created_at > 1.hour.ago
       @observation.when     = last_observation.when
       @observation.where    = last_observation.where
       @observation.location = last_observation.location
@@ -1271,7 +1271,7 @@ class ObserverController < ApplicationController
         # Only save observation if there are changes.
         if @dubious_where_reasons == []
           if @observation.changed?
-            @observation.modified = Time.now
+            @observation.updated_at = Time.now
             if save_observation(@observation)
               flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
               touch = (params[:log_change][:checked] == '1' rescue false)
@@ -1409,7 +1409,7 @@ class ObserverController < ApplicationController
           save_naming(@naming)
           @observation.reload
           @observation.change_vote(@naming, @vote.value)
-          @observation.log(:log_naming_created, :name => @naming.format_name)
+          @observation.log(:log_naming_created_at, :name => @naming.format_name)
 
           # Check for notifications.
           if has_unshown_notifications?(@user, :naming)
@@ -1511,7 +1511,7 @@ class ObserverController < ApplicationController
           save_naming(@naming)
           @observation.reload
           @observation.change_vote(@naming, @vote.value, @naming.user)
-          @observation.log(:log_naming_created, :name => @naming.format_name)
+          @observation.log(:log_naming_created_at, :name => @naming.format_name)
           flash_warning 'Sorry, someone else has given this a positive vote,
             so we had to create a new Naming to accomodate your changes.'
         end
@@ -1837,20 +1837,20 @@ class ObserverController < ApplicationController
     # Add some alternate sorting criteria.
     if is_in_admin_mode?
       args[:sorting_links] = [
-        ['id',         :sort_by_id.t],
-        ['login',      :sort_by_login.t],
-        ['name',       :sort_by_name.t],
-        ['created',    :sort_by_created.t],
-        ['modified',   :sort_by_modified.t],
-        ['last_login', :sort_by_last_login.t],
+        ['id',          :sort_by_id.t],
+        ['login',       :sort_by_login.t],
+        ['name',        :sort_by_name.t],
+        ['created_at',  :sort_by_created_at.t],
+        ['updated_at',  :sort_by_updated_at.t],
+        ['last_login',  :sort_by_last_login.t],
       ]
     else
       args[:sorting_links] = [
-        ['login',      :sort_by_login.t],
-        ['name',       :sort_by_name.t],
-        ['created',    :sort_by_created.t],
-        ['location',   :sort_by_location.t],
-        ['contribution', :sort_by_contribution.t],
+        ['login',         :sort_by_login.t],
+        ['name',          :sort_by_name.t],
+        ['created_at',    :sort_by_created_at.t],
+        ['location',      :sort_by_location.t],
+        ['contribution',  :sort_by_contribution.t],
       ]
     end
 
@@ -2008,7 +2008,7 @@ class ObserverController < ApplicationController
     )
 
     # Get the last six observations whose thumbnails are highly rated.
-    query = Query.lookup(:Observation, :all, :by => :modified,
+    query = Query.lookup(:Observation, :all, :by => :updated_at,
                          :where => 'images.vote_cache >= 3',
                          :join => :'images.thumb_image')
     @observations = query.results(:limit => 6, :include => {:thumb_image => :image_votes})
@@ -2215,8 +2215,8 @@ class ObserverController < ApplicationController
   # this is the site's rss feed.
   def rss # :nologin:
     headers["Content-Type"] = "application/xml"
-    @logs = RssLog.all(:conditions => "datediff(now(), modified) <= 31",
-                       :order => "modified desc", :limit => 100, :include => [
+    @logs = RssLog.all(:conditions => "datediff(now(), updated_at) <= 31",
+                       :order => "updated_at desc", :limit => 100, :include => [
                          :name, :species_list, { :observation  => :name },
                        ])
     render(:action => "rss", :layout => false)
@@ -2258,8 +2258,8 @@ class ObserverController < ApplicationController
   def create_observation_object(args)
     now = Time.now
     observation = Observation.new(args)
-    observation.created  = now
-    observation.modified = now
+    observation.created_at = now
+    observation.updated_at = now
     observation.user     = @user
     observation.name     = Name.unknown
     if Location.is_unknown?(observation.place_name) or
@@ -2276,10 +2276,10 @@ class ObserverController < ApplicationController
   def create_naming_object(args, observation)
     now = Time.now
     naming = Naming.new(args)
-    naming.created     = now
-    naming.modified    = now
-    naming.user        = @user
-    naming.observation = observation
+    naming.created_at   = now
+    naming.updated_at   = now
+    naming.user         = @user
+    naming.observation  = observation
     return naming
   end
 
@@ -2289,11 +2289,11 @@ class ObserverController < ApplicationController
   def create_vote_object(args, naming)
     now = Time.now
     vote = Vote.new(args)
-    vote.created     = now
-    vote.modified    = now
-    vote.user        = @user
-    vote.naming      = naming
-    vote.observation = naming.observation
+    vote.created_at   = now
+    vote.updated_at   = now
+    vote.user         = @user
+    vote.naming       = naming
+    vote.observation  = naming.observation
     return vote
   end
 
@@ -2356,7 +2356,7 @@ class ObserverController < ApplicationController
 
   def init_list_vars
     @lists = User.current.all_editable_species_lists.sort_by(&:title)
-    # @lists = User.current.all_editable_species_lists.sort_by(&:modified).reverse[0..9]
+    # @lists = User.current.all_editable_species_lists.sort_by(&:updated_at).reverse[0..9]
     @list_checks = {}
   end
 
@@ -2490,7 +2490,7 @@ class ObserverController < ApplicationController
     if naming.save
       args[:id] = naming
       Transaction.create(args)
-      flash_notice(:runtime_naming_created.t)
+      flash_notice(:runtime_naming_created_at.t)
     else
       flash_error(:runtime_no_save_naming.t)
       flash_object_errors(naming)
@@ -2503,7 +2503,7 @@ class ObserverController < ApplicationController
   def update_naming_object(naming, name, log)
     naming.name = name
     naming.save
-    flash_notice(:runtime_naming_updated.t)
+    flash_notice(:runtime_naming_updated_at.t)
     naming.observation.log(:log_naming_updated, :name => naming.format_name,
                            :touch => log)
 
@@ -2594,8 +2594,8 @@ class ObserverController < ApplicationController
             name = upload.original_filename.force_encoding('utf-8')
           end
           image = Image.new(args2)
-          image.created = Time.now
-          image.modified = image.created
+          image.created_at = Time.now
+          image.updated_at = image.created_at
           # If image.when is 1950 it means user never saw the form field, so we should use default instead.
           image.when = observation.when if image.when.year == 1950
           image.user = @user
@@ -2654,7 +2654,7 @@ class ObserverController < ApplicationController
              image.copyright_holder_changed? or
              image.license_id_changed? or
              image.original_name_changed?
-            image.modified = Time.now
+            image.updated_at = Time.now
             args = { :id => image }
             args[:set_date]             = image.when             if image.when_changed?
             args[:set_notes]            = image.notes            if image.notes_changed?

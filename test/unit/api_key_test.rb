@@ -10,7 +10,7 @@ class ApiKeyTest < UnitTestCase
 
     ApiKey.create(:notes => 'app name')
     key = ApiKey.last
-    assert(key.created > 1.minute.ago)
+    assert(key.created_at > 1.minute.ago)
     assert_nil(key.last_used)
     assert_equal(0, key.num_uses)
     assert_users_equal(@dick, key.user)

@@ -3,6 +3,9 @@
     :num  => @description.version,
     :name => description_title(@description)
   )
+  new_tab_set do
+    add_tab(:show_name_description.t(:description => description_title(@description)), :action => 'show_name_description', :id => @description.id)
+  end
   Textile.register_name(@name)
 %>
 

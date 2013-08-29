@@ -1422,7 +1422,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_edit_observation
     obs = observations(:detailed_unknown)
-    modified = obs.rss_log.modified
+    updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
     new_notes = "blather blather blather"
     new_specimen = false
@@ -1459,7 +1459,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("2001-02-03", obs.when.to_s)
     assert_equal(new_notes, obs.notes)
     assert_equal(new_specimen, obs.specimen)
-    assert_not_equal(modified, obs.rss_log.modified)
+    assert_not_equal(updated_at, obs.rss_log.updated_at)
     assert_not_equal(0, obs.thumb_image_id)
     img = images(:in_situ).reload
     assert_equal('new notes', img.notes)
@@ -1471,7 +1471,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_edit_observation_no_logging
     obs = observations(:detailed_unknown)
-    modified = obs.rss_log.modified
+    updated_at = obs.rss_log.updated_at
     where = "Somewhere, China"
     params = {
       :id => obs.id.to_s,
@@ -1488,12 +1488,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)
-    assert_equal(modified, obs.rss_log.modified)
+    assert_equal(updated_at, obs.rss_log.updated_at)
   end
 
   def test_edit_observation_bad_place_name
     obs = observations(:detailed_unknown)
-    modified = obs.rss_log.modified
+    updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
     new_notes = "blather blather blather"
     new_specimen = false
@@ -2372,8 +2372,8 @@ class ObserverControllerTest < FunctionalTestCase
       :user_id => 1,
       :image => file1,
       :content_type => 'image/jpeg',
-      :created => week_ago,
-      :modified => week_ago
+      :created_at => week_ago,
+      # :updated_at => week_ago
     )
 
     new_image_2 = Image.create(
@@ -2383,12 +2383,12 @@ class ObserverControllerTest < FunctionalTestCase
       :user_id => 1,
       :image => file2,
       :content_type => 'image/jpeg',
-      :created => week_ago,
-      :modified => week_ago
+      :created_at => week_ago,
+      # :updated_at => week_ago
     )
 
-    assert(new_image_1.modified < 1.day.ago)
-    assert(new_image_2.modified < 1.day.ago)
+    # assert(new_image_1.updated_at < 1.day.ago)
+    # assert(new_image_2.updated_at < 1.day.ago)
 
     post(:create_observation,
       :observation => {
@@ -2437,8 +2437,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('notes_1',     imgs[0].notes)
     assert_equal('notes_2_new', imgs[1].notes)
     assert_equal('notes_3',     imgs[2].notes)
-    assert(imgs[0].modified < 1.day.ago) # notes not changed
-    assert(imgs[1].modified > 1.day.ago) # notes changed
+    # assert(imgs[0].updated_at < 1.day.ago) # notes not changed
+    # assert(imgs[1].updated_at > 1.day.ago) # notes changed
   end
 
   def test_image_upload_when_create_fails
@@ -2790,7 +2790,6 @@ class ObserverControllerTest < FunctionalTestCase
       :language => languages(:english),
       :tag => :app_banner_box,
       :text => 'old banner',
-      :modified => 1.year.ago,
       :user => User.admin
     )
     str1.update_localization
@@ -2799,7 +2798,6 @@ class ObserverControllerTest < FunctionalTestCase
       :language => languages(:french),
       :tag => :app_banner_box,
       :text => 'banner ancienne',
-      :modified => 1.month.ago,
       :user => User.admin
     )
     str2.update_localization
@@ -2827,7 +2825,6 @@ class ObserverControllerTest < FunctionalTestCase
     assert_obj_list_equal([str1.reload, str2.reload], strs)
     assert_equal('new banner', str1.text)
     assert_equal('new banner', str2.text)
-    assert(str1.modified > str2.modified)
   end
 
   def test_download_observation_index

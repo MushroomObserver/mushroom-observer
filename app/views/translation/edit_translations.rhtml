@@ -197,7 +197,7 @@
     str = preview_string(@strings[tag])
     official_record = @official_records[tag]
     translated_record = @translated_records[tag]
-    up_to_date = translated_record && translated_record.modified >= official_record.modified - 1.second
+    up_to_date = translated_record && translated_record.updated_at >= official_record.updated_at - 1.second
     if not up_to_date and
        official_record and
        official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)

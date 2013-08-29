@@ -10,8 +10,8 @@
 #
 #  id::                     Locally unique numerical id, starting at 1.
 #  sync_id::                Globally unique alphanumeric id, used to sync with remote servers.
-#  created::                Date/time it was created.
-#  modified::               Date/time it was last modified.
+#  created_at::             Date/time it was created.
+#  updated_at::             Date/time it was last updated.
 #  user::                   User that created it.
 #  observation::            Observation it is attached to.
 #  name::                   Name it refers to.

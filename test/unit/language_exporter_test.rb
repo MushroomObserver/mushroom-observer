@@ -287,7 +287,7 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(@official, str.language)
     assert_equal('number', str.tag)
     assert_equal('uno', str.text)
-    assert(str.modified > 1.minute.ago)
+    assert(str.updated_at > 1.minute.ago)
     assert_users_equal(@dick, str.user)
     assert_equal(1, str.versions.length)
 
@@ -295,7 +295,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal(1, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal('uno', ver.text)
-    assert(ver.modified > 1.minute.ago)
+    assert(ver.updated_at > 1.minute.ago)
     assert_equal(@dick.id, ver.user_id)
   end
 
@@ -311,7 +311,7 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(greek, str.language)
     assert_equal('one', str.tag)
     assert_equal('eins', str.text)
-    assert(str.modified > 1.minute.ago)
+    assert(str.updated_at > 1.minute.ago)
     assert_users_equal(@katrina, str.user)
     assert_equal(3, str.versions.length)
 
@@ -319,14 +319,14 @@ class LanguageExporterTest < UnitTestCase
     assert_equal(3, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal('eins', ver.text)
-    assert(ver.modified > 1.minute.ago)
+    assert(ver.updated_at > 1.minute.ago)
     assert_equal(@katrina.id, str.user_id)
 
     ver = str.versions[1]
     assert_equal(2, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal('ένα', ver.text)
-    assert(ver.modified < 1.minute.ago)
+    assert(ver.updated_at < 1.minute.ago)
     assert_equal(@dick.id, ver.user_id)
   end
 
@@ -356,39 +356,25 @@ class LanguageExporterTest < UnitTestCase
 
     User.current = @dick
     hash = @official.localization_strings
-    @official.write_export_file_lines([
-      "one: one\n",
-      "two: two\n",
-      "twos: twos\n",
-      "TWO: Two\n",
-      "TWOS: Twos\n",
-      "three: three\n",
-      "four: four\n",
-      "unknown_locations: Unknown, Everywhere, Anywhere, World\n",
-    ])
+    assert(hash.length >= 9) # Make sure we got something
+    @official.write_hash(hash)
     assert_false(@official.import_from_file, "Shouldn't have been any import changes.")
     assert_false(@official.strip, "Shouldn't have been any strip changes.")
     assert_equal(hash, @official.localization_strings)
 
-    @official.write_export_file_lines([
-      "one: one\n",
-      "two: twolian\n",
-      "three: three\n",
-      "four: four\n",
-      "five: five\n",
-      "unknown_locations: bubkes\n",
-    ])
-    assert_true(@official.import_from_file, 'Should have been two import changes.')
     hash['two'] = 'twolian'
     hash['five'] = 'five'
     hash['unknown_locations'] = 'bubkes'
-    assert_equal(hash, @official.localization_strings)
-
+    final_hash = hash.dup
+    final_hash.delete('twos')
+    final_hash.delete('TWO')
+    final_hash.delete('TWOS')
+    
+    @official.write_hash(final_hash)
+    assert_true(@official.import_from_file, 'Should have been two import changes.')
+    assert_equal(hash, @official.localization_strings) # Should still include deletes
     assert_true(@official.strip, 'Should have been three strip changes.')
-    hash.delete('twos')
-    hash.delete('TWO')
-    hash.delete('TWOS')
-    assert_equal(hash, @official.localization_strings)
+    assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
 
     assert_equal(3, @official.translation_strings.select {|str| str.user == @dick}.length)
   end

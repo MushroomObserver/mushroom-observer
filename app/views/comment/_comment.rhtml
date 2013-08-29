@@ -1,7 +1,7 @@
 <td width="100%">
   <p>
     <%= :CREATED.t %>:
-      <span class="Data"><%= comment.created.web_time %></span><br/>
+      <span class="Data"><%= comment.created_at.web_time %></span><br/>
     <%= :BY.t %>:
       <%= user_link(comment.user) %>
       <% if check_permission(comment) %>

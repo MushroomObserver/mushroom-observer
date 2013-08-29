@@ -417,7 +417,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_not_nil(spl)
     obs = spl.observations.first
     assert_not_nil(obs)
-    assert_not_nil(obs.modified)
+    assert_not_nil(obs.updated_at)
     name = Name.find_by_search_name(new_name_str.squeeze(" "))
     assert_not_nil(name)
     assert(spl.name_included(name))
@@ -964,12 +964,12 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     list = species_lists(:first_species_list)
     args = {
-      :place_name    => 'limbo',
-      :when     => now,
-      :created  => now,
-      :modified => now,
-      :user     => @rolf,
-      :specimen => false,
+      :place_name => 'limbo',
+      :when       => now,
+      :created_at => now,
+      :updated_at => now,
+      :user       => @rolf,
+      :specimen   => false,
     }
     list.construct_observation(tapinella, args)
     list.construct_observation(names(:fungi), args)

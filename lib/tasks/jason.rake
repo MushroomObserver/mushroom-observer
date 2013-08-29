@@ -498,7 +498,7 @@ namespace :jason do
           obs.specimen   = spec
           obs.user_id    = user.id
           obs.is_collection_location = is_co
-          obs.created = obs.modified = Time.now
+          obs.created_at = obs.updated_at = Time.now
           obs.name_id = what.id if what
           if where.is_a?(Location)
             obs.where = where.name
@@ -516,14 +516,14 @@ namespace :jason do
               name = 'unknown'
             end
             $stderr.puts('Created observation: #%d (%s)' % [obs.id, name])
-            obs.log(:log_observation_created, { :user => user.login }, true)
+            obs.log(:log_observation_created_at, { :user => user.login }, true)
             lines.clear
 
             # Create naming if "what" given.
             if what
               naming = Naming.new
-              naming.created        = obs.created
-              naming.modified       = obs.created
+              naming.created_at     = obs.created_at
+              naming.updated_at     = obs.created_at
               naming.observation_id = obs.id
               naming.name_id        = what.id
               naming.user_id        = user.id
@@ -559,8 +559,8 @@ namespace :jason do
 
                 # Create new image.
                 image = Image.new
-                image.created          = obs.created
-                image.modified         = obs.created
+                image.created_at       = obs.created_at
+                image.updated_at       = obs.created_at
                 image.user_id          = user.id
                 image.when             = date || obs.when
                 image.notes            = notes if notes

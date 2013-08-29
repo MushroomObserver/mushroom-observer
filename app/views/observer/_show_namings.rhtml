@@ -46,7 +46,7 @@
           <th></th>
         </tr>
 
-        <% for naming in observation.namings.sort_by(&:created) %>
+        <% for naming in observation.namings.sort_by(&:created_at) %>
           <tr>
             <td>
               <div>

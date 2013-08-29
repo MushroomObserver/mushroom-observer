@@ -156,7 +156,7 @@ class NameController < ApplicationController
         AND names.rank = 'Species'
         AND name_counts.count > 1
         AND name_descriptions.name_id IS NULL
-        AND CURRENT_TIMESTAMP - names.modified > #{1.week.to_i}
+        AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
       ORDER BY name_counts.count DESC, names.sort_name ASC
       LIMIT 100
     )
@@ -220,11 +220,11 @@ class NameController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',      :sort_by_name.t],
-      ['created',   :sort_by_created.t],
-      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
-                    :sort_by_modified.t],
-      ['num_views', :sort_by_num_views.t],
+      ['name',        :sort_by_name.t],
+      ['created_at',  :sort_by_created_at.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'updated_at'),
+                      :sort_by_updated_at.t],
+      ['num_views',   :sort_by_num_views.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
@@ -308,10 +308,10 @@ class NameController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',      :sort_by_name.t],
-      ['created',   :sort_by_created.t],
-      ['modified',  :sort_by_modified.t],
-      ['num_views', :sort_by_num_views.t],
+      ['name',        :sort_by_name.t],
+      ['created_at',  :sort_by_created_at.t],
+      ['updated_at',  :sort_by_updated_at.t],
+      ['num_views',   :sort_by_num_views.t],
     ]
 
     # Add "show names" link if this query can be coerced into an
@@ -676,7 +676,7 @@ class NameController < ApplicationController
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
     for name in @parents + [@name]
-      save_name(name, :log_name_created) if name and name.new_record?
+      save_name(name, :log_name_created_at) if name and name.new_record?
     end
     flash_notice(:runtime_create_name_success.t(:name => @name.real_search_name))
   end
@@ -696,7 +696,7 @@ class NameController < ApplicationController
     # This name itself might have been a parent when we called
     # find_or_create... last time(!)
     for name in Name.find_or_create_parsed_name_and_parents(@parse)
-      save_name(name, :log_name_created) if name and name.new_record?
+      save_name(name, :log_name_created_at) if name and name.new_record?
     end
     return any_changes
   end
@@ -828,15 +828,15 @@ class NameController < ApplicationController
 
         Transaction.post_name_description(
           @description.all_notes.merge(
-            :id            => @description,
-            :created       => @description.created,
-            :source_type   => @description.source_type,
-            :source_name   => @description.source_name,
-            :locale        => @description.locale,
-            :license       => @description.license,
-            :admin_groups  => @description.admin_groups,
-            :writer_groups => @description.writer_groups,
-            :reader_groups => @description.reader_groups
+            :id             => @description,
+            :created_at     => @description.created_at,
+            :source_type    => @description.source_type,
+            :source_name    => @description.source_name,
+            :locale         => @description.locale,
+            :license        => @description.license,
+            :admin_groups   => @description.admin_groups,
+            :writer_groups  => @description.writer_groups,
+            :reader_groups  => @description.reader_groups
           )
         )
 
@@ -854,7 +854,7 @@ class NameController < ApplicationController
         end
 
         # Log action in parent name.
-        @description.name.log(:log_description_created,
+        @description.name.log(:log_description_created_at,
                  :user => @user.login, :touch => true,
                  :name => @description.unique_partial_format_name)
 
@@ -1387,7 +1387,7 @@ class NameController < ApplicationController
     # Get corresponding images.
     image_data = Name.connection.select_all %(
       SELECT name_id, image_id, observation_id, images.user_id,
-             images.license_id, images.created
+             images.license_id, images.created_at
       FROM observations, images_observations, images
       WHERE observations.name_id IN (#{name_ids})
       AND observations.vote_cache >= 2.4
@@ -1404,7 +1404,7 @@ class NameController < ApplicationController
       user_id    = row['user_id'].to_i
       license_id = row['license_id'].to_i
       image_datum = row.values_at('image_id', 'observation_id', 'user_id',
-                                  'license_id', 'created')
+                                  'license_id', 'created_at')
       @image_data[name_id] ||= []
       @image_data[name_id].push(image_datum)
       @users[user_id]       ||= User.find(user_id).legal_name

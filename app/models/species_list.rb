@@ -31,8 +31,8 @@
 #
 #  id::                    Locally unique numerical id, starting at 1.
 #  sync_id::               Globally unique alphanumeric id, used to sync with remote servers.
-#  created::               Date/time it was first created.
-#  modified::              Date/time it was last modified.
+#  created_at::            Date/time it was first created.
+#  updated_at::            Date/time it was last updated.
 #  user::                  User that created it.
 #  when::                  Date -- meaning is up to User.
 #  where::                 Location name -- meaning is up to User.
@@ -216,11 +216,11 @@ class SpeciesList < AbstractModel
     # should initiate identical action)
   end
 
-  # Add observation to list (if not already) and set modified.  Saves it.
+  # Add observation to list (if not already) and set updated_at.  Saves it.
   def add_observation(obs)
     unless observations.include?(obs)
       observations.push(obs)
-      update_attribute(:modified, Time.now)
+      update_attribute(:updated_at, Time.now)
       Transaction.put_species_list(
         :id              => self,
         :add_observation => obs
@@ -228,11 +228,11 @@ class SpeciesList < AbstractModel
     end
   end
 
-  # Remove observation from list and set modified.  Saves it.
+  # Remove observation from list and set updated_at.  Saves it.
   def remove_observation(obs)
     if observations.include?(obs)
       observations.delete(obs)
-      update_attribute(:modified, Time.now)
+      update_attribute(:updated_at, Time.now)
       Transaction.put_species_list(
         :id              => self,
         :del_observation => obs

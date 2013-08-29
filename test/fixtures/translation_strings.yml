@@ -11,7 +11,7 @@ english_one:
   language_id: 1
   tag: one
   text: one
-  modified: 2012-05-30
+  updated_at: 2012-05-30
   user_id: 0
 
 english_two:
@@ -20,7 +20,7 @@ english_two:
   language_id: 1
   tag: two
   text: two
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 0
 
 english_TWO:
@@ -29,7 +29,7 @@ english_TWO:
   language_id: 1
   tag: TWO
   text: Two
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 0
 
 english_twos:
@@ -38,7 +38,7 @@ english_twos:
   language_id: 1
   tag: twos
   text: twos
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 0
 
 english_TWOS:
@@ -47,7 +47,7 @@ english_TWOS:
   language_id: 1
   tag: TWOS
   text: Twos
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 0
 
 english_three:
@@ -56,7 +56,7 @@ english_three:
   language_id: 1
   tag: three
   text: three
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 0
 
 english_four:
@@ -65,7 +65,7 @@ english_four:
   language_id: 1
   tag: four
   text: four
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 0
 
 french_one:
@@ -74,7 +74,7 @@ french_one:
   language_id: 2
   tag: one
   text: une
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 2
 
 french_two:
@@ -83,7 +83,7 @@ french_two:
   language_id: 2
   tag: two
   text: deux
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 2
 
 french_TWO:
@@ -92,7 +92,7 @@ french_TWO:
   language_id: 2
   tag: TWO
   text: Deux
-  modified: 2012-05-24
+  updated_at: 2012-05-24
   user_id: 2
 
 french_twos:
@@ -101,7 +101,7 @@ french_twos:
   language_id: 2
   tag: twos
   text: deux
-  modified: 2012-05-30
+  updated_at: 2012-05-30
   user_id: 1
 
 french_TWOS:
@@ -110,7 +110,7 @@ french_TWOS:
   language_id: 2
   tag: TWOS
   text: Deux
-  modified: 2012-05-30
+  updated_at: 2012-05-30
   user_id: 1
 
 greek_one:
@@ -119,7 +119,7 @@ greek_one:
   language_id: 3
   tag: one
   text: ένα
-  modified: 2012-05-31
+  updated_at: 2012-05-31
   user_id: 4
 
 greek_two:
@@ -128,7 +128,7 @@ greek_two:
   language_id: 3
   tag: two
   text: δύο
-  modified: 2012-05-31
+  updated_at: 2012-05-31
   user_id: 4
 
 unknown_locations_string:
@@ -136,7 +136,25 @@ unknown_locations_string:
   version: 1
   language_id: 1
   tag: unknown_locations
-  text: Unknown, Everywhere, Anywhere, World
-  modified: 2012-05-31
+  text: Unknown, Everywhere, Anywhere, World, Earth
+  updated_at: 2012-05-31
   user_id: 0
+
+english_waiting_for_update:
+  id: 16
+  version: 1
+  language_id: 1
+  tag: old
+  text: new
+  updated_at: 2012-05-30
+  user_id: 0
+
+version_wizard:
+  id: 17
+  version: 1
+  language_id: 4
+  tag: wizard
+  text: Gandalf
+  updated_at: 2013-08-22
+  user_id: 6
 

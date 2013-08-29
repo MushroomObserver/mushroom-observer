@@ -86,8 +86,8 @@ class AccountController < ApplicationController
         redirect_back_or_default(:action => :welcome)
       else
         @new_user = User.new(params['new_user'])
-        @new_user.created         = now = Time.now
-        @new_user.modified        = now
+        @new_user.created_at      = now = Time.now
+        @new_user.updated_at      = now
         @new_user.last_login      = now
         @new_user.admin           = false
         @new_user.created_here    = true
@@ -223,7 +223,7 @@ class AccountController < ApplicationController
         flash_notice :runtime_login_success.t
         @user = user
         @user.last_login = now = Time.now
-        @user.modified = now
+        @user.updated_at = now
         @user.save
         set_session_user(@user)
         if @remember

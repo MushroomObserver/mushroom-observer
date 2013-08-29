@@ -105,11 +105,11 @@ class LocationController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',      :sort_by_name.t],
-      ['created',   :sort_by_created.t],
-      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
-                    :sort_by_modified.t],
-      ['num_views', :sort_by_num_views.t],
+      ['name',        :sort_by_name.t],
+      ['created_at',  :sort_by_created_at.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'updated_at'),
+                      :sort_by_updated_at.t],
+      ['num_views',   :sort_by_num_views.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
@@ -303,10 +303,10 @@ class LocationController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',      :sort_by_name.t],
-      ['created',   :sort_by_created.t],
-      ['modified',  :sort_by_modified.t],
-      ['num_views', :sort_by_num_views.t],
+      ['name',        :sort_by_name.t],
+      ['created_at',  :sort_by_created_at.t],
+      ['updated_at',  :sort_by_updated_at.t],
+      ['num_views',   :sort_by_num_views.t],
     ]
 
     # Add "show locations" link if this query can be coerced into an
@@ -529,15 +529,15 @@ class LocationController < ApplicationController
         if @dubious_where_reasons.empty?
           if @location.save
             Transaction.post_location(
-              :id      => @location,
-              :created => @location.created,
-              :name    => @location.name,
-              :north   => @location.north,
-              :south   => @location.south,
-              :east    => @location.east,
-              :west    => @location.west,
-              :low     => @location.low,
-              :high    => @location.high
+              :id         => @location,
+              :created_at => @location.created_at,
+              :name       => @location.name,
+              :north      => @location.north,
+              :south      => @location.south,
+              :east       => @location.east,
+              :west       => @location.west,
+              :low        => @location.low,
+              :high       => @location.high
             )
             flash_notice(:runtime_location_success.t(:id => @location.id))
             done = true
@@ -710,20 +710,20 @@ class LocationController < ApplicationController
 
         Transaction.post_location_description(
           @description.all_notes.merge(
-            :id            => @description,
-            :created       => @description.created,
-            :source_type   => @description.source_type,
-            :source_name   => @description.source_name,
-            :locale        => @description.locale,
-            :license       => @description.license,
-            :admin_groups  => @description.admin_groups,
-            :writer_groups => @description.writer_groups,
-            :reader_groups => @description.reader_groups
+            :id             => @description,
+            :created_at     => @description.created_at,
+            :source_type    => @description.source_type,
+            :source_name    => @description.source_name,
+            :locale         => @description.locale,
+            :license        => @description.license,
+            :admin_groups   => @description.admin_groups,
+            :writer_groups  => @description.writer_groups,
+            :reader_groups  => @description.reader_groups
           )
         )
 
         # Log action in parent location.
-        @description.location.log(:log_description_created,
+        @description.location.log(:log_description_created_at,
                  :user => @user.login, :touch => true,
                  :name => @description.unique_partial_format_name)
 

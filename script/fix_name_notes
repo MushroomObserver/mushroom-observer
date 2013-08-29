@@ -85,12 +85,12 @@ puts "moved: #{notes.inspect}"
         summary = summary.downcase
         comment = comment.strip
         Comment.create(
-          :created  => time,
-          :modified => time,
-          :user     => user,
-          :summary  => summary,
-          :comment  => comment,
-          :object   => desc.name
+          :created_at => time,
+          :updated_at => time,
+          :user       => user,
+          :summary    => summary,
+          :comment    => comment,
+          :object     => desc.name
         )
 puts "comment: #{time.strftime("%Y%m%d%H%M%S")} #{user ? user.id : "<#{login}>"} #{summary.inspect} #{comment.inspect}"
       end

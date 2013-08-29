@@ -12,8 +12,8 @@ xml.send(tag,
     xml_undefined_location(xml, :location, object.where)
   end
   if detail
-    xml_datetime(xml, :created, object.created)
-    xml_datetime(xml, :modified, object.modified)
+    xml_datetime(xml, :created_at, object.created_at)
+    xml_datetime(xml, :updated_at, object.updated_at)
     xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
     xml.observations(:number => object.observation_ids.length) do
       for obs_id in object.observation_ids

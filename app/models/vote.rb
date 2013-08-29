@@ -25,8 +25,8 @@
 #
 #  id::                 Locally unique numerical id, starting at 1.
 #  sync_id::            Globally unique alphanumeric id, used to sync with remote servers.
-#  created::            Date/time it was first created.
-#  modified::           Date/time it was last modified.
+#  created_at::         Date/time it was first created.
+#  updated_at::         Date/time it was last updated.
 #  user::               User that created it.
 #  value::              Value of Vote, a Float: 3.0 = 100%, -3.0 = -100%
 #  naming::             Naming we're voting on.
@@ -205,7 +205,7 @@ class Vote < AbstractModel
   # Now we are free to change the implementation later.
   def anonymous?
     (user.votes_anonymous == :no) or
-    (user.votes_anonymous == :old and modified > Time.parse(VOTE_CUTOFF))
+    (user.votes_anonymous == :old and updated_at > Time.parse(VOTE_CUTOFF))
   end
 
 ################################################################################

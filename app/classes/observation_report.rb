@@ -42,7 +42,7 @@ module ObservationReport
     OBS_VOTE_CACHE = 7
     OBS_THUMB_IMAGE_ID = 8
     OBS_NOTES = 9
-    OBS_MODIFIED = 10
+    OBS_UPDATED_AT = 10
     USER_ID = 11
     USER_LOGIN = 12
     USER_NAME = 13
@@ -72,7 +72,7 @@ module ObservationReport
             'observations.vote_cache',
             'observations.thumb_image_id',
             'observations.notes',
-            'observations.modified',
+            'observations.updated_at',
             'users.id',
             'users.login',
             'users.name',
@@ -108,7 +108,7 @@ module ObservationReport
             'observations.vote_cache',
             'observations.thumb_image_id',
             'observations.notes',
-            'observations.modified',
+            'observations.updated_at',
             'users.id',
             'users.login',
             'users.name',
@@ -431,7 +431,7 @@ module ObservationReport
 
     def rows
       return all_rows.map do |row|
-        modified = clean_string(row[OBS_MODIFIED])
+        updated_at = clean_string(row[OBS_UPDATED_AT])
         id = clean_integer(row[OBS_ID])
         name = clean_string(row[NAME_TEXT_NAME])
         rank = clean_rank(row[NAME_RANK])
@@ -458,7 +458,7 @@ module ObservationReport
         long ||= ((east + west) / 2).round(4) if east and west
         low = high = alt if alt
         [
-          modified, 'MushroomObserver', nil, id,
+          updated_at, 'MushroomObserver', nil, id,
           name, author, rank, genus, sp, f || var || ssp,
           collector, date, year, month, day,
           country, state, county, location,
@@ -494,14 +494,14 @@ module ObservationReport
         decimalLongitude
         minimumElevationInMeters
         maximumElevationInMeters
-        modified
+        updated_at
         fieldNotes
       ]
     end
 
     def rows
       return all_rows.map do |row|
-        modified = clean_string(row[OBS_MODIFIED])
+        updated_at = clean_string(row[OBS_UPDATED_AT])
         id = clean_integer(row[OBS_ID])
         name = clean_string(row[NAME_TEXT_NAME])
         rank = clean_rank(row[NAME_RANK])
@@ -532,7 +532,7 @@ module ObservationReport
           collector, id, date, year, month, day,
           country, state, county, location,
           lat, long, low, high,
-          modified, notes
+          updated_at, notes
         ]
       end.sort_by {|row| row[7].to_i}
     end

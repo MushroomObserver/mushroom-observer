@@ -10,8 +10,8 @@ printf "%-5s %5s %5s %5s %5s %5s %5s %5s %5s %5s\n",
   'year', 1, 3, 10, 32, 100, 316, 1000, 3162, 10000;
 for (my $year=2006; ; $year++) {
   my $cmd1 = "select user_id, count(user_id) from observations where ".
-             "modified > ". ($year-1) ."1231 and ".
-             "modified < ${year}1231 group by user_id;";
+             "updated_at > ". ($year-1) ."1231 and ".
+             "updated_at < ${year}1231 group by user_id;";
   my $cmd2 = $cmd1; $cmd2 =~ s/observations/comments/;
   my $cmd = "mysql -u $USER --password=$PASS $DB -e '$cmd1; $cmd2;'";
   open(my $fh, "$cmd |") or

@@ -34,77 +34,47 @@ class LanguageTest < UnitTestCase
     assert_equal('la chazame', :one.l)
   end
 
-  def test_versioning
-    time1 = 1.year.ago
-    time2 = time1 + 1.minute
-    time3 = time2 + 1.hour
-    time4 = time3 + 1.week
-
-    User.current = @katrina
-    lang = languages(:english)
-    lang.translation_strings.create(
-      :tag  => 'frobozz',
-      :text => 'wizard',
-      :modified => time1
-    )
-    str = TranslationString.last
-    assert_equal('frobozz', str.tag)
-    assert_equal('wizard', str.text)
-    assert_equal(@katrina.id, str.user_id)
-    assert_in_delta(time1, str.modified, 1.second)
-    assert_equal(1, str.version)
-
-    # Combine with last version if same user changes it within a day.
-    str.update_attributes(
-      :text => 'Wizard of Zork',
-      :modified => time2
-    )
-    str = TranslationString.last
-    assert_equal(1, str.version)
-    latest = str.versions.latest
-    assert_equal('Wizard of Zork', latest.text)
-    assert_equal(@katrina.id, latest.user_id)
-    assert_in_delta(time2, latest.modified, 1.second)
-
-    # Make new version for new user, regardless of time since last change.
-    User.current = @rolf
-    str.update_attributes(
-      :text => 'Wizard of Zork II',
-      :modified => time3
-    )
-    str = TranslationString.last
-    assert_equal(2, str.version)
-    latest = str.versions.latest
-    assert_equal('Wizard of Zork II', latest.text)
-    assert_equal(@rolf.id, latest.user_id)
-    assert_in_delta(time3, latest.modified, 1.second)
-
-    # Make new version after a day, regardless who changes it.
-    str.update_attributes(
-      :text => 'Magic Cave Company',
-      :modified => time4
-    )
-    str = TranslationString.last
-    assert_equal(3, str.version)
-    latest = str.versions.latest
-    assert_equal('Magic Cave Company', latest.text)
-    assert_equal(@rolf.id, latest.user_id)
-    assert_in_delta(time4, latest.modified, 1.second)
+  def set_text(str, new_string)
+    str.text = new_string
+    str.save
+    str.reload
+  end
+  
+  def test_versioning_twice
+    str = translation_strings(:version_wizard)
+    yesterday = Time.now - 1.day
+    assert(str.updated_at < yesterday)
+    expected_version = str.version + 1
+    User.current = str.user
+    set_text(str, 'Gandalf the Gray')
+    assert(str.updated_at > yesterday)
+    assert_equal(expected_version, str.version)
+    set_text(str, "Gandalf the White")
+    assert_equal(expected_version, str.version)
   end
 
+  def test_versioning_someone_else
+    str = translation_strings(:version_wizard)
+    User.current = str.user
+    set_text(str, 'Gandalf the Gray')
+    expected_version = str.version + 1
+    User.current = users(:katrina)
+    assert_not_equal(str.user_id, User.current_id)
+    set_text(str, "Mithrandir")
+    assert_equal(expected_version, str.version)
+  end
+  
   def test_update_recent_translations
-    one = translation_strings(:english_one)
+    one = translation_strings(:english_waiting_for_update)
     old_val = one.tag.to_sym.l
-    one.update_attributes(
-      :text => 'new_val',
-      :modified => 1.hour.ago
-    )
-    Language.last_update = 1.minute.ago
+    new_val = one.text
+    assert_not_equal(old_val, new_val)
+    Language.last_update = one.updated_at + 1.minute
     Language.update_recent_translations
     assert_equal(old_val, one.tag.to_sym.l)
-    Language.last_update = 1.day.ago
+    Language.last_update = one.updated_at - 1.minute
     Language.update_recent_translations
-    assert_equal('new_val', one.tag.to_sym.l)
+    assert_equal(new_val, one.tag.to_sym.l)
   end
 
   def test_score_lines

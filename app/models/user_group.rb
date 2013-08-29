@@ -7,16 +7,16 @@
 #  waters: "all users" and "user N".  The first contains all users, whether
 #  they are verified or not.  The second is a set of groups, one for each user,
 #  each containing just that user and no others.  Both of these "meta-groups"
-#  are considered "frozen" in that they can not be modified.  (Obviously,
-#  "all users" is modified every time a user is created or destroyed, but no
+#  are considered "frozen" in that they can not be updated.  (Obviously,
+#  "all users" is updated every time a user is created or destroyed, but no
 #  user is allowed to make changes to it, even the admins.)
 #
 #  == Attributes
 #
 #  id::         Locally unique numerical id, starting at 1.
 #  sync_id::    Globally unique alphanumeric id, used to sync with remote servers.
-#  created::    Date/time it was first created.
-#  modified::   Date/time it was last modified.
+#  created_at:: Date/time it was first created.
+#  updated_at:: Date/time it was last updated.
 #  name::       Name of the group, must be unique.
 #  meta::       Can members be added or removed from this group?
 #

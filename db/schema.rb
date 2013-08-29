@@ -9,27 +9,27 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130804114305) do
+ActiveRecord::Schema.define(:version => 20130813215219) do
 
   create_table "api_keys", :force => true do |t|
-    t.datetime "created"
+    t.datetime "created_at"
     t.datetime "last_used"
-    t.integer  "num_uses",                 :default => 0
-    t.integer  "user_id",                                 :null => false
-    t.string   "key",       :limit => 128,                :null => false
+    t.integer  "num_uses",                  :default => 0
+    t.integer  "user_id",                                  :null => false
+    t.string   "key",        :limit => 128,                :null => false
     t.text     "notes"
     t.datetime "verified"
   end
 
   create_table "comments", :force => true do |t|
-    t.datetime "created"
+    t.datetime "created_at"
     t.integer  "user_id"
     t.string   "summary",     :limit => 100
     t.text     "comment"
     t.string   "target_type", :limit => 30
     t.integer  "target_id"
     t.string   "sync_id",     :limit => 16
-    t.datetime "modified"
+    t.datetime "updated_at"
   end
 
   create_table "conference_events", :force => true do |t|
@@ -56,7 +56,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
 
   create_table "copyright_changes", :force => true do |t|
     t.integer  "user_id",                   :null => false
-    t.datetime "modified",                  :null => false
+    t.datetime "updated_at",                :null => false
     t.string   "target_type", :limit => 30, :null => false
     t.integer  "target_id",                 :null => false
     t.integer  "year"
@@ -101,8 +101,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   add_index "image_votes", ["image_id"], :name => "index_image_votes_on_image_id"
 
   create_table "images", :force => true do |t|
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.string   "content_type",     :limit => 100
     t.integer  "user_id"
     t.date     "when"
@@ -130,13 +130,18 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.integer "project_id", :null => false
   end
 
+  create_table "images_terms", :id => false, :force => true do |t|
+    t.integer "image_id"
+    t.integer "term_id"
+  end
+
   create_table "interests", :force => true do |t|
     t.string   "target_type", :limit => 30
     t.integer  "target_id"
     t.integer  "user_id"
     t.boolean  "state"
     t.string   "sync_id",     :limit => 16
-    t.datetime "modified"
+    t.datetime "updated_at"
   end
 
   create_table "languages", :force => true do |t|
@@ -153,14 +158,14 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.boolean  "deprecated",                  :default => false, :null => false
     t.string   "form_name",    :limit => 20
     t.string   "sync_id",      :limit => 16
-    t.datetime "modified"
+    t.datetime "updated_at"
   end
 
   create_table "location_descriptions", :force => true do |t|
     t.string   "sync_id",         :limit => 16
     t.integer  "version"
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "location_id"
     t.integer  "num_views",                                                                :default => 0
@@ -203,7 +208,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "location_descriptions_versions", :force => true do |t|
     t.integer  "location_description_id"
     t.integer  "version"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "license_id"
     t.integer  "merge_source_id"
@@ -222,8 +227,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "locations", :force => true do |t|
     t.string   "sync_id",         :limit => 16
     t.integer  "version"
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "description_id"
     t.integer  "rss_log_id"
@@ -244,7 +249,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "locations_versions", :force => true do |t|
     t.string   "location_id"
     t.integer  "version"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.float    "north"
     t.float    "south"
@@ -260,8 +265,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "name_descriptions", :force => true do |t|
     t.string   "sync_id",         :limit => 16
     t.integer  "version"
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "name_id"
     t.enum     "review_status",   :limit => [:unreviewed, :unvetted, :vetted, :inaccurate], :default => :unreviewed
@@ -311,7 +316,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "name_descriptions_versions", :force => true do |t|
     t.integer  "name_description_id"
     t.integer  "version"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "license_id"
     t.integer  "merge_source_id"
@@ -334,8 +339,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "names", :force => true do |t|
     t.string   "sync_id",             :limit => 16
     t.integer  "version"
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "description_id"
     t.integer  "rss_log_id"
@@ -359,7 +364,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "names_versions", :force => true do |t|
     t.integer  "name_id"
     t.integer  "version"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "user_id"
     t.enum     "rank",                :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
     t.string   "text_name",           :limit => 100
@@ -380,8 +385,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   end
 
   create_table "namings", :force => true do |t|
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "observation_id"
     t.integer  "name_id"
     t.integer  "user_id"
@@ -396,13 +401,13 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.integer  "obj_id"
     t.text     "note_template"
     t.string   "sync_id",          :limit => 16
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.boolean  "require_specimen",                                                        :default => false, :null => false
   end
 
   create_table "observations", :force => true do |t|
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.date     "when"
     t.integer  "user_id"
     t.boolean  "specimen",                                                               :default => false, :null => false
@@ -444,8 +449,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.string   "title",          :limit => 100, :default => "", :null => false
     t.text     "summary"
     t.string   "sync_id",        :limit => 16
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "rss_log_id"
   end
 
@@ -455,7 +460,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   end
 
   create_table "queries", :force => true do |t|
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "access_count"
     t.enum     "model",        :limit => [:Comment, :Image, :Location, :LocationDescription, :Name, :NameDescription, :Observation, :Project, :RssLog, :SpeciesList, :User]
     t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_project, :for_target, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_for_project, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
@@ -491,7 +496,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   create_table "rss_logs", :force => true do |t|
     t.integer  "observation_id"
     t.integer  "species_list_id"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.text     "notes"
     t.integer  "name_id"
     t.integer  "location_id"
@@ -499,8 +504,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   end
 
   create_table "species_lists", :force => true do |t|
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.date     "when"
     t.integer  "user_id"
     t.string   "where",       :limit => 1024
@@ -526,15 +531,26 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   end
 
   create_table "terms", :force => true do |t|
-    t.string   "name",        :limit => 1024
+    t.integer  "version"
+    t.integer  "user_id"
+    t.string   "name",           :limit => 1024
+    t.integer  "thumb_image_id"
     t.text     "description"
-    t.integer  "image_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
+  create_table "terms_versions", :force => true do |t|
+    t.integer  "term_id"
+    t.integer  "version"
+    t.integer  "user_id"
+    t.datetime "updated_at"
+    t.string   "name",        :limit => 1024
+    t.text     "description"
+  end
+
   create_table "transactions", :force => true do |t|
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.text     "query"
   end
 
@@ -543,7 +559,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.integer  "language_id",                :null => false
     t.string   "tag",         :limit => 100
     t.text     "text"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "user_id"
   end
 
@@ -551,7 +567,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.integer  "version"
     t.integer  "translation_string_id"
     t.text     "text"
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.integer  "user_id"
   end
 
@@ -562,11 +578,11 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   end
 
   create_table "user_groups", :force => true do |t|
-    t.string   "name",                   :default => "",    :null => false
-    t.string   "sync_id",  :limit => 16
-    t.datetime "created"
-    t.datetime "modified"
-    t.boolean  "meta",                   :default => false
+    t.string   "name",                     :default => "",    :null => false
+    t.string   "sync_id",    :limit => 16
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "meta",                     :default => false
   end
 
   create_table "user_groups_users", :id => false, :force => true do |t|
@@ -580,7 +596,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.string   "email",                        :limit => 80,                                                       :default => "",             :null => false
     t.string   "theme",                        :limit => 40
     t.string   "name",                         :limit => 80
-    t.datetime "created"
+    t.datetime "created_at"
     t.datetime "last_login"
     t.datetime "verified"
     t.integer  "rows"
@@ -614,7 +630,7 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
     t.boolean  "email_general_question",                                                                           :default => true,           :null => false
     t.boolean  "email_html",                                                                                       :default => true,           :null => false
     t.string   "sync_id",                      :limit => 16
-    t.datetime "modified"
+    t.datetime "updated_at"
     t.boolean  "admin"
     t.boolean  "created_here"
     t.text     "alert"
@@ -633,8 +649,8 @@ ActiveRecord::Schema.define(:version => 20130804114305) do
   end
 
   create_table "votes", :force => true do |t|
-    t.datetime "created"
-    t.datetime "modified"
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.integer  "naming_id"
     t.integer  "user_id"
     t.integer  "observation_id",               :default => 0

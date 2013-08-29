@@ -87,7 +87,7 @@ class InterestController < ApplicationController
           flash_notice(:set_interest_already_off.l(:name => target.unique_text_name))
         else
           interest.state = (state > 0)
-          interest.modified = Time.now
+          interest.updated_at = Time.now
           if !interest.save
             flash_notice(:set_interest_failure.l(:name => target.unique_text_name))
           else

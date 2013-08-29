@@ -10,8 +10,8 @@ eol_project:
   admin_group_id: 3
   title: EOL Project
   summary: Project to make names for EOL
-  created: 2008-09-24 21:33:30
-  modified: 2008-09-24 21:33:30
+  created_at: 2008-09-24 21:33:30
+  updated_at: 2008-09-24 21:33:30
 
 # admins: dick (4)
 # members: dick (4)
@@ -26,5 +26,5 @@ bolete_project:
   admin_group_id: 5
   title: Bolete Project
   summary: Project about Boletes
-  created: 2008-09-25 07:00:50
-  modified: 2008-09-25 07:00:55
+  created_at: 2008-09-25 07:00:50
+  updated_at: 2008-09-25 07:00:55

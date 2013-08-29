@@ -100,7 +100,7 @@
 #  == Attributes
 #
 #  args::                 Original hash of arguments passed in.
-#  results::              List of objects found / modified.
+#  results::              List of objects found / updated.
 #  errors::               List of errors.
 #  user::                 Authenticated user making request.
 #  api_key::              ApiKey used to authenticate.

@@ -3,6 +3,9 @@
     :num  => @location.version,
     :name => @location.display_name
   )
+  new_tab_set do
+    add_tab(:show_location.t(:location => @location.display_name), :action => 'show_location', :id => @location.id)
+  end
 %>
 
 <%= show_past_versions(@location) %>

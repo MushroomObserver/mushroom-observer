@@ -48,14 +48,14 @@
 #
 #  == Attributes
 #
-#  id::        Locally unique numerical id, starting at 1.
-#  sync_id::   Globally unique alphanumeric id, used to sync with remote servers.
-#  created::   Date/time it was first created.
-#  modified::  Date/time it was last modified.
-#  user::      User that created it.
-#  target::    Object it is attached to.
-#  summary::   Summary line (100 chars).
-#  comment::   Full text (any length).
+#  id::           Locally unique numerical id, starting at 1.
+#  sync_id::      Globally unique alphanumeric id, used to sync with remote servers.
+#  created_at::   Date/time it was first created.
+#  updated_at::   Date/time it was last updated.
+#  user::         User that created it.
+#  target::       Object it is attached to.
+#  summary::      Summary line (100 chars).
+#  comment::      Full text (any length).
 #
 #  == Instance Methods
 #

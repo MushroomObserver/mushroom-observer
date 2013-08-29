@@ -46,8 +46,8 @@
 #  orphan_log::         Add line to RssLog before destroying object.
 #  init_rss_log::       Create and attach RssLog if not already there.
 #  attach_rss_log::     Attach RssLog after creating new record.
-#  autolog_created::    Callback to log creation.
-#  autolog_updated::    Callback to log an update.
+#  autolog_created_at:: Callback to log creation.
+#  autolog_updated_at:: Callback to log an update.
 #  autolog_destroyed::  Callback to log destruction.
 #
 ############################################################################
@@ -169,6 +169,14 @@ class AbstractModel < ActiveRecord::Base
     num ? num.to_i : nil
   end
 
+  def force_updated_at(val)
+    self.save
+    AbstractModel.record_timestamps = false
+    self.updated_at = val
+    self.save
+    AbstractModel.record_timestamps = true
+  end
+  
   ##############################################################################
   #
   #  :section: Callbacks
@@ -176,14 +184,14 @@ class AbstractModel < ActiveRecord::Base
   ##############################################################################
 
   # This is called just before an object is created.
-  # 1) It fills in 'created' and 'user' for new records.
+  # 1) It fills in 'created_at' and 'user' for new records.
   # 2) And it creates a new RssLog if this model accepts one, and logs its
   #    creation.
   def before_create
-    self.created  ||= Time.now        if respond_to?('created=')
-    self.modified ||= Time.now        if respond_to?('modified=')
+    # self.created_at ||= Time.now        if respond_to?('created_at=')
+    # self.updated_at ||= Time.now        if respond_to?('updated_at=')
     self.user_id  ||= User.current_id if respond_to?('user_id=')
-    autolog_created                   if has_rss_log?
+    autolog_created_at                   if has_rss_log?
   end
 
   # This is called just after an object is created.
@@ -201,7 +209,7 @@ class AbstractModel < ActiveRecord::Base
   # This is called just before an object's changes are saved.
   # 1) It passes off to SiteData, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
-  # 2) It updates 'modified' whenever a record changes.
+  # 2) It updates 'updated_at' whenever a record changes.
   # 3) It saves a message to the RssLog.
   #
   # *NOTE*: Use +save_without_our_callbacks+ to save a record without doing
@@ -209,8 +217,8 @@ class AbstractModel < ActiveRecord::Base
   def before_update
     SiteData.update_contribution(:chg, self)
     if !@save_without_our_callbacks
-      self.modified = Time.now if respond_to?('modified=') && !self.modified_changed?
-      autolog_updated          if has_rss_log?
+      # self.updated_at = Time.now if respond_to?('updated_at=') && !self.updated_at_changed?
+      autolog_updated_at          if has_rss_log?
     end
   end
 
@@ -235,7 +243,7 @@ class AbstractModel < ActiveRecord::Base
   # def after_destroy
   # end
 
-  # Bypass the part of the +before_save+ callback that causes 'modified' to be
+  # Bypass the part of the +before_save+ callback that causes 'updated_at' to be
   # updated each time a record is saved.
   def save_without_our_callbacks
     @save_without_our_callbacks = true
@@ -280,15 +288,17 @@ class AbstractModel < ActiveRecord::Base
   #     ...
   #   end
   #
-  # *NOTE*: this does not cause 'modified' to be updated, because it uses
+  # *NOTE*: this does not cause 'updated_at' to be updated, because it uses
   # +save_without_our_callbacks+.
   #
   def update_view_stats
     if respond_to?('num_views=') ||
        respond_to?('last_view=')
+      AbstractModel.record_timestamps = false
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
-      self.save_without_our_callbacks
+      self.save
+      AbstractModel.record_timestamps = true
     end
   end
 
@@ -422,10 +432,10 @@ class AbstractModel < ActiveRecord::Base
 
   # By default do NOT automatically log creation/update/destruction.  Override
   # this with an array of zero or more of the following:
-  # * :created -- automatically log creation
-  # * :created! -- automatically log creation and raise to top of RSS feed
-  # * :updated -- automatically log updates
-  # * :updated! -- automatically log updates and raise to top of RSS feed
+  # * :created_at -- automatically log creation
+  # * :created_at! -- automatically log creation and raise to top of RSS feed
+  # * :updated_at -- automatically log updates
+  # * :updated_at! -- automatically log updates and raise to top of RSS feed
   # * :destroyed -- automatically log destruction
   # * :destroyed! -- automatically log destruction and raise to top of RSS feed
   superclass_delegating_accessor :autolog_events
@@ -464,13 +474,13 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Callback that logs creation.
-  def autolog_created
-    autolog_event(:created)
+  def autolog_created_at
+    autolog_event(:created_at)
   end
 
   # Callback that logs update.
-  def autolog_updated
-    autolog_event(:updated)
+  def autolog_updated_at
+    autolog_event(:updated_at)
   end
 
   # Callback that logs destruction.

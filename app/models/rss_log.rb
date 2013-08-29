@@ -5,7 +5,7 @@
 #  This model handles the RSS feed.  Every object we care about gets an RssLog
 #  instance to report changes in that object.  Going forward, every new object
 #  gets assigned one; historically, there are loads of objects without, but we
-#  don't really care, so they stay that way until they are modified. 
+#  don't really care, so they stay that way until they are updated. 
 #
 #  There is a separate <tt>#{object}_id</tt> field for each kind of object that
 #  can own an RssLog.  I thought it would be cleaner to use a polymorphic
@@ -106,7 +106,7 @@
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
-#  modified::           Date/time it was last modified.
+#  updated_at::         Date/time it was last updated.
 #  notes::              Log of changes.
 #  location::           Owning Location (or nil).
 #  name::               Owning Name (or nil).
@@ -244,23 +244,23 @@ class RssLog < AbstractModel
   # URL.
   def url
     if location_id
-      sprintf("/location/show_location/%d?time=%d", location_id, self.modified.tv_sec)
+      sprintf("/location/show_location/%d?time=%d", location_id, self.updated_at.tv_sec)
     elsif name_id
-      sprintf("/name/show_name/%d?time=%d", name_id, self.modified.tv_sec)
+      sprintf("/name/show_name/%d?time=%d", name_id, self.updated_at.tv_sec)
     elsif observation_id
-      sprintf("/observer/show_observation/%d?time=%d", observation_id, self.modified.tv_sec)
+      sprintf("/observer/show_observation/%d?time=%d", observation_id, self.updated_at.tv_sec)
     elsif project_id
-      sprintf("/project/show_project/%d?time=%d", project_id, self.modified.tv_sec)
+      sprintf("/project/show_project/%d?time=%d", project_id, self.updated_at.tv_sec)
     elsif species_list_id
-      sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.modified.tv_sec)
+      sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.updated_at.tv_sec)
     else
-      sprintf("/observer/show_rss_log/%d?time=%d", id, self.modified.tv_sec)
+      sprintf("/observer/show_rss_log/%d?time=%d", id, self.updated_at.tv_sec)
     end
   end
 
   # Add entry to top of notes and save.  Pass in a localization key and a hash
-  # of arguments it requires.  Changes +modified+ unless <tt>args[:touch]</tt>
-  # is false.  (Changing +modified+ has the effect of pushing it to the front
+  # of arguments it requires.  Changes +updated_at+ unless <tt>args[:touch]</tt>
+  # is false.  (Changing +updated_at+ has the effect of pushing it to the front
   # of the RSS feed.)
   #
   #   name.rss_log.add(:log_name_updated,
@@ -289,9 +289,11 @@ class RssLog < AbstractModel
     args2.delete(:save)
     entry = RssLog.encode(tag, args2, args[:time])
 
+    RssLog.record_timestamps = false if !args[:touch]
     self.notes = entry + "\n" + notes.to_s
-    self.modified = args[:time] if args[:touch]
+    # self.updated_at = args[:time] if args[:touch]
     self.save_without_our_callbacks if args[:save]
+    RssLog.record_timestamps = true
   end
 
   # Add line with timestamp and +title+ to notes, clear references to
@@ -321,7 +323,7 @@ class RssLog < AbstractModel
       if first && !line.match(/^\d{14}/)
         tag  = :log_orphan
         args = { :title => self.class.unescape(line) }
-        time = modified
+        time = updated_at
       elsif !line.blank?
         tag, args, time = self.class.decode(line)
       end

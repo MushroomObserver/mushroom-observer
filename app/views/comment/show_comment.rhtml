@@ -36,7 +36,7 @@
   draw_prev_next_tabs(@comment)
 %>
 
-<p><%= :comment_show_created.t %>: <%= @comment.created.web_time %></p>
+<p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>
 <p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
 <p><%= :comment_show_summary.t %>: <%= (@comment.summary).tl %></p>
 <%= (:comment_show_comment.l + ': ' + @comment.comment).tpl %>

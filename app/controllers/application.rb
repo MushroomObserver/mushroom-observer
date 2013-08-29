@@ -1071,7 +1071,7 @@ class ApplicationController < ActionController::Base
     model = model.to_s
     if result = find_query(model, false)
 
-      # Check if the existing query needs to be modified.
+      # Check if the existing query needs to be updated.
       any_changes = false
       for arg, val in args
         if result.params[:arg] != val

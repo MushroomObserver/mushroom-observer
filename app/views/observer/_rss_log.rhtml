@@ -9,8 +9,8 @@
         tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/) 
     title = :rss_destroyed.t(:type => target_type)
     detail = tag.t(args) rescue nil
-  elsif not time or time < target.created + 1.minute
-    title = :rss_created.t(:type => target_type)
+  elsif not time or time < target.created_at + 1.minute
+    title = :rss_created_at.t(:type => target_type)
     if target_type == :observation || target_type == :species_list
       detail = nil
     else
@@ -38,7 +38,7 @@
     end
     detail ||= tag.t(args) rescue nil
   end
-  time ||= rss_log.modified rescue nil
+  time ||= rss_log.updated_at rescue nil
 %>
 
 <table cellpadding="10">

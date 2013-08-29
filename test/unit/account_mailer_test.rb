@@ -104,7 +104,7 @@ class AccountMailerTest < UnitTestCase
 
     run_mail_test('consensus_change', @mary) do
       AccountMailer.create_consensus_change(@dick, @mary, obs, name1, name2,
-                                            obs.created)
+                                            obs.created_at)
     end
   end
 
@@ -124,7 +124,7 @@ class AccountMailerTest < UnitTestCase
     loc = locations(:albion)
     desc = loc.description
     run_mail_test('location_change', @mary) do
-      AccountMailer.create_location_change(@dick, @mary, loc.modified, loc,
+      AccountMailer.create_location_change(@dick, @mary, loc.updated_at, loc,
                                            desc, 1, 2, 1, 2)
     end
   end
@@ -133,7 +133,7 @@ class AccountMailerTest < UnitTestCase
     name = names(:peltigera)
     desc = name.description
     run_mail_test('name_change', @mary) do
-      AccountMailer.create_name_change(@dick, @mary, name.modified, name, desc,
+      AccountMailer.create_name_change(@dick, @mary, name.updated_at, name, desc,
                                        1, 2, 1, 2, desc.review_status)
     end
   end
@@ -143,7 +143,7 @@ class AccountMailerTest < UnitTestCase
     name = names(:peltigera)
     desc = name.description
     run_mail_test('name_change2', @mary) do
-      AccountMailer.create_name_change(@dick, @mary, name.modified, name, desc,
+      AccountMailer.create_name_change(@dick, @mary, name.updated_at, name, desc,
                                        0, 1, 0, 1, desc.review_status)
     end
   end
@@ -188,11 +188,11 @@ class AccountMailerTest < UnitTestCase
     run_mail_test('observation_change', @mary) do
       AccountMailer.create_observation_change(@dick, @mary, obs,
         'date,location,specimen,is_collection_location,notes,' +
-        'thumb_image_id,added_image,removed_image', obs.created)
+        'thumb_image_id,added_image,removed_image', obs.created_at)
     end
     run_mail_test('observation_destroy', @mary) do
       AccountMailer.create_observation_change(@dick, @mary, nil,
-        '**__Coprinus comatus__** L. (123)', obs.created)
+        '**__Coprinus comatus__** L. (123)', obs.created_at)
     end
   end
 

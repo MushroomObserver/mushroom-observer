@@ -11,8 +11,8 @@
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
 #  sync_id::          (-) Globally unique alphanumeric id, used to sync with remote servers.
-#  created::          (-) Date/time it was first created.
-#  modified::         (V) Date/time it was last modified.
+#  created_at::       (-) Date/time it was first created.
+#  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
 #  merge_source_id::  (V) Used to keep track of descriptions that were merged into this one.
@@ -90,7 +90,7 @@ class NameDescription < Description
   )
   non_versioned_columns.push(
     'sync_id',
-    'created',
+    'created_at',
     'name_id',
     'review_status',
     'last_review',

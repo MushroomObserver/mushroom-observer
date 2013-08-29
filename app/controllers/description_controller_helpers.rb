@@ -208,7 +208,7 @@ module DescriptionControllerHelpers
           :public      => desc.public,
           :license     => desc.license,
         }.merge(desc.all_notes))
-        dest.log(:log_description_created, :user => @user.login,
+        dest.log(:log_description_created_at, :user => @user.login,
                  :name => desc.unique_partial_format_name, :touch => true)
         flash_notice(:runtime_description_copy_success.
                      t(:old => src_title, :new => desc.format_name))

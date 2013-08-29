@@ -344,7 +344,7 @@ module ApplicationHelper::Description
     table = versions.map do |ver|
 
       # Date change was made.
-      date = ver.modified.web_date rescue :unknown.t
+      date = ver.updated_at.web_date rescue :unknown.t
 
       # User making the change.
       if user = User.safe_find(ver.user_id)

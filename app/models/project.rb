@@ -11,8 +11,8 @@
 #
 #  id::             Locally unique numerical id, starting at 1.
 #  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
-#  created::        Date/time it was first created.
-#  modified::       Date/time it was last modified.
+#  created_at::     Date/time it was first created.
+#  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
 #  admin_group::    UserGroup of admins.
 #  user_group::     UserGroup of members.
@@ -139,7 +139,7 @@ class Project < AbstractModel
   def remove_image(img)
     if images.include?(img)
       images.delete(img)
-      update_attribute(:modified, Time.now)
+      update_attribute(:updated_at, Time.now)
       Transaction.put_project(
         :id => self,
         :del_image => img
@@ -183,7 +183,7 @@ class Project < AbstractModel
       for img in imgs
         images.delete(img)
       end
-      update_attribute(:modified, Time.now)
+      update_attribute(:updated_at, Time.now)
       Transaction.put_project(
         :id => self,
         :del_observation => obs,
@@ -207,7 +207,7 @@ class Project < AbstractModel
   def remove_species_list(spl)
     if species_lists.include?(spl)
       species_lists.delete(spl)
-      update_attribute(:modified, Time.now)
+      update_attribute(:updated_at, Time.now)
       Transaction.put_project(
         :id => self,
         :del_species_list => spl
@@ -221,8 +221,8 @@ class Project < AbstractModel
   #
   ##############################################################################
 
-  def log_create; do_log(:log_project_created, true); end
-  def log_update; do_log(:log_project_updated, true); end
+  def log_create; do_log(:log_project_created_at, true); end
+  def log_update; do_log(:log_project_updated_at, true); end
   def log_destroy; do_log(:log_project_destroyed, true); end
   def log_add_member(user); do_log(:log_project_added_member, true, user); end
   def log_remove_member(user); do_log(:log_project_removed_member, false, user); end

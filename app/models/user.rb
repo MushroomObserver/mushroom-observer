@@ -5,7 +5,7 @@
 #  Model describing a User.
 #
 #  Login is handled by lib/login_system.rb, a third-party package that we've
-#  modified slightly.  It is enforced by adding <tt>before_filter
+#  updated slightly.  It is enforced by adding <tt>before_filter
 #  :login_required</tt> filters to the controllers.
 #
 #  We now support autologin or "remember me" login via a simple cookie and the
@@ -89,8 +89,8 @@
 #
 #  id::                 Locally unique numerical id, starting at 1.
 #  sync_id::            Globally unique alphanumeric id, used to sync with remote servers.
-#  created::            Date/time it was first created.
-#  modified::           Date/time it was last modified.
+#  created_at::         Date/time it was first created.
+#  updated_at::         Date/time it was last updated.
 #  verified::           Date/time the account was verified.
 #  last_login::         Date/time the user last logged in.
 #
@@ -202,7 +202,7 @@
 #  ==== Alerts
 #  all_alert_types::    List of accepted alert types.
 #  alert_user::         Which admin created the alert.
-#  alert_created::      When alert was created.
+#  alert_created_at::   When alert was created.
 #  alert_next_showing:: When is the alert going to be shown next?
 #  alert_type::         What type of alert, e.g., :bounced_email.
 #  alert_notes::        Additional notes to add to message.
@@ -650,11 +650,11 @@ class User < AbstractModel
   public
 
   # When the alert was created.
-  def alert_created
-    get_alert[:created]
+  def alert_created_at
+    get_alert[:created_at]
   end
-  def alert_created=(x)
-    get_alert[:created] = x
+  def alert_created_at=(x)
+    get_alert[:created_at] = x
   end
 
   # ID of the admin User that created the alert.

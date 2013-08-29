@@ -9,11 +9,11 @@ class VoteTest < UnitTestCase
     assert_kind_of(User, @mary)
     now = Time.now
     vote = Vote.new(
-        :created  => now,
-        :modified => now,
-        :naming   => namings(:agaricus_campestris_naming),
-        :user     => @mary,
-        :value    => 1
+        :created_at => now,
+        :updated_at => now,
+        :naming     => namings(:agaricus_campestris_naming),
+        :user       => @mary,
+        :value      => 1
     )
     assert(vote.save, vote.errors.full_messages.join("; "))
   end
@@ -25,7 +25,7 @@ class VoteTest < UnitTestCase
     assert_kind_of(User, @rolf)
     assert_equal(@rolf, namings(:coprinus_comatus_naming).user)
     assert_equal(@rolf, votes(:coprinus_comatus_owner_vote).user)
-    votes(:coprinus_comatus_owner_vote).modified = Time.now
+    votes(:coprinus_comatus_owner_vote).updated_at = Time.now
     votes(:coprinus_comatus_owner_vote).value = 1
     assert(votes(:coprinus_comatus_owner_vote).save)
     assert(votes(:coprinus_comatus_owner_vote).errors.full_messages.join("; "))

@@ -59,7 +59,7 @@
 #
 #  1. has a sender (called "user")
 #  2. has a receiver (called "to_user")
-#  3. has a time (called "queued" -- when it was last modified)
+#  3. has a time (called "queued" -- when it was last updated)
 #  4. has zero or more queued_email_integers
 #  5. has zero or more queued_email_strings
 #  6. has zero or one queued_email_note

@@ -185,8 +185,8 @@ end %></p>
     <% for i in (0..chgs.length-1) %>
       <tr>
         <td style="white-space:nowrap; padding-right:10px">
-          <%= i > 0 ? chgs[i-1].modified.web_date : @image.created.web_date %> &rarr;
-          <%= chgs[i].modified.web_date %>
+          <%= i > 0 ? chgs[i-1].updated_at.web_date : @image.created_at.web_date %> &rarr;
+          <%= chgs[i].updated_at.web_date %>
         </td>
         <td align="center" style="white-space:nowrap">
           <%= link_to(chgs[i].license.display_name.t, chgs[i].license.url) %>
@@ -198,8 +198,8 @@ end %></p>
     <% end %>
     <tr>
       <td style="white-space:nowrap; padding-right:10px">
-        <%= chgs[-1].modified.web_date %> &rarr;
-        <%= @image.modified.web_date %>
+        <%= chgs[-1].updated_at.web_date %> &rarr;
+        <%= @image.updated_at.web_date %>
       </td>
       <td align="center" style="white-space:nowrap">
         <%= link_to(@image.license.display_name.t, @image.license.url) %>

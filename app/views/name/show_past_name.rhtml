@@ -3,6 +3,9 @@
     :num  => @name.version,
     :name => @name.display_name
   )
+  new_tab_set do
+    add_tab(:show_name.t(:name => @name.display_name), :action => 'show_name', :id => @name.id)
+  end
 %>
 
 <table cellpadding="10">

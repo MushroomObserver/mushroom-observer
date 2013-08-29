@@ -20,7 +20,7 @@ for log in RssLog.all
   old_notes = log.notes.to_s
   new_notes = nil
   last_time = nil
-  if log.modified > cutoff
+  if log.updated_at > cutoff
     new_notes = old_notes.split(/\r?\n/).select do |line|
       if line.match(/^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/)
         time = Time.utc($1, $2, $3, $4, $5, $6)

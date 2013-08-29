@@ -16,18 +16,18 @@ class API
 
     def query_params
       {
-        :where             => sql_id_condition,
-        :created           => parse_time_range(:created),
-        :modified          => parse_time_range(:modified),
-        :users             => parse_users(:user),
-        :has_images        => parse_boolean(:has_images, :limit => true),
-        :has_observations  => parse_boolean(:has_observations, :limit => true),
-        :has_species_lists => parse_boolean(:has_species_lists, :limit => true),
-        :has_comments      => parse_boolean(:has_comments, :limit => true),
-        :has_notes         => parse_boolean(:has_notes),
-        :title_has         => parse_string(:title_has),
-        :notes_has         => parse_string(:notes_has),
-        :comments_has      => parse_string(:comments_has),
+        :where              => sql_id_condition,
+        :created_at         => parse_time_range(:created_at),
+        :updated_at         => parse_time_range(:updated_at),
+        :users              => parse_users(:user),
+        :has_images         => parse_boolean(:has_images, :limit => true),
+        :has_observations   => parse_boolean(:has_observations, :limit => true),
+        :has_species_lists  => parse_boolean(:has_species_lists, :limit => true),
+        :has_comments       => parse_boolean(:has_comments, :limit => true),
+        :has_notes          => parse_boolean(:has_notes),
+        :title_has          => parse_string(:title_has),
+        :notes_has          => parse_string(:notes_has),
+        :comments_has       => parse_string(:comments_has),
       }
     end
 

@@ -62,7 +62,7 @@ class CommentController < ApplicationController
 
   # Show list of latest comments. (Linked from left panel.)
   def list_comments # :nologin:
-    query = create_query(:Comment, :all, :by => :created)
+    query = create_query(:Comment, :all, :by => :created_at)
     show_selected_comments(query)
   end
 
@@ -125,9 +125,9 @@ class CommentController < ApplicationController
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
       # ['summary',  :sort_by_summary.t],
-      ['user',     :sort_by_user.t],
-      ['created',  :sort_by_posted.t],
-      ['modified', :sort_by_modified.t],
+      ['user', :sort_by_user.t],
+      ['created_at', :sort_by_posted.t],
+      ['updated_at', :sort_by_updated_at.t],
     ]
 
     # Paginate by letter if sorting by user.

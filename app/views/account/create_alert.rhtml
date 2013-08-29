@@ -2,9 +2,9 @@
 
 <% form_tag(:action => "create_alert", :id => @user2.id) do %>
 
-  <% if @user2.alert_created %>
-    <label for="user2_created"><%= :user_alert_created.t %>:</label>
-    <%= @user2.alert_created.web_time %><br/>
+  <% if @user2.alert_created_at %>
+    <label for="user2_created_at"><%= :user_alert_created_at.t %>:</label>
+    <%= @user2.alert_created_at.web_time %><br/>
     <label for="user2_next_showing"><%= :user_alert_next_showing.t %>:</label>
     <%= @user2.alert_next_showing.web_time %><br/>
     <label for="user2_user"><%= :user_alert_user.t %>:</label>

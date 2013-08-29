@@ -36,8 +36,8 @@
 #
 #  id::                     Locally unique numerical id, starting at 1.
 #  sync_id::                Globally unique alphanumeric id, used to sync with remote servers.
-#  created::                Date/time it was first created.
-#  modified::               Date/time it was last modified.
+#  created_at::             Date/time it was first created.
+#  updated_at::             Date/time it was last updated.
 #  user_id::                User that created it.
 #  when::                   Date it was seen.
 #  where::                  Where it was seen (just a String).
@@ -151,7 +151,7 @@ class Observation < AbstractModel
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
-
+  
   # Override the default show_controller
   def self.show_controller
     'observer'
@@ -528,7 +528,7 @@ result = "" if debug
     for naming in namings
       naming_id = naming.id
       name_id = naming.name_id
-      name_ages[name_id] = naming.created if !name_ages[name_id] || naming.created < name_ages[name_id]
+      name_ages[name_id] = naming.created_at if !name_ages[name_id] || naming.created_at < name_ages[name_id]
       sum_val = 0
       sum_wgt = 0
       # Go through all the votes for this naming.  Should be zero or one per
@@ -560,7 +560,7 @@ result = "" if debug
           # uses the synonym id if it exists, else uses the name id, but still
           # keeps them separate.)
           taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
-          taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
+          taxon_ages[taxon_id] = naming.created_at if !taxon_ages[taxon_id] || naming.created_at < taxon_ages[taxon_id]
           taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
 result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
           if !taxon_votes[taxon_id][user_id] ||
@@ -864,7 +864,7 @@ return result if debug
   ##############################################################################
 
   # Logs addition of new Image.
-  def log_create_image(image); log_image(:log_image_created, image, true); end
+  def log_create_image(image); log_image(:log_image_created_at, image, true); end
 
   # Logs addition of existing Image.
   def log_reuse_image(image); log_image(:log_image_reused, image, true); end
@@ -995,7 +995,7 @@ return result if debug
       log(:log_consensus_changed, :old => old_name.display_name,
                                   :new => new_name.display_name)
     else
-      log(:log_consensus_created, :name => new_name.display_name)
+      log(:log_consensus_created_at, :name => new_name.display_name)
     end
 
     # Change can trigger emails.

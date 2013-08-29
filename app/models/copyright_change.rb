@@ -11,7 +11,7 @@
 #
 #  id::                 Locally unique numerical id, starting at 1.
 #  user::               User who made the change.
-#  modified::           Time the change was made.
+#  updated_at::         Time the change was made.
 #  target::             Object whose copyright info changed.
 #  year::               *OLD* year.    \
 #  name::               *OLD* name.     ) ©year name, license
@@ -39,7 +39,7 @@ protected
     if !self.target
       errors.add(:user, 'missing target')
     end
-    if !self.modified
+    if !self.updated_at
       errors.add(:user, 'missing modification time')
     end
     if !self.license

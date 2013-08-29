@@ -30,7 +30,7 @@
         odd_or_even = 1 - odd_or_even %>
         <tr class="ListLine<%= odd_or_even %>">
           <td><%= check_box_tag("key_#{key.id}") %></td>
-          <td style="padding:0em 1em 0em 1em"><%= key.created.web_date %></td>
+          <td style="padding:0em 1em 0em 1em"><%= key.created_at.web_date %></td>
           <td style="padding:0em 1em 0em 1em" id="key_time_<%= key.id %>"><%=
             if key.verified
               key.last_used ? key.last_used.web_date : '--'

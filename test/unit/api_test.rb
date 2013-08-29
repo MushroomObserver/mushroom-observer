@@ -74,8 +74,8 @@ class ApiTest < UnitTestCase
 
   def assert_last_observation_correct
     obs = Observation.last
-    assert_in_delta(Time.now, obs.created, 1.minute)
-    assert_in_delta(Time.now, obs.modified, 1.minute)
+    assert_in_delta(Time.now, obs.created_at, 1.minute)
+    assert_in_delta(Time.now, obs.updated_at, 1.minute)
     assert_equal(@date.web_date, obs.when.web_date)
     assert_users_equal(@user, obs.user)
     assert_equal(@specimen, obs.specimen)
@@ -115,8 +115,8 @@ class ApiTest < UnitTestCase
     assert_objs_equal(obs, naming.observation)
     assert_users_equal(@user, naming.user)
     assert_in_delta(@vote, naming.vote_cache, 1) # vote_cache is weird
-    assert_in_delta(Time.now, naming.created, 1.minute)
-    assert_in_delta(Time.now, naming.modified, 1.minute)
+    assert_in_delta(Time.now, naming.created_at, 1.minute)
+    assert_in_delta(Time.now, naming.updated_at, 1.minute)
     assert_equal(1, naming.votes.length)
     assert_objs_equal(vote, naming.votes.first)
   end
@@ -129,16 +129,16 @@ class ApiTest < UnitTestCase
     assert_objs_equal(obs, vote.observation)
     assert_users_equal(@user, vote.user)
     assert_equal(@vote, vote.value)
-    assert_in_delta(Time.now, vote.created, 1.minute)
-    assert_in_delta(Time.now, vote.modified, 1.minute)
+    assert_in_delta(Time.now, vote.created_at, 1.minute)
+    assert_in_delta(Time.now, vote.updated_at, 1.minute)
     assert_true(vote.favorite)
   end
 
   def assert_last_image_correct
     img = Image.last
     assert_users_equal(@user, img.user)
-    assert_in_delta(Time.now, img.created, 1.minute)
-    assert_in_delta(Time.now, img.modified, 1.minute)
+    assert_in_delta(Time.now, img.created_at, 1.minute)
+    assert_in_delta(Time.now, img.updated_at, 1.minute)
     assert_equal('image/jpeg', img.content_type)
     assert_equal(@date, img.when)
     assert_equal(@notes.strip, img.notes)
@@ -163,8 +163,8 @@ class ApiTest < UnitTestCase
     assert_equal(@name, user.name)
     assert_equal(@email, user.email)
     assert_equal('', user.password)
-    assert_in_delta(Time.now, user.created, 1.minute)
-    assert_in_delta(Time.now, user.modified, 1.minute)
+    assert_in_delta(Time.now, user.created_at, 1.minute)
+    assert_in_delta(Time.now, user.updated_at, 1.minute)
     assert_equal(nil, user.verified)
     assert_equal(nil, user.last_activity)
     assert_equal(nil, user.last_login)
@@ -189,7 +189,7 @@ class ApiTest < UnitTestCase
 
   def assert_last_api_key_correct
     api_key = ApiKey.last
-    assert_in_delta(Time.now, api_key.created, 1.minute)
+    assert_in_delta(Time.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.now, api_key.verified, 1.minute)
     else

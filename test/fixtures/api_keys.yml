@@ -1,6 +1,6 @@
 rolfs_api_key:
   id: 1
-  created: 2012-06-26 12:34:56
+  created_at: 2012-06-26 12:34:56
   verified: 2012-06-26 12:34:56
   last_used: nil
   num_uses: 0

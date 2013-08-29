@@ -17,8 +17,8 @@ class API
     def query_params
       {
         :where              => sql_id_condition,
-        :created            => parse_time_range(:created),
-        :modified           => parse_time_range(:modified),
+        :created_at         => parse_time_range(:created_at),
+        :updated_at         => parse_time_range(:updated_at),
         :users              => parse_users(:user),
         :names              => parse_strings(:name),
         :synonym_names      => parse_strings(:synonyms_of),

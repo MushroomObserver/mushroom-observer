@@ -8,8 +8,8 @@ class NamingTest < UnitTestCase
     assert_kind_of Observation, observations(:coprinus_comatus_obs)
     now = Time.now
     naming = Naming.new(
-        :created        => now,
-        :modified       => now,
+        :created_at     => now,
+        :updated_at     => now,
         :observation_id => observations(:coprinus_comatus_obs).id,
         :name_id        => names(:agaricus_campestris).id,
         :user_id        => @mary.id
@@ -25,7 +25,7 @@ class NamingTest < UnitTestCase
     assert_kind_of Name, names(:agaricus_campestris)
     assert_equal names(:coprinus_comatus), namings(:coprinus_comatus_naming).name
     assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
-    namings(:coprinus_comatus_naming).modified = Time.now
+    namings(:coprinus_comatus_naming).updated_at = Time.now
     namings(:coprinus_comatus_naming).name = names(:agaricus_campestris)
     assert namings(:coprinus_comatus_naming).save
     assert namings(:coprinus_comatus_naming).errors.full_messages.join("; ")

@@ -59,13 +59,13 @@ puts "found #{new_names.length.inspect} names" if verbose
 # Make sure species list exists!
 spl = SpeciesList.find_by_title('lichens')
 spl ||= SpeciesList.create(
-  :created  => now,
-  :modified => now,
-  :when     => now,
-  :user     => User.find_by_login('jason'),
-  :where    => 'Unknown',
-  :title    => 'lichens',
-  :notes    => %(
+  :created_at => now,
+  :updated_at => now,
+  :when       => now,
+  :user       => User.find_by_login('jason'),
+  :where      => 'Unknown',
+  :title      => 'lichens',
+  :notes      => %(
 
 List of all lichenized, lichenicolous and allied species and genera in the
 world.  I keep it relatively up to date for North America via the "Esslinger
@@ -96,7 +96,7 @@ if ids.any?
       $stdout.flush
     end
     fields = [
-      'created', 'modified', 'user_id', 'when', 'where', 'name_id',
+      'created_at', 'updated_at', 'user_id', 'when', 'where', 'name_id',
       'specimen', 'is_collection_location'
     ].map {|x| "`#{x}`"}.join(', ')
     values = [

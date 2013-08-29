@@ -215,7 +215,7 @@
 #                       (*NOTE*: Use +replace_params+ instead if <tt>params=</tt>.)
 #  user::               User that created.
 #  user_id::            (same, as id)
-#  modified::           Last time it was used.
+#  updated_at::         Last time it was used.
 #  access_count::       Number of times its been used.
 #
 #  ==== Local attributes
@@ -457,7 +457,7 @@ class AbstractQuery < ActiveRecord::Base
   #     when :contribution
   #       'user_login'
   #     else
-  #       'modified'
+  #       'updated_at'
   #     end
   #   end
   #
@@ -467,7 +467,7 @@ class AbstractQuery < ActiveRecord::Base
   # orders mean.  Several trivial orders are defined by default, but can be
   # overridden in this method:
   #
-  # * 'modified', 'created', 'date' -- sorts by the column of the same name,
+  # * 'updated_at', 'created_at', 'date' -- sorts by the column of the same name,
   #   in descending order.
   #
   # * 'name', 'title', 'login' -- sorts by the column of the same name, in
@@ -737,7 +737,7 @@ class AbstractQuery < ActiveRecord::Base
       :model        => model,
       :flavor       => flavor,
       :user         => User.current,
-      :modified     => Time.now,
+      :updated_at   => Time.now,
       :access_count => 0,
     }
     query.replace_params(params)
@@ -787,8 +787,8 @@ class AbstractQuery < ActiveRecord::Base
   def self.cleanup
     connection.delete %(
       DELETE FROM #{table_name}
-      WHERE access_count = 0 AND modified < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR
-            access_count > 0 AND modified < DATE_SUB(NOW(), INTERVAL 1 DAY)
+      WHERE access_count = 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR
+            access_count > 0 AND updated_at < DATE_SUB(NOW(), INTERVAL 1 DAY)
     )
   end
 
@@ -1124,7 +1124,7 @@ class AbstractQuery < ActiveRecord::Base
 
       # Then provide some simple defaults.
       result ||= case by
-      when 'modified', 'created', 'date', 'created_at', 'updated_at'
+      when 'date', 'created_at', 'updated_at'
         if model.column_names.include?(by)
           "#{table}.#{by} DESC"
         end

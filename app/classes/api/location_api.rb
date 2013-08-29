@@ -15,14 +15,14 @@ class API
 
     def query_params
       {
-        :where    => sql_id_condition,
-        :created  => parse_time_range(:created),
-        :modified => parse_time_range(:modified),
-        :users    => parse_users(:user),
-        :north    => parse_latitude(:north),
-        :south    => parse_latitude(:south),
-        :east     => parse_longitude(:east),
-        :west     => parse_longitude(:west),
+        :where      => sql_id_condition,
+        :created_at => parse_time_range(:created_at),
+        :updated_at => parse_time_range(:updated_at),
+        :users      => parse_users(:user),
+        :north      => parse_latitude(:north),
+        :south      => parse_latitude(:south),
+        :east       => parse_longitude(:east),
+        :west       => parse_longitude(:west),
       }
     end
 

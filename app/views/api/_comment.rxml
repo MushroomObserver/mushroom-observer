@@ -11,7 +11,7 @@ xml.send(tag,
   else
     xml_detailed_object(xml, :owner, object.user)
     xml_detailed_object(xml, :object, object.target)
-    xml_datetime(xml, :created, object.created)
-    xml_datetime(xml, :modified, object.modified)
+    xml_datetime(xml, :created_at, object.created_at)
+    xml_datetime(xml, :updated_at, object.updated_at)
   end
 end

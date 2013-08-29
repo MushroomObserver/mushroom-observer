@@ -1,0 +1,14 @@
+  rename_column :api_keys, :created, :created_at
+  rename_column :comments, :created, :created_at
+  rename_column :images, :created, :created_at
+  rename_column :location_descriptions, :created, :created_at
+  rename_column :locations, :created, :created_at
+  rename_column :name_descriptions, :created, :created_at
+  rename_column :names, :created, :created_at
+  rename_column :namings, :created, :created_at
+  rename_column :observations, :created, :created_at
+  rename_column :projects, :created, :created_at
+  rename_column :species_lists, :created, :created_at
+  rename_column :user_groups, :created, :created_at
+  rename_column :users, :created, :created_at
+  rename_column :votes, :created, :created_at

@@ -13,7 +13,7 @@ xml.rss(:version=>"2.0") {
             "#{time.rfc2822}: #{key.t(args).strip_html}<br></br>\n"
           end
         )
-        xml.pubDate(log.modified.rfc2822)
+        xml.pubDate(log.updated_at.rfc2822)
         xml.link(HTTP_DOMAIN + log.url)
         xml.guid(HTTP_DOMAIN + log.url, "isPermaLink" => "false")
       end

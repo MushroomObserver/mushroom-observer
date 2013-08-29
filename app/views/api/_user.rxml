@@ -6,7 +6,7 @@ xml.send(tag,
   xml_string(xml, :login_name, object.login)
   xml_string(xml, :legal_name, object.legal_name)
   if detail
-    xml_date(xml, :joined, object.created)
+    xml_date(xml, :joined, object.created_at)
     xml_date(xml, :verified, object.verified)
     xml_datetime(xml, :last_login, object.last_login)
     xml_datetime(xml, :last_activity, object.last_activity)

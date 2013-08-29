@@ -16,7 +16,7 @@
   <table><tr><td>
     <table>
       <tr><td><%= :CREATED.t %>: </td>
-        <td><%= @key.created.web_date %></td></tr>
+        <td><%= @key.created_at.web_date %></td></tr>
       <tr><td><%= :account_api_keys_last_used_column_label.t %>: </td>
         <td><%= @key.last_used ? @key.last_used.web_date : '--' %></td></tr>
       <tr><td><%= :account_api_keys_num_uses_column_label.t %>: </td>

@@ -52,7 +52,7 @@
       [:prefs_votes_anonymous_yes.l, :yes],
     ]
     # Allow old users to granfather in old anonymous votes, but choose to go public from here forward.
-    if @user.created && @user.created < Time.parse(VOTE_CUTOFF)
+    if @user.created_at && @user.created_at < Time.parse(VOTE_CUTOFF)
       values << [:prefs_votes_anonymous_old.l(:cutoff => VOTE_CUTOFF), :old]
     end
     form.select(:votes_anonymous, values) %></p>

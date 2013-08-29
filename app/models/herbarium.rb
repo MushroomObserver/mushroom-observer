@@ -45,7 +45,7 @@ class Herbarium < AbstractModel
         WHERE s.herbarium_id = h.id
         AND h.id = c.herbarium_id
         AND c.user_id = #{user_id}
-        ORDER BY s.modified DESC
+        ORDER BY s.updated_at DESC
         LIMIT 100
       )).sort
     end

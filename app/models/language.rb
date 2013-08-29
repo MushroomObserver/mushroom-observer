@@ -130,7 +130,7 @@ class Language < AbstractModel
       SELECT locale, tag, text
       FROM translation_strings t, languages l
       WHERE t.language_id = l.id
-        AND t.modified >= #{Language.connection.quote(cutoff)}
+        AND t.updated_at >= #{Language.connection.quote(cutoff)}
     )
       data[locale.to_sym][tag.to_sym] = text
     end

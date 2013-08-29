@@ -62,8 +62,8 @@ class SpeciesListTest < UnitTestCase
     n = Naming.last
     v = Vote.last
     assert_objs_equal(o, spl.observations.last)
-    assert(o.created >= 1.minute.ago)
-    assert(o.modified >= 1.minute.ago)
+    assert(o.created_at >= 1.minute.ago)
+    assert(o.updated_at >= 1.minute.ago)
     assert_users_equal(@dick, o.user)
     assert_obj_list_equal([proj], o.projects)
     assert_equal(spl.when, o.when)
@@ -77,13 +77,13 @@ class SpeciesListTest < UnitTestCase
     assert_false(o.specimen)
     assert_names_equal(name, o.name)
     assert_obj_list_equal([n], o.namings)
-    assert(n.created <= now + 1.second)
-    assert(n.modified <= now + 1.second)
+    assert(n.created_at <= now + 1.second)
+    assert(n.updated_at <= now + 1.second)
     assert_users_equal(@dick, n.user)
     assert_names_equal(name, n.name)
     assert_obj_list_equal([v], n.votes)
-    assert(v.created <= now + 1.second)
-    assert(v.modified <= now + 1.second)
+    assert(v.created_at <= now + 1.second)
+    assert(v.updated_at <= now + 1.second)
     assert_users_equal(@dick, v.user)
     assert_equal(Vote.maximum_vote, v.value)
 

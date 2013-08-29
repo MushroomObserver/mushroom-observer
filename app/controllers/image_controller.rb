@@ -75,7 +75,7 @@ class ImageController < ApplicationController
 
   # Display matrix of images, most recent first.
   def list_images # :nologin:
-    query = create_query(:Image, :all, :by => :created)
+    query = create_query(:Image, :all, :by => :created_at)
     show_selected_images(query)
   end
 
@@ -140,8 +140,8 @@ class ImageController < ApplicationController
       ['date',          :sort_by_date.t],
       ['user',          :sort_by_user.t],
       # ['copyright_holder', :sort_by_copyright_holder.t],
-      ['created',       :sort_by_posted.t],
-      ['modified',      :sort_by_modified.t],
+      ['created_at',    :sort_by_posted.t],
+      ['updated_at',    :sort_by_updated_at.t],
       ['confidence',    :sort_by_confidence.t],
       ['image_quality', :sort_by_image_quality.t],
       ['num_views',     :sort_by_num_views.t],
@@ -335,8 +335,8 @@ class ImageController < ApplicationController
   def process_image(args, upload)
     if !upload.blank?
       @image = Image.new(args)
-      @image.created  = Time.now
-      @image.modified = @image.created
+      @image.created_at = Time.now
+      @image.updated_at = @image.created_at
       @image.user     = @user
       @image.image    = upload
       if !@image.save
@@ -599,9 +599,9 @@ class ImageController < ApplicationController
     if !done
       if params[:all_users] == '1'
         @all_users = true
-        query = create_query(:Image, :all, :by => :modified)
+        query = create_query(:Image, :all, :by => :updated_at)
       else
-        query = create_query(:Image, :by_user, :user => @user, :by => :modified)
+        query = create_query(:Image, :by_user, :user => @user, :by => :updated_at)
       end
       @layout = calc_layout_params
       @pages = paginate_numbers(:page, @layout['count'])
@@ -710,7 +710,7 @@ class ImageController < ApplicationController
           ))
           Image.connection.insert(%(
             INSERT INTO copyright_changes
-              (user_id, modified, target_type, target_id, year, name, license_id)
+              (user_id, updated_at, target_type, target_id, year, name, license_id)
             VALUES
               #{data.map {|id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})"}.join(",\n") }
           ))

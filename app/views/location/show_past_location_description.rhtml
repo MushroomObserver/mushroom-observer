@@ -3,6 +3,9 @@
     :num  => @description.version,
     :name => description_title(@description)
   )
+  new_tab_set do
+    add_tab(:show_location_description.t(:description => description_title(@description)), :action => 'show_location_description', :id => @description.id)
+  end
 %>
 
 <%= show_past_versions(@description) %>

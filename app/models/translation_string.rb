@@ -6,16 +6,16 @@
 #
 #  == Attributes
 #
-#  language::   Language it belongs to.
-#  tag::        Globalite "tag", e.g., :app_title.
-#  text::       The actual text, e.g., "Mushroom Observer".
-#  version::    ActsAsVersioned version number.
-#  modified::   DateTime it was last modified.
-#  user::       User who last modified it.
+#  language::    Language it belongs to.
+#  tag::         Globalite "tag", e.g., :app_title.
+#  text::        The actual text, e.g., "Mushroom Observer".
+#  version::     ActsAsVersioned version number.
+#  updated_at::  DateTime it was last updated.
+#  user::        User who last updated it.
 #
 #  == Versions
 #
-#  ActsAsVersioned tracks changes in +text+, +modified+, and +user+.
+#  ActsAsVersioned tracks changes in +text+, +updated_at+, and +user+.
 #
 ################################################################################
 
@@ -34,17 +34,17 @@ class TranslationString < AbstractModel
   def update_version?
     result = false
     self.user = User.current || User.admin
-    self.modified = Time.now unless modified_changed?
+    self.updated_at = Time.now unless updated_at_changed?
     if text_changed? and text_change[0].to_s != text_change[1].to_s
       latest = versions.latest
       if not latest or # (for testing)
          latest.user_id != user_id or
-         latest.modified < modified - 1.day
+         latest.updated_at < updated_at - 1.day
         result = true
-      elsif latest.text != text or latest.modified.to_s != modified.to_s
+      elsif latest.text != text or latest.updated_at.to_s != updated_at.to_s
         latest.update_attributes(
           :text => text,
-          :modified => modified
+          :updated_at => updated_at
         )
       end
     end
