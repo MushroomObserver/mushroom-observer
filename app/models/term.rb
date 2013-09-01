@@ -18,6 +18,11 @@ class Term < AbstractModel
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
 
+  # Override the default show_controller
+  def self.show_controller
+    'glossary'
+  end
+
   def text_name
     self.name
   end
@@ -28,7 +33,7 @@ class Term < AbstractModel
   
   def add_image(image)
     if image
-      self.thumb_image = image if self.image.nil?
+      self.thumb_image = image if self.thumb_image.nil?
       self.images.push(image)
     end
   end

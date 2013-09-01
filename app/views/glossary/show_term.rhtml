@@ -3,9 +3,7 @@
   new_tab_set do
     add_tab(:term_index.t, :action => 'index')
     add_tab(:create_term.t, :action => 'create_term')
-    if is_in_admin_mode?
-      add_tab(:edit_term.t, :action => 'edit_term', :id => @term.id)
-    end
+    add_tab(:edit_term.t, :action => 'edit_term', :id => @term.id)
   end
 %>
 
@@ -18,6 +16,8 @@
   thumbnail(@term.thumb_image_id, :border => 0, :votes => false)
 end %>
 </p>
+
+<%= show_previous_version(@term) %>
 
 <p class="Date">
 <%= :footer_created_at.t(:date => @term.created_at.web_time) %><br/>

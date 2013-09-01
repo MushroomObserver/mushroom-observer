@@ -63,19 +63,14 @@ class GlossaryController < ApplicationController
   
   def edit_term # :norobots:
     # Expand to any MO user, but make them owned and editable only by that user or an admin
-    if is_in_admin_mode?
-      if request.method == :post
-        term = Term.find(params[:id].to_s)
-        term.attributes = params[:term]
-        term.user = @user
-        term.save
-        redirect_to(:action => 'show_term', :id => term.id)
-      else
-        @term = Term.find(params[:id].to_s)
-      end
+    if request.method == :post
+      term = Term.find(params[:id].to_s)
+      term.attributes = params[:term]
+      term.user = @user
+      term.save
+      redirect_to(:action => 'show_term', :id => term.id)
     else
-      flash_error(:edit_term_not_allowed.l)
-      redirect_to(:action => 'index')
+      @term = Term.find(params[:id].to_s)
     end
   end
 
@@ -85,7 +80,12 @@ class GlossaryController < ApplicationController
     pass_query_params
     store_location
     if @term = find_or_goto_index(Term, params[:id].to_s)
-      @term.revert_to(params[:version].to_i)
+      if params[:version]
+        @term.revert_to(params[:version].to_i)
+      else
+        flash_error(:show_past_location_no_version.t)
+        redirect_to(:action => show_term, :id => @term.id)
+      end
     end
   end
 

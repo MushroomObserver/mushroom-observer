@@ -15,3 +15,11 @@ plane_term_v2:
   updated_at: 2013-08-17 06:35:20
   name: Plane
   description: Three points define a plane
+
+conic_term_v1:
+  id: 3
+  term_id: 1
+  version: 1
+  updated_at: 2013-08-04 07:49:12
+  name: Conic
+  description: Cute little cone head

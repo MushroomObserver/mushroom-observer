@@ -604,7 +604,6 @@ class Image < AbstractModel
   # field and returns false.
   def move_original
     raise(SystemCallError, "Don't move my test images!!") if TESTING
-    print "move_original: #{upload_temp_file}, #{original_image}\n"
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end

@@ -403,7 +403,12 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     if @location = find_or_goto_index(Location, params[:id].to_s)
-      @location.revert_to(params[:version].to_i)
+      if params[:version]
+        @location.revert_to(params[:version].to_i)
+      else
+        flash_error(:show_past_location_no_version.t)
+        redirect_to(:action => 'show_location', :id => @location.id)
+      end
     end
   end
 

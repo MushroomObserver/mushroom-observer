@@ -793,7 +793,7 @@ log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
 log_location_created_at: "[:log_object_created_by_user(type=:location)]"
 log_location_destroyed: "[:log_object_destroyed_by_user(type=:location)]"
 log_location_merged: "[:log_object_merged_by_user(type=:location)]"
-log_location_updated: "[:log_object_updated_by_user(type=:location)]"
+log_location_updated_at: "[:log_object_updated_by_user(type=:location)]"
 log_name_created_at: "[:log_object_created_by_user(type=:name)]"
 log_name_destroyed: "[:log_object_destroyed_by_user(type=:name)]"
 log_name_merged: "[:log_object_merged_by_user(type=:name)]"
@@ -1691,7 +1691,7 @@ show_observation_create_specimen: Add Herbarium Specimen
 # location/show_past_location
 show_past_location_title: "[:VERSION] [num]: [name]"
 show_past_location_other_versions: Other Versions
-
+show_past_location_no_version: "No version specified"
 
 
 # location/show_past_location_description
@@ -1895,6 +1895,7 @@ show_term_title: "Glossary Term: [name]"
 
 # glossary/show_past_term
 show_past_term_title: "[:VERSION] [num]: [name]"
+show_past_term_no_version: "No version specified"
 
 # glossary/create_term
 create_term: Create New Term

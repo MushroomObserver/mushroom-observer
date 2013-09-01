@@ -7,6 +7,18 @@ class GlossaryControllerTest < FunctionalTestCase
     assert_response('show_term')
   end
 
+  def test_show_past_term
+    conic = terms(:conic_term)
+    get_with_dump(:show_past_term, :id => conic.id, :version => conic.version - 1)
+    assert_response('show_past_term')
+  end
+
+  def test_show_past_term_no_version
+    conic = terms(:conic_term)
+    get_with_dump(:show_past_term, :id => conic.id)
+    assert_response(:redirect)
+  end
+
   def test_index
     get_with_dump(:index)
     assert_response('index')
@@ -54,7 +66,7 @@ class GlossaryControllerTest < FunctionalTestCase
     get_with_dump(:edit_term, :id => conic.id)
     assert_response(:redirect)
 
-    make_admin
+    login
     get_with_dump(:edit_term, :id => conic.id)
     assert_response('edit_term')
   end
@@ -75,7 +87,7 @@ class GlossaryControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_show_past_term
+  def test_generate_and_show_past_term
     login
     term = terms(:plane_term)
     old_count = term.versions.length
@@ -83,7 +95,7 @@ class GlossaryControllerTest < FunctionalTestCase
     term.reload
     new_count = term.versions.length
     assert_equal(1, new_count - old_count)
-    get_with_dump(:show_past_term, :id => term.id)
+    get_with_dump(:show_past_term, :id => term.id, :version => term.version - 1)
     assert_response('show_past_term')
   end
 

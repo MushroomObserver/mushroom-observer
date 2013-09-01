@@ -294,11 +294,11 @@ class AbstractModel < ActiveRecord::Base
   def update_view_stats
     if respond_to?('num_views=') ||
        respond_to?('last_view=')
-      AbstractModel.record_timestamps = false
+      self.class.record_timestamps = false
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
       self.save
-      AbstractModel.record_timestamps = true
+      self.class.record_timestamps = true
     end
   end
 

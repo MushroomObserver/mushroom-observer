@@ -71,13 +71,21 @@ class LocationControllerTest < FunctionalTestCase
 ################################################################################
 
   def test_show_location
-    get_with_dump(:show_location, :id => 1)
+    location = locations(:albion)
+    get_with_dump(:show_location, :id => location.id)
     assert_response('show_location')
   end
 
   def test_show_past_location
-    get_with_dump(:show_past_location, :id => 1)
+    location = locations(:albion)
+    get_with_dump(:show_past_location, :id => location.id, :version => location.version - 1)
     assert_response('show_past_location')
+  end
+
+  def test_show_past_location_no_version
+    location = locations(:albion)
+    get_with_dump(:show_past_location, :id => location.id)
+    assert_response(:redirect)
   end
 
   def test_list_locations

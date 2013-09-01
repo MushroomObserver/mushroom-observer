@@ -373,6 +373,19 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash(:runtime_ask_webmaster_antispam.t)
   end
 
+  def test_show_observation_num_views
+    obs = observations(:coprinus_comatus_obs)
+    updated_at = obs.updated_at
+    num_views = obs.num_views
+    last_view = obs.last_view
+    # obs.update_view_stats
+    get_with_dump(:show_observation, :id => obs.id)
+    obs.reload
+    assert_equal(num_views+1, obs.num_views)
+    assert_not_equal(last_view, obs.last_view)
+    assert_equal(updated_at, obs.updated_at)
+  end
+  
   def test_show_observation
     assert_equal(0, Query.count)
 
