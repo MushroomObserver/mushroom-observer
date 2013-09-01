@@ -264,6 +264,15 @@ div.HelpNoteIndent {
   font-size: x-small;
 }
 
+#thumbnail_cell {
+  text-align: center;
+  vertical-align: middle;
+  width: 160px;
+  margin-left:auto;
+  margin-right:auto;
+  padding-bottom: 0px;
+}
+
 #copyright {
   text-align: center;
   font-size: x-small;

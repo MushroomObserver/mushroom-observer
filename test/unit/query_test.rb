@@ -1595,7 +1595,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_rsslog_all
-    assert_query([4,3,2,1], :RssLog, :all)
+    ids = RssLog.find(:all).map {|log| log.id}
+    assert_query(ids, :RssLog, :all)
   end
 
   def test_rsslog_in_set

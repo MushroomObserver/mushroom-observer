@@ -1,17 +1,17 @@
 require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class TermTest < UnitTestCase
-  def ignore_test_term_load
+  def test_term_load
     term = terms(:conic_term)
     assert(term)
   end
   
-  def ignore_test_text_name
+  def test_text_name
     term = terms(:conic_term)
     assert_equal(term.text_name, term.name)
   end
   
-  def ignore_test_format_name
+  def test_format_name
     term = terms(:conic_term)
     assert_equal(term.format_name, term.name)
   end
@@ -26,7 +26,7 @@ class TermTest < UnitTestCase
     assert_equal(images, term.images)
   end
   
-  def ignore_test_add_image_additional
+  def test_add_image_additional
     term = terms(:conic_term)
     image = term.thumb_image
     images_length = term.images.length
@@ -38,7 +38,7 @@ class TermTest < UnitTestCase
     assert(term.images.member?(additional_image))
   end
   
-  def ignore_test_add_image_first
+  def test_add_image_first
     term = terms(:convex_term)
     assert(term.thumb_image.nil?)
     assert_equal(0, term.images.length)
@@ -50,4 +50,9 @@ class TermTest < UnitTestCase
     assert(term.images.member?(first_image))
   end
 
+  def test_rss_log
+    assert(Term.has_rss_log?)
+    term = terms(:convex_term)
+    assert(term.has_rss_log?)
+  end
 end

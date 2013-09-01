@@ -130,6 +130,8 @@ SPECIMENS: Specimens
 specimens: specimens
 TERM: Term
 term: term
+TERMS: Terms
+terms: terms
 USER: User
 user: user
 USERS: Users
@@ -793,6 +795,7 @@ log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
 log_location_created_at: "[:log_object_created_by_user(type=:location)]"
 log_location_destroyed: "[:log_object_destroyed_by_user(type=:location)]"
 log_location_merged: "[:log_object_merged_by_user(type=:location)]"
+log_location_updated: "[:log_object_updated_by_user(type=:location)]"
 log_location_updated_at: "[:log_object_updated_by_user(type=:location)]"
 log_name_created_at: "[:log_object_created_by_user(type=:name)]"
 log_name_destroyed: "[:log_object_destroyed_by_user(type=:name)]"
@@ -815,6 +818,8 @@ log_project_updated: "[:log_object_updated_by_user(type=:project)]"
 log_species_list_created_at: "[:log_object_created_by_user(type=:species_list)]"
 log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
 log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
+log_term_created_at: "[:log_object_created_by_user(type=:term)]"
+log_term_updated_at: "[:log_object_updated_by_user(type=:term)]"
 log_specimen_added: "[:log_object_added_by_user_with_name(type=:specimen)]"
 log_object_added: "[:log_object_added_by_user]"
 log_object_created_at: "[:log_object_created_by_user]"
@@ -1905,6 +1910,8 @@ create_term_title: Create New Glossary Term
 # glossary/index
 term_index: Term Index
 term_index_title: Term Index
+term_index_intro: >
+  As part of an on-going collaboration with the Rhode Island School of Design, Nathan Wilson has been working with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms.  To share these works, Nathan created this new glossary feature for Mushroom Observer.  This release provides the bare minimum of functionality to be able to discover and view these illustrations.  New glossary terms can also be created by anyone in the community.  Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs.  There will also be a search feature and the ability to add links to terms as part of any Mushroom Observer markup.  Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org">general@list.mushroomobserver.org</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">Mushroom Observer Facebook page</a>.
 
 # glossary/edit_term
 edit_term: Edit Term

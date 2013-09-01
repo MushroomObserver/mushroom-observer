@@ -5,6 +5,8 @@
   end
 %>
 
+<%= :term_index_intro.tp %>
+
 <table>
 <% odd_or_even = 0
    for term in @terms
@@ -14,9 +16,9 @@
       <%= link_to("<b>#{term.name}</b>", :action => "show_term", :id => term.id) %>:
       <%= term.description.tpl %>
     </td>
-    <td>
+    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <%= if term.thumb_image_id
-        thumbnail(term.thumb_image_id, :border => 0, :votes => false)
+        thumbnail(term.thumb_image_id, :border => 0, :votes => true)
       end %>
     </td>
   </tr>

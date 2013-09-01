@@ -57,6 +57,7 @@ class GlossaryControllerTest < FunctionalTestCase
     term = Term.find(:all, :order => "created_at DESC")[0]
     assert_equal(params[:term][:name], term.name)
     assert_equal(params[:term][:description], term.description)
+    assert_not_nil(term.rss_log)
     assert_equal(@rolf.id, term.user_id)
     assert_response(:redirect)
   end

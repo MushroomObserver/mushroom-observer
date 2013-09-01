@@ -220,6 +220,10 @@ module ApplicationHelper::ObjectLink
       link = { :controller => 'observer', :action => 'show_user',
                :id => args[:user] }
       raise "missing :user" if !args.has_key?(:user)
+    when :show_term
+      link = { :controller => 'glossary', :action => 'show_term',
+               :id => args[:term] }
+      raise "missing :term" if !args.has_key?(:term)
     when :none
       link = nil
     when Hash

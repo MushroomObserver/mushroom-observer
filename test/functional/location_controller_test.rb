@@ -182,6 +182,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
     loc = Location.find_by_name_or_reverse_name(display_name)
     assert_nil(loc.description)
+    assert_not_nil(loc.rss_log)
   end
 
   def test_construct_location_name_errors

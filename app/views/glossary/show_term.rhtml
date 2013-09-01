@@ -12,9 +12,11 @@
 </div>
 
 <p>
+  <center>
 <%= if @term.thumb_image_id
-  thumbnail(@term.thumb_image_id, :border => 0, :votes => false)
+  thumbnail(@term.thumb_image_id, :border => 0, :votes => true)
 end %>
+  </center>
 </p>
 
 <%= show_previous_version(@term) %>

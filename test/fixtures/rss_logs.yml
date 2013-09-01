@@ -22,3 +22,9 @@ location_rss_log:
   location_id: 3
   updated_at: 2006-03-02 21:14:09
   notes: "Updated Location"
+
+term_rss_log:
+  id: 5
+  term_id: 1
+  updated_at: 2013-09-01 12:49:30
+  notes: "Updated Term"

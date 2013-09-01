@@ -7,6 +7,7 @@ class RevisedTerms < ActiveRecord::Migration
       t.string "name", :limit => 1024
       t.integer "thumb_image_id"
       t.text "description"
+      t.integer "rss_log_id"
       t.timestamps
     end
 
@@ -23,9 +24,12 @@ class RevisedTerms < ActiveRecord::Migration
       t.string "name", :limit => 1024
       t.text "description"
     end
+    
+    add_column :rss_logs, :term_id, :integer
   end
 
   def self.down
+    remove_column :rss_logs, :term_id
     drop_table :terms
     create_table :terms do |t|
       t.string "name", :limit => 1024

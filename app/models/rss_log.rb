@@ -113,6 +113,7 @@
 #  observation::        Owning Observation (or nil).
 #  project::            Owning Project (or nil).
 #  species_list::       Owning SpeciesList (or nil).
+#  term::               Owning Term (or nil).
 #
 #  == Class methods
 #
@@ -143,6 +144,7 @@ class RssLog < AbstractModel
   belongs_to :observation
   belongs_to :project
   belongs_to :species_list
+  belongs_to :term
 
   # Override the default show_controller
   def self.show_controller
@@ -152,17 +154,17 @@ class RssLog < AbstractModel
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
   def self.all_types
-    ['observation', 'name', 'location', 'species_list', 'project']
+    ['observation', 'name', 'location', 'species_list', 'project', 'term']
   end
 
   # Returns the associated object, or nil if it's an orphan.
   def target
-    location || name || observation || project || species_list
+    location || name || observation || project || species_list || term
   end
 
   # Returns the associated object's id, or nil if it's an orphan.
   def target_id
-    location_id || name_id || observation_id || project_id || species_list_id
+    location_id || name_id || observation_id || project_id || species_list_id || term_id
   end
 
   # Return the type of object of the target, e.g., :observation.
@@ -171,7 +173,8 @@ class RssLog < AbstractModel
     name_id         ? :name         :
     observation_id  ? :observation  :
     project_id      ? :project      :
-    species_list_id ? :species_list : nil
+    species_list_id ? :species_list :
+    term_id         ? :term         : nil
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an
@@ -253,6 +256,8 @@ class RssLog < AbstractModel
       sprintf("/project/show_project/%d?time=%d", project_id, self.updated_at.tv_sec)
     elsif species_list_id
       sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.updated_at.tv_sec)
+    elsif term_id
+      sprintf("/glossary/show_term/%d?time=%d", term_id, self.updated_at.tv_sec)
     else
       sprintf("/observer/show_rss_log/%d?time=%d", id, self.updated_at.tv_sec)
     end

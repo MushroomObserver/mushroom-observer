@@ -52,6 +52,9 @@
       elsif target and target_type == :observation and target.thumb_image
         thumbnail(target.thumb_image, :border => 0, :votes => true,
                   :link => :show_observation, :obs => target.id) + '<br/>'
+      elsif target and target_type == :term and target.thumb_image
+        thumbnail(target.thumb_image, :border => 0, :votes => true,
+                  :link => :show_term, :term => target.id) + '<br/>'
       else
         done_title = true
         content_tag(:span, title, :class => 'ListRssHeader')

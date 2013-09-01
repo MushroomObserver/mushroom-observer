@@ -1,6 +1,7 @@
 class Term < AbstractModel
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   belongs_to :user
+  belongs_to :rss_log
   has_and_belongs_to_many :images
 
   ALL_TERM_FIELDS = [:name, :description]
@@ -12,8 +13,12 @@ class Term < AbstractModel
   non_versioned_columns.push(
     'thumb_image_id',
     'created_at',
+    'rss_log_id',
   )
   versioned_class.before_save {|x| x.user_id = User.current_id}
+
+  # Automatically log standard events.
+  self.autolog_events = [:created_at!, :updated_at!]
 
   # Probably should add a user_id and a log
   # versioned_class.before_save {|x| x.user_id = User.current_id}
@@ -29,6 +34,14 @@ class Term < AbstractModel
   
   def format_name
     self.name
+  end
+  
+  def unique_format_name
+    unique_text_name
+  end
+  
+  def unique_text_name
+    "#{self.name} (#{self.id})"
   end
   
   def add_image(image)

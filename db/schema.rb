@@ -501,6 +501,7 @@ ActiveRecord::Schema.define(:version => 20130901115749) do
     t.integer  "name_id"
     t.integer  "location_id"
     t.integer  "project_id"
+    t.integer  "term_id"
   end
 
   create_table "species_lists", :force => true do |t|
@@ -536,6 +537,7 @@ ActiveRecord::Schema.define(:version => 20130901115749) do
     t.string   "name",           :limit => 1024
     t.integer  "thumb_image_id"
     t.text     "description"
+    t.integer  "rss_log_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
