@@ -20,7 +20,7 @@ class QueryTest < UnitTestCase
     clean_our_backtrace do
       expect.map!(&:id) if expect.first.is_a?(AbstractModel)
       query = Query.lookup(*args)
-      assert_equal(Set.new(expect), Set.new(query.result_ids), query.last_query)
+      assert((Set.new(expect) - Set.new(query.result_ids)).empty?, query.last_query)
       assert_match(/#{args[0].t}|Advanced Search|(Lower|Higher) Taxa/, query.title)
       assert(!query.title.include?('[:'), "Title contains undefined localizations: <#{query.title}>")
     end

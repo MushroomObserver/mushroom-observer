@@ -37,7 +37,6 @@ class TranslationString < AbstractModel
     self.updated_at = Time.now unless updated_at_changed?
     if text_changed? and text_change[0].to_s != text_change[1].to_s
       latest = versions.latest
-      print "#{self.tag}" if latest.updated_at.nil?
       if not latest or # (for testing)
         (latest.updated_at and
           (latest.user_id != user_id or
