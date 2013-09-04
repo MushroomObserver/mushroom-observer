@@ -16,6 +16,7 @@ albion:
   south: 39.21
   high: 100.0
   low: 0.0
+  rss_log_id: 5
 
 burbank:
   id: 2

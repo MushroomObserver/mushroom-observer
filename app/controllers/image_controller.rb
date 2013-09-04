@@ -555,6 +555,7 @@ class ImageController < ApplicationController
     pass_query_params
     @mode = params[:mode].to_sym
     @observation = Observation.safe_find(params[:obs_id]) if @mode == :observation
+    @term = Term.safe_find(params[:term_id])
     done = false
 
     # Make sure user owns the observation.
@@ -571,8 +572,8 @@ class ImageController < ApplicationController
       if !image
         flash_error(:runtime_image_reuse_invalid_id.t(:id => params[:img_id]))
 
-      # Add image to observation.
       elsif @mode == :observation
+        # Add image to observation.
         @observation.add_image(image)
         @observation.log_reuse_image(image)
         Transaction.put_observation(:id => @observation, :add_image => image)
@@ -580,8 +581,15 @@ class ImageController < ApplicationController
                     :id => @observation.id, :params => query_params)
         done = true
 
-      # Change user's profile image.
+      elsif @mode == :term
+        # Add image to term
+        @term.add_image(image)
+        @term.log_reuse_image(image)
+        redirect_to(:controller => :glossary, :action => :show_term,
+          :id => @term.id, :params => query_params)
+          
       else
+        # Change user's profile image.
         if @user.image == image
           flash_notice(:runtime_no_changes.t)
         else

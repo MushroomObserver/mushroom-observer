@@ -44,6 +44,11 @@
 #  has_rss_log?::       Can this model take an RssLog?
 #  log::                Add line to RssLog.
 #  orphan_log::         Add line to RssLog before destroying object.
+#  log_create_image::   Log addition of new Image.
+#  log_reuse_image::    Log reuse of old Image.
+#  log_update_image::   Log update to Image.
+#  log_remove_image::   Log removal of Image.
+#  log_destroy_image::  Log destruction of Image.
 #  init_rss_log::       Create and attach RssLog if not already there.
 #  attach_rss_log::     Attach RssLog after creating new record.
 #  autolog_created_at:: Callback to log creation.
@@ -217,7 +222,6 @@ class AbstractModel < ActiveRecord::Base
   def before_update
     SiteData.update_contribution(:chg, self)
     if !@save_without_our_callbacks
-      # self.updated_at = Time.now if respond_to?('updated_at=') && !self.updated_at_changed?
       autolog_updated_at          if has_rss_log?
     end
   end
@@ -288,8 +292,8 @@ class AbstractModel < ActiveRecord::Base
   #     ...
   #   end
   #
-  # *NOTE*: this does not cause 'updated_at' to be updated, because it uses
-  # +save_without_our_callbacks+.
+  # *NOTE*: this turns off timestamp updating for this class and avoids touching
+  # any RssLog, because it uses +save_without_our_callbacks+.
   #
   def update_view_stats
     if respond_to?('num_views=') ||
@@ -297,7 +301,7 @@ class AbstractModel < ActiveRecord::Base
       self.class.record_timestamps = false
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
-      self.save
+      self.save_without_our_callbacks
       self.class.record_timestamps = true
     end
   end
@@ -473,6 +477,21 @@ class AbstractModel < ActiveRecord::Base
     rss_log.orphan(format_name, *args)
   end
 
+  # Logs addition of new Image.
+  def log_create_image(image); log_image(:log_image_created_at, image, true); end
+
+  # Logs addition of existing Image.
+  def log_reuse_image(image); log_image(:log_image_reused, image, true); end
+
+  # Logs update of Image.
+  def log_update_image(image); log_image(:log_image_updated, image, false); end
+
+  # Logs removal of Image.
+  def log_remove_image(image); log_image(:log_image_removed, image, false); end
+
+  # Logs destruction of Image.
+  def log_destroy_image(image); log_image(:log_image_destroyed, image, false); end
+
   # Callback that logs creation.
   def autolog_created_at
     autolog_event(:created_at)
@@ -557,4 +576,12 @@ class AbstractModel < ActiveRecord::Base
     end
     save
   end
+
+private
+  
+  def log_image(tag, image, touch) # :nodoc:
+    name = "#{:Image.t} ##{image.id || image.was || '??'}"
+    log(tag, :name => name, :touch => touch)
+  end
+
 end

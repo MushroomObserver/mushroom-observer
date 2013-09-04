@@ -72,8 +72,13 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_show_location
     location = locations(:albion)
+    updated_at = location.updated_at
+    log_updated_at = location.rss_log.updated_at
     get_with_dump(:show_location, :id => location.id)
     assert_response('show_location')
+    location.reload
+    assert_equal(updated_at, location.updated_at)
+    assert_equal(log_updated_at, location.rss_log.updated_at)
   end
 
   def test_show_past_location
@@ -266,18 +271,19 @@ class LocationControllerTest < FunctionalTestCase
   def test_update_location
     count = Location::Version.count
     count2 = LocationDescription::Version.count
-    assert_equal(10, @rolf.reload.contribution)
+    contrib = @rolf.contribution
 
     # Turn Albion into Barton Flats.
     loc = locations(:albion)
-    old_north = loc.north
+    updated_at = loc.updated_at
+    log_updated_at = loc.rss_log.updated_at
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
     params[:location][:display_name] = Location.user_name(@rolf, params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
     assert_response(:action => :show_location)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(contrib, @rolf.reload.contribution)
 
     # Should have created a new version of location only.
     assert_equal(count + 1, Location::Version.count)
@@ -288,6 +294,10 @@ class LocationControllerTest < FunctionalTestCase
     new_params = update_params_from_loc(loc)
     assert_not_equal(new_params, old_params)
 
+    # It and the RssLog should have been updated
+    assert_not_equal(updated_at, loc.updated_at)
+    assert_not_equal(log_updated_at, loc.rss_log.updated_at)
+    
     # Only compare the keys that are in both.
     bfp = barton_flats_params
     key_count = 0

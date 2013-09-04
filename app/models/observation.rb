@@ -104,13 +104,6 @@
 #  ==== Projects
 #  has_edit_permission?::   Check if user has permission to edit this observation.
 #
-#  ==== Logging
-#  log_create_image::       Log addition of new Image.
-#  log_reuse_image::        Log reuse of old Image.
-#  log_update_image::       Log update to Image.
-#  log_remove_image::       Log removal of Image.
-#  log_destroy_image::      Log destruction of Image.
-#
 #  ==== Callbacks
 #  add_spl_callback::           After add: update contribution.
 #  remove_spl_callback::        After remove: update contribution.
@@ -855,32 +848,6 @@ return result if debug
 
   def has_edit_permission?(user=User.current)
     Project.has_edit_permission?(self, user)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Logging
-  #
-  ##############################################################################
-
-  # Logs addition of new Image.
-  def log_create_image(image); log_image(:log_image_created_at, image, true); end
-
-  # Logs addition of existing Image.
-  def log_reuse_image(image); log_image(:log_image_reused, image, true); end
-
-  # Logs update of Image.
-  def log_update_image(image); log_image(:log_image_updated, image, false); end
-
-  # Logs removal of Image.
-  def log_remove_image(image); log_image(:log_image_removed, image, false); end
-
-  # Logs destruction of Image.
-  def log_destroy_image(image); log_image(:log_image_destroyed, image, false); end
-
-  def log_image(tag, image, touch) # :nodoc:
-    name = "#{:Image.t} ##{image.id || image.was || '??'}"
-    log(tag, :name => name, :touch => touch)
   end
 
   ################################################################################

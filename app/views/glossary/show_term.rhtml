@@ -7,17 +7,28 @@
   end
 %>
 
-<div>
-  <%= @term.description.tpl %>
-</div>
+<table width="100%">
+  <tr>
+    <td width="50%">
+      <%= @term.description.tpl %>
+    </td>
+    <td align="center" width="50%">
+      <%= if @term.thumb_image_id
+        thumbnail(@term.thumb_image_id, :border => 0, :votes => true, :size => :medium)
+      end %>
+    </td>
+  </tr>
+</table>
 
 <p>
-  <center>
-<%= if @term.thumb_image_id
-  thumbnail(@term.thumb_image_id, :border => 0, :votes => true)
-end %>
-  </center>
+<%= link_to(:show_term_reuse_image.t, :controller => 'image',
+            :action => 'reuse_image', :term_id => @term.id,
+            :mode => 'term', :params => query_params) %><br/>
 </p>
+
+<% make_matrix(@objects, :width => '100%') do |image| %>
+  <%= thumbnail(image.id, :border => 1, :votes => true) %>
+<% end %>
 
 <%= show_previous_version(@term) %>
 

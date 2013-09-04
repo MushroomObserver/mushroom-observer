@@ -413,13 +413,21 @@ class ImageControllerTest < FunctionalTestCase
     assert_form_action(:action => 'remove_images', :id => obs.id)
   end
 
-  def test_reuse_image
+  def test_reuse_image_for_observation
     obs = observations(:agaricus_campestris_obs)
     params = { :mode => 'observation', :obs_id => obs.id }
     assert_equal('rolf', obs.user.login)
     requires_user(:reuse_image, [:observer, :show_observation], params)
     assert_form_action(:action => 'reuse_image', :mode => 'observation',
                        :obs_id => obs.id)
+  end
+
+  def test_reuse_image_for_term
+    term = terms(:conic_term)
+    params = { :mode => 'term', :term_id => term.id }
+    requires_login(:reuse_image, params)
+    assert_form_action(:action => 'reuse_image', :mode => 'term',
+                       :term_id => term.id)
   end
 
   def test_reuse_image_by_id
@@ -441,6 +449,21 @@ class ImageControllerTest < FunctionalTestCase
     get_with_dump(:reuse_image, params)
     assert_response(:controller => "observer", :action => "show_observation")
     assert(obs.reload.images.member?(image))
+  end
+
+  def test_reuse_image_for_term_post
+    term = terms(:conic_term)
+    image = images(:commercial_inquiry_image)
+    assert(!term.images.member?(image))
+    params = {
+      :mode   => 'term',
+      :term_id => term.id.to_s,
+      :img_id => '3',
+    }
+    login('mary')
+    get_with_dump(:reuse_image, params)
+    assert_response(:controller => :glossary, :action => :show_term)
+    assert(term.reload.images.member?(image))
   end
 
   def test_upload_image

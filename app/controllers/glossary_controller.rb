@@ -8,6 +8,8 @@ class GlossaryController < ApplicationController
   def show_term # :nologin:
     store_location
     @term = Term.find(params[:id].to_s)
+    @layout = calc_layout_params
+    @objects = Set.new(@term.images) - [@term.thumb_image]
   end
 
   def index # :nologin:
