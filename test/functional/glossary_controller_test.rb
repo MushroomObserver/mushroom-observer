@@ -2,8 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class GlossaryControllerTest < FunctionalTestCase
   def test_show_term
-    conic = terms(:conic_term)
-    get_with_dump(:show_term, :id => conic.id)
+    term = terms(:plane_term)
+    get_with_dump(:show_term, :id => term.id)
     assert_response('show_term')
   end
 

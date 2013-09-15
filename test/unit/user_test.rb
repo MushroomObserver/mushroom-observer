@@ -178,4 +178,14 @@ class UserTest < UnitTestCase
     assert_equal(@rolf.preferred_herbarium_name, herbaria(:nybg).name)
     assert_equal(@mary.preferred_herbarium_name, :user_personal_herbarium.t(:name => @mary.unique_text_name))
   end
+  
+  def test_remove_image
+    user = users(:rolf)
+    image = user.image
+    assert(image)
+    user.remove_image(image)
+    user.reload
+    assert_nil(user.image)
+  end
+  
 end

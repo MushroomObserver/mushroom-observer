@@ -44,7 +44,7 @@
           notes = notes.join('<br/>')
           if !notes.blank? %>
           <small>
-            <%= content_tag(:span, notes, :title => image.notes.tp.html_to_ascii) %>
+            <%= content_tag(:span, notes, :title => notes.tp.html_to_ascii) %>
           </small>
         <% end %>
       </p>

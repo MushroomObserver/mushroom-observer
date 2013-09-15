@@ -237,7 +237,7 @@ class Image < AbstractModel
   after_update :track_copyright_changes
 
   def get_subjects
-    result = self.observations + self.subjects + self.terms
+    result = self.observations + self.subjects + self.best_terms + self.terms
   end
   
   # Create plain-text title for image from observations, appending image id to
@@ -772,25 +772,10 @@ class Image < AbstractModel
   #
   ##############################################################################
 
-  # Callback that changes Observation's thumbnails when an image is destroyed.
+  # Callback that changes objects referencing an image that is being destroyed.
   def update_thumbnails
-    for obs in observations
-      if obs.thumb_image_id == id
-        obs.thumb_image_id = (obs.image_ids - [id]).first
-        obs.save
-      end
-    end
-    for user in subjects
-      if user.image_id == id
-        user.image_id = nil
-        user.save
-      end
-    end
-    for term in terms
-      if term.image_id == id
-        term.image_id = nil
-        term.save
-      end
+    for obj in (observations + subjects + best_terms + terms)
+      obj.remove_image(self)
     end
   end
 
@@ -850,9 +835,7 @@ class Image < AbstractModel
     end
   end
 
-  def year()
-    self.when.year
-  end
+  def year; self.when.year; end
 
 ################################################################################
 

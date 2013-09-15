@@ -17,3 +17,7 @@ agaricus_campestris_connection:
 peltigera_connection:
   image_id: 8
   observation_id: 12
+
+peltigera_rolf_connection:
+  image_id: 13
+  observation_id: 13

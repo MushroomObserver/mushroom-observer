@@ -22,8 +22,8 @@
 
 <p>
 <%= link_to(:show_term_reuse_image.t, :controller => 'image',
-            :action => 'reuse_image', :term_id => @term.id,
-            :mode => 'term', :params => query_params) %><br/>
+            :action => 'reuse_image_for_term', :term_id => @term.id,
+            :params => query_params) %><br/>
 </p>
 
 <% make_matrix(@objects, :width => '100%') do |image| %>

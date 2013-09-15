@@ -2,7 +2,7 @@ class Term < AbstractModel
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   belongs_to :user
   belongs_to :rss_log
-  has_and_belongs_to_many :images
+  has_and_belongs_to_many :images, :order => "vote_cache DESC"
 
   ALL_TERM_FIELDS = [:name, :description]
   acts_as_versioned(
@@ -46,8 +46,28 @@ class Term < AbstractModel
   
   def add_image(image)
     if image
-      self.thumb_image = image if self.thumb_image.nil?
-      self.images.push(image)
+      if self.thumb_image.nil?
+        self.thumb_image = image
+      else
+        self.images.push(image)
+      end
     end
   end
+  
+  def all_images
+    return [self.thumb_image] + self.images
+  end
+
+  def remove_image(image)
+    if images.member?(image)
+      images.delete(image)
+      save
+    end
+    if thumb_image == image
+      new_thumb = images[0]
+      self.thumb_image = images[0]
+      images.delete(new_thumb) if new_thumb
+      save
+    end
+  end  
 end

@@ -16,6 +16,7 @@ rolf:
   thumbnail_size: :thumbnail
   image_size: :medium
   keep_filenames: :toss
+  image_id: 13
 
 # Mary has no images and no herbaria
 mary:

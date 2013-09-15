@@ -148,3 +148,17 @@ peltigera_observation:
   specimen: 1
   notes: 'Growing on a hardwood'
   vote_cache: 3
+
+peltigera_rolf_observation:
+  id: 13
+  sync_id: 13x1
+  created_at: 2013-09-14 08:37:55
+  updated_at: 2013-09-14 08:37:55
+  when: 2013-09-08
+  user_id: 2
+  where: 'Briceland, California, USA'
+  is_collection_location: 1
+  name_id: 40
+  specimen: 1
+  notes: 'Growing on a hardwood'
+  vote_cache: 3

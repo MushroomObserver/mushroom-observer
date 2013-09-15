@@ -211,6 +211,7 @@
 #  ==== Other Stuff
 #  primer::             Primer for auto-complete.
 #  erase_user::         Erase all references to a given User (by id).
+#  remove_image::       Ensures that this user doesn't reference this image
 #
 #  == Callbacks
 #
@@ -851,6 +852,13 @@ class User < AbstractModel
     result
   end
 
+  def remove_image(image)
+    if self.image == image
+      self.image = nil
+      save
+    end
+  end
+  
 ################################################################################
 
 protected

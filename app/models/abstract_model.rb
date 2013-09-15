@@ -409,6 +409,14 @@ class AbstractModel < ActiveRecord::Base
   def show_action
     self.class.show_action
   end
+  
+  def self.edit_action
+    'edit_' + name.underscore
+  end
+
+  def edit_action
+    self.class.edit_action
+  end
 
   # Return the URL of the "show_<object>" action
   #
@@ -575,6 +583,17 @@ class AbstractModel < ActiveRecord::Base
       self.notes = note
     end
     save
+  end
+
+  def process_image_reuse(image, query_params)
+    self.add_image(image)
+    self.log_reuse_image(image)
+    {
+      :controller => self.show_controller,
+      :action => self.show_action,
+      :id => self.id,
+      :params => query_params
+    }
   end
 
 private

@@ -535,6 +535,39 @@ class ImageController < ApplicationController
     end
   end
 
+  def serve_reuse_form(params)
+    if params[:all_users] == '1'
+      @all_users = true
+      query = create_query(:Image, :all, :by => :updated_at)
+    else
+      query = create_query(:Image, :by_user, :user => @user, :by => :updated_at)
+    end
+    @layout = calc_layout_params
+    @pages = paginate_numbers(:page, @layout['count'])
+    @objects = query.paginate(@pages,
+                              :include => [:user, {:observations => :name}])
+  end
+  
+  def look_for_image(method, params)
+    result = nil
+    if (method == :post) or !params[:img_id].blank?
+      result = Image.safe_find(params[:img_id])
+      flash_error(:runtime_image_reuse_invalid_id.t(:id => params[:img_id])) if !result
+    end
+    result
+  end
+  
+  def reuse_image_for_term
+    pass_query_params
+    @object = Term.safe_find(params[:id])
+    image = look_for_image(request.method, params)
+    if image
+      redirect_to(@object.process_image_reuse(image, query_params))
+    else
+      serve_reuse_form(params)
+    end
+  end
+
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
   # Linked from: observer/show_observation and account/profile
@@ -587,7 +620,7 @@ class ImageController < ApplicationController
         @term.log_reuse_image(image)
         redirect_to(:controller => :glossary, :action => :show_term,
           :id => @term.id, :params => query_params)
-          
+        done = true
       else
         # Change user's profile image.
         if @user.image == image

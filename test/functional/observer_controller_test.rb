@@ -3,6 +3,14 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class ObserverControllerTest < FunctionalTestCase
 
+  def test_show_observation_noteless_image
+    obs = observations(:peltigera_rolf_observation)
+    img = images(:rolf_profile_image)
+    assert_nil(img.notes)
+    assert(obs.images.member?(img))
+    get_with_dump(:show_observation, :id => obs.id)
+  end
+
   # Test constructing observations in various ways (with minimal namings).
   def generic_construct_observation(params, o_num, g_num, n_num, user = @rolf)
     o_count = Observation.count
@@ -2842,7 +2850,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_download_observation_index
     obs = Observation.find_all_by_user_id(@mary.id)
-    assert_equal(4, obs.length)
+    assert(4 <= obs.length)
     query = Query.lookup_and_save(:Observation, :by_user, :user => @mary.id)
 
     get(:download_observations, :q => query.id.alphabetize)
@@ -2859,12 +2867,15 @@ class ObserverControllerTest < FunctionalTestCase
     assert_no_flash
     assert_response(:success)
 
-    ids = @response.body.split("\n").map { |s| s.sub(/,.*/, '') }
-    assert_equal(['observation_id', '1', '2', '9', '10'], ids)
-    last_row = @response.body.sub(/\n\Z/,'').sub(/\A.*\n/m,'')
+    rows = @response.body.split("\n")
+    ids = rows.map { |s| s.sub(/,.*/, '') }
+    expected = ['observation_id', '1', '2', '9', '10']
+    last_expected_index = expected.length - 1
+    assert_equal(expected, ids[0..last_expected_index])
+    fourth_row = rows[last_expected_index].chop
     assert_equal(
-      '10,2,mary,Mary Newbie,2010-07-22,,1,Fungi,,kingdom,0.0,2,USA,California,,Burbank,34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294,148,X,,',
-      last_row.iconv('utf-8')
+      '10,2,mary,Mary Newbie,2010-07-22,,1,Fungi,,kingdom,0.0,2,USA,California,,Burbank,34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294,148,X,',
+      fourth_row.iconv('utf-8')
     )
 
     post(:download_observations, :q => query.id.alphabetize, :format => 'raw',

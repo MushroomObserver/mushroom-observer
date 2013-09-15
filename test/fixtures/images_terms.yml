@@ -1,3 +1,3 @@
-conic_connection:
-  image_id: 9
-  term_id: 1
+plane_connection:
+  image_id: 12
+  term_id: 3
