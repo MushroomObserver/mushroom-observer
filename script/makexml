@@ -12,8 +12,8 @@
 
 require 'tempfile'
 
-URL = "http://mushroomobserver.org/name/eol\?_js=off\&_new=true"
-# URL = "http://localhost:3000/name/eol"
+# URL = "http://mushroomobserver.org/name/eol\?_js=off\&_new=true"
+URL = "http://localhost:3000/name/eol"
 
 def get_content(filename)
   cmd = "wget -q -O #{filename} '#{URL}'"

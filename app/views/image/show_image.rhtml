@@ -118,7 +118,7 @@ end %></p>
     <%= :User.t %>: <%= link_to(subject.format_name.t, :controller => 'observer',
       :action => 'show_user', :id => subject.id, :params => query_params) %><br/>
   <% end %>
-  <% for term in @image.terms %>
+  <% for term in @image.all_terms %>
     <%= :Term.t %>: <%= link_to(term.format_name.t, :controller => 'glossary',
       :action => 'show_term', :id => term.id, :params => query_params) %><br/>
   <% end %>

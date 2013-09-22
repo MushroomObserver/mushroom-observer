@@ -236,9 +236,9 @@ class Image < AbstractModel
   before_destroy :update_thumbnails
   after_update :track_copyright_changes
 
-  def get_subjects
-    result = self.observations + self.subjects + self.best_terms + self.terms
-  end
+  def all_terms; best_terms + terms; end
+    
+  def get_subjects; observations + subjects + best_terms + terms; end
   
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
@@ -834,7 +834,7 @@ class Image < AbstractModel
       ))
     end
   end
-
+  
   def year; self.when.year; end
 
 ################################################################################

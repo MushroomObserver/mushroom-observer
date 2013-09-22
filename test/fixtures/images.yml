@@ -139,6 +139,7 @@ plane_image_example:
   when: 2013-09-08
   notes: 'Example image of of Plane Pileus'
   copyright_holder: Nathan Wilson
+  vote_cache: 3
 
 rolf_profile_image:
   id: 13

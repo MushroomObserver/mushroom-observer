@@ -18,7 +18,7 @@ class EolData
   attr_accessor :names
   
   def initialize
-    self.names = prune_synonyms(image_names() + description_names())
+    self.names = prune_synonyms(image_names() + description_names() + term_names())
     @id_to_image = id_to_image()
     @name_id_to_images = name_id_to_images()
     @id_to_description = id_to_description()
@@ -31,7 +31,6 @@ class EolData
   
   def image_to_names(id)
     @image_id_to_names[id].map {|n| n.real_search_name }.join(' & ')
-    # @image_id_to_names
   end
   
   def name_count
@@ -93,7 +92,16 @@ class EolData
   def legal_name(id)
     @user_id_to_legal_name[id]
   end
-  
+
+  def rights_holder(image)
+    result = image.copyright_holder
+    if result.nil? or result.strip == ""
+      legal_name(image.user_id)
+    else
+      result
+    end
+  end
+
   def authors(id)
     @description_id_to_authors[id].join(', ')
   end
@@ -169,18 +177,52 @@ private
     get_sorted_names(IMAGE_CONDITIONS)
   end
 
+  TERM_CONDITIONS = %(FROM terms, images_terms, images, images_observations, observations, names
+    WHERE ((terms.id = images_terms.term_id
+            AND images.id = images_terms.image_id)
+           OR (terms.thumb_image_id = images.id))
+    AND images_observations.image_id = images.id
+    AND images_observations.observation_id = observations.id
+    AND observations.name_id = names.id
+    AND images.vote_cache >= 2
+    AND observations.vote_cache >= 2.4
+    AND images.ok_for_export
+    AND names.ok_for_export
+    AND NOT names.deprecated
+  )
+
+  def term_names
+    get_sorted_names(TERM_CONDITIONS)
+  end
+
   def get_sorted_names(conditions)
     SortedSet.new(Name.find_by_sql("SELECT DISTINCT names.* #{conditions}"))
   end
 
+  def get_name_rows(conditions)
+    Name.connection.select_all("SELECT DISTINCT names.id nid, images.id iid #{conditions}")
+  end
+  
+  def get_all_name_rows
+    get_name_rows(IMAGE_CONDITIONS) + get_name_rows(TERM_CONDITIONS)
+  end
+  
   def name_id_to_images
-    make_list_hash_from_pairs(Name.connection.select_all("SELECT DISTINCT names.id nid, images.id iid #{IMAGE_CONDITIONS}").map{
+    make_list_hash_from_pairs(get_all_name_rows.map{
       |row| [row['nid'], @id_to_image[row['iid']]]
     })
   end
   
+  def get_images(conditions)
+    Image.find_by_sql("SELECT DISTINCT images.* #{conditions}")
+  end
+  
+  def get_all_images
+    get_images(IMAGE_CONDITIONS) + get_images(TERM_CONDITIONS)
+  end
+  
   def id_to_image
-    make_id_hash(Image.find_by_sql("SELECT DISTINCT images.* #{IMAGE_CONDITIONS}"))
+    make_id_hash(get_all_images)
   end
   
   def image_id_to_names

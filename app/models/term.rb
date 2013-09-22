@@ -24,25 +24,12 @@ class Term < AbstractModel
   # versioned_class.before_save {|x| x.user_id = User.current_id}
 
   # Override the default show_controller
-  def self.show_controller
-    'glossary'
-  end
-
-  def text_name
-    self.name
-  end
-  
-  def format_name
-    self.name
-  end
-  
-  def unique_format_name
-    unique_text_name
-  end
-  
-  def unique_text_name
-    "#{self.name} (#{self.id})"
-  end
+  def self.show_controller; 'glossary'; end
+  def text_name; self.name; end
+  def format_name; self.name; end
+  def unique_format_name; unique_text_name; end
+  def unique_text_name; "#{self.name} (#{self.id})"; end
+  def has_edit_permission?(user); return true; end
   
   def add_image(image)
     if image
@@ -54,9 +41,7 @@ class Term < AbstractModel
     end
   end
   
-  def all_images
-    return [self.thumb_image] + self.images
-  end
+  def all_images; [self.thumb_image] + self.images; end
 
   def remove_image(image)
     if images.member?(image)
@@ -69,5 +54,6 @@ class Term < AbstractModel
       images.delete(new_thumb) if new_thumb
       save
     end
-  end  
+  end
+  
 end

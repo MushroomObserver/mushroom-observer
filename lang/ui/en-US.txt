@@ -1899,6 +1899,7 @@ term_copyright_warning: Please only upload an image that you created or which yo
 show_term: Show Glossary Term
 show_term_title: "Glossary Term: [name]"
 show_term_reuse_image: "Add Example"
+show_term_remove_image: "Remove Examples"
 
 # glossary/show_past_term
 show_past_term_title: "[:VERSION] [num]: [name]"

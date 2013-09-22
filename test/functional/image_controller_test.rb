@@ -413,6 +413,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_form_action(:action => 'remove_images', :id => obs.id)
   end
 
+  def test_remove_images_for_term
+    term = terms(:plane_term)
+    params = { :id => term.id }
+    requires_login(:remove_images_for_term, params)
+    assert_form_action(:action => 'remove_images_for_term', :id => term.id)
+  end
+
   def test_reuse_image_for_observation
     obs = observations(:agaricus_campestris_obs)
     params = { :mode => 'observation', :obs_id => obs.id }
@@ -424,10 +431,9 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_reuse_image_for_term
     term = terms(:conic_term)
-    params = { :mode => 'term', :term_id => term.id }
-    requires_login(:reuse_image, params)
-    assert_form_action(:action => 'reuse_image', :mode => 'term',
-                       :term_id => term.id)
+    params = { :id => term.id }
+    requires_login(:reuse_image_for_term, params)
+    assert_form_action(:action => 'reuse_image_for_term', :id => term.id)
   end
 
   def test_reuse_image_by_id
@@ -456,12 +462,11 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     assert(!term.images.member?(image))
     params = {
-      :mode   => 'term',
-      :term_id => term.id.to_s,
+      :id => term.id.to_s,
       :img_id => '3',
     }
     login('mary')
-    get_with_dump(:reuse_image, params)
+    get_with_dump(:reuse_image_for_term, params)
     assert_response(:controller => :glossary, :action => :show_term)
     assert(term.reload.images.member?(image))
   end

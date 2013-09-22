@@ -659,33 +659,36 @@ class ImageController < ApplicationController
   # Outputs: @observation
   # Redirects to show_observation.
   def remove_images # :norobots:
+    remove_images_from_object(Observation, params)
+  end
+
+  def remove_images_from_object(target_class, params)
     pass_query_params
-    if @observation = find_or_goto_index(Observation, params[:id].to_s, :include => :images)
-
-      # Make sure user owns the observation.
-      if !check_permission!(@observation)
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
-
-      # POST -- remove selected images.
-      elsif request.method == :post
-        if images = params[:selected]
-          images.each do |image_id, do_it|
-            if do_it == 'yes'
-              if image = Image.safe_find(image_id)
-                @observation.remove_image(image)
-                @observation.log_remove_image(image)
-                flash_notice(:runtime_image_remove_success.t(:id => image_id))
-              end
+    @object = find_or_goto_index(target_class, params[:id].to_s, :include => :images)
+    if check_permission!(@object)
+      if request.method == :post and (images = params[:selected])
+        images.each do |image_id, do_it|
+          if do_it == 'yes'
+            if image = Image.safe_find(image_id)
+              @object.remove_image(image)
+              @object.log_remove_image(image)
+              flash_notice(:runtime_image_remove_success.t(:id => image_id))
             end
           end
         end
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
+        redirect_to(:controller => target_class.show_controller, :action => target_class.show_action,
+                    :id => @object.id, :params => query_params)
       end
+    else
+      redirect_to(:controller => target_class.show_controller, :action => target_class.show_action,
+                  :id => @object.id, :params => query_params)
     end
   end
 
+  def remove_images_for_term
+    remove_images_from_object(Term, params)
+  end
+    
   # Used by show_image to rotate and flip image.
   def transform_image # :norobots:
     pass_query_params

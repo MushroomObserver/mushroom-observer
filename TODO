@@ -1,3 +1,11 @@
+Todo:
+- Remove example from term
+- Add more back links to show_image page
+Update EOL export to look for terms that are associated with higher level taxa
+  Copyright issue
+Add more associations for terms on production site.
+Clean up reuse and remove so they are explicitly _for_observation or _for_profile.
+
 Jason:
   Should list_locations order by user format or stick with postal?
   'Show Locations' not limiting results when looking at index_observation for an undefined location
