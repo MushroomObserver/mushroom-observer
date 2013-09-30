@@ -25,3 +25,7 @@ peltigera_rolf_connection:
 plane_pileus_connection:
   image_id: 12
   observation_id: 14
+
+conic_pileus_connection:
+  image_id: 9
+  observation_id: 14

@@ -106,6 +106,7 @@ conic_image:
   when: 2013-08-04
   notes: 'A scientific illustration of Conic Pileus'
   copyright_holder: Insil Choi
+  vote_cache: 3
 
 convex_image:
   id: 10
@@ -128,6 +129,7 @@ plane_image_thumb:
   when: 2013-09-08
   notes: 'A scientific illustration of Plane Pileus'
   copyright_holder: Insil Choi
+  vote_cache: 3
 
 plane_image_example:
   id: 12

@@ -1,8 +1,8 @@
 Todo:
 - Remove example from term
 - Add more back links to show_image page
-Update EOL export to look for terms that are associated with higher level taxa
-  Copyright issue
+- Update EOL export to look for terms that are associated with higher level taxa
+  - Copyright issue
 Add more associations for terms on production site.
 Clean up reuse and remove so they are explicitly _for_observation or _for_profile.
 

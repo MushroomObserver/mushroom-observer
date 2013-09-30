@@ -177,9 +177,9 @@ private
     get_sorted_names(IMAGE_CONDITIONS)
   end
 
-  TERM_CONDITIONS = %(FROM terms, images_terms, images, images_observations, observations, names
-    WHERE ((terms.id = images_terms.term_id
-            AND images.id = images_terms.image_id)
+  TERM_CONDITIONS = %(FROM images, images_observations, observations, names,
+    terms LEFT OUTER JOIN images_terms ON terms.id = images_terms.term_id
+    WHERE ((images.id = images_terms.image_id)
            OR (terms.thumb_image_id = images.id))
     AND images_observations.image_id = images.id
     AND images_observations.observation_id = observations.id

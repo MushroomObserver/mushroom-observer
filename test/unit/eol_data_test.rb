@@ -5,9 +5,9 @@ class EolDataTest < UnitTestCase
   def test_create
     obj = EolData.new
     assert_equal(SortedSet, obj.names.class)
-    assert_equal(2, obj.name_count)
-    assert_equal(2, obj.total_image_count)
-    assert_equal(1, obj.total_description_count)
+    assert(2 <= obj.name_count)
+    assert(2 <= obj.total_image_count)
+    assert(1 <= obj.total_description_count)
     assert_equal(Array, obj.all_images.class)
     assert_equal(Array, obj.all_descriptions.class)
 
@@ -32,5 +32,13 @@ class EolDataTest < UnitTestCase
     assert_equal(name.user.legal_name, obj.legal_name(name.user.id))
     assert_equal(name.real_search_name, obj.image_to_names(obj.images(name_id)[0].id))
     name_id
+  end
+  
+  def test_term_query
+    obj = EolData.new
+    name_count = obj.name_count
+    Name.connection.delete("DELETE FROM images_terms")
+    obj = EolData.new
+    assert_equal(name_count, obj.name_count)
   end
 end
