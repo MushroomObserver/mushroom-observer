@@ -1139,14 +1139,22 @@ class ApplicationController < ActionController::Base
       query
     else
       Query.lookup(query.model_symbol, query.flavor, query.params.merge(
-        :north => params[:north],
-        :south => params[:south],
-        :east => params[:east],
-        :west => params[:west]
+        :north => tweak_up(params[:north], 0.001, 90),
+        :south => tweak_down(params[:south], 0.001, -90),
+        :east => tweak_up(params[:east], 0.001, 180),
+        :west => tweak_down(params[:west], 0.001, -180)
       ))
     end
   end
 
+  def tweak_up(v, amount, max)
+    [max, v.to_f+amount].min
+  end
+
+  def tweak_down(v, amount, min)
+    [min, v.to_f-amount].max
+  end
+  
   # This is the common code for all the 'prev/next_object' actions.  Pass in
   # the current object and direction (:prev or :next), and it looks up the
   # query, grabs the next object, and redirects to the appropriate

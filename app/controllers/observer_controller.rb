@@ -831,17 +831,18 @@ class ObserverController < ApplicationController
       MinimalMapObservation.new(id, lat, long, location_id)
     end
 
-    # Eager-load corresponding locations.
-    @locations = Location.connection.select_rows(%(
-      SELECT id, name, north, south, east, west FROM locations
-      WHERE id IN (#{locations.keys.sort.map(&:to_s).join(',')})
-    )).map do |id, name, n,s,e,w|
-      locations[id.to_i] = MinimalMapLocation.new(id, name, n,s,e,w)
+    if locations.length > 0
+      # Eager-load corresponding locations.
+      @locations = Location.connection.select_rows(%(
+        SELECT id, name, north, south, east, west FROM locations
+        WHERE id IN (#{locations.keys.sort.map(&:to_s).join(',')})
+      )).map do |id, name, n,s,e,w|
+        locations[id.to_i] = MinimalMapLocation.new(id, name, n,s,e,w)
+      end
+      for obs in @observations
+        obs.location = locations[obs.location_id] if obs.location_id
+      end
     end
-    for obs in @observations
-      obs.location = locations[obs.location_id] if obs.location_id
-    end
-
     @num_results = @observations.count
     @timer_end = Time.now
   end
