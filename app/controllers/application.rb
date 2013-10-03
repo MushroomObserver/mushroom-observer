@@ -1068,6 +1068,7 @@ class ApplicationController < ActionController::Base
   # pass in arguments, it modifies the query as necessary to ensure they are
   # correct.  (Useful for specifying sort conditions, for example.)
   def find_or_create_query(model, args={})
+    map_past_bys(args)
     model = model.to_s
     if result = find_query(model, false)
 
@@ -1096,6 +1097,17 @@ class ApplicationController < ActionController::Base
       result.save
     end
     return result
+  end
+
+  BY_MAP = {
+    "modified" => :updated_at,
+    "created" => :created_at
+  }
+  
+  def map_past_bys(args)
+    if args.member?(:by)
+      args[:by] = (BY_MAP[args[:by].to_s] or args[:by])
+    end
   end
 
   # Lookup the given kind of Query, returning nil if it no longer exists.

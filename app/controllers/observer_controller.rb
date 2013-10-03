@@ -619,7 +619,7 @@ class ObserverController < ApplicationController
       refine_search_initialize_values(@fields, @values, @query)
     end
   end
-
+  
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation # :nologin: :norobots:
     query = find_or_create_query(:Observation, :by => params[:by])

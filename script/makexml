@@ -12,8 +12,8 @@
 
 require 'tempfile'
 
-# URL = "http://mushroomobserver.org/name/eol\?_js=off\&_new=true"
-URL = "http://localhost:3000/name/eol"
+URL = "http://mushroomobserver.org/name/eol\?_js=off\&_new=true"
+# URL = "http://localhost:3000/name/eol"
 
 def get_content(filename)
   cmd = "wget -q -O #{filename} '#{URL}'"
@@ -41,8 +41,8 @@ if new_size
   if old_size.nil? or (new_size > old_size)
     File.rename(temp_filename, dest_filename)
     File.chmod(0644, dest_filename)
-  elsif new_size < old_size
-    print "Size of new EOL dump, #{new_size}, was less than the old dump, #{old_size}.\n"
+  elsif new_size < old_size*0.9
+    print "Size of new EOL dump, #{new_size}, was less than 90% of the old dump, #{old_size}.\n"
     print "Left the old file in place.\n"
   end
 else

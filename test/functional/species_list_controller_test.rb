@@ -36,6 +36,14 @@ class SpeciesListControllerTest < FunctionalTestCase
 
 ################################################################################
 
+
+  def test_index_species_list_by_past_bys
+    get(:index_species_list, :by => :modified)
+    assert_response(:success)
+    get(:index_species_list, :by => :created)
+    assert_response(:success)
+  end
+
   def test_list_species_lists
     get_with_dump(:list_species_lists)
     assert_response('list_species_lists')
