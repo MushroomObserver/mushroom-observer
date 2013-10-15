@@ -39,6 +39,7 @@
 %>
 
 <p><%= :WHEN.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
+<p><%= :OBSERVATIONS.t %>: <span class="Data"><%= @query.num_results %></span></p>
 <p><%= :WHERE.t %>: <span class="Data">
   <%= location_link(@species_list.place_name, @species_list.location, nil, true) rescue :UNKNOWN.t %></span></p>
 <p><%= :WHO.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>

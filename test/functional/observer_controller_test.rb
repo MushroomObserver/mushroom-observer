@@ -2848,7 +2848,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('new banner', str2.text)
   end
 
-  def test_index_observation_by_past_sorts
+  def test_index_observation_by_past_by
     get(:index_observation, :by => :modified)
     assert_response(:success)
     get(:index_observation, :by => :created)
