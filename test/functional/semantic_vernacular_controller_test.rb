@@ -4,7 +4,10 @@ class SemanticVernacularControllerTest < FunctionalTestCase
   
   def test_index
     begin
-      get_with_dump(:index) 
+      get(:index) 
+      assert_response(:redirect)
+      login
+      get_with_dump(:index)
       assert_response('index')
     rescue Errno::EHOSTUNREACH => err
     end
@@ -12,6 +15,9 @@ class SemanticVernacularControllerTest < FunctionalTestCase
 
   def test_show
     begin
+    	get(:show, :uri => "http://aquarius.tw.rpi.edu/ontology/svf.owl#SVD1")
+    	assert_response(:redirect)
+    	login
     	get_with_dump(:show, :uri => "http://aquarius.tw.rpi.edu/ontology/svf.owl#SVD1")
     	assert_response("show")
     	assert_not_nil(assigns(:svd))
@@ -19,4 +25,17 @@ class SemanticVernacularControllerTest < FunctionalTestCase
     end
   end
 
+  # Need a real test framework to do anything meaningful.
+  # In the meantime, simply ensure that both logged out and logged in users get redirected
+  # since delete requires admin.
+  def test_delete
+    begin
+      get(:delete) 
+      assert_response(:redirect)
+      login
+      get(:delete) 
+      assert_response(:redirect)
+    rescue Errno::EHOSTUNREACH => err
+    end
+  end
 end

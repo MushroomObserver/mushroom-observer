@@ -19,7 +19,8 @@
 require_dependency 'classes/semantic_vernacular'
 
 class SemanticVernacularController < ApplicationController
-
+  before_filter :login_required
+  
   def index
   	@svds_with_name = SemanticVernacularDescription.index_with_name
     @svds_without_name = SemanticVernacularDescription.index_without_name
@@ -63,12 +64,17 @@ class SemanticVernacularController < ApplicationController
   end
 
   def delete
-    type = URI.unescape(params["type"])
-    uri = URI.unescape(params["uri"])
-    response = triple_store_delete(type, uri)
-    Rails.logger.debug(response)
-    respond_to do |format|
-      format.html {redirect_to :back}
+    if is_in_admin_mode? # Probably should be expanded to any MO user
+      type = URI.unescape(params["type"])
+      uri = URI.unescape(params["uri"])
+      response = triple_store_delete(type, uri)
+      Rails.logger.debug(response)
+      respond_to do |format|
+        format.html {redirect_to :back}
+      end
+    else
+      flash_error(:delete_svd_not_allowed.l)
+      redirect_to(:action => 'index')
     end
   end
 

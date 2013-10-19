@@ -28,14 +28,16 @@
 					<%= "Proposed by #{name.creator.name} at 
 							#{name.created_date_time}" %>
 				</p>
-				<p class="svd-show-li-item-link">
-					<%= link_to("Delete", {
-											:controller => "semantic_vernacular",
-											:action => "delete",
-											:type => "VernacularLabel",
-											:uri => name.uri },
-											:class => "svd-show-li-item-delete-link") %>
-				</p>
+				<% if is_in_admin_mode? %>
+  				<p class="svd-show-li-item-link">
+  					<%= link_to("Delete", {
+  											:controller => "semantic_vernacular",
+  											:action => "delete",
+  											:type => "VernacularLabel",
+  											:uri => name.uri },
+  											:class => "svd-show-li-item-delete-link") %>
+  				</p>
+				<% end %>
 			<% else %>
 				<p class="svd-show-li-info">
 					This SVD does not have an accepted name yet.
@@ -67,12 +69,14 @@
 													:type => "VernacularLabel",
 													:uri => label.uri },
 													:class => "svd-show-li-item-accept-link") %> |
-							<%= link_to("Delete", {
-													:controller => "semantic_vernacular",
-													:action => "delete",
-													:type => "VernacularLabel",
-													:uri => label.uri },
-													:class => "svd-show-li-item-delete-link") %>
+	    				<% if is_in_admin_mode? %>
+  							<%= link_to("Delete", {
+  													:controller => "semantic_vernacular",
+  													:action => "delete",
+  													:type => "VernacularLabel",
+  													:uri => label.uri },
+  													:class => "svd-show-li-item-delete-link") %>
+							<% end %>
 						</p>
 					<% end %>
 				</div>
@@ -103,12 +107,14 @@
 							#{definition.created_date_time}" %>
 				</p>
 				<p class="svd-show-li-item-link">
-				<%= link_to("Delete", {
-										:controller => "semantic_vernacular",
-										:action => "delete",
-										:type => "VernacularFeatureDescription",
-										:uri => definition.uri },
-										:class => "svd-show-li-item-delete-link") %> |
+				<% if is_in_admin_mode? %>
+  				<%= link_to("Delete", {
+  										:controller => "semantic_vernacular",
+  										:action => "delete",
+  										:type => "VernacularFeatureDescription",
+  										:uri => definition.uri },
+  										:class => "svd-show-li-item-delete-link") %> |
+				<% end %>
 				<%= link_to("Create a new SVD based on this definition",
 										:controller => "semantic_vernacular",
 										:action => "create",
@@ -161,12 +167,14 @@
 												:type => "VernacularFeatureDescription",
 												:uri => description.uri },
 												:class => "svd-show-li-item-accept-link") %> |
-						<%= link_to("Delete", {
-												:controller => "semantic_vernacular",
-												:action => "delete",
-												:type => "VernacularFeatureDescription",
-												:uri => description.uri },
-												:class => "svd-show-li-item-delete-link") %> |
+						<% if is_in_admin_mode? %>
+  						<%= link_to("Delete", {
+  												:controller => "semantic_vernacular",
+  												:action => "delete",
+  												:type => "VernacularFeatureDescription",
+  												:uri => description.uri },
+  												:class => "svd-show-li-item-delete-link") %> |
+						<% end %>
 						<%= link_to("Propose a definition based on this description",
 												:controller => "semantic_vernacular",
 												:action => "create",
@@ -189,14 +197,16 @@
 								<%= scientific_name.label %>
 							<% end %>
 						</li>
-						<span class="svd-show-li-item-link">
-							<%= link_to("Delete", {
-													:controller => "semantic_vernacular",
-													:action => "delete",
-													:type => "ScientificName",
-													:uri => scientific_name.uri },
-													:class => "svd-show-li-item-delete-link") %>
-						</span>
+					  <% if is_in_admin_mode? %>
+  						<span class="svd-show-li-item-link">
+  							<%= link_to("Delete", {
+  													:controller => "semantic_vernacular",
+  													:action => "delete",
+  													:type => "ScientificName",
+  													:uri => scientific_name.uri },
+  													:class => "svd-show-li-item-delete-link") %>
+  						</span>
+						<% end %>
 						<br />
 					<% end %>
 				</ul>

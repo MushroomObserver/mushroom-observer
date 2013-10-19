@@ -1895,6 +1895,9 @@ term_description: Description
 term_copyright_holder: Copyright holder and license for this image
 term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
+# semantic_vernacular/delete
+delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
+
 # glossary/show_term
 show_term: Show Glossary Term
 show_term_title: "Glossary Term: [name]"
