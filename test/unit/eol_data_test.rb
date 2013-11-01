@@ -41,4 +41,11 @@ class EolDataTest < UnitTestCase
     obj = EolData.new
     assert_equal(name_count, obj.name_count)
   end
+  
+  def test_refresh_links_to_eol
+    initial_count = Triple.count
+    obj = EolData.new
+    obj.refresh_links_to_eol
+    assert(initial_count < Triple.count)
+  end
 end

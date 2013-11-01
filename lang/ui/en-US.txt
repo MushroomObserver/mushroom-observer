@@ -1897,6 +1897,10 @@ term_copyright_warning: Please only upload an image that you created or which yo
 
 # semantic_vernacular/delete
 delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
+semantic_vernacular_index: Go to all Semantic Vernacular Descriptions
+semantic_vernacular_proposed: "Proposed by [name] at [date_time]"
+semantic_vernacular_delete: Delete
+semantic_vernacular_title: "SVD Detail: [name]"
 
 # glossary/show_term
 show_term: Show Glossary Term

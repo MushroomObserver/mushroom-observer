@@ -353,7 +353,7 @@ class Image < AbstractModel
   def medium_url;    "#{IMAGE_DOMAIN}/#{medium_file}";    end
   def small_url;     "#{IMAGE_DOMAIN}/#{small_file}";     end
   def thumbnail_url; "#{IMAGE_DOMAIN}/#{thumbnail_file}"; end
-
+  
   def has_size?(size)
     max = width.to_i > height.to_i ? width.to_i : height.to_i
     case size.to_s

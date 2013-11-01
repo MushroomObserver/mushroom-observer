@@ -282,13 +282,7 @@ class Name < AbstractModel
     end
   end
 
-  def <=>(x)
-    self.sort_name <=> x.sort_name
-  end
-
-  def url
-    return "http://mushroomobserver.org/name/#{id}"
-  end
+  def <=>(x); self.sort_name <=> x.sort_name; end
   
   def best_brief_description
     if self.description

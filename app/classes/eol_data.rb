@@ -27,6 +27,7 @@ class EolData
     @user_id_to_legal_name = user_id_to_legal_name()
     @description_id_to_authors = description_id_to_authors()
     @image_id_to_names = image_id_to_names()
+    refresh_links_to_eol
   end
   
   def image_to_names(id)
@@ -107,10 +108,11 @@ class EolData
   end
   
   def refresh_links_to_eol
-    refresh_predicate(self.names, ':eolName')
+    refresh_predicate(self.names, Name.eol_predicate)
+    refresh_predicate(self.all_images, Image.eol_predicate)
   end
 
-private    
+private
   def prune_synonyms(names)
     synonyms = Hash.new{|h, k| h[k] = []}
     for name in names
@@ -281,17 +283,22 @@ private
   
   def refresh_predicate(subjects, predicate)
     Triple.delete_predicate_matches(predicate)
-    create_name_triples(subjects, predicates)
+    create_triples(subjects, predicate)
   end
 
-  def create_name_triples(subjects, p)
-    url_generator = EolUrlGenerator.new()
+  def create_triples(subjects, p)
     for s in subjects
-      Triple.new(subject=s.uri, predicate=p, object=url_generator.calc_url(name))
+      Triple.new({:subject=>s.show_url, :predicate=>p, :object=>eol_search_url(s.class.name, s)}).save
     end
   end
   
-  def name_url(name)
-    return "http://eol.org/search/#{name.text_name}"
+  def eol_search_url(class_name, subject)
+    if class_name == 'Image'
+      "http://eol.org/search?q=#{image_to_names(subject.id).gsub(' ', '+')}&type%5B%5D=Image"
+    elsif class_name == 'Name'
+      "http://eol.org/search?q=#{subject.text_name.gsub(' ', '+')}&type%5B%5D=TaxonConcept"
+    else
+      "http://eol.org"
+    end
   end
 end

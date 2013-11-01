@@ -10,6 +10,8 @@
     new_tab_set do
       add_tab(:show_name.t(:name => obs.format_name), :controller => 'name',
               :action => 'show_name', :id => obs.name.id, :params => query_params)
+      eol_url = @image.eol_url
+      add_tab('EOL', eol_url) if eol_url
       add_tab(:google_images.t,
               'http://images.google.com/images?q=%s' % obs.text_name)
       add_tab(:show_object.t(:type => :observation), :controller => 'observer',

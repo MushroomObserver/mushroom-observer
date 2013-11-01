@@ -39,32 +39,71 @@
 
 class SemanticVernacularDescription < SemanticVernacularDataSource
 
-	attr_accessor :uri,
-				  :name,
-				  :labels,
-				  :definition,
-				  :descriptions,
-				  :scientific_names
+	attr_accessor :uri
 
-	def initialize(uri)
-		@uri = uri
-		@name = get_attribute("name")
-		@labels = get_attribute_array("labels")
-		@definition = get_attribute("definition")
-		@descriptions = get_attribute_array("descriptions")
-		@scientific_names = get_attribute_array("scientific_names")
+  # Fillin any stuff that's provided in the args
+	def initialize(args)
+	  if args.class == String
+	    args = {:uri => args}
+	  end
+		@uri = args[:uri]
+		@name = args[:name]
+		@labels = args[:labels]
+		@definition = args[:definition]
+		@descriptions = args[:descriptions]
+		@scientific_names = args[:scientific_names]
 	end
+	
+	# Make these lazy loading
+	def name; @name.nil? ? @name = get_attribute("name") : @name; end
+	def name=(name); @name = name; end
+	
+	def labels; @labels.nil? ? @labels = get_attribute_array("labels") : @labels; end
+	def labels=(labels); @labels = labels; end
+	
+	def definition; @definition.nil? ? @definition = get_attribute("definition") : @definition; end
+	def definition=(definition); @definition = definition; end
+	
+	def descriptions; @descriptions.nil? ? @descriptions = get_attribute_array("descriptions") : @descriptions; end
+	def descriptions=(descriptions); @descriptions = descriptions; end
+	
+	def scientific_names; @scientific_names.nil? ? @scientific_names = get_attribute_array("scientific_names") : @scientific_names; end
+	def scientific_names=(scientific_names); @scientific_names = scientific_names; end
 
 	def self.index_with_name
-		
-		query(query_svds_with_names)
+		query(query_svds_with_names).sort_by!{ |row| row["label"]["value"]}
 	end
 
+  def self.svds_with_name
+    index_with_name.collect {|row|
+      print "#{row}\n"
+      SemanticVernacularDescription.new(:uri => row["uri"]["value"])
+    }
+  end
+  
 	def self.index_without_name
-		query(query_svds_all).collect {|svd| svd["uri"]["value"]} -
-			index_with_name.collect {|svd| svd["uri"]["value"]}
+		(query(query_svds_all).collect {|svd| svd["uri"]["value"]} -
+			index_with_name.collect {|svd| svd["uri"]["value"]}).sort!
 	end
 
+  def self.svds_without_name
+    index_without_name.collect {|uri| SemanticVernacularDescription.new(uri)}
+  end
+  
+  def id
+    @uri.split("#")[1]
+  end
+  
+  def best_name
+    if name
+      name.label
+    elsif labels != []
+      labels.collect {|label| "\"#{label.label}\""}.join(", ")
+    else
+      id
+    end
+  end
+  
 	def get_attribute(type)
 		attribute = nil
 		result = self.class.query(eval("query_" + type))[0]

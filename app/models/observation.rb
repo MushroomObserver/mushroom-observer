@@ -146,23 +146,13 @@ class Observation < AbstractModel
   self.autolog_events = [:destroyed]
   
   # Override the default show_controller
-  def self.show_controller
-    'observer'
-  end
-
-  def is_location?
-    false
-  end
-
-  def is_observation?
-    true
-  end
+  def self.show_controller; 'observer'; end
+  def is_location?; false; end
+  def is_observation?; true; end
 
   # Always returns empty string.  (Used by
   # <tt>observer/reuse_image.rhtml</tt>.)
-  def idstr
-    ''
-  end
+  def idstr; ''; end
 
   # Adds error if couldn't find image with the given id.  (Used by
   # <tt>observer/reuse_image.rhtml</tt>.)

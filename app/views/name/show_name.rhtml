@@ -4,6 +4,8 @@
 
   # Google Images | Distribution Map | Email Tracking
   new_tab_set do
+    eol_url = @name.eol_url
+    add_tab('EOL', eol_url) if eol_url
     add_tab(:google_images.t,
             "http://images.google.com/images?q=#{@name.real_text_name}")
     add_tab('MyCoPortal', mycoportal_url(@name))
