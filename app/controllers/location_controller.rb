@@ -10,6 +10,8 @@ class LocationController < ApplicationController
     :help,
     :index_location,
     :index_location_description,
+    :list_by_country,
+    :list_countries,
     :list_dubious_locations,
     :list_location_descriptions,
     :list_locations,
@@ -51,6 +53,20 @@ class LocationController < ApplicationController
   def index_location # :nologin: :norobots:
     query = find_or_create_query(:Location, :by => params[:by])
     show_selected_locations(query, :id => params[:id].to_s, :always_index => true)
+  end
+
+  # Displays a list of all countries with counts.
+  def list_countries # :nologin:
+    cc = CountryCounter.new
+    @known_by_count = cc.known_by_count
+    @unknown_by_count = cc.unknown_by_count
+    @known_missing = cc.missing
+  end
+
+  # Displays a list of all locations whose country matches the id param.
+  def list_by_country # :nologin:
+    query = create_query(:Location, :regexp_search, :regexp => "#{params[:country]}$")
+    show_selected_locations(query, :link_all_sorts => true)
   end
 
   # Displays a list of all locations.
@@ -238,6 +254,8 @@ class LocationController < ApplicationController
       args[:where] += query.google_conditions(search, 'observations.where')
       args.delete(:pattern)
 
+    # when :regexp_search  ### NOT SURE WHAT DO FOR THIS
+    
     # None of the rest make sense.
     else
       flavor = nil

@@ -1317,6 +1317,14 @@ list_place_names_merge: Merge
 
 
 
+# location/list_countries
+list_countries: Country List
+list_countries_known: Known Countries
+list_countries_unknown: Unknown Countries
+list_countries_missing: Missing Countries
+
+
+
 # _location (RSS log display)
 location_change: Change to Location
 
@@ -3919,6 +3927,7 @@ runtime_no_match_id: "Can't find [type] #[value]."
 runtime_no_match_name: Can't find [type] matching '[value]'.
 runtime_no_matches: No matching [types] found.
 runtime_no_matches_pattern: No [types] matching '[value]' found.
+runtime_no_matches_regexp: No [types] matching '[value]' found.
 runtime_no_more: There are no more [types].
 runtime_no_objects: There are no [types].
 runtime_no_parse: "Unable to parse: '[value]'"
@@ -4215,6 +4224,7 @@ query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
 query_title_of_name_nonconsensus: "[TYPES] That Might Be [NAME]"
 query_title_of_parents: Higher Taxa Containing [NAME]
 query_title_pattern_search: "[TYPES] Matching '[pattern]'"
+query_title_regexp_search: "[TYPES] Matching '[regexp]'"
 query_title_with_descriptions: "[TYPES] with [:DESCRIPTIONS]"
 query_title_with_descriptions_by_author: "[TYPES] with [:query_title_by_author(type=:description)]"
 query_title_with_descriptions_by_editor: "[TYPES] with [:query_title_by_editor(type=:description)]"

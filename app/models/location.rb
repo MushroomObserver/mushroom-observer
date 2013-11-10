@@ -383,7 +383,11 @@ class Location < AbstractModel
   def self.understood_country?(candidate)
     understood_with_prefixes(candidate, UNDERSTOOD_COUNTRIES)
   end
-
+  
+  def self.countries_by_count
+    CountryCounter.new.countries_by_count
+  end
+  
   @@location_cache = nil
 
   # Check if a given name (postal order) already exists as a defined

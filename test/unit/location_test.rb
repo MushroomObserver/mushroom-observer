@@ -15,7 +15,6 @@ class LocationTest < UnitTestCase
   def test_dubious_name
     bad_location("Albion,California,  USA")
     bad_location("Albion, California")
-    bad_location("Earth")
     bad_location("USA, North America")
     bad_location("San Francisco, USA")
     bad_location("San Francisco, CA, USA")
@@ -37,6 +36,7 @@ class LocationTest < UnitTestCase
     bad_location("Above (about 4800 ft) Chester, California, USA")
     good_location("Albion, California, USA")
     good_location("Unknown")
+    good_location("Earth")
     good_location("North America")
     good_location("San Francisco, California, USA")
     good_location("Tilden Park, Contra Costa Co., California, USA")
@@ -55,6 +55,12 @@ class LocationTest < UnitTestCase
     good_location("near Chester, California, USA")
   end
 
+  def test_understood_country
+    assert(Location.understood_country?('USA'))
+    assert(Location.understood_country?('Afghanistan'))
+    assert(!Location.understood_country?('Moon'))
+  end
+  
   def test_versioning
     User.current = @mary
     loc = Location.create!(

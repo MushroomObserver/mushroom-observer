@@ -98,6 +98,16 @@ class LocationControllerTest < FunctionalTestCase
     assert_response('list_locations')
   end
 
+  def test_list_countries
+    get_with_dump(:list_countries)
+    assert_response('list_countries')
+  end
+
+  def test_list_by_country
+    get_with_dump(:list_by_country, :country => 'USA')
+    assert_response('list_locations')
+  end
+
   def test_locations_by_user
     get_with_dump(:locations_by_user, :id => 1)
     assert_response('list_locations')

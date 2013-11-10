@@ -1328,6 +1328,9 @@ class ApplicationController < ActionController::Base
       when :pattern_search
         :runtime_no_matches_pattern.t(:type => type,
                                       :value => query.params[:pattern].to_s)
+      when :regexp_search
+        :runtime_no_matches_regexp.t(:type => type,
+                                     :value => query.params[:regexp].to_s)
       when :with_descriptions
         :runtime_index_no_with.t(:type => type, :attachment => :description)
       when :with_observations

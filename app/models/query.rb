@@ -229,6 +229,9 @@ class Query < AbstractQuery
     :pattern_search => {
       :pattern => :string,
     },
+    :regexp_search => {
+      :regexp => :string,
+    },
     :with_descriptions_by_author => {
       :user => User,
     },
@@ -318,6 +321,7 @@ class Query < AbstractQuery
       :by_rss_log,            # Locations with RSS logs, in RSS order.
       :in_set,                # Locations in a given set.
       :pattern_search,        # Locations matching a pattern, alphabetically.
+      :regexp_search,        # Locations matching a pattern, alphabetically.
       :with_descriptions,                 # Locations with descriptions, alphabetically.
       :with_descriptions_by_author,       # Locations with descriptions authored by a given user, alphabetically.
       :with_descriptions_by_editor,       # Locations with descriptions edited by a given user, alphabetically.
@@ -1991,67 +1995,84 @@ class Query < AbstractQuery
 
     case model_symbol
 
-      when :Comment
-        self.where += google_conditions(search,
-          'CONCAT(comments.summary,COALESCE(comments.comment,""))')
+    when :Comment
+      self.where += google_conditions(search,
+        'CONCAT(comments.summary,COALESCE(comments.comment,""))')
 
-      when :Herbarium
-        self.where += google_conditions(search,
-          'CONCAT(herbaria.name,COALESCE(herbaria.description,""),COALESCE(herbaria.mailing_address,""))')
+    when :Herbarium
+      self.where += google_conditions(search,
+        'CONCAT(herbaria.name,COALESCE(herbaria.description,""),COALESCE(herbaria.mailing_address,""))')
 
-      when :Image
-        self.join << {:images_observations => {:observations =>
-          [:locations!, :names] }}
-        self.where += google_conditions(search,
-          'CONCAT(names.search_name,COALESCE(images.original_name,""),' +
-          'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
-          'IF(locations.id,locations.name,observations.where))')
+    when :Image
+      self.join << {:images_observations => {:observations =>
+        [:locations!, :names] }}
+      self.where += google_conditions(search,
+        'CONCAT(names.search_name,COALESCE(images.original_name,""),' +
+        'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
+        'IF(locations.id,locations.name,observations.where))')
 
-      when :Location
-        self.join << :"location_descriptions.default!"
-        note_fields = LocationDescription.all_note_fields.map do |x|
-          "COALESCE(location_descriptions.#{x},'')"
-        end
-        self.where += google_conditions(search,
-            "CONCAT(locations.name,#{note_fields.join(',')})")
-
-      when :Name
-        self.join << :"name_descriptions.default!"
-        note_fields = NameDescription.all_note_fields.map do |x|
-          "COALESCE(name_descriptions.#{x},'')"
-        end
-        self.where += google_conditions(search,
-            "CONCAT(names.search_name,COALESCE(names.citation,'')," +
-                    "COALESCE(names.notes,''),#{note_fields.join(',')})")
-
-      when :Observation
-        self.join << [:locations!, :names]
-        self.where += google_conditions(search,
-          'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
-          'IF(locations.id,locations.name,observations.where))')
-
-      when :Project
-        self.where += google_conditions(search,
-          'CONCAT(projects.title,COALESCE(projects.summary,""))')
-
-      when :SpeciesList
-        self.join << :locations!
-        self.where += google_conditions(search,
-          'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
-          'IF(locations.id,locations.name,species_lists.where))')
-
-      when :Specimen
-        self.where += google_conditions(search,
-          'CONCAT(specimens.herbarium_label,COALESCE(specimens.notes,""))')
-
-      when :User
-        self.where += google_conditions(search,
-          'CONCAT(users.login,users.name)')
-
-      else
-        raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
+    when :Location
+      self.join << :"location_descriptions.default!"
+      note_fields = LocationDescription.all_note_fields.map do |x|
+        "COALESCE(location_descriptions.#{x},'')"
       end
+      self.where += google_conditions(search,
+          "CONCAT(locations.name,#{note_fields.join(',')})")
+
+    when :Name
+      self.join << :"name_descriptions.default!"
+      note_fields = NameDescription.all_note_fields.map do |x|
+        "COALESCE(name_descriptions.#{x},'')"
+      end
+      self.where += google_conditions(search,
+          "CONCAT(names.search_name,COALESCE(names.citation,'')," +
+                  "COALESCE(names.notes,''),#{note_fields.join(',')})")
+
+    when :Observation
+      self.join << [:locations!, :names]
+      self.where += google_conditions(search,
+        'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
+        'IF(locations.id,locations.name,observations.where))')
+
+    when :Project
+      self.where += google_conditions(search,
+        'CONCAT(projects.title,COALESCE(projects.summary,""))')
+
+    when :SpeciesList
+      self.join << :locations!
+      self.where += google_conditions(search,
+        'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
+        'IF(locations.id,locations.name,species_lists.where))')
+
+    when :Specimen
+      self.where += google_conditions(search,
+        'CONCAT(specimens.herbarium_label,COALESCE(specimens.notes,""))')
+
+    when :User
+      self.where += google_conditions(search,
+        'CONCAT(users.login,users.name)')
+
+    else
+      raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
     end
+  end
+
+  # ----------------------------
+  #  Regexp search.
+  # ----------------------------
+
+  def initialize_regexp_search
+    regexp = params[:regexp].to_s.strip_squeeze
+
+    case model_symbol
+
+    when :Location
+      self.where += ["locations.name REGEXP '#{regexp}'"]
+
+    else
+      raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
+    end
+  end
 
   # ----------------------------
   #  Advanced search.
