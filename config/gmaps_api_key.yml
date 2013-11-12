@@ -1,15 +1,14 @@
 # Supply the Google Maps API keys for your application here.
 
 development:
- localhost:             ABQIAAAAoN4H8SiH1m-X7s5V1JXxShT2ak2DffiooUuokG88BHgj3ApF7hQZ0izPoWKf-D-qu7OoDrdn5mf_2w
- localhost.localdomain: AIzaSyDtr0wCknVQ9Sob4e6xdTzN5V8zie1WCz0
+ localhost:             "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
+ localhost.localdomain: "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
 
 test:
- localhost:             ABQIAAAAoN4H8SiH1m-X7s5V1JXxShT2ak2DffiooUuokG88BHgj3ApF7hQZ0izPoWKf-D-qu7OoDrdn5mf_2w
- localhost.localdomain: AIzaSyDtr0wCknVQ9Sob4e6xdTzN5V8zie1WCz0
+ localhost:             "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
+ localhost.localdomain: "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
 
 production:
- localhost:             ABQIAAAAoN4H8SiH1m-X7s5V1JXxShT2ak2DffiooUuokG88BHgj3ApF7hQZ0izPoWKf-D-qu7OoDrdn5mf_2w
- localhost.localdomain: AIzaSyDtr0wCknVQ9Sob4e6xdTzN5V8zie1WCz0
- mushroomobserver.org:  AIzaSyDtr0wCknVQ9Sob4e6xdTzN5V8zie1WCz0
- allfungi.ru:           ABQIAAAAzMUFFnT9uH0Sfg98Y4kbhGFJQa0g3IQ9GZqIMmInSLrthJKGDmlRT98f4j135zat56yjRKQlWnkmod3TB
+ localhost:             "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
+ localhost.localdomain: "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
+ mushroomobserver.org:  "AIzaSyDN412tyXjZnYM586hIxRjn7WOURvmeGio"

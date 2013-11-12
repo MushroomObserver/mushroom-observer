@@ -26,47 +26,53 @@ function lngDiff(new_lng, old_lng) {
 }
 
 function updateMapOverlay(north, south, east, west) {
-  west_east = calcLngMidPnt(west, east);
-  center = new GLatLng((north+south)/2, west_east);
-  mo_marker_ct.setLatLng(center);
+  var north_south = (north+south)/2;
+  var west_east = calcLngMidPnt(west, east);
+
+  var ct = L(north_south, west_east);
+  var nw = L(north,west);
+  var nwe = L(north, west_east)
+  var ne = L(north,east);
+  var sw = L(south,west);
+  var swe = L(south, west_east)
+  var se = L(south,east);
+
+  mo_marker_ct.setPosition(ct);
+  mo_marker_nw.setPosition(nw);
+  mo_marker_ne.setPosition(ne);
+  mo_marker_sw.setPosition(sw);
+  mo_marker_se.setPosition(se);
   
-  nw = new GLatLng(north,west);
-  mo_marker_nw.setLatLng(nw);
-  ne = new GLatLng(north,east);
-  nwe = new GLatLng(north, west_east)
-  
-  mo_marker_ne.setLatLng(ne);
-  se = new GLatLng(south,east);
-  mo_marker_se.setLatLng(se);
-  sw = new GLatLng(south,west);
-  mo_marker_sw.setLatLng(sw);
-  swe = new GLatLng(south, west_east)
-  
-  map.removeOverlay(mo_box);
-  mo_box = new GPolyline([nw,nwe,ne,se,swe,sw,nw],"#00ff88",3,1.0);
-  map.addOverlay(mo_box);
-  if (parseFloat($("location_north").value) != north) {
+  mo_box.setPath([nw,nwe,ne,se,swe,sw,nw]);
+
+  if (parseFloat($("location_north").value) != north)
     $("location_north").value = north;
-  }
-  if (parseFloat($("location_south").value) != south) {
+  if (parseFloat($("location_south").value) != south)
     $("location_south").value = south;
-  }
-  if (parseFloat($("location_east").value) != east) {
+  if (parseFloat($("location_east").value) != east)
     $("location_east").value = east;
-  }
-  if (parseFloat($("location_west").value) != west) {
+  if (parseFloat($("location_west").value) != west)
     $("location_west").value = west;
-  }
+
   clearTimeout(timeout_id);
   old_loc = null;
   reset = false;
 }
 
 function resetToLatLng(loc) {
+  var north, south, east, west;
   lat = loc.lat();
   lng = loc.lng();
-  updateMapOverlay(Math.min(90, lat+1), Math.max(-90, lat-1), lngAdd(lng, 1), lngAdd(lng, -1));  
-  map.centerAndZoomOnPoints([new GLatLng(Math.min(90, lat+1.5),lngAdd(lng, -1.5)),new GLatLng(Math.max(-90, lat-1.5),lngAdd(lng, 1.5))]);
+  north = Math.min(90, lat+1);
+  south = Math.max(-90, lat-1);
+  east  = lngAdd(lng, 1);
+  west  = lngAdd(lng, -1);
+  updateMapOverlay(north, south, east, west);  
+  north = Math.min(90, lat+1.5);
+  south = Math.max(-90, lat-1.5);
+  east  = lngAdd(lng, 1.5);
+  west  = lngAdd(lng, -1.5);
+  map.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
 }
 
 function findOnMap() {
@@ -88,7 +94,7 @@ function findOnMap() {
         west = parseFloat(list[3]);
         if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
           updateMapOverlay(north, south, east, west);
-          map.centerAndZoomOnPoints([new GLatLng(north, east),new GLatLng(south, west)]);
+          map_div.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
         };
       },
       onFailure: function(transport){ alert(transport.responseText) }
@@ -154,7 +160,7 @@ function textToMap() {
   west = parseFloat($("location_west").value);
   if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
     updateMapOverlay(north, south, east, west);
-    map.centerAndZoomOnPoints([new GLatLng(north, west),new GLatLng(south, east)]);
+    map.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
   }
 }
 

@@ -27,8 +27,8 @@
 #
 ################################################################################
 
-require 'geocoder'
 require 'cgi'
+require_dependency 'geocoder'
 
 class AjaxController < ApplicationController
   disable_filters

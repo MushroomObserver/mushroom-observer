@@ -28,10 +28,7 @@
 
 require_dependency 'map_collapsible'
 require_dependency 'map_set'
-
-module GM
-  include Ym4r::GmPlugin
-end
+require_dependency 'gmaps'
 
 module ApplicationHelper::Map
   def make_map(objects, args={})
@@ -59,11 +56,11 @@ module ApplicationHelper::Map
       :info_window => false
     )
     gmap = make_map(object, args)
-    gmap.event_init(gmap, 'click', 'function(overlay, latlng) {
-      clickLatLng(latlng);
+    gmap.event_init(gmap, 'click', 'function(e) {
+      clickLatLng(e.latLng);
     }')
-    gmap.event_init(gmap, 'dblclick', 'function(overlay, latlng) {
-      dblClickLatLng(latlng);
+    gmap.event_init(gmap, 'dblclick', 'function(e) {
+      dblClickLatLng(e.latLng);
     }')
     return gmap
   end
@@ -255,8 +252,8 @@ module ApplicationHelper::Map
   def map_control_init(gmap, marker, args, type='ct')
     name = args[:marker_name] || 'mo_marker'
     gmap.overlay_global_init(marker, name + '_' + type)
-    gmap.event_init(marker, 'dragend', "function(latlng) {
-      dragEndLatLng(latlng, '#{type}')
+    gmap.event_init(marker, 'dragend', "function(e) {
+      dragEndLatLng(e.latLng, '#{type}')
     }")
   end
 
@@ -271,26 +268,4 @@ module ApplicationHelper::Map
       map_control_init(gmap, marker, args, type)
     end
   end
-
-  # Center on a given location? (This is never used: -JPH 20120510)
-  # if respond_to?(:start_lat) && respond_to?(:start_long)
-  #   gmap.center_zoom_init( [start_lat, start_long], GM::Constants::GM_ZOOM )
-  #   gmap.overlay_init(
-  #     GM::GMarker.new( [start_lat, start_long],
-  #       :icon => icon_start,
-  #       :title => name + " start",
-  #       :info_window => "start"
-  #   ))
-  # end
-
-  # Started playing with icons and the following got something to show up,
-  # but I decide not to pursue it further right now.
-  # gmap.icon_global_init(
-  #   GM::GIcon.new(
-  #     :image => "/images/blue-dot.png",
-  #     :icon_size => GM::GSize.new( 24,38 ),
-  #     :icon_anchor => GM::GPoint.new(12,38),
-  #     :info_window_anchor => GM::GPoint.new(9,2)
-  #   ), "blue_dot")
-  # blue_dot = GM::Variable.new("blue_dot")
 end
