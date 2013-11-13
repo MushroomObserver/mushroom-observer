@@ -69,6 +69,15 @@ module GM
         function L(lat, long) {
           return new G.LatLng(lat, long);
         }
+        // callback to close currently opened info window
+        var current_info_window = null;
+        var has_info_window_closer = {};
+        function close_current_info_window() {
+          if (current_info_window) {
+            current_info_window.close();
+            current_info_window = null;
+          }
+        }
         // handy to create fully-functional marker pin with popup info-window
         function P(map, lat, long, draggable, title, popup_content) {
           var marker;
@@ -84,7 +93,10 @@ module GM
             info_window = new G.InfoWindow({content: popup_content});
             G.event.addListener(marker, 'click', function() {
               info_window.open(map, marker);
+              current_info_window = info_window;
             });
+            if (!has_info_window_closer[map]++)
+              G.event.addListener(map, 'click', close_current_info_window);
           }
           return marker;
         }
@@ -201,7 +213,7 @@ module GM
     def map_options_code
       [
         "mapTypeControl:#{large ? 'true' : 'false'}",
-        "mapTypeId:G.MapTypeId.ROADMAP"
+        "mapTypeId:G.MapTypeId.#{large ? 'TERRAIN' : 'ROADMAP'}"
       ]
     end
 
