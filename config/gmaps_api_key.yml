@@ -1,14 +1,14 @@
 # Supply the Google Maps API keys for your application here.
 
 development:
- localhost:             "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
- localhost.localdomain: "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
+ localhost:             "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
+ localhost.localdomain: "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
 
 test:
- localhost:             "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
- localhost.localdomain: "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
+ localhost:             "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
+ localhost.localdomain: "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
 
 production:
- localhost:             "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
- localhost.localdomain: "AIzaSyBAuQWe-V-LB1C9fDeQnAOjbPxot0cm044"
- mushroomobserver.org:  "AIzaSyDN412tyXjZnYM586hIxRjn7WOURvmeGio"
+ localhost:             "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
+ localhost.localdomain: "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
+ mushroomobserver.org:  "AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g"
