@@ -18,6 +18,14 @@
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
 #    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
 #
+#    text_name          Amanita muscaria var. muscaria                   (pure text, no accents or authors)
+#    (real_text_name)   Amanita muscaria var. muscaria                   (minus authors, but with umlauts if exist)
+#    search_name        Amanita muscaria var. muscaria (L.) Lam.         (what one would typically search for)
+#    (real_search_name) Amanita muscaria (L.) Lam. var. muscaria         (parsing this should result in identical name)
+#    sort_name          Amanita muscaria  {6var.  !muscaria  (L.) Lam.   (nonsense string which sorts name in correct place)
+#    display_name       **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**   (formatted as for publication)
+#    observation_name   **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**   (formatted as for publication)
+#
 #  Note about "real" text_name and search_name: These are required by edit
 #  forms.  If the user inputs a name with an accent (ë is the only one
 #  allowed), but there is an error or warning that requires the user to
@@ -375,8 +383,9 @@ class Name < AbstractModel
   end
 
   def self.display_to_real_text(name)
-    result = name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
-    return result[0..name.text_name.length-1]
+    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, '').
+                      gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
+                      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, ' ') # (this part should be unnecessary)
   end
 
   def self.display_to_real_search(name)
@@ -1273,10 +1282,10 @@ class Name < AbstractModel
 
   # Check if the reason that the given name (String) is unrecognized is because
   # it's within a deprecated genus.  Use case: Cladina has been included back
-  # within Cladonia, but tons of guides use Cladonia anyway, so people like to
+  # within Cladonia, but tons of guides use Cladina anyway, so people like to
   # enter novel names under Cladina, not realizing that those names already exist
   # under Cladonia. Returns the parent in question which is deprecated (Name).
-  def self.is_parent_deprecated?(str)
+  def self.parent_if_parent_deprecated(str)
     result = nil
     names = find_or_create_name_and_parents(str)
     if names.any? and names.last and names.last.deprecated
@@ -1287,24 +1296,25 @@ class Name < AbstractModel
     return result
   end
 
-  # Related to self.is_parent_deprecated?.  Checks if the deprecated parent has
-  # a synonym, and if so, checks if there is a corresponding child under the
-  # synonym.  Returns an Array of candidates (Name's).
-  def self.suggest_alternate_genus(str, parent=nil)
-    parent ||= is_parent_deprecated?(str)
+  # Checks if the deprecated parent has synonyms, and if so, checks if there
+  # is a corresponding child under on of the synonymous parents.  Returns an
+  # Array of candidates (Name's).
+  def self.suggest_alternate_names_from_synonymous_genera(str, parent=nil)    # str = "Agaricus bogus var. namus"
+    parent ||= parent_if_parent_deprecated(str)                               # parent = <Agaricus>
     parse = parse_name(str)
     result = []
     if parent and parse
-      child = parse.real_text_name.sub(/^#{parent.real_text_name}/,'').strip
-      child_pat = child.gsub(/(a|um|us)( |$)/, '%\2')
-      for synonym in parent.synonyms
-        target = synonym.text_name + ' ' + child
+      child = parse.real_text_name.sub(/^#{parent.real_text_name}/,'').strip  # child = "bogus var. namus"
+      child_pat = child.gsub(/(a|um|us)( |$)/, '%\2')                         # child_pat = "bog% var. nam%"
+      for synonym in parent.synonyms                                          # synonym = <Lepiota>
+        target = synonym.text_name + ' ' + child                              # target = "Lepiota bog% var. nam%"
         conditions = ['text_name like ? AND correct_spelling_id IS NULL',
                       synonym.text_name + ' ' + child_pat]
-        result += Name.find(:all, :conditions => conditions).select do |n|
-          valid_alternate_genus?(n, synonym.text_name, child_pat)
+        result += Name.find(:all, :conditions => conditions).select do |name|
+          valid_alternate_genus?(name, synonym.text_name, child_pat)          # name = <Lepiota boga var. nama>
         end
       end
+      # Return only valid candidates if any are valid.
       if result.any? {|n| not n.deprecated?}
         result.reject!(&:deprecated)
       end
@@ -1312,8 +1322,10 @@ class Name < AbstractModel
     return result
   end
 
-  def self.valid_alternate_genus?(n, parent, child_pat)
-    unless match = n.text_name.match(/^#{parent} #{child_pat.gsub('%','(.*)')}$/)
+  # The SQL pattern, e.g., "Lepiota test%", is too permissive.  Verify that the
+  # results really are of the form /^Lepiota test(a|us|um)$/.
+  def self.valid_alternate_genus?(name, parent, child_pat)
+    unless match = name.text_name.match(/^#{parent} #{child_pat.gsub('%','(.*)')}$/)
       return false
     end
     for i in 1..child_pat.count('%')

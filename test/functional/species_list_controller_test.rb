@@ -36,7 +36,6 @@ class SpeciesListControllerTest < FunctionalTestCase
 
 ################################################################################
 
-
   def test_index_species_list_by_past_bys
     get(:index_species_list, :by => :modified)
     assert_response(:success)
@@ -965,7 +964,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :text_name   => 'Tapinella atrotomentosa',
       :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
       :sort_name   => 'Tapinella atrotomentosa (Batsch) Šutara',
-      :display_name => 'Tapinella atrotomentosa (Batsch) Šutara',
+      :display_name => '**__Tapinella atrotomentosa__** (Batsch) Šutara',
       :deprecated  => false,
       :rank        => :Species
     )

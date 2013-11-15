@@ -2759,8 +2759,8 @@ class ObserverController < ApplicationController
 
       # No matches -- suggest some correct names to make Debbie happy.
       if names.empty?
-        if parent = Name.is_parent_deprecated?(what2)
-          valid_names = Name.suggest_alternate_genus(what2, parent)
+        if parent = Name.parent_if_parent_deprecated(what2)
+          valid_names = Name.suggest_alternate_names_from_synonymous_genera(what2, parent)
           @parent_deprecated = parent
         else
           valid_names = Name.suggest_alternate_spellings(what2)
