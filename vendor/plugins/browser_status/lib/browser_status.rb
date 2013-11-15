@@ -449,6 +449,7 @@ module BrowserStatus
     return [:robot,    0.0    ] if ua.match(/robot|crawler|spider|slurp|googlebot|surveybot|webgobbler|morfeus|linkaider|linklint|linkwalker|metalogger|page-store|network diagnostics|bingbot|linguee bot|mj12bot|yandexbot|genieo/i)
     return [:opera,    $1.to_f] if ua.match(/Opera[ \/](\d+\.\d+)/)
     return [:ie,       $1.to_f] if ua.match(/ MSIE (\d+\.\d+)/)
+    return [:ie,       $1.to_f] if ua.match(/Windows.*Trident.*rv:(\d+\.\d+)/)
     return [:chrome,   $1.to_f] if ua.match(/Chrome\/(\d+\.\d+)/)
     return [:safari,   $1.to_f] if ua.match(/Version\/(\d+(\.\d+)?).*Safari/)
     return [:safari,   2.0    ] if ua.match(/Safari/)
