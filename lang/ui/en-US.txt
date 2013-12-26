@@ -2918,7 +2918,7 @@ sandbox_sample: >
   !http://random.com/image.jpg!\n
   \n
   Internal links:\n
-  _name 371, _Amanita ocreata_, or _A. ocreata_\n
+  _name 371_, _Amanita ocreata_, or _A. ocreata_\n
   _location 382_, _location Mt. Wilson_\n
   _user 252_, _user jason_\n
   _observation 12345_\n
