@@ -2,6 +2,7 @@
   @title = "Specimen '#{@specimen.herbarium_label}'"
   new_tab_set do
     add_tab(:edit_specimen.t, :action => 'edit_specimen', :id => @specimen.id) if is_in_admin_mode? or @specimen.can_edit?(@user)
+    add_tab(:herbarium_delete_specimen.t, :action => 'delete_specimen', :id => @specimen.id, :confirm => :are_you_sure.t)
     add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
   end
 %>

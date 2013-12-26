@@ -41,10 +41,14 @@ end %>
 <label for="observation_is_collection_location"><%= :form_observations_is_collection_location.t %></label><br/>
 <span class="HelpNote"><%= :form_observations_is_collection_location_help.t %></span><br/><br/>
 
-<%= check_box("observation", "specimen") %><label for="observation_specimen"><%= :form_observations_specimen_available.t %></label><br/>
-&nbsp;&nbsp;<%= herbarium_name_box() %><br/>
-&nbsp;&nbsp;<%= herbarium_id_box() %><br/>
-<span class="HelpNote"><%= :form_observations_specimen_available_help.t %></span><br/>
+<% if has_specimens %>
+  <span class="HelpNote"><%= :form_observations_delete_specimens_help.t %></span><br/>
+<% else %>
+  <%= check_box("observation", "specimen") %><label for="observation_specimen"><%= :form_observations_specimen_available.t %></label><br/>
+  &nbsp;&nbsp;<%= herbarium_name_box() %><br/>
+  &nbsp;&nbsp;<%= herbarium_id_box() %><br/>
+  <span class="HelpNote"><%= :form_observations_specimen_available_help.t %></span><br/>
+<% end %>
 
 <center><%= submit_tag(button_name) %></center><br/>
 

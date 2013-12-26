@@ -36,6 +36,7 @@ coprinus_comatus_obs:
   specimen: 1
   notes: Second fruiting in bark chips
   vote_cache: 1
+  thumb_image_id: 5
 
 agaricus_campestris_obs:
   id: 4

@@ -241,12 +241,14 @@ class ImageControllerTest < FunctionalTestCase
   # Test reusing an image by id number.
   def test_add_image_to_obs
     obs = observations(:coprinus_comatus_obs)
+    updated_at = obs.updated_at
     image = images(:disconnected_coprinus_comatus_image)
     assert(!obs.images.member?(image))
     requires_login(:reuse_image, :mode => 'observation', :obs_id => obs.id,
                    :img_id => image.id)
     assert_response(:controller => :observer, :action => :show_observation)
     assert(obs.reload.images.member?(image))
+    assert(updated_at != obs.updated_at)
   end
 
   def test_license_updater
@@ -438,6 +440,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_reuse_image_by_id
     obs = observations(:agaricus_campestris_obs)
+    updated_at = obs.updated_at
     image = images(:commercial_inquiry_image)
     assert(!obs.images.member?(image))
     params = {
@@ -455,6 +458,7 @@ class ImageControllerTest < FunctionalTestCase
     get_with_dump(:reuse_image, params)
     assert_response(:controller => "observer", :action => "show_observation")
     assert(obs.reload.images.member?(image))
+    assert(updated_at != obs.updated_at)
   end
 
   def test_reuse_image_for_term_post
@@ -474,9 +478,12 @@ class ImageControllerTest < FunctionalTestCase
   def test_upload_image
     setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
+    updated_at = obs.updated_at
     proj = projects(:bolete_project)
     proj.observations << obs
     img_count = obs.images.size
+    assert(img_count > 0)
+    assert(obs.thumb_image)
     file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg")
     file.content_type = 'image/jpeg'
     params = {
@@ -505,6 +512,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(20, @rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
+    assert(updated_at != obs.updated_at)
     message = :runtime_image_uploaded_image.t(:name => '#' + obs.images.last.id.to_s)
     assert_flash(/#{message}/)
     img = Image.last

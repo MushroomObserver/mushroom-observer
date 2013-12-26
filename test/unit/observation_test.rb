@@ -368,7 +368,7 @@ class ObservationTest < UnitTestCase
       :from        => @rolf,
       :to          => @dick,
       :observation => observations(:coprinus_comatus_obs).id,
-      :note        => 'notes,location,thumb_image_id,added_image,removed_image'
+      :note        => 'notes,location,added_image,removed_image'
     )
   end
 
@@ -426,7 +426,7 @@ class ObservationTest < UnitTestCase
       :from        => @rolf,
       :to          => @dick,
       :observation => observations(:coprinus_comatus_obs).id,
-      :note        => 'thumb_image_id,added_image'
+      :note        => 'added_image'
     )
 
     # Destroy observation.

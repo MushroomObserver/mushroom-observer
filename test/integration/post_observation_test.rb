@@ -81,8 +81,26 @@ class PostObservationTest < IntegrationTestCase
     submit_form_with_changes(edit_observation_form_changes)
     assert_flash_for_edit_observation
     assert_template(SHOW_OBSERVATION_PAGE)
-    assert_new_observation_is_correct(expected_values_after_edit)
+    assert_edit_observation_is_correct(expected_values_after_edit)
     assert_show_observation_page_has_important_info
+  end
+
+  # Rename from new_observation to just observation ***
+  def assert_edit_observation_is_correct(expected_values)
+    assert_edit_observation_has_correct_data(expected_values)
+    assert_observation_has_correct_location(expected_values)
+    assert_observation_has_correct_name(expected_values)
+    assert_observation_has_correct_image(expected_values)
+  end
+
+  def assert_edit_observation_has_correct_data(expected_values)
+    new_obs = Observation.last
+    assert_users_equal(expected_values[:user], new_obs.user)
+    assert(new_obs.created_at > Time.now - 1.minute)
+    assert(new_obs.updated_at > Time.now - 1.minute)
+    assert_dates_equal(expected_values[:when], new_obs.when)
+    assert_equal(expected_values[:is_collection_location], new_obs.is_collection_location)
+    assert_equal(expected_values[:notes], new_obs.notes)
   end
 
   def destroy_observation
@@ -108,9 +126,9 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_new_observation_is_correct(expected_values)
     assert_new_observation_has_correct_data(expected_values)
-    assert_new_observation_has_correct_location(expected_values)
-    assert_new_observation_has_correct_name(expected_values)
-    assert_new_observation_has_correct_image(expected_values)
+    assert_observation_has_correct_location(expected_values)
+    assert_observation_has_correct_name(expected_values)
+    assert_observation_has_correct_image(expected_values)
   end
 
   def assert_new_observation_has_correct_data(expected_values)
@@ -124,7 +142,7 @@ class PostObservationTest < IntegrationTestCase
     assert_equal(expected_values[:notes], new_obs.notes)
   end
 
-  def assert_new_observation_has_correct_location(expected_values)
+  def assert_observation_has_correct_location(expected_values)
     new_obs = Observation.last
     if expected_values[:where]
       assert_equal(expected_values[:where], new_obs.where)
@@ -138,13 +156,13 @@ class PostObservationTest < IntegrationTestCase
     assert_gps_equal(expected_values[:alt], new_obs.alt)
   end
 
-  def assert_new_observation_has_correct_name(expected_values)
+  def assert_observation_has_correct_name(expected_values)
     new_obs = Observation.last
     assert_names_equal(expected_values[:name], new_obs.name)
     assert_equal(expected_values[:vote], new_obs.owners_votes.first.value)
   end
 
-  def assert_new_observation_has_correct_image(expected_values)
+  def assert_observation_has_correct_image(expected_values)
     new_obs = Observation.last
     new_img = Image.last
     assert_obj_list_equal([new_img], new_obs.images)
@@ -321,7 +339,7 @@ class PostObservationTest < IntegrationTestCase
       'observation_long' => '-123.7519',
       'observation_alt' => '17',
       'is_collection_location' => false,
-      'specimen' => true,
+      # 'specimen' => true,
       'observation_notes' => 'Notes for observation',
       "good_image_#{img_id}_when_1i" => '2010',
       "good_image_#{img_id}_when_2i" => '3',
@@ -341,7 +359,7 @@ class PostObservationTest < IntegrationTestCase
       'observation_long' => '-123.4567',
       'observation_alt' => '987m',
       'is_collection_location' => true,
-      'specimen' => false,
+      # 'specimen' => false,
       'observation_notes' => 'New notes for observation',
       "good_image_#{img_id}_when_1i" => '2011',
       "good_image_#{img_id}_when_2i" => '4',

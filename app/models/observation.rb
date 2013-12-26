@@ -802,11 +802,14 @@ return result if debug
   def add_image(img)
     if !images.include?(img)
       images << img
-      unless thumb_image
+      if thumb_image
+        touch
+      else thumb_image
         self.thumb_image = img
         self.save
       end
       notify_users(:added_image)
+      self.reload
     end
     return img
   end

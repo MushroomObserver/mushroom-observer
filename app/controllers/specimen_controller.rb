@@ -48,7 +48,6 @@ class SpecimenController < ApplicationController
   end
 
   def show_specimen  # :nologin:
-    store_location
     @specimen = Specimen.find(params[:id].to_s)
     @layout = calc_layout_params
   end
@@ -177,7 +176,7 @@ class SpecimenController < ApplicationController
       specimen.clear_observations
       specimen.destroy
     end
-    redirect_to(:action => 'herbarium_index', :id => herbarium_id)
+    redirect_back_or_default(:action => 'herbarium_index', :id => herbarium_id)
   end
 
   def can_delete?(specimen)

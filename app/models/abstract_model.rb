@@ -182,6 +182,14 @@ class AbstractModel < ActiveRecord::Base
     AbstractModel.record_timestamps = true
   end
   
+  def touch
+    user = self.user_id
+    self.user_id = 0
+    self.save
+    self.user_id = user
+    self.save
+  end
+  
   ##############################################################################
   #
   #  :section: Callbacks
