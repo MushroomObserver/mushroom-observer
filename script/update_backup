@@ -53,3 +53,6 @@ print "Updating images...\n"
 os.system("script/update_images --root . --sync dreamhost --download -P")
 
 print "%s UTC" % time.asctime()
+
+print "Updating logs...\n"
+os.system("script/update_logs")

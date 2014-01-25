@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+print "update_logs hasn't been implemented yet.\n"
+
+# require File.expand_path('../../config/environment', __FILE__)
