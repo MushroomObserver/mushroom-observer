@@ -1711,7 +1711,7 @@ show_observation_create_specimen: Add Herbarium Specimen
 # location/show_past_location
 show_past_location_title: "[:VERSION] [num]: [name]"
 show_past_location_other_versions: Other Versions
-show_past_location_no_version: "No version specified"
+show_past_location_no_version: No version specified
 
 
 # location/show_past_location_description
@@ -1912,19 +1912,19 @@ term_copyright_warning: Please only upload an image that you created or which yo
 # semantic_vernacular/delete
 delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
 semantic_vernacular_index: Go to all Semantic Vernacular Descriptions
-semantic_vernacular_proposed: "Proposed by [name] at [date_time]"
+semantic_vernacular_proposed: Proposed by [name] at [date_time]
 semantic_vernacular_delete: Delete
 semantic_vernacular_title: "SVD Detail: [name]"
 
 # glossary/show_term
 show_term: Show Glossary Term
 show_term_title: "Glossary Term: [name]"
-show_term_reuse_image: "Add Example"
-show_term_remove_image: "Remove Examples"
+show_term_reuse_image: Add Example
+show_term_remove_image: Remove Examples
 
 # glossary/show_past_term
 show_past_term_title: "[:VERSION] [num]: [name]"
-show_past_term_no_version: "No version specified"
+show_past_term_no_version: No version specified
 
 # glossary/create_term
 create_term: Create New Term
@@ -1934,8 +1934,7 @@ create_term_title: Create New Glossary Term
 # glossary/index
 term_index: Glossary
 term_index_title: Glossary of Mycology Terms
-term_index_intro: >
-  As part of an on-going collaboration with the Rhode Island School of Design, Nathan Wilson has been working with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. This release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org">general@list.mushroomobserver.org</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">Mushroom Observer Facebook page</a>.
+term_index_intro: As part of an on-going collaboration with the Rhode Island School of Design, Nathan Wilson has been working with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. This release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org">general@list.mushroomobserver.org</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">Mushroom Observer Facebook page</a>.
 
 # glossary/edit_term
 edit_term: "[:edit_object(type=:term)]"
