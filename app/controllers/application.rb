@@ -1647,4 +1647,18 @@ class ApplicationController < ActionController::Base
     result["count"] = result["rows"] * result["columns"]
     result
   end
+  
+  def has_permission?(obj, error_message)
+    result = (is_in_admin_mode? or obj.can_edit?(@user))
+    flash_error(error_message) if not result
+    result
+  end
+
+  def can_delete?(obj)
+    has_permission?(obj, :runtime_no_destroy.l(:type => obj.type_tag))
+  end
+  
+  def can_edit?(obj)
+    has_permission?(obj, :runtime_no_update.l(:type => obj.type_tag))
+  end
 end

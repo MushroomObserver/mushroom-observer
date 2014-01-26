@@ -112,6 +112,10 @@ PROJECT: Project
 project: project
 PROJECTS: Projects
 projects: projects
+PUBLICATION: Publication
+publication: publication
+PUBLICATIONS: Publications
+publications: publications
 RSS_LOG: Activity Log
 rss_log: activity log
 RSS_LOGS: Activity Logs
@@ -891,6 +895,7 @@ app_powered_by: Powered by
 app_preferred_browser: Preferred browser
 app_feature_tracker: Feature Tracker
 app_glossary: Glossary
+app_publications: Publications
 
 # This is for the search bar at the top of every page.
 app_find: Find
@@ -1993,6 +1998,39 @@ conference_verify_success: Registration of [registrant] for [how_many] to [event
 conference_verify_warning: That registration has already been verified
 
 
+# Publication Fields
+publication_full: Full Reference
+publication_link: Link
+publication_peer_reviewed: Publication was peer reviewed
+publication_how_helped: How did Mushroom Observer help with this publication?
+publication_mo_mentioned: Mushroom Observer is mentioned or referenced in the publication
+
+# publication/index
+publication_index: Publication List
+publication_index_title: List of All Publications
+publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/observer/ask_webmaster_question.
+publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
+publication_legend: >
+  *P* indicates that it is a scientific, peer-reviewed article.\n
+  *M* indicates that the article explicitly mentions or references the Mushroom Observer.
+
+publication_citation: >
+  If you wish to cite the Mushroom Observer in a publication you are encouraged to use:\n\n
+  Wilson, N., Hollinger, J. 2006-present. Mushroom Observer. http://mushroomobserver.org\n\n
+  However, your publisher may have restrictions on how or even whether websites can be sited.  If you need a published reference the best current citation we are aware of is:\n\n
+  Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2). http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf
+
+# publication/edit
+edit_publication: Edit
+edit_publication_title: Editing Publication
+
+# publication/create_event
+create_publication: Add Publication
+create_publication_title: Create New Conference Event
+
+# publication/show
+show_publication_title: Publication
+show_publication_added_by: Added by
 
 # Herbarium Fields
 herbarium_name: Name
@@ -3577,10 +3615,10 @@ how_help_contributors: >
   \n
   p(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by "describing species":/observer/how_to_use#describing_species or "defining locations":/observer/how_to_use#defining_locations.\n
 
-how_help_designers: >
-  h2. 2. Designers\n
+how_help_scientists: >
+  h2. 2. Scientists\n
   \n
-  p(normal).  The site is pretty spare and could use an artisitc eye to help with things like icons and themes.\n
+  p(normal).  Mention Mushroom Observer in your publications and "add references to your publications":/publications.\n
 
 how_help_developers: >
   h2. 3. Developers\n

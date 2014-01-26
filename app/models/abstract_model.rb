@@ -591,6 +591,10 @@ class AbstractModel < ActiveRecord::Base
     }
   end
 
+  def can_edit?(user)
+    not respond_to?('user') or (user and (self.user == user))
+  end
+  
 private
   
   def log_image(tag, image, touch) # :nodoc:

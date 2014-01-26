@@ -1,0 +1,36 @@
+<%
+  @title = :edit_publication_title.l
+  new_tab_set do
+    add_tab(:cancel_and_show.t(:TYPE => :publication), @publication)
+    add_tab(:publication_index.t, publications_path)
+  end
+%>
+
+<% form_for(@publication) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :full, :publication_full.t %><br />
+    <span class="HelpNote"><%= :publication_full_help.t %></span><br/>
+    <%= f.text_area :full, cols: 80, rows: 10 %>
+  </p>
+  <p>
+    <%= f.label :link, :publication_link.t %><br />
+    <%= f.text_field :link, size: 80 %>
+  </p>
+  <p>
+    <%= f.check_box :peer_reviewed %>
+    <%= f.label :peer_reviewed, :publication_peer_reviewed.t %>
+  </p>
+  <p>
+    <%= f.label :how_helped, :publication_how_helped.t %><br />
+    <%= f.text_area :how_helped, cols: 80, rows: 10 %>
+  </p>
+  <p>
+    <%= f.check_box :mo_mentioned %>
+    <%= f.label :mo_mentioned, :publication_mo_mentioned.t %>
+  </p>
+  <p>
+    <center><%= f.submit :SAVE.t %></center>
+  </p>
+<% end %>

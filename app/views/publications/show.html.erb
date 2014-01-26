@@ -1,0 +1,39 @@
+<%
+  @title = :show_publication_title.l
+  new_tab_set do
+    add_tab(:EDIT.t, edit_publication_path(@publication)) if @publication.can_edit?(@user)
+    add_tab(:create_publication.t, new_publication_path)
+    add_tab(:publication_index.t, publications_path)
+  end
+%>
+
+<p>
+  <b><%= :publication_full.t %>:</b><br />
+  <%=h @publication.full %>
+</p>
+
+<% if @publication.link and (@publication.link != "") %>
+  <p>
+    <b><%= :publication_link.t %>:</b>
+    <%= link_to @publication.link, @publication.link %>
+  </p>
+<% end %>
+
+<p>
+  <% if @publication.peer_reviewed %>
+    <%= :publication_peer_reviewed.t %><br />
+  <% end %>
+
+  <% if @publication.mo_mentioned %>
+    <%= :publication_mo_mentioned.t %>
+  <% end %>
+</p>
+
+<p>
+  <b><%= :publication_how_helped.t %></b><br />
+  <%=h @publication.how_helped %>
+</p>
+
+<p>
+  <%= :show_publication_added_by.t + ' ' + user_link(@publication.user) %>
+</p>

@@ -1,5 +1,7 @@
 # encoding: utf-8
 ActionController::Routing::Routes.draw do |map|
+  map.resources :publications
+
   # The priority is based upon order of creation: first created -> highest priority.
 
   # Default page is /observer/index.

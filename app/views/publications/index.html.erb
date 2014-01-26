@@ -1,0 +1,34 @@
+<%
+  @title = :publication_index_title.l
+  new_tab_set do
+    add_tab(:create_publication.t, new_publication_path)
+  end
+%>
+
+<%= :publication_index_intro.tp %>
+<%= :publication_citation.tp %>
+<br />
+
+<table cellpadding="5" cellspacing="0" width="100%">
+  <tr>
+    <th><%= :publication_full.t %></th>
+    <th><%= :publication_link.t %></th>
+  </tr>
+
+<% odd_or_even = 1
+  for publication in @publications
+      odd_or_even = 1 - odd_or_even %>
+  <tr class="ListLine<%= odd_or_even %>">
+    <td width="50%"><%= link_to h(publication.full), publication %></td>
+    <td width="30%"><%= link_to h(publication.link).t, h(publication.link) %></td>
+    <td><%= publication.peer_reviewed ? "*P*".t : "" %>
+    <td><%= publication.mo_mentioned ? "*M*".t : "" %>
+    <% if publication.can_edit?(@user) %>
+      <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
+      <td><%= link_to :DESTROY.t, publication, :confirm => :are_you_sure.t, :method => :delete %></td>
+    <% end %>
+  </tr>
+<% end %>
+</table>
+<br />
+<%= :publication_legend.tp %>
