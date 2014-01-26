@@ -2016,8 +2016,7 @@ publication_legend: >
 publication_citation: >
   If you wish to cite the Mushroom Observer in a publication you are encouraged to use:\n\n
   Wilson, N., Hollinger, J. 2006-present. Mushroom Observer. http://mushroomobserver.org\n\n
-  However, your publisher may have restrictions on how or even whether websites can be sited.  If you need a published reference the best current citation we are aware of is:\n\n
-  Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2). http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf
+  However, your publisher may have restrictions on how or even whether websites can be sited.  If you need a published reference the best current citation we are aware of is:
 
 # publication/edit
 edit_publication: Edit
