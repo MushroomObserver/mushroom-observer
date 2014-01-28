@@ -9,6 +9,9 @@ class PublicationsController < ApplicationController
   def index
     store_location
     @publications = Publication.find(:all, :order => 'full')
+    @full_count = Publication.count
+    @peer_count = Publication.find(:all, :conditions => "peer_reviewed = 1").count
+    @mo_count = Publication.find(:all, :conditions => "mo_mentioned = 1").count
 
     respond_to do |format|
       format.html # index.html.erb

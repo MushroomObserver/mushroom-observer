@@ -14,8 +14,10 @@
 
 <table cellpadding="5" cellspacing="0" width="100%">
   <tr>
-    <th><%= :publication_full.t %></th>
+    <th><%= "#{:publication_full.t} (#{@full_count})" %></th>
     <th><%= :publication_link.t %></th>
+    <td><%= "(#{@peer_count})"%>
+    <td><%= "(#{@mo_count})"%>
   </tr>
 
 <% odd_or_even = 1
