@@ -16,8 +16,8 @@
   <tr>
     <th><%= "#{:publication_full.t} (#{@full_count})" %></th>
     <th><%= :publication_link.t %></th>
-    <td><%= "(#{@peer_count})"%>
-    <td><%= "(#{@mo_count})"%>
+    <td align="center"><%= "(#{@peer_count})"%>
+    <td align="center"><%= "(#{@mo_count})"%>
   </tr>
 
 <% odd_or_even = 1
@@ -26,8 +26,8 @@
   <tr class="ListLine<%= odd_or_even %>">
     <td width="50%"><%= link_to h(publication.full), publication %></td>
     <td width="30%"><%= link_to h(publication.link).t, h(publication.link) %></td>
-    <td><%= publication.peer_reviewed ? "*P*".t : "" %>
-    <td><%= publication.mo_mentioned ? "*M*".t : "" %>
+    <td align="center"><%= publication.peer_reviewed ? "*P*".t : "" %>
+    <td align="center"><%= publication.mo_mentioned ? "*M*".t : "" %>
     <% if publication.can_edit?(@user) %>
       <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
       <td><%= link_to :DESTROY.t, publication, :confirm => :are_you_sure.t, :method => :delete %></td>
