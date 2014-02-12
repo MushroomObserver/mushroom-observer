@@ -658,7 +658,7 @@ class NameController < ApplicationController
       else
         others = Name.find_all_by_text_name(@parse.text_name)
         raise(:edit_name_multiple_names_match.t(:str => @parse.real_search_name,
-              :xxx => others.map(&:search_name).join(' / ')))
+              :matches => others.map(&:search_name).join(' / ')))
       end
     end
     return name, parents

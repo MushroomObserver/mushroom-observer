@@ -190,7 +190,8 @@ def check_for_mismatches(file_lists, cronjob=false)
 
   # Get list of files with mismatches.
   mismatches = files.keys.select do |file|
-    size = nil
+    size          = nil
+    local_size    = nil
     any_different = false
     any_missing   = false
 
@@ -539,7 +540,7 @@ end
 # Turn on verbose messages.
 @@verbose = get_flag('-v') || get_flag('--verbose')
 
-# Tell it not to refresh listings (speeds things up for debugging.
+# Tell it not to refresh listings (speeds things up for debugging).
 @@use_cache = get_flag('-u') || get_flag('--use_cache')
 
 # Let user override some of the defaults.
