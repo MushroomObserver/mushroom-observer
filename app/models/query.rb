@@ -2031,8 +2031,8 @@ class Query < AbstractQuery
     when :Observation
       self.join << [:locations!, :names]
       self.where += google_conditions(search,
-        'CONCAT(observations.when,names.search_name,COALESCE(observations.notes,""),' +
-        'IF(locations.id,locations.name,observations.where))')
+        'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
+        'IF(locations.id,locations.name,observations.where),observations.when)')
 
     when :Project
       self.where += google_conditions(search,
