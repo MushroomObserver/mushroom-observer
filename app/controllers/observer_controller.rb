@@ -853,9 +853,7 @@ class ObserverController < ApplicationController
     set_query_params(query)
     @format = params[:format] || 'raw'
     @encoding = params[:encoding] || 'UTF-8'
-    if request.method != :post
-      # serve form
-    elsif params[:commit] == :CANCEL.l
+    if params[:commit] == :CANCEL.l
       redirect_to(:action => :index_observation, :always_index => true,
                   :params => query_params)
     elsif params[:commit] == :DOWNLOAD.l
@@ -866,7 +864,7 @@ class ObserverController < ApplicationController
       )
       render_report(report)
     else
-      raise "Invalid submit button: #{params[:commit].inspect}"
+      # serve form
     end
   rescue => e
     flash_error("Internal error: #{e}", *e.backtrace[0..10])
