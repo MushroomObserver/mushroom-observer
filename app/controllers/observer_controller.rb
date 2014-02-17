@@ -118,6 +118,7 @@ class ObserverController < ApplicationController
 
   require_dependency 'observation_report'
   require_dependency 'refine_search'
+  require_dependency 'pattern_search'
   include RefineSearch
 
   before_filter :login_required, :except => CSS + [
@@ -704,9 +705,16 @@ class ObserverController < ApplicationController
        (observation = Observation.safe_find(pattern))
       redirect_to(:action => 'show_observation', :id => observation.id)
     else
-      query = create_query(:Observation, :pattern_search, :pattern => pattern)
-      @suggest_alternate_spellings = pattern
-      show_selected_observations(query)
+      search = PatternSearch::Observation.new(pattern)
+      if search.errors.any?
+        for error in search.errors
+          flash_error(error.to_s)
+        end
+        render(:action => :list_observations)
+      else
+        @suggest_alternate_spellings = search.query.params[:pattern]
+        show_selected_observations(search.query)
+      end
     end
   end
 

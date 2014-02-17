@@ -369,6 +369,11 @@ class User < AbstractModel
     user == self
   end
 
+  # Improve debug and error message readability.
+  def inspect
+    "#<User #{id}: #{unique_text_name.inspect}>"
+  end
+
   ##############################################################################
   #
   #  :section: Names

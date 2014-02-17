@@ -1473,8 +1473,19 @@ class Query < AbstractQuery
   def initialize_model_do_date(arg=:date, col=arg)
     col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
-      initialize_model_do_date_half(true, vals[0], col)
-      initialize_model_do_date_half(false, vals[1], col)
+      # Ugh, special case for search by month/day where range of months wraps around from December to January.
+      if vals[0].to_s.match(/^\d\d-\d\d$/) and
+         vals[1].to_s.match(/^\d\d-\d\d$/) and
+         vals[0].to_s > vals[1].to_s
+        m1, d1 = vals[0].to_s.split('-')
+        m2, d2 = vals[1].to_s.split('-')
+        self.where << "MONTH(#{col}) > #{m1} OR MONTH(#{col}) < #{m2} OR " +
+                      "(MONTH(#{col}) = #{m1} AND DAY(#{col}) >= #{d1}) OR " +
+                      "(MONTH(#{col}) = #{m2} AND DAY(#{col}) <= #{d2})"
+      else
+        initialize_model_do_date_half(true, vals[0], col)
+        initialize_model_do_date_half(false, vals[1], col)
+      end
     end
   end
 
