@@ -202,10 +202,6 @@ class SpecimenController < ApplicationController
     end
   end
   
-  def can_edit?(specimen)
-    has_permission?(specimen, :edit_specimen_cannot_edit.l)
-  end
-  
   def ok_to_update(specimen, params)
     params[:herbarium_label] = params[:herbarium_label].strip_html
     new_label = params[:herbarium_label]

@@ -135,7 +135,7 @@ class SpecimenControllerTest < FunctionalTestCase
 
     login('mary') # Non-curator
     get_with_dump(:edit_specimen, :id => nybg.id)
-    assert_flash(/without permission/i)
+    assert_flash(/unable to update specimen/i)
     assert_response(:redirect)
 
     login('rolf')

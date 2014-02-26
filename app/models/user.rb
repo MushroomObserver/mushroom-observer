@@ -830,6 +830,7 @@ class User < AbstractModel
       [:name_descriptions_editors,     :user_id],
       [:notifications,                 :user_id],
       [:observations,                  :user_id],
+      [:publications,                  :user_id],
       [:species_lists,                 :user_id],
       [:user_groups_users,             :user_id],
       [:users,                         :id],
