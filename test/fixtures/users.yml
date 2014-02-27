@@ -101,3 +101,18 @@ roy:
   image_size: :medium
   location_format: :scientific
   keep_filenames: :toss
+
+spammer:
+  id: 7
+  sync_id: 7xx1
+  login: spamspamspam
+  name: Must Spam
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
+  email: spammer@collectivesource.com
+  contribution: 10
+  created_here: true
+  locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
+  keep_filenames: :toss

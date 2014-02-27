@@ -15,3 +15,11 @@ two:
   how_helped: MyText
   mo_mentioned: false
   peer_reviewed: false
+
+spam_pub:
+  id: 3
+  user_id: 7
+  full: This is spam
+  how_helped: Spam spam spam
+  mo_mentioned: false
+  peer_reviewed: false

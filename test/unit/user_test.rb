@@ -188,4 +188,10 @@ class UserTest < UnitTestCase
     assert_nil(user.image)
   end
   
+  def test_erase_user
+    user = users(:spammer)
+    pub_id = user.publications[0].id
+    User.erase_user(user.id)
+    assert_raise(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
+  end
 end
