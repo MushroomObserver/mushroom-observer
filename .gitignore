@@ -13,3 +13,4 @@ Thumbs.db
 tmp/
 log/
 checkpoints/
+production-logs
