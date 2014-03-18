@@ -1,0 +1,11 @@
+source 'https://rubygems.org'
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '2.1.1'
+gem 'mysql2'
+gem 'mysql'
+gem 'activerecord-mysql2-adapter'
+gem 'test-unit'
+gem 'RedCloth'
+gem 'sparql'
+gem 'i18n'
