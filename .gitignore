@@ -14,3 +14,4 @@ tmp/
 log/
 checkpoints/
 production-logs
+.ruby-version

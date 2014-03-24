@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140125225358) do
+ActiveRecord::Schema.define(:version => 20140324102552) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created_at"
@@ -92,12 +92,13 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
   end
 
   create_table "image_votes", :force => true do |t|
-    t.integer "image_id",                     :null => false
-    t.integer "user_id",                      :null => false
     t.integer "value",                        :null => false
     t.boolean "anonymous", :default => false, :null => false
+    t.integer "user_id"
+    t.integer "image_id"
   end
 
+  add_index "image_votes", ["user_id"], :name => "index_image_votes_on_user_id"
   add_index "image_votes", ["image_id"], :name => "index_image_votes_on_image_id"
 
   create_table "images", :force => true do |t|
@@ -351,7 +352,6 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
     t.string   "search_name",         :limit => 200
     t.string   "display_name",        :limit => 200
     t.string   "sort_name",           :limit => 200
-    t.string   "author",              :limit => 100,                                                                                                                                                                         :null => false
     t.text     "citation"
     t.boolean  "deprecated",                                                                                                                                                                              :default => false, :null => false
     t.integer  "synonym_id"
@@ -359,6 +359,7 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
     t.text     "notes"
     t.text     "classification"
     t.boolean  "ok_for_export",                                                                                                                                                                           :default => true,  :null => false
+    t.string   "author",              :limit => 100
   end
 
   create_table "names_versions", :force => true do |t|
@@ -366,16 +367,16 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
     t.integer  "version"
     t.datetime "updated_at"
     t.integer  "user_id"
-    t.enum     "rank",                :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
     t.string   "text_name",           :limit => 100
     t.string   "search_name",         :limit => 200
     t.string   "display_name",        :limit => 200
     t.string   "sort_name",           :limit => 200
     t.string   "author",              :limit => 100
     t.text     "citation"
-    t.boolean  "deprecated",                                                                                                                                   :default => false, :null => false
+    t.boolean  "deprecated",                                                                                                                                                                              :default => false, :null => false
     t.integer  "correct_spelling_id"
     t.text     "notes"
+    t.enum     "rank",                :limit => [:Form, :Variety, :Subspecies, :Species, :Stirps, :Subsection, :Section, :Subgenus, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
   end
 
   create_table "naming_reasons", :force => true do |t|
@@ -473,10 +474,10 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
   create_table "queries", :force => true do |t|
     t.datetime "updated_at"
     t.integer  "access_count"
-    t.enum     "model",        :limit => [:Comment, :Image, :Location, :LocationDescription, :Name, :NameDescription, :Observation, :Project, :RssLog, :SpeciesList, :User]
-    t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_project, :for_target, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_for_project, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
     t.text     "params"
     t.integer  "outer_id"
+    t.enum     "flavor",       :limit => [:advanced_search, :all, :at_location, :at_where, :by_author, :by_editor, :by_rss_log, :by_user, :for_project, :for_target, :for_user, :in_set, :in_species_list, :inside_observation, :of_children, :of_name, :of_parents, :pattern_search, :regexp_search, :with_descriptions, :with_descriptions_by_author, :with_descriptions_by_editor, :with_descriptions_by_user, :with_descriptions_in_set, :with_observations, :with_observations_at_location, :with_observations_at_where, :with_observations_by_user, :with_observations_for_project, :with_observations_in_set, :with_observations_in_species_list, :with_observations_of_children, :with_observations_of_name]
+    t.enum     "model",        :limit => [:Comment, :Herbarium, :Image, :Location, :LocationDescription, :Name, :NameDescription, :Observation, :Project, :RssLog, :SpeciesList, :Specimen, :User]
   end
 
   create_table "queued_email_integers", :force => true do |t|
@@ -619,10 +620,8 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
     t.boolean  "vertical_layout",                                                                                  :default => true,           :null => false
     t.integer  "license_id",                                                                                       :default => 3,              :null => false
     t.integer  "contribution",                                                                                     :default => 0
-    t.text     "notes",                                                                                            :default => "",             :null => false
     t.integer  "location_id"
     t.integer  "image_id"
-    t.text     "mailing_address",                                                                                  :default => "",             :null => false
     t.string   "locale",                       :limit => 5
     t.text     "bonuses"
     t.boolean  "email_comments_owner",                                                                             :default => true,           :null => false
@@ -659,6 +658,8 @@ ActiveRecord::Schema.define(:version => 20140125225358) do
     t.boolean  "thumbnail_maps",                                                                                   :default => true,           :null => false
     t.string   "auth_code",                    :limit => 40
     t.enum     "keep_filenames",               :limit => [:toss, :keep_but_hide, :keep_and_show],                  :default => :keep_and_show, :null => false
+    t.text     "notes"
+    t.text     "mailing_address"
   end
 
   create_table "votes", :force => true do |t|

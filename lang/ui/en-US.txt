@@ -2011,12 +2011,14 @@ publication_index_intro: This is a list of all known publications that benefitte
 publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
 publication_legend: >
   *P* indicates that it is a scientific, peer-reviewed article.\n
-  *M* indicates that the article explicitly mentions or references the Mushroom Observer.
+  *M* indicates that the article explicitly mentions or references the Mushroom Observer.\n
 
 publication_citation: >
-  If you wish to cite the Mushroom Observer in a publication you are encouraged to use:\n\n
-  Wilson, N., Hollinger, J. 2006-present. Mushroom Observer. http://mushroomobserver.org\n\n
-  However, your publisher may have restrictions on how or even whether websites can be sited.  If you need a published reference the best current citation we are aware of is:
+  If you wish to cite the Mushroom Observer in a publication you are encouraged to use:\n
+  \n
+  Wilson, N., Hollinger, J. 2006-present. Mushroom Observer. http://mushroomobserver.org\n
+  \n
+  However, your publisher may have restrictions on how or even whether websites can be sited.  If you need a published reference the best current citation we are aware of is:\n
 
 # publication/edit
 edit_publication: Edit

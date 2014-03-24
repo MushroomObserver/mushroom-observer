@@ -2,7 +2,7 @@ rolfs_api_key:
   id: 1
   created_at: 2012-06-26 12:34:56
   verified: 2012-06-26 12:34:56
-  last_used: nil
+  last_used: 2014-03-23 16:57:27
   num_uses: 0
   user_id: 1
   key: bogus_api_key

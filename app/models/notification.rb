@@ -56,7 +56,7 @@ class Notification < AbstractModel
         raise "Missing 'naming' argument for #{self.flavor} notification." if !naming
         template.gsub(':observer', user.login).
                  gsub(':observation', "#{HTTP_DOMAIN}/#{naming.observation_id}").
-                 gsub(':mailing_address', user.mailing_address).
+                 gsub(':mailing_address', user.mailing_address || '').
                  gsub(':location', naming.observation.place_name).
                  gsub(':name', naming.format_name)
       end

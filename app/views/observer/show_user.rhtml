@@ -83,10 +83,10 @@ end %>
   <b><%= :show_user_mailing_address.t %>:</b>
      <%= @show_user.mailing_address %><br/>
 <% end %>
-<% if !@show_user.notes.empty? %>
+<% if !@show_user.notes.blank? %>
   <br/>
 <% end %>
-<% if !@show_user.notes.empty? %>
+<% if !@show_user.notes.blank? %>
   <table><tr><td>
     <%= @show_user.notes.tpl %>
   </td></tr></table>

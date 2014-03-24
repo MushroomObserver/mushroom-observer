@@ -166,7 +166,7 @@ class ObservationTest < UnitTestCase
     assert_equal(names(:agaricus_campestris), obs.reload.name)
 
     # Make sure this changes consensus...
-    @dick.contribution = 100000000000
+    @dick.contribution = 2000000000
     assert_save(@dick)
 
     User.current = @dick
