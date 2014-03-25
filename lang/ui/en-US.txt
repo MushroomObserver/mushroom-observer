@@ -843,8 +843,7 @@ app_title: Mushroom Observer
 app_banner: Mushroom<br/>Observer
 
 # This goes in a box at the top of the page.
-# app_banner_box: It was a busy summer and fall.  See all the <a href="/observer/news">changes</a>!
-app_banner_box: "<a href=\"/support/wrapup_2012\">2012 Wrapup and Request for Support</a>"
+app_banner_box: "<a href=\"/publications\">Read About and Add Publications Related to Mushroom Observer</a>"
 
 # These are the controls/links in the left-hand panel.
 app_intro: Introduction
