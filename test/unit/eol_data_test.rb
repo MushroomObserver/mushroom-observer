@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class EolDataTest < UnitTestCase
+class EolDataTest < ActiveSupport::TestCase
   def test_create
     obj = EolData.new
     assert_equal(SortedSet, obj.names.class)

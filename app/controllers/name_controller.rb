@@ -685,7 +685,7 @@ class NameController < ApplicationController
     @name.attributes = @parse.params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
-    if not @name.altered?
+    if not @name.changed?
       any_changes = false
     elsif not save_name(@name, :log_name_updated)
       raise(:runtime_unable_to_save_changes.t)

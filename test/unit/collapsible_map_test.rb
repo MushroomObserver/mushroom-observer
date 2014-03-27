@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 require 'map_collapsible'
 require 'map_set'
@@ -23,7 +23,7 @@ class TestCollapsible < CollapsibleCollectionOfMappableObjects
   end
 end
 
-class CollapsibleMapTest < UnitTestCase
+class CollapsibleMapTest < ActiveSupport::TestCase
 
   def assert_mapset_is_point(mapset, lat, long)
     clean_our_backtrace do

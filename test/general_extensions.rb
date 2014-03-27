@@ -182,7 +182,7 @@ module GeneralExtensions
   # Compare two lists by mapping their elements, then sorting.  By default it
   # just maps their elements to strings.
   #
-  #   assert_list_equal([@rolf,@mary], name.authors, &:login)
+  #   assert_list_equal([rolf,mary], name.authors, &:login)
   #
   def assert_list_equal(expect, got, msg=nil, &block)
     clean_our_backtrace do
@@ -203,7 +203,7 @@ module GeneralExtensions
 
   # Compare two lists of User's by comparing their logins.
   #
-  #   assert_user_list_equal([@rolf,@mary], name.authors)
+  #   assert_user_list_equal([rolf,mary], name.authors)
   #
   def assert_user_list_equal(expect, got, msg=nil)
     clean_our_backtrace do
@@ -277,8 +277,8 @@ module GeneralExtensions
   #
   #   assert_email(0,
   #     :flavor  => 'QueuedEmail::CommentAdd',
-  #     :from    => @mary,
-  #     :to      => @rolf,
+  #     :from    => mary,
+  #     :to      => rolf,
   #     :comment => @comment_on_minmal_unknown.id
   #   )
   #

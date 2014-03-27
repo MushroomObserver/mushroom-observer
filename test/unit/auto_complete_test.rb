@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 require 'auto_complete'
 
@@ -15,7 +15,7 @@ class AutoCompleteMockByWord < AutoCompleteByWord
   def clean_matches; super; end
 end
 
-class AutoCompleteTest < UnitTestCase
+class AutoCompleteTest < ActiveSupport::TestCase
   def test_subclass
     assert_equal('AutoCompleteName', AutoComplete.subclass('name').name)
     assert_equal('AutoCompleteMockByWord', AutoComplete.subclass('mock_by_word').name)

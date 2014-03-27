@@ -1,6 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class PublicationTest < UnitTestCase
+class PublicationTest < ActiveSupport::TestCase
   # Replace this with your real tests.
   def test_truth
     assert true

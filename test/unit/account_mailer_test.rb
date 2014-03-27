@@ -1,8 +1,8 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 require 'account_mailer'
 
-class AccountMailerTest < UnitTestCase
+class AccountMailerTest < ActiveSupport::TestCase
   FIXTURES_PATH = File.dirname(__FILE__) + '/../fixtures/account_mailer'
 
   def setup
@@ -55,16 +55,16 @@ class AccountMailerTest < UnitTestCase
 
   def test_email_1
     project = projects(:eol_project)
-    run_mail_test('admin_request', @rolf) do
-      AccountMailer.create_admin_request(@katrina, @rolf, project,
+    run_mail_test('admin_request', rolf) do
+      AccountMailer.create_admin_request(katrina, rolf, project,
         'Please do something or other', 'and this is why...')
     end
   end
 
   def test_email_2
     obj = names(:coprinus_comatus)
-    run_mail_test('author_request', @rolf) do
-      AccountMailer.create_author_request(@katrina, @rolf, obj.description,
+    run_mail_test('author_request', rolf) do
+      AccountMailer.create_author_request(katrina, rolf, obj.description,
                         'Please do something or other', 'and this is why...')
     end
   end
@@ -72,23 +72,23 @@ class AccountMailerTest < UnitTestCase
   def test_email_3
     obs = observations(:minimal_unknown)
     comment = comments(:another_comment)
-    run_mail_test('comment_response', @rolf) do
-      email = AccountMailer.create_comment(@dick, @rolf, obs, comment)
+    run_mail_test('comment_response', rolf) do
+      email = AccountMailer.create_comment(dick, rolf, obs, comment)
     end
   end
 
   def test_email_4
     obs = observations(:minimal_unknown)
     comment = comments(:minimal_comment)
-    run_mail_test('comment', @mary) do
-      email = AccountMailer.create_comment(@rolf, @mary, obs, comment)
+    run_mail_test('comment', mary) do
+      email = AccountMailer.create_comment(rolf, mary, obs, comment)
     end
   end
 
   def test_email_5
     image = images(:commercial_inquiry_image)
     run_mail_test('commercial_inquiry', image.user) do
-      AccountMailer.create_commercial_inquiry(@mary, image,
+      AccountMailer.create_commercial_inquiry(mary, image,
                                           'Did test_commercial_inquiry work?')
     end
   end
@@ -102,29 +102,29 @@ class AccountMailerTest < UnitTestCase
     name2.search_name = name2.search_name.to_ascii
     name2.display_name = name2.display_name.to_ascii
 
-    run_mail_test('consensus_change', @mary) do
-      AccountMailer.create_consensus_change(@dick, @mary, obs, name1, name2,
+    run_mail_test('consensus_change', mary) do
+      AccountMailer.create_consensus_change(dick, mary, obs, name1, name2,
                                             obs.created_at)
     end
   end
 
   def test_email_7
     run_mail_test('denied') do
-      AccountMailer.create_denied(@junk)
+      AccountMailer.create_denied(junk)
     end
   end
 
   def test_email_8
-    run_mail_test('email_features', @rolf) do
-      AccountMailer.create_email_features(@rolf, 'A feature')
+    run_mail_test('email_features', rolf) do
+      AccountMailer.create_email_features(rolf, 'A feature')
     end
   end
 
   def test_email_9
     loc = locations(:albion)
     desc = loc.description
-    run_mail_test('location_change', @mary) do
-      AccountMailer.create_location_change(@dick, @mary, loc.updated_at, loc,
+    run_mail_test('location_change', mary) do
+      AccountMailer.create_location_change(dick, mary, loc.updated_at, loc,
                                            desc, 1, 2, 1, 2)
     end
   end
@@ -132,8 +132,8 @@ class AccountMailerTest < UnitTestCase
   def test_email_10
     name = names(:peltigera)
     desc = name.description
-    run_mail_test('name_change', @mary) do
-      AccountMailer.create_name_change(@dick, @mary, name.updated_at, name, desc,
+    run_mail_test('name_change', mary) do
+      AccountMailer.create_name_change(dick, mary, name.updated_at, name, desc,
                                        1, 2, 1, 2, desc.review_status)
     end
   end
@@ -142,8 +142,8 @@ class AccountMailerTest < UnitTestCase
     # Test for bug that occurred in the wild
     name = names(:peltigera)
     desc = name.description
-    run_mail_test('name_change2', @mary) do
-      AccountMailer.create_name_change(@dick, @mary, name.updated_at, name, desc,
+    run_mail_test('name_change2', mary) do
+      AccountMailer.create_name_change(dick, mary, name.updated_at, name, desc,
                                        0, 1, 0, 1, desc.review_status)
     end
   end
@@ -151,29 +151,29 @@ class AccountMailerTest < UnitTestCase
   def test_email_12
     naming = namings(:coprinus_comatus_other_naming)
     obs = observations(:coprinus_comatus_obs)
-    run_mail_test('name_proposal', @rolf) do
-      AccountMailer.create_name_proposal(@mary, @rolf, naming, obs)
+    run_mail_test('name_proposal', rolf) do
+      AccountMailer.create_name_proposal(mary, rolf, naming, obs)
     end
   end
 
   def test_email_13
     naming = namings(:agaricus_campestris_naming)
     notification = notifications(:agaricus_campestris_notification_with_note)
-    run_mail_test('naming_for_observer', @rolf) do
-      AccountMailer.create_naming_for_observer(@rolf, naming, notification)
+    run_mail_test('naming_for_observer', rolf) do
+      AccountMailer.create_naming_for_observer(rolf, naming, notification)
     end
   end
 
   def test_email_14
     naming = namings(:agaricus_campestris_naming)
-    run_mail_test('naming_for_tracker', @mary) do
-      AccountMailer.create_naming_for_tracker(@mary, naming)
+    run_mail_test('naming_for_tracker', mary) do
+      AccountMailer.create_naming_for_tracker(mary, naming)
     end
   end
 
   def test_email_15
-    run_mail_test('new_password', @rolf) do
-      AccountMailer.create_new_password(@rolf, 'A password')
+    run_mail_test('new_password', rolf) do
+      AccountMailer.create_new_password(rolf, 'A password')
     end
   end
 
@@ -185,13 +185,13 @@ class AccountMailerTest < UnitTestCase
     name.search_name = name.search_name.to_ascii
     name.display_name = name.display_name.to_ascii
 
-    run_mail_test('observation_change', @mary) do
-      AccountMailer.create_observation_change(@dick, @mary, obs,
+    run_mail_test('observation_change', mary) do
+      AccountMailer.create_observation_change(dick, mary, obs,
         'date,location,specimen,is_collection_location,notes,' +
         'thumb_image_id,added_image,removed_image', obs.created_at)
     end
-    run_mail_test('observation_destroy', @mary) do
-      AccountMailer.create_observation_change(@dick, @mary, nil,
+    run_mail_test('observation_destroy', mary) do
+      AccountMailer.create_observation_change(dick, mary, nil,
         '**__Coprinus comatus__** L. (123)', obs.created_at)
     end
   end
@@ -199,34 +199,34 @@ class AccountMailerTest < UnitTestCase
   def test_email_17
     obs = observations(:detailed_unknown)
     run_mail_test('observation_question', obs.user) do
-      AccountMailer.create_observation_question(@rolf, obs,
+      AccountMailer.create_observation_question(rolf, obs,
         'Where did you find it?')
     end
   end
 
   def test_email_18
     name = names(:agaricus_campestris)
-    run_mail_test('publish_name', @rolf) do
-      AccountMailer.create_publish_name(@mary, @rolf, name)
+    run_mail_test('publish_name', rolf) do
+      AccountMailer.create_publish_name(mary, rolf, name)
     end
   end
 
   def test_email_19
-    run_mail_test('user_question', @mary) do
-      AccountMailer.create_user_question(@rolf, @mary,
+    run_mail_test('user_question', mary) do
+      AccountMailer.create_user_question(rolf, mary,
         'Interesting idea', 'Shall we discuss it in email?')
     end
   end
 
   def test_email_20
-    run_mail_test('verify', @mary) do
-      AccountMailer.create_verify(@mary)
+    run_mail_test('verify', mary) do
+      AccountMailer.create_verify(mary)
     end
   end
 
   def test_email_21
     run_mail_test('webmaster_question') do
-      AccountMailer.create_webmaster_question(@mary.email, 'A question')
+      AccountMailer.create_webmaster_question(mary.email, 'A question')
     end
   end
 
@@ -248,16 +248,15 @@ class AccountMailerTest < UnitTestCase
   end
 
   def test_email_24
-    run_mail_test('verify_api_key', @rolf) do
-      AccountMailer.create_verify_api_key(@rolf, @dick, ApiKey.first)
+    run_mail_test('verify_api_key', rolf) do
+      AccountMailer.create_verify_api_key(rolf, dick, ApiKey.first)
     end
   end
 
   def test_email_add_specimen_not_curator
     specimen = specimens(:interesting_unknown)
-
-    run_mail_test('add_specimen_not_curator', @rolf) do
-      AccountMailer.create_add_specimen_not_curator(@mary, @rolf, specimen)
+    run_mail_test('add_specimen_not_curator', rolf) do
+      AccountMailer.create_add_specimen_not_curator(mary, rolf, specimen)
     end
   end
 end

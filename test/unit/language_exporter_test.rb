@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class LanguageExporterTest < UnitTestCase
+class LanguageExporterTest < ActiveSupport::TestCase
   def setup
     @official = Language.official
     Language.clear_verbose_messages
@@ -279,7 +279,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_create_string
-    User.current = @dick
+    User.current = dick
     @official.send_private(:create_string, 'number', 'uno', 'one')
 
     str = TranslationString.last
@@ -288,7 +288,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal('number', str.tag)
     assert_equal('uno', str.text)
     assert(str.updated_at > 1.minute.ago)
-    assert_users_equal(@dick, str.user)
+    assert_users_equal(dick, str.user)
     assert_equal(1, str.versions.length)
 
     ver = str.versions.last
@@ -296,11 +296,11 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(str, ver.translation_string)
     assert_equal('uno', ver.text)
     assert(ver.updated_at > 1.minute.ago)
-    assert_equal(@dick.id, ver.user_id)
+    assert_equal(dick.id, ver.user_id)
   end
 
   def test_update_string
-    User.current = @katrina
+    User.current = katrina
     greek = languages(:greek)
     str = translation_strings(:greek_one)
     assert_equal(2, str.version)
@@ -312,7 +312,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal('one', str.tag)
     assert_equal('eins', str.text)
     assert(str.updated_at > 1.minute.ago)
-    assert_users_equal(@katrina, str.user)
+    assert_users_equal(katrina, str.user)
     assert_equal(3, str.versions.length)
 
     ver = str.versions.last
@@ -320,14 +320,14 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(str, ver.translation_string)
     assert_equal('eins', ver.text)
     assert(ver.updated_at > 1.minute.ago)
-    assert_equal(@katrina.id, str.user_id)
+    assert_equal(katrina.id, str.user_id)
 
     ver = str.versions[1]
     assert_equal(2, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal('ένα', ver.text)
     assert(ver.updated_at < 1.minute.ago)
-    assert_equal(@dick.id, ver.user_id)
+    assert_equal(dick.id, ver.user_id)
   end
 
   def test_translation_strings_hash
@@ -354,7 +354,7 @@ class LanguageExporterTest < UnitTestCase
     # Automatically (temporarily) logs in the admin.
     # assert_raises(RuntimeError) { @official.import_from_file }
 
-    User.current = @dick
+    User.current = dick
     hash = @official.localization_strings
     assert(hash.length >= 9) # Make sure we got something
     @official.write_hash(hash)
@@ -376,7 +376,7 @@ class LanguageExporterTest < UnitTestCase
     assert_true(@official.strip, 'Should have been three strip changes.')
     assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
 
-    assert_equal(3, @official.translation_strings.select {|str| str.user == @dick}.length)
+    assert_equal(3, @official.translation_strings.select {|str| str.user == dick}.length)
   end
 
   def test_import_unofficial
@@ -385,7 +385,7 @@ class LanguageExporterTest < UnitTestCase
     # Must be logged in to do this!
     assert_raises(RuntimeError) { greek.import_from_file }
 
-    User.current = @katrina
+    User.current = katrina
     hash = greek.localization_strings
 
     # This is just the template.

@@ -46,7 +46,7 @@ class HerbariumControllerTest < FunctionalTestCase
       :herbarium => {
         :name => "Rolf's Personal Herbarium",
         :description => 'Rolf wants Melanolucas!!!',
-        :email => users(:rolf).email,
+        :email => rolf.email,
         :mailing_address => "",
         :place_name => "",
         :code => "RPH"
@@ -64,7 +64,7 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:email], herbarium.email)
     assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
     assert_equal(params[:herbarium][:code], herbarium.code)
-    assert_equal([users(:rolf)], herbarium.curators)
+    assert_equal([rolf], herbarium.curators)
     assert_response(:redirect)
   end
   

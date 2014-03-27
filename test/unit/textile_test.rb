@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 require 'textile'
 class Textile
@@ -8,7 +8,7 @@ class Textile
   end
 end
 
-class TextileTest < UnitTestCase
+class TextileTest < ActiveSupport::TestCase
 
   def assert_name_link_matches(str, label=nil, name=nil)
     clean_our_backtrace do

@@ -14,12 +14,12 @@ class StudentTest < IntegrationTestCase
     gen_desc = 'Mary wrote this draft text.'
 
     project = projects(:eol_project)
-    project.admin_group.users.delete(@mary)
+    project.admin_group.users.delete(mary)
 
-    rolf    = new_user_session(@rolf)     # EOL admin
-    mary    = new_user_session(@mary)     # EOL user
-    katrina = new_user_session(@katrina)  # another EOL user
-    dick    = new_user_session(@dick)     # random user
+    rolf    = new_user_session(rolf)     # EOL admin
+    mary    = new_user_session(mary)     # EOL user
+    katrina = new_user_session(katrina)  # another EOL user
+    dick    = new_user_session(dick)     # random user
     lurker  = new_session                 # nobody
 
     # Navigate to Strobilurus diminutivus (no descriptions) and create draft.

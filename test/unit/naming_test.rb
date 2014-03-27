@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class NamingTest < UnitTestCase
+class NamingTest < ActiveSupport::TestCase
 
   # Propose a naming for an observation.
   def test_create
@@ -12,7 +12,7 @@ class NamingTest < UnitTestCase
         :updated_at     => now,
         :observation_id => observations(:coprinus_comatus_obs).id,
         :name_id        => names(:agaricus_campestris).id,
-        :user_id        => @mary.id
+        :user_id        => mary.id
     )
     assert naming.save, naming.errors.full_messages.join("; ")
   end
@@ -50,7 +50,7 @@ class NamingTest < UnitTestCase
   def test_destroy
     assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
     id = namings(:coprinus_comatus_naming).id
-    User.current = @rolf
+    User.current = rolf
     namings(:coprinus_comatus_naming).destroy
     observations(:coprinus_comatus_obs).reload
     observations(:coprinus_comatus_obs).calc_consensus

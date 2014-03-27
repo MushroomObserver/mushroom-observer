@@ -44,7 +44,7 @@ class ApiControllerTest < FunctionalTestCase
     )
     assert_no_api_errors
     obs = Observation.last
-    assert_users_equal(@rolf, obs.user)
+    assert_users_equal(rolf, obs.user)
     assert_equal(Date.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
     assert_nil(obs.where)
@@ -83,7 +83,7 @@ class ApiControllerTest < FunctionalTestCase
     )
     assert_no_api_errors
     obs = Observation.last
-    assert_users_equal(@rolf, obs.user)
+    assert_users_equal(rolf, obs.user)
     assert_equal('2012-06-26', obs.when.web_date)
     assert_objs_equal(locations(:burbank), obs.location)
     assert_nil(obs.where)
@@ -111,11 +111,11 @@ class ApiControllerTest < FunctionalTestCase
     )
     assert_no_api_errors
     img = Image.last
-    assert_users_equal(@rolf, img.user)
+    assert_users_equal(rolf, img.user)
     assert_equal(Date.today.web_date, img.when.web_date)
     assert_equal('', img.notes)
-    assert_equal(@rolf.legal_name, img.copyright_holder)
-    assert_objs_equal(@rolf.license, img.license)
+    assert_equal(rolf.legal_name, img.copyright_holder)
+    assert_objs_equal(rolf.license, img.license)
     assert_nil(img.original_name)
     assert_equal('image/jpeg', img.content_type)
     assert_equal(407, img.width)
@@ -135,12 +135,12 @@ class ApiControllerTest < FunctionalTestCase
       :copyright_holder => 'My Friend',
       :license       => '2',
       :original_name => 'Coprinus_comatus.jpg',
-      :projects      => (proj = @rolf.projects_member.first).id,
-      :observations  => (obs = @rolf.observations.first).id
+      :projects      => (proj = rolf.projects_member.first).id,
+      :observations  => (obs = rolf.observations.first).id
     )
     assert_no_api_errors
     img = Image.last
-    assert_users_equal(@rolf, img.user)
+    assert_users_equal(rolf, img.user)
     assert_equal('2012-06-26', img.when.web_date)
     assert_equal('Here are some notes.', img.notes)
     assert_equal('My Friend', img.copyright_holder)
@@ -188,22 +188,22 @@ class ApiControllerTest < FunctionalTestCase
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal('Mushroom Mapper', api_key.notes)
-    assert_users_equal(@rolf, api_key.user)
+    assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     post(:api_keys,
       :api_key => rolfs_key.key,
       :app => 'Mushroom Mapper',
-      :for_user => @mary.id
+      :for_user => mary.id
     )
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal('Mushroom Mapper', api_key.notes)
-    assert_users_equal(@mary, api_key.user)
+    assert_users_equal(mary, api_key.user)
     assert_nil(api_key.verified)
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
     email = ActionMailer::Base.deliveries.last
-    assert_equal(@mary.email, email.header['to'].to_s)
+    assert_equal(mary.email, email.header['to'].to_s)
   end
 end

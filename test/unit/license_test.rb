@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class LicenseTest < UnitTestCase
+class LicenseTest < ActiveSupport::TestCase
 
   def test_current_names_and_ids
     names_and_ids = License.current_names_and_ids()

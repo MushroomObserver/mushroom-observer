@@ -56,7 +56,7 @@ class SpecimenControllerTest < FunctionalTestCase
     return {
       :id => observations(:strobilurus_diminutivus_obs).id,
       :specimen => {
-        :herbarium_name => users(:rolf).preferred_herbarium_name,
+        :herbarium_name => rolf.preferred_herbarium_name,
         :herbarium_label => "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
         'when(1i)'      => '2012',
         'when(2i)'      => '11',
@@ -80,7 +80,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(params[:specimen]['when(1i)'].to_i, specimen.when.year)
     assert_equal(params[:specimen]['when(2i)'].to_i, specimen.when.month)
     assert_equal(params[:specimen]['when(3i)'].to_i, specimen.when.day)
-    assert_equal(users(:rolf), specimen.user)
+    assert_equal(rolf, specimen.user)
     obs = Observation.find(params[:id])
     assert(obs.specimen)
     assert_response(:redirect)

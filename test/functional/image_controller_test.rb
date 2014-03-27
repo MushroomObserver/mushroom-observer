@@ -9,7 +9,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_images_by_user
-    get_with_dump(:images_by_user, :id => @rolf.id)
+    get_with_dump(:images_by_user, :id => rolf.id)
     assert_response('list_images')
   end
 
@@ -78,7 +78,7 @@ class ImageControllerTest < FunctionalTestCase
     image = Image.find(rolfs_favorite_image_id)
 
     # Create simple index.
-    query = Query.lookup_and_save(:Image, :by_user, :user => @rolf)
+    query = Query.lookup_and_save(:Image, :by_user, :user => rolf)
     ids = query.result_ids
     assert(ids.length > 3)
     rolfs_index = ids.index(rolfs_favorite_image_id)
@@ -168,9 +168,9 @@ class ImageControllerTest < FunctionalTestCase
   def test_show_image_edit_links
     img = images(:in_situ)
     proj = projects(:bolete_project)
-    assert_equal(@mary.id, img.user_id)                       # owned by mary
+    assert_equal(mary.id, img.user_id)                       # owned by mary
     assert(img.projects.include?(proj))                       # owned by bolete project
-    assert_equal([@dick.id], proj.user_group.users.map(&:id)) # dick is only member of project
+    assert_equal([dick.id], proj.user_group.users.map(&:id)) # dick is only member of project
 
     login('rolf')
     get(:show_image, :id => img.id)
@@ -284,7 +284,7 @@ class ImageControllerTest < FunctionalTestCase
     }
     post_requires_login(:license_updater, params)
     assert_response('license_updater')
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
 
     target_count_after = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
     new_count_after    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
@@ -338,7 +338,7 @@ class ImageControllerTest < FunctionalTestCase
     }
     post_requires_login(:remove_images, params, 'mary')
     assert_response(:controller => :observer, :action => :show_observation)
-    assert_equal(10, @mary.reload.contribution)
+    assert_equal(10, mary.reload.contribution)
     assert(obs.reload.images.member?(keep))
     assert(!obs.images.member?(remove))
     assert_equal(keep.id, obs.thumb_image_id)
@@ -352,8 +352,8 @@ class ImageControllerTest < FunctionalTestCase
     post(:remove_images, params)
     assert_response(:controller => "observer", :action => "show_observation")
     # Observation gets downgraded to 1 point because it no longer has any images.
-    # assert_equal(1, @mary.reload.contribution)
-    assert_equal(10, @mary.reload.contribution)
+    # assert_equal(1, mary.reload.contribution)
+    assert_equal(10, mary.reload.contribution)
     assert(!obs.reload.images.member?(keep))
     assert_equal(nil, obs.thumb_image_id)
   end
@@ -366,7 +366,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_equal('mary', image.user.login)
     requires_user(:destroy_image, :show_image, params, 'mary')
     assert_response(:action => :list_images)
-    assert_equal(0, @mary.reload.contribution)
+    assert_equal(0, mary.reload.contribution)
     assert(!obs.reload.images.member?(image))
   end
 
@@ -398,7 +398,7 @@ class ImageControllerTest < FunctionalTestCase
     }
     post_requires_login(:edit_image, params)
     assert_response(:action => :show_image)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
 
     assert(obs.reload.rss_log)
     assert(obs.rss_log.notes.include?('log_image_updated'))
@@ -510,7 +510,7 @@ class ImageControllerTest < FunctionalTestCase
     }
     post_requires_user(:add_image, [:observer, :show_observation], params)
     assert_response(:controller => :observer, :action => :show_observation)
-    assert_equal(20, @rolf.reload.contribution)
+    assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
     assert(updated_at != obs.updated_at)
     message = :runtime_image_uploaded_image.t(:name => '#' + obs.images.last.id.to_s)
@@ -533,9 +533,9 @@ class ImageControllerTest < FunctionalTestCase
     params = { :mode => 'profile', :img_id => image.id.to_s }
     requires_login(:reuse_image, params)
     assert_response(:controller => :observer, :action => :show_user,
-                    :id => @rolf.id)
-    assert_equal(@rolf.id, session[:user_id])
-    assert_equal(image.id, @rolf.reload.image_id)
+                    :id => rolf.id)
+    assert_equal(rolf.id, session[:user_id])
+    assert_equal(image.id, rolf.reload.image_id)
   end
 
   # This would happen if user typed in id and submitted.
@@ -544,24 +544,24 @@ class ImageControllerTest < FunctionalTestCase
     params = { :mode => 'profile', :img_id => image.id.to_s }
     post_requires_login(:reuse_image, params)
     assert_response(:controller => :observer, :action => :show_user,
-                    :id => @rolf.id)
-    assert_equal(@rolf.id, session[:user_id])
-    assert_equal(image.id, @rolf.reload.image_id)
+                    :id => rolf.id)
+    assert_equal(rolf.id, session[:user_id])
+    assert_equal(image.id, rolf.reload.image_id)
   end
 
   # Test setting anonymity of all image votes.
   def test_bulk_image_vote_anonymity_thingy
     img1 = images(:in_situ)
     img2 = images(:commercial_inquiry_image)
-    img1.change_vote(@mary, 1, false)
-    img2.change_vote(@mary, 2, true)
-    img1.change_vote(@rolf, 3, true)
-    img2.change_vote(@rolf, 4, false)
+    img1.change_vote(mary, 1, false)
+    img2.change_vote(mary, 2, true)
+    img1.change_vote(rolf, 3, true)
+    img2.change_vote(rolf, 4, false)
 
-    assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
-    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, rolf.id).anonymous)
 
     requires_login(:bulk_vote_anonymity_updater)
     assert_response('bulk_vote_anonymity_updater')
@@ -569,58 +569,58 @@ class ImageControllerTest < FunctionalTestCase
     login('mary')
     post(:bulk_vote_anonymity_updater, :commit => :image_vote_anonymity_make_anonymous.l)
     assert_response(:controller => :account, :action => :prefs)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
-    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, rolf.id).anonymous)
 
     login('rolf')
     post(:bulk_vote_anonymity_updater, :commit => :image_vote_anonymity_make_public.l)
     assert_response(:controller => :account, :action => :prefs)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, @mary.id).anonymous)
-    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, @mary.id).anonymous)
-    assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, @rolf.id).anonymous)
-    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, @rolf.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img1.id, mary.id).anonymous)
+    assert_true(ImageVote.find_by_image_id_and_user_id(img2.id, mary.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img1.id, rolf.id).anonymous)
+    assert_false(ImageVote.find_by_image_id_and_user_id(img2.id, rolf.id).anonymous)
   end
 
   def test_original_filename_visibility
     login('mary')
 
-    @rolf.keep_filenames = :toss
-    @rolf.save
+    rolf.keep_filenames = :toss
+    rolf.save
     get(:show_image, :id => 6)
     assert_false(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_but_hide
-    @rolf.save
+    rolf.keep_filenames = :keep_but_hide
+    rolf.save
     get(:show_image, :id => 6)
     assert_false(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_and_show
-    @rolf.save
+    rolf.keep_filenames = :keep_and_show
+    rolf.save
     get(:show_image, :id => 6)
     assert_true(@response.body.include?('áč€εиts'))
 
     login('rolf')
 
-    @rolf.keep_filenames = :toss
-    @rolf.save
+    rolf.keep_filenames = :toss
+    rolf.save
     get(:show_image, :id => 6)
     assert_true(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_but_hide
-    @rolf.save
+    rolf.keep_filenames = :keep_but_hide
+    rolf.save
     get(:show_image, :id => 6)
     assert_true(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_and_show
-    @rolf.save
+    rolf.keep_filenames = :keep_and_show
+    rolf.save
     get(:show_image, :id => 6)
     assert_true(@response.body.include?('áč€εиts'))
   end
 
   def test_bulk_original_filename_purge
-    assert_equal(1, @rolf.id)
+    assert_equal(1, rolf.id)
     imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1')
     assert(imgs.any?)
 
@@ -637,16 +637,16 @@ class ImageControllerTest < FunctionalTestCase
     obs2 = observations(:detailed_unknown)
     img1 = images(:in_situ)
     img2 = images(:commercial_inquiry_image)
-    assert_users_equal(@mary, obs1.user)
-    assert_users_equal(@mary, obs2.user)
-    assert_users_equal(@mary, img1.user)
-    assert_users_equal(@rolf, img2.user)
+    assert_users_equal(mary, obs1.user)
+    assert_users_equal(mary, obs2.user)
+    assert_users_equal(mary, img1.user)
+    assert_users_equal(rolf, img2.user)
     assert_obj_list_equal([],      obs1.projects)
     assert_obj_list_equal([proj2], obs2.projects)
     assert_obj_list_equal([proj2], img1.projects)
     assert_obj_list_equal([],      img2.projects)
-    assert_obj_list_equal([@rolf, @mary, @katrina], proj1.user_group.users)
-    assert_obj_list_equal([@dick], proj2.user_group.users)
+    assert_obj_list_equal([rolf, mary, katrina], proj1.user_group.users)
+    assert_obj_list_equal([dick], proj2.user_group.users)
 
     # NOTE: It is impossible, apparently, to get edit_image to fail,
     # so there is no way to test init_project_vars_for_reload().

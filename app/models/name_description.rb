@@ -88,7 +88,7 @@ class NameDescription < Description
     :if_changed => ALL_NOTE_FIELDS,
     :association_options => { :dependent => :orphan }
   )
-  non_versioned_columns.push(
+  non_versioned_fields.push(
     'sync_id',
     'created_at',
     'name_id',
@@ -207,12 +207,13 @@ class NameDescription < Description
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
 
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.  Even though
+    # TODO
+    # Was "altered?" which is gone.  Need to test if changed? only returns true if *important* changes have been made.
+    # Even though
     # changing review_status doesn't cause a new version to be created, I want
     # to notify authors of that change.  (review_status_changed? is an implicit
     # method created by ActiveRecord)
-    if altered? || review_status_changed?
+    if changed? || review_status_changed?
       sender = User.current || User.admin
       recipients = []
 

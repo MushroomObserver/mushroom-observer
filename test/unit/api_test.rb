@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class Hash
   def remove(*keys)
@@ -10,7 +10,7 @@ class Hash
   end
 end
 
-class ApiTest < UnitTestCase
+class ApiTest < ActiveSupport::TestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
   end
@@ -214,7 +214,7 @@ class ApiTest < UnitTestCase
   end
 
   def test_post_minimal_observation
-    @user = @rolf
+    @user = rolf
     @name = Name.unknown
     @loc = locations(:unknown_location)
     @img1 = nil
@@ -243,7 +243,7 @@ class ApiTest < UnitTestCase
   end
 
   def test_post_maximal_observation
-    @user = @rolf
+    @user = rolf
     @name = names(:coprinus_comatus)
     @loc = locations(:albion)
     @img1 = Image.find(1)
@@ -324,7 +324,7 @@ class ApiTest < UnitTestCase
       :api_key  => @api_key.key,
     }
 
-    assert_equal(:postal, @rolf.location_format)
+    assert_equal(:postal, rolf.location_format)
 
     params[:location] = 'New Place, California, USA'
     api = API.execute(params)
@@ -340,8 +340,8 @@ class ApiTest < UnitTestCase
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
-    @rolf.update_attribute(:location_format, :scientific)
-    assert_equal(:scientific, @rolf.reload.location_format)
+    rolf.update_attribute(:location_format, :scientific)
+    assert_equal(:scientific, rolf.reload.location_format)
 
     params[:location] = 'USA, California, Somewhere Else'
     api = API.execute(params)
@@ -360,7 +360,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_minimal_image
     setup_image_dirs
-    @user = @rolf
+    @user = rolf
     @proj = nil
     @date = Date.today
     @copy = @user.legal_name
@@ -384,7 +384,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
-    @user = @rolf
+    @user = rolf
     @proj = projects(:eol_project)
     @date = Date.parse('20120626')
     @copy = 'My Friend'
@@ -492,7 +492,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_api_key_for_yourself
     email_count = ActionMailer::Base.deliveries.size
-    @for_user = @rolf
+    @for_user = rolf
     @app = '  Mushroom  Mapper  '
     @verified = true
     params = {
@@ -512,7 +512,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_api_key_for_another_user
     email_count = ActionMailer::Base.deliveries.size
-    @for_user = @katrina
+    @for_user = katrina
     @app = '  Mushroom  Mapper  '
     @verified = false
     params = {
@@ -540,9 +540,9 @@ class ApiTest < UnitTestCase
       :api_key  => @api_key.key,
       :location => 'Anywhere',
     }
-    @rolf.update_attribute(:verified, nil)
+    rolf.update_attribute(:verified, nil)
     assert_api_fail(params)
-    @rolf.update_attribute(:verified, Time.now)
+    rolf.update_attribute(:verified, Time.now)
     assert_api_pass(params)
   end
 
@@ -975,14 +975,14 @@ class ApiTest < UnitTestCase
 
   def test_check_edit_permission
     @api = API.new
-    @api.user = @dick
-    proj = @dick.projects_member.first
+    @api.user = dick
+    proj = dick.projects_member.first
     assert_not_nil(img_good = proj.images.first)
-    assert_not_nil(img_bad = (Image.all - proj.images - @dick.images).first)
+    assert_not_nil(img_bad = (Image.all - proj.images - dick.images).first)
     assert_not_nil(obs_good = proj.observations.first)
-    assert_not_nil(obs_bad = (Observation.all - proj.observations - @dick.observations).first)
+    assert_not_nil(obs_bad = (Observation.all - proj.observations - dick.observations).first)
     assert_not_nil(spl_good = proj.species_lists.first)
-    assert_not_nil(spl_bad = (SpeciesList.all - proj.species_lists - @dick.species_lists).first)
+    assert_not_nil(spl_bad = (SpeciesList.all - proj.species_lists - dick.species_lists).first)
 
     args = { :must_have_edit_permission => true }
     assert_parse(:parse_image, img_good, img_good.id, args)
@@ -991,7 +991,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_observation, API::MustHaveEditPermission, obs_bad.id, args)
     assert_parse(:parse_species_list, spl_good, spl_good.id, args)
     assert_parse(:parse_species_list, API::MustHaveEditPermission, spl_bad.id, args)
-    assert_parse(:parse_user, @dick, @dick.id, args)
+    assert_parse(:parse_user, dick, dick.id, args)
     assert_parse(:parse_user, API::MustHaveEditPermission, '1', args)
 
     args[:limit] = [Image, Observation, SpeciesList, User]
@@ -1001,7 +1001,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_object, API::MustHaveEditPermission, "observation #{obs_bad.id}", args)
     assert_parse(:parse_object, spl_good, "species list #{spl_good.id}", args)
     assert_parse(:parse_object, API::MustHaveEditPermission, "species list #{spl_bad.id}", args)
-    assert_parse(:parse_object, @dick, "user #{@dick.id}", args)
+    assert_parse(:parse_object, dick, "user #{dick.id}", args)
     assert_parse(:parse_object, API::MustHaveEditPermission, 'user 1', args)
   end
 

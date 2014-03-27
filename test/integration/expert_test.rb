@@ -24,15 +24,15 @@ class ExpertTest < IntegrationTestCase
     name = Name.find_by_text_name('Strobilurus diminutivus')
     assert_equal([], name.descriptions)
 
-    @dick.admin = true
-    @dick.save
+    dick.admin = true
+    dick.save
 
     show_name = "/name/show_name/#{name.id}"
 
-    admin    = new_user_session(@dick)     # we'll make him admin
-    reviewer = new_user_session(@rolf)     # reviewer
-    owner    = new_user_session(@mary)     # random user
-    user     = new_user_session(@katrina)  # another random user
+    admin    = new_user_session(dick)     # we'll make him admin
+    reviewer = new_user_session(rolf)     # reviewer
+    owner    = new_user_session(mary)     # random user
+    user     = new_user_session(katrina)  # another random user
     lurker   = new_session                 # nobody
 
     # Make Dick an admin.
@@ -138,7 +138,7 @@ class ExpertTest < IntegrationTestCase
     assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
     assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
     assert_user_list_equal([], desc.authors)
-    assert_user_list_equal([@mary], desc.editors) # (owner = mary)
+    assert_user_list_equal([mary], desc.editors) # (owner = mary)
     assert_equal('I like this mushroom.', desc.notes)
   end
 
@@ -150,15 +150,15 @@ class ExpertTest < IntegrationTestCase
     name = Name.find_by_text_name('Peltigera')
     assert_equal(4, name.descriptions.length)
 
-    @dick.admin = true
-    @dick.save
+    dick.admin = true
+    dick.save
 
     show_name = "/name/show_name/#{name.id}"
 
-    admin    = new_user_session(@dick)     # we'll make him admin
-    reviewer = new_user_session(@rolf)     # reviewer
-    owner    = new_user_session(@mary)     # random user
-    user     = new_user_session(@katrina)  # another random user
+    admin    = new_user_session(dick)     # we'll make him admin
+    reviewer = new_user_session(rolf)     # reviewer
+    owner    = new_user_session(mary)     # random user
+    user     = new_user_session(katrina)  # another random user
     lurker   = new_session                 # nobody
 
     # Make Dick an admin.
@@ -195,10 +195,10 @@ class ExpertTest < IntegrationTestCase
     assert_equal("Mary's Corner", desc.source_name)
     assert_equal(false, desc.public_write)
     assert_equal(true, desc.public)
-    assert_obj_list_equal([UserGroup.one_user(@mary)], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.one_user(@mary)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.one_user(mary)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(mary)], desc.writer_groups)
     assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
-    assert_user_list_equal([@mary], desc.authors)
+    assert_user_list_equal([mary], desc.authors)
     assert_user_list_equal([], desc.editors)
     assert_equal(empty_notes.merge(
       :gen_desc => 'Leafy felt lichens.',
@@ -275,7 +275,7 @@ class ExpertTest < IntegrationTestCase
       "#{name3} #{author3}\r\n" +
       "#{name4} = #{name5}"
 
-    login!(@dick)
+    login!(dick)
     get('name/bulk_name_edit')
     open_form do |form|
       form.assert_value('list_members', '')
@@ -368,11 +368,11 @@ class ExpertTest < IntegrationTestCase
     newer_location_reverse = 'USA, California, Somewhere Else'
 
     # Good opportunity to test scientific location notation!
-    @dick.location_format = :scientific
-    @dick.save
+    dick.location_format = :scientific
+    dick.save
 
     # First attempt at creating a list.
-    login!(@dick)
+    login!(dick)
     get('species_list/create_species_list')
     open_form do |form|
       form.assert_value('list_members', '')
@@ -504,7 +504,7 @@ class ExpertTest < IntegrationTestCase
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
-    assert_equal(@dick, User.current)
+    assert_equal(dick, User.current)
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations

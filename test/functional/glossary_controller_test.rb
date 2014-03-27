@@ -51,14 +51,13 @@ class GlossaryControllerTest < FunctionalTestCase
   
   def test_create_term_post
     login
-    user = @rolf
     params = create_term_params
     post(:create_term, params)
     term = Term.find(:all, :order => "created_at DESC")[0]
     assert_equal(params[:term][:name], term.name)
     assert_equal(params[:term][:description], term.description)
     assert_not_nil(term.rss_log)
-    assert_equal(@rolf.id, term.user_id)
+    assert_equal(user.id, term.user_id)
     assert_response(:redirect)
   end
 
@@ -76,7 +75,6 @@ class GlossaryControllerTest < FunctionalTestCase
     conic = terms(:conic_term)
     count = Term::Version.count
     make_admin
-    user = @rolf
 
     params = create_term_params
     params[:id] = conic.id

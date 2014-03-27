@@ -74,7 +74,7 @@ class AjaxControllerTest < FunctionalTestCase
     key = ApiKey.new
     key.provide_defaults
     key.verified = nil
-    key.user = @katrina
+    key.user = katrina
     key.notes = 'testing'
     key.save!
     assert_nil(key.reload.verified)
@@ -98,7 +98,7 @@ class AjaxControllerTest < FunctionalTestCase
     key = ApiKey.new
     key.provide_defaults
     key.verified = Time.now
-    key.user = @katrina
+    key.user = katrina
     key.notes = 'testing'
     key.save!
     assert_equal('testing', key.notes)
@@ -179,13 +179,6 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_user
-    # @rolf    - Rolf Singer
-    # @mary    - Mary Newbie
-    # @junk    - Junk Box
-    # @dick    - Tricky Dick
-    # @katrina - Katrina
-    # @roy     - Roy Halling
-
     good_ajax_request(:auto_complete, :type => :user, :id => 'Rover')
     assert_equal(['R', 'rolf <Rolf Singer>', 'roy <Roy Halling>'], @response.body.split("\n"))
 
@@ -268,15 +261,15 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_naming_vote
     naming = Naming.find(1)
-    assert_nil(naming.users_vote(@dick))
+    assert_nil(naming.users_vote(dick))
     bad_ajax_request(:vote, :type => :naming, :id => 1, :value => 3)
 
     login('dick')
     good_ajax_request(:vote, :type => :naming, :id => 1, :value => 3)
-    assert_equal(3, naming.reload.users_vote(@dick).value)
+    assert_equal(3, naming.reload.users_vote(dick).value)
 
     good_ajax_request(:vote, :type => :naming, :id => 1, :value => 0)
-    assert_nil(naming.reload.users_vote(@dick))
+    assert_nil(naming.reload.users_vote(dick))
 
     bad_ajax_request(:vote, :type => :naming, :id => 1, :value => 99)
     bad_ajax_request(:vote, :type => :naming, :id => 99, :value => 0)
@@ -285,16 +278,16 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_image_vote
     image = Image.find(1)
-    assert_nil(image.users_vote(@dick))
+    assert_nil(image.users_vote(dick))
     bad_ajax_request(:vote, :type => :image, :id => 1, :value => 3)
 
     login('dick')
-    assert_nil(image.users_vote(@dick))
+    assert_nil(image.users_vote(dick))
     good_ajax_request(:vote, :type => :image, :id => 1, :value => 3)
-    assert_equal(3, image.reload.users_vote(@dick))
+    assert_equal(3, image.reload.users_vote(dick))
 
     good_ajax_request(:vote, :type => :image, :id => 1, :value => 0)
-    assert_nil(image.reload.users_vote(@dick))
+    assert_nil(image.reload.users_vote(dick))
 
     bad_ajax_request(:vote, :type => :image, :id => 1, :value => 99)
     bad_ajax_request(:vote, :type => :image, :id => 99, :value => 0)
