@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class SvdTest < UnitTestCase
+class SvdTest < ActiveSupport::TestCase
   def name_counts(svds)
     with_name = 0
     without_name = 0

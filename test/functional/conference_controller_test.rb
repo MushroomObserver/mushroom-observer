@@ -40,7 +40,6 @@ class ConferenceControllerTest < FunctionalTestCase
   
   def test_create_event_post
     make_admin
-    user = @rolf
     params = create_event_params
     post(:create_event, params)
     event = ConferenceEvent.find(:all, :order => "created_at DESC")[0]
@@ -66,7 +65,6 @@ class ConferenceControllerTest < FunctionalTestCase
   def test_edit_event_post
     msa = conference_events(:msa_annual_meeting)
     make_admin
-    user = @rolf
 
     params = create_event_params
     params[:id] = msa.id

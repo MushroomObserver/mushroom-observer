@@ -192,7 +192,7 @@ class LocationControllerTest < FunctionalTestCase
     post_requires_login(:create_location, params)
     assert_response(:action => :show_location)
     assert_equal(count + 1, Location.count)
-    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
     loc = Location.find_by_name_or_reverse_name(display_name)
@@ -281,7 +281,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_update_location
     count = Location::Version.count
     count2 = LocationDescription::Version.count
-    contrib = @rolf.contribution
+    contrib = rolf.contribution
 
     # Turn Albion into Barton Flats.
     loc = locations(:albion)
@@ -289,11 +289,11 @@ class LocationControllerTest < FunctionalTestCase
     log_updated_at = loc.rss_log.updated_at
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
-    params[:location][:display_name] = Location.user_name(@rolf, params[:location][:display_name])
+    params[:location][:display_name] = Location.user_name(rolf, params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
     assert_response(:action => :show_location)
-    assert_equal(contrib, @rolf.reload.contribution)
+    assert_equal(contrib, rolf.reload.contribution)
 
     # Should have created a new version of location only.
     assert_equal(count + 1, Location::Version.count)
@@ -321,7 +321,7 @@ class LocationControllerTest < FunctionalTestCase
 
     # Rolf was already author, Mary doesn't become editor because
     # there was no change.
-    assert_user_list_equal([@rolf], loc.description.authors)
+    assert_user_list_equal([rolf], loc.description.authors)
     assert_user_list_equal([], loc.description.editors)
   end
 
@@ -355,8 +355,8 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_update_location_with_scientific_names
-    @rolf.update_attributes(:location_format => :scientific)
-    @rolf.reload
+    rolf.update_attributes(:location_format => :scientific)
+    rolf.reload
     login('rolf')
     loc = locations(:burbank)
     normal_name = loc.name
@@ -396,7 +396,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(desc_count, LocationDescription.count)
     assert_equal(past_loc_count-1, Location::Version.count)
     assert_equal(past_desc_count, LocationDescription::Version.count)
-    assert_equal(10 - @new_pts, @rolf.reload.contribution)
+    assert_equal(10 - @new_pts, rolf.reload.contribution)
   end
 
   def test_update_location_admin_merge
@@ -443,7 +443,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_add_to_location
-    User.current = @rolf
+    User.current = rolf
     albion = locations(:albion)
     obs = Observation.create!(
       :when  => Time.now,
@@ -471,7 +471,7 @@ class LocationControllerTest < FunctionalTestCase
       :notes => 'new observation'
     )
     assert_equal(obs.location, nil)
-    assert_equal(:scientific, @roy.location_format)
+    assert_equal(:scientific, roy.location_format)
     params = {
       :where    => where,
       :location => albion.id
@@ -512,7 +512,7 @@ class LocationControllerTest < FunctionalTestCase
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.new(:target => albion, :user => @rolf, :state => true).save
+    Interest.new(:target => albion, :user => rolf, :state => true).save
     get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -525,8 +525,8 @@ class LocationControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.new(:target => albion, :user => @rolf, :state => false).save
+    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.new(:target => albion, :user => rolf, :state => false).save
     get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -547,7 +547,7 @@ class LocationControllerTest < FunctionalTestCase
     }
 
     login('rolf')
-    assert_equal(:postal, @rolf.location_format)
+    assert_equal(:postal, rolf.location_format)
     postal_name = 'Missoula, Montana, USA'
     scientific_name = 'USA, Montana, Missoula'
     params[:location][:display_name] = postal_name
@@ -559,7 +559,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(scientific_name, loc.scientific_name)
 
     login('roy')
-    assert_equal(:scientific, @roy.location_format)
+    assert_equal(:scientific, roy.location_format)
     postal_name = 'Santa Fe, New Mexico, USA'
     scientific_name = 'USA, New Mexico, Santa Fe'
     params[:location][:display_name] = scientific_name

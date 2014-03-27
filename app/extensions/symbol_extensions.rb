@@ -13,10 +13,6 @@
 ################################################################################
 
 class Symbol
-  if !defined? old_localize
-    alias old_localize localize
-  end
-
   # Converts Symbol directly to lowercase, without making you go through String.
   def downcase
     to_s.downcase.to_sym

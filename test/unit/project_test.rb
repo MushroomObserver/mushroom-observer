@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class ProjectTest < UnitTestCase
+class ProjectTest < ActiveSupport::TestCase
 
   def test_add_and_remove_observations
     proj = projects(:eol_project)

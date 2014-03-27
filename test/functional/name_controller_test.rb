@@ -510,8 +510,8 @@ class NameControllerTest < FunctionalTestCase
     end
 
     # Not all the genera actually have records in our test database.
-    User.current = @rolf
-    @controller.instance_variable_set('@user', @rolf)
+    User.current = rolf
+    @controller.instance_variable_set('@user', rolf)
     create_needed_names('Agaricus')
     create_needed_names('Pluteus')
     create_needed_names('Coprinus comatus subsp. bogus var. varietus')
@@ -573,11 +573,11 @@ class NameControllerTest < FunctionalTestCase
     post_requires_login(:create_name, params)
     assert_response(:action => :show_name, :id => Name.last.id)
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
-    assert_equal(10 + 2 * @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + 2 * @new_pts, rolf.reload.contribution)
     assert(name = Name.find_by_text_name(text_name))
     assert_equal(text_name, name.text_name)
     assert_equal(author, name.author)
-    assert_equal(@rolf, name.user)
+    assert_equal(rolf, name.user)
   end
 
   def test_create_name_existing
@@ -598,7 +598,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(count, Name.count, "Shouldn't have created a name; created #{Name.last.search_name.inspect}.")
     names = Name.find_all_by_text_name(text_name)
     assert_obj_list_equal([names(:conocybe_filaris)], names)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
   end
 
   def test_create_name_bad_name
@@ -730,12 +730,12 @@ class NameControllerTest < FunctionalTestCase
     assert_response(:action => :show_name)
     # No more email for filling in author.
     # assert_notify_email('Conocybe filaris', 'Conocybe filaris (Fr.) Kühner')
-    assert_equal(20, @rolf.reload.contribution)
+    assert_equal(20, rolf.reload.contribution)
     assert_equal('(Fr.) Kühner', name.reload.author)
     assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.display_name)
     assert_equal('Conocybe filaris (Fr.) Kühner', name.search_name)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
-    assert_equal(@rolf, name.user)
+    assert_equal(rolf, name.user)
   end
 
   # This catches a bug that was happening when editing a name that was in use.
@@ -757,9 +757,9 @@ class NameControllerTest < FunctionalTestCase
     assert_no_emails
     assert_equal('', name.reload.author)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
-    assert_equal(@rolf, name.user)
+    assert_equal(rolf, name.user)
     assert_equal('Conocybe', Name.last.search_name)
-    assert_equal(20, @rolf.reload.contribution) # created Conocybe
+    assert_equal(20, rolf.reload.contribution) # created Conocybe
   end
 
   def test_edit_name_post_just_change_notes
@@ -786,7 +786,7 @@ class NameControllerTest < FunctionalTestCase
     assert_response(:action => :show_name)
     assert_no_emails
     # It's implicitly creating Conocybe, because not in fixtures.
-    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     assert_equal(new_notes, name.reload.notes)
     assert_equal(past_names + 1, name.versions.size)
   end
@@ -811,7 +811,7 @@ class NameControllerTest < FunctionalTestCase
     assert_response(:action => :show_name)
     assert_no_emails
     # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
-    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
+    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
     assert(name.reload.deprecated)
     assert_equal('new citation', name.citation)
   end
@@ -841,7 +841,7 @@ class NameControllerTest < FunctionalTestCase
     assert_response(:action => :show_name)
     assert_no_emails
     # (In fact, it is even implicitly creating Macrolepiota!)
-    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     # (But owner remains of course.)
     assert_equal(name_owner, name.reload.user)
   end
@@ -1341,7 +1341,7 @@ class NameControllerTest < FunctionalTestCase
     # No more email for filling in author.
     # assert_notify_email(old_text_name, "#{old_text_name} #{new_author}")
     # It seems to be creating Strobilurus as well?
-    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
+    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
   end
@@ -1828,7 +1828,7 @@ class NameControllerTest < FunctionalTestCase
     )
     Interest.create!(
       :target => name,
-      :user => @rolf,
+      :user => rolf,
       :state => true
     )
     params = {
@@ -1863,7 +1863,7 @@ class NameControllerTest < FunctionalTestCase
     assert_response('bulk_name_edit')
     assert_nil(Name.find_by_text_name(new_name_str))
     assert_nil(Name.find_by_text_name(new_synonym_str))
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
   end
 
   def test_update_bulk_names_approved_nn_synonym
@@ -2936,7 +2936,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:conocybe_filaris)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
     params = {
       :id => name.id,
@@ -2950,10 +2950,10 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
-    assert_nil(notification.calc_note(:user => @rolf,
+    assert_nil(notification.calc_note(:user => rolf,
                                       :naming => namings(:coprinus_comatus_naming)))
   end
 
@@ -2961,7 +2961,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:conocybe_filaris)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
     params = {
       :id => name.id,
@@ -2977,10 +2977,10 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(:user => @mary,
+    assert(notification.calc_note(:user => mary,
                                   :naming => namings(:coprinus_comatus_naming)))
   end
 
@@ -2988,7 +2988,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
     params = {
@@ -3005,10 +3005,10 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(:user => @rolf,
+    assert(notification.calc_note(:user => rolf,
                                   :naming => namings(:coprinus_comatus_naming)))
   end
 
@@ -3016,7 +3016,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     params = {
       :id => name.id,
@@ -3032,7 +3032,7 @@ class NameControllerTest < FunctionalTestCase
     # count_after = Notification.count
     # assert_equal(count_before - 1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
   end
 
@@ -3043,7 +3043,7 @@ class NameControllerTest < FunctionalTestCase
   def test_set_review_status_reviewer
     desc = name_descriptions(:coprinus_comatus_desc)
     assert_equal(:unreviewed, desc.review_status)
-    assert(@rolf.in_group?('reviewers'))
+    assert(rolf.in_group?('reviewers'))
     params = {
       :id => desc.id,
       :value => 'vetted'
@@ -3056,7 +3056,7 @@ class NameControllerTest < FunctionalTestCase
   def test_set_review_status_non_reviewer
     desc = name_descriptions(:coprinus_comatus_desc)
     assert_equal(:unreviewed, desc.review_status)
-    assert(!@mary.in_group?('reviewers'))
+    assert(!mary.in_group?('reviewers'))
     params = {
       :id => desc.id,
       :value => 'vetted'
@@ -3087,7 +3087,7 @@ class NameControllerTest < FunctionalTestCase
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.create(:target => peltigera, :user => @rolf, :state => true)
+    Interest.create(:target => peltigera, :user => rolf, :state => true)
     get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -3100,8 +3100,8 @@ class NameControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.create(:target => peltigera, :user => @rolf, :state => false)
+    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.create(:target => peltigera, :user => rolf, :state => false)
     get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -3129,8 +3129,8 @@ class NameControllerTest < FunctionalTestCase
   # Ensure that an admin can see a draft they don't own
   def test_show_draft_admin
     draft = name_descriptions(:draft_coprinus_comatus)
-    assert_not_equal(draft.user, @mary)
-    login(@mary.login)
+    assert_not_equal(draft.user, mary)
+    login(mary.login)
     get_with_dump(:show_name_description, { :id => draft.id })
     assert_response('show_name_description')
   end
@@ -3138,8 +3138,8 @@ class NameControllerTest < FunctionalTestCase
   # Ensure that an member can see a draft they don't own
   def test_show_draft_member
     draft = name_descriptions(:draft_agaricus_campestris)
-    assert_not_equal(draft.user, @katrina)
-    login(@katrina.login)
+    assert_not_equal(draft.user, katrina)
+    login(katrina.login)
     get_with_dump(:show_name_description, { :id => draft.id })
     assert_response('show_name_description')
   end
@@ -3149,23 +3149,23 @@ class NameControllerTest < FunctionalTestCase
     project = projects(:eol_project)
     draft = name_descriptions(:draft_agaricus_campestris)
     assert(draft.belongs_to_project?(project))
-    assert(!project.is_member?(@dick))
-    login(@dick.login)
+    assert(!project.is_member?(dick))
+    login(dick.login)
     get_with_dump(:show_name_description, { :id => draft.id })
     assert_response(:controller => 'project', :action => 'show_project',
                     :id => project.id)
   end
 
   def test_create_draft_member
-    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @katrina)
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), katrina)
   end
 
   def test_create_draft_admin
-    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @mary)
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), mary)
   end
 
   def test_create_draft_not_member
-    create_draft_tester(projects(:eol_project), names(:agaricus_campestris), @dick, false)
+    create_draft_tester(projects(:eol_project), names(:agaricus_campestris), dick, false)
   end
 
   def test_edit_draft
@@ -3173,41 +3173,41 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_draft_admin
-    assert(projects(:eol_project).is_admin?(@mary))
+    assert(projects(:eol_project).is_admin?(mary))
     assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_coprinus_comatus), @mary)
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus), mary)
   end
 
   def test_edit_draft_member
-    assert(projects(:eol_project).is_member?(@katrina))
+    assert(projects(:eol_project).is_member?(katrina))
     assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), katrina, false)
   end
 
   def test_edit_draft_non_member
-    assert(!projects(:eol_project).is_member?(@dick))
+    assert(!projects(:eol_project).is_member?(dick))
     assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), dick, false, false)
   end
 
   def test_edit_draft_post_owner
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf, {})
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), rolf, {})
   end
 
   def test_edit_draft_post_admin
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @mary, {})
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), mary, {})
   end
 
   def test_edit_draft_post_member
-    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @katrina, {}, false)
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), katrina, {}, false)
   end
 
   def test_edit_draft_post_non_member
-    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @dick, {}, false)
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), dick, {}, false)
   end
 
   def test_edit_draft_post_bad_classification
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf,
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), rolf,
       { :classification => "**Domain**: Eukarya" }, true, false)
   end
 
@@ -3218,17 +3218,17 @@ class NameControllerTest < FunctionalTestCase
 
   # Admin can, too.
   def test_publish_draft_admin
-    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary, :merged, false)
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), mary, :merged, false)
   end
 
   # Other members cannot.
   def test_publish_draft_member
-    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false, false)
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina, false, false)
   end
 
   # Non-members certainly can't.
   def test_publish_draft_non_member
-    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), dick, false, false)
   end
 
   # Non-members certainly can't.
@@ -3238,7 +3238,7 @@ class NameControllerTest < FunctionalTestCase
     name = draft.name
     name.description = desc = NameDescription.create!(
       :name        => name,
-      :user        => @rolf,
+      :user        => rolf,
       :source_type => :public,
       :source_name => '',
       :public      => true,
@@ -3255,19 +3255,19 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_destroy_draft_owner
-    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @rolf)
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), rolf)
   end
 
   def test_destroy_draft_admin
-    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary)
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), mary)
   end
 
   def test_destroy_draft_member
-    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina, false)
   end
 
   def test_destroy_draft_non_member
-    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), dick, false)
   end
 
   # ------------------------------
@@ -3477,8 +3477,8 @@ class NameControllerTest < FunctionalTestCase
     assert_equal('Mushrooms Demystified', desc.source_name)
     assert_false(desc.public)
     assert_false(desc.public_write)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.reader_groups)
+    assert_obj_list_equal([UserGroup.one_user(dick)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(dick)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.one_user(dick)], desc.reader_groups)
   end
 end

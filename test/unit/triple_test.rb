@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class TripleTest < ActiveSupport::TestCase
   # Replace this with your real tests.

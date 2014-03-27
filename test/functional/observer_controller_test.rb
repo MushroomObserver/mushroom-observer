@@ -12,7 +12,8 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Test constructing observations in various ways (with minimal namings).
-  def generic_construct_observation(params, o_num, g_num, n_num, user = @rolf)
+  def generic_construct_observation(params, o_num, g_num, n_num, user = :rolf)
+    user = rolf if user == :rolf
     o_count = Observation.count
     g_count = Naming.count
     n_count = Name.count
@@ -441,9 +442,9 @@ class ObserverControllerTest < FunctionalTestCase
   def test_show_observation_edit_links
     obs = observations(:detailed_unknown)
     proj = projects(:bolete_project)
-    assert_equal(@mary.id, obs.user_id)                        # owned by mary
+    assert_equal(mary.id, obs.user_id)                        # owned by mary
     assert(obs.projects.include?(proj))                        # owned by bolete project
-    assert_equal([@dick.id], proj.user_group.users.map(&:id))  # dick is only member of bolete project
+    assert_equal([dick.id], proj.user_group.users.map(&:id))  # dick is only member of bolete project
 
     login('rolf')
     get(:show_observation, :id => obs.id)
@@ -490,7 +491,7 @@ class ObserverControllerTest < FunctionalTestCase
     requires_login(:ask_observation_question, :id => id)
     assert_form_action(:action => 'ask_observation_question', :id => id)
 
-    id = @mary.id
+    id = mary.id
     requires_login(:ask_user_question, :id => id)
     assert_form_action(:action => 'ask_user_question', :id => id)
 
@@ -571,7 +572,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:action => :show_observation)
     assert_flash(:runtime_ask_observation_question_success.t)
 
-    user = @mary
+    user = mary
     params = {
       :id => user.id,
       :email => {
@@ -590,7 +591,7 @@ class ObserverControllerTest < FunctionalTestCase
     # and making sure the person requesting the notifcation is not the same
     # person who created the underlying observation (otherwise nothing happens).
     note = notifications(:coprinus_comatus_notification)
-    note.user = @mary
+    note.user = mary
     note.note_template = 'blah!'
     assert(note.save)
     QueuedEmail.queue_emails(true)
@@ -647,41 +648,41 @@ class ObserverControllerTest < FunctionalTestCase
     assert_user_list_equal([], desc.reload.authors)
 
     # Make sure it lets Rolf and only Rolf see this page.
-    assert(!@mary.in_group?('reviewers'))
-    assert(@rolf.in_group?('reviewers'))
+    assert(!mary.in_group?('reviewers'))
+    assert(rolf.in_group?('reviewers'))
     requires_user(:review_authors, :show_location, params)
     assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
-    user_groups(:reviewers).users.delete(@rolf)
-    @rolf.reload
-    assert(!@rolf.in_group?('reviewers'))
+    user_groups(:reviewers).users.delete(rolf)
+    rolf.reload
+    assert(!rolf.in_group?('reviewers'))
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
     assert_response(:action => :show_location, :id => desc.id)
 
     # Make Rolf an author.
-    desc.add_author(@rolf)
+    desc.add_author(rolf)
     desc.save
     desc.reload
-    assert_user_list_equal([@rolf], desc.authors)
+    assert_user_list_equal([rolf], desc.authors)
 
     # Rolf should be able to do it now.
     get(:review_authors, params)
     assert_response('review_authors')
 
     # Rolf giveth with one hand...
-    post(:review_authors, params.merge(:add => @mary.id))
+    post(:review_authors, params.merge(:add => mary.id))
     assert_response('review_authors')
     desc.reload
-    assert_user_list_equal([@mary, @rolf], desc.authors)
+    assert_user_list_equal([mary, rolf], desc.authors)
 
     # ...and taketh with the other.
-    post(:review_authors, params.merge(:remove => @mary.id))
+    post(:review_authors, params.merge(:remove => mary.id))
     assert_response('review_authors')
     desc.reload
-    assert_user_list_equal([@rolf], desc.authors)
+    assert_user_list_equal([rolf], desc.authors)
   end
 
   def test_review_authors_name
@@ -695,30 +696,30 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
-    user_groups(:reviewers).users.delete(@rolf)
-    assert(!@rolf.reload.in_group?('reviewers'))
+    user_groups(:reviewers).users.delete(rolf)
+    assert(!rolf.reload.in_group?('reviewers'))
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
     assert_response(:action => :show_name, :id => name.id)
 
     # Make Rolf an author.
-    desc.add_author(@rolf)
-    assert_user_list_equal([@rolf], desc.reload.authors)
+    desc.add_author(rolf)
+    assert_user_list_equal([rolf], desc.reload.authors)
 
     # Rolf should be able to do it again now.
     get(:review_authors, params)
     assert_response('review_authors')
 
     # Rolf giveth with one hand...
-    post(:review_authors, params.merge(:add => @mary.id))
+    post(:review_authors, params.merge(:add => mary.id))
     assert_response('review_authors')
-    assert_user_list_equal([@mary, @rolf], desc.reload.authors)
+    assert_user_list_equal([mary, rolf], desc.reload.authors)
 
     # ...and taketh with the other.
-    post(:review_authors, params.merge(:remove => @mary.id))
+    post(:review_authors, params.merge(:remove => mary.id))
     assert_response('review_authors')
-    assert_user_list_equal([@rolf], desc.reload.authors)
+    assert_user_list_equal([rolf], desc.reload.authors)
   end
 
   # Test setting export status of names and descriptions.
@@ -762,35 +763,35 @@ class ObserverControllerTest < FunctionalTestCase
   def test_original_filename_visibility
     login('mary')
 
-    @rolf.keep_filenames = :toss
-    @rolf.save
+    rolf.keep_filenames = :toss
+    rolf.save
     get(:show_observation, :id => 4)
     assert_false(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_but_hide
-    @rolf.save
+    rolf.keep_filenames = :keep_but_hide
+    rolf.save
     get(:show_observation, :id => 4)
     assert_false(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_and_show
-    @rolf.save
+    rolf.keep_filenames = :keep_and_show
+    rolf.save
     get(:show_observation, :id => 4)
     assert_true(@response.body.include?('áč€εиts'))
 
     login('rolf') # owner
 
-    @rolf.keep_filenames = :toss
-    @rolf.save
+    rolf.keep_filenames = :toss
+    rolf.save
     get(:show_observation, :id => 4)
     assert_true(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_but_hide
-    @rolf.save
+    rolf.keep_filenames = :keep_but_hide
+    rolf.save
     get(:show_observation, :id => 4)
     assert_true(@response.body.include?('áč€εиts'))
 
-    @rolf.keep_filenames = :keep_and_show
-    @rolf.save
+    rolf.keep_filenames = :keep_and_show
+    rolf.save
     get(:show_observation, :id => 4)
     assert_true(@response.body.include?('áč€εиts'))
   end
@@ -871,7 +872,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(obs.specimens.count == 1)
     specimen = obs.specimens[0]
     herbarium = specimen.herbarium
-    assert(herbarium.is_curator?(users(:rolf)))
+    assert(herbarium.is_curator?(rolf))
   end
   
   def test_construct_observation
@@ -1114,7 +1115,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => 'Earth' },
       :name => { :name => "Cladina pictum" },
-    }, 0,0,0, @roy)
+    }, 0,0,0, roy)
     assert_names_equal(cladina, assigns(:parent_deprecated))
     assert_obj_list_equal([cladonia_picta], assigns(:valid_names))
 
@@ -1122,7 +1123,7 @@ class ObserverControllerTest < FunctionalTestCase
       :observation => { :place_name => 'Earth' },
       :name => { :name => "Cladina pictum" },
       :approved_name => "Cladina pictum",
-    }, 1,1,1, @roy)
+    }, 1,1,1, roy)
 
     name = Name.last
     assert_equal('Cladina pictum', name.text_name)
@@ -1135,7 +1136,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 1,0,0, @roy)
+    }, 1,0,0, roy)
 
     # Test missing space.
     where = "Reversible, Massachusetts,USA"
@@ -1148,7 +1149,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 1,0,0, @roy)
+    }, 1,0,0, roy)
 
     # Test a bogus country name
     where = "Bogus, Massachusetts, UAS"
@@ -1160,7 +1161,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 0,0,0, @roy)
+    }, 0,0,0, roy)
 
     # Test a bad state name
     where = "Bad State Name, USA"
@@ -1172,7 +1173,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 0,0,0, @roy)
+    }, 0,0,0, roy)
 
     # Test mix of city and county
     where = "Burbank, Los Angeles Co., California, USA"
@@ -1184,7 +1185,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 0,0,0, @roy)
+    }, 0,0,0, roy)
 
     # Test mix of city and county
     where = "Falmouth, Barnstable Co., Massachusetts, USA"
@@ -1196,7 +1197,7 @@ class ObserverControllerTest < FunctionalTestCase
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
-    }, 0,0,0, @roy)
+    }, 0,0,0, roy)
 
     # Test some bad terms
     where = "Some County, Ohio, USA"
@@ -1474,7 +1475,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_user(:edit_observation, ["observer", "show_observation"], params, 'mary')
     assert_response(:controller => :location, :action => :create_location)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
     assert_equal("2001-02-03", obs.when.to_s)
@@ -1506,7 +1507,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_user(:edit_observation, ["observer", "show_observation"], params, 'mary')
     assert_response(:controller => :location, :action => :create_location)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)
     assert_equal(updated_at, obs.rss_log.updated_at)
@@ -1643,7 +1644,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post(:edit_naming, params)
     assert_response('edit_naming')
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     obs = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
@@ -1663,7 +1664,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:edit_naming, params)
     assert_response(:action => :show_observation)
     # Clones naming, creates Easter sp and E. bunny, but no votes.
-    assert_equal(10 + 10*2 + 2, @rolf.reload.contribution)
+    assert_equal(10 + 10*2 + 2, rolf.reload.contribution)
     nam = assigns(:naming)
     assert_equal(new_name, nam.text_name)
     assert_not_equal(old_name, nam.text_name)
@@ -1681,7 +1682,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post(:edit_naming, params)
     assert_response('edit_naming')
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
@@ -1701,7 +1702,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:edit_naming, params)
     assert_response(:action => :show_observation)
     # Must be cloning naming with no vote.
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(12, rolf.reload.contribution)
     nam = assigns(:naming)
     assert_equal(new_name, nam.name.text_name)
     assert_equal(new_name + " sensu Arora", nam.text_name)
@@ -1719,7 +1720,7 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post(:edit_naming, params)
     assert_response('edit_naming')
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
@@ -1741,7 +1742,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:edit_naming, params)
     assert_response(:action => :show_observation)
     # Must be cloning naming, with no vote.
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(12, rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(start_name.id, nam.name_id)
     assert_equal(chosen_name.id, nam.name_id)
@@ -1762,7 +1763,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:edit_naming, params)
     assert_response(:action => :show_observation)
     # Must be cloning the naming, but no votes?
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(12, rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(start_name.id, nam.name_id)
     assert_equal(new_text_name, nam.name.text_name)
@@ -1782,12 +1783,12 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make a few assertions up front to make sure fixtures are as expected.
     assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
-    assert(namings(:coprinus_comatus_naming).user_voted?(@rolf))
-    assert(namings(:coprinus_comatus_naming).user_voted?(@mary))
-    assert(!namings(:coprinus_comatus_naming).user_voted?(@dick))
-    assert(namings(:coprinus_comatus_other_naming).user_voted?(@rolf))
-    assert(namings(:coprinus_comatus_other_naming).user_voted?(@mary))
-    assert(!namings(:coprinus_comatus_other_naming).user_voted?(@dick))
+    assert(namings(:coprinus_comatus_naming).user_voted?(rolf))
+    assert(namings(:coprinus_comatus_naming).user_voted?(mary))
+    assert(!namings(:coprinus_comatus_naming).user_voted?(dick))
+    assert(namings(:coprinus_comatus_other_naming).user_voted?(rolf))
+    assert(namings(:coprinus_comatus_other_naming).user_voted?(mary))
+    assert(!namings(:coprinus_comatus_other_naming).user_voted?(dick))
 
     # Rolf, the owner of observations(:coprinus_comatus_obs), already has a naming, which
     # he's 80% sure of.  Create a new one (the genus Agaricus) that he's 100%
@@ -1814,7 +1815,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(v_count + 1, Vote.count)
 
     # Make sure contribution is updated correctly.
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(12, rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
     observations(:coprinus_comatus_obs).reload
@@ -1830,13 +1831,13 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure naming was created correctly and referenced.
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
     assert_equal(names(:agaricus).id, naming.name_id)
-    assert_equal(@rolf, naming.user)
+    assert_equal(rolf, naming.user)
     assert_equal(3, naming.get_reasons.select(&:used?).length)
     assert_equal(1, naming.votes.length)
 
     # Make sure vote was created correctly.
     assert_equal(naming, vote.naming)
-    assert_equal(@rolf, vote.user)
+    assert_equal(rolf, vote.user)
     assert_equal(3, vote.value)
 
     # Make sure reasons were created correctly.
@@ -1856,9 +1857,9 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make sure a few random methods work right, too.
     assert_equal(3, naming.vote_sum)
-    assert_equal(vote, naming.users_vote(@rolf))
-    assert(naming.user_voted?(@rolf))
-    assert(!naming.user_voted?(@mary))
+    assert_equal(vote, naming.users_vote(rolf))
+    assert(naming.user_voted?(rolf))
+    assert(!naming.user_voted?(mary))
   end
 
   # Now see what happens when rolf's new naming is less confident than old.
@@ -1872,7 +1873,7 @@ class ObserverControllerTest < FunctionalTestCase
     login('rolf')
     post(:create_naming, params)
     assert_response(:redirect)
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(12, rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
     observations(:coprinus_comatus_obs).reload
@@ -1904,7 +1905,7 @@ class ObserverControllerTest < FunctionalTestCase
     login("dick")
     post(:create_naming, params)
     assert_response(:redirect)
-    assert_equal(12, @dick.reload.contribution)
+    assert_equal(12, dick.reload.contribution)
     naming = Naming.last
 
     # Make sure the right number of objects were created.
@@ -1943,7 +1944,7 @@ class ObserverControllerTest < FunctionalTestCase
     post(:create_naming, params)
     assert_response(:action => "show_observation", :id => observations(:coprinus_comatus_obs).id)
     # Dick is getting points for the naming, vote, and name change.
-    assert_equal(12 + 10, @dick.reload.contribution)
+    assert_equal(12 + 10, dick.reload.contribution)
     naming = Naming.last
     assert_equal("Conocybe filaris", naming.name.text_name)
     assert_equal("(With) Author", naming.name.author)
@@ -1998,7 +1999,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     login('dick')
     post(:cast_vote, :value => "3", :id => nam2.id)
-    assert_equal(11, @dick.reload.contribution)
+    assert_equal(11, dick.reload.contribution)
 
     # Check votes.
     assert_equal(3, nam1.reload.vote_sum)
@@ -2012,12 +2013,12 @@ class ObserverControllerTest < FunctionalTestCase
     # If Dick votes on the other as well, then his first vote should
     # get demoted and his preference should change.
     # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
-    obs.change_vote(nam1, 3, @dick)
-    assert_equal(12, @dick.reload.contribution)
-    assert_equal(3, nam1.reload.users_vote(@dick).value)
+    obs.change_vote(nam1, 3, dick)
+    assert_equal(12, dick.reload.contribution)
+    assert_equal(3, nam1.reload.users_vote(dick).value)
     assert_equal(6, nam1.vote_sum)
     assert_equal(3, nam1.votes.length)
-    assert_equal(2, nam2.reload.users_vote(@dick).value)
+    assert_equal(2, nam2.reload.users_vote(dick).value)
     assert_equal(2, nam2.vote_sum)
     assert_equal(3, nam2.votes.length)
     assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
@@ -2032,7 +2033,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     login('rolf')
     post(:cast_vote, :value => "2", :id => nam1.id)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
     assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
@@ -2051,7 +2052,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     login('rolf')
     post(:cast_vote, :value => "3", :id => nam2.id)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
     assert_equal(names(:agaricus_campestris).id, obs.reload.name_id)
@@ -2074,7 +2075,7 @@ class ObserverControllerTest < FunctionalTestCase
       :value => "-1",
       :id    => nam2.id
     )
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
 
     # Make sure observation was updated right.
     assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
@@ -2098,13 +2099,13 @@ class ObserverControllerTest < FunctionalTestCase
     nam2 = namings(:coprinus_comatus_other_naming)
 
     login('dick')
-    obs.change_vote(nam2, 3, @dick)
+    obs.change_vote(nam2, 3, dick)
     assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
-    assert_equal(11, @dick.reload.contribution)
+    assert_equal(11, dick.reload.contribution)
 
     login('mary')
     post(:cast_vote, :value => Vote.delete_vote, :id => nam1.id)
-    assert_equal(9, @mary.reload.contribution)
+    assert_equal(9, mary.reload.contribution)
 
     # Check votes.
     assert_equal(2, nam1.reload.vote_sum)
@@ -2125,8 +2126,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     # First delete Mary's vote for it.
     login('mary')
-    obs.change_vote(nam1, Vote.delete_vote, @mary)
-    assert_equal(9, @mary.reload.contribution)
+    obs.change_vote(nam1, Vote.delete_vote, mary)
+    assert_equal(9, mary.reload.contribution)
 
     old_naming_id = nam1.id
     old_vote1_id = votes(:coprinus_comatus_owner_vote).id
@@ -2166,8 +2167,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make Dick prefer it.
     login('dick')
-    obs.change_vote(nam1, 3, @dick)
-    assert_equal(11, @dick.reload.contribution)
+    obs.change_vote(nam1, 3, dick)
+    assert_equal(11, dick.reload.contribution)
 
     # Have Rolf try to destroy it.
     login('rolf')
@@ -2213,7 +2214,7 @@ class ObserverControllerTest < FunctionalTestCase
         "4" => { :check => "0", :notes => "" }
       }
     )
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
 
     # Make sure the right number of objects were created.
     assert_equal(o_count + 0, Observation.count)
@@ -2254,7 +2255,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Now, Rolf makes name change to his naming (leave rest the same).
     login('rolf')
-    assert_equal(10, @rolf.contribution)
+    assert_equal(10, rolf.contribution)
     post(:edit_naming,
       :id => nam1.id,
       :name => { :name => "Conocybe filaris" },
@@ -2267,7 +2268,7 @@ class ObserverControllerTest < FunctionalTestCase
       }
     )
     assert_response(:redirect) # redirect indicates success
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(12, rolf.reload.contribution)
 
     # Make sure the right number of objects were created.
     assert_equal(o_count + 0, Observation.count)
@@ -2291,7 +2292,7 @@ class ObserverControllerTest < FunctionalTestCase
     # Check new naming.
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
     assert_equal(names(:conocybe_filaris).id, naming.name_id)
-    assert_equal(@rolf, naming.user)
+    assert_equal(rolf, naming.user)
     nrs = naming.get_reasons.select(&:used?)
     assert_equal(1, nrs.length)
     assert_equal(1, nrs.first.num)
@@ -2300,7 +2301,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(1, naming.votes.length)
     assert_equal(vote, naming.votes.first)
     assert_equal(2, vote.value)
-    assert_equal(@rolf, vote.user)
+    assert_equal(rolf, vote.user)
   end
 
   def test_show_votes
@@ -2573,16 +2574,16 @@ class ObserverControllerTest < FunctionalTestCase
     @obs2 = observations(:coprinus_comatus_obs)
     @img1 = @obs1.images.first
     @img2 = @obs2.images.first
-    assert_users_equal(@mary, @obs1.user)
-    assert_users_equal(@rolf, @obs2.user)
-    assert_users_equal(@mary, @img1.user)
-    assert_users_equal(@rolf, @img2.user)
+    assert_users_equal(mary, @obs1.user)
+    assert_users_equal(rolf, @obs2.user)
+    assert_users_equal(mary, @img1.user)
+    assert_users_equal(rolf, @img2.user)
     assert_obj_list_equal([@proj2], @obs1.projects)
     assert_obj_list_equal([], @obs2.projects)
     assert_obj_list_equal([@proj2], @img1.projects)
     assert_obj_list_equal([], @img2.projects)
-    assert_obj_list_equal([@rolf, @mary, @katrina], @proj1.user_group.users)
-    assert_obj_list_equal([@dick], @proj2.user_group.users)
+    assert_obj_list_equal([rolf, mary, katrina], @proj1.user_group.users)
+    assert_obj_list_equal([dick], @proj2.user_group.users)
   end
 
   def assert_project_checks(project_states)
@@ -2664,10 +2665,10 @@ class ObserverControllerTest < FunctionalTestCase
     @spl2 = species_lists(:unknown_species_list)
     @obs1 = observations(:coprinus_comatus_obs)
     @obs2 = observations(:detailed_unknown)
-    assert_users_equal(@rolf, @spl1.user)
-    assert_users_equal(@mary, @spl2.user)
-    assert_users_equal(@rolf, @obs1.user)
-    assert_users_equal(@mary, @obs2.user)
+    assert_users_equal(rolf, @spl1.user)
+    assert_users_equal(mary, @spl2.user)
+    assert_users_equal(rolf, @obs1.user)
+    assert_users_equal(mary, @obs2.user)
     assert_obj_list_equal([], @obs1.species_lists)
     assert_obj_list_equal([@spl2], @obs2.species_lists)
   end
@@ -2699,7 +2700,7 @@ class ObserverControllerTest < FunctionalTestCase
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.create(:target => minimal_unknown, :user => @rolf, :state => true)
+    Interest.create(:target => minimal_unknown, :user => rolf, :state => true)
     get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -2712,8 +2713,8 @@ class ObserverControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.create(:target => minimal_unknown, :user => @rolf, :state => false)
+    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.create(:target => minimal_unknown, :user => rolf, :state => false)
     get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -2800,7 +2801,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_user, :id => 1)
     assert_response(:controller => :observer, :action => :show_user, :id => 1)
     get(:lookup_user, :id => 'mary')
-    assert_response(:controller => :observer, :action => :show_user, :id => @mary.id)
+    assert_response(:controller => :observer, :action => :show_user, :id => mary.id)
     get(:lookup_user, :id => 'Einstein')
     assert_response(:controller => :observer, :action => :index_rss_log)
     assert_flash_error
@@ -2856,9 +2857,9 @@ class ObserverControllerTest < FunctionalTestCase
   end
   
   def test_download_observation_index
-    obs = Observation.find_all_by_user_id(@mary.id)
+    obs = Observation.find_all_by_user_id(mary.id)
     assert(4 <= obs.length)
-    query = Query.lookup_and_save(:Observation, :by_user, :user => @mary.id)
+    query = Query.lookup_and_save(:Observation, :by_user, :user => mary.id)
 
     get(:download_observations, :q => query.id.alphabetize)
     assert_no_flash

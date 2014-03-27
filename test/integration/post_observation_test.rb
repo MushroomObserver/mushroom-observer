@@ -35,7 +35,7 @@ class PostObservationTest < IntegrationTestCase
   def open_create_observation_form
     get(CREATE_OBSERVATION_PAGE)
     assert_template(LOGIN_PAGE)
-    login!(@katrina)
+    login!(katrina)
     assert_template(CREATE_OBSERVATION_PAGE)
     assert_form_has_correct_values(create_observation_form_defaults)
   end
@@ -293,7 +293,7 @@ class PostObservationTest < IntegrationTestCase
       'image_0_when_1i' => '2010',
       'image_0_when_2i' => '3',
       'image_0_when_3i' => '14',
-      'image_0_copyright_holder' => @katrina.legal_name,
+      'image_0_copyright_holder' => katrina.legal_name,
       'image_0_notes' => 'Notes for image',
     }
   end
@@ -344,7 +344,7 @@ class PostObservationTest < IntegrationTestCase
       "good_image_#{img_id}_when_1i" => '2010',
       "good_image_#{img_id}_when_2i" => '3',
       "good_image_#{img_id}_when_3i" => '14',
-      "good_image_#{img_id}_copyright_holder" => @katrina.legal_name,
+      "good_image_#{img_id}_copyright_holder" => katrina.legal_name,
       "good_image_#{img_id}_notes" => 'Notes for image',
     }
   end
@@ -370,7 +370,7 @@ class PostObservationTest < IntegrationTestCase
 
   def expected_values_after_create
     {
-      :user => @katrina,
+      :user => katrina,
       :when => Date.parse('2010-03-14'),
       :where => 'Pasadena, California, USA',
       :location => nil,

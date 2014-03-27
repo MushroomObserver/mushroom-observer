@@ -72,6 +72,7 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
+require 'acts_as_versioned'
 
 class Location < AbstractModel
   belongs_to :description, :class_name => 'LocationDescription' # (main one)
@@ -96,7 +97,7 @@ class Location < AbstractModel
       'low',
       'notes'
   ])
-  non_versioned_columns.push(
+  non_versioned_fields.push(
     'sync_id',
     'created_at',
     'num_views',
@@ -625,9 +626,9 @@ class Location < AbstractModel
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
 
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.
-    if altered?
+    # TODO
+    # Was "altered?" which is gone.  Need to test if changed? only returns true if *important* changes have been made.
+    if changed?
       sender = User.current
       recipients = []
 

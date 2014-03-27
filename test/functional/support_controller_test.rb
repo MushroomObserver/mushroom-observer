@@ -14,7 +14,6 @@ class SupportControllerTest < FunctionalTestCase
   end
 
   def confirm_post(amount, other_amount)
-    user = @rolf
     donations = Donation.count
     anon = false
     final_amount = (amount == 'other') ? other_amount : amount
@@ -22,8 +21,8 @@ class SupportControllerTest < FunctionalTestCase
       :donation => {
         :amount => amount,
         :other_amount => other_amount,
-        :who => user.name,
-        :email => user.email,
+        :who => rolf.name,
+        :email => rolf.email,
         :anonymous => anon,
       }
     }
@@ -32,8 +31,8 @@ class SupportControllerTest < FunctionalTestCase
     assert_equal(donations + 1, Donation.count)
     donation = Donation.find(:all, :order => "created_at DESC")[0]
     assert_equal(final_amount, donation.amount)
-    assert_equal(user.name, donation.who)
-    assert_equal(user.email, donation.email)
+    assert_equal(rolf.name, donation.who)
+    assert_equal(rolf.email, donation.email)
     assert_equal(anon, donation.anonymous)
     assert_equal(false, donation.reviewed)
   end
@@ -57,14 +56,13 @@ class SupportControllerTest < FunctionalTestCase
 
   def create_donation_post(anon)
     make_admin
-    user = @rolf
     amount = 100.00
     donations = Donation.count
     params = {
       :donation => {
         :amount => amount,
-        :who => user.name,
-        :email => user.email,
+        :who => rolf.name,
+        :email => rolf.email,
         :anonymous => anon,
       }
     }
@@ -72,11 +70,11 @@ class SupportControllerTest < FunctionalTestCase
     assert_equal(donations + 1, Donation.count)
     donation = Donation.find(:all, :order => "created_at DESC")[0]
     assert_equal(amount, donation.amount)
-    assert_equal(user.name, donation.who)
-    assert_equal(user.email, donation.email)
+    assert_equal(rolf.name, donation.who)
+    assert_equal(rolf.email, donation.email)
     assert_equal(anon, donation.anonymous)
     assert_equal(true, donation.reviewed)
-    assert_equal(@rolf, donation.user)
+    assert_equal(rolf, donation.user)
   end
 
   def test_create_donation_post

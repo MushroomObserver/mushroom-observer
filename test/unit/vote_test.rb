@@ -1,18 +1,19 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class VoteTest < UnitTestCase
+class VoteTest < ActiveSupport::TestCase
 
   # Create one.
   def test_create
     assert_kind_of(Naming, namings(:agaricus_campestris_naming))
-    assert_kind_of(User, @mary)
+    mary = users(:mary)
+    assert_kind_of(User, mary)
     now = Time.now
     vote = Vote.new(
         :created_at => now,
         :updated_at => now,
         :naming     => namings(:agaricus_campestris_naming),
-        :user       => @mary,
+        :user       => mary,
         :value      => 1
     )
     assert(vote.save, vote.errors.full_messages.join("; "))
@@ -22,9 +23,9 @@ class VoteTest < UnitTestCase
   def test_update
     assert_kind_of(Naming, namings(:coprinus_comatus_naming))
     assert_kind_of(Vote, votes(:coprinus_comatus_owner_vote))
-    assert_kind_of(User, @rolf)
-    assert_equal(@rolf, namings(:coprinus_comatus_naming).user)
-    assert_equal(@rolf, votes(:coprinus_comatus_owner_vote).user)
+    assert_kind_of(User, rolf)
+    assert_equal(rolf, namings(:coprinus_comatus_naming).user)
+    assert_equal(rolf, votes(:coprinus_comatus_owner_vote).user)
     votes(:coprinus_comatus_owner_vote).updated_at = Time.now
     votes(:coprinus_comatus_owner_vote).value = 1
     assert(votes(:coprinus_comatus_owner_vote).save)
@@ -44,7 +45,7 @@ class VoteTest < UnitTestCase
 
     vote = Vote.new(
         :naming => namings(:coprinus_comatus_naming),
-        :user   => @rolf,
+        :user   => rolf,
         :value  => "blah"
     )
     assert !vote.save
@@ -53,7 +54,7 @@ class VoteTest < UnitTestCase
 
     vote = Vote.new(
         :naming => namings(:coprinus_comatus_naming),
-        :user   => @rolf,
+        :user   => rolf,
         :value  => -10
     )
     assert !vote.save

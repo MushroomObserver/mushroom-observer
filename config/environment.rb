@@ -1,5 +1,3 @@
-# encoding: utf-8
-#
 #  = Configuration
 #
 #  This is essentially the "boot" script for the application.  (See below for
@@ -67,11 +65,11 @@
 #
 ################################################################################
 
+# This must be here -- config/boot.rb greps this file looking for it(!!)
+RAILS_GEM_VERSION = '2.3.18'
+
 # Make sure it's already booted.
 require File.join(File.dirname(__FILE__), 'boot')
-
-# This must be here -- config/boot.rb greps this file looking for it(!!)
-RAILS_GEM_VERSION = '2.1.1'
 
 # Short-hand for the three execution modes.
 PRODUCTION  = (RAILS_ENV == 'production')
@@ -132,7 +130,7 @@ Rails::Initializer.run do |config|
 
   # Add our local classes and modules (e.g., Textile and LoginSystem) and class
   # extensions (e.g., String and Symbol extensions) to the include path.
-  config.load_paths += %W(
+  config.autoload_paths += %W(
     #{RAILS_ROOT}/app/classes
     #{RAILS_ROOT}/app/extensions
   )
@@ -238,21 +236,21 @@ end
 # by the live server.  But it *is* used by integration tests, and it fails
 # hideously if you are foolish enough to try to upload a file in such tests.
 # Apparently it simply forgot to unescape the parameter names.  Easy fix. -JPH
-module ActionController
-  class AbstractRequest
-    class << self
-      alias fubar_read_multipart read_multipart
-      def read_multipart(*args)
-        params = fubar_read_multipart(*args)
-        new_params = {}
-        for key, val in params
-          new_params[URI.unescape(key)] = val
-        end
-        return new_params
-      end
-    end
-  end
-end
+# module ActionController
+#   class AbstractRequest
+#     class << self
+#       alias fubar_read_multipart read_multipart
+#       def read_multipart(*args)
+#         params = fubar_read_multipart(*args)
+#         new_params = {}
+#         for key, val in params
+#           new_params[URI.unescape(key)] = val
+#         end
+#         return new_params
+#       end
+#     end
+#   end
+# end
 
 # Add the option to "orphan" attachments if you use ":dependent => :orphan" in
 # the has_many association options.  This has the effect of doing *nothing* to
@@ -326,18 +324,18 @@ end
 
 # Need this to force encoding of views to all be utf-8.  (Rails 3 makes this
 # globally configurable using 'config.encoding'.)
-module ActionView
-  module TemplateHandlers
-    module Compilable
-      alias _old_create_template_source create_template_source
-      def create_template_source(*args)
-        result = _old_create_template_source(*args)
-        result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
-        return result
-      end
-    end
-  end
-end
+# module ActionView
+#   module TemplateHandlers
+#     module Compilable
+#       alias _old_create_template_source create_template_source
+#       def create_template_source(*args)
+#         result = _old_create_template_source(*args)
+#         result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
+#         return result
+#       end
+#     end
+#   end
+# end
 
 # This is used by ym4r_gm plugin.
 module ActionController
@@ -367,25 +365,25 @@ end
 # force the encoding of the text to US-ASCII, as well, causing it to crash.
 # I can find no way to solve this problem without recasting the regexen with
 # the following sleight of hand.  Ugly, but it works.
-require 'action_controller'
-require 'action_controller/assertions'
-module ActionController
-  module Assertions
-    module SelectorAssertions
-      alias __old_assert_select assert_select
-      def assert_select(*args, &block)
-        args = args.map do |arg|
-          case arg
-          when Regexp ; /#{arg}/u
-          when String ; arg.force_encoding('UTF-8')
-          else        ; arg
-          end
-        end
-        __old_assert_select(*args, &block)
-      end
-    end
-  end
-end 
+# require 'action_controller'
+# require 'action_controller/assertions'
+# module ActionController
+#   module Assertions
+#     module SelectorAssertions
+#       alias __old_assert_select assert_select
+#       def assert_select(*args, &block)
+#         args = args.map do |arg|
+#           case arg
+#           when Regexp ; /#{arg}/u
+#           when String ; arg.force_encoding('UTF-8')
+#           else        ; arg
+#           end
+#         end
+#         __old_assert_select(*args, &block)
+#       end
+#     end
+#   end
+# end 
 
 # This is used by passenger?
 module ActionController
@@ -431,18 +429,18 @@ end
 # Multipart form data is read in as ASCII-8BIT / BINARY.  Apparently we can
 # usually assume that it is actually UTF-8, so we just need to force the
 # correct encoding.
-module ActionController
-  class AbstractRequest
-    class << self
-      alias __get_typed_value get_typed_value
-      def get_typed_value(value)
-        result = __get_typed_value(value)
-        result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
-        return result
-      end
-    end
-  end
-end
+# module ActionController
+#   class AbstractRequest
+#     class << self
+#       alias __get_typed_value get_typed_value
+#       def get_typed_value(value)
+#         result = __get_typed_value(value)
+#         result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
+#         return result
+#       end
+#     end
+#   end
+# end
 
 # This tells browsers which encoding to use when sending POST data from forms.
 # The magic hidden field is a workaround to force IE to pay attention to the
@@ -479,23 +477,23 @@ MissingSourceFile::REGEXPS.push([/^cannot load such file -- (.+)$/i, 1])
 # Ruby 1.8.6 introduced new! and deprecated new0.
 # Ruby 1.9.0 removed new0.
 # Ruby trunk revision 31668 removed the new! method.
-if !DateTime.respond_to?(:new!) and
-   !DateTime.respond_to?(:new0)
-  class DateTime
-    HALF_DAYS_IN_DAY = Rational.new!(1, 2)
-    def self.new!(ajd = 0, of = 0, sg = Date::ITALY)
-      jd = ajd + of + HALF_DAYS_IN_DAY
-      jd_i = jd.to_i
-      jd_i -= 1 if jd < 0
-      hours = (jd - jd_i) * 24
-      hours_i = hours.to_i
-      minutes = (hours - hours_i) * 60
-      minutes_i = minutes.to_i
-      seconds = (minutes - minutes_i) * 60
-      DateTime.jd(jd_i, hours_i, minutes_i, seconds, of, sg)
-    end
-  end
-end
+# if !DateTime.respond_to?(:new!) and
+#    !DateTime.respond_to?(:new0)
+#   class DateTime
+#     HALF_DAYS_IN_DAY = Rational.new!(1, 2)
+#     def self.new!(ajd = 0, of = 0, sg = Date::ITALY)
+#       jd = ajd + of + HALF_DAYS_IN_DAY
+#       jd_i = jd.to_i
+#       jd_i -= 1 if jd < 0
+#       hours = (jd - jd_i) * 24
+#       hours_i = hours.to_i
+#       minutes = (hours - hours_i) * 60
+#       minutes_i = minutes.to_i
+#       seconds = (minutes - minutes_i) * 60
+#       DateTime.jd(jd_i, hours_i, minutes_i, seconds, of, sg)
+#     end
+#   end
+# end
 
 # Without this, queries like current_account.tickets.recent.count would
 # instantiate AR objects for all (!!) tickets in the account, not merely

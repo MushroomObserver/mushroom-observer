@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class HerbariumTest < UnitTestCase
+class HerbariumTest < ActiveSupport::TestCase
   def test_specimens
     assert(herbaria(:nybg).specimens.length > 1)
   end

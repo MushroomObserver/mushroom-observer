@@ -1,1 +1,0 @@
-raise LoadError.new

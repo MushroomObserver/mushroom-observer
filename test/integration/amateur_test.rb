@@ -90,14 +90,14 @@ class AmateurTest < IntegrationTestCase
       self.cookies = rolf_cookies
       get_via_redirect('/account/prefs')
       assert_template('account/prefs')
-      assert_users_equal(@rolf, assigns(:user))
+      assert_users_equal(rolf, assigns(:user))
     end
 
     open_session do
       self.cookies = mary_cookies
       get_via_redirect('/account/prefs')
       assert_template('account/prefs')
-      assert_users_equal(@mary, assigns(:user))
+      assert_users_equal(mary, assigns(:user))
     end
 
     open_session do
@@ -114,7 +114,7 @@ class AmateurTest < IntegrationTestCase
   def test_post_comment
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
-    assert_false(obs.comments.any? {|c| c.user == @katrina})
+    assert_false(obs.comments.any? {|c| c.user == katrina})
 
     summary = 'Test summary'
     message = 'This is a big fat test!'
@@ -204,7 +204,7 @@ class AmateurTest < IntegrationTestCase
     katrina = current_session
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
-    assert_false(obs.comments.any? {|c| c.user == @katrina})
+    assert_false(obs.comments.any? {|c| c.user == katrina})
     # (Make sure the name we are going to suggest doesn't exist yet.)
     text_name = 'Xylaria polymorpha'
     assert_nil(Name.find_by_text_name(text_name))
@@ -218,7 +218,7 @@ class AmateurTest < IntegrationTestCase
 
     click(:label => /propose.*name/i)
     assert_template('account/login')
-    current_session.login!(@katrina)
+    current_session.login!(katrina)
     assert_template('observer/create_naming')
 
     # (Make sure the form is for the correct object!)
@@ -322,7 +322,7 @@ class AmateurTest < IntegrationTestCase
     click(:label => /cancel.*show/i)
 
     # Have Rolf join in the fun and vote for this naming.
-    rolf = new_user_session(@rolf)
+    rolf = new_user_session(rolf)
     in_session(rolf) do
       get("/#{obs.id}")
       open_form do |form|
@@ -400,9 +400,9 @@ class AmateurTest < IntegrationTestCase
   # -----------------------------------------------------------------------
 
   def test_language_tracking
-    login(@mary)
-    @mary.locale = Locale.code = 'el-GR'
-    @mary.save
+    login(mary)
+    mary.locale = Locale.code = 'el-GR'
+    mary.save
 
     data = Globalite.localization_data[:'el-GR']
     data[:test_tag1] = 'test_tag1 value'

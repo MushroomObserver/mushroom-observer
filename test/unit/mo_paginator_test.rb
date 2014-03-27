@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class MOPaginatorTest < UnitTestCase
+class MOPaginatorTest < ActiveSupport::TestCase
   def test_basic
     pages = MOPaginator.new
 

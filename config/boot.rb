@@ -2,7 +2,6 @@
 # Configure your app in config/environment.rb and config/environments/*.rb
 
 RAILS_ROOT = "#{File.dirname(__FILE__)}/.." unless defined?(RAILS_ROOT)
-ENV.delete('DYLD_LIBRARY_PATH')
 
 module Rails
   class << self
@@ -45,6 +44,7 @@ module Rails
     def load_initializer
       require "#{RAILS_ROOT}/vendor/rails/railties/lib/initializer"
       Rails::Initializer.run(:install_gem_spec_stubs)
+      Rails::GemDependency.add_frozen_gem_path
     end
   end
 
@@ -62,13 +62,17 @@ module Rails
         gem 'rails'
       end
     rescue Gem::LoadError => load_error
-      $stderr.puts %(Missing the Rails #{version} gem. Please `gem install -v=#{version} rails`, update your RAILS_GEM_VERSION setting in config/environment.rb for the Rails version you do have installed, or comment out RAILS_GEM_VERSION to use the latest version installed.)
-      exit 1
+      if load_error.message =~ /Could not find RubyGem rails/
+        STDERR.puts %(Missing the Rails #{version} gem. Please `gem install -v=#{version} rails`, update your RAILS_GEM_VERSION setting in config/environment.rb for the Rails version you do have installed, or comment out RAILS_GEM_VERSION to use the latest version installed.)
+        exit 1
+      else
+        raise
+      end
     end
 
     class << self
       def rubygems_version
-        Gem::RubyGemsVersion if defined? Gem::RubyGemsVersion
+        Gem::RubyGemsVersion rescue nil
       end
 
       def gem_version
@@ -82,15 +86,15 @@ module Rails
       end
 
       def load_rubygems
+        min_version = '1.3.2'
         require 'rubygems'
-
-        unless rubygems_version >= '0.9.4'
-          $stderr.puts %(Rails requires RubyGems >= 0.9.4 (you have #{rubygems_version}). Please `gem update --system` and try again.)
+        unless rubygems_version >= min_version
+          $stderr.puts %Q(Rails requires RubyGems >= #{min_version} (you have #{rubygems_version}). Please `gem update --system` and try again.)
           exit 1
         end
 
       rescue LoadError
-        $stderr.puts %(Rails requires RubyGems >= 0.9.4. Please install RubyGems and try again: http://rubygems.rubyforge.org)
+        $stderr.puts %Q(Rails requires RubyGems >= #{min_version}. Please install RubyGems and try again: http://rubygems.rubyforge.org)
         exit 1
       end
 
@@ -105,37 +109,6 @@ module Rails
     end
   end
 end
-
-################################################################################
-# Stuff to get rails 2.1.1 working with ruby 1.9.  This must be done before
-# booting rails.  Essentially, I'm just trying to make ruby 1.9 minimally
-# backwards compatible for the purposes of getting rails 2 to boot.
-# -Jason, Feb 2011
-
-if RUBY_VERSION >= '1.9'
-  # Deprecated in ruby 1.9. Rational() is roughly equivalent.
-  class Rational
-    def self.new!(*args)   # (used by active_support/vendor/tzinfo)
-      Rational(*args)
-    end
-  end
-
-  # This method isn't actually ever used, but it is aliased, so it must exist.
-  class StringIO < Data
-    attr_accessor :path
-  end
-
-  # This is a fix the constant autoloader.  Class.parent.name now returns nil if
-  # no superclass.  The autoloader splits parent.name on '::'.  There's no way to
-  # overload the splitter, thus I just convince nil.split() to return [] instead.
-  class NilClass
-    def split(*args)
-      []
-    end
-  end
-end
-
-################################################################################
 
 # All that for this:
 Rails.boot!

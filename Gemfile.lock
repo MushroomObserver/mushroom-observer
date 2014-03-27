@@ -2,17 +2,21 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.2.9)
-    actionmailer (2.1.1)
-      actionpack (= 2.1.1)
-    actionpack (2.1.1)
-      activesupport (= 2.1.1)
-    activerecord (2.1.1)
-      activesupport (= 2.1.1)
+    actionmailer (2.3.18)
+      actionpack (= 2.3.18)
+    actionpack (2.3.18)
+      activesupport (= 2.3.18)
+      rack (~> 1.1.0)
+    activerecord (2.3.18)
+      activesupport (= 2.3.18)
     activerecord-mysql2-adapter (0.0.3)
       mysql2
-    activeresource (2.1.1)
-      activesupport (= 2.1.1)
-    activesupport (2.1.1)
+    activeresource (2.3.18)
+      activesupport (= 2.3.18)
+    activesupport (2.3.18)
+    acts_as_versioned (0.2.3)
+      activerecord (>= 1.10.1)
+      activesupport (>= 1.1.1)
     builder (3.2.2)
     ebnf (0.3.5)
       rdf
@@ -22,13 +26,14 @@ GEM
     mysql (2.9.1)
     mysql2 (0.3.15)
     net-http-persistent (2.9.4)
-    rails (2.1.1)
-      actionmailer (= 2.1.1)
-      actionpack (= 2.1.1)
-      activerecord (= 2.1.1)
-      activeresource (= 2.1.1)
-      activesupport (= 2.1.1)
-      rake (>= 0.8.1)
+    rack (1.1.6)
+    rails (2.3.18)
+      actionmailer (= 2.3.18)
+      actionpack (= 2.3.18)
+      activerecord (= 2.3.18)
+      activeresource (= 2.3.18)
+      activesupport (= 2.3.18)
+      rake (>= 0.8.3)
     rake (10.1.1)
     rdf (1.1.2.1)
     rdf-aggregate-repo (1.1.0)
@@ -57,9 +62,10 @@ PLATFORMS
 DEPENDENCIES
   RedCloth
   activerecord-mysql2-adapter
+  acts_as_versioned (= 0.2.3)
   i18n
   mysql
   mysql2
-  rails (= 2.1.1)
+  rails (= 2.3.18)
   sparql
   test-unit

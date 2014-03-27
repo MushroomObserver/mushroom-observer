@@ -257,7 +257,7 @@ class Name < AbstractModel
       'correct_spelling',
       'notes',
   ])
-  non_versioned_columns.push(
+  non_versioned_fields.push(
     'sync_id',
     'created_at',
     'num_views',
@@ -2149,9 +2149,9 @@ class Name < AbstractModel
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
 
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.
-    if altered?
+    # TODO
+    # Was "altered?" which is gone.  Need to test if changed? only returns true if *important* changes have been made.
+    if changed?
       sender = User.current
       recipients = []
 

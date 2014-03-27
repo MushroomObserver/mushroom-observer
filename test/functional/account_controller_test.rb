@@ -16,7 +16,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash(:runtime_login_success.t)
     assert(@response.has_session_object?(:user_id),
       "Didn't store user in session after successful login!")
-    assert_equal(@rolf.id, @response.session[:user_id],
+    assert_equal(rolf.id, @response.session[:user_id],
       "Wrong user stored in session after successful login!")
   end
 
@@ -317,7 +317,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash(:runtime_prefs_success.t)
 
     # Make sure changes were made.
-    user = @rolf.reload
+    user = rolf.reload
     assert_equal(false,       user.alternate_columns)
     assert_equal(false,       user.alternate_rows)
     assert_equal(10,          user.columns)
@@ -385,7 +385,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash(:runtime_profile_success.t)
 
     # Make sure changes were made.
-    user = @rolf.reload
+    user = rolf.reload
     assert_equal("new_name", user.name)
     assert_equal("new_notes", user.notes)
     assert_equal(locations(:burbank), user.location)
@@ -403,15 +403,15 @@ class AccountControllerTest < FunctionalTestCase
 
     # It should create a new image: this is the current number of images.
     num_images = Image.count
-
+    
     # Post form.
     params = {
       :user => {
-        :name        => @rolf.name,
+        :name        => rolf.name,
         :place_name   => '',
         :notes         => '',
         :upload_image   => file,
-        :mailing_address => @rolf.mailing_address,
+        :mailing_address => rolf.mailing_address,
       },
       :copyright_holder => 'Someone Else',
       :upload => { :license_id => licenses(:ccnc25).id },
@@ -421,12 +421,12 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:controller => :observer, :action => :show_user, :id => 1)
     assert_flash_success
 
-    @rolf.reload
+    rolf.reload
     assert_equal(num_images+1, Image.count)
-    assert_equal(Image.last.id, @rolf.image_id)
-    assert_equal("Someone Else", @rolf.image.copyright_holder)
-    assert_equal(2003, @rolf.image.when.year)
-    assert_equal(licenses(:ccnc25), @rolf.image.license)
+    assert_equal(Image.last.id, rolf.image_id)
+    assert_equal("Someone Else", rolf.image.copyright_holder)
+    assert_equal(2003, rolf.image.when.year)
+    assert_equal(licenses(:ccnc25), rolf.image.license)
   end
 
   def test_no_email_hooks
@@ -450,12 +450,12 @@ class AccountControllerTest < FunctionalTestCase
     ]
       assert_request(
         :action        => "no_email_#{type}",
-        :params        => { :id => @rolf.id },
+        :params        => { :id => rolf.id },
         :require_login => true,
         :require_user  => :index,
         :result        => 'no_email'
       )
-      assert(!@rolf.reload.send("email_#{type}"))
+      assert(!rolf.reload.send("email_#{type}"))
     end
   end
 
@@ -534,8 +534,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'app name'})
     assert_flash_success
     assert_equal(1, ApiKey.count)
-    assert_equal(1, @mary.reload.api_keys.length)
-    key1 = @mary.api_keys.first
+    assert_equal(1, mary.reload.api_keys.length)
+    key1 = mary.api_keys.first
     assert_equal('app name', key1.notes)
     assert_select('a[onclick*=edit_key]', :count => 1)
 
@@ -543,8 +543,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'another name'})
     assert_flash_success
     assert_equal(2, ApiKey.count)
-    assert_equal(2, @mary.reload.api_keys.length)
-    key2 = @mary.api_keys.last
+    assert_equal(2, mary.reload.api_keys.length)
+    key2 = mary.api_keys.last
     assert_equal('another name', key2.notes)
     assert_select('a[onclick*=edit_key]', :count => 2)
 
@@ -558,8 +558,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_remove_button.l, "key_#{key1.id}" => '1')
     assert_flash_success
     assert_equal(1, ApiKey.count)
-    assert_equal(1, @mary.reload.api_keys.length)
-    key = @mary.api_keys.last
+    assert_equal(1, mary.reload.api_keys.length)
+    key = mary.api_keys.last
     assert_objs_equal(key, key2)
     assert_select('a[onclick*=edit_key]', :count => 1)
   end
@@ -569,7 +569,7 @@ class AccountControllerTest < FunctionalTestCase
     key.provide_defaults
     key.verified = nil
     key.notes = 'Testing'
-    key.user = @katrina
+    key.user = katrina
     key.save
     assert_nil(key.verified)
 
@@ -600,7 +600,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_edit_api_key
-    key = @mary.api_keys.create(:notes => 'app name')
+    key = mary.api_keys.create(:notes => 'app name')
 
     # Try without logging in.
     get(:edit_api_key, :id => key.id)

@@ -27,7 +27,7 @@ class TranslationString < AbstractModel
     :table_name => 'translation_strings_versions',
     :if => :update_version?
   )
-  non_versioned_columns.push('language_id', 'tag')
+  non_versioned_fields.push('language_id', 'tag')
 
   # Called to determine whether or not to create a new version.
   # Aggregate changes by the same user for up to a day.

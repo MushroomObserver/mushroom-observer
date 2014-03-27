@@ -97,13 +97,13 @@ class ProjectControllerTest < FunctionalTestCase
     assert(project)
     assert_equal(title, project.title)
     assert_equal(summary, project.summary)
-    assert_equal(@rolf, project.user)
+    assert_equal(rolf, project.user)
     user_group = UserGroup.find_by_name(title)
     assert(user_group)
-    assert_equal([@rolf], user_group.users)
+    assert_equal([rolf], user_group.users)
     admin_group = UserGroup.find_by_name("#{title}.admin")
     assert(admin_group)
-    assert_equal([@rolf], admin_group.users)
+    assert_equal([rolf], admin_group.users)
   end
 
   def test_add_project_empty_name
@@ -189,13 +189,13 @@ class ProjectControllerTest < FunctionalTestCase
   end
 
   def test_destroy_project_other
-    destroy_project_helper(projects(:bolete_project), @rolf)
+    destroy_project_helper(projects(:bolete_project), rolf)
   end
 
   def test_destroy_project_member
     eol_project = projects(:eol_project)
-    assert(eol_project.is_member?(@katrina))
-    destroy_project_helper(eol_project, @katrina)
+    assert(eol_project.is_member?(katrina))
+    destroy_project_helper(eol_project, katrina)
   end
 
   def test_post_admin_request
@@ -222,68 +222,68 @@ class ProjectControllerTest < FunctionalTestCase
     project = projects(:eol_project)
     params = {
       :id => project.id,
-      :candidate => @mary.id
+      :candidate => mary.id
     }
     requires_login(:change_member_status, params)
-    assert_form_action(:action => 'change_member_status', :candidate => @mary.id, :id => project.id)
+    assert_form_action(:action => 'change_member_status', :candidate => mary.id, :id => project.id)
   end
 
   # non-admin member -> non-admin member (should be a no-op)
   def test_change_member_status_member_make_member
-    change_member_status_helper(@rolf, @katrina, :change_member_status_make_member, false, true, false, true)
+    change_member_status_helper(rolf, katrina, :change_member_status_make_member, false, true, false, true)
   end
 
   # non-admin member -> admin member
   def test_change_member_status_member_make_admin
-    change_member_status_helper(@mary, @katrina, :change_member_status_make_admin, false, true, true, true)
+    change_member_status_helper(mary, katrina, :change_member_status_make_admin, false, true, true, true)
   end
 
   # non-admin member -> non-member
   def test_change_member_status_member_remove_member
-    change_member_status_helper(@rolf, @katrina, :change_member_status_remove_member, false, true, false, false)
+    change_member_status_helper(rolf, katrina, :change_member_status_remove_member, false, true, false, false)
   end
 
   # admin member -> non-admin member
   def test_change_member_status_admin_make_member
-    change_member_status_helper(@mary, @mary, :change_member_status_make_member, true, true, false, true)
+    change_member_status_helper(mary, mary, :change_member_status_make_member, true, true, false, true)
   end
 
   # admin member -> admin member (should be a no-op)
   def test_change_member_status_admin_make_admin
-    change_member_status_helper(@rolf, @mary, :change_member_status_make_admin, true, true, true, true)
+    change_member_status_helper(rolf, mary, :change_member_status_make_admin, true, true, true, true)
   end
 
   # admin member -> non-member
   def test_change_member_status_admin_remove_member
-    change_member_status_helper(@mary, @mary, :change_member_status_remove_member, true, true, false, false)
+    change_member_status_helper(mary, mary, :change_member_status_remove_member, true, true, false, false)
   end
 
   # non-member -> non-admin member
   def test_change_member_status_non_member_make_member
-    change_member_status_helper(@rolf, @dick, :change_member_status_make_member, false, false, false, true)
+    change_member_status_helper(rolf, dick, :change_member_status_make_member, false, false, false, true)
   end
 
   # non-member -> admin member
   def test_change_member_status_non_member_make_admin
-    change_member_status_helper(@mary, @dick, :change_member_status_make_admin, false, false, true, true)
+    change_member_status_helper(mary, dick, :change_member_status_make_admin, false, false, true, true)
   end
 
   # non-member -> non-member (should be a no-op)
   def test_change_member_status_non_member_remove_member
-    change_member_status_helper(@rolf, @dick, :change_member_status_remove_member, false, false, false, false)
+    change_member_status_helper(rolf, dick, :change_member_status_remove_member, false, false, false, false)
   end
 
   # The following should all be no-ops
   def test_change_member_status_by_member_make_member
-    change_member_status_helper(@katrina, @dick, :change_member_status_make_member, false, false, false, false)
+    change_member_status_helper(katrina, dick, :change_member_status_make_member, false, false, false, false)
   end
 
   def test_change_member_status_by_non_member_make_admin
-    change_member_status_helper(@dick, @katrina, :change_member_status_make_admin, false, true, false, true)
+    change_member_status_helper(dick, katrina, :change_member_status_make_admin, false, true, false, true)
   end
 
   def test_change_member_status_by_member_remove_member
-    change_member_status_helper(@katrina, @katrina, :change_member_status_remove_member, false, true, false, true)
+    change_member_status_helper(katrina, katrina, :change_member_status_remove_member, false, true, false, true)
   end
 
   # There are many other combinations that shouldn't work for change_member_status, but I think the above
@@ -297,21 +297,21 @@ class ProjectControllerTest < FunctionalTestCase
   # Make sure non-admin cannot see form.
   def test_add_members_non_admin
     project_id = projects(:eol_project).id
-    requires_login(:add_members, { :id => project_id }, @katrina.login)
+    requires_login(:add_members, { :id => project_id }, katrina.login)
     assert_response(:action => 'show_project', :id => project_id)
   end
 
   # Make sure admin can add members.
   def test_add_member_admin
     eol_project = projects(:eol_project)
-    target_user = @dick
+    target_user = dick
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
     params = {
       :id => eol_project.id,
       :candidate => target_user.id
     }
-    requires_login(:add_members, params, @mary.login)
+    requires_login(:add_members, params, mary.login)
     assert_response(:success)
     target_user = User.find(target_user.id)
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
@@ -321,14 +321,14 @@ class ProjectControllerTest < FunctionalTestCase
   # Make sure mere member cannot add members.
   def test_add_member_member
     eol_project = projects(:eol_project)
-    target_user = @dick
+    target_user = dick
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
     params = {
       :id => eol_project.id,
       :candidate => target_user.id
     }
-    requires_login(:add_members, params, @katrina.login)
+    requires_login(:add_members, params, katrina.login)
     assert_response(:action => :show_project, :id => eol_project.id)
     target_user = User.find(target_user.id)
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))

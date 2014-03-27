@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class GeocoderTest < UnitTestCase
+class GeocoderTest < ActiveSupport::TestCase
 
   def test_unknown_place_name
     obj = Geocoder.new('Somewhere Out There')

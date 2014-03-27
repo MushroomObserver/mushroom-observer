@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class LocalizationFilesTest < UnitTestCase
+class LocalizationFilesTest < ActiveSupport::TestCase
 
   def assert_no_missing_translations(tags, type)
     clean_our_backtrace do

@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class CountryCounterTest < UnitTestCase
+class CountryCounterTest < ActiveSupport::TestCase
   def test_wheres
     cc = CountryCounter.new
     wheres = cc.wheres

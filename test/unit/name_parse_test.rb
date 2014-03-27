@@ -1,7 +1,7 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class NameParseTest < UnitTestCase
+class NameParseTest < ActiveSupport::TestCase
 
   def test_default
     name_parse = NameParse.new('Foo bar')

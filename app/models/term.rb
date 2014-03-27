@@ -10,7 +10,7 @@ class Term < AbstractModel
     :if_changed => ALL_TERM_FIELDS,
     :association_options => { :dependent => :orphan }
   )
-  non_versioned_columns.push(
+  non_versioned_fields.push(
     'thumb_image_id',
     'created_at',
     'rss_log_id',

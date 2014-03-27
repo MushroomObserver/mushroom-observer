@@ -10,17 +10,11 @@
 #
 ################################################################################
 
-class Test::Unit::TestCase
+ENV["RAILS_ENV"] = "test"
+require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
+require 'test_help'
 
-  # Register standard app-wide setup and teardown hooks.  (See below.)
-  setup    :application_setup
-  teardown :application_teardown
-
-  # Load all fixtures -- this is only done once thanks to transactional
-  # fixtures (see below), so there is little penalty for loading them all
-  # outside of a small delay at start-up. 
-  fixtures :all
-
+class ActiveSupport::TestCase
   # Transactional fixtures accelerate your tests by wrapping each test method
   # in a transaction that's rolled back on completion.  This ensures that the
   # test database remains unchanged so your fixtures don't have to be reloaded
@@ -34,31 +28,32 @@ class Test::Unit::TestCase
   # don't care one way or the other, switching from MyISAM to InnoDB tables
   # is recommended.
   #
-  # [I have tested the difference, this is *HUGE*.  It also works flawlessly.
-  # with no apparent drawbacks, never making any tests run any slower. -JPH]
+  # The only drawback to using transactional fixtures is when you actually 
+  # need to test transactions.  Since your test is bracketed by a transaction,
+  # any transactions started in your code will be automatically rolled back.
   self.use_transactional_fixtures = true
 
-  # Do NOT use instantiated fixtures.  This buys a *significant* amount of
-  # performance.  I have left the five users instantiated, though, see below
-  # in +application_setup+.
-  self.use_instantiated_fixtures = false
+  # Instantiated fixtures are slow, but give you @david where otherwise you
+  # would need people(:david).  If you don't want to migrate your existing
+  # test cases which use the @david style and don't mind the speed hit (each
+  # instantiated fixtures translates to a database query per test method),
+  # then set this back to true.
+  self.use_instantiated_fixtures  = false
 
-  # Tell the damned tester not to run test methods in a random order!!!
-  # Makes debugging complex interactions absolutely impossible.  Honestly,
-  # isn't the world random enough as it is??  Who thought this was a good
-  # idea??
-  # def self.test_order
-  #   :not_random!
-  # end
+  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
+  #
+  # Note: You'll currently still have to declare fixtures explicitly in integration tests
+  # -- they do not yet inherit this setting
+  fixtures :all
+
+  # Add more helper methods to be used by all tests here...
 
   # Standard setup to run before every test.  Sets the locale, timezone,
-  # and makes sure User doesn't think a user is logged in.  It also
-  # places instances of all the test users in +@rolf+, +@mary+, etc.
+  # and makes sure User doesn't think a user is logged in.
   def application_setup
     Locale.code = :'en-US' if Locale.code != :'en-US'
     Time.zone = 'America/New_York'
     User.current = nil
-    @rolf, @mary, @junk, @dick, @katrina, @roy = User.all
   end
 
   # Standard teardown to run after every test.  Just makes sure any
