@@ -98,8 +98,8 @@ ActiveRecord::Schema.define(:version => 20140324102552) do
     t.integer "image_id"
   end
 
-  add_index "image_votes", ["user_id"], :name => "index_image_votes_on_user_id"
   add_index "image_votes", ["image_id"], :name => "index_image_votes_on_image_id"
+  add_index "image_votes", ["user_id"], :name => "index_image_votes_on_user_id"
 
   create_table "images", :force => true do |t|
     t.datetime "created_at"
