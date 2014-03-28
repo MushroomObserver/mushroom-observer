@@ -3,7 +3,7 @@
 #  = Extensions to Symbol
 #  == Instance Methods
 #
-#  localize:: Wrapper on Globalite#localize.
+#  localize:: Wrapper on I18n#localize.
 #  l::        Alias for localize.
 #  t::        Localize, textilize (no paragraphs or obj links).
 #  tl::       Localize, textilize with obj links (no paragraphs).
@@ -47,8 +47,8 @@ class Symbol
 
   # Does this tag have a translation?
   def has_translation?
-    !!Globalite.localize(self, nil, {}) or
-    !!Globalite.localize(downcase, nil, {})
+    (I18n.t(self, default: '') != '') or
+    (I18n.t(downcase, default: '') != '')
   end
 
   # Wrapper on the old +localize+ method that:
@@ -70,7 +70,7 @@ class Symbol
   # ==== Argument expansion
   #
   # It supports some limited attempts to get case and number correct.  This
-  # feature only works it the value passed in is a Symbol.  For example:
+  # feature only works if the value passed in is a Symbol.  For example:
   #
   #   :tag.l(:type => :login)
   #
@@ -121,9 +121,9 @@ class Symbol
   def localize(args={}, level=[])
     result = nil
     Language.note_usage_of_tag(self)
-    if val = Globalite.localize(self, nil, {})
+    if (val = I18n.t(self, default: '')) != ''
       result = localize_postprocessing(val, args, level)
-    elsif val = Globalite.localize(downcase, nil, {})
+    elsif (val = I18n.t(downcase, default: '')) != ''
       result = localize_postprocessing(val, args, level, :captialize)
     else
       if TESTING
@@ -225,7 +225,7 @@ class Symbol
 
       elsif TESTING
         raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
-          "#{Locale.code} localization for " +
+          "#{I18n.locale} localization for " +
           ([self] + level).map(&:inspect).join(' --> '))
       else
         "[#{orig}]"
@@ -251,11 +251,11 @@ class Symbol
               val = $1
             elsif !val.match(/^([a-z][a-z_]*\d*)$/)
               raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
-                "#{Locale.code} localization for " +
+                "#{I18n.locale} localization for " +
                 ([self] + level).map(&:inspect).join(' --> ')) if TESTING
             elsif !args.has_key?(val.to_sym)
               raise(ArgumentError, "Forgot to pass :#{val} into " +
-                "#{Locale.code} localization for " +
+                "#{I18n.locale} localization for " +
                 ([self] + level).map(&:inspect).join(' --> ')) if TESTING
             else
               val = args[val.to_sym]
@@ -263,7 +263,7 @@ class Symbol
             hash[key] = val
           else
             raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
-              "arguments for #{Locale.code} tag :#{tag} embedded in " +
+              "arguments for #{I18n.locale} tag :#{tag} embedded in " +
               ([self] + level).map(&:inspect).join(' --> ')) if TESTING
           end
         end

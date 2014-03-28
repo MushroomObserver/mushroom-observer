@@ -208,30 +208,6 @@ module ActionController
   end
 end
 
-# RedCloth 4.x has quite a few bugs still. This should roughly fix them until
-# Jason Garber has time to fix them properly in the parser rules. :stopdoc:
-module RedCloth
-  class TextileDoc
-    def to_html(*rules)
-
-      # Pre-filters: losing square brackets if next to quotes, this
-      # introduces a space -- not perfect, but close.
-      self.gsub!('["', '[ "')
-      self.gsub!('"]', '" ]')
-
-      apply_rules(rules)
-      result = to(RedCloth::Formatters::HTML).to_s.clone
-
-      # Post-filters: not catching all the italics, and seeing spans where
-      # they don't belong.
-      result.gsub!(/(^|\W)_+([A-Z][A-Za-z0-9]+)_+(\W|$)/, '\\1<i>\\2</i>\\3')
-      result.gsub!(/<span>(.*?)<\/span>/, '%\\1%')
-
-      return result
-    end
-  end
-end
-
 # There appears to be a bug in read_multipart.  I checked, this is never used
 # by the live server.  But it *is* used by integration tests, and it fails
 # hideously if you are foolish enough to try to upload a file in such tests.

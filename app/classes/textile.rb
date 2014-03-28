@@ -24,6 +24,7 @@
 ################################################################################
 
 require 'cgi'
+require 'redcloth'
 
 class Textile < String
   @@name_lookup     = {}
