@@ -1,5 +1,5 @@
 <% @title = :translators_note_title.t %>
-<%= :translators_note.tpl(:repo => "#{SVN_REPOSITORY}/trunk/lang/ui/") %>
+<%= :translators_note.tpl(:repo => "#{SVN_REPOSITORY}/trunk/config/locales/") %>
 <br/><br/>
 
 <% for lang in Language.all.sort_by(&:order) %>
