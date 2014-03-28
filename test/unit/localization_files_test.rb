@@ -12,7 +12,7 @@ class LocalizationFilesTest < ActiveSupport::TestCase
   end
 
 ################################################################################
-
+  
   def test_localization_files_exist
     for lang in Language.all
       assert File.exists?(lang.localization_file)
@@ -67,7 +67,7 @@ class LocalizationFilesTest < ActiveSupport::TestCase
       "definition(s) in source files:\n" + duplicate_function_defs.join(''))
   end
 
-  # Get Hash of tags we havbe translations for already.
+  # Get Hash of tags we have translations for already.
   def known_tags
     tags = {}
     for tag in Globalite.localizations.keys +
