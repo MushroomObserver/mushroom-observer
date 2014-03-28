@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140324102552) do
+ActiveRecord::Schema.define(:version => 20140328194655) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created_at"
@@ -151,6 +151,7 @@ ActiveRecord::Schema.define(:version => 20140324102552) do
     t.string  "order",    :limit => 100
     t.boolean "official",                :null => false
     t.boolean "beta",                    :null => false
+    t.string  "region",   :limit => 4
   end
 
   create_table "licenses", :force => true do |t|

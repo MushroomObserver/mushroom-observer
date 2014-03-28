@@ -158,7 +158,7 @@ namespace :jason do
 
   task(:get_localization_strings_available) do
     strings = {}
-    File.open("lang/ui/#{ENV['LOCALE']}.yml") do |fh|
+    File.open("config/locales/#{ENV['LOCALE']}.yml") do |fh|
       fh.each_line do |line|
         if line.match(/^(\w+):/)
           strings[$1] = true

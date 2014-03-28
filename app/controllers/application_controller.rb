@@ -451,7 +451,7 @@ class ApplicationController < ActionController::Base
 
   # Get sorted list of locale codes (String's) that we have translations for.
   def all_locales
-    Dir.glob(RAILS_ROOT + '/lang/ui/*.yml').sort.map do |file|
+    Dir.glob(RAILS_ROOT + '/config/locales/*.yml').sort.map do |file|
       file.sub(/.*?(\w+-\w+).yml/, '\\1')
     end
   end
