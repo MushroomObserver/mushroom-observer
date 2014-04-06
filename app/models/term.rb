@@ -1,3 +1,5 @@
+require 'acts_as_versioned'
+
 class Term < AbstractModel
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   belongs_to :user
@@ -8,9 +10,9 @@ class Term < AbstractModel
   acts_as_versioned(
     :table_name => 'terms_versions',
     :if_changed => ALL_TERM_FIELDS,
-    :association_options => { :dependent => :orphan }
+    :association_options => { :dependent => :nullify }
   )
-  non_versioned_fields.push(
+  non_versioned_columns.push(
     'thumb_image_id',
     'created_at',
     'rss_log_id',

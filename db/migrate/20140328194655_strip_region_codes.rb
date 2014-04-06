@@ -4,7 +4,6 @@ class StripRegionCodes < ActiveRecord::Migration
     for l in Language.all
       l.locale, l.region = l.locale.split('-')
       l.save
-      print "#{l.locale}, #{l.region}\n"
     end
   end
 
@@ -12,7 +11,6 @@ class StripRegionCodes < ActiveRecord::Migration
     for l in Language.all
       l.locale = "#{l.locale}-#{l.region}"
       l.save
-      print "#{l.locale}\n"
     end
     remove_column :languages, :region
   end

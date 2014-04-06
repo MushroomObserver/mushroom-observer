@@ -6,7 +6,7 @@
 #
 #  == Attributes
 #
-#  locale::     Official locale string, e.g., "en-US".
+#  locale::     Official locale string, e.g., "en".
 #  name::       Name of the language in that language, e.g., "English" or "Español".
 #  order::      Latinized version of name of language, e.g., "Russkii" or "Ellenika".
 #  official::   Set to true for English: this is the fall-back language for missing translations.

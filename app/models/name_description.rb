@@ -64,6 +64,8 @@
 #
 ############################################################################
 
+require 'acts_as_versioned'
+
 class NameDescription < Description
   belongs_to :license
   belongs_to :name
@@ -86,9 +88,9 @@ class NameDescription < Description
   acts_as_versioned(
     :table_name => 'name_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :orphan }
+    :association_options => { :dependent => :nullify }
   )
-  non_versioned_fields.push(
+  non_versioned_columns.push(
     'sync_id',
     'created_at',
     'name_id',

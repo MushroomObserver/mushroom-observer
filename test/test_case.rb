@@ -51,7 +51,7 @@ class ActiveSupport::TestCase
   # Standard setup to run before every test.  Sets the locale, timezone,
   # and makes sure User doesn't think a user is logged in.
   def application_setup
-    Locale.code = :'en-US' if Locale.code != :'en-US'
+    Locale.code = :'en' if Locale.code != :'en'
     Time.zone = 'America/New_York'
     User.current = nil
   end

@@ -67,10 +67,15 @@ class LocalizationFilesTest < ActiveSupport::TestCase
       "definition(s) in source files:\n" + duplicate_function_defs.join(''))
   end
 
+  def i18n_keys
+    # Going through the backdoor to call a private method.  Yuck!
+    I18n.backend.send(:translations)[:en].keys
+  end
+  
   # Get Hash of tags we have translations for already.
   def known_tags
     tags = {}
-    for tag in Globalite.localizations.keys +
+    for tag in i18n_keys +
         # these are tags only used in unit tests
         [ :one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y, :_unit_test_z ]
       tags[tag.to_s.downcase] = true

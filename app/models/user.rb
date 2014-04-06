@@ -113,7 +113,7 @@
 #  license::            Default license for Images this User uploads.
 #
 #  ==== Preferences
-#  locale::             Language, e.g.: "en-US" or "pt-BR"
+#  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  rows::               Number of rows of thumbnails to show in index.
 #  columns::            Number of columns of thumbnails to show in index.

@@ -258,7 +258,7 @@ mo> vi config/consts-site.rb
   DOMAIN         = 'mushroomobserver.org'
   HTTP_DOMAIN    = 'http://mushroomobserver.org'
   SERVER_CODE    = 'us1'
-  DEFAULT_LOCALE = 'en-US'
+  DEFAULT_LOCALE = 'en'
   BAD_DOMAINS    = ["www.#{DOMAIN}"]
 
   # Use queued email mechanism.
