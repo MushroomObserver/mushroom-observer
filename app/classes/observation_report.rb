@@ -303,6 +303,8 @@ module ObservationReport
 ################################################################################
 
   class Adolf < CSV
+    self.mime_type = 'application/vnd.ms-excel'
+
     def labels
       [
         "Database Field",
