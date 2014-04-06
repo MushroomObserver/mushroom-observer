@@ -6,7 +6,7 @@ class AccountMailerTest < ActiveSupport::TestCase
   FIXTURES_PATH = File.dirname(__FILE__) + '/../fixtures/account_mailer'
 
   def setup
-    Locale.code = "en-US"
+    Locale.code = "en"
     ActionMailer::Base.delivery_method = :test
     ActionMailer::Base.perform_deliveries = true
     ActionMailer::Base.deliveries = []

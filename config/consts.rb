@@ -27,7 +27,7 @@ TEST_IMG_DIR = "#{RAILS_ROOT}/public/test_images"
 SERVER_CODE = 'XX'
 
 # Default locale when nothing sets it explicitly.
-DEFAULT_LOCALE = 'en-US'
+DEFAULT_LOCALE = 'en'
 
 # Time zone of the server.  This is only used in logs(?)
 SERVER_TIME_ZONE = 'America/New_York'

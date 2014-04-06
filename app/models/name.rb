@@ -230,6 +230,8 @@
 #
 ################################################################################
 
+require 'acts_as_versioned'
+
 class Name < AbstractModel
   belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
   belongs_to :description, :class_name => 'NameDescription' # (main one)
@@ -257,7 +259,7 @@ class Name < AbstractModel
       'correct_spelling',
       'notes',
   ])
-  non_versioned_fields.push(
+  non_versioned_columns.push(
     'sync_id',
     'created_at',
     'num_views',

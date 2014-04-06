@@ -50,6 +50,8 @@
 #
 ############################################################################
 
+require 'acts_as_versioned'
+
 class LocationDescription < Description
   belongs_to :license
   belongs_to :location
@@ -70,9 +72,9 @@ class LocationDescription < Description
   acts_as_versioned(
     :table_name => 'location_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :orphan }
+    :association_options => { :dependent => :nullify }
   )
-  non_versioned_fields.push(
+  non_versioned_columns.push(
     'sync_id',
     'created_at',
     'location_id',

@@ -2323,7 +2323,7 @@ en:
   advanced_search_caveat: >
     Advanced search was added in February, 2009 to [:app_title].  There are a lot of directions this feature could go.  I have intentionally kept it somewhat limited since I am concerned that it may have performance issues that result in timeouts.  Please send "email to the webmaster":/observer/ask_webmaster_question if you experience timeouts or if there are particular types of searches you would like to have added.\n
     \n
-    Hints: It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given.  Use "OR" (all caps) to tell it to match one of several possible strings, e.g. "Xanthoria OR Xanthomendoza".  Use a star as a wildcard, e.g. "Wells Gray*Canada" will match "Wells Gray, Canada", "Wells Gray Park, Canada", and "Wells Gray Provincial Park, Canada".  (See notes under 'Content', too.)\n
+    Hints : It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given.  Use "OR" (all caps) to tell it to match one of several possible strings, e.g. "Xanthoria OR Xanthomendoza".  Use a star as a wildcard, e.g. "Wells Gray*Canada" will match "Wells Gray, Canada", "Wells Gray Park, Canada", and "Wells Gray Provincial Park, Canada".  (See notes under 'Content', too.)\n
 
   advanced_search_content: Content
   advanced_search_content_help: Text contained in [:observation] notes or [:comments]
@@ -3164,7 +3164,7 @@ en:
     \n
     Please check the address we're using and make sure it is correct.\n
     \n
-    Email: [email]\n
+    Email : [email]\n
     \n
     "Click here to change it.":/account/prefs\n
     \n
@@ -3486,30 +3486,30 @@ en:
   email_location_merge: >
     User wants to merge two locations, both with observations:\n
     \n
-    user: [user]\n
-    this: [this]\n
-    into: [that]\n
-    loc1: [this_url]\n
-    loc2: [that_url]\n
+    user : [user]\n
+    this : [this]\n
+    into : [that]\n
+    loc1 : [this_url]\n
+    loc2 : [that_url]\n
 
   email_name_change: >
     User made nontrivial change to a name:\n
     \n
-    user: [user]\n
-    old: [old]\n
-    new: [new]\n
-    observations: [observations]\n
-    namings: [namings]\n
-    name: [url]\n
+    user : [user]\n
+    old : [old]\n
+    new : [new]\n
+    observations : [observations]\n
+    namings : [namings]\n
+    name : [url]\n
 
   email_name_merge: >
     User wants to merge two names, both with observations:\n
     \n
-    user: [user]\n
-    this: [this]\n
-    into: [that]\n
-    name1: [this_url]\n
-    name2: [that_url]\n
+    user : [user]\n
+    this : [this]\n
+    into : [that]\n
+    name1 : [this_url]\n
+    name2 : [that_url]\n
 
   email_name_proposal_intro: >
     h2. *Name Proposal*\n
@@ -3670,7 +3670,7 @@ en:
   how_keeping_up: >
     *Keeping Up with Changes* - The default page for [:app_title] is the '[:rss_log_title]', it is also accessible through the '"Latest Changes":/' link in the left-hand panel.  This page shows you the most recent changes on the site.  It lists new "Observations":#observation and "Species Lists":#species_list as well as significant changes to any already existing ones.  Additions of "Images":#image and "Comments":#comment are considered significant changes to the relevant observations.  Changes to "Names":#name are also listed.  Click the page numbers at the top and bottom of the page to browse through older changes.  Observations and names created as a side effect of other changes are not listed separately.\n
     \n
-    Note: The latest changes can be tracked using our "RSS feed":/observer/rss. See this "wikipedia article":http://en.wikipedia.org/wiki/Rss for more information about RSS feeds.\n
+    Note : The latest changes can be tracked using our "RSS feed":/observer/rss. See this "wikipedia article":http://en.wikipedia.org/wiki/Rss for more information about RSS feeds.\n
 
   how_searching: >
     *Searching* - There are several interesting ways to search for information on the site.  The simplest is to type a search string into the search box near the top of each page and click one of the buttons next to it.  This will give you a list of all the "Observations":#observation, "Images":#image, "Names":#name or "Locations":#location that contain fields matching the given string.  If you need a little more control over the search, try clicking '[:app_advanced_search]'.\n
@@ -3723,7 +3723,7 @@ en:
     \n
     To see an occurrence map for a particular "Name":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n
     \n
-    "Users":#user are encouraged to add to the occurrence map for a name.  The easiest way is to create a new "Observation":#observation using an already defined "Location":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n
+    Users are encouraged to add to the occurrence map for a name.  The easiest way is to create a new "Observation":#observation using an already defined "Location":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n
     \n
     You can also explicitly choose not to have an observation show up on the occurrence map.  This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected.  When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'.  By default it is checked.  If you uncheck it, that observation will not appear in any occurrence maps.\n
 

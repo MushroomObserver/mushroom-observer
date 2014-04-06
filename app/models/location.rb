@@ -97,7 +97,7 @@ class Location < AbstractModel
       'low',
       'notes'
   ])
-  non_versioned_fields.push(
+  non_versioned_columns.push(
     'sync_id',
     'created_at',
     'num_views',

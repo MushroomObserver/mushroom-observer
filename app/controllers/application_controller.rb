@@ -36,7 +36,6 @@
 #  all_locales::            Array of available locales for which we have translations.
 #  translate_menu::         Translate keys in select-menu's options.
 #  set_locale::             (filter: determine which locale is requested)
-#  standardize_locale::
 #  get_sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
 #  get_valid_locale_from_request_header::
@@ -509,7 +508,7 @@ class ApplicationController < ActionController::Base
     # Only change the Locale code if it needs changing.  There is about a 0.14
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
-    code = standardize_locale(code)
+    code = code.split('-')[0]
     if Locale.code.to_s != code
       Locale.code = code
       session[:locale] = code
@@ -557,10 +556,10 @@ class ApplicationController < ActionController::Base
   def get_valid_locale_from_request_header
 
     # Get list of languages browser requested, sorted in the order it prefers
-    # them.  (And convert them to standardized format: 'en' or 'en-US'.)
+    # them.
     requested_locales = get_sorted_locales_from_request_header.map do |locale|
       if locale.match(/^(\w\w)-(\w+)$/)
-        locale = "#{$1.downcase}-#{$2.upcase}"
+        locale = $1.downcase
       else
         locale = locale.downcase
       end
@@ -573,96 +572,19 @@ class ApplicationController < ActionController::Base
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
   def lookup_valid_locale(requested_locales)
-    match = nil
-
-    # Get list of available locales.
-    available_locales = Globalite.ui_locales.values.map(&:to_s).sort
-
-    # Look for matches.
-    fallback = nil
+    match = 'en'
     requested_locales.each do |locale|
       logger.debug "[globalite] trying to match locale: #{locale}"
+      language, region = locale.split('-')
 
-      # What is the "preferred" dialect for this language?  Default is 'xx-XX'.
-      locale2 = { 'en' => 'en-US' }[locale[0,2]] ||
-                "#{locale[0,2]}-#{locale[0,2].upcase}"
-
-      # User requested "xx-YY" and we have it.
-      if available_locales.include?(locale)
-        match = locale
-        logger.debug "[globalite] exact match: #{match}"
-
-      # Check for "preferred" dialect 'xx-XX' first.
-      elsif available_locales.include?(locale2)
-        if locale.length > 2
-          # User requestsed "xx-YY", we have "xx-XX".
-          fallback ||= locale2
-        else
-          # User requested "xx", we have "xx-XX".
-          match = locale2
-          logger.debug "[globalite] default language-match: #{match}"
-        end
-
-      # Now we try for any other 'xx-YY'.
-      else
-        available_locales.each do |locale2|
-          if locale2[0,2] == locale[0,2]
-            if locale.length > 2
-              # User requestsed "xx-YY", we have "xx-ZZ".
-              fallback ||= locale2
-            else
-              # User requested "xx", we have "xx-YY".
-              match = locale2
-              logger.debug "[globalite] other language-match: #{match}"
-            end
-          end
-        end
+      if I18n.available_locales.include?(language)
+        match = language
+        logger.debug "[globalite] language match: #{match}"
       end
 
       break if match
     end
-
-    # Fallback can be set if the user requested only exact locales.  If none
-    # of their exact locales worked, we give them default language-matches (in
-    # the same order) instead.  Example:
-    #
-    #   request  = en-AU,pt-PT
-    #   match    = --                   (no matches)
-    #   fallback = en-US                (but "en" would have matched)
-    #
-    # We have neither en-AU nor pt-PT, but we do have en-US and pt-BR.  We give
-    # them en-US because en-XX comes before pt-XX in their request.  Normally
-    # they would request something like this instead, of course:
-    #
-    #   request = en-AU,en,pt-PT,pt
-    #   match   = en-US                 (both "en" and "pt" match)
-    #
-    match || fallback
-  end
-
-  # Standardize locale code to the format Globalite uses: 'xx-YY'.  Returns a
-  # String or raises a RuntimeError if it's invalid.  (*NOTE*: Globalite's
-  # +Locale.code+ is a symbol!)
-  #
-  #   en_us  ->  en-US
-  #   en-us  ->  en-US
-  #   en_US  ->  en-US
-  #   en-US  ->  en-US
-  #   en     ->  (error)
-  #   en-*   ->  (error)
-  #   e-US   ->  (error)
-  #   eng-US ->  (error)
-  #
-  def standardize_locale(code)
-    if code.to_s.match(/^([a-z][a-z])[_\-](\w+)/i)
-      $1.downcase + '-' + $2.upcase
-    elsif code2 = lookup_valid_locale([code])
-      code2
-    elsif PRODUCTION
-      DEFAULT_LOCALE
-    else
-      raise("Invalid locale: #{code.inspect}")
-    end
+    match
   end
 
   ##############################################################################

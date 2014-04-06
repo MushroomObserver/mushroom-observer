@@ -245,7 +245,7 @@ module ActiveRecord
     class HasManyAssociation
       alias original_delete_records delete_records
       def delete_records(records)
-        if @reflection.options[:dependent] != :orphan
+        if @reflection.options[:dependent] != :nullify
           original_delete_records(records)
         end
       end
@@ -253,7 +253,7 @@ module ActiveRecord
     module ClassMethods
       alias original_configure_dependency_for_has_many configure_dependency_for_has_many
       def configure_dependency_for_has_many(reflection)
-        if reflection.options[:dependent] != :orphan
+        if reflection.options[:dependent] != :nullify
           original_configure_dependency_for_has_many(reflection)
         end
       end
