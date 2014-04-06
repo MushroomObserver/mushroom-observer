@@ -1289,12 +1289,16 @@ module RefineSearch
       val
     elsif val.match(/-/)
       m, d = val.split('-')
-      :date_helper_month_names.l[m.to_i] + (' %d' % d)
+      month_index_to_month_name(m.to_i) + (' %d' % d)
     else
-      :date_helper_month_names.l[val.to_i]
+      month_index_to_month_name(m.to_i)
     end
   end
 
+  def rs_month_name(month_index)
+    :all_months.l.split[month_index - 1]
+  end
+  
   def rs_format_time(val, field)
     if val == '0' || val.blank?
       ''
@@ -1351,10 +1355,9 @@ module RefineSearch
     end
   end
 
-  def rs_parse_month(str)
-    str = str.downcase
-    m = :date_helper_month_names.l[1..-1].map(&:downcase).index(str) ||
-        :date_helper_abbr_month_names.l[1..-1].map(&:downcase).index(str)
+  def rs_parse_month(month_name)
+    name = month_name.downcase
+    i = :all_months.l.downcase.split.index(name) || :all_month_abbrs.l.downcase.split.index(month)
     return '%02d' % (m + 1)
   end
 

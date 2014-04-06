@@ -1,4 +1,7 @@
 en:
+  all_months: January February March April May June July August September October November December
+  all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+
   # Important examples:
   hello: Hello world
   they_flew_by: The [they] flew by
