@@ -47,8 +47,8 @@ class Symbol
 
   # Does this tag have a translation?
   def has_translation?
-    (I18n.t(self, default: '') != '') or
-    (I18n.t(downcase, default: '') != '')
+    (I18n.t(self, default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT') or
+    (I18n.t(downcase, default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT')
   end
 
   # Wrapper on the old +localize+ method that:
