@@ -57,6 +57,10 @@ module LanguageExporter
 
   # Update the editable export file.
   def update_export_file
+    debugger
+    str = 'site_stats_location_descriptions_editors'
+    print "update_export_file: localization_strings.member?(str): #{localization_strings.member?(str)}\n"
+    print "update_export_file: translated_strings.member?(str): #{translated_strings.member?(str)}\n"
     lines = format_export_file(localization_strings, translated_strings)
     write_export_file_lines(lines)
   end
@@ -105,8 +109,8 @@ module LanguageExporter
     good_tags = Language.official.read_export_file["en"]
     for str in translation_strings.reject {|str| good_tags.has_key?(str.tag)}
       verbose("  deleting :#{str.tag}")
-      # translation_strings.delete(str) unless safe_mode
-      # any_changes = true
+      translation_strings.delete(str) unless safe_mode
+      any_changes = true
     end
     return any_changes
   end
