@@ -269,7 +269,7 @@
             </div>
             
             <br/><br/><br/>
-            <% lang = Language.find_by_locale(Locale.code)
+            <% lang = Language.find_by_locale(I18n.locale)
             if lang and (!lang.official or Language.tracking_usage) %>
               <div id="translators_credit">
                 <hr width="250" align="left" />

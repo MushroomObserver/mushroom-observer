@@ -56,13 +56,13 @@ class ActiveSupport::TestCase
   # Standard setup to run before every test.  Sets the locale, timezone,
   # and makes sure User doesn't think a user is logged in.
   # def application_setup
-  #   Locale.code = :'en' if Locale.code != :'en'
+  #   I18n.locale = :'en' if I18n.locale != :'en'
   #   Time.zone = 'America/New_York'
   #   User.current = nil
   # end
 
   def setup
-    # Locale.code = :'en' if Locale.code != :'en'
+    # I18n.locale = :'en' if I18n.locale != :'en'
     Time.zone = 'America/New_York'
     User.current = nil
   end
@@ -198,6 +198,36 @@ class ActiveSupport::TestCase
   def assert_name_list_equal(expect, got, msg=nil)
     clean_our_backtrace do
       assert_list_equal(expect, got, msg, &:search_name)
+    end
+  end
+  
+  # Test whether the n-1st queued email matches.  For example:
+  #
+  #   assert_email(0,
+  #     :flavor  => 'QueuedEmail::CommentAdd',
+  #     :from    => mary,
+  #     :to      => rolf,
+  #     :comment => @comment_on_minmal_unknown.id
+  #   )
+  #
+  def assert_email(n, args)
+    clean_our_backtrace do
+      email = QueuedEmail.find(:first, :offset => n)
+      assert(email)
+      for arg in args.keys
+        case arg
+        when :flavor
+          assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
+        when :from
+          assert_equal(args[arg].id, email.user_id, "Sender is wrong")
+        when :to
+          assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
+        when :note
+          assert_equal(args[arg], email.get_note, "Value of note is wrong")
+        else
+          assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
+        end
+      end
     end
   end
 end

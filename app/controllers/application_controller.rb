@@ -180,7 +180,7 @@ class ApplicationController < ActionController::Base
 
   # Keep track of localization strings so that users can edit them (sort of) in situ.
   def track_translations
-    @language = Language.find_by_locale(Locale.code)
+    @language = Language.find_by_locale(I18n.locale)
     if @user and @language and
        (!@language.official or is_reviewer?)
       Language.track_usage(flash[:tags_on_last_page])
@@ -490,16 +490,16 @@ class ApplicationController < ActionController::Base
   #
   def set_locale
     code = if params[:user_locale]
-      logger.debug "[globalite] loading locale: #{params[:user_locale]} from params"
+      logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
       params[:user_locale]
     elsif @user && !@user.locale.blank?
-      logger.debug "[globalite] loading locale: #{@user.locale} from @user"
+      logger.debug "[I18n] loading locale: #{@user.locale} from @user"
       @user.locale
     elsif session[:locale]
-      logger.debug "[globalite] loading locale: #{session[:locale]} from session"
+      logger.debug "[I18n] loading locale: #{session[:locale]} from session"
       session[:locale]
     elsif locale = get_valid_locale_from_request_header
-      logger.debug "[globalite] loading locale: #{locale} from request header"
+      logger.debug "[I18n] loading locale: #{locale} from request header"
       locale
     else
       DEFAULT_LOCALE
@@ -509,18 +509,18 @@ class ApplicationController < ActionController::Base
     # second performance hit every time we change it... even if we're only
     # changing it to what it already is!!
     code = code.split('-')[0]
-    if Locale.code.to_s != code
-      Locale.code = code
+    if I18n.locale.to_s != code
+      I18n.locale = code
       session[:locale] = code
     end
 
     # Update user preference.
-    if @user && @user.locale.to_s != Locale.code.to_s
-      @user.update_attributes(:locale => Locale.code.to_s)
-      Transaction.put_user(:id => @user, :set_locale => Locale.code.to_s)
+    if @user && @user.locale.to_s != I18n.locale.to_s
+      @user.update_attributes(:locale => I18n.locale.to_s)
+      Transaction.put_user(:id => @user, :set_locale => I18n.locale.to_s)
     end
 
-    logger.debug "[globalite] Locale set to #{Locale.code}"
+    logger.debug "[I18n] Locale set to #{I18n.locale}"
 
     # Tell Rails to continue to process request.
     return true

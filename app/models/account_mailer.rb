@@ -67,7 +67,7 @@ class AccountMailer < ActionMailer::Base
   # specimen::  Added specimen.
   def add_specimen_not_curator(sender, receiver, specimen)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_add_specimen_not_curator.l(:herbarium_name => specimen.herbarium.name)
     @body['subject']     = @subject
     @body['user']        = @user
@@ -93,7 +93,7 @@ class AccountMailer < ActionMailer::Base
   # message::   Content of message (provided by user).
   def admin_request(sender, receiver, project, subject, message)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = subject
     @body['subject']     = @subject
     @body['user']        = @user
@@ -120,7 +120,7 @@ class AccountMailer < ActionMailer::Base
   # message::   Content of message (provided by user).
   def author_request(sender, receiver, object, subject, message)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = subject
     @body['subject']     = @subject
     @body['user']        = @user
@@ -146,7 +146,7 @@ class AccountMailer < ActionMailer::Base
   # comment::   Comment that triggered this email.
   def comment(sender, receiver, target, comment)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_comment.l(:name => target.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
@@ -171,7 +171,7 @@ class AccountMailer < ActionMailer::Base
   # commercial_inquiry:: Content of message (provided by user).
   def commercial_inquiry(sender, image, commercial_inquiry)
     @user                = image.user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_commercial_inquiry.l(:name => image.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
@@ -199,7 +199,7 @@ class AccountMailer < ActionMailer::Base
   # time::          Time the change took place.
   def consensus_change(sender, receiver, observation, old_name, new_name, time)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_consensus_change.l(:id => observation.id,
                                 :old => (old_name ? old_name.real_search_name : 'none'),
                                 :new => (new_name ? new_name.real_search_name : 'none'))
@@ -225,7 +225,7 @@ class AccountMailer < ActionMailer::Base
   # Email sent to Nathan when sign-up is denied.
   # user_params::   Hash of parameters from form.
   def denied(user_params)
-    Locale.code          = DEFAULT_LOCALE
+    I18n.locale          = DEFAULT_LOCALE
     @subject             = :email_subject_denied.l
     @body['subject']     = @subject
     @body['user']        = @user
@@ -241,7 +241,7 @@ class AccountMailer < ActionMailer::Base
   # features::  Description of changes (body of email).
   def email_features(user, features)
     @user                = user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_features.l
     @body['subject']     = @subject
     @body['user']        = @user
@@ -260,8 +260,8 @@ class AccountMailer < ActionMailer::Base
   def email_registration(user, registration)
     event = registration.conference_event
     @user                = user
-    Locale.code          = DEFAULT_LOCALE
-    Locale.code          = @user.locale if @user and @user.locale
+    I18n.locale          = DEFAULT_LOCALE
+    I18n.locale          = @user.lang if @user and @user.lang
     @subject             = :email_subject_registration.l(:name => event.name)
     @body['registration'] = registration
     @body['subject']     = @subject
@@ -298,7 +298,7 @@ class AccountMailer < ActionMailer::Base
       new_desc           = nil
     end
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
     @body['subject']     = @subject
     @body['user']        = @user
@@ -344,7 +344,7 @@ class AccountMailer < ActionMailer::Base
       new_desc           = nil
     end
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_name_change.l(:name =>
                               (old_name ? old_name.real_search_name : new_name.real_search_name))
     @body['subject']     = @subject
@@ -376,7 +376,7 @@ class AccountMailer < ActionMailer::Base
   # observation::   Observation in question.
   def name_proposal(sender, receiver, naming, observation)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_name_proposal.l(:name => naming.text_name,
                                                           :id => observation.id)
     @body['subject']     = @subject
@@ -403,7 +403,7 @@ class AccountMailer < ActionMailer::Base
   def naming_for_observer(observer, naming, notification)
     sender               = notification.user
     @user                = observer
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_naming_for_observer.l
     @body['subject']     = @subject
     @body['user']        = @user
@@ -427,7 +427,7 @@ class AccountMailer < ActionMailer::Base
   # naming::    Naming that triggered this email.
   def naming_for_tracker(tracker, naming)
     @user                = tracker
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_naming_for_tracker.l
     @body['subject']     = @subject
     @body['user']        = @user
@@ -451,7 +451,7 @@ class AccountMailer < ActionMailer::Base
   # password::  The new password (unencrypted).
   def new_password(user, password)
     @user                = user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_new_password.l
     @body['subject']     = @subject
     @body['user']        = @user
@@ -474,7 +474,7 @@ class AccountMailer < ActionMailer::Base
   # time::          Time the change took place.
   def observation_change(sender, receiver, observation, note, time)
     @user                = receiver
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = observation ? :email_subject_observation_change.l(:name => observation.unique_text_name) :
                                          :email_subject_observation_destroy.l(:name => note).t.html_to_ascii
     @body['subject']     = @subject
@@ -501,7 +501,7 @@ class AccountMailer < ActionMailer::Base
   # question::      The actual question (content).
   def observation_question(sender, observation, question)
     @user                = observation.user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_observation_question.l(:name => observation.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
@@ -527,7 +527,7 @@ class AccountMailer < ActionMailer::Base
   def publish_name(publisher, receiver, name)
     @user                = receiver
     @name                = name
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_publish_name.l
     @body['subject']     = @subject
     @body['user']        = receiver
@@ -552,8 +552,8 @@ class AccountMailer < ActionMailer::Base
   def update_registration(user, registration, before)
     event = registration.conference_event
     @user                = user
-    Locale.code          = DEFAULT_LOCALE
-    Locale.code          = @user.locale if @user and @user.locale
+    I18n.locale          = DEFAULT_LOCALE
+    I18n.locale          = @user.lang if @user and @user.lang
     @subject             = :email_subject_update_registration.l(:name => event.name)
     @body['registration'] = registration
     @body['before']      = before
@@ -576,7 +576,7 @@ class AccountMailer < ActionMailer::Base
   # content::   Content of question (provided by user).
   def user_question(sender, user, subject, content)
     @user                = user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = subject
     @body['subject']     = @subject
     @body['user']        = user
@@ -597,7 +597,7 @@ class AccountMailer < ActionMailer::Base
   # user::      User that just signed up.
   def verify(user)
     @user                = user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_verify.l
     @body['subject']     = @subject
     @body['user']        = user
@@ -616,7 +616,7 @@ class AccountMailer < ActionMailer::Base
   # api_key::     API key in question.
   def verify_api_key(user, other_user, api_key)
     @user                = user
-    Locale.code          = @user.locale || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_verify_api_key.l
     @body['subject']     = @subject
     @body['user']        = user
@@ -636,7 +636,7 @@ class AccountMailer < ActionMailer::Base
   # sender::    User asking the question.
   # question::  Content of the question.
   def webmaster_question(sender, question)
-    Locale.code          = DEFAULT_LOCALE
+    I18n.locale          = DEFAULT_LOCALE
     @subject             = :email_subject_webmaster_question.l(:user => sender)
     @body['question']    = question
     @recipients          = WEBMASTER_EMAIL_ADDRESS

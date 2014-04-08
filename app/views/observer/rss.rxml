@@ -4,7 +4,7 @@ xml.rss(:version=>"2.0") {
     xml.title(:rss_title.l)
     xml.link(HTTP_DOMAIN + '/observer/list_rss_logs')
     xml.description(:rss_description.l)
-    xml.language(Locale.code.to_s)
+    xml.language(I18n.locale.to_s)
     for log in @logs
       xml.item do
         xml.title(log.unique_text_name)

@@ -9,7 +9,7 @@ Clean up reuse and remove so they are explicitly _for_observation or _for_profil
 Jason:
   Should list_locations order by user format or stick with postal?
   'Show Locations' not limiting results when looking at index_observation for an undefined location
-  Mention queued_email fix for Locale.code problem.
+  Mention queued_email fix for I18n.locale problem.
   
 
 Some recent suggestions from email:
