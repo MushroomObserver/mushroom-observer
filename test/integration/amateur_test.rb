@@ -401,7 +401,8 @@ class AmateurTest < IntegrationTestCase
 
   def test_language_tracking
     login(mary)
-    mary.locale = Locale.code = 'el-GR'
+    mary.locale = 'el-GR'
+    I18n.locale = mary.lang
     mary.save
 
     data = Globalite.localization_data[:'el-GR']

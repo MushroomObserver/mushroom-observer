@@ -54,9 +54,13 @@ class TranslationString < AbstractModel
     return result
   end
 
+  def self.translations(lang)
+    I18n.backend.send(:translations)[lang] # Going through the backdoor to call a private method.  Yuck!
+  end
+  
   # Update this string in the current set of translations Globalite is using.
   def update_localization
-    data = Globalite.localization_data[language.locale.to_sym]
+    data = TranslationString.translations(language.locale.to_sym)
     raise "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
     data[tag.to_sym] = text
   end

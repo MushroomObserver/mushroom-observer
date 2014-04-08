@@ -30,7 +30,7 @@ class LanguageTest < ActiveSupport::TestCase
     str.text = 'la chazame'
     str.update_localization
     assert_equal('shazam', :one.l)
-    Locale.code = str.language.locale
+    I18n.locale = str.language.locale
     assert_equal('la chazame', :one.l)
   end
 

@@ -214,7 +214,7 @@ class TranslationControllerTest < FunctionalTestCase
     assert_equal('uno', :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_textarea_value(:tag_one, 'ichi')
-    Locale.code = 'el-GR'
+    I18n.locale = 'el-GR'
     assert_equal('ichi', :one.l)
   end
 
@@ -271,7 +271,7 @@ class TranslationControllerTest < FunctionalTestCase
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_textarea_value(:tag_one, 'ichi')
 
-    Locale.code = 'el-GR'
+    I18n.locale = 'el-GR'
     assert_equal('ichi', :one.l)
   end
 

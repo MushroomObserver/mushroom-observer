@@ -368,10 +368,10 @@ class LocationTest < ActiveSupport::TestCase
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown
     assert_objs_equal(loc1, loc2)
-    Locale.code = 'es-ES'
+    I18n.locale = 'es'
     loc3 = Location.unknown
     assert_objs_equal(loc1, loc3)
-    Globalite.localization_data[:'es-ES'][:unknown_locations] = 'Desconocido'
+    TranslationString.translations(:es)[:unknown_locations] = 'Desconocido'
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)
   end

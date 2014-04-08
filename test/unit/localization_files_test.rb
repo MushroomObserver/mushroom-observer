@@ -69,7 +69,7 @@ class LocalizationFilesTest < ActiveSupport::TestCase
 
   def i18n_keys
     # Going through the backdoor to call a private method.  Yuck!
-    I18n.backend.send(:translations)[:en].keys
+    TranslationString.translations(:en).keys
   end
   
   # Get Hash of tags we have translations for already.

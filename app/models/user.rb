@@ -928,4 +928,8 @@ protected
       end
     end
   end
+
+  def lang
+    locale.split('-')[0]
+  end
 end
