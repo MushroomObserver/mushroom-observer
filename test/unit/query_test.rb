@@ -1552,6 +1552,7 @@ class QueryTest < ActiveSupport::TestCase
   end
 
   def test_observation_of_name
+    User.current = rolf
     names = Name.all(:conditions => 'text_name like "Agaricus camp%"')
     name = names.pop
     names.each {|n| name.merge_synonyms(n)}

@@ -80,6 +80,7 @@ katrina:
   verified: 2008-03-02 21:14:00
   contribution: 10
   created_here: true
+  locale: en-US
   thumbnail_size: :thumbnail
   image_size: :medium
   keep_filenames: :toss
