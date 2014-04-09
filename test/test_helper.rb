@@ -62,7 +62,7 @@ class ActiveSupport::TestCase
   # end
 
   def setup
-    # I18n.locale = :'en' if I18n.locale != :'en'
+    I18n.locale = :'en' if I18n.locale != :'en'
     Time.zone = 'America/New_York'
     User.current = nil
   end

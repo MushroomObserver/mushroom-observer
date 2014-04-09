@@ -1397,13 +1397,14 @@ class NameTest < ActiveSupport::TestCase
     desc.habitat = ''
     desc.look_alikes = ''
     desc.uses = ''
+    assert_equal(0, QueuedEmail.count)
     desc.save
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_equal(nil, desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
+    assert_equal(3, QueuedEmail.count)
     assert_email(0,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => rolf,
@@ -1438,8 +1439,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
+    assert_equal(4, QueuedEmail.count)
+    assert_email(3,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => mary,
       :to            => rolf,
@@ -1473,8 +1474,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
+    assert_equal(5, QueuedEmail.count)
+    assert_email(4,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => dick,
       :to            => mary,
@@ -1508,8 +1509,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(rolf.id, desc.reviewer_id)
     assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(4, QueuedEmail.count)
-    assert_email(3,
+    assert_equal(6, QueuedEmail.count)
+    assert_email(5,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => rolf,
       :to            => katrina,
@@ -1517,7 +1518,7 @@ class NameTest < ActiveSupport::TestCase
       :description   => desc.id,
       :old_name_version => name.version,
       :new_name_version => name.version,
-      :old_description_version => desc.version,
+      :old_description_version => desc.version-1,
       :new_description_version => desc.version,
       :review_status => 'inaccurate'
     )
@@ -1548,8 +1549,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(5, QueuedEmail.count)
-    assert_email(4,
+    assert_equal(7, QueuedEmail.count)
+    assert_email(6,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => dick,
       :to            => rolf,
@@ -1583,8 +1584,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(6, QueuedEmail.count)
-    assert_email(5,
+    assert_equal(8, QueuedEmail.count)
+    assert_email(7,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => rolf,
       :to            => mary,
@@ -1789,18 +1790,18 @@ class NameTest < ActiveSupport::TestCase
     lepiota = names(:lepiota)
     lepiota.change_deprecated(true)
     lepiota.save
-    assert_false(Name.parent_if_parent_deprecated('Agaricus campestris'))
-    assert_false(Name.parent_if_parent_deprecated('Agaricus campestris ssp. foo'))
-    assert_false(Name.parent_if_parent_deprecated('Agaricus campestris ssp. foo var. bar'))
-    assert_true(Name.parent_if_parent_deprecated('Lactarius alpigenes'))
-    assert_true(Name.parent_if_parent_deprecated('Lactarius alpigenes ssp. foo'))
-    assert_true(Name.parent_if_parent_deprecated('Lactarius alpigenes ssp. foo var. bar'))
-    assert_false(Name.parent_if_parent_deprecated('Peltigera'))
-    assert_false(Name.parent_if_parent_deprecated('Peltigera neckeri'))
-    assert_false(Name.parent_if_parent_deprecated('Peltigera neckeri f. alba'))
-    assert_true(Name.parent_if_parent_deprecated('Lepiota'))
-    assert_true(Name.parent_if_parent_deprecated('Lepiota barsii'))
-    assert_true(Name.parent_if_parent_deprecated('Lepiota barsii f. alba'))
+    assert_nil(Name.parent_if_parent_deprecated('Agaricus campestris'))
+    assert_nil(Name.parent_if_parent_deprecated('Agaricus campestris ssp. foo'))
+    assert_nil(Name.parent_if_parent_deprecated('Agaricus campestris ssp. foo var. bar'))
+    assert(Name.parent_if_parent_deprecated('Lactarius alpigenes'))
+    assert(Name.parent_if_parent_deprecated('Lactarius alpigenes ssp. foo'))
+    assert(Name.parent_if_parent_deprecated('Lactarius alpigenes ssp. foo var. bar'))
+    assert_nil(Name.parent_if_parent_deprecated('Peltigera'))
+    assert_nil(Name.parent_if_parent_deprecated('Peltigera neckeri'))
+    assert_nil(Name.parent_if_parent_deprecated('Peltigera neckeri f. alba'))
+    assert(Name.parent_if_parent_deprecated('Lepiota'))
+    assert(Name.parent_if_parent_deprecated('Lepiota barsii'))
+    assert(Name.parent_if_parent_deprecated('Lepiota barsii f. alba'))
   end
 
   def test_suggest_alternate_names_from_synonymous_genera
