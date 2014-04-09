@@ -3,6 +3,16 @@ require 'test_helper'
 
 class QueuedEmailTest < ActiveSupport::TestCase
 
+  def setup
+    QueuedEmail.queue_emails(true)
+    super
+  end
+  
+  def teardown
+    QueuedEmail.queue_emails(false)
+    super
+  end
+
   def test_not_silent
     assert(RunLevel.is_normal?)
   end
