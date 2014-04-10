@@ -1,11 +1,11 @@
 <%
   url = "#{HTTP_DOMAIN}/account/verify/#{@user.id}?auth_code=#{@user.auth_code}"
-  intro = :email_verify_intro.l(:user => @user.login, :link => link_to(url, url))
+  intro = :email_verify_intro.l(:user => @user.login, :link => "<a href=\"#{url}\">#{url}</a>")
 
 if @user.email_html %>
 <html>
 <head>
-<title><%= "#{:app_title.t}: #{@subject}" %></title>
+<title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>

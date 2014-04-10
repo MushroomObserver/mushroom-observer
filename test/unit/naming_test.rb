@@ -31,6 +31,7 @@ class NamingTest < ActiveSupport::TestCase
     assert namings(:coprinus_comatus_naming).errors.full_messages.join("; ")
     namings(:coprinus_comatus_naming).reload
     observations(:coprinus_comatus_obs).reload
+    User.current = rolf
     observations(:coprinus_comatus_obs).calc_consensus
     assert_equal names(:agaricus_campestris), namings(:coprinus_comatus_naming).name
     assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
