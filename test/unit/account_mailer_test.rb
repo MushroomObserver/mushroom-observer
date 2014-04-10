@@ -28,7 +28,7 @@ class AccountMailerTest < ActiveSupport::TestCase
 
   # Run off an email in both HTML and text form.
   def run_mail_test(name, user=nil, &block)
-    clean_our_backtrace('run_mail_test') do
+    # clean_our_backtrace('run_mail_test') do
       text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
                        reject {|x| x.match(/\.new$/)}
       html_files = Dir.glob("#{FIXTURES_PATH}/#{name}.html*").
@@ -48,7 +48,7 @@ class AccountMailerTest < ActiveSupport::TestCase
         fix_mac_vs_pc!(email)
         assert_string_equal_file(email, *html_files)
       end
-    end
+      # end
   end
 
 ################################################################################

@@ -69,7 +69,7 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_add_specimen_not_curator.l(:herbarium_name => specimen.herbarium.name)
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['specimen']    = specimen
@@ -95,7 +95,7 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = subject
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['message']     = message || ''
@@ -122,7 +122,7 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = subject
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['message']     = message || ''
@@ -148,7 +148,7 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_comment.l(:name => target.unique_text_name)
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['target']      = target
@@ -173,7 +173,7 @@ class AccountMailer < ActionMailer::Base
     @user                = image.user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_commercial_inquiry.l(:name => image.unique_text_name)
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['image']       = image
@@ -203,7 +203,7 @@ class AccountMailer < ActionMailer::Base
     @subject             = :email_subject_consensus_change.l(:id => observation.id,
                                 :old => (old_name ? old_name.real_search_name : 'none'),
                                 :new => (new_name ? new_name.real_search_name : 'none'))
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['observation'] = observation
@@ -227,7 +227,7 @@ class AccountMailer < ActionMailer::Base
   def denied(user_params)
     I18n.locale          = DEFAULT_LOCALE
     @subject             = :email_subject_denied.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['user_params'] = user_params
     @recipients          = WEBMASTER_EMAIL_ADDRESS
@@ -243,7 +243,7 @@ class AccountMailer < ActionMailer::Base
     @user                = user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_features.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['features']    = features
     @recipients          = @user.email
@@ -264,7 +264,7 @@ class AccountMailer < ActionMailer::Base
     I18n.locale          = @user.lang if @user and @user.lang
     @subject             = :email_subject_registration.l(:name => event.name)
     @body['registration'] = registration
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = user
     @recipients          = registration.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
@@ -300,7 +300,7 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['time']        = time
@@ -347,7 +347,7 @@ class AccountMailer < ActionMailer::Base
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_name_change.l(:name =>
                               (old_name ? old_name.real_search_name : new_name.real_search_name))
-    @body['subject']     = @subject
+    @body['title']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['time']        = time
@@ -379,7 +379,7 @@ class AccountMailer < ActionMailer::Base
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_name_proposal.l(:name => naming.text_name,
                                                           :id => observation.id)
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['naming']      = naming
     @body['observation'] = observation
@@ -405,7 +405,7 @@ class AccountMailer < ActionMailer::Base
     @user                = observer
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_naming_for_observer.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['naming']      = naming
     @body['notification'] = notification
@@ -429,7 +429,7 @@ class AccountMailer < ActionMailer::Base
     @user                = tracker
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_naming_for_tracker.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['observation'] = naming.observation
     @body['naming']      = naming
@@ -453,7 +453,7 @@ class AccountMailer < ActionMailer::Base
     @user                = user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_new_password.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['password']    = password
     @recipients          = @user.email
@@ -477,7 +477,7 @@ class AccountMailer < ActionMailer::Base
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = observation ? :email_subject_observation_change.l(:name => observation.unique_text_name) :
                                          :email_subject_observation_destroy.l(:name => note).t.html_to_ascii
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['observation'] = observation
@@ -503,7 +503,7 @@ class AccountMailer < ActionMailer::Base
     @user                = observation.user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_observation_question.l(:name => observation.unique_text_name)
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['observation'] = observation
@@ -529,7 +529,7 @@ class AccountMailer < ActionMailer::Base
     @name                = name
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_publish_name.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = receiver
     @body['publisher']   = publisher
     @body['name']        = name
@@ -557,7 +557,7 @@ class AccountMailer < ActionMailer::Base
     @subject             = :email_subject_update_registration.l(:name => event.name)
     @body['registration'] = registration
     @body['before']      = before
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = user
     @recipients          = registration.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
@@ -578,7 +578,7 @@ class AccountMailer < ActionMailer::Base
     @user                = user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = subject
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = user
     @body['sender']      = sender
     @body['message']     = content || ''
@@ -599,7 +599,7 @@ class AccountMailer < ActionMailer::Base
     @user                = user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_verify.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = user
     @recipients          = user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
@@ -618,7 +618,7 @@ class AccountMailer < ActionMailer::Base
     @user                = user
     I18n.locale          = @user.lang || DEFAULT_LOCALE
     @subject             = :email_subject_verify_api_key.l
-    @body['subject']     = @subject
+    @body['title']       = @subject
     @body['user']        = user
     @body['other_user']  = other_user
     @body['api_key']     = api_key

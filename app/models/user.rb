@@ -649,6 +649,10 @@ class User < AbstractModel
     [:bounced_email, :other]
   end
 
+  def lang
+    locale.split('-')[0]
+  end
+
   protected
   # Get alert structure, initializing it with an empty hash if necessary.
   def get_alert # :nodoc:
@@ -927,9 +931,5 @@ protected
         errors.add(:password, :validate_user_password_no_match.t)
       end
     end
-  end
-
-  def lang
-    locale.split('-')[0]
   end
 end

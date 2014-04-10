@@ -221,52 +221,6 @@ module GeneralExtensions
     end
   end
 
-  # Assert that a string is same as contents of a given file.  Pass in a block
-  # to use as a filter on both contents of response and file.
-  #
-  #   assert_string_equal_file(@response.body,
-  #     "#{path}/expected_response.html",
-  #     "#{path}/alternate_expected_response.html") do |str|
-  #     str.strip_squeeze.downcase
-  #   end
-  #
-  def assert_string_equal_file(str, *files)
-    clean_our_backtrace do
-      result = false
-      msg    = nil
-
-      # Check string against each file, looking for at least one that matches.
-      body1  = str
-      body1  = yield(body1) if block_given?
-      body1.force_encoding('UTF-8') if body1.respond_to?(:force_encoding)
-      for file in files
-        body2 = File.open(file) {|fh| fh.read}
-        body2 = yield(body2) if block_given?
-        body2.force_encoding('UTF-8') if body2.respond_to?(:force_encoding)
-        if body1 == body2
-          # Stop soon as we find one that matches.
-          result = true
-          break
-        elsif !msg
-          # Write out expected (old) and received (new) files for debugging purposes.
-          File.open(file + '.old', 'w') {|fh| fh.write(body2)}
-          File.open(file + '.new', 'w') {|fh| fh.write(body1)}
-          msg = "File #{file} wrong:\n" + `diff #{file}.old #{file}.new`
-          File.delete(file + '.old') if File.exists?(file + '.old')
-        end
-      end
-
-      if result
-        # Clean out old files from previous failure(s).
-        for file in files
-          File.delete(file + '.new') if File.exists?(file + '.new')
-        end
-      else
-        assert(false, msg)
-      end
-    end
-  end
-
   GPS_CLOSE_ENOUGH = 0.001
 
   def assert_gps_equal(expected, value)

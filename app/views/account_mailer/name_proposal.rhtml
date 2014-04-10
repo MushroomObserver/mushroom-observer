@@ -34,7 +34,7 @@
 if @user.email_html %>
 <html>
 <head>
-<title><%= "#{:app_title.t}: #{@subject}" %></title>
+<title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
@@ -42,7 +42,7 @@ if @user.email_html %>
 <%= handy_links.tp %>
 <ul type=none>
   <% for label, url in links %>
-    <li><%= label %>: <%= link_to(url, url) %></li>
+    <li><%= label %>: <%= "<a href=\"#{url}\">#{url}</a>" %></li>
   <% end %>
 </ul>
 <br/>

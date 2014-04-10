@@ -1,12 +1,12 @@
 <%
   url = "#{HTTP_DOMAIN}/conference/verify/#{@registration.id}"
   intro = :email_registration_intro.l(:user => @registration.name, :how_many => @registration.how_many,
-    :name => @registration.conference_event.name, :link => link_to(url, url))
+    :name => @registration.conference_event.name, :link => "<a href=\"#{url}\">#{url}</a>")
 
 if not @user or @user.email_html %>
 <html>
 <head>
-<title><%= "#{:app_title.t}: #{@subject}" %></title>
+<title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
