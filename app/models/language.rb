@@ -123,7 +123,7 @@ class Language < AbstractModel
 
   # Update Globalite with any recent changes in translations.
   def self.update_recent_translations
-    data = Globalite.localization_data
+    data = 
     cutoff = @@last_update
     @@last_update = Time.now
     for locale, tag, text in Language.connection.select_rows %(
@@ -132,7 +132,8 @@ class Language < AbstractModel
       WHERE t.language_id = l.id
         AND t.updated_at >= #{Language.connection.quote(cutoff)}
     )
-      data[locale.to_sym][tag.to_sym] = text
+      print "update_recent_translations: #{locale}, #{tag}\n"
+      TranslationString.translations(locale.to_sym)[tag] = text
     end
   end
 end

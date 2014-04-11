@@ -57,10 +57,6 @@ module LanguageExporter
 
   # Update the editable export file.
   def update_export_file
-    debugger
-    str = 'site_stats_location_descriptions_editors'
-    print "update_export_file: localization_strings.member?(str): #{localization_strings.member?(str)}\n"
-    print "update_export_file: translated_strings.member?(str): #{translated_strings.member?(str)}\n"
     lines = format_export_file(localization_strings, translated_strings)
     write_export_file_lines(lines)
   end
@@ -307,7 +303,7 @@ private
     twice = {}
     pass = true
     for line in read_export_file_lines
-      if line.match(/^['"]?(\w+)['"]?:/)
+      if line.match(/^ *['"]?(\w+)['"]?:/)
         if once[$1] and not twice[$1]
           verbose("#{lang} #{$1}: tag appears more than once")
           twice[$1] = true

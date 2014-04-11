@@ -10,12 +10,12 @@ class DescriptionTest < ActiveSupport::TestCase
   end
 
   # Make sure author/editor callbacks are updating contributions right.
-  def assert_contributions(rolf_score, mary, dick, katrina, msg)
+  def assert_contributions(rolf_score, mary_score, dick_score, katrina_score, msg)
     for score, user in [
       [rolf_score, rolf],
-      [mary, mary],
-      [dick, dick],
-      [katrina, katrina],
+      [mary_score, mary],
+      [dick_score, dick],
+      [katrina_score, katrina],
     ]
       assert_equal(10+score, user.reload.contribution,
                    "Contribution for #{user.login} wrong: " + msg)
