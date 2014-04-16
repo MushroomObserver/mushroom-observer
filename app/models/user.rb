@@ -650,7 +650,7 @@ class User < AbstractModel
   end
 
   def lang
-    locale.split('-')[0]
+    Language.lang_from_locale(locale)
   end
 
   protected
