@@ -249,7 +249,7 @@ class ImageController < ApplicationController
 
       # Grab list of votes.
       @votes = @image.image_votes(:include => :user).sort_by do |v|
-        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
+        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase rescue '?'
       end
 
       # Update view stats on image we're actually showing.
