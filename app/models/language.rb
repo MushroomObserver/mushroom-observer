@@ -136,4 +136,6 @@ class Language < AbstractModel
       TranslationString.translations(locale.to_sym)[tag] = text
     end
   end
+  
+  def self.lang_from_locale(locale); locale.split('-')[0]; end
 end

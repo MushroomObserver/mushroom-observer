@@ -133,6 +133,19 @@ class API
     raise BadLimitedParameterValue.new(str, limit)
   end
 
+  def parse_lang(key, args={})
+    declare_parameter(key, :lang, args)
+    locale = get_param(key) or return Language.official.locale
+    lang = Language.lang_from_locale(locale)
+    langs = Language.all.map(&:locale)
+    for val in langs
+      if lang.downcase == val.to_s.downcase
+        return val
+      end
+    end
+    raise BadLimitedParameterValue.new(lang, langs)
+  end
+
   def parse_string(key, args={})
     declare_parameter(key, :string, args)
     str = get_param(key) or return args[:default]

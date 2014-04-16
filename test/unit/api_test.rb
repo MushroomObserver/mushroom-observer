@@ -173,7 +173,7 @@ class ApiTest < ActiveSupport::TestCase
     assert_equal(0, user.contribution)
     assert_equal(nil, user.bonuses)
     assert_equal(nil, user.alert)
-    assert_equal(@locale, user.locale)
+    assert_equal(Language.lang_from_locale(@locale), user.lang)
     assert_equal(@notes.strip, user.notes)
     assert_equal(@address.strip, user.mailing_address)
     assert_objs_equal(@license, user.license)
