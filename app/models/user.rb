@@ -801,7 +801,7 @@ class User < AbstractModel
     )).map(&:to_s)
     if ids.any?
       ids = ids.join(',')
-      for table, id, type in [
+      for table, id_col, type_col in [
         [:comments,            :target_id, :target_type],
         [:images_observations, :observation_id],
         [:interests,           :target_id, :target_type],
@@ -809,15 +809,15 @@ class User < AbstractModel
         [:rss_logs,            :observation_id],
         [:votes,               :observation_id],
       ]
-        if type
+        if type_col
           User.connection.delete %(
             DELETE FROM #{table}
-            WHERE `#{col}` IN (#{ids}) AND `#{type}` = 'Observation'
+            WHERE `#{id_col}` IN (#{ids}) AND `#{type_col}` = 'Observation'
           )
         else
           User.connection.delete %(
             DELETE FROM #{table}
-            WHERE `#{col}` IN (#{ids})
+            WHERE `#{id_col}` IN (#{ids})
           )
         end
       end
@@ -827,6 +827,7 @@ class User < AbstractModel
     for table, col in [
       [:comments,                      :user_id],
       [:images,                        :user_id],
+      [:image_votes,                   :user_id],
       [:interests,                     :user_id],
       [:location_descriptions_authors, :user_id],
       [:location_descriptions_editors, :user_id],
