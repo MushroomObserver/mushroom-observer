@@ -111,6 +111,7 @@ spammer:
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   auth_code: cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba
   email: spammer@collectivesource.com
+  verified: 2010-07-15 21:20:00
   contribution: 10
   created_here: true
   locale: en-US
