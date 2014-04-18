@@ -79,3 +79,12 @@ user_4_4:
 user_5_5:
   user_id: 5
   user_group_id: 11
+
+user_6_6:
+  user_id: 6
+  user_group_id: 12
+
+user_7_7:
+  user_id: 7
+  user_group_id: 13
+
