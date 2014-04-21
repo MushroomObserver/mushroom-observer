@@ -17,6 +17,12 @@ class ChecklistTest < ActiveSupport::TestCase
       'Strobilurus diminutivus',
     ]
   end
+  
+  def dicks_species
+    [
+      'Boletus edulis'
+    ]
+  end
 
   def genera(species)
     species.map {|name| name.split(' ', 2).first}.uniq
@@ -24,7 +30,7 @@ class ChecklistTest < ActiveSupport::TestCase
 
   def test_checklist_for_site
     data = Checklist::ForSite.new
-    all_species = (rolfs_species + katrinas_species).sort
+    all_species = (rolfs_species + katrinas_species + dicks_species).sort
     all_genera = genera(all_species)
     assert_equal(all_genera, data.genera)
     assert_equal(all_species, data.species)
@@ -50,6 +56,10 @@ class ChecklistTest < ActiveSupport::TestCase
     assert_equal(rolfs_species, data.species)
 
     User.current = dick
+    before_data = Checklist::ForUser.new(dick)
+    before_num_species = before_data.num_species
+    before_num_genera = before_data.num_genera
+
     Observation.create!(:name => names(:agaricus))
     assert_names_equal(names(:agaricus), Observation.last.name)
     assert_users_equal(dick, Observation.last.user)
@@ -60,12 +70,15 @@ class ChecklistTest < ActiveSupport::TestCase
     data = Checklist::ForUser.new(dick)
     assert_equal(['Lactarius'], data.genera)
     assert_equal(['Lactarius alpinus'], data.species)
+    
+    assert_equal(before_num_genera+1, after_num_genera)
+    assert_equal(before_num_species+1, after_num_species)
 
     Observation.create!(:name => names(:lactarius_subalpinus))
     Observation.create!(:name => names(:lactarius_alpinus))
     data = Checklist::ForUser.new(dick)
-    assert_equal(['Lactarius'], data.genera)
-    assert_equal(['Lactarius alpinus'], data.species)
+    assert_equal(after_num_genera, data.num_genera)
+    assert_equal(after_num_species, data.num_species)
   end
 
   def test_checklist_for_projects

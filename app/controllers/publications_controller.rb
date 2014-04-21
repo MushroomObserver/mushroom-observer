@@ -4,6 +4,10 @@ class PublicationsController < ApplicationController
     :show
   ]
 
+  before_filter :require_successful_user, :only => [
+    :create
+  ]
+
   # GET /publications
   # GET /publications.xml
   def index
@@ -54,7 +58,6 @@ class PublicationsController < ApplicationController
   # POST /publications.xml
   def create
     @publication = Publication.new(params[:publication])
-
     respond_to do |format|
       if @publication.save
         flash[:notice] = :runtime_created_at.t(:type => 'publication')

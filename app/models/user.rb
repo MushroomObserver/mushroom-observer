@@ -635,6 +635,8 @@ class User < AbstractModel
     end
   end
 
+  def is_successful_contributor?; observations.length > 0; end
+  
   ##############################################################################
   #
   #  :section: Alerts

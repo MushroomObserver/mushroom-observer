@@ -276,4 +276,12 @@ class UserTest < ActiveSupport::TestCase
     assert_raise(ActiveRecord::RecordNotFound) { Comment.find(comment_id) }
     assert_raise(ActiveRecord::RecordNotFound) { Publication.find(publication_id) }
   end
+
+  def test_is_successful_contributor?
+    assert(@rolf.is_successful_contributor?)
+  end
+
+  def test_is_unsuccessful_contributor?
+    assert_false(users(:spammer).is_successful_contributor?)
+  end
 end

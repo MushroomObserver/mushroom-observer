@@ -235,6 +235,14 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_form_action(:action => 'create_species_list')
   end
 
+  def test_unsuccessful_create_location_description
+    loc = locations(:albion)
+    user = login('spamspamspam')
+    assert_false(user.is_successful_contributor?)
+    get_with_dump(:create_species_list)
+    assert_response(:redirect)
+  end
+
   # Test constructing species lists in various ways.
   def test_construct_species_list
     list_title = "List Title"
