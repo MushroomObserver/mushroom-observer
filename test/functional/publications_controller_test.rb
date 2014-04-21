@@ -22,6 +22,13 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_redirected_to publication_path(assigns(:publication))
   end
 
+  def test_should_not_create_publication
+    login 'spamspamspam'
+    assert_no_difference('Publication.count') do
+      post :create, :publication => { }
+    end
+  end
+
   def test_should_show_publication
     get :show, :id => publications(:one).id
     assert_response :success

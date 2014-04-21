@@ -59,6 +59,9 @@ class SpeciesListController < ApplicationController
     :show_species_list,
   ]
 
+  before_filter :require_successful_user, :only => [
+    :create_species_list
+  ]
   ##############################################################################
   #
   #  :section: Index
