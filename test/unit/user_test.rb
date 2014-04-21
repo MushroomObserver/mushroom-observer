@@ -194,4 +194,12 @@ class UserTest < UnitTestCase
     User.erase_user(user.id)
     assert_raise(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
   end
+
+  def test_is_successful_contributor?
+    assert(@rolf.is_successful_contributor?)
+  end
+
+  def test_is_unsuccessful_contributor?
+    assert_false(users(:spammer).is_successful_contributor?)
+  end
 end

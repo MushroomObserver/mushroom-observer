@@ -363,6 +363,10 @@ def list_local_files(path, size=nil)
   return files
 end
 
+def ssh_args
+  @@id_file ? "-i #{@@id_file}" : ""
+end
+
 # Get list of images on a remote server.  The +server+ parameter can be an
 # alias of an established image server, or a scp-style url (user@host:path).
 def list_remote_files(server, size=nil)
@@ -374,9 +378,9 @@ def list_remote_files(server, size=nil)
   end
   files = {}
   files['date'] = Time.now
-  sizes = size ? [size] : ALL_SIZES
+  sizes = size ? [size] : ALL_SIZES  
   for type in sizes
-    cmd = "ssh #{url} ls -lU --color=never #{path}/#{type}"
+    cmd = "ssh #{url} #{ssh_args} ls -lU --color=never #{path}/#{type}"
     verbose cmd
     open("|#{cmd}") do |dir|
       dir.each_line do |line|
@@ -476,7 +480,7 @@ def upload_files(files, local, remote)
     end
   end
 
-  cmd = "tar -T #{tempfile} -cf - | ssh #{url} \\(cd #{path}\\; tar -xvPf -\\)"
+  cmd = "tar -T #{tempfile} -cf - | ssh #{url} #{ssh_args} \\(cd #{path}\\; tar -xvPf -\\)"
   verbose cmd
 
   cmd = "(#{cmd}) > /dev/null" if !@@verbose
@@ -513,7 +517,7 @@ def download_files(files, local, remote)
     end
   end
 
-  cmd = "cat #{tempfile} | ssh #{url} \\(cd #{path}\\; tar -T - -cf -\\) | tar -xvPf -"
+  cmd = "cat #{tempfile} | ssh #{url} #{ssh_args} \\(cd #{path}\\; tar -T - -cf -\\) | tar -xvPf -"
   verbose cmd
 
   cmd = "(#{cmd}) > /dev/null" if !@@verbose
@@ -547,6 +551,7 @@ end
 @@root       = get_parm('-R') || get_parm('--root')       || ROOT
 @@log_file   = get_parm('-L') || get_parm('--log-file')   || "#{@@root}/#{LOG_FILE}"
 @@local_path = get_parm('-P') || get_parm('--local-path') || "#{@@root}/#{LOCAL_PATH}"
+@@id_file    = get_parm('-i') || get_parm('--ssh_id_file') || nil
 
 case get_next_arg
   when '-l', '--ls'
@@ -637,6 +642,7 @@ OPTIONS
     -P --local-path <path>  Override local image path.  $root/public/images
     -v --verbose            Turn on verbose messages.
     -u --use_cache          Use cached file lists.
+    -i --ssh_id_file        Specify an explicit ssh id file.
 
   These can all be used in --sync mode:
     -U --upload            Only upload images to remote server.

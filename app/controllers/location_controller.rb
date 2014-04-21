@@ -43,6 +43,10 @@ class LocationController < ApplicationController
     :show_past_location_description,
   ]
 
+  before_filter :require_successful_user, :only => [
+    :create_location_description
+  ]
+
   ##############################################################################
   #
   #  :section: Searches and Indexes

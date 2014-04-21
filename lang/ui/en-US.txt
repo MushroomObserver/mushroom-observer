@@ -525,6 +525,7 @@ removed_from_project: Removed [object] from "[project]".
 "NO": "No"
 "yes": "yes"
 "no": "no"
+unsuccessful_contributor_warning: Thanks for wanting to contribute to the Mushroom Observer. This type of contribution can only be made by users who have provided at least one observation to the system.
 
 ################################################################################
 

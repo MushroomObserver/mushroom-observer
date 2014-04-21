@@ -145,6 +145,15 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def require_successful_user
+    if @user.is_successful_contributor?
+      true
+    else
+      flash_warning(:unsuccessful_contributor_warning.t)
+      redirect_back_or_default(:controller => :observer, :action => :index)
+    end
+  end
+  
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
