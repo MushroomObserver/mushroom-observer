@@ -132,7 +132,6 @@ class Language < AbstractModel
       WHERE t.language_id = l.id
         AND t.updated_at >= #{Language.connection.quote(cutoff)}
     )
-      print "update_recent_translations: #{locale}, #{tag}\n"
       TranslationString.translations(locale.to_sym)[tag] = text
     end
   end
