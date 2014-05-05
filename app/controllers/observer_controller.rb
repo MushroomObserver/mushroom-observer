@@ -721,7 +721,17 @@ class ObserverController < ApplicationController
   # Displays matrix of advanced search results.
   def advanced_search # :nologin: :norobots:
     begin
-      query = find_query(:Observation)
+      if params[:name] || params[:location] || params[:user] || params[:content]
+        search = {}
+        search[:name]     = params[:name]     if !params[:name].blank?
+        search[:location] = params[:location] if !params[:location].blank?
+        search[:user]     = params[:user]     if !params[:user].blank?
+        search[:content]  = params[:content]  if !params[:content].blank?
+        search[:search_location_notes] = true if !params[:search_location_notes].blank?
+        query = create_query(:Observation, :advanced_search, search)
+      else
+        query = find_query(:Observation)
+      end
       show_selected_observations(query)
     rescue => err
       flash_error(err.to_s) if !err.blank?
