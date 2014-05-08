@@ -205,7 +205,7 @@ module LanguageExporter
   end
   
   def write_hash(hash)
-    self.write_export_file_lines(hash.map {|k,v| "#{k}: #{format_string(v)}"})
+    self.write_export_file_lines(["en:\n"] + hash.map {|k,v| "  #{k}: #{format_string(v)}"})
   end
   
 ################################################################################
@@ -270,7 +270,7 @@ private
   def format_string(val)
     val = clean_string(val)
     if val.match(/\\n|\n/)
-      val = format_multiline_string(val)
+      val = format_multiline_string(escape_string(val))
     elsif val.match(/:(\s|$)| #/) or
           val.match(/^(no|yes)$/i) or
           (val.match(/^\W/) and val[0].is_ascii_character?)
@@ -282,12 +282,7 @@ private
   end
 
   def format_multiline_string(val)
-    val = val.sub(/(\\n|\n)+\Z/, '')
-    out = ">\n"
-    for line in val.split(/\\n|\n/)
-      out += '  ' + line + "\\n\n"
-    end
-    return out
+    val.gsub(/\n/,'\n')
   end
 
   def escape_string(val)
