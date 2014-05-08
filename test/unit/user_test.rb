@@ -278,7 +278,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   def test_is_successful_contributor?
-    assert(@rolf.is_successful_contributor?)
+    assert(rolf.is_successful_contributor?)
   end
 
   def test_is_unsuccessful_contributor?

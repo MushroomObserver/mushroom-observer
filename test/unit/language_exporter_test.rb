@@ -6,10 +6,12 @@ class LanguageExporterTest < ActiveSupport::TestCase
     @official = Language.official
     Language.clear_verbose_messages
     Language.override_input_files
+    super
   end
 
   def teardown
     Language.reset_input_file_override
+    super
   end
 
   def assert_message(msg)
@@ -17,7 +19,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     return msg.join("\n")
   end
 
-  def ignore_test_yaml
+  def test_yaml
     temp_file = "#{RAILS_ROOT}/tmp/yaml_test"
     # YAML::ENGINE.yamler = 'psych' # (fails)
     File.open(temp_file, 'w:utf-8') do |fh|
@@ -41,7 +43,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     File.unlink(temp_file) rescue nil
   end
 
-  def ignore_test_validators
+  def test_validators
     assert_valid(:validate_tag, 'abc')
     assert_valid(:validate_tag, 'abc_2')
     assert_valid(:validate_tag, '_A_b_3_')
@@ -87,7 +89,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     Language.clear_verbose_messages
   end
 
-  def ignore_test_check_export_line
+  def test_check_export_line
     assert_check_pass(0,0, "")
     assert_check_pass(0,0, " \t \n")
     assert_check_pass(0,0, "# comment\n")
@@ -127,7 +129,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     Language.clear_verbose_messages
   end
 
-  def ignore_test_check_export_file_for_duplicates
+  def test_check_export_file_for_duplicates
     export_file = [
       "en:\n",
       "  tag1: val1\n",
@@ -148,7 +150,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     Language.clear_verbose_messages
   end
 
-  def ignore_test_check_export_file_data
+  def test_check_export_file_data
     export_file = [
       "en:\n",
       "  tag1: >\n",
@@ -195,8 +197,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
       assert(str.is_a?(String), "#{file} #{tag}: value is a #{str.class} not a String!")
     end
     lines = @official.send_private(:format_export_file, data["en"], data["en"])
-    print lines.join
-    new_data = YAML::load(lines.join)
+    new_data = YAML::load(lines.join)["en"]
     seen = {}
     for tag, old_str in data["en"]
       if new_str = new_data[tag]
@@ -213,7 +214,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_formatting
+  def test_formatting
     check_format(:clean_string, '' => '')
     check_format(:clean_string, 'abc def' => 'abc def')
     check_format(:clean_string, ' abc \n def ' => "abc\ndef")
@@ -229,8 +230,8 @@ class LanguageExporterTest < ActiveSupport::TestCase
     check_format(:format_string, '"abc def"' => "\"\\\"abc def\\\"\"\n")
     check_format(:format_string, "\n" => "\"\"\n")
     check_format(:format_string, "abc\n" => "abc\n")
-    check_format(:format_string, "abc\ndef" => ">\n  abc\\n\n  def\\n\n\n")
-    check_format(:format_string, "'abc'\ndef:" => ">\n  'abc'\\n\n  def:\\n\n\n")
+    check_format(:format_string, "abc\ndef" => "\"abc\\ndef\"\n") # ">\n  abc\\n\n  def\\n\n\n")
+    check_format(:format_string, "'abc'\ndef:" => "\"'abc'\\ndef:\"\n") # ">\n  'abc'\\n\n  def:\\n\n\n")
   end
 
   def check_format(method, vals)
@@ -240,17 +241,17 @@ class LanguageExporterTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_format_export_file
+  def test_format_export_file
     input_lines = [
       "---\n",
       "\n",
       "# COMMON STRINGS\n",
       "\n",
-      "name: name\n",
-      "NAME: Name\n",
+      "  name: name\n",
+      "  NAME: Name\n",
       # (this changed last time)\n",
-      "runtime_error: >\n",
-      "  Shit happens.\n",
+      "  runtime_error: >\n",
+      "    Shit happens.\n",
       "\n",
     ]
 
@@ -259,10 +260,10 @@ class LanguageExporterTest < ActiveSupport::TestCase
       "\n",
       "# COMMON STRINGS\n",
       "\n",
-      "name: nombre\n",
-      "NAME: Nombre\n",
+      "  name: nombre\n",
+      "  NAME: Nombre\n",
       # (this changed last time)\n",
-      "runtime_error:  Whatever\n",
+      "  runtime_error:  Whatever\n",
     ]
 
     strings = {
@@ -281,7 +282,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     assert_equal(expect_lines, actual_lines)
   end
 
-  def ignore_test_create_string
+  def test_create_string
     User.current = dick
     @official.send_private(:create_string, 'number', 'uno', 'one')
 
@@ -302,7 +303,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     assert_equal(dick.id, ver.user_id)
   end
 
-  def ignore_test_update_string
+  def test_update_string
     User.current = katrina
     greek = languages(:greek)
     str = translation_strings(:greek_one)
@@ -333,7 +334,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
     assert_equal(dick.id, ver.user_id)
   end
 
-  def ignore_test_translation_strings_hash
+  def test_translation_strings_hash
     greek = languages(:greek)
     str1 = translation_strings(:greek_one)
     str2 = translation_strings(:greek_two)
@@ -341,19 +342,19 @@ class LanguageExporterTest < ActiveSupport::TestCase
     assert_equal({ 'one' => str1, 'two' => str2 }, hash)
   end
 
-  def ignore_test_translated_strings
+  def test_translated_strings
     hash = languages(:greek).translated_strings
     assert_equal({ 'one' => 'ένα', 'two' => 'δύο' }, hash)
   end
 
-  def ignore_test_localization_strings
+  def test_localization_strings
     hash = languages(:greek).localization_strings
     assert_equal('ένα', hash['one'])
     assert_equal('δύο', hash['two'])
     assert_equal('Two', hash['TWO'])
   end
 
-  def ignore_test_import_official
+  def test_import_official
     # Automatically (temporarily) logs in the admin.
     # assert_raises(RuntimeError) { @official.import_from_file }
 
@@ -382,7 +383,8 @@ class LanguageExporterTest < ActiveSupport::TestCase
     assert_equal(3, @official.translation_strings.select {|str| str.user == dick}.length)
   end
 
-  def ignore_test_import_unofficial
+  def test_import_unofficial
+    # User.current = nil
     greek = languages(:greek)
 
     # Must be logged in to do this!
@@ -393,28 +395,31 @@ class LanguageExporterTest < ActiveSupport::TestCase
 
     # This is just the template.
     @official.write_export_file_lines([
-      "one: one\n",
-      "two: two\n",
-      "twos: twos\n",
-      "TWO: Two\n",
-      "TWOS: Twos\n",
-      "three: three\n",
-      "four: four\n",
+      "en:\n",
+      "  one: one\n",
+      "  two: two\n",
+      "  twos: twos\n",
+      "  TWO: Two\n",
+      "  TWOS: Twos\n",
+      "  three: three\n",
+      "  four: four\n",
     ])
 
     greek.write_export_file_lines([
-      "five: ignore me\n",
+      "el:\n",
+      "  five: ignore me\n",
     ])
     assert_false(greek.import_from_file, "Shouldn't have been any import changes.")
     assert_false(greek.strip, "Shouldn't have been any strip changes.")
     assert_equal(hash, greek.localization_strings)
 
     greek.write_export_file_lines([
-      "one: one\n",      # take this because it is a change from original ένα
-      "twos:  twos\n",   # ignore this because unchanged from template
-      "TWOS: Twos\n",    # ignore this despite lack of indentation because not a change from English
-      "three:  τρία\n",  # take this change even though still indented
-      "four: τέσσερα\n", # this is correct, it had better take this!
+      "el:\n",
+      "  one: one\n",      # take this because it is a change from original ένα
+      "  twos:  twos\n",   # ignore this because unchanged from template
+      "  TWOS: Twos\n",    # ignore this despite lack of indentation because not a change from English
+      "  three:  τρία\n",  # take this change even though still indented
+      "  four: τέσσερα\n", # this is correct, it had better take this!
     ])
     assert_true(greek.import_from_file, "Should have been some import changes.")
     assert_false(greek.strip, "Shouldn't have been any strip changes.")
