@@ -90,7 +90,13 @@ end %>
               <label for="image_<%= image.id %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>
                 <%= text_field(:good_image, :copyright_holder, :value => image.copyright_holder, :index => image.id, :size => 30) %><br/>
               <label for="image_<%= image.id %>_when_1i"><%= :form_images_when_taken.t %>:</label>
-                <%= date_select(:good_image, :when, { :object => image, :index => image.id, :start_year => 1980, :end_year => Time.now.year },
+                <%= date_select(:good_image, :when, {
+                      :object => image,
+                      :index => image.id,
+                      :start_year => 1980,
+                      :end_year => Time.now.year,
+                      :order => [:day,:month,:year]
+                    },
                     { :onchange => "CHANGED_DATES[#{image.id}] = true" }) %><br/>
               <label for="image_<%= image.id %>_license_id"><%= :form_images_select_license.t %>:</label>
                 <%= select(:good_image, :license_id, License.current_names_and_ids(image.license),

@@ -46,27 +46,27 @@ module ControllerExtensions
   #
   ##############################################################################
 
-  # Make sure we clear out the last errors before each request.
-  def get(*args)
-    if @without_clearing_flash
-      @without_clearing_flash = nil
-    elsif session.is_a?(ActionController::TestSession)
-      flash[:rendered_notice] = nil
-      session[:notice] = nil
-    end
-    super
-  end
-
-  # Make sure we clear out the last errors before each request.
-  def post(*args)
-    if @without_clearing_flash
-      @without_clearing_flash = nil
-    elsif session.is_a?(ActionController::TestSession)
-      flash[:rendered_notice] = nil
-      session[:notice] = nil
-    end
-    super
-  end
+  # # Make sure we clear out the last errors before each request.
+  # def get(*args)
+  #   if @without_clearing_flash
+  #     @without_clearing_flash = nil
+  #   elsif session.is_a?(ActionController::TestSession)
+  #     flash[:rendered_notice] = nil
+  #     session[:notice] = nil
+  #   end
+  #   super
+  # end
+  # 
+  # # Make sure we clear out the last errors before each request.
+  # def post(*args)
+  #   if @without_clearing_flash
+  #     @without_clearing_flash = nil
+  #   elsif session.is_a?(ActionController::TestSession)
+  #     flash[:rendered_notice] = nil
+  #     session[:notice] = nil
+  #   end
+  #   super
+  # end
 
   # Second "get" won't update request_uri, so we must reset the request.
   def reget(*args)
@@ -598,7 +598,7 @@ module ControllerExtensions
           # Put together good error message telling us exactly what happened.
           code = @response.response_code
           if @response.success?
-            got = ", got #{code} rendered <#{@response.rendered_file}>."
+            got = ", got #{code} rendered <#{@response.rendered[:template]}>."
           elsif @response.missing?
             got = ", got #{code} missing (?)"
           elsif @response.redirect?
@@ -618,16 +618,16 @@ module ControllerExtensions
           if arg.is_a?(Array)
             if arg.length == 1
               controller = @controller.controller_name
-              msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
-              assert_redirected_to({:action => arg[0]}, msg)
+              msg += "Expected redirect to <#{controller}/#{arg[1]}>" + got
+              assert_equal(@response.redirected_to[:action], arg[1], msg)
             else
               msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-              assert_redirected_to({:controller => arg[0], :action => arg[1]}, msg)
+              assert_equal([@response.redirected_to[:controller], @response.redirected_to[:action]], [arg[0], arg[1]], msg)
             end
           elsif arg.is_a?(Hash)
             url = @controller.url_for(arg).sub(/^http:..test.host./, '')
             msg += "Expected redirect to <#{url}>" + got
-            assert_redirected_to(arg, msg)
+            assert_partial_hash(arg, @response.redirected_to, msg)
           elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
             msg += "Expected redirect to <#{arg}>" + got
             assert_equal(arg, @response.redirect_url, msg)
@@ -653,6 +653,17 @@ module ControllerExtensions
     end
   end
 
+  def assert_partial_hash(partial, full, msg)
+    mismatches = {}
+    partial.each do |k, v|
+      f = full[k.to_sym] || full[k.to_s]
+      if f.to_sym != v.to_sym
+        mismatches[k] = v
+      end
+    end
+    assert_equal(mismatches, {}, "Mismatched partial hash: #{mismatches}")
+  end
+  
   # Check default value of a form field.
   def assert_input_value(id, expect_val)
     clean_our_backtrace do

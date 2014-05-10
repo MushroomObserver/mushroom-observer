@@ -26,7 +26,8 @@
         <p>
           <label for="specimen_when_1i"><%= :WHEN.t %>:</label>
           <%= date_select('specimen', 'when', :start_year => 1980,
-                          :end_year => Time.now.year) %>
+                          :end_year => Time.now.year,
+                          :order => [:day,:month,:year]) %>
         </p>
 
         <p>

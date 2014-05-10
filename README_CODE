@@ -307,7 +307,7 @@ that take a block.  See +boxify+ in helpers/html_helper.rb.  Simplified:
 
   def wrap_with_div(&block)
     output = '<div>' + capture(&block) + '</div'>
-    concat(output, block.binding)
+    concat(output)
   end
 
   <% wrap_with_div do %>

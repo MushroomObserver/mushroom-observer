@@ -15,11 +15,11 @@
   </p>
   <p>
     <%= :conference_event_start.t %>: <%= date_select('event', 'start', :start_year => Time.now.year, 
-      :end_year => Time.now.year + 10) %><br/><br/>
+      :end_year => Time.now.year + 10, :order => [:day,:month,:year]) %><br/><br/>
   </p>
   <p>
     <%= :conference_event_end.t %>: <%= date_select('event', 'end', :start_year => Time.now.year, 
-      :end_year => Time.now.year + 10) %><br/><br/>
+      :end_year => Time.now.year + 10, :order => [:day,:month,:year]) %><br/><br/>
   </p>
   <p>
     <%= :conference_event_description.t %>:<br/><%= text_area('event', 'description', :cols => 100) %>
