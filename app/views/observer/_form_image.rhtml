@@ -27,7 +27,8 @@
     <p><label for="image_<%= index %>_when_1i"><%= :form_images_when_taken.t %>:</label>
 
     <%= date_select('image', 'when', { :index => index, :start_year => 1980, :end_year => Time.now.year },
-                  { :onchange => "CHANGED_DATES[#{index}] = true" }) %></p>
+                    { :onchange => "CHANGED_DATES[#{index}] = true" },
+                    :order => [:day,:month,:year]) %></p>
 
     <p><label for="image_<%= index %>_license_id"><%= :form_images_select_license.t %>:</label>
     <%= select('image', :license_id, @licenses, { :value => @image.license_id },

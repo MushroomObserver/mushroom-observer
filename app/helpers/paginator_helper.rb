@@ -32,7 +32,7 @@ module ApplicationHelper::Paginator
     body = capture(&block).to_s
     str = letters + numbers + body + numbers + letters
     str = '<div class="results">' + str + '</div>'
-    concat(str, block.binding)
+    concat(str)
   end
 
   # Insert letter pagination links.

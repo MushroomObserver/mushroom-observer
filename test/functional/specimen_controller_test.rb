@@ -184,7 +184,7 @@ class SpecimenControllerTest < FunctionalTestCase
     post(:delete_specimen, params)
     assert_equal(specimen_count-1, Specimen.count)
     observations.map {|o| o.reload }
-    assert_equal(obs_spec_count - observations.count, observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
+    assert_true(obs_spec_count > observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
     assert_response(:redirect)
   end
   

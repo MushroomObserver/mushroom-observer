@@ -12,32 +12,34 @@ class InterestControllerTest < FunctionalTestCase
     assert_response('list_interests')
   end
 
-  # Test callback.
+  def test_set_interest_another_user
+    login('rolf')
+    get(:set_interest, :type => 'Observation', :id => 1, :user => mary.id)
+    assert_flash(2)
+  end
+
+  def test_set_interest_no_object
+    login('rolf')
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get(:set_interest, :type => 'Observation', :id => 100, :state => 1)
+    end
+  end
+
+  def test_set_interest_bad_type
+    login('rolf')
+    assert_raises(NameError) do
+      get(:set_interest, :type => 'Bogus', :id => 1, :state => 1)
+    end
+  end
+  
   def test_set_interest
     peltigera = names(:peltigera)
     minimal_unknown = observations(:minimal_unknown)
     detailed_unknown = observations(:detailed_unknown)
 
-    # Fail: Try to change another user's interest.
-    login('rolf')
-    get(:set_interest, :type => 'Observation', :id => 1, :user => mary.id)
-    assert_flash(2)
-
-    # Fail: Try to change interest in non-existing object.
-    login('rolf')
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get(:set_interest, :type => 'Observation', :id => 100, :state => 1)
-    end
-
-    # Fail: Try to change interest in non-existing object.
-    login('rolf')
-    assert_raises(NameError) do
-      get(:set_interest, :type => 'Bogus', :id => 1, :state => 1)
-    end
-
     # Succeed: Turn interest on in minimal_unknown.
     login('rolf')
-    get(:set_interest, :type => 'Observation', :id => minimal_unknown.id, :state => 1)
+    get(:set_interest, :type => 'Observation', :id => minimal_unknown.id, :state => 1, :user => 1)
     assert_flash(0)
     
     # Make sure rolf now has one Interest: interested in minimal_unknown.

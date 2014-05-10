@@ -77,7 +77,7 @@ for file in %w(
   integration_extensions
   session_extensions
   session_form_extensions
-  test_case
+  test_helper
   unit_test_case
   functional_test_case
   integration_test_case

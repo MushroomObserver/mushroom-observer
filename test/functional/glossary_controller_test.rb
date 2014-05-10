@@ -50,7 +50,7 @@ class GlossaryControllerTest < FunctionalTestCase
   end
   
   def test_create_term_post
-    login
+    user = login
     params = create_term_params
     post(:create_term, params)
     term = Term.find(:all, :order => "created_at DESC")[0]

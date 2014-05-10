@@ -39,7 +39,8 @@
   <p>
   	<label for="species_list_when_1i"><%= :WHEN.t %></label>:<br/>
   	<%= date_select('species_list', 'when', :start_year => 1980,
-                    :end_year => Time.now.year) %>
+                    :end_year => Time.now.year,
+                    :order => [:day,:month,:year]) %>
   </p>
 
   <% if @dubious_where_reasons and (@dubious_where_reasons != []) %>

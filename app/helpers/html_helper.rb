@@ -135,7 +135,7 @@ module ApplicationHelper::HTML
     rows << cols.join('') if cols.any?
     table = make_table(rows, {:cellspacing => 0, :class => "Matrix"}.merge(table_opts),
                        row_opts, {:colspan => @layout["columns"]})
-    concat(table, block.binding)
+    concat(table)
   end
 
   # Decide what the color should be for a list item.  Returns 0 or 1.
@@ -180,7 +180,7 @@ module ApplicationHelper::HTML
       #{msg}
     </div>"
     if block_given?
-      concat(msg, block.binding)
+      concat(msg)
     else
       msg
     end
@@ -210,7 +210,7 @@ module ApplicationHelper::HTML
       </td></tr></table>
     </div>"
     if block_given?
-      concat(msg, block.binding)
+      concat(msg)
     else
       msg
     end
