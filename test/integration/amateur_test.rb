@@ -74,17 +74,17 @@ class AmateurTest < IntegrationTestCase
     login('rolf', 'testpassword', :true)
     rolf_cookies = cookies.dup
     rolf_cookies.delete('mo_session')
-    assert_match(/^1/, rolf_cookies['mo_user'])
+    assert_match(/^1/, rolf_cookies["mo_user"])
 
     login('mary', 'testpassword', true)
     mary_cookies = cookies.dup
     mary_cookies.delete('mo_session')
-    assert_match(/^2/, mary_cookies['mo_user'])
+    assert_match(/^2/, mary_cookies["mo_user"])
 
     login('dick', 'testpassword', false)
     dick_cookies = cookies.dup
     dick_cookies.delete('mo_session')
-    assert_equal('', dick_cookies['mo_user'])
+    assert_equal('', dick_cookies["mo_user"])
 
     open_session do
       self.cookies = rolf_cookies

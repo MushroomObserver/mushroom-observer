@@ -184,7 +184,7 @@ helpers and data.  Here are just a few, see ActionController for more:
 
 <tt>session[:user]</tt>::    Session: hash of data that follows the user around from request to request.
 <tt>flash[:notice]</tt>::    Temporary storage: this hash persists only until the next request.
-<tt>cookies[:mo_user]</tt>:: It is trivial to read or write cookies on the user's browser.
+<tt>cookies["mo_user"]</tt>:: It is trivial to read or write cookies on the user's browser.
 <tt>request.method</tt>::    You have access to the full CGI request object.
 <tt>@user</tt>::             If user is logged in this will be their User instance.
 <tt>@js</tt>::               True if javascript is enabled on the user's browser.

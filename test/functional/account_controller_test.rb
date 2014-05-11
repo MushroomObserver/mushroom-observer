@@ -151,7 +151,6 @@ class AccountControllerTest < FunctionalTestCase
 
   # Test autologin feature.
   def test_autologin
-
     # First make sure test page that requires login fails without autologin cookie.
     get(:test_autologin)
     assert_response(:redirect)
@@ -163,7 +162,7 @@ class AccountControllerTest < FunctionalTestCase
       :user => { :remember_me => "" }
     )
     assert(session[:user_id])
-    assert(!cookies[:mo_user])
+    assert(!cookies["mo_user"])
 
     logout
     get(:test_autologin)
@@ -176,11 +175,11 @@ class AccountControllerTest < FunctionalTestCase
       :user => { :remember_me => "1" }
     )
     assert(session[:user_id])
-    assert(cookies['mo_user'])
+    assert(cookies["mo_user"])
 
-    # And make sure autlogin will pick that cookie up and do its thing.
+    # And make sure autologin will pick that cookie up and do its thing.
     logout
-    @request.cookies['mo_user'] = cookies['mo_user']
+    @request.cookies["mo_user"] = cookies["mo_user"]
     get(:test_autologin)
     assert_response(:success)
   end
@@ -459,60 +458,6 @@ class AccountControllerTest < FunctionalTestCase
     end
   end
 
-  def test_flash_errors
-    # First make sure app is working correctly in "live" mode.
-    get(:test_flash)
-    assert_flash(nil)
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error one')
-    assert_flash('error one')
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error two')
-    assert_flash('error two')
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error three', :redirect => 1)
-    assert_flash('error three')
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error four', :redirect => 1)
-    assert_flash("error three\nerror four")
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error five')
-    assert_flash("error three\nerror four\nerror five")
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :redirect => 1, :error => 'dont lose me!')
-    get_without_clearing_flash(:test_flash, :redirect => 1)
-    get_without_clearing_flash(:test_flash)
-    assert_flash('dont lose me!')
-
-    # Now make sure our test suite is clearing out the flash automatically
-    # between requests like it should.
-    get(:test_flash, :error => 'tweedle')
-    assert_flash('tweedle')
-
-    get(:test_flash, :error => 'dee')
-    assert_flash('dee')
-
-    get(:test_flash, :error => 'dum', :redirect => 1)
-    assert_flash('dum')
-
-    get(:test_flash, :error => 'jabber', :redirect => 1)
-    assert_flash('jabber')
-
-    get(:test_flash, :error => 'wocky')
-    get(:test_flash)
-    assert_flash(nil)
-
-    get(:test_flash, :error => 'and others', :redirect => 1)
-    get(:test_flash, :redirect => 1)
-    assert_flash(nil)
-  end
-
   def test_api_key_manager
     ApiKey.all.each(&:destroy)
     assert_equal(0, ApiKey.count)
@@ -582,6 +527,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_error
     assert_response(:action => :api_keys)
     assert_nil(key.verified)
+    flash.clear
 
     login('katrina')
     get(:api_keys)

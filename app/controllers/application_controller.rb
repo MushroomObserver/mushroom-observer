@@ -276,7 +276,7 @@ class ApplicationController < ActionController::Base
         @user.reload
 
       # Log in if cookie is valid, and autologin is enabled.
-      elsif (cookie = cookies[:mo_user])  &&
+      elsif (cookie = cookies["mo_user"])  &&
             (split = cookie.split(" ")) &&
             (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
             (split[1] == user.auth_code) &&
@@ -428,7 +428,7 @@ class ApplicationController < ActionController::Base
 
   # Create/update the auto-login cookie.
   def set_autologin_cookie(user)
-    cookies[:mo_user] = {
+    cookies["mo_user"] = {
       :value => "#{user.id} #{user.auth_code}",
       :expires => 1.month.from_now
     }
@@ -436,7 +436,9 @@ class ApplicationController < ActionController::Base
 
   # Destroy the auto-login cookie.
   def clear_autologin_cookie
-    cookies.delete(:mo_user)
+    if cookies.member?("mo_user")
+      cookies.delete("mo_user")
+    end
   end
 
   # Store User in session (id only).
