@@ -46,28 +46,28 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:test)
     assert_nil(@controller.instance_variable_get('@user'))
     assert_nil(User.current)
-    assert_equal(:'pt-BR', I18n.locale)
+    assert_equal(:pt, I18n.locale)
     assert_equal({}, cookies)
-    assert_equal({'locale'=>'pt-BR','flash'=>{}}, session.data)
+    assert_equal({'locale'=>'pt'}, session.data)
     session.data.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,xx-xx;q=0.5"
     good_ajax_request(:test)
-    assert_equal(:'pt-BR', I18n.locale)
+    assert_equal(:pt, I18n.locale)
     session.data.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,en;q=0.5"
     good_ajax_request(:test)
-    assert_equal(:'en-US', I18n.locale)
+    assert_equal(:pt, I18n.locale)
     session.data.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "en-xx,en;q=0.5"
     good_ajax_request(:test)
-    assert_equal(:'en-US', I18n.locale)
+    assert_equal(:en, I18n.locale)
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "zh-*"
     good_ajax_request(:test)
-    assert_equal(:'en-US', I18n.locale)
+    assert_equal(:en, I18n.locale)
   end
 
   def test_activate_api_key
