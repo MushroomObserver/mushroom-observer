@@ -656,8 +656,11 @@ module ControllerExtensions
   def assert_partial_hash(partial, full, msg)
     mismatches = {}
     partial.each do |k, v|
-      f = full[k.to_sym] || full[k.to_s]
-      if f.to_sym != v.to_sym
+      f = full[k] || full[k.to_s]
+      if f.nil? and f.respond_to(:to_sym)
+        f = full[k.to_sym]
+      end
+      if f.to_s != v.to_s
         mismatches[k] = v
       end
     end
