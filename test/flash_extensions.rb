@@ -63,6 +63,8 @@ module FlashExtensions
         assert_block(msg + "Got the wrong flash error(s). " +
                            "Expected: #{expect.inspect}.  Got: #{got.inspect}.") { got == expect }
       end
+      flash[:rendered_notice] = nil
+      session[:notice] = nil
     end
   end
 end

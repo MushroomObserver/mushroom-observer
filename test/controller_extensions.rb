@@ -609,9 +609,9 @@ module ControllerExtensions
           end
 
           # Add flash notice to potential error message.
-          flash = get_last_flash.to_s.strip_squeeze
-          if flash != ''
-            got += "\nFlash message: <#{flash[1..-1].html_to_ascii}>."
+          flash_notice = get_last_flash.to_s.strip_squeeze
+          if flash_notice != ''
+            got += "\nFlash message: <#{flash_notice[1..-1].html_to_ascii}>."
           end
 
           # Now check result.
