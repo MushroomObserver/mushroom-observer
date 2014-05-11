@@ -586,7 +586,7 @@ class ApplicationController < ActionController::Base
       logger.debug "[globalite] trying to match locale: #{locale}"
       language, region = locale.split('-')
 
-      if I18n.available_locales.include?(language)
+      if I18n.available_locales.include?(language.to_sym)
         match = language
         logger.debug "[globalite] language match: #{match}"
       end

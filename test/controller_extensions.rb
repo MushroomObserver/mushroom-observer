@@ -618,8 +618,8 @@ module ControllerExtensions
           if arg.is_a?(Array)
             if arg.length == 1
               controller = @controller.controller_name
-              msg += "Expected redirect to <#{controller}/#{arg[1]}>" + got
-              assert_equal(@response.redirected_to[:action], arg[1], msg)
+              msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
+              assert_equal(@response.redirected_to[:action].to_sym, arg[0].to_sym, msg)
             else
               msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
               assert_equal([@response.redirected_to[:controller], @response.redirected_to[:action]], [arg[0], arg[1]], msg)
