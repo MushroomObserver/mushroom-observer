@@ -16,14 +16,14 @@ class StudentTest < IntegrationTestCase
     project = projects(:eol_project)
     project.admin_group.users.delete(mary)
 
-    rolf    = new_user_session(rolf)     # EOL admin
-    mary    = new_user_session(mary)     # EOL user
-    katrina = new_user_session(katrina)  # another EOL user
-    dick    = new_user_session(dick)     # random user
-    lurker  = new_session                 # nobody
+    rolf_session    = new_user_session(rolf)     # EOL admin
+    mary_session    = new_user_session(mary)     # EOL user
+    katrina_session = new_user_session(katrina)  # another EOL user
+    dick_session    = new_user_session(dick)     # random user
+    lurker_session  = new_session                 # nobody
 
     # Navigate to Strobilurus diminutivus (no descriptions) and create draft.
-    in_session(mary) do
+    in_session(mary_session) do
       get('/')
       click(:label => /index a.*z/i)
       click(:label => name.text_name)
@@ -72,12 +72,12 @@ class StudentTest < IntegrationTestCase
     end
 
     # Make sure Rolf can view, edit and destroy it.
-    in_session(rolf) do
+    in_session(rolf_session) do
       get(@show_name)
       assert_select('a[href*=show_name_description]', 1) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
-      assert_not_match(gen_desc, rolf.response.body)
+      assert_not_match(gen_desc, rolf_session.response.body)
       assert_select('a[href*=create_name_description]', 1)
       click(:href => /show_name_description/)
       assert_template('name/show_name_description')
@@ -99,7 +99,7 @@ class StudentTest < IntegrationTestCase
     end
 
     # Make sure Katrina can view but not edit.
-    in_session(katrina) do
+    in_session(katrina_session) do
       get(@show_name)
       assert_select('a[href*=show_name_description]', 1)
       assert_select('a[href*=create_name_description]', 1)
@@ -110,7 +110,7 @@ class StudentTest < IntegrationTestCase
     end
 
     # Make sure Dick knows it exists but can't even view it.
-    in_session(dick) do
+    in_session(dick_session) do
       get(@show_name)
       assert_select('a[href*=show_name_description]', 1)
       # (Dick is also a member of the Bolete project.)
@@ -118,19 +118,19 @@ class StudentTest < IntegrationTestCase
       click(:href => /show_name_description/)
       assert_flash_error
       assert_template('project/show_project')
-      assert_nil(dick.assigns(:description))
+      assert_nil(dick_session.assigns(:description))
     end
 
     # Likewise for lurker.
-    in_session(lurker) do
+    in_session(lurker_session) do
       get(@show_name)
       assert_select('a[href*=show_name_description]', 1)
       assert_select('a[href*=create_name_description]', 1)
       click(:href => /show_name_description/)
       assert_flash_error
       assert_template('project/show_project')
-      assert_nil(lurker.assigns(:description))
-      assert_match(name.text_name, lurker.response.body)
+      assert_nil(lurker_session.assigns(:description))
+      assert_match(name.text_name, lurker_session.response.body)
     end
   end
 end

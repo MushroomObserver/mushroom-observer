@@ -361,6 +361,7 @@ class LocationController < ApplicationController
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id,
                                       :include => [:user, :descriptions])
+      
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
       if desc_id.blank?

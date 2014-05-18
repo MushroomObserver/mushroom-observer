@@ -241,42 +241,49 @@ class ActiveSupport::TestCase
   #   end
   #
   def assert_string_equal_file(str, *files)
-    # clean_our_backtrace do
+    clean_our_backtrace do
       result = false
       msg    = nil
 
       # Check string against each file, looking for at least one that matches.
       processed_str  = str
       processed_str  = yield(processed_str) if block_given?
-      processed_str.force_encoding('UTF-8') if processed_str.respond_to?(:force_encoding)
+      processed_str.split("\n")
+      # processed_str.force_encoding('UTF-8') if processed_str.respond_to?(:force_encoding)
       for file in files
-        template = File.open(file) {|fh| fh.read}
+        template = File.open(file_name(file), file_format(file)) {|fh| fh.read}
         template = yield(template) if block_given?
-        template.force_encoding('UTF-8') if template.respond_to?(:force_encoding)
+        # template.force_encoding('UTF-8') if template.respond_to?(:force_encoding)
         if template_match(processed_str, template)
           # Stop soon as we find one that matches.
           result = true
           break
         elsif !msg
           # Write out expected (old) and received (new) files for debugging purposes.
-          File.open(file + '.old', 'w') {|fh| fh.write(template)}
-          File.open(file + '.new', 'w') {|fh| fh.write(processed_str)}
-          msg = "File #{file} wrong:\n" + `diff #{file}.old #{file}.new`
-          File.delete(file + '.old') if File.exists?(file + '.old')
+          filename = file_name(file)
+          File.open(filename + '.old', 'w') {|fh| fh.write(template)}
+          File.open(filename + '.new', 'w') {|fh| fh.write(processed_str)}
+          msg = "File #{filename} wrong:\n" +
+            `diff #{filename}.old #{filename}.new`
+          File.delete(filename + '.old') if File.exists?(filename + '.old')
         end
       end
 
       if result
         # Clean out old files from previous failure(s).
         for file in files
-          File.delete(file + '.new') if File.exists?(file + '.new')
+          new_filename = file_name(file) + '.new'
+          File.delete(new_filename) if File.exists?(new_filename)
         end
       else
         assert(false, msg)
       end
-      # end
+    end
   end
   
+  def file_name(file); file.is_a?(Array) ? file[0] : file; end
+  def file_format(file) file.is_a?(Array) ? "r:#{file[1]}" : 'r'; end
+      
   def template_match(str, template)
     # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
     (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0

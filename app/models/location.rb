@@ -625,10 +625,7 @@ class Location < AbstractModel
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
-
-    # TODO
-    # Was "altered?" which is gone.  Need to test if changed? only returns true if *important* changes have been made.
-    if changed?
+    if altered?
       sender = User.current
       recipients = []
 

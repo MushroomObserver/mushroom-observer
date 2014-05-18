@@ -1002,7 +1002,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     end
 
     get(:make_report, :id => list.id, :type => 'csv')
-    assert_response_equal_file("#{path}/test.csv")
+    assert_response_equal_file(["#{path}/test.csv", 'ISO-8859-1'])
   end
 
   def test_name_lister
@@ -1039,7 +1039,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_csv.l))
-    assert_response_equal_file("#{path}/test2.csv")
+    assert_response_equal_file(["#{path}/test2.csv", 'ISO-8859-1'])
   end
 
   def test_name_resolution

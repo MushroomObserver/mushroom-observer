@@ -621,13 +621,14 @@ module ControllerExtensions
               msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
               assert_equal(@response.redirected_to[:action].to_sym, arg[0].to_sym, msg)
             else
+              controller = @response.redirected_to[:controller] || @controller.controller_name
               msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-              assert_equal([@response.redirected_to[:controller], @response.redirected_to[:action]], [arg[0], arg[1]], msg)
+              assert_equal([controller, @response.redirected_to[:action]], [arg[0].to_s, arg[1].to_s], msg)
             end
           elsif arg.is_a?(Hash)
             url = @controller.url_for(arg).sub(/^http:..test.host./, '')
             msg += "Expected redirect to <#{url}>" + got
-            assert_partial_hash(arg, @response.redirected_to, msg)
+            assert_redirect_match(arg, @response, @controller, msg)
           elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
             msg += "Expected redirect to <#{arg}>" + got
             assert_equal(arg, @response.redirect_url, msg)
@@ -653,18 +654,29 @@ module ControllerExtensions
     end
   end
 
-  def assert_partial_hash(partial, full, msg)
+  def assert_redirect_match(partial, response, controller, msg)
+    mismatches = find_mismatches(partial, response.redirected_to)
+    if mismatches[:controller].to_s == controller.controller_name.to_s
+      mismatches.delete(:controller)
+    elsif mismatches.member?(:controller)
+      print "assert_redirect_match: #{partial}\n"
+      print "assert_redirect_match: #{response.redirected_to}\n"
+    end
+    assert_equal({}, mismatches, "Mismatched partial hash: #{mismatches}")
+  end
+  
+  def find_mismatches(partial, full)
     mismatches = {}
     partial.each do |k, v|
       f = full[k] || full[k.to_s]
-      if f.nil? and f.respond_to(:to_sym)
+      if f.nil? and k.respond_to?(:to_sym)
         f = full[k.to_sym]
       end
       if f.to_s != v.to_s
         mismatches[k] = v
       end
     end
-    assert_equal(mismatches, {}, "Mismatched partial hash: #{mismatches}")
+    mismatches
   end
   
   # Check default value of a form field.
