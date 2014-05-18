@@ -2,7 +2,7 @@
 
 <label for="observation_when_1i"><%= :WHEN.t %>:</label>
 <%= date_select('observation', 'when', :start_year => 1980,
-                :end_year => Time.now.year) %><br/><br/>
+                :end_year => Time.now.year, :order => [:day,:month,:year]) %><br/><br/>
 
 <% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
   <div class="Warnings">

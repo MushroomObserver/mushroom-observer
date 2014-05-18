@@ -209,13 +209,11 @@ class NameDescription < Description
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
 
-    # TODO
-    # Was "altered?" which is gone.  Need to test if changed? only returns true if *important* changes have been made.
     # Even though
     # changing review_status doesn't cause a new version to be created, I want
     # to notify authors of that change.  (review_status_changed? is an implicit
     # method created by ActiveRecord)
-    if changed? || review_status_changed?
+    if altered? || review_status_changed?
       sender = User.current || User.admin
       recipients = []
 

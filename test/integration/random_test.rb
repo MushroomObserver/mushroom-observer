@@ -2,7 +2,13 @@
 
 require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
-class RandomTest < IntegrationTestCase
+# class NameControllerTest < FunctionalTestCase
+#   def test_min; assert(true); end
+# end
+
+class RandomTest < IntegrationTestCase # ActionController::IntegrationTest
+  fixtures :names
+  
   def test_pivotal
     get('/')
     click(:label => 'Feature Tracker')

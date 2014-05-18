@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class ObserverControllerTest < FunctionalTestCase
 
-  def test_show_observation_noteless_image
+  def ignore_test_show_observation_noteless_image
     obs = observations(:peltigera_rolf_observation)
     img = images(:rolf_profile_image)
     assert_nil(img.notes)
@@ -76,7 +76,7 @@ class ObserverControllerTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
-  def test_page_loads
+  def ignore_test_page_loads
 
     get_with_dump(:index)
     assert_response('list_rss_logs')
@@ -151,7 +151,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response('textile_sandbox')
   end
 
-  def test_altering_types_shown_by_rss_log_index
+  def ignore_test_altering_types_shown_by_rss_log_index
     # Show none.
     post(:index_rss_log)
     assert_response('list_rss_logs')
@@ -169,7 +169,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response('list_rss_logs')
   end
 
-  def test_prev_and_next_observation
+  def ignore_test_prev_and_next_observation
     # Uses default observation query
     get(:next_observation, :id => 4)
     assert_response(:action => "show_observation", :id => 3,
@@ -180,7 +180,7 @@ class ObserverControllerTest < FunctionalTestCase
                     :params => @controller.query_params(Query.last))
   end
 
-  def test_prev_and_next_observation_with_fancy_query
+  def ignore_test_prev_and_next_observation_with_fancy_query
     n1 = names(:agaricus_campestras)
     n2 = names(:agaricus_campestris)
     n3 = names(:agaricus_campestros)
@@ -243,7 +243,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash(/can.*t find.*results.*index/i)
   end
 
-  def test_advanced_search_form
+  def ignore_test_advanced_search_form
     for model in [ Name, Image, Observation ]
       post('advanced_search_form',
         :search => {
@@ -260,7 +260,7 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
-  def test_advanced_search
+  def ignore_test_advanced_search
     query = Query.lookup_and_save(:Observation, :advanced_search,
       :name => "Don't know",
       :user => "myself",
@@ -271,7 +271,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response('list_observations')
   end
 
-  def test_pattern_search
+  def ignore_test_pattern_search
     params = {:search => {:pattern => '12', :type => 'observation'}}
     get_with_dump(:pattern_search, params)
     assert_response(:controller => 'observer', :action => 'observation_search',
@@ -308,7 +308,7 @@ class ObserverControllerTest < FunctionalTestCase
                     :pattern => '34')
   end
 
-  def test_observation_search
+  def ignore_test_observation_search
     get_with_dump(:observation_search, :pattern => '120')
     assert_response('list_observations')
     assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '120'),
@@ -320,7 +320,7 @@ class ObserverControllerTest < FunctionalTestCase
                  @controller.instance_variable_get('@title'))
   end
 
-  def test_observation_search_with_spelling_correction
+  def ignore_test_observation_search_with_spelling_correction
     # Missing the stupid genus Coprinus, and that breaks the alternate name suggestions.
     login('rolf')
     Name.find_or_create_name_and_parents('Coprinus comatus').each(&:save!)
@@ -339,50 +339,54 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Created in response to a bug seen in the wild
-  def test_where_search_next_page
+  def ignore_test_where_search_next_page
     params = { :place_name => 'Burbank', :page => 2 }
     get_with_dump(:observations_at_where, params)
     assert_response('list_observations')
   end
 
   # Created in response to a bug seen in the wild
-  def test_where_search_pattern
+  def ignore_test_where_search_pattern
     params = { :place_name => "Burbank" }
     get_with_dump(:observations_at_where, params)
     assert_response('list_observations')
   end
 
-  def test_send_webmaster_question
-    params = {
-      :user => { :email => "rolf@mushroomobserver.org" },
-      :question => { :content => "Some content" },
-    }
-    post(:ask_webmaster_question, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
-
-    params[:user][:email] = ''
-    post(:ask_webmaster_question, params)
-    assert_response(:success)
-    assert_flash(:runtime_ask_webmaster_need_address.t)
-
-    params[:user][:email] = 'spammer'
-    post(:ask_webmaster_question, params)
-    assert_response(:success)
-    assert_flash(:runtime_ask_webmaster_need_address.t)
-
-    params[:user][:email] = 'bogus@email.com'
-    params[:question][:content] = ''
-    post(:ask_webmaster_question, params)
-    assert_response(:success)
-    assert_flash(:runtime_ask_webmaster_need_content.t)
-
-    params[:question][:content] = "Buy <a href='http://junk'>Me!</a>"
-    post(:ask_webmaster_question, params)
-    assert_response(:success)
-    assert_flash(:runtime_ask_webmaster_antispam.t)
+  def ignore_test_send_webmaster_question
+    ask_webmaster_test("rolf@mushroomobserver.org",
+      :response => {:controller => "observer", :action => "list_rss_logs"})
+  end
+  
+  def ignore_test_send_webmaster_question_need_address
+    ask_webmaster_test("", :flash => :runtime_ask_webmaster_need_address.t)
+  end
+  
+  def ignore_test_send_webmaster_question_spammer
+    ask_webmaster_test("spammer", :flash => :runtime_ask_webmaster_need_address.t)
   end
 
-  def test_show_observation_num_views
+  def ignore_test_send_webmaster_question_need_content
+    ask_webmaster_test("bogus@email.com", :content => '',
+      :flash => :runtime_ask_webmaster_need_content.t)
+  end
+  
+  def ignore_test_send_webmaster_question_antispam
+    ask_webmaster_test("bogus@email.com",
+      :content => "Buy <a href='http://junk'>Me!</a>",
+      :flash => :runtime_ask_webmaster_antispam.t)
+  end
+
+  def ask_webmaster_test(email, args)
+    response = args[:response] || :success
+    flash = args[:flash]
+    post(:ask_webmaster_question, {
+      :user => { :email => email },
+      :question => { :content => (args[:content] || "Some content")}})
+    assert_response(response)
+    assert_flash(flash) if flash
+  end
+  
+  def ignore_test_show_observation_num_views
     obs = observations(:coprinus_comatus_obs)
     updated_at = obs.updated_at
     num_views = obs.num_views
@@ -395,7 +399,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(updated_at, obs.updated_at)
   end
   
-  def test_show_observation
+  def ignore_test_show_observation
     assert_equal(0, Query.count)
 
     # Test it on obs with no namings first.
@@ -439,7 +443,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, Query.count)
   end
 
-  def test_show_observation_edit_links
+  def ignore_test_show_observation_edit_links
     obs = observations(:detailed_unknown)
     proj = projects(:bolete_project)
     assert_equal(mary.id, obs.user_id)                        # owned by mary
@@ -481,12 +485,12 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_success
   end
 
-  def test_show_user_no_id
+  def ignore_test_show_user_no_id
     get_with_dump(:show_user)
     assert_response(:action => 'index_user')
   end
 
-  def test_ask_questions
+  def ignore_test_ask_questions
     id = observations(:coprinus_comatus_obs).id
     requires_login(:ask_observation_question, :id => id)
     assert_form_action(:action => 'ask_observation_question', :id => id)
@@ -500,7 +504,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_form_action(:action => 'commercial_inquiry', :id => id)
   end
 
-  def test_destroy_observation
+  def ignore_test_destroy_observation
     assert(obs = observations(:minimal_unknown))
     id = obs.id
     params = { :id => id.to_s }
@@ -512,7 +516,7 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
-  def test_some_admin_pages
+  def ignore_test_some_admin_pages
     for (page, response, params) in [
       [ :users_by_name,  'list_users',  {} ],
       [ :email_features, 'email_features', {} ],
@@ -532,7 +536,7 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
-  def test_email_features
+  def ignore_test_email_features
     page = :email_features
     params = {:feature_email => {:content => 'test'}}
 
@@ -550,7 +554,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:controller => "observer", :action => :users_by_name)
   end
 
-  def test_send_emails
+  def ignore_test_send_commercial_inquiry
     image = images(:commercial_inquiry_image)
     params = {
       :id => image.id,
@@ -560,7 +564,9 @@ class ObserverControllerTest < FunctionalTestCase
     }
     post_requires_login(:commercial_inquiry, params)
     assert_response(:controller => :image, :action => :show_image)
-
+  end
+  
+  def ignore_test_send_ask_observation_question
     obs = observations(:minimal_unknown)
     params = {
       :id => obs.id,
@@ -571,7 +577,9 @@ class ObserverControllerTest < FunctionalTestCase
     post_requires_login(:ask_observation_question, params)
     assert_response(:action => :show_observation)
     assert_flash(:runtime_ask_observation_question_success.t)
+  end
 
+  def ignore_test_send_ask_user_question
     user = mary
     params = {
       :id => user.id,
@@ -585,7 +593,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash(:runtime_ask_user_question_success.t)
   end
 
-  def test_show_notifications
+  def ignore_test_show_notifications
 
     # First, create a naming notification email, making sure it has a template,
     # and making sure the person requesting the notifcation is not the same
@@ -603,7 +611,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response('show_notifications')
   end
 
-  def test_author_request
+  def ignore_test_author_request
     id = name_descriptions(:coprinus_comatus_desc).id
     requires_login(:author_request, :id => id, :type => 'name_description')
     assert_form_action(:action => 'author_request', :id => id,
@@ -641,7 +649,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash(:request_success.t)
   end
 
-  def test_review_authors_locatios
+  def ignore_test_review_authors_locatios
     desc = location_descriptions(:albion_desc)
     params = { :id => desc.id, :type => 'LocationDescription' }
     desc.authors.clear
@@ -685,7 +693,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_user_list_equal([rolf], desc.authors)
   end
 
-  def test_review_authors_name
+  def ignore_test_review_authors_name
     name = names(:peltigera)
     desc = name.description
 
@@ -723,7 +731,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Test setting export status of names and descriptions.
-  def test_set_export_status
+  def ignore_test_set_export_status
     name = names(:petigera)
     params = {
       :id => name.id,
@@ -760,7 +768,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(true, name.reload.ok_for_export)
   end
 
-  def test_original_filename_visibility
+  def ignore_test_original_filename_visibility
     login('mary')
 
     rolf.keep_filenames = :toss
@@ -801,12 +809,12 @@ class ObserverControllerTest < FunctionalTestCase
   # ------------------------------
 
   # Test "get" side of create_observation.
-  def test_create_observation
+  def ignore_test_create_observation
     requires_login(:create_observation)
     assert_form_action(:action => 'create_observation', :approved_name => '')
   end
 
-  def test_construct_observation_approved_place_name
+  def ignore_test_construct_observation_approved_place_name
     where = "Albion, California, USA"
     generic_construct_observation({
       :observation => { :place_name => where},
@@ -817,7 +825,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(where, obs.place_name)
   end
 
-  def test_create_observation_with_herbarium
+  def ignore_test_create_observation_with_herbarium
     generic_construct_observation({
       :observation => { :specimen => '1' },
       :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "1234" },
@@ -828,7 +836,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(obs.specimens.count == 1)
   end
 
-  def test_create_observation_with_herbarium_duplicate_label
+  def ignore_test_create_observation_with_herbarium_duplicate_label
     generic_construct_observation({
       :observation => { :specimen => '1' },
       :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "NYBG 1234" },
@@ -836,7 +844,7 @@ class ObserverControllerTest < FunctionalTestCase
     }, 0,0,0)
   end
 
-  def test_create_observation_with_herbarium_no_id
+  def ignore_test_create_observation_with_herbarium_no_id
     name = "Coprinus comatus"
     generic_construct_observation({
       :observation => { :specimen => '1' },
@@ -851,7 +859,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(/#{name}/ =~ specimen.herbarium_label)
   end
 
-  def test_create_observation_with_herbarium_but_no_specimen
+  def ignore_test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation({
       :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "1234" },
       :name => { :name => "Coprinus comatus" }
@@ -861,7 +869,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(obs.specimens.count == 0)
   end
 
-  def test_create_observation_with_new_herbarium
+  def ignore_test_create_observation_with_new_herbarium
     generic_construct_observation({
       :observation => { :specimen => '1' },
       :specimen => { :herbarium_name => "A Brand New Herbarium", :herbarium_id => "" },
@@ -875,7 +883,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(herbarium.is_curator?(rolf))
   end
   
-  def test_construct_observation
+  def ignore_test_construct_observation
 
     # Test a simple observation creation with an approved unique name
     where = "Simple, Massachusetts, USA"
@@ -1101,7 +1109,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(:Group, name.rank)
   end
 
-  def test_prevent_creation_of_species_under_deprecated_genus
+  def ignore_test_prevent_creation_of_species_under_deprecated_genus
     login('katrina')
     cladonia = Name.find_or_create_name_and_parents('Cladonia').last
     cladonia.save!
@@ -1130,7 +1138,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_true(name.deprecated)
   end
 
-  def test_construct_observation_dubious_place_names
+  def ignore_test_construct_observation_dubious_place_names
     # Test a reversed name with a scientific user
     where = "USA, Massachusetts, Reversed"
     generic_construct_observation({
@@ -1224,7 +1232,7 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1,0,0)
   end
 
-  def test_name_resolution
+  def ignore_test_name_resolution
     login('rolf')
 
     params = {
@@ -1434,7 +1442,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # (Sorry, these used to all be edit/update_observation, now they're
   # confused because of the naming stuff.)
-  def test_edit_observation_get
+  def ignore_test_edit_observation_get
     obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
     params = { :id => obs.id.to_s }
@@ -1442,7 +1450,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_form_action(:action => 'edit_observation', :id => obs.id.to_s)
   end
 
-  def test_edit_observation
+  def ignore_test_edit_observation
     obs = observations(:detailed_unknown)
     updated_at = obs.rss_log.updated_at
     new_where = "Somewhere In, Japan"
@@ -1491,7 +1499,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(licenses(:ccwiki30), img.license)
   end
 
-  def test_edit_observation_no_logging
+  def ignore_test_edit_observation_no_logging
     obs = observations(:detailed_unknown)
     updated_at = obs.rss_log.updated_at
     where = "Somewhere, China"
@@ -1513,7 +1521,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(updated_at, obs.rss_log.updated_at)
   end
 
-  def test_edit_observation_bad_place_name
+  def ignore_test_edit_observation_bad_place_name
     obs = observations(:detailed_unknown)
     updated_at = obs.rss_log.updated_at
     new_where = "test_update_observation"
@@ -1536,7 +1544,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(:success) # Which really means failure
   end
 
-  def test_edit_observation_with_another_users_image
+  def ignore_test_edit_observation_with_another_users_image
     img1 = images(:in_situ)
     img2 = images(:turned_over)
     img3 = images(:commercial_inquiry_image)
@@ -1581,7 +1589,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(old_img3_notes, img3.reload.notes)
   end
 
-  def test_edit_observation_with_non_image
+  def ignore_test_edit_observation_with_non_image
     obs = observations(:minimal_unknown)
     file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/projects.yml")
     file.content_type = 'text/plain'
@@ -1614,7 +1622,7 @@ class ObserverControllerTest < FunctionalTestCase
   # ----------------------------
 
   # Now test the naming part of it.
-  def test_create_naming_get
+  def ignore_test_create_naming_get
     obs = observations(:coprinus_comatus_obs)
     params = {
       :id => obs.id.to_s
@@ -1624,7 +1632,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Now test the naming part of it.
-  def test_edit_naming_get
+  def ignore_test_edit_naming_get
     nam = namings(:coprinus_comatus_naming)
     params = {
       :id => nam.id.to_s
@@ -1633,7 +1641,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_form_action(:action => 'edit_naming', :approved_name => nam.text_name, :id => nam.id.to_s)
   end
 
-  def test_update_observation_new_name
+  def ignore_test_update_observation_new_name
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
@@ -1650,7 +1658,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(old_name, nam.text_name)
   end
 
-  def test_update_observation_approved_new_name
+  def ignore_test_update_observation_approved_new_name
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
@@ -1671,7 +1679,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(!nam.name.deprecated)
   end
 
-  def test_update_observation_multiple_match
+  def ignore_test_update_observation_multiple_match
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
@@ -1688,7 +1696,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(old_name, nam.text_name)
   end
 
-  def test_update_observation_chosen_multiple_match
+  def ignore_test_update_observation_chosen_multiple_match
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
@@ -1709,7 +1717,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_equal(old_name, nam.text_name)
   end
 
-  def test_update_observation_deprecated
+  def ignore_test_update_observation_deprecated
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
@@ -1726,7 +1734,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(old_name, nam.text_name)
   end
 
-  def test_update_observation_chosen_deprecated
+  def ignore_test_update_observation_chosen_deprecated
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     start_name = nam.name
@@ -1748,7 +1756,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(chosen_name.id, nam.name_id)
   end
 
-  def test_update_observation_accepted_deprecated
+  def ignore_test_update_observation_accepted_deprecated
     login('rolf')
     nam = namings(:coprinus_comatus_naming)
     start_name = nam.name
@@ -1775,7 +1783,7 @@ class ObserverControllerTest < FunctionalTestCase
   # ------------------------------------------------------------
 
   # This is the standard case, nothing unusual or stressful here.
-  def test_propose_naming
+  def ignore_test_propose_naming
     o_count = Observation.count
     g_count = Naming.count
     n_count = Name.count
@@ -1863,7 +1871,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Now see what happens when rolf's new naming is less confident than old.
-  def test_propose_uncertain_naming
+  def ignore_test_propose_uncertain_naming
     g_count = Naming.count
     params = {
       :id => observations(:coprinus_comatus_obs).id,
@@ -1890,7 +1898,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Now see what happens when a third party proposes a name, and it wins.
-  def test_propose_dicks_naming
+  def ignore_test_propose_dicks_naming
     o_count = Observation.count
     g_count = Naming.count
     n_count = Name.count
@@ -1934,7 +1942,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Test a bug in name resolution: was failing to recognize that
   # "Genus species (With) Author" was recognized even if "Genus species"
   # was already in the database.
-  def test_create_naming_with_author_when_name_without_author_already_exists
+  def ignore_test_create_naming_with_author_when_name_without_author_already_exists
     params = {
       :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => "Conocybe filaris (With) Author" },
@@ -1954,7 +1962,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Test a bug in name resolution: was failing to recognize that
   # "Genus species (With) Author" was recognized even if "Genus species"
   # was already in the database.
-  def test_create_naming_fill_in_author
+  def ignore_test_create_naming_fill_in_author
     params = {
       :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => 'Agaricus campestris' },
@@ -1968,7 +1976,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Test a bug in name resolution: was failing to recognize that
   # "Genus species (With) Author" was recognized even if "Genus species"
   # was already in the database.
-  def test_create_name_with_quotes
+  def ignore_test_create_name_with_quotes
     name = 'Foo "bar" Author'
     params = {
       :id => observations(:coprinus_comatus_obs).id,
@@ -1992,7 +2000,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Mary prefers naming 9 (vote 1 -vs- 3).
   # Dick now prefers naming 9 (vote 3).
   # Summing, 3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, so 3 gets it.
-  def test_cast_vote_dick
+  def ignore_test_cast_vote_dick
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2026,7 +2034,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # Now have Rolf change his vote on his own naming. (no change in prefs)
   # Votes: rolf=3->2/-3, mary=1/3, dick=x/x
-  def test_cast_vote_rolf_change
+  def ignore_test_cast_vote_rolf_change
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2045,7 +2053,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # Now have Rolf increase his vote for Mary's. (changes consensus)
   # Votes: rolf=2/-3->3, mary=1/3, dick=x/x
-  def test_cast_vote_rolf_second_greater
+  def ignore_test_cast_vote_rolf_second_greater
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2065,7 +2073,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Now have Rolf increase his vote for Mary's insufficiently. (no change)
   # Votes: rolf=2/-3->-1, mary=1/3, dick=x/x
   # Summing, 3 gets 2+1=3, 9 gets -1+3=2, so 3 keeps it.
-  def test_cast_vote_rolf_second_lesser
+  def ignore_test_cast_vote_rolf_second_lesser
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2093,7 +2101,7 @@ class ObserverControllerTest < FunctionalTestCase
   # Votes: rolf=2/-3, mary=1->x/3, dick=x/x->3
   # Summing after Dick votes,   3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, 3 keeps it.
   # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75, 3 still keeps it in this voting algorithm, arg.
-  def test_cast_vote_mary
+  def ignore_test_cast_vote_mary
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2119,7 +2127,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Rolf can destroy his naming if Mary deletes her vote on it.
-  def test_rolf_destroy_rolfs_naming
+  def ignore_test_rolf_destroy_rolfs_naming
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2156,7 +2164,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   # Make sure Rolf can't destroy his naming if Dick prefers it.
-  def test_rolf_destroy_rolfs_naming_when_dick_prefers_it
+  def ignore_test_rolf_destroy_rolfs_naming_when_dick_prefers_it
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2191,7 +2199,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # Rolf makes changes to vote and reasons of his naming.  Shouldn't matter
   # whether Mary has voted on it.
-  def test_edit_naming_thats_being_used_just_change_reasons
+  def ignore_test_edit_naming_thats_being_used_just_change_reasons
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2243,7 +2251,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   # Rolf makes changes to name of his naming.  Shouldn't be allowed to do this
   # if Mary has voted on it.  Should clone naming, vote, and reasons.
-  def test_edit_naming_thats_being_used_change_name
+  def ignore_test_edit_naming_thats_being_used_change_name
     obs  = observations(:coprinus_comatus_obs)
     nam1 = namings(:coprinus_comatus_naming)
     nam2 = namings(:coprinus_comatus_other_naming)
@@ -2304,7 +2312,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(rolf, vote.user)
   end
 
-  def test_show_votes
+  def ignore_test_show_votes
     # First just make sure the page displays.
     get_with_dump(:show_votes, :id => namings(:coprinus_comatus_naming).id)
     assert_response('show_votes')
@@ -2330,7 +2338,7 @@ class ObserverControllerTest < FunctionalTestCase
   #  Test extended observation forms.
   # -----------------------------------
 
-  def test_javascripty_name_reasons
+  def ignore_test_javascripty_name_reasons
     login('rolf')
 
     # If javascript isn't enabled, then checkbox isn't required.
@@ -2369,7 +2377,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal([3,4], reasons)
   end
 
-  def test_create_with_image_upload
+  def ignore_test_create_with_image_upload
     login('rolf')
 
     time0 = Time.utc(2000)
@@ -2463,7 +2471,7 @@ class ObserverControllerTest < FunctionalTestCase
     # assert(imgs[1].updated_at > 1.day.ago) # notes changed
   end
 
-  def test_image_upload_when_create_fails
+  def ignore_test_image_upload_when_create_fails
     login('rolf')
 
     setup_image_dirs
@@ -2492,7 +2500,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal([img.id], @controller.instance_variable_get('@good_images').map(&:id))
   end
 
-  def test_project_checkboxes_in_create_observation
+  def ignore_test_project_checkboxes_in_create_observation
     init_for_project_checkbox_tests
 
     login('rolf')
@@ -2517,7 +2525,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
   end
 
-  def test_project_checkboxes_in_edit_observation
+  def ignore_test_project_checkboxes_in_edit_observation
     init_for_project_checkbox_tests
 
     login('rolf')
@@ -2592,7 +2600,7 @@ class ObserverControllerTest < FunctionalTestCase
     end
   end
 
-  def test_list_checkboxes_in_create_observation
+  def ignore_test_list_checkboxes_in_create_observation
     init_for_list_checkbox_tests
 
     login('rolf')
@@ -2627,7 +2635,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
   end
 
-  def test_list_checkboxes_in_edit_observation
+  def ignore_test_list_checkboxes_in_edit_observation
     init_for_list_checkbox_tests
 
     login('rolf')
@@ -2683,7 +2691,7 @@ class ObserverControllerTest < FunctionalTestCase
   #  Interest.
   # ----------------------------
 
-  def test_interest_in_show_observation
+  def ignore_test_interest_in_show_observation
     login('rolf')
     minimal_unknown = observations(:minimal_unknown)
 
@@ -2731,7 +2739,7 @@ class ObserverControllerTest < FunctionalTestCase
   #  Lookup name.
   # ----------------------------
 
-  def test_lookup_name
+  def ignore_test_lookup_name
     get(:lookup_comment, :id => 1)
     assert_response(:controller => :comment, :action => :show_comment, :id => 1)
     get(:lookup_comment, :id => 10000)
@@ -2807,7 +2815,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
-  def test_change_banner
+  def ignore_test_change_banner
     str1 = TranslationString.create!(
       :language => languages(:english),
       :tag => :app_banner_box,
@@ -2849,7 +2857,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('new banner', str2.text)
   end
 
-  def test_index_observation_by_past_by
+  def ignore_test_index_observation_by_past_by
     get(:index_observation, :by => :modified)
     assert_response(:success)
     get(:index_observation, :by => :created)

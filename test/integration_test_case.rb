@@ -99,7 +99,7 @@
 #
 ################################################################################
 
-class IntegrationTestCase < Test::Unit::TestCase
+class IntegrationTestCase < ActionController::IntegrationTest # Test::Unit::TestCase
   include IntegrationExtensions
 
   attr_accessor :current_session

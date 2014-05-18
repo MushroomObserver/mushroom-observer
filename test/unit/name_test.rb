@@ -1404,7 +1404,7 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(1, desc.editors.length)
     assert_equal(nil, desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(3, QueuedEmail.count)
+    assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => rolf,
@@ -1439,8 +1439,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(4, QueuedEmail.count)
-    assert_email(3,
+    assert_equal(2, QueuedEmail.count)
+    assert_email(1,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => mary,
       :to            => rolf,
@@ -1474,8 +1474,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(5, QueuedEmail.count)
-    assert_email(4,
+    assert_equal(3, QueuedEmail.count)
+    assert_email(2,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => dick,
       :to            => mary,
@@ -1509,8 +1509,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(rolf.id, desc.reviewer_id)
     assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(6, QueuedEmail.count)
-    assert_email(5,
+    assert_equal(4, QueuedEmail.count)
+    assert_email(3,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => rolf,
       :to            => katrina,
@@ -1549,8 +1549,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(7, QueuedEmail.count)
-    assert_email(6,
+    assert_equal(5, QueuedEmail.count)
+    assert_email(4,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => dick,
       :to            => rolf,
@@ -1584,8 +1584,8 @@ class NameTest < ActiveSupport::TestCase
     assert_equal(nil, desc.reviewer_id)
     assert_equal([mary.id, katrina.id], desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
-    assert_equal(8, QueuedEmail.count)
-    assert_email(7,
+    assert_equal(6, QueuedEmail.count)
+    assert_email(5,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => rolf,
       :to            => mary,
