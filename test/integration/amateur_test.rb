@@ -62,7 +62,7 @@ class AmateurTest < IntegrationTestCase
     assert_raises(Test::Unit::AssertionFailedError) do
       click(:label => 'Preferences', :in => :left_panel)
     end
-    get_via_redirect('/account/prefs')
+    get('/account/prefs')
     assert_template('account/login')
   end
 
@@ -88,21 +88,21 @@ class AmateurTest < IntegrationTestCase
 
     open_session do
       self.cookies = rolf_cookies
-      get_via_redirect('/account/prefs')
+      get('/account/prefs')
       assert_template('account/prefs')
       assert_users_equal(rolf, assigns(:user))
     end
 
     open_session do
       self.cookies = mary_cookies
-      get_via_redirect('/account/prefs')
+      get('/account/prefs')
       assert_template('account/prefs')
       assert_users_equal(mary, assigns(:user))
     end
-
+    
     open_session do
       self.cookies = dick_cookies
-      get_via_redirect('/account/prefs')
+      get('/account/prefs')
       assert_template('account/login')
     end
   end
@@ -201,7 +201,7 @@ class AmateurTest < IntegrationTestCase
   # --------------------------------------
 
   def test_proposing_names
-    katrina = current_session
+    katrina_session = current_session
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? {|c| c.user == katrina})
@@ -322,8 +322,8 @@ class AmateurTest < IntegrationTestCase
     click(:label => /cancel.*show/i)
 
     # Have Rolf join in the fun and vote for this naming.
-    rolf = new_user_session(rolf)
-    in_session(rolf) do
+    rolf_session = new_user_session(rolf)
+    in_session(rolf_session) do
       get("/#{obs.id}")
       open_form do |form|
         form.assert_value("vote_#{naming.id}_value", /no opinion/i)
@@ -339,7 +339,7 @@ class AmateurTest < IntegrationTestCase
     assert_flash(/sorry/i)
 
     # Have Rolf change his mind.
-    rolf.open_form do |form|
+    rolf_session.open_form do |form|
       form.select("vote_#{naming.id}_value", /as if!/i)
       form.submit
     end
@@ -405,7 +405,7 @@ class AmateurTest < IntegrationTestCase
     I18n.locale = mary.lang
     mary.save
 
-    data = Globalite.localization_data[:'el-GR']
+    data = TranslationString.translations('el') # Globalite.localization_data[:'el-GR']
     data[:test_tag1] = 'test_tag1 value'
     data[:test_tag2] = 'test_tag2 value'
     data[:test_flash_redirection_title] = 'Testing Flash Redirection'
