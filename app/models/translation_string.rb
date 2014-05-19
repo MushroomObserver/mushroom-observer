@@ -55,7 +55,7 @@ class TranslationString < AbstractModel
   end
 
   def self.translations(lang)
-    I18n.backend.send(:translations)[lang] # Going through the backdoor to call a private method.  Yuck!
+    trans = I18n.backend.send(:translations)[lang.to_sym]
   end
   
   # Update this string in the current set of translations Globalite is using.

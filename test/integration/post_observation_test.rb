@@ -205,31 +205,28 @@ class PostObservationTest < IntegrationTestCase
     assert_link_exists_containing("show_image/#{new_img.id}")
   end
 
-  def assert_flash_for_create_observation
+  def review_flash(patterns)
+    notice = flash[:rendered_notice]
     assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/created observation/i)
-    assert_flash(/created proposed name/i)
-    assert_flash(/uploaded/i)
+    patterns.each { |pat| assert_match(pat, notice) }
+  end
+  
+  def assert_flash_for_create_observation
+    review_flash([/success/i, /created observation/i,
+      /created proposed name/i, /uploaded/i])
   end
 
   def assert_flash_for_create_location
-    assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/created location/i)
+    review_flash([/success/i, /created location/i])
   end
 
   def assert_flash_for_edit_observation
-    assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/updated observation/i)
-    assert_flash(/updated notes on image/i)
+    review_flash([/success/i, /updated observation/i,
+      /updated notes on image/i])
   end
 
   def assert_flash_for_destroy_observation
-    assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/destroyed/i)
+    review_flash([/success/i, /destroyed/i])
   end
 
   def assert_has_location_warning(regex)

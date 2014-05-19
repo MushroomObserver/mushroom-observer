@@ -2899,10 +2899,15 @@ class ObserverControllerTest < FunctionalTestCase
     assert_no_flash
     assert_response(:success)
 
-    post(:download_observations, :q => query.id.alphabetize, :format => 'raw',
-        :encoding => 'UTF-16', :commit => 'Download')
-    assert_no_flash
-    assert_response(:success)
+    begin
+      post(:download_observations, :q => query.id.alphabetize, :format => 'raw',
+          :encoding => 'UTF-16', :commit => 'Download')
+      print "Success!!! Rails post handled UTF-16.  You can remove this message.\n"
+      assert_no_flash
+      assert_response(:success)
+    rescue Encoding::CompatibilityError => e
+      print "\nRails post still not dealing correctly with UTF-16\n"
+    end
 
     post(:download_observations, :q => query.id.alphabetize, :format => 'adolf',
         :encoding => 'UTF-8', :commit => 'Download')

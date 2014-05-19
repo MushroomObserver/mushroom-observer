@@ -28,7 +28,7 @@ module ObservationReport
         when 'ASCII'
           render.to_ascii
         else
-          render # .iconv(encoding)  This was causing problems with the UTF-16 encoding.
+          render.iconv(encoding) # This was causing problems with the UTF-16 encoding.
       end
     end
 
