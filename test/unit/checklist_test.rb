@@ -64,12 +64,12 @@ class ChecklistTest < ActiveSupport::TestCase
     assert_names_equal(names(:agaricus), Observation.last.name)
     assert_users_equal(dick, Observation.last.user)
     data = Checklist::ForUser.new(dick)
-    assert_equal(0, data.num_species)
+    assert_equal(before_num_species, data.num_species)
 
     Observation.create!(:name => names(:lactarius_kuehneri))
     data = Checklist::ForUser.new(dick)
-    assert_equal(['Lactarius'], data.genera)
-    assert_equal(['Lactarius alpinus'], data.species)
+    after_num_genera = data.num_genera
+    after_num_species = data.num_species
     
     assert_equal(before_num_genera+1, after_num_genera)
     assert_equal(before_num_species+1, after_num_species)
