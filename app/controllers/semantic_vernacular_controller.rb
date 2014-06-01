@@ -16,7 +16,7 @@
 #
 ################################################################################
 
-require_dependency 'classes/semantic_vernacular'
+# require_dependency 'classes/semantic_vernacular'
 
 class SemanticVernacularController < ApplicationController
   before_filter :login_required

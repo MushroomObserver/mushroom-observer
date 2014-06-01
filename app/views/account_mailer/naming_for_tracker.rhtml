@@ -46,7 +46,7 @@ if @user.email_html %>
 <%= handy_links.tp %>
 <ul type=none>
   <% for label, url in links %>
-    <li><%= label %>: <%= "<a href=\"#{url}\">#{url}</a>" %></li>
+    <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
 <%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
@@ -57,11 +57,11 @@ if @user.email_html %>
 
 <%= fields.tp.html_to_ascii %>
 
-<%= handy_links.tp.html_to_ascii %>
+<%= handy_links.tp.html_to_ascii.html_safe %>
 
-<%= result = ''
+<%= result = ''.html_safe
   for label, url in links
-    result += "#{label}: #{url}\n"
+    result += label + ": " + url + "\n"
   end
   result %>
 <%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>

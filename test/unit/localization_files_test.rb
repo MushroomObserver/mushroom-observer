@@ -57,7 +57,7 @@ class LocalizationFilesTest < ActiveSupport::TestCase
     tags = known_tags
     missing_tags = []
     duplicate_function_defs = []
-    source_files("#{RAILS_ROOT}/app", "#{RAILS_ROOT}/test") do |file|
+    source_files("#{::Rails.root.to_s}/app", "#{::Rails.root.to_s}/test") do |file|
       missing_tags += missing_tags_in_file(file, tags)
       duplicate_function_defs += duplicate_function_defs_in_file(file)
     end
@@ -150,7 +150,7 @@ class LocalizationFilesTest < ActiveSupport::TestCase
 
   def test_api_error_translations
     tags = []
-    file = "#{RAILS_ROOT}/app/classes/api/errors.rb"
+    file = "#{::Rails.root.to_s}/app/classes/api/errors.rb"
     File.open(file, 'r:utf-8') do |fh|
       fh.each_line do |line|
         if line.match(/^\s*class (\w+) < /) and
@@ -159,7 +159,7 @@ class LocalizationFilesTest < ActiveSupport::TestCase
         end
       end
     end
-    file = "#{RAILS_ROOT}/app/classes/api/parsers.rb"
+    file = "#{::Rails.root.to_s}/app/classes/api/parsers.rb"
     File.open(file, 'r:utf-8') do |fh|
       fh.each_line do |line|
         if line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)

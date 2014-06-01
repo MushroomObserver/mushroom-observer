@@ -1,0 +1,24 @@
+From: news@localhost
+Reply-To: katrina@collectivesource.com
+To: rolf@collectivesource.com
+Subject: [MO] Please do something or other
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Admin Request
+
+Katrina (katrina@collectivesource.com) asked the Mushroom Observer website to forward the following request to you regarding EOL Project:
+
+and this is why...
+
+--------------------------------------------------
+
+Here are some handy links:
+
+Change user's status: http://localhost:3000/project/change_user_status/1?candidate=5
+Show user's profile: http://localhost:3000/observer/show_user/5
+Latest changes at Mushroom Observer: http://localhost:3000
+
+If you feel this user is abusing this service please forward this entire email message to: webmaster@localhost

@@ -374,7 +374,7 @@ class ApiTest < ActiveSupport::TestCase
       :method      => :post,
       :action      => :image,
       :api_key     => @api_key.key,
-      :upload_file => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
+      :upload_file => "#{::Rails.root.to_s}/test/fixtures/images/sticky.jpg",
     }
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting image')
@@ -405,7 +405,7 @@ class ApiTest < ActiveSupport::TestCase
       :vote          => '3',
       :observations  => @obs.id,
       :projects      => @proj.id,
-      :upload_file   => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
+      :upload_file   => "#{::Rails.root.to_s}/test/fixtures/images/sticky.jpg",
       :original_name => @orig,
     }
     api = API.execute(params)

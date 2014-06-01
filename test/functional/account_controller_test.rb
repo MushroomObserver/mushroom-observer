@@ -397,7 +397,7 @@ class AccountControllerTest < FunctionalTestCase
     setup_image_dirs
 
     # Open file we want to upload.
-    file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/sticky.jpg")
+    file = FilePlus.new("#{::Rails.root.to_s}/test/fixtures/images/sticky.jpg")
     file.content_type = 'image/jpeg'
 
     # It should create a new image: this is the current number of images.

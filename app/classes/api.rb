@@ -121,7 +121,7 @@ class API
   require_dependency 'api/model_api'
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  for file in Dir.glob("#{RAILS_ROOT}/app/classes/api/*_api.rb")
+  for file in Dir.glob("#{::Rails.root.to_s}/app/classes/api/*_api.rb")
     if file.match(/(api\/\w+_api)\.rb$/) and $1 != 'api/model_api'
       require_dependency $1
     end

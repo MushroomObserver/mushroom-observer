@@ -23,7 +23,7 @@
   links.push([:email_links_show_object.l(:type => :observation),
     "#{HTTP_DOMAIN}/#{@observation.id}"])
   links.push([:email_links_not_interested.l(:type => :observation),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1".html_safe])
   links.push([:email_links_stop_sending.l,
     "#{HTTP_DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.l,
@@ -42,7 +42,7 @@ if @user.email_html %>
 <%= handy_links.tp %>
 <ul type=none>
   <% for label, url in links %>
-    <li><%= label %>: <%= "<a href=\"#{url}\">#{url}</a>" %></li>
+    <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
 <br/>
@@ -52,11 +52,11 @@ if @user.email_html %>
 
 <%= fields.tp.html_to_ascii %>
 
-<%= handy_links.tp.html_to_ascii %>
+<%= handy_links.tp.html_to_ascii.html_safe %>
 
-<%= result = ''
+<%= result = ''.html_safe
   for label, url in links
-    result += "#{label}: #{url}\n"
+    result += label + ": " + url + "\n"
   end
   result %>
 <% end %>

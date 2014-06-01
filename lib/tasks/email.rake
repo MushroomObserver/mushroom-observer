@@ -1,7 +1,7 @@
 namespace :email do
   desc "List queued emails"
   task(:list => :environment) do
-    print "#{HTTP_DOMAIN}, #{RAILS_ENV}\n"
+    print "#{HTTP_DOMAIN}, #{::Rails.env}\n"
     for e in QueuedEmail.find(:all, :include => [
       :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
       e.dump()
@@ -26,7 +26,7 @@ namespace :email do
 
         else
           result = nil
-          File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a') do |fh|
+          File.open("#{::Rails.root.to_s}/log/email-low-level.log", 'a') do |fh|
             fh.puts("sending #{e.id.inspect}...")
             result = e.send_email
             fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : 'false'}")

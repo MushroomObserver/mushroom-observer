@@ -9,7 +9,7 @@
 #    This is a weekly cronjob that makes sure the "lichens" species list is
 #    complete.  It uses
 #
-#      RAILS_ROOT/public/lichen_genera.txt
+#      ::Rails.root.to_s/public/lichen_genera.txt
 #
 #    to determine which species are lichens.  It is going to include
 #    unlichenized lichenicolous fungi and allies, but it will be close.
@@ -37,7 +37,7 @@ now = Time.now
 
 # Get list of lichen genera.
 genera = {}
-file = "#{RAILS_ROOT}/public/lichen_genera.txt"
+file = "#{::Rails.root.to_s}/public/lichen_genera.txt"
 for genus in File.readlines(file).map(&:chomp)
   if !genus.match(/#/)
     genera[genus] = true

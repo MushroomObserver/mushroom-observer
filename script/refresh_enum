@@ -50,7 +50,7 @@ end
 
 if done_anything
   require 'active_record/schema_dumper'
-  File.open("#{RAILS_ROOT}/db/schema.rb", "w") do |file|
+  File.open("#{::Rails.root.to_s}/db/schema.rb", "w") do |file|
     ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
   end
 end

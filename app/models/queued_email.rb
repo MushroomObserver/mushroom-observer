@@ -132,7 +132,7 @@ class QueuedEmail < AbstractModel
   # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
   # soon as QueuedEmail is defined, we know that all subclasses are also
   # properly defined, and we no longer have to rely on autoloading. 
-  Dir["#{RAILS_ROOT}/app/models/queued_email/*.rb"].each do |file|
+  Dir["#{::Rails.root.to_s}/app/models/queued_email/*.rb"].each do |file|
     if file.match(/(\w+)\.rb$/)
       require "queued_email/#{$1}"
     end
@@ -151,7 +151,7 @@ class QueuedEmail < AbstractModel
   def self.all_flavors
     if !defined? @@all_flavors
       @@all_flavors = []
-      Dir["#{RAILS_ROOT}/app/models/queued_email/*.rb"].each do |file|
+      Dir["#{::Rails.root.to_s}/app/models/queued_email/*.rb"].each do |file|
         if file.match(/(\w+).rb/)
           @@all_flavors << "QueuedEmail::#{$1.camelize}"
         end
@@ -287,7 +287,7 @@ class QueuedEmail < AbstractModel
   # Add line to log to help keep track of what/when/why emails are being queued
   # and when they are actually sent.
   def self.debug_log(msg)
-    File.open("#{RAILS_ROOT}/log/email-debug.log", 'a:utf-8') do |fh|
+    File.open("#{::Rails.root.to_s}/log/email-debug.log", 'a:utf-8') do |fh|
       fh.puts("#{Time.now.api_time} #{msg}")
     end
   end

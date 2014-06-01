@@ -29,7 +29,7 @@ if @user.email_html %>
 <%= handy_links.tp %>
 <ul type=none>
   <% for label, url in links %>
-    <li><%= label %>: <%= "<a href=\"#{url}\">#{url}</a>" %></li>
+    <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
 <br/>
@@ -39,7 +39,7 @@ if @user.email_html %>
 
 <%= fields.tp.html_to_ascii %>
 
-<%= handy_links.tp.html_to_ascii %>
+<%= handy_links.tp.html_to_ascii.html_safe %>
 
 <%= result = ''
   for label, url in links

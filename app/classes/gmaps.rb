@@ -45,7 +45,7 @@
 module GM
   GMAPS_API_URL = 'https://maps.googleapis.com/maps/api/js'
   GMAPS_CONFIG_FILE = 'config/gmaps_api_key.yml'
-  GMAPS_API_KEYS = YAML.load_file(RAILS_ROOT + '/' + GMAPS_CONFIG_FILE)
+  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + '/' + GMAPS_CONFIG_FILE)
 
   class GMap
 
@@ -57,7 +57,7 @@ module GM
 
     def self.header(args)
       url = GMAPS_API_URL
-      key = GMAPS_API_KEYS[RAILS_ENV][args[:host]]
+      key = GMAPS_API_KEYS[::Rails.env][args[:host]]
       "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'></script>
       <script type='text/javascript'>
         var G = google.maps;

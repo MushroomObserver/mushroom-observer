@@ -1591,7 +1591,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def ignore_test_edit_observation_with_non_image
     obs = observations(:minimal_unknown)
-    file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/projects.yml")
+    file = FilePlus.new("#{::Rails.root.to_s}/test/fixtures/projects.yml")
     file.content_type = 'text/plain'
     params = {
       :id => obs.id,
@@ -2387,7 +2387,7 @@ class ObserverControllerTest < FunctionalTestCase
     week_ago = 1.week.ago
 
     setup_image_dirs
-    file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
+    file = "#{::Rails.root.to_s}/test/fixtures/images/Coprinus_comatus.jpg"
     file1 = FilePlus.new(file)
     file1.content_type = 'image/jpeg'
     file2 = FilePlus.new(file)
@@ -2475,7 +2475,7 @@ class ObserverControllerTest < FunctionalTestCase
     login('rolf')
 
     setup_image_dirs
-    file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
+    file = "#{::Rails.root.to_s}/test/fixtures/images/Coprinus_comatus.jpg"
     file = FilePlus.new(file)
     file.content_type = 'image/jpeg'
 

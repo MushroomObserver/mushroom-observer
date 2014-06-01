@@ -177,7 +177,7 @@ module BrowserStatus
   def browser_status
 
     # Create bogus browser for testing purposes.
-    if RAILS_ENV == 'test'
+    if ::Rails.env == 'test'
       @session_working = TEST_SESSION_WORKING
       @cookies_enabled = TEST_COOKIES_ENABLED
       @js              = TEST_JS

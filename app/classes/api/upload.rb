@@ -25,7 +25,7 @@ class API
 
   class UploadFromURL < Upload
     def initialize(url)
-      @temp_file = "#{RAILS_ROOT}/tmp/api_upload.#{$$}"
+      @temp_file = "#{::Rails.root.to_s}/tmp/api_upload.#{$$}"
       uri = URI.parse(url)
       File.open(@temp_file, 'w:utf-8') do |fh|
         Net::HTTP.new(uri.host, uri.port).start do |http|

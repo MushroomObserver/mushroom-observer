@@ -64,7 +64,7 @@ class Geocoder < BlankSlate
   end
 
   def content_from_place_name(place_name)
-    if RAILS_ENV == 'test'
+    if ::Rails.env == 'test'
       content = test_place_name(place_name)
     else
       content = nil

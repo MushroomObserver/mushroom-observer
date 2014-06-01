@@ -706,7 +706,7 @@ class AbstractQuery < ActiveRecord::Base
     # Periodically clean out old queries.
     if !defined?(@@last_cleanup) or
        (@@last_cleanup < Time.now - 5.minutes)
-      if RAILS_ENV != 'test'
+      if ::Rails.env != 'test'
         self.cleanup
         @@last_cleanup = Time.now
       end

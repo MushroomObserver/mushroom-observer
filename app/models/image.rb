@@ -22,13 +22,13 @@
 #
 #  The actual image is stored in several files:
 #
-#    RAILS_ROOT/public/images/orig/<id>.<ext>  # (original file if not jpeg)
-#    RAILS_ROOT/public/images/orig/<id>.jpg
-#    RAILS_ROOT/public/images/1280/<id>.jpg
-#    RAILS_ROOT/public/images/960/<id>.jpg
-#    RAILS_ROOT/public/images/640/<id>.jpg
-#    RAILS_ROOT/public/images/320/<id>.jpg
-#    RAILS_ROOT/public/images/thumb/<id>.jpg
+#    ::Rails.root.to_s/public/images/orig/<id>.<ext>  # (original file if not jpeg)
+#    ::Rails.root.to_s/public/images/orig/<id>.jpg
+#    ::Rails.root.to_s/public/images/1280/<id>.jpg
+#    ::Rails.root.to_s/public/images/960/<id>.jpg
+#    ::Rails.root.to_s/public/images/640/<id>.jpg
+#    ::Rails.root.to_s/public/images/320/<id>.jpg
+#    ::Rails.root.to_s/public/images/thumb/<id>.jpg
 #
 #  They are also transferred to a remote image server with more disk space:
 #  (images take up 100 Gb as of Jan 2010)
@@ -70,7 +70,7 @@
 #  3. After the record is saved, it knows the ID so it can finally write out
 #     the original image:
 #
-#       RAILS_ROOT/public/images/orig/<id>.<ext>
+#       ::Rails.root.to_s/public/images/orig/<id>.<ext>
 #
 #  4. Now it forks off a tiny shell script that takes care of the rest:
 #
@@ -78,7 +78,7 @@
 #
 #  5. First it fills in all the other size images with a place-holder:
 #
-#       cd RAILS_ROOT/public/images
+#       cd ::Rails.root.to_s/public/images
 #       cp place_holder_<size>.jpg <size>/$id.jpg
 #
 #  6. Next it resizes the original using ImageMagick:
@@ -622,7 +622,7 @@ class Image < AbstractModel
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
   def set_image_size(file=full_size_image)
-    script = "#{RAILS_ROOT}/script/jpegsize"
+    script = "#{::Rails.root.to_s}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
       self.width  = w.to_i

@@ -286,7 +286,7 @@ class PostObservationTest < IntegrationTestCase
       'observation_alt' => ' 56 ft. ',
       'name_name' => ' Agaricus  campestris ',
       'vote_value' => Vote.next_best_vote,
-      'image_0_image' => JpegUpload.new("#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"),
+      'image_0_image' => JpegUpload.new("#{::Rails.root.to_s}/test/fixtures/images/Coprinus_comatus.jpg"),
       'image_0_when_1i' => '2010',
       'image_0_when_2i' => '3',
       'image_0_when_3i' => '14',

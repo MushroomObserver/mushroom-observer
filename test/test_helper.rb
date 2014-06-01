@@ -12,7 +12,7 @@
 
 ENV["RAILS_ENV"] = "test"
 require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
-require 'test_help'
+require 'rails/test_help'
 for file in Dir[File.expand_path('../*_extensions.rb', __FILE__)]
   require_dependency file
 end

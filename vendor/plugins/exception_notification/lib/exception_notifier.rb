@@ -61,7 +61,7 @@ class ExceptionNotifier < ActionMailer::Base
 
     def rails_root
       return @rails_root if @rails_root
-      @rails_root = Pathname.new(RAILS_ROOT).cleanpath.to_s
+      @rails_root = Pathname.new(::Rails.root.to_s).cleanpath.to_s
     end
 
 end

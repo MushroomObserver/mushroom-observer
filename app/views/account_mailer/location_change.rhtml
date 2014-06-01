@@ -63,7 +63,7 @@
   links.push([:email_links_show_object.l(:type => :location),
     "#{HTTP_DOMAIN}/location/show_location/#{@new_loc.id}"])
   links.push([:email_links_not_interested.l(:type => :location),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_loc.id}&type=Location&user=#{@user.id}&state=-1".html_safe])
   if email_type && email_type != 'interest'
     links.push([:email_links_stop_sending.l,
       "#{HTTP_DOMAIN}/account/no_email_locations_#{email_type}/#{@user.id}"]) unless watching
@@ -91,7 +91,7 @@ if @user.email_html %>
 <%= handy_links.tp %>
 <ul type=none>
   <% for label, url in links %>
-    <li><%= label %>: <%= "<a href=\"#{url}\">#{url}</a>" %></li>
+    <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
 <br/>
@@ -103,16 +103,18 @@ if @user.email_html %>
 
 <%= one_liners.tp.html_to_ascii if !one_liners.blank? %>
 <% for var, val in many_liners %>
+
 <%= "#{var} #{:email_field_is_now.l}:" %>
 --------------------------------------------------
 <%= val.tp.html_to_ascii %>
 --------------------------------------------------
 <% end %>
-<%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''
+<%= handy_links.tp.html_to_ascii.html_safe %>
+
+<%= result = ''.html_safe
   for label, url in links
-    result += "#{label}: #{url}\n"
+    result += label + ": " + url + "\n"
   end
   result %>
 <% end %>

@@ -938,7 +938,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_read_species_list_two
     spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
-    filename = "#{RAILS_ROOT}/test/fixtures/species_lists/foray_notes.txt"
+    filename = "#{::Rails.root.to_s}/test/fixtures/species_lists/foray_notes.txt"
     file = File.new(filename)
     list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
     file = FilePlus.new(filename)
@@ -993,7 +993,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     list.save # just in case
 
     get(:make_report, :id => list.id, :type => 'txt')
-    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    path = "#{::Rails.root.to_s}/test/fixtures/reports"
     assert_response_equal_file("#{path}/test.txt")
 
     get(:make_report, :id => list.id, :type => 'rtf')
@@ -1027,12 +1027,12 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_txt.l))
-    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    path = "#{::Rails.root.to_s}/test/fixtures/reports"
     assert_response_equal_file("#{path}/test2.txt")
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_rtf.l))
-    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    path = "#{::Rails.root.to_s}/test/fixtures/reports"
     assert_response_equal_file("#{path}/test2.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end

@@ -20,7 +20,7 @@ class LanguageExporterTest < ActiveSupport::TestCase
   end
 
   def test_yaml
-    temp_file = "#{RAILS_ROOT}/tmp/yaml_test"
+    temp_file = "#{::Rails.root.to_s}/tmp/yaml_test"
     # YAML::ENGINE.yamler = 'psych' # (fails)
     File.open(temp_file, 'w:utf-8') do |fh|
       fh.puts '---'

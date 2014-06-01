@@ -1,0 +1,17 @@
+From: webmaster@localhost
+To: webmaster@localhost
+Subject: [MO] User Creation Blocked
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+The request for account junk was denied since the theme was set to ''.
+
+Here are all the fields for the request user:
+
+login: junk
+password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f
+email: junk@collectivesource.com
+theme: 
+name: Junk Box

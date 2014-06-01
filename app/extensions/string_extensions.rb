@@ -387,11 +387,11 @@ class String
   end
 
   def tp(sanitize=true)
-    '<div class="textile">' + Textile.textilize(self, false, sanitize) + '</div>'
+    '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + '</div>'.html_safe
   end
 
   def tpl(sanitize=true)
-    '<div class="textile">' + Textile.textilize(self, true, sanitize) + '</div>'
+    '<div class="textile">'.html_safe + Textile.textilize(self, true, sanitize).html_safe + '</div>'.html_safe
   end
 
   def tp_nodiv(sanitize=true)

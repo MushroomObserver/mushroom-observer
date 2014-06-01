@@ -169,7 +169,7 @@ class AjaxController < ApplicationController
         file = "#{IMG_DIR}/place_holder_320.jpg"
       end
     end
-    file ="#{RAILS_ROOT}/test/fixtures/images/sticky.jpg" if TESTING
+    file ="#{::Rails.root.to_s}/test/fixtures/images/sticky.jpg" if TESTING
     send_file(file, :type => 'image/jpeg', :disposition => 'inline')
   end
 

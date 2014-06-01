@@ -143,7 +143,7 @@
                 <% if DEVELOPMENT || is_reviewer? %>
                   Layouts:<br/>
                   <% layouts = []
-                    for file in Dir.glob("#{RAILS_ROOT}/app/views/layouts/*.rhtml")
+                    for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.rhtml")
                       layouts << $1 if file.match(/(\w+)\.rhtml/)
                     end
                     for layout in layouts.sort

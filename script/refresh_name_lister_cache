@@ -9,7 +9,7 @@
 #    This is a nightly cronjob that updates the name_lister data cache.
 #    It just writes the file NAME_LISTER_CACHE_FILE:
 #
-#      RAILS_ROOT/public/javascripts/name_list_data.js
+#      ::Rails.root.to_s/public/javascripts/name_list_data.js
 #
 ################################################################################
 

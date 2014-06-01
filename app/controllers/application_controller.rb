@@ -103,6 +103,7 @@ class X
 end
 
 class ApplicationController < ActionController::Base
+  protect_from_forgery
   require 'extensions'
   require 'login_system'
   include LoginSystem
@@ -461,7 +462,7 @@ class ApplicationController < ActionController::Base
 
   # Get sorted list of locale codes (String's) that we have translations for.
   def all_locales
-    Dir.glob(RAILS_ROOT + '/config/locales/*.yml').sort.map do |file|
+    Dir.glob(::Rails.root.to_s + '/config/locales/*.yml').sort.map do |file|
       file.sub(/.*?(\w+-\w+).yml/, '\\1')
     end
   end

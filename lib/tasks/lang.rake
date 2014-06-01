@@ -4,7 +4,7 @@
 # to declare tasks before the MO environment has been loaded.
 def all_locales
   locales = []
-  for file in Dir.glob("#{RAILS_ROOT}/config/locales/*.yml")
+  for file in Dir.glob("#{::Rails.root.to_s}/config/locales/*.yml")
     if file.match(/(\w+-\w+).yml$/)
       locales << $1
     end

@@ -46,7 +46,7 @@
 #  sendmail::  We've never used this: uses <tt>/usr/sbin/sendmail</tt>.
 #  test::      Default for unit tests: ???
 #  file::      Default for development: writes emails as files in
-#                <tt>RAILS_ROOT/../mail</tt> (if this directory exists).
+#                <tt>::Rails.root.to_s/../mail</tt> (if this directory exists).
 #
 #  == Privacy policy
 #
@@ -132,6 +132,7 @@ class AccountMailer < ActionMailer::Base
     @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
+    @charset             = 'UTF-8'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL author_request " +
                           "from=#{sender.id} " +
@@ -671,7 +672,7 @@ private
 
   # Log exactly who is sending email at what times.
   # def log_email
-  #   File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a:utf-8') do |fh|
+  #   File.open("#{::Rails.root.to_s}/log/email-low-level.log", 'a:utf-8') do |fh|
   #     time = Time.now.strftime('%Y-%m-%d:%H:%M:%S')
   #
   #     begin

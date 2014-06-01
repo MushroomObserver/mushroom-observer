@@ -233,7 +233,7 @@ module ControllerExtensions
   # files that we can run the W3C validator on -- this has nothing to do with
   # debugging!  This happens automatically if following directory exists:
   #
-  #   RAILS_ROOT/../html
+  #   ::Rails.root.to_s/../html
   #
   # Files are created:
   #
@@ -271,9 +271,9 @@ module ControllerExtensions
     end
   end
 
-  # This writes @response.body to the given file (relative to <tt>RAILS_ROOT</tt>).
+  # This writes @response.body to the given file (relative to <tt>::Rails.root.to_s</tt>).
   def save_response(file='public/test.html')
-    File.open("#{RAILS_ROOT}/#{file}", 'w:utf-8') do |fh|
+    File.open("#{::Rails.root.to_s}/#{file}", 'w:utf-8') do |fh|
       fh.write(@response.body)
     end
   end

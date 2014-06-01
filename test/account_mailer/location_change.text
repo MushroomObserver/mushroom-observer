@@ -1,0 +1,31 @@
+From: news@localhost
+Reply-To: no-reply@localhost
+To: mary@collectivesource.com
+Subject: [MO] Albion, California, USA Has Been Changed
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+Location was Changed
+
+There were change(s) made to the location Albion, California, USA (1):
+
+Time: 2007-12-27 01:41:20 EST (-0500)
+By: Tricky Dick (dick)
+
+North edge changed to: 39.32
+South edge changed to: 39.21
+East edge changed to: -123.74
+West edge changed to: -123.82
+Notes changed to:
+--------------------------------------------------
+Here are some new notes to play with.
+--------------------------------------------------
+Here are some handy links:
+
+Show this location: http://localhost:3000/location/show_location/1
+I'm not interested in this location: http://localhost:3000/interest/set_interest?id=1&type=Location&user=2&state=-1
+Change your preferences: http://localhost:3000/account/prefs/2
+Latest changes at Mushroom Observer: http://localhost:3000
+

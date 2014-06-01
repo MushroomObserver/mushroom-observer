@@ -140,7 +140,7 @@ class Symbol
       end
       result = "[:#{self}#{args_str}]"
     end
-    return result
+    return result.html_safe
   end
 
   # Run +localize+ in test mode.
