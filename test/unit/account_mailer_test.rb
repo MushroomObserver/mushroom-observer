@@ -38,8 +38,7 @@ class AccountMailerTest < ActiveSupport::TestCase
       
       if text_files.any?
         user.email_html = false if user
-        e1 = block.call
-        email = e1.encoded
+        email = block.call.encoded
         assert_string_equal_file(email, *text_files)
       end
 
@@ -54,7 +53,7 @@ class AccountMailerTest < ActiveSupport::TestCase
 
 ################################################################################
 
-  def ignore_test_email_1
+  def test_email_1
     project = projects(:eol_project)
     run_mail_test('admin_request', rolf) do
       AccountMailer.create_admin_request(katrina, rolf, project,
@@ -65,12 +64,13 @@ class AccountMailerTest < ActiveSupport::TestCase
   def test_email_2
     obj = names(:coprinus_comatus)
     run_mail_test('author_request', rolf) do
+      print "test_email_2: #{obj.description}\n"
       AccountMailer.create_author_request(katrina, rolf, obj.description,
                         'Please do something or other', 'and this is why...')
     end
   end
 
-  def ignore_test_email_3
+  def test_email_3
     obs = observations(:minimal_unknown)
     comment = comments(:another_comment)
     run_mail_test('comment_response', rolf) do
@@ -78,7 +78,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_4
+  def test_email_4
     obs = observations(:minimal_unknown)
     comment = comments(:minimal_comment)
     run_mail_test('comment', mary) do
@@ -86,7 +86,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_5
+  def test_email_5
     image = images(:commercial_inquiry_image)
     run_mail_test('commercial_inquiry', image.user) do
       AccountMailer.create_commercial_inquiry(mary, image,
@@ -94,7 +94,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_6
+  def test_email_6
     obs = observations(:coprinus_comatus_obs)
     name1 = names(:agaricus_campestris)
     name2 = obs.name
@@ -109,19 +109,19 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_7
+  def test_email_7
     run_mail_test('denied') do
       AccountMailer.create_denied(junk)
     end
   end
 
-  def ignore_test_email_8
+  def test_email_8
     run_mail_test('email_features', rolf) do
       AccountMailer.create_email_features(rolf, 'A feature')
     end
   end
 
-  def ignore_test_email_9
+  def test_email_9
     loc = locations(:albion)
     desc = loc.description
     run_mail_test('location_change', mary) do
@@ -130,7 +130,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_10
+  def test_email_10
     name = names(:peltigera)
     desc = name.description
     run_mail_test('name_change', mary) do
@@ -139,7 +139,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_11
+  def test_email_11
     # Test for bug that occurred in the wild
     name = names(:peltigera)
     desc = name.description
@@ -149,7 +149,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_12
+  def test_email_12
     naming = namings(:coprinus_comatus_other_naming)
     obs = observations(:coprinus_comatus_obs)
     run_mail_test('name_proposal', rolf) do
@@ -157,7 +157,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_13
+  def test_email_13
     naming = namings(:agaricus_campestris_naming)
     notification = notifications(:agaricus_campestris_notification_with_note)
     run_mail_test('naming_for_observer', rolf) do
@@ -165,20 +165,20 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_14
+  def test_email_14
     naming = namings(:agaricus_campestris_naming)
     run_mail_test('naming_for_tracker', mary) do
       AccountMailer.create_naming_for_tracker(mary, naming)
     end
   end
 
-  def ignore_test_email_15
+  def test_email_15
     run_mail_test('new_password', rolf) do
       AccountMailer.create_new_password(rolf, 'A password')
     end
   end
 
-  def ignore_test_email_16
+  def test_email_16
     obs = observations(:coprinus_comatus_obs)
     name = obs.name
 
@@ -197,7 +197,7 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_17
+  def test_email_17
     obs = observations(:detailed_unknown)
     run_mail_test('observation_question', obs.user) do
       AccountMailer.create_observation_question(rolf, obs,
@@ -205,39 +205,39 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_18
+  def test_email_18
     name = names(:agaricus_campestris)
     run_mail_test('publish_name', rolf) do
       AccountMailer.create_publish_name(mary, rolf, name)
     end
   end
 
-  def ignore_test_email_19
+  def test_email_19
     run_mail_test('user_question', mary) do
       AccountMailer.create_user_question(rolf, mary,
         'Interesting idea', 'Shall we discuss it in email?')
     end
   end
 
-  def ignore_test_email_20
+  def test_email_20
     run_mail_test('verify', mary) do
       AccountMailer.create_verify(mary)
     end
   end
 
-  def ignore_test_email_21
+  def test_email_21
     run_mail_test('webmaster_question') do
       AccountMailer.create_webmaster_question(mary.email, 'A question')
     end
   end
 
-  def ignore_test_email_22
+  def test_email_22
     run_mail_test('email_registration') do
       AccountMailer.create_email_registration(nil, conference_registrations(:njw_at_msa))
     end
   end
 
-  def ignore_test_email_23
+  def test_email_23
     run_mail_test('update_registration') do
       reg = conference_registrations(:njw_at_msa)
       before = reg.describe
@@ -248,13 +248,13 @@ class AccountMailerTest < ActiveSupport::TestCase
     end
   end
 
-  def ignore_test_email_24
+  def test_email_24
     run_mail_test('verify_api_key', rolf) do
       AccountMailer.create_verify_api_key(rolf, dick, ApiKey.first)
     end
   end
 
-  def ignore_test_email_add_specimen_not_curator
+  def test_email_add_specimen_not_curator
     specimen = specimens(:interesting_unknown)
     run_mail_test('add_specimen_not_curator', rolf) do
       AccountMailer.create_add_specimen_not_curator(mary, rolf, specimen)

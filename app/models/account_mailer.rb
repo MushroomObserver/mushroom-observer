@@ -132,7 +132,6 @@ class AccountMailer < ActionMailer::Base
     @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
-    @charset             = 'UTF-8'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL author_request " +
                           "from=#{sender.id} " +

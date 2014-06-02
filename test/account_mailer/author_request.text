@@ -3,11 +3,15 @@ Reply-To: katrina@collectivesource.com
 To: rolf@collectivesource.com
 Subject: [MO] Please do something or other
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
 Author Request
 
-Katrina (katrina@collectivesource.com) asked the Mushroom Observer website to forward the following request to you regarding Coprinus comatus (O.F. Müll.) Pers. (2):
+Katrina (katrina@collectivesource.com) asked the Mushroom Observer websit=
+e to forward the following request to you regarding Coprinus comatus (O.F=
+. M=C3=BCll.) Pers. (2):
 
 and this is why...
 
@@ -15,9 +19,10 @@ and this is why...
 
 Here are some handy links:
 
-Make sender an author: http://localhost:3000/observer/review_authors/15?type=name_description&add=5
-Show user's profile: http://localhost:3000/observer/show_user/5
+Make sender an author: http://localhost:3000/observer/review_authors/15?t=
+ype=3Dname_description&amp;add=3D5
+Show user&#x27;s profile: http://localhost:3000/observer/show_user/5
 Latest changes at Mushroom Observer: http://localhost:3000
 
-If you feel this user is abusing this service please forward this entire email message to: webmaster@localhost
-
+If you feel this user is abusing this service please forward this entire =
+email message to: webmaster@localhost
