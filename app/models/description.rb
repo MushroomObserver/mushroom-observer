@@ -480,7 +480,9 @@ class Description < AbstractModel
   # If the Name has no author and they've made sufficient contributions, they
   # get promoted to author by default.  In all cases make sure the user is
   # added on as an editor.
-  def before_save
+  before_save :add_author
+  
+  def add_author
     if !@save_without_our_callbacks and
        (user = User.current)
       if authors.empty? && author_worthy?

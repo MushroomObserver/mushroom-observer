@@ -166,7 +166,7 @@ module LanguageExporter
     else
       temp_file = localization_file + '.' + Process.pid.to_s
       File.open(temp_file, 'w:utf-8') do |fh|
-        YAML::dump({lang => data}, fh)
+        fh << {lang => data}.to_yaml # Apparently Rails breaks YAML::dump
       end
       File.rename(temp_file, localization_file)
     end

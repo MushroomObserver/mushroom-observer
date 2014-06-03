@@ -205,7 +205,7 @@ class API
   class FileMissing < Error
     def initialize(file)
       super()
-      arge.merge(:file => file.to_s)
+      args.merge(:file => file.to_s)
     end
   end
 

@@ -468,7 +468,7 @@ class QueuedEmail < AbstractModel
   #   email.add_note(obs.notes)
   #
   #   # Save a data structure.
-  #   email.add_note(YAML::dump(obs.data))
+  #   email.add_note(obs.data.to_yaml)
   #
   #   # Save list of attributes that have changed.
   #   email.add_note(obs.changed.map(&:to_s).join(','))
