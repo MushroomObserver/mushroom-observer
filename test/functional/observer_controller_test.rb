@@ -2387,7 +2387,7 @@ class ObserverControllerTest < FunctionalTestCase
     week_ago = 1.week.ago
 
     setup_image_dirs
-    file = "#{::Rails.root.to_s}/test/fixtures/images/Coprinus_comatus.jpg"
+    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
     file1 = FilePlus.new(file)
     file1.content_type = 'image/jpeg'
     file2 = FilePlus.new(file)
@@ -2475,7 +2475,7 @@ class ObserverControllerTest < FunctionalTestCase
     login('rolf')
 
     setup_image_dirs
-    file = "#{::Rails.root.to_s}/test/fixtures/images/Coprinus_comatus.jpg"
+    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
     file = FilePlus.new(file)
     file.content_type = 'image/jpeg'
 

@@ -1753,9 +1753,8 @@ class NameTest < ActiveSupport::TestCase
     ]
     x = Name.connection.select_values %(
       SELECT sort_name FROM names WHERE id >= #{names.first.id} AND id <= #{names.last.id}
-      ORDER BY sort_name ASC
     )
-    assert_equal(names.map(&:sort_name), x)
+    assert_equal(names.map(&:sort_name).sort, x.sort)
   end
 
   def test_guess_rank

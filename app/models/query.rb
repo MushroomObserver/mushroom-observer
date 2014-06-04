@@ -209,7 +209,7 @@ class Query < AbstractQuery
     },
     :inside_observation => {
       :observation => Observation,
-      :outer       => Query,
+      :outer       => self, # Used to be Query, but that is now ambiguous
     },
     :of_children => {
       :name => Name,

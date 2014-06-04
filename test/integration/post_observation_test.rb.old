@@ -33,7 +33,7 @@
     katrina.evaluate_no_location
 
     observation_fields = katrina.fills_in_form(observation_fields, observation_form_location,
-      [['image_0_image', "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"]])
+      [['image_0_image', "#{RAILS_ROOT}/test/images/Coprinus_comatus.jpg"]])
     katrina.evaluate_new_location_observation
 
     katrina.fills_in_form(location_form_defaults)

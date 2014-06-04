@@ -105,7 +105,7 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_minimal_image
     setup_image_dirs
-    file = "#{::Rails.root.to_s}/test/fixtures/images/sticky.jpg"
+    file = "#{::Rails.root.to_s}/test/images/sticky.jpg"
     post_and_send_file(:images, file, 'image/jpeg',
       :api_key => api_keys(:rolfs_api_key).key
     )
@@ -126,7 +126,7 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_maximal_image
     setup_image_dirs
-    file = "#{::Rails.root.to_s}/test/fixtures/images/Coprinus_comatus.jpg"
+    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
     post_and_send_file(:images, file, 'image/jpeg',
       :api_key       => api_keys(:rolfs_api_key).key,
       :vote          => '3',

@@ -834,7 +834,7 @@ class AbstractQuery < ActiveRecord::Base
     reqs = parameter_declarations
 
     # Validate all expected parameters one at a time.
-    for arg, type in reqs
+    for arg, arg_type in reqs
       # Allow some parameters to be optional (not used yet).
       arg = arg.to_s
       question = !!arg.sub!(/\?$/,'')
@@ -848,10 +848,10 @@ class AbstractQuery < ActiveRecord::Base
 
       # Validate value if given.
       if !val.nil?
-        if type.is_a?(Array)
-          val = array_validate(arg, val, type.first)
+        if arg_type.is_a?(Array)
+          val = array_validate(arg, val, arg_type.first)
         else
-          val = scalar_validate(arg, val, type)
+          val = scalar_validate(arg, val, arg_type)
         end
       end
 
@@ -940,41 +940,41 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Validate an Array of values.
-  def array_validate(arg, val, type)
+  def array_validate(arg, val, arg_type)
     if val.is_a?(Array)
       val[0,MAX_ARRAY].map do |val2|
-        scalar_validate(arg, val2, type)
+        scalar_validate(arg, val2, arg_type)
       end
     elsif val.is_a?(API::Range)
-      [ scalar_validate(arg, val.begin, type),
-        scalar_validate(arg, val.end, type) ]
+      [ scalar_validate(arg, val.begin, arg_type),
+        scalar_validate(arg, val.end, arg_type) ]
     else
-      [scalar_validate(arg, val, type)]
+      [scalar_validate(arg, val, arg_type)]
     end
   end
 
   # Validate a single value.
-  def scalar_validate(arg, val, type)
+  def scalar_validate(arg, val, arg_type)
 
     # Scalar: Simple type-declaration.
-    if type.is_a?(Symbol)
-      send("validate_#{type}", arg, val)
-    elsif type.is_a?(Class) and
-          type.respond_to?(:descends_from_active_record?)
-      validate_id(arg, val, type)
+    if arg_type.is_a?(Symbol)
+      send("validate_#{arg_type}", arg, val)
+    elsif arg_type.is_a?(Class) and
+          arg_type.respond_to?(:descends_from_active_record?)
+      validate_id(arg, val, arg_type)
 
     # Hash: Type declaration with limit.
-    elsif type.is_a?(Hash)
-      if type.keys.length != 1
+    elsif arg_type.is_a?(Hash)
+      if arg_type.keys.length != 1
         raise("Invalid limit declaration for :#{arg} for #{model} :#{flavor} query! (wrong number of keys in hash)")
       end
-      type2 = type.keys.first
-      limit = type.values.first
+      arg_type2 = arg_type.keys.first
+      limit = arg_type.values.first
       if !limit.is_a?(Array)
         raise("Invalid limit declaration for :#{arg} for #{model} :#{flavor} query! (expected value to be an array of allowed values)")
       end
-      val2 = scalar_validate(arg, val, type2)
-      if (type2 == :string) and
+      val2 = scalar_validate(arg, val, arg_type2)
+      if (arg_type2 == :string) and
          limit.include?(val2.to_sym)
         val2 = val2.to_sym
       elsif !limit.include?(val2)
@@ -983,7 +983,7 @@ class AbstractQuery < ActiveRecord::Base
       val2
 
     else
-      raise("Invalid declaration of :#{arg} for #{model} :#{flavor} query! (invalid type: #{type.class.name})")
+      raise("Invalid declaration of :#{arg} for #{model} :#{flavor} query! (invalid type: #{arg_type.class.name})")
     end
   end
 

@@ -42,7 +42,7 @@ exit
 #   'notes=blah%20blah',
 #   'api_key=' + KEY,
 # ].join('&')
-# data = File.open('test/fixtures/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
+# data = File.open('test/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
 # head = {
 #   'Content-Type' => 'image/jpeg',
 #   'Content-Length' => data.length.to_s,

@@ -244,7 +244,7 @@ class QueryTest < ActiveSupport::TestCase
     assert_equal(7, Query.count)
   end
 
-  def ignore_test_cleanup
+  def test_cleanup
     # Due to the modified => updated_at change explicitly setting updated_at this way doesn't
     # work.  However, I don't really understand what this test does or if it's important, since
     # the time zone comment is definitely inaccurate. - NJW
@@ -252,8 +252,6 @@ class QueryTest < ActiveSupport::TestCase
     # This avoids any possible difference in time zone between mysql and you.
     # (This should be obsolete, but timezone handling is tested elsewhere.)
     now = DateTime.parse(Query.connection.select_value("SELECT NOW()").to_s)
-    print "SQL Now: #{now}\n"
-    print "Rails Now: #{Time.now}\n"
 
     s11 = Query.new(:access_count => 0, :updated_at => now - 1.minute)
     s12 = Query.new(:access_count => 0, :updated_at => now - 6.hour + 1.minute)
