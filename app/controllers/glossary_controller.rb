@@ -18,7 +18,7 @@ class GlossaryController < ApplicationController
   end
 
   def create_term # :norobots:
-    if request.method == :post
+    if request.method == "POST"
       term = Term.new(:user => @user, :name => params[:term][:name], :description => params[:term][:description])
       image_args = {
         :copyright_holder => params[:copyright_holder],
@@ -65,7 +65,7 @@ class GlossaryController < ApplicationController
   
   def edit_term # :norobots:
     # Expand to any MO user, but make them owned and editable only by that user or an admin
-    if request.method == :post
+    if request.method == "POST"
       term = Term.find(params[:id].to_s)
       term.attributes = params[:term]
       term.user = @user

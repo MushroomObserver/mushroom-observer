@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class AjaxControllerTest < FunctionalTestCase
 
@@ -48,18 +48,18 @@ class AjaxControllerTest < FunctionalTestCase
     assert_nil(User.current)
     assert_equal(:pt, I18n.locale)
     assert_equal({}, cookies)
-    assert_equal({'locale'=>'pt'}, session.data)
-    session.data.delete('locale')
+    assert_equal({'locale'=>'pt'}, session)
+    session.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,xx-xx;q=0.5"
     good_ajax_request(:test)
     assert_equal(:pt, I18n.locale)
-    session.data.delete('locale')
+    session.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,en;q=0.5"
     good_ajax_request(:test)
     assert_equal(:pt, I18n.locale)
-    session.data.delete('locale')
+    session.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "en-xx,en;q=0.5"
     good_ajax_request(:test)

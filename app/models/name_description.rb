@@ -268,9 +268,10 @@ class NameDescription < Description
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     begin
       self.classification = Name.validate_classification(parent.rank, self.classification)
     rescue => e

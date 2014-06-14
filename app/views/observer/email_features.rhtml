@@ -2,7 +2,7 @@
 
 <p>Sending to <%= @users.length %> users.</p>
 
-<% form_tag(:action => 'email_features') do %>
+<%= form_tag(:action => 'email_features') do %>
   <center><%= submit_tag("Send") %></center><br/>
 
   <label for="feature_email_content">Feature Email</label><br/>

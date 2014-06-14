@@ -1,6 +1,7 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class PublicationsControllerTest < FunctionalTestCase
+
   def test_should_get_index
     get :index
     assert_response :success

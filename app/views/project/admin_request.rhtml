@@ -1,6 +1,6 @@
 <% @title = :admin_request_title.t(:title => @project.title) %>
 
-<% form_tag(:action => 'admin_request', :id => @project.id,
+<%= form_tag(:action => 'admin_request', :id => @project.id,
             :params => query_params) do %>
   <br/><center><%= submit_tag :SEND.l %></center><br/>
 

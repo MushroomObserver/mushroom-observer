@@ -275,6 +275,7 @@ class Symbol
   alias l localize
 
   def t(*args); localize(*args).t(false); end
+  def ths(*args); localize(*args).t(false).html_safe; end
   def tl(*args); localize(*args).tl(false); end
   def tp(*args); localize(*args).tp(false); end
   def tpl(*args); localize(*args).tpl(false); end

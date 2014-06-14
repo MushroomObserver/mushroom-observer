@@ -1,16 +1,16 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class GlossaryControllerTest < FunctionalTestCase
   def test_show_term
     term = terms(:plane_term)
     get_with_dump(:show_term, :id => term.id)
-    assert_response('show_term')
+    assert_template(action: 'show_term')
   end
 
   def test_show_past_term
     conic = terms(:conic_term)
     get_with_dump(:show_past_term, :id => conic.id, :version => conic.version - 1)
-    assert_response('show_past_term')
+    assert_template(action: 'show_past_term', partial: "_term")
   end
 
   def test_show_past_term_no_version
@@ -21,7 +21,7 @@ class GlossaryControllerTest < FunctionalTestCase
 
   def test_index
     get_with_dump(:index)
-    assert_response('index')
+    assert_template(action: 'index')
   end
 
   def test_create_term
@@ -30,7 +30,7 @@ class GlossaryControllerTest < FunctionalTestCase
 
     login
     get_with_dump(:create_term)
-    assert_response('create_term')
+    assert_template(action: 'create_term')
   end
   
   def create_term_params
@@ -50,9 +50,11 @@ class GlossaryControllerTest < FunctionalTestCase
   end
   
   def test_create_term_post
+    print "test_create_term_post: #{Term.count}\n"
     user = login
     params = create_term_params
     post(:create_term, params)
+    print "test_create_term_post: #{Term.count}\n"
     term = Term.find(:all, :order => "created_at DESC")[0]
     assert_equal(params[:term][:name], term.name)
     assert_equal(params[:term][:description], term.description)
@@ -68,7 +70,7 @@ class GlossaryControllerTest < FunctionalTestCase
 
     login
     get_with_dump(:edit_term, :id => conic.id)
-    assert_response('edit_term')
+    assert_template(action: 'edit_term')
   end
   
   def test_edit_term_post
@@ -95,7 +97,7 @@ class GlossaryControllerTest < FunctionalTestCase
     new_count = term.versions.length
     assert_equal(1, new_count - old_count)
     get_with_dump(:show_past_term, :id => term.id, :version => term.version - 1)
-    assert_response('show_past_term')
+    assert_template(action: 'show_past_term', partial: "_term")
   end
 
 end

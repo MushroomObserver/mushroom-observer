@@ -116,6 +116,9 @@ module ApplicationHelper
     :"review_#{val}".l
   end
 
+
+  def safe_br; "<br/>".html_safe; end
+
   ##############################################################################
   #
   #  :section: Other Stuff
@@ -197,9 +200,8 @@ module ApplicationHelper
                       :id => obj.rss_log_id)
     end
 
-    html = html.join("<br/>\n")
-    html = '<span class="Date">' + html + '</span>'
-    html = '<p>' + html + '</p>'
+    html = html.join("<br/>\n").html_safe
+    html = content_tag(:p, html, class: "Date")
   end
 
   def herbarium_name_box(default_name="")
@@ -544,7 +546,7 @@ module ApplicationHelper
     type = obj.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = "#{:show_name_descriptions.t}: "
+    head = "#{:show_name_descriptions.t}: ".html_safe
     head += link_to(:show_name_create_description.t,
                     :controller => obj.show_controller,
                     :action => "create_#{type}_description",
@@ -556,7 +558,7 @@ module ApplicationHelper
     any = list.any?
     # list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.join("<br/>\n")
+    html = list.join("<br/>\n").html_safe
     html = colored_notes_box(odd_even, html)
     head + html
   end
@@ -573,7 +575,7 @@ module ApplicationHelper
                      :source => 'project', :params => query_params)
       indent + item
     end
-    head + colored_notes_box(odd_even, list.join("<br/>\n"))
+    head.html_safe + colored_notes_box(odd_even, list.join("<br/>\n").html_safe)
   end
 
   def edit_desc_link(desc)
@@ -610,12 +612,12 @@ module ApplicationHelper
   #
   def show_previous_version(obj)
     type = obj.type_tag
-    html = "#{:VERSION.t}: #{obj.version}"
+    html = "#{:VERSION.t}: #{obj.version}".html_safe
     latest_version = obj.versions.latest
     if (latest_version.merge_source_id rescue false)
       html += indent(1) + get_version_merge_link(obj, latest_version)
     end
-    html += "<br/>\n"
+    html += safe_br
     if previous_version = latest_version.previous
       html += link_to("#{:show_name_previous_version.t}: %d" % previous_version.version,
                       :action => "show_past_#{type}", :id => obj.id,
@@ -624,7 +626,7 @@ module ApplicationHelper
       if (previous_version.merge_source_id rescue false)
         html += indent(1) + get_version_merge_link(obj, previous_version)
       end
-      html += "<br/>\n"
+      html += safe_br
     end
     return html
   end
@@ -766,7 +768,7 @@ module ApplicationHelper
       editors = user_list(:"show_#{type}_editor", editors)
     end
 
-    return "<p>#{authors}<br/>#{editors}</p>"
+    return content_tag(:p, authors + safe_br + editors)
   end
 
   # From html_helper.rb
@@ -781,7 +783,7 @@ module ApplicationHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent(w=10)
-   "<span style='margin-left:#{w}px'>&nbsp;</span>"
+   "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
   end
 
   # Wrap an html object in '<span title="blah">' tag.  This has the effect of
@@ -864,7 +866,7 @@ module ApplicationHelper
   # Just pass in a list of objects (and make sure @layout is initialized).
   # It yields for each object, then renders the whole thing.
   #
-  #   <% make_matrix(@objects) do |obj %>
+  #   <%= make_matrix(@objects) do |obj %>
   #     <%= render(obj) %>
   #   <% end %>
   #
@@ -930,13 +932,11 @@ module ApplicationHelper
       'padding:10px',
       'border:1px dotted',
     ].join(';')
-    msg = "<div class='#{klass}' style='#{style}'>
-      #{msg}
-    </div>"
+    result = content_tag(:div, msg, class: klass, style: style)
     if block_given?
-      concat(msg)
+      concat(result)
     else
-      msg
+      result
     end
   end
 
@@ -958,16 +958,12 @@ module ApplicationHelper
     type = "Warnings" if lvl == 1
     type = "Errors"   if lvl == 2
     msg = capture(&block) if block_given?
-    msg = "<div style='min-width:400px; max-width:800px'>
-      <table class='#{type}'><tr><td>
-        #{msg}
-      </td></tr></table>
-    </div>"
-    if block_given?
-      concat(msg)
-    else
-      msg
-    end
+    content_tag(:div,
+      content_tag(:table,
+        content_tag(:tr,
+          content_tag(:td, msg)),
+        class: type),
+      style: 'min-width:400px; max-width:800px')
   end
   
   # From javascript_helper.rb
@@ -1310,11 +1306,11 @@ module ApplicationHelper
   #
   def user_list(title, users)
     format_user_list(title, users.count, ': ',
-      users.map {|u| user_link(u, u.legal_name)}.join(', '))
+      users.map {|u| user_link(u, u.legal_name)}.join(', ').html_safe)
   end
   
   def format_user_list(title, user_count, separator, user_block)
-    result = ''
+    result = ''.html_safe
     if user_count > 0
       result = (user_count > 1 ? title.to_s.pluralize.to_sym.t : title.t) + separator + user_block
     end
@@ -1503,7 +1499,7 @@ module ApplicationHelper
     end
     result = image.license.copyright_text(image.year, link)
     if div
-      result = "<div id=\"copyright\"> #{result} </div>"
+      result = content_tag(:div, result, :id => "copytight")
     end
     result
   end
@@ -1593,7 +1589,7 @@ module ApplicationHelper
         link_to(:review_ok_for_export.t, :controller => 'observer',
                 :action => 'set_export_status', :type => obj.type_tag,
                 :id => obj.id, :value => '1', :params => query_params)
-      end + '<br/>' +
+      end + safe_br +
       if obj.ok_for_export
         link_to(:review_no_export.t, :controller => 'observer',
                 :action => 'set_export_status', :type => obj.type_tag,
@@ -1635,19 +1631,19 @@ module ApplicationHelper
   # From paginator_helper.rb
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
-  #   <% paginate_block(@pages) do %>
+  #   <%= paginate_block(@pages) do %>
   #     <% for object in @objects %>
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>
   #
   def paginate_block(pages, args={}, &block)
-    letters = pagination_letters(pages, args).to_s
-    numbers = pagination_numbers(pages, args).to_s
+    letters = pagination_letters(pages, args)
+    numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
-    str = letters + numbers + body + numbers + letters
-    str = '<div class="results">' + str + '</div>'
-    concat(str)
+    content_tag(:div, :class => 'results') do
+      letters + numbers + body + numbers + letters
+    end
   end
 
   # Insert letter pagination links.
@@ -1677,8 +1673,8 @@ module ApplicationHelper
         else
           letter
         end
-      end.join(' ')
-      return %(<div class="pagination">#{str}</div>)
+      end.join(' ').html_safe
+      return content_tag(:div, str, class: "pagination")
     else
       return ''
     end
@@ -1734,8 +1730,9 @@ module ApplicationHelper
       result << '|'                                      if this < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
       
-      result = %(<div class="pagination">#{result.join(' ')}</div>)
+      result = content_tag(:div, result.join(' ').html_safe, :class => "pagination")
     end
+    result
   end
 
   # Render a single pagination link for paginate_numbers above.
@@ -1906,18 +1903,19 @@ module ApplicationHelper
         else
           set.to_s
         end
-      end.join('')
+      end.join('').html_safe
     end
   end
-
+  
   # Render one tab set in upper left of page body.  (Only used by
   # +render_tab_sets+.)
   def render_tab_set(header, *links)
     header += ' ' if header
     content_tag(:div, :class => 'tab_set') do
-      header.to_s + links.map do |tab|
+      all_tabs = links.map do |tab|
         render_tab(*tab)
-      end.join(' | ') + '<br/>'
+      end
+      header.to_s.html_safe + all_tabs.join(' | ').html_safe + '<br/>'.html_safe
     end
   end
 
@@ -2013,6 +2011,10 @@ module ApplicationHelper
         )
       end
 
+      def interest_tab(img1, img2, img3)
+        content_tag(:div, img1 + "<br/".html_safe + img2 + img3)
+      end
+      
       case @user.interest_in(object)
       when :watching
         alt1 = :interest_watching.l(:object => type.l)
@@ -2023,10 +2025,6 @@ module ApplicationHelper
         img3 = interest_icon_small('ignore', alt3)
         img2 = interest_link(img2, object, 0)
         img3 = interest_link(img3, object, -1)
-        # img1 = add_context_help(img1, alt1)
-        # img2 = add_context_help(img2, alt2)
-        # img3 = add_context_help(img3, alt3)
-        add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
 
       when :ignoring
         alt1 = :interest_ignoring.l(:object => type.l)
@@ -2037,10 +2035,6 @@ module ApplicationHelper
         img3 = interest_icon_small('halfopen', alt3)
         img2 = interest_link(img2, object, 1)
         img3 = interest_link(img3, object, 0)
-        # img1 = add_context_help(img1, alt1)
-        # img2 = add_context_help(img2, alt2)
-        # img3 = add_context_help(img3, alt3)
-        add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
 
       else
         alt1 = :interest_watch_help.l(:object => type.l)
@@ -2049,10 +2043,9 @@ module ApplicationHelper
         img2 = interest_icon_small('ignore', alt2)
         img1 = interest_link(img1, object, 1)
         img2 = interest_link(img2, object, -1)
-        # img1 = add_context_help(img1, alt1)
-        # img2 = add_context_help(img2, alt2)
-        add_right_tab("<div>#{img1} #{img2}</div>")
+        img3 = ''
       end
+      add_right_tab(interest_tab(img1, img2, img3))
     end
   end
 
@@ -2092,6 +2085,6 @@ def name_section_link(title, data, query)
     link_to(title,
             :controller => 'observer',
             :action => 'index_observation',
-            :params => query_params(query)) + "<br/>"
+            :params => query_params(query)) + safe_br
   end
 end

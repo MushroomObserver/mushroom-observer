@@ -7,7 +7,7 @@
   end
 %>
 
-<% form_tag(:action => 'create_species_list', :approved_where => @place_name) do %>
+<%= form_tag(:action => 'create_species_list', :approved_where => @place_name) do %>
   <% if !@new_names.blank?
     val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>
     <input id="approved_names" name="approved_names" type="hidden"

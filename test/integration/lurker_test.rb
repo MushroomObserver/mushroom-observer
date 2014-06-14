@@ -2,7 +2,7 @@
 
 # Test typical sessions of user who never creates an account or contributes.
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class LurkerTest < IntegrationTestCase
   def test_poke_around

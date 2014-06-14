@@ -7,7 +7,7 @@
   end
 %>
 
-<% form_tag(:action => 'approve_name', :id => @name.id) do %>
+<%= form_tag(:action => 'approve_name', :id => @name.id) do %>
   <br/><center><%= submit_tag :APPROVE.l %></center>
 
   <% if @approved_names %>

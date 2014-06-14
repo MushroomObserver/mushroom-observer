@@ -9,7 +9,7 @@
   end
 %>
 
-<% form_tag(:action => 'create_naming', :id => @observation.id,
+<%= form_tag(:action => 'create_naming', :id => @observation.id,
             :approved_name => @what, :params => query_params) do %>
   <br/><center><%= submit_tag :CREATE.l %></center>
 

@@ -45,9 +45,9 @@ class QueuedEmail::NameTracking < QueuedEmail
   def deliver_email
     # Make sure naming wasn't deleted since email was queued.
     if naming
-      result = AccountMailer.deliver_naming_for_tracker(user, naming)
+      result = AccountMailer.naming_for_tracker(user, naming).deliver
       if notification.note_template
-        result = AccountMailer.deliver_naming_for_observer(to_user, naming, notification)
+        result = AccountMailer.naming_for_observer(to_user, naming, notification).deliver
       end
     end
     return result

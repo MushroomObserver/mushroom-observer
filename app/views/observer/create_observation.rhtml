@@ -7,7 +7,7 @@
 <table width="1">
   <tr>
     <td>
-      <% form_tag({ :action => 'create_observation', :approved_name => @what,
+      <%= form_tag({ :action => 'create_observation', :approved_name => @what,
                   :approved_where => @place_name }, { :multipart => true }) do %>
         <br/><center><%= submit_tag :CREATE.l %></center><br/>
 

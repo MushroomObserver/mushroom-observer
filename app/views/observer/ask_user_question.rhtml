@@ -1,6 +1,6 @@
 <% @title = :ask_user_question_title.t(:user => @target.legal_name) %>
 
-<% form_tag(:action => 'ask_user_question', :id => @target.id,
+<%= form_tag(:action => 'ask_user_question', :id => @target.id,
             :params => query_params) do %>
   <br/><center><%= submit_tag :SEND.l %></center>
 

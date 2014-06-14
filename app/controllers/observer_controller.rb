@@ -298,7 +298,7 @@ class ObserverController < ApplicationController
 
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox # :nologin:
-    if request.method != :post
+    if request.method != "POST"
       @code = nil
     else
       @code = params[:code]
@@ -352,7 +352,7 @@ class ObserverController < ApplicationController
     if !is_in_admin_mode?
       flash_error(:permission_denied.t)
       redirect_to(:action => 'list_rss_logs')
-    elsif request.method == :post
+    elsif request.method == "POST"
       @val = params[:val].to_s.strip
       @val = 'X' if @val.blank?
       time = Time.now
@@ -518,7 +518,7 @@ class ObserverController < ApplicationController
   #   name/advanced_search
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
-    if request.method == :post
+    if request.method == "POST"
       model = params[:search][:type].to_s.camelize.constantize
 
       # Pass along all given search fields (remove angle-bracketed user name,
@@ -575,7 +575,7 @@ class ObserverController < ApplicationController
 
       # Modify the query on POST, test it out, and redirect or re-serve form.
       if !@first_time &&
-         (request.method == :post) and !is_robot?
+         (request.method == "POST") and !is_robot?
         params2 = refine_search_clone_params(query2, @query.params)
         @errors = refine_search_change_params(@fields, @values, params2)
 
@@ -910,7 +910,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   # Display observation and related namings, comments, votes, images, etc.
-  # This should be redirected_to, not rendered, due to large number of
+  # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:
   #   show_observation
   #   _show_observation
@@ -963,7 +963,7 @@ class ObserverController < ApplicationController
 
       if @user
         # This happens when user clicks on "Update Votes".
-        if request.method == :post
+        if request.method == "POST"
           if params[:vote]
             flashed = false
             for naming in @observation.namings
@@ -1045,7 +1045,7 @@ class ObserverController < ApplicationController
     clear_query_in_session
 
     # Create empty instances first time through.
-    if request.method != :post
+    if request.method != "POST"
       create_observation_get
     else
       create_observation_post(params)
@@ -1248,7 +1248,7 @@ class ObserverController < ApplicationController
                     :params => query_params)
 
       # Initialize form.
-      elsif request.method != :post
+      elsif request.method != "POST"
         @images      = []
         @good_images = @observation.images
         init_project_vars_for_edit(@observation)
@@ -1374,7 +1374,7 @@ class ObserverController < ApplicationController
       @confidence_menu = translate_menu(Vote.confidence_menu)
 
       # Create empty instances first time through.
-      if request.method != :post
+      if request.method != "POST"
         @naming      = Naming.new
         @vote        = Vote.new
         @what        = '' # can't be nil else rails tries to call @name.name
@@ -1473,7 +1473,7 @@ class ObserverController < ApplicationController
                   :params => query_params)
 
     # Initialize form.
-    elsif request.method != :post
+    elsif request.method != "POST"
       @what        = @naming.text_name
       @names       = nil
       @valid_names = nil
@@ -1664,11 +1664,11 @@ class ObserverController < ApplicationController
   def author_request # :norobots:
     pass_query_params
     @object = AbstractModel.find_object(params[:type], params[:id].to_s)
-    if request.method == :post
+    if request.method == "POST"
       subject = params[:email][:subject] rescue ''
       content = params[:email][:content] rescue ''
       for receiver in (@object.authors + UserGroup.reviewers.users).uniq
-        AccountMailer.deliver_author_request(@user, receiver, @object, subject, content)
+        AccountMailer.author_request(@user, receiver, @object, subject, content).deliver
       end
       flash_notice(:request_success.t)
       parent = @object.parent
@@ -1934,7 +1934,7 @@ class ObserverController < ApplicationController
   def change_user_bonuses # :root: :norobots:
     if @user2 = find_or_goto_index(User, params[:id].to_s)
       if is_in_admin_mode?
-        if request.method != :post
+        if request.method != "POST"
 
           # Reformat bonuses as string for editing, one entry per line.
           @val = ''
@@ -2056,7 +2056,7 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'list_rss_logs')
     else
       @users = User.all(:conditions => "email_general_feature=1 and verified is not null")
-      if request.method == :post
+      if request.method == "POST"
         for user in @users
           QueuedEmail::Feature.create_email(user, params[:feature_email][:content])
         end
@@ -2070,7 +2070,7 @@ class ObserverController < ApplicationController
     @email = params[:user][:email] if params[:user]
     @content = params[:question][:content] if params[:question]
     @email_error = false
-    if request.method != :post
+    if request.method != "POST"
       @email = @user.email if @user
     elsif @email.blank? or @email.index('@').nil?
       flash_error (:runtime_ask_webmaster_need_address.t)
@@ -2080,7 +2080,7 @@ class ObserverController < ApplicationController
     elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
     else
-      AccountMailer.deliver_webmaster_question(@email, @content)
+      AccountMailer.webmaster_question(@email, @content).deliver
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to(:action => "list_rss_logs")
     end
@@ -2089,10 +2089,10 @@ class ObserverController < ApplicationController
   def ask_user_question # :norobots:
     if @target = find_or_goto_index(User, params[:id].to_s) and
        email_question(@user) and
-       request.method == :post
+       request.method == "POST"
       subject = params[:email][:subject]
       content = params[:email][:content]
-      AccountMailer.deliver_user_question(@user, @target, subject, content)
+      AccountMailer.user_question(@user, @target, subject, content).deliver
       flash_notice(:runtime_ask_user_question_success.t)
       redirect_to(:action => 'show_user', :id => @target.id)
     end
@@ -2101,9 +2101,9 @@ class ObserverController < ApplicationController
   def ask_observation_question # :norobots:
     if @observation = find_or_goto_index(Observation, params[:id].to_s) and
        email_question(@observation) and
-       request.method == :post
+       request.method == "POST"
       question = params[:question][:content]
-      AccountMailer.deliver_observation_question(@user, @observation, question)
+      AccountMailer.observation_question(@user, @observation, question).deliver
       flash_notice(:runtime_ask_observation_question_success.t)
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params)
@@ -2113,9 +2113,9 @@ class ObserverController < ApplicationController
   def commercial_inquiry # :norobots:
     if @image = find_or_goto_index(Image, params[:id].to_s) and
        email_question(@image, :email_general_commercial) and
-       request.method == :post
+       request.method == "POST"
       commercial_inquiry = params[:commercial_inquiry][:content]
-      AccountMailer.deliver_commercial_inquiry(@user, @image, commercial_inquiry)
+      AccountMailer.commercial_inquiry(@user, @image, commercial_inquiry).deliver
       flash_notice(:runtime_commercial_inquiry_success.t)
       redirect_to(:controller => 'image', :action => 'show_image',
                   :id => @image.id, :params => query_params)
@@ -2144,7 +2144,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of selected RssLog's (based on current Query).
   def index_rss_log # :nologin: :norobots:
-    if request.method == :post
+    if request.method == "POST"
       types = RssLog.all_types.select {|type| params["show_#{type}"] == '1'}
       types = 'all' if types.length == RssLog.all_types.length
       types = 'none' if types.empty?
@@ -2832,7 +2832,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   def rewrite_url(obj, old_method, new_method)
-    url = request.request_uri
+    url = request.fullpath
     if url.match(/\?/)
       base = url.sub(/\?.*/, '')
       args = url.sub(/^[^?]*/, '')

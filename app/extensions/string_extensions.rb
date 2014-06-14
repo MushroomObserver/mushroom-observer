@@ -379,13 +379,14 @@ class String
   HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
 
   def t(sanitize=true)
-    Textile.textilize_without_paragraph(self, false, sanitize)
+    Textile.textilize_without_paragraph(self, false, sanitize).html_safe
   end
 
   def tl(sanitize=true)
-    Textile.textilize_without_paragraph(self, true, sanitize)
+    Textile.textilize_without_paragraph(self, true, sanitize).html_safe
   end
 
+  # TODO: Move somewhere that content_tag is defined
   def tp(sanitize=true)
     '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + '</div>'.html_safe
   end
@@ -487,12 +488,14 @@ class String
          gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
                                         # convert &xxx; and &#nnn; to ascii
   end
-
-
+  
+  def print_thing(thing)
+    print "#{self}: #{thing.class}: #{thing}\n"
+  end
   # Surround HTML string with a span that prevents long strings from being
   # broken.
   def nowrap
-    '<span style="white-space:nowrap">' + self + '</span>'
+    '<span style="white-space:nowrap">'.html_safe + self + '</span>'.html_safe
   end
 
   # Strip leading and trailing whitespace, and squeeze embedded whitespace.

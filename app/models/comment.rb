@@ -209,9 +209,10 @@ class Comment < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.user && !User.current
       errors.add(:user, :validate_comment_user_missing.t)
     end

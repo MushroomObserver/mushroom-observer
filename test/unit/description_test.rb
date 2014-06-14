@@ -63,7 +63,7 @@ class DescriptionTest < ActiveSupport::TestCase
       # Delete editors and author so we can test changes to old object that
       # is grandfathered in without any editors or authors.
       User.current = nil # (prevents AbstractModel from screwing up contributions)
-      obj.before_destroy
+      obj.update_users_and_parent
       obj.authors.clear
       obj.editors.clear
       msg = "#{model}: Just deleted authors and editors."

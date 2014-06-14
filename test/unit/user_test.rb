@@ -27,16 +27,16 @@ class UserTest < ActiveSupport::TestCase
 
     u.password = u.password_confirmation = "tiny"
     assert !u.save
-    assert u.errors.invalid?('password')
+    assert u.errors[:password].any?
 
     u.password = u.password_confirmation = "hugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehuge"
     assert !u.save
-    assert u.errors.invalid?('password')
+    assert u.errors[:password].any?
 
     # This is allowed now so that API can create users without a password chosen yet.
     # u.password = u.password_confirmation = ""
     # assert !u.save
-    # assert u.errors.invalid?('password')
+    # assert u.errors[:password].any?
 
     u.password = u.password_confirmation = "bobs_secure_password"
     assert u.save
@@ -53,15 +53,15 @@ class UserTest < ActiveSupport::TestCase
 
     u.login = "x"
     assert !u.save
-    assert u.errors.invalid?('login')
+    assert u.errors[:login].any?
 
     u.login = "hugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhug"
     assert !u.save
-    assert u.errors.invalid?('login')
+    assert u.errors[:login].any?
 
     u.login = ""
     assert !u.save
-    assert u.errors.invalid?('login')
+    assert u.errors[:login].any?
 
     u.login = "okbob"
     assert u.save

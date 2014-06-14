@@ -676,9 +676,10 @@ class Location < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.north || (self.north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end

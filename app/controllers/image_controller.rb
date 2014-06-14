@@ -309,7 +309,7 @@ class ImageController < ApplicationController
       if !check_permission!(@observation)
         redirect_to(:controller => 'observer', :action => 'show_observation',
                     :id => @observation.id, :params => query_params)
-      elsif request.method != :post
+      elsif request.method != "POST"
         @image = Image.new
         @image.license = @user.license
         @image.copyright_holder = @user.legal_name
@@ -380,7 +380,7 @@ class ImageController < ApplicationController
       if !check_permission!(@image)
         redirect_to(:action => 'show_image', :id => @image,
                     :params => query_params)
-      elsif request.method != :post
+      elsif request.method != "POST"
         init_project_vars_for_add_or_edit(@image)
       else
         @image.attributes = params[:image]
@@ -550,7 +550,7 @@ class ImageController < ApplicationController
   
   def look_for_image(method, params)
     result = nil
-    if (method == :post) or !params[:img_id].blank?
+    if (method == "POST") or !params[:img_id].blank?
       result = Image.safe_find(params[:img_id])
       flash_error(:runtime_image_reuse_invalid_id.t(:id => params[:img_id])) if !result
     end
@@ -599,7 +599,7 @@ class ImageController < ApplicationController
       done = true
 
     # User entered an image id by hand or clicked on an image.
-    elsif (request.method == :post) or
+    elsif (request.method == "POST") or
           !params[:img_id].blank?
       image = Image.safe_find(params[:img_id])
       if !image
@@ -666,7 +666,7 @@ class ImageController < ApplicationController
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s, :include => :images)
     if check_permission!(@object)
-      if request.method == :post and (images = params[:selected])
+      if request.method == "POST" and (images = params[:selected])
         images.each do |image_id, do_it|
           if do_it == 'yes'
             if image = Image.safe_find(image_id)
@@ -735,7 +735,7 @@ class ImageController < ApplicationController
   def license_updater # :norobots:
 
     # Process any changes.
-    if request.method == :post
+    if request.method == "POST"
       data = params[:updates]
       for row in data.values
         old_id = row[:old_id].to_i
@@ -796,7 +796,7 @@ class ImageController < ApplicationController
   #   @num_anonymous - number of existing anonymous votes
   #   @num_public    - number of existing puclic votes
   def bulk_vote_anonymity_updater
-    if request.method == :post
+    if request.method == "POST"
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
         ImageVote.connection.update %(

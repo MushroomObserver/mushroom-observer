@@ -506,7 +506,7 @@ class LocationController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
 
     # Render a blank form.
-    if request.method != :post
+    if request.method != "POST"
       user_name = Location.user_name(@user, @display_name)
       @dubious_where_reasons = Location.dubious_name?(user_name, true) if @display_name
       @location = Location.new
@@ -622,7 +622,7 @@ class LocationController < ApplicationController
     if @location = find_or_goto_index(Location, params[:id].to_s)
       @display_name = @location.display_name
       done = false
-      if request.method == :post
+      if request.method == "POST"
         @display_name = params[:location][:display_name].strip_squeeze rescue ''
 
         # First check if user changed the name to one that already exists.
@@ -651,7 +651,7 @@ class LocationController < ApplicationController
                                               :that => "##{merge.id}: " + merge.name,
                                               :this_url => "#{HTTP_DOMAIN}/location/show_location/#{@location.id}",
                                               :that_url => "#{HTTP_DOMAIN}/location/show_location/#{merge.id}")
-            AccountMailer.deliver_webmaster_question(@user.email, content)
+            AccountMailer.webmaster_question(@user.email, content).deliver
           end
 
         # Otherwise it is safe to change the name.
@@ -720,7 +720,7 @@ class LocationController < ApplicationController
     @licenses = License.current_names_and_ids
 
     # Render a blank form.
-    if request.method == :get
+    if request.method == "GET"
       @description = LocationDescription.new
       @description.location = @location
       initialize_description_source(@description)
@@ -774,7 +774,7 @@ class LocationController < ApplicationController
     if !check_description_edit_permission(@description, params[:description])
       # already redirected
 
-    elsif request.method == :post
+    elsif request.method == "POST"
       @description.attributes = params[:description]
 
       args = {}

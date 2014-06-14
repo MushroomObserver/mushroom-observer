@@ -8,7 +8,7 @@
   end
 %>
 
-<% form_tag(:action => 'edit_species_list', :id => @species_list.id,
+<%= form_tag(:action => 'edit_species_list', :id => @species_list.id,
             :approved_where => @place_name) do %>
   <% if !@new_names.blank?
     val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>

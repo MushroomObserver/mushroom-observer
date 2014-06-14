@@ -1,6 +1,6 @@
 <% @title = :signup_title.t %>
 
-<% form_tag(:action=> "signup") do %>
+<%= form_tag(:action=> "signup") do %>
   
   <label for="new_user_login"><%= :signup_login.t %>:</label><br/>
   <%= text_field "new_user", "login", :size => 30 %><br/><br/>

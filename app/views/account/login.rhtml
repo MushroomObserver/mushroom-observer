@@ -1,6 +1,6 @@
 <% @title = :login_please_login.t %>
 
-<% form_tag(:action => "login") do %>
+<%= form_tag(:action => "login") do %>
 
   <label for="user_login"><%= :login_user.t %>:</label><br/>
   <input type="text" name="user_login" id="user_login" size="30" value="<%= @login %>"/><br/><br/>

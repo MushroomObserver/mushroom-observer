@@ -14,7 +14,7 @@ class SupportController < ApplicationController
   def create_donation
     if is_in_admin_mode?
       @donation = Donation.new
-      if request.method == :post
+      if request.method == "POST"
         @donation.amount = params['donation']['amount']
         @donation.who = params['donation']['who']
         @donation.anonymous = params['donation']['anonymous']
@@ -34,7 +34,7 @@ class SupportController < ApplicationController
   
   def confirm
     @donation = Donation.new
-    if request.method == :post
+    if request.method == "POST"
       amount = params['donation']['amount']
       if amount == "other"
         amount = params['donation']['other_amount']
@@ -51,7 +51,7 @@ class SupportController < ApplicationController
   
   def review_donations
     if is_in_admin_mode?
-      if request.method == :post
+      if request.method == "POST"
         params[:reviewed].each { |x,y|
           d = Donation.find(x)
           d.reviewed = y

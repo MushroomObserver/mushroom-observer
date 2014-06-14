@@ -7,7 +7,7 @@
   end
 %>
 
-<% form_tag(:action => 'change_synonyms', :id => @name.id, :approved_names => @new_names,
+<%= form_tag(:action => 'change_synonyms', :id => @name.id, :approved_names => @new_names,
             :approved_synonyms => @synonym_name_ids) do %>
   <center><%= submit_tag :name_change_synonyms_submit.l %></center><br/>
 

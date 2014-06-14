@@ -5,8 +5,8 @@
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
-<% paginate_block(@pages) do %>
-  <% make_matrix(@objects, :width => '100%') do |image| %>
+<%= paginate_block(@pages) do %>
+  <%= make_matrix(@objects, :width => '100%') do |image| %>
     <%= render(:partial => 'image', :object => image) %>
   <% end %>
 <% end %>

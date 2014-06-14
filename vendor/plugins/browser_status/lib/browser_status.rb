@@ -382,7 +382,7 @@ module BrowserStatus
   #
   #   link_to("Next Page", reload_with_args(:page => 2))
   def reload_with_args(new_args)
-    add_args_to_url(request.request_uri, new_args)
+    add_args_to_url(request.fullpath.html_safe, new_args) # I think we're already screwed if fullpath isn't safe
   end
 
   # Take an arbitrary URL and change the parameters.  Returns new URL.  Should
@@ -393,6 +393,8 @@ module BrowserStatus
   #   url = url_for(:action => "blah", ...)
   #   new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)
   def add_args_to_url(url, new_args)
+    # "add_args_to_url.url".print_thing(url)
+    # "add_args_to_url.new_args".print_thing(new_args)
     new_args = new_args.clone
     args = {}
 
@@ -401,6 +403,7 @@ module BrowserStatus
 
     # Parse parameters off of current URL.
     addr, parms = url.split('?')
+    addr = addr.html_safe
     for arg in parms ? parms.split('&') : []
       var, val = arg.split('=')
       if var && var != ''
@@ -434,7 +437,7 @@ module BrowserStatus
     # Put it back together.
     return addr if args.keys == []
     return addr + '?' + args.keys.sort.map \
-        {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&')
+        {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&').html_safe
   end
 
   # Parse the user_agent string from apache.  This does not catch everything.

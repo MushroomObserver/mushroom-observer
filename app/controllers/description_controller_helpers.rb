@@ -75,7 +75,7 @@ module DescriptionControllerHelpers
                     :params => query_params)
 
       # POST method
-      elsif request.method == :post
+      elsif request.method == "POST"
         delete_after = (params[:delete] == '1')
         target = params[:target].to_s
         if target.match(/^parent_(\d+)$/)
@@ -294,7 +294,7 @@ module DescriptionControllerHelpers
         done = true
 
       # GET method.
-      elsif request.method != :post
+      elsif request.method != "POST"
         @data = nil
 
       # POST method.

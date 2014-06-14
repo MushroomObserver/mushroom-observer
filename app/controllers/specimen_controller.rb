@@ -90,7 +90,7 @@ class SpecimenController < ApplicationController
     @layout = calc_layout_params
     if @observation
       @herbarium_label = @observation.default_specimen_label
-      if request.method == :post
+      if request.method == "POST"
         if valid_specimen_params(params[:specimen])
           build_specimen(params[:specimen], @observation)
         end
@@ -192,7 +192,7 @@ class SpecimenController < ApplicationController
   def edit_specimen # :norobots:
     @specimen = Specimen.find(params[:id].to_s)
     if can_edit?(@specimen)
-      if (request.method == :post) and params[:specimen]
+      if (request.method == "POST") and params[:specimen]
         if ok_to_update(@specimen, params[:specimen])
           update_specimen(@specimen, params[:specimen])
         end

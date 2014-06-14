@@ -5,7 +5,7 @@
 %>
 
 <div class="HelpNote"><%= :advanced_search_caveat.tp %></div>
-<% form_tag(:action => 'advanced_search_form') do %>
+<%= form_tag(:action => 'advanced_search_form') do %>
   <br/><center><%= submit_tag :SEARCH.l %></center><br/>
 
   <label for="search_type"><%= :advanced_search_result_type.t %>:</label><br/>

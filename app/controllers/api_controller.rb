@@ -65,7 +65,7 @@ class ApiController < ApplicationController
 
     # Special exception to allow caller who creates new user to see that user's
     # new API keys.  Otherwise there is no way to get that info via the API. 
-    if request.method == :post and type == :user
+    if request.method == "POST" and type == :user
       @show_api_keys_for_new_user = true
     end
 

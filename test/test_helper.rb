@@ -13,8 +13,20 @@
 ENV["RAILS_ENV"] = "test"
 require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 require 'rails/test_help'
-for file in Dir[File.expand_path('../*_extensions.rb', __FILE__)]
-  require_dependency file
+for file in %w(
+  general_extensions
+  flash_extensions
+  controller_extensions
+  integration_extensions
+  session_extensions
+  session_form_extensions
+  unit_test_case
+  functional_test_case
+  integration_test_case
+  integration_session
+  language_extensions
+)
+  require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
 
 I18n.enforce_available_locales = true
@@ -287,5 +299,55 @@ class ActiveSupport::TestCase
   def template_match(str, template)
     # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
     (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
+  end
+end
+
+# Used to test image uploads.  The normal "live" params[:upload] is
+# essentially a file with a "content_type" field added to it.  This is
+# meant to take its place.
+class FilePlus < File
+  attr_accessor :content_type
+  def size
+    File.size(path)
+  end
+end
+
+# Create subclasses of StringIO that has a content_type member to replicate the
+# dynamic method addition that happens in Rails cgi.rb.
+class StringIOPlus < StringIO
+  attr_accessor :content_type
+end
+
+# Re-raise errors caught by the controller.
+class ApplicationController
+  def rescue_action(e)
+    raise e
+  end
+end
+
+require 'test/unit/ui/console/testrunner'
+
+# Apparently bugs in the new version of Test::Unit?  Probably because we're using
+# old version of rails...
+module Test
+  module Unit
+    module UI
+      module Console
+        class TestRunner
+          # When running in "show_detail_immediately" and "need_detail_faults"
+          # mode it totally screws up the assertion message. 
+          def output_fault_message(fault)
+            output_single(fault.message, fault_color(fault))
+          end
+
+          # It no longer prints dots for successful tests.
+          alias old_attach_to_mediator attach_to_mediator
+          def attach_to_mediator
+            old_attach_to_mediator
+            @mediator.add_listener(TestResult::FINISHED, &method(:test_finished))
+          end
+        end
+      end
+    end
   end
 end

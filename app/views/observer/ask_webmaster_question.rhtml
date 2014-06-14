@@ -2,7 +2,7 @@
 
 <%= :ask_webmaster_note.tp(:todo_list => "#{SVN_REPOSITORY}/trunk/TODO") %>
 
-<% form_tag(:action => 'ask_webmaster_question') do %>
+<%= form_tag(:action => 'ask_webmaster_question') do %>
   <br/><center><%= submit_tag :SEND.l %></center>
 
   <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label><br/>

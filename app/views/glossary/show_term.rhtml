@@ -29,7 +29,7 @@
             :params => query_params) %><br/>
 </p>
 
-<% make_matrix(@objects, :width => '100%') do |image| %>
+<%= make_matrix(@objects, :width => '100%') do |image| %>
   <%= thumbnail(image.id, :border => 1, :votes => true) %>
 <% end %>
 

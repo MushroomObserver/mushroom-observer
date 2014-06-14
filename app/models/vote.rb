@@ -210,7 +210,7 @@ class Vote < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
   # Find label of closest value in a given enumerated lists.
   def self.lookup_value(val, list) # :nodoc:
@@ -226,7 +226,8 @@ protected
     return last_pair[0]
   end
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.naming
       errors.add(:naming, :validate_vote_naming_missing.t)
     end

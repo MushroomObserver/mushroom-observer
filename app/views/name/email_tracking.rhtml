@@ -9,7 +9,7 @@
 
 <%= :email_tracking_help.tp %>
 
-<% form_tag(:action => 'email_tracking', :id => @name.id) do %>
+<%= form_tag(:action => 'email_tracking', :id => @name.id) do %>
   <br/><center>
     <%= if @notification
       submit_tag(:UPDATE.t) + ' ' + submit_tag(:DISABLE.t)

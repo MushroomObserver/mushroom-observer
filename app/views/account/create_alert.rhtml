@@ -1,6 +1,6 @@
 <% @title = :user_alert_create_title.t(:user => @user2.legal_name) %>
 
-<% form_tag(:action => "create_alert", :id => @user2.id) do %>
+<%= form_tag(:action => "create_alert", :id => @user2.id) do %>
 
   <% if @user2.alert_created_at %>
     <label for="user2_created_at"><%= :user_alert_created_at.t %>:</label>

@@ -18,7 +18,7 @@
 			<p>
 				<%= curator_table(:herbarium_curator.t, @herbarium, @herbarium.can_delete_curator?(@user)) %>
 			  <% if @herbarium.is_curator?(@user) %>
-					<% form_tag(:action => 'show_herbarium', :id => @herbarium) do %>
+					<%= form_tag(:action => 'show_herbarium', :id => @herbarium) do %>
 						<%= text_field('curator', 'name', :size => 50) %>
 						<label for="curator_name"><%= submit_tag :show_herbarium_add_curator.t %></label>
 					  <%= turn_into_user_auto_completer("curator_name") %>

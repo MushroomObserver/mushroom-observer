@@ -2,7 +2,7 @@
   flash_error(@error) if @error and (!@targets or @targets.empty?)
 %>
 
-<% paginate_block(@pages) do %>
+<%= paginate_block(@pages) do %>
   <% if @targets.length > 0 %>
     <table cellpadding="5" cellspacing="0" width="100%">
       <% odd_or_even = 0

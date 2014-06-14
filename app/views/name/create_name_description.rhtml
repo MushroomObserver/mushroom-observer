@@ -8,7 +8,7 @@
   end
 %>
 
-<% form_for(:description, :url => {
+<%= form_for(:description, :url => {
                :action => :create_name_description,
                :id => @description.name_id,
                :params => query_params,

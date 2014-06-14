@@ -5,7 +5,7 @@
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
-<% paginate_block(@pages) do %>
+<%= paginate_block(@pages) do %>
   <table cellpadding="5" cellspacing="0" width="100%">
     <% odd_or_even = 0
     for species_list in @objects

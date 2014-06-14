@@ -1,11 +1,11 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class HerbariumControllerTest < FunctionalTestCase
   def test_show_herbarium
     nybg = herbaria(:nybg)
     assert(nybg)
     get_with_dump(:show_herbarium, :id => nybg.id)
-    assert_response('show_herbarium')
+    assert_template(action: 'show_herbarium')
   end
 
   def show_herbarium_params
@@ -29,7 +29,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def test_index
     get_with_dump(:index)
-    assert_response('index')
+    assert_template(action: 'index')
   end
   
   def test_create_herbarium
@@ -38,7 +38,7 @@ class HerbariumControllerTest < FunctionalTestCase
 
     login('rolf')
     get_with_dump(:create_herbarium)
-    assert_response('create_herbarium')
+    assert_template(action: 'create_herbarium')
   end
   
   def create_herbarium_params
@@ -130,11 +130,11 @@ class HerbariumControllerTest < FunctionalTestCase
 
     login('rolf')
     get_with_dump(:edit_herbarium, :id => nybg.id)
-    assert_response('edit_herbarium')
+    assert_template(action: 'edit_herbarium')
 
     make_admin('mary') # Non-curator but an admin
     get_with_dump(:edit_herbarium, :id => nybg.id)
-    assert_response('edit_herbarium')
+    assert_template(action: 'edit_herbarium')
   end
   
   def test_edit_herbarium_post

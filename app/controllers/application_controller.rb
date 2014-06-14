@@ -225,9 +225,9 @@ class ApplicationController < ActionController::Base
   # when you click on these embedded links.
   #
   def fix_bad_domains
-    if (request.method == :get) and
+    if (request.method == "GET") and
        BAD_DOMAINS.include?(request.env['HTTP_HOST'])
-      redirect_to("#{HTTP_DOMAIN}#{request.request_uri}")
+      redirect_to("#{HTTP_DOMAIN}#{request.fullpath}")
     end
   end
 
@@ -636,7 +636,7 @@ class ApplicationController < ActionController::Base
 
   # Get a copy of the errors.  Return as String.
   def flash_get_notices
-    session[:notice].to_s[1..-1]
+    session[:notice].to_s[1..-1].html_safe
   end
   helper_method :flash_get_notices
 
@@ -902,12 +902,12 @@ class ApplicationController < ActionController::Base
       for arg in changed_args
         xargs[arg] = name.send(arg)
       end
-      xargs[:method] = :post
+      xargs[:method] = "POST"
     else
       for arg in changed_args
         xargs[:"set_#{arg}"] = name.send(arg)
       end
-      xargs[:method] = :put
+      xargs[:method] = "PUT"
     end
 
     # Save any changes.
@@ -1261,7 +1261,7 @@ class ApplicationController < ActionController::Base
                                        :name => name.display_name)
       when :pattern_search
         :runtime_no_matches_pattern.t(:type => type,
-                                      :value => query.params[:pattern].to_s)
+                                      :value => query.params[:pattern].to_s).html_safe
       when :regexp_search
         :runtime_no_matches_regexp.t(:type => type,
                                      :value => query.params[:regexp].to_s)
@@ -1488,7 +1488,7 @@ class ApplicationController < ActionController::Base
     end
     uid = session[:user_id].to_i
     logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
-        [pd, pc, sd, sc, $$, uid, request.request_uri]
+        [pd, pc, sd, sc, $$, uid, request.fullpath]
   end
 
   ################################################################################

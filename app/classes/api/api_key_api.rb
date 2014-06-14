@@ -14,7 +14,7 @@ class API
     ]
 
     def query_params
-      raise NoMethodForAction.new(:get, :api_keys)
+      raise NoMethodForAction.new("GET", :api_keys)
       # {
       #   :created_at   => parse_time_ranges(:created_at),
       #   :verified     => parse_time_ranges(:verified),
@@ -40,7 +40,7 @@ class API
 
     def after_create(api_key)
       if @for_user != @user
-        AccountMailer.deliver_verify_api_key(@for_user, @user, api_key)
+        AccountMailer.verify_api_key(@for_user, @user, api_key).deliver
       end
     end
 

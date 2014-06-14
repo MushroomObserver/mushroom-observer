@@ -7,7 +7,7 @@
 %>
 
 <p>
-<% form_tag({:action => 'edit_event', :id => @event}) do %>
+<%= form_tag({:action => 'edit_event', :id => @event}) do %>
   <p>
     <%= :conference_event_name.t %>: <%= text_field('event', 'name', :size => 150, :value => @event.name) %>
   </p>

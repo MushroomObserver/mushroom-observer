@@ -74,11 +74,11 @@ class API
     end
 
     def put
-      raise NoMethodForAction(:put, action)
+      raise NoMethodForAction("PUT", action)
     end
 
     def delete
-      raise NoMethodForAction(:delete, action)
+      raise NoMethodForAction("DELETE", action)
     end
   end
 end

@@ -1,15 +1,15 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class ConferenceControllerTest < FunctionalTestCase
   def test_show_event
     msa = conference_events(:msa_annual_meeting)
     get_with_dump(:show_event, :id => msa.id)
-    assert_response('show_event')
+    assert_template(action: 'show_event')
   end
 
   def test_index
     get_with_dump(:index)
-    assert_response('index')
+    assert_template(action: 'index')
   end
   
   def test_create_event
@@ -18,7 +18,7 @@ class ConferenceControllerTest < FunctionalTestCase
 
     make_admin
     get_with_dump(:create_event)
-    assert_response('create_event')
+    assert_template(action: 'create_event')
   end
   
   def create_event_params
@@ -59,7 +59,7 @@ class ConferenceControllerTest < FunctionalTestCase
 
     make_admin
     get_with_dump(:edit_event, :id => msa.id)
-    assert_response('edit_event')
+    assert_template(action: 'edit_event')
   end
   
   def test_edit_event_post
@@ -82,7 +82,7 @@ class ConferenceControllerTest < FunctionalTestCase
   def test_register
     msa = conference_events(:msa_annual_meeting)
     get_with_dump(:register, :id => msa.id)
-    assert_response('register')
+    assert_template(action: 'register')
   end
 
   def create_registration_params
@@ -133,7 +133,7 @@ class ConferenceControllerTest < FunctionalTestCase
 
     make_admin
     get_with_dump(:list_registrations, :id => msa.id)
-    assert_response('list_registrations')
+    assert_template(action: 'list_registrations')
   end
   
   def test_verify

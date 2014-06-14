@@ -16,7 +16,7 @@
 #  == Instance methods
 #
 #  registration::           Get instance of ConferenceRegistration in question.
-#  deliver_email::  Deliver via AccountMailer#deliver_email_registration
+#  deliver_email::  Deliver via AccountMailer#update_registration.deliver
 #
 ################################################################################
 
@@ -34,6 +34,6 @@ class QueuedEmail::UpdateRegistration < QueuedEmail
   end
   
   def deliver_email
-    AccountMailer.deliver_update_registration(to_user, registration, before)
+    AccountMailer.update_registration(to_user, registration, before).deliver
   end
 end

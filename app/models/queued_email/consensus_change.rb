@@ -48,8 +48,8 @@ class QueuedEmail::ConsensusChange < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     if observation && old_name && new_name
-      AccountMailer.deliver_consensus_change(user, to_user, observation,
-                                             old_name, new_name, queued)
+      AccountMailer.consensus_change(user, to_user, observation,
+        old_name, new_name, queued).deliver
     end
   end
 end

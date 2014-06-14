@@ -95,38 +95,38 @@ class Pivotal
       @http ||= Net::HTTP.new(PIVOTAL_URL, 80)
       headers = { 'X-TrackerToken' => @@token }
       case method
-      when :get
+      when "GET"
         req = Net::HTTP::Get.new(PIVOTAL_PATH + path, headers)
-      when :put
+      when "PUT"
         req = Net::HTTP::Put.new(PIVOTAL_PATH + path, headers)
         req.content_length = data.length
         req.content_type = "application/xml"
         req.body = data.to_s
-      when :post
+      when "POST"
         req = Net::HTTP::Post.new(PIVOTAL_PATH + path, headers)
         req.content_length = data.length
         req.content_type = "application/xml"
         req.body = data.to_s
-      when :delete
+      when "DELETE"
         req = Net::HTTP::Delete.new(PIVOTAL_PATH + path, headers)
       end
       return @http.request(req).body
     end
 
     def get_request(path)
-      do_request(:get, path)
+      do_request("GET", path)
     end
 
     def put_request(path, data)
-      do_request(:put, path, data)
+      do_request("PUT", path, data)
     end
 
     def post_request(path, data)
-      do_request(:post, path, data)
+      do_request("POST", path, data)
     end
 
     def delete_request(path)
-      do_request(:delete, path)
+      do_request("DELETE", path)
     end
 
     def delete_cache(filename)

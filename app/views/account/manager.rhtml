@@ -1,6 +1,6 @@
 <% @title = :account_manager_title.t %>
 
-<% form_tag(:action => "manager") do %>
+<%= form_tag(:action => "manager") do %>
   <label for="ids"><%= :account_manager_ids.t %></label>
     <%= text_field_tag('ids', @users.map(&:id).map(&:to_s).join(', '), :size => 40) %><br/>
   <label for="login"><%= :account_manager_login.t %></label>

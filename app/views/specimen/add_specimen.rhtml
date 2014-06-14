@@ -11,7 +11,7 @@
 <table>
   <tr>
     <td>
-      <% form_tag(:action => 'add_specimen', :id => @observation.id) do %>
+      <%= form_tag(:action => 'add_specimen', :id => @observation.id) do %>
         <%= hidden_field_tag('id', @observation.id) %>
       	<center><%= submit_tag :add_specimen_add.t %><br/></center>
 

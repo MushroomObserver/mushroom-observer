@@ -4,7 +4,7 @@
 #
 #  == Usage
 #
-#    api = API.execute(:method => :get, :action => :observation, :id => 12345)
+#    api = API.execute(:method => "GET", :action => :observation, :id => 12345)
 #    unless api.errors.any?
 #      render_results(api.results)
 #    else
@@ -15,20 +15,20 @@
 #  errors.  There are four basic types of request: 
 #
 #    # GET: Retrieve all jason's observations:
-#    api = API.execute(:method => :get, :action => :observation, :user => 'jason')
+#    api = API.execute(:method => "GET", :action => :observation, :user => 'jason')
 #    observations = api.results
 #
 #    # POST: Post new observation:
-#    api = API.execute(:method => :post, :action => :observation, :when => 1.month.ago, etc...)
+#    api = API.execute(:method => "POST", :action => :observation, :when => 1.month.ago, etc...)
 #    new_observation = api.results.first
 #
 #    # PUT: Set the notes in all your observations from 23 May 2012:
-#    api = API.execute(:method => :put, :action => :observation, :when => '2012-05-23',
+#    api = API.execute(:method => "PUT", :action => :observation, :when => '2012-05-23',
 #                      :set_notes => 'on rock')
 #    updated_observations = api.results
 #
 #    # DELETE: Destroy all your observations from May 2012:
-#    api = API.execute(:method => :delete, :action => :observation, :when => '2012-05')
+#    api = API.execute(:method => "DELETE", :action => :observation, :when => '2012-05')
 #    dead_observations = api.results
 #
 #  == Queries

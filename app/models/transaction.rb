@@ -22,7 +22,7 @@
 #  == Instance Methods
 #
 #  text_name::          Returns simple summary for debugging.
-#  method::             Return request method, e.g., :get.
+#  method::             Return request method, e.g., "GET".
 #  action::             Return action, e.g., 'observations'.
 #  args::               Return hash of arguments.
 #  execute::            Execute query, return API instance.

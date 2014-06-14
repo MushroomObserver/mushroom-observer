@@ -26,7 +26,7 @@
         <div class="SubTitle"><%= :list_place_names_known.t %>
           <%= :list_place_names_known_order.t if @default_orders %></div>
       <% end %>
-      <% paginate_block(@known_pages) do %>
+      <%= paginate_block(@known_pages) do %>
         <table cellpadding="5" cellspacing="0" width="100%">          
           <% odd_or_even = 0
           for location in @known_data
@@ -46,7 +46,7 @@
       <td>
         <div class="SubTitle"><%= :list_place_names_undef.t %>
           <%= :list_place_names_undef_order.t if @default_orders %></div>
-        <% paginate_block(@undef_pages) do %>
+        <%= paginate_block(@undef_pages) do %>
           <table cellpadding="5" cellspacing="0" width="100%">          
             <% odd_or_even = 0
             for loc, cnt in @undef_data

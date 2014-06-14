@@ -78,9 +78,9 @@ class License < AbstractModel
   
   def copyright_text(year, name)
     if self.form_name == 'publicdomain'
-      "#{:image_show_public_domain.t} #{name}"
+      "".html_safe + :image_show_public_domain.t + " " + name
     else
-      "#{:image_show_copyright.t} &copy; #{year} #{name}"
+      "".html_safe + "#{:image_show_copyright.t}" + " &copy;".html_safe + " #{year} " + name
     end
   end
 end

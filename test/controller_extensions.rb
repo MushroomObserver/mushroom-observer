@@ -68,7 +68,7 @@ module ControllerExtensions
   #   super
   # end
 
-  # Second "get" won't update request_uri, so we must reset the request.
+  # Second "get" won't update fullpath, so we must reset the request.
   def reget(*args)
     @request = @request.class.new
     get(*args)
@@ -179,7 +179,7 @@ module ControllerExtensions
   end
 
   # Helper used by the blah_requires_blah methods.
-  # method::        [Request method: :get or :post. -- Supplied automatically by all four "public" methods.]
+  # method::        [Request method: "GET" or "POST". -- Supplied automatically by all four "public" methods.]
   # page::          Name of action.
   # altpage::       [Name of page redirected to if user wrong. -- Only include in +requires_user+ and +post_requires_user+.]
   # params::        Hash of parameters for action.
@@ -435,15 +435,26 @@ module ControllerExtensions
     end
   end
 
+  def raise_params(opts)
+    if opts.member?(:params)
+      result = opts.clone
+      result.delete(:params)
+      result.merge(opts[:params])
+    else
+      opts
+    end
+  end
+  
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
   def assert_link_in_html(label, url_opts, msg=nil)
     clean_our_backtrace do
-      url = url_for(url_opts)
+      revised_opts = raise_params(url_opts)
+      url = url_for(revised_opts)
       found_it = false
       extract_links(:label => label) do |link|
         if link.url != url
-          assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, url2)) {false}
+          assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, link.url)) {false}
         else
           found_it = true
           break
@@ -506,7 +517,7 @@ module ControllerExtensions
   # heuristics if appropriate.  Check that the resulting redirection or
   # rendered template is correct.
   #
-  # method::        HTTP request method.  Defaults to :get.
+  # method::        HTTP request method.  Defaults to "GET".
   # action::        Action/page requested, e.g., :show_observation.
   # params::        Hash of parameters to pass in.  Defaults to {}.
   # user::          User name.  Defaults to 'rolf' (user #1, a reviewer).
@@ -520,7 +531,7 @@ module ControllerExtensions
   #   # POST the edit_name form: requires standard login; redirect to
   #   # show_name if it succeeds.
   #   assert_request(
-  #     :method        => :post,
+  #     :method        => "POST",
   #     :action        => 'edit_name',
   #     :params        => params,
   #     :require_login => :login,
@@ -619,11 +630,11 @@ module ControllerExtensions
             if arg.length == 1
               controller = @controller.controller_name
               msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
-              assert_equal(@response.redirected_to[:action].to_sym, arg[0].to_sym, msg)
+              assert_equal(@response.redirect_url[:action].to_sym, arg[0].to_sym, msg)
             else
-              controller = @response.redirected_to[:controller] || @controller.controller_name
+              controller = @response.redirect_url[:controller] || @controller.controller_name
               msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-              assert_equal([controller, @response.redirected_to[:action]], [arg[0].to_s, arg[1].to_s], msg)
+              assert_equal([controller, @response.redirect_url[:action]], [arg[0].to_s, arg[1].to_s], msg)
             end
           elsif arg.is_a?(Hash)
             url = @controller.url_for(arg).sub(/^http:..test.host./, '')
@@ -655,12 +666,12 @@ module ControllerExtensions
   end
 
   def assert_redirect_match(partial, response, controller, msg)
-    mismatches = find_mismatches(partial, response.redirected_to)
+    mismatches = find_mismatches(partial, response.redirect_url)
     if mismatches[:controller].to_s == controller.controller_name.to_s
       mismatches.delete(:controller)
     elsif mismatches.member?(:controller)
       print "assert_redirect_match: #{partial}\n"
-      print "assert_redirect_match: #{response.redirected_to}\n"
+      print "assert_redirect_match: #{response.redirect_url}\n"
     end
     assert_equal({}, mismatches, "Mismatched partial hash: #{mismatches}")
   end

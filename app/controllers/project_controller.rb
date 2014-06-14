@@ -148,7 +148,7 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def add_project # :norobots:
     pass_query_params
-    if request.method == :get
+    if request.method == "GET"
       @project = Project.new
     else
       title = params[:project][:title].to_s
@@ -221,7 +221,7 @@ class ProjectController < ApplicationController
       if !check_permission!(@project)
         redirect_to(:action => 'show_project', :id => @project.id,
                     :params => query_params)
-      elsif request.method == :post
+      elsif request.method == "POST"
         @title = params[:project][:title].to_s
         @summary = params[:project][:summary]
         xargs = {}
@@ -288,12 +288,12 @@ class ProjectController < ApplicationController
     sender = @user
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
-      if request.method == :post
+      if request.method == "POST"
         subject = params[:email][:subject]
         content = params[:email][:content]
         for receiver in @project.admin_group.users
-          AccountMailer.deliver_admin_request(sender, receiver, @project,
-                                              subject, content)
+          AccountMailer.admin_request(sender, receiver, @project,
+                                      subject, content).deliver
         end
         flash_notice(:admin_request_success.t(:title => @project.title))
         redirect_to(:action => 'show_project', :id => @project.id,
@@ -340,7 +340,7 @@ class ProjectController < ApplicationController
         flash_error(:change_member_status_denied.t)
         redirect_to(:action => 'show_project', :id => @project.id,
                     :params => query_params)
-      elsif request.method == :post
+      elsif request.method == "POST"
         user_group = @project.user_group
         admin_group = @project.admin_group
         admin = member = :remove

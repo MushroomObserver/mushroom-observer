@@ -897,7 +897,9 @@ protected
     write_attribute("auth_code", String.random(39))
   end
 
-  def validate # :nodoc:
+  validate :user_requirements
+  
+  def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
     elsif login.length < 3 or login.binary_length > 40
@@ -926,7 +928,8 @@ protected
     end
   end
 
-  def validate_on_create # :nodoc:
+  validate(:check_password, :on => :create)
+  def check_password # :nodoc:
     unless password.blank? 
       if password_confirmation.to_s.blank?
         errors.add(:password, :validate_user_password_confirmation_missing.t)

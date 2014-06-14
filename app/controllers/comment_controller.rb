@@ -192,7 +192,7 @@ class CommentController < ApplicationController
     @target = Comment.find_object(params[:type], params[:id].to_s)
     if !allowed_to_see!(@target)
       # redirected already
-    elsif request.method == :get
+    elsif request.method == "GET"
       @comment = Comment.new
       @comment.target = @target
     else
@@ -238,7 +238,7 @@ class CommentController < ApplicationController
         redirect_to(:controller => @target.show_controller,
                     :action => @target.show_action, :id => @target.id,
                     :params => query_params)
-      elsif request.method == :post
+      elsif request.method == "POST"
         @comment.attributes = params[:comment]
         xargs = {}
         xargs[:summary] = @comment.summary if @comment.summary_changed?

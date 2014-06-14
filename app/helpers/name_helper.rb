@@ -17,13 +17,14 @@ module NameHelper
   end
   
   def classification_section(classification, parents, first_child, children_query)
-    head = ""
+    head = "".html_safe
     lines = []
     if classification
       head = classification.tpl
     else
+      # TODO: Create test that covers this section
       for p in parents
-        lines.push(rank_as_string(p.rank) + ": " + link_to(p.display_name.t, :action => 'show_name',
+        lines.push(rank_as_string(p.rank).html_safe + ": " + link_to(p.display_name.t, :action => 'show_name',
                                                           :id => p.id, :params => query_params))
       end
     end
@@ -31,7 +32,7 @@ module NameHelper
       lines.push(link_to("#{:show_object.t(:type => first_child.rank.to_s)}", :action => 'index_name',
                       :params => query_params(children_query)))
     end
-    head + lines.join("<br/>\n")
+    head + lines.join("<br/>\n").html_safe
   end
 	
 end

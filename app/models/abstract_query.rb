@@ -618,7 +618,8 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Serialize params hash before saving it.
-  def before_save
+  before_save :store_params
+  def store_params
     # No need to reserialize if we never parsed it to start with.
     if @params
       self.params = params_write_hash(@params)

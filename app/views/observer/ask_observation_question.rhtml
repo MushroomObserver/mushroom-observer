@@ -1,6 +1,6 @@
 <% @title = :ask_observation_question_title.t(:name => @observation.unique_format_name) %>
 
-<% form_tag(:action => 'ask_observation_question', :id => @observation.id,
+<%= form_tag(:action => 'ask_observation_question', :id => @observation.id,
             :params => query_params) do %>
   <br/><center><%= submit_tag :SEND.l %></center><br/>
 

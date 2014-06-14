@@ -32,6 +32,6 @@ class QueuedEmail::Publish < QueuedEmail
   end
   
   def deliver_email
-    AccountMailer.deliver_publish_name(user, to_user, name)
+    AccountMailer.publish_name(user, to_user, name).deliver
   end
 end

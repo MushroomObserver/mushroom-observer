@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class LocationControllerTest < FunctionalTestCase
 
@@ -51,7 +51,7 @@ class LocationControllerTest < FunctionalTestCase
     desc_count = LocationDescription.count
     past_desc_count = LocationDescription::Version.count
     post_requires_login(page, params)
-    assert_response(page.to_s)
+    assert_template(action: page.to_s, partial: true)
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -75,7 +75,7 @@ class LocationControllerTest < FunctionalTestCase
     updated_at = location.updated_at
     log_updated_at = location.rss_log.updated_at
     get_with_dump(:show_location, :id => location.id)
-    assert_response('show_location')
+    assert_template(action: 'show_location', partial: true)
     location.reload
     assert_equal(updated_at, location.updated_at)
     assert_equal(log_updated_at, location.rss_log.updated_at)
@@ -84,7 +84,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_show_past_location
     location = locations(:albion)
     get_with_dump(:show_past_location, :id => location.id, :version => location.version - 1)
-    assert_response('show_past_location')
+    assert_template(action: 'show_past_location', partial: true)
   end
 
   def test_show_past_location_no_version
@@ -95,52 +95,52 @@ class LocationControllerTest < FunctionalTestCase
 
   def test_list_locations
     get_with_dump(:list_locations)
-    assert_response('list_locations')
+    assert_template(action: 'list_locations')
   end
 
   def test_list_countries
     get_with_dump(:list_countries)
-    assert_response('list_countries')
+    assert_template(action: 'list_countries')
   end
 
   def test_list_by_country
     get_with_dump(:list_by_country, :country => 'USA')
-    assert_response('list_locations')
+    assert_template(action: 'list_locations')
   end
 
   def test_locations_by_user
     get_with_dump(:locations_by_user, :id => 1)
-    assert_response('list_locations')
+    assert_template(action: 'list_locations')
   end
 
   def test_locations_by_editor
     get_with_dump(:locations_by_editor, :id => 1)
-    assert_response('list_locations')
+    assert_template(action: 'list_locations')
   end
 
   def test_list_location_descriptions
     login('mary')
     Location.find(2).description = LocationDescription.create!(:location_id => 2)
     get_with_dump(:list_location_descriptions)
-    assert_response('list_location_descriptions')
+    assert_template(action: 'list_location_descriptions')
   end
 
   def test_location_descriptions_by_author
     descs = LocationDescription.all
     assert_equal(1, descs.length)
     get_with_dump(:location_descriptions_by_author, :id => 1)
-    assert_response(:action => 'show_location_description', :id => descs.first.id)
+    assert_template(:action => 'show_location_description', :id => descs.first.id)
   end
 
   def test_location_descriptions_by_editor
     get_with_dump(:location_descriptions_by_editor, :id => 1)
-    assert_response('list_location_descriptions')
+    assert_template(action: 'list_location_descriptions')
   end
 
   def test_show_location_description
     desc = location_descriptions(:albion_desc)
     get_with_dump(:show_location_description, :id => desc.id)
-    assert_response('show_location_description')
+    assert_template(action: 'show_location_description', partial: true)
   end
 
   def test_show_past_location_description
@@ -152,7 +152,7 @@ class LocationControllerTest < FunctionalTestCase
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
     get_with_dump(:show_past_location_description, :id => desc.id)
-    assert_response('show_past_location_description')
+    assert_template(action: 'show_past_location_description')
   end
 
   def test_create_location_description
@@ -198,7 +198,7 @@ class LocationControllerTest < FunctionalTestCase
     params = barton_flats_params
     display_name = params[:display_name]
     post_requires_login(:create_location, params)
-    assert_response(:action => :show_location)
+    assert_template(action: :show_location)
     assert_equal(count + 1, Location.count)
     assert_equal(10 + @new_pts, rolf.reload.contribution)
     loc = assigns(:location)
@@ -300,7 +300,7 @@ class LocationControllerTest < FunctionalTestCase
     params[:location][:display_name] = Location.user_name(rolf, params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
-    assert_response(:action => :show_location)
+    assert_template(action: :show_location)
     assert_equal(contrib, rolf.reload.contribution)
 
     # Should have created a new version of location only.
@@ -399,7 +399,7 @@ class LocationControllerTest < FunctionalTestCase
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
     post_requires_login(:edit_location, params)
-    assert_response(:action => :show_location)
+    assert_template(action: :show_location)
     assert_equal(loc_count-1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
     assert_equal(past_loc_count-1, Location::Version.count)
@@ -422,7 +422,7 @@ class LocationControllerTest < FunctionalTestCase
 
     make_admin('rolf')
     post_with_dump(:edit_location, params)
-    assert_response(:action => "show_location")
+    assert_template(action: "show_location")
 
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -465,7 +465,7 @@ class LocationControllerTest < FunctionalTestCase
       :location => albion.id
     }
     requires_login(:add_to_location, params)
-    assert_response(:action => :list_locations)
+    assert_template(action: :list_locations)
     assert_not_nil(obs.reload.location)
     assert_equal(albion, obs.location)
   end
@@ -485,7 +485,7 @@ class LocationControllerTest < FunctionalTestCase
       :location => albion.id
     }
     requires_login(:add_to_location, params, 'roy')
-    assert_response(:action => :list_locations)
+    assert_template(action: :list_locations)
     assert_not_nil(obs.reload.location)
     assert_equal(albion, obs.location)
   end
@@ -493,15 +493,15 @@ class LocationControllerTest < FunctionalTestCase
   def test_map_locations
     # test_map_locations - map everything
     get_with_dump(:map_locations)
-    assert_response('map_locations')
+    assert_template(action: 'map_locations')
 
     # test_map_locations_empty - map nothing
     get_with_dump(:map_locations, :pattern => 'Never Never Land')
-    assert_response('map_locations')
+    assert_template(action: 'map_locations')
 
     # test_map_locations_some - map something
     get_with_dump(:map_locations, :pattern => 'California')
-    assert_response('map_locations')
+    assert_template(action: 'map_locations')
   end
 
   def test_interest_in_show_location
@@ -509,7 +509,7 @@ class LocationControllerTest < FunctionalTestCase
     albion = locations(:albion)
     login('rolf')
     get(:show_location, :id => albion.id)
-    assert_response('show_location')
+    assert_template(action: 'show_location', partial: true)
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 1
@@ -522,7 +522,7 @@ class LocationControllerTest < FunctionalTestCase
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(:target => albion, :user => rolf, :state => true).save
     get(:show_location, :id => albion.id)
-    assert_response('show_location')
+    assert_template(action: 'show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 0
@@ -536,7 +536,7 @@ class LocationControllerTest < FunctionalTestCase
     Interest.find_all_by_user_id(rolf.id).last.destroy
     Interest.new(:target => albion, :user => rolf, :state => false).save
     get(:show_location, :id => albion.id)
-    assert_response('show_location')
+    assert_template(action: 'show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 0

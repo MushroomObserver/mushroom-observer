@@ -481,7 +481,6 @@ class Description < AbstractModel
   # get promoted to author by default.  In all cases make sure the user is
   # added on as an editor.
   before_save :add_author_or_editor
-  
   def add_author_or_editor
     if !@save_without_our_callbacks and
        (user = User.current)
@@ -495,7 +494,8 @@ class Description < AbstractModel
 
   # When destroying an object, subtract contributions due to
   # authorship/editorship.
-  def before_destroy
+  before_destroy :update_users_and_parent
+  def update_users_and_parent
 
     # Update editors' and authors' contributions.
     for user in authors
@@ -510,7 +510,5 @@ class Description < AbstractModel
       parent.description_id = nil
       parent.save_without_our_callbacks
     end
-
-    super
   end
 end

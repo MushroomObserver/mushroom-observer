@@ -30,9 +30,10 @@ class CopyrightChange < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.user
       errors.add(:user, 'missing user')
     end

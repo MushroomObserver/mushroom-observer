@@ -7,7 +7,7 @@
   end
 %>
 
-<% form_for(:image, :url => { :action => :edit_image, :id => @image,
+<%= form_for(:image, :url => { :action => :edit_image, :id => @image,
                               :params => query_params }) do |form| %>
   <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
 

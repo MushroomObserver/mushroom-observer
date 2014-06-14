@@ -839,9 +839,10 @@ class Image < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if upload_handle and new_record?
       validate_upload
     end

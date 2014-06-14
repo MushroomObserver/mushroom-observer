@@ -16,7 +16,7 @@
   end
 %>
 
-<% form_tag(:action => 'change_member_status', :id => @project.id,
+<%= form_tag(:action => 'change_member_status', :id => @project.id,
             :candidate => @candidate.id, :params => query_params) do %>
   <center>
     <table cellpadding="10">

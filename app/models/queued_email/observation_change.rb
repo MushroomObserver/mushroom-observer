@@ -110,7 +110,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
   end
 
   def deliver_email
-    AccountMailer.deliver_observation_change(user, to_user, observation, note, queued)
+    AccountMailer.observation_change(user, to_user, observation, note, queued).deliver
   end
 
 ################################################################################

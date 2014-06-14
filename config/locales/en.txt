@@ -4204,7 +4204,7 @@ en:
   api_ambiguous_name: Name "[name]" is ambiguous, matches [others].
   api_api_key_not_verified: API key for "[notes]" has not been activated yet. (key = "[key]")
   api_bad_action: Invalid request type "[action]".
-  api_bad_api_key: Invalid API key "[key]".
+  api_bad_api_key: Bad key "[key]".
   api_bad_limited_parameter_value: Expected "[val]" to be in [limit].
   api_bad_method: Invalid request method "[method]".
   api_bad_boolean_parameter_value: Invalid boolean, "[val]", expect "1", "yes", "true", "0", "no", or "false".

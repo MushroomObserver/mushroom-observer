@@ -68,9 +68,9 @@ class QueuedEmail::LocationChange < QueuedEmail
   def deliver_email
     # Make sure location wasn't deleted or merged away since email was queued.
     if location
-      AccountMailer.deliver_location_change(user, to_user, queued, location,
+      AccountMailer.location_change(user, to_user, queued, location,
         description, old_location_version, new_location_version,
-        old_description_version, new_description_version)
+        old_description_version, new_description_version).deliver
     end
   end
 end

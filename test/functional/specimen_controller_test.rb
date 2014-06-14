@@ -1,10 +1,12 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class SpecimenControllerTest < FunctionalTestCase
   def test_show_specimen
     specimen = specimens(:coprinus_comatus_nybg_spec)
     assert(specimen)
     get_with_dump(:show_specimen, :id => specimen.id)
+    print "response.controller: #{response.controller}\n"
+    print "layout: #{response.controller.layout}\n"
     assert_response('show_specimen')
   end
 

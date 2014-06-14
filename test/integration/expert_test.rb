@@ -2,7 +2,7 @@
 
 # Test a few representative sessions of a power-user.
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class ExpertTest < IntegrationTestCase
 
@@ -20,7 +20,7 @@ class ExpertTest < IntegrationTestCase
   #  Test standard creation of public desc.
   # -----------------------------------------
 
-  def ignore_test_creating_public_description
+  def test_creating_public_description
     name = Name.find_by_text_name('Strobilurus diminutivus')
     assert_equal([], name.descriptions)
 
@@ -146,7 +146,7 @@ class ExpertTest < IntegrationTestCase
   #  Test standard creation of personal desc.
   # -------------------------------------------
 
-  def ignore_test_creating_user_description
+  def test_creating_user_description
     name = Name.find_by_text_name('Peltigera')
     assert_equal(4, name.descriptions.length)
 
@@ -253,7 +253,7 @@ class ExpertTest < IntegrationTestCase
   #  Test passing of arguments around in bulk name editor.
   # --------------------------------------------------------
 
-  def ignore_test_bulk_name_editor
+  def test_bulk_name_editor
     name1 = "Caloplaca arnoldii"
     author1 = "(Wedd.) Zahlbr."
     full_name1 = "#{name1} #{author1}"

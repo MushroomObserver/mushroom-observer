@@ -6,7 +6,7 @@
 %>
 
 <p>
-  <% form_for(:term, :url => { :action => :create_term }, :html => { :multipart => true }) do |form| %>
+  <%= form_for(:term, :url => { :action => :create_term }, :html => { :multipart => true }) do |form| %>
   <p>
     <%= :term_name.t %>: <%= form.text_field('name', :size => 150) %>
   </p>

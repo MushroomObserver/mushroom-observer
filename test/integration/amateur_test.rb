@@ -2,7 +2,7 @@
 # Test typical sessions of amateur user who just posts the occasional comment,
 # observations, or votes.
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class AmateurTest < IntegrationTestCase
 

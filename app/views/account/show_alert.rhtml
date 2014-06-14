@@ -1,6 +1,6 @@
 <% @title = :user_alert_show_title.t(:user => @user.legal_name) %>
 
-<% form_tag(:action => "show_alert") do %>
+<%= form_tag(:action => "show_alert") do %>
 
   <div class="memo">
     <%= @user.alert_message.tp(

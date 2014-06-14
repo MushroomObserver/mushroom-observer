@@ -14,7 +14,7 @@
   end
 %>
 
-<% form_tag(:action => 'edit_project', :id => @project.id,
+<%= form_tag(:action => 'edit_project', :id => @project.id,
             :params => query_params) do %>
   <br/><center><%= submit_tag :SAVE_EDITS.l %></center><br/>
   <%= render(:partial => 'form_projects') %>

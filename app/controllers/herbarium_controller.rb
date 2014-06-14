@@ -47,7 +47,7 @@ class HerbariumController < ApplicationController
   def show_herbarium  # :nologin:
     store_location
     @herbarium = Herbarium.find(params[:id].to_s)
-    if request.method == :post
+    if request.method == "POST"
       herbarium = Herbarium.find(params[:id].to_s)
       login = params[:curator][:name].sub(/ <.*/, '')
       user = User.find_by_login(login)
@@ -82,7 +82,7 @@ class HerbariumController < ApplicationController
   def create_herbarium # :norobots:
     name = @user.personal_herbarium
     @herbarium_name = (@user.personal_herbarium.nil?) ? @user.preferred_herbarium_name : ""
-    if request.method == :post
+    if request.method == "POST"
       if valid_herbarium_params(params[:herbarium])
         build_herbarium(params[:herbarium])
       end
@@ -133,7 +133,7 @@ class HerbariumController < ApplicationController
   def edit_herbarium # :norobots:
     @herbarium = Herbarium.find(params[:id].to_s)
     if is_in_admin_mode? or user_is_curator?(@herbarium)
-      if request.method == :post
+      if request.method == "POST"
         if ok_to_update(@herbarium, params[:herbarium])
           update_herbarium(@herbarium, params[:herbarium])
         end

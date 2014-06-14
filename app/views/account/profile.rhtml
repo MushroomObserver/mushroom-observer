@@ -14,7 +14,7 @@
   end
 %>
 
-<% form_for(:user, :url => { :action => :profile }, :html => { :multipart => true }) do |form| %>
+<%= form_for(:user, :url => { :action => :profile }, :html => { :multipart => true }) do |form| %>
   <br/><center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center><br/>
 
   <p><label for="user_name"><%= :profile_name.t %></label><br/>

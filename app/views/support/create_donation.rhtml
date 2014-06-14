@@ -10,7 +10,7 @@
 %>
 
 <p>
-<% form_tag(:action => 'create_donation') do %>
+<%= form_tag(:action => 'create_donation') do %>
   <p>
     Amount: $<%= text_field('donation', 'amount', :size => 7) %>
   </p>

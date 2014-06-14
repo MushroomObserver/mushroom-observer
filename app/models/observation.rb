@@ -997,9 +997,10 @@ return result if debug
   
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     # Clean off leading/trailing whitespace from +where+.
     self.where = self.where.strip_squeeze if self.where
     self.where = nil if self.where == ''

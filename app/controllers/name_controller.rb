@@ -518,7 +518,7 @@ class NameController < ApplicationController
   def create_name # :prefetch: :norobots:
     store_location
     pass_query_params
-    if request.method != :post
+    if request.method != "POST"
       init_create_name_form
     else
       @parse = parse_name
@@ -537,7 +537,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       init_edit_name_form
-      if request.method == :post
+      if request.method == "POST"
         @parse = parse_name
         new_name, @parents = find_or_create_name_and_parents
         if new_name.new_record? or new_name == @name
@@ -630,7 +630,7 @@ class NameController < ApplicationController
         :namings => @name.namings.length,
         :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
       )
-      AccountMailer.deliver_webmaster_question(@user.email, content)
+      AccountMailer.webmaster_question(@user.email, content).deliver
       NameControllerTest.report_email(content) if TESTING
     end
   end
@@ -738,7 +738,7 @@ class NameController < ApplicationController
                                   :that => "##{new_name.id}: " + new_name.real_search_name,
                                   :this_url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}",
                                   :that_url => "#{HTTP_DOMAIN}/name/show_name/#{new_name.id}")
-    AccountMailer.deliver_webmaster_question(@user.email, content)
+    AccountMailer.webmaster_question(@user.email, content).deliver
     NameControllerTest.report_email(content) if TESTING
   end
 
@@ -811,7 +811,7 @@ class NameController < ApplicationController
     @licenses = License.current_names_and_ids
 
     # Render a blank form.
-    if request.method == :get
+    if request.method == "GET"
       @description = NameDescription.new
       @description.name = @name
       initialize_description_source(@description)
@@ -881,7 +881,7 @@ class NameController < ApplicationController
     if !check_description_edit_permission(@description, params[:description])
       # already redirected
 
-    elsif request.method == :post
+    elsif request.method == "POST"
       @description.attributes = params[:description]
 
       args = {}
@@ -1001,7 +1001,7 @@ class NameController < ApplicationController
       @synonym_name_ids = []
       @synonym_names    = []
       @deprecate_all    = true
-      if request.method == :post
+      if request.method == "POST"
         list = params[:synonym][:members].strip_squeeze
         @deprecate_all = (params[:deprecate][:all] == '1')
 
@@ -1116,7 +1116,7 @@ class NameController < ApplicationController
       @names            = []
       @misspelling      = (params[:is][:misspelling] == '1')
 
-      if request.method == :post
+      if request.method == "POST"
         if @what.blank?
           flash_error :runtime_name_deprecate_must_choose.t
 
@@ -1168,7 +1168,7 @@ class NameController < ApplicationController
           end
 
         end # @what
-      end # :post
+      end # "POST"
     end
   end
 
@@ -1180,7 +1180,7 @@ class NameController < ApplicationController
       @approved_names = @name.approved_synonyms
       comment = params[:comment][:comment] rescue ''
       comment = comment.strip_squeeze
-      if request.method == :post
+      if request.method == "POST"
 
         # Deprecate others first.
         others = []
@@ -1500,7 +1500,7 @@ class NameController < ApplicationController
   def bulk_name_edit # :prefetch: :norobots:
     @list_members = nil
     @new_names    = nil
-    if request.method == :post
+    if request.method == "POST"
       list = params[:list][:members].strip_squeeze rescue ''
       construct_approved_names(list, params[:approved_names])
       sorter = NameSorter.new
@@ -1541,7 +1541,7 @@ class NameController < ApplicationController
       @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
 
       # Initialize form.
-      if request.method != :post
+      if request.method != "POST"
         if Name.ranks_above_genus.member?(@name.rank)
           flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
         end

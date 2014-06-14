@@ -34,7 +34,7 @@
   end
 %>
 
-<% form_tag(tag_params) do %>
+<%= form_tag(tag_params) do %>
 
   <p>
     <label for="img_id"><%= :image_reuse_id.t %>:</label>
@@ -49,8 +49,8 @@
                 :all_users => (@all_users ? 0 : 1), :params => query_params) %>
   </big></p><br/>
 
-  <% paginate_block(@pages) do %>
-    <% make_matrix(@objects) do |image| %>
+  <%= paginate_block(@pages) do %>
+    <%= make_matrix(@objects) do |image| %>
       <%= render(:partial => 'image_reuse', :object => image, :locals => {
                    :link_args => { :action => 'reuse_image', :mode => @mode,
                                    :obs_id => obs_id, :term_id => term_id, :img_id => image.id,

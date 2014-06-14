@@ -45,7 +45,7 @@ class QueuedEmail::NameProposal < QueuedEmail
   def deliver_email
     # Make sure nothing's been deleted since email was queued.
     if naming && observation
-      AccountMailer.deliver_name_proposal(user, to_user, naming, observation)
+      AccountMailer.name_proposal(user, to_user, naming, observation).deliver
     end
   end
 end

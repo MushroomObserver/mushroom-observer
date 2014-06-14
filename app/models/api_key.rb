@@ -43,7 +43,8 @@ class ApiKey < AbstractModel
     return result
   end
 
-  def validate
+  validate :check_key
+  def check_key
     other = self.class.find_by_key(key)
     if other and other.id != self.id
       # This should never happen.

@@ -296,7 +296,7 @@ class SpeciesListController < ApplicationController
   def name_lister # :nologin: :norobots:
     # Names are passed in as string, one name per line.
     @name_strings = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
-    if request.method == :post
+    if request.method == "POST"
       # (make this an instance var to give unit test access)
       @names = @name_strings.map do |str|
         str.sub!(/\*$/, '')
@@ -334,7 +334,7 @@ class SpeciesListController < ApplicationController
 
   def create_species_list # :prefetch: :norobots:
     @species_list = SpeciesList.new
-    if request.method != :post
+    if request.method != "POST"
       init_name_vars_for_create()
       init_member_vars_for_create()
       init_project_vars_for_create()
@@ -351,7 +351,7 @@ class SpeciesListController < ApplicationController
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if !check_permission!(@species_list)
         redirect_to(:action => 'show_species_list', :id => @species_list)
-      elsif request.method != :post
+      elsif request.method != "POST"
         init_name_vars_for_edit(@species_list)
         init_member_vars_for_edit(@species_list)
         init_project_vars_for_edit(@species_list)
@@ -367,7 +367,7 @@ class SpeciesListController < ApplicationController
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if !check_permission!(@species_list)
         redirect_to(:action => 'show_species_list', :id => @species_list)
-      elsif request.method != :post
+      elsif request.method != "POST"
         query = create_query(:Observation, :in_species_list, :by => :name,
                              :species_list => @species_list)
         @observation_list = query.results
@@ -455,7 +455,7 @@ class SpeciesListController < ApplicationController
       if @observation.empty?
         flash_error(:species_list_bulk_editor_you_own_no_observations.t)
         redirect_to(:action => 'show_species_list', :id => @species_list.id)
-      elsif request.method == :post
+      elsif request.method == "POST"
         updates = 0
         stay_on_page = false
         for obs in @observations
@@ -522,7 +522,7 @@ class SpeciesListController < ApplicationController
         @projects = projects_to_manage
         @object_states = manage_object_states
         @project_states = manage_project_states
-        if request.method == :post
+        if request.method == "POST"
           if params[:commit] == :ATTACH.l
             if attach_objects_to_projects
               redirect_to(:action => 'show_species_list', :id => @list.id)

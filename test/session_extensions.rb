@@ -76,8 +76,9 @@ module SessionExtensions
 
   # Override all 'get' calls and do a bunch of extra error checking.
   def get(*args)
+    print "******** calling session_extensions.rb#get ****************\n"
     if !@doing_with_error_checking
-      process_with_error_checking('get', *args)
+      process_with_error_checking("get", *args)
     else
       super
     end
@@ -86,7 +87,7 @@ module SessionExtensions
   # Override all 'post' calls and do a bunch of extra error checking.
   def post(*args)
     if !@doing_with_error_checking
-      process_with_error_checking('post', *args)
+      process_with_error_checking("POST", *args)
     else
       super
     end

@@ -13,7 +13,7 @@
 
 <div id="license-notice"><%= :image_add_warning.tp %></div>
 
-<% form_for(:image, :url => { :action => :add_image, :id => @observation.id,
+<%= form_for(:image, :url => { :action => :add_image, :id => @observation.id,
             :params => query_params }, :html => { :multipart => true }) do |form| %>
   <br/><center><%= submit_tag(:image_add_upload.l) %></center><br/>
 

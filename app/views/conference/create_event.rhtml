@@ -6,7 +6,7 @@
 %>
 
 <p>
-<% form_tag(:action => 'create_event') do %>
+<%= form_tag(:action => 'create_event') do %>
   <p>
     <%= :conference_event_name.t %>: <%= text_field('event', 'name', :size => 150) %>
   </p>

@@ -29,7 +29,7 @@ class API
       uri = URI.parse(url)
       File.open(@temp_file, 'w:utf-8') do |fh|
         Net::HTTP.new(uri.host, uri.port).start do |http|
-          http.request_get(uri.request_uri) do |response|
+          http.request_get(uri.fullpath) do |response|
             response.read_body do |chunk|
               fh.write(chunk)
             end

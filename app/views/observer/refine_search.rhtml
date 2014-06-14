@@ -11,7 +11,7 @@
   time = "%.3f" % (Time.now - start).to_f
 %>
 
-<% form_for(:values, :url => {:action => 'refine_search',
+<%= form_for(:values, :url => {:action => 'refine_search',
             :params => query_params(@query)}) do |form| %>
 
   <table>

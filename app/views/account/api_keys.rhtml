@@ -58,7 +58,7 @@
   <br/><br/>
 <% end %>
 
-<% form_for(:key) do |form| %>
+<%= form_for(:key) do |form| %>
   <label for="notes"><%= :account_api_keys_notes_label.t %></label><br/>
   <%= form.text_field(:notes, :size => 80) %><br/>
   <%= submit_tag(:account_api_keys_create_button.l, :id => 'create_button') %>
