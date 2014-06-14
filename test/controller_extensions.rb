@@ -609,7 +609,7 @@ module ControllerExtensions
           # Put together good error message telling us exactly what happened.
           code = @response.response_code
           if @response.success?
-            got = ", got #{code} rendered <#{@response.rendered[:template]}>."
+            got = ", got #{code} rendered <#{@response.fullpath}>."
           elsif @response.missing?
             got = ", got #{code} missing (?)"
           elsif @response.redirect?
@@ -630,11 +630,11 @@ module ControllerExtensions
             if arg.length == 1
               controller = @controller.controller_name
               msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
-              assert_equal(@response.redirect_url[:action].to_sym, arg[0].to_sym, msg)
+              assert_template({action: arg[0]}, msg)
             else
               controller = @response.redirect_url[:controller] || @controller.controller_name
               msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-              assert_equal([controller, @response.redirect_url[:action]], [arg[0].to_s, arg[1].to_s], msg)
+              assert_template({controller: arg[0], action: arg[1]}, msg)
             end
           elsif arg.is_a?(Hash)
             url = @controller.url_for(arg).sub(/^http:..test.host./, '')
@@ -677,6 +677,7 @@ module ControllerExtensions
   end
   
   def find_mismatches(partial, full)
+    "find_mismatches.full".print_thing(full)
     mismatches = {}
     partial.each do |k, v|
       f = full[k] || full[k.to_s]

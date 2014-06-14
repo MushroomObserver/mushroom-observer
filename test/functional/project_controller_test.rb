@@ -32,7 +32,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(drafts.length > 0)
     params = { :id => project.id.to_s }
     requires_user(:destroy_project, :show_project, params, changer.login)
-    assert_response(:action => :show_project)
+    assert_template(:action => "show_project")
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
@@ -49,7 +49,7 @@ class ProjectControllerTest < FunctionalTestCase
       :commit => commit.l
     }
     post_requires_login(:change_member_status, params, changer.login)
-    assert_response(:action => 'show_project', :id => eol_project.id)
+    assert_template(:action => 'show_project', :id => eol_project.id)
     target_user = User.find(target_user.id)
     assert_equal(admin_after, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(user_after, target_user.in_group?(eol_project.user_group.name))
@@ -63,12 +63,12 @@ class ProjectControllerTest < FunctionalTestCase
 
   def test_show_project
     get_with_dump(:show_project, :id => 1)
-    assert_response('show_project')
+    assert_template('show_project')
   end
 
   def test_list_projects
     get_with_dump(:list_projects)
-    assert_response('list_projects')
+    assert_template('list_projects')
   end
 
   def test_add_project
@@ -92,7 +92,7 @@ class ProjectControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:add_project, params)
-    assert_response(:action => :show_project)
+    assert_template(:action => "show_project")
     project = Project.find_by_title(title)
     assert(project)
     assert_equal(title, project.title)
@@ -135,7 +135,7 @@ class ProjectControllerTest < FunctionalTestCase
       }
     }
     post_requires_user(:edit_project, :show_project, params)
-    assert_response(:action => :show_project)
+    assert_template(:action => "show_project")
     project = Project.find_by_title(title)
     assert(project)
     assert_equal(summary, project.summary)
@@ -161,7 +161,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(project_draft_count > 0)
     params = { :id => project.id.to_s }
     requires_user(:destroy_project, :show_project, params, 'dick')
-    assert_response(:action => :index_project)
+    assert_template(:action => "index_project")
     assert_raises(ActiveRecord::RecordNotFound) do
       project = Project.find(project.id)
     end
@@ -208,7 +208,7 @@ class ProjectControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:admin_request, params)
-    assert_response(:action => "show_project", :id => eol_project.id)
+    assert_template(:action => "show_project", :id => eol_project.id)
     assert_flash(:admin_request_success.t(:title => eol_project.title))
   end
 
@@ -298,7 +298,7 @@ class ProjectControllerTest < FunctionalTestCase
   def test_add_members_non_admin
     project_id = projects(:eol_project).id
     requires_login(:add_members, { :id => project_id }, katrina.login)
-    assert_response(:action => 'show_project', :id => project_id)
+    assert_template(:action => 'show_project', :id => project_id)
   end
 
   # Make sure admin can add members.
@@ -329,7 +329,7 @@ class ProjectControllerTest < FunctionalTestCase
       :candidate => target_user.id
     }
     requires_login(:add_members, params, katrina.login)
-    assert_response(:action => :show_project, :id => eol_project.id)
+    assert_template(:action => "show_project", :id => eol_project.id)
     target_user = User.find(target_user.id)
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
