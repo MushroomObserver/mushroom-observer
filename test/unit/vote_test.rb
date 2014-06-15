@@ -38,9 +38,9 @@ class VoteTest < ActiveSupport::TestCase
   def test_validate
     vote = Vote.new
     assert !vote.save
-    assert_equal(:validate_vote_naming_missing.t, vote.errors[:naming])
-    assert_equal(:validate_vote_user_missing.t, vote.errors[:user])
-    assert_equal(:validate_vote_value_missing.t, vote.errors[:value])
+    assert_equal(:validate_vote_naming_missing.t, vote.errors[:naming].first)
+    assert_equal(:validate_vote_user_missing.t, vote.errors[:user].first)
+    assert_equal(:validate_vote_value_missing.t, vote.errors[:value].first)
     assert_equal(3, vote.errors.count)
 
     vote = Vote.new(
@@ -49,7 +49,7 @@ class VoteTest < ActiveSupport::TestCase
         :value  => "blah"
     )
     assert !vote.save
-    assert_equal(:validate_vote_value_not_integer.t, vote.errors[:value])
+    assert_equal(:validate_vote_value_not_integer.t, vote.errors[:value].first)
     assert_equal(1, vote.errors.count)
 
     vote = Vote.new(
@@ -58,7 +58,7 @@ class VoteTest < ActiveSupport::TestCase
         :value  => -10
     )
     assert !vote.save
-    assert_equal(:validate_vote_value_out_of_bounds.t, vote.errors[:value])
+    assert_equal(:validate_vote_value_out_of_bounds.t, vote.errors[:value].first)
     assert_equal(1, vote.errors.count)
   end
 

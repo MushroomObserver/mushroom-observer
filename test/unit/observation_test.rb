@@ -49,9 +49,7 @@ class ObservationTest < ActiveSupport::TestCase
     @cc_obs.where = nil  # no longer an error, defaults to Location.unknown
     assert(!@cc_obs.save)
     assert_equal(1, @cc_obs.errors.count)
-    assert_equal(:validate_observation_user_missing.t, @cc_obs.errors[:user])
-    # assert_equal(:validate_observation_when_missing.t, @cc_obs.errors[:when])
-    # assert_equal(:validate_observation_where_missing.t, @cc_obs.errors[:where])
+    assert_equal(:validate_observation_user_missing.t, @cc_obs.errors[:user].first)
   end
 
   def test_destroy

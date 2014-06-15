@@ -42,9 +42,9 @@ class NamingTest < ActiveSupport::TestCase
     naming = Naming.new
     assert !naming.save
     assert_equal 3, naming.errors.count
-    assert_equal :validate_naming_name_missing.t, naming.errors[:name]
-    assert_equal :validate_naming_observation_missing.t, naming.errors[:observation]
-    assert_equal :validate_naming_user_missing.t, naming.errors[:user]
+    assert_equal :validate_naming_name_missing.t, naming.errors[:name].first
+    assert_equal :validate_naming_observation_missing.t, naming.errors[:observation].first
+    assert_equal :validate_naming_user_missing.t, naming.errors[:user].first
   end
 
   # Destroy one.
