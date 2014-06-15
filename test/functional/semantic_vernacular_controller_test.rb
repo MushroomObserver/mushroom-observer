@@ -8,7 +8,7 @@ class SemanticVernacularControllerTest < FunctionalTestCase
       assert_response(:redirect)
       login
       get_with_dump(:index)
-      assert_response('index')
+      assert_template(action: 'index')
     rescue Errno::EHOSTUNREACH => err
     end
   end
@@ -19,7 +19,7 @@ class SemanticVernacularControllerTest < FunctionalTestCase
     	assert_response(:redirect)
     	login
     	get_with_dump(:show, :uri => "http://aquarius.tw.rpi.edu/ontology/svf.owl#SVD1")
-    	assert_response("show")
+      assert_template(action: 'show')
     	assert_not_nil(assigns(:svd))
     rescue Errno::EHOSTUNREACH => err
     rescue ActionView::TemplateError => err

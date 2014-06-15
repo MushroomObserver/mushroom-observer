@@ -393,8 +393,6 @@ module BrowserStatus
   #   url = url_for(:action => "blah", ...)
   #   new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)
   def add_args_to_url(url, new_args)
-    # "add_args_to_url.url".print_thing(url)
-    # "add_args_to_url.new_args".print_thing(new_args)
     new_args = new_args.clone
     args = {}
 

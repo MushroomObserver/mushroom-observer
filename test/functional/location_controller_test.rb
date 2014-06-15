@@ -51,7 +51,7 @@ class LocationControllerTest < FunctionalTestCase
     desc_count = LocationDescription.count
     past_desc_count = LocationDescription::Version.count
     post_requires_login(page, params)
-    assert_template(action: page.to_s, partial: true)
+    assert_action_partials(page.to_s, ["_form_location", "_textilize_help"])
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -75,7 +75,7 @@ class LocationControllerTest < FunctionalTestCase
     updated_at = location.updated_at
     log_updated_at = location.rss_log.updated_at
     get_with_dump(:show_location, :id => location.id)
-    assert_template(action: 'show_location', partial: true)
+    assert_action_partials('show_location', ["_location", "_show_comments", "_location_description"])
     location.reload
     assert_equal(updated_at, location.updated_at)
     assert_equal(log_updated_at, location.rss_log.updated_at)
@@ -84,7 +84,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_show_past_location
     location = locations(:albion)
     get_with_dump(:show_past_location, :id => location.id, :version => location.version - 1)
-    assert_template(action: 'show_past_location', partial: true)
+    assert_template(action: 'show_past_location', partial: "_location")
   end
 
   def test_show_past_location_no_version
@@ -140,7 +140,8 @@ class LocationControllerTest < FunctionalTestCase
   def test_show_location_description
     desc = location_descriptions(:albion_desc)
     get_with_dump(:show_location_description, :id => desc.id)
-    assert_template(action: 'show_location_description', partial: true)
+    assert_action_partials('show_location_description',
+      ["_show_description", "_location_description"])
   end
 
   def test_show_past_location_description
@@ -152,7 +153,7 @@ class LocationControllerTest < FunctionalTestCase
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
     get_with_dump(:show_past_location_description, :id => desc.id)
-    assert_template(action: 'show_past_location_description')
+    assert_template(action: 'show_past_location_description', partial: "_location_description")
   end
 
   def test_create_location_description
@@ -503,13 +504,17 @@ class LocationControllerTest < FunctionalTestCase
     get_with_dump(:map_locations, :pattern => 'California')
     assert_template(action: 'map_locations')
   end
-
+  
+  def assert_show_location
+    assert_action_partials('show_location', ["_location", "_show_comments", "_location_description"])
+  end
+  
   def test_interest_in_show_location
     # No interest in this location yet.
     albion = locations(:albion)
     login('rolf')
     get(:show_location, :id => albion.id)
-    assert_template(action: 'show_location', partial: true)
+    assert_show_location
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 1
@@ -522,7 +527,7 @@ class LocationControllerTest < FunctionalTestCase
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(:target => albion, :user => rolf, :state => true).save
     get(:show_location, :id => albion.id)
-    assert_template(action: 'show_location')
+    assert_show_location
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 0
@@ -536,7 +541,7 @@ class LocationControllerTest < FunctionalTestCase
     Interest.find_all_by_user_id(rolf.id).last.destroy
     Interest.new(:target => albion, :user => rolf, :state => false).save
     get(:show_location, :id => albion.id)
-    assert_template(action: 'show_location')
+    assert_show_location
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => albion.id, :state => 0

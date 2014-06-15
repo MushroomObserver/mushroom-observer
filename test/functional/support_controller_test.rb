@@ -5,12 +5,12 @@ class SupportControllerTest < FunctionalTestCase
   # Replace this with your real tests.
   def test_donors
     get_with_dump(:donors)
-    assert_response('donors')
+    assert_template(action: 'donors')
   end
 
   def test_donate
     get_with_dump(:donate)
-    assert_response('donate')
+    assert_template(action: 'donate')
   end
 
   def confirm_post(amount, other_amount)
@@ -27,7 +27,7 @@ class SupportControllerTest < FunctionalTestCase
       }
     }
     post(:confirm, params)
-    assert_response('confirm')
+    assert_template(action: 'confirm')
     assert_equal(donations + 1, Donation.count)
     donation = Donation.find(:all, :order => "created_at DESC")[0]
     assert_equal(final_amount, donation.amount)
@@ -51,7 +51,7 @@ class SupportControllerTest < FunctionalTestCase
     
     make_admin
     get_with_dump(:create_donation)
-    assert_response('create_donation')
+    assert_template(action: 'create_donation')
   end
 
   def create_donation_post(anon)
@@ -91,7 +91,7 @@ class SupportControllerTest < FunctionalTestCase
     
     make_admin
     get_with_dump(:review_donations)
-    assert_response('review_donations')
+    assert_template(action: 'review_donations')
   end
 
   def test_review_donations_post
@@ -110,6 +110,6 @@ class SupportControllerTest < FunctionalTestCase
 
   def test_letter
     get_with_dump(:letter)
-    assert_response('letter')
+    assert_template(action: 'letter')
   end
 end

@@ -261,11 +261,12 @@ class ActiveSupport::TestCase
       processed_str  = str
       processed_str  = yield(processed_str) if block_given?
       processed_str.split("\n")
-      # processed_str.force_encoding('UTF-8') if processed_str.respond_to?(:force_encoding)
+      encoding = processed_str.encoding
+      
       for file in files
-        template = File.open(file_name(file), file_format(file)) {|fh| fh.read}
+        template = File.open(file_name(file), file_format(file)).read
+        template = enforce_encoding(encoding, file, template)
         template = yield(template) if block_given?
-        # template.force_encoding('UTF-8') if template.respond_to?(:force_encoding)
         if template_match(processed_str, template)
           # Stop soon as we find one that matches.
           result = true
@@ -273,8 +274,8 @@ class ActiveSupport::TestCase
         elsif !msg
           # Write out expected (old) and received (new) files for debugging purposes.
           filename = file_name(file)
-          File.open(filename + '.old', 'w') {|fh| fh.write(template)}
-          File.open(filename + '.new', 'w') {|fh| fh.write(processed_str)}
+          File.open(filename + '.old', "w:#{encoding}") {|fh| fh.write(template)}
+          File.open(filename + '.new', "w:#{encoding}") {|fh| fh.write(processed_str)}
           msg = "File #{filename} wrong:\n" +
             `diff #{filename}.old #{filename}.new`
           File.delete(filename + '.old') if File.exists?(filename + '.old')
@@ -291,6 +292,19 @@ class ActiveSupport::TestCase
         assert(false, msg)
       end
     end
+  end
+  
+  def enforce_encoding(encoding, file, str)
+    result = str
+    if str.encoding != encoding
+      result = str.encode(encoding)
+    end
+    if file.is_a?(Array) and file[1] == 'ISO-8859-1'
+      if file[1] == str.encoding
+        print "Re-encoding no longer needed\n"
+      end
+    end
+    result
   end
   
   def file_name(file); file.is_a?(Array) ? file[0] : file; end

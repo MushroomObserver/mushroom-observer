@@ -24,7 +24,7 @@
     end
   end
   form += indent + submit_tag(:SUBMIT.t)
-  form += '</form>'
+  form += '</form>'.html_safe
 
   custom_tab_set(form)
   new_tab_set(@links)

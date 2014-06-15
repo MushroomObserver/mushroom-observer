@@ -17,13 +17,13 @@
     else
       :show_namings_no_names_yet.t
     end %><%=
-      '&nbsp;' + link_to(:show_namings_propose_new_name.t,
+      safe_nbsp + link_to(:show_namings_propose_new_name.t,
         :action => 'create_naming', :id => observation, :params => query_params)
     %><%= if is_in_admin_mode?
-      '&nbsp;|&nbsp;' + link_to(:show_observation_debug_consensus.t,
+      safe_nbsp + '|' + safe_nbsp + link_to(:show_observation_debug_consensus.t,
         :action => 'recalc', :id => @observation.id)
     end %><%= if logged_in && any_names && can_do_ajax?
-      '&nbsp;' + submit_tag(:show_namings_update_votes.l,
+      safe_nbsp + submit_tag(:show_namings_update_votes.l,
         :onclick => "set_changed(0)")
     end %>
   </div>
@@ -70,10 +70,10 @@
             </td>
 
             <td width="20">&nbsp;</td>
-            <% txt = naming.vote_percent.round.to_s + "%"
+            <% txt = naming.vote_percent.round.to_s.html_safe + "%"
             nvotes = naming.votes.length %>
             <td>
-              <% html = ""
+              <% html = safe_empty
               if nvotes == 0
                 html += "(#{:show_namings_no_votes.t})"
               else
@@ -84,7 +84,7 @@
                 popups << naming
               end
               if nvotes != 0
-                html += "&nbsp;(#{nvotes})"
+                html += safe_nbsp + "(#{nvotes})"
               end %>
               <%= html %>
             </td>
@@ -141,7 +141,7 @@
           <%= image_tag("eye3.png") %>
         </td>
         <td>
-          <%= " = " + :show_namings_eye_help.t %>
+          <%= " = ".html_safe + :show_namings_eye_help.t %>
         </td>
         <td>
         </td>
@@ -149,7 +149,7 @@
           <%= image_tag("eyes3.png") %>
         </td>
         <td>
-          <%= " = " + :show_namings_eyes_help.t %>
+          <%= " = ".html_safe + :show_namings_eyes_help.t %>
         </td>
       </tr>
     </table>

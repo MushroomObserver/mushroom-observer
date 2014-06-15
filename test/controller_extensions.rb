@@ -509,7 +509,8 @@ module ControllerExtensions
   #
   def assert_response_equal_file(*files, &block)
     clean_our_backtrace do
-      assert_string_equal_file(@response.body.clone, *files, &block)
+      body = @response.body.clone
+      assert_string_equal_file(body, *files, &block)
     end
   end
 
@@ -632,14 +633,14 @@ module ControllerExtensions
               msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
               assert_template({action: arg[0]}, msg)
             else
-              controller = @response.redirect_url[:controller] || @controller.controller_name
               msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
               assert_template({controller: arg[0], action: arg[1]}, msg)
             end
           elsif arg.is_a?(Hash)
             url = @controller.url_for(arg).sub(/^http:..test.host./, '')
             msg += "Expected redirect to <#{url}>" + got
-            assert_redirect_match(arg, @response, @controller, msg)
+            assert_template(arg, msg)
+            # assert_redirect_match(arg, @response, @controller, msg)
           elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
             msg += "Expected redirect to <#{arg}>" + got
             assert_equal(arg, @response.redirect_url, msg)
@@ -665,6 +666,12 @@ module ControllerExtensions
     end
   end
 
+  def assert_action_partials(action, partials)
+    partials.each do |p|
+      assert_template(action: action, partial: p)
+    end
+  end
+
   def assert_redirect_match(partial, response, controller, msg)
     mismatches = find_mismatches(partial, response.redirect_url)
     if mismatches[:controller].to_s == controller.controller_name.to_s
@@ -677,7 +684,6 @@ module ControllerExtensions
   end
   
   def find_mismatches(partial, full)
-    "find_mismatches.full".print_thing(full)
     mismatches = {}
     partial.each do |k, v|
       f = full[k] || full[k.to_s]

@@ -5,17 +5,17 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_list_images
     get_with_dump(:list_images)
-    assert_template(action: 'list_images', partial: true)
+    assert_template(action: 'list_images', partial: "_image")
   end
 
   def test_images_by_user
     get_with_dump(:images_by_user, :id => rolf.id)
-    assert_template(action: 'list_images', partial: true)
+    assert_template(action: 'list_images', partial: "_image")
   end
 
   def test_images_for_project
     get_with_dump(:images_for_project, :id => projects(:bolete_project).id)
-    assert_template(action: 'list_images', partial: true)
+    assert_template(action: 'list_images', partial: "_image")
   end
 
   def test_mushroom_app_report
@@ -156,12 +156,12 @@ class ImageControllerTest < FunctionalTestCase
     image = Image.find(1)
     num_views = image.num_views
     get_with_dump(:show_image, :id => 1)
-    assert_template(action: 'show_image', partial: true)
+    assert_template(action: 'show_image', partial: "_form_ccbyncsa25")
     image.reload
     assert_equal(num_views + 1, image.num_views)
     for size in Image.all_sizes + [:original]
       get(:show_image, :id => 1, :size => size)
-      assert_template(action: 'show_image')
+      assert_template(action: 'show_image', partial: "_form_ccbyncsa25")
     end
   end
 
@@ -200,7 +200,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_image_search
     get_with_dump(:image_search, :pattern => 'Notes')
-    assert_template(action: 'list_images', partial: true)
+    assert_template(action: 'list_images', partial: "_image")
     assert_equal(:query_title_pattern_search.t(:types => 'Images', :pattern => 'Notes'),
                  @controller.instance_variable_get('@title'))
     get_with_dump(:image_search, :pattern => 'Notes', :page => 2)
@@ -211,7 +211,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_image_search_next
     get_with_dump(:image_search, :pattern => 'Notes')
-    assert_template(action: 'list_images', partial: true)
+    assert_template(action: 'list_images', partial: "_image")
   end
 
   def test_image_search_by_number
@@ -253,7 +253,7 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_license_updater
     requires_login(:license_updater)
-    assert_form_action(:action => 'license_updater', partial: true)
+    assert_form_action(:action => 'license_updater')
   end
 
   def test_update_licenses
@@ -523,7 +523,7 @@ class ImageControllerTest < FunctionalTestCase
   # This is what would happen when user first opens form.
   def test_reuse_image_for_user
     requires_login(:reuse_image, :mode => 'profile')
-    assert_template(action: 'reuse_image', partial: true)
+    assert_template(action: 'reuse_image', partial: "_image_reuse")
     assert_form_action(:action => 'reuse_image', :mode => 'profile')
   end
 

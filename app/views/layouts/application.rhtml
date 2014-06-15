@@ -35,7 +35,7 @@
     stylesheet_link_tag('general.css?v=1', "#{css}.css?v=1")
   %>
 
-  <%= sort_javascript_includes.map {|m| javascript_include_tag(m).sub(/\.js/,'.js?v=2')}.join('') %>
+  <%= sort_javascript_includes.map {|m| javascript_include_tag(m).sub(/\.js/,'.js?v=2')}.join('').html_safe %>
 
   <% if @header %>
     <%= @header %>

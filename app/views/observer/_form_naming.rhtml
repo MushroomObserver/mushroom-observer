@@ -20,7 +20,7 @@
  
 <%# -------------------- Naming Reasons -------------------- %>
 <%=
-  html = "<br/>"
+  html = safe_br
   for r in @reason.values.sort_by(&:order)
     num      = r.num
     label    = r.label.t
@@ -31,11 +31,11 @@
                "{ if ($('reason_#{num}_check').checked) $('reason_#{num}_notes').focus() }, 0.25)"
     checkbox = check_box('reason', 'check', { :index => num, :checked => check,
                          :onclick => (can_do_ajax? ? onclick : 1)}, '1')
-    label    = "<label for='reason_#{num}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
+    label    = content_tag(:label, label + (default ? ' (default)' : ' '), for: "reason_#{num}_check") + safe_br
     textarea = text_area('reason', 'notes', { :index => num, :cols => 80, :rows => 1, :value => notes })
-    textarea += "<br/>"
+    textarea += safe_br
     if can_do_ajax?
-      textarea = "<div id='reason_#{num}_div'>#{textarea}</div>"
+      textarea = content_tag(:div, textarea, id: "reason_#{num}_div")
       if !check
         textarea += javascript_tag("Element.hide('reason_#{num}_div')")
       end
@@ -43,7 +43,7 @@
     html += checkbox + label + textarea
   end
   if can_do_ajax? && !show_reasons && @what.blank?
-    html = "<div id='reasons_div'>#{html}</div>"
+    html = content_tag(:div, html, id: 'reasons_div')
     # html += javascript_tag("Element.hide('reasons_div')");
   end
   html

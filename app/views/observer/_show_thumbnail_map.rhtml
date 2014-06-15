@@ -17,7 +17,7 @@
         width, height = 320, 200
       end
       map = gmap.div(:width => width, :height => height).
-                 sub(/style="/, 'style="border:1px solid black; margin-bottom:1em; ')
+                 sub(/style="/, 'style="border:1px solid black; margin-bottom:1em; ').html_safe
       content_tag(:center, map)
     end
   %>

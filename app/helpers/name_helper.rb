@@ -17,7 +17,7 @@ module NameHelper
   end
   
   def classification_section(classification, parents, first_child, children_query)
-    head = "".html_safe
+    head = safe_empty
     lines = []
     if classification
       head = classification.tpl

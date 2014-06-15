@@ -547,8 +547,6 @@ class NameControllerTest < FunctionalTestCase
       :num_per_page => 10,
       :test_anchor => 'blah'
     }.merge(query_params))
-    # "request.fullpath".print_thing(request.fullpath)
-    # print @response.body
     assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
                         :params => query_params, :page => 2,
                         :test_anchor => 'blah', :anchor => 'blah')

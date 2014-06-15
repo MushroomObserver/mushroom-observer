@@ -8,8 +8,10 @@ class ApiControllerTest < FunctionalTestCase
   def assert_no_api_errors
     clean_our_backtrace do
       @api = assigns(:api)
-      msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
-      assert_block(msg) { @api.errors.empty? }
+      if @api
+        msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
+        assert_block(msg) { @api.errors.empty? }
+      end
     end
   end
 
@@ -29,8 +31,8 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_basic_get_requests
     for model in [Comment, Image, Location, Name, Observation, Project, SpeciesList, User]
-      print "test_basic_get_requests: #{model}\n"
       for detail in [:none, :low, :high]
+        assert_no_api_errors
         get(model.table_name.to_sym, :detail => detail)
         assert_no_api_errors
         assert_objs_equal(model.first, @api.results.first)

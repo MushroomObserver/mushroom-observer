@@ -117,8 +117,10 @@ module ApplicationHelper
   end
 
 
+  def safe_empty; "".html_safe; end
   def safe_br; "<br/>".html_safe; end
-
+  def safe_nbsp; "&nbsp;".html_safe; end
+  
   ##############################################################################
   #
   #  :section: Other Stuff
@@ -411,7 +413,7 @@ module ApplicationHelper
       links << link_to(:DESTROY.t, :id => desc.id,
                        :action => "destroy_#{type}", :params => query_params)
     end
-    '<p><big>' + title + ':</big> ' + links.join(' | ') + '</p>'
+    content_tag(:p, content_tag(:big, title) + links.join(' | ').html_safe)
   end
 
   def show_best_image(obs)
@@ -747,13 +749,13 @@ module ApplicationHelper
       editors = user_list(:show_name_description_editor, editors)
 
       if is_admin
-        authors += '&nbsp;'
+        authors += safe_nbsp
         authors += link_to("(#{:review_authors_review_authors.t})",
                            :controller => 'observer',
                            :action => 'review_authors', :id => obj.id,
                            :type => type, :params => query_params)
       elsif !is_author
-        authors += '&nbsp;'
+        authors += safe_nbsp
         authors += link_to("(#{:show_name_author_request.t})",
                            :controller => 'observer',
                            :action => 'author_request', :id => obj.id,
@@ -772,12 +774,12 @@ module ApplicationHelper
   end
 
   # From html_helper.rb
-  # Replace spaces with '&nbsp;'.
+  # Replace spaces with safe_nbsp.
   #
   #   <%= button_name.lnbsp %>
   #
   def lnbsp(key)
-    key.l.gsub(' ', '&nbsp;')
+    key.l.gsub(' ', safe_nbsp)
   end
 
   # Create an in-line white-space element approximately the given width in
@@ -806,7 +808,7 @@ module ApplicationHelper
   #   %>
   #
   def add_header(str)
-    @header ||= ''
+    @header ||= safe_empty
     @header += str
   end
 
@@ -831,7 +833,7 @@ module ApplicationHelper
     content_tag(:table, table_opts) do
       rows.map do |row|
         make_row(row, tr_opts, td_opts) + make_line(row, td_opts)
-      end.join
+      end.join.html_safe
     end
   end
   
@@ -842,7 +844,7 @@ module ApplicationHelper
       else
         row.map do |cell|
           make_cell(cell, td_opts)
-        end.join
+        end.join.html_safe
       end
     end
   end
@@ -858,7 +860,7 @@ module ApplicationHelper
         content_tag(:td, '<hr/>', {:class => 'MatrixLine', :colspan => colspan})
       end
     else
-      ''
+      safe_empty
     end
   end
   
@@ -884,11 +886,11 @@ module ApplicationHelper
         capture(obj, &block)
       end
       if cols.length >= @layout["columns"]
-        rows << cols.join('')
+        rows << cols.join('').html_safe
         cols = []
       end
     end
-    rows << cols.join('') if cols.any?
+    rows << cols.join('').html_safe if cols.any?
     table = make_table(rows, {:cellspacing => 0, :class => "Matrix"}.merge(table_opts),
                        row_opts, {:colspan => @layout["columns"]})
     concat(table)
@@ -1257,7 +1259,7 @@ module ApplicationHelper
   def where_string(where, count=nil)
     result = where.t
     result += " (#{count})" if count
-    result = "<span class=\"Data\">#{result}</span>"
+    result = content_tag(:span, result, class: "Data")
   end
 
   # Wrap location name in link to show_location / observations_at_where.
@@ -1310,7 +1312,7 @@ module ApplicationHelper
   end
   
   def format_user_list(title, user_count, separator, user_block)
-    result = ''.html_safe
+    result = safe_empty
     if user_count > 0
       result = (user_count > 1 ? title.to_s.pluralize.to_sym.t : title.t) + separator + user_block
     end
@@ -1432,7 +1434,7 @@ module ApplicationHelper
     opts = {}
     opts[:border] = args[:border] if args.has_key?(:border)
     opts[:style]  = args[:style]  if args.has_key?(:style)
-    str = image_tag(file, opts)
+    str = safe_empty + image_tag(file, opts)
     str += args[:append].to_s
 
     # Decide what to link it to.
@@ -1468,7 +1470,7 @@ module ApplicationHelper
     # Include AJAX vote links below image?
     if @js && @user && args[:votes]
       table = image_vote_tabs(image || id, args[:vote_data])
-      result += '<br/>' + content_tag(:div, table, :id => "image_votes_#{id}")
+      result += safe_br + content_tag(:div, table, :id => "image_votes_#{id}")
       did_vote_div = true
     end
 
@@ -1536,7 +1538,7 @@ module ApplicationHelper
       num = nil
     end
 
-    row1 = ''
+    row1 = safe_empty
     if avg and num and num > 0
       num += 1
       num = 8 if num > 8
@@ -1549,14 +1551,14 @@ module ApplicationHelper
           str = content_tag(:div, '', :class => 'on',
                               :style => "width:#{pct}%")
         else
-          str = ''
+          str = safe_empty
         end
         row1 += content_tag(:td, str, :height => num)
       end
       row1 = content_tag(:tr, row1)
     end
 
-    row2 = ''
+    row2 = safe_empty
     str = link_to_function('(X)', "image_vote(#{id},0)",
                            :title => :image_vote_help_0.l)
     str += indent(5)
@@ -1570,7 +1572,7 @@ module ApplicationHelper
         str = link_to_function(str1, "image_vote(#{id},'#{val}')",
                                :title => str2)
       end
-      str = '&nbsp;|&nbsp;' + str if val > 1
+      str = '&nbsp;|&nbsp;'.html_safe + str if val > 1
       row2 += content_tag(:td, content_tag(:small, str))
     end
     row2 = content_tag(:tr, row2)
@@ -1601,7 +1603,7 @@ module ApplicationHelper
   end
   
   def observation_specimen_info(obs)
-    "<span class=\"Data\">#{observation_specimen_link(obs)}</span> #{create_specimen_link(obs)}"
+    content_tag(:span, observation_specimen_link(obs), class: "Data") + create_specimen_link(obs)
   end
     
   def observation_specimen_link(obs)
@@ -1620,11 +1622,11 @@ module ApplicationHelper
   
   def create_specimen_link(obs)
     if check_permission(obs) or (@user && (@user.curated_herbaria.length > 0))
-		  " | " + link_to(:show_observation_create_specimen.t,
+		  " | ".html_safe + link_to(:show_observation_create_specimen.t,
 						          :controller => 'specimen', :action => 'add_specimen',
 						          :id => obs.id, :params => query_params)
 		else
-		  ""
+		  safe_empty
 		end
 	end
 
@@ -1676,7 +1678,7 @@ module ApplicationHelper
       end.join(' ').html_safe
       return content_tag(:div, str, class: "pagination")
     else
-      return ''
+      return safe_empty
     end
   end
 
@@ -1695,7 +1697,7 @@ module ApplicationHelper
   #   <%= pagination_numbers(@pages) %>
   #
   def pagination_numbers(pages, args={})
-    result = ''
+    result = safe_empty
     if pages && pages.num_pages > 1
       params = args[:params] ||= {}
       if pages.letter_arg && pages.letter

@@ -100,7 +100,7 @@ module GM
           }
           return marker;
         }
-      </script>"
+      </script>".html_safe
     end
 
     attr_accessor :name       # name of map div and global variable for Map object

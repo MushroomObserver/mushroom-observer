@@ -43,18 +43,17 @@
 
 <table cellpadding="10">
   <tr style="padding-bottom:0px">
-
     <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <%= if target and target_type == :species_list
         link_to(image_tag('splist.png', :border => 0),
                 :controller => :species_list, :action => :show_species_list,
-                :id => target.id, :params => query_params) + '<br/>'
+                :id => target.id, :params => query_params) + safe_br
       elsif target and target_type == :observation and target.thumb_image
         thumbnail(target.thumb_image, :border => 0, :votes => true,
-                  :link => :show_observation, :obs => target.id) + '<br/>'
+                  :link => :show_observation, :obs => target.id) + safe_br
       elsif target and target_type == :term and target.thumb_image
         thumbnail(target.thumb_image, :border => 0, :votes => true,
-                  :link => :show_term, :term => target.id) + '<br/>'
+                  :link => :show_term, :term => target.id) + safe_br
       else
         done_title = true
         content_tag(:span, title, :class => 'ListRssHeader')

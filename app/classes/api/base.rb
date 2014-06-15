@@ -79,7 +79,9 @@ class API
   end
 
   def process_request
-    self.method = parse_string(:method)
+    tmp_method = parse_string(:method)
+    self.method = tmp_method.downcase.to_sym
+    print "The API method, #{tmp_method}, is better behaved now" if tmp_method == self.method
     if !method
       raise MissingMethod.new
     elsif respond_to?(method)
