@@ -1008,6 +1008,8 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_name_lister
     # This will have to be very rudimentary, since the vast majority of the
     # complexity is in Javascript.  Sigh.
+    user = login('rolf')
+    assert(user.is_successful_contributor?)
     get(:name_lister)
 
     params = {
@@ -1019,25 +1021,25 @@ class SpeciesListControllerTest < FunctionalTestCase
       ].join("\n")
     }
 
-    @request.session[:user_id] = 1
+    # @request.session[:user_id] = 1
     post(:name_lister, params.merge(:commit => :name_lister_submit_spl.l))
     ids = @controller.instance_variable_get('@names').map {|n| n.id}
     assert_equal([6, 2, 1, 14], ids)
     assert_response('create_species_list')
 
-    @request.session[:user_id] = nil
+    # @request.session[:user_id] = 1
     post(:name_lister, params.merge(:commit => :name_lister_submit_txt.l))
     path = "#{RAILS_ROOT}/test/fixtures/reports"
     assert_response_equal_file("#{path}/test2.txt")
 
-    @request.session[:user_id] = nil
+    # @request.session[:user_id] = 1
     post(:name_lister, params.merge(:commit => :name_lister_submit_rtf.l))
     path = "#{RAILS_ROOT}/test/fixtures/reports"
     assert_response_equal_file("#{path}/test2.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end
 
-    @request.session[:user_id] = nil
+    # @request.session[:user_id] = 1
     post(:name_lister, params.merge(:commit => :name_lister_submit_csv.l))
     assert_response_equal_file("#{path}/test2.csv")
   end
