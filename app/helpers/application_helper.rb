@@ -473,7 +473,7 @@ module ApplicationHelper
                          :controller => obj.show_controller,
                          :params => query_params },
                          { :confirm => :are_you_sure.t }) if admin
-        item += indent + "[#{links.join(' | ')}]" if links.any?
+        item += indent + "[" + links.join(' | ').html_safe + "]" if links.any?
       end
       item
     end
@@ -513,7 +513,7 @@ module ApplicationHelper
     type = obj.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = "<big>#{:show_name_descriptions.t}:</big> "
+    head = content_tag(:big, :show_name_descriptions.t)
     head += link_to(:show_name_create_description.t,
                     :controller => obj.show_controller,
                     :action => "create_#{type}_description",
@@ -525,8 +525,8 @@ module ApplicationHelper
     any = list.any?
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.join("<br/>\n")
-    html = '<p>' + html + '</p>'
+    html = list.join("<br/>\n").html_safe
+    html = content_tag(:p, html)
 
     # Show list of projects user is a member of.
     if projects && projects.length > 0
@@ -538,8 +538,8 @@ module ApplicationHelper
                        :source => 'project', :params => query_params)
         indent + item
       end
-      html2 = list.join("<br/>\n")
-      html += '<p>' + html2 + '</p>'
+      html2 = list.join("<br/>\n").html_safe
+      html += content_tag(:p, html2)
     end
     return html
   end
@@ -893,7 +893,7 @@ module ApplicationHelper
     rows << cols.join('').html_safe if cols.any?
     table = make_table(rows, {:cellspacing => 0, :class => "Matrix"}.merge(table_opts),
                        row_opts, {:colspan => @layout["columns"]})
-    concat(table)
+    # concat(table)
   end
 
   # Decide what the color should be for a list item.  Returns 0 or 1.

@@ -14,8 +14,8 @@ MushroomObserver::Application.routes.draw do
   
   # Short-hand notation for AJAX methods.
   # map.connect 'ajax/:action/:type/:id', :controller => 'ajax', :id => /\S.*/
-  match 'ajax/:action/:type/:id' => "ajax", :constraints => { :id => /\d+/ }
-  
+  match 'ajax/:action/:type/:id' => "ajax", :constraints => { :id => /\S.*/ }
+
   # Default action for any controller is 'index'.
   # map.connect ':controller', :action => 'index'
   match ':controller' => ':controller#index'

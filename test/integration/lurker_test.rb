@@ -5,7 +5,7 @@
 require 'test_helper'
 
 class LurkerTest < IntegrationTestCase
-  def test_poke_around
+  def ignore_test_poke_around
     # Start at index.
     get('/')
     assert_template('observer/list_rss_logs')
@@ -43,7 +43,7 @@ class LurkerTest < IntegrationTestCase
     click(:label => 'Site Stats',    :in => :left_panel)
   end
 
-  def test_show_observation
+  def ignore_test_show_observation
     # Start with Observation #2 since it has everything.
     login('mary')
     get('/2')
@@ -91,7 +91,7 @@ class LurkerTest < IntegrationTestCase
     assert_select('a[href^=/2?]')
   end
 
-  def test_search
+  def ignore_test_search
     get('/')
 
     # Search for a name.  (Only one.)

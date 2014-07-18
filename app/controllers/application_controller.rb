@@ -1358,7 +1358,7 @@ class ApplicationController < ActionController::Base
       else
         results << [str, { :controller => query.model.show_controller,
                            :action => query.model.index_action,
-                           :by => by, :params => query_params }]
+                           :by => by }.merge(query_params)]
       end
     end
 
@@ -1371,7 +1371,7 @@ class ApplicationController < ActionController::Base
     end
     results << [str, { :controller => query.model.show_controller,
                        :action => query.model.index_action,
-                       :by => reverse_by, :params => query_params }]
+                       :by => reverse_by }.merge(query_params)]
 
     return results
   end

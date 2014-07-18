@@ -2,7 +2,9 @@
 
 require 'test_helper'
 
-class CuratorTest < IntegrationTestCase
+class CuratorTest < ActionDispatch::IntegrationTest
+  include SessionExtensions
+
   def test_first_specimen
     # login as mary (who doesn't have a herbarium)
     login('mary', 'testpassword', :true)
@@ -59,7 +61,7 @@ class CuratorTest < IntegrationTestCase
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]
     login(curator.login, 'testpassword', :true)
-    get("herbarium/edit_herbarium/#{herbarium.id}")
+    get("herbarium/edit_herbarium?id=#{herbarium.id}")
     open_form do |form|
       form.assert_value('code', herbarium.code)
       form.change('code', new_code)

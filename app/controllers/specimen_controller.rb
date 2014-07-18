@@ -99,7 +99,7 @@ class SpecimenController < ApplicationController
   end
  
   def valid_specimen_params(params)
-    params[:herbarium_name] = params[:herbarium_name].strip_html
+    params[:herbarium_name] = params[:herbarium_name].to_s.strip_html
     params[:herbarium_label] = params[:herbarium_label].strip_html
     # has_curator_permission(params[:herbarium_name], @user) and
     !specimen_exists(params[:herbarium_name], params[:herbarium_label])

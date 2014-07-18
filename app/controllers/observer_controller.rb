@@ -765,11 +765,17 @@ class ObserverController < ApplicationController
       ['num_views',   :sort_by_num_views.t],
     ]
 
-    @links << [:show_object.t(:type => :map), {
+    link = :show_object.t(:type => :map), {
                 :controller => 'observer',
                 :action => 'map_observations',
                 :params => query_params(query),
-              }]
+    }
+    @links << link
+    # @links << [:show_object.t(:type => :map), {
+    #             :controller => 'observer',
+    #             :action => 'map_observations',
+    #             :params => query_params(query),
+    #           }]
 
     # Add "show location" link if this query can be coerced into a location query.
     if query.is_coercable?(:Location)

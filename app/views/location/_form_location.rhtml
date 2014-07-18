@@ -116,7 +116,7 @@
           gmap = make_editable_map(@location)
           finish_map(gmap)
           add_header(javascript_tag('var geocoder = new GClientGeocoder()'))
-          gmap.div(:width => 500, :height => 500)
+          gmap.div(:width => 500, :height => 500).html_safe
         %>
       </center>
     </td>

@@ -58,7 +58,7 @@ module SessionExtensions
   def process_with_error_checking(method, url, *args)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send("#{method}_via_redirect", url, *args)
+    send("#{method.downcase}_via_redirect", url, *args)
     if status == 500
       if error = controller.instance_variable_get('@error')
         msg = "#{error}\n#{error.backtrace.join("\n")}"
@@ -76,7 +76,6 @@ module SessionExtensions
 
   # Override all 'get' calls and do a bunch of extra error checking.
   def get(*args)
-    print "******** calling session_extensions.rb#get ****************\n"
     if !@doing_with_error_checking
       process_with_error_checking("get", *args)
     else
