@@ -57,7 +57,9 @@ class PublicationsController < ApplicationController
   # POST /publications
   # POST /publications.xml
   def create
-    @publication = Publication.new(params[:publication])
+    @publication = Publication.new(params[:publication].merge(
+      :user => User.current
+    ))
     respond_to do |format|
       if @publication.save
         flash[:notice] = :runtime_created_at.t(:type => 'publication')
