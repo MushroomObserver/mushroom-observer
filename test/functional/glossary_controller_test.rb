@@ -50,11 +50,9 @@ class GlossaryControllerTest < FunctionalTestCase
   end
   
   def test_create_term_post
-    print "test_create_term_post: #{Term.count}\n"
     user = login
     params = create_term_params
     post(:create_term, params)
-    print "test_create_term_post: #{Term.count}\n"
     term = Term.find(:all, :order => "created_at DESC")[0]
     assert_equal(params[:term][:name], term.name)
     assert_equal(params[:term][:description], term.description)

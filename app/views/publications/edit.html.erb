@@ -7,7 +7,15 @@
 %>
 
 <%= form_for(@publication) do |f| %>
-  <%= f.error_messages %>
+  <% if @publication.errors.any? %>
+    <div id="error_explanation">
+      <ul>
+        <% @publication.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 
   <p>
     <%= f.label :full, :publication_full.t %><br />

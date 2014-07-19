@@ -48,7 +48,7 @@ class AccountMailerTest < ActiveSupport::TestCase
         fix_mac_vs_pc!(email)
         assert_string_equal_file(email, *html_files)
       end
-      # end
+    # end
   end
 
 ################################################################################
@@ -64,7 +64,6 @@ class AccountMailerTest < ActiveSupport::TestCase
   def test_email_2
     obj = names(:coprinus_comatus)
     run_mail_test('author_request', rolf) do
-      print "test_email_2: #{obj.description}\n"
       AccountMailer.author_request(katrina, rolf, obj.description,
                         'Please do something or other', 'and this is why...')
     end
