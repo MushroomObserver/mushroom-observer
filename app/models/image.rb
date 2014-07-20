@@ -561,7 +561,7 @@ class Image < AbstractModel
           self.upload_length = @file.size
           result = true
         rescue => e
-          errors.add(:image, e.to_s)
+          errors.add(:image, "Unexpected error while copying attached file to temp file. Error class #{e.class.to_s}: #{e.to_s}")
           result = false
         end
 

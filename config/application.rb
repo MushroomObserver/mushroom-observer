@@ -99,10 +99,11 @@ module MushroomObserver
     # I just change the CSS class to "has_error", which gives it a red border.
     # This is superior to the default, which encapsulates the field in a div,
     # because that throws the layout off.  Just changing the border, while less
-    # conspicuous, has no effect on the layout.
-    # config.action_view.field_error_proc = Proc.new { |html_tag, instance|
-    #   html_tag.sub(/(<\w+)/, '\1 class="has_error"')
-    # }
+    # conspicuous, has no effect on the layout.  This is not a hack, this is
+    # just a standard configuration many rails apps take advantage of.
+    config.action_view.field_error_proc = Proc.new { |html_tag, instance|
+      html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
+    }
 
     # Configure SMTP settings for ActionMailer.
     config.action_mailer.smtp_settings = MAIL_CONFIG

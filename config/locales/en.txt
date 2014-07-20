@@ -3874,7 +3874,6 @@ en:
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
   validate_user_login_taken: Sorry, that login name is already taken.
   validate_image_wrong_type: The file "[file]" is not a valid image; it is comes through as '[type]'.
-  validate_publication_ref_missing: Reference missing.
 
   # These shouldn't need translating, but you are free to override if you need to.
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
@@ -3915,8 +3914,9 @@ en:
   validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-  validate_project_user_group_missing: Missing [:user_group].
+  validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"
   validate_project_user_missing: "[:validate_missing(field=:user)]"
+  validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_species_list_user_missing: "[:validate_missing(field=:user)]"
@@ -4258,6 +4258,7 @@ en:
   api_string_too_long: The string, "[val]", has more than [limit] characters.
   api_too_many_uploads: Only one upload allowed per request.  You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter.  But do not use both methods at the same time.
   api_trying_to_set_multiple_locations_to_same_name: You are attempting to update multiple locations to the same name.
+  api_unexpected_upload: "Unexpected file attached."
   api_unused_parameters: "Unexpected parameters: [params]"
   api_user_already_exists: The user "[login]" already exists or is taken.
   api_user_group_taken: The user group "[title]" already exists.

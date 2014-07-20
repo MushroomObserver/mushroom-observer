@@ -61,7 +61,11 @@ class ApiController < ApplicationController
     args.delete(:controller)
     args[:method] = request.method
     args[:action] = type
-    args[:http_request] = request if request.content_length.to_i > 0
+    if request.content_length.to_i > 0 and
+       !request.content_type.blank?
+      puts "type: #{request.content_type.inspect}, length: #{request.content_length.inspect}"
+      args[:http_request] = request
+    end
 
     # Special exception to allow caller who creates new user to see that user's
     # new API keys.  Otherwise there is no way to get that info via the API. 

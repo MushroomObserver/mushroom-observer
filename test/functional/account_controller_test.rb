@@ -402,7 +402,7 @@ class AccountControllerTest < FunctionalTestCase
 
     # It should create a new image: this is the current number of images.
     num_images = Image.count
-    
+
     # Post form.
     params = {
       :user => {

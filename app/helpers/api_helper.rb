@@ -9,26 +9,26 @@
 module ApiHelper
   def xml_boolean(xml, tag, val)
     str = val ? 'true' : 'false'
-    xml.send(tag, :type => 'boolean', :value => str)
+    xml.tag!(tag, :type => 'boolean', :value => str)
   rescue
   end
 
   def xml_integer(xml, tag, val)
     str = '%d' % val rescue ''
-    xml.send(tag, str, :type => 'integer')
+    xml.tag!(tag, str, :type => 'integer')
   rescue
   end
 
   def xml_float(xml, tag, val, places)
     str = "%.#{places}f" % val rescue ''
-    xml.send(tag, str, :type => 'float')
+    xml.tag!(tag, str, :type => 'float')
   rescue
   end
 
   def xml_string(xml, tag, val)
     if !val.blank?
       str = val.to_s
-      xml.send(tag, str, :type => 'string', :content_type => 'text/plain')
+      xml.tag!(tag, str, :type => 'string', :content_type => 'text/plain')
     end
   rescue
   end
@@ -36,7 +36,7 @@ module ApiHelper
   def xml_html_string(xml, tag, val)
     if !val.blank?
       str = val.to_s
-      xml.send(tag, str, :type => 'string', :content_type => 'text/html')
+      xml.tag!(tag, str, :type => 'string', :content_type => 'text/html')
     end
   rescue
   end
@@ -44,7 +44,7 @@ module ApiHelper
   def xml_sql_string(xml, tag, val)
     if !val.blank?
       str = val.to_s
-      xml.send(tag, str, :type => 'string', :content_type => 'application/x-sql')
+      xml.tag!(tag, str, :type => 'string', :content_type => 'application/x-sql')
     end
   rescue
   end
@@ -52,7 +52,7 @@ module ApiHelper
   def xml_date(xml, tag, val)
     if val
       str = val.api_date rescue ''
-      xml.send(tag, str, :type => 'date', :format => 'YYYY-MM-DD')
+      xml.tag!(tag, str, :type => 'date', :format => 'YYYY-MM-DD')
     end
   rescue
   end
@@ -60,32 +60,32 @@ module ApiHelper
   def xml_datetime(xml, tag, val)
     if val
       str = val.api_time
-      xml.send(tag, str, :type => 'date-time', :format => 'YYYY-MM-DD HH:MM:SS')
+      xml.tag!(tag, str, :type => 'date-time', :format => 'YYYY-MM-DD HH:MM:SS')
     end
   rescue
   end
 
   def xml_ellapsed_time(xml, tag, val)
     str = '%.4f' % val
-    xml.send(tag, str, :type => 'float', :units => 'seconds')
+    xml.tag!(tag, str, :type => 'float', :units => 'seconds')
   rescue
   end
 
   def xml_latitude(xml, tag, val)
     str = '%.4f' % val
-    xml.send(tag, str, :type => 'float', :units => 'degrees north')
+    xml.tag!(tag, str, :type => 'float', :units => 'degrees north')
   rescue
   end
 
   def xml_longitude(xml, tag, val)
     str = '%.4f' % val
-    xml.send(tag, str, :type => 'float', :units => 'degrees east')
+    xml.tag!(tag, str, :type => 'float', :units => 'degrees east')
   rescue
   end
 
   def xml_altitude(xml, tag, val)
     str = '%d' % val
-    xml.send(tag, str, :type => 'integer', :units => 'meters')
+    xml.tag!(tag, str, :type => 'integer', :units => 'meters')
   rescue
   end
 
@@ -93,28 +93,28 @@ module ApiHelper
     if @user && @user.location_format == :scientific
       val = Location.reverse_name(val)
     end
-    xml.send(tag, val, :type => 'string')
+    xml.tag!(tag, val, :type => 'string')
   rescue
   end
 
   def xml_naming_reason(xml, tag, val)
     if val.notes.blank?
-      xml.send(tag, :category => val.label.l)
+      xml.tag!(tag, :category => val.label.l)
     else
       str = val.notes.to_s
-      xml.send(tag, str, :category => val.label.l)
+      xml.tag!(tag, str, :category => val.label.l)
     end
   end
 
   def xml_confidence_level(xml, tag, val)
     str = '%.2f' % val
-    xml.send(tag, str, :type => 'float', :range => '-3.0 to 3.0')
+    xml.tag!(tag, str, :type => 'float', :range => '-3.0 to 3.0')
   rescue
   end
 
   def xml_image_quality(xml, tag, val)
     str = '%.2f' % val
-    xml.send(tag, str, :type => 'float', :range => '0.0 to 4.0')
+    xml.tag!(tag, str, :type => 'float', :range => '0.0 to 4.0')
   rescue
   end
 
@@ -135,9 +135,9 @@ module ApiHelper
       model = model.constantize unless model.is_a?(Class)
       url = model.show_url(id) rescue nil
       if url
-        xml.send(tag, :id => id, :url => url, :type => model.type_tag.to_s)
+        xml.tag!(tag, :id => id, :url => url, :type => model.type_tag.to_s)
       else
-        xml.send(tag, :id => id, :type => model.type_tag.to_s)
+        xml.tag!(tag, :id => id, :type => model.type_tag.to_s)
       end
     end
   end

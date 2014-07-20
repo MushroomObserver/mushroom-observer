@@ -4,10 +4,10 @@ require 'digest/md5'
 require 'net/http'
 require 'uri'
 
-# HOST = 'localhost'
-# PORT = 3000
-HOST = 'localhost.localdomain'
-PORT = 80
+HOST = 'localhost'
+PORT = 3000
+# HOST = 'localhost.localdomain'
+# PORT = 80
 KEY = 'cahja4s81achfojjlqzgkt16qgkl2hira'
 
 # HOST = 'mushroomobserver.org'

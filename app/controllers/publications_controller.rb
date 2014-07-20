@@ -66,6 +66,7 @@ class PublicationsController < ApplicationController
         format.html { redirect_to(@publication) }
         format.xml  { render :xml => @publication, :status => :created, :location => @publication }
       else
+        flash_object_errors(@publication)
         format.html { render :action => "new" }
         format.xml  { render :xml => @publication.errors, :status => :unprocessable_entity }
       end
@@ -83,6 +84,7 @@ class PublicationsController < ApplicationController
           format.html { redirect_to(@publication) }
           format.xml  { head :ok }
         else
+          flash_object_errors(@publication)
           format.html { render :action => "edit" }
           format.xml  { render :xml => @publication.errors, :status => :unprocessable_entity }
         end

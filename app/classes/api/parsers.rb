@@ -568,8 +568,14 @@ class API
     unused = params.keys - expected_params.keys
     if unused.include?(:help)
       raise HelpMessage.new(expected_params)
-    elsif unused.any?
-      raise UnusedParameters.new(unused)
+    else
+      if unused.include?(:http_request)
+        raise UnexpectedUpload.new
+        unused.delete(:http_request)
+      end
+      if unused.any?
+        raise UnusedParameters.new(unused)
+      end
     end
   end
 
