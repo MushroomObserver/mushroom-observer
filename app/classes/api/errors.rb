@@ -163,6 +163,9 @@ class API
     end
   end
 
+  class UnexpectedUpload < Error
+  end
+
   class HelpMessage < Error
     def initialize(params)
       super()

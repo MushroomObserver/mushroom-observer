@@ -423,7 +423,7 @@ class AccountController < ApplicationController
         else
           name = nil
         end
-        date = Time.local(params['date']['copyright_year'])
+        date = Date.parse(params['date']['copyright_year'].to_s + '0101')
         license = License.safe_find(params['upload']['license_id'])
         holder = params['copyright_holder']
         image = Image.new(

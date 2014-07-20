@@ -1,4 +1,4 @@
-xml.send(tag,
+xml.tag!(tag,
   :id => object.id,
   :url => object.show_url,
   :type => 'image'

@@ -50,9 +50,9 @@ class API
   end
 
   def handle_version
-    version = parse_float(:version)
+    self.version = parse_float(:version)
     if version.blank?
-      version = self.class.version
+      self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
       raise BadVersion.new(version)
     else
