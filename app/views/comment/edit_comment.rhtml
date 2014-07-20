@@ -2,8 +2,8 @@
   @title = :comment_edit_title.t(:name => @target.unique_format_name)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :comment),
-      add_query_param(:action => 'show_comment', :id => @comment.id))
+    add_tab_with_query(:cancel_and_show.t(:type => :comment),
+      :action => 'show_comment', :id => @comment.id)
   end
 %>
 

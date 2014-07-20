@@ -2,12 +2,12 @@
   @title = :image_remove_title.t(:name => @object.unique_format_name)
 
   new_tab_set do
-    add_tab(:show_object.t(:type => target_class),
-      add_query_param(:controller => target_class.show_controller, :action => target_class.show_action,
-        :id => @object.id))
-    add_tab(:edit_object.t(:type => target_class),
-      add_query_param(:controller => target_class.show_controller, :action => target_class.edit_action,
-        :id => @object.id))
+    add_tab_with_query(:show_object.t(:type => target_class),
+      :controller => target_class.show_controller, :action => target_class.show_action,
+      :id => @object.id)
+    add_tab_with_query(:edit_object.t(:type => target_class),
+      :controller => target_class.show_controller, :action => target_class.edit_action,
+      :id => @object.id)
   end
 %>
 

@@ -324,51 +324,49 @@ module ApplicationHelper
     admin  = desc.is_admin?(@user)  || is_in_admin_mode?
     new_tab_set do
       if true
-        add_tab(:show_object.t(:type => type),
-          add_query_param(:action => "show_#{type}", :id => desc.parent_id))
+        add_tab_with_query(:show_object.t(:type => type),
+          :action => "show_#{type}", :id => desc.parent_id)
       end
       if (desc.source_type == :project) and
          (project = desc.source_object)
-        add_tab(:show_object.t(:type => :project),
-          add_query_param(:controller => 'project', :action => 'show_project', 
-            :id => project.id))
+        add_tab_with_query(:show_object.t(:type => :project),
+          :controller => 'project', :action => 'show_project', 
+          :id => project.id)
       end
       if admin
-        add_tab(:show_description_destroy.t,
-          add_query_param({
-            :action => "destroy_#{type}_description",
-            :id => desc.id
-          }), { :confirm => :are_you_sure.l })
+        add_tab_with_query(:show_description_destroy.t,
+          { :action => "destroy_#{type}_description", :id => desc.id },
+          { :confirm => :are_you_sure.l })
       end
       if true
-        add_tab(:show_description_clone.t,
-          add_query_param(:controller => type,
-            :action => "create_#{type}_description", :id => desc.parent_id,
-            :clone => desc.id, :help => :show_description_clone_help.l))
+        add_tab_with_query(:show_description_clone.t,
+          :controller => type,
+          :action => "create_#{type}_description", :id => desc.parent_id,
+          :clone => desc.id, :help => :show_description_clone_help.l)
       end
       if admin
-        add_tab(:show_description_merge.t,
-          add_query_param(:action => 'merge_descriptions', :id => desc.id,
-            :help => :show_description_merge_help.l))
+        add_tab_with_query(:show_description_merge.t,
+          :action => 'merge_descriptions', :id => desc.id,
+          :help => :show_description_merge_help.l)
       end
       if admin
-        add_tab(:show_description_adjust_permissions.t,
-          add_query_param(:action => 'adjust_permissions', :id => @description.id,
-            :help => :show_description_adjust_permissions_help.l))
+        add_tab_with_query(:show_description_adjust_permissions.t,
+          :action => 'adjust_permissions', :id => @description.id,
+          :help => :show_description_adjust_permissions_help.l)
       end
       if desc.public && @user && (desc.parent.description_id != desc.id)
-        add_tab(:show_description_make_default.t,
-          add_query_param(:action => 'make_description_default', :id => desc.id,
-            :help => :show_description_make_default_help.l))
+        add_tab_with_query(:show_description_make_default.t,
+          :action => 'make_description_default', :id => desc.id,
+          :help => :show_description_make_default_help.l)
       end
       if admin and (desc.source_type != :public)
-        add_tab(:show_description_publish.t,
-          add_query_param(:action => 'publish_description', :id => desc.id,
-            :help => :show_description_publish_help.l))
+        add_tab_with_query(:show_description_publish.t,
+          :action => 'publish_description', :id => desc.id,
+          :help => :show_description_publish_help.l)
       end
       if writer
-        add_tab(:show_description_edit.t,
-          add_query_param(:action => "edit_#{type}_description", :id => desc.id))
+        add_tab_with_query(:show_description_edit.t,
+          :action => "edit_#{type}_description", :id => desc.id)
       end
     end
 
@@ -1795,9 +1793,8 @@ module ApplicationHelper
       add_tab("« #{:BACK.t}",  args.merge(:action => "prev_#{type}" ))
       add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
       if mappable
-        add_tab(:MAP.t,
-          add_query_param(:controller => 'location',
-          :action => 'map_locations'))
+        add_tab_with_query(:MAP.t, :controller => 'location',
+          :action => 'map_locations')
       end
       add_tab("#{:FORWARD.t} »",  args.merge(:action => "next_#{type}"  ))
     end

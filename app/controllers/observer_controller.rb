@@ -543,9 +543,9 @@ class ObserverController < ApplicationController
 
       # Let the individual controllers execute and render it.
       redirect_to(add_query_param({
-        :controller => model.show_controller,
-        :action => 'advanced_search'
-      }, query))
+          :controller => model.show_controller,
+          :action => 'advanced_search'
+        }, query))
     end
   end
 

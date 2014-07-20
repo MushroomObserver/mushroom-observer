@@ -8,9 +8,9 @@
 
   for obs in @image.observations
     new_tab_set do
-      add_tab(:show_name.t(:name => obs.format_name),
-        add_query_param(:controller => 'name', :action => 'show_name',
-          :id => obs.name.id))
+      add_tab_with_query(:show_name.t(:name => obs.format_name),
+        :controller => 'name', :action => 'show_name',
+        :id => obs.name.id)
       eol_url = @image.eol_url
       add_tab('EOL', eol_url) if eol_url
       add_tab(:google_images.t,

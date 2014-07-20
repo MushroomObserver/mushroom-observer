@@ -9,24 +9,22 @@
     obs_id = @observation.id
     tag_params[:obs_id] = obs_id
     new_tab_set do
-      add_tab(:show_object.t(:type => :observation),
-        add_query_param(:controller => 'observer',
-          :action => 'show_observation', :id => obs_id))
-      add_tab(:image_reuse_edit.t,
-        add_query_param(:controller => 'observer',
-          :action => 'edit_observation', :id => obs_id))
+      add_tab_with_query(:show_object.t(:type => :observation),
+        :controller => 'observer', :action => 'show_observation',
+        :id => obs_id)
+      add_tab_with_query(:image_reuse_edit.t, :controller => 'observer',
+        :action => 'edit_observation', :id => obs_id)
     end
   elsif @mode == :term
     @title = :image_reuse_title.t(:name => @term.unique_format_name)
     term_id = @term.id
     tag_params[:term_id] = term_id
     new_tab_set do
-      add_tab(:show_object.t(:type => :term),
-        add_query_param(:controller => 'glossary', :action => 'show_term',
-          :id => term_id))
-      add_tab(:edit_term.t,
-        add_query_param(:controller => 'glossary', :action => 'edit_term',
-          :id => term_id))
+      add_tab_with_query(:show_object.t(:type => :term), :controller => 'glossary',
+        :action => 'show_term', :id => term_id)
+      add_tab_with_query(:edit_term.t,
+        :controller => 'glossary', :action => 'edit_term',
+        :id => term_id)
     end
   else
     @title = :image_reuse_title.t(:name => @user.legal_name)

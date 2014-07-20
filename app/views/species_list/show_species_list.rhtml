@@ -54,22 +54,19 @@
 <% if @pages && @pages.length > 0
   set_query_params(@query) %>
   <%= :species_list_show_members.t %>: 
-    <%= link_to(:show_objects.t(:type => :observation),
-                :controller => :observer, :action => :index_observation,
-                :params => query_params) %> |
-    <%= link_to(:show_objects.t(:type => :image),
-                :controller => :image, :action => :index_image,
-                :params => query_params) %> |
-    <%= link_to(:show_objects.t(:type => :name),
-                :controller => :name, :action => :index_name,
-                :params => query_params) %> |
+    <%= link_with_query(:show_objects.t(:type => :observation),
+          :controller => :observer, :action => :index_observation) %> |
+    <%= link_with_query(:show_objects.t(:type => :image),
+          :controller => :image, :action => :index_image) %> |
+    <%= link_with_query(:show_objects.t(:type => :name),
+          :controller => :name, :action => :index_name) %> |
     <%= link_to(:app_checklist.t,
                 :controller => :observer, :action => :checklist,
                 :species_list_id => @species_list.id) %>
     <% if DEVELOPMENT || is_reviewer? %>
      | <%= link_to(:species_list_show_print_labels.t,
-                :controller => :species_list, :action => :print_labels,
-                :id => @species_list.id) %>
+             :controller => :species_list, :action => :print_labels,
+             :id => @species_list.id) %>
     <% end %>
     <br/>
   <%= paginate_block(@pages) do %>
@@ -81,14 +78,16 @@
           <tr valign="top" class="ListLine<%= odd_or_even %>">
             <td width="110" align="center" valign="middle">
               <%= if observation.thumb_image_id
-                thumbnail(observation.thumb_image, :border => 0, :link => :show_observation,
-                          :obs => observation.id, :votes => true)
+                thumbnail(observation.thumb_image, :border => 0,
+                  :link => :show_observation, :obs => observation.id,
+                  :votes => true)
               end %>
             </td>
             <td width="100%" valign="middle">
               <span class="ListName">
-                <%= link_to(observation.unique_format_name.t, :controller => 'observer',
-                            :action => 'show_observation', :id => observation.id, :params => query_params) %>
+                <%= link_with_query(observation.unique_format_name.t,
+                      :controller => 'observer',
+                      :action => 'show_observation', :id => observation.id) %>
               </span><br/>
               <span class="ListWhere"><%= location_link(observation.place_name, observation.location) %></span>:
               <span class="ListWho"><%= user_link(observation.user) %></span>:

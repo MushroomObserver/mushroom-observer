@@ -19,15 +19,15 @@
   end
 
   new_tab_set do
-    add_tab(:comment_show_show.t(:type => target_type),
-      add_query_param(:controller => @target.show_controller,
-        :action => @target.show_action, :id => @target.id))
+    add_tab_with_query(:comment_show_show.t(:type => target_type),
+      :controller => @target.show_controller,
+      :action => @target.show_action, :id => @target.id)
     if check_permission(@comment)
-      add_tab(:comment_show_edit.t,
-        add_query_param(:action => 'edit_comment', :id => @comment.id))
-      add_tab(:comment_show_destroy.t,
-        add_query_param({:action => 'destroy_comment', :id => @comment.id}),
-          { :confirm => :are_you_sure.l })
+      add_tab_with_query(:comment_show_edit.t,
+        :action => 'edit_comment', :id => @comment.id)
+      add_tab_with_query(:comment_show_destroy.t,
+        { :action => 'destroy_comment', :id => @comment.id },
+        { :confirm => :are_you_sure.l })
     end 
   end
 
