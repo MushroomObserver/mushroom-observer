@@ -40,7 +40,7 @@ class ApiControllerTest < FunctionalTestCase
     end
   end
 
-  def ignore_test_post_minimal_observation
+  def test_post_minimal_observation
     post(:observations,
       :api_key  => api_keys(:rolfs_api_key).key,
       :location => 'Unknown',
@@ -66,7 +66,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_obj_list_equal([], obs.species_lists)
   end
 
-  def ignore_test_post_maximal_observation
+  def test_post_maximal_observation
     post(:observations,
       :api_key       => api_keys(:rolfs_api_key).key,
       :date          => '2012-06-26',
@@ -106,7 +106,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_obj_list_equal([species_lists(:another_species_list)], obs.species_lists)
   end
 
-  def ignore_test_post_minimal_image
+  def test_post_minimal_image
     setup_image_dirs
     file = "#{::Rails.root.to_s}/test/images/sticky.jpg"
     post_and_send_file(:images, file, 'image/jpeg',
@@ -127,7 +127,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_obj_list_equal([], img.observations)
   end
 
-  def ignore_test_post_maximal_image
+  def test_post_maximal_image
     setup_image_dirs
     file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
     post_and_send_file(:images, file, 'image/jpeg',
@@ -156,7 +156,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_obj_list_equal([obs], img.observations)
   end
 
-  def ignore_test_post_user
+  def test_post_user
     rolfs_key = api_keys(:rolfs_api_key)
     post(:users,
       :api_key => rolfs_key.key,
@@ -180,7 +180,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal('New API Key', notes.to_s)
   end
 
-  def ignore_test_post_api_key
+  def test_post_api_key
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)

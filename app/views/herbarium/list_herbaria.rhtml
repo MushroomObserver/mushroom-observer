@@ -18,9 +18,8 @@
         odd_or_even = 1 - odd_or_even %>
         <tr valign="top" class="ListLine<%= odd_or_even %>">
           <td width="100%">
-            <%= link_to(content_tag(:span, herbarium.name.t, class: "ListWhat"),
-                        :action => 'show_herbarium', :id => herbarium.id,
-                        :params => query_params) %>:
+            <%= link_with_query(content_tag(:span, herbarium.name.t, class: "ListWhat"),
+                  :action => 'show_herbarium', :id => herbarium.id) %>:
             <br/>
             <span class="ListWhen"><%= herbarium.created_at.web_time %></span>
           </td>

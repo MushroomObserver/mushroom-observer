@@ -2,19 +2,19 @@
   @title = :image_add_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :observation), :controller => 'observer',
-            :action => 'show_observation', :id => @observation.id,
-            :params => query_params)
-    add_tab(:image_add_edit.t, :controller => 'observer',
-            :action => 'edit_observation', :id => @observation.id,
-            :params => query_params)
+    add_tab(:cancel_and_show.t(:type => :observation),
+      add_query_param(:controller => 'observer',
+        :action => 'show_observation', :id => @observation.id))
+    add_tab(:image_add_edit.t,
+      add_query_param(:controller => 'observer',
+        :action => 'edit_observation', :id => @observation.id))
   end
 %>
 
 <div id="license-notice"><%= :image_add_warning.tp %></div>
 
-<%= form_for(:image, :url => { :action => :add_image, :id => @observation.id,
-            :params => query_params }, :html => { :multipart => true }) do |form| %>
+<%= form_for(:image, :url => add_query_param({ :action => :add_image, :id => @observation.id}),
+      :html => { :multipart => true }) do |form| %>
   <br/><center><%= submit_tag(:image_add_upload.l) %></center><br/>
 
   <%= hidden_field("observation", "id") %>

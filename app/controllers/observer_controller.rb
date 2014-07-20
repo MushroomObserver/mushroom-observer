@@ -456,8 +456,9 @@ class ObserverController < ApplicationController
       else
         flash_warning(:runtime_object_multiple_matches.t(:match => id, :type => type))
       end
-      redirect_to(:controller => obj.show_controller, :action => obj.index_action,
-                  :params => query_params(query))
+      redirect_to(add_query_param({
+        :controller => obj.show_controller, :action => obj.index_action
+        }, query))
     end
   end
 
@@ -541,8 +542,10 @@ class ObserverController < ApplicationController
       query = create_query(model, :advanced_search, search)
 
       # Let the individual controllers execute and render it.
-      redirect_to(:controller => model.show_controller,
-        :action => 'advanced_search', :params => query_params(query))
+      redirect_to(add_query_param({
+        :controller => model.show_controller,
+        :action => 'advanced_search'
+      }, query))
     end
   end
 
@@ -610,9 +613,10 @@ class ObserverController < ApplicationController
 
     # Redisplay the index if user presses "Index".
     if @goto_index
-      redirect_to(:controller => @query.model.show_controller,
-                  :action => @query.model.index_action,
-                  :params => query_params(@query))
+      redirect_to(add_query_param({
+        :controller => @query.model.show_controller,
+        :action => @query.model.index_action
+      }, @query))
     else
       # flash_notice(@query.query)
       @flavor_field = refine_search_flavor_field
@@ -765,50 +769,44 @@ class ObserverController < ApplicationController
       ['num_views',   :sort_by_num_views.t],
     ]
 
-    link = :show_object.t(:type => :map), {
-                :controller => 'observer',
-                :action => 'map_observations',
-                :params => query_params(query),
-    }
+    link = :show_object.t(:type => :map), add_query_param({
+        :controller => 'observer', :action => 'map_observations'
+      }, query)
     @links << link
-    # @links << [:show_object.t(:type => :map), {
-    #             :controller => 'observer',
-    #             :action => 'map_observations',
-    #             :params => query_params(query),
-    #           }]
+    # @links << [:show_object.t(:type => :map),
+    #   add_query_param({
+    #     :controller => 'observer',
+    #     :action => 'map_observations',
+    #     }, query)]
 
     # Add "show location" link if this query can be coerced into a location query.
     if query.is_coercable?(:Location)
-      @links << [:show_objects.t(:type => :location), {
-                  :controller => 'location',
-                  :action => 'index_location',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :location),
+        add_query_param({
+          :controller => 'location', :action => 'index_location'
+        }, query)]
     end
 
     # Add "show names" link if this query can be coerced into a name query.
     if query.is_coercable?(:Name)
-      @links << [:show_objects.t(:type => :name), {
-                  :controller => 'name',
-                  :action => 'index_name',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :name),
+      add_query_param({
+        :controller => 'name', :action => 'index_name'
+      }, query)]
     end
 
     # Add "show images" link if this query can be coerced into an image query.
     if query.is_coercable?(:Image)
-      @links << [:show_objects.t(:type => :image), {
-                  :controller => 'image',
-                  :action => 'index_image',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :image),
+        add_query_param({
+          :controller => 'image', :action => 'index_image'
+        }, query)]
     end
 
-    @links << [:list_observations_download_as_csv.t, {
-                :controller => 'observer',
-                :action => 'download_observations',
-                :params => query_params(query)
-              }]
+    @links << [:list_observations_download_as_csv.t,
+      add_query_param({
+        :controller => 'observer', :action => 'download_observations'
+      }, query)]
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == 'user') or
@@ -868,8 +866,7 @@ class ObserverController < ApplicationController
     @format = params[:format] || 'raw'
     @encoding = params[:encoding] || 'UTF-8'
     if params[:commit] == :CANCEL.l
-      redirect_to(:action => :index_observation, :always_index => true,
-                  :params => query_params)
+      redirect_with_query(:action => :index_observation, :always_index => true)
     elsif params[:commit] == :DOWNLOAD.l
       report = create_observation_report(
         :query    => query,
@@ -1250,8 +1247,8 @@ class ObserverController < ApplicationController
 
       # Make sure user owns this observation!
       if !check_permission!(@observation)
-        redirect_to(:action => 'show_observation', :id => @observation.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_observation',
+          :id => @observation.id)
 
       # Initialize form.
       elsif request.method != "POST"
@@ -1308,10 +1305,12 @@ class ObserverController < ApplicationController
 
         # Redirect to show_observation or create_location on success.
         elsif @observation.location.nil?
-          redirect_to(:controller => 'location', :action => 'create_location', :where => @observation.place_name,
-                      :set_observation => @observation.id, :params => query_params)
+          redirect_with_query(:controller => 'location',
+            :action => 'create_location', :where => @observation.place_name,
+            :set_observation => @observation.id)
         else
-          redirect_to(:action => 'show_observation', :id => @observation.id, :params => query_params)
+          redirect_with_query(:action => 'show_observation',
+            :id => @observation.id)
         end
       end
     end
@@ -1331,18 +1330,21 @@ class ObserverController < ApplicationController
       end
       if !check_permission!(@observation)
         flash_error(:runtime_destroy_observation_denied.t(:id => @observation.id))
-        redirect_to(:action => 'show_observation', :id => @observation.id,
-                    :params => query_params(this_state))
+        redirect_to(add_query_param({
+          :action => 'show_observation', :id => @observation.id
+        }, this_state))
       elsif !@observation.destroy
         flash_error(:runtime_destroy_observation_failed.t(:id => @observation.id))
-        redirect_to(:action => 'show_observation', :id => @observation.id,
-                    :params => query_params(this_state))
+        edirect_to(add_query_param({
+          :action => 'show_observation', :id => @observation.id
+          }, this_state))
       else
         Transaction.delete_observation(:id => @observation)
         flash_notice(:runtime_destroy_observation_success.t(:id => params[:id].to_s))
         if next_state
-          redirect_to(:action => 'show_observation', :id => next_state.current_id,
-                      :params => query_params(next_state))
+          edirect_to(add_query_param({
+            :action => 'show_observation', :id => next_state.current_id
+            }, next_state))
         else
           redirect_to(:action => 'list_observations')
         end
@@ -1426,11 +1428,11 @@ class ObserverController < ApplicationController
 
           # Check for notifications.
           if has_unshown_notifications?(@user, :naming)
-            redirect_to(:action => 'show_notifications', :id => @observation.id,
-                        :params => query_params)
+            redirect_with_query(:action => 'show_notifications',
+              :id => @observation.id)
           else
-            redirect_to(:action => 'show_observation', :id => @observation.id,
-                        :params => query_params)
+            redirect_with_query(:action => 'show_observation',
+              :id => @observation.id)
           end
 
         # If anything failed reload the form.
@@ -1475,8 +1477,8 @@ class ObserverController < ApplicationController
 
     # Make sure user owns this naming!
     if !check_permission!(@naming)
-      redirect_to(:action => 'show_observation', :id => @observation.id,
-                  :params => query_params)
+      redirect_with_query(:action => 'show_observation',
+        :id => @observation.id)
 
     # Initialize form.
     elsif request.method != "POST"
@@ -1570,8 +1572,8 @@ class ObserverController < ApplicationController
 
       # Redirect to observation on success, reload form if anything failed.
       if success
-        redirect_to(:action => 'show_observation', :id => @observation.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_observation',
+          :id => @observation.id)
       else
         @reason = init_naming_reasons(@naming, params[:reason])
       end
@@ -1596,8 +1598,7 @@ class ObserverController < ApplicationController
       Transaction.delete_naming(:id => @naming)
       flash_notice(:runtime_destroy_naming_success.t(:id => params[:id].to_s))
     end
-    redirect_to(:action => 'show_observation', :id => @observation.id,
-                :params => query_params)
+    redirect_with_query(:action => 'show_observation', :id => @observation.id)
   end
 
   # I'm tired of tweaking show_observation to call calc_consensus for debugging.
@@ -1615,8 +1616,7 @@ class ObserverController < ApplicationController
       flash_error(:observer_recalc_caught_error.t(:error => err))
     end
     # render(:text => '', :layout => true)
-    redirect_to(:action => 'show_observation', :id => id,
-                :params => query_params)
+    redirect_with_query(:action => 'show_observation', :id => id)
   end
 
   ##############################################################################
@@ -1636,8 +1636,7 @@ class ObserverController < ApplicationController
     observation = naming.observation
     value = params[:value].to_i
     observation.change_vote(naming, value)
-    redirect_to(:action => 'show_observation', :id => observation.id,
-                :params => query_params)
+    redirect_with_query(:action => 'show_observation', :id => observation.id)
   end
 
   # Show breakdown of votes for a given naming.
@@ -1678,9 +1677,8 @@ class ObserverController < ApplicationController
       end
       flash_notice(:request_success.t)
       parent = @object.parent
-      redirect_to(:controller => @object.show_controller,
-                  :action => @object.show_action, :id => @object.id,
-                  :params => query_params)
+      redirect_with_query(:controller => @object.show_controller,
+        :action => @object.show_action, :id => @object.id)
     end
   end
 
@@ -1717,9 +1715,8 @@ class ObserverController < ApplicationController
       end
     else
       flash_error(:review_authors_denied.t)
-      redirect_to(:controller => parent.show_controller,
-                  :action => parent.show_action, :id => parent.id,
-                  :params => query_params)
+      redirect_with_query(:controller => parent.show_controller,
+        :action => parent.show_action, :id => parent.id)
     end
   end
 
@@ -1750,9 +1747,8 @@ class ObserverController < ApplicationController
       else
         controller = params[:return_controller] || obj.show_controller
         action = params[:return_action] || obj.show_action
-        redirect_to(:controller => controller,
-                    :action => action, :id => id,
-                    :params => query_params)
+        redirect_with_query(:controller => controller,
+          :action => action, :id => id)
       end
     end
   end
@@ -2111,8 +2107,7 @@ class ObserverController < ApplicationController
       question = params[:question][:content]
       AccountMailer.observation_question(@user, @observation, question).deliver
       flash_notice(:runtime_ask_observation_question_success.t)
-      redirect_to(:action => 'show_observation', :id => @observation.id,
-                  :params => query_params)
+      redirect_with_query(:action => 'show_observation', :id => @observation.id)
     end
   end
 
@@ -2123,8 +2118,8 @@ class ObserverController < ApplicationController
       commercial_inquiry = params[:commercial_inquiry][:content]
       AccountMailer.commercial_inquiry(@user, @image, commercial_inquiry).deliver
       flash_notice(:runtime_commercial_inquiry_success.t)
-      redirect_to(:controller => 'image', :action => 'show_image',
-                  :id => @image.id, :params => query_params)
+      redirect_with_query(:controller => 'image', :action => 'show_image',
+        :id => @image.id)
     end
   end
 
@@ -2135,9 +2130,8 @@ class ObserverController < ApplicationController
       result = true
     else
       flash_error(:permission_denied.t)
-      redirect_to(:controller => target.show_controller,
-                  :action => target.show_action, :id => target.id,
-                  :params => query_params)
+      redirect_with_query(:controller => target.show_controller,
+        :action => target.show_action, :id => target.id)
     end
     return result
   end
@@ -2200,8 +2194,9 @@ class ObserverController < ApplicationController
         @user.default_rss_type = @types.join(' ')
         @user.save_without_our_callbacks
       elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [:rss_make_default.t, { :action => 'index_rss_log',
-                   :make_default => 1, :params => query_params }]
+        @links << [:rss_make_default.t,
+          add_query_param(:action => 'index_rss_log', :make_default => 1)
+        ]
       end
     end
 
@@ -2828,7 +2823,7 @@ class ObserverController < ApplicationController
     else
       session[:hide_thumbnail_maps] = true
     end
-    redirect_to(:action => :show_observation, :id => id, :params => query_params)
+    redirect_with_query(:action => :show_observation, :id => id)
   end
 
   ##############################################################################

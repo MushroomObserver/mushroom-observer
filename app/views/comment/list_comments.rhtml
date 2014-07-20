@@ -17,9 +17,9 @@
             <%= render(:partial => 'comment', :object => comment) %>
           <% else %>
             <td width="100%">
-              <%= link_to(content_tag(:span, comment.summary.t,
-                          :class => 'ListWhat'), :action => 'show_comment',
-                          :id => comment.id, :params => query_params) %>:
+              <%= link_with_query(content_tag(:span, comment.summary.t,
+                    :class => 'ListWhat'), :action => 'show_comment',
+                    :id => comment.id) %>:
               <% if target %>
                 <%= link_to(sprintf('<span class="ListWhat">%s</span>',
                                     target.unique_format_name.t),

@@ -101,9 +101,9 @@ class InterestController < ApplicationController
       end
     end
     if target
-      redirect_back_or_default(:controller => target.show_controller,
-                               :action => target.show_action, :id => oid,
-                               :params => query_params)
+      redirect_back_or_default(
+        add_query_param(:controller => target.show_controller,
+          :action => target.show_action, :id => oid))
     else
       redirect_back_or_default(:controller => 'interest',
                                :action => 'list_interests')
@@ -113,6 +113,6 @@ class InterestController < ApplicationController
   def destroy_notification
     pass_query_params
     Notification.find(params[:id].to_i).destroy
-    redirect_to(:action => 'list_interests', :params => query_params)
+    redirect_with_query(:action => 'list_interests')
   end
 end

@@ -3,16 +3,15 @@
 
   new_tab_set do
     add_tab(:show_object.t(:type => target_class),
-            :controller => target_class.show_controller, :action => target_class.show_action,
-            :id => @object.id, :params => query_params)
+      add_query_param(:controller => target_class.show_controller, :action => target_class.show_action,
+        :id => @object.id))
     add_tab(:edit_object.t(:type => target_class),
-            :controller => target_class.show_controller, :action => target_class.edit_action,
-            :id => @object.id, :params => query_params)
+      add_query_param(:controller => target_class.show_controller, :action => target_class.edit_action,
+        :id => @object.id))
   end
 %>
 
-<%= form_tag(:action => form_action, :id => @object.id,
-            :params => query_params) do %>
+<%= form_tag(add_query_param(:action => form_action, :id => @object.id)) do %>
   <br/><center><%= submit_tag(:image_remove_remove.l) %></center><br/>
 
   <table>

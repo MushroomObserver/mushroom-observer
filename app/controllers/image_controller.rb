@@ -150,11 +150,10 @@ class ImageController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer',
-                  :action => 'index_observation',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :observation),
+        add_query_param({
+          :controller => 'observer', :action => 'index_observation'
+        }, query)]
     end
 
     # Paginate by letter if sorting by user.
@@ -280,7 +279,7 @@ class ImageController < ApplicationController
       if params[:next]
         redirect_to_next_object(:next, Image, params[:id].to_s)
       else
-        redirect_to(:action => 'show_image', :id => id, :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => id)
       end
     end
   end
@@ -307,8 +306,8 @@ class ImageController < ApplicationController
     pass_query_params
     if @observation = find_or_goto_index(Observation, params[:id].to_s)
       if !check_permission!(@observation)
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
       elsif request.method != "POST"
         @image = Image.new
         @image.license = @user.license
@@ -326,8 +325,8 @@ class ImageController < ApplicationController
           process_image(args, params[:upload]["image#{i}"])
           i += 1
         end
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
       end
     end
   end
@@ -378,8 +377,7 @@ class ImageController < ApplicationController
     if @image = find_or_goto_index(Image, params[:id].to_s)
       @licenses = License.current_names_and_ids(@image.license)
       if !check_permission!(@image)
-        redirect_to(:action => 'show_image', :id => @image,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => @image)
       elsif request.method != "POST"
         init_project_vars_for_add_or_edit(@image)
       else
@@ -409,7 +407,7 @@ class ImageController < ApplicationController
           done = true
         end
         if done
-          redirect_to(:action => 'show_image', :id => @image.id, :params => query_params)
+          redirect_with_query(:action => 'show_image', :id => @image.id)
         else
           init_project_vars_for_reload(@image)
         end
@@ -492,16 +490,15 @@ class ImageController < ApplicationController
         next_state = this_state.next
       end
       if !check_permission!(@image)
-        redirect_to(:action => 'show_image', :id => @image.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => @image.id)
       else
         @image.log_destroy
         @image.destroy
         Transaction.delete_image(:id => @image)
         flash_notice(:runtime_image_destroy_success.t(:id => params[:id].to_s))
         if next_state
-          redirect_to(:action => 'show_image', :id => next_state.current_id,
-                      :params => set_query_params(next_state))
+          set_query_params(next_state)
+          redirect_with_query(:action => 'show_image', :id => next_state.current_id)
         else
           redirect_to(:action => 'list_images')
         end
@@ -530,8 +527,8 @@ class ImageController < ApplicationController
         )
         flash_notice(:runtime_image_remove_success.t(:id => @image.id))
       end
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
+      redirect_with_query(:controller => 'observer',
+        :action => 'show_observation', :id => @observation.id)
     end
   end
 
@@ -594,8 +591,8 @@ class ImageController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) and
        !check_permission!(@observation)
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
+      redirect_with_query(:controller => 'observer',
+        :action => 'show_observation', :id => @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
@@ -610,16 +607,16 @@ class ImageController < ApplicationController
         @observation.add_image(image)
         @observation.log_reuse_image(image)
         Transaction.put_observation(:id => @observation, :add_image => image)
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
         done = true
 
       elsif @mode == :term
         # Add image to term
         @term.add_image(image)
         @term.log_reuse_image(image)
-        redirect_to(:controller => :glossary, :action => :show_term,
-          :id => @term.id, :params => query_params)
+        redirect_with_query(:controller => :glossary, :action => :show_term,
+          :id => @term.id)
         done = true
       else
         # Change user's profile image.
@@ -676,12 +673,12 @@ class ImageController < ApplicationController
             end
           end
         end
-        redirect_to(:controller => target_class.show_controller, :action => target_class.show_action,
-                    :id => @object.id, :params => query_params)
+        redirect_with_query(:controller => target_class.show_controller,
+          :action => target_class.show_action, :id => @object.id)
       end
     else
-      redirect_to(:controller => target_class.show_controller, :action => target_class.show_action,
-                  :id => @object.id, :params => query_params)
+      redirect_with_query(:controller => target_class.show_controller,
+        :action => target_class.show_action, :id => @object.id)
     end
   end
 
@@ -709,10 +706,10 @@ class ImageController < ApplicationController
       end
       if params[:size].blank? or
          params[:size].to_sym == (@user ? @user.image_size : :medium)
-        redirect_to(:action => 'show_image', :id => image, :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => image)
       else
-        redirect_to(:action => 'show_image', :id => image, :params => query_params,
-                    :size => params[:size])
+        redirect_with_query(:action => 'show_image', :id => image,
+          :size => params[:size])
       end
     end
   end

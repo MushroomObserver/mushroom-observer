@@ -3,18 +3,17 @@
 
   new_tab_set do
     add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
-    add_tab(:cancel_and_show.t(:type => :location), :action => 'show_location',
-            :id => @location.id, :params => query_params)
+    add_tab_with_query(:cancel_and_show.t(:type => :location),
+      :action => 'show_location', :id => @location.id)
     add_location_search_tabs(@location.name)
   end
 %>
 
-<%= form_for(:location, :url => {
-              :action => :edit_location,
-              :id => @location.id,
-              :params => query_params,
-              :approved_where => @display_name
-            }) do |form| %>
+<%= form_for(:location, :url => add_query_param(
+      :action => :edit_location,
+      :id => @location.id,
+      :approved_where => @display_name
+    )) do |form| %>
   <br/><center><%= submit_tag(:UPDATE.l) %></center>
 
   <%= render(:partial => 'form_location', :locals =>

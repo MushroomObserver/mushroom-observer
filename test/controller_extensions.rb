@@ -610,7 +610,7 @@ module ControllerExtensions
           # Put together good error message telling us exactly what happened.
           code = @response.response_code
           if @response.success?
-            got = ", got #{code} rendered <#{@response.fullpath}>."
+            got = ", got #{code} rendered <#{@request.fullpath}>."
           elsif @response.missing?
             got = ", got #{code} missing (?)"
           elsif @response.redirect?

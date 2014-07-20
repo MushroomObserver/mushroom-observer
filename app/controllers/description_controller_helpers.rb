@@ -53,8 +53,7 @@ module DescriptionControllerHelpers
                         :touch => true)
         desc.parent.save
       end
-      redirect_to(:action => desc.show_action, :id => desc.id,
-                  :params => query_params)
+      redirect_with_query(:action => desc.show_action, :id => desc.id)
     end
   end
 
@@ -71,8 +70,7 @@ module DescriptionControllerHelpers
       # Doesn't have permission to see source.
       if !src.is_reader?(@user)
         flash_error(:runtime_description_private.t)
-        redirect_to(:action => src.parent.show_action, :id => src.parent_id,
-                    :params => query_params)
+        redirect_with_query(:action => src.parent.show_action, :id => src.parent_id)
 
       # POST method
       elsif request.method == "POST"
@@ -124,8 +122,7 @@ module DescriptionControllerHelpers
                       :to => dest.unique_partial_format_name)
       flash_notice(:runtime_description_merge_success.
                    t(:old => src_title, :new => dest.format_name))
-      redirect_to(:action => dest.show_action, :id => dest.id,
-                  :params => query_params)
+      redirect_with_query(:action => dest.show_action, :id => dest.id)
     end
   end
 
@@ -157,8 +154,7 @@ module DescriptionControllerHelpers
       end
       flash_notice(:runtime_description_move_success.
                    t(:old => src_title, :new => dest.format_name))
-      redirect_to(:action => src.show_action, :id => src.id,
-                  :params => query_params)
+      redirect_with_query(:action => src.show_action, :id => src.id)
 
     # Create a clone in the destination name/location.
     else
@@ -212,8 +208,7 @@ module DescriptionControllerHelpers
                  :name => desc.unique_partial_format_name, :touch => true)
         flash_notice(:runtime_description_copy_success.
                      t(:old => src_title, :new => desc.format_name))
-        redirect_to(:action => desc.show_action, :id => desc.id,
-                    :params => query_params)
+        redirect_with_query(:action => desc.show_action, :id => desc.id)
       end
     end
   end
@@ -235,14 +230,12 @@ module DescriptionControllerHelpers
       # to delete the draft after publishing it.)
       if !draft.is_admin?(@user)
         flash_error(:runtime_edit_description_denied.t)
-        redirect_to(:action => parent.show_action, :id => parent.id,
-                    :params => query_params)
+        redirect_with_query(:action => parent.show_action, :id => parent.id)
 
       # Can't merge it into itself!
       elsif old == draft
         flash_error(:runtime_description_already_default.t)
-        redirect_to(:action => draft.show_action, :id => draft.id,
-                    :params => query_params)
+        redirect_with_query(:action => draft.show_action, :id => draft.id)
 
       # I've temporarily decided to always just turn it into a public desc.
       # User can then merge by hand if public desc already exists.
@@ -270,8 +263,7 @@ module DescriptionControllerHelpers
           :set_writers     => draft.writer_groups,
           :set_readers     => draft.reader_groups
         )
-        redirect_to(:action => parent.show_action, :id => parent.id,
-                    :params => query_params)
+        redirect_with_query(:action => parent.show_action, :id => parent.id)
       end
     end
   end
@@ -362,8 +354,8 @@ module DescriptionControllerHelpers
       end
 
       if done
-        redirect_to(:action => @description.show_action,
-                    :id => @description.id, :params => query_params)
+        redirect_with_query(:action => @description.show_action,
+          :id => @description.id)
 
       # Gather list of all the groups, authors, editors and owner.
       # If the user wants more they can write them in.

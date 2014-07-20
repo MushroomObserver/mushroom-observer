@@ -3,13 +3,13 @@
 
   new_tab_set do
     add_tab(:name_map_about.t(:name => @name.display_name),
-            :action => 'show_name', :id => @name.id, :params => query_params)
+      add_query_param({action: 'show_name', id: @name.id}, @query))
     add_tab(:show_objects.t(:type => :location),
-            :controller => 'location', :action => 'index_location',
-            :params => query_params(@query))
+      add_query_param({controller: 'location', action: 'index_location'},
+        @query))
     add_tab(:show_objects.t(:type => :observation),
-            :controller => 'observer', :action => 'index_observation',
-            :params => query_params(@query))
+      add_query_param({controller: 'observer', action: 'index_observation'},
+        @query))
   end
 %>
 

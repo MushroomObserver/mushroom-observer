@@ -979,13 +979,31 @@ class ApplicationController < ActionController::Base
   end
   helper_method :query_params
 
+  def add_query_param(params, query=nil)
+    if query
+      query.save if !query.id
+      params[:q] = query.id.alphabetize
+    else
+      if @query_params
+        params[:q] = @query_params[:q]
+      end
+    end
+    params
+  end
+  helper_method :add_query_param
+  
+  def redirect_with_query(args)
+    redirect_to(add_query_param(args))
+  end
+  helper_method :add_query_param
+
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}
     @query_params[:q] = params[:q] if !params[:q].blank?
     @query_params
   end
-
+  
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
@@ -1150,9 +1168,11 @@ class ApplicationController < ActionController::Base
       end
 
       # Redirect to the show_object page appropriate for the new object.
-      redirect_to(:controller => object.show_controller,
-                  :action => object.show_action, :id => id,
-                  :params => query_params(query))
+      redirect_to(add_query_param({
+        :controller => object.show_controller,
+        :action => object.show_action,
+        :id => id
+        }, query))
     end
   end
 
@@ -1281,7 +1301,8 @@ class ApplicationController < ActionController::Base
     else
       @sorts = nil
     end
-
+    # "@sorts".print_thing(@sorts)
+    
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1305,10 +1326,9 @@ class ApplicationController < ActionController::Base
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) and
        !args[:always_index]
-      redirect_to(:controller => query.model.show_controller,
-                  :action => query.model.show_action,
-                  :id => query.result_ids.first,
-                  :params => query_params)
+      redirect_with_query(:controller => query.model.show_controller,
+        :action => query.model.show_action,
+        :id => query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
     else
@@ -1383,8 +1403,8 @@ class ApplicationController < ActionController::Base
     if !result
       flash_error(:runtime_object_not_found.t(:id => id || '0',
                                               :type => model.type_tag))
-      redirect_to(:controller => model.show_controller,
-                  :action => model.index_action, :params => query_params)
+      redirect_with_query(:controller => model.show_controller,
+        :action => model.index_action)
     end
     return result
   end
@@ -1412,8 +1432,8 @@ class ApplicationController < ActionController::Base
       when 'vote'         ; Observation
     end
     raise "Not sure where to go from #{redirect || controller.name}." if !model
-    redirect_to(:controller => model.show_controller,
-                :action => model.index_action, :params => query_params)
+    redirect_with_query(:controller => model.show_controller,
+      :action => model.index_action)
   end
 
   # Initialize Paginator object.  This now does very little thanks to the new

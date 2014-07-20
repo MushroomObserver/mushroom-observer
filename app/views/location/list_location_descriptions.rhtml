@@ -1,8 +1,7 @@
 <%
   new_tab_set(:sort_by_header.t, @sorts)
   new_tab_set do
-    add_tab(:list_place_names_map.t, :action => :map_locations,
-            :params => query_params)
+    add_tab_with_query(:list_place_names_map.t, :action => :map_locations)
     add_tab(:all_objects.t(:type => :location), :action => :list_locations)
     add_tabs(@links)
   end
@@ -17,9 +16,9 @@
       <% for desc in @objects || []
         odd_or_even = 1 - odd_or_even %>
         <tr class="ListLine<%= odd_or_even %>">
-          <td><%= link_to(desc.format_name.t,
-                          :action => 'show_location_description',
-                          :id => desc.id, :params => query_params) %><td>
+          <td><%= link_with_query(desc.format_name.t,
+                    :action => 'show_location_description',
+                    :id => desc.id) %><td>
         </tr>
       <% end %>
     </table>

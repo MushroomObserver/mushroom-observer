@@ -230,20 +230,18 @@ class NameController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer',
-                  :action => 'index_observation',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :observation),
+        add_query_param({
+          :controller => 'observer', :action => 'index_observation'
+          }, query)]
     end
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
     if query.is_coercable?(:NameDescription)
-      @links << [:show_objects.t(:type => :description), {
-                  :action => 'index_name_description',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :description),
+        add_query_param({:action => 'index_name_description'},
+          query)]
     end
 
     # Add some extra fields to the index for authored_names.
@@ -317,10 +315,8 @@ class NameController < ApplicationController
     # Add "show names" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Name)
-      @links << [:show_objects.t(:type => :name), {
-                  :action => 'index_name',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :name),
+        add_query_param({:action => 'index_name'}, query)]
     end
 
     show_index_of_objects(query, args)
@@ -504,8 +500,7 @@ class NameController < ApplicationController
     if is_reviewer?
       desc.update_review_status(params[:value])
     end
-    redirect_to(:action => 'show_name', :id => desc.name_id,
-                :params => query_params)
+    redirect_with_query(:action => 'show_name', :id => desc.name_id)
   end
 
   ##############################################################################
@@ -745,10 +740,10 @@ class NameController < ApplicationController
   # Chain on to approve/deprecate name if changed status.
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == 'true' and not @name.deprecated
-      redirect_to(:action => :deprecate_name, :id => @name.id, :params => query_params)
+      redirect_with_query(:action => :deprecate_name, :id => @name.id)
       return true
     elsif params[:name][:deprecated].to_s == 'false' and @name.deprecated
-      redirect_to(:action => :approve_name, :id => @name.id, :params => query_params)
+      redirect_with_query(:action => :approve_name, :id => @name.id)
       return true
     else
       return false
@@ -756,7 +751,7 @@ class NameController < ApplicationController
   end
 
   def redirect_to_show_name
-    redirect_to(:action => :show_name, :id => @name.id, :params => query_params)
+    redirect_with_query(:action => :show_name, :id => @name.id)
   end
 
   # Update the misspelling status.
@@ -971,16 +966,14 @@ class NameController < ApplicationController
                :user => @user.login, :touch => true,
                :name => @description.unique_partial_format_name)
       @description.destroy
-      redirect_to(:action => 'show_name', :id => @description.name_id,
-                  :params => query_params)
+      redirect_with_query(:action => 'show_name', :id => @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if @description.is_reader?(@user)
-        redirect_to(:action => 'show_name_description', :id => @description.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_name_description',
+          :id => @description.id)
       else
-        redirect_to(:action => 'show_name', :id => @description.name_id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_name', :id => @description.name_id)
       end
     end
   end
@@ -1077,8 +1070,7 @@ class NameController < ApplicationController
           end
 
           if success
-            redirect_to(:action => 'show_name', :id => @name.id,
-                        :params => query_params)
+            redirect_with_query(:action => 'show_name', :id => @name.id)
           else
             flash_object_errors(@name)
             flash_object_errors(@name.synonym)
@@ -1163,8 +1155,7 @@ class NameController < ApplicationController
               post_comment(:deprecate, @name, @comment)
             end
 
-            redirect_to(:action => 'show_name', :id => @name.id,
-                        :params => query_params)
+            redirect_with_query(:action => 'show_name', :id => @name.id)
           end
 
         end # @what
@@ -1205,8 +1196,7 @@ class NameController < ApplicationController
           post_comment(:approve, @name, comment)
         end
 
-        redirect_to(:action => 'show_name', :id => @name.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_name', :id => @name.id)
       end
     end
   end
@@ -1576,7 +1566,7 @@ class NameController < ApplicationController
           @notification.destroy
           flash_notice(:email_tracking_no_longer_tracking.t(:name => @name.display_name))
         end
-        redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
+        redirect_with_query(:action => 'show_name', :id => name_id)
       end
     end
   end

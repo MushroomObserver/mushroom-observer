@@ -1,19 +1,16 @@
 <%
-  tag_params = {
-    :action => 'reuse_image_for_term', # Turn this into a method, then make all of it a partial
-    :params => query_params
-  }
+  tag_params = add_query_param(:action => 'reuse_image_for_term')
 
   @title = :image_reuse_title.t(:name => @object.unique_format_name)
   id = @object.id
   tag_params[:id] = id
   new_tab_set do
     add_tab(:show_object.t(:type => @object.class),
-            :controller => @object.show_controller, :action => @object.show_action,
-            :id => @object.id, :params => query_params)
+      add_query_param(:controller => @object.show_controller,
+        :action => @object.show_action, :id => @object.id))
     add_tab(:edit_object.t(:type => @object.class),
-            :controller => @object.show_controller, :action => @object.edit_action,
-            :id => id, :params => query_params)
+      add_query_param(:controller => @object.show_controller,
+        :action => @object.edit_action, :id => id))
   end
 %>
 
@@ -27,18 +24,17 @@
   <div class="HelpNote"><%= :image_reuse_id_help.tp %></div>
 
   <p><big>
-    <%= link_to(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
-                :term_id => id,
-                :all_users => (@all_users ? 0 : 1), :params => query_params) %>
+    <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
+          :term_id => id,
+          :all_users => (@all_users ? 0 : 1)) %>
   </big></p><br/>
 
   <%= paginate_block(@pages) do %>
     <%= make_matrix(@objects) do |image| %>
       <%= render(:partial => 'image_reuse', :object => image, :locals => {
-                   :link_args => { :action => 'reuse_image_for_term',
-                                   :term_id => id, :img_id => image.id,
-                                   :params => query_params }
-                 }) %>
+            :link_args => add_query_param(:action => 'reuse_image_for_term',
+              :term_id => id, :img_id => image.id)
+          }) %>
     <% end %>
   <% end %>
 

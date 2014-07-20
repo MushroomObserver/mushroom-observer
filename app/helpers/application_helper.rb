@@ -24,27 +24,6 @@ require_dependency 'map_set'
 require_dependency 'gmaps'
 
 module ApplicationHelper
-  # require_dependency 'auto_complete_helper'
-  # require_dependency 'description_helper'
-  # require_dependency 'html_helper'
-  # require_dependency 'javascript_helper'
-  # require_dependency 'map_helper'
-  # require_dependency 'object_link_helper'
-  # require_dependency 'paginator_helper'
-  # require_dependency 'pivotal_tracker_helper'
-  # require_dependency 'tab_helper'
-  # require_dependency 'textile_helper'
-  # 
-  # include AutoComplete
-  # include Description
-  # include HTML
-  # include Javascript
-  # include Map
-  # include ObjectLink
-  # include Paginator
-  # include PivotalTracker
-  # include Tabs
-  # include Textile
 
   ##############################################################################
   #
@@ -120,6 +99,10 @@ module ApplicationHelper
   def safe_empty; "".html_safe; end
   def safe_br; "<br/>".html_safe; end
   def safe_nbsp; "&nbsp;".html_safe; end
+  
+  def link_with_query(name = nil, options = nil, html_options = nil)
+    link_to(name, add_query_param(options), html_options)
+  end
   
   ##############################################################################
   #
@@ -341,53 +324,51 @@ module ApplicationHelper
     admin  = desc.is_admin?(@user)  || is_in_admin_mode?
     new_tab_set do
       if true
-        add_tab(:show_object.t(:type => type), :action => "show_#{type}",
-                :id => desc.parent_id, :params => query_params)
+        add_tab(:show_object.t(:type => type),
+          add_query_param(:action => "show_#{type}", :id => desc.parent_id))
       end
       if (desc.source_type == :project) and
          (project = desc.source_object)
-        add_tab(:show_object.t(:type => :project), :controller => 'project',
-                :action => 'show_project', :id => project.id,
-                :params => query_params)
+        add_tab(:show_object.t(:type => :project),
+          add_query_param(:controller => 'project', :action => 'show_project', 
+            :id => project.id))
       end
       if admin
         add_tab(:show_description_destroy.t,
-                { :action => "destroy_#{type}_description",
-                :id => desc.id, :params => query_params },
-                { :confirm => :are_you_sure.l })
+          add_query_param({
+            :action => "destroy_#{type}_description",
+            :id => desc.id
+          }), { :confirm => :are_you_sure.l })
       end
       if true
-        add_tab(:show_description_clone.t, :controller => type,
-                :action => "create_#{type}_description", :id => desc.parent_id,
-                :clone => desc.id, :params => query_params,
-                :help => :show_description_clone_help.l)
+        add_tab(:show_description_clone.t,
+          add_query_param(:controller => type,
+            :action => "create_#{type}_description", :id => desc.parent_id,
+            :clone => desc.id, :help => :show_description_clone_help.l))
       end
       if admin
-        add_tab(:show_description_merge.t, :action => 'merge_descriptions',
-                :id => desc.id, :params => query_params,
-                :help => :show_description_merge_help.l)
+        add_tab(:show_description_merge.t,
+          add_query_param(:action => 'merge_descriptions', :id => desc.id,
+            :help => :show_description_merge_help.l))
       end
       if admin
         add_tab(:show_description_adjust_permissions.t,
-                :action => 'adjust_permissions', :id => @description.id,
-                :params => query_params,
-                :help => :show_description_adjust_permissions_help.l)
+          add_query_param(:action => 'adjust_permissions', :id => @description.id,
+            :help => :show_description_adjust_permissions_help.l))
       end
       if desc.public && @user && (desc.parent.description_id != desc.id)
         add_tab(:show_description_make_default.t,
-                :action => 'make_description_default', :id => desc.id,
-                :params => query_params,
-                :help => :show_description_make_default_help.l)
+          add_query_param(:action => 'make_description_default', :id => desc.id,
+            :help => :show_description_make_default_help.l))
       end
       if admin and (desc.source_type != :public)
-        add_tab(:show_description_publish.t, :action => 'publish_description',
-                :id => desc.id, :params => query_params,
-                :help => :show_description_publish_help.l)
+        add_tab(:show_description_publish.t,
+          add_query_param(:action => 'publish_description', :id => desc.id,
+            :help => :show_description_publish_help.l))
       end
       if writer
         add_tab(:show_description_edit.t,
-                :action => "edit_#{type}_description", :id => desc.id,
-                :params => query_params)
+          add_query_param(:action => "edit_#{type}_description", :id => desc.id))
       end
     end
 
@@ -406,12 +387,12 @@ module ApplicationHelper
     title = description_title(desc)
     links = []
     if @user && desc.is_writer?(@user)
-      links << link_to(:EDIT.t, :id => desc.id, :action => "edit_#{type}",
-                       :params => query_params)
+      links << link_with_query(:EDIT.t, :id => desc.id,
+        :action => "edit_#{type}")
     end
     if @user && desc.is_admin?(@user)
-      links << link_to(:DESTROY.t, :id => desc.id,
-                       :action => "destroy_#{type}", :params => query_params)
+      links << link_with_query(:DESTROY.t, :id => desc.id,
+        :action => "destroy_#{type}")
     end
     content_tag(:p, content_tag(:big, title) + links.join(' | ').html_safe)
   end
@@ -465,14 +446,13 @@ module ApplicationHelper
       admin  = desc.is_admin?(@user)  || is_in_admin_mode?
       if writer || admin
         links = []
-        links << link_to(:EDIT.t, :id => desc.id, :params => query_params,
-                         :controller => obj.show_controller,
-                         :action => "edit_#{type}_description") if writer
-        links << link_to(:DESTROY.t, { :id => desc.id,
-                         :action => "destroy_#{type}_description",
-                         :controller => obj.show_controller,
-                         :params => query_params },
-                         { :confirm => :are_you_sure.t }) if admin
+        links << link_with_query(:EDIT.t, :id => desc.id,
+          :controller => obj.show_controller,
+          :action => "edit_#{type}_description") if writer
+        links << link_with_query(:DESTROY.t,
+          { :id => desc.id, :action => "destroy_#{type}_description",
+            :controller => obj.show_controller },
+          { :confirm => :are_you_sure.t }) if admin
         item += indent + "[" + links.join(' | ').html_safe + "]" if links.any?
       end
       item
@@ -480,10 +460,10 @@ module ApplicationHelper
 
     if fake_default && !obj.descriptions.select {|d| d.source_type == :public} != []
       str = :description_part_title_public.t
-      link = link_to(:CREATE.t,
-                    :controller => obj.show_controller,
-                    :action => "create_#{type}_description",
-                    :id => obj.id, :params => query_params)
+      link = link_with_query(:CREATE.t,
+        :controller => obj.show_controller,
+        :action => "create_#{type}_description",
+        :id => obj.id)
       str += indent + '[' + link + ']'
       list.unshift(str)
     end
@@ -514,10 +494,10 @@ module ApplicationHelper
 
     # Show existing drafts, with link to create new one.
     head = content_tag(:big, :show_name_descriptions.t)
-    head += link_to(:show_name_create_description.t,
-                    :controller => obj.show_controller,
-                    :action => "create_#{type}_description",
-                    :id => obj.id, :params => query_params)
+    head += link_with_query(:show_name_create_description.t,
+      :controller => obj.show_controller,
+      :action => "create_#{type}_description",
+      :id => obj.id)
     any = false
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
@@ -532,10 +512,10 @@ module ApplicationHelper
     if projects && projects.length > 0
       head2 = :show_name_create_draft.t + ': '
       list = [head2] + projects.map do |project|
-        item = link_to(project.title,
-                       :action => "create_#{type}_description",
-                       :id => obj.id, :project => project.id,
-                       :source => 'project', :params => query_params)
+        item = link_with_query(project.title,
+          :action => "create_#{type}_description",
+          :id => obj.id, :project => project.id,
+          :source => 'project')
         indent + item
       end
       html2 = list.join("<br/>\n").html_safe
@@ -549,10 +529,10 @@ module ApplicationHelper
 
     # Show existing drafts, with link to create new one.
     head = "#{:show_name_descriptions.t}: ".html_safe
-    head += link_to(:show_name_create_description.t,
-                    :controller => obj.show_controller,
-                    :action => "create_#{type}_description",
-                    :id => obj.id, :params => query_params)
+    head += link_with_query(:show_name_create_description.t,
+      :controller => obj.show_controller,
+      :action => "create_#{type}_description",
+      :id => obj.id)
     any = false
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
@@ -571,10 +551,10 @@ module ApplicationHelper
     # Show list of projects user is a member of.
     head = :show_name_create_draft.t + ': '
     list = projects.map do |project|
-      item = link_to(project.title,
-                     :action => "create_#{type}_description",
-                     :id => obj.id, :project => project.id,
-                     :source => 'project', :params => query_params)
+      item = link_with_query(project.title,
+        :action => "create_#{type}_description",
+        :id => obj.id, :project => project.id,
+        :source => 'project')
       indent + item
     end
     head.html_safe + colored_notes_box(odd_even, list.join("<br/>\n").html_safe)
@@ -582,9 +562,9 @@ module ApplicationHelper
 
   def edit_desc_link(desc)
     if desc
-      link_to(:EDIT.t, :id => desc.id, :params => query_params,
-              :controller => 'name',
-              :action => 'edit_name_description')
+      link_with_query(:EDIT.t, :id => desc.id,
+        :controller => 'name',
+        :action => 'edit_name_description')
     else
       ''
     end
@@ -599,9 +579,9 @@ module ApplicationHelper
   end
   
   def edit_name_notes_link(name)
-    link_to(:EDIT.t, :id => name.id, :params => query_params,
-            :controller => 'name',
-            :action => 'edit_name')
+    link_to(:EDIT.t, :id => name.id,
+      :controller => 'name',
+      :action => 'edit_name')
   end
 
   # Just shows the current version number and a link to see the previous.
@@ -621,10 +601,9 @@ module ApplicationHelper
     end
     html += safe_br
     if previous_version = latest_version.previous
-      html += link_to("#{:show_name_previous_version.t}: %d" % previous_version.version,
-                      :action => "show_past_#{type}", :id => obj.id,
-                      :version => previous_version,
-                      :params => query_params)
+      html += link_with_query("#{:show_name_previous_version.t}: %d" % previous_version.version,
+        :action => "show_past_#{type}", :id => obj.id,
+        :version => previous_version)
       if (previous_version.merge_source_id rescue false)
         html += indent(1) + get_version_merge_link(obj, previous_version)
       end
@@ -677,18 +656,17 @@ module ApplicationHelper
       end
       if ver.version != obj.version
         if @merge_source_id
-          link = link_to(link, :controller => obj.show_controller,
-                         :action => "show_past_#{type}", :id => obj.id,
-                         :merge_source_id => @merge_source_id,
-                         :version => version, :params => query_params)
+          link = link_with_query(link, :controller => obj.show_controller,
+            :action => "show_past_#{type}", :id => obj.id,
+            :merge_source_id => @merge_source_id,
+            :version => version)
         elsif ver == obj.versions.last
-          link = link_to(link, :controller => obj.show_controller,
-                         :action => "show_#{type}", :id => obj.id,
-                         :params => query_params)
+          link = link_with_query(link, :controller => obj.show_controller,
+            :action => "show_#{type}", :id => obj.id)
         else
-          link = link_to(link, :controller => obj.show_controller,
-                         :action => "show_past_#{type}", :id => obj.id,
-                         :version => ver.version, :params => query_params)
+          link = link_with_query(link, :controller => obj.show_controller,
+            :action => "show_past_#{type}", :id => obj.id,
+            :version => ver.version)
         end
       end
       if args[:bold] and args[:bold].call(ver)
@@ -716,11 +694,10 @@ module ApplicationHelper
     if ver.merge_source_id and
        (other_ver = ver.class.find(ver.merge_source_id) rescue nil)
       parent_id = other_ver.send("#{type}_id")
-      link_to(:show_past_version_merged_with.t(:id => parent_id),
-              :controller => obj.show_controller,
-              :action => "show_past_#{type}", :id => obj.id,
-              :merge_source_id => ver.merge_source_id,
-              :params => query_params)
+      link_with_query(:show_past_version_merged_with.t(:id => parent_id),
+        :controller => obj.show_controller,
+        :action => "show_past_#{type}", :id => obj.id,
+        :merge_source_id => ver.merge_source_id)
     end
   end
 
@@ -750,16 +727,16 @@ module ApplicationHelper
 
       if is_admin
         authors += safe_nbsp
-        authors += link_to("(#{:review_authors_review_authors.t})",
-                           :controller => 'observer',
-                           :action => 'review_authors', :id => obj.id,
-                           :type => type, :params => query_params)
+        authors += link_with_query("(#{:review_authors_review_authors.t})",
+          :controller => 'observer',
+          :action => 'review_authors', :id => obj.id,
+          :type => type)
       elsif !is_author
         authors += safe_nbsp
-        authors += link_to("(#{:show_name_author_request.t})",
-                           :controller => 'observer',
-                           :action => 'author_request', :id => obj.id,
-                           :type => type, :params => query_params)
+        authors += link_with_query("(#{:show_name_author_request.t})",
+          :controller => 'observer',
+          :action => 'author_request', :id => obj.id,
+          :type => type)
       end
 
     # Locations and names.
@@ -1386,8 +1363,8 @@ module ApplicationHelper
   def description_link(desc)
     result = description_title(desc)
     if !result.match("(#{:private.t})$")
-      result = link_to(result, :controller => desc.show_controller,
-        :action => desc.show_action, :id => desc.id, :params => query_params)
+      result = link_with_query(result, :controller => desc.show_controller,
+        :action => desc.show_action, :id => desc.id)
     end
     return result
   end
@@ -1588,14 +1565,14 @@ module ApplicationHelper
       if obj.ok_for_export
         content_tag(:b, :review_ok_for_export.t)
       else
-        link_to(:review_ok_for_export.t, :controller => 'observer',
-                :action => 'set_export_status', :type => obj.type_tag,
-                :id => obj.id, :value => '1', :params => query_params)
+        link_with_query(:review_ok_for_export.t, :controller => 'observer',
+          :action => 'set_export_status', :type => obj.type_tag,
+          :id => obj.id, :value => '1')
       end + safe_br +
       if obj.ok_for_export
-        link_to(:review_no_export.t, :controller => 'observer',
-                :action => 'set_export_status', :type => obj.type_tag,
-                :id => obj.id, :value => '0', :params => query_params)
+        link_with_query(:review_no_export.t, :controller => 'observer',
+          :action => 'set_export_status', :type => obj.type_tag,
+          :id => obj.id, :value => '0')
       else
         content_tag(:b, :review_no_export.t)
       end
@@ -1622,9 +1599,9 @@ module ApplicationHelper
   
   def create_specimen_link(obs)
     if check_permission(obs) or (@user && (@user.curated_herbaria.length > 0))
-		  " | ".html_safe + link_to(:show_observation_create_specimen.t,
-						          :controller => 'specimen', :action => 'add_specimen',
-						          :id => obs.id, :params => query_params)
+		  " | ".html_safe + link_with_query(:show_observation_create_specimen.t,
+        :controller => 'specimen', :action => 'add_specimen',
+        :id => obs.id)
 		else
 		  safe_empty
 		end
@@ -1819,10 +1796,8 @@ module ApplicationHelper
       add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
       if mappable
         add_tab(:MAP.t,
-          :controller => 'location',
-          :action => 'map_locations',
-          :params => query_params
-        )
+          add_query_param(:controller => 'location',
+          :action => 'map_locations'))
       end
       add_tab("#{:FORWARD.t} »",  args.merge(:action => "next_#{type}"  ))
     end
@@ -1896,6 +1871,11 @@ module ApplicationHelper
     end
   end
 
+  # Add a tab to an open tab set.  See +new_tab_set+.
+  def add_tab_with_query(name, params, html=nil)
+    add_tab(name, add_query_param(params), html)
+  end
+
   # Render tab sets in upper left of page body.  (Only used by app layout.)
   def render_tab_sets
     if @tab_sets
@@ -1932,7 +1912,7 @@ module ApplicationHelper
         help = link_args[:help]
         link_args = link_args.dup
         link_args.delete(:help)
-      elsif html_args.has_key?(:help)
+      elsif html_args and html_args.has_key?(:help)
         help = html_args[:help]
         html_args = html_args.dup
         html_args.delete(:help)
@@ -1981,13 +1961,12 @@ module ApplicationHelper
 
       # Create link to change interest state.
       def interest_link(label, object, state) #:nodoc:
-        link_to(label,
+        link_with_query(label,
           :controller => 'interest',
           :action => 'set_interest',
           :id => object.id,
           :type => object.class.name,
-          :state => state,
-          :params => query_params
+          :state => state
         )
       end
 
@@ -2085,8 +2064,7 @@ end
 def name_section_link(title, data, query)
   if data and data != 0
     link_to(title,
-            :controller => 'observer',
-            :action => 'index_observation',
-            :params => query_params(query)) + safe_br
+     add_query_param({:controller => 'observer',
+       :action => 'index_observation'}, query)) + safe_br
   end
 end

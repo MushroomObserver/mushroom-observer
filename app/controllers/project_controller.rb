@@ -197,8 +197,7 @@ class ProjectController < ApplicationController
           )
           @project.log_create
           flash_notice(:add_project_success.t)
-          redirect_to(:action => :show_project, :id => @project.id,
-                      :params => query_params)
+          redirect_with_query(:action => :show_project, :id => @project.id)
         end
       end
     end
@@ -219,8 +218,7 @@ class ProjectController < ApplicationController
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       elsif request.method == "POST"
         @title = params[:project][:title].to_s
         @summary = params[:project][:summary]
@@ -240,8 +238,7 @@ class ProjectController < ApplicationController
           end
           @project.log_update
           flash_notice(:runtime_edit_project_success.t(:id => @project.id))
-          redirect_to(:action => 'show_project', :id => @project.id,
-                      :params => query_params)
+          redirect_with_query(:action => 'show_project', :id => @project.id)
         end
       end
     end
@@ -256,17 +253,15 @@ class ProjectController < ApplicationController
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       elsif !@project.destroy
         flash_error(:destroy_project_failed.t)
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       else
         @project.log_destroy
         Transaction.delete_project(:id => @project)
         flash_notice(:destroy_project_success.t)
-        redirect_to(:action => :index_project, :params => query_params)
+        redirect_with_query(:action => :index_project)
       end
     end
   end
@@ -296,8 +291,7 @@ class ProjectController < ApplicationController
                                       subject, content).deliver
         end
         flash_notice(:admin_request_success.t(:title => @project.title))
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       end
     end
   end
@@ -315,8 +309,7 @@ class ProjectController < ApplicationController
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.all(:order => "login, name")
       if !@project.is_admin?(@user)
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       elsif !params[:candidate].blank?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
@@ -338,8 +331,7 @@ class ProjectController < ApplicationController
        @candidate = find_or_goto_index(User, params[:candidate])
       if !@project.is_admin?(@user)
         flash_error(:change_member_status_denied.t)
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       elsif request.method == "POST"
         user_group = @project.user_group
         admin_group = @project.admin_group
@@ -352,8 +344,7 @@ class ProjectController < ApplicationController
         end
         set_status(@project, :admin, @candidate, admin)
         set_status(@project, :member, @candidate, member)
-        redirect_to(:action => 'show_project', :id => @project.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_project', :id => @project.id)
       end
     end
   end

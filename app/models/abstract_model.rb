@@ -593,7 +593,7 @@ class AbstractModel < ActiveRecord::Base
       :controller => self.show_controller,
       :action => self.show_action,
       :id => self.id,
-      :params => query_params
+      :q => query_params[:q]
     }
   end
 

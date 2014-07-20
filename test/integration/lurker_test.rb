@@ -149,6 +149,7 @@ class LurkerTest < IntegrationTestCase
     click(:label => 'Observations at this Location', :in => :tabs)
     assert_template('observer/list_observations')
     save_results = get_links('div.results a[href^=?]', /\/\d+/)
+    "save_results (no sort)".print_thing(save_results)
 
     # Try sorting differently.
     click(:label => 'Date', :in => :tabs)
@@ -164,6 +165,8 @@ class LurkerTest < IntegrationTestCase
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
     save_results = results
+    "save_results".print_thing(save_results)
+    "save_results.firsst".print_thing(save_results.first)
     query_params = parse_query_params(save_results.first)
 
     # Go to first observation, and try stepping back and forth.

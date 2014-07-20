@@ -9,9 +9,9 @@
 <% if controls or comments.any? %>
   <div style="margin-top:1em; margin-bottom:0.5em">
     <%= if controls
-      link = link_to(:"show_comments_add_comment".t, :controller => 'comment',
-                     :action => 'add_comment', :id => object.id,
-                     :type => object.class.name, :params => query_params)
+      link = link_with_query(:"show_comments_add_comment".t, :controller => 'comment',
+        :action => 'add_comment', :id => object.id,
+        :type => object.class.name)
       if comments.empty?
         :"show_comments_no_comments_yet".t + indent + link
       else

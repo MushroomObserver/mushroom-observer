@@ -205,9 +205,9 @@
                        :selected => session[:search_type] || :observation) %>
                 <%= submit_tag :app_search.l %>&nbsp;&nbsp;
                 <% if (DEVELOPMENT || is_reviewer?) && query_params != {} %>
-                  <%= link_to(:app_refine_search.l.nowrap , :controller => 'observer',
-                              :action => 'refine_search',
-                              :params => query_params) %> |
+                  <%= link_with_query(:app_refine_search.l.nowrap ,
+                        :controller => 'observer', :action => 'refine_search') 
+                  %> |
                 <% end %>
                 <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer',
                             :action => 'advanced_search_form') %>

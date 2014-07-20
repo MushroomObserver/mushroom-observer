@@ -35,9 +35,9 @@
             if key.verified
               key.last_used ? key.last_used.web_date : '--'
             elsif @js
-              '[' + link_to_function(:ACTIVATE.t, "activate_key(#{key.id})") + ']'
+              '['.html_safe + link_to_function(:ACTIVATE.t, "activate_key(#{key.id})") + ']'
             else
-              '[' + link_to(:ACTIVATE.t, :action => :activate_api_key, :id => key.id) + ']'
+              '['.html_safe + link_to(:ACTIVATE.t, :action => :activate_api_key, :id => key.id) + ']'
             end
           %></td>
           <td style="padding:0em 1em 0em 1em"><%= key.num_uses > 0 ? key.num_uses : '--' %></td>
@@ -45,9 +45,9 @@
           <td style="padding:0em 1em 0em 1em" id="key_notes_<%= key.id %>">
             <%= key.notes.t %> &nbsp;
             <%= if @js
-              '[' + link_to_function(:EDIT.t, "edit_key(#{key.id})") + ']'
+              '['.html_safe + link_to_function(:EDIT.t, "edit_key(#{key.id})") + ']'
             else
-              '[' + link_to(:EDIT.t, :action => :edit_api_key, :id => key.id) + ']'
+              '['.html_safe + link_to(:EDIT.t, :action => :edit_api_key, :id => key.id) + ']'
             end %>
           </td>
         </tr>

@@ -5,12 +5,10 @@
     <%= :BY.t %>:
       <%= user_link(comment.user) %>
       <% if check_permission(comment) %>
-        [<%= link_to(:EDIT.t, :controller => 'comment',
-                     :action => 'edit_comment', :id => comment.id,
-                     :params => query_params) %> |
-        <%= link_to(:DESTROY.t, { :controller => 'comment',
-                    :action => 'destroy_comment', :id => comment.id,
-                    :params => query_params },
+        [<%= link_with_query(:EDIT.t, :controller => 'comment',
+               :action => 'edit_comment', :id => comment.id) %> |
+        <%= link_with_query(:DESTROY.t, { :controller => 'comment',
+                    :action => 'destroy_comment', :id => comment.id },
                     { :confirm => :are_you_sure.l }) %>]
       <% end %><br/>
     <%= :SUMMARY.t %>:

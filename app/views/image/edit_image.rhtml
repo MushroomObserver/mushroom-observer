@@ -2,13 +2,12 @@
   @title = :image_edit_title.t(:name => @image.unique_format_name)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :image), :action => 'show_image',
-            :id => @image.id, :params => query_params)
+    add_tab(:cancel_and_show.t(:type => :image),
+      add_query_param(:action => 'show_image', :id => @image.id))
   end
 %>
 
-<%= form_for(:image, :url => { :action => :edit_image, :id => @image,
-                              :params => query_params }) do |form| %>
+<%= form_for(:image, :url => add_query_param({ :action => :edit_image, :id => @image })) do |form| %>
   <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
 
   <table cellpadding="10">

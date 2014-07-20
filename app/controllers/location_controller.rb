@@ -135,20 +135,16 @@ class LocationController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer',
-                  :action => 'index_observation',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :observation),
+        add_query_param({controller: 'observer', action: 'index_observation'},
+          query)]
     end
 
     # Add "show descriptions" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:LocationDescription)
-      @links << [:show_objects.t(:type => :description), {
-                  :action => 'index_location_description',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :description),
+        add_query_param({:action => 'index_location_description'}, query)]
     end
 
     # Restrict to subset within a geographical region (used by map
@@ -334,10 +330,8 @@ class LocationController < ApplicationController
     # Add "show locations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Location)
-      @links << [:show_objects.t(:type => :location), {
-                  :action => 'index_location',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :location),
+        add_query_param({:action => 'index_location'}, query)]
     end
 
     show_index_of_objects(query, args)
@@ -850,16 +844,16 @@ class LocationController < ApplicationController
                :user => @user.login, :touch => true,
                :name => @description.unique_partial_format_name)
       @description.destroy
-      redirect_to(:action => 'show_location', :id => @description.location_id,
-                  :params => query_params)
+      redirect_with_query(:action => 'show_location',
+        :id => @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if @description.is_reader?(@user)
-        redirect_to(:action => 'show_location_description', :id => @description.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_location_description',
+          :id => @description.id)
       else
-        redirect_to(:action => 'show_location', :id => @description.location_id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_location',
+          :id => @description.location_id)
       end
     end
   end

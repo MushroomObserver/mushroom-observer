@@ -1,11 +1,11 @@
 <%
   new_tab_set do
-    add_tab(:all_objects.t(:type => :location), :controller => :location,
-            :action => 'list_locations')
-    add_tab(:show_objects.t(:type => :observation), :controller => :observer,
-            :action => 'index_observation', :params => query_params(@query))
-    add_tab(:show_objects.t(:type => :location), :controller => :location,
-            :action => 'index_location', :params => query_params(@query))
+    add_tab(:all_objects.t(:type => :location),
+      :controller => :location, :action => 'list_locations')
+    add_tab(:show_objects.t(:type => :observation), add_query_param(
+      { :controller => :observer, :action => 'index_observation' }, @query))
+    add_tab(:show_objects.t(:type => :location), add_query_param(
+      { :controller => :location, :action => 'index_location' }, @query))
   end
 %>
 
