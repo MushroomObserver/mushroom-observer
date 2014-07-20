@@ -6,7 +6,7 @@
   end
 %>
 
-<%= form_tag(:action => 'add_project', :params => query_params) do %>
+<%= form_tag(add_query_param(:action => 'add_project')) do %>
   <br/><center><%= submit_tag :CREATE.l %></center><br/>
   <%= render(:partial => 'form_projects') %>
 <% end %>

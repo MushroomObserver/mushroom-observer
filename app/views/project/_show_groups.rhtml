@@ -3,9 +3,9 @@
   <% for u in project.user_group.users %>
     <%= indent + user_link(u) %>
     <% if @project.is_admin?(user) %>
-      | <%= link_to(:change_member_status_change_status.t,
-                    :action => :change_member_status, :id => project.id,
-                    :candidate => u.id, :params => query_params) %>
+      | <%= link_with_query(:change_member_status_change_status.t,
+              :action => :change_member_status, :id => project.id,
+              :candidate => u.id) %>
     <% end %>
     <br/>
   <% end %>
@@ -16,9 +16,9 @@
   <% for u in project.admin_group.users %>
     <%= indent + user_link(u) %>
     <% if @project.is_member?(user) %>
-     | <%= link_to(:change_member_status_change_status.t,
-                   :action => :change_member_status, :id => project.id,
-                   :candidate => u.id, :params => query_params) %>
+     | <%= link_with_query(:change_member_status_change_status.t,
+             :action => :change_member_status, :id => project.id,
+             :candidate => u.id) %>
     <% end %>
     <br/>
   <% end %>

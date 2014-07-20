@@ -1,7 +1,7 @@
 <% @title = :commercial_inquiry_title.t(:name => @image.unique_format_name) %>
 
-<%= form_tag(:action => 'commercial_inquiry', :id => @image.id,
-            :params => query_params) do %>
+<%= form_tag(add_query_param(:action => 'commercial_inquiry',
+      :id => @image.id)) do %>
   <br/><center><%= submit_tag :SEND.l %></center>
   <table cellpadding="10" width="1">
     <tr>

@@ -449,15 +449,14 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(10, name_links.length)
     expected = Name.all(:order => 'text_name, author', :limit => 10)
     assert_equal(expected.map(&:id), ids_from_links(name_links))
-    assert_equal(@controller.url_for(:action => 'show_name',
-      :id => expected.first.id, :params => query_params,
-      :only_path => true), name_links.first.url)
+    assert_equal(@controller.url_with_query(:action => 'show_name',
+      :id => expected.first.id, :only_path => true), name_links.first.url)
     assert_no_link_in_html(1)
     assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :page => 2)
+      :params => query_params, :page => 2)
     assert_no_link_in_html('Z')
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :letter => 'A')
+      :params => query_params, :letter => 'A')
   end
   
   def test_pagination_page2
@@ -470,15 +469,14 @@ class NameControllerTest < FunctionalTestCase
     expected = Name.all(:order => 'text_name, author', :limit => 10,
                         :offset => 10)
     assert_equal(expected.map(&:id), ids_from_links(name_links))
-    assert_equal(@controller.url_for(:action => 'show_name',
-                 :id => expected.first.id, :params => query_params,
-                 :only_path => true), name_links.first.url)
+    assert_equal(@controller.url_with_query(:action => 'show_name',
+      :id => expected.first.id, :only_path => true), name_links.first.url)
     assert_no_link_in_html(2)
     assert_link_in_html(1, :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :page => 1)
+      :params => query_params, :page => 1)
     assert_no_link_in_html('Z')
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :letter => 'A')
+      :params => query_params, :letter => 'A')
   end
   
   def test_pagination_letter
@@ -493,13 +491,12 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(l_names.size, name_links.length)
     # (Mysql and ruby sort "Kuhner" and "Kühner" oppositely. Just ignore them.)
     assert_equal(l_names.map(&:id)-[35,36], ids_from_links(name_links)-[35,36])
-    assert_equal(@controller.url_for(:action => 'show_name',
-                 :id => l_names.first.id, :params => query_params,
-                 :only_path => true), name_links.first.url)
+    assert_equal(@controller.url_with_query(:action => 'show_name',
+      :id => l_names.first.id, :only_path => true), name_links.first.url)
     assert_no_link_in_html(1)
     assert_no_link_in_html('Z')
     assert_link_in_html('A', :action => :test_index,:params => query_params,
-                        :num_per_page => l_names.size, :letter => 'A')
+      :num_per_page => l_names.size, :letter => 'A')
   end
   
   def test_pagination_letter_with_page
@@ -516,8 +513,8 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(l_names.map(&:id)-[35,36], ids_from_links(name_links)-[35,36])
     assert_no_link_in_html(1)
     assert_link_in_html(2, :action => :test_index, :params => query_params,
-                        :num_per_page => l_names.size,
-                        :letter => 'L', :page => 2)
+      :num_per_page => l_names.size,
+      :letter => 'L', :page => 2)
     assert_no_link_in_html(3)
   end
   
@@ -535,8 +532,8 @@ class NameControllerTest < FunctionalTestCase
     assert_equal([last_name.id], ids_from_links(name_links))
     assert_no_link_in_html(2)
     assert_link_in_html(1, :action => :test_index, :params => query_params,
-                        :num_per_page => l_names.size,
-                        :letter => 'L', :page => 1)
+      :num_per_page => l_names.size,
+      :letter => 'L', :page => 1)
     assert_no_link_in_html(3)
   end
   
@@ -548,11 +545,11 @@ class NameControllerTest < FunctionalTestCase
       :test_anchor => 'blah'
     }.merge(query_params))
     assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :page => 2,
-                        :test_anchor => 'blah', :anchor => 'blah')
+      :params => query_params, :page => 2,
+      :test_anchor => 'blah', :anchor => 'blah')
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :letter => 'A',
-                        :test_anchor => 'blah', :anchor => 'blah')
+      :params => query_params, :letter => 'A',
+      :test_anchor => 'blah', :anchor => 'blah')
   end
 
   def test_name_guessing

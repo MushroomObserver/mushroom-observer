@@ -1,8 +1,7 @@
 <% @title = :author_request_title.t(:title => @object.format_name) %>
 
-<%= form_tag(:action => 'author_request', :id => @object.id,
-            :type => @object.type_tag,
-            :params => query_params) do %>
+<%= form_tag(add_query_param(:action => 'author_request', :id => @object.id,
+      :type => @object.type_tag)) do %>
   <br/><center><%= submit_tag :SEND.l %></center><br/>
 
   <label for="email_subject"><%= :request_subject.t %></label>:<br/>

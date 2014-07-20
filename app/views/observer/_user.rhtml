@@ -16,8 +16,8 @@
 <% end %>
 
       <span class="ListWhat">
-        <%= link_to(user.unique_text_name, :action => 'show_user',
-                   :id => user.id, :params => query_params) %>
+        <%= link_with_query(user.unique_text_name, :action => 'show_user',
+              :id => user.id) %>
       </span><br/>
 
       <% if user.location %>

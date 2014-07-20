@@ -2,10 +2,10 @@
   @title = :species_list_bulk_editor_title.t(:name => @species_list.unique_format_name)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :species_list), :action => 'show_species_list',
-            :id => @species_list.id, :params => query_params)
-    add_tab(:species_list_show_edit.t, :action => 'edit_species_list',
-            :id => @species_list.id, :params => query_params)
+    add_tab_with_query(:cancel_and_show.t(:type => :species_list),
+      :action => 'show_species_list', :id => @species_list.id)
+    add_tab_with_query(:species_list_show_edit.t,
+      :action => 'edit_species_list', :id => @species_list.id)
   end
 %>
 
@@ -52,31 +52,47 @@
 
   <div id="row_controls" class="row_controls">
     <%= :OBSERVATION.t %>:
-      <%= url = url_for(:controller => :observer, :action => :show_observation, :id => 'XXX', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :observer,
+            :action => :show_observation, :id => 'XXX' }, @query))
           link_to(:SHOW.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :observer, :action => :edit_observation, :id => 'XXX', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :observer,
+            :action => :edit_observation, :id => 'XXX' }, @query))
           link_to(:EDIT.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :observer, :action => :destroy_observation, :id => 'XXX', :params => query_params(@query))
-          link_to(:DESTROY.l, "javascript:row_button('#{url}')", :confirm => :are_you_sure.l) %>
+      <%= url = url_for(add_query_param({ :controller => :observer,
+            :action => :destroy_observation, :id => 'XXX' }, @query))
+          link_to(:DESTROY.l, "javascript:row_button('#{url}')",
+            :confirm => :are_you_sure.l) %>
     &nbsp;
     <%= :NAMES.t %>: (<span id="number_of_names"></span>)
-      <%= url = url_for(:controller => :observer, :action => :edit_naming, :observation_id => 'XXX', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :observer,
+            :action => :edit_naming, :observation_id => 'XXX' }, @query))
           link_to(:EDIT.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :observer, :action => :create_naming, :id => 'XXX', :params => query_params(@query))
-          link_to(:species_list_bulk_editor_another.l, "javascript:row_button('#{url}')") %>
+      <%= url = url_for(add_query_param({ :controller => :observer,
+            :action => :create_naming, :id => 'XXX' }, @query))
+          link_to(:species_list_bulk_editor_another.l,
+            "javascript:row_button('#{url}')") %>
     &nbsp;
     <%= :COMMENTS.t %>: (<span id="number_of_comments"></span>)
-      <%= url = url_for(:controller => :comment, :action => :show_comments_for_target, :id => 'XXX', :type => 'Observation', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :comment,
+            :action => :show_comments_for_target, :id => 'XXX',
+            :type => 'Observation' }, @query))
           link_to(:SHOW.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :comment, :action => :add_comment, :id => 'XXX', :type => 'Observation', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :comment,
+              :action => :add_comment, :id => 'XXX', :type => 'Observation' },
+            @query))
           link_to(:CREATE.l, "javascript:row_button('#{url}')") %>
     &nbsp;
     <%= :IMAGES.t %>: (<span id="number_of_images"></span>)
-      <%= url = url_for(:controller => :image, :action => :add_image, :id => 'XXX', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :image,
+            :action => :add_image, :id => 'XXX' }, @query))
           link_to(:UPLOAD.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :image, :action => :reuse_image, :obs_id => 'XXX', :mode => 'observation', :params => query_params(@query))
-          link_to(:species_list_bulk_editor_reuse.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(:controller => :image, :action => :remove_images, :id => 'XXX', :params => query_params(@query))
+      <%= url = url_for(add_query_param({ :controller => :image,
+            :action => :reuse_image, :obs_id => 'XXX',
+            :mode => 'observation' }, @query))
+          link_to(:species_list_bulk_editor_reuse.l,
+            "javascript:row_button('#{url}')") %> |
+      <%= url = url_for(add_query_param({ :controller => :image,
+            :action => :remove_images, :id => 'XXX' }, @query))
           link_to(:REMOVE.l, "javascript:row_button('#{url}')") %>
   </div>
 

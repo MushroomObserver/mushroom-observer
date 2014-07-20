@@ -45,9 +45,9 @@
   <tr style="padding-bottom:0px">
     <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <%= if target and target_type == :species_list
-        link_to(image_tag('splist.png', :border => 0),
-                :controller => :species_list, :action => :show_species_list,
-                :id => target.id, :params => query_params) + safe_br
+        link_with_query(image_tag('splist.png', :border => 0),
+          :controller => :species_list, :action => :show_species_list,
+          :id => target.id) + safe_br
       elsif target and target_type == :observation and target.thumb_image
         thumbnail(target.thumb_image, :border => 0, :votes => true,
                   :link => :show_observation, :obs => target.id) + safe_br
@@ -78,11 +78,11 @@
       <% unless target_name.blank? %>
         <span class="ListWhat">
           <%= if target
-            link_to(target_name, :controller => target.show_controller,
-                    :action => target.show_action, :id => target.id, :params => query_params)
+            link_with_query(target_name, :controller => target.show_controller,
+              :action => target.show_action, :id => target.id)
           else
-            link_to(target_name, :controller => :observer, :action => :show_rss_log,
-                    :id => rss_log.id, :params => query_params)
+            link_with_query(target_name, :controller => :observer,
+              :action => :show_rss_log, :id => rss_log.id)
           end %>
         </span><br/>
       <% end %>

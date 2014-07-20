@@ -3,24 +3,19 @@
                 t(:name => @description.format_name)
 
   new_tab_set do
-    add_tab(:show_object.t(:type => :name), :action => 'show_name',
-            :id => @description.name_id, :params => query_params)
-    add_tab(:cancel_and_show.t(:type => :name_description),
-            :action => 'show_name_description',
-            :id => @description.id, :params => query_params)
+    add_tab_with_query(:show_object.t(:type => :name), :action => 'show_name',
+      :id => @description.name_id)
+    add_tab_with_query(:cancel_and_show.t(:type => :name_description),
+      :action => 'show_name_description', :id => @description.id)
     if @description.is_admin?(@user) || is_in_admin_mode?
-      add_tab(:show_description_adjust_permissions.t,
-              :action => 'adjust_permissions', :id => @description.id,
-              :params => query_params)
+      add_tab_with_query(:show_description_adjust_permissions.t,
+        :action => 'adjust_permissions', :id => @description.id)
     end
   end
 %>
 
-<%= form_for(:description, :url => {
-               :action => :edit_name_description,
-               :id => @description.id,
-               :params => query_params,
-            }) do |form| %>
+<%= form_for(:description, :url => add_query_param(
+      :action => :edit_name_description, :id => @description.id)) do |form| %>
   <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
 
   <%= render(:partial => 'form_name_description', :locals =>

@@ -1,14 +1,14 @@
 <%
   @title = :rss_log_title.t.nowrap
 
-  form = form_tag(:action => 'index_rss_log', :params => query_params)
+  form = form_tag(add_query_param(:action => 'index_rss_log'))
   form += :rss_show.t + ' '
   if @types == ['all']
     form += :rss_all.t
   else
     help = :rss_all_help.t
-    form += link_to(:rss_all.t, { :action => 'index_rss_log', :type => 'all',
-                    :params => query_params }, { :title => help })
+    form += link_with_query(:rss_all.t,
+      { :action => 'index_rss_log', :type => 'all' }, { :title => help })
   end
   for type in RssLog.all_types.map(&:to_s)
     checked = @types.include?(type) || @types == ['all']
@@ -19,8 +19,8 @@
       form += str
     else
       help = :rss_one_help.t(:type => type.to_sym)
-      form += link_to(str, { :action => 'index_rss_log', :type => type,
-                      :params => query_params }, { :title => help })
+      form += link_with_query(str,
+        { :action => 'index_rss_log', :type => type }, { :title => help })
     end
   end
   form += indent + submit_tag(:SUBMIT.t)

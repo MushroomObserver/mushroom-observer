@@ -21,6 +21,7 @@
       content_tag(:center, map)
     end
   %>
-  <%= :MAP.t %>: <%= link_to(:show_observation_hide_map.t, :action => :hide_thumbnail_map,
-                             :id => @observation.id, :params => query_params) %><br/>
+  <%= :MAP.t %>: 
+  <%= link_with_query(:show_observation_hide_map.t,
+        :action => :hide_thumbnail_map, :id => @observation.id) %><br/>
 <% end %>

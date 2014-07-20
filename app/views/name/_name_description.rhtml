@@ -19,15 +19,12 @@
   <% end %>
 
   <% if is_reviewer? %>
-    <%= indent + link_to(:review_unvetted.t, :action => 'set_review_status',
-                         :value => :unvetted, :id => desc.id,
-                         :params => query_params) %><br/>
-    <%= indent + link_to(:review_vetted.t, :action => 'set_review_status',
-                         :value => :vetted, :id => desc.id,
-                         :params => query_params) %><br/>
-    <%= indent + link_to(:review_inaccurate.t, :action => 'set_review_status',
-                         :value => :inaccurate, :id => desc.id,
-                         :params => query_params) %><br/>
+    <%= indent + link_with_query(:review_unvetted.t, :action => 'set_review_status',
+          :value => :unvetted, :id => desc.id) %><br/>
+    <%= indent + link_with_query(:review_vetted.t, :action => 'set_review_status',
+          :value => :vetted, :id => desc.id) %><br/>
+    <%= indent + link_with_query(:review_inaccurate.t, :action => 'set_review_status',
+          :value => :inaccurate, :id => desc.id) %><br/>
   <% end %><br/>
 <% end %>
 

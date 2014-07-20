@@ -3,25 +3,25 @@
 
   new_tab_set do
     if @user
-      add_tab(:species_list_show_clone_list.t,
-              { :action => 'create_species_list', :clone => @species_list.id,
-              :params => query_params },
-              { :help => :species_list_show_clone_list_help.l })
-      add_tab(:species_list_show_set_source.t, { :action => 'show_species_list',
-              :id => @species_list.id, :set_source => 1,
-              :params => query_params },
-              { :help => :species_list_show_set_source_help.l })
-      add_tab(:species_list_show_bulk_edit.t, { :action => 'bulk_editor',
-              :id => @species_list.id }, { :help => :species_list_show_bulk_edit_help.l })
+      add_tab_with_query(:species_list_show_clone_list.t,
+        { :action => 'create_species_list', :clone => @species_list.id },
+        { :help => :species_list_show_clone_list_help.l })
+      add_tab_with_query(:species_list_show_set_source.t,
+        { :action => 'show_species_list', :id => @species_list.id,
+          :set_source => 1 },
+        { :help => :species_list_show_set_source_help.l })
+      add_tab(:species_list_show_bulk_edit.t,
+        { :action => 'bulk_editor', :id => @species_list.id },
+        { :help => :species_list_show_bulk_edit_help.l })
     end
     if check_permission(@species_list)
-      add_tab(:species_list_show_manage_projects.t, :action => 'manage_projects',
-              :id => @species_list.id, :params => query_params)
-      add_tab(:species_list_show_edit.t, :action => 'edit_species_list',
-              :id => @species_list.id, :params => query_params)
-      add_tab(:DESTROY.t, { :action => 'destroy_species_list',
-              :id => @species_list.id, :params => query_params },
-              { :confirm => :are_you_sure.l })
+      add_tab_with_query(:species_list_show_manage_projects.t,
+        :action => 'manage_projects', :id => @species_list.id)
+      add_tab_with_query(:species_list_show_edit.t,
+        :action => 'edit_species_list', :id => @species_list.id)
+      add_tab_with_query(:DESTROY.t,
+        { :action => 'destroy_species_list', :id => @species_list.id },
+        { :confirm => :are_you_sure.l })
     end
   end
 

@@ -10,29 +10,28 @@
             "http://images.google.com/images?q=#{@name.real_text_name}")
     add_tab('MyCoPortal', mycoportal_url(@name))
     if @data != []
-      add_tab(:show_name_distribution_map.t, :action => 'map', :id => @name.id,
-              :params => query_params)
+      add_tab_with_query(:show_name_distribution_map.t, :action => 'map',
+        :id => @name.id)
     end
-    add_tab(:show_name_email_tracking.t, :action => 'email_tracking',
-            :id => @name.id, :params => query_params)
+    add_tab_with_query(:show_name_email_tracking.t,
+      :action => 'email_tracking', :id => @name.id)
   end
 
   # Edit Name | Bulk Name Edit | Add Name | Change Synonyms | Approve/Deprecate
   new_tab_set do
-    add_tab(:show_name_edit_name.t, :action => 'edit_name', :id => @name.id,
-            :params => query_params)
-    add_tab(:show_name_bulk_name_edit.t, :action => 'bulk_name_edit',
-            :params => query_params)
-    add_tab(:show_name_add_name.t, :action => 'create_name',
-            :params => query_params)
-    add_tab(:show_name_change_synonyms.t, :action => 'change_synonyms',
-            :id => @name.id, :params => query_params)
+    add_tab_with_query(:show_name_edit_name.t, :action => 'edit_name',
+      :id => @name.id)
+    add_tab_with_query(:show_name_bulk_name_edit.t,
+      :action => 'bulk_name_edit')
+    add_tab_with_query(:show_name_add_name.t, :action => 'create_name')
+    add_tab_with_query(:show_name_change_synonyms.t,
+      :action => 'change_synonyms', :id => @name.id)
     if @name.deprecated
-      add_tab(:APPROVE.t, :action => 'approve_name', :id => @name.id,
-              :params => query_params)
+      add_tab_with_query(:APPROVE.t, :action => 'approve_name',
+        :id => @name.id)
     else
-      add_tab(:DEPRECATE.t, :action => 'deprecate_name', :id => @name.id,
-              :params => query_params)
+      add_tab_with_query(:DEPRECATE.t, :action => 'deprecate_name',
+        :id => @name.id)
     end
   end
 
@@ -81,9 +80,9 @@
 				<br/>
 				<% odd_even = not(odd_even) %>
 				<%= :show_name_brief_description.t %>:
-				<%= link_to(:show_name_see_more.t, :id => @name.description.id, :params => query_params,
-		            :controller => 'name',
-		            :action => 'show_name_description') %> |
+				<%= link_with_query(:show_name_see_more.t, :id => @name.description.id,
+              :controller => 'name',
+		          :action => 'show_name_description') %> |
 				<%= edit_best_brief_desc_link(@name.description) %>
 				<%= colored_notes_box(odd_even, @best_description.tpl) %>
 			<% end %>

@@ -995,7 +995,10 @@ class ApplicationController < ActionController::Base
   def redirect_with_query(args)
     redirect_to(add_query_param(args))
   end
-  helper_method :add_query_param
+
+  def url_with_query(args)
+    url_for(add_query_param(args))
+  end
 
   # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params

@@ -3,26 +3,25 @@
     <%= :IMAGES.t %>:
     <%= if thumb_size_control
       if default_thumbnail_size == :thumbnail
-        link_to(:show_images_large_thumbs.t, :id => @observation.id,
-                :set_thumbnail_size => 'small', :params => query_params)
+        link_with_query(:show_images_large_thumbs.t, :id => @observation.id,
+          :set_thumbnail_size => 'small')
       else
-        link_to(:show_images_small_thumbs.t, :id => @observation.id,
-                :set_thumbnail_size => 'thumbnail', :params => query_params)
+        link_with_query(:show_images_small_thumbs.t, :id => @observation.id,
+          :set_thumbnail_size => 'thumbnail')
       end + safe_br
     end %>
   <% end %>
 
   <% if check_permission(@observation) %>
-    <%= link_to(:show_observation_add_images.t, :controller => 'image',
-                :action => 'add_image', :id => @observation.id,
-                :params => query_params) %><br/>
-    <%= link_to(:show_observation_reuse_image.t, :controller => 'image',
-                :action => 'reuse_image', :obs_id => @observation.id,
-                :mode => 'observation', :params => query_params) %><br/>
+    <%= link_with_query(:show_observation_add_images.t, :controller => 'image',
+          :action => 'add_image', :id => @observation.id) %><br/>
+    <%= link_with_query(:show_observation_reuse_image.t,
+          :controller => 'image', :action => 'reuse_image',
+          :obs_id => @observation.id, :mode => 'observation') %><br/>
     <% if @observation.images.length > 0 %>
-      <%= link_to(:show_observation_remove_images.t, :controller => 'image',
-                  :action => 'remove_images', :id => @observation.id,
-                  :params => query_params) %><br/>
+      <%= link_with_query(:show_observation_remove_images.t,
+            :controller => 'image', :action => 'remove_images',
+            :id => @observation.id) %><br/>
     <% end %>
   <% end %>
 

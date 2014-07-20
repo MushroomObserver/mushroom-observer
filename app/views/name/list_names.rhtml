@@ -35,8 +35,10 @@ args = @test_pagination_args || {} %>
       <% for name in @objects || []
         odd_or_even = 1 - odd_or_even %>
         <tr class="ListLine<%= odd_or_even %>">
-          <td><%= link_to(name.display_name.html_safe.t, :action => 'show_name',
-                          :id => name.id, :params => query_params) + " [#{name.observations.count}]" %></td>
+          <td>
+            <%= link_with_query(name.display_name.html_safe.t,
+                  :action => 'show_name',
+                  :id => name.id) + " [#{name.observations.count}]" %></td>
           <% if @extra_data %>
             <% data = @extra_data[name.id]
             if data && !data.empty?

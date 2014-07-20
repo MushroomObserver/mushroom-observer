@@ -12,9 +12,8 @@
       <% for desc in @objects || []
         odd_or_even = 1 - odd_or_even %>
         <tr class="ListLine<%= odd_or_even %>">
-          <td><%= link_to(desc.format_name.t,
-                          :action => 'show_name_description',
-                          :id => desc.id, :params => query_params) %><td>
+          <td><%= link_with_query(desc.format_name.t,
+                    :action => 'show_name_description', :id => desc.id) %><td>
         </tr>
       <% end %>
     </table>

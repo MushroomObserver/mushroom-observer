@@ -3,16 +3,14 @@
                t(:name => @name.display_name)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :name), :action => 'show_name',
-            :id => @description.name_id, :params => query_params)
+    add_tab_with_query(:cancel_and_show.t(:type => :name),
+      :action => 'show_name', :id => @description.name_id)
   end
 %>
 
-<%= form_for(:description, :url => {
-               :action => :create_name_description,
-               :id => @description.name_id,
-               :params => query_params,
-            }) do |form| %>
+<%= form_for(:description, :url => add_query_param(
+       :action => :create_name_description,
+       :id => @description.name_id)) do |form| %>
   <br/><center><%= submit_tag(:CREATE.l) %></center>
 
   <%= render(:partial => 'form_name_description', :locals =>

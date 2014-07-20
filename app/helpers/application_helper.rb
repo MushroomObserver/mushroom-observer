@@ -579,7 +579,7 @@ module ApplicationHelper
   end
   
   def edit_name_notes_link(name)
-    link_to(:EDIT.t, :id => name.id,
+    link_with_query(:EDIT.t, :id => name.id,
       :controller => 'name',
       :action => 'edit_name')
   end

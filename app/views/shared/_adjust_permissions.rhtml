@@ -1,7 +1,7 @@
 <% javascript_include_auto_complete %>
 
-<%= form_for(:description, :url => { :action => 'adjust_permissions',
-            :id => description.id, :params => query_params, }) do |form| %>
+<%= form_for(:description, :url => add_query_param(
+      :action => 'adjust_permissions', :id => description.id)) do |form| %>
   <br/><br/>
   <center><%= submit_tag(:SUBMIT.l) %></center>
   <br/><br/>

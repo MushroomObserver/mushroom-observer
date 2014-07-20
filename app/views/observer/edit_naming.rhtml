@@ -3,14 +3,13 @@
   @title = :edit_naming_title.t(:id => @observation.id)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :observation),
-            :action => 'show_observation', :id => @observation.id,
-            :params => query_params)
+    add_tab_with_query(:cancel_and_show.t(:type => :observation),
+      :action => 'show_observation', :id => @observation.id)
   end
 %>
 
-<%= form_tag(:action => 'edit_naming', :id => @naming.id,
-            :approved_name => @what, :params => query_params) do %>
+<%= form_tag(add_query_param(:action => 'edit_naming', :id => @naming.id,
+      :approved_name => @what)) do %>
   <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
 
   <table width="100%" cellpadding="10">

@@ -6,10 +6,8 @@
   end
 %>
 
-<%= form_for(:name, :url => {
-               :action => :create_name,
-               :params => query_params,
-            }) do |form| %>
+<%= form_for(:name,
+      :url => add_query_param(:action => :create_name)) do |form| %>
   <br/><center><%= submit_tag(:CREATE.l) %></center>
 
   <%= render(:partial => 'form_name', :locals => {:form => form }) %>

@@ -9,9 +9,8 @@
 <% if name.is_misspelling? %>
   <%= :show_name_misspelling_correct.t %>:
     <%= if name.correct_spelling
-      link_to(name.correct_spelling.display_name.t,
-              :action => :show_name, :id => name.correct_spelling_id,
-              :params => query_params)
+      link_with_query(name.correct_spelling.display_name.t,
+        :action => :show_name, :id => name.correct_spelling_id)
     else
       # This can apparently happen for past_names.
       name.correct_spelling_id
@@ -22,8 +21,7 @@
   approved_synonyms, deprecated_synonyms = name.sort_synonyms
   if approved_synonyms != []
     links = approved_synonyms.map do |n|
-      link_to(n.display_name.t, :action => "show_name", :id => n.id,
-              :params => query_params)
+      link_with_query(n.display_name.t, :action => "show_name", :id => n.id,)
     end %>
     <%= name.deprecated ? :show_name_preferred_synonyms.t :
                           :show_name_synonyms.t %>:
@@ -31,8 +29,7 @@
   <% end
   if deprecated_synonyms != []
     links = deprecated_synonyms.map do |n|
-      link_to(n.display_name.t, :action => "show_name", :id => n.id,
-              :params => query_params)
+      link_with_query(n.display_name.t, :action => "show_name", :id => n.id)
     end %>
     <%= :show_name_deprecated_synonyms.t %>:
       <%= links.join(', ') %><br/>

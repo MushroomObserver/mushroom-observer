@@ -4,18 +4,18 @@
   # List Projects | Edit Project
   new_tab_set do
     add_tab(:app_list_projects.t, :action => 'list_projects')
-    add_tab(:show_project_admin_request.t, :action => 'admin_request',
-            :id => @project.id, :params => query_params)
+    add_tab_with_query(:show_project_admin_request.t,
+      :action => 'admin_request', :id => @project.id)
     if check_permission(@project)
-      add_tab(:show_project_destroy.t, { :action => 'destroy_project',
-              :id => @project.id, :params => query_params },
-              { :confirm => :are_you_sure.l })
-      add_tab(:show_project_edit.t, :action => 'edit_project',
-              :id => @project.id, :params => query_params)
+      add_tab_with_query(:show_project_destroy.t,
+        { :action => 'destroy_project', :id => @project.id, },
+        { :confirm => :are_you_sure.l })
+      add_tab_with_query(:show_project_edit.t, :action => 'edit_project',
+        :id => @project.id)
     end
     if @project.is_admin?(@user)
-      add_tab(:show_project_add_members.t, :action => 'add_members',
-              :id => @project.id, :params => query_params)
+      add_tab_with_query(:show_project_add_members.t, :action => 'add_members',
+        :id => @project.id)
     end
   end
 
@@ -67,9 +67,10 @@
 
       <%= :show_project_drafts.t %>: <%= @draft_data.any? ? @draft_data.length : :NONE.t %><br/>
       <% for datum in @draft_data %>
-        <%= indent + link_to(datum['display_name'].t, :controller => 'name',
-                             :action => 'show_name_description',
-                             :id => datum['id'], :params => query_params) %>
+        <%= indent + link_with_query(datum['display_name'].t,
+              :controller => 'name',
+              :action => 'show_name_description',
+              :id => datum['id']) %>
         (<%= user_link(User.find(datum['user_id'])) %>)<br/>
       <% end %>
     </td>

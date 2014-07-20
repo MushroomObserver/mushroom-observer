@@ -7,30 +7,31 @@
   new_tab_set do
     if name && !name.unknown?
       add_tab(:google_images.t, 'http://images.google.com/images?q=%s' % name.real_text_name)
-      add_tab(:show_name_distribution_map.t, :controller => 'name', :action => 'map',
-              :id => name.id, :params => query_params)
+      add_tab_with_query(:show_name_distribution_map.t, :controller => 'name', 
+        :action => 'map', :id => name.id)
     end
     if questions_ok
-      add_tab(:show_observation_send_question.t, :controller => 'observer',
-              :action => 'ask_observation_question', :id => @observation.id,
-              :params => query_params)
+      add_tab_with_query(:show_observation_send_question.t,
+        :controller => 'observer', :action => 'ask_observation_question', 
+        :id => @observation.id)
     end
     if check_permission(@observation)
-      add_tab(:show_observation_edit_observation.t, :controller => 'observer',
-              :action => 'edit_observation', :id => @observation.id,
-              :params => query_params)
-      add_tab(:DESTROY.t, { :controller => 'observer', :action => 'destroy_observation',
-              :id => @observation.id, :params => query_params },
-              { :confirm => :are_you_sure.l })
+      add_tab_with_query(:show_observation_edit_observation.t, 
+        :controller => 'observer', :action => 'edit_observation',
+        :id => @observation.id)
+      add_tab_with_query(:DESTROY.t, { :controller => 'observer',
+        :action => 'destroy_observation', :id => @observation.id },
+        { :confirm => :are_you_sure.l })
     end
     if @user && @user.has_unshown_naming_notifications?(@observation)
-      add_tab(:show_observation_view_notifications.t, :controller => 'observation',
-              :action => 'show_notifications', :id => @observation.id)
+      add_tab(:show_observation_view_notifications.t,
+        :controller => 'observation', :action => 'show_notifications',
+        :id => @observation.id)
     end
     if user_has_lists
-      add_tab(:show_observation_manage_species_lists.t,
-              :controller => 'species_list', :action => 'manage_species_lists',
-              :id => @observation.id, :params => query_params)
+      add_tab_with_query(:show_observation_manage_species_lists.t,
+        :controller => 'species_list', :action => 'manage_species_lists',
+        :id => @observation.id)
     end
   end
 
