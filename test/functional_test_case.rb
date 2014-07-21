@@ -40,12 +40,17 @@ class FunctionalTestCase < ActionController::TestCase
   @@file_num = 0
   def check_for_unsafe_html
     str = @response.body.to_s.force_encoding('utf-8')
-    if str[0..4] == '<!DOC' and str.match(/&lt;[a-z]+|&amp;[#\w]+;/i)
-      @@file_num += 1
-      path = "#{Rails.root}/unsafe"
-      if File.directory?(path)
-        file = "#{path}/#{@controller.class}_#{@@file_num}.html"
-        File.open(file, 'w') {|f| f.write(@response.body)}
+    if str[0..4] == '<!DOC'
+      str.gsub!(/<!--.*?-->/mu, '')
+      str.gsub!(/<!\[CDATA\[.*?\]\]>/mu, '')
+      if str.match(/&lt;[a-z]+|&amp;[#\w]+;/i)
+        @@file_num += 1
+        path = "#{Rails.root}/unsafe"
+        if File.directory?(path)
+          file = "#{path}/#{@controller.class}_#{@@file_num}.html"
+          # File.open(file, 'w') {|f| f.write(@response.body)}
+          File.open(file, 'w') {|f| f.write(str)}
+        end
       end
     end
   end

@@ -11,19 +11,19 @@
       <h3>
         <%= :list_countries_known.t + " (#{@known_by_count.length})" %>
       </h3>
-      <%= @known_by_count.map {|country, count| country_link(country, count)}.join %>
+      <%= @known_by_count.map {|country, count| country_link(country, count)}.safe_join(safe_br) %>
     </td>
     <td valign="top" width="33%">
       <h3>
         <%= :list_countries_missing.t + " (#{@known_missing.length})" %>
       </h3>
-      <%= @known_missing.map {|country, count| "#{country}<br/>"}.join %>
+      <%= @known_missing.map {|country, count| country}.safe_join(safe_br) %>
     </td>
     <td valign="top" width="33%">
       <h3>
         <%= :list_countries_unknown.t + " (#{@unknown_by_count.length})" %>
       </h3>
-      <%= @unknown_by_count.map {|country, count| country_link(country, count)}.join %>
+      <%= @unknown_by_count.map {|country, count| country_link(country, count)}.safe_join(safe_br) %>
     </td>
   </tr>
 </table>

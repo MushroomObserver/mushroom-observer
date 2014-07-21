@@ -61,7 +61,7 @@
     !@image.width || @image.has_size?(size)
   end.map do |size|
     w, h = @image.size(size)
-    title = "#{w} &#215; #{h} pixels"
+    title = "#{w} × #{h} pixels"
     help = w ? { :title => title } : {}
     if size.to_s != @size.to_s
       link_with_query(:"image_show_#{size}".t,

@@ -81,7 +81,7 @@
                 words << :reviewer.l
               end
               if words.any?
-                " (#{words.join(', ')})"
+                ' ('.html_safe + words.safe_join(', ') + ')'
               end
             %>
           <% end %>

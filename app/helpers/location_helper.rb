@@ -1,7 +1,8 @@
 module LocationHelper
   
   def country_link(country, count=nil)
-    result = link_to(country + (count ? ": #{count}" : ""), :action => "list_by_country", :country => country) + "<br/>\n"
+    str = country + (count ? ": #{count}" : "")
+    result = link_to(str, :action => :list_by_country, :country => country)
   end
 
 end

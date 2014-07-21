@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => :app_rss.l}) %>
-  <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
+  <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png" />
   <meta property="og:title" content="Mushroom Observer" />
@@ -243,7 +243,7 @@
 
             <% if @right_tabs %>
               <div id="right_tabs">
-                <%= @right_tabs.join('<br/>').html_safe %>
+                <%= @right_tabs.safe_join(safe_br) %>
               </div>
             <% end %>
 

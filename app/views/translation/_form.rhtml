@@ -36,7 +36,7 @@
   elsif tag == tag.downcase and @edit_tags.include?(tag.upcase)
     notes << :edit_translations_lowercase.t
   end
-  note = notes.any? ? ' (' + notes.join(', ') + ')' : ''
+  note = notes.any? ? ' (' + notes.safe_join(', ') + ')' : ''
   %>
   <label for="tag_<%=tag%>"><%= h(tag) %>:</label><%= note %><br/>
   <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80,

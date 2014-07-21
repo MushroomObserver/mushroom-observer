@@ -15,13 +15,13 @@
         <tr valign="top" class="ListLine<%= odd_or_even %>"><td>
           <%= link_to(list.format_name.t, :controller => 'species_list',
                       :action => 'show_species_list', :id => list.id) %>
-          <%= if check_permission(list)
-            '[' + link_to(:REMOVE.t, { :controller => 'species_list',
+          <% if check_permission(list) %>
+            [<%= link_to(:REMOVE.t, { :controller => 'species_list',
                             :action => 'remove_observation_from_species_list',
                             :observation => @observation.id,
                             :species_list => list.id },
-                          :confirm => :are_you_sure.l) + ']'
-          end %>
+                            :confirm => :are_you_sure.l) %>]
+          <% end %>
         </td></tr>
       <% end %>
     </table>

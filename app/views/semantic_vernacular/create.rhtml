@@ -91,16 +91,20 @@
         <% @base_description.features.each do |feature, values| %>
           <% value_labels = Array.new %>
           <% values.collect do |value| %>
-            <% value_labels.push("<span class=\"svd-show-feature-value\" 
-              id=\"#{value["uri"]}\">" + value["label"] + "</span>") %>
+            <% span = content_tag(:span, value['label'], :class => 'svd-show-feature-value',
+                                  :id => value['uri'])
+               value_labels.push(span) %>
           <% end %>
-          <%= "<li id=\"#{feature["uri"]}\" title=\"#{feature["label"]}\">" +
-                  link_to(feature["label"], {
-                          :controller => "semantic_vernacular",
-                          :action => "show_feature",
-                          :uri => feature["uri"]},
-                          :target => "_blank") + ": " +
-                  value_labels.join(" <i>or</i> ") + "</li>" %>
+          <%=
+            link = link_to(feature['label'], {
+                     :controller => 'semantic_vernacular',
+                     :action => 'show_feature',
+                     :uri => feature['uri']
+                   }, :target => '_blank')
+            labels = value_labels.safe_join(' <i>or</i> '.html_safe)
+            content_tag(:li, link + ': ' + labels, :id => feature['uri'],
+                        :title => feature['label'])
+          %>
         <% end %>
       <% end %>
     </ul>

@@ -12,13 +12,11 @@
             :approved_where => @place_name) do %>
   <% if !@new_names.blank?
     val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>
-    <input id="approved_names" name="approved_names" type="hidden"
-           value="<%= val %>"/>
+    <input id="approved_names" name="approved_names" type="hidden" value="<%= val.html_safe %>"/>
   <% end %>
   <% if !@deprecated_names.blank?
     val = @deprecated_names.map(&:id).join(' ') %>
-    <input id="approved_deprecated_names" name="approved_deprecated_names"
-           type="hidden" value="<%= val %>"/>
+    <input id="approved_deprecated_names" name="approved_deprecated_names" type="hidden" value="<%= val %>"/>
   <% end %>
 
   <br/><center><%= submit_tag :UPDATE.l %></center>

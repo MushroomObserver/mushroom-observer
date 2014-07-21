@@ -31,10 +31,10 @@
 <center>
 	<p>
 		<% if @specimen.created_at %>
-		  <%= :specimen_created_at.t + ': ' +  @specimen.created_at.web_date %><br/>
+		  <%= :specimen_created_at.t %>: <%= @specimen.created_at.web_date %><br/>
 		<% end %>
 		<% if @specimen.updated_at %>
-		  <%= :specimen_updated_at.t + ': ' +  @specimen.updated_at.web_date %><br/>
+		  <%= :specimen_updated_at.t %>: <%= @specimen.updated_at.web_date %><br/>
 		<% end %>
 	</p>
 </center>

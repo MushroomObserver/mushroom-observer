@@ -31,15 +31,15 @@
       <% value_labels = Array.new %>
       <% @feature.domain.each do |key, values| %>
         <% values.each do |value| %>
-          <% value_labels.push(
-            "<span class=\"feature-domain-item\">#{value["label"]}</span>") %>
+          <% span = content_tag(:span, value['label'], :class => 'feature-domain-item')
+            value_labels.push(span) %>
         <% end %>
-        <%= "which " +
+        <%= 'which '.html_safe +
           link_to(key["label"],
                   :controller => "semantic_vernacular",
                   :action => "show_feature",
                   :uri => key["uri"]) + 
-          " of #{value_labels.join(" or ")}" %>
+          ' of ' + value_labels.safe_join(' <i>or</i> '.html_safe) %>
       <% end %>
     </li>
     <li class="svd-show-li">

@@ -8,7 +8,7 @@
 <table width="100%">
 	<tr>
 		<td></td>
-		<%= [:specimen_herbarium, :specimen_herbarium_label, :OBSERVATIONS].map {|title| table_column_title(title.t) }.join() %>
+		<%= [:specimen_herbarium, :specimen_herbarium_label, :OBSERVATIONS].map {|title| table_column_title(title.t) }.safe_join %>
 		<td></td>
 	</tr>
 	<%

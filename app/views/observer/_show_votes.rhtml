@@ -36,14 +36,14 @@
             .sort_by {|v| v.id.to_s.reverse} # pseudorandom but deterministic order
           if votes.length > 0
             n = 0
-            '(' + votes.map do |vote|
+            '('.html_safe + votes.map do |vote|
               n += 1
               if n < 4
                 user_link(vote.user, vote.user.login)
               else
                 '...'
               end
-            end.join(',') + ')'
+            end.safe_join(',') + ')'
           end
         %></small></td>
         <td>&nbsp;</td>

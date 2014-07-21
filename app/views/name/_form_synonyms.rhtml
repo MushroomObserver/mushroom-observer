@@ -15,9 +15,9 @@
             <% if n != @name %>
               <br/>
               <%= check_box("existing_synonyms", n.id, { :checked => '1' }, '1') %>
-              <%= "<label for=\"existing_synonyms_#{n.id}\">" %>
-                <%= link_to(n.display_name.t, :action => 'show_name', :id => n.id) %>
-              </label>
+              <%= content_tag(:label, :for => "existing_synonyms_#{n.id}") do
+                link_to(n.display_name.t, :action => 'show_name', :id => n.id)
+              end %>
             <% end %>
           <% end %>
         </span>
@@ -34,9 +34,9 @@
             <% if not names.member?(name) %>
               <br/>
               <%= check_box("proposed_synonyms", name.id, { :checked => '1' }, '1') %>
-              <%= "<label for=\"proposed_synonyms_#{name.id}\">" %>
-                <%= link_to(name.display_name.t, :action => 'show_name', :id => name.id) %>
-              </label>
+              <%= content_tag(:label, :for => "proposed_synonyms_#{name.id}") do
+                link_to(name.display_name.t, :action => 'show_name', :id => name.id)
+              end %>
             <% end %>
           <% end %>
         </span>

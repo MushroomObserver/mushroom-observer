@@ -48,7 +48,7 @@
       <table style="margin-left:20px">
         <% for field in SiteData::ALL_FIELDS %>
           <% if SiteData::FIELD_WEIGHTS[field] > 0 %>
-            <%= "<tr><td nowrap='nowrap'>#{"user_stats_#{field}".to_sym.t} &nbsp; </td><td>#{SiteData::FIELD_WEIGHTS[field]}</td></tr>" %>
+            <tr><td nowrap="nowrap"><%= "user_stats_#{field}".to_sym.t %> &nbsp; </td><td><%= SiteData::FIELD_WEIGHTS[field] %></td></tr>
           <% end %>
         <% end %>
       </table><br/>

@@ -40,7 +40,7 @@
           if !image.notes.blank?
             notes << image.notes.tl.truncate_html(300)
           end
-          notes = notes.join('<br/>')
+          notes = notes.safe_join(safe_br)
           if !notes.blank? %>
           <small>
             <%= content_tag(:span, notes, :title => notes.tp.html_to_ascii) %>

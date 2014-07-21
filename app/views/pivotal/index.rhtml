@@ -90,7 +90,7 @@
               end
             %></td>
             <td style="white-space:nowrap"><%=
-              label == '-' ? '' : '&#8211; ' + :"pivotal_head_#{label}".t
+              label == '-' ? '' : '&#8211; '.html_safe + :"pivotal_head_#{label}".ths
             %></td>
           </tr>
           <% if label == 'all' %>
@@ -116,10 +116,10 @@
           <span class="pivotal_state pivotal_<%= story.state %>"><%=
             :"pivotal_state_#{story.state}".l
           %></span>
-          <span class="pivotal_num_comments">(<%=
-            :comments.l + ': <span id="pivotal_num_comments_' + story.id + '">' +
-            story.comments.length.to_s + '</span>'
-          %>)</span>
+          <span class="pivotal_num_comments">(<%= :comments.l %>: 
+            <span id="pivotal_num_comments_<%= story.id + %>"><%=
+              story.comments.length.to_s
+            %></span>)</span>
           <span class="pivotal_labels"><%=
             labels = story.sorted_labels.map do |label|
               link_to_function(h(:"pivotal_label_#{label}".l), "click_on_label('#{label}')",
@@ -130,7 +130,7 @@
                 "click_on_label('#{story.activity}')",
                 :class => "pA p_#{story.activity}")
             end
-            labels.join(' ')
+            labels.safe_join(' ')
           %></span>
         </span>
       </div>

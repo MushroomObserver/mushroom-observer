@@ -31,7 +31,7 @@ if is_in_admin_mode? %>
         odd_or_even = 1 - odd_or_even %>
         <tr class="ListLine<%= odd_or_even %>">
           <td><%= user.verified %></td>
-          <td><%= user.user_groups.map { |g| h(g.name) }.join(',') %></td>
+          <td><%= user.user_groups.map { |g| h(g.name) }.safe_join(',') %></td>
           <td><%= user.last_login.web_time rescue '--' %></td>
           <td><%= user.id %></td>
           <td><%= user_link(user, user.login) %></td>

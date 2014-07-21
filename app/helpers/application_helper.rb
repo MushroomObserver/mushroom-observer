@@ -190,18 +190,18 @@ module ApplicationHelper
   end
 
   def herbarium_name_box(default_name="")
-	  "<label for=\"specimen_herbarium_name\">#{:specimen_herbarium_name.t}</label>:
-	  #{text_field('specimen', 'herbarium_name', :value => @user.preferred_herbarium_name, :size => 60)}
-	  #{turn_into_herbarium_auto_completer("specimen_herbarium_name")}"
+	  content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
+	  text_field(:specimen, :herbarium_name, :value => @user.preferred_herbarium_name, :size => 60) +
+	  turn_into_herbarium_auto_completer(:specimen_herbarium_name)
   end
 
   def herbarium_id_box
-	  "<label for=\"specimen_herbarium_id\">#{:specimen_herbarium_id.t}</label>:
-	  #{text_field('specimen', 'herbarium_id', :size => 20)}"
+	  content_tag(:label, :specimen_herbarium_id.t, :for => :specimen_herbarium_id) + ': ' +
+	  text_field(:specimen, :herbarium_id, :size => 20)
   end
 
   def table_column_title(title)
-    "<td align=\"center\" class=\"TableColumn\">#{title}</td>"
+    content_tag(:td, title, :align => :center, :class => :TableColumn)
   end
 
   ### From auto_complete_helper.rb
@@ -228,7 +228,7 @@ module ApplicationHelper
         else
           if !key.to_s.match(/^on/) &&
              !val.to_s.match(/^(-?\d+(\.\d+)?|true|false|null)$/)
-            val = "'" + escape_javascript(val) + "'"
+            val = "'" + escape_javascript(val.to_s) + "'"
           end
           js_args << "#{key}: #{val}"
         end
@@ -668,7 +668,7 @@ module ApplicationHelper
         end
       end
       if args[:bold] and args[:bold].call(ver)
-        link = '<b>' + link + '</b>'
+        link = content_tag(:b, link)
       end
 
       # Was this the result of a merge?
@@ -2033,8 +2033,8 @@ module ApplicationHelper
   def add_location_search_tabs(name)
     search_string = name.gsub(' Co.', ' County').gsub(', USA', '').gsub(' ', '+').gsub(',', '%2C')
     add_tab('Google Maps', 'http://maps.google.com/maps?q=' + search_string)
-    add_tab('Yahoo Maps', 'http://maps.yahoo.com/#mvt=m&amp;q1=' + search_string)
-    add_tab('Wikipedia', 'http://en.wikipedia.org/w/index.php?title=Special:Search&amp;search=' + search_string)
+    add_tab('Yahoo Maps', 'http://maps.yahoo.com/#mvt=m&q1=' + search_string)
+    add_tab('Wikipedia', 'http://en.wikipedia.org/w/index.php?title=Special:Search&search=' + search_string)
     add_tab('Google Search', 'http://www.google.com/search?q=' + search_string)
   end
 

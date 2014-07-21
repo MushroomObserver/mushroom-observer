@@ -168,10 +168,10 @@
             link = link_to_function(link, "alert(\"#{help2}\")")
             result << indent
             result << content_tag(:span, link, :title => help)
-            result[-3..-1] = content_tag(:span, result[-3..-1].join,
+            result[-3..-1] = content_tag(:span, result[-3..-1].safe_join,
                                          :style => 'white-space:nowrap')
           end
-          result.join %>
+          result.safe_join %>
         </td>
       </tr>
     <% end %>

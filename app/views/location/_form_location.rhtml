@@ -7,7 +7,7 @@
     <td>
 <% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
   <table class="Warnings"><tr><td>
-    <%= @dubious_where_reasons.join('<br/>') %>
+    <%= @dubious_where_reasons.safe_join(safe_br) %>
     <br/>
     <span class="HelpNote">
       <%= :form_locations_dubious_help.t %>

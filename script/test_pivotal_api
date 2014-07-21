@@ -72,3 +72,5 @@ doc.root.elements.each('story') do |story|
 end
 
 puts "Found #{stories.length} stories!"
+
+puts stories[100].inspect

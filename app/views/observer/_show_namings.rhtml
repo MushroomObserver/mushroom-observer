@@ -104,10 +104,10 @@
             <% end %>
 
             <td width="20">&nbsp;</td>
-            <td><%=
-              (observation.is_owners_favorite?(naming) ? image_tag("eye3.png") : "") +
-              (naming == consensus ? image_tag("eyes3.png") : "")
-            %></td>
+            <td>
+              <%= image_tag("eye3.png") if observation.is_owners_favorite?(naming) %>
+              <%= image_tag("eyes3.png") if naming == consensus %>
+            </td>
           </tr>
 
           <% Textile.register_name(naming.name) %>
@@ -118,7 +118,7 @@
                   <% if reason.notes.blank? %>
                     <%= reason.label.t %>
                   <% else %>
-                    <%= (reason.label.l + ": " + reason.notes).tl %>
+                    <%= reason.notes.sub(/\A/, reason.label.l + ': ').tl %>
                   <% end %><br/>
                 <% end %>
               <% end %>
@@ -141,7 +141,7 @@
           <%= image_tag("eye3.png") %>
         </td>
         <td>
-          <%= " = ".html_safe + :show_namings_eye_help.t %>
+          = <%= :show_namings_eye_help.t %>
         </td>
         <td>
         </td>
@@ -149,7 +149,7 @@
           <%= image_tag("eyes3.png") %>
         </td>
         <td>
-          <%= " = ".html_safe + :show_namings_eyes_help.t %>
+          = <%= :show_namings_eyes_help.t %>
         </td>
       </tr>
     </table>

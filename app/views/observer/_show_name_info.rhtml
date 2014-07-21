@@ -16,7 +16,7 @@
       else
         label = links.length > 1 ? :show_observation_alternative_names.t : :show_observation_alternative_name.t
       end
-      lines << "#{label}: <span class='Data'>#{links.join(', ')}</span>"
+      lines << label + ': ' + content_tag(:span, links.safe_join(', '), :class => :Data)
     end
 
     data = []
@@ -81,5 +81,5 @@
 
   lines += list_descriptions(name) if name
 
-  lines.join("<br/>\n").html_safe
+  lines.safe_join(safe_br)
 %>
