@@ -21,8 +21,8 @@
                     :class => 'ListWhat'), :action => 'show_comment',
                     :id => comment.id) %>:
               <% if target %>
-                <%= link_to(sprintf('<span class="ListWhat">%s</span>',
-                                    target.unique_format_name.t),
+                <%= link_to(content_tag(:span, target.unique_format_name.t,
+                                        :class => 'ListWhat'),
                             :controller => target.show_controller,
                             :action => target.show_action, :id => target.id) %>
               <% else %>

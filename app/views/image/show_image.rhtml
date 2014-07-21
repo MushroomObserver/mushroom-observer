@@ -70,7 +70,7 @@
     else
       content_tag(:span, :"image_show_#{size}".t, help)
     end
-  end.join(' | ')
+  end.safe_join(' | ')
 %><br/>
 <%= if @size != @default_size
   link_with_query(:image_show_make_default.t, :action => 'show_image',

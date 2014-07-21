@@ -99,7 +99,7 @@ module ApplicationHelper
   def safe_empty; "".html_safe; end
   def safe_br; "<br/>".html_safe; end
   def safe_nbsp; "&nbsp;".html_safe; end
-  
+
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
   end
@@ -185,7 +185,7 @@ module ApplicationHelper
                       :id => obj.rss_log_id)
     end
 
-    html = html.join("<br/>\n").html_safe
+    html = html.safe_join(safe_br)
     html = content_tag(:p, html, class: "Date")
   end
 
@@ -392,7 +392,7 @@ module ApplicationHelper
       links << link_with_query(:DESTROY.t, :id => desc.id,
         :action => "destroy_#{type}")
     end
-    content_tag(:p, content_tag(:big, title) + links.join(' | ').html_safe)
+    content_tag(:p, content_tag(:big, title) + links.safe_join(' | '))
   end
 
   def show_best_image(obs)
@@ -451,7 +451,7 @@ module ApplicationHelper
           { :id => desc.id, :action => "destroy_#{type}_description",
             :controller => obj.show_controller },
           { :confirm => :are_you_sure.t }) if admin
-        item += indent + "[" + links.join(' | ').html_safe + "]" if links.any?
+        item += indent + "[" + links.safe_join(' | ') + "]" if links.any?
       end
       item
     end
@@ -503,7 +503,7 @@ module ApplicationHelper
     any = list.any?
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.join("<br/>\n").html_safe
+    html = list.safe_join(safe_br)
     html = content_tag(:p, html)
 
     # Show list of projects user is a member of.
@@ -516,7 +516,7 @@ module ApplicationHelper
           :source => 'project')
         indent + item
       end
-      html2 = list.join("<br/>\n").html_safe
+      html2 = list.safe_join(safe_br)
       html += content_tag(:p, html2)
     end
     return html
@@ -538,7 +538,7 @@ module ApplicationHelper
     any = list.any?
     # list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.join("<br/>\n").html_safe
+    html = list.safe_join(safe_br)
     html = colored_notes_box(odd_even, html)
     head + html
   end
@@ -555,7 +555,7 @@ module ApplicationHelper
         :source => 'project')
       indent + item
     end
-    head.html_safe + colored_notes_box(odd_even, list.join("<br/>\n").html_safe)
+    head.html_safe + colored_notes_box(odd_even, list.safe_join(safe_br))
   end
 
   def edit_desc_link(desc)
@@ -682,7 +682,7 @@ module ApplicationHelper
       [ date, i, user, i, link, i, merge ]
     end
     table = make_table(table, :style => 'margin-left:20px')
-    html = "<p>#{:VERSIONS.t}:</p>#{table}<br/>"
+    html = content_tag(:p, :VERSIONS.t) + table + safe_br
   end
 
   # Return link to orphaned versions of old description if this version
@@ -760,7 +760,7 @@ module ApplicationHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent(w=10)
-   "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
+    "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
   end
 
   # Wrap an html object in '<span title="blah">' tag.  This has the effect of
@@ -808,7 +808,7 @@ module ApplicationHelper
     content_tag(:table, table_opts) do
       rows.map do |row|
         make_row(row, tr_opts, td_opts) + make_line(row, td_opts)
-      end.join.html_safe
+      end.safe_join
     end
   end
   
@@ -819,7 +819,7 @@ module ApplicationHelper
       else
         row.map do |cell|
           make_cell(cell, td_opts)
-        end.join.html_safe
+        end.safe_join
       end
     end
   end
@@ -832,7 +832,7 @@ module ApplicationHelper
     colspan = td_opts[:colspan]
     if colspan
       content_tag(:tr, {:class => 'MatrixLine'}) do
-        content_tag(:td, '<hr/>', {:class => 'MatrixLine', :colspan => colspan})
+        content_tag(:td, tag(:hr), {:class => 'MatrixLine', :colspan => colspan})
       end
     else
       safe_empty
@@ -861,11 +861,11 @@ module ApplicationHelper
         capture(obj, &block)
       end
       if cols.length >= @layout["columns"]
-        rows << cols.join('').html_safe
+        rows << cols.safe_join
         cols = []
       end
     end
-    rows << cols.join('').html_safe if cols.any?
+    rows << cols.safe_join if cols.any?
     table = make_table(rows, {:cellspacing => 0, :class => "Matrix"}.merge(table_opts),
                        row_opts, {:colspan => @layout["columns"]})
     # concat(table)
@@ -1134,7 +1134,7 @@ module ApplicationHelper
     lines << mapset_observation_link(observations.first, args) if observations.length == 1
     lines << mapset_location_link(locations.first, args) if locations.length == 1
     lines << mapset_coords(set)
-    return lines.join('<br/>')
+    return lines.safe_join(safe_br)
   end
 
   def mapset_observation_header(set, args)
@@ -1179,9 +1179,10 @@ module ApplicationHelper
       "#{format_latitude(set.lat)} #{format_longitude(set.long)}"
     else
       content_tag(:center,
-        "#{format_latitude(set.north)}<br/>" +
-        "#{format_longitude(set.west)} &nbsp; #{format_longitude(set.east)}<br/>" +
-        "#{format_latitude(set.south)}"
+        format_latitude(set.north) + safe_br +
+        format_longitude(set.west) + safe_nbsp +
+        format_longitude(set.east) + safe_br +
+        format_latitude(set.south)
       )
     end
   end
@@ -1283,7 +1284,7 @@ module ApplicationHelper
   #
   def user_list(title, users)
     format_user_list(title, users.count, ': ',
-      users.map {|u| user_link(u, u.legal_name)}.join(', ').html_safe)
+      users.map {|u| user_link(u, u.legal_name)}.safe_join(', '))
   end
   
   def format_user_list(title, user_count, separator, user_block)
@@ -1455,7 +1456,7 @@ module ApplicationHelper
          check_permission(image) or
          (image and image.user and image.user.keep_filenames == :keep_and_show)
        )
-      result += '<br/>' unless did_vote_div
+      result += safe_br unless did_vote_div
       result += h(image.original_name)
     end
 
@@ -1650,7 +1651,7 @@ module ApplicationHelper
         else
           letter
         end
-      end.join(' ').html_safe
+      end.safe_join(' ')
       return content_tag(:div, str, class: "pagination")
     else
       return safe_empty
@@ -1707,7 +1708,7 @@ module ApplicationHelper
       result << '|'                                      if this < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
       
-      result = content_tag(:div, result.join(' ').html_safe, :class => "pagination")
+      result = content_tag(:div, result.safe_join(' '), :class => "pagination")
     end
     result
   end
@@ -1734,7 +1735,7 @@ module ApplicationHelper
     else
       image_tag('vote_up_cold.png')
     end
-    result += '<span id="pivotal_vote_num_' + story.id + '">' + story.score.to_s + '</span>'
+    result += content_tag(:span, story.score.to_s, :id => 'pivotal_vote_num_' + story.id)
     result += if @user && current_vote > PIVOTAL_MIN_VOTE
       link_to_function(image_tag('vote_down_hot.png'),
         "vote_on_story(#{story.id}, #{@user.id}, #{current_vote-1})")
@@ -1745,39 +1746,34 @@ module ApplicationHelper
   end
 
   def pivotal_story(story)
-    result = ''
-    result += '<p class="pivotal_heading">' + :DESCRIPTION.l + ':</p>'
+    result = content_tag(:p, :DESCRIPTION.l + ':', :class => 'pivotal_heading')
     result += story.description.tp
     if story.user.instance_of?(User)
-      result += '<p class="pivotal_heading">' + :pivotal_posted_by.l + ': '
-      result += user_link(story.user) + '</p>'
+      result += content_tag(:p, :pivotal_posted_by.l + ': ' + user_link(story.user),
+                            :class => 'pivotal_heading')
     end
-    result += '<p class="pivotal_heading">' + :COMMENTS.l + ':</p>'
-    result += '<div id="pivotal_comments">'
+    result += content_tag(:p, :COMMENTS.l + ':', :class => 'pivotal_heading')
+    comments = []
     num = 0
     for comment in story.comments
       num += 1
-      result += pivotal_comment(comment, num)
+      comments << pivotal_comment(comment, num)
     end
-    result += '</div>'
-    result += '<form action="" style="margin-top:1em">'
-    result += '<textarea id="pivotal_comment" cols="80" rows="10"></textarea><br/>'
-    result += '<input type="button" value="' + :pivotal_post_comment.l + '" ' +
-              'onclick="post_comment(' + story.id + ')" />'
-    result += '</form>'
+    result += content_tag(:div, comments.safe_join, :id => 'pivotal_comments')
+    form = content_tag(:textarea, '', :id => 'pivotal_comment', :cols => 80, :rows => 10) + safe_br
+    form += tag(:input, :type => :button, :value => :pivotal_post_comment.l,
+                :onclick => "post_comment(#{story.id})")
+    result += content_tag(:form, form, :action => '', :style => 'margin-top:1em')
     return result
   end
 
   def pivotal_comment(comment, num)
-    result = ''
-    result += '<div class="ListLine' + (num & 1).to_s + '">'
-    result += '<p>'
-    result += :CREATED.t + ': ' + comment.time.to_s + '<br/>'
-    result += :BY.t + ': ' + user_link(comment.user) + '<br/>'
-    result += '</p>'
-    result += comment.text.to_s.tp
-    result += '</div>'
-    return result
+    content_tag(:div, :class => 'ListLine' + (num & 1).to_s) do
+      content_tag(:p) do
+        :CREATED.t + ': ' + comment.time.to_s + safe_br +
+        :BY.t + ': ' + user_link(comment.user) + safe_br
+      end + comment.text.to_s.tp
+    end
   end
 
   # From tab_helper.rb
@@ -1882,7 +1878,7 @@ module ApplicationHelper
         else
           set.to_s
         end
-      end.join('').html_safe
+      end.safe_join
     end
   end
   
@@ -1894,7 +1890,7 @@ module ApplicationHelper
       all_tabs = links.map do |tab|
         render_tab(*tab)
       end
-      header.to_s.html_safe + all_tabs.join(' | ').html_safe + '<br/>'.html_safe
+      header.to_s.html_safe + all_tabs.safe_join(' | ') + safe_br
     end
   end
 
@@ -1903,7 +1899,7 @@ module ApplicationHelper
     if !link_args
       result = label
     elsif link_args.is_a?(String) && (link_args[0..6] == 'http://')
-      result = "<a href=\"#{link_args}\" target=\"_new\">#{label}</a>"
+      result = content_tag(:a, label, :href => link_args, :target => :_new)
     else
       if link_args.is_a?(Hash) && link_args.has_key?(:help)
         help = link_args[:help]
@@ -1990,7 +1986,7 @@ module ApplicationHelper
       end
 
       def interest_tab(img1, img2, img3)
-        content_tag(:div, img1 + "<br/".html_safe + img2 + img3)
+        content_tag(:div, img1 + safe_br + img2 + img3)
       end
       
       case @user.interest_in(object)

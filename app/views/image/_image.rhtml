@@ -10,12 +10,14 @@
 <% else %>
     <td valign="middle">
 <% end %>
-      <%= link_with_query(sprintf('<span class="ListWhen">%s: </span>' +
-                            '<span class="ListWhat">%s</span>',
-            image.when, image.unique_format_name.t),
-                  :action => 'show_image', :id => image.id) %><br/>
-      <span class="ListWho"><%= image.user ? user_link(image.user) :
-                                             "#{image.id}" %></span>
+      <%=
+        when_span = content_tag(:span, "#{image.when}:", :class => :ListWhen)
+        what_span = content_tag(:span, image.unique_format_name.t, :class => :ListWhat)
+        who_span = content_tag(:span, image.user ? user_link(image.user) : image.id, :class => :ListWho)
+        link_with_query(when_span + ' ' + what_span,
+          :action => 'show_image', :id => image.id) + safe_br +
+        who_span
+      %>
     </td>
   </tr>
 </table>
