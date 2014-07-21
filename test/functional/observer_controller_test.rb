@@ -69,7 +69,7 @@ class ObserverControllerTest < FunctionalTestCase
       :herbarium_id => ''
     }
   end
-  
+
 ################################################################################
 
   # ----------------------------
@@ -87,11 +87,11 @@ class ObserverControllerTest < FunctionalTestCase
       assert_template(action: action)
     end
   end
-  
+
   def assert_list_rss_logs(has_partial=false)
     assert_action('list_rss_logs', has_partial ? "_rss_log" : false)
   end
-  
+
   def assert_list_observations(has_partial=false)
     assert_action('list_observations', has_partial ? "_rss_log" : false)
   end
@@ -385,11 +385,11 @@ class ObserverControllerTest < FunctionalTestCase
     ask_webmaster_test("rolf@mushroomobserver.org",
       :response => {:controller => "observer", :action => "list_rss_logs"})
   end
-  
+
   def test_send_webmaster_question_need_address
     ask_webmaster_test("", :flash => :runtime_ask_webmaster_need_address.t)
   end
-  
+
   def test_send_webmaster_question_spammer
     ask_webmaster_test("spammer", :flash => :runtime_ask_webmaster_need_address.t)
   end
@@ -398,8 +398,9 @@ class ObserverControllerTest < FunctionalTestCase
     ask_webmaster_test("bogus@email.com", :content => '',
       :flash => :runtime_ask_webmaster_need_content.t)
   end
-  
+
   def test_send_webmaster_question_antispam
+    disable_unsafe_html_filter
     ask_webmaster_test("bogus@email.com",
       :content => "Buy <a href='http://junk'>Me!</a>",
       :flash => :runtime_ask_webmaster_antispam.t)
@@ -414,7 +415,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response(response)
     assert_flash(flash) if flash
   end
-  
+
   def test_show_observation_num_views
     obs = observations(:coprinus_comatus_obs)
     updated_at = obs.updated_at
@@ -427,7 +428,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_equal(last_view, obs.last_view)
     assert_equal(updated_at, obs.updated_at)
   end
-  
+
   def assert_show_observation
     assert_action_partials('show_observation',
       ["_show_name_info",
@@ -438,7 +439,7 @@ class ObserverControllerTest < FunctionalTestCase
        "_show_thumbnail_map",
        "_show_images"])
   end
-  
+
   def test_show_observation
     assert_equal(0, Query.count)
 
@@ -605,7 +606,7 @@ class ObserverControllerTest < FunctionalTestCase
     post_requires_login(:commercial_inquiry, params)
     assert_template(:controller => :image, :action => :show_image)
   end
-  
+
   def test_send_ask_observation_question
     obs = observations(:minimal_unknown)
     params = {
@@ -922,7 +923,7 @@ class ObserverControllerTest < FunctionalTestCase
     herbarium = specimen.herbarium
     assert(herbarium.is_curator?(rolf))
   end
-  
+
   def test_construct_observation
 
     # Test a simple observation creation with an approved unique name
@@ -2903,7 +2904,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:index_observation, :by => :created)
     assert_response(:success)
   end
-  
+
   def test_download_observation_index
     obs = Observation.find_all_by_user_id(mary.id)
     assert(4 <= obs.length)
