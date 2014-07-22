@@ -6,4 +6,4 @@ rolfs_api_key:
   num_uses: 0
   user_id: 1
   key: bogus_api_key
-  notes: For testing purposes only.
+  notes: For testing purpose’s only.

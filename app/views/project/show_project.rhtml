@@ -31,7 +31,7 @@
       <p><%= :show_project_by.t %>: <%= user_link(@project.user) %></p>
       <p><%= :show_project_user_group.t %>: <%= @project.user_group.name.t %></p>
       <p><%= :show_project_admin_group.t %>: <%= @project.admin_group.name.t %></p>
-      <%= (:show_project_summary.l + ': ' + @project.summary.to_s).tpl %>
+      <%= @project.summary.to_s.sub(/\A/, :show_project_summary.l + ': ').tpl %>
       <% if @user and @project.user_group.users.member?(@user) %>
         <%= render(:partial => 'show_groups', :locals => { :project => @project,
                    :user => @user }) %>

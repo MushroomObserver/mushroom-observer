@@ -5,7 +5,7 @@ Subject: [MO] Albion, California, USA Has Been Changed
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 
 Location was Changed
 
@@ -18,14 +18,17 @@ North edge changed to: 39.32
 South edge changed to: 39.21
 East edge changed to: -123.74
 West edge changed to: -123.82
+
 Notes changed to:
 --------------------------------------------------
-Here are some new notes to play with.
+Here are some new =E2=80=98notes=E2=80=99 to play with.
 --------------------------------------------------
+
 Here are some handy links:
 
 Show this location: http://localhost:3000/location/show_location/1
-I'm not interested in this location: http://localhost:3000/interest/set_interest?id=1&type=Location&user=2&state=-1
+I'm not interested in this location: http://localhost:3000/interest/set_i=
+nterest?id=3D1&type=3DLocation&user=3D2&state=3D-1
 Change your preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000
 

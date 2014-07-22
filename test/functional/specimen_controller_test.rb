@@ -5,8 +5,15 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_template(action: 'specimen_index')
   end
 
-  def test_show_specimen
+  def test_show_specimen_without_notes
     specimen = specimens(:coprinus_comatus_nybg_spec)
+    assert(specimen)
+    get_with_dump(:show_specimen, :id => specimen.id)
+    assert_template(action: 'show_specimen', partial: "_rss_log")
+  end
+
+  def test_show_specimen_with_notes
+    specimen = specimens(:interesting_unknown)
     assert(specimen)
     get_with_dump(:show_specimen, :id => specimen.id)
     assert_template(action: 'show_specimen', partial: "_rss_log")

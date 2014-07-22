@@ -90,7 +90,7 @@ if @user.email_html %>
 </html>
 <% else %><%= intro.tp.html_to_ascii %>
 
-<%= fields.tp.html_to_ascii.html_safe %>
+<%= fields.tp.html_to_ascii %>
 
 <%= @comment.comment ? @comment.comment.tp.html_to_ascii.html_safe + "\n" : "" %>
 --------------------------------------------------

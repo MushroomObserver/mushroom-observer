@@ -7,7 +7,7 @@ in_situ:
   content_type: image/jpeg
   user_id: 2
   when: 2006-05-11
-  notes: What it looked like originally
+  notes: What it looked like originally & before we'd messed it up
   copyright_holder: Bob Dobbs
   width: 1000
   height: 1000

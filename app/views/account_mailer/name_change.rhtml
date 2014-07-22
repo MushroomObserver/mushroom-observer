@@ -120,12 +120,12 @@ if @user.email_html %>
 <%= var + ' ' + is_now %>:
 --------------------------------------------------
 <%=
-  val.to_s.tp.html_to_ascii.html_safe
+  val.to_s.tp.html_to_ascii
 %>
 --------------------------------------------------
 <% end %>
 
-<%= handy_links.tp.html_to_ascii.html_safe %>
+<%= handy_links.tp.html_to_ascii %>
 
 <%= result = ''.html_safe
   for label, url in links

@@ -7,7 +7,7 @@ agaricus_campestras_desc_version_1:
   updated_at: 2007-06-23 20:04:00
   user_id: 1
   version: 1
-  notes: This is should prevent me for merging
+  notes: This should prevent me from merging, too... with some “special” chars
   classification: ''
 
 # Another name with notes (not mergeable)
