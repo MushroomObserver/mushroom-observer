@@ -1781,11 +1781,10 @@ module ApplicationHelper
   def draw_prev_next_tabs(object, mappable=false)
     type = object.type_tag
     new_tab_set do
-      args = {
+      args = add_query_param({
         :controller => object.show_controller,
         :id         => object.id,
-        :params     => query_params,
-      }
+      })
       add_tab("« #{:BACK.t}",  args.merge(:action => "prev_#{type}" ))
       add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
       if mappable
