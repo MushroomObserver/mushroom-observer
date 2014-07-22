@@ -24,7 +24,7 @@ plane_term:
   version: 2
   user_id: 1
   name: Plane
-  description: Three points define a plane
+  description: Three points define a plane & be sure to test unsafe html
   thumb_image_id: 11
   created_at: 2013-08-17 06:33:50
   updated_at: 2013-08-17 06:35:20

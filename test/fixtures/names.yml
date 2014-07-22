@@ -15,7 +15,7 @@ fungi:
   search_name: Fungi
   sort_name: Fungi
   citation: ''
-  notes: ''
+  notes: C’mon, let's make sure we test at least one show_name with notes...
   rss_log_id: 3
 
 coprinus_comatus:

@@ -27,7 +27,7 @@
     Textile.clear_textile_cache
     Textile.register_name(*observation.namings.map(&:name))
     Textile.register_name(observation.name)
-    content_tag(:div, (:NOTES.l + ': ' + observation.notes.to_s).tpl,
+    content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').tpl,
       style: "margin-top:1em; margin-bottom:-1em")
   end %>
 </div>

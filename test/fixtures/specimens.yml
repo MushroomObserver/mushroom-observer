@@ -9,8 +9,7 @@ interesting_unknown:
     user_id: 1
     herbarium_label: "Cortinarius sp.: NYBG 1234"
     when: 2012-10-21
-    notes: It was dried at 115 degrees F
-
+    notes: It was cleaned & dried at 115°F
 
 # Same observation with more than one specimen
 coprinus_comatus_nybg_spec:
@@ -30,7 +29,6 @@ coprinus_comatus_rolf_spec:
     user_id: 1
     herbarium_label: "Coprinus comatus: ROLF 1"
     when: 2007-02-27
-
 
 # One observation with one specimen
 agaricus_campestris_spec:

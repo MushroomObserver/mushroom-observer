@@ -43,7 +43,7 @@
           notes = notes.safe_join(safe_br)
           if !notes.blank? %>
           <small>
-            <%= content_tag(:span, notes, :title => notes.tp.html_to_ascii) %>
+            <%= content_tag(:span, notes, :title => notes.html_to_ascii) %>
           </small>
         <% end %>
       </p>

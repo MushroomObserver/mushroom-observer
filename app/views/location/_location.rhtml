@@ -49,7 +49,7 @@
 </table>
 
 <% if !location.notes.blank? %>
-  <%= (:NOTES.l + ': ' + location.notes.to_s).tpl %>
+  <%= location.notes.to_s.sub(/\A/, :NOTES.l + ': ').tpl %>
 <% end %>
 
 <center>

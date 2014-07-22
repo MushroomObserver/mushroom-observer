@@ -11,6 +11,11 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_observation, :id => obs.id)
   end
 
+  def test_show_observation_noteful_image
+    obs = observations(:detailed_unknown)
+    get_with_dump(:show_observation, :id => obs.id)
+  end
+
   # Test constructing observations in various ways (with minimal namings).
   def generic_construct_observation(params, o_num, g_num, n_num, user = :rolf)
     user = rolf if user == :rolf
@@ -488,7 +493,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:detailed_unknown)
     proj = projects(:bolete_project)
     assert_equal(mary.id, obs.user_id)                        # owned by mary
-    assert(obs.projects.include?(proj))                        # owned by bolete project
+    assert(obs.projects.include?(proj))                       # owned by bolete project
     assert_equal([dick.id], proj.user_group.users.map(&:id))  # dick is only member of bolete project
 
     login('rolf')

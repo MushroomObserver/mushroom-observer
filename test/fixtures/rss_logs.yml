@@ -3,7 +3,7 @@ observation_rss_log:
   id: 1
   observation_id: 2
   updated_at: 2006-03-02 21:14:00
-  notes: "Updated Observation"
+  notes: "Updated Observation & Notes"
 
 species_list_rss_log:
   id: 2
