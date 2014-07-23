@@ -27,7 +27,9 @@ class PostObservationTest < IntegrationTestCase
     submit_location_form_without_errors
     open_edit_observation_form
     submit_observation_form_with_changes
+    push_page
     make_sure_observation_is_in_main_index(obs = Observation.last)
+    go_back
     destroy_observation
     make_sure_observation_is_not_in_main_index(obs)
   end
@@ -201,8 +203,8 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_obs.notes, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing('observations_at_where')
-    assert_link_exists_containing("show_location/#{new_loc.id}")
-    assert_link_exists_containing("show_image/#{new_img.id}")
+    assert_link_exists_containing("show_location?id=#{new_loc.id}")
+    assert_link_exists_containing("show_image?id=#{new_img.id}")
   end
 
   def review_flash(patterns)

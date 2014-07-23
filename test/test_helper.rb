@@ -6,7 +6,7 @@
 #  the base class that all unit tests must derive from.
 #
 #  *NOTE*: This must go directly in Test::Unit::TestCase because of how Rails
-#  tests work. 
+#  tests work.
 #
 ################################################################################
 
@@ -45,7 +45,7 @@ class ActiveSupport::TestCase
   # don't care one way or the other, switching from MyISAM to InnoDB tables
   # is recommended.
   #
-  # The only drawback to using transactional fixtures is when you actually 
+  # The only drawback to using transactional fixtures is when you actually
   # need to test transactions.  Since your test is bracketed by a transaction,
   # any transactions started in your code will be automatically rolled back.
   self.use_transactional_fixtures = true
@@ -87,45 +87,16 @@ class ActiveSupport::TestCase
       FileUtils.rm_rf(IMG_DIR)
     end
   end
-  
+
   def rolf; users(:rolf); end
   def mary; users(:mary); end
   def junk; users(:junk); end
   def dick; users(:dick); end
   def katrina; users(:katrina); end
   def roy; users(:roy); end
-  
+
   def assert_obj_list_equal(expect, got, msg=nil)
-    clean_our_backtrace do
-      assert_list_equal(expect, got, msg) {|o| o.nil? ? nil : "#{o.class.name} ##{o.id}"}
-    end
-  end
-  
-  # Clean up backtrace of any assertion failures so that it appears as if
-  # assertions occurred in the unit test that called the caller.  It strips
-  # out everything past and including the method name given, or everything
-  # past a method starting with "assert_".
-  def clean_our_backtrace(caller=nil, &block)
-    yield
-  rescue Test::Unit::AssertionFailedError => error
-    keepers = []
-    for line in error.backtrace
-      if line.match(/(\w+)\.rb.*`(\w+)'/)
-        file, method = $1, $2
-        if method == caller or method.match(/^assert_/)
-          keepers.clear
-        elsif file == 'setup_and_teardown' and method == 'run_with_callbacks'
-          break
-        else
-          keepers << line
-        end
-      else
-        keepers << line
-      end
-    end
-    error.backtrace.clear
-    error.backtrace.push(*keepers)
-    raise error
+    assert_list_equal(expect, got, msg) {|o| o.nil? ? nil : "#{o.class.name} ##{o.id}"}
   end
 
   # Compare two lists by mapping their elements, then sorting.  By default it
@@ -134,43 +105,35 @@ class ActiveSupport::TestCase
   #   assert_list_equal([rolf,mary], name.authors, &:login)
   #
   def assert_list_equal(expect, got, msg=nil, &block)
-    clean_our_backtrace do
-      block ||= :to_s.to_proc
-      assert_equal(expect.map(&block).sort, got.map(&block).sort, msg)
-    end
+    block ||= :to_s.to_proc
+    assert_equal(expect.map(&block).sort, got.map(&block).sort, msg)
   end
 
   # Assert that two User instances are equal.
   def assert_objs_equal(expect, got, *msg)
-    clean_our_backtrace do
-      assert_equal(
-        (expect ? "#{expect.class.name} ##{expect.id}" : "nil"),
-        (got ? "#{got.class.name} ##{got.id}" : "nil"),
-        *msg
-      )
-    end
+    assert_equal(
+      (expect ? "#{expect.class.name} ##{expect.id}" : "nil"),
+      (got ? "#{got.class.name} ##{got.id}" : "nil"),
+      *msg
+    )
   end
 
   # Assert that two User instances are equal.
   def assert_users_equal(expect, got, *msg)
-    clean_our_backtrace do
-      assert_equal(
-        (expect ? "#{expect.login} (#{expect.id})" : "nil"),
-        (got ? "#{got.login} (#{got.id})" : "nil"),
-        *msg
-      )
-    end
+    assert_equal(
+      (expect ? "#{expect.login} (#{expect.id})" : "nil"),
+      (got ? "#{got.login} (#{got.id})" : "nil"),
+      *msg
+    )
   end
 
   # Assert that two Name instances are equal.
   def assert_names_equal(expect, got, *msg)
-    clean_our_backtrace do
-      assert_equal(
-        (expect ? "#{expect.search_name} (#{expect.id})" : "nil"),
-        (got ? "#{got.search_name} (#{got.id})" : "nil"),
-        *msg
-      )
-    end
+    assert_equal(
+      (expect ? "#{expect.search_name} (#{expect.id})" : "nil"),
+      (got ? "#{got.search_name} (#{got.id})" : "nil"),
+      *msg
+    )
   end
 
   # Compare two lists of User's by comparing their logins.
@@ -178,21 +141,17 @@ class ActiveSupport::TestCase
   #   assert_user_list_equal([rolf,mary], name.authors)
   #
   def assert_user_list_equal(expect, got, msg=nil)
-    clean_our_backtrace do
-      assert_list_equal(expect, got, msg, &:login)
-    end
+    assert_list_equal(expect, got, msg, &:login)
   end
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.
   def assert_save(obj, msg=nil)
-    clean_our_backtrace do
-      if obj.save
-        assert(true)
-      else
-        msg2 = obj.errors.full_messages.join("; ")
-        msg2 = msg + "\n" + msg2 if msg
-        assert(false, msg2)
-      end
+    if obj.save
+      assert(true)
+    else
+      msg2 = obj.errors.full_messages.join("; ")
+      msg2 = msg + "\n" + msg2 if msg
+      assert(false, msg2)
     end
   end
 
@@ -208,11 +167,9 @@ class ActiveSupport::TestCase
   #   assert_name_list_equal([old_name,new_name], old_name.synonym.names)
   #
   def assert_name_list_equal(expect, got, msg=nil)
-    clean_our_backtrace do
-      assert_list_equal(expect, got, msg, &:search_name)
-    end
+    assert_list_equal(expect, got, msg, &:search_name)
   end
-  
+
   # Test whether the n-1st queued email matches.  For example:
   #
   #   assert_email(0,
@@ -223,22 +180,20 @@ class ActiveSupport::TestCase
   #   )
   #
   def assert_email(n, args)
-    clean_our_backtrace do
-      email = QueuedEmail.find(:first, :offset => n)
-      assert(email)
-      for arg in args.keys
-        case arg
-        when :flavor
-          assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
-        when :from
-          assert_equal(args[arg].id, email.user_id, "Sender is wrong")
-        when :to
-          assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
-        when :note
-          assert_equal(args[arg], email.get_note, "Value of note is wrong")
-        else
-          assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
-        end
+    email = QueuedEmail.find(:first, :offset => n)
+    assert(email)
+    for arg in args.keys
+      case arg
+      when :flavor
+        assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
+      when :from
+        assert_equal(args[arg].id, email.user_id, "Sender is wrong")
+      when :to
+        assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
+      when :note
+        assert_equal(args[arg], email.get_note, "Value of note is wrong")
+      else
+        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
       end
     end
   end
@@ -253,47 +208,45 @@ class ActiveSupport::TestCase
   #   end
   #
   def assert_string_equal_file(str, *files)
-    clean_our_backtrace do
-      result = false
-      msg    = nil
+    result = false
+    msg    = nil
 
-      # Check string against each file, looking for at least one that matches.
-      processed_str  = str
-      processed_str  = yield(processed_str) if block_given?
-      processed_str.split("\n")
-      encoding = processed_str.encoding
-      
-      for file in files
-        template = File.open(file_name(file), file_format(file)).read
-        template = enforce_encoding(encoding, file, template)
-        template = yield(template) if block_given?
-        if template_match(processed_str, template)
-          # Stop soon as we find one that matches.
-          result = true
-          break
-        elsif !msg
-          # Write out expected (old) and received (new) files for debugging purposes.
-          filename = file_name(file)
-          File.open(filename + '.old', "w:#{encoding}") {|fh| fh.write(template)}
-          File.open(filename + '.new', "w:#{encoding}") {|fh| fh.write(processed_str)}
-          msg = "File #{filename} wrong:\n" +
-            `diff #{filename}.old #{filename}.new`
-          File.delete(filename + '.old') if File.exists?(filename + '.old')
-        end
-      end
+    # Check string against each file, looking for at least one that matches.
+    processed_str  = str
+    processed_str  = yield(processed_str) if block_given?
+    processed_str.split("\n")
+    encoding = processed_str.encoding
 
-      if result
-        # Clean out old files from previous failure(s).
-        for file in files
-          new_filename = file_name(file) + '.new'
-          File.delete(new_filename) if File.exists?(new_filename)
-        end
-      else
-        assert(false, msg)
+    for file in files
+      template = File.open(file_name(file), file_format(file)).read
+      template = enforce_encoding(encoding, file, template)
+      template = yield(template) if block_given?
+      if template_match(processed_str, template)
+        # Stop soon as we find one that matches.
+        result = true
+        break
+      elsif !msg
+        # Write out expected (old) and received (new) files for debugging purposes.
+        filename = file_name(file)
+        File.open(filename + '.old', "w:#{encoding}") {|fh| fh.write(template)}
+        File.open(filename + '.new', "w:#{encoding}") {|fh| fh.write(processed_str)}
+        msg = "File #{filename} wrong:\n" +
+          `diff #{filename}.old #{filename}.new`
+        File.delete(filename + '.old') if File.exists?(filename + '.old')
       end
     end
+
+    if result
+      # Clean out old files from previous failure(s).
+      for file in files
+        new_filename = file_name(file) + '.new'
+        File.delete(new_filename) if File.exists?(new_filename)
+      end
+    else
+      assert(false, msg)
+    end
   end
-  
+
   def enforce_encoding(encoding, file, str)
     result = str
     if str.encoding != encoding
@@ -306,10 +259,10 @@ class ActiveSupport::TestCase
     end
     result
   end
-  
+
   def file_name(file); file.is_a?(Array) ? file[0] : file; end
   def file_format(file) file.is_a?(Array) ? "r:#{file[1]}" : 'r'; end
-      
+
   def template_match(str, template)
     # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
     (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
@@ -349,7 +302,7 @@ module Test
       module Console
         class TestRunner
           # When running in "show_detail_immediately" and "need_detail_faults"
-          # mode it totally screws up the assertion message. 
+          # mode it totally screws up the assertion message.
           def output_fault_message(fault)
             output_single(fault.message, fault_color(fault))
           end

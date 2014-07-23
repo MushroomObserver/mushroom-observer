@@ -353,7 +353,7 @@ module SessionExtensions
           if field.value
             file = field.value.filename
             type = field.value.content_type
-            hash[field.name] = ActionController::TestUploadedFile.new(file, type, :binary)
+            hash[field.name] = Rack::Test::UploadedFile.new(file, type, :binary)
           else
             hash[field.name] = nil
           end

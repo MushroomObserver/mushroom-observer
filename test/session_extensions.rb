@@ -128,13 +128,11 @@ module SessionExtensions
   #   urls = get_links('div.results a[href^=/name/show_name]')
   #
   def get_links(*args)
-    clean_our_backtrace('get_links') do
-      results = []
-      assert_select(*args) do |links|
-        results = links.map {|l| l.attributes['href']}
-      end
-      return results
+    results = []
+    assert_select(*args) do |links|
+      results = links.map {|l| l.attributes['href']}
     end
+    return results
   end
 
   # Login the given user, do no testing, doesn't re-get login form if already
@@ -171,23 +169,19 @@ module SessionExtensions
   ################################################################################
 
   def assert_form_has_correct_values(expected_values)
-    clean_our_backtrace do
-      open_form do |form|
-        for key, value in expected_values
-          form.assert_value(key, value)
-        end
+    open_form do |form|
+      for key, value in expected_values
+        form.assert_value(key, value)
       end
     end
   end
 
   def submit_form_with_changes(changes)
-    clean_our_backtrace('submit_form_with_changes') do
-      open_form do |form|
-        for key, value in changes
-          form.change(key, value)
-        end
-        form.submit
+    open_form do |form|
+      for key, value in changes
+        form.change(key, value)
       end
+      form.submit
     end
   end
 
@@ -197,20 +191,18 @@ module SessionExtensions
   # for a form that posts back to the same page.)
   def open_form(*args)
     form = nil
-    clean_our_backtrace('open_form') do
-      if args == []
-        action = path.sub(/\?.*/, '')
-        args << "form[action*=#{action}]"
-      end
-      assert_select(*args) do |elems|
-        assert_equal(1, elems.length,
-                     "Found multiple forms matching #{args.inspect}.")
-        elem = elems.first
-        assert_equal('form', elem.name,
-                     "Expected #{args.inspect} to find a form!")
-        form = Form.new(self, elem)
-        yield(form) if block_given?
-      end
+    if args == []
+      action = path.sub(/\?.*/, '')
+      args << "form[action*=#{action}]"
+    end
+    assert_select(*args) do |elems|
+      assert_equal(1, elems.length,
+                   "Found multiple forms matching #{args.inspect}.")
+      elem = elems.first
+      assert_equal('form', elem.name,
+                   "Expected #{args.inspect} to find a form!")
+      form = Form.new(self, elem)
+      yield(form) if block_given?
     end
     return form
   end
@@ -258,64 +250,62 @@ module SessionExtensions
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
   def click(args={})
-    clean_our_backtrace('click') do
-      select = 'a[href]'
-      sargs  = []
+    select = 'a[href]'
+    sargs  = []
 
-      # Filter links based on URL.
-      if arg = args[:href]
-        if arg.is_a?(Regexp)
-          if arg.to_s.match(/^..-mix:\^/)
-            select = "a[href^=?]"
-          else
-            select = "a[href*=?]"
-          end
-          sargs << arg
+    # Filter links based on URL.
+    if arg = args[:href]
+      if arg.is_a?(Regexp)
+        if arg.to_s.match(/^..-mix:\^/)
+          select = "a[href^=?]"
         else
-          select = "a[href^=#{arg}]"
+          select = "a[href*=?]"
         end
+        sargs << arg
+      else
+        select = "a[href^=#{arg}]"
       end
-
-      # Filter links by parent element types.
-      if arg = args[:in]
-        if arg == :tabs
-          arg = 'div#left_tabs'
-        elsif arg == :left_panel
-          arg = 'table.LeftSide'
-        elsif arg == :results
-          arg = 'div.results'
-        end
-        select = "#{arg} #{select}"
-      end
-
-      done = false
-      assert_select(select, *sargs) do |links|
-        for link in links
-          match = true
-
-          # Filter based on link "label" (can be an image too, for example).
-          if arg = args[:label]
-            if arg == :image
-              match = false if !link.to_s.match(/<img /)
-            elsif arg.is_a?(Regexp)
-              match = false if !link.to_s.match(arg)
-            else
-              match = false if !link.to_s.index(arg)
-            end
-          end
-
-          # Click on first link that matches everything.
-          if match
-            url = CGI.unescapeHTML(link.attributes['href'])
-            get(url)
-            done = true
-            break
-          end
-        end
-      end
-
-      assert_block("Expected a link matching: #{args.inspect}") { done }
     end
+
+    # Filter links by parent element types.
+    if arg = args[:in]
+      if arg == :tabs
+        arg = 'div#left_tabs'
+      elsif arg == :left_panel
+        arg = 'table.LeftSide'
+      elsif arg == :results
+        arg = 'div.results'
+      end
+      select = "#{arg} #{select}"
+    end
+
+    done = false
+    assert_select(select, *sargs) do |links|
+      for link in links
+        match = true
+
+        # Filter based on link "label" (can be an image too, for example).
+        if arg = args[:label]
+          if arg == :image
+            match = false if !link.to_s.match(/<img /)
+          elsif arg.is_a?(Regexp)
+            match = false if !link.to_s.match(arg)
+          else
+            match = false if !link.to_s.index(arg)
+          end
+        end
+
+        # Click on first link that matches everything.
+        if match
+          url = CGI.unescapeHTML(link.attributes['href'])
+          get(url)
+          done = true
+          break
+        end
+      end
+    end
+
+    assert_block("Expected a link matching: #{args.inspect}") { done }
   end
 
   ################################################################################
@@ -349,14 +339,10 @@ module SessionExtensions
   end
 
   def assert_link_exists_general_case(url, mod)
-    clean_our_backtrace do
-      assert_select("a[href#{mod}=#{url}]", { :minimum => 1 }, "Expected to find link to #{url}")
-    end
+    assert_select("a[href#{mod}=#{url}]", { :minimum => 1 }, "Expected to find link to #{url}")
   end
 
   def assert_no_link_exists_general_case(url, mod)
-    clean_our_backtrace do
-      assert_select("a[href#{mod}=#{url}]", { :count => 0 }, "Shouldn't be any links to #{url}")
-    end
+    assert_select("a[href#{mod}=#{url}]", { :count => 0 }, "Shouldn't be any links to #{url}")
   end
 end

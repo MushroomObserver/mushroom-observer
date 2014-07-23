@@ -427,12 +427,10 @@ module ControllerExtensions
   # Assert the LACK of existence of a given link in the response body, and
   # check that it points to the right place.
   def assert_no_link_in_html(label, msg=nil)
-    clean_our_backtrace do
-      extract_links(:label => label) do |link|
-        assert_block(build_message(msg, "Expected HTML *not* to contain link called <?>.", label)) {false}
-      end
-      assert_block('') { true } # to count the assertion
+    extract_links(:label => label) do |link|
+      assert_block(build_message(msg, "Expected HTML *not* to contain link called <?>.", label)) {false}
     end
+    assert_block('') { true } # to count the assertion
   end
 
   def raise_params(opts)
@@ -448,53 +446,49 @@ module ControllerExtensions
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
   def assert_link_in_html(label, url_opts, msg=nil)
-    clean_our_backtrace do
-      revised_opts = raise_params(url_opts)
-      url = url_for(revised_opts)
-      found_it = false
-      extract_links(:label => label) do |link|
-        if link.url != url
-          assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, link.url)) {false}
-        else
-          found_it = true
-          break
-        end
-      end
-      if found_it
-        assert_block('') { true } # to count the assertion
+    revised_opts = raise_params(url_opts)
+    url = url_for(revised_opts)
+    found_it = false
+    extract_links(:label => label) do |link|
+      if link.url != url
+        assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, link.url)) {false}
       else
-        assert_block(build_message(msg, "Expected HTML to contain link called <?>.", label)) {false}
+        found_it = true
+        break
       end
+    end
+    if found_it
+      assert_block('') { true } # to count the assertion
+    else
+      assert_block(build_message(msg, "Expected HTML to contain link called <?>.", label)) {false}
     end
   end
 
   # Assert that a form exists which posts to the given url.
   def assert_form_action(url_opts, msg=nil)
-    clean_our_backtrace do
-      url_opts[:only_path] = true if url_opts[:only_path].nil?
-      url = @controller.url_for(url_opts)
-      url.force_encoding('UTF-8') if url.respond_to?(:force_encoding)
-      url = URI.unescape(url)
-      # Find each occurrance of <form action="blah" method="post">.
-      found_it = false
-      found = {}
-      @response.body.split(/<form [^<>]*action/).each do |str|
-        if str =~ /^="([^"]*)" [^>]*method="post"/
-          url2 = URI.unescape($1).gsub('&amp;', '&')
-          if url == url2
-            found_it = true
-            break
-          end
-          found[url2] = 1
+    url_opts[:only_path] = true if url_opts[:only_path].nil?
+    url = @controller.url_for(url_opts)
+    url.force_encoding('UTF-8') if url.respond_to?(:force_encoding)
+    url = URI.unescape(url)
+    # Find each occurrance of <form action="blah" method="post">.
+    found_it = false
+    found = {}
+    @response.body.split(/<form [^<>]*action/).each do |str|
+      if str =~ /^="([^"]*)" [^>]*method="post"/
+        url2 = URI.unescape($1).gsub('&amp;', '&')
+        if url == url2
+          found_it = true
+          break
         end
+        found[url2] = 1
       end
-      if found_it
-        assert_block("") { true } # to count the assertion
-      elsif found.keys
-        assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join('>, <'))) { false }
-      else
-        assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
-      end
+    end
+    if found_it
+      assert_block("") { true } # to count the assertion
+    elsif found.keys
+      assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join('>, <'))) { false }
+    else
+      assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
     end
   end
 
@@ -508,10 +502,8 @@ module ControllerExtensions
   #   end
   #
   def assert_response_equal_file(*files, &block)
-    clean_our_backtrace do
-      body = @response.body.clone
-      assert_string_equal_file(body, *files, &block)
-    end
+    body = @response.body.clone
+    assert_string_equal_file(body, *files, &block)
   end
 
   # Send a general request of any type.  Check login_required and check_user
@@ -544,36 +536,34 @@ module ControllerExtensions
   #   post_requires_login(:edit_name, :id => 1)
   #
   def assert_request(args)
-    clean_our_backtrace do
-      method       = args[:method]       || :get
-      action       = args[:action]       || raise("Missing action!")
-      params       = args[:params]       || {}
-      user         = args[:user]         || 'rolf'
-      password     = args[:password]     || 'testpassword'
-      alt_user     = args[:alt_user]     || (user == 'mary' ? 'rolf' : 'mary')
-      alt_password = args[:alt_password] || 'testpassword'
+    method       = args[:method]       || :get
+    action       = args[:action]       || raise("Missing action!")
+    params       = args[:params]       || {}
+    user         = args[:user]         || 'rolf'
+    password     = args[:password]     || 'testpassword'
+    alt_user     = args[:alt_user]     || (user == 'mary' ? 'rolf' : 'mary')
+    alt_password = args[:alt_password] || 'testpassword'
 
-      logout
+    logout
 
-      # Make sure it fails if not logged in at all.
-      if result = args[:require_login]
-        result = :login if result == true
-        send(method, action, params)
-        assert_response(result, "No user: ")
-      end
-
-      # Login alternate user, and make sure that also fails.
-      if result = args[:require_user]
-        login(alt_user, alt_password)
-        send(method, action, params)
-        assert_response(result, "Wrong user (#{alt_user}): ")
-      end
-
-      # Finally, login correct user and let it do its thing.
-      login(user, password)
-      send("#{method}_with_dump", action, params)
-      assert_response(args[:result])
+    # Make sure it fails if not logged in at all.
+    if result = args[:require_login]
+      result = :login if result == true
+      send(method, action, params)
+      assert_response(result, "No user: ")
     end
+
+    # Login alternate user, and make sure that also fails.
+    if result = args[:require_user]
+      login(alt_user, alt_password)
+      send(method, action, params)
+      assert_response(result, "Wrong user (#{alt_user}): ")
+    end
+
+    # Finally, login correct user and let it do its thing.
+    login(user, password)
+    send("#{method}_with_dump", action, params)
+    assert_response(args[:result])
   end
 
   # Check response of a request.  There are several different types:
@@ -602,65 +592,63 @@ module ControllerExtensions
   #
   def assert_response(arg, msg='')
     if arg
-      clean_our_backtrace do
-        if arg == :success || arg == :redirect || arg.is_a?(Fixnum)
-          super
+      if arg == :success || arg == :redirect || arg.is_a?(Fixnum)
+        super
+      else
+
+        # Put together good error message telling us exactly what happened.
+        code = @response.response_code
+        if @response.success?
+          got = ", got #{code} rendered <#{@request.fullpath}>."
+        elsif @response.missing?
+          got = ", got #{code} missing (?)"
+        elsif @response.redirect?
+          url = @response.redirect_url.sub(/^http:..test.host./, '')
+          got = ", got #{code} redirect to <#{url}>."
         else
+          got = ", got #{code} body is <#{extract_error_from_body}>."
+        end
 
-          # Put together good error message telling us exactly what happened.
-          code = @response.response_code
-          if @response.success?
-            got = ", got #{code} rendered <#{@request.fullpath}>."
-          elsif @response.missing?
-            got = ", got #{code} missing (?)"
-          elsif @response.redirect?
-            url = @response.redirect_url.sub(/^http:..test.host./, '')
-            got = ", got #{code} redirect to <#{url}>."
-          else
-            got = ", got #{code} body is <#{extract_error_from_body}>."
-          end
+        # Add flash notice to potential error message.
+        flash_notice = get_last_flash.to_s.strip_squeeze
+        if flash_notice != ''
+          got += "\nFlash message: <#{flash_notice[1..-1].html_to_ascii}>."
+        end
 
-          # Add flash notice to potential error message.
-          flash_notice = get_last_flash.to_s.strip_squeeze
-          if flash_notice != ''
-            got += "\nFlash message: <#{flash_notice[1..-1].html_to_ascii}>."
-          end
-
-          # Now check result.
-          if arg.is_a?(Array)
-            if arg.length == 1
-              controller = @controller.controller_name
-              msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
-              assert_template({action: arg[0]}, msg)
-            else
-              msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-              assert_template({controller: arg[0], action: arg[1]}, msg)
-            end
-          elsif arg.is_a?(Hash)
-            url = @controller.url_for(arg).sub(/^http:..test.host./, '')
-            msg += "Expected redirect to <#{url}>" + got
-            assert_template(arg, msg)
-            # assert_redirect_match(arg, @response, @controller, msg)
-          elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
-            msg += "Expected redirect to <#{arg}>" + got
-            assert_equal(arg, @response.redirect_url, msg)
-          elsif arg.is_a?(String)
+        # Now check result.
+        if arg.is_a?(Array)
+          if arg.length == 1
             controller = @controller.controller_name
-            msg += "Expected it to render <#{controller}/#{arg}>" + got
-            super(:success, msg)
-            assert_template(arg.to_s, msg)
-          elsif arg == :index
-            msg += "Expected redirect to <observer/list_rss_logs>" + got
-            assert_redirected_to({:controller => 'observer', :action => 'list_rss_logs'}, msg)
-          elsif arg == :login
-            msg += "Expected redirect to <account/login>" + got
-            assert_redirected_to({:controller => 'account', :action => 'login'}, msg)
-          elsif arg == :welcome
-            msg += "Expected redirect to <account/welcome>" + got
-            assert_redirected_to({:controller => 'account', :action => 'login'}, msg)
+            msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
+            assert_template({action: arg[0]}, msg)
           else
-            raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
+            msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
+            assert_template({controller: arg[0], action: arg[1]}, msg)
           end
+        elsif arg.is_a?(Hash)
+          url = @controller.url_for(arg).sub(/^http:..test.host./, '')
+          msg += "Expected redirect to <#{url}>" + got
+          assert_template(arg, msg)
+          # assert_redirect_match(arg, @response, @controller, msg)
+        elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
+          msg += "Expected redirect to <#{arg}>" + got
+          assert_equal(arg, @response.redirect_url, msg)
+        elsif arg.is_a?(String)
+          controller = @controller.controller_name
+          msg += "Expected it to render <#{controller}/#{arg}>" + got
+          super(:success, msg)
+          assert_template(arg.to_s, msg)
+        elsif arg == :index
+          msg += "Expected redirect to <observer/list_rss_logs>" + got
+          assert_redirected_to({:controller => 'observer', :action => 'list_rss_logs'}, msg)
+        elsif arg == :login
+          msg += "Expected redirect to <account/login>" + got
+          assert_redirected_to({:controller => 'account', :action => 'login'}, msg)
+        elsif arg == :welcome
+          msg += "Expected redirect to <account/welcome>" + got
+          assert_redirected_to({:controller => 'account', :action => 'login'}, msg)
+        else
+          raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
         end
       end
     end
@@ -699,43 +687,39 @@ module ControllerExtensions
   
   # Check default value of a form field.
   def assert_input_value(id, expect_val)
-    clean_our_backtrace do
-      message = "Didn't find any inputs '#{id}'."
-      assert_select("input##{id}") do |elements|
-        if elements.length > 1
-          message = "Found more than one input '#{id}'."
-        elsif elements.length == 1
-          match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
-          actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ''
-          if actual_val != expect_val.to_s
-            message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
-          else
-            message = nil
-          end
+    message = "Didn't find any inputs '#{id}'."
+    assert_select("input##{id}") do |elements|
+      if elements.length > 1
+        message = "Found more than one input '#{id}'."
+      elsif elements.length == 1
+        match = elements.first.to_s.match(/value=('[^']*'|"[^"]*")/)
+        actual_val = match ? CGI.unescapeHTML(match[1].sub(/^.(.*).$/, '\\1')) : ''
+        if actual_val != expect_val.to_s
+          message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
+        else
+          message = nil
         end
       end
-      assert_block(message) { message.nil? }
     end
+    assert_block(message) { message.nil? }
   end
 
   # Check default value of a form field.
   def assert_textarea_value(id, expect_val)
-    clean_our_backtrace do
-      message = "Didn't find any inputs '#{id}'."
-      assert_select("textarea##{id}") do |elements|
-        if elements.length > 1
-          message = "Found more than one input '#{id}'."
-        elsif elements.length == 1
-          actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).join(''))
-          if actual_val != expect_val.to_s
-            message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
-          else
-            message = nil
-          end
+    message = "Didn't find any inputs '#{id}'."
+    assert_select("textarea##{id}") do |elements|
+      if elements.length > 1
+        message = "Found more than one input '#{id}'."
+      elsif elements.length == 1
+        actual_val = CGI.unescapeHTML(elements.first.children.map(&:to_s).join(''))
+        if actual_val != expect_val.to_s
+          message = "Input '#{id}' has wrong value, expected <#{expect_val}>, got <#{actual_val}>"
+        else
+          message = nil
         end
       end
-      assert_block(message) { message.nil? }
     end
+    assert_block(message) { message.nil? }
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,
@@ -748,29 +732,27 @@ module ControllerExtensions
   #   :unchecked_but_disabled
   #
   def assert_checkbox_state(id, state)
-    clean_our_backtrace do
-      case state
-      when :checked_but_disabled
-        assert_select("input##{id}", 1)
-        assert_select("input##{id}[checked=checked]", 1)
-        assert_select("input##{id}[disabled=disabled]", 1)
-      when :unchecked_but_disabled
-        assert_select("input##{id}", 1)
-        assert_select("input##{id}[checked=checked]", 0)
-        assert_select("input##{id}[disabled=disabled]", 1)
-      when :checked
-        assert_select("input##{id}", 1)
-        assert_select("input##{id}[checked=checked]", 1)
-        assert_select("input##{id}[disabled=disabled]", 0)
-      when :unchecked
-        assert_select("input##{id}", 1)
-        assert_select("input##{id}[checked=checked]", 0)
-        assert_select("input##{id}[disabled=disabled]", 0)
-      when :no_field
-        assert_select("input##{id}", 0)
-      else
-        raise "Invalid state in check_project_checks: #{state.inspect}"
-      end
+    case state
+    when :checked_but_disabled
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 1)
+      assert_select("input##{id}[disabled=disabled]", 1)
+    when :unchecked_but_disabled
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 0)
+      assert_select("input##{id}[disabled=disabled]", 1)
+    when :checked
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 1)
+      assert_select("input##{id}[disabled=disabled]", 0)
+    when :unchecked
+      assert_select("input##{id}", 1)
+      assert_select("input##{id}[checked=checked]", 0)
+      assert_select("input##{id}[disabled=disabled]", 0)
+    when :no_field
+      assert_select("input##{id}", 0)
+    else
+      raise "Invalid state in check_project_checks: #{state.inspect}"
     end
   end
 end

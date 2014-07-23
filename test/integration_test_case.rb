@@ -102,6 +102,7 @@
 class IntegrationTestCase < ActionController::IntegrationTest # Test::Unit::TestCase
   include SessionExtensions
   include FlashExtensions
+  include GeneralExtensions
 
   def new_user_session(user)
     login!(user)

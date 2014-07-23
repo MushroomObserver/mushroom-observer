@@ -440,7 +440,7 @@ class Image < AbstractModel
     case file
       # Image is already stored in a local temp file.  This is how Rails passes
       # large files from Apache.
-      when Tempfile
+      when Tempfile, ActionDispatch::Http::UploadedFile
         @file = file
         self.upload_temp_file = file.path
         self.upload_length = file.size
@@ -551,6 +551,9 @@ class Image < AbstractModel
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
+puts '-'*80
+puts upload_handle.inspect
+puts '-'*80
       if upload_handle.is_a?(IO) or
          upload_handle.is_a?(StringIO) or
          upload_handle.is_a?(PhusionPassenger::Utils::UnseekableSocket)
