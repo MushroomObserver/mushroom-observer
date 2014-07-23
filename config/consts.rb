@@ -29,6 +29,9 @@ SERVER_CODE = 'XX'
 # Default locale when nothing sets it explicitly.
 DEFAULT_LOCALE = 'en'
 
+# I18n namespace all our app-specific translations are kept in inside localization files.
+LOCALE_NAMESPACE = 'mo'
+
 # Time zone of the server.  This is only used in logs(?)
 SERVER_TIME_ZONE = 'America/New_York'
 

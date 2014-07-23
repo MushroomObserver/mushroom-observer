@@ -49,7 +49,7 @@
     </div>
   <% end %>
   <%
-    banner = :app_banner_box.ths
+    banner = :app_banner_box.t
     if banner.to_s.length > 1 %>
     <div>
       <center class="MessageBanner">
@@ -65,69 +65,69 @@
           <table class="LeftSide" cellpadding="10" style='height:100%; white-space:nowrap'>
             <tr style="height:1px">
               <td id="banner">
-                <%= link_to(@page_title || :app_banner.ths,
+                <%= link_to(@page_title || :app_banner.t,
                             :controller => 'observer', :action => 'index') %>
               </td>
             </tr>
             <tr>
               <td valign="top" align="left">
-                <%= link_to(:app_intro.ths, :controller => 'observer', :action => 'intro') %><br/>
-                <%= link_to(:app_how_to_use.ths, :controller => 'observer', :action => 'how_to_use') %><br/>
-                <%= link_to(:app_how_to_help.ths, :controller => 'observer', :action => 'how_to_help') %><br/>
-                <%= link_to(:app_donate.ths, :controller => 'support', :action => 'donate') %><br/>
-                <%= link_to(:app_feature_tracker.ths, :controller => 'pivotal', :action => 'index') %><br/>
-                <%= link_to(:app_send_a_comment.ths, :controller => 'observer', :action => 'ask_webmaster_question') %><br/>
+                <%= link_to(:app_intro.t, :controller => 'observer', :action => 'intro') %><br/>
+                <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use') %><br/>
+                <%= link_to(:app_how_to_help.t, :controller => 'observer', :action => 'how_to_help') %><br/>
+                <%= link_to(:app_donate.t, :controller => 'support', :action => 'donate') %><br/>
+                <%= link_to(:app_feature_tracker.t, :controller => 'pivotal', :action => 'index') %><br/>
+                <%= link_to(:app_send_a_comment.t, :controller => 'observer', :action => 'ask_webmaster_question') %><br/>
                 <br/>
 
-                <%= link_to(:app_index_a_z.ths, :controller => 'name', :action => 'observation_index') %><br/>
-                <%= link_to(:app_list_locations.ths, :controller => 'location', :action => 'list_locations') %><br/>
-                <%= link_to(:app_list_projects.ths, :controller => 'project', :action => 'list_projects') %><br/>
+                <%= link_to(:app_index_a_z.t, :controller => 'name', :action => 'observation_index') %><br/>
+                <%= link_to(:app_list_locations.t, :controller => 'location', :action => 'list_locations') %><br/>
+                <%= link_to(:app_list_projects.t, :controller => 'project', :action => 'list_projects') %><br/>
                 <br/>
 
                 <%= :app_latest.t %>:<br/>
-                <%= indent + link_to(:app_latest_changes.ths, :controller => 'observer', :action => 'list_rss_logs') %><br/>
-                <%= indent + link_to(:app_newest_images.ths, :controller => 'image', :action => 'list_images') %><br/>
-                <%= indent + link_to(:app_comments.ths, :controller => 'comment', :action => 'list_comments') %><br/>
-                <%= indent + link_to(:app_news.ths, :controller => 'observer', :action => 'news') %><br/>
+                <%= indent + link_to(:app_latest_changes.t, :controller => 'observer', :action => 'list_rss_logs') %><br/>
+                <%= indent + link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %><br/>
+                <%= indent + link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %><br/>
+                <%= indent + link_to(:app_news.t, :controller => 'observer', :action => 'news') %><br/>
                 <br/>
 
                 <%= :app_observations_left.t %>:<br/>
-                <%= indent + link_to(:app_create_observation.ths, :controller => 'observer', :action => 'create_observation') %><br/>
-                <%= indent + link_to(:app_sort_by_date_obs.ths, :controller => 'observer', :action => 'list_observations') %><br/>
+                <%= indent + link_to(:app_create_observation.t, :controller => 'observer', :action => 'create_observation') %><br/>
+                <%= indent + link_to(:app_sort_by_date_obs.t, :controller => 'observer', :action => 'list_observations') %><br/>
                 <br/>
 
                 <%= :app_species_list.t %>:<br/>
-                <%= indent + link_to(:app_create_list.ths, :controller => 'species_list', :action => 'name_lister') %><br/>
-                <%= indent + link_to(:app_sort_by_date_spl.ths, :controller => 'species_list', :action => 'list_species_lists') %><br/>
-                <%= indent + link_to(:app_sort_by_title.ths, :controller => 'species_list', :action => 'species_lists_by_title') %><br/>
+                <%= indent + link_to(:app_create_list.t, :controller => 'species_list', :action => 'name_lister') %><br/>
+                <%= indent + link_to(:app_sort_by_date_spl.t, :controller => 'species_list', :action => 'list_species_lists') %><br/>
+                <%= indent + link_to(:app_sort_by_title.t, :controller => 'species_list', :action => 'species_lists_by_title') %><br/>
                 <br/>
 
                 <% if @user.nil? %>
                   <%= :app_account.t %>:<br/>
-                  <%= indent + link_to(:app_login.ths, :controller => 'account', :action => 'login') %><br/>
-                  <%= indent + link_to(:app_create_account.ths, :controller => 'account', :action => 'signup') %><br/>
+                  <%= indent + link_to(:app_login.t, :controller => 'account', :action => 'login') %><br/>
+                  <%= indent + link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %><br/>
                 <% else %>
                   <%= :app_current_user.t %>:<br/>
                   <%= indent + h(@user.login) %><br/>
-                  <%= indent + link_to(:app_comments_for_you.ths, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %><br/>
-                  <%= indent + link_to(:app_your_observations.ths, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %><br/>
-                  <%= indent + link_to(:app_your_interests.ths, :controller => 'interest', :action => 'list_interests') %><br/>
-                  <%= indent + link_to(:app_your_summary.ths, :controller => 'observer', :action => 'show_user', :id => @user.id) %><br/>
-                  <%= indent + link_to(:app_preferences.ths, :controller => 'account', :action => 'prefs') %><br/>
-                  <%= indent + link_to(:app_join_mailing_list.ths, 'http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org') %><br/>
-                  <%= indent + link_to(:app_logout.ths, :controller => 'account', :action => 'logout_user') %><br/>
+                  <%= indent + link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %><br/>
+                  <%= indent + link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %><br/>
+                  <%= indent + link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %><br/>
+                  <%= indent + link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %><br/>
+                  <%= indent + link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
+                  <%= indent + link_to(:app_join_mailing_list.t, 'http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org') %><br/>
+                  <%= indent + link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
                   <% if @user.admin %>
                     <br/>
                     <%= :app_admin.t %>:<br/>
                     <% if is_in_admin_mode? %>
-                      <%= indent + link_to(:app_users.ths, :controller => 'observer', :action => 'users_by_name') %><br/>
-                      <%= indent + link_to(:change_banner_title.ths, :controller => 'observer', :action => 'change_banner') %><br/>
-                      <%= indent + link_to(:app_email_all_users.ths, :controller => 'observer', :action => 'email_features') %><br/>
-                      <%= indent + link_to(:app_add_to_group.ths, :controller => 'account', :action => 'add_user_to_group') %><br/>
-                      <%= indent + link_to(:account_manager_title.ths, :controller => 'account', :action => 'manager') %><br/>
-                      <%= indent + link_to(:app_turn_admin_off.ths, :controller => 'account', :action => 'turn_admin_off') %><br/>
+                      <%= indent + link_to(:app_users.t, :controller => 'observer', :action => 'users_by_name') %><br/>
+                      <%= indent + link_to(:change_banner_title.t, :controller => 'observer', :action => 'change_banner') %><br/>
+                      <%= indent + link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %><br/>
+                      <%= indent + link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %><br/>
+                      <%= indent + link_to(:account_manager_title.t, :controller => 'account', :action => 'manager') %><br/>
+                      <%= indent + link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %><br/>
                     <% else %>
-                      <%= indent + link_to(:app_turn_admin_on.ths, :controller => 'account', :action => 'turn_admin_on') %><br/>
+                      <%= indent + link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %><br/>
                     <% end %>
                   <% end %>
                 <% end %>
@@ -154,11 +154,11 @@
                   <br/>
                 <% end %>
 
-                <%= link_to(:app_glossary.ths, :controller => 'glossary', :action => 'index') %><br/>
-                <%= link_to(:app_publications.ths, :controller => 'publications', :action => 'index') %><br/>
-                <%= link_to(:app_contributors.ths, :controller => 'observer', :action => 'users_by_contribution') %><br/>
-                <%= link_to(:app_site_stats.ths, :controller => 'observer', :action => 'show_site_stats') %><br/>
-                <%= link_to(:translators_note_title.ths, :controller => 'observer', :action => 'translators_note') %><br/>
+                <%= link_to(:app_glossary.t, :controller => 'glossary', :action => 'index') %><br/>
+                <%= link_to(:app_publications.t, :controller => 'publications', :action => 'index') %><br/>
+                <%= link_to(:app_contributors.t, :controller => 'observer', :action => 'users_by_contribution') %><br/>
+                <%= link_to(:app_site_stats.t, :controller => 'observer', :action => 'show_site_stats') %><br/>
+                <%= link_to(:translators_note_title.t, :controller => 'observer', :action => 'translators_note') %><br/>
                 <br/>
 
                 <div id="color_note">
@@ -254,10 +254,10 @@
               no_browser    = can_do_ajax? == nil   && javascript_enabled? && session[:js_override] != :on
               if no_session || no_javascript || no_ajax || no_browser
                 new_tab_set do
-                  add_tab(:app_no_session.ths,    :controller => 'observer', :action => 'no_session')    if no_session
-                  add_tab(:app_no_javascript.ths, :controller => 'observer', :action => 'no_javascript') if no_javascript
-                  add_tab(:app_no_ajax.ths,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
-                  add_tab(:app_no_browser.ths,    :controller => 'observer', :action => 'no_browser')    if no_browser
+                  add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if no_session
+                  add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if no_javascript
+                  add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
+                  add_tab(:app_no_browser.t,    :controller => 'observer', :action => 'no_browser')    if no_browser
                 end
               end
               render_tab_sets %>
@@ -287,9 +287,9 @@
                 <% end %>
                 <% if Language.tracking_usage
                   file = Language.save_tags %>
-                  <%= link_to(:app_edit_translations_on_page.ths, :controller => :translation,
+                  <%= link_to(:app_edit_translations_on_page.t, :controller => :translation,
                         :action => :edit_translations, :page => file) %> |
-                  <%= link_to(:app_edit_translations.ths, :controller => :translation,
+                  <%= link_to(:app_edit_translations.t, :controller => :translation,
                         :action => :edit_translations) %>
                 <% end %>
               </div><br/>

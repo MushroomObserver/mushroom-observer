@@ -118,7 +118,7 @@
                   <% if reason.notes.blank? %>
                     <%= reason.label.t %>
                   <% else %>
-                    <%= reason.notes.sub(/\A/, reason.label.l + ': ').tl %>
+                    <%= (reason.label.l + ': ' + reason.notes.to_s.html_safe).tl %>
                   <% end %><br/>
                 <% end %>
               <% end %>

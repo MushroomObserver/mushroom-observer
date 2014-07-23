@@ -76,8 +76,8 @@ module LanguageExporter
       User.current = User.admin
     end
     old_data = localization_strings
-    new_data = read_export_file[lang]
-    good_tags = Language.official.read_export_file["en"]
+    new_data = read_export_file
+    good_tags = Language.official.read_export_file
     tag_lookup = translation_strings_hash
     for tag, new_val in new_data
       if new_val.is_a?(String) and
@@ -102,7 +102,7 @@ module LanguageExporter
   # any strings from unofficial locales which are not also in the official locale.
   def strip
     any_changes = false
-    good_tags = Language.official.read_export_file["en"]
+    good_tags = Language.official.read_export_file
     for str in translation_strings.reject {|str| good_tags.has_key?(str.tag)}
       verbose("  deleting :#{str.tag}")
       translation_strings.delete(str) unless safe_mode
@@ -155,7 +155,7 @@ module LanguageExporter
       @@localization_files[lang]
     else
       File.open(localization_file, 'r:utf-8') do |fh|
-        YAML::load(fh)
+        YAML::load(fh)[lang][LOCALE_NAMESPACE]
       end
     end
   end
@@ -166,7 +166,7 @@ module LanguageExporter
     else
       temp_file = localization_file + '.' + Process.pid.to_s
       File.open(temp_file, 'w:utf-8') do |fh|
-        fh << {lang => data}.to_yaml # Apparently Rails breaks YAML::dump
+        fh << {lang => {LOCALE_NAMESPACE => data}}.to_yaml # Apparently Rails breaks YAML::dump
       end
       File.rename(temp_file, localization_file)
     end
@@ -205,7 +205,7 @@ module LanguageExporter
   end
   
   def write_hash(hash)
-    self.write_export_file_lines(["en:\n"] + hash.map {|k,v| "  #{k}: #{format_string(v)}"})
+    self.write_export_file_lines(hash.map {|k,v| "  #{k}: #{format_string(v)}"})
   end
   
 ################################################################################
@@ -312,7 +312,7 @@ private
 
   def check_export_file_data
     pass = true
-    data = read_export_file[lang]
+    data = read_export_file
     for tag, str in data
       if not tag.is_a?(String)
         verbose("#{lang} #{tag}: tag is a #{tag.class.name} instead of a String")

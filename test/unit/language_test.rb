@@ -74,8 +74,7 @@ class LanguageTest < ActiveSupport::TestCase
     assert_equal(old_val, one.tag.to_sym.l)
     Language.last_update = one.updated_at - 1.minute
     Language.update_recent_translations
-    print "\nDynamic translation updating not working.  Waiting to get to a later version of rails.\n"
-    # assert_equal(new_val, one.tag.to_sym.l)
+    assert_equal(new_val, one.tag.to_sym.l)
   end
 
   def test_score_lines

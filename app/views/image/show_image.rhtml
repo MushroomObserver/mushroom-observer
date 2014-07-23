@@ -135,9 +135,9 @@ end %></p>
   <% end %>
   <% if @image.notes.blank? %>
   <% elsif @image.notes.include?("\n") %>
-    <%= @image.notes.to_s.sub(/\A/, :image_show_notes.l + ': ').tpl %>
+    <%= (:image_show_notes.l + ': ' + @image.notes.to_s.html_safe).tpl %>
   <% else %>
-    <%= @image.notes.to_s.sub(/\A/, :image_show_notes.l + ': ').tl %>
+    <%= (:image_show_notes.l + ': ' + @image.notes.to_s.html_safe).tl %>
   <% end %>
 </div>
 

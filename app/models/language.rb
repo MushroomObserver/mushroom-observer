@@ -121,9 +121,8 @@ class Language < AbstractModel
   # changed while the Rails app is booting. 
   @@last_update = 1.minute.ago
 
-  # Update Globalite with any recent changes in translations.
+  # Update I18n backend with any recent changes in translations.
   def self.update_recent_translations
-    data = 
     cutoff = @@last_update
     @@last_update = Time.now
     for locale, tag, text in Language.connection.select_rows %(
@@ -132,11 +131,13 @@ class Language < AbstractModel
       WHERE t.language_id = l.id
         AND t.updated_at >= #{Language.connection.quote(cutoff)}
     )
-      TranslationString.translations(locale.to_sym)[tag] = text
+      TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end
   
-  def self.lang_from_locale(locale); locale.to_s.split('-')[0]; end
+  def self.lang_from_locale(locale)
+    locale.to_s.split('-')[0]
+  end
 
   def self.from_locale(locale)
     Language.find_by_locale(lang_from_locale(locale))

@@ -8,7 +8,7 @@ module SpecimenHelper
   end
 
   def herbarium_link(herbarium)
-    :HERBARIUM.ths + ': ' + link_to(herbarium.name, :controller => :herbarium,
-                                    :action => :show_herbarium, :id => herbarium.id)
+    :HERBARIUM.t + ': ' + link_to(herbarium.name, :controller => :herbarium,
+                                  :action => :show_herbarium, :id => herbarium.id)
 	end
 end

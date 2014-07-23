@@ -47,8 +47,8 @@ class Symbol
 
   # Does this tag have a translation?
   def has_translation?
-    (I18n.t(self, default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT') or
-    (I18n.t(downcase, default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT')
+    (I18n.t("#{LOCALE_NAMESPACE}.#{self}", default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT') or
+    (I18n.t("#{LOCALE_NAMESPACE}.#{downcase}", default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT')
   end
 
   # Wrapper on the old +localize+ method that:
@@ -121,9 +121,9 @@ class Symbol
   def localize(args={}, level=[])
     result = nil
     Language.note_usage_of_tag(self)
-    if (val = I18n.t(self, default: '')) != ''
+    if (val = I18n.t("#{LOCALE_NAMESPACE}.#{self}", default: '')) != ''
       result = localize_postprocessing(val, args, level)
-    elsif (val = I18n.t(downcase, default: '')) != ''
+    elsif (val = I18n.t("#{LOCALE_NAMESPACE}.#{downcase}", default: '')) != ''
       result = localize_postprocessing(val, args, level, :captialize)
     else
       if TESTING
@@ -275,7 +275,6 @@ class Symbol
   alias l localize
 
   def t(*args); localize(*args).t(false); end
-  def ths(*args); localize(*args).t(false).html_safe; end
   def tl(*args); localize(*args).tl(false); end
   def tp(*args); localize(*args).tp(false); end
   def tpl(*args); localize(*args).tpl(false); end

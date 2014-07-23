@@ -144,7 +144,6 @@ class LanguageExporterTest < ActiveSupport::TestCase
 
   def test_check_export_file_for_duplicates
     export_file = [
-      "en:\n",
       "  tag1: val1\n",
       "  tag2: val2\n",
       "  tag3: val3\n",
@@ -165,7 +164,6 @@ class LanguageExporterTest < ActiveSupport::TestCase
 
   def test_check_export_file_data
     export_file = [
-      "en:\n",
       "  tag1: >\n",
       "    blah blah blah\n",
       "\n",
@@ -205,14 +203,14 @@ class LanguageExporterTest < ActiveSupport::TestCase
     data = File.open(file, 'r:utf-8') do |fh|
       YAML::load(fh)
     end
-    for tag, str in data["en"]
+    for tag, str in data
       assert(tag.is_a?(String), "#{file} #{tag}: tag is a #{tag.class} not a String!")
       assert(str.is_a?(String), "#{file} #{tag}: value is a #{str.class} not a String!")
     end
-    lines = @official.send_private(:format_export_file, data["en"], data["en"])
-    new_data = YAML::load(lines.join)["en"]
+    lines = @official.send_private(:format_export_file, data, data)
+    new_data = YAML::load(lines.join)
     seen = {}
-    for tag, old_str in data["en"]
+    for tag, old_str in data
       if new_str = new_data[tag]
         old_str = @official.send_private(:clean_string, old_str)
         new_str = @official.send_private(:clean_string, new_str)
@@ -408,7 +406,6 @@ class LanguageExporterTest < ActiveSupport::TestCase
 
     # This is just the template.
     @official.write_export_file_lines([
-      "en:\n",
       "  one: one\n",
       "  two: two\n",
       "  twos: twos\n",
@@ -419,7 +416,6 @@ class LanguageExporterTest < ActiveSupport::TestCase
     ])
 
     greek.write_export_file_lines([
-      "el:\n",
       "  five: ignore me\n",
     ])
     assert_false(greek.import_from_file, "Shouldn't have been any import changes.")
@@ -427,7 +423,6 @@ class LanguageExporterTest < ActiveSupport::TestCase
     assert_equal(hash, greek.localization_strings)
 
     greek.write_export_file_lines([
-      "el:\n",
       "  one: one\n",      # take this because it is a change from original ένα
       "  twos:  twos\n",   # ignore this because unchanged from template
       "  TWOS: Twos\n",    # ignore this despite lack of indentation because not a change from English

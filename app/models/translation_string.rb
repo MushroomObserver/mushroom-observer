@@ -55,7 +55,8 @@ class TranslationString < AbstractModel
   end
 
   def self.translations(lang)
-    trans = I18n.backend.send(:translations)[lang.to_sym]
+    I18n.backend.load_translations if I18n.backend.send(:translations).empty?
+    I18n.backend.send(:translations)[lang.to_sym][LOCALE_NAMESPACE.to_sym]
   end
   
   # Update this string in the current set of translations Globalite is using.
