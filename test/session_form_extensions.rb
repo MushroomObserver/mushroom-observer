@@ -173,7 +173,7 @@ module SessionExtensions
           when 'hidden'
             # Work-around for the check-box work-around: Rails adds an extra
             # hidden field imediately after every check-box for the benefit of
-            # browsers that fail to post check-boxes whivh aren't checked.
+            # browsers that fail to post check-boxes which aren't checked.
             unless (id == '') and inputs.last and (inputs.last.name == name)
               inputs << field
             end

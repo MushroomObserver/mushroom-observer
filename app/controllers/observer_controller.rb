@@ -578,7 +578,7 @@ class ObserverController < ApplicationController
 
       # Modify the query on POST, test it out, and redirect or re-serve form.
       if !@first_time &&
-         (request.method == "POST") and !is_robot?
+         (request.method == "POST") and !browser.bot?
         params2 = refine_search_clone_params(query2, @query.params)
         @errors = refine_search_change_params(@fields, @values, params2)
 
@@ -861,7 +861,7 @@ class ObserverController < ApplicationController
 
   def download_observations # :nologin: :norobots:
     query = find_or_create_query(:Observation, :by => params[:by])
-    raise "no robots!" if is_robot?
+    raise "no robots!" if browser.bot?
     set_query_params(query)
     @format = params[:format] || 'raw'
     @encoding = params[:encoding] || 'UTF-8'
@@ -2033,11 +2033,9 @@ class ObserverController < ApplicationController
         ObjectSpace.garbage_collect
         flash_notice("Collected garbage")
       when :system_status_clear_caches.l
-        clear_browser_status_cache
         String.clear_textile_cache
         flash_notice("Cleared caches")
       end
-      @cache_size = browser_status_cache_size
       @textile_name_size = String.textile_name_size
     else
       redirect_to(:action => 'list_observations')

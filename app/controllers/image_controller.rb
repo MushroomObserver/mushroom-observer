@@ -215,7 +215,7 @@ class ImageController < ApplicationController
       if !obs.blank? &&
          # The outer search on observation won't be saved for robots, so no sense
          # in bothering with any of this.
-         !is_robot?
+         !browser.bot?
         obs_query = find_or_create_query(:Observation)
         obs_query.current = obs
         img_query = create_query(:Image, :inside_observation,

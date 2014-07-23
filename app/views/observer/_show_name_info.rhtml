@@ -7,7 +7,7 @@
              ' [' + link_to('MyCoPortal', mycoportal_url(name)) + ']'
   end
 
-  if name && !name.unknown? && !is_robot?
+  if name && !name.unknown? && !browser.bot?
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
     if approved_synonyms.any?
       links = approved_synonyms.map {|n| name_link(n)}
@@ -70,7 +70,7 @@
     if genus = name.genus
       query = Query.lookup(:Name, :of_children, :name => genus, :all => true)
       count = query.select_count
-      query.save if !is_robot?
+      query.save if !browser.bot?
       if count > 1
         lines << link_to(:show_consensus_list_of_species.t(:name => genus.display_name.t),
           add_query_param({:controller => 'name', :action => 'index_name'},

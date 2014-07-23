@@ -1,4 +1,4 @@
-<% if @user ? @user.thumbnail_maps : (!is_robot? and !session[:hide_thumbnail_maps]) %>
+<% if @user ? @user.thumbnail_maps : (!browser.bot? and !session[:hide_thumbnail_maps]) %>
   <%=
     gmap = nil
     if observation.lat and observation.long

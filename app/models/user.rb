@@ -42,16 +42,16 @@
 #  The execution flow for an HTTP request as affects login, including all
 #  application-wide filters, is as follows:
 #
-#  1. +browser_status+: Determine browser type and state of javascript.
-#
-#  2. +autologin+: Check if User is logged in by first looking at session, then
+#  1. +autologin+: Check if User is logged in by first looking at session, then
 #     autologin cookie.  Requires User be verified.  Stores User in session,
 #     cookie, User#current, and +@user+ (visible to controllers and views).
 #     Sets all these to nil if no User logged in.
 #
-#  3. +check_user_alert+: Check if User has an alert to show, redirecting if so.
+#  2. +check_user_alert+: Check if User has an alert to show, redirecting if so.
 #
-#  4. +set_locale+: Check if User has chosen a locale.
+#  3. +set_locale+: Check if User has chosen a locale.
+#
+#  4. +set_timezone+: Set timezone from cookie set by client's browser.
 #
 #  5. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
 #     logged in.

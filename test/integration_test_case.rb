@@ -65,7 +65,7 @@
 #      rolf.get('/edit_rolfs_stuff')
 #      rolf.assert_success
 #
-#      # Mave Mary do stuff.
+#      # Have Mary do stuff.
 #      mary.get('/edit_rolfs_stuff')
 #      mary.assert_redirect
 #
@@ -102,11 +102,11 @@
 class IntegrationTestCase < ActionController::IntegrationTest # Test::Unit::TestCase
   include SessionExtensions
   include FlashExtensions
-  
+
   def new_user_session(user)
     login!(user)
   end
-  
+
   def login(login, password='testpassword', remember_me=true)
     login = login.login if login.is_a?(User)
     open_session do |sess|

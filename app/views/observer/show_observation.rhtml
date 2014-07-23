@@ -51,7 +51,7 @@
       <%= show_object_footer(@observation) %>
     </td>
     <td width="25%" valign="top">
-      <%= render(:partial => 'show_thumbnail_map', :locals => { :observation => @observation }) unless is_robot? %>
+      <%= render(:partial => 'show_thumbnail_map', :locals => { :observation => @observation }) unless browser.bot? %>
       <%= render(:partial => 'show_images', :locals => { :thumb_size_control => true }) %>
     </td>
   </tr>

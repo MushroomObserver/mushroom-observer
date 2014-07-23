@@ -25,6 +25,17 @@ require_dependency 'gmaps'
 
 module ApplicationHelper
 
+  # For now, just use Browser gem's "modern?" criteria.  Used to be:
+  #   Firefox/Iceweasel > 1.0
+  #   Netscape > 7.0
+  #   Safari > 1.2
+  #   IE > 5.5
+  #   Opera (all)
+  #   Chrome (all)
+  def can_do_ajax?
+    browser.modern? || TESTING
+  end
+
   ##############################################################################
   #
   #  :section: Localization
@@ -103,7 +114,7 @@ module ApplicationHelper
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
   end
-  
+
   ##############################################################################
   #
   #  :section: Other Stuff
@@ -190,14 +201,14 @@ module ApplicationHelper
   end
 
   def herbarium_name_box(default_name="")
-	  content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
-	  text_field(:specimen, :herbarium_name, :value => @user.preferred_herbarium_name, :size => 60) +
-	  turn_into_herbarium_auto_completer(:specimen_herbarium_name)
+    content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
+    text_field(:specimen, :herbarium_name, :value => @user.preferred_herbarium_name, :size => 60) +
+    turn_into_herbarium_auto_completer(:specimen_herbarium_name)
   end
 
   def herbarium_id_box
-	  content_tag(:label, :specimen_herbarium_id.t, :for => :specimen_herbarium_id) + ': ' +
-	  text_field(:specimen, :herbarium_id, :size => 20)
+    content_tag(:label, :specimen_herbarium_id.t, :for => :specimen_herbarium_id) + ': ' +
+    text_field(:specimen, :herbarium_id, :size => 20)
   end
 
   def table_column_title(title)
@@ -235,9 +246,11 @@ module ApplicationHelper
       end
       js_args = js_args.join(', ')
 
-      script = javascript_tag("new MOAutocompleter({ #{js_args} })")
-      return script
+      result = javascript_tag("new MOAutocompleter({ #{js_args} })")
+    else
+      result = ''
     end
+    return result
   end
 
   # Make text_field auto-complete for fixed set of strings.
@@ -315,7 +328,7 @@ module ApplicationHelper
       javascript_include 'element_extensions'
     end
   end
-  
+
   # From description_helper.rb
   # Create tabs for show_description page.
   def show_description_tab_set(desc)
@@ -330,7 +343,7 @@ module ApplicationHelper
       if (desc.source_type == :project) and
          (project = desc.source_object)
         add_tab_with_query(:show_object.t(:type => :project),
-          :controller => 'project', :action => 'show_project', 
+          :controller => 'project', :action => 'show_project',
           :id => project.id)
       end
       if admin
@@ -542,7 +555,7 @@ module ApplicationHelper
     html = colored_notes_box(odd_even, html)
     head + html
   end
-  
+
   def show_boxed_projects(odd_even, obj, projects)
     type = obj.type_tag
 
@@ -567,7 +580,7 @@ module ApplicationHelper
       ''
     end
   end
-  
+
   def edit_best_brief_desc_link(desc)
     edit_desc_link(desc)
   end
@@ -575,7 +588,7 @@ module ApplicationHelper
   def edit_classification_link(desc)
     edit_desc_link(desc)
   end
-  
+
   def edit_name_notes_link(name)
     link_with_query(:EDIT.t, :id => name.id,
       :controller => 'name',
@@ -811,7 +824,7 @@ module ApplicationHelper
       end.safe_join
     end
   end
-  
+
   def make_row(row, tr_opts={}, td_opts={})
     content_tag(:tr, tr_opts) do
       if !row.is_a?(Array)
@@ -823,7 +836,7 @@ module ApplicationHelper
       end
     end
   end
-  
+
   def make_cell(cell, td_opts={})
     content_tag(:td, cell.to_s, td_opts)
   end
@@ -838,7 +851,7 @@ module ApplicationHelper
       safe_empty
     end
   end
-  
+
   # Draw the fancy check-board matrix of objects used, e.g., in list_rss_log.
   # Just pass in a list of objects (and make sure @layout is initialized).
   # It yields for each object, then renders the whole thing.
@@ -942,7 +955,7 @@ module ApplicationHelper
         class: type),
       style: 'min-width:400px; max-width:800px')
   end
-  
+
   # From javascript_helper.rb
   # This is a list of modules that are sensitive to order.
   JAVASCRIPT_MODULE_ORDER = %w(
@@ -1286,7 +1299,7 @@ module ApplicationHelper
     format_user_list(title, users.count, ': ',
       users.map {|u| user_link(u, u.legal_name)}.safe_join(', '))
   end
-  
+
   def format_user_list(title, user_count, separator, user_block)
     result = safe_empty
     if user_count > 0
@@ -1294,7 +1307,7 @@ module ApplicationHelper
     end
     result
   end
-  
+
   # Wrap user name in link to show_user.
   #
   #   Owner:   <%= user_link(name.user) %>
@@ -1489,14 +1502,14 @@ module ApplicationHelper
       link_to_function('For Export', "image_export(#{image_id},1)")
     end
   end
-  
+
   def image_exporter(image_id, exported)
     javascript_include('prototype')
     javascript_include('image_export')
 
     content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
   end
-  
+
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
     javascript_include('prototype')
@@ -1577,11 +1590,11 @@ module ApplicationHelper
       end
     end
   end
-  
+
   def observation_specimen_info(obs)
     content_tag(:span, observation_specimen_link(obs), class: "Data") + create_specimen_link(obs)
   end
-    
+
   def observation_specimen_link(obs)
     count = obs.specimens.count
     if count > 0
@@ -1595,16 +1608,16 @@ module ApplicationHelper
       end
     end
   end
-  
+
   def create_specimen_link(obs)
     if check_permission(obs) or (@user && (@user.curated_herbaria.length > 0))
-		  " | ".html_safe + link_with_query(:show_observation_create_specimen.t,
+      " | ".html_safe + link_with_query(:show_observation_create_specimen.t,
         :controller => 'specimen', :action => 'add_specimen',
         :id => obs.id)
-		else
-		  safe_empty
-		end
-	end
+    else
+      safe_empty
+    end
+  end
 
   # From paginator_helper.rb
   # Wrap a block in pagination links.  Includes letters if appropriate.
@@ -1679,7 +1692,7 @@ module ApplicationHelper
       if pages.letter_arg && pages.letter
         params[pages.letter_arg] = pages.letter
       end
-      
+
       num  = pages.num_pages
       arg  = pages.number_arg
       this = pages.number
@@ -1688,7 +1701,7 @@ module ApplicationHelper
       size = args[:window_size] || 5
       from = this - size
       to   = this + size
-      
+
       result = []
       pstr = "« #{:PREV.t}"
       nstr = "#{:NEXT.t} »"
@@ -1707,7 +1720,7 @@ module ApplicationHelper
       result << pagination_link(num, num, arg, args)     if to < num
       result << '|'                                      if this < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
-      
+
       result = content_tag(:div, result.safe_join(' '), :class => "pagination")
     end
     result
@@ -1717,13 +1730,75 @@ module ApplicationHelper
   def pagination_link(label, page, arg, args)
     params = args[:params] || {}
     params[arg] = page
-    url = h(reload_with_args(params))
+    url = reload_with_args(params)
     if args[:anchor]
       url.sub!(/#.*/, '')
       url += '#' + args[:anchor]
     end
     link_to(label, url)
   end
+
+  # Take URL that got us to this page and add one or more parameters to it.
+  # Returns new URL.
+  #
+  # link_to("Next Page", reload_with_args(:page => 2))
+  def reload_with_args(new_args)
+    uri = request.url.sub(/^\w+:\/+[^\/]+/, '')
+    add_args_to_url(uri, new_args)
+  end
+
+  # Take an arbitrary URL and change the parameters. Returns new URL. Should
+  # even handle the fancy "/object/id" case. (Note: use +nil+ to mean delete
+  # -- i.e. <tt>add_args_to_url(url, :old_arg => nil)</tt> deletes the
+  # parameter named +old_arg+ from +url+.)
+  #
+  # url = url_for(:action => "blah", ...)
+  # new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)
+  def add_args_to_url(url, new_args)
+    new_args = new_args.clone
+    args = {}
+
+    # Garbage in, garbage out...
+    return url if !url.valid_encoding?
+
+    # Parse parameters off of current URL.
+    addr, parms = url.split('?')
+    for arg in parms ? parms.split('&') : []
+      var, val = arg.split('=')
+      if var && var != ''
+        var = CGI.unescape(var)
+        # See note below about precedence in case of redundancy.
+        args[var] = val if !args.has_key?(var)
+      end
+    end
+
+    # Deal with the special "/xxx/id" case.
+    if addr.match(/\/(\d+)$/)
+      new_id = new_args[:id] || new_args['id']
+      addr.sub!(/\d+$/, new_id.to_s) if new_id
+      new_args.delete(:id)
+      new_args.delete('id')
+    end
+
+    # Merge in new arguments, deleting where new values are nil.
+    for var in new_args.keys
+      val = new_args[var]
+      var = var.to_s
+      if val.nil?
+        args.delete(var)
+      elsif val.is_a?(ActiveRecord::Base)
+        args[var] = val.id.to_s
+      else
+        args[var] = CGI.escape(val.to_s)
+      end
+    end
+
+    # Put it back together.
+    return addr if args.keys == []
+    return addr + '?' + args.keys.sort.map \
+        {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&')
+  end
+
 
   # From pivotal_tracker_helper.rb
   def pivotal_vote_controls(story)
@@ -1880,7 +1955,7 @@ module ApplicationHelper
       end.safe_join
     end
   end
-  
+
   # Render one tab set in upper left of page body.  (Only used by
   # +render_tab_sets+.)
   def render_tab_set(header, *links)
@@ -1987,7 +2062,7 @@ module ApplicationHelper
       def interest_tab(img1, img2, img3)
         content_tag(:div, img1 + safe_br + img2 + img3)
       end
-      
+
       case @user.interest_in(object)
       when :watching
         alt1 = :interest_watching.l(:object => type.l)
@@ -2049,7 +2124,6 @@ module ApplicationHelper
   def textilize(str, do_object_links=false)
     Textile.textilize(str, do_object_links)
   end
-  
 end
 
 # From description_helper.rb

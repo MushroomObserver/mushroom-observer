@@ -8,7 +8,6 @@
 #
 #  == Filters
 #
-#  browser_status::     Auto-detect browser capabilities (plugin).
 #  autologin::          Determine which if any User is logged in.
 #  set_locale::         Determine which language is requested.
 #  check_user_alert::   Check if User has an alert to be displayed.
@@ -111,9 +110,9 @@ class ApplicationController < ActionController::Base
   around_filter :catch_errors if TESTING
   before_filter :block_ip_addresses
   before_filter :fix_bad_domains
-  before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
+  before_filter :set_timezone
   before_filter :refresh_translations
   before_filter :track_translations
   before_filter :check_user_alert
@@ -124,8 +123,8 @@ class ApplicationController < ActionController::Base
   # Disable all filters except set_locale. (For API and Ajax controllers.)
   def self.disable_filters
     skip_filter   :fix_bad_domains
-    skip_filter   :browser_status
     skip_filter   :autologin
+    skip_filter   :set_timezone
     skip_filter   :track_translations
     skip_filter   :check_user_alert
     skip_filter   :extra_gc
@@ -257,7 +256,7 @@ class ApplicationController < ActionController::Base
     # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
     # return false
 
-    # if is_robot?
+    # if browser.bot?
     #   render(:status => 503, :text => "robots are temporarily blocked from MO", :layout => false)
     #   return false
     # end
@@ -299,7 +298,7 @@ class ApplicationController < ActionController::Base
 
       # Make currently logged-in user available to everyone.
       User.current = @user
-      logger.warn("user=#{@user ? @user.id : '0'} robot=#{is_robot? ? 'Y' : 'N'}")
+      logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'}")
 
       # Keep track of last time user requested a page, but only update at most once an hour.
       if @user and (
@@ -536,6 +535,15 @@ class ApplicationController < ActionController::Base
 
     # Tell Rails to continue to process request.
     return true
+  end
+
+  # Before filter: Set timezone based on cookie set in application layout.
+  def set_timezone
+    Time.zone = cookies[:tz]
+
+    # For now, until we get rid of reliance on @js, this is a surrogate for actually 
+    # testing if the client's JS is enabled and sufficiently fully-featured.
+    @js = !cookies[:tz].blank? || TESTING
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).
@@ -1047,7 +1055,7 @@ class ApplicationController < ActionController::Base
       result = create_query(model, :default, args)
     end
 
-    if result && !is_robot?
+    if result && !browser.bot?
       result.access_count += 1
       result.save
     end
@@ -1066,7 +1074,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model=nil, update=!is_robot?)
+  def find_query(model=nil, update=!browser.bot?)
     model = model.to_s if model
     result = nil
     q = params[:q].dealphabetize rescue nil
@@ -1299,7 +1307,7 @@ class ApplicationController < ActionController::Base
     # Add magic links for sorting.
     if (sorts = args[:sorting_links]) and
        (sorts.length > 1) and
-       !is_robot?
+       !browser.bot?
       @sorts = add_sorting_links(query, sorts, args[:link_all_sorts])
     else
       @sorts = nil
@@ -1545,7 +1553,7 @@ class ApplicationController < ActionController::Base
   # Tell an object that someone has looked at it (unless a robot made the
   # request).
   def update_view_stats(object)
-    if object.respond_to?(:update_view_stats) && !is_robot?
+    if object.respond_to?(:update_view_stats) && !browser.bot?
       object.update_view_stats
     end
   end

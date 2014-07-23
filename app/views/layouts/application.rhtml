@@ -10,13 +10,14 @@
   <meta property="og:title" content="Mushroom Observer" />
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world." />
 
-  <%= check_if_user_turned_javascript_on %>
+  <%= javascript_include_tag('jstz.min.js') %>
+  <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 
   <%=
     css = nil
     if is_in_admin_mode?
       css = 'Admin'
-    elsif is_robot?
+    elsif browser.bot?
       css = DEFAULT_THEME
     else
       if CSS.member?(controller.action_name)
@@ -133,7 +134,7 @@
                 <% end %>
                 <br/>
 
-                <% unless is_robot? %>
+                <% unless browser.bot? %>
                   <%= :app_languages.t %>:<br/>
                   <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
                     <%= indent + link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %><br/>
@@ -248,19 +249,7 @@
             <% end %>
 
             <div id="left_tabs">
-              <%= no_session = !session_working?
-              no_javascript = !javascript_enabled? && session[:js_override] != :off
-              no_ajax       = can_do_ajax? == false && javascript_enabled? && session[:js_override] != :on
-              no_browser    = can_do_ajax? == nil   && javascript_enabled? && session[:js_override] != :on
-              if no_session || no_javascript || no_ajax || no_browser
-                new_tab_set do
-                  add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if no_session
-                  add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if no_javascript
-                  add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
-                  add_tab(:app_no_browser.t,    :controller => 'observer', :action => 'no_browser')    if no_browser
-                end
-              end
-              render_tab_sets %>
+              <%= render_tab_sets %>
             </div>
 
             <div id="Title"><%= @title %></div>
