@@ -58,7 +58,7 @@
 #      # Create two sessions: think "browser" - each session represents the
 #      # actions of a single user in one or more tabs of a single browser.
 #      rolf = new_session
-#      mary = new_user_session('mary')
+#      mary = login!('mary')
 #
 #      # Have Rolf do some stuff.
 #      rolf.login!('rolf')
@@ -104,10 +104,6 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest # Test::Unit::TestCa
   include FlashExtensions
   include GeneralExtensions
 
-  def new_user_session(user)
-    login!(user)
-  end
-
   def login(login, password='testpassword', remember_me=true)
     login = login.login if login.is_a?(User)
     open_session do |sess|
@@ -130,72 +126,4 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest # Test::Unit::TestCa
     assert_users_equal(user, sess.assigns(:user), "Wrong user ended up logged in!")
     sess
   end
-
-  # attr_accessor :current_session
-  #
-  # # Open a default session.
-  # def setup
-  #   @current_session = new_session
-  # end
-  #
-  # # Instantiate a new session.
-  # def new_session
-  #   open_session
-  # end
-  #
-  # # Instantiate a new session with user already logged in.
-  # def new_user_session(user)
-  #   session = new_session
-  #   session.login!(user)
-  #   return session
-  # end
-  #
-  # # Run an enclosed block of code in a temporary, new session.
-  # # def open_session
-  # #   old_session = @current_session
-  # #   @current_session = new_session
-  # #   result = yield @current_session
-  # #   @current_session = old_session
-  # #   return result
-  # # end
-  #
-  # # Bind all the actions in the enclosed block of code to another session.
-  # def in_session(another_session)
-  #   old_session = @current_session
-  #   @current_session = another_session
-  #   result = yield @current_session
-  #   @current_session = old_session
-  #   return result
-  # end
-  #
-  # # Automatically delegate everything we don't recognize to the current session.
-  # def method_missing(name, *args, &block)
-  #   @current_session.send(name, *args, &block)
-  # end
-  #
-  # # Rails has polluted Test::Unit::TestCase with dozens of methods.  We need to
-  # # override them to get them to delegate properly to the session.  I've tried
-  # # everything to do this more elegantly, but there is just no choice.  The key
-  # # problem is that if you ever call a method directly on a session instance,
-  # # the changes won't be reflected in the parent test case, which is the cause
-  # # of never-ending headaches.  So here I remove by hand all methods that can
-  # # potentially be confused between the two and force them instead to delegate
-  # # to the session instead of running off of cached instance variables in the
-  # # test case.
-  # for method in %w(
-  #     assert_template assert_response assert_redirected_to
-  #     assert_generates assert_routing
-  #     assert_tag assert_no_tag
-  #     assert_select assert_select_email assert_select_encoded assert_select_rjs
-  #     assigns cookies flash session
-  #     get post put delete head process
-  #     xhr xml_http_request redirect_to_url
-  #     find_tag find_all_tag css_select html_document
-  #   )
-  #   class_eval <<-EOV, __FILE__, __LINE__
-  #     def #{method}(*args, &block)
-  #       @current_session.send(:#{method}, *args, &block)
-  #     end
-  #   EOV
-  # end
 end

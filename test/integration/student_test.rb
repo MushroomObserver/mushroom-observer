@@ -16,10 +16,10 @@ class StudentTest < IntegrationTestCase
     project = projects(:eol_project)
     project.admin_group.users.delete(mary)
 
-    rolf_session    = new_user_session(rolf).extend(AdminDsl)
-    mary_session    = new_user_session(mary).extend(CreatorDsl)
-    katrina_session = new_user_session(katrina).extend(StudentDsl)
-    dick_session    = new_user_session(dick).extend(UserDsl)
+    rolf_session    = login!(rolf).extend(AdminDsl)
+    mary_session    = login!(mary).extend(CreatorDsl)
+    katrina_session = login!(katrina).extend(StudentDsl)
+    dick_session    = login!(dick).extend(UserDsl)
     lurker_session  = open_session.extend(UserDsl)
 
     assert_not_equal(mary_session.session[:session_id], dick_session.session[:session_id])
@@ -30,12 +30,6 @@ class StudentTest < IntegrationTestCase
     lurker_session.check_another_user(url)
   end
 
-  def test_sessions
-    rolf_session    = new_user_session(rolf).extend(AdminDsl)
-    mary_session    = new_user_session(mary).extend(CreatorDsl)
-    assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
-  end
-  
   private
   
   module AdminDsl

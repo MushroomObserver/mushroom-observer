@@ -29,7 +29,7 @@ class RandomTest < IntegrationTestCase
   end
 
   test "login" do
-    rolf_session = new_user_session(rolf)
+    rolf_session = login!(rolf)
     rolf_session.get('/')
     assert(/current user/i, rolf_session.response.body)
   end

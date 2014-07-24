@@ -212,7 +212,7 @@ class AmateurTest < IntegrationTestCase
     namer_session.propose_then_login(namer, obs)
     naming = namer_session.create_name(obs, text_name)
     
-    voter_session = new_user_session(rolf).extend(VoterDsl)
+    voter_session = login!(rolf).extend(VoterDsl)
     assert_not_equal(namer_session.session[:session_id], voter_session.session[:session_id])
     voter_session.vote_on_name(obs, naming)
     namer_session.failed_delete(obs)
@@ -221,8 +221,8 @@ class AmateurTest < IntegrationTestCase
   end
 
   def test_sessions
-    rolf_session    = new_user_session(rolf).extend(NamerDsl)
-    mary_session    = new_user_session(mary).extend(VoterDsl)
+    rolf_session    = login!(rolf).extend(NamerDsl)
+    mary_session    = login!(mary).extend(VoterDsl)
     assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
   end
 

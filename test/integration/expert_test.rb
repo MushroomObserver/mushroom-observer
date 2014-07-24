@@ -29,10 +29,10 @@ class ExpertTest < IntegrationTestCase
 
     show_name = "/name/show_name/#{name.id}"
 
-    admin    = new_user_session(dick)     # we'll make him admin
-    reviewer = new_user_session(rolf)     # reviewer
-    owner    = new_user_session(mary)     # random user
-    user     = new_user_session(katrina)  # another random user
+    admin    = login!(dick)     # we'll make him admin
+    reviewer = login!(rolf)     # reviewer
+    owner    = login!(mary)     # random user
+    user     = login!(katrina)  # another random user
     lurker   = new_session                 # nobody
 
     # Make Dick an admin.
@@ -155,11 +155,11 @@ class ExpertTest < IntegrationTestCase
 
     show_name = "/name/show_name/#{name.id}"
 
-    admin    = new_user_session(dick)     # we'll make him admin
-    reviewer = new_user_session(rolf)     # reviewer
-    owner    = new_user_session(mary)     # random user
-    user     = new_user_session(katrina)  # another random user
-    lurker   = new_session                 # nobody
+    admin    = login!(dick)     # we'll make him admin
+    reviewer = login!(rolf)     # reviewer
+    owner    = login!(mary)     # random user
+    user     = login!(katrina)  # another random user
+    lurker   = open_session     # nobody
 
     # Make Dick an admin.
     admin.click(:href => /turn_admin_on/)
