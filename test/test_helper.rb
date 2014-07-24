@@ -88,6 +88,7 @@ class ActiveSupport::TestCase
     end
   end
 
+  # These used to be automatically instantiated fixtures, e.g., @dick, etc.
   def rolf; users(:rolf); end
   def mary; users(:mary); end
   def junk; users(:junk); end
