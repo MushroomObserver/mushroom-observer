@@ -30,6 +30,12 @@ class StudentTest < IntegrationTestCase
     lurker_session.check_another_user(url)
   end
 
+  def test_sessions
+    rolf_session    = new_user_session(rolf).extend(AdminDsl)
+    mary_session    = new_user_session(mary).extend(CreatorDsl)
+    assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
+  end
+  
   private
   
   module AdminDsl

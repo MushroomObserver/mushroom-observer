@@ -99,7 +99,7 @@
 #
 ################################################################################
 
-class IntegrationTestCase < ActionController::IntegrationTest # Test::Unit::TestCase
+class IntegrationTestCase < ActionDispatch::IntegrationTest # Test::Unit::TestCase
   include SessionExtensions
   include FlashExtensions
   include GeneralExtensions
