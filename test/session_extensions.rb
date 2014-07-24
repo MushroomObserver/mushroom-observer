@@ -21,10 +21,10 @@
 #  ==== Navigation
 #  push_page::        Save response from last query so we can go back to it.
 #  go_back::          Go back a number of times.
-#  click::         Click on first link that matches the given args.
+#  click::            Click on first link that matches the given args.
 #
 #  ==== Forms
-#  open_form::          Encapsulate filling out and posting a given form.
+#  open_form::        Encapsulate filling out and posting a given form.
 #
 ################################################################################
 

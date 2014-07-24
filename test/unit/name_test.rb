@@ -4,125 +4,107 @@ require 'test_helper'
 
 class NameTest < ActiveSupport::TestCase
   def create_test_name(string, force_rank=nil)
-    clean_our_backtrace do
-      User.current = rolf
-      parse = Name.parse_name(string)
-      assert_block("Expected this to parse: #{string}") {parse}
-      params = parse.params
-      params[:rank] = force_rank if force_rank
-      name = Name.create_name(params)
-      assert_block("Error saving name \"#{string}\": [#{name.dump_errors}]") {name.save}
-      return name
-    end
+    User.current = rolf
+    parse = Name.parse_name(string)
+    assert_block("Expected this to parse: #{string}") {parse}
+    params = parse.params
+    params[:rank] = force_rank if force_rank
+    name = Name.create_name(params)
+    assert_block("Error saving name \"#{string}\": [#{name.dump_errors}]") {name.save}
+    return name
   end
 
   def do_name_parse_test(str, args)
-    clean_our_backtrace('do_name_parse_test') do
-      parse = Name.parse_name(str)
-      assert_block("Expected #{str.inspect} to parse!") { parse }
-      any_errors = false
-      msg = ['Name is wrong; expected -vs- actual:']
-      i = 0
-      for var in [
-        :text_name,
-        :real_text_name,
-        :search_name,
-        :real_search_name,
-        :sort_name,
-        :display_name,
-        :parent_name,
-        :rank,
-        :author,
-      ]
-        expect = args[var]
-        if var == :real_text_name
-          actual = Name.display_to_real_text(parse)
-        elsif var == :real_search_name
-          actual = Name.display_to_real_search(parse)
-        else
-          actual = parse.send(var)
-        end
-        if actual != expect
-          any_errors = true
-          var = "#{var} (*)"
-        end
-        msg << '%-20s %-40s %-40s' % [var.to_s, expect.inspect, actual.inspect]
-        i += 1
+    parse = Name.parse_name(str)
+    assert_block("Expected #{str.inspect} to parse!") { parse }
+    any_errors = false
+    msg = ['Name is wrong; expected -vs- actual:']
+    i = 0
+    for var in [
+      :text_name,
+      :real_text_name,
+      :search_name,
+      :real_search_name,
+      :sort_name,
+      :display_name,
+      :parent_name,
+      :rank,
+      :author,
+    ]
+      expect = args[var]
+      if var == :real_text_name
+        actual = Name.display_to_real_text(parse)
+      elsif var == :real_search_name
+        actual = Name.display_to_real_search(parse)
+      else
+        actual = parse.send(var)
       end
-      assert_block(msg.join("\n")) { !any_errors }
+      if actual != expect
+        any_errors = true
+        var = "#{var} (*)"
+      end
+      msg << '%-20s %-40s %-40s' % [var.to_s, expect.inspect, actual.inspect]
+      i += 1
     end
+    assert_block(msg.join("\n")) { !any_errors }
   end
 
   def assert_name_match_author_required(pattern, string, first_match=string)
-    clean_our_backtrace do
-      assert_block("Expected #{string.inspect} not to match #{@pat}.") { !pattern.match(string) }
-      assert_name_match_various_authors(pattern, string, first_match)
-    end
+    assert_block("Expected #{string.inspect} not to match #{@pat}.") { !pattern.match(string) }
+    assert_name_match_various_authors(pattern, string, first_match)
   end
 
   def assert_name_match_author_optional(pattern, string, first_match=string)
-    clean_our_backtrace do
-      assert_name_match(pattern, string, first_match, '')
-      assert_name_match_various_authors(pattern, string, first_match)
-    end
+    assert_name_match(pattern, string, first_match, '')
+    assert_name_match_various_authors(pattern, string, first_match)
   end
 
   def assert_name_match_various_authors(pattern, string, first_match)
-    clean_our_backtrace do
-      assert_name_match(pattern, string + ' Author', first_match, ' Author')
-      assert_name_match(pattern, string + ' Śliwa', first_match, ' Śliwa')
-      assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
-      assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
-      assert_name_match(pattern, string + ' (One) Two', first_match, ' (One) Two')
-      assert_name_match(pattern, string + ' auct', first_match, ' auct')
-      assert_name_match(pattern, string + ' auct non Aurora', first_match, ' auct non Aurora')
-      assert_name_match(pattern, string + ' auct Borealis', first_match, ' auct Borealis')
-      assert_name_match(pattern, string + ' auct. N. Amer.', first_match, ' auct. N. Amer.')
-      assert_name_match(pattern, string + ' ined', first_match, ' ined')
-      assert_name_match(pattern, string + ' in ed.', first_match, ' in ed.')
-      assert_name_match(pattern, string + ' nomen nudum', first_match, ' nomen nudum')
-      assert_name_match(pattern, string + ' nom. prov.', first_match, ' nom. prov.')
-      assert_name_match(pattern, string + ' sensu Author', first_match, ' sensu Author')
-      assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
-      assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
-    end
+    assert_name_match(pattern, string + ' Author', first_match, ' Author')
+    assert_name_match(pattern, string + ' Śliwa', first_match, ' Śliwa')
+    assert_name_match(pattern, string + ' "Author"', first_match, ' "Author"')
+    assert_name_match(pattern, string + ' "Česka"', first_match, ' "Česka"')
+    assert_name_match(pattern, string + ' (One) Two', first_match, ' (One) Two')
+    assert_name_match(pattern, string + ' auct', first_match, ' auct')
+    assert_name_match(pattern, string + ' auct non Aurora', first_match, ' auct non Aurora')
+    assert_name_match(pattern, string + ' auct Borealis', first_match, ' auct Borealis')
+    assert_name_match(pattern, string + ' auct. N. Amer.', first_match, ' auct. N. Amer.')
+    assert_name_match(pattern, string + ' ined', first_match, ' ined')
+    assert_name_match(pattern, string + ' in ed.', first_match, ' in ed.')
+    assert_name_match(pattern, string + ' nomen nudum', first_match, ' nomen nudum')
+    assert_name_match(pattern, string + ' nom. prov.', first_match, ' nom. prov.')
+    assert_name_match(pattern, string + ' sensu Author', first_match, ' sensu Author')
+    assert_name_match(pattern, string + ' sens. "Author"', first_match, ' sens. "Author"')
+    assert_name_match(pattern, string + ' "(One) Two"', first_match, ' "(One) Two"')
   end
 
   def assert_name_match(pattern, string, first, second='')
-    clean_our_backtrace do
-      match = pattern.match(string)
-      assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
-      assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
-      assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
-    end
+    match = pattern.match(string)
+    assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
+    assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
+    assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
   end
 
   def assert_name_parse_fails(str)
-    clean_our_backtrace do
-      parse = Name.parse_name(str)
-      assert_block("Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}") { !parse }
-    end
+    parse = Name.parse_name(str)
+    assert_block("Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}") { !parse }
   end
 
   def do_parse_classification_test(text, expected)
-    clean_our_backtrace do
-      begin
-        parse = Name.parse_classification(text)
-        assert_equal(expected, parse)
-      rescue RuntimeError => err
-        raise err if expected
-      end
+    begin
+      parse = Name.parse_classification(text)
+      assert_equal(expected, parse)
+    rescue RuntimeError => err
+      raise err if expected
     end
   end
 
   def do_validate_classification_test(rank, text, expected)
-    clean_our_backtrace do
-      begin
-        result = Name.validate_classification(rank, text)
-        assert_equal(expected, result)
-      rescue RuntimeError => err
-        raise err if expected
-      end
+    begin
+      result = Name.validate_classification(rank, text)
+      assert_equal(expected, result)
+    rescue RuntimeError => err
+      raise err if expected
     end
   end
 

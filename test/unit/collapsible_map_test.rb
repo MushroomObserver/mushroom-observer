@@ -26,85 +26,75 @@ end
 class CollapsibleMapTest < ActiveSupport::TestCase
 
   def assert_mapset_is_point(mapset, lat, long)
-    clean_our_backtrace do
-      assert_true(mapset.is_point?)
-      assert_false(mapset.is_box?)
-      assert_mapset(mapset, lat, long, lat, lat, long, long, 0, 0)
-    end
+    assert_true(mapset.is_point?)
+    assert_false(mapset.is_box?)
+    assert_mapset(mapset, lat, long, lat, lat, long, long, 0, 0)
   end
 
   def assert_mapset_is_box(mapset, north, south, east, west)
-    clean_our_backtrace do
-      lat = (north + south) / 2.0
-      long = (east + west) / 2.0
-      assert_false(mapset.is_point?)
-      assert_true(mapset.is_box?)
-      if east >= west
-        assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
-      else
-        assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
-      end
+    lat = (north + south) / 2.0
+    long = (east + west) / 2.0
+    assert_false(mapset.is_point?)
+    assert_true(mapset.is_box?)
+    if east >= west
+      assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
+    else
+      assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
     end
   end
 
   def assert_mapset(mapset, lat, long, north, south, east, west, north_south, east_west)
-    clean_our_backtrace do
-      assert_extents(mapset, north, south, east, west)
-      assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
-      assert_in_delta(long, mapset.long, 0.0001)
-      assert_in_delta(lat, mapset.center[0], 0.0001)
-      assert_in_delta(long, mapset.center[1], 0.0001)
-      assert_in_delta(north, mapset.north_west[0], 0.0001)
-      assert_in_delta(west, mapset.north_west[1], 0.0001)
-      assert_in_delta(north, mapset.north_east[0], 0.0001)
-      assert_in_delta(east, mapset.north_east[1], 0.0001)
-      assert_in_delta(south, mapset.south_west[0], 0.0001)
-      assert_in_delta(west, mapset.south_west[1], 0.0001)
-      assert_in_delta(south, mapset.south_east[0], 0.0001)
-      assert_in_delta(east, mapset.south_east[1], 0.0001)
-      assert_in_delta(north_south, mapset.north_south_distance, 0.0001)
-      assert_in_delta(east_west, mapset.east_west_distance, 0.0001)
-    end
+    assert_extents(mapset, north, south, east, west)
+    assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
+    assert_in_delta(long, mapset.long, 0.0001)
+    assert_in_delta(lat, mapset.center[0], 0.0001)
+    assert_in_delta(long, mapset.center[1], 0.0001)
+    assert_in_delta(north, mapset.north_west[0], 0.0001)
+    assert_in_delta(west, mapset.north_west[1], 0.0001)
+    assert_in_delta(north, mapset.north_east[0], 0.0001)
+    assert_in_delta(east, mapset.north_east[1], 0.0001)
+    assert_in_delta(south, mapset.south_west[0], 0.0001)
+    assert_in_delta(west, mapset.south_west[1], 0.0001)
+    assert_in_delta(south, mapset.south_east[0], 0.0001)
+    assert_in_delta(east, mapset.south_east[1], 0.0001)
+    assert_in_delta(north_south, mapset.north_south_distance, 0.0001)
+    assert_in_delta(east_west, mapset.east_west_distance, 0.0001)
   end
 
   def assert_extents(mapset, north, south, east, west)
-    clean_our_backtrace do
-      errors = []
-      errors << 'north' if north.round(4) != mapset.north.round(4)
-      errors << 'south' if south.round(4) != mapset.south.round(4)
-      errors << 'east' if east.round(4) != mapset.east.round(4)
-      errors << 'west' if west.round(4) != mapset.west.round(4)
-      if errors.any?
-        expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
-        actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
-        message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
-        assert_block(message) {false}
-      end
+    errors = []
+    errors << 'north' if north.round(4) != mapset.north.round(4)
+    errors << 'south' if south.round(4) != mapset.south.round(4)
+    errors << 'east' if east.round(4) != mapset.east.round(4)
+    errors << 'west' if west.round(4) != mapset.west.round(4)
+    if errors.any?
+      expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
+      actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
+      message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
+      assert_block(message) {false}
     end
   end
 
   def assert_list_of_mapsets(coll, objs)
-    clean_our_backtrace do
-      expect = objs.reject(&:nil?).map do |x|
-        x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
-      end.map do |x|
-        '%9.4f %9.4f %9.4f %9.4f' % x
-      end.sort
-      actual = coll.mapsets.map(&:edges).map do |x|
-        '%9.4f %9.4f %9.4f %9.4f' % x
-      end.sort
-      messages = []
-      differ = false
-      for i in 0..(expect.length > actual.length ? expect.length : actual.length)
-        message = '%39.39s    %39.39s' % [expect[i], actual[i]]
-        if expect[i] != actual[i]
-          differ = true
-          message += ' (*)'
-        end
-        messages << message
+    expect = objs.reject(&:nil?).map do |x|
+      x.length == 2 ? [x[0], x[0], x[1], x[1]] : x
+    end.map do |x|
+      '%9.4f %9.4f %9.4f %9.4f' % x
+    end.sort
+    actual = coll.mapsets.map(&:edges).map do |x|
+      '%9.4f %9.4f %9.4f %9.4f' % x
+    end.sort
+    messages = []
+    differ = false
+    for i in 0..(expect.length > actual.length ? expect.length : actual.length)
+      message = '%39.39s    %39.39s' % [expect[i], actual[i]]
+      if expect[i] != actual[i]
+        differ = true
+        message += ' (*)'
       end
-      assert_block("Mapsets are wrong: expect -vs- actual\n" + messages.join("\n")) { !differ }
+      messages << message
     end
+    assert_block("Mapsets are wrong: expect -vs- actual\n" + messages.join("\n")) { !differ }
   end
 
   # ------------------------------------------------------------

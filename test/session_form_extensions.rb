@@ -374,7 +374,7 @@ module SessionExtensions
           found = field.value
         end
       end
-      context.assert_block("Couldn't find submit button labelled " +
+      context.assert_block("Couldn't find submit button labeled " +
                             "#{button.inspect}.") { found }
       puts "POST #{url}: #{hash.inspect}" if debug
       context.post(url, hash)

@@ -4,11 +4,9 @@ require 'test_helper'
 class LocalizationFilesTest < ActiveSupport::TestCase
 
   def assert_no_missing_translations(tags, type)
-    clean_our_backtrace do
-      missing = tags.uniq.reject(&:has_translation?)
-      msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
-      assert_block(msg) { missing.empty? }
-    end
+    missing = tags.uniq.reject(&:has_translation?)
+    msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
+    assert_block(msg) { missing.empty? }
   end
 
 ################################################################################

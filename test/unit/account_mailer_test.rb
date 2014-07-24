@@ -28,27 +28,25 @@ class AccountMailerTest < ActiveSupport::TestCase
 
   # Run off an email in both HTML and text form.
   def run_mail_test(name, user=nil, &block)
-    # clean_our_backtrace('run_mail_test') do
-      text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
-                       reject {|x| x.match(/\.new$/)}
-      html_files = Dir.glob("#{FIXTURES_PATH}/#{name}.html*").
-                       reject {|x| x.match(/\.new$/)}
+    text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
+                     reject {|x| x.match(/\.new$/)}
+    html_files = Dir.glob("#{FIXTURES_PATH}/#{name}.html*").
+                     reject {|x| x.match(/\.new$/)}
 
-      assert(text_files.any? || html_files.any?)
-      
-      if text_files.any?
-        user.email_html = false if user
-        email = block.call.encoded
-        assert_string_equal_file(email, *text_files)
-      end
+    assert(text_files.any? || html_files.any?)
+    
+    if text_files.any?
+      user.email_html = false if user
+      email = block.call.encoded
+      assert_string_equal_file(email, *text_files)
+    end
 
-      if html_files.any?
-        user.email_html = true if user
-        email = block.call.encoded
-        fix_mac_vs_pc!(email)
-        assert_string_equal_file(email, *html_files)
-      end
-    # end
+    if html_files.any?
+      user.email_html = true if user
+      email = block.call.encoded
+      fix_mac_vs_pc!(email)
+      assert_string_equal_file(email, *html_files)
+    end
   end
 
 ################################################################################

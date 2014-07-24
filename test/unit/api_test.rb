@@ -16,45 +16,37 @@ class ApiTest < ActiveSupport::TestCase
   end
 
   def assert_no_errors(api, msg='API errors')
-    clean_our_backtrace do
-      assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
-        api.errors.empty?
-      end
+    assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
+      api.errors.empty?
     end
   end
 
   def assert_api_fail(params)
-    clean_our_backtrace do
-      assert_block("API request should have failed, params: #{params.inspect}") do
-        API.execute(params).errors.any?
-      end
+    assert_block("API request should have failed, params: #{params.inspect}") do
+      API.execute(params).errors.any?
     end
   end
 
   def assert_api_pass(params)
-    clean_our_backtrace do
-      api = API.execute(params)
-      assert_no_errors(api, "API request should have passed, params: #{params.inspect}")
-    end
+    api = API.execute(params)
+    assert_no_errors(api, "API request should have passed, params: #{params.inspect}")
   end
 
   def assert_parse(method, expect, val, *args)
     @api ||= API.new
-    clean_our_backtrace do
-      val = val.to_s if val
-      begin
-        actual = @api.send(method, val, *args)
-      rescue API::Error => e
-        actual = e
-      end
-      msg = "Expected: <#{show_val(expect)}>\n" +
-            "Got: <#{show_val(actual)}>\n"
-      assert_block(msg) do
-        if expect.is_a?(Class) and expect <= API::Error
-          actual.is_a?(expect)
-        else
-          actual == expect
-        end
+    val = val.to_s if val
+    begin
+      actual = @api.send(method, val, *args)
+    rescue API::Error => e
+      actual = e
+    end
+    msg = "Expected: <#{show_val(expect)}>\n" +
+          "Got: <#{show_val(actual)}>\n"
+    assert_block(msg) do
+      if expect.is_a?(Class) and expect <= API::Error
+        actual.is_a?(expect)
+      else
+        actual == expect
       end
     end
   end

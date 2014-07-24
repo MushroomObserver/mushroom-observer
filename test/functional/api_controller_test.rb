@@ -6,12 +6,10 @@ require 'rexml/document'
 class ApiControllerTest < FunctionalTestCase
 
   def assert_no_api_errors
-    clean_our_backtrace do
-      @api = assigns(:api)
-      if @api
-        msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
-        assert_block(msg) { @api.errors.empty? }
-      end
+    @api = assigns(:api)
+    if @api
+      msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
+      assert_block(msg) { @api.errors.empty? }
     end
   end
 

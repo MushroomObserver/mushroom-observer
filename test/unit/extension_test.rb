@@ -134,12 +134,10 @@ class ExtensionTest < ActiveSupport::TestCase
   end
 
   def assert_fancy_time(diff, tag, args={})
-    clean_our_backtrace do
-      ref = Time.now
-      time = ref - diff
-      expect = tag.l(args.merge(:date => time.web_date))
-      actual = time.fancy_time(ref)
-      assert_equal(expect, actual)
-    end
+    ref = Time.now
+    time = ref - diff
+    expect = tag.l(args.merge(:date => time.web_date))
+    actual = time.fancy_time(ref)
+    assert_equal(expect, actual)
   end
 end

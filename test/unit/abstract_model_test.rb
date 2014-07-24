@@ -26,25 +26,21 @@ class AbstractModelTest < ActiveSupport::TestCase
   end
 
   def assert_rss_log_lines(num, obj)
-    clean_our_backtrace do
-      assert_equal(num, obj.rss_log.notes.split("\n").length,
-                   "Expected #{num} lines in rss log, got:\n" +
-                   "<#{obj.rss_log.notes}>")
-    end
+    assert_equal(num, obj.rss_log.notes.split("\n").length,
+                 "Expected #{num} lines in rss log, got:\n" +
+                 "<#{obj.rss_log.notes}>")
   end
 
   def assert_rss_log_has_tag(expect_tag, obj)
-    clean_our_backtrace do
-      found = false
-      for tag, args, time in obj.rss_log.parse_log
-        if tag == expect_tag
-          found = true
-          break
-        end
+    found = false
+    for tag, args, time in obj.rss_log.parse_log
+      if tag == expect_tag
+        found = true
+        break
       end
-      assert_block("Expected to find #{expect_tag.inspect} in rss log, got:\n" +
-                   "<#{obj.rss_log.notes}>") { found }
     end
+    assert_block("Expected to find #{expect_tag.inspect} in rss log, got:\n" +
+                 "<#{obj.rss_log.notes}>") { found }
   end
 
 ################################################################################

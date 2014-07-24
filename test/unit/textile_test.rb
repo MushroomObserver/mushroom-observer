@@ -11,19 +11,15 @@ end
 class TextileTest < ActiveSupport::TestCase
 
   def assert_name_link_matches(str, label=nil, name=nil)
-    clean_our_backtrace do
-      obj = Textile.new(str)
-      obj.send_private(:check_name_links!)
-      assert_equal("x{NAME __#{label}__ }{ #{name} }x", obj.to_s)
-    end
+    obj = Textile.new(str)
+    obj.send_private(:check_name_links!)
+    assert_equal("x{NAME __#{label}__ }{ #{name} }x", obj.to_s)
   end
 
   def assert_name_link_fails(str)
-    clean_our_backtrace do
-      obj = Textile.new(str)
-      obj.send_private(:check_name_links!)
-      assert_equal(str, obj.to_s)
-    end
+    obj = Textile.new(str)
+    obj.send_private(:check_name_links!)
+    assert_equal(str, obj.to_s)
   end
 
   def do_other_links(str)
@@ -33,13 +29,11 @@ class TextileTest < ActiveSupport::TestCase
   end
 
   def assert_href_equal(url, str)
-    clean_our_backtrace do
-      result = str.tl
-      assert_match(/href=.([^"']*)/, result, "Expected an <a href='...'> tag for #{str.inspect}.\nGot: #{result.inspect}\n")
-      result.match(/href=.([^"']*)/)
-      actual = $1
-      assert_equal(url, actual, "URL for #{str.inspect} is wrong:\nurl: #{url.inspect}\nactual: #{actual}\n")
-    end
+    result = str.tl
+    assert_match(/href=.([^"']*)/, result, "Expected an <a href='...'> tag for #{str.inspect}.\nGot: #{result.inspect}\n")
+    result.match(/href=.([^"']*)/)
+    actual = $1
+    assert_equal(url, actual, "URL for #{str.inspect} is wrong:\nurl: #{url.inspect}\nactual: #{actual}\n")
   end
 
   def test_name_lookup

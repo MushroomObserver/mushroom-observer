@@ -573,10 +573,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def assert_name_suggestions(str)
-    clean_our_backtrace do
-      results = Name.suggest_alternate_spellings(str)
-      assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
-    end
+    results = Name.suggest_alternate_spellings(str)
+    assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
   end
 
   # ----------------------------
