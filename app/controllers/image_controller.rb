@@ -891,7 +891,7 @@ class ImageController < ApplicationController
   end
 
   def render_image_csv_file(data)
-    report = FasterCSV.generate(:col_sep => "\t") do |csv|
+    report = CSV.generate(:col_sep => "\t") do |csv|
       csv << ['name', 'image id', 'image width', 'image height']
       data.each do |name, id, width, height|
         csv << [name, id.to_s, width.to_s, height.to_s]
@@ -934,7 +934,7 @@ class ImageController < ApplicationController
   end
 
   def get_list_of_names_from_csv_file(file)
-    results = FasterCSV.parse(file.read)
+    results = CSV.parse(file.read)
     headings = results.shift.map(&:to_s).map(&:downcase)
     name_column = headings.index_of('name')
     rank_column = headings.index_of('rank')

@@ -73,6 +73,7 @@ GEM
     rake (10.3.2)
     rdoc (3.12.2)
       json (~> 1.4)
+    ruby-rtf (0.0.1)
     test-unit (2.5.5)
     thor (0.14.6)
     treetop (1.4.15)
@@ -94,4 +95,5 @@ DEPENDENCIES
   mysql
   mysql2
   rails (~> 3.0.10)
+  ruby-rtf
   test-unit

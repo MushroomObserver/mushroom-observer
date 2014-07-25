@@ -1630,7 +1630,7 @@ class NameController < ApplicationController
       end
     end
 
-    report = FasterCSV.generate(:col_sep => "\t") do |csv|
+    report = CSV.generate(:col_sep => "\t") do |csv|
       csv << ['name', 'rank', 'number_observations', 'family']
       data.each do |name, rank, number|
         genus = name.split(' ').first

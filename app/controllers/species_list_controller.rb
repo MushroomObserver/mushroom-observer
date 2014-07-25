@@ -236,7 +236,7 @@ class SpeciesListController < ApplicationController
     if !['ASCII', 'ISO-8859-1'].include?(charset)
       raise "Unsupported CSV report charset: #{charset}"
     end
-    str = FasterCSV.generate do |csv|
+    str = CSV.generate do |csv|
       csv << ['sciname', 'author', 'citation', 'valid']
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,

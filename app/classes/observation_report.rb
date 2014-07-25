@@ -194,7 +194,7 @@ module ObservationReport
     self.header = { :header => 'present' }
 
     def render
-      FasterCSV.generate do |csv|
+      ::CSV.generate do |csv|
         csv << labels
         rows.each do |row|
           csv << row
