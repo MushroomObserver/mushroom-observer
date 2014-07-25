@@ -35,7 +35,7 @@
   license = @new_desc ? @new_desc.license : nil
 
   one_liners = ''
-  one_liners += "*#{:Name.l} #{is_now}:* #{@new_loc.display_name}\n"          if @new_loc.name != @old_loc.name
+  one_liners += "*#{:Name.l} #{is_now}:* #{@new_loc.display_name}\n"          if @new_loc.name  != @old_loc.name
   one_liners += "*#{:email_field_north.l} #{is_now}:* #{@new_loc.north}\n"    if @new_loc.north != @old_loc.north
   one_liners += "*#{:email_field_south.l} #{is_now}:* #{@new_loc.south}\n"    if @new_loc.south != @old_loc.south
   one_liners += "*#{:email_field_east.l} #{is_now}:* #{@new_loc.east}\n"      if @new_loc.east  != @old_loc.east
@@ -53,24 +53,24 @@
     end
   end
 
-  handy_links = :email_handy_links
+  handy_links = :email_handy_links.l
   if email_type
     tag = :"email_object_change_reason_#{email_type}".to_sym
-    handy_links = tag.l(:type => :location).sub(/\n*\Z/, "\n" + handy_links.l)
+    handy_links = tag.l(:type => :location).sub(/\n*\Z/, "\n" + handy_links)
   end
 
   links = []
-  links.push([:email_links_show_object.l(:type => :location),
+  links.push([:email_links_show_object.t(:type => :location),
     "#{HTTP_DOMAIN}/location/show_location/#{@new_loc.id}"])
-  links.push([:email_links_not_interested.l(:type => :location),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_loc.id}&type=Location&user=#{@user.id}&state=-1".html_safe])
+  links.push([:email_links_not_interested.t(:type => :location),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
   if email_type && email_type != 'interest'
-    links.push([:email_links_stop_sending.l,
+    links.push([:email_links_stop_sending.t,
       "#{HTTP_DOMAIN}/account/no_email_locations_#{email_type}/#{@user.id}"]) unless watching
   end
-  links.push([:email_links_change_prefs.l,
+  links.push([:email_links_change_prefs.t,
     "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
 
 if @user.email_html %>
@@ -114,7 +114,7 @@ if @user.email_html %>
 
 <%= result = ''.html_safe
   for label, url in links
-    result += label + ": " + url + "\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
 <% end %>

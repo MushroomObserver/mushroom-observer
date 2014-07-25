@@ -1,7 +1,12 @@
 <%
   url = "#{HTTP_DOMAIN}/conference/verify/#{@registration.id}"
-  intro = :email_registration_intro.l(:user => @registration.name, :how_many => @registration.how_many,
-    :name => @registration.conference_event.name, :link => "<a href=\"#{url}\">#{url}</a>")
+  intro = :email_registration_intro.tp(
+    :user => @registration.name,
+    :how_many => @registration.how_many,
+    :name => @registration.conference_event.name,
+    :link => 'xxx'
+  )
+  intro.gsub!(/xxx/, link_to(url, url))
 
 if not @user or @user.email_html %>
 <html>
@@ -9,9 +14,9 @@ if not @user or @user.email_html %>
 <title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
-<%= intro.tp %>
+<%= intro.html_safe %>
 <br/>
 </body>
 </html>
-<% else %><%= intro.tp.html_to_ascii %>
+<% else %><%= intro.html_to_ascii %>
 <% end %>

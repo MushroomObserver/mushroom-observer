@@ -52,18 +52,20 @@
   handy_links.sub!(/\n*\Z/, "\n" + :email_handy_links.l)
 
   links = []
-  links.push([:email_links_show_object.l(:type => type_sym),
+  links.push([:email_links_show_object.t(:type => type_sym),
     "#{HTTP_DOMAIN}/#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
-  links.push([:email_links_post_comment.l,
-    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@comment.target_id}&type=#{@comment.target_type}".html_safe])
-  links.push([:email_links_not_interested.l(:type => type_sym),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@comment.target_id}&type=#{@comment.target_type}&user=#{@user.id}&state=-1".html_safe])
-  links.push([:email_links_stop_sending.l,
+  links.push([:email_links_post_comment.t,
+    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@comment.target_id}&type=#{@comment.target_type}"])
+  links.push([:email_links_not_interested.t(:type => type_sym),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@comment.target_id}&type=#{@comment.target_type}&user=#{@user.id}&state=-1"])
+  links.push([:email_links_stop_sending.t,
     "#{HTTP_DOMAIN}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
-  links.push([:email_links_change_prefs.l,
+  links.push([:email_links_change_prefs.t,
     "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
+
+  report_abuse = :email_report_abuse.l(:email => WEBMASTER_EMAIL_ADDRESS)
 
 if @user.email_html %>
 <html>
@@ -84,7 +86,7 @@ if @user.email_html %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
-<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
+<%= report_abuse.tp %>
 <br/>
 </body>
 </html>
@@ -92,15 +94,15 @@ if @user.email_html %>
 
 <%= fields.tp.html_to_ascii %>
 
-<%= @comment.comment ? @comment.comment.tp.html_to_ascii.html_safe + "\n" : "" %>
+<%= @comment.comment ? @comment.comment.tp.html_to_ascii + "\n" : "" %>
 --------------------------------------------------
 
-<%= handy_links.tp.html_to_ascii.html_safe %>
+<%= handy_links.tp.html_to_ascii %>
 
 <%= result = ''.html_safe
   for label, url in links
-    result += label + ": " + url + "\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
-<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<%= report_abuse.tp.html_to_ascii %>
 <% end %>

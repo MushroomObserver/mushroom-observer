@@ -1,13 +1,14 @@
 <%
-  intro = :email_features_intro
-  handy_links = :email_handy_links
+  intro = :email_features_intro.l
+
+  handy_links = :email_handy_links.l
 
   links = []
-  links.push([:email_links_stop_sending.l,
+  links.push([:email_links_stop_sending.t,
     "#{HTTP_DOMAIN}/account/no_email_general_feature/#{@user.id}"])
-  links.push([:email_links_change_prefs.l,
+  links.push([:email_links_change_prefs.t,
     "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
 
 if @user.email_html %>
@@ -37,9 +38,9 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''
+<%= result = ''.html_safe
   for label, url in links
-    result += "#{label.t.html_to_ascii}: #{url}\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
 <% end %>

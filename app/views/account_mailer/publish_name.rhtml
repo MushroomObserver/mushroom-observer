@@ -1,21 +1,18 @@
 <%
-  name_url = "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
-  user_url = "#{HTTP_DOMAIN}/observer/show_user/#{@publisher.id}"
-
   intro = :email_publish_name_intro.l
 
   fields = ""
   fields += "*#{:Name.l}:* #{@name.display_name}\n"
   fields += "*#{:email_field_published.l}:* #{@publisher.legal_name} (#{@publisher.login})\n"
 
-  handy_links = :email_handy_links
+  handy_links = :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.l(:type => :name),
-    name_url])
-  links.push([:email_links_email_publisher.l,
-    user_url])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_show_object.t(:type => :name),
+    "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"])
+  links.push([:email_links_email_publisher.t,
+    "#{HTTP_DOMAIN}/observer/show_user/#{@publisher.id}"])
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
 
 if @user.email_html %>
@@ -41,9 +38,9 @@ if @user.email_html %>
 
 <%= handy_links.tp.html_to_ascii %>
 
-<%= result = ''
+<%= result = ''.html_safe
   for label, url in links
-    result += "#{label.t.html_to_ascii}: #{url}\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
 <% end %>

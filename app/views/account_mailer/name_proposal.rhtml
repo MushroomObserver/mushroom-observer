@@ -17,18 +17,18 @@
     end
   end
 
-  handy_links = :email_handy_links
+  handy_links = :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation),
+  links.push([:email_links_show_object.t(:type => :observation),
     "#{HTTP_DOMAIN}/#{@observation.id}"])
-  links.push([:email_links_not_interested.l(:type => :observation),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1".html_safe])
-  links.push([:email_links_stop_sending.l,
+  links.push([:email_links_not_interested.t(:type => :observation),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+  links.push([:email_links_stop_sending.t,
     "#{HTTP_DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
-  links.push([:email_links_change_prefs.l,
+  links.push([:email_links_change_prefs.t,
     "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
 
 if @user.email_html %>
@@ -56,7 +56,7 @@ if @user.email_html %>
 
 <%= result = ''.html_safe
   for label, url in links
-    result += label + ": " + url + "\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
 <% end %>

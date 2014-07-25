@@ -4,36 +4,40 @@
   observer_url    = "#{HTTP_DOMAIN}/observer/show_user/#{@observation.user_id}"
   identifier_url  = "#{HTTP_DOMAIN}/observer/show_user/#{@naming.user_id}"
 
-  intro = :email_naming_for_tracker_intro.l(
-    :obs  => link_to(:observation.l, observation_url),
-    :name => link_to(@naming.format_name, name_url)
-  )
+  intro = :email_naming_for_tracker_intro.tp(:obs => 'xxx', :name => 'yyy')
+  intro.gsub!(/xxx/, link_to(:observation.l, observation_url))
+  intro.gsub!(/yyy/, link_to(@naming.format_name.t, name_url))
 
   fields = ""
-  fields += "*#{:Observer.l}:* #{link_to(@observation.user.legal_name, observer_url)}\n"
-  fields += "*#{:Identifier.l}:* #{link_to(@naming.user.legal_name, identifier_url)}\n"
+  fields += "*#{:Observer.l}:* xxx\n"
+  fields += "*#{:Identifier.l}:* yyy\n"
   if @observation.specimen
     fields += "*#{:show_observation_specimen_available.l}*\n"
   else
     fields += "*#{:show_observation_specimen_not_available.l}*\n"
   end
   fields += "*#{:email_field_image_count.l}:* #{@observation.images.length}\n"
+  fields = fields.tp
+  fields.gsub!(/xxx/, link_to(@observation.user.legal_name, observer_url))
+  fields.gsub!(/yyy/, link_to(@naming.user.legal_name, identifier_url))
 
-  handy_links = :email_handy_links
+  handy_links = :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation),
+  links.push([:email_links_show_object.t(:type => :observation),
     observation_url])
-  links.push([:email_links_show_observer.l,
+  links.push([:email_links_show_observer.t,
     observer_url])
-  links.push([:email_links_show_identifier.l,
+  links.push([:email_links_show_identifier.t,
     identifier_url]) if @observation.user_id != @naming.user_id
-  links.push([:email_links_disable_tracking.l(:type => :name),
+  links.push([:email_links_disable_tracking.t(:type => :name),
     "#{HTTP_DOMAIN}/name/email_tracking/#{@naming.name_id}"])
-  links.push([:email_links_your_interests.l,
+  links.push([:email_links_your_interests.t,
     "#{HTTP_DOMAIN}/interest/list_interests"])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
+
+  report_abuse = :email_report_abuse.l(:email => WEBMASTER_EMAIL_ADDRESS)
 
 if @user.email_html %>
 <html>
@@ -41,28 +45,28 @@ if @user.email_html %>
 <title><%= "#{:app_title.t}: #{@title}" %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
-<%= intro.tp %>
-<%= fields.tp %>
+<%= intro.html_safe %>
+<%= fields.html_safe %>
 <%= handy_links.tp %>
 <ul type=none>
   <% for label, url in links %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
-<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
+<%= report_abuse.tp %>
 <br/>
 </body>
 </html>
-<% else %><%= intro.tp.html_to_ascii %>
+<% else %><%= intro.html_to_ascii %>
 
-<%= fields.tp.html_to_ascii %>
+<%= fields.html_to_ascii %>
 
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = ''.html_safe
   for label, url in links
-    result += label + ": " + url + "\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
-<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<%= report_abuse.tp.html_to_ascii %>
 <% end %>

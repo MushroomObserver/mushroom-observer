@@ -37,18 +37,18 @@
   end
   changes += "*#{:Notes.l} #{is_now}:*\n" if notes_changed
 
-  handy_links = :email_handy_links
+  handy_links = :email_handy_links.l
 
   links = []
   if @observation
-    links.push([:email_links_show_object.l(:type => :observation),
+    links.push([:email_links_show_object.t(:type => :observation),
       "#{HTTP_DOMAIN}/#{@observation.id}"])
-    links.push([:email_links_post_comment.l,
-      "#{HTTP_DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation".html_safe])
-    links.push([:email_links_not_interested.l(:type => :observation),
-      "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1".html_safe])
+    links.push([:email_links_post_comment.t,
+      "#{HTTP_DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
+    links.push([:email_links_not_interested.t(:type => :observation),
+      "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   end
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
 
 if @user.email_html %>
@@ -87,7 +87,7 @@ if @user.email_html %>
 
 <%= result = ''.html_safe
   for label, url in links
-    result += label + ": " + url + "\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
 <% end %>

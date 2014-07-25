@@ -66,24 +66,24 @@
     )
   end
 
-  handy_links = :email_handy_links
+  handy_links = :email_handy_links.l
   if email_type
     tag = :"email_object_change_reason_#{email_type}".to_sym
-    handy_links = tag.l(:type => :name).sub(/\n*\Z/, "\n" + handy_links.l)
+    handy_links = tag.l(:type => :name).sub(/\n*\Z/, "\n" + handy_links)
   end
 
   links = []
-  links.push([:email_links_show_object.l(:type => :name),
+  links.push([:email_links_show_object.t(:type => :name),
     "#{HTTP_DOMAIN}/name/show_name/#{@new_name.id}"])
-  links.push([:email_links_not_interested.l(:type => :name),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_name.id}&type=Name&user=#{@user.id}&state=-1".html_safe])
+  links.push([:email_links_not_interested.t(:type => :name),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_name.id}&type=Name&user=#{@user.id}&state=-1"])
   if email_type && email_type != 'interest'
-    links.push([:email_links_stop_sending.l,
+    links.push([:email_links_stop_sending.t,
       "#{HTTP_DOMAIN}/account/no_email_names_#{email_type}/#{@user.id}"])
   end
-  links.push([:email_links_change_prefs.l,
+  links.push([:email_links_change_prefs.t,
     "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
-  links.push([:email_links_latest_changes.l,
+  links.push([:email_links_latest_changes.t,
     HTTP_DOMAIN])
 
 if @user.email_html %>
@@ -129,7 +129,7 @@ if @user.email_html %>
 
 <%= result = ''.html_safe
   for label, url in links
-    result += label + ": " + url + "\n"
+    result += label.html_to_ascii + ": " + url.html_safe + "\n"
   end
   result %>
 <% end %>
