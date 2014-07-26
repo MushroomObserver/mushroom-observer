@@ -41,7 +41,8 @@ function vote_on_story(story, user, value) {
   var div = $("pivotal_votes_" + story);
   var span = $("pivotal_vote_num_" + story);
   var old_score = span.innerHTML;
-  new Ajax.Request("/ajax/pivotal/vote/" + story + "?value=" + value, {
+  new Ajax.Request("/ajax/pivotal/vote/" + story, {
+    parameters: { value: value, authenticity_token: CSRF_TOKEN },
     asynchronous: true,
     onComplete: function(request) {
       if (request.status == 200) {
@@ -66,6 +67,7 @@ function click_on_story(story) {
   }
   CUR_STORY = story;
   new Ajax.Request("/ajax/pivotal/story/" + story, {
+    parameters: { authenticity_token: CSRF_TOKEN },
     asynchronous: true,
     onComplete: function(request) {
       if (request.status == 200) {
@@ -91,7 +93,8 @@ function post_comment(story) {
   var value = $("pivotal_comment").value;
   var popup = $("pivotal_popup");
   var num;
-  new Ajax.Request("/ajax/pivotal/comment/" + story + "?value=" + escape(value), {
+  new Ajax.Request("/ajax/pivotal/comment/" + story, {
+    parameters: { value: value, authenticity_token: CSRF_TOKEN },
     asynchronous: true,
     onComplete: function(request) {
       popup.hide();

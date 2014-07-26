@@ -116,6 +116,7 @@
   function show_old_version(id) {
     show_whirly(LOADING_STRING);
     new Ajax.Request("/ajax/old_translation/" + id, {
+      parameters: { authenticity_token: CSRF_TOKEN },
       asynchronous: true,
       onComplete: function (response) {
         hide_whirly();
@@ -128,7 +129,8 @@
     LOCALE = locale;
     if (!CHANGED || confirm(CONFIRM_STRING)) {
       show_whirly(LOADING_STRING);
-      new Ajax.Request("edit_translations_ajax_get?locale=" + locale + "&tag=" + tag, {
+      new Ajax.Request("edit_translations_ajax_get, {
+      parameters: { locale: locale, tag: tag, authenticity_token: CSRF_TOKEN },
         asynchronous: true,
         onFailure: function (response) {
           hide_whirly();

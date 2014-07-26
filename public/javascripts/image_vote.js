@@ -1,5 +1,6 @@
 function image_vote(id, value) {
-  new Ajax.Request("/ajax/vote/image/" + id + "?value=" + value, {
+  new Ajax.Request("/ajax/vote/image/" + id, {
+    parameters: { value: value, authenticity_token: CSRF_TOKEN },
     asynchronous: true,
     onFailure: function (response) {
       alert(response.responseText);

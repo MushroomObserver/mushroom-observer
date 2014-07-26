@@ -880,6 +880,7 @@ var MOAutocompleter = Class.create({
       this.ajax_request.abort();
 
     this.ajax_request = new Ajax.Request(url, {
+      parameters: { authenticity_token: CSRF_TOKEN },
       asynchronous: true,
 
       onFailure: (function (response) {

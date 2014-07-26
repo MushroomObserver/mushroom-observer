@@ -80,6 +80,7 @@
     function activate_key(id) {
       var td = $("key_time_" + id);
       new Ajax.Request("/ajax/api_key/activate/" + id, {
+        parameters: { authenticity_token: CSRF_TOKEN },
         asynchronous: true,
         onFailure: function (response) {
           alert(response.responseText);
@@ -112,7 +113,8 @@
 
     function save_key(id) {
       var val = $('key_notes_field').value;
-      new Ajax.Request("/ajax/api_key/edit/" + id + "?value=" + encodeURI(val), {
+      new Ajax.Request("/ajax/api_key/edit/" + id, {
+        parameters: { value: val, authenticity_token: CSRF_TOKEN },
         asynchronous: true,
         onFailure: function (response) {
           cancel_key(id);

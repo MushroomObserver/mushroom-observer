@@ -529,7 +529,7 @@ class User < AbstractModel
   end
   
   def personal_herbarium_name
-    :user_personal_herbarium.t(:name => self.unique_text_name)
+    :user_personal_herbarium.l(:name => self.unique_text_name)
   end
   
   def personal_herbarium

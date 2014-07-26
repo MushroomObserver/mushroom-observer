@@ -102,12 +102,12 @@ class X
 end
 
 class ApplicationController < ActionController::Base
-  protect_from_forgery
   require 'extensions'
   require 'login_system'
   include LoginSystem
 
-  around_filter :catch_errors if TESTING
+  around_filter :catch_errors # if TESTING
+  before_filter :verify_authenticity_token
   before_filter :block_ip_addresses
   before_filter :fix_bad_domains
   before_filter :autologin
@@ -127,10 +127,20 @@ class ApplicationController < ActionController::Base
     skip_filter   :set_timezone
     skip_filter   :track_translations
     skip_filter   :check_user_alert
-    skip_filter   :extra_gc
-    skip_filter   :log_memory_usage
+    # skip_filter   :extra_gc
+    # skip_filter   :log_memory_usage
     before_filter :disable_link_prefetching
     before_filter { User.current = nil }
+  end
+
+  # The default CSRF handler silently resets the session.  The problem is
+  # autologin will circumvent this, so we would need to disable autologin
+  # temporarily.  Or we can just make forgeries fail, but leave valid requests
+  # alone.  This seems much more graceful... and it lets the user know why they
+  # are experiencing otherwise bewildering and incorrect behavior.
+  def handle_unverified_request
+    render(:text => "Cross-site Request Forgery detected!", :layout => false)
+    return false
   end
 
   # Filter to run before anything else to protect against denial-of-service attacks.
@@ -176,6 +186,7 @@ class ApplicationController < ActionController::Base
 
   # Catch errors for integration tests.
   def catch_errors
+logger.warn('SESSION: ' + session.inspect)
     yield
   rescue => e
     @error = e
@@ -308,12 +319,6 @@ class ApplicationController < ActionController::Base
         @user.last_activity = Time.now
         @user.save
       end
-    end
-
-    # User Innorimarlo has been spamming us.
-    if @user && [4334, 4441].include?(@user.id)
-      render(:status => 503, :text => "You have been blocked from MO because of spam.  Please contact webaster@mushroomobserver.org if you would like to appeal our decision.", :layout => false)
-      return false
     end
 
     # Tell Rails to continue to process.

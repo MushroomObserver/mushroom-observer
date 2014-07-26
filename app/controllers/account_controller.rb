@@ -173,7 +173,9 @@ class AccountController < ApplicationController
       # If not already verified, and the code checks out, then mark account
       # "verified", log user in, and display the "you're verified" page.
       else
-        set_session_user(@user = user)
+        @user = user
+        User.current = user
+        set_session_user(user)
         @user.verify
       end
     end

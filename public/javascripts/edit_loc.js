@@ -77,28 +77,28 @@ function resetToLatLng(loc) {
 
 function findOnMap() {
   address = $("location_display_name").value;
-  new Ajax.Request('/ajax/geocode?name=' + address,
-    {
-      method:'get',
-      onSuccess: function(transport){
-        var response = transport.responseText || "no response text";
-        list = []
-        while ((x = response.indexOf("\n")) >= 0) {
-          if (x > 0)
-            list.push(response.substr(0, x));
-          response = response.substr(x+1);
-        }
-        north = parseFloat(list[0]);
-        south = parseFloat(list[1]);
-        east = parseFloat(list[2]);
-        west = parseFloat(list[3]);
-        if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
-          updateMapOverlay(north, south, east, west);
-          map_div.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
-        };
-      },
-      onFailure: function(transport){ alert(transport.responseText) }
-    });  
+  new Ajax.Request('/ajax/geocode', {
+    parameters: { name: address, authenticity_token: CSRF_TOKEN },
+    method:'get',
+    onSuccess: function(transport){
+      var response = transport.responseText || "no response text";
+      list = []
+      while ((x = response.indexOf("\n")) >= 0) {
+        if (x > 0)
+          list.push(response.substr(0, x));
+        response = response.substr(x+1);
+      }
+      north = parseFloat(list[0]);
+      south = parseFloat(list[1]);
+      east = parseFloat(list[2]);
+      west = parseFloat(list[3]);
+      if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
+        updateMapOverlay(north, south, east, west);
+        map_div.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
+      };
+    },
+    onFailure: function(transport){ alert(transport.responseText) }
+  });  
 }
 
 function sendOldLoc() {
