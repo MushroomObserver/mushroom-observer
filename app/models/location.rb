@@ -133,7 +133,7 @@ class Location < AbstractModel
   include BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
-       (-?\d+(?:\.\d+)?) (?:°|°|o|d|deg)?     \s*
+       (-?\d+(?:\.\d+)?) (?:°|°|o|d|deg|,\s)?     \s*
     (?: (?<![\d\.]) (\d+(?:\.\d+)?) (?:'|‘|’|′|′|m|min)? \s* )?
     (?: (?<![\d\.]) (\d+(?:\.\d+)?) (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
