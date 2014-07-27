@@ -8,10 +8,10 @@
 #    OTHER_IP_ADDR      ip address of old server
 #    DOMAIN             mushroomobserver.org
 #    SITE               mo
-#    FLAVOR             raring
+#    FLAVOR             trusty
 #    USER               jason
 #    USER_PASSWORD      xxx
-#    DATA_PASSWORD      xxx
+#    DATA_PASSWORD      xxx                       k498dnt4
 #    MAIL_PASSWORD      xxx
 #    YOUR_EMAIL         pellaea@gmail.com
 #    FULL_NAME          Jason Hollinger
@@ -19,7 +19,7 @@
 #  Present production package versions are: (as of 20140301)
 #
 #  packages:
-#    ubuntu (13.04)
+#    ubuntu (14.04)
 #    ruby (1.9.3-p545)
 #    rubygems (2.2.2)
 #    nginx (1.4.5)
@@ -53,21 +53,8 @@
 local> ssh root@$IP_ADDR
 root> passwd
 
-# Check for release update.
-root> apt-get update
-root> apt-get install update-manager-core
-root> do-release-upgrade -d
-# (if there is an update it will require a reboot; log in again)
-
-# Need to add third-party repository for nginx.
-root> echo "deb http://nginx.org/packages/ubuntu/ $FLAVOR nginx" >> /etc/apt/sources.list
-root> echo "deb-src http://nginx.org/packages/ubuntu/ $FLAVOR nginx" >> /etc/apt/sources.list
-root> apt-get update
-# (may need to import key for nginx; $KEY = value after NO_PUBKEY in error msg)
-root> apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $KEY
-root> apt-get update
-
 # Install core packages.
+root> apt-get update
 root> apt-get upgrade
 root> apt-get install build-essential man telnet wget vim emacs iptables mlocate
 
@@ -104,9 +91,9 @@ $SITE> vi ~/.bashrc
   export TZ='Eastern Time (US & Canada)'
   export RAILS_ENV=production
   alias $SITE='cd /var/web/$SITE'
-  alias $SITEsql="mysql -u $SITE -p'$SITE' $SITE_production"
+  alias $SITEsql="mysql -u $SITE -p'$DATA_PASSWORD' $SITE_production"
   function $SITEsqle() {
-    mysql -u $SITE -p$SITE $SITE_production -e "source $1"
+    mysql -u $SITE -p$DATA_PASSWORD $SITE_production -e "source $1"
   }
   alias restart='kill -HUP `cat /var/web/$SITE/tmp/unicorn.pid`'
 $SITE> exit
@@ -138,41 +125,17 @@ root> vi /etc/rc.local
 
 # Install most of the modules that we will need (except ruby).
 root> apt-get install mysql-server mysql-client libmysqlclient-dev \
-          libcurl4-openssl-dev libssl-dev git nginx libyaml-dev
-# (These no longer exist in saucy: libyaml libopenssl-ruby)
+          libcurl4-openssl-dev libssl-dev git nginx libyaml-dev \
+          imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev
 
-# Build and install ruby from source to get good version.
-root> cd
-root> mkdir build
-root> cd build
-root> wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p545.tar.bz2
-root> tar -xjf ruby*.bz2
-root> cd ruby-1.9.3-p545
-root> ./configure --with-ruby-version=1.9.3
-root> make install
-root> cd
-
-# Ditto for rubygems.
-root> cd ~/build
-root> wget http://production.cf.rubygems.org/rubygems/rubygems-2.2.2.tgz
-root> tar -xzf rubygems*.tgz
-root> cd rubygems-2.2.2
-root> ruby setup.rb --prefix=/usr/local --verbose
-root> cd
-
-# Now we can install ruby gems properly.
-root> gem install rails --version=2.1.1 --verbose --no-rdoc --no-ri
-root> gem install mysql2 --verbose --no-rdoc --no-ri
-root> gem install activerecord-mysql2-adapter --verbose --no-rdoc --no-ri
-root> gem install test-unit --verbose --no-rdoc --no-ri
-root> gem install RedCloth --verbose --no-rdoc --no-ri
-root> gem install unicorn --verbose --no-rdoc --no-ri
-# (not sure if this is necessary, it got installed when working on getting rails to play with gmail nicely)
-# root> gem install openrain-action_mailer_tls -s http://gems.github.com
-
-# Install ImageMagick.
-root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev
-root> gem install rmagick --verbose --no-rdoc --no-ri
+# Install rvm and ruby.
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=1.9.3
+root> gpasswd -a $SITE rvm
+root> echo "gem: --no-document" > /etc/gemrc
+root> echo "gem: --no-document" > /root/.gemrc
+root> echo "gem: --no-document" > /home/$SITE/.gemrc
+root> echo "source /usr/local/rvm/scripts/rvm" >> /root/.bashrc
+root> echo "source /usr/local/rvm/scripts/rvm" >> /home/mo/.bashrc
 
 # Create directory for rails app.
 root> mkdir /var/web
@@ -229,9 +192,13 @@ mo> vi config/consts-site.rb
   PIVOTAL_PASSWORD = 'heCdf#sj'
   PIVOTAL_PROJECT  = '224629'
   PIVOTAL_TEST_ID  = '14385277'
-mo> exit
+
+# Install gems.
+mo> echo "gem 'unicorn'" >> Gemfile
+mo> bundle install
 
 # Configure nginx.
+mo> exit
 root> cp /var/web/mo/config/nginx.conf /etc/nginx/
 root> service nginx start
 
@@ -259,14 +226,13 @@ mo> rm checkpoint
 mo> exit
 
 # Set up password-less ssh for image transfers.
-root> mo
 mo> ssh-keygen -t rsa
   # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
-# This command is currently broken, use the alternate below instead.
-# mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
-mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com \
-    'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
+mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
   # Enter password.
+# If the command above doesn't work, use this instead.
+# mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com \
+#     'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
 mo> ssh cdmr@images.digitalmycology.com
   # (just make sure it works)
 mo> exit
@@ -298,12 +264,15 @@ root> chmod 755 /usr/local/bin/exifautotran
 
 # Test basic system now.
 root> mo
-mo> script/server
+mo> rails server
 # Look for errors.  Should start listening on port 3000.
 # Break out when working.
 
 # Once the system can boot successfully, make sure translations are installed.
 mo> rake lang:update
+
+# And make sure the database is up to date.
+mo> rake db:migrate
 
 # Now get unicorn to run right.
 mo> unicorn_rails -c config/unicorn.rb -D
