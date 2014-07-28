@@ -1,4 +1,4 @@
-APP_PATH = '/home/jason/mo'
+APP_PATH = '/var/web/mo'
 worker_processes 4
 working_directory APP_PATH
 listen APP_PATH + '/tmp/.unicorn.sock', :backlog => 64
