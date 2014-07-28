@@ -1409,7 +1409,7 @@ module ApplicationHelper
     else
       file = Image.file_name(size, id)
     end
-    if image && !image.transferred && image.size != :thumbnail && image.size != :small
+    if image && !image.transferred && size != :thumbnail && size != :small
       # Serve image from web server if it hasn't transferred yet.  Since apache can't know
       # about this, we have to fake it into thinking it's not serving an image.  Route it
       # through ajax controller to reduce overhead to minimum.
