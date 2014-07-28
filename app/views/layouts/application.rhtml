@@ -268,7 +268,7 @@
                   <%= ids_and_names = lang.top_contributors(5)
                   user_links = ids_and_names.map do |id, name|
                     user_link(id, name)
-                  end.join(', ')
+                  end.safe_join(', ')
                   if ids_and_names.length == 5
                     user_links += ', ' + :app_translators_credit_and_others.t
                   end

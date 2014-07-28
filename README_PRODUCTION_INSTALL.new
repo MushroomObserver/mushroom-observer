@@ -95,7 +95,9 @@ $SITE> vi ~/.bashrc
   function $SITEsqle() {
     mysql -u $SITE -p$DATA_PASSWORD $SITE_production -e "source $1"
   }
-  alias restart='kill -HUP `cat /var/web/$SITE/tmp/unicorn.pid`'
+  alias restart_unicorn='kill -HUP `cat /var/web/mo/tmp/unicorn.pid`'
+  alias stop_unicorn='kill -QUIT `cat /var/web/mo/tmp/unicorn.pid`'
+  alias kill_unicorn='kill -TERM `cat /var/web/mo/tmp/unicorn.pid`'
 $SITE> exit
 
 # Disable direct root login for security purposes.
