@@ -265,7 +265,7 @@ mo> rake lang:update
 mo> rake db:migrate
 
 # Now get unicorn to run right.
-mo> unicorn_rails -c config/unicorn.rb -D
+mo> uni start
 # If there are any errors you'll find them in log/unicorn.stderr.log
 # Should start listening on port 8080.
 mo> lynx localhost:8080

@@ -31,6 +31,8 @@ function uni {
   case $1 in
     show)
       ps -ef | grep unicorn ;;
+    start)
+      unicorn_rails -c /var/web/mo/config/unicorn.rb -D ;;
     reload)
       kill -HUP `cat /var/web/mo/tmp/unicorn.pid` ;;
     stop)
@@ -43,6 +45,7 @@ function uni {
       echo
       echo COMMANDS:
       echo "  show     Show unicorn processes."
+      echo "  start    Start unicorn."
       echo "  reload   Reload application."
       echo "  stop     Shutdown unicorn and workers gracefully, waiting for them to"
       echo "           finish serving their last request."
