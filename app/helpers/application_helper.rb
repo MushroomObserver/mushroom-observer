@@ -1189,7 +1189,7 @@ module ApplicationHelper
 
   def mapset_coords(set)
     if set.is_point?
-      "#{format_latitude(set.lat)} #{format_longitude(set.long)}"
+      format_latitude(set.lat) + safe_nbsp + format_longitude(set.long)
     else
       content_tag(:center,
         format_latitude(set.north) + safe_br +
@@ -1210,7 +1210,7 @@ module ApplicationHelper
 
   def format_lxxxitude(val, dir1, dir2)
     deg = val.abs.round(4)
-    return "#{deg}°#{val < 0 ? dir2 : dir1}"
+    return "#{deg}°#{val < 0 ? dir2 : dir1}".html_safe
 
     # sec = (val.abs * 3600).round
     # min = (sec / 60.0).truncate

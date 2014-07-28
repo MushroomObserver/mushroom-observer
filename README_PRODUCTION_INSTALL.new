@@ -201,6 +201,7 @@ mo> bundle install
 mo> exit
 root> cp /var/web/mo/config/nginx.conf /etc/nginx/
 root> service nginx start
+root> rm /usr/share/nginx/html/index.html    # (there's *got* to be a better way!)
 
 # Create database.
 root> mo
