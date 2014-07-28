@@ -92,12 +92,32 @@ $SITE> vi ~/.bashrc
   export RAILS_ENV=production
   alias $SITE='cd /var/web/$SITE'
   alias $SITEsql="mysql -u $SITE -p'$DATA_PASSWORD' $SITE_production"
-  function $SITEsqle() {
+  function $SITEsqle {
     mysql -u $SITE -p$DATA_PASSWORD $SITE_production -e "source $1"
   }
-  alias restart_unicorn='kill -HUP `cat /var/web/mo/tmp/unicorn.pid`'
-  alias stop_unicorn='kill -QUIT `cat /var/web/mo/tmp/unicorn.pid`'
-  alias kill_unicorn='kill -TERM `cat /var/web/mo/tmp/unicorn.pid`'
+  function uni {
+    case $1 in
+      show)
+        ps -ef | grep unicorn ;;
+      reload)
+        kill -HUP `cat /var/web/mo/tmp/unicorn.pid` ;;
+      stop)
+        kill -QUIT `cat /var/web/mo/tmp/unicorn.pid` ;;
+      kill)
+        kill -TERM `cat /var/web/mo/tmp/unicorn.pid` ;;
+      *)
+        echo
+        echo USAGE: uni <command>
+        echo
+        echo COMMANDS:
+        echo "  show     Show unicorn processes.
+        echo "  reload   Reload application.
+        echo "  stop     Shutdown unicorn and workers gracefully, waiting for them to
+        echo "           finish serving their last request.
+        echo "  kill     Kill unicorn and workers immediately.
+        echo
+    esac
+  }
 $SITE> exit
 
 # Disable direct root login for security purposes.
