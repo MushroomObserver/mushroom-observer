@@ -88,7 +88,7 @@ MAX_MAP_OBJECTS = 100
 CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite)
 
 # URL of the subversion source repository.
-SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings"
+CODE_REPOSITORY = "https://github.com/MushroomObserver/"
 
 # Date after which votes become public.
 VOTE_CUTOFF = '20100401'
