@@ -1,6 +1,6 @@
 <% @title = :ask_webmaster_title.t %>
 
-<%= :ask_webmaster_note.tp(:todo_list => "#{SVN_REPOSITORY}/trunk/TODO") %>
+<%= :ask_webmaster_note.tp(:todo_list => "#{CODE_REPOSITORY}/mushroom-observer/blob/master/TODO") %>
 
 <%= form_tag(:action => 'ask_webmaster_question') do %>
   <br/><center><%= submit_tag :SEND.l %></center>

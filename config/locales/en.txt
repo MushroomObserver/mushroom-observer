@@ -3086,7 +3086,7 @@
     \n
     There are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you.  We've organized it so someone with limited time can concentrate on the most important text.  Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n
     \n
-    There are several ways to get started.  You can pick up a copy of the entire "translation file":[repo] and start translating it into any language you wish.  "Send us an email":/observer/ask_webmaster_question when you finish doing what you can, and we'll tell you how to submit your work.\n
+    There are several ways to get started.  You can pick up a copy of the entire "translation file":[repo] and start translating it into any language you wish.  "Send us an email":/observer/ask_webmaster_question to learn more about this approach.\n
     \n
     It's even easier to work on existing translations.  Just look for "[:app_edit_translations]" at the bottom of any page.  You can see immediately how your changes look in the context of the page.  If your language is not available, "send us an email":/observer/ask_webmaster_question and we can create a "beta" version for you to work on.\n
     \n
