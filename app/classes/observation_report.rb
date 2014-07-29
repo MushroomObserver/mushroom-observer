@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'csv'
+
 module ObservationReport
   class Base
     attr_accessor :query

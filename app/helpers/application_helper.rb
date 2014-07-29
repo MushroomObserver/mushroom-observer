@@ -504,7 +504,7 @@ module ApplicationHelper
     type = obj.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = content_tag(:big, :show_name_descriptions.t)
+    head = content_tag(:big, :show_name_descriptions.t) + ': '
     head += link_with_query(:show_name_create_description.t,
       :controller => obj.show_controller,
       :action => "create_#{type}_description",

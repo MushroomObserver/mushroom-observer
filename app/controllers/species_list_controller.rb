@@ -36,6 +36,7 @@
 ################################################################################
 
 class SpeciesListController < ApplicationController
+  # require 'csv'
   require 'rtf'
 
   before_filter :login_required, :except => [
@@ -183,7 +184,7 @@ class SpeciesListController < ApplicationController
 
   def print_labels
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-    render(:action => "print_labels", :layout => "labels")
+    render(:action => 'print_labels', :layout => 'printable')
   end
   
   ##############################################################################
@@ -237,7 +238,7 @@ class SpeciesListController < ApplicationController
       raise "Unsupported CSV report charset: #{charset}"
     end
     str = CSV.generate do |csv|
-      csv << ['sciname', 'author', 'citation', 'valid']
+      csv << ['scientific_name', 'authority', 'citation', 'accepted']
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
           name.deprecated ? '' : '1'].map {|v| v.blank? ? nil : v}

@@ -51,6 +51,7 @@
 
 class NameController < ApplicationController
   include DescriptionControllerHelpers
+  require 'csv'
 
   before_filter :login_required, :except => [
     :advanced_search,

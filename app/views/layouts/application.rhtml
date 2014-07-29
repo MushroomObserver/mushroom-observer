@@ -142,17 +142,19 @@
                   <br/>
                 <% end %>
 
-                <% if DEVELOPMENT || is_reviewer? %>
-                  Layouts:<br/>
-                  <% layouts = []
-                    for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.rhtml")
-                      layouts << $1 if file.match(/(\w+)\.rhtml/)
-                    end
-                    for layout in layouts.sort
+                <% if DEVELOPMENT || is_reviewer?
+                  layouts = []
+                  for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.rhtml")
+                    layouts << $1 if file.match(/(app\w+)\.rhtml/)
+                  end
+                  if layouts.length > 1 %>
+                    Layouts:<br/>
+                    <% for layout in layouts.sort
                       layout2 = layout == 'application' ? 'old' : layout %>
                       <%= indent + link_to(layout2, h(reload_with_args(:user_theme => layout))) %><br/>
+                    <% end %>
+                    <br/>
                   <% end %>
-                  <br/>
                 <% end %>
 
                 <%= link_to(:app_glossary.t, :controller => 'glossary', :action => 'index') %><br/>
