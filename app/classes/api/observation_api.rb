@@ -79,7 +79,7 @@ class API
       images.unshift(thumbnail) if thumbnail and not images.include?(thumbnail)
 
       {
-        :when          => parse_date(:date, :default => Time.now),
+        :when          => parse_date(:date, :default => Date.today),
         :notes         => parse_string(:notes, :default => ''),
         :place_name    => loc,
         :lat           => lat,

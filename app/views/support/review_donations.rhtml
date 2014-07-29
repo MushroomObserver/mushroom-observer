@@ -9,9 +9,9 @@
   end
 %>
 
-<form id="review_form" action="/support/review_donations" method="post">
+<%= form_tag do %>
   <p>
-    <center><%= submit_tag :review_donations_update.l %><br/>
+    <center><%= submit_tag :review_donations_update.l %></center>
   </p>
   <table border="1">
     <tr>
@@ -43,6 +43,6 @@
     <% end %>
   </table>
   <p>
-    <center><%= submit_tag :review_donations_update.l %><br/>
+    <center><%= submit_tag :review_donations_update.l %></center>
   </p>
-</form>
+<% end %>

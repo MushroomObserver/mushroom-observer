@@ -50,6 +50,15 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest # Test::Unit::TestCa
   include FlashExtensions
   include GeneralExtensions
 
+  # Important to allow integration tests test the CSRF stuff to avoid unpleasant
+  # surprises in production mode.
+  def setup
+    ApplicationController.allow_forgery_protection = true
+  end
+  def teardown
+    ApplicationController.allow_forgery_protection = false
+  end
+
   def login(login, password='testpassword', remember_me=true)
     login = login.login if login.is_a?(User)
     open_session do |sess|
