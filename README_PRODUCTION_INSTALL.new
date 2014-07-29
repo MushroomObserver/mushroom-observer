@@ -271,22 +271,7 @@ mo> uni start
 mo> lynx localhost:8080
 # Should request cookies, etc. and soon see the main page.
 
-# This is as far as I've gotten...
-# (all that's left is email, cron jobs and switching database over)
-
-
-
-
-
-
-
-
-
-
 --------------------------------------------------------------------------------
-
-# This section deals with setting up email.  It's mostly generic.
-# Haven't done any of this yet... -Jason 20140301
 
 # Set up simple mailserver using postfix.
 root> apt-get install postfix mutt
@@ -344,6 +329,13 @@ root> chmod 644 /home/no-reply/.[maf]*
 root> chmod 755 /usr/local/bin/autoreply
 
 --------------------------------------------------------------------------------
+
+# This is as far as I've gotten. -Jason 20140729
+
+
+
+
+
 
 # Now the site should be mostly working.  We need to do some configuration to
 # get image uploads to work, though.
