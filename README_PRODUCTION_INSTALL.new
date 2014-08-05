@@ -74,6 +74,10 @@ root> logout
 # Password-less ssh.
 local> ssh-keygen -t rsa   # (if not already done)
 local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
+[NJW: The above didn't work on my Mac.  Instead I had to copy my public key
+by hand to $USER/.ssh/authorized_keys on $IP_ADDR. Make sure that .ssh is 
+only readable by $USER (chmod 700 .ssh) and .ssh/authorized_keys is only
+writable by $USER, but otherwise readable (chmod 644 .ssh/authorized_keys).]
 
 # Set up your accounts.
 local> ssh $IP_ADDR
@@ -143,6 +147,9 @@ root> ln -s mo /var/web/mushroom-observer
 # Install and configure rails apps.
 root> mo
 mo> git clone https://github.com/MushroomObserver/mushroom-observer .
+[NJW: Remember to switch to another branch if you are testing this process
+on code not on the master branch.]
+
 mo> mkdir log public/images/{thumb,320,640,960,1280,orig}
 mo> cp config/bash_aliases ~/.bash_aliases
 mo> vi config/consts-site.rb
@@ -212,8 +219,8 @@ mo> cd db
 mo> scp $USER@$OLD_SERVER:/var/web/mushroom-observer/db/checkpoint.gz .
 mo> gunzip checkpoint.gz
 mo> mosqle checkpoint
+[NJW Password is in the bash_aliases file and may need to be tweaked.]
 mo> rm checkpoint
-mo> exit
 
 # Set up password-less ssh for image transfers.
 mo> ssh-keygen -t rsa
@@ -266,10 +273,18 @@ mo> rake db:migrate
 
 # Now get unicorn to run right.
 mo> uni start
+[NJW: Ran "unicorn -E production -c config/unicorn.rb"]
+
 # If there are any errors you'll find them in log/unicorn.stderr.log
+
 # Should start listening on port 8080.
 mo> lynx localhost:8080
+[NJW: lynx is not installed, but wget works]
+
 # Should request cookies, etc. and soon see the main page.
+
+[NJW: At first it didn't respond to outside access, but Jason got it working by restart nginx and unicorn (which was down).
+Jason suggested that: 'sudo service nginx reload' might have done the trick.]
 
 --------------------------------------------------------------------------------
 
@@ -285,6 +300,7 @@ root> newaliases
 # NOTE: After moving mail.mo.org to gmail, had to tweak postfix configuration:
 root> vi /etc/postfix/main.cf
   # change myhostname to "$DOMAIN" (instead of "mail.$DOMAIN")
+[NJW: Not needed?  Was already set to 'ror30.mushroomobserver.org']
 
 # Test mail server.
 root> su $USER

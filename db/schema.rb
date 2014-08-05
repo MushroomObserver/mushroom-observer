@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140328194655) do
+ActiveRecord::Schema.define(:version => 20140804135800) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created_at"
@@ -261,7 +261,7 @@ ActiveRecord::Schema.define(:version => 20140328194655) do
     t.float    "east"
     t.float    "high"
     t.float    "low"
-    t.string   "name",            :limit => 200
+    t.string   "name",            :limit => 1024
     t.text     "notes"
     t.string   "scientific_name", :limit => 1024
   end
