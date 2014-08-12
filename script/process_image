@@ -138,19 +138,20 @@ run jpegresize 160x160 -q 90 --max-size $small $thumb
 # run convert -thumbnail "160x160>" -quality 90 $small $thumb
 
 # Transfer images.
+# This needs to be updated to read list of destinations from config dir.
 if (( $production )); then
-  wait_for scp
-  run scp $thumb  $server/thumb/$id.jpg
+  # wait_for scp
+  # run scp $thumb  $server/thumb/$id.jpg
   # run scp $thumb  $server2/thumb/$id.jpg
-  run scp $small  $server/320/$id.jpg
+  # run scp $small  $server/320/$id.jpg
   # run scp $small  $server2/320/$id.jpg
-  run scp $medium $server/640/$id.jpg
-  run scp $large  $server/960/$id.jpg
-  run scp $huge   $server/1280/$id.jpg
-  run scp $full   $server/orig/$id.jpg
-  if [[ $orig != $full ]]; then
-    run scp $orig $server/orig/$id.$ext
-  fi
+  # run scp $medium $server/640/$id.jpg
+  # run scp $large  $server/960/$id.jpg
+  # run scp $huge   $server/1280/$id.jpg
+  # run scp $full   $server/orig/$id.jpg
+  # if [[ $orig != $full ]]; then
+  #   run scp $orig $server/orig/$id.$ext
+  # fi
 fi
 
 # Set "transferred" bit in database if everything was a success.

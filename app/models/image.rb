@@ -179,15 +179,6 @@
 #  has_size?::          Does image have this size?
 #  size::               Calculate size of image of given type.
 #
-#  ==== Filenames
-#  original_image::     Path of original image.
-#  full_size_image::    Path of full-size jpeg.
-#  huge_image::         Path of 1280 image.
-#  large_image::        Path of 960 image.
-#  medium_image::       Path of 640 image.
-#  small_image::        Path of 320 image.
-#  thumbnail_image::    Path of thumbnail.
-#
 #  ==== URLs
 #  original_url::       URL of original image.
 #  full_size_url::      URL of full-size jpeg.
@@ -237,9 +228,9 @@ class Image < AbstractModel
   after_update :track_copyright_changes
 
   def all_terms; best_terms + terms; end
-    
+
   def get_subjects; observations + subjects + best_terms + terms; end
-  
+
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
   #
@@ -303,6 +294,66 @@ class Image < AbstractModel
     ['image/jpeg', 'image/gif', 'image/png', 'image/tiff', 'image/x-ms-bmp', nil]
   end
 
+  SIZE_ABBREVIATIONS = {
+    :original  => 'orig',
+    :full_size => 'orig',
+    :huge      => '1280',
+    :large     => '960',
+    :medium    => '640',
+    :small     => '320',
+    :thumbnail => 'thumb'
+  }
+
+  # Private: evaluates config hashes.  Typical hash may look like:
+  #   IMAGE_URLS = {
+  #     :all_sizes => IMAGE_SERVER + '/<size>/<id>.<ext>',
+  #     :thumbnail => '/local_thumbnail_cache/<id>.jpg'
+  #   }
+  #   url = Image.interpolate_config_hash(IMAGE_URLS, image)
+  def self.interpolate_config_hash(str, args)
+    if str.is_a?(Hash)
+      str = str[args[:size]] || str[:all_sizes] or
+        raise "missing/invalid size: #{args[:size].inspect}"
+    end
+    str.gsub(/<size>/, SIZE_ABBREVIATIONS[args[:size]].to_s).
+        gsub(/<(\w+)>/) {|m| args[$1.to_sym].to_s }
+  end
+
+  def interpolate_config_hash(str, size)
+    ext = size == :original ? self.original_extension : 'jpg'
+    Image.interpolate_config_hash(str,
+      :size => size,
+      :id => self.id,
+      :ext => ext
+    )
+  end
+
+  # This is just approximate -- need an actual image instance to know whether
+  # it has been transferred, and what the original extension was.
+  def self.url(size, id)
+    self.interpolate_config_hash(IMAGE_URLS, :size => size, :id => id, :ext => 'jpg')
+  end
+
+  def url(size)
+    if transferred
+      interpolate_config_hash(IMAGE_URLS, size)
+    else
+      interpolate_config_hash(UNTRANSFERRED_IMAGE_URLS, size)
+    end
+  end
+
+  def file(size)
+    interpolate_config_hash(LOCAL_IMAGE_FILES, size)
+  end
+
+  def original_url;  url(:original);  end
+  def full_size_url; url(:full_size); end
+  def huge_url;      url(:huge);      end
+  def large_url;     url(:large);     end
+  def medium_url;    url(:medium);    end
+  def small_url;     url(:small);     end
+  def thumbnail_url; url(:thumbnail); end
+
   def original_extension
     case content_type
     when 'image/jpeg'     ; 'jpg'
@@ -314,46 +365,6 @@ class Image < AbstractModel
     end
   end
 
-  def self.file_name(size, id)
-    case size
-    when :full_size; "orig/#{id}.jpg"
-    when :huge;      "1280/#{id}.jpg"
-    when :large;     "960/#{id}.jpg"
-    when :medium;    "640/#{id}.jpg"
-    when :small;     "320/#{id}.jpg"
-    when :thumbnail; "thumb/#{id}.jpg"
-    else;            "thumb/#{id}.jpg"
-    end
-  end
-
-  def self.url(size, id)
-    "#{IMAGE_DOMAIN}/#{file_name(size, id)}"
-  end
-
-  def original_file;  "orig/#{id}.#{original_extension}"; end
-  def full_size_file; "orig/#{id}.jpg";  end
-  def huge_file;      "1280/#{id}.jpg";  end
-  def large_file;     "960/#{id}.jpg";   end
-  def medium_file;    "640/#{id}.jpg";   end
-  def small_file;     "320/#{id}.jpg";   end
-  def thumbnail_file; "thumb/#{id}.jpg"; end
-
-  def original_image;  "#{image_dir}/#{original_file}";  end
-  def full_size_image; "#{image_dir}/#{full_size_file}"; end
-  def huge_image;      "#{image_dir}/#{huge_file}";      end
-  def large_image;     "#{image_dir}/#{large_file}";     end
-  def medium_image;    "#{image_dir}/#{medium_file}";    end
-  def small_image;     "#{image_dir}/#{small_file}";     end
-  def thumbnail_image; "#{image_dir}/#{thumbnail_file}"; end
-
-  def original_url;  "#{IMAGE_DOMAIN}/#{original_file}";  end
-  def full_size_url; "#{IMAGE_DOMAIN}/#{full_size_file}"; end
-  def huge_url;      "#{IMAGE_DOMAIN}/#{huge_file}";      end
-  def large_url;     "#{IMAGE_DOMAIN}/#{large_file}";     end
-  def medium_url;    "#{IMAGE_DOMAIN}/#{medium_file}";    end
-  def small_url;     "#{IMAGE_DOMAIN}/#{small_file}";     end
-  def thumbnail_url; "#{IMAGE_DOMAIN}/#{thumbnail_file}"; end
-  
   def has_size?(size)
     max = width.to_i > height.to_i ? width.to_i : height.to_i
     case size.to_s
@@ -591,10 +602,14 @@ class Image < AbstractModel
       set = width.nil? ? 'set' : ''
       if !move_original
         result = false
-      elsif !system("script/process_image #{id} #{ext} #{set}&")
+      else
+        cmd = Image.interpolate_config_hash(PROCESS_IMAGE_COMMAND,
+                :id => id, :ext => ext, :set_size_flag => set)
         # Spawn process to resize and transfer images to image server.
-        errors.add(:image, :runtime_image_process_failed.t(:id => id))
-        result = false
+        if !system(cmd)
+          errors.add(:image, :runtime_image_process_failed.t(:id => id))
+          result = false
+        end
       end
     end
     return result
@@ -603,6 +618,7 @@ class Image < AbstractModel
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
   def move_original
+    original_image = file(:original)
     raise(SystemCallError, "Don't move my test images!!") if TESTING
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
@@ -621,7 +637,7 @@ class Image < AbstractModel
 
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
-  def set_image_size(file=full_size_image)
+  def set_image_size(file=file(:full_size))
     script = "#{::Rails.root.to_s}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
@@ -834,7 +850,7 @@ class Image < AbstractModel
       ))
     end
   end
-  
+
   def year; self.when.year; end
 
 ################################################################################

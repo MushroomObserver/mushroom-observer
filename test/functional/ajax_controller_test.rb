@@ -243,11 +243,6 @@ class AjaxControllerTest < FunctionalTestCase
     end
   end
 
-  def test_image
-    # Returns a bogus image no matter what in test mode.
-    good_ajax_request(:image, :type => '320', :id => 1)
-  end
-
   def test_get_pivotal_story
     if PIVOTAL_USERNAME != 'username'
       good_ajax_request(:pivotal, :type => 'story', :id => PIVOTAL_TEST_ID)

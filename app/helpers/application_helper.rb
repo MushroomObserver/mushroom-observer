@@ -1403,27 +1403,17 @@ module ApplicationHelper
 
     # Get URL to image.
     size = (args[:size] || default_thumbnail_size).to_sym
-    if size == :original
-      # Must pass in image instance to display original!
-      file = image.original_file
+    if image
+      url = image.url(size)
     else
-      file = Image.file_name(size, id)
-    end
-    if image && !image.transferred && size != :thumbnail && size != :small
-      # Serve image from web server if it hasn't transferred yet.  Since apache can't know
-      # about this, we have to fake it into thinking it's not serving an image.  Route it
-      # through ajax controller to reduce overhead to minimum.
-      file = "/ajax/image/#{file.sub(/\.jpg$/,'')}"
-    elsif DEVELOPMENT and !File.exists?("#{IMG_DIR}/#{file}")
-      # Serve images I'm locally missing directly from image server.
-      file = Image.url(size, id)
+      url = Image.url(size, id)
     end
 
     # Create <img> tag.
     opts = {}
     opts[:border] = args[:border] if args.has_key?(:border)
     opts[:style]  = args[:style]  if args.has_key?(:style)
-    str = safe_empty + image_tag(file, opts)
+    str = safe_empty + image_tag(url, opts)
     str += args[:append].to_s
 
     # Decide what to link it to.

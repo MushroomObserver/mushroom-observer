@@ -117,3 +117,27 @@ LOCATION_STATES_FILE    = "#{APP_ROOT}/config/location/states.yml"
 LOCATION_PREFIXES_FILE  = "#{APP_ROOT}/config/location/prefixes.yml"
 LOCATION_BAD_TERMS_FILE = "#{APP_ROOT}/config/location/bad_terms.yml"
 
+# Primary image server.
+IMAGE_SERVER = 'http://images.digitalmycology.com'
+
+# Where to serve images from. Hash keys are sizes:
+#   :thumbnail, :small, :medium, :large, :huge, :full_size
+IMAGE_URLS = {
+  :all_sizes => IMAGE_SERVER + '/<size>/<id>.<ext>'
+}
+UNTRANSFERRED_IMAGE_URLS = {
+  :all_sizes => '/images/<size>/<id>.<ext>'
+}
+
+# Where images are kept locally until they are transferred.
+LOCAL_IMAGE_FILES = APP_ROOT + '/public/images/<size>/<id>.<ext>'
+
+# Location of script used to process and transfer images.
+# (Set to nil to have it do nothing.)
+PROCESS_IMAGE_COMMAND = APP_ROOT + '/script/process_image <id> <ext> <set_size_flag>'
+
+# List of places to transfer images to. SSH destinations like this:
+#   'cdmr@digitalmycology.com/<size>/<id>.<ext>'
+IMAGE_TRANSFER_DESTINATIONS = []
+THUMBNAIL_TRANSFER_DESTINATIONS = []
+

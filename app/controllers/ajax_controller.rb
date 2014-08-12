@@ -20,7 +20,6 @@
 #  api_key::          Activate and edit ApiKey's.
 #  export::           Change export status.
 #  geocode::          Look up extents for geographic location by name.
-#  image::            Serve image from web server until transferred to image server.
 #  old_translation::  Return an old TranslationString by version id.
 #  pivotal::          Pivotal requests: look up, vote, or comment on story.
 #  vote::             Change vote on proposed name or image.
@@ -152,25 +151,6 @@ class AjaxController < ApplicationController
       name = Location.reverse_name(name) if @user.location_format == :scientific
     end
     render(:inline => Geocoder.new(name).ajax_response)
-  end
-
-  # Serve image from web server, bypassing apache and passenger.  (This is only
-  # used when an image hasn't been transferred to the image server successfully.)
-  # type:: Size: 'thumb', '320', etc.
-  # id::   Image id.
-  def image
-    size = params[:type].to_s
-    id   = params[:id].to_s
-    file = "#{IMG_DIR}/#{size}/#{id}.jpg"
-    if !File.exists?(file)
-      if size == 'thumb'
-        file = "#{IMG_DIR}/place_holder_thumb.jpg"
-      else
-        file = "#{IMG_DIR}/place_holder_320.jpg"
-      end
-    end
-    file ="#{::Rails.root.to_s}/test/images/sticky.jpg" if TESTING
-    send_file(file, :type => 'image/jpeg', :disposition => 'inline')
   end
 
   # Return an old TranslationString by version id.
