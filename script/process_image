@@ -140,7 +140,7 @@ run jpegresize 160x160 -q 90 --max-size $small $thumb
 # Transfer images.
 # This needs to be updated to read list of destinations from config dir.
 if (( $production )); then
-  # wait_for scp
+  wait_for scp
   # run scp $thumb  $server/thumb/$id.jpg
   # run scp $thumb  $server2/thumb/$id.jpg
   # run scp $small  $server/320/$id.jpg
@@ -163,6 +163,9 @@ fi
 if (( $production && $errors)); then
   mutt -s "[MO] process_image" $email < $log
 fi
+
+# Extremely useful for debugging unit tests!!
+# cat $log
 
 # Add to cumulative log and clean up temporary log.
 cat $log >> $log2

@@ -304,46 +304,49 @@ class Image < AbstractModel
     :thumbnail => 'thumb'
   }
 
-  # Private: evaluates config hashes.  Typical hash may look like:
+  # Private: evaluates config strings and hashes.  Typical hash may look like:
   #   IMAGE_URLS = {
   #     :all_sizes => IMAGE_SERVER + '/<size>/<id>.<ext>',
   #     :thumbnail => '/local_thumbnail_cache/<id>.jpg'
   #   }
-  #   url = Image.interpolate_config_hash(IMAGE_URLS, image)
-  def self.interpolate_config_hash(str, args)
-    if str.is_a?(Hash)
-      str = str[args[:size]] || str[:all_sizes] or
-        raise "missing/invalid size: #{args[:size].inspect}"
+  #   url = Image.interpolate_config_hash(IMAGE_URLS, :image => image)
+  def self.interpolate_config_hash(hash, args)
+    unless str = hash[args[:size]] || hash[:all_sizes]
+      raise "missing/invalid size: #{args[:size].inspect}"
     end
-    str.gsub(/<size>/, SIZE_ABBREVIATIONS[args[:size]].to_s).
-        gsub(/<(\w+)>/) {|m| args[$1.to_sym].to_s }
+    interpolate_config_string(str, args)
   end
 
-  def interpolate_config_hash(str, size)
-    ext = size == :original ? self.original_extension : 'jpg'
-    Image.interpolate_config_hash(str,
-      :size => size,
-      :id => self.id,
-      :ext => ext
-    )
+  def self.interpolate_config_string(str, args)
+    image = args[:image]
+    str.gsub(/<size>/, SIZE_ABBREVIATIONS[args[:size]].to_s).
+        gsub(/<ext>/, :original && image ? image.original_extension : 'jpg').
+        gsub(/<(\w+)>/) do |match|
+          var = match[1..-2].to_sym
+          if image && image.respond_to?(var)
+            image.send(var).to_s
+          else
+            args[var].to_s
+          end
+        end
   end
 
   # This is just approximate -- need an actual image instance to know whether
   # it has been transferred, and what the original extension was.
   def self.url(size, id)
-    self.interpolate_config_hash(IMAGE_URLS, :size => size, :id => id, :ext => 'jpg')
+    Image.interpolate_config_hash(IMAGE_URLS, :size => size, :id => id, :ext => 'jpg')
   end
 
   def url(size)
     if transferred
-      interpolate_config_hash(IMAGE_URLS, size)
+      Image.interpolate_config_hash(IMAGE_URLS, :size => size, :image => self)
     else
-      interpolate_config_hash(UNTRANSFERRED_IMAGE_URLS, size)
+      Image.interpolate_config_hash(UNTRANSFERRED_IMAGE_URLS, :size => size, :image => self)
     end
   end
 
-  def file(size)
-    interpolate_config_hash(LOCAL_IMAGE_FILES, size)
+  def local_file_name(size)
+    Image.interpolate_config_string(LOCAL_IMAGE_FILES, :size => size, :image => self)
   end
 
   def original_url;  url(:original);  end
@@ -603,7 +606,7 @@ class Image < AbstractModel
       if !move_original
         result = false
       else
-        cmd = Image.interpolate_config_hash(PROCESS_IMAGE_COMMAND,
+        cmd = Image.interpolate_config_string(PROCESS_IMAGE_COMMAND,
                 :id => id, :ext => ext, :set_size_flag => set)
         # Spawn process to resize and transfer images to image server.
         if !system(cmd)
@@ -618,7 +621,7 @@ class Image < AbstractModel
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
   def move_original
-    original_image = file(:original)
+    original_image = local_file_name(:original)
     raise(SystemCallError, "Don't move my test images!!") if TESTING
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
@@ -637,7 +640,7 @@ class Image < AbstractModel
 
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
-  def set_image_size(file=file(:full_size))
+  def set_image_size(file=local_file_name(:full_size))
     script = "#{::Rails.root.to_s}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
