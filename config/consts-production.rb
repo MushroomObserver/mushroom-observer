@@ -53,8 +53,6 @@ IMAGE_SOURCES = {
 }
 
 IMAGE_PRECEDENCE = {
-  :thumbnail => [:local, :cdmr],
-  :small     => [:local, :cdmr],
   :default   => [:cdmr, :local]
   # For use when testing live server in parallel with production server.
   # :default   => [:cdmr, :local, :mo]
