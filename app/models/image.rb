@@ -209,9 +209,10 @@
 #
 ################################################################################
 
-require 'fileutils'
-
 class Image < AbstractModel
+  require "fileutils"
+  require "net/http"
+
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :terms
@@ -294,59 +295,34 @@ class Image < AbstractModel
     ['image/jpeg', 'image/gif', 'image/png', 'image/tiff', 'image/x-ms-bmp', nil]
   end
 
-  SIZE_ABBREVIATIONS = {
-    :original  => 'orig',
-    :full_size => 'orig',
-    :huge      => '1280',
-    :large     => '960',
-    :medium    => '640',
-    :small     => '320',
-    :thumbnail => 'thumb'
-  }
-
-  # Private: evaluates config strings and hashes.  Typical hash may look like:
-  #   IMAGE_URLS = {
-  #     :all_sizes => IMAGE_SERVER + '/<size>/<id>.<ext>',
-  #     :thumbnail => '/local_thumbnail_cache/<id>.jpg'
-  #   }
-  #   url = Image.interpolate_config_hash(IMAGE_URLS, :image => image)
-  def self.interpolate_config_hash(hash, args)
-    unless str = hash[args[:size]] || hash[:all_sizes]
-      raise "missing/invalid size: #{args[:size].inspect}"
-    end
-    interpolate_config_string(str, args)
+  def image_url(size)
+    ImageURL.new(
+      :size => size,
+      :id => id,
+      :transferred => transferred,
+      :extension => extension(size)
+    )
   end
 
-  def self.interpolate_config_string(str, args)
-    image = args[:image]
-    str.gsub(/<size>/, SIZE_ABBREVIATIONS[args[:size]].to_s).
-        gsub(/<ext>/, :original && image ? image.original_extension : 'jpg').
-        gsub(/<(\w+)>/) do |match|
-          var = match[1..-2].to_sym
-          if image && image.respond_to?(var)
-            image.send(var).to_s
-          else
-            args[var].to_s
-          end
-        end
-  end
-
-  # This is just approximate -- need an actual image instance to know whether
-  # it has been transferred, and what the original extension was.
-  def self.url(size, id)
-    Image.interpolate_config_hash(IMAGE_URLS, :size => size, :id => id, :ext => 'jpg')
+  def self.image_url(size, id, args={})
+    ImageURL.new(
+      :size => size,
+      :id => id,
+      :transferred => args.fetch(:transferred, true),
+      :extension => args.fetch(:extension, 'jpg')
+    )
   end
 
   def url(size)
-    if transferred
-      Image.interpolate_config_hash(IMAGE_URLS, :size => size, :image => self)
-    else
-      Image.interpolate_config_hash(UNTRANSFERRED_IMAGE_URLS, :size => size, :image => self)
-    end
+    image_url(size).url
+  end
+
+  def self.url(size, id, args={})
+    image_url(size, id, args).url
   end
 
   def local_file_name(size)
-    Image.interpolate_config_string(LOCAL_IMAGE_FILES, :size => size, :image => self)
+    image_url(size).file_name(LOCAL_IMAGE_FILES)
   end
 
   def original_url;  url(:original);  end
@@ -366,6 +342,10 @@ class Image < AbstractModel
     when 'image/x-ms-bmp' ; 'bmp'
     else                  ; 'raw'
     end
+  end
+
+  def extension(size)
+    size == :original ? original_extension : 'jpg'
   end
 
   def has_size?(size)
@@ -402,6 +382,84 @@ class Image < AbstractModel
       end
     end
     return [w, h]
+  end
+
+  class ImageURL
+    SUBDIRECTORIES = {
+      :original  => 'orig',
+      :full_size => 'orig',
+      :huge      => '1280',
+      :large     => '960',
+      :medium    => '640',
+      :small     => '320',
+      :thumbnail => 'thumb'
+    }
+
+    attr_accessor :size, :id, :transferred, :extension
+
+    def initialize(args)
+      self.size        = args[:size]
+      self.id          = args[:id]
+      self.transferred = args[:transferred]
+      self.extension   = args[:extension]
+    end
+
+    def url
+      for source in source_order
+        return source_url(source) if source_exists?(source)
+      end
+      return source_url(fallback_source)
+    end
+
+    def source_exists?(source)
+      spec = specs(source)[:test]
+      case spec
+      when :transferred_flag
+        transferred
+      when /^file:/
+        path = spec[7..-1]
+        local_file_exists?(path)
+      when /^http:/
+        remote_file_exists?(url=spec)
+      else
+        raise "Invalid image source test spec for #{source.inspect}: #{spec.inspect}"
+      end
+    end
+
+    def local_file_exists?(path)
+      File.exists?(file_name(path))
+    end
+
+    def remote_file_exists?(url)
+      url = URI.parse(url)
+      result = Net::HTTP.new(url.host, url.port).request_head(url.path)
+      result.code == 200
+    end
+
+    def source_url(source)
+      spec = specs(source)[:read]
+      file_name(spec)
+    end
+
+    def file_name(root)
+      "#{root}/#{subdirectory}/#{id}.#{extension}"
+    end
+
+    def subdirectory
+      SUBDIRECTORIES[size] or raise "Invalid size: #{size.inspect}"
+    end
+
+    def source_order
+      IMAGE_PRECEDENCE[size] || IMAGE_PRECEDENCE[:default]
+    end
+
+    def fallback_source
+      FALLBACK_SOURCE
+    end
+
+    def specs(source)
+      IMAGE_SOURCES[source] or raise "Missing image source: #{source.inspect}"
+    end
   end
 
   ##############################################################################
@@ -606,9 +664,10 @@ class Image < AbstractModel
       if !move_original
         result = false
       else
-        cmd = Image.interpolate_config_string(PROCESS_IMAGE_COMMAND,
-                :id => id, :ext => ext, :set_size_flag => set)
-        # Spawn process to resize and transfer images to image server.
+        cmd = PROCESS_IMAGE_COMMAND.
+              gsub('<id>', id.to_s).
+              gsub('<ext>', ext.to_s).
+              gsub('<set>', set.to_s)
         if !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(:id => id))
           result = false

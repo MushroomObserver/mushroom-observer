@@ -117,27 +117,30 @@ LOCATION_STATES_FILE    = "#{APP_ROOT}/config/location/states.yml"
 LOCATION_PREFIXES_FILE  = "#{APP_ROOT}/config/location/prefixes.yml"
 LOCATION_BAD_TERMS_FILE = "#{APP_ROOT}/config/location/bad_terms.yml"
 
-# Primary image server.
-IMAGE_SERVER = 'http://images.digitalmycology.com'
-
-# Where to serve images from. Hash keys are sizes:
-#   :thumbnail, :small, :medium, :large, :huge, :full_size
-IMAGE_URLS = {
-  :all_sizes => IMAGE_SERVER + '/<size>/<id>.<ext>'
-}
-UNTRANSFERRED_IMAGE_URLS = {
-  :all_sizes => '/images/<size>/<id>.<ext>'
-}
-
 # Where images are kept locally until they are transferred.
-LOCAL_IMAGE_FILES = APP_ROOT + '/public/images/<size>/<id>.<ext>'
+LOCAL_IMAGE_FILES = "#{APP_ROOT}/public/images"
 
 # Location of script used to process and transfer images.
 # (Set to nil to have it do nothing.)
-PROCESS_IMAGE_COMMAND = APP_ROOT + '/script/process_image <id> <ext> <set_size_flag>'
+PROCESS_IMAGE_COMMAND = "#{APP_ROOT}/script/process_image <id> <ext> <set>"
 
-# List of places to transfer images to. SSH destinations like this:
-#   'cdmr@digitalmycology.com/<size>/<id>.<ext>'
-IMAGE_TRANSFER_DESTINATIONS = []
-THUMBNAIL_TRANSFER_DESTINATIONS = []
+# Definition of image sources.  Keys are :test, :read and :write.  Values are
+# URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
+# to test for existence of file by using image#transferred flag.
+IMAGE_SOURCES = {
+  :local => {
+    :test => "file://#{LOCAL_IMAGE_FILES}",
+    :read => "/images",
+  },
+  :cdmr => {
+    :test => :transferred_flag,
+    :read => "http://images.digitalmycology.com",
+  }
+}
+
+# Search order when serving images.  Key is size, e.g., :thumbnail, :small, etc.
+IMAGE_PRECEDENCE = {
+  :default => [:local, :cdmr]
+}
+FALLBACK_SOURCE = :cdmr
 

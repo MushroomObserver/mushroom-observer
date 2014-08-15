@@ -152,42 +152,10 @@ on code not on the master branch.]
 
 mo> mkdir log public/images/{thumb,320,640,960,1280,orig}
 mo> cp config/bash_aliases ~/.bash_aliases
+mo> cp config/consts-production.rb config/consts-site.rb
 mo> vi config/consts-site.rb
-  # Override these defaults.
-  DOMAIN         = 'mushroomobserver.org'
-  HTTP_DOMAIN    = 'http://mushroomobserver.org'
-  IMAGE_DOMAIN   = "#{HTTP_DOMAIN}/images"
-  SERVER_CODE    = 'us1'
-  DEFAULT_LOCALE = 'en-US'
-  BAD_DOMAINS    = ["www.#{DOMAIN}"]
-
-  # Use queued email mechanism.
-  QUEUE_EMAIL = true
-
-  # Nathan wants to be BCC'ed on every single email.
-  EXTRA_BCC_EMAIL_ADDRESSES = "mo@collectivesource.com"
-
-  # Date after which votes become public.
-  VOTE_CUTOFF = '20100405'
-
-  # Set timezone?
-  ENV['TZ'] = 'Eastern Time (US & Canada)'
-
-  # Use gmail server to send email.
-  MAIL_CONFIG = {
-    :address => "smtp.gmail.com",
-    :port => 587,
-    :authentication => :plain,
-    :enable_starttls_auto => true,
-    :user_name => "webmaster@mushroomobserver.org",
-    :password => "sdGF24$@"
-  }
-
-  # Configuration for accessing Pivotal Tracker project.
-  PIVOTAL_USERNAME = 'webmaster@mushroomobserver.org'
-  PIVOTAL_PASSWORD = 'heCdf#sj'
-  PIVOTAL_PROJECT  = '224629'
-  PIVOTAL_TEST_ID  = '14385277'
+  # change email password to "sdGF24$@"
+  # change pivotal password to "heCdf#sj"
 
 # Install gems.
 mo> echo "gem 'unicorn'" >> Gemfile
