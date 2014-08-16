@@ -660,14 +660,14 @@ class Image < AbstractModel
     elsif save_to_temp_file
       ext = original_extension
       set_image_size(upload_temp_file) if ext == 'jpg'
-      set = width.nil? ? 'set' : ''
+      set = width.nil? ? '1' : '0'
       if !move_original
         result = false
       else
         cmd = PROCESS_IMAGE_COMMAND.
               gsub('<id>', id.to_s).
-              gsub('<ext>', ext.to_s).
-              gsub('<set>', set.to_s)
+              gsub('<ext>', ext).
+              gsub('<set>', set)
         if !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(:id => id))
           result = false

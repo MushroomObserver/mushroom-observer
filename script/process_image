@@ -4,171 +4,106 @@ id=$1
 ext=$2
 set_size=$3
 
-server=cdmr@digitalmycology.com:images.digitalmycology.com
-server2=jason@174.143.24.209:/var/web/mushroom-observer/public/images
-images=public/images
+source $(dirname "$0")/bash_include.sh
+keep_cumulative_log
 
-db_config=config/database.yml
-username=`grep -A 20 production: $db_config | grep username: | head -1 | sed "s/.*: *//"`
-database=`grep -A 20 production: $db_config | grep database: | head -1 | sed "s/.*: *//"`
-password=`grep -A 20 production: $db_config | grep password: | head -1 | sed "s/.*: *//"`
+images_root=$app_root/public/images
 
-orig=$images/orig/$id.$ext
-orig_layers=$images/orig/$id-"*".jpg
-full=$images/orig/$id.jpg
-huge=$images/1280/$id.jpg
-large=$images/960/$id.jpg
-medium=$images/640/$id.jpg
-small=$images/320/$id.jpg
-thumb=$images/thumb/$id.jpg
+orig_layers=$images_root/orig/$id-"*".jpg
+orig_file=$images_root/orig/$id.$ext
+full_file=$images_root/orig/$id.jpg
+huge_file=$images_root/1280/$id.jpg
+large_file=$images_root/960/$id.jpg
+medium_file=$images_root/640/$id.jpg
+small_file=$images_root/320/$id.jpg
+thumb_file=$images_root/thumb/$id.jpg
 
-log=log/process_image.$$
-log2=log/process_image.log
-email=webmaster@mushroomobserver.org
+if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<EOH; exit -1; fi
 
-path=(. /bin /usr/bin /usr/local/bin)
+USAGE:
+    script/process_image <id> <extension> <set_size_in_database?>
 
-errors=0
+DESCRIPTION:
+    This is used by the webserver to resize and transfer uploaded images to
+    the image server(s).  It is intended to run asynchronously.  One of these
+    jobs is spwaned for each image uploaded.  It takes these steps:
 
-if [[ $RAILS_ENV == "production" ]]; then
-  production=1
-else
-  production=0
-fi
+    1. converts original to jpeg if necessary
+    2. reorients it correctly if necessary
+    3. sets size of original image in database if 'set' flag used
+    4. creates the five smaller-sized copies
+    5. copies all files to the image server(s) if in production mode
+    6. emails webmaster if there are any errors
 
-# ----------------------------
-#  Help message.
-# ----------------------------
+    It ensures that no other processes are running ImageMagick or scp before
+    it runs its own commands.  If another is running, it sleep a few seconds
+    and tries again.
 
-if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<-EOH; exit -1
+EOH
 
-	USAGE:
-	    script/process_image <id> <ext> <0|1>
-
-	DESCRIPTION:
-	    This is used by the webserver to resize and transfer uploaded
-	    images to the image server.  It is intended to run
-	    asynchronously.  One of these jobs is spwaned for each image
-	    uploaded.  Each process first creates temporary soft links to a
-	    place-holder image so that the user sees at least something while
-	    waiting for the images to be processed.  Then it runs convert
-	    (from ImageMagick suite) to downsize the image, first checking
-	    that no one else is running convert.  If another process is
-	    running convert, it sleeps a few seconds and tries again.  After
-	    images are resized, it transfers them to the image server using
-	    scp, again waiting for other scp jobs to finish first.  It emails
-	    the webmaster if there are any errors.
-	
-	FILES:
-	    webmaster       $email
-	    image server    $server
-	    error log       $log2
-
-	EOH
-fi
-
-# ----------------------------
-#  Subroutines.
-# ----------------------------
-
-function wait_for() {
-  while (ps -e | grep " $*\$" > /dev/null); do sleep 5; done
-}
-
-function run() {
-  echo "`date`>" $* >> $log
-  if !($* >> $log 2>&1); then
-    errors=1
-    echo "**** FAILED ****" >> $log
-  fi
-}
-
-function run_mysql() {
-  echo "`date`>" mysql "\"$*\"" >> $log
-  if !( mysql -q -u "$username" -p"$password" "$database" -e "$*" >> $log 2>&1 ); then
-    errors=1
-    echo "**** FAILED ****" >> $log
-  fi
-}
-
-# ----------------------------
-#  Main program.
-# ----------------------------
-
-# Do we need to convert the original to a JPEG?
-if [[ $orig != $full ]]; then
+# Convert the original image to a JPEG.
+if [[ $orig_file != $full_file ]]; then
   wait_for "(convert|jpegresize)"
-  run convert -quality 90 $orig $full
+  run convert -quality 90 $orig_file $full_file
 
   # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
   # Take the first one, and delete the rest.
-  if [[ ! -e $full ]]; then
+  if [[ ! -e $full_file ]]; then
     biggest_layer=`ls -rS $orig_layers | tail -1`
     if [[ -e $biggest_layer ]]; then
-      run mv $biggest_layer $full
+      run mv $biggest_layer $full_file
       run rm $orig_layers
     fi
   fi
 fi
 
-# Make sure it is oriented correctly.
-run exifautotran $full
+# Make sure image is oriented correctly.
+run exifautotran $full_file
 
-# Set the image size in the database.
 if (( $set_size )); then
-  size=`script/jpegsize $full | sed "s/.*: //"`
-  w=`echo $size | sed "s/ .*//"`
-  h=`echo $size | sed "s/.* //"`
+  size=$( script/jpegsize $full_file | sed "s/.*: //" )
+  w=$( echo $size | sed "s/ .*//" )
+  h=$( echo $size | sed "s/.* //" )
   run_mysql "UPDATE images SET width=$w, height=$h WHERE id=$id"
 fi
 
-# Create the other sizes now.  Image processing theory says that reducing
-# images by no more than 50% at a time is optimal.
+# Image processing theory says that reducing images by 50% at a time is optimal.
 wait_for "(convert|jpegresize)"
-run jpegresize 1280x1280 -q 70 --max-size $full $huge
-run jpegresize 960x960 -q 70 --max-size $huge $large
-run jpegresize 640x640 -q 70 --max-size $huge $medium
-run jpegresize 320x320 -q 80 --max-size $medium $small
-run jpegresize 160x160 -q 90 --max-size $small $thumb
+run jpegresize 1280x1280 -q 70 --max-size $full_file $huge_file
+run jpegresize 960x960   -q 70 --max-size $huge_file $large_file
+run jpegresize 640x640   -q 70 --max-size $huge_file $medium_file
+run jpegresize 320x320   -q 80 --max-size $medium_file $small_file
+run jpegresize 160x160   -q 90 --max-size $small_file $thumb_file
 
-# run convert -thumbnail "1280x1280>" -quality 70 $full $huge
-# run convert -thumbnail "960x960>" -quality 70 $huge $large
-# run convert -thumbnail "640x640>" -quality 70 $huge $medium
-# run convert -thumbnail "320x320>" -quality 80 $medium $small
-# run convert -thumbnail "160x160>" -quality 90 $small $thumb
+# ImageMagick slurps the entire image into memory all at once.
+# Our jpegresize is much more memory-efficient but otherwise equivalent.
+# run convert -thumbnail "1280x1280>" -quality 70 $full_file $huge_file
+# run convert -thumbnail "960x960>"   -quality 70 $huge_file $large_file
+# run convert -thumbnail "640x640>"   -quality 70 $huge_file $medium_file
+# run convert -thumbnail "320x320>"   -quality 80 $medium_file $small_file
+# run convert -thumbnail "160x160>"   -quality 90 $small_file $thumb_file
 
-# Transfer images.
-# This needs to be updated to read list of destinations from config dir.
 if (( $production )); then
-  wait_for scp
-  # run scp $thumb  $server/thumb/$id.jpg
-  # run scp $thumb  $server2/thumb/$id.jpg
-  # run scp $small  $server/320/$id.jpg
-  # run scp $small  $server2/320/$id.jpg
-  # run scp $medium $server/640/$id.jpg
-  # run scp $large  $server/960/$id.jpg
-  # run scp $huge   $server/1280/$id.jpg
-  # run scp $full   $server/orig/$id.jpg
-  # if [[ $orig != $full ]]; then
-  #   run scp $orig $server/orig/$id.$ext
-  # fi
+  for server in ${image_servers[@]}; do
+    wait_for scp
+    run scp $thumb_file  $server/thumb/$id.jpg
+    run scp $small_file  $server/320/$id.jpg
+    run scp $medium_file $server/640/$id.jpg
+    run scp $large_file  $server/960/$id.jpg
+    run scp $huge_file   $server/1280/$id.jpg
+    run scp $full_file   $server/orig/$id.jpg
+    if [[ $orig_file != $full_file ]]; then
+      run scp $orig_file $server/orig/$id.$ext
+    fi
+  done
 fi
 
-# Set "transferred" bit in database if everything was a success.
 if (( $production && !$errors )); then
   run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id"
 fi
 
-# Email any error messages to admins.
-if (( $production && $errors)); then
-  mutt -s "[MO] process_image" $email < $log
+if (( $production && $errors )); then
+  mutt -s "[MO] process_image" $webmaster_email < $log_file
 fi
-
-# Extremely useful for debugging unit tests!!
-# cat $log
-
-# Add to cumulative log and clean up temporary log.
-cat $log >> $log2
-rm -f $log
 
 exit $errors
