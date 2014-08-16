@@ -133,9 +133,9 @@ class Location < AbstractModel
   include BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
-       (-?\d+(?:\.\d+)?) (?:°|°|o|d|deg|,\s)?     \s*
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) (?:'|‘|’|′|′|m|min)? \s* )?
-    (?: (?<![\d\.]) (\d+(?:\.\d+)?) (?:"|“|”|″|″|s|sec)? \s* )?
+       (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)?     \s*
+    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
+    (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
   \s*$/x
 
@@ -148,7 +148,11 @@ class Location < AbstractModel
     result = nil
     match = value.to_s.match(LXXXITUDE_REGEX)
     if match and (match[4].blank? or [direction1, direction2].member?(match[4]))
-      val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
+      if match[1].to_f > 0
+        val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
+      else
+        val = match[1].to_f - match[2].to_f/60 - match[3].to_f/3600
+      end
       val = -val if match[4] == direction2
       if val >= -max_degrees and val <= max_degrees
         result = val.round(4)

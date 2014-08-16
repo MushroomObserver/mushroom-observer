@@ -325,7 +325,8 @@ class LocationTest < UnitTestCase
     assert_equal(     nil, Location.parse_latitude('12.3456E'))
     assert_equal( 12.5824, Location.parse_latitude('12°34\'56.789"N'))
     assert_equal( 12.5760, Location.parse_latitude('12 34.56'))
-    assert_equal(-12.5822, Location.parse_latitude(' 12deg 34min 56sec S '))
+    assert_equal(-12.5760, Location.parse_latitude('-12 34 33.6'))
+    assert_equal(-12.5822, Location.parse_latitude(' 12 deg 34 min 56 sec S '))
   end
 
   def test_parse_longitude
@@ -338,7 +339,8 @@ class LocationTest < UnitTestCase
     assert_equal(     nil, Location.parse_longitude('12.3456S'))
     assert_equal( 12.5824, Location.parse_longitude('12°34\'56.789"E'))
     assert_equal( 12.5760, Location.parse_longitude('12 34.56'))
-    assert_equal(-12.5822, Location.parse_longitude(' 12deg 34min 56sec W '))
+    assert_equal(-12.5760, Location.parse_longitude('-12 34 33.6'))
+    assert_equal(-12.5822, Location.parse_longitude(' 12 deg 34 min 56 sec W '))
   end
 
   def test_convert_altitude
