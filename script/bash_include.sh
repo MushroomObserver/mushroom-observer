@@ -39,7 +39,7 @@ for config in \
   $app_root/config/consts-site.rb \
   $app_root/config/consts.rb
 do
-  if [[ $(grep -c IMAGE_SOURCES $config) -gt 0 ]]; then
+  if [[ -f $config && $(grep -c IMAGE_SOURCES $config) -gt 0 ]]; then
     img_config=$config
     break
   fi
