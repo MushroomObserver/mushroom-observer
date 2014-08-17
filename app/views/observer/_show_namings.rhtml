@@ -1,6 +1,5 @@
 <%
-  javascript_include 'prototype'
-  javascript_include 'element_extensions'
+  javascript_include 'jquery.min'
   javascript_include 'vote_popup'
 
   logged_in = !@user.nil? && @user.verified
@@ -172,11 +171,11 @@
     var CHANGED = false;
     var POPUPS = { #{observation.namings.map {|n|
       id = n.id.to_s
-      "#{id}: $('show_votes_' + #{id})"
+      "#{id}: 'show_votes_' + #{id}"
     }.join(", ")} };
     var VOTES = { #{observation.namings.map {|n|
       id = n.id.to_s
-      "#{id}: $('vote_' + #{id} + '_value')"
+      "#{id}: 'vote_' + #{id} + '_value'"
     }.join(", ")} };
 
     // Called when user leaves the page.
