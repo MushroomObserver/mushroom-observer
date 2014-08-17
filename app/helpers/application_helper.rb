@@ -1502,7 +1502,7 @@ module ApplicationHelper
 
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
-    javascript_include('prototype')
+    javascript_include('jquery.min')
     javascript_include('image_vote')
 
     if image.is_a?(Image)
