@@ -1,7 +1,7 @@
 <%
   @title = :edit_translations_title.t
-  javascript_include('prototype')
-  javascript_include('element_extensions')
+  javascript_include('jquery.min')
+  javascript_include('jquery.center')
 %>
 
 <style>
@@ -94,12 +94,12 @@
 
   function form_changed() {
     CHANGED = true;
-    $("save_button").disabled = "";
-    $("cancel_button").disabled = "";
+    jQuery("#save_button").prop("disabled", false);
+    jQuery("#cancel_button").prop("disabled", false);
   }
 
   function clear_form() {
-    $("form_div").innerHTML = "";
+    jQuery("#form_div").html();
     LOADED = false;
     CHANGED = false;
   }
@@ -107,20 +107,21 @@
   function submit_form() {
     CHANGED = false;
     show_whirly(SAVING_STRING);
-    $("save_button").disabled = "disabled";
-    $("cancel_button").disabled = "disabled";
-    $("post_form").submit();
+    jQuery("#save_button").prop("disabled", true);
+    jQuery("#cancel_button").prop("disabled", true);
+    jQuery("#post_form").submit();
     return(false);
   }
 
   function show_old_version(id) {
     show_whirly(LOADING_STRING);
-    new Ajax.Request("/ajax/old_translation/" + id, {
-      parameters: { authenticity_token: CSRF_TOKEN },
-      asynchronous: true,
-      onComplete: function (response) {
+    jQuery.ajax("/ajax/old_translation/" + id, {
+      data: { authenticity_token: CSRF_TOKEN },
+      dataType: 'text',
+      async: true,
+      success: function(text) {
         hide_whirly();
-        alert(response.responseText);
+        alert(text);
       }
     });
   }
@@ -129,16 +130,17 @@
     LOCALE = locale;
     if (!CHANGED || confirm(CONFIRM_STRING)) {
       show_whirly(LOADING_STRING);
-      new Ajax.Request("edit_translations_ajax_get, {
-      parameters: { locale: locale, tag: tag, authenticity_token: CSRF_TOKEN },
-        asynchronous: true,
-        onFailure: function (response) {
+      jQuery.ajax("edit_translations_ajax_get", {
+        data: { locale: locale, tag: tag, authenticity_token: CSRF_TOKEN },
+        dataType: 'text',
+        async: true,
+        error: function(response) {
           hide_whirly();
           alert(response.responseText);
         },
-        onSuccess: function(response) {
+        success: function(html) {
           hide_whirly();
-          $("form_div").innerHTML = response.responseText;
+          jQuery("#form_div").html(html);
           CHANGED = false;
           LOADED = true;
         }
@@ -150,27 +152,22 @@
     var tag = window.hidden_frame.tag;
     var str = window.hidden_frame.str;
     if (tag != undefined) {
-      var span = $("str_" + tag);
-      span.innerHTML = str;
-      span.className = "translated faint";
+      jQuery("#str_" + tag).html(str).addClass("translated faint");
     } else if (LOADED) {
       CHANGED = true;
-      $("save_button").disabled = "";
-      $("cancel_button").disabled = "";
+      jQuery("#save_button").prop("disabled", false);
+      jQuery("#cancel_button").prop("disabled", false);
     }
     hide_whirly();
   }
 
   function show_whirly(text) {
-    $("whirly_text").innerHTML = text;
-    div = $("whirly");
-    Element.center(div);
-    div.show();
+    jQuery("#whirly_text").html(text);
+    jQuery("#whirly").center().show();
   }
 
   function hide_whirly() {
-    var div = $("whirly");
-    div.hide();
+    jQuery("#whirly").hide();
   }
 ) if @js %>
 
@@ -189,11 +186,11 @@
 <% for item in @form %>
   <%= case item.class.name
   when /MajorHeader/
-    content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'major_header')
+    content_tag(:p, h(item.string).gsub('\n','<br/>').html_safe, :class => 'major_header')
   when /MinorHeader/
-    content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'minor_header')
+    content_tag(:p, h(item.string).gsub('\n','<br/>').html_safe, :class => 'minor_header')
   when /Comment/
-    content_tag(:p, h(item.string).gsub('\n','<br/>'), :class => 'comment')
+    content_tag(:p, h(item.string).gsub('\n','<br/>').html_safe, :class => 'comment')
   when /TagField/
     tag = item.tag
     str = preview_string(@strings[tag])

@@ -1,13 +1,13 @@
 function image_export(id, value) {
-  new Ajax.Request("/ajax/export/image/" + id, {
-    parameters: { value: value, authenticity_token: CSRF_TOKEN },
-    asynchronous: true,
-    onFailure: function (response) {
+  jQuery.ajax("/ajax/export/image/" + id, {
+    data: { value: value, authenticity_token: CSRF_TOKEN },
+    dataType: "text",
+    asyn: true,
+    error: function (response) {
       alert(response.responseText);
     },
-    onSuccess: function(response) {
-      var div = $("image_export_" + id);
-      div.innerHTML = response.responseText;
+    success: function(html) {
+      jQuery("#image_export_" + id).html(html);
     }
   })
 }

@@ -61,7 +61,7 @@ module GM
       "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'></script>
       <script type='text/javascript'>
         var G = google.maps;
-        // in case prototype and/or jQuery are not loaded for this page
+        // in case jQuery is not loaded for this page
         function E(id) {
           return document.getElementById(id);
         }

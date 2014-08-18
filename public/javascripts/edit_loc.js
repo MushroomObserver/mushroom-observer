@@ -45,14 +45,14 @@ function updateMapOverlay(north, south, east, west) {
   
   mo_box.setPath([nw,nwe,ne,se,swe,sw,nw]);
 
-  if (parseFloat($("location_north").value) != north)
-    $("location_north").value = north;
-  if (parseFloat($("location_south").value) != south)
-    $("location_south").value = south;
-  if (parseFloat($("location_east").value) != east)
-    $("location_east").value = east;
-  if (parseFloat($("location_west").value) != west)
-    $("location_west").value = west;
+  if (parseFloat(jQuery("#location_north").val()) != north)
+    jQuery("#location_north").val(north);
+  if (parseFloat(jQuery("#location_south").val()) != south)
+    jQuery("#location_south").val(south);
+  if (parseFloat(jQuery("#location_east").val()) != east)
+    jQuery("#location_east").val(east);
+  if (parseFloat(jQuery("#location_west").val()) != west)
+    jQuery("#location_west").val(west);
 
   clearTimeout(timeout_id);
   old_loc = null;
@@ -76,12 +76,12 @@ function resetToLatLng(loc) {
 }
 
 function findOnMap() {
-  address = $("location_display_name").value;
-  new Ajax.Request('/ajax/geocode', {
-    parameters: { name: address, authenticity_token: CSRF_TOKEN },
-    method:'get',
-    onSuccess: function(transport){
-      var response = transport.responseText || "no response text";
+  address = jQuery("#location_display_name").val();
+  jQuery.ajax('/ajax/geocode', {
+    data: { name: address, authenticity_token: CSRF_TOKEN },
+    dataType: "text",
+    type: "GET",
+    success: function(response) {
       list = []
       while ((x = response.indexOf("\n")) >= 0) {
         if (x > 0)
@@ -97,16 +97,18 @@ function findOnMap() {
         map_div.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
       };
     },
-    onFailure: function(transport){ alert(transport.responseText) }
+    error: function(response) {
+      alert(response.responseText);
+    }
   });  
 }
 
 function sendOldLoc() {
   if (old_loc != null) {
-    north = parseFloat($("location_north").value);
-    south = parseFloat($("location_south").value);
-    east = parseFloat($("location_east").value);
-    west = parseFloat($("location_west").value);
+    north = parseFloat(jQuery("#location_north").val());
+    south = parseFloat(jQuery("#location_south").val());
+    east = parseFloat(jQuery("#location_east").val());
+    west = parseFloat(jQuery("#location_west").val());
     if ((north == -south) && (east == -west)) {
       resetToLatLng(old_loc);
     }
@@ -114,10 +116,10 @@ function sendOldLoc() {
 }
 
 function dragEndLatLng(location, which) {
-  north = parseFloat($("location_north").value);
-  south = parseFloat($("location_south").value);
-  east = parseFloat($("location_east").value);
-  west = parseFloat($("location_west").value);
+  north = parseFloat(jQuery("#location_north").val());
+  south = parseFloat(jQuery("#location_south").val());
+  east = parseFloat(jQuery("#location_east").val());
+  west = parseFloat(jQuery("#location_west").val());
   if ((north == -south) && (east == -west)) {
     resetToLatLng(location);
   } else {
@@ -154,13 +156,14 @@ function dblClickLatLng(location) {
 }
 
 function textToMap() {
-  north = parseFloat($("location_north").value);
-  south = parseFloat($("location_south").value);
-  east = parseFloat($("location_east").value);
-  west = parseFloat($("location_west").value);
+  north = parseFloat(jQuery("#location_north").val());
+  south = parseFloat(jQuery("#location_south").val());
+  east = parseFloat(jQuery("#location_east").val());
+  west = parseFloat(jQuery("#location_west").val());
   if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
     updateMapOverlay(north, south, east, west);
-    map.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
+    // Yuck! 'map_div' is a global variable set to the last map div.
+    map_div.fitBounds(new G.LatLngBounds(L(south,west), L(north,east)));
   }
 }
 

@@ -959,6 +959,7 @@ module ApplicationHelper
   # From javascript_helper.rb
   # This is a list of modules that are sensitive to order.
   JAVASCRIPT_MODULE_ORDER = %w(
+    jquery.min
     prototype
     effects
     controls
@@ -1494,9 +1495,8 @@ module ApplicationHelper
   end
 
   def image_exporter(image_id, exported)
-    javascript_include('prototype')
+    javascript_include('jquery.min')
     javascript_include('image_export')
-
     content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
   end
 

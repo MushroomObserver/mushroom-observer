@@ -244,7 +244,7 @@ class TranslationController < ApplicationController
   end
 
   def process_template_line(line)
-    if line.match(/^['"]?(\w+)['"]?:\s*/)
+    if line.match(/^\s*['"]?(\w+)['"]?:\s*/)
       tag, str = $1, $'
       process_tag_line(tag)
       @in_tag = true if str.match(/^>/)
