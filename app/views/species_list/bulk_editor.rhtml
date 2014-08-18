@@ -151,9 +151,14 @@
       height: 50px;
       margin: 2px;
     }
+    div.auto_complete {
+      z-index: 3;
+    }
   </style>
 
-  <%= javascript_tag(%(
+  <%=
+  javascript_include('jquery')
+  javascript_tag(%(
     var NUMBER_OF_NAMES    = {#{@observations.map {|o| "#{o.id}:#{o.namings.length}"}.join(',')}};
     var NUMBER_OF_COMMENTS = {#{@observations.map {|o| "#{o.id}:#{o.comments.length}"}.join(',')}};
     var NUMBER_OF_IMAGES   = {#{@observations.map {|o| "#{o.id}:#{o.images.length}"}.join(',')}};
@@ -161,31 +166,32 @@
     var ignore_click = false;
     function enter_row(i) {
       if (i != current_id) {
-        var old_row = $("row_" + current_id);
-        var row = $("row_" + i);
-        var div = $("row_controls");
-        Position.clone(row, div, {
-          setHeight: false,
-          setWidth: false,
-          offsetTop: row.offsetHeight
+        var old_row = jQuery("#row_" + current_id);
+        var row = jQuery("#row_" + i);
+        var div = jQuery("#row_controls");
+        var x = row.position().left;
+        var y = row.position().top + row.outerHeight();
+        div.css({
+          left: "" + x + "px",
+          top: "" + y + "px",
+          display: "block"
         });
-        div.style.display = "block";
-        row.addClassName("hot");
-        if (old_row) old_row.removeClassName("hot");
-        $('number_of_names').innerHTML    = NUMBER_OF_NAMES[i];
-        $('number_of_comments').innerHTML = NUMBER_OF_COMMENTS[i];
-        $('number_of_images').innerHTML   = NUMBER_OF_IMAGES[i];
+        row.addClass("hot");
+        if (old_row) old_row.removeClass("hot");
+        jQuery("#number_of_names").html(NUMBER_OF_NAMES[i]);
+        jQuery("#number_of_comments").html(NUMBER_OF_COMMENTS[i]);
+        jQuery("#number_of_images").html(NUMBER_OF_IMAGES[i]);
         current_id = i;
       }
     }
-    Event.observe($("observation_table"), 'click', function() { ignore_click = true });
-    Event.observe($("row_controls"),      'click', function() { ignore_click = true });
-    Event.observe(document, 'click', function () {
+    jQuery("#observation_table").click(function() { ignore_click = true });
+    jQuery("#row_controls").click(function() { ignore_click = true });
+    jQuery(document).click(function() {
       if (current_id != null && !ignore_click) {
-        var row = $("row_" + current_id);
-        var div = $("row_controls");
-        row.removeClassName("hot");
-        div.style.display = "none";
+        var row = jQuery("#row_" + current_id);
+        var div = jQuery("#row_controls");
+        row.removeClass("hot");
+        div.hide();
         current_id = null;
       }
       ignore_click = false;

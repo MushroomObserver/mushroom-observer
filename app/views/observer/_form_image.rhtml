@@ -1,5 +1,6 @@
 <!--[form:image]-->
 
+<% javascript_include('jquery') %>
 <% @image = @images[index] %>
 
 <div id="image_<%= index %>_box" class="form_image">
@@ -13,7 +14,7 @@
                            { :id => "image_#{index}_more" }) %>
     <%= button_to_function("« #{:LESS.t}", "image_off(#{index})",
                            { :id => "image_#{index}_less", :style => 'display:none' }) %>
-    <%= javascript_tag("Element.hide('image_#{index}_less')") %>
+    <%= javascript_tag("jQuery('#image_#{index}_less').hide()") %>
   <% end %><br/>
 
   <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
@@ -38,7 +39,7 @@
   <%= if @js
     javascript_tag %(
       CHANGED_DATES[#{index}] = false;
-      Element.hide('image_#{index}_div');
+      jQuery('#image_#{index}_div').hide();
     )
   end %>
 

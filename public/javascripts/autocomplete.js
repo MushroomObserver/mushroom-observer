@@ -1,165 +1,171 @@
 var AUTOCOMPLETERS = {};
 
-var MOAutocompleter = Class.create({
-  initialize: function (opts) {
+// How to Use:
+//   <input type="text_field" id="field"/>
+//   <script>new MOAutocompleter({ input_id: "field", ... })</script>
+//
+// Overview:
+//   1) First it creates the pulldown menu (hidden):
+//        <div>                 (this is used to scroll the inner content)
+//         <div>                (this is used to clip the inner content)
+//          <table><tr><td>     (this is needed to allow Firefox to read off the width of the content)
+//           <ul>               (this is the actual content)
+//            <li>              (a fixed number of these are created and "scrolling" is simulated
+//            <li>               by changing the text on these, and hiding/showing as necessary)
+//            ...
+//           </ul>
+//          </td></tr></table>
+//         </div>
+//        </div>
+//   2) It watches keyup/down/press and blur events:
+//      It handles cursor movement and selection on keydown.
+//      It stops propogation of tab and enter in both keydown and keypress.
+//      It checks for change whenever a key is released.
+//      It hides the menu when it loses focus, but it does it on a timer to allow
+//       for temporary loss of focus when messing around with the pulldown menu.
+//   3) Several things cause the menu to be redrawn:
+//       cursor movement, any time the matches are recalculated
+//      Several things cause the list of matches to be recalculated:
+//       change in text field, selection of item, receipt of AJAX response
+//      Two things can potentially result in AJAX request:
+//       change in text field, selection of item
+//   4) Summary of important events:
+//       cursor movement        -- redraw                  -- move_cursor() -> draw_pulldown()
+//       selection of menu item -- matches, [AJAX], redraw -- select_row() -> our_change() -> schedule_refresh()
+//       change in text field   -- matches, [AJAX], redraw -- our_change() -> schedule_refresh()
+//       AJAX response          -- matches, menu           -- process_ajax_response() -> schedule_refresh()
+//      (Where schedule_refresh() -> refresh_options() -> update_matches() -> draw_pulldown().)
+//   5) Important medthods:
+//       refresh_options()        send AJAX request
+//       process_ajax_response()  process AJAX response
+//       update_matches()         search options for matches
+//       draw_pulldown()          update pulldown menu
+//
+var MOAutocompleter = function(opts) {
 
-    // How to Use:
-    //   <input type="text_field" id="field"/>
-    //   <script>new MOAutocompleter({ input_id: "field", ... })</script>
-    //
-    // Overview:
-    //   1) First it creates the pulldown menu (hidden):
-    //        <div>                 (this is used to scroll the inner content)
-    //         <div>                (this is used to clip the inner content)
-    //          <table><tr><td>     (this is needed to allow Firefox to read off the width of the content)
-    //           <ul>               (this is the actual content)
-    //            <li>              (a fixed number of these are created and "scrolling" is simulated
-    //            <li>               by changing the text on these, and hiding/showing as necessary)
-    //            ...
-    //           </ul>
-    //          </td></tr></table>
-    //         </div>
-    //        </div>
-    //   2) It watches keyup/down/press and blur events:
-    //      It handles cursor movement and selection on keydown.
-    //      It stops propogation of tab and enter in both keydown and keypress.
-    //      It checks for change whenever a key is released.
-    //      It hides the menu when it loses focus, but it does it on a timer to allow
-    //       for temporary loss of focus when messing around with the pulldown menu.
-    //   3) Several things cause the menu to be redrawn:
-    //       cursor movement, any time the matches are recalculated
-    //      Several things cause the list of matches to be recalculated:
-    //       change in text field, selection of item, receipt of AJAX response
-    //      Two things can potentially result in AJAX request:
-    //       change in text field, selection of item
-    //   4) Summary of important events:
-    //       cursor movement        -- redraw                  -- move_cursor() -> draw_pulldown()
-    //       selection of menu item -- matches, [AJAX], redraw -- select_row() -> our_change() -> schedule_refresh()
-    //       change in text field   -- matches, [AJAX], redraw -- our_change() -> schedule_refresh()
-    //       AJAX response          -- matches, menu           -- process_ajax_response() -> schedule_refresh()
-    //      (Where schedule_refresh() -> refresh_options() -> update_matches() -> draw_pulldown().)
-    //   5) Important medthods:
-    //       refresh_options()        send AJAX request
-    //       process_ajax_response()  process AJAX response
-    //       update_matches()         search options for matches
-    //       draw_pulldown()          update pulldown menu
+  // These are potentially useful parameters the user might want to tweak.
+  jQuery.extend(this, {
+    input_id:             null,            // id of text field
+    pulldown_class:       'auto_complete', // class of pulldown div
+    hot_class:            'selected',      // class of <li> when highlighted
+    unordered:            false,           // ignore order of words when matching
+                                           // (collapse must be 0 if this is true!)
+    collapse:             0,               // 0 = normal mode
+                                           // 1 = autocomplete first word, then the rest
+                                           // 2 = autocomplete first word, then second word, then the rest
+                                           // N = etc.
+    token:                null,            // separator between options
+    primer:               null,            // initial list of options (one string per line)
+    update_primer_on_blur: false,          // add each entered value into primer (useful if auto-completing a column of fields)
+    ajax_url:             null,            // where to request options from
+    refresh_delay:        0.10,            // how long to wait before sending AJAX request (seconds)
+    hide_delay:           0.25,            // how long to wait before hiding pulldown (seconds)
+    key_delay1:           0.50,            // initial key repeat delay (seconds)
+    key_delay2:           0.03,            // subsequent key repeat delay (seconds)
+    pulldown_size:        10,              // maximum number of options shown at a time
+    page_size:            10,              // amount to move cursor on page up and down
+    max_request_length:   50,              // max length of string to send via AJAX
+    show_errors:          false            // show error messages returned via AJAX?
+  });
+  jQuery.extend(this, opts);
 
-    // These are potentially useful parameters the user might want to tweak.
-    Object.extend(this, {
-      input_id:             null,            // id of text field
-      pulldown_class:       'auto_complete', // class of pulldown div
-      hot_class:            'selected',      // class of <li> when highlighted
-      unordered:            false,           // ignore order of words when matching
-                                             // (collapse must be 0 if this is true!)
-      collapse:             0,               // 0 = normal mode
-                                             // 1 = autocomplete first word, then the rest
-                                             // 2 = autocomplete first word, then second word, then the rest
-                                             // N = etc.
-      token:                null,            // separator between options
-      primer:               null,            // initial list of options (one string per line)
-      update_primer_on_blur: false,          // add each entered value into primer (useful if auto-completing a column of fields)
-      ajax_url:             null,            // where to request options from
-      refresh_delay:        0.10,            // how long to wait before sending AJAX request (seconds)
-      hide_delay:           0.25,            // how long to wait before hiding pulldown (seconds)
-      key_delay1:           0.50,            // initial key repeat delay (seconds)
-      key_delay2:           0.03,            // subsequent key repeat delay (seconds)
-      pulldown_size:        10,              // maximum number of options shown at a time
-      page_size:            10,              // amount to move cursor on page up and down
-      max_request_length:   50,              // max length of string to send via AJAX
-      show_errors:          false            // show error messages returned via AJAX?
-    });
-    Object.extend(this, opts);
+  // These are internal state variables the user should leave alone.
+  jQuery.extend(this, {
+    input_elem:           null,            // DOM element of text field
+    datalist_elem:        null,            // DOM element of datalist
+    pulldown_elem:        null,            // DOM element of pulldown div
+    list_elem:            null,            // DOM element of pulldown ul
+    active:               false,           // is pulldown visible and active?
+    old_value:            {},              // previous value of input field
+    options:              '',              // list of all options
+    matches:              [],              // list of options currently showing
+    current_row:          -1,              // number of option currently highlighted (0 = none)
+    current_value:        null,            // value currently highlighted (null = none)
+    current_highlight:    -1,              // row of view highlighted (-1 = none)
+    current_width:        0,               // current width of menu
+    scroll_offset:        0,               // scroll offset
+    focused:              false,           // do we have input focus?
+    last_ajax_request:    null,            // last ajax request we got results for
+    last_ajax_incomplete: true,            // did we get all the results we requested last time?
+    ajax_request:         null,            // ajax request while underway
+    refresh_timer:        null,            // timer used to delay update after typing
+    hide_timer:           null,            // timer used to delay hiding of pulldown
+    key_timer:            null,            // timer used to emulate key repeat
+    do_scrollbar:         null,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
+    do_datalist:          null,            // implement using <datalist> instead of doing pulldown ourselves
+    row_height:           null,            // height of a row in pixels (filled in automatically)
+    scrollbar_width:      null             // width of scrollbar (filled in automatically)
+  });
 
-    // These are internal state variables the user should leave alone.
-    Object.extend(this, {
-      input_elem:           null,            // DOM element of text field
-      datalist_elem:        null,            // DOM element of datalist
-      pulldown_elem:        null,            // DOM element of pulldown div
-      list_elem:            null,            // DOM element of pulldown ul
-      active:               false,           // is pulldown visible and active?
-      old_value:            {},              // previous value of input field
-      options:              '',              // list of all options
-      matches:              [],              // list of options currently showing
-      current_row:          -1,              // number of option currently highlighted (0 = none)
-      current_value:        null,            // value currently highlighted (null = none)
-      current_highlight:    -1,              // row of view highlighted (-1 = none)
-      current_width:        0,               // current width of menu
-      scroll_offset:        0,               // scroll offset
-      focused:              false,           // do we have input focus?
-      last_ajax_request:    null,            // last ajax request we got results for
-      last_ajax_incomplete: true,            // did we get all the results we requested last time?
-      ajax_request:         null,            // ajax request while underway
-      refresh_timer:        null,            // timer used to delay update after typing
-      hide_timer:           null,            // timer used to delay hiding of pulldown
-      key_timer:            null,            // timer used to emulate key repeat
-      do_scrollbar:         null,            // should we allow scrollbar? some browsers just can't handle it, e.g., old IE
-      do_datalist:          null,            // implement using <datalist> instead of doing pulldown ourselves
-      row_height:           null,            // height of a row in pixels (filled in automatically)
-      scrollbar_width:      null             // width of scrollbar (filled in automatically)
-    });
+  // Check if browser can handle doing scrollbar.
+  this.do_scrollbar =
+    navigator.appVersion.toLowerCase().indexOf('msie') == 0 ||
+    parseInt(navigator.userAgent.toLowerCase().split('msie')[1]) >= 8;
 
-    // Check if browser can handle doing scrollbar.
-    this.do_scrollbar =
-      Prototype.Browser.IE ? Prototype.Browser.IE8 : true;
+  // Get the DOM element of the input field.
+  if (!this.input_elem)
+    this.input_elem = jQuery("#" + this.input_id);
+  if (!this.input_elem)
+    alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
 
-    // Get the DOM element of the input field.
-    if (!this.input_elem)
-      this.input_elem = $(this.input_id);
-    if (!this.input_elem)
-      alert("MOAutocompleter: Invalid input id: \"" + this.input_id + "\"");
+  // Figure out a few browser-dependent dimensions.
+  this.scrollbar_width = this.input_elem.getScrollBarWidth();
 
-    // Figure out a few browser-dependent dimensions.
-    this.scrollbar_width = Element.getScrollBarWidth();
+  // Initialize options.
+  this.options = "\n" + this.primer + "\n" + this.options;
 
-    // Initialize options.
-    this.options = "\n" + this.primer + "\n" + this.options;
+  // Create datalist if browser is capable.
+  if (this.do_datalist) {
+    this.create_datalist();
+  } else {
+    this.create_pulldown();
+  }
 
-    // Create datalist if browser is capable.
-    if (this.do_datalist) {
-      this.create_datalist();
-    } else {
-      this.create_pulldown();
-    }
+  // Attach events, etc. to input element.
+  this.prepare_input_element(this.input_elem);
 
-    // Attach events, etc. to input element.
-    this.prepare_input_element(this.input_elem);
+  // Keep catalog of autocompleter objects so we can reuse them as needed.
+  AUTOCOMPLETERS[this.input_id] = this;
 
-    // Keep catalog of autocompleter objects so we can reuse them as needed.
-    AUTOCOMPLETERS[this.input_id] = this;
-  },
+  // Prevent these keys from propagating to the input field.
+  this.HOT_KEYS = { 27:1, 13:1, 9:1, 38:1, 40:1, 33:1, 34:1, 36:1, 35:1 };
+}
+
+jQuery.extend(MOAutocompleter.prototype, {
 
   // Prepare another input element to share an existing autocompleter instance.
-  reuse: function (other_id) {
-    var other_elem = $(other_id);
+  reuse: function(other_id) {
+    var other_elem = jQuery("#" + other_id);
     this.prepare_input_element(other_elem);
   },
 
-  switch_inputs: function (event, elem) {
-    if (this.input_id != elem.id) {
-      this.input_id   = elem.id;
+  switch_inputs: function(event, elem) {
+    if (this.input_id != elem.attr("id")) {
+      this.input_id   = elem.attr("id");
       this.input_elem = elem;
-      this.input_elem.parentNode.appendChild(this.pulldown_elem);
+      this.input_elem.parent().append(this.pulldown_elem);
     }
     this.our_focus(event);
   },
 
   // Prepare input element: attach elements, set properties.
-  prepare_input_element: function (elem) {
-    this.old_value[elem.id] = null;
+  prepare_input_element: function(elem) {
+    var this2 = this;
+    var id = elem.attr("id");
+
+    this.old_value[id] = null;
 
     // Attach events if we aren't using datalist thingy.
     if (!this.do_datalist) {
-      Event.observe(elem, 'focus', (function (event) {
-        this.switch_inputs(event, elem);
-      }).bindAsEventListener(this));
-      Event.observe(elem, 'blur',     this.our_blur.bindAsEventListener(this));
-      Event.observe(elem, 'keydown',  this.our_keydown.bindAsEventListener(this));
-      Event.observe(elem, 'keyup',    this.our_keyup.bindAsEventListener(this));
-      Event.observe(elem, 'keypress', this.our_keypress.bindAsEventListener(this));
+      elem.focus(function(event) { return this2.switch_inputs(event, elem) });
+      elem.blur(function(event) { return this2.our_blur(event) });
+      elem.keydown(function(event) { return this2.our_keydown(event) });
+      elem.keyup(function(event) { return this2.our_keyup(event) });
+      elem.keypress(function(event) { return this2.our_keypress(event) });
     }
 
     // Disable default browser autocomplete.
-    elem.setAttribute('autocomplete','off');
+    elem.attr("autocomplete", "off");
 
     // Restore field value when user "goes back" to this page.  Only really need
     // this for firefox browsers which handle the autocomplete="off" attribute,
@@ -168,135 +174,120 @@ var MOAutocompleter = Class.create({
     // prevent potentially sensitive information from being visible to random
     // people walking by a terminal and pressing "back" button.  This fix just
     // sets it right back to the old value.  So there.
-    Event.observe(document, 'focus', (function () {
-      if (this.old_value[elem.id] != null)
-        elem.value = this.old_value[elem.id];
+    jQuery(document).focus((function() {
+      if (this.old_value[id] != null)
+        elem.val(this.old_value[id]);
     }).bind(this));
   },
 
 // ------------------------------ Events ------------------------------
 
   // User pressed a key in the text field.
-  our_keydown: function (event) {
-    // $('log').innerHTML += "keydown(" + event.keyCode + ")<br/>";
+  our_keydown: function(event) {
+    // jQuery("#log").append("keydown(" + event.which + ")<br/>");
     this.clear_key();
     this.focused = true;
-    switch (event.keyCode) {
-      case Event.KEY_ESC:
+    if (this.active) {
+      switch (event.which) {
+      case EVENT_KEY_ESC:
         this.schedule_hide();
         this.active = false;
         break;
-      case Event.KEY_RETURN:
-      case Event.KEY_TAB:
-        if (this.active) {
-          if (this.current_row >= 0)
-            this.select_row(this.current_row - this.scroll_offset);
-          Event.stop(event);
-        }
+      case EVENT_KEY_RETURN:
+      case EVENT_KEY_TAB:
+        if (this.current_row >= 0)
+          this.select_row(this.current_row - this.scroll_offset);
         break;
-      case Event.KEY_ESC:
-        if (this.active) {
-          this.lose_focus();
-          Event.stop(event);
-        }
+      case EVENT_KEY_ESC:
+        this.lose_focus();
         break;
-      case Event.KEY_HOME:
-        if (this.active) {
-          this.go_home();
-          Event.stop(event);
-        }
+      case EVENT_KEY_HOME:
+        this.go_home();
         break;
-      case Event.KEY_END:
-        if (this.active) {
-          this.go_end();
-          Event.stop(event);
-        }
+      case EVENT_KEY_END:
+        this.go_end();
         break;
-      case Event.KEY_PAGEUP:
-        if (this.active) {
-          this.page_up();
-          this.schedule_key(this.page_up);
-          Event.stop(event);
-        }
+      case EVENT_KEY_PAGEUP:
+        this.page_up();
+        this.schedule_key(this.page_up);
         break;
-      case Event.KEY_UP:
-        if (this.active) {
-          this.arrow_up();
-          this.schedule_key(this.arrow_up);
-          Event.stop(event);
-        }
+      case EVENT_KEY_UP:
+        this.arrow_up();
+        this.schedule_key(this.arrow_up);
         break;
-      case Event.KEY_DOWN:
-        if (this.active) {
-          this.arrow_down();
-          this.schedule_key(this.arrow_down);
-          Event.stop(event);
-        }
+      case EVENT_KEY_DOWN:
+        this.arrow_down();
+        this.schedule_key(this.arrow_down);
         break;
-      case Event.KEY_PAGEDOWN:
-        if (this.active) {
-          this.page_down();
-          this.schedule_key(this.page_down);
-          Event.stop(event);
-        }
+      case EVENT_KEY_PAGEDOWN:
+        this.page_down();
+        this.schedule_key(this.page_down);
         break;
+      }
     }
-    if (this.on_keydown) this.on_keydown(event);
+    if (this.on_keydown)
+      this.on_keydown(event);
+    if (this.active && this.HOT_KEYS[event.which])
+      return false;
+    return true;
   },
 
   // Need to prevent these keys from being processed by form.
-  our_keypress: function (event) {
-    // $('log').innerHTML += "keypress(" + event.keyCode + ")<br/>";
-    switch (event.keyCode) {
-      case Event.KEY_RETURN:
-      case Event.KEY_TAB:
-        if (this.active)
-          Event.stop(event);
-    }
-    if (this.on_keypress) this.on_keypress(event);
+  our_keypress: function(event) {
+    // jQuery("#log").append("keypress(" + event.which + ")<br/>");
+    if (this.on_keypress)
+      this.on_keypress(event);
+    if (this.active && this.HOT_KEYS[event.which])
+      return false;
+    return true;
   },
 
   // User has released a key.
-  our_keyup: function (event) {
-    // $('log').innerHTML += "keyup()<br/>";
+  our_keyup: function(event) {
+    // jQuery("#log").append("keyup()<br/>");
     this.clear_key();
     this.our_change();
-    if (this.on_keyup) this.on_keyup(event);
+    if (this.on_keyup)
+      this.on_keyup(event);
+    return true;
   },
 
   // Input field has changed.
-  our_change: function () {
-    // $('log').innerHTML += "our_change(" + this.input_elem.value + ")<br/>";
-    if (this.input_elem.value != this.old_value[this.input_id])
+  our_change: function() {
+    // jQuery("#log").append("our_change(" + this.input_elem.val() + ")<br/>");
+    if (this.input_elem.val() != this.old_value[this.input_id])
       this.schedule_refresh();
-    if (this.on_change) this.on_change(this.input_elem.value);
+    if (this.on_change)
+      this.on_change(this.input_elem.val());
   },
 
   // User entered text field.
-  our_focus: function (event) {
-    // $('log').innerHTML += "our_focus()<br/>";
+  our_focus: function(event) {
+    // jQuery("#log").append("our_focus()<br/>");
     if (!this.row_height)
       this.get_row_height();
-    if (this.on_focus) this.on_focus(event);
+    if (this.on_focus)
+      this.on_focus(event);
   },
 
   // User left the text field.
-  our_blur: function (event) {
-    // $('log').innerHTML += "our_blur()<br/>";
+  our_blur: function(event) {
+    // jQuery("#log").append("our_blur()<br/>");
     this.schedule_hide();
-    if (this.on_blur) this.on_blur(event);
+    if (this.on_blur)
+      this.on_blur(event);
   },
 
 // ------------------------------ Timers ------------------------------
 
   // Schedule options to be refreshed after polite delay.
-  schedule_refresh: function () {
+  schedule_refresh: function() {
     this.verbose("schedule_refresh()");
     this.clear_refresh();
     this.refresh_timer = setTimeout((function() {
       this.verbose("doing_refresh()");
-      // $('log').innerHTML += "refresh_timer(" + this.input_elem.value + ")<br/>";
-      this.old_value[this.input_id] = this.input_elem.value;
+      // jQuery("#log").append("refresh_timer(" + this.input_elem.val() + ")<br/>");
+      this.old_value[this.input_id] = this.input_elem.val();
       if (this.ajax_url)
         this.refresh_options();
       this.update_matches();
@@ -308,7 +299,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Schedule pulldown to be hidden if nothing happens in the meantime.
-  schedule_hide: function () {
+  schedule_hide: function() {
     this.clear_hide();
     this.hide_timer = setTimeout(this.hide_pulldown.bind(this), this.hide_delay*1000);
     if (this.update_primer_on_blur)
@@ -316,23 +307,23 @@ var MOAutocompleter = Class.create({
   },
 
   // Schedule a method to be called after key stays pressed for some time.
-  schedule_key: function (action) {
+  schedule_key: function(action) {
     this.clear_key();
     this.key_timer = setTimeout((function () {
-      action.bind(this).call();
+      action.call(this);
       this.schedule_key2(action);
     }).bind(this), this.key_delay1*1000);
   },
-  schedule_key2: function (action) {
+  schedule_key2: function(action) {
     this.clear_key();
     this.key_timer = setTimeout((function () {
-      action.bind(this).call();
+      action.call(this);
       this.schedule_key2(action);
     }).bind(this), this.key_delay2*1000);
   },
 
   // Clear refresh timer.
-  clear_refresh: function () {
+  clear_refresh: function() {
     if (this.refresh_timer) {
       clearTimeout(this.refresh_timer);
       this.refresh_timer = null;
@@ -340,7 +331,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Clear hide timer.
-  clear_hide: function () {
+  clear_hide: function() {
     if (this.hide_timer) {
       clearTimeout(this.hide_timer);
       this.hide_timer = null;
@@ -348,7 +339,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Clear key timer.
-  clear_key: function () {
+  clear_key: function() {
     if (this.key_timer) {
       clearTimeout(this.key_timer);
       this.key_timer = null;
@@ -358,19 +349,19 @@ var MOAutocompleter = Class.create({
 // ------------------------------ Cursor ------------------------------
 
   // Move cursor up or down some number of rows.
-  page_up: function ()
+  page_up: function()
     { this.move_cursor(-this.page_size); },
-  page_down: function ()
+  page_down: function()
     { this.move_cursor(this.page_size); },
-  arrow_up: function ()
+  arrow_up: function()
     { this.move_cursor(-1); },
-  arrow_down: function ()
+  arrow_down: function()
     { this.move_cursor(1); },
-  go_home: function ()
+  go_home: function()
     { this.move_cursor(-this.matches.length) },
-  go_end: function ()
+  go_end: function()
     { this.move_cursor(this.matches.length) },
-  move_cursor: function (rows) {
+  move_cursor: function(rows) {
     this.verbose("move_cursor()");
     var old_row = this.current_row;
     var new_row = old_row + rows;
@@ -401,27 +392,27 @@ var MOAutocompleter = Class.create({
   },
 
   // Mouse has moved over a menu item.
-  highlight_row: function (new_hl) {
+  highlight_row: function(new_hl) {
     this.verbose("highlight_row()");
-    var rows = this.list_elem.childNodes;
+    var rows = this.list_elem.children();
     var old_hl = this.current_highlight;
     this.current_highlight = new_hl;
     this.current_row = this.scroll_offset + new_hl;
     if (old_hl != new_hl) {
       if (old_hl >= 0)
-        rows[old_hl].removeClassName(this.hot_class);
+        jQuery(rows[old_hl]).removeClass(this.hot_class);
       if (new_hl >= 0)
-        rows[new_hl].addClassName(this.hot_class);
+        jQuery(rows[new_hl]).addClass(this.hot_class);
     }
     this.input_elem.focus();
     this.update_width();
   },
 
   // Called when users scrolls via scrollbar.
-  our_scroll: function () {
+  our_scroll: function() {
     this.verbose("our_scroll()");
     var old_scr = this.scroll_offset;
-    var new_scr = Math.round(this.pulldown_elem.scrollTop / this.row_height);
+    var new_scr = Math.round(this.pulldown_elem.scrollTop() / this.row_height);
     var old_row = this.current_row;
     var new_row = this.current_row;
     if (new_row < new_scr)
@@ -436,9 +427,9 @@ var MOAutocompleter = Class.create({
   },
 
   // User has selected a value, either pressing tab/return or clicking on an option.
-  select_row: function (row) {
+  select_row: function(row) {
     this.verbose("select_row()");
-    var old_val = this.input_elem.value;
+    var old_val = this.input_elem.val();
     var new_val = this.matches[this.scroll_offset+row];
     this.input_elem.focus();
     if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse)
@@ -450,24 +441,21 @@ var MOAutocompleter = Class.create({
 // ------------------------------ Pulldown ------------------------------
 
   // Create div for pulldown.
-  create_pulldown: function () {
-    var div1  = document.createElement('div');
-    var div2  = document.createElement('div');
-    var list  = document.createElement('ul');
+  create_pulldown: function() {
+    var div = jQuery("<div><div><ul></ul></div></div>");
+    var list = div.find('ul');
     var i, row;
-    div1.className = this.pulldown_class;
-    div1.appendChild(div2);
-    div2.appendChild(list);
+    div.addClass(this.pulldown_class);
     for (i=0; i<this.pulldown_size; i++) {
-      row = document.createElement('li');
-      row.style.display = 'none';
+      row = jQuery("<li/>");
+      row.hide();
       this.attach_row_events(row, i);
-      list.appendChild(row);
+      list.append(row);
     }
     if (this.do_scrollbar)
-      Event.observe(div1, 'scroll', this.our_scroll.bind(this));
-    this.input_elem.parentNode.appendChild(div1);
-    this.pulldown_elem = div1;
+      div.scroll(this.our_scroll.bind(this));
+    this.input_elem.parent().append(div);
+    this.pulldown_elem = div;
     this.list_elem = list;
   },
 
@@ -475,18 +463,18 @@ var MOAutocompleter = Class.create({
   // Need to do this in a separate method, otherwise row doesn't get
   // a separate value for each row!  Something to do with scope of
   // variables inside for loops.
-  attach_row_events: function (e, row) {
-    Event.observe(e, 'click', (function () {
+  attach_row_events: function(e, row) {
+    e.click((function () {
       this.select_row(row);
       this.our_change();
     }).bind(this));
-    Event.observe(e, 'mouseover', (function() {
+    e.mouseover((function() {
       this.highlight_row(row);
     }).bind(this));
   },
 
   // Get actual row height when it becomes available.
-  get_row_height: function () {
+  get_row_height: function() {
     var div = document.createElement('div');
     var ul  = document.createElement('ul');
     var li  = document.createElement('li');
@@ -500,7 +488,7 @@ var MOAutocompleter = Class.create({
     this.temp_row = div;
     setTimeout(this.set_row_height.bind(this), 100);
   },
-  set_row_height: function () {
+  set_row_height: function() {
     if (this.temp_row) {
       this.row_height = this.temp_row.offsetHeight;
       if (!this.row_height) {
@@ -513,12 +501,12 @@ var MOAutocompleter = Class.create({
   },
 
   // Redraw the pulldown options.
-  draw_pulldown: function () {
+  draw_pulldown: function() {
     this.verbose("draw_pulldown()");
     var menu    = this.pulldown_elem;
-    var inner   = menu.firstChild;
+    var inner   = menu.children().first();
     var list    = this.list_elem;
-    var rows    = list.childNodes;
+    var rows    = list.children();
     var size    = this.pulldown_size;
     var scroll  = this.scroll_offset;
     var cur     = this.current_row;
@@ -528,26 +516,27 @@ var MOAutocompleter = Class.create({
     var i, x, y;
 
     if (this.log)
-      $('log').innerHTML += "Redraw: matches=" + matches.length +
-        ", scroll=" + scroll + ", cursor=" + cur + "<br/>";
+      jQuery("#log").append("Redraw: matches=" + matches.length +
+        ", scroll=" + scroll + ", cursor=" + cur + "<br/>");
 
     // Get row height if haven't been able to yet.
     this.set_row_height();
 
     // Update menu text first.
     for (i=0; i<size; i++) {
-      x = rows[i].innerHTML;
+      var row = jQuery(rows[i]);
+      x = row.html();
       if (i+scroll < matches.length) {
         y = matches[i+scroll].escapeHTML();
         if (x != y) {
           if (x == '')
-            rows[i].style.display = 'block';
-          rows[i].innerHTML = y;
+            row.show();
+          row.html(y);
         }
       } else {
         if (x != '') {
-          rows[i].innerHTML = '';
-          rows[i].style.display = 'none';
+          row.html('');
+          row.hide();
         }
       }
     }
@@ -559,27 +548,27 @@ var MOAutocompleter = Class.create({
     this.current_highlight = new_hl;
     if (new_hl != old_hl) {
       if (old_hl >= 0)
-        rows[old_hl].removeClassName(this.hot_class);
+        jQuery(rows[old_hl]).removeClass(this.hot_class);
       if (new_hl >= 0)
-        rows[new_hl].addClassName(this.hot_class);
+        jQuery(rows[new_hl]).addClass(this.hot_class);
     }
 
     // Make menu visible if nonempty.
     if (matches.length > 0) {
-      Position.clone(this.input_elem, menu, {
-        setHeight: false,
-        setWidth: false,
-        offsetTop: this.input_elem.offsetHeight + this.input_elem.scrollTop
-      });
-      menu.style.display = 'block';
+      var pos = this.input_elem.position();
+      var hgt = this.input_elem.height();
+      var scr = this.input_elem.scrollTop();
+      menu.css("top", "" + (pos.top + hgt + scr) + "px");
+      menu.css("left", "" + pos.left + "px");
+      menu.show();
 
       // Set height of menu.
       if (this.do_scrollbar) {
-        menu.style.overflowY  = matches.length > size ? 'scroll' : 'hidden';
-        menu.style.height     = '' + this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + 'px';
-        inner.style.marginTop = '' + this.row_height * scroll + 'px';
-        inner.style.height    = '' + this.row_height * (matches.length - scroll) + 'px';
-        menu.scrollTop        = this.row_height * scroll;
+        menu.css("overflowY", matches.length > size ? 'scroll' : 'hidden');
+        menu.css("height", '' + this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + 'px');
+        inner.css("marginTop", '' + this.row_height * scroll + 'px');
+        inner.css("height", '' + this.row_height * (matches.length - scroll) + 'px');
+        menu.scrollTop(this.row_height * scroll);
       }
 
       // Set width of menu.
@@ -587,10 +576,10 @@ var MOAutocompleter = Class.create({
       this.update_width();
 
       // Scroll the *window* so that menu is visible.
-      Element.ensureVisible(menu);
+      menu.ensureVisible();
 
       // Cancel scheduled hide.
-      if (matches.length > 1 || this.input_elem.value != matches[0]) {
+      if (matches.length > 1 || this.input_elem.val() != matches[0]) {
         this.clear_hide();
         this.active = true;
       }
@@ -598,7 +587,7 @@ var MOAutocompleter = Class.create({
 
     // Else hide it if now empty.
     else {
-      menu.style.display = "none";
+      menu.hide();
       this.active = false;
     }
 
@@ -607,16 +596,16 @@ var MOAutocompleter = Class.create({
   },
 
   // Hide pulldown options.
-  hide_pulldown: function () {
+  hide_pulldown: function() {
     this.verbose("hide_pulldown()");
-    this.pulldown_elem.style.display = 'none';
+    this.pulldown_elem.hide();
     this.active = false;
   },
 
   // Update width of pulldown.
-  update_width: function () {
+  update_width: function() {
     this.verbose("update_width()");
-    var w = this.list_elem.offsetWidth;
+    var w = this.list_elem.width();
     if (this.do_scrollbar && this.matches.length > this.pulldown_size)
       w += this.scrollbar_width;
     if (this.current_width < w) {
@@ -626,16 +615,16 @@ var MOAutocompleter = Class.create({
   },
 
   // Set width of pulldown.
-  set_width: function () {
+  set_width: function() {
     this.verbose("set_width()");
     var w1 = this.current_width;
     var w2 = w1;
     if (this.matches.length > this.pulldown_size)
       w2 -= this.scrollbar_width;
-    if (Prototype.Browser.IE)
-      this.pulldown_elem.style.width = w1 + 'px';
-    this.list_elem.style.minWidth = w2 + 'px';
-    Element.ensureVisible(this.pulldown_elem);
+    if (navigator.appVersion.toLowerCase().indexOf('msie') > 0)
+      this.pulldown_elem.css("width", w1 + 'px');
+    this.list_elem.css("minWidth", w2 + 'px');
+    this.pulldown_elem.ensureVisible();
   },
 
 // ------------------------------ Datalist ------------------------------
@@ -666,7 +655,7 @@ var MOAutocompleter = Class.create({
 // ------------------------------ Matches ------------------------------
 
   // Update content of pulldown.
-  update_matches: function () {
+  update_matches: function() {
     this.verbose("update_matches()");
     // Remember which option used to be highlighted.
     var last = this.current_row < 0 ? null : this.matches[this.current_row];
@@ -684,13 +673,13 @@ var MOAutocompleter = Class.create({
 
     // Try to find old highlighted row in new set of options.
     this.update_current_row(last);
-    
+
     // Reset width each time we change the options.
-    this.current_width = this.input_elem.getWidth();
+    this.current_width = this.input_elem.width();
   },
 
   // Grab all matches, doing exact match, ignoring number of words.
-  update_normal: function () {
+  update_normal: function() {
     var val = "\n" + this.get_token().toLowerCase();
     var options  = this.options;
     var options2 = this.options.toLowerCase();
@@ -710,7 +699,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Grab matches ignoring order of words.
-  update_unordered: function () {
+  update_unordered: function() {
     var val = this.get_token().toLowerCase().
                    replace(/^ */, '').replace(/  +/g, ' ');
     var vals = val.split(' ');
@@ -747,7 +736,7 @@ var MOAutocompleter = Class.create({
 
   // Grab all matches, preferring the ones with no additional words.
   // Note: order of options must have genera first, then species, then varieties.
-  update_collapsed: function () {
+  update_collapsed: function() {
     var val = "\n" + this.get_token().toLowerCase();
     var options  = this.options;
     var options2 = this.options.toLowerCase();
@@ -782,7 +771,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Remove duplicates from a sorted array.
-  remove_dups: function (list) {
+  remove_dups: function(list) {
     var i, j;
     for (i=0, j=1; j<list.length; j++) {
       if (list[j] != list[i])
@@ -794,7 +783,7 @@ var MOAutocompleter = Class.create({
   },
 
   // Look for 'val' in list of matches and highlight it, otherwise highlight first.
-  update_current_row: function (val) {
+  update_current_row: function(val) {
     this.verbose("update_current_row()");
     var matches = this.matches;
     var size  = this.pulldown_size;
@@ -829,7 +818,7 @@ var MOAutocompleter = Class.create({
 // ------------------------------ AJAX ------------------------------
 
   // Send request for updated options.
-  refresh_options: function () {
+  refresh_options: function() {
     this.verbose("refresh_options()");
     var val = this.get_token().toLowerCase();
     var url;
@@ -869,7 +858,7 @@ var MOAutocompleter = Class.create({
       val = val.substr(0, this.max_request_length);
 
     if (this.log)
-      $('log').innerHTML += "Sending AJAX request: " + val + "<br/>";
+      jQuery("#log").append("Sending AJAX request: " + val + "<br/>");
 
     // Need to doubly-encode this to prevent router from interpreting slashes, dots, etc.
     url = this.ajax_url.replace('@', encodeURIComponent(encodeURIComponent(val.replace(/\./g, '%2e'))));
@@ -879,18 +868,17 @@ var MOAutocompleter = Class.create({
     if (this.ajax_request)
       this.ajax_request.abort();
 
-    this.ajax_request = new Ajax.Request(url, {
-      parameters: { authenticity_token: CSRF_TOKEN },
-      asynchronous: true,
-
-      onFailure: (function (response) {
+    this.ajax_request = jQuery.ajax(url, {
+      data: { authenticity_token: CSRF_TOKEN },
+      dataType: "text",
+      async: true,
+      error: (function (response) {
         this.ajax_request = null;
         if (this.show_errors)
           alert(response.responseText);
       }).bind(this),
-
-      onSuccess: (function (response) {
-        this.process_ajax_response(response.responseText);
+      success: (function (text) {
+        this.process_ajax_response(text);
       }).bind(this)
     });
   },
@@ -930,9 +918,9 @@ var MOAutocompleter = Class.create({
 
     // Log requests and responses if in debug mode.
     if (this.log) {
-      $('log').innerHTML += "Got response for " + this.last_ajax_request.escapeHTML() +
+      jQuery("#log").append("Got response for " + this.last_ajax_request.escapeHTML() +
         ": " + (new_opts.split("\n").length-2) + " strings (" +
-        (this.last_ajax_incomplete ? "incomplete" : "complete") + ").<br/>";
+        (this.last_ajax_incomplete ? "incomplete" : "complete") + ").<br/>");
     }
 
     // Tack on primer if available.
@@ -953,8 +941,8 @@ var MOAutocompleter = Class.create({
 // ------------------------------ Tokens ------------------------------
 
   // Get token under or immediately in front of cursor.
-  get_token: function () {
-    var val = this.input_elem.value;
+  get_token: function() {
+    var val = this.input_elem.val();
     if (this.token) {
       var token = this.token_extents();
       val = val.substring(token.start, token.end);
@@ -963,8 +951,8 @@ var MOAutocompleter = Class.create({
   },
 
   // Change the token under or immediately in front of the cursor.
-  set_token: function (new_val) {
-    var old_str = this.input_elem.value;
+  set_token: function(new_val) {
+    var old_str = this.input_elem.val();
     if (this.token) {
       var new_str = "";
       var token = this.token_extents();
@@ -974,21 +962,21 @@ var MOAutocompleter = Class.create({
       if (token.end < old_str.length)
         new_str += old_str.substring(token.end);
       if (old_str != new_str) {
-        var old_scroll = this.input_elem.scrollTop;
-        this.input_elem.value = new_str;
-        setCursorPosition(this.input_elem, token.start + new_val.length);
-        this.input_elem.scrollTop = old_scroll;
+        var old_scroll = this.input_elem.scrollTop();
+        this.input_elem.val(new_str);
+        setCursorPosition(this.input_elem[0], token.start + new_val.length);
+        this.input_elem.scrollTop(old_scroll);
       }
     } else {
       if (old_str != new_val)
-        this.input_elem.value = new_val;
+        this.input_elem.val(new_val);
     }
   },
 
   // Get index of first character and character after last of current token.
-  token_extents: function () {
-    var start, end, sel = getInputSelection(this.input_elem);
-    var val = this.input_elem.value;
+  token_extents: function() {
+    var start, end, sel = getInputSelection(this.input_elem[0]);
+    var val = this.input_elem.val();
     if (sel.start > 0)
       start = val.lastIndexOf(this.token, sel.start - 1);
     else
@@ -1005,10 +993,12 @@ var MOAutocompleter = Class.create({
 
 // ------------------------------ Primer ------------------------------
 
-  update_primer: function () {
-    var val = this.input_elem.value.replace(/^\s+/,'').replace(/\s+$/,'');
+  update_primer: function() {
+    var val = this.input_elem.val().replace(/^\s+/,'').replace(/\s+$/,'');
     if (val == "") return;
     var primer = this.primer;
+    if (!primer)
+      this.primer = primer = "";
     var j, s;
     for (var i=primer.indexOf("\n"); i>=0; i=j) {
       j = primer.indexOf("\n", i+1);
@@ -1020,12 +1010,12 @@ var MOAutocompleter = Class.create({
     this.options += "\n" + val;
   },
 
-  debug: function (str) {
-    $('log').innerHTML += str + "<br/>";
+  debug: function(str) {
+    jQuery("#log").append(str + "<br/>");
   },
 
-  verbose: function (str) {
-    // $('log').innerHTML += str + "<br/>";
+  verbose: function(str) {
+    // jQuery("#log").append(str + "<br/>");
   }
 });
 

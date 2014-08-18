@@ -30,85 +30,88 @@ function click_on_label(label) {
   for (i=0; i<old_stories.length; i++) {
     j = old_stories[i];
     if (state[j]) {
-      $("pivotal_" + j).hide();
+      jQuery("#pivotal_" + j).hide();
     }
   }
   CUR_LABEL = label;
-  Element.ensureVisible($("pivotal_stories"));
+  jQuery("#pivotal_stories").ensureVisible();
 }
 
 function vote_on_story(story, user, value) {
-  var div = $("pivotal_votes_" + story);
-  var span = $("pivotal_vote_num_" + story);
-  var old_score = span.innerHTML;
-  new Ajax.Request("/ajax/pivotal/vote/" + story, {
-    parameters: { value: value, authenticity_token: CSRF_TOKEN },
-    asynchronous: true,
-    onComplete: function(request) {
+  var div = jQuery("#pivotal_votes_" + story);
+  var span = jQuery("#pivotal_vote_num_" + story);
+  var old_score = span.html();
+  jQuery.ajax("/ajax/pivotal/vote/" + story, {
+    data: { value: value, authenticity_token: CSRF_TOKEN },
+    dataType: "text",
+    async: true,
+    complete: function(request) {
       if (request.status == 200) {
-        div.innerHTML = request.responseText;
+        div.html(request.responseText);
       } else {
-        span.innerHTML = old_score;
+        span.html(old_score);
         alert(PIVOTAL_VOTE_FAILED + request.responseText);
       }
     }
   });
-  span.innerHTML = '<img alt="Indicator" src="/images/indicator.gif" />';
+  span.html('<img alt="Indicator" src="/images/indicator.gif" />');
 }
 
 function click_on_story(story) {
-  var div = $("pivotal_body_" + story);
+  var div = jQuery("%pivotal_body_" + story);
   if (CUR_STORY) {
-    $("pivotal_body_" + CUR_STORY).hide();
+    jQuery("#pivotal_body_" + CUR_STORY).hide();
   }
   if (CUR_STORY === story) {
     CUR_STORY = null;
     return;
   }
   CUR_STORY = story;
-  new Ajax.Request("/ajax/pivotal/story/" + story, {
-    parameters: { authenticity_token: CSRF_TOKEN },
-    asynchronous: true,
-    onComplete: function(request) {
+  jQuery.ajax("/ajax/pivotal/story/" + story, {
+    data: { authenticity_token: CSRF_TOKEN },
+    dataType: "text",
+    async: true,
+    complete: function(request) {
       if (request.status == 200) {
-        div.innerHTML = request.responseText;
-        Element.ensureVisible($("pivotal_" + story));
+        div.html(request.responseText);
+        jQuery("#pivotal_" + story).ensureVisible();
       } else {
-        div.innerHTML = '';
+        div.html('');
         div.hide();
         alert(PIVOTAL_STORY_FAILED + request.responseText);
         CUR_STORY = null;
       }
     }
   });
-  div.innerHTML = '<span class="pivotal_loading">' +
+  div.html('<span class="pivotal_loading">' +
     PIVOTAL_STORY_LOADING +
     ' <img alt="Indicator" src="/images/indicator.gif" />' +
-    '</span>';
+    '</span>');
   div.show();
-  Element.ensureVisible($("pivotal_" + story));
+  jQuery("#pivotal_" + story).ensureVisible();
 }
 
 function post_comment(story) {
-  var value = $("pivotal_comment").value;
-  var popup = $("pivotal_popup");
+  var value = jQuery("#pivotal_comment").val();
+  var popup = jQuery("#pivotal_popup");
   var num;
-  new Ajax.Request("/ajax/pivotal/comment/" + story, {
-    parameters: { value: value, authenticity_token: CSRF_TOKEN },
-    asynchronous: true,
-    onComplete: function(request) {
+  jQuery.ajax("/ajax/pivotal/comment/" + story, {
+    data: { value: value, authenticity_token: CSRF_TOKEN },
+    dataType: "text",
+    async: true,
+    complete: function(request) {
       popup.hide();
       if (request.status == 200) {
-        num = $("pivotal_num_comments_" + story);
-        num.innerHTML = parseInt(num.innerHTML) + 1;
-        $("pivotal_comments").innerHTML += request.responseText;
-        $("pivotal_comment").value = "";
+        num = jQuery("#pivotal_num_comments_" + story);
+        num.html(parseInt(num.innerHTML) + 1);
+        jQuery("#pivotal_comments").append(request.responseText);
+        jQuery("#pivotal_comment").val('');
       } else {
         alert(PIVOTAL_COMMENT_FAILED + request.responseText);
       }
     }
   });
-  Element.center(popup);
+  popup.center();
   popup.show();
 }
 

@@ -45,9 +45,7 @@
           <td align="center">
             <label for="location_north"><%= :North.t %>:</label><br/>
             <%= form.text_field('north', :size => 12) %>
-            <%= javascript_tag("jQuery('#location_north').keypress(function (event) {
-              startKeyPressTimer();
-            });") %>
+            <%= javascript_tag("jQuery('#location_north').keypress(startKeyPressTimer);") %>
           </td>
           <td></td>
         </tr>
@@ -55,9 +53,7 @@
           <td align="center">
             <label for="location_west"><%= :West.t %>:</label><br/>
             <%= form.text_field('west', :size => 12) %>
-            <%= javascript_tag("jQuery('#location_west').keypress(function (event) {
-              startKeyPressTimer();
-            });") %>
+            <%= javascript_tag("jQuery('#location_west').keypress(startKeyPressTimer)") %>
           </td>
           <td align="center">
               <%= :form_locations_lat_long_help.l %>
@@ -65,9 +61,7 @@
           <td align="center">
             <label for="location_east"><%= :East.t %>:</label><br/>
             <%= form.text_field('east', :size => 12) %>
-            <%= javascript_tag("jQuery('#location_east').keypress(function (event) {
-              startKeyPressTimer();
-            });") %>
+            <%= javascript_tag("jQuery('#location_east').keypress(startKeyPressTimer)") %>
           </td>
         </tr>
         <tr>
@@ -75,9 +69,7 @@
           <td align="center">
             <label for="location_south"><%= :South.t %>:</label><br/>
             <%= form.text_field('south', :size => 12) %>
-            <%= javascript_tag("jQuery('#location_south').keypress(function (event) {
-              startKeyPressTimer();
-            });") %>
+            <%= javascript_tag("jQuery('#location_south').keypress(startKeyPressTimer)") %>
           </td>
           <td></td>
         </tr>
@@ -109,9 +101,8 @@
     <td>
       <center>
         <%=
-          javascript_include("jquery.min")
-          javascript_include("edit_loc")
-          # javascript_include('http://maps.google.com/maps/api/js?sensor=false')
+          javascript_include('jquery')
+          javascript_include('edit_location')
           @location.force_valid_lat_longs!
           gmap = make_editable_map(@location)
           finish_map(gmap)

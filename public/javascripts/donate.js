@@ -1,20 +1,16 @@
 function radioAmount() {
-  return Form.getInputs('donate_form','radio','donation[amount]').find(function(radio) { return radio.checked; }).value;
+  return jQuery("input[type=radio]:checked", "#donate_form").val();
 }
 
 function enableOther() {
-  current_value = radioAmount();
-  if (current_value == "other")
-    $("donation_other_amount").enable();
-  else
-    $("donation_other_amount").disable();
+  jQuery("#donation_other_amount").prop("disabled", radioAmount() != "other");
 }
 
 function transferAmount() {
   var val1 = radioAmount();
-  var val2 = $("donation_other_amount").value;
+  var val2 = jQuery("#donation_other_amount").val();
   var val = val1 == "other" ? val2 : val1;
-  $("amount").value = val;
+  jQuery("#amount").val(val);
   document.cookie = "donation_amount=" + val;
   document.cookie = "who=" + $("donation_who").value
   document.cookie = "anon=" + $("donation_anonymous").checked

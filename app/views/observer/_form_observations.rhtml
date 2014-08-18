@@ -134,7 +134,9 @@ end %>
   <% if can_do_ajax? %>
     <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
 
-    <%= javascript_tag %(
+    <%= javascript_include('jquery')
+    javascript_include('jquery_extensions')
+    javascript_tag %(
       var x = String.fromCharCode(60);
       var y = String.fromCharCode(93);
 
@@ -159,31 +161,31 @@ end %>
 
       function image_new() {
         var form = IMAGE_FORM.replace(/XXX/g, NEXT_IMAGE_INDEX++);
-        Insertion.Bottom('image_forms', form);
-        Element.ensureVisible($('new_image_button'));
+        jQuery('#image_forms').append(form);
+        jQuery('#new_image_button').ensureVisible();
         return false;
       }
 
       function image_on(i) {
-        Element.show('image_'+i+'_div');
-        Element.show('image_'+i+'_less');
-        Element.hide('image_'+i+'_more');
-        var div = $('image_'+i+'_box');
-        div.style.border = '1px solid #888';
-        Element.ensureVisible(div);
+        jQuery('#image_'+i+'_div').show();
+        jQuery('#image_'+i+'_less').show();
+        jQuery('#image_'+i+'_more').hide();
+        var div = jQuery('#image_'+i+'_box');
+        div.css("border", '1px solid #888');
+        div.ensureVisible();
         if (!CHANGED_DATES[i]) {
-          $('image_'+i+'_when_1i').value = $('observation_when_1i').value;
-          $('image_'+i+'_when_2i').value = $('observation_when_2i').value;
-          $('image_'+i+'_when_3i').value = $('observation_when_3i').value;
+          jQuery('#image_'+i+'_when_1i').val( jQuery('#observation_when_1i').val() );
+          jQuery('#image_'+i+'_when_2i').val( jQuery('#observation_when_2i').val() );
+          jQuery('#image_'+i+'_when_3i').val( jQuery('#observation_when_3i').val() );
         }
         return false;
       }
 
       function image_off(i) {
-        Element.show('image_'+i+'_more');
-        Element.hide('image_'+i+'_div');
-        Element.hide('image_'+i+'_less');
-        $('image_'+i+'_box').style.border = '0';
+        jQuery('#image_'+i+'_more').show();
+        jQuery('#image_'+i+'_div').hide();
+        jQuery('#image_'+i+'_less').hide();
+        jQuery('#image_'+i+'_box').css("border", "0");
         return false;
       }
     ) %>

@@ -1,8 +1,7 @@
 <%
   if can_do_ajax?
-    javascript_include 'prototype'
-    javascript_include 'effects'
-    javascript_include 'controls'
+    javascript_include 'jquery'
+    javascript_include 'jquery_extensions'
     javascript_include 'name_list'
     javascript_include 'name_list_data'
   end
@@ -67,10 +66,10 @@
     nl_initialize_names();
     nl_draw('g', NL_GENERA);
     nl_draw('n', NL_NAMES);
-    Event.observe(document, 'keypress', nl_keypress);
-    Event.observe(document, 'keydown', nl_keydown);
-    Event.observe(document, 'keyup', nl_keyup);
-    Event.observe(document, 'click', nl_unfocus);
+    jQuery(document).keypress(nl_keypress);
+    jQuery(document).keydown(nl_keydown);
+    jQuery(document).keyup(nl_keyup);
+    jQuery(document).click(nl_unfocus);
   ) %>
 
   <div class="HelpNote"><%= :name_lister_help.tp %></div>

@@ -16,7 +16,7 @@
 <% end %>
 <span class="HelpNote"><%= :form_naming_name_help.t %></span><br/>
 <%= turn_into_name_auto_completer('name_name', :primer => Name.primer,
-  :on_change => %( function(v) { v && v != '' ? Element.show('reasons_div') : Element.hide('reasons_div') } )) %>
+  :on_change => %( function(v) { v && v != '' ? jQuery('#reasons_div').show() : jQuery('#reasons_div').hide() } )) %>
  
 <%# -------------------- Naming Reasons -------------------- %>
 <%=
@@ -27,8 +27,8 @@
     check    = r.used?
     notes    = r.notes.to_s
     default  = r.default?
-    onclick  = "Element.toggle('reason_#{num}_div'); setTimeout(function() " +
-               "{ if ($('reason_#{num}_check').checked) $('reason_#{num}_notes').focus() }, 0.25)"
+    onclick  = "jQuery('#reason_#{num}_div').toggle(); setTimeout(function() " +
+               "{ if (jQuery('#reason_#{num}_check').is(':checked')) jQuery('#reason_#{num}_notes').focus() }, 0.25)"
     checkbox = check_box('reason', 'check', { :index => num, :checked => check,
                          :onclick => (can_do_ajax? ? onclick : 1)}, '1')
     label    = content_tag(:label, label + (default ? ' (default)' : ' '), for: "reason_#{num}_check") + safe_br
@@ -37,14 +37,14 @@
     if can_do_ajax?
       textarea = content_tag(:div, textarea, id: "reason_#{num}_div")
       if !check
-        textarea += javascript_tag("Element.hide('reason_#{num}_div')")
+        textarea += javascript_tag("jQuery('#reason_#{num}_div').hide()")
       end
     end
     html += checkbox + label + textarea
   end
   if can_do_ajax? && !show_reasons && @what.blank?
     html = content_tag(:div, html, id: 'reasons_div')
-    # html += javascript_tag("Element.hide('reasons_div')");
+    # html += javascript_tag("jQuery('#reasons_div').hide()");
   end
   html
 %>
@@ -53,3 +53,5 @@
 <%= focus_on('name_name') %>
 
 <!--[eoform:naming]-->
+
+<div id="log"></div>

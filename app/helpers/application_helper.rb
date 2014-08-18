@@ -224,11 +224,12 @@ module ApplicationHelper
 
   # Turn a text_field into an auto-completer.
   # id::   id of text_field
-  # opts:: arguments (see autocompleter.js)
+  # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
-      javascript_include_auto_complete
-
+      javascript_include 'jquery'
+      javascript_include 'jquery_extensions'
+      javascript_include 'autocomplete'
       js_args = []
       opts[:input_id]   = id
       opts[:row_height] = 22
@@ -315,17 +316,6 @@ module ApplicationHelper
       }.merge(opts))
     else
       ''
-    end
-  end
-
-  # Include everything needed for auto-completion.
-  def javascript_include_auto_complete
-    if can_do_ajax?
-      javascript_include 'prototype'
-      javascript_include 'effects'
-      javascript_include 'controls'
-      javascript_include 'autocomplete'
-      javascript_include 'element_extensions'
     end
   end
 
@@ -959,18 +949,13 @@ module ApplicationHelper
   # From javascript_helper.rb
   # This is a list of modules that are sensitive to order.
   JAVASCRIPT_MODULE_ORDER = %w(
-    jquery.min
-    prototype
-    effects
-    controls
-    window
+    jquery
+    jquery_extensions
   )
 
   # Schedule javascript modules for inclusion in header.  This is much safer
   # than javascript_include_tag(), since that one is ignorant of whether the
-  # given module(s) have been included yet or not, and is ignorant of correct
-  # order (the prototype modules must be included first in a certain order,
-  # followed by our extensions, finally followed by anything else).
+  # given module(s) have been included yet or not, and of correct order.
   #   # Example usage in view template:
   #   <% javascript_include 'name_lister' %>
   def javascript_include(*args)
@@ -1495,14 +1480,14 @@ module ApplicationHelper
   end
 
   def image_exporter(image_id, exported)
-    javascript_include('jquery.min')
+    javascript_include('jquery')
     javascript_include('image_export')
     content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
   end
 
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
-    javascript_include('jquery.min')
+    javascript_include('jquery')
     javascript_include('image_vote')
 
     if image.is_a?(Image)
