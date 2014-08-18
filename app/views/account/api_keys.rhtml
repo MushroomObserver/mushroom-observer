@@ -67,7 +67,7 @@
 
 <%= if @js
 ################################################################################
-  javascript_include('prototype')
+  javascript_include('jquery.min')
   javascript_tag %(
     var CUR_ID = null;
 
@@ -78,31 +78,30 @@
     } };
 
     function activate_key(id) {
-      var td = $("key_time_" + id);
-      new Ajax.Request("/ajax/api_key/activate/" + id, {
-        parameters: { authenticity_token: CSRF_TOKEN },
-        asynchronous: true,
-        onFailure: function (response) {
+      jQuery.ajax("/ajax/api_key/activate/" + id, {
+        data: { authenticity_token: CSRF_TOKEN },
+        dataType: "text",
+        async: true,
+        error: function (response) {
           alert(response.responseText);
         },
-        onSuccess: function(response) {
-          td.innerHTML = '--';
+        success: function() {
+          jQuery("#key_time_" + id).html("--");
         }
       })
     }
 
     function edit_key(id) {
-      var td = $("key_notes_" + id);
       var html = "<form>";
       html += "<input type='text_field' size='40' id='key_notes_field'/>";
       html += "<input type='button' value='#{:SAVE.l}' onclick='save_key(" + id + ")'/>";
       html += "<input type='button' value='#{:CANCEL.l}' onclick='cancel_key(" + id + ")'/>";
       html += "</form>";
-      td.innerHTML = html;
-      $('key_notes_field').value = NOTES[id];
-      $('remove_button').disabled = 'disabled';
-      $('create_button').disabled = 'disabled';
-      Event.observe($('key_notes_field'), 'keypress', function (e) {
+      jQuery("#key_notes_" + id).html(html);
+      jQuery("#key_notes_field").val(NOTES[id]);
+      jQuery("#remove_button").prop("disabled", true);
+      jQuery("#create_button").prop("disabled", true);
+      jQuery("#key_notes_field").keypress(function (e) {
         if (CUR_ID && e.keyCode == Event.KEY_ESC)
           cancel_key(CUR_ID);
         if (CUR_ID && e.keyCode == Event.KEY_RETURN)
@@ -112,29 +111,28 @@
     }
 
     function save_key(id) {
-      var val = $('key_notes_field').value;
-      new Ajax.Request("/ajax/api_key/edit/" + id, {
-        parameters: { value: val, authenticity_token: CSRF_TOKEN },
-        asynchronous: true,
-        onFailure: function (response) {
+      var val = jQuery("#key_notes_field").val();
+      jQuery.ajax("/ajax/api_key/edit/" + id, {
+        data: { value: val, authenticity_token: CSRF_TOKEN },
+        dataType: "text",
+        async: true,
+        error: function (response) {
           cancel_key(id);
           alert(response.responseText);
         },
-        onSuccess: function(response) {
-          NOTES[id] = response.responseText;
+        success: function(text) {
+          NOTES[id] = text;
           cancel_key(id);
         }
       })
     }
 
     function cancel_key(id) {
-      var td = $("key_notes_" + id);
       var val = NOTES[id];
-      var html = val.escapeHTML() + " &nbsp; "
-      html += "[<a href='#' onclick='edit_key(" + id + ")'>#{:EDIT.t}</a>]"
-      td.innerHTML = html;
-      $('remove_button').disabled = '';
-      $('create_button').disabled = '';
+      var link = "[<a href='#' onclick='edit_key(" + id + ")'>#{:EDIT.t}</a>]";
+      jQuery("#key_notes_" + id).text(val).append(" &nbsp; " + link);
+      jQuery("#remove_button").prop("disabled", false);
+      jQuery("#create_button").prop("disabled", false);
       CUR_ID = null;
     }
   )
