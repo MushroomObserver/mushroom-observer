@@ -2,7 +2,7 @@
   if can_do_ajax?
     javascript_include 'jquery'
     javascript_include 'jquery_extensions'
-    javascript_include 'name_list'
+    javascript_include 'name_lister'
     javascript_include 'name_list_data'
   end
 
@@ -62,6 +62,8 @@
     </tr>
   </table><br/>
 
+<div id="log"></div>
+
   <%= javascript_tag %(
     nl_initialize_names();
     nl_draw('g', NL_GENERA);
@@ -70,6 +72,7 @@
     jQuery(document).keydown(nl_keydown);
     jQuery(document).keyup(nl_keyup);
     jQuery(document).click(nl_unfocus);
+    nc('g', 0); // click on first genus
   ) %>
 
   <div class="HelpNote"><%= :name_lister_help.tp %></div>

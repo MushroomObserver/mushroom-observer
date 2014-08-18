@@ -299,16 +299,20 @@ function nl_draw_cursor(s, list) {
   }
 }
 
+var scroll_bar_width = null;
+
 // Make sure cursor is visible in a given column.
 function nl_warp(s) {
   var i = NL_CURSOR[s] || 0;
   var e = jQuery("#" + s + i);
+  if (!scroll_bar_width)
+    scroll_bar_width = e.getScrollBarWidth();
   if (e && e.offset()) {
     var section = jQuery("#" + NL_DIVS[s]);
-    var ey = e.offset().top;
-    var eh = e.height();
+    var ey = e.offset().top - e.parent().offset().top;
+    var eh = e.outerHeight();
     var sy = section.scrollTop();
-    var sh = 450 - 17; // 17 is for scrollbar
+    var sh = 450 - scroll_bar_width;
     var ny = ey+eh > sy+sh ? ey+eh - sh : sy;
     ny = ey < ny ? ey : ny;
     if (sy != ny)
