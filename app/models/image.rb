@@ -296,7 +296,7 @@ class Image < AbstractModel
   end
 
   def image_url(size)
-    ImageURL.new(
+    Image::Url.new(
       :size => size,
       :id => id,
       :transferred => transferred,
@@ -305,7 +305,7 @@ class Image < AbstractModel
   end
 
   def self.image_url(size, id, args={})
-    ImageURL.new(
+    Image::Url.new(
       :size => size,
       :id => id,
       :transferred => args.fetch(:transferred, true),

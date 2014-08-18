@@ -1,5 +1,5 @@
 class Image
-  class URL
+  class Url
     SUBDIRECTORIES = {
       :original  => 'orig',
       :full_size => 'orig',
