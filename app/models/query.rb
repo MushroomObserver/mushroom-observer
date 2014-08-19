@@ -172,6 +172,7 @@ class Query < AbstractQuery
       :location? => :string,
       :user?     => :string,
       :content?  => :string,
+      :search_location_notes? => :boolean,
     },
     :all => {
     },
@@ -2152,6 +2153,9 @@ class Query < AbstractQuery
     if !location.blank?
       if model_symbol == :Location
         self.where += google_conditions(location, 'locations.name')
+      elsif params[:search_location_notes]
+        self.where += google_conditions(location,
+          'IF(locations.id,CONCAT(locations.name,locations.notes),observations.where)')
       else
         self.where += google_conditions(location,
           'IF(locations.id,locations.name,observations.where)')

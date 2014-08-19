@@ -305,6 +305,66 @@ class ObserverControllerTest < FunctionalTestCase
     assert_list_observations
   end
 
+  def test_advanced_search_2
+    get(:advanced_search,
+      :name => 'Agaricus',
+      :location => 'California'
+    )
+    assert_response(:success)
+    results = @controller.instance_variable_get('@objects');
+    assert_equal(4, results.length)
+  end
+
+  def test_advanced_search_3
+
+    # Fail to include notes.
+    get(:advanced_search,
+      :name => 'Fungi',
+      :location => 'String in notes'
+    )
+    assert_response(:success)
+    results = @controller.instance_variable_get('@objects');
+    assert_equal(0, results.length)
+
+    # Include notes, but notes don't have string yet!
+    get(:advanced_search,
+      :name => 'Fungi',
+      :location => '"String in notes"',
+      :search_location_notes => 1
+    )
+    assert_response(:success)
+    results = @controller.instance_variable_get('@objects');
+    assert_equal(0, results.length)
+
+    # Add string to notes, make sure it is actually added.
+    login('rolf')
+    loc = locations(:burbank)
+    loc.notes = 'blah blah blahString in notesblah blah blah'
+    loc.save
+    loc.reload
+    assert(loc.notes.to_s.include?('String in notes'))
+
+    # Forget to include notes again.
+    get(:advanced_search,
+      :name => 'Fungi',
+      :location => 'String in notes'
+    )
+    assert_response(:success)
+    results = @controller.instance_variable_get('@objects');
+    assert_equal(0, results.length)
+
+    # Now it should finally find the three unknowns at Burbank because Burbank
+    # has the magic string in its notes, and we're looking for it.
+    get(:advanced_search,
+      :name => 'Fungi',
+      :location => '"String in notes"',
+      :search_location_notes => 1
+    )
+    assert_response(:success)
+    results = @controller.instance_variable_get('@objects');
+    assert_equal(3, results.length)
+  end
+
   def test_pattern_search
     params = {:search => {:pattern => '12', :type => 'observation'}}
     get_with_dump(:pattern_search, params)
