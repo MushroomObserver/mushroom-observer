@@ -92,15 +92,6 @@
 #
 ################################################################################
 
-class X
-  def self.clear
-    @@x = []
-  end
-  def self.x
-    @@x
-  end
-end
-
 class ApplicationController < ActionController::Base
   require 'extensions'
   require 'login_system'

@@ -732,7 +732,6 @@ class AbstractQuery < ActiveRecord::Base
     query.attributes = {
       :model        => model,
       :flavor       => flavor,
-      :user         => User.current,
       :updated_at   => Time.now,
       :access_count => 0,
     }
