@@ -248,7 +248,7 @@ class AjaxControllerTest < FunctionalTestCase
       good_ajax_request(:pivotal, :type => 'story', :id => PIVOTAL_TEST_ID)
       assert_match(/This is a test story/, @response.body)
       assert_match(/Posted by.*Rolf Singer/, @response.body)
-      assert_match(/this is a test comment/, @response.body)
+      assert_match(/This is a test comment/, @response.body)
       assert_match(/By:.*Mary Newbie/, @response.body)
       assert_match(/Post Comment/, @response.body)
     end
