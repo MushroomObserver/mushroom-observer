@@ -345,6 +345,11 @@ div.HelpNoteIndent {
   font-size: 80%;
 }
 
+div.textile {
+  max-width: 50em;
+  word-wrap: break-word;
+}
+
 div.textile table td {
   padding: 2px 5px 2px 5px;
 }
