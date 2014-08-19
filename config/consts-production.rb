@@ -36,7 +36,7 @@ PIVOTAL_PASSWORD = 'xxx'
 
 IMAGE_SOURCES = {
   :local => {
-    :test => "file://#{LOCAL_IMAGE_FILES}",
+    :test => "file://#{APP_ROOT}/public/images",
     :read => "/local_images"
   },
   :cdmr => {

@@ -44,7 +44,7 @@ do
     break
   fi
 done
-declare -a image_servers=( $(sed -n '/IMAGE_SOURCES/,/^}/p' $img_config | grep :write | sed -e 's/.*"\(.*\)".*/\1/') )
+declare -a image_servers=( $(sed -n '/IMAGE_SOURCES/,/^}/p' $img_config | egrep -v '^ *#' | grep :write | sed -e 's/.*"\(.*\)".*/\1/') )
 
 function time_stamp {
   date "+%Y%m%d %H:%M:%S %Z"
