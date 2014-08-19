@@ -30,7 +30,7 @@ MAIL_CONFIG = {
 
 # Configuration for accessing Pivotal Tracker project.
 PIVOTAL_PROJECT  = '224629'
-PIVOTAL_TEST_ID  = '14385277'
+PIVOTAL_TEST_ID  = '77165602'
 PIVOTAL_USERNAME = 'webmaster@mushroomobserver.org'
 PIVOTAL_PASSWORD = 'xxx'
 

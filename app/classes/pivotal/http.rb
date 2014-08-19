@@ -135,9 +135,9 @@ class Pivotal
     end
 
     def write_cache(filename, text)
+      FileUtils.mkdir_p(PIVOTAL_CACHE) unless File.directory?(PIVOTAL_CACHE)
       file = PIVOTAL_CACHE + '/' + filename
-      Dir.mkdir(PIVOTAL_CACHE) if !File.exists?(PIVOTAL_CACHE)
-      File.open(file, 'w:utf-8') {|f| f.write(text)}
+      File.open(file, 'w:utf-8') {|f| f.write(text.to_s.force_encoding('utf-8'))}
     end
 
     def get_cache_or_request(filename, path)

@@ -2468,20 +2468,29 @@
   pivotal_head_month: has comments within last month
   pivotal_head_none: has no recent comments
   pivotal_head_all: show everything
+
   pivotal_label_critical: critical
   pivotal_label_bottleneck: bottleneck
   pivotal_label_api: api
   pivotal_label_design: design
+  pivotal_label_documentation: documentation
   pivotal_label_email: email
   pivotal_label_eol: eol
+  pivotal_label_github: github
+  pivotal_label_glossary: glossary
+  pivotal_label_herbarium: herbarium
   pivotal_label_i18n: translations
+  pivotal_label_images: images
   pivotal_label_interface: interface
   pivotal_label_lists: lists
   pivotal_label_locations: locations
   pivotal_label_names: names
+  pivotal_label_observations: observations
+  pivotal_label_pivotal_tracker: pivotal
   pivotal_label_projects: projects
   pivotal_label_search: searching
   pivotal_label_taxonomy: taxonomy
+  pivotal_label_vagrant: vagrant
   pivotal_label_voting: voting
   pivotal_label_other: other
   pivotal_label_admin: admin
@@ -2496,8 +2505,6 @@
   pivotal_label_unstarted: "[:pivotal_state_unstarted]"
   pivotal_label_started: "[:pivotal_state_started]"
   pivotal_label_all: "[:all]"
-
-
 
   # observer/refine_search
   refine_search_title: Refine [TYPE] Search

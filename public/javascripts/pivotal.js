@@ -22,7 +22,7 @@ function click_on_label(label) {
   for (i=0; i<new_stories.length; i++) {
     j = new_stories[i];
     if (!state[j]) {
-      $("pivotal_" + j).show();
+      jQuery("#pivotal_" + j).show();
     } else {
       state[j] = false;
     }
@@ -58,7 +58,7 @@ function vote_on_story(story, user, value) {
 }
 
 function click_on_story(story) {
-  var div = jQuery("%pivotal_body_" + story);
+  var div = jQuery("#pivotal_body_" + story);
   if (CUR_STORY) {
     jQuery("#pivotal_body_" + CUR_STORY).hide();
   }
