@@ -123,7 +123,7 @@ class QueuedEmail < AbstractModel
   # This tells ActiveRecord to instantiate new records into the class referred
   # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration is
   # important to convince it not to strip the "QueuedEmail::" off the front.
-  set_inheritance_column 'flavor'
+  self.inheritance_column = 'flavor'
   self.store_full_sti_class = true
 
   # Ensure that all the subclasses get loaded.  Problem is some subclasses have
