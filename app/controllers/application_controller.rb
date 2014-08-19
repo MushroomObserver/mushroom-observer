@@ -155,7 +155,7 @@ class ApplicationController < ActionController::Base
   end
 
   def require_successful_user
-    if @user.is_successful_contributor?
+    if @user and @user.is_successful_contributor?
       true
     else
       flash_warning(:unsuccessful_contributor_warning.t)

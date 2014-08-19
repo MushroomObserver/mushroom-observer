@@ -61,7 +61,7 @@ class SpeciesListController < ApplicationController
   ]
 
   before_filter :require_successful_user, :only => [
-    :create_species_list
+    :create_species_list, :name_lister
   ]
   ##############################################################################
   #
