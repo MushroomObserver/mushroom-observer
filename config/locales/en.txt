@@ -1196,7 +1196,7 @@
   form_observations_upload_another: Upload Another...
   form_observations_edit_image: Edit Image
   form_observations_remove_image: Remove Image
-  form_observations_lat_long_help: "Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and longitude between -180.0 and 180.0.  Altitude will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1330\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_lat_long_help: "Optional GPS location. Latitude is expected to be between -90.0 and 90.0 and longitude between -180.0 and 180.0. Altitude will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
