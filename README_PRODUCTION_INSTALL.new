@@ -151,6 +151,7 @@ mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 on code not on the master branch.]
 
 mo> mkdir log public/images/{thumb,320,640,960,1280,orig}
+mo> ln -s images public/local_images
 mo> cp config/bash_aliases ~/.bash_aliases
 mo> cp config/consts-production.rb config/consts-site.rb
 mo> vi config/consts-site.rb

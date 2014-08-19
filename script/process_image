@@ -84,6 +84,7 @@ run jpegresize 160x160   -q 90 --max-size $small_file $thumb_file
 # run convert -thumbnail "160x160>"   -quality 90 $small_file $thumb_file
 
 if (( $production )); then
+  transferred_any=0
   for server in ${image_servers[@]}; do
     wait_for scp
     run scp $thumb_file  $server/thumb/$id.jpg
@@ -95,10 +96,11 @@ if (( $production )); then
     if [[ $orig_file != $full_file ]]; then
       run scp $orig_file $server/orig/$id.$ext
     fi
+    transferred_any=1
   done
 fi
 
-if (( $production && !$errors )); then
+if (( $production && !$errors && $transferred_any)); then
   run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id"
 fi
 
