@@ -18,9 +18,9 @@ gem 'blankslate'
 gem 'acts_as_versioned_jw'
 gem 'browser'
 gem 'ruby-rtf'
+gem 'enum_column3'
 
 # These may not be necessary any more:
 # gem 'activerecord-mysql2-adapter'
 # gem 'mysql'
 # gem 'sparql', '> 1'
-# gem 'enum_column3'
