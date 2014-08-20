@@ -83,7 +83,7 @@ class ApiController < ApplicationController
     if @api.errors.any?(&:fatal)
       render(:layout => 'api', :text => '')
     else
-      render(:layout => 'api', :template => '/api/results.rxml')
+      render(:layout => 'api', :template => '/api/results.xml.erb')
     end
   rescue => e
     @api ||= API.new

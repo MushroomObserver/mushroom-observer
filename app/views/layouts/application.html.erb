@@ -144,8 +144,8 @@
 
                 <% if DEVELOPMENT || is_reviewer?
                   layouts = []
-                  for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.rhtml")
-                    layouts << $1 if file.match(/(app\w+)\.rhtml/)
+                  for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.html.erb")
+                    layouts << $1 if file.match(/(app\w+)\.html\.erb/)
                   end
                   if layouts.length > 1 %>
                     Layouts:<br/>
