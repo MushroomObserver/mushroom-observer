@@ -108,5 +108,8 @@ module MushroomObserver
     # Configure SMTP settings for ActionMailer.
     config.action_mailer.smtp_settings = MAIL_CONFIG
     
+    # Minimal asset configuration.
+    config.assets.enabled = true
+    config.assets.version = '1.0'
   end
 end

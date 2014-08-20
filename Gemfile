@@ -1,16 +1,25 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 3.0.10'
+gem 'rails', '3.1.12'
 gem 'mysql2'
-gem 'activerecord-mysql2-adapter'
-gem 'mysql' # To keep rake happy for some reason
-gem 'test-unit'
-gem 'RedCloth'
+gem 'jquery-rails'
+
+group :assets do
+  gem 'sass-rails',   '~> 3.1.7'
+  gem 'coffee-rails', '~> 3.1.1'
+  gem 'uglifier',     '>= 1.0.3'
+end
+
+# gem 'activerecord-mysql2-adapter'
+# gem 'mysql'
+# gem 'test-unit'
+# gem 'RedCloth'
 # gem 'sparql', '> 1'
-gem 'i18n'
-gem 'acts_as_versioned' # , '0.2.3'
-gem 'enum_column3'
-gem 'blankslate'
+# gem 'i18n'
+# gem 'acts_as_versioned_jw'
+# gem 'enum_column3'
+# gem 'blankslate'
+
 gem 'browser'
 gem 'ruby-rtf'
