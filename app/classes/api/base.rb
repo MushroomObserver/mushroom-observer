@@ -16,7 +16,7 @@ class API
   attr_accessor :errors
 
   # Give other modules ability to do additional initialization.
-  class_inheritable_accessor :initializers
+  class_attribute :initializers
   self.initializers = []
 
   # Initialize and process a request.

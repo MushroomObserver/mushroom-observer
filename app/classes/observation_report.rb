@@ -7,10 +7,10 @@ module ObservationReport
     attr_accessor :query
     attr_accessor :encoding
 
-    class_inheritable_accessor :default_encoding
-    class_inheritable_accessor :mime_type
-    class_inheritable_accessor :extension
-    class_inheritable_accessor :header
+    class_attribute :default_encoding
+    class_attribute :mime_type
+    class_attribute :extension
+    class_attribute :header
 
     def initialize(args)
       self.query    = args[:query]

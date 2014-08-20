@@ -1,16 +1,16 @@
 # encoding: utf-8
 
 class API
-  class_inheritable_accessor :model
-  class_inheritable_accessor :table
+  class_attribute :model
+  class_attribute :table
 
-  class_inheritable_accessor :high_detail_includes
-  class_inheritable_accessor :low_detail_includes
+  class_attribute :high_detail_includes
+  class_attribute :low_detail_includes
 
-  class_inheritable_accessor :high_detail_page_length
-  class_inheritable_accessor :low_detail_page_length
-  class_inheritable_accessor :put_page_length
-  class_inheritable_accessor :delete_page_length
+  class_attribute :high_detail_page_length
+  class_attribute :low_detail_page_length
+  class_attribute :put_page_length
+  class_attribute :delete_page_length
 
   self.high_detail_includes = []
   self.low_detail_includes  = []
