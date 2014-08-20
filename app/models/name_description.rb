@@ -88,23 +88,23 @@ class NameDescription < Description
   acts_as_versioned(
     :table_name => 'name_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :nullify }
-  )
-  non_versioned_columns.push(
-    'sync_id',
-    'created_at',
-    'name_id',
-    'review_status',
-    'last_review',
-    'reviewer_id',
-    'ok_for_export',
-    'num_views',
-    'last_view',
-    'source_type',
-    'source_name',
-    'project_id',
-    'public',
-    'locale'
+    :association_options => { :dependent => :nullify },
+    :except => [
+      :sync_id,
+      :created_at,
+      :name_id,
+      :review_status,
+      :last_review,
+      :reviewer_id,
+      :ok_for_export,
+      :num_views,
+      :last_view,
+      :source_type,
+      :source_name,
+      :project_id,
+      :public,
+      :locale
+    ]
   )
 
   versioned_class.before_save {|x| x.user_id = User.current_id}

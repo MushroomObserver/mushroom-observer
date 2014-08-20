@@ -10,12 +10,12 @@ class Term < AbstractModel
   acts_as_versioned(
     :table_name => 'terms_versions',
     :if_changed => ALL_TERM_FIELDS,
-    :association_options => { :dependent => :nullify }
-  )
-  non_versioned_columns.push(
-    'thumb_image_id',
-    'created_at',
-    'rss_log_id',
+    :association_options => { :dependent => :nullify },
+    :except => [
+      :thumb_image_id,
+      :created_at,
+      :rss_log_id
+    ]
   )
   versioned_class.before_save {|x| x.user_id = User.current_id}
 

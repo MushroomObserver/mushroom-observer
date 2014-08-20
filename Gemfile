@@ -17,9 +17,9 @@ end
 # gem 'RedCloth'
 # gem 'sparql', '> 1'
 # gem 'i18n'
-# gem 'acts_as_versioned_jw'
 # gem 'enum_column3'
 # gem 'blankslate'
 
+gem 'acts_as_versioned_jw'
 gem 'browser'
 gem 'ruby-rtf'

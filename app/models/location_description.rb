@@ -72,20 +72,20 @@ class LocationDescription < Description
   acts_as_versioned(
     :table_name => 'location_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :nullify }
-  )
-  non_versioned_columns.push(
-    'sync_id',
-    'created_at',
-    'location_id',
-    'num_views',
-    'last_view',
-    'ok_for_export',
-    'source_type',
-    'source_name',
-    'project_id',
-    'public',
-    'locale'
+    :association_options => { :dependent => :nullify },
+    :except => [
+      :sync_id,
+      :created_at,
+      :location_id,
+      :num_views,
+      :last_view,
+      :ok_for_export,
+      :source_type,
+      :source_name,
+      :project_id,
+      :public,
+      :locale
+    ]
   )
 
   versioned_class.before_save {|x| x.user_id = User.current_id}

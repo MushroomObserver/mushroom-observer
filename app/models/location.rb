@@ -88,26 +88,26 @@ class Location < AbstractModel
   acts_as_versioned(
     :table_name => 'locations_versions',
     :if_changed => [
-      'name',
-      'north',
-      'south',
-      'west',
-      'east',
-      'high',
-      'low',
-      'notes'
-  ])
-  non_versioned_columns.push(
-    'sync_id',
-    'created_at',
-    'num_views',
-    'last_view',
-    'ok_for_export',
-    'rss_log_id',
-    'description_id'
+      :name,
+      :north,
+      :south,
+      :west,
+      :east,
+      :high,
+      :low,
+      :notes
+    ],
+    :except => [
+      :sync_id,
+      :created_at,
+      :num_views,
+      :last_view,
+      :ok_for_export,
+      :rss_log_id,
+      :description_id
+    ]
   )
 
-#  before_save  :set_search_name
   after_update :notify_users
 
   # Automatically log standard events.
@@ -388,11 +388,11 @@ class Location < AbstractModel
   def self.understood_country?(candidate)
     understood_with_prefixes(candidate, UNDERSTOOD_COUNTRIES)
   end
-  
+
   def self.countries_by_count
     CountryCounter.new.countries_by_count
   end
-  
+
   @@location_cache = nil
 
   # Check if a given name (postal order) already exists as a defined

@@ -113,3 +113,25 @@ module MushroomObserver
     config.assets.version = '1.0'
   end
 end
+
+# The original version of this method tries to copy the inheritance column,
+# but since we don't use inheritance columns, it throws a ton of deprecation
+# warnings. I copied the original version here minus the inheritance stuff.
+# I suspect this will go away when we upgrade to rails 3.2.
+# -Jason 20140727 (acts_as_versioned_jw version 3.2.3)
+require 'acts_as_versioned'
+module ActiveRecord
+  module Acts
+    module Versioned
+      module Behaviors
+        def clone_versioned_model(orig_model, new_model)
+          self.class.versioned_columns.each do |col|
+            next unless orig_model.has_attribute?(col.name)
+            define_method(new_model, col.name.to_sym)
+            new_model.send("#{col.name.to_sym}=", orig_model.send(col.name))
+          end
+        end
+      end
+    end
+  end
+end
