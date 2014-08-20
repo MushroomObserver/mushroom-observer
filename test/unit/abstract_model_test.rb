@@ -58,7 +58,7 @@ class AbstractModelTest < ActiveSupport::TestCase
     )
 
     # Make sure it fails to save if no user logged in.
-    assert_equal(1, obs.errors.length, 'Should not have saved without login.')
+    assert_equal(1, obs.errors.size, 'Should not have saved without login.')
     assert_equal(:validate_observation_user_missing.t, obs.dump_errors)
 
     # Log Rolf in ang try again.

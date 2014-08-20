@@ -184,7 +184,7 @@ class NameDescription < Description
     # Save unless there are substantive changes pending.
     if !save_version?
       save_without_our_callbacks
-      if errors.length > 0
+      if errors.size > 0
         raise "update_review_status failed: [#{dump_errors}]"
       end
     end
