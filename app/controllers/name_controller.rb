@@ -1422,7 +1422,7 @@ class NameController < ApplicationController
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
     @data = EolData.new()
-    render(:action => "eol", :layout => false)
+    render(:template => '/name/eol.xml.erb', :layout => false)
   end
 
   def refresh_links_to_eol
@@ -1451,6 +1451,7 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY images.vote_cache DESC
     ))
+    
     @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
 
     ids = Name.connection.select_values(%(
