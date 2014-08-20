@@ -2235,7 +2235,7 @@ class ObserverController < ApplicationController
                        :order => "updated_at desc", :limit => 100, :include => [
                          :name, :species_list, { :observation  => :name },
                        ])
-    render(:action => "rss", :layout => false)
+    render(:template => "/observer/rss.xml.erb", :layout => false)
   end
 
   ##############################################################################

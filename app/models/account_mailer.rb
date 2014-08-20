@@ -61,6 +61,10 @@
 
 class AccountMailer < ActionMailer::Base
 
+  # Suppress charset deprecation warning until we can upgrade further.
+  # See: http://stackoverflow.com/questions/10390951
+  def charset; @charset; end
+
   # Let curators know about a specimen added by a non-curator.
   # sender::    User who created the specimen.
   # receiver::  Curator.

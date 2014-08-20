@@ -64,7 +64,7 @@ class AbstractModelTest < ActiveSupport::TestCase
     # Log Rolf in ang try again.
     User.current = rolf
     obs.save
-    assert_equal(0, obs.errors.length, 'Could not save even when logged in.')
+    assert_equal(0, obs.errors.size, 'Could not save even when logged in.')
 
     # Make sure our local time is the same after being saved then retrieved
     # from database.  'Make sure the updated_at' timestamp also gets set to some
