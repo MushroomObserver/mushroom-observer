@@ -1345,14 +1345,14 @@ class ObserverController < ApplicationController
         }, this_state))
       elsif !@observation.destroy
         flash_error(:runtime_destroy_observation_failed.t(:id => @observation.id))
-        edirect_to(add_query_param({
+        redirect_to(add_query_param({
           :action => 'show_observation', :id => @observation.id
           }, this_state))
       else
         Transaction.delete_observation(:id => @observation)
         flash_notice(:runtime_destroy_observation_success.t(:id => params[:id].to_s))
         if next_state
-          edirect_to(add_query_param({
+          redirect_to(add_query_param({
             :action => 'show_observation', :id => next_state.current_id
             }, next_state))
         else
