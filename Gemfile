@@ -11,15 +11,16 @@ group :assets do
   gem 'uglifier',     '>= 1.0.3'
 end
 
-# gem 'activerecord-mysql2-adapter'
-# gem 'mysql'
-# gem 'test-unit'
-# gem 'RedCloth'
-# gem 'sparql', '> 1'
-# gem 'i18n'
-# gem 'enum_column3'
-# gem 'blankslate'
-
+gem 'i18n'
+gem 'test-unit'
+gem 'RedCloth'
+gem 'blankslate'
 gem 'acts_as_versioned_jw'
 gem 'browser'
 gem 'ruby-rtf'
+
+# These may not be necessary any more:
+# gem 'activerecord-mysql2-adapter'
+# gem 'mysql'
+# gem 'sparql', '> 1'
+# gem 'enum_column3'

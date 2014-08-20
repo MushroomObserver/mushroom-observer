@@ -18,3 +18,4 @@ production-logs
 .tm_properties
 
 .bundle
+Gemfile.lock
