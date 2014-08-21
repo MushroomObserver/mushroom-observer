@@ -46,28 +46,6 @@ module ControllerExtensions
   #
   ##############################################################################
 
-  # # Make sure we clear out the last errors before each request.
-  # def get(*args)
-  #   if @without_clearing_flash
-  #     @without_clearing_flash = nil
-  #   elsif session.is_a?(ActionController::TestSession)
-  #     flash[:rendered_notice] = nil
-  #     session[:notice] = nil
-  #   end
-  #   super
-  # end
-  # 
-  # # Make sure we clear out the last errors before each request.
-  # def post(*args)
-  #   if @without_clearing_flash
-  #     @without_clearing_flash = nil
-  #   elsif session.is_a?(ActionController::TestSession)
-  #     flash[:rendered_notice] = nil
-  #     session[:notice] = nil
-  #   end
-  #   super
-  # end
-
   # Second "get" won't update fullpath, so we must reset the request.
   def reget(*args)
     @request = @request.class.new

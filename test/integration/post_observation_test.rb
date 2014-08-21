@@ -208,7 +208,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def review_flash(patterns)
-    notice = flash[:rendered_notice]
+    notice = get_last_flash
     assert_flash_success
     patterns.each { |pat| assert_match(pat, notice) }
   end
