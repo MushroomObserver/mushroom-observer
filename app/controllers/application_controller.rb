@@ -655,9 +655,7 @@ logger.warn('SESSION: ' + session.inspect)
   # application layout (app/views/layouts/application.rhtml) every time it
   # renders the latest error messages.
   def flash_clear
-    if TESTING
-      flash[:rendered_notice] = session[:notice]
-    end
+    @last_notice = session[:notice] if TESTING
     session[:notice] = nil
   end
   helper_method :flash_clear

@@ -5,7 +5,7 @@ require 'test_helper'
 class RandomTest < IntegrationTestCase
   include SessionExtensions
   fixtures :names
-  
+
   test "pivotal tracker" do
     get('/')
     click(:label => 'Feature Tracker')
@@ -33,12 +33,12 @@ class RandomTest < IntegrationTestCase
     rolf_session.get('/')
     assert(/current user/i, rolf_session.response.body)
   end
-  
+
   test "sessions" do
     rolf_session = login(rolf)
     mary_session = login(mary)
     katrina_session = login(katrina)
-    
+
     rolf_session.get('/')
     assert(/rolf/i, rolf_session.response.body)
 

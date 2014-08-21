@@ -19,7 +19,7 @@ module FlashExtensions
   # Get the errors rendered in the last request, or current set of errors if
   # redirected.
   def get_last_flash
-    flash[:rendered_notice] || session[:notice]
+    @controller.instance_variable_get('@last_notice') || session[:notice]
   end
 
   # Assert that there was no notice, warning or error.
@@ -62,7 +62,7 @@ module FlashExtensions
       assert_block(msg + "Got the wrong flash error(s). " +
                          "Expected: #{expect.inspect}.  Got: #{got.inspect}.") { got == expect }
     end
-    flash[:rendered_notice] = nil
+    @controller.instance_variable_set('@last_notice', nil)
     session[:notice] = nil
   end
 end
