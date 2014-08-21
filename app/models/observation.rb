@@ -362,7 +362,8 @@ class Observation < AbstractModel
   def change_vote(naming, value, user=User.current)
     result = false
     naming = lookup_naming(naming)
-    vote = naming.users_vote(user)
+    vote  = naming.users_vote(user)
+    value = value.to_f
 
     # This special value means destroy vote.
     if value == Vote.delete_vote
