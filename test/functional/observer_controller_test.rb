@@ -1697,8 +1697,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_edit_observation_with_non_image
     obs = observations(:minimal_unknown)
-    file = FilePlus.new("#{::Rails.root.to_s}/test/fixtures/projects.yml")
-    file.content_type = 'text/plain'
+    file = Rack::Test::UploadedFile.new("#{Rails.root}/test/fixtures/projects.yml", "text/plain")
     params = {
       :id => obs.id,
       :observation => {
@@ -2494,12 +2493,9 @@ class ObserverControllerTest < FunctionalTestCase
 
     setup_image_dirs
     file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
-    file1 = FilePlus.new(file)
-    file1.content_type = 'image/jpeg'
-    file2 = FilePlus.new(file)
-    file2.content_type = 'image/jpeg'
-    file3 = FilePlus.new(file)
-    file3.content_type = 'image/jpeg'
+    file1 = Rack::Test::UploadedFile.new(file, "image/jpeg")
+    file2 = Rack::Test::UploadedFile.new(file, "image/jpeg")
+    file3 = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
     new_image_1 = Image.create(
       :copyright_holder => 'holder_1',
@@ -2581,9 +2577,8 @@ class ObserverControllerTest < FunctionalTestCase
     login('rolf')
 
     setup_image_dirs
-    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
-    file = FilePlus.new(file)
-    file.content_type = 'image/jpeg'
+    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    file = Rack::Test::UploadedFile.new(file, "image/jpeg")
 
     post(:create_observation,
       :observation => {

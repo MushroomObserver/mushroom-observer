@@ -945,8 +945,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
     list_data = "Agaricus bisporus\r\nBoletus rubripes\r\nAmanita phalloides"
-    file = StringIOPlus.new(list_data)
-    file.content_type = 'text/plain'
+    file = Rack::Test::UploadedString.new(list_data, 'text/plain')
     params = {
       "id" => spl.id,
       "species_list" => {
@@ -963,11 +962,10 @@ class SpeciesListControllerTest < FunctionalTestCase
   def test_read_species_list_two
     spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
-    filename = "#{::Rails.root.to_s}/test/species_lists/foray_notes.txt"
+    filename = "#{::Rails.root}/test/species_lists/foray_notes.txt"
     file = File.new(filename)
     list_data = file.read.split(/\s*\n\s*/).reject(&:blank?).join("\r\n")
-    file = FilePlus.new(filename)
-    file.content_type = 'text/plain'
+    file = Rack::Test::UploadedFile.new(filename, "text/plain")
     params = {
       "id" => spl.id,
       "species_list" => {

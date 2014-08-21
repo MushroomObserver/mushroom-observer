@@ -433,8 +433,8 @@ class Image < AbstractModel
 
     case file
       # Image is already stored in a local temp file.  This is how Rails passes
-      # large files from Apache.
-      when Tempfile, ActionDispatch::Http::UploadedFile
+      # large files from the webserver.
+      when Tempfile, ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         @file = file
         self.upload_temp_file = file.path
         self.upload_length = file.size

@@ -25,6 +25,7 @@ for file in %w(
   integration_test_case
   integration_session
   language_extensions
+  uploaded_string
 )
   require File.expand_path(File.dirname(__FILE__) + "/#{file}")
 end
@@ -268,22 +269,6 @@ class ActiveSupport::TestCase
     # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
     (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
   end
-end
-
-# Used to test image uploads.  The normal "live" params[:upload] is
-# essentially a file with a "content_type" field added to it.  This is
-# meant to take its place.
-class FilePlus < File
-  attr_accessor :content_type
-  def size
-    File.size(path)
-  end
-end
-
-# Create subclasses of StringIO that has a content_type member to replicate the
-# dynamic method addition that happens in Rails cgi.rb.
-class StringIOPlus < StringIO
-  attr_accessor :content_type
 end
 
 # Re-raise errors caught by the controller.

@@ -263,10 +263,10 @@ class SpeciesList < AbstractModel
            'application/octet-stream'
         self.data = file_field.read
       else
-        raise sprintf("Unrecognized content_type: %s\n", content_type)
+        raise "Unrecognized content_type: #{content_type.inspect}"
       end
     else
-      raise sprintf("Unrecognized file_field class: %s\n", file_field.class)
+      raise "Unrecognized file_field class: #{file_field.inspect}"
     end
   end
 

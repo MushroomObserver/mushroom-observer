@@ -484,8 +484,7 @@ class ImageControllerTest < FunctionalTestCase
     img_count = obs.images.size
     assert(img_count > 0)
     assert(obs.thumb_image)
-    file = FilePlus.new("#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg")
-    file.content_type = 'image/jpeg'
+    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg")
     params = {
       :id => obs.id,
       :image => {
