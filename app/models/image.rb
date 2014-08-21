@@ -546,8 +546,7 @@ class Image < AbstractModel
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
       if upload_handle.is_a?(IO) or
-         upload_handle.is_a?(StringIO) or
-         upload_handle.is_a?(PhusionPassenger::Utils::UnseekableSocket)
+         upload_handle.is_a?(StringIO)
         begin
           @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
           FileUtils.copy_stream(upload_handle, @file)
