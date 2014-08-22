@@ -158,7 +158,7 @@ class SiteData
       user_id ||= User.current_id
     end
 
-    if weight && weight > 0 && user_id > 0
+    if weight && weight > 0 && user_id && user_id > 0
       if mode == :del
         weight = -weight
       elsif mode == :chg

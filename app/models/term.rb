@@ -14,6 +14,7 @@ class Term < AbstractModel
     :except => [
       :thumb_image_id,
       :created_at,
+      :updated_at,
       :rss_log_id
     ]
   )

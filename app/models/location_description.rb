@@ -76,6 +76,7 @@ class LocationDescription < Description
     :except => [
       :sync_id,
       :created_at,
+      :updated_at,
       :location_id,
       :num_views,
       :last_view,

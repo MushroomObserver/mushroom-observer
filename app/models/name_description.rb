@@ -92,6 +92,7 @@ class NameDescription < Description
     :except => [
       :sync_id,
       :created_at,
+      :updated_at,
       :name_id,
       :review_status,
       :last_review,

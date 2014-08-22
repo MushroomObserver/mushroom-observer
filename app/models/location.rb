@@ -100,6 +100,7 @@ class Location < AbstractModel
     :except => [
       :sync_id,
       :created_at,
+      :updated_at,
       :num_views,
       :last_view,
       :ok_for_export,
