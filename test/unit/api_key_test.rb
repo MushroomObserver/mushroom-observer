@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ApiKeyTest < ActiveSupport::TestCase
+class ApiKeyTest < UnitTestCase
   def test_create
     count = ApiKey.count
 

@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class GeocoderTest < ActiveSupport::TestCase
+class GeocoderTest < UnitTestCase
 
   def test_unknown_place_name
     obj = Geocoder.new('Somewhere Out There')

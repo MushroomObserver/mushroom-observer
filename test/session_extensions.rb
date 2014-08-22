@@ -15,16 +15,24 @@
 #  ==== Helpers
 #  parse_query_params:: Get (our) query params from the given URL.
 #  get_links::        Get an Array of URLs for a set of links.
-#  login::            Log in a given user.
-#  logout::           Log out the current user.
 #
 #  ==== Navigation
 #  push_page::        Save response from last query so we can go back to it.
 #  go_back::          Go back a number of times.
 #  click::            Click on first link that matches the given args.
 #
+#  ==== Links
+#  assert_link_exists::                   Check that a link exists somewhere on the page.
+#  assert_link_exists_containing::        Check that a link containing a given string exists.
+#  assert_link_exists_beginning_with::    Check that a link beginning with a given string exists.
+#  assert_no_link_exists::                Opposite of above.
+#  assert_no_link_exists_containing::     Opposite of above.
+#  assert_no_link_exists_beginning_with:: Opposite of above.
+#
 #  ==== Forms
 #  open_form::        Encapsulate filling out and posting a given form.
+#  submit_form_with_changes::  Open form, apply Hash of changes, and submit it.
+#  assert_form_has_correct_values::  Make sure a given form has been initialized correctly.
 #
 ################################################################################
 
@@ -133,33 +141,6 @@ module SessionExtensions
       results = links.map {|l| l.attributes['href']}
     end
     return results
-  end
-
-  # Login the given user, do no testing, doesn't re-get login form if already
-  # served.
-  def login(login, password='testpassword', remember_me=true)
-    login = login.login if login.is_a?(User)
-    get('/account/login') if path != '/account/login'
-    open_form do |form|
-      form.change('login', login)
-      form.change('password', password)
-      form.change('remember_me', remember_me)
-      form.submit('Login')
-    end
-  end
-
-  # Login the given user, testing to make sure it was successful.
-  def login!(user, *args)
-    login(user, *args)
-    assert_flash(/success/i)
-    user = User.find_by_login(user) if user.is_a?(String)
-    assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
-  end
-
-  # Logout the current user and make sure it was successful.
-  def logout
-    click(:label => 'Logout')
-    assert_flash(/success/i)
   end
 
   ################################################################################

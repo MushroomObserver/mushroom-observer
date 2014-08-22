@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class NameTest < ActiveSupport::TestCase
+class NameTest < UnitTestCase
   def create_test_name(string, force_rank=nil)
     User.current = rolf
     parse = Name.parse_name(string)

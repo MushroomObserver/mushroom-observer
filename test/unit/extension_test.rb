@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class ExtensionTest < ActiveSupport::TestCase
+class ExtensionTest < UnitTestCase
 
   # ----------------------------
   #  :section: Symbol Tests

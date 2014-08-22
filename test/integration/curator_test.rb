@@ -2,57 +2,59 @@
 
 require 'test_helper'
 
-class CuratorTest < ActionDispatch::IntegrationTest
-  include SessionExtensions
+class CuratorTest < IntegrationTestCase
 
   def test_first_specimen
-    # login as mary (who doesn't have a herbarium)
-    login('mary', 'testpassword', :true)
-    get('/1')
-    assert_template('observer/show_observation')
-    click(:label => :show_observation_create_specimen.t)
-    assert_template('specimen/add_specimen')
-    open_form do |form|
+    # Mary doesn't have a herbarium.
+    sess = login!('mary', 'testpassword', true)
+    sess.get('/1')
+    sess.assert_template('observer/show_observation')
+    sess.click(:label => :show_observation_create_specimen.t)
+    sess.assert_template('specimen/add_specimen')
+    sess.open_form do |form|
       form.submit('Add')
     end
-    assert_template('herbarium/edit_herbarium')
+    sess.assert_template('herbarium/edit_herbarium')
   end
   
   def test_herbarium_index_from_add_specimen
-    login('mary', 'testpassword', :true)
-    get('specimen/add_specimen/1')
-    click(:label => :herbarium_index.t)
-    assert_template('herbarium/index')
+    sess = login!('mary', 'testpassword', true)
+    sess.get('specimen/add_specimen/1')
+    sess.click(:label => :herbarium_index.t)
+    sess.assert_template('herbarium/index')
   end
   
   def test_single_herbarium_search
-    get('/')
-    open_form('form[action*=search]') do |form|
+    sess = open_session
+    sess.get('/')
+    sess.open_form('form[action*=search]') do |form|
       form.change('pattern', 'New York')
       form.select('type', :HERBARIA.l)
       form.submit('Search')
     end
-    assert_template('herbarium/show_herbarium')
+    sess.assert_template('herbarium/show_herbarium')
   end
   
   def test_multiple_herbarium_search
-    get('/')
-    open_form('form[action*=search]') do |form|
+    sess = open_session
+    sess.get('/')
+    sess.open_form('form[action*=search]') do |form|
       form.change('pattern', 'Personal')
       form.select('type', :HERBARIA.l)
       form.submit('Search')
     end
-    assert_template('herbarium/list_herbaria')
+    sess.assert_template('herbarium/list_herbaria')
   end
   
   def test_specimen_search
-    get('/')
-    open_form('form[action*=search]') do |form|
+    sess = open_session
+    sess.get('/')
+    sess.open_form('form[action*=search]') do |form|
       form.change('pattern', 'Coprinus comatus')
       form.select('type', :SPECIMENS.l)
       form.submit('Search')
     end
-    assert_template('specimen/list_specimens')
+    sess.assert_template('specimen/list_specimens')
   end
   
   def test_herbarium_change_code
@@ -60,24 +62,24 @@ class CuratorTest < ActionDispatch::IntegrationTest
     new_code = 'NYBG'
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]
-    login(curator.login, 'testpassword', :true)
-    get("herbarium/edit_herbarium?id=#{herbarium.id}")
-    open_form do |form|
+    sess = login!(curator.login, 'testpassword', true)
+    sess.get("herbarium/edit_herbarium?id=#{herbarium.id}")
+    sess.open_form do |form|
       form.assert_value('code', herbarium.code)
       form.change('code', new_code)
       form.submit(:edit_herbarium_save.t)
     end
     herbarium = Herbarium.find(herbarium.id)
-    assert_equal(new_code, herbarium.code)
-    assert_template('herbarium/show_herbarium')
+    sess.assert_equal(new_code, herbarium.code)
+    sess.assert_template('herbarium/show_herbarium')
   end
   
   def test_herbarium_create
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
-    login(user.login, 'testpassword', :true)
-    get("herbarium/create_herbarium")
-    open_form do |form|
+    sess = login!(user.login, 'testpassword', true)
+    sess.get("herbarium/create_herbarium")
+    sess.open_form do |form|
       form.assert_value('herbarium_name', user.personal_herbarium_name)
       form.assert_value('code', '')
       form.assert_value('description', '')
@@ -87,7 +89,7 @@ class CuratorTest < ActionDispatch::IntegrationTest
       form.submit(:create_herbarium_add.t)
     end
     user = User.find(user.id)
-    assert_not_equal([], user.curated_herbaria)
-    assert_template('herbarium/show_herbarium')
+    sess.assert_not_equal([], user.curated_herbaria)
+    sess.assert_template('herbarium/show_herbarium')
   end
 end

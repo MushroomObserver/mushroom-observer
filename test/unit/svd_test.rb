@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class SvdTest < ActiveSupport::TestCase
+class SvdTest < UnitTestCase
   def name_counts(svds)
     with_name = 0
     without_name = 0

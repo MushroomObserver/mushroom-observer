@@ -45,40 +45,14 @@
 #
 ################################################################################
 
-class IntegrationTestCase < ActionDispatch::IntegrationTest # Test::Unit::TestCase
+class IntegrationTestCase < ActionDispatch::IntegrationTest
+  include GeneralExtensions
   include SessionExtensions
   include FlashExtensions
-  include GeneralExtensions
+  include IntegrationExtensions
 
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
-  def setup
-    ApplicationController.allow_forgery_protection = true
-  end
-  def teardown
-    ApplicationController.allow_forgery_protection = false
-  end
-
-  def login(login, password='testpassword', remember_me=true)
-    login = login.login if login.is_a?(User)
-    open_session do |sess|
-      sess.get('/account/login')
-      sess.open_form do |form|
-        form.change('login', login)
-        form.change('password', password)
-        form.change('remember_me', remember_me)
-        form.submit('Login')
-      end
-      sess
-    end
-  end
-
-  # Login the given user, testing to make sure it was successful.
-  def login!(user, *args)
-    sess = login(user, *args)
-    sess.assert_flash(/success/i)
-    user = User.find_by_login(user) if user.is_a?(String)
-    assert_users_equal(user, sess.assigns(:user), "Wrong user ended up logged in!")
-    sess
-  end
+  def setup;    ApplicationController.allow_forgery_protection = true;  end
+  def teardown; ApplicationController.allow_forgery_protection = false; end
 end

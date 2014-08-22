@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class DonationTest < ActiveSupport::TestCase
+class DonationTest < UnitTestCase
   # Replace this with your real tests.
   def test_truth
     assert true

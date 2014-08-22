@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class NamingTest < ActiveSupport::TestCase
+class NamingTest < UnitTestCase
 
   # Propose a naming for an observation.
   def test_create

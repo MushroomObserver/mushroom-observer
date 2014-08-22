@@ -21,7 +21,6 @@
 #  post_without_clearing_flash:: Wrapper: calls +post+ without clearing flash errors.
 #
 #  == HTML Helpers
-#  get_last_flash::             Retrieve the current list of errors or last set rendered.
 #  url_for::                    Get URL for +link_to+ style Hash of args.
 #  extract_links::              Get Array of show_object links on page.
 #  extract_error_from_body::    Extract error and stacktrace from 500 response body.
@@ -33,10 +32,14 @@
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
 #  assert_response::            Check that last request resulted in a given redirect / render.
+#  assert_action_partials::     Check that each of the given partials were rendered(?)
+#  assert_redirect_match::      Check that last request resulted in a given redirect(?)
 #  assert_input_value::         Check default value of a form field.
 #  assert_checkbox_state::      Check state of checkbox.
+#  assert_textarea_value::      Check value of textarea.
 #
 ################################################################################
+
 
 module ControllerExtensions
 

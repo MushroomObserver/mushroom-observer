@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class PublicationTest < ActiveSupport::TestCase
+class PublicationTest < UnitTestCase
   # Replace this with your real tests.
   def test_truth
     assert true

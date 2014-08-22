@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class SpeciesListTest < ActiveSupport::TestCase
+class SpeciesListTest < UnitTestCase
 
   def test_project_ownership
 

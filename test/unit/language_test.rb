@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class LanguageTest < ActiveSupport::TestCase
+class LanguageTest < UnitTestCase
 
   def test_official
     english = languages(:english)

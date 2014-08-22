@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class TermTest < ActiveSupport::TestCase
+class TermTest < UnitTestCase
   def test_term_load
     term = terms(:conic_term)
     assert(term)

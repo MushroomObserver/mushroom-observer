@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class AbstractModelTest < ActiveSupport::TestCase
+class AbstractModelTest < UnitTestCase
 
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg='')

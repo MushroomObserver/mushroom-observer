@@ -7,27 +7,7 @@
 #
 ################################################################################
 
-class FunctionalTestCase < ActionController::TestCase
-  def get(*args, &block)
-    super(*args, &block)
-    check_for_unsafe_html!
-  end
-
-  def post(*args, &block)
-    super(*args, &block)
-    check_for_unsafe_html!
-  end
-
-  def put(*args, &block)
-    super(*args, &block)
-    check_for_unsafe_html!
-  end
-
-  def delete(*args, &block)
-    super(*args, &block)
-    check_for_unsafe_html!
-  end
-
+module CheckForUnsafeHtml
   def check_for_unsafe_html!
     unless @unsafe_html_filter_disabled
       str = @response.body.to_s.force_encoding('utf-8')

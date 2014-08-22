@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class LicenseTest < ActiveSupport::TestCase
+class LicenseTest < UnitTestCase
 
   def test_current_names_and_ids
     names_and_ids = License.current_names_and_ids()

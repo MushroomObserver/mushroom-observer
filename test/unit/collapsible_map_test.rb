@@ -23,7 +23,7 @@ class TestCollapsible < CollapsibleCollectionOfMappableObjects
   end
 end
 
-class CollapsibleMapTest < ActiveSupport::TestCase
+class CollapsibleMapTest < UnitTestCase
 
   def assert_mapset_is_point(mapset, lat, long)
     assert_true(mapset.is_point?)

@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class UserTest < ActiveSupport::TestCase
+class UserTest < UnitTestCase
 
   def test_auth
     assert_equal rolf, User.authenticate("rolf", "testpassword")

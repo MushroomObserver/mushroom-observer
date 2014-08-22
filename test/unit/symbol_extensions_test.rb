@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class SymbolExtensionsTest < ActiveSupport::TestCase
+class SymbolExtensionsTest < UnitTestCase
   def test_hello
     assert_equal "Hello world", :hello.t
   end

@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class EolDataTest < ActiveSupport::TestCase
+class EolDataTest < UnitTestCase
   def test_create
     obj = EolData.new
     assert_equal(SortedSet, obj.names.class)

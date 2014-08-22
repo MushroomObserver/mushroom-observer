@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class PivotalTest < ActiveSupport::TestCase
+class PivotalTest < UnitTestCase
   def test_get_stories
     if PIVOTAL_USERNAME != 'username'
       stories = Pivotal.get_stories

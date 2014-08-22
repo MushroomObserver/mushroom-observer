@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class CountryCounterTest < ActiveSupport::TestCase
+class CountryCounterTest < UnitTestCase
   def test_wheres
     cc = CountryCounter.new
     wheres = cc.wheres

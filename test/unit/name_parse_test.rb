@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class NameParseTest < ActiveSupport::TestCase
+class NameParseTest < UnitTestCase
 
   def test_default
     name_parse = NameParse.new('Foo bar')

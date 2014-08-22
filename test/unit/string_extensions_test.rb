@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class StringExtensionsTest < ActiveSupport::TestCase
+class StringExtensionsTest < UnitTestCase
 
   def test_binary_length
     str = 'abčde';

@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class LanguageExporterTest < ActiveSupport::TestCase
+class LanguageExporterTest < UnitTestCase
   def setup
     @official = Language.official
     Language.clear_verbose_messages

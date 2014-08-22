@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class LocalizationFilesTest < ActiveSupport::TestCase
+class LocalizationFilesTest < UnitTestCase
 
   def assert_no_missing_translations(tags, type)
     missing = tags.uniq.reject(&:has_translation?)

@@ -15,7 +15,7 @@ class AutoCompleteMockByWord < AutoCompleteByWord
   def clean_matches; super; end
 end
 
-class AutoCompleteTest < ActiveSupport::TestCase
+class AutoCompleteTest < UnitTestCase
   def test_subclass
     assert_equal('AutoCompleteName', AutoComplete.subclass('name').name)
     assert_equal('AutoCompleteMockByWord', AutoComplete.subclass('mock_by_word').name)

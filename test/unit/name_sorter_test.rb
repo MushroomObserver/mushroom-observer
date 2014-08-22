@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class NameSorterTest < ActiveSupport::TestCase
+class NameSorterTest < UnitTestCase
 
   def test_add_name_default
     name_sorter = NameSorter.new

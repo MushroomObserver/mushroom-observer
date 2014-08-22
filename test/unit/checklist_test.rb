@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class ChecklistTest < ActiveSupport::TestCase
+class ChecklistTest < UnitTestCase
 
   def katrinas_species
     ['Conocybe filaris']

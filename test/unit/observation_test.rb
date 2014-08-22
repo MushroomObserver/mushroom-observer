@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class ObservationTest < ActiveSupport::TestCase
+class ObservationTest < UnitTestCase
 
   def create_new_objects
     @cc_obs = Observation.new
@@ -434,6 +434,7 @@ class ObservationTest < ActiveSupport::TestCase
     assert_save(katrinas_interest)
 
     User.current = rolf
+    assert_equal(2, QueuedEmail.count)
     obs.reload.destroy
     assert_equal(3, QueuedEmail.count)
     assert_email(2,

@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class InterestTest < ActiveSupport::TestCase
+class InterestTest < UnitTestCase
 
   def test_setting_and_getting
     Interest.new(

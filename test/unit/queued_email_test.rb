@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class QueuedEmailTest < ActiveSupport::TestCase
+class QueuedEmailTest < UnitTestCase
 
   def setup
     QueuedEmail.queue_emails(true)

@@ -8,7 +8,7 @@ class Textile
   end
 end
 
-class TextileTest < ActiveSupport::TestCase
+class TextileTest < UnitTestCase
 
   def assert_name_link_matches(str, label=nil, name=nil)
     obj = Textile.new(str)

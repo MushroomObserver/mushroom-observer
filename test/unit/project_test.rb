@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class ProjectTest < ActiveSupport::TestCase
+class ProjectTest < UnitTestCase
 
   def test_add_and_remove_observations
     proj = projects(:eol_project)

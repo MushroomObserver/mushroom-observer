@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class MOPaginatorTest < ActiveSupport::TestCase
+class MOPaginatorTest < UnitTestCase
   def test_basic
     pages = MOPaginator.new
 

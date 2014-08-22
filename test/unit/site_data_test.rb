@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class SiteDataTest < ActiveSupport::TestCase
+class SiteDataTest < UnitTestCase
 
   def test_create
     obj = SiteData.new

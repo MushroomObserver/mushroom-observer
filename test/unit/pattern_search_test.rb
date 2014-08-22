@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 require 'test_helper'
-class PatternSearchTest < ActiveSupport::TestCase
+class PatternSearchTest < UnitTestCase
 
   def test_term
     x = PatternSearch::Term.new(:xxx)

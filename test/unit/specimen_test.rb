@@ -4,7 +4,7 @@ require 'test_helper'
 
 # require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
-class SpecimenTest < ActiveSupport::TestCase
+class SpecimenTest < UnitTestCase
   def test_fields
     assert(specimens(:interesting_unknown).observations.length > 0)
     assert(specimens(:interesting_unknown).herbarium)

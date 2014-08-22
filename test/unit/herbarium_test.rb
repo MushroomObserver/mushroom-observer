@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class HerbariumTest < ActiveSupport::TestCase
+class HerbariumTest < UnitTestCase
   def test_specimens
     assert(herbaria(:nybg).specimens.length > 1)
   end

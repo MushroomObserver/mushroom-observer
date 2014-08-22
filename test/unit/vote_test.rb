@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class VoteTest < ActiveSupport::TestCase
+class VoteTest < UnitTestCase
 
   # Create one.
   def test_create

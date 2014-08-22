@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class DescriptionTest < ActiveSupport::TestCase
+class DescriptionTest < UnitTestCase
 
   # Make sure authors and editors are as they should be.
   def assert_authors_and_editors(obj, authors, editors, msg)

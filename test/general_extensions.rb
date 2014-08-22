@@ -6,6 +6,7 @@
 #  integration tests.
 #
 #  == Test unit helpers
+#  rolf, mary, etc.::           Quick access to User instances.
 #  setup_image_dirs::           Create test image dirs for tests that do image uploads.
 #
 #  == General Assertions
@@ -23,9 +24,10 @@
 #  assert_obj_list_equal::      Compare two lists of objects, comparing ids.
 #  assert_user_list_equal::     Compare two lists of User's.
 #  assert_name_list_equal::     Compare two lists of Name's.
-#  assert_string_equal_file::   A string is same as contents of a file.
+#  assert_gps_equal::           Compare two latitudes or longitudes.
 #  assert_email::               Check the properties of a QueuedEmail.
 #  assert_save::                Assert ActiveRecord save succeeds.
+#  assert_string_equal_file::   A string is same as contents of a file.
 #
 #  == XML Assertions
 #  assert_xml_exists::          An element exists.
@@ -44,6 +46,14 @@ module GeneralExtensions
   #  :section: Test unit helpers
   #
   ##############################################################################
+
+  # These used to be automatically instantiated fixtures, e.g., @dick, etc.
+  def rolf; users(:rolf); end
+  def mary; users(:mary); end
+  def junk; users(:junk); end
+  def dick; users(:dick); end
+  def katrina; users(:katrina); end
+  def roy; users(:roy); end
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
@@ -167,6 +177,10 @@ module GeneralExtensions
 
   GPS_CLOSE_ENOUGH = 0.001
 
+  # Compare two latitudes or longitudes.
+  #
+  #   assert_gps_equal(-123.4567, location.west)
+  #
   def assert_gps_equal(expected, value)
     assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
   end
@@ -323,5 +337,80 @@ module GeneralExtensions
         dump_xml(child, indent + '  ')
       end
     end
+  end
+
+  ##############################################################################
+  #
+  #  :section:  File contents assertions
+  #
+  ##############################################################################
+
+  # Assert that a string is same as contents of a given file.  Pass in a block
+  # to use as a filter on both contents of response and file.
+  #
+  #   assert_string_equal_file(@response.body,
+  #     "#{path}/expected_response.html",
+  #     "#{path}/alternate_expected_response.html") do |str|
+  #     str.strip_squeeze.downcase
+  #   end
+  #
+  def assert_string_equal_file(str, *files)
+    result = false
+    msg    = nil
+
+    # Check string against each file, looking for at least one that matches.
+    processed_str  = str
+    processed_str  = yield(processed_str) if block_given?
+    processed_str.split("\n")
+    encoding = processed_str.encoding
+
+    for file in files
+      filename = Array(file).first
+      format = file.is_a?(Array) ? "r:#{file[1]}" : "r"
+      template = File.open(filename, format).read
+      template = enforce_encoding(encoding, file, template)
+      template = yield(template) if block_given?
+      if template_match(processed_str, template)
+        # Stop soon as we find one that matches.
+        result = true
+        break
+      elsif !msg
+        # Write out expected (old) and received (new) files for debugging purposes.
+        File.open(filename + '.old', "w:#{encoding}") {|fh| fh.write(template)}
+        File.open(filename + '.new', "w:#{encoding}") {|fh| fh.write(processed_str)}
+        msg = "File #{filename} wrong:\n" +
+          `diff #{filename}.old #{filename}.new`
+        File.delete(filename + '.old') if File.exists?(filename + '.old')
+      end
+    end
+
+    if result
+      # Clean out old files from previous failure(s).
+      for file in files
+        filename = Array(file).first
+        new_filename = filename + '.new'
+        File.delete(new_filename) if File.exists?(new_filename)
+      end
+    else
+      assert(false, msg)
+    end
+  end
+
+  def enforce_encoding(encoding, file, str)
+    result = str
+    if str.encoding != encoding
+      result = str.encode(encoding)
+    end
+    if file.is_a?(Array) and file[1] == 'ISO-8859-1'
+      if file[1] == str.encoding
+        print "Re-encoding no longer needed\n"
+      end
+    end
+    result
+  end
+
+  # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
+  def template_match(str, template)
+    (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
   end
 end

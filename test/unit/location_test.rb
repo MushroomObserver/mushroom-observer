@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class LocationTest < ActiveSupport::TestCase
+class LocationTest < UnitTestCase
 
   def bad_location(str)
     assert(Location.dubious_name?(str, true) != [])

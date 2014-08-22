@@ -2,7 +2,7 @@
 
 require 'test_helper'
 require 'set'
-class QueryTest < ActiveSupport::TestCase
+class QueryTest < UnitTestCase
 
   def assert_state_exists(id)
     assert(!id.nil? && Query.find(id))

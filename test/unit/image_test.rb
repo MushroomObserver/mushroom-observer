@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'test_helper'
 
-class ImageTest < ActiveSupport::TestCase
+class ImageTest < UnitTestCase
 
   def test_votes
     img = images(:in_situ)

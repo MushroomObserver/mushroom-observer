@@ -10,7 +10,7 @@ class Hash
   end
 end
 
-class ApiTest < ActiveSupport::TestCase
+class ApiTest < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
   end
