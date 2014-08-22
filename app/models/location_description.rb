@@ -50,9 +50,9 @@
 #
 ############################################################################
 
-require 'acts_as_versioned'
-
 class LocationDescription < Description
+  require 'acts_as_versioned'
+
   belongs_to :license
   belongs_to :location
   belongs_to :project

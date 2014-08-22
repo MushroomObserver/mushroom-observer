@@ -1,6 +1,8 @@
-require 'acts_as_versioned'
+# encoding: utf-8
 
 class Term < AbstractModel
+  require 'acts_as_versioned'
+
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   belongs_to :user
   belongs_to :rss_log

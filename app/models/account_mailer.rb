@@ -57,9 +57,8 @@
 #
 ################################################################################
 
-# require 'smtp_tls'
-
 class AccountMailer < ActionMailer::Base
+  # require 'smtp_tls'
 
   # Suppress charset deprecation warning until we can upgrade further.
   # See: http://stackoverflow.com/questions/10390951

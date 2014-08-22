@@ -64,9 +64,9 @@
 #
 ############################################################################
 
-require 'acts_as_versioned'
-
 class NameDescription < Description
+  require 'acts_as_versioned'
+
   belongs_to :license
   belongs_to :name
   belongs_to :project

@@ -72,9 +72,10 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-require 'acts_as_versioned'
 
 class Location < AbstractModel
+  require 'acts_as_versioned'
+
   belongs_to :description, :class_name => 'LocationDescription' # (main one)
   belongs_to :rss_log
   belongs_to :user

@@ -110,7 +110,7 @@
 #  notify_species_lists::       Before destroy: log destruction on species_lists.
 #  destroy_dependents::         After destroy: destroy Naming's.
 #  notify_users_after_change::  After save: call notify_users (if important).
-#  notify_users_after_destroy:: After destroy: call notify_users.
+#  notify_users_before_destroy:: Before destroy: call notify_users.
 #  notify_users::               After save/destroy/image: send email.
 #  announce_consensus_change::  After consensus changes: send email.
 #
@@ -122,6 +122,10 @@ class Observation < AbstractModel
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
+
+  # Has to go before "has many interests" or interests will be destroyed
+  # before it has a chance to notify the interested users of the destruction.
+  before_destroy :notify_users_before_destroy
 
   has_many :votes
   has_many :comments,  :as => :target, :dependent => :destroy
@@ -139,7 +143,6 @@ class Observation < AbstractModel
 
   after_update   :notify_users_after_change
   before_destroy :notify_species_lists
-  after_destroy  :notify_users_after_destroy
   after_destroy  :destroy_dependents
 
   # Automatically (but silently) log destruction.
@@ -900,7 +903,7 @@ return result if debug
   end
 
   # Callback that sends email notifications after destroy.
-  def notify_users_after_destroy
+  def notify_users_before_destroy
     notify_users(:destroy)
   end
 

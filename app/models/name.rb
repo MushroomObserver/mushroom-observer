@@ -230,9 +230,9 @@
 #
 ################################################################################
 
-require 'acts_as_versioned'
-
 class Name < AbstractModel
+  require 'acts_as_versioned'
+
   belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
   belongs_to :description, :class_name => 'NameDescription' # (main one)
   belongs_to :rss_log

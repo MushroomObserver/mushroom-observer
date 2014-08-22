@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Herbarium < AbstractModel
   has_many :specimens
   belongs_to :location

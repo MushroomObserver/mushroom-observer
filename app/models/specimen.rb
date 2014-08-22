@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Specimen < AbstractModel
   belongs_to :herbarium
   belongs_to :user
