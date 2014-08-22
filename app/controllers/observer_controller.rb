@@ -2230,12 +2230,11 @@ class ObserverController < ApplicationController
 
   # this is the site's rss feed.
   def rss # :nologin:
-    headers["Content-Type"] = "application/xml"
     @logs = RssLog.all(:conditions => "datediff(now(), updated_at) <= 31",
                        :order => "updated_at desc", :limit => 100, :include => [
                          :name, :species_list, { :observation  => :name },
                        ])
-    render(:template => "/observer/rss.xml.erb", :layout => false)
+    render_xml(:layout => false)
   end
 
   ##############################################################################

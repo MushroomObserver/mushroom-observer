@@ -17,28 +17,6 @@ require 'xmlrpc/client'
 class ApiController < ApplicationController
   disable_filters
 
-  # Standard entry point for XML-RPC requests.
-  # def xml_rpc
-  #   begin
-  #     @@xmlrpc_reader ||= XMLRPC::XMLParser::REXMLStreamParser.new
-  #     method, args = @@xmlrpc_reader.parseMethodCall(request.content)
-  #     if (args.length != 1) or
-  #        !args[0].is_a?(Hash)
-  #       raise "Invalid request; expecting a single hash of named parameters."
-  #     end
-  #     args = args.first
-  #     args[:method] = method
-  #     xact = Transaction.new(args)
-  #     xact.validate_args
-  #     @api = xact.execute
-  #     render_api_results
-  #   rescue => e
-  #     @api = API.new
-  #     @api.errors << API::RenderFailed.new(e)
-  #     render_api_results
-  #   end
-  # end
-
   # Standard entry point for REST requests.
   def api_keys;      rest_query(:api_key);      end
   def comments;      rest_query(:comment);      end
@@ -78,16 +56,15 @@ class ApiController < ApplicationController
 
   def render_api_results(args)
     @api = API.execute(args)
-    headers['Content-Type'] = 'application/xml'
     User.current = @user = @api.user
     if @api.errors.any?(&:fatal)
-      render(:layout => 'api', :text => '')
+      render_xml(:layout => 'api', :text => '')
     else
-      render(:layout => 'api', :template => '/api/results.xml.erb')
+      render_xml(:layout => 'api', :template => '/api/results')
     end
   rescue => e
     @api ||= API.new
     @api.errors << API::RenderFailed.new(e)
-    render(:layout => 'api', :text => '')
+    render_xml(:layout => 'api', :text => '')
   end
 end

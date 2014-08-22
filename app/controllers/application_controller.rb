@@ -1620,4 +1620,11 @@ logger.warn('SESSION: ' + session.inspect)
   def can_edit?(obj)
     has_permission?(obj, :runtime_no_update.l(:type => obj.type_tag))
   end
+
+  def render_xml(args)
+    request.format = "xml"
+    respond_to do |format|
+      format.xml { render args }
+    end
+  end
 end

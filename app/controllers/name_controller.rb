@@ -1311,11 +1311,10 @@ class NameController < ApplicationController
 
   # Send stuff to eol.
   def eol_old # :nologin: :norobots:
-    headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
     eol_data(['unvetted', 'vetted'])
-    render(:action => "eol", :layout => false)
+    render_xml(:action => "eol", :layout => false)
   end
 
 
@@ -1418,11 +1417,10 @@ class NameController < ApplicationController
 
   # Send stuff to eol.
   def eol # :nologin: :norobots:
-    headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
     @data = EolData.new()
-    render(:template => '/name/eol.xml.erb', :layout => false)
+    render_xml(:layout => false)
   end
 
   def refresh_links_to_eol
