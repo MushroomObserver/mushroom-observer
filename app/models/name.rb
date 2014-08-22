@@ -248,30 +248,30 @@ class Name < AbstractModel
   acts_as_versioned(
     :table_name => 'names_versions',
     :if_changed => [
-      :rank,
-      :text_name,
-      :search_name,
-      :sort_name,
-      :display_name,
-      :author,
-      :citation,
-      :deprecated,
-      :correct_spelling,
-      :notes
-    ],
-    :except => [
-      :sync_id,
-      :created_at,
-      :updated_at,
-      :num_views,
-      :last_view,
-      :ok_for_export,
-      :rss_log_id,
-      # :accepted_name_id,
-      :synonym_id,
-      :description_id,
-      :classification   # (versioned in the default desc)
+      'rank',
+      'text_name',
+      'search_name',
+      'sort_name',
+      'display_name',
+      'author',
+      'citation',
+      'deprecated',
+      'correct_spelling',
+      'notes'
     ]
+  )
+  non_versioned_columns.push(
+    'sync_id',
+    'created_at',
+    'updated_at',
+    'num_views',
+    'last_view',
+    'ok_for_export',
+    'rss_log_id',
+    # 'accepted_name_id',
+    'synonym_id',
+    'description_id',
+    'classification'   # (versioned in the default desc)
   )
 
   after_update :notify_users

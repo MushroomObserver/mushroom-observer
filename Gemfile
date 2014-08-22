@@ -15,10 +15,10 @@ gem 'i18n'
 gem 'test-unit'
 gem 'RedCloth'
 gem 'blankslate'
-gem 'acts_as_versioned_jw'
 gem 'browser'
 gem 'ruby-rtf'
 gem 'enum_column3'
+gem 'acts_as_versioned_rails3.1.3'
 
 # These may not be necessary any more:
 # gem 'activerecord-mysql2-adapter'

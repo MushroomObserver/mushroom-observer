@@ -88,25 +88,25 @@ class Location < AbstractModel
   acts_as_versioned(
     :table_name => 'locations_versions',
     :if_changed => [
-      :name,
-      :north,
-      :south,
-      :west,
-      :east,
-      :high,
-      :low,
-      :notes
-    ],
-    :except => [
-      :sync_id,
-      :created_at,
-      :updated_at,
-      :num_views,
-      :last_view,
-      :ok_for_export,
-      :rss_log_id,
-      :description_id
+      'name',
+      'north',
+      'south',
+      'west',
+      'east',
+      'high',
+      'low',
+      'notes'
     ]
+  )
+  non_versioned_columns.push(
+    'sync_id',
+    'created_at',
+    'updated_at',
+    'num_views',
+    'last_view',
+    'ok_for_export',
+    'rss_log_id',
+    'description_id'
   )
 
   after_update :notify_users
