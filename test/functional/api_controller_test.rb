@@ -8,21 +8,53 @@ class ApiControllerTest < FunctionalTestCase
   def assert_no_api_errors
     @api = assigns(:api)
     if @api
-      msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
+      msg = "Caught API Errors:\n" + @api.errors.map do |error|
+        error.to_s + "\n" + error.trace.join("\n")
+      end.join("\n")
       assert_block(msg) { @api.errors.empty? }
     end
   end
 
   def post_and_send_file(action, file, content_type, params)
-    @request.env['RAW_POST_DATA'] = File.read(file).force_encoding('binary')
-    @request.env['CONTENT_LENGTH'] = File.size(file)
-    @request.env['CONTENT_TYPE'] = content_type
-    cmd = '/usr/bin/md5sum'
-    if !File.exists?('/usr/bin/md5sum') and File.exists?('/usr/bin/cksum')
-      cmd = '/usr/bin/cksum'
-    end
-    @request.env['CONTENT_MD5'] = File.read("| #{cmd} #{file}")
+    stream = File.open(file, "rb")
+    length = File.size(file)
+    checksum = file_checksum(file)
+    post_and_send(action, stream, length, content_type, checksum, params)
+  end
+
+  def post_and_send_string(action, string, content_type, params)
+    stream = StringIO.new(string, "rb")
+    length = string.length
+    checksum = string_checksum(string)
+    post_and_send(action, stream, length, content_type, checksum, params)
+  end
+
+  def post_and_send(action, stream, length, type, md5, params)
+    @request.env['RAW_POST_DATA'] = stream
+    @request.env['CONTENT_LENGTH'] = length
+    @request.env['CONTENT_TYPE'] = type
+    @request.env['CONTENT_MD5'] = md5
     post(action, params)
+    @request.env.delete('RAW_POST_DATA')
+  end
+
+  def file_checksum(file)
+    File.read("| #{checksum_command} #{file}").split.first
+  end
+
+  def string_checksum(string)
+    tempfile = Tempfile.new("checksum")
+    File.open(tempfile.path, "w") { |f| f.write(string) }
+    File.read("| #{checksum_command} #{tempfile.path}").split.first
+  end
+
+  def checksum_command
+    cmds = [
+      '/usr/bin/md5sum',
+      '/usr/bin/cksum'
+    ]
+    cmds.select { |f| File.exists?(f) }.first or
+      raise "Can't find #{cmds.join(" or ")} on your system."
   end
 
 ################################################################################
@@ -105,54 +137,55 @@ class ApiControllerTest < FunctionalTestCase
   end
 
   def test_post_minimal_image
-    puts 'API image upload tests not working.'
-    # setup_image_dirs
-    # file = "#{::Rails.root.to_s}/test/images/sticky.jpg"
-    # post_and_send_file(:images, file, 'image/jpeg',
-    #   :api_key => api_keys(:rolfs_api_key).key
-    # )
-    # assert_no_api_errors
-    # img = Image.last
-    # assert_users_equal(rolf, img.user)
-    # assert_equal(Date.today.web_date, img.when.web_date)
-    # assert_equal('', img.notes)
-    # assert_equal(rolf.legal_name, img.copyright_holder)
-    # assert_objs_equal(rolf.license, img.license)
-    # assert_nil(img.original_name)
-    # assert_equal('image/jpeg', img.content_type)
-    # assert_equal(407, img.width)
-    # assert_equal(500, img.height)
-    # assert_obj_list_equal([], img.projects)
-    # assert_obj_list_equal([], img.observations)
+    setup_image_dirs
+    count = Image.count
+    file = "#{::Rails.root}/test/images/sticky.jpg"
+    post_and_send_file(:images, file, 'image/jpeg',
+      :api_key => api_keys(:rolfs_api_key).key
+    )
+    assert_no_api_errors
+    assert_equal(count+1, Image.count)
+    img = Image.last
+    assert_users_equal(rolf, img.user)
+    assert_equal(Date.today.web_date, img.when.web_date)
+    assert_equal('', img.notes)
+    assert_equal(rolf.legal_name, img.copyright_holder)
+    assert_objs_equal(rolf.license, img.license)
+    assert_nil(img.original_name)
+    assert_equal('image/jpeg', img.content_type)
+    assert_equal(407, img.width)
+    assert_equal(500, img.height)
+    assert_obj_list_equal([], img.projects)
+    assert_obj_list_equal([], img.observations)
   end
 
   def test_post_maximal_image
-    # setup_image_dirs
-    # file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
-    # post_and_send_file(:images, file, 'image/jpeg',
-    #   :api_key       => api_keys(:rolfs_api_key).key,
-    #   :vote          => '3',
-    #   :date          => '20120626',
-    #   :notes         => ' Here are some notes. ',
-    #   :copyright_holder => 'My Friend',
-    #   :license       => '2',
-    #   :original_name => 'Coprinus_comatus.jpg',
-    #   :projects      => (proj = rolf.projects_member.first).id,
-    #   :observations  => (obs = rolf.observations.first).id
-    # )
-    # assert_no_api_errors
-    # img = Image.last
-    # assert_users_equal(rolf, img.user)
-    # assert_equal('2012-06-26', img.when.web_date)
-    # assert_equal('Here are some notes.', img.notes)
-    # assert_equal('My Friend', img.copyright_holder)
-    # assert_objs_equal(License.find(2), img.license)
-    # assert_equal('Coprinus_comatus.jpg', img.original_name)
-    # assert_equal('image/jpeg', img.content_type)
-    # assert_equal(2288, img.width)
-    # assert_equal(2168, img.height)
-    # assert_obj_list_equal([proj], img.projects)
-    # assert_obj_list_equal([obs], img.observations)
+    setup_image_dirs
+    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
+    post_and_send_file(:images, file, 'image/jpeg',
+      :api_key       => api_keys(:rolfs_api_key).key,
+      :vote          => '3',
+      :date          => '20120626',
+      :notes         => ' Here are some notes. ',
+      :copyright_holder => 'My Friend',
+      :license       => '2',
+      :original_name => 'Coprinus_comatus.jpg',
+      :projects      => (proj = rolf.projects_member.first).id,
+      :observations  => (obs = rolf.observations.first).id
+    )
+    assert_no_api_errors
+    img = Image.last
+    assert_users_equal(rolf, img.user)
+    assert_equal('2012-06-26', img.when.web_date)
+    assert_equal('Here are some notes.', img.notes)
+    assert_equal('My Friend', img.copyright_holder)
+    assert_objs_equal(License.find(2), img.license)
+    assert_equal('Coprinus_comatus.jpg', img.original_name)
+    assert_equal('image/jpeg', img.content_type)
+    assert_equal(2288, img.width)
+    assert_equal(2168, img.height)
+    assert_obj_list_equal([proj], img.projects)
+    assert_obj_list_equal([obs], img.observations)
   end
 
   def test_post_user

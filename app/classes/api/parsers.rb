@@ -89,9 +89,9 @@ class API
 
   # Simplified "parser" for getting the HTTP request -- this is passed in
   # specially by ApiController: it should not be processed in any way.
-  def parse_http_request
-    declare_parameter(:http_request, :http_request, {})
-    params[:http_request]
+  def parse_upload
+    declare_parameter(:upload, :upload, {})
+    params[:upload]
   end
 
   def parse_boolean(key, args={})
@@ -569,9 +569,9 @@ class API
     if unused.include?(:help)
       raise HelpMessage.new(expected_params)
     else
-      if unused.include?(:http_request)
+      if unused.include?(:upload)
         raise UnexpectedUpload.new
-        unused.delete(:http_request)
+        unused.delete(:upload)
       end
       if unused.any?
         raise UnusedParameters.new(unused)

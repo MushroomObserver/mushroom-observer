@@ -11,10 +11,10 @@
 #
 ################################################################################
 
-require 'xmlrpc/client'
-# require_dependency 'classes/api'
-
 class ApiController < ApplicationController
+  require 'xmlrpc/client'
+  # require_dependency 'classes/api'
+
   disable_filters
 
   # Standard entry point for REST requests.
@@ -39,10 +39,29 @@ class ApiController < ApplicationController
     args.delete(:controller)
     args[:method] = request.method
     args[:action] = type
-    if request.content_length.to_i > 0 and
-       !request.content_type.blank?
-      puts "type: #{request.content_type.inspect}, length: #{request.content_length.inspect}"
-      args[:http_request] = request
+
+    if TESTING
+      post_data      = request.headers['RAW_POST_DATA']
+      content_length = request.headers['CONTENT_LENGTH'].to_i
+      content_type   = request.headers['CONTENT_TYPE'].to_s
+      content_md5    = request.headers['CONTENT_MD5'].to_s
+      if request.method == "POST" && content_length > 0 && !content_type.blank?
+        args[:upload] = API::Upload.new(
+          data:         post_data,
+          length:       content_length,
+          content_type: content_type,
+          checksum:     content_md5
+        )
+      end
+    else
+      if request.method == "POST" && request.length > 0 && !request.media_type.blank?
+        args[:upload] = API::Upload.new(
+          data:         request.body,
+          length:       request.length,
+          content_type: request.media_type,
+          checksum:     request.headers['CONTENT_MD5'].to_s
+        )
+      end
     end
 
     # Special exception to allow caller who creates new user to see that user's

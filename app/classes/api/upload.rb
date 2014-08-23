@@ -1,6 +1,16 @@
 # encoding: utf-8
 
 class API
+  class Upload 
+    attr_accessor :data, :length, :content_type, :checksum
+    def initialize(args)
+      @data = args[:data]
+      @length = args[:length]
+      @content_type = args[:content_type]
+      @checksum = args[:checksum]
+    end
+  end
+
   def prepare_upload
     result = nil
     if url = parse_string(:upload_url)
@@ -11,9 +21,9 @@ class API
       raise TooManyUploads.new if result
       result = UploadFromFile.new(file)
     end
-    if http_request = parse_http_request
+    if upload = parse_upload
       raise TooManyUploads.new if result
-      result = UploadFromHTTPRequest.new(http_request)
+      result = UploadFromHTTPRequest.new(upload)
     end
     return result
   end
@@ -59,11 +69,11 @@ class API
   end
 
   class UploadFromHTTPRequest < Upload
-    def initialize(request)
-      self.content        = request.body
-      self.content_length = request.content_length.to_i
-      self.content_type   = request.content_type.to_s
-      self.content_md5    = request.headers['Content-MD5']
+    def initialize(upload)
+      self.content        = upload.data
+      self.content_length = upload.length
+      self.content_type   = upload.content_type
+      self.content_md5    = upload.checksum
     end
   end
 end
