@@ -10,7 +10,7 @@
         <%= text_area('commercial_inquiry', 'content', :cols => 60) %><br/><br/>
       </td>
       <td>
-        <%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %>
+        <%= thumbnail(@image, :size => :medium, :border => 0, :votes => true) %>
       </td>
     </tr>
   </table>

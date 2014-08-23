@@ -54,7 +54,7 @@ function vote_on_story(story, user, value) {
       }
     }
   });
-  span.html('<img alt="Indicator" src="/images/indicator.gif" />');
+  span.html('<img alt="Indicator" src="/assets/indicator.gif" />');
 }
 
 function click_on_story(story) {
@@ -85,7 +85,7 @@ function click_on_story(story) {
   });
   div.html('<span class="pivotal_loading">' +
     PIVOTAL_STORY_LOADING +
-    ' <img alt="Indicator" src="/images/indicator.gif" />' +
+    ' <img alt="Indicator" src="/assets/indicator.gif" />' +
     '</span>');
   div.show();
   jQuery("#pivotal_" + story).ensureVisible();

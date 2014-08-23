@@ -73,7 +73,7 @@ NAME_PRIMER_CACHE_FILE = "#{APP_ROOT}/tmp/name_primer.#{::Rails.env}"
 USER_PRIMER_CACHE_FILE = "#{APP_ROOT}/tmp/user_primer.#{::Rails.env}"
 
 # File where we keep name_lister data cache.
-NAME_LISTER_CACHE_FILE = "#{APP_ROOT}/public/javascripts/name_list_data.js"
+NAME_LISTER_CACHE_FILE = "#{APP_ROOT}/public/assets/name_list_data.js"
 
 # Location of HTML pages to serve on error.
 ERROR_PAGE_FILES = "#{APP_ROOT}/public/error_NNN.html"
