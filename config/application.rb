@@ -2,16 +2,9 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 
-APP_ROOT = File.expand_path('../..', __FILE__)
-
 # If you have a Gemfile, require the gems listed there, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(:default, Rails.env) if defined?(Bundler)
-
-# Short-hand for the three execution modes.
-PRODUCTION  = (::Rails.env == 'production')
-DEVELOPMENT = (::Rails.env == 'development')
-TESTING     = (::Rails.env == 'test')
 
 # Should be one of [:normal, :silent]
 # :silent turns off event logging and email notifications
@@ -32,22 +25,7 @@ end
 
 # RUN_LEVEL = :normal # :silent
 
-def import_constants(file)
-  file = File.join(File.dirname(__FILE__), file)
-  if File.exists?(file)
-    Module.new do
-      class_eval File.read(file, :encoding => 'utf-8')
-      for const in constants
-        unless Object.const_defined?(const)
-          Object.const_set(const, const_get(const))
-        end
-      end
-    end
-  end
-end
-
-import_constants('consts-site.rb')
-import_constants('consts.rb')
+require File.expand_path('../import_constants', __FILE__)
 
 module MushroomObserver
   class Application < Rails::Application

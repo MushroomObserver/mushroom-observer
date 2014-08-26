@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+use strict;
+
+# Login info for mysql:
+my $USER = 'mo';
+my $PASS = 'mo';
+my $DB   = 'mo_development';
+
+printf "%-5s %5s %5s %5s %5s %5s %5s %5s %5s %5s\n",
+  'year', 1, 3, 10, 32, 100, 316, 1000, 3162, 10000;
+for (my $year=2006; ; $year++) {
+  my $cmd1 = "select user_id, count(user_id) from observations where ".
+             "updated_at > ". ($year-1) ."1231 and ".
+             "updated_at < ${year}1231 group by user_id;";
+  my $cmd2 = $cmd1; $cmd2 =~ s/observations/comments/;
+  my $cmd = "mysql -u $USER --password=$PASS $DB -e '$cmd1; $cmd2;'";
+  open(my $fh, "$cmd |") or
+    die("Some error occurred when running $cmd: $!\n");
+  my (%u, $n1, $n3, $n10, $n30, $n100, $n300, $n1000, $n3000, $n10000);
+  while (<$fh>) {
+    next if /[a-z]/ || /^0/;
+    chomp;
+    my ($id, $num) = split;
+    $u{$id} += $num;
+  }
+  foreach my $id (keys %u) {
+    my $num = $u{$id};
+    $n10000++ if $num >= 10000;
+    $n3000++  if $num >= 3162;
+    $n1000++  if $num >= 1000;
+    $n300++   if $num >= 316;
+    $n100++   if $num >= 100;
+    $n30++    if $num >= 32;
+    $n10++    if $num >= 10;
+    $n3++     if $num >= 3;
+    $n1++     if $num >= 1;
+  }
+  last if !$n1;
+  printf "%-5d %5d %5d %5d %5d %5d %5d %5d %5d %5d\n",
+    $year, $n1, $n3, $n10, $n30, $n100, $n300, $n1000, $n3000, $n10000;
+  close($fh);
+}

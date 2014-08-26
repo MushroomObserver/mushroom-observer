@@ -1,0 +1,50 @@
+#!/usr/bin/ruby
+
+# require File.expand_path('../../config/boot.rb', __FILE__)
+# require File.expand_path('../../config/environment.rb', __FILE__)
+
+@show = {}
+
+def process_section(lines)
+  error  = nil
+  error2 = nil
+  show   = false
+  for line in lines
+    if line.match(/^[A-Z][A-Za-z]+(::\w+)* \(/)
+      error = line
+    elsif line.match(/\((500 Internal Server Error|404 Not Found)\)/)
+      show = true
+    end
+    if error && !error2 && line.match(/^ *(\/|app)(?!usr)/)
+      error2 = line
+    end
+  end
+  if show
+    error = "#{error}\n#{error2}" if error && error2
+    @show[error] ||= [0]
+    @show[error][0] += 1
+    @show[error][1] = lines
+  end
+end
+
+file = ARGV[0]
+section = []
+File.open(file) do |fh|
+  fh.each_line do |line|
+    line.chomp!
+    if line.match(/^Processing/)
+      section = section.select {|x| x.to_s.match(/\S/)}
+      process_section(section) if section.any?
+      section = [line]
+    else
+      section << line
+    end
+  end
+end
+
+for error in @show.keys.sort_by {|x| -@show[x][0]}
+  num, lines = @show[error]
+  puts num.to_s + (error.to_s.match(/\S/) ? ": #{error}" : '')
+  puts lines.join("\n")
+  puts
+end

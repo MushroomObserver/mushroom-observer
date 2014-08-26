@@ -1,0 +1,170 @@
+#!/usr/bin/ruby
+
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
+
+$stderr.puts("Getting our names...")
+names = Name.connection.select_rows %(
+  SELECT MIN(id), text_name
+  FROM names
+  WHERE correct_spelling_id IS NULL
+  GROUP BY text_name
+)
+
+# names = [
+#   [1, 'Agaricus'],
+#   [2, 'Agarica'],
+#   [3, 'Physcina'],
+#   [4, 'Physcia'],
+#   [5, 'Phycsia'],
+#   [6, 'Bogus'],
+#   [7, 'Bogis'],
+#   [8, 'Bogas'],
+# ]
+
+$stderr.puts("Building lookup for our names...")
+lookup = Hash.new
+used = Hash.new
+for id, name in names
+  lookup[id] = name
+  used[name] = [id]
+end
+
+$stderr.puts("Getting index fungorum's names...")
+index = Hash.new
+# Expect: "Genus species\tblah blah blah"
+File.open('index_fungorum.txt') do |fh|
+  fh.each_line do |line|
+    name = line.split("\t", 2).first
+    index[name] = true
+  end
+end
+
+$stderr.puts("Getting Esslinger's names...")
+# Expect: "Genus species"
+File.open('esslinger.txt') do |fh|
+  fh.each_line do |line|
+    name = line.chomp
+    index[name] = true
+  end
+end
+
+# index = {
+#   'Agaricus' => true,
+#   'Physcia'  => true,
+#   'Physcina' => true,
+# }
+
+$stderr.puts("Identifying potential misspellings...")
+used2 = used.dup
+for id, name in names
+  for i in 1..name.length
+
+    # Do one letter at a time.
+    name2 = name.dup
+    name2[i-1,1] = ''
+    used2[name2] ||= Array.new
+    used2[name2] << id
+
+    # Do two letters at a time.
+    # name2 = name.dup
+    # name2[i-1,2] = ''
+    # used2[name2] ||= Array.new
+    # used2[name2] << id
+
+    # Do one letter in two different places (slow!)
+    # for j in 1..name2.length
+    #   name3 = name2.dup
+    #   name3[j-1,1] = ''
+    #   used2[name3] ||= Array.new
+    #   used2[name3] << id
+    # end
+  end
+end
+
+# puts "names=#{names.inspect}"
+# puts "lookup=#{lookup.inspect}"
+# puts "used=#{used.inspect}"
+# puts "used2=#{used2.inspect}"
+
+syns = @syns = Hash.new
+@syn_id = 0
+
+def synonymize(ids)
+  sids = ids.map {|id| @syns[id]}.reject {|x| x.nil?}.uniq
+  sid = sids.first
+  if !sid
+    sid = (@syn_id += 1)
+  end
+  for sid2 in sids - [sid]
+    for key, val in @syns
+      if val == sid2
+        @syns[key] = sid
+      end
+    end
+  end
+  for id in ids
+    @syns[id] = sid
+  end
+end
+
+$stderr.puts("Grouping misspellings...")
+for name, ids in used2
+  ids = ids.uniq
+  if ids.length > 1
+    synonymize(ids)
+  end
+end
+
+$stderr.puts("Sorting into good and bad...")
+goods = []
+bads = []
+for sid in syns.values.uniq.sort
+  list = []
+  num_legit = 0
+  for key, val in syns
+    if val == sid
+      name = lookup[key]
+      legit = index[name]
+      list << [key, name, legit]
+      num_legit += 1 if legit
+    end
+  end
+  if num_legit == 1
+    goods << list
+  elsif num_legit < list.length
+    bads << list
+  end
+end
+
+$stderr.puts("Dumping good ones...")
+for list in goods
+  for id, name, legit in list.sort(&lambda do |a,b|
+    x = (a[2]?0:1) <=> (b[2]?0:1)
+    x = a[1] <=> b[1] if x == 0
+    x = a[0] <=> b[0] if x == 0
+    x
+  end)
+    star = legit ? '*' : ''
+    puts "#{star}#{id}\t#{name}"
+  end
+  puts
+end
+
+puts "############################################################"
+puts
+
+$stderr.puts("Dumping bad ones...")
+for list in bads
+  for id, name, legit in list.sort(&lambda do |a,b|
+    x = (a[2]?0:1) <=> (b[2]?0:1)
+    x = a[1] <=> b[1] if x == 0
+    x = a[0] <=> b[0] if x == 0
+    x
+  end)
+    star = legit ? '*' : ''
+    puts "#{star}#{id}\t#{name}"
+  end
+  puts
+end
+

@@ -1,4 +1,9 @@
 #!/usr/bin/env ruby
+#
+#  Read width and height of JPEG image from header.  (ImageMagick loads the
+#  entire image into memory!)
+#
+################################################################################
 
 # ------------------------------------
 #  Grab dimensions from JPEG header.
@@ -70,8 +75,7 @@ end
 $stderr.puts %(
   USAGE
     script/jpegsize <file>.jpg
-    script/jpegsize -f <file_list>.txt
-    script/jpegsize -s <id> <file>.jpg
+    script/jpegsize -f <file_list.txt>
 
   DESCRIPTION
     Reports the size of one or more JPEG files.
@@ -81,4 +85,5 @@ $stderr.puts %(
     -f --file <file>      Report size of all files listed in <file>.
 
 )
-exit(1)
+exit 1
+

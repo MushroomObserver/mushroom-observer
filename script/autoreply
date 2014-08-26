@@ -1,34 +1,28 @@
-#!/usr/bin/perl
+#!/bin/bash
+#
+#  Script run when no-reply user gets an email.
+#
+################################################################################
+set -e
 
-my $user = $ENV{'USER'};
-my $sender = $ENV{'SENDER'};
-my $message = `cat /home/$user/.autoreply`;
-$message =~ s/^Subject: ([^\n]*)\n+//;
-my $subject = $1;
+source $(dirname "$0")/bash_include
 
-my $original;
-while (<>) {
-    last if !/\S/;
-}
-while (<>) {
-    $original .= $_;
-}
+subject=$1
 
-my $tempfile = "/tmp/autoreply.$$";
-open(my $mail, ">$tempfile");
-print $mail $message;
-print $mail "\n";
-print $mail "-" x 80, "\n";
-print $mail "\n";
-print $mail $original;
-close($mail);
+tempfile="/tmp/autoreply.$$"
+autoreply="/home/$USER/.autoreply"
 
-# open(my $log, ">/home/$user/.autoreply.log");
-# print $log "/usr/bin/mutt -s '$subject' $sender\n";
-# print $log `cat $tempfile`;
-# close($log);
+if (( $testing )); then
+  autoreply=$app_root/test/reports/autoreply
+fi
 
-system("/usr/bin/mutt -s '$subject' $sender < $tempfile");
-unlink($tempfile);
+cat $autoreply | sed "/^Subject:/,+1d" > $tempfile
+echo >> $tempfile
+echo "----------------------------------------" >> $tempfile
+echo >> $tempfile
+sed '1,/^ *$/d' >> $tempfile
 
-exit 0;
+send_mail -s "$subject" $SENDER < $tempfile
+rm -f $tempfile
+
+exit 0

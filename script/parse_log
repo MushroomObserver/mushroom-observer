@@ -1,5 +1,29 @@
-#!/bin/sh
-grep '^[A-Za-z:]*Error \|ENOMEM' /var/web/mushroom-observer/log/production.log | grep -v 'ActionController::RoutingError' | grep -v 'ActiveRecord::RecordNotFound' > /var/web/mushroom-observer/log/errors.new
-touch /var/web/mushroom-observer/log/errors.old
-diff /var/web/mushroom-observer/log/errors.new /var/web/mushroom-observer/log/errors.old
-mv /var/web/mushroom-observer/log/errors.new /var/web/mushroom-observer/log/errors.old
+#!/bin/bash
+#
+#  USAGE::
+#
+#    script/parse_log
+#
+#  DESCRIPTION::
+#
+#  Grabs all the error messages from the server log file, and outputs any new
+#  ones since last time this was run.
+#
+################################################################################
+set -e
+
+source $(dirname $0)/bash_include
+
+log_file=$app_root/log/$RAILS_ENV.log
+old_errors=$app_root/log/errors.old
+new_errors=$app_root/log/errors.new
+
+grep '^[A-Za-z:]*Error \|ENOMEM' $log_file |
+grep -v 'ActionController::RoutingError' |
+grep -v 'ActiveRecord::RecordNotFound' > $new_errors || true
+
+touch $old_errors
+diff $new_errors $old_errors
+mv $new_errors $old_errors
+
+exit 0

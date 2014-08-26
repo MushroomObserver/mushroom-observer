@@ -223,7 +223,7 @@ root> vi /etc/logrotate.d/unicorn
 # Install our programs for resizing and rotating JPEG images.
 root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
 root> gcc /var/web/mo/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
-root> cp /var/web/mo/script/exifautotran.sh /usr/local/bin/exifautotran
+root> cp /var/web/mo/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
 
 --------------------------------------------------------------------------------

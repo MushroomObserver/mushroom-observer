@@ -1,0 +1,194 @@
+#!/usr/bin/perl
+use strict;
+
+# Root path for Rails.
+my $ROOT = '/var/web/mushroom-observer';
+# my ROOT = '/home/jason/public_html/mo_trunk';
+
+# Path to images on web server.
+my $LOCAL_PATH = "$ROOT/public/images";
+
+# Path to images on image server.
+my $REMOTE_PATH = 'cdmr@digitalmycology.com:images.digitalmycology.com';
+
+# Location of files which cache local and remote listings.
+my $LOCAL_LISTING  = "$LOCAL_PATH/local.files";
+my $REMOTE_LISTING = "$LOCAL_PATH/remote.files";
+
+# Temp file used to list the files that need to be uploaded.
+my $TEMP_FILE = "/tmp/verify_images.$$";
+
+# List of all image sizes available.
+my @ALL_SIZES = qw( thumb 320 640 960 1280 orig );
+
+# List of sizes we don't want to keep on web server.
+my @DELETE_SIZES = qw( 640 960 1280 orig );
+
+################################################################################
+
+# Command line arguments.
+my $OPT_CACHE = get_flag('-c', '--use_cache', '--use-cache');
+my $OPT_TEST  = get_flag('-t', '--test');
+my $OPT_V     = get_flag('-v', '--verbose');
+
+# Help message.
+(print STDERR <<EOH), exit 1 if get_flag('-h', '--help');
+
+USAGE
+    script/verify_images.prl [--use_cache|verbose|test]
+
+OPTIONS
+   -c --use_cache
+   -t --test
+   -v --verbose
+
+DESCRIPTION
+    A simplified version of script/update_images specifically designed to be as
+    lightweight as possible.  It checks for discrepencies between images found
+    on the web server and image server.  It deletes images from the web server
+    once they have been verified. 
+
+EOH
+
+################################################################################
+
+# Refresh listing of files.
+if (!$OPT_CACHE) {
+  refresh_local_cache($LOCAL_LISTING, $LOCAL_PATH);
+  refresh_remote_cache($REMOTE_LISTING, $REMOTE_PATH);
+}
+
+# Get lists of differences.
+my $files_to_upload = get_list_to_upload($LOCAL_LISTING, $REMOTE_LISTING);
+my $files_to_delete = get_list_to_delete($LOCAL_LISTING, $files_to_upload);
+
+# Delete files which have been verified.
+delete_files($files_to_delete);
+
+# Upload files which are different.
+upload_files($files_to_upload);
+
+exit 0;
+
+################################################################################
+
+sub get_flag {
+  my $result;
+  foreach my $flag (@_) {
+    $result = 1 if grep($_ eq $flag, @ARGV);
+    @ARGV = grep($_ ne $flag, @ARGV);
+  }
+  return $result;
+}
+
+sub refresh_local_cache {
+  my ($file, $path) = @_;
+  local $_;
+  open(my $fh, "| sort > $file") or die("Couldn't write $file: $!\n");
+  foreach my $size (@ALL_SIZES) {
+    print "Getting local $size...\n" if $OPT_V;
+    opendir(my $dh, "$path/$size") or die("Couldn't list $path/$size: $!\n");
+    my $n = 0;
+    while ($_ = readdir $dh) {
+      next if !/^\d+\.\w+$/;
+      print $fh "$size/$_ ", (-s "$path/$size/$_"), "\n";
+      $n++;
+    }
+    close($dh);
+    print "  $n files\n" if $OPT_V;
+  }
+  close($fh);
+}
+
+sub refresh_remote_cache {
+  my ($file, $path) = @_;
+  local $_;
+  my ($url, $path2) = split(':', $path);
+  open(my $fh, "| sort > $file") or die("Couldn't write $file: $!\n");
+  foreach my $size (@ALL_SIZES) {
+    print "Getting remote $size...\n" if $OPT_V;
+    my $cmd = "ssh $url ls -lU --color=never $path2/$size";
+    open(my $fh2, "$cmd |") or die("Couldn't list $path/$size: $!\n");
+    my $n = 0;
+    while (<$fh2>) {
+      chomp;
+      my ($size2, $file2) = (split)[4, -1];
+      next if $file2 !~ /^\d+\.\w+$/;
+      print $fh "$size/$file2 $size2\n";
+      $n++;
+    }
+    close($fh2);
+    print "  $n files\n" if $OPT_V;
+    print STDERR "DANGER!!!! -- only $n files found in $path2/$size\n" if $n < 100;
+  }
+  close($fh);
+}
+
+sub get_list_to_upload {
+  my ($listing1, $listing2) = @_;
+  local $_;
+  my @result;
+  print "Getting files to upload...\n" if $OPT_V;
+  open(my $fh, "diff $listing1 $listing2 |") or die("Couldn't diff $listing1 and $listing2: $!\n");
+  while (<$fh>) {
+    push(@result, $1) if /^< (\S+)/;
+  }
+  close($fh);
+  return \@result;
+}
+
+sub get_list_to_delete {
+  my ($listing, $uploads) = @_;
+  local $_;
+  my %uploading;
+  foreach (@$uploads) {
+    $uploading{$_} = 1;
+  }
+  my %delete_sizes;
+  foreach (@DELETE_SIZES) {
+    $delete_sizes{$_} = 1;
+  }
+  my @result;
+  print "Getting files to delete...\n" if $OPT_V;
+  open(my $fh, "<$listing") or die("Couldn't read $listing: $!\n");
+  while (<$fh>) {
+    my ($file, $size) = /^((\w+)\/\S+)/;
+    next if !$delete_sizes{$size};
+    push(@result, $file) if !$uploading{$file};
+  }
+  close($fh);
+  return \@result;
+}
+
+sub delete_files {
+  my $files = shift;
+  print "\nDeleting:\n" if $OPT_V;
+  foreach my $file (@$files) {
+    print "$file\n" if $OPT_V;
+    unlink("$LOCAL_PATH/$file") if !$OPT_TEST;
+  }
+}
+
+sub upload_files {
+  my $files = shift;
+  write_file_list($TEMP_FILE, $files);
+  print "\nUploading:\n" if $OPT_V;
+  if (!$OPT_TEST) {
+    my ($url, $path) = split(':', $REMOTE_PATH);
+    my $flags = $OPT_V ? '-xvPf' : '-xvPf';
+    system("cd $LOCAL_PATH; tar -T $TEMP_FILE -cf - | ssh $url \\(cd $path\\; tar $flags -\\)");
+  } elsif ($OPT_V) {
+    system("cat $TEMP_FILE");
+  }
+  unlink($TEMP_FILE);
+}
+
+sub write_file_list {
+  my ($file_name, $list) = @_;
+  open(my $fh, ">$file_name") or die("Couldn't write $file_name: $!\n");
+  foreach my $file (@$list) {
+    print $fh "$file\n";
+  }
+  close($fh);
+}
+

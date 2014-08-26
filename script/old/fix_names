@@ -1,0 +1,80 @@
+# encoding: utf-8
+
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
+
+SAFE_MODE = false
+
+for row in Name.connection.select_rows %(
+    SELECT id, rank, text_name, search_name, sort_name, display_name, author, rank, deprecated, correct_spelling_id, synonym_id FROM names
+  )
+  id, rank, text_name, search_name, sort_name, display_name, author, rank, deprecated, correct_spelling_id, synonym_id = *row
+  rank = rank.to_sym
+  deprecated = deprecated2 = (deprecated == 1)
+
+  # Need to jump through these hoops in order to preserve the ë which are stripped out of text_name.
+  str = display_name.sub(/__[^_]*$/, '').gsub(/[_\*]/, '').strip_squeeze
+  str += ' group' if rank == :Group
+  if str.gsub('ë', 'e') != text_name.strip_squeeze
+    puts "TEXT_NAME AND DISPLAY_NAME DISAGREE: #{id} #{text_name.inspect} -vs- #{display_name.inspect}"
+  end
+  str = (str + ' ' + author.to_s).strip
+
+  # Check if spelling, synonym and deprecated are all consistent.
+  if !correct_spelling_id.blank? and synonym_id.blank?
+    puts "[MISPELLING NEEDS SYNONYM]: #{id} #{str.inspect} (#{rank})"
+      Name.find(id).merge_synonyms(Name.find(correct_spelling_id)) unless SAFE_MODE
+  elsif !deprecated and !correct_spelling_id.blank?
+    puts "MISPELLING IS ACCEPTED: #{id} #{str.inspect} (#{rank})"
+    deprecated2 = true
+  elsif deprecated and synonym_id.blank?
+    puts "DEPRECATED WITHOUT SYNONYM: #{id} #{str.inspect} (#{rank})"
+  end
+
+  # Re-parse name and see if anything needs to be corrected.
+  parse = Name.parse_name(str, deprecated2)
+  if not parse
+    puts "INVALID NAME: #{id} #{str.inspect} (#{rank})"
+  else
+    text_name2, display_name2, sort_name2, search_name2, parent_name, rank2, author2 = *parse
+    if rank2 == :Genus and Name::RANKS_ABOVE_GENUS.include?(rank)
+      rank2 = rank
+    end
+
+    if text_name    != text_name2    or
+       search_name  != search_name2  or
+       sort_name    != sort_name2    or
+       display_name != display_name2 or
+       author       != author2       or
+       rank         != rank2         or
+       deprecated   != deprecated2
+
+      puts "[NAME CHANGE]: #{id} #{str.inspect} (#{rank})#{deprecated ? ' (deprecated)' : ''}"
+      puts "  text_name:    #{text_name.inspect}\t#{text_name2.inspect}"       if text_name    != text_name2
+      puts "  search_name:  #{search_name.inspect}\t#{search_name2.inspect}"   if search_name  != search_name2
+      puts "  sort_name:    #{sort_name.inspect}\t#{sort_name2.inspect}"       if sort_name    != sort_name2
+      puts "  display_name: #{display_name.inspect}\t#{display_name2.inspect}" if display_name != display_name2
+      puts "  author:       #{author.inspect}\t#{author2.inspect}"             if author       != author2
+      puts "  rank:         #{rank}\t#{rank2}"                                 if rank         != rank2
+      puts "  deprecated:   #{deprecated.inspect}\t#{deprecated2.inspect}"     if deprecated   != deprecated2
+
+      other = Name.find_by_search_name(search_name2)
+      if other and other.id != id
+        puts "NEED TO MERGE THIS NAME!!"
+      elsif not SAFE_MODE
+        Name.connection.update %(
+          UPDATE names SET
+            text_name    = #{Name.connection.quote(text_name2)},
+            search_name  = #{Name.connection.quote(search_name2)},
+            sort_name    = #{Name.connection.quote(sort_name2)},
+            display_name = #{Name.connection.quote(display_name2)},
+            author       = #{Name.connection.quote(author2)},
+            rank         = #{Name.connection.quote(rank2)},
+            deprecated   = #{deprecated2 ? 1 : 0}
+          WHERE id = #{id}
+        )
+      end
+    end
+  end
+end
+

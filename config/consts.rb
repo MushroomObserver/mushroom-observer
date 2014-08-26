@@ -13,6 +13,10 @@
 #
 ################################################################################
 
+# Ensure that this is defined in case we're executing this script on its own
+# (e.g., to provide access to configs for bash sripts).
+APP_ROOT = File.expand_path('../..', __FILE__) unless defined? APP_ROOT
+
 # Various server domains.
 DOMAIN       = 'localhost' if not defined? DOMAIN
 HTTP_DOMAIN  = "http://#{DOMAIN}:3000"
@@ -69,8 +73,8 @@ EXCEPTION_RECIPIENTS      = "webmaster@#{DOMAIN}"
 EXTRA_BCC_EMAIL_ADDRESSES = ""
 
 # File where the list of most commonly used names lives.
-NAME_PRIMER_CACHE_FILE = "#{APP_ROOT}/tmp/name_primer.#{::Rails.env}"
-USER_PRIMER_CACHE_FILE = "#{APP_ROOT}/tmp/user_primer.#{::Rails.env}"
+NAME_PRIMER_CACHE_FILE = "#{APP_ROOT}/tmp/name_primer.#{ENV['RAILS_ENV']}"
+USER_PRIMER_CACHE_FILE = "#{APP_ROOT}/tmp/user_primer.#{ENV['RAILS_ENV']}"
 
 # File where we keep name_lister data cache.
 NAME_LISTER_CACHE_FILE = "#{APP_ROOT}/public/assets/name_list_data.js"

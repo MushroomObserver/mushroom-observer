@@ -30,6 +30,7 @@
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::  Measure how closely this String matches another String.
+#  unindent::       Remove indentation (e.g., from here docs).
 #
 ################################################################################
 
@@ -648,6 +649,11 @@ class String
   def percent_match(other)
     max = [length, other.length].max
     1.0 - levenshtein_distance_to(other).to_f / max
+  end
+
+  # Find amount first line is indented and remove that from all lines.
+  def unindent
+    gsub /^#{self[/\A\s*/]}/, ''
   end
 
   # This method is missing from ruby 1.9.

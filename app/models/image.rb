@@ -589,7 +589,7 @@ class Image < AbstractModel
               gsub('<id>', id.to_s).
               gsub('<ext>', ext).
               gsub('<set>', set)
-        if !system(cmd)
+        if !TESTING && !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(:id => id))
           result = false
         end
@@ -639,7 +639,7 @@ class Image < AbstractModel
     else
       raise("Invalid transform op: #{op.inspect}")
     end
-    system("script/rotate_image #{id} #{op}&")
+    system("script/rotate_image #{id} #{op}&") if !TESTING
   end
 
   ################################################################################
