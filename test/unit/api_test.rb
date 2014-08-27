@@ -208,9 +208,16 @@ class ApiTest < UnitTestCase
                    SpeciesList, User ]
       expected_object = model.find(1)
       api = API.execute(:method => :get, :action => model.type_tag, :id => 1)
+      query = api.query.query
       assert_no_errors(api, "Errors while getting #{model} #1")
       assert_obj_list_equal([expected_object], api.results, "Failed to get first #{model}")
     end
+  end
+
+  def test_getting_observations_from_august
+    api = API.execute(:method => :get, :action => :observation, :date => 20140824)
+    query = api.query.query
+    assert_no_errors(api)
   end
 
   def test_post_minimal_observation

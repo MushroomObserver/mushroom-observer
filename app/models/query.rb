@@ -1496,7 +1496,7 @@ class Query < AbstractQuery
       y, m, d = val.split('-')
       m ||= min ? 1 : 12
       d ||= min ? 1 : 31
-      self.where << "#{col} #{dir}= '%04d-%02d-%02d'" % [y, m, d]
+      self.where << "#{col} #{dir}= '%04d-%02d-%02d'" % [y, m, d].map(&:to_i)
     elsif val.to_s.match(/-/)
       m, d = val.split('-')
       self.where << "MONTH(#{col}) #{dir} #{m} OR " +
