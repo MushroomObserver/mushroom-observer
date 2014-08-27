@@ -99,7 +99,8 @@ class API
   class RenderFailed < Error
     def initialize(error)
       super()
-      args.merge!(:error => error.to_s)
+      msg = error.to_s + "\n" + error.backtrace.join("\n")
+      args.merge!(:error => msg)
     end
   end
 
