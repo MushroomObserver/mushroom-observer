@@ -11,13 +11,13 @@
 
   links = []
   links.push([:author_request_add_author.t,
-    "#{HTTP_DOMAIN}/observer/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
+    "#{MO.http_domain}/observer/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
   links.push([:email_links_show_user.t,
-    "#{HTTP_DOMAIN}/observer/show_user/#{@sender.id}"])
+    "#{MO.http_domain}/observer/show_user/#{@sender.id}"])
   links.push([:email_links_latest_changes.t,
-    HTTP_DOMAIN])
+    MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => WEBMASTER_EMAIL_ADDRESS)
+  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>

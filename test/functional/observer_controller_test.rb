@@ -124,7 +124,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     get_with_dump(:color_themes)
     assert_template(action: 'color_themes')
-    for theme in CSS
+    for theme in MO.themes
       get_with_dump(theme)
       assert_template(action: theme)
     end

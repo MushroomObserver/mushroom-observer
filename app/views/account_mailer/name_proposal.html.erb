@@ -21,15 +21,15 @@
 
   links = []
   links.push([:email_links_show_object.t(:type => :observation),
-    "#{HTTP_DOMAIN}/#{@observation.id}"])
+    "#{MO.http_domain}/#{@observation.id}"])
   links.push([:email_links_not_interested.t(:type => :observation),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+    "#{MO.http_domain}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,
-    "#{HTTP_DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
+    "#{MO.http_domain}/account/no_email_observations_naming/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.t,
-    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.t,
-    HTTP_DOMAIN])
+    MO.http_domain])
 
 if @user.email_html %>
 <html>

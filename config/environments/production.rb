@@ -1,6 +1,82 @@
 MushroomObserver::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
+  # ----------------------------
+  #  MO configuration.
+  # ----------------------------
+
+  config.domain      = "mushroomobserver.org"
+  config.http_domain = "http://mushroomobserver.org"
+
+  # List of alternate server domains.  We redirect from each of these to the real one.
+  config.bad_domains = ["www.#{config.domain}"]
+
+  # Date after which votes become public.
+  config.vote_cutoff = "20100405"
+
+  # Code appended to ids to make "sync_id".  Must start with letter.
+  config.server_code = "us1"
+
+  # Time zone of the server.
+  config.time_zone = "America/New_York"
+  ENV["TZ"] = "Eastern Time (US & Canada)"
+
+  # Enable queued email.
+  config.queue_email = true
+
+  # Nathan wants a copy of everything.
+  config.extra_bcc_email_addresses = "mo@collectivesource.com"
+
+  # Use gmail to send email.
+  config.action_mailer.smtp_settings = {
+    :address => "smtp.gmail.com",
+    :port => 587,
+    :authentication => :plain,
+    :enable_starttls_auto => true,
+    :user_name => "webmaster@mushroomobserver.org",
+    :password => config.smtp_password
+  }
+
+  # Enable Pivotal interface.
+  config.pivotal_enabled  = true
+  config.pivotal_username = "webmaster@mushroomobserver.org"
+  config.pivotal_project  = "224629"
+
+  # Serve new images locally until transferred to image server
+  config.local_image_files = "#{config.root}/public/images"
+  config.image_sources = {
+    :local => {
+      :test => "file://#{config.local_image_files}",
+      :read => "/local_images",
+    },
+    :cdmr => {
+      :test => :transferred_flag,
+      :read  => "/images",
+      :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
+    }
+    # For use when testing live server in parallel with production server.
+    # :mo = {
+    #   :test  => "http://mushroomobserver.org/local_images",
+    #   :read  => "http://mushroomobserver.org/local_images",
+    #   :write => "ssh://jason@mushroomobserver.org:/var/web/mo/public/images",
+    #   :sizes => [ :thumbnail, :small ]
+    # }
+  }
+
+  # Search order when serving images.  Key is size, e.g., :thumbnail, :small, etc.
+  config.image_precedence = {
+    :default   => [:cdmr, :local]
+    # For use when testing live server in parallel with production server.
+    # :default   => [:cdmr, :local, :mo]
+  }
+
+  # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
+  config.keep_these_image_sizes_local = [ :thumbnail, :small ]
+
+  # ----------------------------
+  #  Rails configuration.
+  # ----------------------------
+
   # The production environment is meant for finished, "live" apps.
   # Code is not reloaded between requests
   config.cache_classes = true
@@ -47,21 +123,22 @@ MushroomObserver::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  # Compress JavaScripts and CSS
-  config.assets.compress = true
-
-  # Don't fallback to assets pipeline if a precompiled asset is missed
-  config.assets.compile = false
-
-  # Generate digests for assets URLs
-  config.assets.digest = true
-
-  # Defaults to Rails.root.join("public/assets")
-  # config.assets.manifest = YOUR_PATH
-
-  # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  # config.assets.precompile += %w( search.js )
-
-  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  # Haven't really figured out how assets work yet.
+  # # Compress JavaScripts and CSS
+  # config.assets.compress = true
+  # 
+  # # Don't fallback to assets pipeline if a precompiled asset is missed
+  # config.assets.compile = false
+  # 
+  # # Generate digests for assets URLs
+  # config.assets.digest = true
+  # 
+  # # Defaults to Rails.root.join("public/assets")
+  # # config.assets.manifest = YOUR_PATH
+  # 
+  # # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
+  # # config.assets.precompile += %w( search.js )
+  # 
+  # # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+  # # config.force_ssl = true
 end

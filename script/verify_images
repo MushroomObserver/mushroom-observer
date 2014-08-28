@@ -94,7 +94,7 @@ def files_in_common(server)
   remote = File.open(cache_file(server))
   result = []
   remote_file = ""
-  keep = KEEP_THESE_IMAGE_SIZES.map {|x| SIZES[x]}
+  keep = MO.keep_these_image_sizes_local.map {|x| SIZES[x]}
   until local.eof? || remote.eof?
     local_file, local_size = local.read_line.chomp.split
     subdir = local_file.split('/').first
@@ -176,7 +176,7 @@ SIZES = {
 }
 
 if DEVELOPMENT || PRODUCTION
-  LOCAL_PATH = LOCAL_IMAGE_FILES
+  LOCAL_PATH = MO.local_image_files
   SERVERS = IMAGE_SOURCES.keys.reject do |server|
     IMAGE_SOURCES[server][:write].blank?
   end

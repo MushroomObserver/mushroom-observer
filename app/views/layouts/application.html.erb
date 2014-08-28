@@ -18,19 +18,19 @@
     if is_in_admin_mode?
       css = 'Admin'
     elsif browser.bot?
-      css = DEFAULT_THEME
+      css = MO.default_theme
     else
-      if CSS.member?(controller.action_name)
+      if MO.themes.member?(controller.action_name)
         css = controller.action_name
       else
         if @user.nil?
-          css = DEFAULT_THEME
+          css = MO.default_theme
         else
           css = @user.theme
         end
       end
-      unless CSS.member?(css)
-        css = CSS[rand(CSS.length)]
+      unless MO.themes.member?(css)
+        css = MO.themes.sample
       end
     end
     stylesheet_link_tag("general") +

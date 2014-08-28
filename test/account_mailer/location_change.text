@@ -1,5 +1,5 @@
-From: news@localhost
-Reply-To: no-reply@localhost
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
 Subject: [MO] Albion, California, USA Has Been Changed
 Mime-Version: 1.0
@@ -26,9 +26,9 @@ Here are some new =E2=80=98notes=E2=80=99 to play with.
 
 Here are some handy links:
 
-Show this location: http://localhost:3000/location/show_location/1
-I'm not interested in this location: http://localhost:3000/interest/set_i=
-nterest?id=3D1&type=3DLocation&user=3D2&state=3D-1
-Change your preferences: http://localhost:3000/account/prefs/2
-Latest changes at Mushroom Observer: http://localhost:3000
+Show this location: http://mushroomobserver.org/location/show_location/1
+I'm not interested in this location: http://mushroomobserver.org/interest=
+/set_interest?id=3D1&type=3DLocation&user=3D2&state=3D-1
+Change your preferences: http://mushroomobserver.org/account/prefs/2
+Latest changes at Mushroom Observer: http://mushroomobserver.org
 

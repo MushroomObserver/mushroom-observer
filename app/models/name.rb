@@ -320,12 +320,12 @@ class Name < AbstractModel
   #
   # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
   # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (NAME_PRIMER_CACHE_FILE).
+  # in a plain old file (MO.name_primer_cache_file).
   #
   def self.primer
     result = []
-    if !File.exists?(NAME_PRIMER_CACHE_FILE) ||
-       File.mtime(NAME_PRIMER_CACHE_FILE) < Time.now - 1.day
+    if !File.exists?(MO.name_primer_cache_file) ||
+       File.mtime(MO.name_primer_cache_file) < Time.now - 1.day
 
       # Get list of names sorted by how many times they've been used, then
       # re-sort by name.
@@ -339,11 +339,11 @@ class Name < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      file = File.open(NAME_PRIMER_CACHE_FILE, 'w:utf-8')
+      file = File.open(MO.name_primer_cache_file, 'w:utf-8')
       file.write(result.join("\n") + "\n")
       file.close()
     else
-      file = File.open(NAME_PRIMER_CACHE_FILE, "r:UTF-8")
+      file = File.open(MO.name_primer_cache_file, "r:UTF-8")
       result = file.readlines.map(&:chomp)
       file.close()
     end

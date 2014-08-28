@@ -72,11 +72,11 @@ class AccountController < ApplicationController
 
   def signup # :nologin: :prefetch:
     if request.method != "POST"
-      @new_user = User.new(:theme => DEFAULT_THEME)
+      @new_user = User.new(:theme => MO.default_theme)
     else
       theme = params['new_user']['theme']
       login = params['new_user']['login']
-      valid_themes = CSS + ["NULL"]
+      valid_themes = MO.themes + ["NULL"]
       if !valid_themes.member?(theme) or (login == 'test_denied')
         if !theme.blank?
           # I'm guessing this has something to do with spammer/hacker trying

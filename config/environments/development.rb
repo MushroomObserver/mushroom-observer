@@ -1,6 +1,51 @@
 MushroomObserver::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
+  # ----------------------------
+  #  MO configuration.
+  # ----------------------------
+
+  config.domain      = "localhost"
+  config.http_domain = "http://localhost:3000"
+
+  # List of alternate server domains.  We redirect from each of these to the real one.
+  config.bad_domains = ["localhost.localdomain:3000"]
+
+  # Code appended to ids to make "sync_id".  Must start with letter.
+  config.server_code = "XX"
+
+  # Turn off email.
+  config.queue_email = false
+  config.action_mailer.smtp_settings = {
+    :address => "localhost",
+    :port    => 25,
+    :domain  => "localhost"
+  }
+
+  # Disable Pivotal interface.
+  config.pivotal_enabled = false
+
+  # Serve new images locally, pre-existing images from real image server.
+  config.local_image_files = "#{config.root}/public/images"
+  config.image_sources = {
+    :local => {
+      :test => "file://#{config.local_image_files}",
+      :read => "/images",
+    },
+    :cdmr => {
+      :test => :transferred_flag,
+      :read => "http://images.digitalmycology.com",
+    }
+  }
+  config.image_precedence = {
+    :default => [:local, :cdmr]
+  }
+  config.image_fallback_source = :cdmr
+
+  # ----------------------------
+  #  Rails configuration.
+  # ----------------------------
+
   # In the development environment your application's code is reloaded on
   # every request.  This slows down response time but is perfect for development
   # since you don't have to restart the webserver when you make code changes.
@@ -27,4 +72,3 @@ MushroomObserver::Application.configure do
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 end
-

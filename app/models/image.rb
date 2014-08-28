@@ -22,18 +22,18 @@
 #
 #  The actual image is stored in several files:
 #
-#    ::Rails.root.to_s/public/images/orig/<id>.<ext>  # (original file if not jpeg)
-#    ::Rails.root.to_s/public/images/orig/<id>.jpg
-#    ::Rails.root.to_s/public/images/1280/<id>.jpg
-#    ::Rails.root.to_s/public/images/960/<id>.jpg
-#    ::Rails.root.to_s/public/images/640/<id>.jpg
-#    ::Rails.root.to_s/public/images/320/<id>.jpg
-#    ::Rails.root.to_s/public/images/thumb/<id>.jpg
+#    Rails.root/public/images/orig/<id>.<ext>  # (original file if not jpeg)
+#    Rails.root/public/images/orig/<id>.jpg
+#    Rails.root/public/images/1280/<id>.jpg
+#    Rails.root/public/images/960/<id>.jpg
+#    Rails.root/public/images/640/<id>.jpg
+#    Rails.root/public/images/320/<id>.jpg
+#    Rails.root/public/images/thumb/<id>.jpg
 #
 #  They are also transferred to a remote image server with more disk space:
 #  (images take up 100 Gb as of Jan 2010)
 #
-#    IMAGE_DOMAIN/<dir>/<id>.<ext>
+#    http://<image_server>/<dir>/<id>.<ext>
 #
 #  After the images are successfully transferred, we remove the originals from
 #  the web server (see scripts/update_images).
@@ -90,9 +90,9 @@
 #
 #  7. Lastly it transfers all the images to the image server:
 #
-#       scp orig/$id.<ext>  IMAGE_DOMAIN/orig/$id.<ext>
-#       scp orig/$id.jpg    IMAGE_DOMAIN/orig/$id.jpg
-#       scp 1280/$id.jpg    IMAGE_DOMAIN/1280/$id.jpg
+#       scp orig/$id.<ext>  <user>@<image_server>/orig/$id.<ext>
+#       scp orig/$id.jpg    <user>@<image_server>/orig/$id.jpg
+#       scp 1280/$id.jpg    <user>@<image_server>/1280/$id.jpg
 #       etc.
 #
 #     (If any errors occur in +script/process_image+ they get emailed to the
@@ -152,7 +152,7 @@
 #
 #  ==== Temporary attributes
 #
-#  image_dir::          Where images are stored (default is IMG_DIR).
+#  image_dir::          Where images are stored (default is MO.local_image_files).
 #  upload_handle::      File or IO handle of upload stream.
 #  upload_temp_file::   Path of the tempfile holding the upload until we process it.
 #  upload_length::      Length of the upload (if available).
@@ -163,7 +163,7 @@
 #  == Class Methods
 #
 #  validate_vote::      Validate a vote value.
-#  file_name::          Filename (relative to IMG_DIR) given size and id.
+#  file_name::          Filename (relative to MO.local_image_files) given size and id.
 #  url::                Full URL on image server given size and id.
 #  all_sizes::          All image sizes from +:thumbnail+ to +:full_size+.
 #  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
@@ -322,7 +322,7 @@ class Image < AbstractModel
   end
 
   def local_file_name(size)
-    image_url(size).file_name(LOCAL_IMAGE_FILES)
+    image_url(size).file_name(MO.local_image_files)
   end
 
   def original_url;  url(:original);  end
@@ -400,10 +400,10 @@ class Image < AbstractModel
   #
   ##############################################################################
 
-  # Directory images are stored under.  (Default is +IMG_DIR+.)
+  # Directory images are stored under.  (Default is +MO.local_image_files+.)
   attr_accessor :image_dir
   def image_dir
-    @image_dir || IMG_DIR
+    @image_dir || MO.local_image_files
   end
 
   # Upload file handle.
@@ -471,9 +471,9 @@ class Image < AbstractModel
   # okay, otherwise adds an error to the :image field.
   def validate_image_length
     if upload_length || save_to_temp_file
-      if upload_length > IMAGE_UPLOAD_MAX_SIZE
+      if upload_length > MO.image_upload_max_size
         errors.add(:image, :validate_image_file_too_big.t(:size => upload_length,
-                   :max => IMAGE_UPLOAD_MAX_SIZE.to_s.sub(/\d{6}$/, 'Mb')))
+                   :max => MO.image_upload_max_size.to_s.sub(/\d{6}$/, 'Mb')))
         result = false
       else
         result = true
@@ -585,10 +585,10 @@ class Image < AbstractModel
       if !move_original
         result = false
       else
-        cmd = PROCESS_IMAGE_COMMAND.
-              gsub('<id>', id.to_s).
-              gsub('<ext>', ext).
-              gsub('<set>', set)
+        cmd = MO.process_image_command.
+                 gsub('<id>', id.to_s).
+                 gsub('<ext>', ext).
+                 gsub('<set>', set)
         if !TESTING && !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(:id => id))
           result = false

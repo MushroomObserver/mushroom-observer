@@ -205,7 +205,7 @@ class Vote < AbstractModel
   # Now we are free to change the implementation later.
   def anonymous?
     (user.votes_anonymous == :no) or
-    (user.votes_anonymous == :old and updated_at > Time.parse(VOTE_CUTOFF))
+    (user.votes_anonymous == :old and updated_at > Time.parse(MO.vote_cutoff))
   end
 
 ################################################################################

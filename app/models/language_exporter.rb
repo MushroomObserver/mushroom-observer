@@ -155,7 +155,7 @@ module LanguageExporter
       @@localization_files[lang]
     else
       File.open(localization_file, 'r:utf-8') do |fh|
-        YAML::load(fh)[lang][LOCALE_NAMESPACE]
+        YAML::load(fh)[lang][MO.locale_namespace]
       end
     end
   end
@@ -166,7 +166,7 @@ module LanguageExporter
     else
       temp_file = localization_file + '.' + Process.pid.to_s
       File.open(temp_file, 'w:utf-8') do |fh|
-        fh << {lang => {LOCALE_NAMESPACE => data}}.to_yaml # Apparently Rails breaks YAML::dump
+        fh << {lang => {MO.locale_namespace => data}}.to_yaml # Apparently Rails breaks YAML::dump
       end
       File.rename(temp_file, localization_file)
     end

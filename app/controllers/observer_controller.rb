@@ -121,7 +121,7 @@ class ObserverController < ApplicationController
   require_dependency 'pattern_search'
   include RefineSearch
 
-  before_filter :login_required, :except => CSS + [
+  before_filter :login_required, :except => MO.themes + [
     :advanced_search,
     :advanced_search_form,
     :ask_webmaster_question,
@@ -505,7 +505,7 @@ class ObserverController < ApplicationController
       type = 'rss_log' if type == :google
       redirect_to(:controller => ctrlr, :action => "list_#{type}s")
     elsif type == :google
-      pat = URI.escape("site:#{DOMAIN} #{pattern}")
+      pat = URI.escape("site:#{MO.domain} #{pattern}")
       redirect_to("http://google.com?q=#{pat}")
     else
       redirect_to(:controller => ctrlr, :action => "#{type}_search",

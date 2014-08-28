@@ -54,7 +54,7 @@ function clean_log {
 trap clean_log EXIT
 
 # Grab constant from rails configuration (consts.rb and consts-site.rb).
-#   path=$( rails_constant LOCAL_IMAGE_FILES )
+#   path=$( rails_constant MO.local_image_files )
 function rails_constant {
   ruby -I$app_root/config -e "require 'import_constants.rb'" -e "print $1"
 }

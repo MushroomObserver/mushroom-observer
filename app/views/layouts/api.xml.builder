@@ -1,5 +1,5 @@
 xml.instruct!(:xml, :version => '1.0')
-xml.response(:xmlns => "#{HTTP_DOMAIN}/response.xsd") do
+xml.response(:xmlns => "#{MO.http_domain}/response.xsd") do
   xml_string(xml, :version, @api.version)
   xml_datetime(xml, :run_date, @start_time)
   if @api.user

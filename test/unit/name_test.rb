@@ -1595,14 +1595,14 @@ class NameTest < UnitTestCase
     assert_nil(names(:petigera).correct_spelling)
 
     # Coprinus comatus should normally end up in name primer.
-    File.delete(NAME_PRIMER_CACHE_FILE) if File.exists?(NAME_PRIMER_CACHE_FILE)
+    File.delete(MO.name_primer_cache_file) if File.exists?(MO.name_primer_cache_file)
     assert(!Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
 
     # Mark it as misspelled and see that it gets removed from the primer list.
     names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
     names(:coprinus_comatus).change_deprecated(true)
     names(:coprinus_comatus).save
-    File.delete(NAME_PRIMER_CACHE_FILE)
+    File.delete(MO.name_primer_cache_file)
     assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end
 

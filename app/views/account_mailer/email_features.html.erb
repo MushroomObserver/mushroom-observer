@@ -5,11 +5,11 @@
 
   links = []
   links.push([:email_links_stop_sending.t,
-    "#{HTTP_DOMAIN}/account/no_email_general_feature/#{@user.id}"])
+    "#{MO.http_domain}/account/no_email_general_feature/#{@user.id}"])
   links.push([:email_links_change_prefs.t,
-    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.t,
-    HTTP_DOMAIN])
+    MO.http_domain])
 
 if @user.email_html %>
 <html>

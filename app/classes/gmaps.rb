@@ -33,7 +33,7 @@
 #    %>
 #
 #    <head>
-#      <%= GM::GMap.header(:host => DOMAIN) %>
+#      <%= GM::GMap.header(:host => MO.domain) %>
 #      <%= javascript_tag(gmap.to_html) %>
 #    </head>
 #    <body>

@@ -24,14 +24,14 @@
 #
 ################################################################################
 
-require_dependency 'pivotal'
-
 class PivotalController < ApplicationController
+  require_dependency 'pivotal'
+
   def index
-    if PIVOTAL_PROJECT == 'project_id'
-      @stories = []
-    else
+    if MO.pivotal_enabled
       @stories = Pivotal.get_stories.sort_by(&:story_order).select(&:active?)
+    else
+      @stories = []
     end
   end
 end

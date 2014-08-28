@@ -1,5 +1,5 @@
-From: news@localhost
-Reply-To: no-reply@localhost
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
 Subject: [MO] Observation Changed, Coprinus comatus (O.F. Mull.) Pers. (3)
 Mime-Version: 1.0
@@ -28,8 +28,8 @@ Second fruiting in bark chips
 
 Here are some handy links:
 
-Show this observation: http://localhost:3000/3
-Post a comment: http://localhost:3000/comment/add_comment?id=3&type=Observation
-I'm not interested in this observation: http://localhost:3000/interest/set_interest?id=3&type=Observation&user=2&state=-1
-Latest changes at Mushroom Observer: http://localhost:3000
+Show this observation: http://mushroomobserver.org/3
+Post a comment: http://mushroomobserver.org/comment/add_comment?id=3&type=Observation
+I'm not interested in this observation: http://mushroomobserver.org/interest/set_interest?id=3&type=Observation&user=2&state=-1
+Latest changes at Mushroom Observer: http://mushroomobserver.org
 

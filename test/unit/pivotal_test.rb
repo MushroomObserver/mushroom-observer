@@ -3,10 +3,10 @@ require 'test_helper'
 
 class PivotalTest < UnitTestCase
   def test_get_stories
-    if PIVOTAL_USERNAME != 'username'
+    if MO.pivotal_enabled
       stories = Pivotal.get_stories
       assert(stories.length > 10)
-      test_story = stories.select {|s| s.id == PIVOTAL_TEST_ID}.first
+      test_story = stories.select {|s| s.id == MO.pivotal_test_id}.first
       assert_not_nil(test_story)
       assert_true(test_story.active?)
       assert_equal('test', test_story.name)
@@ -26,8 +26,8 @@ class PivotalTest < UnitTestCase
   end
 
   def test_get_story
-    if PIVOTAL_USERNAME != 'username'
-      story = Pivotal.get_story(PIVOTAL_TEST_ID)
+    if MO.pivotal_enabled
+      story = Pivotal.get_story(MO.pivotal_test_id)
       assert_not_nil(story)
       assert_equal('test', story.name)
       assert_equal(1, story.comments.length)
@@ -40,7 +40,7 @@ class PivotalTest < UnitTestCase
   # Instead of doing a teardown, I'm just going to throw all tests that
   # involve modifying the live(!) Pivotal server in a single test.
   def test_modifications
-    if PIVOTAL_USERNAME != 'username'
+    if MO.pivotal_enabled
 
       # Clean up after failed previous tests.
       stories = Pivotal.get_stories

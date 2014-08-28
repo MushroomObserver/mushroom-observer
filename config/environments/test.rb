@@ -1,6 +1,53 @@
 MushroomObserver::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
+  # ----------------------------
+  #  MO configuration.
+  # ----------------------------
+
+  config.domain      = "mushroomobserver.org"
+  config.http_domain = "http://mushroomobserver.org"
+
+  # List of alternate server domains.  We redirect from each of these to the real one.
+  config.bad_domains = ["www.mushroomobserver.org"]
+
+  # Disable queued email.
+  config.queue_email = false
+
+  # Access data for Pivotal Tracker's API.
+  config.pivotal_enabled  = false
+  config.pivotal_username = "webmaster@mushroomobserver.org"
+  config.pivotal_project  = "224629"
+
+  # Serve new images from local_images, old images from remote_images.
+  # Transfer to two servers, both local, but one using ssh to do it.
+  # Keep thumbnails locally, and only copy thumbnails to second server.
+  config.local_image_files = "#{config.root}/public/test_images"
+  config.image_sources = {
+    :local => {
+      :test => "file://#{config.local_image_files}",
+      :read => "/local_images",
+    },
+    :remote1 => {
+      :test  => :transferred_flag,
+      :read  => "/remote_images",
+      :write => "#{config.root}/public/test_server1"
+    },
+    :remote2 => {
+      :write => "ssh://vagrant@localhost:#{config.root}/public/test_server2",
+      :size  => [ :thumbnail, :small ]
+    }
+  }
+  config.image_precedence = {
+    :default => [:local, :remote1 ]
+  }
+  config.image_fallback_source = :remote1
+  config.keep_these_image_sizes_local = [ :thumbnail, :small ]
+
+  # ----------------------------
+  #  Rails configuration.
+  # ----------------------------
+
   # The test environment is used exclusively to run your application's
   # test suite.  You never need to work with it otherwise.  Remember that
   # your test database is "scratch space" for the test suite and is wiped

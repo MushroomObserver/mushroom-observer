@@ -7,7 +7,7 @@ class Pivotal
   class << self
     def get_stories
       xml = get_cache_or_request('all_stories.xml',
-        '/projects/' + PIVOTAL_PROJECT + '/stories')
+        "/projects/#{MO.pivotal_project}/stories")
       doc = REXML::Document.new(xml)
       stories = []
       doc.root.elements.each('story') do |elem|
@@ -22,7 +22,7 @@ class Pivotal
 
     def get_story(id)
       xml = get_cache_or_request('story_' + id + '.xml',
-        '/projects/' + PIVOTAL_PROJECT + '/stories/' + id)
+        "/projects/#{MO.pivotal_project}/stories/#{id}")
       doc = REXML::Document.new(xml)
       return Pivotal::Story.new(doc.root)
     end
@@ -32,7 +32,7 @@ class Pivotal
       data.add_element("story_type").text = "feature"
       data.add_element("name").text = name
       data.add_element("description").text = prepare_text(description, user)
-      xml = post_request('/projects/' + PIVOTAL_PROJECT + '/stories', data)
+      xml = post_request("/projects/#{MO.pivotal_project}/stories", data)
       doc = REXML::Document.new(xml)
       story = Pivotal::Story.new(doc.root)
       write_cache('story_' + story.id + '.xml', xml)
@@ -42,13 +42,13 @@ class Pivotal
 
     # Just used by unit tests to clean up temp story created during test.
     def delete_story(id)
-      xml = delete_request('/projects/' + PIVOTAL_PROJECT + '/stories/' + id)
+      xml = delete_request("/projects/#{MO.pivotal_project}/stories/#{id}")
     end
 
     def post_comment(id, user, text)
       data = REXML::Element.new("note")
       data.add_element("text").text = prepare_text(text, user)
-      xml = post_request('/projects/' + PIVOTAL_PROJECT + '/stories/' + id + '/notes', data)
+      xml = post_request("/projects/#{MO.pivotal_project}/stories/#{id}/notes", data)
       doc = REXML::Document.new(xml)
       comment = Pivotal::Comment.new(doc.root)
       delete_cache('story_' + id + '.xml')
@@ -58,7 +58,7 @@ class Pivotal
 
     def cast_vote(id, user, value)
       xml = get_cache_or_request('story_' + id + '.xml',
-        '/projects/' + PIVOTAL_PROJECT + '/stories/' + id)
+        "/projects/#{MO.pivotal_project}/stories/#{id}")
       doc = REXML::Document.new(xml)
       desc = doc.root.elements['description'].first.value rescue ''
       desc = desc.split(/\n/).reject do |line|
@@ -67,7 +67,7 @@ class Pivotal
       desc += "\nVOTE: #{user.id} #{value}\n"
       data = REXML::Element.new("story")
       data.add_element("description").text = desc
-      xml = put_request('/projects/' + PIVOTAL_PROJECT + '/stories/' + id, data)
+      xml = put_request("/projects/#{MO.pivotal_project}/stories/#{id}", data)
       doc = REXML::Document.new(xml)
       story = Pivotal::Story.new(doc.root)
       write_cache('story_' + id + '.xml', xml)
@@ -78,9 +78,9 @@ class Pivotal
   private
 
     def get_token
-      https = Net::HTTP.new(PIVOTAL_URL, 443)
-      req = Net::HTTP::Get.new(PIVOTAL_PATH + '/tokens/active')
-      req.basic_auth(PIVOTAL_USERNAME, PIVOTAL_PASSWORD)
+      https = Net::HTTP.new(MO.pivotal_url, 443)
+      req = Net::HTTP::Get.new("#{MO.pivotal_path}/tokens/active")
+      req.basic_auth(MO.pivotal_username, MO.pivotal_password)
       https.use_ssl = true
       res = https.request(req)
       doc = REXML::Document.new(res.body)
@@ -92,23 +92,23 @@ class Pivotal
       @@token ||= get_token
       return nil unless @@token
       # Use same HTTP connection for duration of this MO request.
-      @http ||= Net::HTTP.new(PIVOTAL_URL, 80)
+      @http ||= Net::HTTP.new(MO.pivotal_url, 80)
       headers = { 'X-TrackerToken' => @@token }
       case method
       when "GET"
-        req = Net::HTTP::Get.new(PIVOTAL_PATH + path, headers)
+        req = Net::HTTP::Get.new(MO.pivotal_path + path, headers)
       when "PUT"
-        req = Net::HTTP::Put.new(PIVOTAL_PATH + path, headers)
+        req = Net::HTTP::Put.new(MO.pivotal_path + path, headers)
         req.content_length = data.length
         req.content_type = "application/xml"
         req.body = data.to_s
       when "POST"
-        req = Net::HTTP::Post.new(PIVOTAL_PATH + path, headers)
+        req = Net::HTTP::Post.new(MO.pivotal_path + path, headers)
         req.content_length = data.length
         req.content_type = "application/xml"
         req.body = data.to_s
       when "DELETE"
-        req = Net::HTTP::Delete.new(PIVOTAL_PATH + path, headers)
+        req = Net::HTTP::Delete.new(MO.pivotal_path + path, headers)
       end
       return @http.request(req).body
     end
@@ -130,18 +130,18 @@ class Pivotal
     end
 
     def delete_cache(filename)
-      file = PIVOTAL_CACHE + '/' + filename
+      file = "#{MO.pivotal_cache}/#{filename}"
       File.delete(file) if File.exists?(file)
     end
 
     def write_cache(filename, text)
-      FileUtils.mkdir_p(PIVOTAL_CACHE) unless File.directory?(PIVOTAL_CACHE)
-      file = PIVOTAL_CACHE + '/' + filename
+      FileUtils.mkdir_p(MO.pivotal_cache) unless File.directory?(MO.pivotal_cache)
+      file = "#{MO.pivotal_cache}/#{filename}"
       File.open(file, 'w:utf-8') {|f| f.write(text.to_s.force_encoding('utf-8'))}
     end
 
     def get_cache_or_request(filename, path)
-      file = PIVOTAL_CACHE + '/' + filename
+      file = "#{MO.pivotal_cache}/#{filename}"
       if File.exists?(file) and
          File.mtime(file) > 1.hour.ago
         result = File.new(file)

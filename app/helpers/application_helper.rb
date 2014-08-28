@@ -1049,7 +1049,7 @@ module ApplicationHelper
 
   def ensure_global_header_is_added
     if !@done_gmap_header_yet
-      add_header(GM::GMap.header(:host => DOMAIN))
+      add_header(GM::GMap.header(:host => MO.domain))
       @done_gmap_header_yet = true
     end
   end
@@ -1779,14 +1779,14 @@ module ApplicationHelper
   def pivotal_vote_controls(story)
     current_vote = story.user_vote(@user)
     result = ''.html_safe
-    result << if @user && current_vote < PIVOTAL_MAX_VOTE
+    result << if @user && current_vote < MO.pivotal_max_vote
       link_to_function(image_tag('vote_up_hot.png'),
         "vote_on_story(#{story.id}, #{@user.id}, #{current_vote+1})")
     else
       image_tag('vote_up_cold.png')
     end
     result << content_tag(:span, story.score.to_s, :id => 'pivotal_vote_num_' + story.id)
-    result << if @user && current_vote > PIVOTAL_MIN_VOTE
+    result << if @user && current_vote > MO.pivotal_min_vote
       link_to_function(image_tag('vote_down_hot.png'),
         "vote_on_story(#{story.id}, #{@user.id}, #{current_vote-1})")
     else

@@ -1,5 +1,5 @@
-From: news@localhost
-Reply-To: no-reply@localhost
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
 To: mary@collectivesource.com
 Subject: [MO] Petigera Has Been Changed
 Mime-Version: 1.0
@@ -19,9 +19,9 @@ By: Tricky Dick (dick)
 You received this email because you are an author of a description of the changed name.
 Here are some handy links:
 
-Show this name: http://localhost:3000/name/show_name/40
-I'm not interested in this name: http://localhost:3000/interest/set_interest?id=40&type=Name&user=2&state=-1
-Stop sending me email like this: http://localhost:3000/account/no_email_names_author/2
-Change your preferences: http://localhost:3000/account/prefs/2
-Latest changes at Mushroom Observer: http://localhost:3000
+Show this name: http://mushroomobserver.org/name/show_name/40
+I'm not interested in this name: http://mushroomobserver.org/interest/set_interest?id=40&type=Name&user=2&state=-1
+Stop sending me email like this: http://mushroomobserver.org/account/no_email_names_author/2
+Change your preferences: http://mushroomobserver.org/account/prefs/2
+Latest changes at Mushroom Observer: http://mushroomobserver.org
 

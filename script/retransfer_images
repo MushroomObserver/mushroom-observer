@@ -7,7 +7,7 @@ set -e
 
 source $(dirname "$0")/bash_include
 
-images_root=$( rails_constant LOCAL_IMAGE_FILES )
+images_root=$( rails_constant MO.local_image_files )
 
 if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
 

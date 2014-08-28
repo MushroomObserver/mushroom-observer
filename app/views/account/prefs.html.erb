@@ -52,8 +52,8 @@
       [:prefs_votes_anonymous_yes.l, :yes],
     ]
     # Allow old users to granfather in old anonymous votes, but choose to go public from here forward.
-    if @user.created_at && @user.created_at < Time.parse(VOTE_CUTOFF)
-      values << [:prefs_votes_anonymous_old.l(:cutoff => VOTE_CUTOFF), :old]
+    if @user.created_at && @user.created_at < Time.parse(MO.vote_cutoff)
+      values << [:prefs_votes_anonymous_old.l(:cutoff => MO.vote_cutoff), :old]
     end
     form.select(:votes_anonymous, values) %></p>
 
@@ -90,7 +90,7 @@
   <table cellpadding="0" cellspacing="0">
     <tr>
       <td><label for="user_theme"><%= :prefs_theme.t %>:</label><br/>
-        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS.map {|t| [t.to_sym.l, t]}) %></td>
+        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + MO.themes.map {|t| [t.to_sym.l, t]}) %></td>
       <td width="20"></td>
       <td><label for="user_locale"><%= :prefs_locale.t %>:</label><br/>
         <%= locales = Language.all.map do |lang|

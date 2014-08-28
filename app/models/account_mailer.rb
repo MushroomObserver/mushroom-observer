@@ -70,14 +70,14 @@ class AccountMailer < ActionMailer::Base
   # specimen::  Added specimen.
   def add_specimen_not_curator(sender, receiver, specimen)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_add_specimen_not_curator.l(:herbarium_name => specimen.herbarium.name)
     @title               = @subject
     @sender              = sender
     @specimen            = specimen
     @recipients          = receiver.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
@@ -95,15 +95,15 @@ class AccountMailer < ActionMailer::Base
   # message::   Content of message (provided by user).
   def admin_request(sender, receiver, project, subject, message)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = subject
     @title               = @subject
     @sender              = sender
     @message             = message || ''
     @project             = project
     @recipients          = receiver.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
@@ -121,15 +121,15 @@ class AccountMailer < ActionMailer::Base
   # message::   Content of message (provided by user).
   def author_request(sender, receiver, object, subject, message)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = subject
     @title               = @subject
     @sender              = sender
     @message             = message || ''
     @object              = object
     @recipients          = receiver.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
@@ -146,16 +146,16 @@ class AccountMailer < ActionMailer::Base
   # comment::   Comment that triggered this email.
   def comment(sender, receiver, target, comment)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_comment.l(:name => target.unique_text_name)
     @title               = @subject
     @sender              = sender
     @target              = target
     @comment             = comment
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = (sender && receiver == target.user) ? sender.email : NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = (sender && receiver == target.user) ? sender.email : MO.noreply_email_address
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL comment " +
@@ -170,15 +170,15 @@ class AccountMailer < ActionMailer::Base
   # commercial_inquiry:: Content of message (provided by user).
   def commercial_inquiry(sender, image, commercial_inquiry)
     @user                = image.user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_commercial_inquiry.l(:name => image.unique_text_name)
     @title               = @subject
     @sender              = sender
     @image               = image
     @message             = commercial_inquiry || ''
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
@@ -197,7 +197,7 @@ class AccountMailer < ActionMailer::Base
   # time::          Time the change took place.
   def consensus_change(sender, receiver, observation, old_name, new_name, time)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_consensus_change.l(:id => observation.id,
                                 :old => (old_name ? old_name.real_search_name : 'none'),
                                 :new => (new_name ? new_name.real_search_name : 'none'))
@@ -208,9 +208,9 @@ class AccountMailer < ActionMailer::Base
     @new_name            = new_name
     @time                = time
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL consensus_change " +
@@ -222,13 +222,13 @@ class AccountMailer < ActionMailer::Base
   # Email sent to Nathan when sign-up is denied.
   # user_params::   Hash of parameters from form.
   def denied(user_params)
-    I18n.locale          = DEFAULT_LOCALE
+    I18n.locale          = MO.default_locale
     @subject             = :email_subject_denied.l
     @title               = @subject
     @user_params         = user_params
-    @recipients          = WEBMASTER_EMAIL_ADDRESS
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = ACCOUNTS_EMAIL_ADDRESS
+    @recipients          = MO.webmaster_email_address
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.accounts_email_address
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
@@ -237,14 +237,14 @@ class AccountMailer < ActionMailer::Base
   # features::  Description of changes (body of email).
   def email_features(user, features)
     @user                = user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_features.l
     @title               = @subject
     @features            = features
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
   end
@@ -255,14 +255,14 @@ class AccountMailer < ActionMailer::Base
   def email_registration(user, registration)
     event = registration.conference_event
     @user                = user
-    I18n.locale          = DEFAULT_LOCALE
+    I18n.locale          = MO.default_locale
     I18n.locale          = @user.lang if @user and @user.lang
     @subject             = :email_subject_registration.l(:name => event.name)
     @registration        = registration
     @title               = @subject
     @recipients          = registration.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = WEBMASTER_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.webmaster_email_address
     @content_type        = 'text/html'
     @content_type        = 'text/plain' if @user and not @user.email_html
     @subject             = '[MO] ' + @subject.to_ascii
@@ -292,7 +292,7 @@ class AccountMailer < ActionMailer::Base
       new_desc           = nil
     end
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
     @title               = @subject
     @sender              = sender
@@ -302,9 +302,9 @@ class AccountMailer < ActionMailer::Base
     @old_desc            = old_desc
     @new_desc            = new_desc
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL location_change " +
@@ -337,7 +337,7 @@ class AccountMailer < ActionMailer::Base
       new_desc           = nil
     end
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_name_change.l(:name =>
                               (old_name ? old_name.real_search_name : new_name.real_search_name))
     @title               = @subject
@@ -349,9 +349,9 @@ class AccountMailer < ActionMailer::Base
     @new_desc            = new_desc
     @review_status       = "review_#{review_status}".to_sym.l if review_status != :no_change
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL name_change " +
@@ -368,16 +368,16 @@ class AccountMailer < ActionMailer::Base
   # observation::   Observation in question.
   def name_proposal(sender, receiver, naming, observation)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_name_proposal.l(:name => naming.text_name,
                                                           :id => observation.id)
     @title               = @subject
     @naming              = naming
     @observation         = observation
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL name_proposal " +
@@ -394,15 +394,15 @@ class AccountMailer < ActionMailer::Base
   def naming_for_observer(observer, naming, notification)
     sender               = notification.user
     @user                = observer
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_naming_for_observer.l
     @title               = @subject
     @naming              = naming
     @notification        = notification
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = sender ? sender.email : NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = sender ? sender.email : MO.noreply_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL naming_for_observer " +
@@ -417,15 +417,15 @@ class AccountMailer < ActionMailer::Base
   # naming::    Naming that triggered this email.
   def naming_for_tracker(tracker, naming)
     @user                = tracker
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_naming_for_tracker.l
     @title               = @subject
     @observation         = naming.observation
     @naming              = naming
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL naming_for_tracker " +
@@ -440,14 +440,14 @@ class AccountMailer < ActionMailer::Base
   # password::  The new password (unencrypted).
   def new_password(user, password)
     @user                = user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_new_password.l
     @title               = @subject
     @password            = password
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = ACCOUNTS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.accounts_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL new_password " +
@@ -462,7 +462,7 @@ class AccountMailer < ActionMailer::Base
   # time::          Time the change took place.
   def observation_change(sender, receiver, observation, note, time)
     @user                = receiver
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = observation ? :email_subject_observation_change.l(:name => observation.unique_text_name) :
                                          :email_subject_observation_destroy.l(:name => note).t.html_to_ascii
     @title               = @subject
@@ -471,9 +471,9 @@ class AccountMailer < ActionMailer::Base
     @note                = note
     @time                = time
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL observation_change " +
@@ -488,15 +488,15 @@ class AccountMailer < ActionMailer::Base
   # question::      The actual question (content).
   def observation_question(sender, observation, question)
     @user                = observation.user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_observation_question.l(:name => observation.unique_text_name)
     @title               = @subject
     @sender              = sender
     @observation         = observation
     @message             = question || ''
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
@@ -513,15 +513,15 @@ class AccountMailer < ActionMailer::Base
   def publish_name(publisher, receiver, name)
     @user                = receiver
     @name                = name
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_publish_name.l
     @title               = @subject
     @publisher           = publisher
     @name                = name
     @recipients          = receiver.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
+    @headers['Reply-To'] = MO.noreply_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL publish_name " +
@@ -537,15 +537,15 @@ class AccountMailer < ActionMailer::Base
   def update_registration(user, registration, before)
     event = registration.conference_event
     @user                = user
-    I18n.locale          = DEFAULT_LOCALE
+    I18n.locale          = MO.default_locale
     I18n.locale          = @user.lang if @user and @user.lang
     @subject             = :email_subject_update_registration.l(:name => event.name)
     @registration        = registration
     @before              = before
     @title               = @subject
     @recipients          = registration.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = WEBMASTER_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.webmaster_email_address
     @content_type        = 'text/html'
     @content_type        = 'text/plain' if @user and not @user.email_html
     @subject             = '[MO] ' + @subject.to_ascii
@@ -560,14 +560,14 @@ class AccountMailer < ActionMailer::Base
   # content::   Content of question (provided by user).
   def user_question(sender, user, subject, content)
     @user                = user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = subject
     @title               = @subject
     @sender              = sender
     @message             = content || ''
     @recipients          = user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = NEWS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.news_email_address
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
@@ -580,12 +580,12 @@ class AccountMailer < ActionMailer::Base
   # user::      User that just signed up.
   def verify(user)
     @user                = user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_verify.l
     @title               = @subject
     @recipients          = user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = ACCOUNTS_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.accounts_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL verify " +
@@ -598,15 +598,15 @@ class AccountMailer < ActionMailer::Base
   # api_key::     API key in question.
   def verify_api_key(user, other_user, api_key)
     @user                = user
-    I18n.locale          = @user.lang || DEFAULT_LOCALE
+    I18n.locale          = @user.lang || MO.default_locale
     @subject             = :email_subject_verify_api_key.l
     @title               = @subject
     @other_user          = other_user
     @api_key             = api_key
     @recipients          = user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = ACCOUNTS_EMAIL_ADDRESS
-    @headers['Reply-To'] = WEBMASTER_EMAIL_ADDRESS
+    @bcc                 = MO.extra_bcc_email_addresses
+    @from                = MO.accounts_email_address
+    @headers['Reply-To'] = MO.webmaster_email_address
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL verify " +
@@ -617,12 +617,12 @@ class AccountMailer < ActionMailer::Base
   # sender::    User asking the question.
   # question::  Content of the question.
   def webmaster_question(sender, question)
-    I18n.locale          = DEFAULT_LOCALE
+    I18n.locale          = MO.default_locale
     @subject             = :email_subject_webmaster_question.l(:user => sender)
     @question            = question
-    @recipients          = WEBMASTER_EMAIL_ADDRESS
-    @bcc	               = EXTRA_BCC_EMAIL_ADDRESSES
-    @from                = WEBMASTER_EMAIL_ADDRESS
+    @recipients          = MO.webmaster_email_address
+    @bcc	               = MO.extra_bcc_email_addresses
+    @from                = MO.webmaster_email_address
     @headers['Reply-To'] = sender
     @subject             = '[MO] ' + @subject.to_ascii
   end

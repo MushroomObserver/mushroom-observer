@@ -7,7 +7,7 @@
 #  DESCRIPTION::
 #
 #  This is a nightly cronjob that updates the name_lister data cache.
-#  It just writes the file NAME_LISTER_CACHE_FILE:
+#  It just writes the file MO.name_lister_cache_file:
 #
 #    RAILS_ROOT/public/assets/javascripts/name_list_data.js
 #
@@ -87,10 +87,10 @@ species = species.map do |rec|
 end.flatten
 
 # Write cache.
-unless File.directory?(NAME_LISTER_CACHE_FILE)
-  FileUtils.mkpath(File.dirname(NAME_LISTER_CACHE_FILE))
+unless File.directory?(MO.name_lister_cache_file)
+  FileUtils.mkpath(File.dirname(MO.name_lister_cache_file))
 end
-File.open(NAME_LISTER_CACHE_FILE, 'w') do |fh|
+File.open(MO.name_lister_cache_file, 'w') do |fh|
   fh.write <<-END.unindent
     var NL_GENERA  = [#{genera.map  {|n| "'#{escape(n)}'"}.join(",")}];
     var NL_SPECIES = [#{species.map {|n| "'#{escape(n)}'"}.join(",")}];

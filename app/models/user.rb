@@ -730,8 +730,8 @@ class User < AbstractModel
   # (with full name in parens).
   def self.primer
     result = []
-    if !File.exists?(USER_PRIMER_CACHE_FILE) ||
-       File.mtime(USER_PRIMER_CACHE_FILE) < Time.now - 1.day
+    if !File.exists?(MO.user_primer_cache_file) ||
+       File.mtime(MO.user_primer_cache_file) < Time.now - 1.day
 
       # Get list of users sorted first by when they last logged in (if recent),
       # then by cotribution.
@@ -743,9 +743,9 @@ class User < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      File.open(USER_PRIMER_CACHE_FILE, 'w:utf-8').write(result.join("\n") + "\n")
+      File.open(MO.user_primer_cache_file, 'w:utf-8').write(result.join("\n") + "\n")
     else
-      result = File.open(USER_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
+      result = File.open(MO.user_primer_cache_file, "r:UTF-8").readlines.map(&:chomp)
     end
     return result
   end

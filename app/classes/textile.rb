@@ -103,7 +103,7 @@ class Textile < String
       url1  = url.gsub(/<span class="caps">([A-Z]+)<\/span>/, '\\1')
       extra = url1.sub!(/([^\w\/]+$)/, '') ? $1 : ''
       url2  = ''
-      if url1.length > URL_TRUNCATION_LENGTH and not url1.starts_with?(HTTP_DOMAIN)
+      if url1.length > URL_TRUNCATION_LENGTH and not url1.starts_with?(MO.http_domain)
         if url1.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
           url2 = $1 + '/...'
         else
@@ -127,13 +127,13 @@ class Textile < String
         id.gsub!(/&#822[01];/, '"')
         id = CGI.unescapeHTML(id)
         id = CGI.escape(id)
-        url = "#{HTTP_DOMAIN}/observer/lookup_#{type.downcase}/#{id}"
+        url = "#{MO.http_domain}/observer/lookup_#{type.downcase}/#{id}"
         "<a href=\"#{url}\">#{label}</a>"
       end
     end
 
     # Make sure all links are fully-qualified.
-    gsub!(/href="\//, "href=\"#{HTTP_DOMAIN}/")
+    gsub!(/href="\//, "href=\"#{MO.http_domain}/")
 
     # Put pre-existing links back in (removing the _object_ tag wrappers).
     gsub!(/<XXX(\d+)>/) do
@@ -297,11 +297,12 @@ private
 
   # Convert !image 12345! in a textile string.
   def check_our_images!
-    self.gsub!(/!image (\w+\/)?(\d+)!/) do
-      size, id = $1, $2
-      size ||= 'thumb/'
-      '"!%s/%s%d.jpg!":%s/image/show_image/%d' %
-        [IMAGE_DOMAIN, size, id, HTTP_DOMAIN, id]
+    self.gsub!(/!image (?:(\w+)\/)?(\d+)!/) do
+      size = Regexp.last_match[1] || "thumb"
+      id   = Regexp.last_match[2]
+      src  = Image.url(size, id)
+      link = "#{MO.http_domain}/image/show_image/#{id}"
+      "\"!#{src}!\":#{link}"
     end
   end
 end

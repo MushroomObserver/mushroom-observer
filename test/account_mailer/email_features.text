@@ -1,5 +1,5 @@
-From: news@localhost
-Reply-To: no-reply@localhost
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
 To: rolf@collectivesource.com
 Subject: [MO] New Mushroom Observer Features
 Mime-Version: 1.0
@@ -17,7 +17,7 @@ A feature
 
 Here are some handy links:
 
-Stop sending me email like this: http://localhost:3000/account/no_email_general_feature/1
-Change your preferences: http://localhost:3000/account/prefs/1
-Latest changes at Mushroom Observer: http://localhost:3000
+Stop sending me email like this: http://mushroomobserver.org/account/no_email_general_feature/1
+Change your preferences: http://mushroomobserver.org/account/prefs/1
+Latest changes at Mushroom Observer: http://mushroomobserver.org
 

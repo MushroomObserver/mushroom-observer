@@ -5,12 +5,12 @@
 
   fields = ""
   if @old_name
-    fields += "*#{:email_field_old_name.l}:* " + link_to(@old_name.observation_name, "#{HTTP_DOMAIN}/name/show_name/#{@old_name.id}") + "\n"
+    fields += "*#{:email_field_old_name.l}:* " + link_to(@old_name.observation_name, "#{MO.http_domain}/name/show_name/#{@old_name.id}") + "\n"
   else
     fields += "*#{:email_field_old_name.l}:* --\n"
   end
   if @new_name
-    fields += "*#{:email_field_new_name.l}:* " + link_to(@new_name.observation_name, "#{HTTP_DOMAIN}/name/show_name/#{@new_name.id}") + "\n"
+    fields += "*#{:email_field_new_name.l}:* " + link_to(@new_name.observation_name, "#{MO.http_domain}/name/show_name/#{@new_name.id}") + "\n"
   else
     fields += "*#{:email_field_new_name.l}:* --\n"
   end
@@ -21,17 +21,17 @@
 
   links = []
   links.push([:email_links_show_object.t(:type => :observation),
-    "#{HTTP_DOMAIN}/#{@observation.id}"])
+    "#{MO.http_domain}/#{@observation.id}"])
   links.push([:email_links_post_comment.t,
-    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
+    "#{MO.http_domain}/comment/add_comment?id=#{@observation.id}&type=Observation"])
   links.push([:email_links_not_interested.t(:type => :observation),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+    "#{MO.http_domain}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.t,
-    "#{HTTP_DOMAIN}/account/no_email_observations_consensus/#{@user.id}"]) unless watching
+    "#{MO.http_domain}/account/no_email_observations_consensus/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.t,
-    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.t,
-    HTTP_DOMAIN])
+    MO.http_domain])
 
 if @user.email_html %>
 <html>

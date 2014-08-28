@@ -6,7 +6,7 @@
 #  manageable number of points and boxes.  Resulting points and boxes each may
 #  contain one or more Observation's and Location's.
 #
-#  Note: Uses the global +MAX_MAP_OBJECTS+ to limit the number of objects.
+#  Note: Uses the global +MO.max_map_objects+ to limit the number of objects.
 #
 #  == Typical Usage
 #
@@ -105,9 +105,9 @@ private
     end
   end
 
-  # need to be able to override this in test suite
+  # Need to be able to override this in test suite.
   def max_objects
-    MAX_MAP_OBJECTS
+    MO.max_map_objects
   end
 
   def add_point_set(loc, objs, prec)

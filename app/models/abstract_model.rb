@@ -280,7 +280,7 @@ class AbstractModel < ActiveRecord::Base
   # any possible confusion and/or overhead dealing with callbacks.  It would
   # be super-cool if mysql gave us a way to make this the default value...
   def set_sync_id
-    self.sync_id = sync_id = "#{id}#{SERVER_CODE}"
+    self.sync_id = sync_id = "#{id}#{MO.server_code}"
     self.class.connection.update %(
       UPDATE #{self.class.table_name} SET sync_id = '#{sync_id}'
       WHERE id = #{id}
@@ -420,7 +420,7 @@ class AbstractModel < ActiveRecord::Base
   #   User.show_action(123) => 'http://mushroomobserver.org/observer/show_user/123'
   #   Name.show_action(123) => 'http://mushroomobserver.org/name/show_name/123'
   #
-  def self.show_url(id); "#{HTTP_DOMAIN}/#{show_controller}/#{show_action}/#{id}"; end
+  def self.show_url(id); "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"; end
 
   # Return the URL of the "show_<object>" action
   #

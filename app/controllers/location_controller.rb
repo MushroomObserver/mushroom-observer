@@ -643,8 +643,8 @@ class LocationController < ApplicationController
             content = :email_location_merge.l(:user => @user.login,
                                               :this => "##{@location.id}: " + @location.name,
                                               :that => "##{merge.id}: " + merge.name,
-                                              :this_url => "#{HTTP_DOMAIN}/location/show_location/#{@location.id}",
-                                              :that_url => "#{HTTP_DOMAIN}/location/show_location/#{merge.id}")
+                                              :this_url => "#{MO.http_domain}/location/show_location/#{@location.id}",
+                                              :that_url => "#{MO.http_domain}/location/show_location/#{merge.id}")
             AccountMailer.webmaster_question(@user.email, content).deliver
           end
 

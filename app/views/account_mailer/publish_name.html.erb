@@ -9,11 +9,11 @@
 
   links = []
   links.push([:email_links_show_object.t(:type => :name),
-    "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"])
+    "#{MO.http_domain}/name/show_name/#{@name.id}"])
   links.push([:email_links_email_publisher.t,
-    "#{HTTP_DOMAIN}/observer/show_user/#{@publisher.id}"])
+    "#{MO.http_domain}/observer/show_user/#{@publisher.id}"])
   links.push([:email_links_latest_changes.t,
-    HTTP_DOMAIN])
+    MO.http_domain])
 
 if @user.email_html %>
 <html>

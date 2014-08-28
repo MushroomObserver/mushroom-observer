@@ -159,7 +159,7 @@ class ApplicationController < ActionController::Base
   def choose_layout
     change = params[:user_theme].to_s
     if !change.blank?
-      if CSS.member?(change)
+      if MO.themes.member?(change)
         if @user
           @user.theme = change
           @user.save
@@ -210,11 +210,11 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Redirect from www.mo.org to mo.org.
   #
-  # This would be much easier to check if HTTP_HOST != DOMAIN, but if this ever
+  # This would be much easier to check if HTTP_HOST != MO.domain, but if this ever
   # were to break we'd get into an infinite loop too easily that way.  I think
-  # this is a lot safer.  BAD_DOMAINS would be something like: 
+  # this is a lot safer.  MO.bad_domains would be something like: 
   #
-  #   BAD_DOMAINS = [
+  #   MO.bad_domains = [
   #     'www.mushroomobserver.org',
   #     'mushroomobserver.com',
   #   ]
@@ -227,8 +227,8 @@ logger.warn('SESSION: ' + session.inspect)
   #
   def fix_bad_domains
     if (request.method == "GET") and
-       BAD_DOMAINS.include?(request.env['HTTP_HOST'])
-      redirect_to("#{HTTP_DOMAIN}#{request.fullpath}")
+       MO.bad_domains.include?(request.env['HTTP_HOST'])
+      redirect_to("#{MO.http_domain}#{request.fullpath}")
     end
   end
 
@@ -493,7 +493,7 @@ logger.warn('SESSION: ' + session.inspect)
   # 2. user prefs (user edited their preferences)
   # 3. session (whatever we used last time)
   # 4. navigator (provides default)
-  # 5. server (DEFAULT_LOCALE)
+  # 5. server (MO.default_locale)
   #
   def set_locale
     code = if params[:user_locale]
@@ -509,7 +509,7 @@ logger.warn('SESSION: ' + session.inspect)
       logger.debug "[I18n] loading locale: #{locale} from request header"
       locale
     else
-      DEFAULT_LOCALE
+      MO.default_locale
     end
 
     # Only change the Locale code if it needs changing.  There is about a 0.14

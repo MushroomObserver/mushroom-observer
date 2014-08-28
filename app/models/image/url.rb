@@ -10,10 +10,21 @@ class Image
       :thumbnail => 'thumb'
     }
 
+    SUBDIRECTORY_TO_SIZE = {
+      'orig'  => :full_size,
+      '1280'  => :huge,
+      '960'   => :large,
+      '640'   => :medium,
+      '320'   => :small,
+      'thumb' => :thumbnail
+    }
+
     attr_accessor :size, :id, :transferred, :extension
 
     def initialize(args)
-      self.size        = args[:size]
+      size = args[:size]
+      size = SUBDIRECTORY_TO_SIZE[size] if !size.is_a?(Symbol)
+      self.size        = size
       self.id          = args[:id]
       self.transferred = args[:transferred]
       self.extension   = args[:extension]
@@ -65,15 +76,15 @@ class Image
     end
 
     def source_order
-      IMAGE_PRECEDENCE[size] || IMAGE_PRECEDENCE[:default]
+      MO.image_precedence[size] || MO.image_precedence[:default]
     end
 
     def fallback_source
-      FALLBACK_SOURCE
+      MO.image_fallback_source
     end
 
     def specs(source)
-      IMAGE_SOURCES[source] or raise "Missing image source: #{source.inspect}"
+      MO.image_sources[source] or raise "Missing image source: #{source.inspect}"
     end
   end
 end

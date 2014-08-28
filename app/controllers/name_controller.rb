@@ -624,7 +624,7 @@ class NameController < ApplicationController
         :new => @parse.real_search_name,
         :observations => @name.observations.length,
         :namings => @name.namings.length,
-        :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
+        :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
       AccountMailer.webmaster_question(@user.email, content).deliver
       NameControllerTest.report_email(content) if TESTING
@@ -732,8 +732,8 @@ class NameController < ApplicationController
     content = :email_name_merge.l(:user => @user.login,
                                   :this => "##{@name.id}: " + @name.real_search_name,
                                   :that => "##{new_name.id}: " + new_name.real_search_name,
-                                  :this_url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}",
-                                  :that_url => "#{HTTP_DOMAIN}/name/show_name/#{new_name.id}")
+                                  :this_url => "#{MO.http_domain}/name/show_name/#{@name.id}",
+                                  :that_url => "#{MO.http_domain}/name/show_name/#{new_name.id}")
     AccountMailer.webmaster_question(@user.email, content).deliver
     NameControllerTest.report_email(content) if TESTING
   end

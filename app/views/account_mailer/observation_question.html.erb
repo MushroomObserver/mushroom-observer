@@ -13,15 +13,15 @@
 
   links = []
   links.push([:email_links_show_object.t(:type => :observation),
-    "#{HTTP_DOMAIN}/#{@observation.id}"])
+    "#{MO.http_domain}/#{@observation.id}"])
   links.push([:email_links_stop_sending.t,
-    "#{HTTP_DOMAIN}/account/no_email_general_question/#{@user.id}"])
+    "#{MO.http_domain}/account/no_email_general_question/#{@user.id}"])
   links.push([:email_links_change_prefs.t,
-    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+    "#{MO.http_domain}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.t,
-    HTTP_DOMAIN])
+    MO.http_domain])
 
-  report_abuse = :email_report_abuse.l(:email => WEBMASTER_EMAIL_ADDRESS)
+  report_abuse = :email_report_abuse.l(:email => MO.webmaster_email_address)
 
 if @user.email_html %>
 <html>

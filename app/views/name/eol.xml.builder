@@ -9,8 +9,8 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
   "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 http://services.eol.org/schema/content_0_2.xsd") {
     for taxon in @data.names
       xml.taxon do
-        xml.dc(:identifier, "#{HTTP_DOMAIN}/name/show_name/#{taxon.id}")
-        xml.dc(:source, "#{HTTP_DOMAIN}/name/show_name/#{taxon.id}")
+        xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
+        xml.dc(:source, "#{MO.http_domain}/name/show_name/#{taxon.id}")
         for (rank, name) in Name.parse_classification(taxon.classification)
           if Name.eol_ranks.member?(rank)
             xml.dwc(rank, name)
@@ -75,9 +75,9 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
             xml.license(@data.license_url(image.license_id))
             xml.dcterms(:rightsHolder, user)
             xml.audience('General public')
-            xml.dc(:source, "#{HTTP_DOMAIN}/image/show_image/#{image.id}")
+            xml.dc(:source, "#{MO.http_domain}/image/show_image/#{image.id}")
             xml.dc(:description, "Mushroom Observer Image #{image.id}: #{@data.image_to_names(image.id)}", "xml:lang" => "en")
-            xml.mediaURL("#{HTTP_DOMAIN}/images/640/#{image.id}.jpg")
+            xml.mediaURL("#{MO.http_domain}/images/640/#{image.id}.jpg")
             # xml.reviewStatus(image.review_status)
           end
         end

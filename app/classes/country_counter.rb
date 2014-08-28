@@ -57,7 +57,7 @@ class CountryCounter
     end
   end
   
-  UNDERSTOOD_COUNTRIES = Set.new(load_param_hash(LOCATION_COUNTRIES_FILE))
+  UNDERSTOOD_COUNTRIES = Set.new(load_param_hash(MO.location_countries_file))
 
   def known_by_count; @known_by_count; end
   def unknown_by_count; @unknown_by_count; end

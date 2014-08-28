@@ -1,5 +1,5 @@
-From: news@localhost
-Reply-To: no-reply@localhost
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
 To: rolf@collectivesource.com
 Subject: [MO] Name Published
 Mime-Version: 1.0
@@ -16,7 +16,7 @@ Published by: Mary Newbie (mary)
 
 Here are some handy links:
 
-Show this name: http://localhost:3000/name/show_name/3
-Send email to the publisher: http://localhost:3000/observer/show_user/2
-Latest changes at Mushroom Observer: http://localhost:3000
+Show this name: http://mushroomobserver.org/name/show_name/3
+Send email to the publisher: http://mushroomobserver.org/observer/show_user/2
+Latest changes at Mushroom Observer: http://mushroomobserver.org
 

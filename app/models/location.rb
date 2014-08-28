@@ -348,10 +348,10 @@ class Location < AbstractModel
     end
   end
 
-  UNDERSTOOD_COUNTRIES = load_param_hash(LOCATION_COUNTRIES_FILE)
-  UNDERSTOOD_STATES    = load_param_hash(LOCATION_STATES_FILE)
-  OK_PREFIXES          = load_param_hash(LOCATION_PREFIXES_FILE)
-  BAD_TERMS            = load_param_hash(LOCATION_BAD_TERMS_FILE)
+  UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
+  UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
+  OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
+  BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})"
 
   # Returns a member of understood_places if the candidate is either a member or

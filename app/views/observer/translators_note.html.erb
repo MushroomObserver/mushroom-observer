@@ -1,5 +1,5 @@
 <% @title = :translators_note_title.t %>
-<%= :translators_note.tpl(:repo => "#{CODE_REPOSITORY}/mushroom-observer/blob/master/config/locales/en.txt") %>
+<%= :translators_note.tpl(:repo => "#{MO.code_repository}/mushroom-observer/blob/master/config/locales/en.txt") %>
 <br/><br/>
 
 <% for lang in Language.all.sort_by(&:order) %>

@@ -244,8 +244,8 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_get_pivotal_story
-    if PIVOTAL_USERNAME != 'username'
-      good_ajax_request(:pivotal, :type => 'story', :id => PIVOTAL_TEST_ID)
+    if MO.pivotal_enabled
+      good_ajax_request(:pivotal, :type => 'story', :id => MO.pivotal_test_id)
       assert_match(/This is a test story/, @response.body)
       assert_match(/Posted by.*Rolf Singer/, @response.body)
       assert_match(/This is a test comment/, @response.body)
