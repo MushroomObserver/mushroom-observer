@@ -148,3 +148,6 @@ IMAGE_PRECEDENCE = {
 }
 FALLBACK_SOURCE = :cdmr
 
+# Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
+KEEP_THESE_IMAGE_SIZES = []
+

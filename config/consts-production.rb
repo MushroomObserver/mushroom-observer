@@ -49,6 +49,7 @@ IMAGE_SOURCES = {
   #   :test  => "http://mushroomobserver.org/local_images",
   #   :read  => "http://mushroomobserver.org/local_images",
   #   :write => "ssh://jason@mushroomobserver.org:/var/web/mo/public/images",
+  #   :sizes => [ :thumbnail, :small ]
   # }
 }
 
@@ -57,3 +58,7 @@ IMAGE_PRECEDENCE = {
   # For use when testing live server in parallel with production server.
   # :default   => [:cdmr, :local, :mo]
 }
+
+# Keep local copy of thumbnails at least, in case image server is unavailable.
+KEEP_THESE_IMAGE_SIZES = [ :thumbnail, :small ]
+

@@ -19,6 +19,8 @@ class ScriptTest < UnitTestCase
     system("mysql -u #{user} -p#{pass} #{db} -e '#{cmd}'")
   end
 
+################################################################################
+
   test "autoreply" do
     sender = "test@email.com"
     subject = "RE: do not reply"
@@ -133,9 +135,10 @@ class ScriptTest < UnitTestCase
     script = script_file("process_image")
     tempfile = Tempfile.new("test").path
     img_root = LOCAL_IMAGE_FILES
+    remote_root = "#{::Rails::root}/tmp/image_server"
     original_image = "#{::Rails.root}/test/images/pleopsidium.tiff"
     FileUtils.cp(original_image, "#{img_root}/orig/1.tiff")
-    system("rm -rf #{::Rails::root}/tmp/image_server*")
+    system("rm -rf #{remote_root}*")
     # Can't do this, since in unit tests ActiveRecord wraps all work on the
     # database in a transaction.  Soon as you look at the database it becomes
     # immune to external changes for the rest of the test.  So we need to be
@@ -169,18 +172,24 @@ class ScriptTest < UnitTestCase
     assert_equal(2560, img.width)
     assert_equal(1920, img.height)
     assert_equal(true, img.transferred)
-    for server in [
-      "#{::Rails::root}/tmp/image_server1",
-      "#{::Rails::root}/tmp/image_server2"
-    ]
-      for file in [ "thumb/1.jpg", "320/1.jpg", "640/1.jpg", "960/1.jpg",
-                    "1280/1.jpg", "orig/1.jpg", "orig/1.tiff" ]
-        file1 = "#{img_root}/#{file}"
-        file2 = "#{server}/#{file}"
-        assert_equal(File.size(file1), File.size(file2),
-                     "Failed to transfer #{file}, size is wrong.")
-      end
+    for file in [ "thumb/1.jpg", "320/1.jpg", "640/1.jpg", "960/1.jpg",
+                  "1280/1.jpg", "orig/1.jpg", "orig/1.tiff" ]
+      file1 = "#{img_root}/#{file}"
+      file2 = "#{remote_root}1/#{file}"
+      assert_equal(File.size(file1), File.size(file2),
+                   "Failed to transfer #{file} to server 1, size is wrong.")
     end
+    for file in [ "thumb/1.jpg", "320/1.jpg" ]
+      file1 = "#{img_root}/#{file}"
+      file2 = "#{remote_root}2/#{file}"
+      assert_equal(File.size(file1), File.size(file2),
+                   "Failed to transfer #{file} to server 2, size is wrong.")
+    end
+    # Not implemented yet.
+    # for file in [ "640/1.jpg", "960/1.jpg", "1280/1.jpg", "orig/1.jpg", "orig/1.tiff" ]
+    #   file2 = "#{remote_root}2/#{file}"
+    #   assert(!File.exist?(file2), "Shouldn't have transferred #{file} to server 2.")
+    # end
   end
 
   test "refresh_name_lister_cache" do
@@ -212,10 +221,16 @@ class ScriptTest < UnitTestCase
     # assert_equal(false, img2.transferred)
     system("rm -rf #{remote_root}*")
     system("rm -rf #{local_root}/*/[12].*")
-    File.open("#{local_root}/orig/1.tiff", "w") { |f| f.write("orig raw") }
-    File.open("#{local_root}/orig/1.jpg",  "w") { |f| f.write("orig jpg") }
-    File.open("#{local_root}/thumb/1.jpg", "w") { |f| f.write("thumb") }
-    File.open("#{local_root}/640/2.jpg",   "w") { |f| f.write("640") }
+    File.open("#{local_root}/orig/1.tiff", "w") { |f| f.write("A") }
+    File.open("#{local_root}/orig/1.jpg",  "w") { |f| f.write("B") }
+    File.open("#{local_root}/1280/1.jpg",  "w") { |f| f.write("C") }
+    File.open("#{local_root}/960/1.jpg",   "w") { |f| f.write("D") }
+    File.open("#{local_root}/640/1.jpg",   "w") { |f| f.write("E") }
+    File.open("#{local_root}/320/1.jpg",   "w") { |f| f.write("F") }
+    File.open("#{local_root}/thumb/1.jpg", "w") { |f| f.write("G") }
+    File.open("#{local_root}/640/2.jpg",   "w") { |f| f.write("H") }
+    File.open("#{local_root}/320/2.jpg",   "w") { |f| f.write("I") }
+    File.open("#{local_root}/thumb/2.jpg", "w") { |f| f.write("J") }
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
@@ -224,12 +239,26 @@ class ScriptTest < UnitTestCase
     img2 = Image.find(2)
     assert_equal(true, img1.transferred)
     assert_equal(true, img2.transferred)
-    for server in [ "#{remote_root}1", "#{remote_root}2" ]
-      assert_equal("orig raw", File.read("#{server}/orig/1.tiff"), "orig/1.tiff wrong for #{server}")
-      assert_equal("orig jpg", File.read("#{server}/orig/1.jpg"),  "orig/1.jpg wrong for #{server}")
-      assert_equal("thumb",    File.read("#{server}/thumb/1.jpg"), "thumb/1.jpg wrong for #{server}")
-      assert_equal("640",      File.read("#{server}/640/2.jpg"),   "640/2.jpg wrong for #{server}")
-    end
+    assert_equal("A", File.read("#{remote_root}1/orig/1.tiff"), "orig/1.tiff wrong for server 1")
+    assert_equal("B", File.read("#{remote_root}1/orig/1.jpg"),  "orig/1.jpg wrong for server 1")
+    assert_equal("C", File.read("#{remote_root}1/1280/1.jpg"),  "1280/1.jpg wrong for server 1")
+    assert_equal("D", File.read("#{remote_root}1/960/1.jpg"),   "960/1.jpg wrong for server 1")
+    assert_equal("E", File.read("#{remote_root}1/640/1.jpg"),   "640/1.jpg wrong for server 1")
+    assert_equal("F", File.read("#{remote_root}1/320/1.jpg"),   "320/1.jpg wrong for server 1")
+    assert_equal("G", File.read("#{remote_root}1/thumb/1.jpg"), "thumb/1.jpg wrong for server 1")
+    assert_equal("H", File.read("#{remote_root}1/640/2.jpg"),   "640/2.jpg wrong for server 1")
+    assert_equal("I", File.read("#{remote_root}1/320/2.jpg"),   "320/2.jpg wrong for server 1")
+    assert_equal("F", File.read("#{remote_root}2/320/1.jpg"),   "320/1.jpg wrong for server 2")
+    assert_equal("G", File.read("#{remote_root}2/thumb/1.jpg"), "thumb/1.jpg wrong for server 2")
+    assert_equal("I", File.read("#{remote_root}2/320/2.jpg"),   "320/2.jpg wrong for server 2")
+    assert_equal("J", File.read("#{remote_root}2/thumb/2.jpg"), "thumb/2.jpg wrong for server 2")
+    # Not implemented yet.
+    # assert(!File.exist?("#{remote_root}2/orig/1.tiff"), "orig/1.tiff shouldnt be on server 2")
+    # assert(!File.exist?("#{remote_root}2/orig/1.jpg"),  "orig/1.jpg shouldnt be on server 2")
+    # assert(!File.exist?("#{remote_root}2/1280/1.jpg"),  "1280/1.jpg shouldnt be on server 2")
+    # assert(!File.exist?("#{remote_root}2/960/1.jpg"),   "960/1.jpg shouldnt be on server 2")
+    # assert(!File.exist?("#{remote_root}2/640/1.jpg"),   "640/1.jpg shouldnt be on server 2")
+    # assert(!File.exist?("#{remote_root}2/640/2.jpg"),   "640/2.jpg shouldnt be on server 2")
   end
 
   test "rotate_image" do
@@ -258,9 +287,30 @@ class ScriptTest < UnitTestCase
     assert_equal(true, img.transferred)
   end
 
-  test "update_lichen_list" do
-  end
-
-  test "verify_images" do
-  end
+#   test "verify_images" do
+#     script = script_file("verify_images")
+#     tempfile = Tempfile.new("test").path
+#     local_root = "#{::Rails.root}/tmp/local_images"
+#     remote_root = "#{::Rails.root}/tmp/image_server"
+#     system("rm -rf #{local_root}")
+#     system("rm -rf #{remote_root}*")
+#     FileUtils.mkpath("#{local_root}/orig")
+#     FileUtils.mkpath("#{local_root}/640")
+#     FileUtils.mkpath("#{local_root}/320")
+#     File.open("#{local_root}/orig/1.tiff", "w") { |f| f.write("A") }
+#     File.open("#{local_root}/orig/1.jpg", "w") { |f| f.write("AB") }
+#     File.open("#{local_root}/640/1.jpg", "w") { |f| f.write("ABC") }
+#     File.open("#{local_root}/320/1.jpg", "w") { |f| f.write("ABCD") }
+#     File.open("#{local_root}/640/2.jpg", "w") { |f| f.write("ABCDE") }
+#     File.open("#{local_root}/320/2.jpg", "w") { |f| f.write("ABCDEF") }
+#     File.open("#{local_root}/640/3.jpg", "w") { |f| f.write("ABCDEFG") }
+#     File.open("#{local_root}/320/3.jpg", "w") { |f| f.write("ABCDEFGH") }
+#     cmd = "#{script} -t 2>&1 > #{tempfile}"
+#     status = system(cmd)
+#     errors = File.read(tempfile)
+#     assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+#     assert_equal(<<-END.unindent, errors)
+#       blah
+#     END
+#   end
 end
