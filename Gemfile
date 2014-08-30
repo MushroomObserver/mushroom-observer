@@ -11,6 +11,9 @@ group :assets do
   gem 'uglifier',     '>= 1.0.3'
 end
 
+# Only needed by production server, but simplest to always have it here.
+gem 'unicorn'
+
 gem 'i18n'
 gem 'test-unit'
 gem 'RedCloth'
