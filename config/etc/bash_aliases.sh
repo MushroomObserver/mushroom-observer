@@ -29,27 +29,27 @@ function mosqle {
 
 function uni {
   case $1 in
-    show)
-      ps -ef | grep unicorn ;;
-    start)
-      unicorn_rails -c /var/web/mo/config/unicorn.rb -D ;;
-    reload)
-      kill -HUP `cat /var/web/mo/tmp/unicorn.pid` ;;
-    stop)
-      kill -QUIT `cat /var/web/mo/tmp/unicorn.pid` ;;
-    kill)
-      kill -TERM `cat /var/web/mo/tmp/unicorn.pid` ;;
-    *)
-      echo
-      echo "USAGE: uni <command>"
-      echo
-      echo COMMANDS:
-      echo "  show     Show unicorn processes."
-      echo "  start    Start unicorn."
-      echo "  reload   Reload application."
-      echo "  stop     Shutdown unicorn and workers gracefully, waiting for them to"
-      echo "           finish serving their last request."
-      echo "  kill     Kill unicorn and workers immediately."
-      echo
+  show)
+    ps -ef | grep unicorn ;;
+  start)
+    unicorn_rails -c /var/web/mo/config/unicorn.rb -D ;;
+  reload)
+    kill -HUP `cat /var/web/mo/tmp/unicorn.pid` ;;
+  stop)
+    kill -QUIT `cat /var/web/mo/tmp/unicorn.pid` ;;
+  kill)
+    kill -TERM `cat /var/web/mo/tmp/unicorn.pid` ;;
+  *)
+    echo
+    echo "USAGE: uni <command>"
+    echo
+    echo COMMANDS:
+    echo "  show     Show unicorn processes."
+    echo "  start    Start unicorn."
+    echo "  reload   Reload application."
+    echo "  stop     Shutdown unicorn and workers gracefully, waiting for them to"
+    echo "           finish serving their last request."
+    echo "  kill     Kill unicorn and workers immediately."
+    echo
   esac
 }

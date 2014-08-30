@@ -86,9 +86,7 @@ class ActiveSupport::TestCase
   # Standard teardown to run after every test.  Just makes sure any
   # images that might have been uploaded are cleared out.
   def teardown
-    if File.exists?(MO.local_image_files)
-      FileUtils.rm_rf(MO.local_image_files)
-    end
+    # FileUtils.rm_rf(MO.local_image_files)
   end
 end
 

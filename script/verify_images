@@ -1,208 +1,40 @@
-#!/usr/bin/env ruby
+#!/bin/bash
 #
 #  Get listings of all local and remote image files, transfer ones that need
 #  to be transferred, and delete ones that are no longer needed locally.
 #
 ################################################################################
+set -e
 
-require File.expand_path('../../config/import_constants',  __FILE__)
+source $(dirname "$0")/bash_include
+get_image_servers
+tempfile=/tmp/verify_images.$$
 
-def cache_file(server)
-  if DEVELOPMENT || PRODUCTION
-    "#{LOCAL_PATH}/#{server}.files"
-  else
-    "#{LOCAL_PATH}/#{server}.files.test"
-  end
-end
+USE_CACHE=0
+SAFE_MODE=0
+VERBOSE=0
 
-def refresh_local_cache(path)
-  cmd = "ls -s #{path}"
-  read_subdirs(:local, cmd)
-end
-
-def refresh_remote_cache(server, url)
-  if url.match(/^file:\/\/(.*)/)
-    path = Regex.last_match[1]
-    cmd = "ls -s #{path}"
-    read_subdirs(server, cmd)
-  elsif url.match(/^ssh:\/\/(.*?)\/(.*)/)
-    host = Regex.last_match[1]
-    path = Regex.last_match[2]
-    cmd = "ssh #{host} ls -s #{path}"
-    read_subdirs(server, cmd)
-  else
-    $stderr.puts "Don't know how to access #{url}."
-  end
-end
-
-def read_subdirs(server, cmd)
-  file = cache_file(server)
-  Kernel.open("| sort > #{file}", "w") do |output|
-    SIZES.values.sort.each do |_, subdir|
-      puts "Getting #{server} #{subdir}..." if VERBOSE
-      num = read_dir(subdir, cmd, output)
-      puts "  #{num} files" if VERBOSE
-    end
-  end
-end
-
-def read_dir(subdir, cmd, output)
-  num = 0
-  Kernel.open("| #{cmd}/#{subdir}").each do |line|
-    size, file = line.chomp.split
-    output.puts("#{subdir}/#{file} #{size}") if size != 'total'
-    num += 1
-  end
-  return num
-end
-
-def files_to_upload(server)
-  puts "Getting files to upload to #{server}..." if VERBOSE
-  local  = File.open(cache_file(:local))
-  remote = File.open(cache_file(server))
-  result = []
-  remote_file = ""
-  until local.eof?
-    local_file, local_size = local.read_line.chomp.split
-    loop do
-      if remote_file >= local_file
-        result << local_file if remote_file != local_file || remote_size != local_size
-        break
-      elsif remote.eof?
-        result << local_file
-        break
-      else
-        remote_file, remote_size = remote.read_line.chomp.split 
-      end
-    end
-  end
-  return result
-end
-
-def files_to_delete(servers)
-  puts "Getting files to delete..." if VERBOSE
-  result = nil
-  servers.each do |server|
-    files = files_in_common(server)
-    result = result ? result & files : files
-  end
-  return result
-end
-
-def files_in_common(server)
-  local  = File.open(cache_file(:local))
-  remote = File.open(cache_file(server))
-  result = []
-  remote_file = ""
-  keep = MO.keep_these_image_sizes_local.map {|x| SIZES[x]}
-  until local.eof? || remote.eof?
-    local_file, local_size = local.read_line.chomp.split
-    subdir = local_file.split('/').first
-    next if keep[subdir] 
-    loop do
-      if remote_file >= local_file
-        result << local_file if remote_file == local_file && remote_size == local_size
-        break
-      elsif remote.eof?
-        break
-      else
-        remote_file, remote_size = remote.read_line.chomp.split 
-      end
-    end
-  end
-  return result
-end
-
-def upload_files(server, files)
-  url = IMAGE_SOURCES[server][:write]
-  if url.match(/^file:\/\/(.*)/)
-    path = Regex.last_match[1]
-    upload_via_file(server, files, path)
-  elsif url.match(/^ssh:\/\/(.*?)\/(.*)/)
-    host = Regex.last_match[1]
-    path = Regex.last_match[2]
-    upload_via_ssh(server, files, host, path)
-  else
-    $stderr.puts "Don't know how to access #{url}."
-  end
-end
-
-def upload_via_file(server, files, path)
-  puts "\nUploading to #{server}:" if VERBOSE
-  files.each do |file|
-    src  = "#{LOCAL_PATH}/#{file}"
-    dest = "#{path}/#{file}"
-    puts file if VERBOSE
-    FileUtils.cp(src, dest) unless TEST_MODE
-  end
-end
-
-def upload_via_ssh(server, files, host, path)
-  puts "\nUploading to #{server}:" if VERBOSE
-  tempfile = Tempfile.new("verify_images").path
-  File.open(tempfile, "w") do |output|
-    files.each { |file| output.puts(file) }
-  end
-  flags = VERBOSE ? "-xvPf" : "-xPf"
-  cmd = <<-END.unindent
-    ( cd #{LOCAL_PATH} &&
-      tar -T #{tempfile} -cf - |
-      ssh #{host} \\(cd #{path}\\; tar #{flags} -\\) )
-  END
-  if !TEST_MODE
-    system(cmd)
-  elsif VERBOSE
-    puts cmd
-  end
-end
-
-def delete_files(files)
-  puts "\nDeleting:" if VERBOSE
-  files.each do |file|
-    puts file if VERBOSE
-    FileUtils.rm("#{LOCAL_PATH}/#{file}") unless TEST_MODE
-  end
-end
-
-################################################################################
-
-SIZES = {
-  thumbnail: 'thumb',
-  small:     '320',
-  medium:    '640',
-  large:     '960',
-  huge:      '1280',
-  full_size: 'orig'
-}
-
-if DEVELOPMENT || PRODUCTION
-  LOCAL_PATH = MO.local_image_files
-  SERVERS = IMAGE_SOURCES.keys.reject do |server|
-    IMAGE_SOURCES[server][:write].blank?
-  end
-else
-  LOCAL_PATH = "#{APP_ROOT}/tmp/local_images"
-  SERVER_URLS = {
-    :remote1 => { :write => "file://#{APP_ROOT}/tmp/image_server1" },
-    :remote2 => { :write => "file://#{APP_ROOT}/tmp/image_server2",
-                  :sizes => [ :thumbnail, :small ] }
-  }
-end
-
-USE_CACHE = ARGV.include?('-c') || ARGV.include?('--use-cache')
-TEST_MODE = ARGV.include?('-t') || ARGV.include?('--test')
-VERBOSE   = ARGV.include?('-v') || ARGV.include?('--verbose')
-
-valid_flags = ['-c', '-t', '-v', '--use-cache', '--test', '--verbose']
-$stderr.print(<<END) && exit(1) if (ARGV - valid_flags).any?
+for arg in "$@"; do
+  case $arg in
+  -c|--use-cache)
+    USE_CACHE=1
+    ;;
+  -s|--safe)
+    SAFE_MODE=1
+    ;;
+  -v|--verbose)
+    VERBOSE=1
+    ;;
+  *)
+    cat <<-END && exit 1
 
 USAGE
-  script/verify_images.prl [--use-cache|verbose|test]
+  script/verify_images [-c|s|v or --use-cache|safe|verbose]
 
 OPTIONS
- -c | --use_cache
- -t | --test
- -v | --verbose
+  -c | --use_cache
+  -s | --safe
+  -v | --verbose
 
 DESCRIPTION
   Gets listings of the size of all image files stored locally and on the image
@@ -210,20 +42,135 @@ DESCRIPTION
   copies of any image files which have been transferred successfully.
 
 END
+  esac
+done
 
-unless USE_CACHE
-  refresh_local_cache(LOCAL_PATH)
-  for server in SERVERS
-    url = IMAGE_SOURCES[server][:write]
-    refresh_remote_cache(server, url)
-  end
-end
+################################################################################
 
-for server in SERVERS
-  files = files_to_upload(server)
-  upload_files(server, files)
-end
-files = files_to_delete(SERVERS)
-delete_files(files)
+function verbose {
+  (( $VERBOSE )) && echo "$*"
+}
 
+function cache_file {
+  server=$1
+  echo $image_root/$server.files
+}
+
+function refresh_cache {
+  server=$1
+  file=$(cache_file $server)
+  rm -f $file
+  touch $file
+  for subdir in ${image_subdirs[@]}; do
+    if image_server_has_subdir $server $subdir; then
+      read_directory $server $subdir | sort | sed "s/^/$subdir\//" >> $file
+    fi
+  done
+}
+
+function read_directory {
+  server=$1
+  subdir=$2
+  case ${image_server_data[$server,type]} in
+  "file")
+    path=${image_server_data[$server,path]}
+    find $path/$subdir -maxdepth 1 -type f -printf "%f\t%s\n" || \
+      die "Failed to list $path/$subdir on $server server."
+    ;;
+  "ssh")
+    wait_for "(scp|ssh)"
+    host=$( echo "${image_server_data[$server,path]}" | sed "s/:.*//" )
+    path=$( echo "${image_server_data[$server,path]}" | sed "s/.*://" )
+    ssh $host find $path/$subdir -maxdepth 1 -type f -printf "%f\t%s\n" || \
+      die "Failed to list $host:$path/$subdir on $server server."
+    ;;
+  *)
+    url=${image_server_data[$server,url]}
+    die "Don't know how to get listing of $url/$subdir on $server server."
+  esac
+} 
+
+function delete_files {
+  while read file; do
+    verbose "Deleting $file"
+    (( $SAFE_MODE )) || rm "$image_root/$file"
+  done
+}
+
+function upload_files {
+  server=$1
+  while read file; do
+    verbose "Uploading $file to $server"
+    (( $SAFE_MODE )) || copy_file_to_server $server $file
+  done
+}
+
+function local_files_that_dont_match {
+  server=$1
+  subdir=$2
+  grep "^$subdir" $(cache_file local)   > $tempfile.1 || true
+  grep "^$subdir" $(cache_file $server) > $tempfile.2 || true
+  # (prints lines unique to first file)
+  comm -23 $tempfile.1 $tempfile.2 | cut -f1
+}
+
+function local_files_we_no_longer_need {
+  subdir=$1
+  if start_with_local_files $subdir; then
+    if subtract_files_with_differences_on_any_server $subdir; then
+      cut -f1 $tempfile.1
+    fi
+  fi
+}
+
+function start_with_local_files {
+  subdir=$1
+  grep "^$subdir" $(cache_file local) > $tempfile.1
+}
+
+function subtract_files_with_differences_on_any_server {
+  subdir=$1
+  any_servers=0
+  for server in ${image_servers[@]}; do
+    if image_server_has_subdir $server $subdir; then
+      subtract_files_with_differences $server $subdir
+      any_servers=1
+    fi
+  done
+  (( $any_servers )) && true || false
+}
+
+function subtract_files_with_differences {
+  server=$1
+  subdir=$2
+  grep "^$subdir" $(cache_file $server) > $tempfile.2 || true
+  # (remove lines with differences)
+  comm -12 $tempfile.1 $tempfile.2 > $tempfile.3
+  mv -f $tempfile.3 $tempfile.1
+}
+
+################################################################################
+
+if (( ! $USE_CACHE )); then
+  for server in local ${image_servers[@]}; do
+    refresh_cache $server
+  done
+fi
+
+for subdir in ${image_subdirs[@]}; do
+  for server in ${image_servers[@]}; do
+    if image_server_has_subdir $server $subdir; then
+      local_files_that_dont_match $server $subdir | upload_files $server
+    fi
+  done
+done
+
+keep=$( rails_constant MO.keep_these_image_sizes_local )
+for subdir in ${image_subdirs[@]}; do
+  if !( echo $keep | grep -q ${subdir_to_size[$subdir]} ); then
+    local_files_we_no_longer_need $subdir | delete_files
+  fi
+done
+
+rm -f $tempfile.*
 exit 0

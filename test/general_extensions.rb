@@ -58,7 +58,8 @@ module GeneralExtensions
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
     if not FileTest.exist?(MO.local_image_files)
-      FileUtils.cp_r(MO.local_image_files.gsub(/test_images$/, 'setup_images'), MO.local_image_files)
+      setup_images = MO.local_image_files.gsub(/test_images$/, 'setup_images')
+      FileUtils.cp_r(setup_images, MO.local_image_files)
     end
   end
 
