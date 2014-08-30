@@ -38,23 +38,14 @@ class ApiControllerTest < FunctionalTestCase
     @request.env.delete('RAW_POST_DATA')
   end
 
-  def file_checksum(file)
-    File.read("| #{checksum_command} #{file}").split.first
+  def file_checksum(filename)
+    File.open(filename) do |f|
+      Digest::MD5.hexdigest(f.read)
+    end
   end
 
   def string_checksum(string)
-    tempfile = Tempfile.new("checksum")
-    File.open(tempfile.path, "w") { |f| f.write(string) }
-    File.read("| #{checksum_command} #{tempfile.path}").split.first
-  end
-
-  def checksum_command
-    cmds = [
-      '/usr/bin/md5sum',
-      '/usr/bin/cksum'
-    ]
-    cmds.select { |f| File.exists?(f) }.first or
-      raise "Can't find #{cmds.join(" or ")} on your system."
+    Digest::MD5.hexdigest(string)
   end
 
 ################################################################################

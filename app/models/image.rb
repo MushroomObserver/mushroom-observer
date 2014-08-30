@@ -510,8 +510,10 @@ class Image < AbstractModel
   def validate_image_md5sum
     result = true
     if upload_md5sum and save_to_temp_file
-      if (sum = File.read("| /usr/bin/md5sum #{upload_temp_file}")) &&
-         (sum.split.first == upload_md5sum)
+      sum = File.open(upload_temp_file) do |f|
+        Digest::MD5.hexdigest(f.read)
+      end
+      if sum == upload_md5sum
         result = true
       else
         errors.add(:image, :validate_image_md5_mismatch.
