@@ -31,11 +31,13 @@ MushroomObserver::Application.configure do
     :remote1 => {
       :test  => :transferred_flag,
       :read  => "/remote_images",
-      :write => "#{config.root}/public/test_server1"
+      :write => "file://#{config.root}/public/test_server1"
     },
     :remote2 => {
-      :write => "ssh://vagrant@localhost:#{config.root}/public/test_server2",
-      :size  => [ :thumbnail, :small ]
+      :write => "file://#{config.root}/public/test_server2",
+      # Having trouble getting this to work on vagrant machine...
+      # :write => "ssh://vagrant@localhost:#{config.root}/public/test_server2",
+      :sizes => [ :thumbnail, :small, :medium ]
     }
   }
   config.image_precedence = {

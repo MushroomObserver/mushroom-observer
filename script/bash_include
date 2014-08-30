@@ -56,41 +56,78 @@ trap clean_log EXIT
 # Grab constant from rails configuration (consts.rb and consts-site.rb).
 #   path=$( rails_constant MO.local_image_files )
 function rails_constant {
-  ruby -I$app_root/config -e "require 'import_constants.rb'" -e "print $1"
+  $app_root/script/config $*
 }
 
 # Get mysql login information.
-config=$app_root/config/database.yml
-db_database=$( grep -A 20 $RAILS_ENV: $config | grep database: | head -1 | sed "s/.*: *//" )
-db_username=$( grep -A 20 $RAILS_ENV: $config | grep username: | head -1 | sed "s/.*: *//" )
-db_password=$( grep -A 20 $RAILS_ENV: $config | grep password: | head -1 | sed "s/.*: *//" )
+file=$app_root/config/database.yml
+db_database=$( grep -A 20 $RAILS_ENV: $file | grep database: | head -1 | sed "s/.*: *//" )
+db_username=$( grep -A 20 $RAILS_ENV: $file | grep username: | head -1 | sed "s/.*: *//" )
+db_password=$( grep -A 20 $RAILS_ENV: $file | grep password: | head -1 | sed "s/.*: *//" )
 
-# Get a list of image servers.
-for config in \
-  $app_root/config/consts-site.rb \
-  $app_root/config/consts.rb
-do
-  if [[ -f $config && $(grep -c IMAGE_SOURCES $config) -gt 0 ]]; then
-    img_config=$config
-    break
-  fi
-done
-declare -a image_servers=( $(sed -n '/IMAGE_SOURCES/,/^}/p' $img_config | egrep -v '^ *#' | grep :write | sed -e 's/.*"\(.*\)".*/\1/') )
+# Get array of image servers. Usage:
+#   get_image_servers
+#   for server in ${image_servers[@]}; do
+#     echo $server url: ${image_server_data[$server,url]}
+#   done
+# Format from "config image_servers" is:
+#   name;type://path;thumb,small
+declare image_root
+declare -a image_servers
+declare -A image_server_data
+declare -a image_sizes
+declare -a image_subdirs
+declare -A size_to_subdir
+declare -A subdir_to_size
 
-if (( $testing )); then
-  # Override real image server(s) with two fake local ones.
-  declare -a image_servers=( $app_root/tmp/image_server1 $app_root/tmp/image_server2 )
-  for server in ${image_servers[@]}; do
-    mkdir -p $server/{orig,1280,960,640,320,thumb}
+function get_image_servers {
+  image_root=$( rails_constant MO.local_image_files )
+  image_sizes=( thumbnail small medium large huge full_size )
+  image_subdirs=( 1280 320 640 960 orig thumb )
+
+  size_to_subdir[thumbnail]=thumb
+  size_to_subdir[small]=320
+  size_to_subdir[medium]=640
+  size_to_subdir[large]=960
+  size_to_subdir[huge]=1280
+  size_to_subdir[full_size]=orig
+
+  subdir_to_size[thumb]=thumbnail
+  subdir_to_size[320]=small
+  subdir_to_size[640]=medium
+  subdir_to_size[960]=large
+  subdir_to_size[1280]=huge
+  subdir_to_size[orig]=full_size
+
+  image_server_data[local,url]="file://$image_root"
+  image_server_data[local,type]="file"
+  image_server_data[local,path]="$image_root"
+  image_server_data[local,subdirs]="thumb,320,640,960,1280,orig"
+
+  for line in $($app_root/script/config image_servers); do
+    name=$(    echo "$line" | sed 's/;.*//' )
+    url=$(     echo "$line" | sed -e 's/^[^;]*;//' -e 's/;.*//' )
+    type=$(    echo "$line" | sed -e 's/^[^;]*;//' -e 's/:.*//' )
+    path=$(    echo "$line" | sed -e 's/^.*:\/\///' -e 's/;.*//' )
+    subdirs=$( echo "$line" | sed 's/.*;//' )
+    image_servers=( "${image_servers[@]}" "$name" )
+    image_server_data[$name,url]="$url"
+    image_server_data[$name,type]="$type"
+    image_server_data[$name,path]="$path"
+    image_server_data[$name,subdirs]="$subdirs"
   done
-fi
+}
+
+function image_server_has_subdir {
+  echo ${image_server_data[$1,subdirs]} | grep -q "$2"
+}
 
 function time_stamp {
   date "+%Y%m%d %H:%M:%S %Z"
 }
 
 # Wait until no other processes are running the given command(s). Examples:
-#   wait_for scp
+#   wait_for "(scp|ssh)"
 #   wait_for "(convert|jpegresize)"
 function wait_for {
   while (ps -e | grep " $*\$" > /dev/null); do sleep 5; done
@@ -140,6 +177,52 @@ function send_mail {
   else
     mutt -s "$subject" $@
   fi
+}
+
+# Copy one image file from a given server.
+#   copy_file_from_server "cdmr" "thumb/1234.jpg"
+function copy_file_from_server {
+  server=$1
+  file=$2
+  case ${image_server_data[$server,type]} in
+  "file")
+    path=${image_server_data[$server,path]}
+    cp $path/$file $image_root/$file || die "Failed to get $file from $path."
+    ;;
+  "ssh")
+    wait_for "(scp|ssh)"
+    path=${image_server_data[$server,path]}
+    scp $path/$file $image_root/$file || die "Failed to get $file from $path."
+    ;;
+  "http")
+    url=${image_server_data[$server,url]}
+    wget "$url/$file" -O $image_root/$file || die "Failed to get $file from $url."
+    ;;
+  *)
+    url=${image_server_data[$server,url]}
+    die "Don't know how to get $file from $url."
+  esac
+}
+
+# Copy one image file to a given server.
+#   copy_file_from_server "cdmr" "thumb/1234.jpg"
+function copy_file_to_server {
+  server=$1
+  file=$2
+  case ${image_server_data[$server,type]} in
+  "file")
+    path=${image_server_data[$server,path]}
+    cp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
+    ;;
+  "ssh")
+    wait_for "(scp|ssh)"
+    path=${image_server_data[$server,path]}
+    scp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
+    ;;
+  *)
+    url=${image_server_data[$server,url]}
+    die "Don't know how to transfer $file to $url."
+  esac
 }
 
 # Equivalent of perl carp command.

@@ -6,8 +6,7 @@
 set -e
 
 source $(dirname "$0")/bash_include
-
-images_root=$( rails_constant MO.local_image_files )
+get_image_servers
 
 if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
 
@@ -22,26 +21,21 @@ DESCRIPTION
 
 END
 
-# Get list of images that still need to go.
 ids=$( run_mysql "SELECT id FROM images WHERE transferred=FALSE" )
-[[ $ids = "" ]] && exit 0
 
-# Transfer images.
 for id in $ids; do
-  # Assume verify_images has done our job for us if any files are missing.
-  for dir in {thumb,320,640,960,1280,orig}; do
-    for file in $images_root/$dir/$id.*; do
-      if [[ -e $file ]]; then
-        wait_for scp
-        for server in ${image_servers[@]}; do
-          scp $file $server/$dir/ || die "Failed to transfer $file to $server/$dir/."
-        done
-      fi
+  for subdir in thumb 320 640 960 1280 orig; do
+    for file in $(cd $image_root && ls $subdir/$id.* 2> /dev/null); do
+      for server in ${image_servers[@]}; do
+        if image_server_has_subdir $server $subdir; then
+          copy_file_to_server $server $file
+        fi
+      done
     done
   done
 
-  # Update database to say that image has transferred successfully.
-  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id" || warn "Failed to set transferred bit on $id."
+  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id" || \
+    die "Failed to set transferred bit on $id."
 done
 
 exit 0

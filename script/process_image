@@ -12,17 +12,15 @@ set_size=$3
 
 source $(dirname "$0")/bash_include
 keep_cumulative_log
+get_image_servers
 
-images_root=$( rails_constant MO.local_image_files )
-
-orig_layers=$images_root/orig/$id-"*".jpg
-orig_file=$images_root/orig/$id.$ext
-full_file=$images_root/orig/$id.jpg
-huge_file=$images_root/1280/$id.jpg
-large_file=$images_root/960/$id.jpg
-medium_file=$images_root/640/$id.jpg
-small_file=$images_root/320/$id.jpg
-thumb_file=$images_root/thumb/$id.jpg
+raw_file=$image_root/orig/$id.$ext
+full_file=$image_root/orig/$id.jpg
+huge_file=$image_root/1280/$id.jpg
+large_file=$image_root/960/$id.jpg
+medium_file=$image_root/640/$id.jpg
+small_file=$image_root/320/$id.jpg
+thumb_file=$image_root/thumb/$id.jpg
 
 if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
 
@@ -48,17 +46,17 @@ DESCRIPTION
 END
 
 # Convert the original image to a JPEG.
-if [[ $orig_file != $full_file ]]; then
+if [[ $ext != "jpg" ]]; then
   wait_for "(convert|jpegresize)"
-  log_cmd convert -quality 90 $orig_file $full_file
+  log_cmd convert -quality 90 $raw_file $full_file
 
   # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
   # Take the first one, and delete the rest.
   if [[ ! -e $full_file ]]; then
-    biggest_layer=`ls -rS $orig_layers | tail -1`
+    biggest_layer=$( ls -rS $image_root/orig/$id-*.jpg | tail -1 )
     if [[ -e $biggest_layer ]]; then
       log_cmd mv $biggest_layer $full_file
-      log_cmd rm $orig_layers
+      log_cmd rm $image_root/orig/$id-*.jpg
     fi
   fi
 fi
@@ -92,15 +90,12 @@ log_cmd jpegresize 160x160   -q 90 --max-size $small_file $thumb_file
 transferred_any=0
 if (( !$development )); then
   for server in ${image_servers[@]}; do
-    wait_for scp
-    log_cmd scp $thumb_file  $server/thumb/$id.jpg
-    log_cmd scp $small_file  $server/320/$id.jpg
-    log_cmd scp $medium_file $server/640/$id.jpg
-    log_cmd scp $large_file  $server/960/$id.jpg
-    log_cmd scp $huge_file   $server/1280/$id.jpg
-    log_cmd scp $full_file   $server/orig/$id.jpg
-    if [[ $orig_file != $full_file ]]; then
-      log_cmd scp $orig_file $server/orig/$id.$ext
+    subdirs=${image_server_data[$server,subdirs]}
+    for subdir in thumb 320 640 960 1280 orig; do
+      ( echo $subdirs | grep -q $subdir ) && log_cmd copy_file_to_server $server $subdir/$id.jpg
+    done
+    if [[ $ext != "jpg" ]]; then
+      ( echo $subdirs | grep -q orig ) && log_cmd copy_file_to_server $server orig/$id.$ext
     fi
     transferred_any=1
   done
