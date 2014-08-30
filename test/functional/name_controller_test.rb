@@ -240,6 +240,10 @@ class NameControllerTest < FunctionalTestCase
     assert_template(action: 'show_name', partial: "_name")
     # Needs new queries this time.
     assert_equal(5, Query.count)
+
+    # Agarcius: has children taxa.
+    get(:show_name, :id => 18)
+    assert_template(action: 'show_name', partial: "_name")
   end
 
   # TODO: Show a name that has a parent to trigger

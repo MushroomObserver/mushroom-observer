@@ -30,7 +30,7 @@ module NameHelper
     end
     if first_child
       lines.push(link_to("#{:show_object.t(:type => first_child.rank.to_s)}",
-        add_query_param({:action => 'index_name'}, child_query)))
+        add_query_param({:action => 'index_name'}, children_query)))
     end
     head + lines.join("<br/>\n").html_safe
   end
