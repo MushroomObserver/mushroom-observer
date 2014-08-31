@@ -1992,7 +1992,7 @@
 
   # publication/create_event
   create_publication: Add Publication
-  create_publication_title: Create New Conference Event
+  create_publication_title: Create New Publication
 
   # publication/show
   show_publication_title: Publication
