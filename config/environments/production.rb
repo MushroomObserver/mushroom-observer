@@ -34,7 +34,7 @@ MushroomObserver::Application.configure do
     :authentication => :plain,
     :enable_starttls_auto => true,
     :user_name => "webmaster@mushroomobserver.org",
-    :password => config.smtp_password
+    :password => "xxx"
   }
 
   # Enable Pivotal interface.
