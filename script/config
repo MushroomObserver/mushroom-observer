@@ -76,8 +76,8 @@ end
 
 [
   "consts.rb",
-  "consts-site.rb",
-  "environments/#{ENV['RAILS_ENV']}.rb"
+  "environments/#{ENV['RAILS_ENV']}.rb",
+  "consts-site.rb"
 ].each do |file|
   file = File.expand_path("../../config/#{file}", __FILE__)
   require file if File.exist?(file)
