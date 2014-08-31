@@ -691,6 +691,7 @@ class SpeciesListController < ApplicationController
     @species_list.updated_at = now
     @species_list.user = @user
     @species_list.attributes = args
+    @species_list.title = @species_list.title.to_s.strip_squeeze
     if Location.is_unknown?(@species_list.place_name) or
        @species_list.place_name.blank?
       @species_list.location = Location.unknown

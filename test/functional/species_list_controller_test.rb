@@ -276,7 +276,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :member => { :notes => "" },
       :species_list => {
         :place_name => "Burbank, California, USA",
-        :title => list_title,
+        :title => "  " + list_title.sub(/ /, "  ") + "  ",
         "when(1i)" => "2007",
         "when(2i)" => "3",
         "when(3i)" => "14",
@@ -286,8 +286,9 @@ class SpeciesListControllerTest < FunctionalTestCase
     post_requires_login(:create_species_list, params)
     assert_show_species_list
     assert_equal(10 + v_spl + v_obs, rolf.reload.contribution)
-    spl = SpeciesList.find_by_title(list_title)
+    spl = SpeciesList.last
     assert_not_nil(spl)
+    assert_equal(list_title, spl.title)
     assert(spl.name_included(names(:coprinus_comatus)))
     obs = spl.observations.first
     assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
