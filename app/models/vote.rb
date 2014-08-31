@@ -137,12 +137,12 @@ class Vote < AbstractModel
   # ----------------------------
 
   CONFIDENCE_VALS = [
-    [ :vote_confidence_100,  3 ],
-    [ :vote_confidence_80,   2 ],
-    [ :vote_confidence_60,   1 ],
-    [ :vote_confidence_40,  -1 ],
-    [ :vote_confidence_20,  -2 ],
-    [ :vote_confidence_0,   -3 ]
+    [ :vote_confidence_100,  3.0 ],
+    [ :vote_confidence_80,   2.0 ],
+    [ :vote_confidence_60,   1.0 ],
+    [ :vote_confidence_40,  -1.0 ],
+    [ :vote_confidence_20,  -2.0 ],
+    [ :vote_confidence_0,   -3.0 ]
   ]
 
   NO_OPINION_VAL = [:vote_no_opinion, 0]
