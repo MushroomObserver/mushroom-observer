@@ -11,8 +11,8 @@ ext=$2
 set_size=$3
 
 source $(dirname "$0")/bash_include
+source $(dirname "$0")/bash_images
 keep_cumulative_log
-get_image_servers
 
 raw_file=$image_root/orig/$id.$ext
 full_file=$image_root/orig/$id.jpg

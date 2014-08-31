@@ -6,7 +6,7 @@
 set -e
 
 source $(dirname "$0")/bash_include
-get_image_servers
+source $(dirname "$0")/bash_images
 
 if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
 
