@@ -30,7 +30,7 @@
     <td align="center"><%= publication.mo_mentioned ? "*M*".t : "" %>
     <% if publication.can_edit?(@user) %>
       <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
-      <td><%= link_to :DESTROY.t, publication, :confirm => :are_you_sure.t, :method => "DELETE" %></td>
+      <td><%= link_to :DESTROY.t, :destroy_publication, :id => publication.id, :confirm => :are_you_sure.t %></td>
     <% end %>
   </tr>
 <% end %>
