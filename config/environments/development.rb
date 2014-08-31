@@ -72,3 +72,6 @@ MushroomObserver::Application.configure do
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 end
+
+file = File.expand_path("../consts-site.rb", __FILE__)
+require file if File.exist?(file)

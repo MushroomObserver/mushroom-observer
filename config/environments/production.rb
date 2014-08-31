@@ -62,15 +62,12 @@ MushroomObserver::Application.configure do
     #   :sizes => [ :thumbnail, :small ]
     # }
   }
-
-  # Search order when serving images.  Key is size, e.g., :thumbnail, :small, etc.
   config.image_precedence = {
     :default   => [:cdmr, :local]
     # For use when testing live server in parallel with production server.
     # :default   => [:cdmr, :local, :mo]
   }
-
-  # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
+  config.image_fallback_source = :cdmr
   config.keep_these_image_sizes_local = [ :thumbnail, :small ]
 
   # ----------------------------
@@ -142,3 +139,6 @@ MushroomObserver::Application.configure do
   # # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # # config.force_ssl = true
 end
+
+file = File.expand_path("../consts-site.rb", __FILE__)
+require file if File.exist?(file)

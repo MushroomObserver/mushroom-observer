@@ -60,7 +60,4 @@ DEVELOPMENT = (ENV["RAILS_ENV"] == 'development')
 TESTING     = (ENV["RAILS_ENV"] == 'test')
 
 MO = MushroomObserver::Application.config
-for name in ["consts", "consts-site"]
-  file = File.expand_path("../#{name}.rb", __FILE__)
-  require file if File.exist?(file)
-end
+require File.expand_path("../consts.rb", __FILE__)

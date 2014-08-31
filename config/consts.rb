@@ -99,31 +99,27 @@ MushroomObserver::Application.configure do
   config.max_map_objects = 100
 
   # Where images are kept locally until they are transferred.
-  if config.env == 'test'
-    config.local_image_files = "#{config.root}/public/test_images"
-  else
-    config.local_image_files = "#{config.root}/public/images"
-  end
+  config.local_image_files = "#{config.root}/public/images"
 
   # Definition of image sources.  Keys are :test, :read and :write.  Values are
   # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
   # to test for existence of file by using image#transferred flag.
-  config.image_sources = {
-    :local => {
-      :test => "file://#{config.local_image_files}",
-      :read => "/images",
-    },
-    :cdmr => {
-      :test => :transferred_flag,
-      :read => "http://images.digitalmycology.com",
-    }
-  }
+  # config.image_sources = {
+  #   :local => {
+  #     :test => "file://#{config.local_image_files}",
+  #     :read => "/images",
+  #   },
+  #   :cdmr => {
+  #     :test => :transferred_flag,
+  #     :read => "http://images.digitalmycology.com",
+  #   }
+  # }
 
   # Search order when serving images.  Key is size, e.g., :thumbnail, :small, etc.
-  config.image_precedence = {
-    :default => [:local, :cdmr]
-  }
-  config.image_fallback_source = :cdmr
+  # config.image_precedence = {
+  #   :default => [:local, :cdmr]
+  # }
+  # config.image_fallback_source = :cdmr
 
   # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
   config.keep_these_image_sizes_local = []
