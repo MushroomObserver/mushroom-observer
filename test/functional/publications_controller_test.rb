@@ -8,6 +8,15 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_not_nil assigns(:publications)
   end
 
+  def test_should_get_index_for_user_who_owns_a_publication
+    login('rolf')
+    get :index
+    assert_response :success
+    assert_not_nil assigns(:publications)
+    assert_link_in_html("Edit", :action => :edit, :id => 1)
+    assert_link_in_html("Destroy", :action => :destroy, :id => 1)
+  end
+
   def test_should_get_new
     login
     get :new

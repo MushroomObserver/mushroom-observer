@@ -6,7 +6,7 @@
   end
 %>
 
-<%= form_for(@publication) do |f| %>
+<%= form_for(@publication, :action => :update) do |f| %>
   <p>
     <b><%= :publication_full.t %>:</b>
     <span class="HelpNote"><%= :publication_full_help.t %></span><br/>

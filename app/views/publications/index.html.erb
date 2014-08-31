@@ -20,20 +20,21 @@
     <td align="center"><%= "(#{@mo_count})"%>
   </tr>
 
-<% odd_or_even = 1
-  for publication in @publications
-      odd_or_even = 1 - odd_or_even %>
-  <tr class="ListLine<%= odd_or_even %>">
-    <td width="50%"><%= link_to h(publication.full), publication %></td>
-    <td width="30%"><%= link_to h(publication.link).t, h(publication.link) %></td>
-    <td align="center"><%= publication.peer_reviewed ? "*P*".t : "" %>
-    <td align="center"><%= publication.mo_mentioned ? "*M*".t : "" %>
-    <% if publication.can_edit?(@user) %>
-      <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
-      <td><%= link_to :DESTROY.t, :destroy_publication, :id => publication.id, :confirm => :are_you_sure.t %></td>
-    <% end %>
-  </tr>
-<% end %>
+  <% odd_or_even = 1
+    for publication in @publications
+        odd_or_even = 1 - odd_or_even %>
+    <tr class="ListLine<%= odd_or_even %>">
+      <td width="50%"><%= link_to publication.full.t, publication %></td>
+      <td width="30%"><%= link_to publication.link, publication.link %></td>
+      <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %>
+      <td align="center"><%= publication.mo_mentioned  ? content_tag(:b, "M") : "" %>
+      <% if is_in_admin_mode? || publication.can_edit?(@user) %>
+        <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
+        <td><%= link_to :DESTROY.t, { :action => :destroy, :id => publication.id },
+                        { :confirm => "aren't we cool?" + :are_you_sure.t } %></td>
+      <% end %>
+    </tr>
+  <% end %>
 </table>
 <br />
 <%= :publication_legend.tp %>

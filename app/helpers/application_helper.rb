@@ -106,13 +106,20 @@ module ApplicationHelper
     :"review_#{val}".l
   end
 
-
   def safe_empty; "".html_safe; end
   def safe_br; "<br/>".html_safe; end
   def safe_nbsp; "&nbsp;".html_safe; end
 
   def link_with_query(name = nil, options = nil, html_options = nil)
     link_to(name, add_query_param(options), html_options)
+  end
+
+  # Rails 3.x has broken the link_to :confirm mechanism.  The new method requires
+  # rather sophisticated javascript capabilities (in rails.js).  I'd far prefer
+  # to keep the old blindingly simple onclick="return confirm()" mechanism.
+  def link_to(*args)
+    super(*args).sub(/data-confirm="(.*?)"/,
+      'onclick="' + CGI.escapeHTML('return confirm("\1")') + '"').html_safe
   end
 
   ##############################################################################

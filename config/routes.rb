@@ -1,5 +1,6 @@
 MushroomObserver::Application.routes.draw do
   # map.resources :publications
+  match 'publications/:id/destroy' => 'publications#destroy'
   resources :publications
   
   # The priority is based upon order of creation: first created -> highest priority.

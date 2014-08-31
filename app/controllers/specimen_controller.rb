@@ -183,12 +183,6 @@ class SpecimenController < ApplicationController
     has_permission?(specimen, :delete_specimen_cannot_delete.l)
   end
   
-  def has_permission?(specimen, error_message)
-    result = (is_in_admin_mode? or specimen.can_edit?(@user))
-    flash_error(error_message) if not result
-    result
-  end
-  
   def edit_specimen # :norobots:
     @specimen = Specimen.find(params[:id].to_s)
     if can_edit?(@specimen)
