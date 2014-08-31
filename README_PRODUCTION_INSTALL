@@ -4,14 +4,12 @@
 #  It starts out fairly generic, and becomes increasingly specific to Mushroom
 #  Observer.  Look for the following "variables":
 #
-#    IP_ADDR            ip address of new server  80.77.87.191  r8Vxf1v1wm
-#    OTHER_IP_ADDR      ip address of old server
+#    IP_ADDR            ip address of new server
 #    DOMAIN             mushroomobserver.org
 #    SITE               mo
-#    FLAVOR             trusty
 #    USER               jason
 #    USER_PASSWORD      xxx
-#    DATA_PASSWORD      xxx                       k498dnt4
+#    DATA_PASSWORD      xxx
 #    MAIL_PASSWORD      xxx
 #    YOUR_EMAIL         pellaea@gmail.com
 #    FULL_NAME          Jason Hollinger
@@ -26,28 +24,6 @@
 #    postfix (2.10.0)
 #    mysql (14.14)
 #
-#  gems:
-#   actionmailer (2.1.1)
-#   actionpack (2.1.1)
-#   activerecord (2.1.1)
-#   activeresource (2.1.1)
-#   activesupport (2.1.1)
-#   bigdecimal (1.1.0)
-#   io-console (0.3)
-#   json (1.5.5)
-#   kgio (2.9.2)
-#   minitest (2.5.1)
-#   mysql2 (0.3.15)
-#   rack (1.5.2)
-#   rails (2.1.1)
-#   raindrops (0.13.0)
-#   rake (0.9.2.2)
-#   rdoc (3.9.5)
-#   RedCloth (4.2.9)
-#   rmagick (2.13.2)
-#   test-unit (2.5.5)
-#   unicorn (4.8.2)
-#
 ################################################################################
 
 local> ssh root@$IP_ADDR
@@ -56,7 +32,7 @@ root> passwd
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade
-root> apt-get install build-essential man telnet wget vim emacs iptables mlocate
+root> apt-get install build-essential man telnet wget vim emacs iptables mlocate lynx
 
 # Create account for webserver.
 root> useradd -m -s /bin/bash $SITE
@@ -67,27 +43,27 @@ root> visudo
   %$SITE ALL = NOPASSWD: /bin/su - $SITE
 
 # Create account for yourself.
-root> useradd -m -s /bin/bash -G $SITE $USER
+root> useradd -m -s /bin/bash -G $SITE,sudo $USER
 root> passwd $USER
 root> logout
 
 # Password-less ssh.
 local> ssh-keygen -t rsa   # (if not already done)
 local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
-[NJW: The above didn't work on my Mac.  Instead I had to copy my public key
-by hand to $USER/.ssh/authorized_keys on $IP_ADDR. Make sure that .ssh is 
-only readable by $USER (chmod 700 .ssh) and .ssh/authorized_keys is only
-writable by $USER, but otherwise readable (chmod 644 .ssh/authorized_keys).]
+# If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
+local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'mkdir .ssh; cat >> .ssh/authorized_keys; chmod 600 .ssh/authorized_keys; chmod 700 .ssh'
+
+[JPH: It asked me to reboot when I logged in, so I did that at this point.]
 
 # Set up your accounts.
 local> ssh $IP_ADDR
-user> vi .bashrc
+user> vi .bash_aliases
   # Add these at end.
   alias $SITE='cd /var/web/$SITE && sudo su $SITE'
 user> su root
 root> vi /root/.bashrc
   # Add these at end.
-  export CFLAGS="-O3 -m64 -march=core2"
+  export CFLAGS="-O3 -m64"
   alias $SITE='cd /var/web/$SITE && su $SITE'
 
 # Disable direct root login for security purposes.
@@ -127,7 +103,7 @@ root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
 root> echo "gem: --no-document" > /home/$SITE/.gemrc
 root> echo "source /usr/local/rvm/scripts/rvm" >> /root/.bashrc
-root> echo "source /usr/local/rvm/scripts/rvm" >> /home/mo/.bashrc
+root> echo "source /usr/local/rvm/scripts/rvm" >> /home/$SITE/.bashrc
 
 # Create directory for rails app.
 root> mkdir /var/web
@@ -145,7 +121,8 @@ root> usermod -a -G $SITE www-data
 root> ln -s mo /var/web/mushroom-observer
 
 # Install and configure rails apps.
-root> mo
+root> cd /var/web/mo
+root> su mo
 mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
 on code not on the master branch.]
@@ -154,11 +131,12 @@ mo> mkdir log public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
 mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
-  config.smtp_password    = "xxx"
-  config.pivotal_password = "xxx"
+  MO.configure do
+    config.smtp_password    = "xxx"
+    config.pivotal_password = "xxx"
+  end
 
 # Install gems.
-mo> echo "gem 'unicorn'" >> Gemfile
 mo> bundle install
 
 # Configure nginx.
@@ -168,95 +146,58 @@ root> service nginx start
 root> rm /usr/share/nginx/html/index.html    # (there's *got* to be a better way!)
 
 # Create database.
-root> mo
+root> su mo
 mo> mysql -u root -p
   create database mo_production;
   create user 'mo'@'localhost' identified by '$DATA_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DATA_PASSWORD');
   grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
-mo> cp config/database.yml-template config/database.yml
 mo> vi config/database.yml
-  # Change these values in production section: (other sections aren't needed)
-  adapter:  mysql2
-  database: mo_production
-  password: $DATA_PASSWORD
-  socket:   /var/run/mysqld/mysqld.sock    # ubuntu/debian
-  # socket:   /var/lib/mysql/mysql.sock    # fedora/centos?
-  encoding: utf8
+  # Replace with this:
+  production:
+    adapter: mysql2
+    database: mo_production
+    username: mo
+    password: $DATA_PASSWORD
+    socket: /var/run/mysqld/mysqld.sock
+    encoding: utf8
 mo> cd db
 mo> scp $USER@$OLD_SERVER:/var/web/mushroom-observer/db/checkpoint.gz .
-mo> gunzip checkpoint.gz
-mo> mosqle checkpoint
-[NJW Password is in the bash_aliases file and may need to be tweaked.]
-mo> rm checkpoint
-
-# Set up password-less ssh for image transfers.
-mo> ssh-keygen -t rsa
-  # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
-mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
-  # Enter password.
-# If the command above doesn't work, use this instead.
-# mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com \
-#     'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
-mo> ssh cdmr@images.digitalmycology.com
-  # (just make sure it works)
-mo> exit
-
-# Set up logrotate to archive passenger and rails logs.
-root> vi /etc/logrotate.d/unicorn
-  /var/web/mo/log/*.log {
-    daily
-    missingok
-    rotate 7
-    dateext
-    compress
-    delaycompress
-    sharedscripts
-    postrotate
-      touch /var/web/mo/tmp/restart.txt
-      scp /var/web/mo/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
-      mv /var/web/mo/log/*.gz /var/web/mo/log/old/
-    endscript
-  }
+mo> gunzip -cd checkpoint.gz | mysql -u mo -p'$DATA_PASSWORD' mo_production
+mo> rm checkpoint.gz
 
 # Install our programs for resizing and rotating JPEG images.
+mo> exit
 root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
 root> gcc /var/web/mo/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
 root> cp /var/web/mo/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
 
---------------------------------------------------------------------------------
-
 # Test basic system now.
-root> mo
-mo> rails server
-# Look for errors.  Should start listening on port 3000.
-# Break out when working.
-
-# Once the system can boot successfully, make sure translations are installed.
-mo> rake lang:update
-
-# And make sure the database is up to date.
+root> su mo
+mo> env | grep RAILS_ENV
+  # Should be "production"!!
+mo> bundle update
 mo> rake db:migrate
+mo> rake lang:update
+mo> rails server
 
 # Now get unicorn to run right.
-mo> uni start
-[NJW: Ran "unicorn -E production -c config/unicorn.rb"]
-
+mo> unicorn -c config/unicorn.rb -D
 # If there are any errors you'll find them in log/unicorn.stderr.log
+# Bash alias "uni start" is shorthand for the above command.
 
 # Should start listening on port 8080.
 mo> lynx localhost:8080
-[NJW: lynx is not installed, but wget works]
+mo> wget localhost:8080
 
-# Should request cookies, etc. and soon see the main page.
-
-[NJW: At first it didn't respond to outside access, but Jason got it working by restart nginx and unicorn (which was down).
-Jason suggested that: 'sudo service nginx reload' might have done the trick.]
-
---------------------------------------------------------------------------------
+[NJW: At first it didn't respond to outside access, but Jason got it working by restart
+nginx and unicorn (which was down). I just followed these instructions and it worked
+first time.  Just make sure you do "service nginx reload" if you make any changes to
+nginx.conf.  In the instructions we start nginx after copying nginx.conf into place.]
 
 # Set up simple mailserver using postfix.
+mo> exit
 root> apt-get install postfix mutt
   # Select "internet site" when it prompts you.
   # Enter the proper hostname as "system mail name" (should resolve back with reverse DNS).
@@ -269,6 +210,7 @@ root> newaliases
 root> vi /etc/postfix/main.cf
   # change myhostname to "$DOMAIN" (instead of "mail.$DOMAIN")
 [NJW: Not needed?  Was already set to 'ror30.mushroomobserver.org']
+[JPH: I'm not sure what the purpose of this was.  Might be an RDNS thing.]
 
 # Test mail server.
 root> su $USER
@@ -284,7 +226,7 @@ user> echo "This is a test." | mutt -s test $YOUR_EMAIL
 user> exit
 
 # Configure mail for MO.
-root> mo
+root> su mo
 mo> cd
 mo> vi .muttrc
   set realname="Mushroom Observer"
@@ -321,12 +263,34 @@ root> chmod 755 /usr/local/bin/autoreply
 
 
 
-# Now the site should be mostly working.  We need to do some configuration to
-# get image uploads to work, though.
+# Set up password-less ssh for image transfers.
+mo> ssh-keygen -t rsa
+  # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
+mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
+  # Enter password.
+# If the command above doesn't work, use this instead.
+# mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com \
+#     'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
+mo> ssh cdmr@images.digitalmycology.com
+  # (just make sure it works)
+mo> exit
 
-# Make sure these have the correct image server(s).
-mo> vim script/process_image
-mo> vim script/update_images
+# Set up logrotate to archive passenger and rails logs.
+root> vi /etc/logrotate.d/unicorn
+  /var/web/mo/log/*.log {
+    daily
+    missingok
+    rotate 7
+    dateext
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+      touch /var/web/mo/tmp/restart.txt
+      scp /var/web/mo/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
+      mv /var/web/mo/log/*.gz /var/web/mo/log/old/
+    endscript
+  }
 
 # Test image upload on server:
 #   http://$IP_ADDR/observer/create_observation
@@ -337,10 +301,7 @@ mo> script/process_image NNNNN jpg 0
 # Grab thumbnails from image server.  (This takes hours!)
 mo> script/update_images -v --sync dreamhost --download --thumb --320
 
---------------------------------------------------------------------------------
-
 # Install cron jobs.
-
 # They're all already present, just need to stick them in the crontab.
 mo> crontab -e
   # (copy from config/etc/crontab)
