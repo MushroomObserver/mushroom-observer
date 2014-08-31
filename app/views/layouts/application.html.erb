@@ -116,7 +116,7 @@
                   <%= indent + link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %><br/>
                   <%= indent + link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %><br/>
                   <%= indent + link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
-                  <%= indent + link_to(:app_join_mailing_list.t, 'http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org') %><br/>
+                  <%= indent + link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general') %><br/>
                   <%= indent + link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
                   <% if @user.admin %>
                     <br/>
