@@ -2,8 +2,8 @@
 #
 #  USAGE::
 #
-#    script/config MO.local_image_files   # arbitrary constant
-#    script/config image_servers          # special case
+#    script/config.rb MO.local_image_files   # arbitrary constant
+#    script/config.rb image_servers          # special case
 #
 #  DESCRIPTION::
 #
@@ -84,7 +84,7 @@ end
 end
 
 # If run from command line, evaluate arguments and print results.
-if File.basename($0) == 'config'
+if File.basename($0) == 'config.rb'
   print ARGV.map {|arg| eval(arg).to_s }.join("\n")
   exit 0
 end
