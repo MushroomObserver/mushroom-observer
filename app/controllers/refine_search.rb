@@ -207,7 +207,6 @@ module RefineSearch
       :locations,
       :species_lists,
       :confidence,
-      :include_admin,
       :is_col_loc,
       :has_specimen,
       :has_name,
@@ -602,17 +601,6 @@ module RefineSearch
       :label => :refine_search_has_votes,
       :input => :menu,
       :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
-      :default => nil,
-      :blank => true
-    )
-  end
-
-  def rs_field_include_admin(model, flavor)
-    Field.new(
-      :name  => :include_admin,
-      :label => :refine_search_include_admin,
-      :input => :menu,
-      :opts  => [[:yes.l, 'true']],
       :default => nil,
       :blank => true
     )

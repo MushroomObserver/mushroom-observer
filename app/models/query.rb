@@ -110,7 +110,6 @@ class Query < AbstractQuery
       :projects?        => [:string],
       :species_lists?   => [:string],
       :confidence?      => [:float],
-      :include_admin?   => :boolean,
       :is_col_loc?      => :boolean,
       :has_specimen?    => :boolean,
       :has_location?    => :boolean,
@@ -1146,9 +1145,6 @@ class Query < AbstractQuery
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
       self.join << :comments
-    end
-    if !params[:include_admin]
-      self.where << "observations.user_id != 0"
     end
     initialize_model_do_bounding_box(:observation)
   end

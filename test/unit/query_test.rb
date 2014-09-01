@@ -1501,7 +1501,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_all
-    expect = Observation.all(:conditions => ['user_id != 0'], :order => '`when` DESC, id DESC')
+    expect = Observation.all(:order => '`when` DESC, id DESC')
     assert_query(expect, :Observation, :all)
   end
 

@@ -174,28 +174,12 @@ class AbstractModel < ActiveRecord::Base
     num ? num.to_i : nil
   end
 
-  def force_updated_at(val)
-    self.save
-    AbstractModel.record_timestamps = false
-    self.updated_at = val
-    self.save
-    AbstractModel.record_timestamps = true
-  end
-  
-  def touch
-    user = self.user_id
-    self.user_id = 0
-    self.save
-    self.user_id = user
-    self.save
-  end
-  
   ##############################################################################
   #
   #  :section: Callbacks
   #
   ##############################################################################
-  
+
   # This is called just before an object is created.
   # 1) It fills in 'created_at' and 'user' for new records.
   # 2) And it creates a new RssLog if this model accepts one, and logs its
@@ -207,7 +191,7 @@ class AbstractModel < ActiveRecord::Base
     self.user_id  ||= User.current_id if respond_to?('user_id=')
     autolog_created_at                   if has_rss_log?
   end
-  
+
   # This is called just after an object is created.
   # 1) It passes off to SiteData, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
@@ -411,7 +395,7 @@ class AbstractModel < ActiveRecord::Base
   #   name.show_action => 'show_name'
   #
   def show_action; self.class.show_action; end
-  
+
   def self.edit_action; 'edit_' + name.underscore; end
   def edit_action; self.class.edit_action; end
 
@@ -428,10 +412,10 @@ class AbstractModel < ActiveRecord::Base
   #   name.show_action => 'http://mushroomobserver.org/name/show_name/123'
   #
   def show_url; self.class.show_url(id); end
-  
+
   def self.eol_predicate; ":eol#{name}"; end
   def eol_predicate; self.class.eol_predicate; end
-  
+
   def eol_url
     triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
     triple.object if triple
@@ -575,7 +559,7 @@ class AbstractModel < ActiveRecord::Base
       rss_log.save
     end
   end
-  
+
   # Add a note
   def add_note(note)
     if self.notes
@@ -600,9 +584,9 @@ class AbstractModel < ActiveRecord::Base
   def can_edit?(user)
     not respond_to?('user') or (user and (self.user == user))
   end
-  
+
 private
-  
+
   def log_image(tag, image, touch) # :nodoc:
     name = "#{:Image.t} ##{image.id || image.was || '??'}"
     log(tag, :name => name, :touch => touch)
