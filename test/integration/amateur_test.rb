@@ -86,7 +86,7 @@ class AmateurTest < IntegrationTestCase
     if autologin
       assert_match(/^#{user.id}/, result["mo_user"])
     else
-      assert_equal(nil, result["mo_user"])
+      assert_equal("", result["mo_user"].to_s)
     end
     result
   end

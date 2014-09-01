@@ -139,6 +139,8 @@ class AccountController < ApplicationController
       # log in any time they wanted to.  This makes it a one-time use.)
       elsif user.verified
         flash_warning(:runtime_reverify_already_verified.t)
+        @user = nil
+        User.current = nil
         set_session_user(nil)
         redirect_to(:action => :login)
 
@@ -159,6 +161,7 @@ class AccountController < ApplicationController
           elsif password.length < 5 or password.binary_length > 40
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
+            User.current = @user
             set_session_user(@user)
             @user.change_password(password)
             @user.verify
@@ -227,6 +230,7 @@ class AccountController < ApplicationController
         @user.last_login = now = Time.now
         @user.updated_at = now
         @user.save
+        User.current = @user
         set_session_user(@user)
         if @remember
           set_autologin_cookie(@user)
@@ -262,7 +266,9 @@ class AccountController < ApplicationController
   end
 
   def logout_user # :nologin:
-    @user = set_session_user(nil)
+    @user = nil
+    User.current = nil
+    set_session_user(nil)
     clear_autologin_cookie
   end
 

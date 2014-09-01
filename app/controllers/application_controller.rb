@@ -267,49 +267,45 @@ logger.warn('SESSION: ' + session.inspect)
     @user = nil
     User.current = nil
 
-    # Disable everything to do with cookies for API controller.
-    if controller_name != 'api'
+    # Do nothing if already logged in: if user asked us to remember him the
+    # cookie will already be there, if not then we want to leave it out.
+    if (user = get_session_user) &&
+       (user.verified)
+      @user = user
+      @user.reload
 
-      # Do nothing if already logged in: if user asked us to remember him the
-      # cookie will already be there, if not then we want to leave it out.
-      if (user = get_session_user) &&
-         (user.verified)
-        @user = user
-        @user.reload
+    # Log in if cookie is valid, and autologin is enabled.
+    elsif (cookie = cookies["mo_user"])  &&
+          (split = cookie.split(" ")) &&
+          (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
+          (split[1] == user.auth_code) &&
+          (user.verified)
+      @user = set_session_user(user)
+      @user.last_login = Time.now
+      @user.save
 
-      # Log in if cookie is valid, and autologin is enabled.
-      elsif (cookie = cookies["mo_user"])  &&
-            (split = cookie.split(" ")) &&
-            (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
-            (split[1] == user.auth_code) &&
-            (user.verified)
-        @user = set_session_user(user)
-        @user.last_login = Time.now
-        @user.save
+      # Reset cookie to push expiry forward.  This way it will continue to
+      # remember the user until they are inactive for over a month.  (Else
+      # they'd have to login every month, no matter how often they login.)
+      set_autologin_cookie(user)
 
-        # Reset cookie to push expiry forward.  This way it will continue to
-        # remember the user until they are inactive for over a month.  (Else
-        # they'd have to login every month, no matter how often they login.)
-        set_autologin_cookie(user)
+    # Delete invalid cookies.
+    else
+      clear_autologin_cookie
+      set_session_user(nil)
+    end
 
-      # Delete invalid cookies.
-      else
-        clear_autologin_cookie
-        set_session_user(nil)
-      end
+    # Make currently logged-in user available to everyone.
+    User.current = @user
+    logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'}")
 
-      # Make currently logged-in user available to everyone.
-      User.current = @user
-      logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'}")
-
-      # Keep track of last time user requested a page, but only update at most once an hour.
-      if @user and (
-        !@user.last_activity or
-        @user.last_activity.to_s('%Y%m%d%H') != Time.now.to_s('%Y%m%d%H')
-      )
-        @user.last_activity = Time.now
-        @user.save
-      end
+    # Keep track of last time user requested a page, but only update at most once an hour.
+    if @user and (
+      !@user.last_activity or
+      @user.last_activity.to_s('%Y%m%d%H') != Time.now.to_s('%Y%m%d%H')
+    )
+      @user.last_activity = Time.now
+      @user.save
     end
 
     # Tell Rails to continue to process.
@@ -432,9 +428,7 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Destroy the auto-login cookie.
   def clear_autologin_cookie
-    if cookies.member?("mo_user")
-      cookies.delete("mo_user")
-    end
+    cookies.delete("mo_user")
   end
 
   # Store User in session (id only).
