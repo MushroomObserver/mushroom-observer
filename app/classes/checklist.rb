@@ -156,7 +156,6 @@ private
     conditions = [
       'n.id = o.name_id',
       "n.rank IN (#{ranks_to_consider})",
-      'o.user_id > 0',
     ]
     tables += args[:tables] || []
     conditions += args[:conditions] || []

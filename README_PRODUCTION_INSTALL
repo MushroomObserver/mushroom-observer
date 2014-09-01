@@ -131,9 +131,10 @@ mo> mkdir log public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
 mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
-  MO.configure do
-    config.smtp_password    = "xxx"
+  MushroomObserver::Application.configure do
+    config.action_mailer.smtp_settings[:password] = "xxx"
     config.pivotal_password = "xxx"
+    config.image_sources[:cdmr].delete(:write)
   end
 
 # Install gems.
