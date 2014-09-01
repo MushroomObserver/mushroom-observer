@@ -1,0 +1,119 @@
+<% javascript_include("jquery") %>
+<% javascript_include("semantic_vernacular/sv_lib") %>
+<% javascript_include("semantic_vernacular/sv_create") %>
+<%= stylesheet_link_tag("semantic_vernacular.css") %>
+
+<div class="svd-navigation">
+  <%= link_to("Go to all Semantic Vernacular Descriptions", 
+              :controller => "semantic_vernacular",
+              :action => "index") %>
+</div>
+<div id="svd-create">
+  <h2>
+      <% if @svd %>
+        <% if @svd.name %>
+          Propose a Definition for <%= @svd.name.label %>
+        <% else %>
+          Propose a Definition for <%= @svd.uri %>
+        <% end %>
+      <% else %>
+        Create a New Semantic Vernacular Description
+      <% end %>
+    </h2>
+  <div id="svd-create-input">
+    <table>
+      <% if @svd %>
+        <tr>
+          <td colspan="3">
+            <input type="hidden" id="svd-create-uri" value="<%= @svd.uri %>" /> 
+          </td>
+        </tr>
+      <% else %>
+        <tr>
+          <td><b>Name</b>:</td>
+          <td><input type="text" id="svd-create-label" /></td>
+          <td></td>
+        </tr>
+      <% end %>
+      <tr>
+        <td colspan="3"><b>Definition</b>:</td>
+      </tr>
+      <tr>
+        <td>Feature</td>
+        <td>Value</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>
+          <select id="svd-create-feature" multiple="multiple">
+            <option class="svd-create-select-default" disabled>
+              Select one feature
+            </option>
+          </select>
+        </td>
+        <td>
+          <select id="svd-create-feature-value" multiple="multiple">
+            <option class="svd-create-select-default" disabled>
+              Select one or more values
+            </option>
+          </select>
+        </td>
+        <td>
+          <button type="button" id="svd-add-feature">Add</button><br />
+        </td>
+      </tr>
+      <tr>
+        <td><b>Associated Scientific Names</b>:</td>
+        <td><input type="text" id="svd-create-scientific-name" /></td>
+        <td>
+          <button type="button" id="svd-add-scientific-name">Add</button><br />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <button type="button" id="svd-create-submit">Submit</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div id="svd-create-display">
+    <ul id="svd-matched-svd-display">
+      <div class="svd-create-display-header">
+        <span><u>Matched vernacular descriptions:</u></span>
+      </div>
+    </ul>
+    <ul id="svd-feature-value-display">
+      <div class="svd-create-display-header">
+        <span><u>Your input of features:</u></span>
+        <button type="button" id="svd-clear-feature">Clear</button>
+      </div>
+      <% if @base_description != nil %>
+        <% @base_description.features.each do |feature, values| %>
+          <% value_labels = Array.new %>
+          <% values.collect do |value| %>
+            <% span = content_tag(:span, value['label'], :class => 'svd-show-feature-value',
+                                  :id => value['uri'])
+               value_labels.push(span) %>
+          <% end %>
+          <%=
+            link = link_to(feature['label'], {
+                     :controller => 'semantic_vernacular',
+                     :action => 'show_feature',
+                     :uri => feature['uri']
+                   }, :target => '_blank')
+            labels = value_labels.safe_join(' <i>or</i> '.html_safe)
+            content_tag(:li, link + ': ' + labels, :id => feature['uri'],
+                        :title => feature['label'])
+          %>
+        <% end %>
+      <% end %>
+    </ul>
+    <ul id="svd-scientific-name-display">
+      <div class="svd-create-display-header">
+        <span><u>Your input of scientific names:</u></span>
+        <button type="button" id="svd-clear-scientific-name">Clear</button>
+      </div>
+    </ul>
+  </div>
+  <div style="clear:both"></div>
+</div>

@@ -19,30 +19,30 @@
 ################################################################################
 
 class ActiveSupport::TimeWithZone
-  Date::DATE_FORMATS[:web]   = WEB_DATE_FORMAT
-  Time::DATE_FORMATS[:web]   = WEB_TIME_FORMAT
-  Date::DATE_FORMATS[:api]   = API_DATE_FORMAT
-  Time::DATE_FORMATS[:api]   = API_TIME_FORMAT
-  Date::DATE_FORMATS[:email] = EMAIL_DATE_FORMAT
-  Time::DATE_FORMATS[:email] = EMAIL_TIME_FORMAT
+  Date::DATE_FORMATS[:web]   = MO.web_date_format
+  Time::DATE_FORMATS[:web]   = MO.web_time_format
+  Date::DATE_FORMATS[:api]   = MO.api_date_format
+  Time::DATE_FORMATS[:api]   = MO.api_time_format
+  Date::DATE_FORMATS[:email] = MO.email_date_format
+  Time::DATE_FORMATS[:email] = MO.email_time_format
 
   # Format as date for API XML responses.
-  def web_date; strftime(WEB_DATE_FORMAT); end
+  def web_date; strftime(MO.web_date_format); end
 
   # Format as date-time for API XML responses.
-  def web_time; strftime(WEB_TIME_FORMAT); end
+  def web_time; strftime(MO.web_time_format); end
 
   # Format as date for API XML responses.
-  def api_date; utc.strftime(API_TIME_FORMAT); end
+  def api_date; utc.strftime(MO.api_time_format); end
 
   # Format as date-time for API XML responses.
-  def api_time; utc.strftime(API_TIME_FORMAT); end
+  def api_time; utc.strftime(MO.api_time_format); end
 
   # Format as date for emails.
-  def email_date; strftime(EMAIL_TIME_FORMAT); end
+  def email_date; strftime(MO.email_time_format); end
 
   # Format as date-time for emails.
-  def email_time; strftime(EMAIL_TIME_FORMAT); end
+  def email_time; strftime(MO.email_time_format); end
 
   # Format time as "5 days ago", etc.
   def fancy_time(ref=Time.now)
@@ -113,7 +113,7 @@ class DateTime
 end
 
 class Date
-  def web_date;   strftime(WEB_DATE_FORMAT); end
-  def api_date;   strftime(API_DATE_FORMAT); end
-  def email_date; strftime(EMAIL_DATE_FORMAT); end
+  def web_date;   strftime(MO.web_date_format); end
+  def api_date;   strftime(MO.api_date_format); end
+  def email_date; strftime(MO.email_date_format); end
 end

@@ -51,6 +51,7 @@
 
 class NameController < ApplicationController
   include DescriptionControllerHelpers
+  require 'csv'
 
   before_filter :login_required, :except => [
     :advanced_search,
@@ -230,20 +231,18 @@ class NameController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer',
-                  :action => 'index_observation',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :observation),
+        add_query_param({
+          :controller => 'observer', :action => 'index_observation'
+          }, query)]
     end
 
     # Add "show descriptions" link if this query can be coerced into a
     # description query.
     if query.is_coercable?(:NameDescription)
-      @links << [:show_objects.t(:type => :description), {
-                  :action => 'index_name_description',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :description),
+        add_query_param({:action => 'index_name_description'},
+          query)]
     end
 
     # Add some extra fields to the index for authored_names.
@@ -317,10 +316,8 @@ class NameController < ApplicationController
     # Add "show names" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Name)
-      @links << [:show_objects.t(:type => :name), {
-                  :action => 'index_name',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :name),
+        add_query_param({:action => 'index_name'}, query)]
     end
 
     show_index_of_objects(query, args)
@@ -504,8 +501,7 @@ class NameController < ApplicationController
     if is_reviewer?
       desc.update_review_status(params[:value])
     end
-    redirect_to(:action => 'show_name', :id => desc.name_id,
-                :params => query_params)
+    redirect_with_query(:action => 'show_name', :id => desc.name_id)
   end
 
   ##############################################################################
@@ -518,7 +514,7 @@ class NameController < ApplicationController
   def create_name # :prefetch: :norobots:
     store_location
     pass_query_params
-    if request.method != :post
+    if request.method != "POST"
       init_create_name_form
     else
       @parse = parse_name
@@ -537,7 +533,7 @@ class NameController < ApplicationController
     pass_query_params
     if @name = find_or_goto_index(Name, params[:id].to_s)
       init_edit_name_form
-      if request.method == :post
+      if request.method == "POST"
         @parse = parse_name
         new_name, @parents = find_or_create_name_and_parents
         if new_name.new_record? or new_name == @name
@@ -628,9 +624,9 @@ class NameController < ApplicationController
         :new => @parse.real_search_name,
         :observations => @name.observations.length,
         :namings => @name.namings.length,
-        :url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}"
+        :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      AccountMailer.deliver_webmaster_question(@user.email, content)
+      AccountMailer.webmaster_question(@user.email, content).deliver
       NameControllerTest.report_email(content) if TESTING
     end
   end
@@ -685,7 +681,7 @@ class NameController < ApplicationController
     @name.attributes = @parse.params
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
-    if not @name.altered?
+    if not @name.changed?
       any_changes = false
     elsif not save_name(@name, :log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
@@ -736,19 +732,19 @@ class NameController < ApplicationController
     content = :email_name_merge.l(:user => @user.login,
                                   :this => "##{@name.id}: " + @name.real_search_name,
                                   :that => "##{new_name.id}: " + new_name.real_search_name,
-                                  :this_url => "#{HTTP_DOMAIN}/name/show_name/#{@name.id}",
-                                  :that_url => "#{HTTP_DOMAIN}/name/show_name/#{new_name.id}")
-    AccountMailer.deliver_webmaster_question(@user.email, content)
+                                  :this_url => "#{MO.http_domain}/name/show_name/#{@name.id}",
+                                  :that_url => "#{MO.http_domain}/name/show_name/#{new_name.id}")
+    AccountMailer.webmaster_question(@user.email, content).deliver
     NameControllerTest.report_email(content) if TESTING
   end
 
   # Chain on to approve/deprecate name if changed status.
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == 'true' and not @name.deprecated
-      redirect_to(:action => :deprecate_name, :id => @name.id, :params => query_params)
+      redirect_with_query(:action => :deprecate_name, :id => @name.id)
       return true
     elsif params[:name][:deprecated].to_s == 'false' and @name.deprecated
-      redirect_to(:action => :approve_name, :id => @name.id, :params => query_params)
+      redirect_with_query(:action => :approve_name, :id => @name.id)
       return true
     else
       return false
@@ -756,7 +752,7 @@ class NameController < ApplicationController
   end
 
   def redirect_to_show_name
-    redirect_to(:action => :show_name, :id => @name.id, :params => query_params)
+    redirect_with_query(:action => :show_name, :id => @name.id)
   end
 
   # Update the misspelling status.
@@ -811,7 +807,7 @@ class NameController < ApplicationController
     @licenses = License.current_names_and_ids
 
     # Render a blank form.
-    if request.method == :get
+    if request.method == "GET"
       @description = NameDescription.new
       @description.name = @name
       initialize_description_source(@description)
@@ -881,7 +877,7 @@ class NameController < ApplicationController
     if !check_description_edit_permission(@description, params[:description])
       # already redirected
 
-    elsif request.method == :post
+    elsif request.method == "POST"
       @description.attributes = params[:description]
 
       args = {}
@@ -971,16 +967,14 @@ class NameController < ApplicationController
                :user => @user.login, :touch => true,
                :name => @description.unique_partial_format_name)
       @description.destroy
-      redirect_to(:action => 'show_name', :id => @description.name_id,
-                  :params => query_params)
+      redirect_with_query(:action => 'show_name', :id => @description.name_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if @description.is_reader?(@user)
-        redirect_to(:action => 'show_name_description', :id => @description.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_name_description',
+          :id => @description.id)
       else
-        redirect_to(:action => 'show_name', :id => @description.name_id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_name', :id => @description.name_id)
       end
     end
   end
@@ -1001,7 +995,7 @@ class NameController < ApplicationController
       @synonym_name_ids = []
       @synonym_names    = []
       @deprecate_all    = true
-      if request.method == :post
+      if request.method == "POST"
         list = params[:synonym][:members].strip_squeeze
         @deprecate_all = (params[:deprecate][:all] == '1')
 
@@ -1077,8 +1071,7 @@ class NameController < ApplicationController
           end
 
           if success
-            redirect_to(:action => 'show_name', :id => @name.id,
-                        :params => query_params)
+            redirect_with_query(:action => 'show_name', :id => @name.id)
           else
             flash_object_errors(@name)
             flash_object_errors(@name.synonym)
@@ -1116,7 +1109,7 @@ class NameController < ApplicationController
       @names            = []
       @misspelling      = (params[:is][:misspelling] == '1')
 
-      if request.method == :post
+      if request.method == "POST"
         if @what.blank?
           flash_error :runtime_name_deprecate_must_choose.t
 
@@ -1163,12 +1156,11 @@ class NameController < ApplicationController
               post_comment(:deprecate, @name, @comment)
             end
 
-            redirect_to(:action => 'show_name', :id => @name.id,
-                        :params => query_params)
+            redirect_with_query(:action => 'show_name', :id => @name.id)
           end
 
         end # @what
-      end # :post
+      end # "POST"
     end
   end
 
@@ -1180,7 +1172,7 @@ class NameController < ApplicationController
       @approved_names = @name.approved_synonyms
       comment = params[:comment][:comment] rescue ''
       comment = comment.strip_squeeze
-      if request.method == :post
+      if request.method == "POST"
 
         # Deprecate others first.
         others = []
@@ -1205,8 +1197,7 @@ class NameController < ApplicationController
           post_comment(:approve, @name, comment)
         end
 
-        redirect_to(:action => 'show_name', :id => @name.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_name', :id => @name.id)
       end
     end
   end
@@ -1320,11 +1311,10 @@ class NameController < ApplicationController
 
   # Send stuff to eol.
   def eol_old # :nologin: :norobots:
-    headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
     eol_data(['unvetted', 'vetted'])
-    render(:action => "eol", :layout => false)
+    render_xml(:action => "eol", :layout => false)
   end
 
 
@@ -1427,11 +1417,10 @@ class NameController < ApplicationController
 
   # Send stuff to eol.
   def eol # :nologin: :norobots:
-    headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
     @data = EolData.new()
-    render(:action => "eol", :layout => false)
+    render_xml(:layout => false)
   end
 
   def refresh_links_to_eol
@@ -1460,6 +1449,7 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY images.vote_cache DESC
     ))
+    
     @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
 
     ids = Name.connection.select_values(%(
@@ -1500,7 +1490,7 @@ class NameController < ApplicationController
   def bulk_name_edit # :prefetch: :norobots:
     @list_members = nil
     @new_names    = nil
-    if request.method == :post
+    if request.method == "POST"
       list = params[:list][:members].strip_squeeze rescue ''
       construct_approved_names(list, params[:approved_names])
       sorter = NameSorter.new
@@ -1541,7 +1531,7 @@ class NameController < ApplicationController
       @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
 
       # Initialize form.
-      if request.method != :post
+      if request.method != "POST"
         if Name.ranks_above_genus.member?(@name.rank)
           flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
         end
@@ -1576,7 +1566,7 @@ class NameController < ApplicationController
           @notification.destroy
           flash_notice(:email_tracking_no_longer_tracking.t(:name => @name.display_name))
         end
-        redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
+        redirect_with_query(:action => 'show_name', :id => name_id)
       end
     end
   end
@@ -1640,7 +1630,7 @@ class NameController < ApplicationController
       end
     end
 
-    report = FasterCSV.generate(:col_sep => "\t") do |csv|
+    report = CSV.generate(:col_sep => "\t") do |csv|
       csv << ['name', 'rank', 'number_observations', 'family']
       data.each do |name, rank, number|
         genus = name.split(' ').first

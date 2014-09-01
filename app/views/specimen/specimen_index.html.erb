@@ -1,0 +1,46 @@
+<%
+  @title = :specimen_index_title.t(:subject => @subject)
+  new_tab_set do
+    add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
+  end
+%>
+
+<table width="100%">
+	<tr>
+		<td></td>
+		<%= [:specimen_herbarium, :specimen_herbarium_label, :OBSERVATIONS].map {|title| table_column_title(title.t) }.safe_join %>
+		<td></td>
+	</tr>
+	<%
+	odd_or_even = 1
+	for specimen in @specimens
+    odd_or_even = 1 - odd_or_even
+ 		herbarium = specimen.herbarium
+		observation = specimen.observations %>
+    <tr class="ListLine<%= odd_or_even %>">
+	    <td>
+	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
+					form_tag({:action => 'edit_specimen', :id => specimen.id}) do %>
+						<%= submit_tag :herbarium_edit_specimen.t %>
+					<% end
+				end %>
+	    </td>
+			<td>
+				<%= link_to(herbarium.name.t, :controller => 'herbarium', :action => 'show_herbarium', :id => herbarium.id) %>
+			</td>
+			<td>
+	      <%= link_to(specimen.herbarium_label, :action => "show_specimen", :id => specimen.id) %>
+	    </td>
+			<td>
+				<%= observation_links(specimen) %>
+			</td>
+	    <td>
+	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
+					form_tag({:action => 'delete_specimen', :id => specimen.id}) do %>
+						<%= submit_tag :herbarium_delete_specimen.t, :confirm => :are_you_sure.t %>
+					<% end
+				end %>
+	    </td>
+	  </tr>
+	<% end %>
+</table>

@@ -71,17 +71,17 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def signup # :nologin: :prefetch:
-    if request.method != :post
-      @new_user = User.new(:theme => DEFAULT_THEME)
+    if request.method != "POST"
+      @new_user = User.new(:theme => MO.default_theme)
     else
       theme = params['new_user']['theme']
       login = params['new_user']['login']
-      valid_themes = CSS + ["NULL"]
+      valid_themes = MO.themes + ["NULL"]
       if !valid_themes.member?(theme) or (login == 'test_denied')
         if !theme.blank?
           # I'm guessing this has something to do with spammer/hacker trying
           # to automate creation of accounts?
-          AccountMailer.deliver_denied(params['new_user'])
+          AccountMailer.denied(params['new_user']).deliver
         end
         redirect_back_or_default(:action => :welcome)
       else
@@ -111,7 +111,7 @@ class AccountController < ApplicationController
             :group => group
           )
           flash_notice :runtime_signup_success.t
-          AccountMailer.deliver_verify(@new_user)
+          AccountMailer.verify(@new_user).deliver
           redirect_back_or_default(:action => :welcome)
         end
       end
@@ -139,6 +139,8 @@ class AccountController < ApplicationController
       # log in any time they wanted to.  This makes it a one-time use.)
       elsif user.verified
         flash_warning(:runtime_reverify_already_verified.t)
+        @user = nil
+        User.current = nil
         set_session_user(nil)
         redirect_to(:action => :login)
 
@@ -146,7 +148,7 @@ class AccountController < ApplicationController
       # first before we can verify them.
       elsif user.password.blank?
         @user = user
-        if request.method != :post
+        if request.method != "POST"
           flash_warning(:account_choose_password_warning.t)
           render(:action => :choose_password)
         else
@@ -159,6 +161,7 @@ class AccountController < ApplicationController
           elsif password.length < 5 or password.binary_length > 40
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
+            User.current = @user
             set_session_user(@user)
             @user.change_password(password)
             @user.verify
@@ -173,7 +176,9 @@ class AccountController < ApplicationController
       # If not already verified, and the code checks out, then mark account
       # "verified", log user in, and display the "you're verified" page.
       else
-        set_session_user(@user = user)
+        @user = user
+        User.current = user
+        set_session_user(user)
         @user.verify
       end
     end
@@ -187,7 +192,7 @@ class AccountController < ApplicationController
   # This is used by the "reverify" page to re-send the verification email.
   def send_verify # :nologin:
     if user = find_or_goto_index(User, params[:id].to_s)
-      AccountMailer.deliver_verify(user)
+      AccountMailer.verify(user).deliver
       flash_notice :runtime_reverify_sent.t
       redirect_back_or_default(:action => :welcome)
     end
@@ -204,7 +209,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def login # :nologin: :prefetch:
-    if request.method != :post
+    if request.method != "POST"
       @login = ""
       @remember = true
     else
@@ -225,6 +230,7 @@ class AccountController < ApplicationController
         @user.last_login = now = Time.now
         @user.updated_at = now
         @user.save
+        User.current = @user
         set_session_user(@user)
         if @remember
           set_autologin_cookie(@user)
@@ -237,7 +243,7 @@ class AccountController < ApplicationController
   end
 
   def email_new_password # :nologin:
-    if request.method != :post
+    if request.method != "POST"
       @new_user = User.new
     else
       @login = params['new_user']['login']
@@ -250,7 +256,7 @@ class AccountController < ApplicationController
         @new_user.change_password(password)
         if @new_user.save
           flash_notice :runtime_email_new_password_success.t
-          AccountMailer.deliver_new_password(@new_user, password)
+          AccountMailer.new_password(@new_user, password).deliver
           render(:action => "login")
         else
           flash_object_errors(@new_user)
@@ -260,7 +266,9 @@ class AccountController < ApplicationController
   end
 
   def logout_user # :nologin:
-    @user = set_session_user(nil)
+    @user = nil
+    User.current = nil
+    set_session_user(nil)
     clear_autologin_cookie
   end
 
@@ -270,10 +278,10 @@ class AccountController < ApplicationController
     elsif !@user.alert || !@user.alert_type
       flash_warning :user_alert_missing.t
       redirect_back_or_default(:action => :welcome)
-    elsif request.method == :get
+    elsif request.method == "GET"
       @back = session['return-to']
       # render alert
-    elsif request.method == :post
+    elsif request.method == "POST"
       if params[:commit] == :user_alert_okay.l
         @user.alert = nil
         @user.save
@@ -297,7 +305,7 @@ class AccountController < ApplicationController
 
   def prefs # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
-    if request.method == :post
+    if request.method == "POST"
 
       # Make sure password matches confirmation.
       if password = params['user']['password']
@@ -383,7 +391,7 @@ class AccountController < ApplicationController
 
   def profile # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
-    if request.method != :post
+    if request.method != "POST"
       @place_name      = @user.location ? @user.location.display_name : ""
       @copyright_holder = @user.legal_name
       @copyright_year    = Time.now.year
@@ -423,7 +431,7 @@ class AccountController < ApplicationController
         else
           name = nil
         end
-        date = Time.local(params['date']['copyright_year'])
+        date = Date.parse(params['date']['copyright_year'].to_s + '0101')
         license = License.safe_find(params['upload']['license_id'])
         holder = params['copyright_holder']
         image = Image.new(
@@ -544,7 +552,7 @@ class AccountController < ApplicationController
 
   def api_keys # :login: :norobots:
     @key = ApiKey.new
-    if request.method == :post
+    if request.method == "POST"
       if params[:commit] == :account_api_keys_create_button.l
         create_api_key()
       else
@@ -593,7 +601,7 @@ class AccountController < ApplicationController
   def edit_api_key # :login: :norobots:
     if @key = find_or_goto_index(ApiKey, params[:id].to_s)
       if check_permission!(@key)
-        if request.method == :post
+        if request.method == "POST"
           if params[:commit] == :UPDATE.l
             @key.update_attributes!(params[:key])
             flash_notice(:account_api_keys_updated.t)
@@ -629,7 +637,7 @@ class AccountController < ApplicationController
   def add_user_to_group # :root:
     redirect = true
     if is_in_admin_mode?
-      if request.method == :post
+      if request.method == "POST"
         user_name  = params['user_name'].to_s
         group_name = params['group_name'].to_s
         user       = User.find_by_login(user_name)
@@ -666,10 +674,10 @@ class AccountController < ApplicationController
     id = params[:id].to_s
     if @user2 = find_or_goto_index(User, id)
       if is_in_admin_mode?
-        if request.method == :get
+        if request.method == "GET"
           # render form
           redirect = false
-        elsif request.method == :post
+        elsif request.method == "POST"
           if params[:commit] == :user_alert_save.l
             @user2.alert_type  = params[:user2][:alert_type]
             @user2.alert_notes = params[:user2][:alert_notes]

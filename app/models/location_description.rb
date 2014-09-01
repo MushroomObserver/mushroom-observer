@@ -51,6 +51,8 @@
 ############################################################################
 
 class LocationDescription < Description
+  require 'acts_as_versioned'
+
   belongs_to :license
   belongs_to :location
   belongs_to :project
@@ -70,11 +72,12 @@ class LocationDescription < Description
   acts_as_versioned(
     :table_name => 'location_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :orphan }
+    :association_options => { :dependent => :nullify }
   )
   non_versioned_columns.push(
     'sync_id',
     'created_at',
+    'updated_at',
     'location_id',
     'num_views',
     'last_view',
@@ -108,9 +111,6 @@ class LocationDescription < Description
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so. 
   def notify_users
-
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.
     if altered?
       sender = User.current
       recipients = []

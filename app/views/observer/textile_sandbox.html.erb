@@ -1,0 +1,46 @@
+<% @title = :sandbox_title.t %>
+
+<table width="1">
+  <tr>
+    <td>
+      <div class="HelpNote"><%= :sandbox_header.tp %></div>
+
+      <% if !@code.nil? %>
+        <b><%= :sandbox_look_like.t %>:</b><br/>
+        <% if @submit == :sandbox_test.l %>
+          <div class="sandbox"><%= @code.tpl %></div><br/>
+        <% else %>
+          <div class="sandbox"><%= h(@code.tpl) %></div><br/>
+        <% end %>
+      <% end %>
+
+      <%= form_tag(:action => "textile_sandbox") %>
+        <% if !@code.nil? %>
+          <center>
+            <%= image_tag("up_arrow.png", :style => "margin-bottom:-6px; margin-right:50px") %>
+            <%= submit_tag :sandbox_test.l %>
+            <span style='margin-left:20px'></span>
+            <%= submit_tag :sandbox_test_codes.l %>
+            <%= image_tag("up_arrow.png", :style => "margin-bottom:-6px; margin-left:50px") %>
+          </center><br/>
+        <% end %>
+        <b><%= :sandbox_enter.t %>:</b><br/>
+        <%= text_area_tag("code", @code, { :cols => 80, :rows => 10 }) %><br/>
+        <% if @code.nil? %>
+          <br/>
+          <center><%= submit_tag :sandbox_test.l %></center>
+        <% end %>
+      </form><br/>
+
+      <p><b><%= :sandbox_quick_ref.t %>:</b></p>
+      <div style="font-family:monospace; font-size:11px; white-space:pre; margin-bottom:1em"><%= :sandbox_sample.l %></div>
+
+      <b><%= :sandbox_web_refs.t %>:</b><br/>
+      <div style="margin-left:20px">
+        <%= link_to(:sandbox_link4.t, "http://redcloth.org/textile") %><br/>
+        <%= link_to(:sandbox_link5.t, "http://redcloth.org/hobix.com/textile/") %><br/>
+        <%= link_to(:sandbox_link6.t, "http://warpedvisions.org/projects/textile-cheat-sheet.md") %><br/>
+      </div>
+    </td>
+  </tr>
+</table>

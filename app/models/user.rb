@@ -42,16 +42,16 @@
 #  The execution flow for an HTTP request as affects login, including all
 #  application-wide filters, is as follows:
 #
-#  1. +browser_status+: Determine browser type and state of javascript.
-#
-#  2. +autologin+: Check if User is logged in by first looking at session, then
+#  1. +autologin+: Check if User is logged in by first looking at session, then
 #     autologin cookie.  Requires User be verified.  Stores User in session,
 #     cookie, User#current, and +@user+ (visible to controllers and views).
 #     Sets all these to nil if no User logged in.
 #
-#  3. +check_user_alert+: Check if User has an alert to show, redirecting if so.
+#  2. +check_user_alert+: Check if User has an alert to show, redirecting if so.
 #
-#  4. +set_locale+: Check if User has chosen a locale.
+#  3. +set_locale+: Check if User has chosen a locale.
+#
+#  4. +set_timezone+: Set timezone from cookie set by client's browser.
 #
 #  5. +login_required+: (optional) Redirects to <tt>/account/login</tt> if not
 #     logged in.
@@ -113,7 +113,7 @@
 #  license::            Default license for Images this User uploads.
 #
 #  ==== Preferences
-#  locale::             Language, e.g.: "en-US" or "pt-BR"
+#  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
 #  rows::               Number of rows of thumbnails to show in index.
 #  columns::            Number of columns of thumbnails to show in index.
@@ -529,7 +529,7 @@ class User < AbstractModel
   end
   
   def personal_herbarium_name
-    :user_personal_herbarium.t(:name => self.unique_text_name)
+    :user_personal_herbarium.l(:name => self.unique_text_name)
   end
   
   def personal_herbarium
@@ -651,6 +651,10 @@ class User < AbstractModel
     [:bounced_email, :other]
   end
 
+  def lang
+    Language.lang_from_locale(locale)
+  end
+
   protected
   # Get alert structure, initializing it with an empty hash if necessary.
   def get_alert # :nodoc:
@@ -726,8 +730,8 @@ class User < AbstractModel
   # (with full name in parens).
   def self.primer
     result = []
-    if !File.exists?(USER_PRIMER_CACHE_FILE) ||
-       File.mtime(USER_PRIMER_CACHE_FILE) < Time.now - 1.day
+    if !File.exists?(MO.user_primer_cache_file) ||
+       File.mtime(MO.user_primer_cache_file) < Time.now - 1.day
 
       # Get list of users sorted first by when they last logged in (if recent),
       # then by cotribution.
@@ -739,9 +743,9 @@ class User < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      File.open(USER_PRIMER_CACHE_FILE, 'w:utf-8').write(result.join("\n") + "\n")
+      File.open(MO.user_primer_cache_file, 'w:utf-8').write(result.join("\n") + "\n")
     else
-      result = File.open(USER_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
+      result = File.open(MO.user_primer_cache_file, "r:UTF-8").readlines.map(&:chomp)
     end
     return result
   end
@@ -893,7 +897,9 @@ protected
     write_attribute("auth_code", String.random(39))
   end
 
-  def validate # :nodoc:
+  validate :user_requirements
+  
+  def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
     elsif login.length < 3 or login.binary_length > 40
@@ -922,7 +928,8 @@ protected
     end
   end
 
-  def validate_on_create # :nodoc:
+  validate(:check_password, :on => :create)
+  def check_password # :nodoc:
     unless password.blank? 
       if password_confirmation.to_s.blank?
         errors.add(:password, :validate_user_password_confirmation_missing.t)

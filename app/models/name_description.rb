@@ -65,6 +65,8 @@
 ############################################################################
 
 class NameDescription < Description
+  require 'acts_as_versioned'
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -86,11 +88,12 @@ class NameDescription < Description
   acts_as_versioned(
     :table_name => 'name_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :orphan }
+    :association_options => { :dependent => :nullify }
   )
   non_versioned_columns.push(
     'sync_id',
     'created_at',
+    'updated_at',
     'name_id',
     'review_status',
     'last_review',
@@ -182,7 +185,7 @@ class NameDescription < Description
     # Save unless there are substantive changes pending.
     if !save_version?
       save_without_our_callbacks
-      if errors.length > 0
+      if errors.size > 0
         raise "update_review_status failed: [#{dump_errors}]"
       end
     end
@@ -207,8 +210,7 @@ class NameDescription < Description
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
 
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.  Even though
+    # Even though
     # changing review_status doesn't cause a new version to be created, I want
     # to notify authors of that change.  (review_status_changed? is an implicit
     # method created by ActiveRecord)
@@ -233,7 +235,9 @@ class NameDescription < Description
 
       # Tell reviewer of the change.
       reviewer = self.reviewer || @old_reviewer
-      recipients.push(reviewer) if reviewer && reviewer.email_names_reviewer
+      if reviewer && reviewer.email_names_reviewer
+        recipients.push(reviewer) 
+      end
 
       # Tell masochists who want to know about all name changes.
       for user in User.find_all_by_email_names_all(true)
@@ -265,9 +269,10 @@ class NameDescription < Description
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     begin
       self.classification = Name.validate_classification(parent.rank, self.classification)
     rescue => e

@@ -22,18 +22,18 @@
 #
 #  The actual image is stored in several files:
 #
-#    RAILS_ROOT/public/images/orig/<id>.<ext>  # (original file if not jpeg)
-#    RAILS_ROOT/public/images/orig/<id>.jpg
-#    RAILS_ROOT/public/images/1280/<id>.jpg
-#    RAILS_ROOT/public/images/960/<id>.jpg
-#    RAILS_ROOT/public/images/640/<id>.jpg
-#    RAILS_ROOT/public/images/320/<id>.jpg
-#    RAILS_ROOT/public/images/thumb/<id>.jpg
+#    Rails.root/public/images/orig/<id>.<ext>  # (original file if not jpeg)
+#    Rails.root/public/images/orig/<id>.jpg
+#    Rails.root/public/images/1280/<id>.jpg
+#    Rails.root/public/images/960/<id>.jpg
+#    Rails.root/public/images/640/<id>.jpg
+#    Rails.root/public/images/320/<id>.jpg
+#    Rails.root/public/images/thumb/<id>.jpg
 #
 #  They are also transferred to a remote image server with more disk space:
 #  (images take up 100 Gb as of Jan 2010)
 #
-#    IMAGE_DOMAIN/<dir>/<id>.<ext>
+#    http://<image_server>/<dir>/<id>.<ext>
 #
 #  After the images are successfully transferred, we remove the originals from
 #  the web server (see scripts/update_images).
@@ -70,7 +70,7 @@
 #  3. After the record is saved, it knows the ID so it can finally write out
 #     the original image:
 #
-#       RAILS_ROOT/public/images/orig/<id>.<ext>
+#       ::Rails.root.to_s/public/images/orig/<id>.<ext>
 #
 #  4. Now it forks off a tiny shell script that takes care of the rest:
 #
@@ -78,7 +78,7 @@
 #
 #  5. First it fills in all the other size images with a place-holder:
 #
-#       cd RAILS_ROOT/public/images
+#       cd ::Rails.root.to_s/public/images
 #       cp place_holder_<size>.jpg <size>/$id.jpg
 #
 #  6. Next it resizes the original using ImageMagick:
@@ -90,9 +90,9 @@
 #
 #  7. Lastly it transfers all the images to the image server:
 #
-#       scp orig/$id.<ext>  IMAGE_DOMAIN/orig/$id.<ext>
-#       scp orig/$id.jpg    IMAGE_DOMAIN/orig/$id.jpg
-#       scp 1280/$id.jpg    IMAGE_DOMAIN/1280/$id.jpg
+#       scp orig/$id.<ext>  <user>@<image_server>/orig/$id.<ext>
+#       scp orig/$id.jpg    <user>@<image_server>/orig/$id.jpg
+#       scp 1280/$id.jpg    <user>@<image_server>/1280/$id.jpg
 #       etc.
 #
 #     (If any errors occur in +script/process_image+ they get emailed to the
@@ -152,7 +152,7 @@
 #
 #  ==== Temporary attributes
 #
-#  image_dir::          Where images are stored (default is IMG_DIR).
+#  image_dir::          Where images are stored (default is MO.local_image_files).
 #  upload_handle::      File or IO handle of upload stream.
 #  upload_temp_file::   Path of the tempfile holding the upload until we process it.
 #  upload_length::      Length of the upload (if available).
@@ -163,7 +163,7 @@
 #  == Class Methods
 #
 #  validate_vote::      Validate a vote value.
-#  file_name::          Filename (relative to IMG_DIR) given size and id.
+#  file_name::          Filename (relative to MO.local_image_files) given size and id.
 #  url::                Full URL on image server given size and id.
 #  all_sizes::          All image sizes from +:thumbnail+ to +:full_size+.
 #  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
@@ -178,15 +178,6 @@
 #  thumb_clients::      Observations that use this image as their "thumbnail".
 #  has_size?::          Does image have this size?
 #  size::               Calculate size of image of given type.
-#
-#  ==== Filenames
-#  original_image::     Path of original image.
-#  full_size_image::    Path of full-size jpeg.
-#  huge_image::         Path of 1280 image.
-#  large_image::        Path of 960 image.
-#  medium_image::       Path of 640 image.
-#  small_image::        Path of 320 image.
-#  thumbnail_image::    Path of thumbnail.
 #
 #  ==== URLs
 #  original_url::       URL of original image.
@@ -218,9 +209,10 @@
 #
 ################################################################################
 
-require 'fileutils'
-
 class Image < AbstractModel
+  require "fileutils"
+  require "net/http"
+
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :terms
@@ -237,9 +229,9 @@ class Image < AbstractModel
   after_update :track_copyright_changes
 
   def all_terms; best_terms + terms; end
-    
+
   def get_subjects; observations + subjects + best_terms + terms; end
-  
+
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
   #
@@ -303,6 +295,44 @@ class Image < AbstractModel
     ['image/jpeg', 'image/gif', 'image/png', 'image/tiff', 'image/x-ms-bmp', nil]
   end
 
+  def image_url(size)
+    Image::Url.new(
+      :size => size,
+      :id => id,
+      :transferred => transferred,
+      :extension => extension(size)
+    )
+  end
+
+  def self.image_url(size, id, args={})
+    Image::Url.new(
+      :size => size,
+      :id => id,
+      :transferred => args.fetch(:transferred, true),
+      :extension => args.fetch(:extension, 'jpg')
+    )
+  end
+
+  def url(size)
+    image_url(size).url
+  end
+
+  def self.url(size, id, args={})
+    image_url(size, id, args).url
+  end
+
+  def local_file_name(size)
+    image_url(size).file_name(MO.local_image_files)
+  end
+
+  def original_url;  url(:original);  end
+  def full_size_url; url(:full_size); end
+  def huge_url;      url(:huge);      end
+  def large_url;     url(:large);     end
+  def medium_url;    url(:medium);    end
+  def small_url;     url(:small);     end
+  def thumbnail_url; url(:thumbnail); end
+
   def original_extension
     case content_type
     when 'image/jpeg'     ; 'jpg'
@@ -314,46 +344,10 @@ class Image < AbstractModel
     end
   end
 
-  def self.file_name(size, id)
-    case size
-    when :full_size; "orig/#{id}.jpg"
-    when :huge;      "1280/#{id}.jpg"
-    when :large;     "960/#{id}.jpg"
-    when :medium;    "640/#{id}.jpg"
-    when :small;     "320/#{id}.jpg"
-    when :thumbnail; "thumb/#{id}.jpg"
-    else;            "thumb/#{id}.jpg"
-    end
+  def extension(size)
+    size == :original ? original_extension : 'jpg'
   end
 
-  def self.url(size, id)
-    "#{IMAGE_DOMAIN}/#{file_name(size, id)}"
-  end
-
-  def original_file;  "orig/#{id}.#{original_extension}"; end
-  def full_size_file; "orig/#{id}.jpg";  end
-  def huge_file;      "1280/#{id}.jpg";  end
-  def large_file;     "960/#{id}.jpg";   end
-  def medium_file;    "640/#{id}.jpg";   end
-  def small_file;     "320/#{id}.jpg";   end
-  def thumbnail_file; "thumb/#{id}.jpg"; end
-
-  def original_image;  "#{image_dir}/#{original_file}";  end
-  def full_size_image; "#{image_dir}/#{full_size_file}"; end
-  def huge_image;      "#{image_dir}/#{huge_file}";      end
-  def large_image;     "#{image_dir}/#{large_file}";     end
-  def medium_image;    "#{image_dir}/#{medium_file}";    end
-  def small_image;     "#{image_dir}/#{small_file}";     end
-  def thumbnail_image; "#{image_dir}/#{thumbnail_file}"; end
-
-  def original_url;  "#{IMAGE_DOMAIN}/#{original_file}";  end
-  def full_size_url; "#{IMAGE_DOMAIN}/#{full_size_file}"; end
-  def huge_url;      "#{IMAGE_DOMAIN}/#{huge_file}";      end
-  def large_url;     "#{IMAGE_DOMAIN}/#{large_file}";     end
-  def medium_url;    "#{IMAGE_DOMAIN}/#{medium_file}";    end
-  def small_url;     "#{IMAGE_DOMAIN}/#{small_file}";     end
-  def thumbnail_url; "#{IMAGE_DOMAIN}/#{thumbnail_file}"; end
-  
   def has_size?(size)
     max = width.to_i > height.to_i ? width.to_i : height.to_i
     case size.to_s
@@ -406,10 +400,10 @@ class Image < AbstractModel
   #
   ##############################################################################
 
-  # Directory images are stored under.  (Default is +IMG_DIR+.)
+  # Directory images are stored under.  (Default is +MO.local_image_files+.)
   attr_accessor :image_dir
   def image_dir
-    @image_dir || IMG_DIR
+    @image_dir || MO.local_image_files
   end
 
   # Upload file handle.
@@ -439,8 +433,8 @@ class Image < AbstractModel
 
     case file
       # Image is already stored in a local temp file.  This is how Rails passes
-      # large files from Apache.
-      when Tempfile
+      # large files from the webserver.
+      when Tempfile, ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
         @file = file
         self.upload_temp_file = file.path
         self.upload_length = file.size
@@ -477,9 +471,9 @@ class Image < AbstractModel
   # okay, otherwise adds an error to the :image field.
   def validate_image_length
     if upload_length || save_to_temp_file
-      if upload_length > IMAGE_UPLOAD_MAX_SIZE
+      if upload_length > MO.image_upload_max_size
         errors.add(:image, :validate_image_file_too_big.t(:size => upload_length,
-                   :max => IMAGE_UPLOAD_MAX_SIZE.to_s.sub(/\d{6}$/, 'Mb')))
+                   :max => MO.image_upload_max_size.to_s.sub(/\d{6}$/, 'Mb')))
         result = false
       else
         result = true
@@ -516,8 +510,10 @@ class Image < AbstractModel
   def validate_image_md5sum
     result = true
     if upload_md5sum and save_to_temp_file
-      if (sum = File.read("| /usr/bin/md5sum #{upload_temp_file}")) &&
-         (sum.split.first == upload_md5sum)
+      sum = File.open(upload_temp_file) do |f|
+        Digest::MD5.hexdigest(f.read)
+      end
+      if sum == upload_md5sum
         result = true
       else
         errors.add(:image, :validate_image_md5_mismatch.
@@ -552,8 +548,7 @@ class Image < AbstractModel
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
       if upload_handle.is_a?(IO) or
-         upload_handle.is_a?(StringIO) or
-         upload_handle.is_a?(PhusionPassenger::Utils::UnseekableSocket)
+         upload_handle.is_a?(StringIO)
         begin
           @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
           FileUtils.copy_stream(upload_handle, @file)
@@ -561,7 +556,7 @@ class Image < AbstractModel
           self.upload_length = @file.size
           result = true
         rescue => e
-          errors.add(:image, e.to_s)
+          errors.add(:image, "Unexpected error while copying attached file to temp file. Error class #{e.class.to_s}: #{e.to_s}")
           result = false
         end
 
@@ -588,13 +583,18 @@ class Image < AbstractModel
     elsif save_to_temp_file
       ext = original_extension
       set_image_size(upload_temp_file) if ext == 'jpg'
-      set = width.nil? ? 'set' : ''
+      set = width.nil? ? '1' : '0'
       if !move_original
         result = false
-      elsif !system("script/process_image #{id} #{ext} #{set}&")
-        # Spawn process to resize and transfer images to image server.
-        errors.add(:image, :runtime_image_process_failed.t(:id => id))
-        result = false
+      else
+        cmd = MO.process_image_command.
+                 gsub('<id>', id.to_s).
+                 gsub('<ext>', ext).
+                 gsub('<set>', set)
+        if !TESTING && !system(cmd)
+          errors.add(:image, :runtime_image_process_failed.t(:id => id))
+          result = false
+        end
       end
     end
     return result
@@ -603,6 +603,7 @@ class Image < AbstractModel
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
   def move_original
+    original_image = local_file_name(:original)
     raise(SystemCallError, "Don't move my test images!!") if TESTING
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
@@ -621,8 +622,8 @@ class Image < AbstractModel
 
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
-  def set_image_size(file=full_size_image)
-    script = "#{RAILS_ROOT}/script/jpegsize"
+  def set_image_size(file=local_file_name(:full_size))
+    script = "#{::Rails.root.to_s}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
       self.width  = w.to_i
@@ -640,7 +641,7 @@ class Image < AbstractModel
     else
       raise("Invalid transform op: #{op.inspect}")
     end
-    system("script/rotate_image #{id} #{op}&")
+    system("script/rotate_image #{id} #{op}&") if !TESTING
   end
 
   ################################################################################
@@ -834,14 +835,15 @@ class Image < AbstractModel
       ))
     end
   end
-  
+
   def year; self.when.year; end
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if upload_handle and new_record?
       validate_upload
     end

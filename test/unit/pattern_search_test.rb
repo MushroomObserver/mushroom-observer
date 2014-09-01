@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 class PatternSearchTest < UnitTestCase
 
   def test_term
@@ -58,10 +58,10 @@ class PatternSearchTest < UnitTestCase
   def test_parse_list_of_users
     x = PatternSearch::Term.new(:xxx)
     x.vals = [];              assert_raises(PatternSearch::MissingValueError) {x.parse_list_of_users}
-    x.vals = ['2'];           assert_obj_list_equal([@mary], x.parse_list_of_users)
-    x.vals = ['katrina'];     assert_obj_list_equal([@katrina], x.parse_list_of_users)
-    x.vals = ['Tricky Dick']; assert_obj_list_equal([@dick], x.parse_list_of_users)
-    x.vals = ['1', '2', '4']; assert_obj_list_equal([@rolf, @mary, @dick], x.parse_list_of_users)
+    x.vals = ['2'];           assert_obj_list_equal([mary], x.parse_list_of_users)
+    x.vals = ['katrina'];     assert_obj_list_equal([katrina], x.parse_list_of_users)
+    x.vals = ['Tricky Dick']; assert_obj_list_equal([dick], x.parse_list_of_users)
+    x.vals = ['1', '2', '4']; assert_obj_list_equal([rolf, mary, dick], x.parse_list_of_users)
   end
 
   def test_parse_date_range
@@ -96,7 +96,7 @@ class PatternSearchTest < UnitTestCase
     assert_equal(:pattern, y.var)
     assert_equal('abc "tack this on"', y.parse_pattern)
     assert_equal(:user, z.var)
-    assert_obj_list_equal([@dick], z.parse_list_of_users)
+    assert_obj_list_equal([dick], z.parse_list_of_users)
   end
 
   def test_observation_search
@@ -113,8 +113,8 @@ class PatternSearchTest < UnitTestCase
     assert_obj_list_equal([], x.query.results)
     albion = locations(:albion)
     agaricus = names(:agaricus)
-    o1 = Observation.create(:when => 20120110, :location => albion, :name => agaricus, :user => @dick, :specimen => true)
-    o2 = Observation.create(:when => 20131230, :location => albion, :name => agaricus, :user => @dick, :specimen => false)
+    o1 = Observation.create(:when => 20120110, :location => albion, :name => agaricus, :user => dick, :specimen => true)
+    o2 = Observation.create(:when => 20131230, :location => albion, :name => agaricus, :user => dick, :specimen => false)
     x = PatternSearch::Observation.new('Agaricus user:dick')
     assert_obj_list_equal([o1,o2], x.query.results)
     x = PatternSearch::Observation.new('Agaricus user:dick specimen:yes')

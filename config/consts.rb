@@ -1,116 +1,133 @@
 # encoding: utf-8
-#
-#  = Global Constants
-#
-#  This file provides default values for all our application-wide global
-#  constants.
-#
-#  *NOTE*: This file is version-controlled, so any changes you make here will
-#  propogate to all the other servers around the world.  If you need to
-#  override any of these values locally, please do so here, instead:
-#
-#    config/consts-site.rb
-#
-################################################################################
+MushroomObserver::Application.configure do
 
-# Various server domains.
-DOMAIN       = 'localhost' if not defined? DOMAIN
-HTTP_DOMAIN  = "http://#{DOMAIN}:3000"
-IMAGE_DOMAIN = "http://#{DOMAIN}:3000/images"
-BAD_DOMAINS  = ['localhost.localdomain:3000']
+  # Ensure that these are defined in case we're executing this script on its own
+  # (e.g., to provide access to configs for bash sripts).
+  config.root = File.expand_path("../..", __FILE__)
+  config.env  = ENV["RAILS_ENV"]
 
-# Where images are kept.
-IMG_DIR      = "#{RAILS_ROOT}/public/" + (TESTING ? 'test_images' : 'images')
-TEST_IMG_DIR = "#{RAILS_ROOT}/public/test_images"
+  # List of alternate server domains.  We redirect from each of these to the real one.
+  config.bad_domains = []
 
-# Code appended to ids to make 'sync_id'.  Must start with letter.
-SERVER_CODE = 'XX'
+  # Base URL of the source repository.
+  config.code_repository = "https://github.com/MushroomObserver"
 
-# Default locale when nothing sets it explicitly.
-DEFAULT_LOCALE = 'en-US'
+  # Date after which votes become public.
+  config.vote_cutoff = "19000101"
 
-# Time zone of the server.  This is only used in logs(?)
-SERVER_TIME_ZONE = 'America/New_York'
+  # Code appended to ids to make "sync_id".  Must start with letter.
+  config.server_code = "XX"
 
-# Date/time formats for website UI.
-WEB_DATE_FORMAT = '%Y-%m-%d'
-WEB_TIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z (%z)'
+  # Default locale when nothing sets it explicitly.
+  config.default_locale = "en"
 
-# Date/time formats for API XML responses.
-API_DATE_FORMAT = '%Y-%m-%d'
-API_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+  # I18n namespace all our app-specific translations are kept in inside localization files.
+  config.locale_namespace = "mo"
 
-# Date/time formats for emails.
-EMAIL_DATE_FORMAT = '%Y-%m-%d'
-EMAIL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z (%z)'
+  # Make Active Record use UTC instead of local time.  This is critical if we
+  # want to sync up remote servers.  It causes Rails to store dates in UTC and
+  # convert from UTC to whatever we've set the timezone to when reading them
+  # back in.  It shouldn't actually make any difference how the database is
+  # configured.  It takes dates as a string, stores them however it chooses,
+  # performing whatever conversions it deems fit, then returns them back to us
+  # in exactly the same format we gave them to it.  (NOTE: only the first line
+  # should be necessary, but for whatever reason, Rails is failing to do the
+  # other configs on some platforms.)
+  config.time_zone = 'America/New_York'
 
-# Default theme for users not logged in, new users and robots.
-DEFAULT_THEME = 'BlackOnWhite'
+  # Date/time formats for website UI.
+  config.web_date_format = "%Y-%m-%d"
+  config.web_time_format = "%Y-%m-%d %H:%M:%S %Z (%z)"
 
-# Queued email only gets delivered if you have run the rake task email:send.
-# script/send_email is a cron script for running email:send.  (Delay is in
-# seconds.)
-QUEUE_EMAIL        = false
-EMAIL_PER_MINUTE   = 25
-EMAIL_NUM_ATTEMPTS = 3
-EMAIL_LOG          = "#{RAILS_ROOT}/log/email_error.log"
-QUEUE_DELAY        = 5
+  # Date/time formats for API XML responses.
+  config.api_date_format = "%Y-%m-%d"
+  config.api_time_format = "%Y-%m-%d %H:%M:%S"
 
-# Important email addresses.
-NEWS_EMAIL_ADDRESS        = "news@#{DOMAIN}"
-NOREPLY_EMAIL_ADDRESS     = "no-reply@#{DOMAIN}"
-ACCOUNTS_EMAIL_ADDRESS    = "webmaster@#{DOMAIN}"
-ERROR_EMAIL_ADDRESS       = "webmaster@#{DOMAIN}"
-WEBMASTER_EMAIL_ADDRESS   = "webmaster@#{DOMAIN}"
-EXCEPTION_RECIPIENTS      = "webmaster@#{DOMAIN}"
-EXTRA_BCC_EMAIL_ADDRESSES = ""
+  # Date/time formats for emails.
+  config.email_date_format = "%Y-%m-%d"
+  config.email_time_format = "%Y-%m-%d %H:%M:%S %Z (%z)"
 
-# File where the list of most commonly used names lives.
-NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.#{RAILS_ENV}"
-USER_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/user_primer.#{RAILS_ENV}"
+  # Default theme for users not logged in, new users and robots.
+  config.default_theme = "BlackOnWhite"
 
-# File where we keep name_lister data cache.
-NAME_LISTER_CACHE_FILE = "#{RAILS_ROOT}/public/javascripts/name_list_data.js"
+  # Available themes.
+  config.themes = %w( Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite )
 
-# Location of HTML pages to serve on error.
-ERROR_PAGE_FILES = "#{RAILS_ROOT}/public/error_NNN.html"
+  # Queued email only gets delivered if you have run the rake task email:send.
+  # script/send_email is a cron script for running email:send.  (Delay is in
+  # seconds.)
+  config.queue_email        = false
+  config.email_per_minute   = 25
+  config.email_num_attempts = 3
+  config.email_log          = "#{config.root}/log/email_error.log"
+  config.email_queue_delay  = 5
 
-# Limit size of image uploads (ImageMagick bogs down on large images).
-IMAGE_UPLOAD_MAX_SIZE = 20000000
+  # Default email addresses.
+  config.news_email_address        = "news@mushroomobserver.org"
+  config.noreply_email_address     = "no-reply@mushroomobserver.org"
+  config.accounts_email_address    = "webmaster@mushroomobserver.org"
+  config.error_email_address       = "webmaster@mushroomobserver.org"
+  config.webmaster_email_address   = "webmaster@mushroomobserver.org"
+  config.exception_recipients      = "webmaster@mushroomobserver.org"
+  config.extra_bcc_email_addresses = ""
 
-# Limit the number of objects we draw on a google map.
-MAX_MAP_OBJECTS = 100
+  # File where the list of most commonly used names lives.
+  config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"
+  config.user_primer_cache_file = "#{config.root}/tmp/user_primer.#{config.env}"
 
-# Stylesheets available.
-CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite)
+  # File where we keep name_lister data cache.
+  config.name_lister_cache_file = "#{config.root}/public/assets/name_list_data.js"
 
-# URL of the subversion source repository.
-SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings"
+  # Access data for Pivotal Tracker's API.
+  config.pivotal_enabled  = true
+  config.pivotal_url      = "www.pivotaltracker.com"
+  config.pivotal_path     = "/services/v3"
+  config.pivotal_username = "xxx"
+  config.pivotal_password = "xxx"
+  config.pivotal_project  = "xxx"
+  config.pivotal_max_vote = 1
+  config.pivotal_min_vote = -1
+  config.pivotal_cache    = "#{config.root}/tmp/pivotal"
 
-# Date after which votes become public.
-VOTE_CUTOFF = '20100401'
+  # Configuration files for location validator.
+  config.location_countries_file = "#{config.root}/config/location/countries.yml"
+  config.location_states_file    = "#{config.root}/config/location/states.yml"
+  config.location_prefixes_file  = "#{config.root}/config/location/prefixes.yml"
+  config.location_bad_terms_file = "#{config.root}/config/location/bad_terms.yml"
 
-# Mail configuration.  Moved here to allow easy site-specific configuration
-# by overriding in config/consts-site.rb.
-MAIL_CONFIG = {
-  :address        => 'localhost',
-  :port           => 25,
-  :domain         => DOMAIN,
-}
+  # Limit the number of objects we draw on a google map.
+  config.max_map_objects = 100
 
-# Access data for Pivotal Tracker's API.
-PIVOTAL_URL      = 'www.pivotaltracker.com'
-PIVOTAL_PATH     = '/services/v3'
-PIVOTAL_USERNAME = 'username'
-PIVOTAL_PASSWORD = 'password'
-PIVOTAL_PROJECT  = 'project_id'
-PIVOTAL_MAX_VOTE = 1
-PIVOTAL_MIN_VOTE = -1
-PIVOTAL_CACHE    = RAILS_ROOT + '/tmp/pivotal'
+  # Where images are kept locally until they are transferred.
+  config.local_image_files = "#{config.root}/public/images"
 
-# Configuration files for location validator.
-LOCATION_COUNTRIES_FILE = "#{RAILS_ROOT}/config/location/countries.yml"
-LOCATION_STATES_FILE    = "#{RAILS_ROOT}/config/location/states.yml"
-LOCATION_PREFIXES_FILE  = "#{RAILS_ROOT}/config/location/prefixes.yml"
-LOCATION_BAD_TERMS_FILE = "#{RAILS_ROOT}/config/location/bad_terms.yml"
+  # Definition of image sources.  Keys are :test, :read and :write.  Values are
+  # URLs.  Leave :write blank for read-only sources.  :transferred_flag tells MO
+  # to test for existence of file by using image#transferred flag.
+  # config.image_sources = {
+  #   :local => {
+  #     :test => "file://#{config.local_image_files}",
+  #     :read => "/images",
+  #   },
+  #   :cdmr => {
+  #     :test => :transferred_flag,
+  #     :read => "http://images.digitalmycology.com",
+  #   }
+  # }
 
+  # Search order when serving images.  Key is size, e.g., :thumbnail, :small, etc.
+  # config.image_precedence = {
+  #   :default => [:local, :cdmr]
+  # }
+  # config.image_fallback_source = :cdmr
+
+  # Array of sizes to be kept on the web server, e.g., :thumbnail, :small, etc.
+  config.keep_these_image_sizes_local = []
+
+  # Location of script used to process and transfer images.
+  # (Set to nil to have it do nothing.)
+  config.process_image_command = "#{config.root}/script/process_image <id> <ext> <set>"
+
+  # Limit size of image uploads (ImageMagick bogs down on large images).
+  config.image_upload_max_size = 20000000
+end

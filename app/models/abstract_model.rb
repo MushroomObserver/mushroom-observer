@@ -195,25 +195,27 @@ class AbstractModel < ActiveRecord::Base
   #  :section: Callbacks
   #
   ##############################################################################
-
+  
   # This is called just before an object is created.
   # 1) It fills in 'created_at' and 'user' for new records.
   # 2) And it creates a new RssLog if this model accepts one, and logs its
   #    creation.
-  def before_create
+  before_create :set_user_and_autolog
+  def set_user_and_autolog
     # self.created_at ||= Time.now        if respond_to?('created_at=')
     # self.updated_at ||= Time.now        if respond_to?('updated_at=')
     self.user_id  ||= User.current_id if respond_to?('user_id=')
     autolog_created_at                   if has_rss_log?
   end
-
+  
   # This is called just after an object is created.
   # 1) It passes off to SiteData, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It also assigns sync_ids to new records.  (I can't see how to avoid
   #    causing each record to get saved twice.)
   # 3) Lastly, it finishes attaching the new RssLog if one exists.
-  def after_create
+  after_create :update_contribution
+  def update_contribution
     SiteData.update_contribution(:add, self)
     set_sync_id    if respond_to?('sync_id=') && !sync_id
     attach_rss_log if has_rss_log?
@@ -227,7 +229,9 @@ class AbstractModel < ActiveRecord::Base
   #
   # *NOTE*: Use +save_without_our_callbacks+ to save a record without doing
   # either of these things.
-  def before_update
+  before_update :do_log_update
+  def do_log_update
+    # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
     if !@save_without_our_callbacks
       autolog_updated_at          if has_rss_log?
@@ -244,7 +248,8 @@ class AbstractModel < ActiveRecord::Base
   #    user's contribution score, and if so update it appropriately.
   # 2) It orphans the old RssLog if it had one.
   # 3) It also saves the id in case we needed to know what the id was later on.
-  def before_destroy
+  before_destroy :do_log_destroy
+  def do_log_destroy
     SiteData.update_contribution(:del, self)
     autolog_destroyed if has_rss_log?
     @id_was = self.id
@@ -263,7 +268,8 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Clears the +@save_without_our_callbacks+ flag after save.
-  def after_save
+  after_save :clear_callback_flag
+  def clear_callback_flag
     @save_without_our_callbacks = nil
   end
 
@@ -274,7 +280,7 @@ class AbstractModel < ActiveRecord::Base
   # any possible confusion and/or overhead dealing with callbacks.  It would
   # be super-cool if mysql gave us a way to make this the default value...
   def set_sync_id
-    self.sync_id = sync_id = "#{id}#{SERVER_CODE}"
+    self.sync_id = sync_id = "#{id}#{MO.server_code}"
     self.class.connection.update %(
       UPDATE #{self.class.table_name} SET sync_id = '#{sync_id}'
       WHERE id = #{id}
@@ -414,7 +420,7 @@ class AbstractModel < ActiveRecord::Base
   #   User.show_action(123) => 'http://mushroomobserver.org/observer/show_user/123'
   #   Name.show_action(123) => 'http://mushroomobserver.org/name/show_name/123'
   #
-  def self.show_url(id); "#{HTTP_DOMAIN}/#{show_controller}/#{show_action}/#{id}"; end
+  def self.show_url(id); "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"; end
 
   # Return the URL of the "show_<object>" action
   #
@@ -587,7 +593,7 @@ class AbstractModel < ActiveRecord::Base
       :controller => self.show_controller,
       :action => self.show_action,
       :id => self.id,
-      :params => query_params
+      :q => query_params[:q]
     }
   end
 

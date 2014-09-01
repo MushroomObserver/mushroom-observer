@@ -1,19 +1,19 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class ObservationTest < UnitTestCase
 
   def create_new_objects
     @cc_obs = Observation.new
-    @cc_obs.user = @mary
+    @cc_obs.user = mary
     @cc_obs.when = Time.now
     @cc_obs.where = "Glendale, California"
     @cc_obs.notes = "New"
     @cc_obs.name = names(:fungi)
 
     @cc_nam = Naming.new
-    @cc_nam.user = @mary
+    @cc_nam.user = mary
     @cc_nam.name = names(:fungi)
     @cc_nam.observation = @cc_obs
   end
@@ -49,14 +49,12 @@ class ObservationTest < UnitTestCase
     @cc_obs.where = nil  # no longer an error, defaults to Location.unknown
     assert(!@cc_obs.save)
     assert_equal(1, @cc_obs.errors.count)
-    assert_equal(:validate_observation_user_missing.t, @cc_obs.errors.on(:user))
-    # assert_equal(:validate_observation_when_missing.t, @cc_obs.errors.on(:when))
-    # assert_equal(:validate_observation_where_missing.t, @cc_obs.errors.on(:where))
+    assert_equal(:validate_observation_user_missing.t, @cc_obs.errors[:user].first)
   end
 
   def test_destroy
     create_new_objects
-    User.current = @rolf
+    User.current = rolf
     assert_save(@cc_obs)
     assert_save(@cc_nam)
     @cc_obs.destroy
@@ -107,18 +105,18 @@ class ObservationTest < UnitTestCase
     obs = observations(:coprinus_comatus_obs)
 
     # Make sure Rolf has requested emails.
-    @rolf.email_comments_owner = true
-    @rolf.email_comments_response = true
-    @rolf.email_observations_naming = true
-    @rolf.email_observations_consensus = true
-    assert_save(@rolf)
+    rolf.email_comments_owner = true
+    rolf.email_comments_response = true
+    rolf.email_observations_naming = true
+    rolf.email_observations_consensus = true
+    assert_save(rolf)
 
     # Make sure observation name starts as Coprinus comatus.
     assert_equal(names(:coprinus_comatus), obs.name)
 
     # Observation owner is not notified if comment added by themselves.
     # (Rolf owns coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
-    User.current = @rolf
+    User.current = rolf
     new_comment = Comment.create(
       :summary => 'This is Rolf...',
       :target  => obs
@@ -126,7 +124,7 @@ class ObservationTest < UnitTestCase
     assert_equal(0, QueuedEmail.count)
 
     # Observation owner is not notified if naming added by themselves.
-    User.current = @rolf
+    User.current = rolf
     new_naming = Naming.create(
       :observation => obs,
       :name        => names(:agaricus_campestris),
@@ -136,27 +134,27 @@ class ObservationTest < UnitTestCase
     assert_equal(names(:coprinus_comatus), obs.reload.name)
 
     # Observation owner is not notified if consensus changed by themselves.
-    User.current = @rolf
+    User.current = rolf
     obs.change_vote(new_naming, 3)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
     assert_equal(0, QueuedEmail.count)
 
     # Make Rolf opt out of all emails.
-    @rolf.email_comments_owner = false
-    @rolf.email_comments_response = false
-    @rolf.email_observations_naming = false
-    @rolf.email_observations_consensus = false
-    assert_save(@rolf)
+    rolf.email_comments_owner = false
+    rolf.email_comments_response = false
+    rolf.email_observations_naming = false
+    rolf.email_observations_consensus = false
+    assert_save(rolf)
 
     # Rolf should not be notified of anything here, either...
-    User.current = @dick
+    User.current = dick
     new_comment = Comment.create(
       :summary => 'This is Dick...',
       :target  => observations(:coprinus_comatus_obs)
     )
     assert_equal(0, QueuedEmail.count)
 
-    User.current = @dick
+    User.current = dick
     new_naming = Naming.create(
       :observation => obs,
       :name        => names(:peltigera),
@@ -166,10 +164,10 @@ class ObservationTest < UnitTestCase
     assert_equal(names(:agaricus_campestris), obs.reload.name)
 
     # Make sure this changes consensus...
-    @dick.contribution = 2000000000
-    assert_save(@dick)
+    dick.contribution = 2000000000
+    assert_save(dick)
 
-    User.current = @dick
+    User.current = dick
     obs.change_vote(new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
     assert_equal(0, QueuedEmail.count)
@@ -183,17 +181,17 @@ class ObservationTest < UnitTestCase
 
     # Make sure Rolf has requested no emails (will turn on one at a time to be
     # sure the right pref affects the right notification).
-    @rolf.email_comments_owner = false
-    @rolf.email_comments_response = false
-    @rolf.email_observations_naming = false
-    @rolf.email_observations_consensus = false
-    assert_save(@rolf)
+    rolf.email_comments_owner = false
+    rolf.email_comments_response = false
+    rolf.email_observations_naming = false
+    rolf.email_observations_consensus = false
+    assert_save(rolf)
 
     # Observation owner is notified if comment added by someone else.
     # (Rolf owns observations(:coprinus_comatus_obs), one naming, two votes, conf. around 1.5.)
-    @rolf.email_comments_owner = true
-    assert_save(@rolf)
-    User.current = @mary
+    rolf.email_comments_owner = true
+    assert_save(rolf)
+    User.current = mary
     new_comment = Comment.create(
       :summary => 'This is Mary...',
       :target  => obs
@@ -201,16 +199,16 @@ class ObservationTest < UnitTestCase
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor  => 'QueuedEmail::CommentAdd',
-      :from    => @mary,
-      :to      => @rolf,
+      :from    => mary,
+      :to      => rolf,
       :comment => new_comment.id
     )
 
     # Observation owner is notified if naming added by someone else.
-    @rolf.email_comments_owner = false
-    @rolf.email_observations_naming = true
-    assert_save(@rolf)
-    User.current = @mary
+    rolf.email_comments_owner = false
+    rolf.email_observations_naming = true
+    assert_save(rolf)
+    User.current = mary
     new_naming = Naming.create(
       :observation => obs.reload,
       :name        => names(:agaricus_campestris),
@@ -219,35 +217,35 @@ class ObservationTest < UnitTestCase
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor      => 'QueuedEmail::NameProposal',
-      :from        => @mary,
-      :to          => @rolf,
+      :from        => mary,
+      :to          => rolf,
       :observation => obs.id,
       :naming      => new_naming.id
     )
 
     # Observation owner is notified if consensus changed by someone else.
-    @rolf.email_observations_naming = false
-    @rolf.email_observations_consensus = true
-    assert_save(@rolf)
+    rolf.email_observations_naming = false
+    rolf.email_observations_consensus = true
+    assert_save(rolf)
     # (Actually, Mary already gave this her highest possible vote,
     # so think of this as Mary changing Rolf's vote. :)
-    User.current = @mary
-    obs.change_vote(namings(:coprinus_comatus_other_naming), 3, @rolf)
+    User.current = mary
+    obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
     assert_equal(3, votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
       :flavor      => 'QueuedEmail::ConsensusChange',
-      :from        => @mary,
-      :to          => @rolf,
+      :from        => mary,
+      :to          => rolf,
       :observation => obs.id,
       :old_name    => names(:coprinus_comatus).id,
       :new_name    => names(:agaricus_campestris).id
     )
 
     # Make sure Mary gets notified if Rolf responds to her comment.
-    @mary.email_comments_response = true
-    assert_save(@mary)
-    User.current = @rolf
+    mary.email_comments_response = true
+    assert_save(mary)
+    User.current = rolf
     new_comment = Comment.create(
       :summary => 'This is Rolf...',
       :target  => observations(:coprinus_comatus_obs)
@@ -255,8 +253,8 @@ class ObservationTest < UnitTestCase
     assert_equal(4, QueuedEmail.count)
     assert_email(3,
       :flavor  => 'QueuedEmail::CommentAdd',
-      :from    => @rolf,
-      :to      => @mary,
+      :from    => rolf,
+      :to      => mary,
       :comment => new_comment.id
     )
   end
@@ -268,36 +266,36 @@ class ObservationTest < UnitTestCase
     obs = observations(:coprinus_comatus_obs)
 
     # Make sure Rolf has requested emails.
-    @rolf.email_comments_owner = true
-    @rolf.email_comments_response = true
-    @rolf.email_observations_naming = true
-    @rolf.email_observations_consensus = true
-    assert_save(@rolf)
+    rolf.email_comments_owner = true
+    rolf.email_comments_response = true
+    rolf.email_observations_naming = true
+    rolf.email_observations_consensus = true
+    assert_save(rolf)
 
     # Make sure Dick has requested no emails.
-    @dick.email_comments_owner = false
-    @dick.email_comments_response = false
-    @dick.email_observations_naming = false
-    @dick.email_observations_consensus = false
-    assert_save(@dick)
+    dick.email_comments_owner = false
+    dick.email_comments_response = false
+    dick.email_observations_naming = false
+    dick.email_observations_consensus = false
+    assert_save(dick)
 
     # Make Rolf ignore his own observation (will override prefs).
     Interest.create(
       :target => obs,
-      :user   => @rolf,
+      :user   => rolf,
       :state  => false
     )
 
     # But make Dick watch it (will override prefs).
     Interest.create(
       :target => observations(:coprinus_comatus_obs),
-      :user   => @dick,
+      :user   => dick,
       :state  => true
     )
 
     # Watcher is notified if comment added.
     # (Rolf owns observations(:coprinus_comatus_obs), one naming, two votes, conf. around 1.5.)
-    User.current = @mary
+    User.current = mary
     new_comment = Comment.create(
       :summary => 'This is Mary...',
       :target  => observations(:coprinus_comatus_obs)
@@ -305,13 +303,13 @@ class ObservationTest < UnitTestCase
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor  => 'QueuedEmail::CommentAdd',
-      :from    => @mary,
-      :to      => @dick,
+      :from    => mary,
+      :to      => dick,
       :comment => new_comment.id
     )
 
     # Watcher is notified if naming added.
-    User.current = @mary
+    User.current = mary
     new_naming = Naming.create(
       :observation => observations(:coprinus_comatus_obs),
       :name        => names(:agaricus_campestris),
@@ -320,8 +318,8 @@ class ObservationTest < UnitTestCase
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor      => 'QueuedEmail::NameProposal',
-      :from        => @mary,
-      :to          => @dick,
+      :from        => mary,
+      :to          => dick,
       :observation => observations(:coprinus_comatus_obs).id,
       :naming      => new_naming.id
     )
@@ -329,22 +327,22 @@ class ObservationTest < UnitTestCase
     # Watcher is notified if consensus changed.
     # (Actually, Mary already gave this her highest possible vote,
     # so think of this as Mary changing Rolf's vote. :)
-    User.current = @mary
-    obs.change_vote(namings(:coprinus_comatus_other_naming), 3, @rolf)
+    User.current = mary
+    obs.change_vote(namings(:coprinus_comatus_other_naming), 3, rolf)
     assert_equal(3, votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
     assert_save(votes(:coprinus_comatus_other_naming_rolf_vote))
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
        :flavor      => 'QueuedEmail::ConsensusChange',
-       :from        => @mary,
-       :to          => @dick,
+       :from        => mary,
+       :to          => dick,
        :observation => observations(:coprinus_comatus_obs).id,
        :old_name    => names(:coprinus_comatus).id,
        :new_name    => names(:agaricus_campestris).id
     )
 
     # Now have Rolf make a bunch of changes...
-    User.current = @rolf
+    User.current = rolf
 
     # Watcher is also notified of changes in the observation.
     obs.notes = 'I have new information on this observation.'
@@ -365,8 +363,8 @@ class ObservationTest < UnitTestCase
     # All the above modify this email:
     assert_email(3,
       :flavor      => 'QueuedEmail::ObservationChange',
-      :from        => @rolf,
-      :to          => @dick,
+      :from        => rolf,
+      :to          => dick,
       :observation => observations(:coprinus_comatus_obs).id,
       :note        => 'notes,location,added_image,removed_image'
     )
@@ -380,19 +378,19 @@ class ObservationTest < UnitTestCase
 
     marys_interest = Interest.create(
       :target => observations(:coprinus_comatus_obs),
-      :user   => @mary,
+      :user   => mary,
       :state  => false
     )
 
     dicks_interest = Interest.create(
       :target => observations(:coprinus_comatus_obs),
-      :user   => @dick,
+      :user   => dick,
       :state  => false
     )
 
     katrinas_interest = Interest.create(
       :target => observations(:coprinus_comatus_obs),
-      :user   => @katrina,
+      :user   => katrina,
       :state  => false
     )
 
@@ -400,14 +398,14 @@ class ObservationTest < UnitTestCase
     marys_interest.state = true
     assert_save(marys_interest)
 
-    User.current = @rolf
+    User.current = rolf
     observations(:coprinus_comatus_obs).notes = 'I have new information on this observation.'
     observations(:coprinus_comatus_obs).save
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor      => 'QueuedEmail::ObservationChange',
-      :from        => @rolf,
-      :to          => @mary,
+      :from        => rolf,
+      :to          => mary,
       :observation => observations(:coprinus_comatus_obs).id,
       :note        => 'notes'
     )
@@ -418,13 +416,13 @@ class ObservationTest < UnitTestCase
     dicks_interest.state = true
     assert_save(dicks_interest)
 
-    User.current = @rolf
+    User.current = rolf
     obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor      => 'QueuedEmail::ObservationChange',
-      :from        => @rolf,
-      :to          => @dick,
+      :from        => rolf,
+      :to          => dick,
       :observation => observations(:coprinus_comatus_obs).id,
       :note        => 'added_image'
     )
@@ -435,13 +433,14 @@ class ObservationTest < UnitTestCase
     katrinas_interest.state = true
     assert_save(katrinas_interest)
 
-    User.current = @rolf
+    User.current = rolf
+    assert_equal(2, QueuedEmail.count)
     obs.reload.destroy
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
       :flavor      => 'QueuedEmail::ObservationChange',
-      :from        => @rolf,
-      :to          => @katrina,
+      :from        => rolf,
+      :to          => katrina,
       :observation => 0,
       :note        => '**__Coprinus comatus__** (O.F. Müll.) Pers. (3)'
     )
@@ -454,27 +453,27 @@ class ObservationTest < UnitTestCase
   #   @name1 = names(:agaricus_campestris)
   #   @name2 = names(:coprinus_comatus)
   #   @name3 = names(:conocybe_filaris)
-  # 
-  #   User.current = @rolf
+  #
+  #   User.current = rolf
   #   obs = Observation.create!(
   #     :when    => Date.today,
   #     :where   => "anywhere",
   #     :name_id => @fungi.id
   #   )
   # 
-  #   User.current = @rolf
+  #   User.current = rolf
   #   nam1 = Naming.create!(
   #     :observation_id => obs.id,
   #     :name_id => @name1.id
   #   )
   # 
-  #   User.current = @mary
+  #   User.current = mary
   #   nam2 = Naming.create!(
   #     :observation_id => obs.id,
   #     :name_id => @name2.id
   #   )
   # 
-  #   User.current = @dick
+  #   User.current = dick
   #   nam3 = Naming.create!(
   #     :observation_id => obs.id,
   #     :name_id => @name3.id
@@ -485,16 +484,16 @@ class ObservationTest < UnitTestCase
   #   assert_equal(@fungi, obs.name)
   #   assert_equal(nil, obs.consensus_naming)
   #   assert_equal(false, obs.owner_voted?(nam1))
-  #   assert_equal(false, obs.user_voted?(nam1, @rolf))
-  #   assert_equal(false, obs.user_voted?(nam1, @mary))
-  #   assert_equal(false, obs.user_voted?(nam1, @dick))
+  #   assert_equal(false, obs.user_voted?(nam1, rolf))
+  #   assert_equal(false, obs.user_voted?(nam1, mary))
+  #   assert_equal(false, obs.user_voted?(nam1, dick))
   #   assert_equal(nil, obs.owners_vote(nam1))
-  #   assert_equal(nil, obs.users_vote(nam1, @rolf))
-  #   assert_equal(nil, obs.users_vote(nam1, @mary))
-  #   assert_equal(nil, obs.users_vote(nam1, @dick))
-  #   assert_equal(false, obs.is_users_favorite?(nam1, @rolf))
-  #   assert_equal(false, obs.is_users_favorite?(nam1, @mary))
-  #   assert_equal(false, obs.is_users_favorite?(nam1, @dick))
+  #   assert_equal(nil, obs.users_vote(nam1, rolf))
+  #   assert_equal(nil, obs.users_vote(nam1, mary))
+  #   assert_equal(nil, obs.users_vote(nam1, dick))
+  #   assert_equal(false, obs.is_users_favorite?(nam1, rolf))
+  #   assert_equal(false, obs.is_users_favorite?(nam1, mary))
+  #   assert_equal(false, obs.is_users_favorite?(nam1, dick))
   # 
   #   # They're all the same, none with votes yet, so first apparently wins.
   #   obs.calc_consensus
@@ -502,53 +501,53 @@ class ObservationTest < UnitTestCase
   #   assert_equal(nam1, obs.consensus_naming)
   # 
   #   # Play with Rolf's vote for his naming (first naming).
-  #   obs.change_vote(nam1, 2, @rolf)
+  #   obs.change_vote(nam1, 2, rolf)
   #   assert_true(obs.owner_voted?(nam1))
-  #   assert_true(obs.user_voted?(nam1, @rolf))
+  #   assert_true(obs.user_voted?(nam1, rolf))
   #   assert_true(vote = obs.owners_vote(nam1))
-  #   assert_equal(vote, obs.users_vote(nam1, @rolf))
-  #   assert_equal(vote, nam1.users_vote(@rolf))
+  #   assert_equal(vote, obs.users_vote(nam1, rolf))
+  #   assert_equal(vote, nam1.users_vote(rolf))
   #   assert_true(obs.is_owners_favorite?(nam1))
-  #   assert_true(obs.is_users_favorite?(nam1, @rolf))
-  #   assert_true(nam1.is_users_favorite?(@rolf))
+  #   assert_true(obs.is_users_favorite?(nam1, rolf))
+  #   assert_true(nam1.is_users_favorite?(rolf))
   #   assert_names_equal(@name1, obs.name)
   #   assert_equal(nam1, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam1, 0.01, @rolf)
+  #   obs.change_vote(nam1, 0.01, rolf)
   # puts obs.dump_votes
   #   assert_true(obs.is_owners_favorite?(nam1))
   #   assert_names_equal(@name1, obs.name)
   #   assert_equal(nam1, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam1, -0.01, @rolf)
+  #   obs.change_vote(nam1, -0.01, rolf)
   #   assert_false(obs.is_owners_favorite?(nam1))
-  #   assert_false(nam1.is_users_favorite?(@rolf))
+  #   assert_false(nam1.is_users_favorite?(rolf))
   #   assert_names_equal(@name1, obs.name)
   #   assert_equal(nam1, obs.consensus_naming)
   # 
   #   # Play with Rolf's vote for other namings.
-  #   obs.change_vote(nam2, 1, @rolf)
+  #   obs.change_vote(nam2, 1, rolf)
   #   assert_false(nam1.is_owners_favorite?)
   #   assert_true(nam2.is_owners_favorite?)
   #   assert_false(nam3.is_owners_favorite?)
   #   assert_names_equal(@name2, obs.name)
   #   assert_equal(nam2, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam3, 2, @rolf)
+  #   obs.change_vote(nam3, 2, rolf)
   #   assert_false(nam1.is_owners_favorite?)
   #   assert_false(nam2.is_owners_favorite?)
   #   assert_true(nam3.is_owners_favorite?)
   #   assert_names_equal(@name3, obs.name)
   #   assert_equal(nam3, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam1, 3, @rolf)
+  #   obs.change_vote(nam1, 3, rolf)
   #   assert_true(nam1.is_owners_favorite?)
   #   assert_false(nam2.is_owners_favorite?)
   #   assert_false(nam3.is_owners_favorite?)
   #   assert_names_equal(@name1, obs.name)
   #   assert_equal(nam1, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam1, 1, @rolf)
+  #   obs.change_vote(nam1, 1, rolf)
   #   assert_false(nam1.is_owners_favorite?)
   #   assert_false(nam2.is_owners_favorite?)
   #   assert_true(nam3.is_owners_favorite?)
@@ -556,48 +555,47 @@ class ObservationTest < UnitTestCase
   #   assert_equal(nam3, obs.consensus_naming)
   # 
   #   # Play with Mary's vote.
-  #   obs.change_vote(nam1, 1, @mary)
-  #   obs.change_vote(nam2, 2, @mary)
-  #   obs.change_vote(nam3, -1, @mary)
-  #   assert_false(nam1.is_users_favorite?(@mary))
-  #   assert_true(nam2.is_users_favorite?(@mary))
-  #   assert_false(nam3.is_users_favorite?(@mary))
+  #   obs.change_vote(nam1, 1, mary)
+  #   obs.change_vote(nam2, 2, mary)
+  #   obs.change_vote(nam3, -1, mary)
+  #   assert_false(nam1.is_users_favorite?(mary))
+  #   assert_true(nam2.is_users_favorite?(mary))
+  #   assert_false(nam3.is_users_favorite?(mary))
   #   assert_names_equal(@name3, obs.name)
   #   assert_equal(nam3, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam2, 0.01, @mary)
-  #   assert_true(nam1.is_users_favorite?(@mary))
-  #   assert_false(nam2.is_users_favorite?(@mary))
-  #   assert_false(nam3.is_users_favorite?(@mary))
+  #   obs.change_vote(nam2, 0.01, mary)
+  #   assert_true(nam1.is_users_favorite?(mary))
+  #   assert_false(nam2.is_users_favorite?(mary))
+  #   assert_false(nam3.is_users_favorite?(mary))
   #   assert_names_equal(@name3, obs.name)
   #   assert_equal(nam3, obs.consensus_naming)
   # 
-  #   obs.change_vote(nam1, -0.01, @mary)
-  #   assert_false(nam1.is_users_favorite?(@mary))
-  #   assert_true(nam2.is_users_favorite?(@mary))
-  #   assert_false(nam3.is_users_favorite?(@mary))
-  #   assert_false(nam1.is_users_favorite?(@rolf))
-  #   assert_false(nam2.is_users_favorite?(@rolf))
-  #   assert_true(nam3.is_users_favorite?(@rolf))
-  #   assert_false(nam1.is_users_favorite?(@dick))
-  #   assert_false(nam2.is_users_favorite?(@dick))
-  #   assert_false(nam3.is_users_favorite?(@dick))
+  #   obs.change_vote(nam1, -0.01, mary)
+  #   assert_false(nam1.is_users_favorite?(mary))
+  #   assert_true(nam2.is_users_favorite?(mary))
+  #   assert_false(nam3.is_users_favorite?(mary))
+  #   assert_false(nam1.is_users_favorite?(rolf))
+  #   assert_false(nam2.is_users_favorite?(rolf))
+  #   assert_true(nam3.is_users_favorite?(rolf))
+  #   assert_false(nam1.is_users_favorite?(dick))
+  #   assert_false(nam2.is_users_favorite?(dick))
+  #   assert_false(nam3.is_users_favorite?(dick))
   #   assert_names_equal(@name3, obs.name)
   #   assert_equal(nam3, obs.consensus_naming)
   # end
 
   def test_project_ownership
-
     # NOT owned by Bolete project, but owned by Mary
     obs = observations(:minimal_unknown)
-    assert_false(obs.has_edit_permission?(@rolf))
-    assert_true(obs.has_edit_permission?(@mary))
-    assert_false(obs.has_edit_permission?(@dick))
+    assert_false(obs.has_edit_permission?(rolf))
+    assert_true(obs.has_edit_permission?(mary))
+    assert_false(obs.has_edit_permission?(dick))
 
     # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
     obs = observations(:detailed_unknown)
-    assert_false(obs.has_edit_permission?(@rolf))
-    assert_true(obs.has_edit_permission?(@mary))
-    assert_true(obs.has_edit_permission?(@dick))
+    assert_false(obs.has_edit_permission?(rolf))
+    assert_true(obs.has_edit_permission?(mary))
+    assert_true(obs.has_edit_permission?(dick))
   end
 end

@@ -10,7 +10,7 @@
   #
   #  Variables:
   #    katrina, rolf  - integration test sessions
-  #    @katrina       - User instance
+  #    katrina       - User instance
   #    @expectations  - set of objects to compare against in evaluate_xxx() methods
   #
   #  Methods added to sessions by the "constructor" regular_user():
@@ -27,13 +27,13 @@
       :vote => votes(:amateur_vote)
     }
     katrina = regular_user(@expectations)
-    katrina.login_required(@katrina, 'observer/create_observation')
+    katrina.login_required(katrina, 'observer/create_observation')
 
     observation_fields = katrina.fills_in_form(observation_form_defaults, observation_form_no_location)
     katrina.evaluate_no_location
 
     observation_fields = katrina.fills_in_form(observation_fields, observation_form_location,
-      [['image_0_image', "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"]])
+      [['image_0_image', "#{RAILS_ROOT}/test/images/Coprinus_comatus.jpg"]])
     katrina.evaluate_new_location_observation
 
     katrina.fills_in_form(location_form_defaults)

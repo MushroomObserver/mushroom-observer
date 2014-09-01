@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class AccountControllerTest < FunctionalTestCase
 
@@ -14,9 +14,9 @@ class AccountControllerTest < FunctionalTestCase
     post(:login, "user_login" => "rolf", "user_password" => "testpassword")
     assert_response("http://localhost/bogus/location")
     assert_flash(:runtime_login_success.t)
-    assert(@response.has_session_object?(:user_id),
+    assert(@request.session[:user_id],
       "Didn't store user in session after successful login!")
-    assert_equal(@rolf.id, @response.session[:user_id],
+    assert_equal(rolf.id, @request.session[:user_id],
       "Wrong user stored in session after successful login!")
   end
 
@@ -59,7 +59,7 @@ class AccountControllerTest < FunctionalTestCase
       :theme => "NULL",
       :notes => ""
     })
-    assert(@response.template_objects["new_user"].errors.invalid?(:password))
+    assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
     post(:signup, :new_user => {
@@ -70,7 +70,7 @@ class AccountControllerTest < FunctionalTestCase
       :theme => "NULL",
       :notes => ""
     })
-    assert(@response.template_objects["new_user"].errors.invalid?(:password))
+    assert(assigns("new_user").errors[:password].any?)
 
     # No email
     post(:signup, :new_user => {
@@ -81,7 +81,7 @@ class AccountControllerTest < FunctionalTestCase
       :theme => "NULL",
       :notes => ""
     })
-    assert(@response.template_objects["new_user"].errors.invalid?(:login))
+    assert(assigns("new_user").errors[:login].any?)
 
     # Bad password and no email
     post(:signup, :new_user => {
@@ -92,8 +92,8 @@ class AccountControllerTest < FunctionalTestCase
       :theme => "NULL",
       :notes => ""
     })
-    assert(@response.template_objects["new_user"].errors.invalid?(:password))
-    assert(@response.template_objects["new_user"].errors.invalid?(:login))
+    assert(assigns("new_user").errors[:password].any?)
+    assert(assigns("new_user").errors[:login].any?)
   end
 
   def test_signup_theme_errors
@@ -108,7 +108,7 @@ class AccountControllerTest < FunctionalTestCase
       :theme => "",
       :notes => ""
     })
-    assert(!@response.has_session_object?("user_id"))
+    assert(!@request.session["user_id"])
 
     # Disabled denied email in above case...
     # assert_equal("http://localhost/bogus/location", @response.redirect_url)
@@ -122,36 +122,35 @@ class AccountControllerTest < FunctionalTestCase
       :theme => "spammer",
       :notes => ""
     })
-    assert(!@response.has_session_object?("user_id"))
-    assert_response(:action => "welcome")
+    assert(!@request.session["user_id"])
+    assert_template(action: "welcome")
   end
 
   def test_invalid_login
     post(:login, :user_login => "rolf", :user_password => "not_correct")
-    assert(!@response.has_session_object?("user_id"))
-    assert(@response.has_template_object?("login"))
+    assert_nil(@request.session["user_id"])
+    assert_template("login")
 
     user = User.create!(
       :login => 'api',
       :email => 'foo@bar.com',
     )
     post(:login, :user_login => 'api', :user_password => '')
-    assert(!@response.has_session_object?("user_id"))
-    assert(@response.has_template_object?("login"))
+    assert_nil(@request.session["user_id"])
+    assert_template("login")
 
     user.update_attribute(:verified, Time.now)
     post(:login, :user_login => 'api', :user_password => '')
-    assert(!@response.has_session_object?("user_id"))
-    assert(@response.has_template_object?("login"))
+    assert_nil(@request.session["user_id"])
+    assert_template("login")
 
     user.change_password('try_this_for_size')
     post(:login, :user_login => 'api', :user_password => 'try_this_for_size')
-    assert(@response.has_session_object?("user_id"))
+    assert(@request.session["user_id"])
   end
 
   # Test autologin feature.
   def test_autologin
-
     # First make sure test page that requires login fails without autologin cookie.
     get(:test_autologin)
     assert_response(:redirect)
@@ -163,7 +162,7 @@ class AccountControllerTest < FunctionalTestCase
       :user => { :remember_me => "" }
     )
     assert(session[:user_id])
-    assert(!cookies[:mo_user])
+    assert(!cookies["mo_user"])
 
     logout
     get(:test_autologin)
@@ -176,11 +175,11 @@ class AccountControllerTest < FunctionalTestCase
       :user => { :remember_me => "1" }
     )
     assert(session[:user_id])
-    assert(cookies['mo_user'])
+    assert(cookies["mo_user"])
 
-    # And make sure autlogin will pick that cookie up and do its thing.
+    # And make sure autologin will pick that cookie up and do its thing.
     logout
-    @request.cookies['mo_user'] = cookies['mo_user']
+    @request.cookies["mo_user"] = cookies["mo_user"]
     get(:test_autologin)
     assert_response(:success)
   end
@@ -197,23 +196,23 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:verify, :id => user.id, :auth_code => 'bogus_code')
     assert_template('reverify')
-    assert(!@response.has_session_object?(:user_id))
+    assert(!@request.session[:user_id])
 
     get(:verify, :id => user.id, :auth_code => user.auth_code)
     assert_template('verify')
-    assert(@response.has_session_object?(:user_id))
+    assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
 
     get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_response(:action => :welcome)
-    assert(@response.has_session_object?(:user_id))
+    assert_template(action: :welcome)
+    assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
 
     login('rolf')
     get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_response(:action => :login)
-    assert(!@response.has_session_object?(:user_id))
+    assert_template(action: :login)
+    assert(!@request.session[:user_id])
   end
 
   def test_verify_after_api_create
@@ -224,12 +223,12 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:verify, :id => user.id, :auth_code => 'bogus_code')
     assert_template('reverify')
-    assert(!@response.has_session_object?(:user_id))
+    assert(!@request.session[:user_id])
 
     get(:verify, :id => user.id, :auth_code => user.auth_code)
     assert_flash_warning
     assert_template('choose_password')
-    assert(!@response.has_session_object?(:user_id))
+    assert(!@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_input_value('user_password', '')
     assert_input_value('user_password_confirmation', '')
@@ -251,15 +250,15 @@ class AccountControllerTest < FunctionalTestCase
     post(:verify, :id => user.id, :auth_code => user.auth_code,
          :user => { :password => 'mouse', :password_confirmation => 'mouse'})
     assert_template('verify')
-    assert(@response.has_session_object?(:user_id))
+    assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
     assert_not_equal('', user.password)
 
     login('rolf')
     get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_response(:action => :login)
-    assert(!@response.has_session_object?(:user_id))
+    assert_template(action: :login)
+    assert(!@request.session[:user_id])
   end
 
   def test_edit_prefs
@@ -317,7 +316,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash(:runtime_prefs_success.t)
 
     # Make sure changes were made.
-    user = @rolf.reload
+    user = rolf.reload
     assert_equal(false,       user.alternate_columns)
     assert_equal(false,       user.alternate_rows)
     assert_equal(10,          user.columns)
@@ -385,7 +384,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash(:runtime_profile_success.t)
 
     # Make sure changes were made.
-    user = @rolf.reload
+    user = rolf.reload
     assert_equal("new_name", user.name)
     assert_equal("new_notes", user.notes)
     assert_equal(locations(:burbank), user.location)
@@ -398,8 +397,7 @@ class AccountControllerTest < FunctionalTestCase
     setup_image_dirs
 
     # Open file we want to upload.
-    file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/sticky.jpg")
-    file.content_type = 'image/jpeg'
+    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/sticky.jpg", "image/jpeg")
 
     # It should create a new image: this is the current number of images.
     num_images = Image.count
@@ -407,26 +405,26 @@ class AccountControllerTest < FunctionalTestCase
     # Post form.
     params = {
       :user => {
-        :name        => @rolf.name,
+        :name        => rolf.name,
         :place_name   => '',
         :notes         => '',
         :upload_image   => file,
-        :mailing_address => @rolf.mailing_address,
+        :mailing_address => rolf.mailing_address,
       },
       :copyright_holder => 'Someone Else',
       :upload => { :license_id => licenses(:ccnc25).id },
       :date => { :copyright_year => "2003" },
     }
     post_requires_login(:profile, params)
-    assert_response(:controller => :observer, :action => :show_user, :id => 1)
+    assert_template(controller: :observer, action: :show_user, id: 1)
     assert_flash_success
 
-    @rolf.reload
+    rolf.reload
     assert_equal(num_images+1, Image.count)
-    assert_equal(Image.last.id, @rolf.image_id)
-    assert_equal("Someone Else", @rolf.image.copyright_holder)
-    assert_equal(2003, @rolf.image.when.year)
-    assert_equal(licenses(:ccnc25), @rolf.image.license)
+    assert_equal(Image.last.id, rolf.image_id)
+    assert_equal("Someone Else", rolf.image.copyright_holder)
+    assert_equal(2003, rolf.image.when.year)
+    assert_equal(licenses(:ccnc25), rolf.image.license)
   end
 
   def test_no_email_hooks
@@ -450,67 +448,13 @@ class AccountControllerTest < FunctionalTestCase
     ]
       assert_request(
         :action        => "no_email_#{type}",
-        :params        => { :id => @rolf.id },
+        :params        => { :id => rolf.id },
         :require_login => true,
         :require_user  => :index,
         :result        => 'no_email'
       )
-      assert(!@rolf.reload.send("email_#{type}"))
+      assert(!rolf.reload.send("email_#{type}"))
     end
-  end
-
-  def test_flash_errors
-    # First make sure app is working correctly in "live" mode.
-    get(:test_flash)
-    assert_flash(nil)
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error one')
-    assert_flash('error one')
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error two')
-    assert_flash('error two')
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error three', :redirect => 1)
-    assert_flash('error three')
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error four', :redirect => 1)
-    assert_flash("error three\nerror four")
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :error => 'error five')
-    assert_flash("error three\nerror four\nerror five")
-    flash[:rendered_notice] = nil
-
-    get_without_clearing_flash(:test_flash, :redirect => 1, :error => 'dont lose me!')
-    get_without_clearing_flash(:test_flash, :redirect => 1)
-    get_without_clearing_flash(:test_flash)
-    assert_flash('dont lose me!')
-
-    # Now make sure our test suite is clearing out the flash automatically
-    # between requests like it should.
-    get(:test_flash, :error => 'tweedle')
-    assert_flash('tweedle')
-
-    get(:test_flash, :error => 'dee')
-    assert_flash('dee')
-
-    get(:test_flash, :error => 'dum', :redirect => 1)
-    assert_flash('dum')
-
-    get(:test_flash, :error => 'jabber', :redirect => 1)
-    assert_flash('jabber')
-
-    get(:test_flash, :error => 'wocky')
-    get(:test_flash)
-    assert_flash(nil)
-
-    get(:test_flash, :error => 'and others', :redirect => 1)
-    get(:test_flash, :redirect => 1)
-    assert_flash(nil)
   end
 
   def test_api_key_manager
@@ -534,8 +478,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'app name'})
     assert_flash_success
     assert_equal(1, ApiKey.count)
-    assert_equal(1, @mary.reload.api_keys.length)
-    key1 = @mary.api_keys.first
+    assert_equal(1, mary.reload.api_keys.length)
+    key1 = mary.api_keys.first
     assert_equal('app name', key1.notes)
     assert_select('a[onclick*=edit_key]', :count => 1)
 
@@ -543,8 +487,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'another name'})
     assert_flash_success
     assert_equal(2, ApiKey.count)
-    assert_equal(2, @mary.reload.api_keys.length)
-    key2 = @mary.api_keys.last
+    assert_equal(2, mary.reload.api_keys.length)
+    key2 = mary.api_keys.last
     assert_equal('another name', key2.notes)
     assert_select('a[onclick*=edit_key]', :count => 2)
 
@@ -558,8 +502,8 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, :commit => :account_api_keys_remove_button.l, "key_#{key1.id}" => '1')
     assert_flash_success
     assert_equal(1, ApiKey.count)
-    assert_equal(1, @mary.reload.api_keys.length)
-    key = @mary.api_keys.last
+    assert_equal(1, mary.reload.api_keys.length)
+    key = mary.api_keys.last
     assert_objs_equal(key, key2)
     assert_select('a[onclick*=edit_key]', :count => 1)
   end
@@ -569,19 +513,20 @@ class AccountControllerTest < FunctionalTestCase
     key.provide_defaults
     key.verified = nil
     key.notes = 'Testing'
-    key.user = @katrina
+    key.user = katrina
     key.save
     assert_nil(key.verified)
 
     get(:activate_api_key, :id => 12345)
-    assert_response(:action => :login)
+    assert_template(action: :login)
     assert_nil(key.verified)
 
     login('dick')
     get(:activate_api_key, :id => key.id)
     assert_flash_error
-    assert_response(:action => :api_keys)
+    assert_template(action: :api_keys)
     assert_nil(key.verified)
+    flash.clear
 
     login('katrina')
     get(:api_keys)
@@ -590,7 +535,7 @@ class AccountControllerTest < FunctionalTestCase
 
     get(:activate_api_key, :id => key.id)
     assert_flash_success
-    assert_response(:action => :api_keys)
+    assert_template(action: :api_keys)
     key.reload
     assert_not_nil(key.verified)
 
@@ -600,7 +545,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_edit_api_key
-    key = @mary.api_keys.create(:notes => 'app name')
+    key = mary.api_keys.create(:notes => 'app name')
 
     # Try without logging in.
     get(:edit_api_key, :id => key.id)
@@ -630,7 +575,7 @@ class AccountControllerTest < FunctionalTestCase
     # Change notes correctly.
     post(:edit_api_key, :commit => :UPDATE.l, :id => key.id, :key => {:notes => 'new name'})
     assert_flash_success
-    assert_response(:action => :api_keys)
+    assert_template(action: :api_keys)
     assert_equal('new name', key.reload.notes)
   end
 end

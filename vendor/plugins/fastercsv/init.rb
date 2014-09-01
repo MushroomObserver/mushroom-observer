@@ -1,1 +1,0 @@
-require 'faster_csv'

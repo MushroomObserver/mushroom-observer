@@ -49,7 +49,7 @@ class QueuedEmail::NameChange < QueuedEmail
     if name
       result.add_integer(:name, name.id)
       result.add_integer(:new_name_version, name.version)
-      result.add_integer(:old_name_version, (name.altered? ? name.version - 1 : name.version))
+      result.add_integer(:old_name_version, (name.changed? ? name.version - 1 : name.version))
     else
       name = desc.name
       result.add_integer(:name, name.id)
@@ -59,7 +59,7 @@ class QueuedEmail::NameChange < QueuedEmail
     if desc
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
-      result.add_integer(:old_description_version, (desc.altered? ? desc.version - 1 : desc.version))
+      result.add_integer(:old_description_version, (desc.changed? ? desc.version - 1 : desc.version))
       result.add_string(:review_status, review_status_changed ? desc.review_status : :no_change)
     else
       result.add_integer(:description, 0)
@@ -74,9 +74,9 @@ class QueuedEmail::NameChange < QueuedEmail
   def deliver_email
     # Make sure name wasn't deleted or merged since email was queued.
     if name
-      AccountMailer.deliver_name_change(user, to_user, queued, name, description,
+      AccountMailer.name_change(user, to_user, queued, name, description,
         old_name_version, new_name_version, old_description_version,
-        new_description_version, review_status)
+        new_description_version, review_status).deliver
     end
   end
 end

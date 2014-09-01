@@ -1,0 +1,33 @@
+<div class="ThinBox" style="margin-top:1em">
+  <%= :WHEN.t %>: <span class="Data"><%= observation.when.web_date %></span><br/>
+
+  <%= if observation.is_collection_location
+    :show_observation_collection_location.t
+  else
+    :show_observation_seen_at.t
+  end %>:
+  <%= location_link(observation.place_name, observation.location, nil, true) %>
+  <%= if observation.lat and observation.alt
+    "(#{observation.lat}° #{observation.long}° #{observation.alt}m)"
+  elsif observation.lat
+    "(#{observation.lat}° #{observation.long}°)"
+  elsif observation.alt
+    "(#{observation.alt}m)"
+  end %><br/>
+
+  <%= :WHO.t %>: <span class="Data"><%= user_link(observation.user) %></span><br/>
+
+  <% for project in observation.projects %>
+    <%= :PROJECT.t %>: <span class="Data"><%= project_link(project) %></span><br/>
+  <% end %>
+
+	<%= observation_specimen_info(observation) %>
+
+  <%= if !observation.notes.blank?
+    Textile.clear_textile_cache
+    Textile.register_name(*observation.namings.map(&:name))
+    Textile.register_name(observation.name)
+    content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').tpl,
+      style: "margin-top:1em; margin-bottom:-1em")
+  end %>
+</div>

@@ -1,0 +1,26 @@
+<%
+  @title = :add_members_title.t(:title => @project.title)
+
+  new_tab_set do
+    add_tab_with_query(:cancel_and_show.t(:type => :project), :action => 'show_project',
+      :id => @project.id)
+  end
+%>
+
+<% for user in @users
+  name = user.name
+  if !name.blank?
+    name = " (#{name})"
+  else
+    name = ""
+  end %>
+
+  <span class="Data">
+    <%= user_link(user, "#{user.login}#{name}") %>:
+  </span>
+  <%= link_with_query(:add_members_change_status.t, :action => :change_member_status,
+        :id => @project.id, :candidate => user.id) %>
+  <%= link_with_query(:ADD.t, :action => :add_members, :id => @project.id,
+        :candidate => user.id) %>
+  <br/>
+<% end %>

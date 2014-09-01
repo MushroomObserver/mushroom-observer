@@ -9,7 +9,7 @@ agaricus_campestras_desc:
   updated_at: 2007-06-23 20:04:00
   user_id: 1
   version: 1
-  notes: This is should prevent me for merging
+  notes: This should... ¡prevent me from merging!
   review_status: unreviewed
   source_type: public
   public: 1

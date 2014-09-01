@@ -137,12 +137,12 @@ class Vote < AbstractModel
   # ----------------------------
 
   CONFIDENCE_VALS = [
-    [ :vote_confidence_100,  3 ],
-    [ :vote_confidence_80,   2 ],
-    [ :vote_confidence_60,   1 ],
-    [ :vote_confidence_40,  -1 ],
-    [ :vote_confidence_20,  -2 ],
-    [ :vote_confidence_0,   -3 ]
+    [ :vote_confidence_100,  3.0 ],
+    [ :vote_confidence_80,   2.0 ],
+    [ :vote_confidence_60,   1.0 ],
+    [ :vote_confidence_40,  -1.0 ],
+    [ :vote_confidence_20,  -2.0 ],
+    [ :vote_confidence_0,   -3.0 ]
   ]
 
   NO_OPINION_VAL = [:vote_no_opinion, 0]
@@ -205,12 +205,12 @@ class Vote < AbstractModel
   # Now we are free to change the implementation later.
   def anonymous?
     (user.votes_anonymous == :no) or
-    (user.votes_anonymous == :old and updated_at > Time.parse(VOTE_CUTOFF))
+    (user.votes_anonymous == :old and updated_at > Time.parse(MO.vote_cutoff))
   end
 
 ################################################################################
 
-protected
+  protected
 
   # Find label of closest value in a given enumerated lists.
   def self.lookup_value(val, list) # :nodoc:
@@ -226,7 +226,8 @@ protected
     return last_pair[0]
   end
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.naming
       errors.add(:naming, :validate_vote_naming_missing.t)
     end

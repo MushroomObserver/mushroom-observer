@@ -89,9 +89,9 @@ class API
 
   # Simplified "parser" for getting the HTTP request -- this is passed in
   # specially by ApiController: it should not be processed in any way.
-  def parse_http_request
-    declare_parameter(:http_request, :http_request, {})
-    params[:http_request]
+  def parse_upload
+    declare_parameter(:upload, :upload, {})
+    params[:upload]
   end
 
   def parse_boolean(key, args={})
@@ -131,6 +131,19 @@ class API
       end
     end
     raise BadLimitedParameterValue.new(str, limit)
+  end
+
+  def parse_lang(key, args={})
+    declare_parameter(key, :lang, args)
+    locale = get_param(key) or return Language.official.locale
+    lang = Language.lang_from_locale(locale)
+    langs = Language.all.map(&:locale)
+    for val in langs
+      if lang.downcase == val.to_s.downcase
+        return val
+      end
+    end
+    raise BadLimitedParameterValue.new(lang, langs)
   end
 
   def parse_string(key, args={})
@@ -555,8 +568,14 @@ class API
     unused = params.keys - expected_params.keys
     if unused.include?(:help)
       raise HelpMessage.new(expected_params)
-    elsif unused.any?
-      raise UnusedParameters.new(unused)
+    else
+      if unused.include?(:upload)
+        raise UnexpectedUpload.new
+        unused.delete(:upload)
+      end
+      if unused.any?
+        raise UnusedParameters.new(unused)
+      end
     end
   end
 

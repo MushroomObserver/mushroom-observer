@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class Hash
   def remove(*keys)
@@ -16,45 +16,37 @@ class ApiTest < UnitTestCase
   end
 
   def assert_no_errors(api, msg='API errors')
-    clean_our_backtrace do
-      assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
-        api.errors.empty?
-      end
+    assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
+      api.errors.empty?
     end
   end
 
   def assert_api_fail(params)
-    clean_our_backtrace do
-      assert_block("API request should have failed, params: #{params.inspect}") do
-        API.execute(params).errors.any?
-      end
+    assert_block("API request should have failed, params: #{params.inspect}") do
+      API.execute(params).errors.any?
     end
   end
 
   def assert_api_pass(params)
-    clean_our_backtrace do
-      api = API.execute(params)
-      assert_no_errors(api, "API request should have passed, params: #{params.inspect}")
-    end
+    api = API.execute(params)
+    assert_no_errors(api, "API request should have passed, params: #{params.inspect}")
   end
 
   def assert_parse(method, expect, val, *args)
     @api ||= API.new
-    clean_our_backtrace do
-      val = val.to_s if val
-      begin
-        actual = @api.send(method, val, *args)
-      rescue API::Error => e
-        actual = e
-      end
-      msg = "Expected: <#{show_val(expect)}>\n" +
-            "Got: <#{show_val(actual)}>\n"
-      assert_block(msg) do
-        if expect.is_a?(Class) and expect <= API::Error
-          actual.is_a?(expect)
-        else
-          actual == expect
-        end
+    val = val.to_s if val
+    begin
+      actual = @api.send(method, val, *args)
+    rescue API::Error => e
+      actual = e
+    end
+    msg = "Expected: <#{show_val(expect)}>\n" +
+          "Got: <#{show_val(actual)}>\n"
+    assert_block(msg) do
+      if expect.is_a?(Class) and expect <= API::Error
+        actual.is_a?(expect)
+      else
+        actual == expect
       end
     end
   end
@@ -173,7 +165,7 @@ class ApiTest < UnitTestCase
     assert_equal(0, user.contribution)
     assert_equal(nil, user.bonuses)
     assert_equal(nil, user.alert)
-    assert_equal(@locale, user.locale)
+    assert_equal(Language.lang_from_locale(@locale), user.lang)
     assert_equal(@notes.strip, user.notes)
     assert_equal(@address.strip, user.mailing_address)
     assert_objs_equal(@license, user.license)
@@ -221,7 +213,7 @@ class ApiTest < UnitTestCase
   end
 
   def test_post_minimal_observation
-    @user = @rolf
+    @user = rolf
     @name = Name.unknown
     @loc = locations(:unknown_location)
     @img1 = nil
@@ -250,7 +242,7 @@ class ApiTest < UnitTestCase
   end
 
   def test_post_maximal_observation
-    @user = @rolf
+    @user = rolf
     @name = names(:coprinus_comatus)
     @loc = locations(:albion)
     @img1 = Image.find(1)
@@ -331,7 +323,7 @@ class ApiTest < UnitTestCase
       :api_key  => @api_key.key,
     }
 
-    assert_equal(:postal, @rolf.location_format)
+    assert_equal(:postal, rolf.location_format)
 
     params[:location] = 'New Place, California, USA'
     api = API.execute(params)
@@ -347,8 +339,8 @@ class ApiTest < UnitTestCase
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
-    @rolf.update_attribute(:location_format, :scientific)
-    assert_equal(:scientific, @rolf.reload.location_format)
+    rolf.update_attribute(:location_format, :scientific)
+    assert_equal(:scientific, rolf.reload.location_format)
 
     params[:location] = 'USA, California, Somewhere Else'
     api = API.execute(params)
@@ -367,7 +359,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_minimal_image
     setup_image_dirs
-    @user = @rolf
+    @user = rolf
     @proj = nil
     @date = Date.today
     @copy = @user.legal_name
@@ -381,7 +373,7 @@ class ApiTest < UnitTestCase
       :method      => :post,
       :action      => :image,
       :api_key     => @api_key.key,
-      :upload_file => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
+      :upload_file => "#{::Rails.root.to_s}/test/images/sticky.jpg",
     }
     api = API.execute(params)
     assert_no_errors(api, 'Errors while posting image')
@@ -391,7 +383,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_maximal_image
     setup_image_dirs
-    @user = @rolf
+    @user = rolf
     @proj = projects(:eol_project)
     @date = Date.parse('20120626')
     @copy = 'My Friend'
@@ -412,7 +404,7 @@ class ApiTest < UnitTestCase
       :vote          => '3',
       :observations  => @obs.id,
       :projects      => @proj.id,
-      :upload_file   => "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg",
+      :upload_file   => "#{::Rails.root.to_s}/test/images/sticky.jpg",
       :original_name => @orig,
     }
     api = API.execute(params)
@@ -499,7 +491,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_api_key_for_yourself
     email_count = ActionMailer::Base.deliveries.size
-    @for_user = @rolf
+    @for_user = rolf
     @app = '  Mushroom  Mapper  '
     @verified = true
     params = {
@@ -519,7 +511,7 @@ class ApiTest < UnitTestCase
 
   def test_posting_api_key_for_another_user
     email_count = ActionMailer::Base.deliveries.size
-    @for_user = @katrina
+    @for_user = katrina
     @app = '  Mushroom  Mapper  '
     @verified = false
     params = {
@@ -547,9 +539,9 @@ class ApiTest < UnitTestCase
       :api_key  => @api_key.key,
       :location => 'Anywhere',
     }
-    @rolf.update_attribute(:verified, nil)
+    rolf.update_attribute(:verified, nil)
     assert_api_fail(params)
-    @rolf.update_attribute(:verified, Time.now)
+    rolf.update_attribute(:verified, Time.now)
     assert_api_pass(params)
   end
 
@@ -982,14 +974,14 @@ class ApiTest < UnitTestCase
 
   def test_check_edit_permission
     @api = API.new
-    @api.user = @dick
-    proj = @dick.projects_member.first
+    @api.user = dick
+    proj = dick.projects_member.first
     assert_not_nil(img_good = proj.images.first)
-    assert_not_nil(img_bad = (Image.all - proj.images - @dick.images).first)
+    assert_not_nil(img_bad = (Image.all - proj.images - dick.images).first)
     assert_not_nil(obs_good = proj.observations.first)
-    assert_not_nil(obs_bad = (Observation.all - proj.observations - @dick.observations).first)
+    assert_not_nil(obs_bad = (Observation.all - proj.observations - dick.observations).first)
     assert_not_nil(spl_good = proj.species_lists.first)
-    assert_not_nil(spl_bad = (SpeciesList.all - proj.species_lists - @dick.species_lists).first)
+    assert_not_nil(spl_bad = (SpeciesList.all - proj.species_lists - dick.species_lists).first)
 
     args = { :must_have_edit_permission => true }
     assert_parse(:parse_image, img_good, img_good.id, args)
@@ -998,7 +990,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_observation, API::MustHaveEditPermission, obs_bad.id, args)
     assert_parse(:parse_species_list, spl_good, spl_good.id, args)
     assert_parse(:parse_species_list, API::MustHaveEditPermission, spl_bad.id, args)
-    assert_parse(:parse_user, @dick, @dick.id, args)
+    assert_parse(:parse_user, dick, dick.id, args)
     assert_parse(:parse_user, API::MustHaveEditPermission, '1', args)
 
     args[:limit] = [Image, Observation, SpeciesList, User]
@@ -1008,7 +1000,7 @@ class ApiTest < UnitTestCase
     assert_parse(:parse_object, API::MustHaveEditPermission, "observation #{obs_bad.id}", args)
     assert_parse(:parse_object, spl_good, "species list #{spl_good.id}", args)
     assert_parse(:parse_object, API::MustHaveEditPermission, "species list #{spl_bad.id}", args)
-    assert_parse(:parse_object, @dick, "user #{@dick.id}", args)
+    assert_parse(:parse_object, dick, "user #{dick.id}", args)
     assert_parse(:parse_object, API::MustHaveEditPermission, 'user 1', args)
   end
 

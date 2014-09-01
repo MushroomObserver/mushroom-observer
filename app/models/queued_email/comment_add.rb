@@ -53,7 +53,7 @@ class QueuedEmail::CommentAdd < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     if comment
-      AccountMailer.deliver_comment(user, to_user, comment.target, comment)
+      AccountMailer.comment(user, to_user, comment.target, comment).deliver
     end
   end
 end

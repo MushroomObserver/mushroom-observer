@@ -1,0 +1,27 @@
+<%
+  @title = :create_donation_title.l
+  new_tab_set do
+    add_tab(:donors_tab.t, :action => 'donors')
+    add_tab(:donate_tab.t, :action => 'donate')
+    if is_in_admin_mode?
+	    add_tab(:review_donations_tab.t, :action => 'review_donations')
+    end
+  end
+%>
+
+<p>
+<%= form_tag(:action => 'create_donation') do %>
+  <p>
+    Amount: $<%= text_field('donation', 'amount', :size => 7) %>
+  </p>
+  <p>
+    Who: <%= text_field('donation', 'who', :size => 50) %>
+    <%= check_box('donation', 'anonymous') %>
+    <label for="donation_anonymous"><%= :donate_anonymous.t %></label><br/>
+  </p>
+  <p>
+    Email: <%= text_field('donation', 'email', :size => 50) %><br/>
+  </p>
+  <center><%= submit_tag :create_donation_add.l %><br/></center>
+<% end %>
+</p>

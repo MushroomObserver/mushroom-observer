@@ -1,0 +1,47 @@
+<%
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set(@links)
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.length > 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% odd_or_even = 0
+      for comment in @objects
+        odd_or_even = 1 - odd_or_even
+        target = comment.target %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <% if @full_detail %>
+            <%= render(:partial => 'comment', :object => comment) %>
+          <% else %>
+            <td width="100%">
+              <%= link_with_query(content_tag(:span, comment.summary.t,
+                    :class => 'ListWhat'), :action => 'show_comment',
+                    :id => comment.id) %>:
+              <% if target %>
+                <%= link_to(content_tag(:span, target.unique_format_name.t,
+                                        :class => 'ListWhat'),
+                            :controller => target.show_controller,
+                            :action => target.show_action, :id => target.id) %>
+              <% else %>
+                (<%= :comment_list_deleted.t %>)
+              <% end %>
+              <br/>
+              <span class="ListWhen"><%= comment.created_at.web_time %></span>:
+              <span class="ListWho"><%= user_link(comment.user) %></span>
+              <% if target %>
+                (<span class="ListDetail"><%= target.class.name.to_sym.t
+                %></span>)
+              <% else %>
+                (<span class="ListDetail"><%= :runtime_object_deleted
+                %></span>)
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

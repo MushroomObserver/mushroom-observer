@@ -1,0 +1,35 @@
+<%
+  @title = :image_add_title.t(:name => @observation.unique_format_name)
+
+  new_tab_set do
+    add_tab_with_query(:cancel_and_show.t(:type => :observation),
+      :controller => 'observer', :action => 'show_observation', 
+      :id => @observation.id)
+    add_tab_with_query(:image_add_edit.t, :controller => 'observer',
+      :action => 'edit_observation', :id => @observation.id)
+  end
+%>
+
+<div id="license-notice"><%= :image_add_warning.tp %></div>
+
+<%= form_for(:image, :url => add_query_param({ :action => :add_image, :id => @observation.id}),
+      :html => { :multipart => true }) do |form| %>
+  <br/><center><%= submit_tag(:image_add_upload.l) %></center><br/>
+
+  <%= hidden_field("observation", "id") %>
+
+  <p>
+    <%= :image_add_image.t %> 1: <%= file_field("upload", "image1") %> (<%= :image_add_default.t %>)<br/>
+    <%= :image_add_image.t %> 2: <%= file_field("upload", "image2") %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 3: <%= file_field("upload", "image3") %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 4: <%= file_field("upload", "image4") %> (<%= :image_add_optional.t %>)<br/>
+  </p><br/>
+
+  <%= render(:partial => 'form_images', :locals => {
+    :form => form,
+    :width => 80,
+    :leave_out_original_file_name => true
+  }) %>
+
+  <center><%= submit_tag(:image_add_upload.l) %></center>
+<% end %>

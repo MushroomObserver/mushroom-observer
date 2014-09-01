@@ -15,4 +15,25 @@ class FunctionalTestCase < ActionController::TestCase
   include GeneralExtensions
   include FlashExtensions
   include ControllerExtensions
+  include CheckForUnsafeHtml
+
+  def get(*args, &block)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
+
+  def post(*args, &block)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
+
+  def put(*args, &block)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
+
+  def delete(*args, &block)
+    super(*args, &block)
+    check_for_unsafe_html!
+  end
 end

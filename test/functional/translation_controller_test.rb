@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class TranslationControllerTest < FunctionalTestCase
 
@@ -119,24 +119,33 @@ class TranslationControllerTest < FunctionalTestCase
     assert(form.empty?)
   end
 
-  def test_authorization
+  def test_authorization_no_login_en
     get(:edit_translations, :locale => 'en-US')
     assert_flash_error
     assert_response(:redirect)
-
+  end
+  
+  def test_authorization_no_login_el
     get(:edit_translations, :locale => 'el-GR')
     assert_flash_error
     assert_response(:redirect)
+  end
 
+  def test_authorization_user_en
     login('mary')
     get(:edit_translations, :locale => 'en-US')
     assert_flash_error
     assert_response(:redirect)
-
+  end
+  
+  def test_authorization_user_el
+    login('mary')
     get(:edit_translations, :locale => 'el-GR')
     assert_no_flash
     assert_response(:success)
-
+  end
+  
+  def test_authorization_admin_en
     login('rolf')
     get(:edit_translations, :locale => 'en-US')
     assert_no_flash
@@ -214,7 +223,7 @@ class TranslationControllerTest < FunctionalTestCase
     assert_equal('uno', :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_textarea_value(:tag_one, 'ichi')
-    Locale.code = 'el-GR'
+    I18n.locale = 'el'
     assert_equal('ichi', :one.l)
   end
 
@@ -243,7 +252,7 @@ class TranslationControllerTest < FunctionalTestCase
       :commit => :SAVE.l
     )
     assert_no_flash
-    assert_match(/locale = "en-US"/, @response.body)
+    assert_match(/locale = "en"/, @response.body)
     assert_match(/tag = "one"/, @response.body)
     assert_match(/str = "uno"/, @response.body)
     assert_equal('uno', :one.l)
@@ -261,7 +270,7 @@ class TranslationControllerTest < FunctionalTestCase
       :commit => :SAVE.l
     )
     assert_no_flash
-    assert_match(/locale = "el-GR"/, @response.body)
+    assert_match(/locale = "el"/, @response.body)
     assert_match(/tag = "one"/, @response.body)
     assert_match(/str = "ichi"/, @response.body)
     assert_equal('uno', :one.l)
@@ -271,7 +280,7 @@ class TranslationControllerTest < FunctionalTestCase
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_textarea_value(:tag_one, 'ichi')
 
-    Locale.code = 'el-GR'
+    I18n.locale = 'el'
     assert_equal('ichi', :one.l)
   end
 

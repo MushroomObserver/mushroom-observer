@@ -34,7 +34,7 @@ class QueuedEmail::Feature < QueuedEmail
   
   def deliver_email
     if to_user.email_general_feature # Make sure it hasn't changed
-      AccountMailer.deliver_email_features(to_user, content)
+      AccountMailer.email_features(to_user, content).deliver
     end
   end
 end

@@ -41,6 +41,8 @@
 ################################################################################
 
 class ImageController < ApplicationController
+  require 'csv'
+
   before_filter :login_required, :except => [
     :advanced_search,
     :image_search,
@@ -150,11 +152,10 @@ class ImageController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer',
-                  :action => 'index_observation',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :observation),
+        add_query_param({
+          :controller => 'observer', :action => 'index_observation'
+        }, query)]
     end
 
     # Paginate by letter if sorting by user.
@@ -216,7 +217,7 @@ class ImageController < ApplicationController
       if !obs.blank? &&
          # The outer search on observation won't be saved for robots, so no sense
          # in bothering with any of this.
-         !is_robot?
+         !browser.bot?
         obs_query = find_or_create_query(:Observation)
         obs_query.current = obs
         img_query = create_query(:Image, :inside_observation,
@@ -280,7 +281,7 @@ class ImageController < ApplicationController
       if params[:next]
         redirect_to_next_object(:next, Image, params[:id].to_s)
       else
-        redirect_to(:action => 'show_image', :id => id, :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => id)
       end
     end
   end
@@ -307,9 +308,9 @@ class ImageController < ApplicationController
     pass_query_params
     if @observation = find_or_goto_index(Observation, params[:id].to_s)
       if !check_permission!(@observation)
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
-      elsif request.method != :post
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
+      elsif request.method != "POST"
         @image = Image.new
         @image.license = @user.license
         @image.copyright_holder = @user.legal_name
@@ -326,8 +327,8 @@ class ImageController < ApplicationController
           process_image(args, params[:upload]["image#{i}"])
           i += 1
         end
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
       end
     end
   end
@@ -378,9 +379,8 @@ class ImageController < ApplicationController
     if @image = find_or_goto_index(Image, params[:id].to_s)
       @licenses = License.current_names_and_ids(@image.license)
       if !check_permission!(@image)
-        redirect_to(:action => 'show_image', :id => @image,
-                    :params => query_params)
-      elsif request.method != :post
+        redirect_with_query(:action => 'show_image', :id => @image)
+      elsif request.method != "POST"
         init_project_vars_for_add_or_edit(@image)
       else
         @image.attributes = params[:image]
@@ -409,7 +409,7 @@ class ImageController < ApplicationController
           done = true
         end
         if done
-          redirect_to(:action => 'show_image', :id => @image.id, :params => query_params)
+          redirect_with_query(:action => 'show_image', :id => @image.id)
         else
           init_project_vars_for_reload(@image)
         end
@@ -492,16 +492,15 @@ class ImageController < ApplicationController
         next_state = this_state.next
       end
       if !check_permission!(@image)
-        redirect_to(:action => 'show_image', :id => @image.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => @image.id)
       else
         @image.log_destroy
         @image.destroy
         Transaction.delete_image(:id => @image)
         flash_notice(:runtime_image_destroy_success.t(:id => params[:id].to_s))
         if next_state
-          redirect_to(:action => 'show_image', :id => next_state.current_id,
-                      :params => set_query_params(next_state))
+          set_query_params(next_state)
+          redirect_with_query(:action => 'show_image', :id => next_state.current_id)
         else
           redirect_to(:action => 'list_images')
         end
@@ -530,8 +529,8 @@ class ImageController < ApplicationController
         )
         flash_notice(:runtime_image_remove_success.t(:id => @image.id))
       end
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
+      redirect_with_query(:controller => 'observer',
+        :action => 'show_observation', :id => @observation.id)
     end
   end
 
@@ -550,7 +549,7 @@ class ImageController < ApplicationController
   
   def look_for_image(method, params)
     result = nil
-    if (method == :post) or !params[:img_id].blank?
+    if (method == "POST") or !params[:img_id].blank?
       result = Image.safe_find(params[:img_id])
       flash_error(:runtime_image_reuse_invalid_id.t(:id => params[:img_id])) if !result
     end
@@ -594,12 +593,12 @@ class ImageController < ApplicationController
     # Make sure user owns the observation.
     if (@mode == :observation) and
        !check_permission!(@observation)
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id, :params => query_params)
+      redirect_with_query(:controller => 'observer',
+        :action => 'show_observation', :id => @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
-    elsif (request.method == :post) or
+    elsif (request.method == "POST") or
           !params[:img_id].blank?
       image = Image.safe_find(params[:img_id])
       if !image
@@ -610,16 +609,16 @@ class ImageController < ApplicationController
         @observation.add_image(image)
         @observation.log_reuse_image(image)
         Transaction.put_observation(:id => @observation, :add_image => image)
-        redirect_to(:controller => 'observer', :action => 'show_observation',
-                    :id => @observation.id, :params => query_params)
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
         done = true
 
       elsif @mode == :term
         # Add image to term
         @term.add_image(image)
         @term.log_reuse_image(image)
-        redirect_to(:controller => :glossary, :action => :show_term,
-          :id => @term.id, :params => query_params)
+        redirect_with_query(:controller => :glossary, :action => :show_term,
+          :id => @term.id)
         done = true
       else
         # Change user's profile image.
@@ -666,7 +665,7 @@ class ImageController < ApplicationController
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s, :include => :images)
     if check_permission!(@object)
-      if request.method == :post and (images = params[:selected])
+      if request.method == "POST" and (images = params[:selected])
         images.each do |image_id, do_it|
           if do_it == 'yes'
             if image = Image.safe_find(image_id)
@@ -676,12 +675,12 @@ class ImageController < ApplicationController
             end
           end
         end
-        redirect_to(:controller => target_class.show_controller, :action => target_class.show_action,
-                    :id => @object.id, :params => query_params)
+        redirect_with_query(:controller => target_class.show_controller,
+          :action => target_class.show_action, :id => @object.id)
       end
     else
-      redirect_to(:controller => target_class.show_controller, :action => target_class.show_action,
-                  :id => @object.id, :params => query_params)
+      redirect_with_query(:controller => target_class.show_controller,
+        :action => target_class.show_action, :id => @object.id)
     end
   end
 
@@ -709,10 +708,10 @@ class ImageController < ApplicationController
       end
       if params[:size].blank? or
          params[:size].to_sym == (@user ? @user.image_size : :medium)
-        redirect_to(:action => 'show_image', :id => image, :params => query_params)
+        redirect_with_query(:action => 'show_image', :id => image)
       else
-        redirect_to(:action => 'show_image', :id => image, :params => query_params,
-                    :size => params[:size])
+        redirect_with_query(:action => 'show_image', :id => image,
+          :size => params[:size])
       end
     end
   end
@@ -735,7 +734,7 @@ class ImageController < ApplicationController
   def license_updater # :norobots:
 
     # Process any changes.
-    if request.method == :post
+    if request.method == "POST"
       data = params[:updates]
       for row in data.values
         old_id = row[:old_id].to_i
@@ -796,7 +795,7 @@ class ImageController < ApplicationController
   #   @num_anonymous - number of existing anonymous votes
   #   @num_public    - number of existing puclic votes
   def bulk_vote_anonymity_updater
-    if request.method == :post
+    if request.method == "POST"
       submit = params[:commit]
       if submit == :image_vote_anonymity_make_anonymous.l
         ImageVote.connection.update %(
@@ -894,7 +893,7 @@ class ImageController < ApplicationController
   end
 
   def render_image_csv_file(data)
-    report = FasterCSV.generate(:col_sep => "\t") do |csv|
+    report = CSV.generate(:col_sep => "\t") do |csv|
       csv << ['name', 'image id', 'image width', 'image height']
       data.each do |name, id, width, height|
         csv << [name, id.to_s, width.to_s, height.to_s]
@@ -937,7 +936,7 @@ class ImageController < ApplicationController
   end
 
   def get_list_of_names_from_csv_file(file)
-    results = FasterCSV.parse(file.read)
+    results = CSV.parse(file.read)
     headings = results.shift.map(&:to_s).map(&:downcase)
     name_column = headings.index_of('name')
     rank_column = headings.index_of('rank')

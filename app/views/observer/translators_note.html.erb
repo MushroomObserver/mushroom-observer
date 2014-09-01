@@ -1,0 +1,8 @@
+<% @title = :translators_note_title.t %>
+<%= :translators_note.tpl(:repo => "#{MO.code_repository}/mushroom-observer/blob/master/config/locales/en.txt") %>
+<br/><br/>
+
+<% for lang in Language.all.sort_by(&:order) %>
+  <%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %>
+    <% if lang.beta %>(beta)<% end %><br/>
+<% end %>

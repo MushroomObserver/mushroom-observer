@@ -1,0 +1,43 @@
+<%
+  @title = :app_advanced_search.t
+%>
+
+<div class="HelpNote"><%= :advanced_search_caveat.tp %></div>
+<%= form_tag(:action => 'advanced_search_form') do %>
+  <br/><center><%= submit_tag :SEARCH.l %></center><br/>
+
+  <label for="search_type"><%= :advanced_search_result_type.t %>:</label><br/>
+  <span class="HelpNote"><%= :advanced_search_result_type_help.t %></span><br/>
+  <%= select('search', 'type', [
+    [:OBSERVATIONS.l, :observation],
+    [:IMAGES.l, :image],
+    [:LOCATIONS.l, :location],
+    [:NAMES.l, :name],
+  ]) %><br/><br/>
+
+  <label for="search_name"><%= :NAME.t %>:</label><br/>
+  <span class="HelpNote"><%= :advanced_search_name_help.t %></span><br/>
+  <%= text_field('search', 'name', :size => 70) %><br/><br/>
+  <%= turn_into_name_auto_completer('search_name', :primer => Name.primer,
+                                    :token => ' OR ') %>
+  
+  <label for="search_user"><%= :OBSERVER.t %>:</label><br/>
+  <span class="HelpNote"><%= :advanced_search_observer_help.t %></span><br/>
+  <%= text_field('search', 'user', :size => 70) %><br/><br/>
+  <%= turn_into_user_auto_completer('search_user', :primer => User.primer,
+                                    :token => ' OR ') %>
+  
+  <label for="search_location"><%= :LOCATION.t %>:</label><br/>
+  <span class="HelpNote"><%= :advanced_search_location_help.t %></span><br/>
+  <%= text_field('search', 'location', :size => 70) %><br/><br/>
+  <%= turn_into_location_auto_completer('search_location',
+                                        :primer => Location.primer,
+                                        :token => ' OR ') %>
+  
+  <label for="search_content"><%= :advanced_search_content.t %>:</label><br/>
+  <span class="HelpNote"><%= :advanced_search_content_help.t %></span><br/>
+  <%= text_field('search', 'content', :size => 70) %><br/>
+  <span class="HelpNote"><%= :advanced_search_content_notes.t %></span><br/><br/>
+
+  <br/><center><%= submit_tag :SEARCH.l %></center>
+<% end %>

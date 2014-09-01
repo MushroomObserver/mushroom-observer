@@ -1,0 +1,59 @@
+<!--[form:image]-->
+
+<p>
+  <label for="image_copyright_holder"><%= :form_images_copyright_holder.t %>:
+  </label><br/>
+  <%= form.text_field('copyright_holder') %>
+</p>
+
+<% unless leave_out_original_file_name %>
+  <p>
+    <label for="image_original_name">
+      <%= :form_images_original_name.t %>:
+    </label><br/>
+    <%= form.text_field('original_name') %>
+  </p>
+<% end %>
+
+<p><label for="image_when_1i"><%= :WHEN.t %>:</label>
+  <span class="HelpNote">
+    <%= :form_images_when_help.t %>
+  </span><br/>
+<%= date_select(:image, :when,
+  :start_year => 1980, :end_year => Time.now.year,
+  :order => [:day,:month,:year]) %></p>
+
+<p><label for="image_license_id"><%= :LICENSE.t %>:</label>
+  <span class="HelpNote">
+    <%= :form_images_license_help.t %>
+  </span><br/>
+<%= form.select(:license_id, @licenses) %></p>
+
+<p><label for="image_notes"><%= :NOTES.t %>:</label>
+  <span class="HelpNote">
+    <%= :form_images_notes_help.t %>
+  </span><br/>
+<%= form.text_area('notes', "cols" => width) %></p>
+<%= render(:partial => 'shared/textilize_help') %>
+
+<% if @projects.any? %>
+  <br/>
+  <p>
+    <%= :PROJECTS.t %>:
+    <span class="HelpNote">
+      (<%= :form_images_project_help.t %>)
+    </span><br/>
+    <% for project in @projects %>
+      <%= check_box('project', "id_#{project.id}",
+        :checked => @project_checks[project.id],
+        :disabled => @image.user != @user && !project.is_member?(@user)) %>
+      <label for="project_id_<%= project.id %>">
+        <%= project_link(project) %>
+      </label><br/>
+  <% end %>
+  </p>
+<% end %>
+
+<%= focus_on('image_notes') %>
+
+<!--[eoform:image]-->

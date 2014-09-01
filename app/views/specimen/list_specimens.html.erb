@@ -1,0 +1,32 @@
+<%
+  @title ||= :list_specimens_title.t
+
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set do
+    add_tabs(@links)
+  end
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @objects.length > 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% odd_or_even = 0
+      for specimen in @objects
+				herbarium = specimen.herbarium
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+					<td>
+            <%= link_with_query(specimen.herbarium_label,
+                  :action => "show_specimen", :id => specimen.id) %>
+						(<%= link_with_query(herbarium.name.t, :controller => 'herbarium',
+                   :action => 'show_herbarium', :id => herbarium.id) %>)
+            <br/>
+            <span class="ListWhen"><%= specimen.created_at.web_time %></span>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

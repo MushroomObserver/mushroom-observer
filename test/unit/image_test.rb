@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class ImageTest < UnitTestCase
 
@@ -8,36 +8,36 @@ class ImageTest < UnitTestCase
     assert(img.image_votes.empty?)
     assert_equal(0, img.num_votes)
     assert_equal(0, img.vote_cache.to_i)
-    assert_nil(img.users_vote(@mary))
-    assert_nil(img.users_vote(@rolf))
+    assert_nil(img.users_vote(mary))
+    assert_nil(img.users_vote(rolf))
 
-    img.change_vote(@mary, 2)
+    img.change_vote(mary, 2)
     assert_equal(1, img.num_votes)
     assert_equal(2, img.vote_cache)
-    assert_equal(2, img.users_vote(@mary))
-    assert_nil(img.users_vote(@rolf))
+    assert_equal(2, img.users_vote(mary))
+    assert_nil(img.users_vote(rolf))
     assert_false(img.image_votes.first.anonymous)
 
-    img.change_vote(@rolf, 4, :anon)
+    img.change_vote(rolf, 4, :anon)
     assert_equal(2, img.num_votes)
     assert_equal(3, img.vote_cache)
-    assert_equal(2, img.users_vote(@mary))
-    assert_equal(4, img.users_vote(@rolf))
+    assert_equal(2, img.users_vote(mary))
+    assert_equal(4, img.users_vote(rolf))
 
-    img.change_vote(@mary)
+    img.change_vote(mary)
     assert_equal(1, img.num_votes)
     assert_equal(4, img.vote_cache)
-    assert_equal(4, img.users_vote(@rolf))
-    assert_nil(img.users_vote(@mary))
+    assert_equal(4, img.users_vote(rolf))
+    assert_nil(img.users_vote(mary))
     assert_true(img.image_votes.first.anonymous)
 
-    img.change_vote(@rolf)
-    assert_nil(img.users_vote(@mary))
-    assert_nil(img.users_vote(@rolf))
+    img.change_vote(rolf)
+    assert_nil(img.users_vote(mary))
+    assert_nil(img.users_vote(rolf))
   end
 
   def test_copyright_logging
-    User.current = @mary
+    User.current = mary
 
     license_one = License.find(1)
     license_two = License.find(3)
@@ -49,7 +49,7 @@ class ImageTest < UnitTestCase
     # Got rid of date stamp messing around due to switch from 'modified' to 'updated_at'
     
     img = Image.create(
-      :user             => @mary,
+      :user             => mary,
       :when             => date_one,
       :license          => license_one,
       :copyright_holder => name_one
@@ -90,24 +90,23 @@ class ImageTest < UnitTestCase
   end
 
   def test_project_ownership
-
     # NOT owned by Bolete project, but owned by Rolf
     img = images(:commercial_inquiry_image)
-    assert_true(img.has_edit_permission?(@rolf))
-    assert_false(img.has_edit_permission?(@mary))
-    assert_false(img.has_edit_permission?(@dick))
+    assert_true(img.has_edit_permission?(rolf))
+    assert_false(img.has_edit_permission?(mary))
+    assert_false(img.has_edit_permission?(dick))
 
     # IS owned by Bolete project, AND owned by Mary (Dick is member of Bolete project)
     img = images(:in_situ)
-    assert_false(img.has_edit_permission?(@rolf))
-    assert_true(img.has_edit_permission?(@mary))
-    assert_true(img.has_edit_permission?(@dick))
+    assert_false(img.has_edit_permission?(rolf))
+    assert_true(img.has_edit_permission?(mary))
+    assert_true(img.has_edit_permission?(dick))
   end
 
   def test_validation
     img = Image.new
     assert_false(img.valid?)
-    img.user = @rolf
+    img.user = rolf
     assert_true(img.valid?)
     do_truncate_test(img, :content_type, 100)
     do_truncate_test(img, :copyright_holder, 100)
@@ -128,9 +127,9 @@ class ImageTest < UnitTestCase
   end
 
   def test_presence_of_critical_external_scripts
-    assert(!File.exist?("#{RAILS_ROOT}/script/bogus_script"), "script/bogus_script should not exist!")
-    assert(File.exist?("#{RAILS_ROOT}/script/process_image"), "Missing script/process_image!")
-    assert(File.exist?("#{RAILS_ROOT}/script/rotate_image"), "Missing script/rotate_image!")
-    assert(File.exist?("#{RAILS_ROOT}/script/retransfer_images"), "Missing script/retransfer_images!")
+    assert(!File.exist?("#{::Rails.root.to_s}/script/bogus_script"), "script/bogus_script should not exist!")
+    assert(File.exist?("#{::Rails.root.to_s}/script/process_image"), "Missing script/process_image!")
+    assert(File.exist?("#{::Rails.root.to_s}/script/rotate_image"), "Missing script/rotate_image!")
+    assert(File.exist?("#{::Rails.root.to_s}/script/retransfer_images"), "Missing script/retransfer_images!")
   end
 end

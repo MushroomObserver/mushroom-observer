@@ -1,0 +1,12 @@
+RAILS_ENV=production
+RUBYLIB=/usr/local/lib/ruby/site_ruby/1.9.3
+GEM_HOME=/usr/local/lib/ruby/gems/1.9.3
+PATH=/usr/local/bin:/usr/bin:/bin
+
+*/5 * * * * /var/web/mushroom-observer/script/run_rake email:send
+*/5 * * * * /var/web/mushroom-observer/script/run_script monitor_top
+*/6 * * * * /var/web/mushroom-observer/script/run_script retransfer_images
+23  * * * * /var/web/mushroom-observer/script/parse_log
+13  3 * * * /var/web/mushroom-observer/script/run_script refresh_name_lister_cache
+13  4 * * * /var/web/mushroom-observer/script/run_script verify_images
+33 21 * * * /var/web/mushroom-observer/script/make_eol_xml /var/web/mushroom-observer/public/eol.xml

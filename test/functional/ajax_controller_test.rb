@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class AjaxControllerTest < FunctionalTestCase
 
@@ -46,35 +46,35 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:test)
     assert_nil(@controller.instance_variable_get('@user'))
     assert_nil(User.current)
-    assert_equal(:'pt-BR', Locale.code)
+    assert_equal(:pt, I18n.locale)
     assert_equal({}, cookies)
-    assert_equal({'locale'=>'pt-BR','flash'=>{}}, session.data)
-    session.data.delete('locale')
+    assert_equal({'locale'=>'pt'}, session)
+    session.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,xx-xx;q=0.5"
     good_ajax_request(:test)
-    assert_equal(:'pt-BR', Locale.code)
-    session.data.delete('locale')
+    assert_equal(:pt, I18n.locale)
+    session.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,en;q=0.5"
     good_ajax_request(:test)
-    assert_equal(:'en-US', Locale.code)
-    session.data.delete('locale')
+    assert_equal(:pt, I18n.locale)
+    session.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "en-xx,en;q=0.5"
     good_ajax_request(:test)
-    assert_equal(:'en-US', Locale.code)
+    assert_equal(:en, I18n.locale)
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "zh-*"
     good_ajax_request(:test)
-    assert_equal(:'en-US', Locale.code)
+    assert_equal(:en, I18n.locale)
   end
 
   def test_activate_api_key
     key = ApiKey.new
     key.provide_defaults
     key.verified = nil
-    key.user = @katrina
+    key.user = katrina
     key.notes = 'testing'
     key.save!
     assert_nil(key.reload.verified)
@@ -98,7 +98,7 @@ class AjaxControllerTest < FunctionalTestCase
     key = ApiKey.new
     key.provide_defaults
     key.verified = Time.now
-    key.user = @katrina
+    key.user = katrina
     key.notes = 'testing'
     key.save!
     assert_equal('testing', key.notes)
@@ -179,13 +179,6 @@ class AjaxControllerTest < FunctionalTestCase
   end
 
   def test_auto_complete_user
-    # @rolf    - Rolf Singer
-    # @mary    - Mary Newbie
-    # @junk    - Junk Box
-    # @dick    - Tricky Dick
-    # @katrina - Katrina
-    # @roy     - Roy Halling
-
     good_ajax_request(:auto_complete, :type => :user, :id => 'Rover')
     assert_equal(['R', 'rolf <Rolf Singer>', 'roy <Roy Halling>'], @response.body.split("\n"))
 
@@ -250,17 +243,12 @@ class AjaxControllerTest < FunctionalTestCase
     end
   end
 
-  def test_image
-    # Returns a bogus image no matter what in test mode.
-    good_ajax_request(:image, :type => '320', :id => 1)
-  end
-
   def test_get_pivotal_story
-    if PIVOTAL_USERNAME != 'username'
-      good_ajax_request(:pivotal, :type => 'story', :id => PIVOTAL_TEST_ID)
+    if MO.pivotal_enabled
+      good_ajax_request(:pivotal, :type => 'story', :id => MO.pivotal_test_id)
       assert_match(/This is a test story/, @response.body)
       assert_match(/Posted by.*Rolf Singer/, @response.body)
-      assert_match(/this is a test comment/, @response.body)
+      assert_match(/This is a test comment/, @response.body)
       assert_match(/By:.*Mary Newbie/, @response.body)
       assert_match(/Post Comment/, @response.body)
     end
@@ -268,15 +256,15 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_naming_vote
     naming = Naming.find(1)
-    assert_nil(naming.users_vote(@dick))
+    assert_nil(naming.users_vote(dick))
     bad_ajax_request(:vote, :type => :naming, :id => 1, :value => 3)
 
     login('dick')
     good_ajax_request(:vote, :type => :naming, :id => 1, :value => 3)
-    assert_equal(3, naming.reload.users_vote(@dick).value)
+    assert_equal(3, naming.reload.users_vote(dick).value)
 
     good_ajax_request(:vote, :type => :naming, :id => 1, :value => 0)
-    assert_nil(naming.reload.users_vote(@dick))
+    assert_nil(naming.reload.users_vote(dick))
 
     bad_ajax_request(:vote, :type => :naming, :id => 1, :value => 99)
     bad_ajax_request(:vote, :type => :naming, :id => 99, :value => 0)
@@ -285,16 +273,16 @@ class AjaxControllerTest < FunctionalTestCase
 
   def test_image_vote
     image = Image.find(1)
-    assert_nil(image.users_vote(@dick))
+    assert_nil(image.users_vote(dick))
     bad_ajax_request(:vote, :type => :image, :id => 1, :value => 3)
 
     login('dick')
-    assert_nil(image.users_vote(@dick))
+    assert_nil(image.users_vote(dick))
     good_ajax_request(:vote, :type => :image, :id => 1, :value => 3)
-    assert_equal(3, image.reload.users_vote(@dick))
+    assert_equal(3, image.reload.users_vote(dick))
 
     good_ajax_request(:vote, :type => :image, :id => 1, :value => 0)
-    assert_nil(image.reload.users_vote(@dick))
+    assert_nil(image.reload.users_vote(dick))
 
     bad_ajax_request(:vote, :type => :image, :id => 1, :value => 99)
     bad_ajax_request(:vote, :type => :image, :id => 99, :value => 0)

@@ -64,4 +64,10 @@ class Array
       nil
     end
   end
+
+  # (Stolen forward from rails 3.1.)
+  def safe_join(sep=$,)
+    sep = ERB::Util.html_escape(sep)
+    map { |i| ERB::Util.html_escape(i) }.join(sep).html_safe
+  end
 end

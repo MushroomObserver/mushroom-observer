@@ -4,29 +4,21 @@ require 'digest/md5'
 require 'net/http'
 require 'uri'
 
-# HOST = 'localhost'
-# PORT = 3000
-HOST = 'localhost.localdomain'
-PORT = 80
-KEY = 'cahja4s81achfojjlqzgkt16qgkl2hira'
-
 # HOST = 'mushroomobserver.org'
 # PORT = 80
-# KEY = '7lujzo3uld8gwcy39n0e914hge1ptfxug'
+HOST = 'localhost'
+PORT = 3000
+KEY = 'xxx'
 
 ################################################################################
 
-# Net::HTTP.get_print(URI.parse("http://#{HOST}:#{PORT}/observer/how_to_help"))
-# exit
-
-# Net::HTTP.get_print(HOST, '/observer/how_to_help', PORT)
-# exit
-
+# # Get observation #1.
 # http = Net::HTTP.new(HOST, PORT)
-# response = http.get('/api/images?id=3')
+# response = http.get('/api/observations?id=1')
 # puts response.body
 # exit
 
+# Create observation.
 http = Net::HTTP.new(HOST, PORT)
 path = '/api/observations?' + [
   'api_key=' + KEY,
@@ -36,13 +28,14 @@ response = http.post(path, '')
 puts response.body
 exit
 
+# # Create image via upload.
 # http = Net::HTTP.new(HOST, PORT)
 # path = '/api/images?' + [
 #   'date=20100102',
 #   'notes=blah%20blah',
 #   'api_key=' + KEY,
 # ].join('&')
-# data = File.open('test/fixtures/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
+# data = File.open('test/images/Coprinus_comatus.jpg', 'rb') {|fh| fh.read}
 # head = {
 #   'Content-Type' => 'image/jpeg',
 #   'Content-Length' => data.length.to_s,
@@ -52,6 +45,7 @@ exit
 # puts response.body
 # exit
 
+# # Create image via url.
 # http = Net::HTTP.new(HOST, PORT)
 # path = '/api/images?' + [
 #   'date=20100102',
@@ -63,6 +57,7 @@ exit
 # response = http.post(path, nil)
 # puts response.body
 
+# # Create image via local file (admin would have to upload to server first).
 # http = Net::HTTP.new(HOST, PORT)
 # path = '/api/images?' + [
 #   'date=20100102',

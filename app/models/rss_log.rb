@@ -390,7 +390,7 @@ private
 
   # Protect special characters (whitespace) in string for log encoder/decoder.
   def self.escape(str)
-    str.to_s.gsub(/[%\s]/) { '%%%02X' % $&[0].ord }
+    str.to_s.gsub(/[%\s]/) {|m| '%%%02X' % m.ord }
   end
 
   # Reverse protection of special characters in string for log encoder/decoder.

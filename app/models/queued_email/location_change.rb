@@ -46,7 +46,7 @@ class QueuedEmail::LocationChange < QueuedEmail
     if location
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
-      result.add_integer(:old_location_version, (location.altered? ? location.version - 1 : location.version))
+      result.add_integer(:old_location_version, (location.changed? ? location.version - 1 : location.version))
     elsif location = desc.location
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
@@ -55,7 +55,7 @@ class QueuedEmail::LocationChange < QueuedEmail
     if desc
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
-      result.add_integer(:old_description_version, (desc.altered? ? desc.version - 1 : desc.version))
+      result.add_integer(:old_description_version, (desc.changed? ? desc.version - 1 : desc.version))
     elsif desc = location.description
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
@@ -68,9 +68,9 @@ class QueuedEmail::LocationChange < QueuedEmail
   def deliver_email
     # Make sure location wasn't deleted or merged away since email was queued.
     if location
-      AccountMailer.deliver_location_change(user, to_user, queued, location,
+      AccountMailer.location_change(user, to_user, queued, location,
         description, old_location_version, new_location_version,
-        old_description_version, new_description_version)
+        old_description_version, new_description_version).deliver
     end
   end
 end

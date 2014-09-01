@@ -1,18 +1,16 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class LocalizationFilesTest < UnitTestCase
 
   def assert_no_missing_translations(tags, type)
-    clean_our_backtrace do
-      missing = tags.uniq.reject(&:has_translation?)
-      msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
-      assert_block(msg) { missing.empty? }
-    end
+    missing = tags.uniq.reject(&:has_translation?)
+    msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
+    assert_block(msg) { missing.empty? }
   end
 
 ################################################################################
-
+  
   def test_localization_files_exist
     for lang in Language.all
       assert File.exists?(lang.localization_file)
@@ -57,7 +55,7 @@ class LocalizationFilesTest < UnitTestCase
     tags = known_tags
     missing_tags = []
     duplicate_function_defs = []
-    source_files("#{RAILS_ROOT}/app", "#{RAILS_ROOT}/test") do |file|
+    source_files("#{::Rails.root.to_s}/app", "#{::Rails.root.to_s}/test") do |file|
       missing_tags += missing_tags_in_file(file, tags)
       duplicate_function_defs += duplicate_function_defs_in_file(file)
     end
@@ -67,10 +65,15 @@ class LocalizationFilesTest < UnitTestCase
       "definition(s) in source files:\n" + duplicate_function_defs.join(''))
   end
 
-  # Get Hash of tags we havbe translations for already.
+  def i18n_keys
+    # Going through the backdoor to call a private method.  Yuck!
+    TranslationString.translations(:en).keys
+  end
+  
+  # Get Hash of tags we have translations for already.
   def known_tags
     tags = {}
-    for tag in Globalite.localizations.keys +
+    for tag in i18n_keys +
         # these are tags only used in unit tests
         [ :one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y, :_unit_test_z ]
       tags[tag.to_s.downcase] = true
@@ -145,7 +148,7 @@ class LocalizationFilesTest < UnitTestCase
 
   def test_api_error_translations
     tags = []
-    file = "#{RAILS_ROOT}/app/classes/api/errors.rb"
+    file = "#{::Rails.root.to_s}/app/classes/api/errors.rb"
     File.open(file, 'r:utf-8') do |fh|
       fh.each_line do |line|
         if line.match(/^\s*class (\w+) < /) and
@@ -154,7 +157,7 @@ class LocalizationFilesTest < UnitTestCase
         end
       end
     end
-    file = "#{RAILS_ROOT}/app/classes/api/parsers.rb"
+    file = "#{::Rails.root.to_s}/app/classes/api/parsers.rb"
     File.open(file, 'r:utf-8') do |fh|
       fh.each_line do |line|
         if line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)

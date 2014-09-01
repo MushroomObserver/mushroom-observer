@@ -1,6 +1,8 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
+
+# require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class SpecimenTest < UnitTestCase
   def test_fields

@@ -1,0 +1,44 @@
+<%
+  flash_error(@error) if @error and (!@targets or @targets.empty?)
+%>
+
+<%= paginate_block(@pages) do %>
+  <% if @targets.length > 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% odd_or_even = 0
+      for item in @targets
+        obj = item.target
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td>
+            <span class='ListWhat'><%= item.summary.t %></span>
+          </td>
+          <td>
+            <% if item.is_a?(Notification) %>
+              <% if obj %>
+                <%= link_to(:show_object.t(:type => obj.type_tag.t),
+                            :controller => obj.show_controller,
+                            :action => obj.show_action, :id => obj.id) %> |
+              <% end %>
+              <%= link_to(:EDIT.t, item.link_params) %> |
+              <%= link_to(:DESTROY.t, :action => 'destroy_notification', :id => item.id) %>
+            <% else %>
+              <% if obj %>
+                <%= link_to(:show_object.t(:type => obj.type_tag.t),
+                            :controller => obj.show_controller,
+                            :action => obj.show_action, :id => obj.id) %> |
+              <% end %>
+              <%= link_to(item.state ? :list_interests_turn_off.t : :list_interests_turn_on.t,
+                          :controller => 'interest', :action => 'set_interest',
+                          :type => item.target_type, :id => item.target_id,
+                          :state => item.state ? -1 : 1) %> |
+              <%= link_to(:DESTROY.t, :controller => 'interest',
+                          :action => 'set_interest', :type => item.target_type,
+                          :id => item.target_id, :state => 0) %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

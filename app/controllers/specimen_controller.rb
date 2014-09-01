@@ -90,7 +90,7 @@ class SpecimenController < ApplicationController
     @layout = calc_layout_params
     if @observation
       @herbarium_label = @observation.default_specimen_label
-      if request.method == :post
+      if request.method == "POST"
         if valid_specimen_params(params[:specimen])
           build_specimen(params[:specimen], @observation)
         end
@@ -99,7 +99,7 @@ class SpecimenController < ApplicationController
   end
  
   def valid_specimen_params(params)
-    params[:herbarium_name] = params[:herbarium_name].strip_html
+    params[:herbarium_name] = params[:herbarium_name].to_s.strip_html
     params[:herbarium_label] = params[:herbarium_label].strip_html
     # has_curator_permission(params[:herbarium_name], @user) and
     !specimen_exists(params[:herbarium_name], params[:herbarium_label])
@@ -183,16 +183,10 @@ class SpecimenController < ApplicationController
     has_permission?(specimen, :delete_specimen_cannot_delete.l)
   end
   
-  def has_permission?(specimen, error_message)
-    result = (is_in_admin_mode? or specimen.can_edit?(@user))
-    flash_error(error_message) if not result
-    result
-  end
-  
   def edit_specimen # :norobots:
     @specimen = Specimen.find(params[:id].to_s)
     if can_edit?(@specimen)
-      if (request.method == :post) and params[:specimen]
+      if (request.method == "POST") and params[:specimen]
         if ok_to_update(@specimen, params[:specimen])
           update_specimen(@specimen, params[:specimen])
         end

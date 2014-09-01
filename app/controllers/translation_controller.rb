@@ -66,8 +66,8 @@ class TranslationController < ApplicationController
   end
 
   def get_language_and_authorize_user
-    locale = params[:locale] || Locale.code
-    lang = Language.find_by_locale(locale)
+    locale = params[:locale] || I18n.locale
+    lang = Language.from_locale(locale)
     if !lang
       raise(:edit_translations_bad_locale.t(:locale => locale))
     elsif !@user
@@ -244,7 +244,7 @@ class TranslationController < ApplicationController
   end
 
   def process_template_line(line)
-    if line.match(/^['"]?(\w+)['"]?:\s*/)
+    if line.match(/^\s*['"]?(\w+)['"]?:\s*/)
       tag, str = $1, $'
       process_tag_line(tag)
       @in_tag = true if str.match(/^>/)

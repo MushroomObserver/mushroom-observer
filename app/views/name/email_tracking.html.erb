@@ -1,0 +1,26 @@
+<%
+  @title = :email_tracking_title.t(:name => @name.display_name)
+
+  new_tab_set do
+    add_tab(:cancel_and_show.t(:type => :name),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
+
+<%= :email_tracking_help.tp %>
+
+<%= form_tag(:action => 'email_tracking', :id => @name.id) do %>
+  <br/><center>
+    <%= if @notification
+      submit_tag(:UPDATE.t) + ' ' + submit_tag(:DISABLE.t)
+    else
+      submit_tag(:ENABLE.t)
+    end %>
+  </center>
+
+  <label for="notification_note_template"><%= :email_tracking_note.t %></label>:<br/>
+  <span class="HelpNote"><%= :email_tracking_note_help.t %></span><br/>
+  <%= text_area('notification', 'note_template', :cols => 80, :value => @note_template) %><br/>
+
+  <%= focus_on('notification_note_template') %>
+<% end %>

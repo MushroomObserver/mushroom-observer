@@ -1,0 +1,23 @@
+<%
+  @title ||= :edit_location_title.t(:name => @location.display_name)
+
+  new_tab_set do
+    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
+    add_tab_with_query(:cancel_and_show.t(:type => :location),
+      :action => 'show_location', :id => @location.id)
+    add_location_search_tabs(@location.name)
+  end
+%>
+
+<%= form_for(:location, :url => add_query_param(
+      :action => :edit_location,
+      :id => @location.id,
+      :approved_where => @display_name
+    )) do |form| %>
+  <br/><center><%= submit_tag(:UPDATE.l) %></center>
+
+  <%= render(:partial => 'form_location', :locals =>
+             { :where => @display_name, :form => form }) %>
+
+  <br/><center><%= submit_tag(:UPDATE.l) %></center>
+<% end %>

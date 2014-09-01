@@ -1,28 +1,51 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 require 'rexml/document'
 
 class ApiControllerTest < FunctionalTestCase
 
   def assert_no_api_errors
-    clean_our_backtrace do
-      @api = assigns(:api)
-      msg = "Caught API Errors:\n" + @api.errors.map(&:to_s).join("\n")
+    @api = assigns(:api)
+    if @api
+      msg = "Caught API Errors:\n" + @api.errors.map do |error|
+        error.to_s + "\n" + error.trace.join("\n")
+      end.join("\n")
       assert_block(msg) { @api.errors.empty? }
     end
   end
 
   def post_and_send_file(action, file, content_type, params)
-    @request.env['RAW_POST_DATA'] = File.read(file)
-    @request.env['CONTENT_LENGTH'] = File.size(file)
-    @request.env['CONTENT_TYPE'] = content_type
-    cmd = '/usr/bin/md5sum'
-    if !File.exists?('/usr/bin/md5sum') and File.exists?('/usr/bin/cksum')
-      cmd = '/usr/bin/cksum'
-    end
-    @request.env['CONTENT_MD5'] = File.read("| #{cmd} #{file}")
+    stream = File.open(file, "rb")
+    length = File.size(file)
+    checksum = file_checksum(file)
+    post_and_send(action, stream, length, content_type, checksum, params)
+  end
+
+  def post_and_send_string(action, string, content_type, params)
+    stream = StringIO.new(string, "rb")
+    length = string.length
+    checksum = string_checksum(string)
+    post_and_send(action, stream, length, content_type, checksum, params)
+  end
+
+  def post_and_send(action, stream, length, type, md5, params)
+    @request.env['RAW_POST_DATA'] = stream
+    @request.env['CONTENT_LENGTH'] = length
+    @request.env['CONTENT_TYPE'] = type
+    @request.env['CONTENT_MD5'] = md5
     post(action, params)
+    @request.env.delete('RAW_POST_DATA')
+  end
+
+  def file_checksum(filename)
+    File.open(filename) do |f|
+      Digest::MD5.hexdigest(f.read)
+    end
+  end
+
+  def string_checksum(string)
+    Digest::MD5.hexdigest(string)
   end
 
 ################################################################################
@@ -30,6 +53,7 @@ class ApiControllerTest < FunctionalTestCase
   def test_basic_get_requests
     for model in [Comment, Image, Location, Name, Observation, Project, SpeciesList, User]
       for detail in [:none, :low, :high]
+        assert_no_api_errors
         get(model.table_name.to_sym, :detail => detail)
         assert_no_api_errors
         assert_objs_equal(model.first, @api.results.first)
@@ -44,7 +68,7 @@ class ApiControllerTest < FunctionalTestCase
     )
     assert_no_api_errors
     obs = Observation.last
-    assert_users_equal(@rolf, obs.user)
+    assert_users_equal(rolf, obs.user)
     assert_equal(Date.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
     assert_nil(obs.where)
@@ -83,7 +107,7 @@ class ApiControllerTest < FunctionalTestCase
     )
     assert_no_api_errors
     obs = Observation.last
-    assert_users_equal(@rolf, obs.user)
+    assert_users_equal(rolf, obs.user)
     assert_equal('2012-06-26', obs.when.web_date)
     assert_objs_equal(locations(:burbank), obs.location)
     assert_nil(obs.where)
@@ -105,17 +129,19 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_minimal_image
     setup_image_dirs
-    file = "#{RAILS_ROOT}/test/fixtures/images/sticky.jpg"
+    count = Image.count
+    file = "#{::Rails.root}/test/images/sticky.jpg"
     post_and_send_file(:images, file, 'image/jpeg',
       :api_key => api_keys(:rolfs_api_key).key
     )
     assert_no_api_errors
+    assert_equal(count+1, Image.count)
     img = Image.last
-    assert_users_equal(@rolf, img.user)
+    assert_users_equal(rolf, img.user)
     assert_equal(Date.today.web_date, img.when.web_date)
     assert_equal('', img.notes)
-    assert_equal(@rolf.legal_name, img.copyright_holder)
-    assert_objs_equal(@rolf.license, img.license)
+    assert_equal(rolf.legal_name, img.copyright_holder)
+    assert_objs_equal(rolf.license, img.license)
     assert_nil(img.original_name)
     assert_equal('image/jpeg', img.content_type)
     assert_equal(407, img.width)
@@ -126,7 +152,7 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_maximal_image
     setup_image_dirs
-    file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
+    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
     post_and_send_file(:images, file, 'image/jpeg',
       :api_key       => api_keys(:rolfs_api_key).key,
       :vote          => '3',
@@ -135,12 +161,12 @@ class ApiControllerTest < FunctionalTestCase
       :copyright_holder => 'My Friend',
       :license       => '2',
       :original_name => 'Coprinus_comatus.jpg',
-      :projects      => (proj = @rolf.projects_member.first).id,
-      :observations  => (obs = @rolf.observations.first).id
+      :projects      => (proj = rolf.projects_member.first).id,
+      :observations  => (obs = rolf.observations.first).id
     )
     assert_no_api_errors
     img = Image.last
-    assert_users_equal(@rolf, img.user)
+    assert_users_equal(rolf, img.user)
     assert_equal('2012-06-26', img.when.web_date)
     assert_equal('Here are some notes.', img.notes)
     assert_equal('My Friend', img.copyright_holder)
@@ -188,22 +214,22 @@ class ApiControllerTest < FunctionalTestCase
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal('Mushroom Mapper', api_key.notes)
-    assert_users_equal(@rolf, api_key.user)
+    assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     post(:api_keys,
       :api_key => rolfs_key.key,
       :app => 'Mushroom Mapper',
-      :for_user => @mary.id
+      :for_user => mary.id
     )
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal('Mushroom Mapper', api_key.notes)
-    assert_users_equal(@mary, api_key.user)
+    assert_users_equal(mary, api_key.user)
     assert_nil(api_key.verified)
     assert_equal(email_count + 1, ActionMailer::Base.deliveries.size)
     email = ActionMailer::Base.deliveries.last
-    assert_equal(@mary.email, email.header['to'].to_s)
+    assert_equal(mary.email, email.header['to'].to_s)
   end
 end

@@ -1,0 +1,27 @@
+<% @title = :user_alert_create_title.t(:user => @user2.legal_name) %>
+
+<%= form_tag(:action => "create_alert", :id => @user2.id) do %>
+
+  <% if @user2.alert_created_at %>
+    <label for="user2_created_at"><%= :user_alert_created_at.t %>:</label>
+    <%= @user2.alert_created_at.web_time %><br/>
+    <label for="user2_next_showing"><%= :user_alert_next_showing.t %>:</label>
+    <%= @user2.alert_next_showing.web_time %><br/>
+    <label for="user2_user"><%= :user_alert_user.t %>:</label>
+    <%= @user2.alert_user.login %><br/><br/>
+  <% end %>
+
+  <label for="user2_alert_type"><%= :user_alert_type.t %>:</label>
+  <%= select('user2', 'alert_type', [['','']] + User.all_alert_types.map \
+    {|x| ["user_alert_type_#{x}".to_sym.l, x.to_s]})%><br/><br/>
+
+  <label for="user2_alert_notes"><%= :user_alert_notes.t %>:</label><br/>
+  <%= text_area('user2', 'alert_notes', :cols => 80, :rows => 8) %><br/><br/>
+
+  <center>
+    <input type="submit" name="commit" value="<%= :user_alert_save.l %>" class="primary" />
+    <span style="padding-right:50px">&nbsp;</span>
+    <input type="submit" name="commit" value="<%= :user_alert_delete.l %>" class="primary" />
+  </center>
+<% end %>
+

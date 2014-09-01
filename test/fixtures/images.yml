@@ -7,11 +7,12 @@ in_situ:
   content_type: image/jpeg
   user_id: 2
   when: 2006-05-11
-  notes: What it looked like originally
+  notes: What it looked like originally & before we'd messed it up
   copyright_holder: Bob Dobbs
   width: 1000
   height: 1000
   original_name: DSCN8835.JPG
+  transferred: false
 
 turned_over:
   id: 2
@@ -24,6 +25,7 @@ turned_over:
   notes: What it looked like when I turned it over
   copyright_holder: Bob Dobbs
   original_name: 1.jpg
+  transferred: false
 
 commercial_inquiry_image:
   id: 3
@@ -36,6 +38,7 @@ commercial_inquiry_image:
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Location 2007-02-25 b.jpg
+  transferred: true
 
 disconnected_coprinus_comatus_image:
   id: 4
@@ -48,6 +51,7 @@ disconnected_coprinus_comatus_image:
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Coprinus comatus.tiff
+  transferred: true
 
 connected_coprinus_comatus_image:
   id: 5
@@ -60,6 +64,7 @@ connected_coprinus_comatus_image:
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Coprinus comatus close-up.tiff
+  transferred: true
 
 agaricus_campestris_image:
   id: 6
@@ -72,6 +77,7 @@ agaricus_campestris_image:
   notes: Some Notes
   copyright_holder: Bob Dobbs
   original_name: Name with áč€εиts.gif
+  transferred: true
 
 amateur_image:
   id: 7
@@ -83,6 +89,7 @@ amateur_image:
   when: 2010-12-30
   notes: 'A friend took this photo.'
   copyright_holder: Nathan Wilson
+  transferred: true
 
 peltigera_image:
   id: 8
@@ -95,6 +102,7 @@ peltigera_image:
   notes: 'Pretty lichen'
   vote_cache: 3
   copyright_holder: Nathan Wilson
+  transferred: true
 
 conic_image:
   id: 9
@@ -107,6 +115,7 @@ conic_image:
   notes: 'A scientific illustration of Conic Pileus'
   copyright_holder: Insil Choi
   vote_cache: 3
+  transferred: true
 
 convex_image:
   id: 10
@@ -118,6 +127,7 @@ convex_image:
   when: 2013-08-13
   notes: 'A scientific illustration of Convex Pileus'
   copyright_holder: Insil Choi
+  transferred: true
 
 plane_image_thumb:
   id: 11
@@ -130,6 +140,7 @@ plane_image_thumb:
   notes: 'A scientific illustration of Plane Pileus'
   copyright_holder: Insil Choi
   vote_cache: 3
+  transferred: true
 
 plane_image_example:
   id: 12
@@ -142,6 +153,7 @@ plane_image_example:
   notes: 'Example image of of Plane Pileus'
   copyright_holder: Nathan Wilson
   vote_cache: 3
+  transferred: true
 
 rolf_profile_image:
   id: 13
@@ -152,3 +164,4 @@ rolf_profile_image:
   user_id: 1
   when: 2013-09-08
   copyright_holder: Rolf Singer
+  transferred: true

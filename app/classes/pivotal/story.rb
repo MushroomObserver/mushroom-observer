@@ -21,26 +21,34 @@ class Pivotal
     }
 
     LABEL_VALUE = {
-      'critical'   => 4,
-      'bottleneck' => 3,
-      'api'        => 2,
-      'design'     => 2,
-      'email'      => 2,
-      'interface'  => 2,
-      'lists'      => 2,
-      'locations'  => 2,
-      'names'      => 2,
-      'projects'   => 2,
-      'search'     => 2,
-      'taxonomy'   => 2,
-      'voting'     => 2,
-      'eol'        => 2,
-      'i18n'       => 2,
-      'other'      => 2,
-      'admin'      => 1,
-      'code'       => 1,
-      'server'     => 1,
-      'open'       => 0,
+      'critical'        => 4,
+      'bottleneck'      => 3,
+      'api'             => 2,
+      'design'          => 2,
+      'documentation'   => 2,
+      'email'           => 2,
+      'eol'             => 2,
+      'github'          => 2,
+      'glossary'        => 2,
+      'herbarium'       => 2,
+      'i18n'            => 2,
+      'images'          => 2,
+      'interface'       => 2,
+      'lists'           => 2,
+      'locations'       => 2,
+      'names'           => 2,
+      'observations'    => 2,
+      'pivotal_tracker' => 2,
+      'projects'        => 2,
+      'search'          => 2,
+      'taxonomy'        => 2,
+      'vagrant'         => 2,
+      'voting'          => 2,
+      'other'           => 2,
+      'admin'           => 1,
+      'code'            => 1,
+      'server'          => 1,
+      'open'            => 0,
     }
 
     def initialize(xml)
@@ -63,7 +71,7 @@ class Pivotal
         when 'current_state' ; @state    = elem.text
         when 'requested_by'  ; @user   ||= elem.text
         when 'name'          ; @name     = elem.text
-        when 'description'   ; self.description = elem.text
+        when 'description'   ; self.description = elem.text.to_s
         when 'labels'        ; @labels   = elem.text.split(',')
         when 'notes'         ; @comments = elem.elements.map { |e| Pivotal::Comment.new(e) }
         end

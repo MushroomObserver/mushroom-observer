@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class ChecklistTest < UnitTestCase
 
@@ -37,37 +37,37 @@ class ChecklistTest < UnitTestCase
   end
 
   def test_checklist_for_users
-    data = Checklist::ForUser.new(@mary)
+    data = Checklist::ForUser.new(mary)
     assert_equal(0, data.num_genera)
     assert_equal(0, data.num_species)
     assert_equal([], data.genera)
     assert_equal([], data.species)
 
-    data = Checklist::ForUser.new(@katrina)
+    data = Checklist::ForUser.new(katrina)
     assert_equal(1, data.num_genera)
     assert_equal(1, data.num_species)
     assert_equal(genera(katrinas_species), data.genera)
     assert_equal(katrinas_species, data.species)
 
-    data = Checklist::ForUser.new(@rolf)
+    data = Checklist::ForUser.new(rolf)
     assert_equal(3, data.num_genera)
     assert_equal(6, data.num_species)
     assert_equal(genera(rolfs_species), data.genera)
     assert_equal(rolfs_species, data.species)
 
-    User.current = @dick
-    before_data = Checklist::ForUser.new(@dick)
+    User.current = dick
+    before_data = Checklist::ForUser.new(dick)
     before_num_species = before_data.num_species
     before_num_genera = before_data.num_genera
-    
+
     Observation.create!(:name => names(:agaricus))
     assert_names_equal(names(:agaricus), Observation.last.name)
-    assert_users_equal(@dick, Observation.last.user)
-    data = Checklist::ForUser.new(@dick)
+    assert_users_equal(dick, Observation.last.user)
+    data = Checklist::ForUser.new(dick)
     assert_equal(before_num_species, data.num_species)
 
     Observation.create!(:name => names(:lactarius_kuehneri))
-    data = Checklist::ForUser.new(@dick)
+    data = Checklist::ForUser.new(dick)
     after_num_genera = data.num_genera
     after_num_species = data.num_species
     
@@ -76,7 +76,7 @@ class ChecklistTest < UnitTestCase
 
     Observation.create!(:name => names(:lactarius_subalpinus))
     Observation.create!(:name => names(:lactarius_alpinus))
-    data = Checklist::ForUser.new(@dick)
+    data = Checklist::ForUser.new(dick)
     assert_equal(after_num_genera, data.num_genera)
     assert_equal(after_num_species, data.num_species)
   end

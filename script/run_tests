@@ -8,15 +8,4 @@ else
   loader=/usr/local/lib/ruby/1.9.3/rake/rake_test_loader.rb
 fi
 
-echo
-echo Preparing database using old mysql adapter...
-perl -p -e 's/ mysql2$/ mysql/; $_' config/database.yml > config/tmp.yml
-mv config/tmp.yml config/database.yml
-rake db:test:prepare
-perl -p -e 's/ mysql$/ mysql2/; $_' config/database.yml > config/tmp.yml
-mv config/tmp.yml config/database.yml
-
-
-echo
-echo Running tests using new mysql2 adapter...
 ruby -Ilib:test $loader test/{unit,functional,integration}/*_test.rb

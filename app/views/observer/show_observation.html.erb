@@ -1,0 +1,58 @@
+<%
+  @title = :show_observation_title.t(:name => @observation.unique_format_name)
+  questions_ok = @observation.user.email_general_question
+  name = @observation.name
+  user_has_lists = @user && !@user.species_lists.empty?
+
+  new_tab_set do
+    if name && !name.unknown?
+      add_tab(:google_images.t, 'http://images.google.com/images?q=%s' % name.real_text_name)
+      add_tab_with_query(:show_name_distribution_map.t, :controller => 'name', 
+        :action => 'map', :id => name.id)
+    end
+    if questions_ok
+      add_tab_with_query(:show_observation_send_question.t,
+        :controller => 'observer', :action => 'ask_observation_question', 
+        :id => @observation.id)
+    end
+    if check_permission(@observation)
+      add_tab_with_query(:show_observation_edit_observation.t, 
+        :controller => 'observer', :action => 'edit_observation',
+        :id => @observation.id)
+      add_tab_with_query(:DESTROY.t, { :controller => 'observer',
+        :action => 'destroy_observation', :id => @observation.id },
+        { :confirm => :are_you_sure.l })
+    end
+    if @user && @user.has_unshown_naming_notifications?(@observation)
+      add_tab(:show_observation_view_notifications.t,
+        :controller => 'observation', :action => 'show_notifications',
+        :id => @observation.id)
+    end
+    if user_has_lists
+      add_tab_with_query(:show_observation_manage_species_lists.t,
+        :controller => 'species_list', :action => 'manage_species_lists',
+        :id => @observation.id)
+    end
+  end
+
+  draw_prev_next_tabs(@observation, @mappable)
+  draw_interest_icons(@observation)
+%>
+
+<table width="100%" cellpadding="10">
+  <tr>
+    <td width="75%" valign="top">
+      <%= render(:partial => 'show_name_info', :locals => { :observation => @observation }) %>
+      <%= render(:partial => 'show_observation', :locals => { :observation => @observation }) %>
+      <%= render(:partial => 'show_lists', :locals => { :observation => @observation }) %>
+      <%= render(:partial => 'show_namings', :locals => { :observation => @observation }) %>
+      <%= render(:partial => 'comment/show_comments', :locals => { :object => @observation,
+                 :controls => true, :limit => nil }) %><br/>
+      <%= show_object_footer(@observation) %>
+    </td>
+    <td width="25%" valign="top">
+      <%= render(:partial => 'show_thumbnail_map', :locals => { :observation => @observation }) unless browser.bot? %>
+      <%= render(:partial => 'show_images', :locals => { :thumb_size_control => true }) %>
+    </td>
+  </tr>
+</table>

@@ -1,0 +1,16 @@
+<%
+  @title ||= :create_name_title.t
+
+  new_tab_set do
+    add_tab(:all_objects.t(:type => :name), :action => 'list_names')
+  end
+%>
+
+<%= form_for(:name,
+      :url => add_query_param(:action => :create_name)) do |form| %>
+  <br/><center><%= submit_tag(:CREATE.l) %></center>
+
+  <%= render(:partial => 'form_name', :locals => {:form => form }) %>
+
+  <br/><center><%= submit_tag(:CREATE.l) %></center>
+<% end %>

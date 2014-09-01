@@ -1,0 +1,42 @@
+<%
+  comments = object.comments.sort_by(&:created_at).reverse
+  if limit
+    and_more = comments.length - limit
+    comments = comments[0..limit-1]
+  end
+%>
+
+<% if controls or comments.any? %>
+  <div style="margin-top:1em; margin-bottom:0.5em">
+    <%= if controls
+      link = link_with_query(:"show_comments_add_comment".t, :controller => 'comment',
+        :action => 'add_comment', :id => object.id,
+        :type => object.class.name)
+      if comments.empty?
+        :"show_comments_no_comments_yet".t + indent + link
+      else
+        :COMMENTS.t + ':' + indent + link
+      end
+    elsif comments.any?
+      :COMMENTS.t + ':'
+    end %>
+  </div>
+<% end %>
+
+<table cellpadding="5" cellspacing="0" width="100%">
+  <tr class="MatrixLine"><td class="MatrixLine" colspan='2'><hr/></td></tr>
+  <% odd_or_even = 0
+  for comment in comments
+    odd_or_even = 1 - odd_or_even %>
+    <tr valign="top" class="ListLine<%= odd_or_even %>">
+      <%= render(:partial => 'comment/comment', :object => comment) %>
+    </tr>
+    <tr class="MatrixLine"><td class="MatrixLine" colspan='2'><hr/></td></tr>
+  <% end %>
+</table>
+
+<%= if limit and (and_more > 0)
+  link_to(:show_comments_and_more.t(:num => and_more),
+          :controller => 'comment', :action => 'show_comments_for_target',
+          :id => object.id, :type => object.class.name)
+end %>

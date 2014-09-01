@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+#  Drop-in replacement of "mutt" which just dumps email to stdout instead of
+#  actually mailing it.  Useful for test mode.
+#
+################################################################################
+set -e
+
+while getopts "s:" opt; do
+  case "$opt" in
+  s) subject="$OPTARG"
+     ;;
+  \?) 
+  esac
+done
+shift $((OPTIND-1))
+
+echo "To: $@"
+echo "Subject: $subject"
+echo
+cat
+
+exit 0

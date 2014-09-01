@@ -1,0 +1,78 @@
+<%
+  @title = :species_list_manage_title.t(:name => @observation.unique_format_name)
+
+  new_tab_set do
+    add_tab(:cancel_and_show.t(:type => :observation), :controller => 'observer',
+            :action => 'show_observation', :id => @observation.id)
+  end
+
+  obs_lists = []
+  other_lists = []
+  for list in @all_lists
+    if list.observations.member?(@observation)
+      obs_lists << list
+    else
+      other_lists << list
+    end
+  end
+%>
+
+<% if obs_lists.length != 0 %>
+  <p>
+    <%= :species_list_manage_belongs_to.t %>:<br/><br/>
+    <table cellpadding="5" cellspacing="0">
+      <% odd_or_even = 0
+      for species_list in obs_lists
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td width="100%" valign="middle">
+            <%=
+              when_span = content_tag(:span, species_list.when, :class => :ListWhen)
+              what_span = content_tag(:span, species_list.unique_text_name, :class => :ListWhat)
+              link_to(when_span + ': ' + what_span, :action => :show_species_list,
+                      :id => species_list.id)
+            %><br/>
+            <span class="ListWhere"><%= species_list.place_name.t %></span>
+            <span class="ListWho"><%= user_link(species_list.user) %></span>
+          </td>
+          <td valign='middle' class="ListActions">
+            <% if check_permission(species_list) %>
+               <%= link_to(:REMOVE.t, { :action => 'remove_observation_from_species_list',
+                           :observation => @observation.id, :species_list => species_list.id },
+                           :confirm => :are_you_sure.l) %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </p>
+<% end %>
+
+<% if other_lists.length != 0 %>
+  <br/>
+  <%= :species_list_manage_doesnt_contain.t %>:<br/><br/>
+  <table cellpadding="5" cellspacing="0">
+    <% odd_or_even = 0
+    for species_list in other_lists
+      odd_or_even = 1 - odd_or_even %>
+      <tr valign="top" class="ListLine<%= odd_or_even %>">
+        <td width="100%" valign="middle">
+          <%=
+            when_span = content_tag(:span, species_list.when, :class => :ListWhen)
+            what_span = content_tag(:span, species_list.unique_text_name, :class => :ListWhat)
+            link_to(when_span + ': ' + what_span, :action => :show_species_list,
+                    :id => species_list.id)
+          %><br/>
+          <span class="ListWhere"><%= species_list.place_name.t rescue :UNKNOWN.t %></span>
+          <span class="ListWho"><%= user_link(species_list.user) %></span>
+        </td>
+        <td valign='middle' class="ListActions">
+          <% if check_permission(species_list) %>
+            <%= link_to(:ADD.t, { :action => 'add_observation_to_species_list',
+                        :observation => @observation.id, :species_list => species_list.id }) %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>

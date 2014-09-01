@@ -37,8 +37,7 @@ class API
         :login           => parse_string(:login, :limit => 80),
         :name            => parse_string(:name, :limit => 80, :default => ''),
         :email           => parse_email(:email, :limit => 80),
-        :locale          => parse_enum(:locale, :limit => Language.all.map(&:locale),
-                                       :default => Language.official.locale),
+        :locale          => parse_lang(:locale),
         :notes           => parse_string(:notes, :default => ''),
         :mailing_address => parse_string(:mailing_address, :default => ''),
         :license         => parse_license(:license, :default => License.preferred),
@@ -75,11 +74,11 @@ class API
     end
 
     def put
-      raise NoMethodForAction(:put, action)
+      raise NoMethodForAction("PUT", action)
     end
 
     def delete
-      raise NoMethodForAction(:delete, action)
+      raise NoMethodForAction("DELETE", action)
     end
   end
 end

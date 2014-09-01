@@ -16,7 +16,7 @@ class API
   attr_accessor :errors
 
   # Give other modules ability to do additional initialization.
-  class_inheritable_accessor :initializers
+  class_attribute :initializers
   self.initializers = []
 
   # Initialize and process a request.
@@ -50,9 +50,9 @@ class API
   end
 
   def handle_version
-    version = parse_float(:version)
+    self.version = parse_float(:version)
     if version.blank?
-      version = self.class.version
+      self.version = self.class.version
     elsif !version.match(/^\d+\.\d+$/)
       raise BadVersion.new(version)
     else
@@ -79,7 +79,9 @@ class API
   end
 
   def process_request
-    self.method = parse_string(:method)
+    tmp_method = parse_string(:method)
+    self.method = tmp_method.downcase.to_sym
+    print "The API method, #{tmp_method}, is better behaved now" if tmp_method == self.method
     if !method
       raise MissingMethod.new
     elsif respond_to?(method)

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class LocationTest < UnitTestCase
 
@@ -62,7 +62,7 @@ class LocationTest < UnitTestCase
   end
   
   def test_versioning
-    User.current = @mary
+    User.current = mary
     loc = Location.create!(
       :name => 'Anywhere',
       :north        => 60,
@@ -70,33 +70,33 @@ class LocationTest < UnitTestCase
       :east         => 40,
       :west         => 30
     )
-    assert_equal(@mary.id, loc.user_id)
-    assert_equal(@mary.id, loc.versions.last.user_id)
+    assert_equal(mary.id, loc.user_id)
+    assert_equal(mary.id, loc.versions.last.user_id)
 
-    User.current = @rolf
+    User.current = rolf
     loc.display_name = 'Anywhere, USA'
     loc.save
-    assert_equal(@mary.id, loc.user_id)
-    assert_equal(@rolf.id, loc.versions.last.user_id)
-    assert_equal(@mary.id, loc.versions.first.user_id)
+    assert_equal(mary.id, loc.user_id)
+    assert_equal(rolf.id, loc.versions.last.user_id)
+    assert_equal(mary.id, loc.versions.first.user_id)
 
-    User.current = @dick
+    User.current = dick
     desc = LocationDescription.create!(
       :location => loc,
       :notes    => 'Something.'
     )
-    assert_equal(@dick.id, desc.user_id)
-    assert_equal(@dick.id, desc.versions.last.user_id)
-    assert_equal(@mary.id, loc.user_id)
-    assert_equal(@rolf.id, loc.versions.last.user_id)
-    assert_equal(@mary.id, loc.versions.first.user_id)
+    assert_equal(dick.id, desc.user_id)
+    assert_equal(dick.id, desc.versions.last.user_id)
+    assert_equal(mary.id, loc.user_id)
+    assert_equal(rolf.id, loc.versions.last.user_id)
+    assert_equal(mary.id, loc.versions.first.user_id)
 
-    User.current = @rolf
+    User.current = rolf
     desc.notes = 'Something else.'
     desc.save
-    assert_equal(@dick.id, desc.user_id)
-    assert_equal(@rolf.id, desc.versions.last.user_id)
-    assert_equal(@dick.id, desc.versions.first.user_id)
+    assert_equal(dick.id, desc.user_id)
+    assert_equal(rolf.id, desc.versions.last.user_id)
+    assert_equal(dick.id, desc.versions.first.user_id)
   end
 
   # --------------------------------------
@@ -116,23 +116,23 @@ class LocationTest < UnitTestCase
     desc.editors.clear
     desc.reload
 
-    @rolf.email_locations_admin  = false
-    @rolf.email_locations_author = true
-    @rolf.email_locations_editor = false
-    @rolf.email_locations_all    = false
-    @rolf.save
+    rolf.email_locations_admin  = false
+    rolf.email_locations_author = true
+    rolf.email_locations_editor = false
+    rolf.email_locations_all    = false
+    rolf.save
 
-    @mary.email_locations_admin  = false
-    @mary.email_locations_author = true
-    @mary.email_locations_editor = false
-    @mary.email_locations_all    = false
-    @mary.save
+    mary.email_locations_admin  = false
+    mary.email_locations_author = true
+    mary.email_locations_editor = false
+    mary.email_locations_all    = false
+    mary.save
 
-    @dick.email_locations_admin  = false
-    @dick.email_locations_author = true
-    @dick.email_locations_editor = false
-    @dick.email_locations_all    = true
-    @dick.save
+    dick.email_locations_admin  = false
+    dick.email_locations_author = true
+    dick.email_locations_editor = false
+    dick.email_locations_all    = true
+    dick.save
 
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
@@ -143,19 +143,19 @@ class LocationTest < UnitTestCase
     # 3 Dick:       x       .       x       .
     # Authors: --   editors: --
     # Rolf changes notes: notify Dick (all); Rolf becomes editor.
-    User.current = @rolf
+    User.current = rolf
     desc.reload
     desc.notes = ''
     desc.save
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(@rolf, desc.editors.first)
+    assert_equal(rolf, desc.editors.first)
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor      => 'QueuedEmail::LocationChange',
-      :from        => @rolf,
-      :to          => @dick,
+      :from        => rolf,
+      :to          => dick,
       :location    => loc.id,
       :description => desc.id,
       :old_location_version => loc.version,
@@ -167,10 +167,10 @@ class LocationTest < UnitTestCase
     # Dick wisely reconsiders getting emails for every location change.
     # Have Mary opt in for all temporarily just to make sure she doesn't
     # send herself emails when she changes things.
-    @dick.email_locations_all = false
-    @dick.save
-    @mary.email_locations_all = true
-    @mary.save
+    dick.email_locations_all = false
+    dick.save
+    mary.email_locations_all = true
+    mary.save
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       .       .       .
@@ -178,20 +178,20 @@ class LocationTest < UnitTestCase
     # 3 Dick:       x       .       .       .
     # Authors: --   editors: Rolf
     # Mary writes notes: no emails; Mary becomes author.
-    User.current = @mary
+    User.current = mary
     desc.reload
     desc.notes = "Mary wrote this."
     desc.save
     assert_equal(description_version + 2, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(@mary, desc.authors.first)
-    assert_equal(@rolf, desc.editors.first)
+    assert_equal(mary, desc.authors.first)
+    assert_equal(rolf, desc.editors.first)
     assert_equal(1, QueuedEmail.count)
 
     # Have Mary opt back out.
-    @mary.email_locations_all = false
-    @mary.save
+    mary.email_locations_all = false
+    mary.save
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       .       .       .
@@ -199,20 +199,20 @@ class LocationTest < UnitTestCase
     # 3 Dick:       x       .       .       .
     # Authors: Mary   editors: Rolf
     # Now when Rolf changes the notes Mary should get notified.
-    User.current = @rolf
+    User.current = rolf
     desc.reload
     desc.notes = "Rolf changed it to this."
     desc.save
     assert_equal(1, desc.authors.length)
     assert_equal(1, desc.editors.length)
-    assert_equal(@mary, desc.authors.first)
-    assert_equal(@rolf, desc.editors.first)
+    assert_equal(mary, desc.authors.first)
+    assert_equal(rolf, desc.editors.first)
     assert_equal(description_version + 3, desc.version)
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor      => 'QueuedEmail::LocationChange',
-      :from        => @rolf,
-      :to          => @mary,
+      :from        => rolf,
+      :to          => mary,
       :location    => loc.id,
       :description => desc.id,
       :old_location_version => loc.version,
@@ -223,8 +223,8 @@ class LocationTest < UnitTestCase
 
     # Have Mary opt out of author-notifications to make sure that's why she
     # got the last email.
-    @mary.email_locations_author = false
-    @mary.save
+    mary.email_locations_author = false
+    mary.save
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       .       .       .
@@ -233,46 +233,46 @@ class LocationTest < UnitTestCase
     # Authors: Mary   editors: Rolf
     # Have Dick change it to make sure rolf doesn't get an email as he is just
     # an editor and he has opted out of such notifications.
-    User.current = @dick
+    User.current = dick
     desc.reload
     desc.notes = "Dick changed it now."
     desc.save
     assert_equal(description_version + 4, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(@mary, desc.authors.first)
-    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
+    assert_equal(mary, desc.authors.first)
+    assert_equal([rolf.id, dick.id], desc.editors.map(&:id).sort)
     assert_equal(2, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
     # Only Rolf should get notified since Mary is an author, not an editor, and
     # Dick shouldn't send himself notifications.
-    @mary.email_locations_editor = true
-    @mary.save
-    @rolf.email_locations_editor = true
-    @rolf.save
-    @dick.email_locations_editor = true
-    @dick.save
+    mary.email_locations_editor = true
+    mary.save
+    rolf.email_locations_editor = true
+    rolf.save
+    dick.email_locations_editor = true
+    dick.save
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       x       .       .
     # 2 Mary:       .       x       .       .
     # 3 Dick:       x       x       .       .
     # Authors: Mary   editors: Rolf, Dick
-    User.current = @dick
+    User.current = dick
     desc.reload
     desc.notes = "Dick changed it again."
     desc.save
     assert_equal(description_version + 5, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(@mary, desc.authors.first)
-    assert_user_list_equal([@rolf, @dick], desc.editors)
+    assert_equal(mary, desc.authors.first)
+    assert_user_list_equal([rolf, dick], desc.editors)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
       :flavor      => 'QueuedEmail::LocationChange',
-      :from        => @dick,
-      :to          => @rolf,
+      :from        => dick,
+      :to          => rolf,
       :location    => loc.id,
       :description => desc.id,
       :old_location_version => loc.version,
@@ -283,16 +283,16 @@ class LocationTest < UnitTestCase
 
     # Have Mary and Dick express interest, Rolf express disinterest,
     # then have Dick change it again.  Mary should get an email.
-    Interest.create(:target => loc, :user => @rolf, :state => false)
-    Interest.create(:target => loc, :user => @mary, :state => true)
-    Interest.create(:target => loc, :user => @dick, :state => true)
+    Interest.create(:target => loc, :user => rolf, :state => false)
+    Interest.create(:target => loc, :user => mary, :state => true)
+    Interest.create(:target => loc, :user => dick, :state => true)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       x       .       no
     # 2 Mary:       .       x       .       yes
     # 3 Dick:       x       x       .       yes
     # Authors: Mary   editors: Rolf, Dick
-    User.current = @dick
+    User.current = dick
     loc.reload
     loc.display_name = "Another Name"
     loc.save
@@ -300,12 +300,12 @@ class LocationTest < UnitTestCase
     assert_equal(description_version + 5, desc.version)
     assert_equal(1, desc.authors.length)
     assert_equal(2, desc.editors.length)
-    assert_equal(@mary, desc.authors.first)
-    assert_user_list_equal([@rolf, @dick], desc.editors)
+    assert_equal(mary, desc.authors.first)
+    assert_user_list_equal([rolf, dick], desc.editors)
     assert_email(3,
       :flavor        => 'QueuedEmail::LocationChange',
-      :from          => @dick,
-      :to            => @mary,
+      :from          => dick,
+      :to            => mary,
       :location      => loc.id,
       :description   => desc.id,
       :old_location_version => loc.version-1,
@@ -340,7 +340,7 @@ class LocationTest < UnitTestCase
     assert_equal( 12.5824, Location.parse_longitude('12°34\'56.789"E'))
     assert_equal( 12.5760, Location.parse_longitude('12 34.56'))
     assert_equal(-12.5760, Location.parse_longitude('-12 34 33.6'))
-    assert_equal(-12.5822, Location.parse_longitude(' 12 deg 34 min 56 sec W '))
+    assert_equal(-12.5822, Location.parse_longitude(' 12deg 34min 56sec W '))
   end
 
   def test_convert_altitude
@@ -370,16 +370,16 @@ class LocationTest < UnitTestCase
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown
     assert_objs_equal(loc1, loc2)
-    Locale.code = 'es-ES'
+    I18n.locale = 'es'
     loc3 = Location.unknown
     assert_objs_equal(loc1, loc3)
-    Globalite.localization_data[:'es-ES'][:unknown_locations] = 'Desconocido'
+    TranslationString.translations(:es)[:unknown_locations] = 'Desconocido'
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)
   end
 
   def test_merge_with_user
-    do_merge_test(@rolf)
+    do_merge_test(rolf)
   end
 
   def test_merge_with_species_lists
@@ -404,13 +404,13 @@ class LocationTest < UnitTestCase
   def test_change_scientific_name
     loc = Location.first
 
-    User.current = @rolf
+    User.current = rolf
     assert_equal(:postal, User.current_location_format)
     loc.update_attribute(:display_name, 'One, Two, Three')
     assert_equal('One, Two, Three', loc.name)
     assert_equal('Three, Two, One', loc.scientific_name)
 
-    User.current = @roy
+    User.current = roy
     assert_equal(:scientific, User.current_location_format)
     loc.update_attribute(:display_name, 'Un, Deux, Trois')
     assert_equal('Trois, Deux, Un', loc.name)

@@ -27,7 +27,7 @@ class ConferenceController < ApplicationController
   
   def create_event # :norobots:
     if is_in_admin_mode? # Probably should be expanded to any MO user
-      if request.method == :post
+      if request.method == "POST"
         event = ConferenceEvent.new(params[:event])
         event.save
         redirect_to(:action => 'show_event', :id => event.id)
@@ -41,7 +41,7 @@ class ConferenceController < ApplicationController
   def edit_event # :norobots:
     # Expand to any MO user, but make them owned and editable only by that user or an admin
     if is_in_admin_mode?
-      if request.method == :post
+      if request.method == "POST"
         event = ConferenceEvent.find(params[:id].to_s)
         event.attributes = params[:event]
         event.save
@@ -58,7 +58,7 @@ class ConferenceController < ApplicationController
   def register # :nologin: :norobots:
     store_location
     event = ConferenceEvent.find(params[:id].to_s)
-    if request.method == :post
+    if request.method == "POST"
       registration = find_previous_registration(params)
       if registration.nil?
         registration = ConferenceRegistration.new(params[:registration])

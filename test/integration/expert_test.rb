@@ -2,7 +2,7 @@
 
 # Test a few representative sessions of a power-user.
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class ExpertTest < IntegrationTestCase
 
@@ -12,241 +12,6 @@ class ExpertTest < IntegrationTestCase
       hash[f] = nil
     end
     return hash
-  end
-
-################################################################################
-
-  # -----------------------------------------
-  #  Test standard creation of public desc.
-  # -----------------------------------------
-
-  def test_creating_public_description
-    name = Name.find_by_text_name('Strobilurus diminutivus')
-    assert_equal([], name.descriptions)
-
-    @dick.admin = true
-    @dick.save
-
-    show_name = "/name/show_name/#{name.id}"
-
-    admin    = new_user_session(@dick)     # we'll make him admin
-    reviewer = new_user_session(@rolf)     # reviewer
-    owner    = new_user_session(@mary)     # random user
-    user     = new_user_session(@katrina)  # another random user
-    lurker   = new_session                 # nobody
-
-    # Make Dick an admin.
-    admin.click(:href => /turn_admin_on/)
-
-    # Have random user create a public description.
-    in_session(owner) do
-      get(show_name)
-      click(:href => /create_name_description/)
-      assert_template('name/create_name_description')
-      open_form do |form|
-        form.assert_value('source_type', 'public')
-        form.assert_value('source_name', '')
-        form.assert_value('public_write', true)
-        form.assert_value('public', true)
-        form.assert_enabled('source_type')
-        form.assert_enabled('source_name')
-        # (have to be enabled because user could switch to :source or :user,
-        # instead must used javascript to disable these when :public)
-        form.assert_enabled('public_write')
-        form.assert_enabled('public')
-        form.change('notes', 'I like this mushroom.')
-        form.submit
-      end
-      assert_flash_success
-      assert_template('name/show_name_description')
-    end
-
-    # Admin of course can do anything.
-    in_session(admin) do
-      get(show_name)
-      assert_select('a[href*=edit_name_description]')
-      assert_select('a[href*=destroy_name_description]')
-      click(:href => /edit_name_description/)
-    end
-
-    # Reviewer is an admin for public descs, and can edit and destroy.
-    in_session(reviewer) do
-      get(show_name)
-      assert_select('a[href*=edit_name_description]')
-      assert_select('a[href*=destroy_name_description]')
-      click(:href => /edit_name_description/)
-    end
-
-    # Owner, surprisingly, is NOT an admin for public descs, and cannot
-    # destroy.  But can edit.
-    in_session(owner) do
-      get(show_name)
-      assert_select('a[href*=edit_name_description]')
-      assert_select('a[href*=destroy_name_description]', 0)
-      click(:href => /edit_name_description/)
-      assert_template('name/edit_name_description')
-    end
-
-    # Other random users end up with the same permissions.
-    in_session(user) do
-      get(show_name)
-      assert_select('a[href*=edit_name_description]')
-      assert_select('a[href*=destroy_name_description]', 0)
-      click(:href => /edit_name_description/)
-      assert_template('name/edit_name_description')
-    end
-
-    # The lurker appears to have same permissions, but will need to login in
-    # order to actually do anything.
-    in_session(lurker) do
-      get(show_name)
-      assert_select('a[href*=edit_name_description]')
-      assert_select('a[href*=destroy_name_description]', 0)
-      click(:href => /edit_name_description/)
-      assert_template('account/login')
-    end
-
-    # Check that all editors can edit the "source_name".
-    admin.open_form do |form|
-      form.assert_enabled('source_type')
-      form.assert_enabled('source_name')
-      form.assert_enabled('public_write')
-      form.assert_enabled('public')
-    end
-    reviewer.open_form do |form|
-      form.assert_hidden('source_type')
-      form.assert_enabled('source_name')
-      form.assert_disabled('public_write')
-      form.assert_disabled('public')
-    end
-    owner.open_form do |form|
-      form.assert_no_field('source_type')
-      form.assert_enabled('source_name')
-      form.assert_disabled('public_write')
-      form.assert_disabled('public')
-    end
-    user.open_form do |form|
-      form.assert_no_field('source_type')
-      form.assert_no_field('source_name')
-      form.assert_no_field('public_write')
-      form.assert_no_field('public')
-    end
-
-    # Verify that permissions and authors and editors are right.
-    desc = NameDescription.last
-    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
-    assert_user_list_equal([], desc.authors)
-    assert_user_list_equal([@mary], desc.editors) # (owner = mary)
-    assert_equal('I like this mushroom.', desc.notes)
-  end
-
-  # -------------------------------------------
-  #  Test standard creation of personal desc.
-  # -------------------------------------------
-
-  def test_creating_user_description
-    name = Name.find_by_text_name('Peltigera')
-    assert_equal(4, name.descriptions.length)
-
-    @dick.admin = true
-    @dick.save
-
-    show_name = "/name/show_name/#{name.id}"
-
-    admin    = new_user_session(@dick)     # we'll make him admin
-    reviewer = new_user_session(@rolf)     # reviewer
-    owner    = new_user_session(@mary)     # random user
-    user     = new_user_session(@katrina)  # another random user
-    lurker   = new_session                 # nobody
-
-    # Make Dick an admin.
-    admin.click(:href => /turn_admin_on/)
-
-    # Have random user create a personal description.
-    in_session(owner) do
-      get(show_name)
-      click(:href => /create_name_description/)
-      assert_template('name/create_name_description')
-      open_form do |form|
-        form.assert_value('source_type', 'public')
-        form.assert_value('source_name', '')
-        form.assert_value('public_write', true)
-        form.assert_value('public', true)
-        form.assert_enabled('source_type')
-        form.assert_enabled('source_name')
-        form.assert_enabled('public_write')
-        form.assert_enabled('public')
-        form.select('source_type', /user/i)
-        form.change('source_name', "Mary's Corner")
-        form.uncheck('public_write')
-        form.change('gen_desc', 'Leafy felt lichens.')
-        form.change('diag_desc', 'Usually with veins and tomentum below.')
-        form.change('look_alikes', '_Solorina_ maybe, but not much else.')
-        form.submit
-      end
-      assert_flash_success
-      assert_template('name/show_name_description')
-    end
-
-    desc = NameDescription.last
-    assert_equal(:user, desc.source_type)
-    assert_equal("Mary's Corner", desc.source_name)
-    assert_equal(false, desc.public_write)
-    assert_equal(true, desc.public)
-    assert_obj_list_equal([UserGroup.one_user(@mary)], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.one_user(@mary)], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
-    assert_user_list_equal([@mary], desc.authors)
-    assert_user_list_equal([], desc.editors)
-    assert_equal(empty_notes.merge(
-      :gen_desc => 'Leafy felt lichens.',
-      :diag_desc => 'Usually with veins and tomentum below.',
-      :look_alikes => '_Solorina_ maybe, but not much else.'
-    ), desc.all_notes)
-
-    edit_name    = "/name/edit_name_description/#{desc.id}"
-    destroy_name = "/name/destroy_name_description/#{desc.id}"
-
-    # Admin of course can do anything.
-    in_session(admin) do
-      admin.get(show_name)
-      admin.assert_select("a[href*=#{edit_name}]")
-      admin.assert_select("a[href*=#{destroy_name}]")
-      admin.click(:href => edit_name)
-    end
-
-    # Reviewer is nothing in this case.
-    in_session(reviewer) do
-      get(show_name)
-      assert_select("a[href*=#{edit_name}]", 0)
-      assert_select("a[href*=#{destroy_name}]", 0)
-    end
-
-    # Owner, is an admin and can do anything.
-    # destroy.  But can edit.
-    in_session(owner) do
-      get(show_name)
-      assert_select("a[href*=#{edit_name}]")
-      assert_select("a[href*=#{destroy_name}]")
-      click(:href => edit_name)
-      assert_template('name/edit_name_description')
-    end
-
-    # Other random users are also nobodies.
-    in_session(user) do
-      get(show_name)
-      assert_select("a[href*=#{edit_name}]", 0)
-      assert_select("a[href*=#{destroy_name}]", 0)
-    end
-
-    # The lurker is nobody.
-    in_session(lurker) do
-      get(show_name)
-      assert_select("a[href*=#{edit_name}]", 0)
-      assert_select("a[href*=#{destroy_name}]", 0)
-    end
   end
 
   # --------------------------------------------------------
@@ -275,29 +40,29 @@ class ExpertTest < IntegrationTestCase
       "#{name3} #{author3}\r\n" +
       "#{name4} = #{name5}"
 
-    login!(@dick)
-    get('name/bulk_name_edit')
-    open_form do |form|
+    sess = login!(dick)
+    sess.get('name/bulk_name_edit')
+    sess.open_form do |form|
       form.assert_value('list_members', '')
       form.change('list_members', list)
       form.submit
     end
-    assert_flash_error
-    assert_response(:success)
-    assert_template('name/bulk_name_edit')
+    sess.assert_flash_error
+    sess.assert_response(:success)
+    sess.assert_template('name/bulk_name_edit')
 
     # Don't mess around, just let it do whatever it does, and make sure it is
     # correct.  I don't want to make any assumptions about how the internals
     # work (e.g., I don't want to make any assertions about the hidden fields)
-    # -- all I want to be sure of is that it doesn't f--- up our list of names.
-    open_form do |form|
+    # -- all I want to be sure of is that it doesn't mess up our list of names.
+    sess.open_form do |form|
       assert_equal(list.split(/\r\n/).sort,
                    form.get_value!('list_members').split(/\r\n/).sort)
       # field = form.get_field('approved_names')
       form.submit
     end
-    assert_flash_success
-    assert_template('observer/list_rss_logs')
+    sess.assert_flash_success
+    sess.assert_template('observer/list_rss_logs')
 
     assert_not_nil(Name.find_by_text_name('Caloplaca'))
 
@@ -368,13 +133,13 @@ class ExpertTest < IntegrationTestCase
     newer_location_reverse = 'USA, California, Somewhere Else'
 
     # Good opportunity to test scientific location notation!
-    @dick.location_format = :scientific
-    @dick.save
+    dick.location_format = :scientific
+    dick.save
 
     # First attempt at creating a list.
-    login!(@dick)
-    get('species_list/create_species_list')
-    open_form do |form|
+    sess = login!(dick)
+    sess.get('species_list/create_species_list')
+    sess.open_form do |form|
       form.assert_value('list_members', '')
       form.change('list_members', list)
       form.change('title', 'List Title')
@@ -385,30 +150,30 @@ class ExpertTest < IntegrationTestCase
       form.check('member_specimen')
       form.submit
     end
-    assert_flash_error
-    assert_response(:success)
-    assert_template('species_list/create_species_list')
+    sess.assert_flash_error
+    sess.assert_response(:success)
+    sess.assert_template('species_list/create_species_list')
 
-    assert_select('div#missing_names', /Caloplaca arnoldii ssp. obliterate/)
-    assert_select('div#deprecated_names', /Lactarius alpigenes/)
-    assert_select('div#deprecated_names', /Lactarius alpinus/)
-    assert_select('div#deprecated_names', /Petigera/)
-    assert_select('div#deprecated_names', /Peltigera/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
-    assert_select('div#ambiguous_names', /Suillus.*Gray/)
-    assert_select('div#ambiguous_names', /Suillus.*White/)
+    sess.assert_select('div#missing_names', /Caloplaca arnoldii ssp. obliterate/)
+    sess.assert_select('div#deprecated_names', /Lactarius alpigenes/)
+    sess.assert_select('div#deprecated_names', /Lactarius alpinus/)
+    sess.assert_select('div#deprecated_names', /Petigera/)
+    sess.assert_select('div#deprecated_names', /Peltigera/)
+    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
+    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
+    sess.assert_select('div#ambiguous_names', /Suillus.*Gray/)
+    sess.assert_select('div#ambiguous_names', /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
-    open_form do |form|
+    sess.open_form do |form|
       assert_equal(list.split(/\r\n/).sort,
                    form.get_value!('list_members').split(/\r\n/).sort)
       form.check(/chosen_multiple_names_\d+_#{amanita[0].id}/)
       form.check(/chosen_multiple_names_\d+_#{suillus[1].id}/)
       form.submit
     end
-    assert_flash_success
-    assert_template('species_list/show_species_list')
+    sess.assert_flash_success
+    sess.assert_template('species_list/show_species_list')
 
     spl = SpeciesList.last
     obs = spl.observations
@@ -429,8 +194,8 @@ class ExpertTest < IntegrationTestCase
     assert_true(obs.last.specimen)
 
     # Try making some edits, too.
-    click(:href => /edit_species_list/)
-    open_form do |form|
+    sess.click(:href => /edit_species_list/)
+    sess.open_form do |form|
       form.assert_value('list_members', '')
       form.assert_value('title', 'List Title')
       form.assert_value('place_name', albion_name_reverse)
@@ -447,21 +212,21 @@ class ExpertTest < IntegrationTestCase
       form.uncheck('member_specimen')
       form.submit
     end
-    assert_flash_error
-    assert_response(:success)
-    assert_template('species_list/edit_species_list')
+    sess.assert_flash_error
+    sess.assert_response(:success)
+    sess.assert_template('species_list/edit_species_list')
 
-    assert_select('div#missing_names', /Agaricus nova/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
-    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
+    sess.assert_select('div#missing_names', /Agaricus nova/)
+    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
+    sess.assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
 
     # Fix the ambiguous name.
-    open_form do |form|
+    sess.open_form do |form|
       form.check(/chosen_multiple_names_\d+_#{amanita[1].id}/)
       form.submit
     end
-    assert_flash_success
-    assert_template('location/create_location')
+    sess.assert_flash_success
+    sess.assert_template('location/create_location')
 
     spl.reload
     obs = spl.observations
@@ -488,7 +253,7 @@ class ExpertTest < IntegrationTestCase
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
-    open_form do |form|
+    sess.open_form do |form|
       form.assert_value('location_display_name', new_location_reverse)
       form.change('location_display_name', newer_location_reverse)
       form.change('location_north', '35.6622')
@@ -497,14 +262,14 @@ class ExpertTest < IntegrationTestCase
       form.change('location_west', '-83.0745')
       form.submit
     end
-    assert_flash_success
-    assert_template('species_list/show_species_list')
-    assert_select('div#Title', :text => /#{spl.title}/)
-    assert_select("a[href*=edit_species_list/#{spl.id}]", :text => /edit/i)
+    sess.assert_flash_success
+    sess.assert_template('species_list/show_species_list')
+    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select("a[href*=edit_species_list?id=#{spl.id}]", :text => /edit/i)
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
-    assert_equal(@dick, User.current)
+    assert_equal(dick, User.current)
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
@@ -512,21 +277,21 @@ class ExpertTest < IntegrationTestCase
     assert_equal(loc, spl.location)
     assert_equal(nil, obs.last.where)
     assert_equal(loc, obs.last.location)
-    
+
     # Try adding a comment, just for kicks.
-    click(:href => /add_comment/)
-    assert_template('comment/add_comment')
-    assert_select('div#Title', :text => /#{spl.title}/)
-    assert_select("a[href*=show_species_list/#{spl.id}]", :text => /cancel/i)
-    open_form do |form|
+    sess.click(:href => /add_comment/)
+    sess.assert_template('comment/add_comment')
+    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select("a[href*=show_species_list?id=#{spl.id}]", :text => /cancel/i)
+    sess.open_form do |form|
       form.change('comment_summary', 'Slartibartfast')
       form.change('comment_comment', 'Steatopygia')
       form.submit
     end
-    assert_flash_success
-    assert_template('species_list/show_species_list')
-    assert_select('div#Title', :text => /#{spl.title}/)
-    assert_select('p', :text => /Slartibartfast/)
-    assert_select('p', :text => /Steatopygia/)
+    sess.assert_flash_success
+    sess.assert_template('species_list/show_species_list')
+    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select('p', :text => /Slartibartfast/)
+    sess.assert_select('p', :text => /Steatopygia/)
   end
 end

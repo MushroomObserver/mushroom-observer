@@ -11,33 +11,11 @@
 #
 ################################################################################
 
-require 'xmlrpc/client'
-require_dependency 'classes/api'
-
 class ApiController < ApplicationController
-  disable_filters
+  require 'xmlrpc/client'
+  # require_dependency 'classes/api'
 
-  # Standard entry point for XML-RPC requests.
-  # def xml_rpc
-  #   begin
-  #     @@xmlrpc_reader ||= XMLRPC::XMLParser::REXMLStreamParser.new
-  #     method, args = @@xmlrpc_reader.parseMethodCall(request.content)
-  #     if (args.length != 1) or
-  #        !args[0].is_a?(Hash)
-  #       raise "Invalid request; expecting a single hash of named parameters."
-  #     end
-  #     args = args.first
-  #     args[:method] = method
-  #     xact = Transaction.new(args)
-  #     xact.validate_args
-  #     @api = xact.execute
-  #     render_api_results
-  #   rescue => e
-  #     @api = API.new
-  #     @api.errors << API::RenderFailed.new(e)
-  #     render_api_results
-  #   end
-  # end
+  disable_filters
 
   # Standard entry point for REST requests.
   def api_keys;      rest_query(:api_key);      end
@@ -61,11 +39,34 @@ class ApiController < ApplicationController
     args.delete(:controller)
     args[:method] = request.method
     args[:action] = type
-    args[:http_request] = request if request.content_length.to_i > 0
+
+    if TESTING
+      post_data      = request.headers['RAW_POST_DATA']
+      content_length = request.headers['CONTENT_LENGTH'].to_i
+      content_type   = request.headers['CONTENT_TYPE'].to_s
+      content_md5    = request.headers['CONTENT_MD5'].to_s
+      if request.method == "POST" && content_length > 0 && !content_type.blank?
+        args[:upload] = API::Upload.new(
+          data:         post_data,
+          length:       content_length,
+          content_type: content_type,
+          checksum:     content_md5
+        )
+      end
+    else
+      if request.method == "POST" && request.length > 0 && !request.media_type.blank?
+        args[:upload] = API::Upload.new(
+          data:         request.body,
+          length:       request.length,
+          content_type: request.media_type,
+          checksum:     request.headers['CONTENT_MD5'].to_s
+        )
+      end
+    end
 
     # Special exception to allow caller who creates new user to see that user's
     # new API keys.  Otherwise there is no way to get that info via the API. 
-    if request.method == :post and type == :user
+    if request.method == "POST" and type == :user
       @show_api_keys_for_new_user = true
     end
 
@@ -74,16 +75,15 @@ class ApiController < ApplicationController
 
   def render_api_results(args)
     @api = API.execute(args)
-    headers['Content-Type'] = 'application/xml'
     User.current = @user = @api.user
     if @api.errors.any?(&:fatal)
-      render(:layout => 'api', :text => '')
+      render_xml(:layout => 'api', :text => '')
     else
-      render(:layout => 'api', :template => '/api/results.rxml')
+      render_xml(:layout => 'api', :template => '/api/results')
     end
   rescue => e
     @api ||= API.new
     @api.errors << API::RenderFailed.new(e)
-    render(:layout => 'api', :text => '')
+    render_xml(:layout => 'api', :text => '')
   end
 end

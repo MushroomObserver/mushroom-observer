@@ -10,7 +10,7 @@ first_species_list:
   where: nil
   location_id: 2 # Burbank
   title: A Species List
-  notes: Got Skunked!
+  notes: ¡Got Skunked!
   rss_log_id: 2
 
 # has no obs

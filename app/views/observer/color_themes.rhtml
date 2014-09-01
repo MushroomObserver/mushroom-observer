@@ -1,9 +1,0 @@
-<% @title = :color_themes_title.t %>
-
-<%= :color_themes_text.tp %>
-
-<p>
-  <% for name in CSS %>
-    <%= indent + link_to(name.to_sym.l, :action => name) %><br/>
-  <% end %>
-</p>

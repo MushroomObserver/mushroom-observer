@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class NameControllerTest < FunctionalTestCase
   def self.report_email(email)
@@ -23,6 +23,17 @@ class NameControllerTest < FunctionalTestCase
     result
   end
 
+  CREATE_NAME_DESCRIPTION_PARTIALS = [
+    "_form_description",
+    "_textilize_help",
+    "_form_name_description"
+  ]
+
+  SHOW_NAME_DESCRIPTION_PARTIALS = [
+    "_show_description",
+    "_name_description"
+  ]
+  
   # Create a draft for a project.
   def create_draft_tester(project, name, user=nil, success=true)
     count = NameDescription.count
@@ -33,11 +44,12 @@ class NameControllerTest < FunctionalTestCase
     }
     requires_login(:create_name_description, params, user.login)
     if success
-      assert_response('create_name_description')
+      assert_template(action: 'create_name_description',
+        partial: "_form_name_description")
       assert_equal(count, NameDescription.count)
     else
-      assert_response(:controller => 'project',
-                      :action => 'show_project', :id => project.id)
+      assert_template(controller: 'project', action: 'show_project',
+        id: project.id)
       assert_equal(count, NameDescription.count)
     end
   end
@@ -54,11 +66,11 @@ class NameControllerTest < FunctionalTestCase
     }
     requires_login(:edit_name_description, params, user.login)
     if success
-      assert_response('edit_name_description')
+      assert_template(action: 'edit_name_description', partial: "_form_name_description")
     elsif reader
-      assert_response(:action => "show_name_description", :id => draft.id)
+      assert_template(action: "show_name_description", id: draft.id)
     else
-      assert_response(:action => "show_name", :id => draft.name_id)
+      assert_template(action: "show_name", id: draft.name_id)
     end
   end
 
@@ -80,11 +92,11 @@ class NameControllerTest < FunctionalTestCase
     }
     post_requires_login(:edit_name_description, params, user.login)
     if permission && !success
-      assert_response('edit_name_description')
+      assert_template(action: 'edit_name_description', partial: "_form_name_description")
     elsif draft.is_reader?(user)
-      assert_response(:action => 'show_name_description', :id => draft.id)
+      assert_template(action: 'show_name_description', id: draft.id)
     else
-      assert_response(:action => 'show_name', :id => draft.name_id)
+      assert_template(action: 'show_name', id: draft.name_id)
     end
     draft.reload
     if permission && success
@@ -121,11 +133,11 @@ class NameControllerTest < FunctionalTestCase
       assert(NameDescription.safe_find(draft.id))
     end
     if conflict
-      assert_template('edit_name_description')
+      assert_template(action: 'edit_name_description', partial: true)
       assert(assigns(:description).gen_desc.index(draft_gen_desc))
       assert(assigns(:description).gen_desc.index(name_gen_desc))
     else
-      assert_response(:action => 'show_name', :id => name_id)
+      assert_template(action: 'show_name', id: name_id)
     end
   end
 
@@ -138,7 +150,7 @@ class NameControllerTest < FunctionalTestCase
     }
     requires_login(:destroy_name_description, params, user.login)
     if success
-      assert_response(:action => 'show_name', :id => draft.name_id)
+      assert_template(action: 'show_name', id: draft.name_id)
       assert_raises(ActiveRecord::RecordNotFound) do
         draft = NameDescription.find(draft.id)
       end
@@ -147,9 +159,9 @@ class NameControllerTest < FunctionalTestCase
       assert(NameDescription.find(draft.id))
       assert_equal(count, NameDescription.count)
       if draft.is_reader?(user)
-        assert_response(:action => 'show_name_description', :id => draft.id)
+        assert_template(action: 'show_name_description', id: draft.id)
       else
-        assert_response(:action => 'show_name', :id => draft.name_id)
+        assert_template(action: 'show_name', id: draft.name_id)
       end
     end
   end
@@ -173,8 +185,8 @@ class NameControllerTest < FunctionalTestCase
                  "---- Actual: ----------------------\n" +
                  "#{@@emails.first}\n" +
                  "-----------------------------------\n") {
-      old_name2 = $2 if @@emails.first.match(/^(old|this): #\d+: (.*)/)
-      new_name2 = $2 if @@emails.first.match(/^(new|into): #\d+: (.*)/)
+      old_name2 = $2 if @@emails.first.match(/^(old|this) : #\d+: (.*)/)
+      new_name2 = $2 if @@emails.first.match(/^(new|into) : #\d+: (.*)/)
       old_name == old_name2 and new_name == new_name2
     }
   ensure
@@ -185,22 +197,27 @@ class NameControllerTest < FunctionalTestCase
 
   def test_name_index
     get_with_dump(:list_names)
-    assert_response('list_names')
+    assert_template(action: 'list_names')
   end
 
   def test_name_description_index
     get_with_dump(:list_name_descriptions)
-    assert_response('list_name_descriptions')
+    assert_template(action: 'list_name_descriptions')
   end
 
   def test_observation_index
     get_with_dump(:observation_index)
-    assert_response('list_names')
+    assert_template(action: 'list_names')
+  end
+
+  def test_observation_index_by_letter
+    get_with_dump(:observation_index, :letter => 'A')
+    assert_template(action: 'list_names')
   end
 
   def test_authored_names
     get_with_dump(:authored_names)
-    assert_response('list_names')
+    assert_template(action: 'list_names')
   end
 
   def test_mushroom_app_report
@@ -210,24 +227,30 @@ class NameControllerTest < FunctionalTestCase
   def test_show_name
     assert_equal(0, Query.count)
     get_with_dump(:show_name, :id => 2)
-    assert_response('show_name')
+    assert_template(action: 'show_name', partial: "_name")
     # Creates two for children and all four observations sections, but one never used.
     assert_equal(2, Query.count)
 
-    reget(:show_name, :id => 2)
-    assert_response('show_name')
+    get(:show_name, :id => 2)
+    assert_template(action: 'show_name', partial: "_name")
     # Should re-use all the old queries.
     assert_equal(2, Query.count)
 
-    reget(:show_name, :id => 3)
-    assert_response('show_name')
+    get(:show_name, :id => 3)
+    assert_template(action: 'show_name', partial: "_name")
     # Needs new queries this time.
     assert_equal(5, Query.count)
+
+    # Agarcius: has children taxa.
+    get(:show_name, :id => 18)
+    assert_template(action: 'show_name', partial: "_name")
   end
 
+  # TODO: Show a name that has a parent to trigger
+  
   def test_show_past_name
     get_with_dump(:show_past_name, :id => 2)
-    assert_response('show_past_name')
+    assert_template(action: 'show_past_name', partial: "_name")
   end
 
   def test_next_and_prev
@@ -237,13 +260,13 @@ class NameControllerTest < FunctionalTestCase
     name14 = names[14]
     get(:next_name, :id => name12.id)
     q = @controller.query_params(Query.last)
-    assert_response(:action => 'show_name', :id => name13.id, :params => q)
+    assert_template(action: 'show_name', id: name13.id, params: q)
     get(:next_name, :id => name13.id)
-    assert_response(:action => 'show_name', :id => name14.id, :params => q)
+    assert_template(action: 'show_name', id: name14.id, params: q)
     get(:prev_name, :id => name14.id)
-    assert_response(:action => 'show_name', :id => name13.id, :params => q)
+    assert_template(action: 'show_name', id: name13.id, params: q)
     get(:prev_name, :id => name13.id)
-    assert_response(:action => 'show_name', :id => name12.id, :params => q)
+    assert_template(action: 'show_name', id: name12.id, params: q)
   end
 
   def test_next_and_prev_2
@@ -256,64 +279,64 @@ class NameControllerTest < FunctionalTestCase
     name4 = names(:lactarius_subalpinus)
 
     get(:next_name, q.merge(:id => name1.id))
-    assert_response(:action => 'show_name', :id => name2.id, :params => q)
+    assert_template(action: 'show_name', id: name2.id)
     get(:next_name, q.merge(:id => name2.id))
-    assert_response(:action => 'show_name', :id => name3.id, :params => q)
+    assert_template(action: 'show_name', id: name3.id)
     get(:next_name, q.merge(:id => name3.id))
-    assert_response(:action => 'show_name', :id => name4.id, :params => q)
+    assert_template(action: 'show_name', id: name4.id)
     get(:next_name, q.merge(:id => name4.id))
-    assert_response(:action => 'show_name', :id => name4.id, :params => q)
+    assert_template(action: 'show_name', id: name4.id)
     assert_flash(/no more/i)
 
     get(:prev_name, q.merge(:id => name4.id))
-    assert_response(:action => 'show_name', :id => name3.id, :params => q)
+    assert_template(action: 'show_name', id: name3.id)
     get(:prev_name, q.merge(:id => name3.id))
-    assert_response(:action => 'show_name', :id => name2.id, :params => q)
+    assert_template(action: 'show_name', id: name2.id)
     get(:prev_name, q.merge(:id => name2.id))
-    assert_response(:action => 'show_name', :id => name1.id, :params => q)
+    assert_template(action: 'show_name', id: name1.id)
     get(:prev_name, q.merge(:id => name1.id))
-    assert_response(:action => 'show_name', :id => name1.id, :params => q)
+    assert_template(action: 'show_name', id: name1.id)
     assert_flash(/no more/i)
   end
 
   def test_names_by_user
     get_with_dump(:names_by_user, :id => 1)
-    assert_response('list_names')
+    assert_template(action: 'list_names')
   end
 
   def test_names_by_editor
     get_with_dump(:names_by_editor, :id => 1)
-    assert_response('list_names')
+    assert_template(action: 'list_names')
   end
 
   def test_name_descriptions_by_author
     get_with_dump(:name_descriptions_by_author, :id => 1)
-    assert_response('list_name_descriptions')
+    assert_template(action: 'list_name_descriptions')
   end
 
   def test_name_descriptions_by_editor
     get_with_dump(:name_descriptions_by_editor, :id => 1)
-    assert_response(:action => :show_name_description, :id => 15,
-                    :params => @controller.query_params)
+    assert_template(action: 'show_name_description', id: 15,
+                    params: @controller.query_params)
   end
 
   def test_name_search
     get_with_dump(:name_search, :pattern => '56')
-    assert_response('list_names')
+    assert_template(action: 'list_names')
     assert_equal(:query_title_pattern_search.t(:types => 'Names', :pattern => '56'),
                  @controller.instance_variable_get('@title'))
   end
 
   def test_name_search_with_spelling_correction
     get_with_dump(:name_search, :pattern => 'agaricis campestrus')
-    assert_response('list_names')
+    assert_template(action: 'list_names')
     assert_select('div.Warnings', 1)
-    assert_select('a[href*=show_name/19]', :text => Name.find(19).search_name)
-    assert_select('a[href*=show_name/20]', :text => Name.find(20).search_name)
-    assert_select('a[href*=show_name/21]', :text => Name.find(21).search_name)
+    assert_select('a[href*=show_name?id=19]', :text => Name.find(19).search_name)
+    assert_select('a[href*=show_name?id=20]', :text => Name.find(20).search_name)
+    assert_select('a[href*=show_name?id=21]', :text => Name.find(21).search_name)
 
     get(:name_search, :pattern => 'Agaricus')
-    assert_response('list_names')
+    assert_template(action: 'list_names')
     assert_select('div.Warnings', 0)
   end
 
@@ -325,7 +348,7 @@ class NameControllerTest < FunctionalTestCase
       :location => "Eastern Oklahoma"
     )
     get(:advanced_search, @controller.query_params(query))
-    assert_response('list_names')
+    assert_template(action: 'list_names')
   end
 
   def test_edit_name
@@ -344,7 +367,7 @@ class NameControllerTest < FunctionalTestCase
     desc = name_descriptions(:peltigera_desc)
     params = { "id" => desc.id.to_s }
     get_with_dump(:show_name_description, params)
-    assert_response('show_name_description')
+    assert_template(action: 'show_name_description', partial: "_show_description")
   end
 
   def test_show_past_name_description
@@ -356,7 +379,7 @@ class NameControllerTest < FunctionalTestCase
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
     get_with_dump(:show_past_name_description, :id => desc.id)
-    assert_response('show_past_name_description')
+    assert_template(action: 'show_past_name_description', partial: "_name_description")
   end
 
   def test_create_name_description
@@ -407,101 +430,130 @@ class NameControllerTest < FunctionalTestCase
     get_with_dump('eol_preview')
   end
 
+  def ids_from_links(links)
+    links.map do |l|
+      l.url.match(/.*id=([0-9]+)/)[1].to_i
+    end
+  end
+  
+  def pagination_query_params
+    query = Query.lookup_and_save(:Name, :all, :by => :name)
+    @controller.query_params(query)
+  end
+  
   # None of our standard tests ever actually renders pagination_links
   # or pagination_letters.  This tests all the above.
-  def test_pagination
-
+  def test_pagination_page1
     # Straightforward index of all names, showing first 10.
-    query = Query.lookup_and_save(:Name, :all, :by => :name)
-    query_params = @controller.query_params(query)
+    query_params = pagination_query_params
     get(:test_index, { :num_per_page => 10 }.merge(query_params))
-    assert_response('list_names')
+    # print @response.body
+    assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(10, name_links.length)
     expected = Name.all(:order => 'text_name, author', :limit => 10)
-    assert_equal(expected.map(&:id), name_links.map(&:id))
-    assert_equal(@controller.url_for(:action => 'show_name',
-                 :id => expected.first.id, :params => query_params,
-                 :only_path => true), name_links.first.url)
+    assert_equal(expected.map(&:id), ids_from_links(name_links))
+    assert_equal(@controller.url_with_query(:action => 'show_name',
+      :id => expected.first.id, :only_path => true), name_links.first.url)
     assert_no_link_in_html(1)
     assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :page => 2)
+      :params => query_params, :page => 2)
     assert_no_link_in_html('Z')
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :letter => 'A')
-
+      :params => query_params, :letter => 'A')
+  end
+  
+  def test_pagination_page2
     # Now go to the second page.
-    reget(:test_index, { :num_per_page => 10, :page => 2 }.merge(query_params))
-    assert_response('list_names')
+    query_params = pagination_query_params
+    get(:test_index, { :num_per_page => 10, :page => 2 }.merge(query_params))
+    assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(10, name_links.length)
     expected = Name.all(:order => 'text_name, author', :limit => 10,
                         :offset => 10)
-    assert_equal(expected.map(&:id), name_links.map(&:id))
-    assert_equal(@controller.url_for(:action => 'show_name',
-                 :id => expected.first.id, :params => query_params,
-                 :only_path => true), name_links.first.url)
+    assert_equal(expected.map(&:id), ids_from_links(name_links))
+    assert_equal(@controller.url_with_query(:action => 'show_name',
+      :id => expected.first.id, :only_path => true), name_links.first.url)
     assert_no_link_in_html(2)
     assert_link_in_html(1, :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :page => 1)
+      :params => query_params, :page => 1)
     assert_no_link_in_html('Z')
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :letter => 'A')
-
+      :params => query_params, :letter => 'A')
+  end
+  
+  def test_pagination_letter
     # Now try a letter.
+    query_params = pagination_query_params
     l_names = Name.all(:conditions => 'text_name LIKE "L%"',
-                       :order => 'text_name, author')
-    reget(:test_index, { :num_per_page => l_names.size,
+      :order => 'text_name, author')
+    get(:test_index, { :num_per_page => l_names.size,
                :letter => 'L' }.merge(query_params))
-    assert_response('list_names')
+    assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(l_names.size, name_links.length)
     # (Mysql and ruby sort "Kuhner" and "Kühner" oppositely. Just ignore them.)
-    assert_equal(l_names.map(&:id)-[35,36], name_links.map(&:id)-[35,36])
-    assert_equal(@controller.url_for(:action => 'show_name',
-                 :id => l_names.first.id, :params => query_params,
-                 :only_path => true), name_links.first.url)
+    assert_equal(l_names.map(&:id)-[35,36], ids_from_links(name_links)-[35,36])
+    assert_equal(@controller.url_with_query(:action => 'show_name',
+      :id => l_names.first.id, :only_path => true), name_links.first.url)
     assert_no_link_in_html(1)
     assert_no_link_in_html('Z')
     assert_link_in_html('A', :action => :test_index,:params => query_params,
-                        :num_per_page => l_names.size, :letter => 'A')
-
+      :num_per_page => l_names.size, :letter => 'A')
+  end
+  
+  def test_pagination_letter_with_page
+    query_params = pagination_query_params
+    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
+      :order => 'text_name, author')
     # Do it again, but make page size exactly one too small.
-    last_name = l_names.pop
-    reget(:test_index, { :num_per_page => l_names.size,
+    l_names.pop
+    get(:test_index, { :num_per_page => l_names.size,
         :letter => 'L' }.merge(query_params))
-    assert_response('list_names')
+    assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(l_names.size, name_links.length)
-    assert_equal(l_names.map(&:id)-[35,36], name_links.map(&:id)-[35,36])
+    assert_equal(l_names.map(&:id)-[35,36], ids_from_links(name_links)-[35,36])
     assert_no_link_in_html(1)
     assert_link_in_html(2, :action => :test_index, :params => query_params,
-                        :num_per_page => l_names.size,
-                        :letter => 'L', :page => 2)
+      :num_per_page => l_names.size,
+      :letter => 'L', :page => 2)
     assert_no_link_in_html(3)
-
+  end
+  
+  def test_pagination_letter_with_page_2
+    query_params = pagination_query_params
+    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
+      :order => 'text_name, author')
+    last_name = l_names.pop
     # Check second page.
-    reget(:test_index, { :num_per_page => l_names.size, :letter => 'L',
+    get(:test_index, { :num_per_page => l_names.size, :letter => 'L',
         :page => 2 }.merge(query_params))
-    assert_response('list_names')
+    assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(1, name_links.length)
-    assert_equal([last_name.id], name_links.map(&:id))
+    assert_equal([last_name.id], ids_from_links(name_links))
     assert_no_link_in_html(2)
     assert_link_in_html(1, :action => :test_index, :params => query_params,
-                        :num_per_page => l_names.size,
-                        :letter => 'L', :page => 1)
+      :num_per_page => l_names.size,
+      :letter => 'L', :page => 1)
     assert_no_link_in_html(3)
-
+  end
+  
+  def test_pagination_with_anchors
+    query_params = pagination_query_params
     # Some cleverness is required to get pagination links to include anchors.
-    reget(:test_index, { :num_per_page => 10,
-                        :test_anchor => 'blah' }.merge(query_params))
+    get(:test_index, {
+      :num_per_page => 10,
+      :test_anchor => 'blah'
+    }.merge(query_params))
     assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :page => 2,
-                        :test_anchor => 'blah', :anchor => 'blah')
+      :params => query_params, :page => 2,
+      :test_anchor => 'blah', :anchor => 'blah')
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
-                        :params => query_params, :letter => 'A',
-                        :test_anchor => 'blah', :anchor => 'blah')
+      :params => query_params, :letter => 'A',
+      :test_anchor => 'blah', :anchor => 'blah')
   end
 
   def test_name_guessing
@@ -510,8 +562,8 @@ class NameControllerTest < FunctionalTestCase
     end
 
     # Not all the genera actually have records in our test database.
-    User.current = @rolf
-    @controller.instance_variable_set('@user', @rolf)
+    User.current = rolf
+    @controller.instance_variable_set('@user', rolf)
     create_needed_names('Agaricus')
     create_needed_names('Pluteus')
     create_needed_names('Coprinus comatus subsp. bogus var. varietus')
@@ -525,10 +577,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def assert_name_suggestions(str)
-    clean_our_backtrace do
-      results = Name.suggest_alternate_spellings(str)
-      assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
-    end
+    results = Name.suggest_alternate_spellings(str)
+    assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
   end
 
   # ----------------------------
@@ -538,19 +588,19 @@ class NameControllerTest < FunctionalTestCase
   # name with Observations that have Locations
   def test_map
     get_with_dump(:map, :id => names(:agaricus_campestris).id)
-    assert_response('map')
+    assert_template(action: 'map')
   end
 
   # name with Observations that don't have Locations
   def test_map_no_loc
     get_with_dump(:map, :id => names(:coprinus_comatus).id)
-    assert_response('map')
+    assert_template(action: 'map')
   end
 
   # name with no Observations
   def test_map_no_obs
     get_with_dump(:map, :id => names(:conocybe_filaris).id)
-    assert_response('map')
+    assert_template(action: 'map')
   end
 
   # ----------------------------
@@ -571,13 +621,13 @@ class NameControllerTest < FunctionalTestCase
       },
     }
     post_requires_login(:create_name, params)
-    assert_response(:action => :show_name, :id => Name.last.id)
+    assert_template(action: 'show_name', id: Name.last.id)
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
-    assert_equal(10 + 2 * @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + 2 * @new_pts, rolf.reload.contribution)
     assert(name = Name.find_by_text_name(text_name))
     assert_equal(text_name, name.text_name)
     assert_equal(author, name.author)
-    assert_equal(@rolf, name.user)
+    assert_equal(rolf, name.user)
   end
 
   def test_create_name_existing
@@ -598,7 +648,7 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(count, Name.count, "Shouldn't have created a name; created #{Name.last.search_name.inspect}.")
     names = Name.find_all_by_text_name(text_name)
     assert_obj_list_equal([names(:conocybe_filaris)], names)
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
   end
 
   def test_create_name_bad_name
@@ -613,7 +663,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:create_name, params)
-    assert_response('create_name')
+    assert_template(action: 'create_name', partial: "_form_name")
     # Should fail and no name should get created
     assert_nil(Name.find_by_text_name(text_name))
     assert_form_action(:action => 'create_name')
@@ -631,7 +681,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:create_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert(name = Name.find_by_text_name(text_name))
   end
 
@@ -649,7 +699,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:create_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert(name = Name.find_by_text_name(text_name2))
     assert_equal(count + 5, Name.count)
   end
@@ -684,7 +734,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:create_name, params)
     assert_flash_success
-    assert_response(:action => :show_name, :id => Name.last.id)
+    assert_template(action: 'show_name', id: Name.last.id)
   end
 
   def test_create_family
@@ -727,15 +777,15 @@ class NameControllerTest < FunctionalTestCase
     }
     post_requires_login(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     # No more email for filling in author.
     # assert_notify_email('Conocybe filaris', 'Conocybe filaris (Fr.) Kühner')
-    assert_equal(20, @rolf.reload.contribution)
+    assert_equal(20, rolf.reload.contribution)
     assert_equal('(Fr.) Kühner', name.reload.author)
     assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.display_name)
     assert_equal('Conocybe filaris (Fr.) Kühner', name.search_name)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
-    assert_equal(@rolf, name.user)
+    assert_equal(rolf, name.user)
   end
 
   # This catches a bug that was happening when editing a name that was in use.
@@ -753,13 +803,13 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_equal('', name.reload.author)
     assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
-    assert_equal(@rolf, name.user)
+    assert_equal(rolf, name.user)
     assert_equal('Conocybe', Name.last.search_name)
-    assert_equal(20, @rolf.reload.contribution) # created Conocybe
+    assert_equal(20, rolf.reload.contribution) # created Conocybe
   end
 
   def test_edit_name_post_just_change_notes
@@ -783,10 +833,10 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     # It's implicitly creating Conocybe, because not in fixtures.
-    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     assert_equal(new_notes, name.reload.notes)
     assert_equal(past_names + 1, name.versions.size)
   end
@@ -808,10 +858,10 @@ class NameControllerTest < FunctionalTestCase
     login('mary')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
-    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
+    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
     assert(name.reload.deprecated)
     assert_equal('new citation', name.citation)
   end
@@ -838,10 +888,10 @@ class NameControllerTest < FunctionalTestCase
     # change the name, instead it seems to be doing nothing simply because he's
     # not actually changing anything!
     assert_flash_warning
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     # (In fact, it is even implicitly creating Macrolepiota!)
-    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, rolf.reload.contribution)
     # (But owner remains of course.)
     assert_equal(name_owner, name.reload.user)
   end
@@ -871,7 +921,7 @@ class NameControllerTest < FunctionalTestCase
     # Fails because Rolf isn't in admin mode.
     login('rolf')
     post(:edit_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_flash_warning
     assert_notify_email(old_name.real_search_name, new_name.real_search_name)
     assert(Name.find(old_name.id))
@@ -886,7 +936,7 @@ class NameControllerTest < FunctionalTestCase
     make_admin
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       old_name = Name.find(old_name.id)
@@ -920,7 +970,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(old_name.id)
@@ -952,7 +1002,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(wrong_author_name.id)
@@ -986,7 +1036,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(old_name.id)
@@ -1026,7 +1076,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(bad_name1.id)
@@ -1052,7 +1102,7 @@ class NameControllerTest < FunctionalTestCase
     params[:name][:deprecated] = 'true'
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(bad_name2.id)
@@ -1071,7 +1121,7 @@ class NameControllerTest < FunctionalTestCase
     params[:name][:deprecated] = 'false'
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(bad_name3.id)
@@ -1090,7 +1140,7 @@ class NameControllerTest < FunctionalTestCase
     params[:name][:deprecated] = 'true'
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(bad_name4.id)
@@ -1127,7 +1177,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert(new_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1168,7 +1218,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert(new_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1200,7 +1250,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name, :id => new_name.id)
+    assert_template(action: 'show_name', id: new_name.id)
     assert_no_emails
     assert(new_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1225,7 +1275,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name, :id => old_name.id)
+    assert_template(action: 'show_name', id: old_name.id)
     assert_no_emails
     assert(old_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1257,7 +1307,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert(new_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1296,7 +1346,7 @@ class NameControllerTest < FunctionalTestCase
     post(:edit_name, params)
     assert_flash_warning
     assert_notify_email(old_name.real_search_name, new_name.real_search_name)
-    assert_response(:action => 'show_name', :id => old_name.id)
+    assert_template(action: 'show_name', id: old_name.id)
     assert(old_name.reload)
     assert(new_name.reload)
     assert_equal(1, new_name.version)
@@ -1309,7 +1359,7 @@ class NameControllerTest < FunctionalTestCase
     make_admin
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => 'show_name', :id => new_name.id)
+    assert_template(action: 'show_name', id: new_name.id)
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       assert(old_name.reload)
@@ -1337,11 +1387,11 @@ class NameControllerTest < FunctionalTestCase
     login('mary')
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     # No more email for filling in author.
     # assert_notify_email(old_text_name, "#{old_text_name} #{new_author}")
     # It seems to be creating Strobilurus as well?
-    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
+    assert_equal(10 + @new_pts + @chg_pts, mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
   end
@@ -1370,7 +1420,7 @@ class NameControllerTest < FunctionalTestCase
     make_admin
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(bad_id)
@@ -1400,14 +1450,14 @@ class NameControllerTest < FunctionalTestCase
     params[:name][:deprecated] = 'true'
     post(:edit_name, params)
     assert_flash_warning
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
 
     # Change to accepted: go to approve_name, no flash.
     params[:name][:deprecated] = 'false'
     post(:edit_name, params)
     assert_no_flash
-    assert_response(:action => :approve_name)
+    assert_template(action: 'approve_name')
 
     # Change to deprecated: go to deprecate_name, no flash.
     name.change_deprecated(false)
@@ -1415,7 +1465,7 @@ class NameControllerTest < FunctionalTestCase
     params[:name][:deprecated] = 'true'
     post(:edit_name, params)
     assert_no_flash
-    assert_response(:action => :deprecate_name)
+    assert_template(action: 'deprecate_name')
   end
 
   # Test that misspellings are handle right when merging.
@@ -1446,7 +1496,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(name2.id)
@@ -1477,7 +1527,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(name3.id)
@@ -1509,7 +1559,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(name4.id)
@@ -1564,7 +1614,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(name2.id)
@@ -1611,7 +1661,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(name2.id)
@@ -1661,7 +1711,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       Name.find(name2.id)
@@ -1698,7 +1748,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     name.reload
     assert_equal('Xanthoparmelia coloradoensis', name.text_name)
@@ -1713,7 +1763,7 @@ class NameControllerTest < FunctionalTestCase
     params[:name][:author] = ''
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     name.reload
     assert_equal('Xanthoparmelia coloradoensis', name.text_name)
@@ -1733,7 +1783,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:create_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     name = Name.last
     assert_equal(:Variety, name.rank)
@@ -1767,7 +1817,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     name.reload
     assert_equal(:Variety, name.rank)
@@ -1802,7 +1852,7 @@ class NameControllerTest < FunctionalTestCase
     }
     post(:edit_name, params)
     assert_flash_success
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_no_emails
     name.reload
     assert_equal(:Group, name.rank)
@@ -1828,7 +1878,7 @@ class NameControllerTest < FunctionalTestCase
     )
     Interest.create!(
       :target => name,
-      :user => @rolf,
+      :user => rolf,
       :state => true
     )
     params = {
@@ -1860,10 +1910,10 @@ class NameControllerTest < FunctionalTestCase
       :list => { :members => "#{new_name_str} = #{new_synonym_str}"},
     }
     post_requires_login(:bulk_name_edit, params)
-    assert_response('bulk_name_edit')
+    assert_template(action: 'bulk_name_edit', partial: "_form_list_feedback")
     assert_nil(Name.find_by_text_name(new_name_str))
     assert_nil(Name.find_by_text_name(new_synonym_str))
-    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(10, rolf.reload.contribution)
   end
 
   def test_update_bulk_names_approved_nn_synonym
@@ -1877,7 +1927,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:bulk_name_edit, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_template(controller: 'observer', action: 'list_rss_logs')
     assert(new_name = Name.find_by_text_name(new_name_str))
     assert_equal(new_name_str, new_name.text_name)
     assert_equal("**__#{new_name_str}__**", new_name.display_name)
@@ -1902,7 +1952,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:bulk_name_edit, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_template(controller: 'observer', action: 'list_rss_logs')
     assert(!approved_name.reload.deprecated)
     assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym)
@@ -1927,7 +1977,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:bulk_name_edit, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_template(controller: 'observer', action: 'list_rss_logs')
     assert(!approved_name.reload.deprecated)
     assert(synonym_name.reload.deprecated)
     assert(synonym_name2.reload.deprecated)
@@ -1948,7 +1998,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:bulk_name_edit, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_template(controller: 'observer', action: 'list_rss_logs')
     assert(!approved_name.reload.deprecated)
     assert(synonym_name = Name.find_by_search_name(new_synonym_str))
     assert(synonym_name.deprecated)
@@ -1971,7 +2021,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:bulk_name_edit, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_template(controller: 'observer', action: 'list_rss_logs')
     assert(approved_name = Name.find_by_search_name(new_name_str))
     assert(!approved_name.deprecated)
     assert_equal(:Species, approved_name.rank)
@@ -1997,7 +2047,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:bulk_name_edit, params)
-    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_template(controller: 'observer', action: 'list_rss_logs')
     assert(Name.find_by_text_name(new_name_str))
   end
 
@@ -2026,7 +2076,7 @@ class NameControllerTest < FunctionalTestCase
       :deprecate => { :all => "1" }
     }
     post_requires_login(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal("__Lepiota rhacodes__ Vittad.", add_name.display_name)
@@ -2064,7 +2114,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(!add_name.reload.deprecated)
     assert_not_nil(add_synonym = add_name.synonym)
@@ -2090,7 +2140,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response('change_synonyms')
+    assert_template(action: 'change_synonyms', partial: "_form_synonyms")
 
     assert_nil(selected_name.reload.synonym)
     assert(!selected_name.deprecated)
@@ -2111,7 +2161,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert_equal(selected_version, selected_name.reload.version)
     assert_not_nil(synonym = selected_name.synonym)
@@ -2147,7 +2197,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(!page_name.reload.deprecated)
     assert_not_nil(synonym = page_name.synonym)
@@ -2184,7 +2234,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_not_nil(add_synonym = add_name.synonym)
@@ -2233,7 +2283,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
@@ -2287,7 +2337,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
@@ -2328,7 +2378,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response('change_synonyms')
+    assert_template(action: 'change_synonyms', partial: "_form_synonyms")
 
     assert(!add_name.reload.deprecated)
     assert_equal(add_version, add_name.version)
@@ -2368,7 +2418,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => "show_name")
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
@@ -2408,7 +2458,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => "show_name")
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
@@ -2448,7 +2498,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response('change_synonyms')
+    assert_template(action: 'change_synonyms', partial: "_form_synonyms")
 
     assert(!add_name.reload.deprecated)
     assert_not_nil(add_synonym = add_name.synonym)
@@ -2486,7 +2536,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => "show_name")
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
@@ -2526,7 +2576,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => "show_name")
+    assert_template(action: 'show_name')
 
     assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
@@ -2573,7 +2623,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => "show_name")
+    assert_template(action: 'show_name')
 
     assert_equal(selected_version, selected_name.reload.version)
     assert(!selected_name.deprecated)
@@ -2624,7 +2674,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
@@ -2669,7 +2719,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert_equal(selected_version, selected_name.reload.version)
     assert(!selected_name.deprecated)
@@ -2706,7 +2756,7 @@ class NameControllerTest < FunctionalTestCase
       :comment => { :comment => "Don't like this name" }
     }
     post_requires_login(:deprecate_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(old_name.reload.deprecated)
     assert_equal(old_past_name_count+1, old_name.versions.length)
@@ -2749,7 +2799,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:deprecate_name, params)
-    assert_response('deprecate_name')
+    assert_template(action: 'deprecate_name', partial: "_form_name_feedback")
     # Fail since name can't be disambiguated
 
     assert(!old_name.reload.deprecated)
@@ -2784,7 +2834,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:deprecate_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(old_name.reload.deprecated)
     assert_equal(old_past_name_count+1, old_name.versions.length)
@@ -2814,7 +2864,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:deprecate_name, params)
-    assert_response('deprecate_name')
+    assert_template(action: 'deprecate_name', partial: "_form_name_feedback")
     # Fail since new name is not approved
 
     assert(!old_name.reload.deprecated)
@@ -2839,7 +2889,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:deprecate_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(old_name.reload.deprecated)
     assert_equal(old_past_name_count+1, old_name.versions.length) # past name should have been created
@@ -2872,7 +2922,7 @@ class NameControllerTest < FunctionalTestCase
       :comment => { :comment => "Prefer this name"}
     }
     post_requires_login(:approve_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(!old_name.reload.deprecated)
     assert_equal(old_past_name_count+1, old_name.versions.length)
@@ -2907,7 +2957,7 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:approve_name, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
 
     assert(!old_name.reload.deprecated)
     assert_equal(old_past_name_count+1, old_name.versions.length)
@@ -2928,7 +2978,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     params = { :id => name.id.to_s }
     requires_login(:email_tracking, params)
-    assert_response('email_tracking')
+    assert_template(action: 'email_tracking')
     assert_form_action(:action => 'email_tracking', :id => name.id.to_s)
   end
 
@@ -2936,7 +2986,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:conocybe_filaris)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
     params = {
       :id => name.id,
@@ -2950,10 +3000,10 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
-    assert_nil(notification.calc_note(:user => @rolf,
+    assert_nil(notification.calc_note(:user => rolf,
                                       :naming => namings(:coprinus_comatus_naming)))
   end
 
@@ -2961,7 +3011,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:conocybe_filaris)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
     params = {
       :id => name.id,
@@ -2972,15 +3022,15 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:email_tracking, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     # This is needed before the next find for some reason
     count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(:user => @mary,
+    assert(notification.calc_note(:user => mary,
                                   :naming => namings(:coprinus_comatus_naming)))
   end
 
@@ -2988,7 +3038,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
     params = {
@@ -3000,15 +3050,15 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:email_tracking, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     # This is needed before the next find for some reason
     count_after = Notification.count
     assert_equal(count_before, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(:user => @rolf,
+    assert(notification.calc_note(:user => rolf,
                                   :naming => namings(:coprinus_comatus_naming)))
   end
 
@@ -3016,7 +3066,7 @@ class NameControllerTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     count_before = Notification.count
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert(notification)
     params = {
       :id => name.id,
@@ -3027,12 +3077,12 @@ class NameControllerTest < FunctionalTestCase
     }
     login('rolf')
     post(:email_tracking, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     # This is needed before the next find for some reason
     # count_after = Notification.count
     # assert_equal(count_before - 1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
     assert_nil(notification)
   end
 
@@ -3043,26 +3093,26 @@ class NameControllerTest < FunctionalTestCase
   def test_set_review_status_reviewer
     desc = name_descriptions(:coprinus_comatus_desc)
     assert_equal(:unreviewed, desc.review_status)
-    assert(@rolf.in_group?('reviewers'))
+    assert(rolf.in_group?('reviewers'))
     params = {
       :id => desc.id,
       :value => 'vetted'
     }
     post_requires_login(:set_review_status, params)
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_equal(:vetted, desc.reload.review_status)
   end
 
   def test_set_review_status_non_reviewer
     desc = name_descriptions(:coprinus_comatus_desc)
     assert_equal(:unreviewed, desc.review_status)
-    assert(!@mary.in_group?('reviewers'))
+    assert(!mary.in_group?('reviewers'))
     params = {
       :id => desc.id,
       :value => 'vetted'
     }
     post_requires_login(:set_review_status, params, 'mary')
-    assert_response(:action => :show_name)
+    assert_template(action: 'show_name')
     assert_equal(:unreviewed, desc.reload.review_status)
   end
 
@@ -3087,7 +3137,7 @@ class NameControllerTest < FunctionalTestCase
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.create(:target => peltigera, :user => @rolf, :state => true)
+    Interest.create(:target => peltigera, :user => rolf, :state => true)
     get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -3100,8 +3150,8 @@ class NameControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.create(:target => peltigera, :user => @rolf, :state => false)
+    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.create(:target => peltigera, :user => rolf, :state => false)
     get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -3123,25 +3173,25 @@ class NameControllerTest < FunctionalTestCase
     draft = name_descriptions(:draft_coprinus_comatus)
     login(draft.user.login)
     get_with_dump(:show_name_description, { :id => draft.id })
-    assert_response('show_name_description')
+    assert_template(action: 'show_name_description', partial: "_show_description")
   end
 
   # Ensure that an admin can see a draft they don't own
   def test_show_draft_admin
     draft = name_descriptions(:draft_coprinus_comatus)
-    assert_not_equal(draft.user, @mary)
-    login(@mary.login)
+    assert_not_equal(draft.user, mary)
+    login(mary.login)
     get_with_dump(:show_name_description, { :id => draft.id })
-    assert_response('show_name_description')
+    assert_template(action: 'show_name_description', partial: "_show_description")
   end
 
   # Ensure that an member can see a draft they don't own
   def test_show_draft_member
     draft = name_descriptions(:draft_agaricus_campestris)
-    assert_not_equal(draft.user, @katrina)
-    login(@katrina.login)
+    assert_not_equal(draft.user, katrina)
+    login(katrina.login)
     get_with_dump(:show_name_description, { :id => draft.id })
-    assert_response('show_name_description')
+    assert_template(action: 'show_name_description', partial: "_show_description")
   end
 
   # Ensure that a non-member cannot see a draft
@@ -3149,23 +3199,23 @@ class NameControllerTest < FunctionalTestCase
     project = projects(:eol_project)
     draft = name_descriptions(:draft_agaricus_campestris)
     assert(draft.belongs_to_project?(project))
-    assert(!project.is_member?(@dick))
-    login(@dick.login)
+    assert(!project.is_member?(dick))
+    login(dick.login)
     get_with_dump(:show_name_description, { :id => draft.id })
-    assert_response(:controller => 'project', :action => 'show_project',
-                    :id => project.id)
+    assert_template(controller: 'project', action: 'show_project',
+                    id: project.id)
   end
 
   def test_create_draft_member
-    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @katrina)
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), katrina)
   end
 
   def test_create_draft_admin
-    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @mary)
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), mary)
   end
 
   def test_create_draft_not_member
-    create_draft_tester(projects(:eol_project), names(:agaricus_campestris), @dick, false)
+    create_draft_tester(projects(:eol_project), names(:agaricus_campestris), dick, false)
   end
 
   def test_edit_draft
@@ -3173,41 +3223,41 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_edit_draft_admin
-    assert(projects(:eol_project).is_admin?(@mary))
+    assert(projects(:eol_project).is_admin?(mary))
     assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_coprinus_comatus), @mary)
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus), mary)
   end
 
   def test_edit_draft_member
-    assert(projects(:eol_project).is_member?(@katrina))
+    assert(projects(:eol_project).is_member?(katrina))
     assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), katrina, false)
   end
 
   def test_edit_draft_non_member
-    assert(!projects(:eol_project).is_member?(@dick))
+    assert(!projects(:eol_project).is_member?(dick))
     assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), dick, false, false)
   end
 
   def test_edit_draft_post_owner
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf, {})
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), rolf, {})
   end
 
   def test_edit_draft_post_admin
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @mary, {})
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), mary, {})
   end
 
   def test_edit_draft_post_member
-    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @katrina, {}, false)
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), katrina, {}, false)
   end
 
   def test_edit_draft_post_non_member
-    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @dick, {}, false)
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), dick, {}, false)
   end
 
   def test_edit_draft_post_bad_classification
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf,
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), rolf,
       { :classification => "**Domain**: Eukarya" }, true, false)
   end
 
@@ -3218,17 +3268,17 @@ class NameControllerTest < FunctionalTestCase
 
   # Admin can, too.
   def test_publish_draft_admin
-    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary, :merged, false)
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), mary, :merged, false)
   end
 
   # Other members cannot.
   def test_publish_draft_member
-    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false, false)
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina, false, false)
   end
 
   # Non-members certainly can't.
   def test_publish_draft_non_member
-    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), dick, false, false)
   end
 
   # Non-members certainly can't.
@@ -3238,7 +3288,7 @@ class NameControllerTest < FunctionalTestCase
     name = draft.name
     name.description = desc = NameDescription.create!(
       :name        => name,
-      :user        => @rolf,
+      :user        => rolf,
       :source_type => :public,
       :source_name => '',
       :public      => true,
@@ -3255,19 +3305,19 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_destroy_draft_owner
-    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @rolf)
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), rolf)
   end
 
   def test_destroy_draft_admin
-    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary)
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), mary)
   end
 
   def test_destroy_draft_member
-    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina, false)
   end
 
   def test_destroy_draft_non_member
-    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), dick, false)
   end
 
   # ------------------------------
@@ -3291,7 +3341,7 @@ class NameControllerTest < FunctionalTestCase
     login('rolf') # member
     project = projects(:eol_project)
     get(:create_name_description, params.merge(:project => project.id))
-    assert_response('create_name_description')
+    assert_template(action: 'create_name_description', partial: "_form_name_description")
     desc = assigns(:description)
     assert_equal(:project, desc.source_type)
     assert_equal(project.title, desc.source_name)
@@ -3301,8 +3351,8 @@ class NameControllerTest < FunctionalTestCase
     # Test draft creation by project non-member.
     login('dick')
     get(:create_name_description, params.merge(:project => project.id))
-    assert_response(:controller => 'project', :action => 'show_project',
-                    :id => project.id)
+    assert_template(controller: 'project', action: 'show_project',
+                    id: project.id)
     assert_flash_error
   end
 
@@ -3323,7 +3373,7 @@ class NameControllerTest < FunctionalTestCase
     login('katrina') # member
     project = projects(:eol_project)
     get(:create_name_description, params.merge(:project => project.id))
-    assert_response('create_name_description')
+    assert_template(action: 'create_name_description', partial: "_form_name_description")
     desc = assigns(:description)
     assert_equal(:project, desc.source_type)
     assert_equal(project.title, desc.source_name)
@@ -3333,21 +3383,21 @@ class NameControllerTest < FunctionalTestCase
     # Test draft creation by project non-member.
     login('dick')
     get(:create_name_description, params.merge(:project => project.id))
-    assert_response(:controller => 'project', :action => 'show_project',
-                    :id => project.id)
+    assert_template(controller: 'project', action: 'show_project',
+                    id: project.id)
     assert_flash_error
 
     # Test clone of private description if not reader.
     other = name_descriptions(:peltigera_user_desc)
     login('katrina') # random user
     get(:create_name_description, params.merge(:clone => other.id))
-    assert_response(:action => 'show_name', :id => name.id)
+    assert_template(action: 'show_name', id: name.id)
     assert_flash_error
 
     # Test clone of private description if can read.
     login('dick') # reader
     get(:create_name_description, params.merge(:clone => other.id))
-    assert_response('create_name_description')
+    assert_template(action: 'create_name_description', partial: "_form_name_description")
     desc = assigns(:description)
     assert_equal(:user, desc.source_type)
     assert_equal('', desc.source_name.to_s)
@@ -3377,7 +3427,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name_description, params)
     assert_flash_success
     desc = NameDescription.last
-    assert_response(:action => 'show_name_description', :id => desc.id)
+    assert_template(action: 'show_name_description', id: desc.id)
     name.reload
     assert_objs_equal(desc, name.description)
     assert_obj_list_equal([desc], name.descriptions)
@@ -3401,7 +3451,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name_description, params)
     assert_flash_warning # tried to make it private
     desc = NameDescription.last
-    assert_response(:action => 'show_name_description', :id => desc.id)
+    assert_template(action: 'show_name_description', id: desc.id)
     name.reload
     assert_objs_equal(default, name.description)
     assert_true(name.descriptions.include?(desc))
@@ -3435,13 +3485,13 @@ class NameControllerTest < FunctionalTestCase
     params[:description][:classification] = bad_class
     post(:create_name_description, params)
     assert_flash_error
-    assert_response('create_name_description')
+    assert_template(action: 'create_name_description', partial: "_form_name_description")
 
     params[:description][:classification] = good_class
     post(:create_name_description, params)
     assert_flash_success
     desc = NameDescription.last
-    assert_response(:action => 'show_name_description', :id => desc.id)
+    assert_template(action: 'show_name_description', id: desc.id)
 
     name.reload
     assert_equal(final_class, name.classification)
@@ -3468,7 +3518,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name_description, params)
     assert_flash_success
     desc = NameDescription.last
-    assert_response(:action => 'show_name_description', :id => desc.id)
+    assert_template(action: 'show_name_description', id: desc.id)
 
     name.reload
     assert_nil(name.description)
@@ -3477,8 +3527,8 @@ class NameControllerTest < FunctionalTestCase
     assert_equal('Mushrooms Demystified', desc.source_name)
     assert_false(desc.public)
     assert_false(desc.public_write)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.reader_groups)
+    assert_obj_list_equal([UserGroup.one_user(dick)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(dick)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.one_user(dick)], desc.reader_groups)
   end
 end

@@ -2,7 +2,7 @@
 # Test typical sessions of amateur user who just posts the occasional comment,
 # observations, or votes.
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class AmateurTest < IntegrationTestCase
 
@@ -62,48 +62,45 @@ class AmateurTest < IntegrationTestCase
     assert_raises(Test::Unit::AssertionFailedError) do
       click(:label => 'Preferences', :in => :left_panel)
     end
-    get_via_redirect('/account/prefs')
+    get('/account/prefs')
     assert_template('account/login')
   end
 
   # ----------------------------
   #  Test autologin cookies.
   # ----------------------------
-
+  
   def test_autologin
-    login('rolf', 'testpassword', :true)
-    rolf_cookies = cookies.dup
-    rolf_cookies.delete('mo_session')
-    assert_match(/^1/, rolf_cookies['mo_user'])
+    rolf_cookies = get_cookies(rolf, :true)
+    mary_cookies = get_cookies(mary, true)
+    dick_cookies = get_cookies(dick, false)
+    
+    try_autologin(rolf_cookies, rolf)
+    try_autologin(mary_cookies, mary)
+    try_autologin(dick_cookies, false)
+  end
 
-    login('mary', 'testpassword', true)
-    mary_cookies = cookies.dup
-    mary_cookies.delete('mo_session')
-    assert_match(/^2/, mary_cookies['mo_user'])
-
-    login('dick', 'testpassword', false)
-    dick_cookies = cookies.dup
-    dick_cookies.delete('mo_session')
-    assert_equal('', dick_cookies['mo_user'])
-
-    open_session do
-      self.cookies = rolf_cookies
-      get_via_redirect('/account/prefs')
-      assert_template('account/prefs')
-      assert_users_equal(@rolf, assigns(:user))
+  def get_cookies(user, autologin)
+    sess = login(user, 'testpassword', autologin)
+    result = sess.cookies.dup
+    if autologin
+      assert_match(/^#{user.id}/, result["mo_user"])
+    else
+      assert_equal("", result["mo_user"].to_s)
     end
+    result
+  end
 
-    open_session do
-      self.cookies = mary_cookies
-      get_via_redirect('/account/prefs')
-      assert_template('account/prefs')
-      assert_users_equal(@mary, assigns(:user))
-    end
-
-    open_session do
-      self.cookies = dick_cookies
-      get_via_redirect('/account/prefs')
-      assert_template('account/login')
+  def try_autologin(cookies, user)
+    open_session do |sess|
+      sess.cookies["mo_user"] = cookies["mo_user"]
+      sess.get('/account/prefs')
+      if user
+        sess.assert_template('account/prefs')
+        assert_users_equal(user, sess.assigns(:user))
+      else
+        sess.assert_template('account/login')
+      end
     end
   end
 
@@ -114,7 +111,7 @@ class AmateurTest < IntegrationTestCase
   def test_post_comment
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
-    assert_false(obs.comments.any? {|c| c.user == @katrina})
+    assert_false(obs.comments.any? {|c| c.user == katrina})
 
     summary = 'Test summary'
     message = 'This is a big fat test!'
@@ -128,7 +125,7 @@ class AmateurTest < IntegrationTestCase
 
     click(:label => 'Add Comment')
     assert_template('account/login')
-    current_session.login!('katrina')
+    login('katrina')
     assert_template('comment/add_comment')
 
     # (Make sure the form is for the correct object!)
@@ -159,8 +156,8 @@ class AmateurTest < IntegrationTestCase
     assert_match(summary, response.body)
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_select("a[href*=edit_comment/#{com.id}]", 1)
-    assert_select("a[href*=destroy_comment/#{com.id}]", 1)
+    assert_select("a[href*=edit_comment?id=#{com.id}]", 1)
+    assert_select("a[href*=destroy_comment?id=#{com.id}]", 1)
 
     # Try changing it.
     click(:label => /edit/i, :href => /edit_comment/)
@@ -184,7 +181,7 @@ class AmateurTest < IntegrationTestCase
     # (There should be a link in there to look up Xylaria polymorpha.)
     assert_select('a[href*=lookup_name]', 1) do |links|
       url = links.first.attributes['href']
-      assert_equal("#{HTTP_DOMAIN}/observer/lookup_name/Xylaria+polymorpha", url)
+      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha", url)
     end
 
     # I grow weary of this comment.
@@ -201,159 +198,32 @@ class AmateurTest < IntegrationTestCase
   # --------------------------------------
 
   def test_proposing_names
-    katrina = current_session
+    namer_session = open_session.extend(NamerDsl)
+    namer = katrina
+    
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
-    assert_false(obs.comments.any? {|c| c.user == @katrina})
+    assert_false(obs.comments.any? {|c| c.user == namer})
     # (Make sure the name we are going to suggest doesn't exist yet.)
     text_name = 'Xylaria polymorpha'
     assert_nil(Name.find_by_text_name(text_name))
-    fungi = obs.name
+    orignal_name = obs.name
 
-    # Start by showing the observation...
-    get("/#{obs.id}")
+    namer_session.propose_then_login(namer, obs)
+    naming = namer_session.create_name(obs, text_name)
+    
+    voter_session = login!(rolf).extend(VoterDsl)
+    assert_not_equal(namer_session.session[:session_id], voter_session.session[:session_id])
+    voter_session.vote_on_name(obs, naming)
+    namer_session.failed_delete(obs)
+    voter_session.change_mind(obs, naming)
+    namer_session.successful_delete(obs, naming, text_name, orignal_name)
+  end
 
-    # (Make sure there are no edit or destroy controls on existing namings.)
-    assert_select('a[href*=edit_naming], a[href*=destroy_naming]', false)
-
-    click(:label => /propose.*name/i)
-    assert_template('account/login')
-    current_session.login!(@katrina)
-    assert_template('observer/create_naming')
-
-    # (Make sure the form is for the correct object!)
-    assert_objs_equal(obs, assigns(:observation))
-    # (Make sure there is a tab to go back to show_observation.)
-    assert_select("div#left_tabs a[href=/#{obs.id}]")
-
-    open_form do |form|
-      form.assert_value('reason_1_check', false)
-      form.assert_value('reason_2_check', false)
-      form.assert_value('reason_3_check', false)
-      form.assert_value('reason_4_check', false)
-      form.submit
-    end
-    assert_template('observer/create_naming')
-    # (I don't care so long as it says something.)
-    assert_flash(/\S/)
-
-    open_form do |form|
-      form.change('name', text_name)
-      form.submit
-    end
-    assert_template('observer/create_naming')
-    assert_select('div.Warnings') do |elems|
-      assert_block('Expected error about name not existing yet.') do
-        elems.any? {|e| e.to_s.match(/#{text_name}.*not recognized/i)}
-      end
-    end
-
-    open_form do |form|
-      # Re-submit to accept name.
-      form.submit
-    end
-    assert_template('observer/create_naming')
-    assert_flash(/confidence/i)
-
-    open_form do |form|
-      form.assert_value('name', text_name)
-      form.assert_value('reason_1_check', false)
-      form.assert_value('reason_2_check', false)
-      form.assert_value('reason_3_check', false)
-      form.assert_value('reason_4_check', false)
-      form.select(/vote/, /call it that/i)
-      form.submit
-    end
-    assert_template('observer/show_observation')
-    assert_flash(/success/i)
-    assert_objs_equal(obs, assigns(:observation))
-
-    obs.reload
-    name = Name.find_by_text_name(text_name)
-    naming = Naming.last
-    assert_names_equal(name, naming.name)
-    assert_names_equal(name, obs.name)
-    assert_equal('', name.author.to_s)
-
-    # (Make sure naming shows up somewhere.)
-    assert_match(text_name, response.body)
-    # (Make sure there is an edit and destroy control for the new naming.)
-    assert_select("a[href*=edit_naming/#{naming.id}]", 1)
-    assert_select("a[href*=destroy_naming/#{naming.id}]", 1)
-
-    # Try changing it.
-    author = '(Pers.) Grev.'
-    reason = 'Test reason.'
-    click(:label => /edit/i, :href => /edit_naming/)
-    assert_template('observer/edit_naming')
-    open_form do |form|
-      form.assert_value('name', text_name)
-      form.change('name', "#{text_name} #{author}")
-      form.change('reason_2_check', true)
-      form.change('reason_2_notes', reason)
-      form.submit
-    end
-    assert_template('observer/show_observation')
-    assert_objs_equal(obs, assigns(:observation))
-
-    obs.reload
-    name.reload
-    naming.reload
-    assert_equal(author, name.author)
-    assert_names_equal(name, naming.name)
-    assert_names_equal(name, obs.name)
-
-    # (Make sure author shows up somewhere.)
-    assert_match(author, response.body)
-    # (Make sure reason shows up, too.)
-    assert_match(reason, response.body)
-
-    click(:label => /edit/i, :href => /edit_naming/)
-    assert_template('observer/edit_naming')
-    open_form do |form|
-      form.assert_value('name', "#{text_name} #{author}")
-      form.assert_value('reason_1_check', true)
-      form.assert_value('reason_1_notes', '')
-      form.assert_value('reason_2_check', true)
-      form.assert_value('reason_2_notes', reason)
-      form.assert_value('reason_3_check', false)
-      form.assert_value('reason_3_notes', '')
-    end
-    click(:label => /cancel.*show/i)
-
-    # Have Rolf join in the fun and vote for this naming.
-    rolf = new_user_session(@rolf)
-    in_session(rolf) do
-      get("/#{obs.id}")
-      open_form do |form|
-        form.assert_value("vote_#{naming.id}_value", /no opinion/i)
-        form.select("vote_#{naming.id}_value", /call it that/i)
-        form.submit
-      end
-      assert_template('observer/show_observation')
-      assert_match(/call it that/i, response.body)
-    end
-
-    # Now Katrina shouldn't be allowed to delete her naming.
-    click(:label => /destroy/i, :href => /destroy_naming/)
-    assert_flash(/sorry/i)
-
-    # Have Rolf change his mind.
-    rolf.open_form do |form|
-      form.select("vote_#{naming.id}_value", /as if!/i)
-      form.submit
-    end
-
-    # Now Katrina *can* delete it.
-    click(:label => /destroy/i, :href => /destroy_naming/)
-    assert_template('observer/show_observation')
-    assert_objs_equal(obs, assigns(:observation))
-    assert_flash(/success/i)
-
-    obs.reload
-    assert_names_equal(fungi, obs.name)
-    assert_nil(Naming.safe_find(naming.id))
-    assert_not_match(text_name, response.body)
+  def test_sessions
+    rolf_session    = login!(rolf).extend(NamerDsl)
+    mary_session    = login!(mary).extend(VoterDsl)
+    assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
   end
 
   # ------------------------------------------------------------------------
@@ -381,17 +251,17 @@ class AmateurTest < IntegrationTestCase
     assert_template('observer/show_observation')
     assert_select('div#map_div', 0)
 
-    login('dick')
-    assert_template('observer/show_observation')
-    assert_select('div#map_div', 1)
+    session = login('dick')
+    session.assert_template('observer/show_observation')
+    session.assert_select('div#map_div', 1)
 
-    click(:label => 'Hide thumbnail map.')
-    assert_template('observer/show_observation')
-    assert_select('div#map_div', 0)
+    session.click(:label => 'Hide thumbnail map.')
+    session.assert_template('observer/show_observation')
+    session.assert_select('div#map_div', 0)
 
-    get('/2')
-    assert_template('observer/show_observation')
-    assert_select('div#map_div', 0)
+    session.get('/2')
+    session.assert_template('observer/show_observation')
+    session.assert_select('div#map_div', 0)
   end
 
   # -----------------------------------------------------------------------
@@ -400,27 +270,198 @@ class AmateurTest < IntegrationTestCase
   # -----------------------------------------------------------------------
 
   def test_language_tracking
-    login(@mary)
-    @mary.locale = Locale.code = 'el-GR'
-    @mary.save
+    session = login(mary).extend(UserDsl)
+    mary.locale = 'el-GR'
+    I18n.locale = mary.lang
+    mary.save
 
-    data = Globalite.localization_data[:'el-GR']
+    data = TranslationString.translations('el') # Globalite.localization_data[:'el-GR']
     data[:test_tag1] = 'test_tag1 value'
     data[:test_tag2] = 'test_tag2 value'
     data[:test_flash_redirection_title] = 'Testing Flash Redirection'
 
-    get('/observer/test_flash_redirection?tags=')
-    click(:label => :app_edit_translations_on_page.t)
-    assert_no_flash
-    assert_select('span.tag', :text => 'test_tag1:', :count => 0)
-    assert_select('span.tag', :text => 'test_tag2:', :count => 0)
-    assert_select('span.tag', :text => 'test_flash_redirection_title:', :count => 1)
+    session.run_test
+  end
+  
+  private
+  
+  module UserDsl
+    def run_test
+      get('/observer/test_flash_redirection?tags=')
+      click(:label => :app_edit_translations_on_page.t)
+      assert_no_flash
+      assert_select('span.tag', :text => 'test_tag1:', :count => 0)
+      assert_select('span.tag', :text => 'test_tag2:', :count => 0)
+      assert_select('span.tag', :text => 'test_flash_redirection_title:', :count => 1)
 
-    get('/observer/test_flash_redirection?tags=test_tag1,test_tag2')
-    click(:label => :app_edit_translations_on_page.t)
-    assert_no_flash
-    assert_select('span.tag', :text => 'test_tag1:', :count => 1)
-    assert_select('span.tag', :text => 'test_tag2:', :count => 1)
-    assert_select('span.tag', :text => 'test_flash_redirection_title:', :count => 1)
+      get('/observer/test_flash_redirection?tags=test_tag1,test_tag2')
+      click(:label => :app_edit_translations_on_page.t)
+      assert_no_flash
+      assert_select('span.tag', :text => 'test_tag1:', :count => 1)
+      assert_select('span.tag', :text => 'test_tag2:', :count => 1)
+      assert_select('span.tag', :text => 'test_flash_redirection_title:', :count => 1)
+    end
+  end
+  
+  module VoterDsl
+    def vote_on_name(obs, naming)
+      get("/#{obs.id}")
+      open_form do |form|
+        form.assert_value("vote_#{naming.id}_value", /no opinion/i)
+        form.select("vote_#{naming.id}_value", /call it that/i)
+        form.submit
+      end
+      assert_template('observer/show_observation')
+      assert_match(/call it that/i, response.body)
+    end
+    
+    def change_mind(obs, naming)
+      # "change_mind response.body".print_thing(response.body)
+      get("/#{obs.id}")
+      open_form do |form|
+        form.select("vote_#{naming.id}_value", /as if!/i)
+        form.submit
+      end
+    end
+  end
+  
+  module NamerDsl
+    def propose_then_login(namer, obs)
+      get("/#{obs.id}")
+      assert_select('a[href*=edit_naming], a[href*=destroy_naming]', false)
+      click(:label => /propose.*name/i)
+      assert_template('account/login')
+      open_form do |form|
+        form.change('login', namer.login)
+        form.change('password', 'testpassword')
+        form.change('remember_me', true)
+        form.submit('Login')
+      end
+    end
+    
+    def create_name(obs, text_name)
+      assert_template('observer/create_naming')
+
+      # (Make sure the form is for the correct object!)
+      assert_objs_equal(obs, assigns(:observation))
+      # (Make sure there is a tab to go back to show_observation.)
+      assert_select("div#left_tabs a[href=/#{obs.id}]")
+
+      open_form do |form|
+        form.assert_value('reason_1_check', false)
+        form.assert_value('reason_2_check', false)
+        form.assert_value('reason_3_check', false)
+        form.assert_value('reason_4_check', false)
+        form.submit
+      end
+      assert_template('observer/create_naming')
+      # (I don't care so long as it says something.)
+      assert_flash(/\S/)
+
+      open_form do |form|
+        form.change('name', text_name)
+        form.submit
+      end
+      assert_template('observer/create_naming')
+      assert_select('div.Warnings') do |elems|
+        assert_block('Expected error about name not existing yet.') do
+          elems.any? {|e| e.to_s.match(/#{text_name}.*not recognized/i)}
+        end
+      end
+
+      open_form do |form|
+        # Re-submit to accept name.
+        form.submit
+      end
+      assert_template('observer/create_naming')
+      assert_flash(/confidence/i)
+
+      open_form do |form|
+        form.assert_value('name', text_name)
+        form.assert_value('reason_1_check', false)
+        form.assert_value('reason_2_check', false)
+        form.assert_value('reason_3_check', false)
+        form.assert_value('reason_4_check', false)
+        form.select(/vote/, /call it that/i)
+        form.submit
+      end
+      assert_template('observer/show_observation')
+      assert_flash(/success/i)
+      assert_objs_equal(obs, assigns(:observation))
+
+      obs.reload
+      name = Name.find_by_text_name(text_name)
+      naming = Naming.last
+      assert_names_equal(name, naming.name)
+      assert_names_equal(name, obs.name)
+      assert_equal('', name.author.to_s)
+
+      # (Make sure naming shows up somewhere.)
+      assert_match(text_name, response.body)
+      # (Make sure there is an edit and destroy control for the new naming.)
+      assert_select("a[href*=edit_naming?id=#{naming.id}]", 1)
+      assert_select("a[href*=destroy_naming?id=#{naming.id}]", 1)
+
+      # Try changing it.
+      author = '(Pers.) Grev.'
+      reason = 'Test reason.'
+      click(:label => /edit/i, :href => /edit_naming/)
+      assert_template('observer/edit_naming')
+      open_form do |form|
+        form.assert_value('name', text_name)
+        form.change('name', "#{text_name} #{author}")
+        form.change('reason_2_check', true)
+        form.change('reason_2_notes', reason)
+        form.submit
+      end
+      assert_template('observer/show_observation')
+      assert_objs_equal(obs, assigns(:observation))
+
+      obs.reload
+      name.reload
+      naming.reload
+      assert_equal(author, name.author)
+      assert_names_equal(name, naming.name)
+      assert_names_equal(name, obs.name)
+
+      # (Make sure author shows up somewhere.)
+      assert_match(author, response.body)
+      # (Make sure reason shows up, too.)
+      assert_match(reason, response.body)
+
+      click(:label => /edit/i, :href => /edit_naming/)
+      assert_template('observer/edit_naming')
+      open_form do |form|
+        form.assert_value('name', "#{text_name} #{author}")
+        form.assert_value('reason_1_check', true)
+        form.assert_value('reason_1_notes', '')
+        form.assert_value('reason_2_check', true)
+        form.assert_value('reason_2_notes', reason)
+        form.assert_value('reason_3_check', false)
+        form.assert_value('reason_3_notes', '')
+      end
+      click(:label => /cancel.*show/i)
+      # "end create_name response.body".print_thing(response.body)
+      naming
+    end
+  
+    def failed_delete(obs)
+      # "failed_delete response.body".print_thing(response.body)
+      click(:label => /destroy/i, :href => /destroy_naming/)
+      assert_flash(/sorry/i)
+    end
+
+    def successful_delete(obs, naming, text_name, original_name)
+      # "successful_delete response.body".print_thing(response.body)
+      click(:label => /destroy/i, :href => /destroy_naming/)
+      assert_template('observer/show_observation')
+      assert_objs_equal(obs, assigns(:observation))
+      assert_flash(/success/i)
+
+      obs.reload
+      assert_names_equal(original_name, obs.name)
+      assert_nil(Naming.safe_find(naming.id))
+      assert_not_match(text_name, response.body)
+    end
   end
 end

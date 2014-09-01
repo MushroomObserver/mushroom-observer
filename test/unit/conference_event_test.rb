@@ -1,7 +1,7 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class ConferenceEventTest < UnitTestCase
-  def test_registration_count
+  test "test_registration_count" do
     msa = conference_events(:msa_annual_meeting)
     assert_equal(4, msa.how_many)
   end

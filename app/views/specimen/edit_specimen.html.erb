@@ -1,0 +1,34 @@
+<%
+  @title = :edit_specimen_title.l(:herbarium_label => @specimen.herbarium_label)
+  new_tab_set do
+    add_tab(:cancel_and_show.t(:TYPE => 'specimen'), :action => 'show_specimen', :id => @specimen.id)
+    add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
+  end
+%>
+
+<%= form_tag(:action => 'edit_specimen', :id => @specimen) do %>
+	<center><%= submit_tag :edit_specimen_save.t %><br/></center>
+
+  <p>
+		<%= herbarium_link(@specimen.herbarium) %>
+	</p>
+
+  <p>
+    <%= :add_specimen_herbarium_label.t %>:
+    <%= text_field('specimen', 'herbarium_label', :value => @specimen.herbarium_label, :size => 100) %>
+  </p>
+
+  <p>
+    <label for="specimen_when_1i"><%= :WHEN.t %>:</label>
+    <%= date_select('specimen', 'when', :start_year => 1980,
+                    :end_year => Time.now.year, :value => @specimen.when,
+                    :order => [:day,:month,:year]) %>
+  </p>
+
+  <p>
+    <%= :add_specimen_notes.t %>:<br/>
+		<%= text_area('specimen', 'notes', :value => @specimen.notes, :cols => 80, :rows => 10) %>
+  </p>
+
+  <center><%= submit_tag :edit_specimen_save.t %><br/></center>
+<% end %>

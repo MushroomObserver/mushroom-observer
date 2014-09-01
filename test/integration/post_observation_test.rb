@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class PostObservationTest < IntegrationTestCase
 
@@ -27,7 +27,9 @@ class PostObservationTest < IntegrationTestCase
     submit_location_form_without_errors
     open_edit_observation_form
     submit_observation_form_with_changes
+    push_page
     make_sure_observation_is_in_main_index(obs = Observation.last)
+    go_back
     destroy_observation
     make_sure_observation_is_not_in_main_index(obs)
   end
@@ -35,7 +37,7 @@ class PostObservationTest < IntegrationTestCase
   def open_create_observation_form
     get(CREATE_OBSERVATION_PAGE)
     assert_template(LOGIN_PAGE)
-    login!(@katrina)
+    login!(katrina)
     assert_template(CREATE_OBSERVATION_PAGE)
     assert_form_has_correct_values(create_observation_form_defaults)
   end
@@ -201,35 +203,32 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_obs.notes, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing('observations_at_where')
-    assert_link_exists_containing("show_location/#{new_loc.id}")
-    assert_link_exists_containing("show_image/#{new_img.id}")
+    assert_link_exists_containing("show_location?id=#{new_loc.id}")
+    assert_link_exists_containing("show_image?id=#{new_img.id}")
   end
 
-  def assert_flash_for_create_observation
+  def review_flash(patterns)
+    notice = get_last_flash
     assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/created observation/i)
-    assert_flash(/created proposed name/i)
-    assert_flash(/uploaded/i)
+    patterns.each { |pat| assert_match(pat, notice) }
+  end
+  
+  def assert_flash_for_create_observation
+    review_flash([/success/i, /created observation/i,
+      /created proposed name/i, /uploaded/i])
   end
 
   def assert_flash_for_create_location
-    assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/created location/i)
+    review_flash([/success/i, /created location/i])
   end
 
   def assert_flash_for_edit_observation
-    assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/updated observation/i)
-    assert_flash(/updated notes on image/i)
+    review_flash([/success/i, /updated observation/i,
+      /updated notes on image/i])
   end
 
   def assert_flash_for_destroy_observation
-    assert_flash_success
-    assert_flash(/success/i)
-    assert_flash(/destroyed/i)
+    review_flash([/success/i, /destroyed/i])
   end
 
   def assert_has_location_warning(regex)
@@ -289,11 +288,11 @@ class PostObservationTest < IntegrationTestCase
       'observation_alt' => ' 56 ft. ',
       'name_name' => ' Agaricus  campestris ',
       'vote_value' => Vote.next_best_vote,
-      'image_0_image' => JpegUpload.new("#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"),
+      'image_0_image' => JpegUpload.new("#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"),
       'image_0_when_1i' => '2010',
       'image_0_when_2i' => '3',
       'image_0_when_3i' => '14',
-      'image_0_copyright_holder' => @katrina.legal_name,
+      'image_0_copyright_holder' => katrina.legal_name,
       'image_0_notes' => 'Notes for image',
     }
   end
@@ -344,7 +343,7 @@ class PostObservationTest < IntegrationTestCase
       "good_image_#{img_id}_when_1i" => '2010',
       "good_image_#{img_id}_when_2i" => '3',
       "good_image_#{img_id}_when_3i" => '14',
-      "good_image_#{img_id}_copyright_holder" => @katrina.legal_name,
+      "good_image_#{img_id}_copyright_holder" => katrina.legal_name,
       "good_image_#{img_id}_notes" => 'Notes for image',
     }
   end
@@ -370,7 +369,7 @@ class PostObservationTest < IntegrationTestCase
 
   def expected_values_after_create
     {
-      :user => @katrina,
+      :user => katrina,
       :when => Date.parse('2010-03-14'),
       :where => 'Pasadena, California, USA',
       :location => nil,

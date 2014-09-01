@@ -1,18 +1,22 @@
 <%
   @title = :show_publication_title.l
   new_tab_set do
-    add_tab(:EDIT.t, edit_publication_path(@publication)) if @publication.can_edit?(@user)
     add_tab(:create_publication.t, new_publication_path)
     add_tab(:publication_index.t, publications_path)
+    if is_in_admin_mode? || @publication.can_edit?(@user)
+      add_tab(:EDIT.t, edit_publication_path(@publication))
+      add_tab(:DESTROY.t, { :action => :destroy, :id => @publication.id },
+                          { :confirm => "aren't we cool?" + :are_you_sure.t })
+    end
   end
 %>
 
 <p>
   <b><%= :publication_full.t %>:</b><br />
-  <%=h @publication.full %>
+  <%= @publication.full.t %>
 </p>
 
-<% if @publication.link and (@publication.link != "") %>
+<% unless @publication.link.blank? %>
   <p>
     <b><%= :publication_link.t %>:</b>
     <%= link_to @publication.link, @publication.link %>
@@ -31,7 +35,7 @@
 
 <p>
   <b><%= :publication_how_helped.t %></b><br />
-  <%=h @publication.how_helped %>
+  <%= @publication.how_helped.t %>
 </p>
 
 <p>

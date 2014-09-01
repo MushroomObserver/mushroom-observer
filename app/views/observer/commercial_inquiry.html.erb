@@ -1,0 +1,17 @@
+<% @title = :commercial_inquiry_title.t(:name => @image.unique_format_name) %>
+
+<%= form_tag(add_query_param(:action => 'commercial_inquiry',
+      :id => @image.id)) do %>
+  <br/><center><%= submit_tag :SEND.l %></center>
+  <table cellpadding="10" width="1">
+    <tr>
+      <td valign="top">
+        <%= :commercial_inquiry_header.tp(:user => @image.user.legal_name) %>
+        <%= text_area('commercial_inquiry', 'content', :cols => 60) %><br/><br/>
+      </td>
+      <td>
+        <%= thumbnail(@image, :size => :medium, :border => 0, :votes => true) %>
+      </td>
+    </tr>
+  </table>
+<% end %>

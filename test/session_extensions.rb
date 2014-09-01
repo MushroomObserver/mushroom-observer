@@ -15,16 +15,24 @@
 #  ==== Helpers
 #  parse_query_params:: Get (our) query params from the given URL.
 #  get_links::        Get an Array of URLs for a set of links.
-#  login::            Log in a given user.
-#  logout::           Log out the current user.
 #
 #  ==== Navigation
 #  push_page::        Save response from last query so we can go back to it.
 #  go_back::          Go back a number of times.
-#  click::         Click on first link that matches the given args.
+#  click::            Click on first link that matches the given args.
+#
+#  ==== Links
+#  assert_link_exists::                   Check that a link exists somewhere on the page.
+#  assert_link_exists_containing::        Check that a link containing a given string exists.
+#  assert_link_exists_beginning_with::    Check that a link beginning with a given string exists.
+#  assert_no_link_exists::                Opposite of above.
+#  assert_no_link_exists_containing::     Opposite of above.
+#  assert_no_link_exists_beginning_with:: Opposite of above.
 #
 #  ==== Forms
-#  open_form::          Encapsulate filling out and posting a given form.
+#  open_form::        Encapsulate filling out and posting a given form.
+#  submit_form_with_changes::  Open form, apply Hash of changes, and submit it.
+#  assert_form_has_correct_values::  Make sure a given form has been initialized correctly.
 #
 ################################################################################
 
@@ -47,7 +55,7 @@ module SessionExtensions
 
   # Save response from last request so you can look at it in a browser.
   def save_page(file=nil)
-    file ||= "#{RAILS_ROOT}/public/test.html"
+    file ||= "#{::Rails.root.to_s}/public/test.html"
     File.open(file, 'w') do |fh|
       fh.write(response.body)
     end
@@ -58,7 +66,7 @@ module SessionExtensions
   def process_with_error_checking(method, url, *args)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send("#{method}_via_redirect", url, *args)
+    send("#{method.downcase}_via_redirect", url, *args)
     if status == 500
       if error = controller.instance_variable_get('@error')
         msg = "#{error}\n#{error.backtrace.join("\n")}"
@@ -77,7 +85,7 @@ module SessionExtensions
   # Override all 'get' calls and do a bunch of extra error checking.
   def get(*args)
     if !@doing_with_error_checking
-      process_with_error_checking('get', *args)
+      process_with_error_checking("get", *args)
     else
       super
     end
@@ -86,7 +94,7 @@ module SessionExtensions
   # Override all 'post' calls and do a bunch of extra error checking.
   def post(*args)
     if !@doing_with_error_checking
-      process_with_error_checking('post', *args)
+      process_with_error_checking("POST", *args)
     else
       super
     end
@@ -128,40 +136,11 @@ module SessionExtensions
   #   urls = get_links('div.results a[href^=/name/show_name]')
   #
   def get_links(*args)
-    clean_our_backtrace('get_links') do
-      results = []
-      assert_select(*args) do |links|
-        results = links.map {|l| l.attributes['href']}
-      end
-      return results
+    results = []
+    assert_select(*args) do |links|
+      results = links.map {|l| l.attributes['href']}
     end
-  end
-
-  # Login the given user, do no testing, doesn't re-get login form if already
-  # served.
-  def login(login, password='testpassword', remember_me=true)
-    login = login.login if login.is_a?(User)
-    get('/account/login') if path != '/account/login'
-    open_form do |form|
-      form.change('login', login)
-      form.change('password', password)
-      form.change('remember_me', remember_me)
-      form.submit('Login')
-    end
-  end
-
-  # Login the given user, testing to make sure it was successful.
-  def login!(user, *args)
-    login(user, *args)
-    assert_flash(/success/i)
-    user = User.find_by_login(user) if user.is_a?(String)
-    assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
-  end
-
-  # Logout the current user and make sure it was successful.
-  def logout
-    click(:label => 'Logout')
-    assert_flash(/success/i)
+    return results
   end
 
   ################################################################################
@@ -171,23 +150,19 @@ module SessionExtensions
   ################################################################################
 
   def assert_form_has_correct_values(expected_values)
-    clean_our_backtrace do
-      open_form do |form|
-        for key, value in expected_values
-          form.assert_value(key, value)
-        end
+    open_form do |form|
+      for key, value in expected_values
+        form.assert_value(key, value)
       end
     end
   end
 
   def submit_form_with_changes(changes)
-    clean_our_backtrace('submit_form_with_changes') do
-      open_form do |form|
-        for key, value in changes
-          form.change(key, value)
-        end
-        form.submit
+    open_form do |form|
+      for key, value in changes
+        form.change(key, value)
       end
+      form.submit
     end
   end
 
@@ -197,20 +172,18 @@ module SessionExtensions
   # for a form that posts back to the same page.)
   def open_form(*args)
     form = nil
-    clean_our_backtrace('open_form') do
-      if args == []
-        action = path.sub(/\?.*/, '')
-        args << "form[action*=#{action}]"
-      end
-      assert_select(*args) do |elems|
-        assert_equal(1, elems.length,
-                     "Found multiple forms matching #{args.inspect}.")
-        elem = elems.first
-        assert_equal('form', elem.name,
-                     "Expected #{args.inspect} to find a form!")
-        form = Form.new(self, elem)
-        yield(form) if block_given?
-      end
+    if args == []
+      action = path.sub(/\?.*/, '')
+      args << "form[action*=#{action}]"
+    end
+    assert_select(*args) do |elems|
+      assert_equal(1, elems.length,
+                   "Found multiple forms matching #{args.inspect}.")
+      elem = elems.first
+      assert_equal('form', elem.name,
+                   "Expected #{args.inspect} to find a form!")
+      form = Form.new(self, elem)
+      yield(form) if block_given?
     end
     return form
   end
@@ -258,64 +231,62 @@ module SessionExtensions
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
   def click(args={})
-    clean_our_backtrace('click') do
-      select = 'a[href]'
-      sargs  = []
+    select = 'a[href]'
+    sargs  = []
 
-      # Filter links based on URL.
-      if arg = args[:href]
-        if arg.is_a?(Regexp)
-          if arg.to_s.match(/^..-mix:\^/)
-            select = "a[href^=?]"
-          else
-            select = "a[href*=?]"
-          end
-          sargs << arg
+    # Filter links based on URL.
+    if arg = args[:href]
+      if arg.is_a?(Regexp)
+        if arg.to_s.match(/^..-mix:\^/)
+          select = "a[href^=?]"
         else
-          select = "a[href^=#{arg}]"
+          select = "a[href*=?]"
         end
+        sargs << arg
+      else
+        select = "a[href^=#{arg}]"
       end
-
-      # Filter links by parent element types.
-      if arg = args[:in]
-        if arg == :tabs
-          arg = 'div#left_tabs'
-        elsif arg == :left_panel
-          arg = 'table.LeftSide'
-        elsif arg == :results
-          arg = 'div.results'
-        end
-        select = "#{arg} #{select}"
-      end
-
-      done = false
-      assert_select(select, *sargs) do |links|
-        for link in links
-          match = true
-
-          # Filter based on link "label" (can be an image too, for example).
-          if arg = args[:label]
-            if arg == :image
-              match = false if !link.to_s.match(/<img /)
-            elsif arg.is_a?(Regexp)
-              match = false if !link.to_s.match(arg)
-            else
-              match = false if !link.to_s.index(arg)
-            end
-          end
-
-          # Click on first link that matches everything.
-          if match
-            url = CGI.unescapeHTML(link.attributes['href'])
-            get(url)
-            done = true
-            break
-          end
-        end
-      end
-
-      assert_block("Expected a link matching: #{args.inspect}") { done }
     end
+
+    # Filter links by parent element types.
+    if arg = args[:in]
+      if arg == :tabs
+        arg = 'div#left_tabs'
+      elsif arg == :left_panel
+        arg = 'table.LeftSide'
+      elsif arg == :results
+        arg = 'div.results'
+      end
+      select = "#{arg} #{select}"
+    end
+
+    done = false
+    assert_select(select, *sargs) do |links|
+      for link in links
+        match = true
+
+        # Filter based on link "label" (can be an image too, for example).
+        if arg = args[:label]
+          if arg == :image
+            match = false if !link.to_s.match(/<img /)
+          elsif arg.is_a?(Regexp)
+            match = false if !link.to_s.match(arg)
+          else
+            match = false if !link.to_s.index(arg)
+          end
+        end
+
+        # Click on first link that matches everything.
+        if match
+          url = CGI.unescapeHTML(link.attributes['href'])
+          get(url)
+          done = true
+          break
+        end
+      end
+    end
+
+    assert_block("Expected a link matching: #{args.inspect}") { done }
   end
 
   ################################################################################
@@ -349,14 +320,10 @@ module SessionExtensions
   end
 
   def assert_link_exists_general_case(url, mod)
-    clean_our_backtrace do
-      assert_select("a[href#{mod}=#{url}]", { :minimum => 1 }, "Expected to find link to #{url}")
-    end
+    assert_select("a[href#{mod}=#{url}]", { :minimum => 1 }, "Expected to find link to #{url}")
   end
 
   def assert_no_link_exists_general_case(url, mod)
-    clean_our_backtrace do
-      assert_select("a[href#{mod}=#{url}]", { :count => 0 }, "Shouldn't be any links to #{url}")
-    end
+    assert_select("a[href#{mod}=#{url}]", { :count => 0 }, "Shouldn't be any links to #{url}")
   end
 end

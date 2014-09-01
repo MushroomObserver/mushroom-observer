@@ -30,6 +30,7 @@
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::  Measure how closely this String matches another String.
+#  unindent::       Remove indentation (e.g., from here docs).
 #
 ################################################################################
 
@@ -379,19 +380,20 @@ class String
   HTML_TAG_PATTERN = /<\/*[A-Za-z][^>]*>/
 
   def t(sanitize=true)
-    Textile.textilize_without_paragraph(self, false, sanitize)
+    Textile.textilize_without_paragraph(self, false, sanitize).html_safe
   end
 
   def tl(sanitize=true)
-    Textile.textilize_without_paragraph(self, true, sanitize)
+    Textile.textilize_without_paragraph(self, true, sanitize).html_safe
   end
 
+  # TODO: Move somewhere that content_tag is defined
   def tp(sanitize=true)
-    '<div class="textile">' + Textile.textilize(self, false, sanitize) + '</div>'
+    '<div class="textile">'.html_safe + Textile.textilize(self, false, sanitize).html_safe + '</div>'.html_safe
   end
 
   def tpl(sanitize=true)
-    '<div class="textile">' + Textile.textilize(self, true, sanitize) + '</div>'
+    '<div class="textile">'.html_safe + Textile.textilize(self, true, sanitize).html_safe + '</div>'.html_safe
   end
 
   def tp_nodiv(sanitize=true)
@@ -435,7 +437,7 @@ class String
   # String is well-formatted HTML with properly-nested tags.
   def truncate_html(max)
     result = ''
-    str = self.dup
+    str = '' + self
     opens = []
     while str != ''
       # Self-closing tag.
@@ -465,7 +467,7 @@ class String
       end
     end
     result += opens.reverse.map {|x| "<\/#{x}>"}.join('')
-    return result
+    return result.html_safe
   end
 
   # Attempt to turn HTML into plain text.  Remove all '<blah>' tags, and
@@ -484,15 +486,17 @@ class String
          gsub(/\n+\Z/, '').             # remove superfluous newlines at end
          gsub(HTML_TAG_PATTERN, '').    # remove all <tags>
          gsub(/^ +|[ \t]+$/, '').       # remove leading/trailing space on each line
-         gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
-                                        # convert &xxx; and &#nnn; to ascii
+         gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }.
+         html_safe                      # convert &xxx; and &#nnn; to ascii
   end
-
-
+  
+  def print_thing(thing)
+    print "#{self}: #{thing.class}: #{thing}\n"
+  end
   # Surround HTML string with a span that prevents long strings from being
   # broken.
   def nowrap
-    '<span style="white-space:nowrap">' + self + '</span>'
+    '<span style="white-space:nowrap">'.html_safe + self + '</span>'.html_safe
   end
 
   # Strip leading and trailing whitespace, and squeeze embedded whitespace.
@@ -645,6 +649,11 @@ class String
   def percent_match(other)
     max = [length, other.length].max
     1.0 - levenshtein_distance_to(other).to_f / max
+  end
+
+  # Find amount first line is indented and remove that from all lines.
+  def unindent
+    gsub /^#{self[/\A\s*/]}/, ''
   end
 
   # This method is missing from ruby 1.9.

@@ -1,0 +1,54 @@
+<%
+  @title = :show_location_title.t(:name => @location.display_name)
+
+  new_tab_set do
+    add_tab_with_query(:show_location_observations.t,
+      :controller => "observer", :action => "observations_at_location", 
+      :id => @location.id)
+    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
+    add_tab_with_query(:show_location_create.t, :action => 'create_location')
+    add_tab_with_query(:show_location_edit.t, :action => 'edit_location',
+      :id => @location.id)
+    if is_in_admin_mode?
+      add_tab_with_query(:show_location_destroy.t,
+        :action => 'destroy_location', :id => @location.id)
+      add_tab_with_query(:show_location_reverse.t,
+        :action => 'reverse_name_order', :id => @location.id)
+    end
+  end
+
+  draw_prev_next_tabs(@location)
+  draw_interest_icons(@location)
+%>
+
+<table cellpadding="5" width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <p>
+        <%= show_previous_version(@location) %>
+        <%= set_export_status_controls(@location) %>
+      </p>
+    </td>
+
+    <td valign="top" width="50%">
+      <%= show_alt_descriptions(@location, @projects) %>
+    </td>
+  </tr>
+</table>
+
+<%= render(:partial => 'location', :object => @location) %>
+<%= render(:partial => 'comment/show_comments', :locals => 
+           { :object => @location, :controls => true,
+             :limit => 2 }) %>
+
+<% if @description && @description.has_any_notes? %>
+  <hr/>
+  <%= show_embedded_description_title(@description, @location) %>
+  <%= render(:partial => 'location_description', :object => @description) %>
+  <%= render(:partial => 'comment/show_comments', :locals => 
+             { :object => @description, :controls => true,
+               :limit => 2 }) if false %>
+  <hr/>
+<% end %>
+
+<%= show_object_footer(@location) %>

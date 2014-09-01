@@ -1,0 +1,13 @@
+<% @title = :intro_title.t.nowrap %>
+
+<%= :intro_purpose.tp %>
+
+<%= :intro_image_sharing.tp %>
+
+<%= :intro_source_code.tp(
+  :repo => MO.code_repository,
+  :todo_list => "#{MO.code_repository}/mushroom-observer/blob/master/TODO",
+  :readme => "#{MO.code_repository}/developer-startup"
+) %>
+
+<%= :intro_note.tp %>

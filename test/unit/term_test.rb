@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class TermTest < UnitTestCase
   def test_term_load
@@ -44,7 +44,7 @@ class TermTest < UnitTestCase
     term = terms(:convex_term)
     assert_nil(term.thumb_image)
     assert_equal(0, term.images.length)
-    images = term.images
+    images = term.images # Seems like this conflicts with the next line
     first_image = images(:convex_image)
     term.add_image(first_image)
     assert_equal(first_image, term.thumb_image)

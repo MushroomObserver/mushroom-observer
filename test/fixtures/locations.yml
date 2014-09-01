@@ -17,6 +17,7 @@ albion:
   high: 100.0
   low: 0.0
   rss_log_id: 5
+  notes: some notes & stuff... to test "unsafe" html
 
 burbank:
   id: 2

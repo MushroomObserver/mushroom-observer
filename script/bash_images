@@ -1,0 +1,135 @@
+#
+#  Image-related stuff bash scripts need access to.
+#
+#  $image_root               Local path to images.
+#  $image_sizes              Array of image sizes: "thumbnail", "small", ...
+#  $image_subdirs            Array of image subdirs: "thumb", "320", ...
+#  $size_to_subdir           Hash mapping size to subdir.
+#  $subdir_to_size           Hash mapping subdir to size.
+#  $image_servers            Array of image servers: "cdmr", ...
+#  $image_server_data        Hash of data on each image server.
+#
+#  image_server_has_subdir   Does a given image server support a given subdir?
+#  copy_file_to_server       Copy one subir/image to a given server.
+#  copy_file_from_server     Get one subir/image from a given server.
+#  read_server_directory     Get list of files/sizes from a given subdir on a given server.
+#
+################################################################################
+
+image_root=$( rails_constant MO.local_image_files )
+
+declare -a image_sizes=( thumbnail small medium large huge full_size )
+declare -a image_subdirs=( 1280 320 640 960 orig thumb )
+
+declare -A size_to_subdir
+size_to_subdir[thumbnail]=thumb
+size_to_subdir[small]=320
+size_to_subdir[medium]=640
+size_to_subdir[large]=960
+size_to_subdir[huge]=1280
+size_to_subdir[full_size]=orig
+
+declare -A subdir_to_size
+subdir_to_size[thumb]=thumbnail
+subdir_to_size[320]=small
+subdir_to_size[640]=medium
+subdir_to_size[960]=large
+subdir_to_size[1280]=huge
+subdir_to_size[orig]=full_size
+
+declare -A image_server_data
+image_server_data[local,url]="file://$image_root"
+image_server_data[local,type]="file"
+image_server_data[local,path]="$image_root"
+image_server_data[local,subdirs]="thumb,320,640,960,1280,orig"
+
+declare -a image_servers
+for line in $($app_root/script/config image_servers); do
+  # Format from "config image_servers" is:
+  #   name;type://path;thumb,small
+  name=$(    echo "$line" | sed 's/;.*//' )
+  url=$(     echo "$line" | sed -e 's/^[^;]*;//' -e 's/;.*//' )
+  type=$(    echo "$line" | sed -e 's/^[^;]*;//' -e 's/:.*//' )
+  path=$(    echo "$line" | sed -e 's/^.*:\/\///' -e 's/;.*//' )
+  subdirs=$( echo "$line" | sed 's/.*;//' )
+  image_servers=( "${image_servers[@]}" "$name" )
+  image_server_data[$name,url]="$url"
+  image_server_data[$name,type]="$type"
+  image_server_data[$name,path]="$path"
+  image_server_data[$name,subdirs]="$subdirs"
+done
+
+function image_server_has_subdir {
+  echo ${image_server_data[$1,subdirs]} | grep -q "$2"
+}
+
+# Copy one image file from a given server.
+#   copy_file_from_server "cdmr" "thumb/1234.jpg"
+function copy_file_from_server {
+  server=$1
+  file=$2
+  case ${image_server_data[$server,type]} in
+  "file")
+    path=${image_server_data[$server,path]}
+    cp $path/$file $image_root/$file || die "Failed to get $file from $path."
+    ;;
+  "ssh")
+    wait_for "(scp|ssh)"
+    path=${image_server_data[$server,path]}
+    scp $path/$file $image_root/$file || die "Failed to get $file from $path."
+    ;;
+  "http")
+    url=${image_server_data[$server,url]}
+    wget "$url/$file" -O $image_root/$file || die "Failed to get $file from $url."
+    ;;
+  *)
+    url=${image_server_data[$server,url]}
+    die "Don't know how to get $file from $url."
+  esac
+}
+
+# Copy one image file to a given server.
+#   copy_file_from_server "cdmr" "thumb/1234.jpg"
+function copy_file_to_server {
+  server=$1
+  file=$2
+  case ${image_server_data[$server,type]} in
+  "file")
+    path=${image_server_data[$server,path]}
+    cp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
+    ;;
+  "ssh")
+    wait_for "(scp|ssh)"
+    path=${image_server_data[$server,path]}
+    scp $image_root/$file $path/$file || die "Failed to transfer $file to $path."
+    ;;
+  *)
+    url=${image_server_data[$server,url]}
+    die "Don't know how to transfer $file to $url."
+  esac
+}
+
+# Read a directory on a server.
+#   read_directory "cdmr" "thumb" > cdmr.files
+function read_server_directory {
+  server=$1
+  subdir=$2
+  case ${image_server_data[$server,type]} in
+  "file")
+    path=${image_server_data[$server,path]}
+    find $path/$subdir -maxdepth 1 -type f -printf "%f\t%s\n" || \
+      die "Failed to list $path/$subdir on $server server."
+    ;;
+  "ssh")
+    wait_for "(scp|ssh)"
+    host=$( echo "${image_server_data[$server,path]}" | sed "s/:.*//" )
+    path=$( echo "${image_server_data[$server,path]}" | sed "s/.*://" )
+    ssh $host find $path/$subdir -maxdepth 1 -type f -printf "%f\t%s\n" || \
+      die "Failed to list $host:$path/$subdir on $server server."
+    ;;
+  *)
+    url=${image_server_data[$server,url]}
+    die "Don't know how to get listing of $url/$subdir on $server server."
+  esac
+} 
+

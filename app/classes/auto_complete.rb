@@ -13,7 +13,7 @@ PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 class AutoComplete
   attr_accessor :string, :matches
 
-  class_inheritable_accessor :limit
+  class_attribute :limit
   self.limit = 1000
 
   def self.subclass(type)

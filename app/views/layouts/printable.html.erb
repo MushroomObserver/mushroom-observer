@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => :app_rss.l}) %>
+  <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
+  <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
+  <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png" />
+  <meta property="og:title" content="Mushroom Observer" />
+  <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world." />
+
+  <style>
+    body, p, ol, ul, td {
+      font-family: verdana, arial, helvetica, sans-serif;
+      font-size:   9px;
+      line-height: 15px;
+      margin-top: 0px;
+      margin-left: 0px;
+      margin-right: 0px;
+    }
+
+    body {
+      margin-bottom: 0px;
+    }
+
+    .break {
+      page-break-before: always;
+    }
+
+    table {
+      page-break-inside:avoid;
+    }
+  </style>
+</head>
+<body>
+  <%= yield %>
+</body>
+</html>

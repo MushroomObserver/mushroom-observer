@@ -1,14 +1,16 @@
 # encoding: utf-8
 
+require 'csv'
+
 module ObservationReport
   class Base
     attr_accessor :query
     attr_accessor :encoding
 
-    class_inheritable_accessor :default_encoding
-    class_inheritable_accessor :mime_type
-    class_inheritable_accessor :extension
-    class_inheritable_accessor :header
+    class_attribute :default_encoding
+    class_attribute :mime_type
+    class_attribute :extension
+    class_attribute :header
 
     def initialize(args)
       self.query    = args[:query]
@@ -28,7 +30,7 @@ module ObservationReport
         when 'ASCII'
           render.to_ascii
         else
-          render.iconv(encoding)
+          render.iconv(encoding) # This was causing problems with the UTF-16 encoding.
       end
     end
 
@@ -194,7 +196,7 @@ module ObservationReport
     self.header = { :header => 'present' }
 
     def render
-      FasterCSV.generate do |csv|
+      ::CSV.generate do |csv|
         csv << labels
         rows.each do |row|
           csv << row

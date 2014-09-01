@@ -2,7 +2,7 @@
 
 # Test typical sessions of user who never creates an account or contributes.
 
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class LurkerTest < IntegrationTestCase
   def test_poke_around
@@ -59,7 +59,7 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select('a[href^=/observer/show_user/2]', :minimum => 3)
+    assert_select('a[href^=/observer/show_user?id=2]', :minimum => 3)
     click(:label => 'Mary Newbie')
     assert_template('observer/show_user')
 
@@ -78,10 +78,10 @@ class LurkerTest < IntegrationTestCase
     # Click on name.
     go_back
     # (Should be at least two links to show the name Fungi.)
-    assert_select('a[href^=/name/show_name/1]', :minimum => 2)
+    assert_select('a[href^=/name/show_name?id=1]', :minimum => 2)
     click(:label => /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
-    assert_select('a[href^=/name/create_name_description/1]')
+    assert_select('a[href^=/name/create_name_description?id=1]')
 
     # And lastly there are some images.
     go_back
@@ -99,17 +99,17 @@ class LurkerTest < IntegrationTestCase
     form.change('pattern', 'Coprinus comatus')
     form.select('type', 'Names')
     form.submit('Search')
-    assert_match(/^.name.show_name.2\?/, path)
+    assert_match(/^\/name\/show_name\?id=2/, @request.fullpath)
 
     # Search for observations of that name.  (Only one.)
     form.select('type', 'Observations')
     form.submit('Search')
-    assert_match(/^\/3\?/, path)
+    assert_match(/^\/3\?/, @request.fullpath)
 
     # Search for images of the same thing.  (Still only one.)
     form.select('type', 'Images')
     form.submit('Search')
-    assert_match(/^.image.show_image.5\?/, path)
+    assert_match(/^\/image\/show_image\?id=5/, @request.fullpath)
 
     # There should be no locations of that name, though.
     form.select('type', 'Locations')
@@ -168,23 +168,23 @@ class LurkerTest < IntegrationTestCase
 
     # Go to first observation, and try stepping back and forth.
     click(:href => /^\/\d+\?/, :in => :results)
-    save_path = path
-    assert_equal(query_params, parse_query_params)
+    save_path = @request.fullpath
+    assert_equal(query_params, parse_query_params(save_path))
     click(:label => '« Prev', :in => :tabs)
     assert_flash(/there are no more observations/i)
-    assert_equal(save_path, path)
-    assert_equal(query_params, parse_query_params)
+    assert_equal(save_path, @request.fullpath)
+    assert_equal(query_params, parse_query_params(save_path))
     click(:label => 'Next »', :in => :tabs)
     assert_flash(nil)
-    assert_equal(query_params, parse_query_params)
-    save_path = path
+    assert_equal(query_params, parse_query_params(save_path))
+    save_path = @request.fullpath
     click(:label => 'Next »', :in => :tabs)
     assert_flash(nil)
-    assert_equal(query_params, parse_query_params)
+    assert_equal(query_params, parse_query_params(save_path))
     click(:label => '« Prev', :in => :tabs)
     assert_flash(nil)
-    assert_equal(query_params, parse_query_params)
-    assert_equal(save_path, path,
+    assert_equal(query_params, parse_query_params(save_path))
+    assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")
     click(:label => 'Index', :href => /index/, :in => :tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)

@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/monitor_top
+#
+#  DESCRIPTION::
+#
+#  Parse memory and swap usage from "top" and log result.  Restarts the server
+#  (unicorn) if memory and swap usage go too high.
+#
+################################################################################
+
+ROOT = File.expand_path("../..",  __FILE__)
+LOG_FILE = "#{ROOT}/log/top.log"
+UNICORN_FILE = "#{ROOT}/tmp/unicorn.pid"
+PASSENGER_FILE = "#{ROOT}/tmp/restart.txt"
+
+date = `date +%Y%m%d:%H%M%S`.chomp
+
+top = `top -bn 1 | head -5`
+mem  = top.match(/Mem:\D+(\d+)\D+(\d+)\D+(\d+)/)
+swap = top.match(/Swap:\D+(\d+)\D+(\d+)\D+(\d+)/)
+raise "Failed to parse top! #{top.inspect}" if !mem or !swap
+
+mem_total, mem_used, mem_free = mem[1..3].map(&:to_f)
+swap_total, swap_used, swap_free = swap[1..3].map(&:to_f)
+raise "Memory doesn't add up! #{top.inspect}" if mem_total < 1  || (mem_total - mem_used - mem_free).abs > 5
+raise "Swap doesn't add up! #{top.inspect}"   if swap_total < 0 || (swap_total - swap_used - swap_free).abs > 5
+
+mem_pct = mem_used / mem_total * 100
+swap_pct = swap_used / swap_total * 100
+
+size = File.size(LOG_FILE) rescue nil
+File.open(LOG_FILE, "a") do |file|
+  file.print "date                   memory           swap\n" if !size
+  file.printf("%-16s   %5.2fG %5.1f%%   %5.2fG %5.1f%%\n",
+              date, mem_used/1e6, mem_pct, swap_used/1e6, swap_pct)
+end
+
+if swap_pct > 50 && mem_pct > 99
+  if File.exist?(UNICORN_FILE)
+    pid = File.read(UNICORN_FILE).chomp
+    system("kill -HUP #{pid}")
+    $stderr.puts("Restarted server!")
+  elsif File.exist?(PASSENGER_FILE)
+    File.open(PASSENGER_FILE, "w") {}
+    $stderr.puts("Restarted server!")
+  else
+    $stderr.puts("Time to restart server, but couldn't find unicorn or passenger!")
+  end
+end
+
+exit 0

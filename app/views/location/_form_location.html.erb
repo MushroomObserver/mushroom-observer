@@ -1,0 +1,118 @@
+<!--[form:location]-->
+
+<br/>
+
+<table>
+  <tr valign="top">
+    <td>
+<% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
+  <table class="Warnings"><tr><td>
+    <%= @dubious_where_reasons.safe_join(safe_br) %>
+    <br/>
+    <span class="HelpNote">
+      <%= :form_locations_dubious_help.t %>
+    </span><br/>
+  </td></tr></table>
+<% end %>
+
+<table>
+  <tr>
+    <td>
+      <label for="location_display_name"><%= :Where.t %>:</label><br/>
+    </td>
+    <td>
+      <%= form.text_field('display_name', :value => where, :size => 65) %><br/>
+    </td>
+    <td>
+      <span class="HelpNote"><%= :form_locations_help.t %></span>
+    </td>
+  </tr>
+  <tr>
+    <td/>
+    <td align="right">
+      <input type="button" id="find_on_map" onclick="findOnMap()" value="<%= :form_locations_find_on_map.t %>" /> 
+    </td>
+    <td/>
+  </tr>
+</table>
+
+<table cellpadding="10">
+  <tr>
+    <td width="60%" align="center">
+      <table cellpadding="5">
+        <tr>
+          <td></td>
+          <td align="center">
+            <label for="location_north"><%= :North.t %>:</label><br/>
+            <%= form.text_field('north', :size => 12) %>
+            <%= javascript_tag("jQuery('#location_north').keypress(startKeyPressTimer);") %>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td align="center">
+            <label for="location_west"><%= :West.t %>:</label><br/>
+            <%= form.text_field('west', :size => 12) %>
+            <%= javascript_tag("jQuery('#location_west').keypress(startKeyPressTimer)") %>
+          </td>
+          <td align="center">
+              <%= :form_locations_lat_long_help.l %>
+          </td>
+          <td align="center">
+            <label for="location_east"><%= :East.t %>:</label><br/>
+            <%= form.text_field('east', :size => 12) %>
+            <%= javascript_tag("jQuery('#location_east').keypress(startKeyPressTimer)") %>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td align="center">
+            <label for="location_south"><%= :South.t %>:</label><br/>
+            <%= form.text_field('south', :size => 12) %>
+            <%= javascript_tag("jQuery('#location_south').keypress(startKeyPressTimer)") %>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+    </td>
+    <td width="40%" align="center">
+      <table cellpadding="5">
+        <tr>
+          <td>
+            <label for="location_high"><%= :show_location_highest.t %>:</label><br/>
+            <%= form.text_field('high', :size => 12) %> <%= :units_meters.t %>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="location_low"><%= :show_location_lowest.t %>:</label><br/>
+            <%= form.text_field('low', :size => 12) %> <%= :units_meters.t %>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<label for="location_notes"><%= :NOTES.t %>:</label>
+<span class="HelpNote"><%= :form_locations_notes_help.t %></span><br/>
+<%= text_area('location', 'notes', :cols => 65) %><br/>
+<%= render(:partial => 'shared/textilize_help') %>
+    </td>
+    <td>
+      <center>
+        <%=
+          javascript_include('jquery')
+          javascript_include('edit_location')
+          @location.force_valid_lat_longs!
+          gmap = make_editable_map(@location)
+          finish_map(gmap)
+          gmap.div(:width => 500, :height => 500).html_safe
+        %>
+      </center>
+    </td>
+  </tr>
+</table>
+
+<%= focus_on('location_display_name') %>
+
+<!--[eoform:location]-->

@@ -20,6 +20,8 @@
 ################################################################################
 
 class TranslationString < AbstractModel
+  require 'acts_as_versioned'
+
   belongs_to :language
   belongs_to :user
 
@@ -27,7 +29,10 @@ class TranslationString < AbstractModel
     :table_name => 'translation_strings_versions',
     :if => :update_version?
   )
-  non_versioned_columns.push('language_id', 'tag')
+  non_versioned_columns.push(
+    'language_id',
+    'tag'
+  )
 
   # Called to determine whether or not to create a new version.
   # Aggregate changes by the same user for up to a day.
@@ -52,9 +57,14 @@ class TranslationString < AbstractModel
     return result
   end
 
+  def self.translations(lang)
+    I18n.backend.load_translations if I18n.backend.send(:translations).empty?
+    I18n.backend.send(:translations)[lang.to_sym][MO.locale_namespace.to_sym]
+  end
+  
   # Update this string in the current set of translations Globalite is using.
   def update_localization
-    data = Globalite.localization_data[language.locale.to_sym]
+    data = TranslationString.translations(language.locale.to_sym)
     raise "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
     data[tag.to_sym] = text
   end

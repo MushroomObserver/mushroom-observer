@@ -1,15 +1,17 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class LanguageExporterTest < UnitTestCase
   def setup
     @official = Language.official
     Language.clear_verbose_messages
     Language.override_input_files
+    super
   end
 
   def teardown
     Language.reset_input_file_override
+    super
   end
 
   def assert_message(msg)
@@ -18,8 +20,8 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_yaml
-    temp_file = "#{RAILS_ROOT}/tmp/yaml_test"
-    # YAML::ENGINE.yamler = 'psych' # (fails)
+    temp_file = "#{::Rails.root.to_s}/tmp/yaml_test"
+    YAML::ENGINE.yamler = 'psych' # (fails)
     File.open(temp_file, 'w:utf-8') do |fh|
       fh.puts '---'
       fh.puts 'one: ενα'
@@ -30,7 +32,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal({'one' => 'ενα'}, data)
     assert_equal('UTF-8', data['one'].encoding.to_s)
     File.open(temp_file, 'w:utf-8') do |fh|
-      YAML::dump(data, fh)
+      fh << data.to_yaml
     end
     data = File.open(temp_file, 'r:utf-8') do |fh|
       data = YAML::load(fh)
@@ -41,6 +43,19 @@ class LanguageExporterTest < UnitTestCase
     File.unlink(temp_file) rescue nil
   end
 
+  def test_yaml_dump_breakage
+    temp_file = "#{::Rails.root.to_s}/tmp/yaml_test"
+    File.open(temp_file, 'w:utf-8') do |fh|
+      begin
+        YAML::dump({'one' => 'ενα'}, fh)
+        print "YAML::dump works!\n"
+      rescue Encoding::UndefinedConversionError
+      end
+    end
+  ensure
+    File.unlink(temp_file) rescue nil
+  end
+  
   def test_validators
     assert_valid(:validate_tag, 'abc')
     assert_valid(:validate_tag, 'abc_2')
@@ -103,7 +118,7 @@ class LanguageExporterTest < UnitTestCase
     assert_check_fail(0,0, "abc: abc: d\n")
     assert_check_pass(0,1, "TAG: >\n")
     assert_check_pass(1,1, "  blah\n")
-    assert_check_pass(1,1, "  any: thing[:goes]\n")
+    assert_check_pass(1,1, "  any : thing[:goes]\n")
     assert_check_fail(1,0, "abc: abc\n")
     assert_check_pass(1,0, "\n")
   end
@@ -129,9 +144,9 @@ class LanguageExporterTest < UnitTestCase
 
   def test_check_export_file_for_duplicates
     export_file = [
-      "tag1: val1\n",
-      "tag2: val2\n",
-      "tag3: val3\n",
+      "  tag1: val1\n",
+      "  tag2: val2\n",
+      "  tag3: val3\n",
     ]
     @official.write_export_file_lines(export_file)
 
@@ -140,7 +155,7 @@ class LanguageExporterTest < UnitTestCase
     assert_block(msg) { result }
     Language.clear_verbose_messages
 
-    export_file << "tag1: val4\n"
+    export_file << "  tag1: val4\n"
     result = @official.send_private(:check_export_file_for_duplicates)
     msg = assert_message('Expected second version to fail.')
     assert_block(msg) { !result }
@@ -149,11 +164,11 @@ class LanguageExporterTest < UnitTestCase
 
   def test_check_export_file_data
     export_file = [
-      "tag1: >\n",
-      "  blah blah blah\n",
+      "  tag1: >\n",
+      "    blah blah blah\n",
       "\n",
-      "tag2: val2\n",
-      "tag3: val3[:tag2]\n",
+      "  tag2: val2\n",
+      "  tag3: val3[:tag2]\n",
     ]
     @official.write_export_file_lines(export_file)
 
@@ -163,19 +178,19 @@ class LanguageExporterTest < UnitTestCase
     Language.clear_verbose_messages
 
     # Value of tag4 will be true, not a String.
-    export_file[-1] = "tag4: yes\n"
+    export_file[-1] = "  tag4: yes\n"
     result = @official.send_private(:check_export_file_data)
     msg = assert_message('Expected second version to fail.')
     assert_block(msg) { !result }
     Language.clear_verbose_messages
 
-    export_file[-1] = ":tag5: blah\n"
+    export_file[-1] = "  :tag5: blah\n"
     result = @official.send_private(:check_export_file_data)
     msg = assert_message('Expected third version to fail.')
     assert_block(msg) { !result }
     Language.clear_verbose_messages
 
-    export_file[-1] = "tag6: blah[bogus=args=here]\n"
+    export_file[-1] = "  tag6: blah[bogus=args=here]\n"
     result = @official.send_private(:check_export_file_data)
     msg = assert_message('Expected four version to fail.')
     assert_block(msg) { !result }
@@ -226,8 +241,8 @@ class LanguageExporterTest < UnitTestCase
     check_format(:format_string, '"abc def"' => "\"\\\"abc def\\\"\"\n")
     check_format(:format_string, "\n" => "\"\"\n")
     check_format(:format_string, "abc\n" => "abc\n")
-    check_format(:format_string, "abc\ndef" => ">\n  abc\\n\n  def\\n\n\n")
-    check_format(:format_string, "'abc'\ndef:" => ">\n  'abc'\\n\n  def:\\n\n\n")
+    check_format(:format_string, "abc\ndef" => "\"abc\\ndef\"\n") # ">\n  abc\\n\n  def\\n\n\n")
+    check_format(:format_string, "'abc'\ndef:" => "\"'abc'\\ndef:\"\n") # ">\n  'abc'\\n\n  def:\\n\n\n")
   end
 
   def check_format(method, vals)
@@ -243,11 +258,11 @@ class LanguageExporterTest < UnitTestCase
       "\n",
       "# COMMON STRINGS\n",
       "\n",
-      "name: name\n",
-      "NAME: Name\n",
+      "  name: name\n",
+      "  NAME: Name\n",
       # (this changed last time)\n",
-      "runtime_error: >\n",
-      "  Shit happens.\n",
+      "  runtime_error: >\n",
+      "    Shit happens.\n",
       "\n",
     ]
 
@@ -256,10 +271,10 @@ class LanguageExporterTest < UnitTestCase
       "\n",
       "# COMMON STRINGS\n",
       "\n",
-      "name: nombre\n",
-      "NAME: Nombre\n",
+      "  name: nombre\n",
+      "  NAME: Nombre\n",
       # (this changed last time)\n",
-      "runtime_error:  Whatever\n",
+      "  runtime_error:  Whatever\n",
     ]
 
     strings = {
@@ -279,7 +294,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_create_string
-    User.current = @dick
+    User.current = dick
     @official.send_private(:create_string, 'number', 'uno', 'one')
 
     str = TranslationString.last
@@ -288,7 +303,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal('number', str.tag)
     assert_equal('uno', str.text)
     assert(str.updated_at > 1.minute.ago)
-    assert_users_equal(@dick, str.user)
+    assert_users_equal(dick, str.user)
     assert_equal(1, str.versions.length)
 
     ver = str.versions.last
@@ -296,11 +311,11 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(str, ver.translation_string)
     assert_equal('uno', ver.text)
     assert(ver.updated_at > 1.minute.ago)
-    assert_equal(@dick.id, ver.user_id)
+    assert_equal(dick.id, ver.user_id)
   end
 
   def test_update_string
-    User.current = @katrina
+    User.current = katrina
     greek = languages(:greek)
     str = translation_strings(:greek_one)
     assert_equal(2, str.version)
@@ -312,7 +327,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal('one', str.tag)
     assert_equal('eins', str.text)
     assert(str.updated_at > 1.minute.ago)
-    assert_users_equal(@katrina, str.user)
+    assert_users_equal(katrina, str.user)
     assert_equal(3, str.versions.length)
 
     ver = str.versions.last
@@ -320,14 +335,14 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(str, ver.translation_string)
     assert_equal('eins', ver.text)
     assert(ver.updated_at > 1.minute.ago)
-    assert_equal(@katrina.id, str.user_id)
+    assert_equal(katrina.id, str.user_id)
 
     ver = str.versions[1]
     assert_equal(2, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal('ένα', ver.text)
     assert(ver.updated_at < 1.minute.ago)
-    assert_equal(@dick.id, ver.user_id)
+    assert_equal(dick.id, ver.user_id)
   end
 
   def test_translation_strings_hash
@@ -354,7 +369,7 @@ class LanguageExporterTest < UnitTestCase
     # Automatically (temporarily) logs in the admin.
     # assert_raises(RuntimeError) { @official.import_from_file }
 
-    User.current = @dick
+    User.current = dick
     hash = @official.localization_strings
     assert(hash.length >= 9) # Make sure we got something
     @official.write_hash(hash)
@@ -376,42 +391,43 @@ class LanguageExporterTest < UnitTestCase
     assert_true(@official.strip, 'Should have been three strip changes.')
     assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
 
-    assert_equal(3, @official.translation_strings.select {|str| str.user == @dick}.length)
+    assert_equal(3, @official.translation_strings.select {|str| str.user == dick}.length)
   end
 
   def test_import_unofficial
+    # User.current = nil
     greek = languages(:greek)
 
     # Must be logged in to do this!
     assert_raises(RuntimeError) { greek.import_from_file }
 
-    User.current = @katrina
+    User.current = katrina
     hash = greek.localization_strings
 
     # This is just the template.
     @official.write_export_file_lines([
-      "one: one\n",
-      "two: two\n",
-      "twos: twos\n",
-      "TWO: Two\n",
-      "TWOS: Twos\n",
-      "three: three\n",
-      "four: four\n",
+      "  one: one\n",
+      "  two: two\n",
+      "  twos: twos\n",
+      "  TWO: Two\n",
+      "  TWOS: Twos\n",
+      "  three: three\n",
+      "  four: four\n",
     ])
 
     greek.write_export_file_lines([
-      "five: ignore me\n",
+      "  five: ignore me\n",
     ])
     assert_false(greek.import_from_file, "Shouldn't have been any import changes.")
     assert_false(greek.strip, "Shouldn't have been any strip changes.")
     assert_equal(hash, greek.localization_strings)
 
     greek.write_export_file_lines([
-      "one: one\n",      # take this because it is a change from original ένα
-      "twos:  twos\n",   # ignore this because unchanged from template
-      "TWOS: Twos\n",    # ignore this despite lack of indentation because not a change from English
-      "three:  τρία\n",  # take this change even though still indented
-      "four: τέσσερα\n", # this is correct, it had better take this!
+      "  one: one\n",      # take this because it is a change from original ένα
+      "  twos:  twos\n",   # ignore this because unchanged from template
+      "  TWOS: Twos\n",    # ignore this despite lack of indentation because not a change from English
+      "  three:  τρία\n",  # take this change even though still indented
+      "  four: τέσσερα\n", # this is correct, it had better take this!
     ])
     assert_true(greek.import_from_file, "Should have been some import changes.")
     assert_false(greek.strip, "Shouldn't have been any strip changes.")

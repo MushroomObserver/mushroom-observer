@@ -135,20 +135,16 @@ class LocationController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer',
-                  :action => 'index_observation',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :observation),
+        add_query_param({controller: 'observer', action: 'index_observation'},
+          query)]
     end
 
     # Add "show descriptions" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:LocationDescription)
-      @links << [:show_objects.t(:type => :description), {
-                  :action => 'index_location_description',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :description),
+        add_query_param({:action => 'index_location_description'}, query)]
     end
 
     # Restrict to subset within a geographical region (used by map
@@ -334,10 +330,8 @@ class LocationController < ApplicationController
     # Add "show locations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Location)
-      @links << [:show_objects.t(:type => :location), {
-                  :action => 'index_location',
-                  :params => query_params(query),
-                }]
+      @links << [:show_objects.t(:type => :location),
+        add_query_param({:action => 'index_location'}, query)]
     end
 
     show_index_of_objects(query, args)
@@ -361,6 +355,7 @@ class LocationController < ApplicationController
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id,
                                       :include => [:user, :descriptions])
+      
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
       if desc_id.blank?
@@ -505,7 +500,7 @@ class LocationController < ApplicationController
     @set_herbarium    = params[:set_herbarium]
 
     # Render a blank form.
-    if request.method != :post
+    if request.method != "POST"
       user_name = Location.user_name(@user, @display_name)
       @dubious_where_reasons = Location.dubious_name?(user_name, true) if @display_name
       @location = Location.new
@@ -621,7 +616,7 @@ class LocationController < ApplicationController
     if @location = find_or_goto_index(Location, params[:id].to_s)
       @display_name = @location.display_name
       done = false
-      if request.method == :post
+      if request.method == "POST"
         @display_name = params[:location][:display_name].strip_squeeze rescue ''
 
         # First check if user changed the name to one that already exists.
@@ -648,9 +643,9 @@ class LocationController < ApplicationController
             content = :email_location_merge.l(:user => @user.login,
                                               :this => "##{@location.id}: " + @location.name,
                                               :that => "##{merge.id}: " + merge.name,
-                                              :this_url => "#{HTTP_DOMAIN}/location/show_location/#{@location.id}",
-                                              :that_url => "#{HTTP_DOMAIN}/location/show_location/#{merge.id}")
-            AccountMailer.deliver_webmaster_question(@user.email, content)
+                                              :this_url => "#{MO.http_domain}/location/show_location/#{@location.id}",
+                                              :that_url => "#{MO.http_domain}/location/show_location/#{merge.id}")
+            AccountMailer.webmaster_question(@user.email, content).deliver
           end
 
         # Otherwise it is safe to change the name.
@@ -719,7 +714,7 @@ class LocationController < ApplicationController
     @licenses = License.current_names_and_ids
 
     # Render a blank form.
-    if request.method == :get
+    if request.method == "GET"
       @description = LocationDescription.new
       @description.location = @location
       initialize_description_source(@description)
@@ -773,7 +768,7 @@ class LocationController < ApplicationController
     if !check_description_edit_permission(@description, params[:description])
       # already redirected
 
-    elsif request.method == :post
+    elsif request.method == "POST"
       @description.attributes = params[:description]
 
       args = {}
@@ -849,16 +844,16 @@ class LocationController < ApplicationController
                :user => @user.login, :touch => true,
                :name => @description.unique_partial_format_name)
       @description.destroy
-      redirect_to(:action => 'show_location', :id => @description.location_id,
-                  :params => query_params)
+      redirect_with_query(:action => 'show_location',
+        :id => @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if @description.is_reader?(@user)
-        redirect_to(:action => 'show_location_description', :id => @description.id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_location_description',
+          :id => @description.id)
       else
-        redirect_to(:action => 'show_location', :id => @description.location_id,
-                    :params => query_params)
+        redirect_with_query(:action => 'show_location',
+          :id => @description.location_id)
       end
     end
   end

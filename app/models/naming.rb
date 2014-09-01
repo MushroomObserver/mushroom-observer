@@ -450,9 +450,10 @@ class Naming < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.observation
       errors.add(:observation, :validate_naming_observation_missing.t)
     end

@@ -74,6 +74,8 @@
 ################################################################################
 
 class Location < AbstractModel
+  require 'acts_as_versioned'
+
   belongs_to :description, :class_name => 'LocationDescription' # (main one)
   belongs_to :rss_log
   belongs_to :user
@@ -95,10 +97,12 @@ class Location < AbstractModel
       'high',
       'low',
       'notes'
-  ])
+    ]
+  )
   non_versioned_columns.push(
     'sync_id',
     'created_at',
+    'updated_at',
     'num_views',
     'last_view',
     'ok_for_export',
@@ -106,7 +110,6 @@ class Location < AbstractModel
     'description_id'
   )
 
-#  before_save  :set_search_name
   after_update :notify_users
 
   # Automatically log standard events.
@@ -133,7 +136,7 @@ class Location < AbstractModel
   include BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
-       (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)?     \s*
+       (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*
     (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:'|‘|’|′|′|m|min)? \s* )?
     (?: (?<![\d\.]) (\d+(?:\.\d+)?) \s* (?:"|“|”|″|″|s|sec)? \s* )?
     ([NSEW]?)
@@ -345,10 +348,10 @@ class Location < AbstractModel
     end
   end
 
-  UNDERSTOOD_COUNTRIES = load_param_hash(LOCATION_COUNTRIES_FILE)
-  UNDERSTOOD_STATES    = load_param_hash(LOCATION_STATES_FILE)
-  OK_PREFIXES          = load_param_hash(LOCATION_PREFIXES_FILE)
-  BAD_TERMS            = load_param_hash(LOCATION_BAD_TERMS_FILE)
+  UNDERSTOOD_COUNTRIES = load_param_hash(MO.location_countries_file)
+  UNDERSTOOD_STATES    = load_param_hash(MO.location_states_file)
+  OK_PREFIXES          = load_param_hash(MO.location_prefixes_file)
+  BAD_TERMS            = load_param_hash(MO.location_bad_terms_file)
   BAD_CHARS            = "({[;:|]})"
 
   # Returns a member of understood_places if the candidate is either a member or
@@ -387,11 +390,11 @@ class Location < AbstractModel
   def self.understood_country?(candidate)
     understood_with_prefixes(candidate, UNDERSTOOD_COUNTRIES)
   end
-  
+
   def self.countries_by_count
     CountryCounter.new.countries_by_count
   end
-  
+
   @@location_cache = nil
 
   # Check if a given name (postal order) already exists as a defined
@@ -628,9 +631,6 @@ class Location < AbstractModel
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
   def notify_users
-
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.
     if altered?
       sender = User.current
       recipients = []
@@ -682,9 +682,10 @@ class Location < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.north || (self.north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end

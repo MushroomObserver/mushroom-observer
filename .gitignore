@@ -16,3 +16,6 @@ checkpoints/
 production-logs
 .ruby-version
 .tm_properties
+
+.bundle
+Gemfile.lock

@@ -2,12 +2,13 @@
 
 class API
   class Error < Exception
-    attr_accessor :tag, :args, :fatal
+    attr_accessor :tag, :args, :fatal, :trace
 
     def initialize
       self.tag = self.class.name.underscore.gsub('/','_').to_sym
       self.args = {}
       self.fatal = false
+      self.trace = caller()
     end
 
     def inspect
@@ -98,7 +99,8 @@ class API
   class RenderFailed < Error
     def initialize(error)
       super()
-      args.merge!(:error => error.to_s)
+      msg = error.to_s + "\n" + error.backtrace.join("\n")
+      args.merge!(:error => msg)
     end
   end
 
@@ -163,6 +165,9 @@ class API
     end
   end
 
+  class UnexpectedUpload < Error
+  end
+
   class HelpMessage < Error
     def initialize(params)
       super()
@@ -205,7 +210,7 @@ class API
   class FileMissing < Error
     def initialize(file)
       super()
-      arge.merge(:file => file.to_s)
+      args.merge(:file => file.to_s)
     end
   end
 

@@ -42,7 +42,7 @@ class API
 
     def build_object
       observations = parse_observations(:observations, :default => [], :must_have_edit_permission => true)
-      default_date = observations.any? ? observations.first.when : Time.now
+      default_date = observations.any? ? observations.first.when : Date.today
       vote = parse_enum(:vote, :limit => Image.all_votes)
 
       params = {

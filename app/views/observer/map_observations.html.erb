@@ -1,0 +1,20 @@
+<%
+  new_tab_set do
+    add_tab(:show_objects.t(:type => :observation),
+      add_query_param({ :controller => :observer,
+        :action => 'index_observation' }, @query))
+    add_tab(:show_objects.t(:type => :location),
+      add_query_param({ :controller => :location,
+        :action => 'index_location' }, @query))
+  end
+%>
+
+<center>
+  <%= if @observations.any?
+    gmap = make_map(@observations + @locations, :query_params => query_params(@query))
+    finish_map(gmap)
+    gmap.div(:width => 800, :height => 550).html_safe
+  else
+    :runtime_map_nothing_to_map.t
+  end %>
+</center>

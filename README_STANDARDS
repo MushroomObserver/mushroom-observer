@@ -154,7 +154,7 @@ helper +sanitize+ and +html_escape+, however nowadays all user-supplied text
 gets processed by RedCloth instead.
 
 All text on the site, including error messages -- anything that the end user
-will see -- is kept in a set of YAML files in <tt>lang/ui/xxx.yml</tt>.  For
+will see -- is kept in a set of YAML files in <tt>config/locales/xxx.yml</tt>.  For
 more information, see the documentation for Symbol#localize in
 app/extensions/symbol_extensions.rb.  See also README_TRANSLATIONS.
 

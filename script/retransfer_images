@@ -1,85 +1,41 @@
 #!/bin/bash
+#
+#  Re-transfer any images that haven't transferred correctly yet.
+#
+################################################################################
+set -e
 
-server=cdmr@digitalmycology.com:images.digitalmycology.com
-images=public/images
+source $(dirname "$0")/bash_include
+source $(dirname "$0")/bash_images
 
-db_config=config/database.yml
-username=`grep -A 20 production: $db_config | grep username: | head -1 | sed "s/.*: *//"`
-database=`grep -A 20 production: $db_config | grep database: | head -1 | sed "s/.*: *//"`
-password=`grep -A 20 production: $db_config | grep password: | head -1 | sed "s/.*: *//"`
+if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<END; exit 1; fi
 
-path=(. /bin /usr/bin /usr/local/bin)
+USAGE
+  script/retransfer_images
 
-if [[ $RAILS_ENV == "production" ]]; then
-  production=1
-else
-  production=0
-fi
+DESCRIPTION
+  This is used by the webserver to try to re-transfer images which failed to
+  transfer when script/process_image ran.  It sets the "transferred" bit in
+  the images database table if successful.  It aborts at the first sign of
+  any trouble.
 
-# ----------------------------
-#  Help message.
-# ----------------------------
+END
 
-if [[ $1 == "-h" || $1 == "--help" ]]; then cat <<-EOH; exit -1
+ids=$( run_mysql "SELECT id FROM images WHERE transferred=FALSE" )
 
-	USAGE:
-	    script/retransfer_images
+for id in $ids; do
+  for subdir in thumb 320 640 960 1280 orig; do
+    for file in $(cd $image_root && ls $subdir/$id.* 2> /dev/null); do
+      for server in ${image_servers[@]}; do
+        if image_server_has_subdir $server $subdir; then
+          copy_file_to_server $server $file
+        fi
+      done
+    done
+  done
 
-	DESCRIPTION:
-	    This is used by the webserver to try to re-transfer images which failed to
-	    transfer when script/process_image ran.  It sets the "transferred" bit in
-	    the images database table if successful.  It aborts at the first sign of
-	    any trouble. 
-
-	EOH
-fi
-
-# ----------------------------
-#  Subroutines.
-# ----------------------------
-
-function wait_for() {
-  while (ps -e | grep " $*\$" > /dev/null); do sleep 5; done
-}
-
-function run() {
-  if !( $* ); then
-    exit 1
-  fi
-}
-
-function run_mysql() {
-  if !( mysql -q -u "$username" -p"$password" "$database" -e "$*" ); then
-    echo "*** Failed to update database! ***"
-    exit 1
-  fi
-}
-
-# ----------------------------
-#  Main program.
-# ----------------------------
-
-# Get list of images that still need to go.
-ids=`mysql -q -u "$username" -p"$password" "$database" -e "SELECT id FROM images WHERE transferred=FALSE;" | grep -v id`
-if [[ $ids == "" ]]; then
-  exit 0
-fi
-
-# Transfer images.
-for id in $ids
-do
-  # Assume update_images has done our job for us if the files are missing.
-  if [[ -e $images/320/$id.jpg ]]; then
-    wait_for scp
-    run scp $images/320/$id.jpg  $server/320
-    run scp $images/640/$id.jpg  $server/640
-    run scp $images/960/$id.jpg  $server/960
-    run scp $images/1280/$id.jpg $server/1280
-    run scp $images/orig/$id.*   $server/orig
-  fi
-
-  # Update database to say that image has transferred successfully.
-  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id"
+  run_mysql "UPDATE images SET transferred=TRUE WHERE id=$id" || \
+    die "Failed to set transferred bit on $id."
 done
 
 exit 0

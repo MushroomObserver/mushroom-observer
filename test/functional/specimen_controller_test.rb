@@ -1,16 +1,27 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot')
+require 'test_helper'
 
 class SpecimenControllerTest < FunctionalTestCase
-  def test_show_specimen
+  def assert_specimen_index
+    assert_template(action: 'specimen_index')
+  end
+
+  def test_show_specimen_without_notes
     specimen = specimens(:coprinus_comatus_nybg_spec)
     assert(specimen)
     get_with_dump(:show_specimen, :id => specimen.id)
-    assert_response('show_specimen')
+    assert_template(action: 'show_specimen', partial: "_rss_log")
+  end
+
+  def test_show_specimen_with_notes
+    specimen = specimens(:interesting_unknown)
+    assert(specimen)
+    get_with_dump(:show_specimen, :id => specimen.id)
+    assert_template(action: 'show_specimen', partial: "_rss_log")
   end
 
   def test_herbarium_index
     get_with_dump(:herbarium_index, :id => herbaria(:nybg).id)
-    assert_response('specimen_index')
+    assert_specimen_index
   end
 
   def test_herbarium_with_one_specimen_index
@@ -27,7 +38,7 @@ class SpecimenControllerTest < FunctionalTestCase
 
   def test_observation_index
     get_with_dump(:observation_index, :id => observations(:coprinus_comatus_obs).id)
-    assert_response('specimen_index')
+    assert_specimen_index
   end
 
   def test_observation_with_one_specimen_index
@@ -48,7 +59,7 @@ class SpecimenControllerTest < FunctionalTestCase
 
     login('rolf')
     get_with_dump(:add_specimen, :id => observations(:coprinus_comatus_obs).id)
-    assert_response('add_specimen')
+    assert_template(action: 'add_specimen', partial: "_rss_log")
     assert(assigns(:herbarium_label))
   end
  
@@ -56,7 +67,7 @@ class SpecimenControllerTest < FunctionalTestCase
     return {
       :id => observations(:strobilurus_diminutivus_obs).id,
       :specimen => {
-        :herbarium_name => users(:rolf).preferred_herbarium_name,
+        :herbarium_name => rolf.preferred_herbarium_name,
         :herbarium_label => "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
         'when(1i)'      => '2012',
         'when(2i)'      => '11',
@@ -80,7 +91,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(params[:specimen]['when(1i)'].to_i, specimen.when.year)
     assert_equal(params[:specimen]['when(2i)'].to_i, specimen.when.month)
     assert_equal(params[:specimen]['when(3i)'].to_i, specimen.when.day)
-    assert_equal(users(:rolf), specimen.user)
+    assert_equal(rolf, specimen.user)
     obs = Observation.find(params[:id])
     assert(obs.specimen)
     assert_response(:redirect)
@@ -128,6 +139,10 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def assert_edit_specimen
+    assert_template(action: 'edit_specimen')
+  end
+  
   def test_edit_specimen
     nybg = specimens(:coprinus_comatus_nybg_spec)
     get_with_dump(:edit_specimen, :id => nybg.id)
@@ -140,11 +155,11 @@ class SpecimenControllerTest < FunctionalTestCase
 
     login('rolf')
     get_with_dump(:edit_specimen, :id => nybg.id)
-    assert_response('edit_specimen')
+    assert_edit_specimen
 
     make_admin('mary') # Non-curator, but an admin
     get_with_dump(:edit_specimen, :id => nybg.id)
-    assert_response('edit_specimen')
+    assert_edit_specimen
   end
   
   def test_edit_specimen_post
@@ -171,7 +186,7 @@ class SpecimenControllerTest < FunctionalTestCase
     login('rolf')
     nybg = specimens(:coprinus_comatus_nybg_spec)
     post(:edit_specimen, :id => nybg.id)
-    assert_response('edit_specimen')
+    assert_edit_specimen
   end
 
   def test_delete_specimen
@@ -184,7 +199,7 @@ class SpecimenControllerTest < FunctionalTestCase
     post(:delete_specimen, params)
     assert_equal(specimen_count-1, Specimen.count)
     observations.map {|o| o.reload }
-    assert_equal(obs_spec_count - observations.count, observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
+    assert_true(obs_spec_count > observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
     assert_response(:redirect)
   end
   

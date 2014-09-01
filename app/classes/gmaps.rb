@@ -33,7 +33,7 @@
 #    %>
 #
 #    <head>
-#      <%= GM::GMap.header(:host => DOMAIN) %>
+#      <%= GM::GMap.header(:host => MO.domain) %>
 #      <%= javascript_tag(gmap.to_html) %>
 #    </head>
 #    <body>
@@ -45,7 +45,7 @@
 module GM
   GMAPS_API_URL = 'https://maps.googleapis.com/maps/api/js'
   GMAPS_CONFIG_FILE = 'config/gmaps_api_key.yml'
-  GMAPS_API_KEYS = YAML.load_file(RAILS_ROOT + '/' + GMAPS_CONFIG_FILE)
+  GMAPS_API_KEYS = YAML.load_file(::Rails.root.to_s + '/' + GMAPS_CONFIG_FILE)
 
   class GMap
 
@@ -57,11 +57,11 @@ module GM
 
     def self.header(args)
       url = GMAPS_API_URL
-      key = GMAPS_API_KEYS[RAILS_ENV][args[:host]]
+      key = GMAPS_API_KEYS[::Rails.env][args[:host]]
       "<script type='text/javascript' src='#{url}?key=#{key}&sensor=false'></script>
       <script type='text/javascript'>
         var G = google.maps;
-        // in case prototype and/or jQuery are not loaded for this page
+        // in case jQuery is not loaded for this page
         function E(id) {
           return document.getElementById(id);
         }
@@ -100,7 +100,7 @@ module GM
           }
           return marker;
         }
-      </script>"
+      </script>".html_safe
     end
 
     attr_accessor :name       # name of map div and global variable for Map object

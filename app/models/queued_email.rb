@@ -123,7 +123,7 @@ class QueuedEmail < AbstractModel
   # This tells ActiveRecord to instantiate new records into the class referred
   # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration is
   # important to convince it not to strip the "QueuedEmail::" off the front.
-  set_inheritance_column 'flavor'
+  self.inheritance_column = 'flavor'
   self.store_full_sti_class = true
 
   # Ensure that all the subclasses get loaded.  Problem is some subclasses have
@@ -132,7 +132,7 @@ class QueuedEmail < AbstractModel
   # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
   # soon as QueuedEmail is defined, we know that all subclasses are also
   # properly defined, and we no longer have to rely on autoloading. 
-  Dir["#{RAILS_ROOT}/app/models/queued_email/*.rb"].each do |file|
+  Dir["#{::Rails.root.to_s}/app/models/queued_email/*.rb"].each do |file|
     if file.match(/(\w+)\.rb$/)
       require "queued_email/#{$1}"
     end
@@ -151,7 +151,7 @@ class QueuedEmail < AbstractModel
   def self.all_flavors
     if !defined? @@all_flavors
       @@all_flavors = []
-      Dir["#{RAILS_ROOT}/app/models/queued_email/*.rb"].each do |file|
+      Dir["#{::Rails.root.to_s}/app/models/queued_email/*.rb"].each do |file|
         if file.match(/(\w+).rb/)
           @@all_flavors << "QueuedEmail::#{$1.camelize}"
         end
@@ -213,12 +213,12 @@ class QueuedEmail < AbstractModel
          "to=#{to_user.login rescue 'nil'} " +
          queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
          queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' '))
-    current_locale = Locale.code
-    unless QUEUE_EMAIL || @@queue
+    current_locale = I18n.locale
+    unless MO.queue_email || @@queue
       self.deliver_email if RunLevel.is_normal?
       self.destroy
     end
-    Locale.code = current_locale
+    I18n.locale = current_locale
   end
 
   # This is called by <tt>rake email:send</tt>.  It just checks that sender !=
@@ -231,14 +231,14 @@ class QueuedEmail < AbstractModel
       queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
       queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' ')
     self.class.debug_log(log_msg)
-    current_locale = Locale.code
+    current_locale = I18n.locale
     result = false
     if user == to_user
       raise("Skipping email with same sender and recipient: #{user.email}\n") if !TESTING
     else
       result = deliver_email
     end
-    Locale.code = current_locale
+    I18n.locale = current_locale
     return result
   rescue => e
     raise e if TESTING
@@ -246,7 +246,7 @@ class QueuedEmail < AbstractModel
     $stderr.puts(log_msg)
     $stderr.puts(e.to_s)
     $stderr.puts(e.backtrace)
-    Locale.code = current_locale
+    I18n.locale = current_locale
     return false
   end
 
@@ -287,7 +287,7 @@ class QueuedEmail < AbstractModel
   # Add line to log to help keep track of what/when/why emails are being queued
   # and when they are actually sent.
   def self.debug_log(msg)
-    File.open("#{RAILS_ROOT}/log/email-debug.log", 'a:utf-8') do |fh|
+    File.open("#{::Rails.root.to_s}/log/email-debug.log", 'a:utf-8') do |fh|
       fh.puts("#{Time.now.api_time} #{msg}")
     end
   end
@@ -468,7 +468,7 @@ class QueuedEmail < AbstractModel
   #   email.add_note(obs.notes)
   #
   #   # Save a data structure.
-  #   email.add_note(YAML::dump(obs.data))
+  #   email.add_note(obs.data.to_yaml)
   #
   #   # Save list of attributes that have changed.
   #   email.add_note(obs.changed.map(&:to_s).join(','))

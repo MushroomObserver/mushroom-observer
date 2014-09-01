@@ -36,7 +36,7 @@ class QueuedEmail::AddSpecimenNotCurator < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     if specimen
-      AccountMailer.deliver_add_specimen_not_curator(user, to_user, specimen)
+      AccountMailer.add_specimen_not_curator(user, to_user, specimen).deliver
     end
   end
 end

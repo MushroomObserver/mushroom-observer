@@ -1,0 +1,13 @@
+<% @title = :admin_request_title.t(:title => @project.title) %>
+
+<%= form_tag(add_query_param(:action => 'admin_request',
+      :id => @project.id)) do %>
+  <br/><center><%= submit_tag :SEND.l %></center><br/>
+
+  <label for="email_subject"><%= :request_subject.t %></label>:<br/>
+  <%= text_field('email', 'subject', :size => 70) %><br/><br/>
+  <label for="email_content"><%= :request_message.t %></label>:<br/>
+  <%= text_area('email', 'content', :cols => 80) %>
+
+  <%= focus_on('email_subject') %>
+<% end %>

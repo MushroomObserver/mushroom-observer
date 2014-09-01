@@ -15,7 +15,7 @@ convex_term:
   user_id: 1
   name: Convex
   description: Boring old Convex
-  # image_id: Expected to not have an image initially
+  thumb_image_id: nil # Expected to not have an image initially
   created_at: 2013-08-13 17:26:20
   updated_at: 2013-08-13 17:26:20
 
@@ -24,7 +24,7 @@ plane_term:
   version: 2
   user_id: 1
   name: Plane
-  description: Three points define a plane
+  description: Three points define a plane & be sure to test unsafe html
   thumb_image_id: 11
   created_at: 2013-08-17 06:33:50
   updated_at: 2013-08-17 06:35:20

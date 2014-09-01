@@ -1,0 +1,12 @@
+<%
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set(@links)
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
+
+<%= paginate_block(@pages) do %>
+  <%= make_matrix(@objects, :width => '100%') do |image| %>
+    <%= render(:partial => 'image', :object => image) %>
+  <% end %>
+<% end %>

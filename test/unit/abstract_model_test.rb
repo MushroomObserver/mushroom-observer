@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class AbstractModelTest < UnitTestCase
 
@@ -26,25 +26,21 @@ class AbstractModelTest < UnitTestCase
   end
 
   def assert_rss_log_lines(num, obj)
-    clean_our_backtrace do
-      assert_equal(num, obj.rss_log.notes.split("\n").length,
-                   "Expected #{num} lines in rss log, got:\n" +
-                   "<#{obj.rss_log.notes}>")
-    end
+    assert_equal(num, obj.rss_log.notes.split("\n").length,
+                 "Expected #{num} lines in rss log, got:\n" +
+                 "<#{obj.rss_log.notes}>")
   end
 
   def assert_rss_log_has_tag(expect_tag, obj)
-    clean_our_backtrace do
-      found = false
-      for tag, args, time in obj.rss_log.parse_log
-        if tag == expect_tag
-          found = true
-          break
-        end
+    found = false
+    for tag, args, time in obj.rss_log.parse_log
+      if tag == expect_tag
+        found = true
+        break
       end
-      assert_block("Expected to find #{expect_tag.inspect} in rss log, got:\n" +
-                   "<#{obj.rss_log.notes}>") { found }
     end
+    assert_block("Expected to find #{expect_tag.inspect} in rss log, got:\n" +
+                 "<#{obj.rss_log.notes}>") { found }
   end
 
 ################################################################################
@@ -62,13 +58,13 @@ class AbstractModelTest < UnitTestCase
     )
 
     # Make sure it fails to save if no user logged in.
-    assert_equal(1, obs.errors.length, 'Should not have saved without login.')
+    assert_equal(1, obs.errors.size, 'Should not have saved without login.')
     assert_equal(:validate_observation_user_missing.t, obs.dump_errors)
 
     # Log Rolf in ang try again.
-    User.current = @rolf
+    User.current = rolf
     obs.save
-    assert_equal(0, obs.errors.length, 'Could not save even when logged in.')
+    assert_equal(0, obs.errors.size, 'Could not save even when logged in.')
 
     # Make sure our local time is the same after being saved then retrieved
     # from database.  'Make sure the updated_at' timestamp also gets set to some
@@ -102,7 +98,7 @@ class AbstractModelTest < UnitTestCase
   end
   
   def test_update_view_stats
-    User.current = @rolf
+    User.current = rolf
     obs      = Observation.find(2)
     image    = obs.images.first
     comment  = obs.comments.first
@@ -125,10 +121,10 @@ class AbstractModelTest < UnitTestCase
     naming_attrs   = naming.attributes.dup
     user_attrs     = user.attributes.dup
 
-    num_past_names     = Name::Version.count
-    num_past_name_descs= NameDescription::Version.count
-    num_past_locations = Location::Version.count
-    num_past_loc_descs = LocationDescription::Version.count
+    num_past_names     = Name.versioned_class.count
+    num_past_name_descs= NameDescription.versioned_class.count
+    num_past_locations = Location.versioned_class.count
+    num_past_loc_descs = LocationDescription.versioned_class.count
     num_transactions   = Transaction.count
 
     for attrs, obj in [
@@ -146,10 +142,10 @@ class AbstractModelTest < UnitTestCase
                                  "#{obj.class}#update_view_stats screwed up: ")
     end
 
-    assert_equal(num_past_names     + 0, Name::Version.count)
-    assert_equal(num_past_name_descs+ 0, NameDescription::Version.count)
-    assert_equal(num_past_locations + 0, Location::Version.count)
-    assert_equal(num_past_loc_descs + 0, LocationDescription::Version.count)
+    assert_equal(num_past_names     + 0, Name.versioned_class.count)
+    assert_equal(num_past_name_descs+ 0, NameDescription.versioned_class.count)
+    assert_equal(num_past_locations + 0, Location.versioned_class.count)
+    assert_equal(num_past_loc_descs + 0, LocationDescription.versioned_class.count)
     assert_equal(num_transactions   + 0, Transaction.count)
   end
 
@@ -160,7 +156,7 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_location_rss_log_life_cycle
-    User.current = @rolf
+    User.current = rolf
     time = 1.minute.ago
 
     loc = Location.new(
@@ -208,7 +204,7 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_name_rss_log_life_cycle
-    User.current = @rolf
+    User.current = rolf
     time = 1.minute.ago
 
     name = Name.new(
@@ -216,7 +212,7 @@ class AbstractModelTest < UnitTestCase
       :search_name  => 'Test',
       :sort_name    => 'Test',
       :display_name => '**__Test__**',
-      :rank         => :Genus,
+      :rank         => 'Genus',
       :author       => ''
     )
 
@@ -235,7 +231,7 @@ class AbstractModelTest < UnitTestCase
     rss_log.update_attribute(:updated_at, time)
     name.update_attribute(:author, 'New Author')
     # This is normally done by ApplicationController#save_name.
-    name.log(:log_name_updated_at, :user => @rolf.login, :touch => true)
+    name.log(:log_name_updated_at, :user => rolf.login, :touch => true)
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
     assert_rss_log_has_tag(:log_name_updated_at, rss_log)
@@ -253,7 +249,7 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_observation_rss_log_life_cycle
-    User.current = @rolf
+    User.current = rolf
     # time = 1.minute.ago update_attribute doesn't do anything as it did with modified
 
     obs = Observation.new(
@@ -301,7 +297,7 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_project_rss_log_life_cycle
-    User.current = @rolf
+    User.current = rolf
     time = 1.minute.ago
 
     proj = Project.new(
@@ -350,7 +346,7 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_species_list_rss_log_life_cycle
-    User.current = @rolf
+    User.current = rolf
 
     spl = SpeciesList.new(
       :title => 'New List',

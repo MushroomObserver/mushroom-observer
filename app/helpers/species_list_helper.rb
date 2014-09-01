@@ -13,7 +13,7 @@
 module SpeciesListHelper
   def label_rows(rows)
     rows.map do |label, value|
-      "<b>#{label}:</b> #{value}<br/>"
-    end.join
+      content_tag(:b, label + ':') + ' ' + value.to_s + safe_br
+    end.safe_join
   end	
 end

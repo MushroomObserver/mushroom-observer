@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class ConferenceEvent < AbstractModel
   has_many :conference_registrations
   

@@ -1,19 +1,19 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class UserTest < UnitTestCase
 
   def test_auth
-    assert_equal @rolf, User.authenticate("rolf", "testpassword")
+    assert_equal rolf, User.authenticate("rolf", "testpassword")
     assert_nil   User.authenticate("nonrolf", "testpassword")
   end
 
   def test_password_change
-    @mary.change_password("marypasswd")
-    assert_equal @mary, User.authenticate("mary", "marypasswd")
+    mary.change_password("marypasswd")
+    assert_equal mary, User.authenticate("mary", "marypasswd")
     assert_nil   User.authenticate("mary", "longtest")
-    @mary.change_password("longtest")
-    assert_equal @mary, User.authenticate("mary", "longtest")
+    mary.change_password("longtest")
+    assert_equal mary, User.authenticate("mary", "longtest")
     assert_nil   User.authenticate("mary", "marypasswd")
   end
 
@@ -27,16 +27,16 @@ class UserTest < UnitTestCase
 
     u.password = u.password_confirmation = "tiny"
     assert !u.save
-    assert u.errors.invalid?('password')
+    assert u.errors[:password].any?
 
     u.password = u.password_confirmation = "hugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehugehuge"
     assert !u.save
-    assert u.errors.invalid?('password')
+    assert u.errors[:password].any?
 
     # This is allowed now so that API can create users without a password chosen yet.
     # u.password = u.password_confirmation = ""
     # assert !u.save
-    # assert u.errors.invalid?('password')
+    # assert u.errors[:password].any?
 
     u.password = u.password_confirmation = "bobs_secure_password"
     assert u.save
@@ -53,15 +53,15 @@ class UserTest < UnitTestCase
 
     u.login = "x"
     assert !u.save
-    assert u.errors.invalid?('login')
+    assert u.errors[:login].any?
 
     u.login = "hugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhugebobhug"
     assert !u.save
-    assert u.errors.invalid?('login')
+    assert u.errors[:login].any?
 
     u.login = ""
     assert !u.save
-    assert u.errors.invalid?('login')
+    assert u.errors[:login].any?
 
     u.login = "okbob"
     assert u.save
@@ -139,12 +139,12 @@ class UserTest < UnitTestCase
   def test_myxomops_debacle
     name = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Simón"
     name2 = "Herbario Forestal Nacional Martín Cárdenas de la Universidad Mayor de San Sim."
-    @mary.name = name
-    assert(!@mary.save)
-    @mary.name = name2
-    assert(@mary.save)
-    @mary.reload
-    assert_equal(name2, @mary.name)
+    mary.name = name
+    assert(!mary.save)
+    mary.name = name2
+    assert(mary.save)
+    mary.reload
+    assert_equal(name2, mary.name)
   end
 
   def test_all_editable_species_lists
@@ -152,42 +152,41 @@ class UserTest < UnitTestCase
     spl1  = species_lists(:first_species_list)
     spl2  = species_lists(:another_species_list)
     spl3  = species_lists(:unknown_species_list)
-    assert_obj_list_equal([spl1, spl2], @rolf.species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl3], @mary.species_lists)
-    assert_obj_list_equal([], @dick.species_lists)
-    assert_obj_list_equal([@dick], proj.user_group.users)
+    assert_obj_list_equal([spl1, spl2], rolf.species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl3], mary.species_lists)
+    assert_obj_list_equal([], dick.species_lists)
+    assert_obj_list_equal([dick], proj.user_group.users)
     assert_obj_list_equal([spl3], proj.species_lists)
 
-    assert_obj_list_equal([spl1, spl2], @rolf.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl3], @mary.all_editable_species_lists)
-    assert_obj_list_equal([spl3], @dick.all_editable_species_lists)
+    assert_obj_list_equal([spl1, spl2], rolf.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl3], mary.all_editable_species_lists)
+    assert_obj_list_equal([spl3], dick.all_editable_species_lists)
 
     proj.add_species_list(spl1)
-    @dick.reload
-    assert_obj_list_equal([spl1, spl3], @dick.all_editable_species_lists.sort_by(&:id))
+    dick.reload
+    assert_obj_list_equal([spl1, spl3], dick.all_editable_species_lists.sort_by(&:id))
 
-    proj.user_group.users.push(@rolf, @mary)
-    proj.user_group.users.delete(@dick)
-    @rolf.reload
-    @mary.reload
-    @dick.reload
-    assert_obj_list_equal([spl1, spl2, spl3], @rolf.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([spl1, spl3], @mary.all_editable_species_lists.sort_by(&:id))
-    assert_obj_list_equal([], @dick.all_editable_species_lists)
+    proj.user_group.users.push(rolf, mary)
+    proj.user_group.users.delete(dick)
+    rolf.reload
+    mary.reload
+    dick.reload
+    assert_obj_list_equal([spl1, spl2, spl3], rolf.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([spl1, spl3], mary.all_editable_species_lists.sort_by(&:id))
+    assert_obj_list_equal([], dick.all_editable_species_lists)
   end
 
   def test_preferred_herbarium_name
-    assert_equal(@rolf.preferred_herbarium_name, herbaria(:nybg).name)
-    assert_equal(@mary.preferred_herbarium_name, :user_personal_herbarium.t(:name => @mary.unique_text_name))
+    assert_equal(rolf.preferred_herbarium_name, herbaria(:nybg).name)
+    assert_equal(mary.preferred_herbarium_name, :user_personal_herbarium.t(:name => mary.unique_text_name))
   end
 
   def test_remove_image
-    user = users(:rolf)
-    image = user.image
+    image = rolf.image
     assert(image)
-    user.remove_image(image)
-    user.reload
-    assert_nil(user.image)
+    rolf.remove_image(image)
+    rolf.reload
+    assert_nil(rolf.image)
   end
 
 # For some reason this is breaking test_meta_groups, and I can't figure out why.
@@ -279,7 +278,7 @@ class UserTest < UnitTestCase
   end
 
   def test_is_successful_contributor?
-    assert(@rolf.is_successful_contributor?)
+    assert(rolf.is_successful_contributor?)
   end
 
   def test_is_unsuccessful_contributor?

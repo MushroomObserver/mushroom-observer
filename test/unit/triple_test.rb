@@ -1,10 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
-class TripleTest < ActiveSupport::TestCase
-  # Replace this with your real tests.
-  def test_truth
-    assert true
-  end
+class TripleTest < UnitTestCase
 
   def test_delete_predicate_matches
     Triple.delete_predicate_matches(':somePredicate')

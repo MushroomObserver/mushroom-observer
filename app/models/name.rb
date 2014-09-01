@@ -231,6 +231,8 @@
 ################################################################################
 
 class Name < AbstractModel
+  require 'acts_as_versioned'
+
   belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
   belongs_to :description, :class_name => 'NameDescription' # (main one)
   belongs_to :rss_log
@@ -255,11 +257,13 @@ class Name < AbstractModel
       'citation',
       'deprecated',
       'correct_spelling',
-      'notes',
-  ])
+      'notes'
+    ]
+  )
   non_versioned_columns.push(
     'sync_id',
     'created_at',
+    'updated_at',
     'num_views',
     'last_view',
     'ok_for_export',
@@ -267,7 +271,7 @@ class Name < AbstractModel
     # 'accepted_name_id',
     'synonym_id',
     'description_id',
-    'classification' # (versioned in the default desc)
+    'classification'   # (versioned in the default desc)
   )
 
   after_update :notify_users
@@ -316,12 +320,12 @@ class Name < AbstractModel
   #
   # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
   # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (NAME_PRIMER_CACHE_FILE).
+  # in a plain old file (MO.name_primer_cache_file).
   #
   def self.primer
     result = []
-    if !File.exists?(NAME_PRIMER_CACHE_FILE) ||
-       File.mtime(NAME_PRIMER_CACHE_FILE) < Time.now - 1.day
+    if !File.exists?(MO.name_primer_cache_file) ||
+       File.mtime(MO.name_primer_cache_file) < Time.now - 1.day
 
       # Get list of names sorted by how many times they've been used, then
       # re-sort by name.
@@ -335,11 +339,11 @@ class Name < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      file = File.open(NAME_PRIMER_CACHE_FILE, 'w:utf-8')
+      file = File.open(MO.name_primer_cache_file, 'w:utf-8')
       file.write(result.join("\n") + "\n")
       file.close()
     else
-      file = File.open(NAME_PRIMER_CACHE_FILE, "r:UTF-8")
+      file = File.open(MO.name_primer_cache_file, "r:UTF-8")
       result = file.readlines.map(&:chomp)
       file.close()
     end
@@ -2148,9 +2152,6 @@ class Name < AbstractModel
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
-
-    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.
     if altered?
       sender = User.current
       recipients = []
@@ -2207,9 +2208,10 @@ class Name < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.user && !User.current
       errors.add(:user, :validate_name_user_missing.t)
     end

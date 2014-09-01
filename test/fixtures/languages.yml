@@ -1,6 +1,7 @@
 english:
   id: 1
-  locale: en-US
+  locale: en
+  region: US
   name: English
   order: English
   official: true
@@ -8,7 +9,8 @@ english:
 
 french:
   id: 2
-  locale: fr-FR
+  locale: fr
+  region: FR
   name: Français
   order: Francais
   official: false
@@ -16,7 +18,8 @@ french:
 
 greek:
   id: 3
-  locale: el-GR
+  locale: el
+  region: GR
   name: Ελληνικά
   order: Ellenika
   official: false
@@ -24,7 +27,8 @@ greek:
 
 russian:
   id: 4
-  locale: ru-RU
+  locale: ru
+  region: RU
   name: Русский
   order: Russkii
   official: false

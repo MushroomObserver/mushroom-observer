@@ -55,7 +55,7 @@ class Notification < AbstractModel
         raise "Missing 'user' argument for #{self.flavor} notification."   if !user
         raise "Missing 'naming' argument for #{self.flavor} notification." if !naming
         template.gsub(':observer', user.login).
-                 gsub(':observation', "#{HTTP_DOMAIN}/#{naming.observation_id}").
+                 gsub(':observation', "#{MO.http_domain}/#{naming.observation_id}").
                  gsub(':mailing_address', user.mailing_address || '').
                  gsub(':location', naming.observation.place_name).
                  gsub(':name', naming.format_name)
@@ -110,9 +110,10 @@ class Notification < AbstractModel
 
 ################################################################################
 
-protected
+  protected
 
-  def validate # :nodoc:
+  validate :check_requirements
+  def check_requirements # :nodoc:
     if !self.user && !User.current
       errors.add(:user, :validate_notification_user_missing.t)
     end

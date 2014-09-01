@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
+require 'test_helper'
 
 class NamingTest < UnitTestCase
 
@@ -12,7 +12,7 @@ class NamingTest < UnitTestCase
         :updated_at     => now,
         :observation_id => observations(:coprinus_comatus_obs).id,
         :name_id        => names(:agaricus_campestris).id,
-        :user_id        => @mary.id
+        :user_id        => mary.id
     )
     assert naming.save, naming.errors.full_messages.join("; ")
   end
@@ -31,6 +31,7 @@ class NamingTest < UnitTestCase
     assert namings(:coprinus_comatus_naming).errors.full_messages.join("; ")
     namings(:coprinus_comatus_naming).reload
     observations(:coprinus_comatus_obs).reload
+    User.current = rolf
     observations(:coprinus_comatus_obs).calc_consensus
     assert_equal names(:agaricus_campestris), namings(:coprinus_comatus_naming).name
     assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
@@ -41,16 +42,16 @@ class NamingTest < UnitTestCase
     naming = Naming.new
     assert !naming.save
     assert_equal 3, naming.errors.count
-    assert_equal :validate_naming_name_missing.t, naming.errors.on(:name)
-    assert_equal :validate_naming_observation_missing.t, naming.errors.on(:observation)
-    assert_equal :validate_naming_user_missing.t, naming.errors.on(:user)
+    assert_equal :validate_naming_name_missing.t, naming.errors[:name].first
+    assert_equal :validate_naming_observation_missing.t, naming.errors[:observation].first
+    assert_equal :validate_naming_user_missing.t, naming.errors[:user].first
   end
 
   # Destroy one.
   def test_destroy
     assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
     id = namings(:coprinus_comatus_naming).id
-    User.current = @rolf
+    User.current = rolf
     namings(:coprinus_comatus_naming).destroy
     observations(:coprinus_comatus_obs).reload
     observations(:coprinus_comatus_obs).calc_consensus

@@ -192,7 +192,7 @@ class CommentController < ApplicationController
     @target = Comment.find_object(params[:type], params[:id].to_s)
     if !allowed_to_see!(@target)
       # redirected already
-    elsif request.method == :get
+    elsif request.method == "GET"
       @comment = Comment.new
       @comment.target = @target
     else
@@ -210,9 +210,8 @@ class CommentController < ApplicationController
         )
         @comment.log_create
         flash_notice(:runtime_form_comments_create_success.t(:id => @comment.id))
-        redirect_to(:controller => @target.show_controller,
-                    :action => @target.show_action, :id => @target.id,
-                    :params => query_params)
+        redirect_with_query(:controller => @target.show_controller,
+          :action => @target.show_action, :id => @target.id)
       end
     end
   end
@@ -235,10 +234,9 @@ class CommentController < ApplicationController
       if !allowed_to_see!(@target)
         # redirected already
       elsif !check_permission!(@comment)
-        redirect_to(:controller => @target.show_controller,
-                    :action => @target.show_action, :id => @target.id,
-                    :params => query_params)
-      elsif request.method == :post
+        redirect_with_query(:controller => @target.show_controller,
+          :action => @target.show_action, :id => @target.id)
+      elsif request.method == "POST"
         @comment.attributes = params[:comment]
         xargs = {}
         xargs[:summary] = @comment.summary if @comment.summary_changed?
@@ -256,9 +254,8 @@ class CommentController < ApplicationController
           done = true
         end
         if done
-          redirect_to(:controller => @target.show_controller,
-                      :action => @target.show_action, :id => @target.id,
-                      :params => query_params)
+          redirect_with_query(:controller => @target.show_controller,
+            :action => @target.show_action, :id => @target.id)
         end
       end
     end
@@ -283,9 +280,8 @@ class CommentController < ApplicationController
         @comment.log_destroy
         flash_notice(:runtime_form_comments_destroy_success.t(:id => id))
       end
-      redirect_to(:controller => @target.show_controller,
-                  :action => @target.show_action, :id => @target.id,
-                  :params => query_params)
+      redirect_with_query(:controller => @target.show_controller,
+        :action => @target.show_action, :id => @target.id)
     end
   end
 

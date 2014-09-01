@@ -1,0 +1,57 @@
+<%
+  @title = :download_observations_title.t
+  
+  new_tab_set do
+    add_tab_with_query(:download_observations_back.t, :action => :index_observation)
+  end
+%>
+
+<%= form_tag(add_query_param({})) %>
+
+  <p><%= :download_observations_format.t %>:</p>
+  <ul type="none">
+    <li>
+      <%= radio_button_tag(:format, :raw, @format == 'raw') %>
+      <%= :download_observations_raw.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :adolf, @format == 'adolf') %>
+      <%= :download_observations_adolf.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :darwin, @format == 'darwin') %>
+      <%= :download_observations_darwin.t %>
+      (<%= link_to(:download_observations_what_is_this.t, 'http://rs.tdwg.org/dwc/index.htm',
+                   :target => '_new') %>)
+    </li>
+    <li>
+      <%= radio_button_tag(:format, :symbiota, @format == 'symbiota') %>
+      <%= :download_observations_symbiota.t %>
+    </li>
+  </ul>
+
+  <p><%= :download_observations_encoding.t %>:</p>
+  <ul type="none">
+    <li>
+      <%= radio_button_tag(:encoding, 'ASCII', @encoding == 'ASCII') %>
+      <%= :download_observations_ascii.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:encoding, 'WINDOWS-1252', @encoding == 'WINDOWS-1252') %>
+      <%= :download_observations_windows.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:encoding, 'UTF-8', @encoding == 'UTF-8') %>
+      <%= :download_observations_utf8.t %>
+    </li>
+    <li>
+      <%= radio_button_tag(:encoding, 'UTF-16', @encoding == 'UTF-16') %>
+      <%= :download_observations_utf16.t %>
+    </li>
+  </ul>
+
+  <center>
+    <%= submit_tag :DOWNLOAD.l %>
+    <%= submit_tag :CANCEL.l %>
+  </center>
+</form>

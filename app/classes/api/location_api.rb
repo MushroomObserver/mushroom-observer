@@ -77,7 +77,7 @@ class API
     end
 
     def delete
-      raise NoMethodForAction.new(:delete, action)
+      raise NoMethodForAction.new("DELETE", action)
     end
   end
 end
