@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+require File.expand_path("../config", __FILE__)
+
+require 'digest/md5'
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'rexml/document'
+
+token = nil
+stories_xml = File.read("stories.xml") if File.exist?("stories.xml")
+
+token ||= begin
+  https = Net::HTTP.new(MO.pivotal_url, 443)
+  req = Net::HTTP::Get.new(MO.pivotal_path + '/tokens/active')
+  req.basic_auth(MO.pivotal_username, MO.pivotal_password)
+  https.use_ssl = true
+  res = https.request(req)
+  doc = REXML::Document.new(res.body)
+  token = doc.root.elements['guid'].first.value
+  puts "Token: #{token}"
+  token
+end
+
+http = Net::HTTP.new(MO.pivotal_url, 80)
+headers = { 'X-TrackerToken' => token }
+
+MO.pivotal_project ||= begin
+  req = Net::HTTP::Get.new(MO.pivotal_path + '/projects', headers)
+  res = http.request(req)
+  doc = REXML::Document.new(res.body)
+  project_id = doc.root.elements['project/id'].first.value
+  puts "Project: #{project_id}"
+  project_id
+end
+
+stories_xml ||= begin
+  url = "#{MO.pivotal_path}/projects/#{MO.pivotal_project}/stories"
+  req = Net::HTTP::Get.new(url, headers)
+  res = http.request(req)
+  File.open("stories.xml", "w") { |f| f.write res.body }
+  res.body
+end
+
+stories = []
+doc = REXML::Document.new(stories_xml)
+doc.root.elements.each('story') do |story|
+  data = {
+    :labels   => [],
+    :comments => [],
+  }
+  story.each_element do |elem|
+    case elem.name
+    when 'id'            ; data[:id]       = elem.text
+    when 'story_type'    ; data[:type]     = elem.text
+    when 'estimate'      ; data[:time]     = elem.text
+    when 'current_state' ; data[:state]    = elem.text
+    when 'name'          ; data[:name]     = elem.text
+    when 'description'   ; data[:desc]     = elem.text
+    when 'labels'        ; data[:labels]   = elem.text.split(',')
+    when 'notes'         ; data[:comments] = elem.elements
+    end
+  end
+  stories << data
+end
+puts "Found #{stories.length} stories!"
+
+exit 0
