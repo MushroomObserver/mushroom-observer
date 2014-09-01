@@ -372,7 +372,6 @@ class AccountController < ApplicationController
       legal_name_change = @user.legal_name_change
       if !@user.changed
         flash_notice(:runtime_no_changes.t)
-        redirect_back_or_default(:controller => :observer, :action => :index)
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
       else
@@ -384,7 +383,6 @@ class AccountController < ApplicationController
           Transaction.put_user(xargs)
         end
         flash_notice(:runtime_prefs_success.t)
-        redirect_back_or_default(:controller => :observer, :action => :index)
       end
     end
   end
