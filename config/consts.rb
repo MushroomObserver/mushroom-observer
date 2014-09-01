@@ -79,7 +79,7 @@ MushroomObserver::Application.configure do
   config.name_lister_cache_file = "#{config.root}/public/assets/name_list_data.js"
 
   # Access data for Pivotal Tracker's API.
-  config.pivotal_enabled  = true
+  config.pivotal_enabled  = false
   config.pivotal_url      = "www.pivotaltracker.com"
   config.pivotal_path     = "/services/v3"
   config.pivotal_username = "xxx"
