@@ -5,7 +5,7 @@
     add_tab(:publication_index.t, publications_path)
     if is_in_admin_mode? || @publication.can_edit?(@user)
       add_tab(:EDIT.t, edit_publication_path(@publication))
-      add_tab(:DESTROY.t, { :action => :destroy, :id => publication.id },
+      add_tab(:DESTROY.t, { :action => :destroy, :id => @publication.id },
                           { :confirm => "aren't we cool?" + :are_you_sure.t })
     end
   end

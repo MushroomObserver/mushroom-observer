@@ -65,6 +65,9 @@ class PublicationsControllerTest < FunctionalTestCase
   def test_should_show_publication
     get :show, :id => publications(:one).id
     assert_response :success
+    login('rolf')
+    get :show, :id => publications(:one).id
+    assert_response :success
   end
 
   def test_should_get_edit
