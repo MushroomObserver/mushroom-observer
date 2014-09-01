@@ -26,7 +26,7 @@ raise "Failed to parse top! #{top.inspect}" if !mem or !swap
 mem_total, mem_used, mem_free = mem[1..3].map(&:to_f)
 swap_total, swap_used, swap_free = swap[1..3].map(&:to_f)
 raise "Memory doesn't add up! #{top.inspect}" if mem_total < 1  || (mem_total - mem_used - mem_free).abs > 5
-raise "Swap doesn't add up! #{top.inspect}"   if swap_total < 1 || (swap_total - swap_used - swap_free).abs > 5
+raise "Swap doesn't add up! #{top.inspect}"   if swap_total < 0 || (swap_total - swap_used - swap_free).abs > 5
 
 mem_pct = mem_used / mem_total * 100
 swap_pct = swap_used / swap_total * 100
