@@ -65,6 +65,7 @@ root> vi /root/.bashrc
   # Add these at end.
   export CFLAGS="-O3 -m64"
   alias $SITE='cd /var/web/$SITE && su $SITE'
+root> source /root/.bashrc
 
 # Disable direct root login for security purposes.
 root> vi /etc/ssh/sshd_config
@@ -166,6 +167,8 @@ mo> cd db
 mo> scp $USER@$OLD_SERVER:/var/web/mushroom-observer/db/checkpoint.gz .
 mo> gunzip -cd checkpoint.gz | mysql -u mo -p'$DATA_PASSWORD' mo_production
 mo> rm checkpoint.gz
+# If you want to test this server on a "safe" database...
+# mo> mysql -u mo -p"$DATA_PASSWORD" mo_production < clean.sql
 
 # Install our programs for resizing and rotating JPEG images.
 mo> exit
@@ -196,6 +199,12 @@ mo> wget localhost:8080
 nginx and unicorn (which was down). I just followed these instructions and it worked
 first time.  Just make sure you do "service nginx reload" if you make any changes to
 nginx.conf.  In the instructions we start nginx after copying nginx.conf into place.]
+
+[JPH: I also had to restart nginx, not sure why. Also, I had to tweak
+nginx.conf to serve all /images from cdmr -- the default is to serve
+thumbnails locally.]
+
+--------------------------------------------------------------------------------
 
 # Set up simple mailserver using postfix.
 mo> exit
@@ -257,7 +266,7 @@ root> chmod 755 /usr/local/bin/autoreply
 
 --------------------------------------------------------------------------------
 
-# This is as far as I've gotten. -Jason 20140729
+# This is as far as I've gotten. -Jason 20140901
 
 
 
