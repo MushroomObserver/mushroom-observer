@@ -42,7 +42,7 @@ class Pivotal
       'publications'    => 2,
       'search'          => 2,
       'taxonomy'        => 2,
-      'upgrade'         =. 2,
+      'upgrade'         => 2,
       'vagrant'         => 2,
       'voting'          => 2,
       'other'           => 2,
