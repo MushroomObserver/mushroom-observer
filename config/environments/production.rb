@@ -135,5 +135,5 @@ MushroomObserver::Application.configure do
   # # config.force_ssl = true
 end
 
-file = File.expand_path("../consts-site.rb", __FILE__)
+file = File.expand_path("../../consts-site.rb", __FILE__)
 require file if File.exist?(file)

@@ -74,7 +74,7 @@ class Pivotal
     end
 
     def description=(str)
-      @description = str.split(/\n/).select do |line|
+      @description = str.to_s.split(/\n/).select do |line|
         if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
           @user = User.find($1) rescue $2.sub(/^\((.*)\)$/, '\\1')
           false
@@ -88,7 +88,7 @@ class Pivotal
     end
 
     def comments
-      @comments ||= get_comments(@id)
+      @comments ||= Pivotal.get_comments(@id)
     end
 
     def active?
@@ -98,7 +98,8 @@ class Pivotal
     def activity
       @activity ||= begin
         result = "none"
-        if comment = comments.last
+        if @comments
+          comment = @comments.last
           time = Time.parse(comment.time)
           if time > 1.day.ago
             result = "day"
@@ -114,7 +115,10 @@ class Pivotal
 
     def story_order
       max = labels.map {|l| LABEL_VALUE[l].to_i}.max.to_i
-      @view_order ||= -((max * 1000 + score) * 100 + comments.length)
+      @view_order ||= -((max * 1000 + score) * 100) # + comments.length)
+      # Can't include comments any more because they aren't returned
+      # with the story.  We would have to request the comments for each
+      # and every one of our hundreds of stories, which takes minutes.
     end
 
     def score

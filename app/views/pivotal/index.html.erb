@@ -118,7 +118,7 @@
           %></span>
           <span class="pivotal_num_comments">(<%= :comments.l %>: 
             <span id="pivotal_num_comments_<%= story.id %>"><%=
-              story.comments.length.to_s
+              "?" # story.comments.length.to_s
             %></span>)</span>
           <span class="pivotal_labels"><%=
             labels = story.sorted_labels.map do |label|

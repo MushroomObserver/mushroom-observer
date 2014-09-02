@@ -129,7 +129,7 @@ class Pivotal
       file = "#{MO.pivotal_cache}/#{filename}.json"
       if File.exists?(file) and
          File.mtime(file) > 1.hour.ago
-        result = File.new(file)
+        result = File.read(file)
       else
         result = get_request(path)
         write_cache(filename, result)

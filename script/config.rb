@@ -26,7 +26,7 @@ class Configuration
   end
   def method_missing(var, *vals)
     if var.to_s.match(/^(.*)=$/)
-      @hash[var.to_s.sub(/=$/,'')] = vals.first
+      @hash[var.to_s.sub(/=$/,"")] = vals.first
     else
       @hash[var.to_s]
     end
@@ -74,17 +74,19 @@ def image_servers
   results.join("\n")
 end
 
+env = ENV["RAILS_ENV"]
+env = "development" if env.to_s == ""
 [
   "consts.rb",
-  "environments/#{ENV['RAILS_ENV']}.rb",
-  "consts-site.rb"
+  "environments/#{env}.rb",
+  # "consts-site.rb" automatically included by env.rb
 ].each do |file|
   file = File.expand_path("../../config/#{file}", __FILE__)
   require file if File.exist?(file)
 end
 
 # If run from command line, evaluate arguments and print results.
-if File.basename($0) == 'config.rb'
+if File.basename($0) == "config.rb"
   print ARGV.map {|arg| eval(arg).to_s }.join("\n")
   exit 0
 end

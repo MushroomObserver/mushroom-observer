@@ -82,5 +82,5 @@ MushroomObserver::Application.configure do
   config.static_cache_control = 'public, max-age=3600'
 end
 
-file = File.expand_path("../consts-site.rb", __FILE__)
+file = File.expand_path("../../consts-site.rb", __FILE__)
 require file if File.exist?(file)
