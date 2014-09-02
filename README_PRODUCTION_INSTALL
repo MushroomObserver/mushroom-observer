@@ -134,7 +134,8 @@ mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
   MushroomObserver::Application.configure do
     config.action_mailer.smtp_settings[:password] = "xxx"
-    config.pivotal_password = "xxx"
+    config.pivotal_enabled = true
+    config.pivotal_token = "xxx"
     config.image_sources[:cdmr].delete(:write)
   end
 

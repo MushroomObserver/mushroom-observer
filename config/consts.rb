@@ -87,6 +87,7 @@ MushroomObserver::Application.configure do
   config.pivotal_max_vote = 1
   config.pivotal_min_vote = -1
   config.pivotal_cache    = "#{config.root}/tmp/pivotal"
+  config.pivotal_test_id  = 77165602
 
   # Configuration files for location validator.
   config.location_countries_file = "#{config.root}/config/location/countries.yml"
