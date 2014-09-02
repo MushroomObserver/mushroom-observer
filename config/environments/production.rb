@@ -47,7 +47,8 @@ MushroomObserver::Application.configure do
     :cdmr => {
       :test => :transferred_flag,
       :read  => "/images",
-      :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
+      # Safer to keep this disabled until truly going live.
+      # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
     }
     # For use when testing live server in parallel with production server.
     # :mo = {
