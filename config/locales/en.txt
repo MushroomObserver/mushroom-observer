@@ -2487,8 +2487,10 @@
   pivotal_label_observations: observations
   pivotal_label_pivotal_tracker: pivotal
   pivotal_label_projects: projects
+  pivotal_label_publications: publications
   pivotal_label_search: searching
   pivotal_label_taxonomy: taxonomy
+  pivotal_label_upgrade: upgrade
   pivotal_label_vagrant: vagrant
   pivotal_label_voting: voting
   pivotal_label_other: other
