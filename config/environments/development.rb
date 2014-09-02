@@ -22,9 +22,6 @@ MushroomObserver::Application.configure do
     :domain  => "localhost"
   }
 
-  # Disable Pivotal interface.
-  config.pivotal_enabled = false
-
   # Serve new images locally, pre-existing images from real image server.
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {

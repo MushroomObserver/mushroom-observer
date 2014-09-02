@@ -14,11 +14,6 @@ MushroomObserver::Application.configure do
   # Disable queued email.
   config.queue_email = false
 
-  # Access data for Pivotal Tracker's API.
-  config.pivotal_enabled  = false
-  config.pivotal_username = "webmaster@mushroomobserver.org"
-  config.pivotal_project  = "224629"
-
   # Serve new images from local_images, old images from remote_images.
   # Transfer to two servers, both local, but one using ssh to do it.
   # Keep thumbnails locally, and only copy thumbnails to second server.

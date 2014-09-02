@@ -5,10 +5,10 @@ class Pivotal
     attr_accessor :time
     attr_accessor :user
     attr_accessor :text
-    attr_accessor :xml
+    attr_accessor :json
     
-    def initialize(xml)
-      @xml = xml
+    def initialize(json)
+      @json = json
     end
 
     def id;   parse; @id;   end
@@ -16,19 +16,14 @@ class Pivotal
     def user; parse; @user; end
     def text; parse; @text; end
 
-    # Delay parsing of XML until actually need the comment.
+    # Delay parsing of JSON until actually need the comment.
     # In most cases we probably won't ever need it.
     def parse
       if !@id
-        @id = 0
-        xml.each_element do |elem|
-          case elem.name
-          when 'id'       ; @id   = elem.text
-          when 'noted_at' ; @time = elem.text
-          when 'author'   ; @user ||= elem.text
-          when 'text'     ; self.text = elem.text
-          end
-        end
+        data = @json.is_a?(String) ? JSON.parse(@json) : @json
+        @id = data["id"]
+        @time = data["created_at"]
+        self.text = data["text"]
       end
     end
 

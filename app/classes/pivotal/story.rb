@@ -9,7 +9,6 @@ class Pivotal
     attr_accessor :name
     attr_accessor :description
     attr_accessor :labels
-    attr_accessor :comments
     attr_accessor :votes
 
     ACTIVE_STATES = {
@@ -51,33 +50,27 @@ class Pivotal
       'open'            => 0,
     }
 
-    def initialize(xml)
+    def initialize(json)
       @id          = nil
       @type        = nil
       @time        = nil
       @state       = nil
       @user        = nil
-      @name        = ''
-      @description = ''
+      @name        = ""
+      @description = ""
       @labels      = []
-      @comments    = []
       @votes       = []
+      @comments    = nil
 
-      xml.each_element do |elem|
-        case elem.name
-        when 'id'            ; @id       = elem.text
-        when 'story_type'    ; @type     = elem.text
-        when 'estimate'      ; @time     = elem.text
-        when 'current_state' ; @state    = elem.text
-        when 'requested_by'  ; @user   ||= elem.text
-        when 'name'          ; @name     = elem.text
-        when 'description'   ; self.description = elem.text.to_s
-        when 'labels'        ; @labels   = elem.text.split(',')
-        when 'notes'         ; @comments = elem.elements.map { |e| Pivotal::Comment.new(e) }
-        end
-      end
-
-      @labels = ['other'] if @labels.empty?
+      data = json.is_a?(String) ? JSON.parse(json) : json
+      @id     = data["id"]
+      @type   = data["story_type"]
+      @time   = data["estimate"]
+      @state  = data["current_state"]
+      @name   = data["name"]
+      @labels = data["labels"].map {|l| l["name"]}
+      @labels = ["other"] if @labels.empty?
+      self.description = data["description"]
     end
 
     def description=(str)
@@ -91,7 +84,11 @@ class Pivotal
         else
           true
         end
-      end.join("\n").sub(/\A\s+/, '').sub(/\s+\Z/, "\n")
+      end.join("\n").sub(/\A\s+/, "").sub(/\s+\Z/, "\n")
+    end
+
+    def comments
+      @comments ||= get_comments(@id)
     end
 
     def active?
@@ -100,15 +97,15 @@ class Pivotal
 
     def activity
       @activity ||= begin
-        result = 'none'
+        result = "none"
         if comment = comments.last
           time = Time.parse(comment.time)
           if time > 1.day.ago
-            result = 'day'
+            result = "day"
           elsif time > 1.week.ago
-            result = 'week'
+            result = "week"
           elsif time > 1.month.ago
-            result = 'month'
+            result = "month"
           end
         end
         result

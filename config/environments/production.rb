@@ -37,11 +37,6 @@ MushroomObserver::Application.configure do
     :password => "xxx"
   }
 
-  # Enable Pivotal interface.
-  config.pivotal_enabled  = true
-  config.pivotal_username = "webmaster@mushroomobserver.org"
-  config.pivotal_project  = "224629"
-
   # Serve new images locally until transferred to image server
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {

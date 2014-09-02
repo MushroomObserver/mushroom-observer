@@ -81,10 +81,9 @@ MushroomObserver::Application.configure do
   # Access data for Pivotal Tracker's API.
   config.pivotal_enabled  = false
   config.pivotal_url      = "www.pivotaltracker.com"
-  config.pivotal_path     = "/services/v3"
-  config.pivotal_username = "xxx"
-  config.pivotal_password = "xxx"
-  config.pivotal_project  = "xxx"
+  config.pivotal_path     = "/services/v5"
+  config.pivotal_project  = "224629"
+  config.pivotal_token    = "xxx"
   config.pivotal_max_vote = 1
   config.pivotal_min_vote = -1
   config.pivotal_cache    = "#{config.root}/tmp/pivotal"
