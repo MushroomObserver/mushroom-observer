@@ -65,7 +65,7 @@ class Pivotal
       @description = parse_description(data["description"])
       @labels = data["labels"] == [] ? ["other"] :
                 data["labels"].map {|l| l["name"]}
-      @comments = !data["comments"] ? Pivotal.get_comments(@id) :
+      @comments = !data["comments"] ? [] :
                   data["comments"].map {|c| Pivotal::Comment.new(c)}
     end
 
