@@ -1002,6 +1002,21 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_38
+    do_name_parse_test(
+      'Podoscyphaceae sensu Reid',
+      :text_name        => 'Podoscyphaceae',
+      :real_text_name   => 'Podoscyphaceae',
+      :search_name      => 'Podoscyphaceae sensu Reid',
+      :real_search_name => 'Podoscyphaceae sensu Reid',
+      :sort_name        => 'Podoscyph!7  sensu Reid',
+      :display_name     => '**__Podoscyphaceae__** sensu Reid',
+      :parent_name      => nil,
+      :rank             => :Family,
+      :author           => 'sensu Reid'
+    )
+  end
+
   # -----------------------------
   #  Test classification.
   # -----------------------------

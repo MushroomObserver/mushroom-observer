@@ -1501,7 +1501,7 @@ class Name < AbstractModel
   ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} | #{SENSU_ABBR} ) (?:\s|$) /x
 
   UPPER_WORD = / [A-Z][a-zë\-]*[a-zë] | "[A-Z][a-zë\-\.]*[a-zë]" /x
-  LOWER_WORD = / [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
+  LOWER_WORD = / (?!sensu\b) [a-z][a-zë\-]*[a-zë] | "[a-z][\wë\-\.]*[\wë]" /x
   LOWER_WORD_OR_SP_NOV = / (?!sp\s|sp$|species) #{LOWER_WORD} | sp\.\s\S*\d\S* /x
 
   # Matches the last epithet in a (standardized) name, including preceding abbreviation if there is one.
