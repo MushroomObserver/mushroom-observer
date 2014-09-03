@@ -7,15 +7,15 @@ class Pivotal
   require 'time'
 
   class << self
-    def get_stories
+    def get_stories(verbose=false)
       touch_cache("stories.new")
       if !cache_exist?("stories")
         json = get_request("stories?limit=1000")
-        stories = process_stories(json)
+        stories = process_stories(json, verbose)
       else
         time = cache_date("stories")
         json = get_request("stories?limit=1000&updated_after=#{time.utc.iso8601}")
-        stories = process_stories(json)
+        stories = process_stories(json, verbose)
         Dir.glob(cache_file("story_*.json")).each do |file|
           if File.mtime(file) < time &&
              file.match(/(\d+).json/)
@@ -30,7 +30,7 @@ class Pivotal
       delete_cache("stories.new")
     end
 
-    def process_stories(json)
+    def process_stories(json, verbose)
       stories = []
       JSON.parse(json).each do |obj|
         id   = obj["id"]
@@ -41,7 +41,7 @@ class Pivotal
              cache_date("story_#{id}.json") > Time.iso8601(date)
             story = get_story(id)
           else
-            puts "Reading story ##{id}..."
+            puts "Reading story ##{id}..." if verbose
             story = Pivotal::Story.new(obj)
             write_cache("story_#{story.id}.json", story.to_json)
           end
@@ -53,11 +53,9 @@ class Pivotal
 
     def get_story(id, refresh_cache=false)
       if !refresh_cache && cache_exist?("story_#{id}.json")
-        # puts "Using cache for ##{id}..."
         json = read_cache("story_#{id}.json")
         story = Pivotal::Story.new(json)
       else
-        # puts "Reading story ##{id}..."
         json = get_request("stories/#{id}")
         story = Pivotal::Story.new(json)
         write_cache("story_#{id}.json", story.to_json)
