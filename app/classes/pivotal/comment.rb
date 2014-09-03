@@ -23,14 +23,16 @@ class Pivotal
         data = @json.is_a?(String) ? JSON.parse(@json) : @json
         @id = data["id"]
         @time = data["created_at"]
-        self.text = data["text"]
+        @text = parse_text(data["text"])
       end
     end
 
-    def text=(str)
-      @text = str.split(/\n/).select do |line|
+    def parse_text(str)
+      str.to_s.split(/\n/).select do |line|
         if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
-          @user = User.find($1) rescue $2.sub(/^\((.*)\)$/, '\\1')
+          id    = Regexp.last_match[1]
+          login = Regexp.last_match[2]
+          @user = User.find(id) rescue Pivotal::User.new(id, login)
           false
         else
           true

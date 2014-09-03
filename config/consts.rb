@@ -86,7 +86,7 @@ MushroomObserver::Application.configure do
   config.pivotal_token    = "xxx"
   config.pivotal_max_vote = 1
   config.pivotal_min_vote = -1
-  config.pivotal_cache    = "#{config.root}/tmp/pivotal"
+  config.pivotal_cache    = "#{config.root}/public/pivotal"
   config.pivotal_test_id  = 77165602
 
   # Configuration files for location validator.

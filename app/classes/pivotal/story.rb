@@ -9,6 +9,7 @@ class Pivotal
     attr_accessor :name
     attr_accessor :description
     attr_accessor :labels
+    attr_accessor :comments
     attr_accessor :votes
 
     ACTIVE_STATES = {
@@ -53,44 +54,56 @@ class Pivotal
     }
 
     def initialize(json)
-      @id          = nil
-      @type        = nil
-      @time        = nil
-      @state       = nil
-      @user        = nil
-      @name        = ""
-      @description = ""
-      @labels      = []
-      @votes       = []
-      @comments    = nil
-
       data = json.is_a?(String) ? JSON.parse(json) : json
-      @id     = data["id"]
-      @type   = data["story_type"]
-      @time   = data["estimate"]
-      @state  = data["current_state"]
-      @name   = data["name"]
-      @labels = data["labels"].map {|l| l["name"]}
-      @labels = ["other"] if @labels.empty?
-      self.description = data["description"]
+      @id    = data["id"]
+      @type  = data["story_type"]
+      @time  = data["estimate"]
+      @state = data["current_state"]
+      @name  = data["name"]
+      @user  = nil
+      @votes = []
+      @description = parse_description(data["description"])
+      @labels = data["labels"] == [] ? ["other"] :
+                data["labels"].map {|l| l["name"]}
+      @comments = !data["comments"] ? Pivotal.get_comments(@id) :
+                  data["comments"].map {|c| Pivotal::Comment.new(c)}
     end
 
-    def description=(str)
-      @description = str.to_s.split(/\n/).select do |line|
+    def to_json
+      JSON.dump(
+        "id" => @id,
+        "story_type" => @type,
+        "estimate" => @time,
+        "current_state" => @state,
+        "name" => @name,
+        "description" => Pivotal.prepare_text(@description, @user, @votes),
+        "labels" => @labels.map do |l|
+          { "name" => l }
+        end,
+        "comments" => @comments.map do |c|
+          { "id" => c.id,
+          "created_at" => c.time,
+          "text" => Pivotal.prepare_text(c.text, c.user) }
+        end
+      )
+    end
+
+    def parse_description(str)
+      str.to_s.split(/\n/).select do |line|
         if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
-          @user = User.find($1) rescue $2.sub(/^\((.*)\)$/, '\\1')
+          id    = Regexp.last_match[1]
+          login = Regexp.last_match[2]
+          @user = User.find(id) rescue Pivotal::User.new(id, login)
           false
         elsif line.match(/VOTE:\s*(\d+)\s+(\S+)/)
-          @votes << Pivotal::Vote.new($1, $2)
+          id   = Regexp.last_match[1]
+          data = Regexp.last_match[2]
+          @votes << Pivotal::Vote.new(id, data)
           false
         else
           true
         end
       end.join("\n").sub(/\A\s+/, "").sub(/\s+\Z/, "\n")
-    end
-
-    def comments
-      @comments ||= Pivotal.get_comments(@id)
     end
 
     def active?
@@ -152,6 +165,17 @@ class Pivotal
         end
       end
       return 0
+    end
+
+    def change_vote(user, value)
+      found = false
+      votes.each do |vote|
+        if vote.id == user.id
+          vote.data = value
+          found = true
+        end
+      end
+      votes << Pivotal::Vote.new(user.id, value) if !found
     end
   end
 end
