@@ -93,7 +93,7 @@ class Pivotal
         if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
           id    = Regexp.last_match[1]
           login = Regexp.last_match[2]
-          @user = User.find(id) rescue Pivotal::User.new(id, login)
+          @user = ::User.find(id) rescue Pivotal::User.new(id, login)
           false
         elsif line.match(/VOTE:\s*(\d+)\s+(\S+)/)
           id   = Regexp.last_match[1]
@@ -113,7 +113,7 @@ class Pivotal
     def activity
       @activity ||= begin
         result = "none"
-        if @comments
+        if @comments.any?
           comment = @comments.last
           time = Time.parse(comment.time)
           if time > 1.day.ago
@@ -130,10 +130,7 @@ class Pivotal
 
     def story_order
       max = labels.map {|l| LABEL_VALUE[l].to_i}.max.to_i
-      @view_order ||= -((max * 1000 + score) * 100) # + comments.length)
-      # Can't include comments any more because they aren't returned
-      # with the story.  We would have to request the comments for each
-      # and every one of our hundreds of stories, which takes minutes.
+      @view_order ||= -((max * 1000 + score) * 100) + comments.length
     end
 
     def score

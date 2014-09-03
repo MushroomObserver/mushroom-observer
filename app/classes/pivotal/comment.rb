@@ -32,7 +32,7 @@ class Pivotal
         if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
           id    = Regexp.last_match[1]
           login = Regexp.last_match[2]
-          @user = User.find(id) rescue Pivotal::User.new(id, login)
+          @user = ::User.find(id) rescue Pivotal::User.new(id, login)
           false
         else
           true
