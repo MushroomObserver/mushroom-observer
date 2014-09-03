@@ -24,8 +24,9 @@ module PivotalHelper
   def pivotal_story(story)
     result = content_tag(:p, :DESCRIPTION.l + ':', :class => 'pivotal_heading')
     result += story.description.tp
-    if story.user.instance_of?(User)
-      result += content_tag(:p, :pivotal_posted_by.l + ': ' + user_link(story.user),
+    if story.user
+      result += content_tag(:p, :pivotal_posted_by.l + ': ' +
+                            user_link(story.user.id, story.user.name),
                             :class => 'pivotal_heading')
     end
     result += content_tag(:p, :COMMENTS.l + ':', :class => 'pivotal_heading')
@@ -47,7 +48,7 @@ module PivotalHelper
     content_tag(:div, :class => 'ListLine' + (num & 1).to_s) do
       content_tag(:p) do
         :CREATED.t + ': ' + comment.time.to_s + safe_br +
-        :BY.t + ': ' + user_link(comment.user) + safe_br
+        :BY.t + ': ' + user_link(comment.user.id, comment.user.name) + safe_br
       end + comment.text.to_s.tp
     end
   end

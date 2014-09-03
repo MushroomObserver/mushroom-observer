@@ -91,14 +91,14 @@ class Pivotal
     def parse_description(str)
       str.to_s.split(/\n/).select do |line|
         if line.match(/USER:\s*(\d+)\s+(\S.*\S)/)
-          id    = Regexp.last_match[1]
-          login = Regexp.last_match[2]
-          @user = ::User.find(id) rescue Pivotal::User.new(id, login)
+          id   = Regexp.last_match[1]
+          name = Regexp.last_match[2]
+          @user = Pivotal::User.new(id, name)
           false
         elsif line.match(/VOTE:\s*(\d+)\s+(\S+)/)
-          id   = Regexp.last_match[1]
-          data = Regexp.last_match[2]
-          @votes << Pivotal::Vote.new(id, data)
+          id    = Regexp.last_match[1]
+          value = Regexp.last_match[2]
+          @votes << Pivotal::Vote.new(id, value)
           false
         else
           true
@@ -135,7 +135,7 @@ class Pivotal
 
     def score
       @score ||= votes.inject(0) do |sum, vote|
-        sum + vote.data
+        sum + vote.value
       end
     end
 
@@ -158,7 +158,7 @@ class Pivotal
       if user
         user_id = user.id
         for vote in votes
-          return vote.data if vote.id == user_id
+          return vote.value if vote.id == user_id
         end
       end
       return 0
@@ -168,7 +168,7 @@ class Pivotal
       found = false
       votes.each do |vote|
         if vote.id == user.id
-          vote.data = value
+          vote.value = value
           found = true
         end
       end

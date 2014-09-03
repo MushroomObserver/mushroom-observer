@@ -2,11 +2,11 @@
 class Pivotal
   class Vote
     attr_accessor :id
-    attr_accessor :data
+    attr_accessor :value
 
-    def initialize(id, data)
-      @id   = id.to_i
-      @data = data.to_i
+    def initialize(id, value)
+      @id    = id.to_i
+      @value = value.to_i
     end
   end
 end

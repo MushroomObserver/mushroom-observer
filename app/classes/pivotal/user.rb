@@ -2,11 +2,11 @@
 class Pivotal
   class User
     attr_accessor :id
-    attr_accessor :login
+    attr_accessor :name
 
-    def initialize(id, login)
-      @id    = id.to_i
-      @login = login.to_s.sub(/^\((.*)\)$/, '\1')
+    def initialize(id, name)
+      @id   = id.to_i
+      @name = name.to_s.sub(/^\((.*)\)$/, '\1')
     end
   end
 end

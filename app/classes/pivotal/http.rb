@@ -108,10 +108,10 @@ class Pivotal
     def prepare_text(text, user=nil, votes=[])
       text = text.sub(/\A\s+/, "").sub(/\s*\Z/, "\n\n")
       if user
-        text += "USER: #{user.id} (#{user.login})\n"
+        text += "USER: #{user.id} (#{user.name})\n"
       end
       votes.each do |vote|
-        text += "VOTE: #{vote.id} #{vote.data}\n"
+        text += "VOTE: #{vote.id} #{vote.value}\n"
       end
       return text
     end
