@@ -184,6 +184,7 @@ class Pivotal
     end
 
     def touch_cache(cache_name)
+      create_cache_directory
       file = cache_file(cache_name)
       FileUtils.touch(file)
     end
@@ -194,7 +195,7 @@ class Pivotal
     end
 
     def write_cache(cache_name, text)
-      FileUtils.mkpath(MO.pivotal_cache) unless File.directory?(MO.pivotal_cache)
+      create_cache_directory
       file = cache_file(cache_name)
       File.open(file, "w:utf-8") {|f| f.write(text.to_s.force_encoding("utf-8"))}
     end
@@ -202,6 +203,10 @@ class Pivotal
     def delete_cache(cache_name)
       file = cache_file(cache_name)
       File.delete(file) if File.exists?(file)
+    end
+
+    def create_cache_directory
+      FileUtils.mkpath(MO.pivotal_cache) unless File.directory?(MO.pivotal_cache)
     end
   end
 end
