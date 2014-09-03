@@ -799,7 +799,7 @@ logger.warn('SESSION: ' + session.inspect)
             citation = $1
             name.citation = citation if name.citation.blank?
           # Only save comment if name didn't exist
-          elsif names.new_record?
+          elsif name.new_record?
             name.notes = comment
           else
             flash_warning("Didn't save comment for #{name.real_search_name}, " +
