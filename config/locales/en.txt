@@ -861,7 +861,7 @@
   app_title: Mushroom Observer
 
   # This goes in the left-hand column.  The "<br/>" forces a line-break.
-  app_banner: Mushrooms<br/>Rule!!
+  app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
   app_banner_box: "<a href=\"/publications\">Read About and Add Publications Related to Mushroom Observer</a>"
