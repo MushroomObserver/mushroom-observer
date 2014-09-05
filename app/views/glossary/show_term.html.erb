@@ -13,8 +13,8 @@
       <%= @term.description.tpl %>
     </td>
     <td align="center" width="50%">
-      <%= if @term.thumb_image_id
-        thumbnail(@term.thumb_image_id, :border => 0, :votes => true, :size => :medium)
+      <%= if @term.thumb_image
+        thumbnail(@term.thumb_image, :border => 0, :votes => true, :size => :medium)
       end %>
     </td>
   </tr>
