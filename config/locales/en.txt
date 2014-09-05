@@ -74,7 +74,7 @@
   herbarium: herbarium
   HERBARIUM: Herbarium
   herbariums: herbaria
-  HREBARIUMS: Herbaria
+  HERBARIUMS: Herbaria
   LICENSE: License
   license: license
   LICENSES: Licenses
