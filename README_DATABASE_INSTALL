@@ -1,0 +1,106 @@
+#
+#  Installation of the database server. [JPH 20140904]
+#
+#  $USER             jason
+#  $DB_PASSWORD      xxxxxxxx
+#  $IP_ADDR          xxx.xxx.xxx.xxx
+#  $WEB_SERVER       web.mushroomobserver.org
+#  $SNAPSHOT_PATH    user@mushroomobserver.org:/var/web/mo/db
+#
+################################################################################
+
+local> ssh root@$IP_ADDR
+root> passwd
+
+# Create account for yourself.
+root> useradd -m -s /bin/bash -G sudo $USER
+root> passwd $USER
+root> logout
+
+# Password-less ssh.
+local> ssh-keygen -t rsa   # (if not already done)
+local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
+# If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
+local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'mkdir .ssh; cat >> .ssh/authorized_keys; chmod 600 .ssh/authorized_keys; chmod 700 .ssh'
+
+# Finish setting
+local> ssh $IP_ADDR
+user> su root
+root> vi /root/.bashrc
+  # Add this at end.
+  export CFLAGS="-O3 -m64"
+root> source /root/.bashrc
+
+# Disable direct root login for security purposes.
+root> vi /etc/ssh/sshd_config
+  PermitRootLogin no
+
+# Setup other users' accounts:
+root> useradd -m -s /bin/bash -G mo,sudo $USER
+root> cd /home/$USER
+root> mkdir .ssh
+# Probably should keep admin's public keys somewhere handy...
+root> scp xxx .
+root> cat xxx > .ssh/authorized_keys
+root> chmod 600 .ssh/authorized_keys
+root> chmod 700 .ssh
+
+# Install core packages.
+root> apt-get update
+root> apt-get upgrade
+root> apt-get install build-essential man vim emacs iptables mlocate
+root> apt-get install mysql-server mysql-client
+
+# Configure firewall. (22=ssh, 25=smtp, 3306=mysql, 53=dns)
+root> iptables -F
+root> iptables -P INPUT ACCEPT
+root> iptables -P OUTPUT ACCEPT
+root> iptables -P FORWARD ACCEPT
+root> iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+root> iptables -A INPUT -i lo -j ACCEPT
+root> iptables -A INPUT -p icmp -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 22   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 25   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 3306 -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p tcp --dport 53   -j ACCEPT
+root> iptables -A INPUT -m state --state NEW -p udp --dport 53   -j ACCEPT
+root> iptables -A INPUT   -j REJECT --reject-with icmp-host-prohibited
+root> iptables -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+root> iptables-save > /etc/firewall.conf
+root> chmod 600 /etc/firewall.conf
+root> vi /etc/rc.local
+  iptables-restore < /etc/firewall.conf
+
+# Configure database.
+root> mysql -u root -p
+  create database mushroom_observer;
+  create database test;
+  create user 'mo'@'localhost' identified by '$DB_PASSWORD';
+  # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
+  grant all privileges on mushroom_observer.* to 'mo'@'localhost' with grant option;
+  grant all privileges on test.* to 'mo'@'localhost' with grant option;
+root> scp $SNAPSHOT_PATH/checkpoint.gz .
+root> scp $SNAPSHOT_PATH/clean.sql .
+root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mushroom_observer
+root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' test
+root> cat clean.sql | mysql -u mo -p'$DB_PASSWORD' test
+root> vi /etc/mysql/my.cnf
+  # Comment out this line to allow remote connections.
+  # bind-address = 127.0.0.1
+root> mysql -u root -p
+  # For each remote user:
+  create user 'mo'@'$WEB_SERVER' identified by '$DB_PASSWORD';
+  grant all privileges on mushroom_observer.* to 'mo'@'$WEB_SERVER' with grant option;
+  grant all privileges on test.* to 'mo'@'$WEB_SERVER' with grant option;
+root> service mysql restart
+
+# Configure on remote machine:
+remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
+remote> vi /var/web/mo/config/database.yml
+  production:
+    database: mushroom_observer
+    host:     db.mushroomobserver.org
+    username: mo
+    password: $DB_PASSWORD
+remote> rake db:version   # (just a simple test)
+

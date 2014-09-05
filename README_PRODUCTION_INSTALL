@@ -1,49 +1,27 @@
 #
-#  This is a log of the installation of a production server in August 2014.
+#  Installation of a web server. [JPH 20140904]
 #
-#  It starts out fairly generic, and becomes increasingly specific to Mushroom
-#  Observer.  Look for the following "variables":
-#
-#    IP_ADDR            ip address of new server
-#    DOMAIN             mushroomobserver.org
-#    SITE               mo
-#    USER               jason
-#    USER_PASSWORD      xxx
-#    DATA_PASSWORD      xxx
-#    MAIL_PASSWORD      xxx
-#    YOUR_EMAIL         pellaea@gmail.com
-#    FULL_NAME          Jason Hollinger
-#
-#  Present production package versions are: (as of 20140301)
-#
-#  packages:
-#    ubuntu (14.04)
-#    ruby (1.9.3-p545)
-#    rubygems (2.2.2)
-#    nginx (1.4.5)
-#    postfix (2.10.0)
-#    mysql (14.14)
+#  $IP_ADDR            ip address of new server
+#  $USER               jason
+#  $USER_PASSWORD      xxx
+#  $DATA_PASSWORD      xxx
+#  $MAIL_PASSWORD      xxx
 #
 ################################################################################
 
 local> ssh root@$IP_ADDR
 root> passwd
 
-# Install core packages.
-root> apt-get update
-root> apt-get upgrade
-root> apt-get install build-essential man telnet wget vim emacs iptables mlocate lynx
-
 # Create account for webserver.
-root> useradd -m -s /bin/bash $SITE
-root> passwd -l $SITE
+root> useradd -m -s /bin/bash mo
+root> passwd -l mo
 root> visudo
   # Add these lines to end. Allows users in "mo" group to "sudo su mo".
-  %$SITE ALL = NOPASSWD: /bin/su $SITE
-  %$SITE ALL = NOPASSWD: /bin/su - $SITE
+  %mo ALL = NOPASSWD: /bin/su mo
+  %mo ALL = NOPASSWD: /bin/su - mo
 
 # Create account for yourself.
-root> useradd -m -s /bin/bash -G $SITE,sudo $USER
+root> useradd -m -s /bin/bash -G mo,sudo $USER
 root> passwd $USER
 root> logout
 
@@ -53,25 +31,39 @@ local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
 # If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
 local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'mkdir .ssh; cat >> .ssh/authorized_keys; chmod 600 .ssh/authorized_keys; chmod 700 .ssh'
 
-[JPH: It asked me to reboot when I logged in, so I did that at this point.]
-
-# Set up your accounts.
+# Set up your account.
 local> ssh $IP_ADDR
 user> vi .bash_aliases
-  # Add these at end.
-  alias $SITE='cd /var/web/$SITE && sudo su $SITE'
+  # Add this at least.
+  alias mo='cd /var/web/mo && sudo su mo'
 user> su root
+
+# Set up root account.
 root> vi /root/.bashrc
   # Add these at end.
   export CFLAGS="-O3 -m64"
-  alias $SITE='cd /var/web/$SITE && su $SITE'
+  alias mo='cd /var/web/mo && su mo'
 root> source /root/.bashrc
-
-# Disable direct root login for security purposes.
 root> vi /etc/ssh/sshd_config
   PermitRootLogin no
 
-# Configure firewall.
+# Setup other users' accounts:
+root> useradd -m -s /bin/bash -G mo,sudo $USER
+root> cd /home/$USER
+root> mkdir .ssh
+# Probably should keep admin's public keys somewhere handy...
+root> scp xxx .
+root> cat xxx > .ssh/authorized_keys
+root> chmod 600 .ssh/authorized_keys
+root> chmod 700 .ssh
+
+# Install core packages.
+root> apt-get update
+root> apt-get upgrade
+root> apt-get install build-essential man telnet wget curl vim emacs \
+                      iptables mlocate lynx
+
+# Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables -F
 root> iptables -P INPUT ACCEPT
 root> iptables -P OUTPUT ACCEPT
@@ -99,27 +91,22 @@ root> apt-get install mysql-server mysql-client libmysqlclient-dev \
 
 # Install rvm and ruby.
 root> curl -sSL https://get.rvm.io | bash -s stable --ruby=1.9.3
-root> gpasswd -a $SITE rvm
+root> gpasswd -a mo rvm
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
-root> echo "gem: --no-document" > /home/$SITE/.gemrc
+root> echo "gem: --no-document" > /home/mo/.gemrc
 root> echo "source /usr/local/rvm/scripts/rvm" >> /root/.bashrc
-root> echo "source /usr/local/rvm/scripts/rvm" >> /home/$SITE/.bashrc
+root> echo "source /usr/local/rvm/scripts/rvm" >> /home/mo/.bashrc
 
 # Create directory for rails app.
 root> mkdir /var/web
-root> mkdir /var/web/$SITE
-root> chown -R $SITE:$SITE /var/web/$SITE
-root> chmod 750 /var/web/$SITE
+root> mkdir /var/web/mo
+root> chown mo:mo /var/web/mo
+root> chmod 750 /var/web/mo
+root> ln -s mo /var/web/mushroom-observer
 
 # Make sure nginx user has access to rails directories.
-root> usermod -a -G $SITE www-data
-
---------------------------------------------------------------------------------
-
-# Now we're done with the generic installation.  Start installing Mushroom
-# Observer in particular.
-root> ln -s mo /var/web/mushroom-observer
+root> usermod -a -G mo www-data
 
 # Install and configure rails apps.
 root> cd /var/web/mo
@@ -138,6 +125,19 @@ mo> vi config/consts-site.rb
     config.pivotal_token = "xxx"
     config.image_sources[:cdmr].delete(:write)
   end
+mo> vi config/database.yml
+  # Replace with this:
+  production:
+    adapter:  mysql2
+    database: test
+    # database: mushroom_observer
+    host:     db.mushroomobserver.org
+    username: mo
+    password: xxx
+    socket:   /var/run/mysqld/mysqld.sock
+    encoding: utf8
+# Ping the database to make sure everything's working right.
+mo> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
 
 # Install gems.
 mo> bundle install
@@ -148,35 +148,13 @@ root> cp /var/web/mo/config/etc/nginx.conf /etc/nginx/
 root> service nginx start
 root> rm /usr/share/nginx/html/index.html    # (there's *got* to be a better way!)
 
-# Create database.
-root> su mo
-mo> mysql -u root -p
-  create database mo_production;
-  create user 'mo'@'localhost' identified by '$DATA_PASSWORD';
-  # set password for 'mo'@'localhost' = password('$DATA_PASSWORD');
-  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
-mo> vi config/database.yml
-  # Replace with this:
-  production:
-    adapter: mysql2
-    database: mo_production
-    username: mo
-    password: $DATA_PASSWORD
-    socket: /var/run/mysqld/mysqld.sock
-    encoding: utf8
-mo> cd db
-mo> scp $USER@$OLD_SERVER:/var/web/mushroom-observer/db/checkpoint.gz .
-mo> gunzip -cd checkpoint.gz | mysql -u mo -p'$DATA_PASSWORD' mo_production
-mo> rm checkpoint.gz
-# If you want to test this server on a "safe" database...
-# mo> mysql -u mo -p"$DATA_PASSWORD" mo_production < clean.sql
-
 # Install our programs for resizing and rotating JPEG images.
-mo> exit
 root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
 root> gcc /var/web/mo/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
 root> cp /var/web/mo/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
+
+--------------------------------------------------------------------------------
 
 # Test basic system now.
 root> su mo
@@ -192,18 +170,13 @@ mo> unicorn -c config/unicorn.rb -D
 # If there are any errors you'll find them in log/unicorn.stderr.log
 # Bash alias "uni start" is shorthand for the above command.
 
+# Apparently have to restart nginx after first time run unicorn(?)
+mo> service nginx stop
+mo> service nginx start
+
 # Should start listening on port 8080.
 mo> lynx localhost:8080
 mo> wget localhost:8080
-
-[NJW: At first it didn't respond to outside access, but Jason got it working by restart
-nginx and unicorn (which was down). I just followed these instructions and it worked
-first time.  Just make sure you do "service nginx reload" if you make any changes to
-nginx.conf.  In the instructions we start nginx after copying nginx.conf into place.]
-
-[JPH: I also had to restart nginx, not sure why. Also, I had to tweak
-nginx.conf to serve all /images from cdmr -- the default is to serve
-thumbnails locally.]
 
 --------------------------------------------------------------------------------
 
@@ -211,7 +184,7 @@ thumbnails locally.]
 mo> exit
 root> apt-get install postfix mutt
   # Select "internet site" when it prompts you.
-  # Enter the proper hostname as "system mail name" (should resolve back with reverse DNS).
+  # Change hostname to "mushroomobserver.org" (should resolve back with reverse DNS).
 root> vi /etc/aliases
   # Change where root's mail goes.
   root: $USER,...
@@ -219,7 +192,7 @@ root> newaliases
 
 # NOTE: After moving mail.mo.org to gmail, had to tweak postfix configuration:
 root> vi /etc/postfix/main.cf
-  # change myhostname to "$DOMAIN" (instead of "mail.$DOMAIN")
+  # change myhostname to "mushroomobserver.org" (instead of "xxx.mushroomobserver.org")
 [NJW: Not needed?  Was already set to 'ror30.mushroomobserver.org']
 [JPH: I'm not sure what the purpose of this was.  Might be an RDNS thing.]
 
@@ -229,7 +202,7 @@ user> cd
 user> echo $YOUR_EMAIL > .forward
 user> vi .muttrc
   set realname="$FULL_NAME"
-  set from="$USER@$DOMAIN"
+  set from="$USER@mushroomobserver.org"
   set use_from=yes
   set envelope_from=yes
 user> echo "This is a test." | mutt -s test $YOUR_EMAIL
@@ -267,7 +240,7 @@ root> chmod 755 /usr/local/bin/autoreply
 
 --------------------------------------------------------------------------------
 
-# This is as far as I've gotten. -Jason 20140901
+# This is as far as I've gotten. -Jason 20140904
 
 
 
@@ -316,107 +289,6 @@ mo> script/update_images -v --sync dreamhost --download --thumb --320
 # They're all already present, just need to stick them in the crontab.
 mo> crontab -e
   # (copy from config/etc/crontab)
-
---------------------------------------------------------------------------------
-
-# This section deals with creating all the additional user accounts for
-# members of CDMR to give them access to the server in case of emergency.
-
-# Create an email to send to CDMR members explaining what we're doing.
-root> cd
-root> cat > password_email <<EOB
-      I've created an account on the new mushroomobserver.org server for you.
-      Please log in using an ssh (Secure Shell) client and change your
-      password at your earliest convenience:
-
-        ssh USER@$IP_ADDR
-        (password = PASS)
-
-      If you don't have an ssh client, or if you have any problems logging
-      in, please let me know by replying to this email.
-
-      As a member of CDMR, you should have already received a copy of the
-      administrative details for Mushroom Observer, including the root
-      password for this new server.  However, for security reasons, we do not
-      allow direct ssh log-in as root, so in the unlikely event that you need
-      to access the server, you will need to login using your individual
-      account, instead.  Once logged in you can switch to root via "su root".
-
-      If you prefer, you do not need to do any of this (let me know), but we
-      would like at least a few members of CDMR to maintain active accounts
-      on our servers, in case of emergency.
-
-      Thank you for your time,
-      Jason Hollinger
-      Mushroom Observer System Administrator
-      EOB
-
-# Create user accounts, initialize with random password, mail password to root.
-root> foreach user (anne darv mgwood mike velosa)
-        set pass=`cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c8`
-        useradd -m -s /bin/tcsh $user
-        echo "$user":"$pass" | chpasswd
-        passwd -e $user
-        cat password_email | sed "s/USER/$user/g" | sed "s/PASS/$pass/" | \
-          mail -s "account on mushroomobserver.org" root
-      end
-
-# If you need to remove a user completely (e.g., a test user).
-# root> userdel -r $user
-
-# To copy over login information from another server instance.
-# (NOTE: this doesn't seem to work going from Fedora to Ubuntu,
-# it may only work if both are running the same distribution.)
-# root> vi /etc/shadow
-#   # (copy lines from the same file on the other server)
-
---------------------------------------------------------------------------------
-
-# This section deals with sharing databases between multiple servers.
-# NOTE: This is also useful for running two servers in parallel while testing
-# a new installation
-
-# Configure database to accept remote connections.
-root> vi /etc/mysql/my/cnf
-  # Comment out this line to allow remote connections.
-  # bind-address = 127.0.0.1
-root> mysql -u root -p
-  create user 'mo'@'$OTHER_IP_ADDR' identified by '$DATA_PASSWORD';
-  grant all privileges on mo_production.* to 'mo'@'$OTHER_IP_ADDR' with grant option;
-root> ssh $USER@$OTHER_IP_ADDR
-user> mysqladmin --protocol=tcp -u mo -p'$DATA_PASSWORD' --host=$IP_ADDR ping
-user> exit
-
-# To switch databases from old server to new server.
-# First set up new server as above.
-# Make sure everyone can connect to the new server's database.
-
-# Shut down apache2 on all servers.
-xxx_root> service apache2 stop
-
-# Make snapshot of old database.
-old_root> mo
-old_mo> cd db
-old_mo> ./dump
-
-# Copy snapshot to new server.
-new_root> mo
-new_mo> cd db
-new_mo> scp $USER@$OLD_IP_ADDR:/var/web/mushroom-observer/db/checkpoint.gz .
-new_mo> gunzip checkpoint.gz
-new_mo> mosqle checkpoint
-
-# Reconfigure and restart all servers.
-xxx_root> mo
-xxx_mo> vi config/database.yml
-  production:
-    database: mo_production
-    host:     $IP_ADDR
-    username: mo
-    password: $DATA_PASSWORD
-xxx_mo> rake db:version   # (just a simple test)
-xxx_mo> exit
-xxx_root> service apache2 start
 
 --------------------------------------------------------------------------------
 

@@ -28,7 +28,7 @@
 </p>
 
 <%= make_matrix(@objects, :width => '100%') do |image| %>
-  <%= thumbnail(image.id, :border => 1, :votes => true) %>
+  <%= thumbnail(image, :border => 1, :votes => true) %>
 <% end %>
 
 <%= show_previous_version(@term) %>

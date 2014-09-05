@@ -518,6 +518,8 @@ class User < AbstractModel
     result = personal_herbarium_name
     preferred_herbarium = nil
     count = -1
+    # TODO -- This really needs to be replaced with a single mysql call instead of
+    # looking up and instantiating all of a user's specimens just to get a single name(!!)
     for herbarium in self.curated_herbaria
       new_count = Specimen.find_all_by_herbarium_id_and_user_id(herbarium.id, self.id).count
       if new_count > count
