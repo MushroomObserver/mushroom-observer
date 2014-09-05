@@ -5,6 +5,10 @@ gem 'rails', '3.1.12'
 gem 'mysql2'
 gem 'jquery-rails'
 
+group :test do
+  gem 'debugger'
+end
+
 group :assets do
   gem 'sass-rails',   '~> 3.1.7'
   gem 'coffee-rails', '~> 3.1.1'
