@@ -356,13 +356,19 @@ class ObserverController < ApplicationController
       @val = params[:val].to_s.strip
       @val = 'X' if @val.blank?
       time = Time.now
-      for str in TranslationString.find_all_by_tag('app_banner_box')
-        str.update_attributes!(
-          :text => @val,
-          # This has the effect of marking them "needs to be updated".  If we just deleted
-          # them, MO wouldn't know to update the translations in the other threads.
-          :updated_at => (str.language.official ? time : time - 1.minute)
-        )
+      for lang in Language.all
+        if str = lang.translation_strings.find_all_by_tag('app_banner_box').first
+          str.update_attributes!(
+            :text => @val,
+            :updated_at => (str.language.official ? time : time - 1.minute)
+          )
+        else
+          str = lang.translation_strings.create!(
+            :tag => 'app_banner_box',
+            :text => @val,
+            :updated_at => time - 1.minute
+          )
+        end
         str.update_localization
         str.language.update_localization_file
         str.language.update_export_file
