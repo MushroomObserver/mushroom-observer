@@ -1,9 +1,15 @@
 #!/bin/bash
 set -e
 
-RAILS_ENV=production
-
-rvm_env=$(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
+### BEGIN INIT INFO
+# Provides: unicorn
+# Required-Start: $remote_fs $syslog
+# Required-Stop: $remote_fs $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start daemon at boot time
+# Description: Enable service provided by daemon.
+### END INIT INFO
 
 app_root=/var/web/mushroom-observer
 pid_file=$app_root/tmp/unicorn.pid
@@ -17,7 +23,9 @@ start)
   else
     echo "Starting unicorn..."
     cd $app_root
-    sudo -u mo "source $rvm_env && bundle exec unicorn_rails -c $conf_file -D" && exit 0
+    rvm_env=$(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
+    start_cmd="source $rvm_env && bundle exec unicorn_rails -c $conf_file -D"
+    sudo RAILS_ENV=production -u mo sh -c "$start_cmd" && exit 0
     echo "FAILED!"
     exit 1
   fi
