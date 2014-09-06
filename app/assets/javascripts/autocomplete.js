@@ -556,7 +556,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     // Make menu visible if nonempty.
     if (matches.length > 0) {
       var pos = this.input_elem.position();
-      var hgt = this.input_elem.height();
+      var hgt = this.input_elem.outerHeight();
       var scr = this.input_elem.scrollTop();
       menu.css("top", "" + (pos.top + hgt + scr) + "px");
       menu.css("left", "" + pos.left + "px");
