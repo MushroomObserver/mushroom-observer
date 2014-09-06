@@ -2953,9 +2953,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal('new banner', :app_banner_box.l)
 
     strs = TranslationString.find_all_by_tag(:app_banner_box)
-    assert_obj_list_equal([str1.reload, str2.reload], strs)
-    assert_equal('new banner', str1.text)
-    assert_equal('new banner', str2.text)
+    for str in strs
+      assert_equal('new banner', str.text, "Didn't change text of #{str.language.locale} correctly.")
+    end
   end
 
   def test_index_observation_by_past_by
