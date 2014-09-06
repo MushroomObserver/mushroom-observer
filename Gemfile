@@ -19,10 +19,14 @@ end
 gem 'unicorn'
 
 gem 'i18n'
-gem 'test-unit'
 gem 'RedCloth'
 gem 'blankslate'
 gem 'browser'
 gem 'ruby-rtf'
 gem 'enum_column3'
 gem 'acts_as_versioned_rails3.1.3'
+
+group :development, :test do
+  gem 'debugger'
+  gem 'test-unit'
+end
