@@ -92,12 +92,14 @@ if (( !$development )); then
   for server in ${image_servers[@]}; do
     subdirs=${image_server_data[$server,subdirs]}
     for subdir in thumb 320 640 960 1280 orig; do
-      # ( echo $subdirs | grep -q $subdir ) && log_cmd copy_file_to_server $server $subdir/$id.jpg
-      copy_file_to_server $server $subdir/$id.jpg
+      if ( echo $subdirs | grep -q $subdir ); then
+        log_cmd copy_file_to_server $server $subdir/$id.jpg
+      fi
     done
     if [[ $ext != "jpg" ]]; then
-      # ( echo $subdirs | grep -q orig ) && log_cmd copy_file_to_server $server orig/$id.$ext
-      log_cmd copy_file_to_server $server orig/$id.$ext
+      if ( echo $subdirs | grep -q orig ); then
+        log_cmd copy_file_to_server $server orig/$id.$ext
+      fi
     fi
     transferred_any=1
   done
