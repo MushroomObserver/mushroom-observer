@@ -35,14 +35,14 @@ local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'umask 077; mkdir .ssh; cat >> .ssh/
 local> ssh $IP_ADDR
 user> vi .bash_aliases
   # Add this at least.
-  alias mo='cd /var/web/mo && sudo su mo'
+  alias mo='cd /var/web/mushroom-observer && sudo su mo'
 user> su root
 
 # Set up root account.
 root> vi /root/.bashrc
   # Add these at end.
   export CFLAGS="-O3 -m64"
-  alias mo='cd /var/web/mo && su mo'
+  alias mo='cd /var/web/mushroom-observer && su mo'
 root> source /root/.bashrc
 root> vi /etc/ssh/sshd_config
   PermitRootLogin no
@@ -109,7 +109,7 @@ root> ln -s mo /var/web/mushroom-observer
 root> usermod -a -G mo www-data
 
 # Install and configure rails apps.
-root> cd /var/web/mo
+root> cd /var/web/mushroom-observer
 root> su mo
 mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
@@ -144,16 +144,16 @@ mo> bundle install
 
 # Configure nginx.
 mo> exit
-root> cp /var/web/mo/config/etc/nginx.conf /etc/nginx/
+root> cp /var/web/mushroom-observer/config/etc/nginx.conf /etc/nginx/
 root> service nginx start
 root> rm /usr/share/nginx/html/index.html    # (there's *got* to be a better way!)
 
 # Install our programs for resizing and rotating JPEG images.
-root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
-root> gcc /var/web/mo/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
-root> cp /var/web/mo/script/exifautotran /usr/local/bin/exifautotran
+root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+root> gcc /var/web/mushroom-observer/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
+root> cp /var/web/mushroom-observer/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
-root> cp /var/web/mo/script/unicorn /etc/init.d
+root> cp /var/web/mushroom-observer/script/service_unicorn /etc/init.d/unicorn
 root> chmod 755 /etc/init.d/unicorn
 root> update-rc.d unicorn defaults
 
@@ -256,7 +256,7 @@ mo> ssh cdmr@images.digitalmycology.com echo hello world
 # Set up logrotate to archive unicorn and rails logs.
 mo> exit
 root> vi /etc/logrotate.d/unicorn
-  /var/web/mo/log/*.log {
+  /var/web/mushroom-observer/log/*.log {
     daily
     missingok
     rotate 7
@@ -265,8 +265,8 @@ root> vi /etc/logrotate.d/unicorn
     delaycompress
     sharedscripts
     postrotate
-      kill -HUP `cat /var/web/mo/tmp/unicorn.pid`
-      mv /var/web/mo/log/*.gz /var/web/mo/log/old/
+      kill -HUP `cat /var/web/mushroom-observer/tmp/unicorn.pid`
+      mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }
 root> su mo
@@ -276,7 +276,7 @@ mo> rsync -av cdmr@images.digitalmycology.com:images.digitalmycology.com/thumb p
 mo> rsync -av cdmr@images.digitalmycology.com:images.digitalmycology.com/320 public/images
 
 # Install cron jobs.
-mo> crontab /var/web/mo/config/etc/crontab
+mo> crontab /var/web/mushroom-observer/config/etc/crontab
 
 --------------------------------------------------------------------------------
 

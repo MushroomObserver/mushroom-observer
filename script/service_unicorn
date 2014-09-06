@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
+RAILS_ENV=production
+
+rvm_env=$(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
 
 app_root=/var/web/mushroom-observer
 pid_file=$app_root/tmp/unicorn.pid
@@ -9,16 +11,27 @@ conf_file=$app_root/config/unicorn.rb
 
 case "$1" in
 start)
-  echo "Starting unicorn..."
-  cd $app_root
-  bundle exec unicorn_rails -c $conf_file -D
+  if [ -s $pid_file ]; then
+    echo "Unicorn already running."
+    exit 1
+  else
+    echo "Starting unicorn..."
+    cd $app_root
+    sudo -u mo "source $rvm_env && bundle exec unicorn_rails -c $conf_file -D" && exit 0
+    echo "FAILED!"
+    exit 1
+  fi
   ;;
 stop)
-  echo "Stopping unicorn..."
-  test -s $pid_file && kill -QUIT `cat $pid_file` && exit 0
-  signal QUIT && exit 0
-  echo "Unicorn not running."
-  exit 1
+  if [ ! -s $pid_file ]; then
+    echo "Unicorn not running."
+    exit 1
+  else
+    echo "Stopping unicorn..."
+    kill -QUIT `cat $pid_file` && exit 0
+    echo "FAILED!"
+    exit 1
+  fi
   ;;
 restart)
   if [ ! -s $pid_file ]; then
@@ -35,7 +48,7 @@ restart)
       test -s $pid_file || sleep 5
     done
     if [ ! -s $pid_file ]; then
-      echo "Couldn't restart.  Old pid: $old_pid."
+      echo "FAILED! Old pid was $old_pid."
       echo $old_pid > $pid_file
       exit 1
     else
@@ -50,8 +63,9 @@ reload)
     exit 1
   else
     echo "Reloading unicorn workers..."
-    kill -HUP `cat $pid_file`
-    exit 0
+    kill -HUP `cat $pid_file` && exit 0
+    echo "FAILED!"
+    exit 1
   fi
   ;;
 status)
@@ -60,7 +74,7 @@ status)
     exit 1
   else
     pid=`cat $pid_file`
-    echo "Unicorn running on $pid."
+    echo "Unicorn running as $pid."
     exit 0
   fi
   ;;
