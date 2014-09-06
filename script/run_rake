@@ -1,4 +1,6 @@
 #!/bin/bash
-declare -x RUBYLIB="/usr/local/lib/ruby/site_ruby/1.9.3"
-declare -x GEM_HOME="/usr/local/lib/ruby/gems/1.9.3"
-/usr/local/bin/rake $* RAILS_ENV=production -f /var/web/mushroom-observer/Rakefile | grep -v '(in /home/' | grep -v '^\*\* '
+
+source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | tail -1)
+
+rake $* -f /var/web/mushroom-observer/Rakefile | \
+  grep -v '(in /home/' | grep -v '^\*\* '

@@ -1,17 +1,9 @@
 #!/bin/bash
 
-declare -x RUBYLIB="/usr/local/lib/ruby/site_ruby/1.9.3"
-declare -x GEM_HOME="/usr/local/lib/ruby/gems/1.9.3"
-declare -x RAILS_ENV="production"
+source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | tail -1)
 
-dir=/var/web/mushroom-observer
-if [[ !(-d $dir) ]]; then
-  dir=.
-fi
-
+dir=$(dirname "$0")
 if [[ $2 == '-v' ]]; then
-  echo Running $dir/script/$*
+  echo Running $dir/$*
 fi
-
-cd $dir
-$dir/script/$* 2>&1 | grep -v "29: warning: nested"
+$dir/$* 2>&1 | grep -v "29: warning: nested"
