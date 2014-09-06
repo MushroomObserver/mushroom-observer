@@ -153,7 +153,7 @@ root> gcc /var/web/mushroom-observer/script/jpegresize.c -ljpeg -lm -O2 -o /usr/
 root> gcc /var/web/mushroom-observer/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
 root> cp /var/web/mushroom-observer/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
-root> cp /var/web/mushroom-observer/script/service_unicorn /etc/init.d/unicorn
+root> cp /var/web/mushroom-observer/script/unicorn /etc/init.d/unicorn
 root> chmod 755 /etc/init.d/unicorn
 root> update-rc.d unicorn defaults
 
@@ -169,9 +169,9 @@ mo> rake lang:update
 mo> rails server
 # Watch for errors in any of these!!
 
-mo> unicorn -c config/unicorn.rb -D
+mo> unicorn_rails -c config/unicorn.rb -D
 # If there are any errors you'll find them in log/unicorn.stderr.log
-# Bash alias "uni start" is shorthand for the above command.
+# ("service unicorn start" and "uni start" are shorthand for above command.)
 
 # Apparently have to restart nginx after first time run unicorn(?)
 mo> service nginx stop

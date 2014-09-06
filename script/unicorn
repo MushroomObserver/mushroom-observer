@@ -16,6 +16,11 @@ pid_file=$app_root/tmp/unicorn.pid
 conf_file=$app_root/config/unicorn.rb
 
 case "$1" in
+
+# ----------------------------------------------
+#  Start server as user mo in production mode.
+# ----------------------------------------------
+
 start)
   if [ -s $pid_file ]; then
     echo "Unicorn already running."
@@ -25,11 +30,28 @@ start)
     cd $app_root
     rvm_env=$(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
     start_cmd="source $rvm_env && bundle exec unicorn_rails -c $conf_file -D"
-    sudo RAILS_ENV=production -u mo sh -c "$start_cmd" && exit 0
-    echo "FAILED!"
-    exit 1
+    case `whoami` in
+    mo)
+      RAILS_ENV=production bash -c "$start_cmd" && exit 0
+      echo "FAILED!"
+      exit 1
+      ;;
+    root)
+      sudo RAILS_ENV=production -u mo bash -c "$start_cmd" && exit 0
+      echo "FAILED!"
+      exit 1
+      ;;
+    *)
+      echo "Must be root or mo to start unicorn!"
+      exit 1
+    esac
   fi
   ;;
+
+# ----------------------------
+#  Stop server.
+# ----------------------------
+
 stop)
   if [ ! -s $pid_file ]; then
     echo "Unicorn not running."
@@ -41,6 +63,11 @@ stop)
     exit 1
   fi
   ;;
+
+# ----------------------------
+#  Restart server. (??)
+# ----------------------------
+
 restart)
   if [ ! -s $pid_file ]; then
     echo "Unicorn not running."
@@ -65,6 +92,11 @@ restart)
     fi
   fi
   ;;
+
+# ----------------------------
+#  Reload workers.
+# ----------------------------
+
 reload)
   if [ ! -s $pid_file ]; then
     echo "Unicorn not running."
@@ -76,6 +108,11 @@ reload)
     exit 1
   fi
   ;;
+
+# ----------------------------
+#  Show status of server.
+# ----------------------------
+
 status)
   if [ ! -s $pid_file ]; then
     echo "Unicorn not running."
@@ -86,8 +123,10 @@ status)
     exit 0
   fi
   ;;
+
 *)
   echo "Usage: $0 {start|stop|restart|reload|status}"
   exit 1
   ;;
+
 esac
