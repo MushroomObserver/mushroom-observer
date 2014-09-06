@@ -23,7 +23,7 @@ grep -v 'ActionController::RoutingError' |
 grep -v 'ActiveRecord::RecordNotFound' > $new_errors || true
 
 touch $old_errors
-diff $new_errors $old_errors
+diff $new_errors $old_errors || true
 mv $new_errors $old_errors
 
 exit 0
