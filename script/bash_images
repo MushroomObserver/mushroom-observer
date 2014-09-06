@@ -89,7 +89,7 @@ function copy_file_from_server {
 }
 
 # Copy one image file to a given server.
-#   copy_file_from_server "cdmr" "thumb/1234.jpg"
+#   copy_file_to_server "cdmr" "thumb/1234.jpg"
 function copy_file_to_server {
   server=$1
   file=$2
