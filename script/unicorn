@@ -1,0 +1,70 @@
+#!/bin/bash
+
+source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | tail -1)
+
+app_root=/var/web/mushroom-observer
+pid_file=$app_root/tmp/unicorn.pid
+conf_file=$app_root/config/unicorn.rb
+
+case "$1" in
+start)
+  echo "Starting unicorn..."
+  cd $app_root
+  exec unicorn_rails -c $conf_file -D
+  ;;
+stop)
+  echo "Stopping unicorn..."
+  test -s $pid_file && kill -QUIT `cat $pid_file` && exit 0
+  signal QUIT && exit 0
+  echo "Unicorn not running."
+  exit 1
+  ;;
+restart)
+  if [ ! -s $pid_file ]; then
+    echo "Unicorn not running."
+    exit 1
+  else
+    echo "Restarting unicorn..."
+    old_pid=`cat $pid_file`
+    rm $pid_file
+    kill -s USR2 $old_pid
+    sleep 5
+    # wait up to a minute for new unicorn to start
+    for x in 1 2 3 4 5 6 7 8 9 10 11 12; do
+      test -s $pid_file || sleep 5
+    done
+    if [ ! -s $pid_file ]; then
+      echo "Couldn't restart.  Old pid: $old_pid."
+      echo $old_pid > $pid_file
+      exit 1
+    else
+      kill -9 $old_pid
+      exit 0
+    fi
+  fi
+  ;;
+reload)
+  if [ ! -s $pid_file ]; then
+    echo "Unicorn not running."
+    exit 1
+  else
+    echo "Reloading unicorn workers..."
+    kill -HUP `cat $pid_file`
+    exit 0
+  fi
+  ;;
+status)
+  if [ ! -s $pid_file ]; then
+    echo "Unicorn not running."
+    exit 1
+  else
+    pid=`cat $pid_file`
+    echo "Unicorn running on $pid."
+    exit 0
+  fi
+  ;;
+*)
+  echo "Usage: $0 {start|stop|restart|reload|status}"
+  exit 1
+  ;;
+esac
