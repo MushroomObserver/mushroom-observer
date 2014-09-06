@@ -209,13 +209,13 @@ module ApplicationHelper
 
   def herbarium_name_box(default_name="")
     content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
-    text_field(:specimen, :herbarium_name, :value => @user.preferred_herbarium_name, :size => 60) +
+    text_field(:specimen, :herbarium_name, :value => @herbarium_name, :size => 60) +
     turn_into_herbarium_auto_completer(:specimen_herbarium_name)
   end
 
   def herbarium_id_box
     content_tag(:label, :specimen_herbarium_id.t, :for => :specimen_herbarium_id) + ': ' +
-    text_field(:specimen, :herbarium_id, :size => 20)
+    text_field(:specimen, :herbarium_id, :value => @herbarium_id, :size => 20)
   end
 
   def table_column_title(title)

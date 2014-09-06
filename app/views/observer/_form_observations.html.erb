@@ -47,6 +47,14 @@ end %>
   <%= check_box("observation", "specimen") %><label for="observation_specimen"><%= :form_observations_specimen_available.t %></label><br/>
   &nbsp;&nbsp;<%= herbarium_name_box() %><br/>
   &nbsp;&nbsp;<%= herbarium_id_box() %><br/>
+  <%= javascript_tag %(
+    id_field = jQuery("#specimen_herbarium_id");
+    specimen_checkbox = jQuery("#observation_specimen");
+    id_field.change(function() {
+      if (id_field.val().length > 0)
+        specimen_checkbox.prop("checked", true)
+    });
+  ) %>
   <span class="HelpNote"><%= :form_observations_specimen_available_help.t %></span><br/>
 <% end %>
 

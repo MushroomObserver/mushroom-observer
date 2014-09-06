@@ -88,6 +88,7 @@ class SpecimenController < ApplicationController
   def add_specimen
     @observation = Observation.find(params[:id].to_s)
     @layout = calc_layout_params
+    @herbarium_name = @user.preferred_herbarium_name
     if @observation
       @herbarium_label = @observation.default_specimen_label
       if request.method == "POST"

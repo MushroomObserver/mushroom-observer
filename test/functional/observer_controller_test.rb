@@ -918,6 +918,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_create_observation
     requires_login(:create_observation)
     assert_form_action(:action => 'create_observation', :approved_name => '')
+    assert_input_value(:specimen_herbarium_name, users(:rolf).preferred_herbarium_name)
+    assert_input_value(:specimen_herbarium_id, "")
   end
 
   def test_construct_observation_approved_place_name
@@ -948,6 +950,8 @@ class ObserverControllerTest < FunctionalTestCase
       :specimen => { :herbarium_name => herbaria(:nybg).name, :herbarium_id => "NYBG 1234" },
       :name => { :name => "Cortinarius sp." }
     }, 0,0,0)
+    assert_input_value(:specimen_herbarium_name, "The New York Botanical Garden")
+    assert_input_value(:specimen_herbarium_id, "NYBG 1234")
   end
 
   def test_create_observation_with_herbarium_no_id

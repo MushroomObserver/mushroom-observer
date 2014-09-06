@@ -1195,6 +1195,7 @@ class ObserverController < ApplicationController
     @reason          = init_naming_reasons(@naming, reason)
     @images          = @bad_images
     @new_image.when  = @observation.when
+    init_specimen_vars_for_reload
     init_project_vars_for_reload(@observation)
     init_list_vars_for_reload(@observation)
   end
@@ -1209,6 +1210,7 @@ class ObserverController < ApplicationController
     @reason          = init_naming_reasons(@naming)
     @images          = []
     @good_images     = []
+    init_specimen_vars_for_create
     init_project_vars_for_create
     init_list_vars_for_create
     get_defaults_from_last_observation_created
@@ -2346,6 +2348,16 @@ class ObserverController < ApplicationController
       success = false
     end
     return success
+  end
+
+  def init_specimen_vars_for_create
+    @herbarium_name = @user.preferred_herbarium_name
+    @herbarium_id = ""
+  end
+
+  def init_specimen_vars_for_reload
+    @herbarium_name = params[:specimen][:herbarium_name] rescue @user.preferred_herbarium_name
+    @herbarium_id   = params[:specimen][:herbarium_id]   rescue ""
   end
 
   def init_project_vars
