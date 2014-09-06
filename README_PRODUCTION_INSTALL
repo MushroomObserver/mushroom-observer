@@ -29,7 +29,7 @@ root> logout
 local> ssh-keygen -t rsa   # (if not already done)
 local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
 # If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
-local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'mkdir .ssh; cat >> .ssh/authorized_keys; chmod 600 .ssh/authorized_keys; chmod 700 .ssh'
+local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'umask 077; mkdir .ssh; cat >> .ssh/authorized_keys'
 
 # Set up your account.
 local> ssh $IP_ADDR
@@ -240,26 +240,18 @@ root> chmod 755 /usr/local/bin/autoreply
 
 --------------------------------------------------------------------------------
 
-# This is as far as I've gotten. -Jason 20140904
-
-
-
-
-
-
 # Set up password-less ssh for image transfers.
+mo> su mo
 mo> ssh-keygen -t rsa
   # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
 mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
   # Enter password.
-# If the command above doesn't work, use this instead.
-# mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com \
-#     'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
-mo> ssh cdmr@images.digitalmycology.com
-  # (just make sure it works)
-mo> exit
+# If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
+mo> cat ~/.ssh/id_rsa.pub | ssh cdmr@images.digitalmycology.com 'umask 077; mkdir .ssh; cat >> .ssh/authorized_keys'
+mo> ssh cdmr@images.digitalmycology.com echo hello world
 
-# Set up logrotate to archive passenger and rails logs.
+# Set up logrotate to archive unicorn and rails logs.
+mo> exit
 root> vi /etc/logrotate.d/unicorn
   /var/web/mo/log/*.log {
     daily
@@ -270,25 +262,18 @@ root> vi /etc/logrotate.d/unicorn
     delaycompress
     sharedscripts
     postrotate
-      touch /var/web/mo/tmp/restart.txt
-      scp /var/web/mo/log/*.gz cdmr@digitalmycology.com:logs.mushroomobserver.org/6sync
+      kill -HUP `cat /var/web/mo/tmp/unicorn.pid`
       mv /var/web/mo/log/*.gz /var/web/mo/log/old/
     endscript
   }
-
-# Test image upload on server:
-#   http://$IP_ADDR/observer/create_observation
-# Might need to run process_image once by hand before it will be fully automatic.
-mo> ls public/images/orig
-mo> script/process_image NNNNN jpg 0
+root> su mo
 
 # Grab thumbnails from image server.  (This takes hours!)
-mo> script/update_images -v --sync dreamhost --download --thumb --320
+mo> rsync -av cdmr@images.digitalmycology.com:images.digitalmycology.com/thumb public/images
+mo> rsync -av cdmr@images.digitalmycology.com:images.digitalmycology.com/320 public/images
 
 # Install cron jobs.
-# They're all already present, just need to stick them in the crontab.
-mo> crontab -e
-  # (copy from config/etc/crontab)
+mo> crontab /var/web/mo/config/etc/crontab
 
 --------------------------------------------------------------------------------
 
