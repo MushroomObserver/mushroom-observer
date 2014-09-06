@@ -60,7 +60,7 @@ class ScriptTest < UnitTestCase
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
     cmd = "#{script} #{dest_file} > #{stdout_file}"
-    assert_block { File.size(dest_file) == 0 }
+    assert_block { !File.exist?(dest_file) || File.size(dest_file) == 0 }
     assert_block { system(cmd) }
     assert_block { File.size(dest_file) > 0 }
     assert_equal("", File.read(stdout_file))

@@ -519,6 +519,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_obj_list_equal([proj], img.projects)
   end
 
+  def test_add_images_empty
+    login('rolf')
+    obs = observations(:coprinus_comatus_obs)
+    post(:add_image, :id => obs.id)
+    assert_flash(/no changes/i)
+  end
+
   # This is what would happen when user first opens form.
   def test_reuse_image_for_user
     requires_login(:reuse_image, :mode => 'profile')

@@ -320,6 +320,10 @@ class ImageController < ApplicationController
         @image.when = @observation.when
         @licenses = License.current_names_and_ids(@image.license)
         init_project_vars_for_add_or_edit(@observation)
+      elsif params[:upload].blank?
+        flash_warning(:runtime_no_changes.t)
+        redirect_with_query(:controller => 'observer',
+          :action => 'show_observation', :id => @observation.id)
       else
         args = params[:image]
         i = 1
