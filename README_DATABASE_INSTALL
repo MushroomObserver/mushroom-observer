@@ -44,6 +44,7 @@ root> scp xxx .
 root> cat xxx > .ssh/authorized_keys
 root> chmod 600 .ssh/authorized_keys
 root> chmod 700 .ssh
+root> chown -r $USER:$USER .ssh
 
 # Install core packages.
 root> apt-get update
@@ -73,16 +74,13 @@ root> vi /etc/rc.local
 
 # Configure database.
 root> mysql -u root -p
-  create database mushroom_observer;
-  create database test;
+  create database mo_production;
   create user 'mo'@'localhost' identified by '$DB_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
-  grant all privileges on mushroom_observer.* to 'mo'@'localhost' with grant option;
-  grant all privileges on test.* to 'mo'@'localhost' with grant option;
+  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
 root> scp $SNAPSHOT_PATH/checkpoint.gz .
 root> scp $SNAPSHOT_PATH/clean.sql .
-root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mushroom_observer
-root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' test
+root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production
 root> cat clean.sql | mysql -u mo -p'$DB_PASSWORD' test
 root> vi /etc/mysql/my.cnf
   # Comment out this line to allow remote connections.
@@ -90,15 +88,14 @@ root> vi /etc/mysql/my.cnf
 root> mysql -u root -p
   # For each remote user:
   create user 'mo'@'$WEB_SERVER' identified by '$DB_PASSWORD';
-  grant all privileges on mushroom_observer.* to 'mo'@'$WEB_SERVER' with grant option;
-  grant all privileges on test.* to 'mo'@'$WEB_SERVER' with grant option;
+  grant all privileges on mo_production.* to 'mo'@'$WEB_SERVER' with grant option;
 root> service mysql restart
 
 # Configure on remote machine:
 remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
 remote> vi /var/web/mo/config/database.yml
   production:
-    database: mushroom_observer
+    database: mo_production
     host:     db.mushroomobserver.org
     username: mo
     password: $DB_PASSWORD

@@ -56,6 +56,7 @@ root> scp xxx .
 root> cat xxx > .ssh/authorized_keys
 root> chmod 600 .ssh/authorized_keys
 root> chmod 700 .ssh
+root> chown -r $USER:$USER .ssh
 
 # Install core packages.
 root> apt-get update
@@ -129,8 +130,7 @@ mo> vi config/database.yml
   # Replace with this:
   production:
     adapter:  mysql2
-    database: test
-    # database: mushroom_observer
+    database: mo_production
     host:     db.mushroomobserver.org
     username: mo
     password: xxx
