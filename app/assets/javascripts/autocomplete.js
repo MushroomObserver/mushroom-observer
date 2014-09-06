@@ -237,8 +237,8 @@ jQuery.extend(MOAutocompleter.prototype, {
     // jQuery("#log").append("keypress(" + event.which + ")<br/>");
     if (this.on_keypress)
       this.on_keypress(event);
-    if (this.active && this.HOT_KEYS[event.which])
-      return false;
+    // if (this.active && this.HOT_KEYS[event.which])
+    //   return false;
     return true;
   },
 
