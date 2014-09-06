@@ -65,9 +65,7 @@ def get_content(filename, url)
 end
 
 def get_size(filename)
-  if File.exists?(filename)
-    File::Stat.new(filename).size
-  end
+  File.exists?(filename) ? File::Stat.new(filename).size : 0
 end
 
 temp_file = Tempfile.new('eol')
