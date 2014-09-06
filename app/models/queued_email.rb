@@ -288,7 +288,7 @@ class QueuedEmail < AbstractModel
   # and when they are actually sent.
   def self.debug_log(msg)
     File.open("#{::Rails.root.to_s}/log/email-debug.log", 'a:utf-8') do |fh|
-      fh.puts("#{Time.now.api_time} #{msg}")
+      fh.puts("#{Time.now} #{msg}")
     end
   end
 
