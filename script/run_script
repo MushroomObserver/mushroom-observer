@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | tail -1)
+source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
 
 dir=$(dirname "$0")
 if [[ $2 == '-v' ]]; then

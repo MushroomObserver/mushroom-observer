@@ -1,6 +1,7 @@
 #!/bin/bash
+set -e
 
-source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | tail -1)
+source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
 
 app_root=/var/web/mushroom-observer
 pid_file=$app_root/tmp/unicorn.pid
@@ -10,7 +11,7 @@ case "$1" in
 start)
   echo "Starting unicorn..."
   cd $app_root
-  exec unicorn_rails -c $conf_file -D
+  bundle exec unicorn_rails -c $conf_file -D
   ;;
 stop)
   echo "Stopping unicorn..."

@@ -153,19 +153,22 @@ root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegr
 root> gcc /var/web/mo/script/jpegexiforient.c -o /usr/local/bin/jpegexiforient
 root> cp /var/web/mo/script/exifautotran /usr/local/bin/exifautotran
 root> chmod 755 /usr/local/bin/exifautotran
+root> cp /var/web/mo/script/unicorn /etc/init.d
+root> chmod 755 /etc/init.d/unicorn
+root> update-rc.d unicorn defaults
 
 --------------------------------------------------------------------------------
 
 # Test basic system now.
 root> su mo
 mo> env | grep RAILS_ENV
-  # Should be "production"!!
+# Should print "production"!!
 mo> bundle update
 mo> rake db:migrate
 mo> rake lang:update
 mo> rails server
+# Watch for errors in any of these!!
 
-# Now get unicorn to run right.
 mo> unicorn -c config/unicorn.rb -D
 # If there are any errors you'll find them in log/unicorn.stderr.log
 # Bash alias "uni start" is shorthand for the above command.
@@ -286,10 +289,12 @@ root> iptables-save
 
 # Make sure all the critical processes started automatically.
 # Look for sshd, nginx, unicorn, mysqld, postfix.
-root> ps -ef
+root> ps -ef | grep sshd
+root> ps -ef | grep nginx
+root> ps -ef | grep unicorn
+root> ps -ef | grep mysqld
+root> ps -ef | grep postfix
 
 # If any are missing, do this on ubuntu/debian:
-root> update-rc.d nginx   defaults
-root> update-rc.d mysql   defaults
-root> update-rc.d postfix defaults
+root> update-rc.d $SERVICE defaults
 
