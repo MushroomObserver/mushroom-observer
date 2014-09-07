@@ -21,12 +21,14 @@
 <%= turn_into_location_auto_completer('observation_place_name', :primer => Location.primer) %>
 <span class="HelpNote"><%= :form_observations_where_help.t %></span><br/><br/>
 
-<label for="observation_lat"><%= :LATITUDE.t %>:</label>
-<%= text_field('observation', 'lat', :size => 12) %>&nbsp;&nbsp;
-<label for="observation_long"><%= :LONGITUDE.t %>:</label>
-<%= text_field('observation', 'long', :size => 12) %>&nbsp;&nbsp;
-<label for="observation_alt"><%= :ALTITUDE.t %>:</label>
-<%= text_field('observation', 'alt', :size => 12) %><br/>
+<span style="white-space:nowrap">
+  <label for="observation_lat"><%= :LATITUDE.t %>:</label>
+  <%= text_field('observation', 'lat', :size => 10) %>&nbsp;&nbsp;
+  <label for="observation_long"><%= :LONGITUDE.t %>:</label>
+  <%= text_field('observation', 'long', :size => 10) %>&nbsp;&nbsp;
+  <label for="observation_alt"><%= :ALTITUDE.t %>:</label>
+  <%= text_field('observation', 'alt', :size => 8) %>
+</span><br/>
 <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span><br/><br/>
 
 <%= if include_naming
