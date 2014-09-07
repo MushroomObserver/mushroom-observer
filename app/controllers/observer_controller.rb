@@ -497,22 +497,27 @@ class ObserverController < ApplicationController
     session[:search_type] = type
 
     case type
-    when :observation, :user, :google
-      ctrlr = 'observer'
+    when :observation, :user
+      ctrlr = :observer
     when :comment, :herbarium, :image, :location, :name, :project, :species_list, :specimen
       ctrlr = type
+    when :google
+      if pattern.blank?
+        redirect_to(:action => :list_rss_logs)
+      else
+        search = URI.escape("site:#{MO.domain} #{pattern}")
+        redirect_to("http://google.com?q=#{search}")
+      end
+      return
     else
       flash_error(:runtime_invalid.t(:type => :search, :value => type.inspect))
-      redirect_back_or_default(:action => 'list_rss_logs')
+      redirect_back_or_default(:action => :list_rss_logs)
+      return
     end
 
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
-      type = 'rss_log' if type == :google
       redirect_to(:controller => ctrlr, :action => "list_#{type}s")
-    elsif type == :google
-      pat = URI.escape("site:#{MO.domain} #{pattern}")
-      redirect_to("http://google.com?q=#{pat}")
     else
       redirect_to(:controller => ctrlr, :action => "#{type}_search",
                   :pattern => pattern)
