@@ -133,6 +133,19 @@ class LurkerTest < IntegrationTestCase
     end
   end
 
+  def test_search_next
+    get('/')
+
+    # Search for a name.  (More than one.)
+    form = open_form('form[action*=search]')
+    form.change('pattern', 'Fungi')
+    form.select('type', 'Observations')
+    form.submit('Search')
+    assert_select('a[href^=/2]') do |links|
+      assert(links.all? { |l| l.to_s.match(/2\?q=/) })
+    end
+  end
+
   def test_obs_at_location
     # Start at distribution map for Fungi.
     get('/name/map/1')

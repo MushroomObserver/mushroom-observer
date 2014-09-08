@@ -1412,12 +1412,15 @@ module ApplicationHelper
     # Decide what to link it to.
     case link = args[:link] || :show_image
     when :show_image
-      link = { :controller => 'image', :action => 'show_image', :id => id,
-               :params => args[:query_params] || query_params }
+      link = { :controller => 'image', :action => 'show_image', :id => id }.
+        merge(args[:query_params] || query_params)
       link[:obs] = args[:obs] if args.has_key?(:obs)
     when :show_observation
-      link = { :controller => 'observer', :action => 'show_observation',
-               :id => args[:obs], :params => args[:query_params] || query_params }
+      link = {
+        :controller => 'observer',
+        :action => 'show_observation',
+        :id => args[:obs]
+      }.merge(args[:query_params] || query_params)
       raise "missing :obs" if !args.has_key?(:obs)
     when :show_user
       link = { :controller => 'observer', :action => 'show_user',
