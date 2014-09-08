@@ -532,11 +532,19 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Before filter: Set timezone based on cookie set in application layout.
   def set_timezone
-    Time.zone = cookies[:tz]
-
-    # For now, until we get rid of reliance on @js, this is a surrogate for actually 
-    # testing if the client's JS is enabled and sufficiently fully-featured.
-    @js = !cookies[:tz].blank? || TESTING
+    tz = cookies[:tz]
+    if tz.blank?
+      # For now, until we get rid of reliance on @js, this is a surrogate for
+      # testing if the client's JS is enabled and sufficiently fully-featured.
+      @js = TESTING
+    else
+      begin
+        Time.zone = tz
+      rescue 
+        logger.warn "TimezoneError: #{tz.inspect}"
+      end
+      @js = true
+    end
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).
