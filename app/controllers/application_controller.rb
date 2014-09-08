@@ -111,11 +111,14 @@ class ApplicationController < ActionController::Base
   # after_filter  :extra_gc
   # after_filter  :log_memory_usage
 
-  # Disable all filters except set_locale. (For API and Ajax controllers.)
+  # Disable all filters except set_locale and block_ip_addresses.
+  # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
+    skip_filter   :verify_authenticity_token
     skip_filter   :fix_bad_domains
     skip_filter   :autologin
     skip_filter   :set_timezone
+    skip_filter   :refresh_translations
     skip_filter   :track_translations
     skip_filter   :check_user_alert
     # skip_filter   :extra_gc

@@ -54,10 +54,10 @@ class ApiController < ApplicationController
         )
       end
     else
-      if request.method == "POST" && request.length > 0 && !request.media_type.blank?
+      if request.method == "POST" && request.content_length > 0 && !request.media_type.blank?
         args[:upload] = API::Upload.new(
           data:         request.body,
-          length:       request.length,
+          length:       request.content_length,
           content_type: request.media_type,
           checksum:     request.headers['CONTENT_MD5'].to_s
         )
