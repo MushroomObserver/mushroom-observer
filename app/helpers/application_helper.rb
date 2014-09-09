@@ -236,11 +236,7 @@ module ApplicationHelper
     if can_do_ajax?
       javascript_include 'jquery'
       javascript_include 'jquery_extensions'
-if params[:z]
-javascript_include 'autocomplete' + params[:z].to_s
-else
       javascript_include 'autocomplete'
-end
       js_args = []
       opts[:input_id]   = id
       opts[:row_height] = 22
@@ -990,9 +986,9 @@ end
     end + @javascripts
     return @result.uniq.map do |m|
       if m.to_s == "jquery"
-        browser.ie? && browser.version.to_i < 9 ||
-        params[:jquery].to_s == "1" ?
-          "jquery_1" : "jquery_2"
+        # Just user jQuery 1.x for everyone. There is at least one case of
+        # version 2.x not working for a fairly modern version of Chrome.
+        "jquery_1"
       else
         m
       end
