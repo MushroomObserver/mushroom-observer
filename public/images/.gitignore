@@ -6,5 +6,4 @@ thumb
 orig
 orig-ln
 orig-real
-local.files
-dreamhost.files
+*.files
