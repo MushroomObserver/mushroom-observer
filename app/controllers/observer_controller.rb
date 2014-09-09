@@ -903,7 +903,6 @@ class ObserverController < ApplicationController
   end
 
   def create_observation_report(args)
-@z = params[:z].to_s
     format = args[:format].to_s
     case format
       when 'raw'

@@ -236,8 +236,8 @@ module ApplicationHelper
     if can_do_ajax?
       javascript_include 'jquery'
       javascript_include 'jquery_extensions'
-if @z
-javascript_include 'autocomplete' + @z.to_s
+if params[:z]
+javascript_include 'autocomplete' + params[:z].to_s
 else
       javascript_include 'autocomplete'
 end
