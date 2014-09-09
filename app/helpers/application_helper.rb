@@ -234,11 +234,7 @@ module ApplicationHelper
   # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
-if params[:jquery]
-javascript_include params[:jquery]
-else
       javascript_include 'jquery'
-end
       javascript_include 'jquery_extensions'
 if params[:z]
 javascript_include 'autocomplete' + params[:z].to_s
@@ -994,7 +990,9 @@ end
     end + @javascripts
     return @result.uniq.map do |m|
       if m.to_s == "jquery"
-        browser.ie? && browser.version < 9 ? "jquery_1" : "jquery_2"
+        browser.ie? && browser.version.to_i < 9 ||
+        params[:jquery].to_s == "1" ?
+          "jquery_1" : "jquery_2"
       else
         m
       end
