@@ -413,7 +413,8 @@ class API
     str = get_param(key) or return args[:default]
     raise BadParameterValue.new(str, :herbarium) if str.blank?
     val = try_parsing_id(str, Herbarium)
-    val ||= Herbarium.find_by_name(str)
+    val ||= Herbarium.find_by_name(str) ||
+            Herbarium.find_by_code(str)
     raise ObjectNotFoundByString.new(str, Herbarium) if !val
     check_edit_permission!(val, args)
     return val
