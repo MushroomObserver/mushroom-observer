@@ -182,7 +182,7 @@ class AccountController < ApplicationController
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
-          content = "Suspicious user: login=#{@user.login.inspect}, name=#{@user.name.inspect}, email=#{@user.email.inspect}"
+          content = "Suspicious user:\n  login=#{@user.login.inspect}\n  name=#{@user.name.inspect}\n  email=#{@user.email.inspect}\n  http://mushroomobserver.org/observer/show_user?id=#{@user.id}"
           AccountMailer.webmaster_question(@user.email, content).deliver
         end
       end
