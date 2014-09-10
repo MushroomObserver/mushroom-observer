@@ -182,7 +182,7 @@ class AccountController < ApplicationController
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
-          content = "Suspicious disease: login=#{@user.login.inspect}, name=#{@user.name.inspect}, email=#{@user.email.inspect}"
+          content = "Suspicious user: login=#{@user.login.inspect}, name=#{@user.name.inspect}, email=#{@user.email.inspect}"
           AccountMailer.webmaster_question(@user.email, content).deliver
         end
       end
