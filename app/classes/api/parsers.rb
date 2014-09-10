@@ -408,6 +408,17 @@ class API
     return val
   end
 
+  def parse_herbarium(key, args={})
+    declare_parameter(key, :herbarium, args)
+    str = get_param(key) or return args[:default]
+    raise BadParameterValue.new(str, :herbarium) if str.blank?
+    val = try_parsing_id(str, Herbarium)
+    val ||= Herbarium.find_by_name(str)
+    raise ObjectNotFoundByString.new(str, Herbarium) if !val
+    check_edit_permission!(val, args)
+    return val
+  end
+
   def parse_image(key, args={})
     declare_parameter(key, :image, args)
     str = get_param(key) or return args[:default]
@@ -447,7 +458,7 @@ class API
   def parse_name(key, args={})
     declare_parameter(key, :name, args)
     str = get_param(key) or return args[:default]
-    raise BadParameterValue.new(str, :location) if str.blank?
+    raise BadParameterValue.new(str, :name) if str.blank?
     val = try_parsing_id(str, Name)
     if not val
       val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
@@ -480,7 +491,7 @@ class API
   def parse_project(key, args={})
     declare_parameter(key, :project, args)
     str = get_param(key) or return args[:default]
-    raise BadParameterValue.new(str, :location) if str.blank?
+    raise BadParameterValue.new(str, :project) if str.blank?
     val = try_parsing_id(str, Project)
     val ||= Project.find_by_title(str)
     raise ObjectNotFoundByString.new(str, Project) if !val
@@ -492,7 +503,7 @@ class API
   def parse_species_list(key, args={})
     declare_parameter(key, :species_list, args)
     str = get_param(key) or return args[:default]
-    raise BadParameterValue.new(str, :location) if str.blank?
+    raise BadParameterValue.new(str, :species_list) if str.blank?
     val = try_parsing_id(str, SpeciesList)
     val ||= SpeciesList.find_by_title(str)
     raise ObjectNotFoundByString.new(str, SpeciesList) if !val
@@ -503,7 +514,7 @@ class API
   def parse_user(key, args={})
     declare_parameter(key, :user, args)
     str = get_param(key) or return args[:default]
-    raise BadParameterValue.new(str, :location) if str.blank?
+    raise BadParameterValue.new(str, :user) if str.blank?
     val = try_parsing_id(str, User)
     val ||= User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
     raise ObjectNotFoundByString.new(str, User) if !val

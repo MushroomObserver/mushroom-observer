@@ -3599,6 +3599,7 @@
   api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
   api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
   api_bad_altitude_parameter_value: "Invalid altitude, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
+  api_bad_herbarium_parameter_value: Invalid or unknown herbarium, "[val]", accept numerical id or name.
   api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.
   api_bad_license_parameter_value: Invalid or unknown license, "[val]", accept only numerical id.
   api_bad_location_parameter_value: Invalid or unknown location, "[val]", accept numerical id or location name.
@@ -3609,6 +3610,8 @@
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
   api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_version: Invalid version number "[version]".
+  api_can_only_use_this_field_if_has_specimen: "The parameter, \"[field]\", can only be used if the observation has a specimen."
+  api_can_only_use_one_of_these_fields: "Please only use one of these parameters: [fields]."
   api_couldnt_download_url: "Failed to download the resource at the URL, \"[url]\": [error]"
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
