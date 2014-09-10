@@ -4,7 +4,11 @@ class Herbarium < AbstractModel
   has_many :specimens
   belongs_to :location
   has_and_belongs_to_many :curators, :class_name => "User", :join_table => "herbaria_curators"
-  
+
+  # If this is a user's personal herbarium (there should only be one?) then
+  # personal_user_id is set to mark whose personal herbarium it is.
+  belongs_to :personal_user, :class_name => "User"
+
   # Used to allow location name to be entered as text in forms
   attr_accessor :place_name
 
@@ -15,21 +19,21 @@ class Herbarium < AbstractModel
   def can_delete_curator?(user)
     is_curator?(user) and (curators.count > 1)
   end
-  
+
   def add_curator(user)
     if !is_curator?(user)
       curators.push(user)
     end
   end
-  
+
   def delete_curator(user)
     curators.delete(user)
   end
-  
+
   def label_free?(new_label)
     Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
   end
-  
+
   def self.default_specimen_label(name, id)
     "#{name}: #{id || '?'}".strip_html
   end
@@ -53,7 +57,7 @@ class Herbarium < AbstractModel
     end
     result
   end
-  
+
   def specimen_count
     specimens.count
   end

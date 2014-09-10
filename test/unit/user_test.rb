@@ -177,8 +177,8 @@ class UserTest < UnitTestCase
   end
 
   def test_preferred_herbarium_name
-    assert_equal(rolf.preferred_herbarium_name, herbaria(:nybg).name)
-    assert_equal(mary.preferred_herbarium_name, :user_personal_herbarium.t(:name => mary.unique_text_name))
+    assert_equal(herbaria(:nybg).name, rolf.preferred_herbarium_name)
+    assert_equal(users(:mary).personal_herbarium_name, mary.preferred_herbarium_name)
   end
 
   def test_remove_image
@@ -189,18 +189,19 @@ class UserTest < UnitTestCase
     assert_nil(rolf.image)
   end
 
-# For some reason this is breaking test_meta_groups, and I can't figure out why.
-#   def test_erase_user
-#     user = users(:spammer)
-#     user_id = user.id
-#     group_id = UserGroup.one_user(user_id).id
-#     pub_id = user.publications[0].id
-#     User.erase_user(user_id)
-#     assert_raise(ActiveRecord::RecordNotFound) { User.find(user_id) }
-#     assert_raise(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
-#     assert(!UserGroup.all_users.user_ids.include?(user_id))
-#     assert_raise(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
-#   end
+  # For some reason this is breaking test_meta_groups, and I can't figure out why.
+  # Hmmmm, seems to work now...
+  def test_erase_user
+    user = users(:spammer)
+    user_id = user.id
+    group_id = UserGroup.one_user(user_id).id
+    pub_id = user.publications[0].id
+    User.erase_user(user_id)
+    assert_raise(ActiveRecord::RecordNotFound) { User.find(user_id) }
+    assert_raise(ActiveRecord::RecordNotFound) { UserGroup.find(group_id) }
+    assert(!UserGroup.all_users.user_ids.include?(user_id))
+    assert_raise(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
+  end
 
   def test_erase_user_with_comment_and_name_descriptions
     user = users(:dick)
