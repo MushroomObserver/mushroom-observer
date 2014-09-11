@@ -864,7 +864,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "<a href=\"/publications\">Read About and Add Publications Related to Mushroom Observer</a>"
+  app_banner_box: "MO Update Complete:  Please <a href=\"http://mushroomobserver.org/observer/ask_webmaster_question\">send us a note</a> if you see any weird behavior."
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
