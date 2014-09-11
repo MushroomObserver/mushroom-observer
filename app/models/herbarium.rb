@@ -61,4 +61,8 @@ class Herbarium < AbstractModel
   def specimen_count
     specimens.count
   end
+
+  def sort_name
+    name.t.strip_html.gsub(/\W+/, ' ').strip_squeeze.downcase
+  end
 end
