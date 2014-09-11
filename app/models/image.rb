@@ -423,7 +423,7 @@ class Image < AbstractModel
 
   # MD5 sum (if available).
   attr_accessor :upload_md5sum
-
+    
   # Initialize the upload process.  Pass in the value of the file upload filed
   # from the CGI +params+ struct, or any other I/O stream.  You will have the
   # opportunity to provide extra information, such as the original file name,
@@ -431,29 +431,32 @@ class Image < AbstractModel
   def image=(file)
     self.upload_handle = file
 
-    case file
-      # Image is already stored in a local temp file.  This is how Rails passes
-      # large files from the webserver.
-      when Tempfile, ActionDispatch::Http::UploadedFile, Rack::Test::UploadedFile
-        @file = file
-        self.upload_temp_file = file.path
-        self.upload_length = file.size
-        self.upload_type   = file.content_type if file.respond_to?(:content_type)
-        self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
-        self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
-          if file.respond_to?(:original_filename)
+    # Image is already stored in a local temp file.  This is how Rails passes
+    # large files from the webserver.
+    if file.is_a?(Tempfile) ||
+       file.is_a?(ActionDispatch::Http::UploadedFile) ||
+       file.is_a?(Rack::Test::UploadedFile)
+      @file = file
+      self.upload_temp_file = file.path
+      self.upload_length = file.size
+      self.upload_type   = file.content_type if file.respond_to?(:content_type)
+      self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
+      self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
+        if file.respond_to?(:original_filename)
 
-      # Image is given as an input stream.  We need to save it to a temp file
-      # before we can do anything useful with it.
-      when IO, StringIO
-        @file = nil
-        self.upload_temp_file = nil
-        self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
-        self.upload_length = file.size           if file.respond_to?(:size)
-        self.upload_type   = file.content_type   if file.respond_to?(:content_type)
-        self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
-        self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
-          if file.respond_to?(:original_filename)
+    # Image is given as an input stream.  We need to save it to a temp file
+    # before we can do anything useful with it.
+    elsif file.is_a?(IO) ||
+       file.is_a?(StringIO) ||
+       defined?(Unicorn) && file.is_a?(Unicorn::TeeInput)
+      @file = nil
+      self.upload_temp_file = nil
+      self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
+      self.upload_length = file.size           if file.respond_to?(:size)
+      self.upload_type   = file.content_type   if file.respond_to?(:content_type)
+      self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
+      self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
+        if file.respond_to?(:original_filename)
     end
   end
 
