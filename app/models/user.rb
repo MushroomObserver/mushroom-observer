@@ -196,7 +196,8 @@
 #  edited_locations::   Location's they've edited.
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
-#  preferred_herbarium_name:: User's preferred herbarium name (defaults to a new personal herbarium).
+#  preferred_herbarium:: User's preferred herbarium (defaults to personal_herbarium).
+#  personal_herbarium:: User's private herbarium: "Name (login): Personal Herbarium".
 #  all_editable_species_lists:: Species Lists they own or that are attached to projects they're on.
 #
 #  ==== Alerts
@@ -280,7 +281,7 @@ class User < AbstractModel
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
   has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"
   has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
-  
+
   has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup',            :join_table => 'user_groups_users'
   has_and_belongs_to_many :authored_names,     :class_name => 'NameDescription',      :join_table => 'name_descriptions_authors'
   has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
@@ -348,7 +349,7 @@ class User < AbstractModel
       @@user.location_format
     end
   end
-  
+
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter.
   def self.current=(x)
@@ -402,7 +403,7 @@ class User < AbstractModel
   def format_name
     self.unique_text_name
   end
-  
+
   # Return User's full name if present, else return login.
   #
   #   name present:  "Fred Flintstone"
@@ -512,37 +513,35 @@ class User < AbstractModel
     )
   end
 
+  def preferred_herbarium_name
+    preferred_herbarium.name rescue personal_herbarium_name
+  end
+
   # Return the name of this user's "favorite" herbarium (meaning the one they have used the most).
   # TODO: Make this a user preference.
-  def preferred_herbarium_name
-    result = personal_herbarium_name
-    preferred_herbarium = nil
-    count = -1
-    # TODO -- This really needs to be replaced with a single mysql call instead of
-    # looking up and instantiating all of a user's specimens just to get a single name(!!)
-    for herbarium in self.curated_herbaria
-      new_count = Specimen.find_all_by_herbarium_id_and_user_id(herbarium.id, self.id).count
-      if new_count > count
-        count = new_count
-        result = herbarium.name
-      end
-    end
-    result
+  def preferred_herbarium
+    herbarium_id = Herbarium.connection.select_value(%(
+      SELECT herbarium_id, count(id) FROM specimens WHERE user_id=#{id}
+      GROUP BY herbarium_id ORDER BY count(id) desc LIMIT 1
+    ));
+    herbarium_id.blank? ? personal_herbarium : Herbarium.find(herbarium_id)
   end
-  
+
   def personal_herbarium_name
-    :user_personal_herbarium.l(:name => self.unique_text_name)
+    Herbarium.connection.select_value(%(
+      SELECT name FROM herbaria WHERE personal_user_id = #{self.id} LIMIT 1
+    )) || :user_personal_herbarium.l(:name => self.unique_text_name)
   end
-  
+
   def personal_herbarium
-    Herbarium.find_all_by_name(personal_herbarium_name)[0]
+    Herbarium.find_all_by_personal_user_id(self.id).first
   end
-  
+
   # Return an Array of SpeciesList's that User owns or that are attached to a
   # Project that the User is a member of.
   def all_editable_species_lists
     @all_editable_species_lists ||= begin
-      results = species_lists 
+      results = species_lists
       if projects_member.any?
         project_ids = projects_member.map(&:id).join(',')
         results += SpeciesList.find_by_sql %(
@@ -638,7 +637,7 @@ class User < AbstractModel
   end
 
   def is_successful_contributor?; observations.length > 0; end
-  
+
   ##############################################################################
   #
   #  :section: Alerts
@@ -874,7 +873,7 @@ class User < AbstractModel
       save
     end
   end
-  
+
 ################################################################################
 
 protected
@@ -900,7 +899,7 @@ protected
   end
 
   validate :user_requirements
-  
+
   def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
@@ -932,7 +931,7 @@ protected
 
   validate(:check_password, :on => :create)
   def check_password # :nodoc:
-    unless password.blank? 
+    unless password.blank?
       if password_confirmation.to_s.blank?
         errors.add(:password, :validate_user_password_confirmation_missing.t)
       elsif password != password_confirmation

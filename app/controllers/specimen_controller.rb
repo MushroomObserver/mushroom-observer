@@ -143,6 +143,7 @@ class SpecimenController < ApplicationController
     result = herbarium.nil?
     if result
       herbarium = Herbarium.new(herbarium_params(params))
+      herbarium.personal_user = @user if herbarium.name == @user.personal_herbarium_name
       herbarium.curators.push(@user)
       herbarium.save
     end

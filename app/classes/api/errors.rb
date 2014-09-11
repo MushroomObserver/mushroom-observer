@@ -304,4 +304,18 @@ class API
       args.merge!(:title => title.to_s)
     end
   end
+
+  class CanOnlyUseThisFieldIfHasSpecimen < Error
+    def initialize(field)
+      super()
+      args.merge!(:field => field)
+    end
+  end
+
+  class CanOnlyUseOneOfTheseFields < Error
+    def initialize(*fields)
+      super()
+      args.merge!(:fields => fields.join(', '))
+    end
+  end
 end

@@ -19,17 +19,22 @@ class ApiTest < UnitTestCase
     assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
       api.errors.empty?
     end
+    return api
   end
 
   def assert_api_fail(params)
+    api = nil
     assert_block("API request should have failed, params: #{params.inspect}") do
-      API.execute(params).errors.any?
+      api = API.execute(params)
+      api.errors.any?
     end
+    return api
   end
 
   def assert_api_pass(params)
     api = API.execute(params)
     assert_no_errors(api, "API request should have passed, params: #{params.inspect}")
+    return api
   end
 
   def assert_parse(method, expect, val, *args)
@@ -355,6 +360,37 @@ class ApiTest < UnitTestCase
     obs = Observation.last
     assert_nil(obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
+  end
+
+  def test_post_observation_with_specimen
+    params = {
+      :method   => :post,
+      :action   => :observation,
+      :api_key  => @api_key.key,
+      :location => locations(:burbank).name,
+      :name     => names(:peltigera).text_name
+    }
+
+    assert_api_fail(params.merge(:has_specimen => "no", :herbarium => "1"))
+    assert_api_fail(params.merge(:has_specimen => "no", :specimen_id => "1"))
+    assert_api_fail(params.merge(:has_specimen => "no", :herbarium_label => "1"))
+    assert_api_fail(params.merge(:has_specimen => "yes", :specimen_id => "1", :herbarium_label => "1"))
+    assert_api_fail(params.merge(:has_specimen => "yes", :herbarium => "bogus"))
+
+    assert_api_pass(params.merge(:has_specimen => "yes"))
+    obs = Observation.last
+    spec = Specimen.last
+    assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
+    assert_equal("Peltigera: #{obs.id}", spec.herbarium_label)
+    assert_obj_list_equal([obs], spec.observations)
+
+    nybg = herbaria(:nybg)
+    assert_api_pass(params.merge(:has_specimen => "yes", :herbarium => nybg.code, :specimen_id => "R. Singer 12345"))
+    obs = Observation.last
+    spec = Specimen.last
+    assert_objs_equal(nybg, spec.herbarium)
+    assert_equal("Peltigera: R. Singer 12345", spec.herbarium_label)
+    assert_obj_list_equal([obs], spec.observations)
   end
 
   def test_posting_minimal_image

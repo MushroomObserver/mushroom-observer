@@ -35,6 +35,8 @@ class API
         :synonym_names  => parse_strings(:synonyms_of),
         :children_names => parse_strings(:children_of),
         :locations      => parse_strings(:locations),
+        # :herbaria       => parse_strings(:herbaria),
+        # :specimen_ids   => parse_strings(:specimen_ids),
         :projects       => parse_strings(:projects),
         :species_lists  => parse_strings(:species_lists),
         :confidence     => parse_float_range(:confidence, :limit => [Vote.minimum_vote..Vote.maximum_vote]),
@@ -59,6 +61,19 @@ class API
       @name = parse_name(:name, :default => Name.unknown)
       @vote = parse_float(:vote, :default => Vote.maximum_vote)
       @log  = parse_boolean(:log, :default => true)
+
+      @herbarium = parse_herbarium(:herbarium, :default => nil)
+      @specimen_id = parse_string(:specimen_id, :default => nil)
+      @herbarium_label = parse_string(:herbarium_label, :default => nil)
+      has_specimen = parse_boolean(:has_specimen,
+        :default => @herbarium || @specimen_id || @herbarium_label || false)
+      unless has_specimen
+        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium) if @herbarium
+        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id) if @specimen_id
+        errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium_label) if @herbarium_label
+      end
+      errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label) \
+        if @specimen_id && @herbarium_label
 
       loc = parse_place_name(:location, :limit => 1024)
       loc = Location.unknown.name if Location.is_unknown?(loc)
@@ -85,7 +100,7 @@ class API
         :lat           => lat,
         :long          => long,
         :alt           => alt,
-        :specimen      => parse_boolean(:has_specimen, :default => false),
+        :specimen      => has_specimen,
         :is_collection_location => parse_boolean(:is_collection_location, :default => true),
         :thumb_image   => thumbnail,
         :images        => images,
@@ -99,9 +114,23 @@ class API
     end
 
     def after_create(obs)
+      create_specimen(obs) if obs.specimen
       naming = obs.namings.create(:name => @name)
       obs.change_vote(naming, @vote, user)
       obs.log(:log_observation_created_at) if @log
+    end
+
+    def create_specimen(obs)
+      @herbarium ||= user.personal_herbarium || Herbarium.create!(
+        :name => user.personal_herbarium_name,
+        :personal_user => user
+      )
+      obs.specimens << Specimen.create!(
+        :herbarium => @herbarium,
+        :when => Time.now,
+        :user => user,
+        :herbarium_label => @herbarium_label || Herbarium.default_specimen_label(@name.text_name, @specimen_id || obs.id)
+      )
     end
 
     def build_setter

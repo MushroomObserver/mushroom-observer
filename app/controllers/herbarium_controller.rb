@@ -109,6 +109,7 @@ class HerbariumController < ApplicationController
   def build_herbarium(params)
     infer_location(params)
     herbarium = Herbarium.new(params)
+    herbarium.personal_user = @user if herbarium.name == @user.personal_herbarium_name
     herbarium.curators.push(@user)
     herbarium.save
     calc_herbarium_redirect(params, herbarium)

@@ -509,7 +509,7 @@ class Image < AbstractModel
   # unless the test fails, in which case it adds an error to the :image field.
   def validate_image_md5sum
     result = true
-    if upload_md5sum and save_to_temp_file
+    if !upload_md5sum.blank? and save_to_temp_file
       sum = File.open(upload_temp_file) do |f|
         Digest::MD5.hexdigest(f.read)
       end
@@ -551,7 +551,14 @@ class Image < AbstractModel
          upload_handle.is_a?(StringIO)
         begin
           @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
-          FileUtils.copy_stream(upload_handle, @file)
+          File.open(@file, "wb") do |write_handle|
+            until upload_handle.eof?
+              str = upload_handle.read(16384)
+              write_handle.write(str)
+            end
+          end
+          # This seems to have problems with character encoding(?)
+          # FileUtils.copy_stream(upload_handle, @file)
           self.upload_temp_file = @file.path
           self.upload_length = @file.size
           result = true

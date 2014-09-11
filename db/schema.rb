@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140901161745) do
+ActiveRecord::Schema.define(:version => 20140910105700) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created_at"
@@ -80,12 +80,13 @@ ActiveRecord::Schema.define(:version => 20140901161745) do
   create_table "herbaria", :force => true do |t|
     t.text     "mailing_address"
     t.integer  "location_id"
-    t.string   "email",           :limit => 80,   :default => "", :null => false
-    t.string   "name",            :limit => 1024
+    t.string   "email",            :limit => 80,   :default => "", :null => false
+    t.string   "name",             :limit => 1024
     t.text     "description"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "code",            :limit => 8,    :default => "", :null => false
+    t.string   "code",             :limit => 8,    :default => "", :null => false
+    t.integer  "personal_user_id"
   end
 
   create_table "herbaria_curators", :id => false, :force => true do |t|
