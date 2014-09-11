@@ -10,7 +10,7 @@
       add_tab_with_query(:show_name_distribution_map.t, :controller => 'name', 
         :action => 'map', :id => name.id)
     end
-    if questions_ok
+    if questions_ok && @user != @observation.user
       add_tab_with_query(:show_observation_send_question.t,
         :controller => 'observer', :action => 'ask_observation_question', 
         :id => @observation.id)
