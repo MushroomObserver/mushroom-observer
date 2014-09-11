@@ -141,7 +141,7 @@ class LocationController < ApplicationController
     end
 
     # Add "show descriptions" link if this query can be coerced into an
-    # observation query.
+    # location description query.
     if query.is_coercable?(:LocationDescription)
       @links << [:show_objects.t(:type => :description),
         add_query_param({:action => 'index_location_description'}, query)]
@@ -239,7 +239,6 @@ class LocationController < ApplicationController
       flavor = :for_project
     when :with_observations_in_set
       flavor = :in_set
-      args.delete(:old_title)
     when :with_observations_in_species_list
       flavor = :in_species_list
     when :with_observations_of_children
@@ -260,6 +259,10 @@ class LocationController < ApplicationController
     else
       flavor = nil
     end
+
+    # These are only used to create title, which isn't used, they just get in the way.
+    args.delete(:old_title)
+    args.delete(:old_by)
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
     if flavor
