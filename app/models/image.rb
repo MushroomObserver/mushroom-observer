@@ -551,7 +551,8 @@ class Image < AbstractModel
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
       if upload_handle.is_a?(IO) or
-         upload_handle.is_a?(StringIO)
+         upload_handle.is_a?(StringIO) or
+         defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
         begin
           @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
           File.open(@file, "wb") do |write_handle|
