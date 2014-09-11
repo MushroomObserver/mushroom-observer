@@ -556,8 +556,9 @@ class Image < AbstractModel
         begin
           @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
           File.open(@file, "wb") do |write_handle|
-            until upload_handle.eof?
+            loop do
               str = upload_handle.read(16384)
+              break if str.to_s.length == 0
               write_handle.write(str)
             end
           end
