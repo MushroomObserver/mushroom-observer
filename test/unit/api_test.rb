@@ -25,7 +25,8 @@ class ApiTest < UnitTestCase
   def assert_api_fail(params)
     api = nil
     assert_block("API request should have failed, params: #{params.inspect}") do
-      api = API.execute(params).errors.any?
+      api = API.execute(params)
+      api.errors.any?
     end
     return api
   end
@@ -374,6 +375,7 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(:has_specimen => "no", :specimen_id => "1"))
     assert_api_fail(params.merge(:has_specimen => "no", :herbarium_label => "1"))
     assert_api_fail(params.merge(:has_specimen => "yes", :specimen_id => "1", :herbarium_label => "1"))
+    assert_api_fail(params.merge(:has_specimen => "yes", :herbarium => "bogus"))
 
     assert_api_pass(params.merge(:has_specimen => "yes"))
     obs = Observation.last
@@ -383,7 +385,7 @@ class ApiTest < UnitTestCase
     assert_obj_list_equal([obs], spec.observations)
 
     nybg = herbaria(:nybg)
-    assert_api_pass(params.merge(:has_specimen => "yes", :herbarium => nybg.name, :specimen_id => "R. Singer 12345"))
+    assert_api_pass(params.merge(:has_specimen => "yes", :herbarium => nybg.code, :specimen_id => "R. Singer 12345"))
     obs = Observation.last
     spec = Specimen.last
     assert_objs_equal(nybg, spec.herbarium)
