@@ -12,10 +12,13 @@
       <%= :herbarium_specimen_count.t %>
     </td>
     <td align="center">
+      <%= :herbarium_code.t %>
+    </td>
+    <td align="center">
       <%= :herbarium_name.t %>
     </td>
   </tr>
-<% for herbarium in @herbaria %>
+<% for herbarium in @herbaria.sort_by(&:sort_name) %>
   <tr>
     <td>
       <% if is_in_admin_mode? or herbarium.is_curator?(@user) %>
@@ -26,7 +29,11 @@
       <%= herbarium.specimen_count %>
     </td>
     <td>
-      <%= link_to(herbarium.name, :action => "show_herbarium", :id => herbarium.id) %>
+      <%= herbarium.code.blank? ? "&mdash;".html_safe : herbarium.code %>
+    </td>
+    <td>
+      <%= link_to(herbarium.name.blank? ? content_tag(:i, "n/a") : herbarium.name.t,
+                  :action => "show_herbarium", :id => herbarium.id) %>
     </td>
   </tr>
 <% end %>

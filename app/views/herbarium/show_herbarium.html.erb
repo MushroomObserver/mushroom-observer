@@ -1,6 +1,6 @@
 <%
   @title = @herbarium.name.t
-	@title = @title + " (#{@herbarium.code.t})" if @herbarium.code != ""
+	@title += " (#{@herbarium.code.t})".html_safe if @herbarium.code != ""
   new_tab_set do
     add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id) if is_in_admin_mode? or @herbarium.is_curator?(@user)
     add_tab(:create_herbarium.t, :action => 'create_herbarium')
