@@ -496,7 +496,7 @@ logger.warn('SESSION: ' + session.inspect)
     code = if params[:user_locale]
       logger.debug "[I18n] loading locale: #{params[:user_locale]} from params"
       params[:user_locale]
-    elsif @user && !@user.locale.blank?
+    elsif @user && !@user.locale.blank? && params[:controller] != "ajax"
       logger.debug "[I18n] loading locale: #{@user.locale} from @user"
       @user.locale
     elsif session[:locale]
