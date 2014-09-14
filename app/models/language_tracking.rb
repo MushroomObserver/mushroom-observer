@@ -102,10 +102,11 @@ private
       @@last_clean = Time.now
       glob = tag_file('*')
       for file in Dir.glob(glob)
-        # I've seen this fail because of files presumably being deleted by
-        # another process between Dir.glob and File.mtime.
-        if File.exist?(file) and File.mtime(file) < cutoff
-          File.delete(file)
+        begin
+          File.delete(file) if File.mtime(file) < cutoff
+        rescue
+          # I've seen this fail because of files presumably being deleted by
+          # another process between Dir.glob and File.mtime.
         end
       end
     end
