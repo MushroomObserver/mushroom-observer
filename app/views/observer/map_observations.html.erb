@@ -11,7 +11,9 @@
 
 <center>
   <%= if @observations.any?
-    gmap = make_map(@observations + @locations, :query_params => query_params(@query))
+    objects = @observations
+    objects += @locations if @locations.any?
+    gmap = make_map(objects, :query_params => query_params(@query))
     finish_map(gmap)
     gmap.div(:width => 800, :height => 550).html_safe
   else
