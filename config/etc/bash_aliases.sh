@@ -24,8 +24,8 @@ alias mo='cd /var/web/mo'
 
 alias uni='service unicorn'
 
-alias mosql='mysql -u mo -p"xxx" mo_production'
+alias mosql='mysql -u mo -h xxx -p"xxx" mo_production'
 
 function mosqle {
-  mysql -u mo -p"xxx" mo_production -e "source $1"
+  mysql -u mo -h xxx -p"xxx" mo_production -e "source $1"
 }
