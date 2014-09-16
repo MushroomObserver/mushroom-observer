@@ -10,7 +10,7 @@
 ################################################################################
 
 local> ssh root@$IP_ADDR
-root> passwd
+root> passwd -l root
 
 # Create account for webserver.
 root> useradd -m -s /bin/bash mo
@@ -20,23 +20,23 @@ root> visudo
   %mo ALL = NOPASSWD: /bin/su mo
   %mo ALL = NOPASSWD: /bin/su - mo
 
-# Create account for yourself.
+# Create user accounts.
 root> useradd -m -s /bin/bash -G mo,sudo $USER
 root> passwd $USER
+root> mkdir /home/$USER/.ssh
+root> vi /home/$USER/.ssh/authorized_keys
+  # paste in your local ~/.ssh/id_rsa.pub
+root> chmod 600 /home/$USER/.ssh/authorized_keys
+root> chmod 700 /home/$USER/.ssh
+root> chown -R $USER:$USER /home/$USER/.ssh
 root> logout
-
-# Password-less ssh.
-local> ssh-keygen -t rsa   # (if not already done)
-local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
-# If ssh-copy-id doesn't work, try this: (See: http://www.phcomp.co.uk/Tutorials/Unix-And-Linux/ssh-passwordless-login.html)
-local> cat ~/.ssh/id_rsa.pub | ssh $IP_ADDR 'umask 077; mkdir .ssh; cat >> .ssh/authorized_keys'
 
 # Set up your account.
 local> ssh $IP_ADDR
 user> vi .bash_aliases
   # Add this at least.
   alias mo='cd /var/web/mushroom-observer && sudo su mo'
-user> su root
+user> sudo su
 
 # Set up root account.
 root> vi /root/.bashrc
@@ -47,22 +47,11 @@ root> source /root/.bashrc
 root> vi /etc/ssh/sshd_config
   PermitRootLogin no
 
-# Setup other users' accounts:
-root> useradd -m -s /bin/bash -G mo,sudo $USER
-root> cd /home/$USER
-root> mkdir .ssh
-# Probably should keep admin's public keys somewhere handy...
-root> scp xxx .
-root> cat xxx > .ssh/authorized_keys
-root> chmod 600 .ssh/authorized_keys
-root> chmod 700 .ssh
-root> chown -r $USER:$USER .ssh
-
 # Install core packages.
 root> apt-get update
-root> apt-get upgrade
-root> apt-get install build-essential man telnet wget curl vim emacs \
-                      iptables mlocate lynx
+root> apt-get upgrade -y
+root> apt-get install -y build-essential man telnet wget curl vim emacs \
+                         iptables mlocate lynx
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables -F
@@ -86,7 +75,7 @@ root> vi /etc/rc.local
   iptables-restore < /etc/firewall.conf
 
 # Install most of the modules that we will need (except ruby).
-root> apt-get install mysql-server mysql-client libmysqlclient-dev \
+root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
           libcurl4-openssl-dev libssl-dev git nginx libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev
 
@@ -145,7 +134,7 @@ mo> bundle install
 # Configure nginx.
 mo> exit
 root> cp /var/web/mushroom-observer/config/etc/nginx.conf /etc/nginx/
-root> service nginx start
+root> service nginx restart
 root> rm /usr/share/nginx/html/index.html    # (there's *got* to be a better way!)
 
 # Install our programs for resizing and rotating JPEG images.
@@ -173,7 +162,7 @@ mo> unicorn_rails -c config/unicorn.rb -D
 # If there are any errors you'll find them in log/unicorn.stderr.log
 # ("service unicorn start" and "uni start" are shorthand for above command.)
 
-# Apparently have to restart nginx after first time run unicorn(?)
+# Apparently have to restart nginx after first time run unicorn sometimes(?)
 mo> service nginx stop
 mo> service nginx start
 
@@ -185,7 +174,7 @@ mo> wget localhost:8080
 
 # Set up simple mailserver using postfix.
 mo> exit
-root> apt-get install postfix mutt
+root> apt-get install -y postfix mutt
   # Select "internet site" when it prompts you.
   # Change hostname to "mushroomobserver.org" (should resolve back with reverse DNS).
 root> vi /etc/aliases
