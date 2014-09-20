@@ -757,7 +757,14 @@ module ApplicationHelper
 
     return content_tag(:p, authors + safe_br + editors)
   end
-
+  
+  ### from textile_sandbox.html.erb ###
+  # returns escaped html of Textile input
+  # for instance "**hi**" =>
+  def escape_markup(markup)
+		h(markup.tpl.to_str)
+	end
+	
   # From html_helper.rb
   # Replace spaces with safe_nbsp.
   #

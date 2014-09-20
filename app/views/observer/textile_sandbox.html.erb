@@ -10,7 +10,7 @@
         <% if @submit == :sandbox_test.l %>
           <div class="sandbox"><%= @code.tpl %></div><br/>
         <% else %>
-          <div class="sandbox"><%= h(@code.tpl) %></div><br/>
+          <div class="sandbox"><%= escape_markup(@code) %></div><br/>
         <% end %>
       <% end %>
 
