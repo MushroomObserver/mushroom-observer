@@ -7,25 +7,26 @@
 
       <% if !@code.nil? %>
         <b><%= :sandbox_look_like.t %>:</b><br/>
-        <% if @submit == :sandbox_test.l %>
-          <div class="sandbox"><%= @code.tpl %></div><br/>
-        <% else %>
-          <div class="sandbox"><%= escape_markup(@code) %></div><br/>
-        <% end %>
+        <div class="sandbox">
+					<% if @submit == :sandbox_test.l %>
+						<%= @code.tpl %>
+					<% else %>
+						<%= escape_markup(@code) %>
+					<% end %>
+        </div><br/>
       <% end %>
 
       <%= form_tag(:action => "textile_sandbox") %>
         <% if !@code.nil? %>
-          <center>
-            <%= image_tag("up_arrow.png", :style => "margin-bottom:-6px; margin-right:50px") %>
+          <div class="sandbox-up-ptr">
+            <%= image_tag("up_arrow.png") %>
             <%= submit_tag :sandbox_test.l %>
-            <span style='margin-left:20px'></span>
             <%= submit_tag :sandbox_test_codes.l %>
-            <%= image_tag("up_arrow.png", :style => "margin-bottom:-6px; margin-left:50px") %>
-          </center><br/>
+            <%= image_tag("up_arrow.png") %>
+          </div><br/>
         <% end %>
         <b><%= :sandbox_enter.t %>:</b><br/>
-        <%= text_area_tag("code", @code, { :cols => 80, :rows => 10 }) %><br/>
+        <%= text_area_tag("code", @code, :size => "80x10") %><br/>
         <% if @code.nil? %>
           <br/>
           <center><%= submit_tag :sandbox_test.l %></center>
@@ -33,7 +34,7 @@
       </form><br/>
 
       <p><b><%= :sandbox_quick_ref.t %>:</b></p>
-      <div style="font-family:monospace; font-size:11px; white-space:pre; margin-bottom:1em"><%= :sandbox_sample.l %></div>
+      <div class="sandbox-quick-ref"><%= :sandbox_sample.l %></div>
 
       <b><%= :sandbox_web_refs.t %>:</b><br/>
       <div style="margin-left:20px">
