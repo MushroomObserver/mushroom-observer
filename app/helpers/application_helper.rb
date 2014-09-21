@@ -759,10 +759,10 @@ module ApplicationHelper
   end
   
   ### from textile_sandbox.html.erb ###
-  # returns escaped html of Textile input
-  # for instance "**hi**" =>
-  def escape_markup(markup)
-		h(markup.tpl.to_str)
+  # return escaped html
+  # for instance: <i>X</i> => &lt;i&gt;X&lt;/i&gt
+  def escape_html(html)
+		h(html.to_str)
 	end
 	
   # From html_helper.rb

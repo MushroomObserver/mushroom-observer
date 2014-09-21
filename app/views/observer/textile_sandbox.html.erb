@@ -11,7 +11,7 @@
 					<% if @submit == :sandbox_test.l %>
 						<%= @code.tpl %>
 					<% else %>
-						<%= escape_markup(@code) %>
+						<%= escape_html(@code.tpl) %>
 					<% end %>
         </div><br/>
       <% end %>
