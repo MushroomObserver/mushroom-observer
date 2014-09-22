@@ -1522,7 +1522,7 @@ class Query < AbstractQuery
       n ||= min ? 0 : 60
       s ||= min ? 0 : 60
       self.where << "#{col} #{dir}= '%04d-%02d-%02d %02d:%02d:%02d'" %
-                                    [y, m, d, h, n, s]
+                            [y, m, d, h, n, s].map(&:to_i)
     end
   end
 
