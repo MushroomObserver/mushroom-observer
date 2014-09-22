@@ -217,6 +217,12 @@ class ApiTest < UnitTestCase
     assert_no_errors(api)
   end
 
+  def test_getting_observations_updated_on_day
+    api = API.execute(:method => :get, :action => :observation, :updated_at => '20140824')
+    query = api.query.query
+    assert_no_errors(api)
+  end
+
   def test_post_minimal_observation
     @user = rolf
     @name = Name.unknown
@@ -705,10 +711,12 @@ class ApiTest < UnitTestCase
 
   def test_parse_time
     assert_parse(:parse_time, nil, nil)
+    assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), nil, :default => DateTime.parse('2012-06-25 12:34:56'))
     assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), '20120625123456')
     assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), '2012-06-25 12:34:56')
     assert_parse(:parse_time, DateTime.parse('2012-06-25 12:34:56'), '2012/06/25 12:34:56')
     assert_parse(:parse_time, DateTime.parse('2012-06-05 02:04:06'), '2012/6/5 2:4:6')
+    assert_parse(:parse_time, API::BadParameterValue, '20120625')
     assert_parse(:parse_time, API::BadParameterValue, '201206251234567')
     assert_parse(:parse_time, API::BadParameterValue, '2012/06/25 103456')
     assert_parse(:parse_time, API::BadParameterValue, '2012-06/25 10:34:56')
