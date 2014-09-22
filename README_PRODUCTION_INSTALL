@@ -152,7 +152,7 @@ root> update-rc.d unicorn defaults
 root> su mo
 mo> env | grep RAILS_ENV
 # Should print "production"!!
-mo> bundle update
+mo> bundle install
 mo> rake db:migrate
 mo> rake lang:update
 mo> rails server
