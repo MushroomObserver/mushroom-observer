@@ -472,10 +472,7 @@ div.scroller span.normal {
 
 /* sandbox */
 div.sandbox {
-  border-top: solid #888 2px;
-  border-left: solid #888 2px;
-  border-right: solid #FFF 2px;
-  border-bottom: solid #FFF 2px;
+  border: 2px solid #888; 
   background-color: white;
   color: black;
 }
@@ -484,6 +481,16 @@ div.sandbox a:visited { background-color: white; color: red    }
 div.sandbox a:hover   { background-color: white; color: yellow }
 div.sandbox table     { background: black; }
 div.sandbox table td  { background: white; }
+div.sandbox-up-ptr {
+  text-align: center
+}
+div.sandbox-up-ptr img {margin-bottom:-6px; margin-left:40px; margin-right:40px; }
+div.sandbox-up-ptr input {margin-left:10px; margin-right:10px; }
+div.sandbox-quick-ref {
+	font: 11px monospace;
+	margin-bottom: 1em;
+	white-space: pre;
+}
 
 /* bulk name editor */
 p.bulk_text {
