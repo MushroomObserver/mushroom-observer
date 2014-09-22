@@ -217,7 +217,7 @@ class API
   class CouldntDownloadURL < Error
     def initialize(url, error)
       super()
-      args.merge!(:url => url.to_s, :error => error.to_s)
+      args.merge!(:url => url.to_s, :error => "#{error.class.name}: #{error}")
     end
   end
 
