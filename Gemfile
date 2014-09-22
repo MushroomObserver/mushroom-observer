@@ -7,6 +7,7 @@ gem 'jquery-rails'
 
 group :test do
   gem 'debugger'
+  gem 'fakeweb', '~> 1.3'
 end
 
 group :assets do

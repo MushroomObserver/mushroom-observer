@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'test_helper'
+require 'fakeweb'
 
 class Hash
   def remove(*keys)
@@ -459,6 +460,26 @@ class ApiTest < UnitTestCase
     assert_api_fail(params.merge(:vote => '-5'))
     assert_api_fail(params.merge(:observations => '11')) # Katrina owns this observation
     assert_api_fail(params.merge(:projects => '2')) # Rolf is not a member of this project
+  end
+
+  def test_posting_image_via_url
+    setup_image_dirs
+    url = "http://mushroomobserver.org/images/thumb/459340.jpg"
+    response = File.read("#{::Rails.root}/test/images/test_image.curl")
+    FakeWeb.register_uri(:get, url, :response => response)
+    params = {
+      :method     => :post,
+      :action     => :image,
+      :api_key    => @api_key.key,
+      :upload_url => url
+    }
+    api = API.execute(params)
+    assert_no_errors(api, 'Errors while posting image')
+    img = Image.last
+    assert_obj_list_equal([img], api.results)
+    actual = File.read(img.local_file_name(:full_size))
+    expect = File.read("#{::Rails.root}/test/images/test_image.jpg")
+    assert_equal(expect, actual, "Uploaded image differs from original!")
   end
 
   def test_posting_minimal_user
