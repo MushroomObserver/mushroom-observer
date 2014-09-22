@@ -35,13 +35,13 @@ class API
 
   class UploadFromURL < Upload
     def initialize(url)
-      @temp_file = "#{::Rails.root.to_s}/tmp/api_upload.#{$$}"
+      @temp_file = Tempfile.new("api_upload")
       uri = URI.parse(url)
       File.open(@temp_file, 'w:utf-8') do |fh|
         Net::HTTP.new(uri.host, uri.port).start do |http|
-          http.request_get(uri.fullpath) do |response|
+          http.request_get(uri.path) do |response|
             response.read_body do |chunk|
-              fh.write(chunk)
+              fh.write(chunk.force_encoding('utf-8'))
             end
             self.content        = @temp_file
             self.content_length = response['Content-Length'].to_i
