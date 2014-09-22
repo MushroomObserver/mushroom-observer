@@ -105,7 +105,7 @@ mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
 on code not on the master branch.]
 
-mo> mkdir log public/images/{thumb,320,640,960,1280,orig}
+mo> mkdir log log/old tmp public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
 mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
