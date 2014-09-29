@@ -54,16 +54,13 @@ README_STANDARDS: The closest we have to coding standards.  Currently this is
 
 README_TRANSLATIONS: Details needed for translators to provide support in for
 the site in a new language.
-Copyright
----------
 
-Code: [Nathan Wilson][3],[Jason Hollinger][4]
-
-Copyright (c) 2014 [Marine Biological Laboratory][12]. See [LICENSE][13] for
-further details.
+Copyright (c) . [Nathan Wilson][3],[Jason Hollinger][4],
+[Joseph Cohen][5] See [LICENSE][6] for further details.
 
 [1]: https://codeclimate.com/github/MushroomObserver/mushroom-observer.png
 [2]: https://codeclimate.com/github/MushroomObserver/mushroom-observer
 [3]: https://github.com/mo-nathan
 [4]: https://github.com/pellaea
 [5]: https://github.com/JoeCohen
+[6]: https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE
