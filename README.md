@@ -1,13 +1,17 @@
-Last Revised: February 6, 2011
+Mushroom Observer
+=======
+
+Last Revised: September 28, 2014
 
 This README provides a quick overview of the tools used by Mushroom Observer 
 (MO) and an overview of the other READMEs that accompany this file.  See
 http://mushroomobserver.org/observer/intro for an introduction to the website
 itself.
 
-[![CodePolice][5]][6]
+[![CodePolice][1]][2]
 
-== Tools
+Tools
+-----
 
 Source code control: The source code for MO is currently managed using
 subversion (http://subversion.apache.org).  Version 1.6.5 is known to work and
@@ -28,7 +32,8 @@ probably will as well).  Fortunately these are all very popular so it's easy
 to find pre-built binaries for most operating systems.  New developers have
 reported being able to get the system up and running in under two hours.
 
-== Other READMEs
+Other READMEs
+-------------
 
 The following files should provide useful information for working with the
 Mushroom Observer code base.  Note that we are not great at keeping these up
@@ -49,3 +54,16 @@ README_STANDARDS: The closest we have to coding standards.  Currently this is
 
 README_TRANSLATIONS: Details needed for translators to provide support in for
 the site in a new language.
+Copyright
+---------
+
+Code: [Nathan Wilson][3],[Jason Hollinger][4]
+
+Copyright (c) 2014 [Marine Biological Laboratory][12]. See [LICENSE][13] for
+further details.
+
+[1]: https://codeclimate.com/github/EOL/taxon_reporter.png
+[2]: https://codeclimate.com/github/EOL/taxon_reporter
+[3]: https://github.com/mo-nathan
+[4]: https://github.com/pellaea
+[5]: https://github.com/JoeCohen
