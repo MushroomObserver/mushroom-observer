@@ -62,8 +62,8 @@ Code: [Nathan Wilson][3],[Jason Hollinger][4]
 Copyright (c) 2014 [Marine Biological Laboratory][12]. See [LICENSE][13] for
 further details.
 
-[1]: https://codeclimate.com/github/EOL/taxon_reporter.png
-[2]: https://codeclimate.com/github/EOL/taxon_reporter
+[1]: https://codeclimate.com/github/MushroomObserver/mushroom-observer.png
+[2]: https://codeclimate.com/github/MushroomObserver/mushroom-observer
 [3]: https://github.com/mo-nathan
 [4]: https://github.com/pellaea
 [5]: https://github.com/JoeCohen
