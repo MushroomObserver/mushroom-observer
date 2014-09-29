@@ -584,9 +584,11 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(scientific_name, loc.scientific_name)
   end
 
+  def named_obs_query(name)
+    Query.lookup(:Observation, :pattern_search, :pattern => name, :by => :name)
+  end
+
   def test_coercing_sorted_observation_query_into_location_query
-    query1 = Query.lookup(:Observation, :pattern_search, :pattern => "Pasadena", :by => :name)
-    query2 = query1.coerce(:Location)
-    query3 = @controller.coerce_query_for_undefined_locations(query2)
+    @controller.coerce_query_for_undefined_locations(named_obs_query("Pasadena").coerce(:Location))
   end
 end

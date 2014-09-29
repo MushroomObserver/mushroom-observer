@@ -5,6 +5,8 @@ This README provides a quick overview of the tools used by Mushroom Observer
 http://mushroomobserver.org/observer/intro for an introduction to the website
 itself.
 
+[![CodePolice][5]][6]
+
 == Tools
 
 Source code control: The source code for MO is currently managed using
