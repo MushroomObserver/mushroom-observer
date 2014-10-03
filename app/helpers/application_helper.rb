@@ -1160,12 +1160,16 @@ module ApplicationHelper
 
   def mapset_observation_header(set, args)
     show, map = mapset_submap_links(set, args, :observation)
-    return "#{:Observations.t}: #{set.observations.length} (#{show} | #{map})"
+    map_point_text(:Observations.t, set.observations.length, show, map)
   end
 
   def mapset_location_header(set, args)
     show, map = mapset_submap_links(set, args, :location)
-    return "#{:Locations.t}: #{set.underlying_locations.length} (#{show} | #{map})"
+    map_point_text(:Locations.t, set.underlying_locations.length, show, map)
+  end
+
+  def map_point_text(label, count, show, map)
+    label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
   end
 
   def mapset_submap_links(set, args, type)
