@@ -60,7 +60,6 @@ class ScriptTest < UnitTestCase
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
     cmd = "#{script} #{dest_file} > #{stdout_file}"
-    print "make_eol_xml:cmd: #{cmd}\n"
     assert_block { !File.exist?(dest_file) || File.size(dest_file) == 0 }
     assert_block { system(cmd) }
     assert_block { File.size(dest_file) > 0 }
@@ -105,7 +104,6 @@ class ScriptTest < UnitTestCase
       image = "#{::Rails.root}/public/assets/eye.png"
       cmd = "#{script} #{site} #{image} #{tempdir} 1 2>&1 > #{tempfile}"
       status = system(cmd)
-      print "perf_monitor:cmd: #{cmd}\n"
       errors = File.read(tempfile)
       assert_block("Something went wrong with #{script}:\n#{errors}") { status }
       logfile = "#{tempdir}/perf.log"
