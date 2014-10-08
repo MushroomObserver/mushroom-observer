@@ -6,7 +6,7 @@ gem 'mysql2'
 gem 'jquery-rails'
 
 group :test do
-  gem 'debugger'
+  gem 'byebug'
   gem 'fakeweb', '~> 1.3'
 end
 
