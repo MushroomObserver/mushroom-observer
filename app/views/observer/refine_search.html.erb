@@ -87,8 +87,8 @@
             result << form.text_field("#{name}_1", :size => 18)
             result << indent(2)
             if field.word
-              op = '&lt;' + (field.or_equal ? '=' : '')
-              result << "#{op} #{field.word} #{op}".nowrap
+              op = '&lt;'.html_safe + (field.or_equal ? '=' : '')
+              result << op << " " << field.word << " " << op
               result << indent(2)
             end
             result << form.text_field("#{name}_2", :size => 18)
@@ -98,7 +98,7 @@
             result << form.hidden_field("#{name}_n")
             for i in 1..(field.num || 1)
               result << form.text_field("#{name}_#{i}", :size => 40)
-              result << indent(2) + word + '<br/>' if i != field.num
+              result << indent(2) + word + safe_br if i != field.num
             end
 
           when :menu
@@ -116,8 +116,8 @@
             result << form.select(name1, field.opts, args)
             result << indent(2)
             if field.word
-              op = '&lt;' + (field.or_equal ? '=' : '')
-              result << "#{op} #{field.word} #{op}".nowrap
+              op = '&lt;'.html_safe + (field.or_equal ? '=' : '')
+              result << op << " " << field.word << " " << op
               result << indent(2)
             end
             result << form.select(name2, field.opts, args)
@@ -130,7 +130,7 @@
             result << form.hidden_field("#{name}_n")
             for i in 1..field.num
               result << form.select("#{name}_#{i}", field.opts, args)
-              result << indent(2) + word + '<br/>' if i != field.num
+              result << indent(2) + word + safe_br if i != field.num
             end
 
           when :checkboxes
@@ -190,7 +190,7 @@
   </table>
 
   <%= if @js and autos
-    autos.join("\n")
+    autos.safe_join("\n")
   end %>
 <% end %>
 
