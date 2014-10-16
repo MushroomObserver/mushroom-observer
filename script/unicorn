@@ -28,7 +28,8 @@ start)
   else
     echo "Starting unicorn..."
     cd $app_root
-    rvm_env=$(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
+    ruby_version=$(cat /var/web/mushroom-observer/.ruby-version)
+    rvm_env=/usr/local/rvm/environments/ruby-$ruby_version
     start_cmd="source $rvm_env && bundle exec unicorn_rails -c $conf_file -D"
     case `whoami` in
     mo)

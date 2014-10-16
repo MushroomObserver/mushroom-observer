@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source $(ls /usr/local/rvm/environments/ruby-1.9.3-p* | grep -v @ | tail -1)
+ruby_version=$(cat /var/web/mushroom-observer/.ruby-version)
+source /usr/local/rvm/environments/ruby-$ruby_version
 
 rake $* -f /var/web/mushroom-observer/Rakefile | \
   grep -v '(in /home/' | grep -v '^\*\* '

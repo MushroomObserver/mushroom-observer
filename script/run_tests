@@ -3,9 +3,10 @@
 if [[ $RAKE_TEST_LOADER != '' ]]; then
   loader=$RAKE_TEST_LOADER
 elif [[ $MY_RUBY_HOME != '' ]]; then
-  loader=$MY_RUBY_HOME/lib/ruby/1.9.1/rake/rake_test_loader.rb
+  loader=$(ls $MY_RUBY_HOME/lib/ruby/*/rake/rake_test_loader.rb | tail -1)
 else
-  loader=/usr/local/lib/ruby/1.9.3/rake/rake_test_loader.rb
+  ruby_version=$(cat /var/web/mushroom-observer/.ruby-version)
+  loader=/usr/local/lib/ruby/$ruby_version/rake/rake_test_loader.rb
 fi
 
 ruby -Ilib:test $loader test/{unit,functional,integration}/*_test.rb
