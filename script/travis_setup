@@ -54,4 +54,8 @@ fi
 git pull
 bundle install
 rake db:schema:load
+
+echo $pwd
+ls
+
 # rake lang:update
