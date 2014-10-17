@@ -54,4 +54,4 @@ fi
 git pull
 bundle install
 rake db:schema:load
-rake lang:update
+# rake lang:update
