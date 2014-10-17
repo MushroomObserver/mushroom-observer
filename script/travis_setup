@@ -4,7 +4,6 @@ mysql -u mo -pmo mo_development -e ''
 if [ ! $? -eq 0 ]; then
     mysql -u root < db/initialize.sql
     mysql -u mo -pmo mo_development < db/vagrant/init.sql
-    mysql -u mo -pmo mo_test < db/vagrant/init.sql
     echo Created and populated mo_development database
 else
     echo mo_development exists
@@ -54,5 +53,4 @@ fi
 
 git pull
 bundle install
-rake db:migrate
 rake lang:update
