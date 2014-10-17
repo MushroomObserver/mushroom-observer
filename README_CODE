@@ -126,7 +126,7 @@ UserGroup::         Used to keep track of which User's are members or admins of 
 The following non-database-related classes are also found in
 <tt>app/models</tt>:
 
-AccountMailer::     Used to actually send an email
+AccountMailer::     Base class for all real email
 NameParse::         Used by Name to parse scientific names.
 NameSorter::        Used to parse and deal with synonymy, etc. in a list of names.
 Query::             Used to keep track of search queries.

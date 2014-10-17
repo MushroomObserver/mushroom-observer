@@ -81,7 +81,7 @@ class AccountController < ApplicationController
         if !theme.blank?
           # I'm guessing this has something to do with spammer/hacker trying
           # to automate creation of accounts?
-          AccountMailer.denied(params['new_user']).deliver
+          DeniedEmail.build(params['new_user']).deliver
         end
         redirect_back_or_default(:action => :welcome)
       else
@@ -111,7 +111,7 @@ class AccountController < ApplicationController
             :group => group
           )
           flash_notice :runtime_signup_success.t
-          AccountMailer.verify(@new_user).deliver
+          VerifyEmail.build(@new_user).deliver
           redirect_back_or_default(:action => :welcome)
         end
       end
@@ -183,7 +183,7 @@ class AccountController < ApplicationController
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
           content = "Suspicious user:\n  login=#{@user.login.inspect}\n  name=#{@user.name.inspect}\n  email=#{@user.email.inspect}\n  http://mushroomobserver.org/observer/show_user?id=#{@user.id}"
-          AccountMailer.webmaster_question(@user.email, content).deliver
+          WebmasterEmail.build(@user.email, content).deliver
         end
       end
     end
@@ -197,7 +197,7 @@ class AccountController < ApplicationController
   # This is used by the "reverify" page to re-send the verification email.
   def send_verify # :nologin:
     if user = find_or_goto_index(User, params[:id].to_s)
-      AccountMailer.verify(user).deliver
+      VerifyEmail.build(user).deliver
       flash_notice :runtime_reverify_sent.t
       redirect_back_or_default(:action => :welcome)
     end
@@ -261,7 +261,7 @@ class AccountController < ApplicationController
         @new_user.change_password(password)
         if @new_user.save
           flash_notice :runtime_email_new_password_success.t
-          AccountMailer.new_password(@new_user, password).deliver
+          PasswordEmail.build(@new_user, password).deliver
           render(:action => "login")
         else
           flash_object_errors(@new_user)

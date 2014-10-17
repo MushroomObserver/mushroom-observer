@@ -59,7 +59,7 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select('a[href^=/observer/show_user?id=2]', :minimum => 3)
+    assert_select('a[href^=/observer/show_user/2]', :minimum => 3)
     click(:label => 'Mary Newbie')
     assert_template('observer/show_user')
 
@@ -78,10 +78,10 @@ class LurkerTest < IntegrationTestCase
     # Click on name.
     go_back
     # (Should be at least two links to show the name Fungi.)
-    assert_select('a[href^=/name/show_name?id=1]', :minimum => 2)
+    assert_select('a[href^=/name/show_name/1]', :minimum => 2)
     click(:label => /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
-    assert_select('a[href^=/name/create_name_description?id=1]')
+    assert_select('a[href^=/name/create_name_description/1]')
 
     # And lastly there are some images.
     go_back
@@ -99,7 +99,7 @@ class LurkerTest < IntegrationTestCase
     form.change('pattern', 'Coprinus comatus')
     form.select('type', 'Names')
     form.submit('Search')
-    assert_match(/^\/name\/show_name\?id=2/, @request.fullpath)
+    assert_match(/^\/name\/show_name\/2/, @request.fullpath)
 
     # Search for observations of that name.  (Only one.)
     form.select('type', 'Observations')
@@ -109,7 +109,7 @@ class LurkerTest < IntegrationTestCase
     # Search for images of the same thing.  (Still only one.)
     form.select('type', 'Images')
     form.submit('Search')
-    assert_match(/^\/image\/show_image\?id=5/, @request.fullpath)
+    assert_match(/^\/image\/show_image\/5/, @request.fullpath)
 
     # There should be no locations of that name, though.
     form.select('type', 'Locations')

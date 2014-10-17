@@ -47,7 +47,7 @@ class AjaxControllerTest < FunctionalTestCase
     assert_nil(@controller.instance_variable_get('@user'))
     assert_nil(User.current)
     assert_equal(:pt, I18n.locale)
-    assert_equal({}, cookies)
+    assert_equal(0, cookies.count)
     assert_equal({'locale'=>'pt'}, session)
     session.delete('locale')
 

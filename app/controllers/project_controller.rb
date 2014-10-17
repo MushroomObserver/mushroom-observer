@@ -287,8 +287,8 @@ class ProjectController < ApplicationController
         subject = params[:email][:subject]
         content = params[:email][:content]
         for receiver in @project.admin_group.users
-          AccountMailer.admin_request(sender, receiver, @project,
-                                      subject, content).deliver
+          AdminEmail.build(sender, receiver, @project,
+                           subject, content).deliver
         end
         flash_notice(:admin_request_success.t(:title => @project.title))
         redirect_with_query(:action => 'show_project', :id => @project.id)

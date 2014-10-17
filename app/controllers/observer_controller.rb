@@ -1697,7 +1697,7 @@ class ObserverController < ApplicationController
       subject = params[:email][:subject] rescue ''
       content = params[:email][:content] rescue ''
       for receiver in (@object.authors + UserGroup.reviewers.users).uniq
-        AccountMailer.author_request(@user, receiver, @object, subject, content).deliver
+        AuthorEmail.build(@user, receiver, @object, subject, content).deliver
       end
       flash_notice(:request_success.t)
       parent = @object.parent
@@ -2104,7 +2104,7 @@ class ObserverController < ApplicationController
     elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
     else
-      AccountMailer.webmaster_question(@email, @content).deliver
+      WebmasterEmail.build(@email, @content).deliver
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to(:action => "list_rss_logs")
     end
@@ -2116,7 +2116,7 @@ class ObserverController < ApplicationController
        request.method == "POST"
       subject = params[:email][:subject]
       content = params[:email][:content]
-      AccountMailer.user_question(@user, @target, subject, content).deliver
+      UserEmail.build(@user, @target, subject, content).deliver
       flash_notice(:runtime_ask_user_question_success.t)
       redirect_to(:action => 'show_user', :id => @target.id)
     end
@@ -2127,7 +2127,7 @@ class ObserverController < ApplicationController
        email_question(@observation) and
        request.method == "POST"
       question = params[:question][:content]
-      AccountMailer.observation_question(@user, @observation, question).deliver
+      ObservationEmail.build(@user, @observation, question).deliver
       flash_notice(:runtime_ask_observation_question_success.t)
       redirect_with_query(:action => 'show_observation', :id => @observation.id)
     end
@@ -2138,7 +2138,7 @@ class ObserverController < ApplicationController
        email_question(@image, :email_general_commercial) and
        request.method == "POST"
       commercial_inquiry = params[:commercial_inquiry][:content]
-      AccountMailer.commercial_inquiry(@user, @image, commercial_inquiry).deliver
+      CommercialEmail.build(@user, @image, commercial_inquiry).deliver
       flash_notice(:runtime_commercial_inquiry_success.t)
       redirect_with_query(:controller => 'image', :action => 'show_image',
         :id => @image.id)

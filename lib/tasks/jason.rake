@@ -690,6 +690,6 @@ namespace :jason do
   desc "test"
   task(:test => :environment) do
     user = User.find(252)
-    AccountMailer.user_question(user, user, 'test', 'test').deliver
+    UserEmail.build(user, user, 'test', 'test').deliver
   end
 end

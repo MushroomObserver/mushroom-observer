@@ -626,7 +626,7 @@ class NameController < ApplicationController
         :namings => @name.namings.length,
         :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      AccountMailer.webmaster_question(@user.email, content).deliver
+      WebmasterQuestion(@user.email, content).deliver
       NameControllerTest.report_email(content) if TESTING
     end
   end
@@ -734,7 +734,7 @@ class NameController < ApplicationController
                                   :that => "##{new_name.id}: " + new_name.real_search_name,
                                   :this_url => "#{MO.http_domain}/name/show_name/#{@name.id}",
                                   :that_url => "#{MO.http_domain}/name/show_name/#{new_name.id}")
-    AccountMailer.webmaster_question(@user.email, content).deliver
+    WebmasterEmail.build(@user.email, content).deliver
     NameControllerTest.report_email(content) if TESTING
   end
 

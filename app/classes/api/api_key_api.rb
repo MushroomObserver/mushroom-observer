@@ -40,7 +40,7 @@ class API
 
     def after_create(api_key)
       if @for_user != @user
-        AccountMailer.verify_api_key(@for_user, @user, api_key).deliver
+        VerifyAPIKeyEmail.build(@for_user, @user, api_key).deliver
       end
     end
 

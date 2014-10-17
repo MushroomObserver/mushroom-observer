@@ -1,25 +1,6 @@
 # encoding: utf-8
-#
-#  = Conference Event Registration Email
-#
-#  This email is sent whenever someone registers for a conference event.  This is sent
-#  to email address given in the registration.
-#
-#  == Associated data
-#
-#  registration::    integer, refers to a ConferenceRegistration id
-#
-#  == Class methods
-#
-#  create_email:: Create new email.
-#
-#  == Instance methods
-#
-#  registration::           Get instance of ConferenceRegistration in question.
-#  deliver_email::  Deliver via AccountMailer#email_registration.deliver
-#
-################################################################################
 
+# Conference Event Registration Email
 class QueuedEmail::Registered < QueuedEmail
   def registration; get_object(:registration, ::ConferenceRegistration); end
 
@@ -32,6 +13,6 @@ class QueuedEmail::Registered < QueuedEmail
   end
   
   def deliver_email
-    AccountMailer.email_registration(to_user, registration).deliver
+    RegistrationEmail.build(to_user, registration).deliver
   end
 end

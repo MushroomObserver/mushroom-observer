@@ -102,7 +102,7 @@ class PostObservationTest < IntegrationTestCase
     assert(new_obs.updated_at > Time.now - 1.minute)
     assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location], new_obs.is_collection_location)
-    assert_equal(expected_values[:notes], new_obs.notes)
+    assert_equal(expected_values[:notes], new_obs.notes.strip)
   end
 
   def destroy_observation
@@ -141,7 +141,7 @@ class PostObservationTest < IntegrationTestCase
     assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location], new_obs.is_collection_location)
     assert_equal(expected_values[:specimen], new_obs.specimen)
-    assert_equal(expected_values[:notes], new_obs.notes)
+    assert_equal(expected_values[:notes], new_obs.notes.strip)
   end
 
   def assert_observation_has_correct_location(expected_values)
@@ -170,7 +170,7 @@ class PostObservationTest < IntegrationTestCase
     assert_obj_list_equal([new_img], new_obs.images)
     assert_dates_equal(expected_values[:when], new_img.when)
     assert_equal(expected_values[:user].legal_name, new_img.copyright_holder)
-    assert_equal(expected_values[:image_notes], new_img.notes)
+    assert_equal(expected_values[:image_notes], new_img.notes.strip)
   end
 
   def assert_new_location_is_correct(expected_values)
@@ -203,8 +203,8 @@ class PostObservationTest < IntegrationTestCase
     assert_match(new_obs.notes, response.body)
     assert_match(new_img.notes, response.body)
     assert_no_link_exists_containing('observations_at_where')
-    assert_link_exists_containing("show_location?id=#{new_loc.id}")
-    assert_link_exists_containing("show_image?id=#{new_img.id}")
+    assert_link_exists_containing("show_location/#{new_loc.id}")
+    assert_link_exists_containing("show_image/#{new_img.id}")
   end
 
   def review_flash(patterns)

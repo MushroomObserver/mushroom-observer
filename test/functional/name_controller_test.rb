@@ -331,9 +331,9 @@ class NameControllerTest < FunctionalTestCase
     get_with_dump(:name_search, :pattern => 'agaricis campestrus')
     assert_template(action: 'list_names')
     assert_select('div.Warnings', 1)
-    assert_select('a[href*=show_name?id=19]', :text => Name.find(19).search_name)
-    assert_select('a[href*=show_name?id=20]', :text => Name.find(20).search_name)
-    assert_select('a[href*=show_name?id=21]', :text => Name.find(21).search_name)
+    assert_select('a[href*=show_name/19]', :text => Name.find(19).search_name)
+    assert_select('a[href*=show_name/20]', :text => Name.find(20).search_name)
+    assert_select('a[href*=show_name/21]', :text => Name.find(21).search_name)
 
     get(:name_search, :pattern => 'Agaricus')
     assert_template(action: 'list_names')
@@ -432,7 +432,7 @@ class NameControllerTest < FunctionalTestCase
 
   def ids_from_links(links)
     links.map do |l|
-      l.url.match(/.*id=([0-9]+)/)[1].to_i
+      l.url.match(/.*\/([0-9]+)/)[1].to_i
     end
   end
   

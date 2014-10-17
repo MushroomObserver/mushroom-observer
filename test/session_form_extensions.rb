@@ -213,12 +213,12 @@ module SessionExtensions
     # Find the field whose ID ends in the given String or matches the given
     # Regexp.  Returns its value as a String if found, else +nil+.
     def get_value(id)
-      get_field(id).value
+      get_field(id).value.strip
     end
 
     # Call get_value and flunk an assertion if field not found.
     def get_value!(id)
-      get_field(id, :strict).value
+      get_field(id, :strict).value.strip
     end
 
     # Make sure the form does _not_ have a given field.
@@ -237,7 +237,7 @@ module SessionExtensions
     # expected value.
     def assert_value(id, val, msg=nil)
       field = get_field!(id)
-      val2 = field.value.to_s
+      val2 = field.value.to_s.strip
       msg ||= "Expected value of form field #{id.inspect} to be #{val.inspect}."
       if val.is_a?(Regexp)
         context.assert_match(val, val2.to_s, msg)
