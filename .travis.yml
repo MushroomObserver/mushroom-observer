@@ -11,3 +11,4 @@ before_script:
   - rake db:schema:load
   - rake db:fixtures:load
   - rake lang:update
+  - mysql -u mo -pmo mo_test -e 'select * from schema_migrations'
