@@ -6,3 +6,7 @@ rvm:
 # script: bundle exec rake lang:update
 
 install: ./script/travis_setup
+
+before_script:
+  - rake db:schema:load
+  - rake lang:update
