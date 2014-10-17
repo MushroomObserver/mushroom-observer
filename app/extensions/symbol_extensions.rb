@@ -121,11 +121,13 @@ class Symbol
   def localize(args={}, level=[])
     result = nil
     Language.note_usage_of_tag(self)
+    print "localize: #{MO.locale_namespace}.#{self}\n"
     if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: '')) != ''
       result = localize_postprocessing(val, args, level)
     elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}", default: '')) != ''
       result = localize_postprocessing(val, args, level, :captialize)
     else
+      print "localize: cleanup case\n"
       if TESTING
         @@missing_tags << self if defined?(@@missing_tags)
       end
@@ -140,6 +142,7 @@ class Symbol
       end
       result = "[:#{self}#{args_str}]"
     end
+    print "localize#result: #{result}\n"
     return result.html_safe
   end
 
