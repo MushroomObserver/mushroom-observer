@@ -4,4 +4,4 @@ rvm:
 # uncomment this line if your project needs to run something other than `rake`:
 # script: bundle exec rspec spec
 
-install: ./script/travis_startup
+install: ./script/travis_setup
