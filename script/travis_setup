@@ -52,4 +52,3 @@ fi
 
 git pull
 bundle install
-mysql -u mo -pmo mo_test -e 'select * from schema_migrations'
