@@ -9,4 +9,5 @@ install: ./script/travis_setup
 
 before_script:
   - rake db:schema:load
+  - rake db:fixtures:load
   - rake lang:update

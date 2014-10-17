@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo $LANG
-LANG=en_US.UTF-8
-export LANG
-
 mysql -u mo -pmo mo_development -e ''
 if [ ! $? -eq 0 ]; then
     mysql -u root < db/initialize.sql
