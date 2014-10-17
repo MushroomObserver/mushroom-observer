@@ -648,7 +648,7 @@ class LocationController < ApplicationController
                                               :that => "##{merge.id}: " + merge.name,
                                               :this_url => "#{MO.http_domain}/location/show_location/#{@location.id}",
                                               :that_url => "#{MO.http_domain}/location/show_location/#{merge.id}")
-            AccountMailer.webmaster_question(@user.email, content).deliver
+            WebmasterEmail.build(@user.email, content).deliver
           end
 
         # Otherwise it is safe to change the name.

@@ -17,3 +17,5 @@ production-logs
 .tm_properties
 
 .bundle
+.rubocop_todo.yml
+rubocop.out

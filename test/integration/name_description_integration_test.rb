@@ -266,17 +266,17 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def show_name_description_uri
       desc = new_name_description
-      "/name/show_name_description?id=#{desc.id}"
+      "/name/show_name_description/#{desc.id}"
     end
 
     def edit_name_description_uri
       desc = new_name_description
-      "/name/edit_name_description?id=#{desc.id}"
+      "/name/edit_name_description/#{desc.id}"
     end
 
     def destroy_name_description_uri
       desc = new_name_description
-      "/name/destroy_name_description?id=#{desc.id}"
+      "/name/destroy_name_description/#{desc.id}"
     end
 
     def create_name_description

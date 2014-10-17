@@ -187,9 +187,9 @@ class ExpertTest < IntegrationTestCase
     ].sort, obs.map(&:name).map(&:search_name).sort)
     assert_equal('List Title', spl.title)
     assert_equal(albion, spl.location)
-    assert_equal('List notes.', spl.notes)
+    assert_equal('List notes.', spl.notes.strip)
     assert_equal(albion, obs.last.location)
-    assert_equal('Member notes.', obs.last.notes)
+    assert_equal('Member notes.', obs.last.notes.strip)
     assert_true(obs.last.is_collection_location)
     assert_true(obs.last.specimen)
 
@@ -243,11 +243,11 @@ class ExpertTest < IntegrationTestCase
     assert_equal('Something New', spl.title)
     assert_equal(new_location, spl.where)
     assert_equal(nil, spl.location)
-    assert_equal('New list notes.', spl.notes)
+    assert_equal('New list notes.', spl.notes.strip)
     assert_equal(nil, obs.last.location)
     assert_equal(new_location, obs.last.where)
     assert_equal(nil, obs.last.location)
-    assert_equal('New member notes.', obs.last.notes)
+    assert_equal('New member notes.', obs.last.notes.strip)
     assert_false(obs.last.is_collection_location)
     assert_false(obs.last.specimen)
 
@@ -265,7 +265,7 @@ class ExpertTest < IntegrationTestCase
     sess.assert_flash_success
     sess.assert_template('species_list/show_species_list')
     sess.assert_select('div#Title', :text => /#{spl.title}/)
-    sess.assert_select("a[href*=edit_species_list?id=#{spl.id}]", :text => /edit/i)
+    sess.assert_select("a[href*=edit_species_list/#{spl.id}]", :text => /edit/i)
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
@@ -282,7 +282,7 @@ class ExpertTest < IntegrationTestCase
     sess.click(:href => /add_comment/)
     sess.assert_template('comment/add_comment')
     sess.assert_select('div#Title', :text => /#{spl.title}/)
-    sess.assert_select("a[href*=show_species_list?id=#{spl.id}]", :text => /cancel/i)
+    sess.assert_select("a[href*=show_species_list/#{spl.id}]", :text => /cancel/i)
     sess.open_form do |form|
       form.change('comment_summary', 'Slartibartfast')
       form.change('comment_comment', 'Steatopygia')

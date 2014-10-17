@@ -35,19 +35,19 @@ class RandomTest < IntegrationTestCase
     sess.assert_template('observer/how_to_help')
     sess.assert_no_link_exists('/account/login')
     sess.assert_link_exists('/account/logout_user')
-    sess.assert_link_exists('/observer/show_user?id=1')
+    sess.assert_link_exists('/observer/show_user/1')
 
     sess.click(:label => 'Logout')
     sess.assert_template('account/logout_user')
     sess.assert_link_exists('/account/login')
     sess.assert_no_link_exists('/account/logout_user')
-    sess.assert_no_link_exists('/observer/show_user?id=1')
+    sess.assert_no_link_exists('/observer/show_user/1')
 
     sess.click(:label => 'How To Help')
     sess.assert_template('observer/how_to_help')
     sess.assert_link_exists('/account/login')
     sess.assert_no_link_exists('/account/logout_user')
-    sess.assert_no_link_exists('/observer/show_user?id=1')
+    sess.assert_no_link_exists('/observer/show_user/1')
   end
 
   test "sessions" do

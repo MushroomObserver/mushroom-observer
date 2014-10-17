@@ -1,59 +1,6 @@
 # encoding: utf-8
-#
-#  = Observation Change Email
-#
-#  This email is sent whenever an Observation is changed.  There are several
-#  cases in which this happens: 
-#
-#  1. when the observation is edited
-#  2. when images are added or removed
-#  3. when the observation is deleted
-#
-#  In practice, I think these only get sent to people "interested in" the
-#  Observation in question.
-#
-#  == Associated data
-#
-#  observation::  integer, refers to an Observation id
-#  note::         string, a list of attribute (names) that were changed
-#
-#  This is somewhat complicated, so it's worth explaining in more detail.
-#
-#  If the observation was destroyed:
-#
-#    observation = 0
-#    note        = observation.unique_format_name
-#
-#  If the observation or images were changed:
-#
-#    observation = observation.id
-#    note        = changes.join(",")
-#
-#  Where "changes" are any of these words (only one of each allowed):
-#
-#  "date"::                   Date was changed.
-#  "location"::               Location was changed.
-#  "notes"::                  Notes were changed.
-#  "specimen"::               Is there a specimen? changed.
-#  "is_collection_location":: Is this where it was collected? changed.
-#  "thumb_image_id"::         The thumbnail changed.
-#  "add_image"::              An image was added.
-#  "removed_image"::          An image was removed.
-#
-#  == Class methods
-#
-#  change_observation::  Create/modify email after editing an observation.
-#  change_images::       Create/modify email after adding/removing images.
-#  destroy_observation:: Create/modify email after destroying an observation.
-#
-#  == Instance methods
-#
-#  observation::    Get instance of Observation that was changed.
-#  note::           Get string of attributes that were changed.
-#  deliver_email::  Deliver via AccountMailer#deliver_observation_change.
-#
-################################################################################
 
+# Observation Change Email
 class QueuedEmail::ObservationChange < QueuedEmail
   def observation; get_object(:observation, ::Observation, :allow_nil); end
   def note; get_note; end
@@ -110,7 +57,7 @@ class QueuedEmail::ObservationChange < QueuedEmail
   end
 
   def deliver_email
-    AccountMailer.observation_change(user, to_user, observation, note, queued).deliver
+    ObservationChangeEmail.build(user, to_user, observation, note, queued).deliver
   end
 
 ################################################################################

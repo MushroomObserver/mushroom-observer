@@ -37,7 +37,7 @@
 
 class SpeciesListController < ApplicationController
   # require 'csv'
-  require 'rtf'
+  # require 'rtf'
 
   before_filter :login_required, :except => [
     :index_species_list,

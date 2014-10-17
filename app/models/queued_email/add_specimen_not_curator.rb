@@ -1,27 +1,6 @@
 # encoding: utf-8
-#
-#  = Add Specimen Not Curator Email
-#
-#  This email is sent whenever a specimen is for an herbarium by someone who is not a curator of that herbarium.
-#  It is sent to:
-#
-#  1. the herbarium curators
-#
-#  == Associated data
-#
-#  specimen:: integer, refers to a Specimen id
-#
-#  == Class methods
-#
-#  create_email:: Creates new email.
-#
-#  == Instance methods
-#
-#  observation::    Get instance of Specimen.
-#  deliver_email::  Deliver via AccountMailer#deliver_add_specimen_not_curator.
-#
-################################################################################
 
+# Add Specimen Not Curator Email
 class QueuedEmail::AddSpecimenNotCurator < QueuedEmail
   def specimen; get_object(:specimen, ::Specimen);   end
 
@@ -36,7 +15,7 @@ class QueuedEmail::AddSpecimenNotCurator < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     if specimen
-      AccountMailer.add_specimen_not_curator(user, to_user, specimen).deliver
+      AddSpecimenEmail.build(user, to_user, specimen).deliver
     end
   end
 end

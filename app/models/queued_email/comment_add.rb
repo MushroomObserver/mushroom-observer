@@ -1,31 +1,6 @@
 # encoding: utf-8
-#
-#  = Comment Email
-#
-#  This email is sent whenever someone comments on someone else's object.
-#  There are actually three cases in which this happens:
-#
-#  1. sent to owner of object
-#  2. sent "in response" to an earlier comment
-#  3. sent to third parties "interested in" or "watching" the object
-#
-#  == Associated data
-#
-#  comment::    integer, refers to a Comment id
-#
-#  == Class methods
-#
-#  find_or_create_email:: If there is already an email for this comment to this
-#                         user, it will just "touch" it, otherwise if creates
-#                         a new email.
-#
-#  == Instance methods
-#
-#  comment::        Get instance of Comment that triggered this email.
-#  deliver_email::  Deliver via AccountMailer#deliver_comment.
-#
-################################################################################
 
+# Comment Email
 class QueuedEmail::CommentAdd < QueuedEmail
   def comment; get_object(:comment, Comment); end
 
@@ -53,7 +28,7 @@ class QueuedEmail::CommentAdd < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     if comment
-      AccountMailer.comment(user, to_user, comment.target, comment).deliver
+      CommentEmail.build(user, to_user, comment.target, comment).deliver
     end
   end
 end

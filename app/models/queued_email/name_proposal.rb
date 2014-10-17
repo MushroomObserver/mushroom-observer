@@ -1,33 +1,6 @@
 # encoding: utf-8
-#
-#  = Name Proposal Email
-#
-#  This email is sent whenever someone proposes a new name for an Observation.
-#  It is sent to:
-#
-#  1. the owner of the Observation
-#  2. anyone "interested in" the Observation
-#
-#  *NOTE*: Users who are tracking a name will get a different type of email,
-#  QueuedEmail::NameTracking.
-#
-#  == Associated data
-#
-#  naming::         integer, refers to a Naming id
-#  observation::    integer, refers to a Observation id
-#
-#  == Class methods
-#
-#  create_email::  Create new email.
-#
-#  == Instance methods
-#
-#  naming::         Get instance of Observation in question.
-#  observation::    Get instance of new Naming.
-#  deliver_email::  Deliver via AccountMailer#deliver_name_proposal.
-#
-################################################################################
 
+# Name Proposal Email
 class QueuedEmail::NameProposal < QueuedEmail
   def naming;      get_object(:naming, Naming);           end
   def observation; get_object(:observation, Observation); end
@@ -45,7 +18,7 @@ class QueuedEmail::NameProposal < QueuedEmail
   def deliver_email
     # Make sure nothing's been deleted since email was queued.
     if naming && observation
-      AccountMailer.name_proposal(user, to_user, naming, observation).deliver
+      NameProposalEmail.build(user, to_user, naming, observation).deliver
     end
   end
 end

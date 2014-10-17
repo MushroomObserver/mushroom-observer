@@ -1,14 +1,14 @@
 # encoding: utf-8
 #
-#  = QueuedEmail
+# = QueuedEmail
 #
-#  Model to describe a single email.  There are several related classes in a
-#  somewhat complicated relationship, so I'm going to describe them all here.
+#  There are several related classes in a somewhat complicated
+#  relationship, so I'm going to describe them all here.
 #
-#  QueuedQueuedEmail::    Base class.
-#  QueuedEmail::Xxxx::    Derived classes: one record per email.
-#  AccountMailer::  This is the class that actually sends email.  It is never
-#                   instantiated; it's just a collection of class methods.
+#  QueuedQueuedEmail:: Base class.
+#  QueuedEmail::Xxxx:: Derived classes: one record per email.
+#  AccountMailer:: Base class for the classes that actually render and
+#  deliver each type of email.
 #
 #  In addition, each QueuedEmail record can own zero or more of each of these:
 #
@@ -18,7 +18,7 @@
 #
 #  The specific email classes know which data are required for themselves: how
 #  to store it, how to retrieve it, and how to deliver the actual mail (via
-#  AccountMailer).
+#  an AccountMailer subclass).
 #
 #  == Typical execution flow
 #
@@ -48,11 +48,12 @@
 #       email.send_email()
 #
 #  7. QueuedEmail::Blah grabs all the attached data it needs (often done in the
-#     constructor, actually), and calls the appropriate AccountMailer method:
+#     constructor, actually), and calls the build method of the appropriate
+#     AccountMailer subclass:
 #
-#       AccountMailer.comment(from, to, observation, comment)
+#       CommentEmail.build(from, to, observation, comment)
 #
-#  8. AccountMailer renders the email message and dispatches it to postfix or
+#  8. AccountMailer subclass renders the email message and dispatches it to postfix or
 #     whichever mailserver is responsible for delivering email.
 #
 #  == Basic properties
@@ -113,6 +114,7 @@
 #
 ################################################################################
 
+# Stores an email and details about it to get delivered later
 class QueuedEmail < AbstractModel
   has_many :queued_email_integers, :dependent => :destroy
   has_many :queued_email_strings,  :dependent => :destroy

@@ -156,8 +156,8 @@ class AmateurTest < IntegrationTestCase
     assert_match(summary, response.body)
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_select("a[href*=edit_comment?id=#{com.id}]", 1)
-    assert_select("a[href*=destroy_comment?id=#{com.id}]", 1)
+    assert_select("a[href*=edit_comment/#{com.id}]", 1)
+    assert_select("a[href*=destroy_comment/#{com.id}]", 1)
 
     # Try changing it.
     click(:label => /edit/i, :href => /edit_comment/)
@@ -399,8 +399,8 @@ class AmateurTest < IntegrationTestCase
       # (Make sure naming shows up somewhere.)
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
-      assert_select("a[href*=edit_naming?id=#{naming.id}]", 1)
-      assert_select("a[href*=destroy_naming?id=#{naming.id}]", 1)
+      assert_select("a[href*=edit_naming/#{naming.id}]", 1)
+      assert_select("a[href*=destroy_naming/#{naming.id}]", 1)
 
       # Try changing it.
       author = '(Pers.) Grev.'
