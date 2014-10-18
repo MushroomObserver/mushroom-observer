@@ -11,5 +11,5 @@ before_script:
   - rake db:schema:load
   - rake db:fixtures:load
   - rake lang:update
-  - ls db/migrate
-  - mysql -u mo -pmo mo_test -e 'select * from schema_migrations'
+  - ls config/locales
+  - grep validate_observation_user_missing config/locales/*
