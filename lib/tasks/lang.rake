@@ -16,7 +16,6 @@ def define_tasks(action, verbose, verbose_method, description)
   desc description.gsub(/XXX/, 'official').gsub(/\(S\)/, '')
   task(:official => :setup) do
     lang = Language.official
-    print "#{lang.class}: #{lang}\n"
     lang.verbose(verbose + ' ' + lang.send(verbose_method))
     lang.send(action)
   end

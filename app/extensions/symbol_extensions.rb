@@ -13,6 +13,16 @@
 ################################################################################
 
 class Symbol
+  @raise_errors = false
+
+  def self.raise_errors(turn_on = true)
+    @raise_errors = turn_on
+  end
+
+  def self.raise_error?
+    @raise_errors
+  end
+
   # Converts Symbol directly to lowercase, without making you go through String.
   def downcase
     to_s.downcase.to_sym
@@ -121,16 +131,12 @@ class Symbol
   def localize(args={}, level=[])
     result = nil
     Language.note_usage_of_tag(self)
-    print "localize: #{MO.locale_namespace}.#{self}\n"
     if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: '')) != ''
       result = localize_postprocessing(val, args, level)
     elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}", default: '')) != ''
       result = localize_postprocessing(val, args, level, :captialize)
     else
-      print "localize: cleanup case\n"
-      if TESTING
-        @@missing_tags << self if defined?(@@missing_tags)
-      end
+      @@missing_tags << self if defined?(@@missing_tags)
       if args.any?
         pairs = []
         for k, v in args
@@ -142,7 +148,6 @@ class Symbol
       end
       result = "[:#{self}#{args_str}]"
     end
-    print "localize#result: #{result}\n"
     return result.html_safe
   end
 
@@ -226,10 +231,6 @@ class Symbol
           "#{val}s".to_sym.l.capitalize_first :
           val.to_s.strip_html.capitalize_first
 
-      elsif TESTING
-        raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
-          "#{I18n.locale} localization for " +
-          ([self] + level).map(&:inspect).join(' --> '))
       else
         "[#{orig}]"
       end
@@ -255,11 +256,11 @@ class Symbol
             elsif !val.match(/^([a-z][a-z_]*\d*)$/)
               raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
                 "#{I18n.locale} localization for " +
-                ([self] + level).map(&:inspect).join(' --> ')) if TESTING
+                ([self] + level).map(&:inspect).join(' --> ')) if Symbol.raise_error?
             elsif !args.has_key?(val.to_sym)
               raise(ArgumentError, "Forgot to pass :#{val} into " +
                 "#{I18n.locale} localization for " +
-                ([self] + level).map(&:inspect).join(' --> ')) if TESTING
+                ([self] + level).map(&:inspect).join(' --> ')) if Symbol.raise_error?
             else
               val = args[val.to_sym]
             end
@@ -267,7 +268,7 @@ class Symbol
           else
             raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
               "arguments for #{I18n.locale} tag :#{tag} embedded in " +
-              ([self] + level).map(&:inspect).join(' --> ')) if TESTING
+              ([self] + level).map(&:inspect).join(' --> ')) if Symbol.raise_error?
           end
         end
       end

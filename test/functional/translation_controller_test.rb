@@ -152,20 +152,24 @@ class TranslationControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_edit_translation_form
-    old_one = :one.l
-
+  def test_edit_translation_form_get
     login('rolf')
     get(:edit_translations)
     assert_no_flash
     assert_response(:success, :locale => 'en-US')
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
+  end
 
+  def test_edit_translation_form_get_tag
+    login('rolf')
     get(:edit_translations, :locale => 'en-US', :tag => 'xxx')
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_select("textarea[name=tag_xxx]", 1)
     assert_textarea_value(:tag_xxx, '')
+  end
 
+  def test_edit_translation_form_get_tag_two
+    login('rolf')
     get_with_dump(:edit_translations, :locale => 'en-US', :tag => 'two')
     assert_no_flash
     assert_response(:success)
@@ -178,110 +182,129 @@ class TranslationControllerTest < FunctionalTestCase
     assert_textarea_value(:tag_twos, 'twos')
     assert_textarea_value(:tag_TWO, 'Two')
     assert_textarea_value(:tag_TWOS, 'Twos')
+  end
 
+  def test_edit_translation_form_post_save
+    use_test_locales {
+      login('rolf')
+      post(:edit_translations,
+           :locale => 'en-US',
+           :tag => 'one',
+           :tag_one => 'uno',
+           :commit => :SAVE.l
+           )
+      assert_flash_success
+      assert_equal('uno', :one.l)
+      assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+      assert_select("textarea[name=tag_one]", 1)
+      assert_textarea_value(:tag_one, 'uno')
+    }
+  end
+
+  def test_edit_translation_form_post_cancel
+    login('rolf')
+    old_one = :one.l
+    post(:edit_translations,
+         :locale => 'en-US',
+         :tag => 'one',
+         :tag_one => 'ichi',
+         :commit => :CANCEL.l
+         )
+    assert_no_flash
     assert_equal(old_one, :one.l)
-    post(:edit_translations,
-      :locale => 'en-US',
-      :tag => 'one',
-      :tag_one => 'uno',
-      :commit => :SAVE.l
-    )
-    assert_flash_success
-    assert_equal('uno', :one.l)
-    assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-    assert_select("textarea[name=tag_one]", 1)
-    assert_textarea_value(:tag_one, 'uno')
-
-    post(:edit_translations,
-      :locale => 'en-US',
-      :tag => 'one',
-      :tag_one => 'ichi',
-      :commit => :CANCEL.l
-    )
-    assert_no_flash
-    assert_equal('uno', :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
+  end
 
+  def test_edit_translation_form_post_reload_greek
+    login('rolf')
+    old_one = :one.l
     post(:edit_translations,
-      :locale => 'el-GR',
-      :tag => 'one',
-      :tag_one => 'ichi',
-      :commit => :RELOAD.l
-    )
+         :locale => 'el-GR',
+         :tag => 'one',
+         :tag_one => 'ichi',
+         :commit => :RELOAD.l
+         )
     assert_no_flash
-    assert_equal('uno', :one.l)
+    assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_textarea_value(:tag_one, 'ένα')
+  end
 
-    post(:edit_translations,
-      :locale => 'el-GR',
-      :tag => 'one',
-      :tag_one => 'ichi',
-      :commit => :SAVE.l
-    )
-    assert_flash_success
-    assert_equal('uno', :one.l)
-    assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-    assert_textarea_value(:tag_one, 'ichi')
-    I18n.locale = 'el'
-    assert_equal('ichi', :one.l)
+  def test_edit_translation_form_post_save_greek
+    use_test_locales {
+      login('rolf')
+      post(:edit_translations,
+           :locale => 'el-GR',
+           :tag => 'one',
+           :tag_one => 'ichi',
+           :commit => :SAVE.l
+           )
+      assert_flash_success
+      assert_equal('uno', :one.l)
+      assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+      assert_textarea_value(:tag_one, 'ichi')
+      I18n.locale = 'el'
+      assert_equal('ichi', :one.l)
+    }
   end
 
   def test_edit_translation_ajax_form
-    old_one = :one.l
+    use_test_locales {
+      old_one = :one.l
 
-    login('rolf')
-    get(:edit_translations_ajax_get, :locale => 'en-US', :tag => 'two')
-    assert_no_flash
-    assert_response(:success)
-    assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-    assert_select("textarea[name=tag_two]", 1)
-    assert_select("textarea[name=tag_twos]", 1)
-    assert_select("textarea[name=tag_TWO]", 1)
-    assert_select("textarea[name=tag_TWOS]", 1)
-    assert_textarea_value(:tag_two, 'two')
-    assert_textarea_value(:tag_twos, 'twos')
-    assert_textarea_value(:tag_TWO, 'Two')
-    assert_textarea_value(:tag_TWOS, 'Twos')
+      login('rolf')
+      get(:edit_translations_ajax_get, :locale => 'en-US', :tag => 'two')
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+      assert_select("textarea[name=tag_two]", 1)
+      assert_select("textarea[name=tag_twos]", 1)
+      assert_select("textarea[name=tag_TWO]", 1)
+      assert_select("textarea[name=tag_TWOS]", 1)
+      assert_textarea_value(:tag_two, 'two')
+      assert_textarea_value(:tag_twos, 'twos')
+      assert_textarea_value(:tag_TWO, 'Two')
+      assert_textarea_value(:tag_TWOS, 'Twos')
 
-    assert_equal(old_one, :one.l)
-    post(:edit_translations_ajax_post,
-      :locale => 'en-US',
-      :tag => 'one',
-      :tag_one => 'uno',
-      :commit => :SAVE.l
-    )
-    assert_no_flash
-    assert_match(/locale = "en"/, @response.body)
-    assert_match(/tag = "one"/, @response.body)
-    assert_match(/str = "uno"/, @response.body)
-    assert_equal('uno', :one.l)
+      assert_equal(old_one, :one.l)
+      post(:edit_translations_ajax_post,
+           :locale => 'en-US',
+           :tag => 'one',
+           :tag_one => 'uno',
+           :commit => :SAVE.l
+           )
+      assert_no_flash
+      assert_match(/locale = "en"/, @response.body)
+      assert_match(/tag = "one"/, @response.body)
+      assert_match(/str = "uno"/, @response.body)
+      assert_equal('uno', :one.l)
 
-    get(:edit_translations_ajax_get, :locale => 'en-US', :tag => 'one')
-    assert_no_flash
-    assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-    assert_select("textarea[name=tag_one]", 1)
-    assert_textarea_value(:tag_one, 'uno')
+      get(:edit_translations_ajax_get, :locale => 'en-US', :tag => 'one')
+      assert_no_flash
+      assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+      assert_select("textarea[name=tag_one]", 1)
+      assert_textarea_value(:tag_one, 'uno')
 
-    post(:edit_translations_ajax_post,
-      :locale => 'el-GR',
-      :tag => 'one',
-      :tag_one => 'ichi',
-      :commit => :SAVE.l
-    )
-    assert_no_flash
-    assert_match(/locale = "el"/, @response.body)
-    assert_match(/tag = "one"/, @response.body)
-    assert_match(/str = "ichi"/, @response.body)
-    assert_equal('uno', :one.l)
+      post(:edit_translations_ajax_post,
+           :locale => 'el-GR',
+           :tag => 'one',
+           :tag_one => 'ichi',
+           :commit => :SAVE.l
+           )
+      assert_no_flash
+      assert_match(/locale = "el"/, @response.body)
+      assert_match(/tag = "one"/, @response.body)
+      assert_match(/str = "ichi"/, @response.body)
+      assert_equal('uno', :one.l)
 
-    get(:edit_translations_ajax_get, :locale => 'el-GR', :tag => 'one')
-    assert_no_flash
-    assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-    assert_textarea_value(:tag_one, 'ichi')
+      get(:edit_translations_ajax_get, :locale => 'el-GR', :tag => 'one')
+      assert_no_flash
+      assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
+      assert_textarea_value(:tag_one, 'ichi')
 
-    I18n.locale = 'el'
-    assert_equal('ichi', :one.l)
+      I18n.locale = 'el'
+      assert_equal('ichi', :one.l)
+    }
   end
 
   def test_page_expired

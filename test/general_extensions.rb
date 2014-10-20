@@ -55,6 +55,10 @@ module GeneralExtensions
   def katrina; users(:katrina); end
   def roy; users(:roy); end
 
+  def use_test_locales(&block)
+    Language.alt_locales_path("config/test_locales", &block)
+  end
+
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
     if not FileTest.exist?(MO.local_image_files)

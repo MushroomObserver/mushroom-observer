@@ -141,88 +141,80 @@ class LanguageExporterTest < UnitTestCase
     assert_block(msg) { !!in_tag == (in_tag_end == 1) }
     Language.clear_verbose_messages
   end
-
+  
+  def export_check(export_data, message, pass)
+    use_test_locales {
+      @official.write_export_file_lines(export_data)
+      result = @official.send_private(message)
+      msg = assert_message("#{export_data}\n should have " +
+                           (pass ? "passed" : "failed"))
+      assert_block(msg) { pass ? result : !result }
+      Language.clear_verbose_messages
+    }
+  end
+    
   def test_check_export_file_for_duplicates
-    export_file = [
-      "  tag1: val1\n",
-      "  tag2: val2\n",
-      "  tag3: val3\n",
-    ]
-    @official.write_export_file_lines(export_file)
+    export_data = [
+                   "  tag1: val1\n",
+                   "  tag2: val2\n",
+                   "  tag3: val3\n",
+                  ]
+    export_check(export_data, :check_export_file_for_duplicates, true)
 
-    result = @official.send_private(:check_export_file_for_duplicates)
-    msg = assert_message('Expected first version to pass.')
-    assert_block(msg) { result }
-    Language.clear_verbose_messages
-
-    export_file << "  tag1: val4\n"
-    result = @official.send_private(:check_export_file_for_duplicates)
-    msg = assert_message('Expected second version to fail.')
-    assert_block(msg) { !result }
-    Language.clear_verbose_messages
+    export_data << "  tag1: val4\n"
+    export_check(export_data, :check_export_file_for_duplicates, false)
   end
 
   def test_check_export_file_data
-    export_file = [
+    export_data = [
       "  tag1: >\n",
       "    blah blah blah\n",
       "\n",
       "  tag2: val2\n",
       "  tag3: val3[:tag2]\n",
     ]
-    @official.write_export_file_lines(export_file)
 
-    result = @official.send_private(:check_export_file_data)
-    msg = assert_message('Expected first version to pass.')
-    assert_block(msg) { result }
-    Language.clear_verbose_messages
+    export_check(export_data, :check_export_file_data, true)
 
     # Value of tag4 will be true, not a String.
-    export_file[-1] = "  tag4: yes\n"
-    result = @official.send_private(:check_export_file_data)
-    msg = assert_message('Expected second version to fail.')
-    assert_block(msg) { !result }
-    Language.clear_verbose_messages
+    export_data[-1] = "  tag4: yes\n"
+    export_check(export_data, :check_export_file_data, false)
 
-    export_file[-1] = "  :tag5: blah\n"
-    result = @official.send_private(:check_export_file_data)
-    msg = assert_message('Expected third version to fail.')
-    assert_block(msg) { !result }
-    Language.clear_verbose_messages
+    export_data[-1] = "  :tag5: blah\n"
+    export_check(export_data, :check_export_file_data, false)
 
-    export_file[-1] = "  tag6: blah[bogus=args=here]\n"
-    result = @official.send_private(:check_export_file_data)
-    msg = assert_message('Expected four version to fail.')
-    assert_block(msg) { !result }
-    Language.clear_verbose_messages
+    export_data[-1] = "  tag6: blah[bogus=args=here]\n"
+    export_check(export_data, :check_export_file_data, false)
   end
 
   def test_export_round_trip
-    file = @official.export_file
-    @official.write_export_file_lines(File.open(file, 'r:utf-8').readlines)
-    data = File.open(file, 'r:utf-8') do |fh|
-      YAML::load(fh)
-    end
-    for tag, str in data
-      assert(tag.is_a?(String), "#{file} #{tag}: tag is a #{tag.class} not a String!")
-      assert(str.is_a?(String), "#{file} #{tag}: value is a #{str.class} not a String!")
-    end
-    lines = @official.send_private(:format_export_file, data, data)
-    new_data = YAML::load(lines.join)
-    seen = {}
-    for tag, old_str in data
-      if new_str = new_data[tag]
-        old_str = @official.send_private(:clean_string, old_str)
-        new_str = @official.send_private(:clean_string, new_str)
-        assert_equal(old_str, new_str, "String for #{tag} got garbled.")
-      else
-        assert_block("Missing string for #{tag}.") { false }
+    use_test_locales {
+      file = @official.export_file
+      @official.write_export_file_lines(File.open(file, 'r:utf-8').readlines)
+      data = File.open(file, 'r:utf-8') do |fh|
+        YAML::load(fh)
       end
-      seen[tag] = true
-    end
-    for tag in new_data.keys.reject {|tag| seen[tag]}
-      assert_block("Unexpected string for #{tag}.") { false }
-    end
+      for tag, str in data
+        assert(tag.is_a?(String), "#{file} #{tag}: tag is a #{tag.class} not a String!")
+        assert(str.is_a?(String), "#{file} #{tag}: value is a #{str.class} not a String!")
+      end
+      lines = @official.send_private(:format_export_file, data, data)
+      new_data = YAML::load(lines.join)
+      seen = {}
+      for tag, old_str in data
+        if new_str = new_data[tag]
+          old_str = @official.send_private(:clean_string, old_str)
+          new_str = @official.send_private(:clean_string, new_str)
+          assert_equal(old_str, new_str, "String for #{tag} got garbled.")
+        else
+          assert_block("Missing string for #{tag}.") { false }
+        end
+        seen[tag] = true
+      end
+      for tag in new_data.keys.reject {|tag| seen[tag]}
+        assert_block("Unexpected string for #{tag}.") { false }
+      end
+    }
   end
 
   def test_formatting
@@ -288,9 +280,11 @@ class LanguageExporterTest < UnitTestCase
       'NAME' => true,
     }
 
-    @official.write_export_file_lines(input_lines)
-    actual_lines = @official.send_private(:format_export_file, strings, translated)
-    assert_equal(expect_lines, actual_lines)
+    use_test_locales {
+      @official.write_export_file_lines(input_lines)
+      actual_lines = @official.send_private(:format_export_file, strings, translated)
+      assert_equal(expect_lines, actual_lines)
+    }
   end
 
   def test_create_string
@@ -370,70 +364,76 @@ class LanguageExporterTest < UnitTestCase
     # assert_raises(RuntimeError) { @official.import_from_file }
 
     User.current = dick
-    hash = @official.localization_strings
-    assert(hash.length >= 9) # Make sure we got something
-    @official.write_hash(hash)
-    assert_false(@official.import_from_file, "Shouldn't have been any import changes.")
-    assert_false(@official.strip, "Shouldn't have been any strip changes.")
-    assert_equal(hash, @official.localization_strings)
+    use_test_locales {
+      hash = @official.localization_strings
+      assert(hash.length >= 9) # Make sure we got something
+      @official.write_hash(hash)
+      assert_false(@official.import_from_file, "Shouldn't have been any import changes.")
+      assert_false(@official.strip, "Shouldn't have been any strip changes.")
+      assert_equal(hash, @official.localization_strings)
 
-    hash['two'] = 'twolian'
-    hash['five'] = 'five'
-    hash['unknown_locations'] = 'bubkes'
-    final_hash = hash.dup
-    final_hash.delete('twos')
-    final_hash.delete('TWO')
-    final_hash.delete('TWOS')
+      hash['two'] = 'twolian'
+      hash['five'] = 'five'
+      hash['unknown_locations'] = 'bubkes'
+      final_hash = hash.dup
+      final_hash.delete('twos')
+      final_hash.delete('TWO')
+      final_hash.delete('TWOS')
     
-    @official.write_hash(final_hash)
-    assert_true(@official.import_from_file, 'Should have been two import changes.')
-    assert_equal(hash, @official.localization_strings) # Should still include deletes
-    assert_true(@official.strip, 'Should have been three strip changes.')
-    assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
-
-    assert_equal(3, @official.translation_strings.select {|str| str.user == dick}.length)
+      @official.write_hash(final_hash)
+      assert_true(@official.import_from_file, 'Should have been two import changes.')
+      assert_equal(hash, @official.localization_strings) # Should still include deletes
+      assert_true(@official.strip, 'Should have been three strip changes.')
+      assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
+      
+      
+      assert_equal(3, @official.translation_strings.select {|str| str.user == dick}.count)
+    }
   end
 
   def test_import_unofficial
-    # User.current = nil
-    greek = languages(:greek)
+    use_test_locales {
+      # User.current = nil
+      greek = languages(:greek)
 
-    # Must be logged in to do this!
-    assert_raises(RuntimeError) { greek.import_from_file }
+      # Must be logged in to do this!
+      assert_raises(RuntimeError) { greek.import_from_file }
 
-    User.current = katrina
-    hash = greek.localization_strings
+      User.current = katrina
+      hash = greek.localization_strings
 
-    # This is just the template.
-    @official.write_export_file_lines([
-      "  one: one\n",
-      "  two: two\n",
-      "  twos: twos\n",
-      "  TWO: Two\n",
-      "  TWOS: Twos\n",
-      "  three: three\n",
-      "  four: four\n",
-    ])
+      # This is just the template.
+      @official.write_export_file_lines([
+                                         "  one: one\n",
+                                         "  two: two\n",
+                                         "  twos: twos\n",
+                                         "  TWO: Two\n",
+                                         "  TWOS: Twos\n",
+                                         "  three: three\n",
+                                         "  four: four\n",
+                                        ])
 
-    greek.write_export_file_lines([
-      "  five: ignore me\n",
-    ])
-    assert_false(greek.import_from_file, "Shouldn't have been any import changes.")
-    assert_false(greek.strip, "Shouldn't have been any strip changes.")
-    assert_equal(hash, greek.localization_strings)
+      greek.write_export_file_lines([
+                                     "  five: ignore me\n",
+                                    ])
+      assert_false(greek.import_from_file, "Shouldn't have been any import changes.")
+      assert_false(greek.strip, "Shouldn't have been any strip changes.")
+      assert_equal(hash, greek.localization_strings)
 
-    greek.write_export_file_lines([
-      "  one: one\n",      # take this because it is a change from original ένα
-      "  twos:  twos\n",   # ignore this because unchanged from template
-      "  TWOS: Twos\n",    # ignore this despite lack of indentation because not a change from English
-      "  three:  τρία\n",  # take this change even though still indented
-      "  four: τέσσερα\n", # this is correct, it had better take this!
-    ])
-    assert_true(greek.import_from_file, "Should have been some import changes.")
-    assert_false(greek.strip, "Shouldn't have been any strip changes.")
-    hash['one'] = 'one'
-    hash['three'] = 'τρία'
-    hash['four'] = 'τέσσερα'
-    assert_equal(hash, greek.localization_strings)
+      data = [
+              "  one: one\n", # take this because it is a change from original ένα
+              "  twos:  twos\n",   # ignore this because unchanged from template
+              "  TWOS: Twos\n",    # ignore this because not a change from English
+              "  three:  τρία\n",  # take this change even though still indented
+              "  four: τέσσερα\n", # this is correct, it had better take this!
+             ]
+      greek.write_export_file_lines(data)
+      assert_true(greek.import_from_file, "Should have been some import changes.")
+      assert_false(greek.strip, "Shouldn't have been any strip changes.")
+      hash['one'] = 'one'
+      hash['three'] = 'τρία'
+      hash['four'] = 'τέσσερα'
+      assert_equal(hash, greek.localization_strings)
+    }
   end
 end
