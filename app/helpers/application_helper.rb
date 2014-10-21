@@ -1445,10 +1445,10 @@ module ApplicationHelper
       link = { :controller => 'observer', :action => 'show_user',
                :id => args[:user] }
       raise "missing :user" if !args.has_key?(:user)
-    when :show_term
-      link = { :controller => 'glossary', :action => 'show_term',
-               :id => args[:term] }
-      raise "missing :term" if !args.has_key?(:term)
+    when :show_glossary_term
+      link = { :controller => 'glossary', :action => 'show_glossary_term',
+               :id => args[:glossary_term] }
+      raise "missing :glossary_term" if !args.has_key?(:glossary_term)
     when :none
       link = nil
     when Hash

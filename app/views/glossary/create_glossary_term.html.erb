@@ -1,0 +1,29 @@
+<%
+  @title = :create_glossary_term_title.l
+  new_tab_set do
+    add_tab(:glossary_term_index.t, :action => 'index')
+  end
+%>
+
+<p>
+  <%= form_for(:glossary_term, :url => { :action => :create_glossary_term }, :html => { :multipart => true }) do |form| %>
+    <p>
+      <%= :glossary_term_name.t %>: <%= form.text_field('name', :size => 150) %>
+    </p>
+    <p>
+      <%= :glossary_term_description.t %>:<br/>
+      <%= form.text_area('description', :cols => 100, :rows => 20) %>
+    </p>
+    <%= form.file_field('upload_image') %></p>
+
+    <p><label for="copyright_holder"><%= :glossary_term_copyright_holder.t %></label><br/>
+    <%= text_field_tag('copyright_holder', @copyright_holder, :size => 40) %>
+    <%= select_year(@copyright_year, :field_name => "copyright_year",
+                    :start_year => 1980, :end_year => Time.now.year) %></p>
+
+    <p><%= select("upload", "license_id", @licenses, :selected => @upload_license_id) %><br/>
+    <span id="help_note">(<%= :glossary_term_copyright_warning.t %>)</span></p>
+    
+    <center><%= submit_tag :create_glossary_term_add.t %><br/></center>
+  <% end %>
+</p>

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140910105700) do
+ActiveRecord::Schema.define(:version => 20141021184347) do
 
   create_table "api_keys", :force => true do |t|
     t.datetime "created_at"
@@ -77,6 +77,31 @@ ActiveRecord::Schema.define(:version => 20140910105700) do
     t.integer  "user_id"
   end
 
+  create_table "glossary_terms", :force => true do |t|
+    t.integer  "version"
+    t.integer  "user_id"
+    t.string   "name",           :limit => 1024
+    t.integer  "thumb_image_id"
+    t.text     "description"
+    t.integer  "rss_log_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "glossary_terms_images", :id => false, :force => true do |t|
+    t.integer "image_id"
+    t.integer "glossary_term_id"
+  end
+
+  create_table "glossary_terms_versions", :force => true do |t|
+    t.integer  "glossary_term_id"
+    t.integer  "version"
+    t.integer  "user_id"
+    t.datetime "updated_at"
+    t.string   "name",             :limit => 1024
+    t.text     "description"
+  end
+
   create_table "herbaria", :force => true do |t|
     t.text     "mailing_address"
     t.integer  "location_id"
@@ -132,11 +157,6 @@ ActiveRecord::Schema.define(:version => 20140910105700) do
   create_table "images_projects", :id => false, :force => true do |t|
     t.integer "image_id",   :null => false
     t.integer "project_id", :null => false
-  end
-
-  create_table "images_terms", :id => false, :force => true do |t|
-    t.integer "image_id"
-    t.integer "term_id"
   end
 
   create_table "interests", :force => true do |t|
@@ -517,7 +537,7 @@ ActiveRecord::Schema.define(:version => 20140910105700) do
     t.integer  "name_id"
     t.integer  "location_id"
     t.integer  "project_id"
-    t.integer  "term_id"
+    t.integer  "glossary_term_id"
   end
 
   create_table "species_lists", :force => true do |t|
@@ -545,26 +565,6 @@ ActiveRecord::Schema.define(:version => 20140910105700) do
 
   create_table "synonyms", :force => true do |t|
     t.string "sync_id", :limit => 16
-  end
-
-  create_table "terms", :force => true do |t|
-    t.integer  "version"
-    t.integer  "user_id"
-    t.string   "name",           :limit => 1024
-    t.integer  "thumb_image_id"
-    t.text     "description"
-    t.integer  "rss_log_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "terms_versions", :force => true do |t|
-    t.integer  "term_id"
-    t.integer  "version"
-    t.integer  "user_id"
-    t.datetime "updated_at"
-    t.string   "name",        :limit => 1024
-    t.text     "description"
   end
 
   create_table "transactions", :force => true do |t|

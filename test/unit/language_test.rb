@@ -20,18 +20,33 @@ class LanguageTest < UnitTestCase
     assert_equal([[4, 'dick']], greek.top_contributors)
   end
 
+  def read_from_yaml(lang, symbol)
+    file = lang.localization_file
+    data = File.open(file, 'r:utf-8') do |fh|
+      YAML::load(fh)
+    end
+    data[lang.locale.to_s]["mo"][symbol.to_s]
+  end
+  
   def test_update_localization
-    str = translation_strings(:english_one)
-    str.text = 'shazam'
-    str.update_localization
-    assert_equal('shazam', :one.l)
+    # TODO: While this seems to work, it doesn't really.  If you
+    # put a str.language.update_localization_file before the
+    # update_attributes! it will fail to correctly rewrite the
+    # lang file.
+    use_test_locales {
+      str = translation_strings(:english_one)
+      en_text = "shazam"
+      assert_not_equal(str.text, en_text)
+      str.update_attributes!(:text => en_text)
+      str.update_localization
+      str.language.update_localization_file
+      assert_equal(en_text, read_from_yaml(str.language, str.tag))
 
-    str = translation_strings(:french_one)
-    str.text = 'la chazame'
-    str.update_localization
-    assert_equal('shazam', :one.l)
-    I18n.locale = str.language.locale
-    assert_equal('la chazame', :one.l)
+      fr_str = translation_strings(:french_one)
+      fr_str.language.update_localization_file
+      assert_not_equal(en_text, read_from_yaml(fr_str.language, fr_str.tag))
+      assert_equal(en_text, read_from_yaml(str.language, fr_str.tag))
+    }
   end
 
   def set_text(str, new_string)
@@ -66,6 +81,8 @@ class LanguageTest < UnitTestCase
   
   def test_update_recent_translations
     one = translation_strings(:english_waiting_for_update)
+    one.text = 'new'
+    one.save
     old_val = one.tag.to_sym.l
     new_val = one.text
     assert_not_equal(old_val, new_val)

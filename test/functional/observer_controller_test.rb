@@ -2921,45 +2921,47 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_change_banner
-    str1 = TranslationString.create!(
-      :language => languages(:english),
-      :tag => :app_banner_box,
-      :text => 'old banner',
-      :user => User.admin
-    )
-    str1.update_localization
+    use_test_locales {
+      str1 = TranslationString.create!(
+                                       :language => languages(:english),
+                                       :tag => :app_banner_box,
+                                       :text => 'old banner',
+                                       :user => User.admin
+                                       )
+      str1.update_localization
 
-    str2 = TranslationString.create!(
-      :language => languages(:french),
-      :tag => :app_banner_box,
-      :text => 'banner ancienne',
-      :user => User.admin
-    )
-    str2.update_localization
+      str2 = TranslationString.create!(
+                                       :language => languages(:french),
+                                       :tag => :app_banner_box,
+                                       :text => 'banner ancienne',
+                                       :user => User.admin
+                                       )
+      str2.update_localization
 
-    get(:change_banner)
-    assert_template(:action => 'login')
+      get(:change_banner)
+      assert_template(:action => 'login')
 
-    login('rolf')
-    get(:change_banner)
-    assert_flash_error
-    assert_template(:action => 'list_rss_logs')
+      login('rolf')
+      get(:change_banner)
+      assert_flash_error
+      assert_template(:action => 'list_rss_logs')
 
-    make_admin('rolf')
-    get(:change_banner)
-    assert_no_flash
-    assert_response(:success)
-    assert_textarea_value(:val, :app_banner_box.l)
+      make_admin('rolf')
+      get(:change_banner)
+      assert_no_flash
+      assert_response(:success)
+      assert_textarea_value(:val, :app_banner_box.l)
 
-    post(:change_banner, :val => 'new banner')
-    assert_no_flash
-    assert_template(:action => 'list_rss_logs')
-    assert_equal('new banner', :app_banner_box.l)
+      post(:change_banner, :val => 'new banner')
+      assert_no_flash
+      assert_template(:action => 'list_rss_logs')
+      assert_equal('new banner', :app_banner_box.l)
 
-    strs = TranslationString.find_all_by_tag(:app_banner_box)
-    for str in strs
-      assert_equal('new banner', str.text, "Didn't change text of #{str.language.locale} correctly.")
-    end
+      strs = TranslationString.find_all_by_tag(:app_banner_box)
+      for str in strs
+        assert_equal('new banner', str.text, "Didn't change text of #{str.language.locale} correctly.")
+      end
+    }
   end
 
   def test_index_observation_by_past_by

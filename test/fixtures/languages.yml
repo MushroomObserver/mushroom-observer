@@ -33,3 +33,21 @@ russian:
   order: Russkii
   official: false
   beta: true
+
+spanish:
+  id: 5
+  locale: es
+  region: ES
+  name: Español
+  order: Espanol
+  official: false
+  beta: true
+
+portuguese:
+  id: 6
+  locale: pt
+  region: BR
+  name: Português
+  order: Português
+  official: false
+  beta: true

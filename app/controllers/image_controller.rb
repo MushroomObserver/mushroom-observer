@@ -560,9 +560,9 @@ class ImageController < ApplicationController
     result
   end
   
-  def reuse_image_for_term
+  def reuse_image_for_glossary_term
     pass_query_params
-    @object = Term.safe_find(params[:id])
+    @object = GlossaryTerm.safe_find(params[:id])
     image = look_for_image(request.method, params)
     if image
       redirect_to(@object.process_image_reuse(image, query_params))
@@ -591,7 +591,7 @@ class ImageController < ApplicationController
     pass_query_params
     @mode = params[:mode].to_sym
     @observation = Observation.safe_find(params[:obs_id]) if @mode == :observation
-    @term = Term.safe_find(params[:term_id])
+    @glossary_term = GlossaryTerm.safe_find(params[:glossary_term_id])
     done = false
 
     # Make sure user owns the observation.
@@ -617,12 +617,12 @@ class ImageController < ApplicationController
           :action => 'show_observation', :id => @observation.id)
         done = true
 
-      elsif @mode == :term
-        # Add image to term
-        @term.add_image(image)
-        @term.log_reuse_image(image)
-        redirect_with_query(:controller => :glossary, :action => :show_term,
-          :id => @term.id)
+      elsif @mode == :glossary_term
+        # Add image to glossary_term
+        @glossary_term.add_image(image)
+        @glossary_term.log_reuse_image(image)
+        redirect_with_query(:controller => :glossary, :action => :show_glossary_term,
+          :id => @glossary_term.id)
         done = true
       else
         # Change user's profile image.
@@ -688,8 +688,8 @@ class ImageController < ApplicationController
     end
   end
 
-  def remove_images_for_term
-    remove_images_from_object(Term, params)
+  def remove_images_for_glossary_term
+    remove_images_from_object(GlossaryTerm, params)
   end
     
   # Used by show_image to rotate and flip image.

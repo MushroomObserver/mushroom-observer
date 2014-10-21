@@ -1,10 +1,10 @@
 module GlossaryHelper
   def name_layout(name)
-    :term_name.t + ": " + name
+    :glossary_term_name.t + ": " + name
   end
   
   def description_layout(description )
-    :term_description.t + ": " + description.tpl
+    :glossary_term_description.t + ": " + description.tpl
   end
   
   def thumbnail_layout(id)

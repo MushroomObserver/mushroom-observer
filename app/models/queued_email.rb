@@ -7,7 +7,7 @@
 #
 #  QueuedQueuedEmail:: Base class.
 #  QueuedEmail::Xxxx:: Derived classes: one record per email.
-#  AccountMailer:: Base class for the classes that actually render and
+#   Base class for the classes that actually render and
 #  deliver each type of email.
 #
 #  In addition, each QueuedEmail record can own zero or more of each of these:
