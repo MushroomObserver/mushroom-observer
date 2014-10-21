@@ -1,5 +1,5 @@
 <%
-  tag_params = add_query_param(:action => 'reuse_image_for_term')
+  tag_params = add_query_param(:action => 'reuse_image_for_glossary_term')
 
   @title = :image_reuse_title.t(:name => @object.unique_format_name)
   id = @object.id
@@ -25,15 +25,15 @@
 
   <p><big>
     <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
-          :term_id => id,
+          :glossary_term_id => id,
           :all_users => (@all_users ? 0 : 1)) %>
   </big></p><br/>
 
   <%= paginate_block(@pages) do %>
     <%= make_matrix(@objects) do |image| %>
       <%= render(:partial => 'image_reuse', :object => image, :locals => {
-            :link_args => add_query_param(:action => 'reuse_image_for_term',
-              :term_id => id, :img_id => image.id)
+            :link_args => add_query_param(:action => 'reuse_image_for_glossary_term',
+              :glossary_term_id => id, :img_id => image.id)
           }) %>
     <% end %>
   <% end %>

@@ -153,10 +153,10 @@
   specimen: specimen
   SPECIMENS: Specimens
   specimens: specimens
-  TERM: Term
-  term: term
-  TERMS: Terms
-  terms: terms
+  GLOSSARY_TERM: Glossary Term
+  glossary_term: glossary term
+  GLOSSARY_TERMS: Glossary Terms
+  glossary_terms: glossary terms
   USER: User
   user: user
   USERS: Users
@@ -844,8 +844,8 @@
   log_species_list_created_at: "[:log_object_created_by_user(type=:species_list)]"
   log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
   log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
-  log_term_created_at: "[:log_object_created_by_user(type=:term)]"
-  log_term_updated_at: "[:log_object_updated_by_user(type=:term)]"
+  log_glossary_term_created_at: "[:log_object_created_by_user(type=:glossary_term)]"
+  log_glossary_term_updated_at: "[:log_object_updated_by_user(type=:glossary_term)]"
   log_specimen_added: "[:log_object_added_by_user_with_name(type=:specimen)]"
   log_object_added: "[:log_object_added_by_user]"
   log_object_created_at: "[:log_object_created_by_user]"
@@ -1877,13 +1877,13 @@
   welcome_note: You are now logged into the system...
 
 
-  # Term Fields
-  term_created_at: Created At
-  term_updated_at: Updated At
-  term_name: Name
-  term_description: Description
-  term_copyright_holder: Copyright holder and license for this image
-  term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+  # Glossary Term Fields
+  glossary_term_created_at: Created At
+  glossary_term_updated_at: Updated At
+  glossary_term_name: Name
+  glossary_term_description: Description
+  glossary_term_copyright_holder: Copyright holder and license for this image
+  glossary_term_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # semantic_vernacular/delete
   delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
@@ -1892,31 +1892,31 @@
   semantic_vernacular_delete: Delete
   semantic_vernacular_title: "SVD Detail: [name]"
 
-  # glossary/show_term
-  show_term: Show Glossary Term
-  show_term_title: "Glossary Term: [name]"
-  show_term_reuse_image: Add Example
-  show_term_remove_image: Remove Examples
+  # glossary/show_glossary_term
+  show_glossary_term: Show Glossary Term
+  show_glossary_term_title: "Glossary Term: [name]"
+  show_glossary_term_reuse_image: Add Example
+  show_glossary_term_remove_image: Remove Examples
 
-  # glossary/show_past_term
-  show_past_term_title: "[:VERSION] [num]: [name]"
-  show_past_term_no_version: No version specified
+  # glossary/show_past_glossary_term
+  show_past_glossary_term_title: "[:VERSION] [num]: [name]"
+  show_past_glossary_term_no_version: No version specified
 
-  # glossary/create_term
-  create_term: Create New Term
-  create_term_add: Add Term
-  create_term_title: Create New Glossary Term
+  # glossary/create_glossary_term
+  create_glossary_term: Create New Glossary Term
+  create_glossary_term_add: Add Glossary Term
+  create_glossary_term_title: Create New Glossary Term
 
   # glossary/index
-  term_index: Glossary
-  term_index_title: Glossary of Mycology Terms
-  term_index_intro: As part of an on-going collaboration with the Rhode Island School of Design, Nathan Wilson has been working with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. This release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">Mushroom Observer Facebook page</a>.
+  glossary_term_index: Glossary
+  glossary_term_index_title: Glossary of Mycology Terms
+  glossary_term_index_intro: As part of an on-going collaboration with the Rhode Island School of Design, Nathan Wilson has been working with students from Jean Blackburn's Scientific Illustration class to create high-quality Creative Commons licensed scientific illustrations of fungal anatomy terms. To share these works, Nathan created this new glossary feature for Mushroom Observer. This release provides the bare minimum of functionality to be able to discover and view these illustrations. New glossary terms can also be created by anyone in the community. Currently these terms are illustrated by single images, but my intent is to add support for multiple images including both scientific illustrations and example photographs. There will also be a search feature, the ability to add links to terms as part of any Mushroom Observer markup. A particular feature that needs discussion is how best to handle translations of these terms and their definitions. Discussion of these features including additional desired terms are welcome on either the Mushroom Observer mailing list (<a href="https://groups.google.com/forum/?fromgroups=#!forum/mo-general">mo-general@googlegroups.com</a>) or the <a href="https://www.facebook.com/groups/105230049528087/">Mushroom Observer Facebook page</a>.
 
-  # glossary/edit_term
-  edit_term: "[:edit_object(type=:term)]"
-  edit_term_title: "Editing Term: [name]"
-  edit_term_save: Save
-  edit_term_not_allowed: Only admins can edit terms
+  # glossary/edit_glossary_term
+  edit_glossary_term: "[:edit_object(type=:glossary_term)]"
+  edit_glossary_term_title: "Editing Glossary Term: [name]"
+  edit_glossary_term_save: Save
+  edit_glossary_term_not_allowed: Only admins can edit glossary terms
 
 
   # ConferenceEvent Fields

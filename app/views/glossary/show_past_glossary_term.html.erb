@@ -1,0 +1,26 @@
+<%
+  @title = :show_past_glossary_term_title.t(
+    :num  => @glossary_term.version,
+    :name => @glossary_term.name
+  )
+  new_tab_set do
+    add_tab(:show_glossary_term.t(:glossary_term => @glossary_term.name), :action => 'show_glossary_term', :id => @glossary_term.id)
+  end
+%>
+
+<table cellpadding="10" width="100%">
+  <tr>
+    <td valign="top">
+      <p>
+        <%= render(:partial => 'glossary_term', :object => @glossary_term, :locals =>
+                   { :synonyms => false }) %>
+      </p>
+    </td>
+
+    <td valign="top" width="50%">
+      <%= show_past_versions(@glossary_term) %>
+    </td>
+  </tr>
+</table>
+
+<%= show_object_footer(@glossary_term) %>

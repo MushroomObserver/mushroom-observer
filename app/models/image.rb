@@ -215,22 +215,22 @@ class Image < AbstractModel
 
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
-  has_and_belongs_to_many :terms
+  has_and_belongs_to_many :glossary_terms
   has_many :thumb_clients, :class_name => 'Observation', :foreign_key => 'thumb_image_id'
   has_many :image_votes
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
   has_many :subjects, :class_name => 'User', :foreign_key => 'image_id'
-  has_many :best_terms, :class_name => 'Term', :foreign_key => 'thumb_image_id'
+  has_many :best_glossary_terms, :class_name => 'GlossaryTerm', :foreign_key => 'thumb_image_id'
   has_many :copyright_changes, :as => :target, :dependent => :destroy
 
   before_destroy :update_thumbnails
   after_update :track_copyright_changes
 
-  def all_terms; best_terms + terms; end
+  def all_glossary_terms; best_glossary_terms + glossary_terms; end
 
-  def get_subjects; observations + subjects + best_terms + terms; end
+  def get_subjects; observations + subjects + best_glossary_terms + glossary_terms; end
 
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
@@ -787,7 +787,7 @@ class Image < AbstractModel
 
   # Callback that changes objects referencing an image that is being destroyed.
   def update_thumbnails
-    for obj in (observations + subjects + best_terms + terms)
+    for obj in (observations + subjects + best_glossary_terms + glossary_terms)
       obj.remove_image(self)
     end
   end

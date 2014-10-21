@@ -1,9 +1,9 @@
 Todo:
-- Remove example from term
+- Remove example from glossary term
 - Add more back links to show_image page
-- Update EOL export to look for terms that are associated with higher level taxa
+- Update EOL export to look for glossary terms that are associated with higher level taxa
   - Copyright issue
-Add more associations for terms on production site.
+Add more associations for glossary terms on production site.
 Clean up reuse and remove so they are explicitly _for_observation or _for_profile.
 
 Jason:

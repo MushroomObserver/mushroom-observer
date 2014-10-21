@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-class Term < AbstractModel
+class GlossaryTerm < AbstractModel
   require 'acts_as_versioned'
 
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
@@ -10,7 +10,7 @@ class Term < AbstractModel
 
   ALL_TERM_FIELDS = [:name, :description]
   acts_as_versioned(
-    :table_name => 'terms_versions',
+    :table_name => 'glossary_terms_versions',
     :if_changed => ALL_TERM_FIELDS,
     :association_options => { :dependent => :nullify }
   )

@@ -128,9 +128,9 @@ end %></p>
       :controller => 'observer', :action => 'show_user', :id => subject.id)
     %><br/>
   <% end %>
-  <% for term in @image.all_terms %>
-    <%= :Term.t %>: <%= link_with_query(term.format_name.t,
-      :controller => 'glossary', :action => 'show_term', :id => term.id)
+  <% for glossary_term in @image.all_glossary_terms %>
+    <%= :Glossary_Term.t %>: <%= link_with_query(glossary_term.format_name.t,
+      :controller => 'glossary', :action => 'show_glossary_term', :id => glossary_term.id)
     %><br/>
   <% end %>
   <% if @image.notes.blank? %>

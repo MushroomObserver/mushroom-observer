@@ -1,24 +1,24 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-plane_term_v1:
+plane_glossary_term_v1:
   id: 1
-  term_id: 3
+  glossary_term_id: 3
   version: 1
   updated_at: 2013-08-17 06:33:50
   name: Plane
   description: 
 
-plane_term_v2:
+plane_glossary_term_v2:
   id: 2
-  term_id: 3
+  glossary_term_id: 3
   version: 2
   updated_at: 2013-08-17 06:35:20
   name: Plane
   description: Three points define a plane
 
-conic_term_v1:
+conic_glossary_term_v1:
   id: 3
-  term_id: 1
+  glossary_term_id: 1
   version: 1
   updated_at: 2013-08-04 07:49:12
   name: Conic

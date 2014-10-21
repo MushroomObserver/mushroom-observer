@@ -18,7 +18,9 @@ class EolData
   attr_accessor :names
   
   def initialize
-    self.names = prune_synonyms(image_names() + description_names() + term_names())
+    self.names = prune_synonyms(image_names() +
+                                description_names() +
+                                glossary_term_names())
     @id_to_image = id_to_image()
     @name_id_to_images = name_id_to_images()
     @id_to_description = id_to_description()
@@ -179,10 +181,12 @@ private
     get_sorted_names(IMAGE_CONDITIONS)
   end
 
-  TERM_CONDITIONS = %(FROM images, images_observations, observations, names,
-    terms LEFT OUTER JOIN images_terms ON terms.id = images_terms.term_id
-    WHERE ((images.id = images_terms.image_id)
-           OR (terms.thumb_image_id = images.id))
+  GLOSSARY_TERM_CONDITIONS = %(
+    FROM images, images_observations, observations, names, glossary_terms
+    LEFT OUTER JOIN glossary_terms_images
+    ON glossary_terms.id = glossary_terms_images.glossary_term_id
+    WHERE ((images.id = glossary_terms_images.image_id)
+           OR (glossary_terms.thumb_image_id = images.id))
     AND images_observations.image_id = images.id
     AND images_observations.observation_id = observations.id
     AND observations.name_id = names.id
@@ -193,8 +197,8 @@ private
     AND NOT names.deprecated
   )
 
-  def term_names
-    get_sorted_names(TERM_CONDITIONS)
+  def glossary_term_names
+    get_sorted_names(GLOSSARY_TERM_CONDITIONS)
   end
 
   def get_sorted_names(conditions)
@@ -206,7 +210,7 @@ private
   end
   
   def get_all_name_rows
-    get_name_rows(IMAGE_CONDITIONS) + get_name_rows(TERM_CONDITIONS)
+    get_name_rows(IMAGE_CONDITIONS) + get_name_rows(GLOSSARY_TERM_CONDITIONS)
   end
   
   def name_id_to_images
@@ -220,7 +224,7 @@ private
   end
   
   def get_all_images
-    get_images(IMAGE_CONDITIONS) + get_images(TERM_CONDITIONS)
+    get_images(IMAGE_CONDITIONS) + get_images(GLOSSARY_TERM_CONDITIONS)
   end
   
   def id_to_image

@@ -1,0 +1,21 @@
+<%
+  @title = :edit_glossary_term_title.t(:name => @glossary_term.name)
+  
+  str = :cancel_and_show.t(:TYPE => 'GlossaryTerm')
+  new_tab_set do
+    add_tab(:cancel_and_show.t(:TYPE => 'GlossaryTerm'), :action => 'show_glossary_term', :id => @glossary_term.id)
+    add_tab(:glossary_term_index.t, :action => 'index')
+  end
+%>
+
+<p>
+  <%= form_tag({:action => 'edit_glossary_term', :id => @glossary_term.id}) do %>
+    <p>
+      <%= :glossary_term_name.t %>: <%= text_field('glossary_term', 'name', :size => 150, :value => @glossary_term.name) %>
+    </p>
+    <p>
+      <%= :glossary_term_description.t %>:<br/><%= text_area('glossary_term', 'description', :cols => 100, :value => @glossary_term.description) %>
+    </p>
+    <center><%= submit_tag :edit_glossary_term_save.t %><br/></center>
+  <% end %>
+</p>

@@ -1,21 +1,21 @@
 require 'test_helper'
 
 class GlossaryControllerTest < FunctionalTestCase
-  def test_show_term
-    term = terms(:plane_term)
-    get_with_dump(:show_term, :id => term.id)
-    assert_template(action: 'show_term')
+  def test_show_glossary_term
+    glossary_term = glossary_terms(:plane_glossary_term)
+    get_with_dump(:show_glossary_term, :id => glossary_term.id)
+    assert_template(action: 'show_glossary_term')
   end
 
-  def test_show_past_term
-    conic = terms(:conic_term)
-    get_with_dump(:show_past_term, :id => conic.id, :version => conic.version - 1)
-    assert_template(action: 'show_past_term', partial: "_term")
+  def test_show_past_glossary_term
+    conic = glossary_terms(:conic_glossary_term)
+    get_with_dump(:show_past_glossary_term, :id => conic.id, :version => conic.version - 1)
+    assert_template(action: 'show_past_glossary_term', partial: "_glossary_term")
   end
 
-  def test_show_past_term_no_version
-    conic = terms(:conic_term)
-    get_with_dump(:show_past_term, :id => conic.id)
+  def test_show_past_glossary_term_no_version
+    conic = glossary_terms(:conic_glossary_term)
+    get_with_dump(:show_past_glossary_term, :id => conic.id)
     assert_response(:redirect)
   end
 
@@ -24,18 +24,18 @@ class GlossaryControllerTest < FunctionalTestCase
     assert_template(action: 'index')
   end
 
-  def test_create_term
-    get(:create_term)
+  def test_create_glossary_term
+    get(:create_glossary_term)
     assert_response(:redirect)
 
     login
-    get_with_dump(:create_term)
-    assert_template(action: 'create_term')
+    get_with_dump(:create_glossary_term)
+    assert_template(action: 'create_glossary_term')
   end
   
-  def create_term_params
+  def create_glossary_term_params
     return {
-      :term => {
+      :glossary_term => {
         :name => 'Convex',
         :description => 'Boring old convex',
       },
@@ -49,53 +49,53 @@ class GlossaryControllerTest < FunctionalTestCase
     }
   end
   
-  def test_create_term_post
+  def test_create_glossary_term_post
     user = login
-    params = create_term_params
-    post(:create_term, params)
-    term = Term.find(:all, :order => "created_at DESC")[0]
-    assert_equal(params[:term][:name], term.name)
-    assert_equal(params[:term][:description], term.description)
-    assert_not_nil(term.rss_log)
-    assert_equal(user.id, term.user_id)
+    params = create_glossary_term_params
+    post(:create_glossary_term, params)
+    glossary_term = GlossaryTerm.find(:all, :order => "created_at DESC")[0]
+    assert_equal(params[:glossary_term][:name], glossary_term.name)
+    assert_equal(params[:glossary_term][:description], glossary_term.description)
+    assert_not_nil(glossary_term.rss_log)
+    assert_equal(user.id, glossary_term.user_id)
     assert_response(:redirect)
   end
 
-  def test_edit_term
-    conic = terms(:conic_term)
-    get_with_dump(:edit_term, :id => conic.id)
+  def test_edit_glossary_term
+    conic = glossary_terms(:conic_glossary_term)
+    get_with_dump(:edit_glossary_term, :id => conic.id)
     assert_response(:redirect)
 
     login
-    get_with_dump(:edit_term, :id => conic.id)
-    assert_template(action: 'edit_term')
+    get_with_dump(:edit_glossary_term, :id => conic.id)
+    assert_template(action: 'edit_glossary_term')
   end
   
-  def test_edit_term_post
-    conic = terms(:conic_term)
-    count = Term::Version.count
+  def test_edit_glossary_term_post
+    conic = glossary_terms(:conic_glossary_term)
+    count = GlossaryTerm::Version.count
     make_admin
 
-    params = create_term_params
+    params = create_glossary_term_params
     params[:id] = conic.id
-    post(:edit_term, params)
+    post(:edit_glossary_term, params)
     conic.reload
-    assert_equal(params[:term][:name], conic.name)
-    assert_equal(params[:term][:description], conic.description)
-    assert_equal(count+1, Term::Version.count)
+    assert_equal(params[:glossary_term][:name], conic.name)
+    assert_equal(params[:glossary_term][:description], conic.description)
+    assert_equal(count+1, GlossaryTerm::Version.count)
     assert_response(:redirect)
   end
 
-  def test_generate_and_show_past_term
+  def test_generate_and_show_past_glossary_term
     login
-    term = terms(:plane_term)
-    old_count = term.versions.length
-    term.update_attributes(:description => 'Are we flying yet?')
-    term.reload
-    new_count = term.versions.length
+    glossary_term = glossary_terms(:plane_glossary_term)
+    old_count = glossary_term.versions.length
+    glossary_term.update_attributes(:description => 'Are we flying yet?')
+    glossary_term.reload
+    new_count = glossary_term.versions.length
     assert_equal(1, new_count - old_count)
-    get_with_dump(:show_past_term, :id => term.id, :version => term.version - 1)
-    assert_template(action: 'show_past_term', partial: "_term")
+    get_with_dump(:show_past_glossary_term, :id => glossary_term.id, :version => glossary_term.version - 1)
+    assert_template(action: 'show_past_glossary_term', partial: "_glossary_term")
   end
 
 end

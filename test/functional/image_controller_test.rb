@@ -415,11 +415,11 @@ class ImageControllerTest < FunctionalTestCase
     assert_form_action(:action => 'remove_images', :id => obs.id)
   end
 
-  def test_remove_images_for_term
-    term = terms(:plane_term)
-    params = { :id => term.id }
-    requires_login(:remove_images_for_term, params)
-    assert_form_action(:action => 'remove_images_for_term', :id => term.id)
+  def test_remove_images_for_glossary_term
+    glossary_term = glossary_terms(:plane_glossary_term)
+    params = { :id => glossary_term.id }
+    requires_login(:remove_images_for_glossary_term, params)
+    assert_form_action(:action => 'remove_images_for_glossary_term', :id => glossary_term.id)
   end
 
   def test_reuse_image_for_observation
@@ -431,11 +431,11 @@ class ImageControllerTest < FunctionalTestCase
                        :obs_id => obs.id)
   end
 
-  def test_reuse_image_for_term
-    term = terms(:conic_term)
-    params = { :id => term.id }
-    requires_login(:reuse_image_for_term, params)
-    assert_form_action(:action => 'reuse_image_for_term', :id => term.id)
+  def test_reuse_image_for_glossary_term
+    glossary_term = glossary_terms(:conic_glossary_term)
+    params = { :id => glossary_term.id }
+    requires_login(:reuse_image_for_glossary_term, params)
+    assert_form_action(:action => 'reuse_image_for_glossary_term', :id => glossary_term.id)
   end
 
   def test_reuse_image_by_id
@@ -461,18 +461,18 @@ class ImageControllerTest < FunctionalTestCase
     assert(updated_at != obs.updated_at)
   end
 
-  def test_reuse_image_for_term_post
-    term = terms(:conic_term)
+  def test_reuse_image_for_glossary_term_post
+    glossary_term = glossary_terms(:conic_glossary_term)
     image = images(:commercial_inquiry_image)
-    assert(!term.images.member?(image))
+    assert(!glossary_term.images.member?(image))
     params = {
-      :id => term.id.to_s,
+      :id => glossary_term.id.to_s,
       :img_id => '3',
     }
     login('mary')
-    get_with_dump(:reuse_image_for_term, params)
-    assert_template(:controller => :glossary, :action => :show_term)
-    assert(term.reload.images.member?(image))
+    get_with_dump(:reuse_image_for_glossary_term, params)
+    assert_template(:controller => :glossary, :action => :show_glossary_term)
+    assert(glossary_term.reload.images.member?(image))
   end
 
   def test_upload_image

@@ -15,16 +15,16 @@
       add_tab_with_query(:image_reuse_edit.t, :controller => 'observer',
         :action => 'edit_observation', :id => obs_id)
     end
-  elsif @mode == :term
-    @title = :image_reuse_title.t(:name => @term.unique_format_name)
-    term_id = @term.id
-    tag_params[:term_id] = term_id
+  elsif @mode == :glossary_term
+    @title = :image_reuse_title.t(:name => @glossary_term.unique_format_name)
+    glossary_term_id = @glossary_term.id
+    tag_params[:glossary_term_id] = glossary_term_id
     new_tab_set do
-      add_tab_with_query(:show_object.t(:type => :term), :controller => 'glossary',
-        :action => 'show_term', :id => term_id)
-      add_tab_with_query(:edit_term.t,
-        :controller => 'glossary', :action => 'edit_term',
-        :id => term_id)
+      add_tab_with_query(:show_object.t(:type => :glossary_term), :controller => 'glossary',
+        :action => 'show_glossary_term', :id => glossary_term_id)
+      add_tab_with_query(:edit_glossary_term.t,
+        :controller => 'glossary', :action => 'edit_glossary_term',
+        :id => glossary_term_id)
     end
   else
     @title = :image_reuse_title.t(:name => @user.legal_name)
@@ -43,7 +43,7 @@
   <p><big>
     <%= link_with_query(
           @all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
-          :mode => @mode, :obs_id => obs_id, :term_id => term_id,
+          :mode => @mode, :obs_id => obs_id, :glossary_term_id => glossary_term_id,
           :all_users => (@all_users ? 0 : 1)) %>
   </big></p><br/>
 
@@ -52,7 +52,7 @@
       <%= render(:partial => 'image_reuse', :object => image,
             :locals => {
               :link_args => add_query_param({ :action => 'reuse_image',
-                :mode => @mode, :obs_id => obs_id, :term_id => term_id,
+                :mode => @mode, :obs_id => obs_id, :glossary_term_id => glossary_term_id,
                 :img_id => image.id})
             }) %>
     <% end %>

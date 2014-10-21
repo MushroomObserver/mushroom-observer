@@ -29,8 +29,8 @@ albion_rss_log:
   updated_at: 2007-12-27 06:41:20
   notes: "Updated Created"
 
-term_rss_log:
+glossary_term_rss_log:
   id: 6
-  term_id: 1
+  glossary_term_id: 1
   updated_at: 2013-09-01 12:49:30
-  notes: "Updated Term"
+  notes: "Updated Glossary Term"

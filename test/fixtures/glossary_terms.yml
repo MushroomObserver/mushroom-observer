@@ -1,5 +1,5 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-conic_term:
+conic_glossary_term:
   id: 1
   version: 1
   user_id: 1
@@ -9,7 +9,7 @@ conic_term:
   created_at: 2013-08-04 07:49:12
   updated_at: 2013-08-04 07:49:12
 
-convex_term:
+convex_glossary_term:
   id: 2
   version: 1
   user_id: 1
@@ -19,7 +19,7 @@ convex_term:
   created_at: 2013-08-13 17:26:20
   updated_at: 2013-08-13 17:26:20
 
-plane_term:
+plane_glossary_term:
   id: 3
   version: 2
   user_id: 1
