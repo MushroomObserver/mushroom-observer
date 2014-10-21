@@ -145,7 +145,7 @@ english_waiting_for_update:
   version: 1
   language_id: 1
   tag: old
-  text: new
+  text: old
   updated_at: 2012-05-30
   user_id: 0
 
@@ -158,3 +158,11 @@ version_wizard:
   updated_at: 2013-08-22
   user_id: 6
 
+french_app_contributors:
+  id: 18
+  version: 1
+  language_id: 2
+  tag: app_contributors
+  text: Contributeurs
+  updated_at: 2014-10-20
+  user_id: 1

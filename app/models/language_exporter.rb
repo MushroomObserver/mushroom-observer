@@ -109,7 +109,7 @@ module LanguageExporter
          good_tags.has_key?(tag)
         new_val = clean_string(new_val)
         old_val = clean_string(old_data[tag])
-        if old_val != new_val
+        if old_data[tag].nil? || (old_val != new_val)
           if str = tag_lookup[tag]
             update_string(str, new_val, old_val)
           else

@@ -62,10 +62,11 @@ class TranslationString < AbstractModel
     I18n.backend.send(:translations)[lang.to_sym][MO.locale_namespace.to_sym]
   end
   
-  # Update this string in the current set of translations Globalite is using.
+  # Update this string in the translations I18n is using.
   def update_localization
     data = TranslationString.translations(language.locale.to_sym)
-    raise "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
+    fail "Localization for #{language.locale.inspect} hasn't been loaded yet!" unless data
+    fail "Localization for :#{tag.to_sym} doesn't exist!" unless data[tag.to_sym]
     data[tag.to_sym] = text
   end
 end

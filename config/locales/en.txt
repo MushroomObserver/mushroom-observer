@@ -7,6 +7,7 @@
   they_fly: "[THEY] fly"
   quote_test: This has "quotes"
   quote_them: This has "[THEM]"
+  one: one
 
   # Yes and No are apparently broken
   YEP: "Yes"
@@ -716,13 +717,13 @@
   site_stats_images: "[:IMAGES]"
   site_stats_listed_taxa: Listed Taxa
   site_stats_location_descriptions_authors: Authored [:LOCATION_DESCRIPTIONS]
-  site_stats_location_descriptions_editors: ""
+  site_stats_location_descriptions_editors: " "
   site_stats_locations: Defined [:LOCATIONS]
-  site_stats_locations_versions: ""
+  site_stats_locations_versions: " "
   site_stats_name_descriptions_authors: Authored [:NAME_DESCRIPTIONS]
-  site_stats_name_descriptions_editors: ""
-  site_stats_names: ""
-  site_stats_names_versions: ""
+  site_stats_name_descriptions_editors: " "
+  site_stats_names: " "
+  site_stats_names_versions: " "
   site_stats_namings: Proposed IDs
   site_stats_observations: "[:OBSERVATIONS]"
   site_stats_observations_with_voucher: Observations with Full Data
