@@ -3,12 +3,12 @@ require 'test_helper'
 
 class CommentControllerTest < FunctionalTestCase
 
-  def ignore_test_list_comments
+  def test_list_comments
     get_with_dump(:list_comments)
     assert_template(action: 'list_comments')
   end
 
-  def ignore_test_show_comment
+  def test_show_comment
     get_with_dump(:show_comment, :id => 1)
     assert_template(action: 'show_comment')
   end
@@ -18,18 +18,18 @@ class CommentControllerTest < FunctionalTestCase
     assert_template(action: 'list_comments')
   end
 
-  def ignore_test_show_comments_by_user
+  def test_show_comments_by_user
     get_with_dump(:show_comments_by_user, :id => rolf.id)
     assert_template(action: 'show_comment', id: 1,
                     params: @controller.query_params(Query.last))
   end
 
-  def ignore_test_add_comment
+  def test_add_comment
     requires_login(:add_comment, :id => 1, :type => 'Observation')
     assert_form_action(:action => 'add_comment', :id => 1, :type => 'Observation')
   end
 
-  def ignore_test_edit_comment
+  def test_edit_comment
     comment = comments(:minimal_comment)
     params = { "id" => comment.id.to_s }
     assert_equal("rolf", comment.user.login)
@@ -37,7 +37,7 @@ class CommentControllerTest < FunctionalTestCase
     assert_form_action(:action => 'edit_comment', :id => comment.id.to_s)
   end
 
-  def ignore_test_destroy_comment
+  def test_destroy_comment
     comment = comments(:minimal_comment)
     obs = comment.target
     assert(obs.comments.member?(comment))
@@ -50,7 +50,7 @@ class CommentControllerTest < FunctionalTestCase
     assert(!obs.comments.member?(comment))
   end
 
-  def ignore_test_save_comment
+  def test_save_comment
     assert_equal(10, rolf.contribution)
     obs = observations(:minimal_unknown)
     comment_count = obs.comments.size
@@ -72,7 +72,7 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("Some text.", comment.comment)
   end
 
-  def ignore_test_update_comment
+  def test_update_comment
     comment = comments(:minimal_comment)
     params = {
       :id => comment.id,
