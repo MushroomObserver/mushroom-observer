@@ -28,3 +28,4 @@ gem 'browser'
 gem 'rtf'
 gem 'enum_column3'
 gem 'cure_acts_as_versioned'
+gem 'coveralls', require: false
