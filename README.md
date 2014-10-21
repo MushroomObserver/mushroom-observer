@@ -1,14 +1,17 @@
 Mushroom Observer
 =======
 
-Last Revised: September 28, 2014
+Last Revised: October 21, 2014
 
 This README provides a quick overview of the tools used by Mushroom Observer 
 (MO) and an overview of the other READMEs that accompany this file.  See
 http://mushroomobserver.org/observer/intro for an introduction to the website
 itself.
 
-[![CodePolice][1]][2]
+[![Continuous Integration Status][1]][2]
+[![Coverage Status][3]][4]
+[![CodePolice][5]][6]
+[![Dependency Status][7]][8]
 
 Tools
 -----
@@ -55,12 +58,18 @@ README_STANDARDS: The closest we have to coding standards.  Currently this is
 README_TRANSLATIONS: Details needed for translators to provide support in for
 the site in a new language.
 
-Copyright (c) . [Nathan Wilson][3],[Jason Hollinger][4],
-[Joseph Cohen][5] See [LICENSE][6] for further details.
+Copyright (c) . [Nathan Wilson][9],[Jason Hollinger][10],
+[Joseph Cohen][11] See [LICENSE][12] for further details.
 
-[1]: https://codeclimate.com/github/MushroomObserver/mushroom-observer.png
-[2]: https://codeclimate.com/github/MushroomObserver/mushroom-observer
-[3]: https://github.com/mo-nathan
-[4]: https://github.com/pellaea
-[5]: https://github.com/JoeCohen
-[6]: https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE
+[1]: https://secure.travis-ci.org/MushroomObserver/mushroom-observer.png
+[2]: http://travis-ci.org/MushroomObserver/mushroom-observer
+[3]: https://coveralls.io/repos/MushroomObserver/mushroom-observer/badge.png?branch=master
+[4]: https://coveralls.io/r/MushroomObserver/mushroom-observer?branch=master
+[5]: https://codeclimate.com/github/MushroomObserver/mushroom-observer.png
+[6]: https://codeclimate.com/github/MushroomObserver/mushroom-observer
+[7]: https://gemnasium.com/MushroomObserver/mushroom-observer.png
+[8]: https://gemnasium.com/MushroomObserver/mushroom-observer
+[9]: https://github.com/mo-nathan
+[10]: https://github.com/pellaea
+[11]: https://github.com/JoeCohen
+[12]: https://github.com/MushroomObserver/mushroom-observer/blob/master/LICENSE
