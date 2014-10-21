@@ -15,8 +15,9 @@ class LanguageTest < UnitTestCase
     french = languages(:french)
     greek = languages(:greek)
     assert_equal([], english.top_contributors)
-    assert_equal([[2, 'mary'], [1, 'rolf']], french.top_contributors)
-    assert_equal([[2, 'mary']], french.top_contributors(1))
+    french_contributors = Set.new(french.top_contributors)
+    assert_equal(Set.new([[2, 'mary'], [1, 'rolf']]), french_contributors)
+    assert(french_contributors.member?([2, 'mary']))
     assert_equal([[4, 'dick']], greek.top_contributors)
   end
 
