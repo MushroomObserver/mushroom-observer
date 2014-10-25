@@ -1800,7 +1800,7 @@ class NameTest < UnitTestCase
     assert(Name.parent_if_parent_deprecated('Lepiota barsii f. alba'))
   end
 
-  def test_suggest_alternate_names_from_synonymous_genera
+  def test_names_from_synonymous_genera
     User.current = rolf
     a  = create_test_name('Agaricus')
     a1 = create_test_name('Agaricus testus')
@@ -1822,15 +1822,13 @@ class NameTest < UnitTestCase
     d.merge_synonyms(b)
     d.merge_synonyms(c)
 
-    # assert_names_equal(d, Name.parent_if_parent_deprecated('Lepiota test'))
-    # assert_obj_list_equal([], Name.suggest_alternate_names_from_synonymous_genera('Lepiota test'))
-    assert_obj_list_equal([a1], Name.suggest_alternate_names_from_synonymous_genera('Lepiota testa'))
-    assert_obj_list_equal([a1], Name.suggest_alternate_names_from_synonymous_genera('Lepiota testus'))
-    assert_obj_list_equal([a1], Name.suggest_alternate_names_from_synonymous_genera('Lepiota testum'))
-    assert_obj_list_equal([a3], Name.suggest_alternate_names_from_synonymous_genera('Lepiota testii'))
+    assert_obj_list_equal([a1], Name.names_from_synonymous_genera('Lepiota testa'))
+    assert_obj_list_equal([a1], Name.names_from_synonymous_genera('Lepiota testus'))
+    assert_obj_list_equal([a1], Name.names_from_synonymous_genera('Lepiota testum'))
+    assert_obj_list_equal([a3], Name.names_from_synonymous_genera('Lepiota testii'))
 
     a1.change_deprecated(true); a1.save
-    assert_obj_list_equal([a1,b1,c1], Name.suggest_alternate_names_from_synonymous_genera('Lepiota testa'))
+    assert_obj_list_equal([a1,b1,c1], Name.names_from_synonymous_genera('Lepiota testa'))
   end
 
   def test_suggest_alternate_spelling

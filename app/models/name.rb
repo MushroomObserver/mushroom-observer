@@ -1303,7 +1303,7 @@ class Name < AbstractModel
   # Checks if the deprecated parent has synonyms, and if so, checks if there
   # is a corresponding child under on of the synonymous parents.  Returns an
   # Array of candidates (Name's).
-  def self.suggest_alternate_names_from_synonymous_genera(str, parent=nil)    # str = "Agaricus bogus var. namus"
+  def self.names_from_synonymous_genera(str, parent=nil)    # str = "Agaricus bogus var. namus"
     parent ||= parent_if_parent_deprecated(str)                               # parent = <Agaricus>
     parse = parse_name(str)
     result = []
