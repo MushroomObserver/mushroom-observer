@@ -127,6 +127,20 @@ class ApplicationController < ActionController::Base
     before_filter { User.current = nil }
   end
 
+  # Utility for extracting nested params where any level might be nil
+  def param_lookup(path, default = nil)
+    result = params
+    path.each do |arg|
+      result = result[arg]
+      break if result.nil?
+    end
+    if result.nil?
+      default
+    else
+      block_given? ? yield(result) : result
+    end
+  end
+
   # The default CSRF handler silently resets the session.  The problem is
   # autologin will circumvent this, so we would need to disable autologin
   # temporarily.  Or we can just make forgeries fail, but leave valid requests
