@@ -220,3 +220,5 @@ Thurs Aug 31 - Started adding observation_logs, but realized that species list e
 Fri Sep 1 - Finished testing rss_logs.
 
 Sat Sep 9 - Adjusted RSS log URL to go to object.  Got show_log working for RSS items whose object has been deleted.
+
+Sat Nov 1, 2014 - Been a long time since I wrote anything here.  Just making a minor tweak to trigger Travis
