@@ -14,6 +14,7 @@ class NamingControllerTest < FunctionalTestCase
     params = { id: nam.id.to_s }
     requires_user(:edit, ["observer", "show_observation"], params)
     assert_form_action(action: 'edit', approved_name: nam.text_name, id: nam.id.to_s)
+    assert_select('option[selected]', :count => 2)
   end
 
   def test_update_observation_new_name
@@ -29,6 +30,7 @@ class NamingControllerTest < FunctionalTestCase
     nam = params.naming
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
+    assert_select('option[selected]', :count => 2)
   end
 
   def test_update_observation_approved_new_name
@@ -70,6 +72,7 @@ class NamingControllerTest < FunctionalTestCase
     nam = params.naming
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
+    assert_select('option[selected]', :count => 2)
   end
 
   def test_update_observation_chosen_multiple_match
@@ -110,6 +113,7 @@ class NamingControllerTest < FunctionalTestCase
     nam = params.naming
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
+    assert_select('option[selected]', :count => 2)
   end
 
   def test_update_observation_chosen_deprecated

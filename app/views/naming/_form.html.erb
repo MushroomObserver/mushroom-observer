@@ -13,6 +13,7 @@
   <%= text_field('name', 'name', value: @params && @params.what) %>
   <span style="margin-left:20px">&nbsp;</span>
   <label for="vote_value"><%= :form_naming_confidence.t %>:</label>
+  <% @vote = @vote || @params.vote %>
   <%= select('vote', 'value', Vote.confidence_menu,
              { include_blank: action == 'edit' ? false : true }) %>
 </div><br/>
