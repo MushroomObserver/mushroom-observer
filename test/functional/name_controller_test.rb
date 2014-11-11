@@ -557,16 +557,12 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_name_guessing
-    def create_needed_names(str)
-      @controller.create_needed_names(str, str)
-    end
-
     # Not all the genera actually have records in our test database.
     User.current = rolf
     @controller.instance_variable_set('@user', rolf)
-    create_needed_names('Agaricus')
-    create_needed_names('Pluteus')
-    create_needed_names('Coprinus comatus subsp. bogus var. varietus')
+    Name.create_needed_names('Agaricus')
+    Name.create_needed_names('Pluteus')
+    Name.create_needed_names('Coprinus comatus subsp. bogus var. varietus')
 
     assert_name_suggestions('Agricus')
     assert_name_suggestions('Ptligera')

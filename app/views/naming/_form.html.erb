@@ -1,0 +1,64 @@
+<!--[form:naming]-->
+
+<%# -------------------- Name Autocompleter -------------------- %>
+<%= render(partial: 'shared/form_name_feedback',
+           locals: { button_name: button_name,
+                     what: @params && @params.what,
+                     valid_names: @params && @params.valid_names,
+                     suggest_corrections: @params && @params.suggest_corrections,
+                     parent_deprecated: @params && @params.parent_deprecated,
+                     names: @params && @params.names }) %>
+<div style="white-space:nowrap">
+  <label for="name_name"><%= :WHAT.t %>:</label>
+  <%= text_field('name', 'name', value: @params && @params.what) %>
+  <span style="margin-left:20px">&nbsp;</span>
+  <label for="vote_value"><%= :form_naming_confidence.t %>:</label>
+  <%= select('vote', 'value', Vote.confidence_menu,
+             { include_blank: action == 'edit' ? false : true }) %>
+</div><br/>
+<% if !show_reasons %>
+  <span class="HelpNote"><%= :form_naming_name_help_create.t %></span>
+<% end %>
+<span class="HelpNote"><%= :form_naming_name_help.t %></span><br/>
+<%= turn_into_name_auto_completer('name_name', primer: Name.primer,
+  on_change: %( function(v) { v && v != '' ? jQuery('#reasons_div').show() : jQuery('#reasons_div').hide() } )) %>
+ 
+<%# -------------------- Naming Reasons -------------------- %>
+<%=
+  html = safe_br
+  if @params
+    for r in @params.reason.values.sort_by(&:order)
+      num      = r.num
+      label    = r.label.t
+      check    = r.used?
+      notes    = r.notes.to_s
+      default  = r.default?
+      onclick  = "jQuery('#reason_#{num}_div').toggle(); setTimeout(function() " +
+                 "{ if (jQuery('#reason_#{num}_check').is(':checked')) jQuery('#reason_#{num}_notes').focus() }, 0.25)"
+      checkbox = check_box('reason', 'check', { index: num, checked: check,
+                           onclick: (can_do_ajax? ? onclick : 1)}, '1')
+      label    = content_tag(:label, label + (default ? ' (default)' : ' '), for: "reason_#{num}_check") + safe_br
+      textarea = text_area('reason', 'notes', { index: num, cols: 80, rows: 1, value: notes })
+      textarea += safe_br
+      if can_do_ajax?
+        textarea = content_tag(:div, textarea, id: "reason_#{num}_div")
+        if !check
+          textarea += javascript_tag("jQuery('#reason_#{num}_div').hide()")
+        end
+      end
+      html += checkbox + label + textarea
+    end
+  end
+  if can_do_ajax? && !show_reasons && @params && @params.what.blank?
+    html = content_tag(:div, html, id: 'reasons_div')
+    # html += javascript_tag("jQuery('#reasons_div').hide()");
+  end
+  html
+%>
+
+<%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
+<%= focus_on('name_name') %>
+
+<!--[eoform:naming]-->
+
+<div id="log"></div>

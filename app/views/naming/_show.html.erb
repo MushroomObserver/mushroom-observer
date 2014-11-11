@@ -1,15 +1,17 @@
 <%
-  javascript_include 'jquery'
-  javascript_include 'jquery_extensions'
-  javascript_include 'vote_popup'
+   javascript_include 'jquery'
+   javascript_include 'jquery_extensions'
+   javascript_include 'vote_popup'
 
-  logged_in = !@user.nil? && @user.verified
-  consensus = observation.consensus_naming
-  any_names = observation.namings && observation.namings.length > 0
-  popups = []
+   logged_in = !@user.nil? && @user.verified
+   consensus = observation.consensus_naming
+   any_names = observation.namings && observation.namings.length > 0
+   popups = []
 %>
 
-<%= form_tag(add_query_param(:action => 'show_observation', :id => observation)) do %>
+<%= form_tag(add_query_param(controller: :observer,
+                             action: :show_observation,
+                             id: observation.id)) do %>
   <div style="margin-top:1em">
     <%= if any_names
       :show_namings_proposed_names.t + ':'
@@ -17,13 +19,17 @@
       :show_namings_no_names_yet.t
     end %><%=
       safe_nbsp + link_with_query(:show_namings_propose_new_name.t,
-        :action => 'create_naming', :id => observation)
+                                  controller: :naming,
+                                  action: :create, id: observation.id)
     %><%= if is_in_admin_mode?
-      safe_nbsp + '|' + safe_nbsp + link_to(:show_observation_debug_consensus.t,
-        :action => 'recalc', :id => @observation.id)
+      safe_nbsp + '|' + safe_nbsp +
+        link_to(:show_observation_debug_consensus.t,
+                controller: :observer,
+                action: :recalc,
+                id: observation.id)
     end %><%= if logged_in && any_names && can_do_ajax?
       safe_nbsp + submit_tag(:show_namings_update_votes.l,
-        :onclick => "set_changed(0)")
+        onclick: "set_changed(0)")
     end %>
   </div>
 
@@ -50,16 +56,21 @@
             <td>
               <div>
                 <%= link_with_query(naming.format_name.t,
-                      :controller => 'name', :action => 'show_name',
-                      :id => naming.name) %>
+                                    controller: :name,
+                                    action: :show_name,
+                                    id: naming.name) %>
               </div>
               <% if check_permission(naming) %>
                 <div>
-                  (<%= link_with_query(:EDIT.t, :action => 'edit_naming',
-                         :id => naming) %>
+                  (<%= link_with_query(:EDIT.t,
+                                       controller: :naming,
+                                       action: :edit,
+                                       id: naming) %>
                   | <%= link_with_query(:DESTROY.t,
-                          { :action => 'destroy_naming', :id => naming.id },
-                          { :confirm => :are_you_sure.l }) %>)
+                                        { controller: :naming,
+                                          action: :destroy,
+                                          id: naming.id },
+                                        { confirm: :are_you_sure.l }) %>)
                 </div>
               <% end %>
             </td>
@@ -78,8 +89,10 @@
               else
                 html += can_do_ajax? ?
                   link_to_function(h(txt), "show_votes(#{naming.id})") :
-                  link_with_query(h(txt), :action => 'show_votes',
-                    :id => naming.id)
+                  link_with_query(h(txt),
+                                  controller: :observer,
+                                  action: :show_votes,
+                                  id: naming.id)
                 popups << naming
               end
               if nvotes != 0
@@ -92,13 +105,13 @@
               <td width="20">&nbsp;</td>
               <td>
                 <% @vote = @votes[naming.id]
-                menu = @confidence_menu
+                menu = Vote.confidence_menu
                 if !check_permission(naming) or 
                   (check_permission(naming) && (!@vote || @vote.value == 0))
-                  menu = [@no_opinion] + menu
+                  menu = [Vote.no_opinion] + menu
                 end %>
-                <%= select('vote', 'value', menu, {}, { :index => naming.id,
-                           :onchange => "change_vote(#{naming.id})" }) %>
+                <%= select('vote', 'value', menu, {}, { index: naming.id,
+                           onchange: "change_vote(#{naming.id})" }) %>
                 <%= submit_tag(:show_namings_cast.l) if !can_do_ajax? %>
               </td>
             <% end %>
@@ -162,7 +175,7 @@
     <div class="popup" id="show_votes_<%= @naming.id %>" style="display:none">
       <table width="50%"><tr><td>
         <div class="popup_frame" id="show_votes_<%= @naming.id %>_frame">
-          <%= render(:partial => 'show_votes', :locals => { :do_cancel => true }) %>
+          <%= render(partial: 'observer/show_votes', locals: { do_cancel: true }) %>
         </div>
       </td></tr></table>
     </div>

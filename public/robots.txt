@@ -94,6 +94,9 @@ Disallow: /name/set_review_status
 Disallow: /name/show_past_name
 Disallow: /name/show_past_name_description
 Disallow: /name/test_index
+Disallow: /naming/create
+Disallow: /naming/destroy
+Disallow: /naming/edit
 Disallow: /observer/add_comment
 Disallow: /observer/add_image
 Disallow: /observer/add_observation_to_species_list

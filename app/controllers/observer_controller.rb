@@ -1,17 +1,15 @@
 # encoding: utf-8
-#
-#  = Main Controller
-#
-#  == Actions
-#
-#  ==== RssLog's
+
+# TODO: Create RssLogController with:
+#  index
 #  list_rss_logs::
 #  index_rss_log::
 #  show_rss_log::
 #  next_rss_log::
 #  prev_rss_log::
 #  rss::
-#
+
+# TODO: Create ObservationController with:
 #  ==== Observation's
 #  show_observation::
 #  next_observation::
@@ -19,34 +17,36 @@
 #  create_observation::
 #  edit_observation::
 #  destroy_observation::
-#  create_naming::
-#  edit_naming::
-#  destroy_naming::
-#  cast_vote::
-#  show_votes::
-#
-#  ==== Notification's
-#  show_notifications::
-#  list_notifications::
-#
-#  ==== Observation Index
 #  index_observation::
 #  list_observations::
+# Should the following be separate methods or just params?
 #  observations_by_name::
 #  observations_of_name::
 #  observations_by_user::
 #  observations_at_location::
 #  observations_at_where::
 #  observation_search::
-#  advanced_search::
+# Is this just a private helper?
 #  show_selected_observations:: (helper)
-#
+
+# TODO: Create VoteController with:
+#  cast_vote::
+#  show_votes::
+
+# TODO: Create NotificationController with:
+#  show_notifications::
+#  list_notifications::
+
+# TODO: Determine where this really goes
+#  advanced_search::
+
+# TODO: Create SearchController with:
 #  ==== Searches
 #  pattern_search::
 #  advanced_search_form::
 #  refine_search::
-#
-#  ==== Textile Object Links
+
+# TODO: Create MarkupController with:
 #  lookup_comment::
 #  lookup_image::
 #  lookup_location::
@@ -56,35 +56,45 @@
 #  lookup_species_list::
 #  lookup_user::
 #  lookup_general:: (helper)
-#
-#  ==== Description Authors
+
+# TODO: Create AuthorController with:
 #  review_authors:: Let authors/reviewers add/remove authors from descriptions.
 #  author_request:: Let non-authors request authorship credit on descriptions.
-#
-#  ==== Users
+
+# TODO: Create UserController with:
 #  change_user_bonuses::
 #  index_user::
 #  users_by_name::
 #  users_by_contribution::
 #  show_user::
 #  show_site_stats::
-#
-#  ==== Email Questions
+
+# TODO: Create EmailController with:
 #  ask_webmaster_question::
 #  email_features::
 #  ask_user_question::
 #  ask_observation_question::
 #  commercial_inquiry::
 #  email_question:: (helper)
-#
-#  ==== Site Info
+
+# TODO: Create InfoController with:
 #  intro::
 #  how_to_help::
 #  how_to_use::
 #  news::
 #  textile_sandbox::
 #  translators_note::
-#
+#  wrapup_2011
+
+# TODO: Create ThemeController with:
+#  ==== Themes
+#  color_themes::
+#  Agaricus::
+#  Amanita::
+#  Cantharellus::
+#  Hygrocybe::
+
+# TODO: Figure out where this stuff goes
 #  ==== Global Callbacks
 #  no_ajax::
 #  no_browser::
@@ -92,27 +102,18 @@
 #  no_session::
 #  turn_javascript_on::
 #  turn_javascript_off::
-#
-#  ==== Themes
-#  color_themes::
-#  Agaricus::
-#  Amanita::
-#  Cantharellus::
-#  Hygrocybe::
-#
-#  ==== Test Views
-#  throw_error::
-#  throw_mobile_error::
-#
-#  ==== Admin Tools
 #  recalc::
 #  refresh_vote_cache::
 #  clear_session::
 #  w3c_tests::
+
+# TODO: Are these useful?
+#  throw_error::
+#  throw_mobile_error::
 #
 ################################################################################
 
-# The original MO controller and hence a real mess!
+# The original MO controller and hence a real mess!  The Clitocybe of Controllers
 class ObserverController < ApplicationController
   require "find"
   require "set"
@@ -188,9 +189,7 @@ class ObserverController < ApplicationController
   ]
 
   before_filter :disable_link_prefetching, except: [
-    :create_naming,
     :create_observation,
-    :edit_naming,
     :edit_observation,
     :show_obs,
     :show_observation,
@@ -212,44 +211,44 @@ class ObserverController < ApplicationController
 
   # Provided just as a way to verify the before_filter.
   # This page should always require the user to be logged in.
-  def login # :norobots:
-    list_rss_logs
-  end
+  # def login # :norobots:
+  #   list_rss_logs
+  # end
 
   # Another test method.  Repurpose as needed.
-  def throw_error # :nologin: :norobots:
-    fail "Something bad happened."
-  end
+  # def throw_error # :nologin: :norobots:
+  #   fail "Something bad happened."
+  # end
 
   # Used for initial investigation of specialized mobile support
-  def throw_mobile_error # :nologin: :norobots:
-    if request.env["HTTP_USER_AGENT"].index("BlackBerry")
-      fail "This is a BlackBerry!"
-    else
-      fail request.env["HTTP_USER_AGENT"].to_s
-    end
-  end
+  # def throw_mobile_error # :nologin: :norobots:
+  #   if request.env["HTTP_USER_AGENT"].index("BlackBerry")
+  #     fail "This is a BlackBerry!"
+  #   else
+  #     fail request.env["HTTP_USER_AGENT"].to_s
+  #   end
+  # end
 
-  def test
-    flash_notice params.inspect
-  end
+  # def test
+  #   flash_notice params.inspect
+  # end
 
-  def test_flash_redirection
-    tags = params[:tags].to_s.split(",")
-    if tags.any?
-      flash_notice(tags.pop.to_sym.t)
-      redirect_to(
-        controller: :observer,
-        action: :test_flash_redirection,
-        tags: tags.join(",")
-      )
-    else
-      # (sleight of hand to prevent localization_file_text from complaining
-      # about missing test_flash_redirection_title tag)
-      @title = "test_flash_redirection_title".to_sym.t
-      render(layout: "application", text: "")
-    end
-  end
+ def test_flash_redirection
+   tags = params[:tags].to_s.split(",")
+   if tags.any?
+     flash_notice(tags.pop.to_sym.t)
+     redirect_to(
+       controller: :observer,
+       action: :test_flash_redirection,
+       tags: tags.join(",")
+     )
+   else
+     # (sleight of hand to prevent localization_file_text from complaining
+     # about missing test_flash_redirection_title tag)
+     @title = "test_flash_redirection_title".to_sym.t
+     render(layout: "application", text: "")
+   end
+ end
 
   def wrapup_2011 # :nologin:
   end
@@ -264,9 +263,9 @@ class ObserverController < ApplicationController
 
   # Help page.
   def how_to_use # :nologin:
-    @min_pos_vote = Vote.confidence(Vote.min_pos_vote).l
-    @min_neg_vote = Vote.confidence(Vote.min_neg_vote).l
-    @maximum_vote = Vote.confidence(Vote.maximum_vote).l
+    @min_pos_vote = Vote.confidence(Vote.min_pos_vote)
+    @min_neg_vote = Vote.confidence(Vote.min_neg_vote)
+    @maximum_vote = Vote.confidence(Vote.maximum_vote)
   end
 
   # A few ways in which users can help.
@@ -422,6 +421,7 @@ class ObserverController < ApplicationController
     lookup_general(User)
   end # :nologin
 
+  # MarkupController:
   # Alternative to controller/show_object/id.  These were included for the
   # benefit of the textile wrapper: We don't want to be looking up all these
   # names and objects every time we display comments, etc.  Instead we make
@@ -984,8 +984,6 @@ class ObserverController < ApplicationController
   # Inputs: params[:id]
   # Outputs:
   #   @observation
-  #   @confidence_menu    (used to create vote menus)
-  #   @no_opinion         (used to add "No Opinion" vote)
   #   @votes                        (user's vote for each naming.id)
   def show_observation # :nologin: :prefetch:
     pass_query_params
@@ -1049,8 +1047,6 @@ class ObserverController < ApplicationController
       vote ||= Vote.new(value: 0)
       @votes[naming.id] = vote
     end
-    @confidence_menu = translate_menu(Vote.confidence_menu)
-    @no_opinion  = Vote.no_opinion
   end
 
   def show_obs
@@ -1091,7 +1087,6 @@ class ObserverController < ApplicationController
   # Outputs:
   #   @observation, @naming, @vote      empty objects
   #   @what, @names, @valid_names       name validation
-  #   @confidence_menu                  used for vote option menu
   #   @reason                           array of naming_reasons
   #   @images                           array of images
   #   @licenses                         used for image license menu
@@ -1102,7 +1097,6 @@ class ObserverController < ApplicationController
     # These are needed to create pulldown menus in form.
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(Time.now)
-    @confidence_menu = translate_menu(Vote.confidence_menu)
 
     # Clear search list. [Huh? -JPH 20120513]
     clear_query_in_session
@@ -1120,10 +1114,10 @@ class ObserverController < ApplicationController
     success = true
     success = false unless validate_name(params)
     success = false unless validate_place_name(params)
-    success = false unless validate_observation(@observation)
+    success = false unless validate_object(@observation)
     success = false unless validate_specimen(params)
-    success = false if @name && !validate_naming(@naming)
-    success = false if @name && !validate_vote(@vote)
+    success = false if @name && !validate_object(@naming)
+    success = false if @name && !validate_object(@vote)
     success = false if @bad_images != []
     success = false if success && !save_observation(@observation)
 
@@ -1143,8 +1137,8 @@ class ObserverController < ApplicationController
   def rough_cut(params)
     # Create everything roughly first.
     @observation = create_observation_object(params[:observation])
-    @naming      = create_naming_object(params[:naming], @observation)
-    @vote        = create_vote_object(params[:vote], @naming)
+    @naming      = Naming.construct(params[:naming], @observation)
+    @vote        = Vote.construct(params[:vote], @naming)
     @good_images = update_good_images(params[:good_images])
     @bad_images  = create_image_objects(params[:image],
                                         @observation, @good_images)
@@ -1153,8 +1147,8 @@ class ObserverController < ApplicationController
   def validate_name(params)
     given_name = param_lookup([:name, :name], "").to_s
     chosen_name = param_lookup([:chosen_name, :name_id], "").to_s
-    (success, @what, @name, @names, @valid_names) =
-      resolve_name(given_name, params[:approved_name], chosen_name)
+    (success, @what, @name, @names, @valid_names, @parent_deprecated, @suggest_corrections) =
+      Name.resolve_name(given_name, params[:approved_name], chosen_name)
     @naming.name = @name if @name
     success
   end
@@ -1201,8 +1195,8 @@ class ObserverController < ApplicationController
 
   def save_everything_else(reason)
     if @name
-      create_naming_reasons(@naming, reason)
-      save_naming(@naming)
+      @naming.create_reasons(reason, params[:was_js_on] == "yes")
+      save_with_transaction(@naming)
       @observation.reload
       @observation.change_vote(@naming, @vote.value)
     end
@@ -1251,7 +1245,7 @@ class ObserverController < ApplicationController
   end
 
   def reload_the_form(reason)
-    @reason          = init_naming_reasons(@naming, reason)
+    @reason          = @naming.init_reasons(reason)
     @images          = @bad_images
     @new_image.when  = @observation.when
     init_specimen_vars_for_reload
@@ -1266,7 +1260,7 @@ class ObserverController < ApplicationController
     @what            = "" # can't be nil else rails tries to call @name.name
     @names           = nil
     @valid_names     = nil
-    @reason          = init_naming_reasons(@naming)
+    @reason          = @naming.init_reasons
     @images          = []
     @good_images     = []
     init_specimen_vars_for_create
@@ -1430,251 +1424,6 @@ class ObserverController < ApplicationController
         redirect_to(action: "list_observations")
       end
     end
-  end
-
-  ##############################################################################
-  #
-  #  :section: Create and Edit Namings
-  #
-  ##############################################################################
-
-  # Form to propose new naming for an observation.
-  # Linked from: show_observation
-  #
-  # Inputs (post):
-  #   params[:id]                       observation id
-  #   params[:name][:name]              name
-  #   params[:approved_name]            old name
-  #   params[:chosen_name][:name_id]    name radio boxes
-  #   params[:vote][...]                vote args
-  #   params[:reason][n][...]           naming_reason args
-  #   params[:was_js_on]                was form javascripty? ("yes" = true)
-  #
-  # Outputs:
-  #   @observation, @naming, @vote      empty objects
-  #   @what, @names, @valid_names       name validation
-  #   @confidence_menu                  used for vote option menu
-  #   @reason                           array of naming_reasons
-  #
-  def create_naming # :prefetch: :norobots:
-    pass_query_params
-    @observation = find_or_goto_index(Observation, params[:id].to_s)
-    return unless @observation
-    @confidence_menu = translate_menu(Vote.confidence_menu)
-
-    # Create empty instances first time through.
-    if request.method != "POST"
-      @naming      = Naming.new
-      @vote        = Vote.new
-      @what        = "" # can't be nil else rails tries to call @name.name
-      @names       = nil
-      @valid_names = nil
-      @reason      = init_naming_reasons(@naming)
-    else
-      # Create everything roughly first.
-      @naming = create_naming_object(params[:naming], @observation)
-      @vote   = create_vote_object(params[:vote], @naming)
-
-      # Validate name.
-      given_name  = param_lookup([:name, :name], "").to_s
-      chosen_name = param_lookup([:chosen_name, :name_id], "").to_s
-      (success, @what, @name, @names, @valid_names) =
-        resolve_name(given_name, params[:approved_name], chosen_name)
-      unless @name
-        unless given_name.match(/\S/)
-          @naming.errors.add(:name, :validate_naming_name_missing.t)
-          flash_object_errors(@naming)
-        end
-        success = false
-      end
-
-      if success && @observation.name_been_proposed?(@name)
-        flash_warning(:runtime_create_naming_already_proposed.t)
-        success = false
-      end
-
-      # Validate objects.
-      @naming.name = @name
-      success = validate_naming(@naming) if success
-      success = validate_vote(@vote)     if success
-
-      if success
-        # Save changes now that everything checks out.
-        create_naming_reasons(@naming, params[:reason])
-        save_naming(@naming)
-        @observation.reload
-        @observation.change_vote(@naming, @vote.value)
-        @observation.log(:log_naming_created_at, name: @naming.format_name)
-
-        # Check for notifications.
-        if has_unshown_notifications?(@user, :naming)
-          redirect_with_query(action: "show_notifications",
-                              id: @observation.id)
-        else
-          redirect_with_query(action: "show_observation",
-                              id: @observation.id)
-        end
-      else # If anything failed reload the form.
-        @reason = init_naming_reasons(@naming, params[:reason])
-      end
-    end
-  end
-
-  # Form to edit an existing naming for an observation.
-  # Linked from: show_observation
-  #
-  # Inputs:
-  #   params[:id]                       naming id
-  #   params[:observation_id]           (alternate way to enter)
-  #   params[:name][:name]              name
-  #   params[:approved_name]            old name
-  #   params[:chosen_name][:name_id]    name radio boxes
-  #   params[:vote][...]                vote args
-  #   params[:reason][n][...]           naming_reason args
-  #   params[:was_js_on]                was form javascripty? ("yes" = true)
-  #
-  # Outputs:
-  #   @observation, @naming, @vote      empty objects
-  #   @what, @names, @valid_names       name validation
-  #   @confidence_menu                  used for vote option menu
-  #   @reason                           array of naming_reasons
-  #
-  def edit_naming # :prefetch: :norobots:
-    pass_query_params
-    if params[:id].blank?
-      @observation = Observation.find(params[:observation_id])
-      @naming = @observation.consensus_naming
-    else
-      @naming = Naming.find(params[:id].to_s)
-      @observation = @naming.observation
-    end
-    @vote = Vote.find(:first, conditions:
-      ["naming_id = ? AND user_id = ?", @naming.id, @naming.user_id])
-    @confidence_menu = translate_menu(Vote.confidence_menu)
-
-    # Make sure user owns this naming!
-    if !check_permission!(@naming)
-      redirect_with_query(action: "show_observation",
-                          id: @observation.id)
-
-    # Initialize form.
-    elsif request.method != "POST"
-      @what        = @naming.text_name
-      @names       = nil
-      @valid_names = nil
-      @reason      = init_naming_reasons(@naming)
-
-    else
-      # Validate name.
-      given_name  = param_lookup([:name, :name], "").to_s
-      chosen_name = param_lookup([:chosen_name, :name_id], "").to_s
-      (success, @what, @name, @names, @valid_names) =
-        resolve_name(given_name, params[:approved_name], chosen_name)
-      unless @name
-        unless given_name.match(/\S/)
-          @naming.errors.add(:name, :validate_naming_name_missing.t)
-          flash_object_errors(@naming)
-        end
-        success = false
-      end
-
-      if success && (@naming.name != @name) &&
-         @observation.name_been_proposed?(@name)
-        flash_warning(:runtime_edit_naming_someone_else.t)
-        success = false
-      end
-
-      # Owner is not allowed to change a naming once it's been used by someone
-      # else.  Instead I automatically clone it and make changes to the clone.
-      # I assume there will be no validation problems since we're cloning
-      # pre-existing valid objects.
-      if success && !@naming.editable? && (@name != @naming.name)
-        @naming = create_naming_object(params[:naming], @observation)
-        @vote   = create_vote_object(params[:vote], @naming)
-
-        # Validate objects.
-        @naming.name = @name
-        success = validate_naming(@naming) if success
-        success = validate_vote(@vote)     if success
-
-        # Save changes now that everything checks out.
-        if success
-          create_naming_reasons(@naming, params[:reason])
-          save_naming(@naming)
-          @observation.reload
-          @observation.change_vote(@naming, @vote.value, @naming.user)
-          @observation.log(:log_naming_created_at, name: @naming.format_name)
-          flash_warning "Sorry, someone else has given this a positive vote,
-            so we had to create a new Naming to accomodate your changes."
-        end
-
-      # Owner is allowed to change the naming so long as no one else
-      # has used it.  They are also allowed to change the reasons even
-      # if others have used it.
-      elsif success
-
-        # If user's changed the name, it sorta invalidates any votes that
-        # others might have cast prior to this.
-        need_to_calc_consensus = false
-        need_to_log_change = false
-        if @name != @naming.name
-          @naming.votes.each do |vote|
-            vote.destroy if vote.user_id != @user.id
-          end
-          need_to_calc_consensus = true
-          need_to_log_change = true
-        end
-
-        # Update reasons.
-        create_naming_reasons(@naming, params[:reason])
-
-        # Make changes to naming.
-        success = update_naming_object(@naming, @name, need_to_log_change)
-
-        # Save everything if it all checks out.
-        if success
-          # Only change vote if changed value.
-          if (new_val = param_lookup([:vote, :value]) { |r| r.to_i }) &&
-             (!@vote || @vote.value != new_val)
-            @observation.change_vote(@naming, new_val)
-            need_to_calc_consensus = false
-          end
-          if need_to_calc_consensus
-            @observation.reload
-            @observation.calc_consensus
-          end
-        end
-      end
-
-      # Redirect to observation on success, reload form if anything failed.
-      if success
-        redirect_with_query(action: "show_observation",
-                            id: @observation.id)
-      else
-        @reason = init_naming_reasons(@naming, params[:reason])
-      end
-    end
-  end
-
-  # Callback to destroy a naming (and associated votes, etc.)
-  # Linked from: show_observation
-  # Inputs: params[:id] (observation)
-  # Redirects back to show_observation.
-  def destroy_naming # :norobots:
-    pass_query_params
-    @naming = Naming.find(params[:id].to_s)
-    @observation = @naming.observation
-    if !check_permission!(@naming)
-      flash_error(:runtime_destroy_naming_denied.t(id: @naming.id))
-    elsif !@naming.deletable?
-      flash_warning(:runtime_destroy_naming_someone_else.t)
-    elsif !@naming.destroy
-      flash_error(:runtime_destroy_naming_failed.t(id: @naming.id))
-    else
-      Transaction.delete_naming(id: @naming)
-      flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
-    end
-    redirect_with_query(action: "show_observation", id: @observation.id)
   end
 
   # I'm tired of tweaking show_observation to call calc_consensus for
@@ -2309,28 +2058,15 @@ class ObserverController < ApplicationController
   #  :section: create and edit helpers
   #
   #    create_observation_object(...)     create rough first-drafts.
-  #    create_naming_object(...)
-  #    create_vote_object(...)
-  #
-  #    validate_observation(...)          validate first-drafts.
-  #    validate_naming(...)
-  #    validate_vote(...)
   #
   #    save_observation(...)              Save validated objects.
-  #    save_naming(...)
   #
   #    update_observation_object(...)     Update and save existing objects.
-  #    update_naming_object(...)
-  #
-  #    init_naming_reasons(...)           Handle naming reasons.
-  #    create_naming_reasons(...)
   #
   #    init_image()                       Handle image uploads.
   #    create_image_objects(...)
   #    update_good_images(...)
   #    attach_good_images(...)
-  #
-  #    resolve_name(...)                  Validate name.
   #
   ##############################################################################
 
@@ -2351,65 +2087,6 @@ class ObserverController < ApplicationController
       observation.where = nil
     end
     observation
-  end
-
-  # Roughly create naming object.  Will validate and save later once
-  # we're sure everything is correct.
-  # INPUT: params[:naming], observation (and @user)
-  # OUTPUT: new naming
-  def create_naming_object(args, observation)
-    now = Time.now
-    naming = Naming.new(args)
-    naming.created_at   = now
-    naming.updated_at   = now
-    naming.user         = @user
-    naming.observation  = observation
-    naming
-  end
-
-  # Roughly create vote object.  Will validate and save later once
-  # we're sure everything is correct.
-  # INPUT: params[:vote], naming (and @user)
-  # OUTPUT: new vote
-  def create_vote_object(args, naming)
-    now = Time.now
-    vote = Vote.new(args)
-    vote.created_at   = now
-    vote.updated_at   = now
-    vote.user         = @user
-    vote.naming       = naming
-    vote.observation  = naming.observation
-    vote
-  end
-
-  # Make sure there are no errors in observation.
-  def validate_observation(observation)
-    success = true
-    unless observation.valid?
-      flash_object_errors(observation)
-      success = false
-    end
-    success
-  end
-
-  # Make sure there are no errors in naming.
-  def validate_naming(naming)
-    success = true
-    unless naming.valid?
-      flash_object_errors(naming)
-      success = false
-    end
-    success
-  end
-
-  # Make sure there are no errors in vote.
-  def validate_vote(vote)
-    success = true
-    unless vote.valid?
-      flash_object_errors(vote)
-      success = false
-    end
-    success
   end
 
   def init_specimen_vars_for_create
@@ -2573,109 +2250,6 @@ class ObserverController < ApplicationController
     success
   end
 
-  # Save naming now that everything is created successfully.
-  def save_naming(naming)
-    success = true
-    args = {}
-    if naming.new_record?
-      args[:method]      = "post"
-      args[:action]      = "naming"
-      args[:name]        = naming.name
-      args[:observation] = naming.observation
-    else
-      args[:method]          = "put"
-      args[:action]          = "naming"
-      args[:set_name] = naming.name if naming.name_id_changed?
-      if naming.observation_id_changed?
-        args[:set_observation] = naming.observation
-      end
-    end
-    if naming.save
-      args[:id] = naming
-      Transaction.create(args)
-      flash_notice(:runtime_naming_created_at.t)
-    else
-      flash_error(:runtime_no_save_naming.t)
-      flash_object_errors(naming)
-      success = false
-    end
-    success
-  end
-
-  # Update naming and log changes.
-  def update_naming_object(naming, name, log)
-    naming.name = name
-    naming.save
-    flash_notice(:runtime_naming_updated_at.t)
-    naming.observation.log(:log_naming_updated,
-                           name: naming.format_name, touch: log)
-
-    # Always tell Transaction to change reasons, even if no changes.
-    args = { id: naming }
-    args[:set_name] = name
-    naming.get_reasons.select(&:used?).each do |reason|
-      args["set_reason_#{reason.num}".to_sym] = reason.notes
-    end
-    Transaction.put_naming(args)
-
-    true
-  end
-
-  # Initialize the naming_reasons objects used by the naming form.
-  def init_naming_reasons(naming, args = nil)
-    result = {}
-    naming.get_reasons.each do |reason|
-      num = reason.num
-
-      # Use naming's reasons by default.
-      result[num] = reason
-
-      # Override with values in params.
-      next unless args
-      if (x = args[num.to_s])
-        check = x[:check]
-        notes = x[:notes]
-        # Reason is "used" if checked or notes non-empty.
-        if (check == "1") ||
-            !notes.blank?
-          reason.notes = notes
-        else
-          reason.delete
-        end
-      else
-        reason.delete
-      end
-    end
-    result
-  end
-
-  # Creates all the reasons for a naming.
-  # Gets checkboxes and notes from params[:reason].
-  def create_naming_reasons(naming, args = nil)
-    args ||= {}
-
-    # Need to know if JS was on because it changes how we deal with unchecked
-    # reasons that have notes: if JS is off these are considered valid, if JS
-    # was on the notes are hidden when the box is unchecked thus it is invalid.
-    was_js_on = (params[:was_js_on] == "yes")
-
-    naming.get_reasons.each do |reason|
-      num = reason.num
-      if (x = args[num.to_s])
-        check = x[:check]
-        notes = x[:notes]
-        if (check == "1") ||
-           (!was_js_on && !notes.blank?)
-          reason.notes = notes
-        else
-          reason.delete
-        end
-      else
-        reason.delete
-      end
-    end
-  end
-
   # Attempt to upload any images.  We will attach them to the observation
   # later, assuming we can create it.  Problem is if anything goes wrong, we
   # cannot repopulate the image forms (security issue associated with giving
@@ -2798,119 +2372,6 @@ class ObserverController < ApplicationController
     image.license          = @user.license
     image.copyright_holder = @user.legal_name
     image
-  end
-
-  # Resolves the name using these heuristics:
-  #   First time through:
-  #     Only 'what' will be filled in.
-  #     Prompts the user if not found.
-  #     Gives user a list of options if matches more than one. ('names')
-  #     Gives user a list of options if deprecated. ('valid_names')
-  #   Second time through:
-  #     'what' is a new string if user typed new name, else same as old 'what'
-  #     'approved_name' is old 'what'
-  #     'chosen_name' hash on name.id: radio buttons
-  #     Uses the name chosen from the radio buttons first.
-  #     If 'what' has changed, then go back to "First time through" above.
-  #     Else 'what' has been approved, create it if necessary.
-  #
-  # INPUTS:
-  #   what            params[:name][:name]            Text field.
-  #   approved_name   params[:approved_name]          Last name user entered.
-  #   chosen_name     params[:chosen_name][:name_id]  Name id from radio boxes.
-  #   (@user -- might be used by one or more things)
-  #
-  # RETURNS:
-  #   success       true: okay to use name; false: user needs to approve name.
-  #   name          Name object if it resolved without reservations.
-  #   names         List of choices if name matched multiple objects.
-  #   valid_names   List of choices if name is deprecated.
-  #
-  def resolve_name(what, approved_name, chosen_name)
-    success = true
-    name = nil
-    names = nil
-    valid_names = nil
-
-    what2 = what.to_s.gsub("_", " ").strip_squeeze
-    approved_name2 = approved_name.to_s.gsub("_", " ").strip_squeeze
-
-    unless what2.blank? || Name.names_for_unknown.member?(what2.downcase)
-      success = false
-
-      ignore_approved_name = false
-      # Has user chosen among multiple matching names or among
-      # multiple approved names?
-      if chosen_name.blank?
-        # Look up name: can return zero (unrecognized), one
-        # (unambiguous match), or many (multiple authors match).
-        names = Name.find_names_filling_in_authors(what2)
-      else
-        names = [Name.find(chosen_name)]
-        # This tells it to check if this name is deprecated below EVEN
-        # IF the user didn't change the what field.  This will solve
-        # the problem of multiple matching deprecated names discussed
-        # below.
-        ignore_approved_name = true
-      end
-
-      # Create temporary name object for it.  (This will not save anything
-      # EXCEPT in the case of user supplying author for existing name that
-      # has no author.)
-      if names.empty? &&
-         (name = create_needed_names(approved_name2, what2))
-        names << name
-      end
-
-      # No matches -- suggest some correct names to make Debbie happy.
-      if names.empty?
-        if (parent = Name.parent_if_parent_deprecated(what2))
-          valid_names = Name.names_from_synonymous_genera(what2, parent)
-          @parent_deprecated = parent
-        else
-          valid_names = Name.suggest_alternate_spellings(what2)
-          @suggest_corrections = true
-        end
-
-      # Only one match (or we just created an approved new name).
-      elsif names.length == 1
-        target_name = names.first
-        # Single matching name.  Check if it's deprecated.
-        if target_name.deprecated &&
-            (ignore_approved_name || (approved_name != what))
-          # User has not explicitly approved the deprecated name: get list of
-          # valid synonyms.  Will display them for user to choose among.
-          valid_names = target_name.approved_synonyms
-        else
-          # User has selected an unambiguous, accepted name... or they have
-          # chosen or approved of their choice.  Either way, go with it.
-          name = target_name
-          # Fill in author, just in case user has chosen between two authors.
-          # If the form fails for some other reason and we don't do this, it
-          # will ask the user to choose between the authors *again* later.
-          what = name.real_search_name
-          # (This is the only way to get out of here with success.)
-          success = true
-        end
-
-      # Multiple matches.
-      elsif names.length > 1
-        if names.reject(&:deprecated).empty?
-          # Multiple matches, all of which are deprecated.  Check if
-          # they all have the same set of approved names.  Pain in the
-          # butt, but otherwise can get stuck choosing between
-          # Helvella infula Fr. and H. infula Schaeff. without anyone
-          # mentioning that both are deprecated by Gyromitra infula.
-          valid_set = Set.new
-          names.each do |n|
-            valid_set.merge(n.approved_synonyms)
-          end
-          valid_names = valid_set.sort_by(&:sort_name)
-        end
-      end
-    end
-
-    [success, what, name, names, valid_names]
   end
 
   def hide_thumbnail_map # :nologin:
