@@ -75,6 +75,17 @@ class Vote < AbstractModel
   NEXT_BEST_VOTE =  2
   MAXIMUM_VOTE   =  3
 
+  def self.construct(args, naming)
+    now = Time.now
+    vote = Vote.new(args)
+    vote.created_at = now
+    vote.updated_at = now
+    vote.user = @user
+    vote.naming = naming
+    vote.observation = naming.observation
+    vote
+  end
+
   # Override the default show_controller
   def self.show_controller
     'observer'
@@ -165,7 +176,7 @@ class Vote < AbstractModel
   #   end
   #
   def self.confidence_menu
-    CONFIDENCE_VALS
+    translate_menu(CONFIDENCE_VALS)
   end
 
   def self.no_opinion
@@ -173,7 +184,7 @@ class Vote < AbstractModel
   end
 
   def self.opinion_menu
-    [NO_OPINION_VAL] + confidence_menu
+    translate_menu([NO_OPINION_VAL] + confidence_menu)
   end
   
   # Find label of closest value in the "confidence" menu.
@@ -243,4 +254,15 @@ class Vote < AbstractModel
       errors.add(:value, :validate_vote_value_out_of_bounds.t)
     end
   end
+
+  private
+
+  def self.translate_menu(menu)
+    result = []
+    for k,v in menu
+      result << [ (k.is_a?(Symbol) ? k.l : k.to_s), v ]
+    end
+    return result
+  end
+
 end

@@ -33,7 +33,7 @@
             <%= text_field(:observation, :alt,                   :index => obs.id, :object => obs, :style => "width:4em",  :title => :Altitude.l) %>
             <%= check_box(:observation, :is_collection_location, :index => obs.id, :object => obs, :title => :form_observations_is_collection_location_help.l) %>
             <%= check_box(:observation, :specimen,               :index => obs.id, :object => obs, :title => :form_observations_specimen_available_help.l) %>
-            <%= menu = @vote_menu
+            <%= menu = Vote.confidence_menu
                 vote = @votes[obs.id] || @no_vote
                 menu << [ :vote_no_opinion.t, 0 ] if vote.value == 0
                 select(:observation, :value, menu, { :object => vote }, { :index => obs.id, :title => :Confidence_level.l}) %> &nbsp;
@@ -64,11 +64,11 @@
             :confirm => :are_you_sure.l) %>
     &nbsp;
     <%= :NAMES.t %>: (<span id="number_of_names"></span>)
-      <%= url = url_for(add_query_param({ :controller => :observer,
-            :action => :edit_naming, :observation_id => 'XXX' }, @query))
+      <%= url = url_for(add_query_param({ :controller => :naming,
+            :action => :edit, :observation_id => 'XXX' }, @query))
           link_to(:EDIT.l, "javascript:row_button('#{url}')") %> |
-      <%= url = url_for(add_query_param({ :controller => :observer,
-            :action => :create_naming, :id => 'XXX' }, @query))
+      <%= url = url_for(add_query_param({ :controller => :naming,
+            :action => :create, :id => 'XXX' }, @query))
           link_to(:species_list_bulk_editor_another.l,
             "javascript:row_button('#{url}')") %>
     &nbsp;

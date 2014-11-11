@@ -293,8 +293,8 @@ class ImageController < ApplicationController
   ##############################################################################
 
   # Form for uploading and adding images to an observation.
-  # Linked from: show_observation, reuse_image, and
-  #   create/edit_naming (via _show_images partial)
+  # Linked from: show_observation, reuse_image,
+  #   naming/create, and naming/edit (via _show_images partial)
   # Inputs: params[:id] (observation)
   #   params[:upload][:image1-4]
   #   params[:image][:copyright_holder]

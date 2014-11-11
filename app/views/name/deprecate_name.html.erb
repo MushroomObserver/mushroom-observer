@@ -11,7 +11,12 @@
   <br/><center><%= submit_tag :name_deprecate_submit.l %></center><br/>
 
   <%= render(:partial => 'shared/form_name_feedback',
-             :locals => { :button_name => :name_deprecate_submit.l }) %>
+             :locals => { button_name: :name_deprecate_submit.l,
+                          what: @what,
+                          valid_names: @valid_names,
+                          suggest_corrections: @suggest_corrections,
+                          parent_deprecated: @parent_deprecated,
+                          names: @names }) %>
 
   <p><label for="proposed_name"><%= :name_deprecate_preferred.t %>:</label>
   <%= text_field('proposed', 'name', :value => @what) %></p>

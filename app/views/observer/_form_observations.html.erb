@@ -32,7 +32,7 @@
 <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span><br/><br/>
 
 <%= if include_naming
-  render(:partial => 'form_naming', :locals => {
+  render(:partial => 'naming/form', :locals => {
     :action       => action,
     :button_name  => button_name,
     :show_reasons => false,

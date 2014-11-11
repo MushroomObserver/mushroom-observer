@@ -672,7 +672,7 @@ class NameController < ApplicationController
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
     for name in @parents + [@name]
-      save_name(name, :log_name_created_at) if name and name.new_record?
+      name.save_with_transaction(:log_name_created_at) if name and name.new_record?
     end
     flash_notice(:runtime_create_name_success.t(:name => @name.real_search_name))
   end
@@ -683,7 +683,7 @@ class NameController < ApplicationController
     @name.notes = params[:name][:notes].to_s.strip
     if not @name.changed?
       any_changes = false
-    elsif not save_name(@name, :log_name_updated)
+    elsif not @name.save_with_transaction(:log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     else
       flash_notice(:runtime_edit_name_success.t(:name => @name.real_search_name))
@@ -692,7 +692,7 @@ class NameController < ApplicationController
     # This name itself might have been a parent when we called
     # find_or_create... last time(!)
     for name in Name.find_or_create_parsed_name_and_parents(@parse)
-      save_name(name, :log_name_created_at) if name and name.new_record?
+      name.save_with_transaction(:log_name_created_at) if name and name.new_record?
     end
     return any_changes
   end
@@ -788,7 +788,8 @@ class NameController < ApplicationController
         # Make sure the "correct" name isn't also a misspelled name!
         if name2.is_misspelling?
           name2.correct_spelling = nil
-          save_name(name2, :log_name_unmisspelled, :other => @name.display_name)
+          name2.save_with_transaction(:log_name_unmisspelled,
+                                      other: @name.display_name)
         end
       end
     end
@@ -1121,8 +1122,9 @@ class NameController < ApplicationController
           else
             @names = Name.find_names_filling_in_authors(@what)
           end
-          if @names.empty? and
-             (new_name = create_needed_names(params[:approved_name].to_s.strip_squeeze, @what))
+          approved_name = params[:approved_name].to_s.strip_squeeze
+          if @names.empty? &&
+              (new_name = Name.create_needed_names(approved_name, @what))
             @names = [new_name]
           end
           target_name = @names.first
@@ -1141,8 +1143,8 @@ class NameController < ApplicationController
 
             # Change target name to "undeprecated".
             target_name.change_deprecated(false)
-            save_name(target_name, :log_name_approved,
-                      :other => @name.real_search_name)
+            target_name.save_with_transaction(:log_name_approved,
+                                              other: @name.real_search_name)
 
             # Change this name to "deprecated", set correct spelling, add note.
             @name.change_deprecated(true)
@@ -1150,8 +1152,8 @@ class NameController < ApplicationController
               @name.misspelling = true
               @name.correct_spelling = target_name
             end
-            save_name(@name, :log_name_deprecated,
-                      :other => target_name.real_search_name)
+            @name.save_with_transaction(:log_name_deprecated,
+                                        other: target_name.real_search_name)
             if !@comment.blank?
               post_comment(:deprecate, @name, @comment)
             end
@@ -1179,7 +1181,8 @@ class NameController < ApplicationController
         if params[:deprecate][:others] == '1'
           for n in @name.approved_synonyms
             n.change_deprecated(true)
-            save_name(n, :log_name_deprecated, :other => @name.real_search_name)
+            n.save_with_transaction(:log_name_deprecated,
+                                    other: @name.real_search_name)
             others << n.real_search_name
           end
         end
@@ -1192,7 +1195,7 @@ class NameController < ApplicationController
           tag = :log_name_approved
           args[:other] = others.join(', ')
         end
-        save_name(@name, tag, args)
+        @name.save_with_transaction(tag, args)
         if !comment.blank?
           post_comment(:approve, @name, comment)
         end
@@ -1210,7 +1213,7 @@ class NameController < ApplicationController
     unless name.deprecated
       begin
         name.change_deprecated(true)
-        result = save_name(name, :log_deprecated_by)
+        result = name.save_with_transaction(:log_deprecated_by)
       rescue RuntimeError => err
         flash_error(err.to_s) if !err.blank?
         result = false

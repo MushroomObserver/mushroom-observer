@@ -230,7 +230,7 @@ class AbstractModelTest < UnitTestCase
 
     rss_log.update_attribute(:updated_at, time)
     name.update_attribute(:author, 'New Author')
-    # This is normally done by ApplicationController#save_name.
+    # This is normally done by Name#save_with_transaction
     name.log(:log_name_updated_at, :user => rolf.login, :touch => true)
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
