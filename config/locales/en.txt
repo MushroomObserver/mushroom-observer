@@ -1064,7 +1064,7 @@
 
 
   # name/edit_name
-  edit_name_title: Edit Description of [name]
+  edit_name_title: Edit Name [name]
   edit_name_multiple_names_match: "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
 
 
