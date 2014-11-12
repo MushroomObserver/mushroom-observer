@@ -611,7 +611,7 @@ module ApplicationHelper
     if previous_version = latest_version.previous
       html += link_with_query("#{:show_name_previous_version.t}: %d" % previous_version.version,
         :action => "show_past_#{type}", :id => obj.id,
-        :version => previous_version)
+        :version => previous_version.version)
       if (previous_version.merge_source_id rescue false)
         html += indent(1) + get_version_merge_link(obj, previous_version)
       end
