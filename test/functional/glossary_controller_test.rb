@@ -98,4 +98,11 @@ class GlossaryControllerTest < FunctionalTestCase
     assert_template(action: 'show_past_glossary_term', partial: "_glossary_term")
   end
 
+  test "prior version link target" do
+    square = glossary_terms(:square_glossary_term)
+    prior_version_target = "/glossary/show_past_glossary_term/#{square.id}?version=#{square.version-1}"
+    get(:show_glossary_term, id: square.id)
+ 	  assert_select "a[href=?]", prior_version_target
+	end
+
 end
