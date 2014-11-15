@@ -1021,9 +1021,9 @@
 
 
 
-  # observer/create_naming
+  # naming/create
   create_naming_title: "Propose Name for Observation #[id]"
-
+  create_new_naming_warn: Sorry, someone else has given this a positive vote, so we had to create a new Naming to accomodate your changes."
 
 
   # observer/create_observation

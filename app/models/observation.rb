@@ -454,6 +454,12 @@ class Observation < AbstractModel
     return result
   end
 
+  def logged_change_vote(naming, vote)
+    reload
+    change_vote(naming, vote.value, naming.user)
+    log(:log_naming_created_at, name: naming.format_name)
+  end
+
   # Try to guess which Naming is responsible for the consensus.  This will
   # always return a Naming, no matter how ambiguous, unless there are no
   # namings.

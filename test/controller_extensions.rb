@@ -635,6 +635,18 @@ module ControllerExtensions
     end
   end
 
+  def assert_action(action, partials)
+    if partials
+      if partials.is_a?(Array)
+        assert_action_partials(action, partials)
+      else
+        assert_template(action: action, partial: partials)
+      end
+    else
+      assert_template(action: action)
+    end
+  end
+
   def assert_action_partials(action, partials)
     partials.each do |p|
       assert_template(action: action, partial: p)
