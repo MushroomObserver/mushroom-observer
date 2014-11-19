@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", "~> 3.2.18"
+gem "rails", "~> 4.0"
 gem "mysql2"
 gem "jquery-rails"
 
@@ -15,8 +15,8 @@ group :development, :test do
 end
 
 group :assets do
-  gem "sass-rails",   "~> 3.2.6"
-  gem "coffee-rails", "~> 3.2.2"
+  gem "sass-rails",   "~> 4.0"
+  gem "coffee-rails", "~> 4.0"
   gem "uglifier",     ">= 1.0.3"
 end
 
@@ -29,6 +29,5 @@ gem "RedCloth"
 gem "blankslate"
 gem "browser"
 gem "rtf"
-gem "enum_column3"
 gem "cure_acts_as_versioned"
 gem "coveralls", require: false
