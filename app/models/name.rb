@@ -239,7 +239,8 @@ class Name < AbstractModel
   belongs_to :synonym
   belongs_to :user
 
-  has_many :descriptions, :class_name => 'NameDescription', :order => 'num_views DESC'
+  has_many :descriptions, -> { order "num_views DESC" },
+           class_name: "NameDescription"
   has_many :comments,  :as => :target, :dependent => :destroy
   has_many :interests, :as => :target, :dependent => :destroy
   has_many :namings
@@ -295,7 +296,7 @@ class Name < AbstractModel
   end
 
   def <=>(x); self.sort_name <=> x.sort_name; end
-  
+
   def best_brief_description
     if self.description
       if self.description.gen_desc.blank?
@@ -305,11 +306,11 @@ class Name < AbstractModel
       end
     end
   end
-  
+
   def best_classification
     self.description.classification if self.description
   end
-  
+
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
     Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
