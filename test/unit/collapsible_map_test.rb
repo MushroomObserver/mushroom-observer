@@ -71,7 +71,7 @@ class CollapsibleMapTest < UnitTestCase
       expect = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [north, south, east, west]
       actual = 'N=%.4f S=%.4f E=%.4f W=%.4f' % [mapset.north, mapset.south, mapset.east, mapset.west]
       message = "Extents wrong: <#{errors.join(', ')}>\nExpect: <#{expect}>\nActual: <#{actual}>"
-      assert_block(message) {false}
+      assert(message) {false}
     end
   end
 
@@ -94,7 +94,7 @@ class CollapsibleMapTest < UnitTestCase
       end
       messages << message
     end
-    assert_block("Mapsets are wrong: expect -vs- actual\n" + messages.join("\n")) { !differ }
+    assert("Mapsets are wrong: expect -vs- actual\n" + messages.join("\n")) { !differ }
   end
 
   # ------------------------------------------------------------

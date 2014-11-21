@@ -16,7 +16,7 @@ module CheckForUnsafeHtml
         str.gsub!(/<!\[CDATA\[.*?\]\]>/mu, '')
         if str.match(/&lt;[a-z]+|&amp;[#\w]+;/i)
           msg = '...' + $`[-200..-1] + '***HERE***' + $& + $'[0..200] + '...'
-          assert_block("Unsafe HTML found! Here's the appropriate part of the HTML page:\n" + msg + "\n") {false}
+          assert("Unsafe HTML found! Here's the appropriate part of the HTML page:\n" + msg + "\n") {false}
         end
       end
     end

@@ -11,7 +11,7 @@ class ApiControllerTest < FunctionalTestCase
       msg = "Caught API Errors:\n" + @api.errors.map do |error|
         error.to_s + "\n" + error.trace.join("\n")
       end.join("\n")
-      assert_block(msg) { @api.errors.empty? }
+      assert(msg) { @api.errors.empty? }
     end
   end
 

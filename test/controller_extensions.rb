@@ -409,9 +409,9 @@ module ControllerExtensions
   # check that it points to the right place.
   def assert_no_link_in_html(label, msg=nil)
     extract_links(:label => label) do |link|
-      assert_block(build_message(msg, "Expected HTML *not* to contain link called <?>.", label)) {false}
+      assert(build_message(msg, "Expected HTML *not* to contain link called <?>.", label)) {false}
     end
-    assert_block('') { true } # to count the assertion
+    assert('') { true } # to count the assertion
   end
 
   def raise_params(opts)
@@ -432,16 +432,16 @@ module ControllerExtensions
     found_it = false
     extract_links(:label => label) do |link|
       if link.url != url
-        assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, link.url)) {false}
+        assert(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, link.url)) {false}
       else
         found_it = true
         break
       end
     end
     if found_it
-      assert_block('') { true } # to count the assertion
+      assert('') { true } # to count the assertion
     else
-      assert_block(build_message(msg, "Expected HTML to contain link called <?>.", label)) {false}
+      assert(build_message(msg, "Expected HTML to contain link called <?>.", label)) {false}
     end
   end
 
@@ -465,11 +465,11 @@ module ControllerExtensions
       end
     end
     if found_it
-      assert_block("") { true } # to count the assertion
+      assert("") { true } # to count the assertion
     elsif found.keys
-      assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join('>, <'))) { false }
+      assert(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join('>, <'))) { false }
     else
-      assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
+      assert(build_message(msg, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
     end
   end
 
@@ -694,7 +694,7 @@ module ControllerExtensions
         end
       end
     end
-    assert_block(message) { message.nil? }
+    assert(message) { message.nil? }
   end
 
   # Check default value of a form field.
@@ -712,7 +712,7 @@ module ControllerExtensions
         end
       end
     end
-    assert_block(message) { message.nil? }
+    assert(message) { message.nil? }
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,

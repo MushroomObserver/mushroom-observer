@@ -51,7 +51,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 1 tiff 1 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
+    assert("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
     File.open(tempfile, "w") do |file|
       file.puts "#{local_root}/orig/1.jpg"
       file.puts "#{local_root}/1280/1.jpg"
@@ -117,7 +117,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
+    assert("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
     img1 = Image.find(1)
     img2 = Image.find(2)
     assert_equal(true, img1.transferred)
@@ -154,7 +154,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 1 +90 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
+    assert("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
     assert(File.exist?("#{local_root}/orig/1.jpg"))
     assert(File.exist?("#{local_root}/thumb/1.jpg"))
     assert(File.exist?("#{remote_root}1/orig/1.jpg"))
@@ -205,7 +205,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+    assert("Something went wrong with #{script}:\n#{errors}") { status }
     assert_equal(<<-END.unindent, errors)
       Uploading 320/4.jpg to remote1
       Uploading 320/3.jpg to remote2

@@ -18,9 +18,9 @@ class AjaxControllerTest < FunctionalTestCase
       msg = "Expected #{status} from: #{url}\n"
       msg += "Got #{@response.response_code}:\n"
       msg += @response.body
-      assert_block(msg) {false}
+      assert(msg) {false}
     else
-      assert_block('') {true}
+      assert('') {true}
     end
   end
 
