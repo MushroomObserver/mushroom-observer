@@ -316,7 +316,7 @@ class LocationControllerTest < FunctionalTestCase
     # It and the RssLog should have been updated
     assert_not_equal(updated_at, loc.updated_at)
     assert_not_equal(log_updated_at, loc.rss_log.updated_at)
-    
+
     # Only compare the keys that are in both.
     bfp = barton_flats_params
     key_count = 0
@@ -504,11 +504,11 @@ class LocationControllerTest < FunctionalTestCase
     get_with_dump(:map_locations, :pattern => 'California')
     assert_template(action: 'map_locations')
   end
-  
+
   def assert_show_location
     assert_action_partials('show_location', ["_location", "_show_comments", "_location_description"])
   end
-  
+
   def test_interest_in_show_location
     # No interest in this location yet.
     albion = locations(:albion)
@@ -538,7 +538,7 @@ class LocationControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.where(user_id: rolf.id).last.destroy
     Interest.new(:target => albion, :user => rolf, :state => false).save
     get(:show_location, :id => albion.id)
     assert_show_location

@@ -549,7 +549,7 @@ class Location < AbstractModel
     end
 
     # Move species lists over.
-    for spl in SpeciesList.find_all_by_location_id(old_loc.id)
+    for spl in SpeciesList.where(location_id: old_loc.id)
       spl.update_attribute(:location, self)
       Transaction.put_species_list(
         :id           => spl,
@@ -558,7 +558,7 @@ class Location < AbstractModel
     end
 
     # Update any users who call this location their primary location.
-    for user in User.find_all_by_location_id(old_loc.id)
+    for user in User.where(location_id: old_loc.id)
       user.update_attribute(:location, self)
       Transaction.put_user(
         :id           => user,
@@ -567,8 +567,10 @@ class Location < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_target_type_and_target_id('Location',
-                                                              old_loc.id)
+    # for int in Interest.find_all_by_target_type_and_target_id('Location',
+    #                                                         old_loc.id)
+    for int in Interest.where("target_type = ? AND target_id = ?",
+                              "Location", old_loc.id)
       int.target = self
       int.save
     end
@@ -658,8 +660,9 @@ class Location < AbstractModel
       end
 
       # Tell masochists who want to know about all location changes.
-      for user in User.find_all_by_email_locations_all(true)
-        recipients.push(user)
+      # for user in User.find_all_by_email_locations_all(true)
+      for user in User.where(email_locations_all: true)
+       recipients.push(user)
       end
 
       # Send to people who have registered interest.

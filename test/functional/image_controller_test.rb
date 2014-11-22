@@ -267,8 +267,14 @@ class ImageControllerTest < FunctionalTestCase
     assert_not_equal(target_license, new_license)
     assert_equal(0, example_image.copyright_changes.length)
 
-    target_count = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
-    new_count    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
+    # target_count = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
+    target_count = Image.where(user_id: user_id,
+                               license_id: target_license.id,
+                               copyright_holder: copyright_holder).length
+    # new_count    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
+    new_count = Image.where(user_id: user_id,
+                            license_id: new_license.id,
+                            copyright_holder: copyright_holder).length
     assert(target_count > 0)
     assert(new_count == 0)
 
@@ -286,8 +292,14 @@ class ImageControllerTest < FunctionalTestCase
     assert_template(action: 'license_updater')
     assert_equal(10, rolf.reload.contribution)
 
-    target_count_after = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
-    new_count_after    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
+    # target_count_after = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
+    target_count_after = Image.where(user_id: user_id,
+                                     license_id: target_license.id,
+                                     copyright_holder: copyright_holder).length
+    # new_count_after    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
+    new_count_after = Image.where(user_id: user_id,
+                                  license_id: new_license.id,
+                                  copyright_holder: copyright_holder).length
     assert(target_count_after < target_count)
     assert(new_count_after > new_count)
     assert_equal(target_count_after + new_count_after, target_count + new_count)

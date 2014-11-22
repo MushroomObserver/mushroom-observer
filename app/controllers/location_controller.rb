@@ -177,7 +177,7 @@ class LocationController < ApplicationController
       @undef_data = nil
     end
 
-    # Paginate the defined locations using the usual helper.   
+    # Paginate the defined locations using the usual helper.
     args[:always_index] = (@undef_pages && @undef_pages.num_total > 0)
     args[:action] = args[:action] || 'list_locations'
     show_index_of_objects(query, args)
@@ -254,7 +254,7 @@ class LocationController < ApplicationController
       args.delete(:pattern)
 
     # when :regexp_search  ### NOT SURE WHAT DO FOR THIS
-    
+
     # None of the rest make sense.
     else
       flavor = nil
@@ -358,7 +358,7 @@ class LocationController < ApplicationController
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id,
                                       :include => [:user, :descriptions])
-      
+
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
       if desc_id.blank?
@@ -908,7 +908,7 @@ class LocationController < ApplicationController
     end
     redirect_to(:action => 'show_location', :id => params[:id].to_s)
   end
-  
+
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
   # into the given Location.  Linked from +list_merge_options+, I think.
   def add_to_location # :norobots:
@@ -928,9 +928,10 @@ class LocationController < ApplicationController
   end
 
   # Move all the Observation's with a given +where+ into a given Location.
-  def update_observations_by_where(location, where)
+  def update_observations_by_where(location, given_where)
     success = true
-    observations = Observation.find_all_by_where(where)
+    # observations = Observation.find_all_by_where(given_where)
+    observations = Observation.where(where: given_where)
     count = 3
     for o in observations
       count += 1

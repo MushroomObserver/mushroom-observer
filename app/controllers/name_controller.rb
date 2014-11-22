@@ -356,7 +356,7 @@ class NameController < ApplicationController
         # Get list of immediate parents.
         @parents = @name.parents
       end
-      
+
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, :name => @name)
 
@@ -374,7 +374,7 @@ class NameController < ApplicationController
                                   :by => :confidence)
       @obs_with_images_query = create_query(:Observation, :of_name, :name => @name,
                                       :by => :confidence, :has_images => :yes)
-                                  
+
       if @name.at_or_below_genus?
         @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
                                       :all => true, :by => :confidence)
@@ -652,7 +652,7 @@ class NameController < ApplicationController
       if params[:action] == 'create_name'
         raise(:create_name_multiple_names_match.t(:str => @parse.real_search_name))
       else
-        others = Name.find_all_by_text_name(@parse.text_name)
+        others = Name.where(text_name: @parse.text_name)
         raise(:edit_name_multiple_names_match.t(:str => @parse.real_search_name,
               :matches => others.map(&:search_name).join(' / ')))
       end
@@ -1431,7 +1431,7 @@ class NameController < ApplicationController
     clear_eol_data
     load_eol_data(data)
   end
-  
+
   def eol_for_taxon
     store_location
 
@@ -1452,7 +1452,7 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY images.vote_cache DESC
     ))
-    
+
     @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
 
     ids = Name.connection.select_values(%(
@@ -1524,7 +1524,7 @@ class NameController < ApplicationController
       @observations = @query.results.select {|o| o.lat or o.location}
     end
   end
-  
+
   # Form accessible from show_name that lets a user setup tracker notifications
   # for a name.
   def email_tracking # :norobots:

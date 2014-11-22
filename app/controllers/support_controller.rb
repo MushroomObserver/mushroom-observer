@@ -10,7 +10,7 @@ class SupportController < ApplicationController
       @donation.email = @user.email
     end
   end
-  
+
   def create_donation
     if is_in_admin_mode?
       @donation = Donation.new
@@ -19,7 +19,7 @@ class SupportController < ApplicationController
         @donation.who = params['donation']['who']
         @donation.anonymous = params['donation']['anonymous']
         @donation.email = params['donation']['email']
-        users = User.find_all_by_email(@donation.email)
+        users = User.where(email: @donation.email)
         if users.length == 1
           @donation.user = users[0]
         end
@@ -31,7 +31,7 @@ class SupportController < ApplicationController
       redirect_to(:action => 'donate')
     end
   end
-  
+
   def confirm
     @donation = Donation.new
     if request.method == "POST"
@@ -48,7 +48,7 @@ class SupportController < ApplicationController
       @donation.save
     end
   end
-  
+
   def review_donations
     if is_in_admin_mode?
       if request.method == "POST"
@@ -68,20 +68,20 @@ class SupportController < ApplicationController
       redirect_to(:action => 'donate')
     end
   end
-  
+
   def donors
     store_location
     @donor_list = Donation.get_donor_list
   end
-  
+
   def wrapup_2010
     store_location
   end
-  
+
   def wrapup_2012
     store_location
   end
-  
+
   def letter
     store_location
   end

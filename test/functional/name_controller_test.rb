@@ -33,7 +33,7 @@ class NameControllerTest < FunctionalTestCase
     "_show_description",
     "_name_description"
   ]
-  
+
   # Create a draft for a project.
   def create_draft_tester(project, name, user=nil, success=true)
     count = NameDescription.count
@@ -247,7 +247,7 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # TODO: Show a name that has a parent to trigger
-  
+
   def test_show_past_name
     get_with_dump(:show_past_name, :id => 2)
     assert_template(action: 'show_past_name', partial: "_name")
@@ -435,12 +435,12 @@ class NameControllerTest < FunctionalTestCase
       l.url.match(/.*\/([0-9]+)/)[1].to_i
     end
   end
-  
+
   def pagination_query_params
     query = Query.lookup_and_save(:Name, :all, :by => :name)
     @controller.query_params(query)
   end
-  
+
   # None of our standard tests ever actually renders pagination_links
   # or pagination_letters.  This tests all the above.
   def test_pagination_page1
@@ -462,7 +462,7 @@ class NameControllerTest < FunctionalTestCase
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
       :params => query_params, :letter => 'A')
   end
-  
+
   def test_pagination_page2
     # Now go to the second page.
     query_params = pagination_query_params
@@ -482,7 +482,7 @@ class NameControllerTest < FunctionalTestCase
     assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
       :params => query_params, :letter => 'A')
   end
-  
+
   def test_pagination_letter
     # Now try a letter.
     query_params = pagination_query_params
@@ -502,7 +502,7 @@ class NameControllerTest < FunctionalTestCase
     assert_link_in_html('A', :action => :test_index,:params => query_params,
       :num_per_page => l_names.size, :letter => 'A')
   end
-  
+
   def test_pagination_letter_with_page
     query_params = pagination_query_params
     l_names = Name.all(:conditions => 'text_name LIKE "L%"',
@@ -521,7 +521,7 @@ class NameControllerTest < FunctionalTestCase
       :letter => 'L', :page => 2)
     assert_no_link_in_html(3)
   end
-  
+
   def test_pagination_letter_with_page_2
     query_params = pagination_query_params
     l_names = Name.all(:conditions => 'text_name LIKE "L%"',
@@ -540,7 +540,7 @@ class NameControllerTest < FunctionalTestCase
       :letter => 'L', :page => 1)
     assert_no_link_in_html(3)
   end
-  
+
   def test_pagination_with_anchors
     query_params = pagination_query_params
     # Some cleverness is required to get pagination links to include anchors.
@@ -642,7 +642,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name, params)
     assert_response(:success)
     assert_equal(count, Name.count, "Shouldn't have created a name; created #{Name.last.search_name.inspect}.")
-    names = Name.find_all_by_text_name(text_name)
+    names = Name.where(text_name: text_name)
     assert_obj_list_equal([names(:conocybe_filaris)], names)
     assert_equal(10, rolf.reload.contribution)
   end
@@ -715,7 +715,7 @@ class NameControllerTest < FunctionalTestCase
       :deprecated => false,
       :correct_spelling => nil
     )
-    agarici = Name.find_all_by_text_name('Agaricus')
+    agarici = Name.where(text_name: "Agaricus")
     assert_equal(2, agarici.length)
     assert_equal('L.', agarici.first.author)
     assert_equal('Raf.', agarici.last.author)
@@ -3146,7 +3146,7 @@ class NameControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.where(user_id: rolf.id).last.destroy
     Interest.create(:target => peltigera, :user => rolf, :state => false)
     get(:show_name, :id => peltigera.id)
     assert_response(:success)

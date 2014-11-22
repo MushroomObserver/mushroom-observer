@@ -177,7 +177,7 @@ class Comment < AbstractModel
       end
 
       # Send to masochists who want to see all comments.
-      for user in User.find_all_by_email_comments_all(true)
+      for user in User.where(email_comments_all: true)
         recipients.push(user)
       end
 
@@ -190,7 +190,8 @@ class Comment < AbstractModel
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in Interest.find_all_by_target(target)
+      # for interest in Interest.find_all_by_target(target)
+      for interest in Interest.where_target(target)
         if interest.state
           recipients.push(interest.user)
         else

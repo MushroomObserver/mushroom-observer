@@ -166,7 +166,7 @@ class ApplicationController < ActionController::Base
       redirect_back_or_default(:controller => :observer, :action => :index)
     end
   end
-  
+
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
@@ -225,7 +225,7 @@ logger.warn('SESSION: ' + session.inspect)
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this ever
   # were to break we'd get into an infinite loop too easily that way.  I think
-  # this is a lot safer.  MO.bad_domains would be something like: 
+  # this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
   #     'www.mushroomobserver.org',
@@ -403,7 +403,8 @@ logger.warn('SESSION: ' + session.inspect)
   #
   def has_unshown_notifications?(user, flavor=:naming)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+  # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+    for q in QueuedEmail.where(flavor: favor, to_user_id: flavor, user.id)
       ints = q.get_integers(["shown", "notification"], true)
       unless ints["shown"]
         notification = Notification.safe_find(ints["notification"].to_i)
@@ -527,7 +528,7 @@ logger.warn('SESSION: ' + session.inspect)
     else
       begin
         Time.zone = tz
-      rescue 
+      rescue
         logger.warn "TimezoneError: #{tz.inspect}"
       end
       @js = true
@@ -895,7 +896,7 @@ logger.warn('SESSION: ' + session.inspect)
     params
   end
   helper_method :add_query_param
-  
+
   def redirect_with_query(args)
     redirect_to(add_query_param(args))
   end
@@ -910,7 +911,7 @@ logger.warn('SESSION: ' + session.inspect)
     @query_params[:q] = params[:q] if !params[:q].blank?
     @query_params
   end
-  
+
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
@@ -962,7 +963,7 @@ logger.warn('SESSION: ' + session.inspect)
     "modified" => :updated_at,
     "created" => :created_at
   }
-  
+
   def map_past_bys(args)
     if args.member?(:by)
       args[:by] = (BY_MAP[args[:by].to_s] or args[:by])
@@ -1025,7 +1026,7 @@ logger.warn('SESSION: ' + session.inspect)
   def tweak_down(v, amount, min)
     [min, v.to_f-amount].max
   end
-  
+
   # This is the common code for all the 'prev/next_object' actions.  Pass in
   # the current object and direction (:prev or :next), and it looks up the
   # query, grabs the next object, and redirects to the appropriate
@@ -1107,9 +1108,9 @@ logger.warn('SESSION: ' + session.inspect)
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links::        
-  # @sorts::        
-  # @layout::       
+  # @links::
+  # @sorts::
+  # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.
   # @extra_data::   Results of block yielded on every object if block given.
@@ -1209,7 +1210,7 @@ logger.warn('SESSION: ' + session.inspect)
       @sorts = nil
     end
     # "@sorts".print_thing(@sorts)
-    
+
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1456,7 +1457,7 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Default image size to use for thumbnails: either :thumbnail or :small.
   # Looks at both the user's pref (if logged in) or the session (if not logged
-  # in), else reverts to small. *NOTE*: This method is available to views. 
+  # in), else reverts to small. *NOTE*: This method is available to views.
   def default_thumbnail_size
     if @user
       @user.thumbnail_size
@@ -1508,7 +1509,7 @@ logger.warn('SESSION: ' + session.inspect)
     result["count"] = result["rows"] * result["columns"]
     result
   end
-  
+
   def has_permission?(obj, error_message)
     result = (is_in_admin_mode? or obj.can_edit?(@user))
     flash_error(error_message) if not result
@@ -1518,7 +1519,7 @@ logger.warn('SESSION: ' + session.inspect)
   def can_delete?(obj)
     has_permission?(obj, :runtime_no_destroy.l(:type => obj.type_tag))
   end
-  
+
   def can_edit?(obj)
     has_permission?(obj, :runtime_no_update.l(:type => obj.type_tag))
   end

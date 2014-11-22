@@ -534,7 +534,7 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    Herbarium.find_all_by_personal_user_id(self.id).first
+    # Herbarium.where(personal_user_id: self.id).first
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
@@ -854,7 +854,8 @@ class User < AbstractModel
   # complicated set of pages. -JPH)
   def has_unshown_naming_notifications?(observation=nil)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
+    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
+    for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking", user_id: self.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
         notification = Notification.find(notification_id)

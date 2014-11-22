@@ -1092,7 +1092,8 @@ class ObserverControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)
+    # notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)
+    notifications = Notification.where(flavor: :name, and_obj_id: name.id)
     assert_equal(2, notifications.length)
 
     where = "Simple, Massachusetts, USA"
@@ -2246,7 +2247,7 @@ class ObserverControllerTest < FunctionalTestCase
     )
 
     # Destroy that interest, create new one with interest off.
-    Interest.find_all_by_user_id(rolf.id).last.destroy
+    Interest.where(user_id: rolf.id).last.destroy
     Interest.create(:target => minimal_unknown, :user => rolf, :state => false)
     get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
@@ -2377,7 +2378,7 @@ class ObserverControllerTest < FunctionalTestCase
       assert_template(:action => 'list_rss_logs')
       assert_equal('new banner', :app_banner_box.l)
 
-      strs = TranslationString.find_all_by_tag(:app_banner_box)
+      strs = TranslationString.where(tag: :app_banner_box)
       for str in strs
         assert_equal('new banner', str.text, "Didn't change text of #{str.language.locale} correctly.")
       end
@@ -2392,7 +2393,7 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_download_observation_index
-    obs = Observation.find_all_by_user_id(mary.id)
+    obs = Observation.where(user_id: mary.id)
     assert(4 <= obs.length)
     query = Query.lookup_and_save(:Observation, :by_user, :user => mary.id)
 

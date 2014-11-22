@@ -31,7 +31,7 @@ class InterestControllerTest < FunctionalTestCase
       get(:set_interest, :type => 'Bogus', :id => 1, :state => 1)
     end
   end
-  
+
   def test_set_interest
     peltigera = names(:peltigera)
     minimal_unknown = observations(:minimal_unknown)
@@ -41,9 +41,9 @@ class InterestControllerTest < FunctionalTestCase
     login('rolf')
     get(:set_interest, :type => 'Observation', :id => minimal_unknown.id, :state => 1, :user => 1)
     assert_flash(0)
-    
+
     # Make sure rolf now has one Interest: interested in minimal_unknown.
-    rolfs_interests = Interest.find_all_by_user_id(rolf.id)
+    rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(1, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.first.target)
     assert_equal(true, rolfs_interests.first.state)
@@ -54,7 +54,7 @@ class InterestControllerTest < FunctionalTestCase
     assert_flash(0)
 
     # Make sure rolf now has one Interest: NOT interested in minimal_unknown.
-    rolfs_interests = Interest.find_all_by_user_id(rolf.id)
+    rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(1, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.first.target)
     assert_equal(false, rolfs_interests.first.state)
@@ -65,7 +65,7 @@ class InterestControllerTest < FunctionalTestCase
     assert_flash(0)
 
     # Make sure rolf now has two Interests.
-    rolfs_interests = Interest.find_all_by_user_id(rolf.id)
+    rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.first.target)
     assert_equal(false, rolfs_interests.first.state)
@@ -76,7 +76,7 @@ class InterestControllerTest < FunctionalTestCase
     login('rolf')
     get(:set_interest, :type => 'Observation', :id => detailed_unknown.id, :state => 0)
     assert_flash(0)
-    assert_equal(2, Interest.find_all_by_user_id(rolf.id).length)
+    assert_equal(2, Interest.where(user_id: rolf.id).length)
 
     # Succeed: Delete first interest now.
     login('rolf')
@@ -84,7 +84,7 @@ class InterestControllerTest < FunctionalTestCase
     assert_flash(0)
 
     # Make sure rolf now has one Interest: NOT interested in peltigera.
-    rolfs_interests = Interest.find_all_by_user_id(rolf.id)
+    rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(1, rolfs_interests.length)
     assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
@@ -93,9 +93,9 @@ class InterestControllerTest < FunctionalTestCase
     login('rolf')
     get(:set_interest, :type => 'Name', :id => peltigera.id, :state => 0)
     assert_flash(0)
-    assert_equal(0, Interest.find_all_by_user_id(rolf.id).length)
+    assert_equal(0, Interest.where(user_id: rolf.id).length)
   end
-  
+
   def test_destroy_notification
     login('rolf')
     n = notifications(:coprinus_comatus_notification)

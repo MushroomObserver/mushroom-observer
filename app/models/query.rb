@@ -1310,14 +1310,14 @@ class Query < AbstractQuery
             else
               name2 = Name.clean_incoming_string(name)
             end
-            matches = model.find_all_by_search_name(name2)
-            matches = model.find_all_by_text_name(name2) if matches.empty?
+            matches = model.where(search_name: name2)
+            matches = model.where(text_name: name2) if matches.empty?
             objs += matches
           when 'Project', 'SpeciesList'
-            objs += model.find_all_by_title(name)
+            objs += model.where(title: name)
           when 'User'
             name.sub(/ *<.*>/, '')
-            objs += model.find_all_by_login(name)
+            objs += model.where(login: name)
           else
             raise("Forgot to tell initialize_model_do_objects_by_name how " +
                   "to find instances of #{model.name}!")
@@ -1728,8 +1728,8 @@ class Query < AbstractQuery
       if name.is_a?(Fixnum) or name.match(/^\d+$/)
         names = [Name.find(name.to_i)]
       else
-        names = Name.find_all_by_search_name(name)
-        names = Name.find_all_by_text_name(name) if names.empty?
+        names = Name.where(search_name: name)
+        names = Name.where(text_name: name) if names.empty?
       end
     end
 

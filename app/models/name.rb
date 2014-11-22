@@ -586,7 +586,8 @@ class Name < AbstractModel
   def genus
     result = nil
     if self.below_genus?
-      genera = Name.find_all_by_text_name(self.text_name.split(' ').first)
+      # genera = Name.find_all_by_text_name(self.text_name.split(' ').first)
+      genera = Name.where(text_name: self.text_name.split(' ').first)
       result = genera.reject(&:deprecated).first || genera.first
     end
     return result
@@ -643,7 +644,7 @@ class Name < AbstractModel
         # Grab name for 'next_rank' from classification string.
         for line_rank, line_name in lines
           if line_rank == next_rank
-            these += Name.find_all_by_text_name(line_name)
+            these += Name.where(text_name: line_name)
           end
         end
 
@@ -658,7 +659,6 @@ class Name < AbstractModel
                                          AND rank = '#{next_rank}'
                                          AND text_name = '#{$1}'")
       end
-
 
       # Get rid of deprecated names unless all the results are deprecated.
       if !these.empty?
@@ -722,7 +722,7 @@ class Name < AbstractModel
       names = []
       if rank == :Family
         for cstr, sname in rows
-          results += Name.find_all_by_search_name(sname)
+          results += Name.where(search_name: sname)
         end
 
       # Grab all names below our rank.
@@ -745,7 +745,7 @@ class Name < AbstractModel
             end
           end
           # (include genus, too)
-          results += Name.find_all_by_search_name(sname)
+          results += Name.where(search_name: sname)
         end
 
       # Grab all names at next lower rank.
@@ -761,7 +761,7 @@ class Name < AbstractModel
       end
 
       # Convert these name strings into Names.
-      results += names.uniq.map { |n| Name.find_all_by_text_name(n) }.flatten
+      results += names.uniq.map { |n| Name.where(text_name: n) }.flatten
       results.uniq!
 
       # Add subgeneric names for all genera in the results.
@@ -1396,13 +1396,15 @@ class Name < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
+    # for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
+    for int in Interest.where(target_type: "Name", target_id: old_name.id)
       int.target = self
       int.save
     end
 
     # Move over any notifications on the old name.
-    for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
+    # for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
+    for note in Notification.where(flavor: "name", obj_id: old_name.id)
       note.obj_id = self.id
       note.save
     end
@@ -2184,7 +2186,7 @@ class Name < AbstractModel
       end
 
       # Tell masochists who want to know about all name changes.
-      for user in User.find_all_by_email_names_all(true)
+      for user in User.where(email_names_all: true)
         recipients.push(user)
       end
 

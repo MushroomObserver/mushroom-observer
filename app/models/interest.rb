@@ -65,10 +65,12 @@ class Interest < AbstractModel
   # Find all Interests associated with a given object.  This should really be
   # created magically like all the other find_all_by_xxx methods, but the
   # polymorphism messes it up.
-  def self.find_all_by_target(obj)
+  # def self.find_all_by_target(obj)
+  def self.where_target(obj)
     if obj.is_a?(ActiveRecord::Base) && obj.id
-      find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
-    end
+      # find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
+      where(target_type: obj.class.to_s, target_id: obj.id)
+   end
   end
 
   # To be compatible with Notification need to have summary string:
@@ -85,7 +87,7 @@ class Interest < AbstractModel
 
 ################################################################################
 
-  protected 
+  protected
 
   validate :check_requirements
   def check_requirements # :nodoc:

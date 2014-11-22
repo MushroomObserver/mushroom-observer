@@ -357,7 +357,7 @@ class ObserverController < ApplicationController
       @val = "X" if @val.blank?
       time = Time.now
       Language.all.each do |lang|
-        if (str = lang.translation_strings.find_all_by_tag("app_banner_box")[0])
+        if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
           str.update_attributes!(
             text: @val,
             updated_at: (str.language.official ? time : time - 1.minute)
@@ -442,9 +442,9 @@ class ObserverController < ApplicationController
         case model.to_s
         when "Name"
           if (parse = Name.parse_name(id))
-            matches = Name.find_all_by_search_name(parse.search_name)
+            matches = Name.where(search_name: parse.search_name)
             if matches.empty?
-              matches = Name.find_all_by_text_name(parse.text_name)
+              matches = Name.where(text_name: parse.text_name)
             end
             matches = fix_name_matches(matches, accepted)
           end
@@ -470,8 +470,8 @@ class ObserverController < ApplicationController
                                      limit: 100,
                                      conditions: ["title LIKE ?", pattern])
         when "User"
-          matches = User.find_all_by_login(id)
-          matches = User.find_all_by_name(id) if matches.empty?
+          matches = User.where(login: id)
+          matches = User.where(name: id) if matches.empty?
         end
       end
     rescue => e
@@ -1171,7 +1171,7 @@ class ObserverController < ApplicationController
       herbarium_name = params[:specimen][:herbarium_name]
       if herbarium_name
         herbarium_name = herbarium_name.strip_html
-        herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
+        herbarium = Herbarium.where(name: herbarium_name)[0]
         if herbarium
           herbarium_label = herbarium_label_from_params(params)
           success = herbarium.label_free?(herbarium_label)
@@ -1214,7 +1214,7 @@ class ObserverController < ApplicationController
       params[:specimen][:herbarium_id] = obs.id.to_s
     end
     herbarium_label = herbarium_label_from_params(params)
-    herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
+    herbarium = Herbarium.where(name: herbarium_name)[0]
     if herbarium.nil?
       herbarium = Herbarium.new(name: herbarium_name, email: @user.email)
       if herbarium_name == @user.personal_herbarium_name
@@ -1607,8 +1607,7 @@ class ObserverController < ApplicationController
   end
 
   def name_tracking_emails(user_id)
-    QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking",
-                                                  user_id)
+    QueuedEmail.where(flavor: "QueuedEmail::NameTracking", to_user_id: user_id)
   end
 
   # Lists notifications that the given user has created.
@@ -1616,7 +1615,8 @@ class ObserverController < ApplicationController
   # Outputs:
   #   @notifications
   def list_notifications # :norobots:
-    @notifications = Notification.find_all_by_user_id(@user.id, order: :flavor)
+    # @notifications = Notification.find_all_by_user_id(@user.id, order: :flavor)
+    @notifications = Notification.where(user_id: @user.id).order(:flavor)
   end
 
   ##############################################################################

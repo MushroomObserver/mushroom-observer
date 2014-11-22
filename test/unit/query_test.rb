@@ -242,7 +242,7 @@ class QueryTest < UnitTestCase
     # Due to the modified => updated_at change explicitly setting updated_at this way doesn't
     # work.  However, I don't really understand what this test does or if it's important, since
     # the time zone comment is definitely inaccurate. - NJW
-    
+
     # This avoids any possible difference in time zone between mysql and you.
     # (This should be obsolete, but timezone handling is tested elsewhere.)
     now = DateTime.parse(Query.connection.select_value("SELECT NOW()").to_s)
@@ -619,7 +619,7 @@ class QueryTest < UnitTestCase
   def assert_starts_with(expected, result)
     assert_equal(expected, result[0..expected.length-1])
   end
-  
+
   def test_inner_outer
     # obs 2: imgs 1, 2
     # obs 3: imgs 5
@@ -1079,7 +1079,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_by_user
-    expect = Comment.find_all_by_user_id(mary.id).reverse
+    expect = Comment.where(user_id: mary.id).reverse
     assert_query(expect, :Comment, :by_user, :user => mary)
   end
 
@@ -1111,11 +1111,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_by_user
-    expect = Image.find_all_by_user_id(rolf.id).reverse
+    expect = Image.where(user_id: rolf.id).reverse
     assert_query(expect, :Image, :by_user, :user => rolf)
-    expect = Image.find_all_by_user_id(mary.id).reverse
+    expect = where(user_id: mary.id).reverse
     assert_query(expect, :Image, :by_user, :user => mary)
-    expect = Image.find_all_by_user_id(dick.id).reverse
+    expect = where(user_id: dick.id).reverse
     assert_query(expect, :Image, :by_user, :user => dick)
   end
 
@@ -1492,9 +1492,9 @@ class QueryTest < UnitTestCase
   def test_observation_advanced
     assert_query([8], :Observation, :advanced_search, :name => 'diminutivus')
     assert_query([3], :Observation, :advanced_search, :location => 'glendale') # where
-    expect = Observation.find_all_by_location_id(2)
+    expect = Observation.where(location_id: 2)
     assert_query(expect, :Observation, :advanced_search, :location => 'burbank', :by => :id) # location
-    expect = Observation.find_all_by_user_id(1)
+    expect = Observation.where(user_id: 1)
     assert_query(expect, :Observation, :advanced_search, :user => 'rolf', :by => :id)
     assert_query([3], :Observation, :advanced_search, :content => 'second fruiting') # notes
     assert_query([1], :Observation, :advanced_search, :content => 'agaricus') # comment
@@ -1506,8 +1506,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_at_location
-    expect = Observation.find_all_by_location_id(2, :include => :name,
-      :order => 'names.text_name, names.author, observations.id DESC')
+    # expect = Observation.find_all_by_location_id(2, :include => :name,
+    #   :order => 'names.text_name, names.author, observations.id DESC')
+    expect = Observation.where(location_id: 2).include(:name).order("names.text_name, names.author, observations.id DESC")
     assert_query(expect, :Observation, :at_location, :location => 2)
   end
 
@@ -1520,13 +1521,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_by_user
-    expect = Observation.find_all_by_user_id(rolf.id)
+    expect = Observation.where(user_id: rolf.id)
     assert_query(expect, :Observation, :by_user, :user => rolf, :by => :id)
-    expect = Observation.find_all_by_user_id(mary.id)
+    expect = Observation.where(user_id: mary.id)
     assert_query(expect, :Observation, :by_user, :user => mary, :by => :id)
-    expect = Observation.find_all_by_user_id(dick.id)
+    expect = Observation.where(user_id: dick.id)
     assert_query(expect, :Observation, :by_user, :user => dick, :by => :id)
-    expect = Observation.find_all_by_user_id(junk.id)
+    expect = Observation.where(user_id: junk.id)
     assert_query([], :Observation, :by_user, :user => junk, :by => :id)
   end
 
@@ -1573,8 +1574,9 @@ class QueryTest < UnitTestCase
     assert_query([6,7,5,8], :Observation, :pattern_search, :pattern => '"somewhere else"', :by => :name) # notes
     # assert_query([1], :Observation, :pattern_search, :pattern => 'wow!') # comment
     assert_query([8], :Observation, :pattern_search, :pattern => 'pipi valley') # where
-    expect = Observation.find_all_by_location_id(2, :include => :name,
+    #expect = Observation.find_all_by_location_id(2, :include => :name,
       :order => 'names.text_name, names.author, observations.id DESC')
+    expect = Observation.include(:name).where(location_id: 2.order("names.text_name, names.author, observations.id DESC")
     assert_query(expect, :Observation, :pattern_search, :pattern => 'burbank', :by => :name) # location
     expect = Observation.all(:conditions => "text_name LIKE 'agaricus%'",
       :include => :name, :order => 'names.text_name, names.author, observations.id DESC')

@@ -109,7 +109,7 @@ class LocationDescription < Description
   end
 
   # This is called after saving potential changes to a Location.  It will
-  # determine if the changes are important enough to notify people, and do so. 
+  # determine if the changes are important enough to notify people, and do so.
   def notify_users
     if altered?
       sender = User.current
@@ -131,7 +131,7 @@ class LocationDescription < Description
       end
 
       # Tell masochists who want to know about all location changes.
-      for user in User.find_all_by_email_locations_all(true)
+      for user in User.where(email_locations_all: true)
         recipients.push(user)
       end
 

@@ -520,7 +520,7 @@ class ApiTest < UnitTestCase
     @email = 'stephane@grappelli.com'
     @locale = 'el-GR'
     @notes = " Here are some notes\nThey look like this!\n "
-    @license = (License.find_all_by_deprecated(false) - [License.preferred]).first
+    @license = (License.where(deprecated: false) - [License.preferred]).first
     @location = Location.last
     @image = Image.last
     @address = ' I live here '

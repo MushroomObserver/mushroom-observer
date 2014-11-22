@@ -28,7 +28,7 @@ class ProjectControllerTest < FunctionalTestCase
 
   def destroy_project_helper(project, changer)
     assert(project)
-    drafts = NameDescription.find_all_by_source_name(project.title)
+    drafts = NameDescription.where(source_name: project.title)
     assert(drafts.length > 0)
     params = { :id => project.id.to_s }
     requires_user(:destroy_project, :show_project, params, changer.login)
@@ -36,7 +36,8 @@ class ProjectControllerTest < FunctionalTestCase
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
-    assert_obj_list_equal(drafts, NameDescription.find_all_by_source_name(project.title))
+    assert_obj_list_equal(drafts,
+                          NameDescription.where(source_name: project.title))
   end
 
   def change_member_status_helper(changer, target_user, commit, admin_before, user_before, admin_after, user_after)
@@ -156,7 +157,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(user_group)
     admin_group = project.admin_group
     assert(admin_group)
-    drafts = NameDescription.find_all_by_source_name(project.title)
+    drafts = NameDescription.where(source_name: project.title)
     project_draft_count = drafts.length
     assert(project_draft_count > 0)
     params = { :id => project.id.to_s }

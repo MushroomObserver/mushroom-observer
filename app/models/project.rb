@@ -252,7 +252,8 @@ class Project < AbstractModel
     title       = self.title
     user_group  = self.user_group
     admin_group = self.admin_group
-    for d in NameDescription.find_all_by_source_type_and_project_id(:project, self.id)
+    # for d in NameDescription.find_all_by_source_type_and_project_id(:project, self.id)
+    for d in NameDescription.where(source_type: :project, project_id: self.id)
       d.source_type = :source
       d.admin_groups.delete(admin_group)
       d.writer_groups.delete(admin_group)
