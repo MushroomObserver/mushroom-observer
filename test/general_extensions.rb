@@ -189,7 +189,7 @@ module GeneralExtensions
   def assert_gps_equal(expected, value)
     assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
   end
-  
+
   # Test whether the n-1st queued email matches.  For example:
   #
   #   assert_email(0,
@@ -200,7 +200,8 @@ module GeneralExtensions
   #   )
   #
   def assert_email(n, args)
-    email = QueuedEmail.find(:first, :offset => n)
+    # email = QueuedEmail.find(:first, :offset => n)
+    email = QueuedEmail.offset(n).first
     assert(email)
     for arg in args.keys
       case arg

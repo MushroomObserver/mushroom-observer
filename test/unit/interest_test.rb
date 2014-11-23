@@ -25,9 +25,9 @@ class InterestTest < UnitTestCase
     assert_equal(2,
                  Interest.where_target(observations(:minimal_unknown)).length)
     # assert_equal(1, Interest.find_all_by_target(names(:agaricus_campestris)).length)
-    assert_equal(1, Interest.where_target(names: :agaricus_campestris)).length)
+    assert_equal(1, Interest.where_target(names(:agaricus_campestris)).length)
     # assert_equal(0, Interest.find_all_by_target(names(:coprinus_comatus)).length)
-    assert_equal(0, Interest.where_target(names: :coprinus_comatus)).length)
+    assert_equal(0, Interest.where_target(names(:coprinus_comatus)).length)
 
     assert_equal(1, Interest.where(user_id: rolf.id).length)
     assert_equal(1, Interest.where(user_id: mary.id).length)
