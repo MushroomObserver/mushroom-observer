@@ -569,8 +569,7 @@ class Location < AbstractModel
     # Move over any interest in the old name.
     # for int in Interest.find_all_by_target_type_and_target_id('Location',
     #                                                         old_loc.id)
-    for int in Interest.where("target_type = ? AND target_id = ?",
-                              "Location", old_loc.id)
+    for int in Interest.where(target_type: "Location", target_id: old_loc.id)
       int.target = self
       int.save
     end

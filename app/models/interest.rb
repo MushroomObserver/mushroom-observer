@@ -31,7 +31,8 @@
 #
 #  == Class methods
 #
-#  find_all_by_target::   Find all Interests for a given object.
+#  # find_all_by_target::   Find all Interests for a given object.
+#  where_target::   Find all Interests for a given object.
 #
 #  == Instance methods
 #

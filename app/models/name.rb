@@ -1178,9 +1178,11 @@ class Name < AbstractModel
     @misspellings ||= begin
       if @misspelling_ids
         # Slightly faster since id is primary index.
-        Name.all(:conditions => ['id IN (?)', @misspelling_ids])
+        # Name.all(:conditions => ['id IN (?)', @misspelling_ids])
+        Name.where(id: @misspelling_ids)
       else
-        Name.all(:conditions => "correct_spelling_id = #{id}")
+        # Name.all(:conditions => "correct_spelling_id = #{id}")
+        Name.where(correct_spelling_id: id)
       end
     end
   end

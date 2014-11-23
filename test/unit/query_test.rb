@@ -1575,8 +1575,8 @@ class QueryTest < UnitTestCase
     # assert_query([1], :Observation, :pattern_search, :pattern => 'wow!') # comment
     assert_query([8], :Observation, :pattern_search, :pattern => 'pipi valley') # where
     #expect = Observation.find_all_by_location_id(2, :include => :name,
-      :order => 'names.text_name, names.author, observations.id DESC')
-    expect = Observation.include(:name).where(location_id: 2.order("names.text_name, names.author, observations.id DESC")
+    #  :order => 'names.text_name, names.author, observations.id DESC')
+    expect = Observation.where(location_id: 2).includes(:name).order("names.text_name, names.author, observations.id DESC")
     assert_query(expect, :Observation, :pattern_search, :pattern => 'burbank', :by => :name) # location
     expect = Observation.all(:conditions => "text_name LIKE 'agaricus%'",
       :include => :name, :order => 'names.text_name, names.author, observations.id DESC')
