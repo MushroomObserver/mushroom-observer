@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ConferenceEventTest < UnitTestCase
   test "test_registration_count" do
