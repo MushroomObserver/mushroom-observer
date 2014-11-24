@@ -13,17 +13,17 @@ class EolDataTest < UnitTestCase
 
     name_test(obj, names(:fungi))
     name_id = name_test(obj, names(:peltigera))
-    
+
     assert(obj.has_descriptions?(name_id))
     assert_equal(Array, obj.descriptions(name_id).class)
     assert(1 <= obj.description_count(name_id))
     description = obj.descriptions(name_id)[0]
     assert_equal(description.user.legal_name, obj.authors(description.id))
-    
+
     license = licenses(:ccnc30)
     assert_equal(license.url, obj.license_url(license.id))
   end
-  
+
   def name_test(obj, name)
     name_id = name.id
     assert(obj.has_images?(name_id))
@@ -33,7 +33,7 @@ class EolDataTest < UnitTestCase
     assert_equal(name.real_search_name, obj.image_to_names(obj.images(name_id)[0].id))
     name_id
   end
-  
+
   def test_glossary_term_query
     obj = EolData.new
     name_count = obj.name_count
@@ -41,7 +41,7 @@ class EolDataTest < UnitTestCase
     obj = EolData.new
     assert_equal(name_count, obj.name_count)
   end
-  
+
   def test_refresh_links_to_eol
     initial_count = Triple.count
     obj = EolData.new

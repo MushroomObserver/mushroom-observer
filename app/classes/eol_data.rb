@@ -16,7 +16,7 @@
 
 class EolData
   attr_accessor :names
-  
+
   def initialize
     self.names = prune_synonyms(image_names() +
                                 description_names() +
@@ -31,23 +31,23 @@ class EolData
     @image_id_to_names = image_id_to_names()
     refresh_links_to_eol
   end
-  
+
   def image_to_names(id)
     @image_id_to_names[id].map {|n| n.real_search_name }.join(' & ')
   end
-  
+
   def name_count
     self.names.count
   end
-  
+
   def total_image_count
     @id_to_image.count
   end
-  
+
   def total_description_count
     @id_to_description.count
   end
-  
+
   def has_images?(id)
     @name_id_to_images.member?(id)
   end
@@ -55,11 +55,11 @@ class EolData
   def all_images
     @id_to_image.values
   end
-  
+
   def images(id)
     @name_id_to_images[id]
   end
-  
+
   def image_count(id)
     if self.has_images?(id)
       @name_id_to_images[id].count
@@ -67,19 +67,19 @@ class EolData
       0
     end
   end
-  
+
   def has_descriptions?(id)
     @name_id_to_descriptions.member?(id)
   end
-  
+
   def all_descriptions
     @id_to_description.values
   end
-  
+
   def descriptions(id)
     @name_id_to_descriptions[id]
   end
-  
+
   def description_count(id)
     if self.has_descriptions?(id)
       @name_id_to_descriptions[id].count
@@ -91,7 +91,7 @@ class EolData
   def license_url(id)
     @license_id_to_url[id]
   end
-  
+
   def legal_name(id)
     @user_id_to_legal_name[id]
   end
@@ -108,7 +108,7 @@ class EolData
   def authors(id)
     @description_id_to_authors[id].join(', ')
   end
-  
+
   def refresh_links_to_eol
     refresh_predicate(self.names, Name.eol_predicate)
     refresh_predicate(self.all_images, Image.eol_predicate)
@@ -149,7 +149,7 @@ private
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
   )
-  
+
   def description_names
     return get_sorted_names(DESCRIPTION_CONDITIONS)
   end
@@ -160,7 +160,7 @@ private
       |row| [row['nid'], descriptions[row['did']]]
     })
   end
-  
+
   def id_to_description
     return make_id_hash(NameDescription.find_by_sql("SELECT DISTINCT name_descriptions.* #{DESCRIPTION_CONDITIONS}"))
   end
@@ -206,44 +206,45 @@ private
   end
 
   def get_name_rows(conditions)
-    Name.connection.select_all("SELECT DISTINCT names.id nid, images.id iid #{conditions}")
+    Name.connection.select_all("SELECT DISTINCT names.id nid,
+                               images.id iid #{conditions}").to_a
   end
-  
+
   def get_all_name_rows
     get_name_rows(IMAGE_CONDITIONS) + get_name_rows(GLOSSARY_TERM_CONDITIONS)
   end
-  
+
   def name_id_to_images
     make_list_hash_from_pairs(get_all_name_rows.map{
       |row| [row['nid'], @id_to_image[row['iid']]]
     })
   end
-  
+
   def get_images(conditions)
     Image.find_by_sql("SELECT DISTINCT images.* #{conditions}")
   end
-  
+
   def get_all_images
     get_images(IMAGE_CONDITIONS) + get_images(GLOSSARY_TERM_CONDITIONS)
   end
-  
+
   def id_to_image
     make_id_hash(get_all_images)
   end
-  
+
   def image_id_to_names
     make_list_hash_from_pairs(names.map {
       |n| @name_id_to_images[n.id].map { |i| [i.id, n] } }.reduce {
       |a,b| a+b })
   end
-  
+
   def license_id_to_url()
     # There are only three licenses at the moment. Just grabbing them all.
     result = {}
-    License.find(:all).each {|l| result[l.id] = l.url}
+    License.find_each {|l| result[l.id] = l.url}
     result
   end
-  
+
   def user_id_to_legal_name()
     # Just grab the ones with contribution > 0 (1621) since we're going to use at least 400 of them
     result = {}
@@ -270,7 +271,7 @@ private
     end
     result
   end
-  
+
   def make_list_hash_from_pairs(pairs)
     result = Hash.new{|h, k| h[k] = []}
     for x, y in pairs
@@ -278,13 +279,13 @@ private
     end
     result
   end
-  
+
   def make_id_hash(obj_list)
     result = {}
     obj_list.each {|o| result[o.id] = o}
     result
   end
-  
+
   def refresh_predicate(subjects, predicate)
     Triple.delete_predicate_matches(predicate)
     create_triples(subjects, predicate)
@@ -295,7 +296,7 @@ private
       Triple.new({:subject=>s.show_url, :predicate=>p, :object=>eol_search_url(s.class.name, s)}).save
     end
   end
-  
+
   def eol_search_url(class_name, subject)
     if class_name == 'Image'
       "http://eol.org/search?q=#{image_to_names(subject.id).gsub(' ', '+')}&type%5B%5D=Image"
