@@ -2066,7 +2066,7 @@ class Name < AbstractModel
     result = nil
     search_name = params[:search_name]
     # matches = Name.find(:all, :conditions => ['search_name = ?', search_name]) # Rails 3
-    matches = Name.where(search_name: search_name])
+    matches = Name.where(search_name: search_name)
     if matches.empty?
       result = Name.create_name(params)
     elsif matches.length == 1

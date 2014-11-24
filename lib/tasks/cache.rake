@@ -14,13 +14,13 @@ namespace :cache do
   desc "Recalculate vote caches for observations and namings"
   task(:refresh_votes => :environment) do
     print "Refreshing naming.vote_cache...\n"
-    for n in Naming.find(:all) # Rails 3
+    # for n in Naming.find(:all) # Rails 3
     for n in Naming.all
       print "##{n.id}\r"
       n.calc_vote_table
     end
     print "Refreshing observation.vote_cache...\n"
-    for o in Observation.find(:all) # Rails 3
+    # for o in Observation.find(:all) # Rails 3
     for o in Observation.all
       print "##{o.id}\r"
       o.calc_consensus
