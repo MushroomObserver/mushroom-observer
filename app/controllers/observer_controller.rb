@@ -456,19 +456,22 @@ class ObserverController < ApplicationController
           pattern = "%#{id}%"
           conditions = ["name LIKE ? OR scientific_name LIKE ?",
                         pattern, pattern]
-          matches = Location.find(:all,
-                                  limit: 100,
-                                  conditions: conditions)
+          # matches = Location.find(:all, # Rails 3
+          #                        limit: 100,
+          #                        conditions: conditions)
+          matches = Location.where(conditions).first(100)
         when "Project"
           pattern = "%#{id}%"
-          matches = Project.find(:all,
-                                 limit: 100,
-                                 conditions: ["title LIKE ?", pattern])
+          # matches = Project.find(:all, # Rails 3
+          #                        limit: 100,
+          #                        conditions: ["title LIKE ?", pattern])
+          matches = Project.where("title LIKE ?", pattern).first(100)
         when "SpeciesList"
           pattern = "%#{id}%"
-          matches = SpeciesList.find(:all,
-                                     limit: 100,
-                                     conditions: ["title LIKE ?", pattern])
+          # matches = SpeciesList.find(:all, # Rails 3
+          #                            limit: 100,
+          #                            conditions: ["title LIKE ?", pattern])
+          matches = SpeciesList.where("title LIKE ?", pattern).first(100)
         when "User"
           matches = User.where(login: id)
           matches = User.where(name: id) if matches.empty?

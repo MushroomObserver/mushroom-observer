@@ -11,7 +11,7 @@ class ConferenceControllerTest < FunctionalTestCase
     get_with_dump(:index)
     assert_template(action: 'index')
   end
-  
+
   def test_create_event
     get(:create_event)
     assert_response(:redirect)
@@ -20,7 +20,7 @@ class ConferenceControllerTest < FunctionalTestCase
     get_with_dump(:create_event)
     assert_template(action: 'create_event')
   end
-  
+
   def create_event_params
     return {
       :event => {
@@ -37,12 +37,13 @@ class ConferenceControllerTest < FunctionalTestCase
       }
     }
   end
-  
+
   def test_create_event_post
     make_admin
     params = create_event_params
     post(:create_event, params)
-    event = ConferenceEvent.find(:all, :order => "created_at DESC")[0]
+    # event = ConferenceEvent.find(:all, :order => "created_at DESC")[0] # Rails 3
+    event = ConferenceEvent.all.order("created_at DESC")[0]
     assert_equal(params[:event][:name], event.name)
     assert_equal(params[:event][:location], event.location)
     assert_equal(params[:event][:description], event.description)
@@ -51,7 +52,7 @@ class ConferenceControllerTest < FunctionalTestCase
     assert(event.end)
     assert_response(:redirect)
   end
-  
+
   def test_edit_event
     msa = conference_events(:msa_annual_meeting)
     get_with_dump(:edit_event, :id => msa.id)
@@ -61,7 +62,7 @@ class ConferenceControllerTest < FunctionalTestCase
     get_with_dump(:edit_event, :id => msa.id)
     assert_template(action: 'edit_event')
   end
-  
+
   def test_edit_event_post
     msa = conference_events(:msa_annual_meeting)
     make_admin
@@ -69,7 +70,8 @@ class ConferenceControllerTest < FunctionalTestCase
     params = create_event_params
     params[:id] = msa.id
     post(:edit_event, params)
-    event = ConferenceEvent.find(:all, :order => "created_at DESC")[0]
+    # event = ConferenceEvent.find(:all, :order => "created_at DESC")[0] # Rails 3
+    event = ConferenceEvent.all.order("created_at DESC")[0]
     assert_equal(params[:event][:name], event.name)
     assert_equal(params[:event][:location], event.location)
     assert_equal(params[:event][:description], event.description)
@@ -96,20 +98,21 @@ class ConferenceControllerTest < FunctionalTestCase
       }
     }
   end
-  
+
   def test_register_post
     registrations = ConferenceRegistration.count
     params = create_registration_params
     post(:register, params)
     assert_equal(registrations + 1, ConferenceRegistration.count)
-    registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0]
+    # registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0] # Rails 3
+    registration = ConferenceRegistration.all.order("created_at DESC")[0]
     assert_equal(params[:registration][:name], registration.name)
     assert_equal(params[:registration][:email], registration.email)
     assert_equal(params[:registration][:how_many], registration.how_many)
     assert_equal(params[:registration][:notes], registration.notes)
     assert_response(:redirect)
   end
-  
+
   def test_reregister_post
     registrations = ConferenceRegistration.count
     previous_registration = conference_registrations(:njw_at_msa)
@@ -118,7 +121,8 @@ class ConferenceControllerTest < FunctionalTestCase
     params[:registration][:email] = previous_registration.email
     post(:register, params)
     assert_equal(registrations, ConferenceRegistration.count)
-    registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0]
+    # registration = ConferenceRegistration.find(:all, :order => "created_at DESC")[0] # Rails 3
+    registration = ConferenceRegistration.all.order("created_at DESC")[0]
     assert_equal(params[:registration][:name], registration.name)
     assert_equal(params[:registration][:email], registration.email)
     assert_equal(params[:registration][:how_many], registration.how_many)
@@ -135,7 +139,7 @@ class ConferenceControllerTest < FunctionalTestCase
     get_with_dump(:list_registrations, :id => msa.id)
     assert_template(action: 'list_registrations')
   end
-  
+
   def test_verify
     msa = conference_registrations(:njw_at_msa)
     get_with_dump(:verify, :id => msa.id)

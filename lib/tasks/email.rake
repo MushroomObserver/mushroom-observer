@@ -2,8 +2,11 @@ namespace :email do
   desc "List queued emails"
   task(:list => :environment) do
     print "#{MO.http_domain}, #{::Rails.env}\n"
-    for e in QueuedEmail.find(:all, :include => [
-      :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
+    # for e in QueuedEmail.find(:all, :include => [ # Rails 3
+    #  :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
+    for e in QueuedEmail.include(:queued_email_integers,
+                                 :queued_email_note,
+                                 :queued_email_strings, :user).all
       e.dump()
     end
   end
@@ -11,7 +14,8 @@ namespace :email do
   desc "Send queued emails"
   task(:send => :environment) do
     count = 0
-    for e in QueuedEmail.find(:all)
+    # for e in QueuedEmail.find(:all) # Rails 3
+    for e in QueuedEmail.all
       now = Time.now()
       # Has it been queued (and unchanged) for MO.email_queue_delay or more.
       if e.queued + MO.email_queue_delay.seconds < now
@@ -63,10 +67,11 @@ namespace :email do
       end
     end
   end
-  
+
   desc "Purge the email queue without sending anything"
   task(:purge => :environment) do
-    for e in QueuedEmail.find(:all)
+    # for e in QueuedEmail.find(:all) # Rails 3
+    for e in QueuedEmail.all
       print "Purging #{e.id}: from => #{e.user and e.user.login}, to => #{e.to_user.login}, flavor => #{e.flavor}, queued => #{e.queued}\n"
       e.destroy
     end

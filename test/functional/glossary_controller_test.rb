@@ -32,7 +32,7 @@ class GlossaryControllerTest < FunctionalTestCase
     get_with_dump(:create_glossary_term)
     assert_template(action: 'create_glossary_term')
   end
-  
+
   def create_glossary_term_params
     return {
       :glossary_term => {
@@ -48,12 +48,13 @@ class GlossaryControllerTest < FunctionalTestCase
       }
     }
   end
-  
+
   def test_create_glossary_term_post
     user = login
     params = create_glossary_term_params
     post(:create_glossary_term, params)
-    glossary_term = GlossaryTerm.find(:all, :order => "created_at DESC")[0]
+    # glossary_term = GlossaryTerm.find(:all, :order => "created_at DESC")[0] # Rails 3
+    glossary_term = GlossaryTerm.all.order("created_at DESC")[0]
     assert_equal(params[:glossary_term][:name], glossary_term.name)
     assert_equal(params[:glossary_term][:description], glossary_term.description)
     assert_not_nil(glossary_term.rss_log)
@@ -70,7 +71,7 @@ class GlossaryControllerTest < FunctionalTestCase
     get_with_dump(:edit_glossary_term, :id => conic.id)
     assert_template(action: 'edit_glossary_term')
   end
-  
+
   def test_edit_glossary_term_post
     conic = glossary_terms(:conic_glossary_term)
     count = GlossaryTerm::Version.count

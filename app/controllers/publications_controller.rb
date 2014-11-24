@@ -12,7 +12,8 @@ class PublicationsController < ApplicationController
   # GET /publications.xml
   def index
     store_location
-    @publications = Publication.find(:all, :order => 'full')
+    # @publications = Publication.find(:all, :order => 'full') # Rails 3
+    @publications = Publication.all.order("full")
     @full_count = @publications.length
     @peer_count = @publications.select(&:peer_reviewed).length
     @mo_count   = @publications.select(&:mo_mentioned).length

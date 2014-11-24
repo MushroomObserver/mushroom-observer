@@ -639,12 +639,14 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_bulk_original_filename_purge
     assert_equal(1, rolf.id)
-    imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1')
+    # imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1') # Rails 3
+    imgs = Image.where('original_name != "" AND user_id = 1')
     assert(imgs.any?)
 
     login('rolf')
     get(:bulk_filename_purge)
-    imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1')
+    # imgs = Image.find(:all, :conditions => 'original_name != "" AND user_id = 1') # Rails 3
+    imgs = Image.where('original_name != "" AND user_id = 1')
     assert(imgs.empty?)
   end
 

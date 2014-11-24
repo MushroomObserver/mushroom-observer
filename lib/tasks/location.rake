@@ -3971,8 +3971,9 @@ namespace :location do
   task(:list => :environment) do
     RunLevel.silent()
     new_locs = Set.new
-    for l in Location.find(:all)
-      w = fix_funny_chars(l.name)
+    # for l in Location.find(:all) # Rails 3
+    for l in Location.all
+     w = fix_funny_chars(l.name)
       if not (APPROVED_LOCATIONS.member?(w) or LOCATION_FIXES.member?(w))
         new_locs.add(w.gsub("\"", "\\\""))
       end
@@ -4079,7 +4080,8 @@ namespace :location do
   task(:fix => :environment) do
     RunLevel.silent()
     User.current = User.find(1) # nathan
-    for l in Location.find(:all)
+    # for l in Location.find(:all) # Rails 3
+    for l in Location.all
       fix_location(LOCATION_FIXES[l.name], l.name, l)
     end
     wheres = Observation.connection.select_values %(
@@ -4130,7 +4132,8 @@ namespace :location do
   task(:accents => :environment) do
     RunLevel.silent()
     User.current = User.find(1) # nathan
-    for l in Location.find(:all)
+    # for l in Location.find(:all) # Rails 3
+    for l in Location.all
       fix = accent_fix(l.name)
       if fix != l.name
         print("Replacing: \"#{l.name}\" with \"#{fix}\"")

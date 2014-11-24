@@ -725,7 +725,8 @@ return result if debug
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    for o in Observation.find(:all)
+    # for o in Observation.find(:all) # Rails 3
+    for o in Observation.all
       o.calc_consensus
     end
   end

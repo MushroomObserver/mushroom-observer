@@ -14,7 +14,8 @@ class GlossaryController < ApplicationController
 
   def index # :nologin:
     store_location
-    @glossary_terms = GlossaryTerm.find(:all, :order => :name)
+    # @glossary_terms = GlossaryTerm.find(:all, :order => :name) # Rails 3
+    @glossary_terms = GlossaryTerm.all.order(:name)
   end
 
   def create_glossary_term # :norobots:
@@ -62,7 +63,7 @@ class GlossaryController < ApplicationController
     end
     return image
   end
-  
+
   def edit_glossary_term # :norobots:
     # Expand to any MO user, but make them owned and editable only by that user or an admin
     if request.method == "POST"

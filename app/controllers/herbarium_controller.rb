@@ -73,12 +73,13 @@ class HerbariumController < ApplicationController
     end
     redirect_to(:action => :show_herbarium, :id => params[:id].to_s)
   end
-  
+
   def index # :nologin:
     store_location
-    @herbaria = Herbarium.find(:all, :order => :name)
+    # @herbaria = Herbarium.find(:all, :order => :name) # Rails 3
+    @glossary_terms = GlossaryTerm.all.order(:name)
   end
-  
+
   def create_herbarium # :norobots:
     name = @user.personal_herbarium
     @herbarium_name = (@user.personal_herbarium.nil?) ? @user.preferred_herbarium_name : ""
@@ -88,7 +89,7 @@ class HerbariumController < ApplicationController
       end
     end
   end
-  
+
   def valid_herbarium_params(params)
     params[:name] = params[:name].strip_html
     name_free?(params[:name]) and email_valid?(params[:email])
@@ -99,13 +100,13 @@ class HerbariumController < ApplicationController
     flash_error(:create_herbarium_duplicate_name.l(:name => new_name)) if not result
     result
   end
-  
+
   def email_valid?(email)
     result = (email and (email != "") and (email == email.strip_html))
     flash_error(:create_herbarium_missing_email.l) if not result
     result
   end
-  
+
   def build_herbarium(params)
     infer_location(params)
     herbarium = Herbarium.new(params)
@@ -114,7 +115,7 @@ class HerbariumController < ApplicationController
     herbarium.save
     calc_herbarium_redirect(params, herbarium)
   end
-  
+
   def infer_location(params)
     params[:place_name] = params[:place_name] ? params[:place_name].strip_html : ""
     location = Location.find_by_name_or_reverse_name(params[:place_name])
@@ -130,7 +131,7 @@ class HerbariumController < ApplicationController
       redirect_to(:action => 'show_herbarium', :id => herbarium.id)
     end
   end
-  
+
   def edit_herbarium # :norobots:
     @herbarium = Herbarium.find(params[:id].to_s)
     if is_in_admin_mode? or user_is_curator?(@herbarium)
@@ -143,7 +144,7 @@ class HerbariumController < ApplicationController
       redirect_to(:action => 'show_herbarium', :id => @herbarium.id)
     end
   end
-  
+
   def ok_to_update(herbarium, params)
     new_name = params[:name].strip_html
     return (((herbarium.name == new_name) or name_free?(new_name)) and email_valid?(params[:email]))

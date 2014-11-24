@@ -182,9 +182,13 @@ class Comment < AbstractModel
       end
 
       # Send to other people who have commented on this same object if they want.
-      for other_comment in Comment.find(:all, :conditions =>
-          ['comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE',
-          target.class.to_s, target.id], :include => 'user')
+      # for other_comment in Comment.find(:all, :conditions => # Rails 3
+      #    ['comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE',
+      #    target.class.to_s, target.id], :include => 'user')
+      for other_comment in Comment.
+        include("user").
+        where("comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE",
+              target.class.to_s, target.id)
         recipients.push(other_comment.user)
       end
 

@@ -1,7 +1,8 @@
 class SeparateTermThumbFromImages < ActiveRecord::Migration
   def self.up
     Term.record_timestamps = false
-    for term in Term.find(:all)
+    # for term in Term.find(:all) # Rails 3
+    for term in Term.all
       if term.images.member?(term.thumb_image)
         term.images.delete(term.thumb_image)
         term.save_without_our_callbacks
@@ -12,7 +13,8 @@ class SeparateTermThumbFromImages < ActiveRecord::Migration
 
   def self.down
     Term.record_timestamps = false
-    for term in Term.find(:all)
+    # for term in Term.find(:all) # Rails 3
+    for term in Term.all
       if term.thumb_image
         term.images.push(term.thumb_image)
         term.save_without_our_callbacks

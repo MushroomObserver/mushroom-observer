@@ -1593,7 +1593,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_rsslog_all
-    ids = RssLog.find(:all).map {|log| log.id}
+#    ids = RssLog.find(:all).map {|log| log.id} # Rails 3
+    ids = RssLog.all.map {|log| log.id}
     assert_query(ids, :RssLog, :all)
   end
 

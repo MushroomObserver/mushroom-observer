@@ -52,7 +52,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
-  
+
   def test_add_specimen
     get(:add_specimen, :id => observations(:coprinus_comatus_obs).id)
     assert_response(:redirect)
@@ -62,7 +62,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_template(action: 'add_specimen', partial: "_rss_log")
     assert(assigns(:herbarium_label))
   end
- 
+
   def add_specimen_params
     return {
       :id => observations(:strobilurus_diminutivus_obs).id,
@@ -76,7 +76,7 @@ class SpecimenControllerTest < FunctionalTestCase
       }
     }
   end
-  
+
   def test_add_specimen_post
     login('rolf')
     specimen_count = Specimen.count
@@ -85,7 +85,8 @@ class SpecimenControllerTest < FunctionalTestCase
     assert(!obs.specimen)
     post(:add_specimen, params)
     assert_equal(specimen_count + 1, Specimen.count)
-    specimen = Specimen.find(:all, :order => "created_at DESC")[0]
+    # specimen = Specimen.find(:all, :order => "created_at DESC")[0] # Rails 3
+    specimen = Specimen.all.order("created_at DESC")[0]
     assert_equal(params[:specimen][:herbarium_name], specimen.herbarium.name)
     assert_equal(params[:specimen][:herbarium_label], specimen.herbarium_label)
     assert_equal(params[:specimen]['when(1i)'].to_i, specimen.when.year)
@@ -96,7 +97,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert(obs.specimen)
     assert_response(:redirect)
   end
-  
+
   def test_add_specimen_post_new_herbarium
     mary = login('mary')
     herbarium_count = mary.curated_herbaria.count
@@ -106,10 +107,11 @@ class SpecimenControllerTest < FunctionalTestCase
     post(:add_specimen, params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count+1, mary.curated_herbaria.count)
-    herbarium = Herbarium.find(:all, :order => "created_at DESC")[0]
+    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
+    herbarium = Herbarium.all.order("created_at DESC")[0]
     assert(herbarium.curators.member?(mary))
   end
-  
+
   def test_add_specimen_post_duplicate
     login('rolf')
     specimen_count = Specimen.count
@@ -119,10 +121,10 @@ class SpecimenControllerTest < FunctionalTestCase
     params[:specimen][:herbarium_label] = existing_specimen.herbarium_label
     post(:add_specimen, params)
     assert_equal(specimen_count, Specimen.count)
-    assert_flash(/already exists/i)    
+    assert_flash(/already exists/i)
     assert_response(:success)
   end
-  
+
   # I keep thinking only curators should be able to add specimens.  However, for now anyone can.
   def test_add_specimen_post_not_curator
     user = login('mary')
@@ -142,7 +144,7 @@ class SpecimenControllerTest < FunctionalTestCase
   def assert_edit_specimen
     assert_template(action: 'edit_specimen')
   end
-  
+
   def test_edit_specimen
     nybg = specimens(:coprinus_comatus_nybg_spec)
     get_with_dump(:edit_specimen, :id => nybg.id)
@@ -161,7 +163,7 @@ class SpecimenControllerTest < FunctionalTestCase
     get_with_dump(:edit_specimen, :id => nybg.id)
     assert_edit_specimen
   end
-  
+
   def test_edit_specimen_post
     login('rolf')
     nybg = specimens(:coprinus_comatus_nybg_spec)
@@ -181,7 +183,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(nybg.user, specimen.user)
     assert_response(:redirect)
   end
-  
+
   def test_edit_specimen_post_no_specimen
     login('rolf')
     nybg = specimens(:coprinus_comatus_nybg_spec)
@@ -202,7 +204,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_true(obs_spec_count > observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
     assert_response(:redirect)
   end
-  
+
   def test_delete_specimen_not_curator
     login('mary')
     params = delete_specimen_params
@@ -214,7 +216,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(specimen_count, Specimen.count)
     assert_response(:redirect)
   end
-  
+
   def test_delete_specimen_admin
     make_admin('mary')
     params = delete_specimen_params
@@ -226,7 +228,7 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(specimen_count-1, Specimen.count)
     assert_response(:redirect)
   end
-  
+
   def delete_specimen_params
     {
       :id => specimens(:interesting_unknown).id

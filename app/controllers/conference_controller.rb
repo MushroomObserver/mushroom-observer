@@ -9,10 +9,10 @@ class ConferenceController < ApplicationController
   # TODO:
   # Need to watch for non-verified registrations
   # Links to events
-  
+
   # Have users own ConferenceEvents rather than admin
   # Owners can delete ConferenceEvents
-  
+
   # Creating a conference event should be RESTful, but I'm not sure what our conventions are at this point
   def show_event # :nologin:
     store_location
@@ -22,9 +22,10 @@ class ConferenceController < ApplicationController
 
   def index # :nologin:
     store_location
-    @events = ConferenceEvent.find(:all)
+    # @events = ConferenceEvent.find(:all) # Rails 3
+    @events = ConferenceEvent.all
   end
-  
+
   def create_event # :norobots:
     if is_in_admin_mode? # Probably should be expanded to any MO user
       if request.method == "POST"
@@ -37,7 +38,7 @@ class ConferenceController < ApplicationController
       redirect_to(:action => 'index')
     end
   end
-  
+
   def edit_event # :norobots:
     # Expand to any MO user, but make them owned and editable only by that user or an admin
     if is_in_admin_mode?
@@ -54,7 +55,7 @@ class ConferenceController < ApplicationController
       redirect_to(:action => 'index')
     end
   end
-  
+
   def register # :nologin: :norobots:
     store_location
     event = ConferenceEvent.find(params[:id].to_s)
@@ -75,8 +76,11 @@ class ConferenceController < ApplicationController
 
   def find_previous_registration(params)
     result = nil
-    all_registrations = ConferenceRegistration.find(:all,
-      :conditions => "email = '#{params[:registration][:email]}' and conference_event_id = #{params[:id]}")
+    # all_registrations = ConferenceRegistration.find(:all, # Rails 3
+    #  :conditions => "email = '#{params[:registration][:email]}' and conference_event_id = #{params[:id]}")
+    all_registrations = ConferenceRegistration.
+      all(email: "#{params[:registration][:email]}",
+      conference_event_id: "#{params[:id]}")
     if not all_registrations.empty?
       result = all_registrations[0]
       before = result.describe
@@ -87,7 +91,7 @@ class ConferenceController < ApplicationController
     end
     return result
   end
-  
+
   def list_registrations # :norobots:
     if is_in_admin_mode?
       @event = ConferenceEvent.find(params[:id].to_s)
@@ -97,7 +101,7 @@ class ConferenceController < ApplicationController
       redirect_to(:action => 'index')
     end
   end
-  
+
   def verify # :nologin: :norobots:
     registration = ConferenceRegistration.find(params[:id].to_s)
     if registration.verified == nil

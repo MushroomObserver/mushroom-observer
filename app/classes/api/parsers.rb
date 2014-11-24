@@ -462,10 +462,10 @@ class API
     raise BadParameterValue.new(str, :name) if str.blank?
     val = try_parsing_id(str, Name)
     if not val
-      # val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
+      # val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str]) # Rails 3
       val = Name.where("(text_name = ? OR search_name = ?) AND deprecated IS FALSE", str, str)
       if val.empty?
-        # val = Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str])
+        # val = Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str]) # Rails 3
         val = Name.where("text_name = ? OR search_name = ?", str, str)
       end
       if val.empty?

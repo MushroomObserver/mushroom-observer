@@ -29,7 +29,8 @@ class SupportControllerTest < FunctionalTestCase
     post(:confirm, params)
     assert_template(action: 'confirm')
     assert_equal(donations + 1, Donation.count)
-    donation = Donation.find(:all, :order => "created_at DESC")[0]
+    # donation = Donation.find(:all, :order => "created_at DESC")[0] # Rails 3
+    donation = Donation.all.order("created_at DESC")[0]
     assert_equal(final_amount, donation.amount)
     assert_equal(rolf.name, donation.who)
     assert_equal(rolf.email, donation.email)
@@ -40,15 +41,15 @@ class SupportControllerTest < FunctionalTestCase
   def test_confirm_post
     confirm_post(25, 0)
   end
-  
+
   def test_confirm_other_amount_post
     confirm_post('other', 30)
   end
-  
+
   def test_create_donation
     get(:create_donation)
     assert_response(:redirect)
-    
+
     make_admin
     get_with_dump(:create_donation)
     assert_template(action: 'create_donation')
@@ -68,7 +69,8 @@ class SupportControllerTest < FunctionalTestCase
     }
     post(:create_donation, params)
     assert_equal(donations + 1, Donation.count)
-    donation = Donation.find(:all, :order => "created_at DESC")[0]
+    # donation = Donation.find(:all, :order => "created_at DESC")[0] # Rails 3
+    donation = Donation.all.order("created_at DESC")[0]
     assert_equal(amount, donation.amount)
     assert_equal(rolf.name, donation.who)
     assert_equal(rolf.email, donation.email)
@@ -84,11 +86,11 @@ class SupportControllerTest < FunctionalTestCase
   def test_create_donation_anon_post
     create_donation_post(true)
   end
-  
+
   def test_review_donations
     get(:review_donations)
     assert_response(:redirect)
-    
+
     make_admin
     get_with_dump(:review_donations)
     assert_template(action: 'review_donations')

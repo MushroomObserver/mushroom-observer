@@ -510,7 +510,8 @@ class Name < AbstractModel
 
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
-    result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != [])
+    # result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != []) # Rails 3
+    result = (Triple.where(subject: ':name/#{id}', predicate: :lichenAuthority) != [])
     if !result and below_genus?
       genus = self.class.find_by_text_name(text_name.split.first)
       result = genus.is_lichen? if genus
@@ -1317,7 +1318,8 @@ class Name < AbstractModel
         target = synonym.text_name + ' ' + child                              # target = "Lepiota bog% var. nam%"
         conditions = ['text_name like ? AND correct_spelling_id IS NULL',
                       synonym.text_name + ' ' + child_pat]
-        result += Name.find(:all, :conditions => conditions).select do |name|
+        # result += Name.find(:all, :conditions => conditions).select do |name| # Rails 3
+        result += Name.where(conditions).select do |name|
           valid_alternate_genus?(name, synonym.text_name, child_pat)          # name = <Lepiota boga var. nama>
         end
       end
@@ -2063,7 +2065,8 @@ class Name < AbstractModel
   def self.make_name(params)
     result = nil
     search_name = params[:search_name]
-    matches = Name.find(:all, :conditions => ['search_name = ?', search_name])
+    # matches = Name.find(:all, :conditions => ['search_name = ?', search_name]) # Rails 3
+    matches = Name.where(search_name: search_name])
     if matches.empty?
       result = Name.create_name(params)
     elsif matches.length == 1

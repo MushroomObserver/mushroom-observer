@@ -58,7 +58,8 @@ class SupportController < ApplicationController
           d.save
         }
       end
-      @donations = Donation.find(:all, :order => "created_at DESC")
+      # @donations = Donation.find(:all, :order => "created_at DESC") # Rails 3
+      @donations = Donation.all.order("created_at DESC")
       @reviewed = {}
       for d in @donations
         @reviewed[d.id] = d.reviewed
