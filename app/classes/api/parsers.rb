@@ -462,9 +462,11 @@ class API
     raise BadParameterValue.new(str, :name) if str.blank?
     val = try_parsing_id(str, Name)
     if not val
-      val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
+      # val = Name.find(:all, :conditions => ['(text_name = ? OR search_name = ?) AND deprecated IS FALSE', str, str])
+      val = Name.where("(text_name = ? OR search_name = ?) AND deprecated IS FALSE", str, str)
       if val.empty?
-        val = Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str])
+        # val = Name.find(:all, :conditions => ['text_name = ? OR search_name = ?', str, str])
+        val = Name.where("text_name = ? OR search_name = ?", str, str)
       end
       if val.empty?
         raise NameDoesntParse.new(str) if !Name.parse_name(str)
@@ -517,7 +519,8 @@ class API
     str = get_param(key) or return args[:default]
     raise BadParameterValue.new(str, :user) if str.blank?
     val = try_parsing_id(str, User)
-    val ||= User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
+    # val ||= User.find(:first, :conditions => ['login = ? OR name = ?', str, str])
+    val ||= User.where("login = ? OR name = ?", str, str).first
     raise ObjectNotFoundByString.new(str, User) if !val
     check_edit_permission!(val, args)
     return val
