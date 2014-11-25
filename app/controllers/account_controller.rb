@@ -252,8 +252,11 @@ class AccountController < ApplicationController
       @new_user = User.new
     else
       @login = params['new_user']['login']
-      @new_user = User.find(:first, :conditions =>
-              [ "login = ? OR name = ? OR email = ?", @login, @login, @login ])
+#      @new_user = User.find(:first, :conditions => # Rails 3
+#              [ "login = ? OR name = ? OR email = ?", @login, @login, @login ])
+      @new_user = User.where("login = ? OR name = ? OR email = ?",
+                             @login, @login, @login ]).
+                       first
       if @new_user.nil?
         flash_error :runtime_email_new_password_failed.t(:user => @login)
       else

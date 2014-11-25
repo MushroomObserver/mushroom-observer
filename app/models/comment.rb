@@ -186,9 +186,11 @@ class Comment < AbstractModel
       #    ['comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE',
       #    target.class.to_s, target.id], :include => 'user')
       for other_comment in Comment.
-        include("user").
-        where("comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE",
-              target.class.to_s, target.id)
+                             include("user").
+                             where("comments.target_type = ? AND
+                                    comments.target_id = ? AND
+                                    users.email_comments_response = TRUE",
+                                    target.class.to_s, target.id)
         recipients.push(other_comment.user)
       end
 

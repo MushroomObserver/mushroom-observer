@@ -447,9 +447,13 @@ class User < AbstractModel
   #   user = User.authenticate('fred99@aol.com', 'password')
   #
   def self.authenticate(login, pass)
-    find(:first, :conditions =>
-      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
-        login, login, login, sha1(pass) ])
+#    find(:first, :conditions => # Rails 3
+#      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
+#         login, login, login, sha1(pass) ])
+    find.where("(login = ? OR name = ? OR email = ?) AND password = ? AND
+                   password != ''",
+                login, login, login, sha1(pass) ).
+        first
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute

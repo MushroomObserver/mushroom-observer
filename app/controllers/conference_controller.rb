@@ -78,9 +78,9 @@ class ConferenceController < ApplicationController
     result = nil
     # all_registrations = ConferenceRegistration.find(:all, # Rails 3
     #  :conditions => "email = '#{params[:registration][:email]}' and conference_event_id = #{params[:id]}")
-    all_registrations = ConferenceRegistration.
-      all(email: "#{params[:registration][:email]}",
-      conference_event_id: "#{params[:id]}")
+    all_registrations =
+      ConferenceRegistration.all(email: "#{params[:registration][:email]}",
+                                 conference_event_id: "#{params[:id]}")
     if not all_registrations.empty?
       result = all_registrations[0]
       before = result.describe

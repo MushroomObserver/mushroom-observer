@@ -313,7 +313,8 @@ class Name < AbstractModel
 
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
-    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
+#    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4") # Rails 3
+    Observation.where("name_id = #{id} AND vote_cache >= 2.4")
   end
 
   # Get list of common names to prime auto-completer.  Returns a simple Array
@@ -511,7 +512,8 @@ class Name < AbstractModel
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
     # result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != []) # Rails 3
-    result = (Triple.where(subject: ':name/#{id}', predicate: :lichenAuthority) != [])
+    result = (Triple.where(subject: ":name/#{id}",
+                           predicate: :lichenAuthority) != [])
     if !result and below_genus?
       genus = self.class.find_by_text_name(text_name.split.first)
       result = genus.is_lichen? if genus
@@ -656,9 +658,11 @@ class Name < AbstractModel
             next_rank == :Subspecies && text_name.match(/^(.* subsp\. \S+)/) ||
             next_rank == :Species    && text_name.match(/^(\S+ \S+)/)        ||
             next_rank == :Genus      && text_name.match(/^(\S+)/)
-        these = Name.all(:conditions => "correct_spelling_id IS NULL
-                                         AND rank = '#{next_rank}'
-                                         AND text_name = '#{$1}'")
+#        these = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
+#                                         AND rank = '#{next_rank}'
+#                                         AND text_name = '#{$1}'")
+        these = Name.where("correct_spelling_id IS NULL AND
+                            rank = ? AND text_name = ?", next_rank, $1)
       end
 
       # Get rid of deprecated names unless all the results are deprecated.
@@ -770,9 +774,11 @@ class Name < AbstractModel
         results2 = []
         for name in results
           if name.rank == :Genus
-            results2 += Name.all(:conditions =>
-                                 "correct_spelling_id IS NULL
-                                  AND text_name LIKE '#{name.text_name} %'")
+#            results2 += Name.all(:conditions => # Rails 3
+#                                 "correct_spelling_id IS NULL
+#                                  AND text_name LIKE '#{name.text_name} %'")
+            results2 += Name.where("correct_spelling_id IS NULL AND
+                                    text_name LIKE ?", name.text_name)
           end
         end
         results += results2
@@ -780,8 +786,10 @@ class Name < AbstractModel
 
     # Get everything below our rank.
     else
-      results = Name.all(:conditions => "correct_spelling_id IS NULL
-                                         AND text_name LIKE '#{text_name} %'")
+#      results = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
+#                                         AND text_name LIKE '#{text_name} %'")
+      results = Name.where("correct_spelling_id IS NULL AND
+                            text_name LIKE ?", text_name)
 
       # Remove subchildren if not getting all children.  This is trickier than
       # I originally expected because we want the children of G. species to
@@ -941,10 +949,12 @@ class Name < AbstractModel
     @synonyms ||= begin
       if @synonym_ids
         # Slightly faster since id is primary index.
-        Name.all(:conditions => ['id IN (?)', @synonym_ids])
+        # Name.all(:conditions => ['id IN (?)', @synonym_ids]) # Rails 3
+        Name.where(id: @synonym_ids)
       elsif synonym_id
         # Takes on average 0.050 seconds.
-        Name.all(:conditions => "synonym_id = #{synonym_id}")
+        # Name.all(:conditions => "synonym_id = #{synonym_id}") # Rails 3
+        Name.where(synonym_id: synonym_id)
 
         # Involves instantiating a Synonym, something which need never happen.
         # synonym ? synonym.names : [self]
@@ -990,9 +1000,11 @@ class Name < AbstractModel
     @other_authors ||= begin
       if @other_author_ids
         # Slightly faster since id is primary index.
-        Name.all(:conditions => ['id IN (?)', @other_author_ids])
+        # Name.all(:conditions => ['id IN (?)', @other_author_ids]) # Rails 3
+        Name.where(id: @other_author_ids)
       else
-        Name.all(:conditions => ['text_name = ?', text_name])
+        # Name.all(:conditions => ['text_name = ?', text_name]) # Rails 3
+        Name.where(text_name: text_name)
       end
     end
   end
@@ -1179,10 +1191,10 @@ class Name < AbstractModel
     @misspellings ||= begin
       if @misspelling_ids
         # Slightly faster since id is primary index.
-        # Name.all(:conditions => ['id IN (?)', @misspelling_ids])
+        # Name.all(:conditions => ['id IN (?)', @misspelling_ids]) # Rails 3
         Name.where(id: @misspelling_ids)
       else
-        # Name.all(:conditions => "correct_spelling_id = #{id}")
+        # Name.all(:conditions => "correct_spelling_id = #{id}") # Rails 3
         Name.where(correct_spelling_id: id)
       end
     end
@@ -1961,12 +1973,14 @@ class Name < AbstractModel
           conditions_args[:rank] = rank
         end
 
-        results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
+        # results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ]) # Rails 3
+        results = Name.where(conditions.join(" AND "), conditions_args)
 
         # If user provided author, check if name already exists without author.
         if results.empty? and not author.blank?
           conditions_args[:name] = text_name
-          results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
+        # results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ]) # Rails 3
+        results = Name.where(conditions.join(" AND "), conditions_args)
           # (this should never return more than one result)
           if fill_in_authors and results.length == 1
             results.first.change_author(author)
@@ -2042,11 +2056,14 @@ class Name < AbstractModel
   def self.find_matching_names(parsed_name)
     result = []
     if parsed_name.author.blank?
-      result = Name.all(:conditions => ['text_name = ?', parsed_name.text_name])
+#      result = Name.all(:conditions => ['text_name = ?', parsed_name.text_name]) # Rails 3
+      result = Name.where(text_name: parsed_name.text_name)
     else
-      result = Name.all(:conditions => ['search_name = ?', parsed_name.search_name])
+#      result = Name.all(:conditions => ['search_name = ?', parsed_name.search_name]) # Rails 3
+      result = Name.where(search_name: parsed_name.search_name)
       if result.empty?
-        result = Name.all(:conditions => ['text_name = ? AND author = ""', parsed_name.text_name])
+#        result = Name.all(:conditions => ['text_name = ? AND author = ""', parsed_name.text_name]) # Rails 3
+        result = Name.where(text_name: "", author: parsed_name.text_name)
       end
     end
     return result

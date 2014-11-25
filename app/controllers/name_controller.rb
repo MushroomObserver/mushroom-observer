@@ -1353,7 +1353,9 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list))
+#    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list)) # Rails 3
+    descs = NameDescription.where(
+                              eol_description_conditions(review_status_list))
 
     # Fill in @descs, @users, @authors, @licenses.
     for desc in descs
@@ -1374,8 +1376,9 @@ class NameController < ApplicationController
 
     # Get corresponding names.
     name_ids = @descs.keys.map(&:to_s).join(',')
-    @names = Name.all(:conditions => "id IN (#{name_ids})",
-                      :order => 'sort_name ASC, author ASC')
+#    @names = Name.all(:conditions => "id IN (#{name_ids})", # Rails 3
+#                      :order => 'sort_name ASC, author ASC')
+    @names = Name.where(id: name_ids).order(:sort_name, :author)
 
     # Get corresponding images.
     image_data = Name.connection.select_all %(
@@ -1481,7 +1484,7 @@ class NameController < ApplicationController
       ORDER BY observations.id
     ))
     # @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids]) # Rails 3
-    @voteless_obs = Observation.find.where(images.id: ids)
+    @voteless_obs = Observation.where(images.id: ids)
   end
 
   ################################################################################

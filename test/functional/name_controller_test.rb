@@ -486,8 +486,9 @@ class NameControllerTest < FunctionalTestCase
   def test_pagination_letter
     # Now try a letter.
     query_params = pagination_query_params
-    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
-      :order => 'text_name, author')
+#    l_names = Name.all(:conditions => 'text_name LIKE "L%"', # Rails 3
+#      :order => 'text_name, author')
+    l_names = Name.where("text_name LIKE ?", "L%").order("text_name, author")
     get(:test_index, { :num_per_page => l_names.size,
                :letter => 'L' }.merge(query_params))
     assert_template(action: 'list_names')
@@ -505,8 +506,9 @@ class NameControllerTest < FunctionalTestCase
 
   def test_pagination_letter_with_page
     query_params = pagination_query_params
-    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
-      :order => 'text_name, author')
+#    l_names = Name.all(:conditions => 'text_name LIKE "L%"', # Rails 3
+#      :order => 'text_name, author')
+    l_names = Name.where("text_name LIKE ?", "L%").order("text_name, author")
     # Do it again, but make page size exactly one too small.
     l_names.pop
     get(:test_index, { :num_per_page => l_names.size,

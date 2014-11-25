@@ -66,11 +66,18 @@ private
 
   # Check to see if there is already an email started.
   def self.find_email(recipient, observation)
-    QueuedEmail.first(:include => :queued_email_integers,
-      :conditions => [
-        'queued_emails.to_user_id = ?' +
-        ' and queued_emails.flavor = "QueuedEmail::ObservationChange"' +
-        ' and queued_email_integers.key = "observation"' +
-        ' and queued_email_integers.value = ?', recipient.id, observation.id])
+#    QueuedEmail.first(:include => :queued_email_integers, # Rails 3
+#      :conditions => [
+#        'queued_emails.to_user_id = ?' +
+#        ' and queued_emails.flavor = "QueuedEmail::ObservationChange"' +
+#        ' and queued_email_integers.key = "observation"' +
+#        ' and queued_email_integers.value = ?', recipient.id, observation.id])
+    QueuedEmail.
+      include(:queued_email_integers).
+      where("queued_emails.flavor = 'QueuedEmail::ObservationChange' AND
+             queued_email_integers.key = 'observation' AND
+             queued_email_integers.value = ? AND queued_emails.to_user_id = ?",
+             observation.id, recipient.id).
+     first
   end
 end

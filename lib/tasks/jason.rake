@@ -619,7 +619,7 @@ namespace :jason do
     elsif !loc
       val2 = val.downcase.gsub(/\W+/, ' ')
       # results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "name asc") # Rails 3
-      results = Location.where("search_name LIKE '%#{val2}%'", order: "name asc")
+      results = Location.where("search_name LIKE ?", "%#{val2}%").order(name)
       if results.length == 0
         lines.push('>>>>>>>> couldn\'t find any matching locations (add "*" to end to create)')
       elsif results.length == 1

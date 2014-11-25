@@ -1214,8 +1214,10 @@ module RefineSearch
       case model.name
       when 'Location'
         pattern = Query.clean_pattern(Location.clean_name(val, :leave_stars))
-        obj = Location.find_by_name_or_reverse_name(val) ||
-              Location.first(:conditions => "search_name LIKE '%#{pattern}%'")
+#        obj = Location.find_by_name_or_reverse_name(val) || # Rails 3
+#              Location.first(:conditions => "search_name LIKE '%#{pattern}%'")
+        obj = Location.where("name = ? OR reverse_name = ?", val, val) ||
+              Location.where("search_name LIKE ?", "%#{pattern}%").first
       when 'Name'
         obj = Name.find_by_search_name(val) ||
               Name.find_by_text_name(val)
@@ -1286,7 +1288,7 @@ module RefineSearch
   def rs_month_name(month_index)
     :all_months.l.split[month_index - 1]
   end
-  
+
   def rs_format_time(val, field)
     if val == '0' || val.blank?
       ''

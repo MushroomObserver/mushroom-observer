@@ -443,7 +443,8 @@ class QueryTest < UnitTestCase
       @fungi = names(:fungi)
       @agaricus = names(:agaricus)
       num = Name.count
-      num_agaricus = Name.count(:conditions => 'text_name LIKE "Agaricus%"')
+      # num_agaricus = Name.count(:conditions => 'text_name LIKE "Agaricus%"') # Rails 3
+      num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
 
       assert_equal(num, query.select_count)
       assert_equal(num, query.select_count(:limit => 10)) # limit limits number of counts!!

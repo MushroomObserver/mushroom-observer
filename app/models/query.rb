@@ -1303,7 +1303,8 @@ class Query < AbstractQuery
           case model.name
           when 'Location'
             pattern = clean_pattern(Location.clean_name(name))
-            objs += model.all(:conditions => "name LIKE '%#{pattern}%'")
+#            objs += model.all(:conditions => "name LIKE '%#{pattern}%'") # Rails 3
+            objs += model.where("name LIKE ?", "%#{pattern}%")
           when 'Name'
             if parse = Name.parse_name(name)
               name2 = parse.search_name
