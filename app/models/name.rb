@@ -505,6 +505,10 @@ class Name < AbstractModel
     RANKS_BELOW_SPECIES.include?(rank)
   end
 
+  def rank_index(rank)
+    ALL_RANKS.index(rank.to_sym)
+  end
+
   def self.compare_ranks(a, b)
     ALL_RANKS.index(a.to_sym) <=> ALL_RANKS.index(b.to_sym)
   end
@@ -613,11 +617,12 @@ class Name < AbstractModel
   def parents(all=false)
     results   = []
     lines     = nil
-    next_rank = rank
+    # next_rank = rank # Rails 3
+    next_rank = rank.to_sym
 
     # Try ranks above ours one at a time until we find a parent.
     while all || results.empty?
-      next_rank = ALL_RANKS[ALL_RANKS.index(next_rank) + 1]
+      next_rank = ALL_RANKS[rank_index(next_rank) + 1]
       break if !next_rank || next_rank == :Group
       these = []
 
@@ -709,10 +714,13 @@ class Name < AbstractModel
   #
   def children(all=false)
     results = []
-    our_index = ALL_RANKS.index(rank)
+#    our_index = ALL_RANKS.index(rank) # Rails 3
+    our_rank = rank.to_sym
+    our_index = rank_index(our_rank)
 
     # If we're above genus we need to rely on classification strings.
-    if RANKS_ABOVE_GENUS.include?(rank)
+#    if RANKS_ABOVE_GENUS.include?(rank) # Rails 3
+    if RANKS_ABOVE_GENUS.include?(our_rank)
 
       # Querying every genus that refers to this ancestor could potentially get
       # expensive -- think of doing children for Eukarya!! -- but I'm not sure
@@ -727,7 +735,8 @@ class Name < AbstractModel
       names = []
       if rank == :Family
         for cstr, sname in rows
-          results += Name.where(search_name: sname)
+#           results += Name.where(search_name: sname) # Rails 3
+          results += Name.where(search_name: sname).to_a
         end
 
       # Grab all names below our rank.
@@ -750,12 +759,13 @@ class Name < AbstractModel
             end
           end
           # (include genus, too)
-          results += Name.where(search_name: sname)
+#           results += Name.where(search_name: sname) # Rails 3
+          results += Name.where(search_name: sname).to_a
         end
 
       # Grab all names at next lower rank.
       else
-        next_rank = ALL_RANKS[our_index-1]
+        next_rank = ALL_RANKS[our_index - 1]
         match_str = "#{next_rank}: _"
         for cstr, sname in rows
           if (i = cstr.index(match_str)) and
@@ -778,7 +788,8 @@ class Name < AbstractModel
 #                                 "correct_spelling_id IS NULL
 #                                  AND text_name LIKE '#{name.text_name} %'")
             results2 += Name.where("correct_spelling_id IS NULL AND
-                                    text_name LIKE ?", name.text_name)
+                                    text_name LIKE ?", name.text_name).
+                             to_a
           end
         end
         results += results2
@@ -789,7 +800,12 @@ class Name < AbstractModel
 #      results = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
 #                                         AND text_name LIKE '#{text_name} %'")
       results = Name.where("correct_spelling_id IS NULL AND
-                            text_name LIKE ?", text_name)
+                            text_name LIKE ?", text_name).
+                     to_a
+# remove results at our level or above
+      results.reject! do |name|
+       rank_index(name.rank) >= our_index
+      end
 
       # Remove subchildren if not getting all children.  This is trickier than
       # I originally expected because we want the children of G. species to
