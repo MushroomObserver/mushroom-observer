@@ -2086,17 +2086,17 @@ class Name < AbstractModel
     # matches = Name.find(:all, :conditions => ['search_name = ?', search_name]) # Rails 3
     matches = Name.where(search_name: search_name)
     if matches.empty?
-      result = Name.create_name(params)
+      result = Name.new_name(params)
     elsif matches.length == 1
       result = matches.first
     end
     result
   end
 
-  # Create a Name given all the various name formats, etc.
+  # make a Name given all the various name formats, etc.
   # Used only by +make_name+, and +create_test_name+ in unit test.
   # Returns a Name instance, *UNSAVED*!!
-  def self.create_name(params)
+  def self.new_name(params)
     result = Name.new(params)
     result.created_at = now = Time.now
     result.updated_at = now

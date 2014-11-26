@@ -6,11 +6,15 @@ class NameTest < UnitTestCase
   def create_test_name(string, force_rank=nil)
     User.current = rolf
     parse = Name.parse_name(string)
-    assert("Expected this to parse: #{string}") {parse}
+    # assert("Expected this to parse: #{string}") {parse} # Rails 3
+    # Unsure how above line ever worked; assert 1st arg should be the test
+    assert(parse, "Expected this to parse: #{string}")
     params = parse.params
     params[:rank] = force_rank if force_rank
-    name = Name.create_name(params)
-    assert("Error saving name \"#{string}\": [#{name.dump_errors}]") {name.save}
+    name = Name.new_name(params)
+    # assert("Error saving name \"#{string}\":
+    #         [#{name.dump_errors}]") {name.save} # Rails 3
+    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
     return name
   end
 
