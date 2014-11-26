@@ -1278,7 +1278,8 @@ class Name < AbstractModel
       "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(' OR ')
     conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
-    names = all(:conditions => conds, :limit => 10)
+    # names = all(:conditions => conds, :limit => 10) Rails 3
+    names = where(conds).limit(10)
 
     # Screen out ones way too different.
     names = names.reject do |x|
