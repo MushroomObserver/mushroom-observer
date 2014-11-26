@@ -1507,9 +1507,12 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_at_location
-    # expect = Observation.find_all_by_location_id(2, :include => :name,
+    # expect = Observation.find_all_by_location_id(2, :include => :name, # Rails 3
     #   :order => 'names.text_name, names.author, observations.id DESC')
-    expect = Observation.where(location_id: 2).include(:name).order("names.text_name, names.author, observations.id DESC")
+    expect = Observation.where(location_id: 2).
+                         include(:name).
+                         order("names.text_name, names.author,
+                           observations.id DESC")
     assert_query(expect, :Observation, :at_location, :location => 2)
   end
 

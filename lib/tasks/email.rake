@@ -4,9 +4,9 @@ namespace :email do
     print "#{MO.http_domain}, #{::Rails.env}\n"
     # for e in QueuedEmail.find(:all, :include => [ # Rails 3
     #  :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
-    for e in QueuedEmail.include(:queued_email_integers,
-                                 :queued_email_note,
-                                 :queued_email_strings, :user).all
+    for e in QueuedEmail.all.includes(:queued_email_integers,
+                                      :queued_email_note,
+                                      :queued_email_strings, :user)
       e.dump()
     end
   end

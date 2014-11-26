@@ -185,13 +185,19 @@ class Comment < AbstractModel
       # for other_comment in Comment.find(:all, :conditions => # Rails 3
       #    ['comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE',
       #    target.class.to_s, target.id], :include => 'user')
-      for other_comment in Comment.
-                             include("user").
+#      for other_comment in Comment.
+#                             includes("user").
+#                             where(conditions: ["comments.target_type = ? AND
+#                                    comments.target_id = ? AND
+#                                    users.email_comments_response = TRUE"],
+#                                    target.class.to_s, target.id)
+       for other_comment in Comment.
+                             includes("user").
                              where("comments.target_type = ? AND
                                     comments.target_id = ? AND
                                     users.email_comments_response = TRUE",
                                     target.class.to_s, target.id)
-        recipients.push(other_comment.user)
+       recipients.push(other_comment.user)
       end
 
       # Send to people who have registered interest.

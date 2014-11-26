@@ -73,11 +73,11 @@ private
 #        ' and queued_email_integers.key = "observation"' +
 #        ' and queued_email_integers.value = ?', recipient.id, observation.id])
     QueuedEmail.
-      include(:queued_email_integers).
       where("queued_emails.flavor = 'QueuedEmail::ObservationChange' AND
              queued_email_integers.key = 'observation' AND
              queued_email_integers.value = ? AND queued_emails.to_user_id = ?",
              observation.id, recipient.id).
-     first
+      first.
+      include(:queued_email_integers)
   end
 end

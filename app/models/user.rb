@@ -450,10 +450,10 @@ class User < AbstractModel
 #    find(:first, :conditions => # Rails 3
 #      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
 #         login, login, login, sha1(pass) ])
-    find.where("(login = ? OR name = ? OR email = ?) AND password = ? AND
-                   password != ''",
-                login, login, login, sha1(pass) ).
-        first
+    where("(login = ? OR name = ? OR email = ?) AND password = ? AND
+           password != ''",
+           login, login, login, sha1(pass) ).
+    first
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute

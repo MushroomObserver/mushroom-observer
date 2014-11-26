@@ -13,13 +13,14 @@ class QueuedEmail::CommentAdd < QueuedEmail
 #          AND queued_email_integers.key = "comment"
 #          AND queued_email_integers.value = ?', receiver.id, comment.id])
     email = QueuedEmail.
-              include(queued_email_integers).
+              includes(:queued_email_integers).
               where("queued_emails.flavor = 'QueuedEmail::CommentAdd' AND
                      queued_email_integers.key = 'comment' AND
                      queued_emails.to_user_id = ? AND
                      queued_email_integers.value = ?",
                      comment.id, receiver.id).
               first
+
     if email
       # Only happens when queuing is enabled, just touch 'queued' time.
       email.queued = Time.now
