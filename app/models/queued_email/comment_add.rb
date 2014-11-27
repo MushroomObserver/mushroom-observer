@@ -14,11 +14,10 @@ class QueuedEmail::CommentAdd < QueuedEmail
 #          AND queued_email_integers.value = ?', receiver.id, comment.id])
     email = QueuedEmail.
               includes(:queued_email_integers).
-              where("queued_emails.flavor = 'QueuedEmail::CommentAdd' AND
-                     queued_email_integers.key = 'comment' AND
-                     queued_emails.to_user_id = ? AND
-                     queued_email_integers.value = ?",
-                     comment.id, receiver.id).
+              where("queued_emails.flavor" => "QueuedEmail::CommentAdd",
+                    "queued_email_integers.key" => "comment",
+                    "queued_emails.to_user_id" => comment.id,
+                    "queued_email_integers.value" => receiver.id).
               first
 
     if email
