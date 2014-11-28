@@ -17,7 +17,8 @@ class ScriptTest < UnitTestCase
     script = script_file("autoreply")
     env = { "SENDER" => sender }
     cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" > #{tempfile}"
-    assert { system(env, cmd) }
+#    assert { system(env, cmd) } # Rails 3
+    assert system(env, cmd)
     expect = <<-END.unindent
       To: #{sender}
       Subject: #{subject}
@@ -48,7 +49,8 @@ class ScriptTest < UnitTestCase
     script = script_file("lookup_user")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
-    assert { system(cmd) }
+#    assert { system(cmd) } # Rails 3
+    assert system(cmd)
     expect = "id login name email verified last_use\n" +
              "4 dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
     actual = File.read(tempfile).gsub(/ +/, ' ')
@@ -60,15 +62,19 @@ class ScriptTest < UnitTestCase
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
     cmd = "#{script} #{dest_file} > #{stdout_file}"
-    assert { !File.exist?(dest_file) || File.size(dest_file) == 0 }
-    assert { system(cmd) }
-    assert { File.size(dest_file) > 0 }
+#    assert { !File.exist?(dest_file) || File.size(dest_file) == 0 } # Rails 3
+#    assert { system(cmd) }
+#    assert { File.size(dest_file) > 0 }
+    assert !File.exist?(dest_file) || File.size(dest_file) == 0
+    assert system(cmd)
+    assert File.size(dest_file) > 0
     assert_equal("", File.read(stdout_file))
 
     # In test mode, the script just grabs first observation from api.
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert { File.read(dest_file).match(/<results number="1">/) }
+#    assert { File.read(dest_file).match(/<results number="1">/) } # Rails 3
+    assert File.read(dest_file).match(/<results number="1">/)
     # system("cp #{dest_file} x.xml")
   end
 
@@ -96,6 +102,7 @@ class ScriptTest < UnitTestCase
   end
 
   test "perf_monitor" do
+    skip ("skipped during RoR 3 => 4 changeover due to lengthy run")
     begin
       script = script_file("perf_monitor")
       tempfile = Tempfile.new("test").path
@@ -107,7 +114,8 @@ class ScriptTest < UnitTestCase
       errors = File.read(tempfile)
       assert("Something went wrong with #{script}:\n#{errors}") { status }
       logfile = "#{tempdir}/perf.log"
-      assert { File.exist?(logfile) && File.size(logfile) > 0 }
+#      assert { File.exist?(logfile) && File.size(logfile) > 0 } # Rails 3
+      assert File.exist?(logfile) && File.size(logfile) > 0
       lines = File.readlines(logfile)
       assert_equal(5, lines.length)
       assert("There were errors in perf.log:\n#{lines.join("\n")}") do
