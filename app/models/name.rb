@@ -733,7 +733,7 @@ class Name < AbstractModel
 
       # Genus should not be included in classifications.
       names = []
-      if rank == :Family
+      if our_rank == :Family
         for cstr, sname in rows
 #           results += Name.where(search_name: sname) # Rails 3
           results += Name.where(search_name: sname).to_a
@@ -788,8 +788,7 @@ class Name < AbstractModel
 #                                 "correct_spelling_id IS NULL
 #                                  AND text_name LIKE '#{name.text_name} %'")
             results2 += Name.where("correct_spelling_id IS NULL AND
-                                    text_name LIKE ?", name.text_name).
-                             to_a
+                                    text_name LIKE ? ' %'", name.text_name).to_a
           end
         end
         results += results2
@@ -800,12 +799,7 @@ class Name < AbstractModel
 #      results = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
 #                                         AND text_name LIKE '#{text_name} %'")
       results = Name.where("correct_spelling_id IS NULL AND
-                            text_name LIKE ?", text_name).
-                     to_a
-# remove results at our level or above
-      results.reject! do |name|
-       rank_index(name.rank) >= our_index
-      end
+                            text_name LIKE ? ' %'", text_name).to_a
 
       # Remove subchildren if not getting all children.  This is trickier than
       # I originally expected because we want the children of G. species to
