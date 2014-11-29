@@ -1114,9 +1114,11 @@ class QueryTest < UnitTestCase
   def test_image_by_user
     expect = Image.where(user_id: rolf.id).reverse
     assert_query(expect, :Image, :by_user, :user => rolf)
-    expect = where(user_id: mary.id).reverse
+#    expect = where(user_id: mary.id).reverse # Rails 3
+    expect = Image.where(user_id: mary.id).reverse
     assert_query(expect, :Image, :by_user, :user => mary)
-    expect = where(user_id: dick.id).reverse
+#    expect = where(user_id: dick.id).reverse # Rails 3
+    expect = Image.where(user_id: dick.id).reverse
     assert_query(expect, :Image, :by_user, :user => dick)
   end
 
@@ -1207,7 +1209,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_all
-    expect = Location.all
+#    expect = Location.all # Rails 3
+    expect = Location.all.to_a
     assert_query(expect, :Location, :all, :by => :id)
   end
 
@@ -1299,7 +1302,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_all
-    all = LocationDescription.all
+#    all = LocationDescription.all # Rails 3
+    all = LocationDescription.all.to_a
     assert_query(all, :LocationDescription, :all, :by => :id)
   end
 
@@ -1337,18 +1341,23 @@ class QueryTest < UnitTestCase
   def test_name_advanced
     assert_query([38], :Name, :advanced_search, :name => 'macrocybe*titans')
     assert_query([2], :Name, :advanced_search, :location => 'glendale') # where
-    expect = Name.all(:conditions => 'observations.location_id = 2',
-                      :include => :observations, :order => 'text_name, author')
+#    expect = Name.all(:conditions => 'observations.location_id = 2', # Rails 3
+#                      :include => :observations, :order => 'text_name, author')
+    expect = Name.where("observations.location_id" => 2).
+                  includes(:observations).order("text_name, author").to_a
     assert_query(expect, :Name, :advanced_search, :location => 'burbank') # location
-    expect = Name.all(:conditions => 'observations.user_id = 1',
-                      :include => :observations, :order => 'text_name, author')
+#    expect = Name.all(:conditions => 'observations.user_id = 1', # Rails 3
+#                      :include => :observations, :order => 'text_name, author')
+    expect = Name.where("observations.user_id" => 1).
+                  includes(:observations).order("text_name, author").to_a
     assert_query(expect, :Name, :advanced_search, :user => 'rolf')
     assert_query([2], :Name, :advanced_search, :content => 'second fruiting') # notes
     assert_query([1], :Name, :advanced_search, :content => '"a little of everything"') # comment
   end
 
   def test_name_all
-    expect = Name.all(:order => 'sort_name')
+#    expect = Name.all(:order => 'sort_name') # Rails 3
+    expect = Name.all.order("sort_name").to_a
     do_test_name_all(expect)
   rescue
     # Having problems with "Kuhner" and "Kühner" sorting correctly in all versions.
@@ -1391,8 +1400,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_of_children
-    expect = Name.all(:conditions => 'text_name LIKE "agaricus %"',
-                      :order => 'text_name')
+    expect = Name.where("text_name LIKE 'agaricus %'").order("text_name").to_a
     expect.reject!(&:is_misspelling?)
     assert_query(expect, :Name, :of_children, :name => names(:agaricus))
   end
@@ -1468,7 +1476,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_description_all
-    all = NameDescription.all
+    all = NameDescription.all.to_a
     assert_query(all, :NameDescription, :all, :by => :id)
   end
 
@@ -1493,26 +1501,25 @@ class QueryTest < UnitTestCase
   def test_observation_advanced
     assert_query([8], :Observation, :advanced_search, :name => 'diminutivus')
     assert_query([3], :Observation, :advanced_search, :location => 'glendale') # where
-    expect = Observation.where(location_id: 2)
+    expect = Observation.where(location_id: 2).to_a
     assert_query(expect, :Observation, :advanced_search, :location => 'burbank', :by => :id) # location
-    expect = Observation.where(user_id: 1)
+    expect = Observation.where(user_id: 1).to_a
     assert_query(expect, :Observation, :advanced_search, :user => 'rolf', :by => :id)
     assert_query([3], :Observation, :advanced_search, :content => 'second fruiting') # notes
     assert_query([1], :Observation, :advanced_search, :content => 'agaricus') # comment
   end
 
   def test_observation_all
-    expect = Observation.all(:order => '`when` DESC, id DESC')
+    expect = Observation.all.order('`when` DESC, id DESC').to_a
     assert_query(expect, :Observation, :all)
   end
 
   def test_observation_at_location
     # expect = Observation.find_all_by_location_id(2, :include => :name, # Rails 3
     #   :order => 'names.text_name, names.author, observations.id DESC')
-    expect = Observation.where(location_id: 2).
-                         include(:name).
+    expect = Observation.where(location_id: 2).includes(:name).
                          order("names.text_name, names.author,
-                           observations.id DESC")
+                           observations.id DESC").to_a
     assert_query(expect, :Observation, :at_location, :location => 2)
   end
 
@@ -1525,13 +1532,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_by_user
-    expect = Observation.where(user_id: rolf.id)
+    expect = Observation.where(user_id: rolf.id).to_a
     assert_query(expect, :Observation, :by_user, :user => rolf, :by => :id)
-    expect = Observation.where(user_id: mary.id)
+    expect = Observation.where(user_id: mary.id).to_a
     assert_query(expect, :Observation, :by_user, :user => mary, :by => :id)
-    expect = Observation.where(user_id: dick.id)
+    expect = Observation.where(user_id: dick.id).to_a
     assert_query(expect, :Observation, :by_user, :user => dick, :by => :id)
-    expect = Observation.where(user_id: junk.id)
+    expect = Observation.where(user_id: junk.id).to_a
     assert_query([], :Observation, :by_user, :user => junk, :by => :id)
   end
 
@@ -1550,7 +1557,7 @@ class QueryTest < UnitTestCase
 
   def test_observation_of_name
     User.current = rolf
-    names = Name.all(:conditions => 'text_name like "Agaricus camp%"')
+    names = Name.where("text_name like 'Agaricus camp%'").to_a
     name = names.pop
     names.each {|n| name.merge_synonyms(n)}
     Observation.find(6).update_attribute(:user, mary)
@@ -1575,16 +1582,27 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_pattern
-    assert_query([6,7,5,8], :Observation, :pattern_search, :pattern => '"somewhere else"', :by => :name) # notes
-    # assert_query([1], :Observation, :pattern_search, :pattern => 'wow!') # comment
-    assert_query([8], :Observation, :pattern_search, :pattern => 'pipi valley') # where
-    #expect = Observation.find_all_by_location_id(2, :include => :name,
-    #  :order => 'names.text_name, names.author, observations.id DESC')
-    expect = Observation.where(location_id: 2).includes(:name).order("names.text_name, names.author, observations.id DESC")
-    assert_query(expect, :Observation, :pattern_search, :pattern => 'burbank', :by => :name) # location
-    expect = Observation.all(:conditions => "text_name LIKE 'agaricus%'",
-      :include => :name, :order => 'names.text_name, names.author, observations.id DESC')
-    assert_query(expect.map(&:id), :Observation, :pattern_search, :pattern => 'agaricus', :by => :name) # name
+    # notes
+    assert_query([6,7,5,8], :Observation, :pattern_search,
+                            pattern: '"somewhere else"', by: :name)
+    # assert_query([1], :Observation, :pattern_search,
+    #                   :pattern => 'wow!') # comment
+    # where
+    assert_query([8], :Observation, :pattern_search, pattern: "pipi valley")
+
+    # location
+    expect = Observation.where(location_id: 2).includes(:name).
+                         order("names.text_name, names.author,
+                                observations.id DESC").to_a
+    assert_query(expect, :Observation, :pattern_search, pattern: "burbank",
+                         by: :name)
+
+    # name
+    expect = Observation.where("text_name LIKE 'agaricus%'").includes(:name).
+                         order("names.text_name, names.author,
+                                observations.id DESC")
+    assert_query(expect.map(&:id), :Observation, :pattern_search,
+                                   pattern: "agaricus", by: :name)
   end
 
   def test_project_all
@@ -1607,7 +1625,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_specieslist_all
-    expect = SpeciesList.all(:order => 'title')
+#    expect = SpeciesList.all(:order => 'title') # Rails 3
+    expect = SpeciesList.all.order("title").to_a
     assert_query(expect, :SpeciesList, :all)
   end
 
@@ -1626,9 +1645,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_all
-    expect = User.all(:order => 'name')
+#    expect = User.all(:order => 'name') # Rails 3
+    expect = User.all.order("name").to_a
     assert_query(expect, :User, :all)
-    expect = User.all(:order => 'login')
+#    expect = User.all(:order => 'login') # Rails 3
+    expect = User.all.order("login").to_a
     assert_query(expect, :User, :all, :by => :login)
   end
 

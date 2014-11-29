@@ -1771,9 +1771,16 @@ class AbstractQuery < ActiveRecord::Base
       # This could result in some results not being returned. (See
       # the reject(&:nil?) clause below.)
       args2[:conditions] = "#{model.table_name}.id IN (#{set})"
-      args2[:include] = args[:include] if args[:include]
-      model.all(args2).each do |obj|
-        @results[obj.id] = obj
+#      args2[:include] = args[:include] if args[:include] #
+#      model.all(args2).each do |obj| # Rails 3
+      if args[:include]
+        model.where(args2[:conditions]).includes(args[:include]).each do |obj|
+          @results[obj.id] = obj
+        end
+      else
+        model.where(args2[:conditions]).each do |obj|
+          @results[obj.id] = obj
+        end
       end
     end
     ids.map {|id| @results[id]}.reject(&:nil?)
