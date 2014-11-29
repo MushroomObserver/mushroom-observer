@@ -280,6 +280,12 @@ class Name < AbstractModel
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
+  # always read rank as Symbol (not String)
+  # to solve problem created by Rails 3.2 => 4.0
+  def rank
+    read_attribute(:rank).to_sym
+  end
+
   # (Destruction is already logged as a merge.)
   self.autolog_events = []
 
@@ -506,7 +512,7 @@ class Name < AbstractModel
   end
 
   def rank_index(rank)
-    ALL_RANKS.index(rank.to_sym)
+    ALL_RANKS.index(rank)
   end
 
   def self.compare_ranks(a, b)
@@ -617,8 +623,7 @@ class Name < AbstractModel
   def parents(all=false)
     results   = []
     lines     = nil
-    # next_rank = rank # Rails 3
-    next_rank = rank.to_sym
+    next_rank = rank
 
     # Try ranks above ours one at a time until we find a parent.
     while all || results.empty?
@@ -715,7 +720,7 @@ class Name < AbstractModel
   def children(all=false)
     results = []
 #    our_index = ALL_RANKS.index(rank) # Rails 3
-    our_rank = rank.to_sym
+    our_rank = rank
     our_index = rank_index(our_rank)
 
     # If we're above genus we need to rely on classification strings.
@@ -838,7 +843,7 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      rank_index = Name.all_ranks.index(rank.to_sym)
+      rank_index = Name.all_ranks.index(rank)
       rank_str = "rank_#{rank}".downcase.to_sym.l
       raise :runtime_user_bad_rank.t(:rank => rank) if rank_index.nil?
 
