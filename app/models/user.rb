@@ -293,6 +293,16 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
+  # ensure that default values are symbols (rather than strings)
+  # because when the migration specifies a symbol,
+  # the Rails 4 schema specifies a string
+  # even though the migration
+  after_initialize :default
+  def default
+    self.location_format = self.location_format.to_sym if
+      !self.location_format.is_a?(Symbol)
+  end
+
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
