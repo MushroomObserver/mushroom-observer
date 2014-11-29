@@ -118,12 +118,12 @@ class NameTest < UnitTestCase
   #  Test name parsing.
   # ----------------------------
 
-  # Create new subspecies Coprinus comatus v. bogus and make sure it doesn't
-  # create a duplicate species if one already exists.
-  # Saw this bug 20080114 -JPH
   def test_find_or_create_name_and_parents
 
     # Coprinus comatus already has an author.
+    # Create new subspecies Coprinus comatus v. bogus and make sure it doesn't
+    # create a duplicate species if one already exists.
+    # Saw this bug 20080114 -JPH
     result = Name.find_or_create_name_and_parents("Coprinus comatus v. bogus (With) Author")
     assert_equal 3, result.length
     assert_equal nil, result[0].id
@@ -149,7 +149,7 @@ class NameTest < UnitTestCase
     assert_equal "", result[1].author
     assert_equal "(With) Author", result[2].author
 
-    # Agaricus does not have an author.
+    # Agaricus fixture does not have an author.
     result = Name.find_or_create_name_and_parents("Agaricus L.")
     assert_equal 1, result.length
     assert_equal 18, result[0].id

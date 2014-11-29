@@ -521,9 +521,11 @@ class Name < AbstractModel
 
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
-    # result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != []) # Rails 3
+    # result = (Triple.find(:all,
+    #                       :conditions => ["subject = ':name/#{id}' and
+    #                         predicate = ':lichenAuthority'"]) != []) # Rails 3
     result = (Triple.where(subject: ":name/#{id}",
-                           predicate: :lichenAuthority) != [])
+                           predicate: ":lichenAuthority") != [])
     if !result and below_genus?
       genus = self.class.find_by_text_name(text_name.split.first)
       result = genus.is_lichen? if genus
@@ -2072,14 +2074,18 @@ class Name < AbstractModel
   def self.find_matching_names(parsed_name)
     result = []
     if parsed_name.author.blank?
-#      result = Name.all(:conditions => ['text_name = ?', parsed_name.text_name]) # Rails 3
+#     result = Name.all(:conditions => ['text_name = ?',
+#                                        parsed_name.text_name]) # Rails 3
       result = Name.where(text_name: parsed_name.text_name)
     else
-#      result = Name.all(:conditions => ['search_name = ?', parsed_name.search_name]) # Rails 3
+#     result = Name.all(:conditions => ['search_name = ?',
+#                                        parsed_name.search_name]) # Rails 3
       result = Name.where(search_name: parsed_name.search_name)
       if result.empty?
-#        result = Name.all(:conditions => ['text_name = ? AND author = ""', parsed_name.text_name]) # Rails 3
-        result = Name.where(text_name: "", author: parsed_name.text_name)
+#       result = Name.all(:conditions =>
+#                           ['text_name = ? AND author = ""',
+#                             parsed_name.text_name]) # Rails 3
+        result = Name.where(text_name: parsed_name.text_name, author: "")
       end
     end
     return result
