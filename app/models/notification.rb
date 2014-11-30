@@ -48,7 +48,8 @@ class Notification < AbstractModel
   #
   def calc_note(args)
     if template = self.note_template
-      case self.flavor
+#     case self.flavor # Rails 3
+      case self.flavor.to_sym
       when :name
         user   = args[:user]
         naming = args[:naming]
