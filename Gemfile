@@ -7,6 +7,8 @@ gem "jquery-rails"
 
 group :test do
   gem "fakeweb", "~> 1.3"
+  gem "rails-perftest"
+  gem "ruby-prof"
   gem "rubocop"
 end
 
