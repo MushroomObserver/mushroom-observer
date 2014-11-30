@@ -91,7 +91,7 @@ class GlossaryControllerTest < FunctionalTestCase
     login
     glossary_term = glossary_terms(:plane_glossary_term)
     old_count = glossary_term.versions.length
-    glossary_term.update_attributes(:description => 'Are we flying yet?')
+    glossary_term.update(:description => 'Are we flying yet?')
     glossary_term.reload
     new_count = glossary_term.versions.length
     assert_equal(1, new_count - old_count)

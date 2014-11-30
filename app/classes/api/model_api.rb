@@ -71,7 +71,7 @@ class API
       raise MissingSetParameters.new if params.empty?
       lambda do |obj|
         must_have_edit_permission!(obj)
-        obj.update_attributes!(params)
+        obj.update!(params)
       end
     end
 

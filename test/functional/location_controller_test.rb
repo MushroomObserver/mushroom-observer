@@ -148,7 +148,7 @@ class LocationControllerTest < FunctionalTestCase
     login('dick')
     desc = location_descriptions(:albion_desc)
     old_versions = desc.versions.length
-    desc.update_attributes(:gen_desc => 'something new')
+    desc.update(:gen_desc => 'something new')
     desc.reload
     new_versions = desc.versions.length
     assert(new_versions > old_versions)
@@ -364,7 +364,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def test_update_location_with_scientific_names
-    rolf.update_attributes(:location_format => :scientific)
+    rolf.update(:location_format => :scientific)
     rolf.reload
     login('rolf')
     loc = locations(:burbank)

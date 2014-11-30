@@ -499,7 +499,7 @@ class AccountController < ApplicationController
 
   def remove_image
     if @user && @user.image
-      @user.update_attributes(:image => nil)
+      @user.update(:image => nil)
       Transaction.put_user(:id => @user, :set_image => 0)
       flash_notice(:runtime_profile_removed_image.t)
     end
@@ -609,7 +609,7 @@ class AccountController < ApplicationController
       if check_permission!(@key)
         if request.method == "POST"
           if params[:commit] == :UPDATE.l
-            @key.update_attributes!(params[:key])
+            @key.update!(params[:key])
             flash_notice(:account_api_keys_updated.t)
           end
           redirect_to(:action => :api_keys)

@@ -49,7 +49,7 @@ MushroomObserver::Application.configure do
   config.cache_classes = false
 
   # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
+  # config.whiny_nils = true # Rails 3 (Rails 4 removes this setting.)
 
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true

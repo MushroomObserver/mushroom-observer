@@ -629,7 +629,7 @@ class ImageController < ApplicationController
         if @user.image == image
           flash_notice(:runtime_no_changes.t)
         else
-          @user.update_attributes(:image => image)
+          @user.update(:image => image)
           Transaction.put_user(:id => @user, :set_image => image)
           flash_notice(:runtime_image_changed_your_image.t(:id => image.id))
         end

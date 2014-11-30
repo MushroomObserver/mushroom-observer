@@ -25,14 +25,14 @@ class ApiKey < AbstractModel
   end
 
   def touch!
-    update_attributes!(
+    update!(
       :last_used => Time.now,
       :num_uses => num_uses + 1
     )
   end 
 
   def verify!
-    update_attributes!(
+    update!(
       :verified => Time.now
     )
   end

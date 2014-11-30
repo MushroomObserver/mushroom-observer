@@ -135,13 +135,13 @@ class TranslationController < ApplicationController
   end
 
   def change_translation(str, val)
-    str.update_attributes!(:text => val)
+    str.update!(:text => val)
     str.update_localization
     flash_notice(:edit_translations_changed.t(:tag => str.tag, :str => val)) if !@ajax
   end
 
   def touch_translation(str)
-    str.update_attributes!(:updated_at => Time.now)
+    str.update!(:updated_at => Time.now)
   end
 
   def preview_string(str, limit=250)

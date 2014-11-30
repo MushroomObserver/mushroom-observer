@@ -509,7 +509,7 @@ logger.warn('SESSION: ' + session.inspect)
 
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
-      @user.update_attributes(:locale => I18n.locale.to_s)
+      @user.update(:locale => I18n.locale.to_s)
       Transaction.put_user(:id => @user, :set_locale => I18n.locale.to_s)
     end
 

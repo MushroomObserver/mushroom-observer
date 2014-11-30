@@ -72,7 +72,7 @@ class API
       if observations.any?
         for obs in observations
           unless obs.thumb_image_id
-            obs.update_attributes(:thumb_image_id => img.id)
+            obs.update(:thumb_image_id => img.id)
           end
           obs.log_create_image(img)
         end

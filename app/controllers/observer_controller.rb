@@ -358,7 +358,7 @@ class ObserverController < ApplicationController
       time = Time.now
       Language.all.each do |lang|
         if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
-          str.update_attributes!(
+          str.update!(
             text: @val,
             updated_at: (str.language.official ? time : time - 1.minute)
           )
@@ -2246,7 +2246,7 @@ class ObserverController < ApplicationController
   # Update observation, check if valid.
   def update_observation_object(observation, args)
     success = true
-    unless observation.update_attributes(args)
+    unless observation.update(args)
       flash_object_errors(observation)
       success = false
     end

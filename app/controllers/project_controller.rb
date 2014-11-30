@@ -229,7 +229,7 @@ class ProjectController < ApplicationController
           flash_error(:add_project_need_title.t)
         elsif Project.find_by_title(@title) != @project
           flash_error(:add_project_already_exists.t(:title => @title))
-        elsif !@project.update_attributes(params[:project])
+        elsif !@project.update(params[:project])
           flash_object_errors(@project)
         else
           if !xargs.empty?

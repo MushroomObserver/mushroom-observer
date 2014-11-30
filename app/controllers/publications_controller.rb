@@ -79,7 +79,7 @@ class PublicationsController < ApplicationController
       if !can_edit?(@publication)
         format.html { redirect_to(publications_url) }
         format.xml  { render :xml => "can't edit", :status => :unprocessable_entity }
-      elsif @publication.update_attributes(params[:publication])
+      elsif @publication.update(params[:publication])
         flash_notice(:runtime_updated_at.t(:type => :publication))
         format.html { redirect_to(@publication) }
         format.xml  { head :ok }

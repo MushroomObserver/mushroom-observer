@@ -23,7 +23,7 @@ class SpecimenTest < UnitTestCase
     assert_objs_equal(herbarium, user.personal_herbarium)
     I18n.locale = 'en'
     assert_objs_equal(herbarium, user.personal_herbarium)
-    herbarium.update_attributes!(:name => "My very own herbarium")
+    herbarium.update!(:name => "My very own herbarium")
     assert_objs_equal(herbarium, user.personal_herbarium)
     assert_equal("My very own herbarium", user.personal_herbarium_name)
     I18n.locale = 'fr'
