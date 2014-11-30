@@ -548,7 +548,8 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    # Herbarium.where(personal_user_id: self.id).first
+  # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
+    Herbarium.where(personal_user_id: self.id).first
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
