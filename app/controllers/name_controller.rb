@@ -1457,7 +1457,7 @@ class NameController < ApplicationController
     ))
 
     # @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
-    @images = Image.includes(:image_votes).where(images.id: ids)
+    @images = Image.includes(:image_votes).where(images.id => ids)
 
     ids = Name.connection.select_values(%(
       SELECT images.id
@@ -1471,7 +1471,7 @@ class NameController < ApplicationController
       ORDER BY observations.vote_cache
     ))
     # @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
-    @voteless_images = Image.includes(:image_votes).where(images.id: ids)
+    @voteless_images = Image.includes(:image_votes).where(images.id => ids)
 
     ids = Name.connection.select_values(%(
       SELECT DISTINCT observations.id
@@ -1484,7 +1484,7 @@ class NameController < ApplicationController
       ORDER BY observations.id
     ))
     # @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids]) # Rails 3
-    @voteless_obs = Observation.where(images.id: ids)
+    @voteless_obs = Observation.where(images.id => ids)
   end
 
   ################################################################################
