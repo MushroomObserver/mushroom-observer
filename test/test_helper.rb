@@ -13,10 +13,10 @@
 require 'coveralls'
 Coveralls.wear!('rails')
 
-ENV["RAILS_ENV"] = "test"
+ENV["RAILS_ENV"] ||= "test"
 
-require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
-require 'rails/test_help'
+require File.expand_path("../../config/environment", __FILE__)
+require "rails/test_help"
 
 for file in %w(
   general_extensions
@@ -38,13 +38,6 @@ for file in %w(
 end
 
 I18n.enforce_available_locales = true
-
-# Re-raise errors caught by the controller.
-class ApplicationController
-  def rescue_action(e)
-    raise e
-  end
-end
 
 class ActiveSupport::TestCase
   # Transactional fixtures accelerate your tests by wrapping each test method
@@ -94,7 +87,7 @@ class ActiveSupport::TestCase
 end
 
 # require 'test/unit/ui/console/testrunner'
-# 
+#
 # # Apparently bugs in the new version of Test::Unit?  Probably because we're using
 # # old version of rails...
 # module Test
@@ -107,7 +100,7 @@ end
 #           def output_fault_message(fault)
 #             output_single(fault.message, fault_color(fault))
 #           end
-# 
+#
 #           # It no longer prints dots for successful tests.
 #           alias old_attach_to_mediator attach_to_mediator
 #           def attach_to_mediator

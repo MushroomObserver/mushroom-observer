@@ -401,11 +401,10 @@ logger.warn('SESSION: ' + session.inspect)
   # This only applies to emails that are associated with Notification's for
   # which there is a note_template.  (Only one type now: Notification's with
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  #
   def has_unshown_notifications?(user, flavor=:naming)
     result = false
   # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
-    for q in QueuedEmail.where(flavor: favor, to_user_id: flavor, user.id)
+    for q in QueuedEmail.where(flavor: favor, to_user_id: user.id)
       ints = q.get_integers(["shown", "notification"], true)
       unless ints["shown"]
         notification = Notification.safe_find(ints["notification"].to_i)
