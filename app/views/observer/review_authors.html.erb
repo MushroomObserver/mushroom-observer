@@ -23,7 +23,7 @@
     <%= indent + user_link(u) %>
     | <%= link_to(:review_authors_remove_author.t, {:action => :review_authors,
                   :id => @object.id, :type => type, :remove => u.id},
-                  {:confirm => :are_you_sure.l}) %>
+                  { data: { confirm: :are_you_sure.l } }) %>
     <br/>
   <% end %>
 </p>

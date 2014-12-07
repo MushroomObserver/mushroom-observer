@@ -65,10 +65,11 @@ class ActiveSupport::TestCase
   # then set this back to true.
   self.use_instantiated_fixtures = false
 
-  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
+  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
+  # alphabetical order.
   #
-  # Note: You'll currently still have to declare fixtures explicitly in integration tests
-  # -- they do not yet inherit this setting
+  # Note: You'll currently still have to declare fixtures explicitly
+  # in integration tests -- they do not yet inherit this setting
   fixtures :all
 
   # Standard setup to run before every test.  Sets the locale, timezone,
@@ -85,30 +86,3 @@ class ActiveSupport::TestCase
     FileUtils.rm_rf(MO.local_image_files)
   end
 end
-
-# require 'test/unit/ui/console/testrunner'
-#
-# # Apparently bugs in the new version of Test::Unit?  Probably because we're using
-# # old version of rails...
-# module Test
-#   module Unit
-#     module UI
-#       module Console
-#         class TestRunner
-#           # When running in "show_detail_immediately" and "need_detail_faults"
-#           # mode it totally screws up the assertion message.
-#           def output_fault_message(fault)
-#             output_single(fault.message, fault_color(fault))
-#           end
-#
-#           # It no longer prints dots for successful tests.
-#           alias old_attach_to_mediator attach_to_mediator
-#           def attach_to_mediator
-#             old_attach_to_mediator
-#             @mediator.add_listener(TestResult::FINISHED, &method(:test_finished))
-#           end
-#         end
-#       end
-#     end
-#   end
-# end

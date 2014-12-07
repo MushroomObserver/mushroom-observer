@@ -114,9 +114,10 @@ module ApplicationHelper
     link_to(name, add_query_param(options), html_options)
   end
 
-  # Rails 3.x has broken the link_to :confirm mechanism.  The new method requires
-  # rather sophisticated javascript capabilities (in rails.js).  I'd far prefer
-  # to keep the old blindingly simple onclick="return confirm()" mechanism.
+  # Rails 3.x has broken the link_to :confirm mechanism.
+  # The new method requires rather sophisticated javascript capabilities
+  # (in rails.js).  I'd far prefer to keep the old blindingly simple
+  # onclick="return confirm()" mechanism.
   def link_to(*args)
     super(*args).sub(/data-confirm="(.*?)"/,
       'onclick="' + CGI.escapeHTML('return confirm("\1")') + '"').html_safe
@@ -346,7 +347,7 @@ module ApplicationHelper
       if admin
         add_tab_with_query(:show_description_destroy.t,
           { :action => "destroy_#{type}_description", :id => desc.id },
-          { :confirm => :are_you_sure.l })
+          { data: { confirm: :are_you_sure.l } })
       end
       if true
         add_tab_with_query(:show_description_clone.t,
@@ -460,7 +461,7 @@ module ApplicationHelper
         links << link_with_query(:DESTROY.t,
           { :id => desc.id, :action => "destroy_#{type}_description",
             :controller => obj.show_controller },
-          { :confirm => :are_you_sure.t }) if admin
+          { data: {confirm: :are_you_sure.t } }) if admin
         item += indent + "[" + links.safe_join(' | ') + "]" if links.any?
       end
       item
@@ -1831,7 +1832,7 @@ module ApplicationHelper
   #     add_tab('External Link', 'http://images.google.com/')
   #     add_tab('Normal Link', :action => :blah, :id => 123, ...)
   #     add_tab('Dangerous Link', { :action => :destroy, :id => 123 },
-  #                               { :confirm => :are_you_sure.l })
+  #                               { data: { confirm: :are_you_sure.l } })
   #   end
   #
   # Tab sets now support headers.  Syntaxes allowed are:

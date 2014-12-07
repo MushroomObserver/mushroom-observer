@@ -20,7 +20,7 @@
                             :action => 'remove_observation_from_species_list',
                             :observation => @observation.id,
                             :species_list => list.id },
-                            :confirm => :are_you_sure.l) %>]
+                            data: { confirm: :are_you_sure.l }) %>]
           <% end %>
         </td></tr>
       <% end %>

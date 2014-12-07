@@ -12,8 +12,10 @@
             odd_or_even = 1 - odd_or_even %>
             <tr valign="top" class="ListLine<%= odd_or_even %>">
               <td width="100%" class="Data">
-                <%= link_to(l.display_name.t, {:action => 'add_to_location', :where => @where, :location => l},
-                            :confirm => :list_merge_are_you_sure.l) %>
+                <%= link_to(l.display_name.t,
+                      {:action => 'add_to_location', :where => @where,
+                       :location => l},
+                      data: { confirm: :list_merge_are_you_sure.l } ) %>
               </td>
             </tr>
           <% end %>
@@ -29,8 +31,10 @@
           odd_or_even = 1 - odd_or_even %>
           <tr valign="top" class="ListLine<%= odd_or_even %>">
             <td width="100%" class="Data">
-              <%= link_to(l.display_name.t, {:action => 'add_to_location', :where => @where, :location => l},
-                          :confirm => :list_merge_are_you_sure.l) %>
+              <%= link_to(l.display_name.t,
+                      {:action => 'add_to_location', :where => @where,
+                        :location => l},
+                      data: { confirm: :list_merge_are_you_sure.l } ) %>
             </td>
           </tr>
         <% end %>

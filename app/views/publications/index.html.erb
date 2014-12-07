@@ -25,14 +25,15 @@
         odd_or_even = 1 - odd_or_even %>
     <tr class="ListLine<%= odd_or_even %>">
       <td width="50%"><%= link_to publication.full.t, publication %></td>
-      <td width="30%"><%= link_to content_tag(:span, publication.link, :style => "word-wrap:break-word"),
-                                  publication.link %></td>
+      <td width="30%"><%= link_to content_tag(:span,
+                            publication.link, :style => "word-wrap:break-word"),
+                            publication.link %></td>
       <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %>
       <td align="center"><%= publication.mo_mentioned  ? content_tag(:b, "M") : "" %>
       <% if is_in_admin_mode? || publication.can_edit?(@user) %>
         <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
         <td><%= link_to :DESTROY.t, { :action => :destroy, :id => publication.id },
-                        { :confirm => :are_you_sure.t } %></td>
+                        { data: { confirm: :are_you_sure.t } } %></td>
       <% end %>
     </tr>
   <% end %>

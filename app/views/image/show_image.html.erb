@@ -32,15 +32,15 @@
       add_tab_with_query(:image_show_rotate_left.t,
         :action => 'transform_image', :op => 'rotate_left', :id => @image.id,
         :size => @size)
-      add_tab_with_query(:image_show_rotate_right.t, 
-        :action => 'transform_image', :op => 'rotate_right', :id => @image.id, 
+      add_tab_with_query(:image_show_rotate_right.t,
+        :action => 'transform_image', :op => 'rotate_right', :id => @image.id,
         :size => @size)
-      add_tab_with_query(:image_show_mirror.t, :action => 'transform_image', 
+      add_tab_with_query(:image_show_mirror.t, :action => 'transform_image',
         :op => 'mirror', :id => @image.id, :size => @size)
-      add_tab_with_query(:image_show_edit.t, :action => 'edit_image', 
+      add_tab_with_query(:image_show_edit.t, :action => 'edit_image',
         :id => @image.id)
-      add_tab_with_query(:image_show_destroy.t, { :action => 'destroy_image', 
-        :id => @image.id }, { :confirm => :are_you_sure.l })
+      add_tab_with_query(:image_show_destroy.t, { :action => 'destroy_image',
+        :id => @image.id }, { data: { confirm: :are_you_sure.l } })
     end
   end
 
@@ -65,7 +65,7 @@
     help = w ? { :title => title } : {}
     if size.to_s != @size.to_s
       link_with_query(:"image_show_#{size}".t,
-        { :action => 'show_image', :id => @image.id, :size => size }, 
+        { :action => 'show_image', :id => @image.id, :size => size },
         help)
     else
       content_tag(:span, :"image_show_#{size}".t, help)
@@ -80,7 +80,7 @@ end %></p>
 <center>
   <%= thumbnail(@image, :size => @size, :votes => true,
         :link => add_query_param(:action => 'show_image', :id => @image.id,
-          :size => (@size == @default_size ? :full_size : @default_size)), 
+          :size => (@size == @default_size ? :full_size : @default_size)),
         :original => true) %><br/>
   <%= image_copyright(@image) %><br/>
   <%= render(:partial => "shared/form_#{@image.license.form_name}") %><br/>
@@ -92,7 +92,7 @@ end %></p>
 
 <% if check_permission(@image) %>
   <p>
-    <%= link_with_query(:image_show_rotate_left.t, 
+    <%= link_with_query(:image_show_rotate_left.t,
           :action => 'transform_image', :op => 'rotate_left',
           :id => @image.id, :size => @size) %> |
     <%= link_with_query(:image_show_rotate_right.t,
@@ -105,7 +105,7 @@ end %></p>
           :id => @image.id) %> |
     <%= link_with_query(:image_show_destroy.t,
           { :action => 'destroy_image', :id => @image.id },
-          { :confirm => :are_you_sure.l }) %>
+          { data: { confirm: :are_you_sure.l } }) %>
   </p>
 <% end %>
 

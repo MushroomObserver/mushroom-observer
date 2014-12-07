@@ -9,7 +9,7 @@
     if check_permission(@project)
       add_tab_with_query(:show_project_destroy.t,
         { :action => 'destroy_project', :id => @project.id, },
-        { :confirm => :are_you_sure.l })
+        { data: { confirm: :are_you_sure.l } })
       add_tab_with_query(:show_project_edit.t, :action => 'edit_project',
         :id => @project.id)
     end
@@ -77,7 +77,7 @@
   </tr>
 </table>
 
-<%= render(:partial => 'comment/show_comments', :locals => 
+<%= render(:partial => 'comment/show_comments', :locals =>
            { :object => @project, :controls => true, :limit => nil }) %>
 <br/>
 
