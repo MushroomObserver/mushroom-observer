@@ -29,14 +29,15 @@ String.prototype.escapeHTML = function() {
 
 // Center an element within the viewport.
 jQuery.fn.center = function() {
-  var ww = jQuery(window).width();
-  var wh = jQuery(window).height();
+  var win = jQuery(window);
+  var sx = win.scrollLeft();
+  var sy = win.scrollTop();
+  var sw = win.width();
+  var sh = win.height();
   var ow = this.outerWidth();
   var oh = this.outerHeight();
-  var sx = jQuery(window).scrollLeft();
-  var sy = jQuery(window).scrollTop();
-  var x = Math.round(Math.max(0, (ww - ow) / 2 + sx));
-  var y = Math.round(Math.max(0, (wh - oh) / 2 + sy));
+  var x = Math.round(Math.max(0, (sw - ow) / 2 + sx));
+  var y = Math.round(Math.max(0, (sh - oh) / 2 + sy));
   this.css({
     position: "absolute",
     left: x + "px",
@@ -47,14 +48,15 @@ jQuery.fn.center = function() {
 
 // Scroll browser window to make an element visible.
 jQuery.fn.ensureVisible = function() {
+  var win = jQuery(window);
+  var sx = win.scrollLeft();
+  var sy = win.scrollTop();
+  var sw = win.width();
+  var sh = win.height();
   var ex = this.position().left;
   var ey = this.position().top;
   var ew = this.width();
   var eh = this.height();
-  var sx = jQuery(window).scrollLeft();
-  var sy = jQuery(window).scrollTop();
-  var sw = window.innerWidth || document.documentElement.clientWidth;
-  var sh = window.innerHeight || document.documentElement.clientHeight;
 
   // Add 5 pixel padding.
   ex = ex < 5 ? 0 : ex - 5;
@@ -92,6 +94,7 @@ jQuery.fn.ensureVisible = function() {
 var scroll_bar_width = null;
 jQuery.fn.getScrollBarWidth = function() {
   var inner, outer, w1, w2;
+  var body = document.body || document.getElementsByTagName("body")[0];
 
   if (scroll_bar_width != null)
     return scroll_bar_width;
@@ -110,12 +113,12 @@ jQuery.fn.getScrollBarWidth = function() {
   outer.style.overflow = "hidden";
   outer.appendChild(inner);
 
-  document.body.appendChild(outer);
+  body.appendChild(outer);
   var w1 = inner.offsetWidth;
   outer.style.overflow = 'scroll';
   var w2 = inner.offsetWidth;
   if (w1 == w2) w2 = outer.clientWidth;
-  document.body.removeChild(outer);
+  body.removeChild(outer);
 
   scroll_bar_width = w1 - w2;
   return scroll_bar_width;
