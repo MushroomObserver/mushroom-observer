@@ -168,7 +168,7 @@ class Pivotal
       found = false
       votes.each do |vote|
         if vote.id == user.id
-          vote.value = value
+          vote.value = value.to_i
           found = true
         end
       end
