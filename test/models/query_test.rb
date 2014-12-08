@@ -437,119 +437,127 @@ class QueryTest < UnitTestCase
     assert_match(/rss_logs.observation_id = observations.id/, query.query)
   end
 
-    def test_low_levels
-      query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
+  def test_low_levels
+    query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
 
-      @fungi = names(:fungi)
-      @agaricus = names(:agaricus)
-      num = Name.count
-      # num_agaricus = Name.count(:conditions => 'text_name LIKE "Agaricus%"') # Rails 3
-      num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
+    @fungi = names(:fungi)
+    @agaricus = names(:agaricus)
+    num = Name.count
+    # num_agaricus = Name.count(:conditions => 'text_name LIKE "Agaricus%"') # Rails 3
+    num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
 
-      assert_equal(num, query.select_count)
-      assert_equal(num, query.select_count(:limit => 10)) # limit limits number of counts!!
-      assert_equal(num_agaricus, query.select_count(:where => 'text_name LIKE "Agaricus%"'))
+    assert_equal(num, query.select_count)
+    assert_equal(num, query.select_count(limit: 10)) # limit limits no. of counts!!
+    assert_equal(num_agaricus,
+                 query.select_count(where: 'text_name LIKE "Agaricus%"'))
 
-      assert_equal('1', query.select_value.to_s) # first id
-      assert_equal('11', query.select_value(:limit => '10, 10').to_s) # tenth id
-      assert_equal(num.to_s, query.select_value(:order => :reverse).to_s) # last id
-      assert_equal('Fungi', query.select_value(:select => 'text_name').to_s)
+    assert_equal("1", query.select_value.to_s) # first id
+    assert_equal("11", query.select_value(limit: "10, 10").to_s) # tenth id
+    assert_equal(num.to_s, query.select_value(order: :reverse).to_s) # last id
+    assert_equal("Fungi", query.select_value(select: "text_name").to_s)
 
-      assert_equal((1..num).map(&:to_s), query.select_values.map(&:to_s))
-      assert_equal(['3','18','19','20','21'], query.select_values(:where => 'text_name LIKE "Agaricus%"').map(&:to_s))
-      agaricus = query.select_values(:select => 'text_name', :where => 'text_name LIKE "Agaricus%"').map(&:to_s)
-      assert_equal(num_agaricus, agaricus.uniq.length)
-      assert_equal(num_agaricus, agaricus.select {|x| x[0,8] == 'Agaricus'}.length)
+    assert_equal((1..num).map(&:to_s), query.select_values.map(&:to_s))
+    assert_equal(['3','18','19','20','21'],
+                 query.select_values(where: 'text_name LIKE "Agaricus%"').
+                       map(&:to_s))
 
-      if RUBY_VERSION < '1.9'
-        assert_equal((1..num).map {|x| [x.to_s]}, query.select_rows)
-        assert_equal((1..num).map {|x| {'id' => x.to_s}}, query.select_all)
-        assert_equal({'id' => '1'}, query.select_one)
-      else
-        assert_equal((1..num).map {|x| [x]}, query.select_rows)
-        assert_equal((1..num).map {|x| {'id' => x}}, query.select_all)
-        assert_equal({'id' => 1}, query.select_one)
-      end
-      assert_equal([@fungi], query.find_by_sql(:limit => 1))
-      assert_equal(@agaricus.children.sort_by(&:id), query.find_by_sql(:where => 'text_name LIKE "Agaricus %"'))
+    agaricus = query.select_values(select: "text_name",
+                                   where: 'text_name LIKE "Agaricus%"').
+                     map(&:to_s)
+    assert_equal(num_agaricus, agaricus.uniq.length)
+    assert_equal(num_agaricus,
+                 agaricus.select {|x| x[0,8] == "Agaricus"}.length)
+
+    if RUBY_VERSION < "1.9"
+      assert_equal((1..num).map {|x| [x.to_s]}, query.select_rows)
+      assert_equal((1..num).map {|x| {"id" => x.to_s}}, query.select_all)
+      assert_equal({"id" => "1"}, query.select_one)
+    else
+      assert_equal((1..num).map {|x| [x]}, query.select_rows)
+      assert_equal((1..num).map {|x| {"id" => x}}, query.select_all)
+      assert_equal({"id" => 1}, query.select_one)
     end
+    assert_equal([@fungi], query.find_by_sql(limit: 1))
+    assert_equal(@agaricus.children.sort_by(&:id),
+                 query.find_by_sql(where: 'text_name LIKE "Agaricus %"'))
+  end
 
-    def test_tables_used
-      query = Query.lookup(:Observation, :all, :by => :id)
-      assert_equal([:observations], query.tables_used)
+  def test_tables_used
+    query = Query.lookup(:Observation, :all, :by => :id)
+    assert_equal([:observations], query.tables_used)
 
-      query = Query.lookup(:Observation, :all, :by => :name)
-      assert_equal([:names,:observations], query.tables_used)
+    query = Query.lookup(:Observation, :all, :by => :name)
+    assert_equal([:names,:observations], query.tables_used)
 
-      query = Query.lookup(:Image, :all, :by => :name)
-      assert_equal([:images,:images_observations,:names,:observations], query.tables_used)
-      assert_equal(true, query.uses_table?(:images))
-      assert_equal(true, query.uses_table?(:images_observations))
-      assert_equal(true, query.uses_table?(:names))
-      assert_equal(true, query.uses_table?(:observations))
-      assert_equal(false, query.uses_table?(:comments))
-    end
+    query = Query.lookup(:Image, :all, :by => :name)
+    assert_equal([:images,:images_observations,:names,:observations], query.tables_used)
+    assert_equal(true, query.uses_table?(:images))
+    assert_equal(true, query.uses_table?(:images_observations))
+    assert_equal(true, query.uses_table?(:names))
+    assert_equal(true, query.uses_table?(:observations))
+    assert_equal(false, query.uses_table?(:comments))
+  end
 
-    def test_results
-      query = Query.lookup(:User, :all, :by => :id)
-      assert_equal(Set.new, Set.new([1,2,3,4,5,6]) - query.result_ids)
-      assert_equal(roy.location_format, :scientific)
-      assert_equal(Set.new, Set.new([rolf,mary,junk,dick,katrina,roy]) - query.results)
-      assert_equal(2, query.index(3))
-      assert_equal(3, query.index('4'))
-      assert_equal(1, query.index(mary))
+  def test_results
+    query = Query.lookup(:User, :all, :by => :id)
+    assert_equal(Set.new, Set.new([1,2,3,4,5,6]) - query.result_ids)
+    assert_equal(roy.location_format, :scientific)
+    assert_equal(Set.new, Set.new([rolf,mary,junk,dick,katrina,roy]) - query.results)
+    assert_equal(2, query.index(3))
+    assert_equal(3, query.index('4'))
+    assert_equal(1, query.index(mary))
 
-      # Verify that it's getting all this crap from cache.
-      query.result_ids = [1,3,5,100]
-      assert_equal([rolf,junk,katrina], query.results)
+    # Verify that it's getting all this crap from cache.
+    query.result_ids = [1,3,5,100]
+    assert_equal([rolf,junk,katrina], query.results)
 
-      # Should be able to set it this way, to.
-      query.results = [dick, mary, rolf]
-      assert_equal(3, query.num_results)
-      assert_equal([4,2,1], query.result_ids)
-      assert_equal([dick,mary,rolf], query.results)
-      assert_equal(1, query.index(mary))
-      assert_equal(2, query.index(1))
-    end
+    # Should be able to set it this way, to.
+    query.results = [dick, mary, rolf]
+    assert_equal(3, query.num_results)
+    assert_equal([4,2,1], query.result_ids)
+    assert_equal([dick,mary,rolf], query.results)
+    assert_equal(1, query.index(mary))
+    assert_equal(2, query.index(1))
+  end
 
-    def test_paginate
-      # The only methods of Paginator used by Query are:
-      #   from, to      index of first and last itemto show
-      #   num_total=    lets Query tell it how many results there are
-      #   letter        selected letter (if any)
-      #   used_letters= lets Query tell it which letters have results
-      query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
-      @names = Name.all
+  def test_paginate
+    # The only methods of Paginator used by Query are:
+    #   from, to      index of first and last itemto show
+    #   num_total=    lets Query tell it how many results there are
+    #   letter        selected letter (if any)
+    #   used_letters= lets Query tell it which letters have results
+    query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
+    @names = Name.all
 
-      pages = Wrapper.new(:from => 1, :to => 4)
-      assert_equal([2,3,4,5], query.paginate_ids(pages))
-      assert_equal(@names.size, pages.num_total)
-      assert_equal(@names[1..4], query.paginate(pages))
+    pages = Wrapper.new(:from => 1, :to => 4)
+    assert_equal([2,3,4,5], query.paginate_ids(pages))
+    assert_equal(@names.size, pages.num_total)
+    assert_equal(@names[1..4], query.paginate(pages))
 
-      pages = Wrapper.new(:from => 5, :to => 8)
-      assert_equal([6,7,8,9], query.paginate_ids(pages))
-      assert_equal(@names.size, pages.num_total)
-      assert_equal(@names[5..8], query.paginate(pages))
+    pages = Wrapper.new(:from => 5, :to => 8)
+    assert_equal([6,7,8,9], query.paginate_ids(pages))
+    assert_equal(@names.size, pages.num_total)
+    assert_equal(@names[5..8], query.paginate(pages))
 
-      pages = Wrapper.new(:from => 1, :to => 4)
-      query.need_letters = 'names.text_name'
-      assert_equal([2,3,4,5], query.paginate_ids(pages))
-      assert_equal(@names.size, pages.num_total)
-      assert_equal(@names[1..4], query.paginate(pages))
-      letters = @names.map {|n| n.text_name[0,1]}.uniq
-      assert_equal(letters.sort, pages.used_letters.sort)
+    pages = Wrapper.new(:from => 1, :to => 4)
+    query.need_letters = 'names.text_name'
+    assert_equal([2,3,4,5], query.paginate_ids(pages))
+    assert_equal(@names.size, pages.num_total)
+    assert_equal(@names[1..4], query.paginate(pages))
+    letters = @names.map {|n| n.text_name[0,1]}.uniq
+    assert_equal(letters.sort, pages.used_letters.sort)
 
-      # Make sure we have a bunch of Lactarii, Leptiotas, etc.
-      @ells = @names.select {|n| n.text_name[0,1] == 'L'}
-      assert(@ells.length >= 9)
+    # Make sure we have a bunch of Lactarii, Leptiotas, etc.
+    @ells = @names.select {|n| n.text_name[0,1] == 'L'}
+    assert(@ells.length >= 9)
 
-      pages = Wrapper.new(:from => 3, :to => 6, :letter => 'L')
-      # Need to clear out cache or used_letters will be wrong.
-      query.clear_cache
-      assert_equal(@ells[3..6].map(&:id), query.paginate_ids(pages))
-      assert_equal(letters.sort, pages.used_letters.sort)
-      assert_equal(@ells[3..6], query.paginate(pages))
-    end
+    pages = Wrapper.new(:from => 3, :to => 6, :letter => 'L')
+    # Need to clear out cache or used_letters will be wrong.
+    query.clear_cache
+    assert_equal(@ells[3..6].map(&:id), query.paginate_ids(pages))
+    assert_equal(letters.sort, pages.used_letters.sort)
+    assert_equal(@ells[3..6], query.paginate(pages))
+  end
 
   def test_eager_instantiator
     query = Query.lookup(:Observation)
@@ -627,17 +635,26 @@ class QueryTest < UnitTestCase
     # obs 4: imgs 6
     # obs 12: imgs 8
 
-    outer = Query.lookup_and_save(:Observation, :all, :by => :id)
+    outer = Query.lookup_and_save(:Observation, :all, by: :id)
 
-    q = Query.lookup(:Image, :inside_observation, :outer => outer, :observation => 1, :by => :id)
+    q = Query.lookup(:Image, :inside_observation, outer: outer,
+                     observation: 1, by: :id)
     assert_equal([], q.result_ids)
-    inner1 = Query.lookup_and_save(:Image, :inside_observation, :outer => outer, :observation => 2, :by => :id)
+
+    inner1 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
+                                   observation: 2, by: :id)
     assert_equal([1,2], inner1.result_ids)
-    inner2 = Query.lookup_and_save(:Image, :inside_observation, :outer => outer, :observation => 3, :by => :id)
+
+    inner2 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
+                                   observation: 3, by: :id)
     assert_equal([5], inner2.result_ids)
-    inner3 = Query.lookup_and_save(:Image, :inside_observation, :outer => outer, :observation => 4, :by => :id)
+
+    inner3 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
+                                   observation: 4, by: :id)
     assert_equal([6], inner3.result_ids)
-    inner4 = Query.lookup_and_save(:Image, :inside_observation, :outer => outer, :observation => 12, :by => :id)
+
+    inner4 = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
+                                   observation: 12, by: :id)
     assert_equal([8], inner4.result_ids)
 
     q = inner1

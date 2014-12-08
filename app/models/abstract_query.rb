@@ -711,6 +711,8 @@ class AbstractQuery < ActiveRecord::Base
     # Provide default flavor.
     if flavor == :default || flavor.blank?
       flavor = default_flavors[model.to_s.to_sym] || :all
+    else
+      flavor = flavor.to_sym
     end
 
     # Make sure this is a recognized query type.
@@ -1579,7 +1581,7 @@ class AbstractQuery < ActiveRecord::Base
   def select_all(args={})
     initialize_query
     raise "This query doesn't support low-level access!" if executor
-    model.connection.select_all(query(args))
+    model.connection.select_all(query(args)).to_a
   end
 
   # Call model.find_by_sql.

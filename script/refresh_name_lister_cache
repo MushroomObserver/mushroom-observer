@@ -16,16 +16,21 @@
 require File.expand_path('../../config/boot.rb', __FILE__)
 require File.expand_path('../../config/environment.rb', __FILE__)
 
+# In RoR 4.0 string extensions not yet loaded
+# need this to avoid NoMethodError undefined method "unindent"
+require File.expand_path("../../app/extensions/string_extensions.rb", __FILE__)
+
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
 def escape(str)
-  str.to_s.gsub('\\','\0\0').gsub('</','<\/').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
+  str.to_s.gsub('\\','\0\0').gsub('</','<\/').gsub(/\r\n|\n|\r/, "\\n").
+           gsub(/["']/) { |m| "\\#{m}" }
 end
 
 # Instead of doing all of this every time someone requests name_lister, let's
 # cache as a separate JS file and serve it up directly (bypassing Rails
 # altogether if all goes well!)  This should plug one of our major memory
-# leaks.  (fingers crossed) 
+# leaks.  (fingers crossed)
 
 genera = Name.connection.select_all %(
   SELECT text_name as n, deprecated as d
@@ -33,6 +38,7 @@ genera = Name.connection.select_all %(
   WHERE rank = 'Genus' AND correct_spelling_id IS NULL
   ORDER BY sort_name
 )
+genera = genera.to_a
 
 species = Name.connection.select_all %(
   SELECT text_name as n, author as a, deprecated as d, synonym_id as s
@@ -41,6 +47,7 @@ species = Name.connection.select_all %(
         AND correct_spelling_id IS NULL
   ORDER BY sort_name
 )
+# species = species.to_a
 
 # Place "*" after all accepted genera.
 seen = {}
