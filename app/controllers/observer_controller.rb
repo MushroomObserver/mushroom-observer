@@ -1475,8 +1475,7 @@ class ObserverController < ApplicationController
   # Outputs: @naming
   def show_votes # :nologin: :prefetch:
     pass_query_params
-    @naming = find_or_goto_index(Naming, params[:id].to_s,
-                                 include: [:name, :votes])
+    @naming = find_or_goto_index(Naming, params[:id].to_s)
   end
 
   # Refresh vote cache for all observations in the database.
@@ -1716,7 +1715,7 @@ class ObserverController < ApplicationController
   def show_user # :nologin: :prefetch:
     store_location
     id = params[:id].to_s
-    @show_user = find_or_goto_index(User, id, include: :location)
+    @show_user = find_or_goto_index(User, id)
     return unless @show_user
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)

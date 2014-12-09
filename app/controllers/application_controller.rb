@@ -1306,13 +1306,13 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
-  def find_or_goto_index(model, id, *args)
-    result = model.safe_find(id, *args)
+  def find_or_goto_index(model, id)
+    result = model.safe_find(id)
     if !result
-      flash_error(:runtime_object_not_found.t(:id => id || '0',
-                                              :type => model.type_tag))
-      redirect_with_query(:controller => model.show_controller,
-        :action => model.index_action)
+      flash_error(:runtime_object_not_found.t(id: id || "0",
+                                              type: model.type_tag))
+      redirect_with_query(controller: model.show_controller,
+                          action: model.index_action)
     end
     return result
   end

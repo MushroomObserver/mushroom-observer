@@ -159,12 +159,7 @@ class SpeciesListController < ApplicationController
     store_location
     clear_query_in_session
     pass_query_params
-    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s, :include => [
-                                            {:comments => :user},
-                                            :location,
-                                            :projects,
-                                            :user,
-                                          ])
+    if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       @query = create_query(:Observation, :in_species_list, :by => :name,
                             :species_list => @species_list)
       store_query_in_session(@query) if !params[:set_source].blank?
@@ -186,7 +181,7 @@ class SpeciesListController < ApplicationController
     @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
     render(:action => 'print_labels', :layout => 'printable')
   end
-  
+
   ##############################################################################
   #
   #  :section: Reports
@@ -400,7 +395,7 @@ class SpeciesListController < ApplicationController
 
   # Form to let user add/remove an observation from one of their species lists.
   def manage_species_lists # :prefetch: :norobots:
-    @observation = find_or_goto_index(Observation, params[:id].to_s, :include => :species_lists)
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
     @all_lists = @user.all_editable_species_lists
   end
 

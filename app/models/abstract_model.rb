@@ -109,9 +109,9 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Look up record with given ID, returning nil if it no longer exists.
-  def self.safe_find(id, *args)
+  def self.safe_find(id)
     begin
-      self.find(id, *args)
+      self.find(id)
     rescue ActiveRecord::RecordNotFound
       nil
     end

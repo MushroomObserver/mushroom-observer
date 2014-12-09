@@ -186,14 +186,7 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image # :nologin: :prefetch:
     store_location
-    if @image = find_or_goto_index(Image, params[:id].to_s, :include => [
-                                     :copyright_changes,
-                                     :image_votes,
-                                     :license,
-                                     {:observations => [:comments, :name]},
-                                     :projects,
-                                     :user,
-                                   ])
+    if @image = find_or_goto_index(Image, params[:id].to_s)
       @is_reviewer = is_reviewer
       pass_query_params
 
@@ -667,7 +660,7 @@ class ImageController < ApplicationController
 
   def remove_images_from_object(target_class, params)
     pass_query_params
-    @object = find_or_goto_index(target_class, params[:id].to_s, :include => :images)
+    @object = find_or_goto_index(target_class, params[:id].to_s)
     if check_permission!(@object)
       if request.method == "POST" and (images = params[:selected])
         images.each do |image_id, do_it|

@@ -363,8 +363,7 @@ class LocationController < ApplicationController
       desc_id = @location.description_id if desc_id.blank?
       if desc_id.blank?
         @description = nil
-      elsif @description = LocationDescription.safe_find(desc_id, :include =>
-                                         [:authors, :editors, :license, :user])
+      elsif @description = LocationDescription.safe_find(desc_id)
         @description = nil if !@description.is_reader?(@user)
       else
         flash_error(:runtime_object_not_found.t(:type => :description,
@@ -385,9 +384,7 @@ class LocationController < ApplicationController
   def show_location_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(LocationDescription, params[:id].to_s,
-                         :include => [ :authors, :editors, :license, :user,
-                                       {:location => :descriptions} ])
+    if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
 
       # Public or user has permission.
       if @description.is_reader?(@user)
