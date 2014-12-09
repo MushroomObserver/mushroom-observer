@@ -1393,6 +1393,7 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY observations.vote_cache
     )
+    image_data = image_data.to_a
 
     # Fill in @image_data, @users, and @licenses.
     for row in image_data

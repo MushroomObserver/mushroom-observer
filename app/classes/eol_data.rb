@@ -156,7 +156,7 @@ private
 
   def name_id_to_descriptions
     descriptions = @id_to_description
-    make_list_hash_from_pairs(Name.connection.select_all("SELECT DISTINCT names.id nid, name_descriptions.id did #{DESCRIPTION_CONDITIONS}").map{
+    make_list_hash_from_pairs(Name.connection.select_all("SELECT DISTINCT names.id nid, name_descriptions.id did #{DESCRIPTION_CONDITIONS}").to_a.map{
       |row| [row['nid'], descriptions[row['did']]]
     })
   end

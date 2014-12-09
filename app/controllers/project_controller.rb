@@ -122,6 +122,7 @@ class ProjectController < ApplicationController
           AND n.id = nd.name_id
         ORDER BY n.sort_name ASC, n.author ASC
       )
+      @draft_data = @draft_data.to_a
     end
   end
 

@@ -550,7 +550,7 @@ class ImageController < ApplicationController
     @objects = query.paginate(@pages,
                               :include => [:user, {:observations => :name}])
   end
-  
+
   def look_for_image(method, params)
     result = nil
     if (method == "POST") or !params[:img_id].blank?
@@ -559,7 +559,7 @@ class ImageController < ApplicationController
     end
     result
   end
-  
+
   def reuse_image_for_glossary_term
     pass_query_params
     @object = GlossaryTerm.safe_find(params[:id])
@@ -691,7 +691,7 @@ class ImageController < ApplicationController
   def remove_images_for_glossary_term
     remove_images_from_object(GlossaryTerm, params)
   end
-    
+
   # Used by show_image to rotate and flip image.
   def transform_image # :norobots:
     pass_query_params
@@ -784,7 +784,7 @@ class ImageController < ApplicationController
       FROM images
       WHERE user_id = #{@user.id.to_i}
       GROUP BY copyright_holder, license_id
-    ))
+    )).to_a
     for datum in @data
       if license = License.safe_find(datum['license_id'].to_i)
         datum['license_name'] = license.display_name

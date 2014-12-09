@@ -264,7 +264,7 @@ namespace :jason do
 
   desc 'Dump and flush mysqld stats.'
   task(:global_status => :environment) do
-    for hash in Comment.connection.select_all('show global status')
+    for hash in Comment.connection.select_all('show global status').to_a
       key = hash['Variable_name']
       val = hash['Value']
       printf "%-40.40s %s\n", key, val
