@@ -168,17 +168,17 @@ class NameControllerTest < FunctionalTestCase
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert("Wasn't expecting any email notifications; got:\n#{msg}") { @@emails.empty? }
+    assert_block("Wasn't expecting any email notifications; got:\n#{msg}") { @@emails.empty? }
   ensure
     @@emails = []
   end
 
   def assert_notify_email(old_name, new_name)
-    assert('Was expecting an email notification.') \
+    assert_block('Was expecting an email notification.') \
       { @@emails.any? }
-    assert("Was only expecting one email notification, got:\n" + @@emails.inspect) \
+    assert_block("Was only expecting one email notification, got:\n" + @@emails.inspect) \
       { @@emails.length == 1 }
-    assert("Was expecting different email notification content.\n" +
+    assert_block("Was expecting different email notification content.\n" +
                  "---- Expected: --------------------\n" +
                  "old: #nnn: #{old_name}\n" +
                  "new: #nnn: #{new_name}\n" +
@@ -576,7 +576,7 @@ class NameControllerTest < FunctionalTestCase
 
   def assert_name_suggestions(str)
     results = Name.suggest_alternate_spellings(str)
-    assert("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
+    assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
   end
 
   # ----------------------------

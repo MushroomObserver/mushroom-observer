@@ -17,7 +17,7 @@ class ApiTest < UnitTestCase
   end
 
   def assert_no_errors(api, msg='API errors')
-    assert("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
+    assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
       api.errors.empty?
     end
     return api
@@ -25,7 +25,7 @@ class ApiTest < UnitTestCase
 
   def assert_api_fail(params)
     api = nil
-    assert("API request should have failed, params: #{params.inspect}") do
+    assert_block("API request should have failed, params: #{params.inspect}") do
       api = API.execute(params)
       api.errors.any?
     end
@@ -48,7 +48,7 @@ class ApiTest < UnitTestCase
     end
     msg = "Expected: <#{show_val(expect)}>\n" +
           "Got: <#{show_val(actual)}>\n"
-    assert(msg) do
+    assert_block(msg) do
       if expect.is_a?(Class) and expect <= API::Error
         actual.is_a?(expect)
       else

@@ -133,9 +133,9 @@ class AutoCompleteTest < UnitTestCase
       msg = "Didn't refine matches correctly for limit = #{auto.limit}:\n"
       msg += "Refined string: #{string.inspect}, expected: #{expected_string.inspect}\n"
       msg += show_matches(auto)
-      assert(msg) { false }
+      assert_block(msg) { false }
     else
-      assert('') { true }
+      assert_block('') { true }
     end
   end
 

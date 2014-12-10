@@ -74,7 +74,7 @@ module SessionExtensions
         msg = "Got unknown 500 error from outside our application?!\n" +
               "This usually means that a file failed to parse.\n"
       end
-      assert(msg) { false }
+      assert_block(msg) { false }
     end
     assert_equal([], Symbol.missing_tags, "Language tag(s) are missing. #{url}: #{method}")
     save_page
@@ -283,7 +283,7 @@ module SessionExtensions
       end
     end
 
-    assert("Expected a link matching: #{args.inspect}") { done }
+    assert_block("Expected a link matching: #{args.inspect}") { done }
   end
 
   ################################################################################

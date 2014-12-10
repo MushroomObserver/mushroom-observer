@@ -98,7 +98,7 @@ class LanguageExporterTest < UnitTestCase
 
   def assert_valid_or_invalid(method, str, expected_val, expected_str)
     msg = assert_message("#{method}: Expected #{str.inspect} to be #{expected_str}.")
-    assert(msg) { !!@official.send_private(method, str) == !!expected_val }
+    assert_block(msg) { !!@official.send_private(method, str) == !!expected_val }
     Language.clear_verbose_messages
   end
 
@@ -136,9 +136,9 @@ class LanguageExporterTest < UnitTestCase
     @official.send_private(:check_export_line, str)
     pass, in_tag = @official.get_check_export_line_status
     msg = assert_message("Expected #{str.inspect} to #{expected_str}.")
-    assert(msg) { pass == expected_val }
+    assert_block(msg) { pass == expected_val }
     msg = assert_message("Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}")
-    assert(msg) { !!in_tag == (in_tag_end == 1) }
+    assert_block(msg) { !!in_tag == (in_tag_end == 1) }
     Language.clear_verbose_messages
   end
   
@@ -148,7 +148,7 @@ class LanguageExporterTest < UnitTestCase
       result = @official.send_private(message)
       msg = assert_message("#{export_data}\n should have " +
                            (pass ? "passed" : "failed"))
-      assert(msg) { pass ? result : !result }
+      assert_block(msg) { pass ? result : !result }
       Language.clear_verbose_messages
     }
   end
@@ -207,12 +207,12 @@ class LanguageExporterTest < UnitTestCase
           new_str = @official.send_private(:clean_string, new_str)
           assert_equal(old_str, new_str, "String for #{tag} got garbled.")
         else
-          assert("Missing string for #{tag}.") { false }
+          assert_block("Missing string for #{tag}.") { false }
         end
         seen[tag] = true
       end
       for tag in new_data.keys.reject {|tag| seen[tag]}
-        assert("Unexpected string for #{tag}.") { false }
+        assert_block("Unexpected string for #{tag}.") { false }
       end
     }
   end

@@ -174,7 +174,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     params = { :id => obs.id.to_s }
     requires_login(:manage_species_lists, params)
-    assert('Missing species lists!') {
+    assert_block('Missing species lists!') {
       assigns(:all_lists).length > 0 rescue nil
     }
   end
