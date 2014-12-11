@@ -409,9 +409,10 @@ module ControllerExtensions
   # check that it points to the right place.
   def assert_no_link_in_html(label, msg=nil)
     extract_links(:label => label) do |link|
-      assert_block(build_message(msg, "Expected HTML *not* to contain link called <?>.", label)) {false}
+      flunk(build_message(
+              msg, "Expected HTML *not* to contain link called <?>.", label))
     end
-    assert_block('') { true } # to count the assertion
+    pass
   end
 
   def raise_params(opts)
@@ -423,7 +424,7 @@ module ControllerExtensions
       opts
     end
   end
-  
+
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
   def assert_link_in_html(label, url_opts, msg=nil)
@@ -432,16 +433,19 @@ module ControllerExtensions
     found_it = false
     extract_links(:label => label) do |link|
       if link.url != url
-        assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, link.url)) {false}
+        flunk(build_message(
+                msg, "Expected <?> link to point to <?>," \
+                     "instead it points to <?>", label, url, link.url))
       else
         found_it = true
         break
       end
     end
     if found_it
-      assert_block('') { true } # to count the assertion
+      pass
     else
-      assert_block(build_message(msg, "Expected HTML to contain link called <?>.", label)) {false}
+      flunk(build_message(msg, "Expected HTML to contain link called <?>.",
+                          label))
     end
   end
 
@@ -465,11 +469,16 @@ module ControllerExtensions
       end
     end
     if found_it
-      assert_block("") { true } # to count the assertion
+      pass
     elsif found.keys
-      assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join('>, <'))) { false }
+      flunk(build_message(
+              msg, "Expected HTML to contain form that posts to <?>," \
+                   "but only found these: <?>.",
+              url, found.keys.sort.join(">, <")))
     else
-      assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
+      flunk(build_message(
+              msg, "Expected HTML to contain form that posts to <?>," \
+              "but found nothing at all.", url))
     end
   end
 
@@ -663,7 +672,7 @@ module ControllerExtensions
     end
     assert_equal({}, mismatches, "Mismatched partial hash: #{mismatches}")
   end
-  
+
   def find_mismatches(partial, full)
     mismatches = {}
     partial.each do |k, v|
@@ -677,7 +686,7 @@ module ControllerExtensions
     end
     mismatches
   end
-  
+
   # Check default value of a form field.
   def assert_input_value(id, expect_val)
     message = "Didn't find any inputs '#{id}'."
@@ -694,7 +703,7 @@ module ControllerExtensions
         end
       end
     end
-    assert_block(message) { message.nil? }
+    assert(message.nil?, message)
   end
 
   # Check default value of a form field.
@@ -712,7 +721,7 @@ module ControllerExtensions
         end
       end
     end
-    assert_block(message) { message.nil? }
+    assert(message.nil?, message)
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,

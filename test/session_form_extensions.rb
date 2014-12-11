@@ -194,12 +194,13 @@ module SessionExtensions
       end
 
       if strict
-        context.assert_block("Couldn't find input field with ID ending in " +
-                              "#{id.inspect}.\nHave these: " +
-                              "#{inputs.map(&:id).inspect}") { results.any? }
-        context.assert_block("Multiple input fields field with ID ending in " +
-                              "#{id.inspect}: #{results.map(&:id).inspect}") \
-                              { results.length == 1 }
+        context.assert(results.any?,
+                       "Couldn't find input field with ID ending in " \
+                       "#{id.inspect}.\n" \
+                       "Have these: #{inputs.map(&:id).inspect}")
+        context.assert(results.length == 1,
+                       "Multiple input fields field with ID ending in " \
+                       "#{id.inspect}: #{results.map(&:id).inspect}")
       end
 
       return results.first
@@ -223,11 +224,9 @@ module SessionExtensions
 
     # Make sure the form does _not_ have a given field.
     def assert_no_field(id, msg=nil)
+      field = get_field(id)
       msg ||= "Expected form NOT to have field #{id.inspect}."
-      context.assert_block(msg) {
-        field = get_field(id)
-        !field or (field.type == :hidden)
-      }
+      context.assert(!field || (field.type == :hidden), msg)
     end
 
     # Assert the value of a given input field.  Change the value of the given
@@ -250,7 +249,7 @@ module SessionExtensions
     def assert_enabled(id, msg=nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be enabled."
-      context.assert_block(msg) { !field.disabled }
+      context.refute(field.disabled, msg)
       return field
     end
 
@@ -258,7 +257,7 @@ module SessionExtensions
     def assert_disabled(id, msg=nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be disabled."
-      context.assert_block(msg) { field.disabled }
+      context.assert(field.disabled, msg)
       return field
     end
 
@@ -266,7 +265,7 @@ module SessionExtensions
     def assert_hidden(id, msg=nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be hidden."
-      context.assert_block(msg) { field.type == :hidden }
+      context.assert(field.type == :hidden, msg)
       return field
     end
 
@@ -284,9 +283,8 @@ module SessionExtensions
     # Check a given check-box.
     def check(id)
       field = assert_enabled(id)
-      context.assert_block("Must be a check-box or radio-box.") do
-        [:checkbox, :radio].include?(field.type)
-      end
+      context.assert([:checkbox, :radio].include?(field.type),
+                     "Must be a check-box or radio-box.")
       field.value = true
 
       # Uncheck all the other radio-boxes in this group.
@@ -302,9 +300,7 @@ module SessionExtensions
     # Uncheck a given check-box.
     def uncheck(id)
       field = assert_enabled(id)
-      context.assert_block("Must be a check-box.") do
-        [:checkbox].include?(field.type)
-      end
+      context.assert([:checkbox].include?(field.type), "Must be a check-box.")
       field.value = false
     end
 
@@ -318,8 +314,8 @@ module SessionExtensions
     # Change selection of pulldown menu.
     def select(id, label)
       field = assert_enabled(id)
-      context.assert_block("Expected field #{id.inspect} to be a select field!") \
-        { field.type == :select }
+      context.assert(field.type == :select,
+                     "Expected field #{id.inspect} to be a select field!")
       matches = []
       for opt in field.options
         if label.is_a?(Regexp) ? opt.label.match(label) :
@@ -328,13 +324,13 @@ module SessionExtensions
           matches << opt.label
         end
       end
-      context.assert_block("Couldn't find any options in the pulldown " +
-                            "#{field.id.inspect} that match #{label.inspect}.\n" +
-                            "Have these: #{field.options.map(&:label).inspect}") \
-                            { matches.length > 0 }
-      context.assert_block("Multiple options in the pulldown " +
-                            "#{field.id.inspect} match #{label.inspect}: " +
-                            "#{matches.inspect}") { matches.length == 1 }
+      context.assert(matches.length > 0,
+                     "Couldn't find any options in the pulldown " \
+                     "#{field.id.inspect} that match #{label.inspect}.\n" \
+                     "Have these: #{field.options.map(&:label).inspect}")
+      context.assert(matches.length == 1,
+                     "Multiple options in the pulldown #{field.id.inspect} " \
+                     "match #{label.inspect}: #{matches.inspect}")
     end
 
     # Submit the form using the given button.  Button can be specified by a
@@ -364,17 +360,18 @@ module SessionExtensions
         if button.is_a?(Regexp) and field.value.match(button) or
            button.is_a?(String) and (field.value == button) or
            button.nil?
-          context.assert_block("Tried to submit form with disabled button: " +
-                               button.inspect) { !field.disabled }
-          context.assert_block("Found multiple non-identical submit " +
-                               "buttons matching #{button.inspect}") \
-                               { !found || found == field.value }
+          context.refute(field.disabled,
+                         "Tried to submit form with disabled button: " \
+                         "#{button.inspect}")
+          context.assert(!found || found == field.value,
+                         "Found multiple non-identical submit buttons " \
+                         "matching #{button.inspect}")
           hash[field.name] = field.value
           found = field.value
         end
       end
-      context.assert_block("Couldn't find submit button labeled " +
-                            "#{button.inspect}.") { found }
+      context.assert(found,
+                     "Couldn't find submit button labeled #{button.inspect}.")
       puts "POST #{url}: #{hash.inspect}" if debug
       context.post(url, hash)
     end

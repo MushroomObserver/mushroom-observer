@@ -6,11 +6,11 @@ class LocalizationFilesTest < UnitTestCase
   def assert_no_missing_translations(tags, type)
     missing = tags.uniq.reject(&:has_translation?)
     msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
-    assert_block(msg) { missing.empty? }
+    assert_empty missing, msg
   end
 
 ################################################################################
-  
+
   def test_localization_files_exist
     for lang in Language.all
       assert File.exists?(lang.localization_file)
@@ -23,7 +23,8 @@ class LocalizationFilesTest < UnitTestCase
     Language.clear_verbose_messages
     lang.check_export_syntax
     errors += Language.verbose_messages
-    assert_block("Bad syntax in language export files:\n" + errors.join("\n")) { errors.empty? }
+    assert_empty errors, "Bad syntax in language export files:\n" +
+                         errors.join("\n")
   end
 
   # Make sure all "[:tag]" refs inside the translations exist.
@@ -69,7 +70,7 @@ class LocalizationFilesTest < UnitTestCase
     # Going through the backdoor to call a private method.  Yuck!
     TranslationString.translations(:en).keys
   end
-  
+
   # Get Hash of tags we have translations for already.
   def known_tags
     tags = {}
@@ -101,7 +102,7 @@ class LocalizationFilesTest < UnitTestCase
   # than once.  (I find myself copying and pasting method definitions and
   # forgetting to change the method name frequently.  Ruby does not complain
   # about this, and just overwrites the old method.  This is particularly
-  # insidious in the unit tests, because there's absolutely no way to know.) 
+  # insidious in the unit tests, because there's absolutely no way to know.)
   def duplicate_function_defs_in_file(file)
     errors = []
     defs = {}

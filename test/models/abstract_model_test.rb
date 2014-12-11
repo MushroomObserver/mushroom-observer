@@ -39,8 +39,9 @@ class AbstractModelTest < UnitTestCase
         break
       end
     end
-    assert_block("Expected to find #{expect_tag.inspect} in rss log, got:\n" +
-                 "<#{obj.rss_log.notes}>") { found }
+    assert(found,
+           "Expected to find #{expect_tag.inspect} in rss log, got:\n" \
+           "<#{obj.rss_log.notes}>")
   end
 
 ################################################################################
@@ -96,7 +97,7 @@ class AbstractModelTest < UnitTestCase
     obs.reload
     assert_equal(updated_at, obs.updated_at)
   end
-  
+
   def test_update_view_stats
     User.current = rolf
     obs      = Observation.find(2)

@@ -168,27 +168,27 @@ class NameControllerTest < FunctionalTestCase
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert_block("Wasn't expecting any email notifications; got:\n#{msg}") { @@emails.empty? }
+    assert(@@emails.empty?,
+           "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end
 
   def assert_notify_email(old_name, new_name)
-    assert_block('Was expecting an email notification.') \
-      { @@emails.any? }
-    assert_block("Was only expecting one email notification, got:\n" + @@emails.inspect) \
-      { @@emails.length == 1 }
-    assert_block("Was expecting different email notification content.\n" +
-                 "---- Expected: --------------------\n" +
-                 "old: #nnn: #{old_name}\n" +
-                 "new: #nnn: #{new_name}\n" +
-                 "---- Actual: ----------------------\n" +
-                 "#{@@emails.first}\n" +
-                 "-----------------------------------\n") {
-      old_name2 = $2 if @@emails.first.match(/^(old|this) : #\d+: (.*)/)
-      new_name2 = $2 if @@emails.first.match(/^(new|into) : #\d+: (.*)/)
-      old_name == old_name2 and new_name == new_name2
-    }
+    assert( @@emails.any? "Was expecting an email notification.")
+    assert(@@emails.length == 1,
+           "Was only expecting one email notification, got:\n" \
+           @@emails.inspect)
+    old_name2 = $2 if @@emails.first.match(/^(old|this) : #\d+: (.*)/)
+    new_name2 = $2 if @@emails.first.match(/^(new|into) : #\d+: (.*)/)
+    assert(old_name == old_name2 and new_name == new_name2,
+           "Was expecting different email notification content.\n" \
+           "---- Expected: --------------------\n" \
+           "old: #nnn: #{old_name}\n" \
+           "new: #nnn: #{new_name}\n" \
+           "---- Actual: ----------------------\n" \
+           "#{@@emails.first}\n" \
+           "-----------------------------------\n")
   ensure
     @@emails = []
   end
@@ -576,7 +576,8 @@ class NameControllerTest < FunctionalTestCase
 
   def assert_name_suggestions(str)
     results = Name.suggest_alternate_spellings(str)
-    assert_block("Couldn't suggest alternate spellings for #{str.inspect}.") { results.any? }
+    assert(results.any?,
+           "Couldn't suggest alternate spellings for #{str.inspect}.")
   end
 
   # ----------------------------

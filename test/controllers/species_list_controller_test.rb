@@ -44,7 +44,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   end
 
   MODIFY_PARTIALS = ["_form_list_feedback", "_textilize_help", "_form_species_lists"]
-  
+
   def assert_create_species_list
     assert_action_partials('create_species_list', MODIFY_PARTIALS)
   end
@@ -72,7 +72,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     get_with_dump(:list_species_lists)
     assert_template(action: 'list_species_lists')
   end
-  
+
   def test_show_species_list
     # Show empty list with no one logged in.
     get_with_dump(:show_species_list, :id => 1)
@@ -174,9 +174,12 @@ class SpeciesListControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     params = { :id => obs.id.to_s }
     requires_login(:manage_species_lists, params)
-    assert_block('Missing species lists!') {
-      assigns(:all_lists).length > 0 rescue nil
-    }
+    assert(assigns_exist, "Missing species lists!")
+  end
+
+  def assigns_exist
+    assigns(:all_lists).length > 0
+    rescue nil
   end
 
   def test_add_observation_to_species_list
@@ -406,7 +409,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(!synonym_name.reload.deprecated)
     assert_nil(synonym_name.synonym)
   end
-  
+
   def test_construct_species_list_junk
     list_title = "List Title"
     new_name_str = "This is a bunch of junk"
@@ -652,7 +655,7 @@ class SpeciesListControllerTest < FunctionalTestCase
   # -----------------------------------------------
   #  Test changing species lists in various ways.
   # -----------------------------------------------
-  
+
   def test_edit_species_list
     spl = species_lists(:first_species_list)
     params = { :id => spl.id.to_s }
@@ -1594,7 +1597,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     proj1.reload
     assert_equal(2, proj1.observations.length)
     assert_equal(2, proj1.images.length)
-  
+
     post(:manage_projects, :id => list.id,
       :objects_obs => '1',
       :objects_img => '1',

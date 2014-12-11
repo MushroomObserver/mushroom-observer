@@ -16,26 +16,32 @@ class ApiTest < UnitTestCase
     @api_key = api_keys(:rolfs_api_key)
   end
 
-  def assert_no_errors(api, msg='API errors')
-    assert_block("#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>") do
-      api.errors.empty?
-    end
-    return api
+  def assert_no_errors(api, msg="API errors")
+    assert(api.errors.empty?,
+           "#{msg}: <\n" + api.errors.map(&:to_s).join("\n") + "\n>")
+    api
   end
 
+# TODO review following
+# should it return nil or API.execute(params)
   def assert_api_fail(params)
     api = nil
-    assert_block("API request should have failed, params: #{params.inspect}") do
-      api = API.execute(params)
-      api.errors.any?
-    end
-    return api
+    assert(api_errors(params),
+          "API request should have failed, params: #{params.inspect}")
+    api
+  end
+
+  def api_errors(params)
+    api = API.execute(params)
+    api.errors.any?
   end
 
   def assert_api_pass(params)
     api = API.execute(params)
-    assert_no_errors(api, "API request should have passed, params: #{params.inspect}")
-    return api
+    assert_no_errors(api,
+                     "API request should have passed," \
+                     "params: #{params.inspect}")
+    api
   end
 
   def assert_parse(method, expect, val, *args)
@@ -46,15 +52,14 @@ class ApiTest < UnitTestCase
     rescue API::Error => e
       actual = e
     end
-    msg = "Expected: <#{show_val(expect)}>\n" +
+    msg = "Expected: <#{show_val(expect)}>\n" \
           "Got: <#{show_val(actual)}>\n"
-    assert_block(msg) do
-      if expect.is_a?(Class) and expect <= API::Error
-        actual.is_a?(expect)
+    if expect.is_a?(Class) and expect <= API::Error
+        expected_class = actual.is_a?(expect)
       else
-        actual == expect
+        expected_class = (actual == expect)
       end
-    end
+    assert(expected_class, msg)
   end
 
   def show_val(val)

@@ -17,7 +17,7 @@ class ScriptTest < UnitTestCase
     script = script_file("autoreply")
     env = { "SENDER" => sender }
     cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" > #{tempfile}"
-    assert_block { system(env, cmd) }
+    assert system(env, cmd)
     expect = <<-END.unindent
       To: #{sender}
       Subject: #{subject}
@@ -48,7 +48,7 @@ class ScriptTest < UnitTestCase
     script = script_file("lookup_user")
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
-    assert_block { system(cmd) }
+    assert system(cmd)
     expect = "id login name email verified last_use\n" +
              "4 dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
     actual = File.read(tempfile).gsub(/ +/, ' ')
@@ -60,15 +60,16 @@ class ScriptTest < UnitTestCase
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
     cmd = "#{script} #{dest_file} > #{stdout_file}"
-    assert_block { !File.exist?(dest_file) || File.size(dest_file) == 0 }
-    assert_block { system(cmd) }
-    assert_block { File.size(dest_file) > 0 }
+    assert !File.exist?(dest_file) || File.size(dest_file) == 0
+    assert system(cmd)
+    assert File.size(dest_file) > 0,
+           "#{dest_file} should have content butis empty."
     assert_equal("", File.read(stdout_file))
 
     # In test mode, the script just grabs first observation from api.
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert_block { File.read(dest_file).match(/<results number="1">/) }
+    assert File.read(dest_file).match(/<results number="1">/)
     # system("cp #{dest_file} x.xml")
   end
 
@@ -80,7 +81,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+    assert status, "Something went wrong with #{script}:\n#{errors}"
     assert_equal("", File.read(tempfile))
     new_size = File.size(logfile)
     assert_operator(new_size, :>, old_size)
@@ -92,7 +93,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+    assert status, "Something went wrong with #{script}:\n#{errors}"
   end
 
   test "perf_monitor" do
@@ -106,14 +107,13 @@ class ScriptTest < UnitTestCase
       cmd = "#{script} #{site} #{image} #{tempdir} 1 2>&1 > #{tempfile}"
       status = system(cmd)
       errors = File.read(tempfile)
-      assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+      assert status, "Something went wrong with #{script}:\n#{errors}"
       logfile = "#{tempdir}/perf.log"
-      assert_block { File.exist?(logfile) && File.size(logfile) > 0 }
+      assert  File.exist?(logfile) && File.size(logfile) > 0
       lines = File.readlines(logfile)
       assert_equal(5, lines.length)
-      assert_block("There were errors in perf.log:\n#{lines.join("\n")}") do
-        lines.none? {|line| line.match(/ERROR/)}
-      end
+      assert(lines.none? {|line| line.match(/ERROR/)},
+             "There were errors in perf.log:\n#{lines.join("\n")}")
     ensure
       system("rm -rf #{tempdir}") if File.directory?(tempdir)
     end

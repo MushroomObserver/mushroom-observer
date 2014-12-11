@@ -82,25 +82,25 @@ module GeneralExtensions
   # Assert that something is true.
   def assert_true(value, msg=nil)
     msg ||= "Expected #{value.inspect} to be true."
-    assert_block(msg) { value }
+    assert(value, msg)
   end
 
   # Assert that something is false.
   def assert_false(value, msg=nil)
     msg ||= "Expected #{value.inspect} to be false."
-    assert_block(msg) { not value }
+    refute(value, msg)
   end
 
   # Assert that something is blank.
   def assert_blank(value, msg=nil)
     msg ||= "Expected #{value.inspect} to be blank."
-    assert_block(msg) { value.blank? }
+    assert(value.blank?, msg)
   end
 
   # Assert that something is not blank.
   def assert_not_blank(value, msg=nil)
     msg ||= "Expected #{value.inspect} not to be blank."
-    assert_block(msg) { not value.blank? }
+    refute(value.blank?, msg)
   end
 
   # Exactly the opposite of +assert_match+ (and essentially copied verbatim
@@ -108,7 +108,7 @@ module GeneralExtensions
   def assert_not_match(expect, actual, msg=nil)
     expect = Regexp.new(expect) if expect.is_a?(String)
     msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
-    assert_block(msg) { actual !~ expect }
+    refute(actual !~ expect, msg)
   end
 
   # Compare two Date/Time/DateTime/TimeWithZone instances.
@@ -116,7 +116,7 @@ module GeneralExtensions
     expect = expect.strftime('%Y%m%d')
     actual = actual.strftime('%Y%m%d')
     msg = build_message(msg, 'Expected <?> to be <?>.', expect, actual)
-    assert_block(msg) { expect == actual }
+    assert(expect == actual, msg)
   end
 
   # Assert that two User instances are equal.

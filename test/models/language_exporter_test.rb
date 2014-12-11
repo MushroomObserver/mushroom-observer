@@ -55,7 +55,7 @@ class LanguageExporterTest < UnitTestCase
   ensure
     File.unlink(temp_file) rescue nil
   end
-  
+
   def test_validators
     assert_valid(:validate_tag, 'abc')
     assert_valid(:validate_tag, 'abc_2')
@@ -97,8 +97,9 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def assert_valid_or_invalid(method, str, expected_val, expected_str)
-    msg = assert_message("#{method}: Expected #{str.inspect} to be #{expected_str}.")
-    assert_block(msg) { !!@official.send_private(method, str) == !!expected_val }
+    msg = assert_message("#{method}: Expected #{str.inspect} to be" \
+                         "#{expected_str}.")
+    assert(!!@official.send_private(method, str) == !!expected_val, msg)
     Language.clear_verbose_messages
   end
 
@@ -136,23 +137,23 @@ class LanguageExporterTest < UnitTestCase
     @official.send_private(:check_export_line, str)
     pass, in_tag = @official.get_check_export_line_status
     msg = assert_message("Expected #{str.inspect} to #{expected_str}.")
-    assert_block(msg) { pass == expected_val }
+    assert pass == expected_val, msg
     msg = assert_message("Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}")
-    assert_block(msg) { !!in_tag == (in_tag_end == 1) }
+    assert !!in_tag == (in_tag_end == 1), msg
     Language.clear_verbose_messages
   end
-  
+
   def export_check(export_data, message, pass)
     use_test_locales {
       @official.write_export_file_lines(export_data)
       result = @official.send_private(message)
       msg = assert_message("#{export_data}\n should have " +
                            (pass ? "passed" : "failed"))
-      assert_block(msg) { pass ? result : !result }
+      assert(pass ? result : !result, msg)
       Language.clear_verbose_messages
     }
   end
-    
+
   def test_check_export_file_for_duplicates
     export_data = [
                    "  tag1: val1\n",
@@ -207,12 +208,12 @@ class LanguageExporterTest < UnitTestCase
           new_str = @official.send_private(:clean_string, new_str)
           assert_equal(old_str, new_str, "String for #{tag} got garbled.")
         else
-          assert_block("Missing string for #{tag}.") { false }
+          flunk("Missing string for #{tag}.")
         end
         seen[tag] = true
       end
       for tag in new_data.keys.reject {|tag| seen[tag]}
-        assert_block("Unexpected string for #{tag}.") { false }
+        flunk("Unexpected string for #{tag}.")
       end
     }
   end
@@ -379,14 +380,14 @@ class LanguageExporterTest < UnitTestCase
       final_hash.delete('twos')
       final_hash.delete('TWO')
       final_hash.delete('TWOS')
-    
+
       @official.write_hash(final_hash)
       assert_true(@official.import_from_file, 'Should have been two import changes.')
       assert_equal(hash, @official.localization_strings) # Should still include deletes
       assert_true(@official.strip, 'Should have been three strip changes.')
       assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
-      
-      
+
+
       assert_equal(3, @official.translation_strings.select {|str| str.user == dick}.count)
     }
   end

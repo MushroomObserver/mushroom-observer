@@ -56,7 +56,7 @@ class ObserverControllerTest < FunctionalTestCase
       flash = get_last_flash.to_s
       flash.sub!(/^(\d)/, '')
       message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
-      assert_block(message) { false }
+      flunk(message)
     end
 
     assert_equal(o_count + o_num, Observation.count)

@@ -1,8 +1,9 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class ScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML::load(IO.read("#{::Rails.root}/config/database.yml"))['test']
+  DATABASE_CONFIG = YAML::load(IO.
+    read("#{::Rails.root}/config/database.yml"))['test']
 
   def script_file(cmd)
     "#{::Rails.root}/script/#{cmd}"
@@ -51,7 +52,8 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 1 tiff 1 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
+    assert(status && errors.blank?,
+           "Something went wrong with #{script}:\n#{errors}")
     File.open(tempfile, "w") do |file|
       file.puts "#{local_root}/orig/1.jpg"
       file.puts "#{local_root}/1280/1.jpg"
@@ -117,7 +119,8 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
+    assert(status && errors.blank?,
+           "Something went wrong with #{script}:\n#{errors}")
     img1 = Image.find(1)
     img2 = Image.find(2)
     assert_equal(true, img1.transferred)
@@ -154,7 +157,8 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} 1 +90 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status && errors.blank? }
+    assert(status && errors.blank?,
+           "Something went wrong with #{script}:\n#{errors}")
     assert(File.exist?("#{local_root}/orig/1.jpg"))
     assert(File.exist?("#{local_root}/thumb/1.jpg"))
     assert(File.exist?("#{remote_root}1/orig/1.jpg"))
@@ -169,10 +173,8 @@ class ScriptTest < UnitTestCase
 
   test "verify_images" do
     script = script_file("verify_images")
+    byebug
     tempfile = Tempfile.new("test").path
-    [ 'thumb', '320', '640', '960', '1280', 'orig' ].each do |subdir|
-      FileUtils.mkpath("#{local_root}/#{subdir}")
-    end
     File.open("#{local_root}/orig/2.tiff", "w") { |f| f.write("A") }
     File.open("#{local_root}/orig/2.jpg",  "w") { |f| f.write("AB") }
     File.open("#{local_root}/960/2.jpg",   "w") { |f| f.write("ABC") }
@@ -205,7 +207,8 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+    assert(status && errors.blank?,
+           "Something went wrong with #{script}:\n#{errors}")
     assert_equal(<<-END.unindent, errors)
       Uploading 320/4.jpg to remote1
       Uploading 320/3.jpg to remote2

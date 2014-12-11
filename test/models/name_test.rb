@@ -6,17 +6,17 @@ class NameTest < UnitTestCase
   def create_test_name(string, force_rank=nil)
     User.current = rolf
     parse = Name.parse_name(string)
-    assert_block("Expected this to parse: #{string}") {parse}
+    assert parse, "Expected this to parse: #{string}"
     params = parse.params
     params[:rank] = force_rank if force_rank
     name = Name.new_name(params)
-    assert_block("Error saving name \"#{string}\": [#{name.dump_errors}]") {name.save}
+    assert name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]"
     return name
   end
 
   def do_name_parse_test(str, args)
     parse = Name.parse_name(str)
-    assert_block("Expected #{str.inspect} to parse!") { parse }
+    assert parse,"Expected #{str.inspect} to parse!"
     any_errors = false
     msg = ['Name is wrong; expected -vs- actual:']
     i = 0
@@ -46,11 +46,12 @@ class NameTest < UnitTestCase
       msg << '%-20s %-40s %-40s' % [var.to_s, expect.inspect, actual.inspect]
       i += 1
     end
-    assert_block(msg.join("\n")) { !any_errors }
+    assert_not any_errors, msg.join("\n")
   end
 
   def assert_name_match_author_required(pattern, string, first_match=string)
-    assert_block("Expected #{string.inspect} not to match #{@pat}.") { !pattern.match(string) }
+    refute pattern.match(string),
+           "Expected #{string.inspect} not to match #{@pat}."
     assert_name_match_various_authors(pattern, string, first_match)
   end
 
@@ -80,14 +81,15 @@ class NameTest < UnitTestCase
 
   def assert_name_match(pattern, string, first, second='')
     match = pattern.match(string)
-    assert_block("Expected #{string.inspect} to match #{@pat}.") { match }
+    assert match, "Expected #{string.inspect} to match #{@pat}."
     assert_equal(first, match[1].to_s, "#{@pat} matched name part of #{string.inspect} wrong.")
     assert_equal(second, match[2].to_s, "#{@pat} matched author part of #{string.inspect} wrong.")
   end
 
   def assert_name_parse_fails(str)
     parse = Name.parse_name(str)
-    assert_block("Expected #{str.inspect} to fail to parse! Got: #{parse.inspect}") { !parse }
+    refute parse, "Expected #{str.inspect} to fail to parse!" \
+                  "Got: #{parse.inspect}"
   end
 
   def do_parse_classification_test(text, expected)

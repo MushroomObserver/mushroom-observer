@@ -50,17 +50,21 @@ module FlashExtensions
     end
     msg.sub(/\n*$/, "\n") if msg
     if !expect && got
-      assert_block(msg + "Shouldn't have been any flash errors.  Got #{got.inspect}.") { got.nil? }
+      assert(got.nil?,
+             "#{msg} Shouldn't have been any flash errors. Got #{got.inspect}.")
     elsif expect && !got
-      assert_block(msg + "Expected a flash error.  Got nothing.") { expect.nil? }
+      assert(expect.nil?, "#{msg} Expected a flash error.  Got nothing.")
     elsif expect.is_a?(Fixnum)
-      assert_block(msg + "Wrong flash error level.  Message: #{got.inspect}.") { expect == lvl }
+      assert(expect == lvl,
+             "#{msg} Wrong flash error level.  Message: #{got.inspect}.")
     elsif expect.is_a?(Regexp)
-      assert_block(msg + "Got the wrong flash error(s). " +
-                         "Expected: #{expect.inspect}.  Got: #{got.inspect}.") { got.match(expect) }
+      assert(got.match(expect),
+             "#{msg} Got the wrong flash error(s). " \
+             "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     else
-      assert_block(msg + "Got the wrong flash error(s). " +
-                         "Expected: #{expect.inspect}.  Got: #{got.inspect}.") { got == expect }
+      assert(got == expect,
+             "#{msg} Got the wrong flash error(s). " \
+             "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     end
     @controller.instance_variable_set('@last_notice', nil)
     session[:notice] = nil

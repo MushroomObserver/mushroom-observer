@@ -44,7 +44,7 @@ class AutoCompleteTest < UnitTestCase
     auto.truncate_matches
     list[9] = '...'
     assert_equal(list, auto.matches)
-    
+
     auto.limit = 1
     auto.truncate_matches
     assert_equal(['b0', '...'], auto.matches)
@@ -133,9 +133,9 @@ class AutoCompleteTest < UnitTestCase
       msg = "Didn't refine matches correctly for limit = #{auto.limit}:\n"
       msg += "Refined string: #{string.inspect}, expected: #{expected_string.inspect}\n"
       msg += show_matches(auto)
-      assert_block(msg) { false }
+      flunk(msg)
     else
-      assert_block('') { true }
+      pass
     end
   end
 
