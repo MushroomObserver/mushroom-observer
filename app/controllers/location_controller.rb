@@ -876,7 +876,7 @@ class LocationController < ApplicationController
     #   2) all that start with everything in "where" up to the comma
     #   3) all that start with the first word in "where"
     #   4) there just aren't any matches, give up
-    all = Location.all(:order => 'name')
+    all = Location.all.order("name")
     @matches, @others = (
       split_out_matches(all, @where) or
       split_out_matches(all, @where.split(',').first) or
