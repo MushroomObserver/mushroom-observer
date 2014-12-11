@@ -143,7 +143,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.string   "sync_id",          limit: 16
     t.integer  "width"
     t.integer  "height"
-    t.float    "vote_cache",       limit: 24
+    t.float    "vote_cache"
     t.boolean  "ok_for_export",                default: true,  null: false
     t.string   "original_name",    limit: 120, default: ""
     t.boolean  "transferred",                  default: false, null: false
@@ -259,12 +259,12 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "rss_log_id"
     t.integer  "num_views",                    default: 0
     t.datetime "last_view"
-    t.float    "north",           limit: 24
-    t.float    "south",           limit: 24
-    t.float    "west",            limit: 24
-    t.float    "east",            limit: 24
-    t.float    "high",            limit: 24
-    t.float    "low",             limit: 24
+    t.float    "north"
+    t.float    "south"
+    t.float    "west"
+    t.float    "east"
+    t.float    "high"
+    t.float    "low"
     t.boolean  "ok_for_export",                default: true, null: false
     t.text     "notes"
     t.string   "name",            limit: 1024
@@ -276,12 +276,12 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "version"
     t.datetime "updated_at"
     t.integer  "user_id"
-    t.float    "north",           limit: 24
-    t.float    "south",           limit: 24
-    t.float    "west",            limit: 24
-    t.float    "east",            limit: 24
-    t.float    "high",            limit: 24
-    t.float    "low",             limit: 24
+    t.float    "north"
+    t.float    "south"
+    t.float    "west"
+    t.float    "east"
+    t.float    "high"
+    t.float    "low"
     t.string   "name",            limit: 1024
     t.text     "notes"
     t.string   "scientific_name", limit: 1024
@@ -415,7 +415,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "observation_id"
     t.integer  "name_id"
     t.integer  "user_id"
-    t.float    "vote_cache",     limit: 24, default: 0.0
+    t.float    "vote_cache",                default: 0.0
     t.string   "sync_id",        limit: 16
     t.text     "reasons"
   end
@@ -441,7 +441,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "name_id"
     t.integer  "location_id"
     t.boolean  "is_collection_location",                                        default: true,  null: false
-    t.float    "vote_cache",             limit: 24,                             default: 0.0
+    t.float    "vote_cache",                                                    default: 0.0
     t.integer  "num_views",                                                     default: 0,     null: false
     t.datetime "last_view"
     t.string   "sync_id",                limit: 16
@@ -674,7 +674,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "observation_id",            default: 0
     t.string   "sync_id",        limit: 16
     t.boolean  "favorite"
-    t.float    "value",          limit: 24
+    t.float    "value"
   end
 
 end
