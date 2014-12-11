@@ -173,7 +173,6 @@ class ScriptTest < UnitTestCase
 
   test "verify_images" do
     script = script_file("verify_images")
-    byebug
     tempfile = Tempfile.new("test").path
     File.open("#{local_root}/orig/2.tiff", "w") { |f| f.write("A") }
     File.open("#{local_root}/orig/2.jpg",  "w") { |f| f.write("AB") }
@@ -207,8 +206,7 @@ class ScriptTest < UnitTestCase
     cmd = "#{script} --verbose 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)
-    assert(status && errors.blank?,
-           "Something went wrong with #{script}:\n#{errors}")
+    assert status, "Something went wrong with #{script}:\n#{errors}"
     assert_equal(<<-END.unindent, errors)
       Uploading 320/4.jpg to remote1
       Uploading 320/3.jpg to remote2
