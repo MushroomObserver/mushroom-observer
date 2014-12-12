@@ -36,7 +36,7 @@
 ################################################################################
 
 class SpeciesListController < ApplicationController
-  # require 'csv'
+  require 'csv'
   # require 'rtf'
 
   before_filter :login_required, :except => [
@@ -200,8 +200,8 @@ class SpeciesListController < ApplicationController
       when 'csv'
         render_name_list_as_csv(names)
       else
-        flash_error(:make_report_not_supported.t(:type => params[:type]))
-        redirect_to(:action => "show_species_list", :id => params[:id].to_s)
+        flash_error(:make_report_not_supported.t(type: params[:type]))
+        redirect_to(action: "show_species_list", id: params[:id].to_s)
       end
     end
   end
@@ -227,31 +227,32 @@ class SpeciesListController < ApplicationController
   end
 
   def render_name_list_as_csv(names, charset=nil)
-    charset ||= 'ISO-8859-1'
+    charset ||= "ISO-8859-1"
     charset = charset.upcase
-    if !['ASCII', 'ISO-8859-1'].include?(charset)
+    if !["ASCII", "ISO-8859-1"].include?(charset)
       raise "Unsupported CSV report charset: #{charset}"
     end
     str = CSV.generate do |csv|
-      csv << ['scientific_name', 'authority', 'citation', 'accepted']
+      csv << %w(scientific_name authority citation accepted)
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
-          name.deprecated ? '' : '1'].map {|v| v.blank? ? nil : v}
+                  name.deprecated ? "" : "1"].
+                map {|v| v.blank? ? nil : v}
       end
     end
     str = case charset
-      when 'UTF-8'; str
-      when 'ASCII'; str.to_ascii
+      when "UTF-8"; str
+      when "ASCII"; str.to_ascii
       else
-        str.force_encoding('UTF-8')
+        str.force_encoding("UTF-8")
         str.iconv(charset)
     end
     send_data(str,
-      :type => 'text/csv',
-      :charset => charset,
-      :header => 'present',
-      :disposition => 'attachment',
-      :filename => 'report.csv'
+      type: "text/csv",
+      charset: charset,
+      header: "present",
+      disposition: "attachment",
+      filename: "report.csv"
     )
   end
 
@@ -401,8 +402,7 @@ class SpeciesListController < ApplicationController
 
   # Used by manage_species_lists.
   def remove_observation_from_species_list # :norobots:
-    if species_list = find_or_goto_index(SpeciesList, params[:species_list],
-                                         :include => :observations)
+    if species_list = find_or_goto_index(SpeciesList, params[:species_list])
       if observation = find_or_goto_index(Observation, params[:observation])
         if check_permission!(species_list)
           species_list.remove_observation(observation)
@@ -418,8 +418,7 @@ class SpeciesListController < ApplicationController
 
   # Used by manage_species_lists.
   def add_observation_to_species_list # :norobots:
-    if species_list = find_or_goto_index(SpeciesList, params[:species_list],
-                                         :include => :observations)
+    if species_list = find_or_goto_index(SpeciesList, params[:species_list])
       if observation = find_or_goto_index(Observation, params[:observation])
         if check_permission!(species_list)
           species_list.add_observation(observation)
@@ -941,7 +940,7 @@ class SpeciesListController < ApplicationController
 
   def init_name_vars_for_clone(clone_id)
     if clone = SpeciesList.safe_find(clone_id)
-      query = create_query(:Observation, :in_species_list, :species_list => clone)
+      query = create_query(:Observation, :in_species_list, species_list: clone)
       @checklist = calc_checklist(query)
       @species_list.when = clone.when
       @species_list.place_name = clone.place_name
@@ -1001,7 +1000,8 @@ class SpeciesListController < ApplicationController
 
   def init_project_vars_for_create
     init_project_vars
-    last_obs = Observation.find_by_user_id(User.current_id, :order => 'created_at DESC')
+    last_obs = Observation.where(user_id: User.current_id).
+                           order(:created_at).last
     if last_obs && last_obs.created_at > 1.hour.ago
       for proj in last_obs.projects
         @project_checks[proj.id] = true
@@ -1036,11 +1036,13 @@ class SpeciesListController < ApplicationController
         if before != after
           if after
             project.add_species_list(spl)
-            flash_notice(:attached_to_project.t(:object => :species_list, :project => project.title))
+            flash_notice(:attached_to_project.t(object: :species_list,
+                                                project: project.title))
             any_changes = true
           else
             project.remove_species_list(spl)
-            flash_notice(:removed_from_project.t(:object => :species_list, :project => project.title))
+            flash_notice(:removed_from_project.t(object: :species_list,
+                                                project: project.title))
             any_changes = true
           end
         end

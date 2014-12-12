@@ -34,7 +34,7 @@ class NamingControllerTest < FunctionalTestCase
   end
 
   def test_update_observation_approved_new_name
-    login('rolf')
+    login("rolf")
     nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Easter bunny"
@@ -45,7 +45,7 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: 1 }
     }
     post(:edit, params)
-    assert_template(action: 'show_observation')
+    assert_template(action: "show_observation")
     # Clones naming, creates Easter sp and E. bunny, but no votes.
     assert_equal(10 + 10*2 + 2, rolf.reload.contribution)
     params = assigns(:params)

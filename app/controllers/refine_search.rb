@@ -1216,7 +1216,7 @@ module RefineSearch
         pattern = Query.clean_pattern(Location.clean_name(val, :leave_stars))
 #        obj = Location.find_by_name_or_reverse_name(val) || # Rails 3
 #              Location.first(:conditions => "search_name LIKE '%#{pattern}%'")
-        obj = Location.where("name = ? OR reverse_name = ?", val, val) ||
+        obj = Location.where("name = ? OR reverse_name = ?", val, val).to_a ||
               Location.where("search_name LIKE ?", "%#{pattern}%").first
       when 'Name'
         obj = Name.find_by_search_name(val) ||

@@ -461,7 +461,7 @@ class User < AbstractModel
 #      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
 #         login, login, login, sha1(pass) ])
     where("(login = ? OR name = ? OR email = ?) AND password = ? AND
-           password != ''",
+           password != '' ",
            login, login, login, sha1(pass) ).
     first
   end

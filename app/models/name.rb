@@ -320,7 +320,7 @@ class Name < AbstractModel
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
 #    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4") # Rails 3
-    Observation.where("name_id = #{id} AND vote_cache >= 2.4")
+    Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
   end
 
   # Get list of common names to prime auto-completer.  Returns a simple Array
@@ -525,7 +525,7 @@ class Name < AbstractModel
     #                       :conditions => ["subject = ':name/#{id}' and
     #                         predicate = ':lichenAuthority'"]) != []) # Rails 3
     result = (Triple.where(subject: ":name/#{id}",
-                           predicate: ":lichenAuthority") != [])
+                           predicate: ":lichenAuthority").to_a != [])
     if !result and below_genus?
       genus = self.class.find_by_text_name(text_name.split.first)
       result = genus.is_lichen? if genus
@@ -674,7 +674,7 @@ class Name < AbstractModel
 #                                         AND rank = '#{next_rank}'
 #                                         AND text_name = '#{$1}'")
         these = Name.where("correct_spelling_id IS NULL AND
-                            rank = ? AND text_name = ?", next_rank, $1)
+                            rank = ? AND text_name = ?", next_rank, $1).to_a
       end
 
       # Get rid of deprecated names unless all the results are deprecated.
@@ -967,11 +967,11 @@ class Name < AbstractModel
       if @synonym_ids
         # Slightly faster since id is primary index.
         # Name.all(:conditions => ['id IN (?)', @synonym_ids]) # Rails 3
-        Name.where(id: @synonym_ids)
+        Name.where(id: @synonym_ids).to_a
       elsif synonym_id
         # Takes on average 0.050 seconds.
         # Name.all(:conditions => "synonym_id = #{synonym_id}") # Rails 3
-        Name.where(synonym_id: synonym_id)
+        Name.where(synonym_id: synonym_id).to_a
 
         # Involves instantiating a Synonym, something which need never happen.
         # synonym ? synonym.names : [self]
@@ -1018,10 +1018,10 @@ class Name < AbstractModel
       if @other_author_ids
         # Slightly faster since id is primary index.
         # Name.all(:conditions => ['id IN (?)', @other_author_ids]) # Rails 3
-        Name.where(id: @other_author_ids)
+        Name.where(id: @other_author_ids).to_a
       else
         # Name.all(:conditions => ['text_name = ?', text_name]) # Rails 3
-        Name.where(text_name: text_name)
+        Name.where(text_name: text_name).to_a
       end
     end
   end
@@ -1209,10 +1209,10 @@ class Name < AbstractModel
       if @misspelling_ids
         # Slightly faster since id is primary index.
         # Name.all(:conditions => ['id IN (?)', @misspelling_ids]) # Rails 3
-        Name.where(id: @misspelling_ids)
+        Name.where(id: @misspelling_ids).to_a
       else
         # Name.all(:conditions => "correct_spelling_id = #{id}") # Rails 3
-        Name.where(correct_spelling_id: id)
+        Name.where(correct_spelling_id: id).to_a
       end
     end
   end
@@ -1296,7 +1296,7 @@ class Name < AbstractModel
     end.join(' OR ')
     conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
     # names = all(:conditions => conds, :limit => 10) Rails 3
-    names = where(conds).limit(10)
+    names = where(conds).limit(10).to_a
 
     # Screen out ones way too different.
     names = names.reject do |x|
@@ -2088,7 +2088,7 @@ class Name < AbstractModel
         result = Name.where(text_name: parsed_name.text_name, author: "")
       end
     end
-    return result
+    return result.to_a
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,

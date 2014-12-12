@@ -123,7 +123,8 @@ class QueryTest < UnitTestCase
     assert_equal(['foo = bar'], Query.lookup(:Name, :all, :where => 'foo = bar').params[:where])
     assert_equal(['foo = bar','id in (1,2,3)'], Query.lookup(:Name, :all, :where => ['foo = bar', 'id in (1,2,3)']).params[:where])
     assert_equal('names.id', Query.lookup(:Name, :all, :group => 'names.id').params[:group])
-    assert_equal('id DESC', Query.lookup(:Name, :all, :order => 'id DESC').params[:order])
+    assert_equal('id DESC',
+                 Query.lookup(:Name, :all, order: 'id DESC').params[:order])
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, :group => ['1', '2']) }
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, :order => ['1', '2']) }
   end
@@ -1356,25 +1357,25 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_advanced
-    assert_query([38], :Name, :advanced_search, :name => 'macrocybe*titans')
-    assert_query([2], :Name, :advanced_search, :location => 'glendale') # where
+    assert_query([38], :Name, :advanced_search, name: "macrocybe*titans")
+    assert_query([2], :Name, :advanced_search, location: "glendale") # where
 #    expect = Name.all(:conditions => 'observations.location_id = 2', # Rails 3
 #                      :include => :observations, :order => 'text_name, author')
     expect = Name.where("observations.location_id" => 2).
-                  includes(:observations).order("text_name, author").to_a
-    assert_query(expect, :Name, :advanced_search, :location => 'burbank') # location
+                  includes(:observations).order(:text_name, :author).to_a
+    assert_query(expect, :Name, :advanced_search, location: "burbank") # location
 #    expect = Name.all(:conditions => 'observations.user_id = 1', # Rails 3
 #                      :include => :observations, :order => 'text_name, author')
     expect = Name.where("observations.user_id" => 1).
-                  includes(:observations).order("text_name, author").to_a
-    assert_query(expect, :Name, :advanced_search, :user => 'rolf')
-    assert_query([2], :Name, :advanced_search, :content => 'second fruiting') # notes
-    assert_query([1], :Name, :advanced_search, :content => '"a little of everything"') # comment
+                  includes(:observations).order(:text_name, :author).to_a
+    assert_query(expect, :Name, :advanced_search, user: "rolf")
+    assert_query([2], :Name, :advanced_search, content: "second fruiting") # notes
+    assert_query([1], :Name, :advanced_search, content: '"a little of everything"') # comment
   end
 
   def test_name_all
 #    expect = Name.all(:order => 'sort_name') # Rails 3
-    expect = Name.all.order("sort_name").to_a
+    expect = Name.all.order(:sort_name).to_a
     do_test_name_all(expect)
   rescue
     # Having problems with "Kuhner" and "Kühner" sorting correctly in all versions.

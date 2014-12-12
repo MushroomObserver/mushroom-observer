@@ -158,8 +158,7 @@ class CommentController < ApplicationController
   def show_comment # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @comment = find_or_goto_index(Comment, params[:id].to_s,
-                                     :include => [:target, :user])
+    if @comment = find_or_goto_index(Comment, params[:id].to_s)
       @target = @comment.target
       allowed_to_see!(@target)
     end

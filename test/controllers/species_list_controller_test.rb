@@ -995,23 +995,23 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     User.current = rolf
     tapinella = Name.create(
-      :author      => '(Batsch) Šutara',
-      :text_name   => 'Tapinella atrotomentosa',
-      :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
-      :sort_name   => 'Tapinella atrotomentosa (Batsch) Šutara',
-      :display_name => '**__Tapinella atrotomentosa__** (Batsch) Šutara',
-      :deprecated  => false,
-      :rank        => :Species
+      author:       "(Batsch) Šutara",
+      text_name:    "Tapinella atrotomentosa",
+      search_name:  "Tapinella atrotomentosa (Batsch) Šutara",
+      sort_name:    "Tapinella atrotomentosa (Batsch) Šutara",
+      display_name: "**__Tapinella atrotomentosa__** (Batsch) Šutara",
+      deprecated:   false,
+      rank:         :Species
     )
 
     list = species_lists(:first_species_list)
     args = {
-      :place_name => 'limbo',
-      :when       => now,
-      :created_at => now,
-      :updated_at => now,
-      :user       => rolf,
-      :specimen   => false,
+      place_name: "limbo",
+      when:       now,
+      created_at: now,
+      updated_at: now,
+      user:       rolf,
+      specimen:   false
     }
     list.construct_observation(tapinella, args)
     list.construct_observation(names(:fungi), args)
@@ -1021,15 +1021,15 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     path = "#{::Rails.root.to_s}/test/reports"
 
-    get(:make_report, :id => list.id, :type => 'csv')
-    assert_response_equal_file(["#{path}/test.csv", 'ISO-8859-1'])
+    get(:make_report, id: list.id, type: "csv")
+    assert_response_equal_file(["#{path}/test.csv", "ISO-8859-1"])
 
-    get(:make_report, :id => list.id, :type => 'txt')
+    get(:make_report, id: list.id, type: "txt")
     assert_response_equal_file("#{path}/test.txt")
 
-    get(:make_report, :id => list.id, :type => 'rtf')
+    get(:make_report, id: list.id, type: "rtf")
     assert_response_equal_file("#{path}/test.rtf") do |x|
-      x.sub(/\{\\createim\\yr.*\}/, '')
+      x.sub(/\{\\createim\\yr.*\}/, "")
     end
   end
 

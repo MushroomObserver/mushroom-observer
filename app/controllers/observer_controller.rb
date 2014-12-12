@@ -1008,16 +1008,7 @@ class ObserverController < ApplicationController
       set_default_thumbnail_size(params[:set_thumbnail_size])
     end
 
-    @observation = find_or_goto_index(Observation, params[:id].to_s,
-                                      include: [{ comments: :user },
-                                                { images: :image_votes },
-                                                :location,
-                                                :name,
-                                                { namings: [:name, :user,
-                                                            { votes: :user }] },
-                                                :projects,
-                                                { species_lists: :location },
-                                                :user])
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
     update_view_stats(@observation)
 
@@ -1275,8 +1266,8 @@ class ObserverController < ApplicationController
   def defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
     # edited if it was less than an hour ago.
-    last_observation = Observation.find_by_user_id(@user.id,
-                                                   order: "created_at DESC")
+    last_observation = Observation.where(user_id: @user.id).
+                                   order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
     @observation.when     = last_observation.when
     @observation.where    = last_observation.where
@@ -1315,8 +1306,7 @@ class ObserverController < ApplicationController
     pass_query_params
 
     includes = [:name, :images, :location]
-    @observation = find_or_goto_index(Observation, params[:id].to_s,
-                                      include: includes)
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(@observation.when)
@@ -1527,7 +1517,7 @@ class ObserverController < ApplicationController
     @authors = @object.authors
     parent = @object.parent
     if @authors.member?(@user) || @user.in_group?("reviewers")
-      @users = User.all(order: "login, name")
+      @users = User.all.order("login, name").to_a
       new_author = params[:add] ?  User.find(params[:add]) : nil
       if new_author && !@authors.member?(new_author)
         @object.add_author(new_author)

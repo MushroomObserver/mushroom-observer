@@ -274,8 +274,7 @@ class Naming < AbstractModel
   end
 
   def first_vote
-    Vote.find(:first, conditions: ["naming_id = ? AND user_id = ?",
-                                   id, user_id])
+    Vote.where(naming_id: id, user_id: user_id).first
   end
 
   ##############################################################################

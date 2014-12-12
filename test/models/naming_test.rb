@@ -142,7 +142,8 @@ class NamingTest < UnitTestCase
   def test_reason_order
     naming = Naming.first
     assert_equal(Naming::Reason.all_reasons, naming.get_reasons.map(&:num))
-    assert_equal(Naming::Reason.all_reasons, naming.get_reasons.sort_by(&:order).map(&:num))
+    assert_equal(Naming::Reason.all_reasons,
+                 naming.get_reasons.sort_by(&:order).map(&:num))
   end
 
   def test_reason_labels
@@ -150,7 +151,7 @@ class NamingTest < UnitTestCase
     nrs = naming.get_reasons
     assert_equal("Recognized by sight", nrs.first.label.l)
     assert_equal("Based on chemical features", nrs.last.label.l)
-  end  
+  end
 
   def test_other_reason_methods
     naming = namings(:coprinus_comatus_other_naming)

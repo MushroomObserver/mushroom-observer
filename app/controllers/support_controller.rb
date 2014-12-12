@@ -66,7 +66,7 @@ class SupportController < ApplicationController
       end
     else
       flash_error(:review_donations_not_allowed.l)
-      redirect_to(:action => 'donate')
+      redirect_to(action: "donate")
     end
   end
 

@@ -308,7 +308,7 @@ class ProjectController < ApplicationController
   def add_members # :norobots:
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
-      @users = User.all(:order => "login, name")
+      @users = User.all.order("login, name").to_a
       if !@project.is_admin?(@user)
         redirect_with_query(:action => 'show_project', :id => @project.id)
       elsif !params[:candidate].blank?

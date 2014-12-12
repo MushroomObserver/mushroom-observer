@@ -339,8 +339,7 @@ class NameController < ApplicationController
     # Load Name and NameDescription along with a bunch of associated objects.
     name_id = params[:id].to_s
     desc_id = params[:desc]
-    if @name = find_or_goto_index(Name, name_id,
-                                  :include => [:user, :descriptions])
+    if @name = find_or_goto_index(Name, name_id)
 
       update_view_stats(@name)
 
@@ -398,9 +397,7 @@ class NameController < ApplicationController
   def show_name_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(NameDescription, params[:id].to_s,
-                        :include => [:authors, :editors, :license, :reviewer,
-                                     :user, {:name=>:descriptions}])
+    if @description = find_or_goto_index(NameDescription, params[:id].to_s)
 
       # Public or user has permission.
       if @description.is_reader?(@user)
@@ -1378,7 +1375,7 @@ class NameController < ApplicationController
     name_ids = @descs.keys.map(&:to_s).join(',')
 #    @names = Name.all(:conditions => "id IN (#{name_ids})", # Rails 3
 #                      :order => 'sort_name ASC, author ASC')
-    @names = Name.where(id: name_ids).order(:sort_name, :author)
+    @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
     image_data = Name.connection.select_all %(
@@ -1458,7 +1455,7 @@ class NameController < ApplicationController
     ))
 
     # @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
-    @images = Image.includes(:image_votes).where(images.id => ids)
+    @images = Image.includes(:image_votes).where(images.id => ids).to_a
 
     ids = Name.connection.select_values(%(
       SELECT images.id
@@ -1485,7 +1482,7 @@ class NameController < ApplicationController
       ORDER BY observations.id
     ))
     # @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids]) # Rails 3
-    @voteless_obs = Observation.where(images.id => ids)
+    @voteless_obs = Observation.where(images.id => ids).to_a
   end
 
   ################################################################################

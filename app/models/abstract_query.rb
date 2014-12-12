@@ -1776,11 +1776,12 @@ class AbstractQuery < ActiveRecord::Base
 #      args2[:include] = args[:include] if args[:include] #
 #      model.all(args2).each do |obj| # Rails 3
       if args[:include]
-        model.where(args2[:conditions]).includes(args[:include]).each do |obj|
-          @results[obj.id] = obj
-        end
+        model.where(args2[:conditions]).includes(args[:include]).to_a.
+          each do |obj|
+            @results[obj.id] = obj
+          end
       else
-        model.where(args2[:conditions]).each do |obj|
+        model.where(args2[:conditions]).to_a.each do |obj|
           @results[obj.id] = obj
         end
       end

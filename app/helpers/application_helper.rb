@@ -752,7 +752,7 @@ module ApplicationHelper
     else
       editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
 #      editors = User.all(:conditions => ["id IN (?)", editors]) # Rails 3
-      editors = User.where(id: editors)
+      editors = User.where(id: editors).to_a
       authors = user_list(:"show_#{type}_creator", [obj.user])
       editors = user_list(:"show_#{type}_editor", editors)
     end

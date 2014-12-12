@@ -175,13 +175,13 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def assert_notify_email(old_name, new_name)
-    assert( @@emails.any? "Was expecting an email notification.")
+    assert(@@emails.any? "Was expecting an email notification.")
     assert(@@emails.length == 1,
-           "Was only expecting one email notification, got:\n" \
+           "Was only expecting one email notification, got:\n" +
            @@emails.inspect)
     old_name2 = $2 if @@emails.first.match(/^(old|this) : #\d+: (.*)/)
     new_name2 = $2 if @@emails.first.match(/^(new|into) : #\d+: (.*)/)
-    assert(old_name == old_name2 and new_name == new_name2,
+    assert(old_name == old_name2 && new_name == new_name2,
            "Was expecting different email notification content.\n" \
            "---- Expected: --------------------\n" \
            "old: #nnn: #{old_name}\n" \
@@ -254,23 +254,23 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev
-    names = Name.all(:order => 'text_name, author')
+    names = Name.all.order("text_name, author").to_a
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]
-    get(:next_name, :id => name12.id)
+    get(:next_name, id: name12.id)
     q = @controller.query_params(Query.last)
     assert_template(action: 'show_name', id: name13.id, params: q)
-    get(:next_name, :id => name13.id)
+    get(:next_name, id: name13.id)
     assert_template(action: 'show_name', id: name14.id, params: q)
-    get(:prev_name, :id => name14.id)
+    get(:prev_name, id: name14.id)
     assert_template(action: 'show_name', id: name13.id, params: q)
-    get(:prev_name, :id => name13.id)
+    get(:prev_name, id: name13.id)
     assert_template(action: 'show_name', id: name12.id, params: q)
   end
 
   def test_next_and_prev_2
-    query = Query.lookup_and_save(:Name, :pattern_search, :pattern => 'lactarius')
+    query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
     q = @controller.query_params(query)
 
     name1 = names(:lactarius_alpigenes)
@@ -451,7 +451,7 @@ class NameControllerTest < FunctionalTestCase
     assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(10, name_links.length)
-    expected = Name.all(:order => 'text_name, author', :limit => 10)
+    expected = Name.all.order("text_name, author").limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     assert_equal(@controller.url_with_query(:action => 'show_name',
       :id => expected.first.id, :only_path => true), name_links.first.url)
@@ -470,8 +470,7 @@ class NameControllerTest < FunctionalTestCase
     assert_template(action: 'list_names')
     name_links = extract_links(:action => 'show_name')
     assert_equal(10, name_links.length)
-    expected = Name.all(:order => 'text_name, author', :limit => 10,
-                        :offset => 10)
+    expected = Name.all.order("text_name, author").limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     assert_equal(@controller.url_with_query(:action => 'show_name',
       :id => expected.first.id, :only_path => true), name_links.first.url)
@@ -488,7 +487,7 @@ class NameControllerTest < FunctionalTestCase
     query_params = pagination_query_params
 #    l_names = Name.all(:conditions => 'text_name LIKE "L%"', # Rails 3
 #      :order => 'text_name, author')
-    l_names = Name.where("text_name LIKE ?", "L%").order("text_name, author")
+    l_names = Name.where("text_name LIKE 'L%").order("text_name, author").to_a
     get(:test_index, { :num_per_page => l_names.size,
                :letter => 'L' }.merge(query_params))
     assert_template(action: 'list_names')
@@ -508,7 +507,7 @@ class NameControllerTest < FunctionalTestCase
     query_params = pagination_query_params
 #    l_names = Name.all(:conditions => 'text_name LIKE "L%"', # Rails 3
 #      :order => 'text_name, author')
-    l_names = Name.where("text_name LIKE ?", "L%").order("text_name, author")
+    l_names = Name.where("text_name LIKE 'L%").order("text_name, author").to_a
     # Do it again, but make page size exactly one too small.
     l_names.pop
     get(:test_index, { :num_per_page => l_names.size,
@@ -526,8 +525,7 @@ class NameControllerTest < FunctionalTestCase
 
   def test_pagination_letter_with_page_2
     query_params = pagination_query_params
-    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
-      :order => 'text_name, author')
+    l_names = Name.where("text_name LIKE 'L%'").order("text_name, author").to_a
     last_name = l_names.pop
     # Check second page.
     get(:test_index, { :num_per_page => l_names.size, :letter => 'L',
