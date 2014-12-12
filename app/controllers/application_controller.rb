@@ -91,6 +91,7 @@
 class ApplicationController < ActionController::Base
   require 'extensions'
   require 'login_system'
+  require "csv"
   include LoginSystem
 
   around_filter :catch_errors # if TESTING

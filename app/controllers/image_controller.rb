@@ -41,8 +41,6 @@
 ################################################################################
 
 class ImageController < ApplicationController
-  require 'csv'
-
   before_filter :login_required, :except => [
     :advanced_search,
     :image_search,

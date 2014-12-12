@@ -492,7 +492,10 @@ module ControllerExtensions
   #   end
   #
   def assert_response_equal_file(*files, &block)
-    body = @response.body.clone
+  # body = @response.body.clone # Rails 3
+  # in Rails 4, above strips the '\n's (or other part separators)
+  # so put it back in
+    body = @response.body_parts.join("\n").clone
     assert_string_equal_file(body, *files, &block)
   end
 
