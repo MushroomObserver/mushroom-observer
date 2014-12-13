@@ -583,7 +583,7 @@ module ControllerExtensions
   #   # Lastly, expect redirect to full explicit URL.
   #   assert_response("http://bogus.com")
   #
-  def assert_response(arg, msg='')
+  def assert_response(arg, msg="")
     if arg
       if arg == :success || arg == :redirect || arg.is_a?(Fixnum)
         super
@@ -604,7 +604,7 @@ module ControllerExtensions
 
         # Add flash notice to potential error message.
         flash_notice = get_last_flash.to_s.strip_squeeze
-        if flash_notice != ''
+        if flash_notice != ""
           got += "\nFlash message: <#{flash_notice[1..-1].html_to_ascii}>."
         end
 
@@ -616,7 +616,7 @@ module ControllerExtensions
             assert_template({action: arg[0]}, msg)
           else
             msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-            assert_template({controller: arg[0], action: arg[1]}, msg)
+            assert_template({ controller: arg[0], action: arg[1] }, msg)
           end
         elsif arg.is_a?(Hash)
           url = @controller.url_for(arg).sub(/^http:..test.host./, '')
@@ -633,13 +633,14 @@ module ControllerExtensions
           assert_template(arg.to_s, msg)
         elsif arg == :index
           msg += "Expected redirect to <observer/list_rss_logs>" + got
-          assert_redirected_to({:controller => 'observer', :action => 'list_rss_logs'}, msg)
+          assert_redirected_to({ controller: "observer",
+                                 action: "list_rss_logs" }, msg)
         elsif arg == :login
           msg += "Expected redirect to <account/login>" + got
-          assert_redirected_to({:controller => 'account', :action => 'login'}, msg)
+          assert_redirected_to({ controller: "account", action: "login" }, msg)
         elsif arg == :welcome
           msg += "Expected redirect to <account/welcome>" + got
-          assert_redirected_to({:controller => 'account', :action => 'login'}, msg)
+          assert_redirected_to({ controller: "account", action: "login" }, msg)
         else
           raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
         end

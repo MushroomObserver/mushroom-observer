@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class AccountControllerTest < FunctionalTestCase
 
@@ -10,7 +10,7 @@ class AccountControllerTest < FunctionalTestCase
 ################################################################################
 
   def test_auth_rolf
-    @request.session['return-to'] = "http://localhost/bogus/location"
+    @request.session["return-to"] = "http://localhost/bogus/location"
     post(:login, "user_login" => "rolf", "user_password" => "testpassword")
     assert_response("http://localhost/bogus/location")
     assert_flash(:runtime_login_success.t)
@@ -21,7 +21,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_signup
-    @request.session['return-to'] = "http://localhost/bogus/location"
+    @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
     post(:signup, "new_user" => {
       "login"    => "newbob",
@@ -34,9 +34,9 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
     assert_equal(num_users+1, User.count)
     user = User.last
-    assert_equal('newbob', user.login)
-    assert_equal('needs a name!', user.name)
-    assert_equal('nathan@collectivesource.com', user.email)
+    assert_equal("newbob", user.login)
+    assert_equal("needs a name!", user.name)
+    assert_equal("nathan@collectivesource.com", user.email)
     assert_equal(nil, user.verified)
     assert_equal(false, user.admin)
     assert_equal(true, user.created_here)
@@ -48,7 +48,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_bad_signup
-    @request.session['return-to'] = "http://localhost/bogus/location"
+    @request.session["return-to"] = "http://localhost/bogus/location"
 
     # Missing password.
     post(:signup, :new_user => {
@@ -57,7 +57,7 @@ class AccountControllerTest < FunctionalTestCase
       :password_confirmation => "",
       :mailing_address => "",
       :theme => "NULL",
-      :notes => ""
+      notes: ""
     })
     assert(assigns("new_user").errors[:password].any?)
 
@@ -68,7 +68,7 @@ class AccountControllerTest < FunctionalTestCase
       :password_confirmation => "wrong",
       :mailing_address => "",
       :theme => "NULL",
-      :notes => ""
+      notes: ""
     })
     assert(assigns("new_user").errors[:password].any?)
 
@@ -79,7 +79,7 @@ class AccountControllerTest < FunctionalTestCase
       :password_confirmation => "newpassword",
       :mailing_address => "",
       :theme => "NULL",
-      :notes => ""
+      notes: ""
     })
     assert(assigns("new_user").errors[:login].any?)
 
@@ -90,14 +90,14 @@ class AccountControllerTest < FunctionalTestCase
       :password_confirmation => "wrong",
       :mailing_address => "",
       :theme => "NULL",
-      :notes => ""
+      notes: ""
     })
     assert(assigns("new_user").errors[:password].any?)
     assert(assigns("new_user").errors[:login].any?)
   end
 
   def test_signup_theme_errors
-    @request.session['return-to'] = "http://localhost/bogus/location"
+    @request.session["return-to"] = "http://localhost/bogus/location"
 
     post(:signup, :new_user => {
       :login => "spammer",
@@ -106,7 +106,7 @@ class AccountControllerTest < FunctionalTestCase
       :email => "spam@spam.spam",
       :mailing_address => "",
       :theme => "",
-      :notes => ""
+      notes: ""
     })
     assert(!@request.session["user_id"])
 
@@ -120,10 +120,10 @@ class AccountControllerTest < FunctionalTestCase
       :email => "spam@spam.spam",
       :mailing_address => "",
       :theme => "spammer",
-      :notes => ""
+      notes: ""
     })
     assert(!@request.session["user_id"])
-    assert_template(action: "welcome")
+    assert_redirected_to(action: "welcome")
   end
 
   def test_invalid_login
@@ -132,34 +132,34 @@ class AccountControllerTest < FunctionalTestCase
     assert_template("login")
 
     user = User.create!(
-      :login => 'api',
-      :email => 'foo@bar.com',
+      :login => "api",
+      :email => "foo@bar.com",
     )
-    post(:login, :user_login => 'api', :user_password => '')
+    post(:login, :user_login => "api", :user_password => "")
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.update_attribute(:verified, Time.now)
-    post(:login, :user_login => 'api', :user_password => '')
+    post(:login, :user_login => "api", :user_password => "")
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
-    user.change_password('try_this_for_size')
-    post(:login, :user_login => 'api', :user_password => 'try_this_for_size')
+    user.change_password("try_this_for_size")
+    post(:login, :user_login => "api", :user_password => "try_this_for_size")
     assert(@request.session["user_id"])
   end
 
   # Test autologin feature.
   def test_autologin
-    # First make sure test page that requires login fails without autologin cookie.
+    # Make sure test page that requires login fails without autologin cookie.
     get(:test_autologin)
     assert_response(:redirect)
 
     # Make sure cookie is not set if clear remember_me box in login.
     post(:login,
-      :user_login    => "rolf",
-      :user_password => "testpassword",
-      :user => { :remember_me => "" }
+      user_login: "rolf",
+      user_password: "testpassword",
+      user: { remember_me: "" }
     )
     assert(session[:user_id])
     assert(!cookies["mo_user"])
@@ -170,9 +170,9 @@ class AccountControllerTest < FunctionalTestCase
 
     # Now clear session and try again with remember_me box set.
     post(:login,
-      :user_login    => "rolf",
-      :user_password => "testpassword",
-      :user => { :remember_me => "1" }
+      user_login: "rolf",
+      user_password: "testpassword",
+      user: { remember_me: "1" }
     )
     assert(session[:user_id])
     assert(cookies["mo_user"])
@@ -186,78 +186,78 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_normal_verify
     user = User.create!(
-      :login => 'micky',
-      :password => 'mouse',
-      :password_confirmation => 'mouse',
-      :email => 'mm@disney.com'
+      login: "micky",
+      password: "mouse",
+      password_confirmation: "mouse",
+      email: "mm@disney.com"
     )
     assert(!user.auth_code.blank?)
     assert(user.auth_code.length > 10)
 
-    get(:verify, :id => user.id, :auth_code => 'bogus_code')
-    assert_template('reverify')
+    get(:verify, id: user.id, auth_code: "bogus_code")
+    assert_template("reverify")
     assert(!@request.session[:user_id])
 
-    get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_template('verify')
+    get(:verify, id: user.id, auth_code: user.auth_code)
+    assert_template("verify")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
 
-    get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_template(action: :welcome)
+    get(:verify, id: user.id, auth_code: user.auth_code)
+    assert_redirected_to(action: :welcome)
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
 
-    login('rolf')
-    get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_template(action: :login)
+    login("rolf")
+    get(:verify, id: user.id, auth_code: user.auth_code)
+    assert_redirected_to(action: :login)
     assert(!@request.session[:user_id])
   end
 
   def test_verify_after_api_create
     user = User.create!(
-      :login => 'micky',
-      :email => 'mm@disney.com'
+      :login => "micky",
+      :email => "mm@disney.com"
     )
 
-    get(:verify, :id => user.id, :auth_code => 'bogus_code')
-    assert_template('reverify')
+    get(:verify, id: user.id, auth_code: "bogus_code")
+    assert_template("reverify")
     assert(!@request.session[:user_id])
 
-    get(:verify, :id => user.id, :auth_code => user.auth_code)
+    get(:verify, id: user.id, auth_code: user.auth_code)
     assert_flash_warning
-    assert_template('choose_password')
+    assert_template("choose_password")
     assert(!@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
-    assert_input_value('user_password', '')
-    assert_input_value('user_password_confirmation', '')
+    assert_input_value("user_password", "")
+    assert_input_value("user_password_confirmation", "")
 
-    post(:verify, :id => user.id, :auth_code => user.auth_code,
+    post(:verify, id: user.id, auth_code: user.auth_code,
          :user => {})
     assert_flash_error
-    assert_template('choose_password')
-    assert_input_value('user_password', '')
-    assert_input_value('user_password_confirmation', '')
+    assert_template("choose_password")
+    assert_input_value("user_password", "")
+    assert_input_value("user_password_confirmation", "")
 
-    post(:verify, :id => user.id, :auth_code => user.auth_code,
-         :user => { :password => 'mouse', :password_confirmation => 'moose'})
+    post(:verify, id: user.id, auth_code: user.auth_code,
+         :user => { :password => "mouse", :password_confirmation => "moose"})
     assert_flash_error
-    assert_template('choose_password')
-    assert_input_value('user_password', 'mouse')
-    assert_input_value('user_password_confirmation', '')
+    assert_template("choose_password")
+    assert_input_value("user_password", "mouse")
+    assert_input_value("user_password_confirmation", "")
 
-    post(:verify, :id => user.id, :auth_code => user.auth_code,
-         :user => { :password => 'mouse', :password_confirmation => 'mouse'})
-    assert_template('verify')
+    post(:verify, id: user.id, auth_code: user.auth_code,
+         :user => { :password => "mouse", :password_confirmation => "mouse"})
+    assert_template("verify")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
     assert_not_nil(user.reload.verified)
-    assert_not_equal('', user.password)
+    assert_not_equal("", user.password)
 
-    login('rolf')
-    get(:verify, :id => user.id, :auth_code => user.auth_code)
-    assert_template(action: :login)
+    login("rolf")
+    get(:verify, id: user.id, auth_code: user.auth_code)
+    assert_redirected_to(action: :login)
     assert(!@request.session[:user_id])
   end
 
@@ -407,17 +407,17 @@ class AccountControllerTest < FunctionalTestCase
     params = {
       :user => {
         :name        => rolf.name,
-        :place_name   => '',
-        :notes         => '',
+        :place_name   => "",
+        :notes         => "",
         :upload_image   => file,
         :mailing_address => rolf.mailing_address,
       },
-      :copyright_holder => 'Someone Else',
+      :copyright_holder => "Someone Else",
       :upload => { :license_id => licenses(:ccnc25).id },
       :date => { :copyright_year => "2003" },
     }
     post_requires_login(:profile, params)
-    assert_template(controller: :observer, action: :show_user, id: 1)
+    assert_redirected_to(controller: :observer, action: :show_user, id: 1)
     assert_flash_success
 
     rolf.reload
@@ -449,10 +449,10 @@ class AccountControllerTest < FunctionalTestCase
     ]
       assert_request(
         :action        => "no_email_#{type}",
-        :params        => { :id => rolf.id },
+        :params        => { id: rolf.id },
         :require_login => true,
         :require_user  => :index,
-        :result        => 'no_email'
+        :result        => "no_email"
       )
       assert(!rolf.reload.send("email_#{type}"))
     end
@@ -464,119 +464,122 @@ class AccountControllerTest < FunctionalTestCase
 
     # Get initial (empty) form.
     requires_login(:api_keys)
-    assert_select('a[onclick*=edit_key]', :count => 0)
-    assert_select('a[onclick*=activate_key]', :count => 0)
-    assert_input_value(:key_notes, '')
+    assert_select("a[onclick*=edit_key]", count: 0)
+    assert_select("a[onclick*=activate_key]", count: 0)
+    assert_input_value(:key_notes, "")
 
     # Try to create key with no name.
-    login('mary')
-    post(:api_keys, :commit => :account_api_keys_create_button.l)
+    login("mary")
+    post(:api_keys, commit: :account_api_keys_create_button.l)
     assert_flash_error
     assert_equal(0, ApiKey.count)
-    assert_select('a[onclick*=edit_key]', :count => 0)
+    assert_select("a[onclick*=edit_key]", count: 0)
 
     # Create good key.
-    post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'app name'})
+    post(:api_keys, commit: :account_api_keys_create_button.l,
+         key: {notes: "app name"})
     assert_flash_success
     assert_equal(1, ApiKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key1 = mary.api_keys.first
-    assert_equal('app name', key1.notes)
-    assert_select('a[onclick*=edit_key]', :count => 1)
+    assert_equal("app name", key1.notes)
+    assert_select("a[onclick*=edit_key]", count: 1)
 
     # Create another key.
-    post(:api_keys, :commit => :account_api_keys_create_button.l, :key => {:notes => 'another name'})
+    post(:api_keys, commit: :account_api_keys_create_button.l,
+         key: {notes: "another name"})
     assert_flash_success
     assert_equal(2, ApiKey.count)
     assert_equal(2, mary.reload.api_keys.length)
     key2 = mary.api_keys.last
-    assert_equal('another name', key2.notes)
-    assert_select('a[onclick*=edit_key]', :count => 2)
+    assert_equal("another name", key2.notes)
+    assert_select("a[onclick*=edit_key]", count: 2)
 
     # Press "remove" without selecting anything.
-    post(:api_keys, :commit => :account_api_keys_remove_button.l)
+    post(:api_keys, commit: :account_api_keys_remove_button.l)
     assert_flash_warning
     assert_equal(2, ApiKey.count)
-    assert_select('a[onclick*=edit_key]', :count => 2)
+    assert_select("a[onclick*=edit_key]", count: 2)
 
     # Remove first key.
-    post(:api_keys, :commit => :account_api_keys_remove_button.l, "key_#{key1.id}" => '1')
+    post(:api_keys, commit: :account_api_keys_remove_button.l,
+         "key_#{key1.id}" => "1")
     assert_flash_success
     assert_equal(1, ApiKey.count)
     assert_equal(1, mary.reload.api_keys.length)
     key = mary.api_keys.last
     assert_objs_equal(key, key2)
-    assert_select('a[onclick*=edit_key]', :count => 1)
+    assert_select("a[onclick*=edit_key]", count: 1)
   end
 
   def test_activate_api_key
     key = ApiKey.new
     key.provide_defaults
     key.verified = nil
-    key.notes = 'Testing'
+    key.notes = "Testing"
     key.user = katrina
     key.save
     assert_nil(key.verified)
 
-    get(:activate_api_key, :id => 12345)
-    assert_template(action: :login)
+    get(:activate_api_key, id: 12345)
+    assert_redirected_to(action: :login)
     assert_nil(key.verified)
 
-    login('dick')
-    get(:activate_api_key, :id => key.id)
+    login("dick")
+    get(:activate_api_key, id: key.id)
     assert_flash_error
-    assert_template(action: :api_keys)
+    assert_redirected_to(action: :api_keys)
     assert_nil(key.verified)
     flash.clear
 
-    login('katrina')
+    login("katrina")
     get(:api_keys)
-    assert_select('a[onclick*=edit_key]', :count => 1)
-    assert_select('a[onclick*=activate_key]', :count => 1)
+    assert_select("a[onclick*=edit_key]", count: 1)
+    assert_select("a[onclick*=activate_key]", count: 1)
 
-    get(:activate_api_key, :id => key.id)
+    get(:activate_api_key, id: key.id)
     assert_flash_success
-    assert_template(action: :api_keys)
+    assert_redirected_to(action: :api_keys)
     key.reload
     assert_not_nil(key.verified)
 
     get(:api_keys)
-    assert_select('a[onclick*=edit_key]', :count => 1)
-    assert_select('a[onclick*=activate_key]', :count => 0)
+    assert_select("a[onclick*=edit_key]", count: 1)
+    assert_select("a[onclick*=activate_key]", count: 0)
   end
 
   def test_edit_api_key
-    key = mary.api_keys.create(:notes => 'app name')
+    key = mary.api_keys.create(notes: "app name")
 
     # Try without logging in.
-    get(:edit_api_key, :id => key.id)
+    get(:edit_api_key, id: key.id)
     assert_response(:redirect)
 
     # Try to edit another user's key.
-    login('dick')
-    get(:edit_api_key, :id => key.id)
+    login("dick")
+    get(:edit_api_key, id: key.id)
     assert_response(:redirect)
 
     # Have Mary edit her own key.
-    login('mary')
-    get(:edit_api_key, :id => key.id)
+    login("mary")
+    get(:edit_api_key, id: key.id)
     assert_response(:success)
-    assert_input_value(:key_notes, 'app name')
+    assert_input_value(:key_notes, "app name")
 
     # Cancel form.
-    post(:edit_api_key, :commit => :CANCEL.l, :id => key.id)
+    post(:edit_api_key, commit: :CANCEL.l, id: key.id)
     assert_response(:redirect)
-    assert_equal('app name', key.reload.notes)
+    assert_equal("app name", key.reload.notes)
 
     # Try to change notes to empty string.
-    post(:edit_api_key, :commit => :UPDATE.l, :id => key.id, :key => {:notes => ''})
+    post(:edit_api_key, commit: :UPDATE.l, id: key.id, key: {notes: ""})
     assert_flash_error
     assert_response(:success) # means failure
 
     # Change notes correctly.
-    post(:edit_api_key, :commit => :UPDATE.l, :id => key.id, :key => {:notes => 'new name'})
+    post(:edit_api_key, commit: :UPDATE.l, id: key.id, key: {notes: "new name"})
     assert_flash_success
-    assert_template(action: :api_keys)
-    assert_equal('new name', key.reload.notes)
+    assert_redirected_to(action: :api_keys)
+    assert_equal("new name", key.reload.notes)
   end
 end

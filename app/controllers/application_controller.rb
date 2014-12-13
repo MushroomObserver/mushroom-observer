@@ -292,7 +292,7 @@ logger.warn('SESSION: ' + session.inspect)
     elsif (cookie = cookies["mo_user"])  &&
           (split = cookie.split(" ")) &&
 #          (user = User.find(:first, :conditions => ['id = ?', split[0]])) && # Rails 3
-          (user = User.where(id: split[0])).first &&
+          (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
           (user.verified)
       @user = set_session_user(user)
