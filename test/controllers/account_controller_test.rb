@@ -11,7 +11,7 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_auth_rolf
     @request.session["return-to"] = "http://localhost/bogus/location"
-    post(:login, "user_login" => "rolf", "user_password" => "testpassword")
+    post(:login, user_login: "rolf", user_password: "testpassword")
     assert_response("http://localhost/bogus/location")
     assert_flash(:runtime_login_success.t)
     assert(@request.session[:user_id],
@@ -23,13 +23,13 @@ class AccountControllerTest < FunctionalTestCase
   def test_signup
     @request.session["return-to"] = "http://localhost/bogus/location"
     num_users = User.count
-    post(:signup, "new_user" => {
-      "login"    => "newbob",
-      "password" => "newpassword",
-      "password_confirmation" => "newpassword",
-      "email"    => "nathan@collectivesource.com",
-      "name"     => "needs a name!",
-      "theme"    => "NULL"
+    post(:signup, new_user: {
+      login: "newbob",
+      password: "newpassword",
+      password_confirmation: "newpassword",
+      email: "nathan@collectivesource.com",
+      name: "needs a name!",
+      theme: "NULL"
     })
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
     assert_equal(num_users+1, User.count)
@@ -51,45 +51,45 @@ class AccountControllerTest < FunctionalTestCase
     @request.session["return-to"] = "http://localhost/bogus/location"
 
     # Missing password.
-    post(:signup, :new_user => {
-      :login => "newbob",
-      :password => "",
-      :password_confirmation => "",
-      :mailing_address => "",
-      :theme => "NULL",
+    post(:signup, new_user: {
+      login: "newbob",
+      password: "",
+      password_confirmation: "",
+      mailing_address: "",
+      theme: "NULL",
       notes: ""
     })
     assert(assigns("new_user").errors[:password].any?)
 
     # Password doesn't match
-    post(:signup, :new_user => {
-      :login => "newbob",
-      :password => "newpassword",
-      :password_confirmation => "wrong",
-      :mailing_address => "",
-      :theme => "NULL",
+    post(:signup, new_user: {
+      login: "newbob",
+      password: "newpassword",
+      password_confirmation: "wrong",
+      mailing_address: "",
+      theme: "NULL",
       notes: ""
     })
     assert(assigns("new_user").errors[:password].any?)
 
     # No email
-    post(:signup, :new_user => {
-      :login => "yo",
-      :password => "newpassword",
-      :password_confirmation => "newpassword",
-      :mailing_address => "",
-      :theme => "NULL",
+    post(:signup, new_user: {
+      login: "yo",
+      password: "newpassword",
+      password_confirmation: "newpassword",
+      mailing_address: "",
+      theme: "NULL",
       notes: ""
     })
     assert(assigns("new_user").errors[:login].any?)
 
     # Bad password and no email
-    post(:signup, :new_user => {
-      :login => "yo",
-      :password => "newpassword",
-      :password_confirmation => "wrong",
-      :mailing_address => "",
-      :theme => "NULL",
+    post(:signup, new_user: {
+      login: "yo",
+      password: "newpassword",
+      password_confirmation: "wrong",
+      mailing_address: "",
+      theme: "NULL",
       notes: ""
     })
     assert(assigns("new_user").errors[:password].any?)
@@ -99,13 +99,13 @@ class AccountControllerTest < FunctionalTestCase
   def test_signup_theme_errors
     @request.session["return-to"] = "http://localhost/bogus/location"
 
-    post(:signup, :new_user => {
-      :login => "spammer",
-      :password => "spammer",
-      :password_confirmation => "spammer",
-      :email => "spam@spam.spam",
-      :mailing_address => "",
-      :theme => "",
+    post(:signup, new_user: {
+      login: "spammer",
+      password: "spammer",
+      password_confirmation: "spammer",
+      email: "spam@spam.spam",
+      mailing_address: "",
+      theme: "",
       notes: ""
     })
     assert(!@request.session["user_id"])
@@ -113,13 +113,13 @@ class AccountControllerTest < FunctionalTestCase
     # Disabled denied email in above case...
     # assert_equal("http://localhost/bogus/location", @response.redirect_url)
 
-    post(:signup, :new_user => {
-      :login => "spammer",
-      :password => "spammer",
-      :password_confirmation => "spammer",
-      :email => "spam@spam.spam",
-      :mailing_address => "",
-      :theme => "spammer",
+    post(:signup, new_user: {
+      login: "spammer",
+      password: "spammer",
+      password_confirmation: "spammer",
+      email: "spam@spam.spam",
+      mailing_address: "",
+      theme: "spammer",
       notes: ""
     })
     assert(!@request.session["user_id"])
@@ -127,25 +127,25 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_invalid_login
-    post(:login, :user_login => "rolf", :user_password => "not_correct")
+    post(:login, user_login: "rolf", user_password: "not_correct")
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user = User.create!(
-      :login => "api",
-      :email => "foo@bar.com",
+      login: "api",
+      email: "foo@bar.com",
     )
-    post(:login, :user_login => "api", :user_password => "")
+    post(:login, user_login: "api", user_password: "")
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.update_attribute(:verified, Time.now)
-    post(:login, :user_login => "api", :user_password => "")
+    post(:login, user_login: "api", user_password: "")
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.change_password("try_this_for_size")
-    post(:login, :user_login => "api", :user_password => "try_this_for_size")
+    post(:login, user_login: "api", user_password: "try_this_for_size")
     assert(@request.session["user_id"])
   end
 
@@ -217,8 +217,8 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_verify_after_api_create
     user = User.create!(
-      :login => "micky",
-      :email => "mm@disney.com"
+      login: "micky",
+      email: "mm@disney.com"
     )
 
     get(:verify, id: user.id, auth_code: "bogus_code")
@@ -234,21 +234,21 @@ class AccountControllerTest < FunctionalTestCase
     assert_input_value("user_password_confirmation", "")
 
     post(:verify, id: user.id, auth_code: user.auth_code,
-         :user => {})
+         user: {})
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "")
     assert_input_value("user_password_confirmation", "")
 
     post(:verify, id: user.id, auth_code: user.auth_code,
-         :user => { :password => "mouse", :password_confirmation => "moose"})
+         user: { password: "mouse", password_confirmation: "moose"})
     assert_flash_error
     assert_template("choose_password")
     assert_input_value("user_password", "mouse")
     assert_input_value("user_password_confirmation", "")
 
     post(:verify, id: user.id, auth_code: user.auth_code,
-         :user => { :password => "mouse", :password_confirmation => "mouse"})
+         user: { password: "mouse", password_confirmation: "mouse"})
     assert_template("verify")
     assert(@request.session[:user_id])
     assert_users_equal(user, assigns(:user))
@@ -358,9 +358,9 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_edit_prefs_login_already_exists
     params = {
-      :user => {
-        :login => "mary",
-        :email => "email", # (must be defined or will barf)
+      user: {
+        login: "mary",
+        email: "email", # (must be defined or will barf)
       }
     }
     post_requires_login(:prefs, params)
@@ -374,11 +374,11 @@ class AccountControllerTest < FunctionalTestCase
     # Now change everything. (Note that this user owns no images, so this tests
     # the bulk copyright_holder updater in the boundary case of no images.)
     params = {
-      :user => {
+      user: {
         :name       => "new_name",
         :notes      => "new_notes",
-        :place_name => "Burbank, California, USA",
-        :mailing_address => ""
+        place_name: "Burbank, California, USA",
+        mailing_address: ""
       }
     }
     post_with_dump(:profile, params)
@@ -405,16 +405,15 @@ class AccountControllerTest < FunctionalTestCase
 
     # Post form.
     params = {
-      :user => {
-        :name        => rolf.name,
-        :place_name   => "",
-        :notes         => "",
-        :upload_image   => file,
-        :mailing_address => rolf.mailing_address,
-      },
-      :copyright_holder => "Someone Else",
-      :upload => { :license_id => licenses(:ccnc25).id },
-      :date => { :copyright_year => "2003" },
+      user: {
+        name: rolf.name,
+        place_name: "",
+        notes: "",
+        upload_image: file,
+        mailing_address: rolf.mailing_address },
+      copyright_holder: "Someone Else",
+      upload: { license_id: licenses(:ccnc25).id },
+      date: { copyright_year: "2003" }
     }
     post_requires_login(:profile, params)
     assert_redirected_to(controller: :observer, action: :show_user, id: 1)
@@ -448,11 +447,11 @@ class AccountControllerTest < FunctionalTestCase
       :general_question,
     ]
       assert_request(
-        :action        => "no_email_#{type}",
-        :params        => { id: rolf.id },
-        :require_login => true,
-        :require_user  => :index,
-        :result        => "no_email"
+        action: "no_email_#{type}",
+        params: { id: rolf.id },
+        require_login: true,
+        require_user: :index,
+        result: "no_email"
       )
       assert(!rolf.reload.send("email_#{type}"))
     end

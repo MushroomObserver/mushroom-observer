@@ -653,16 +653,16 @@ module ControllerExtensions
       if partials.is_a?(Array)
         assert_action_partials(action, partials)
       else
-        assert_template(action: action, partial: partials)
+        assert_redirected_to(action: action, partial: partials)
       end
     else
-      assert_template(action: action)
+      assert_redirected_to(action: action)
     end
   end
 
   def assert_action_partials(action, partials)
     partials.each do |p|
-      assert_template(action: action, partial: p)
+      assert_template(action, partial: p)
     end
   end
 

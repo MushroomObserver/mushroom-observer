@@ -5,12 +5,12 @@
 #  Methods in this class are available to all the functional and integration
 #  tests.
 #
-#  get_last_flash::       Retrieve the current list of errors or last set rendered.
-#  assert_flash::         Assert that an error was rendered or is pending.
-#  assert_no_flash::      Assert that there was no notice, warning or error.
-#  assert_flash_success:: Assert that there was a notice but no warning or error.
-#  assert_flash_warning:: Assert that there was a warning but no error.
-#  assert_flash_error::   Assert that there was an error.
+#  get_last_flash::       Retrieve current list of errors or last set rendered.
+#  assert_flash::         Assert an error was rendered or is pending.
+#  assert_no_flash::      Assert there was no notice, warning or error.
+#  assert_flash_success:: Assert there was a notice but no warning or error.
+#  assert_flash_warning:: Assert there was a warning but no error.
+#  assert_flash_error::   Assert there was an error.
 #
 ################################################################################
 
@@ -19,34 +19,34 @@ module FlashExtensions
   # Get the errors rendered in the last request, or current set of errors if
   # redirected.
   def get_last_flash
-    @controller.instance_variable_get('@last_notice') || session[:notice]
+    @controller.instance_variable_get("@last_notice") || session[:notice]
   end
 
   # Assert that there was no notice, warning or error.
-  def assert_no_flash(msg='')
+  def assert_no_flash(msg="")
     assert_flash(nil, msg)
   end
 
   # Assert that there was a notice but no warning or error.
-  def assert_flash_success(msg='')
+  def assert_flash_success(msg="Should be flash success.")
     assert_flash(0, msg)
   end
 
   # Assert that there was warning but no error.
-  def assert_flash_warning(msg='')
+  def assert_flash_warning(msg="")
     assert_flash(1, msg)
   end
 
   # Assert that there was a error.
-  def assert_flash_error(msg='')
+  def assert_flash_error(msg="")
     assert_flash(2, msg)
   end
 
   # Assert that an error was rendered or is pending.
-  def assert_flash(expect, msg='')
+  def assert_flash(expect, msg="")
     if got = get_last_flash
       lvl = got[0,1].to_i
-      got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n")
+      got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n").strip_html
     end
     msg.sub(/\n*$/, "\n") if msg
     if !expect && got
