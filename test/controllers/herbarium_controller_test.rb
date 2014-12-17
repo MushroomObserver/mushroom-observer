@@ -1,149 +1,147 @@
-require 'test_helper'
+require "test_helper"
 
+# tests of Herbarium controller
 class HerbariumControllerTest < FunctionalTestCase
   def test_show_herbarium
     nybg = herbaria(:nybg)
     assert(nybg)
-    get_with_dump(:show_herbarium, :id => nybg.id)
-    assert_template(action: 'show_herbarium')
+    get_with_dump(:show_herbarium, id: nybg.id)
+    assert_template("show_herbarium")
   end
 
   def show_herbarium_params
-    {
-      :id => herbaria(:nybg).id,
-      :curator => {
-        :name => users(:mary).login
-      }
+    { id: herbaria(:nybg).id,
+      curator: { name: users(:mary).login }
     }
   end
 
   def test_show_herbarium_post
-    login('rolf')
+    login("rolf")
     params = show_herbarium_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
     post(:show_herbarium, params)
-    assert_equal(curator_count+1, Herbarium.find(params[:id]).curators.count)
+    assert_equal(curator_count + 1, Herbarium.find(params[:id]).curators.count)
     assert_response(:success)
   end
 
   def test_index
     get_with_dump(:index)
-    assert_template(action: 'index')
+    assert_template("index")
   end
 
   def test_create_herbarium
     get(:create_herbarium)
     assert_response(:redirect)
 
-    login('rolf')
+    login("rolf")
     get_with_dump(:create_herbarium)
-    assert_template(action: 'create_herbarium')
+    assert_template("create_herbarium")
   end
 
   def create_herbarium_params
-    return {
-      :herbarium => {
-        :name => "Rolf's Personal Herbarium",
-        :description => 'Rolf wants Melanolucas!!!',
-        :email => rolf.email,
-        :mailing_address => "",
-        :place_name => "",
-        :code => "RPH"
+    { herbarium: {
+        name: "Rolf's Personal Herbarium",
+        description: "Rolf wants Melanolucas!!!",
+        email: rolf.email,
+        mailing_address: "",
+        place_name: "",
+        code: "RPH"
       }
     }
   end
 
   def test_create_herbarium_post
-    login('rolf')
+    login("rolf")
     params = create_herbarium_params
     post(:create_herbarium, params)
-    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
-    herbarium = Herbarium.all.order("created_at DESC")[0]
+    herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_equal(params[:herbarium][:code], herbarium.code)
     assert_equal([rolf], herbarium.curators)
     assert_response(:redirect)
   end
 
   def test_create_herbarium_post_with_duplicate_name
-    login('rolf')
+    login("rolf")
     params = create_herbarium_params
     params[:herbarium][:name] = herbaria(:nybg).name
     post(:create_herbarium, params)
     assert_flash(/already exists/i)
-    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
-    herbarium = Herbarium.all.order("created_at DESC")[0]
-    assert_not_equal(params[:herbarium][:description], herbarium.description)
-    assert_response(:success) # Really means we go back to create_herbarium without having created one.
+    herbarium = Herbarium.order(created_at: :desc).first
+    assert_not_equal(params[:herbarium][:description],
+                     herbarium.description)
+     # Really means we go back to create_herbarium without having created one.
+     assert_response(:success)
   end
 
   def test_create_herbarium_post_no_email
-    login('rolf')
+    login("rolf")
     params = create_herbarium_params
     params[:herbarium][:email] = ""
     post(:create_herbarium, params)
     assert_flash(/email address is required/i)
-    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
-    herbarium = Herbarium.all.order("created_at DESC")[0]
+    herbarium = Herbarium.order(created_at: :desc).first
     assert_not_equal(params[:herbarium][:name], herbarium.name)
     assert_response(:success)
   end
 
   def test_create_herbarium_post_with_existing_place_name
-    login('rolf')
+    login("rolf")
     params = create_herbarium_params
     params[:herbarium][:place_name] = locations(:nybg).name
     post(:create_herbarium, params)
-    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
-    herbarium = Herbarium.all.order("created_at DESC")[0]
+
+    herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_equal(locations(:nybg), herbarium.location)
     assert_response(:redirect)
   end
 
   def test_create_herbarium_post_with_nonexisting_place_name
-    login('rolf')
+    login("rolf")
     params = create_herbarium_params
     params[:herbarium][:place_name] = "Somewhere over the rainbow"
     post(:create_herbarium, params)
-    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
-    herbarium = Herbarium.all.order("created_at DESC")[0]
+    herbarium = Herbarium.order(created_at: :desc).first
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_nil(herbarium.location)
     assert_response(:redirect)
   end
 
   def test_edit_herbarium
     nybg = herbaria(:nybg)
-    get_with_dump(:edit_herbarium, :id => nybg.id)
+    get_with_dump(:edit_herbarium, id: nybg.id)
     assert_response(:redirect)
 
-    login('mary') # Non-curator
-    get_with_dump(:edit_herbarium, :id => nybg.id)
+    login("mary") # Non-curator
+    get_with_dump(:edit_herbarium, id: nybg.id)
     assert_flash(/non-curator/i)
     assert_response(:redirect)
 
-    login('rolf')
-    get_with_dump(:edit_herbarium, :id => nybg.id)
-    assert_template(action: 'edit_herbarium')
+    login("rolf")
+    get_with_dump(:edit_herbarium, id: nybg.id)
+    assert_template("edit_herbarium")
 
-    make_admin('mary') # Non-curator but an admin
-    get_with_dump(:edit_herbarium, :id => nybg.id)
-    assert_template(action: 'edit_herbarium')
+    make_admin("mary") # Non-curator but an admin
+    get_with_dump(:edit_herbarium, id: nybg.id)
+    assert_template("edit_herbarium")
   end
 
   def test_edit_herbarium_post
-    login('rolf')
+    login("rolf")
     nybg = herbaria(:nybg)
     params = create_herbarium_params
     params[:id] = nybg.id
@@ -152,13 +150,14 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_nil(herbarium.location)
     assert_response(:redirect)
   end
 
   def test_edit_herbarium_post_with_duplicate_name
-    login('rolf')
+    login("rolf")
     nybg = herbaria(:nybg)
     rolf = herbaria(:rolf)
     params = create_herbarium_params
@@ -172,7 +171,7 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def test_edit_herbarium_post_no_name_change
-    login('rolf')
+    login("rolf")
     nybg = herbaria(:nybg)
     params = create_herbarium_params
     params[:herbarium][:name] = nybg.name
@@ -182,13 +181,14 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_nil(herbarium.location)
     assert_response(:redirect)
   end
 
   def test_edit_herbarium_post_no_email
-    login('rolf')
+    login("rolf")
     nybg = herbaria(:nybg)
     params = create_herbarium_params
     params[:id] = nybg.id
@@ -201,7 +201,7 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def test_edit_herbarium_post_with_existing_place_name
-    login('rolf')
+    login("rolf")
     nybg = herbaria(:nybg)
     params = create_herbarium_params
     params[:id] = nybg.id
@@ -211,13 +211,14 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_equal(locations(:salt_point), herbarium.location)
     assert_response(:redirect)
   end
 
   def test_edit_herbarium_post_with_nonexisting_place_name
-    login('rolf')
+    login("rolf")
     nybg = herbaria(:nybg)
     params = create_herbarium_params
     params[:id] = nybg.id
@@ -227,13 +228,14 @@ class HerbariumControllerTest < FunctionalTestCase
     assert_equal(params[:herbarium][:name], herbarium.name)
     assert_equal(params[:herbarium][:description], herbarium.description)
     assert_equal(params[:herbarium][:email], herbarium.email)
-    assert_equal(params[:herbarium][:mailing_address], herbarium.mailing_address)
+    assert_equal(params[:herbarium][:mailing_address],
+                 herbarium.mailing_address)
     assert_nil(herbarium.location)
     assert_response(:redirect)
   end
 
   def test_edit_herbarium_post_by_non_curator
-    login('mary')
+    login("mary")
     nybg = herbaria(:nybg)
     old_name = nybg.name
     params = create_herbarium_params
@@ -248,23 +250,24 @@ class HerbariumControllerTest < FunctionalTestCase
 
   def delete_curator_params
     {
-      :id => herbaria(:nybg).id,
-      :user => users(:roy).id
+      id: herbaria(:nybg).id,
+      user: users(:roy).id
     }
   end
 
   def test_delete_curator
-    login('rolf')
+    login("rolf")
     params = delete_curator_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
     post(:delete_curator, params)
-    assert_equal(curator_count-1, Herbarium.find(params[:id]).curators.count)
+    assert_equal(curator_count - 1,
+                 Herbarium.find(params[:id]).curators.count)
     assert_response(:redirect)
   end
 
   def test_delete_curator_you_not_curator
-    login('mary')
+    login("mary")
     params = delete_curator_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
@@ -275,17 +278,17 @@ class HerbariumControllerTest < FunctionalTestCase
   end
 
   def test_delete_curator_you_admin
-    make_admin('mary')
+    make_admin("mary")
     params = delete_curator_params
     herbarium = Herbarium.find(params[:id])
     curator_count = herbarium.curators.count
     post(:delete_curator, params)
-    assert_equal(curator_count-1, Herbarium.find(params[:id]).curators.count)
+    assert_equal(curator_count - 1, Herbarium.find(params[:id]).curators.count)
     assert_response(:redirect)
   end
 
   def test_delete_curator_they_not_curator
-    login('rolf')
+    login("rolf")
     params = delete_curator_params
     params[:user] = users(:mary).id
     herbarium = Herbarium.find(params[:id])
