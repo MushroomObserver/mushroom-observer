@@ -476,21 +476,23 @@ class LocationController < ApplicationController
   #  :section: Create/Edit Location
   #
   ##############################################################################
-
   def create_location # :prefetch: :norobots:
     store_location
     pass_query_params
 
-    # Original name passed in when arrive here with express purpose of defining a given location.
-    # (e.g., clicking on "define this location", or after create_observation with unknown location)
-    # (Note: all names are in user's preferred order unless explicitly otherwise.)
+    # Original name passed in when arrive here with express purpose of
+    # defining a given location. (e.g., clicking on "define this location",
+    # or after create_observation with unknown location)
+    # Note: names are in user's preferred order unless explicitly otherwise.)
     @original_name = params[:where]
 
-    # Previous value of place name: ignore warnings if unchanged (i.e., resubmit same name).
+    # Previous value of place name: ignore warnings if unchanged
+    # (i.e., resubmit same name).
     @approved_name = params[:approved_where]
 
     # This is the latest value of place name.
-    @display_name = params[:location][:display_name].strip_squeeze rescue @original_name
+    @display_name = params[:location][:display_name].
+      strip_squeeze rescue @original_name
 
     # Where to return after successfully creating location.
     @set_observation  = params[:set_observation]
@@ -501,7 +503,8 @@ class LocationController < ApplicationController
     # Render a blank form.
     if request.method != "POST"
       user_name = Location.user_name(@user, @display_name)
-      @dubious_where_reasons = Location.dubious_name?(user_name, true) if @display_name
+      @dubious_where_reasons = Location.
+        dubious_name?(user_name, true) if @display_name
       @location = Location.new
       geocoder = Geocoder.new(user_name)
       if geocoder.valid
@@ -511,7 +514,7 @@ class LocationController < ApplicationController
         @location.east = geocoder.east
         @location.west = geocoder.west
       else
-        @location.display_name = ''
+        @location.display_name = ""
         @location.north = 80
         @location.south = -80
         @location.east = 89
@@ -524,20 +527,20 @@ class LocationController < ApplicationController
       # already exists.  In either case, we're done with this form.
       done = false
 
-      # Look to see if the display name is already in use.  If it is then just use
-      # that location and ignore the other values.  Probably should be smarter
-      # with warnings and merges and such...
+      # Look to see if the display name is already in use.
+      # If it is then just use that location and ignore the other values.
+      # Probably should be smarter with warnings and merges and such...
       db_name = Location.user_name(@user, @display_name)
       @location = Location.find_by_name_or_reverse_name(db_name)
 
       # Location already exists.
       if @location
-        flash_warning(:runtime_location_already_exists.t(:name => @display_name))
+        flash_warning(:runtime_location_already_exists.t(name: @display_name))
         done = true
 
       # Need to create location.
       else
-        @location = Location.new(params[:location])
+        @location = Location.new(whitelisted_location_params)
         @location.display_name = @display_name # (strip_squozen)
 
         # Validate name.
@@ -909,7 +912,7 @@ class LocationController < ApplicationController
   # into the given Location.  Linked from +list_merge_options+, I think.
   def add_to_location # :norobots:
     if location = find_or_goto_index(Location, params[:location])
-      where = params[:where].strip_squeeze rescue ''
+      where = params[:where].strip_squeeze rescue ""
       if not where.blank? and
          update_observations_by_where(location, where)
         flash_notice(:runtime_location_merge_success.t(:this => where,
@@ -950,6 +953,15 @@ class LocationController < ApplicationController
 
   def tweak
     print("Tweak called\n")
+  end
+
+  ##############################################################################
+
+  private
+
+  def whitelisted_location_params
+    params.required(:location).
+      permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end
 end
 
