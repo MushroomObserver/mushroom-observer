@@ -1471,10 +1471,10 @@ module ApplicationHelper
     end
 
     # Include original filename.
-    if args[:original] and
-       image and !image.original_name.blank? and (
-         check_permission(image) or
-         (image and image.user and image.user.keep_filenames == :keep_and_show)
+    if args[:original] &&
+       image && !image.original_name.blank? && (
+         check_permission(image) ||
+         (image.user && image.user.keep_filenames == "keep_and_show")
        )
       result += safe_br unless did_vote_div
       result += h(image.original_name)
