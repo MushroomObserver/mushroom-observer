@@ -173,7 +173,7 @@ class NameController < ApplicationController
   # Display list of names that match a string.
   def name_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (name = Name.safe_find(pattern))
       redirect_to(:action => 'show_name', :id => name.id)
     else
@@ -743,7 +743,7 @@ class NameController < ApplicationController
       redirect_with_query(:action => :approve_name, :id => @name.id)
       return true
     else
-      return false
+      false
     end
   end
 
@@ -797,6 +797,16 @@ class NameController < ApplicationController
   #
   ##############################################################################
 
+  # TODO public, public_write and source_type probably should be removed
+  # from the list; they should be individually checked and set, since we
+  # don't want them to have arbitrary values
+  def whitelisted_name_description_params
+    params.required(:description).
+      permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
+      :look_alikes, :uses, :refs, :notes, :source_name,
+      :source_type, :public, :public_write)
+  end
+
   def create_name_description # :prefetch: :norobots:
     store_location
     pass_query_params
@@ -813,7 +823,8 @@ class NameController < ApplicationController
     else
       @description = NameDescription.new
       @description.name = @name
-      @description.attributes = params[:description]
+      @description.attributes = whitelisted_name_description_params
+      @description.source_type = @description.source_type.to_sym
 
       if @description.valid?
         initialize_description_permissions(@description)
@@ -835,6 +846,7 @@ class NameController < ApplicationController
 
         # Make this the "default" description if there isn't one and this is
         # publicly readable.
+
         if !@name.description and
            @description.public
           @name.description = @description
@@ -875,7 +887,8 @@ class NameController < ApplicationController
       # already redirected
 
     elsif request.method == "POST"
-      @description.attributes = params[:description]
+      @description.attributes = whitelisted_name_description_params
+      @description.source_type = @description.source_type.to_sym
 
       args = {}
       args["set_source_type"] = @description.source_type if @description.source_type_changed?

@@ -293,20 +293,21 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  # ensure that default values are symbols (rather than strings)
-  # because when the migration specifies a symbol,
-  # the Rails 4 schema specifies a string
-  # even though the migration
-  after_initialize :default
-  def default
-    self.location_format = self.location_format.to_sym if
-      !self.location_format.is_a?(Symbol)
-  end
+################################################################################
+# Callbacks
+################################################################################
 
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
 
+  # ensure that certain default values are symbols (rather than strings)
+  # might only be an issue for test environment?
+  # probably better to instead use after_create and after_update,
+  # as after_initialize will get called every time a User is instantiated
+  after_initialize :symbolize_values
+
+################################################################################
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
   serialize :bonuses
@@ -955,5 +956,15 @@ protected
         errors.add(:password, :validate_user_password_no_match.t)
       end
     end
+  end
+
+################################################################################
+
+private
+
+  # ensure that certain values are always symbols
+  def symbolize_values
+    self.location_format = self.location_format.to_sym unless
+      self.location_format.is_a?(Symbol)
   end
 end

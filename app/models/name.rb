@@ -2402,7 +2402,7 @@ class Name < AbstractModel
     log ||= :log_name_updated
 
     # Get list of args we care about.  (intersection)
-    changed_args = changed & [
+    changed_args = changed.collect { |key| key.to_sym } & [
       :rank,
       :text_name,
       :author,
