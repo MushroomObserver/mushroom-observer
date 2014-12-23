@@ -281,10 +281,10 @@ class Name < AbstractModel
   attr_accessor :misspelling
 
   # always read rank as Symbol (not String)
-  # to solve problem created by Rails 3.2 => 4.0
-  def rank
-    read_attribute(:rank).to_sym
-  end
+  # to solve problem created by breakage of gem enum_col3
+  # def rank
+  #  read_attribute(:rank).to_sym
+  # end
 
   # (Destruction is already logged as a merge.)
   self.autolog_events = []
@@ -488,31 +488,31 @@ class Name < AbstractModel
 
   # Is this Name a family or higher?
   def above_genus?
-    RANKS_ABOVE_GENUS.include?(rank)
+    RANKS_ABOVE_GENUS.include?(rank.to_sym)
   end
 
   # Is this Name a subgenus or lower?
   def below_genus?
-    RANKS_BELOW_GENUS.include?(rank)
+    RANKS_BELOW_GENUS.include?(rank.to_sym)
   end
 
   # Is this Name a genus or lower?
   def at_or_below_genus?
-    RANKS_BELOW_GENUS.include?(rank) or rank == :Genus
+    RANKS_BELOW_GENUS.include?(rank.to_sym) || rank == :Genus
   end
 
   # Is this Name a stirps or higher?
   def above_species?
-    RANKS_ABOVE_SPECIES.include?(rank)
+    RANKS_ABOVE_SPECIES.include?(rank.to_sym)
   end
 
   # Is this Name a subspecies or lower?
   def below_species?
-    RANKS_BELOW_SPECIES.include?(rank)
+    RANKS_BELOW_SPECIES.include?(rank.to_sym)
   end
 
   def rank_index(rank)
-    ALL_RANKS.index(rank)
+    ALL_RANKS.index(rank.to_sym)
   end
 
   def self.compare_ranks(a, b)

@@ -532,8 +532,8 @@ class NameController < ApplicationController
       if request.method == "POST"
         @parse = parse_name
         new_name, @parents = find_or_create_name_and_parents
-        if new_name.new_record? or new_name == @name
-          unless can_make_changes? or minor_name_change?
+        if new_name.new_record? || new_name == @name
+          unless can_make_changes? || minor_name_change?
             email_admin_name_change
           end
           update_correct_spelling
@@ -797,16 +797,6 @@ class NameController < ApplicationController
   #
   ##############################################################################
 
-  # TODO public, public_write and source_type probably should be removed
-  # from the list; they should be individually checked and set, since we
-  # don't want them to have arbitrary values
-  def whitelisted_name_description_params
-    params.required(:description).
-      permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
-      :look_alikes, :uses, :refs, :notes, :source_name,
-      :source_type, :public, :public_write)
-  end
-
   def create_name_description # :prefetch: :norobots:
     store_location
     pass_query_params
@@ -988,6 +978,21 @@ class NameController < ApplicationController
       end
     end
   end
+
+  private
+
+  # TODO should public, public_write and source_type be removed from this list?
+  # They should be individually checked and set, since we
+  # don't want them to have arbitrary values
+  def whitelisted_name_description_params
+    params.required(:description).
+      permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
+      :look_alikes, :uses, :refs, :notes, :source_name,
+      :source_type, :public, :public_write)
+  end
+
+  public
+
 
   ################################################################################
   #
