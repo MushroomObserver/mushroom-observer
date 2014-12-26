@@ -1304,7 +1304,6 @@ class ObserverController < ApplicationController
   #
   def edit_observation # :prefetch: :norobots:
     pass_query_params
-
     includes = [:name, :images, :location]
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
@@ -1327,7 +1326,7 @@ class ObserverController < ApplicationController
       any_errors = false
 
       # Update observation attributes
-      @observation.attributes = params[:observation]
+      @observation.attributes = whitelisted_observation_params
 
       # Validate place name.
       @place_name = @observation.place_name
@@ -2068,11 +2067,11 @@ class ObserverController < ApplicationController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
-    observation = Observation.new(args)
+    observation = Observation.new(args.permit(whitelisted_observation_args))
     observation.created_at = now
     observation.updated_at = now
-    observation.user     = @user
-    observation.name     = Name.unknown
+    observation.user = @user
+    observation.name = Name.unknown
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.long && observation.place_name.blank?)
       observation.location = Location.unknown
@@ -2235,7 +2234,7 @@ class ObserverController < ApplicationController
   # Update observation, check if valid.
   def update_observation_object(observation, args)
     success = true
-    unless observation.update(args)
+    unless observation.update(args.permit(observation_whitelisted_args))
       flash_object_errors(observation)
       success = false
     end
@@ -2260,7 +2259,7 @@ class ObserverController < ApplicationController
           if upload.respond_to?(:original_filename)
             name = upload.original_filename.force_encoding("utf-8")
           end
-          image = Image.new(args2)
+          image = Image.new(args2.permit(whitelisted_observation_image_args))
           image.created_at = Time.now
           image.updated_at = image.created_at
           # If image.when is 1950 it means user never saw the form
@@ -2317,7 +2316,7 @@ class ObserverController < ApplicationController
       next unless check_permission(image)
       args = param_lookup([:good_image, image.id.to_s])
       next unless args
-      image.attributes = args
+      image.attributes = args.permit(whitelisted_observation_image_args)
       next unless image.when_changed? ||
         image.notes_changed? ||
         image.copyright_holder_changed? ||
@@ -2452,4 +2451,22 @@ class ObserverController < ApplicationController
   action_has_moved "species_list", "show_species_list"
   action_has_moved "species_list", "species_lists_by_title"
   action_has_moved "species_list", "upload_species_list"
+
+  ##############################################################################
+
+  private
+
+  def whitelisted_observation_image_args
+  #  [:when, "when(1i)", "when(2i)", "when(3i)", :copyright_holder, :notes, :original_name]
+    [:when, :copyright_holder, :notes, :original_name, :license_id]
+end
+
+  def whitelisted_observation_args
+    [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
+      "when(3i)", :notes, :specimen, :thumb_image_id]
+  end
+
+  def whitelisted_observation_params
+    params.require(:observation).permit(whitelisted_observation_args)
+  end
 end
