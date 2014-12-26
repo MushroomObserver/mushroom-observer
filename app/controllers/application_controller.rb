@@ -405,7 +405,7 @@ logger.warn('SESSION: ' + session.inspect)
   def has_unshown_notifications?(user, flavor=:naming)
     result = false
   # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
-    for q in QueuedEmail.where(flavor: favor, to_user_id: user.id)
+    for q in QueuedEmail.where(flavor: flavor, to_user_id: user.id)
       ints = q.get_integers(["shown", "notification"], true)
       unless ints["shown"]
         notification = Notification.safe_find(ints["notification"].to_i)
