@@ -76,7 +76,8 @@ class LocalizationFilesTest < UnitTestCase
     tags = {}
     for tag in i18n_keys +
         # these are tags only used in unit tests
-        [ :one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y, :_unit_test_z ]
+        [ :one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y,
+          :_unit_test_z ]
       tags[tag.to_s.downcase] = true
     end
     return tags
