@@ -33,7 +33,6 @@
 #
 #  ==== Internationalization
 #  all_locales::            Array of available locales for which we have translations.
-#  translate_menu::         Translate keys in select-menu's options.
 #  set_locale::             (filter: determine which locale is requested)
 #  get_sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
@@ -51,11 +50,8 @@
 #  flash_object_errors::    Add all errors for a given instance.
 #
 #  ==== Name validation
-#  create_needed_names::      Creates the given name if it's been approved.
 #  construct_approved_names:: Creates a list of names if they've been approved.
 #  construct_approved_name::  (helper)
-#  save_names::               (helper)
-#  save_name::                (helper)
 #
 #  ==== Searching
 #  clear_query_in_session:: Clears out Query stored in session below.
@@ -474,29 +470,6 @@ logger.warn('SESSION: ' + session.inspect)
   end
   helper_method :all_locales
 
-  # Translate the given pulldown menu.  Accepts and returns the same structure
-  # the select menu helper takes:
-  #
-  #   <%
-  #     menu = [
-  #       [ :label1, value1 ],
-  #       [ :label2, value2 ],
-  #       ...
-  #     ]
-  #     select('object', 'field', translate_menu(menu), options => ...)
-  #   %>
-  #
-  # (Just calls +l+ on each label.)  (*NOTE*: this is available to views.)
-  #
-  def translate_menu(menu)
-    result = []
-    for k,v in menu
-      result << [ (k.is_a?(Symbol) ? k.l : k.to_s), v ]
-    end
-    return result
-  end
-  helper_method :translate_menu
-
   # Before filter: Decide which locale to use for this request.  Sets the
   # Globalite default.  Tries to get the locale from:
   #
@@ -693,6 +666,7 @@ logger.warn('SESSION: ' + session.inspect)
   def flash_warning(*strs)
     flash_notice(*strs)
     session[:notice][0,1] = '1' if session[:notice][0,1] == '0'
+    false
   end
   helper_method :flash_warning
 
@@ -701,23 +675,36 @@ logger.warn('SESSION: ' + session.inspect)
   def flash_error(*strs)
     flash_notice(*strs)
     session[:notice][0,1] = '2' if session[:notice][0,1] != '2'
+    false
   end
   helper_method :flash_error
 
-  # Report the errors for a given ActiveRecord::Base instance.  These will be
-  # displayed (in red) at the top of the next page the User sees.
-  #
-  #   if object.save
-  #     flash_notice "Yay!"
-  #   else
-  #     flash_error "Failed to save changes."
-  #     flash_object_error(object)
-  #   end
-  #
   def flash_object_errors(obj)
     if obj && obj.errors && (obj.errors.size > 0)
       flash_error(obj.formatted_errors.join("<br/>"))
     end
+  end
+
+  def save_with_transaction(obj)
+    type_sym = obj.class.to_s.underscore.to_sym
+    if (result = obj.save_with_transaction)
+      flash_notice(:runtime_created_at.t(type: type_sym))
+    else
+      flash_error(:runtime_no_save.t(type: type_sym))
+      flash_object_errors(obj)
+    end
+    result
+  end
+
+  def object_flashes(obj)
+    flash_object_warnings(obj)
+    flash_object_errors(obj)
+  end
+
+  def validate_object(obj)
+    result = obj.valid?
+    flash_object_errors(obj) unless result
+    result
   end
 
   ##############################################################################
@@ -725,42 +712,6 @@ logger.warn('SESSION: ' + session.inspect)
   #  :section: Name validation
   #
   ##############################################################################
-
-  # This is called by +create_name_helper+ (used by +create_observation+,
-  # +create_naming+, and +edit_naming+) and +deprecate_name+.  It creates a new
-  # name, first checking if it is a valid name, and that it has been approved
-  # by the user.  Uses <tt>Name.find_or_create_name_and_parents(@what)</tt> to do the
-  # parsing.
-  #
-  # input_what::   params[:approved_name] (name that user typed before
-  #                getting the "this name not recognized" message)
-  # output_what::  @what (name after "this name not recognized" message,
-  #                must be the same or it is not "approved")
-  # 
-  # Returns +nil+ if user hasn't approved the name.  If approved, it creates
-  # and returns a new Name record (saved).
-  #   
-  def create_needed_names(input_what, output_what)
-    result = nil
-    if input_what == output_what
-
-      # This returns an array of Names: genus, species, then variety (if
-      # applicable).  New names are created for any that don't exist... but
-      # they need to be saved if they are new (just check if any is missing
-      # an id).
-      names = Name.find_or_create_name_and_parents(output_what)
-      if names.last.nil?
-        flash_error :runtime_no_create_name.t(:type => :name,
-                                              :value => output_what)
-      else
-        for n in names
-          save_name(n, :log_updated_by) if n and n.new_record?
-        end
-      end
-      result = names.last
-    end
-    result
-  end
 
   # Goes through list of names entered by user and creates (and saves) any that
   # are not in the database (but only if user has approved them).
@@ -838,7 +789,8 @@ logger.warn('SESSION: ' + session.inspect)
         deprecate2 = false if name_parse.has_synonym
 
         # Save the names (deals with deprecation here).
-        save_names(names, deprecate2)
+        Name.save_names(names, deprecate2)
+        names.each { |n| flash_object_errors(n) }
       end
     end
 
@@ -872,79 +824,10 @@ logger.warn('SESSION: ' + session.inspect)
 
         # Deprecate and save.
         synonym.change_deprecated(true)
-        save_name(synonym, :log_deprecated_by, :touch => true)
-        save_names(synonyms[0..-2], nil) # Don't change higher taxa
+        synonym.save_with_transaction(:log_deprecated_by, :touch => true)
+        Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
       end
     end
-  end
-
-  # Makes sure an array of names are saved, deprecating them if you wish.
-  # Inputs:
-  #   names         array of name objects (unsaved)
-  #   deprecate     create them deprecated to start with
-  def save_names(names, deprecate)
-    log = nil
-    unless deprecate.nil?
-      if deprecate
-        log = :log_deprecated_by
-      else
-        log = :log_approved_by
-      end
-    end
-    for n in names
-      if n and n.new_record? # Could be nil if parent is ambiguous with respect to the author
-        n.change_deprecated(deprecate) if deprecate
-        save_name(n, log)
-      end
-    end
-  end
-
-  # Save any changes to this name (including creating it if it is a new
-  # record), log the change, add the current user as the editor, and log the
-  # transaction appropriately for syncing with foreign databases.
-  def save_name(name, log=nil, args={})
-    log ||= :log_name_updated
-
-    # Get list of args we care about.  (intersection)
-    changed_args = name.changed & [
-      :rank,
-      :text_name,
-      :author,
-      :citation,
-      :synonym,
-      :deprecated,
-      :correct_spelling,
-      :notes
-    ]
-
-    # Log transaction.
-    xargs = { :id => name }
-    if name.new_record?
-      for arg in changed_args
-        xargs[arg] = name.send(arg)
-      end
-      xargs[:method] = "POST"
-    else
-      for arg in changed_args
-        xargs[:"set_#{arg}"] = name.send(arg)
-      end
-      xargs[:method] = "PUT"
-    end
-
-    # Save any changes.
-    if name.changed?
-      args = { :touch => name.altered? }.merge(args)
-      name.log(log, args)
-      if name.save
-        Transaction.create(xargs)
-        result = true
-      else
-        flash_object_errors(name)
-        result = false
-      end
-    end
-
-    return result
   end
 
   ##############################################################################

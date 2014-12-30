@@ -27,15 +27,25 @@ MushroomObserver::Application.configure do
   # Nathan wants a copy of everything.
   config.extra_bcc_email_addresses = "mo@collectivesource.com"
 
-  # Use gmail to send email.
-  config.action_mailer.smtp_settings = {
-    :address => "smtp.gmail.com",
-    :port => 587,
-    :authentication => :plain,
-    :enable_starttls_auto => true,
-    :user_name => "webmaster@mushroomobserver.org",
-    :password => "xxx"
-  }
+  # # Use gmail to send email.
+  # config.action_mailer.smtp_settings = {
+  #   :address => "smtp.gmail.com",
+  #   :port => 587,
+  #   :authentication => :plain,
+  #   :enable_starttls_auto => true,
+  #   :user_name => "webmaster@mushroomobserver.org",
+  #   :password => "xxx"
+  # }
+
+  # Testing
+  config.action_mailer.delivery_method = :sendmail
+  # Defaults to:
+  # config.action_mailer.sendmail_settings = {
+  #   :location => '/usr/sbin/sendmail',
+  #   :arguments => '-i -t'
+  # }
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
 
   # Serve new images locally until transferred to image server
   config.local_image_files = "#{config.root}/public/images"

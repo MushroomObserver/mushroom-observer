@@ -2,3 +2,5 @@ Style/StringLiterals:
   EnforcedStyle: double_quotes
 Style/DotPosition:
   EnforcedStyle: trailing
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes

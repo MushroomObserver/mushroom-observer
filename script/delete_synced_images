@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cd /var/web/mushroom-observer/public/images
+
+for size in 640 960 1280 orig; do
+  ls $size > $size.ls;
+  rsync -aznv -e 'ssh -l cdmr' $size/ cdmr@digitalmycology.com:images.digitalmycology.com/$size > $size.rsync;
+  sort $size.ls $size.rsync $size.rsync | uniq -u | sed "s|^|$size/|" | xargs rm;
+  echo Removed synced files from $size/;
+done

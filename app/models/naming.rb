@@ -69,6 +69,76 @@ class Naming < AbstractModel
     'observer'
   end
 
+  def self.construct(args, observation)
+    now = Time.now
+    naming = Naming.new(args)
+    naming.created_at = now
+    naming.updated_at = now
+    naming.user = @user
+    naming.observation = observation
+    naming
+  end
+
+  def self.from_params(params)
+    if params[:id].blank?
+      observation = Observation.find(params[:observation_id])
+      observation.consensus_naming
+    else
+      find(params[:id].to_s)
+    end
+  end
+
+  def save_with_transaction
+    args = transaction_args
+    if save
+      args[:id] = self
+      Transaction.create(args)
+      true
+    else
+      false
+    end
+  end
+
+  # Update naming and log changes.
+  def update_object(new_name, log)
+    self.name = new_name
+    save
+    observation.log(:log_naming_updated,
+                    name: format_name, touch: log)
+
+    # Always tell Transaction to change reasons, even if no changes.
+    args = { id: self }
+    args[:set_name] = name
+    get_reasons.select(&:used?).each do |reason|
+      args["set_reason_#{reason.num}".to_sym] = reason.notes
+    end
+    Transaction.put_naming(args)
+
+    true
+  end
+
+  # Need to know if JS was on because it changes how we deal with unchecked
+  # reasons that have notes: if JS is off these are considered valid, if JS
+  # was on the notes are hidden when the box is unchecked thus it is invalid.
+  def create_reasons(args, was_js_on)
+    args ||= {}
+    get_reasons.each do |reason|
+      num = reason.num
+      if (x = args[num.to_s])
+        check = x[:check]
+        notes = x[:notes]
+        if (check == "1") ||
+           (!was_js_on && !notes.blank?)
+          reason.notes = notes
+        else
+          reason.delete
+        end
+      else
+        reason.delete
+      end
+    end
+  end
+
   # Return name in plain text.
   def text_name
     name ? name.real_search_name : ''
@@ -175,6 +245,38 @@ class Naming < AbstractModel
     end
   end
 
+  def init_reasons(args = nil)
+    result = {}
+    get_reasons.each do |reason|
+      num = reason.num
+
+      # Use naming's reasons by default.
+      result[num] = reason
+
+      # Override with values in params.
+      next unless args
+      if (x = args[num.to_s])
+        check = x[:check]
+        notes = x[:notes]
+        # Reason is "used" if checked or notes non-empty.
+        if (check == "1") ||
+            !notes.blank?
+          reason.notes = notes
+        else
+          reason.delete
+        end
+      else
+        reason.delete
+      end
+    end
+    result
+  end
+
+  def first_vote
+    Vote.find(:first, conditions: ["naming_id = ? AND user_id = ?",
+                                   id, user_id])
+  end
+
   ##############################################################################
   #
   #  :section: Voting
@@ -228,6 +330,20 @@ class Naming < AbstractModel
   # Change User's Vote on this Naming.  (Uses Observation#change_vote.)
   def change_vote(value, user=User.current)
     observation.change_vote(self, value, user)
+  end
+
+  def update_name(new_name, user, reason, was_js_on)
+    clean_votes(new_name, user)
+    create_reasons(reason, was_js_on)
+    update_object(new_name, changed?)
+  end
+
+  def clean_votes(new_name, user)
+    if new_name != name
+      votes.each do |vote|
+        vote.destroy if vote.user_id != user.id
+      end
+    end
   end
 
   # Has anyone voted (positively) on this?  We don't want people changing
@@ -463,5 +579,18 @@ class Naming < AbstractModel
     if !self.user && !User.current
       errors.add(:user, :validate_naming_user_missing.t)
     end
+  end
+
+  private
+
+  def transaction_args
+    args = { action: "naming" }
+    if new_record?
+      args.merge(method: "post", name: name, observation: observation)
+    else
+      args[:set_name] = name if name_id_changed?
+      args[:set_observation] = observation if observation_id_changed?
+      args.merge(method: "put")
+     end
   end
 end

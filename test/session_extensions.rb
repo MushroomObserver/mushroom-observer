@@ -197,10 +197,7 @@ module SessionExtensions
   # Save response from last query on the page stack.
   def push_page(name='')
     @page_stack ||= []
-    @page_stack.push({
-      :name => name,
-      :body => response.body,
-    })
+    @page_stack.push({ name: name, body: response.body })
   end
 
   # Go back one or more times and restore a previous query result.  If called
@@ -320,10 +317,10 @@ module SessionExtensions
   end
 
   def assert_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}=#{url}]", { :minimum => 1 }, "Expected to find link to #{url}")
+    assert_select("a[href#{mod}=#{url}]", { minimum: 1 }, "Expected to find link to #{url}")
   end
 
   def assert_no_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}=#{url}]", { :count => 0 }, "Shouldn't be any links to #{url}")
+    assert_select("a[href#{mod}=#{url}]", { count: 0 }, "Shouldn't be any links to #{url}")
   end
 end
