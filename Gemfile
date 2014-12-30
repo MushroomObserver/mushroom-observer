@@ -16,6 +16,7 @@ gem "browser"
 gem "rtf"
 gem "cure_acts_as_versioned"
 gem "coveralls", require: false
+gem "simple_enum"
 
 group :test do
   gem "fakeweb", "~> 1.3"

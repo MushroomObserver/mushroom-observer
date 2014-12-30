@@ -115,6 +115,8 @@ GEM
       sass (~> 3.2.2)
       sprockets (~> 2.8, < 3.0)
       sprockets-rails (~> 2.0)
+    simple_enum (2.1.1)
+      activesupport (>= 4.0.0)
     simplecov (0.9.1)
       docile (~> 1.1.0)
       multi_json (~> 1.0)
@@ -168,6 +170,7 @@ DEPENDENCIES
   rubocop
   ruby-prof
   sass-rails (~> 4.0)
+  simple_enum
   test-unit
   uglifier (>= 1.0.3)
   unicorn
