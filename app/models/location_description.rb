@@ -53,6 +53,19 @@
 class LocationDescription < Description
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:source_type,
+           { public: 0,
+             foreign: 1,
+             project: 2,
+             source: 3,
+             user: 4
+           },
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :license
   belongs_to :location
   belongs_to :project

@@ -67,6 +67,28 @@
 class NameDescription < Description
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:review_status,
+           { unreviewed: 0,
+             unvetted: 1,
+             vetted: 2,
+             inaccurate: 3
+           },
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:source_type,
+           { public: 0,
+             foreign: 1,
+             project: 2,
+             source: 3,
+             user: 4
+           },
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :license
   belongs_to :name
   belongs_to :project

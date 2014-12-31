@@ -34,6 +34,18 @@
 class Notification < AbstractModel
   belongs_to :user
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:flavor,
+           { name: 0,
+             observation: 1,
+             user: 2,
+             all_comments: 3
+           },
+           with: [],
+           accessor: :whiny
+         )
+
   # List of all available flavors (Symbol's).
   def self.all_flavors
     [:name]

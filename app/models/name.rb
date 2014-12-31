@@ -233,6 +233,30 @@
 class Name < AbstractModel
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:rank,
+           { Form: 0,
+             Variety: 1,
+             Subspecies: 2,
+             Species: 3,
+             Stirps: 4,
+             Subsection: 5,
+             Section: 6,
+             Subgenus: 7,
+             Genus: 8,
+             Family: 9,
+             Order: 10,
+             Class: 11,
+             Phylum: 12,
+             Kingdom: 13,
+             Domain: 14,
+             Group: 15
+           },
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
   belongs_to :description, :class_name => 'NameDescription' # (main one)
   belongs_to :rss_log

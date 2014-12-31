@@ -7,6 +7,66 @@
 class Query < AbstractQuery
   belongs_to :user
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+    as_enum(:flavor,
+             { advanced_search: 0,
+               all: 1,
+               at_location: 2,
+               at_where: 3,
+               by_author: 4,
+               by_editor: 5,
+               by_rss_log: 6,
+               by_user: 7,
+               for_project: 8,
+               for_target: 9,
+               for_user: 10,
+               in_set: 11,
+               in_species_list: 12,
+               inside_observation: 13,
+               of_children: 14,
+               of_name: 15,
+               of_parents: 16,
+               pattern_search: 17,
+               regexp_search: 18,
+               with_descriptions: 19,
+               with_descriptions_by_author: 20,
+               with_descriptions_by_editor: 21,
+               with_descriptions_by_user: 22,
+               with_descriptions_in_set: 23,
+               with_observations: 24,
+               with_observations_at_location: 25,
+               with_observations_at_where: 26,
+               with_observations_by_user: 27,
+               with_observations_for_project: 28,
+               with_observations_in_set: 29,
+               with_observations_in_species_list: 30,
+               with_observations_of_children: 31,
+               with_observations_of_name: 32
+             },
+             with: [],
+             accessor: :whiny
+           )
+    as_enum(:model,
+             { Comment: 0,
+               Herbarium: 1,
+               Image: 2,
+               Location: 3,
+               LocationDescription: 4,
+               Name: 5,
+               NameDescription: 6,
+               Observation: 7,
+               Project: 8,
+               RssLog: 9,
+               SpeciesList: 10,
+               Specimen: 11,
+               User: 12
+             },
+             with: [],
+             accessor: :whiny
+           )
+
+
   # Parameters allowed in every query.
   self.global_params = {
     # Allow every query to customize its title.
