@@ -258,6 +258,42 @@
 class User < AbstractModel
   require 'digest/sha1'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:thumbnail_size,
+           { thumbnail: 0,
+             small: 1
+           },
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:image_size,
+           { medium: 0,
+             thumbnail: 1,
+             small: 2,
+             large: 3,
+             huge: 4,
+             full_size: 5
+           },
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:votes_anonymous,
+           { no: 0,
+             yes: 1,
+             old: 2
+           },
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:location_format,
+           { postal: 0,
+             scientific: 1
+           },
+           with: [],
+           accessor: :whiny
+         )
+
   has_many :api_keys, :dependent => :destroy
   has_many :comments
   has_many :donations
