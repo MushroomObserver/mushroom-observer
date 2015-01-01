@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141021184347) do
+ActiveRecord::Schema.define(version: 20141230043405) do
 
   create_table "api_keys", force: true do |t|
     t.datetime "created_at"
@@ -195,7 +195,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "location_id"
     t.integer  "num_views",                   default: 0
     t.datetime "last_view"
-    t.string   "source_type",     limit: 7
+    t.integer  "source_type"
     t.string   "source_name",     limit: 100
     t.string   "locale",          limit: 8
     t.boolean  "public"
@@ -294,13 +294,13 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "name_id"
-    t.string   "review_status",   limit: 10,  default: "unreviewed"
+    t.integer  "review_status",               default: 0
     t.datetime "last_review"
     t.integer  "reviewer_id"
-    t.boolean  "ok_for_export",               default: true,         null: false
+    t.boolean  "ok_for_export",               default: true, null: false
     t.integer  "num_views",                   default: 0
     t.datetime "last_view"
-    t.string   "source_type",     limit: 7
+    t.integer  "source_type"
     t.string   "source_name",     limit: 100
     t.string   "locale",          limit: 8
     t.boolean  "public"
@@ -371,7 +371,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "rss_log_id"
     t.integer  "num_views",                       default: 0
     t.datetime "last_view"
-    t.string   "rank",                limit: 10
+    t.integer  "rank"
     t.string   "text_name",           limit: 100
     t.string   "search_name",         limit: 200
     t.string   "display_name",        limit: 200
@@ -400,7 +400,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.boolean  "deprecated",                      default: false, null: false
     t.integer  "correct_spelling_id"
     t.text     "notes"
-    t.string   "rank",                limit: 10
+    t.integer  "rank"
   end
 
   create_table "naming_reasons", force: true do |t|
@@ -422,7 +422,7 @@ ActiveRecord::Schema.define(version: 20141021184347) do
 
   create_table "notifications", force: true do |t|
     t.integer  "user_id",                     default: 0,     null: false
-    t.string   "flavor",           limit: 12
+    t.integer  "flavor"
     t.integer  "obj_id"
     t.text     "note_template"
     t.string   "sync_id",          limit: 16
@@ -500,8 +500,8 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.integer  "access_count"
     t.text     "params"
     t.integer  "outer_id"
-    t.string   "flavor",       limit: 33
-    t.string   "model",        limit: 19
+    t.integer  "flavor"
+    t.integer  "model"
   end
 
   create_table "queued_email_integers", force: true do |t|
@@ -609,9 +609,9 @@ ActiveRecord::Schema.define(version: 20141021184347) do
   end
 
   create_table "users", force: true do |t|
-    t.string   "login",                        limit: 80, default: "",              null: false
-    t.string   "password",                     limit: 40, default: "",              null: false
-    t.string   "email",                        limit: 80, default: "",              null: false
+    t.string   "login",                        limit: 80, default: "",    null: false
+    t.string   "password",                     limit: 40, default: "",    null: false
+    t.string   "email",                        limit: 80, default: "",    null: false
     t.string   "theme",                        limit: 40
     t.string   "name",                         limit: 80
     t.datetime "created_at"
@@ -619,32 +619,32 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.datetime "verified"
     t.integer  "rows"
     t.integer  "columns"
-    t.boolean  "alternate_rows",                          default: true,            null: false
-    t.boolean  "alternate_columns",                       default: true,            null: false
-    t.boolean  "vertical_layout",                         default: true,            null: false
-    t.integer  "license_id",                              default: 3,               null: false
+    t.boolean  "alternate_rows",                          default: true,  null: false
+    t.boolean  "alternate_columns",                       default: true,  null: false
+    t.boolean  "vertical_layout",                         default: true,  null: false
+    t.integer  "license_id",                              default: 3,     null: false
     t.integer  "contribution",                            default: 0
     t.integer  "location_id"
     t.integer  "image_id"
     t.string   "locale",                       limit: 5
     t.text     "bonuses"
-    t.boolean  "email_comments_owner",                    default: true,            null: false
-    t.boolean  "email_comments_response",                 default: true,            null: false
-    t.boolean  "email_comments_all",                      default: false,           null: false
-    t.boolean  "email_observations_consensus",            default: true,            null: false
-    t.boolean  "email_observations_naming",               default: true,            null: false
-    t.boolean  "email_observations_all",                  default: false,           null: false
-    t.boolean  "email_names_author",                      default: true,            null: false
-    t.boolean  "email_names_editor",                      default: false,           null: false
-    t.boolean  "email_names_reviewer",                    default: true,            null: false
-    t.boolean  "email_names_all",                         default: false,           null: false
-    t.boolean  "email_locations_author",                  default: true,            null: false
-    t.boolean  "email_locations_editor",                  default: false,           null: false
-    t.boolean  "email_locations_all",                     default: false,           null: false
-    t.boolean  "email_general_feature",                   default: true,            null: false
-    t.boolean  "email_general_commercial",                default: true,            null: false
-    t.boolean  "email_general_question",                  default: true,            null: false
-    t.boolean  "email_html",                              default: true,            null: false
+    t.boolean  "email_comments_owner",                    default: true,  null: false
+    t.boolean  "email_comments_response",                 default: true,  null: false
+    t.boolean  "email_comments_all",                      default: false, null: false
+    t.boolean  "email_observations_consensus",            default: true,  null: false
+    t.boolean  "email_observations_naming",               default: true,  null: false
+    t.boolean  "email_observations_all",                  default: false, null: false
+    t.boolean  "email_names_author",                      default: true,  null: false
+    t.boolean  "email_names_editor",                      default: false, null: false
+    t.boolean  "email_names_reviewer",                    default: true,  null: false
+    t.boolean  "email_names_all",                         default: false, null: false
+    t.boolean  "email_locations_author",                  default: true,  null: false
+    t.boolean  "email_locations_editor",                  default: false, null: false
+    t.boolean  "email_locations_all",                     default: false, null: false
+    t.boolean  "email_general_feature",                   default: true,  null: false
+    t.boolean  "email_general_commercial",                default: true,  null: false
+    t.boolean  "email_general_question",                  default: true,  null: false
+    t.boolean  "email_html",                              default: true,  null: false
     t.string   "sync_id",                      limit: 16
     t.datetime "updated_at"
     t.boolean  "admin"
@@ -652,16 +652,16 @@ ActiveRecord::Schema.define(version: 20141021184347) do
     t.text     "alert"
     t.boolean  "email_locations_admin",                   default: false
     t.boolean  "email_names_admin",                       default: false
-    t.string   "thumbnail_size",               limit: 9,  default: "thumbnail"
-    t.string   "image_size",                   limit: 9,  default: "medium"
+    t.integer  "thumbnail_size",                          default: 0
+    t.integer  "image_size",                              default: 0
     t.string   "default_rss_type",             limit: 40, default: "all"
-    t.string   "votes_anonymous",              limit: 3,  default: "no"
-    t.string   "location_format",              limit: 10, default: "postal"
+    t.integer  "votes_anonymous",                         default: 0
+    t.integer  "location_format",                         default: 0
     t.datetime "last_activity"
-    t.string   "hide_authors",                 limit: 13, default: "none",          null: false
-    t.boolean  "thumbnail_maps",                          default: true,            null: false
+    t.integer  "hide_authors",                            default: 0,     null: false
+    t.boolean  "thumbnail_maps",                          default: true,  null: false
     t.string   "auth_code",                    limit: 40
-    t.string   "keep_filenames",               limit: 13, default: "keep_and_show", null: false
+    t.integer  "keep_filenames",                          default: 0,     null: false
     t.text     "notes"
     t.text     "mailing_address"
   end
