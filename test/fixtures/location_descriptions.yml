@@ -9,6 +9,6 @@ albion_desc:
   user_id: 1
   version: 2
   notes: Here are some new ‘notes’ to play with.
-  source_type: public
+  source_type: LocationDescription.source_types[:public]
   public: 1
 

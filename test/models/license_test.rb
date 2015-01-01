@@ -2,7 +2,6 @@
 require 'test_helper'
 
 class LicenseTest < UnitTestCase
-
   def test_current_names_and_ids
     names_and_ids = License.current_names_and_ids()
     assert_equal(2, names_and_ids.length)
