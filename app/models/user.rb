@@ -293,6 +293,21 @@ class User < AbstractModel
            with: [],
            accessor: :whiny
          )
+  as_enum(:hide_authors,
+           { none: 0,
+             above_species: 1
+           },
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:keep_filenames,
+           { keep_and_show: 0,
+             keep_but_hide: 1,
+             toss: 2
+           },
+           with: [],
+           accessor: :whiny
+         )
 
   has_many :api_keys, :dependent => :destroy
   has_many :comments
