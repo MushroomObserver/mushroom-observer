@@ -44,6 +44,7 @@ class Query < AbstractQuery
                with_observations_of_children: 31,
                with_observations_of_name: 32
              },
+             source: :flavor,
              with: [],
              accessor: :whiny
            )
@@ -62,6 +63,7 @@ class Query < AbstractQuery
                Specimen: 11,
                User: 12
              },
+             source: :model,
              with: [],
              accessor: :whiny
            )

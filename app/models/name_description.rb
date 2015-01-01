@@ -75,6 +75,7 @@ class NameDescription < Description
              vetted: 2,
              inaccurate: 3
            },
+           source: :review_status,
            with: [],
            accessor: :whiny
          )
@@ -85,6 +86,7 @@ class NameDescription < Description
              source: 3,
              user: 4
            },
+           source: :source_type,
            with: [],
            accessor: :whiny
          )

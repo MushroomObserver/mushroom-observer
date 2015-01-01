@@ -264,6 +264,7 @@ class User < AbstractModel
            { thumbnail: 0,
              small: 1
            },
+           source: :thumbnail_size,
            with: [],
            accessor: :whiny
          )
@@ -275,6 +276,7 @@ class User < AbstractModel
              huge: 4,
              full_size: 5
            },
+           source: :image_size,
            with: [],
            accessor: :whiny
          )
@@ -283,6 +285,7 @@ class User < AbstractModel
              yes: 1,
              old: 2
            },
+           source: :votes_anonymous,
            with: [],
            accessor: :whiny
          )
@@ -290,6 +293,7 @@ class User < AbstractModel
            { postal: 0,
              scientific: 1
            },
+           source: :location_format,
            with: [],
            accessor: :whiny
          )
@@ -297,6 +301,7 @@ class User < AbstractModel
            { none: 0,
              above_species: 1
            },
+           source: :hide_authors,
            with: [],
            accessor: :whiny
          )
@@ -305,6 +310,7 @@ class User < AbstractModel
              keep_but_hide: 1,
              toss: 2
            },
+           source: :keep_filenames,
            with: [],
            accessor: :whiny
          )

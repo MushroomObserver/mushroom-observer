@@ -253,6 +253,7 @@ class Name < AbstractModel
              Domain: 14,
              Group: 15
            },
+           source: :rank,
            with: [],
            accessor: :whiny
          )

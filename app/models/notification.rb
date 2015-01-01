@@ -42,6 +42,7 @@ class Notification < AbstractModel
              user: 2,
              all_comments: 3
            },
+           source: :flavor,
            with: [],
            accessor: :whiny
          )
