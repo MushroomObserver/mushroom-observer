@@ -1656,7 +1656,12 @@ class AbstractQuery < ActiveRecord::Base
 
   # Number of results the query returns.
   def num_results(args={})
-    result_ids(args).length
+    @result_count ||=
+      if @result_ids
+        @result_ids.count
+      else
+        rows = select_rows(args.merge(:select => "count(*)"))[0][0]
+      end
   end
 
   # Array of all results, just ids.
@@ -1692,6 +1697,7 @@ class AbstractQuery < ActiveRecord::Base
   # better all be valid instances of +model+ -- no error checking is done!!
   def results=(list)
     @result_ids = list.map(&:id)
+    @result_count = list.count
     @results = list.inject({}) do |map,obj|
       map[obj.id] ||= obj
       map
@@ -1703,6 +1709,7 @@ class AbstractQuery < ActiveRecord::Base
   # better all be valid Fixnum ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
+    @result_count = list.count
   end
 
   # Get index of a given record / id in the results.
@@ -1720,6 +1727,7 @@ class AbstractQuery < ActiveRecord::Base
       raise "You need to pass in a SQL expression to 'need_letters'."
     elsif @need_letters != x
       @result_ids = nil
+      @result_count = nil
       @need_letters = x
     end
   end
@@ -1732,20 +1740,25 @@ class AbstractQuery < ActiveRecord::Base
 
     # Get list of letters used in results.
     if need_letters
-      num_results
+      @result_ids = nil
+      @result_count = nil
+      result_ids(results_args)
       map = letters
       paginator.used_letters = map.values.uniq
 
       # Filter by letter. (paginator keeps letter upper case, as do we)
       if letter = paginator.letter
         @result_ids = @result_ids.select {|id| map[id] == letter}
+        @result_count = @result_ids.count
       end
+      paginator.num_total = num_results(results_args)
+      @result_ids[paginator.from..paginator.to] || []
+    else
+      # Paginate remaining results.
+      paginator.num_total = num_results(results_args)
+      results_args[:limit] = "#{paginator.from},#{paginator.num_per_page}"
+      result_ids(results_args) || []
     end
-
-    # Paginate remaining results.
-    paginator.num_total = num_results(results_args)
-    from, to = paginator.from, paginator.to
-    result_ids(results_args)[from..to] || []
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
@@ -1784,6 +1797,7 @@ class AbstractQuery < ActiveRecord::Base
   def clear_cache
     @results    = nil
     @result_ids = nil
+    @result_count = nil
     @letters    = nil
   end
 
