@@ -10,8 +10,10 @@ agaricus_campestras_desc:
   user_id: 1
   version: 1
   notes: This should... ¡prevent me from merging!
-  review_status: NameDescription.review_statuses[:unreviewed]
-  source_type: NameDescription.source_types[:public]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 # Another name with notes (not mergeable)
@@ -24,8 +26,10 @@ agaricus_campestros_desc:
   user_id: 1
   version: 1
   notes: Need two to get an error
-  review_status: NameDescription.review_statuses[:unreviewed]
-  source_type: NameDescription.source_types[:public]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 russula_brevipes_author_notes_desc:
@@ -37,8 +41,10 @@ russula_brevipes_author_notes_desc:
   user_id: 1
   version: 1
   notes: Here are some notes
-  review_status: NameDescription.review_statuses[:unreviewed]
-  source_type: NameDescription.source_types[:public]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 russula_cremoricolor_no_author_notes_desc:
@@ -50,8 +56,10 @@ russula_cremoricolor_no_author_notes_desc:
   user_id: 1
   version: 1
   notes: Here are some notes
-  review_status: NameDescription.review_statuses[:unreviewed]
-  source_type: NameDescription.source_types[:public]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 russula_cremoricolor_author_notes_desc:
@@ -63,8 +71,10 @@ russula_cremoricolor_author_notes_desc:
   user_id: 1
   version: 1
   notes: Some different notes
-  review_status: NameDescription.review_statuses[:unreviewed]
-  source_type: NameDescription.source_types[:public]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 peltigera_desc:
@@ -76,7 +86,8 @@ peltigera_desc:
   user_id: 4
   version: 2
   reviewer_id: 1
-  review_status: NameDescription.review_statuses[:vetted]
+  # review_status: NameDescription.review_statuses[:vetted]
+  review_status: 2
   ok_for_export: 1
   last_review: 2009-01-02 02:01:01
   license_id: 2
@@ -87,7 +98,8 @@ peltigera_desc:
   habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
   look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
   uses: "Good for making birds nests... if you're a bird."
-  source_type: NameDescription.source_types[:public]
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 suillus_desc:
@@ -98,9 +110,11 @@ suillus_desc:
   updated_at: 2009-10-12 21:30:01
   user_id: 4
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   gen_desc: A __Suillus__ by any other name would smell as sweet...
-  source_type: NameDescription.source_types[:public]
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
@@ -110,11 +124,13 @@ draft_coprinus_comatus:
   sync_id: 8xx1
   user_id: 5
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   gen_desc: This is a general description of __C. comatus__.
   created_at: 2008-10-05 12:31:10
   updated_at: 2008-10-05 12:31:12
-  source_type: NameDescription.source_types[:project]
+  # source_type: NameDescription.source_types[:project]
+  source_type: 2
   source_name: EOL Project
   project_id: 1
   public: 0
@@ -126,10 +142,12 @@ draft_agaricus_campestris:
   sync_id: 9xx1
   user_id: 2
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   created_at: 2008-10-05 12:37:33
   updated_at: 2008-10-05 12:37:35
-  source_type: NameDescription.source_types[:project]
+  # source_type: NameDescription.source_types[:project]
+  source_type: 2
   source_name: EOL Project
   project_id: 1
   public: 0
@@ -141,10 +159,12 @@ draft_boletus_edulis:
   sync_id: 10xx1
   user_id: 4
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   created_at: 2008-10-05 16:19:45
   updated_at: 2008-10-05 16:19:45
-  source_type: NameDescription.source_types[:project]
+  # source_type: NameDescription.source_types[:project]
+  source_type: 2
   source_name: Bolete Project
   project_id: 2
   public: 0
@@ -156,11 +176,13 @@ draft_lactarius_alpinus:
   sync_id: 11xx1
   user_id: 5
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   created_at: 2009-05-04 16:19:45
   updated_at: 2009-05-04 19:56:25
   classification: "**Domain**: Eukarya"
-  source_type: NameDescription.source_types[:project]
+  # source_type: NameDescription.source_types[:project]
+  source_type: 2
   source_name: EOL Project
   project_id: 1
   public: 0
@@ -173,10 +195,12 @@ peltigera_alt_desc:
   updated_at: 2010-01-01 01:01:01
   user_id: 1
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   ok_for_export: 1
   gen_desc: "Another general description of _Peltigera_."
-  source_type: NameDescription.source_types[:public]
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1
 
 peltigera_user_desc:
@@ -187,10 +211,12 @@ peltigera_user_desc:
   updated_at: 2010-01-02 01:01:01
   user_id: 2
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   ok_for_export: 1
   gen_desc: "Mary's general description of _Peltigera_."
-  source_type: NameDescription.source_types[:user]
+  # source_type: NameDescription.source_types[:user]
+  source_type: 4
   public: 0
 
 peltigera_source_desc:
@@ -201,10 +227,12 @@ peltigera_source_desc:
   updated_at: 2010-01-03 01:01:01
   user_id: 5
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
   ok_for_export: 1
   diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
-  source_type: NameDescription.source_types[:source]
+  # source_type: NameDescription.source_types[:source]
+  source_type: 3
   source_name: Lichens of North America
   public: 1
 
@@ -216,6 +244,8 @@ coprinus_comatus_desc:
   updated_at: 2007-06-23 20:04:00
   user_id: 1
   version: 1
-  review_status: NameDescription.review_statuses[:unreviewed]
-  source_type: NameDescription.source_types[:public]
+  # review_status: NameDescription.review_statuses[:unreviewed]
+  review_status: 0
+  # source_type: NameDescription.source_types[:public]
+  source_type: 0
   public: 1

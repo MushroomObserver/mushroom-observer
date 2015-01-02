@@ -3,7 +3,8 @@ coprinus_comatus_notification:
   id: 1
   sync_id: 1xx1
   user_id: 1
-  flavor: Notification.flavors[:name]
+  # flavor: Notification.flavors[:name]
+  flavor: 0
   obj_id: 2
   note_template:
 
@@ -11,7 +12,8 @@ agaricus_campestris_notification_with_note:
   id: 2
   sync_id: 2xx1
   user_id: 2
-  flavor: Notification.flavors[:name]
+  # flavor: Notification.flavors[:name]
+  flavor: 0
   obj_id: 3
   note_template: A note about :observation for :observer
 
@@ -19,6 +21,7 @@ agaricus_campestris_notification_without_note:
   id: 3
   sync_id: 3xx1
   user_id: 5
-  flavor: Notification.flavors[:name]
+  # flavor: Notification.flavors[:name]
+  flavor: 0
   obj_id: 3
   note_template:
