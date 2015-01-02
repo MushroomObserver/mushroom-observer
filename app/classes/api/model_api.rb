@@ -50,7 +50,7 @@ class API
       params = query_params
       params.remove_nils!
       params.merge!(:by => :id)
-      Query.lookup(model.name.to_sym, :all, params)
+      Query.lookup(model_symbol, :all, params)
     rescue RuntimeError => e
       raise QueryError.new(e)
     end
@@ -110,10 +110,10 @@ class API
       if ids = parse_integer_ranges(:id)
         result = ids.map do |term|
           if term.is_a?(Range)
-            "#{model.table_name}.id >= #{term.begin} AND " +
-            "#{model.table_name}.id <= #{term.end}"
+            "#{model_class.table_name}.id >= #{term.begin} AND " +
+            "#{model_class.table_name}.id <= #{term.end}"
           else
-            "#{model.table_name}.id = #{term}"
+            "#{model_class.table_name}.id = #{term}"
           end
         end.join(' OR ')
       end

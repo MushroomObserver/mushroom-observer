@@ -24,7 +24,7 @@ class API
     end
   end
 
-  class ObjectError < Error 
+  class ObjectError < Error
     def initialize(obj)
       super()
       if obj.respond_to?(:unique_text_name)
@@ -277,14 +277,14 @@ class API
   class ObjectNotFoundById < Error
     def initialize(id, model)
       super()
-      args.merge!(:id => id.to_s, :type => model.type_tag)
+      args.merge!(:id => id.to_s, :type => model_class.type_tag)
     end
   end
 
   class ObjectNotFoundByString < Error
     def initialize(str, model)
       super()
-      args.merge!(:str => str.to_s, :type => model.type_tag)
+      args.merge!(:str => str.to_s, :type => model_class.type_tag)
     end
   end
 

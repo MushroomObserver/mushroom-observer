@@ -49,13 +49,13 @@ class ApiControllerTest < FunctionalTestCase
 ################################################################################
 
   def test_basic_get_requests
-    for model in [Comment, Image, Location, Name, Observation, Project,
+    for model_class in [Comment, Image, Location, Name, Observation, Project,
                   SpeciesList, User]
       for detail in [:none, :low, :high]
         assert_no_api_errors
-        get(model.table_name.to_sym, detail: detail)
+        get(model_class.table_name.to_sym, detail: detail)
         assert_no_api_errors
-        assert_objs_equal(model.first, @api.results.first)
+        assert_objs_equal(model_class.first, @api.results.first)
       end
     end
   end

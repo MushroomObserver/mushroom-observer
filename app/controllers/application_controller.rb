@@ -928,9 +928,9 @@ logger.warn('SESSION: ' + session.inspect)
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
   # correct.  (Useful for specifying sort conditions, for example.)
-  def find_or_create_query(model, args={})
+  def find_or_create_query(model_symbol, args={})
     map_past_bys(args)
-    model = model.to_s
+    model = model_symbol.to_s
     if result = find_query(model, false)
 
       # Check if the existing query needs to be updated.
@@ -1126,7 +1126,7 @@ logger.warn('SESSION: ' + session.inspect)
     number_arg   = args[:number_arg]   || :page
     num_per_page = args[:num_per_page] || 50
     include      = args[:include]      || nil
-    type = query.model.type_tag
+    type = query.model_class.type_tag
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1235,8 +1235,8 @@ logger.warn('SESSION: ' + session.inspect)
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) and
        !args[:always_index]
-      redirect_with_query(:controller => query.model.show_controller,
-        :action => query.model.show_action,
+      redirect_with_query(:controller => query.model_class.show_controller,
+        :action => query.model_class.show_action,
         :id => query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
@@ -1285,8 +1285,8 @@ logger.warn('SESSION: ' + session.inspect)
       if !link_all and (by.to_s == this_by)
         results << str
       else
-        results << [str, { :controller => query.model.show_controller,
-                           :action => query.model.index_action,
+        results << [str, { :controller => query.model_class.show_controller,
+                           :action => query.model_class.index_action,
                            :by => by }.merge(query_params)]
       end
     end
@@ -1298,8 +1298,8 @@ logger.warn('SESSION: ' + session.inspect)
     else
       reverse_by = "reverse_#{this_by}"
     end
-    results << [str, { :controller => query.model.show_controller,
-                       :action => query.model.index_action,
+    results << [str, { :controller => query.model_class.show_controller,
+                       :action => query.model_class.index_action,
                        :by => reverse_by }.merge(query_params)]
 
     return results

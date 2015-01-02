@@ -428,6 +428,7 @@ class ObserverController < ApplicationController
   # _object_ link to these lookup_object methods, and defer lookup until the
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
+  # inputs: model Class, true/false
   def lookup_general(model, accepted = false)
     matches = []
     suggestions = []
@@ -1549,7 +1550,7 @@ class ObserverController < ApplicationController
       redirect_back_or_default("/")
     elsif !model ||
           !model.respond_to?(:column_names) ||
-          !model.column_names.include?("ok_for_export")
+          !model_class.column_names.include?("ok_for_export")
       flash_error(:runtime_invalid.t(type: '"type"', value: type))
       redirect_back_or_default("/")
     elsif !value.match(/^[01]$/)

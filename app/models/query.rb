@@ -844,20 +844,20 @@ class Query < AbstractQuery
 
   # Tell SQL how to sort results using the <tt>:by => :blah</tt> mechanism.
   def initialize_order(by)
-    table = model.table_name
+    table = model_class.table_name
     case by
 
     when 'updated_at', 'created_at', 'last_login', 'num_views'
-      if model.column_names.include?(by)
+      if model_class.column_names.include?(by)
         "#{table}.#{by} DESC"
       end
 
     when 'date'
-      if model.column_names.include?('date')
+      if model_class.column_names.include?('date')
         "#{table}.date DESC"
-      elsif model.column_names.include?('when')
+      elsif model_class.column_names.include?('when')
         "#{table}.when DESC"
-      elsif model.column_names.include?('created_at')
+      elsif model_class.column_names.include?('created_at')
         "#{table}.created_at DESC"
       end
 
@@ -880,34 +880,34 @@ class Query < AbstractQuery
       elsif model == Observation
         self.join << :names
         'names.sort_name ASC, observations.when DESC'
-      elsif model.column_names.include?('sort_name')
+      elsif model_class.column_names.include?('sort_name')
         "#{table}.sort_name ASC"
-      elsif model.column_names.include?('name')
+      elsif model_class.column_names.include?('name')
         "#{table}.name ASC"
-      elsif model.column_names.include?('title')
+      elsif model_class.column_names.include?('title')
         "#{table}.title ASC"
       end
 
     when 'title', 'login', 'summary', 'copyright_holder', 'where'
-      if model.column_names.include?(by)
+      if model_class.column_names.include?(by)
         "#{table}.#{by} ASC"
       end
 
     when 'user'
-      if model.column_names.include?('user_id')
+      if model_class.column_names.include?('user_id')
         self.join << :users
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
 
     when 'location'
-      if model.column_names.include?('location_id')
+      if model_class.column_names.include?('location_id')
         self.join << :locations
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
       end
 
     when 'rss_log'
-      if model.column_names.include?('rss_log_id')
+      if model_class.column_names.include?('rss_log_id')
         self.join << :rss_logs
         'rss_logs.updated_at DESC'
       end
@@ -1299,7 +1299,7 @@ class Query < AbstractQuery
 
   def initialize_model_do_search(arg, col=nil)
     if !params[arg].blank?
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       search = google_parse(params[arg])
       self.where += google_conditions(search, col)
     end
@@ -1319,7 +1319,7 @@ class Query < AbstractQuery
 
   def initialize_model_do_type_list(arg, col, vals)
     if !params[arg].blank?
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       types = params[arg].to_s.strip_squeeze.split
       types &= vals.map(&:to_s)
       if types.any?
@@ -1345,7 +1345,7 @@ class Query < AbstractQuery
   def initialize_model_do_objects_by_id(arg, col=nil)
     if ids = params[arg]
       col ||= "#{arg.to_s.sub(/s$/,'')}_id"
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       set = clean_id_set(ids)
       self.where << "#{col} IN (#{set})"
     end
@@ -1355,7 +1355,7 @@ class Query < AbstractQuery
     names = params[arg]
     if names && names.any?
       col ||= arg.to_s.sub(/s?$/, '_id')
-      col = "#{self.model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{self.model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       objs = []
       for name in names
         if name.to_s.match(/^\d+$/)
@@ -1398,7 +1398,7 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_locations(table=model.table_name, args={})
+  def initialize_model_do_locations(table=model_class.table_name, args={})
     locs = params[:locations]
     if locs && locs.any?
       loc_col = "#{table}.location_id"
@@ -1522,7 +1522,7 @@ class Query < AbstractQuery
   def initialize_model_do_license
     if !params[:license].blank?
       license = find_cached_parameter_instance(License, :license)
-      self.where << "#{model.table_name}.license_id = #{license.id}"
+      self.where << "#{model_class.table_name}.license_id = #{license.id}"
     end
   end
 
@@ -1531,7 +1531,7 @@ class Query < AbstractQuery
   # ----------------------------
 
   def initialize_model_do_date(arg=:date, col=arg)
-    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
       # Ugh, special case for search by month/day where range of months wraps around from December to January.
       if vals[0].to_s.match(/^\d\d-\d\d$/) and
@@ -1568,7 +1568,7 @@ class Query < AbstractQuery
   end
 
   def initialize_model_do_time(arg=:time, col=arg)
-    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
       initialize_model_do_time_half(true, vals[0], col)
       initialize_model_do_time_half(false, vals[1], col)
@@ -1676,8 +1676,8 @@ class Query < AbstractQuery
   def initialize_by_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    table = model.table_name
-    if model.column_names.include?('user_id')
+    table = model_class.table_name
+    if model_class.column_names.include?('user_id')
       self.where << "#{table}.user_id = '#{params[:user]}'"
     else
       raise "Can't figure out how to select #{model_string} by user_id!"
@@ -1699,7 +1699,7 @@ class Query < AbstractQuery
   def initialize_for_project
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
-    join_table = [model.table_name, 'projects'].sort.join('_')
+    join_table = [model_class.table_name, 'projects'].sort.join('_')
     self.where << "#{join_table}.project_id = '#{params[:project]}'"
     self.join << join_table
   end
@@ -1733,10 +1733,10 @@ class Query < AbstractQuery
     title_args[:user] = user.legal_name
     case model_symbol
     when :Name, :Location
-      version_table = "#{model.table_name}_versions".to_sym
+      version_table = "#{model_class.table_name}_versions".to_sym
       self.join << version_table
       self.where << "#{version_table}.user_id = '#{params[:user]}'"
-      self.where << "#{model.table_name}.user_id != '#{params[:user]}'"
+      self.where << "#{model_class.table_name}.user_id != '#{params[:user]}'"
     when :NameDescription, :LocationDescription
       glue_table = "#{model.name.underscore}s_#{flavor}s".
                       sub('_by_', '_').to_sym
@@ -1756,7 +1756,7 @@ class Query < AbstractQuery
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
     self.join << :names
-    self.where << "#{model.table_name}.location_id = '#{params[:location]}'"
+    self.where << "#{model_class.table_name}.location_id = '#{params[:location]}'"
     params[:by] ||= 'name'
   end
 
@@ -1764,7 +1764,7 @@ class Query < AbstractQuery
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
     self.join << :names
-    self.where << "#{model.table_name}.where LIKE '%#{pattern}%'"
+    self.where << "#{model_class.table_name}.where LIKE '%#{pattern}%'"
     params[:by] ||= 'name'
   end
 
