@@ -29,14 +29,14 @@ class DescriptionTest < UnitTestCase
   # ------------------------------------------------------------------
 
   def test_authors_and_editors
-    for model_class in [LocationDescription, NameDescription]
-      case model_class.name
+    for model in [LocationDescription, NameDescription]
+      case model.name
       when 'LocationDescription'
-        obj = model_class.new(:location_id => 1, :license_id => 1)
+        obj = model.new(:location_id => 1, :license_id => 1)
         a, e = 50, 5
         set_nontrivial = 'notes='
       when 'NameDescription'
-        obj = model_class.new(:name_id => 1, :license_id => 1)
+        obj = model.new(:name_id => 1, :license_id => 1)
         a, e = 100, 10
         set_nontrivial = 'gen_desc='
       end
