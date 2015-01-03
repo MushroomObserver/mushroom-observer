@@ -11,20 +11,29 @@
 #  == Name Formats
 #
 #    text_name          "Xanthoparmelia" coloradoensis
-#    (real_text_name)   "Xanthoparmelia" coloradoënsis          (derived on the fly from display_name)
+#    (real_text_name)   "Xanthoparmelia" coloradoënsis
+#                         (derived on the fly from display_name)
 #    search_name        "Xanthoparmelia" coloradoensis Fries
-#    (real_search_name) "Xanthoparmelia" coloradoënsis Fries    (derived on the fly from display_name)
+#    (real_search_name) "Xanthoparmelia" coloradoënsis Fries
+#                         (derived on the fly from display_name)
 #    sort_name          Xanthoparmelia" coloradoensis Fries
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
-#    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
-#
-#    text_name          Amanita muscaria var. muscaria                   (pure text, no accents or authors)
-#    (real_text_name)   Amanita muscaria var. muscaria                   (minus authors, but with umlauts if exist)
-#    search_name        Amanita muscaria var. muscaria (L.) Lam.         (what one would typically search for)
-#    (real_search_name) Amanita muscaria (L.) Lam. var. muscaria         (parsing this should result in identical name)
-#    sort_name          Amanita muscaria  {6var.  !muscaria  (L.) Lam.   (nonsense string which sorts name in correct place)
-#    display_name       **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**   (formatted as for publication)
-#    observation_name   **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**   (formatted as for publication)
+#    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries
+#                         (adds "sp." on the fly for genera)
+#    text_name          Amanita muscaria var. muscaria
+#                         (pure text, no accents or authors)
+#    (real_text_name)   Amanita muscaria var. muscaria
+#                          (minus authors, but with umlauts if exist)
+#    search_name        Amanita muscaria var. muscaria (L.) Lam.
+#                         (what one would typically search for)
+#    (real_search_name) Amanita muscaria (L.) Lam. var. muscaria
+#                         (parsing this should result in identical name)
+#    sort_name          Amanita muscaria  {6var.  !muscaria  (L.) Lam.
+#                         (nonsense string which sorts name in correct place)
+#    display_name       **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**
+#                         (formatted as for publication)
+#    observation_name   **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**
+#                         (formatted as for publication)
 #
 #  Note about "real" text_name and search_name: These are required by edit
 #  forms.  If the user inputs a name with an accent (ë is the only one
@@ -94,7 +103,8 @@
 #  == Attributes
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
-#  sync_id::          (-) Globally unique alphanumeric id, used to sync with remote servers.
+#  sync_id::          (-) Globally unique alphanumeric id,
+#                         used to sync with remote servers.
 #  created_at::       (-) Date/time it was first created.
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
@@ -110,7 +120,8 @@
 #  real_search_name:: (V) "Xanthoparmelia" coloradoënsis Fries
 #  sort_name::        (V) Xanthoparmelia" coloradoensis Fries
 #  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
-#  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
+#  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries
+#                         (adds "sp." on the fly for genera)
 #  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
@@ -137,9 +148,12 @@
 #  parse_classification::    Parse +classification+ string.
 #
 #  ==== Name Parsing
-#  find_names::              Parses string, looks up Name by search_name, falls back on text_name.
-#  find_names_filling_in_authors:: Look up Name's by text_name and search_name; fills in authors if supplied.
-#  find_or_create_name_and_parents:: Look up Name, create it, return it and parents.
+#  find_names::              Parses string, looks up Name by search_name,
+#                              falls back on text_name.
+#  find_names_filling_in_authors:: Look up Name's by text_name and search_name;
+#                              fills in authors if supplied.
+#  find_or_create_name_and_parents:: Look up Name, create it,
+#                              return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
 #  parse_author::            Grab the author from the end of a name.
 #  parse_group::             Parse "Whatever group".
@@ -157,8 +171,10 @@
 #  format_name::             Add itallics and/or boldness to string.
 #  clean_incoming_string::   Preprocess string from user before parsing.
 #  standardize_name::        Standardize abbreviations in parsed name string.
-#  standardize_author::      Standardize special abbreviations at start of parsed author.
-#  squeeze_author::          Squeeze out space between initials, such as in "A. H. Smith".
+#  standardize_author::      Standardize special abbreviations
+#                              at start of parsed author.
+#  squeeze_author::          Squeeze out space between initials,
+#                              such as in "A. H. Smith".
 #
 #  == Instance methods
 #
@@ -188,20 +204,22 @@
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
-#  synonym_ids:              List of all synonyms, including this Name, just ids.
+#  synonym_ids:              List of IDs of all synonyms, including this Name
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
 #  clear_synonym::           Remove this Name from its Synonym.
 #  merge_synonyms::          Merge Synonym's of this and another Name.
-#  transfer_synonym::        Transfer a Name from another Synonym into this Name's Synonym.
+#  transfer_synonym::        Transfer a Name from another Synonym
+#                              into this Name's Synonym.
 #  other_authors::           List of names that differ only in author.
-#  other_author_ids::        List of names that differ only in author, just ids.
+#  other_author_ids::        List of ids of names that differ only in author
 #
 #  ==== Misspellings
 #  is_misspelling?::         Is this name a misspelling?
 #  correct_spelling::        Link to the correctly-spelled Name (or nil).
 #  misspellings::            Names that call this their "correct spelling".
-#  misspelling_ids::         Names that call this their "correct spelling", just ids.
+#  misspelling_ids::         Names that call this their "correct spelling",
+#                              just ids.
 #
 #  ==== Status
 #  deprecated::              Is this name deprecated?
@@ -220,12 +238,13 @@
 #  reviewed_observations::   Observation's that have > 80% confidence.
 #
 #  ==== Merging
-#  mergeable?::               Is it safe to merge this Name into another.
+#  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
 #
 #  == Callbacks
 #
-#  create_description::      After create: create (empty) official NameDescription.
+#  create_description::      After create: create (empty) official
+#                              NameDescription.
 #  notify_users::            After save: notify interested User's of changes.
 #
 ################################################################################
@@ -304,11 +323,6 @@ class Name < AbstractModel
 
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
-
-  # always read rank into memory as Symbol
-  def rank
-    read_attribute(:rank).to_sym
-  end
 
   # (Destruction is already logged as a merge.)
   self.autolog_events = []
@@ -468,7 +482,8 @@ class Name < AbstractModel
   RANKS_ABOVE_SPECIES = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
   RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species] + RANKS_INSIDE_GENUS
   ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
-  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom] # Why doesn't this have :Species?
+  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class,
+               :Phylum, :Kingdom] # Why doesn't this have :Species?
   EOL_RANKS_FOR_EXPORT = [:Form, :Variety, :Subspecies, :Species, :Genus]
   EOL_MIN_IMAGE_VOTE = 2
   EOL_MIN_OBSERVATION_VOTE = 2.4
@@ -549,8 +564,8 @@ class Name < AbstractModel
     #                       :conditions => ["subject = ':name/#{id}' and
     #                         predicate = ':lichenAuthority'"]) != []) # Rails 3
     result = (Triple.where(subject: ":name/#{id}",
-                           predicate: ":lichenAuthority").to_a != [])
-    if !result and below_genus?
+                           predicate: ":lichenAuthority") != [])
+    if !result && below_genus?
       genus = self.class.find_by_text_name(text_name.split.first)
       result = genus.is_lichen? if genus
     end
@@ -698,7 +713,9 @@ class Name < AbstractModel
 #                                         AND rank = '#{next_rank}'
 #                                         AND text_name = '#{$1}'")
         these = Name.where("correct_spelling_id IS NULL AND
-                            rank = ? AND text_name = ?", next_rank, $1).to_a
+                            rank = '#{rank_symbol_to_enum(next_rank)}' AND
+                            text_name = '#{$1}'"
+                          ).to_a
       end
 
       # Get rid of deprecated names unless all the results are deprecated.
@@ -715,6 +732,10 @@ class Name < AbstractModel
     end
 
     return results
+  end
+
+  def rank_symbol_to_enum(rank_symbol)
+    Name.ranks[rank_symbol]
   end
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,

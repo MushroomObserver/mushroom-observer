@@ -733,28 +733,26 @@ class AbstractQuery < ActiveRecord::Base
     end
 
     # Initialize attributes, but don't create query or do anything yet.
-    query.attributes = {
-      model:        model_symbol,
-      flavor:       flavor,
-      updated_at:   Time.now,
-      access_count: 0,
-    }
+    query.attributes = { model:        model_symbol,
+                         flavor:       flavor,
+                         updated_at:   Time.now,
+                         access_count: 0
+                       }
     query.replace_params(params)
 
-    # Make sure all required params exist and are valid; also make sure there
-    # aren't any unexpected arguments.
+    # Make sure all required params exist and are valid;
+    # Also make sure there are no unexpected arguments.
     query.validate_params
 
-    # See if such a query already exists and use it instead.
-    str = query.params_write_hash(query.params)
-    if other = find_by_model_and_flavor_and_params(model_symbol, flavor, str)
-      query = other
-    end
+    # Search (using enum integers for model and flavor values)
+    # for preexisting identical query.  Use it instead of creating new query.
+    existing_query = find_by_model_and_flavor_and_params(
+      query.class.models[model_symbol],
+      query.class.flavors[flavor],
+      query.params_write_hash(query.params))
+    query = existing_query if existing_query
 
-    # Okay to set "current" now.
-    if set_current
-      query.current = set_current
-    end
+    query.current = set_current if set_current # Okay to set "current" now.
 
     query
   end
@@ -1828,7 +1826,6 @@ class AbstractQuery < ActiveRecord::Base
 
   # Set current place in results; takes instance or id (String or Fixnum).
   def current=(arg)
-  byebug
     if arg.is_a?(model_class)
       @results ||= {}
       @results[arg.id] = arg
@@ -1959,7 +1956,7 @@ class AbstractQuery < ActiveRecord::Base
     if outer_current_id
       outer_current_id.call(self)
     else
-      params[outer.model.type_tag]
+      params[outer.model_class.type_tag]
     end
   end
 
@@ -1969,9 +1966,9 @@ class AbstractQuery < ActiveRecord::Base
     if setup_new_inner_query
       setup_new_inner_query.call(new_params, new_outer)
     else
-      new_params[new_outer.model.type_tag] = new_outer.current_id
+      new_params[new_outer.model_class.type_tag] = new_outer.current_id
     end
-    self.class.lookup_and_save(model, flavor, new_params)
+    self.class.lookup_and_save(model_symbol, flavor, new_params)
   end
 
   # Create a new copy of this query if the outer query changed, otherwise

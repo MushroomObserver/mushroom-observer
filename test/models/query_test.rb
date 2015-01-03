@@ -40,7 +40,7 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:Observation)
     assert(query.new_record?)
 
-    assert_equal(Observation, query.model)
+    assert_equal(Observation, query.model_class)
     assert_equal(:Observation, query.model_symbol)
     assert_equal("Observation", query.model_string)
     assert_equal(:all, query.flavor)
@@ -406,12 +406,16 @@ class QueryTest < UnitTestCase
       query.order = ""
 
       # Yikes!!  This should about test everything.
-      sql = query.query(join: [{observations: [:locations, :comments, {images_observations: :images}]}, :'users.reviewer'])
+      sql = query.query(
+        join: [ { observations: [:locations,
+                                 :comments, { images_observations: :images } ]
+                },
+                :'users.reviewer' ])
       assert_match(/names.reviewer_id = users.id/, sql)
       assert_match(/observations.name_id = names.id/, sql)
       assert_match(/observations.location_id = locations.id/, sql)
       assert_match(/comments.target_id = observations.id/, sql)
-      assert_match(/comments.target_type = "Observation"/, sql)
+      assert_match(/comments.target_type = (['"])Observation\1/, sql)
       assert_match(/images_observations.observation_id = observations.id/, sql)
       assert_match(/images_observations.image_id = images.id/, sql)
     end
@@ -420,7 +424,8 @@ class QueryTest < UnitTestCase
       query = Query.lookup(:Name)
       assert_equal("", query.reverse_order(""))
       assert_equal('id ASC', query.reverse_order('id DESC'))
-      assert_equal('one ASC, two DESC, three ASC', query.reverse_order('one DESC, two ASC, three DESC'))
+      assert_equal('one ASC, two DESC, three ASC',
+                   query.reverse_order('one DESC, two ASC, three DESC'))
       assert_equal('IF(users.name = "", users.login, users.name) DESC, users.id ASC',
         query.reverse_order('IF(users.name = "", users.login, users.name) ASC, users.id DESC'))
     end

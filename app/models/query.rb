@@ -862,22 +862,22 @@ class Query < AbstractQuery
       end
 
     when 'name'
-      if model == Image
+      if model_class == Image
         self.join << {:images_observations => {:observations => :names}}
         self.group = 'images.id'
         'MIN(names.sort_name) ASC, images.when DESC'
-      elsif model == Location
+      elsif model_class == Location
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
-      elsif model == LocationDescription
+      elsif model_class == LocationDescription
         self.join << :locations
         'locations.name ASC, location_descriptions.created_at ASC'
-      elsif model == Name
+      elsif model_class == Name
         'names.sort_name ASC'
-      elsif model == NameDescription
+      elsif model_class == NameDescription
         self.join << :names
         'names.sort_name ASC, name_descriptions.created_at ASC'
-      elsif model == Observation
+      elsif model_class == Observation
         self.join << :names
         'names.sort_name ASC, observations.when DESC'
       elsif model_class.column_names.include?('sort_name')
@@ -1738,7 +1738,7 @@ class Query < AbstractQuery
       self.where << "#{version_table}.user_id = '#{params[:user]}'"
       self.where << "#{model_class.table_name}.user_id != '#{params[:user]}'"
     when :NameDescription, :LocationDescription
-      glue_table = "#{model.name.underscore}s_#{flavor}s".
+      glue_table = "#{model_string.underscore}s_#{flavor}s".
                       sub('_by_', '_').to_sym
       self.join << glue_table
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
@@ -2024,7 +2024,7 @@ class Query < AbstractQuery
   # ---------------------------------------------------------------
 
   def initialize_with_descriptions
-    type = model.name.underscore
+    type = model_string.underscore
     self.join << :"#{type}_descriptions"
     params[:by] ||= 'name'
   end
@@ -2034,7 +2034,7 @@ class Query < AbstractQuery
   end
 
   def initialize_with_descriptions_by_editor
-    type = model.name.underscore
+    type = model_string.underscore
     glue = flavor.to_s.sub(/^.*_by_/, '')
     desc_table = :"#{type}_descriptions"
     glue_table = :"#{type}_descriptions_#{glue}s"
@@ -2046,7 +2046,7 @@ class Query < AbstractQuery
   end
 
   def initialize_with_descriptions_by_user
-    type = model.name.underscore
+    type = model_string.underscore
     desc_table = :"#{type}_descriptions"
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
@@ -2173,7 +2173,7 @@ class Query < AbstractQuery
         args2 = args.dup
         extend_join(args2)  << :images_observations
         extend_where(args2) << "images_observations.observation_id IN (#{ids})"
-        model.connection.select_rows(query(args2))
+        model_class.connection.select_rows(query(args2))
       end
       return
     end
@@ -2241,7 +2241,7 @@ class Query < AbstractQuery
         args2 = args.dup
         extend_where(args2)
         args2[:where] += google_conditions(content, 'observations.notes')
-        results = model.connection.select_rows(query(args2))
+        results = model_class.connection.select_rows(query(args2))
 
         args2 = args.dup
         extend_join(args2) << case model_symbol
@@ -2253,7 +2253,7 @@ class Query < AbstractQuery
         extend_where(args2)
         args2[:where] += google_conditions(content,
           'CONCAT(observations.notes,comments.summary,comments.comment)')
-        results |= model.connection.select_rows(query(args2))
+        results |= model_class.connection.select_rows(query(args2))
       end
     end
   end
