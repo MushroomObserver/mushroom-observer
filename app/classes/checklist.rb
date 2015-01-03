@@ -34,7 +34,7 @@ class Checklist
 
     def query
       super(
-        :conditions => [ "o.user_id = #{@user.id}" ]
+        conditions: [ "o.user_id = #{@user.id}" ]
       )
     end
   end
@@ -48,8 +48,8 @@ class Checklist
 
     def query
       super(
-        :tables => [ 'observations_projects op' ],
-        :conditions => [ 'op.observation_id = o.id', "op.project_id = #{@project.id}" ]
+        tables: [ 'observations_projects op' ],
+        conditions: [ 'op.observation_id = o.id', "op.project_id = #{@project.id}" ]
       )
     end
   end
@@ -63,8 +63,9 @@ class Checklist
 
     def query
       super(
-        :tables => [ 'observations_species_lists os' ],
-        :conditions => [ 'os.observation_id = o.id', "os.species_list_id = #{@list.id}" ]
+        tables: [ 'observations_species_lists os' ],
+        conditions: [ 'os.observation_id = o.id',
+                         "os.species_list_id = #{@list.id}" ]
       )
     end
   end
@@ -106,7 +107,6 @@ private
 
   def count_nonsynonyms_and_gather_synonyms
     synonyms = {}
-    ranks = [:Species] + Name::RANKS_BELOW_SPECIES
     for text_name, syn_id, deprecated in Name.connection.select_rows(query)
       if syn_id and deprecated == 1
         # wait until we find an accepted synonym
@@ -123,7 +123,6 @@ private
   end
 
   def count_synonyms(synonyms)
-    ranks = [:Species] + Name::RANKS_BELOW_SPECIES
     for syn_id, text_name in synonyms
       text_name ||= Name.connection.select_values(%(
         SELECT text_name FROM names
@@ -144,8 +143,9 @@ private
   end
 
   def ranks_to_consider
-    ranks = [:Species] + Name::RANKS_BELOW_SPECIES
-    ranks.map {|x| Name.connection.quote(x.to_s)}.join(', ')
+    ranklist = [:Species] + Name::RANKS_BELOW_SPECIES
+    # ranks.map {|x| Name.connection.quote(x.to_s)}.join(', ')
+    ranklist.map {|rank| Name.ranks[rank]}.join(', ') # rank => enum integer
   end
 
   def query(args={})
