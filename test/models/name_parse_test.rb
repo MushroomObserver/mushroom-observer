@@ -45,7 +45,8 @@ class NameParseTest < UnitTestCase
   end
 
   def test_explicit_coprinus_comatus
-    input_str = "#{names(:coprinus_comatus).rank} #{names(:coprinus_comatus).text_name}"
+    input_str = "#{names(:coprinus_comatus).rank} " \
+                "#{names(:coprinus_comatus).text_name}"
     name_parse = NameParse.new(input_str)
     assert_not_nil(name_parse)
     assert_equal(names(:coprinus_comatus).rank.to_sym, name_parse.rank)

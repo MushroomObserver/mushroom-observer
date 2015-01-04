@@ -143,9 +143,9 @@ private
   end
 
   def ranks_to_consider
-    ranklist = [:Species] + Name::RANKS_BELOW_SPECIES
     # ranks.map {|x| Name.connection.quote(x.to_s)}.join(', ')
-    ranklist.map {|rank| Name.ranks[rank]}.join(', ') # rank => enum integer
+    # map rank => enum integer instead of string
+    Name::RANKS_LE_SPECIES.map {|rank| Name.ranks[rank]}.join(", ")
   end
 
   def query(args={})

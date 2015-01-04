@@ -476,18 +476,19 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
-  RANKS_INSIDE_GENUS  = [:Stirps, :Subsection, :Section, :Subgenus]
-  RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
-  RANKS_ABOVE_SPECIES = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
-  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species] + RANKS_INSIDE_GENUS
-  ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
-  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class,
-               :Phylum, :Kingdom] # Why doesn't this have :Species?
+  RANKS_ABOVE_GENUS    = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
+  RANKS_INSIDE_GENUS   = [:Stirps, :Subsection, :Section, :Subgenus]
+  RANKS_BELOW_SPECIES  = [:Form, :Variety, :Subspecies]
+  RANKS_LE_SPECIES     = RANKS_BELOW_SPECIES + [:Species]
+  RANKS_ABOVE_SPECIES  = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
+  RANKS_BELOW_GENUS    = RANKS_LE_SPECIES + RANKS_INSIDE_GENUS
+  ALL_RANKS            = RANKS_LE_SPECIES + RANKS_ABOVE_SPECIES + [:Group]
+  EOL_RANKS            = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order,
+                         :Class, :Phylum, :Kingdom] # Why not :Species?
   EOL_RANKS_FOR_EXPORT = [:Form, :Variety, :Subspecies, :Species, :Genus]
-  EOL_MIN_IMAGE_VOTE = 2
+  EOL_MIN_IMAGE_VOTE   = 2
   EOL_MIN_OBSERVATION_VOTE = 2.4
-  ALT_RANKS = {:Division => :Phylum}
+  ALT_RANKS            = { Division: :Phylum }
 
   # Returns an Array of Symbol's from :Form to :Domain, then :Group.
   def self.all_ranks
@@ -1989,7 +1990,8 @@ class Name < AbstractModel
   ##############################################################################
 
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
-  def self.find_names_filling_in_authors(in_str, rank=nil, ignore_deprecated=false)
+  def self.find_names_filling_in_authors(in_str, rank=nil,
+                                         ignore_deprecated=false)
     find_names(in_str, rank, ignore_deprecated, :fill_in_authors)
   end
 
@@ -1999,65 +2001,60 @@ class Name < AbstractModel
   #
   # +in_str+::              String to parse.
   # +rank+::                Accept only names of this rank (optional).
-  # +ignore_deprecated+::   If +true+, return all matching names, even if deprecated.
-  # +fill_in_authors+::     If +true+, will fill in author for Name's missing authors
+  # +ignore_deprecated+::   If +true+, return all matching names,
+  #                         even if deprecated.
+  # +fill_in_authors+::     If +true+, will fill in author for Name's missing
+  #                         authors
   #                         if +in_str+ supplies one.
   #
-  #   names = Name.find_names('Letharia vulpina')
+  #  names = Name.find_names('Letharia vulpina')
   #
-  def self.find_names(in_str, rank=nil, ignore_deprecated=false, fill_in_authors=false)
+  def self.find_names(in_str, rank=nil, ignore_deprecated=false,
+                      fill_in_authors=false)
+
+    return [] unless parse = parse_name(in_str)
+
+    text_name = parse.text_name
+    search_name = parse.search_name
+    author = parse.author
+    if names_for_unknown.member?(name.downcase)
+      name = "Fungi"
+    end
     results = []
 
-    parse = parse_name(in_str)
-    if parse
-      text_name = parse.text_name
-      search_name = parse.search_name
-      author = parse.author
+    while results.empty?
+      conditions = []
+      conditions_args = {}
+      if author.present?
+        conditions << "search_name = :name"
+        conditions_args[:name] = search_name
+      else
+        conditions << "text_name = :name"
+        conditions_args[:name] = text_name
+      end
+      conditions << "deprecated = 0" unless ignore_deprecated
+      conditions << "rank = #{ Name.ranks[rank] }" if rank # enum integer value
 
-      if names_for_unknown.member?(name.downcase)
-        name = 'Fungi'
+      results = Name.where(conditions.join(" AND "), conditions_args)
+
+      # If user provided author, check if name already exists without author.
+      if author.present? && results.empty?
+        conditions_args[:name] = text_name
+        results = Name.where(conditions.join(" AND "), conditions_args)
+        # (this should never return more than one result)
+        if fill_in_authors and results.length == 1
+          results.first.change_author(author)
+          results.first.save
+        end
       end
 
-      while results.empty?
-        conditions = []
-        conditions_args = {}
-        if not author.blank?
-          conditions << 'search_name = :name'
-          conditions_args[:name] = search_name
-        else
-          conditions << 'text_name = :name'
-          conditions_args[:name] = text_name
-        end
-        unless ignore_deprecated
-          conditions << 'deprecated = 0'
-        end
-        if rank
-          conditions << 'rank = :rank'
-          conditions_args[:rank] = rank
-        end
-
-        # results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ]) # Rails 3
-        results = Name.where(conditions.join(" AND "), conditions_args)
-
-        # If user provided author, check if name already exists without author.
-        if results.empty? and not author.blank?
-          conditions_args[:name] = text_name
-        # results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ]) # Rails 3
-        results = Name.where(conditions.join(" AND "), conditions_args)
-          # (this should never return more than one result)
-          if fill_in_authors and results.length == 1
-            results.first.change_author(author)
-            results.first.save
-          end
-        end
-
-        # Try again, looking for deprecated names if didn't find any matching approved names.
-        break if ignore_deprecated
-        ignore_deprecated = true
-      end
+      # Try again, looking for deprecated names
+      # if didn't find any matching approved names.
+      break if ignore_deprecated
+      ignore_deprecated = true
     end
 
-    return results
+    results
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
@@ -2119,17 +2116,10 @@ class Name < AbstractModel
   def self.find_matching_names(parsed_name)
     result = []
     if parsed_name.author.blank?
-#     result = Name.all(:conditions => ['text_name = ?',
-#                                        parsed_name.text_name]) # Rails 3
       result = Name.where(text_name: parsed_name.text_name)
     else
-#     result = Name.all(:conditions => ['search_name = ?',
-#                                        parsed_name.search_name]) # Rails 3
       result = Name.where(search_name: parsed_name.search_name)
       if result.empty?
-#       result = Name.all(:conditions =>
-#                           ['text_name = ? AND author = ""',
-#                             parsed_name.text_name]) # Rails 3
         result = Name.where(text_name: parsed_name.text_name, author: "")
       end
     end
