@@ -476,18 +476,19 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
-  RANKS_INSIDE_GENUS  = [:Stirps, :Subsection, :Section, :Subgenus]
-  RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
-  RANKS_ABOVE_SPECIES = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
-  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species] + RANKS_INSIDE_GENUS
-  ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
-  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class,
-               :Phylum, :Kingdom] # Why doesn't this have :Species?
+  RANKS_ABOVE_GENUS    = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
+  RANKS_INSIDE_GENUS   = [:Stirps, :Subsection, :Section, :Subgenus]
+  RANKS_BELOW_SPECIES  = [:Form, :Variety, :Subspecies]
+  RANKS_LE_SPECIES     = RANKS_BELOW_SPECIES + [:Species]
+  RANKS_ABOVE_SPECIES  = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
+  RANKS_BELOW_GENUS    = RANKS_LE_SPECIES + RANKS_INSIDE_GENUS
+  ALL_RANKS            = RANKS_LE_SPECIES + RANKS_ABOVE_SPECIES + [:Group]
+  EOL_RANKS            = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order,
+                         :Class, :Phylum, :Kingdom] # Why not :Species?
   EOL_RANKS_FOR_EXPORT = [:Form, :Variety, :Subspecies, :Species, :Genus]
-  EOL_MIN_IMAGE_VOTE = 2
+  EOL_MIN_IMAGE_VOTE   = 2
   EOL_MIN_OBSERVATION_VOTE = 2.4
-  ALT_RANKS = {:Division => :Phylum}
+  ALT_RANKS            = { Division: :Phylum }
 
   # Returns an Array of Symbol's from :Form to :Domain, then :Group.
   def self.all_ranks
@@ -766,12 +767,10 @@ class Name < AbstractModel
   #
   def children(all=false)
     results = []
-#    our_index = ALL_RANKS.index(rank) # Rails 3
     our_rank = rank
     our_index = rank_index(our_rank)
 
     # If we're above genus we need to rely on classification strings.
-#    if RANKS_ABOVE_GENUS.include?(rank) # Rails 3
     if RANKS_ABOVE_GENUS.include?(our_rank)
 
       # Querying every genus that refers to this ancestor could potentially get
@@ -779,7 +778,7 @@ class Name < AbstractModel
       # how else to do it.  (There are currently 1927 genera in the database.)
       rows = Name.connection.select_rows %(
         SELECT classification, search_name FROM names
-        WHERE rank = 'Genus'
+        WHERE rank = #{Name.ranks[:Genus]}
           AND classification LIKE '%#{rank}: _#{text_name}_%'
       )
 
@@ -787,7 +786,6 @@ class Name < AbstractModel
       names = []
       if our_rank == :Family
         for cstr, sname in rows
-#           results += Name.where(search_name: sname) # Rails 3
           results += Name.where(search_name: sname).to_a
         end
 
@@ -836,9 +834,6 @@ class Name < AbstractModel
         results2 = []
         for name in results
           if name.rank == :Genus
-#            results2 += Name.all(:conditions => # Rails 3
-#                                 "correct_spelling_id IS NULL
-#                                  AND text_name LIKE '#{name.text_name} %'")
             results2 += Name.where("correct_spelling_id IS NULL AND
                                     text_name LIKE ? ' %'", name.text_name).to_a
           end
@@ -1062,10 +1057,8 @@ class Name < AbstractModel
     @other_authors ||= begin
       if @other_author_ids
         # Slightly faster since id is primary index.
-        # Name.all(:conditions => ['id IN (?)', @other_author_ids]) # Rails 3
         Name.where(id: @other_author_ids).to_a
       else
-        # Name.all(:conditions => ['text_name = ?', text_name]) # Rails 3
         Name.where(text_name: text_name).to_a
       end
     end
@@ -1256,7 +1249,6 @@ class Name < AbstractModel
         # Name.all(:conditions => ['id IN (?)', @misspelling_ids]) # Rails 3
         Name.where(id: @misspelling_ids).to_a
       else
-        # Name.all(:conditions => "correct_spelling_id = #{id}") # Rails 3
         Name.where(correct_spelling_id: id).to_a
       end
     end
@@ -1293,7 +1285,7 @@ class Name < AbstractModel
       end
     end
 
-    return results
+    results
   end
 
   private
@@ -1304,7 +1296,7 @@ class Name < AbstractModel
     results = guess_with_errors(str, 1)
     results = guess_with_errors(str, 2) if results.empty?
     results = guess_with_errors(str, 3) if results.empty?
-    return results
+    results
   end
 
   # Look up name replacing n letters at a time with a star.
@@ -1340,7 +1332,6 @@ class Name < AbstractModel
       "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(' OR ')
     conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
-    # names = all(:conditions => conds, :limit => 10) Rails 3
     names = where(conds).limit(10).to_a
 
     # Screen out ones way too different.
@@ -1349,7 +1340,7 @@ class Name < AbstractModel
       (x.text_name.length > b)
     end
 
-    return names
+    names
   end
 
   # String words together replacing the one at index +i+ with +sub+.
@@ -1989,7 +1980,8 @@ class Name < AbstractModel
   ##############################################################################
 
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
-  def self.find_names_filling_in_authors(in_str, rank=nil, ignore_deprecated=false)
+  def self.find_names_filling_in_authors(in_str, rank=nil,
+                                         ignore_deprecated=false)
     find_names(in_str, rank, ignore_deprecated, :fill_in_authors)
   end
 
@@ -1999,65 +1991,60 @@ class Name < AbstractModel
   #
   # +in_str+::              String to parse.
   # +rank+::                Accept only names of this rank (optional).
-  # +ignore_deprecated+::   If +true+, return all matching names, even if deprecated.
-  # +fill_in_authors+::     If +true+, will fill in author for Name's missing authors
+  # +ignore_deprecated+::   If +true+, return all matching names,
+  #                         even if deprecated.
+  # +fill_in_authors+::     If +true+, will fill in author for Name's missing
+  #                         authors
   #                         if +in_str+ supplies one.
   #
-  #   names = Name.find_names('Letharia vulpina')
+  #  names = Name.find_names('Letharia vulpina')
   #
-  def self.find_names(in_str, rank=nil, ignore_deprecated=false, fill_in_authors=false)
+  def self.find_names(in_str, rank=nil, ignore_deprecated=false,
+                      fill_in_authors=false)
+
+    return [] unless parse = parse_name(in_str)
+
+    text_name = parse.text_name
+    search_name = parse.search_name
+    author = parse.author
+    if names_for_unknown.member?(name.downcase)
+      name = "Fungi"
+    end
     results = []
 
-    parse = parse_name(in_str)
-    if parse
-      text_name = parse.text_name
-      search_name = parse.search_name
-      author = parse.author
+    while results.empty?
+      conditions = []
+      conditions_args = {}
+      if author.present?
+        conditions << "search_name = :name"
+        conditions_args[:name] = search_name
+      else
+        conditions << "text_name = :name"
+        conditions_args[:name] = text_name
+      end
+      conditions << "deprecated = 0" unless ignore_deprecated
+      conditions << "rank = #{ Name.ranks[rank] }" if rank # enum integer value
 
-      if names_for_unknown.member?(name.downcase)
-        name = 'Fungi'
+      results = Name.where(conditions.join(" AND "), conditions_args)
+
+      # If user provided author, check if name already exists without author.
+      if author.present? && results.empty?
+        conditions_args[:name] = text_name
+        results = Name.where(conditions.join(" AND "), conditions_args)
+        # (this should never return more than one result)
+        if fill_in_authors and results.length == 1
+          results.first.change_author(author)
+          results.first.save
+        end
       end
 
-      while results.empty?
-        conditions = []
-        conditions_args = {}
-        if not author.blank?
-          conditions << 'search_name = :name'
-          conditions_args[:name] = search_name
-        else
-          conditions << 'text_name = :name'
-          conditions_args[:name] = text_name
-        end
-        unless ignore_deprecated
-          conditions << 'deprecated = 0'
-        end
-        if rank
-          conditions << 'rank = :rank'
-          conditions_args[:rank] = rank
-        end
-
-        # results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ]) # Rails 3
-        results = Name.where(conditions.join(" AND "), conditions_args)
-
-        # If user provided author, check if name already exists without author.
-        if results.empty? and not author.blank?
-          conditions_args[:name] = text_name
-        # results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ]) # Rails 3
-        results = Name.where(conditions.join(" AND "), conditions_args)
-          # (this should never return more than one result)
-          if fill_in_authors and results.length == 1
-            results.first.change_author(author)
-            results.first.save
-          end
-        end
-
-        # Try again, looking for deprecated names if didn't find any matching approved names.
-        break if ignore_deprecated
-        ignore_deprecated = true
-      end
+      # Try again, looking for deprecated names
+      # if didn't find any matching approved names.
+      break if ignore_deprecated
+      ignore_deprecated = true
     end
 
-    return results
+    results
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
@@ -2119,17 +2106,10 @@ class Name < AbstractModel
   def self.find_matching_names(parsed_name)
     result = []
     if parsed_name.author.blank?
-#     result = Name.all(:conditions => ['text_name = ?',
-#                                        parsed_name.text_name]) # Rails 3
       result = Name.where(text_name: parsed_name.text_name)
     else
-#     result = Name.all(:conditions => ['search_name = ?',
-#                                        parsed_name.search_name]) # Rails 3
       result = Name.where(search_name: parsed_name.search_name)
       if result.empty?
-#       result = Name.all(:conditions =>
-#                           ['text_name = ? AND author = ""',
-#                             parsed_name.text_name]) # Rails 3
         result = Name.where(text_name: parsed_name.text_name, author: "")
       end
     end
