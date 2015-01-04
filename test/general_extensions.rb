@@ -221,13 +221,11 @@ module GeneralExtensions
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.
   def assert_save(obj, msg=nil)
-    if obj.save
-      assert(true)
-    else
-      msg2 = obj.errors.full_messages.join("; ")
-      msg2 = msg + "\n" + msg2 if msg
-      assert(false, msg2)
-    end
+    return pass if obj.save
+
+    msg2 = obj.errors.full_messages.join("; ")
+    msg2 = msg + "\n" + msg2 if msg
+    flunk(msg2)
   end
 
   ##############################################################################
@@ -390,16 +388,15 @@ module GeneralExtensions
       end
     end
 
-    if result
-      # Clean out old files from previous failure(s).
-      for file in files
-        filename = Array(file).first
-        new_filename = filename + '.new'
-        File.delete(new_filename) if File.exists?(new_filename)
-      end
-    else
-      assert(false, msg)
+    return assert(false, msg) unless result
+
+    # Clean out old files from previous failure(s).
+    for file in files
+      filename = Array(file).first
+      new_filename = filename + '.new'
+      File.delete(new_filename) if File.exists?(new_filename)
     end
+    pass
   end
 
   def enforce_encoding(encoding, file, str)
