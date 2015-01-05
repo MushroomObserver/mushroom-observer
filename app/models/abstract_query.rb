@@ -697,9 +697,9 @@ class AbstractQuery < ActiveRecord::Base
 
   # Instantiate new query for a given model and flavor
   # Inputs:
-  # model_symbol Symbol
-  # flavor       Symbol
-  def self.lookup(model_symbol, flavor=:default, params={})
+  #   model:  Class
+  #   flavor: Symbol
+  def self.lookup(model, flavor=:default, params={})
     query = new()
 
     # Periodically clean out old queries.
@@ -713,12 +713,13 @@ class AbstractQuery < ActiveRecord::Base
 
     # Provide default flavor.
     if flavor == :default || flavor.blank?
-      flavor = default_flavors[model_symbol] || :all
+      flavor = default_flavors[model] || :all
     else
       flavor = flavor.to_sym
     end
 
     # Make sure this is a recognized query type.
+    model_symbol = model.to_s.to_sym
     if !allowed_model_flavors.has_key?(model_symbol)
       raise("Invalid model: '#{model_symbol}'")
     elsif !allowed_model_flavors[model_symbol].include?(flavor)

@@ -1002,8 +1002,8 @@ logger.warn('SESSION: ' + session.inspect)
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
-  def create_query(model, flavor=:default, args={})
-    Query.lookup(model, flavor, args)
+  def create_query(model_symbol, flavor=:default, args={})
+    Query.lookup(model_symbol, flavor, args)
   end
 
   # Create a new query by adding a bounding box to the given one.
