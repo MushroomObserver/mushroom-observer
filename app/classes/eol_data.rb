@@ -174,9 +174,10 @@ private
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND names.rank IN ('Form','Variety','Subspecies','Species', 'Genus')
+    AND names.rank IN (#{Name.ranks[:Form]}, #{Name.ranks[:Variety]},
+                       #{Name.ranks[:Subspecies]}, #{Name.ranks[:Species]},
+                       #{Name.ranks[:Genus]} )
   )
-
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
@@ -246,7 +247,8 @@ private
   end
 
   def user_id_to_legal_name()
-    # Just grab the ones with contribution > 0 (1621) since we're going to use at least 400 of them
+    # Just grab the ones with contribution > 0 (1621)
+    # since we're going to use at least 400 of them
     result = {}
     data = User.connection.select_rows %(
       SELECT id, IF(COALESCE(name,'') = '', login, name) AS name
@@ -293,14 +295,15 @@ private
 
   def create_triples(subjects, p)
     for s in subjects
-      Triple.new({:subject=>s.show_url, :predicate=>p, :object=>eol_search_url(s.class.name, s)}).save
+      Triple.new({subject: s.show_url, predicate: p,
+                  object: eol_search_url(s.class.name, s)}).save
     end
   end
 
   def eol_search_url(class_name, subject)
-    if class_name == 'Image'
+    if class_name == "Image"
       "http://eol.org/search?q=#{image_to_names(subject.id).gsub(' ', '+')}&type%5B%5D=Image"
-    elsif class_name == 'Name'
+    elsif class_name == "Name"
       "http://eol.org/search?q=#{subject.text_name.gsub(' ', '+')}&type%5B%5D=TaxonConcept"
     else
       "http://eol.org"
