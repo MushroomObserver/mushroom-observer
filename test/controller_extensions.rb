@@ -506,14 +506,14 @@ module ControllerExtensions
   #   end
   #
   def assert_response_equal_file(*files, &block)
-  # body = @response.body.clone # Rails 3
+    body = @response.body.clone # Rails 3
   # in Rails 4, above strips the '\n's which are added to the body when
   # the csv converter adds separate rows.
   # so put it back in
   # This is a bad solution, and could cause problems if a different separator is
   # used.  But I cannot figure out how to access the raw body
-    body = @response.body_parts.join("\n").clone
-    assert_string_equal_file(body, *files, &block)
+  #  body = @response.body_parts.join("\n").clone
+  #  assert_string_equal_file(body, *files, &block)
   end
 
   # Send a general request of any type.  Check login_required and check_user
