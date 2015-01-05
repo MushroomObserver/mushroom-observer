@@ -86,3 +86,9 @@ end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
 require file if File.exist?(file)
+
+# temporarily silence deprecation warnings
+# TODO turn them back on
+ActiveSupport::Deprecation.silenced = true
+
+
