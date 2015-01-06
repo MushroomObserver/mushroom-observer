@@ -46,7 +46,7 @@ module FlashExtensions
   def assert_flash(expect, msg="")
     if got = get_last_flash
       lvl = got[0,1].to_i
-      got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n").strip_html
+      got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n")
     end
     msg.sub(/\n*$/, "\n") if msg
     if !expect && got
@@ -56,7 +56,7 @@ module FlashExtensions
       assert(expect.nil?, "#{msg} Expected a flash error.  Got nothing.")
     elsif expect.is_a?(Fixnum)
       assert(expect == lvl,
-             "#{msg} Wrong flash error level.  Message: level #{lvl}, #{got.inspect}.")
+        "#{msg} Wrong flash error level.  Message: level #{lvl}, #{got.inspect}.")
     elsif expect.is_a?(Regexp)
       assert(got.match(expect),
              "#{msg} Got the wrong flash error(s). " \
@@ -66,7 +66,7 @@ module FlashExtensions
              "#{msg} Got the wrong flash error(s). " \
              "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     end
-    @controller.instance_variable_set('@last_notice', nil)
+    @controller.instance_variable_set("@last_notice", nil)
     session[:notice] = nil
   end
 end

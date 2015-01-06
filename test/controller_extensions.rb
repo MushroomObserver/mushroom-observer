@@ -482,9 +482,8 @@ module ControllerExtensions
         found[url2] = 1
       end
     end
-    if found_it
-      pass
-    elsif found.keys
+    return pass if found_it
+    if found.keys
       flunk(build_message(
               msg, "Expected HTML to contain form that posts to <?>," \
                    "but only found these: <?>.",

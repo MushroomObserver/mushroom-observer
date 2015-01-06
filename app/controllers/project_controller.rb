@@ -32,7 +32,7 @@
 
 class ProjectController < ApplicationController
 
-  before_filter :login_required, :except => [
+  before_filter :login_required, except: [
     :index_project,
     :list_projects,
     :next_project,
@@ -41,7 +41,7 @@ class ProjectController < ApplicationController
     :show_project,
   ]
 
-  before_filter :disable_link_prefetching, :except => [
+  before_filter :disable_link_prefetching, except: [
     :admin_request,
     :edit_project,
     :show_project,
@@ -55,13 +55,13 @@ class ProjectController < ApplicationController
 
   # Show list of selected projects, based on current Query.
   def index_project # :nologin: :norobots:
-    query = find_or_create_query(:Project, :by => params[:by])
-    show_selected_projects(query, :id => params[:id].to_s, :always_index => true)
+    query = find_or_create_query(:Project, by: params[:by])
+    show_selected_projects(query, id: params[:id].to_s, always_index: true)
   end
 
   # Show list of latest projects.  (Linked from left panel.)
   def list_projects # :nologin:
-    query = create_query(:Project, :all, :by => :title)
+    query = create_query(:Project, :all, by: :title)
     show_selected_projects(query)
   end
 
@@ -70,9 +70,9 @@ class ProjectController < ApplicationController
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (project = Project.safe_find(pattern))
-      redirect_to(:action => 'show_project', :id => project.id)
+         redirect_to(action: "show_project", id: project.id)
     else
-      query = create_query(:Project, :pattern_search, :pattern => pattern)
+      query = create_query(:Project, :pattern_search, pattern: pattern)
       show_selected_projects(query)
     end
   end
@@ -80,18 +80,18 @@ class ProjectController < ApplicationController
   # Show selected list of projects.
   def show_selected_projects(query, args={})
     args = {
-      :action => :list_projects,
-      :letters => 'projects.title',
-      :num_per_page => 10,
+      action: :list_projects,
+      letters: 'projects.title',
+      num_per_page: 10,
     }.merge(args)
 
     @links ||= []
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',        :sort_by_title.t],
-      ['created_at',  :sort_by_created_at.t],
-      ['updated_at',  :sort_by_updated_at.t],
+      ["name",        :sort_by_title.t],
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
     ]
 
     show_index_of_objects(query, args)
@@ -160,11 +160,11 @@ class ProjectController < ApplicationController
       if title.blank?
         flash_error(:add_project_need_title.t)
       elsif project
-        flash_error(:add_project_already_exists.t(:title => project.title))
+        flash_error(:add_project_already_exists.t(title: project.title))
       elsif user_group
-        flash_error(:add_project_group_exists.t(:group => title))
+        flash_error(:add_project_group_exists.t(group: title))
       elsif admin_group
-        flash_error(:add_project_group_exists.t(:group => admin_name))
+        flash_error(:add_project_group_exists.t(group: admin_name))
       else
         # Create members group.
         user_group = UserGroup.new
@@ -177,7 +177,7 @@ class ProjectController < ApplicationController
         admin_group.users << @user
 
         # Create project.
-        @project = Project.new(params[:project])
+        @project = Project.new(whitelisted_project_params)
         @project.user = @user
         @project.user_group = user_group
         @project.admin_group = admin_group
@@ -190,15 +190,15 @@ class ProjectController < ApplicationController
           flash_object_errors(@project)
         else
           Transaction.post_project(
-            :id      => @project,
-            :title   => @project.title,
-            :summary => @project.summary,
-            :admins  => [@user],
-            :members => [@user],
+            id:      @project,
+            title:   @project.title,
+            summary: @project.summary,
+            admins:  [@user],
+            members: [@user],
           )
           @project.log_create
           flash_notice(:add_project_success.t)
-          redirect_with_query(:action => :show_project, :id => @project.id)
+          redirect_with_query(action: :show_project, id: @project.id)
         end
       end
     end
@@ -217,30 +217,29 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def edit_project # :prefetch: :norobots:
     pass_query_params
-    if @project = find_or_goto_index(Project, params[:id].to_s)
-      if !check_permission!(@project)
-        redirect_with_query(:action => 'show_project', :id => @project.id)
-      elsif request.method == "POST"
-        @title = params[:project][:title].to_s
-        @summary = params[:project][:summary]
-        xargs = {}
-        xargs[:set_title]   = @title   if @project_title   != @title
-        xargs[:set_summary] = @summary if @project_summary != @summary
-        if @title.blank?
-          flash_error(:add_project_need_title.t)
-        elsif Project.find_by_title(@title) != @project
-          flash_error(:add_project_already_exists.t(:title => @title))
-        elsif !@project.update(params[:project])
-          flash_object_errors(@project)
-        else
-          if !xargs.empty?
-            xargs[:id] = @project
-            Transaction.put_project(xargs)
-          end
-          @project.log_update
-          flash_notice(:runtime_edit_project_success.t(:id => @project.id))
-          redirect_with_query(:action => 'show_project', :id => @project.id)
+    return unless @project = find_or_goto_index(Project, params[:id].to_s)
+    if !check_permission!(@project)
+      redirect_with_query(action: "show_project", id: @project.id)
+    elsif request.method == "POST"
+      @title = params[:project][:title].to_s
+      @summary = params[:project][:summary]
+      xargs = {}
+      xargs[:set_title]   = @title   if @project_title   != @title
+      xargs[:set_summary] = @summary if @project_summary != @summary
+      if @title.blank?
+        flash_error(:add_project_need_title.t)
+      elsif Project.find_by_title(@title) != @project
+        flash_error(:add_project_already_exists.t(title: @title))
+      elsif !@project.update(whitelisted_project_params)
+        flash_object_errors(@project)
+      else
+        if !xargs.empty?
+          xargs[:id] = @project
+          Transaction.put_project(xargs)
         end
+        @project.log_update
+        flash_notice(:runtime_edit_project_success.t(id: @project.id))
+        redirect_with_query(action: "show_project", id: @project.id)
       end
     end
   end
@@ -254,15 +253,15 @@ class ProjectController < ApplicationController
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
       if !check_permission!(@project)
-        redirect_with_query(:action => 'show_project', :id => @project.id)
+        redirect_with_query(action: "show_project", id: @project.id)
       elsif !@project.destroy
         flash_error(:destroy_project_failed.t)
-        redirect_with_query(:action => 'show_project', :id => @project.id)
+        redirect_with_query(action: "show_project", id: @project.id)
       else
         @project.log_destroy
-        Transaction.delete_project(:id => @project)
+        Transaction.delete_project(id: @project)
         flash_notice(:destroy_project_success.t)
-        redirect_with_query(:action => :index_project)
+        redirect_with_query(action: :index_project)
       end
     end
   end
@@ -291,8 +290,8 @@ class ProjectController < ApplicationController
           AdminEmail.build(sender, receiver, @project,
                            subject, content).deliver
         end
-        flash_notice(:admin_request_success.t(:title => @project.title))
-        redirect_with_query(:action => 'show_project', :id => @project.id)
+        flash_notice(:admin_request_success.t(title: @project.title))
+        redirect_with_query(action: :show_project, id: @project.id)
       end
     end
   end
@@ -310,7 +309,7 @@ class ProjectController < ApplicationController
     if @project = find_or_goto_index(Project, params[:id].to_s)
       @users = User.all.order("login, name").to_a
       if !@project.is_admin?(@user)
-        redirect_with_query(:action => 'show_project', :id => @project.id)
+        redirect_with_query(action: "show_project", id: @project.id)
       elsif !params[:candidate].blank?
         @candidate = User.find(params[:candidate])
         set_status(@project, :member, @candidate, :add)
@@ -332,7 +331,7 @@ class ProjectController < ApplicationController
        @candidate = find_or_goto_index(User, params[:candidate])
       if !@project.is_admin?(@user)
         flash_error(:change_member_status_denied.t)
-        redirect_with_query(:action => 'show_project', :id => @project.id)
+        redirect_with_query(action: :show_project, id: @project.id)
       elsif request.method == "POST"
         user_group = @project.user_group
         admin_group = @project.admin_group
@@ -345,7 +344,7 @@ class ProjectController < ApplicationController
         end
         set_status(@project, :admin, @candidate, admin)
         set_status(@project, :member, @candidate, member)
-        redirect_with_query(:action => 'show_project', :id => @project.id)
+        redirect_with_query(action: :show_project, id: @project.id)
       end
     end
   end
@@ -357,15 +356,23 @@ class ProjectController < ApplicationController
     if mode == :add
       if !group.users.include?(user)
         group.users << user unless group.users.member?(user)
-        Transaction.put_project(:id => project, :"add_#{type}" => user)
+        Transaction.put_project(id: project, :"add_#{type}" => user)
         project.send("log_add_#{type}", user)
       end
     else
       if group.users.include?(user)
         group.users.delete(user)
-        Transaction.put_project(:id => project, :"del_#{type}" => user)
+        Transaction.put_project(id: project, :"del_#{type}" => user)
         project.send("log_remove_#{type}", user)
       end
     end
+  end
+
+  ##############################################################################
+
+  private
+
+  def whitelisted_project_params
+    params.require(:project).permit(:title, :summary)
   end
 end
