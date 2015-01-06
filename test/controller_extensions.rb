@@ -366,8 +366,8 @@ module ControllerExtensions
 
       # Allow label to be embedded in HTML tags, with some whitespace, but
       # require it to be the first text inside the <a> tag.
-      if passed && args[:label] &&
-         !label.match(/^(\s*<\w+[^\\<>]+>)*\s*#{args[:label]}(\s*<\/\w+[^<>]+>)*\s*$/m)
+      if passed && args[:label] && !label.
+         match(/^(\s*<\w+[^\\<>]+>)*\s*#{args[:label]}(\s*<\/\w+[^<>]+>)*\s*$/m)
         passed = false
       end
 

@@ -16,8 +16,8 @@
   <tr>
     <th><%= "#{:publication_full.t} (#{@full_count})" %></th>
     <th><%= :publication_link.t %></th>
-    <td align="center"><%= "(#{@peer_count})"%>
-    <td align="center"><%= "(#{@mo_count})"%>
+    <td align="center"><%= "(#{@peer_count})"%></td>
+    <td align="center"><%= "(#{@mo_count})"%></td>
   </tr>
 
   <% odd_or_even = 1
@@ -28,8 +28,8 @@
       <td width="30%"><%= link_to content_tag(:span,
                             publication.link, :style => "word-wrap:break-word"),
                             publication.link %></td>
-      <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %>
-      <td align="center"><%= publication.mo_mentioned  ? content_tag(:b, "M") : "" %>
+      <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %></td>
+      <td align="center"><%= publication.mo_mentioned  ? content_tag(:b, "M") : "" %></td>
       <% if is_in_admin_mode? || publication.can_edit?(@user) %>
         <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
         <td><%= link_to :DESTROY.t, { :action => :destroy, :id => publication.id },
