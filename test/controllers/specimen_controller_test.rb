@@ -1,91 +1,93 @@
-require 'test_helper'
+require "test_helper"
 
 class SpecimenControllerTest < FunctionalTestCase
   def assert_specimen_index
-    assert_template(action: 'specimen_index')
+    assert_template(:specimen_index)
   end
 
   def test_show_specimen_without_notes
     specimen = specimens(:coprinus_comatus_nybg_spec)
     assert(specimen)
-    get_with_dump(:show_specimen, :id => specimen.id)
-    assert_template(action: 'show_specimen', partial: "_rss_log")
+    get_with_dump(:show_specimen, id: specimen.id)
+    assert_template(:show_specimen, partial: "_rss_log")
   end
 
   def test_show_specimen_with_notes
     specimen = specimens(:interesting_unknown)
     assert(specimen)
-    get_with_dump(:show_specimen, :id => specimen.id)
-    assert_template(action: 'show_specimen', partial: "_rss_log")
+    get_with_dump(:show_specimen, id: specimen.id)
+    assert_template(:show_specimen, partial: "_rss_log")
   end
 
   def test_herbarium_index
-    get_with_dump(:herbarium_index, :id => herbaria(:nybg).id)
+    get_with_dump(:herbarium_index, id: herbaria(:nybg).id)
     assert_specimen_index
   end
 
   def test_herbarium_with_one_specimen_index
-    get_with_dump(:herbarium_index, :id => herbaria(:rolf).id)
+    get_with_dump(:herbarium_index, id: herbaria(:rolf).id)
     assert_response(:redirect)
     assert_no_flash
   end
 
   def test_herbarium_with_no_specimens_index
-    get_with_dump(:herbarium_index, :id => herbaria(:dick).id)
+    get_with_dump(:herbarium_index, id: herbaria(:dick).id)
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
 
   def test_observation_index
-    get_with_dump(:observation_index, :id => observations(:coprinus_comatus_obs).id)
+    get_with_dump(:observation_index,
+      id: observations(:coprinus_comatus_obs).id)
     assert_specimen_index
   end
 
   def test_observation_with_one_specimen_index
-    get_with_dump(:observation_index, :id => observations(:detailed_unknown).id)
+    get_with_dump(:observation_index, id: observations(:detailed_unknown).id)
     assert_response(:redirect)
     assert_no_flash
   end
 
   def test_observation_with_no_specimens_index
-    get_with_dump(:observation_index, :id => observations(:strobilurus_diminutivus_obs).id)
+    get_with_dump(:observation_index, id: observations(:strobilurus_diminutivus_obs).id)
     assert_response(:redirect)
     assert_flash(/no specimens/)
   end
 
   def test_add_specimen
-    get(:add_specimen, :id => observations(:coprinus_comatus_obs).id)
+    get(:add_specimen, id: observations(:coprinus_comatus_obs).id)
     assert_response(:redirect)
 
-    login('rolf')
-    get_with_dump(:add_specimen, :id => observations(:coprinus_comatus_obs).id)
-    assert_template(action: 'add_specimen', partial: "_rss_log")
+    login("rolf")
+    get_with_dump(:add_specimen, id: observations(:coprinus_comatus_obs).id)
+    # assert_template(action: "add_specimen", partial: "_rss_log")
+    assert_template("add_specimen", partial: "_rss_log")
     assert(assigns(:herbarium_label))
   end
 
   def add_specimen_params
     return {
-      :id => observations(:strobilurus_diminutivus_obs).id,
-      :specimen => {
-        :herbarium_name => rolf.preferred_herbarium_name,
-        :herbarium_label => "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
-        'when(1i)'      => '2012',
-        'when(2i)'      => '11',
-        'when(3i)'      => '26',
-        :notes => "Some notes about this specimen"
+      id: observations(:strobilurus_diminutivus_obs).id,
+      specimen: {
+        herbarium_name: rolf.preferred_herbarium_name,
+        herbarium_label: "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
+        'when(1i)'      => "2012",
+        'when(2i)'      => "11",
+        'when(3i)'      => "26",
+        notes: "Some notes about this specimen"
       }
     }
   end
 
   def test_add_specimen_post
-    login('rolf')
+    login("rolf")
     specimen_count = Specimen.count
     params = add_specimen_params
     obs = Observation.find(params[:id])
     assert(!obs.specimen)
     post(:add_specimen, params)
     assert_equal(specimen_count + 1, Specimen.count)
-    # specimen = Specimen.find(:all, :order => "created_at DESC")[0] # Rails 3
+    # specimen = Specimen.find(:all, order: "created_at DESC")[0] # Rails 3
     specimen = Specimen.all.order("created_at DESC")[0]
     assert_equal(params[:specimen][:herbarium_name], specimen.herbarium.name)
     assert_equal(params[:specimen][:herbarium_label], specimen.herbarium_label)
@@ -99,7 +101,7 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_add_specimen_post_new_herbarium
-    mary = login('mary')
+    mary = login("mary")
     herbarium_count = mary.curated_herbaria.count
     # Count the number of herbaria that mary is a curator for
     params = add_specimen_params
@@ -107,13 +109,13 @@ class SpecimenControllerTest < FunctionalTestCase
     post(:add_specimen, params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count+1, mary.curated_herbaria.count)
-    # herbarium = Herbarium.find(:all, :order => "created_at DESC")[0] # Rails 3
+    # herbarium = Herbarium.find(:all, order: "created_at DESC")[0] # Rails 3
     herbarium = Herbarium.all.order("created_at DESC")[0]
     assert(herbarium.curators.member?(mary))
   end
 
   def test_add_specimen_post_duplicate
-    login('rolf')
+    login("rolf")
     specimen_count = Specimen.count
     params = add_specimen_params
     existing_specimen = specimens(:coprinus_comatus_nybg_spec)
@@ -127,7 +129,7 @@ class SpecimenControllerTest < FunctionalTestCase
 
   # I keep thinking only curators should be able to add specimens.  However, for now anyone can.
   def test_add_specimen_post_not_curator
-    user = login('mary')
+    user = login("mary")
     nybg = herbaria(:nybg)
     assert(!nybg.curators.member?(user))
     specimen_count = Specimen.count
@@ -142,30 +144,30 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def assert_edit_specimen
-    assert_template(action: 'edit_specimen')
+    assert_template(:edit_specimen)
   end
 
   def test_edit_specimen
     nybg = specimens(:coprinus_comatus_nybg_spec)
-    get_with_dump(:edit_specimen, :id => nybg.id)
+    get_with_dump(:edit_specimen, id: nybg.id)
     assert_response(:redirect)
 
-    login('mary') # Non-curator
-    get_with_dump(:edit_specimen, :id => nybg.id)
+    login("mary") # Non-curator
+    get_with_dump(:edit_specimen, id: nybg.id)
     assert_flash(/unable to update specimen/i)
     assert_response(:redirect)
 
-    login('rolf')
-    get_with_dump(:edit_specimen, :id => nybg.id)
+    login("rolf")
+    get_with_dump(:edit_specimen, id: nybg.id)
     assert_edit_specimen
 
-    make_admin('mary') # Non-curator, but an admin
-    get_with_dump(:edit_specimen, :id => nybg.id)
+    make_admin("mary") # Non-curator, but an admin
+    get_with_dump(:edit_specimen, id: nybg.id)
     assert_edit_specimen
   end
 
   def test_edit_specimen_post
-    login('rolf')
+    login("rolf")
     nybg = specimens(:coprinus_comatus_nybg_spec)
     herbarium = nybg.herbarium
     user = nybg.user
@@ -185,14 +187,14 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_edit_specimen_post_no_specimen
-    login('rolf')
+    login("rolf")
     nybg = specimens(:coprinus_comatus_nybg_spec)
-    post(:edit_specimen, :id => nybg.id)
+    post(:edit_specimen, id: nybg.id)
     assert_edit_specimen
   end
 
   def test_delete_specimen
-    login('rolf')
+    login("rolf")
     params = delete_specimen_params
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
@@ -206,7 +208,7 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_delete_specimen_not_curator
-    login('mary')
+    login("mary")
     params = delete_specimen_params
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
@@ -218,7 +220,7 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def test_delete_specimen_admin
-    make_admin('mary')
+    make_admin("mary")
     params = delete_specimen_params
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
@@ -231,7 +233,7 @@ class SpecimenControllerTest < FunctionalTestCase
 
   def delete_specimen_params
     {
-      :id => specimens(:interesting_unknown).id
+      id: specimens(:interesting_unknown).id
     }
   end
 end
