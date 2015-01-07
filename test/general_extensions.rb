@@ -103,14 +103,6 @@ module GeneralExtensions
     refute(value.blank?, msg)
   end
 
-  # Exactly the opposite of +assert_match+ (and essentially copied verbatim
-  # from Test::Unit::Assertions source).
-  def assert_not_match(expect, actual, msg=nil)
-    expect = Regexp.new(expect) if expect.is_a?(String)
-    msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
-    refute(actual !~ expect, msg)
-  end
-
   # Compare two Date/Time/DateTime/TimeWithZone instances.
   def assert_dates_equal(expect, actual, msg=nil)
     expect = expect.strftime('%Y%m%d')

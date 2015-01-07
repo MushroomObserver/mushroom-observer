@@ -11,7 +11,7 @@ class PivotalTest < UnitTestCase
       assert_true(test_story.active?)
       assert_equal('test', test_story.name)
       assert_match(/test story/, test_story.description)
-      assert_not_match(/USER|VOTE/, test_story.description)
+      refute_match(/USER|VOTE/, test_story.description)
       assert_equal(1, test_story.comments.length)
       assert_equal(3, test_story.votes.length)
       assert_equal(1, test_story.user_vote(rolf))
@@ -35,20 +35,20 @@ class PivotalTest < UnitTestCase
       assert_equal(1, story.score)
       assert_equal(-1, story.user_vote(dick))
     end
-  end 
+  end
 
   # Instead of doing a teardown, I'm just going to throw all tests that
   # involve modifying the live(!) Pivotal server in a single test.
   def test_modifications
     if MO.pivotal_enabled and false
-  
+
       # Clean up after failed previous tests.
       stories = Pivotal.get_stories
       for story in stories.select {|s| s.name == 'temp'}
         puts "Cleaning up story ##{story.id}"
         Pivotal.delete_story(story.id)
       end
-  
+
       puts "Creating temp story..."
       story = Pivotal.create_story('temp', 'this is a test', mary)
       assert_not_nil(story)
@@ -60,7 +60,7 @@ class PivotalTest < UnitTestCase
       assert_equal(['other'], story.labels)
       assert_equal([], story.comments)
       assert_equal([], story.votes)
-  
+
       puts "Casting vote..."
       result = Pivotal.cast_vote(story.id, rolf, 1)
       assert_kind_of(Pivotal::Story, result)
@@ -71,7 +71,7 @@ class PivotalTest < UnitTestCase
       assert_equal(1, result.score)
       assert_equal(rolf.id, result.votes.first.id)
       assert_equal(1, result.votes.first.data)
-  
+
       puts "Changing vote..."
       result = Pivotal.cast_vote(story.id, rolf, -1)
       assert_kind_of(Pivotal::Story, result)
@@ -80,20 +80,20 @@ class PivotalTest < UnitTestCase
       assert_equal(story.description, result.description)
       assert_equal(1, result.votes.length)
       assert_equal(-1, result.score)
-  
+
       puts "Posting comment..."
       result = Pivotal.post_comment(story.id, mary, 'test comment')
       assert_kind_of(Pivotal::Comment, result)
       assert_equal("test comment\n", result.text)
       assert_equal(mary.id, result.user.id)
-  
+
       puts "Checking final result..."
       updated_story = Pivotal.get_story(story.id)
       assert_equal(story.id, updated_story.id)
       assert_equal(1, updated_story.comments.length)
       assert_equal("test comment\n", updated_story.comments.first.text)
       assert_equal(mary.id, updated_story.comments.first.user.id)
-  
+
       puts "Cleaning up..."
       Pivotal.delete_story(story.id)
     end

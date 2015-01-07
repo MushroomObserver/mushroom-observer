@@ -460,7 +460,7 @@ class AmateurTest < IntegrationTestCase
       obs.reload
       assert_names_equal(original_name, obs.name)
       assert_nil(Naming.safe_find(naming.id))
-      assert_not_match(text_name, response.body)
+      refute_match(text_name, response.body)
     end
   end
 end
