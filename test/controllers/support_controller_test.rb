@@ -1,35 +1,34 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class SupportControllerTest < FunctionalTestCase
   # Replace this with your real tests.
   def test_donors
     get_with_dump(:donors)
-    assert_template(action: 'donors')
+    assert_template(:donors)
   end
 
   def test_donate
     get_with_dump(:donate)
-    assert_template(action: 'donate')
+    assert_template(:donate)
   end
 
   def confirm_post(amount, other_amount)
     donations = Donation.count
     anon = false
-    final_amount = (amount == 'other') ? other_amount : amount
+    final_amount = (amount == "other") ? other_amount : amount
     params = {
-      :donation => {
-        :amount => amount,
-        :other_amount => other_amount,
-        :who => rolf.name,
-        :email => rolf.email,
-        :anonymous => anon,
+      donation: {
+        amount: amount,
+        other_amount: other_amount,
+        who: rolf.name,
+        email: rolf.email,
+        anonymous: anon,
       }
     }
     post(:confirm, params)
-    assert_template(action: 'confirm')
+    assert_template(:confirm)
     assert_equal(donations + 1, Donation.count)
-    # donation = Donation.find(:all, :order => "created_at DESC")[0] # Rails 3
     donation = Donation.all.order("created_at DESC")[0]
     assert_equal(final_amount, donation.amount)
     assert_equal(rolf.name, donation.who)
@@ -43,7 +42,7 @@ class SupportControllerTest < FunctionalTestCase
   end
 
   def test_confirm_other_amount_post
-    confirm_post('other', 30)
+    confirm_post("other", 30)
   end
 
   def test_create_donation
@@ -52,7 +51,7 @@ class SupportControllerTest < FunctionalTestCase
 
     make_admin
     get_with_dump(:create_donation)
-    assert_template(action: 'create_donation')
+    assert_template(:create_donation)
   end
 
   def create_donation_post(anon)
@@ -60,16 +59,15 @@ class SupportControllerTest < FunctionalTestCase
     amount = 100.00
     donations = Donation.count
     params = {
-      :donation => {
-        :amount => amount,
-        :who => rolf.name,
-        :email => rolf.email,
-        :anonymous => anon,
+      donation: {
+        amount: amount,
+        who: rolf.name,
+        email: rolf.email,
+        anonymous: anon,
       }
     }
     post(:create_donation, params)
     assert_equal(donations + 1, Donation.count)
-    # donation = Donation.find(:all, :order => "created_at DESC")[0] # Rails 3
     donation = Donation.all.order("created_at DESC")[0]
     assert_equal(amount, donation.amount)
     assert_equal(rolf.name, donation.who)
@@ -93,7 +91,7 @@ class SupportControllerTest < FunctionalTestCase
 
     make_admin
     get_with_dump(:review_donations)
-    assert_template(action: 'review_donations')
+    assert_template(:review_donations)
   end
 
   def test_review_donations_post
@@ -101,7 +99,7 @@ class SupportControllerTest < FunctionalTestCase
     unreviewed = donations(:unreviewed)
     assert_equal(false, unreviewed.reviewed)
     params = {
-      :reviewed => {
+      reviewed: {
         unreviewed.id => true,
       }
     }
@@ -112,6 +110,6 @@ class SupportControllerTest < FunctionalTestCase
 
   def test_letter
     get_with_dump(:letter)
-    assert_template(action: 'letter')
+    assert_template(:letter)
   end
 end
