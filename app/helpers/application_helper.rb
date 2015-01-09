@@ -1397,7 +1397,8 @@ module ApplicationHelper
 
   # Draw a thumbnail image.  It takes either an Image instance or an id.  Args:
   # size::      Size of image.  (default is user's default thumbnail size)
-  # link::      :show_image, :show_observation, :show_user, :none, or Hash of +link_to+ args.  (default is :show_image)
+  # link::      :show_image, :show_observation, :show_user, :none,
+  #             or Hash of +link_to+ args.  (default is :show_image)
   # obs::       Add <tt>:obs => id</tt> to the show_image link args.
   # user::      (used with :link => :show_user)
   # border::    Set +border+ attribute, e.g. <tt>:border => 0</tt>.
@@ -1433,23 +1434,22 @@ module ApplicationHelper
     # Decide what to link it to.
     case link = args[:link] || :show_image
     when :show_image
-      link = { :controller => 'image', :action => 'show_image', :id => id }.
+      link = { controller: :image, action: :show_image, id: id }.
         merge(args[:query_params] || query_params)
       link[:obs] = args[:obs] if args.has_key?(:obs)
     when :show_observation
       link = {
-        :controller => 'observer',
-        :action => 'show_observation',
-        :id => args[:obs]
+        controller: :observer,
+        action: :show_observation,
+        id: args[:obs]
       }.merge(args[:query_params] || query_params)
       raise "missing :obs" if !args.has_key?(:obs)
     when :show_user
-      link = { :controller => 'observer', :action => 'show_user',
-               :id => args[:user] }
+      link = { controller: :observer, action: :show_user, id: args[:user] }
       raise "missing :user" if !args.has_key?(:user)
     when :show_glossary_term
-      link = { :controller => 'glossary', :action => 'show_glossary_term',
-               :id => args[:glossary_term] }
+      link = { controller: :glossary, action: :show_glossary_term,
+               id: args[:glossary_term] }
       raise "missing :glossary_term" if !args.has_key?(:glossary_term)
     when :none
       link = nil
@@ -1466,7 +1466,7 @@ module ApplicationHelper
     # Include AJAX vote links below image?
     if @js && @user && args[:votes]
       table = image_vote_tabs(image || id, args[:vote_data])
-      result += safe_br + content_tag(:div, table, :id => "image_votes_#{id}")
+      result += safe_br + content_tag(:div, table, id: "image_votes_#{id}")
       did_vote_div = true
     end
 
@@ -1474,7 +1474,7 @@ module ApplicationHelper
     if args[:original] &&
        image && !image.original_name.blank? && (
          check_permission(image) ||
-         (image.user && image.user.keep_filenames == "keep_and_show")
+         (image.user && image.user.keep_filenames == :keep_and_show)
        )
       result += safe_br unless did_vote_div
       result += h(image.original_name)
@@ -1484,7 +1484,7 @@ module ApplicationHelper
     if args[:nodiv]
       result
     else
-      content_tag(:div, result, :class => args[:class] || 'thumbnail')
+      content_tag(:div, result, class: args[:class] || "thumbnail")
     end
   end
 

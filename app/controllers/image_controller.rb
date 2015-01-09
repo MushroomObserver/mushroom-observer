@@ -184,69 +184,65 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image # :nologin: :prefetch:
     store_location
-    if @image = find_or_goto_index(Image, params[:id].to_s)
-      @is_reviewer = is_reviewer
-      pass_query_params
+    return false unless @image = find_or_goto_index(Image, params[:id].to_s)
 
-      # Decide which size to display.
-      @default_size = @user ? @user.image_size : :medium
-      @size = params[:size].blank? ? @default_size : params[:size].to_sym
+    @is_reviewer = is_reviewer
+    pass_query_params
 
-      # Make this size the default image size for this user.
-      if @user and (@default_size != @size) and
-         (params[:make_default] == "1")
-        @user.image_size = @size
-        @user.save_without_our_callbacks
-        @default_size = @size
-      end
+    # Decide which size to display.
+    @default_size = @user ? @user.image_size : :medium
+    @size = params[:size].blank? ? @default_size : params[:size].to_sym
 
-      # Wait until here to create this search query to save server resources.
-      # Otherwise we'd be creating a new search query for images for every single
-      # show_observation request.  We know we came from an observation-type page
-      # because that's the only time the "obs" param will be set (with obs id).
-      obs = params[:obs]
-      if !obs.blank? &&
-         # The outer search on observation won't be saved for robots, so no sense
-         # in bothering with any of this.
-         !browser.bot?
-        obs_query = find_or_create_query(:Observation)
-        obs_query.current = obs
-        img_query = create_query(:Image, :inside_observation,
-                                 observation: obs, outer: obs_query)
-        set_query_params(img_query)
-      end
-
-      # Cast user's vote if passed in "vote" parameter.
-      if @user and
-         (val = params[:vote]) and
-         (val == "0" or (val = Image.validate_vote(val)))
-        val = nil if val == "0"
-        cur = @image.users_vote
-        if cur != val
-          anon = @user.votes_anonymous == :yes
-          @image.change_vote(@user, val, anon)
-          Transaction.put_images(id: @image, set_vote: val, set_anonymous: anon)
-        end
-
-        # Advance to next image automatically if "next" parameter set.
-        if params[:next]
-          query = find_or_create_query(Image)
-          query.current = @image
-          if query.index(@image) and
-             (query = query.next)
-            @image = query.current
-          end
-        end
-      end
-
-      # Grab list of votes.
-      @votes = @image.image_votes(include: :user).sort_by do |v|
-        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase rescue '?'
-      end
-
-      # Update view stats on image we're actually showing.
-      update_view_stats(@image)
+    # Make this size the default image size for this user.
+    if @user && (@default_size != @size) && (params[:make_default] == "1")
+      @user.image_size = @size
+      @user.save_without_our_callbacks
+      @default_size = @size
     end
+
+    # Wait until here to create this search query to save server resources.
+    # Otherwise we'd be creating a new search query for images for every single
+    # show_observation request.  We know we came from an observation-type page
+    # because that's the only time the "obs" param will be set (with obs id).
+    obs = params[:obs]
+    if !obs.blank? &&
+       # The outer search on observation won't be saved for robots, so no sense
+       # in bothering with any of this.
+       !browser.bot?
+      obs_query = find_or_create_query(:Observation)
+      obs_query.current = obs
+      img_query = create_query(:Image, :inside_observation,
+                               observation: obs, outer: obs_query)
+      set_query_params(img_query)
+    end
+
+    # Cast user's vote if passed in "vote" parameter.
+    if @user and
+       (val = params[:vote]) and
+       (val == "0" or (val = Image.validate_vote(val)))
+      val = nil if val == "0"
+      cur = @image.users_vote
+      if cur != val
+        anon = @user.votes_anonymous == :yes
+        @image.change_vote(@user, val, anon)
+        Transaction.put_images(id: @image, set_vote: val, set_anonymous: anon)
+      end
+
+      # Advance to next image automatically if "next" parameter set.
+      if params[:next]
+        query = find_or_create_query(Image)
+        query.current = @image
+        @image = query.current if query.index(@image) && (query = query.next)
+      end
+    end
+
+    # Grab list of votes.
+    @votes = @image.image_votes(include: :user).sort_by do |v|
+      (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase rescue "?"
+    end
+
+    # Update view stats on image we're actually showing.
+    update_view_stats(@image)
   end
 
   # For backwards compatibility.
@@ -340,7 +336,7 @@ class ImageController < ApplicationController
       # The 1st save (or !save) puts the image's original filename in the db,
       # whether or not the user wants it.  So if we don't want it,
       # we must empty it and save a 2nd time.
-      @image.original_name = "" if @user.keep_filenames == "toss"
+      @image.original_name = "" if @user.keep_filenames == :toss
       return flash_object_errors(@image) unless @image.save
 
       if !@image.process_image

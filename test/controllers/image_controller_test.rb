@@ -659,13 +659,11 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_bulk_original_filename_purge
     assert_equal(1, rolf.id)
-    # imgs = Image.find(:all, conditions: 'original_name != "" AND user_id = 1') # Rails 3
     imgs = Image.where("original_name != '' AND user_id = 1")
     assert(imgs.any?)
 
     login("rolf")
     get(:bulk_filename_purge)
-    # imgs = Image.find(:all, conditions: 'original_name != "" AND user_id = 1') # Rails 3
     imgs = Image.where("original_name != '' AND user_id = 1")
     assert(imgs.empty?)
   end
@@ -720,7 +718,8 @@ class ImageControllerTest < FunctionalTestCase
     assert_response(:redirect)
     proj1.add_image(img1)
     get(:edit_image, id: img1.id)
-    assert_project_checks(proj1.id => :checked_but_disabled, proj2.id => :checked)
+    assert_project_checks(proj1.id => :checked_but_disabled,
+                          proj2.id => :checked)
   end
 
   def assert_project_checks(project_states)
