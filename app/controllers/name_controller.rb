@@ -16,9 +16,12 @@
 #  name_search::                 Seach for string in name, notes, etc.
 #  map::                         Show distribution map.
 #  index_name_description::      List of results of index/search.
-#  list_name_descriptions::      Alphabetical list of all name_descriptions, used or otherwise.
-#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored by given user.
-#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited by given user.
+#  list_name_descriptions::      Alphabetical list of all name_descriptions,
+#                                used or otherwise.
+#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored
+#                                by given user.
+#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited
+#                                by given user.
 #  show_name::                   Show info about name.
 #  show_past_name::              Show past versions of name info.
 #  prev_name::                   Show previous name in index.
@@ -38,14 +41,15 @@
 #  adjust_permissions::          Adjust permissions on a description.
 #  change_synonyms::             Change list of synonyms for a name.
 #  deprecate_name::              Deprecate name in favor of another.
-#  approve_name::                Flag given name as "accepted" (others could be, too).
+#  approve_name::                Flag given name as "accepted"
+#                                (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #  names_for_mushroom_app::      Display list of most common names in plain text.
 #
 #  ==== Helpers
-#  deprecate_synonym::         (used by change_synonyms)
-#  check_for_new_synonym::     (used by change_synonyms)
-#  dump_sorter::               Error diagnostics for change_synonyms.
+#  deprecate_synonym::           (used by change_synonyms)
+#  check_for_new_synonym::       (used by change_synonyms)
+#  dump_sorter::                 Error diagnostics for change_synonyms.
 #
 ################################################################################
 
@@ -497,7 +501,7 @@ class NameController < ApplicationController
     if is_reviewer?
       desc.update_review_status(params[:value])
     end
-    redirect_with_query(:action => 'show_name', :id => desc.name_id)
+    redirect_with_query(action: :show_name, id: desc.name_id)
   end
 
   ##############################################################################
@@ -542,7 +546,7 @@ class NameController < ApplicationController
             flash_warning(:runtime_edit_name_no_change.t) unless any_changes
             redirect_to_show_name
           end
-        elsif is_in_admin_mode? or @name.mergeable? or new_name.mergeable?
+        elsif is_in_admin_mode? || @name.mergeable? || new_name.mergeable?
           merge_name_into(new_name)
           redirect_to_show_name
         else
@@ -725,11 +729,13 @@ class NameController < ApplicationController
 
   def send_name_merge_email(new_name)
     flash_warning(:runtime_merge_names_warning.t)
-    content = :email_name_merge.l(:user => @user.login,
-                                  :this => "##{@name.id}: " + @name.real_search_name,
-                                  :that => "##{new_name.id}: " + new_name.real_search_name,
-                                  :this_url => "#{MO.http_domain}/name/show_name/#{@name.id}",
-                                  :that_url => "#{MO.http_domain}/name/show_name/#{new_name.id}")
+    content = :email_name_merge.l(
+                user: @user.login,
+                this: "##{@name.id}: " + @name.real_search_name,
+                that: "##{new_name.id}: " + new_name.real_search_name,
+                this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
+                that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
+    )
     WebmasterEmail.build(@user.email, content).deliver
     NameControllerTest.report_email(content) if TESTING
   end
@@ -748,7 +754,7 @@ class NameController < ApplicationController
   end
 
   def redirect_to_show_name
-    redirect_with_query(:action => :show_name, :id => @name.id)
+    redirect_with_query(action: :show_name, id: @name.id)
   end
 
   # Update the misspelling status.

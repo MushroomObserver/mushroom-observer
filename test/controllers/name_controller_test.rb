@@ -75,7 +75,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   # Edit a draft for a project (POST).
-  def edit_draft_post_helper(draft, user, params={}, permission=true, success=true)
+  def edit_draft_post_helper(draft, user, params: {}, permission: true,
+                             success: true)
     gen_desc = "This is a very general description."
     assert_not_equal(gen_desc, draft.gen_desc)
     diag_desc = "This is a diagnostic description"
@@ -94,10 +95,11 @@ class NameControllerTest < FunctionalTestCase
     if permission && !success
       assert_template(:edit_name_description, partial: "_form_name_description")
     elsif draft.is_reader?(user)
-      assert_template(%r{/show_name_description/#{ draft.id }})
+      assert_redirected_to(action: :show_name_description, id: draft.id)
     else
       assert_redirected_to(action: :show_name, id: draft.name_id)
     end
+
     draft.reload
     if permission && success
       assert_equal(gen_desc, draft.gen_desc)
@@ -228,7 +230,8 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(0, Query.count)
     get_with_dump(:show_name, id: 2)
     assert_template(:show_name, partial: "_name")
-    # Creates two for children and all four observations sections, but one never used.
+    # Creates two for children and all four observations sections,
+    # but one never used.
     assert_equal(2, Query.count)
 
     get(:show_name, id: 2)
@@ -919,7 +922,7 @@ class NameControllerTest < FunctionalTestCase
     # Fails because Rolf isn't in admin mode.
     login("rolf")
     post(:edit_name, params)
-    assert_template(:show_name)
+    assert_redirected_to(action: :show_name)
     assert_flash_warning
     assert_notify_email(old_name.real_search_name, new_name.real_search_name)
     assert(Name.find(old_name.id))
@@ -934,7 +937,7 @@ class NameControllerTest < FunctionalTestCase
     make_admin
     post(:edit_name, params)
     assert_flash_success
-    assert_template(:show_name)
+    assert_redirected_to(action: :show_name, id: new_name.id)
     assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       old_name = Name.find(old_name.id)
@@ -2920,7 +2923,7 @@ class NameControllerTest < FunctionalTestCase
       comment: { comment: "Prefer this name"}
     }
     post_requires_login(:approve_name, params)
-    assert_template(:show_name)
+    assert_redirected_to(action: :show_name)
 
     assert(!old_name.reload.deprecated)
     assert_equal(old_past_name_count+1, old_name.versions.length)
@@ -3097,7 +3100,7 @@ class NameControllerTest < FunctionalTestCase
       value: "vetted"
     }
     post_requires_login(:set_review_status, params)
-    assert_template(:show_name)
+    assert_redirected_to(action: :show_name, id: desc.name_id)
     assert_equal(:vetted, desc.reload.review_status)
   end
 
@@ -3110,7 +3113,7 @@ class NameControllerTest < FunctionalTestCase
       value: "vetted"
     }
     post_requires_login(:set_review_status, params, "mary")
-    assert_template(:show_name)
+    assert_redirected_to(action: :show_name, id: desc.name_id)
     assert_equal(:unreviewed, desc.reload.review_status)
   end
 
@@ -3234,44 +3237,60 @@ class NameControllerTest < FunctionalTestCase
 
   def test_edit_draft_non_member
     assert(!projects(:eol_project).is_member?(dick))
-    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
-    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), dick, false, false)
+    assert_equal("EOL Project",
+                 name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris),
+      dick, false, false)
   end
 
   def test_edit_draft_post_owner
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), rolf, {})
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus),
+      rolf
+    )
   end
 
   def test_edit_draft_post_admin
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), mary, {})
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus),
+      mary
+    )
   end
 
   def test_edit_draft_post_member
-    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), katrina, {}, false)
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris),
+      katrina, permission: false
+    )
   end
 
   def test_edit_draft_post_non_member
-    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), dick, {}, false)
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris),
+      dick, permission: false
+    )
   end
 
   def test_edit_draft_post_bad_classification
-    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), rolf,
-      { classification: "**Domain**: Eukarya" }, true, false)
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus),
+      rolf, params: { classification: "**Domain**: Eukarya" },
+            permission: true,
+            success: false
+    )
   end
 
   # Owner can publish.
   def test_publish_draft
-    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil, :merged, false)
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil,
+      :merged, false)
   end
 
   # Admin can, too.
   def test_publish_draft_admin
-    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), mary, :merged, false)
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), mary,
+      :merged, false)
   end
 
   # Other members cannot.
   def test_publish_draft_member
-    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina, false, false)
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), katrina,
+      false, false)
   end
 
   # Non-members certainly can't.

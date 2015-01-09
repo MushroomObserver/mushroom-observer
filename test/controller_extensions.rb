@@ -181,7 +181,7 @@ module ControllerExtensions
   #                 (default is "testpassword").
   #
   #   # Make sure only logged-in users get to see this page, and that it
-  #   # render the template of the same name when it succeeds.
+  #   # renders the template of the same name when it succeeds.
   #   requires_login(:edit_name, id: 1)
   #
   #   # Make sure only logged-in users get to post this page, but that it
@@ -215,8 +215,8 @@ module ControllerExtensions
       method: method,
       action: page,
       params: params,
-      user: (params[:username] or username),
-      password: (params[:password] or password),
+      user: (params[:username] || username),
+      password: (params[:password] || password),
       require_login: :login,
       require_user: altpage ? [altpage].flatten : nil
     )
@@ -506,11 +506,11 @@ module ControllerExtensions
   #
   def assert_response_equal_file(*files, &block)
     body = @response.body.clone # Rails 3
-  # in Rails 4, above strips the '\n's which are added to the body when
+  # in Rails 4, it appears that above strips the '\n's added to the body when
   # the csv converter adds separate rows.
-  # so put it back in
-  # This is a bad solution, and could cause problems if a different separator is
-  # used.  But I cannot figure out how to access the raw body
+  # I originally manually replaced the '\n's with the following lines.
+  # But this is a bad, e.g., it could cause problems if a different separator is
+  # used.  But I cannot figure out how to access the raw body.
   #  body = @response.body_parts.join("\n").clone
   #  assert_string_equal_file(body, *files, &block)
   end
