@@ -260,6 +260,7 @@ class User < AbstractModel
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
+  # first value is the default
   as_enum(:thumbnail_size,
            { thumbnail: 0,
              small: 1
@@ -315,7 +316,7 @@ class User < AbstractModel
            accessor: :whiny
          )
 
-  has_many :api_keys, :dependent => :destroy
+  has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
   has_many :images
@@ -327,7 +328,7 @@ class User < AbstractModel
   has_many :namings
   has_many :notifications
   has_many :observations
-  has_many :projects_created, :class_name => 'Project'
+  has_many :projects_created, class_name: "Project"
   has_many :publications
   has_many :queued_emails
   has_many :species_lists
@@ -335,16 +336,29 @@ class User < AbstractModel
   has_many :test_add_image_logs
   has_many :votes
 
-  has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
-  has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"
-  has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
+  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
+  has_many :reviewed_name_descriptions, class_name: "NameDescription",
+             foreign_key: "reviewer_id"
+  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
-  has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup',            :join_table => 'user_groups_users'
-  has_and_belongs_to_many :authored_names,     :class_name => 'NameDescription',      :join_table => 'name_descriptions_authors'
-  has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
-  has_and_belongs_to_many :authored_locations, :class_name => 'LocationDescription',  :join_table => 'location_descriptions_authors'
-  has_and_belongs_to_many :edited_locations,   :class_name => 'LocationDescription',  :join_table => 'location_descriptions_editors'
-  has_and_belongs_to_many :curated_herbaria,   :class_name => 'Herbarium',            :join_table => 'herbaria_curators'
+  has_and_belongs_to_many :user_groups,
+    class_name: "UserGroup",
+    join_table: "user_groups_users"
+  has_and_belongs_to_many :authored_names,
+    class_name: "NameDescription",
+    join_table: "name_descriptions_authors"
+  has_and_belongs_to_many :edited_names,
+    class_name: "NameDescription",
+    join_table: "name_descriptions_editors"
+  has_and_belongs_to_many :authored_locations,
+    class_name: "LocationDescription",
+    join_table: "location_descriptions_authors"
+  has_and_belongs_to_many :edited_locations,
+    class_name: "LocationDescription",
+    join_table: "location_descriptions_editors"
+  has_and_belongs_to_many :curated_herbaria,
+    class_name: "Herbarium",
+    join_table: "herbaria_curators"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -379,10 +393,10 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    'observer'
+    "observer"
   end
 
-  # Find admin's record.
+# Find admin's record.
   def self.admin
     User.first
   end
@@ -515,13 +529,9 @@ class User < AbstractModel
   #   user = User.authenticate('fred99@aol.com', 'password')
   #
   def self.authenticate(login, pass)
-#    find(:first, :conditions => # Rails 3
-#      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
-#         login, login, login, sha1(pass) ])
     where("(login = ? OR name = ? OR email = ?) AND password = ? AND
            password != '' ",
-           login, login, login, sha1(pass) ).
-    first
+           login, login, login, sha1(pass) ).first
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -589,7 +599,8 @@ class User < AbstractModel
     preferred_herbarium.name rescue personal_herbarium_name
   end
 
-  # Return the name of this user's "favorite" herbarium (meaning the one they have used the most).
+  # Return the name of this user's "favorite" herbarium
+  # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
     herbarium_id = Herbarium.connection.select_value(%(
@@ -628,11 +639,11 @@ class User < AbstractModel
     end
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Interests
   #
-  ################################################################################
+  ##############################################################################
 
   # Has this user expressed positive or negative interest in a given object?
   # Returns +:watching+ or +:ignoring+ if so, else +nil+.  Caches result.

@@ -296,19 +296,19 @@ class AccountControllerTest < FunctionalTestCase
         email_observations_all:       "",
         email_observations_consensus: "1",
         email_observations_naming:    "1",
-        hide_authors:                 "above_species",
-        image_size:                   "small",
-        keep_filenames:               "keep_but_hide",
+        hide_authors:                 :above_species,
+        image_size:                   :small,
+        keep_filenames:               :keep_but_hide,
         license_id:                   "1",
         locale:                       "el-GR",
-        location_format:              "scientific",
+        location_format:              :scientific,
         login:                        "new_login",
         rows:                         "10",
         theme:                        "Agaricus",
         thumbnail_maps:               "",
-        thumbnail_size:               "small",
+        thumbnail_size:               :small,
         vertical_layout:              "",
-        votes_anonymous:              "yes"
+        votes_anonymous:              :yes
       }
     }
     post_with_dump(:prefs, params)
@@ -316,44 +316,42 @@ class AccountControllerTest < FunctionalTestCase
 
     # Make sure changes were made.
     user = rolf.reload
-    assert_equal(false,       user.alternate_columns)
-    assert_equal(false,       user.alternate_rows)
-    assert_equal(10,          user.columns)
+    assert_equal(false, user.alternate_columns)
+    assert_equal(false, user.alternate_rows)
+    assert_equal(10, user.columns)
     assert_equal("new_email", user.email)
-    assert_equal(false,       user.email_comments_all)
-    assert_equal(true,        user.email_comments_owner)
-    assert_equal(true,        user.email_comments_response)
-    assert_equal(true,        user.email_general_commercial)
-    assert_equal(true,        user.email_general_feature)
-    assert_equal(true,        user.email_general_question)
-    assert_equal(true,        user.email_html)
-    assert_equal(true,        user.email_locations_admin)
-    assert_equal(false,       user.email_locations_all)
-    assert_equal(true,        user.email_locations_author)
-    assert_equal(false,       user.email_locations_editor)
-    assert_equal(true,        user.email_names_admin)
-    assert_equal(false,       user.email_names_all)
-    assert_equal(true,        user.email_names_author)
-    assert_equal(false,       user.email_names_editor)
-    assert_equal(true,        user.email_names_reviewer)
-    assert_equal(false,       user.email_observations_all)
-    assert_equal(true,        user.email_observations_consensus)
-    assert_equal(true,        user.email_observations_naming)
-    assert_equal("above_species", user.hide_authors)
-    assert_equal("small",     user.image_size)
-    assert_equal("keep_but_hide", user.keep_filenames)
+    assert_equal(false, user.email_comments_all)
+    assert_equal(true, user.email_comments_owner)
+    assert_equal(true, user.email_comments_response)
+    assert_equal(true, user.email_general_commercial)
+    assert_equal(true, user.email_general_feature)
+    assert_equal(true, user.email_general_question)
+    assert_equal(true, user.email_html)
+    assert_equal(true, user.email_locations_admin)
+    assert_equal(false, user.email_locations_all)
+    assert_equal(true, user.email_locations_author)
+    assert_equal(false, user.email_locations_editor)
+    assert_equal(true, user.email_names_admin)
+    assert_equal(false, user.email_names_all)
+    assert_equal(true, user.email_names_author)
+    assert_equal(false, user.email_names_editor)
+    assert_equal(true, user.email_names_reviewer)
+    assert_equal(false, user.email_observations_all)
+    assert_equal(true, user.email_observations_consensus)
+    assert_equal(true, user.email_observations_naming)
+    assert_equal(:above_species, user.hide_authors)
+    assert_equal(:small, user.image_size)
+    assert_equal(:keep_but_hide, user.keep_filenames)
     assert_equal(licenses(:ccnc25), user.license)
-    assert_equal("el-GR",     user.locale)
-    # location_format is always a symbol.
-    # TODO: make consistent with other preferences
-    assert_equal("scientific", user.location_format.to_s)
+    assert_equal("el-GR", user.locale)
+    assert_equal(:scientific, user.location_format)
     assert_equal("new_login", user.login)
-    assert_equal(10,          user.rows)
-    assert_equal("Agaricus",  user.theme)
-    assert_equal(false,       user.thumbnail_maps)
-    assert_equal("small",     user.thumbnail_size)
-    assert_equal(false,       user.vertical_layout)
-    assert_equal("yes",       user.votes_anonymous)
+    assert_equal(10, user.rows)
+    assert_equal("Agaricus", user.theme)
+    assert_equal(false, user.thumbnail_maps)
+    assert_equal(:small, user.thumbnail_size)
+    assert_equal(false, user.vertical_layout)
+    assert_equal(:yes, user.votes_anonymous)
   end
 
   def test_edit_prefs_login_already_exists
@@ -367,7 +365,6 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_edit_profile
-
     # First make sure it can serve the form to start with.
     requires_login(:profile)
 
@@ -375,8 +372,8 @@ class AccountControllerTest < FunctionalTestCase
     # the bulk copyright_holder updater in the boundary case of no images.)
     params = {
       user: {
-        :name       => "new_name",
-        :notes      => "new_notes",
+        name:       "new_name",
+        notes:      "new_notes",
         place_name: "Burbank, California, USA",
         mailing_address: ""
       }
@@ -398,7 +395,8 @@ class AccountControllerTest < FunctionalTestCase
     setup_image_dirs
 
     # Open file we want to upload.
-    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/sticky.jpg", "image/jpeg")
+    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/sticky.jpg",
+      "image/jpeg")
 
     # It should create a new image: this is the current number of images.
     num_images = Image.count

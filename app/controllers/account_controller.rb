@@ -319,95 +319,96 @@ class AccountController < ApplicationController
 
   def prefs # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
-    if request.method == "POST"
+    return unless request.method == "POST"
 
-      # Make sure password matches confirmation.
-      if password = params["user"]["password"]
-        if password == params["user"]["password_confirmation"]
-          @user.change_password(password)
-        else
-          @user.errors.add(:password, :runtime_prefs_password_no_match.t)
-        end
-      end
-
-      xargs = {}
-      for type, arg, post in [
-        [ :str,  :login,           true ],
-        [ :str,  :email,           true ],
-        [ :str,  :locale,          true ],
-        [ :int,  :license_id,      true ],
-        [ :str,  :votes_anonymous, true ],
-        [ :bool, :email_html,      true ],
-        [ :str,  :keep_filenames ],
-        [ :str,  :location_format ],
-        [ :str,  :hide_authors ],
-        [ :str,  :theme ],
-        [ :int,  :rows ],
-        [ :int,  :columns ],
-        [ :bool, :alternate_rows ],
-        [ :bool, :alternate_columns ],
-        [ :bool, :vertical_layout ],
-        [ :bool, :email_comments_owner ],
-        [ :bool, :email_comments_response ],
-        [ :bool, :email_comments_all ],
-        [ :bool, :email_observations_consensus ],
-        [ :bool, :email_observations_naming ],
-        [ :bool, :email_observations_all ],
-        [ :bool, :email_names_admin ],
-        [ :bool, :email_names_author ],
-        [ :bool, :email_names_editor ],
-        [ :bool, :email_names_reviewer ],
-        [ :bool, :email_names_all ],
-        [ :bool, :email_locations_admin ],
-        [ :bool, :email_locations_author ],
-        [ :bool, :email_locations_editor ],
-        [ :bool, :email_locations_all ],
-        [ :bool, :email_general_feature ],
-        [ :bool, :email_general_commercial ],
-        [ :bool, :email_general_question ],
-        # [ :str,  :email_digest ],
-        [ :str,  :thumbnail_size ],
-        [ :bool, :thumbnail_maps ],
-        [ :str,  :image_size ],
-      ]
-        val = params[:user][arg]
-        val = case type
-          when :str  ; val.to_s
-          when :int  ; val.to_i
-          when :bool ; val == "1"
-        end
-        if @user.send(arg) != val
-          @user.send("#{arg}=", val)
-          arg = arg.to_s.sub(/_id/, "")
-          xargs[:"set_#{arg}"] = val if post
-        end
-      end
-
-      legal_name_change = @user.legal_name_change
-      if !@user.changed
-        flash_notice(:runtime_no_changes.t)
-      elsif !@user.errors.empty? || !@user.save
-        flash_object_errors(@user)
+    # Make sure password matches confirmation.
+    if password = params["user"]["password"]
+      if password == params["user"]["password_confirmation"]
+        @user.change_password(password)
       else
-        if legal_name_change
-          Image.update_copyright_holder(*legal_name_change, @user)
-        end
-        if !xargs.empty?
-          xargs[:id] = @user
-          Transaction.put_user(xargs)
-        end
-        flash_notice(:runtime_prefs_success.t)
+        @user.errors.add(:password, :runtime_prefs_password_no_match.t)
       end
     end
+
+    xargs = {}
+    for type, arg, post in [
+      [ :str,  :login,           true ],
+      [ :str,  :email,           true ],
+      [ :str,  :locale,          true ],
+      [ :int,  :license_id,      true ],
+      [ :bool, :email_html,      true ],
+      [ :enum, :keep_filenames ],
+      [ :enum, :location_format ],
+      [ :enum, :hide_authors ],
+      [ :enum, :votes_anonymous, true ],
+      [ :enum,  :thumbnail_size ],
+      [ :enum,  :image_size ],
+      [ :str,  :theme ],
+      [ :int,  :rows ],
+      [ :int,  :columns ],
+      [ :bool, :alternate_rows ],
+      [ :bool, :alternate_columns ],
+      [ :bool, :vertical_layout ],
+      [ :bool, :email_comments_owner ],
+      [ :bool, :email_comments_response ],
+      [ :bool, :email_comments_all ],
+      [ :bool, :email_observations_consensus ],
+      [ :bool, :email_observations_naming ],
+      [ :bool, :email_observations_all ],
+      [ :bool, :email_names_admin ],
+      [ :bool, :email_names_author ],
+      [ :bool, :email_names_editor ],
+      [ :bool, :email_names_reviewer ],
+      [ :bool, :email_names_all ],
+      [ :bool, :email_locations_admin ],
+      [ :bool, :email_locations_author ],
+      [ :bool, :email_locations_editor ],
+      [ :bool, :email_locations_all ],
+      [ :bool, :email_general_feature ],
+      [ :bool, :email_general_commercial ],
+      [ :bool, :email_general_question ],
+      # [ :str,  :email_digest ],
+      [ :bool, :thumbnail_maps ]
+    ]
+      val = params[:user][arg]
+      val = case type
+        when :str  then val.to_s
+        when :int  then val.to_i
+        when :bool then val == "1"
+        when :enum then val ||= User.enum_default_value(arg)
+      end
+      if @user.send(arg) != val
+        @user.send("#{arg}=", val)
+        arg = arg.to_s.sub(/_id/, "")
+        xargs[:"set_#{arg}"] = val if post
+      end
+    end
+
+    legal_name_change = @user.legal_name_change
+    if !@user.changed
+      flash_notice(:runtime_no_changes.t)
+    elsif !@user.errors.empty? || !@user.save
+      flash_object_errors(@user)
+    else
+      if legal_name_change
+        Image.update_copyright_holder(*legal_name_change, @user)
+      end
+      if !xargs.empty?
+        xargs[:id] = @user
+        Transaction.put_user(xargs)
+      end
+      flash_notice(:runtime_prefs_success.t)
+    end
   end
+
 
   def profile # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
     if request.method != "POST"
-      @place_name      = @user.location ? @user.location.display_name : ""
-      @copyright_holder = @user.legal_name
+      @place_name        = @user.location ? @user.location.display_name : ""
+      @copyright_holder  = @user.legal_name
       @copyright_year    = Time.now.year
-      @upload_license_id  = @user.license.id
+      @upload_license_id = @user.license.id
 
     else
       xargs = {}
