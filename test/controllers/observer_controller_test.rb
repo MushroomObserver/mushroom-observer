@@ -181,12 +181,12 @@ class ObserverControllerTest < FunctionalTestCase
   def test_prev_and_next_observation
     # Uses default observation query
     get(:next_observation, id: 4)
-    assert_template(action: :show_observation, id: 3,
-                    params: @controller.query_params(Query.last))
+    assert_redirected_to(action: :show_observation, id: 3,
+                         params: @controller.query_params(Query.last))
 
     get(:prev_observation, id: 4)
-    assert_template(action: :show_observation, id: 5,
-                    params: @controller.query_params(Query.last))
+    assert_redirected_to(action: :show_observation, id: 5,
+                        params: @controller.query_params(Query.last))
   end
 
   def test_prev_and_next_observation_with_fancy_query
@@ -264,8 +264,11 @@ class ObserverControllerTest < FunctionalTestCase
         },
         commit: "Search"
       )
-      assert_redirected_to(controller: model.show_controller,
-                      action: :advanced_search)
+
+      # assert_redirected_to(controller: model.show_controller,
+      # action: :advanced_search )
+      assert_match(%r{#{ model.show_controller }/advanced_search},
+                   response.body)
     end
   end
 
@@ -283,7 +286,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_advanced_search_2
     get(:advanced_search, name: "Agaricus", location: "California")
     assert_response(:success)
-    results = @controller.instance_variable_get('@objects');
+    results = @controller.instance_variable_get("@objects");
     assert_equal(4, results.length)
   end
 
@@ -1700,7 +1703,7 @@ class ObserverControllerTest < FunctionalTestCase
         when: obs.when,
         notes: obs.notes,
         specimen: obs.specimen,
-        thumb_image_id: "0",
+        thumb_image_id: "0"
       },
       good_images: "",
       good_image: {},
