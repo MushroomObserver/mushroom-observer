@@ -251,7 +251,8 @@ class ImageControllerTest < FunctionalTestCase
     assert(!obs.images.member?(image))
     requires_login(:reuse_image, mode: "observation", obs_id: obs.id,
                    img_id: image.id)
-    assert_redirected_to("/#{obs.id}")
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
   end
@@ -449,7 +450,9 @@ class ImageControllerTest < FunctionalTestCase
 
     login("mary", "testpassword")
     send(:get, :reuse_image, params)
-    assert_redirected_to(%r{/#{obs.id}$})
+    # assert_redirected_to(%r{/#{obs.id}$})
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
 
     login("rolf", "testpassword")
     send(:get_with_dump, :reuse_image, params)
@@ -479,13 +482,15 @@ class ImageControllerTest < FunctionalTestCase
     assert_not_equal("mary", owner)
     requires_login(:reuse_image, params, "mary")
     # assert_template(controller: :observer, action: :show_observation)
-    assert_redirected_to(%r{/#{obs.id}$})
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
     refute(obs.reload.images.member?(image))
 
     login(owner)
     get_with_dump(:reuse_image, params)
     # assert_template(controller: "observer", action: "show_observation")
-    assert_redirected_to(%r{/#{obs.id}$})
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                         id: obs.id)
     assert(obs.reload.images.member?(image))
     assert(updated_at != obs.updated_at)
   end

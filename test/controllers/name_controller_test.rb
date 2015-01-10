@@ -282,23 +282,31 @@ class NameControllerTest < FunctionalTestCase
     name4 = names(:lactarius_subalpinus)
 
     get(:next_name, q.merge(id: name1.id))
-    assert_redirected_to(%r{/show_name/#{name2.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name2.id,
+                         params: q)
     get(:next_name, q.merge(id: name2.id))
-    assert_redirected_to(%r{/show_name/#{name3.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name3.id,
+                         params: q)
     get(:next_name, q.merge(id: name3.id))
-    assert_redirected_to(%r{/show_name/#{name4.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name4.id,
+                         params: q)
     get(:next_name, q.merge(id: name4.id))
-    assert_redirected_to(%r{/show_name/#{name4.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name4.id,
+                         params: q)
     assert_flash(/no more/i)
 
     get(:prev_name, q.merge(id: name4.id))
-    assert_redirected_to(%r{/show_name/#{name3.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name3.id,
+                         params: q)
     get(:prev_name, q.merge(id: name3.id))
-    assert_redirected_to(%r{/show_name/#{name2.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name2.id,
+                         params: q)
     get(:prev_name, q.merge(id: name2.id))
-    assert_redirected_to(%r{/show_name/#{name1.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name1.id,
+                         params: q)
     get(:prev_name, q.merge(id: name1.id))
-    assert_redirected_to(%r{/show_name/#{name1.id}})
+    assert_redirected_to(controller: :name, action: :show_name, id: name1.id,
+                         params: q)
     assert_flash(/no more/i)
   end
 
