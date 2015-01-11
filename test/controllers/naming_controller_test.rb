@@ -45,10 +45,12 @@ class NamingControllerTest < FunctionalTestCase
       vote: { value: 1 }
     }
 
-    post(:edit, params)
-    assert_template("show_observation")
     # Clones naming, creates Easter sp and E. bunny, but no votes.
-    assert_equal(10 + 10*2 + 2, rolf.reload.contribution)
+    post(:edit, params)
+
+    assert_template("show_observation")
+    assert_equal(rolf.contribution + (SiteData::FIELD_WEIGHTS[:names] * 2) + 2,
+                 rolf.reload.contribution)
     params = assigns(:params)
     nam = params.naming
     assert_equal(new_name, nam.text_name)
@@ -290,7 +292,8 @@ class NamingControllerTest < FunctionalTestCase
     v_count = Vote.count
 
     # Make a few assertions up front to make sure fixtures are as expected.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id,
+                 observations(:coprinus_comatus_obs).name_id)
     assert(namings(:coprinus_comatus_naming).user_voted?(rolf))
     assert(namings(:coprinus_comatus_naming).user_voted?(mary))
     assert(!namings(:coprinus_comatus_naming).user_voted?(dick))

@@ -196,9 +196,12 @@
 #  edited_locations::   Location's they've edited.
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
-#  preferred_herbarium:: User's preferred herbarium (defaults to personal_herbarium).
-#  personal_herbarium:: User's private herbarium: "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own or that are attached to projects they're on.
+#  preferred_herbarium:: User's preferred herbarium
+#                       (defaults to personal_herbarium).
+#  personal_herbarium:: User's private herbarium:
+#                       "Name (login): Personal Herbarium".
+#  all_editable_species_lists:: Species Lists they own
+#                       or that are attached to projects they're on.
 #
 #  ==== Alerts
 #  all_alert_types::    List of accepted alert types.

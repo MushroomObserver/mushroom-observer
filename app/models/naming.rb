@@ -9,7 +9,8 @@
 #  == Attributes
 #
 #  id::                     Locally unique numerical id, starting at 1.
-#  sync_id::                Globally unique alphanumeric id, used to sync with remote servers.
+#  sync_id::                Globally unique alphanumeric id,
+#                           used to sync with remote servers.
 #  created_at::             Date/time it was created.
 #  updated_at::             Date/time it was last updated.
 #  user::                   User that created it.
@@ -66,7 +67,7 @@ class Naming < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    'observer'
+    "observer"
   end
 
   def self.construct(args, observation)
@@ -180,7 +181,7 @@ class Naming < AbstractModel
       @initial_name_id = self.name_id
       taxa = self.name.all_parents
       taxa.push(self.name)
-      taxa.push(Name.find_by_text_name('Lichen')) if self.name.is_lichen?
+      taxa.push(Name.find_by_text_name("Lichen")) if self.name.is_lichen?
       done_user = {}
       for taxon in taxa
         # for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
@@ -215,7 +216,8 @@ class Naming < AbstractModel
         end
 
         # Also send to people who have registered positive interest in this name.
-        # (Don't want *disinterest* in name overriding interest in the observation, say.)
+        # (Don't want *disinterest* in name overriding
+        # interest in the observation, say.)
         for taxon in taxa
           for interest in taxon.interests
             if interest.state
