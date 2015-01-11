@@ -266,9 +266,10 @@ class ObserverControllerTest < FunctionalTestCase
       )
 
       # assert_redirected_to(controller: model.show_controller,
-      # action: :advanced_search )
+      #                      action: :advanced_search)
+      assert_response(:redirect)
       assert_match(%r{#{ model.show_controller }/advanced_search},
-                   response.body)
+                   redirect_to_url)
     end
   end
 
@@ -624,18 +625,16 @@ class ObserverControllerTest < FunctionalTestCase
 
     logout
     post(page, params)
-    # assert_redirected_to(controller: :account, action: :login)
-    assert_redirected_to("/account/login")
+    # assert_template(:controller => "account", :action => "login")
+    assert_redirected_to(controller: :account, action: :login)
 
     login("rolf")
     post(page, params)
-    # assert_redirected_to(controller: :observer, action: :list_rss_logs)
-    assert_redirected_to("/observer/list_rss_logs")
+    assert_redirected_to(controller: :observer, action: :list_rss_logs)
     assert_flash(/denied|only.*admin/i)
 
     make_admin("rolf")
     post_with_dump(page, params)
-    # assert_redirected_to(controller: :observer, action: :users_by_name)
     assert_redirected_to(controller: :observer, action: :users_by_name)
   end
 
@@ -1343,12 +1342,14 @@ class ObserverControllerTest < FunctionalTestCase
       name: {},
       vote: { value: "3" },
     }
-    expected_page = "create_location"
+    expected_page = :create_location
+
     # Can we create observation with existing genus?
     agaricus = names(:agaricus)
     params[:name][:name] = "Agaricus"
     params[:approved_name] = nil
     post(:create_observation, params)
+    # assert_template(action: expected_page)
     assert_redirected_to(%r{#{ expected_page }})
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
@@ -1463,7 +1464,11 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = '"One"'
     params[:approved_name] = '"One"'
     post(:create_observation, params)
-    assert_template(expected_page)
+    # assert_template(action: expected_page)
+    # assert_template(%r{observer/#{ expected_page }})
+    # assert_match(%r{#{ expected_page }}, @response.body)
+    # assert_template(controller: :observer, action: expected_page)
+    assert_redirected_to(%r{#{ expected_page }})
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
 
@@ -2053,7 +2058,8 @@ class ObserverControllerTest < FunctionalTestCase
     get(:create_observation)
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :unchecked)
 
-    # Should have different default if recently posted observation attached to project.
+    # Should have different default
+    # if recently posted observation attached to project.
     obs = Observation.create!
     @proj2.add_observation(obs)
     get(:create_observation)
@@ -2282,72 +2288,72 @@ class ObserverControllerTest < FunctionalTestCase
   #  Lookup name.
   # ----------------------------
 
-  #  TODO investigate why Rails 4.0 gives following with commented-out lines
-  #  ArgumentError: Unknown key: controller
   def test_lookup_name
     get(:lookup_comment, id: 1)
-    # assert_redirected_to(controller: :comment, action: :show_comment, id: 1)
-    assert_redirected_to("/comment/show_comment/1")
+    assert_redirected_to(controller: :comment, action: :show_comment, id: 1)
     get(:lookup_comment, id: 10000)
-    # assert_redirected_to(controller: :comment, action: :index_comment)
-    assert_redirected_to("/comment/index_comment/10000")
+    assert_redirected_to(controller: :comment, action: :index_comment)
     assert_flash_error
 
     get(:lookup_image, id: 1)
-    # assert_redirected_to(controller: :image, action: :show_image, id: 1)
-    assert_redirected_to("/image/show_image/1")
+    assert_redirected_to(controller: :image, action: :show_image, id: 1)
     get(:lookup_image, id: 10000)
-    # assert_redirected_to(controller: :image, action: :index_image)
-    assert_redirected_to("/image/index_image/10000")
+    assert_redirected_to(controller: :image, action: :index_image)
     assert_flash_error
 
     get(:lookup_location, id: 1)
-    # assert_redirected_to(controller: :location, action: :show_location, id: 1)
-    assert_redirected_to("/location/show_location/1")
-    get(:lookup_location, id: 'Burbank, California')
-    # assert_redirected_to(controller: :location, action: :show_location, id: locations(:burbank).id)
-    assert_redirected_to("/location/show_location/#{locations(:burbank).id}")
-    get(:lookup_location, id: 'California, Burbank')
-    # assert_redirected_to(controller: :location, action: :show_location, id: locations(:burbank).id)
-    assert_redirected_to("/location/show_location/#{locations(:burbank).id}")
+    assert_redirected_to(controller: :location, action: :show_location, id: 1)
+    get(:lookup_location, id: "Burbank, California")
+    assert_redirected_to(controller: :location, action: :show_location,
+                         id: locations(:burbank).id)
+    get(:lookup_location, id: "California, Burbank")
+    assert_redirected_to(controller: :location, action: :show_location,
+                         id: locations(:burbank).id)
     get(:lookup_location, id: 'Zyzyx, Califonria')
-    # assert_redirected_to(controller: :location, action: :index_location)
-    assert_redirected_to("location/index_location")
+    assert_redirected_to(controller: :location, action: :index_location)
     assert_flash_error
     get(:lookup_location, id: "California")
     # assert_redirected_to(controller: :location, action: :index_location)
-    assert_redirected_to("location/index_location")
+    assert_redirected_to(%r{/location/index_location})
     assert_flash_warning
 
     get(:lookup_name, id: 1)
     assert_redirected_to(controller: :name, action: :show_name, id: 1)
     get(:lookup_name, id: names(:coprinus_comatus).id)
+    # assert_redirected_to(controller: :name, action: :show_name,
+    #                      id: names(:coprinus_comatus).id)
+    assert_redirected_to(%r{/name/show_name/#{names(:coprinus_comatus).id}})
+    get(:lookup_name, id: "Agaricus campestris")
     assert_redirected_to(controller: :name, action: :show_name,
-                         id: names(:coprinus_comatus).id)
-    get(:lookup_name, id: 'Agaricus campestris')
-    assert_redirected_to(controller: :name, action: :show_name, id: names(:agaricus_campestris).id)
+                         id: names(:agaricus_campestris).id)
     get(:lookup_name, id: 'Agaricus newname')
     assert_redirected_to(controller: :name, action: :index_name)
     assert_flash_error
     get(:lookup_name, id: 'Amanita baccata sensu Borealis')
-    assert_redirected_to(controller: :name, action: :show_name, id: names(:amanita_baccata_borealis).id)
+    assert_redirected_to(controller: :name, action: :show_name,
+                         id: names(:amanita_baccata_borealis).id)
     get(:lookup_name, id: 'Amanita baccata')
-    assert_redirected_to(controller: :name, action: :index_name)
+    # assert_redirected_to(controller: :name, action: :index_name)
+    assert_redirected_to(%r{/name/index_name})
     assert_flash_warning
     get(:lookup_name, id: 'Agaricus campestris L.')
-    assert_redirected_to(controller: :name, action: :show_name, id: names(:agaricus_campestris).id)
+    assert_redirected_to(controller: :name, action: :show_name,
+                         id: names(:agaricus_campestris).id)
     get(:lookup_name, id: 'Agaricus campestris Linn.')
-    assert_redirected_to(controller: :name, action: :show_name, id: names(:agaricus_campestris).id)
+    assert_redirected_to(controller: :name, action: :show_name,
+                                     id: names(:agaricus_campestris).id)
 
     get(:lookup_project, id: 1)
     assert_redirected_to(controller: :project, action: :show_project, id: 1)
     get(:lookup_project, id: "Bolete")
-    assert_redirected_to(controller: :project, action: :show_project, id: projects(:bolete_project).id)
+    assert_redirected_to(controller: :project, action: :show_project,
+                         id: projects(:bolete_project).id)
     get(:lookup_project, id: "Bogus")
     assert_redirected_to(controller: :project, action: :index_project)
     assert_flash_error
     get(:lookup_project, id: "project")
-    assert_redirected_to(controller: :project, action: :index_project)
+    # assert_redirected_to(controller: :project, action: :index_project)
+    assert_redirected_to(%r{/project/index_project})
     assert_flash_warning
 
     get(:lookup_species_list, id: 1)
@@ -2356,8 +2362,9 @@ class ObserverControllerTest < FunctionalTestCase
     get(:lookup_species_list, id: "Mysteries")
     assert_redirected_to(controller: :species_list, action: :show_species_list,
                          id: species_lists(:unknown_species_list).id)
-    get(:lookup_species_list, id: 'species list')
-    assert_redirected_to(controller: :species_list, action: :index_species_list)
+    get(:lookup_species_list, id: "species list")
+    # assert_redirected_to(controller: :species_list, action: :index_species_list)
+    assert_redirected_to(%r{/species_list/index_species_list})
     assert_flash_warning
     get(:lookup_species_list, id: "Flibbertygibbets")
     assert_redirected_to(controller: :species_list, action: :index_species_list)
@@ -2377,9 +2384,9 @@ class ObserverControllerTest < FunctionalTestCase
       str1 = TranslationString.create!(
                                        language: languages(:english),
                                        tag: :app_banner_box,
-                                       text: 'old banner',
+                                       text: "old banner",
                                        user: User.admin
-                                       )
+      )
       str1.update_localization
 
       str2 = TranslationString.create!(

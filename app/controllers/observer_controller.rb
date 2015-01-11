@@ -460,13 +460,13 @@ class ObserverController < ApplicationController
           # matches = Location.find(:all, # Rails 3
           #                        limit: 100,
           #                        conditions: conditions)
-          matches = Location..limit(100).where(conditions)
+          matches = Location.limit(100).where(conditions)
         when "Project"
           pattern = "%#{id}%"
           # matches = Project.find(:all, # Rails 3
           #                        limit: 100,
           #                        conditions: ["title LIKE ?", pattern])
-          matches = Project..limit(100).where("title LIKE ?", pattern)
+          matches = Project.limit(100).where("title LIKE ?", pattern)
         when "SpeciesList"
           pattern = "%#{id}%"
           # matches = SpeciesList.find(:all, # Rails 3
