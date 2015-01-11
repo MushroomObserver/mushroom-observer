@@ -119,29 +119,64 @@ end %>
     <br/>
   <% end %>
 
-  <b><%= :form_observations_upload_images.t %>:</b><br/>
-
-  <% if can_do_ajax? %>
-    <%= javascript_tag %(
-      var NEXT_IMAGE_INDEX = #{@images.length+1};
-      var CHANGED_DATES = [];
-    ) %>
-  <% end %>
-
-  <div id="image_forms">
-    <% i = 0 %>
-    <% @images.push(@new_image) %>
-    <% while i < @images.length %>
-      <%= render(:partial => 'form_image', :locals => { :index => i }) %>
-      <% i += 1 %>
+    <b><%= :form_observations_upload_images.t %>:</b><br/>
+    <% ############################### START Multiple image uploads ############################## %>
+    <% if can_do_multifile_upload? %>
+        <!--Container to show messages relating to the selected images  -->
+        <div class="image_messages hidden" id="image_messages">
+          <div id="inconsistent_date_message_container hidden">
+            <strong><%= :form_observations_inconsistent_date_warn.t %></strong>
+            <ul>
+                  <li><button id="inconsistent_date_use_obs_date_btn" type="button"><%= :form_observations_inconsistent_date_update_img_dates.t %></button></li>
+                  <li><button id="inconsistent_date_update_obs_date_btn" type="button"><%= :form_observations_inconsistent_date_update_obs_date.t %></button></li>
+                  <li><strong><%=:form_observations_inconsistent_date_correct_yourself.t%></strong></li>
+            </ul>
+          </div>
+        </div>
+        <!--Container for appending images-->
+        <div class="images_container margin-top">
+          <input type="file" multiple id="multiple_images_button"/>
+          <div id="added_images_container">
+            <!--Target for insertion-->
+          </div>
+        </div>
+        <% javascript_include('exif')
+           javascript_include('multi_image_upload') %>
+        <%= javascript_tag %(
+              jQuery(document).ready(function () {
+                 var uploader = MultiImageUploader({
+                  image_upload_error_text: "#{:form_observations_image_upload_error}",
+                  uploading_text: "#{:UPLOADING}",
+                  image_too_big_text:  "#{:form_observations_image_too_big}",
+                  creating_observation_text: "#{:CREATING}"
+                 })
+                 uploader.init();
+              });
+            ) %>
     <% end %>
-  </div>
+    <% ############################### END Multiple image uploads ############################## %>
 
-  <div class='HelpNote'>
-    <%= :form_observations_upload_help.tp %>
-  </div>
+    <% if !can_do_multifile_upload? %>
+          <% if can_do_ajax? %>
+            <%= javascript_tag %(
+              var NEXT_IMAGE_INDEX = #{@images.length+1};
+              var CHANGED_DATES = [];
+            ) %>
+          <% end %>
+          <div id="image_forms">
+            <% i = 0 %>
+            <% @images.push(@new_image) %>
+            <% while i < @images.length %>
+              <%= render(:partial => 'form_image', :locals => { :index => i }) %>
+              <% i += 1 %>
+            <% end %>
+          </div>
+          <div class='HelpNote'>
+            <%= :form_observations_upload_help.tp %>
+          </div>
+    <% end %>
 
-  <% if can_do_ajax? %>
+  <% if can_do_ajax? && !can_do_multifile_upload? %>
     <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
 
     <%= javascript_include('jquery')

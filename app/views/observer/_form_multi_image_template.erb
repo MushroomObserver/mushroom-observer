@@ -1,0 +1,52 @@
+<!--This is ugly since ruby attempts to add IDs and form name values that already exist in the form this will put into. So we need to override the labels-->
+
+<div id="image_<%= @img_number%>" class="margin_top added_image_wrapper">
+  <div class="added_image_name_container">
+    <!--Replaced by javascript-->
+    <strong style="font-size:14px;">{{img_file_name}}</strong>
+    <span style="font-size:14px">{{img_file_size}}</span>
+    <span style="font-size:14px; color: red" class="warn-text"></span>
+    <span style="font-size:14px; color: green" class="info-text"></span>
+    <a href="javascript:" style="float: right;" data-file-uuid="<%=@img_number%>">Remove Image</a>
+  </div>
+  <div class="added_image_image_container">
+    <img class="img_responsive" src="" style="width: 100%; height: auto;">
+  </div>
+
+  <div class="added_image_details_container">
+    <div class="added_image_notes_container">
+      <label for="temp_image_<%= @img_number %>_notes"><%= :NOTES.t %>:</label>
+      <%= text_field('temp_image', 'notes', :index => @img_number, class: 'width_100', placeholder: 'Notes') %>
+    </div>
+
+    <div class="margin_top added_image_additional_details_container">
+      <div class="added_image_copyright_holder_container">
+        <div class="miu_left">
+          <label for="temp_image_<%= @img_number %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>
+        </div>
+        <div class="miu_right">
+          <%= text_field('temp_image', 'copyright_holder', :index => @img_number, class: 'width_90', value: @image.user.legal_name) %>
+        </div>
+      </div>
+
+      <div class="margin_top  added_image_date_taken_container">
+        <div class="miu_left">
+          <label><%= :form_images_when_taken.t %>:</label>
+        </div>
+        <div class="miu_right">
+          <%= date_select('temp_image', 'when', { :index => @img_number, :start_year => 1980, :end_year => Time.now.year,
+                                             :order => [:day,:month,:year]}) %></p>
+
+        </div>
+        <div class="margin_top added_image_license_container">
+          <div class="miu_left">
+            <%= :form_images_select_license.t %>
+          </div>
+          <div class="miu_right">
+            <%= select("temp_image[#{@img_number}]", :license_id, @licenses, { :id => "temp_image_#{@img_number}_license_id"}) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

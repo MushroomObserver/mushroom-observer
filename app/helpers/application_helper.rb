@@ -25,16 +25,26 @@ require_dependency 'gmaps'
 
 module ApplicationHelper
 
-  # For now, just use Browser gem's "modern?" criteria.  Used to be:
-  #   Firefox/Iceweasel > 1.0
-  #   Netscape > 7.0
-  #   Safari > 1.2
-  #   IE > 5.5
-  #   Opera (all)
-  #   Chrome (all)
-  def can_do_ajax?
+  # For now, just use Browser gem's "modern?" criteria.
+  # Webkit,
+  # Firefox 17+,
+  # IE 9+ and
+  # Opera 12+
+
+
+def can_do_ajax?
     browser.modern? || TESTING
-  end
+end
+
+  #Use this test to determine if a user can upload multiple images at a time.
+  #It checks for support of the following requirements:
+  # Select multiple files button
+  # XHRHttpRequest2
+  # FileAPI
+  #CanIuse.com is the source of this information.
+def can_do_multifile_upload?
+   (browser.modern? && !browser.ie9?) || TESTING  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
+end
 
   ##############################################################################
   #

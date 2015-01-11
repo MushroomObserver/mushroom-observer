@@ -453,6 +453,8 @@
   by: by
   CREATED: Created
   created: created
+  CREATING: Creating
+  creating: creating
   CREATED_AT: Created at
   created_at: created at
   DESTROYED: Destroyed
@@ -473,6 +475,8 @@
   updated: updated
   UPDATED_AT: Updated at
   updated_at: updated at
+  UPLOADING: Uploading
+  uploading: uploading
   VIEWED: Viewed
   viewed: viewed
 
@@ -1209,6 +1213,12 @@
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check and species lists you would like to add this observation to.
   form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
+  form_observations_inconsistent_date_warn: The images appear to have been taken on a date different from the observation date.
+  form_observations_inconsistent_date_update_obs_date: Change the observation date to the image dates.
+  form_observations_inconsistent_date_update_img_dates: Change the image dates to the observation date.
+  form_observations_inconsistent_date_correct_yourself: Or, correct the dates manually.
+  form_observations_image_upload_error: There was an error uploading the image. Continuing anyway.
+  form_observations_image_too_big: This image is too large. Images must be less than 10mb in file size.
 
 
   # observer/_form_species_list
