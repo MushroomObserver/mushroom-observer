@@ -133,10 +133,11 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(1, descs.length)
     get_with_dump(:location_descriptions_by_author, id: 1)
     # assert_template(action: :show_location_description, id: descs.first.id)
-    assert_response(:redirect)
-    assert_match(%r{/location/show_location_description/#{descs.first.id}}
-                 redirect_to_url)
-  end
+    # assert_response(:redirect)
+    assert_redirected_to(
+      %r{/location/show_location_description/#{ descs.first.id }}
+    )
+    end
 
   def test_location_descriptions_by_editor
     get_with_dump(:location_descriptions_by_editor, id: 1)
@@ -433,7 +434,7 @@ class LocationControllerTest < FunctionalTestCase
     post_with_dump(:edit_location, params)
 
     # assert_template(action: "show_location")
-    assert_redirected_to(action: :show_location id: to_stay.id)
+    assert_redirected_to(action: :show_location, id: to_stay.id)
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
     assert_equal(past_loc_count+1 - past_locs_to_go, Location::Version.count)
