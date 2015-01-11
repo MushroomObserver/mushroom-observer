@@ -204,12 +204,14 @@ class LocationControllerTest < FunctionalTestCase
     count = Location.count
     params = barton_flats_params
     display_name = params[:display_name]
-    post_requires_login(:create_location, params)
 
-    assert_redirected_to(controller: :location, action: :show_location)
+    post_requires_login(:create_location, params)
+    loc = assigns(:location)
+
+    assert_redirected_to(controller: :location, action: :show_location,
+                         id: loc.id)
     assert_equal(count + 1, Location.count)
     assert_equal(10 + @new_pts, rolf.reload.contribution)
-    loc = assigns(:location)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
     loc = Location.find_by_name_or_reverse_name(display_name)
