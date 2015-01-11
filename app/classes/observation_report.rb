@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'csv'
+require "csv"
 
 module ObservationReport
   class Base
@@ -30,7 +30,7 @@ module ObservationReport
         when 'ASCII'
           render.to_ascii
         else
-          render.iconv(encoding) # This was causing problems with the UTF-16 encoding.
+          render.iconv(encoding) # This caused problems with  UTF-16 encoding.
       end
     end
 
@@ -99,7 +99,7 @@ module ObservationReport
 
     def rows_with_location
       query.select_rows(
-        :select => [
+        select: [
             'observations.id',
             'observations.when',
             'observations.lat',
@@ -127,8 +127,8 @@ module ObservationReport
             'locations.high',
             'locations.low',
           ].join(','),
-        :join => [:users, :locations, :names],
-        :order => 'observations.id ASC'
+        join: [:users, :locations, :names],
+        order: 'observations.id ASC'
       )
     end
 
@@ -153,7 +153,9 @@ module ObservationReport
     end
 
     def clean_rank(val)
-      val.blank? ? nil : val.downcase   # :"rank_#{val.downcase}".l
+      # :"rank_#{val.downcase}".l
+      # val.blank? ? nil : val.downcase
+      val.blank? ? nil : Name.ranks.key(val).to_s
     end
 
     def split_location(val)
@@ -178,10 +180,10 @@ module ObservationReport
         ssp = $2 if name.sub!(/ ssp. (\S+)$/, '')
         sp  = $1 if name.sub!(/ (\S+)$/, '')
         gen = name
-        f_author   = author if rank == 'Form'
-        var_author = author if rank == 'Variety'
-        ssp_author = author if rank == 'Subspecies'
-        sp_author  = author if rank == 'Species'
+        f_author   = author if rank == :Form
+        var_author = author if rank == :Variety
+        ssp_author = author if rank == :Subspecies
+        sp_author  = author if rank == :Species
       else
         gen = name.sub(/ .*/, '')
       end
@@ -190,10 +192,10 @@ module ObservationReport
   end
 
   class CSV < Base
-    self.default_encoding = 'UTF-8'
-    self.mime_type = 'text/csv'
-    self.extension = 'csv'
-    self.header = { :header => 'present' }
+    self.default_encoding = "UTF-8"
+    self.mime_type = "text/csv"
+    self.extension = "csv"
+    self.header = { header: :present }
 
     def render
       ::CSV.generate do |csv|
@@ -201,7 +203,7 @@ module ObservationReport
         rows.each do |row|
           csv << row
         end
-      end.force_encoding('UTF-8')
+      end.force_encoding("UTF-8")
     end
   end
 
