@@ -157,7 +157,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = { id: id.to_s }
     assert_equal("rolf", spl.user.login)
     requires_user(:destroy_species_list, [:show_species_list], params)
-    assert_redirected_to(action: "list_species_lists")
+    assert_redirected_to(action: :list_species_lists)
     assert_raises(ActiveRecord::RecordNotFound) do
       SpeciesList.find(id)
     end
@@ -181,7 +181,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert(!sp.observations.member?(obs))
     params = { species_list: sp.id, observation: obs.id }
     requires_login(:add_observation_to_species_list, params)
-    assert_redirected_to(action: "manage_species_lists/#{obs.id}")
+    assert_redirected_to(action: :manage_species_lists, id: obs.id)
     assert(sp.reload.observations.member?(obs))
   end
 
@@ -239,13 +239,13 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = { species_list: spl1.id, observation: obs2.id }
     post(:add_observation_to_species_list, observation: obs2.id,
                                            species_list: spl1.id)
-    assert_redirected_to(action: "manage_species_lists/#{obs2.id}")
+    assert_redirected_to(action: :manage_species_lists, id: obs2.id)
     assert_true(spl1.reload.observations.include?(obs2))
 
     params = { species_list: spl1.id, observation: obs2.id }
     post(:remove_observation_from_species_list, observation: obs2.id,
                                                 species_list: spl1.id)
-    assert_redirected_to(action: "manage_species_lists/#{obs2.id}")
+    assert_redirected_to(action: :manage_species_lists, id: obs2.id)
     assert_false(spl1.reload.observations.include?(obs2))
   end
 
@@ -749,7 +749,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     login owner
     post_with_dump(:edit_species_list, params)
     # assert_redirected_to(controller: "location", action: "create_location")
-    assert_redirected_to(%r{\/location\/create_location})
+    assert_redirected_to(%r{/location/create_location})
     assert_equal(10 + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place, California, USA", spl.where)
@@ -1089,7 +1089,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         notes: "notes",
       },
       member: { notes: "" },
-      list: {},
+      list: {}
     }
     @request.session[:user_id] = 1
 
@@ -1115,7 +1115,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     ].join("\r\n")
     post(:create_species_list, params)
     # assert_redirected_to(controller: :location, action: :create_location)
-    assert_redirected_to(%r{\/location\/create_location})
+    assert_redirected_to(%r{/location/create_location})
     assert_equal([
       "Fungi",
       "Agaricus",
@@ -1146,7 +1146,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     ].join("\r\n")
     post(:create_species_list, params)
     # assert_redirected_to(controller: "location", action: "create_location")
-    assert_redirected_to(%r{\/location\/create_location})
+    assert_redirected_to(%r{/location/create_location})
     assert_equal([
       "Fungi",
       "Agaricus",

@@ -2444,8 +2444,7 @@ class ObserverControllerTest < FunctionalTestCase
         encoding: 'UTF-8', commit: "Cancel")
     assert_no_flash
     # assert_redirected_to(action: :index_observation)
-    assert_response(:redirect)
-    assert_match(%r{/index_observation}, redirect_to_url)
+    assert_redirected_to(%r{/index_observation})
 
     post(:download_observations, q: query.id.alphabetize, format: :raw,
         encoding: 'UTF-8', commit: "Download")
