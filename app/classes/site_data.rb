@@ -165,7 +165,6 @@ class SiteData
         weight = get_weight_change(obj, field)
       end
       unless weight == 0
-debugger
         User.connection.update %(
           UPDATE users SET contribution =
             IF(contribution IS NULL, #{weight}, contribution + #{weight})
