@@ -77,16 +77,7 @@ class ObserverControllerTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
-  def assert_list_rss_logs(has_partial=false)
-    assert_action("list_rss_logs", has_partial ? "_rss_log" : false)
-  end
-
-  def assert_list_observations(has_partial=false)
-    assert_action("list_observations", has_partial ? "_rss_log" : false)
-  end
-
   def test_page_loads
-
     get_with_dump(:index)
     assert_template(:list_rss_logs, partial: :_rss_log)
     assert_link_in_html(:app_intro.t, action: :intro)
@@ -370,23 +361,23 @@ class ObserverControllerTest < FunctionalTestCase
     params = {search: {pattern: "12", type: :species_list}}
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :species_list, action: :species_list_search,
-                    pattern: "12")
+                         pattern: "12")
 
     params = {search: {pattern: "34", type: :user}}
     get_with_dump(:pattern_search, params)
     assert_redirected_to(controller: :observer, action: :user_search,
-                    pattern: "34")
+                         pattern: "34")
   end
 
   def test_observation_search
     get_with_dump(:observation_search, pattern: "120")
-    assert_list_observations
+    assert_template(:list_observations)
     assert_equal(:query_title_pattern_search.t(types: "Observations",
                                                pattern: "120"),
                  @controller.instance_variable_get('@title'))
 
     get_with_dump(:observation_search, pattern: "120", page: 2)
-    assert_list_observations
+    assert_template(:list_observations)
     assert_equal(:query_title_pattern_search.t(types: "Observations",
                                                pattern: "120"),
                  @controller.instance_variable_get('@title'))
@@ -400,7 +391,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_equal([], names.map(&:search_name))
 
     get(:observation_search, pattern: 'coprinis comatis')
-    assert_list_observations
+    assert_template(:list_observations)
     assert_equal('coprinis comatis', assigns(:suggest_alternate_spellings))
     assert_select('div.Warnings', 1)
     assert_select('a[href*=observation_search?pattern=Coprinus+comatus]',
@@ -414,14 +405,14 @@ class ObserverControllerTest < FunctionalTestCase
   def test_where_search_next_page
     params = { place_name: "Burbank", page: 2 }
     get_with_dump(:observations_at_where, params)
-    assert_list_observations
+    assert_template(:list_observations)
   end
 
   # Created in response to a bug seen in the wild
   def test_where_search_pattern
     params = { place_name: "Burbank" }
     get_with_dump(:observations_at_where, params)
-    assert_list_observations(true)
+    assert_template(:list_observations, partial: :_rss_log)
   end
 
   def test_send_webmaster_question
