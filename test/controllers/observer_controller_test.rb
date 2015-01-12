@@ -1455,11 +1455,9 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = '"One"'
     params[:approved_name] = '"One"'
     post(:create_observation, params)
-    # assert_template(action: expected_page)
-    # assert_template(%r{observer/#{ expected_page }})
-    # assert_match(%r{#{ expected_page }}, @response.body)
     # assert_template(controller: :observer, action: expected_page)
-    assert_redirected_to(%r{#{ expected_page }})
+    assert_template(expected_page)
+    assert_template(%r{/observer/#{ expected_page }})
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
 
@@ -1691,7 +1689,8 @@ class ObserverControllerTest < FunctionalTestCase
   def test_edit_observation_with_non_image
     obs = observations(:minimal_unknown)
     file = Rack::Test::UploadedFile.new(
-      "#{Rails.root}/test/fixtures/projects.yml", "text/plain")
+      "#{Rails.root}/test/fixtures/projects.yml", "text/plain"
+    )
     params = {
       id: obs.id,
       observation: {
@@ -1706,13 +1705,17 @@ class ObserverControllerTest < FunctionalTestCase
       image: {
         "0" => {
           image: file,
-          when: Time.now,
-        },
-      },
+          when: Time.now
+        }
+      }
     }
     login("mary")
+    byebug
     post(:edit_observation, params)
-    assert_response(:success) # means failure!
+
+    assert_response(:success,
+      "Expected 200 (OK), Got #{@response.status} (#{@response.message})")
+    # 200 :success means means failure!
     assert_flash_error
   end
 
@@ -2073,7 +2076,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:edit_observation, id: @obs2.id)
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
     post(:edit_observation, id: @obs2.id,
-      observation: { place_name: 'blah blah blah' },  # (ensures it will fail)
+      observation: { place_name: "blah blah blah" },  # (ensures it will fail)
       project: { "id_#{@proj1.id}" => "1" }
     )
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -2160,7 +2163,8 @@ class ObserverControllerTest < FunctionalTestCase
     get(:create_observation)
     assert_list_checks(@spl1.id => :no_field, @spl2.id => :unchecked)
 
-    # Should have different default if recently posted observation attached to project.
+    # Should have different default
+    # if recently posted observation attached to project.
     obs = Observation.create!
     @spl1.add_observation(obs) # (shouldn't affect anything for create)
     @spl2.add_observation(obs)
