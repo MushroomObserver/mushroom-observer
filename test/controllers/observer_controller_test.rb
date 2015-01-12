@@ -88,86 +88,86 @@ class ObserverControllerTest < FunctionalTestCase
   def test_page_loads
 
     get_with_dump(:index)
-    assert_list_rss_logs(true)
+    assert_template(:list_rss_logs, partial: :_rss_log)
     assert_link_in_html(:app_intro.t, action: :intro)
     assert_link_in_html(:app_create_account.t, controller: :account,
                         action: :signup)
 
     get_with_dump(:ask_webmaster_question)
-    assert_template(action: :ask_webmaster_question)
+    assert_template(:ask_webmaster_question)
     assert_form_action(action: :ask_webmaster_question)
 
     get_with_dump(:color_themes)
-    assert_template(action: :color_themes)
+    assert_template(:color_themes)
     for theme in MO.themes
       get_with_dump(theme)
-      assert_template(action: theme)
+      assert_template(theme)
     end
 
     get_with_dump(:how_to_help)
-    assert_template(action: :how_to_help)
+    assert_template(:how_to_help)
 
     get_with_dump(:how_to_use)
-    assert_template(action: :how_to_use)
+    assert_template(:how_to_use)
 
     get_with_dump(:intro)
-    assert_template(action: :intro)
+    assert_template(:intro)
 
     get_with_dump(:list_observations)
-    assert_list_observations(true)
+    assert_template(:list_observations, partial: :_rss_log)
 
     # Test again, this time specifying page number via an observation id.
     get(:list_observations, id: 4)
-    assert_list_observations(true)
+    assert_template(:list_observations, partial: :_rss_log)
 
     get(:observations_for_project, id: projects(:bolete_project).id)
-    assert_list_observations(true)
+    assert_template(:list_observations, partial: :_rss_log)
 
     get_with_dump(:list_rss_logs)
-    assert_list_rss_logs(true)
+    assert_template(:list_rss_logs, partial: :_rss_log)
 
     get_with_dump(:news)
-    assert_template(action: :news)
+    assert_template(:news)
 
     get_with_dump(:observations_by_name)
-    assert_list_observations(true)
+    assert_template(:list_observations, partial: :_rss_log)
 
     get_with_dump(:rss)
-    assert_template(action: :rss)
+    assert_template(:rss)
 
     get_with_dump(:show_rss_log, id: 1)
-    assert_template(action: :show_rss_log)
+    assert_template(:show_rss_log)
 
     get_with_dump(:users_by_contribution)
-    assert_template(action: :users_by_contribution)
+    assert_template(:users_by_contribution)
 
     get_with_dump(:show_user, id: 1)
-    assert_template(action: :show_user)
+    assert_template(:show_user)
 
     get_with_dump(:show_site_stats)
-    assert_template(action: :show_site_stats)
+    assert_template(:show_site_stats)
 
     get_with_dump(:observations_by_user, id: 1)
-    assert_list_observations(true)
+    assert_template(:list_observations, partial: :_rss_log)
 
     # get_with_dump(:login)
     # assert_redirected_to(controller: :account, action: :login)
 
     get_with_dump(:textile)
-    assert_template(action: :textile_sandbox)
+    assert_template(:textile_sandbox)
 
     get_with_dump(:textile_sandbox)
-    assert_template(action: :textile_sandbox)
+    assert_template(:textile_sandbox)
   end
 
   def test_altering_types_shown_by_rss_log_index
     # Show none.
     post(:index_rss_log)
-    assert_list_rss_logs
+    assert_template(:list_rss_logs)
 
     # Show one.
     post(:index_rss_log, show_observations: "1")
-    assert_list_rss_logs
+    assert_template(:list_rss_logs)
 
     # Show all.
     params = {}
@@ -175,7 +175,7 @@ class ObserverControllerTest < FunctionalTestCase
       params["show_#{type}"] = "1"
     end
     post(:index_rss_log, params)
-    assert_list_rss_logs(true)
+    assert_template(:list_rss_logs, partial: 1)
   end
 
   def test_prev_and_next_observation
