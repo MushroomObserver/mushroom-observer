@@ -281,7 +281,7 @@ class ObserverControllerTest < FunctionalTestCase
       location: "Eastern Oklahoma"
     )
     get(:advanced_search, @controller.query_params(query))
-    assert_list_observations
+    assert_template(:list_observations)
   end
 
   def test_advanced_search_2
