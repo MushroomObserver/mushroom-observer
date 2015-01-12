@@ -217,29 +217,29 @@ class ObserverControllerTest < FunctionalTestCase
     qp = @controller.query_params(query)
 
     get(:next_observation, qp.merge(id: 1))
-    assert_template(action: :show_observation, id: 1, params: qp)
+    assert_redirected_to(action: :show_observation, id: 1, params: qp)
     assert_flash(/can.*t find.*results.*index/i)
     get(:next_observation, qp.merge(id: o1.id))
-    assert_template(action: :show_observation, id: o2.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o2.id, params: qp)
     get(:next_observation, qp.merge(id: o2.id))
-    assert_template(action: :show_observation, id: o3.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o3.id, params: qp)
     get(:next_observation, qp.merge(id: o3.id))
-    assert_template(action: :show_observation, id: o4.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o4.id, params: qp)
     get(:next_observation, qp.merge(id: o4.id))
-    assert_template(action: :show_observation, id: o4.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o4.id, params: qp)
     assert_flash(/no more/i)
 
     get(:prev_observation, qp.merge(id: o4.id))
-    assert_template(action: :show_observation, id: o3.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o3.id, params: qp)
     get(:prev_observation, qp.merge(id: o3.id))
-    assert_template(action: :show_observation, id: o2.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o2.id, params: qp)
     get(:prev_observation, qp.merge(id: o2.id))
-    assert_template(action: :show_observation, id: o1.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o1.id, params: qp)
     get(:prev_observation, qp.merge(id: o1.id))
-    assert_template(action: :show_observation, id: o1.id, params: qp)
+    assert_redirected_to(action: :show_observation, id: o1.id, params: qp)
     assert_flash(/no more/i)
     get(:prev_observation, qp.merge(id: 1))
-    assert_template(action: :show_observation, id: 1, params: qp)
+    assert_redirected_to(action: :show_observation, id: 1, params: qp)
     assert_flash(/can.*t find.*results.*index/i)
   end
 
@@ -606,7 +606,7 @@ class ObserverControllerTest < FunctionalTestCase
 
       make_admin("rolf")
       get_with_dump(page, params)
-      assert_template(action: response) # 1
+      assert_template(response) # 1
     end
   end
 
