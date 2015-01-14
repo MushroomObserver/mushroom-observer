@@ -1456,7 +1456,6 @@ class ObserverControllerTest < FunctionalTestCase
     params[:approved_name] = '"One"'
     post(:create_observation, params)
     # assert_template(controller: :observer, action: expected_page)
-    assert_template(expected_page)
     assert_template(%r{/observer/#{ expected_page }})
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
@@ -1710,7 +1709,6 @@ class ObserverControllerTest < FunctionalTestCase
       }
     }
     login("mary")
-    byebug
     post(:edit_observation, params)
 
     assert_response(:success,

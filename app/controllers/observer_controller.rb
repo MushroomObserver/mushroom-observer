@@ -1544,19 +1544,19 @@ class ObserverController < ApplicationController
     id    = params[:id].to_s
     type  = params[:type].to_s
     value = params[:value].to_s
-    model = type.camelize.safe_constantize
+    model_class = type.camelize.safe_constantize
     if !is_reviewer?
       flash_error(:runtime_admin_only.t)
       redirect_back_or_default("/")
-    elsif !model ||
-          !model.respond_to?(:column_names) ||
+    elsif !model_class ||
+          !model_class.respond_to?(:column_names) ||
           !model_class.column_names.include?("ok_for_export")
       flash_error(:runtime_invalid.t(type: '"type"', value: type))
       redirect_back_or_default("/")
     elsif !value.match(/^[01]$/)
       flash_error(:runtime_invalid.t(type: '"value"', value: value))
       redirect_back_or_default("/")
-    elsif (obj = find_or_goto_index(model, id))
+    elsif (obj = find_or_goto_index(model_class, id))
       obj.ok_for_export = (value == "1")
       obj.save_without_our_callbacks
       if params[:return]
@@ -2458,9 +2458,8 @@ class ObserverController < ApplicationController
   private
 
   def whitelisted_observation_image_args
-  #  [:when, "when(1i)", "when(2i)", "when(3i)", :copyright_holder, :notes, :original_name]
     [:when, :copyright_holder, :notes, :original_name, :license_id]
-end
+  end
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
