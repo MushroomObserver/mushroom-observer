@@ -3,7 +3,7 @@
 #  = Functional Test Case
 #
 #  The test case class that all functional tests currently derive from.
-#  Includes: 
+#  Includes:
 #
 #  1. Some general-purpose helpers and assertions from GeneralExtensions.
 #  2. Some controller-related helpers and assertions from ControllerExtensions.
@@ -16,6 +16,11 @@ class FunctionalTestCase < ActionController::TestCase
   include FlashExtensions
   include ControllerExtensions
   include CheckForUnsafeHtml
+
+
+# temporarily silence deprecation warnings
+# TODO turn them back on
+  ActiveSupport::Deprecation.silenced = true
 
   def get(*args, &block)
     super(*args, &block)
