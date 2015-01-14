@@ -114,7 +114,7 @@ class PublicationsController < ApplicationController
   private
 
   def whitelisted_publication_params
-    params.require(:publication).permit(:full, :link, :how_helped,
-                                        :mo_mentioned, :peer_reviewed)
+    params[:publication].permit(:full, :link, :how_helped, :mo_mentioned,
+                                :peer_reviewed)
   end
 end

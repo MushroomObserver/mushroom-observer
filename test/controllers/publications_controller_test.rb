@@ -15,11 +15,11 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_not_nil assigns(:publications)
     assert_link_in_html("Edit", action: :edit, id: 1)
     # assert_link_in_html("Destroy", action: :destroy, id: 1)
-    # Above assertion didn't work in Rails 4, even though
-    # manual inspection of the response shows the link exists.
+    # Above assertion didn't work in Rails 4,
+    # although manual inspection of the response shows the link exists.
     # Instead, use Rails assert_select assertion.
     # Assert there's anchor with href matching the regex,
-    #   that it's text matches the quoted text,
+    #   that its text matches the quoted text,
     #   and that there's only one such anchor.
     assert_select("a[href=?]", /\/publications\/1\/destroy/,
                   { text: "Destroy", count: 1 } )
