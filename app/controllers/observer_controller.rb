@@ -1329,7 +1329,7 @@ class ObserverController < ApplicationController
       # Update observation attributes
       @observation.attributes = whitelisted_observation_params
 
-      # Validate place name.
+      # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []
       if @place_name != params[:approved_where] && @observation.location.nil?
@@ -2068,7 +2068,11 @@ class ObserverController < ApplicationController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
-    observation = Observation.new(args.permit(whitelisted_observation_args))
+    if args
+      observation = Observation.new(args.permit(whitelisted_observation_args))
+    else
+      observation = Observation.new()
+    end
     observation.created_at = now
     observation.updated_at = now
     observation.user = @user
@@ -2467,6 +2471,7 @@ class ObserverController < ApplicationController
   end
 
   def whitelisted_observation_params
-    params.require(:observation).permit(whitelisted_observation_args)
+    return nil unless params[:observation]
+    params[:observation].permit(whitelisted_observation_args)
   end
 end
