@@ -1,5 +1,4 @@
 <!--[form:observation]-->
-
 <label for="observation_when_1i"><%= :WHEN.t %>:</label>
 <%= date_select('observation', 'when', :start_year => 1980,
                 :end_year => Time.now.year, :order => [:day,:month,:year]) %><br/><br/>
@@ -120,41 +119,7 @@ end %>
   <% end %>
 
     <b><%= :form_observations_upload_images.t %>:</b><br/>
-    <% ############################### START Multiple image uploads ############################## %>
-    <% if can_do_multifile_upload? %>
-        <!--Container to show messages relating to the selected images  -->
-        <div class="image_messages hidden" id="image_messages">
-          <div id="inconsistent_date_message_container hidden">
-            <strong><%= :form_observations_inconsistent_date_warn.t %></strong>
-            <ul>
-                  <li><button id="inconsistent_date_use_obs_date_btn" type="button"><%= :form_observations_inconsistent_date_update_img_dates.t %></button></li>
-                  <li><button id="inconsistent_date_update_obs_date_btn" type="button"><%= :form_observations_inconsistent_date_update_obs_date.t %></button></li>
-                  <li><strong><%=:form_observations_inconsistent_date_correct_yourself.t%></strong></li>
-            </ul>
-          </div>
-        </div>
-        <!--Container for appending images-->
-        <div class="images_container margin-top">
-          <input type="file" multiple id="multiple_images_button"/>
-          <div id="added_images_container">
-            <!--Target for insertion-->
-          </div>
-        </div>
-        <% javascript_include('exif')
-           javascript_include('multi_image_upload') %>
-        <%= javascript_tag %(
-              jQuery(document).ready(function () {
-                 var uploader = MultiImageUploader({
-                  image_upload_error_text: "#{:form_observations_image_upload_error}",
-                  uploading_text: "#{:UPLOADING}",
-                  image_too_big_text:  "#{:form_observations_image_too_big}",
-                  creating_observation_text: "#{:CREATING}"
-                 })
-                 uploader.init();
-              });
-            ) %>
-    <% end %>
-    <% ############################### END Multiple image uploads ############################## %>
+
 
     <% if !can_do_multifile_upload? %>
           <% if can_do_ajax? %>
@@ -241,6 +206,63 @@ end %>
   <%= hidden_field_tag("good_images", @good_images.map {|o| o.id}.join(" ")) %>
 
   </td></tr></table>
+    <% ############################### START Multiple image uploads ############################## %>
+    <% if can_do_multifile_upload? %>
+        <input type="file" multiple id="multiple_images_button"/>
+        <!--Container to show messages relating to the selected images  -->
+        <%=stylesheet_link_tag("grids")%>
+
+              <div class="row margin_top image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
+                  <div class="col-sm-4">
+                    <strong>We've detected the camera date on your photos doesn't match the observation date you have entered.</strong>
+                  </div>
+                  <div class="col-sm-7">
+                      <div class="inconsistent_date_options">
+                        <div class="col-sm-6">
+                            <div><strong>Set observation date to:</strong></div>
+                            <div id="image_date_radio_container">  <!--id referenced in jquery-->
+
+                            </div>
+                            <div><strong>Set image dates to:</strong></div>
+                            <div id="observation_date_radio_container"> <!--id referenced in jquery-->
+
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div>&nbsp</div>
+                            <div><label><input type="radio" data-target="none" name="fix_date"/>Do Nothing</label></div>
+                        </div>
+                        <div class="col-sm-12">
+                          <center>
+                          <button id="fix_date_submit" type="button">Okay</button>
+                          </center>
+                        </div>
+                      </div>
+                  </div>
+              </div>
+
+        <!--Container for appending images-->
+        <div class="images_container margin-top">
+          <div id="added_images_container">
+            <!--Target for insertion-->
+          </div>
+        </div>
+        <% javascript_include('exif')
+           javascript_include('multi_image_upload') %>
+        <%= javascript_tag %(
+              jQuery(document).ready(function () {
+                 var uploader = MultiImageUploader({
+                  image_upload_error_text: "#{:form_observations_image_upload_error}",
+                  uploading_text: "#{:Uploading} #{:image}",
+                  image_too_big_text:  "#{:form_observations_image_too_big}",
+                  creating_observation_text: "#{:CREATING}",
+                  months: "#{:all_months.t}"
+                 })
+                 uploader.init();
+              });
+            ) %>
+    <% end %>
+    <% ############################### END Multiple image uploads ############################## %>
 <% end %>
 
 <% ########################################################################## %>
