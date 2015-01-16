@@ -76,7 +76,7 @@ module GeneralExtensions
   # Assert that an assertion fails.
   def assert_fail(msg=nil, &block)
     msg ||= 'Expected assertion to fail.'
-    assert_raises(Test::Unit::AssertionFailedError, msg, &block)
+    assert_raises(MiniTest::Assertion, msg, &block)
   end
 
   # Assert that something is true.

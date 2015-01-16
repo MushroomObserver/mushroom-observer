@@ -59,7 +59,7 @@ class AmateurTest < IntegrationTestCase
     # Log out and try again.
     click(label: 'Logout', in: :left_panel)
     assert_template('account/logout_user')
-    assert_raises(Test::Unit::AssertionFailedError) do
+    assert_raises(MiniTest::Assertion) do
       click(label: 'Preferences', in: :left_panel)
     end
     get('/account/prefs')

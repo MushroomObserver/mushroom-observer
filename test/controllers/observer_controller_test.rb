@@ -2,7 +2,6 @@
 require "test_helper"
 
 class ObserverControllerTest < FunctionalTestCase
-
   def test_show_observation_noteless_image
     obs = observations(:peltigera_rolf_observation)
     img = images(:rolf_profile_image)
@@ -37,7 +36,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:username] = user.login
 
     post_requires_login(:create_observation, params)
-    begin
+     begin
       if o_num == 0
         assert_response(:success)
       elsif Location.find_by_name(params[:observation][:place_name]) or
@@ -47,12 +46,12 @@ class ObserverControllerTest < FunctionalTestCase
       else
         assert_redirected_to(action: :create_location)
       end
-    rescue Test::Unit::AssertionFailedError => e
-      flash = get_last_flash.to_s
-      flash.sub!(/^(\d)/, "")
-      message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
-      flunk(message)
-    end
+     rescue MiniTest::Assertion => e
+       flash = get_last_flash.to_s
+       flash.sub!(/^(\d)/, "")
+       message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
+       flunk(message)
+     end
 
     assert_equal(o_count + o_num, Observation.count)
     assert_equal(g_count + g_num, Naming.count)
