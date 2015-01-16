@@ -10,11 +10,11 @@
 #
 ################################################################################
 
+# Coveralls.wear! must occur before any of your application code is required
 require 'coveralls'
 Coveralls.wear!('rails')
 
 ENV["RAILS_ENV"] ||= "test"
-
 require File.expand_path("../../config/environment", __FILE__)
 require "rails/test_help"
 
@@ -40,6 +40,11 @@ end
 I18n.enforce_available_locales = true
 
 class ActiveSupport::TestCase
+  ActiveRecord::Migration.check_pending! # throw error if migration pending
+
+  ############################################################################
+  #  Transactional fixtures
+  ############################################################################
   # Transactional fixtures accelerate your tests by wrapping each test method
   # in a transaction that's rolled back on completion.  This ensures that the
   # test database remains unchanged so your fixtures don't have to be reloaded
@@ -64,6 +69,7 @@ class ActiveSupport::TestCase
   # instantiated fixtures translates to a database query per test method),
   # then set this back to true.
   self.use_instantiated_fixtures = false
+  ##############################################################################
 
   # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
   # alphabetical order.
@@ -72,11 +78,13 @@ class ActiveSupport::TestCase
   # in integration tests -- they do not yet inherit this setting
   fixtures :all
 
+  # Add more helper methods to be used by all tests here...
+
   # Standard setup to run before every test.  Sets the locale, timezone,
   # and makes sure User doesn't think a user is logged in.
   def setup
     I18n.locale = :'en' if I18n.locale != :'en'
-    Time.zone = 'America/New_York'
+    Time.zone = "America/New_York"
     User.current = nil
   end
 
