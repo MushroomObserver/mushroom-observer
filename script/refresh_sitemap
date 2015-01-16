@@ -1,0 +1,219 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/refresh_sitemap
+#
+#  DESCRIPTION::
+#
+#  Build a set of sitemap files for search engines to use.
+#
+#    RAILS_ROOT/public/sitemap/index.xml
+#    RAILS_ROOT/public/sitemap/static.xml
+#    RAILS_ROOT/public/sitemap/<table>-<N>.xml
+#
+################################################################################
+
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
+
+DOMAIN = "http://mushroomobserver.org"
+SITEMAP_FILE = "#{::Rails.root}/public/sitemap/TABLE.xml"
+SITEMAP_URL  = "#{DOMAIN}/sitemap/TABLE.xml"
+
+OBJECT_TYPES = [
+  [ "observations",          "Observation",         "observer/show_observation/ID"          ],
+  [ "names",                 "Name",                "name/show_name/ID"                     ],
+  [ "locations",             "Location",            "location/show_location/ID"             ],
+  [ "species_lists",         "SpeciesList",         "species_list/show_species_list/ID"     ],
+  [ "projects",              "Project",             "project/show_project/ID"               ],
+  [ "glossary_terms",        "GlossaryTerm",        "glossary/show_term/ID"                 ],
+  [ "herbaria",              "Herbarium",           "herbarium/show_herbarium/ID"           ],
+  [ "name_descriptions",     "NameDescription",     "name/show_name_description/ID"         ],
+  [ "location_descriptions", "LocationDescription", "location/show_location_description/ID" ]
+]
+
+STATIC_PAGES = [
+  [ "",                     "hourly" ], # observer/list_rss_logs
+  [ "observer/intro",       "weekly" ],
+  [ "observer/how_to_use",  "weekly" ],
+  [ "observer/how_to_help", "weekly" ]
+]
+
+LOCALES = Language.connection.select_values %(
+  SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
+)
+
+################################################################################
+
+def update_sitemap
+  FileUtils.mkpath(File.dirname(SITEMAP_FILE))
+  last_update = get_last_update
+  comments = get_new_comments(last_update)
+  sitemaps = []
+  for object_type in OBJECT_TYPES
+    sitemaps += map_one_object_type(object_type, comments, last_update)
+  end
+  sitemaps += write_static_map
+  write_index(sitemaps)
+end
+
+def get_new_comments(last_update)
+  Name.connection.select_rows %(
+    SELECT target_type, target_id, updated_at
+    FROM comments WHERE updated_at >= "#{last_update}"
+  )
+end
+
+def get_new_images(last_update)
+  Name.connection.select_rows %(
+    SELECT io.observation_id, i.updated_at
+    FROM images i, images_observations io
+    WHERE i.id = io.image_id AND i.updated_at >= "#{last_update}"
+  )
+end
+
+def map_one_object_type(obj, comments, last_update)
+  table, type, url = *obj
+  times = read_old_files(table)
+  update_times_of_new_objects(times, table, last_update)
+  update_times_of_objects_with_new_images(times, last_update) if type == "Observation"
+  update_times_of_objects_with_new_comments(times, comments, type)
+  return write_new_files(times, table, url)
+end
+
+def update_times_of_new_objects(times, table, last_update)
+  for id, time in Name.connection.select_rows %(
+    SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
+  )
+    times[id.to_i] = parse_mysql_time(time)
+  end
+end
+
+def update_times_of_objects_with_new_images(times, last_update)
+  for id, time in get_new_images(last_update)
+    id = id.to_i
+    time = parse_mysql_time(time)
+    times[id] = time if !times[id] || times[id] < time
+  end
+end
+
+def update_times_of_objects_with_new_comments(times, comments, type)
+  for target_type, target_id, target_time in comments
+    target_id = target_id.to_i
+    target_time = parse_mysql_time(target_time)
+    times[target_id] = target_time if target_type == type and
+                                      (!times[target_id] or times[target_id] < target_time)
+  end
+end
+
+def read_old_files(table)
+  result = {}
+  pat = Regexp.new("<loc>.*/(\d+)</loc><lastmod>(.*)</lastmod>")
+  wildcard = SITEMAP_FILE.sub("TABLE", "#{table}-*")
+  for file in Dir.glob(wildcard)
+    File.open(file).readlines.each do |line|
+      if match = pat.match(line)
+        result[match[0]] = match[1]
+      end
+    end
+  end
+  return result
+end
+
+def write_new_files(times, table, url)
+  lines = []
+  for id in times.keys.sort
+    url2 = url.sub("ID", id.to_s)
+    time = times[id]
+    lines << "<url><loc>#{DOMAIN}/#{url2}</loc><lastmod>#{time}</lastmod></url>"
+  end
+  sitemaps = []
+  until lines.empty?
+    name = "#{table}-#{sitemaps.length+1}"
+    file = SITEMAP_FILE.sub("TABLE", name)
+    File.open(file, "w") do |fh|
+      fh.write %(
+        <?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      )
+      lines[0..9999].each do |line|
+        fh.puts line
+      end
+      fh.write %(
+        </urlset>
+      )
+      lines[0..9999] = []
+    end
+    sitemaps << name
+  end
+  return sitemaps
+end
+
+def write_static_map
+  name = "static"
+  file = SITEMAP_FILE.sub("TABLE", name)
+  File.open(file, "w") do |fh|
+    fh.write %(
+      <?xml version="1.0" encoding="UTF-8"?>
+      <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    )
+    for path, freq in STATIC_PAGES
+      for locale in LOCALES
+        lang = locale == "en" ? "" : "?user_locale=#{locale}"
+        url  = "<loc>#{DOMAIN}/#{path}#{lang}</loc>"
+        freq2 = "<changefreq>#{freq}</changefreq>"
+        fh.puts "<url>#{url}#{freq2}</url>"
+      end
+    end
+    fh.write %(
+      </urlset>
+    )
+  end
+  return [name]
+end
+
+def write_index(sitemaps)
+  now = get_current_time
+  file = SITEMAP_FILE.sub("TABLE", "index")
+  File.open(file, "w") do |fh|
+    fh.write %(
+      <?xml version="1.0" encoding="UTF-8"?>
+      <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    )
+    for sitemap in sitemaps
+      url  = "<loc>#{SITEMAP_URL.sub("TABLE", sitemap)}</loc>"
+      time = "<lastmod>#{now}</lastmod>"
+      fh.puts "<sitemap>#{url}#{time}</sitemap>"
+    end
+    fh.write %(
+      </sitemapindex>
+    )
+  end
+end
+
+# Times come out of the mysql adapter as Time objects right now.
+# Sitemaps require "yyyy:mm:ddThh:mm:ss+00:00" format.
+# These functions ensure that all times are Strings in that format.
+def parse_mysql_time(time)
+  format_time(time)
+end
+
+def format_time(time)
+  time.utc.strftime "%Y-%m-%dT%H:%M:%S+00:00"
+end
+
+def get_last_update
+  file = SITEMAP_FILE.sub("TABLE", "index")
+  format_time(File.mtime(file)) rescue format_time(100.years.ago)
+end
+
+def get_current_time
+  format_time(Time.now)
+end
+
+################################################################################
+
+update_sitemap
+exit 0
+
