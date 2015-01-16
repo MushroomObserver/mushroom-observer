@@ -586,54 +586,10 @@ div.floatthumb {
   display: none;
 }
 
-/*Multiimage upload CSS */
-.miu_left{
-    display: inline-block; width: 35%
-}
-.miu_right{
-    display: inline-block; width: 64%
-}
+/*Multiimage upload CSS*/
+
 .image-responsive{
     width: 100%; height: auto;
 }
-.margin_top {
-    margin-top: 5px;
-}
-.width_100 {
-    width: 100%;
-}
-.width_90 {
-    width: 90%;
-}
-.added_image_notes_container{
-    padding: 4px;
-    width: 95%;
-    display: inline-block;
-}
 
-.added_image_image_container {
-    padding: 4px;
-    width: 35%;
-    display: inline-block;
-}
-.added_image_wrapper {
-    border: 1px solid;
-    padding: 4px;
-}
-.added_image_name_container {
-    border-bottom: 1px solid;
-    padding: 5px;
-}
-.added_image_details_container {
-    width: 63%; display: inline-block; vertical-align: top;
-}
 
-.added_image_additional_details_container {
-    display: block; width: 100%;
-    padding: 4px;
-}
-.image_messages {
-    border: 1px solid;
-    padding: 4px;
-}
-/*end multiimage upload css*/

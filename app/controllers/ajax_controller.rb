@@ -240,11 +240,9 @@ class AjaxController < ApplicationController
 
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation
-  # a param of :img_number must be supplied (needed for javascript helper)
   def get_multi_image_template
-    current_user = get_session_user! ##TODO: Exception handling
-    @img_number = params[:img_number].to_s  #Injected into HTML for building the form
-    @licenses = License.current_names_and_ids(current_user.license) #Needed to render licenses drop down ##TODO, we should add this as an extension to image class
+    current_user = get_session_user!
+    @licenses = License.current_names_and_ids(current_user.license) #Needed to render licenses drop down
     @image = Image.new(
                       :user => current_user,
                       :when => Time.now
@@ -260,6 +258,7 @@ class AjaxController < ApplicationController
   def create_image_object
     user = get_session_user!
     @image = params[:image]
+     p @image
      img_when = Date.new(@image[:when][('1i')].to_i, @image[:when][('2i')].to_i, @image[:when][('3i')].to_i);
      ##TODO: handle invalid date
      image = Image.new(

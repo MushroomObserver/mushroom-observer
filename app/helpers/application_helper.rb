@@ -43,7 +43,7 @@ end
   # FileAPI
   #CanIuse.com is the source of this information.
 def can_do_multifile_upload?
-   (browser.modern? && !browser.ie9?) || TESTING  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
+   (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
 end
 
   ##############################################################################

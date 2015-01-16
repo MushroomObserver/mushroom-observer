@@ -208,34 +208,29 @@ end %>
   </td></tr></table>
     <% ############################### START Multiple image uploads ############################## %>
     <% if can_do_multifile_upload? %>
-        <input type="file" multiple id="multiple_images_button"/>
+        <input type="file" multiple id="multiple_images_button" accept="image/*"/>
         <!--Container to show messages relating to the selected images  -->
         <%=stylesheet_link_tag("grids")%>
 
               <div class="row margin_top image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
                   <div class="col-sm-4">
-                    <strong>We've detected the camera date on your photos doesn't match the observation date you have entered.</strong>
+                    <strong><%= :forms_observations_date_warning.t %></strong>
                   </div>
                   <div class="col-sm-7">
                       <div class="inconsistent_date_options">
-                        <div class="col-sm-6">
-                            <div><strong>Set observation date to:</strong></div>
+                        <div class="col-sm-12">
+                            <div><strong><%= :form_observations_set_observation_date_to.t %>:</strong></div>
                             <div id="image_date_radio_container">  <!--id referenced in jquery-->
 
                             </div>
-                            <div><strong>Set image dates to:</strong></div>
+                            <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
                             <div id="observation_date_radio_container"> <!--id referenced in jquery-->
 
                             </div>
                         </div>
-                        <div class="col-sm-6">
-                            <div>&nbsp</div>
-                            <div><label><input type="radio" data-target="none" name="fix_date"/>Do Nothing</label></div>
-                        </div>
-                        <div class="col-sm-12">
-                          <center>
-                          <button id="fix_date_submit" type="button">Okay</button>
-                          </center>
+                        <div class="col-sm-12" style="margin-top: 15px;">
+                          <button id="fix_dates" type="button"><%= :form_observations_use_date.t %></button>
+                          <button id="ignore_dates" type="button"><%= :IGNORE.t %></button>
                         </div>
                       </div>
                   </div>

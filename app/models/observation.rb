@@ -273,7 +273,7 @@ class Observation < AbstractModel
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
-    name.observation_name + " (#{id || '?'})"
+    name.observation_name + "(#{id || '?'})" rescue ""
   end
   
   def default_specimen_label

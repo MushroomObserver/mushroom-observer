@@ -19,22 +19,25 @@ function MultiImageUploader(localized_text) {
 
     //Internal Variable Definitions;
     var  fileStore = new FileStore(),
+        dateUpdater = new DateUpdater(),
         _getTemplateUri = "/ajax/get_multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
-        _$addedImagesContainer = jQuery("#added_images_container"),//container to insert images
+        blockFormSubmission = true,
+        $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
         $form = jQuery(document.forms.namedItem("create_observation_form")),
         $submitButtons= $form.find('input[type="submit"]'),
         $goodImages = jQuery('#good_images'),
-        $removeLinks = jQuery("[data-file-uuid]"),
+        $removeLinks = jQuery(".remove_image_link"),
         $selectFilesButton = jQuery('#multiple_images_button'),
         $obsDay = jQuery('#observation_when_3i'),
         $obsMonth = jQuery('#observation_when_2i'),
         $obsYear = jQuery('#observation_when_1i'),
         $imgRadioContainer = jQuery('#image_date_radio_container'),
         $obsRadioContainer = jQuery('#observation_date_radio_container'),
-        $fixDateSubmit = jQuery('#fix_date_submit'),
-        $imgMessages = jQuery(".image_messages"),
-        dateUpdater = new DateUpdater();
+        $fixDateSubmit = jQuery('#fix_dates'),
+        $ignoreDateSubmit = jQuery('#ignore_dates'),
+        $imgMessages = jQuery(".image_messages");
+
 
     /*********************/
     /* Class Definitions */
@@ -61,9 +64,7 @@ function MultiImageUploader(localized_text) {
       image and observation dates and their updating.
       Through the message box*/
 
-    function DateUpdater() {
-        this.observationDateAdded = false;
-        }
+    function DateUpdater() {}
 
 
     DateUpdater.prototype.areDatesInconsistent = function() {  //will check differences between the image dates and observation dates
@@ -93,22 +94,22 @@ function MultiImageUploader(localized_text) {
             _this.makeImageDateRadio(simpleDate);
         });
 
-        if (_this.areDatesInconsistent())
+        if (_this.areDatesInconsistent()) {
             $imgMessages.show('slow');
+        }
 
-        //TODO: move
-        $fixDateSubmit.unbind('click.fixDateBind').bind('click.fixDateBind', function () {
-            var _selectedItemData = jQuery('input[name=fix_date]:checked').data();
-            if (_selectedItemData && _selectedItemData.date) {
-                _this.fixDates(_selectedItemData.date);
-            }
-        });
+        if (!this.areDatesInconsistent()) {
+            $imgMessages.hide('slow')
+        }
+
     };
 
-    DateUpdater.prototype.fixDates = function (simpleDate) {
+    DateUpdater.prototype.fixDates = function (simpleDate, target) {
         var _this = this;
-        fileStore.updateImageDates(simpleDate);
-        _this.observationDate(simpleDate);
+        if (target == "image")
+            fileStore.updateImageDates(simpleDate);
+        if (target == "observation")
+            _this.observationDate(simpleDate);
         $imgMessages.hide('slow');
     }
 
@@ -132,18 +133,15 @@ function MultiImageUploader(localized_text) {
         html = html.replace('{{dateStr}}',  simpleDate.asDateString());
 
         var $obsRadio = jQuery(html);
-        $obsYear.change(function (){_this.updateObservationDateRadio($obsRadio)});
-        $obsMonth.change(function (){_this.updateObservationDateRadio($obsRadio)});
-        $obsDay.change(function (){_this.updateObservationDateRadio($obsRadio)});
         $obsRadioContainer.append($obsRadio);
     };
 
 
-    DateUpdater.prototype.updateObservationDateRadio = function ($obsRadio) {
+    DateUpdater.prototype.updateObservationDateRadio = function () {
         var _this = this;
         var _currentObsDate = _this.observationDate();
-        $obsRadio.find('input').data('date', _currentObsDate);
-        $obsRadio.find('span').text(_currentObsDate.asDateString());
+        $obsRadioContainer.find('input').data('date', _currentObsDate);
+        $obsRadioContainer.find('span').text(_currentObsDate.asDateString());
         if (_this.areDatesInconsistent())
             $imgMessages.show('slow');
     };
@@ -209,15 +207,15 @@ function MultiImageUploader(localized_text) {
 
 
     FileStore.prototype.getDistinctImageDates = function () {
-        var _this = this;
-        var _testAgainst = "";
-        var _distinct = [];
+        var _this = this,
+            _testAgainst = "",
+            _distinct = [];
 
         for (var i = 0; i < _this.fileStoreItems.length; i++) {
             var _ds = _this.fileStoreItems[i].imageDate().asDateString();
             if (_testAgainst.indexOf(_ds) != -1)
                 continue;
-            _testAgainst =+ _ds;
+            _testAgainst += _ds;
             _distinct.push(_this.fileStoreItems[i].imageDate())
         }
 
@@ -231,64 +229,37 @@ function MultiImageUploader(localized_text) {
     };
 
     FileStore.prototype.uploadAll = function (){
-        /*  var _imagesRemaining = fileStore.length - 1,  //0 based index please
-         _imageUploadNumber = 1; //use this to display the text to the user of what image we are uploading.
+         var _this = this;
 
          $submitButtons.prop('disabled', 'true'); //disable submit and remove image buttons during upload process.
          $removeLinks.hide();
 
-         if (_uploadsCompleted || _imagesRemaining == -1)  //if the images were all uploaded or no images to uploads, submit the form
-         return true;
+        //callback function to move through the the images to upload
+        function getNextImage () {
+            _this.fileStoreItems[0].destroy();
+            return _this.fileStoreItems[0];
+        }
 
-         //kick off the upload starting with the last in the list (could be first if we wanted, but less code this way)
-         upload(fileStore.fileStoreItems[_imagesRemaining]);
-
-         function upload(fileStoreItemToUpload) {   //call recursively because it is async
-         $submitButtons.val(localized_text.uploading_text + " " + _imageUploadNumber + '...');
-         fileStoreItemToUpload.incrementProgressBar();
-         var xhrReq = new XMLHttpRequest();
-
-         xhrReq.onload = function () { //attach event listener
-         if (xhrReq.status == 200) {
-         var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
-         goodImageVals = $goodImages.val();
-         $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add to the good images;
-         } else {
-         alert(localized_text.image_upload_error_text);
-         }
-         fileStoreItemToUpload.dom_element.hide('slow');
-         next();  //recursive to upload
-         };
-
-         xhrReq.onprogress = function (event) {
-         if (event.lengthComputable) {
-         var percentComplete = event.loaded / event.total;
-         fileStoreItemToUpload.incrementProgressBar(percentComplete);
-         }
-         };
-
-         //Note: You need to add the event listeners before calling open() on the request.
-         xhrReq.open("POST", _uploadImageUri, true);
-         //Send the form
-         var _fd = fileStoreItemToUpload.asFormData();
-         _fd != null ? xhrReq.send(_fd) : next();
-
+        function onUploadedCallback() {
+            var nextInLine = getNextImage();
+            if (nextInLine)
+                nextInLine.upload(onUploadedCallback);
+            else {
+                blockFormSubmission = false; //now the form will be submitted without hitting the uploads.
+                $submitButtons.val(localized_text.creating_observation_text);
+                $form.submit();
+            }
          }
 
-         function next() { //calls upload recursively
-         _imagesRemaining--;  //decrement items remaining
-         _imageUploadNumber++; //increase image upload number
-         if (_imagesRemaining == -1) {  //no more images to upload
-         _uploadsCompleted = true;
-         fileStore.destroyAll();
-         $submitButtons.val(localized_text.creating_observation_text);
-         $form.submit();
-         }
-         else {  //keep uploading
-         upload(fileStore.fileStoreItems[_imagesRemaining]) //recursively call
-         }
-         }
-         return false;  //keeps form from submiting*/
+        var firstUpload = _this.fileStoreItems[0];
+        if (firstUpload) {
+            firstUpload.upload(onUploadedCallback); //uploads first image. if we have one.
+        }
+        else{
+            return true; //returns true if there were not any images, causing form to submit right away.
+        }
+
+        return false;
     }
 
 
@@ -301,8 +272,10 @@ function MultiImageUploader(localized_text) {
         this.dom_element = null;
         this.exif_data = null;
         this.processed = false;  //we use this to check the async status of files
-        this.getTemplateHtml();
+        this.getTemplateHtml(); //kicks off the process of creating the image and such.
     }
+
+
 
     FileStoreItem.prototype.getTemplateHtml = function () {  //does an ajax request to get the template, then formats it, the format function adds to HTML.
         var _this = this;
@@ -324,10 +297,16 @@ function MultiImageUploader(localized_text) {
         if (_this.file.size > 10000000)
             _this.dom_element.find('.warn-text').text(localized_text.image_too_big_text);
 
-        _$addedImagesContainer.append(_this.dom_element); //add it to the page
-        _this.dom_element.find('a[data-file-uuid]').click(function () {  // bind the destroy function
+        $addedImagesContainer.append(_this.dom_element); //add it to the page
+
+        _this.dom_element.find('.remove_image_link').click(function () {  // bind the destroy function
             _this.destroy();
+            dateUpdater.refreshBox();
         });
+
+        _this.dom_element.find('select').change(function() {
+            dateUpdater.refreshBox();
+        })
 
         _this.getExifData();  //extract the EXIF data (async) and then load it
         _this.loadImageAsFileUrl(); //load image as base64 async
@@ -366,6 +345,15 @@ function MultiImageUploader(localized_text) {
             var _date_taken_array = _exif_date_taken.substring(' ', 10).split(':'), //returns an array of [YYYY,MM,DD]
                 _exifSimpleDate = new SimpleDate(_date_taken_array[2], _date_taken_array[1], _date_taken_array[0]);
                 _this.imageDate(_exifSimpleDate);
+
+            var $camera_date = _this.dom_element.find(".camera_date_text");
+                $camera_date.text(_exifSimpleDate.asDateString());//shows the exif date by the photo
+                $camera_date.data('exif_date', _exifSimpleDate);
+                $camera_date.click(function(){
+                    _this.imageDate(_exifSimpleDate);
+                    dateUpdater.refreshBox();
+                })
+
             }
         else {  //no date was found in EXIF data
             _this.imageDate(dateUpdater.observationDate()); //Use observation date
@@ -396,6 +384,7 @@ function MultiImageUploader(localized_text) {
             copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
         };
     };
+
 
     FileStoreItem.prototype.asFormData = function () {
         var _this = this,
@@ -439,6 +428,39 @@ function MultiImageUploader(localized_text) {
         }
     };
 
+    FileStoreItem.prototype.upload = function (onUploadedCallback) {
+        var _this = this,
+            xhrReq = new XMLHttpRequest();
+
+        $submitButtons.val(localized_text.uploading_text + '...');
+        _this.incrementProgressBar();
+
+        xhrReq.onload = function () { //after image has been created.
+            if (xhrReq.status == 200) {
+                var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
+                    goodImageVals = $goodImages.val();
+                $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
+            } else {
+                alert(localized_text.image_upload_error_text);
+            }
+            _this.dom_element.hide('slow');
+            onUploadedCallback();
+        };
+
+        xhrReq.onprogress = function (event) {  //show the upload status
+            if (event.lengthComputable) {
+                var percentComplete = event.loaded / event.total;
+                _this.incrementProgressBar(percentComplete);
+            }
+        };
+
+        //Note: You need to add the event listeners before calling open() on the request.
+        xhrReq.open("POST", _uploadImageUri, true);
+        var _fd = _this.asFormData(); //Send the form
+        _fd != null ? xhrReq.send(_fd) : _this.isUploaded = true;
+    }
+
+
     FileStoreItem.prototype.destroy = function () {
         this.dom_element.remove();  //remove element from the dom;
         delete fileStore.fileDictionary[this.file.size]; //remove the file from the dictionary
@@ -456,8 +478,25 @@ function MultiImageUploader(localized_text) {
         });
     }
 
+
+    /*BINDINGS ARE HERE*/
     function init() { //initialize the uploader!
         $submitButtons.prop('disabled', false);//make sure submit buttons are enabled when the dom is loaded!
+
+        $fixDateSubmit.bind('click.fixDateBind', function () {
+            var _selectedItemData = jQuery('input[name=fix_date]:checked').data();
+            if (_selectedItemData && _selectedItemData.date) {
+                dateUpdater.fixDates(_selectedItemData.date, _selectedItemData.target);
+            }
+        });
+
+        $ignoreDateSubmit.bind('click.ignoreDateBind', function () {
+            $imgMessages.hide('slow');
+        });
+
+        $obsYear.change(function (){dateUpdater.updateObservationDateRadio()});
+        $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
+        $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
 
         //Detect when files are added from browser
         $selectFilesButton.change(function () {
@@ -466,7 +505,13 @@ function MultiImageUploader(localized_text) {
         });
 
         //Detect when a user submits observation; includes upload logic
-        $form.submit(function () {});
+        $form.submit(function () {
+            if (blockFormSubmission) {
+                fileStore.uploadAll();
+                return false;
+            }
+            return true;
+        });
     }
 
     return {
