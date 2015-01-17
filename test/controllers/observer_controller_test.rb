@@ -36,22 +36,22 @@ class ObserverControllerTest < FunctionalTestCase
     params[:username] = user.login
 
     post_requires_login(:create_observation, params)
-     begin
+    begin
       if o_num == 0
         assert_response(:success)
       elsif Location.find_by_name(params[:observation][:place_name]) or
             Location.is_unknown?(params[:observation][:place_name]) or
             params[:observation][:place_name].blank?
-        assert_template(action: :show_observation)
+        assert_redirected_to(action: :show_observation)
       else
-        assert_redirected_to(action: :create_location)
+        assert_redirected_to(%r{/location/create_location})
       end
-     rescue MiniTest::Assertion => e
-       flash = get_last_flash.to_s
-       flash.sub!(/^(\d)/, "")
-       message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
-       flunk(message)
-     end
+    rescue MiniTest::Assertion => e
+      flash = get_last_flash.to_s
+      flash.sub!(/^(\d)/, "")
+      message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
+      flunk(message)
+    end
 
     assert_equal(o_count + o_num, Observation.count)
     assert_equal(g_count + g_num, Naming.count)
@@ -967,9 +967,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(herbarium.is_curator?(rolf))
   end
 
-  def test_construct_observation
-
-    # Test a simple observation creation with an approved unique name
+  def test_create_simple_observation_with_approved_unique_name
     where = "Simple, Massachusetts, USA"
     generic_construct_observation({
       observation: { place_name: where, thumb_image_id: "0" },
@@ -984,8 +982,9 @@ class ObserverControllerTest < FunctionalTestCase
     # This was getting set to zero instead of nil if no images were uploaded
     # when obs was created.
     assert_equal(nil, obs.thumb_image_id)
+  end
 
-    # Test a simple observation creation of an unknown
+  def test_create_simple_observation_of_unknown_taxon
     where = "Unknown, Massachusetts, USA"
     generic_construct_observation({
       observation: { place_name: where },
@@ -994,104 +993,110 @@ class ObserverControllerTest < FunctionalTestCase
     obs = assigns(:observation)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
+  end
 
-    # Test an observation creation with a new name
+  def test_create_observation_with_new_name
     generic_construct_observation({
       name: { name: "New name" }
     }, 0,0,0)
+  end
 
+  def test_create_observation_with_approved_new_name
     # Test an observation creation with an approved new name
-    new_name = "Argus arg-arg"
     generic_construct_observation({
-      name: { name: new_name },
-      approved_name: new_name
+      name: { name: "Argus arg-arg" },
+      approved_name: "Argus arg-arg"
     }, 1,1,2)
+  end
 
-    # Test an observation creation with an approved new name with extra space
-    new_name = "Another new-name"
+  def test_create_observation_with_approved_name_and_extra_space
     generic_construct_observation({
-      name: { name: new_name + "  " },
-      approved_name: new_name + "  "
+      name: { name: "Another new-name" + "  " },
+      approved_name: "Another new-name" + "  "
     }, 1,1,2)
+  end
 
-    # Test an observation creation with an approved section.
+  def test_create_observation_with_approved_section
     # (This is now supported nominally)
     # (Use Macrocybe because it already exists and has an author.
     # That way we know it is actually creating a name for this section.)
-    new_name = "Macrocybe section Fakesection"
     generic_construct_observation({
-      name: { name: new_name },
-      approved_name: new_name
+      name: { name: "Macrocybe section Fakesection" },
+      approved_name: "Macrocybe section Fakesection"
     }, 1,1,1)
+  end
 
-    # Test an observation creation with an approved junk name
-    new_name = "This is a bunch of junk"
+  def test_create_observation_with_approved_junk_name
     generic_construct_observation({
-      name: { name: new_name },
-      approved_name: new_name
+      name: { name: "This is a bunch of junk" },
+      approved_name: "This is a bunch of junk"
     }, 0,0,0)
+  end
 
-    # Test an observation creation with multiple matches
+  def test_create_observation_with_multiple_name_matches
     generic_construct_observation({
       name: { name: "Amanita baccata" }
     }, 0,0,0)
+  end
 
-    # Test an observation creation with one of the multiple matches chosen
+  def test_create_observation_choosing_one_of_multiple_name_matches
     generic_construct_observation({
       name: { name: "Amanita baccata" },
       chosen_name: { name_id: names(:amanita_baccata_arora).id }
     }, 1,1,0)
+  end
 
-    # Test an observation creation with one of the multiple matches chosen
+  def test_create_observation_choosing_deprecated_one_of_multiple_name_matches
     generic_construct_observation({
       name: { name: names(:pluteus_petasatus_deprecated).text_name }
     }, 1,1,0)
     nam = assigns(:naming)
     assert_equal(names(:pluteus_petasatus_approved).id, nam.name_id)
+  end
 
-    # Test an observation creation with a deprecated name
+  def test_create_observation_with_deprecated_name
     generic_construct_observation({
       name: { name: "Lactarius subalpinus" }
     }, 0,0,0)
+  end
 
-    # Test an observation creation with a deprecated name,
-    # but a chosen approved alternative
-    new_name = "Lactarius subalpinus"
+  def test_create_observation_with_chosen_approved_synonym_of_deprecated_name
     generic_construct_observation({
-      name: { name: new_name },
-      approved_name: new_name,
+      name: { name: "Lactarius subalpinus" },
+      approved_name: "Lactarius subalpinus",
       chosen_name: { name_id: names(:lactarius_alpinus).id }
     }, 1,1,0)
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_alpinus))
+  end
 
-    # Test an observation creation with a deprecated name that has been approved
-    new_name = "Lactarius subalpinus"
+  def test_create_observation_with_approved_deprecated_name
     generic_construct_observation({
-      name: { name: new_name },
-      approved_name: new_name,
+      name: { name: "Lactarius subalpinus" },
+      approved_name: "Lactarius subalpinus",
       chosen_name: { }
     }, 1,1,0)
     nam = assigns(:naming)
     assert_equal(nam.name, names(:lactarius_subalpinus))
+  end
 
+  def test_create_observation_with_approved_new_name
     # Test an observation creation with an approved new name
-    new_name = "Agaricus novus"
     Name.find_by_text_name("Agaricus").destroy
     generic_construct_observation({
-      name: { name: new_name },
-      approved_name: new_name
+      name: { name: "Agaricus novus" },
+      approved_name: "Agaricus novus"
     }, 1,1,2)
-    name = Name.find_by_text_name(new_name)
+    name = Name.find_by_text_name("Agaricus novus")
     assert(name)
     assert_equal(new_name, name.text_name)
+  end
 
-    # Test an observation that generates emails
+  def test_create_observation_that_generates_email
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    # notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)
-    notifications = Notification.where(flavor: :name, and_obj_id: name.id)
+    notifications = Notification.where(flavor: :name, obj_id: name.id)
     assert_equal(2, notifications.length)
 
     where = "Simple, Massachusetts, USA"
@@ -1101,14 +1106,14 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1,1,0)
     obs = assigns(:observation)
     nam = assigns(:naming)
+
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_equal(name.id, nam.name_id) # Make sure it's the right name
     assert_not_nil(obs.rss_log)
+    assert_equal(count_before+2, QueuedEmail.count)
+  end
 
-    count_after = QueuedEmail.count
-    assert_equal(count_before+2, count_after)
-
-    # Test a simple observation creation of an unknown with a lat/long
+  def test_create_observation_with_decimal_geolocation_and_unknown_name
     lat = 34.1622
     long = -118.3521
     generic_construct_observation({
@@ -1116,11 +1121,14 @@ class ObserverControllerTest < FunctionalTestCase
       name: { name: "Unknown" },
     }, 1,0,0)
     obs = assigns(:observation)
+
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(long.to_s, obs.long.to_s)
     assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
+  end
 
+  def test_create_observation_with_dms_geolocation_and_unknown_name
     lat2 = '34°9’43.92”N'
     long2 = '118°21′7.56″W'
     generic_construct_observation({
@@ -1128,42 +1136,53 @@ class ObserverControllerTest < FunctionalTestCase
       name: { name: "Unknown" },
     }, 1,0,0)
     obs = assigns(:observation)
+
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(long.to_s, obs.long.to_s)
     assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
+  end
 
+  def test_create_observation_with_empty_geolocation_and_location
     # Make sure it doesn't accept no location AND no lat/long.
     generic_construct_observation({
       observation: { place_name: "", lat: "", long: "" },
       name: { name: "Unknown" },
     }, 0,0,0)
+  end
 
-    # ... unless explicitly tell it "unknown" location.
+  def test_create_observations_with_unknown_location_and_empty_geolocation
+    # But create observation if explicitly tell it "unknown" location.
     generic_construct_observation({
       observation: { place_name: "Earth", lat: "", long: "" },
       name: { name: "Unknown" },
     }, 1,0,0)
+  end
 
-    # Test a simple observation creation of an unknown with various altitudes
+  def test_create_observation_with_various_altitude_formats
     for input, output in [
         [ "500",     500 ],
         [ "500m",    500 ],
-        [ '500 ft.', 152 ],
+        [ "500 ft.", 152 ],
         [ ' 500\' ', 152 ]
       ]
-      where = 'Unknown, Massachusetts, USA'
+      where = "Unknown, Massachusetts, USA"
+
       generic_construct_observation({
         observation: { place_name: where, alt: input },
         name: { name: "Unknown" },
       }, 1,0,0)
+
       obs = assigns(:observation)
+
       assert_equal(output, obs.alt)
       assert_equal(where, obs.where) # Make sure it's the right observation
       assert_not_nil(obs.rss_log)
     end
 
-    # Create class.
+  end
+
+  def test_create_observation_creating_class
     generic_construct_observation({
       observation: { place_name: "Earth", lat: "", long: "" },
       name: { name: "Lecanoromycetes L." },
@@ -1173,8 +1192,9 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal('L.', name.author)
     assert_equal(:Class, name.rank)
+  end
 
-    # Create family.
+  def test_create_observation_creating_family
     generic_construct_observation({
       observation: { place_name: "Earth", lat: "", long: "" },
       name: { name: "Acarosporaceae" },
@@ -1183,15 +1203,17 @@ class ObserverControllerTest < FunctionalTestCase
     name = Name.last
     assert_equal("Acarosporaceae", name.text_name)
     assert_equal(:Family, name.rank)
+  end
 
-    # Create group.
+  def test_create_observation_creating_group
     generic_construct_observation({
       observation: { place_name: "Earth", lat: "", long: "" },
       name: { name: "Morchella elata group" },
       approved_name: "Morchella elata group",
     }, 1,1,2)
+
     name = Name.last
-    assert_equal('Morchella elata group', name.text_name)
+    assert_equal("Morchella elata group", name.text_name)
     assert_equal("", name.author)
     assert_equal(:Group, name.rank)
   end
@@ -1325,7 +1347,7 @@ class ObserverControllerTest < FunctionalTestCase
     params = {
       observation: {
         when: Time.now,
-        place_name: 'Somewhere, Massachusetts, USA',
+        place_name: "Somewhere, Massachusetts, USA",
         specimen: "0",
         thumb_image_id: "0",
       },
@@ -1455,7 +1477,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:approved_name] = '"One"'
     post(:create_observation, params)
     # assert_template(controller: :observer, action: expected_page)
-    assert_template(%r{/observer/#{ expected_page }})
+    assert_template(%r{/observer/#{expected_page}})
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
 
