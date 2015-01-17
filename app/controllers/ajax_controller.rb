@@ -258,7 +258,7 @@ class AjaxController < ApplicationController
   def create_image_object
     user = get_session_user!
     @image = params[:image]
-     p @image
+
      img_when = Date.new(@image[:when][('1i')].to_i, @image[:when][('2i')].to_i, @image[:when][('3i')].to_i);
      ##TODO: handle invalid date
      image = Image.new(
