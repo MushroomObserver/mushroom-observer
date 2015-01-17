@@ -18,37 +18,37 @@
 
   <% table = @naming.calc_vote_table %>
   <% for str in table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}
-    val = table[str][:value]
-    wgt = table[str][:wgt]
-    num = table[str][:num] %>
-    <% if val != 0 %>
-      <tr>
-        <td>&nbsp;</td>
-        <td><%= str.t %></td>
-        <td>&nbsp;</td>
-        <td align="center"><%= val %></td>
-        <td>&nbsp;</td>
-        <td align="center"><%= "%.2f" % wgt %></td>
-        <td>&nbsp;</td>
-        <td align="center"><%= num %></td>
-        <td align="left"><small><%=
-          votes = table[str][:votes].select(&:anonymous?) \
+       val = table[str][:value]
+       wgt = table[str][:wgt]
+       num = table[str][:num] %>
+      <% if val != 0 %>
+          <tr>
+            <td>&nbsp;</td>
+            <td><%= str.t %></td>
+            <td>&nbsp;</td>
+            <td align="center"><%= val %></td>
+            <td>&nbsp;</td>
+            <td align="center"><%= "%.2f" % wgt %></td>
+            <td>&nbsp;</td>
+            <td align="center"><%= num %></td>
+            <td align="left"><small><%=
+                votes = table[str][:votes].select(&:anonymous?) \
             .sort_by {|v| v.id.to_s.reverse} # pseudorandom but deterministic order
-          if votes.length > 0
-            n = 0
-            '('.html_safe + votes.map do |vote|
-              n += 1
-              if n < 4
-                user_link(vote.user, vote.user.login)
-              else
-                '...'
-              end
-            end.safe_join(',') + ')'
-          end
-        %></small></td>
-        <td>&nbsp;</td>
-      </tr>
-    <% end %>
+                if votes.length > 0
+                  n = 0
+                  '('.html_safe + votes.map do |vote|
+                    n += 1
+                    if n < 4
+                      user_link(vote.user, vote.user.login)
+                    else
+                      '...'
+                    end
+                  end.safe_join(',') + ')'
+                end
+            %></small></td>
+            <td>&nbsp;</td>
+          </tr>
+      <% end %>
   <% end %>
 
   <tr>
@@ -66,27 +66,27 @@
   </tr>
 
   <% if @user %>
-    <tr style='white-space:normal'>
-      <td colspan="9" align="center">
-        <%= if @user.votes_anonymous == :yes
-          link_with_query(:show_votes_go_public.t,
-            { :action => 'show_observation',
-              :id => @naming.observation.id,
-              :go_public => '1' },
-            { :confirm => :show_votes_go_public_confirm.l })
-        else
-          link_to(:show_votes_go_private.t, { :action => 'show_observation',
-            :id => @naming.observation.id, :go_private => '1' },
-            { :confirm => :show_votes_go_private_confirm.l })
-        end %>
-      </td>
-    </tr>
+      <tr style='white-space:normal'>
+        <td colspan="9" align="center">
+          <%= if @user.votes_anonymous == :yes
+                link_with_query(:show_votes_go_public.t,
+                                { :action => 'show_observation',
+                                  :id => @naming.observation.id,
+                                  :go_public => '1' },
+                                { :confirm => :show_votes_go_public_confirm.l })
+              else
+                link_to(:show_votes_go_private.t, { :action => 'show_observation',
+                                                    :id => @naming.observation.id, :go_private => '1' },
+                        { :confirm => :show_votes_go_private_confirm.l })
+              end %>
+        </td>
+      </tr>
   <% end %>
 
 </table>
 
 <% if do_cancel %>
-  <center>
-    <%= button_to_function(:CLOSE.t, "hide_votes(#{@naming.id})") %>
-  </center>
+    <div class="center-text">
+      <%= button_tag(:CLOSE.t, {:type => "button", :class => "close_votes_popup", data: {:role => "close_popup"}}) %>
+    </div>
 <% end %>
