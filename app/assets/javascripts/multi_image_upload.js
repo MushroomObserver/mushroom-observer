@@ -256,7 +256,8 @@ function MultiImageUploader(localized_text) {
             firstUpload.upload(onUploadedCallback); //uploads first image. if we have one.
         }
         else{
-            return true; //returns true if there were not any images, causing form to submit right away.
+            blockFormSubmission = false;
+            $form.submit(); //no images to upload, submit form
         }
 
         return false;
