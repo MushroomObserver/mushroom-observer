@@ -322,7 +322,7 @@ def get_list_of_controllers
   result = []
   wildcard = CONTROLLER_FILE.sub("NAME", "*")
   for file in Dir.glob(wildcard)
-    result << $1 if file.match(/(\w+)_controller.rb/)
+    result << match[1] if match = file.match(/(\w+)_controller.rb/)
   end
   return result
 end
