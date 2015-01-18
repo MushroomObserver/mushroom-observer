@@ -14,18 +14,22 @@
 <% end %>
 
 <span style='white-space:nowrap'>
-  <label for="observation_place_name"><%= :WHERE.t %>: (<%= :required.t %>)</label>
+  <%= label_tag("observation_place_name", "#{:WHERE.t}: (#{:required.t})") %>
   <%= text_field('observation', 'place_name', :size => 60) %>
 </span><br/>
+
 <%= turn_into_location_auto_completer('observation_place_name', :primer => Location.primer) %>
 <span class="HelpNote"><%= :form_observations_where_help.t %></span><br/><br/>
 
 <span style="white-space:nowrap">
-  <label for="observation_lat"><%= :LATITUDE.t %>:</label>
+
+  <%= label_tag("observation_lat", "#{:LATITUDE.t}:") %>
   <%= text_field('observation', 'lat', :size => 10) %>&nbsp;&nbsp;
-  <label for="observation_long"><%= :LONGITUDE.t %>:</label>
+
+  <%= label_tag("observation_long", "#{:LONGITUDE.t}:") %>
   <%= text_field('observation', 'long', :size => 10) %>&nbsp;&nbsp;
-  <label for="observation_alt"><%= :ALTITUDE.t %>:</label>
+
+  <%= label_tag("observation_alt", "#{:ALTITUDE.t}:") %>
   <%= text_field('observation', 'alt', :size => 8) %>
 </span><br/>
 <span class="HelpNote"><%= :form_observations_lat_long_help.t %></span><br/><br/>
@@ -39,13 +43,15 @@
 end %>
 
 <%= check_box("observation", "is_collection_location") %>
-<label for="observation_is_collection_location"><%= :form_observations_is_collection_location.t %></label><br/>
+
+<%= label_tag("observation_is_collection_location", "#{:form_observations_is_collection_location.t}:") %><br/>
 <span class="HelpNote"><%= :form_observations_is_collection_location_help.t %></span><br/><br/>
 
 <% if has_specimens %>
   <span class="HelpNote"><%= :form_observations_delete_specimens_help.t %></span><br/>
 <% else %>
-  <%= check_box("observation", "specimen") %><label for="observation_specimen"><%= :form_observations_specimen_available.t %></label><br/>
+  <%= check_box("observation", "specimen") %>
+  <%= label_tag("observation_specimen", "#{:form_observations_specimen_available.t}:") %><br/>
   &nbsp;&nbsp;<%= herbarium_name_box() %><br/>
   &nbsp;&nbsp;<%= herbarium_id_box() %><br/>
   <%= javascript_tag %(
@@ -61,7 +67,7 @@ end %>
 
 <center><%= submit_tag(button_name) %></center><br/>
 
-<label for="observation_notes"><%= :NOTES.t %>:</label>
+<%= label_tag("observation_notes", "#{:NOTES.t}:") %>
 <span class="HelpNote"><%= :form_observations_notes_help.t %></span><br/>
 <%= text_area('observation', 'notes', :cols => 80) %><br/>
 <%= render(:partial => 'shared/textilize_help') %>
@@ -88,17 +94,20 @@ end %>
           </td>
           <td valign="middle" style="white-space:nowrap">
             <% if check_permission(image) %>
-              <label for="image_<%= image.id %>_notes"><%= :NOTES.t %>:</label>
+                <%= label_tag("image_#{image.id}_notes", "#{:NOTES.t}:") %>
                 <% if @user.thumbnail_size == :thumbnail %>
                   <%= text_field(:good_image, :notes, :value => image.notes, :index => image.id, :size => 40) %><br/>
                 <% else %><br/>
                   <%= text_area(:good_image, :notes, :value => image.notes, :index => image.id, :cols => 60, :rows => 3) %><br/>
                 <% end %>
-              <label for="image_<%= image.id %>_original_name"><%= :form_observations_original_name.t %>:</label>
-                <%= text_field(:good_image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %><br/>
-              <label for="image_<%= image.id %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>
+
+                <%= label_tag("image_#{image.id}_orgiginal_name", "#{:form_observations_original_name.t}:") %>
+                <%= text_field(:good_image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %>
+
+                <%= label_tag("image_#{image.id}_copyright_holder", "#{:form_images_copyright_holder.t}:") %>
                 <%= text_field(:good_image, :copyright_holder, :value => image.copyright_holder, :index => image.id, :size => 30) %><br/>
-              <label for="image_<%= image.id %>_when_1i"><%= :form_images_when_taken.t %>:</label>
+
+                <%= label_tag("image_#{image.id}_when_1i", "#{:form_images_when_taken.t}:") %>
                 <%= date_select(:good_image, :when, {
                       :object => image,
                       :index => image.id,
@@ -107,7 +116,8 @@ end %>
                       :order => [:day,:month,:year]
                     },
                     { :onchange => "CHANGED_DATES[#{image.id}] = true" }) %><br/>
-              <label for="image_<%= image.id %>_license_id"><%= :form_images_select_license.t %>:</label>
+
+                <%= label_tag("image_#{image.id}_license_id", "#{:form_images_select_license.t}:".html_safe) %>
                 <%= select(:good_image, :license_id, License.current_names_and_ids(image.license),
                            { :selected => image.license_id }, { :index => image.id }) %><br/>
             <% end %>
@@ -214,7 +224,7 @@ end %>
 
               <div class="row margin_top image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
                   <div class="col-sm-4">
-                    <strong><%= :forms_observations_date_warning.t %></strong>
+                    <strong><%= :form_observations_date_warning.t %></strong>
                   </div>
                   <div class="col-sm-7">
                       <div class="inconsistent_date_options">
@@ -247,11 +257,11 @@ end %>
         <%= javascript_tag %(
               jQuery(document).ready(function () {
                  var uploader = MultiImageUploader({
-                  image_upload_error_text: "#{:form_observations_image_upload_error}",
-                  uploading_text: "#{:Uploading} #{:image}",
-                  image_too_big_text:  "#{:form_observations_image_too_big}",
-                  creating_observation_text: "#{:CREATING}",
-                  months: "#{:all_months.t}"
+                  image_upload_error_text: "#{j :form_observations_image_upload_error.t}",
+                  uploading_text: "#{j :Uploading.t} #{:image}",
+                  image_too_big_text:  "#{j :form_observations_image_too_big.t}",
+                  creating_observation_text: "#{j :CREATING.t}",
+                  months: "#{j :all_months.t}"
                  })
                  uploader.init();
               });

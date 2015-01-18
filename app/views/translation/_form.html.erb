@@ -1,124 +1,107 @@
 <%= hidden_field_tag(:tag, @tag) %>
 
-<% if not @lang.official %>
-  <big><b><%= Language.official.name %>:</b></big><br/><br/>
-  <% for tag in @edit_tags
-    if record = @official_records[tag]
-      str = record.text.gsub(/\\n/, "\n") 
-      str = h(str).gsub("\n", "<br/>\n") %>
-      <u><%= h(tag) %>:</u><br/>
-      <p><%= str %></p>
+<% unless @lang.official %>
+    <h3 class="bold"><%= Language.official.name %>:</h3>
+    <% @edit_tags.each do |tag|
+         if record = @official_records[tag]
+           str = record.text.gsub(/\\n/, "\n")
+           str = h(str).gsub("\n", "<br/>\n") %>
+            <span class="underline"><%= h(tag) %>:</span>
+            <p><%= str %></p>
+        <% end %>
     <% end %>
-  <% end %>
 
-  <br/>
-  <hr/>
-  <br/>
+    <hr class="pad-bottom-1x pad-top-1x"/>
 <% end %>
 
-<big><b><%= @lang.name %>:</b></big><br/><br/>
+<h3 class="bold"><%= @lang.name %>:</h3>
 
 <% for tag in @edit_tags
-  str = @strings[tag].to_s.gsub(/\\n/, "\n")
-  rows = 1
-  for line in str.each_line
-    rows += (line.length / 80).truncate + 1
-  end
-  rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
-  notes = []
-  if tag.match(/s$/i) and @edit_tags.include?($`)
-    notes << :edit_translations_plural.t
-  elsif @edit_tags.include?(tag+'s') or @edit_tags.include?(tag+'S')
-    notes << :edit_translations_singular.t
-  end
-  if tag == tag.upcase and @edit_tags.include?(tag.downcase)
-    notes << :edit_translations_uppercase.t
-  elsif tag == tag.downcase and @edit_tags.include?(tag.upcase)
-    notes << :edit_translations_lowercase.t
-  end
-  note = notes.any? ? ' (' + notes.safe_join(', ') + ')' : ''
-  %>
-  <label for="tag_<%=tag%>"><%= h(tag) %>:</label><%= note %><br/>
-  <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80,
-        :onchange => 'form_changed()', :onkeypress => 'form_changed()') %><br/><br/>
+     str = @strings[tag].to_s.gsub(/\\n/, "\n")
+     rows = 1
+     for line in str.each_line
+       rows += (line.length / 80).truncate + 1
+     end
+     rows = @edit_tags.length > 1 ? 2 : 5 if rows < 2
+     notes = []
+     if tag.match(/s$/i) and @edit_tags.include?($`)
+       notes << :edit_translations_plural.t
+     elsif @edit_tags.include?(tag+'s') or @edit_tags.include?(tag+'S')
+       notes << :edit_translations_singular.t
+     end
+     if tag == tag.upcase and @edit_tags.include?(tag.downcase)
+       notes << :edit_translations_uppercase.t
+     elsif tag == tag.downcase and @edit_tags.include?(tag.upcase)
+       notes << :edit_translations_lowercase.t
+     end
+     note = notes.any? ? ' (' + notes.safe_join(', ') + ')' : ''
+%>
+    <div>
+        <%=label_tag("tag_#{tag}", h(tag)) %>
+        <span><%= note %></span><br>
+        <%= text_area_tag("tag_#{tag}", str, :rows => rows, :cols => 80, class: "pad-bottom-2x") %>
+    </div>
 <% end %>
 
-<center>
-  <% if @js %>
-    <%= submit_tag(:SAVE.l, :onclick => 'submit_form()', :id => :save_button,
-                   :disabled => false) %>
-    <span style='margin-left:2em'>&nbsp;</span>
-    <%= button_to_function(:CANCEL.l, 'clear_form()', :id => :cancel_button,
-                   :disabled => true) %>
-    <span style='margin-left:2em'>&nbsp;</span>
-    <%= button_to_function(:RELOAD.l, "show_tag(LOCALE,'#{@tag}')", :id => :reload_button,
-                   :disabled => false) %>
-    <span style='margin-left:2em'>&nbsp;</span>
-    <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale),
-                   :onchange => "show_tag($('locale').value,'#{@tag}')") %>
-  <% else %>
-    <%= submit_tag(:SAVE.l) %>
-    <span style='margin-left:2em'>&nbsp;</span>
-    <%= submit_tag(:CANCEL.l) %>
-    <span style='margin-left:2em'>&nbsp;</span>
-    <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale)) %><%= submit_tag(:RELOAD.l) %>
-  <% end %>
-</center>
+<div class="center-text">
+      <%= submit_tag(:SAVE.l, :id => :save_button, class: "pad-left-2x") %>
+      <%= button_tag(:CANCEL.l, :id => :cancel_button, class: "pad-left-2x", type: "cancel") %>
+      <%= button_tag(:RELOAD.l, :id => :reload_button, class: "pad-left-2x", type: "button", data: {:tag => tag}) %>
+      <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale), class: "pad-left-2x", data: {tag: tag}) %>
+</div>
 
 <% any_versions = false
-user_logins = { @user.id => @user.login }
-for tag in @edit_tags
-  if record = @translated_records[tag]
-    user_logins[record.user_id] ||= record.user.login rescue nil  # (can be nil in testing because admin doesn't exist)
-    last_text = record.text
-    versions_to_show = []
-    for version in record.versions.reverse
-      if version.text != last_text
-        versions_to_show << version
-        last_text = version.text
-      end
-    end
-    if versions_to_show.any?
-      if not any_versions
-        any_versions = true %>
+   user_logins = { @user.id => @user.login }
+    @edit_tags.each do |tag|
+    if record = @translated_records[tag]
+       user_logins[record.user_id] ||= record.user.login rescue nil  # (can be nil in testing because admin doesn't exist)
+       last_text = record.text
+       versions_to_show = []
+       for version in record.versions.reverse
+         if version.text != last_text
+           versions_to_show << version
+           last_text = version.text
+         end
+       end
+       if versions_to_show.any?
+         if not any_versions
+           any_versions = true %>
 
-        <br/>
-        <hr/>
-        <br/>
+                <br/>
+                <hr/>
+                <br/>
 
-        <big><b><%= :edit_translations_old_versions.t %>:</b></big><br/><br/>
-      <% end %>
-      <u><%= h tag %>:</u><br/>
-      <table class="old_versions">
-        <% odd_or_even = 1
-        for version in versions_to_show
-          odd_or_even = 1 - odd_or_even %>
-          <tr class="ListLine<%=odd_or_even%>">
-            <td>
-              <%= user_id = version.user_id
-              login = user_logins[user_id] ||= User.find(user_id).login rescue ''
-              login.blank? ? '--' : user_link(user_id, login) %>
-            </td>
-            <td>
-              <%= version.updated_at.web_date %>
-            </td>
-            <td>
-              <%= h(str = preview_string(version.text, 80)) %>
-              <%= if str.length > 80
-                label = '[' + :edit_translations_full_text.t + ']'
-                if @js
-                  link_to_function(label, "show_old_version(#{version.id})")
-                else
-                  link_to(label, :controller => :ajax, :action => :old_translation,
-                          :id => version.id)
-                end
-              end %>
-            </td>
-          </tr>
-        <% end %>
-      </table>
-      <br/>
-    <% end
-  end
-end %>
- 
+                <h3 class="pad-bottom-2x"><b><%= :edit_translations_old_versions.t %>:</b></h3>
+            <% end %>
+            <span class="underline"><%= h tag %>:</span><br/>
+            <table class="lined-table old_versions">
+              <% versions_to_show.each do |version| %>
+                  <tr>
+                    <td>
+                      <%= user_id = version.user_id
+                          login = user_logins[user_id] ||= User.find(user_id).login rescue ''
+                          login.blank? ? '--' : user_link(user_id, login) %>
+                    </td>
+                    <td>
+                      <%= version.updated_at.web_date %>
+                    </td>
+                    <td>
+                      <%= h(str = preview_string(version.text, 80)) %>
+                      <%= if str.length > 80
+                            label = '[' + :edit_translations_full_text.t + ']'
+                            if @js
+                              link_to_function(label, "show_old_version(#{version.id})")
+                            else
+                              link_to(label, {:controller => :ajax, :action => :old_translation,
+                                      :id => version.id}, data:{ :role => "show_old_version", :id => version.id})
+                            end
+                          end %>
+                    </td>
+                  </tr>
+              <% end %>
+            </table>
+            <br/>
+        <% end
+           end
+           end %>
+

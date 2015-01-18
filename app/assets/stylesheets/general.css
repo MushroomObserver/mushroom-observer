@@ -592,16 +592,89 @@ div.floatthumb {
     font-weight: bolder;
 }
 
+.underline {
+    text-decoration: underline;
+}
+
 .pad-bottom-1x {
-    margin-bottom: 10px;
+    margin-bottom: 1em;
 }
 
 .pad-bottom-2x {
-    margin-bottom: 20px;
+    margin-bottom: 2em;
+}
+
+.pad-top-1x {
+    margin-top: 1em;
+}
+
+.pad-top-2x {
+    margin-top: 2em;
+}
+
+.pad-left-2x {
+    margin-left:2em;
+}
+
+.border {
+    border: solid 1px;
 }
 
 
 table.pad-columns td,
 table.pad-columns th {
     padding:0em 1em 0em 1em
+}
+
+/*Translations Page -- Moving here for now */
+div.translation {
+    padding: 5px 10px 5px 10px;
+}
+
+#left_translation_container {
+    border: 1px solid;
+    max-height: 750px;
+    overflow-y: auto;
+    padding-left: 5px;
+}
+
+table.old_versions td {
+    margin: 0;
+    border: 0;
+    padding: 1px 0.5em 1px 0.5em;
+    white-space: nowrap;
+    text-align: left;
+}
+
+p.major_header {
+    font-size: 150%;
+    margin: 2em 0em 1em 0em;
+    padding: 0px;
+}
+
+p.minor_header {
+    font-size: 100%;
+    margin: 1.7em 0em 0.3em 0em;
+    padding: 0px;
+}
+
+p.comment {
+    font-size: 85%;
+    margin: 0px;
+    padding: 0px;
+}
+
+p.tag_field {
+    margin: 0em 0em 0em 1em;
+    padding: 0px;
+    text-indent: -1em
+}
+
+div#whirly {
+    border: 1px solid black;
+    padding: 1em 2em 1em 2em;
+    background: white;
+    color: black;
+    text-align: center;
+    z-index: 10000;
 }
