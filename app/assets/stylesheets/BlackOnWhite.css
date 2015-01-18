@@ -48,6 +48,29 @@ li.selected { background-color: #FFFF00 ! important }
   display: none;
 }
 
+
+/*New CSS for even rows */
+table.lined-table tr:nth-child(even) {
+    background-color: #F0F0F0;
+}
+
+table.lined-table tr:nth-child(even) div.textile table {
+    background: #FFFFFF;
+}
+
+table.lined-table tr:nth-child(even) div.textile table.noborder,
+table.lined-table tr:nth-child(even) div.textile table td {
+    background: #FFFFFF;
+}
+
+table.lined-table tr:nth-child(even) a {
+    color: #205080;
+}
+
+table.lined-table tr:nth-child(even) a:visited {
+    color: #205080;
+}
+
 /* Colors for even lines */
 .ListLine0 {
       background-color: #F0F0F0;
@@ -64,6 +87,31 @@ li.selected { background-color: #FFFF00 ! important }
 .ListLine0 a:visited {
       color: #205080;
 }
+
+
+/*New CSS for ODD Rows */
+table.lined-table tr:nth-child(odd) {
+    background-color: #FFFFFF;
+}
+
+table.lined-table tr:nth-child(odd) div.textile table{
+    background: #D0D0D0;
+}
+
+table.lined-table tr:nth-child(odd) div.textile table.noborder,
+table.lined-table tr:nth-child(odd) div.textile table td{
+    background: #D0D0D0;
+}
+
+
+table.lined-table tr:nth-child(odd) a {
+    color: #205080;
+}
+
+table.lined-table tr:nth-child(odd) a:visited {
+    color: #205080;
+}
+
 
 
 /* Colors for odd lines */

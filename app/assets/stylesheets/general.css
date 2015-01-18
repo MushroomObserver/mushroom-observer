@@ -313,18 +313,16 @@ div.HelpNoteIndent {
     line-height: 24px;
 }
 
+table.lined-table tr {  /*This should replace ListLine0 and ListLine1 */
+    padding: 1px 10px;
+}
+
 .ListLine0 {
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 1px;
+    padding: 1px 10px;
 }
 
 .ListLine1 {
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 1px;
+    padding: 1px 10px;
 }
 
 .pagination {
@@ -592,4 +590,18 @@ div.floatthumb {
 
 .bold {
     font-weight: bolder;
+}
+
+.pad-bottom-1x {
+    margin-bottom: 10px;
+}
+
+.pad-bottom-2x {
+    margin-bottom: 20px;
+}
+
+
+table.pad-columns td,
+table.pad-columns th {
+    padding:0em 1em 0em 1em
 }
