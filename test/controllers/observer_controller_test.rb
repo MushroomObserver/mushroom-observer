@@ -2,6 +2,43 @@
 require "test_helper"
 
 class ObserverControllerTest < FunctionalTestCase
+  ##############################################################################
+  # Helpers
+  # TODO: can helpers move to separate file?  Will this filename work:
+  # test/helpers/observer_controller_helper_test.rb
+
+  def modified_generic_params(params, user)
+    params[:observation] = sample_obs_fields.merge(params[:observation] || {})
+    params[:vote] = { value: "3" }.merge(params[:vote] || {})
+    params[:specimen] = default_specimen_fields.merge(params[:specimen] || {})
+    params[:username] = user.login
+    params
+  end
+
+  def sample_obs_fields
+    { place_name: "Right Here, Massachusetts, USA",
+      lat: "",
+      long: "",
+      alt: "",
+      "when(1i)" => "2007",
+      "when(2i)" => "10",
+      "when(3i)" => "31",
+      specimen: "0",
+      thumb_image_id: "0"
+    }
+  end
+
+  def default_specimen_fields
+    { herbarium_name: "", herbarium_id: "" }
+  end
+
+  def location_exists_or_place_name_blank(params)
+    Location.find_by_name(params[:observation][:place_name]) ||
+      Location.is_unknown?(params[:observation][:place_name]) ||
+      params[:observation][:place_name].blank?
+  end
+  ##############################################################################
+
   def test_show_observation_noteless_image
     obs = observations(:peltigera_rolf_observation)
     img = images(:rolf_profile_image)
@@ -15,34 +52,23 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_observation, id: obs.id)
   end
 
-  # Test constructing observations in various ways (with minimal namings).
-  def generic_construct_observation(params, o_num, g_num, n_num, user = :rolf)
-    user = rolf if user == :rolf
+  # Test constructing observations in various ways (with minimal namings)
+  def generic_construct_observation(params, o_num, g_num, n_num, user = rolf)
     o_count = Observation.count
     g_count = Naming.count
     n_count = Name.count
     score   = user.reload.contribution
-
-    params[:observation] = {
-      place_name: "Right Here, Massachusetts, USA",
-      lat: "", long: "", alt: "",
-      "when(1i)" => "2007", "when(2i)" => "10", "when(3i)" => "31",
-      specimen: "0", thumb_image_id: "0",
-    }.merge(params[:observation] || {})
-    params[:vote] = {
-      value: "3",
-    }.merge(params[:vote] || {})
-    params[:specimen] = default_specimen_fields.merge(params[:specimen] || {})
-    params[:username] = user.login
+    params  = modified_generic_params(params, user)
 
     post_requires_login(:create_observation, params)
+
     begin
       if o_num == 0
         assert_response(:success)
-      elsif Location.find_by_name(params[:observation][:place_name]) or
-            Location.is_unknown?(params[:observation][:place_name]) or
-            params[:observation][:place_name].blank?
-        assert_redirected_to(action: :show_observation)
+      elsif location_exists_or_place_name_blank(params)
+        # assert_redirected_to(action: :show_observation)
+        assert_response(:redirect)
+        assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
       else
         assert_redirected_to(%r{/location/create_location})
       end
@@ -52,22 +78,16 @@ class ObserverControllerTest < FunctionalTestCase
       message = e.to_s + "\nFlash messages: (level #{$1})\n<" + flash + ">\n"
       flunk(message)
     end
-
-    assert_equal(o_count + o_num, Observation.count)
-    assert_equal(g_count + g_num, Naming.count)
-    assert_equal(n_count + n_num, Name.count)
-    assert_equal(score + o_num + 2*g_num + 10*n_num, user.reload.contribution)
+    assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
+    assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
+    assert_equal(n_count + n_num, Name.count, "Wrong Name count")
+    assert_equal(score + o_num + 2*g_num + 10*n_num, user.reload.contribution,
+      "Wrong User score")
     if o_num == 1
       assert_not_equal(0,
-        @controller.instance_variable_get('@observation').thumb_image_id)
+        @controller.instance_variable_get("@observation").thumb_image_id,
+        "Wrong image id")
     end
-  end
-
-  def default_specimen_fields
-    {
-      herbarium_name: "",
-      herbarium_id: ""
-    }
   end
 
 ################################################################################
@@ -726,7 +746,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_flash(:request_success.t)
   end
 
-  def test_review_authors_locatios
+  def test_review_authors_locations
     desc = location_descriptions(:albion_desc)
     params = { id: desc.id, type: "LocationDescription" }
     desc.authors.clear
@@ -1137,8 +1157,8 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1,0,0)
     obs = assigns(:observation)
 
-    assert_equal(lat.to_s, obs.lat.to_s)
-    assert_equal(long.to_s, obs.long.to_s)
+    assert_equal("34.1622", obs.lat.to_s)
+    assert_equal("-118.3521", obs.long.to_s)
     assert_objs_equal(Location.unknown, obs.location)
     assert_not_nil(obs.rss_log)
   end
@@ -1172,7 +1192,6 @@ class ObserverControllerTest < FunctionalTestCase
         observation: { place_name: where, alt: input },
         name: { name: "Unknown" },
       }, 1,0,0)
-
       obs = assigns(:observation)
 
       assert_equal(output, obs.alt)
@@ -1195,13 +1214,37 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_create_observation_creating_family
-    generic_construct_observation({
+    params = {
       observation: { place_name: "Earth", lat: "", long: "" },
       name: { name: "Acarosporaceae" },
       approved_name: "Acarosporaceae",
-    }, 1,1,1)
+    }
+    o_num = 1
+    g_num = 1
+    n_num = 1
+    user = rolf
+    o_count = Observation.count
+    g_count = Naming.count
+    n_count = Name.count
+    score   = user.reload.contribution
+    params  = modified_generic_params(params, user)
+
+    post_requires_login(:create_observation, params)
     name = Name.last
-    assert_equal("Acarosporaceae", name.text_name)
+
+    # assert_redirected_to(action: :show_observation)
+    assert_response(:redirect)
+    assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
+    assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
+    assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
+    assert_equal(n_count + n_num, Name.count, "Wrong Name count")
+    assert_equal(score + o_num + 2*g_num + 10*n_num, user.reload.contribution,
+      "Wrong User score")
+    assert_not_equal(0,
+      @controller.instance_variable_get("@observation").thumb_image_id,
+      "Wrong image id")
+
+    assert_equal("Acarosporaceae", name.text_name, )
     assert_equal(:Family, name.rank)
   end
 
@@ -1477,7 +1520,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:approved_name] = '"One"'
     post(:create_observation, params)
     # assert_template(controller: :observer, action: expected_page)
-    assert_template(%r{/observer/#{expected_page}})
+    assert_redirected_to(%r{#{ expected_page }})
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One"', assigns(:observation).name.search_name)
 
