@@ -2025,12 +2025,12 @@ class Name < AbstractModel
       conditions << "deprecated = 0" unless ignore_deprecated
       conditions << "rank = #{ Name.ranks[rank] }" if rank # enum integer value
 
-      results = Name.where(conditions.join(" AND "), conditions_args)
+      results = Name.where(conditions.join(" AND "), conditions_args).to_a
 
       # If user provided author, check if name already exists without author.
       if author.present? && results.empty?
         conditions_args[:name] = text_name
-        results = Name.where(conditions.join(" AND "), conditions_args)
+        results = Name.where(conditions.join(" AND "), conditions_args).to_a
         # (this should never return more than one result)
         if fill_in_authors and results.length == 1
           results.first.change_author(author)
