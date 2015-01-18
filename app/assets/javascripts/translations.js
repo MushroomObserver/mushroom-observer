@@ -47,7 +47,14 @@ function TranslationsModule(localizedText) {
         $post_form.delegate('#locale', 'change', function () {
             var data = $(this).data();
             show_tag($(this).val(), data.tag);
-        })
+        });
+
+        $post_form.delegate('[data-role="show_old_version', 'click', function(event) {
+            event.preventDefault()
+            var data = $(this).data();
+            show_old_version(data.id);
+        });
+
 
         $post_form.submit(function (){
             CHANGED = false;

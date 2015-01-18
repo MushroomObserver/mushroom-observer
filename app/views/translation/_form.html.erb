@@ -89,12 +89,8 @@
                       <%= h(str = preview_string(version.text, 80)) %>
                       <%= if str.length > 80
                             label = '[' + :edit_translations_full_text.t + ']'
-                            if @js
-                              link_to_function(label, "show_old_version(#{version.id})")
-                            else
                               link_to(label, {:controller => :ajax, :action => :old_translation,
                                       :id => version.id}, data:{ :role => "show_old_version", :id => version.id})
-                            end
                           end %>
                     </td>
                   </tr>
