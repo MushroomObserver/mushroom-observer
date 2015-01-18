@@ -1505,7 +1505,7 @@ end
     end
     result = image.license.copyright_text(image.year, link)
     if div
-      result = content_tag(:div, result, :id => "copytight")
+      result = content_tag(:div, result, :id => "copyright")
     end
     result
   end
@@ -1572,7 +1572,7 @@ end
       if val == cur
         str = content_tag(:b, content_tag(:span, str1, :title => str2))
       else
-          str = link_to(str1, {}, :title => str2, data: {:role => "image_vote", :id => id, :val => val})
+          str = link_to(str1, {controller: :image, action: :show_image, id: id, vote: val}, :title => str2, data: {:role => "image_vote", :id => id, :val => val})
       end
       str = '&nbsp;|&nbsp;'.html_safe + str if val > 1
       row2 += content_tag(:td, content_tag(:small, str))
