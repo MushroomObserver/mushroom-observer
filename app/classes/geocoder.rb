@@ -85,31 +85,35 @@ class Geocoder < BlankSlate
     end
   end
 
-  TEST_EXPECTED_LOCATIONS = {
-    'North Falmouth, Massachusetts, USA' => {
-      :south => 41.6169329,
-      :west => -70.6603389,
-      :north => 41.6592100,
-      :east => -70.6022670
-    },
-    'North bound Rest Area, State Highway 33, between Pomeroy and Athens, Ohio, USA' => {
-      :north => 39.3043,
-      :west => -82.1067,
-      :east => -82.002,
-      :south => 39.0299
-    },
-    'Pasadena, California, USA' => {
-      :north => 34.251905,
-      :west => -118.198139,
-      :east => -118.065479,
-      :south => 34.1192
+  unless defined? TEST_EXPECTED_LOCATIONS
+    TEST_EXPECTED_LOCATIONS = {
+      'North Falmouth, Massachusetts, USA' => {
+        :south => 41.6169329,
+        :west => -70.6603389,
+        :north => 41.6592100,
+        :east => -70.6022670
+      },
+      'North bound Rest Area, State Highway 33, between Pomeroy and Athens, Ohio, USA' => {
+        :north => 39.3043,
+        :west => -82.1067,
+        :east => -82.002,
+        :south => 39.0299
+      },
+      'Pasadena, California, USA' => {
+        :north => 34.251905,
+        :west => -118.198139,
+        :east => -118.065479,
+        :south => 34.1192
+      }
     }
-  }
+  end
 
-  TEST_FAILURE = '<?xml version="1.0" encoding="UTF-8"?>
-  <GeocodeResponse>
-   <status>ZERO_RESULTS</status>
-  </GeocodeResponse>'
+  unless defined? TEST_FAILURE
+    TEST_FAILURE = '<?xml version="1.0" encoding="UTF-8"?>
+    <GeocodeResponse>
+     <status>ZERO_RESULTS</status>
+    </GeocodeResponse>'
+  end
 
   def test_success(loc)
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
