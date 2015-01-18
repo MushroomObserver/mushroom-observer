@@ -1109,7 +1109,7 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1,1,2)
     name = Name.find_by_text_name("Agaricus novus")
     assert(name)
-    assert_equal(new_name, name.text_name)
+    assert_equal("Agaricus novus", name.text_name)
   end
 
   def test_create_observation_that_generates_email
