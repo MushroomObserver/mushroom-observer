@@ -1,0 +1,354 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/refresh_sitemap
+#
+#  DESCRIPTION::
+#
+#  Build robots.txt, a set of sitemap.xml files, and a set of pared-down
+#  index.html files for robots to use to index our site efficiently.
+#
+#  Creates the following files:
+#
+#    RAILS_ROOT/public/robots.txt
+#    RAILS_ROOT/public/sitemap/index.xml
+#    RAILS_ROOT/public/sitemap/static.xml
+#    RAILS_ROOT/public/sitemap/<table>-<N>.xml
+#    RAILS_ROOT/public/sitemap/index.html
+#    RAILS_ROOT/public/sitemap/static.html
+#    RAILS_ROOT/public/sitemap/<table>-<N>.html
+#
+#  The robots.txt file tells robots what *not* to crawl.  The sitemap.xml
+#  files give search robots useful information about the files we *do* want
+#  them to crawl (e.g., how often to crawl them, or when they have changed).
+#  The sitemap.html files give robots access to the pages we *do* want them
+#  to crawl (since we can't always guarantee that they will be able to reach
+#  all those pages via pages they're allowed to crawl by robots.txt).
+#
+################################################################################
+
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
+
+DOMAIN      = "http://mushroomobserver.org"
+SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml"
+INDEX_URL   = "#{DOMAIN}/sitemap/NAME.html"
+
+ROBOTS_FILE     = "#{::Rails.root}/public/robots.txt"
+SITEMAP_FILE    = "#{::Rails.root}/public/sitemap/NAME.xml"
+INDEX_FILE      = "#{::Rails.root}/public/sitemap/NAME.html"
+CONTROLLER_FILE = "#{::Rails.root}/app/controllers/NAME_controller.rb"
+
+OBJECT_TYPES = [
+  [ "observations",          "Observation",         "observer/show_observation/ID"          ],
+  [ "names",                 "Name",                "name/show_name/ID"                     ],
+  [ "locations",             "Location",            "location/show_location/ID"             ],
+  [ "species_lists",         "SpeciesList",         "species_list/show_species_list/ID"     ],
+  [ "projects",              "Project",             "project/show_project/ID"               ],
+  [ "glossary_terms",        "GlossaryTerm",        "glossary/show_term/ID"                 ],
+  [ "herbaria",              "Herbarium",           "herbarium/show_herbarium/ID"           ],
+  [ "name_descriptions",     "NameDescription",     "name/show_name_description/ID"         ],
+  [ "location_descriptions", "LocationDescription", "location/show_location_description/ID" ]
+]
+
+STATIC_PAGES = [
+  [ "home page",    "",                     "hourly" ], # observer/list_rss_logs
+  [ "introduction", "observer/intro",       "weekly" ],
+  [ "how to use",   "observer/how_to_use",  "weekly" ],
+  [ "how to help",  "observer/how_to_help", "weekly" ]
+]
+
+LOCALES = Language.connection.select_values %(
+  SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
+)
+
+ROBOTS_HEADER = %(
+# See http://www.robotstxt.org for documentation.
+Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
+User-agent: *
+Disallow: *?*
+)
+ROBOTS_FOOTER = %(
+)
+
+SITEMAP_ROOT_HEADER = %(
+  <?xml version="1.0" encoding="UTF-8"?>
+  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+)
+SITEMAP_ROOT_FOOTER = %(
+  </sitemapindex>
+)
+
+SITEMAP_LEAF_HEADER = %(
+  <?xml version="1.0" encoding="UTF-8"?>
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+)
+SITEMAP_LEAF_FOOTER = %(
+  </urlset>
+)
+
+INDEX_HEADER = %(
+  <html><head></head><body>
+)
+INDEX_FOOTER = %(
+  </body></html>
+)
+
+################################################################################
+
+def update_sitemap_files
+  FileUtils.mkpath(File.dirname(SITEMAP_FILE))
+  last_update = get_last_update
+  comments = get_new_comments(last_update)
+  sitemaps = []
+  for object_type in OBJECT_TYPES
+    sitemaps += map_one_object_type(object_type, comments, last_update)
+  end
+  sitemaps += map_static_pages
+  write_index_xml(sitemaps)
+  write_index_html(sitemaps)
+end
+
+def get_new_comments(last_update)
+  Name.connection.select_rows %(
+    SELECT target_type, target_id, updated_at
+    FROM comments WHERE updated_at >= "#{last_update}"
+  )
+end
+
+def get_new_images(last_update)
+  Name.connection.select_rows %(
+    SELECT io.observation_id, i.updated_at
+    FROM images i, images_observations io
+    WHERE i.id = io.image_id AND i.updated_at >= "#{last_update}"
+  )
+end
+
+def map_one_object_type(params, comments, last_update)
+  table, type, path = *params
+  times = read_old_files(table)
+  update_times_of_new_objects(times, table, last_update)
+  update_times_of_objects_with_new_images(times, last_update) if type == "Observation"
+  update_times_of_objects_with_new_comments(times, comments, type)
+  return write_new_files(times, table, path)
+end
+
+def update_times_of_new_objects(times, table, last_update)
+  for id, time in Name.connection.select_rows %(
+    SELECT id, updated_at FROM #{table} WHERE updated_at > "#{last_update}"
+  )
+    times[id.to_i] = parse_mysql_time(time)
+  end
+end
+
+def update_times_of_objects_with_new_images(times, last_update)
+  for id, time in get_new_images(last_update)
+    id = id.to_i
+    time = parse_mysql_time(time)
+    times[id] = time if !times[id] || times[id] < time
+  end
+end
+
+def update_times_of_objects_with_new_comments(times, comments, type)
+  for target_type, target_id, target_time in comments
+    target_id = target_id.to_i
+    target_time = parse_mysql_time(target_time)
+    times[target_id] = target_time if target_type == type and
+                                      (!times[target_id] or times[target_id] < target_time)
+  end
+end
+
+def read_old_files(table)
+  result = {}
+  pat = Regexp.new("<loc>.*/(\\d+)</loc><lastmod>(.*)</lastmod>")
+  wildcard = SITEMAP_FILE.sub("NAME", "#{table}-*")
+  for file in Dir.glob(wildcard)
+    File.open(file).readlines.each do |line|
+      if match = pat.match(line)
+        result[match[1].to_i] = match[2]
+      end
+    end
+  end
+  return result
+end
+
+def write_new_files(times, table, path_template)
+  pages = []
+  for id in times.keys.sort
+    str  = "#{table} ##{id}"
+    path = path_template.sub("ID", id.to_s)
+    time = "<lastmod>#{times[id]}</lastmod>"
+    pages << [str, path, time]
+  end
+  sitemaps = []
+  until pages.empty?
+    name = "#{table}-#{sitemaps.length+1}"
+    next_pages = pages[0..9999]
+    write_sitemap_xml(name, next_pages)
+    write_sitemap_html(name, next_pages)
+    pages[0..9999] = []
+    sitemaps << name
+  end
+  return sitemaps
+end
+
+def map_static_pages
+  name = "static"
+  pages = []
+  for str, path, freq in STATIC_PAGES
+    for locale in LOCALES
+      lang = locale == "en" ? "" : "?user_locale=#{locale}"
+      time = "<changefreq>#{freq}</changefreq>"
+      pages << [ "#{str} in #{locale}", "#{path}#{lang}", time ]
+    end
+  end
+  write_sitemap_xml(name, pages)
+  write_sitemap_html(name, pages)
+  return [name]
+end
+
+def write_sitemap_xml(name, pages)
+  file = SITEMAP_FILE.sub("NAME", name)
+  File.open(file, "w") do |fh|
+    fh.write SITEMAP_LEAF_HEADER
+    for str, path, time in pages
+      fh.puts "<url><loc>#{DOMAIN}/#{path}</loc>#{time}</url>"
+    end
+    fh.write SITEMAP_LEAF_FOOTER
+  end
+end
+
+def write_sitemap_html(name, pages)
+  file = INDEX_FILE.sub("NAME", name)
+  File.open(file, "w") do |fh|
+    fh.write INDEX_HEADER
+    for str, path, time in pages
+      fh.puts "<a href=\"/#{path}\">#{str}</a><br/>"
+    end
+    fh.write INDEX_FOOTER
+  end
+end
+
+def write_index_xml(sitemaps)
+  now = get_current_time
+  file = SITEMAP_FILE.sub("NAME", "index")
+  File.open(file, "w") do |fh|
+    fh.write SITEMAP_ROOT_HEADER
+    for sitemap in sitemaps
+      url  = "<loc>#{SITEMAP_URL.sub("NAME", sitemap)}</loc>"
+      time = "<lastmod>#{now}</lastmod>"
+      fh.puts "<sitemap>#{url}#{time}</sitemap>"
+    end
+    fh.write SITEMAP_ROOT_FOOTER
+  end
+end
+
+def write_index_html(sitemaps)
+  now = get_current_time
+  file = INDEX_FILE.sub("NAME", "index")
+  File.open(file, "w") do |fh|
+    fh.write INDEX_HEADER
+    for sitemap in sitemaps
+      fh.puts "<a href=\"#{sitemap}.html\">#{sitemap}</a><br/>"
+    end
+    fh.write INDEX_FOOTER
+  end
+end
+
+################################################################################
+
+# Times come out of the mysql adapter as Time objects right now.
+# Sitemaps require "yyyy:mm:ddThh:mm:ss+00:00" format.
+# These functions ensure that all times are Strings in that format.
+def parse_mysql_time(time)
+  format_time(time)
+end
+
+def format_time(time)
+  time.utc.strftime "%Y-%m-%dT%H:%M:%S+00:00"
+end
+
+def get_last_update
+  file = SITEMAP_FILE.sub("NAME", "index")
+  format_time(File.mtime(file)) rescue format_time(100.years.ago)
+end
+
+def get_current_time
+  format_time(Time.now)
+end
+
+################################################################################
+
+def update_robots_file
+  allowed_actions = deduce_allowed_actions
+  disallowed_paths = []
+  for controller in get_list_of_controllers
+    actions  = controller_actions(controller)
+    allow    = allowed_actions[controller] || []
+    disallow = actions - allow
+    disallowed_paths += disallow.map {|action| "/#{controller}/#{action}"}
+  end
+  write_robots_file(disallowed_paths)
+end
+
+def deduce_allowed_actions
+  actions = {}
+  for table, type, path in OBJECT_TYPES
+    add_action(actions, path)
+  end
+  for str, path, freq in STATIC_PAGES
+    add_action(actions, path)
+  end
+  return actions
+end
+
+def add_action(actions, path)
+  controller, action = parse_path(path)
+  return if controller.blank?
+  actions[controller] ||= []
+  actions[controller] << action
+end
+
+def parse_path(path)
+  controller, action = path.split("/")
+  action.sub!(/\?.*/, "") if action
+  return controller, action
+end
+
+def get_list_of_controllers
+  # We could use ApplicationController.descendants, but controllers are loaded
+  # lazily, so there won't actually be any loaded yet.  This is safer.
+  result = []
+  wildcard = CONTROLLER_FILE.sub("NAME", "*")
+  for file in Dir.glob(wildcard)
+    match = file.match(/(\w+)_controller.rb/)
+    result << match[1] if match
+  end
+  return result
+end
+
+def controller_actions(controller)
+  klass = "#{controller}_controller".camelize.constantize
+  instance = klass.new
+  klass.action_methods.reject do |name|
+    name.match(/\W/) || instance.method(name).arity != 0
+  end
+end
+
+def write_robots_file(disallowed_paths)
+  File.open(ROBOTS_FILE, "w") do |fh|
+    fh.write ROBOTS_HEADER
+    for path in disallowed_paths.sort
+      fh.puts "Disallow: #{path}"
+    end
+    fh.write ROBOTS_FOOTER
+  end
+end
+
+################################################################################
+
+update_sitemap_files
+update_robots_file
+exit 0
+
