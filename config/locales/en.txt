@@ -1220,13 +1220,12 @@
   form_observations_inconsistent_date_warn: The images appear to have been taken on a date different from the observation date.
   form_observations_inconsistent_date_update_obs_date: Change the observation date to the image dates.
   form_observations_inconsistent_date_update_img_dates: Change the image dates to the observation date.
-  form_observations_inconsistent_date_correct_yourself: Or, correct the dates manually.
   form_observations_image_upload_error: There was an error uploading the image. Continuing anyway.
   form_observations_image_too_big: This image is too large. Images must be less than 10mb in file size.
   form_observations_image_select_images: Select Images
   form_observations_use_date: Use this date
   form_observations_camera_date: Camera Date
-  form_observations_date_warning: Warning! The camera date on some of your photos doesn't match the observation date you have entered.
+  form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_select_images: Select images

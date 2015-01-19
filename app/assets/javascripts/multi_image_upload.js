@@ -88,10 +88,12 @@ function MultiImageUploader(localized_text) {
         $imgRadioContainer.html('');
         $obsRadioContainer.html('');
 
-        _this.makeObservationDateRadio(_this.observationDate());
+        var obsDate = _this.observationDate();
+        _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate){
-            _this.makeImageDateRadio(simpleDate);
+            if (!obsDate.areEqual(simpleDate))
+                _this.makeImageDateRadio(simpleDate);
         });
 
         if (_this.areDatesInconsistent()) {

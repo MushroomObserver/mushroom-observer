@@ -223,9 +223,7 @@ end %>
         <%=stylesheet_link_tag("grids")%>
 
               <div class="row margin_top image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
-                  <div class="col-sm-4">
-                    <strong><%= :form_observations_date_warning.t %></strong>
-                  </div>
+
                   <div class="col-sm-7">
                       <div class="inconsistent_date_options">
                         <div class="col-sm-12">
@@ -244,6 +242,9 @@ end %>
                         </div>
                       </div>
                   </div>
+                <div class="col-sm-4">
+                  <span><%= :form_observations_date_warning.t %></span>
+                </div>
               </div>
 
         <!--Container for appending images-->
