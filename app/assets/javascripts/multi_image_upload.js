@@ -128,7 +128,7 @@ function MultiImageUploader(localized_text) {
     DateUpdater.prototype.makeObservationDateRadio = function (simpleDate) {
         var _this = this;
 
-        var html = "<div><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>"
+        var html = "<div><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
         html = html.replace('{{date}}', JSON.stringify(simpleDate));
         html = html.replace('{{dateStr}}',  simpleDate.asDateString());
 
