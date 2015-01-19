@@ -365,7 +365,6 @@ class AmateurTest < IntegrationTestCase
       assert_select('div.Warnings') do |elems|
         assert(elems.any? { |e| e.to_s.match(/#{text_name}.*not recognized/i) },
                "Expected error about name not existing yet.")
-        end
       end
 
       open_form do |form|

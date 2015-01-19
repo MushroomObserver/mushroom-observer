@@ -66,7 +66,7 @@ class ExpertTest < IntegrationTestCase
 
     assert_not_nil(Name.find_by_text_name('Caloplaca'))
 
-    names = Name.where:(text_name: name1)
+    names = Name.where(text_name: name1)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author1, names.first.author)
     assert_equal(false, names.first.deprecated)
