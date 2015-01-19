@@ -1100,7 +1100,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(nam.name, names(:lactarius_subalpinus))
   end
 
-  def test_create_observation_with_approved_new_name
+  def test_create_observation_with_approved_new_species
     # Test an observation creation with an approved new name
     Name.find_by_text_name("Agaricus").destroy
     generic_construct_observation({
