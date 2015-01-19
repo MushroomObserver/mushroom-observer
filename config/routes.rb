@@ -4,7 +4,7 @@ MushroomObserver::Application.routes.draw do
   resources :publications
 
   # The priority is based upon order of creation: first created -> highest priority.
-  
+
   # Default page is /observer/index.
   # map.connect '', :controller => 'observer', :action => 'index'
   root :to => "observer#index"
@@ -23,7 +23,7 @@ MushroomObserver::Application.routes.draw do
 
   # map.connect ':controller/:action/:id', :id => /\d+/
   match ':controller(/:action(/:id))', :constraints => { :id => /\d+/ }
-  
+
   # Accept non-numeric ids for the lookup_xxx actions.
   # map.connect ':controller/:action/:id', :action => /lookup_\w+/
   match ':controller/:action/:id', :action => /lookup_\w+/

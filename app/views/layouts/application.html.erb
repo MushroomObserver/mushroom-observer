@@ -67,8 +67,7 @@
           <table class="LeftSide" cellpadding="10" style='height:100%; white-space:nowrap'>
             <tr style="height:1px">
               <td id="banner">
-                <%= link_to(@page_title || :app_banner.t,
-                            :controller => 'observer', :action => 'index') %>
+                <%= link_to(:app_banner.t, browser.bot? ? "/sitemap/index.html" : "/") %>
               </td>
             </tr>
             <tr>
