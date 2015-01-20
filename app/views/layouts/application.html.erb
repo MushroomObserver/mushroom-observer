@@ -171,9 +171,8 @@
         <%= link_to(:app_site_stats.t, :controller => 'observer', :action => 'show_site_stats') %>
         <%= link_to(:translators_note_title.t, :controller => 'observer', :action => 'translators_note') %>
       </div>
-      <div class="group">
+      <div class="group hidden-xs">
         <%= link_to(:app_colors_from.t(:theme => css.to_sym.l), :controller => 'observer', :action => 'color_themes') %>
-        <br/><br/>
         <%= :app_powered_by.t %>:
         <a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a>
         <%= :app_preferred_browser.t %>:
@@ -292,6 +291,7 @@
 </div>
 <!--Javascript should be last thing loaded -->
 <%= javascript_include_tag("jstz.min") %>
+<% javascript_include('bootstrap') %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <%= javascript_tag('var CSRF_TOKEN = "' + form_authenticity_token + '";') %>
 <%= sort_javascript_includes.map { |m| javascript_include_tag(m) }.safe_join('') %>
