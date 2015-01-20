@@ -63,37 +63,37 @@ LOCALES = Language.connection.select_values %(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 )
 
-ROBOTS_HEADER = %(
+ROBOTS_HEADER = <<"EOB"
 # See http://www.robotstxt.org for documentation.
 Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 User-agent: *
 Disallow: *?*
-)
-ROBOTS_FOOTER = %(
-)
+EOB
+ROBOTS_FOOTER = <<"EOB"
+EOB
 
-SITEMAP_ROOT_HEADER = %(
-  <?xml version="1.0" encoding="UTF-8"?>
-  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-)
-SITEMAP_ROOT_FOOTER = %(
-  </sitemapindex>
-)
+SITEMAP_ROOT_HEADER = <<"EOB"
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+EOB
+SITEMAP_ROOT_FOOTER = <<"EOB"
+</sitemapindex>
+EOB
 
-SITEMAP_LEAF_HEADER = %(
-  <?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-)
-SITEMAP_LEAF_FOOTER = %(
-  </urlset>
-)
+SITEMAP_LEAF_HEADER = <<"EOB"
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+EOB
+SITEMAP_LEAF_FOOTER = <<"EOB"
+</urlset>
+EOB
 
-INDEX_HEADER = %(
-  <html><head></head><body>
-)
-INDEX_FOOTER = %(
-  </body></html>
-)
+INDEX_HEADER = <<"EOB"
+<html><head></head><body>
+EOB
+INDEX_FOOTER = <<"EOB"
+</body></html>
+EOB
 
 ################################################################################
 
