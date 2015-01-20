@@ -613,7 +613,7 @@ module ControllerExtensions
         elsif @response.missing?
           got = ", got #{code} missing (?)"
         elsif @response.redirect?
-          url = @response.redirect_url.sub(/^http:..test.host./, '')
+          url = @response.redirect_url.sub(/^http:..test.host/, '')
           got = ", got #{code} redirect to <#{url}>."
         else
           got = ", got #{code} body is <#{extract_error_from_body}>."
@@ -628,18 +628,25 @@ module ControllerExtensions
         # Now check result.
         if arg.is_a?(Array)
           if arg.length == 1
-            controller = @controller.controller_name
-            msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
-            assert_redirected_to({action: arg[0]}, msg)
+            if arg[0].is_a?(Hash)
+              msg += "Expected redirect to <#{url_for(arg[0])}>" + got
+              assert_redirected_to(url_for(arg[0]), msg)
+            else
+              controller = @controller.controller_name
+              msg += "Expected redirect to <#{controller}/#{arg[0]}>" + got
+              # assert_redirected_to({action: arg[0]}, msg)
+              assert_redirected_to(%r{/#{controller}/#{arg[0]}}, msg)
+            end
           else
             msg += "Expected redirect to <#{arg[0]}/#{arg[1]}}>" + got
-            assert_redirected_to({ controller: arg[0], action: arg[1] }, msg)
+            # assert_redirected_to({ controller: arg[0], action: arg[1] }, msg)
+            assert_redirected_to(%r{/#{arg[0]}/#{arg[1]}}, msg)
           end
         elsif arg.is_a?(Hash)
-          url = @controller.url_for(arg).sub(/^http:..test.host./, '')
+          url = @controller.url_for(arg).sub(/^http:..test.host./, "")
           msg += "Expected redirect to <#{url}>" + got
-          assert_redirected_to(arg, msg)
           # assert_redirect_match(arg, @response, @controller, msg)
+          assert_redirected_to(arg, msg)
         elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
           msg += "Expected redirect to <#{arg}>" + got
           assert_equal(arg, @response.redirect_url, msg)
