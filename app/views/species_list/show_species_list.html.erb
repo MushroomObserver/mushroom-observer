@@ -21,7 +21,7 @@
         :action => 'edit_species_list', :id => @species_list.id)
       add_tab_with_query(:DESTROY.t,
         { :action => 'destroy_species_list', :id => @species_list.id },
-        { :confirm => :are_you_sure.l })
+        { data: { confirm: :are_you_sure.l } })
     end
   end
 
@@ -53,7 +53,7 @@
 
 <% if @pages && @pages.length > 0
   set_query_params(@query) %>
-  <%= :species_list_show_members.t %>: 
+  <%= :species_list_show_members.t %>:
     <%= link_with_query(:show_objects.t(:type => :observation),
           :controller => :observer, :action => :index_observation) %> |
     <%= link_with_query(:show_objects.t(:type => :image),

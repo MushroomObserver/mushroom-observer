@@ -1,8 +1,9 @@
 class FixCurators < ActiveRecord::Migration
   def self.up
-    for h in Herbarium.find(:all)
-      if h.curators == []
-        user = User.find_all_by_email(h.email)[0]
+    # for h in Herbarium.find(:all) # Rails 3
+    for h in Herbarium.all
+     if h.curators == []
+        user = User.where(email: h.email)[0]
         if user
           h.curators.push(user)
           h.save

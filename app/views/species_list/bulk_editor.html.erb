@@ -61,7 +61,7 @@
       <%= url = url_for(add_query_param({ :controller => :observer,
             :action => :destroy_observation, :id => 'XXX' }, @query))
           link_to(:DESTROY.l, "javascript:row_button('#{url}')",
-            :confirm => :are_you_sure.l) %>
+            data: { confirm: :are_you_sure.l }) %>
     &nbsp;
     <%= :NAMES.t %>: (<span id="number_of_names"></span>)
       <%= url = url_for(add_query_param({ :controller => :naming,

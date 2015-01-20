@@ -67,6 +67,30 @@
 class NameDescription < Description
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:review_status,
+           { unreviewed: 0,
+             unvetted: 1,
+             vetted: 2,
+             inaccurate: 3
+           },
+           source: :review_status,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:source_type,
+           { public: 0,
+             foreign: 1,
+             project: 2,
+             source: 3,
+             user: 4
+           },
+           source: :source_type,
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -236,11 +260,11 @@ class NameDescription < Description
       # Tell reviewer of the change.
       reviewer = self.reviewer || @old_reviewer
       if reviewer && reviewer.email_names_reviewer
-        recipients.push(reviewer) 
+        recipients.push(reviewer)
       end
 
       # Tell masochists who want to know about all name changes.
-      for user in User.find_all_by_email_names_all(true)
+      for user in User.where(email_names_all: true)
         recipients.push(user)
       end
 

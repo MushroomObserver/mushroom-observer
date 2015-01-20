@@ -7,6 +7,68 @@
 class Query < AbstractQuery
   belongs_to :user
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+    as_enum(:flavor,
+             { advanced_search: 0,
+               all: 1,
+               at_location: 2,
+               at_where: 3,
+               by_author: 4,
+               by_editor: 5,
+               by_rss_log: 6,
+               by_user: 7,
+               for_project: 8,
+               for_target: 9,
+               for_user: 10,
+               in_set: 11,
+               in_species_list: 12,
+               inside_observation: 13,
+               of_children: 14,
+               of_name: 15,
+               of_parents: 16,
+               pattern_search: 17,
+               regexp_search: 18,
+               with_descriptions: 19,
+               with_descriptions_by_author: 20,
+               with_descriptions_by_editor: 21,
+               with_descriptions_by_user: 22,
+               with_descriptions_in_set: 23,
+               with_observations: 24,
+               with_observations_at_location: 25,
+               with_observations_at_where: 26,
+               with_observations_by_user: 27,
+               with_observations_for_project: 28,
+               with_observations_in_set: 29,
+               with_observations_in_species_list: 30,
+               with_observations_of_children: 31,
+               with_observations_of_name: 32
+             },
+             source: :flavor,
+             with: [],
+             accessor: :whiny
+           )
+    as_enum(:model,
+             { Comment: 0,
+               Herbarium: 1,
+               Image: 2,
+               Location: 3,
+               LocationDescription: 4,
+               Name: 5,
+               NameDescription: 6,
+               Observation: 7,
+               Project: 8,
+               RssLog: 9,
+               SpeciesList: 10,
+               Specimen: 11,
+               User: 12
+             },
+             source: :model,
+             with: [],
+             accessor: :whiny
+           )
+
+
   # Parameters allowed in every query.
   self.global_params = {
     # Allow every query to customize its title.
@@ -782,70 +844,70 @@ class Query < AbstractQuery
 
   # Tell SQL how to sort results using the <tt>:by => :blah</tt> mechanism.
   def initialize_order(by)
-    table = model.table_name
+    table = model_class.table_name
     case by
 
     when 'updated_at', 'created_at', 'last_login', 'num_views'
-      if model.column_names.include?(by)
+      if model_class.column_names.include?(by)
         "#{table}.#{by} DESC"
       end
 
     when 'date'
-      if model.column_names.include?('date')
+      if model_class.column_names.include?('date')
         "#{table}.date DESC"
-      elsif model.column_names.include?('when')
+      elsif model_class.column_names.include?('when')
         "#{table}.when DESC"
-      elsif model.column_names.include?('created_at')
+      elsif model_class.column_names.include?('created_at')
         "#{table}.created_at DESC"
       end
 
     when 'name'
-      if model == Image
+      if model_class == Image
         self.join << {:images_observations => {:observations => :names}}
         self.group = 'images.id'
         'MIN(names.sort_name) ASC, images.when DESC'
-      elsif model == Location
+      elsif model_class == Location
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
-      elsif model == LocationDescription
+      elsif model_class == LocationDescription
         self.join << :locations
         'locations.name ASC, location_descriptions.created_at ASC'
-      elsif model == Name
+      elsif model_class == Name
         'names.sort_name ASC'
-      elsif model == NameDescription
+      elsif model_class == NameDescription
         self.join << :names
         'names.sort_name ASC, name_descriptions.created_at ASC'
-      elsif model == Observation
+      elsif model_class == Observation
         self.join << :names
         'names.sort_name ASC, observations.when DESC'
-      elsif model.column_names.include?('sort_name')
+      elsif model_class.column_names.include?('sort_name')
         "#{table}.sort_name ASC"
-      elsif model.column_names.include?('name')
+      elsif model_class.column_names.include?('name')
         "#{table}.name ASC"
-      elsif model.column_names.include?('title')
+      elsif model_class.column_names.include?('title')
         "#{table}.title ASC"
       end
 
     when 'title', 'login', 'summary', 'copyright_holder', 'where'
-      if model.column_names.include?(by)
+      if model_class.column_names.include?(by)
         "#{table}.#{by} ASC"
       end
 
     when 'user'
-      if model.column_names.include?('user_id')
+      if model_class.column_names.include?('user_id')
         self.join << :users
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
 
     when 'location'
-      if model.column_names.include?('location_id')
+      if model_class.column_names.include?('location_id')
         self.join << :locations
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
       end
 
     when 'rss_log'
-      if model.column_names.include?('rss_log_id')
+      if model_class.column_names.include?('rss_log_id')
         self.join << :rss_logs
         'rss_logs.updated_at DESC'
       end
@@ -1237,7 +1299,7 @@ class Query < AbstractQuery
 
   def initialize_model_do_search(arg, col=nil)
     if !params[arg].blank?
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       search = google_parse(params[arg])
       self.where += google_conditions(search, col)
     end
@@ -1257,7 +1319,7 @@ class Query < AbstractQuery
 
   def initialize_model_do_type_list(arg, col, vals)
     if !params[arg].blank?
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       types = params[arg].to_s.strip_squeeze.split
       types &= vals.map(&:to_s)
       if types.any?
@@ -1283,7 +1345,7 @@ class Query < AbstractQuery
   def initialize_model_do_objects_by_id(arg, col=nil)
     if ids = params[arg]
       col ||= "#{arg.to_s.sub(/s$/,'')}_id"
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       set = clean_id_set(ids)
       self.where << "#{col} IN (#{set})"
     end
@@ -1293,7 +1355,7 @@ class Query < AbstractQuery
     names = params[arg]
     if names && names.any?
       col ||= arg.to_s.sub(/s?$/, '_id')
-      col = "#{self.model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{self.model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       objs = []
       for name in names
         if name.to_s.match(/^\d+$/)
@@ -1303,21 +1365,22 @@ class Query < AbstractQuery
           case model.name
           when 'Location'
             pattern = clean_pattern(Location.clean_name(name))
-            objs += model.all(:conditions => "name LIKE '%#{pattern}%'")
+#            objs += model.all(:conditions => "name LIKE '%#{pattern}%'") # Rails 3
+            objs += model.where("name LIKE ?", "%#{pattern}%")
           when 'Name'
             if parse = Name.parse_name(name)
               name2 = parse.search_name
             else
               name2 = Name.clean_incoming_string(name)
             end
-            matches = model.find_all_by_search_name(name2)
-            matches = model.find_all_by_text_name(name2) if matches.empty?
+            matches = model.where(search_name: name2)
+            matches = model.where(text_name: name2) if matches.empty?
             objs += matches
           when 'Project', 'SpeciesList'
-            objs += model.find_all_by_title(name)
+            objs += model.where(title: name)
           when 'User'
             name.sub(/ *<.*>/, '')
-            objs += model.find_all_by_login(name)
+            objs += model.where(login: name)
           else
             raise("Forgot to tell initialize_model_do_objects_by_name how " +
                   "to find instances of #{model.name}!")
@@ -1335,7 +1398,7 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_locations(table=model.table_name, args={})
+  def initialize_model_do_locations(table=model_class.table_name, args={})
     locs = params[:locations]
     if locs && locs.any?
       loc_col = "#{table}.location_id"
@@ -1459,7 +1522,7 @@ class Query < AbstractQuery
   def initialize_model_do_license
     if !params[:license].blank?
       license = find_cached_parameter_instance(License, :license)
-      self.where << "#{model.table_name}.license_id = #{license.id}"
+      self.where << "#{model_class.table_name}.license_id = #{license.id}"
     end
   end
 
@@ -1468,7 +1531,7 @@ class Query < AbstractQuery
   # ----------------------------
 
   def initialize_model_do_date(arg=:date, col=arg)
-    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
       # Ugh, special case for search by month/day where range of months wraps around from December to January.
       if vals[0].to_s.match(/^\d\d-\d\d$/) and
@@ -1505,7 +1568,7 @@ class Query < AbstractQuery
   end
 
   def initialize_model_do_time(arg=:time, col=arg)
-    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
       initialize_model_do_time_half(true, vals[0], col)
       initialize_model_do_time_half(false, vals[1], col)
@@ -1613,8 +1676,8 @@ class Query < AbstractQuery
   def initialize_by_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    table = model.table_name
-    if model.column_names.include?('user_id')
+    table = model_class.table_name
+    if model_class.column_names.include?('user_id')
       self.where << "#{table}.user_id = '#{params[:user]}'"
     else
       raise "Can't figure out how to select #{model_string} by user_id!"
@@ -1636,7 +1699,7 @@ class Query < AbstractQuery
   def initialize_for_project
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
-    join_table = [model.table_name, 'projects'].sort.join('_')
+    join_table = [model_class.table_name, 'projects'].sort.join('_')
     self.where << "#{join_table}.project_id = '#{params[:project]}'"
     self.join << join_table
   end
@@ -1670,12 +1733,12 @@ class Query < AbstractQuery
     title_args[:user] = user.legal_name
     case model_symbol
     when :Name, :Location
-      version_table = "#{model.table_name}_versions".to_sym
+      version_table = "#{model_class.table_name}_versions".to_sym
       self.join << version_table
       self.where << "#{version_table}.user_id = '#{params[:user]}'"
-      self.where << "#{model.table_name}.user_id != '#{params[:user]}'"
+      self.where << "#{model_class.table_name}.user_id != '#{params[:user]}'"
     when :NameDescription, :LocationDescription
-      glue_table = "#{model.name.underscore}s_#{flavor}s".
+      glue_table = "#{model_string.underscore}s_#{flavor}s".
                       sub('_by_', '_').to_sym
       self.join << glue_table
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
@@ -1693,7 +1756,7 @@ class Query < AbstractQuery
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
     self.join << :names
-    self.where << "#{model.table_name}.location_id = '#{params[:location]}'"
+    self.where << "#{model_class.table_name}.location_id = '#{params[:location]}'"
     params[:by] ||= 'name'
   end
 
@@ -1701,7 +1764,7 @@ class Query < AbstractQuery
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
     self.join << :names
-    self.where << "#{model.table_name}.where LIKE '%#{pattern}%'"
+    self.where << "#{model_class.table_name}.where LIKE '%#{pattern}%'"
     params[:by] ||= 'name'
   end
 
@@ -1728,8 +1791,8 @@ class Query < AbstractQuery
       if name.is_a?(Fixnum) or name.match(/^\d+$/)
         names = [Name.find(name.to_i)]
       else
-        names = Name.find_all_by_search_name(name)
-        names = Name.find_all_by_text_name(name) if names.empty?
+        names = Name.where(search_name: name)
+        names = Name.where(text_name: name) if names.empty?
       end
     end
 
@@ -1961,7 +2024,7 @@ class Query < AbstractQuery
   # ---------------------------------------------------------------
 
   def initialize_with_descriptions
-    type = model.name.underscore
+    type = model_string.underscore
     self.join << :"#{type}_descriptions"
     params[:by] ||= 'name'
   end
@@ -1971,7 +2034,7 @@ class Query < AbstractQuery
   end
 
   def initialize_with_descriptions_by_editor
-    type = model.name.underscore
+    type = model_string.underscore
     glue = flavor.to_s.sub(/^.*_by_/, '')
     desc_table = :"#{type}_descriptions"
     glue_table = :"#{type}_descriptions_#{glue}s"
@@ -1983,7 +2046,7 @@ class Query < AbstractQuery
   end
 
   def initialize_with_descriptions_by_user
-    type = model.name.underscore
+    type = model_string.underscore
     desc_table = :"#{type}_descriptions"
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
@@ -2110,7 +2173,7 @@ class Query < AbstractQuery
         args2 = args.dup
         extend_join(args2)  << :images_observations
         extend_where(args2) << "images_observations.observation_id IN (#{ids})"
-        model.connection.select_rows(query(args2))
+        model_class.connection.select_rows(query(args2))
       end
       return
     end
@@ -2178,7 +2241,7 @@ class Query < AbstractQuery
         args2 = args.dup
         extend_where(args2)
         args2[:where] += google_conditions(content, 'observations.notes')
-        results = model.connection.select_rows(query(args2))
+        results = model_class.connection.select_rows(query(args2))
 
         args2 = args.dup
         extend_join(args2) << case model_symbol
@@ -2190,7 +2253,7 @@ class Query < AbstractQuery
         extend_where(args2)
         args2[:where] += google_conditions(content,
           'CONCAT(observations.notes,comments.summary,comments.comment)')
-        results |= model.connection.select_rows(query(args2))
+        results |= model_class.connection.select_rows(query(args2))
       end
     end
   end

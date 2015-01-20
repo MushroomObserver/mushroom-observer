@@ -80,7 +80,8 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, :class_name => 'LocationDescription', :order => 'num_views DESC'
+  has_many :descriptions, -> { order "num_views DESC" },
+           class_name: "LocationDescription"
   has_many :comments,  :as => :target, :dependent => :destroy
   has_many :interests, :as => :target, :dependent => :destroy
   has_many :observations
@@ -213,7 +214,8 @@ class Location < AbstractModel
     @@names_for_unknown ||= begin
       # yikes! need to make sure we always include the English words for "unknown",
       # even when viewing the site in another language
-      Language.official.translation_strings.find_by_tag('unknown_locations').text.split(/, */)
+      Language.official.translation_strings.find_by_tag("unknown_locations").
+               text.split(/, */)
     rescue
       []
     end
@@ -223,7 +225,8 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     for name in names_for_unknown
-      location = Location.find(:first, :conditions => ['name like ?', name])
+      # location = Location.find(:first, :conditions => ['name like ?', name])
+      location = Location.where("name LIKE ?", name).first
       return location if location
     end
     raise "There is no \"unknown\" location!"
@@ -548,7 +551,7 @@ class Location < AbstractModel
     end
 
     # Move species lists over.
-    for spl in SpeciesList.find_all_by_location_id(old_loc.id)
+    for spl in SpeciesList.where(location_id: old_loc.id)
       spl.update_attribute(:location, self)
       Transaction.put_species_list(
         :id           => spl,
@@ -557,7 +560,7 @@ class Location < AbstractModel
     end
 
     # Update any users who call this location their primary location.
-    for user in User.find_all_by_location_id(old_loc.id)
+    for user in User.where(location_id: old_loc.id)
       user.update_attribute(:location, self)
       Transaction.put_user(
         :id           => user,
@@ -566,8 +569,9 @@ class Location < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_target_type_and_target_id('Location',
-                                                              old_loc.id)
+    # for int in Interest.find_all_by_target_type_and_target_id('Location',
+    #                                                         old_loc.id)
+    for int in Interest.where(target_type: "Location", target_id: old_loc.id)
       int.target = self
       int.save
     end
@@ -657,8 +661,9 @@ class Location < AbstractModel
       end
 
       # Tell masochists who want to know about all location changes.
-      for user in User.find_all_by_email_locations_all(true)
-        recipients.push(user)
+      # for user in User.find_all_by_email_locations_all(true)
+      for user in User.where(email_locations_all: true)
+       recipients.push(user)
       end
 
       # Send to people who have registered interest.

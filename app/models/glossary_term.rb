@@ -6,7 +6,7 @@ class GlossaryTerm < AbstractModel
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   belongs_to :user
   belongs_to :rss_log
-  has_and_belongs_to_many :images, :order => "vote_cache DESC"
+  has_and_belongs_to_many :images, -> { order "vote_cache DESC" }
 
   ALL_TERM_FIELDS = [:name, :description]
   acts_as_versioned(
@@ -35,7 +35,7 @@ class GlossaryTerm < AbstractModel
   def unique_format_name; unique_text_name; end
   def unique_text_name; "#{self.name} (#{self.id})"; end
   def has_edit_permission?(user); return true; end
-  
+
   def add_image(image)
     if image
       if self.thumb_image.nil?
@@ -45,7 +45,7 @@ class GlossaryTerm < AbstractModel
       end
     end
   end
-  
+
   def all_images; [self.thumb_image] + self.images; end
 
   def remove_image(image)
@@ -60,5 +60,5 @@ class GlossaryTerm < AbstractModel
       save
     end
   end
-  
+
 end

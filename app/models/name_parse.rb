@@ -5,7 +5,7 @@
 #  This class is used by NameSorter and a few controllers (e.g.
 #  NameController, SpeciesListController) to help parse lists of names, such as
 #  in bulk_name_edit, create/edit_species_list, and change_synonyms.  It splits
-#  each line up into a name and an optional synonym: 
+#  each line up into a name and an optional synonym:
 #
 #    Species name
 #    Species name = Synonym name
@@ -18,25 +18,28 @@
 #    File.new("species_list").each do |line|
 #      np = NameParse.new(line)
 #
-#      np.line_str               # "Lichenomphalia umbellifera = Omphalia ericetorum [Lichen Mushroom]"
+#      np.line_str               # "Lichenomphalia umbellifera =
+#                                   Omphalia ericetorum [Lichen Mushroom]"
 #      np.name                   # "Lichenomphalia umbellifera"
 #      np.search_name            # "Lichenomphalia umbellifera"
 #      np.rank                   # :Species
 #      np.comment                # nil
-#      np.find_names             # (Array of Name instances matching "L. umbellifera")
+#      np.find_names             # (Array of Name instances matching
+#                                   "L. umbellifera")
 #      np.has_synonym            # true
 #      np.synonym                # "Omphalia ericetorum"
 #      np.synonym_search_name    # "Omphalia ericetorum"
 #      np.synonym_rank           # :Species
 #      np.synonym_comment        # "Lichen Mushroom"
-#      np.find_synonym_names     # (Array of Name instances matching "L. umbellifera")
-#
+#      np.find_synonym_names     # (Array of Name instances matching
+#                                   "L. umbellifera")
 #      np.line_str               # "Phyllum Myxomycota [Highly polyphyletic]"
 #      np.name                   # "Phyllum Myxomycota"
 #      np.search_name            # "Myxomycota"
 #      np.rank                   # :Phyllum
 #      np.comment                # "Highly polyphyletic"
-#      np.find_names             # (Array of Name instances matching "Myxomycota")
+#      np.find_names             # (Array of Name instances matching
+#                                   "Myxomycota")
 #      np.has_synonym            # false
 #    end
 #
@@ -107,7 +110,8 @@ class NameParse
   def find_synonym_names()
     result = []
     if @synonym
-      result = Name.find_names_filling_in_authors(@synonym_search_name, @synonym_rank)
+      result = Name.find_names_filling_in_authors(@synonym_search_name,
+                                                  @synonym_rank)
     end
     result
   end

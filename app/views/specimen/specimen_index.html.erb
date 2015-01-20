@@ -36,8 +36,9 @@
 			</td>
 	    <td>
 	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
-					form_tag({:action => 'delete_specimen', :id => specimen.id}) do %>
-						<%= submit_tag :herbarium_delete_specimen.t, :confirm => :are_you_sure.t %>
+					form_tag({ :action => 'delete_specimen', :id => specimen.id }) do %>
+						<%= submit_tag :herbarium_delete_specimen.t,
+                           data: { confirm: :are_you_sure.t } %>
 					<% end
 				end %>
 	    </td>

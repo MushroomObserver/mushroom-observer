@@ -1,9 +1,9 @@
 <%
-  @title = :refine_search_title.t(:type => @query.model.type_tag)
+  @title = :refine_search_title.t(:type => @query.model_class.type_tag)
 
   begin
     start = Time.now
-    num = @query.num_results 
+    num = @query.num_results
   rescue => e
     flash_error(e)
     num = 0

@@ -1,5 +1,5 @@
 <%
-  @title = :image_show_title.t(:name => @image.unique_format_name)
+  @title = :image_show_title.t(name: @image.unique_format_name)
   commercial_inquiries_ok = @image.user.email_general_commercial
 
   # Put controls and info to right of image unless it is too big.
@@ -8,39 +8,39 @@
 
   for obs in @image.observations
     new_tab_set do
-      add_tab_with_query(:show_name.t(:name => obs.format_name),
-        :controller => 'name', :action => 'show_name',
-        :id => obs.name.id)
+      add_tab_with_query(:show_name.t(name: obs.format_name),
+        controller: 'name', action: 'show_name',
+        id: obs.name.id)
       eol_url = @image.eol_url
       add_tab('EOL', eol_url) if eol_url
       add_tab(:google_images.t,
         'http://images.google.com/images?q=%s' % obs.text_name)
-      add_tab_with_query(:show_object.t(:type => :observation),
-        :controller => 'observer', :action => 'show_observation',
-        :id => obs.id)
+      add_tab_with_query(:show_object.t(type: :observation),
+        controller: 'observer', action: 'show_observation',
+        id: obs.id)
     end
   end
 
   new_tab_set do
     add_tab_with_query(:image_show_original.t,
-      :action => 'show_image', :id => @image.id, :size => 'original')
+      action: 'show_image', id: @image.id, size: 'original')
     if commercial_inquiries_ok
-	    add_tab_with_query(:image_show_inquiry.t, :controller => 'observer',
-        :action => 'commercial_inquiry', :id => @image.id)
+	    add_tab_with_query(:image_show_inquiry.t, controller: 'observer',
+        action: 'commercial_inquiry', id: @image.id)
     end
     if check_permission(@image)
       add_tab_with_query(:image_show_rotate_left.t,
-        :action => 'transform_image', :op => 'rotate_left', :id => @image.id,
-        :size => @size)
-      add_tab_with_query(:image_show_rotate_right.t, 
-        :action => 'transform_image', :op => 'rotate_right', :id => @image.id, 
-        :size => @size)
-      add_tab_with_query(:image_show_mirror.t, :action => 'transform_image', 
-        :op => 'mirror', :id => @image.id, :size => @size)
-      add_tab_with_query(:image_show_edit.t, :action => 'edit_image', 
-        :id => @image.id)
-      add_tab_with_query(:image_show_destroy.t, { :action => 'destroy_image', 
-        :id => @image.id }, { :confirm => :are_you_sure.l })
+        action: 'transform_image', op: 'rotate_left', id: @image.id,
+        size: @size)
+      add_tab_with_query(:image_show_rotate_right.t,
+        action: 'transform_image', op: 'rotate_right', id: @image.id,
+        size: @size)
+      add_tab_with_query(:image_show_mirror.t, action: 'transform_image',
+        op: 'mirror', id: @image.id, size: @size)
+      add_tab_with_query(:image_show_edit.t, action: 'edit_image',
+        id: @image.id)
+      add_tab_with_query(:image_show_destroy.t, { action: 'destroy_image',
+        id: @image.id }, { data: { confirm: :are_you_sure.l } })
     end
   end
 
@@ -62,10 +62,10 @@
   end.map do |size|
     w, h = @image.size(size)
     title = "#{w} × #{h} pixels"
-    help = w ? { :title => title } : {}
+    help = w ? { title: title } : {}
     if size.to_s != @size.to_s
       link_with_query(:"image_show_#{size}".t,
-        { :action => 'show_image', :id => @image.id, :size => size }, 
+        { action: 'show_image', id: @image.id, size: size },
         help)
     else
       content_tag(:span, :"image_show_#{size}".t, help)
@@ -73,17 +73,17 @@
   end.safe_join(' | ')
 %><br/>
 <%= if @size != @default_size
-  link_with_query(:image_show_make_default.t, :action => 'show_image',
-    :id => @image.id, :size => @size, :make_default => 1)
+  link_with_query(:image_show_make_default.t, action: 'show_image',
+    id: @image.id, size: @size, make_default: 1)
 end %></p>
 
 <center>
-  <%= thumbnail(@image, :size => @size, :votes => true,
-        :link => add_query_param(:action => 'show_image', :id => @image.id,
-          :size => (@size == @default_size ? :full_size : @default_size)), 
-        :original => true) %><br/>
+  <%= thumbnail(@image, size: @size, votes: true,
+        link: add_query_param(action: 'show_image', id: @image.id,
+          size: (@size == @default_size ? :full_size : @default_size)),
+        original: true) %><br/>
   <%= image_copyright(@image) %><br/>
-  <%= render(:partial => "shared/form_#{@image.license.form_name}") %><br/>
+  <%= render(partial: "shared/form_#{@image.license.form_name}") %><br/>
 </center>
 
 <% if columns > 1 %>
@@ -92,20 +92,20 @@ end %></p>
 
 <% if check_permission(@image) %>
   <p>
-    <%= link_with_query(:image_show_rotate_left.t, 
-          :action => 'transform_image', :op => 'rotate_left',
-          :id => @image.id, :size => @size) %> |
+    <%= link_with_query(:image_show_rotate_left.t,
+          action: 'transform_image', op: 'rotate_left',
+          id: @image.id, size: @size) %> |
     <%= link_with_query(:image_show_rotate_right.t,
-          :action => 'transform_image', :op => 'rotate_right',
-          :id => @image.id, :size => @size) %> |
+          action: 'transform_image', op: 'rotate_right',
+          id: @image.id, size: @size) %> |
     <%= link_with_query(:image_show_mirror.t,
-          :action => 'transform_image',
-          :op => 'mirror', :id => @image.id, :size => @size) %> |
-    <%= link_with_query(:image_show_edit.t, :action => 'edit_image',
-          :id => @image.id) %> |
+          action: 'transform_image',
+          op: 'mirror', id: @image.id, size: @size) %> |
+    <%= link_with_query(:image_show_edit.t, action: 'edit_image',
+          id: @image.id) %> |
     <%= link_with_query(:image_show_destroy.t,
-          { :action => 'destroy_image', :id => @image.id },
-          { :confirm => :are_you_sure.l }) %>
+          { action: 'destroy_image', id: @image.id },
+          { data: { confirm: :are_you_sure.l } }) %>
   </p>
 <% end %>
 
@@ -120,17 +120,17 @@ end %></p>
   <% end %>
   <% for obs in @image.observations %>
     <%= :Observation.t %>: <%= link_with_query(obs.unique_format_name.t,
-      :controller => 'observer', :action => 'show_observation', :id => obs.id)
+      controller: 'observer', action: 'show_observation', id: obs.id)
     %><br/>
   <% end %>
   <% for subject in @image.subjects %>
     <%= :User.t %>: <%= link_with_query(subject.format_name.t,
-      :controller => 'observer', :action => 'show_user', :id => subject.id)
+      controller: 'observer', action: 'show_user', id: subject.id)
     %><br/>
   <% end %>
   <% for glossary_term in @image.all_glossary_terms %>
     <%= :Glossary_Term.t %>: <%= link_with_query(glossary_term.format_name.t,
-      :controller => 'glossary', :action => 'show_glossary_term', :id => glossary_term.id)
+      controller: 'glossary', action: 'show_glossary_term', id: glossary_term.id)
     %><br/>
   <% end %>
   <% if @image.notes.blank? %>
@@ -156,14 +156,14 @@ end %></p>
     <span class="Data">
       <%= image_vote_as_long_string(current).t %>
     </span><br/><br/>
-    <% args = add_query_param(:id => @image.id)
+    <% args = add_query_param(id: @image.id)
     args[:size] = @size if @size != @default_size
     for value in [0] + Image.all_votes
       str1 = image_vote_as_short_string(value)
       str2 = image_vote_as_help_string(value)
-      str3 = :image_show_vote_and_next.t(:value => str1) %>
-      <%= link_to(str2, { :vote => value }.merge(args)) %> |
-      <%= link_to(str3, { :vote => value, :next => true }. merge(args)) %><br/>
+      str3 = :image_show_vote_and_next.t(value: str1) %>
+      <%= link_to(str2, { vote: value }.merge(args)) %> |
+      <%= link_to(str3, { vote: value, next: true }. merge(args)) %><br/>
     <% end %>
   <% end %>
 </p>

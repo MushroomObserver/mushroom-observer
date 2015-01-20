@@ -114,9 +114,10 @@ module ApplicationHelper
     link_to(name, add_query_param(options), html_options)
   end
 
-  # Rails 3.x has broken the link_to :confirm mechanism.  The new method requires
-  # rather sophisticated javascript capabilities (in rails.js).  I'd far prefer
-  # to keep the old blindingly simple onclick="return confirm()" mechanism.
+  # Rails 3.x has broken the link_to :confirm mechanism.
+  # The new method requires rather sophisticated javascript capabilities
+  # (in rails.js).  I'd far prefer to keep the old blindingly simple
+  # onclick="return confirm()" mechanism.
   def link_to(*args)
     super(*args).sub(/data-confirm="(.*?)"/,
       'onclick="' + CGI.escapeHTML('return confirm("\1")') + '"').html_safe
@@ -346,7 +347,7 @@ module ApplicationHelper
       if admin
         add_tab_with_query(:show_description_destroy.t,
           { :action => "destroy_#{type}_description", :id => desc.id },
-          { :confirm => :are_you_sure.l })
+          { data: { confirm: :are_you_sure.l } })
       end
       if true
         add_tab_with_query(:show_description_clone.t,
@@ -460,7 +461,7 @@ module ApplicationHelper
         links << link_with_query(:DESTROY.t,
           { :id => desc.id, :action => "destroy_#{type}_description",
             :controller => obj.show_controller },
-          { :confirm => :are_you_sure.t }) if admin
+          { data: {confirm: :are_you_sure.t } }) if admin
         item += indent + "[" + links.safe_join(' | ') + "]" if links.any?
       end
       item
@@ -611,7 +612,7 @@ module ApplicationHelper
     if previous_version = latest_version.previous
       html += link_with_query("#{:show_name_previous_version.t}: %d" % previous_version.version,
         :action => "show_past_#{type}", :id => obj.id,
-        :version => previous_version)
+        :version => previous_version.version)
       if (previous_version.merge_source_id rescue false)
         html += indent(1) + get_version_merge_link(obj, previous_version)
       end
@@ -750,21 +751,22 @@ module ApplicationHelper
     # Locations and names.
     else
       editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
-      editors = User.all(:conditions => ["id IN (?)", editors])
+#      editors = User.all(:conditions => ["id IN (?)", editors]) # Rails 3
+      editors = User.where(id: editors).to_a
       authors = user_list(:"show_#{type}_creator", [obj.user])
       editors = user_list(:"show_#{type}_editor", editors)
     end
 
     return content_tag(:p, authors + safe_br + editors)
   end
-  
+
   ### from textile_sandbox.html.erb ###
   # return escaped html
   # for instance: <i>X</i> => &lt;i&gt;X&lt;/i&gt
   def escape_html(html)
 		h(html.to_str)
 	end
-	
+
   # From html_helper.rb
   # Replace spaces with safe_nbsp.
   #
@@ -1395,7 +1397,8 @@ module ApplicationHelper
 
   # Draw a thumbnail image.  It takes either an Image instance or an id.  Args:
   # size::      Size of image.  (default is user's default thumbnail size)
-  # link::      :show_image, :show_observation, :show_user, :none, or Hash of +link_to+ args.  (default is :show_image)
+  # link::      :show_image, :show_observation, :show_user, :none,
+  #             or Hash of +link_to+ args.  (default is :show_image)
   # obs::       Add <tt>:obs => id</tt> to the show_image link args.
   # user::      (used with :link => :show_user)
   # border::    Set +border+ attribute, e.g. <tt>:border => 0</tt>.
@@ -1431,23 +1434,22 @@ module ApplicationHelper
     # Decide what to link it to.
     case link = args[:link] || :show_image
     when :show_image
-      link = { :controller => 'image', :action => 'show_image', :id => id }.
+      link = { controller: :image, action: :show_image, id: id }.
         merge(args[:query_params] || query_params)
       link[:obs] = args[:obs] if args.has_key?(:obs)
     when :show_observation
       link = {
-        :controller => 'observer',
-        :action => 'show_observation',
-        :id => args[:obs]
+        controller: :observer,
+        action: :show_observation,
+        id: args[:obs]
       }.merge(args[:query_params] || query_params)
       raise "missing :obs" if !args.has_key?(:obs)
     when :show_user
-      link = { :controller => 'observer', :action => 'show_user',
-               :id => args[:user] }
+      link = { controller: :observer, action: :show_user, id: args[:user] }
       raise "missing :user" if !args.has_key?(:user)
     when :show_glossary_term
-      link = { :controller => 'glossary', :action => 'show_glossary_term',
-               :id => args[:glossary_term] }
+      link = { controller: :glossary, action: :show_glossary_term,
+               id: args[:glossary_term] }
       raise "missing :glossary_term" if !args.has_key?(:glossary_term)
     when :none
       link = nil
@@ -1464,15 +1466,15 @@ module ApplicationHelper
     # Include AJAX vote links below image?
     if @js && @user && args[:votes]
       table = image_vote_tabs(image || id, args[:vote_data])
-      result += safe_br + content_tag(:div, table, :id => "image_votes_#{id}")
+      result += safe_br + content_tag(:div, table, id: "image_votes_#{id}")
       did_vote_div = true
     end
 
     # Include original filename.
-    if args[:original] and
-       image and !image.original_name.blank? and (
-         check_permission(image) or
-         (image and image.user and image.user.keep_filenames == :keep_and_show)
+    if args[:original] &&
+       image && !image.original_name.blank? && (
+         check_permission(image) ||
+         (image.user && image.user.keep_filenames == :keep_and_show)
        )
       result += safe_br unless did_vote_div
       result += h(image.original_name)
@@ -1482,7 +1484,7 @@ module ApplicationHelper
     if args[:nodiv]
       result
     else
-      content_tag(:div, result, :class => args[:class] || 'thumbnail')
+      content_tag(:div, result, class: args[:class] || "thumbnail")
     end
   end
 
@@ -1830,7 +1832,7 @@ module ApplicationHelper
   #     add_tab('External Link', 'http://images.google.com/')
   #     add_tab('Normal Link', :action => :blah, :id => 123, ...)
   #     add_tab('Dangerous Link', { :action => :destroy, :id => 123 },
-  #                               { :confirm => :are_you_sure.l })
+  #                               { data: { confirm: :are_you_sure.l } })
   #   end
   #
   # Tab sets now support headers.  Syntaxes allowed are:
@@ -2075,6 +2077,20 @@ module ApplicationHelper
   # method on the given string.
   def textilize(str, do_object_links=false)
     Textile.textilize(str, do_object_links)
+  end
+
+  # Create a file input fields with client-side size validation.
+  def image_file_field(obj, attr, opts={})
+    validated_file_field(obj, attr, opts.merge(
+      :max_upload_msg => :validate_image_file_too_big.l(:max => "#{MO.image_upload_max_size/1000000}Mb"),
+      :max_upload_size => MO.image_upload_max_size
+    ))
+  end
+
+  def validated_file_field(obj, attr, opts)
+    javascript_include("jquery")
+    javascript_include("validate_file_input_fields")
+    file_field(obj, attr, opts)
   end
 end
 

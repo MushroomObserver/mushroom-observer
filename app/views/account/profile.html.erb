@@ -1,4 +1,4 @@
-<% 
+<%
   @title = :profile_title.t
 
   new_tab_set do
@@ -31,8 +31,8 @@
     <%= link_to(:profile_image_reuse.t, :controller => 'image',
                 :action => 'reuse_image', :mode => 'profile') %>
     <%= link_to(:profile_image_remove.t, { :action => 'remove_image' },
-                { :confirm => :are_you_sure.l }) if @user.image %><br/>
-  <%= form.file_field("upload_image") %></p>
+                { data: { confirm: :are_you_sure.l } }) if @user.image %><br/>
+  <%= image_file_field(:user, :upload_image) %></p>
 
   <p><label for="copyright_holder"><%= :profile_copyright_holder.t %></label><br/>
   <%= text_field_tag("copyright_holder", @copyright_holder, :size => 40) %>

@@ -5,16 +5,20 @@
 #  == Methods
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
+#  enum_default_value   Default value (as a Symbol) of an enum attribute
+#                       Ex: User.enum_default_value(:image_size) => :medium
 #
 #  ==== Extensions to "find"
 #  find::               Extend <tt>find(id)</tt> to look up by id _or_ sync_id.
-#  safe_find::          Same as <tt>find(id)</tt> except returns nil if not found.
+#  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
 #                       Add limit to a SQL query, then pass it to find_by_sql.
 #  count_by_sql_wrapping_select_query::
-#                       Wrap a normal SQL query in a count query, then pass it to count_by_sql.
-#  revert_clone::       Clone and revert to old version (or return nil if version not found).
+#                       Wrap a normal SQL query in a count query,
+#                       then pass it to count_by_sql.
+#  revert_clone::       Clone and revert to old version
+#                       (or return nil if version not found).
 #
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
@@ -33,7 +37,8 @@
 #  update_user_before_save_version::
 #                       Callback to update 'user' when versioned record changes.
 #  save_without_our_callbacks::
-#                       Post changes _without_ doing the +before_update+ callback above.
+#                       Post changes _without_ doing
+#                       the +before_update+ callback above.
 #
 #  ==== Error handling
 #  dump_errors::        Returns errors in one big printable string.
@@ -73,6 +78,16 @@ class AbstractModel < ActiveRecord::Base
     self.class.name.underscore.to_sym
   end
 
+  # Default value (as a symbol) for an enum attribute
+  def self.enum_default_value(attr)
+    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
+  end
+
+  # number (or nil) that is the default value for attr
+  def self.default_cardinal(attr)
+    self.column_defaults[attr.to_s]
+  end
+
   ##############################################################################
   #
   #  :section: "Find" Extensions
@@ -85,7 +100,7 @@ class AbstractModel < ActiveRecord::Base
     return self if self.version == version
     result = self.class.find(id)
     result = nil if not result.revert_to(version)
-    return result
+    result
   end
 
   # Extend AR.find(id) to accept either local id (integer or all-numeric
@@ -109,9 +124,9 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Look up record with given ID, returning nil if it no longer exists.
-  def self.safe_find(id, *args)
+  def self.safe_find(id)
     begin
-      self.find(id, *args)
+      self.find(id)
     rescue ActiveRecord::RecordNotFound
       nil
     end
@@ -189,7 +204,7 @@ class AbstractModel < ActiveRecord::Base
     # self.created_at ||= Time.now        if respond_to?('created_at=')
     # self.updated_at ||= Time.now        if respond_to?('updated_at=')
     self.user_id  ||= User.current_id if respond_to?('user_id=')
-    autolog_created_at                   if has_rss_log?
+    autolog_created_at                if has_rss_log?
   end
 
   # This is called just after an object is created.
@@ -218,7 +233,7 @@ class AbstractModel < ActiveRecord::Base
     # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
     if !@save_without_our_callbacks
-      autolog_updated_at          if has_rss_log?
+      autolog_updated_at if has_rss_log?
     end
   end
 
@@ -294,8 +309,7 @@ class AbstractModel < ActiveRecord::Base
   # any RssLog, because it uses +save_without_our_callbacks+.
   #
   def update_view_stats
-    if respond_to?('num_views=') ||
-       respond_to?('last_view=')
+    if respond_to?('num_views=') || respond_to?('last_view=')
       self.class.record_timestamps = false
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
@@ -338,7 +352,7 @@ class AbstractModel < ActiveRecord::Base
         out << "#{obj} #{name} #{msg}."
       end
     end
-    return out
+    out
   end
 
   ##############################################################################
@@ -353,7 +367,8 @@ class AbstractModel < ActiveRecord::Base
   #   User.show_controller => 'observer'
   #   Name.show_controller => 'name'
   #
-  # TODO: Make this a model method!  Also it's not clear why the default is an error rather than name.underscore.
+  # TODO: Make this a model method!  Also it's not clear why the default
+  # is an error rather than name.underscore.
   def self.show_controller; name.underscore; end
 
   # Return the name of the controller (as a simple lowercase string)
@@ -401,10 +416,12 @@ class AbstractModel < ActiveRecord::Base
 
   # Return the URL of the "show_<object>" action
   #
-  #   User.show_action(123) => 'http://mushroomobserver.org/observer/show_user/123'
-  #   Name.show_action(123) => 'http://mushroomobserver.org/name/show_name/123'
+  #   User.show_action(12): 'http://mushroomobserver.org/observer/show_user/12'
+  #   Name.show_action(123): 'http://mushroomobserver.org/name/show_name/123'
   #
-  def self.show_url(id); "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"; end
+  def self.show_url(id)
+    "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+  end
 
   # Return the URL of the "show_<object>" action
   #
@@ -548,13 +565,12 @@ class AbstractModel < ActiveRecord::Base
     end
     # We need to return it in case we created an orphaned log, otherwise
     # the caller won't have access to it!
-    return result
+    result
   end
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log
-    if rss_log and
-       rss_log.send("#{self.type_tag}_id") != id
+    if rss_log && (rss_log.send("#{self.type_tag}_id") != id)
       rss_log.send("#{self.type_tag}_id=", id)
       rss_log.save
     end
@@ -591,5 +607,4 @@ private
     name = "#{:Image.t} ##{image.id || image.was || '??'}"
     log(tag, :name => name, :touch => touch)
   end
-
 end

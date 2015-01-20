@@ -5,7 +5,7 @@
   # Register pertinent names so that Textile know what the "G." in "_G.
   # species_" stands for.  Include all proposed names, because there's no
   # telling which names will be referred to in the comment.  Likewise, include
-  # all synonyms if commenting on taxonomy of Name. 
+  # all synonyms if commenting on taxonomy of Name.
   if @comment.target_type == 'Observation'
     for naming in @comment.target.namings
       Textile.register_name(naming.name)
@@ -27,8 +27,8 @@
         :action => 'edit_comment', :id => @comment.id)
       add_tab_with_query(:comment_show_destroy.t,
         { :action => 'destroy_comment', :id => @comment.id },
-        { :confirm => :are_you_sure.l })
-    end 
+        { data: { confirm: :are_you_sure.l } })
+    end
   end
 
   draw_prev_next_tabs(@comment)

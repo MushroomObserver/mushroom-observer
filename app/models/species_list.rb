@@ -30,7 +30,8 @@
 #  == Attributes
 #
 #  id::                    Locally unique numerical id, starting at 1.
-#  sync_id::               Globally unique alphanumeric id, used to sync with remote servers.
+#  sync_id::               Globally unique alphanumeric id,
+#                          used to sync with remote servers.
 #  created_at::            Date/time it was first created.
 #  updated_at::            Date/time it was last updated.
 #  user::                  User that created it.
@@ -42,7 +43,8 @@
 #  ==== "Fake" attributes
 #  file::                  Upload text file into +data+.
 #  data::                  Internal temporary data field.
-#  place_name::            Wrapper on top of +where+ and +location+.  Handles location_format.
+#  place_name::            Wrapper on top of +where+ and +location+.
+#                          Handles location_format.
 #
 #  == Class methods
 #

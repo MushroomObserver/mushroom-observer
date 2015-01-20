@@ -59,7 +59,7 @@ class AmateurTest < IntegrationTestCase
     # Log out and try again.
     click(label: 'Logout', in: :left_panel)
     assert_template('account/logout_user')
-    assert_raises(Test::Unit::AssertionFailedError) do
+    assert_raises(MiniTest::Assertion) do
       click(label: 'Preferences', in: :left_panel)
     end
     get('/account/prefs')
@@ -69,12 +69,12 @@ class AmateurTest < IntegrationTestCase
   # ----------------------------
   #  Test autologin cookies.
   # ----------------------------
-  
+
   def test_autologin
     rolf_cookies = get_cookies(rolf, :true)
     mary_cookies = get_cookies(mary, true)
     dick_cookies = get_cookies(dick, false)
-    
+
     try_autologin(rolf_cookies, rolf)
     try_autologin(mary_cookies, mary)
     try_autologin(dick_cookies, false)
@@ -200,7 +200,7 @@ class AmateurTest < IntegrationTestCase
   def test_proposing_names
     namer_session = open_session.extend(NamerDsl)
     namer = katrina
-    
+
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? {|c| c.user == namer})
@@ -211,7 +211,7 @@ class AmateurTest < IntegrationTestCase
 
     namer_session.propose_then_login(namer, obs)
     naming = namer_session.create_name(obs, text_name)
-    
+
     voter_session = login!(rolf).extend(VoterDsl)
     assert_not_equal(namer_session.session[:session_id], voter_session.session[:session_id])
     voter_session.vote_on_name(obs, naming)
@@ -282,9 +282,9 @@ class AmateurTest < IntegrationTestCase
 
     session.run_test
   end
-  
+
   private
-  
+
   module UserDsl
     def run_test
       get('/observer/test_flash_redirection?tags=')
@@ -302,7 +302,7 @@ class AmateurTest < IntegrationTestCase
       assert_select('span.tag', text: 'test_flash_redirection_title:', count: 1)
     end
   end
-  
+
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
@@ -314,7 +314,7 @@ class AmateurTest < IntegrationTestCase
       assert_template('observer/show_observation')
       assert_match(/call it that/i, response.body)
     end
-    
+
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
@@ -324,7 +324,7 @@ class AmateurTest < IntegrationTestCase
       end
     end
   end
-  
+
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
@@ -338,7 +338,7 @@ class AmateurTest < IntegrationTestCase
         form.submit('Login')
       end
     end
-    
+
     def create_name(obs, text_name)
       assert_template('naming/create')
       # (Make sure the form is for the correct object!)
@@ -363,9 +363,8 @@ class AmateurTest < IntegrationTestCase
       end
       assert_template('naming/create')
       assert_select('div.Warnings') do |elems|
-        assert_block('Expected error about name not existing yet.') do
-          elems.any? {|e| e.to_s.match(/#{text_name}.*not recognized/i)}
-        end
+        assert(elems.any? { |e| e.to_s.match(/#{text_name}.*not recognized/i) },
+               "Expected error about name not existing yet.")
       end
 
       open_form do |form|
@@ -443,7 +442,7 @@ class AmateurTest < IntegrationTestCase
       # "end create_name response.body".print_thing(response.body)
       naming
     end
-  
+
     def failed_delete(obs)
       # "failed_delete response.body".print_thing(response.body)
       click(label: /destroy/i, href: /naming\/destroy/)
@@ -460,7 +459,7 @@ class AmateurTest < IntegrationTestCase
       obs.reload
       assert_names_equal(original_name, obs.name)
       assert_nil(Naming.safe_find(naming.id))
-      assert_not_match(text_name, response.body)
+      refute_match(text_name, response.body)
     end
   end
 end

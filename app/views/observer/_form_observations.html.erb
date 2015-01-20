@@ -170,9 +170,11 @@ end %>
       }
 
       function image_new() {
-        var form = IMAGE_FORM.replace(/XXX/g, NEXT_IMAGE_INDEX++);
+        var n = NEXT_IMAGE_INDEX++;
+        var form = IMAGE_FORM.replace(/XXX/g, n);
         jQuery('#image_forms').append(form);
         jQuery('#new_image_button').ensureVisible();
+        apply_file_input_field_validation("image_" + n + "_image");
         return false;
       }
 

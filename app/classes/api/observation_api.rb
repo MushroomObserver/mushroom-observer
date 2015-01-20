@@ -180,7 +180,7 @@ class API
 
       lambda do |obj|
         must_have_edit_permission!(obj)
-        obj.update_attributes!(params)
+        obj.update!(params)
         obj.images.push(*add_images) if add_images.any?
         obj.images.delete(*remove_images) if remove_images.any?
         obj.projects.push(*add_projects) if add_projects.any?

@@ -142,21 +142,21 @@ class Descriptions < ActiveRecord::Migration
     # old_editors_locations = Name.connection.select_all('SELECT * FROM editors_locations LIMIT 100')
 
     puts "Loading name data..."
-    old_names             = Name.connection.select_all('SELECT * FROM names')
-    old_past_names        = Name.connection.select_all('SELECT * FROM past_names')
-    old_authors_names     = Name.connection.select_all('SELECT * FROM authors_names')
-    old_editors_names     = Name.connection.select_all('SELECT * FROM editors_names')
+    old_names             = Name.connection.select_all('SELECT * FROM names').to_a
+    old_past_names        = Name.connection.select_all('SELECT * FROM past_names').to_a
+    old_authors_names     = Name.connection.select_all('SELECT * FROM authors_names').to_a
+    old_editors_names     = Name.connection.select_all('SELECT * FROM editors_names').to_a
 
     puts "Loading draft data..."
-    projects              = Name.connection.select_all('SELECT * FROM projects')
-    old_draft_names       = Name.connection.select_all('SELECT * FROM draft_names')
-    old_past_draft_names  = Name.connection.select_all('SELECT * FROM past_draft_names')
+    projects              = Name.connection.select_all('SELECT * FROM projects').to_a
+    old_draft_names       = Name.connection.select_all('SELECT * FROM draft_names').to_a
+    old_past_draft_names  = Name.connection.select_all('SELECT * FROM past_draft_names').to_a
 
     puts "Loading location data..."
-    old_locations         = Name.connection.select_all('SELECT * FROM locations')
-    old_past_locations    = Name.connection.select_all('SELECT * FROM past_locations')
-    old_authors_locations = Name.connection.select_all('SELECT * FROM authors_locations')
-    old_editors_locations = Name.connection.select_all('SELECT * FROM editors_locations')
+    old_locations         = Name.connection.select_all('SELECT * FROM locations').to_a
+    old_past_locations    = Name.connection.select_all('SELECT * FROM past_locations').to_a
+    old_authors_locations = Name.connection.select_all('SELECT * FROM authors_locations').to_a
+    old_editors_locations = Name.connection.select_all('SELECT * FROM editors_locations').to_a
 
     # Convert results of a select_all into a hash keyed on the given id field.
     # Values are Arrays of records corresponding to the given id.

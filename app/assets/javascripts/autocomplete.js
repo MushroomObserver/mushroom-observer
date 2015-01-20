@@ -17,11 +17,11 @@ var AUTOCOMPLETERS = {};
 //          </td></tr></table>
 //         </div>
 //        </div>
-//   2) It watches keyup/down/press and blur events:
-//      It handles cursor movement and selection on keydown.
-//      It stops propogation of tab and enter in both keydown and keypress.
-//      It checks for change whenever a key is released.
-//      It hides the menu when it loses focus, but it does it on a timer to allow
+//   2) It watches keyup/down/press and focus/blur events (on the text field):
+//      * Handles cursor movement and selection on keydown.
+//      * Stops propogation of tab/ret/arrows/etc. on keydown.
+//      * Checks for change in text field whenever a key is released.
+//      * Hides the menu when it loses focus, but it does it on a timer to allow
 //       for temporary loss of focus when messing around with the pulldown menu.
 //   3) Several things cause the menu to be redrawn:
 //       cursor movement, any time the matches are recalculated
@@ -30,17 +30,13 @@ var AUTOCOMPLETERS = {};
 //      Two things can potentially result in AJAX request:
 //       change in text field, selection of item
 //   4) Summary of important events:
-//       cursor movement        -- redraw                  -- move_cursor() -> draw_pulldown()
-//       selection of menu item -- matches, [AJAX], redraw -- select_row() -> our_change() -> schedule_refresh()
-//       change in text field   -- matches, [AJAX], redraw -- our_change() -> schedule_refresh()
-//       AJAX response          -- matches, menu           -- process_ajax_response() -> schedule_refresh()
-//      (Where schedule_refresh() -> refresh_options() -> update_matches() -> draw_pulldown().)
-//   5) Important medthods:
-//       refresh_options()        send AJAX request
-//       process_ajax_response()  process AJAX response
-//       update_matches()         search options for matches
-//       draw_pulldown()          update pulldown menu
-//
+//       focus on text field -- switch_inputs()
+//       leave text field    -- schedule_hide() -> hide_pulldown()
+//       arrow keys   -- move_cursor() -> draw_pulldown()
+//       click/return -- select_row() -> hide_pulldown()
+//       change text  -- our_change() -> schedule_refresh()...
+//       AJAX reply   -- process_ajax_response() -> schedule_refresh()...
+//         ...schedule_refresh() -> refresh_options(), update_matches(), draw_pulldown()
 var MOAutocompleter = function(opts) {
 
   // These are potentially useful parameters the user might want to tweak.
@@ -75,7 +71,8 @@ var MOAutocompleter = function(opts) {
     datalist_elem:        null,            // DOM element of datalist
     pulldown_elem:        null,            // DOM element of pulldown div
     list_elem:            null,            // DOM element of pulldown ul
-    active:               false,           // is pulldown visible and active?
+    focused:              false,           // is user in text field?
+    menu_up:              false,           // is pulldown visible?
     old_value:            {},              // previous value of input field
     options:              '',              // list of all options
     matches:              [],              // list of options currently showing
@@ -84,7 +81,6 @@ var MOAutocompleter = function(opts) {
     current_highlight:    -1,              // row of view highlighted (-1 = none)
     current_width:        0,               // current width of menu
     scroll_offset:        0,               // scroll offset
-    focused:              false,           // do we have input focus?
     last_ajax_request:    null,            // last ajax request we got results for
     last_ajax_incomplete: true,            // did we get all the results we requested last time?
     ajax_request:         null,            // ajax request while underway
@@ -99,7 +95,7 @@ var MOAutocompleter = function(opts) {
 
   // Check if browser can handle doing scrollbar.
   this.do_scrollbar =
-    navigator.appVersion.toLowerCase().indexOf('msie') == 0 ||
+    navigator.appVersion.toLowerCase().indexOf('msie') <= 0 ||
     parseInt(navigator.userAgent.toLowerCase().split('msie')[1]) >= 8;
 
   // Get the DOM element of the input field.
@@ -126,9 +122,6 @@ var MOAutocompleter = function(opts) {
 
   // Keep catalog of autocompleter objects so we can reuse them as needed.
   AUTOCOMPLETERS[this.input_id] = this;
-
-  // Prevent these keys from propagating to the input field.
-  this.HOT_KEYS = { 27:1, 13:1, 9:1, 38:1, 40:1, 33:1, 34:1, 36:1, 35:1 };
 }
 
 jQuery.extend(MOAutocompleter.prototype, {
@@ -139,6 +132,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     this.prepare_input_element(other_elem);
   },
 
+  // Move/attach this autocompleter to a new field.
   switch_inputs: function(event, elem) {
     if (this.input_id != elem.attr("id")) {
       this.input_id   = elem.attr("id");
@@ -150,8 +144,10 @@ jQuery.extend(MOAutocompleter.prototype, {
 
   // Prepare input element: attach elements, set properties.
   prepare_input_element: function(elem) {
-    var this2 = this;
     var id = elem.attr("id");
+
+    // (something to do with scope of closures below)
+    var this2 = this;
 
     this.old_value[id] = null;
 
@@ -162,36 +158,27 @@ jQuery.extend(MOAutocompleter.prototype, {
       elem.keydown(function(event) { return this2.our_keydown(event) });
       elem.keyup(function(event) { return this2.our_keyup(event) });
       elem.keypress(function(event) { return this2.our_keypress(event) });
+      elem.change(function(event) { return this2.our_change(false) });
+      $(window).unload(function(event) { return this2.our_unload() });
     }
 
     // Disable default browser autocomplete.
     elem.attr("autocomplete", "off");
-
-    // Restore field value when user "goes back" to this page.  Only really need
-    // this for firefox browsers which handle the autocomplete="off" attribute,
-    // but it shouldn't hurt to do it for all browsers.  Problem is, if
-    // autocomplete="off" is set, Firefox deliberately *erases* the field value to
-    // prevent potentially sensitive information from being visible to random
-    // people walking by a terminal and pressing "back" button.  This fix just
-    // sets it right back to the old value.  So there.
-    jQuery(document).focus((function() {
-      if (this.old_value[id] != null)
-        elem.val(this.old_value[id]);
-    }).bind(this));
   },
 
 // ------------------------------ Events ------------------------------
 
   // User pressed a key in the text field.
   our_keydown: function(event) {
-    // jQuery("#log").append("keydown(" + event.which + ")<br/>");
+    var key = event.which == 0 ? event.keyCode : event.which;
+    // jQuery("#log").append("keydown(" + key + ")<br>");
     this.clear_key();
     this.focused = true;
-    if (this.active) {
-      switch (event.which) {
+    if (this.menu_up) {
+      switch (key) {
       case EVENT_KEY_ESC:
         this.schedule_hide();
-        this.active = false;
+        this.menu_up = false;
         break;
       case EVENT_KEY_RETURN:
       case EVENT_KEY_TAB:
@@ -227,18 +214,19 @@ jQuery.extend(MOAutocompleter.prototype, {
     }
     if (this.on_keydown)
       this.on_keydown(event);
-    if (this.active && this.HOT_KEYS[event.which])
+    if (this.menu_up && this.is_hot_key(key))
       return false;
     return true;
   },
 
   // Need to prevent these keys from being processed by form.
   our_keypress: function(event) {
-    // jQuery("#log").append("keypress(" + event.which + ")<br/>");
+    var key = event.which == 0 ? event.keyCode : event.which;
+    // jQuery("#log").append("keypress(key=" + key + ", menu_up=" + this.menu_up + ", hot=" + this.is_hot_key(key) + ")<br/>");
     if (this.on_keypress)
       this.on_keypress(event);
-    // if (this.active && this.HOT_KEYS[event.which])
-    //   return false;
+    if (this.menu_up && this.is_hot_key(key))
+      return false;
     return true;
   },
 
@@ -246,19 +234,24 @@ jQuery.extend(MOAutocompleter.prototype, {
   our_keyup: function(event) {
     // jQuery("#log").append("keyup()<br/>");
     this.clear_key();
-    this.our_change();
+    this.our_change(true);
     if (this.on_keyup)
       this.on_keyup(event);
     return true;
   },
 
   // Input field has changed.
-  our_change: function() {
+  our_change: function(do_refresh) {
+    var old_val = this.old_value[this.input_id];
+    var new_val = this.input_elem.val();
     // jQuery("#log").append("our_change(" + this.input_elem.val() + ")<br/>");
-    if (this.input_elem.val() != this.old_value[this.input_id])
-      this.schedule_refresh();
-    if (this.on_change)
-      this.on_change(this.input_elem.val());
+    if (new_val != old_val) {
+      this.old_value[this.input_id] = new_val;
+      if (do_refresh)
+        this.schedule_refresh();
+      if (this.on_change)
+        this.on_change(new_val);
+    }
   },
 
   // User entered text field.
@@ -268,6 +261,7 @@ jQuery.extend(MOAutocompleter.prototype, {
       this.get_row_height();
     if (this.on_focus)
       this.on_focus(event);
+    this.focused = true;
   },
 
   // User left the text field.
@@ -276,6 +270,34 @@ jQuery.extend(MOAutocompleter.prototype, {
     this.schedule_hide();
     if (this.on_blur)
       this.on_blur(event);
+    this.focused = false;
+  },
+
+  // User has navigated away from page.
+  our_unload: function() {
+    // If native browser autocomplete is turned off, browsers like chrome
+    // and firefox will not remember the value of fields when you go back.
+    // This hack re-enables native autocomplete before leaving the page.
+    // [This only works for firefox; should work for chrome but doesn't.]
+    this.input_elem.removeAttr("autocomplete");
+    return false;
+  },
+
+  // Prevent these keys from propagating to the input field.
+  is_hot_key: function(key) {
+    switch(key) {
+    case EVENT_KEY_ESC:      
+    case EVENT_KEY_RETURN:   
+    case EVENT_KEY_TAB:      
+    case EVENT_KEY_UP:       
+    case EVENT_KEY_DOWN:     
+    case EVENT_KEY_PAGEUP:   
+    case EVENT_KEY_PAGEDOWN: 
+    case EVENT_KEY_HOME:     
+    case EVENT_KEY_END:      
+      return true;
+    }
+    return false;
   },
 
 // ------------------------------ Timers ------------------------------
@@ -431,11 +453,18 @@ jQuery.extend(MOAutocompleter.prototype, {
     this.verbose("select_row()");
     var old_val = this.input_elem.val();
     var new_val = this.matches[this.scroll_offset+row];
-    this.input_elem.focus();
-    if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse)
+    // Close pulldown unless the value the user selected uncollapses into a set
+    // of new options.  In that case schedule a refresh and leave it up.
+    if (this.collapse > 0 && (new_val.match(/ /g) || []).length < this.collapse) {
       new_val += ' ';
+      this.schedule_refresh();
+    } else {
+      this.schedule_hide();
+    }
+    this.input_elem.focus();
+    this.focused = true;
     this.set_token(new_val);
-    this.schedule_hide();
+    this.our_change(false);
   },
 
 // ------------------------------ Pulldown ------------------------------
@@ -466,7 +495,6 @@ jQuery.extend(MOAutocompleter.prototype, {
   attach_row_events: function(e, row) {
     e.click((function () {
       this.select_row(row);
-      this.our_change();
     }).bind(this));
     e.mouseover((function() {
       this.highlight_row(row);
@@ -478,13 +506,14 @@ jQuery.extend(MOAutocompleter.prototype, {
     var div = document.createElement('div');
     var ul  = document.createElement('ul');
     var li  = document.createElement('li');
+    var body = document.body || document.getElementsByTagName("body")[0];
     div.className = this.pulldown_class;
     div.style.display = 'block';
     div.style.border = div.style.margin = div.style.padding = '0px';
     li.innerHTML = 'test';
     ul.appendChild(li);
     div.appendChild(ul);
-    document.body.appendChild(div);
+    body.appendChild(div);
     this.temp_row = div;
     setTimeout(this.set_row_height.bind(this), 100);
   },
@@ -560,14 +589,13 @@ jQuery.extend(MOAutocompleter.prototype, {
       var scr = this.input_elem.scrollTop();
       menu.css("top", "" + (pos.top + hgt + scr) + "px");
       menu.css("left", "" + pos.left + "px");
-      menu.show();
 
       // Set height of menu.
       if (this.do_scrollbar) {
-        menu.css("overflowY", matches.length > size ? 'scroll' : 'hidden');
-        menu.css("height", '' + this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + 'px');
-        inner.css("marginTop", '' + this.row_height * scroll + 'px');
-        inner.css("height", '' + this.row_height * (matches.length - scroll) + 'px');
+        menu.css("overflowY", matches.length > size ? "scroll" : "hidden");
+        menu.css("height", "" + this.row_height * (size < matches.length - scroll ? size : matches.length - scroll) + "px");
+        inner.css("marginTop", "" + this.row_height * scroll + "px");
+        inner.css("height", "" + this.row_height * (matches.length - scroll) + "px");
         menu.scrollTop(this.row_height * scroll);
       }
 
@@ -575,20 +603,23 @@ jQuery.extend(MOAutocompleter.prototype, {
       this.set_width();
       this.update_width();
 
-      // Scroll the *window* so that menu is visible.
-      menu.ensureVisible();
-
-      // Cancel scheduled hide.
+      // Only show menu if it is nontrivial, i.e., show an option other than
+      // the value that's already in the text field.
       if (matches.length > 1 || this.input_elem.val() != matches[0]) {
         this.clear_hide();
-        this.active = true;
+        menu.show();
+        menu.ensureVisible();
+        this.menu_up = true;
+      } else {
+        menu.hide();
+        this.menu_up = false;
       }
     }
 
-    // Else hide it if now empty.
+    // Hide the menu if it's empty now.
     else {
       menu.hide();
-      this.active = false;
+      this.menu_up = false;
     }
 
     // Make sure input focus stays on text field!
@@ -599,7 +630,7 @@ jQuery.extend(MOAutocompleter.prototype, {
   hide_pulldown: function() {
     this.verbose("hide_pulldown()");
     this.pulldown_elem.hide();
-    this.active = false;
+    this.menu_up = false;
   },
 
   // Update width of pulldown.
@@ -657,6 +688,7 @@ jQuery.extend(MOAutocompleter.prototype, {
   // Update content of pulldown.
   update_matches: function() {
     this.verbose("update_matches()");
+
     // Remember which option used to be highlighted.
     var last = this.current_row < 0 ? null : this.matches[this.current_row];
 
@@ -911,7 +943,8 @@ jQuery.extend(MOAutocompleter.prototype, {
     if (new_opts.substr(new_opts.length-5, 5) == "\n...\n") {
       this.last_ajax_incomplete = true;
       new_opts = new_opts.substr(0, new_opts.length - 4);
-      this.schedule_refresh(); // (just in case we need to refine the request)
+      if (this.focused)
+        this.schedule_refresh(); // (just in case we need to refine the request due to activity while waiting for this response)
     } else {
       this.last_ajax_incomplete = false;
     }
@@ -928,7 +961,7 @@ jQuery.extend(MOAutocompleter.prototype, {
       new_opts = "\n" + this.primer + new_opts;
 
     // Update menu if anything has changed.
-    if (this.options != new_opts) {
+    if (this.options != new_opts && this.focused) {
       this.options = new_opts;
       this.update_matches();
       if (this.do_datalist)

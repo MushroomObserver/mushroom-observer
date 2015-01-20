@@ -57,7 +57,7 @@ class API
       raise BadVersion.new(version)
     else
       self.version = version.to_f
-    end 
+    end
   end
 
   def authenticate_user

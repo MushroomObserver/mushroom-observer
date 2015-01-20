@@ -42,7 +42,7 @@ class Language < AbstractModel
 
   # Return Array of unofficial Language's.
   def self.unofficial
-    find_all_by_official(false)
+    where(official: false)
   end
 
   # Returns an Array of pairs containing language name and locale.
@@ -118,7 +118,7 @@ class Language < AbstractModel
   end
 
   # Be generous to ensure that we don't accidentally miss anything that is
-  # changed while the Rails app is booting. 
+  # changed while the Rails app is booting.
   @@last_update = 1.minute.ago
 
   # Update I18n backend with any recent changes in translations.
@@ -134,7 +134,7 @@ class Language < AbstractModel
       TranslationString.translations(locale.to_sym)[tag.to_sym] = text
     end
   end
-  
+
   def self.lang_from_locale(locale)
     locale.to_s.split('-')[0]
   end

@@ -177,7 +177,7 @@ class LocationController < ApplicationController
       @undef_data = nil
     end
 
-    # Paginate the defined locations using the usual helper.   
+    # Paginate the defined locations using the usual helper.
     args[:always_index] = (@undef_pages && @undef_pages.num_total > 0)
     args[:action] = args[:action] || 'list_locations'
     show_index_of_objects(query, args)
@@ -254,7 +254,7 @@ class LocationController < ApplicationController
       args.delete(:pattern)
 
     # when :regexp_search  ### NOT SURE WHAT DO FOR THIS
-    
+
     # None of the rest make sense.
     else
       flavor = nil
@@ -356,15 +356,13 @@ class LocationController < ApplicationController
     # objects.
     loc_id = params[:id].to_s
     desc_id = params[:desc]
-    if @location = find_or_goto_index(Location, loc_id,
-                                      :include => [:user, :descriptions])
-      
+    if @location = find_or_goto_index(Location, loc_id)
+
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
       if desc_id.blank?
         @description = nil
-      elsif @description = LocationDescription.safe_find(desc_id, :include =>
-                                         [:authors, :editors, :license, :user])
+      elsif @description = LocationDescription.safe_find(desc_id)
         @description = nil if !@description.is_reader?(@user)
       else
         flash_error(:runtime_object_not_found.t(:type => :description,
@@ -385,9 +383,7 @@ class LocationController < ApplicationController
   def show_location_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(LocationDescription, params[:id].to_s,
-                         :include => [ :authors, :editors, :license, :user,
-                                       {:location => :descriptions} ])
+    if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
 
       # Public or user has permission.
       if @description.is_reader?(@user)
@@ -480,21 +476,23 @@ class LocationController < ApplicationController
   #  :section: Create/Edit Location
   #
   ##############################################################################
-
   def create_location # :prefetch: :norobots:
     store_location
     pass_query_params
 
-    # Original name passed in when arrive here with express purpose of defining a given location.
-    # (e.g., clicking on "define this location", or after create_observation with unknown location)
-    # (Note: all names are in user's preferred order unless explicitly otherwise.)
+    # Original name passed in when arrive here with express purpose of
+    # defining a given location. (e.g., clicking on "define this location",
+    # or after create_observation with unknown location)
+    # Note: names are in user's preferred order unless explicitly otherwise.)
     @original_name = params[:where]
 
-    # Previous value of place name: ignore warnings if unchanged (i.e., resubmit same name).
+    # Previous value of place name: ignore warnings if unchanged
+    # (i.e., resubmit same name).
     @approved_name = params[:approved_where]
 
     # This is the latest value of place name.
-    @display_name = params[:location][:display_name].strip_squeeze rescue @original_name
+    @display_name = params[:location][:display_name].
+      strip_squeeze rescue @original_name
 
     # Where to return after successfully creating location.
     @set_observation  = params[:set_observation]
@@ -505,7 +503,8 @@ class LocationController < ApplicationController
     # Render a blank form.
     if request.method != "POST"
       user_name = Location.user_name(@user, @display_name)
-      @dubious_where_reasons = Location.dubious_name?(user_name, true) if @display_name
+      @dubious_where_reasons = Location.
+        dubious_name?(user_name, true) if @display_name
       @location = Location.new
       geocoder = Geocoder.new(user_name)
       if geocoder.valid
@@ -515,7 +514,7 @@ class LocationController < ApplicationController
         @location.east = geocoder.east
         @location.west = geocoder.west
       else
-        @location.display_name = ''
+        @location.display_name = ""
         @location.north = 80
         @location.south = -80
         @location.east = 89
@@ -528,20 +527,20 @@ class LocationController < ApplicationController
       # already exists.  In either case, we're done with this form.
       done = false
 
-      # Look to see if the display name is already in use.  If it is then just use
-      # that location and ignore the other values.  Probably should be smarter
-      # with warnings and merges and such...
+      # Look to see if the display name is already in use.
+      # If it is then just use that location and ignore the other values.
+      # Probably should be smarter with warnings and merges and such...
       db_name = Location.user_name(@user, @display_name)
       @location = Location.find_by_name_or_reverse_name(db_name)
 
       # Location already exists.
       if @location
-        flash_warning(:runtime_location_already_exists.t(:name => @display_name))
+        flash_warning(:runtime_location_already_exists.t(name: @display_name))
         done = true
 
       # Need to create location.
       else
-        @location = Location.new(params[:location])
+        @location = Location.new(whitelisted_location_params)
         @location.display_name = @display_name # (strip_squozen)
 
         # Validate name.
@@ -879,7 +878,7 @@ class LocationController < ApplicationController
     #   2) all that start with everything in "where" up to the comma
     #   3) all that start with the first word in "where"
     #   4) there just aren't any matches, give up
-    all = Location.all(:order => 'name')
+    all = Location.all.order("name")
     @matches, @others = (
       split_out_matches(all, @where) or
       split_out_matches(all, @where.split(',').first) or
@@ -908,12 +907,12 @@ class LocationController < ApplicationController
     end
     redirect_to(:action => 'show_location', :id => params[:id].to_s)
   end
-  
+
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
   # into the given Location.  Linked from +list_merge_options+, I think.
   def add_to_location # :norobots:
     if location = find_or_goto_index(Location, params[:location])
-      where = params[:where].strip_squeeze rescue ''
+      where = params[:where].strip_squeeze rescue ""
       if not where.blank? and
          update_observations_by_where(location, where)
         flash_notice(:runtime_location_merge_success.t(:this => where,
@@ -928,9 +927,10 @@ class LocationController < ApplicationController
   end
 
   # Move all the Observation's with a given +where+ into a given Location.
-  def update_observations_by_where(location, where)
+  def update_observations_by_where(location, given_where)
     success = true
-    observations = Observation.find_all_by_where(where)
+    # observations = Observation.find_all_by_where(given_where)
+    observations = Observation.where(where: given_where)
     count = 3
     for o in observations
       count += 1
@@ -953,6 +953,15 @@ class LocationController < ApplicationController
 
   def tweak
     print("Tweak called\n")
+  end
+
+  ##############################################################################
+
+  private
+
+  def whitelisted_location_params
+    params.required(:location).
+      permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end
 end
 

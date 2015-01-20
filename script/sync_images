@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /var/web/mushroom-observer/public/images
+
+date; for size in 640 960 1280 orig; do
+  echo Syncing $size;
+  rsync -az -e 'ssh -l cdmr' $size/ cdmr@digitalmycology.com:images.digitalmycology.com/$size;
+  date;
+done

@@ -9,12 +9,14 @@
 #  the value.
 #
 #  Observation#change_vote::         Change a User's Vote for a given Naming.
-#  Observation#calc_consensus::      Decide which Name is winner for an Observation.
-#  Observation#is_owners_favorite?:: Is a given Naming the Observation owner's favorite?
-#  Observation#is_users_favorite?::  Is a given Naming the given User's favorite?
+#  Observation#calc_consensus::  Decide which Name is winner for an Observation.
+#  Observation#is_owners_favorite?:: Is a given Naming the Observation owner's
+#                                    favorite?
+#  Observation#is_users_favorite?::  Is a given Naming the given User's
+#                                    favorite?
 #  Observation#refresh_vote_cache::  Refresh vote cache for all Observation's.
 #
-#  Naming#vote_sum::            Straight sum of Vote's for this Naming (used in tests).
+#  Naming#vote_sum::     Straight sum of Vote's for this Naming (used in tests).
 #  Naming#user_voted?::         Has a given User voted for this Naming?
 #  Naming#users_vote::          Get a given User's Vote for this Naming.
 #  Naming#vote_percent::        Convert score for this Naming into a percentage.
@@ -24,7 +26,8 @@
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
-#  sync_id::            Globally unique alphanumeric id, used to sync with remote servers.
+#  sync_id::            Globally unique alphanumeric id,
+#                       used to sync with remote servers.
 #  created_at::         Date/time it was first created.
 #  updated_at::         Date/time it was last updated.
 #  user::               User that created it.
@@ -45,7 +48,8 @@
 #  percent::            Convert value to percentage.
 #
 #  ==== Vote labels
-#  confidence_menu::    Structure used by form helper +select+ to create pulldown menu.
+#  confidence_menu::    Structure used by form helper +select+
+#                       to create pulldown menu.
 #  confidence::         Classify value as confidence level, String.
 #
 #  == Instance methods
@@ -75,9 +79,11 @@ class Vote < AbstractModel
   NEXT_BEST_VOTE =  2
   MAXIMUM_VOTE   =  3
 
+
   def self.construct(args, naming)
     now = Time.now
-    vote = Vote.new(args)
+    vote = Vote.new
+    vote.assign_attributes(args.permit(:favorite, :value)) if args
     vote.created_at = now
     vote.updated_at = now
     vote.user = @user
@@ -123,11 +129,8 @@ class Vote < AbstractModel
 
   # Convert a given Vote value to a percentage.
   def self.percent(v)
-    if v.blank?
-      0.0
-    else
-      v.to_f * 100 / 3
-    end
+    return 0.0 if v.blank?
+    v.to_f * 100 / 3
   end
 
   # Convert Vote's value to a percentage.
@@ -186,7 +189,7 @@ class Vote < AbstractModel
   def self.opinion_menu
     translate_menu([NO_OPINION_VAL] + confidence_menu)
   end
-  
+
   # Find label of closest value in the "confidence" menu.
   def self.confidence(val)
     lookup_value(val, confidence_menu)

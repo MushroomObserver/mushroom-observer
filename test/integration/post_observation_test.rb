@@ -198,7 +198,7 @@ class PostObservationTest < IntegrationTestCase
     if new_obs.specimen
       assert_match(/[0-9] specimen/, response.body)
     else
-      assert_not_match(/No herbarium specimen/, response.body)
+      refute_match(/No herbarium specimen/, response.body)
     end
     assert_match(new_obs.notes, response.body)
     assert_match(new_img.notes, response.body)
@@ -212,7 +212,7 @@ class PostObservationTest < IntegrationTestCase
     assert_flash_success
     patterns.each { |pat| assert_match(pat, notice) }
   end
-  
+
   def assert_flash_for_create_observation
     review_flash([/success/i, /created observation/i,
       /created proposed name/i, /uploaded/i])
