@@ -312,7 +312,8 @@ class LocationControllerTest < FunctionalTestCase
                                          params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
-    assert_redirected_to(action: :show_location)
+    assert_redirected_to(controller: :location, action: :show_location,
+                         id: loc.id)
     assert_equal(contrib, rolf.reload.contribution)
 
     # Should have created a new version of location only.
@@ -411,7 +412,8 @@ class LocationControllerTest < FunctionalTestCase
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
     post_requires_login(:edit_location, params)
-    assert_redirected_to(action: :show_location)
+    assert_redirected_to(controller: :location, action: :show_location,
+                         id: to_go.id)
     assert_equal(loc_count-1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
     assert_equal(past_loc_count-1, Location::Version.count)

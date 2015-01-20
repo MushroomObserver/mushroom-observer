@@ -413,7 +413,7 @@ class ImageControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:edit_image, params)
-    assert_redirected_to(action: :show_image)
+    assert_redirected_to(action: :show_image, id: image.id)
     assert_equal(10, rolf.reload.contribution)
 
     assert(obs.reload.rss_log)
@@ -427,7 +427,9 @@ class ImageControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     params = { id: obs.id }
     assert_equal("rolf", obs.user.login)
-    requires_user(:remove_images, [:observer, :show_observation], params)
+    requires_user(:remove_images,
+      { controller: :observer, action: :show_observation, id: obs.id },
+      params)
     assert_form_action(action: "remove_images", id: obs.id)
   end
 
@@ -505,7 +507,8 @@ class ImageControllerTest < FunctionalTestCase
     }
     login("mary")
     get_with_dump(:reuse_image_for_glossary_term, params)
-    assert_redirected_to(controller: :glossary, action: :show_glossary_term)
+    assert_redirected_to(controller: :glossary, action: :show_glossary_term,
+      id: glossary_term.id)
     assert(glossary_term.reload.images.member?(image))
   end
 
@@ -541,12 +544,12 @@ class ImageControllerTest < FunctionalTestCase
         "id_#{proj.id}" => "1"
       }
     }
-    post_requires_user(:add_image, [:observer, :show_observation], params)
-    assert_redirected_to(controller: :observer, action: :show_observation)
+    post_requires_user(:add_image,
+      { controller: :observer, action: :show_observation, id: obs.id }, params)
     assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
     assert(updated_at != obs.updated_at)
-    message = :runtime_image_uploaded_image.t(name: '#' + obs.images.last.id.to_s)
+    message = :runtime_image_uploaded_image.t(name: "#" + obs.images.last.id.to_s)
     assert_flash(/#{message}/)
     img = Image.last
     assert_obj_list_equal([obs], img.observations)
