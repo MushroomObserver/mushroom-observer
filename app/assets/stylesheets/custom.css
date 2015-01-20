@@ -1,0 +1,73 @@
+.border-bottom {
+    border-bottom: 1px solid;
+}
+
+.margin-bottom {
+    margin-bottom: 1em;
+}
+
+.indent {
+    padding-left: 1em;
+}
+
+.pad-left {
+    padding-left: 1em;
+}
+
+.pad-bottom {
+    padding-bottom: 1em;
+}
+
+.pad-top {
+    padding-top: 1em;
+}
+
+.kill-padding {
+    padding: 0 !important;
+}
+
+.kill-margins {
+    margin: 0 !important;
+}
+
+#navigation a {
+    display: block;
+}
+
+#navigation .group {
+    margin-bottom: 1.25em;
+}
+
+#banner {
+    margin-left: -15px;
+    margin-right:-15px;
+}
+/*Themeable options below */
+/* Banner colors */
+#banner {
+    padding-top: 5px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid;
+    font: small-caps 25px/25px "Times New Roman", serif;
+    text-align: center;
+}
+
+#banner a {
+    text-decoration: none;
+}
+
+#banner {
+    background-color: #cc2616; color: #FAEBD4;
+}
+
+#banner a {
+    color: #FAEBD4;
+}
+
+#banner a:visited {
+    color: #FAEBD4;
+}
+
+.color1 {
+    background: #E0E0E0;
+}
