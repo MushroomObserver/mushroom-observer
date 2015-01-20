@@ -131,40 +131,43 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, order: ["1", "2"]) }
   end
 
-    def test_initialize_helpers
-      query = Query.lookup(:Name)
+  def test_initialize_helpers
+    query = Query.lookup(:Name)
 
-      assert_equal('4,1,2', query.clean_id_set(["4", 1, 4, 2, 4, 1, 2]))
-      assert_equal('-1', query.clean_id_set([]))
+    assert_equal('4,1,2', query.clean_id_set(["4", 1, 4, 2, 4, 1, 2]))
+    assert_equal('-1', query.clean_id_set([]))
 
-      assert_equal("blah", query.clean_pattern("blah"))
-      assert_equal('foo bar', query.clean_pattern('foo bar'))
-      assert_equal('\\"foo\\%bar\\"', query.clean_pattern('"foo%bar"'))
-      assert_equal('one\\\\two', query.clean_pattern('one\\two'))
-      assert_equal("foo%bar", query.clean_pattern('foo*bar'))
+    assert_equal("blah", query.clean_pattern("blah"))
+    assert_equal('foo bar', query.clean_pattern('foo bar'))
+    assert_equal('\\"foo\\%bar\\"', query.clean_pattern('"foo%bar"'))
+    assert_equal('one\\\\two', query.clean_pattern('one\\two'))
+    assert_equal("foo%bar", query.clean_pattern('foo*bar'))
 
-      assert_equal(nil, query.and_clause())
-      assert_equal("one", query.and_clause("one"))
-      assert_equal('(one AND two)', query.and_clause("one", "two"))
-      assert_equal('(one AND two AND three)', query.and_clause("one", "two", "three"))
+    assert_equal(nil, query.and_clause())
+    assert_equal("one", query.and_clause("one"))
+    assert_equal('(one AND two)', query.and_clause("one", "two"))
+    assert_equal('(one AND two AND three)', query.and_clause("one", "two", "three"))
 
-      assert_equal(nil, query.or_clause())
-      assert_equal("one", query.or_clause("one"))
-      assert_equal('(one OR two)', query.or_clause("one", "two"))
-      assert_equal('(one OR two OR three)', query.or_clause("one", "two", "three"))
-    end
+    assert_equal(nil, query.or_clause())
+    assert_equal("one", query.or_clause("one"))
+    assert_equal('(one OR two)', query.or_clause("one", "two"))
+    assert_equal('(one OR two OR three)', query.or_clause("one", "two", "three"))
+  end
 
     def test_google_parse
       query = Query.lookup(:Name)
       assert_equal([["blah"]], query.google_parse("blah").goods)
       assert_equal([["foo","bar"]], query.google_parse('foo OR bar').goods)
-      assert_equal([["one"],["foo","bar"],["two"]], query.google_parse('one foo OR bar two').goods)
-      assert_equal([["one"],["foo","bar",'quoted phrase','-gar'],["two"]], query.google_parse('one foo OR bar OR "quoted phrase" OR -gar two').goods)
+      assert_equal([["one"],["foo","bar"],["two"]],
+                   query.google_parse('one foo OR bar two').goods)
+      assert_equal([["one"],["foo","bar",'quoted phrase','-gar'],["two"]],
+        query.google_parse('one foo OR bar OR "quoted phrase" OR -gar two').goods)
       assert_equal([], query.google_parse('-bad').goods)
       assert_equal(["bad"], query.google_parse('-bad').bads)
       assert_equal(["bad"], query.google_parse('foo -bad bar').bads)
       assert_equal(['bad wolf'], query.google_parse('foo -"bad wolf" bar').bads)
-      assert_equal(['bad wolf',"foo","bar"], query.google_parse('-"bad wolf" -foo -bar').bads)
+      assert_equal(['bad wolf',"foo","bar"],
+        query.google_parse('-"bad wolf" -foo -bar').bads)
     end
 
     def test_google_conditions
@@ -451,7 +454,6 @@ class QueryTest < UnitTestCase
     @fungi = names(:fungi)
     @agaricus = names(:agaricus)
     num = Name.count
-    # num_agaricus = Name.count(conditions: 'text_name LIKE "Agaricus%"') # Rails 3
     num_agaricus = Name.where('text_name LIKE "Agaricus%"').count
 
     assert_equal(num, query.select_count)
@@ -498,7 +500,9 @@ class QueryTest < UnitTestCase
     assert_equal([:names,:observations], query.tables_used)
 
     query = Query.lookup(:Image, :all, by: :name)
-    assert_equal([:images,:images_observations,:names,:observations], query.tables_used)
+
+    assert_equal([:images,:images_observations,:names,:observations],
+                 query.tables_used)
     assert_equal(true, query.uses_table?(:images))
     assert_equal(true, query.uses_table?(:images_observations))
     assert_equal(true, query.uses_table?(:names))
@@ -508,9 +512,11 @@ class QueryTest < UnitTestCase
 
   def test_results
     query = Query.lookup(:User, :all, by: :id)
+
     assert_equal(Set.new, Set.new([1,2,3,4,5,6]) - query.result_ids)
     assert_equal(roy.location_format, :scientific)
-    assert_equal(Set.new, Set.new([rolf,mary,junk,dick,katrina,roy]) - query.results)
+    assert_equal(Set.new,
+                 Set.new([rolf,mary,junk,dick,katrina,roy]) - query.results)
     assert_equal(2, query.index(3))
     assert_equal(3, query.index("4"))
     assert_equal(1, query.index(mary))
@@ -528,43 +534,54 @@ class QueryTest < UnitTestCase
     assert_equal(2, query.index(1))
   end
 
-  def test_paginate
-    # The only methods of Paginator used by Query are:
-    #   from, to      index of first and last itemto show
-    #   num_total=    lets Query tell it how many results there are
-    #   letter        selected letter (if any)
-    #   used_letters= lets Query tell it which letters have results
-    query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
+  def paginate_test_setup(from, to)
     @names = Name.all
+    @pages = Wrapper.new(from: from, to: to, num_per_page: to-from+1)
+    @query = Query.lookup(:Name, :all, misspellings: :either, by: :id)
+  end
 
-    pages = Wrapper.new(from: 1, to: 4)
-    assert_equal([2,3,4,5], query.paginate_ids(pages))
-    assert_equal(@names.size, pages.num_total)
-    assert_equal(@names[1..4], query.paginate(pages))
+  def paginate_test(from, to, expected)
+    paginate_test_setup(from, to)
+    paginate_assertions(from, to, expected)
+  end
 
-    pages = Wrapper.new(from: 5, to: 8)
-    assert_equal([6,7,8,9], query.paginate_ids(pages))
-    assert_equal(@names.size, pages.num_total)
-    assert_equal(@names[5..8], query.paginate(pages))
+  def paginate_assertions(from, to, expected)
+    assert_equal(expected, @query.paginate_ids(@pages))
+    assert_equal(@names.size, @pages.num_total)
+    assert_equal(@names[from..to], @query.paginate(@pages))
+  end
 
-    pages = Wrapper.new(from: 1, to: 4)
-    query.need_letters = 'names.text_name'
-    assert_equal([2,3,4,5], query.paginate_ids(pages))
-    assert_equal(@names.size, pages.num_total)
-    assert_equal(@names[1..4], query.paginate(pages))
-    letters = @names.map {|n| n.text_name[0,1]}.uniq
-    assert_equal(letters.sort, pages.used_letters.sort)
+  def test_paginate_start
+    paginate_test(1, 4, [2,3,4,5])
+  end
+
+  def test_paginate_middle
+    MO.debugger_flag = true
+    paginate_test(5, 8, [6,7,8,9])
+  end
+
+  def paginate_test_letter_setup(to, from)
+    paginate_test_setup(to, from)
+    @query.need_letters = "names.text_name"
+    @letters = @names.map {|n| n.text_name[0,1]}.uniq.sort
+  end
+
+  def test_paginate_need_letters
+    paginate_test_letter_setup(1, 4)
+    paginate_assertions(1, 4, [2,3,4,5])
+    assert_equal(@letters, @pages.used_letters.sort)
+  end
+
+  def test_paginate_ells
+    paginate_test_letter_setup(3, 6)
+    @pages = Wrapper.new(from: 3, to: 6, letter: "L", num_per_page: 4)
 
     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
     @ells = @names.select {|n| n.text_name[0,1] == "L"}
     assert(@ells.length >= 9)
-
-    pages = Wrapper.new(from: 3, to: 6, letter: "L")
-    # Need to clear out cache or used_letters will be wrong.
-    query.clear_cache
-    assert_equal(@ells[3..6].map(&:id), query.paginate_ids(pages))
-    assert_equal(letters.sort, pages.used_letters.sort)
-    assert_equal(@ells[3..6], query.paginate(pages))
+    assert_equal(@ells[3..6].map(&:id), @query.paginate_ids(@pages))
+    assert_equal(@letters, @pages.used_letters.sort)
+    assert_equal(@ells[3..6], @query.paginate(@pages))
   end
 
   def test_eager_instantiator

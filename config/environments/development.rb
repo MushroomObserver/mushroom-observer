@@ -17,25 +17,25 @@ MushroomObserver::Application.configure do
   # Turn off email.
   config.queue_email = false
   config.action_mailer.smtp_settings = {
-    :address => "localhost",
-    :port    => 25,
-    :domain  => "localhost"
+    address: "localhost",
+    port:    25,
+    domain:  "localhost"
   }
 
   # Serve new images locally, pre-existing images from real image server.
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {
-    :local => {
-      :test => "file://#{config.local_image_files}",
-      :read => "/images",
+    local: {
+      test: "file://#{config.local_image_files}",
+      read: "/images"
     },
-    :cdmr => {
-      :test => :transferred_flag,
-      :read => "http://images.digitalmycology.com",
+    cdmr: {
+      test: :transferred_flag,
+      read: "http://images.digitalmycology.com"
     }
   }
   config.image_precedence = {
-    :default => [:local, :cdmr]
+    default: [:local, :cdmr]
   }
   config.image_fallback_source = :cdmr
 
@@ -66,10 +66,20 @@ MushroomObserver::Application.configure do
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
 
-  # Log the query plan for queries taking more than this (works
-  # with SQLite, MySQL, and PostgreSQL)
-
+  # Speed up Rails server boot time in development environment
   config.eager_load = false
+
+  # Only use best-standards-support built into browsers
+  config.action_dispatch.best_standards_support = :builtin
+
+  if config.active_record
+    # Raise exception on mass assignment protection for Active Record models
+    config.active_record.mass_assignment_sanitizer = :strict \
+
+    # Log the query plan for queries taking more than this (works
+    # with SQLite, MySQL, and PostgreSQL)
+    config.active_record.auto_explain_threshold_in_seconds = 0.5
+  end
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

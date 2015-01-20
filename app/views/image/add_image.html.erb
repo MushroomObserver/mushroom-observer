@@ -19,10 +19,10 @@
   <%= hidden_field("observation", "id") %>
 
   <p>
-    <%= :image_add_image.t %> 1: <%= file_field("upload", "image1") %> (<%= :image_add_default.t %>)<br/>
-    <%= :image_add_image.t %> 2: <%= file_field("upload", "image2") %> (<%= :image_add_optional.t %>)<br/>
-    <%= :image_add_image.t %> 3: <%= file_field("upload", "image3") %> (<%= :image_add_optional.t %>)<br/>
-    <%= :image_add_image.t %> 4: <%= file_field("upload", "image4") %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 1: <%= image_file_field(:upload, :image1) %> (<%= :image_add_default.t %>)<br/>
+    <%= :image_add_image.t %> 2: <%= image_file_field(:upload, :image2) %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 3: <%= image_file_field(:upload, :image3) %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 4: <%= image_file_field(:upload, :image4) %> (<%= :image_add_optional.t %>)<br/>
   </p><br/>
 
   <%= render(:partial => 'form_images', :locals => {

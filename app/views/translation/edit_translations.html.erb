@@ -130,7 +130,7 @@
     LOCALE = locale;
     if (!CHANGED || confirm(CONFIRM_STRING)) {
       show_whirly(LOADING_STRING);
-      jQuery.ajax("edit_translations_ajax_get", {
+      jQuery.ajax("/translation/edit_translations_ajax_get", {
         data: { locale: locale, tag: tag, authenticity_token: CSRF_TOKEN },
         dataType: 'text',
         async: true,
@@ -224,7 +224,7 @@
       <div>
 
 <%= if @js
-  form_tag({ :action => :edit_translations_ajax_post },
+  form_tag({ :controller => :translation, :action => :edit_translations_ajax_post },
            { :id => :post_form, :target => :hidden_frame })
 else
   form_tag(:action => :edit_translations, :page => @page)

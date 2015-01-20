@@ -612,7 +612,7 @@ module ApplicationHelper
     if previous_version = latest_version.previous
       html += link_with_query("#{:show_name_previous_version.t}: %d" % previous_version.version,
         :action => "show_past_#{type}", :id => obj.id,
-        :version => previous_version)
+        :version => previous_version.version)
       if (previous_version.merge_source_id rescue false)
         html += indent(1) + get_version_merge_link(obj, previous_version)
       end
@@ -2077,6 +2077,20 @@ module ApplicationHelper
   # method on the given string.
   def textilize(str, do_object_links=false)
     Textile.textilize(str, do_object_links)
+  end
+
+  # Create a file input fields with client-side size validation.
+  def image_file_field(obj, attr, opts={})
+    validated_file_field(obj, attr, opts.merge(
+      :max_upload_msg => :validate_image_file_too_big.l(:max => "#{MO.image_upload_max_size/1000000}Mb"),
+      :max_upload_size => MO.image_upload_max_size
+    ))
+  end
+
+  def validated_file_field(obj, attr, opts)
+    javascript_include("jquery")
+    javascript_include("validate_file_input_fields")
+    file_field(obj, attr, opts)
   end
 end
 

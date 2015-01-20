@@ -129,4 +129,8 @@ MushroomObserver::Application.configure do
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
   config.image_upload_max_size = 20000000
+
+  # Flag intended for controller when the debugger gets invoked.
+  # Use with lines like: debugger if MO.debugger_flag
+  config.debugger_flag = false
 end
