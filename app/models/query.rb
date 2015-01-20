@@ -2075,7 +2075,7 @@ class Query < AbstractQuery
     case model_symbol
 
     when :Location
-      self.where += ["locations.name REGEXP '#{regexp}'"]
+      self.where += ["locations.name REGEXP '#{Location.connection.quote_string(regexp)}'"]
 
     else
       raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
