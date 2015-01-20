@@ -9,18 +9,16 @@
   <meta property="og:title" content="Mushroom Observer"/>
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
   <%=
-      css = nil
+      css = MO.default_theme
       if is_in_admin_mode?
         css = 'Admin'
       elsif browser.bot?
         css = MO.default_theme
       else
-        if MO.themes.member?(controller.action_name)
+        if MO.themes.member?(controller.action_name)  ##what does this do?
           css = controller.action_name
         else
-          if @user.nil?
-            css = MO.default_theme
-          else
+          if !@user.nil?
             css = @user.theme
           end
         end
