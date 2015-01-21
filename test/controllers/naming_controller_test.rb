@@ -12,8 +12,10 @@ class NamingControllerTest < FunctionalTestCase
   def test_edit_get
     nam = namings(:coprinus_comatus_naming)
     params = { id: nam.id.to_s }
-    requires_user(:edit, ["observer", "show_observation"], params)
-    assert_form_action(action: "edit", approved_name: nam.text_name, id: nam.id.to_s)
+    requires_user(:edit, { controller: :observer, action: :show_observation,
+                  id: nam.observation_id }, params)
+    assert_form_action(action: "edit", approved_name: nam.text_name,
+                       id: nam.id.to_s)
     assert_select("option[selected]", count: 2)
   end
 
@@ -44,20 +46,23 @@ class NamingControllerTest < FunctionalTestCase
       approved_name: new_name,
       vote: { value: 1 }
     }
+    old_contribution = rolf.contribution
 
     # Clones naming, creates Easter sp and E. bunny, but no votes.
     post(:edit, params)
-
-    assert_template("show_observation")
-    assert_equal(rolf.contribution + (SiteData::FIELD_WEIGHTS[:names] * 2) + 2,
-                 rolf.reload.contribution)
     params = assigns(:params)
     nam = params.naming
+
+    # assert_template(action: 'show_observation')
+    assert_redirected_to(controller: :observer, action: :show_observation,
+                  id: nam.observation_id)
     assert_equal(new_name, nam.text_name)
     assert_not_equal(old_name, nam.text_name)
-    assert(!nam.name.deprecated)
+    refute(nam.name.deprecated)
+    # assert_equal(10 + 10*2 + 2, rolf.reload.contribution)
+    assert_equal(old_contribution + (SiteData::FIELD_WEIGHTS[:names] * 2) + 2,
+                 rolf.reload.contribution)
   end
-
 
   def test_update_observation_multiple_match
     login("rolf")

@@ -585,6 +585,10 @@ module ControllerExtensions
   #   # Expect it to render a given template (success).
   #   assert_response("template")
   #
+  #   # Expect a redirect to particular observation
+  #   assert_response( {controller: observer, action: show_observation, id: 1 })
+  #   assert_response( {action: show_observation, id: 1 })
+  #
   #   # Expect a redirection to site index.
   #   assert_response(controller: "observer", action: "index")
   #

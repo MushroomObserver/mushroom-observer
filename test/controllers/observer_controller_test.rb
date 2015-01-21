@@ -602,7 +602,8 @@ class ObserverControllerTest < FunctionalTestCase
     id = obs.id
     params = { id: id.to_s }
     assert_equal("mary", obs.user.login)
-    requires_user(:destroy_observation, [:show_observation], params, "mary")
+    requires_user(:destroy_observation, [action: :show_observation],
+                  params, "mary")
     assert_redirected_to(action: :list_observations)
     assert_raises(ActiveRecord::RecordNotFound) do
       obs = Observation.find(id)
@@ -612,7 +613,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_some_admin_pages
     for (page, response, params) in [
       [ :users_by_name,  "list_users",  {} ],
-      [ :email_features, "email_features", {} ],
+      [ :email_features, "email_features", {} ]
     ]
       logout
       get(page, params)
@@ -635,7 +636,6 @@ class ObserverControllerTest < FunctionalTestCase
 
     logout
     post(page, params)
-    # assert_template(:controller => "account", :action => "login")
     assert_redirected_to(controller: :account, action: :login)
 
     login("rolf")
@@ -657,7 +657,7 @@ class ObserverControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:commercial_inquiry, params)
-    assert_redirected_to(controller: :image, action: :show_image)
+    assert_redirected_to(controller: :image, action: :show_image, id: image.id)
   end
 
   def test_send_ask_observation_question
@@ -683,7 +683,7 @@ class ObserverControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:ask_user_question, params)
-    assert_redirected_to(action: :show_user)
+    assert_redirected_to(action: :show_user, id: user.id)
     assert_flash(:runtime_ask_user_question_success.t)
   end
 
@@ -755,8 +755,9 @@ class ObserverControllerTest < FunctionalTestCase
     # Make sure it lets Rolf and only Rolf see this page.
     assert(!mary.in_group?("reviewers"))
     assert(rolf.in_group?("reviewers"))
-    requires_user(:review_authors, :show_location, params)
-    assert_template(action: :review_authors)
+    requires_user(:review_authors, [controller: :location,
+                    action: :show_location, id: desc.location_id], params)
+    assert_template(:review_authors)
 
     # Remove Rolf from reviewers group.
     user_groups(:reviewers).users.delete(rolf)
@@ -765,7 +766,8 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
-    assert_template(action: :show_location, id: desc.id)
+    assert_redirected_to(controller: :location, action: :show_location,
+                         id: desc.id)
 
     # Make Rolf an author.
     desc.add_author(rolf)
@@ -775,17 +777,17 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Rolf should be able to do it now.
     get(:review_authors, params)
-    assert_template(action: :review_authors)
+    assert_template(:review_authors)
 
     # Rolf giveth with one hand...
     post(:review_authors, params.merge(add: mary.id))
-    assert_template(action: :review_authors)
+    assert_template(:review_authors)
     desc.reload
     assert_user_list_equal([mary, rolf], desc.authors)
 
     # ...and taketh with the other.
     post(:review_authors, params.merge(remove: mary.id))
-    assert_template(action: :review_authors)
+    assert_template(:review_authors)
     desc.reload
     assert_user_list_equal([rolf], desc.authors)
   end
@@ -833,7 +835,7 @@ class ObserverControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       type: "name",
-      value: "1",
+      value: "1"
     }
 
     # Require login.
@@ -1601,7 +1603,8 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
     params = { id: obs.id.to_s }
-    requires_user(:edit_observation, ["observer", "show_observation"], params)
+    requires_user(:edit_observation, [controller: :observer,
+                  action: :show_observation], params)
     assert_form_action(action: :edit_observation, id: obs.id.to_s)
   end
 
@@ -1622,7 +1625,7 @@ class ObserverControllerTest < FunctionalTestCase
         specimen: new_specimen,
         thumb_image_id: "0",
       },
-      good_images: '1 2',
+      good_images: "1 2",
       good_image: {
         "1" => {
           notes: "new notes",
@@ -1636,10 +1639,11 @@ class ObserverControllerTest < FunctionalTestCase
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:edit_observation, ["observer", "show_observation"],
-      params, "mary")
+    post_requires_user(:edit_observation, [controller: :observer,
+                  action: :show_observation], params, "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
-    assert_redirected_to(%r{/location/create_location/})
+    assert_redirected_to(%r{#{ url_for(controller: :location,
+                                       action: :create_location) }})
     assert_equal(10, rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
@@ -1649,8 +1653,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_equal(updated_at, obs.rss_log.updated_at)
     assert_not_equal(0, obs.thumb_image_id)
     img = images(:in_situ).reload
-    assert_equal('new notes', img.notes)
-    assert_equal('new name', img.original_name)
+    assert_equal("new notes", img.notes)
+    assert_equal("new name", img.original_name)
     assert_equal('someone else', img.copyright_holder)
     assert_equal('2012-04-06', img.when.to_s)
     assert_equal(licenses(:ccwiki30), img.license)
@@ -1666,12 +1670,12 @@ class ObserverControllerTest < FunctionalTestCase
         place_name: where,
         when: obs.when,
         notes: obs.notes,
-        specimen: obs.specimen,
+        specimen: obs.specimen
       },
       log_change: { checked: "0" }
     }
-    post_requires_user(:edit_observation, ["observer", "show_observation"],
-      params, "mary")
+    post_requires_user(:edit_observation, [controller: :observer,
+                       action: :show_observation], params, "mary")
     # assert_redirected_to(controller: :location, action: :create_location)
     assert_redirected_to(%r{/location/create_location})
     assert_equal(10, rolf.reload.contribution)
@@ -1695,12 +1699,12 @@ class ObserverControllerTest < FunctionalTestCase
         "when(3i)" => "3",
         notes: new_notes,
         specimen: new_specimen,
-        thumb_image_id: "0",
+        thumb_image_id: "0"
       },
       log_change: { checked: "1" }
     }
-    post_requires_user(:edit_observation, ["observer", "show_observation"],
-      params, "mary")
+    post_requires_user(:edit_observation, [controller: :observer,
+                       action: :show_observation], params, "mary")
     assert_response(:success) # Which really means failure
   end
 
