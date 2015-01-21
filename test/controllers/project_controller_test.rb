@@ -2,7 +2,7 @@
 require "test_helper"
 
 class ProjectControllerTest < FunctionalTestCase
-
+##### Helpers (which also assert) ##############################################
   def add_project_helper(title, summary)
     params = {
       project: {
@@ -32,7 +32,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(drafts.length > 0)
     params = { id: project.id.to_s }
     requires_user(:destroy_project, :show_project, params, changer.login)
-    assert_redirected_to(action: :show_project)
+    assert_redirected_to(action: :show_project, id: project.id)
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
