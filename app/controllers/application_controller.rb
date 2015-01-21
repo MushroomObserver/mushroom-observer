@@ -93,7 +93,8 @@ class ApplicationController < ActionController::Base
   require 'login_system'
   include LoginSystem
 
-  around_filter :catch_errors # if TESTING
+  around_filter :catch_errors # if Rails.env == "test"
+  before_filter :kick_out_robots
   before_filter :verify_authenticity_token
   before_filter :block_ip_addresses
   before_filter :fix_bad_domains
@@ -147,6 +148,16 @@ class ApplicationController < ActionController::Base
     return false
   end
 
+  # Physically eject robots unless they're looking at accepted pages.
+  def kick_out_robots
+    return unless browser.bot?
+    controller = params[:controller]
+    action     = params[:action]
+    unless Robots.allowed?(controller, action)
+      render :text => "Robots are not allowed on this page.", :status => 403
+    end
+  end
+
   # Filter to run before anything else to protect against denial-of-service attacks.
   def block_ip_addresses
     if [
@@ -188,10 +199,14 @@ class ApplicationController < ActionController::Base
     return layout
   end
 
-  # Catch errors for integration tests.
+  # Catch errors for integration tests, and report stats about completed request.
   def catch_errors
-logger.warn('SESSION: ' + session.inspect)
+    start      = Time.now
+    controller = params[:controller]
+    action     = params[:action]
+    robot      = browser.bot? ? " robot" : ""
     yield
+    logger.warn("TIME: #{Time.now-start} #{status} #{controller} #{action}#{robot}")
   rescue => e
     @error = e
     raise e
@@ -310,7 +325,7 @@ logger.warn('SESSION: ' + session.inspect)
 
     # Make currently logged-in user available to everyone.
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'}")
+    logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'} controller=#{params[:controller]} action=#{params[:action]}")
 
     # Keep track of last time user requested a page, but only update at most once an hour.
     if @user and (
