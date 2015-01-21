@@ -968,11 +968,6 @@ class ImageController < ApplicationController
 
   private
 
-  def whitelisted_image_args
-    ["when(1i)", "when(2i)", "when(3i)", :copyright_holder, :notes,
-      :original_name]
-  end
-
   def whitelisted_image_params
     params.require(:image).permit(whitelisted_image_args)
   end

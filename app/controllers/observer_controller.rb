@@ -2264,7 +2264,9 @@ class ObserverController < ApplicationController
           if upload.respond_to?(:original_filename)
             name = upload.original_filename.force_encoding("utf-8")
           end
-          image = Image.new(args2.permit(whitelisted_observation_image_args))
+          # image = Image.new(args2) # Rails 3.2
+          image = Image.new(args2.permit(whitelisted_image_args))
+          # image = Image.new(args2.permit(:all))
           image.created_at = Time.now
           image.updated_at = image.created_at
           # If image.when is 1950 it means user never saw the form
@@ -2321,7 +2323,7 @@ class ObserverController < ApplicationController
       next unless check_permission(image)
       args = param_lookup([:good_image, image.id.to_s])
       next unless args
-      image.attributes = args.permit(whitelisted_observation_image_args)
+      image.attributes = args.permit(whitelisted_image_args)
       next unless image.when_changed? ||
         image.notes_changed? ||
         image.copyright_holder_changed? ||
@@ -2460,10 +2462,6 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   private
-
-  def whitelisted_observation_image_args
-    [:when, :copyright_holder, :notes, :original_name, :license_id]
-  end
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
