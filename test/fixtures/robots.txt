@@ -4,4 +4,4 @@ User-agent: *
 Disallow: *?*
 Disallow: /account/activate_api_key
 # Allow: /glossary/show_term
-# Allow: /species_list/show_species_list
+# Allow: /observer/intro
