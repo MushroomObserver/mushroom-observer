@@ -53,10 +53,10 @@ OBJECT_TYPES = [
 ]
 
 STATIC_PAGES = [
-  [ "home page",    "",                     "hourly" ], # observer/list_rss_logs
-  [ "introduction", "observer/intro",       "weekly" ],
-  [ "how to use",   "observer/how_to_use",  "weekly" ],
-  [ "how to help",  "observer/how_to_help", "weekly" ]
+  [ "home page",    "observer/list_rss_logs", "hourly" ],
+  [ "introduction", "observer/intro",         "weekly" ],
+  [ "how to use",   "observer/how_to_use",    "weekly" ],
+  [ "how to help",  "observer/how_to_help",   "weekly" ]
 ]
 
 LOCALES = Language.connection.select_values %(
@@ -289,7 +289,7 @@ def update_robots_file
     disallow = actions - allow
     disallowed_paths += disallow.map {|action| "/#{controller}/#{action}"}
   end
-  write_robots_file(disallowed_paths)
+  write_robots_file(disallowed_paths, allowed_actions)
 end
 
 def deduce_allowed_actions
@@ -305,7 +305,6 @@ end
 
 def add_action(actions, path)
   controller, action = parse_path(path)
-  return if controller.blank?
   actions[controller] ||= []
   actions[controller] << action
 end
@@ -336,11 +335,16 @@ def controller_actions(controller)
   end
 end
 
-def write_robots_file(disallowed_paths)
+def write_robots_file(disallowed_paths, allowed_actions)
   File.open(ROBOTS_FILE, "w") do |fh|
     fh.write ROBOTS_HEADER
     for path in disallowed_paths.sort
       fh.puts "Disallow: #{path}"
+    end
+    for controller in allowed_actions.keys.sort
+      for action in allowed_actions[controller].uniq
+        fh.puts "# Allow: /#{controller}/#{action}"
+      end
     end
     fh.write ROBOTS_FOOTER
   end
