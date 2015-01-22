@@ -2508,21 +2508,22 @@ class ObserverControllerTest < FunctionalTestCase
     assert_redirected_to(%r{/index_observation})
 
     post(:download_observations, q: query.id.alphabetize, format: :raw,
-        encoding: 'UTF-8', commit: "Download")
-    assert_no_flash
-    assert_response(:success)
-
-    rows = @response.body.split("\n")
+        encoding: "UTF-8", commit: "Download")
+        rows = @response.body.split("\n")
     ids = rows.map { |s| s.sub(/,.*/, "") }
     expected = ["observation_id", "1", "2", "9", "10"]
     last_expected_index = expected.length - 1
-    assert_equal(expected, ids[0..last_expected_index])
+
+    assert_no_flash
+    assert_response(:success)
+    assert_equal(expected, ids[0..last_expected_index],
+      "Exported 1st column incorrect")
     fourth_row = rows[last_expected_index].chop
     assert_equal(
       "10,2,mary,Mary Newbie,2010-07-22,,1,Fungi,,kingdom,0.0,2," \
         "USA,California,,Burbank," \
         "34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294,148,X,",
-      fourth_row.iconv('utf-8')
+      fourth_row.iconv('utf-8'), "Exported 4th row incorrect"
     )
 
     post(:download_observations, q: query.id.alphabetize, format: "raw",

@@ -192,7 +192,8 @@ class ProjectControllerTest < FunctionalTestCase
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
     for draft in drafts
-      assert_not_equal(:project, draft.reload.source_type)
+      refute_equal(:project, draft.reload.source_type,
+        "Project destruction failed to reset NameDescription's source_type")
     end
   end
 
