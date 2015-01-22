@@ -61,7 +61,7 @@ STATIC_PAGES = [
 
 # These are aliases for pages allowed above.
 OTHER_ALLOWED_PATHS = [
-  "/observer/index",
+  # "/observer/index", (would allow too many indexes we don't want to allow)
   "/observer/lookup_observation",
   "/observer/lookup_name",
   "/observer/show_name"
@@ -303,7 +303,7 @@ def update_robots_file
     disallow = actions - allow
     disallowed_paths += disallow.map {|action| "/#{controller}/#{action}"}
   end
-  allowed_paths = flatten_allowed_actions(allowed_actions)
+  allowed_paths = flatten_allowed_actions(allowed_actions) + OTHER_ALLOWED_PATHS
   remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
   write_robots_file(disallowed_paths, allowed_paths)
 end
@@ -380,7 +380,7 @@ def write_robots_file(disallowed_paths, allowed_paths)
     for path in disallowed_paths.sort
       fh.puts "Disallow: #{path}"
     end
-    for path in allowed_paths + OTHER_ALLOWED_PATHS
+    for path in allowed_paths
       fh.puts "# Allow: #{path}"
     end
     fh.write ROBOTS_FOOTER
