@@ -8,19 +8,21 @@ class Robots
     end
 
     def populate_allowed_robot_actions
-      file = "#{::Rails.root}/public/robots.txt"
+      file = MO.robots_dot_text_file
       @@allowed_robot_actions = parse_robots_dot_text(file)
     end
 
     def parse_robots_dot_text(file)
       results = {}
-      pat = Regexp.new('Allow: /(\w+)/(\w+)')
-      File.open(file).readlines.each do |line|
-        match = line.match(pat)
-        if match
-          controller = match[1]
-          action     = match[2]
-          results["#{controller}/#{action}"] = true
+      if File.exist?(file)
+        pat = Regexp.new('Allow: /(\w+)/(\w+)')
+        File.open(file).readlines.each do |line|
+          match = line.match(pat)
+          if match
+            controller = match[1]
+            action     = match[2]
+            results["#{controller}/#{action}"] = true
+          end
         end
       end
       return results

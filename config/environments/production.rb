@@ -76,6 +76,8 @@ MushroomObserver::Application.configure do
   config.image_fallback_source = :cdmr
   config.keep_these_image_sizes_local = [ :thumbnail, :small ]
 
+  config.robots_dot_text_file = "#{config.root}/public/robots.txt"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------

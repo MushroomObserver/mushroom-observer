@@ -39,6 +39,8 @@ MushroomObserver::Application.configure do
   }
   config.image_fallback_source = :cdmr
 
+  config.robots_dot_text_file = "#{config.root}/public/robots.txt"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------
