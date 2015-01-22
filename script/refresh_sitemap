@@ -289,7 +289,9 @@ def update_robots_file
     disallow = actions - allow
     disallowed_paths += disallow.map {|action| "/#{controller}/#{action}"}
   end
-  write_robots_file(disallowed_paths, allowed_actions)
+  allowed_paths = flatten_allowed_actions(allowed_actions)
+  remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
+  write_robots_file(disallowed_paths, allowed_paths)
 end
 
 def deduce_allowed_actions
@@ -335,16 +337,37 @@ def controller_actions(controller)
   end
 end
 
-def write_robots_file(disallowed_paths, allowed_actions)
+def flatten_allowed_actions(allowed_actions)
+  results = []
+  for controller in allowed_actions.keys.sort
+    for action in allowed_actions[controller].uniq
+      results << "/#{controller}/#{action}"
+    end
+  end
+  return results
+end
+
+def remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
+  disallowed_paths.reject! do |disallowed_path|
+    reject = false
+    for allowed_path in allowed_paths
+      if allowed_path.index(disallowed_path) == 0
+        reject = true
+        break
+      end
+    end
+    reject
+  end
+end
+
+def write_robots_file(disallowed_paths, allowed_paths)
   File.open(ROBOTS_FILE, "w") do |fh|
     fh.write ROBOTS_HEADER
     for path in disallowed_paths.sort
       fh.puts "Disallow: #{path}"
     end
-    for controller in allowed_actions.keys.sort
-      for action in allowed_actions[controller].uniq
-        fh.puts "# Allow: /#{controller}/#{action}"
-      end
+    for path in allowed_paths
+      fh.puts "# Allow: #{path}"
     end
     fh.write ROBOTS_FOOTER
   end
