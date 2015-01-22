@@ -59,6 +59,14 @@ STATIC_PAGES = [
   [ "how to help",  "observer/how_to_help",   "weekly" ]
 ]
 
+# These are aliases for pages allowed above.
+OTHER_ALLOWED_PATHS = [
+  "/observer/index",
+  "/observer/lookup_observation",
+  "/observer/lookup_name",
+  "/observer/show_name"
+]
+
 LOCALES = Language.connection.select_values %(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 )
@@ -67,7 +75,13 @@ ROBOTS_HEADER = <<"EOB"
 # See http://www.robotstxt.org for documentation.
 Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 User-agent: *
-Disallow: *?*
+Disallow: *page=*
+Disallow: *letter=*
+Disallow: *by=*
+Disallow: *user_theme=*
+Disallow: */show*user_locale=*
+Disallow: */index*user_locale=*
+Disallow: */lookup*user_locale=*
 EOB
 ROBOTS_FOOTER = <<"EOB"
 EOB
@@ -366,7 +380,7 @@ def write_robots_file(disallowed_paths, allowed_paths)
     for path in disallowed_paths.sort
       fh.puts "Disallow: #{path}"
     end
-    for path in allowed_paths
+    for path in allowed_paths + OTHER_ALLOWED_PATHS
       fh.puts "# Allow: #{path}"
     end
     fh.write ROBOTS_FOOTER
