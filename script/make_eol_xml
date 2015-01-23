@@ -10,29 +10,23 @@
 #
 ################################################################################
 
-require 'tempfile'
-require 'net/http'
-require 'erb'
+require "tempfile"
+require "net/http"
+require "erb"
 include ERB::Util
 
-if ENV["RAILS_ENV"] != "test"
-  LOCAL_URL = "http://localhost:3000/name/eol"
-  REMOTE_URL = "http://mushroomobserver.org/name/eol"
-else
-  LOCAL_URL = "http://localhost:3000/api/observations?id=1"
-  REMOTE_URL = "http://mushroomobserver.org/api/observations?id=1"
-end
+##### methods ##################################################################
 
 class ParsedUrl
   def initialize(url)
     @url = url
     @m = url.match(/^http:\/\/([\w\.]+)(:[0-9]+)*(.*)$/)
   end
-  
+
   def url; @url; end
   def local_url; @m[3]; end
   def host; @m[1]; end
-  
+
   def port
     p = @m[2]
     p ? p[1..-1].to_i : 80
@@ -68,11 +62,33 @@ def get_size(filename)
   File.exists?(filename) ? File::Stat.new(filename).size : 0
 end
 
-temp_file = Tempfile.new('eol')
+def testing
+  ENV["RAILS_ENV"] == "test"
+end
+
+################################################################################
+
+if testing
+  LOCAL_URL = "http://localhost:3000/api/observations?id=1"
+  REMOTE_URL = "http://mushroomobserver.org/api/observations?id=1"
+else
+  LOCAL_URL = "http://localhost:3000/name/eol"
+  REMOTE_URL = "http://mushroomobserver.org/name/eol"
+end
+
+temp_file = Tempfile.new("eol")
 temp_filename = temp_file.path
 dest_filename = ARGV[0]
 
-get_content(temp_filename, get_parsed_url.url)
+if testing
+  # Mock response because real MO website blocks robots
+  File.open(temp_filename, "w") do |file|
+    file.puts "Mock eol file content: "
+    file.puts '<results number="1">'
+  end
+else
+  get_content(temp_filename, get_parsed_url.url)
+end
 
 new_size = get_size(temp_filename)
 old_size = get_size(dest_filename)
@@ -89,4 +105,3 @@ else
   File.chmod(0644, dest_filename)
   exit 0
 end
-
