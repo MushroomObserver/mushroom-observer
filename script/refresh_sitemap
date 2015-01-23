@@ -64,7 +64,8 @@ OTHER_ALLOWED_PATHS = [
   # "/observer/index", (would allow too many indexes we don't want to allow)
   "/observer/lookup_observation",
   "/observer/lookup_name",
-  "/observer/show_name"
+  "/observer/show_name",
+  "/name/eol"
 ]
 
 LOCALES = Language.connection.select_values %(
