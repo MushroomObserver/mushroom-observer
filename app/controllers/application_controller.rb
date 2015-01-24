@@ -204,9 +204,12 @@ class ApplicationController < ActionController::Base
     start      = Time.now
     controller = params[:controller]
     action     = params[:action]
-    robot      = browser.bot? ? " robot" : ""
+    robot      = browser.bot? ? "robot" : "user"
+    ip         = request.remote_ip rescue "unknown"
+    url        = request.url       rescue "unknown"
+    ua         = browser.ua        rescue "unknown"
     yield
-    logger.warn("TIME: #{Time.now-start} #{status} #{controller} #{action}#{robot}")
+    logger.warn("TIME: #{Time.now-start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
   rescue => e
     @error = e
     raise e
