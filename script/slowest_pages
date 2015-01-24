@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/slowest_pages [logfile] [num]
+#
+#  DESCRIPTION::
+#
+#    Searches the given log file (defaults to production.log) for request time
+#    statistics, figures out which actions took the longest on average, and
+#    displays them in tabular format.  By default it prints the top 10 only.
+#
+#  OPTIONS::
+#
+#    logfile    Name of log file, defaults to $root/log/production.log.
+#    num        Number of actions to show, defaults to 10.
+#
+################################################################################
+
+FILE = ARGV[0] || File.expand_path('../../log/production.log', __FILE__)
+NUM  = ARGV[1].to_i || 10
+
+data = {}
+File.open(FILE).readlines.each do |line|
+  if line.match(/^TIME:/)
+    _, time, status, controller, action, robot = line.split
+    next if status != "200"
+    time = time.to_f
+    path = "/#{controller}/#{action}"
+    rec = data[path] ||= [0,0,0,0]
+    rec[0] += time
+    rec[1] += time*time
+    rec[2] += 1
+    rec[3] += 1 if robot
+  end
+end
+
+for path, rec in data
+  sum, ssq, num = *rec
+  rec[0] = avg = sum / num
+  rec[1] = sig = Math.sqrt(ssq/num - avg*avg)
+end
+
+n = 0
+puts "%-40s %6s %6s %6s %6s" % ["path", "mean", "sigma", "num", "robot"]
+for path in data.keys.sort {|a,b| data[b][0] <=> data[a][0]}
+  avg, sig, num, robots = data[path]
+  puts "%-40s %6.3f %6.3f %6d %5d%%" % [path, avg, sig, num, 100.0*robots/num]
+  n += 1
+  break if n >= NUM
+end
+
+exit 0
