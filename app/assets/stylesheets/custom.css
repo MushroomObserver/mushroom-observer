@@ -1,3 +1,12 @@
+html, body{
+    font-family: verdana,arial,helvetica,sans-serif;
+    font-size: 13px;
+}
+
+a {
+    color: #205080
+}
+
 .border-bottom {
     border-bottom: 1px solid;
 }
@@ -42,6 +51,23 @@
     margin-left: -15px;
     margin-right:-15px;
 }
+
+.rss-log-item{
+    display: table-cell;
+    margin: auto;
+    width: inherit;
+    text-align: center;
+    vertical-align: middle;
+    height: 325px;
+}
+
+.rss-title, .rss-detail {
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
+
+
 /*Themeable options below */
 /* Banner colors */
 #banner {
@@ -70,4 +96,8 @@
 
 .color1 {
     background: #E0E0E0;
+}
+
+.color-block .color-block-item:nth-child(even) {
+    background-color: #F0F0F0;
 }

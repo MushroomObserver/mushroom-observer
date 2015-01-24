@@ -1,0 +1,6 @@
+<% #image = image to be rendered
+   #votes = should votes be shown?
+   #links_to = if not nil, the image will link to this%>
+<div class="thumbnail_container">
+  <%= image_tag(image.url('thumb'), {class: "img-responsive", style: "margin: auto;"}) %>
+</div>

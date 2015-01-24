@@ -1,79 +1,43 @@
 <%
-    target, target_type, target_name, title, detail, time = to_rss_feed_item(target)
+    @presenter = RssLogPresenter.new(rss_log.target, rss_log, @view)
 %>
 
-<table cellpadding="10">
-  <tr style="padding-bottom:0px">
-    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
-      <%= if target and target_type == :species_list  ##TODO: turn this into a switch statement
-        link_with_query(image_tag('splist.png', :border => 0),
-          :controller => :species_list, :action => :show_species_list,
-          :id => target.id) + safe_br
-      elsif target and target_type == :observation and target.thumb_image
-        thumbnail(target.thumb_image, :border => 0, :votes => true,
-                  :link => :show_observation, :obs => target.id) + safe_br
-      elsif target and target_type == :glossary_term and target.thumb_image
-        thumbnail(target.thumb_image, :border => 0, :votes => true,
-                  :link => :show_glossary_term, :glossary_term => target.id) + safe_br
-      else
-        done_title = true
-        content_tag(:span, title, :class => 'ListRssHeader') ##TODO: This only happens when there is no image, deal with this case first
-      end %>
-    </td>
+<% if @presenter.target %>
+    <div class="rss-log-item">
+      <div class="thumbnail-container" style="min-height: 30px">
+      <%= @presenter.thumbnail %>
+      </div>
+      <div class="rss_info_container">
+        <div class="rss-title">
+          <%=@presenter.title %>
+        </div>
+        <div class="rss_what">
+          <%=@presenter.what %>
+        </div>
+        <div class="rss_location">
+          <small>
+            <strong>
+          <%=@presenter.location %>
+            </strong>
+          </small>
+        </div>
+         <span class="rss_when">
+             <% unless @presenter.when.blank? %>
+                <%=@presenter.when %>: <%=@presenter.who %>
+             <%end%>
 
-<% if @layout['vertical_layout'] %>
-  </tr>
-  <tr>
-    <td align="center" valign="middle">
-<% else %>
-    <td valign="middle">
-<% end %>
-
-      <% unless done_title ##TODO: This is only hit if we rendered an image.
-      %>
-        <span class="ListRssHeader">
-          <%= title %>
-        </span><br/>
-        <span style="line-height:1em"><br/></span>
-      <% end %>
-
-      <% unless target_name.blank? ##TODO: This happens when a title is not blank
-      %>
-        <span class="ListWhat">
-          <%= if target  ##If a target is not nil then make a link to with the targets name to the controller.
-            link_with_query(target_name, :controller => target.show_controller,
-              :action => target.show_action, :id => target.id)
-          else
-            link_with_query(target_name, :controller => :observer,
-              :action => :show_rss_log, :id => rss_log.id)
-          end %>
-        </span><br/>
-      <% end %>
-      <% if target and (target_type == :observation || target_type == :species_list) %>
-        <span class="ListWhere">
-          <%= location_link(target.place_name, target.location) %>
-        </span><br/>
-        <span class="ListWhen">
-          <%= target.when.web_date %>:
         </span>
-        <span class="ListWho">
-          <%= user_link(target.user) %>
-        </span><br/>
-      <% end %>
+        <div class="rss_who">
 
-      <span style="line-height:1em"><br/></span>
-
-      <% if not detail.blank? %>
-        <span class="ListDetail">
-          <%= detail %>
-        </span><br/>
-      <% end %>
-      <% if not time.blank? %>
-        <span class="ListWhen">
-          <%= time.fancy_time %>
-        </span><br/>
-      <% end %>
-    </td>
-
-  </tr>
-</table>
+        </div>
+        <div class="rss-detail">
+          <%=@presenter.detail%>
+        </div>
+        <div class="rss_fancy_time">
+          <small>
+          <%=@presenter.fancy_time%>
+          </small>
+        </div>
+      </div>
+    </div>
+<% end %>

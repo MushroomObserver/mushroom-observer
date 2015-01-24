@@ -420,7 +420,7 @@ class String
   end
 
   # Escape a string to be safe to place in double-quotes inside javascript.
-  def escape_js_string
+  def escape_js_string  #TODO: Use the rails method "j" for this
     gsub(/(["\\])/, '\\\1').
     gsub(/\n/, '\\n')
   end

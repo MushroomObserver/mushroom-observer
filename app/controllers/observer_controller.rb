@@ -1,4 +1,5 @@
 # encoding: utf-8
+# encoding: utf-8
 
 # TODO: Create RssLogController with:
 #  index
@@ -115,6 +116,7 @@
 
 # The original MO controller and hence a real mess!  The Clitocybe of Controllers
 class ObserverController < ApplicationController
+
   require "find"
   require "set"
 
@@ -122,6 +124,7 @@ class ObserverController < ApplicationController
   require_dependency "refine_search"
   require_dependency "pattern_search"
   include RefineSearch
+
 
   before_filter :login_required, except: MO.themes + [
     :advanced_search,
@@ -962,10 +965,10 @@ class ObserverController < ApplicationController
 
   def render_report(report)
     send_data(report.body, {
-      type: report.mime_type,
-      charset: report.encoding,
-      disposition: "attachment",
-      filename: report.filename
+                             :type => report.mime_type,
+                             :charset => report.encoding,
+                             :disposition => "attachment",
+                             :filename => report.filename
     }.merge(report.header || {}))
   end
 
@@ -2002,6 +2005,7 @@ class ObserverController < ApplicationController
 
     @types = query.params[:type].to_s.split.sort
     @links = []
+    @view = view_context
 
     # Let the user make this their default and fine tune.
     if @user
