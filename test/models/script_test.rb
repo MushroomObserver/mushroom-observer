@@ -59,14 +59,18 @@ class ScriptTest < UnitTestCase
     script = script_file("make_eol_xml")
     dest_file = Tempfile.new("test").path
     stdout_file = Tempfile.new("test").path
-    cmd = "#{script} #{dest_file} > #{stdout_file}"
     assert !File.exist?(dest_file) || File.size(dest_file) == 0
-    assert system(cmd)
-    assert File.size(dest_file) > 0,
-           "#{dest_file} should have content butis empty."
-    assert_equal("", File.read(stdout_file))
+    cmd = "#{script} #{dest_file} > #{stdout_file}"
 
-    # In test mode, the script just grabs first observation from api.
+    script_succeeded = system(cmd)
+
+    assert script_succeeded, "Script failed."
+    assert File.size(dest_file) > 0,
+           "#{dest_file} should have content but is empty."
+    assert_equal("", File.read(stdout_file),
+                 "#{stdout_file} should be empty, but has content")
+    # In test mode, the script just grabs first observation from api
+    # (or mocks grabbing the first observation from api).
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
     assert File.read(dest_file).match(/<results number="1">/)

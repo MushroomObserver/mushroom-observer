@@ -1531,4 +1531,13 @@ logger.warn('SESSION: ' + session.inspect)
       format.xml { render args }
     end
   end
+  ##############################################################################
+
+  private
+
+  # defined here because used by both image_controller and observer_controller
+  def whitelisted_image_args
+    [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
+  end
+
 end

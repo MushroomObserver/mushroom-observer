@@ -2,7 +2,7 @@
 require "test_helper"
 
 class ProjectControllerTest < FunctionalTestCase
-
+##### Helpers (which also assert) ##############################################
   def add_project_helper(title, summary)
     params = {
       project: {
@@ -32,7 +32,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(drafts.length > 0)
     params = { id: project.id.to_s }
     requires_user(:destroy_project, :show_project, params, changer.login)
-    assert_redirected_to(action: :show_project)
+    assert_redirected_to(action: :show_project, id: project.id)
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
@@ -192,7 +192,8 @@ class ProjectControllerTest < FunctionalTestCase
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
     for draft in drafts
-      assert_not_equal(:project, draft.reload.source_type)
+      refute_equal(:project, draft.reload.source_type,
+        "Project destruction failed to reset NameDescription's source_type")
     end
   end
 
