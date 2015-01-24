@@ -12,9 +12,9 @@ function transferAmount() {
   var val = val1 == "other" ? val2 : val1;
   jQuery("#amount").val(val);
   document.cookie = "donation_amount=" + val;
-  document.cookie = "who=" + $("donation_who").value
-  document.cookie = "anon=" + $("donation_anonymous").checked
-  document.cookie = "email=" + $("donation_email").value
+  document.cookie = "who=" + $("donation_who").value;
+  document.cookie = "anon=" + $("donation_anonymous").checked;
+  document.cookie = "email=" + $("donation_email").value;
 }
 
 function clearDonationCookies() {

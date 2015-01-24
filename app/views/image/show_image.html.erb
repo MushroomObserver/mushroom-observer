@@ -88,7 +88,10 @@ end %></p>
 
 <% if columns > 1 %>
   </td><td>
+<% else %>
+
 <% end %>
+
 
 <% if check_permission(@image) %>
   <p>
@@ -144,7 +147,8 @@ end %></p>
 <% if is_reviewer? %>
   <p><%= set_export_status_controls(@image) %></p>
 <% end %>
-<p style="white-space:nowrap">
+<div id="quality_vote_container"><!--Note: used by ajax-->
+<p id="quality_vote_content" style="white-space:nowrap">
   <%= :image_show_quality.t %>:
   <span class="Data">
     <%= vote = (@image.vote_cache + 0.5).to_i rescue 0
@@ -167,9 +171,11 @@ end %></p>
     <% end %>
   <% end %>
 </p>
+</div>
 
 <% if !@votes.empty? %>
-  <table class="ThinBox" style="margin-top:1em; margin-bottom:1em">
+    <div id="show_votes_container"> <!--note this is used by ajax-->
+  <table id="show_votes_table" class="ThinBox" style="margin-top:1em; margin-bottom:1em">
     <tr>
       <th align="left"><%= :USER.t %></th>
       <th align="left"><%= :VOTE.t %></th>
@@ -183,6 +189,7 @@ end %></p>
       </tr>
     <% end %>
   </table>
+    </div>
 <% end %>
 
 <% chgs = @image.copyright_changes.sort_by(&:id)
