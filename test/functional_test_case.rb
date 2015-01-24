@@ -19,8 +19,7 @@ class FunctionalTestCase < ActionController::TestCase
 
 
 # temporarily silence deprecation warnings
-# TODO turn them back on
-  ActiveSupport::Deprecation.silenced = true
+# ActiveSupport::Deprecation.silenced = true
 
   def get(*args, &block)
     super(*args, &block)
