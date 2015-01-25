@@ -1018,6 +1018,9 @@ class ObserverController < ApplicationController
     return unless @observation
     update_view_stats(@observation)
 
+    # Tell robots the proper URL to use to index this content.
+    @canonical_url = "#{MO.domain}/observer/show_observation/#{@observation.id}"
+
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)
     @mappable = query && query.is_coercable?(:Location)

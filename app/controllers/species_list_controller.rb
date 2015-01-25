@@ -165,6 +165,7 @@ class SpeciesListController < ApplicationController
                                             :projects,
                                             :user,
                                           ])
+      @canonical_url = "#{MO.domain}/species_list/show_species_list/#{@species_list.id}"
       @query = create_query(:Observation, :in_species_list, :by => :name,
                             :species_list => @species_list)
       store_query_in_session(@query) if !params[:set_source].blank?

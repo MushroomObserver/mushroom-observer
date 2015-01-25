@@ -892,7 +892,9 @@ class ApplicationController < ActionController::Base
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query=nil)
-    if query
+    if browser.bot?
+      {}
+    elsif query
       query.save if !query.id
       {:q => query.id.alphabetize}
     else
@@ -902,13 +904,13 @@ class ApplicationController < ActionController::Base
   helper_method :query_params
 
   def add_query_param(params, query=nil)
-    if query
+    if browser.bot?
+      # do nothing
+    elsif query
       query.save if !query.id
       params[:q] = query.id.alphabetize
-    else
-      if @query_params
-        params[:q] = @query_params[:q]
-      end
+    elsif @query_params
+      params[:q] = @query_params[:q]
     end
     params
   end
@@ -933,7 +935,9 @@ class ApplicationController < ActionController::Base
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
     @query_params = {}
-    if query
+    if browser.bot?
+      # do nothing
+    elsif query
       query.save if !query.id
       @query_params[:q] = query.id.alphabetize
     end
