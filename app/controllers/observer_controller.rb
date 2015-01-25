@@ -1701,7 +1701,7 @@ class ObserverController < ApplicationController
   # users_by_contribution.rhtml
   def users_by_contribution # :nologin: :norobots:
     SiteData.new
-    @users = User.all(order: "contribution desc, name, login")
+    @users = User.order("contribution desc, name, login")
   end
 
   # show_user.rhtml
@@ -1871,8 +1871,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def email_features # :root: :norobots:
     if is_in_admin_mode?
-      c = "email_general_feature=1 && verified is not null"
-      @users = User.all(conditions: c)
+      @users = User.where("email_general_feature=1 && verified is not null")
       if request.method == "POST"
         @users.each do |user|
           QueuedEmail::Feature.create_email(user,
@@ -2040,12 +2039,11 @@ class ObserverController < ApplicationController
 
   # this is the site's rss feed.
   def rss # :nologin:
-    @logs = RssLog.all(conditions: "datediff(now(), updated_at) <= 31",
-                       order: "updated_at desc", limit: 100,
-                       include: [:name,
-                                 :species_list,
-                                 { observation: :name }
-                                ])
+    @logs = RssLog.includes(:name, :species_list, { observation: :name }).
+                   where("datediff(now(), updated_at) <= 31").
+                   order(updated_at: :desc).
+                   limit(100)
+
     render_xml(layout: false)
   end
 

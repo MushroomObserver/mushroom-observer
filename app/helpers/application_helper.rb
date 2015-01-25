@@ -25,16 +25,26 @@ require_dependency 'gmaps'
 
 module ApplicationHelper
 
-  # For now, just use Browser gem's "modern?" criteria.  Used to be:
-  #   Firefox/Iceweasel > 1.0
-  #   Netscape > 7.0
-  #   Safari > 1.2
-  #   IE > 5.5
-  #   Opera (all)
-  #   Chrome (all)
-  def can_do_ajax?
+  # For now, just use Browser gem's "modern?" criteria.
+  # Webkit,
+  # Firefox 17+,
+  # IE 9+ and
+  # Opera 12+
+
+
+def can_do_ajax?
     browser.modern? || TESTING
-  end
+end
+
+  #Use this test to determine if a user can upload multiple images at a time.
+  #It checks for support of the following requirements:
+  # Select multiple files button
+  # XHRHttpRequest2
+  # FileAPI
+  #CanIuse.com is the source of this information.
+def can_do_multifile_upload?
+   (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
+end
 
   ##############################################################################
   #
@@ -1408,7 +1418,7 @@ module ApplicationHelper
   # votes::     Add AJAX vote links below image?
   # nodiv::     Tell it not to wrap it in a div.
   # target::    Add target to anchor-link.
-  def thumbnail(image, args={})
+  def thumbnail(image, args={})  ##TODO: Depreciate
     if image.is_a?(Image)
       id = image.id
     else
@@ -1497,7 +1507,7 @@ module ApplicationHelper
     end
     result = image.license.copyright_text(image.year, link)
     if div
-      result = content_tag(:div, result, :id => "copytight")
+      result = content_tag(:div, result, :id => "copyright")
     end
     result
   end
@@ -1520,13 +1530,15 @@ module ApplicationHelper
   #Create an image link vote, where vote param is vote number ie: 3
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
+    vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
+    link = link_to(vote_text, {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id, :val => vote })  ##return a link if the user has NOT voted this way
     if (current_vote == vote)
-      content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
+      link = content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
     end
-      link_to(image_vote_as_short_string(vote), {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id })  ##return a link if the user has NOT voted this way
+    link
   end
 
-  # Render the AJAX vote tabs that go below thumbnails.  #TODO: Depreciate
+  # Render the AJAX vote tabs that go below thumbnails.  #TODO: Remove
   def image_vote_tabs(image, data=nil)
     javascript_include('jquery')
     javascript_include('image_vote')
@@ -1564,8 +1576,8 @@ module ApplicationHelper
     end
 
     row2 = safe_empty
-    str = link_to_function('(X)', "image_vote(#{id},0)",
-                           :title => :image_vote_help_0.l)
+    str = link_to('(X)', {}, :title => :image_vote_help_0.l, data: {:role => "image_vote", :id => id, :val => 0})
+
     str += indent(5)
     row2 += content_tag(:td, content_tag(:small, str)) if cur.to_i > 0
     Image.all_votes.map do |val|
@@ -1574,8 +1586,7 @@ module ApplicationHelper
       if val == cur
         str = content_tag(:b, content_tag(:span, str1, :title => str2))
       else
-        str = link_to_function(str1, "image_vote(#{id},'#{val}')",
-                               :title => str2)
+          str = link_to(str1, {controller: :image, action: :show_image, id: id, vote: val}, :title => str2, data: {:role => "image_vote", :id => id, :val => val})
       end
       str = '&nbsp;|&nbsp;'.html_safe + str if val > 1
       row2 += content_tag(:td, content_tag(:small, str))

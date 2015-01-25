@@ -221,7 +221,7 @@ class AjaxController < ApplicationController
     end
   end
 
-  def cast_image_vote(id, value)
+  def cast_image_vote(id, value)  ##TODO: Rewrite tests
     @image = Image.safe_find(id)
     if value != '0' and not Image.validate_vote(value)
       raise "Invalid value for vote/image: #{value.inspect}"
@@ -233,7 +233,65 @@ class AjaxController < ApplicationController
       @image.change_vote(@user, value, anon)
       Transaction.put_image(:id => @image, :user => @user,
                             :set_vote => value, :set_anonymous => anon)
-      render(:inline => '<%= image_vote_tabs(@image) %>')
+      render(:partial => 'image/image_vote_links')
     end
+  end
+
+  # Upload Image Template. Returns formatted HTML to be injected
+  # when uploading multiple images on create observation
+  def get_multi_image_template
+    current_user = get_session_user!
+    @licenses = License.current_names_and_ids(current_user.license) #Needed to render licenses drop down
+    @image = Image.new(
+                      :user => current_user,
+                      :when => Time.now
+                      )
+
+    render(:partial => '/observer/form_multi_image_template')
+  end
+
+
+ #Uploads an image object without an observation.
+ #returns image as json object
+  def create_image_object
+    user = get_session_user!
+    @image = params[:image]
+
+     img_when = Date.new(@image[:when][("1i")].to_i, @image[:when][("2i")].to_i,
+                         @image[:when][("3i")].to_i
+     )
+     ##TODO: handle invalid date
+     image = Image.new(
+         created_at: Time.now,
+         user: user,
+         when: img_when,
+         license_id: @image[:license].to_i,
+         notes: @image[:notes],
+         copyright_holder: @image[:copyright_holder]
+     )
+
+    image.image = @image[:upload]
+
+     if !image.save
+       p "unable to upload image"
+       flash_object_errors(image)
+     elsif !image.process_image
+       p "unable to upload image"
+       logger.error("Unable to upload image")
+       flash_notice(:runtime_no_upload_image.t(name: (name ? "'#{name}'" : "##{image.id}")))
+       flash_object_errors(image)
+     else
+       Transaction.post_image(
+           id: image,
+           date: image.when,
+           notes: image.notes.to_s,
+           copyright_holder: image.copyright_holder,
+           license: image.license || 0
+       )
+       name = image.original_name
+       name = "##{image.id}" if name.empty?
+       flash_notice(:runtime_image_uploaded.t(name: name))
+     end
+    render json: image
   end
 end
