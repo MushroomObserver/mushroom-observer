@@ -1516,7 +1516,17 @@ module ApplicationHelper
     content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
   end
 
-  # Render the AJAX vote tabs that go below thumbnails.
+
+  #Create an image link vote, where vote param is vote number ie: 3
+  def image_vote_link(image, vote)
+    current_vote = image.users_vote(@user)
+    if (current_vote == vote)
+      content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
+    end
+      link_to(image_vote_as_short_string(vote), {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id })  ##return a link if the user has NOT voted this way
+  end
+
+  # Render the AJAX vote tabs that go below thumbnails.  #TODO: Depreciate
   def image_vote_tabs(image, data=nil)
     javascript_include('jquery')
     javascript_include('image_vote')

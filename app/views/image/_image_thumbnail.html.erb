@@ -1,6 +1,34 @@
 <% #image = image to be rendered
    #votes = should votes be shown?
-   #links_to = if not nil, the image will link to this%>
-<div class="thumbnail_container">
+   #links_to = if not nil, the image will link to this %>
+<div>
   <%= image_tag(image.url('thumb'), {class: "img-responsive", style: "margin: auto;"}) %>
+  <% if image.users_vote(@user) %>
+      <%= image_vote_link(image, 0) %>
+  <% end %>
+
+  <% Image.all_votes.each  do |vote| %>
+      <small>
+      <%= image_vote_link(image, vote) %>
+      </small>
+  <% end %>
+
+ <!-- <div class="image_vote_container" style="padding-top:5px">
+
+    <small>
+      <a href="#" onclick="image_vote(501672,0); return false;" title="No opinion.">(X)</a><span style="margin-left:5px">&nbsp;</span>
+    </small>
+    <small>
+      <a href="#" onclick="image_vote(501682,'1'); return false;" title="Okay but not so useful.">Okay</a>
+    </small>
+    <small>
+      &nbsp;|&nbsp;<a href="#" onclick="image_vote(501682,'2'); return false;" title="Useful for identification.">Useful</a>
+    </small>
+    <small>
+      &nbsp;|&nbsp;<a href="#" onclick="image_vote(501682,'3'); return false;" title="Good enough for a field guide.">Good</a>
+    </small>
+    <small>
+      &nbsp;|&nbsp;<a href="#" onclick="image_vote(501682,'4'); return false;" title="Great! Beyond the work of mortals.">Great</a>
+    </small>
+  </div>-->
 </div>
