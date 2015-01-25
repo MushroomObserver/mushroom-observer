@@ -322,16 +322,17 @@ class AjaxControllerTest < FunctionalTestCase
             upload: file
         }
     }
+
     #Act
     post(:create_image_object, params)
     @json_response = JSON.parse(@response.body)
 
     #Assert
     assert_response(:success)
-    refute_equal(0, @json_response[:image][:id])
-    assert_equal(copyright_holder, @json_response[:image][:copyright_holder])
-    assert_equal(notes, @json_response[:image][:notes])
-    assert_equal("2014-11-27", @json_response[:image][:when])
+    refute_equal(0, @json_response["id"])
+    assert_equal(copyright_holder, @json_response["copyright_holder"])
+    assert_equal(notes, @json_response["notes"])
+    assert_equal("2014-11-27", @json_response["when"])
   end
 
   def test_get_multi_image_template
