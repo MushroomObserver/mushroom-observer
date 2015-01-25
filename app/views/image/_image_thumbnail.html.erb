@@ -1,34 +1,20 @@
 <% #image = image to be rendered
-   #votes = should votes be shown?
-   #links_to = if not nil, the image will link to this %>
-<div>
-  <%= image_tag(image.url('thumb'), {class: "img-responsive", style: "margin: auto;"}) %>
-  <% if image.users_vote(@user) %>
-      <%= image_vote_link(image, 0) %>
-  <% end %>
+   #links_to = if not nil, the image will link to this
+   image = image||@image
+   vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
 
-  <% Image.all_votes.each  do |vote| %>
-      <small>
-      <%= image_vote_link(image, vote) %>
-      </small>
-  <% end %>
-
- <!-- <div class="image_vote_container" style="padding-top:5px">
-
-    <small>
-      <a href="#" onclick="image_vote(501672,0); return false;" title="No opinion.">(X)</a><span style="margin-left:5px">&nbsp;</span>
-    </small>
-    <small>
-      <a href="#" onclick="image_vote(501682,'1'); return false;" title="Okay but not so useful.">Okay</a>
-    </small>
-    <small>
-      &nbsp;|&nbsp;<a href="#" onclick="image_vote(501682,'2'); return false;" title="Useful for identification.">Useful</a>
-    </small>
-    <small>
-      &nbsp;|&nbsp;<a href="#" onclick="image_vote(501682,'3'); return false;" title="Good enough for a field guide.">Good</a>
-    </small>
-    <small>
-      &nbsp;|&nbsp;<a href="#" onclick="image_vote(501682,'4'); return false;" title="Great! Beyond the work of mortals.">Great</a>
-    </small>
-  </div>-->
+%>
+<div style="text-align: center">
+<div style="display: inline-block;">
+     <%= image_tag(image.url('thumb')) %>
+      <div class="vote-meter">
+        <div  id="vote_meter_bar_<%=image.id%>" class="vote-meter-bar" role="progressbar" style="width: <%=vote_percentage%>%">
+        </div>
+      </div>
+</div>
+  <div class="image_vote_links_container">
+  <%= render(:partial => 'image/image_vote_links', :locals => {
+                                                   :image => image
+                                           }) %>
+  </div>
 </div>

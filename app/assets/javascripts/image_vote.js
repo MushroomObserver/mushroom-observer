@@ -13,15 +13,17 @@ jQuery(document).ready(function () {
 
     function image_vote(id, value) {
         jQuery.ajax("/ajax/vote/image/" + id, {
-            data: { value: value, authenticity_token: CSRF_TOKEN },
+            data: { value: value, authenticity_token: jQuery("[name='csrf-token']").attr('content')},
             dataType: 'text',
             async: true,
             error: function (response) {
                 alert(response.responseText);
             },
             success: function(text) {
-                var div = jQuery("#image_votes_" + id);
+                var div = jQuery("#image_vote_links_" + id).parent();
                 div.html(text);
+                var newVotePercentage = div.find('span.data_container').data('percentage');
+                jQuery("#vote_meter_bar_" + id).css('width', newVotePercentage + "%")
                 if ($show_votes_container && $quality_vote_container) { //updates the side bar if on actual image page.
                     $show_votes_container.load(window.location + " #show_votes_table");
                     $quality_vote_container.load(window.location + " #quality_vote_content");

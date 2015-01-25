@@ -4,6 +4,11 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action => 'rss'}, {:title => :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
+  <%= javascript_tag %(
+    var CSRF_TOKEN = "#{j form_authenticity_token}";
+  ) %>
+  <%= csrf_meta_tag %>
+
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
   <meta property="og:title" content="Mushroom Observer"/>
@@ -287,11 +292,14 @@
     </div>
   </div>
 </div>
+
 <!--Javascript should be last thing loaded -->
 <%= javascript_include_tag("jstz.min") %>
-<% javascript_include('bootstrap') %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
-<%= javascript_tag('var CSRF_TOKEN = "' + form_authenticity_token + '";') %>
+<% javascript_include('jquery') %>
+<% javascript_include('image_vote') %>
+<% javascript_include('bootstrap') %>
+
 <%= sort_javascript_includes.map { |m| javascript_include_tag(m) }.safe_join('') %>
 <script>
     (function (i, s, o, g, r, a, m) {i['GoogleAnalyticsObject'] = r;i[r] = i[r] || function () {(i[r].q = i[r].q || []).push(arguments)}, i[r].l = 1 * new Date();

@@ -1418,7 +1418,7 @@ end
   # votes::     Add AJAX vote links below image?
   # nodiv::     Tell it not to wrap it in a div.
   # target::    Add target to anchor-link.
-  def thumbnail(image, args={})
+  def thumbnail(image, args={})  ##TODO: Depreciate
     if image.is_a?(Image)
       id = image.id
     else
@@ -1530,13 +1530,15 @@ end
   #Create an image link vote, where vote param is vote number ie: 3
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
+    vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
+    link = link_to(vote_text, {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id, :val => vote })  ##return a link if the user has NOT voted this way
     if (current_vote == vote)
-      content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
+      link = content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
     end
-      link_to(image_vote_as_short_string(vote), {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id })  ##return a link if the user has NOT voted this way
+    link
   end
 
-  # Render the AJAX vote tabs that go below thumbnails.  #TODO: Depreciate
+  # Render the AJAX vote tabs that go below thumbnails.  #TODO: Remove
   def image_vote_tabs(image, data=nil)
     javascript_include('jquery')
     javascript_include('image_vote')
