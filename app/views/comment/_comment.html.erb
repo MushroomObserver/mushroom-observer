@@ -21,7 +21,7 @@
 <td>
   <% user = comment.user
   if user.image_id %>
-    <%= thumbnail(user.image_id, :border => 0, :size => :thumbnail,
-                 :link => :show_user, :user => user.id, :votes => false) %>
+    <%= thumbnail(user.image_id, :size => :thumbnail,
+                 :link => {controller: :observer, action: :show_user, id: user.id}, :votes => false) %>
   <% end %>
 </td>

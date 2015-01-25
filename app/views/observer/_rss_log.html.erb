@@ -1,29 +1,32 @@
 <%
-    @presenter = RssLogPresenter.new(rss_log.target, rss_log, @view)
+   ##TODO: Rename
+   ##accepts :object local
+    presenter = MatrixBoxPresenter.new(object, @view)
+
 %>
 
-<% if @presenter.target %>
+<% if presenter %>
     <div class="rss-log-item">
       <div class="thumbnail-container" style="min-height: 30px">
-      <%= @presenter.thumbnail %>
+      <%= presenter.thumbnail %>
       </div>
       <div class="rss_info_container">
         <div class="rss-title">
-          <%=@presenter.title %>
+          <%=presenter.title %>
         </div>
         <div class="rss_what">
-          <%=@presenter.what %>
+          <%=presenter.what %>
         </div>
         <div class="rss_location">
           <small>
             <strong>
-          <%=@presenter.location %>
+          <%=presenter.location %>
             </strong>
           </small>
         </div>
          <span class="rss_when">
-             <% unless @presenter.when.blank? %>
-                <%=@presenter.when %>: <%=@presenter.who %>
+             <% unless presenter.when.blank? %>
+                <%=presenter.when %>: <%=presenter.who %>
              <%end%>
 
         </span>
@@ -31,11 +34,11 @@
 
         </div>
         <div class="rss-detail">
-          <%=@presenter.detail%>
+          <%=presenter.detail%>
         </div>
         <div class="rss_fancy_time">
           <small>
-          <%=@presenter.fancy_time%>
+          <%=presenter.fancy_time%>
           </small>
         </div>
       </div>

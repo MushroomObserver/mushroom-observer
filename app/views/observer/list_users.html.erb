@@ -48,10 +48,16 @@ if is_in_admin_mode? %>
 #  Normal version.
 # ----------------------------
 else %>
-  <%= paginate_block(@pages) do %>
-    <%= make_matrix(@objects, :width => '100%') do |user| %>
-      <%= render(:partial => 'user', :object => user) %>
-    <% end %>
-  <% end %>
+    <div class="color-block">
+      <%= paginate_block(@pages) do %>
+          <% @objects.each do |user| %>
+              <div class="col-sm-4 color-block-item">
+                <%= render(:partial => '/observer/rss_log', locals: {:object => user}) %>
+              </div>
+          <% end %>
+      <% end %>
+    </div>
+
+
 <% end %>
 

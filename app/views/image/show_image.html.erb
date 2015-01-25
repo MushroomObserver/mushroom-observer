@@ -78,10 +78,12 @@
 end %></p>
 
 <center>
-  <%= thumbnail(@image, size: @size, votes: true,
-        link: add_query_param(action: 'show_image', id: @image.id,
-          size: (@size == @default_size ? :full_size : @default_size)),
-        original: true) %><br/>
+  <%= thumbnail(@image,
+                size: @size,
+                votes: true,
+                link: add_query_param(action: 'show_image', id: @image.id,
+                                      size: (@size == @default_size ? :full_size : @default_size)),
+                original: true) %><br/>
   <%= image_copyright(@image) %><br/>
   <%= render(partial: "shared/form_#{@image.license.form_name}") %><br/>
 </center>

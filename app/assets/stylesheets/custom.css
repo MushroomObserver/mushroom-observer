@@ -98,7 +98,7 @@ a {
     background: #E0E0E0;
 }
 
-.color-block .color-block-item:nth-child(even) {
+.color-block .color-block-item:nth-child(odd) {
     background-color: #F0F0F0;
 }
 

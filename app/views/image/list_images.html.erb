@@ -1,12 +1,15 @@
 <%
   new_tab_set(:sort_by_header.t, @sorts)
   new_tab_set(@links)
-
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
+<div class="color-block">
 <%= paginate_block(@pages) do %>
-  <%= make_matrix(@objects, :width => '100%') do |image| %>
-    <%= render(:partial => 'image', :object => image) %>
-  <% end %>
+    <% @objects.each do |image| %>
+        <div class="col-sm-4 color-block-item">
+          <%= render(:partial => 'observer/rss_log', locals: {:object => image}) %>
+        </div>
+    <% end %>
 <% end %>
+</div>

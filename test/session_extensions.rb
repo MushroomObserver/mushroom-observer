@@ -250,7 +250,7 @@ module SessionExtensions
       if arg == :tabs
         arg = 'div#left_tabs'
       elsif arg == :left_panel
-        arg = 'table.LeftSide'
+        arg = 'div#navigation'
       elsif arg == :results
         arg = 'div.results'
       end

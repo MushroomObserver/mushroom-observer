@@ -37,7 +37,7 @@
   <% @objects.each do |rss_log| %>
         <div class="col-sm-4 color-block-item">
             <%= render(:partial => 'rss_log', :locals => {
-              :rss_log => rss_log
+              :object => rss_log
             }) %>
         </div>
   <% end %>

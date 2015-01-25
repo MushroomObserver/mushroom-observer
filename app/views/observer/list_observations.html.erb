@@ -1,34 +1,35 @@
 <%
-  new_tab_set(:sort_by_header.t, @sorts) if @sorts
-  new_tab_set(@links) if @links
-
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+   new_tab_set(:sort_by_header.t, @sorts) if @sorts
+   new_tab_set(@links) if @links
+   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <% if @suggest_alternate_spellings and @objects.empty?
-  names = Name.suggest_alternate_spellings(@suggest_alternate_spellings) 
-  if names.any? %>
-    <div class="Warnings">
-      <%= :list_observations_alternate_spellings.t %><br/>
-      <ul type="none">
-        <% for name in names.sort_by(&:sort_name) %>
-          <%= link_to(name.display_name.t, :controller => :observer,
-                      :action => :observation_search, :pattern => name.text_name) %><br/>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+     names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
+     if names.any? %>
+        <div class="Warnings">
+          <%= :list_observations_alternate_spellings.t %><br/>
+          <ul type="none">
+            <% for name in names.sort_by(&:sort_name) %>
+                <%= link_to(name.display_name.t, :controller => :observer,
+                            :action => :observation_search, :pattern => name.text_name) %><br/>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
 <% end %>
 
 <% if @pages %>
-  <%= paginate_block(@pages) do %>
-    <%= make_matrix(@objects, :width => '100%') do |observation| %>
-            <div class="col-sm-4">
-      <%= render(:partial => 'rss_log', :locals => {
-        :rss_log => observation.rss_log,
-        :target => observation,
-      }) %>
-            </div>
+    <%= paginate_block(@pages) do %>
+        <div class="color-block">
+          <% @objects.each do |observation| %>
+              <div class="col-sm-4 color-block-item">
+                <%= render(:partial => 'rss_log', :locals => {
+                                                        :object => observation.rss_log
+                                                        })
+                %>
+              </div>
+          <% end %>
+        </div>
     <% end %>
-  <% end %>
 <% end %>

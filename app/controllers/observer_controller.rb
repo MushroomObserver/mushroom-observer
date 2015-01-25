@@ -200,6 +200,8 @@ class ObserverController < ApplicationController
     :show_votes
   ]
 
+  before_filter :create_view_instance_variable  ## @view can be used by classes to access some view specific features like render
+
   ##############################################################################
   #
   #  :section: General Stuff
@@ -725,6 +727,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
+    @view = view_context
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     if user
       query = create_query(:Observation, :by_user, user: user)
@@ -2474,4 +2477,9 @@ class ObserverController < ApplicationController
     return nil unless params[:observation]
     params[:observation].permit(whitelisted_observation_args)
   end
+
+  def create_view_instance_variable
+    @view = view_context
+  end
+
 end
