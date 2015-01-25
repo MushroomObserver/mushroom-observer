@@ -51,6 +51,34 @@ li.selected { background-color: #f6ae4a ! important }
     background-color: #fae8b8; /* californicus */
 }
 
+
+/*New CSS for even rows */
+table.lined-table tr:nth-child(even) {
+    background-color: #603b29; color: #c2914c; /* tubaeformis */
+}
+
+table.lined-table tr:nth-child(even) div.textile table {
+    background: #c2914c;
+}
+
+table.lined-table tr:nth-child(even) div.textile table.noborder,
+table.lined-table tr:nth-child(even) div.textile table td {
+    background: #603b29;
+}
+
+table.lined-table tr:nth-child(even) a {
+    color: #e5bb67; /* tubaeformis */
+}
+
+table.lined-table tr:nth-child(even) a:visited {
+    color: #c18346; /* tubaeformis */
+}
+
+table.lined-table tr:nth-child(even) a:hover {
+    color: #10110b;
+}
+
+
 /* Colors for even lines */
 .ListLine0 {
       background-color: #603b29; color: #c2914c; /* tubaeformis */
@@ -70,6 +98,34 @@ li.selected { background-color: #f6ae4a ! important }
 
 .ListLine0 a:hover {
      color: #10110b;
+}
+
+
+/*New CSS for ODD Rows */
+table.lined-table tr:nth-child(odd) {
+    background-color: #4f4337; color: #e5bb67; /* cornucopioides & tubaeformis */
+}
+
+table.lined-table tr:nth-child(odd) div.textile table{
+    background: #e5bb67;
+}
+
+table.lined-table tr:nth-child(odd) div.textile table.noborder,
+table.lined-table tr:nth-child(odd) div.textile table td {
+    background: #4f4337;
+}
+
+table.lined-table tr:nth-child(odd) a {
+    color: #e6c987; /* cornucopioides */
+}
+
+table.lined-table tr:nth-child(odd) a:visited {
+    color: #9b9690; /* cornucopioides */
+}
+
+
+table.lined-table tr:nth-child(odd) a:hover {
+    color: #10110b;
 }
 
 /* Colors for odd lines */

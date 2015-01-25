@@ -23,10 +23,24 @@ a img:hover { border-color: #ff0000; }
 
 li.selected { background-color: #ff0000 ! important }
 
+/*New CSS for even rows */
+table.lined-table tr:nth-child(even) { background: #aa00aa; }
+table.lined-table tr:nth-child(even) div.textile table               { background: #220022; }
+table.lined-table tr:nth-child(even) div.textile table table.noborder { background: #aa00aa; }
+table.lined-table tr:nth-child(even) div.textile table table td      { background: #aa00aa; }
+
+
 .ListLine0                                 { background: #aa00aa; }
 .ListLine0 div.textile table               { background: #220022; }
 .ListLine0 div.textile table table.noborder { background: #aa00aa; }
 .ListLine0 div.textile table table td      { background: #aa00aa; }
+
+
+/*New CSS for ODD Rows */
+table.lined-table tr:nth-child(odd) { background: #aaaa00;}
+table.lined-table tr:nth-child(odd) div.textile table{ background: #222200;}
+table.lined-table tr:nth-child(odd) div.textile table.noborder,
+table.lined-table tr:nth-child(odd) div.textile table td { background: #aaaa00;}
 
 .ListLine1                                 { background: #aaaa00; }
 .ListLine1 div.textile table               { background: #222200; }

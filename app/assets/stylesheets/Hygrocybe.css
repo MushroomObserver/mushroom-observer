@@ -59,6 +59,25 @@ li.selected { background-color: #f19c05 ! important }
     background-color: #ebc97f; /* miniata gill-margin */
 }
 
+/*New CSS for even lines */
+table.lined-table tr:nth-child(even) {
+    background-color: #cc382a; /* punicea cap-light */
+}
+
+table.lined-table tr:nth-child(even) div.textile table         { background: #37372f; } /* conica stain */
+table.lined-table tr:nth-child(even) div.textile table.noborder { background: #cc382a; } /* punicea cap-light */
+table.lined-table tr:nth-child(even) div.textile table td      { background: #cc382a; } /* punicea cap-light */
+table.lined-table tr:nth-child(even) a {
+    color: #e9e3af; /* punicea dark-stipe */
+}
+table.lined-table tr:nth-child(even) a:visited {
+    color: #e7bc3c; /* punicea light-stipe */
+}
+table.lined-table tr:nth-child(even) a:hover {
+    color: #37372f; /* conica stain */
+}
+
+
 /* Colors for even lines */
 .ListLine0 {
       background-color: #cc382a; /* punicea cap-light */
@@ -79,6 +98,18 @@ li.selected { background-color: #f19c05 ! important }
 .ListLine0 a:hover {
       color: #37372f; /* conica stain */
 }
+
+/*New CSS for ODD Rows */
+table.lined-table tr:nth-child(odd) {
+    background-color: #ffbf01; /* conica cap-yellow */
+}
+
+table.lined-table tr:nth-child(odd) div.textile table         { background: #37372f; } /* conica stain */
+table.lined-table tr:nth-child(odd) div.textile table.noborder { background: #ffbf01; } /* conica cap-yellow */
+table.lined-table tr:nth-child(odd) div.textile table td      { background: #ffbf01; } /* conica cap-yellow */
+table.lined-table tr:nth-child(odd) a {    color: #a31404; /* conica cap-red */}
+table.lined-table tr:nth-child(odd) a:visited {    color: #dd6226; /* conica cap-orange */}
+table.lined-table tr:nth-child(odd) a:hover {    color: #37372f; /* conica stain */}
 
 /* Colors for odd lines */
 .ListLine1 {

@@ -408,7 +408,8 @@ class AccountControllerTest < FunctionalTestCase
         place_name: "",
         notes: "",
         upload_image: file,
-        mailing_address: rolf.mailing_address },
+        mailing_address: rolf.mailing_address
+      },
       copyright_holder: "Someone Else",
       upload: { license_id: licenses(:ccnc25).id },
       date: { copyright_year: "2003" }
@@ -461,8 +462,8 @@ class AccountControllerTest < FunctionalTestCase
 
     # Get initial (empty) form.
     requires_login(:api_keys)
-    assert_select("a[onclick*=edit_key]", count: 0)
-    assert_select("a[onclick*=activate_key]", count: 0)
+    assert_select("a[data-role*=edit_api_key]", count: 0)
+    assert_select("a[data-role*=activate_api_key]", count: 0)
     assert_input_value(:key_notes, "")
 
     # Try to create key with no name.
@@ -470,7 +471,7 @@ class AccountControllerTest < FunctionalTestCase
     post(:api_keys, commit: :account_api_keys_create_button.l)
     assert_flash_error
     assert_equal(0, ApiKey.count)
-    assert_select("a[onclick*=edit_key]", count: 0)
+    assert_select("a[data-role*=edit_api_key]", count: 0)
 
     # Create good key.
     post(:api_keys, commit: :account_api_keys_create_button.l,
@@ -480,7 +481,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(1, mary.reload.api_keys.length)
     key1 = mary.api_keys.first
     assert_equal("app name", key1.notes)
-    assert_select("a[onclick*=edit_key]", count: 1)
+    assert_select("a[data-role*=edit_api_key]", count: 1)
 
     # Create another key.
     post(:api_keys, commit: :account_api_keys_create_button.l,
@@ -490,13 +491,13 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(2, mary.reload.api_keys.length)
     key2 = mary.api_keys.last
     assert_equal("another name", key2.notes)
-    assert_select("a[onclick*=edit_key]", count: 2)
+    assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Press "remove" without selecting anything.
     post(:api_keys, commit: :account_api_keys_remove_button.l)
     assert_flash_warning
     assert_equal(2, ApiKey.count)
-    assert_select("a[onclick*=edit_key]", count: 2)
+    assert_select("a[data-role*=edit_api_key]", count: 2)
 
     # Remove first key.
     post(:api_keys, commit: :account_api_keys_remove_button.l,
@@ -506,7 +507,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(1, mary.reload.api_keys.length)
     key = mary.api_keys.last
     assert_objs_equal(key, key2)
-    assert_select("a[onclick*=edit_key]", count: 1)
+    assert_select("a[data-role*=edit_api_key]", count: 1)
   end
 
   def test_activate_api_key
@@ -531,8 +532,8 @@ class AccountControllerTest < FunctionalTestCase
 
     login("katrina")
     get(:api_keys)
-    assert_select("a[onclick*=edit_key]", count: 1)
-    assert_select("a[onclick*=activate_key]", count: 1)
+    assert_select("a[data-role*=edit_api_key]", count: 1)
+    assert_select("a[data-role*=activate_api_key]", count: 1)
 
     get(:activate_api_key, id: key.id)
     assert_flash_success
@@ -541,8 +542,8 @@ class AccountControllerTest < FunctionalTestCase
     assert_not_nil(key.verified)
 
     get(:api_keys)
-    assert_select("a[onclick*=edit_key]", count: 1)
-    assert_select("a[onclick*=activate_key]", count: 0)
+    assert_select("a[data-role*=edit_api_key]", count: 1)
+    assert_select("a[data-role*=activate_api_key]", count: 0)
   end
 
   def test_edit_api_key
