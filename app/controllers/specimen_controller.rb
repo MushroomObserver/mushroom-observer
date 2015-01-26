@@ -7,6 +7,7 @@ class SpecimenController < ApplicationController
     :observation_index,
   ]
 
+
   # Display list of Specimens whose text matches a string pattern.
   def specimen_search # :nologin: :norobots:
     pattern = params[:pattern].to_s

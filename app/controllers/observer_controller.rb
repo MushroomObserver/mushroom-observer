@@ -200,8 +200,6 @@ class ObserverController < ApplicationController
     :show_votes
   ]
 
-  before_filter :create_view_instance_variable  ## @view can be used by classes to access some view specific features like render
-
   ##############################################################################
   #
   #  :section: General Stuff
@@ -2478,8 +2476,5 @@ class ObserverController < ApplicationController
     params[:observation].permit(whitelisted_observation_args)
   end
 
-  def create_view_instance_variable
-    @view = view_context
-  end
 
 end

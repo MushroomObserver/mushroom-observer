@@ -1488,10 +1488,6 @@ end
     end
   end
 
-  def observation_specimen_info(obs)
-    content_tag(:span, observation_specimen_link(obs), class: "Data") + create_specimen_link(obs)
-  end
-
   def observation_specimen_link(obs)
     count = obs.specimens.count
     if count > 0

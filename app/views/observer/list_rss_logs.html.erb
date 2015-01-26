@@ -36,7 +36,7 @@
 <%= paginate_block(@pages) do %>
   <% @objects.each do |rss_log| %>
         <div class="col-sm-4 color-block-item">
-            <%= render(:partial => 'rss_log', :locals => {
+            <%= render(:partial => 'shared/matrix_box', :locals => {
               :object => rss_log
             }) %>
         </div>

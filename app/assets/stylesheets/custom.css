@@ -7,6 +7,11 @@ a {
     color: #205080
 }
 
+.bold {
+    font-weight: 800;
+}
+
+
 .border-bottom {
     border-bottom: 1px solid;
 }
@@ -15,10 +20,20 @@ a {
     margin-bottom: 1em;
 }
 
+.push-down {
+    margin-top: 1em;
+}
 .indent {
     padding-left: 1em;
 }
 
+.pad-box {
+    padding: 5px;
+}
+
+.border-box {
+    border: 1px solid;
+}
 .pad-left {
     padding-left: 1em;
 }
@@ -67,6 +82,13 @@ a {
 }
 
 
+.popup {
+    z-index: 1000;
+    border: 1px solid;
+    background: white !important;
+}
+
+
 
 /*Themeable options below */
 /* Banner colors */
@@ -98,7 +120,11 @@ a {
     background: #E0E0E0;
 }
 
-.color-block .color-block-item:nth-child(odd) {
+.color-block .color-block-item:nth-child(odd):not(.row) {
+    background-color: #F0F0F0;
+}
+
+div.color-block div.row.color-block-item:nth-child(odd) > div > div {
     background-color: #F0F0F0;
 }
 

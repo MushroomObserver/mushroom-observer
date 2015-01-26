@@ -95,6 +95,7 @@ class ApplicationController < ActionController::Base
   include LoginSystem
 
   around_filter :catch_errors # if TESTING
+  before_filter :create_view_instance_variable
   before_filter :verify_authenticity_token
   before_filter :block_ip_addresses
   before_filter :fix_bad_domains
@@ -122,6 +123,13 @@ class ApplicationController < ActionController::Base
     # skip_filter   :log_memory_usage
     before_filter :disable_link_prefetching
     before_filter { User.current = nil }
+  end
+
+
+
+  ## @view can be used by classes to access some view specific features like render
+  def create_view_instance_variable
+    @view = view_context
   end
 
   # Utility for extracting nested params where any level might be nil

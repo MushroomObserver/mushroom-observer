@@ -1,42 +1,40 @@
 <%
-  @title = :publication_index_title.l
-  new_tab_set do
-    add_tab(:create_publication.t, new_publication_path)
-  end
+   @title = :publication_index_title.l
+   new_tab_set do
+     add_tab(:create_publication.t, new_publication_path)
+   end
 %>
 
 <%= :publication_index_intro.tp %>
 <%= :publication_citation.tp %>
 <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
 
-<br />
-<br />
 
-<table cellpadding="5" cellspacing="0" width="100%">
+<table class="table table-striped  push-down">
   <tr>
     <th><%= "#{:publication_full.t} (#{@full_count})" %></th>
     <th><%= :publication_link.t %></th>
-    <td align="center"><%= "(#{@peer_count})"%></td>
-    <td align="center"><%= "(#{@mo_count})"%></td>
+    <td align="center"><%= "(#{@peer_count})" %></td>
+    <td align="center"><%= "(#{@mo_count})" %></td>
   </tr>
 
-  <% odd_or_even = 1
-    for publication in @publications
-        odd_or_even = 1 - odd_or_even %>
-    <tr class="ListLine<%= odd_or_even %>">
-      <td width="50%"><%= link_to publication.full.t, publication %></td>
-      <td width="30%"><%= link_to content_tag(:span,
-                            publication.link, :style => "word-wrap:break-word"),
-                            publication.link %></td>
-      <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %></td>
-      <td align="center"><%= publication.mo_mentioned  ? content_tag(:b, "M") : "" %></td>
-      <% if is_in_admin_mode? || publication.can_edit?(@user) %>
-        <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
-        <td><%= link_to :DESTROY.t, { :action => :destroy, :id => publication.id },
-                        { data: { confirm: :are_you_sure.t } } %></td>
-      <% end %>
-    </tr>
+  <% @publications.each do |publication| %>
+      <tbody>
+      <tr>
+        <td width="50%"><%= link_to publication.full.t, publication %></td>
+        <td width="30%"><%= link_to content_tag(:span,
+                                                publication.link, :style => "word-wrap:break-word"),
+                                    publication.link %></td>
+        <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %></td>
+        <td align="center"><%= publication.mo_mentioned ? content_tag(:b, "M") : "" %></td>
+        <% if is_in_admin_mode? || publication.can_edit?(@user) %>
+            <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
+            <td><%= link_to :DESTROY.t, {:action => :destroy, :id => publication.id},
+                            {data: {confirm: :are_you_sure.t}} %></td>
+        <% end %>
+      </tr>
+      </tbody>
   <% end %>
 </table>
-<br />
+
 <%= :publication_legend.tp %>

@@ -24,7 +24,7 @@
         <div class="color-block">
           <% @objects.each do |observation| %>
               <div class="col-sm-4 color-block-item">
-                <%= render(:partial => 'rss_log', :locals => {
+                <%= render(:partial => 'shared/matrix_box', :locals => {
                                                         :object => observation.rss_log
                                                         })
                 %>
