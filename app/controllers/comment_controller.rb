@@ -196,7 +196,7 @@ class CommentController < ApplicationController
       @comment.target = @target
     else
       @comment = Comment.new
-      @comment.attributes = comment_whitelisted_params if params[:comment]
+      @comment.attributes = whitelisted_comment_params if params[:comment]
       @comment.target = @target
       if !@comment.save
         flash_object_errors(@comment)
@@ -237,7 +237,7 @@ class CommentController < ApplicationController
         redirect_with_query(controller: @target.show_controller,
           action: @target.show_action, id: @target.id)
       elsif request.method == "POST"
-        @comment.attributes = comment_whitelisted_params if params[:comment]
+        @comment.attributes = whitelisted_comment_params if params[:comment]
         xargs = {}
         xargs[:summary] = @comment.summary if @comment.summary_changed?
         xargs[:content] = @comment.comment if @comment.comment_changed?
@@ -302,7 +302,7 @@ class CommentController < ApplicationController
 ################################################################################
   private
 
-  def comment_whitelisted_params
+  def whitelisted_comment_params
     params[:comment].permit([:summary, :comment])
   end
 end
