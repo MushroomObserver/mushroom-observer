@@ -196,9 +196,12 @@
 #  edited_locations::   Location's they've edited.
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
-#  preferred_herbarium:: User's preferred herbarium (defaults to personal_herbarium).
-#  personal_herbarium:: User's private herbarium: "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own or that are attached to projects they're on.
+#  preferred_herbarium:: User's preferred herbarium
+#                       (defaults to personal_herbarium).
+#  personal_herbarium:: User's private herbarium:
+#                       "Name (login): Personal Herbarium".
+#  all_editable_species_lists:: Species Lists they own
+#                       or that are attached to projects they're on.
 #
 #  ==== Alerts
 #  all_alert_types::    List of accepted alert types.
@@ -258,7 +261,65 @@
 class User < AbstractModel
   require 'digest/sha1'
 
-  has_many :api_keys, :dependent => :destroy
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  # first value is the default
+  as_enum(:thumbnail_size,
+           { thumbnail: 0,
+             small: 1
+           },
+           source: :thumbnail_size,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:image_size,
+           { medium: 0,
+             thumbnail: 1,
+             small: 2,
+             large: 3,
+             huge: 4,
+             full_size: 5
+           },
+           source: :image_size,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:votes_anonymous,
+           { no: 0,
+             yes: 1,
+             old: 2
+           },
+           source: :votes_anonymous,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:location_format,
+           { postal: 0,
+             scientific: 1
+           },
+           source: :location_format,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:hide_authors,
+           { none: 0,
+             above_species: 1
+           },
+           source: :hide_authors,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:keep_filenames,
+           { keep_and_show: 0,
+             keep_but_hide: 1,
+             toss: 2
+           },
+           source: :keep_filenames,
+           with: [],
+           accessor: :whiny
+         )
+
+  has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
   has_many :images
@@ -270,7 +331,7 @@ class User < AbstractModel
   has_many :namings
   has_many :notifications
   has_many :observations
-  has_many :projects_created, :class_name => 'Project'
+  has_many :projects_created, class_name: "Project"
   has_many :publications
   has_many :queued_emails
   has_many :species_lists
@@ -278,25 +339,49 @@ class User < AbstractModel
   has_many :test_add_image_logs
   has_many :votes
 
-  has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
-  has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"
-  has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
+  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
+  has_many :reviewed_name_descriptions, class_name: "NameDescription",
+             foreign_key: "reviewer_id"
+  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
-  has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup',            :join_table => 'user_groups_users'
-  has_and_belongs_to_many :authored_names,     :class_name => 'NameDescription',      :join_table => 'name_descriptions_authors'
-  has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
-  has_and_belongs_to_many :authored_locations, :class_name => 'LocationDescription',  :join_table => 'location_descriptions_authors'
-  has_and_belongs_to_many :edited_locations,   :class_name => 'LocationDescription',  :join_table => 'location_descriptions_editors'
-  has_and_belongs_to_many :curated_herbaria,   :class_name => 'Herbarium',            :join_table => 'herbaria_curators'
+  has_and_belongs_to_many :user_groups,
+    class_name: "UserGroup",
+    join_table: "user_groups_users"
+  has_and_belongs_to_many :authored_names,
+    class_name: "NameDescription",
+    join_table: "name_descriptions_authors"
+  has_and_belongs_to_many :edited_names,
+    class_name: "NameDescription",
+    join_table: "name_descriptions_editors"
+  has_and_belongs_to_many :authored_locations,
+    class_name: "LocationDescription",
+    join_table: "location_descriptions_authors"
+  has_and_belongs_to_many :edited_locations,
+    class_name: "LocationDescription",
+    join_table: "location_descriptions_editors"
+  has_and_belongs_to_many :curated_herbaria,
+    class_name: "Herbarium",
+    join_table: "herbaria_curators"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
+################################################################################
+# Callbacks
+################################################################################
+
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
 
+  # ensure that certain default values are symbols (rather than strings)
+  # might only be an issue for test environment?
+  # probably better to instead use after_create and after_update,
+  # as after_initialize will get called every time a User is instantiated
+  after_initialize :symbolize_values
+
+################################################################################
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
   serialize :bonuses
@@ -311,10 +396,10 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    'observer'
+    "observer"
   end
 
-  # Find admin's record.
+# Find admin's record.
   def self.admin
     User.first
   end
@@ -447,9 +532,9 @@ class User < AbstractModel
   #   user = User.authenticate('fred99@aol.com', 'password')
   #
   def self.authenticate(login, pass)
-    find(:first, :conditions =>
-      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
-        login, login, login, sha1(pass) ])
+    where("(login = ? OR name = ? OR email = ?) AND password = ? AND
+           password != '' ",
+           login, login, login, sha1(pass) ).first
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -517,7 +602,8 @@ class User < AbstractModel
     preferred_herbarium.name rescue personal_herbarium_name
   end
 
-  # Return the name of this user's "favorite" herbarium (meaning the one they have used the most).
+  # Return the name of this user's "favorite" herbarium
+  # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
     herbarium_id = Herbarium.connection.select_value(%(
@@ -534,7 +620,8 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    Herbarium.find_all_by_personal_user_id(self.id).first
+  # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
+    Herbarium.where(personal_user_id: self.id).first
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
@@ -555,11 +642,11 @@ class User < AbstractModel
     end
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Interests
   #
-  ################################################################################
+  ##############################################################################
 
   # Has this user expressed positive or negative interest in a given object?
   # Returns +:watching+ or +:ignoring+ if so, else +nil+.  Caches result.
@@ -854,7 +941,9 @@ class User < AbstractModel
   # complicated set of pages. -JPH)
   def has_unshown_naming_notifications?(observation=nil)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
+    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
+    for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
+                               user_id: self.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
         notification = Notification.find(notification_id)
@@ -938,5 +1027,15 @@ protected
         errors.add(:password, :validate_user_password_no_match.t)
       end
     end
+  end
+
+################################################################################
+
+private
+
+  # ensure that certain values are always symbols
+  def symbolize_values
+    self.location_format = self.location_format.to_sym unless
+      self.location_format.is_a?(Symbol)
   end
 end

@@ -76,39 +76,31 @@ module GeneralExtensions
   # Assert that an assertion fails.
   def assert_fail(msg=nil, &block)
     msg ||= 'Expected assertion to fail.'
-    assert_raises(Test::Unit::AssertionFailedError, msg, &block)
+    assert_raises(MiniTest::Assertion, msg, &block)
   end
 
   # Assert that something is true.
   def assert_true(value, msg=nil)
     msg ||= "Expected #{value.inspect} to be true."
-    assert_block(msg) { value }
+    assert(value, msg)
   end
 
   # Assert that something is false.
   def assert_false(value, msg=nil)
     msg ||= "Expected #{value.inspect} to be false."
-    assert_block(msg) { not value }
+    refute(value, msg)
   end
 
   # Assert that something is blank.
   def assert_blank(value, msg=nil)
     msg ||= "Expected #{value.inspect} to be blank."
-    assert_block(msg) { value.blank? }
+    assert(value.blank?, msg)
   end
 
   # Assert that something is not blank.
   def assert_not_blank(value, msg=nil)
     msg ||= "Expected #{value.inspect} not to be blank."
-    assert_block(msg) { not value.blank? }
-  end
-
-  # Exactly the opposite of +assert_match+ (and essentially copied verbatim
-  # from Test::Unit::Assertions source).
-  def assert_not_match(expect, actual, msg=nil)
-    expect = Regexp.new(expect) if expect.is_a?(String)
-    msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
-    assert_block(msg) { actual !~ expect }
+    refute(value.blank?, msg)
   end
 
   # Compare two Date/Time/DateTime/TimeWithZone instances.
@@ -116,7 +108,7 @@ module GeneralExtensions
     expect = expect.strftime('%Y%m%d')
     actual = actual.strftime('%Y%m%d')
     msg = build_message(msg, 'Expected <?> to be <?>.', expect, actual)
-    assert_block(msg) { expect == actual }
+    assert(expect == actual, msg)
   end
 
   # Assert that two User instances are equal.
@@ -189,7 +181,7 @@ module GeneralExtensions
   def assert_gps_equal(expected, value)
     assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
   end
-  
+
   # Test whether the n-1st queued email matches.  For example:
   #
   #   assert_email(0,
@@ -200,7 +192,8 @@ module GeneralExtensions
   #   )
   #
   def assert_email(n, args)
-    email = QueuedEmail.find(:first, :offset => n)
+    # email = QueuedEmail.find(:first, :offset => n)
+    email = QueuedEmail.offset(n).first
     assert(email)
     for arg in args.keys
       case arg
@@ -220,13 +213,11 @@ module GeneralExtensions
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.
   def assert_save(obj, msg=nil)
-    if obj.save
-      assert(true)
-    else
-      msg2 = obj.errors.full_messages.join("; ")
-      msg2 = msg + "\n" + msg2 if msg
-      assert(false, msg2)
-    end
+    return pass if obj.save
+
+    msg2 = obj.errors.full_messages.join("; ")
+    msg2 = msg + "\n" + msg2 if msg
+    flunk(msg2)
   end
 
   ##############################################################################
@@ -389,16 +380,15 @@ module GeneralExtensions
       end
     end
 
-    if result
-      # Clean out old files from previous failure(s).
-      for file in files
-        filename = Array(file).first
-        new_filename = filename + '.new'
-        File.delete(new_filename) if File.exists?(new_filename)
-      end
-    else
-      assert(false, msg)
+    return assert(false, msg) unless result
+
+    # Clean out old files from previous failure(s).
+    for file in files
+      filename = Array(file).first
+      new_filename = filename + '.new'
+      File.delete(new_filename) if File.exists?(new_filename)
     end
+    pass
   end
 
   def enforce_encoding(encoding, file, str)

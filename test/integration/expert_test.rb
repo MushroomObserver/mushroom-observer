@@ -66,17 +66,17 @@ class ExpertTest < IntegrationTestCase
 
     assert_not_nil(Name.find_by_text_name('Caloplaca'))
 
-    names = Name.find_all_by_text_name(name1)
+    names = Name.where(text_name: name1)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author1, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name2.sub(/ssp/, 'subsp'))
+    names = Name.where(text_name: name2.sub(/ssp/, 'subsp'))
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author2, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name2.sub(/ssp/, 'subsp'))
+    names = Name.where(text_name: name2.sub(/ssp/, 'subsp'))
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author2, names.first.author)
     assert_equal(false, names.first.deprecated)
@@ -84,23 +84,23 @@ class ExpertTest < IntegrationTestCase
     assert_not_nil(Name.find_by_text_name('Acarospora'))
     assert_not_nil(Name.find_by_text_name('Acarospora nodulosa'))
 
-    names = Name.find_all_by_text_name(name3)
+    names = Name.where(text_name: name3)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author3, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name4)
+    names = Name.where(text_name: name4)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name5)
+    names = Name.where(text_name: name5)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal('', names.first.author)
     assert_equal(true, names.first.deprecated)
 
     # I guess this is left alone, even though you would probably
     # expect it to be deprecated.
-    names = Name.find_all_by_text_name('Lactarius alpinus')
+    names = Name.where(text_name: "Lactarius alpinus")
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(false, names.first.deprecated)
   end
@@ -119,8 +119,8 @@ class ExpertTest < IntegrationTestCase
     ]
     list = names.join("\r\n")
 
-    amanita = Name.find_all_by_text_name('Amanita baccata')
-    suillus = Name.find_all_by_text_name('Suillus')
+    amanita = where(text_name: "Amanita baccata")
+    suillus = where(text_name: "Suillus")
 
     albion = locations(:albion)
     albion_name = albion.name

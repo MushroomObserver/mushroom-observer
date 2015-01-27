@@ -16,9 +16,12 @@
 #  name_search::                 Seach for string in name, notes, etc.
 #  map::                         Show distribution map.
 #  index_name_description::      List of results of index/search.
-#  list_name_descriptions::      Alphabetical list of all name_descriptions, used or otherwise.
-#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored by given user.
-#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited by given user.
+#  list_name_descriptions::      Alphabetical list of all name_descriptions,
+#                                used or otherwise.
+#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored
+#                                by given user.
+#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited
+#                                by given user.
 #  show_name::                   Show info about name.
 #  show_past_name::              Show past versions of name info.
 #  prev_name::                   Show previous name in index.
@@ -38,20 +41,20 @@
 #  adjust_permissions::          Adjust permissions on a description.
 #  change_synonyms::             Change list of synonyms for a name.
 #  deprecate_name::              Deprecate name in favor of another.
-#  approve_name::                Flag given name as "accepted" (others could be, too).
+#  approve_name::                Flag given name as "accepted"
+#                                (others could be, too).
 #  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #  names_for_mushroom_app::      Display list of most common names in plain text.
 #
 #  ==== Helpers
-#  deprecate_synonym::         (used by change_synonyms)
-#  check_for_new_synonym::     (used by change_synonyms)
-#  dump_sorter::               Error diagnostics for change_synonyms.
+#  deprecate_synonym::           (used by change_synonyms)
+#  check_for_new_synonym::       (used by change_synonyms)
+#  dump_sorter::                 Error diagnostics for change_synonyms.
 #
 ################################################################################
 
 class NameController < ApplicationController
   include DescriptionControllerHelpers
-  require 'csv'
 
   before_filter :login_required, :except => [
     :advanced_search,
@@ -174,7 +177,7 @@ class NameController < ApplicationController
   # Display list of names that match a string.
   def name_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (name = Name.safe_find(pattern))
       redirect_to(:action => 'show_name', :id => name.id)
     else
@@ -339,8 +342,7 @@ class NameController < ApplicationController
     # Load Name and NameDescription along with a bunch of associated objects.
     name_id = params[:id].to_s
     desc_id = params[:desc]
-    if @name = find_or_goto_index(Name, name_id,
-                                  :include => [:user, :descriptions])
+    if @name = find_or_goto_index(Name, name_id)
 
       update_view_stats(@name)
 
@@ -356,7 +358,7 @@ class NameController < ApplicationController
         # Get list of immediate parents.
         @parents = @name.parents
       end
-      
+
       # Create query for immediate children.
       @children_query = create_query(:Name, :of_children, :name => @name)
 
@@ -374,7 +376,7 @@ class NameController < ApplicationController
                                   :by => :confidence)
       @obs_with_images_query = create_query(:Observation, :of_name, :name => @name,
                                       :by => :confidence, :has_images => :yes)
-                                  
+
       if @name.at_or_below_genus?
         @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
                                       :all => true, :by => :confidence)
@@ -398,9 +400,7 @@ class NameController < ApplicationController
   def show_name_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    if @description = find_or_goto_index(NameDescription, params[:id].to_s,
-                        :include => [:authors, :editors, :license, :reviewer,
-                                     :user, {:name=>:descriptions}])
+    if @description = find_or_goto_index(NameDescription, params[:id].to_s)
 
       # Public or user has permission.
       if @description.is_reader?(@user)
@@ -501,7 +501,7 @@ class NameController < ApplicationController
     if is_reviewer?
       desc.update_review_status(params[:value])
     end
-    redirect_with_query(:action => 'show_name', :id => desc.name_id)
+    redirect_with_query(action: :show_name, id: desc.name_id)
   end
 
   ##############################################################################
@@ -536,8 +536,8 @@ class NameController < ApplicationController
       if request.method == "POST"
         @parse = parse_name
         new_name, @parents = find_or_create_name_and_parents
-        if new_name.new_record? or new_name == @name
-          unless can_make_changes? or minor_name_change?
+        if new_name.new_record? || new_name == @name
+          unless can_make_changes? || minor_name_change?
             email_admin_name_change
           end
           update_correct_spelling
@@ -546,7 +546,7 @@ class NameController < ApplicationController
             flash_warning(:runtime_edit_name_no_change.t) unless any_changes
             redirect_to_show_name
           end
-        elsif is_in_admin_mode? or @name.mergeable? or new_name.mergeable?
+        elsif is_in_admin_mode? || @name.mergeable? || new_name.mergeable?
           merge_name_into(new_name)
           redirect_to_show_name
         else
@@ -652,7 +652,7 @@ class NameController < ApplicationController
       if params[:action] == 'create_name'
         raise(:create_name_multiple_names_match.t(:str => @parse.real_search_name))
       else
-        others = Name.find_all_by_text_name(@parse.text_name)
+        others = Name.where(text_name: @parse.text_name)
         raise(:edit_name_multiple_names_match.t(:str => @parse.real_search_name,
               :matches => others.map(&:search_name).join(' / ')))
       end
@@ -729,11 +729,13 @@ class NameController < ApplicationController
 
   def send_name_merge_email(new_name)
     flash_warning(:runtime_merge_names_warning.t)
-    content = :email_name_merge.l(:user => @user.login,
-                                  :this => "##{@name.id}: " + @name.real_search_name,
-                                  :that => "##{new_name.id}: " + new_name.real_search_name,
-                                  :this_url => "#{MO.http_domain}/name/show_name/#{@name.id}",
-                                  :that_url => "#{MO.http_domain}/name/show_name/#{new_name.id}")
+    content = :email_name_merge.l(
+                user: @user.login,
+                this: "##{@name.id}: " + @name.real_search_name,
+                that: "##{new_name.id}: " + new_name.real_search_name,
+                this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
+                that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
+    )
     WebmasterEmail.build(@user.email, content).deliver
     NameControllerTest.report_email(content) if TESTING
   end
@@ -747,12 +749,12 @@ class NameController < ApplicationController
       redirect_with_query(:action => :approve_name, :id => @name.id)
       return true
     else
-      return false
+      false
     end
   end
 
   def redirect_to_show_name
-    redirect_with_query(:action => :show_name, :id => @name.id)
+    redirect_with_query(action: :show_name, id: @name.id)
   end
 
   # Update the misspelling status.
@@ -817,7 +819,8 @@ class NameController < ApplicationController
     else
       @description = NameDescription.new
       @description.name = @name
-      @description.attributes = params[:description]
+      @description.attributes = whitelisted_name_description_params
+      @description.source_type = @description.source_type.to_sym
 
       if @description.valid?
         initialize_description_permissions(@description)
@@ -839,6 +842,7 @@ class NameController < ApplicationController
 
         # Make this the "default" description if there isn't one and this is
         # publicly readable.
+
         if !@name.description and
            @description.public
           @name.description = @description
@@ -879,7 +883,8 @@ class NameController < ApplicationController
       # already redirected
 
     elsif request.method == "POST"
-      @description.attributes = params[:description]
+      @description.attributes = whitelisted_name_description_params
+      @description.source_type = @description.source_type.to_sym
 
       args = {}
       args["set_source_type"] = @description.source_type if @description.source_type_changed?
@@ -979,6 +984,21 @@ class NameController < ApplicationController
       end
     end
   end
+
+  private
+
+  # TODO should public, public_write and source_type be removed from this list?
+  # They should be individually checked and set, since we
+  # don't want them to have arbitrary values
+  def whitelisted_name_description_params
+    params.required(:description).
+      permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
+      :look_alikes, :uses, :refs, :notes, :source_name,
+      :source_type, :public, :public_write)
+  end
+
+  public
+
 
   ################################################################################
   #
@@ -1353,7 +1373,9 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list))
+#    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list)) # Rails 3
+    descs = NameDescription.where(
+                              eol_description_conditions(review_status_list))
 
     # Fill in @descs, @users, @authors, @licenses.
     for desc in descs
@@ -1374,8 +1396,9 @@ class NameController < ApplicationController
 
     # Get corresponding names.
     name_ids = @descs.keys.map(&:to_s).join(',')
-    @names = Name.all(:conditions => "id IN (#{name_ids})",
-                      :order => 'sort_name ASC, author ASC')
+#    @names = Name.all(:conditions => "id IN (#{name_ids})", # Rails 3
+#                      :order => 'sort_name ASC, author ASC')
+    @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
     image_data = Name.connection.select_all %(
@@ -1390,6 +1413,7 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY observations.vote_cache
     )
+    image_data = image_data.to_a
 
     # Fill in @image_data, @users, and @licenses.
     for row in image_data
@@ -1431,7 +1455,7 @@ class NameController < ApplicationController
     clear_eol_data
     load_eol_data(data)
   end
-  
+
   def eol_for_taxon
     store_location
 
@@ -1452,8 +1476,9 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY images.vote_cache DESC
     ))
-    
-    @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
+
+    # @images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
+    @images = Image.includes(:image_votes).where(images.id => ids).to_a
 
     ids = Name.connection.select_values(%(
       SELECT images.id
@@ -1466,7 +1491,8 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY observations.vote_cache
     ))
-    @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes)
+    # @voteless_images = Image.find(:all, :conditions => ['images.id IN (?)', ids], :include => :image_votes) # Rails 3
+    @voteless_images = Image.includes(:image_votes).where(images.id => ids)
 
     ids = Name.connection.select_values(%(
       SELECT DISTINCT observations.id
@@ -1478,7 +1504,8 @@ class NameController < ApplicationController
       AND images.ok_for_export
       ORDER BY observations.id
     ))
-    @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids])
+    # @voteless_obs = Observation.find(:all, :conditions => ['id IN (?)', ids]) # Rails 3
+    @voteless_obs = Observation.where(images.id => ids).to_a
   end
 
   ################################################################################
@@ -1524,7 +1551,7 @@ class NameController < ApplicationController
       @observations = @query.results.select {|o| o.lat or o.location}
     end
   end
-  
+
   # Form accessible from show_name that lets a user setup tracker notifications
   # for a name.
   def email_tracking # :norobots:

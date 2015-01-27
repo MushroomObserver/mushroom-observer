@@ -1,245 +1,83 @@
 <%
-  @title = :edit_translations_title.t
-  javascript_include('jquery')
-  javascript_include('jquery_extensions')
+   @title = :edit_translations_title.t
+   javascript_include('jquery')
+   javascript_include('jquery_extensions')
+   javascript_include('translations')
 %>
 
-<style>
-  table.translation td {
-    margin: 0px;
-    border: 1px solid black;
-    padding: 5px 10px 5px 10px;
-  }
-
-  table.translation td div {
-    height: 800px;
-    overflow-y: auto;
-  }
-
-  table.old_versions td {
-    margin: 0px;
-    border: 0px;
-    padding: 1px 0.5em 1px 0.5em;
-    white-space: nowrap;
-    text-align: left;
-  }
-
-  p.form_div {
-    margin: 0px;
-  }
-
-  p.major_header {
-    font-size: 150%;
-    /* font-weight: bold; */
-    margin: 2em 0em 1em 0em;
-    padding: 0px;
-  }
-
-  p.minor_header {
-    font-size: 100%;
-    margin: 1.7em 0em 0.3em 0em;
-    padding: 0px;
-  }
-
-  p.comment {
-    font-size: 85%;
-    margin: 0px;
-    padding: 0px;
-  }
-
-  p.tag_field {
-    margin: 0em 0em 0em 1em;
-    padding: 0px;
-    text-indent: -1em
-  }
-
-  span.translated {
-  }
-
-  span.untranslated {
-    font-weight: bold;
-  }
-
-  span.tag {
-  }
-
-  iframe#hidden_frame {
-    width: 0px;
-    height: 0px;
-    border: 0px;
-  }
-
-  div#whirly {
-    position: absolute;
-    border: 1px solid black;
-    padding: 1em 2em 1em 2em;
-    background: white;
-    color: black;
-    text-align: center;
-  }
-</style>
-
+<%= stylesheet_link_tag('grids.css') %>
 <%= javascript_tag %(
-  var LOCALE = "#{@lang.locale}";
-  var LOADED = false;
-  var CHANGED = false;
-  var CONFIRM_STRING = "#{:edit_translations_will_lose_changes.l}";
-  var LOADING_STRING = "#{:edit_translations_loading.l}";
-  var SAVING_STRING = "#{:edit_translations_saving.l}";
+                   TranslationsModule({
+                        locale: "#{j @lang.locale}",
+                        confirm_string: "#{j :edit_translations_will_lose_changes.l}",
+                        loading_string : "#{j :edit_translations_loading.l}",
+                        saving_string: "#{j :edit_translations_saving.l}"
+                   });
+                   ) %>
 
-  window.onbeforeunload = function() {
-    if (CHANGED)
-      return CONFIRM_STRING;
-  }
-
-  function form_changed() {
-    CHANGED = true;
-    jQuery("#save_button").prop("disabled", false);
-    jQuery("#cancel_button").prop("disabled", false);
-  }
-
-  function clear_form() {
-    jQuery("#form_div").html();
-    LOADED = false;
-    CHANGED = false;
-  }
-
-  function submit_form() {
-    CHANGED = false;
-    show_whirly(SAVING_STRING);
-    jQuery("#save_button").prop("disabled", true);
-    jQuery("#cancel_button").prop("disabled", true);
-    jQuery("#post_form").submit();
-    return(false);
-  }
-
-  function show_old_version(id) {
-    show_whirly(LOADING_STRING);
-    jQuery.ajax("/ajax/old_translation/" + id, {
-      data: { authenticity_token: CSRF_TOKEN },
-      dataType: 'text',
-      async: true,
-      success: function(text) {
-        hide_whirly();
-        alert(text);
-      }
-    });
-  }
-
-  function show_tag(locale, tag) {
-    LOCALE = locale;
-    if (!CHANGED || confirm(CONFIRM_STRING)) {
-      show_whirly(LOADING_STRING);
-      jQuery.ajax("edit_translations_ajax_get", {
-        data: { locale: locale, tag: tag, authenticity_token: CSRF_TOKEN },
-        dataType: 'text',
-        async: true,
-        error: function(response) {
-          hide_whirly();
-          alert(response.responseText);
-        },
-        success: function(html) {
-          hide_whirly();
-          jQuery("#form_div").html(html);
-          CHANGED = false;
-          LOADED = true;
-        }
-      });
-    }
-  }
-
-  function iframe_load() {
-    var tag = window.hidden_frame.tag;
-    var str = window.hidden_frame.str;
-    if (tag != undefined) {
-      jQuery("#str_" + tag).html(str).addClass("translated faint");
-    } else if (LOADED) {
-      CHANGED = true;
-      jQuery("#save_button").prop("disabled", false);
-      jQuery("#cancel_button").prop("disabled", false);
-    }
-    hide_whirly();
-  }
-
-  function show_whirly(text) {
-    jQuery("#whirly_text").html(text);
-    jQuery("#whirly").center().show();
-  }
-
-  function hide_whirly() {
-    jQuery("#whirly").hide();
-  }
-) if @js %>
-
-<div id="whirly" style="display:none">
-  <span id="whirly_text"></span><br/><br/>
+<div id="whirly" class="hidden">
+  <span id="whirly_text" class="pad-bottom-2x"></span>
   <%= image_tag('indicator.gif') %>
 </div>
 
 <div class="HelpNote" style="max-width:800px"><%= :edit_translations_help.t %></div>
 
-<table class="translation" cellspacing="10">
-  <tr>
-    <td width="50%" valign="top" align="left">
-      <div>
+<!---Note: when we upgrade our css we will have to adjust this-->
+<div class="translation row">
+  <div class="col-xs-4">
+    <div id="left_translation_container">
+      <% @form.each do |item| %>
+          <%= case item.class.name
+                when /MajorHeader/
+                  content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'major_header')
+                when /MinorHeader/
+                  content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'minor_header')
+                when /Comment/
+                  content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'comment')
+                when /TagField/
+                  tag = item.tag
+                  str = preview_string(@strings[tag])
+                  official_record = @official_records[tag]
+                  translated_record = @translated_records[tag]
+                  up_to_date = translated_record && translated_record.updated_at >= official_record.updated_at - 1.second
+                  if not up_to_date and
+                          official_record and
+                          official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
+                    # Mark as translated if there is nothing to actually translate!
+                    up_to_date = true
+                  end
+                  span_class = up_to_date ? 'faint' : 'bold bright'
+                  str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
+                  label = content_tag(:span, h(tag) + ':', :class => 'tag')
+                  label = link_to(label, {:page => @page, :tag => tag}, data: {:tag => tag, :role => "show_tag"})
 
-<% for item in @form %>
-  <%= case item.class.name
-  when /MajorHeader/
-    content_tag(:p, h(item.string).gsub('\n','<br/>').html_safe, :class => 'major_header')
-  when /MinorHeader/
-    content_tag(:p, h(item.string).gsub('\n','<br/>').html_safe, :class => 'minor_header')
-  when /Comment/
-    content_tag(:p, h(item.string).gsub('\n','<br/>').html_safe, :class => 'comment')
-  when /TagField/
-    tag = item.tag
-    str = preview_string(@strings[tag])
-    official_record = @official_records[tag]
-    translated_record = @translated_records[tag]
-    up_to_date = translated_record && translated_record.updated_at >= official_record.updated_at - 1.second
-    if not up_to_date and
-       official_record and
-       official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
-      # Mark as translated if there is nothing to actually translate!
-      up_to_date = true
-    end
-    span_class = up_to_date ? 'translated faint' : 'untranslated bright'
-    str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
-    label = content_tag(:span, h(tag) + ':', :class => 'tag')
-    label = if @js
-      link_to_function(label, "show_tag(LOCALE,'#{tag}')")
-    else
-      link_to(label, :page => @page, :tag => tag)
-    end
-    content_tag(:p, label + ' ' + str, :class => 'tag_field')
-  else
-    raise "Unexpected form item type: #{line.class.name}"
-  end %>
-<% end %>
-<br/>
-
-      </div>
-    </td>
-    <td width="50%" valign="top" align="left">
-      <div>
-
-<%= if @js
-  form_tag({ :action => :edit_translations_ajax_post },
-           { :id => :post_form, :target => :hidden_frame })
-else
-  form_tag(:action => :edit_translations, :page => @page)
-end %>
-  <div id="form_div">
-    <%= if @edit_tags.any?
-      render(:partial => 'form')
-    end %>
+                  content_tag(:p, label + ' ' + str, :class => 'tag_field')
+                else
+                  raise "Unexpected form item type: #{line.class.name}"
+              end %>
+      <% end %>
+    </div>
   </div>
-</form>
-<% if @js %>
-  <iframe id="hidden_frame" name="hidden_frame" onload="iframe_load()" src=""></iframe>
-<% end %>
-
+  <div class="col-xs-8 border" style="height: 750px; overflow-y: scroll">
+    <div id="right_translation_container">
+      <%= if @js
+            form_tag({:controller => :translation, :action => :edit_translations_ajax_post},
+                     {:id => :post_form, :target => :hidden_frame})
+          else
+            form_tag(:action => :edit_translations, :page => @page)
+          end %>
+      <div id="form_div">
+        <%= if @edit_tags.any?
+              render(:partial => 'form')
+            end %>
       </div>
-    </td>
-  </tr>
-</table>
+      </form>
+    </div>
+    <iframe id="hidden_frame" name="hidden_frame" src="" style="display: none;"></iframe>
+  </div>
+</div>
+
+
+
+
+

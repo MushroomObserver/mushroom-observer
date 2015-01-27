@@ -66,8 +66,7 @@ class License < AbstractModel
   #   end
   #
   def self.current_names_and_ids(current_license=nil)
-    result = License.find(:all, :conditions => "deprecated = 0").
-                     map {|l| [l.display_name, l.id]}
+    result = License.where(deprecated: 0).map {|l| [l.display_name, l.id]}
     if current_license
       if current_license.deprecated
         result.push([current_license.display_name, current_license.id])
@@ -75,7 +74,7 @@ class License < AbstractModel
     end
     result
   end
-  
+
   def copyright_text(year, name)
     if self.form_name == 'publicdomain'
       "".html_safe + :image_show_public_domain.t + " " + name

@@ -134,7 +134,7 @@ Query::             Used to keep track of search queries.
 For those who prefer a graphical representation, see DATA_STRUCTURE.gif.  It is
 a standard Bachman diagram where arrows indicate cardinality (see below).  The
 version-tracking classes (NameVersion, CopyrightChange, etc.) are all
-abbreviated to just "Ver" to help reduce clutter. 
+abbreviated to just "Ver" to help reduce clutter.
 
   X ---- Y          one-to-one relationship
   X ---> Y          one-to-many relationship, X has many Y
@@ -174,7 +174,7 @@ instance methods.  These correspond directly to the URL of the request:
   http://mushroomobserver.org/controller/action
 
 Note that the default controller is "observer" and the "id" parameter is
-shortened to a bare integer: 
+shortened to a bare integer:
 
   http://mo.org/42                      Show observation #42.
   http://mo.org/observer/show_user/252  Show summary for user #3.
@@ -201,7 +201,7 @@ By default a template of the same name as the action is rendered:
 
 however this can be overridden in a number of ways.  This can get quite
 complicated, and you must be careful not to accidentally attempt to render two
-templates.  Example: 
+templates.  Example:
 
   class ExampleController << ActionController
 
@@ -224,7 +224,8 @@ templates.  Example:
       # Index mode: Get list of all objects and render "index.rhtml".
       # Note that it does NOT call the index() method!!
       when 'index'
-        @objects = Model.find(:all)
+        # @objects = Model.find(:all) # Rails 3
+        @objects = Model.all
         render :action => :index
 
       # Error: Redirect browser to another action.
@@ -255,7 +256,7 @@ Some templates that are shared between controllers can be stored in:
   app/views/shared
 
 And "partial" views (see <tt>render :partial => 'subview'</tt>) are prefixed
-with an underscore: 
+with an underscore:
 
   app/views/controller/_subview.rhtml
 
@@ -359,9 +360,9 @@ db:test:prepare</tt> must still be run with the old +myslq+ adapter.  To
 facilitate this, we've written a script, script/run_tests, to run the tests
 properly.  The complementary utility, script/run_test, runs a single unit test
 file.  We do not, however, have any clever utilty for running a single unit
-test, sorry.) 
+test, sorry.)
 
-There are several files and directories involved, so it's worth an overview: 
+There are several files and directories involved, so it's worth an overview:
 
 test/unit/xxx_test.rb::           Low-level tests of individual classes.
 test/functional/xxx_test.rb::     Mid-level tests in the context of a mock-up controller.

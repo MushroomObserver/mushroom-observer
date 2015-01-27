@@ -52,6 +52,27 @@ li.selected { background-color: #dd9d5f ! important }
     color: #f4d5a6; /* velosa dark veil */
 }
 
+/*New CSS for even rows */
+table.lined-table tr:nth-child(even) {
+    background-color: #954c23; color: #ebe4de; /* calyptroderma-fall */
+}
+
+table.lined-table tr:nth-child(even) div.textile table {
+    background: #ebe4de;
+}
+
+table.lined-table tr:nth-child(even) div.textile table.noborder,
+table.lined-table tr:nth-child(even) div.textile table td {
+    background: #954c23;
+}
+
+table.lined-table tr:nth-child(even) a {
+    color: #f5bd5e; /* calyptroderma-fall light-cap */
+}
+
+table.lined-table tr:nth-child(even) a:visited {
+    color: #c18346; /* calyptroderma-fall middle-cap */
+}
 
 /* Colors for even lines */
 .ListLine0 {
@@ -68,6 +89,29 @@ li.selected { background-color: #dd9d5f ! important }
 
 .ListLine0 a:visited {
       color: #c18346; /* calyptroderma-fall middle-cap */
+}
+
+
+/*New CSS for ODD Rows */
+table.lined-table tr:nth-child(odd) {
+    background-color: #787133; color: #e6edd5; /* phalloides */
+}
+
+table.lined-table tr:nth-child(odd) div.textile table{
+    background: #e6edd5;
+}
+
+table.lined-table tr:nth-child(odd) div.textile table.noborder,
+table.lined-table tr:nth-child(odd) div.textile table td {
+    background: #787133;
+}
+
+table.lined-table tr:nth-child(odd) a {
+    color: #dfe4bc; /* phalloides light-cap */
+}
+
+table.lined-table tr:nth-child(odd) a:visited {
+    color: #beb977; /* phalloides middle-cap */
 }
 
 /* Colors for odd lines */

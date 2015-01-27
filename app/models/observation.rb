@@ -74,7 +74,7 @@
 #  format_name::            Textilized. (uses name.observation_name)
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
-#  default_specimen_label:: 
+#  default_specimen_label::
 #
 #  ==== Namings and Votes
 #  name::                   Conensus Name instance. (never nil)
@@ -147,7 +147,7 @@ class Observation < AbstractModel
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
-  
+
   # Override the default show_controller
   def self.show_controller; 'observer'; end
   def is_location?; false; end
@@ -273,9 +273,9 @@ class Observation < AbstractModel
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
-    name.observation_name + " (#{id || '?'})"
+    name.observation_name + " (#{id || '?'})" rescue ""
   end
-  
+
   def default_specimen_label
     Herbarium.default_specimen_label(name.text_name, id)
   end
@@ -725,7 +725,8 @@ return result if debug
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-    for o in Observation.find(:all)
+    # for o in Observation.find(:all) # Rails 3
+    for o in Observation.all
       o.calc_consensus
     end
   end
@@ -936,7 +937,7 @@ return result if debug
     end
 
     # Tell masochists who want to know about all observation changes.
-    for user in User.find_all_by_email_observations_all(true)
+    for user in User.where(email_observations_all: true)
       recipients.push(user)
     end
 
@@ -1004,7 +1005,7 @@ return result if debug
     # (no transactions necessary: creating location on foreign server
     # should initiate identical action)
   end
-  
+
 ################################################################################
 
   protected

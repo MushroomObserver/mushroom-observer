@@ -14,7 +14,7 @@
       <%= :glossary_term_description.t %>:<br/>
       <%= form.text_area('description', :cols => 100, :rows => 20) %>
     </p>
-    <%= form.file_field('upload_image') %></p>
+    <%= image_file_field(:glossary_term, :upload_image) %></p>
 
     <p><label for="copyright_holder"><%= :glossary_term_copyright_holder.t %></label><br/>
     <%= text_field_tag('copyright_holder', @copyright_holder, :size => 40) %>

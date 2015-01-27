@@ -17,10 +17,11 @@
 ################################################################################
 
 # require_dependency 'classes/semantic_vernacular'
+require_relative "../classes/semantic_vernacular"
 
 class SemanticVernacularController < ApplicationController
   before_filter :login_required
-  
+
   def index
   	@svds_with_name = SemanticVernacularDescription.index_with_name
     @svds_without_name = SemanticVernacularDescription.index_without_name
@@ -52,14 +53,14 @@ class SemanticVernacularController < ApplicationController
     Rails.logger.debug(response)
     respond_to do |format|
       format.json do
-        render :json => { 
+        render :json => {
           :page_uri => post_json["svd"]["uri"],
-          :status => response.class.name, 
+          :status => response.class.name,
           :message => response.message,
           :body => response.body,
           :value => response.value
         }.to_json
-      end        
+      end
     end
   end
 
@@ -120,7 +121,7 @@ class SemanticVernacularController < ApplicationController
       id = id + 1
     end
     if data["scientific_names"].length > 0
-      data["scientific_names"].each do |name| 
+      data["scientific_names"].each do |name|
         name["id"] = id
         id = id + 1
       end
@@ -136,7 +137,7 @@ class SemanticVernacularController < ApplicationController
 
   # Fill URIs into the received post data based on the IDs acollated to them.
   def fill_URIs(data)
-    if data["svd"]["id"] 
+    if data["svd"]["id"]
       data["svd"]["uri"] = SemanticVernacularDataSource.id_to_uri(
         data["svd"]["id"])
     end
@@ -165,20 +166,20 @@ class SemanticVernacularController < ApplicationController
     end
     if data["label"]["value"]
       response = VernacularLabel.insert(
-        data["svd"], 
+        data["svd"],
         data["label"],
         data["user"])
     end
     if data["description"]["uri"]
       response = VernacularFeatureDescription.insert(
-        data["svd"], 
+        data["svd"],
         data["description"],
         data["features"],
         data["user"])
     end
     if data["scientific_names"].length > 0
       response = ScientificName.insert(
-        data["svd"], 
+        data["svd"],
         data["scientific_names"])
     end
     return response

@@ -13,9 +13,12 @@ rolf:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  keep_filenames: :toss
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # keep_filenames: User.keep_filenames[:toss]
+  keep_filenames: 2
   image_id: 13
 
 # Mary has no images and no herbaria
@@ -31,9 +34,12 @@ mary:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  keep_filenames: :keep_and_show
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # keep_filenames: User.keep_filenames[:keep_and_show]
+  keep_filenames: 0
 
 # Junk gets denied
 junk:
@@ -47,9 +53,12 @@ junk:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  keep_filenames: :toss
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # keep_filenames: User.keep_filenames[:toss]
+  keep_filenames: 2
 
 # Need third for testing votes
 dick:
@@ -64,9 +73,12 @@ dick:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  keep_filenames: :toss
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # keep_filenames: User.keep_filenames[:toss]
+  keep_filenames: 2
 
 # Need fourth for testing votes
 katrina:
@@ -81,9 +93,12 @@ katrina:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  keep_filenames: :toss
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # keep_filenames: User.keep_filenames[:toss]
+  keep_filenames: 2
 
 # Roy is a scientific user
 roy:
@@ -98,10 +113,14 @@ roy:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  location_format: :scientific
-  keep_filenames: :toss
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # location_format: User.location_formats[:scientific]
+  location_format: 1
+  # keep_filenames: User.keep_filenames[:toss]
+  keep_filenames: 2
 
 spammer:
   id: 7
@@ -115,6 +134,9 @@ spammer:
   contribution: 10
   created_here: true
   locale: en-US
-  thumbnail_size: :thumbnail
-  image_size: :medium
-  keep_filenames: :toss
+  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
+  thumbnail_size: 0
+  # image_size: User.image_sizes[:medium]
+  image_size: 0
+  # keep_filenames: User.keep_filenames[:toss]
+  keep_filenames: 2

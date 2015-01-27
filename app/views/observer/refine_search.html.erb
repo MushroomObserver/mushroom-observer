@@ -1,9 +1,9 @@
 <%
-  @title = :refine_search_title.t(:type => @query.model.type_tag)
+  @title = :refine_search_title.t(:type => @query.model_class.type_tag)
 
   begin
     start = Time.now
-    num = @query.num_results 
+    num = @query.num_results
   rescue => e
     flash_error(e)
     num = 0
@@ -165,7 +165,7 @@
           if !help.blank?
             link = :refine_search_help.t
             help2 = help.gsub(/\\/, '\\').gsub(/"/, '\\"').gsub(/\n/, '\\n')
-            link = link_to_function(link, "alert(\"#{help2}\")")
+            link = link_to(link, "javascript: alert(\"#{help2}\")")
             result << indent
             result << content_tag(:span, link, :title => help)
             result[-3..-1] = content_tag(:span, result[-3..-1].safe_join,

@@ -99,7 +99,7 @@ class API
 
       lambda do |proj|
         raise MustBeAdmin.new(proj) unless proj.is_admin?(user)
-        proj.update_attributes!(params)
+        proj.update!(params)
         proj.admin_group.users.push(add_admins) if add_admins.any?
         proj.admin_group.users.delete(remove_admins) if remove_admins.any?
         proj.user_group.users.push(add_members) if add_members.any?

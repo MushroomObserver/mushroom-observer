@@ -9,7 +9,8 @@ namespace :jason do
     print "Writing file \"y\"...\n"
     out = ""
     cd = Iconv.new('ISO-8859-1', 'UTF-8')
-    for name in Name.find(:all)
+    # for name in Name.find(:all) # Rails 3
+    for name in Name.all
       str = [
         name.id.to_s,
         name.text_name.to_s,
@@ -263,7 +264,7 @@ namespace :jason do
 
   desc 'Dump and flush mysqld stats.'
   task(:global_status => :environment) do
-    for hash in Comment.connection.select_all('show global status')
+    for hash in Comment.connection.select_all('show global status').to_a
       key = hash['Variable_name']
       val = hash['Value']
       printf "%-40.40s %s\n", key, val
@@ -530,10 +531,10 @@ namespace :jason do
 
               # Attach to observation if creates successfully.
               if naming.save
-                NamingReason.new(:naming => naming, :reason => 1, :notes => sight).save if sight 
+                NamingReason.new(:naming => naming, :reason => 1, :notes => sight).save if sight
                 NamingReason.new(:naming => naming, :reason => 2, :notes => refs).save  if refs
                 NamingReason.new(:naming => naming, :reason => 3, :notes => chem).save  if chem
-                NamingReason.new(:naming => naming, :reason => 4, :notes => micro).save if micro 
+                NamingReason.new(:naming => naming, :reason => 4, :notes => micro).save if micro
                 naming.change_vote(user, vote)
                 $stderr.puts('  Created naming: #%d (%s)' % [naming.id, naming.name.search_name])
               else
@@ -617,7 +618,9 @@ namespace :jason do
       loc ||= val
     elsif !loc
       val2 = val.downcase.gsub(/\W+/, ' ')
-      results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "name asc")
+      # results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "name asc") # Rails 3
+      results = Location.where("search_name LIKE ?", "%#{val2}%").
+                         order(name).to_a
       if results.length == 0
         lines.push('>>>>>>>> couldn\'t find any matching locations (add "*" to end to create)')
       elsif results.length == 1
@@ -641,7 +644,7 @@ namespace :jason do
     if names.length == 0
       lines.push('>>>>>>>> unrecognized name, please correct or create by hand')
     elsif force
-      return names.first  
+      return names.first
     elsif !names.first.deprecated && valid_names.length == 1
       return names.first
     elsif !names.first.deprecated && valid_names.length > 1

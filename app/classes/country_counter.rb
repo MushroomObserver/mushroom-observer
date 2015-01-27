@@ -25,7 +25,7 @@ class CountryCounter
     @known_by_count, @unknown_by_count = partition_with_count
     @missing = (UNDERSTOOD_COUNTRIES - Set.new(@counts.keys)).sort
   end
-  
+
   def partition_with_count
     countries_by_count.partition {|p| UNDERSTOOD_COUNTRIES.member?(p[0])}
   end
@@ -38,13 +38,13 @@ class CountryCounter
   def countries
     (wheres+location_names).map {|l| l.split(', ')[-1]}
   end
-  
+
   def wheres
     location_lookup("SELECT `where` location FROM observations WHERE `where` IS NOT NULL")
   end
-  
+
   def location_lookup(sql)
-    Location.connection.select_all(sql).map {|h| h['location']}
+    Location.connection.select_all(sql).to_a.map {|h| h['location']}
   end
 
   def location_names
@@ -56,13 +56,13 @@ class CountryCounter
       YAML::load(fh)
     end
   end
-  
+
   UNDERSTOOD_COUNTRIES = Set.new(load_param_hash(MO.location_countries_file))
 
   def known_by_count; @known_by_count; end
   def unknown_by_count; @unknown_by_count; end
   def missing; @missing; end
-    
+
   private
 
   def count(country)

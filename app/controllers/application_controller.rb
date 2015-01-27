@@ -91,6 +91,7 @@
 class ApplicationController < ActionController::Base
   require 'extensions'
   require 'login_system'
+  require "csv"
   include LoginSystem
 
   around_filter :catch_errors # if TESTING
@@ -166,7 +167,7 @@ class ApplicationController < ActionController::Base
       redirect_back_or_default(:controller => :observer, :action => :index)
     end
   end
-  
+
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
@@ -225,7 +226,7 @@ logger.warn('SESSION: ' + session.inspect)
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this ever
   # were to break we'd get into an infinite loop too easily that way.  I think
-  # this is a lot safer.  MO.bad_domains would be something like: 
+  # this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
   #     'www.mushroomobserver.org',
@@ -290,7 +291,8 @@ logger.warn('SESSION: ' + session.inspect)
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies["mo_user"])  &&
           (split = cookie.split(" ")) &&
-          (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
+#          (user = User.find(:first, :conditions => ['id = ?', split[0]])) && # Rails 3
+          (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
           (user.verified)
       @user = set_session_user(user)
@@ -400,10 +402,10 @@ logger.warn('SESSION: ' + session.inspect)
   # This only applies to emails that are associated with Notification's for
   # which there is a note_template.  (Only one type now: Notification's with
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  #
   def has_unshown_notifications?(user, flavor=:naming)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+  # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+    for q in QueuedEmail.where(flavor: flavor, to_user_id: user.id)
       ints = q.get_integers(["shown", "notification"], true)
       unless ints["shown"]
         notification = Notification.safe_find(ints["notification"].to_i)
@@ -507,7 +509,7 @@ logger.warn('SESSION: ' + session.inspect)
 
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
-      @user.update_attributes(:locale => I18n.locale.to_s)
+      @user.update(:locale => I18n.locale.to_s)
       Transaction.put_user(:id => @user, :set_locale => I18n.locale.to_s)
     end
 
@@ -527,7 +529,7 @@ logger.warn('SESSION: ' + session.inspect)
     else
       begin
         Time.zone = tz
-      rescue 
+      rescue
         logger.warn "TimezoneError: #{tz.inspect}"
       end
       @js = true
@@ -739,7 +741,7 @@ logger.warn('SESSION: ' + session.inspect)
       if approved_names.is_a?(String)
         approved_names = approved_names.split(/\r?\n/)
       end
-      for ns in name_list
+      for ns in name_list.split("\n")
         if !ns.blank?
           name_parse = NameParse.new(ns)
           construct_approved_name(name_parse, approved_names, deprecate)
@@ -895,7 +897,7 @@ logger.warn('SESSION: ' + session.inspect)
     params
   end
   helper_method :add_query_param
-  
+
   def redirect_with_query(args)
     redirect_to(add_query_param(args))
   end
@@ -910,7 +912,7 @@ logger.warn('SESSION: ' + session.inspect)
     @query_params[:q] = params[:q] if !params[:q].blank?
     @query_params
   end
-  
+
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
@@ -926,9 +928,9 @@ logger.warn('SESSION: ' + session.inspect)
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
   # correct.  (Useful for specifying sort conditions, for example.)
-  def find_or_create_query(model, args={})
+  def find_or_create_query(model_symbol, args={})
     map_past_bys(args)
-    model = model.to_s
+    model = model_symbol.to_s
     if result = find_query(model, false)
 
       # Check if the existing query needs to be updated.
@@ -962,7 +964,7 @@ logger.warn('SESSION: ' + session.inspect)
     "modified" => :updated_at,
     "created" => :created_at
   }
-  
+
   def map_past_bys(args)
     if args.member?(:by)
       args[:by] = (BY_MAP[args[:by].to_s] or args[:by])
@@ -1000,8 +1002,8 @@ logger.warn('SESSION: ' + session.inspect)
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
-  def create_query(model, flavor=:default, args={})
-    Query.lookup(model, flavor, args)
+  def create_query(model_symbol, flavor=:default, args={})
+    Query.lookup(model_symbol, flavor, args)
   end
 
   # Create a new query by adding a bounding box to the given one.
@@ -1025,7 +1027,7 @@ logger.warn('SESSION: ' + session.inspect)
   def tweak_down(v, amount, min)
     [min, v.to_f-amount].max
   end
-  
+
   # This is the common code for all the 'prev/next_object' actions.  Pass in
   # the current object and direction (:prev or :next), and it looks up the
   # query, grabs the next object, and redirects to the appropriate
@@ -1107,9 +1109,9 @@ logger.warn('SESSION: ' + session.inspect)
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links::        
-  # @sorts::        
-  # @layout::       
+  # @links::
+  # @sorts::
+  # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.
   # @extra_data::   Results of block yielded on every object if block given.
@@ -1124,7 +1126,7 @@ logger.warn('SESSION: ' + session.inspect)
     number_arg   = args[:number_arg]   || :page
     num_per_page = args[:num_per_page] || 50
     include      = args[:include]      || nil
-    type = query.model.type_tag
+    type = query.model_class.type_tag
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1209,7 +1211,7 @@ logger.warn('SESSION: ' + session.inspect)
       @sorts = nil
     end
     # "@sorts".print_thing(@sorts)
-    
+
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1233,8 +1235,8 @@ logger.warn('SESSION: ' + session.inspect)
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) and
        !args[:always_index]
-      redirect_with_query(:controller => query.model.show_controller,
-        :action => query.model.show_action,
+      redirect_with_query(:controller => query.model_class.show_controller,
+        :action => query.model_class.show_action,
         :id => query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
@@ -1283,8 +1285,8 @@ logger.warn('SESSION: ' + session.inspect)
       if !link_all and (by.to_s == this_by)
         results << str
       else
-        results << [str, { :controller => query.model.show_controller,
-                           :action => query.model.index_action,
+        results << [str, { :controller => query.model_class.show_controller,
+                           :action => query.model_class.index_action,
                            :by => by }.merge(query_params)]
       end
     end
@@ -1296,8 +1298,8 @@ logger.warn('SESSION: ' + session.inspect)
     else
       reverse_by = "reverse_#{this_by}"
     end
-    results << [str, { :controller => query.model.show_controller,
-                       :action => query.model.index_action,
+    results << [str, { :controller => query.model_class.show_controller,
+                       :action => query.model_class.index_action,
                        :by => reverse_by }.merge(query_params)]
 
     return results
@@ -1305,13 +1307,13 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
-  def find_or_goto_index(model, id, *args)
-    result = model.safe_find(id, *args)
+  def find_or_goto_index(model, id)
+    result = model.safe_find(id)
     if !result
-      flash_error(:runtime_object_not_found.t(:id => id || '0',
-                                              :type => model.type_tag))
-      redirect_with_query(:controller => model.show_controller,
-        :action => model.index_action)
+      flash_error(:runtime_object_not_found.t(id: id || "0",
+                                              type: model.type_tag))
+      redirect_with_query(controller: model.show_controller,
+                          action: model.index_action)
     end
     return result
   end
@@ -1456,7 +1458,7 @@ logger.warn('SESSION: ' + session.inspect)
 
   # Default image size to use for thumbnails: either :thumbnail or :small.
   # Looks at both the user's pref (if logged in) or the session (if not logged
-  # in), else reverts to small. *NOTE*: This method is available to views. 
+  # in), else reverts to small. *NOTE*: This method is available to views.
   def default_thumbnail_size
     if @user
       @user.thumbnail_size
@@ -1508,7 +1510,7 @@ logger.warn('SESSION: ' + session.inspect)
     result["count"] = result["rows"] * result["columns"]
     result
   end
-  
+
   def has_permission?(obj, error_message)
     result = (is_in_admin_mode? or obj.can_edit?(@user))
     flash_error(error_message) if not result
@@ -1518,7 +1520,7 @@ logger.warn('SESSION: ' + session.inspect)
   def can_delete?(obj)
     has_permission?(obj, :runtime_no_destroy.l(:type => obj.type_tag))
   end
-  
+
   def can_edit?(obj)
     has_permission?(obj, :runtime_no_update.l(:type => obj.type_tag))
   end
@@ -1529,4 +1531,13 @@ logger.warn('SESSION: ' + session.inspect)
       format.xml { render args }
     end
   end
+  ##############################################################################
+
+  private
+
+  # defined here because used by both image_controller and observer_controller
+  def whitelisted_image_args
+    [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
+  end
+
 end

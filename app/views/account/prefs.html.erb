@@ -60,7 +60,7 @@
   <p><label for="user_keep_filenames"><%= :prefs_keep_image_filenames.t %></label>:
     <span class="HelpNote">(<%= link_to(:prefs_bulk_filename_purge.t,
       { :controller => 'image', :action => 'bulk_filename_purge' },
-      { :confirm => :prefs_bulk_filename_purge_confirm.l }) %>)</span><br/>
+      { data: { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>)</span><br/>
     <%= form.select(:keep_filenames, [
     [:prefs_keep_image_filenames_toss.l, :toss],
     [:prefs_keep_image_filenames_keep_but_hide.l, :keep_but_hide],
@@ -146,7 +146,7 @@
   <p><%= form.check_box("email_html") %>
     <label for="user_email_html"><%= :prefs_email_html.t %></label></p>
 
-  <p><%= :prefs_email_comments.t %>: 
+  <p><%= :prefs_email_comments.t %>:
     <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
   <%= form.check_box("email_comments_owner") %>
     <label for="user_email_comments_owner"><%= :prefs_email_comments_owner.t %></label><br/>

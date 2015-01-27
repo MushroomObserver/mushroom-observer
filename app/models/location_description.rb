@@ -53,6 +53,20 @@
 class LocationDescription < Description
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:source_type,
+           { public: 0,
+             foreign: 1,
+             project: 2,
+             source: 3,
+             user: 4
+           },
+           source: :source_type,
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :license
   belongs_to :location
   belongs_to :project
@@ -109,7 +123,7 @@ class LocationDescription < Description
   end
 
   # This is called after saving potential changes to a Location.  It will
-  # determine if the changes are important enough to notify people, and do so. 
+  # determine if the changes are important enough to notify people, and do so.
   def notify_users
     if altered?
       sender = User.current
@@ -131,7 +145,7 @@ class LocationDescription < Description
       end
 
       # Tell masochists who want to know about all location changes.
-      for user in User.find_all_by_email_locations_all(true)
+      for user in User.where(email_locations_all: true)
         recipients.push(user)
       end
 

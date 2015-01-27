@@ -14,7 +14,9 @@ class NamingController < ApplicationController
     naming = @params.naming = Naming.from_params(params)
     @params.observation = naming.observation
     return default_redirect(naming.observation) unless check_permission!(naming)
-    @params.vote = naming.first_vote # TODO: Can this get moved into NamingParams#naming=
+
+    # TODO: Can this get moved into NamingParams#naming=
+    @params.vote = naming.first_vote
     request.method == "POST" ? edit_post : @params.edit_init
   end
 

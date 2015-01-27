@@ -11,20 +11,29 @@
 #  == Name Formats
 #
 #    text_name          "Xanthoparmelia" coloradoensis
-#    (real_text_name)   "Xanthoparmelia" coloradoënsis          (derived on the fly from display_name)
+#    (real_text_name)   "Xanthoparmelia" coloradoënsis
+#                         (derived on the fly from display_name)
 #    search_name        "Xanthoparmelia" coloradoensis Fries
-#    (real_search_name) "Xanthoparmelia" coloradoënsis Fries    (derived on the fly from display_name)
+#    (real_search_name) "Xanthoparmelia" coloradoënsis Fries
+#                         (derived on the fly from display_name)
 #    sort_name          Xanthoparmelia" coloradoensis Fries
 #    display_name       **__"Xanthoparmelia" coloradoënsis__** Fries
-#    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
-#
-#    text_name          Amanita muscaria var. muscaria                   (pure text, no accents or authors)
-#    (real_text_name)   Amanita muscaria var. muscaria                   (minus authors, but with umlauts if exist)
-#    search_name        Amanita muscaria var. muscaria (L.) Lam.         (what one would typically search for)
-#    (real_search_name) Amanita muscaria (L.) Lam. var. muscaria         (parsing this should result in identical name)
-#    sort_name          Amanita muscaria  {6var.  !muscaria  (L.) Lam.   (nonsense string which sorts name in correct place)
-#    display_name       **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**   (formatted as for publication)
-#    observation_name   **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**   (formatted as for publication)
+#    observation_name   **__"Xanthoparmelia" coloradoënsis__** Fries
+#                         (adds "sp." on the fly for genera)
+#    text_name          Amanita muscaria var. muscaria
+#                         (pure text, no accents or authors)
+#    (real_text_name)   Amanita muscaria var. muscaria
+#                          (minus authors, but with umlauts if exist)
+#    search_name        Amanita muscaria var. muscaria (L.) Lam.
+#                         (what one would typically search for)
+#    (real_search_name) Amanita muscaria (L.) Lam. var. muscaria
+#                         (parsing this should result in identical name)
+#    sort_name          Amanita muscaria  {6var.  !muscaria  (L.) Lam.
+#                         (nonsense string which sorts name in correct place)
+#    display_name       **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**
+#                         (formatted as for publication)
+#    observation_name   **__Amanita muscaria__** (L.) Lam. var. **__muscaria__**
+#                         (formatted as for publication)
 #
 #  Note about "real" text_name and search_name: These are required by edit
 #  forms.  If the user inputs a name with an accent (ë is the only one
@@ -94,7 +103,8 @@
 #  == Attributes
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
-#  sync_id::          (-) Globally unique alphanumeric id, used to sync with remote servers.
+#  sync_id::          (-) Globally unique alphanumeric id,
+#                         used to sync with remote servers.
 #  created_at::       (-) Date/time it was first created.
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
@@ -110,7 +120,8 @@
 #  real_search_name:: (V) "Xanthoparmelia" coloradoënsis Fries
 #  sort_name::        (V) Xanthoparmelia" coloradoensis Fries
 #  display_name::     (V) **__"Xanthoparmelia" coloradoënsis__** Fries
-#  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries  (adds "sp." on the fly for genera)
+#  observation_name:: (V) **__"Xanthoparmelia" coloradoënsis__** Fries
+#                         (adds "sp." on the fly for genera)
 #  author::           (V) Fries
 #  citation::         (V) Citation where name was first published.
 #  deprecated::       (V) Boolean: is this name deprecated?
@@ -137,9 +148,12 @@
 #  parse_classification::    Parse +classification+ string.
 #
 #  ==== Name Parsing
-#  find_names::              Parses string, looks up Name by search_name, falls back on text_name.
-#  find_names_filling_in_authors:: Look up Name's by text_name and search_name; fills in authors if supplied.
-#  find_or_create_name_and_parents:: Look up Name, create it, return it and parents.
+#  find_names::              Parses string, looks up Name by search_name,
+#                              falls back on text_name.
+#  find_names_filling_in_authors:: Look up Name's by text_name and search_name;
+#                              fills in authors if supplied.
+#  find_or_create_name_and_parents:: Look up Name, create it,
+#                              return it and parents.
 #  parse_name::              Parse arbitrary taxon, return parts.
 #  parse_author::            Grab the author from the end of a name.
 #  parse_group::             Parse "Whatever group".
@@ -157,8 +171,10 @@
 #  format_name::             Add itallics and/or boldness to string.
 #  clean_incoming_string::   Preprocess string from user before parsing.
 #  standardize_name::        Standardize abbreviations in parsed name string.
-#  standardize_author::      Standardize special abbreviations at start of parsed author.
-#  squeeze_author::          Squeeze out space between initials, such as in "A. H. Smith".
+#  standardize_author::      Standardize special abbreviations
+#                              at start of parsed author.
+#  squeeze_author::          Squeeze out space between initials,
+#                              such as in "A. H. Smith".
 #
 #  == Instance methods
 #
@@ -188,20 +204,22 @@
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
-#  synonym_ids:              List of all synonyms, including this Name, just ids.
+#  synonym_ids:              List of IDs of all synonyms, including this Name
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
 #  clear_synonym::           Remove this Name from its Synonym.
 #  merge_synonyms::          Merge Synonym's of this and another Name.
-#  transfer_synonym::        Transfer a Name from another Synonym into this Name's Synonym.
+#  transfer_synonym::        Transfer a Name from another Synonym
+#                              into this Name's Synonym.
 #  other_authors::           List of names that differ only in author.
-#  other_author_ids::        List of names that differ only in author, just ids.
+#  other_author_ids::        List of ids of names that differ only in author
 #
 #  ==== Misspellings
 #  is_misspelling?::         Is this name a misspelling?
 #  correct_spelling::        Link to the correctly-spelled Name (or nil).
 #  misspellings::            Names that call this their "correct spelling".
-#  misspelling_ids::         Names that call this their "correct spelling", just ids.
+#  misspelling_ids::         Names that call this their "correct spelling",
+#                              just ids.
 #
 #  ==== Status
 #  deprecated::              Is this name deprecated?
@@ -220,12 +238,13 @@
 #  reviewed_observations::   Observation's that have > 80% confidence.
 #
 #  ==== Merging
-#  mergeable?::               Is it safe to merge this Name into another.
+#  mergeable?::              Is it safe to merge this Name into another?
 #  merge::                   Merge old name into this one and remove old one.
 #
 #  == Callbacks
 #
-#  create_description::      After create: create (empty) official NameDescription.
+#  create_description::      After create: create (empty) official
+#                              NameDescription.
 #  notify_users::            After save: notify interested User's of changes.
 #
 ################################################################################
@@ -233,13 +252,39 @@
 class Name < AbstractModel
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:rank,
+           { Form: 0,
+             Variety: 1,
+             Subspecies: 2,
+             Species: 3,
+             Stirps: 4,
+             Subsection: 5,
+             Section: 6,
+             Subgenus: 7,
+             Genus: 8,
+             Family: 9,
+             Order: 10,
+             Class: 11,
+             Phylum: 12,
+             Kingdom: 13,
+             Domain: 14,
+             Group: 15
+           },
+           source: :rank,
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
   belongs_to :description, :class_name => 'NameDescription' # (main one)
   belongs_to :rss_log
   belongs_to :synonym
   belongs_to :user
 
-  has_many :descriptions, :class_name => 'NameDescription', :order => 'num_views DESC'
+  has_many :descriptions, -> { order "num_views DESC" },
+           class_name: "NameDescription"
   has_many :comments,  :as => :target, :dependent => :destroy
   has_many :interests, :as => :target, :dependent => :destroy
   has_many :namings
@@ -295,7 +340,7 @@ class Name < AbstractModel
   end
 
   def <=>(x); self.sort_name <=> x.sort_name; end
-  
+
   def best_brief_description
     if self.description
       if self.description.gen_desc.blank?
@@ -305,14 +350,15 @@ class Name < AbstractModel
       end
     end
   end
-  
+
   def best_classification
     self.description.classification if self.description
   end
-  
+
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
-    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
+#    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4") # Rails 3
+    Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
   end
 
   # Get list of common names to prime auto-completer.  Returns a simple Array
@@ -430,17 +476,19 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
-  RANKS_INSIDE_GENUS  = [:Stirps, :Subsection, :Section, :Subgenus]
-  RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
-  RANKS_ABOVE_SPECIES = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
-  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species] + RANKS_INSIDE_GENUS
-  ALL_RANKS = RANKS_BELOW_SPECIES + [:Species] +  RANKS_ABOVE_SPECIES + [:Group]
-  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom] # Why doesn't this have :Species?
+  RANKS_ABOVE_GENUS    = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
+  RANKS_INSIDE_GENUS   = [:Stirps, :Subsection, :Section, :Subgenus]
+  RANKS_BELOW_SPECIES  = [:Form, :Variety, :Subspecies]
+  RANKS_LE_SPECIES     = RANKS_BELOW_SPECIES + [:Species]
+  RANKS_ABOVE_SPECIES  = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
+  RANKS_BELOW_GENUS    = RANKS_LE_SPECIES + RANKS_INSIDE_GENUS
+  ALL_RANKS            = RANKS_LE_SPECIES + RANKS_ABOVE_SPECIES + [:Group]
+  EOL_RANKS            = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order,
+                         :Class, :Phylum, :Kingdom] # Why not :Species?
   EOL_RANKS_FOR_EXPORT = [:Form, :Variety, :Subspecies, :Species, :Genus]
-  EOL_MIN_IMAGE_VOTE = 2
+  EOL_MIN_IMAGE_VOTE   = 2
   EOL_MIN_OBSERVATION_VOTE = 2.4
-  ALT_RANKS = {:Division => :Phylum}
+  ALT_RANKS            = { Division: :Phylum }
 
   # Returns an Array of Symbol's from :Form to :Domain, then :Group.
   def self.all_ranks
@@ -490,7 +538,7 @@ class Name < AbstractModel
 
   # Is this Name a genus or lower?
   def at_or_below_genus?
-    RANKS_BELOW_GENUS.include?(rank) or rank == :Genus
+    RANKS_BELOW_GENUS.include?(rank) || rank == :Genus
   end
 
   # Is this Name a stirps or higher?
@@ -503,14 +551,22 @@ class Name < AbstractModel
     RANKS_BELOW_SPECIES.include?(rank)
   end
 
+  def rank_index(rank)
+    ALL_RANKS.index(rank.to_sym)
+  end
+
   def self.compare_ranks(a, b)
     ALL_RANKS.index(a.to_sym) <=> ALL_RANKS.index(b.to_sym)
   end
 
   def is_lichen?
     # Check both this and genus, just in case I'm missing some species.
-    result = (Triple.find(:all, :conditions => ["subject = ':name/#{id}' and predicate = ':lichenAuthority'"]) != [])
-    if !result and below_genus?
+    # result = (Triple.find(:all,
+    #                       :conditions => ["subject = ':name/#{id}' and
+    #                         predicate = ':lichenAuthority'"]) != []) # Rails 3
+    result = (Triple.where(subject: ":name/#{id}",
+                           predicate: ":lichenAuthority") != [])
+    if !result && below_genus?
       genus = self.class.find_by_text_name(text_name.split.first)
       result = genus.is_lichen? if genus
     end
@@ -585,7 +641,8 @@ class Name < AbstractModel
   def genus
     result = nil
     if self.below_genus?
-      genera = Name.find_all_by_text_name(self.text_name.split(' ').first)
+      # genera = Name.find_all_by_text_name(self.text_name.split(' ').first)
+      genera = Name.where(text_name: self.text_name.split(' ').first)
       result = genera.reject(&:deprecated).first || genera.first
     end
     return result
@@ -612,7 +669,7 @@ class Name < AbstractModel
 
     # Try ranks above ours one at a time until we find a parent.
     while all || results.empty?
-      next_rank = ALL_RANKS[ALL_RANKS.index(next_rank) + 1]
+      next_rank = ALL_RANKS[rank_index(next_rank) + 1]
       break if !next_rank || next_rank == :Group
       these = []
 
@@ -642,7 +699,7 @@ class Name < AbstractModel
         # Grab name for 'next_rank' from classification string.
         for line_rank, line_name in lines
           if line_rank == next_rank
-            these += Name.find_all_by_text_name(line_name)
+            these += Name.where(text_name: line_name)
           end
         end
 
@@ -653,11 +710,14 @@ class Name < AbstractModel
             next_rank == :Subspecies && text_name.match(/^(.* subsp\. \S+)/) ||
             next_rank == :Species    && text_name.match(/^(\S+ \S+)/)        ||
             next_rank == :Genus      && text_name.match(/^(\S+)/)
-        these = Name.all(:conditions => "correct_spelling_id IS NULL
-                                         AND rank = '#{next_rank}'
-                                         AND text_name = '#{$1}'")
+#        these = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
+#                                         AND rank = '#{next_rank}'
+#                                         AND text_name = '#{$1}'")
+        these = Name.where("correct_spelling_id IS NULL AND
+                            rank = '#{rank_symbol_to_enum(next_rank)}' AND
+                            text_name = '#{$1}'"
+                          ).to_a
       end
-
 
       # Get rid of deprecated names unless all the results are deprecated.
       if !these.empty?
@@ -673,6 +733,10 @@ class Name < AbstractModel
     end
 
     return results
+  end
+
+  def rank_symbol_to_enum(rank_symbol)
+    Name.ranks[rank_symbol]
   end
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
@@ -703,25 +767,26 @@ class Name < AbstractModel
   #
   def children(all=false)
     results = []
-    our_index = ALL_RANKS.index(rank)
+    our_rank = rank
+    our_index = rank_index(our_rank)
 
     # If we're above genus we need to rely on classification strings.
-    if RANKS_ABOVE_GENUS.include?(rank)
+    if RANKS_ABOVE_GENUS.include?(our_rank)
 
       # Querying every genus that refers to this ancestor could potentially get
       # expensive -- think of doing children for Eukarya!! -- but I'm not sure
       # how else to do it.  (There are currently 1927 genera in the database.)
       rows = Name.connection.select_rows %(
         SELECT classification, search_name FROM names
-        WHERE rank = 'Genus'
+        WHERE rank = #{Name.ranks[:Genus]}
           AND classification LIKE '%#{rank}: _#{text_name}_%'
       )
 
       # Genus should not be included in classifications.
       names = []
-      if rank == :Family
+      if our_rank == :Family
         for cstr, sname in rows
-          results += Name.find_all_by_search_name(sname)
+          results += Name.where(search_name: sname).to_a
         end
 
       # Grab all names below our rank.
@@ -744,12 +809,13 @@ class Name < AbstractModel
             end
           end
           # (include genus, too)
-          results += Name.find_all_by_search_name(sname)
+#           results += Name.where(search_name: sname) # Rails 3
+          results += Name.where(search_name: sname).to_a
         end
 
       # Grab all names at next lower rank.
       else
-        next_rank = ALL_RANKS[our_index-1]
+        next_rank = ALL_RANKS[our_index - 1]
         match_str = "#{next_rank}: _"
         for cstr, sname in rows
           if (i = cstr.index(match_str)) and
@@ -760,7 +826,7 @@ class Name < AbstractModel
       end
 
       # Convert these name strings into Names.
-      results += names.uniq.map { |n| Name.find_all_by_text_name(n) }.flatten
+      results += names.uniq.map { |n| Name.where(text_name: n) }.flatten
       results.uniq!
 
       # Add subgeneric names for all genera in the results.
@@ -768,9 +834,8 @@ class Name < AbstractModel
         results2 = []
         for name in results
           if name.rank == :Genus
-            results2 += Name.all(:conditions =>
-                                 "correct_spelling_id IS NULL
-                                  AND text_name LIKE '#{name.text_name} %'")
+            results2 += Name.where("correct_spelling_id IS NULL AND
+                                    text_name LIKE ? ' %'", name.text_name).to_a
           end
         end
         results += results2
@@ -778,8 +843,10 @@ class Name < AbstractModel
 
     # Get everything below our rank.
     else
-      results = Name.all(:conditions => "correct_spelling_id IS NULL
-                                         AND text_name LIKE '#{text_name} %'")
+#      results = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
+#                                         AND text_name LIKE '#{text_name} %'")
+      results = Name.where("correct_spelling_id IS NULL AND
+                            text_name LIKE ? ' %'", text_name).to_a
 
       # Remove subchildren if not getting all children.  This is trickier than
       # I originally expected because we want the children of G. species to
@@ -818,7 +885,7 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      rank_index = Name.all_ranks.index(rank.to_sym)
+      rank_index = Name.all_ranks.index(rank)
       rank_str = "rank_#{rank}".downcase.to_sym.l
       raise :runtime_user_bad_rank.t(:rank => rank) if rank_index.nil?
 
@@ -939,10 +1006,12 @@ class Name < AbstractModel
     @synonyms ||= begin
       if @synonym_ids
         # Slightly faster since id is primary index.
-        Name.all(:conditions => ['id IN (?)', @synonym_ids])
+        # Name.all(:conditions => ['id IN (?)', @synonym_ids]) # Rails 3
+        Name.where(id: @synonym_ids).to_a
       elsif synonym_id
         # Takes on average 0.050 seconds.
-        Name.all(:conditions => "synonym_id = #{synonym_id}")
+        # Name.all(:conditions => "synonym_id = #{synonym_id}") # Rails 3
+        Name.where(synonym_id: synonym_id).to_a
 
         # Involves instantiating a Synonym, something which need never happen.
         # synonym ? synonym.names : [self]
@@ -988,9 +1057,9 @@ class Name < AbstractModel
     @other_authors ||= begin
       if @other_author_ids
         # Slightly faster since id is primary index.
-        Name.all(:conditions => ['id IN (?)', @other_author_ids])
+        Name.where(id: @other_author_ids).to_a
       else
-        Name.all(:conditions => ['text_name = ?', text_name])
+        Name.where(text_name: text_name).to_a
       end
     end
   end
@@ -1177,9 +1246,10 @@ class Name < AbstractModel
     @misspellings ||= begin
       if @misspelling_ids
         # Slightly faster since id is primary index.
-        Name.all(:conditions => ['id IN (?)', @misspelling_ids])
+        # Name.all(:conditions => ['id IN (?)', @misspelling_ids]) # Rails 3
+        Name.where(id: @misspelling_ids).to_a
       else
-        Name.all(:conditions => "correct_spelling_id = #{id}")
+        Name.where(correct_spelling_id: id).to_a
       end
     end
   end
@@ -1215,7 +1285,19 @@ class Name < AbstractModel
       end
     end
 
-    return results
+    results
+  end
+
+  def self.count_observations(names)
+    ids = names.map(&:id)
+    counts_and_ids = Name.connection.select(%(
+        SELECT count(*) c, names.id i FROM observations, names
+        WHERE observations.name_id = names.id
+        AND names.id IN (#{ids.join(", ")}) group by names.id
+    ))
+    result = {}
+    counts_and_ids.each { |row| result[row["i"]] = row["c"] }
+    result
   end
 
   private
@@ -1226,7 +1308,7 @@ class Name < AbstractModel
     results = guess_with_errors(str, 1)
     results = guess_with_errors(str, 2) if results.empty?
     results = guess_with_errors(str, 3) if results.empty?
-    return results
+    results
   end
 
   # Look up name replacing n letters at a time with a star.
@@ -1262,7 +1344,7 @@ class Name < AbstractModel
       "text_name LIKE #{Name.connection.quote(pat)}"
     end.join(' OR ')
     conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
-    names = all(:conditions => conds, :limit => 10)
+    names = where(conds).limit(10).to_a
 
     # Screen out ones way too different.
     names = names.reject do |x|
@@ -1270,7 +1352,7 @@ class Name < AbstractModel
       (x.text_name.length > b)
     end
 
-    return names
+    names
   end
 
   # String words together replacing the one at index +i+ with +sub+.
@@ -1314,7 +1396,8 @@ class Name < AbstractModel
         target = synonym.text_name + ' ' + child                              # target = "Lepiota bog% var. nam%"
         conditions = ['text_name like ? AND correct_spelling_id IS NULL',
                       synonym.text_name + ' ' + child_pat]
-        result += Name.find(:all, :conditions => conditions).select do |name|
+        # result += Name.find(:all, :conditions => conditions).select do |name| # Rails 3
+        result += Name.where(conditions).select do |name|
           valid_alternate_genus?(name, synonym.text_name, child_pat)          # name = <Lepiota boga var. nama>
         end
       end
@@ -1395,13 +1478,15 @@ class Name < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
+    # for int in Interest.find_all_by_target_type_and_target_id('Name', old_name.id)
+    for int in Interest.where(target_type: "Name", target_id: old_name.id)
       int.target = self
       int.save
     end
 
     # Move over any notifications on the old name.
-    for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
+    # for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
+    for note in Notification.where(flavor: "name", obj_id: old_name.id)
       note.obj_id = self.id
       note.save
     end
@@ -1907,7 +1992,8 @@ class Name < AbstractModel
   ##############################################################################
 
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
-  def self.find_names_filling_in_authors(in_str, rank=nil, ignore_deprecated=false)
+  def self.find_names_filling_in_authors(in_str, rank=nil,
+                                         ignore_deprecated=false)
     find_names(in_str, rank, ignore_deprecated, :fill_in_authors)
   end
 
@@ -1917,63 +2003,60 @@ class Name < AbstractModel
   #
   # +in_str+::              String to parse.
   # +rank+::                Accept only names of this rank (optional).
-  # +ignore_deprecated+::   If +true+, return all matching names, even if deprecated.
-  # +fill_in_authors+::     If +true+, will fill in author for Name's missing authors
+  # +ignore_deprecated+::   If +true+, return all matching names,
+  #                         even if deprecated.
+  # +fill_in_authors+::     If +true+, will fill in author for Name's missing
+  #                         authors
   #                         if +in_str+ supplies one.
   #
-  #   names = Name.find_names('Letharia vulpina')
+  #  names = Name.find_names('Letharia vulpina')
   #
-  def self.find_names(in_str, rank=nil, ignore_deprecated=false, fill_in_authors=false)
+  def self.find_names(in_str, rank=nil, ignore_deprecated=false,
+                      fill_in_authors=false)
+
+    return [] unless parse = parse_name(in_str)
+
+    text_name = parse.text_name
+    search_name = parse.search_name
+    author = parse.author
+    if names_for_unknown.member?(name.downcase)
+      name = "Fungi"
+    end
     results = []
 
-    parse = parse_name(in_str)
-    if parse
-      text_name = parse.text_name
-      search_name = parse.search_name
-      author = parse.author
+    while results.empty?
+      conditions = []
+      conditions_args = {}
+      if author.present?
+        conditions << "search_name = :name"
+        conditions_args[:name] = search_name
+      else
+        conditions << "text_name = :name"
+        conditions_args[:name] = text_name
+      end
+      conditions << "deprecated = 0" unless ignore_deprecated
+      conditions << "rank = #{ Name.ranks[rank] }" if rank # enum integer value
 
-      if names_for_unknown.member?(name.downcase)
-        name = 'Fungi'
+      results = Name.where(conditions.join(" AND "), conditions_args).to_a
+
+      # If user provided author, check if name already exists without author.
+      if author.present? && results.empty?
+        conditions_args[:name] = text_name
+        results = Name.where(conditions.join(" AND "), conditions_args).to_a
+        # (this should never return more than one result)
+        if fill_in_authors and results.length == 1
+          results.first.change_author(author)
+          results.first.save
+        end
       end
 
-      while results.empty?
-        conditions = []
-        conditions_args = {}
-        if not author.blank?
-          conditions << 'search_name = :name'
-          conditions_args[:name] = search_name
-        else
-          conditions << 'text_name = :name'
-          conditions_args[:name] = text_name
-        end
-        unless ignore_deprecated
-          conditions << 'deprecated = 0'
-        end
-        if rank
-          conditions << 'rank = :rank'
-          conditions_args[:rank] = rank
-        end
-
-        results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
-
-        # If user provided author, check if name already exists without author.
-        if results.empty? and not author.blank?
-          conditions_args[:name] = text_name
-          results = Name.all(:conditions => [ conditions.join(' AND '), conditions_args ])
-          # (this should never return more than one result)
-          if fill_in_authors and results.length == 1
-            results.first.change_author(author)
-            results.first.save
-          end
-        end
-
-        # Try again, looking for deprecated names if didn't find any matching approved names.
-        break if ignore_deprecated
-        ignore_deprecated = true
-      end
+      # Try again, looking for deprecated names
+      # if didn't find any matching approved names.
+      break if ignore_deprecated
+      ignore_deprecated = true
     end
 
-    return results
+    results
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
@@ -2035,14 +2118,14 @@ class Name < AbstractModel
   def self.find_matching_names(parsed_name)
     result = []
     if parsed_name.author.blank?
-      result = Name.all(:conditions => ['text_name = ?', parsed_name.text_name])
+      result = Name.where(text_name: parsed_name.text_name)
     else
-      result = Name.all(:conditions => ['search_name = ?', parsed_name.search_name])
+      result = Name.where(search_name: parsed_name.search_name)
       if result.empty?
-        result = Name.all(:conditions => ['text_name = ? AND author = ""', parsed_name.text_name])
+        result = Name.where(text_name: parsed_name.text_name, author: "")
       end
     end
-    return result
+    return result.to_a
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,
@@ -2058,19 +2141,20 @@ class Name < AbstractModel
   def self.make_name(params)
     result = nil
     search_name = params[:search_name]
-    matches = Name.find(:all, :conditions => ['search_name = ?', search_name])
+    # matches = Name.find(:all, :conditions => ['search_name = ?', search_name]) # Rails 3
+    matches = Name.where(search_name: search_name)
     if matches.empty?
-      result = Name.create_name(params)
+      result = Name.new_name(params)
     elsif matches.length == 1
       result = matches.first
     end
     result
   end
 
-  # Create a Name given all the various name formats, etc.
+  # make a Name given all the various name formats, etc.
   # Used only by +make_name+, and +create_test_name+ in unit test.
   # Returns a Name instance, *UNSAVED*!!
-  def self.create_name(params)
+  def self.new_name(params)
     result = Name.new(params)
     result.created_at = now = Time.now
     result.updated_at = now
@@ -2183,7 +2267,7 @@ class Name < AbstractModel
       end
 
       # Tell masochists who want to know about all name changes.
-      for user in User.find_all_by_email_names_all(true)
+      for user in User.where(email_names_all: true)
         recipients.push(user)
       end
 
@@ -2355,7 +2439,7 @@ class Name < AbstractModel
     log ||= :log_name_updated
 
     # Get list of args we care about.  (intersection)
-    changed_args = changed & [
+    changed_args = changed.collect { |key| key.to_sym } & [
       :rank,
       :text_name,
       :author,
