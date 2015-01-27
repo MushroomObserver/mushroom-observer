@@ -259,8 +259,8 @@ end %>
               jQuery(document).ready(function () {
                  var uploader = MultiImageUploader({
                   image_upload_error_text: "#{j :form_observations_image_upload_error.t}",
-                  uploading_text: "#{j :Uploading.t} #{:image}",
-                  image_too_big_text:  "#{j :form_observations_image_too_big.t}",
+                  uploading_text: "#{j :Uploading.t} #{j :image.t}",
+                  image_too_big_text:  "#{j :form_observations_image_too_big.t(:max_size => (MO.image_upload_max_size.to_f/1024/1024).round)}Mb",
                   creating_observation_text: "#{j :CREATING.t}",
                   months: "#{j :all_months.t}"
                  })
