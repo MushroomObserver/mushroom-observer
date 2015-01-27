@@ -741,7 +741,7 @@ logger.warn('SESSION: ' + session.inspect)
       if approved_names.is_a?(String)
         approved_names = approved_names.split(/\r?\n/)
       end
-      for ns in name_list
+      for ns in name_list.split("\n")
         if !ns.blank?
           name_parse = NameParse.new(ns)
           construct_approved_name(name_parse, approved_names, deprecate)
