@@ -52,3 +52,18 @@ TESTING     = (ENV["RAILS_ENV"] == 'test')
 
 MO = MushroomObserver::Application.config
 require File.expand_path("../consts.rb", __FILE__)
+
+# Patch bug in how rails sends multiline strings via "render text: string".
+module ActionDispatch
+  class Response
+    class Buffer
+      def each(&block)
+        if @buf.is_a?(String)
+          [@buf].each(&block)
+        else
+          @buf.each(&block)
+        end
+      end
+    end
+  end
+end
