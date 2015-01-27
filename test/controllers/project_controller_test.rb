@@ -179,18 +179,21 @@ class ProjectControllerTest < FunctionalTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       admin_group = UserGroup.find(admin_group.id)
     end
-    Name.connection.select_value %(
+    n = Name.connection.select_value %(
       SELECT COUNT(*) FROM name_descriptions_admins
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
-    Name.connection.select_value %(
+    assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set admin privileges.")
+    n = Name.connection.select_value %(
       SELECT COUNT(*) FROM name_descriptions_writers
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
-    Name.connection.select_value %(
+    assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set write permissions.")
+    n = Name.connection.select_value %(
       SELECT COUNT(*) FROM name_descriptions_readers
       WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
     )
+    assert_equal(0, n, "Project admin/user group has been destroyed, no name descriptions should refer to it to set read permissions.")
     for draft in drafts
       refute_equal(:project, draft.reload.source_type,
         "Project destruction failed to reset NameDescription's source_type")
