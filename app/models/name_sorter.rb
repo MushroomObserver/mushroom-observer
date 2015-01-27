@@ -158,7 +158,7 @@ class NameSorter
 
   def add_approved_deprecated_names(new_names)
     if new_names
-      for n in new_names
+      for n in new_names.split("\n")
         @approved_deprecated_names += n.split
       end
     end
@@ -336,7 +336,7 @@ class NameSorter
   # by newlines or an Array of String's.  Each String must contain a single
   # name
   def sort_names(name_list)
-    for n in name_list
+    for n in name_list.split("\n")
       if n.match(/\S/)
         add_name(n)
       end

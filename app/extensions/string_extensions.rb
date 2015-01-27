@@ -655,13 +655,4 @@ class String
   def unindent
     gsub /^#{self[/\A\s*/]}/, ''
   end
-
-  # This method is missing from ruby 1.9.
-  if RUBY_VERSION >= '1.9'
-    def each
-      for x in self.split("\n")
-        yield x
-      end
-    end
-  end
 end

@@ -107,7 +107,7 @@ class Language < AbstractModel
 
   def self.score_lines(text)
     hash = {}
-    for str in text
+    for str in text.split("\n")
       hash[str] = true unless str.blank?
     end
     score = 0
