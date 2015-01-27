@@ -62,6 +62,29 @@ li.selected { background-color: #eccf95 ! important }
 }
 
 
+
+/*New CSS for even rows */
+table.lined-table tr:nth-child(even) {
+    background-color: #d4a833; /* xanthodermus */
+}
+
+table.lined-table tr:nth-child(even) div.textile table {
+    background: #3b2821;
+}
+
+table.lined-table tr:nth-child(even) div.textile table.noborder,
+table.lined-table tr:nth-child(even) div.textile table td {
+    background: #d4a833;
+}
+
+table.lined-table tr:nth-child(even) a {
+    color: #b4725f; /* lilaceps */
+}
+
+table.lined-table tr:nth-child(even) a:visited {
+    color: #3b2821; /* cupreobrunneus */
+}
+
 /* Colors for even lines */
 .ListLine0 {
       background-color: #d4a833; /* xanthodermus */
@@ -77,6 +100,32 @@ li.selected { background-color: #eccf95 ! important }
 
 .ListLine0 a:visited {
       color: #3b2821; /* cupreobrunneus */
+}
+
+
+
+/*New CSS for ODD Rows */
+table.lined-table tr:nth-child(odd) {
+    background-color: #b4725f; /* lilaceps */
+}
+
+table.lined-table tr:nth-child(odd) div.textile table{
+    background: #3b2821; /* cupreobrunneus */
+}
+
+table.lined-table tr:nth-child(odd) div.textile table.noborder,
+table.lined-table tr:nth-child(odd) div.textile table td
+{
+    background: #b4725f;  /* lilaceps */
+}
+
+
+table.lined-table tr:nth-child(odd) a {
+    color: #d4a833; /* xanthodermus */
+}
+
+table.lined-table tr:nth-child(odd) a:visited {
+    color: #3b2821; /* cupreobrunneus */
 }
 
 

@@ -1,7 +1,16 @@
 # encoding: utf-8
 require 'test_helper'
+require 'json'
 
 class AjaxControllerTest < FunctionalTestCase
+
+  # Create test image dirs for tests that do image uploads.
+  def setup_image_dirs
+    if not FileTest.exist?(MO.local_image_files)
+      setup_images = MO.local_image_files.gsub(/test_images$/, 'setup_images')
+      FileUtils.cp_r(setup_images, MO.local_image_files)
+    end
+  end
 
   def good_ajax_request(action, params={})
     ajax_request(action, params, 200)
@@ -23,6 +32,7 @@ class AjaxControllerTest < FunctionalTestCase
       assert_block('') {true}
     end
   end
+
 
   def ajax_request_url(action, params)
     url = "/ajax/#{action}"
@@ -293,5 +303,41 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:old_translation, :id => 0)
     good_ajax_request(:old_translation, :id => 1)
     assert_equal(str.text, @response.body)
+  end
+
+
+  def test_upload_image
+    ##Arrange
+    setup_image_dirs
+    login('dick')
+    file = Rack::Test::UploadedFile.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg", "image/jpeg")
+    copyright_holder = "Douglas Smith"
+    notes = "Some notes."
+
+    params = {
+        :image => {
+            :when=> {"3i"=> "27", "2i"=> "11", "1i"=> "2014"},
+            :copyright_holder => copyright_holder,
+            :notes => notes,
+            :upload => file
+        }
+    }
+    #Act
+    post(:create_image_object, params)
+    @json_response = JSON.parse(@response.body)
+
+    #Assert
+    assert_true(@response.status == 200)
+    assert_true(@json_response['image']['id'] != 0)
+    assert_true(@json_response['image']['copyright_holder'] == copyright_holder)
+    assert_true(@json_response['image']['notes'] == notes)
+    assert_true(@json_response['image']['when'] == "2014-11-27")
+
+  end
+
+  def test_get_multi_image_template
+    bad_ajax_request(:get_multi_image_template)
+    login('dick')
+    good_ajax_request(:get_multi_image_template)
   end
 end
