@@ -16,9 +16,7 @@
 require File.expand_path('../../config/boot.rb', __FILE__)
 require File.expand_path('../../config/environment.rb', __FILE__)
 
-# In RoR 4.0 string extensions not yet loaded
-# need this to avoid NoMethodError undefined method "unindent"
-require File.expand_path("../../app/extensions/string_extensions.rb", __FILE__)
+require "string_extensions"
 
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
