@@ -1,5 +1,4 @@
 # encoding: utf-8
-# encoding: utf-8
 
 # TODO: Create RssLogController with:
 #  index
@@ -45,7 +44,6 @@
 #  ==== Searches
 #  pattern_search::
 #  advanced_search_form::
-#  refine_search::
 
 # TODO: Create MarkupController with:
 #  lookup_comment::
@@ -116,15 +114,11 @@
 
 # The original MO controller and hence a real mess!  The Clitocybe of Controllers
 class ObserverController < ApplicationController
-
   require "find"
   require "set"
 
   require_dependency "observation_report"
-  require_dependency "refine_search"
   require_dependency "pattern_search"
-  include RefineSearch
-
 
   before_filter :login_required, except: MO.themes + [
     :advanced_search,
@@ -168,7 +162,6 @@ class ObserverController < ApplicationController
     :observations_at_location,
     :pattern_search,
     :prev_observation,
-    :refine_search,
     :rss,
     :show_obs,
     :show_observation,
@@ -607,85 +600,6 @@ class ObserverController < ApplicationController
                                 }, query))
   end
 
-  # Allow users to refine an existing query.
-  def refine_search # :nologin:
-    # Create a bogus object with all the parameters used in the form.
-    @values = Wrapper.new(params[:values] || {})
-    @first_time = params[:values].blank?
-    @goto_index = true if params[:commit] == :refine_search_goto_index.l
-    @errors = []
-
-    # Query has expired!
-    if (@query = find_query)
-      # Need to know about change to basic flavor immediately.
-      if @first_time || @values.model_flavor.blank?
-        query2 = @query
-      else
-        model2, flavor2 = @values.model_flavor.to_s.split(" ", 2)
-        # The following line was:
-        #
-        # query2 = Query.template(model2.camelize, flavor2) rescue @query
-        #
-        # However, I can't find any definition of Query.template and
-        # the tests don't exercise this path so I can't tell if this
-        # real or if it just always returns @query.
-        query2 = @query
-      end
-      model2  = query2.model_symbol
-      flavor2 = query2.flavor
-
-      # Get Array of parameters we can play with.
-      @fields = refine_search_get_fields(query2)
-
-      # Modify the query on POST, test it out, and redirect or re-serve form.
-      unless @first_time || (request.method != "POST") || browser.bot?
-        params2 = refine_search_clone_params(query2, @query.params)
-        @errors = refine_search_change_params(@fields, @values, params2)
-
-        if @errors.any?
-          # Already flashed errors.
-        elsif (model2  == @query.model_symbol) &&
-              (flavor2 == @query.flavor) &&
-              (params2 == @query.params)
-          # No changes.  This may not be apparent due to vagaries of parsing.
-          # This will change all the form values to be what's currently in the
-          # query.  The user will then know exactly why we say "no changes".
-          flash_notice(:runtime_no_changes.t) unless @goto_index
-        else
-          begin
-            # Create and initialize the new query to test it out.
-            query2 = Query.lookup(model2, flavor2, params2)
-            query2.initialize_query
-            query2.save
-            @query = query2
-            unless @goto_index
-              flash_notice(:refine_search_success.t(num: @query.num_results))
-            end
-          rescue => e
-            flash_error(e)
-            # flash_error(e.backtrace.join("<br>"))
-          end
-        end
-      end
-    else
-      flash_error(:runtime_search_has_expired.t)
-      redirect_back_or_default(action: "list_rss_logs")
-    end
-
-    # Redisplay the index if user presses "Index".
-    if @goto_index
-      redirect_to(add_query_param({
-                                    controller: @query.model.show_controller,
-                                    action: @query.model.index_action
-                                  }, @query))
-    else
-      # flash_notice(@query.query)
-      @flavor_field = refine_search_flavor_field
-      @values.model_flavor = "#{model2.to_s.underscore} #{flavor2}"
-      refine_search_initialize_values(@fields, @values, @query)
-    end
-  end
-
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
@@ -725,7 +639,6 @@ class ObserverController < ApplicationController
 
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
-    @view = view_context
     user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     if user
       query = create_query(:Observation, :by_user, user: user)
@@ -966,10 +879,10 @@ class ObserverController < ApplicationController
 
   def render_report(report)
     send_data(report.body, {
-                             :type => report.mime_type,
-                             :charset => report.encoding,
-                             :disposition => "attachment",
-                             :filename => report.filename
+      type: report.mime_type,
+      charset: report.encoding,
+      disposition: "attachment",
+      filename: report.filename
     }.merge(report.header || {}))
   end
 
@@ -1016,6 +929,7 @@ class ObserverController < ApplicationController
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
     update_view_stats(@observation)
+    @canonical_url = "#{MO.domain}/observer/show_observation/#{@observation.id}"
 
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)
@@ -1195,7 +1109,7 @@ class ObserverController < ApplicationController
   def save_everything_else(reason)
     if @name
       @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_transaction(@naming)
+      save_with_log(@naming)
       @observation.reload
       @observation.change_vote(@naming, @vote.value)
     end
@@ -1411,7 +1325,6 @@ class ObserverController < ApplicationController
       redirect_to(add_query_param({ action: "show_observation", id: obs_id },
                                   this_state))
     else
-      Transaction.delete_observation(id: @observation)
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       if next_state
         redirect_to(add_query_param({ action: "show_observation",
@@ -1802,11 +1715,6 @@ class ObserverController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          Transaction.put_user(
-                               id: @user2,
-                               set_bonuses: bonuses,
-                               set_contribution: contrib
-                               )
           redirect_to(action: "show_user", id: @user2.id)
         end
       end
@@ -2005,7 +1913,6 @@ class ObserverController < ApplicationController
 
     @types = query.params[:type].to_s.split.sort
     @links = []
-    @view = view_context
 
     # Let the user make this their default and fine tune.
     if @user
@@ -2193,50 +2100,10 @@ class ObserverController < ApplicationController
 
   # Save observation now that everything is created successfully.
   def save_observation(observation)
-    success = true
-    args = {}
-    if observation.new_record?
-      args[:method] = "post"
-      args[:action] = "observation"
-      args[:date]   = observation.when
-      if observation.location_id
-        args[:location] = observation.location
-      else
-        args[:location] = observation.where
-      end
-      args[:notes]     = observation.notes.to_s
-      args[:specimen] = observation.specimen ? true : false
-      args[:thumbnail] = observation.thumb_image_id.to_i
-      args[:is_collection_location] = observation.is_collection_location
-    else
-      args[:method]   = "put"
-      args[:action]   = "observation"
-      args[:set_date] = observation.when if observation.when_changed?
-      if observation.where_changed? || observation.location_id_changed?
-        if observation.location_id
-          args[:set_location] = observation.location
-        else
-          args[:set_location] = observation.where
-        end
-      end
-      args[:set_notes] = observation.notes if observation.notes_changed?
-      if observation.specimen_changed?
-        args[:set_specimen] = observation.specimen
-      end
-      if observation.thumb_image_id_changed?
-        args[:set_thumbnail] = observation.thumb_image_id.to_i
-      end
-      args[:set_is_collection_location] = observation.is_collection_location
-    end
-    if observation.save
-      args[:id] = observation
-      Transaction.create(args)
-    else
-      flash_error(:runtime_no_save_observation.t)
-      flash_object_errors(observation)
-      success = false
-    end
-    success
+    return true if observation.save
+    flash_error(:runtime_no_save_observation.t)
+    flash_object_errors(observation)
+    return false
   end
 
   # Update observation, check if valid.
@@ -2286,13 +2153,6 @@ class ObserverController < ApplicationController
             bad_images.push(image)
             flash_object_errors(image)
           else
-            Transaction.post_image(
-              id: image,
-              date: image.when,
-              notes: image.notes.to_s,
-              copyright_holder: image.copyright_holder.to_s,
-              license: image.license || 0
-            )
             name = image.original_name
             name = "##{image.id}" if name.empty?
             flash_notice(:runtime_image_uploaded.t(name: name))
@@ -2333,18 +2193,7 @@ class ObserverController < ApplicationController
         image.license_id_changed? ||
         image.original_name_changed?
       image.updated_at = Time.now
-      args = { id: image }
-      args[:set_date] = image.when if image.when_changed?
-      args[:set_notes] = image.notes if image.notes_changed?
-      if image.copyright_holder_changed?
-        args[:set_copyright_holder] = image.copyright_holder
-      end
-      args[:set_license] = image.license if image.license_id_changed?
-      if image.original_name_changed?
-        args[:set_original_name] = image.original_name
-      end
       if image.save
-        Transaction.put_image(args)
         flash_notice(:runtime_image_updated_notes.t(id: image.id))
       else
         flash_object_errors(image)
@@ -2475,6 +2324,4 @@ class ObserverController < ApplicationController
     return nil unless params[:observation]
     params[:observation].permit(whitelisted_observation_args)
   end
-
-
 end

@@ -136,15 +136,15 @@ class AjaxControllerTest < FunctionalTestCase
     expect = [mitrula, reyes, pipi].sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto")
-    assert_equal(expect, @response.body_parts)
+    assert_equal(expect, @response.body.split("\n"))
 
     expect = [mitrula, reyes, pipi].map {|x| Location.reverse_name(x)}.sort
     expect.unshift("M")
     good_ajax_request(:auto_complete, type: :location, id: "Modesto", format: "scientific")
-    assert_equal(expect, @response.body_parts)
+    assert_equal(expect, @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :location, id: "Xystus")
-    assert_equal(["X"], @response.body_parts)
+    assert_equal(["X"], @response.body.split("\n"))
   end
 
   def test_auto_complete_name
@@ -152,10 +152,10 @@ class AjaxControllerTest < FunctionalTestCase
                   map(&:text_name).uniq.select {|n| n[0] == "A"}.sort
     expect.unshift("A")
     good_ajax_request(:auto_complete, type: :name, id: "Agaricus")
-    assert_equal(expect, @response.body_parts)
+    assert_equal(expect, @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :name, id: "Xystus")
-    assert_equal(["X"], @response.body_parts)
+    assert_equal(["X"], @response.body.split("\n"))
   end
 
   def test_auto_complete_project
@@ -163,13 +163,13 @@ class AjaxControllerTest < FunctionalTestCase
     bolete = projects(:bolete_project).title
 
     good_ajax_request(:auto_complete, type: :project, id: "Babushka")
-    assert_equal(["B", bolete], @response.body_parts)
+    assert_equal(["B", bolete], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :project, id: "Perfidy")
-    assert_equal(["P", bolete, eol], @response.body_parts)
+    assert_equal(["P", bolete, eol], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :project, id: "Xystus")
-    assert_equal(["X"], @response.body_parts)
+    assert_equal(["X"], @response.body.split("\n"))
   end
 
   def test_auto_complete_species_list
@@ -179,28 +179,28 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal('List of mysteries', list3)
 
     good_ajax_request(:auto_complete, type: :species_list, id: "List")
-    assert_equal(["L", list1, list2, list3], @response.body_parts)
+    assert_equal(["L", list1, list2, list3], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Mojo")
-    assert_equal(["M", list3], @response.body_parts)
+    assert_equal(["M", list3], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :species_list, id: "Xystus")
-    assert_equal(["X"], @response.body_parts)
+    assert_equal(["X"], @response.body.split("\n"))
   end
 
   def test_auto_complete_user
     good_ajax_request(:auto_complete, type: :user, id: "Rover")
     assert_equal(["R", 'rolf <Rolf Singer>', 'roy <Roy Halling>'],
-                 @response.body_parts)
+                 @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Dodo")
-    assert_equal(["D", 'dick <Tricky Dick>'], @response.body_parts)
+    assert_equal(["D", 'dick <Tricky Dick>'], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Komodo")
-    assert_equal(["K", 'katrina <Katrina>'], @response.body_parts)
+    assert_equal(["K", 'katrina <Katrina>'], @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :user, id: "Xystus")
-    assert_equal(["X"], @response.body_parts)
+    assert_equal(["X"], @response.body.split("\n"))
   end
 
   def test_auto_complete_bogus
@@ -244,12 +244,12 @@ class AjaxControllerTest < FunctionalTestCase
     good_ajax_request(:geocode, p)
     assert(@response.body)
     if good
-      assert_equal(4, @response.body_parts.length)
-      @response.body_parts.each do |s|
+      assert_equal(4, @response.body.split("\n").length)
+      @response.body.split("\n").each do |s|
         assert(s.to_f != 0.0)
       end
     else
-      assert_equal(0, @response.body_parts.length)
+      assert_equal(0, @response.body.split("\n").length)
     end
   end
 
@@ -322,16 +322,17 @@ class AjaxControllerTest < FunctionalTestCase
             upload: file
         }
     }
+
     #Act
     post(:create_image_object, params)
     @json_response = JSON.parse(@response.body)
 
     #Assert
     assert_response(:success)
-    refute_equal(0, @json_response[:image][:id])
-    assert_equal(copyright_holder, @json_response[:image][:copyright_holder])
-    assert_equal(notes, @json_response[:image][:notes])
-    assert_equal("2014-11-27", @json_response[:image][:when])
+    refute_equal(0, @json_response["id"])
+    assert_equal(copyright_holder, @json_response["copyright_holder"])
+    assert_equal(notes, @json_response["notes"])
+    assert_equal("2014-11-27", @json_response["when"])
   end
 
   def test_get_multi_image_template

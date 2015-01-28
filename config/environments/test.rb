@@ -41,6 +41,8 @@ MushroomObserver::Application.configure do
   config.image_fallback_source = :remote1
   config.keep_these_image_sizes_local = [ :thumbnail, :small ]
 
+  config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------

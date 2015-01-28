@@ -9,7 +9,6 @@
 #                       Ex: User.enum_default_value(:image_size) => :medium
 #
 #  ==== Extensions to "find"
-#  find::               Extend <tt>find(id)</tt> to look up by id _or_ sync_id.
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
@@ -32,7 +31,6 @@
 #  before_update::      Do several things before commiting changes.
 #  before_destroy::     Do some cleanup just before destroying an object.
 #  id_was::             Returns what the id was from before destroy.
-#  set_sync_id::        Fills in +sync_id+ after id is established.
 #  update_view_stats::  Updates the +num_views+ and +last_view+ fields.
 #  update_user_before_save_version::
 #                       Callback to update 'user' when versioned record changes.
@@ -101,26 +99,6 @@ class AbstractModel < ActiveRecord::Base
     result = self.class.find(id)
     result = nil if not result.revert_to(version)
     result
-  end
-
-  # Extend AR.find(id) to accept either local id (integer or all-numeric
-  # string) or global sync_id (alphanumeric string).  All else gets delegated
-  # to the usual ActiveRecord::Base#find.
-  #
-  #   name = Name.find(1234)        # local id is 1234
-  #   name = Name.find('1234us1')   # gloabl id is '1234us1'
-  #
-  def self.find(*args)
-    if args.length == 1 &&
-       (id = args.first) &&
-       id.is_a?(String) &&
-       id.match(/^\d+[a-z]+\d+$/) &&
-       respond_to?(:find_by_sync_id)
-      find_by_sync_id(id) or raise ActiveRecord::RecordNotFound,
-                                   "Couldn't find #{name} with sync_id=#{id}"
-    else
-      super
-    end
   end
 
   # Look up record with given ID, returning nil if it no longer exists.
@@ -210,13 +188,10 @@ class AbstractModel < ActiveRecord::Base
   # This is called just after an object is created.
   # 1) It passes off to SiteData, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
-  # 2) It also assigns sync_ids to new records.  (I can't see how to avoid
-  #    causing each record to get saved twice.)
-  # 3) Lastly, it finishes attaching the new RssLog if one exists.
+  # 2) It finishes attaching the new RssLog if one exists.
   after_create :update_contribution
   def update_contribution
     SiteData.update_contribution(:add, self)
-    set_sync_id    if respond_to?('sync_id=') && !sync_id
     attach_rss_log if has_rss_log?
   end
 
@@ -274,17 +249,6 @@ class AbstractModel < ActiveRecord::Base
 
   # Return id from before destroy.
   def id_was; @id_was; end
-
-  # Set the sync id after an id is established.  Use low-level call to void
-  # any possible confusion and/or overhead dealing with callbacks.  It would
-  # be super-cool if mysql gave us a way to make this the default value...
-  def set_sync_id
-    self.sync_id = sync_id = "#{id}#{MO.server_code}"
-    self.class.connection.update %(
-      UPDATE #{self.class.table_name} SET sync_id = '#{sync_id}'
-      WHERE id = #{id}
-    )
-  end
 
   # Handy callback a model may choose to use that updates 'user_id' whenever a
   # versioned record changes non-trivially.

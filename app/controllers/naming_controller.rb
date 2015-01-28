@@ -32,7 +32,6 @@ class NamingController < ApplicationController
     pass_query_params
     naming = Naming.find(params[:id].to_s)
     if can_destroy?(naming)
-      Transaction.delete_naming(id: naming)
       flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
     end
     default_redirect(naming.observation)
@@ -116,7 +115,7 @@ class NamingController < ApplicationController
     naming = @params.naming
     return unless validate_object(naming) && validate_object(@params.vote)
     naming.create_reasons(params[:reason], params[:was_js_on] == "yes")
-    save_with_transaction(naming)
+    save_with_log(naming)
     @params.logged_change_vote
     flash_warning :create_new_naming_warn.l
   end
@@ -130,7 +129,7 @@ class NamingController < ApplicationController
 
   def save_changes
     @params.update_naming(params[:reason], params[:was_js_on] == "yes")
-    save_with_transaction(@params.naming)
+    save_with_log(@params.naming)
     @params.save_vote
   end
 

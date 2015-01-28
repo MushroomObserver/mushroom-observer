@@ -4,15 +4,18 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action => 'rss'}, {:title => :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
-  <%= javascript_tag %(
-    var CSRF_TOKEN = "#{j form_authenticity_token}";
-  ) %>
-  <%= csrf_meta_tag %>
-
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
-  <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
-  <meta property="og:title" content="Mushroom Observer"/>
-  <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
+  <% if @canonical_link %>
+    <link rel="canonical" href="<%=escape_once(@canonical_link)%>" />
+  <% end %>
+  <%= csrf_meta_tag %>
+  <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png" />
+  <meta property="og:title" content="Mushroom Observer" />
+  <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world." />
+  <%= javascript_include_tag("jstz.min") %>
+  <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
+  <%= javascript_tag('var CSRF_TOKEN = "' + form_authenticity_token + '";') %>
+
   <%=
       css = MO.default_theme
       if is_in_admin_mode?

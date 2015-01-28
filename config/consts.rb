@@ -128,6 +128,7 @@ MushroomObserver::Application.configure do
   config.process_image_command = "#{config.root}/script/process_image <id> <ext> <set>"
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
+  # Be sure to change app/assets/javascripts/multi_image_upload.js (in asFormData), too.
   config.image_upload_max_size = 20000000
 
   # Flag intended for controller when the debugger gets invoked.

@@ -57,8 +57,8 @@ MushroomObserver::Application.routes.draw do
   get "publications/:id/destroy" => "publications#destroy"
   resources :publications
 
-  # Default page is /observer/index.
-  root "observer#index"
+  # Default page is /observer/list_rss_logs.
+  root "observer#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.
   get ":id" => "observer#show_observation", constraints: { id: /\d+/ }

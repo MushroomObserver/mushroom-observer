@@ -10,8 +10,6 @@
 #  == Attributes
 #
 #  id::             Locally unique numerical id, starting at 1.
-#  sync_id::        Globally unique alphanumeric id, used to sync with remote
-#                   servers.
 #  created_at::     Date/time it was first created.
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
@@ -130,10 +128,6 @@ class Project < AbstractModel
   def add_image(img)
     unless images.include?(img)
       images.push(img)
-      Transaction.put_project(
-        id: self,
-        add_image: img
-      )
     end
   end
 
@@ -142,10 +136,6 @@ class Project < AbstractModel
     if images.include?(img)
       images.delete(img)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_project(
-        id: self,
-        del_image: img
-      )
     end
   end
 
@@ -158,11 +148,6 @@ class Project < AbstractModel
       for img in imgs
         images.push(img)
       end
-      Transaction.put_project(
-        id: self,
-        add_observation: obs,
-        add_images: imgs
-      )
     end
   end
 
@@ -188,11 +173,6 @@ class Project < AbstractModel
         images.delete(img)
       end
       update_attribute(:updated_at, Time.now)
-      Transaction.put_project(
-        id: self,
-        del_observation: obs,
-        del_images: imgs
-      )
     end
   end
 
@@ -200,10 +180,6 @@ class Project < AbstractModel
   def add_species_list(spl)
     unless species_lists.include?(spl)
       species_lists.push(spl)
-      Transaction.put_project(
-        id: self,
-        add_species_list: spl
-      )
     end
   end
 
@@ -212,10 +188,6 @@ class Project < AbstractModel
     if species_lists.include?(spl)
       species_lists.delete(spl)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_project(
-        id: self,
-        del_species_list: spl
-      )
     end
   end
 
@@ -256,7 +228,8 @@ class Project < AbstractModel
     title       = self.title
     user_group  = self.user_group
     admin_group = self.admin_group
-    for d in NameDescription.where(source_type: :project, project_id: self.id)
+    for d in NameDescription.where(source_type: NameDescription.source_types[:project], project_id: self.id) +
+             LocationDescription.where(source_type: LocationDescription.source_types[:project], project_id: self.id)
       d.source_type = :source
       d.admin_groups.delete(admin_group)
       d.writer_groups.delete(admin_group)

@@ -103,8 +103,6 @@
 #  == Attributes
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
-#  sync_id::          (-) Globally unique alphanumeric id,
-#                         used to sync with remote servers.
 #  created_at::       (-) Date/time it was first created.
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
@@ -306,7 +304,6 @@ class Name < AbstractModel
     ]
   )
   non_versioned_columns.push(
-    'sync_id',
     'created_at',
     'updated_at',
     'num_views',
@@ -1447,20 +1444,12 @@ class Name < AbstractModel
     for obs in old_name.observations
       obs.name = self
       obs.save
-      Transaction.put_observation(
-        :id   => obs,
-        :name => self
-      )
     end
 
     # Move all namings over to the new name.
     for name in old_name.namings
       name.name = self
       name.save
-      Transaction.put_naming(
-        :id   => name,
-        :name => self
-      )
     end
 
     # Move all misspellings over to the new name.
@@ -1471,10 +1460,6 @@ class Name < AbstractModel
         name.correct_spelling = self
       end
       name.save
-      Transaction.put_name(
-        :id                   => name,
-        :set_correct_spelling => self
-      )
     end
 
     # Move over any interest in the old name.
@@ -1518,7 +1503,6 @@ class Name < AbstractModel
       }
       desc.name_id = self.id
       desc.save
-      Transaction.put_name_description(xargs)
     end
 
     # Log the action.
@@ -1557,7 +1541,6 @@ class Name < AbstractModel
 
     # Finally destroy the name.
     old_name.destroy
-    Transaction.delete_name(:id => old_name)
   end
 
   ##############################################################################
@@ -2411,7 +2394,7 @@ class Name < AbstractModel
       names = find_or_create_name_and_parents(input_what)
       if names.last
         names.each do |n|
-          n.save_with_transaction(:log_updated_by) if n && n.new_record?
+          n.save_with_log(:log_updated_by) if n && n.new_record?
         end
       end
     end
@@ -2430,53 +2413,17 @@ class Name < AbstractModel
     for n in names
       if n && n.new_record?
         n.change_deprecated(deprecate) if deprecate
-        n.save_with_transaction(log)
+        n.save_with_log(log)
       end
     end
   end
 
-  def save_with_transaction(log=nil, args={})
+  def save_with_log(log=nil, args={})
+    return false unless changed?
     log ||= :log_name_updated
-
-    # Get list of args we care about.  (intersection)
-    changed_args = changed.collect { |key| key.to_sym } & [
-      :rank,
-      :text_name,
-      :author,
-      :citation,
-      :synonym,
-      :deprecated,
-      :correct_spelling,
-      :notes
-    ]
-
-    # Log transaction.
-    xargs = { :id => self }
-    if new_record?
-      for arg in changed_args
-        xargs[arg] = send(arg)
-      end
-      xargs[:method] = "POST"
-    else
-      for arg in changed_args
-        xargs[:"set_#{arg}"] = send(arg)
-      end
-      xargs[:method] = "PUT"
-    end
-
-    # Save any changes.
-    if changed?
-      args = { :touch => altered? }.merge(args)
-      log(log, args)
-      if save
-        Transaction.create(xargs)
-        true
-      else
-        false
-      end
-    else
-      false
-    end
+    args = { :touch => altered? }.merge(args)
+    log(log, args)
+    return save
   end
 
 ################################################################################
