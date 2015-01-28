@@ -119,7 +119,6 @@ class ObserverController < ApplicationController
 
   require_dependency "observation_report"
   require_dependency "pattern_search"
-  include RefineSearch
 
   before_filter :login_required, except: MO.themes + [
     :advanced_search,
