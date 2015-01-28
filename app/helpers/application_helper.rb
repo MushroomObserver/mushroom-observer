@@ -2091,7 +2091,7 @@ end
   # Create a file input fields with client-side size validation.
   def image_file_field(obj, attr, opts={})
     validated_file_field(obj, attr, opts.merge(
-      :max_upload_msg => :validate_image_file_too_big.l(:max => "#{MO.image_upload_max_size/1000000}Mb"),
+      :max_upload_msg => :validate_image_file_too_big.l(:max => (MO.image_upload_max_size.to_f/1024/1024).round),
       :max_upload_size => MO.image_upload_max_size
     ))
   end

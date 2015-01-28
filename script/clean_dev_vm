@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ ! -d app ]; then
+  echo "Must run this script from rails root!"
+  exit 1
+fi
+
+rm -rf log checkpoints
+rm -f test/*/*.new
+rm -f config/database.yml
+rm -f config/consts-site.rb
+rm -f config/locales/*.yml
+mv config/locales/en.txt config/locales/en.txt.save
+rm -f config/locales/*.txt
+mv config/locales/en.txt.save config/locales/en.txt
+rm -f app/assets/name_list_data.js
+rm -f public/eol.xml
+rm -f public/robots.txt
+rm -rf public/test*
+rm -rf public/pivotal
+rm -rf public/local_images
+rm -f public/sitemap/*.xml
+rm -f public/sitemap/*.html
+rm -f public/images/*.files
+rm -rf public/images/{thumb,320,640,960,1280,orig}
+mv tmp/name_primer.test .
+rm -rf tmp/*
+mv name_primer.test tmp
+
+(
+  mysql -s -u mo -pmo -e "drop database mo_development"; \
+  mysql -s -u mo -pmo -e "drop database mo_test"
+) 2>&1 | grep -iv 'can.t drop database'
+
+pushd . 2>&1 > /dev/null
+cd ..
+cat <<EOB
+
+Cleaned out all unversioned files and folders, and deleted dev database.
+Check "git status" to make sure there's no other cruft lying about.
+Then re-run "mo-dev `pwd`" to rebuild things safely.
+
+EOB
+popd 2>&1 > /dev/null
