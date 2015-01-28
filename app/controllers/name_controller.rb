@@ -343,6 +343,7 @@ class NameController < ApplicationController
     name_id = params[:id].to_s
     desc_id = params[:desc]
     if @name = find_or_goto_index(Name, name_id)
+      @canonical_url = "#{MO.domain}/name/show_name/#{@name.id}"
 
       update_view_stats(@name)
 
@@ -401,6 +402,7 @@ class NameController < ApplicationController
     store_location
     pass_query_params
     if @description = find_or_goto_index(NameDescription, params[:id].to_s)
+      @canonical_url = "#{MO.domain}/name/show_name_description/#{@description.id}"
 
       # Public or user has permission.
       if @description.is_reader?(@user)

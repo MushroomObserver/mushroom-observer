@@ -94,7 +94,8 @@ class ApplicationController < ActionController::Base
   require "csv"
   include LoginSystem
 
-  around_filter :catch_errors # if TESTING
+  around_filter :catch_errors # if Rails.env == "test"
+  before_filter :kick_out_robots
   before_filter :verify_authenticity_token
   before_filter :block_ip_addresses
   before_filter :fix_bad_domains
@@ -144,8 +145,18 @@ class ApplicationController < ActionController::Base
   # alone.  This seems much more graceful... and it lets the user know why they
   # are experiencing otherwise bewildering and incorrect behavior.
   def handle_unverified_request
-    render(:text => "Cross-site Request Forgery detected!", :layout => false)
+    render(text: "Cross-site Request Forgery detected!", layout: false)
     return false
+  end
+
+  # Physically eject robots unless they're looking at accepted pages.
+  def kick_out_robots
+    return unless browser.bot?
+    controller = params[:controller]
+    action     = params[:action]
+    unless Robots.allowed?(controller, action)
+      render(text: "Robots are not allowed on this page.", status: 403)
+    end
   end
 
   # Filter to run before anything else to protect against denial-of-service attacks.
@@ -189,10 +200,17 @@ class ApplicationController < ActionController::Base
     return layout
   end
 
-  # Catch errors for integration tests.
+  # Catch errors for integration tests, and report stats about completed request.
   def catch_errors
-logger.warn('SESSION: ' + session.inspect)
+    start      = Time.now
+    controller = params[:controller]
+    action     = params[:action]
+    robot      = browser.bot? ? "robot" : "user"
+    ip         = request.remote_ip rescue "unknown"
+    url        = request.url       rescue "unknown"
+    ua         = browser.ua        rescue "unknown"
     yield
+    logger.warn("TIME: #{Time.now-start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
   rescue => e
     @error = e
     raise e
@@ -876,7 +894,9 @@ logger.warn('SESSION: ' + session.inspect)
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query=nil)
-    if query
+    if browser.bot?
+      {}
+    elsif query
       query.save if !query.id
       {:q => query.id.alphabetize}
     else
@@ -886,13 +906,13 @@ logger.warn('SESSION: ' + session.inspect)
   helper_method :query_params
 
   def add_query_param(params, query=nil)
-    if query
+    if browser.bot?
+      # do nothing
+    elsif query
       query.save if !query.id
       params[:q] = query.id.alphabetize
-    else
-      if @query_params
-        params[:q] = @query_params[:q]
-      end
+    elsif @query_params
+      params[:q] = @query_params[:q]
     end
     params
   end
@@ -917,7 +937,9 @@ logger.warn('SESSION: ' + session.inspect)
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
     @query_params = {}
-    if query
+    if browser.bot?
+      # do nothing
+    elsif query
       query.save if !query.id
       @query_params[:q] = query.id.alphabetize
     end

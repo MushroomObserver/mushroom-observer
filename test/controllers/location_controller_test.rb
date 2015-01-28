@@ -111,6 +111,11 @@ class LocationControllerTest < FunctionalTestCase
     assert_template("list_locations")
   end
 
+  def test_list_by_country_with_quote
+    get_with_dump(:list_by_country, country: "Cote d'Ivoire")
+    assert_template("list_locations")
+  end
+
   def test_locations_by_user
     get_with_dump(:locations_by_user, id: 1)
     assert_template("list_locations")

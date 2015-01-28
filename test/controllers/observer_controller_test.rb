@@ -172,7 +172,7 @@ class ObserverControllerTest < FunctionalTestCase
 
   def test_observations_by_unknown_user
     get(:observations_by_user, id: 1e6)
-    assert_response(:redirect)
+    assert_response(:success)
   end
 
   def test_altering_types_shown_by_rss_log_index
@@ -2555,5 +2555,20 @@ class ObserverControllerTest < FunctionalTestCase
         encoding: 'UTF-8', commit: "Download")
     assert_no_flash
     assert_response(:success)
+  end
+
+  def test_normal_permissions
+    get :intro
+    assert_equal(200, @response.status)
+    get :textile
+    assert_equal(200, @response.status)
+  end
+
+  def test_robot_permissions
+    @request.user_agent = "Googlebot"
+    get :intro
+    assert_equal(200, @response.status)
+    get :textile
+    assert_equal(403, @response.status)
   end
 end
