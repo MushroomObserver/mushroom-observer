@@ -88,7 +88,6 @@
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
-#  sync_id::            Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::         Date/time it was first created.
 #  updated_at::         Date/time it was last updated.
 #  verified::           Date/time the account was verified.
@@ -249,7 +248,6 @@
 #
 #    Attribute      Local Server    Remote Server
 #    id             1502            1513
-#    sync_id        1502us1         1502us1
 #    login          fred            fred (us1)
 #    password       xxxxxxxx        nil
 #    admin          true            false
@@ -555,10 +553,6 @@ class User < AbstractModel
     self.last_login = now
     self.last_activity = now
     self.save
-    Transaction.put_user(
-      :id         => self,
-      :set_verify => now
-    )
   end
 
   ##############################################################################

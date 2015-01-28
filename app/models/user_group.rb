@@ -14,7 +14,6 @@
 #  == Attributes
 #
 #  id::         Locally unique numerical id, starting at 1.
-#  sync_id::    Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at:: Date/time it was first created.
 #  updated_at:: Date/time it was last updated.
 #  name::       Name of the group, must be unique.

@@ -3,7 +3,6 @@
 # Rolf is an experienced user
 rolf:
   id: 1
-  sync_id: 1xx1
   login: rolf
   name: Rolf Singer
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -24,7 +23,6 @@ rolf:
 # Mary has no images and no herbaria
 mary:
   id: 2
-  sync_id: 2xx1
   login: mary
   name: Mary Newbie
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -44,7 +42,6 @@ mary:
 # Junk gets denied
 junk:
   id: 3
-  sync_id: 3xx1
   login: junk
   name: Junk Box
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -63,7 +60,6 @@ junk:
 # Need third for testing votes
 dick:
   id: 4
-  sync_id: 4xx1
   login: dick
   name: Tricky Dick
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -83,7 +79,6 @@ dick:
 # Need fourth for testing votes
 katrina:
   id: 5
-  sync_id: 5xx1
   login: katrina
   name: Katrina
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -103,7 +98,6 @@ katrina:
 # Roy is a scientific user
 roy:
   id: 6
-  sync_id: 6xx1
   login: roy
   name: Roy Halling
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
@@ -124,7 +118,6 @@ roy:
 
 spammer:
   id: 7
-  sync_id: 7xx1
   login: spamspamspam
   name: Must Spam
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword

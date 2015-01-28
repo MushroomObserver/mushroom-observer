@@ -172,25 +172,6 @@ class SiteData
         )
       end
     end
-
-    # Debugging information: show transaction log of all objects created and
-    # destroyed, plus all editors/authors added and removed.
-    if false
-      desc = field.inspect
-      if obj.is_a?(ActiveRecord::Base)
-        desc += " #{obj.type_tag}"
-        desc += " (new)"              if obj.new_record?
-        desc += " ##{obj.id}"         if obj.id
-        desc += " (#{obj.text_name})" if obj.respond_to?(:text_name)
-      end
-      action = ''
-      if weight && weight > 0 && user_id
-        user = User.safe_find(user_id)
-        action += " --> #{user.login} = #{user.contribution}"
-      end
-      puts ">>>> #{mode} #{weight.inspect} #{desc} #{action}"
-      puts obj.args.inspect if obj.is_a?(Transaction)
-    end
   end
 
   def self.get_applicable_field(obj)

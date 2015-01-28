@@ -1,7 +1,6 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 minimal_unknown:
   id: 1
-  sync_id: 1xx1
   created_at: 2005-05-12 17:20:00
   updated_at: 2005-05-12 17:21:00
   when: 2006-05-11
@@ -12,7 +11,6 @@ minimal_unknown:
 
 detailed_unknown:
   id: 2
-  sync_id: 2xx1
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
   when: 2006-05-11
@@ -26,7 +24,6 @@ detailed_unknown:
 
 coprinus_comatus_obs:
   id: 3
-  sync_id: 3xx1
   created_at: 2007-02-27 20:20:00
   updated_at: 2007-02-27 20:21:00
   when: 2007-02-27
@@ -40,7 +37,6 @@ coprinus_comatus_obs:
 
 agaricus_campestris_obs:
   id: 4
-  sync_id: 4xx1
   created_at: 2007-03-19 20:20:00
   updated_at: 2007-03-19 20:21:00
   when: 2007-03-19
@@ -52,7 +48,6 @@ agaricus_campestris_obs:
 
 agaricus_campestrus_obs:
   id: 5
-  sync_id: 5xx1
   created_at: 2007-06-23 20:00:00
   updated_at: 2007-06-23 20:00:00
   when: 2007-06-23
@@ -64,7 +59,6 @@ agaricus_campestrus_obs:
 
 agaricus_campestras_obs:
   id: 6
-  sync_id: 6xx1
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
@@ -76,7 +70,6 @@ agaricus_campestras_obs:
 
 agaricus_campestros_obs:
   id: 7
-  sync_id: 7xx1
   created_at: 2007-06-24 12:00:00
   updated_at: 2007-06-24 12:00:00
   when: 2007-06-24
@@ -88,7 +81,6 @@ agaricus_campestros_obs:
 
 strobilurus_diminutivus_obs:
   id: 8
-  sync_id: 8xx1
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
   when: 2007-07-20
@@ -101,7 +93,6 @@ strobilurus_diminutivus_obs:
 
 unknown_with_no_naming:
   id: 9
-  sync_id: 9xx1
   when: 2008-09-23
   user_id: 2
   where: Who knows where
@@ -110,7 +101,6 @@ unknown_with_no_naming:
 
 unknown_with_lat_long:
   id: 10
-  sync_id: 10x1
   created_at: 2010-07-22 09:20:00
   updated_at: 2010-07-22 09:21:00
   when: 2010-07-22
@@ -123,7 +113,6 @@ unknown_with_lat_long:
 
 amateur_observation:
   id: 11
-  sync_id: 11x1
   created_at: 2010-12-31 06:46:00
   updated_at: 2010-12-31 06:46:00
   when: 2010-12-30
@@ -138,7 +127,6 @@ amateur_observation:
 
 peltigera_observation:
   id: 12
-  sync_id: 12x1
   created_at: 2012-06-07 16:31:40
   updated_at: 2012-06-07 16:31:40
   when: 2012-06-07
@@ -152,7 +140,6 @@ peltigera_observation:
 
 peltigera_rolf_observation:
   id: 13
-  sync_id: 13x1
   created_at: 2013-09-14 08:37:55
   updated_at: 2013-09-14 08:37:55
   when: 2013-09-08
@@ -166,7 +153,6 @@ peltigera_rolf_observation:
 
 fungi_observation:
   id: 14
-  sync_id: 14x1
   created_at: 2013-09-15 22:14:40
   updated_at: 2013-09-15 22:14:40
   when: 2013-09-15
@@ -180,7 +166,6 @@ fungi_observation:
 
 bolete_observation:
   id: 15
-  sync_id: 15x1
   created_at: 2014-04-21 07:48:00
   updated_at: 2014-04-21 07:48:00
   when: 2014-04-21

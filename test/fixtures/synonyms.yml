@@ -1,16 +1,12 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 macrolepiota_rachodes_synonym:
   id: 1
-  sync_id: 1xx1
 
 chlorophyllum_rachodes_synonym:
   id: 2
-  sync_id: 2xx1
 
 lactarius_alpinus_synonym:
   id: 3
-  sync_id: 3xx1
 
 peltigera_synonym:
   id: 4
-  sync_id: 4xx1

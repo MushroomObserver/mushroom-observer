@@ -23,7 +23,6 @@
 #  == Attributes
 #
 #  id::             Locally unique numerical id, starting at 1.
-#  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
 #  target::         Object in question.

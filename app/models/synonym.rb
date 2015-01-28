@@ -13,7 +13,6 @@
 #  == Attributes
 #
 #  id::         Locally unique numerical id, starting at 1.
-#  sync_id::    Globally unique alphanumeric id, used to sync with remote servers.
 #
 #  == Class methods
 #
@@ -31,24 +30,4 @@
 
 class Synonym < AbstractModel
   has_many :names
-
-  # Look through all the attached Name's and chooses one to be the official
-  # "accepted" Name -- in practice, it just chooses the fist non-deprecated
-  # name it comes across.  It doesn't matter which it chooses, so long as it is
-  # unique and consistent. 
-  # def choose_accepted_name
-  #   accepted_name = names.first
-  #   for name in names
-  #     if not name.deprecated
-  #       accepted_name = name
-  #       break
-  #     end
-  #   end
-  #   for name in names
-  #     if name.accepted_name != accepted_name
-  #       name.accepted_name = accepted_name
-  #       name.save
-  #     end
-  #   end
-  # end
 end

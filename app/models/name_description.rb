@@ -10,7 +10,6 @@
 #  == Attributes
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
-#  sync_id::          (-) Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::       (-) Date/time it was first created.
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
@@ -115,7 +114,6 @@ class NameDescription < Description
     :association_options => { :dependent => :nullify }
   )
   non_versioned_columns.push(
-    'sync_id',
     'created_at',
     'updated_at',
     'name_id',
