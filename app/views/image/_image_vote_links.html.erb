@@ -1,0 +1,17 @@
+<% #requires image to be passed as local or instance
+   image = image||@image
+   vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
+%>
+<div id="image_vote_links_<%=image.id%>">
+  <!--vote links -->
+  <% if !image.users_vote(@user).blank? %>
+      <%= image_vote_link(image, 0) %>
+  <% end %>
+  <% Image.all_votes.each  do |vote| %>
+      <small>
+        <%= image_vote_link(image, vote) %>
+      </small>
+  <% end %>
+</div>
+<!--This is used to update the vote meter after an ajax request, a bit hacky, but better than what we had before-->
+<span class="hidden data_container" data-percentage="<%=vote_percentage%>" data-role="image_vote_percentage"></span>

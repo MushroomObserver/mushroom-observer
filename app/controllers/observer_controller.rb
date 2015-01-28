@@ -639,7 +639,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
-    user = User.safe_find(params[:id]) || @user
+    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
     if user
       query = create_query(:Observation, :by_user, user: user)
       show_selected_observations(query)

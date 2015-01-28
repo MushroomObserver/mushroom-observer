@@ -14,7 +14,7 @@
     </td>
     <td align="center" width="50%">
       <%= if @glossary_term.thumb_image
-        thumbnail(@glossary_term.thumb_image, :border => 0, :votes => true, :size => :medium)
+        thumbnail(@glossary_term.thumb_image, :votes => true, :size => :medium)
       end %>
     </td>
   </tr>
@@ -28,7 +28,7 @@
 </p>
 
 <%= make_matrix(@objects, :width => '100%') do |image| %>
-  <%= thumbnail(image, :border => 1, :votes => true) %>
+  <%= thumbnail(image, :votes => true) %>
 <% end %>
 
 <%= show_previous_version(@glossary_term) %>

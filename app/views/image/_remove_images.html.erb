@@ -21,8 +21,8 @@
           <%= check_box("selected", image.id, {}, "yes", "no") %>
         </td>
         <td align="center">
-          <p><%= thumbnail(image, :append => "<br/>#{:image.t} ##{image.id}".html_safe,
-                           :votes => true, :original => true) %></p>
+          <%= thumbnail(image, :votes => true, :original => true) %>
+          <p> <%="#{:image.t} ##{image.id}".html_safe%></p>
         </td>
       </tr>
     <% end %>

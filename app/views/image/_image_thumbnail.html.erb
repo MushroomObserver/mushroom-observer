@@ -1,0 +1,29 @@
+<%
+   image = image
+   link = link||{controller:image.show_controller, action: image.show_action, id: image.id}  ##A hash of {controller:, action:, id:}
+   size = size||:thumbnail
+   votes = votes.nil? ? true : votes
+   original = original.nil? ? false : original
+   vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
+%>
+<div style="text-align: center">
+  <div style="display: inline-block;">
+    <%= link_with_query(image_tag(image.url(size)),link) %>
+    <div class="vote-meter">
+      <div id="vote_meter_bar_<%= image.id %>" class="vote-meter-bar" role="progressbar" style="width: <%=vote_percentage%>%">
+      </div>
+    </div>
+  </div>
+  <% if @user and votes %>
+      <div class="image_vote_links_container">
+        <%= render(:partial => 'image/image_vote_links', :locals => {
+                                                               :image => image
+                                                       }) %>
+      </div>
+  <% end %>
+  <% if original and !image.original_name.blank? and (check_permission(image) or (image and image.user and image.user.keep_filenames == :keep_and_show)) %>
+    <span>
+      <%=image.original_name%>
+    </span>
+  <%end%>
+</div>

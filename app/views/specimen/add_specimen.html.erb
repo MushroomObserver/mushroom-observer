@@ -40,9 +40,8 @@
       <% end %>
     </td>
     <td>
-      <%= render(:partial => 'observer/rss_log', :locals => {
-        :rss_log => @observation.rss_log,
-        :target => @observation,
+      <%= render(:partial => 'shared/matrix_box', :locals => {
+        :object => @observation.rss_log
       }) %>
     </td>
   </tr>

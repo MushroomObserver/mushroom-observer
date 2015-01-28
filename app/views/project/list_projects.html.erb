@@ -1,32 +1,31 @@
 <%
-  @title ||= :list_projects_title.t
+   @title ||= :list_projects_title.t
 
-  new_tab_set(:sort_by_header.t, @sorts)
-  new_tab_set do
-    add_tab_with_query(:list_projects_add_project.t, :action => 'add_project')
-    add_tabs(@links)
-  end
+   new_tab_set(:sort_by_header.t, @sorts)
+   new_tab_set do
+     add_tab_with_query(:list_projects_add_project.t, :action => 'add_project')
+     add_tabs(@links)
+   end
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <%= paginate_block(@pages) do %>
-  <% if @objects.length > 0 %>
-    <table cellpadding="5" cellspacing="0" width="100%">
-      <% odd_or_even = 0
-      for project in @objects
-        odd_or_even = 1 - odd_or_even %>
-        <tr valign="top" class="ListLine<%= odd_or_even %>">
-          <td width="100%">
-            <%= link_with_query(
-                  content_tag(:span, project.title.t, class: "ListWhat"),
-                  :action => 'show_project', :id => project.id) %>:
-            <br/>
-            <span class="ListWhen"><%= project.created_at.web_time %></span>:
-            <span class="ListWho"><%= user_link(project.user) %></span><br/>
-          </td>
-        </tr>
+    <div class="color-block">
+      <% @objects.each do |project| %>
+          <div class="row color-block-item">
+            <div class="col-xs-12 ">
+              <div>
+                <%= link_with_query(
+                            content_tag(:span, project.title.t, class: "ListWhat"),
+                            :action => 'show_project', :id => project.id) %>:
+                <br/>
+                <span><%= project.created_at.web_time %></span>:
+                <span><%= user_link(project.user) %></span>
+              </div>
+            </div>
+          </div>
       <% end %>
-    </table>
-  <% end %>
+    </div>
 <% end %>
+

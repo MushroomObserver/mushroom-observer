@@ -14,7 +14,7 @@ if is_in_admin_mode? %>
     table.permissions td { padding:3px 5px 3px 5px }
   </style>
   <%= paginate_block(@pages) do %>
-    <table align="center" class="permissions" cellspacing="2">
+    <table align="center" class="table table-striped permissions" cellspacing="2">
       <tr class="Data">
         <th><%= :users_by_name_verified.t %></th>
         <th><%= :users_by_name_groups.t %></th>
@@ -25,11 +25,10 @@ if is_in_admin_mode? %>
         <th><%= :users_by_name_theme.t %></th>
         <th><%= :users_by_name_created_at.t %> (<%= @objects.length %>)</th>
       </tr>
+      <tbody>
       <tr height="2"></tr>
-      <% odd_or_even = 0
-      for user in @objects
-        odd_or_even = 1 - odd_or_even %>
-        <tr class="ListLine<%= odd_or_even %>">
+      <% @objects.each do |user| %>
+        <tr>
           <td><%= user.verified %></td>
           <td><%= user.user_groups.map { |g| h(g.name) }.safe_join(',') %></td>
           <td><%= user.last_login.web_time rescue '--' %></td>
@@ -39,6 +38,7 @@ if is_in_admin_mode? %>
           <td><%= h(user.theme) %></td>
           <td><%= user.created_at.web_time rescue '--' %></td>
         </tr>
+          </tbody>
       <% end %>
     </table>
   <% end %>
@@ -48,10 +48,16 @@ if is_in_admin_mode? %>
 #  Normal version.
 # ----------------------------
 else %>
-  <%= paginate_block(@pages) do %>
-    <%= make_matrix(@objects, :width => '100%') do |user| %>
-      <%= render(:partial => 'user', :object => user) %>
-    <% end %>
-  <% end %>
+    <div class="color-block">
+      <%= paginate_block(@pages) do %>
+          <% @objects.each do |user| %>
+              <div class="col-sm-4 color-block-item">
+                <%= render(:partial => '/observer/rss_log', locals: {:object => user}) %>
+              </div>
+          <% end %>
+      <% end %>
+    </div>
+
+
 <% end %>
 

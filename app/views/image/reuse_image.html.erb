@@ -49,12 +49,12 @@
 
   <%= paginate_block(@pages) do %>
     <%= make_matrix(@objects) do |image| %>
-      <%= render(:partial => 'image_reuse', :object => image,
-            :locals => {
-              :link_args => add_query_param({ :action => 'reuse_image',
-                :mode => @mode, :obs_id => obs_id, :glossary_term_id => glossary_term_id,
-                :img_id => image.id})
-            }) %>
+      <%= thumbnail(image, link: add_query_param({ :action => 'reuse_image',
+                                                  :mode => @mode,
+                                                  :obs_id => obs_id,
+                                                  :glossary_term_id => glossary_term_id,
+                                                  :img_id => image.id}),
+                            original: true) %>
     <% end %>
   <% end %>
 

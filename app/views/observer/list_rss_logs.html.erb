@@ -32,11 +32,14 @@
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
+<div class="results color-block">
 <%= paginate_block(@pages) do %>
-  <%= make_matrix(@objects, :width => '100%') do |rss_log| %>
-    <%= render(:partial => 'rss_log', :locals => {
-      :rss_log => rss_log,
-      :target => rss_log.target,
-    }) %>
+  <% @objects.each do |rss_log| %>
+        <div class="col-sm-4 color-block-item">
+            <%= render(:partial => 'shared/matrix_box', :locals => {
+              :object => rss_log
+            }) %>
+        </div>
   <% end %>
 <% end %>
+</div>

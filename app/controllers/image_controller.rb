@@ -121,6 +121,7 @@ class ImageController < ApplicationController
   # Show selected search results as a matrix with "list_images" template.
   def show_selected_images(query, args={})
     store_query_in_session(query)
+    @view = view_context  ## Needed for matrix view helepr
     @links ||= []
 
     # I can't figure out why ActiveRecord is not eager-loading all the names.

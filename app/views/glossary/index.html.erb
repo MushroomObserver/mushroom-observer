@@ -17,7 +17,7 @@
           <%= glossary_term.description.tpl %>
         </td>
         <td align="center" valign="middle" width="160" style="padding-bottom:0px">
-          <%= if glossary_term.thumb_image_id
+          <%= if glossary_term.thumb_image_id and glossary_term.thumb_image_id != 0
             thumbnail(glossary_term.thumb_image_id, :border => 0, :votes => true)
           end %>
         </td>

@@ -1,0 +1,151 @@
+html, body{
+    font-family: verdana,arial,helvetica,sans-serif;
+    font-size: 13px;
+}
+
+a {
+    color: #205080
+}
+
+.bold {
+    font-weight: 800;
+}
+
+
+.border-bottom {
+    border-bottom: 1px solid;
+}
+
+.margin-bottom {
+    margin-bottom: 1em;
+}
+
+.push-down {
+    margin-top: 1em;
+}
+.indent {
+    padding-left: 1em;
+}
+
+.pad-box {
+    padding: 5px;
+}
+
+.border-box {
+    border: 1px solid;
+}
+.pad-left {
+    padding-left: 1em;
+}
+
+.pad-bottom {
+    padding-bottom: 1em;
+}
+
+.pad-top {
+    padding-top: 1em;
+}
+
+.kill-padding {
+    padding: 0 !important;
+}
+
+.kill-margins {
+    margin: 0 !important;
+}
+
+#navigation a {
+    display: block;
+}
+
+#navigation .group {
+    margin-bottom: 1.25em;
+}
+
+#banner {
+    margin-left: -15px;
+    margin-right:-15px;
+}
+
+.rss-log-item{
+    display: table-cell;
+    margin: auto;
+    width: inherit;
+    text-align: center;
+    vertical-align: middle;
+    height: 350px;
+}
+
+.rss-title, .rss-detail {
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
+
+.popup {
+    z-index: 1000;
+    border: 1px solid;
+    background: white !important;
+}
+
+
+
+/*Themeable options below */
+/* Banner colors */
+#banner {
+    padding-top: 5px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid;
+    font: small-caps 25px/25px "Times New Roman", serif;
+    text-align: center;
+}
+
+#banner a {
+    text-decoration: none;
+}
+
+#banner {
+    background-color: #cc2616; color: #FAEBD4;
+}
+
+#banner a {
+    color: #FAEBD4;
+}
+
+#banner a:visited {
+    color: #FAEBD4;
+}
+
+.color1 {
+    background: #E0E0E0;
+}
+
+.color-block .color-block-item:nth-child(odd):not(.row) {
+    background-color: #F0F0F0;
+}
+
+div.color-block div.row.color-block-item:nth-child(odd) > div > div {
+    background-color: #F0F0F0;
+}
+
+.vote-meter {
+    height: 5px;
+    margin-bottom: 4px;
+    overflow: hidden;
+    background-color: #F5F5F5;
+    border-radius: 0px;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1) inset;
+}
+
+.vote-meter-bar {
+    float: left;
+    width: 0px;
+    height: 100%;
+    font-size: 12px;
+    line-height: 5px;
+    color: #FFF;
+    text-align: center;
+    background-color: #205080;
+    box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
+    transition: width 0.6s ease 0s;
+}

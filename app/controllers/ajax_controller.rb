@@ -220,7 +220,7 @@ class AjaxController < ApplicationController
     end
   end
 
-  def cast_image_vote(id, value)
+  def cast_image_vote(id, value)  ##TODO: Rewrite tests
     @image = Image.safe_find(id)
     if value != '0' and not Image.validate_vote(value)
       raise "Invalid value for vote/image: #{value.inspect}"
@@ -230,7 +230,7 @@ class AjaxController < ApplicationController
       value = value == '0' ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == :yes)
       @image.change_vote(@user, value, anon)
-      render(:inline => '<%= image_vote_tabs(@image) %>')
+      render(:partial => 'image/image_vote_links')
     end
   end
 

@@ -420,8 +420,12 @@ end
     result = ""
     if obs
       if image = obs.thumb_image
-        result = thumbnail(image, :border => 0, :link => :show_observation,
-                           :obs => obs.id, :size => :small) + image_copyright(image)
+        result = thumbnail(image, {
+                                    :link => {:controller => obs.show_controller,
+                                              :action => obs.show_action,
+                                              :id => obs.id},
+                                     :size => :thumbnail,
+                                     :votes => true}) + image_copyright(image)
       end
     end
     result
@@ -1406,97 +1410,22 @@ end
   end
 
   # Draw a thumbnail image.  It takes either an Image instance or an id.  Args:
-  # size::      Size of image.  (default is user's default thumbnail size)
-  # link::      :show_image, :show_observation, :show_user, :none,
-  #             or Hash of +link_to+ args.  (default is :show_image)
-  # obs::       Add <tt>:obs => id</tt> to the show_image link args.
-  # user::      (used with :link => :show_user)
-  # border::    Set +border+ attribute, e.g. <tt>:border => 0</tt>.
-  # style::     Add +style+ attribute, e.g. <tt>:style => 'float:right'</tt>.
-  # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
-  # append::    HTML to tack on after +img+ tag; will be included in the link.
-  # votes::     Add AJAX vote links below image?
-  # nodiv::     Tell it not to wrap it in a div.
-  # target::    Add target to anchor-link.
-  def thumbnail(image, args={})
-    if image.is_a?(Image)
-      id = image.id
-    else
-      id = image.to_s.to_i
-      image = nil
-    end
+  # link::      a hash of {controller: , action:, id: }
+  # size::      Size to show, default is thumbnail
+  # original::  Show original file name?
+  # votes::     Show vote buttons?
 
-    # Get URL to image.
-    size = (args[:size] || default_thumbnail_size).to_sym
-    if image
-      url = image.url(size)
-    else
-      url = Image.url(size, id)
-    end
-
-    # Create <img> tag.
-    opts = {}
-    opts[:border] = args[:border] if args.has_key?(:border)
-    opts[:style]  = args[:style]  if args.has_key?(:style)
-    str = safe_empty + image_tag(url, opts)
-    str += args[:append].to_s
-
-    # Decide what to link it to.
-    case link = args[:link] || :show_image
-    when :show_image
-      link = { controller: :image, action: :show_image, id: id }.
-        merge(args[:query_params] || query_params)
-      link[:obs] = args[:obs] if args.has_key?(:obs)
-    when :show_observation
-      link = {
-        controller: :observer,
-        action: :show_observation,
-        id: args[:obs]
-      }.merge(args[:query_params] || query_params)
-      raise "missing :obs" if !args.has_key?(:obs)
-    when :show_user
-      link = { controller: :observer, action: :show_user, id: args[:user] }
-      raise "missing :user" if !args.has_key?(:user)
-    when :show_glossary_term
-      link = { controller: :glossary, action: :show_glossary_term,
-               id: args[:glossary_term] }
-      raise "missing :glossary_term" if !args.has_key?(:glossary_term)
-    when :none
-      link = nil
-    when Hash
-    else
-      raise "invalid link"
-    end
-
-    # Enclose image in a link?
-    link_args = {}
-    link_args[:target] = args[:target] if args[:target]
-    result = link ? link_to(str, link, link_args) : str
-
-    # Include AJAX vote links below image?
-    if @js && @user && args[:votes]
-      table = image_vote_tabs(image || id, args[:vote_data])
-      result += safe_br + content_tag(:div, table, id: "image_votes_#{id}")
-      did_vote_div = true
-    end
-
-    # Include original filename.
-    if args[:original] &&
-       image && !image.original_name.blank? && (
-         check_permission(image) ||
-         (image.user && image.user.keep_filenames == :keep_and_show)
-       )
-      result += safe_br unless did_vote_div
-      result += h(image.original_name)
-    end
-
-    # Wrap result in div.
-    if args[:nodiv]
-      result
-    else
-      content_tag(:div, result, class: args[:class] || "thumbnail")
-    end
+def thumbnail(image, args={}) ##TODO: Add size option
+  if image.is_a?(Numeric)
+    image = Image.find(image)
   end
+
+  render(:partial => 'image/image_thumbnail', :locals => {:image => image,
+                                                          :link => args[:link],
+                                                          :votes => args[:votes],
+                                                          :size => args[:size],
+                                                          :original => args[:original]})
+end
 
   # Provide the copyright for an image
   def image_copyright(image, div=true)
@@ -1526,63 +1455,16 @@ end
     content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
   end
 
-  # Render the AJAX vote tabs that go below thumbnails.
-  def image_vote_tabs(image, data=nil)
-    javascript_include('jquery')
-    javascript_include('image_vote')
 
-    if image.is_a?(Image)
-      id  = image.id
-      cur = image.users_vote(@user)
-      avg = image.vote_cache
-      num = image.num_votes
-    else
-      id  = image.to_i
-      cur = nil
-      avg = nil
-      num = nil
+  #Create an image link vote, where vote param is vote number ie: 3
+  def image_vote_link(image, vote)
+    current_vote = image.users_vote(@user)
+    vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
+    link = link_to(vote_text, {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id, :val => vote })  ##return a link if the user has NOT voted this way
+    if (current_vote == vote)
+      link = content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
     end
-
-    row1 = safe_empty
-    if avg and num and num > 0
-      num += 1
-      num = 8 if num > 8
-      row1 += content_tag(:td, '', :height => num) if cur.to_i > 0
-      Image.all_votes.map do |val|
-        if val <= avg
-          str = content_tag(:div, '', :class => 'on')
-        elsif val <= avg + 1.0
-          pct = ((avg + 1.0 - val) * 100).to_i
-          str = content_tag(:div, '', :class => 'on',
-                              :style => "width:#{pct}%")
-        else
-          str = safe_empty
-        end
-        row1 += content_tag(:td, str, :height => num)
-      end
-      row1 = content_tag(:tr, row1)
-    end
-
-    row2 = safe_empty
-    str = link_to('(X)', {}, :title => :image_vote_help_0.l, data: {:role => "image_vote", :id => id, :val => 0})
-
-    str += indent(5)
-    row2 += content_tag(:td, content_tag(:small, str)) if cur.to_i > 0
-    Image.all_votes.map do |val|
-      str1 = image_vote_as_short_string(val)
-      str2 = image_vote_as_help_string(val)
-      if val == cur
-        str = content_tag(:b, content_tag(:span, str1, :title => str2))
-      else
-          str = link_to(str1, {controller: :image, action: :show_image, id: id, vote: val}, :title => str2, data: {:role => "image_vote", :id => id, :val => val})
-      end
-      str = '&nbsp;|&nbsp;'.html_safe + str if val > 1
-      row2 += content_tag(:td, content_tag(:small, str))
-    end
-    row2 = content_tag(:tr, row2)
-
-    content_tag(:table, row1 + row2, :class => 'vote_meter',
-                :cellspacing => '0', :cellpadding => '0')
+    link
   end
 
   # Display the two export statuses, making the current state plain text and
@@ -1604,10 +1486,6 @@ end
         content_tag(:b, :review_no_export.t)
       end
     end
-  end
-
-  def observation_specimen_info(obs)
-    content_tag(:span, observation_specimen_link(obs), class: "Data") + create_specimen_link(obs)
   end
 
   def observation_specimen_link(obs)

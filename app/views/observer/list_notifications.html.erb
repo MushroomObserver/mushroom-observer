@@ -11,12 +11,10 @@
 %>
 
 <% if @notifications.length > 0 %>
-  <table cellpadding="5" cellspacing="0" width="100%">
-    <% odd_or_even = 0
-    for n in @notifications
-      odd_or_even = 1 - odd_or_even
+  <table cellpadding="5" cellspacing="0" width="100%" class="table table-striped">
+    <%for n in @notifications
       (controller, action) = n.link_params %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
+      <tr valign="top">
         <td width="100%">
           <%= link_to("<span class=\"ListWhat\">#{n.summary.t}</span>", n.link_params) %>
         </td>
