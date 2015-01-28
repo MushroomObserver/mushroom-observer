@@ -674,7 +674,7 @@ class NameController < ApplicationController
     @name.citation = params[:name][:citation].to_s.strip_squeeze
     @name.notes = params[:name][:notes].to_s.strip
     for name in @parents + [@name]
-      name.save_with_transaction(:log_name_created_at) if name and name.new_record?
+      name.save_with_log(:log_name_created_at) if name and name.new_record?
     end
     flash_notice(:runtime_create_name_success.t(:name => @name.real_search_name))
   end
@@ -685,7 +685,7 @@ class NameController < ApplicationController
     @name.notes = params[:name][:notes].to_s.strip
     if not @name.changed?
       any_changes = false
-    elsif not @name.save_with_transaction(:log_name_updated)
+    elsif not @name.save_with_log(:log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     else
       flash_notice(:runtime_edit_name_success.t(:name => @name.real_search_name))
@@ -694,7 +694,7 @@ class NameController < ApplicationController
     # This name itself might have been a parent when we called
     # find_or_create... last time(!)
     for name in Name.find_or_create_parsed_name_and_parents(@parse)
-      name.save_with_transaction(:log_name_created_at) if name and name.new_record?
+      name.save_with_log(:log_name_created_at) if name and name.new_record?
     end
     return any_changes
   end
@@ -792,8 +792,7 @@ class NameController < ApplicationController
         # Make sure the "correct" name isn't also a misspelled name!
         if name2.is_misspelling?
           name2.correct_spelling = nil
-          name2.save_with_transaction(:log_name_unmisspelled,
-                                      other: @name.display_name)
+          name2.save_with_log(:log_name_unmisspelled, other: @name.display_name)
         end
       end
     end
@@ -827,20 +826,6 @@ class NameController < ApplicationController
       if @description.valid?
         initialize_description_permissions(@description)
         @description.save
-
-        Transaction.post_name_description(
-          @description.all_notes.merge(
-            :id             => @description,
-            :created_at     => @description.created_at,
-            :source_type    => @description.source_type,
-            :source_name    => @description.source_name,
-            :locale         => @description.locale,
-            :license        => @description.license,
-            :admin_groups   => @description.admin_groups,
-            :writer_groups  => @description.writer_groups,
-            :reader_groups  => @description.reader_groups
-          )
-        )
 
         # Make this the "default" description if there isn't one and this is
         # publicly readable.
@@ -888,19 +873,8 @@ class NameController < ApplicationController
       @description.attributes = whitelisted_name_description_params
       @description.source_type = @description.source_type.to_sym
 
-      args = {}
-      args["set_source_type"] = @description.source_type if @description.source_type_changed?
-      args["set_source_name"] = @description.source_name if @description.source_name_changed?
-      args["set_locale"]      = @description.locale      if @description.locale_changed?
-      args["set_license"]     = @description.license     if @description.license_id_changed?
-      for field in NameDescription.all_note_fields
-        if @description.send("#{field}_changed?")
-          args["set_#{field}".to_sym] = @description.send(field)
-        end
-      end
-
       # Modify permissions based on changes to the two "public" checkboxes.
-      modify_description_permissions(@description, args)
+      modify_description_permissions(@description)
 
       # If substantive changes are made by a reviewer, call this act a
       # "review", even though they haven't actually changed the review
@@ -910,10 +884,9 @@ class NameController < ApplicationController
       end
 
       # No changes made.
-      if args.empty?
+      if !@description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        redirect_to(:action => 'show_name_description',
-                    :id => @description.id)
+        redirect_to(:action => 'show_name_description', :id => @description.id)
 
       # There were error(s).
       elsif !@description.save
@@ -923,11 +896,6 @@ class NameController < ApplicationController
       else
         flash_notice(:runtime_edit_name_description_success.t(
                      :id => @description.id))
-
-        if !args.empty?
-          args[:id] = @description
-          Transaction.put_name_description(args)
-        end
 
         # Update name's classification cache.
         name = @description.name
@@ -1046,13 +1014,6 @@ class NameController < ApplicationController
           if !@name.synonym_id
             @name.synonym = Synonym.create
             @name.save
-            Transaction.post_synonym(
-              :id => @name.synonym
-            )
-            Transaction.put_name(
-              :id          => @name,
-              :set_synonym => @name.synonym
-            )
           end
 
           # Go through list of all synonyms for this name and written-in names.
@@ -1067,10 +1028,6 @@ class NameController < ApplicationController
             if proposed_synonyms[n.id.to_s] != '0'
               if n.synonym_id != @name.synonym_id
                 @name.transfer_synonym(n)
-                Transaction.put_name(
-                  :id          => n,
-                  :set_synonym => @name.synonym
-                )
               end
             end
           end
@@ -1165,8 +1122,7 @@ class NameController < ApplicationController
 
             # Change target name to "undeprecated".
             target_name.change_deprecated(false)
-            target_name.save_with_transaction(:log_name_approved,
-                                              other: @name.real_search_name)
+            target_name.save_with_log(:log_name_approved, other: @name.real_search_name)
 
             # Change this name to "deprecated", set correct spelling, add note.
             @name.change_deprecated(true)
@@ -1174,8 +1130,7 @@ class NameController < ApplicationController
               @name.misspelling = true
               @name.correct_spelling = target_name
             end
-            @name.save_with_transaction(:log_name_deprecated,
-                                        other: target_name.real_search_name)
+            @name.save_with_log(:log_name_deprecated, other: target_name.real_search_name)
             if !@comment.blank?
               post_comment(:deprecate, @name, @comment)
             end
@@ -1203,8 +1158,7 @@ class NameController < ApplicationController
         if params[:deprecate][:others] == '1'
           for n in @name.approved_synonyms
             n.change_deprecated(true)
-            n.save_with_transaction(:log_name_deprecated,
-                                    other: @name.real_search_name)
+            n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
             others << n.real_search_name
           end
         end
@@ -1217,7 +1171,7 @@ class NameController < ApplicationController
           tag = :log_name_approved
           args[:other] = others.join(', ')
         end
-        @name.save_with_transaction(tag, args)
+        @name.save_with_log(tag, args)
         if !comment.blank?
           post_comment(:approve, @name, comment)
         end
@@ -1235,7 +1189,7 @@ class NameController < ApplicationController
     unless name.deprecated
       begin
         name.change_deprecated(true)
-        result = name.save_with_transaction(:log_deprecated_by)
+        result = name.save_with_log(:log_deprecated_by)
       rescue RuntimeError => err
         flash_error(err.to_s) if !err.blank?
         result = false
@@ -1262,27 +1216,12 @@ class NameController < ApplicationController
       name = new_synonym_members.shift
       name.synonym = new_synonym = Synonym.create
       name.save
-      Transaction.post_synonym(
-        :id => new_synonym
-      )
-      Transaction.put_name(
-        :id          => name,
-        :set_synonym => new_synonym
-      )
       for n in new_synonym_members
         name.transfer_synonym(n)
-        Transaction.put_name(
-          :id          => n,
-          :set_synonym => new_synonym
-        )
       end
     elsif len == 1
       name = new_synonym_members.first
       name.clear_synonym
-      Transaction.put_name(
-        :id          => name,
-        :set_synonym => 0
-      )
     end
   end
 
@@ -1316,12 +1255,6 @@ class NameController < ApplicationController
   def post_comment(action, name, message)
     summary = :"name_#{action}_comment_summary".l
     comment = Comment.create!(
-      :target  => name,
-      :summary => summary,
-      :comment => message
-    )
-    Transaction.post_comment(
-      :id      => comment,
       :target  => name,
       :summary => summary,
       :comment => message

@@ -35,7 +35,6 @@
 #  == Attributes
 #
 #  id::                     Locally unique numerical id, starting at 1.
-#  sync_id::                Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::             Date/time it was first created.
 #  updated_at::             Date/time it was last updated.
 #  user_id::                User that created it.
@@ -1002,8 +1001,6 @@ return result if debug
       UPDATE observations SET `where` = NULL, location_id = #{location.id}
       WHERE `where` = "#{old_name.gsub('"', '\\"')}"
     ))
-    # (no transactions necessary: creating location on foreign server
-    # should initiate identical action)
   end
 
 ################################################################################

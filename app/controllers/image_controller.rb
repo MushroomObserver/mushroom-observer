@@ -225,7 +225,6 @@ class ImageController < ApplicationController
       if cur != val
         anon = @user.votes_anonymous == :yes
         @image.change_vote(@user, val, anon)
-        Transaction.put_images(id: @image, set_vote: val, set_anonymous: anon)
       end
 
       # Advance to next image automatically if "next" parameter set.
@@ -264,7 +263,6 @@ class ImageController < ApplicationController
   def cast_vote # :norobots:
     if image = find_or_goto_index(Image, params[:id].to_s)
       val = image.change_vote(@user, params[:value])
-      Transaction.put_images(id: image, set_vote: val)
       if params[:next]
         redirect_to_next_object(:next, Image, params[:id].to_s)
       else
@@ -348,15 +346,6 @@ class ImageController < ApplicationController
       else
         @observation.add_image(@image)
         @observation.log_create_image(@image)
-        Transaction.post_image(
-          id:               @image,
-          url:              @image.original_url,
-          date:             @image.when,
-          notes:            @image.notes,
-          copyright_holder: @image.copyright_holder,
-          license:          @image.license,
-          observation:      @observation
-        )
         name = @image.original_name
         name = "##{@image.id}" if name.empty?
         flash_notice(:runtime_image_uploaded_image.t(name: name))
@@ -399,7 +388,6 @@ class ImageController < ApplicationController
           flash_object_errors(@image)
         else
           xargs[:id] = @image
-          Transaction.put_image(xargs)
           @image.log_update
           flash_notice :runtime_image_edit_success.t(id: @image.id)
           update_projects(@image, params[:project])
@@ -500,7 +488,6 @@ class ImageController < ApplicationController
       else
         @image.log_destroy
         @image.destroy
-        Transaction.delete_image(id: @image)
         flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
         if next_state
           set_query_params(next_state)
@@ -527,7 +514,6 @@ class ImageController < ApplicationController
       else
         @observation.remove_image(@image)
         @observation.log_remove_image(@image)
-        Transaction.put_observation(id: @observation, del_image: @image)
         flash_notice(:runtime_image_remove_success.t(id: @image.id))
       end
       redirect_with_query(controller: "observer",
@@ -609,7 +595,6 @@ class ImageController < ApplicationController
         # Add image to observation.
         @observation.add_image(image)
         @observation.log_reuse_image(image)
-        Transaction.put_observation(id: @observation, add_image: image)
         redirect_with_query(controller: "observer",
           action: "show_observation", id: @observation.id)
         done = true
@@ -627,7 +612,6 @@ class ImageController < ApplicationController
           flash_notice(:runtime_no_changes.t)
         else
           @user.update(image: image)
-          Transaction.put_user(id: @user, set_image: image)
           flash_notice(:runtime_image_changed_your_image.t(id: image.id))
         end
         redirect_to(controller: "observer", action: "show_user",
@@ -766,13 +750,6 @@ class ImageController < ApplicationController
               AND license_id = #{old_id}
               AND copyright_holder = #{old_holder}
           ))
-          Transaction.put_image(
-            :user                 => @user,
-            :license              => old_id,
-            :set_license          => new_id,
-            :copyright_holder     => old_holder,
-            set_copyright_holder: new_holder
-          )
         end
       end
     end

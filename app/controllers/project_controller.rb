@@ -190,13 +190,6 @@ class ProjectController < ApplicationController
         elsif !@project.save
           flash_object_errors(@project)
         else
-          Transaction.post_project(
-            id:      @project,
-            title:   @project.title,
-            summary: @project.summary,
-            admins:  [@user],
-            members: [@user],
-          )
           @project.log_create
           flash_notice(:add_project_success.t)
           redirect_with_query(action: :show_project, id: @project.id)
@@ -224,9 +217,6 @@ class ProjectController < ApplicationController
     elsif request.method == "POST"
       @title = params[:project][:title].to_s
       @summary = params[:project][:summary]
-      xargs = {}
-      xargs[:set_title]   = @title   if @project_title   != @title
-      xargs[:set_summary] = @summary if @project_summary != @summary
       if @title.blank?
         flash_error(:add_project_need_title.t)
       elsif Project.find_by_title(@title) != @project
@@ -234,10 +224,6 @@ class ProjectController < ApplicationController
       elsif !@project.update(whitelisted_project_params)
         flash_object_errors(@project)
       else
-        if !xargs.empty?
-          xargs[:id] = @project
-          Transaction.put_project(xargs)
-        end
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
         redirect_with_query(action: "show_project", id: @project.id)
@@ -260,7 +246,6 @@ class ProjectController < ApplicationController
         redirect_with_query(action: "show_project", id: @project.id)
       else
         @project.log_destroy
-        Transaction.delete_project(id: @project)
         flash_notice(:destroy_project_success.t)
         redirect_with_query(action: :index_project)
       end
@@ -357,13 +342,11 @@ class ProjectController < ApplicationController
     if mode == :add
       if !group.users.include?(user)
         group.users << user unless group.users.member?(user)
-        Transaction.put_project(id: project, :"add_#{type}" => user)
         project.send("log_add_#{type}", user)
       end
     else
       if group.users.include?(user)
         group.users.delete(user)
-        Transaction.put_project(id: project, :"del_#{type}" => user)
         project.send("log_remove_#{type}", user)
       end
     end

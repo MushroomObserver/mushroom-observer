@@ -1109,7 +1109,7 @@ class ObserverController < ApplicationController
   def save_everything_else(reason)
     if @name
       @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_transaction(@naming)
+      save_with_log(@naming)
       @observation.reload
       @observation.change_vote(@naming, @vote.value)
     end
@@ -1325,7 +1325,6 @@ class ObserverController < ApplicationController
       redirect_to(add_query_param({ action: "show_observation", id: obs_id },
                                   this_state))
     else
-      Transaction.delete_observation(id: @observation)
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       if next_state
         redirect_to(add_query_param({ action: "show_observation",
@@ -1716,11 +1715,6 @@ class ObserverController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          Transaction.put_user(
-                               id: @user2,
-                               set_bonuses: bonuses,
-                               set_contribution: contrib
-                               )
           redirect_to(action: "show_user", id: @user2.id)
         end
       end
@@ -2106,50 +2100,10 @@ class ObserverController < ApplicationController
 
   # Save observation now that everything is created successfully.
   def save_observation(observation)
-    success = true
-    args = {}
-    if observation.new_record?
-      args[:method] = "post"
-      args[:action] = "observation"
-      args[:date]   = observation.when
-      if observation.location_id
-        args[:location] = observation.location
-      else
-        args[:location] = observation.where
-      end
-      args[:notes]     = observation.notes.to_s
-      args[:specimen] = observation.specimen ? true : false
-      args[:thumbnail] = observation.thumb_image_id.to_i
-      args[:is_collection_location] = observation.is_collection_location
-    else
-      args[:method]   = "put"
-      args[:action]   = "observation"
-      args[:set_date] = observation.when if observation.when_changed?
-      if observation.where_changed? || observation.location_id_changed?
-        if observation.location_id
-          args[:set_location] = observation.location
-        else
-          args[:set_location] = observation.where
-        end
-      end
-      args[:set_notes] = observation.notes if observation.notes_changed?
-      if observation.specimen_changed?
-        args[:set_specimen] = observation.specimen
-      end
-      if observation.thumb_image_id_changed?
-        args[:set_thumbnail] = observation.thumb_image_id.to_i
-      end
-      args[:set_is_collection_location] = observation.is_collection_location
-    end
-    if observation.save
-      args[:id] = observation
-      Transaction.create(args)
-    else
-      flash_error(:runtime_no_save_observation.t)
-      flash_object_errors(observation)
-      success = false
-    end
-    success
+    return true if observation.save
+    flash_error(:runtime_no_save_observation.t)
+    flash_object_errors(observation)
+    return false
   end
 
   # Update observation, check if valid.
@@ -2199,13 +2153,6 @@ class ObserverController < ApplicationController
             bad_images.push(image)
             flash_object_errors(image)
           else
-            Transaction.post_image(
-              id: image,
-              date: image.when,
-              notes: image.notes.to_s,
-              copyright_holder: image.copyright_holder.to_s,
-              license: image.license || 0
-            )
             name = image.original_name
             name = "##{image.id}" if name.empty?
             flash_notice(:runtime_image_uploaded.t(name: name))
@@ -2246,18 +2193,7 @@ class ObserverController < ApplicationController
         image.license_id_changed? ||
         image.original_name_changed?
       image.updated_at = Time.now
-      args = { id: image }
-      args[:set_date] = image.when if image.when_changed?
-      args[:set_notes] = image.notes if image.notes_changed?
-      if image.copyright_holder_changed?
-        args[:set_copyright_holder] = image.copyright_holder
-      end
-      args[:set_license] = image.license if image.license_id_changed?
-      if image.original_name_changed?
-        args[:set_original_name] = image.original_name
-      end
       if image.save
-        Transaction.put_image(args)
         flash_notice(:runtime_image_updated_notes.t(id: image.id))
       else
         flash_object_errors(image)

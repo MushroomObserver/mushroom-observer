@@ -528,7 +528,6 @@ class ApplicationController < ActionController::Base
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
       @user.update(:locale => I18n.locale.to_s)
-      Transaction.put_user(:id => @user, :set_locale => I18n.locale.to_s)
     end
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
@@ -705,15 +704,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def save_with_transaction(obj)
+  def save_with_log(obj)
     type_sym = obj.class.to_s.underscore.to_sym
-    if (result = obj.save_with_transaction)
+    if obj.save
       flash_notice(:runtime_created_at.t(type: type_sym))
+      return true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
       flash_object_errors(obj)
+      return false
     end
-    result
   end
 
   def object_flashes(obj)
@@ -844,7 +844,7 @@ class ApplicationController < ActionController::Base
 
         # Deprecate and save.
         synonym.change_deprecated(true)
-        synonym.save_with_transaction(:log_deprecated_by, :touch => true)
+        synonym.save_with_log(:log_deprecated_by, :touch => true)
         Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
       end
     end

@@ -216,7 +216,6 @@ class AjaxController < ApplicationController
       raise "Invalid id for vote/naming: #{id.inspect}"
     else
       @naming.change_vote(value, @user)
-      Transaction.put_naming(:id => @naming, :user => @user, :set_vote => value)
       render(:text => '')
     end
   end
@@ -231,8 +230,6 @@ class AjaxController < ApplicationController
       value = value == '0' ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == :yes)
       @image.change_vote(@user, value, anon)
-      Transaction.put_image(:id => @image, :user => @user,
-                            :set_vote => value, :set_anonymous => anon)
       render(:inline => '<%= image_vote_tabs(@image) %>')
     end
   end
@@ -276,14 +273,6 @@ class AjaxController < ApplicationController
       flash_notice(:runtime_no_upload_image.t(name: (name ? "'#{name}'" : "##{image.id}")))
       flash_object_errors(image)
     else
-      Transaction.post_image(
-        id: image,
-        date: image.when,
-        notes: image.notes.to_s,
-        copyright_holder: image.copyright_holder,
-        license: image.license || 0,
-        original_name: original_name
-      )
       name = original_name
       name = "##{image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded.t(name: name))

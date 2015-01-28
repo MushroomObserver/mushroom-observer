@@ -553,17 +553,6 @@ class LocationController < ApplicationController
 
         if @dubious_where_reasons.empty?
           if @location.save
-            Transaction.post_location(
-              :id         => @location,
-              :created_at => @location.created_at,
-              :name       => @location.name,
-              :north      => @location.north,
-              :south      => @location.south,
-              :east       => @location.east,
-              :west       => @location.west,
-              :low        => @location.low,
-              :high       => @location.high
-            )
             flash_notice(:runtime_location_success.t(:id => @location.id))
             done = true
           else
@@ -601,10 +590,6 @@ class LocationController < ApplicationController
           if user = User.safe_find(@set_user)
             user.location = @location
             user.save
-            Transaction.put_user(
-              :id           => @user,
-              :set_location => @location
-            )
             redirect_to(:controller => 'observer', :action => 'show_user', :id => @set_user)
           end
         else
@@ -667,15 +652,6 @@ class LocationController < ApplicationController
             end
           end
 
-          args = {}
-          args[:set_name]  = @location.name  if @location.name_changed?
-          args[:set_north] = @location.north if @location.north_changed?
-          args[:set_south] = @location.south if @location.south_changed?
-          args[:set_west]  = @location.west  if @location.west_changed?
-          args[:set_east]  = @location.east  if @location.east_changed?
-          args[:set_high]  = @location.high  if @location.high_changed?
-          args[:set_low]   = @location.low   if @location.low_changed?
-
           # Validate name.
           @dubious_where_reasons = []
           if @display_name != params[:approved_where]
@@ -694,10 +670,6 @@ class LocationController < ApplicationController
 
             # Updated successfully.
             else
-              if !args.empty?
-                args[:id] = @location
-                Transaction.put_location(args)
-              end
               flash_notice(:runtime_edit_location_success.t(:id => @location.id))
               done = true
             end
@@ -733,20 +705,6 @@ class LocationController < ApplicationController
         initialize_description_permissions(@description)
         @description.save
 
-        Transaction.post_location_description(
-          @description.all_notes.merge(
-            :id             => @description,
-            :created_at     => @description.created_at,
-            :source_type    => @description.source_type,
-            :source_name    => @description.source_name,
-            :locale         => @description.locale,
-            :license        => @description.license,
-            :admin_groups   => @description.admin_groups,
-            :writer_groups  => @description.writer_groups,
-            :reader_groups  => @description.reader_groups
-          )
-        )
-
         # Log action in parent location.
         @description.location.log(:log_description_created_at,
                  :user => @user.login, :touch => true,
@@ -775,22 +733,11 @@ class LocationController < ApplicationController
     elsif request.method == "POST"
       @description.attributes = params[:description]
 
-      args = {}
-      args["set_source_type"] = @description.source_type if @description.source_type_changed?
-      args["set_source_name"] = @description.source_name if @description.source_name_changed?
-      args["set_locale"]      = @description.locale      if @description.locale_changed?
-      args["set_license"]     = @description.license     if @description.license_id_changed?
-      for field in LocationDescription.all_note_fields
-        if @description.send("#{field}_changed?")
-          args["set_#{field}".to_sym] = @description.send(field)
-        end
-      end
-
       # Modify permissions based on changes to the two "public" checkboxes.
-      modify_description_permissions(@description, args)
+      modify_description_permissions(@description)
 
       # No changes made.
-      if args.empty?
+      if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
         redirect_to(:action => 'show_location_description',
                     :id => @description.id)
@@ -803,11 +750,6 @@ class LocationController < ApplicationController
       else
         flash_notice(:runtime_edit_location_description_success.t(
                      :id => @description.id))
-
-        if !args.empty?
-          args[:id] = @description
-          Transaction.put_location_description(args)
-        end
 
         # Log action in parent location.
         @description.location.log(:log_description_updated,
@@ -939,22 +881,13 @@ class LocationController < ApplicationController
       unless o.location_id
         o.location_id = location.id
         o.where = nil
-        if o.save
-          Transaction.put_observation(
-            :id           => o,
-            :set_location => location
-          )
-        else
+        if !o.save
           flash_error :runtime_location_merge_failed.t(:name => o.unique_format_name)
           success = false
         end
       end
     end
     return success
-  end
-
-  def tweak
-    print("Tweak called\n")
   end
 
   ##############################################################################

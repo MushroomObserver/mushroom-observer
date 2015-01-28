@@ -30,8 +30,6 @@
 #  == Attributes
 #
 #  id::                    Locally unique numerical id, starting at 1.
-#  sync_id::               Globally unique alphanumeric id,
-#                          used to sync with remote servers.
 #  created_at::            Date/time it was first created.
 #  updated_at::            Date/time it was last updated.
 #  user::                  User that created it.
@@ -214,8 +212,6 @@ class SpeciesList < AbstractModel
       UPDATE species_lists SET `where` = NULL, location_id = #{location.id}
       WHERE `where` = "#{old_name.gsub('"', '\\"')}"
     ))
-    # (no transactions necessary: creating location on foreign server
-    # should initiate identical action)
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
@@ -223,10 +219,6 @@ class SpeciesList < AbstractModel
     unless observations.include?(obs)
       observations.push(obs)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_species_list(
-        :id              => self,
-        :add_observation => obs
-      )
     end
   end
 
@@ -235,10 +227,6 @@ class SpeciesList < AbstractModel
     if observations.include?(obs)
       observations.delete(obs)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_species_list(
-        :id              => self,
-        :del_observation => obs
-      )
     end
   end
 
@@ -393,27 +381,6 @@ class SpeciesList < AbstractModel
     end
 
     self.observations << obs
-
-    Transaction.post_observation(
-      :id           => obs,
-      :date         => args[:when],
-      :location     => obs.location || obs.where,
-      :name         => name,
-      :notes        => args[:notes],
-      :lat          => args[:lat],
-      :long         => args[:long],
-      :alt          => args[:alt],
-      :is_collection_location => args[:is_collection_location],
-      :specimen     => args[:specimen],
-      :projects     => args[:projects],
-      :species_list => self
-    )
-
-    Transaction.post_naming(
-      :observation => obs,
-      :name        => name,
-      :vote        => args[:vote]
-    )
   end
 
   ################################################################################

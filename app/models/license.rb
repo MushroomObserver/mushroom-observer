@@ -14,7 +14,6 @@
 #  == Attributes
 #
 #  id::           Locally unique numerical id, starting at 1.
-#  sync_id::      Globally unique alphanumeric id, used to sync with remote servers.
 #  updated_at::   Date/time it was last updated.
 #  deprecated::   Has this been deprecated?
 #  display_name:: Name, e.g., "Creative Commons Non-commercial v2.5"

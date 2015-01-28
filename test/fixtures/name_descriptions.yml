@@ -4,7 +4,6 @@
 agaricus_campestras_desc:
   id: 1
   name_id: 20
-  sync_id: 1xx1
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user_id: 1
@@ -20,7 +19,6 @@ agaricus_campestras_desc:
 agaricus_campestros_desc:
   id: 2
   name_id: 21
-  sync_id: 2xx1
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user_id: 1
@@ -35,7 +33,6 @@ agaricus_campestros_desc:
 russula_brevipes_author_notes_desc:
   id: 3
   name_id: 32
-  sync_id: 3xx1
   created_at: 2008-03-10 22:33:00
   updated_at: 2008-03-10 22:33:05
   user_id: 1
@@ -50,7 +47,6 @@ russula_brevipes_author_notes_desc:
 russula_cremoricolor_no_author_notes_desc:
   id: 4
   name_id: 33
-  sync_id: 4xx1
   created_at: 2008-03-12 20:53:08
   updated_at: 2008-03-12 20:53:18
   user_id: 1
@@ -65,7 +61,6 @@ russula_cremoricolor_no_author_notes_desc:
 russula_cremoricolor_author_notes_desc:
   id: 5
   name_id: 34
-  sync_id: 5xx1
   created_at: 2008-03-12 20:53:36
   updated_at: 2008-03-12 20:53:40
   user_id: 1
@@ -80,7 +75,6 @@ russula_cremoricolor_author_notes_desc:
 peltigera_desc:
   id: 6
   name_id: 40
-  sync_id: 6xx1
   created_at: 2009-01-01 01:01:01
   updated_at: 2009-01-02 01:01:01
   user_id: 4
@@ -105,7 +99,6 @@ peltigera_desc:
 suillus_desc:
   id: 7
   name_id: 42
-  sync_id: 7xx1
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
   user_id: 4
@@ -121,7 +114,6 @@ suillus_desc:
 draft_coprinus_comatus:
   id: 8
   name_id: 2
-  sync_id: 8xx1
   user_id: 5
   version: 1
   # review_status: NameDescription.review_statuses[:unreviewed]
@@ -139,7 +131,6 @@ draft_coprinus_comatus:
 draft_agaricus_campestris:
   id: 9
   name_id: 3
-  sync_id: 9xx1
   user_id: 2
   version: 1
   # review_status: NameDescription.review_statuses[:unreviewed]
@@ -156,7 +147,6 @@ draft_agaricus_campestris:
 draft_boletus_edulis:
   id: 10
   name_id: 39
-  sync_id: 10xx1
   user_id: 4
   version: 1
   # review_status: NameDescription.review_statuses[:unreviewed]
@@ -173,7 +163,6 @@ draft_boletus_edulis:
 draft_lactarius_alpinus:
   id: 11
   name_id: 13
-  sync_id: 11xx1
   user_id: 5
   version: 1
   # review_status: NameDescription.review_statuses[:unreviewed]
@@ -190,7 +179,6 @@ draft_lactarius_alpinus:
 peltigera_alt_desc:
   id: 12
   name_id: 40
-  sync_id: 12xx1
   created_at: 2010-01-01 01:01:01
   updated_at: 2010-01-01 01:01:01
   user_id: 1
@@ -206,7 +194,6 @@ peltigera_alt_desc:
 peltigera_user_desc:
   id: 13
   name_id: 40
-  sync_id: 13xx1
   created_at: 2010-01-02 01:01:01
   updated_at: 2010-01-02 01:01:01
   user_id: 2
@@ -222,7 +209,6 @@ peltigera_user_desc:
 peltigera_source_desc:
   id: 14
   name_id: 40
-  sync_id: 14xx1
   created_at: 2010-01-03 01:01:01
   updated_at: 2010-01-03 01:01:01
   user_id: 5
@@ -239,7 +225,6 @@ peltigera_source_desc:
 coprinus_comatus_desc:
   id: 15
   name_id: 2
-  sync_id: 15xx1
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user_id: 1

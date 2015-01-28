@@ -2,7 +2,6 @@
 
 detailed_unknown_interest:
   id: 1
-  sync_id: 1xx1
   updated_at: 2008-03-02 21:14:00
   user_id: 3
   target_type: Observation
