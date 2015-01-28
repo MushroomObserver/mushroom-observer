@@ -24,7 +24,7 @@ function MultiImageUploader(localized_text) {
         _uploadImageUri = "/ajax/create_image_object",
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
-        $form = jQuery(document.forms.namedItem("create_observation_form")),
+        $form = jQuery(document.forms.namedItem("observation_form")),
         $submitButtons= $form.find('input[type="submit"]'),
         $goodImages = jQuery('#good_images'),
         $removeLinks = jQuery(".remove_image_link"),
