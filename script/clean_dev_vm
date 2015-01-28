@@ -13,7 +13,7 @@ rm -f config/locales/*.yml
 mv config/locales/en.txt config/locales/en.txt.save
 rm -f config/locales/*.txt
 mv config/locales/en.txt.save config/locales/en.txt
-rm -f app/assets/name_list_data.js
+rm -f app/assets/javascripts/name_list_data.js
 rm -f public/eol.xml
 rm -f public/robots.txt
 rm -rf public/test*
