@@ -153,8 +153,6 @@ module ObservationReport
     end
 
     def clean_rank(val)
-      # :"rank_#{val.downcase}".l
-      # val.blank? ? nil : val.downcase
       val.blank? ? nil : Name.ranks.key(val).to_s
     end
 
@@ -174,16 +172,16 @@ module ObservationReport
     def split_name(name, author, rank)
       gen = cf = sp = ssp = var = f = sp_author = ssp_author = var_author = f_author = nil
       cf = 'cf.' if name.sub!(/ cf\. /, ' ')
-      if %[Genus Species Subspecies Variety Form].include?(rank)
+      if Name.ranks.values_at(:Genus, :Species, :Subspecies, :Variety, :Form).include?(rank)
         f   = $2 if name.sub!(/ f. (\S+)$/, '')
         var = $2 if name.sub!(/ var. (\S+)$/, '')
         ssp = $2 if name.sub!(/ ssp. (\S+)$/, '')
         sp  = $1 if name.sub!(/ (\S+)$/, '')
         gen = name
-        f_author   = author if rank == :Form
-        var_author = author if rank == :Variety
-        ssp_author = author if rank == :Subspecies
-        sp_author  = author if rank == :Species
+        f_author   = author if rank == Name.ranks[:Form]
+        var_author = author if rank == Name.ranks[:Variety]
+        ssp_author = author if rank == Name.ranks[:Subspecies]
+        sp_author  = author if rank == Name.ranks[:Species]
       else
         gen = name.sub(/ .*/, '')
       end
