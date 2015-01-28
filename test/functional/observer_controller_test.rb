@@ -164,6 +164,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(action: 'textile_sandbox')
   end
 
+  def test_observations_by_unknown_user
+    get(:observations_by_user, id: 1e6)
+    assert_response(:redirect)
+  end
+
   def test_altering_types_shown_by_rss_log_index
     # Show none.
     post(:index_rss_log)
