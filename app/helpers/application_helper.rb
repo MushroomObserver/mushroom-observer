@@ -128,10 +128,10 @@ end
   # The new method requires rather sophisticated javascript capabilities
   # (in rails.js).  I'd far prefer to keep the old blindingly simple
   # onclick="return confirm()" mechanism.
-  def link_to(*args)
-    super(*args).sub(/data-confirm="(.*?)"/,
-      'onclick="' + CGI.escapeHTML('return confirm("\1")') + '"').html_safe
-  end
+  #def link_to(*args)
+  #  super(*args).sub(/data-confirm="(.*?)"/,
+   #   'onclick="' + CGI.escapeHTML('return confirm("\1")') + '"').html_safe
+  #end
 
   ##############################################################################
   #
@@ -1443,9 +1443,11 @@ end
 
   def export_link(image_id, exported)
     if exported
-      link_to_function('Not for Export', "image_export(#{image_id},0)")
+      link_to('', {} ,:onclick => "image_export(#{image_id},0)") ##TODO: really fix this.
+      #link_to_function('Not for Export', "image_export(#{image_id},0)")
     else
-      link_to_function('For Export', "image_export(#{image_id},1)")
+      link_to('', {} ,:onclick => "image_export(#{image_id},1)") ##TODO: really fix this.
+      #link_to_function('For Export', "image_export(#{image_id},1)")
     end
   end
 
