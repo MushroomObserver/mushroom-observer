@@ -628,7 +628,7 @@ class NameController < ApplicationController
         :namings => @name.namings.length,
         :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      WebmasterQuestion(@user.email, content).deliver
+      WebmasterEmail.build(@user.email, content).deliver
       NameControllerTest.report_email(content) if TESTING
     end
   end
