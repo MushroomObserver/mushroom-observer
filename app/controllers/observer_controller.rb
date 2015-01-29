@@ -645,7 +645,6 @@ class ObserverController < ApplicationController
       show_selected_observations(query)
     else
       flash_error(:runtime_missing.t(field: "id"))
-      redirect_to(action: "list_rss_logs")
     end
   end
 
