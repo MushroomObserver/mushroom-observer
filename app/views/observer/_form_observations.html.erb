@@ -152,8 +152,7 @@ end %>
     <% end %>
 
   <% if can_do_ajax? && !can_do_multifile_upload? %>
-    <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
-
+    <%= button_tag(:form_observations_upload_another.t, {:onclick => 'image_new()', :id => 'new_image_button'}) %>
     <%= javascript_include('jquery')
     javascript_include('jquery_extensions')
     javascript_tag %(

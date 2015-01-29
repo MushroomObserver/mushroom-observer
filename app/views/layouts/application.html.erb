@@ -6,12 +6,12 @@
   <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
   <% if @canonical_link %>
-    <link rel="canonical" href="<%=escape_once(@canonical_link)%>" />
+      <link rel="canonical" href="<%= escape_once(@canonical_link) %>"/>
   <% end %>
   <%= csrf_meta_tag %>
-  <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png" />
-  <meta property="og:title" content="Mushroom Observer" />
-  <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world." />
+  <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
+  <meta property="og:title" content="Mushroom Observer"/>
+  <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
   <%= javascript_include_tag("jstz.min") %>
   <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
   <%= javascript_tag('var CSRF_TOKEN = "' + form_authenticity_token + '";') %>
@@ -23,7 +23,7 @@
       elsif browser.bot?
         css = MO.default_theme
       else
-        if MO.themes.member?(controller.action_name)  ##what does this do?
+        if MO.themes.member?(controller.action_name) ##what does this do?
           css = controller.action_name
         else
           if !@user.nil?
@@ -78,7 +78,7 @@
       <div class="group">
         <%= :app_latest.t %>:
         <div class="pad-left">
-          <%= link_to(:app_latest_changes.t, {:controller => 'observer', :action => 'list_rss_logs'}) %>
+          <%= link_to(:app_latest_changes.t, {:controller => 'observer', :action => 'list_rss_logs'}, data: {confirm: 'yes'}) %>
           <%= link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %>
           <%= link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %>
           <%= link_to(:app_news.t, :controller => 'observer', :action => 'news') %>
@@ -191,7 +191,8 @@
             </p>
         <% end %>
       </div>
-    </div> <!--END NAVIGATION -->
+    </div>
+    <!--END NAVIGATION -->
 
     <div class="col-md-10"> <!--SEARCH BAR-->
       <div id="search_bar_row" class="row">
@@ -246,7 +247,8 @@
                flash_clear %>
           </div>
         </div>
-      </div> <!--END SEARCH BAR-->
+      </div>
+      <!--END SEARCH BAR-->
 
       <div id="content" class="row">
         <div class="col-xs-12">
@@ -300,19 +302,35 @@
 <%= javascript_include_tag("jstz.min") %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <% javascript_include('jquery')
-javascript_include('image_vote')
-javascript_include('bootstrap')
-javascript_include 'jquery'
-javascript_include 'jquery_extensions'
-javascript_include 'vote_popup' %>
+   javascript_include('image_vote')
+   javascript_include('bootstrap')
+   javascript_include 'jquery'
+   javascript_include 'jquery_extensions'
+   javascript_include 'vote_popup' %>
 <%= sort_javascript_includes.map { |m| javascript_include_tag(m) }.safe_join('') %>
-<% ##a place to inject scripts into the page after the javascript elements have loaded%>
+<% ##a place to inject scripts into the page after the javascript elements have loaded %>
 <%= @scripts %>
 <script>
-    (function (i, s, o, g, r, a, m) {i['GoogleAnalyticsObject'] = r;i[r] = i[r] || function () {(i[r].q = i[r].q || []).push(arguments)}, i[r].l = 1 * new Date();
-        a = s.createElement(o),m = s.getElementsByTagName(o)[0];a.async = 1;a.src = g;m.parentNode.insertBefore(a, m)})
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })
     (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-    ga('create', 'UA-1916187-1', 'auto'); ga('send', 'pageview');
+    ga('create', 'UA-1916187-1', 'auto');
+    ga('send', 'pageview');
+</script>
+<script>
+    jQuery(document).ready(function () {
+        jQuery('body').on('click', '[data-confirm]', function (event) {
+            return confirm($(this).data().confirm);
+        })
+    });
 </script>
 </body>
 </html>

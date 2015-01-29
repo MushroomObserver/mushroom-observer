@@ -11,11 +11,9 @@
 
   <% if @js %>
     <span style="margin-left:10px">&nbsp;</span>
-    <%= button_to_function("#{:MORE.t} »", "image_on(#{index})",
-                           { :id => "image_#{index}_more" }) %>
-    <%= button_to_function("« #{:LESS.t}", "image_off(#{index})",
-                           { :id => "image_#{index}_less", :style => 'display:none' }) %>
-    <%= javascript_tag("jQuery('#image_#{index}_less').hide()") %>
+    <%= button_tag("#{:MORE.t} »",  { :id => "image_#{index}_more" , :onclick => "image_on(#{index})"}) %>
+    <%= button_tag("#{:LESS.t} »",  { :id => "image_#{index}_less" , :onclick => "image_off(#{index})", :style => 'display: none'}) %>
+
   <% end %><br/>
 
   <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
@@ -38,11 +36,13 @@
   </div>
 
   <%= if @js
-    javascript_tag %(
-      CHANGED_DATES[#{index}] = false;
-      jQuery('#image_#{index}_div').hide();
-    )
-  end %>
+       javascript_tag("jQuery('#image_#{index}_less').hide()")
+
+       javascript_tag %(
+            CHANGED_DATES[#{index}] = false;
+            jQuery('#image_#{index}_div').hide();
+            )
+      end %>
 
 </div>
 
