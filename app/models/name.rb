@@ -276,6 +276,14 @@ class Name < AbstractModel
 
   after_update :notify_users
 
+  # Notify webmaster that a new name was created.
+  after_create do |name|
+    user    = User.current || User.admin
+    subject = "#{user.login} created #{name.real_text_name}"
+    content = "#{MO.http_domain}/name/show_name/#{name.id}"
+    WebmasterEmail.build(user.email, content, subject)
+  end
+
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
