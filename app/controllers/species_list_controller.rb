@@ -159,6 +159,7 @@ class SpeciesListController < ApplicationController
     clear_query_in_session
     pass_query_params
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
+      @canonical_url = "#{MO.domain}/species_list/show_species_list/#{@species_list.id}"
       @query = create_query(:Observation, :in_species_list, by: :name,
                             species_list: @species_list)
       store_query_in_session(@query) if !params[:set_source].blank?
@@ -383,7 +384,6 @@ class SpeciesListController < ApplicationController
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       if check_permission!(@species_list)
         @species_list.destroy
-        Transaction.delete_species_list(id: @species_list)
         flash_notice(:runtime_species_list_destroy_success.t(id: params[:id].to_s))
         redirect_to(action: "list_species_lists")
       else
@@ -746,28 +746,6 @@ class SpeciesListController < ApplicationController
       if !@species_list.save
         flash_object_errors(@species_list)
       else
-        if created_or_updated == :created_at
-          Transaction.post_species_list(
-            id:       @species_list,
-            date:     @species_list.when,
-            location: @species_list.location || @species_list.where,
-            title:    @species_list.title,
-            notes:    @species_list.notes
-          )
-        else
-          args = {}
-          args[:date] = @species_list.when  if @species_list.when_changed?
-          if @species_list.where_changed? || @species_list.location_id_changed?
-            args[:location] = @species_list.location || @species_list.where
-          end
-          args[:title] = @species_list.title if @species_list.title_changed?
-          args[:notes] = @species_list.notes if @species_list.notes_changed?
-          if !args.empty?
-            args[:id] = @species_list
-            Transaction.put_species_list(args)
-          end
-        end
-
         @species_list.log("log_species_list_#{created_or_updated}".to_sym)
         if created_or_updated == :created_at
           flash_notice(:runtime_species_list_create_success.t(id: @species_list.id))
@@ -834,10 +812,6 @@ class SpeciesListController < ApplicationController
             alt_name = Name.find(alt_name_id)
             naming.name = alt_name
             naming.save
-            Transaction.put_naming(
-              id:       naming,
-              set_name: alt_name
-            )
           end
         end
       end

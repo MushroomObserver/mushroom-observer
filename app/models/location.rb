@@ -13,7 +13,6 @@
 #  == Attributes
 #
 #  id::           (-) Locally unique numerical id, starting at 1.
-#  sync_id::      (-) Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::   (-) Date/time it was first created.
 #  updated_at::   (V) Date/time it was last updated.
 #  user::         (V) User that created it.
@@ -101,7 +100,6 @@ class Location < AbstractModel
     ]
   )
   non_versioned_columns.push(
-    'sync_id',
     'created_at',
     'updated_at',
     'num_views',
@@ -544,28 +542,16 @@ class Location < AbstractModel
     for obs in old_loc.observations
       obs.location = self
       obs.save
-      Transaction.put_observation(
-        :id           => obs,
-        :set_location => self
-      )
     end
 
     # Move species lists over.
     for spl in SpeciesList.where(location_id: old_loc.id)
       spl.update_attribute(:location, self)
-      Transaction.put_species_list(
-        :id           => spl,
-        :set_location => self
-      )
     end
 
     # Update any users who call this location their primary location.
     for user in User.where(location_id: old_loc.id)
       user.update_attribute(:location, self)
-      Transaction.put_user(
-        :id           => user,
-        :set_location => self
-      )
     end
 
     # Move over any interest in the old name.
@@ -601,7 +587,6 @@ class Location < AbstractModel
       }
       desc.location_id = self.id
       desc.save
-      Transaction.put_location_description(xargs)
     end
 
     # Log the action.
@@ -623,7 +608,6 @@ class Location < AbstractModel
 
     # Finally destroy the location.
     old_loc.destroy
-    Transaction.delete_location(:id => old_loc)
   end
 
   ##############################################################################

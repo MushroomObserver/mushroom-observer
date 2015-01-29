@@ -9,8 +9,6 @@
 #  == Attributes
 #
 #  id::                     Locally unique numerical id, starting at 1.
-#  sync_id::                Globally unique alphanumeric id,
-#                           used to sync with remote servers.
 #  created_at::             Date/time it was created.
 #  updated_at::             Date/time it was last updated.
 #  user::                   User that created it.
@@ -89,32 +87,12 @@ class Naming < AbstractModel
     end
   end
 
-  def save_with_transaction
-    args = transaction_args
-    if save
-      args[:id] = self
-      Transaction.create(args)
-      true
-    else
-      false
-    end
-  end
-
   # Update naming and log changes.
   def update_object(new_name, log)
     self.name = new_name
     save
     observation.log(:log_naming_updated,
                     name: format_name, touch: log)
-
-    # Always tell Transaction to change reasons, even if no changes.
-    args = { id: self }
-    args[:set_name] = name
-    get_reasons.select(&:used?).each do |reason|
-      args["set_reason_#{reason.num}".to_sym] = reason.notes
-    end
-    Transaction.put_naming(args)
-
     true
   end
 
@@ -581,18 +559,5 @@ class Naming < AbstractModel
     if !self.user && !User.current
       errors.add(:user, :validate_naming_user_missing.t)
     end
-  end
-
-  private
-
-  def transaction_args
-    args = { action: "naming" }
-    if new_record?
-      args.merge(method: "post", name: name, observation: observation)
-    else
-      args[:set_name] = name if name_id_changed?
-      args[:set_observation] = observation if observation_id_changed?
-      args.merge(method: "put")
-     end
   end
 end

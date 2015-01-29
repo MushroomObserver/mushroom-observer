@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141230043405) do
+ActiveRecord::Schema.define(version: 20150127220000) do
 
   create_table "api_keys", force: true do |t|
     t.datetime "created_at"
@@ -30,7 +30,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.text     "comment"
     t.string   "target_type", limit: 30
     t.integer  "target_id"
-    t.string   "sync_id",     limit: 16
     t.datetime "updated_at"
   end
 
@@ -140,7 +139,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.integer  "license_id",                   default: 1,     null: false
     t.integer  "num_views",                    default: 0,     null: false
     t.datetime "last_view"
-    t.string   "sync_id",          limit: 16
     t.integer  "width"
     t.integer  "height"
     t.float    "vote_cache"
@@ -164,7 +162,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.integer  "target_id"
     t.integer  "user_id"
     t.boolean  "state"
-    t.string   "sync_id",     limit: 16
     t.datetime "updated_at"
   end
 
@@ -182,12 +179,10 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.string   "url",          limit: 200
     t.boolean  "deprecated",               default: false, null: false
     t.string   "form_name",    limit: 20
-    t.string   "sync_id",      limit: 16
     t.datetime "updated_at"
   end
 
   create_table "location_descriptions", force: true do |t|
-    t.string   "sync_id",         limit: 16
     t.integer  "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -250,7 +245,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
   end
 
   create_table "locations", force: true do |t|
-    t.string   "sync_id",         limit: 16
     t.integer  "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -288,7 +282,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
   end
 
   create_table "name_descriptions", force: true do |t|
-    t.string   "sync_id",         limit: 16
     t.integer  "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -362,7 +355,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
   end
 
   create_table "names", force: true do |t|
-    t.string   "sync_id",             limit: 16
     t.integer  "version"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -415,19 +407,17 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.integer  "observation_id"
     t.integer  "name_id"
     t.integer  "user_id"
-    t.float    "vote_cache",                default: 0.0
-    t.string   "sync_id",        limit: 16
+    t.float    "vote_cache",     default: 0.0
     t.text     "reasons"
   end
 
   create_table "notifications", force: true do |t|
-    t.integer  "user_id",                     default: 0,     null: false
+    t.integer  "user_id",          default: 0,     null: false
     t.integer  "flavor"
     t.integer  "obj_id"
     t.text     "note_template"
-    t.string   "sync_id",          limit: 16
     t.datetime "updated_at"
-    t.boolean  "require_specimen",            default: false, null: false
+    t.boolean  "require_specimen", default: false, null: false
   end
 
   create_table "observations", force: true do |t|
@@ -444,7 +434,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.float    "vote_cache",                                                    default: 0.0
     t.integer  "num_views",                                                     default: 0,     null: false
     t.datetime "last_view"
-    t.string   "sync_id",                limit: 16
     t.integer  "rss_log_id"
     t.decimal  "lat",                                 precision: 15, scale: 10
     t.decimal  "long",                                precision: 15, scale: 10
@@ -473,7 +462,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.integer  "user_group_id",              default: 0,  null: false
     t.string   "title",          limit: 100, default: "", null: false
     t.text     "summary"
-    t.string   "sync_id",        limit: 16
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "rss_log_id"
@@ -548,7 +536,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.string   "where",       limit: 1024
     t.string   "title",       limit: 100
     t.text     "notes"
-    t.string   "sync_id",     limit: 16
     t.integer  "rss_log_id"
     t.integer  "location_id"
   end
@@ -564,12 +551,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
   end
 
   create_table "synonyms", force: true do |t|
-    t.string "sync_id", limit: 16
-  end
-
-  create_table "transactions", force: true do |t|
-    t.datetime "updated_at"
-    t.text     "query"
   end
 
   create_table "translation_strings", force: true do |t|
@@ -596,11 +577,10 @@ ActiveRecord::Schema.define(version: 20141230043405) do
   end
 
   create_table "user_groups", force: true do |t|
-    t.string   "name",                  default: "",    null: false
-    t.string   "sync_id",    limit: 16
+    t.string   "name",       default: "",    null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.boolean  "meta",                  default: false
+    t.boolean  "meta",       default: false
   end
 
   create_table "user_groups_users", id: false, force: true do |t|
@@ -645,7 +625,6 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.boolean  "email_general_commercial",                default: true,  null: false
     t.boolean  "email_general_question",                  default: true,  null: false
     t.boolean  "email_html",                              default: true,  null: false
-    t.string   "sync_id",                      limit: 16
     t.datetime "updated_at"
     t.boolean  "admin"
     t.boolean  "created_here"
@@ -671,8 +650,7 @@ ActiveRecord::Schema.define(version: 20141230043405) do
     t.datetime "updated_at"
     t.integer  "naming_id"
     t.integer  "user_id"
-    t.integer  "observation_id",            default: 0
-    t.string   "sync_id",        limit: 16
+    t.integer  "observation_id", default: 0
     t.boolean  "favorite"
     t.float    "value"
   end

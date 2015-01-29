@@ -126,7 +126,6 @@ class AbstractModelTest < UnitTestCase
     num_past_name_descs= NameDescription.versioned_class.count
     num_past_locations = Location.versioned_class.count
     num_past_loc_descs = LocationDescription.versioned_class.count
-    num_transactions   = Transaction.count
 
     for attrs, obj in [
       [ obs_attrs,      obs      ],
@@ -147,7 +146,6 @@ class AbstractModelTest < UnitTestCase
     assert_equal(num_past_name_descs+ 0, NameDescription.versioned_class.count)
     assert_equal(num_past_locations + 0, Location.versioned_class.count)
     assert_equal(num_past_loc_descs + 0, LocationDescription.versioned_class.count)
-    assert_equal(num_transactions   + 0, Transaction.count)
   end
 
   # -------------------------------------------------------------------
@@ -231,7 +229,7 @@ class AbstractModelTest < UnitTestCase
 
     rss_log.update_attribute(:updated_at, time)
     name.update_attribute(:author, 'New Author')
-    # This is normally done by Name#save_with_transaction
+    # This is normally done by Name#save_with_log
     name.log(:log_name_updated_at, :user => rolf.login, :touch => true)
     rss_log.reload
     assert_rss_log_lines(2, rss_log)

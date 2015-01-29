@@ -1,7 +1,6 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 ccnc25:
   id: 1
-  sync_id: 1xx1
   display_name: Creative Commons Non-commercial v2.5
   url: http://creativecommons.org/licenses/by-nc-sa/2.5/
   deprecated: true
@@ -9,7 +8,6 @@ ccnc25:
 
 ccnc30:
   id: 2
-  sync_id: 2xx1
   display_name: Creative Commons Non-commercial v3.0
   url: http://creativecommons.org/licenses/by-nc-sa/3.0/
   deprecated: false
@@ -17,7 +15,6 @@ ccnc30:
 
 ccwiki30:
   id: 3
-  sync_id: 3xx1
   display_name: Creative Commons Wikipedia Compatible v3.0
   url: http://creativecommons.org/licenses/by-sa/3.0/
   deprecated: false

@@ -195,22 +195,17 @@ class CommentController < ApplicationController
       @comment = Comment.new
       @comment.target = @target
     else
-      @comment = Comment.new(comment_whitelisted_params)
+      @comment = Comment.new
+      @comment.attributes = whitelisted_comment_params if params[:comment]
       @comment.target = @target
       if !@comment.save
         flash_object_errors(@comment)
       else
         type = @target.type_tag
-        Transaction.post_comment(
-          id: @comment,
-          type     => @target,
-          summary: @comment.summary,
-          content: @comment.comment
-        )
         @comment.log_create
         flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
         redirect_with_query(controller: @target.show_controller,
-          action: @target.show_action, id: @target.id)
+                            action: @target.show_action, id: @target.id)
       end
     end
   end
@@ -236,18 +231,13 @@ class CommentController < ApplicationController
         redirect_with_query(controller: @target.show_controller,
           action: @target.show_action, id: @target.id)
       elsif request.method == "POST"
-        @comment.attributes = comment_whitelisted_params
-        xargs = {}
-        xargs[:summary] = @comment.summary if @comment.summary_changed?
-        xargs[:content] = @comment.comment if @comment.comment_changed?
-        if xargs.empty?
+        @comment.attributes = whitelisted_comment_params if params[:comment]
+        if !@comment.changed?
           flash_notice(:runtime_no_changes.t)
           done = true
         elsif !@comment.save
           flash_object_errors(@comment)
         else
-          xargs[:id] = @comment
-          Transaction.put_comment(xargs)
           @comment.log_update
           flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
           done = true
@@ -275,7 +265,6 @@ class CommentController < ApplicationController
       elsif !@comment.destroy
         flash_error(:runtime_form_comments_destroy_failed.t(id: id))
       else
-        Transaction.delete_comment(id: @comment)
         @comment.log_destroy
         flash_notice(:runtime_form_comments_destroy_success.t(id: id))
       end
@@ -301,7 +290,7 @@ class CommentController < ApplicationController
 ################################################################################
   private
 
-  def comment_whitelisted_params
-    params.require(:comment).permit(:summary, :comment)
+  def whitelisted_comment_params
+    params[:comment].permit([:summary, :comment])
   end
 end

@@ -94,7 +94,8 @@ class ApplicationController < ActionController::Base
   require "csv"
   include LoginSystem
 
-  around_filter :catch_errors # if TESTING
+  around_filter :catch_errors # if Rails.env == "test"
+  before_filter :kick_out_robots
   before_filter :create_view_instance_variable
   before_filter :verify_authenticity_token
   before_filter :block_ip_addresses
@@ -125,8 +126,6 @@ class ApplicationController < ActionController::Base
     before_filter { User.current = nil }
   end
 
-
-
   ## @view can be used by classes to access some view specific features like render
   def create_view_instance_variable
     @view = view_context
@@ -152,8 +151,18 @@ class ApplicationController < ActionController::Base
   # alone.  This seems much more graceful... and it lets the user know why they
   # are experiencing otherwise bewildering and incorrect behavior.
   def handle_unverified_request
-    render(:text => "Cross-site Request Forgery detected!", :layout => false)
+    render(text: "Cross-site Request Forgery detected!", layout: false)
     return false
+  end
+
+  # Physically eject robots unless they're looking at accepted pages.
+  def kick_out_robots
+    return unless browser.bot?
+    controller = params[:controller]
+    action     = params[:action]
+    unless Robots.allowed?(controller, action)
+      render(text: "Robots are not allowed on this page.", status: 403)
+    end
   end
 
   # Filter to run before anything else to protect against denial-of-service attacks.
@@ -197,10 +206,17 @@ class ApplicationController < ActionController::Base
     return layout
   end
 
-  # Catch errors for integration tests.
+  # Catch errors for integration tests, and report stats about completed request.
   def catch_errors
-logger.warn('SESSION: ' + session.inspect)
+    start      = Time.now
+    controller = params[:controller]
+    action     = params[:action]
+    robot      = browser.bot? ? "robot" : "user"
+    ip         = request.remote_ip rescue "unknown"
+    url        = request.url       rescue "unknown"
+    ua         = browser.ua        rescue "unknown"
     yield
+    logger.warn("TIME: #{Time.now-start} #{status} #{controller} #{action} #{robot} #{ip}\t#{url}\t#{ua}")
   rescue => e
     @error = e
     raise e
@@ -518,7 +534,6 @@ logger.warn('SESSION: ' + session.inspect)
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
       @user.update(:locale => I18n.locale.to_s)
-      Transaction.put_user(:id => @user, :set_locale => I18n.locale.to_s)
     end
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
@@ -695,15 +710,16 @@ logger.warn('SESSION: ' + session.inspect)
     end
   end
 
-  def save_with_transaction(obj)
+  def save_with_log(obj)
     type_sym = obj.class.to_s.underscore.to_sym
-    if (result = obj.save_with_transaction)
+    if obj.save
       flash_notice(:runtime_created_at.t(type: type_sym))
+      return true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
       flash_object_errors(obj)
+      return false
     end
-    result
   end
 
   def object_flashes(obj)
@@ -749,7 +765,7 @@ logger.warn('SESSION: ' + session.inspect)
       if approved_names.is_a?(String)
         approved_names = approved_names.split(/\r?\n/)
       end
-      for ns in name_list
+      for ns in name_list.split("\n")
         if !ns.blank?
           name_parse = NameParse.new(ns)
           construct_approved_name(name_parse, approved_names, deprecate)
@@ -834,7 +850,7 @@ logger.warn('SESSION: ' + session.inspect)
 
         # Deprecate and save.
         synonym.change_deprecated(true)
-        synonym.save_with_transaction(:log_deprecated_by, :touch => true)
+        synonym.save_with_log(:log_deprecated_by, :touch => true)
         Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
       end
     end
@@ -884,7 +900,9 @@ logger.warn('SESSION: ' + session.inspect)
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query=nil)
-    if query
+    if browser.bot?
+      {}
+    elsif query
       query.save if !query.id
       {:q => query.id.alphabetize}
     else
@@ -894,13 +912,13 @@ logger.warn('SESSION: ' + session.inspect)
   helper_method :query_params
 
   def add_query_param(params, query=nil)
-    if query
+    if browser.bot?
+      # do nothing
+    elsif query
       query.save if !query.id
       params[:q] = query.id.alphabetize
-    else
-      if @query_params
-        params[:q] = @query_params[:q]
-      end
+    elsif @query_params
+      params[:q] = @query_params[:q]
     end
     params
   end
@@ -925,7 +943,9 @@ logger.warn('SESSION: ' + session.inspect)
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
     @query_params = {}
-    if query
+    if browser.bot?
+      # do nothing
+    elsif query
       query.save if !query.id
       @query_params[:q] = query.id.alphabetize
     end

@@ -106,13 +106,6 @@ class AccountController < ApplicationController
           flash_object_errors(@new_user)
         else
           group = UserGroup.create_user(@new_user)
-          Transaction.post_user(
-            id: @new_user,
-            name: @new_user.name,
-            email: @new_user.email,
-            login: @new_user.login,
-            group: group
-          )
           flash_notice :runtime_signup_success.t
           VerifyEmail.build(@new_user).deliver
           redirect_back_or_default(action: :welcome)
@@ -330,7 +323,6 @@ class AccountController < ApplicationController
       end
     end
 
-    xargs = {}
     for type, arg, post in [
       [ :str,  :login,           true ],
       [ :str,  :email,           true ],
@@ -379,8 +371,6 @@ class AccountController < ApplicationController
       end
       if @user.send(arg) != val
         @user.send("#{arg}=", val)
-        arg = arg.to_s.sub(/_id/, "")
-        xargs[:"set_#{arg}"] = val if post
       end
     end
 
@@ -392,10 +382,6 @@ class AccountController < ApplicationController
     else
       if legal_name_change
         Image.update_copyright_holder(*legal_name_change, @user)
-      end
-      if !xargs.empty?
-        xargs[:id] = @user
-        Transaction.put_user(xargs)
       end
       flash_notice(:runtime_prefs_success.t)
     end
@@ -411,12 +397,10 @@ class AccountController < ApplicationController
       @upload_license_id = @user.license.id
 
     else
-      xargs = {}
       for arg in [:name, :notes, :mailing_address]
         val = params[:user][arg].to_s
         if @user.send(arg) != val
           @user.send("#{arg}=", val)
-          xargs[:"set_#{arg}"] = val
         end
       end
 
@@ -428,12 +412,10 @@ class AccountController < ApplicationController
           need_to_create_location = true
         elsif @user.location != location
           @user.location = location
-          xargs[:set_location] = location
           @place_name = location.display_name
         end
       elsif @user.location
         @user.location = nil
-        xargs[:set_location] = 0
       end
 
       # Check if we need to upload an image.
@@ -463,15 +445,7 @@ class AccountController < ApplicationController
           flash_error(:runtime_profile_invalid_image.t(name: name))
           flash_object_errors(image)
         else
-          Transaction.post_image(
-            id: image,
-            date: date,
-            url: image.original_url,
-            copyright_holder: holder,
-            license: license
-          )
           @user.image = image
-          xargs[:set_image] = image
           name = image.original_name
           name = "##{image.id}" if name.empty?
           flash_notice(:runtime_profile_uploaded_image.t(name: name))
@@ -488,10 +462,6 @@ class AccountController < ApplicationController
         if legal_name_change
           Image.update_copyright_holder(*legal_name_change, @user)
         end
-        if !xargs.empty?
-          xargs[:id] = @user
-          Transaction.put_user(xargs)
-        end
         if need_to_create_location
           flash_notice(:runtime_profile_must_define.t)
           redirect_to(controller: "location", action: "create_location",
@@ -507,7 +477,6 @@ class AccountController < ApplicationController
   def remove_image
     if @user && @user.image
       @user.update(image: nil)
-      Transaction.put_user(id: @user, set_image: 0)
       flash_notice(:runtime_profile_removed_image.t)
     end
     redirect_to(controller: "observer", action: "show_user", id: @user.id)
@@ -663,10 +632,6 @@ class AccountController < ApplicationController
               t(user: user_name, group: group_name)
           else
             user.user_groups << group
-            Transaction.put_user_group(
-              id: group,
-              add_user: user
-            )
             flash_notice :add_user_to_group_success. \
               t(user: user_name, group: group_name)
           end
@@ -726,7 +691,6 @@ class AccountController < ApplicationController
       if !id.blank?
         user = User.safe_find(id)
         if user
-          Transaction.delete_user(id: user)
           User.erase_user(id)
         end
       end

@@ -352,7 +352,7 @@ module SessionExtensions
           else
             hash[field.name] = nil
           end
-        elsif field.value.to_s != ''
+        else
           hash[field.name] = field.value
         end
       end

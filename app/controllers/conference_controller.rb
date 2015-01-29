@@ -29,7 +29,7 @@ class ConferenceController < ApplicationController
   def create_event # :norobots:
     if is_in_admin_mode? # Probably should be expanded to any MO user
       if request.method == "POST"
-        event = ConferenceEvent.new(event_whitelisted_params)
+        event = ConferenceEvent.new(whitelisted_event_params)
         event.save
         redirect_to(action: "show_event", id: event.id)
       end
@@ -45,7 +45,7 @@ class ConferenceController < ApplicationController
     if is_in_admin_mode?
       if request.method == "POST"
         event = ConferenceEvent.find(params[:id].to_s)
-        event.attributes = event_whitelisted_params
+        event.attributes = whitelisted_event_params
         event.save
         redirect_to(action: "show_event", id: event.id)
       else
@@ -64,7 +64,7 @@ class ConferenceController < ApplicationController
       registration = find_previous_registration(params)
       if registration.nil?
         registration = ConferenceRegistration.
-          new(registration_whitelisted_params)
+          new(whitelisted_registration_params)
         registration.conference_event = event
         registration.save
         flash_notice(:register_success.l(name: event.name,
@@ -86,7 +86,7 @@ class ConferenceController < ApplicationController
     result = all_registrations.first
     before = result.describe
     flash_warning(:register_update_warning.t(description: before))
-    result.update_from_params(registration_whitelisted_params)
+    result.update_from_params(whitelisted_registration_params)
     result.save
     QueuedEmail::UpdateRegistration.create_email(@user, result, before)
     result
@@ -120,14 +120,14 @@ class ConferenceController < ApplicationController
 ################################################################################
   private
 
-  def event_whitelisted_params
+  def whitelisted_event_params
     params.require(:event).
            permit(:name, :location, :description, :registration_note,
                   "start(1i)", "start(2i)", "start(3i)",
                   "end(1i)", "end(2i)", "end(3i)")
   end
 
-  def registration_whitelisted_params
+  def whitelisted_registration_params
     params.require(:registration).permit(:name, :email, :how_many, :notes)
   end
 end
