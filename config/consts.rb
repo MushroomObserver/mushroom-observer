@@ -134,4 +134,8 @@ MushroomObserver::Application.configure do
   # Flag intended for controller when the debugger gets invoked.
   # Use with lines like: debugger if MO.debugger_flag
   config.debugger_flag = false
+
+  # Watch objects with comment wars between these two sets of users.
+  config.water_users = []
+  config.oil_users   = []
 end

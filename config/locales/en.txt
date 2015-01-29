@@ -2885,7 +2885,7 @@
   email_subject_features: New [:app_title] Features
   email_subject_location_change: "[name] Has Been Changed"
   email_subject_naming_for_observer: Research Request
-  email_subject_naming_for_tracker: Naming Notification
+  email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
   email_subject_new_password: New Password

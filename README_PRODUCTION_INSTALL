@@ -287,3 +287,4 @@ root> ps -ef | grep postfix
 # If any are missing, do this on ubuntu/debian:
 root> update-rc.d $SERVICE defaults
 
+# CHECK THE DATE and TIME!!!

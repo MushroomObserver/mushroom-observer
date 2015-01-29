@@ -2,7 +2,7 @@
 class NamingTrackerEmail < AccountMailer
   def build(tracker, naming)
     setup_user(tracker)
-    @title = :email_subject_naming_for_tracker.l
+    @title = :email_subject_naming_for_tracker.l(:name => naming.name.real_search_name)
     @observation = naming.observation
     @naming = naming
     debug_log(:naming_for_observer, nil, tracker,
