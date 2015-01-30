@@ -225,10 +225,11 @@ class Comment < AbstractModel
     water = (user_ids & MO.water_users).any?
     oil   = (user_ids & MO.oil_users).any?
     if water && oil
-      obs_id   = target_id
+      target   = target_type.camelize.constantize.safe_find(target_id) rescue nil
+      show_url = target.show_url rescue "(can't find object?!)"
       logins   = User.where(id: user_ids).map(&:login)
-      subject  = "Oil and water on observation ##{obs_id}"
-      content  = "Observation: #{MO.http_domain}/#{obs_id}\n" +
+      subject  = "Oil and water on #{target_type} ##{target_id}"
+      content  = "#{show_url}\n" +
                  "All users: #{logins.join(", ")}\n\n" +
                  "User: #{user.login}\nSummary: #{summary}\n\n#{comment}"
       WebmasterEmail.build(MO.noreply_email_address, content, subject).deliver
