@@ -1409,23 +1409,25 @@ end
     return result
   end
 
-  # Draw a thumbnail image.  It takes either an Image instance or an id.  Args:
-  # link::      a hash of {controller: , action:, id: }
+  # Draw a thumbnail image.  It takes either an Image instance or an id.
+  # Args:
+  # link::      a hash of { controller:, action:, id: }
   # size::      Size to show, default is thumbnail
   # original::  Show original file name?
   # votes::     Show vote buttons?
+  def thumbnail(image, args={}) ##TODO: Add size option
+    image = Image.find(image) if image.is_a?(Integer)
+    args[:link].is_a?(Symbol) ? link = args[:link].to_s : link = args[:link]
 
-def thumbnail(image, args={}) ##TODO: Add size option
-  if image.is_a?(Numeric)
-    image = Image.find(image)
+    render(partial: "image/image_thumbnail",
+           locals: { image:    image,
+                     link:     link,
+                     votes:    args[:votes],
+                     size:     args[:size],
+                     original: args[:original]
+           }
+    )
   end
-
-  render(:partial => 'image/image_thumbnail', :locals => {:image => image,
-                                                          :link => args[:link],
-                                                          :votes => args[:votes],
-                                                          :size => args[:size],
-                                                          :original => args[:original]})
-end
 
   # Provide the copyright for an image
   def image_copyright(image, div=true)
