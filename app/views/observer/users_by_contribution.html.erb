@@ -2,7 +2,7 @@
   @title = :users_by_contribution_title.t
 
   new_tab_set do
-    add_tab(:app_site_stats.t, :action => 'show_site_stats')
+    add_tab(:app_site_stats.t, action: 'show_site_stats')
   end
 %>
 
@@ -15,8 +15,10 @@
             <tr>
               <td>
                 <%= if user.image_id
-                  thumbnail(user.image_id, :border => 0, :link => :show_user,
-                        :user => user.id, :votes => false, :size => :thumbnail)
+                  thumbnail(
+                    user.image_id, border: 0, link: { action: :show_user },
+                    user: user.id, votes: false, size: :thumbnail
+                  )
                 end %>
               </td>
               <td>
@@ -24,13 +26,13 @@
                   <%= user_link(user.id, user.legal_name) %>
                 </span>
                 <%= if @user and (user.id == @user.id)
-                  link_to("(#{user.percent_complete}%)", :controller => "account", :action => "profile")
+                  link_to("(#{user.percent_complete}%)", controller: "account", action: "profile")
                 else
                   "(#{user.percent_complete}%)"
                 end %>
               </td>
               <td>
-                <%= link_to(:observations.t, :action => "observations_by_user", :id => user.id) %>
+                <%= link_to(:observations.t, action: "observations_by_user", id: user.id) %>
               </td>
               <td>
                 <%= user_link(user.id, user.contribution) %>
