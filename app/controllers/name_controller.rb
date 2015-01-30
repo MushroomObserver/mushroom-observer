@@ -963,7 +963,7 @@ class NameController < ApplicationController
   def whitelisted_name_description_params
     params.required(:description).
       permit(:classification, :gen_desc, :diag_desc, :distribution, :habitat,
-      :look_alikes, :uses, :refs, :notes, :source_name,
+      :look_alikes, :uses, :refs, :notes, :source_name, :project_id,
       :source_type, :public, :public_write)
   end
 
