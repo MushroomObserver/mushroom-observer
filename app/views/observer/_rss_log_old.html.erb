@@ -3,21 +3,21 @@
    target_name = target ? target.unique_format_name.t : rss_log.unique_format_name.t
    tag, args, time = rss_log.parse_log.first rescue []
    if not target_type
-     title = :rss_destroyed.t(:type => :object)
+     title = :rss_destroyed.t(type: :object)
      detail = nil
    elsif not target or
            tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
-     title = :rss_destroyed.t(:type => target_type)
+     title = :rss_destroyed.t(type: target_type)
      detail = tag.t(args) rescue nil
    elsif not time or time < target.created_at + 1.minute
-     title = :rss_created_at.t(:type => target_type)
+     title = :rss_created_at.t(type: target_type)
      if target_type == :observation || target_type == :species_list
        #detail = nil
      else
-       detail = :rss_by.t(:user => target.user.legal_name) rescue nil
+       detail = :rss_by.t(user: target.user.legal_name) rescue nil
      end
    else
-     title = :rss_changed.t(:type => target_type)
+     title = :rss_changed.t(type: target_type)
      detail = nil
      if (target_type == :observation ||
              target_type == :species_list) and
@@ -45,18 +45,18 @@
   <tr style="padding-bottom:0px">
     <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <%= if target and target_type == :species_list  ##TODO: turn this into a switch statement
-        link_with_query(image_tag('splist.png', :border => 0),
-          :controller => :species_list, :action => :show_species_list,
-          :id => target.id) + safe_br
+        link_with_query(image_tag('splist.png', border: 0),
+          controller: :species_list, action: :show_species_list,
+          id: target.id) + safe_br
       elsif target and target_type == :observation and target.thumb_image
-        thumbnail(target.thumb_image, :border => 0, :votes => true,
-                  :link => :show_observation, :obs => target.id) + safe_br
+        thumbnail(target.thumb_image, border: 0, votes: true,
+                  link: { action: :show_observation }, obs: target.id) + safe_br
       elsif target and target_type == :glossary_term and target.thumb_image
-        thumbnail(target.thumb_image, :border => 0, :votes => true,
-                  :link => :show_glossary_term, :glossary_term => target.id) + safe_br
+        thumbnail(target.thumb_image, border: 0, votes: true,
+                  link: { action: :show_glossary_term}, glossary_term: target.id) + safe_br
       else
         done_title = true
-        content_tag(:span, title, :class => 'ListRssHeader') ##TODO: This only happens when there is no image, deal with this case first
+        content_tag(:span, title, class: 'ListRssHeader') ##TODO: This only happens when there is no image, deal with this case first
       end %>
     </td>
 
@@ -80,11 +80,11 @@
       %>
         <span class="ListWhat">
           <%= if target  ##If a target is not nil then make a link to with the targets name to the controller.
-            link_with_query(target_name, :controller => target.show_controller,
-              :action => target.show_action, :id => target.id)
+            link_with_query(target_name, controller: target.show_controller,
+              action: target.show_action, id: target.id)
           else
-            link_with_query(target_name, :controller => :observer,
-              :action => :show_rss_log, :id => rss_log.id)
+            link_with_query(target_name, controller: :observer,
+              action: :show_rss_log, id: rss_log.id)
           end %>
         </span><br/>
       <% end %>
