@@ -1416,8 +1416,8 @@ end
   # original::  Show original file name?
   # votes::     Show vote buttons?
   def thumbnail(image, args={}) ##TODO: Add size option
-    image = Image.find(image) if image.is_a?(Integer)
-    args[:link].is_a?(Symbol) ? link = args[:link].to_s : link = args[:link]
+    image = Image.find(image) unless image.is_a?(Image)
+    link = args[:link].is_a?(Symbol) ? args[:link].to_s : args[:link]
 
     render(partial: "image/image_thumbnail",
            locals: { image:    image,
