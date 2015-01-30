@@ -119,8 +119,8 @@ class ExpertTest < IntegrationTestCase
     ]
     list = names.join("\r\n")
 
-    amanita = where(text_name: "Amanita baccata")
-    suillus = where(text_name: "Suillus")
+    amanita = Name.where(text_name: "Amanita baccata")
+    suillus = Name.where(text_name: "Suillus")
 
     albion = locations(:albion)
     albion_name = albion.name
@@ -291,7 +291,7 @@ class ExpertTest < IntegrationTestCase
     sess.assert_flash_success
     sess.assert_template('species_list/show_species_list')
     sess.assert_select('div#Title', :text => /#{spl.title}/)
-    sess.assert_select('p', :text => /Slartibartfast/)
-    sess.assert_select('p', :text => /Steatopygia/)
+    sess.assert_select('div.comment', :text => /Slartibartfast/)
+    sess.assert_select('div.comment', :text => /Steatopygia/)
   end
 end
