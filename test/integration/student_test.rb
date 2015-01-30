@@ -73,8 +73,9 @@ class StudentTest < IntegrationTestCase
 
       # Check that initial form is correct.
       open_form do |form|
-        form.assert_value('source_type', 'project')
+        form.assert_value('source_type', :project)
         form.assert_value('source_name', project.title)
+        form.assert_value('project_id', project.id)
         form.assert_value('public_write', false)
         form.assert_value('public', false)
         form.assert_hidden('source_type')
@@ -95,7 +96,7 @@ class StudentTest < IntegrationTestCase
       # displayed (content, that is) on main show_name page.
       click(:href => /edit_name_description/)
       open_form do |form|
-        form.assert_value('source_type', 'project')
+        form.assert_value('source_type', :project)
         form.assert_value('source_name', project.title)
         form.assert_value('public_write', false)
         form.assert_value('public', false)
