@@ -170,6 +170,11 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:textile_sandbox)
   end
 
+  def test_page_load_user_by_contribution
+    get_with_dump(:users_by_contribution)
+    assert_template(:users_by_contribution)
+  end
+
   def test_observations_by_unknown_user
     get(:observations_by_user, id: 1e6)
     assert_redirected_to(action: :index_user)
