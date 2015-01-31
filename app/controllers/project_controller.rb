@@ -111,6 +111,8 @@ class ProjectController < ApplicationController
     store_location
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
+      @canonical_url = "#{MO.domain}/project/show_project/#{@project.id}"
+
       @is_member = @project.is_member?(@user)
       @is_admin = @project.is_admin?(@user)
 

@@ -47,6 +47,7 @@ class HerbariumController < ApplicationController
   def show_herbarium  # :nologin:
     store_location
     @herbarium = Herbarium.find(params[:id].to_s)
+    @canonical_url = "#{MO.domain}/herbarium/show_herbarium/#{@herbarium.id}"
     if request.method == "POST"
       herbarium = Herbarium.find(params[:id].to_s)
       login = params[:curator][:name].sub(/ <.*/, '')

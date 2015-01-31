@@ -70,8 +70,8 @@
   image: image
   IMAGES: Images
   images: images
-  ignore: ignore
   IGNORE: Ignore
+  ignore: ignore
   herbaria: herbaria
   HERBARIA: Herbaria
   herbarium: herbarium
@@ -502,8 +502,7 @@
   UNKNOWN: Unknown
   unknown: unknown
 
-  # Permissions:  ""
-  # access; private means the current user does not have access; default means
+  # Permissions -- private means the current user does not have access; default means
   # this is the default description that shows up on the show_name/location page
   # (synonyms that might work better are "principle" or "main" or "official").
   PRIVATE: Private
@@ -598,9 +597,7 @@
   naming_reason_label_3: Based on microscopic features
   naming_reason_label_4: Based on chemical features
 
-  # Name/location description types.  These are used as page title and in index
-  # results:  ""
-  # object ([object]) they're describing.
+  # Name/location description types.  These are used as page title and in index results.
   description_full_title_public: Public [:DESCRIPTION] of [object]
   description_full_title_foreign: "[:DESCRIPTION] of [object] from [text]"
   description_full_title_project: Draft of [object] for [text] by [user]
@@ -622,7 +619,7 @@
   description_part_title_source_with_text: "[:DESCRIPTION] From [TEXT]"
   description_part_title_user_with_text: "[TEXT] by [USER]"
 
-  # Footers:  ""
+  # Footers.
   footer_created_at: "*[:Created]:* [date]"
   footer_created_by: "*[:Created]:* [date] *by* [user]"
   footer_updated_at: "*[:Modified]:* [date]"
@@ -715,7 +712,7 @@
   user_stats_observations_without_voucher: All Other Observations
   user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
   user_stats_species_lists: "[:SPECIES_LISTS]"
-  user_stats_users:  ""
+  user_stats_users: ""
   user_stats_votes: "[:VOTES]"
 
   # Site statistics field names.
@@ -723,13 +720,13 @@
   site_stats_images: "[:IMAGES]"
   site_stats_listed_taxa: Listed Taxa
   site_stats_location_descriptions_authors: Authored [:LOCATION_DESCRIPTIONS]
-  site_stats_location_descriptions_editors: " "
+  site_stats_location_descriptions_editors: ""
   site_stats_locations: Defined [:LOCATIONS]
-  site_stats_locations_versions: " "
+  site_stats_locations_versions: ""
   site_stats_name_descriptions_authors: Authored [:NAME_DESCRIPTIONS]
-  site_stats_name_descriptions_editors: " "
-  site_stats_names: " "
-  site_stats_names_versions: " "
+  site_stats_name_descriptions_editors: ""
+  site_stats_names: ""
+  site_stats_names_versions: ""
   site_stats_namings: Proposed IDs
   site_stats_observations: "[:OBSERVATIONS]"
   site_stats_observations_with_voucher: Observations with Full Data
@@ -1121,8 +1118,7 @@
   form_images_select_license: Select a "License":/observer/how_to_use#license
   form_images_license_help: Select "license":/observer/how_to_use#license you want to give for this image.
   form_images_project_help: Check any projects you wish to attach this image to.
-  form_images_remove_image: Remove image
-  form_images_camera_date: Camera Date
+  form_images_camera_date: Camera date
 
 
   # observer/_form_list_feedback
@@ -1217,19 +1213,12 @@
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check and species lists you would like to add this observation to.
   form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
-  form_observations_inconsistent_date_warn: The images appear to have been taken on a date different from the observation date.
-  form_observations_inconsistent_date_update_obs_date: Change the observation date to the image dates.
-  form_observations_inconsistent_date_update_img_dates: Change the image dates to the observation date.
-  form_observations_inconsistent_date_correct_yourself: Or, correct the dates manually.
-  form_observations_image_upload_error: There was an error uploading the image. Continuing anyway.
-  form_observations_image_too_big: This image is too large. Images must be less than 10mb in file size.
-  form_observations_image_select_images: Select Images
-  form_observations_use_date: Use this date
-  form_observations_camera_date: Camera Date
-  form_observations_date_warning: Warning! The camera date on some of your photos doesn't match the observation date you have entered.
-  form_observations_set_observation_date_to: Set observation date to
-  form_observations_set_image_dates_to: Set image dates to
-  form_observations_select_images: Select images
+  form_observations_use_date: Use This Date
+  form_observations_date_warning: "The date(s) of the selected image(s) are not the same as the observation date.  If you like, you can force all of the dates to be the same.  Just select one of the dates to the left and click on \"[:form_observations_use_date]\"."
+  form_observations_set_observation_date_to: Change the observation date to this date
+  form_observations_set_image_dates_to: Change the image date(s) to this date
+  form_observations_image_too_big: This image is too large to upload and will be skipped, files must be less than [max_size].
+  form_observations_image_upload_error: We were unable to process this image for some reason.  You might try again later.  You should probably also double-check that the image file is really an image and that it displays okay on your computer.
 
 
   # observer/_form_species_list
@@ -2069,7 +2058,6 @@
   add_specimen: Add Specimen
   add_specimen_title: Add Specimen
   add_specimen_add: Add
-  # add_specimen_herbarium:  ""
   add_specimen_herbarium_label: Original Herbarium Label (initial determination and unique herbarium id)
   add_specimen_notes: Specimen Notes
   add_specimen_cancel: Cancel (Show Observation)
@@ -2493,6 +2481,7 @@
   pivotal_label_critical: critical
   pivotal_label_bottleneck: bottleneck
   pivotal_label_api: api
+  pivotal_label_descriptions: descriptions
   pivotal_label_design: design
   pivotal_label_documentation: documentation
   pivotal_label_email: email
@@ -2503,16 +2492,24 @@
   pivotal_label_i18n: translations
   pivotal_label_images: images
   pivotal_label_interface: interface
+  pivotal_label_js: javascript
   pivotal_label_lists: lists
   pivotal_label_locations: locations
+  pivotal_label_mobile: mobile
   pivotal_label_names: names
   pivotal_label_observations: observations
   pivotal_label_pivotal_tracker: pivotal
+  pivotal_label_preferences: prefs
   pivotal_label_projects: projects
   pivotal_label_publications: publications
+  pivotal_label_rss: rss
   pivotal_label_search: searching
+  pivotal_label_specimens: specimens
   pivotal_label_taxonomy: taxonomy
+  pivotal_label_tests: tests
+  pivotal_label_textile: textile
   pivotal_label_upgrade: upgrade
+  pivotal_label_users: users
   pivotal_label_vagrant: vagrant
   pivotal_label_voting: voting
   pivotal_label_other: other
@@ -2528,6 +2525,7 @@
   pivotal_label_unstarted: "[:pivotal_state_unstarted]"
   pivotal_label_started: "[:pivotal_state_started]"
   pivotal_label_all: "[:all]"
+
 
   # observer/refine_search
   refine_search_title: Refine [TYPE] Search
@@ -3079,7 +3077,7 @@
   email_subject_features: New [:app_title] Features
   email_subject_location_change: "[name] Has Been Changed"
   email_subject_naming_for_observer: Research Request
-  email_subject_naming_for_tracker: Naming Notification
+  email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
   email_subject_new_password: New Password
@@ -3223,7 +3221,6 @@
 
   # HOW TO USE PAGE (GLOSSARY)
 
-  # Note:  ""
   how_glossary_body: "#(#comment)       [:how_comment]\n#(#image)         [:how_image]\n#(#license)       [:how_license]\n#(#location)      [:how_location]\n#(#name)          [:how_name]\n#(#observation)   [:how_observation]\n#(#proposed_name) [:how_proposed_name]\n#(#description)   [:how_description]\n#(#species_list)  [:how_species_list]\n#(#user)          [:how_user]\n#(#vote)          [:how_vote]"
   how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image.  Each comment is owned by a particular \"User\":#user.  A comment may only be edited or deleted by the owner or a site administrator.  You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comment/show_comments_for_user' in the left-hand panel."
   how_contribution: "*Contribution* - A number or score that measures the quantity and quality of contributions a \"User\":#user has made to [:app_title].  Click '[:app_your_summary]' to see a break-down of your own contribution.  You earn points for every \"Observation\":#observation, \"Image\":#image, \"Comment\":#comment, etc. you have posted.  \"Describing Species\":#describing_species and \"Defining Locations\":defining_locations are some of the most important contributions a user can make.  (See \"How To Help\":/observer/how_to_help for a list of other ways to help out.) Currently, contribution is used only in weighting your \"Votes\":#vote when voting on \"Proposed Names\":#proposed_names for observations."

@@ -344,6 +344,9 @@ class NameController < ApplicationController
 
       update_view_stats(@name)
 
+      # Tell robots the proper URL to use to index this content.
+      @canonical_url = "#{MO.domain}/name/show_name/#{@name.id}"
+
       # Get a list of projects the user can create drafts for.
       @projects = @user && @user.projects_member.select do |project|
         !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
@@ -401,6 +404,9 @@ class NameController < ApplicationController
     if @description = find_or_goto_index(NameDescription, params[:id].to_s,
                         :include => [:authors, :editors, :license, :reviewer,
                                      :user, {:name=>:descriptions}])
+
+      # Tell robots the proper URL to use to index this content.
+      @canonical_url = "#{MO.domain}/name/show_name_description/#{@description.id}"
 
       # Public or user has permission.
       if @description.is_reader?(@user)
@@ -626,7 +632,7 @@ class NameController < ApplicationController
         :namings => @name.namings.length,
         :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      WebmasterQuestion(@user.email, content).deliver
+      WebmasterEmail.build(@user.email, content).deliver
       NameControllerTest.report_email(content) if TESTING
     end
   end

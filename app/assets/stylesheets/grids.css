@@ -22,27 +22,6 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
-html {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
-body {
-    /*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
-}
-a {
-    color: #337ab7;
-    text-decoration: none;
-}
-a:hover,
-a:focus {
-    color: #23527c;
-    text-decoration: underline;
-}
-a:focus {
-    outline: thin dotted;
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px;
-}
-
 .img-circle {
     border-radius: 50%;
 }

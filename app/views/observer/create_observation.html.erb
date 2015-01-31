@@ -2,11 +2,13 @@
   @title = :create_observation_title.t
 %>
 
-<table width="1">
+<div class="textile">
+<table>
   <tr>
     <td>
       <%= form_tag({ :action => 'create_observation', :approved_name => @what,
-                  :approved_where => @place_name }, { :multipart => true , :name => 'create_observation_form'}) do %>
+                  :approved_where => @place_name }, { :multipart => true,
+                  :name => 'observation_form'}) do %>
         <br/><center><%= submit_tag :CREATE.l %></center><br/>
 
         <%= render(:partial => 'form_observations', :locals => {
@@ -23,3 +25,4 @@
     </td>
   </tr>
 </table>
+</div>

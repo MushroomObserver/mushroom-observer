@@ -724,7 +724,6 @@ class ObserverController < ApplicationController
       show_selected_observations(query)
     else
       flash_error(:runtime_missing.t(field: "id"))
-      redirect_to(action: "list_rss_logs")
     end
   end
 
@@ -1017,6 +1016,9 @@ class ObserverController < ApplicationController
                                                 :user])
     return unless @observation
     update_view_stats(@observation)
+
+    # Tell robots the proper URL to use to index this content.
+    @canonical_url = "#{MO.domain}/observer/show_observation/#{@observation.id}"
 
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)

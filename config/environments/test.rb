@@ -43,6 +43,9 @@ MushroomObserver::Application.configure do
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
 
+  config.water_users = [1, 2]
+  config.oil_users   = [4, 5]
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------

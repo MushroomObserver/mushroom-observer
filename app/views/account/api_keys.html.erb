@@ -1,6 +1,5 @@
 <%
   @title = :account_api_keys_title.t
-
   new_tab_set do
     add_tab(:prefs_link.t,
             :controller => 'account', :action => 'prefs')
@@ -9,131 +8,82 @@
   end
 %>
 
+<p>
 <%= :account_api_keys_help.tp %>
-<br/><br/>
+</p>
 
 <% if @user.api_keys.any? %>
-  <%= form_tag %>
-    <table>
-      <tr class="ListLine1">
+  <%= form_tag({}, { class: "pad-bottom-2x"}) %>
+    <table class="lined-table pad-columns">
+      <tr>
         <th></th>
-        <th style="padding:0em 1em 0em 1em"><%= :CREATED.t %></th>
-        <th style="padding:0em 1em 0em 1em"><%= :account_api_keys_last_used_column_label.t %></th>
-        <th style="padding:0em 1em 0em 1em"><%= :account_api_keys_num_uses_column_label.t %></th>
-        <th style="padding:0em 1em 0em 1em"><%= :API_KEY.t %></th>
-        <th style="padding:0em 1em 0em 1em"><%= :NOTES.t %></th>
+        <th><%= :CREATED.t %></th>
+        <th><%= :account_api_keys_last_used_column_label.t %></th>
+        <th><%= :account_api_keys_num_uses_column_label.t %></th>
+        <th><%= :API_KEY.t %></th>
+        <th><%= :NOTES.t %></th>
       </tr>
-      <% odd_or_even = 1
-      for key in @user.api_keys.sort_by {|k| k.num_uses > 0 ?
+      <%
+      @user.api_keys.sort_by {|k| k.num_uses > 0 ?
                    [-k.num_uses, Time.now - k.last_used, k.id] :
-                   [0, 0, k.id] }
-        odd_or_even = 1 - odd_or_even %>
-        <tr class="ListLine<%= odd_or_even %>">
+                   [0, 0, k.id] }.each do |key|
+        %>
+        <tr>
           <td><%= check_box_tag("key_#{key.id}") %></td>
-          <td style="padding:0em 1em 0em 1em"><%= key.created_at.web_date %></td>
-          <td style="padding:0em 1em 0em 1em" id="key_time_<%= key.id %>"><%=
+          <td><%= key.created_at.web_date %></td>
+          <td id="key_time_<%= key.id %>">
+            <%=
             if key.verified
               key.last_used ? key.last_used.web_date : '--'
-            elsif @js
-              '['.html_safe + link_to_function(:ACTIVATE.t, "activate_key(#{key.id})") + ']'
             else
-              '['.html_safe + link_to(:ACTIVATE.t, :action => :activate_api_key, :id => key.id) + ']'
+              "[#{link_to("[:ACTIVATE.t}]",
+                      {:action => :activate_api_key, :id => key.id},
+                      data: {:role => "activate_api_key", :id => key.id})}]".html_safe
             end
-          %></td>
-          <td style="padding:0em 1em 0em 1em"><%= key.num_uses > 0 ? key.num_uses : '--' %></td>
-          <td style="padding:0em 1em 0em 1em"><%= h(key.key) %></td>
-          <td style="padding:0em 1em 0em 1em" id="key_notes_<%= key.id %>">
-            <%= key.notes.t %> &nbsp;
-            <%= if @js
-              '['.html_safe + link_to_function(:EDIT.t, "edit_key(#{key.id})") + ']'
-            else
-              '['.html_safe + link_to(:EDIT.t, :action => :edit_api_key, :id => key.id) + ']'
-            end %>
+            %>
+          </td>
+          <td><%= key.num_uses > 0 ? key.num_uses : '--' %></td>
+          <td><%= h(key.key) %></td>
+          <td id="key_notes_<%= key.id %>">
+            <div class="edit_key_notes_container hidden" data-target-key="<%= key.id %>">
+                <%=text_field_tag("key_notes_#{key.id}", key.notes, data:{:role => "key_notes_input", :id => key.id}) %>
+                <br/>
+                <%=button_tag(:SAVE.l, :type => "button", data: {:role => "key_notes_save", :id => key.id}) %>
+                <%=button_tag(:CANCEL.l, :type => "button", data: {:role => "key_notes_cancel", :id => key.id}) %>
+            </div>
+            <div class="view_key_notes_container" data-target-key="<%= key.id%>">
+             <span class="current_notes">
+                  <%= key.notes.t %>
+             </span>
+            <%= "[#{link_to(:EDIT.t, {:action => :edit_api_key, :id => key.id},
+                data: {:role => "edit_api_key", :id => key.id })}]".html_safe %>
+            </div>
           </td>
         </tr>
       <% end %>
     </table>
     <%= submit_tag(:account_api_keys_remove_button.l, :id => 'remove_button') %>
   </form>
-  <br/><br/>
 <% end %>
 
 <%= form_for(:key) do |form| %>
-  <label for="notes"><%= :account_api_keys_notes_label.t %></label><br/>
-  <%= form.text_field(:notes, :size => 80) %><br/>
-  <%= submit_tag(:account_api_keys_create_button.l, :id => 'create_button') %>
+    <div>
+        <label for="notes"><%= :account_api_keys_notes_label.t %></label>
+    </div>
+    <div>
+        <%= form.text_field(:notes, :size => 80) %>
+    </div>
+    <div>
+        <%= submit_tag(:account_api_keys_create_button.l, :id => 'create_button') %>
+    </div>
 <% end %>
 <br/>
 
 <%= if @js
 ################################################################################
   javascript_include('jquery')
+  javascript_include('api_key')
   javascript_tag %(
-    var CUR_ID = null;
-
-    var NOTES = { #{
-      @user.api_keys.map do |key|
-        "#{key.id}: '#{escape_javascript(key.notes)}'"
-      end.join(",\n")
-    } };
-
-    function activate_key(id) {
-      jQuery.ajax("/ajax/api_key/activate/" + id, {
-        data: { authenticity_token: CSRF_TOKEN },
-        dataType: "text",
-        async: true,
-        error: function (response) {
-          alert(response.responseText);
-        },
-        success: function() {
-          jQuery("#key_time_" + id).html("--");
-        }
-      })
-    }
-
-    function edit_key(id) {
-      var html = "<form>";
-      html += "<input type='text_field' size='40' id='key_notes_field'/>";
-      html += "<input type='button' value='#{:SAVE.l}' onclick='save_key(" + id + ")'/>";
-      html += "<input type='button' value='#{:CANCEL.l}' onclick='cancel_key(" + id + ")'/>";
-      html += "</form>";
-      jQuery("#key_notes_" + id).html(html);
-      jQuery("#key_notes_field").val(NOTES[id]);
-      jQuery("#remove_button").prop("disabled", true);
-      jQuery("#create_button").prop("disabled", true);
-      jQuery("#key_notes_field").keypress(function (e) {
-        if (CUR_ID && e.keyCode == Event.KEY_ESC)
-          cancel_key(CUR_ID);
-        if (CUR_ID && e.keyCode == Event.KEY_RETURN)
-          save_key(CUR_ID);
-      });
-      CUR_ID = id;
-    }
-
-    function save_key(id) {
-      var val = jQuery("#key_notes_field").val();
-      jQuery.ajax("/ajax/api_key/edit/" + id, {
-        data: { value: val, authenticity_token: CSRF_TOKEN },
-        dataType: "text",
-        async: true,
-        error: function (response) {
-          cancel_key(id);
-          alert(response.responseText);
-        },
-        success: function(text) {
-          NOTES[id] = text;
-          cancel_key(id);
-        }
-      })
-    }
-
-    function cancel_key(id) {
-      var val = NOTES[id];
-      var link = "[<a href='#' onclick='edit_key(" + id + ")'>#{:EDIT.t}</a>]";
-      jQuery("#key_notes_" + id).text(val).append(" &nbsp; " + link);
-      jQuery("#remove_button").prop("disabled", false);
-      jQuery("#create_button").prop("disabled", false);
-      CUR_ID = null;
-    }
-  )
+                 ApiKeyModule();
+                 )
 end %>

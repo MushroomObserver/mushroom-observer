@@ -69,7 +69,7 @@ class LocationController < ApplicationController
 
   # Displays a list of all locations whose country matches the id param.
   def list_by_country # :nologin:
-    query = create_query(:Location, :regexp_search, :regexp => "#{params[:country]}$")
+    query = create_query(:Location, :regexp_search, :regexp => "#{params[:country]}*")
     show_selected_locations(query, :link_all_sorts => true)
   end
 
@@ -358,6 +358,9 @@ class LocationController < ApplicationController
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id,
                                       :include => [:user, :descriptions])
+
+      # Tell robots the proper URL to use to index this content.
+      @canonical_url = "#{MO.domain}/location/show_location/#{@location.id}"
       
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
@@ -388,6 +391,9 @@ class LocationController < ApplicationController
     if @description = find_or_goto_index(LocationDescription, params[:id].to_s,
                          :include => [ :authors, :editors, :license, :user,
                                        {:location => :descriptions} ])
+
+      # Tell robots the proper URL to use to index this content.
+      @canonical_url = "#{MO.domain}/location/show_location_description/#{@description.id}"
 
       # Public or user has permission.
       if @description.is_reader?(@user)

@@ -1505,7 +1505,7 @@ end
     end
     result = image.license.copyright_text(image.year, link)
     if div
-      result = content_tag(:div, result, :id => "copytight")
+      result = content_tag(:div, result, :id => "copyright")
     end
     result
   end
@@ -1562,8 +1562,8 @@ end
     end
 
     row2 = safe_empty
-    str = link_to_function('(X)', "image_vote(#{id},0)",
-                           :title => :image_vote_help_0.l)
+    str = link_to('(X)', {}, :title => :image_vote_help_0.l, data: {:role => "image_vote", :id => id, :val => 0})
+
     str += indent(5)
     row2 += content_tag(:td, content_tag(:small, str)) if cur.to_i > 0
     Image.all_votes.map do |val|
@@ -1572,8 +1572,7 @@ end
       if val == cur
         str = content_tag(:b, content_tag(:span, str1, :title => str2))
       else
-        str = link_to_function(str1, "image_vote(#{id},'#{val}')",
-                               :title => str2)
+          str = link_to(str1, {controller: :image, action: :show_image, id: id, vote: val}, :title => str2, data: {:role => "image_vote", :id => id, :val => val})
       end
       str = '&nbsp;|&nbsp;'.html_safe + str if val > 1
       row2 += content_tag(:td, content_tag(:small, str))
@@ -2090,7 +2089,7 @@ end
   # Create a file input fields with client-side size validation.
   def image_file_field(obj, attr, opts={})
     validated_file_field(obj, attr, opts.merge(
-      :max_upload_msg => :validate_image_file_too_big.l(:max => "#{MO.image_upload_max_size/1000000}Mb"),
+      :max_upload_msg => :validate_image_file_too_big.l(:max => "#{(MO.image_upload_max_size.to_f/1024/1024).round}Mb"),
       :max_upload_size => MO.image_upload_max_size
     ))
   end

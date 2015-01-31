@@ -95,6 +95,7 @@ class Comment < AbstractModel
   belongs_to :user
 
   after_create :notify_users
+  after_create :oil_and_water
 
   # Returns Array of all models (Classes) which take comments.
   def self.all_types
@@ -204,6 +205,27 @@ class Comment < AbstractModel
           QueuedEmail::CommentAdd.find_or_create_email(sender, recipient, self)
         end
       end
+    end
+  end
+
+  # Notify webmaster when comments get fiery on an observation.
+  # We keep two lists of users, one on each side of a "lively" debate.
+  # Send notifications when at least one user from both lists comments on
+  # the same comment.
+  def oil_and_water
+    user_ids = Comment.where(target_id: target_id, target_type: target_type).
+                       map {|c| c.user_id.to_i}.uniq.sort
+    water = (user_ids & MO.water_users).any?
+    oil   = (user_ids & MO.oil_users).any?
+    if water && oil
+      target   = target_type.camelize.constantize.safe_find(target_id) rescue nil
+      show_url = target.show_url rescue "(can't find object?!)"
+      logins   = User.where(id: user_ids).map(&:login)
+      subject  = "Oil and water on #{target_type} ##{target_id}"
+      content  = "#{show_url}\n" +
+                 "All users: #{logins.join(", ")}\n\n" +
+                 "User: #{user.login}\nSummary: #{summary}\n\n#{comment}"
+      WebmasterEmail.build(MO.noreply_email_address, content, subject).deliver
     end
   end
 

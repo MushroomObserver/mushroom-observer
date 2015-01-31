@@ -2,9 +2,9 @@ function MultiImageUploader(localized_text) {
     var defaults = {
         image_upload_error_text: "There was an error uploading the image. Continuing anyway.",
         uploading_text: "Uploading",
-        image_too_big_text: "This image is too large. Images must be less than 10mb in file size.",
+        image_too_big_text: "This image is too large. Images must be less than 20Mb in file size.",
         creating_observation_text: "Creating Observation...",
-        months: "January, February, March, April, May, June, July, August, September,October,November, December"
+        months: "January, February, March, April, May, June, July, August, September, October, November, December"
     };
 
     if (localized_text == undefined) {
@@ -24,7 +24,7 @@ function MultiImageUploader(localized_text) {
         _uploadImageUri = "/ajax/create_image_object",
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
-        $form = jQuery(document.forms.namedItem("create_observation_form")),
+        $form = jQuery(document.forms.namedItem("observation_form")),
         $submitButtons= $form.find('input[type="submit"]'),
         $goodImages = jQuery('#good_images'),
         $removeLinks = jQuery(".remove_image_link"),
@@ -88,10 +88,12 @@ function MultiImageUploader(localized_text) {
         $imgRadioContainer.html('');
         $obsRadioContainer.html('');
 
-        _this.makeObservationDateRadio(_this.observationDate());
+        var obsDate = _this.observationDate();
+        _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate){
-            _this.makeImageDateRadio(simpleDate);
+            if (!obsDate.areEqual(simpleDate))
+                _this.makeImageDateRadio(simpleDate);
         });
 
         if (_this.areDatesInconsistent()) {
@@ -128,7 +130,7 @@ function MultiImageUploader(localized_text) {
     DateUpdater.prototype.makeObservationDateRadio = function (simpleDate) {
         var _this = this;
 
-        var html = "<div><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>"
+        var html = "<div><label><input type='radio' data-target='image' data-date='{{date}}' name='fix_date'/><span>{{dateStr}}</span></label></div>";
         html = html.replace('{{date}}', JSON.stringify(simpleDate));
         html = html.replace('{{dateStr}}',  simpleDate.asDateString());
 
@@ -256,7 +258,8 @@ function MultiImageUploader(localized_text) {
             firstUpload.upload(onUploadedCallback); //uploads first image. if we have one.
         }
         else{
-            return true; //returns true if there were not any images, causing form to submit right away.
+            blockFormSubmission = false;
+            $form.submit(); //no images to upload, submit form
         }
 
         return false;
@@ -391,7 +394,7 @@ function MultiImageUploader(localized_text) {
             _info = _this.getUserEnteredInfo(),
             _fd = new FormData();
 
-        if (_this.file.size > 10000000)
+        if (_this.file.size > 20000000)
             return null;
 
         _fd.append("image[upload]", _this.file, _this.file.name);
@@ -401,6 +404,7 @@ function MultiImageUploader(localized_text) {
         _fd.append("image[notes]", _info.notes);
         _fd.append("image[copyright_holder]", _info.copyright_holder);
         _fd.append("image[license]", _info.license);
+        _fd.append("image[original_name]", _this.file.name);
         return _fd;
     };
 
