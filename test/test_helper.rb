@@ -92,5 +92,6 @@ class ActiveSupport::TestCase
   # images that might have been uploaded are cleared out.
   def teardown
     FileUtils.rm_rf(MO.local_image_files)
+    UserGroup.clear_cache_for_unit_tests
   end
 end

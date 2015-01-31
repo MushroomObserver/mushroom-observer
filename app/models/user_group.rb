@@ -74,6 +74,12 @@ class UserGroup < AbstractModel
     @@reviewers ||= get_or_construct_user('reviewers')
   end
 
+  # Need to clear these at end of each test or some changes can persist from
+  # one unit test to the next, causing very bizarre and frustrating behavior(!)
+  def self.clear_cache_for_unit_tests
+    @@all_users = @@one_users = @@reviewers = nil
+  end
+
   # Callback that fires when a new User is created.
   # 1) Adds the new User to the "all users" meta-group.
   # 2) Creates a new meta-group that contains just that User.
