@@ -262,7 +262,6 @@ end %>
         <%= javascript_tag %(
               jQuery(document).ready(function () {
                  var uploader = MultiImageUploader({
-                  image_upload_error_text: "#{j :form_observations_image_upload_error.t}",
                   uploading_text: "#{j :form_observations_uploading_images.t}",
                   image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
                   creating_observation_text: "#{j :form_observations_creating_observation.t}",
