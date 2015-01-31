@@ -310,21 +310,23 @@
 <%= sort_javascript_includes.map { |m| javascript_include_tag(m) }.safe_join('') %>
 <% ##a place to inject scripts into the page after the javascript elements have loaded %>
 <%= @scripts %>
-<script>
+<% if Rails.env == "production" %>
+  <script>
     (function (i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function () {
-            (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date();
-        a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
     })
     (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
     ga('create', 'UA-1916187-1', 'auto');
     ga('send', 'pageview');
-</script>
+  </script>
+<% end %>
 <script>
     jQuery(document).ready(function () {
         jQuery('body').on('click', '[data-confirm]', function (event) {
