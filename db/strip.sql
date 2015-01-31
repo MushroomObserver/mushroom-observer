@@ -5,4 +5,3 @@ delete from queued_email_notes;
 delete from queued_email_strings;
 delete from queued_emails;
 delete from queries;
-delete from transactions;
