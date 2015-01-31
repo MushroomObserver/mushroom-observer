@@ -439,11 +439,16 @@ function MultiImageUploader(localized_text) {
         $submitButtons.val(localized_text.uploading_text + '...');
         _this.incrementProgressBar();
 
+        //set the thumbnail if it is selected
         xhrReq.onload = function () { //after image has been created.
             if (xhrReq.status == 200) {
                 var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
+                if (_this.dom_element.find('input[name="temp_image_thumbnail"]')[0].checked) {
+                    jQuery('#observation_thumb_image_id').val(image.id);
+                }
+
             } else {
                 alert(localized_text.image_upload_error_text);
             }
@@ -507,6 +512,13 @@ function MultiImageUploader(localized_text) {
             var files = $(this)[0].files; //Get the files from the browser
             fileStore.addFiles(files);
         });
+
+        //IMPORTANT:  This allows the user to updat the thumbnail on the edit observation view.
+        jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
+            jQuery('#observation_thumb_image_id').val($(this).val());
+
+        });
+
 
         //Detect when a user submits observation; includes upload logic
         $form.submit(function () {
