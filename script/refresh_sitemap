@@ -46,54 +46,69 @@ OBJECT_TYPES = [
   [ "locations",             "Location",            "location/show_location/ID"             ],
   [ "species_lists",         "SpeciesList",         "species_list/show_species_list/ID"     ],
   [ "projects",              "Project",             "project/show_project/ID"               ],
-  [ "glossary_terms",        "GlossaryTerm",        "glossary/show_term/ID"                 ],
+  [ "glossary_terms",        "GlossaryTerm",        "glossary/show_glossary_term/ID"                 ],
   [ "herbaria",              "Herbarium",           "herbarium/show_herbarium/ID"           ],
   [ "name_descriptions",     "NameDescription",     "name/show_name_description/ID"         ],
   [ "location_descriptions", "LocationDescription", "location/show_location_description/ID" ]
 ]
 
 STATIC_PAGES = [
-  [ "home page",    "",                     "hourly" ], # observer/list_rss_logs
-  [ "introduction", "observer/intro",       "weekly" ],
-  [ "how to use",   "observer/how_to_use",  "weekly" ],
-  [ "how to help",  "observer/how_to_help", "weekly" ]
+  [ "home page",    "observer/list_rss_logs", "hourly" ],
+  [ "introduction", "observer/intro",         "weekly" ],
+  [ "how to use",   "observer/how_to_use",    "weekly" ],
+  [ "how to help",  "observer/how_to_help",   "weekly" ]
+]
+
+# These are aliases for pages allowed above.
+OTHER_ALLOWED_PATHS = [
+  # "/observer/index", (would allow too many indexes we don't want to allow)
+  "/observer/lookup_observation",
+  "/observer/lookup_name",
+  "/observer/show_name",
+  "/name/eol"
 ]
 
 LOCALES = Language.connection.select_values %(
   SELECT locale FROM languages WHERE NOT beta ORDER BY `order` ASC
 )
 
-ROBOTS_HEADER = %(
+ROBOTS_HEADER = <<"EOB"
 # See http://www.robotstxt.org for documentation.
 Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 User-agent: *
-Disallow: *?*
-)
-ROBOTS_FOOTER = %(
-)
+Disallow: *page=*
+Disallow: *letter=*
+Disallow: *by=*
+Disallow: *user_theme=*
+Disallow: */show*user_locale=*
+Disallow: */index*user_locale=*
+Disallow: */lookup*user_locale=*
+EOB
+ROBOTS_FOOTER = <<"EOB"
+EOB
 
-SITEMAP_ROOT_HEADER = %(
-  <?xml version="1.0" encoding="UTF-8"?>
-  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-)
-SITEMAP_ROOT_FOOTER = %(
-  </sitemapindex>
-)
+SITEMAP_ROOT_HEADER = <<"EOB"
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+EOB
+SITEMAP_ROOT_FOOTER = <<"EOB"
+</sitemapindex>
+EOB
 
-SITEMAP_LEAF_HEADER = %(
-  <?xml version="1.0" encoding="UTF-8"?>
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-)
-SITEMAP_LEAF_FOOTER = %(
-  </urlset>
-)
+SITEMAP_LEAF_HEADER = <<"EOB"
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+EOB
+SITEMAP_LEAF_FOOTER = <<"EOB"
+</urlset>
+EOB
 
-INDEX_HEADER = %(
-  <html><head></head><body>
-)
-INDEX_FOOTER = %(
-  </body></html>
-)
+INDEX_HEADER = <<"EOB"
+<html><head></head><body>
+EOB
+INDEX_FOOTER = <<"EOB"
+</body></html>
+EOB
 
 ################################################################################
 
@@ -289,7 +304,9 @@ def update_robots_file
     disallow = actions - allow
     disallowed_paths += disallow.map {|action| "/#{controller}/#{action}"}
   end
-  write_robots_file(disallowed_paths)
+  allowed_paths = flatten_allowed_actions(allowed_actions) + OTHER_ALLOWED_PATHS
+  remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
+  write_robots_file(disallowed_paths, allowed_paths)
 end
 
 def deduce_allowed_actions
@@ -305,7 +322,6 @@ end
 
 def add_action(actions, path)
   controller, action = parse_path(path)
-  return if controller.blank?
   actions[controller] ||= []
   actions[controller] << action
 end
@@ -336,11 +352,37 @@ def controller_actions(controller)
   end
 end
 
-def write_robots_file(disallowed_paths)
+def flatten_allowed_actions(allowed_actions)
+  results = []
+  for controller in allowed_actions.keys.sort
+    for action in allowed_actions[controller].uniq
+      results << "/#{controller}/#{action}"
+    end
+  end
+  return results
+end
+
+def remove_substrings_from_disallowed_paths(disallowed_paths, allowed_paths)
+  disallowed_paths.reject! do |disallowed_path|
+    reject = false
+    for allowed_path in allowed_paths
+      if allowed_path.index(disallowed_path) == 0
+        reject = true
+        break
+      end
+    end
+    reject
+  end
+end
+
+def write_robots_file(disallowed_paths, allowed_paths)
   File.open(ROBOTS_FILE, "w") do |fh|
     fh.write ROBOTS_HEADER
     for path in disallowed_paths.sort
       fh.puts "Disallow: #{path}"
+    end
+    for path in allowed_paths
+      fh.puts "# Allow: #{path}"
     end
     fh.write ROBOTS_FOOTER
   end

@@ -6,8 +6,8 @@ MushroomObserver::Application.routes.draw do
   # The priority is based upon order of creation: first created -> highest priority.
 
   # Default page is /observer/index.
-  # map.connect '', :controller => 'observer', :action => 'index'
-  root :to => "observer#index"
+  # map.connect '', :controller => 'observer', :action => 'list_rss_logs'
+  root :to => "observer#list_rss_logs"
 
   # Route /123 to /observer/show_observation/123.
   # map.connect ':id', :controller => 'observer', :action => 'show_observation', :id => /\d+/

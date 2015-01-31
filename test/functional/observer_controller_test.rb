@@ -2446,4 +2446,19 @@ class ObserverControllerTest < FunctionalTestCase
     assert_no_flash
     assert_response(:success)
   end
+
+  def test_normal_permissions
+    get :intro
+    assert_equal(200, @response.status)
+    get :textile
+    assert_equal(200, @response.status)
+  end
+
+  def test_robot_permissions
+    @request.user_agent = "Googlebot"
+    get :intro
+    assert_equal(200, @response.status)
+    get :textile
+    assert_equal(403, @response.status)
+  end
 end
