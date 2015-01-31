@@ -347,10 +347,12 @@ class AmateurTest < IntegrationTestCase
       assert_select("div#left_tabs a[href=/#{obs.id}]")
 
       open_form do |form|
-        form.assert_value('reason_1_check', false)
-        form.assert_value('reason_2_check', false)
-        form.assert_value('reason_3_check', false)
-        form.assert_value('reason_4_check', false)
+        form.assert_value("name_name", "")
+        form.assert_value("vote_value", "")
+        form.assert_value("reason_1_check", false)
+        form.assert_value("reason_2_check", false)
+        form.assert_value("reason_3_check", false)
+        form.assert_value("reason_4_check", false)
         form.submit
       end
       assert_template('naming/create')

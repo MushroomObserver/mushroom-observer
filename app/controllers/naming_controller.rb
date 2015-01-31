@@ -56,6 +56,7 @@ class NamingController < ApplicationController
       save_changes
       check_for_notifications
     else # If anything failed reload the form.
+      flash_object_errors(@params.naming) if @params.name_missing?
       @params.add_reason(params[:reason])
     end
   end
