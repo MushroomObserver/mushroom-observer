@@ -315,7 +315,6 @@ class ApplicationController < ActionController::Base
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies["mo_user"])  &&
           (split = cookie.split(" ")) &&
-#          (user = User.find(:first, :conditions => ['id = ?', split[0]])) && # Rails 3
           (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
           (user.verified)
@@ -720,11 +719,6 @@ class ApplicationController < ActionController::Base
       flash_object_errors(obj)
       return false
     end
-  end
-
-  def object_flashes(obj)
-    flash_object_warnings(obj)
-    flash_object_errors(obj)
   end
 
   def validate_object(obj)
