@@ -237,19 +237,17 @@ class AjaxController < ApplicationController
     end
   end
 
-
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation
   def get_multi_image_template
-    current_user = get_session_user!
-    @licenses = License.current_names_and_ids(current_user.license) #Needed to render licenses drop down
+    @user = get_session_user!
+    @licenses = License.current_names_and_ids(@user.license) #Needed to render licenses drop down
     @image = Image.new(
-      :user => current_user,
+      :user => @user,
       :when => Time.now
     );
     render(:partial => '/observer/form_multi_image_template')
   end
-
 
   # Uploads an image object without an observation.
   # Returns image as JSON object.
@@ -258,7 +256,7 @@ class AjaxController < ApplicationController
     @image = params[:image]
 
     original_name = @image[:original_name].to_s
-    original_name = "" if User.current && User.current.keep_filenames == :toss
+    original_name = "" if user && user.keep_filenames == :toss
 
     img_when = Date.new(@image[:when][('1i')].to_i, @image[:when][('2i')].to_i, @image[:when][('3i')].to_i);
     ##TODO: handle invalid date
