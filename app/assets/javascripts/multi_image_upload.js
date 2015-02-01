@@ -23,6 +23,7 @@ function MultiImageUploader(localized_text) {
         _getTemplateUri = "/ajax/get_multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
         _progressUri = "/ajax/upload_progress",
+        _dots = [".", "..", "..."],
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
         $form = jQuery(document.forms.namedItem("observation_form")),
@@ -411,22 +412,24 @@ function MultiImageUploader(localized_text) {
 
     FileStoreItem.prototype.incrementProgressBar = function (decimalPercentage) {
         var _this = this,
-            _$progress_bar = _this.dom_element.find(".added_image_name_container"),
+            _$container = _this.dom_element.find(".added_image_name_container"),
             _percent_string = decimalPercentage ? parseInt(decimalPercentage * 100).toString() + "%" : "0%"; //if we don't have percentage,  just set it to 0 percent
-        _$progress_bar.css('background', 'linear-gradient(to right, #51B973 {{percentage}}, #F6F6F6 0%'.replace("{{percentage}}", _percent_string));
 
-        if (_this.isUploading == true)
-            return;           //don't set multiple timeouts for doDots!
-
-        _this.isUploading = true;
-        doDots(1);
-
-        var _dots = [".", "..", "..."];
+        if (!_this.isUploading) {
+            _this.isUploading = true;
+            _$container.html(
+              '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + localized_text.uploading_text + '</strong></div>' +
+              '<div class="progress-bar" style="position: absolute; width: 0%; height: 1.5em; background: #51B973; z-index: 0;"></div>'
+            )
+            doDots(1);
+        } else {
+            _$container.find(".progress-bar").animate({ width: _percent_string }, 1000, "linear");
+        }
 
         function doDots(i) {
             setTimeout(function () {
                 if (i < 900) {
-                    _$progress_bar.html('<div class="col-xs-12"><strong>' + localized_text.uploading_text + _dots[i % 3] + '</strong></div>'); //show the user we are uploading the image by showing some dots for a while.
+                    _$container.find(".progress-text").html(localized_text.uploading_text + _dots[i % 3]);
                     doDots(++i);
                 }
             }, 333)
@@ -455,6 +458,7 @@ function MultiImageUploader(localized_text) {
                 alert(xhrReq.status + ": " + localized_text.image_upload_error_text);
             }
             if (progress) window.clearTimeout(progress);
+            _this.incrementProgressBar(1);
             _this.dom_element.hide('slow');
             onUploadedCallback();
         };
