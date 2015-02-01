@@ -4,6 +4,7 @@ class Robots
   class << self
     def allowed?(controller, action)
       populate_allowed_robot_actions if !defined?(@@allowed_robot_actions)
+      return true if controller == "api"
       return @@allowed_robot_actions["#{controller}/#{action}"]
     end
 

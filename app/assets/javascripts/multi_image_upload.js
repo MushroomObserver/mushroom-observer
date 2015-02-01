@@ -383,8 +383,8 @@ function MultiImageUploader(localized_text) {
             month: jQuery(this.dom_element.find('select')[1]).val(),
             year: jQuery(this.dom_element.find('select')[2]).val(),
             license: jQuery(this.dom_element.find('select')[3]).val(),
-            notes: jQuery(this.dom_element.find('input')[0]).val(),
-            copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
+            notes: jQuery(this.dom_element.find('input')[1]).val(),
+            copyright_holder: jQuery(this.dom_element.find('input')[2]).val()
         };
     };
 
@@ -445,7 +445,7 @@ function MultiImageUploader(localized_text) {
                 var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
-                if (_this.dom_element.find('input[name="temp_image_thumbnail"]')[0].checked) {
+                if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {
                     jQuery('#observation_thumb_image_id').val(image.id);
                 }
 
@@ -516,7 +516,6 @@ function MultiImageUploader(localized_text) {
         //IMPORTANT:  This allows the user to updat the thumbnail on the edit observation view.
         jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
             jQuery('#observation_thumb_image_id').val($(this).val());
-
         });
 
 
