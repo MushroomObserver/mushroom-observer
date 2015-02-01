@@ -20,6 +20,7 @@ function MultiImageUploader(localized_text) {
     //Internal Variable Definitions;
     var  fileStore = new FileStore(),
         dateUpdater = new DateUpdater(),
+        _maxImageSize = 20*1024*1024,
         _getTemplateUri = "/ajax/get_multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
         _progressUri = "/ajax/upload_progress",
@@ -299,7 +300,7 @@ function MultiImageUploader(localized_text) {
 
         _this.dom_element = $(html_string);  //Create the DOM element and add it to FileStoreItem;
 
-        if (_this.file.size > 10000000)
+        if (_this.file.size > _maxImageSize)
             _this.dom_element.find('.warn-text').text(localized_text.image_too_big_text);
 
         $addedImagesContainer.append(_this.dom_element); //add it to the page
@@ -396,7 +397,7 @@ function MultiImageUploader(localized_text) {
             _info = _this.getUserEnteredInfo(),
             _fd = new FormData();
 
-        if (_this.file.size > 20000000)
+        if (_this.file.size > _maxImageSize)
             return null;
 
         _fd.append("image[upload]", _this.file, _this.file.name);
@@ -423,7 +424,10 @@ function MultiImageUploader(localized_text) {
             )
             doDots(1);
         } else {
-            _$container.find(".progress-bar").animate({ width: _percent_string }, 1000, "linear");
+            _$container.find(".progress-bar").animate({ width: _percent_string }, decimalPercentage == 1 ? 1000 : 1500, "linear");
+            // (a little extra to patch over gap between sending request for next progress update
+            // and actually receiving it, which occurs after a second is up... but not after
+            // image is done, no more progress updates required then)
         }
 
         function doDots(i) {
