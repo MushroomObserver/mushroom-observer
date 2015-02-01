@@ -59,7 +59,7 @@
               <label><%= :form_images_select_license.t %></label>
             </div>
             <div class="col-sm-8">
-              <%= select('temp_image', :license_id, @licenses) %>
+              <%= select('temp_image', :license_id, @licenses, selected: @user.license_id) %>
             </div>
           </div>
         </div>
