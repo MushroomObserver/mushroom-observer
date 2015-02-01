@@ -437,8 +437,7 @@ function MultiImageUploader(localized_text) {
         var _this = this,
             xhrReq = new XMLHttpRequest(),
             progress = null,
-            update = null,
-            uuid = generateUUID();
+            update = null;
 
         $submitButtons.val(localized_text.uploading_text + '...');
         _this.incrementProgressBar();
@@ -463,7 +462,7 @@ function MultiImageUploader(localized_text) {
         update = function() {
           var req = new XMLHttpRequest();
           req.open("GET", _progressUri, 1);
-          req.setRequestHeader("X-Progress-ID", uuid);
+          req.setRequestHeader("X-Progress-ID", _this.uuid);
           req.onreadystatechange = function () {
             if (req.readyState == 4 && req.status == 200) {
               var upload = eval(req.responseText);
@@ -482,7 +481,7 @@ function MultiImageUploader(localized_text) {
 
         //Note: You need to add the event listeners before calling open() on the request.
         xhrReq.open("POST", _uploadImageUri, true);
-        xhrReq.setRequestHeader("X-Progress-ID", uuid);
+        xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
         var _fd = _this.asFormData(); //Send the form
         _fd != null ? xhrReq.send(_fd) : _this.isUploaded = true;
     }
