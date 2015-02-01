@@ -22,6 +22,7 @@ function MultiImageUploader(localized_text) {
         dateUpdater = new DateUpdater(),
         _getTemplateUri = "/ajax/get_multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
+        _progressUri = "/ajax/upload_progress",
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
         $form = jQuery(document.forms.namedItem("observation_form")),
@@ -383,8 +384,8 @@ function MultiImageUploader(localized_text) {
             month: jQuery(this.dom_element.find('select')[1]).val(),
             year: jQuery(this.dom_element.find('select')[2]).val(),
             license: jQuery(this.dom_element.find('select')[3]).val(),
-            notes: jQuery(this.dom_element.find('input')[0]).val(),
-            copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
+            notes: jQuery(this.dom_element.find('input')[1]).val(),
+            copyright_holder: jQuery(this.dom_element.find('input')[2]).val()
         };
     };
 
@@ -434,37 +435,53 @@ function MultiImageUploader(localized_text) {
 
     FileStoreItem.prototype.upload = function (onUploadedCallback) {
         var _this = this,
-            xhrReq = new XMLHttpRequest();
+            xhrReq = new XMLHttpRequest(),
+            progress = null,
+            update = null;
 
         $submitButtons.val(localized_text.uploading_text + '...');
         _this.incrementProgressBar();
 
-        //set the thumbnail if it is selected
         xhrReq.onload = function () { //after image has been created.
             if (xhrReq.status == 200) {
                 var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
-                if (_this.dom_element.find('input[name="temp_image_thumbnail"]')[0].checked) {
+                if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {
+                    //set the thumbnail if it is selected
                     jQuery('#observation_thumb_image_id').val(image.id);
                 }
-
             } else {
-                alert(localized_text.image_upload_error_text);
+                alert(xhrReq.status + ": " + localized_text.image_upload_error_text);
             }
+            if (progress) window.clearTimeout(progress);
             _this.dom_element.hide('slow');
             onUploadedCallback();
         };
 
-        xhrReq.onprogress = function (event) {  //show the upload status
-            if (event.lengthComputable) {
-                var percentComplete = event.loaded / event.total;
-                _this.incrementProgressBar(percentComplete);
+        update = function() {
+          var req = new XMLHttpRequest();
+          req.open("GET", _progressUri, 1);
+          req.setRequestHeader("X-Progress-ID", _this.uuid);
+          req.onreadystatechange = function () {
+            if (req.readyState == 4 && req.status == 200) {
+              var upload = eval(req.responseText);
+              if (upload.state == "done" || upload.state == "uploading") {
+                _this.incrementProgressBar(upload.received / upload.size);
+                progress = window.setTimeout(update, 1000);
+              } else {
+                window.clearTimeout(progress);
+                progress = null;
+              }
             }
+          };
+          req.send(null);
         };
+        progress = window.setTimeout(update, 1000);
 
         //Note: You need to add the event listeners before calling open() on the request.
         xhrReq.open("POST", _uploadImageUri, true);
+        xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
         var _fd = _this.asFormData(); //Send the form
         _fd != null ? xhrReq.send(_fd) : _this.isUploaded = true;
     }
@@ -516,7 +533,6 @@ function MultiImageUploader(localized_text) {
         //IMPORTANT:  This allows the user to updat the thumbnail on the edit observation view.
         jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
             jQuery('#observation_thumb_image_id').val($(this).val());
-
         });
 
 
