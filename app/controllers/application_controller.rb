@@ -94,9 +94,9 @@ class ApplicationController < ActionController::Base
   include LoginSystem
 
   around_filter :catch_errors # if Rails.env == "test"
+  before_filter :block_ip_addresses
   before_filter :kick_out_robots
   before_filter :verify_authenticity_token
-  before_filter :block_ip_addresses
   before_filter :fix_bad_domains
   before_filter :autologin
   before_filter :set_locale
@@ -150,23 +150,22 @@ class ApplicationController < ActionController::Base
 
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
-    return unless browser.bot?
-    controller = params[:controller]
-    action     = params[:action]
-    unless Robots.allowed?(controller, action)
-      render :text => "Robots are not allowed on this page.", :status => 403
-    end
+    return true unless browser.bot?
+    return true if Robots.allowed?(
+      controller: params[:controller],
+      action:     params[:action],
+      ua:         browser.ua,
+      ip:         request.remote_ip
+    )
+    render(:text => "Robots are not allowed on this page.", :status => 403, :layout => false)
+    return false
   end
 
   # Filter to run before anything else to protect against denial-of-service attacks.
   def block_ip_addresses
-    if [
-      '69.174.247.199',
-      '69.174.247.214'
-    ].include?(request.remote_ip.to_s)
-      render(:text => "You have been blocked from this site. Please contact the webmaster for more information.", :layout => false)
-      return false
-    end
+    return true unless MO.blocked_ip_addresses.include?(request.remote_ip.to_s)
+    render(:text => "You have been blocked from this site. Please contact the webmaster for more information.", :status => 403, :layout => false)
+    return false
   end
 
   def require_successful_user
