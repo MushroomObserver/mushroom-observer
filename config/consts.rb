@@ -138,4 +138,7 @@ MushroomObserver::Application.configure do
   # Watch objects with comment wars between these two sets of users.
   config.water_users = []
   config.oil_users   = []
+
+  # List of IP addresses to blacklist.
+  config.blocked_ip_addresses = []
 end
