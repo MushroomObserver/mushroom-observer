@@ -383,8 +383,8 @@ function MultiImageUploader(localized_text) {
             month: jQuery(this.dom_element.find('select')[1]).val(),
             year: jQuery(this.dom_element.find('select')[2]).val(),
             license: jQuery(this.dom_element.find('select')[3]).val(),
-            notes: jQuery(this.dom_element.find('input')[0]).val(),
-            copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
+            notes: jQuery(this.dom_element.find('input')[1]).val(),
+            copyright_holder: jQuery(this.dom_element.find('input')[2]).val()
         };
     };
 
