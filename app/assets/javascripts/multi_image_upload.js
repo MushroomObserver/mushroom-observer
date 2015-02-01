@@ -438,7 +438,7 @@ function MultiImageUploader(localized_text) {
             xhrReq = new XMLHttpRequest(),
             progress = null,
             update = null,
-            uuid;
+            uuid = generateUUID();
 
         $submitButtons.val(localized_text.uploading_text + '...');
         _this.incrementProgressBar();
@@ -459,11 +459,6 @@ function MultiImageUploader(localized_text) {
             _this.dom_element.hide('slow');
             onUploadedCallback();
         };
-
-        // need globally unique id for nginx upload_progress module to track this particular upload
-        uuid = "";
-        for (i=0; i<32; i++)
-          uuid += Math.floor(Math.random()*16).toString(16);
 
         update = function() {
           var req = new XMLHttpRequest();
