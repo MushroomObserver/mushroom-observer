@@ -101,7 +101,7 @@ MushroomObserver::Application.configure do
   config.assets.digest = false
 
   # Raise exception on mass assignment protection for Active Record models
-  config.active_record && config.active_record.mass_assignment_sanitizer = :strict
+  # config.active_record && config.active_record.mass_assignment_sanitizer = :strict
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
