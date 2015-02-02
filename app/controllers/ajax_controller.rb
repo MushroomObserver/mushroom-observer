@@ -38,7 +38,7 @@ class AjaxController < ApplicationController
     yield
   rescue => e
     msg = e.to_s + "\n"
-    if TESTING or DEVELOPMENT
+    if Rails.env != "production"
       for line in e.backtrace
         break if line.match(/action_controller.*perform_action/)
         msg += line + "\n"
@@ -266,17 +266,16 @@ class AjaxController < ApplicationController
       image: @image[:upload]
     )
 
-    if !image.save
-      flash_object_errors(image)
-    elsif !image.process_image
-      logger.error("Unable to upload image")
-      flash_notice(:runtime_no_upload_image.t(name: (name ? "'#{name}'" : "##{image.id}")))
-      flash_object_errors(image)
+    if !image.save || !image.process_image
+      msg = :runtime_no_upload_image.t(:name => (original_name ? "'#{original_name}'" : "##{image.id}"))
+      errors = [msg] + image.formatted_errors
+      logger.error("UPLOAD_FAILED: #{errors.inspect}")
+      render(text: errors.join("\n").strip_html, status: 500, layout: false)
     else
       name = original_name
       name = "##{image.id}" if name.empty?
-      flash_notice(:runtime_image_uploaded.t(name: name))
+      flash_notice(:runtime_image_uploaded.t(:name => name))
+      render(json: image)
     end
-    render json: image
   end
 end

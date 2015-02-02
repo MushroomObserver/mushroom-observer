@@ -29,6 +29,15 @@ module MushroomObserver
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
 
+    # Tells rails not to generate controller-specific css and js stubs.
+    config.generators.assets = false
+
+    # Change this version if you want to expire all your assets at once.
+    config.assets.version = "1.0"
+
+    # We want to use the asset pipeline now.
+    config.assets.enabled = true
+
     # This instructs ActionView how to mark form fields which have an error.
     # I just change the CSS class to "has_error", which gives it a red border.
     # This is superior to the default, which encapsulates the field in a div,
@@ -38,17 +47,8 @@ module MushroomObserver
     config.action_view.field_error_proc = Proc.new { |html_tag, instance|
       html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
     }
-
-    # Minimal asset configuration.
-    # enable asset pipeline
-    config.assets.enabled = true
-    config.assets.version = "1.0"
   end
 end
-
-PRODUCTION  = (ENV["RAILS_ENV"] == 'production')
-DEVELOPMENT = (ENV["RAILS_ENV"] == 'development')
-TESTING     = (ENV["RAILS_ENV"] == 'test')
 
 MO = MushroomObserver::Application.config
 require File.expand_path("../consts.rb", __FILE__)

@@ -63,14 +63,13 @@ end
     if can_do_ajax?
       textarea = content_tag(:div, textarea, id: "reason_#{num}_div")
       if !check
-        textarea += javascript_tag("jQuery('#reason_#{num}_div').hide()")
+        inject_javascript_at_end("jQuery('#reason_#{num}_div').hide()")
       end
     end
     html += checkbox + label + textarea
   end
   if can_do_ajax? && !show_reasons && @params && what.blank?
     html = content_tag(:div, html, id: 'reasons_div')
-    # html += javascript_tag("jQuery('#reasons_div').hide()");
   end
   html
 %>

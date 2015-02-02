@@ -1,7 +1,5 @@
 <%
   @title = :pivotal_index_title.l
-  javascript_include('jquery')
-  javascript_include('jquery_extensions')
   javascript_include('pivotal')
 %>
 
@@ -40,15 +38,14 @@
     data << "'#{label}': [#{label_map[label].join(',')}]"
   end
 
-  javascript_tag( %(
-     MOPivotalModule({#{data.join(",\n")}},
-     {
-        pivotal_vote_failed: "#{:pivotal_vote_failed.l.escape_js_string}",
-        pivotal_story_failed: "#{:pivotal_story_failed.l.escape_js_string}",
-        pivotal_story_loading: "#{:pivotal_story_loading.l.escape_js_string}",
-        pivotal_comment_failed: "#{:pivotal_comment_failed.l.escape_js_string}"
+  inject_javascript_at_end %(
+    MOPivotalModule({#{data.join(",\n")}}, {
+      pivotal_vote_failed: "#{:pivotal_vote_failed.l.escape_js_string}",
+      pivotal_story_failed: "#{:pivotal_story_failed.l.escape_js_string}",
+      pivotal_story_loading: "#{:pivotal_story_loading.l.escape_js_string}",
+      pivotal_comment_failed: "#{:pivotal_comment_failed.l.escape_js_string}"
     })
-  ))
+  )
 %>
 
 <%= :pivotal_index_header.tp %>

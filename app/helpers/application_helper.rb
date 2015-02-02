@@ -30,19 +30,19 @@ module ApplicationHelper
   # Firefox 17+,
   # IE 9+ and
   # Opera 12+
-def can_do_ajax?
-    browser.modern? || browser.ie8? || TESTING
-end
+  def can_do_ajax?
+    browser.modern? || browser.ie8? || Rails.env == "test"
+  end
 
-  #Use this test to determine if a user can upload multiple images at a time.
-  #It checks for support of the following requirements:
-  # Select multiple files button
-  # XHRHttpRequest2
-  # FileAPI
-  #CanIuse.com is the source of this information.
-def can_do_multifile_upload?
-   (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
-end
+  # Use this test to determine if a user can upload multiple images at a time.
+  # It checks for support of the following requirements:
+  #   Select multiple files button
+  #   XHRHttpRequest2
+  #   FileAPI
+  # CanIuse.com is the source of this information.
+  def can_do_multifile_upload?
+    (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
+  end
 
   ##############################################################################
   #
@@ -235,7 +235,7 @@ end
 
   # Add another input field onto an existing auto-completer.
   def reuse_auto_completer(first_id, new_id)
-    javascript_tag("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
+    inject_javascript_at_end("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
   end
 
   # Turn a text_field into an auto-completer.
@@ -243,9 +243,6 @@ end
   # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
-      javascript_include 'jquery'
-      javascript_include 'jquery_extensions'
-      javascript_include 'autocomplete'
       js_args = []
       opts[:input_id]   = id
       opts[:row_height] = 22
@@ -262,8 +259,7 @@ end
         end
       end
       js_args = js_args.join(', ')
-
-      result = javascript_tag("new MOAutocompleter({ #{js_args} })")
+      result = inject_javascript_at_end("new MOAutocompleter({ #{js_args} })")
     else
       result = ''
     end
@@ -990,36 +986,38 @@ end
     if args.select {|arg| arg.class != String} != []
       raise(ArgumentError, "javascript_include doesn't take symbols like :default, etc.")
     end
-    @javascripts = [] if !@javascripts
-    @javascripts += args
+    @javascript_files ||= []
+    @javascript_files += args
   end
 
   # This is called in the header section in the layout.  It returns the
   # javascript modules in correct order (see above).
   #   # Example usage in layout header:
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
-  def sort_javascript_includes
-    @javascripts = [] if !@javascripts
-    # Stick the ones that care about order first, in their preferred order,
-    # ignore duplicates since we'll uniq it later anyway.
-    @result = JAVASCRIPT_MODULE_ORDER.select do |m|
-      @javascripts.include?(m)
-    end + @javascripts
-    return @result.uniq.map do |m|
-      if m.to_s == "jquery"
-        # Just user jQuery 1.x for everyone. There is at least one case of
-        # version 2.x not working for a fairly modern version of Chrome.
-        "jquery_1"
-      else
-        m
-      end
-    end
+  def javascript_includes
+    @javascript_files ||= []
+    @javascript_files.unshift "application"
+    @javascript_files.uniq
+  end
+
+  # Register a bit of javascript to inject after includes at bottom of page.
+  #   <% inject_javascript_at_end %(
+  #     this_javascript_will_run_at_end();
+  #   ) %>
+  def inject_javascript_at_end(*args)
+    @javascript_codes ||= []
+    @javascript_codes += args
+  end
+
+  # Return javascript snippets scheduled for inclusion at the end of the page.
+  def injected_javascripts
+    @javascript_codes || []
   end
 
   # Insert a javacsript snippet that causes the browser to focus on a given
   # input field when it loads the page.
   def focus_on(id)
-    javascript_tag("document.getElementById('#{id}').focus()")
+    inject_javascript_at_end("document.getElementById('#{id}').focus()")
   end
 
   # From map_helper.rb
@@ -1451,13 +1449,10 @@ end
   end
 
   def image_exporter(image_id, exported)
-    javascript_include('jquery')
-    javascript_include('image_export')
     content_tag(:div, export_link(image_id, exported), id: "image_export_#{image_id}")
   end
 
-
-  #Create an image link vote, where vote param is vote number ie: 3
+  # Create an image link vote, where vote param is vote number ie: 3
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
@@ -1976,8 +1971,6 @@ end
   end
 
   def validated_file_field(obj, attr, opts)
-    javascript_include("jquery")
-    javascript_include("validate_file_input_fields")
     file_field(obj, attr, opts)
   end
 end

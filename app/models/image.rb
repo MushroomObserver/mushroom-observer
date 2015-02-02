@@ -602,7 +602,7 @@ class Image < AbstractModel
                  gsub('<id>', id.to_s).
                  gsub('<ext>', ext).
                  gsub('<set>', set)
-        if !TESTING && !system(cmd)
+        if Rails.env != "test" && !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(:id => id))
           result = false
         end
@@ -615,7 +615,7 @@ class Image < AbstractModel
   # field and returns false.
   def move_original
     original_image = local_file_name(:original)
-    raise(SystemCallError, "Don't move my test images!!") if TESTING
+    raise(SystemCallError, "Don't move my test images!!") if Rails.env == "test"
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end
@@ -652,7 +652,7 @@ class Image < AbstractModel
     else
       raise("Invalid transform op: #{op.inspect}")
     end
-    system("script/rotate_image #{id} #{op}&") if !TESTING
+    system("script/rotate_image #{id} #{op}&") if Rails.env != "test"
   end
 
   ################################################################################
@@ -743,6 +743,7 @@ class Image < AbstractModel
   # Calculate the average vote given the raw vote data.
   def refresh_vote_cache!
     @vote_hash = nil
+    image_votes(true) # force reload
     sum = num = 0
     for user, value in vote_hash
       sum += value.to_f

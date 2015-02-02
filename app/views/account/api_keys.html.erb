@@ -8,9 +8,12 @@
   end
 %>
 
-<p>
+<%= 
+  javascript_include('api_key')
+  inject_javascript_at_end "ApiKeyModule()"
+%>
+
 <%= :account_api_keys_help.tp %>
-</p>
 
 <% if @user.api_keys.any? %>
   <%= form_tag({}, { class: "pad-bottom-2x"}) %>
@@ -67,23 +70,14 @@
 <% end %>
 
 <%= form_for(:key) do |form| %>
-    <div>
-        <label for="notes"><%= :account_api_keys_notes_label.t %></label>
-    </div>
-    <div>
-        <%= form.text_field(:notes, :size => 80) %>
-    </div>
-    <div>
-        <%= submit_tag(:account_api_keys_create_button.l, :id => 'create_button') %>
-    </div>
+  <div>
+    <label for="notes"><%= :account_api_keys_notes_label.t %></label>
+  </div>
+  <div>
+    <%= form.text_field(:notes, :size => 80) %>
+  </div>
+  <div>
+    <%= submit_tag(:account_api_keys_create_button.l, :id => 'create_button') %>
+  </div>
 <% end %>
 <br/>
-
-<%= if @js
-################################################################################
-  javascript_include('jquery')
-  javascript_include('api_key')
-  javascript_tag %(
-                 ApiKeyModule();
-                 )
-end %>
