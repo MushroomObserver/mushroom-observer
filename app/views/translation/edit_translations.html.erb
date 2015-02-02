@@ -1,19 +1,17 @@
 <%
-   @title = :edit_translations_title.t
-   javascript_include('jquery')
-   javascript_include('jquery_extensions')
-   javascript_include('translations')
+  @title = :edit_translations_title.t
+  javascript_include('translations')
 %>
 
 <%= stylesheet_link_tag('grids.css') %>
 <%= javascript_tag %(
-                   TranslationsModule({
-                        locale: "#{j @lang.locale}",
-                        confirm_string: "#{j :edit_translations_will_lose_changes.l}",
-                        loading_string : "#{j :edit_translations_loading.l}",
-                        saving_string: "#{j :edit_translations_saving.l}"
-                   });
-                   ) %>
+  TranslationsModule({
+    locale: "#{j @lang.locale}",
+    confirm_string: "#{j :edit_translations_will_lose_changes.l}",
+    loading_string : "#{j :edit_translations_loading.l}",
+    saving_string: "#{j :edit_translations_saving.l}"
+  });
+) %>
 
 <div id="whirly" class="hidden">
   <span id="whirly_text" class="pad-bottom-2x"></span>
@@ -27,34 +25,34 @@
   <div class="col-xs-4">
     <div id="left_translation_container">
       <% @form.each do |item| %>
-          <%= case item.class.name
-                when /MajorHeader/
-                  content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'major_header')
-                when /MinorHeader/
-                  content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'minor_header')
-                when /Comment/
-                  content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'comment')
-                when /TagField/
-                  tag = item.tag
-                  str = preview_string(@strings[tag])
-                  official_record = @official_records[tag]
-                  translated_record = @translated_records[tag]
-                  up_to_date = translated_record && translated_record.updated_at >= official_record.updated_at - 1.second
-                  if not up_to_date and
-                          official_record and
-                          official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
-                    # Mark as translated if there is nothing to actually translate!
-                    up_to_date = true
-                  end
-                  span_class = up_to_date ? 'faint' : 'bold bright'
-                  str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
-                  label = content_tag(:span, h(tag) + ':', :class => 'tag')
-                  label = link_to(label, {:page => @page, :tag => tag}, data: {:tag => tag, :role => "show_tag"})
+        <%= case item.class.name
+              when /MajorHeader/
+                content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'major_header')
+              when /MinorHeader/
+                content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'minor_header')
+              when /Comment/
+                content_tag(:p, h(item.string).gsub('\n', '<br/>').html_safe, :class => 'comment')
+              when /TagField/
+                tag = item.tag
+                str = preview_string(@strings[tag])
+                official_record = @official_records[tag]
+                translated_record = @translated_records[tag]
+                up_to_date = translated_record && translated_record.updated_at >= official_record.updated_at - 1.second
+                if not up_to_date and
+                        official_record and
+                        official_record.text.match(/\A\[:?\w[^\[\]\'\"]*\]\Z/)
+                  # Mark as translated if there is nothing to actually translate!
+                  up_to_date = true
+                end
+                span_class = up_to_date ? 'faint' : 'bold bright'
+                str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
+                label = content_tag(:span, h(tag) + ':', :class => 'tag')
+                label = link_to(label, {:page => @page, :tag => tag}, data: {:tag => tag, :role => "show_tag"})
 
-                  content_tag(:p, label + ' ' + str, :class => 'tag_field')
-                else
-                  raise "Unexpected form item type: #{line.class.name}"
-              end %>
+                content_tag(:p, label + ' ' + str, :class => 'tag_field')
+              else
+                raise "Unexpected form item type: #{line.class.name}"
+            end %>
       <% end %>
     </div>
   </div>

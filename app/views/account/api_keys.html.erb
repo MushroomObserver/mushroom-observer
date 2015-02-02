@@ -79,11 +79,7 @@
 <% end %>
 <br/>
 
-<%= if @js
-################################################################################
-  javascript_include('jquery')
+<%= 
   javascript_include('api_key')
-  javascript_tag %(
-                 ApiKeyModule();
-                 )
-end %>
+  javascript_tag "ApiKeyModule()"
+%>
