@@ -14,7 +14,7 @@ class Pivotal
         id   = obj["id"]
         name = obj["name"]
         date = obj["updated_at"]
-        if TESTING || name != "test"
+        if Rails.env == "test" || name != "test"
           story = Pivotal::Story.new(obj)
           stories << story
         end

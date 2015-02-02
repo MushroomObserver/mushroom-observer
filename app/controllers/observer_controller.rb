@@ -475,7 +475,7 @@ class ObserverController < ApplicationController
         end
       end
     rescue => e
-      flash_error(e.to_s) unless PRODUCTION
+      flash_error(e.to_s) unless Rails.env == "production"
     end
 
     if matches.empty? && suggestions.empty?

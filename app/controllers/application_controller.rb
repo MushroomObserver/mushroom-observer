@@ -545,7 +545,7 @@ class ApplicationController < ActionController::Base
     if tz.blank?
       # For now, until we get rid of reliance on @js, this is a surrogate for
       # testing if the client's JS is enabled and sufficiently fully-featured.
-      @js = TESTING
+      @js = Rails.env == "test"
     else
       begin
         Time.zone = tz
@@ -669,7 +669,7 @@ class ApplicationController < ActionController::Base
   # application layout (app/views/layouts/application.rhtml) every time it
   # renders the latest error messages.
   def flash_clear
-    @last_notice = session[:notice] if TESTING
+    @last_notice = session[:notice] if Rails.env == "test"
     session[:notice] = nil
   end
   helper_method :flash_clear

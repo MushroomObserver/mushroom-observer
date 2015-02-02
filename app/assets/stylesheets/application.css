@@ -407,7 +407,8 @@ div.popup {
     position: absolute;
     top: 0px;
     left: 0px;
-    width: auto !important
+    width: auto !important;
+    z-index: 1000000;
 }
 div.popup_frame {
     padding: 10px;

@@ -629,7 +629,7 @@ class NameController < ApplicationController
         :url => "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
       WebmasterEmail.build(@user.email, content).deliver
-      NameControllerTest.report_email(content) if TESTING
+      NameControllerTest.report_email(content) if Rails.env == "test"
     end
   end
 
@@ -739,7 +739,7 @@ class NameController < ApplicationController
                 that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
     )
     WebmasterEmail.build(@user.email, content).deliver
-    NameControllerTest.report_email(content) if TESTING
+    NameControllerTest.report_email(content) if Rails.env == "test"
   end
 
   # Chain on to approve/deprecate name if changed status.
@@ -1467,7 +1467,7 @@ class NameController < ApplicationController
       else
         if sorter.new_name_strs != []
           # This error message is no longer necessary.
-          flash_error "Unrecognized names given, including: #{sorter.new_name_strs[0].inspect}" if TESTING
+          flash_error "Unrecognized names given, including: #{sorter.new_name_strs[0].inspect}" if Rails.env == "test"
         else
           # Same with this one... err, no this is not reported anywhere.
           flash_error "Ambiguous names given, including: #{sorter.multiple_line_strs[0].inspect}"
