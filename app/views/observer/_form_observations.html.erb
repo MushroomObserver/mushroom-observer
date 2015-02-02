@@ -154,9 +154,7 @@ end %>
   <% if can_do_ajax? and !can_do_multifile_upload? %>
     <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
 
-    <%= javascript_include('jquery')
-    javascript_include('jquery_extensions')
-    javascript_tag %(
+    <%= javascript_tag %(
       var x = String.fromCharCode(60);
       var y = String.fromCharCode(93);
 
@@ -257,8 +255,7 @@ end %>
             <!--Target for insertion-->
           </div>
         </div>
-        <% javascript_include('exif')
-           javascript_include('multi_image_upload') %>
+        <% javascript_include('multi_image_upload') %>
         <%= javascript_tag %(
               jQuery(document).ready(function () {
                  var uploader = MultiImageUploader({

@@ -1,6 +1,7 @@
+//= require exif.js
+
 function MultiImageUploader(localized_text) {
     var defaults = {
-        image_upload_error_text: "There was an error uploading the image. Continuing anyway.",
         uploading_text: "Uploading",
         image_too_big_text: "This image is too large. Images must be less than 20Mb in file size.",
         creating_observation_text: "Creating Observation...",
@@ -12,21 +13,20 @@ function MultiImageUploader(localized_text) {
     } else {
         localized_text.image_too_big_text = !localized_text.image_too_big_text ? defaults.image_too_big_text : localized_text.image_too_big_text;
         localized_text.uploading_text = !localized_text.uploading_text ? defaults.uploading_text : localized_text.uploading_text;
-        localized_text.image_upload_error_text = !localized_text.image_upload_error_text ? defaults.image_upload_error_text : localized_text.image_upload_error_text;
         localized_text.creating_observation_text = !localized_text.creating_observation_text ? defaults.creating_observation_text : localized_text.creating_observation_text;
         localized_text.months = !localized_text.months ? defaults.months : localized_text.months;
     }
 
-    //Internal Variable Definitions;
-    var  fileStore = new FileStore(),
+    // Internal Variable Definitions.
+    var fileStore = new FileStore(),
         dateUpdater = new DateUpdater(),
-        _maxImageSize = 20*1024*1024,
+        _maxImageSize = <%= MO.image_upload_max_size %>,
         _getTemplateUri = "/ajax/get_multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
         _progressUri = "/ajax/upload_progress",
         _dots = [".", "..", "..."],
         blockFormSubmission = true,
-        $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
+        $addedImagesContainer = jQuery("#added_images_container"), // container to insert images into
         $form = jQuery(document.forms.namedItem("observation_form")),
         $submitButtons= $form.find('input[type="submit"]'),
         $goodImages = jQuery('#good_images'),
@@ -41,12 +41,10 @@ function MultiImageUploader(localized_text) {
         $ignoreDateSubmit = jQuery('#ignore_dates'),
         $imgMessages = jQuery(".image_messages");
 
-
     /*********************/
-    /* Class Definitions */
+    /* Simple Date Class */
     /*********************/
 
-    //Simple Date Class
     function SimpleDate(day, month, year) {
         this.day = parseInt(day);
         this.month = parseInt(month);
@@ -63,12 +61,14 @@ function MultiImageUploader(localized_text) {
         return this.day + "-" + _months[this.month-1] + "-" + this.year;
     }
 
-    /*DateUpdater -- deals generally with
-      image and observation dates and their updating.
-      Through the message box*/
+    /*********************/
+    /*    DateUpdater    */
+    /*********************/
+
+    // Deals with synchronizing image and observation dates through
+    // a message box.
 
     function DateUpdater() {}
-
 
     DateUpdater.prototype.areDatesInconsistent = function() {  //will check differences between the image dates and observation dates
         var _this = this,
@@ -118,7 +118,6 @@ function MultiImageUploader(localized_text) {
         $imgMessages.hide('slow');
     }
 
-
     DateUpdater.prototype.makeImageDateRadio = function (simpleDate) {
         var _this = this;
 
@@ -127,8 +126,6 @@ function MultiImageUploader(localized_text) {
         html = html.replace('{{dateStr}}', simpleDate.asDateString());
         $imgRadioContainer.append(jQuery(html));
     };
-
-
 
     DateUpdater.prototype.makeObservationDateRadio = function (simpleDate) {
         var _this = this;
@@ -140,7 +137,6 @@ function MultiImageUploader(localized_text) {
         var $obsRadio = jQuery(html);
         $obsRadioContainer.append($obsRadio);
     };
-
 
     DateUpdater.prototype.updateObservationDateRadio = function () {
         var _this = this;
@@ -161,8 +157,12 @@ function MultiImageUploader(localized_text) {
         return new SimpleDate($obsDay.val(), $obsMonth.val(), $obsYear.val());
     };
 
+    /*********************/
+    /*     FileStore     */
+    /*********************/
 
-    /*File Store contains all the file items*/
+    // Container for the image files.
+
     function FileStore() {
         var _this = this;
         _this.fileStoreItems = [];
@@ -209,7 +209,6 @@ function MultiImageUploader(localized_text) {
             fileStoreItem.imageDate(simpleDate);
         });
     };
-
 
     FileStore.prototype.getDistinctImageDates = function () {
         var _this = this,
@@ -268,9 +267,11 @@ function MultiImageUploader(localized_text) {
         return false;
     }
 
+    /*********************/
+    /*   FileStoreItem   */
+    /*********************/
 
-    //File Store Item Class
-
+    // Contains information about an image file.
 
     function FileStoreItem(file, uuid) {
         this.file = file;
@@ -280,8 +281,6 @@ function MultiImageUploader(localized_text) {
         this.processed = false;  //we use this to check the async status of files
         this.getTemplateHtml(); //kicks off the process of creating the image and such.
     }
-
-
 
     FileStoreItem.prototype.getTemplateHtml = function () {  //does an ajax request to get the template, then formats it, the format function adds to HTML.
         var _this = this;
@@ -391,7 +390,6 @@ function MultiImageUploader(localized_text) {
         };
     };
 
-
     FileStoreItem.prototype.asFormData = function () {
         var _this = this,
             _info = _this.getUserEnteredInfo(),
@@ -425,9 +423,10 @@ function MultiImageUploader(localized_text) {
             doDots(1);
         } else {
             _$container.find(".progress-bar").animate({ width: _percent_string }, decimalPercentage == 1 ? 1000 : 1500, "linear");
-            // (a little extra to patch over gap between sending request for next progress update
-            // and actually receiving it, which occurs after a second is up... but not after
-            // image is done, no more progress updates required then)
+            // 1500: a little extra to patch over gap between sending request
+            // for next progress update and actually receiving it, which occurs
+            // after a second is up... but not after image is done, no more
+            // progress updates required then.
         }
 
         function doDots(i) {
@@ -459,7 +458,7 @@ function MultiImageUploader(localized_text) {
                     jQuery('#observation_thumb_image_id').val(image.id);
                 }
             } else {
-                alert(xhrReq.status + ": " + localized_text.image_upload_error_text);
+                alert(xhrReq.response);
             }
             if (progress) window.clearTimeout(progress);
             _this.incrementProgressBar(1);
@@ -487,13 +486,13 @@ function MultiImageUploader(localized_text) {
         };
         progress = window.setTimeout(update, 1000);
 
-        //Note: You need to add the event listeners before calling open() on the request.
+        // Note: You need to add the event listeners before calling open()
+        // on the request.
         xhrReq.open("POST", _uploadImageUri, true);
         xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
         var _fd = _this.asFormData(); //Send the form
         _fd != null ? xhrReq.send(_fd) : _this.isUploaded = true;
     }
-
 
     FileStoreItem.prototype.destroy = function () {
         this.dom_element.remove();  //remove element from the dom;
@@ -503,7 +502,9 @@ function MultiImageUploader(localized_text) {
             fileStore.fileStoreItems.splice(idx, 1);  //removes the file from the array
     };
 
-    //Helpers
+    /*********************/
+    /*      Helpers      */
+    /*********************/
 
     function generateUUID() {
         return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -512,9 +513,11 @@ function MultiImageUploader(localized_text) {
         });
     }
 
+    /*********************/
+    /*     Bindings      */
+    /*********************/
 
-    /*BINDINGS ARE HERE*/
-    function init() { //initialize the uploader!
+    function init() {
         $submitButtons.prop('disabled', false);//make sure submit buttons are enabled when the dom is loaded!
 
         $fixDateSubmit.bind('click.fixDateBind', function () {
@@ -532,19 +535,19 @@ function MultiImageUploader(localized_text) {
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
 
-        //Detect when files are added from browser
+        // Detect when files are added from browser
         $selectFilesButton.change(function () {
             var files = $(this)[0].files; //Get the files from the browser
             fileStore.addFiles(files);
         });
 
-        //IMPORTANT:  This allows the user to updat the thumbnail on the edit observation view.
+        // IMPORTANT:  This allows the user to updat the thumbnail on the edit
+        // observation view.
         jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
             jQuery('#observation_thumb_image_id').val($(this).val());
         });
 
-
-        //Detect when a user submits observation; includes upload logic
+        // Detect when a user submits observation; includes upload logic
         $form.submit(function () {
             if (blockFormSubmission) {
                 fileStore.uploadAll();
@@ -557,5 +560,4 @@ function MultiImageUploader(localized_text) {
     return {
         init: init
     }
-
 }

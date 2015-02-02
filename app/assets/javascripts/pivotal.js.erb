@@ -77,7 +77,7 @@ jQuery(document).ready(function () {
                 }
             }
         });
-        span.html('<img alt="Indicator" src="/assets/indicator.gif" />');
+        span.html('<img alt="Indicator" src="<%= asset_path('indicator.gif') %>" />');
     }
 
     function click_on_story(story) {
@@ -108,7 +108,7 @@ jQuery(document).ready(function () {
         });
         div.html('<span class="pivotal_loading">' +
         PIVOTAL_STORY_LOADING +
-        ' <img alt="Indicator" src="/assets/indicator.gif" />' +
+        ' <img alt="Indicator" src="<%= asset_path('indicator.gif') %>" />' +
         '</span>');
         div.show();
         jQuery("#pivotal_" + story).ensureVisible();

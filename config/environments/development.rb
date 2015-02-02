@@ -71,6 +71,15 @@ MushroomObserver::Application.configure do
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 
+  # Serve assets in rails.
+  config.serve_static_assets = true
+
+  # Compile asset files, but don't combine, compress, or add digests to names.
+  config.assets.compile = true
+  config.assets.compress = false
+  config.assets.debug = true
+  config.assets.digest = false
+
   if config.active_record
     # Raise exception on mass assignment protection for Active Record models
     config.active_record.mass_assignment_sanitizer = :strict \
