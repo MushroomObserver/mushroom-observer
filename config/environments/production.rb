@@ -165,7 +165,7 @@ MushroomObserver::Application.configure do
     Hygrocybe.css
     grids.css
     semantic_vernacular.css
-  )
+  ) if config.assets and config.assets.precompile
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
