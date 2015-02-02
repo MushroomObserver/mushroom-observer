@@ -102,7 +102,7 @@ end %>
                 <% end %>
 
                 <%= label_tag("image_#{image.id}_orgiginal_name", "#{:form_observations_original_name.t}:") %>
-                <%= text_field(:good_image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %>
+                <%= text_field(:good_image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %><br/>
 
                 <%= label_tag("image_#{image.id}_copyright_holder", "#{:form_images_copyright_holder.t}:") %>
                 <%= text_field(:good_image, :copyright_holder, :value => image.copyright_holder, :index => image.id, :size => 30) %><br/>
@@ -151,8 +151,9 @@ end %>
           </div>
     <% end %>
 
-  <% if can_do_ajax? && !can_do_multifile_upload? %>
+  <% if can_do_ajax? and !can_do_multifile_upload? %>
     <%= button_tag(:form_observations_upload_another.t, {:onclick => 'image_new()', :id => 'new_image_button'}) %>
+
     <%= javascript_include('jquery')
     javascript_include('jquery_extensions')
     javascript_tag %(
@@ -217,6 +218,10 @@ end %>
   </td></tr></table>
     <% ############################### START Multiple image uploads ############################## %>
     <% if can_do_multifile_upload? %>
+        <div class='HelpNote'>
+          <%= :form_observations_upload_help_multi_select.tp %>
+        </div>
+        <%= hidden_field('observation', 'thumb_image_id') %>
         <input type="file" multiple id="multiple_images_button" accept="image/*"/>
         <!--Container to show messages relating to the selected images  -->
         <%=stylesheet_link_tag("grids")%>
@@ -257,7 +262,6 @@ end %>
         <%= javascript_tag %(
               jQuery(document).ready(function () {
                  var uploader = MultiImageUploader({
-                  image_upload_error_text: "#{j :form_observations_image_upload_error.t}",
                   uploading_text: "#{j :form_observations_uploading_images.t}",
                   image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
                   creating_observation_text: "#{j :form_observations_creating_observation.t}",

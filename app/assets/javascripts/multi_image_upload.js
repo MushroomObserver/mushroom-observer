@@ -20,8 +20,11 @@ function MultiImageUploader(localized_text) {
     //Internal Variable Definitions;
     var  fileStore = new FileStore(),
         dateUpdater = new DateUpdater(),
+        _maxImageSize = 20*1024*1024,
         _getTemplateUri = "/ajax/get_multi_image_template",
         _uploadImageUri = "/ajax/create_image_object",
+        _progressUri = "/ajax/upload_progress",
+        _dots = [".", "..", "..."],
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"),//container to insert images
         $form = jQuery(document.forms.namedItem("create_observation_form")),
@@ -297,7 +300,7 @@ function MultiImageUploader(localized_text) {
 
         _this.dom_element = $(html_string);  //Create the DOM element and add it to FileStoreItem;
 
-        if (_this.file.size > 10000000)
+        if (_this.file.size > _maxImageSize)
             _this.dom_element.find('.warn-text').text(localized_text.image_too_big_text);
 
         $addedImagesContainer.append(_this.dom_element); //add it to the page
@@ -383,8 +386,8 @@ function MultiImageUploader(localized_text) {
             month: jQuery(this.dom_element.find('select')[1]).val(),
             year: jQuery(this.dom_element.find('select')[2]).val(),
             license: jQuery(this.dom_element.find('select')[3]).val(),
-            notes: jQuery(this.dom_element.find('input')[0]).val(),
-            copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
+            notes: jQuery(this.dom_element.find('input')[1]).val(),
+            copyright_holder: jQuery(this.dom_element.find('input')[2]).val()
         };
     };
 
@@ -394,7 +397,7 @@ function MultiImageUploader(localized_text) {
             _info = _this.getUserEnteredInfo(),
             _fd = new FormData();
 
-        if (_this.file.size > 20000000)
+        if (_this.file.size > _maxImageSize)
             return null;
 
         _fd.append("image[upload]", _this.file, _this.file.name);
@@ -410,22 +413,27 @@ function MultiImageUploader(localized_text) {
 
     FileStoreItem.prototype.incrementProgressBar = function (decimalPercentage) {
         var _this = this,
-            _$progress_bar = _this.dom_element.find(".added_image_name_container"),
+            _$container = _this.dom_element.find(".added_image_name_container"),
             _percent_string = decimalPercentage ? parseInt(decimalPercentage * 100).toString() + "%" : "0%"; //if we don't have percentage,  just set it to 0 percent
-        _$progress_bar.css('background', 'linear-gradient(to right, #51B973 {{percentage}}, #F6F6F6 0%'.replace("{{percentage}}", _percent_string));
 
-        if (_this.isUploading == true)
-            return;           //don't set multiple timeouts for doDots!
-
-        _this.isUploading = true;
-        doDots(1);
-
-        var _dots = [".", "..", "..."];
+        if (!_this.isUploading) {
+            _this.isUploading = true;
+            _$container.html(
+              '<div class="col-xs-12" style="z-index: 1"><strong class="progress-text">' + localized_text.uploading_text + '</strong></div>' +
+              '<div class="progress-bar" style="position: absolute; width: 0%; height: 1.5em; background: #51B973; z-index: 0;"></div>'
+            )
+            doDots(1);
+        } else {
+            _$container.find(".progress-bar").animate({ width: _percent_string }, decimalPercentage == 1 ? 1000 : 1500, "linear");
+            // (a little extra to patch over gap between sending request for next progress update
+            // and actually receiving it, which occurs after a second is up... but not after
+            // image is done, no more progress updates required then)
+        }
 
         function doDots(i) {
             setTimeout(function () {
                 if (i < 900) {
-                    _$progress_bar.html('<div class="col-xs-12"><strong>' + localized_text.uploading_text + _dots[i % 3] + '</strong></div>'); //show the user we are uploading the image by showing some dots for a while.
+                    _$container.find(".progress-text").html(localized_text.uploading_text + _dots[i % 3]);
                     doDots(++i);
                 }
             }, 333)
@@ -434,7 +442,9 @@ function MultiImageUploader(localized_text) {
 
     FileStoreItem.prototype.upload = function (onUploadedCallback) {
         var _this = this,
-            xhrReq = new XMLHttpRequest();
+            xhrReq = new XMLHttpRequest(),
+            progress = null,
+            update = null;
 
         $submitButtons.val(localized_text.uploading_text + '...');
         _this.incrementProgressBar();
@@ -444,22 +454,42 @@ function MultiImageUploader(localized_text) {
                 var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
+                if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {
+                    //set the thumbnail if it is selected
+                    jQuery('#observation_thumb_image_id').val(image.id);
+                }
             } else {
-                alert(localized_text.image_upload_error_text);
+                alert(xhrReq.status + ": " + localized_text.image_upload_error_text);
             }
+            if (progress) window.clearTimeout(progress);
+            _this.incrementProgressBar(1);
             _this.dom_element.hide('slow');
             onUploadedCallback();
         };
 
-        xhrReq.onprogress = function (event) {  //show the upload status
-            if (event.lengthComputable) {
-                var percentComplete = event.loaded / event.total;
-                _this.incrementProgressBar(percentComplete);
+        update = function() {
+          var req = new XMLHttpRequest();
+          req.open("GET", _progressUri, 1);
+          req.setRequestHeader("X-Progress-ID", _this.uuid);
+          req.onreadystatechange = function () {
+            if (req.readyState == 4 && req.status == 200) {
+              var upload = eval(req.responseText);
+              if (upload.state == "done" || upload.state == "uploading") {
+                _this.incrementProgressBar(upload.received / upload.size);
+                progress = window.setTimeout(update, 1000);
+              } else {
+                window.clearTimeout(progress);
+                progress = null;
+              }
             }
+          };
+          req.send(null);
         };
+        progress = window.setTimeout(update, 1000);
 
         //Note: You need to add the event listeners before calling open() on the request.
         xhrReq.open("POST", _uploadImageUri, true);
+        xhrReq.setRequestHeader("X-Progress-ID", _this.uuid);
         var _fd = _this.asFormData(); //Send the form
         _fd != null ? xhrReq.send(_fd) : _this.isUploaded = true;
     }
@@ -507,6 +537,12 @@ function MultiImageUploader(localized_text) {
             var files = $(this)[0].files; //Get the files from the browser
             fileStore.addFiles(files);
         });
+
+        //IMPORTANT:  This allows the user to updat the thumbnail on the edit observation view.
+        jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
+            jQuery('#observation_thumb_image_id').val($(this).val());
+        });
+
 
         //Detect when a user submits observation; includes upload logic
         $form.submit(function () {

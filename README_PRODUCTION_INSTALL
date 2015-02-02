@@ -51,7 +51,7 @@ root> vi /etc/ssh/sshd_config
 root> apt-get update
 root> apt-get upgrade -y
 root> apt-get install -y build-essential man telnet wget curl vim emacs \
-                         iptables mlocate lynx
+                         iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables -F
@@ -287,4 +287,6 @@ root> ps -ef | grep postfix
 # If any are missing, do this on ubuntu/debian:
 root> update-rc.d $SERVICE defaults
 
-# CHECK THE DATE and TIME!!!
+# Make sure date and time and timezone are correct!
+root> date
+

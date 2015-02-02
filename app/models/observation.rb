@@ -811,14 +811,11 @@ return result if debug
   # Saves changes.  Returns Image.
   def add_image(img)
     if !images.include?(img)
-      images << img
-      if thumb_image
-        touch
-      else thumb_image
-        self.thumb_image = img
-        self.save
-      end
-      notify_users(:added_image)
+      self.images << img
+      self.thumb_image = img unless thumb_image
+      self.updated_at = Time.now
+      self.save
+      self.notify_users(:added_image)
       self.reload
     end
     return img

@@ -30,10 +30,8 @@ module ApplicationHelper
   # Firefox 17+,
   # IE 9+ and
   # Opera 12+
-
-
 def can_do_ajax?
-    browser.modern? || TESTING
+    browser.modern? || browser.ie8? || TESTING
 end
 
   #Use this test to determine if a user can upload multiple images at a time.
