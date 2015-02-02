@@ -865,7 +865,7 @@
   app_title: Mushroom Observer
 
   # This goes in the left-hand column.  The "<br/>" forces a line-break.
-  app_banner: Mushroom<br/>Observer
+  app_banner: Mushrooms<br/>Rock!
 
   # This goes in a box at the top of the page.
   app_banner_box: "MO Update Complete:  Please <a href=\"http://mushroomobserver.org/observer/ask_webmaster_question\">send us a note</a> if you see any weird behavior."
@@ -1215,7 +1215,7 @@
   form_observations_list_help: Check and species lists you would like to add this observation to.
   form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
   form_observations_use_date: Use This Date
-  form_observations_date_warning: "The date(s) of the selected image(s) are not the same as the observation date.  If you like, you can force all of the dates to be the same.  Just select one of the dates to the left and click on \"[:form_observations_use_date]\"."
+  form_observations_date_warning: The date(s) of the selected image(s) are not the same as the observation date.  If you like, you can force all of the dates to be the same.  Just select one of the dates to the left and click on "[:form_observations_use_date]".
   form_observations_set_observation_date_to: Change the observation date to this date
   form_observations_set_image_dates_to: Change the image date(s) to this date
   form_observations_image_too_big: This image is too large to upload and will be skipped, files must be less than [max_size].

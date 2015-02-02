@@ -18,7 +18,7 @@ class TranslationController < ApplicationController
     update_translations(@edit_tags) if params[:commit] == :SAVE.l
     @form = build_form(@lang, @show_tags)
   rescue => e
-    raise e if TESTING and @lang
+    raise e if Rails.env == "test" and @lang
     flash_error(*error_message(e))
     redirect_back_or_default('/')
   end
@@ -56,7 +56,7 @@ class TranslationController < ApplicationController
 
   def error_message(error)
     msg = [error.to_s]
-    if DEVELOPMENT and @lang
+    if Rails.env == "development" and @lang
       for line in error.backtrace
         break if line.match(/action_controller.*perform_action/)
         msg << line

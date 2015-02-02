@@ -23,7 +23,7 @@ xml.response(:xmlns => "#{MO.http_domain}/response.xsd") do
           xml.code    error.class.name
           xml.details error.to_s
           xml.fatal   error.fatal ? 'true' : 'false'
-          xml.trace   error.backtrace.join("\n") unless PRODUCTION or !error.backtrace
+          xml.trace   error.backtrace.join("\n") unless Rails.env == "production" or !error.backtrace
         end
         i += 1
       end

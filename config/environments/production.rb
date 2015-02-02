@@ -115,6 +115,9 @@ MushroomObserver::Application.configure do
   # Enable serving of images, stylesheets, and javascripts from an asset server
   # config.action_controller.asset_host = "http://assets.example.com"
 
+  # Tells rails to let nginx serve static files.
+  config.action_dispatch.x_sendfile_header = "X-Accel-Redirect"
+
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
 
@@ -128,24 +131,44 @@ MushroomObserver::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  # Haven't really figured out how assets work yet.
-  # # Compress JavaScripts and CSS
-  # config.assets.compress = true
-  # 
-  # # Don't fallback to assets pipeline if a precompiled asset is missed
-  # config.assets.compile = false
-  # 
-  # # Generate digests for assets URLs
-  # config.assets.digest = true
-  # 
-  # # Defaults to Rails.root.join("public/assets")
-  # # config.assets.manifest = YOUR_PATH
-  # 
-  # # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  # # config.assets.precompile += %w( search.js )
-  # 
-  # # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # # config.force_ssl = true
+  # Compress JavaScripts and CSS
+  config.assets.compress = true
+  config.assets.js_compressor = :uglifier
+
+  # Don't fallback to assets pipeline if a precompiled asset is missed
+  config.assets.compile = false
+
+  # Combine files using the "require" directives at the top of included files
+  config.assets.debug = false
+
+  # Generate digests for assets URLs
+  config.assets.digest = true
+
+  # Defaults to Rails.root.join("public/assets")
+  # config.assets.manifest = YOUR_PATH
+
+  # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
+  config.assets.precompile += %w(
+    api_key.js
+    edit_location.js
+    multi_image_upload.js
+    name_lister.js
+    pivotal.js
+    semantic_venacular.js
+    translations.js
+    vote_popup.js
+    Admin.css
+    Agaricus.css
+    Amanita.css
+    BlackOnWhite.css
+    Cantharellaceae.css
+    Hygrocybe.css
+    grids.css
+    semantic_vernacular.css
+  )
+
+  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+  # config.force_ssl = true
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

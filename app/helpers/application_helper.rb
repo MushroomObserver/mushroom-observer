@@ -30,19 +30,19 @@ module ApplicationHelper
   # Firefox 17+,
   # IE 9+ and
   # Opera 12+
-def can_do_ajax?
-    browser.modern? || browser.ie8? || TESTING
-end
+  def can_do_ajax?
+    browser.modern? || browser.ie8? || Rails.env == "test"
+  end
 
-  #Use this test to determine if a user can upload multiple images at a time.
-  #It checks for support of the following requirements:
-  # Select multiple files button
-  # XHRHttpRequest2
-  # FileAPI
-  #CanIuse.com is the source of this information.
-def can_do_multifile_upload?
-   (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
-end
+  # Use this test to determine if a user can upload multiple images at a time.
+  # It checks for support of the following requirements:
+  #   Select multiple files button
+  #   XHRHttpRequest2
+  #   FileAPI
+  # CanIuse.com is the source of this information.
+  def can_do_multifile_upload?
+    (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
+  end
 
   ##############################################################################
   #
@@ -242,9 +242,6 @@ end
   # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
-      javascript_include 'jquery'
-      javascript_include 'jquery_extensions'
-      javascript_include 'autocomplete'
       js_args = []
       opts[:input_id]   = id
       opts[:row_height] = 22
@@ -261,7 +258,6 @@ end
         end
       end
       js_args = js_args.join(', ')
-
       result = javascript_tag("new MOAutocompleter({ #{js_args} })")
     else
       result = ''
@@ -992,22 +988,10 @@ end
   # javascript modules in correct order (see above).
   #   # Example usage in layout header:
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
-  def sort_javascript_includes
-    @javascripts = [] if !@javascripts
-    # Stick the ones that care about order first, in their preferred order,
-    # ignore duplicates since we'll uniq it later anyway.
-    @result = JAVASCRIPT_MODULE_ORDER.select do |m|
-      @javascripts.include?(m)
-    end + @javascripts
-    return @result.uniq.map do |m|
-      if m.to_s == "jquery"
-        # Just user jQuery 1.x for everyone. There is at least one case of
-        # version 2.x not working for a fairly modern version of Chrome.
-        "jquery_1"
-      else
-        m
-      end
-    end
+  def javascript_includes
+    @javascripts ||= []
+    @javascripts.unshift "application.js"
+    @javascripts.uniq
   end
 
   # Insert a javacsript snippet that causes the browser to focus on a given
@@ -1517,16 +1501,11 @@ end
   end
 
   def image_exporter(image_id, exported)
-    javascript_include('jquery')
-    javascript_include('image_export')
     content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
   end
 
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
-    javascript_include('jquery')
-    javascript_include('image_vote')
-
     if image.is_a?(Image)
       id  = image.id
       cur = image.users_vote(@user)
@@ -1560,7 +1539,7 @@ end
     end
 
     row2 = safe_empty
-    str = link_to('(X)', {}, :title => :image_vote_help_0.l, data: {:role => "image_vote", :id => id, :val => 0})
+    str = link_to('(X)', {controller: :image, action: :show_image, id: id, vote: 0}, :title => :image_vote_help_0.l, data: {:role => "image_vote", :id => id, :val => 0})
 
     str += indent(5)
     row2 += content_tag(:td, content_tag(:small, str)) if cur.to_i > 0
@@ -2093,8 +2072,6 @@ end
   end
 
   def validated_file_field(obj, attr, opts)
-    javascript_include("jquery")
-    javascript_include("validate_file_input_fields")
     file_field(obj, attr, opts)
   end
 end

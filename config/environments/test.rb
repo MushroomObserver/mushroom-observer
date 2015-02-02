@@ -86,6 +86,12 @@ MushroomObserver::Application.configure do
   config.serve_static_assets = true
   config.static_cache_control = 'public, max-age=3600'
 
+  # Compile and combine assets, but don't compress or add digests to names.
+  config.assets.compile = true
+  config.assets.compress = false
+  config.assets.debug = false
+  config.assets.digest = false
+
   # Raise exception on mass assignment protection for Active Record models
   config.active_record && config.active_record.mass_assignment_sanitizer = :strict
 end
