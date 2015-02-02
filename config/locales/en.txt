@@ -864,7 +864,7 @@
   app_title: Mushroom Observer
 
   # This goes in the left-hand column.  The "<br/>" forces a line-break.
-  app_banner: Mushrooms<br/>Rock!
+  app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
   app_banner_box: Enjoy our new image uploader!  Many thanks to Ray Suelzer.<br>Of course, it's impossible to test it on every browser, so please <a href="http://mushroomobserver.org/observer/ask_webmaster_question">send us a note</a> if you see anything wrong.
