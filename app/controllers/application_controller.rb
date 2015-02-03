@@ -1243,14 +1243,10 @@ class ApplicationController < ActionController::Base
       query.need_letters = args[:letters]
     end
 
-    # Time query -- this caches the ids (and first letters if needed).
-    logger.warn("QUERY starting: #{query.query.inspect}")
+    # Get number of results first so we know how to paginate.
     @timer_start = Time.now
     @num_results = query.num_results
     @timer_end = Time.now
-    logger.warn("QUERY finished: model=#{query.model_string}, " +
-                "flavor=#{query.flavor}, params=#{query.params.inspect}, " +
-                "time=#{(@timer_end-@timer_start).to_f}")
 
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) and
@@ -1275,7 +1271,13 @@ class ApplicationController < ActionController::Base
       end
 
       # Instantiate correct subset.
+      logger.warn("QUERY starting: #{query.query.inspect}")
+      @timer_start = Time.now
       @objects = query.paginate(@pages, :include => include)
+      @timer_end = Time.now
+      logger.warn("QUERY finished: model=#{query.model_string}, " +
+                  "flavor=#{query.flavor}, params=#{query.params.inspect}, " +
+                  "time=#{(@timer_end-@timer_start).to_f}")
 
       # Give the caller the opportunity to add extra columns.
       if block_given?
@@ -1483,8 +1485,8 @@ class ApplicationController < ActionController::Base
     if @user
       @user.thumbnail_size
     else
-      session[:thumbnail_size] || :thumbnail
-    end
+      session[:thumbnail_size]
+    end || :thumbnail
   end
   helper_method :default_thumbnail_size
 

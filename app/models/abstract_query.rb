@@ -1780,24 +1780,18 @@ class AbstractQuery < ActiveRecord::Base
     @results ||= {}
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
-    if !needed.empty?
+    if needed.any?
       set = clean_id_set(needed)
-      args2 = {}
       # Note that "set" will be truncated to MAX_ARRAY if too large.
       # This could result in some results not being returned. (See
       # the reject(&:nil?) clause below.)
-      args2[:conditions] = "#{model_class.table_name}.id IN (#{set})"
-#      args2[:include] = args[:include] if args[:include] #
-#      model.all(args2).each do |obj| # Rails 3
-      if args[:include]
-        model_class.where(args2[:conditions]).includes(args[:include]).to_a.
-          each do |obj|
-            @results[obj.id] = obj
-          end
-      else
-        model_class.where(args2[:conditions]).to_a.each do |obj|
-          @results[obj.id] = obj
-        end
+      conditions = "#{model_class.table_name}.id IN (#{set})"
+      includes   = args[:include] || []
+      model_class.
+        where(conditions).
+        includes(includes).
+        to_a.each do |obj|
+        @results[obj.id] = obj
       end
     end
     ids.map {|id| @results[id]}.reject(&:nil?)
