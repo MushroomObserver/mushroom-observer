@@ -3,6 +3,7 @@
   questions_ok = @observation.user.email_general_question
   name = @observation.name
   user_has_lists = @user && !@user.species_lists.empty?
+  javascript_include("vote_popup")
 
   new_tab_set do
     if name && !name.unknown?

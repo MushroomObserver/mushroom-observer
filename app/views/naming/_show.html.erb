@@ -3,7 +3,7 @@
   consensus = observation.consensus_naming
   any_names = observation.namings && observation.namings.length > 0
 %>
-<%= form_tag(add_query_param(controller: :observer, action: :show_observation, id: observation.id)) do %>
+<%= form_tag(add_query_param(controller: :observer, action: :cast_votes, id: observation.id)) do %>
 
   <!--TOP LINKS-->
   <div class="row push-down">

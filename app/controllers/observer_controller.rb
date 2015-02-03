@@ -38,6 +38,9 @@
 #  list_notifications::
 
 # TODO: Determine where this really goes
+#  JPH: --> SearchController along with pattern_search? I foresee future
+#       additions to out search capabilities, like an actually-usable refine
+#       search page, and a way to store and share and edit searches.
 #  advanced_search::
 
 # TODO: Create SearchController with:
@@ -930,30 +933,14 @@ class ObserverController < ApplicationController
     query = find_query(:Observation)
     @mappable = query && query.is_coercable?(:Location)
 
-    return unless @user
-    # This happens when user clicks on "Update Votes".
-    if request.method == "POST"
-      if params[:vote]
-        flashed = false
-        @observation.namings.each do |naming|
-          value = param_lookup([:vote, naming.id.to_s, :value]) do |p|
-            p.to_i
-          end
-          next unless value &&
-            @observation.change_vote(naming, value) &&
-            !flashed
-          flash_notice(:runtime_show_observation_success.t)
-          flashed = true
-        end
-      end
-    end
-
     # Provide a list of user's votes to view.
-    @votes = {}
-    @observation.namings.each do |naming|
-      vote = naming.votes.select { |x| x.user_id == @user.id }.first
-      vote ||= Vote.new(value: 0)
-      @votes[naming.id] = vote
+    if @user
+      @votes = {}
+      @observation.namings.each do |naming|
+        vote = naming.votes.select { |x| x.user_id == @user.id }.first
+        vote ||= Vote.new(value: 0)
+        @votes[naming.id] = vote
+      end
     end
   end
 
@@ -1368,6 +1355,27 @@ class ObserverController < ApplicationController
     observation = naming.observation
     value = params[:value].to_i
     observation.change_vote(naming, value)
+    redirect_with_query(action: "show_observation", id: observation.id)
+  end
+
+  # This is the new POST method for show_observation.
+  def cast_votes # :norobots:
+    pass_query_params
+    observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless observation
+    if params[:vote]
+      flashed = false
+      observation.namings.each do |naming|
+        value = param_lookup([:vote, naming.id.to_s, :value]) do |p|
+          p.to_i
+        end
+        next unless value &&
+          observation.change_vote(naming, value) &&
+          !flashed
+        flash_notice(:runtime_show_observation_success.t)
+        flashed = true
+      end
+    end
     redirect_with_query(action: "show_observation", id: observation.id)
   end
 
@@ -2311,7 +2319,7 @@ class ObserverController < ApplicationController
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-      "when(3i)", :notes, :specimen, :thumb_image_id]
+      "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location]
   end
 
   def whitelisted_observation_params

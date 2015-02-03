@@ -423,8 +423,7 @@ module ControllerExtensions
   # check that it points to the right place.
   def assert_no_link_in_html(label, msg=nil)
     extract_links(label: label) do |link|
-      flunk(build_message(
-              msg, "Expected HTML *not* to contain link called <?>.", label))
+      flunk(build_message(msg, "Expected HTML *not* to contain link called <#{label}>."))
     end
     pass
   end
@@ -447,9 +446,8 @@ module ControllerExtensions
     found_it = false
     extract_links(label: label) do |link|
       if link.url != url
-        flunk(build_message(
-                msg, "Expected <?> link to point to <?>," \
-                     "instead it points to <?>", label, url, link.url))
+        flunk(build_message(msg, "Expected <#{label}> link to point to <#{url}>," \
+                     "instead it points to <#{link.url}>"))
       else
         found_it = true
         break
@@ -458,8 +456,7 @@ module ControllerExtensions
     if found_it
       pass
     else
-      flunk(build_message(msg, "Expected HTML to contain link called <?>.",
-                          label))
+      flunk(build_message(msg, "Expected HTML to contain link called <#{label}>."))
     end
   end
 
@@ -484,14 +481,11 @@ module ControllerExtensions
     end
     return pass if found_it
     if found.keys
-      flunk(build_message(
-              msg, "Expected HTML to contain form that posts to <?>," \
-                   "but only found these: <?>.",
-              url, found.keys.sort.join(">, <")))
+      flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
+            "but only found these: <#{found.keys.sort.join('>, <')}>."))
     else
-      flunk(build_message(
-              msg, "Expected HTML to contain form that posts to <?>," \
-              "but found nothing at all.", url))
+      flunk(build_message(msg, "Expected HTML to contain form that posts to <#{url}>," \
+            "but found nothing at all."))
     end
   end
 

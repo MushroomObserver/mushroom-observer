@@ -29,8 +29,9 @@ class MatrixBoxPresenter
     get_rss_log_details(rss_log, target)
     self.when  = target.when.web_date if target && target.respond_to?(:when)
     self.who   = view.user_link(target.user) if target && target.user
-    self.what  = view.link_with_query(name, controller: target.show_controller,
-                 action: target.show_action, id: target.id) if target && !name.blank?
+    self.what  = target ?
+      view.link_with_query(name, controller: target.show_controller, action: target.show_action, id: target.id) :
+      view.link_with_query(name, controller: :observer, action: :show_rss_log, id: rss_log.id)
     self.where = view.location_link(target.place_name, target.location) \
                  if target && target.respond_to?(:location)
     self.thumbnail = view.thumbnail(target.thumb_image, link: {controller: target.show_controller,

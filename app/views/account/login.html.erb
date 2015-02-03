@@ -18,5 +18,5 @@
   <%= :login_no_account.tp %>
   <%= :login_having_problems.tp %>
 
-  <%= focus_on(!@login.blank? ? 'user_password' : 'user_login') %>
+  <% focus_on(!@login.blank? ? 'user_password' : 'user_login') %>
 <% end %>

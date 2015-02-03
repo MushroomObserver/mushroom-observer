@@ -86,7 +86,7 @@ function TranslationsModule(localizedText) {
       if (!CHANGED || confirm(CONFIRM_STRING)) {
         show_whirly(LOADING_STRING);
         jQuery.ajax("/translation/edit_translations_ajax_get", {
-          data: {locale: locale, tag: tag, authenticity_token: CSRF_TOKEN},
+          data: {locale: locale, tag: tag, authenticity_token: csrf_token()},
           dataType: 'text',
           async: true,
           error: function (response) {
@@ -112,7 +112,7 @@ function TranslationsModule(localizedText) {
     function show_old_version(id) {
       show_whirly(LOADING_STRING);
       jQuery.ajax("/ajax/old_translation/" + id, {
-        data: {authenticity_token: CSRF_TOKEN},
+        data: {authenticity_token: csrf_token()},
         dataType: 'text',
         async: true,
         success: function (text) {

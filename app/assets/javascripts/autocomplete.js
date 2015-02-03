@@ -901,7 +901,7 @@ jQuery.extend(MOAutocompleter.prototype, {
       this.ajax_request.abort();
 
     this.ajax_request = jQuery.ajax(url, {
-      data: { authenticity_token: CSRF_TOKEN },
+      data: { authenticity_token: csrf_token() },
       dataType: "text",
       async: true,
       error: (function (response) {

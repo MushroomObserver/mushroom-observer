@@ -22,7 +22,7 @@
   <p>
 	  <p><label for="herbarium_place_name"><%= :create_herbarium_location.t %></label>:
 	  <%= text_field('herbarium', 'place_name', :size => 60) %></p>
-	  <%= turn_into_location_auto_completer("herbarium_place_name") %>
+	  <% turn_into_location_auto_completer("herbarium_place_name") %>
   </p>
   <p>
     <%= :create_herbarium_mailing_address.t %>:<br/>

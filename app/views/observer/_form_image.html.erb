@@ -34,13 +34,11 @@
                { :id => "image_#{index}_license_id", :name => "image[#{index}][license_id]" }) %></p>
   </div>
 
-  <%= if @js
-    inject_javascript_at_end %(
-      CHANGED_DATES[#{index}] = false;
-      jQuery('#image_#{index}_less').hide();
-      jQuery('#image_#{index}_div').hide();
-    )
-  end %>
+  <% inject_javascript_at_end %(
+    CHANGED_DATES[#{index}] = false;
+    jQuery('#image_#{index}_less').hide();
+    jQuery('#image_#{index}_div').hide();
+  ) %>
 
 </div>
 

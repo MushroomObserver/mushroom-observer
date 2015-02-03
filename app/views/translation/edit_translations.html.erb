@@ -4,7 +4,7 @@
 %>
 
 <%= stylesheet_link_tag('grids.css') %>
-<%= inject_javascript_at_end %(
+<% inject_javascript_at_end %(
   TranslationsModule({
     locale: "#{j @lang.locale}",
     confirm_string: "#{j :edit_translations_will_lose_changes.l}",
