@@ -1412,8 +1412,6 @@ module ApplicationHelper
   # original::  Show original file name?
   # votes::     Show vote buttons?
   def thumbnail(image, args={}) ##TODO: Add size option
-    image = Image.find(image) unless image.is_a?(Image)
-
     render(partial: "image/image_thumbnail",
            locals: { image:    image,
                      link:     args[:link],

@@ -716,7 +716,7 @@ class ObserverController < ApplicationController
     args = {
       action: "list_observations",
       matrix: true,
-      include: [:name, :location, :user, :rss_log]
+      include: [:name, :location, :user, :rss_log, { thumb_image: :image_votes }]
     }.merge(args)
 
     # Add some extra links to the index user is sent to if they click on an
@@ -1899,8 +1899,7 @@ class ObserverController < ApplicationController
       include: {
         location: :user,
         name: :user,
-        observation: [:location, :name,
-                      { thumb_image: :image_votes }, :user],
+        observation: [:location, :name, { thumb_image: :image_votes }, :user],
         project: :user,
         species_list: [:location, :user]
       }

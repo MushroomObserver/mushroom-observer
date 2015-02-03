@@ -1,29 +1,37 @@
 <%
-   image = image
-   link = link||{controller:image.show_controller, action: image.show_action, id: image.id}  ##A hash of {controller:, action:, id:}
-   size = size||:thumbnail
-   votes = votes.nil? ? true : votes
-   original = original.nil? ? false : original
-   vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
+  # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
+  # so we only have image_id.  It's still possible to render the image with
+  # nothing but the image_id.  (But not votes, original name, etc.)
+  image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+
+  link     ||= {controller: :image, action: :show_image, id: image_id}
+  size     ||= default_thumbnail_size
+  votes    ||= image ? true : false
+  original ||= false
+
+  vote_pct = ((image.vote_cache || 0) / Image.all_votes.length * 100).floor \
+             if image and votes
+  url = image ? image.url(size) : Image.url(size, image_id)
 %>
 <div style="text-align: center">
   <div style="display: inline-block;">
-    <%= link_with_query(image_tag(image.url(size)),link) %>
-    <div class="vote-meter">
-      <div id="vote_meter_bar_<%= image.id %>" class="vote-meter-bar" role="progressbar" style="width: <%=vote_percentage%>%">
+    <%= link_with_query(image_tag(url), link) %>
+    <% if vote_pct %>
+      <div class="vote-meter">
+        <div id="vote_meter_bar_<%=image_id%>" class="vote-meter-bar"
+          role="progressbar" style="width: <%=vote_pct%>%"></div>
       </div>
-    </div>
+    <% end %>
   </div>
-  <% if @user and votes %>
-      <div class="image_vote_links_container">
-        <%= render(:partial => 'image/image_vote_links', :locals => {
-                                                               :image => image
-                                                       }) %>
-      </div>
+  <% if User.current and votes and image %>
+    <div class="image_vote_links_container">
+      <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
+    </div>
   <% end %>
-  <% if original and !image.original_name.blank? and (check_permission(image) or (image and image.user and image.user.keep_filenames == :keep_and_show)) %>
+  <% if original && image and !image.original_name.blank? &&
+        (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
     <span>
-      <%=image.original_name%>
+      <%= image.original_name %>
     </span>
   <%end%>
 </div>

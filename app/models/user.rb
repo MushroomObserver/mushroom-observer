@@ -365,21 +365,24 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-################################################################################
-# Callbacks
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Callbacks and Other Basic Stuff
+  #
+  ##############################################################################
 
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
 
-  # ensure that certain default values are symbols (rather than strings)
+  # Ensure that certain default values are symbols (rather than strings)
   # might only be an issue for test environment?
-  # probably better to instead use after_create and after_update,
-  # as after_initialize will get called every time a User is instantiated
-  after_initialize :symbolize_values
+  # Probably better to instead use after_create and after_update,
+  # as after_initialize will get called every time a User is instantiated.
+  # I don't understand why this is needed at all.  Smells like something
+  # else is wrong if we have to do this hack...
+  # after_initialize :symbolize_values
 
-################################################################################
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
   serialize :bonuses
@@ -397,7 +400,7 @@ class User < AbstractModel
     "observer"
   end
 
-# Find admin's record.
+  # Find admin's record.
   def self.admin
     User.first
   end
@@ -1028,8 +1031,9 @@ protected
 private
 
   # ensure that certain values are always symbols
-  def symbolize_values
-    self.location_format = self.location_format.to_sym unless
-      self.location_format.is_a?(Symbol)
-  end
+  # why is this necessary but not thumbnail_size or any of the other enums??
+  # def symbolize_values
+  #   self.location_format = self.location_format.to_sym unless
+  #     self.location_format.is_a?(Symbol)
+  # end
 end
