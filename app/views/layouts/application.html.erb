@@ -77,7 +77,7 @@
       <div class="group">
         <%= :app_latest.t %>:
         <div class="pad-left">
-          <%= link_to(:app_latest_changes.t, {:controller => 'observer', :action => 'list_rss_logs'}, data: {confirm: 'yes'}) %>
+          <%= link_to(:app_latest_changes.t, {:controller => 'observer', :action => 'list_rss_logs'}) %>
           <%= link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %>
           <%= link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %>
           <%= link_to(:app_news.t, :controller => 'observer', :action => 'news') %>

@@ -933,30 +933,14 @@ class ObserverController < ApplicationController
     query = find_query(:Observation)
     @mappable = query && query.is_coercable?(:Location)
 
-    return unless @user
-    # This happens when user clicks on "Update Votes".
-    if request.method == "POST"
-      if params[:vote]
-        flashed = false
-        @observation.namings.each do |naming|
-          value = param_lookup([:vote, naming.id.to_s, :value]) do |p|
-            p.to_i
-          end
-          next unless value &&
-            @observation.change_vote(naming, value) &&
-            !flashed
-          flash_notice(:runtime_show_observation_success.t)
-          flashed = true
-        end
-      end
-    end
-
     # Provide a list of user's votes to view.
-    @votes = {}
-    @observation.namings.each do |naming|
-      vote = naming.votes.select { |x| x.user_id == @user.id }.first
-      vote ||= Vote.new(value: 0)
-      @votes[naming.id] = vote
+    if @user
+      @votes = {}
+      @observation.namings.each do |naming|
+        vote = naming.votes.select { |x| x.user_id == @user.id }.first
+        vote ||= Vote.new(value: 0)
+        @votes[naming.id] = vote
+      end
     end
   end
 
@@ -1371,6 +1355,27 @@ class ObserverController < ApplicationController
     observation = naming.observation
     value = params[:value].to_i
     observation.change_vote(naming, value)
+    redirect_with_query(action: "show_observation", id: observation.id)
+  end
+
+  # This is the new POST method for show_observation.
+  def cast_votes # :norobots:
+    pass_query_params
+    observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless observation
+    if params[:vote]
+      flashed = false
+      observation.namings.each do |naming|
+        value = param_lookup([:vote, naming.id.to_s, :value]) do |p|
+          p.to_i
+        end
+        next unless value &&
+          observation.change_vote(naming, value) &&
+          !flashed
+        flash_notice(:runtime_show_observation_success.t)
+        flashed = true
+      end
+    end
     redirect_with_query(action: "show_observation", id: observation.id)
   end
 
