@@ -12,7 +12,7 @@
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png" />
   <meta property="og:title" content="Mushroom Observer" />
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world." />
-  <%= javascript_include_tag("jstz.min") %>
+  <%= javascript_includes.map {|f| javascript_include_tag(f)}.safe_join %>
   <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
   <%= javascript_tag('var CSRF_TOKEN = "' + form_authenticity_token + '";') %>
 
@@ -36,11 +36,9 @@
         css = MO.themes.sample
       end
     end
-    stylesheet_link_tag("general") +
+    stylesheet_link_tag("application") +
     stylesheet_link_tag(css)
   %>
-
-  <%= sort_javascript_includes.map {|m| javascript_include_tag(m)}.safe_join('') %>
 
   <% if @header %>
     <%= @header %>
@@ -142,7 +140,7 @@
                   <br/>
                 <% end %>
 
-                <% if DEVELOPMENT || is_reviewer?
+                <% if Rails.env == "development" || is_reviewer?
                   layouts = []
                   for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.html.erb")
                     layouts << $1 if file.match(/(app\w+)\.html\.erb/)
@@ -207,7 +205,7 @@
                 select(:search, :type, options,
                        :selected => session[:search_type] || :observation) %>
                 <%= submit_tag :app_search.l %>&nbsp;&nbsp;
-                <% if (DEVELOPMENT || is_reviewer?) && query_params != {} %>
+                <% if (Rails.env == "development" || is_reviewer?) && query_params != {} %>
                   <%= link_with_query(:app_refine_search.l.nowrap ,
                         :controller => 'observer', :action => 'refine_search') 
                   %> |

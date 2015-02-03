@@ -40,7 +40,7 @@ class ApiController < ApplicationController
     args[:method] = request.method
     args[:action] = type
 
-    if TESTING
+    if Rails.env == "test"
       post_data      = request.headers['RAW_POST_DATA']
       content_length = request.headers['CONTENT_LENGTH'].to_i
       content_type   = request.headers['CONTENT_TYPE'].to_s

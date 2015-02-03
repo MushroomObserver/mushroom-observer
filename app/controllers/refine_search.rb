@@ -1393,7 +1393,7 @@ module RefineSearch
       id = f.id || f.name
       n = order.index(id)
       if !n
-        if DEVELOPMENT
+        if Rails.env == "development"
           raise("Unordered field #{id.inspect} for #{query.model_symbol}.")
         end
         n = 1000 + results.index(f)

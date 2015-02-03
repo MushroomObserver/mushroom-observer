@@ -95,28 +95,30 @@ class ScriptTest < UnitTestCase
     assert_block("Something went wrong with #{script}:\n#{errors}") { status }
   end
 
-  test "perf_monitor" do
-    begin
-      script = script_file("perf_monitor")
-      tempfile = Tempfile.new("test").path
-      tempdir = "#{tempfile}.dir"
-      site = "mushroomobserver.org"
-      image = "#{::Rails.root}/public/assets/eye.png"
-      cmd = "#{script} #{site} #{image} #{tempdir} 1 2>&1 > #{tempfile}"
-      status = system(cmd)
-      errors = File.read(tempfile)
-      assert_block("Something went wrong with #{script}:\n#{errors}") { status }
-      logfile = "#{tempdir}/perf.log"
-      assert_block { File.exist?(logfile) && File.size(logfile) > 0 }
-      lines = File.readlines(logfile)
-      assert_equal(5, lines.length)
-      assert_block("There were errors in perf.log:\n#{lines.join("\n")}") do
-        lines.none? {|line| line.match(/ERROR/)}
-      end
-    ensure
-      system("rm -rf #{tempdir}") if File.directory?(tempdir)
-    end
-  end
+  # Takes way too long, bad for the live server(!) and unreliable.
+  # Oh, and no one uses it anymore, anyway.  So there.
+  # test "perf_monitor" do
+  #   begin
+  #     script = script_file("perf_monitor")
+  #     tempfile = Tempfile.new("test").path
+  #     tempdir = "#{tempfile}.dir"
+  #     site = "mushroomobserver.org"
+  #     image = "#{::Rails.root}/public/assets/eye.png"
+  #     cmd = "#{script} #{site} #{image} #{tempdir} 1 2>&1 > #{tempfile}"
+  #     status = system(cmd)
+  #     errors = File.read(tempfile)
+  #     assert_block("Something went wrong with #{script}:\n#{errors}") { status }
+  #     logfile = "#{tempdir}/perf.log"
+  #     assert_block { File.exist?(logfile) && File.size(logfile) > 0 }
+  #     lines = File.readlines(logfile)
+  #     assert_equal(5, lines.length)
+  #     assert_block("There were errors in perf.log:\n#{lines.join("\n")}") do
+  #       lines.none? {|line| line.match(/ERROR/)}
+  #     end
+  #   ensure
+  #     system("rm -rf #{tempdir}") if File.directory?(tempdir)
+  #   end
+  # end
 
   test "refresh_name_lister_cache" do
     script = script_file("refresh_name_lister_cache")

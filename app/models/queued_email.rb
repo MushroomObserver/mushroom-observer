@@ -236,14 +236,14 @@ class QueuedEmail < AbstractModel
     current_locale = I18n.locale
     result = false
     if user == to_user
-      raise("Skipping email with same sender and recipient: #{user.email}\n") if !TESTING
+      raise("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
     else
       result = deliver_email
     end
     I18n.locale = current_locale
     return result
   rescue => e
-    raise e if TESTING
+    raise e if Rails.env == "test"
     $stderr.puts('ERROR CREATING EMAIL')
     $stderr.puts(log_msg)
     $stderr.puts(e.to_s)
@@ -256,7 +256,7 @@ class QueuedEmail < AbstractModel
   def deliver_email
     error = "We forgot to define #{type}#deliver_email.\n"
     # Failing to send email should not throw an error in production
-    if PRODUCTION
+    if Rails.env == "production"
       $stderr.puts(error)
     else
       raise error
