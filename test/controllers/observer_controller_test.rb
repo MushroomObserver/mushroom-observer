@@ -510,27 +510,27 @@ class ObserverControllerTest < FunctionalTestCase
     obs_id = observations(:unknown_with_no_naming).id
     get_with_dump(:show_observation, id: obs_id)
     assert_show_observation
-    assert_form_action(action: :show_observation, id: obs_id)
+    assert_form_action(action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs_id = observations(:coprinus_comatus_obs).id
     get_with_dump(:show_observation, id: obs_id)
     assert_show_observation
-    assert_form_action(action: :show_observation, id: obs_id)
+    assert_form_action(action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with owner logged in.
     login("rolf")
     obs_id = observations(:coprinus_comatus_obs).id
     get_with_dump(:show_observation, id: obs_id)
     assert_show_observation
-    assert_form_action(action: :show_observation, id: obs_id)
+    assert_form_action(action: :cast_votes, id: obs_id)
 
     # Test it on obs with two namings, with non-owner logged in.
     login("mary")
     obs_id = observations(:coprinus_comatus_obs).id
     get_with_dump(:show_observation, id: obs_id)
     assert_show_observation
-    assert_form_action(action: :show_observation, id: obs_id)
+    assert_form_action(action: :cast_votes, id: obs_id)
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # Ensure that rolf owns @obs_with_no_opinion.

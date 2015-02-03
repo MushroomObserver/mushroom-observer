@@ -221,8 +221,8 @@ class AmateurTest < IntegrationTestCase
   end
 
   def test_sessions
-    rolf_session    = login!(rolf).extend(NamerDsl)
-    mary_session    = login!(mary).extend(VoterDsl)
+    rolf_session = login!(rolf).extend(NamerDsl)
+    mary_session = login!(mary).extend(VoterDsl)
     assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
   end
 
@@ -306,7 +306,7 @@ class AmateurTest < IntegrationTestCase
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
-      open_form do |form|
+      open_form("form[action*=cast_votes]") do |form|
         form.assert_value("vote_#{naming.id}_value", /no opinion/i)
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit
@@ -318,7 +318,7 @@ class AmateurTest < IntegrationTestCase
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
-      open_form do |form|
+      open_form("form[action*=cast_votes]") do |form|
         form.select("vote_#{naming.id}_value", /as if!/i)
         form.submit
       end

@@ -122,15 +122,6 @@ module ApplicationHelper
     link_to(name, add_query_param(options), html_options)
   end
 
-  # Rails 3.x has broken the link_to :confirm mechanism.
-  # The new method requires rather sophisticated javascript capabilities
-  # (in rails.js).  I'd far prefer to keep the old blindingly simple
-  # onclick="return confirm()" mechanism.
-  #def link_to(*args)
-  #  super(*args).sub(/data-confirm="(.*?)"/,
-   #   'onclick="' + CGI.escapeHTML('return confirm("\1")') + '"').html_safe
-  #end
-
   ##############################################################################
   #
   #  :section: Other Stuff
