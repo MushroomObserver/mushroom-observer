@@ -18,7 +18,7 @@
   <%= label_tag("observation_place_name", "#{:WHERE.t}: (#{:required.t})") %>
   <%= text_field('observation', 'place_name', :size => 60) %>
 </span><br/>
-<%= turn_into_location_auto_completer('observation_place_name', :primer => Location.primer) %>
+<% turn_into_location_auto_completer('observation_place_name', :primer => Location.primer) %>
 <span class="HelpNote"><%= :form_observations_where_help.t %></span><br/><br/>
 
 <span style="white-space:nowrap">
@@ -50,7 +50,7 @@ end %>
   <%= label_tag("observation_specimen", "#{:form_observations_specimen_available.t}:") %><br/>
   &nbsp;&nbsp;<%= herbarium_name_box() %><br/>
   &nbsp;&nbsp;<%= herbarium_id_box() %><br/>
-  <%= inject_javascript_at_end %(
+  <% inject_javascript_at_end %(
     id_field = jQuery("#specimen_herbarium_id");
     specimen_checkbox = jQuery("#observation_specimen");
     id_field.change(function() {
@@ -125,7 +125,7 @@ end %>
 
     <% if !can_do_multifile_upload? %>
       <% if can_do_ajax? %>
-        <%= inject_javascript_at_end %(
+        <% inject_javascript_at_end %(
           var NEXT_IMAGE_INDEX = #{@images.length+1};
           var CHANGED_DATES = [];
         ) %>
@@ -188,7 +188,7 @@ end %>
       </div>
     </div>
 
-    <%= inject_javascript_at_end %(
+    <% inject_javascript_at_end %(
       jQuery(document).ready(function () {
         var uploader = MultiImageUploader({
           uploading_text: "#{j :form_observations_uploading_images.t}",

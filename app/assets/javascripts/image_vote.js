@@ -11,7 +11,7 @@ jQuery(document).ready(function () {
 
   function image_vote(id, value) {
     jQuery.ajax("/ajax/vote/image/" + id, {
-      data: { value: value, authenticity_token: jQuery("[name='csrf-token']").attr('content')},
+      data: { value: value, authenticity_token: csrf_token() },
       dataType: 'text',
       async: true,
       error: function (response) {

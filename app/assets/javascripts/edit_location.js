@@ -78,7 +78,7 @@ function resetToLatLng(loc) {
 function findOnMap() {
   address = jQuery("#location_display_name").val();
   jQuery.ajax('/ajax/geocode', {
-    data: { name: address, authenticity_token: CSRF_TOKEN },
+    data: { name: address, authenticity_token: csrf_token() },
     dataType: "text",
     type: "GET",
     success: function(response) {

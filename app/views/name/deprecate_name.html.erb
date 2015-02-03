@@ -23,7 +23,7 @@
   <div class="HelpNote">
     <%= :name_deprecate_preferred_help.tp %>
   </div>
-  <%= turn_into_name_auto_completer('proposed_name', :primer => Name.primer) %>
+  <% turn_into_name_auto_completer('proposed_name', :primer => Name.primer) %>
 
   <p><%= check_box('is', 'misspelling', :checked => @misspelling) %>
   <label for="misspelling"><%= :form_names_misspelling.t %></label></p>
@@ -34,5 +34,5 @@
     <%= :name_deprecate_comments_help.tp(:name => @name.display_name) %>
   </div>
 
-  <%= focus_on('proposed_name') %>
+  <% focus_on('proposed_name') %>
 <% end %>
