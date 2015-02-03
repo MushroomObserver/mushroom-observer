@@ -385,7 +385,7 @@ private
       time = time2
     rescue => e
       # Caught this error in the log, not sure how/why.
-      if PRODUCTION
+      if Rails.env == "production"
         time = Time.now # (but don't crash in production)
       else
         raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"

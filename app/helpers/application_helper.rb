@@ -30,21 +30,19 @@ module ApplicationHelper
   # Firefox 17+,
   # IE 9+ and
   # Opera 12+
+  def can_do_ajax?
+    browser.modern? || browser.ie8? || Rails.env == "test"
+  end
 
-
-def can_do_ajax?
-    browser.modern? || TESTING
-end
-
-  #Use this test to determine if a user can upload multiple images at a time.
-  #It checks for support of the following requirements:
-  # Select multiple files button
-  # XHRHttpRequest2
-  # FileAPI
-  #CanIuse.com is the source of this information.
-def can_do_multifile_upload?
-   (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
-end
+  # Use this test to determine if a user can upload multiple images at a time.
+  # It checks for support of the following requirements:
+  #   Select multiple files button
+  #   XHRHttpRequest2
+  #   FileAPI
+  # CanIuse.com is the source of this information.
+  def can_do_multifile_upload?
+    (browser.modern? && !browser.ie9?)  ##all modern browsers under the current "modern?" criteria support multifile-upload except IE9.
+  end
 
   ##############################################################################
   #
@@ -237,7 +235,7 @@ end
 
   # Add another input field onto an existing auto-completer.
   def reuse_auto_completer(first_id, new_id)
-    javascript_tag("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
+    inject_javascript_at_end("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
   end
 
   # Turn a text_field into an auto-completer.
@@ -245,9 +243,6 @@ end
   # opts:: arguments (see autocomplete.js)
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
-      javascript_include 'jquery'
-      javascript_include 'jquery_extensions'
-      javascript_include 'autocomplete'
       js_args = []
       opts[:input_id]   = id
       opts[:row_height] = 22
@@ -264,8 +259,7 @@ end
         end
       end
       js_args = js_args.join(', ')
-
-      result = javascript_tag("new MOAutocompleter({ #{js_args} })")
+      result = inject_javascript_at_end("new MOAutocompleter({ #{js_args} })")
     else
       result = ''
     end
@@ -992,36 +986,38 @@ end
     if args.select {|arg| arg.class != String} != []
       raise(ArgumentError, "javascript_include doesn't take symbols like :default, etc.")
     end
-    @javascripts = [] if !@javascripts
-    @javascripts += args
+    @javascript_files ||= []
+    @javascript_files += args
   end
 
   # This is called in the header section in the layout.  It returns the
   # javascript modules in correct order (see above).
   #   # Example usage in layout header:
   #   <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
-  def sort_javascript_includes
-    @javascripts = [] if !@javascripts
-    # Stick the ones that care about order first, in their preferred order,
-    # ignore duplicates since we'll uniq it later anyway.
-    @result = JAVASCRIPT_MODULE_ORDER.select do |m|
-      @javascripts.include?(m)
-    end + @javascripts
-    return @result.uniq.map do |m|
-      if m.to_s == "jquery"
-        # Just user jQuery 1.x for everyone. There is at least one case of
-        # version 2.x not working for a fairly modern version of Chrome.
-        "jquery_1"
-      else
-        m
-      end
-    end
+  def javascript_includes
+    @javascript_files ||= []
+    @javascript_files.unshift "application"
+    @javascript_files.uniq
+  end
+
+  # Register a bit of javascript to inject after includes at bottom of page.
+  #   <% inject_javascript_at_end %(
+  #     this_javascript_will_run_at_end();
+  #   ) %>
+  def inject_javascript_at_end(*args)
+    @javascript_codes ||= []
+    @javascript_codes += args
+  end
+
+  # Return javascript snippets scheduled for inclusion at the end of the page.
+  def injected_javascripts
+    @javascript_codes || []
   end
 
   # Insert a javacsript snippet that causes the browser to focus on a given
   # input field when it loads the page.
   def focus_on(id)
-    javascript_tag("document.getElementById('#{id}').focus()")
+    inject_javascript_at_end("document.getElementById('#{id}').focus()")
   end
 
   # From map_helper.rb
@@ -1409,23 +1405,24 @@ end
     return result
   end
 
-  # Draw a thumbnail image.  It takes either an Image instance or an id.  Args:
-  # link::      a hash of {controller: , action:, id: }
+  # Draw a thumbnail image.  It takes either an Image instance or an id.
+  # Args:
+  # link::      a hash of { controller:, action:, id: }
   # size::      Size to show, default is thumbnail
   # original::  Show original file name?
   # votes::     Show vote buttons?
+  def thumbnail(image, args={}) ##TODO: Add size option
+    image = Image.find(image) unless image.is_a?(Image)
 
-def thumbnail(image, args={}) ##TODO: Add size option
-  if image.is_a?(Numeric)
-    image = Image.find(image)
+    render(partial: "image/image_thumbnail",
+           locals: { image:    image,
+                     link:     args[:link],
+                     votes:    args[:votes],
+                     size:     args[:size],
+                     original: args[:original]
+           }
+    )
   end
-
-  render(:partial => 'image/image_thumbnail', :locals => {:image => image,
-                                                          :link => args[:link],
-                                                          :votes => args[:votes],
-                                                          :size => args[:size],
-                                                          :original => args[:original]})
-end
 
   # Provide the copyright for an image
   def image_copyright(image, div=true)
@@ -1436,33 +1433,30 @@ end
     end
     result = image.license.copyright_text(image.year, link)
     if div
-      result = content_tag(:div, result, :id => "copyright")
+      result = content_tag(:div, result, id: "copyright")
     end
     result
   end
 
   def export_link(image_id, exported)
     if exported
-      link_to('', {} ,:onclick => "image_export(#{image_id},0)") ##TODO: really fix this.
+      link_to('', {}, onclick: "image_export(#{image_id},0)") ##TODO: really fix this.
       #link_to_function('Not for Export', "image_export(#{image_id},0)")
     else
-      link_to('', {} ,:onclick => "image_export(#{image_id},1)") ##TODO: really fix this.
+      link_to('', {}, onclick: "image_export(#{image_id},1)") ##TODO: really fix this.
       #link_to_function('For Export', "image_export(#{image_id},1)")
     end
   end
 
   def image_exporter(image_id, exported)
-    javascript_include('jquery')
-    javascript_include('image_export')
-    content_tag(:div, export_link(image_id, exported), :id => "image_export_#{image_id}")
+    content_tag(:div, export_link(image_id, exported), id: "image_export_#{image_id}")
   end
 
-
-  #Create an image link vote, where vote param is vote number ie: 3
+  # Create an image link vote, where vote param is vote number ie: 3
   def image_vote_link(image, vote)
     current_vote = image.users_vote(@user)
     vote_text = vote == 0 ? "(x)" : image_vote_as_short_string(vote)
-    link = link_to(vote_text, {}, :title =>  image_vote_as_help_string(vote), data:{:role => "image_vote", :id => image.id, :val => vote })  ##return a link if the user has NOT voted this way
+    link = link_to(vote_text, {}, title:  image_vote_as_help_string(vote), data:{role: "image_vote", id: image.id, val: vote })  ##return a link if the user has NOT voted this way
     if (current_vote == vote)
       link = content_tag('span', image_vote_as_short_string(vote))  ##return a span if the user has voted this way
     end
@@ -1476,14 +1470,14 @@ end
       if obj.ok_for_export
         content_tag(:b, :review_ok_for_export.t)
       else
-        link_with_query(:review_ok_for_export.t, :controller => 'observer',
-          :action => 'set_export_status', :type => obj.type_tag,
-          :id => obj.id, :value => '1')
+        link_with_query(:review_ok_for_export.t, controller: 'observer',
+          action: 'set_export_status', type: obj.type_tag,
+          id: obj.id, value: '1')
       end + safe_br +
       if obj.ok_for_export
-        link_with_query(:review_no_export.t, :controller => 'observer',
-          :action => 'set_export_status', :type => obj.type_tag,
-          :id => obj.id, :value => '0')
+        link_with_query(:review_no_export.t, controller: 'observer',
+          action: 'set_export_status', type: obj.type_tag,
+          id: obj.id, value: '0')
       else
         content_tag(:b, :review_no_export.t)
       end
@@ -1494,7 +1488,7 @@ end
     count = obs.specimens.count
     if count > 0
       link_to(pluralize(count, :specimen.t),
-              :controller => 'specimen', :action => 'observation_index', :id => obs.id)
+              controller: 'specimen', action: 'observation_index', id: obs.id)
     else
       if obs.specimen
         :show_observation_specimen_available.t
@@ -1507,8 +1501,8 @@ end
   def create_specimen_link(obs)
     if check_permission(obs) or (@user && (@user.curated_herbaria.length > 0))
       " | ".html_safe + link_with_query(:show_observation_create_specimen.t,
-        :controller => 'specimen', :action => 'add_specimen',
-        :id => obs.id)
+        controller: 'specimen', action: 'add_specimen',
+        id: obs.id)
     else
       safe_empty
     end
@@ -1527,7 +1521,7 @@ end
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
-    content_tag(:div, :class => 'results') do
+    content_tag(:div, class: 'results') do
       letters + numbers + body + numbers + letters
     end
   end
@@ -1538,7 +1532,7 @@ end
   #   def action
   #     query = create_query(:Name)
   #     @pages = paginate_letters(:letter, :page, 50)
-  #     @names = query.paginate(@pages, :letter_field => 'names.sort_name')
+  #     @names = query.paginate(@pages, letter_field: 'names.sort_name')
   #   end
   #
   #   # In view:
@@ -1616,7 +1610,7 @@ end
       result << '|'                                      if this < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
 
-      result = content_tag(:div, result.safe_join(' '), :class => "pagination")
+      result = content_tag(:div, result.safe_join(' '), class: "pagination")
     end
     result
   end
@@ -1636,7 +1630,7 @@ end
   # Take URL that got us to this page and add one or more parameters to it.
   # Returns new URL.
   #
-  # link_to("Next Page", reload_with_args(:page => 2))
+  # link_to("Next Page", reload_with_args(page: 2))
   def reload_with_args(new_args)
     uri = request.url.sub(/^\w+:\/+[^\/]+/, '')
     add_args_to_url(uri, new_args)
@@ -1644,11 +1638,11 @@ end
 
   # Take an arbitrary URL and change the parameters. Returns new URL. Should
   # even handle the fancy "/object/id" case. (Note: use +nil+ to mean delete
-  # -- i.e. <tt>add_args_to_url(url, :old_arg => nil)</tt> deletes the
+  # -- i.e. <tt>add_args_to_url(url, old_arg: nil)</tt> deletes the
   # parameter named +old_arg+ from +url+.)
   #
-  # url = url_for(:action => "blah", ...)
-  # new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)
+  # url = url_for(action: "blah", ...)
+  # new_url = add_args_to_url(url, arg1: :val1, arg2: :val2, ...)
   def add_args_to_url(url, new_args)
     new_args = new_args.clone
     args = {}
@@ -1700,16 +1694,16 @@ end
     type = object.type_tag
     new_tab_set do
       args = add_query_param({
-        :controller => object.show_controller,
-        :id         => object.id,
+        controller: object.show_controller,
+        id:         object.id,
       })
-      add_tab("« #{:BACK.t}",  args.merge(:action => "prev_#{type}" ))
-      add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
+      add_tab("« #{:BACK.t}",  args.merge(action: "prev_#{type}" ))
+      add_tab(:INDEX.t, args.merge(action: "index_#{type}"))
       if mappable
-        add_tab_with_query(:MAP.t, :controller => 'location',
-          :action => 'map_locations')
+        add_tab_with_query(:MAP.t, controller: 'location',
+          action: 'map_locations')
       end
-      add_tab("#{:FORWARD.t} »",  args.merge(:action => "next_#{type}"  ))
+      add_tab("#{:FORWARD.t} »", args.merge(action: "next_#{type}"))
     end
   end
 
@@ -1719,8 +1713,8 @@ end
   #     add_tab('Bare String')
   #     add_tab('Hard-Coded Link', '/name/show_name/123')
   #     add_tab('External Link', 'http://images.google.com/')
-  #     add_tab('Normal Link', :action => :blah, :id => 123, ...)
-  #     add_tab('Dangerous Link', { :action => :destroy, :id => 123 },
+  #     add_tab('Normal Link', action: :blah, id: 123, ...)
+  #     add_tab('Dangerous Link', { action: :destroy, id: 123 },
   #                               { data: { confirm: :are_you_sure.l } })
   #   end
   #
@@ -1803,7 +1797,7 @@ end
   # +render_tab_sets+.)
   def render_tab_set(header, *links)
     header += ' ' if header
-    content_tag(:div, :class => 'tab_set') do
+    content_tag(:div, class: 'tab_set') do
       all_tabs = links.map do |tab|
         render_tab(*tab)
       end
@@ -1816,7 +1810,7 @@ end
     if !link_args
       result = label
     elsif link_args.is_a?(String) && (link_args[0..6] == 'http://')
-      result = content_tag(:a, label, :href => link_args, :target => :_new)
+      result = content_tag(:a, label, href: link_args, target: :_new)
     else
       if link_args.is_a?(Hash) && link_args.has_key?(:help)
         help = link_args[:help]
@@ -1853,8 +1847,8 @@ end
   #
   #     # Define set of linked text tabs for top-left.
   #     new_tab_set do
-  #       add_tab("Tab Label One", :link => args, ...)
-  #       add_tab("Tab Label Two", :link => args, ...)
+  #       add_tab("Tab Label One", link: args, ...)
+  #       add_tab("Tab Label Two", link: args, ...)
   #       ...
   #     end
   #
@@ -1872,33 +1866,33 @@ end
       # Create link to change interest state.
       def interest_link(label, object, state) #:nodoc:
         link_with_query(label,
-          :controller => 'interest',
-          :action => 'set_interest',
-          :id => object.id,
-          :type => object.class.name,
-          :state => state
+          controller: 'interest',
+          action: 'set_interest',
+          id: object.id,
+          type: object.class.name,
+          state: state
         )
       end
 
       # Create large icon image.
       def interest_icon_big(type, alt) #:nodoc:
         image_tag("#{type}2.png",
-          :alt => alt,
-          :width => '50px',
-          :height => '50px',
-          :class => 'interest_big',
-          :title => alt
+          alt: alt,
+          width: '50px',
+          height: '50px',
+          class: 'interest_big',
+          title: alt
         )
       end
 
       # Create small icon image.
       def interest_icon_small(type, alt) #:nodoc:
         image_tag("#{type}3.png",
-          :alt => alt,
-          :width => '23px',
-          :height => '23px',
-          :class => 'interest_small',
-          :title => alt
+          alt: alt,
+          width: '23px',
+          height: '23px',
+          class: 'interest_small',
+          title: alt
         )
       end
 
@@ -1908,9 +1902,9 @@ end
 
       case @user.interest_in(object)
       when :watching
-        alt1 = :interest_watching.l(:object => type.l)
-        alt2 = :interest_default_help.l(:object => type.l)
-        alt3 = :interest_ignore_help.l(:object => type.l)
+        alt1 = :interest_watching.l(object: type.l)
+        alt2 = :interest_default_help.l(object: type.l)
+        alt3 = :interest_ignore_help.l(object: type.l)
         img1 = interest_icon_big('watch', alt1)
         img2 = interest_icon_small('halfopen', alt2)
         img3 = interest_icon_small('ignore', alt3)
@@ -1918,9 +1912,9 @@ end
         img3 = interest_link(img3, object, -1)
 
       when :ignoring
-        alt1 = :interest_ignoring.l(:object => type.l)
-        alt2 = :interest_watch_help.l(:object => type.l)
-        alt3 = :interest_default_help.l(:object => type.l)
+        alt1 = :interest_ignoring.l(object: type.l)
+        alt2 = :interest_watch_help.l(object: type.l)
+        alt3 = :interest_default_help.l(object: type.l)
         img1 = interest_icon_big('ignore', alt1)
         img2 = interest_icon_small('watch', alt2)
         img3 = interest_icon_small('halfopen', alt3)
@@ -1928,8 +1922,8 @@ end
         img3 = interest_link(img3, object, 0)
 
       else
-        alt1 = :interest_watch_help.l(:object => type.l)
-        alt2 = :interest_ignore_help.l(:object => type.l)
+        alt1 = :interest_watch_help.l(object: type.l)
+        alt2 = :interest_ignore_help.l(object: type.l)
         img1 = interest_icon_small('watch', alt1)
         img2 = interest_icon_small('ignore', alt2)
         img1 = interest_link(img1, object, 1)
@@ -1971,14 +1965,12 @@ end
   # Create a file input fields with client-side size validation.
   def image_file_field(obj, attr, opts={})
     validated_file_field(obj, attr, opts.merge(
-      :max_upload_msg => :validate_image_file_too_big.l(:max => (MO.image_upload_max_size.to_f/1024/1024).round),
-      :max_upload_size => MO.image_upload_max_size
+      max_upload_msg: :validate_image_file_too_big.l(max: (MO.image_upload_max_size.to_f/1024/1024).round),
+      max_upload_size: MO.image_upload_max_size
     ))
   end
 
   def validated_file_field(obj, attr, opts)
-    javascript_include("jquery")
-    javascript_include("validate_file_input_fields")
     file_field(obj, attr, opts)
   end
 end
@@ -1987,7 +1979,7 @@ end
 def name_section_link(title, data, query)
   if data and data != 0
     link_to(title,
-     add_query_param({:controller => 'observer',
-       :action => 'index_observation'}, query)) + safe_br
+     add_query_param({controller: 'observer',
+       action: 'index_observation'}, query)) + safe_br
   end
 end

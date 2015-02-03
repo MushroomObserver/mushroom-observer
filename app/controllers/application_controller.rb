@@ -95,10 +95,10 @@ class ApplicationController < ActionController::Base
   include LoginSystem
 
   around_filter :catch_errors # if Rails.env == "test"
+  before_filter :block_ip_addresses
   before_filter :kick_out_robots
   before_filter :create_view_instance_variable
   before_filter :verify_authenticity_token
-  before_filter :block_ip_addresses
   before_filter :fix_bad_domains
   before_filter :autologin
   before_filter :set_locale
@@ -157,32 +157,30 @@ class ApplicationController < ActionController::Base
 
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
-    return unless browser.bot?
-    controller = params[:controller]
-    action     = params[:action]
-    unless Robots.allowed?(controller, action)
-      render(text: "Robots are not allowed on this page.", status: 403)
-    end
+    return true unless browser.bot?
+    return true if Robots.allowed?(
+      controller: params[:controller],
+      action:     params[:action],
+      ua:         browser.ua,
+      ip:         request.remote_ip
+    )
+    render(text: "Robots are not allowed on this page.", status: 403, layout: false)
+    return false
   end
 
   # Filter to run before anything else to protect against denial-of-service attacks.
   def block_ip_addresses
-    if [
-      '69.174.247.199',
-      '69.174.247.214'
-    ].include?(request.remote_ip.to_s)
-      render(:text => "You have been blocked from this site. Please contact the webmaster for more information.", :layout => false)
-      return false
-    end
+    return true unless MO.blocked_ip_addresses.include?(request.remote_ip.to_s)
+    render(text: "You have been blocked from this site. Please contact the webmaster for more information.", status: 403, layout: false)
+    return false
   end
 
+  # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    if @user and @user.is_successful_contributor?
-      true
-    else
-      flash_warning(:unsuccessful_contributor_warning.t)
-      redirect_back_or_default(:controller => :observer, :action => :index)
-    end
+    return true if @user and @user.is_successful_contributor?
+    flash_warning(:unsuccessful_contributor_warning.t)
+    redirect_back_or_default(controller: :observer, action: :index)
+    return false
   end
 
   # Enable this to test other layouts...
@@ -315,7 +313,6 @@ class ApplicationController < ActionController::Base
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies["mo_user"])  &&
           (split = cookie.split(" ")) &&
-#          (user = User.find(:first, :conditions => ['id = ?', split[0]])) && # Rails 3
           (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
           (user.verified)
@@ -548,7 +545,7 @@ class ApplicationController < ActionController::Base
     if tz.blank?
       # For now, until we get rid of reliance on @js, this is a surrogate for
       # testing if the client's JS is enabled and sufficiently fully-featured.
-      @js = TESTING
+      @js = Rails.env == "test"
     else
       begin
         Time.zone = tz
@@ -672,7 +669,7 @@ class ApplicationController < ActionController::Base
   # application layout (app/views/layouts/application.rhtml) every time it
   # renders the latest error messages.
   def flash_clear
-    @last_notice = session[:notice] if TESTING
+    @last_notice = session[:notice] if Rails.env == "test"
     session[:notice] = nil
   end
   helper_method :flash_clear
@@ -720,11 +717,6 @@ class ApplicationController < ActionController::Base
       flash_object_errors(obj)
       return false
     end
-  end
-
-  def object_flashes(obj)
-    flash_object_warnings(obj)
-    flash_object_errors(obj)
   end
 
   def validate_object(obj)

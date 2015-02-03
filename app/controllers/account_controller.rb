@@ -179,12 +179,13 @@ class AccountController < ApplicationController
         @user.verify
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
-            content = "Suspicious user:\n  login=#{@user.login.inspect}\n" \
-                      "name=#{@user.name.inspect}\n" \
-                      "email=#{@user.email.inspect}\n" \
-                      "http://mushroomobserver.org/" \
-                        "observer/show_user?id=#{@user.id}"
-          WebmasterEmail.build(@user.email, content).deliver
+          subject = "Suspicious user: #{@user.login.inspect}"
+          content = "Suspicious user:\n" +
+                    "  login=#{@user.login.inspect}\n" +
+                    "  name=#{@user.name.inspect}\n" +
+                    "  email=#{@user.email.inspect}\n" +
+                    "  http://mushroomobserver.org/observer/show_user?id=#{@user.id}"
+          WebmasterEmail.build(@user.email, content, subject).deliver
         end
       end
     end

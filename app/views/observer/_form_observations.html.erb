@@ -1,4 +1,5 @@
 <!--[form:observation]-->
+
 <label for="observation_when_1i"><%= :WHEN.t %>:</label>
 <%= date_select('observation', 'when', :start_year => 1980,
                 :end_year => Time.now.year, :order => [:day,:month,:year]) %><br/><br/>
@@ -17,18 +18,14 @@
   <%= label_tag("observation_place_name", "#{:WHERE.t}: (#{:required.t})") %>
   <%= text_field('observation', 'place_name', :size => 60) %>
 </span><br/>
-
 <%= turn_into_location_auto_completer('observation_place_name', :primer => Location.primer) %>
 <span class="HelpNote"><%= :form_observations_where_help.t %></span><br/><br/>
 
 <span style="white-space:nowrap">
-
   <%= label_tag("observation_lat", "#{:LATITUDE.t}:") %>
   <%= text_field('observation', 'lat', :size => 10) %>&nbsp;&nbsp;
-
   <%= label_tag("observation_long", "#{:LONGITUDE.t}:") %>
   <%= text_field('observation', 'long', :size => 10) %>&nbsp;&nbsp;
-
   <%= label_tag("observation_alt", "#{:ALTITUDE.t}:") %>
   <%= text_field('observation', 'alt', :size => 8) %>
 </span><br/>
@@ -43,7 +40,6 @@
 end %>
 
 <%= check_box("observation", "is_collection_location") %>
-
 <%= label_tag("observation_is_collection_location", "#{:form_observations_is_collection_location.t}:") %><br/>
 <span class="HelpNote"><%= :form_observations_is_collection_location_help.t %></span><br/><br/>
 
@@ -54,7 +50,7 @@ end %>
   <%= label_tag("observation_specimen", "#{:form_observations_specimen_available.t}:") %><br/>
   &nbsp;&nbsp;<%= herbarium_name_box() %><br/>
   &nbsp;&nbsp;<%= herbarium_id_box() %><br/>
-  <%= javascript_tag %(
+  <%= inject_javascript_at_end %(
     id_field = jQuery("#specimen_herbarium_id");
     specimen_checkbox = jQuery("#observation_specimen");
     id_field.change(function() {
@@ -77,198 +73,136 @@ end %>
 <% ############################### Image Forms ############################## %>
 
 <% if include_images %>
-  <table><tr><td>
   <%# table wrapper gets browsers to collapse the divs to fit the forms %>
-  <% @observation.thumb_image_id ||= 0 %>
+  <table><tr><td>
+    <% @observation.thumb_image_id ||= 0 %>
 
-  <% if @good_images != [] %>
-    <b>Images:</b><br/>
-    <% for image in @good_images %>
-      <div class="form_image">
-        <table><tr>
-          <td valign="middle" style="white-space:nowrap">
-            <%= radio_button('observation', 'thumb_image_id', image.id) %>
-          </td>
-          <td valign="middle" align="center" style="padding-right:10px">
-            <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true) %>
-          </td>
-          <td valign="middle" style="white-space:nowrap">
-            <% if check_permission(image) %>
-                <%= label_tag("image_#{image.id}_notes", "#{:NOTES.t}:") %>
-                <% if @user.thumbnail_size == :thumbnail %>
-                  <%= text_field(:good_image, :notes, :value => image.notes, :index => image.id, :size => 40) %><br/>
-                <% else %><br/>
-                  <%= text_area(:good_image, :notes, :value => image.notes, :index => image.id, :cols => 60, :rows => 3) %><br/>
-                <% end %>
-
-                <%= label_tag("image_#{image.id}_orgiginal_name", "#{:form_observations_original_name.t}:") %>
-                <%= text_field(:good_image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %>
-
-                <%= label_tag("image_#{image.id}_copyright_holder", "#{:form_images_copyright_holder.t}:") %>
-                <%= text_field(:good_image, :copyright_holder, :value => image.copyright_holder, :index => image.id, :size => 30) %><br/>
-
-                <%= label_tag("image_#{image.id}_when_1i", "#{:form_images_when_taken.t}:") %>
-                <%= date_select(:good_image, :when, {
-                      :object => image,
-                      :index => image.id,
-                      :start_year => 1980,
-                      :end_year => Time.now.year,
-                      :order => [:day,:month,:year]
-                    },
-                    { :onchange => "CHANGED_DATES[#{image.id}] = true" }) %><br/>
-
-                <%= label_tag("image_#{image.id}_license_id", "#{:form_images_select_license.t}:".html_safe) %>
-                <%= select(:good_image, :license_id, License.current_names_and_ids(image.license),
-                           { :selected => image.license_id }, { :index => image.id }) %><br/>
-            <% end %>
-          </td>
-        </tr></table>
-      </div>
+    <% if @good_images != [] %>
+      <b>Images:</b><br/>
+      <% for image in @good_images %>
+        <div class="form_image">
+          <table><tr>
+            <td valign="middle" style="white-space:nowrap">
+              <%= radio_button('observation', 'thumb_image_id', image.id) %>
+            </td>
+            <td valign="middle" align="center" style="padding-right:10px">
+              <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true) %>
+            </td>
+            <td valign="middle" style="white-space:nowrap">
+              <% if check_permission(image) %>
+                  <%= label_tag("image_#{image.id}_notes", "#{:NOTES.t}:") %>
+                  <% if @user.thumbnail_size == :thumbnail %>
+                    <%= text_field(:good_image, :notes, :value => image.notes, :index => image.id, :size => 40) %><br/>
+                  <% else %><br/>
+                    <%= text_area(:good_image, :notes, :value => image.notes, :index => image.id, :cols => 60, :rows => 3) %><br/>
+                  <% end %>
+                  <%= label_tag("image_#{image.id}_orgiginal_name", "#{:form_observations_original_name.t}:") %>
+                  <%= text_field(:good_image, :original_name, :value => image.original_name, :index => image.id, :size => 30) %><br/>
+                  <%= label_tag("image_#{image.id}_copyright_holder", "#{:form_images_copyright_holder.t}:") %>
+                  <%= text_field(:good_image, :copyright_holder, :value => image.copyright_holder, :index => image.id, :size => 30) %><br/>
+                  <%= label_tag("image_#{image.id}_when_1i", "#{:form_images_when_taken.t}:") %>
+                  <%= date_select(:good_image, :when, {
+                        :object => image,
+                        :index => image.id,
+                        :start_year => 1980,
+                        :end_year => Time.now.year,
+                        :order => [:day,:month,:year]
+                      },
+                      { :onchange => "CHANGED_DATES[#{image.id}] = true" }) %><br/>
+                  <%= label_tag("image_#{image.id}_license_id", "#{:form_images_select_license.t}:".html_safe) %>
+                  <%= select(:good_image, :license_id, License.current_names_and_ids(image.license),
+                             { :selected => image.license_id }, { :index => image.id }) %><br/>
+              <% end %>
+            </td>
+          </tr></table>
+        </div>
+      <% end %>
+      <br/>
     <% end %>
-    <br/>
-  <% end %>
+    <%= hidden_field_tag("good_images", @good_images.map {|o| o.id}.join(" ")) %>
 
     <b><%= :form_observations_upload_images.t %>:</b><br/>
 
-
     <% if !can_do_multifile_upload? %>
-          <% if can_do_ajax? %>
-            <%= javascript_tag %(
-              var NEXT_IMAGE_INDEX = #{@images.length+1};
-              var CHANGED_DATES = [];
-            ) %>
-          <% end %>
-          <div id="image_forms">
-            <% i = 0 %>
-            <% @images.push(@new_image) %>
-            <% while i < @images.length %>
-              <%= render(:partial => 'form_image', :locals => { :index => i }) %>
-              <% i += 1 %>
-            <% end %>
-          </div>
-          <div class='HelpNote'>
-            <%= :form_observations_upload_help.tp %>
-          </div>
+      <% if can_do_ajax? %>
+        <%= inject_javascript_at_end %(
+          var NEXT_IMAGE_INDEX = #{@images.length+1};
+          var CHANGED_DATES = [];
+        ) %>
+      <% end %>
+      <div id="image_forms">
+        <% i = 0 %>
+        <% @images.push(@new_image) %>
+        <% while i < @images.length %>
+          <%= render(:partial => 'form_image', :locals => { :index => i }) %>
+          <% i += 1 %>
+        <% end %>
+      </div>
+      <div class='HelpNote'>
+        <%= :form_observations_upload_help.tp %>
+      </div>
+      <% if can_do_ajax? %>
+        <%= button_tag(:form_observations_upload_another.t, {:onclick => 'image_new()', :id => 'new_image_button'}) %>
+        <% javascript_include("single_image_uploader") %>
+      <% end %>
     <% end %>
-
-  <% if can_do_ajax? && !can_do_multifile_upload? %>
-    <%= button_tag(:form_observations_upload_another.t, {:onclick => 'image_new()', :id => 'new_image_button'}) %>
-    <%= javascript_include('jquery')
-    javascript_include('jquery_extensions')
-    javascript_tag %(
-      var x = String.fromCharCode(60);
-      var y = String.fromCharCode(93);
-
-      var IMAGE_FORM = "#{
-        i = @images.length - 1
-        str = render(:partial => 'form_image', :locals => { :index => i })
-        str.gsub!("image_#{i}_", 'image_XXX_')
-        str.gsub!("image_id_#{i}", 'image_id_XXX')
-        str.gsub!("(#{i})", '(XXX)')
-        str.gsub!("[#{i}]", '[XXX]')
-        str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
-        str.sub!("checked=\"checked\" ", '')
-        str = escape_javascript(str)
-        str.gsub('<', '"+x+"')
-        str.gsub(']', '"+y+"')
-      }";
-
-      function auto_image_new(i) {
-        if (NEXT_IMAGE_INDEX == i+1) image_new();
-        $('image_' + i + '_notes').focus();
-      }
-
-      function image_new() {
-        var n = NEXT_IMAGE_INDEX++;
-        var form = IMAGE_FORM.replace(/XXX/g, n);
-        jQuery('#image_forms').append(form);
-        jQuery('#new_image_button').ensureVisible();
-        apply_file_input_field_validation("image_" + n + "_image");
-        return false;
-      }
-
-      function image_on(i) {
-        jQuery('#image_'+i+'_div').show();
-        jQuery('#image_'+i+'_less').show();
-        jQuery('#image_'+i+'_more').hide();
-        var div = jQuery('#image_'+i+'_box');
-        div.css("border", '1px solid #888');
-        div.ensureVisible();
-        if (!CHANGED_DATES[i]) {
-          jQuery('#image_'+i+'_when_1i').val( jQuery('#observation_when_1i').val() );
-          jQuery('#image_'+i+'_when_2i').val( jQuery('#observation_when_2i').val() );
-          jQuery('#image_'+i+'_when_3i').val( jQuery('#observation_when_3i').val() );
-        }
-        return false;
-      }
-
-      function image_off(i) {
-        jQuery('#image_'+i+'_more').show();
-        jQuery('#image_'+i+'_div').hide();
-        jQuery('#image_'+i+'_less').hide();
-        jQuery('#image_'+i+'_box').css("border", "0");
-        return false;
-      }
-    ) %>
-  <% end %>
-
-  <%= hidden_field_tag("good_images", @good_images.map {|o| o.id}.join(" ")) %>
 
   </td></tr></table>
-    <% ############################### START Multiple image uploads ############################## %>
-    <% if can_do_multifile_upload? %>
-        <input type="file" multiple id="multiple_images_button" accept="image/*"/>
-        <!--Container to show messages relating to the selected images  -->
-        <%=stylesheet_link_tag("grids")%>
 
-              <div class="row margin_top image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
+  <!--MULTIPLE IMAGE UPLOADS--%>
+  <% if can_do_multifile_upload? %>
+    <% javascript_include('multi_image_upload') %>
+    <%= stylesheet_link_tag("grids") %>
 
-                  <div class="col-sm-7">
-                      <div class="inconsistent_date_options">
-                        <div class="col-sm-12">
-                            <div><strong><%= :form_observations_set_observation_date_to.t %>:</strong></div>
-                            <div id="image_date_radio_container">  <!--id referenced in jquery-->
+    <div class='HelpNote'>
+      <%= :form_observations_upload_help_multi_select.tp %>
+    </div>
+    <%= hidden_field('observation', 'thumb_image_id') %>
+    <input type="file" multiple id="multiple_images_button" accept="image/*"/>
 
-                            </div>
-                            <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
-                            <div id="observation_date_radio_container"> <!--id referenced in jquery-->
-
-                            </div>
-                        </div>
-                        <div class="col-sm-12" style="margin-top: 15px;">
-                          <button id="fix_dates" type="button"><%= :form_observations_use_date.t %></button>
-                          <button id="ignore_dates" type="button"><%= :IGNORE.t %></button>
-                        </div>
-                      </div>
-                  </div>
-                <div class="col-sm-4">
-                  <span><%= :form_observations_date_warning.t %></span>
-                </div>
-              </div>
-
-        <!--Container for appending images-->
-        <div class="images_container margin-top">
-          <div id="added_images_container">
-            <!--Target for insertion-->
+    <!-- Container to show messages relating to the selected images -->
+    <div class="row margin_top image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
+      <div class="col-sm-7">
+        <div class="inconsistent_date_options">
+          <div class="col-sm-12">
+            <div><strong><%= :form_observations_set_observation_date_to.t %>:</strong></div>
+            <div id="image_date_radio_container"></div>
+            <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
+            <div id="observation_date_radio_container"></div>
+          </div>
+          <div class="col-sm-12" style="margin-top: 15px;">
+            <button id="fix_dates" type="button"><%= :form_observations_use_date.t %></button>
+            <button id="ignore_dates" type="button"><%= :IGNORE.t %></button>
           </div>
         </div>
-        <% javascript_include('exif')
-           javascript_include('multi_image_upload') %>
-        <%= javascript_tag %(
-              jQuery(document).ready(function () {
-                 var uploader = MultiImageUploader({
-                  image_upload_error_text: "#{j :form_observations_image_upload_error.t}",
-                  uploading_text: "#{j :form_observations_uploading_images.t}",
-                  image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
-                  creating_observation_text: "#{j :form_observations_creating_observation.t}",
-                  months: "#{j :all_months.t}"
-                 })
-                 uploader.init();
-              });
-            ) %>
-    <% end %>
-    <% ############################### END Multiple image uploads ############################## %>
-<% end %>
+      </div>
+      <div class="col-sm-4">
+        <span><%= :form_observations_date_warning.t %></span>
+      </div>
+    </div>
+
+    <!--Container for appending images-->
+    <div class="images_container margin-top">
+      <div id="added_images_container">
+        <!--Target for insertion-->
+      </div>
+    </div>
+
+    <%= inject_javascript_at_end %(
+      jQuery(document).ready(function () {
+        var uploader = MultiImageUploader({
+          uploading_text: "#{j :form_observations_uploading_images.t}",
+          image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
+          creating_observation_text: "#{j :form_observations_creating_observation.t}",
+          months: "#{j :all_months.t}"
+        })
+        uploader.init();
+      });
+    ) %>
+  <% end %>
+  <!--END MULTIPLE IMAGE UPLOADS-->
+
+<% end # include_images? %>
 
 <% ########################################################################## %>
 

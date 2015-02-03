@@ -1,10 +1,6 @@
 <%
-  if can_do_ajax?
-    javascript_include 'jquery'
-    javascript_include 'jquery_extensions'
-    javascript_include 'name_lister'
-    javascript_include 'name_list_data'
-  end
+  javascript_include 'name_lister'
+  javascript_include '/name_list_data.js'  # leading slash should take it out of asset pipeline
 
   @title = :name_lister_title.t
 
@@ -64,7 +60,7 @@
 
 <div id="log"></div>
 
-  <%= javascript_tag %(
+  <%= inject_javascript_at_end %(
     nl_initialize_names();
     nl_draw('g', NL_GENERA);
     nl_draw('n', NL_NAMES);

@@ -867,7 +867,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "MO Update Complete:  Please <a href=\"http://mushroomobserver.org/observer/ask_webmaster_question\">send us a note</a> if you see any weird behavior."
+  app_banner_box: Enjoy our new image uploader!  Many thanks to Ray Suelzer.<br>Of course, it's impossible to test it on every browser, so please <a href="http://mushroomobserver.org/observer/ask_webmaster_question">send us a note</a> if you see anything wrong.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1206,6 +1206,7 @@
   form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation.  If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a dried specimen available for further study.  This can either be at an official herbarium or part of a personal herbarium.  Please note where the specimen is in the notes.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
+  form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time.  You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Where the observation was made.  In the US this should be at least accurate to the county.  Examples:\nAlbion, Mendocino Co., California, USA\nHotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
@@ -1216,7 +1217,6 @@
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
-  form_observations_image_upload_error: There was an error uploading the image. Continuing anyway.
 
 
   # observer/_form_species_list
@@ -2885,7 +2885,7 @@
   email_subject_features: New [:app_title] Features
   email_subject_location_change: "[name] Has Been Changed"
   email_subject_naming_for_observer: Research Request
-  email_subject_naming_for_tracker: Naming Notification
+  email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
   email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
   email_subject_new_password: New Password

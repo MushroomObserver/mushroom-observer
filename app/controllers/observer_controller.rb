@@ -475,7 +475,7 @@ class ObserverController < ApplicationController
         end
       end
     rescue => e
-      flash_error(e.to_s) unless PRODUCTION
+      flash_error(e.to_s) unless Rails.env == "production"
     end
 
     if matches.empty? && suggestions.empty?
@@ -638,15 +638,10 @@ class ObserverController < ApplicationController
   end
 
   # Displays matrix of User's Observation's, by date.
-  def observations_by_user # :nologin: :norobots:
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-    if user
-      query = create_query(:Observation, :by_user, user: user)
-      show_selected_observations(query)
-    else
-      flash_error(:runtime_missing.t(field: "id"))
-      redirect_to(action: "list_rss_logs")
-    end
+  def observations_by_user  # :nologin: :norobots:
+    return unless user = find_or_goto_index(User, params[:id].to_s)
+    query = create_query(:Observation, :by_user, user: user)
+    show_selected_observations(query)
   end
 
   # Displays matrix of Observation's at a Location, by date.

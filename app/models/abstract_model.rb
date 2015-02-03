@@ -291,7 +291,7 @@ class AbstractModel < ActiveRecord::Base
   # Dump out error messages for a given instance in a single string.  Useful
   # for debugging:
   #
-  #   puts user.dump_errors if TESTING
+  #   puts user.dump_errors if Rails.env == "test"
   #
   def dump_errors
     self.formatted_errors.join("; ")

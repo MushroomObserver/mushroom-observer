@@ -38,7 +38,7 @@ class AjaxController < ApplicationController
     yield
   rescue => e
     msg = e.to_s + "\n"
-    if TESTING or DEVELOPMENT
+    if Rails.env != "production"
       for line in e.backtrace
         break if line.match(/action_controller.*perform_action/)
         msg += line + "\n"
@@ -237,9 +237,9 @@ class AjaxController < ApplicationController
   # Upload Image Template. Returns formatted HTML to be injected
   # when uploading multiple images on create observation
   def get_multi_image_template
-    current_user = get_session_user!
-    @licenses = License.current_names_and_ids(current_user.license) #Needed to render licenses drop down
-    @image = Image.new(:user => current_user, :when => Time.now)
+    @user = get_session_user!
+    @licenses = License.current_names_and_ids(@user.license) #Needed to render licenses drop down
+    @image = Image.new(:user => @user, :when => Time.now)
     render(:partial => '/observer/form_multi_image_template')
   end
 
@@ -250,7 +250,7 @@ class AjaxController < ApplicationController
     @image = params[:image]
 
     original_name = @image[:original_name].to_s
-    original_name = "" if User.current && User.current.keep_filenames == :toss
+    original_name = "" if user && user.keep_filenames == :toss
 
     img_when = Date.new(@image[:when][("1i")].to_i, @image[:when][("2i")].to_i,
                         @image[:when][("3i")].to_i)
@@ -266,17 +266,16 @@ class AjaxController < ApplicationController
       image: @image[:upload]
     )
 
-    if !image.save
-      flash_object_errors(image)
-    elsif !image.process_image
-      logger.error("Unable to upload image")
-      flash_notice(:runtime_no_upload_image.t(name: (name ? "'#{name}'" : "##{image.id}")))
-      flash_object_errors(image)
+    if !image.save || !image.process_image
+      msg = :runtime_no_upload_image.t(:name => (original_name ? "'#{original_name}'" : "##{image.id}"))
+      errors = [msg] + image.formatted_errors
+      logger.error("UPLOAD_FAILED: #{errors.inspect}")
+      render(text: errors.join("\n").strip_html, status: 500, layout: false)
     else
       name = original_name
       name = "##{image.id}" if name.empty?
-      flash_notice(:runtime_image_uploaded.t(name: name))
+      flash_notice(:runtime_image_uploaded.t(:name => name))
+      render(json: image)
     end
-    render json: image
   end
 end

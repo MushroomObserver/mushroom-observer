@@ -156,9 +156,7 @@
     }
   </style>
 
-  <%=
-  javascript_include('jquery')
-  javascript_tag(%(
+  <%= inject_javascript_at_end %(
     var NUMBER_OF_NAMES    = {#{@observations.map {|o| "#{o.id}:#{o.namings.length}"}.join(',')}};
     var NUMBER_OF_COMMENTS = {#{@observations.map {|o| "#{o.id}:#{o.comments.length}"}.join(',')}};
     var NUMBER_OF_IMAGES   = {#{@observations.map {|o| "#{o.id}:#{o.images.length}"}.join(',')}};
@@ -200,7 +198,7 @@
       window.open(url.replace("XXX", current_id));
       current_id = null;
     }
-  )) %>
+  ) %>
 
   <br/><center><%= submit_tag(:UPDATE.l) %></center>
 <% end %>

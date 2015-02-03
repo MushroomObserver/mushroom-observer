@@ -2,8 +2,8 @@
   @title = :show_site_stats_title.t
 
   new_tab_set do
-    add_tab(:app_contributors.t, :action => :users_by_contribution)
-    add_tab(:site_stats_observed_taxa.t, :action => :checklist)
+    add_tab(:app_contributors.t, action: :users_by_contribution)
+    add_tab(:site_stats_observed_taxa.t, action: :checklist)
   end
 %>
 
@@ -18,9 +18,9 @@
       if obs_length > 0 %>
         <td>
           <% for obs in @observations[0,3] %>
-            <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id,
-                          :votes => true) %><br/>
+            <%= thumbnail(obs.thumb_image, class: 'site_stats_image',
+                          link: { action: :show_observation }, obs: obs.id,
+                          votes: true) %><br/>
           <% end %>
         </td>
       <% end %>
@@ -64,9 +64,9 @@
       <% if obs_length > 3 %>
         <td>
           <% for obs in @observations[3,3] %>
-            <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id,
-                          :votes => true) %><br/>
+            <%= thumbnail(obs.thumb_image, class: 'site_stats_image',
+                          link: { action: :show_observation }, obs: obs.id,
+                          votes: true) %><br/>
           <% end %>
         </td>
       <% end %>

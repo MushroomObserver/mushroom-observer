@@ -722,19 +722,19 @@ class SpeciesListController < ApplicationController
 
     # Are there any unrecognized names?
     if sorter.new_name_strs != []
-      flash_error "Unrecognized names given: '#{sorter.new_name_strs.map(&:to_s).join("', '")}'" if TESTING
+      flash_error "Unrecognized names given: '#{sorter.new_name_strs.map(&:to_s).join("', '")}'" if Rails.env == "test"
       failed = true
     end
 
     # Are there any ambiguous names?
     if !sorter.only_single_names
-      flash_error "Ambiguous names given: '#{sorter.multiple_line_strs.map(&:to_s).join("', '")}'" if TESTING
+      flash_error "Ambiguous names given: '#{sorter.multiple_line_strs.map(&:to_s).join("', '")}'" if Rails.env == "test"
       failed = true
     end
 
     # Are there any deprecated names which haven't been approved?
     if sorter.has_unapproved_deprecated_names
-      flash_error("Found deprecated names: #{sorter.deprecated_names.map(&:display_name).join(', ').t}") if TESTING
+      flash_error("Found deprecated names: #{sorter.deprecated_names.map(&:display_name).join(', ').t}") if Rails.env == "test"
       failed = true
     end
 

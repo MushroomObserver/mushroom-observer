@@ -43,6 +43,9 @@ MushroomObserver::Application.configure do
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
 
+  config.water_users = [1, 2]
+  config.oil_users   = [4, 5]
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------
@@ -88,7 +91,17 @@ MushroomObserver::Application.configure do
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
+  # What does this do?
   config.eager_load = false
+
+  # Compile and combine assets, but don't compress or add digests to names.
+  config.assets.compile = true
+  config.assets.compress = false
+  config.assets.debug = false
+  config.assets.digest = false
+
+  # Raise exception on mass assignment protection for Active Record models
+  # config.active_record && config.active_record.mass_assignment_sanitizer = :strict
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

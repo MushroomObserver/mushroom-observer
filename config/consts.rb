@@ -76,7 +76,7 @@ MushroomObserver::Application.configure do
   config.user_primer_cache_file = "#{config.root}/tmp/user_primer.#{config.env}"
 
   # File where we keep name_lister data cache.
-  config.name_lister_cache_file = "#{config.root}/public/assets/name_list_data.js"
+  config.name_lister_cache_file = "#{config.root}/public/name_list_data.js"
 
   # Access data for Pivotal Tracker's API.
   config.pivotal_enabled  = false
@@ -125,13 +125,19 @@ MushroomObserver::Application.configure do
 
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
-  config.process_image_command = "#{config.root}/script/process_image <id> <ext> <set>"
+  config.process_image_command = "#{config.root}/script/process_image <id> <ext> <set> &"
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
-  # Be sure to change app/assets/javascripts/multi_image_upload.js (in asFormData), too.
-  config.image_upload_max_size = 20000000
+  config.image_upload_max_size = 20971520  # 20*1024*1024 = 20 Mb
 
   # Flag intended for controller when the debugger gets invoked.
   # Use with lines like: debugger if MO.debugger_flag
   config.debugger_flag = false
+
+  # Watch objects with comment wars between these two sets of users.
+  config.water_users = []
+  config.oil_users   = []
+
+  # List of IP addresses to blacklist.
+  config.blocked_ip_addresses = []
 end

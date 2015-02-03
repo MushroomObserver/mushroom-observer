@@ -1,6 +1,5 @@
 <!--[form:image]-->
 
-<% javascript_include('jquery') %>
 <% @image = @images[index] %>
 
 <div id="image_<%= index %>_box" class="form_image">
@@ -36,13 +35,12 @@
   </div>
 
   <%= if @js
-       javascript_tag("jQuery('#image_#{index}_less').hide()")
-
-       javascript_tag %(
-            CHANGED_DATES[#{index}] = false;
-            jQuery('#image_#{index}_div').hide();
-            )
-      end %>
+    inject_javascript_at_end %(
+      CHANGED_DATES[#{index}] = false;
+      jQuery('#image_#{index}_less').hide();
+      jQuery('#image_#{index}_div').hide();
+    )
+  end %>
 
 </div>
 
