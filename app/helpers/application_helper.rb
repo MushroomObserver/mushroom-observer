@@ -217,9 +217,9 @@ module ApplicationHelper
   end
 
   def herbarium_name_box(default_name="")
-    content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
-    text_field(:specimen, :herbarium_name, :value => @herbarium_name, :size => 60) +
     turn_into_herbarium_auto_completer(:specimen_herbarium_name)
+    content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
+    text_field(:specimen, :herbarium_name, :value => @herbarium_name, :size => 60)
   end
 
   def herbarium_id_box
@@ -259,11 +259,8 @@ module ApplicationHelper
         end
       end
       js_args = js_args.join(', ')
-      result = inject_javascript_at_end("new MOAutocompleter({ #{js_args} })")
-    else
-      result = ''
+      inject_javascript_at_end("new MOAutocompleter({ #{js_args} })")
     end
-    return result
   end
 
   # Make text_field auto-complete for fixed set of strings.
@@ -1018,6 +1015,12 @@ module ApplicationHelper
   # input field when it loads the page.
   def focus_on(id)
     inject_javascript_at_end("document.getElementById('#{id}').focus()")
+  end
+
+  # Hide an element right away, don't wait to inject at end, because it makes
+  # the browser window jump around erratically as it's loading.
+  def hide_element(id)
+    javascript_tag("document.getElementById('#{id}').style.display = 'none'");
   end
 
   # From map_helper.rb

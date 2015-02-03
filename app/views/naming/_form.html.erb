@@ -41,7 +41,7 @@ end
   <span class="HelpNote"><%= :form_naming_name_help_create.t %></span>
 <% end %>
 <span class="HelpNote"><%= :form_naming_name_help.t %></span><br/>
-<%= turn_into_name_auto_completer('name_name', primer: Name.primer,
+<% turn_into_name_auto_completer('name_name', primer: Name.primer,
   on_change: %( function(v) { v && v != '' ? jQuery('#reasons_div').show() : jQuery('#reasons_div').hide() } )) %>
  
 <%# -------------------- Naming Reasons -------------------- %>
@@ -63,7 +63,7 @@ end
     if can_do_ajax?
       textarea = content_tag(:div, textarea, id: "reason_#{num}_div")
       if !check
-        inject_javascript_at_end("jQuery('#reason_#{num}_div').hide()")
+        textarea += hide_element("reason_#{num}_div")
       end
     end
     html += checkbox + label + textarea
@@ -75,7 +75,7 @@ end
 %>
 
 <%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
-<%= focus_on('name_name') %>
+<% focus_on('name_name') %>
 
 <!--[eoform:naming]-->
 

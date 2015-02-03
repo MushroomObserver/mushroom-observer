@@ -6,9 +6,7 @@
     add_tab(:profile_link.t,
             :controller => 'account', :action => 'profile')
   end
-%>
 
-<%= 
   javascript_include('api_key')
   inject_javascript_at_end "ApiKeyModule()"
 %>

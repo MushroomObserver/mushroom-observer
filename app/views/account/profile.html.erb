@@ -21,7 +21,7 @@
 
   <p><label for="user_place_name"><%= :profile_location.t %></label> (33%)<br/>
   <%= text_field('user', 'place_name', :value => @place_name, :size => 60) %></p>
-  <%= turn_into_location_auto_completer("user_place_name") %>
+  <% turn_into_location_auto_completer("user_place_name") %>
 
   <p><label for="user_notes"><%= :profile_notes.t %></label> (33%)<br/>
   <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>

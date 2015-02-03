@@ -67,6 +67,11 @@ module GeneralExtensions
     end
   end
 
+  # This seems to have disappeared from rails.
+  def build_message(msg, add)
+    msg ? "#{msg}\n#{add}" : add
+  end
+
   ##############################################################################
   #
   #  :section: General assertions
@@ -107,7 +112,7 @@ module GeneralExtensions
   def assert_dates_equal(expect, actual, msg=nil)
     expect = expect.strftime('%Y%m%d')
     actual = actual.strftime('%Y%m%d')
-    msg = build_message(msg, 'Expected <?> to be <?>.', expect, actual)
+    msg = build_message(msg, "Expected <#{expect}> to be <#{actual}>.")
     assert(expect == actual, msg)
   end
 

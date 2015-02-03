@@ -3,6 +3,7 @@
 //= require jstz
 //= require autocomplete
 //= require confirm
+//= require csrf_token
 //= require image_vote
 //= require image_export
 //= require validate_file_input_fields

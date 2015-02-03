@@ -71,7 +71,7 @@ function ApiKeyModule() {
     function saveKey(id) {
       var notes = jQuery('[data-role="key_notes_input"][data-id=' + id + ']').val();
       jQuery.ajax("/ajax/api_key/edit/" + id, {
-        data: {value: notes, authenticity_token: CSRF_TOKEN},
+        data: {value: notes, authenticity_token: csrf_token()},
         dataType: "text",
         async: true,
         error: function (response) {
@@ -86,7 +86,7 @@ function ApiKeyModule() {
 
     function activateKey(id) {
       jQuery.ajax("/ajax/api_key/activate/" + id, {
-        data: {authenticity_token: CSRF_TOKEN},
+        data: {authenticity_token: csrf_token()},
         dataType: "text",
         async: true,
         error: function (response) {

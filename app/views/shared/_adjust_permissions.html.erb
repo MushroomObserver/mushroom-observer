@@ -114,7 +114,7 @@
         <td>
           <%= text_field_tag("writein_name[#{n}]", datum[:name],
                              :id => "writein_name_#{n}", :size => 40) %>
-          <%= turn_into_user_auto_completer("writein_name_#{n}") %>
+          <% turn_into_user_auto_completer("writein_name_#{n}") %>
         </td>
         <td></td>
         <td>

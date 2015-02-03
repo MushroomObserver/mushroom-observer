@@ -37,7 +37,7 @@
   <%= form.text_field(:correct_spelling, :size => 60,
                       :value => @correct_spelling) %><br/>
   <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
-  <%= turn_into_name_auto_completer('name_correct_spelling', :primer => Name.primer) %>
+  <% turn_into_name_auto_completer('name_correct_spelling', :primer => Name.primer) %>
 <% end %>
 
 <p>
@@ -46,6 +46,6 @@
   <%= render(:partial => 'shared/textilize_help') %>
 </p>
 
-<%= focus_on('name_text_name') %>
+<% focus_on('name_text_name') %>
 
 <!--[eoform:name]-->

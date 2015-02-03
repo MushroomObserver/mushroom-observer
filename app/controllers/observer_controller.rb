@@ -38,6 +38,9 @@
 #  list_notifications::
 
 # TODO: Determine where this really goes
+#  JPH: --> SearchController along with pattern_search? I foresee future
+#       additions to out search capabilities, like an actually-usable refine
+#       search page, and a way to store and share and edit searches.
 #  advanced_search::
 
 # TODO: Create SearchController with:
@@ -2311,7 +2314,7 @@ class ObserverController < ApplicationController
 
   def whitelisted_observation_args
     [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
-      "when(3i)", :notes, :specimen, :thumb_image_id]
+      "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location]
   end
 
   def whitelisted_observation_params
