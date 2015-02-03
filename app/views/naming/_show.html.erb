@@ -48,7 +48,7 @@
                         (<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %>
                         |
                         <%= link_with_query(:DESTROY.t, {controller: :naming, action: :destroy, id: naming.id},
-                                            {confirm: :are_you_sure.l}) %>)
+                                            { data: { confirm: :are_you_sure.l }}) %>)
                       <% end %>
                     </div>
                   </td>

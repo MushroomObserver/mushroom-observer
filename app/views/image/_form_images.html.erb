@@ -33,7 +33,7 @@
   <span class="HelpNote">
     <%= :form_images_notes_help.t %>
   </span><br/>
-<%= form.text_area('notes', "cols" => width) %></p>
+<%= form.text_area(:notes, cols: width, autofocus: true) %></p>
 <%= render(:partial => 'shared/textilize_help') %>
 
 <% if @projects.any? %>
@@ -53,7 +53,5 @@
   <% end %>
   </p>
 <% end %>
-
-<% focus_on('image_notes') %>
 
 <!--[eoform:image]-->
