@@ -9,7 +9,7 @@
 
 <label for="name_text_name"><%= :form_names_text_name.t %>:</label>
 <% if true %>
-  <%= form.text_field(:text_name, :value => @name_string, :size => 60) %><br/>
+  <%= form.text_field(:text_name, value: @name_string, size: 60, autofocus: true) %><br/>
   <div class="HelpNote"><%= :form_names_text_name_help.tp %></div>
 <% else %>
   <%= @name.real_text_name %><br/>
@@ -45,7 +45,5 @@
   <%= form.text_area(:notes, :cols => 80) %>
   <%= render(:partial => 'shared/textilize_help') %>
 </p>
-
-<% focus_on('name_text_name') %>
 
 <!--[eoform:name]-->

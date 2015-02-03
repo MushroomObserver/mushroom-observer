@@ -1002,12 +1002,6 @@ module ApplicationHelper
     @javascript_codes || []
   end
 
-  # Insert a javacsript snippet that causes the browser to focus on a given
-  # input field when it loads the page.
-  def focus_on(id)
-    inject_javascript_at_end("document.getElementById('#{id}').focus()")
-  end
-
   # Hide an element right away, don't wait to inject at end, because it makes
   # the browser window jump around erratically as it's loading.
   def hide_element(id)

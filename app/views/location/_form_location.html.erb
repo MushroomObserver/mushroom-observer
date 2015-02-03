@@ -21,7 +21,7 @@
       <label for="location_display_name"><%= :Where.t %>:</label><br/>
     </td>
     <td>
-      <%= form.text_field('display_name', :value => where, :size => 65) %><br/>
+      <%= form.text_field('display_name', value: where, size: 65, autofocus: true) %><br/>
     </td>
     <td>
       <span class="HelpNote"><%= :form_locations_help.t %></span>
@@ -111,7 +111,5 @@
     </td>
   </tr>
 </table>
-
-<% focus_on('location_display_name') %>
 
 <!--[eoform:location]-->

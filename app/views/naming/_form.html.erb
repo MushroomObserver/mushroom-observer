@@ -30,7 +30,7 @@ end
                      names: names }) %>
 <div style="white-space:nowrap">
   <label for="name_name"><%= :WHAT.t %>:</label>
-  <%= text_field('name', 'name', value: what) %>
+  <%= text_field('name', 'name', value: what, autofocus: true) %>
   <span style="margin-left:20px">&nbsp;</span>
   <label for="vote_value"><%= :form_naming_confidence.t %>:</label>
   <% @vote = vote %>
@@ -75,7 +75,6 @@ end
 %>
 
 <%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
-<% focus_on('name_name') %>
 
 <!--[eoform:naming]-->
 

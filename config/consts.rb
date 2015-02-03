@@ -140,4 +140,7 @@ MushroomObserver::Application.configure do
 
   # List of IP addresses to blacklist.
   config.blocked_ip_addresses = []
+
+  # Default "secret key", see rails docs.
+  config.secret_key_base = "a"*30
 end

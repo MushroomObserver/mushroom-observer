@@ -20,7 +20,5 @@
 
   <label for="notification_note_template"><%= :email_tracking_note.t %></label>:<br/>
   <span class="HelpNote"><%= :email_tracking_note_help.t %></span><br/>
-  <%= text_area('notification', 'note_template', :cols => 80, :value => @note_template) %><br/>
-
-  <% focus_on('notification_note_template') %>
+  <%= text_area('notification', 'note_template', cols: 80, value: @note_template, autofocus: true) %><br/>
 <% end %>
