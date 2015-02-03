@@ -629,6 +629,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_original_filename_visibility
+    # Image 6 is Rolf's image, original name: "Name with áč€εиts.gif"
     login("mary")
 
     rolf.keep_filenames = :toss
@@ -643,7 +644,6 @@ class ImageControllerTest < FunctionalTestCase
 
     rolf.keep_filenames = :keep_and_show
     rolf.save
-
     get(:show_image, id: 6)
     assert_true(@response.body.include?("áč€εиts"))
 
