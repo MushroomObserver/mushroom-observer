@@ -81,6 +81,6 @@ gem "coveralls", require: false
 # Use rubocop for code style quality control
 gem "rubocop", require: false
 
-
-
-
+# Brakeman static analysis security scanner
+# See http://brakemanscanner.org/
+gem "brakeman", require: false
