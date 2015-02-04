@@ -339,7 +339,7 @@ class SpeciesListController < ApplicationController
       end
       @checklist ||= calc_checklist
     else
-      process_species_list("created_at")
+      process_species_list(:create)
     end
   end
 
@@ -353,7 +353,7 @@ class SpeciesListController < ApplicationController
         init_project_vars_for_edit(@species_list)
         @checklist ||= calc_checklist
       else
-        process_species_list("updated")
+        process_species_list(:update)
       end
     end
   end
@@ -672,13 +672,13 @@ class SpeciesListController < ApplicationController
   #       val: id of name user has chosen (via radio boxes in feedback)
   #   params[:checklist_data][...]          Radio boxes on left side: hash from name id to "1".
   #   params[:checklist_names][name_id]     (Used by view to give a name to each id in checklist_data hash.)
-  def process_species_list(created_or_updated)
+  def process_species_list(create_or_update)
     redirected = false
     args = params[:species_list]
 
     # Update the timestamps/user/when/where/title/notes fields.
     now = Time.now
-    @species_list.created_at = now if created_or_updated == :created_at
+    @species_list.created_at = now if create_or_update == :create
     @species_list.updated_at = now
     @species_list.user = @user
     @species_list.attributes = args.permit(whitelisted_species_list_args) if args
@@ -746,15 +746,16 @@ class SpeciesListController < ApplicationController
       if !@species_list.save
         flash_object_errors(@species_list)
       else
-        @species_list.log("log_species_list_#{created_or_updated}".to_sym)
-        if created_or_updated == :created_at
+        if create_or_update == :create
+          @species_list.log(:log_species_list_created_at)
           flash_notice(:runtime_species_list_create_success.t(id: @species_list.id))
         else
+          @species_list.log(:log_species_list_updated)
           flash_notice(:runtime_species_list_edit_success.t(id: @species_list.id))
         end
 
         update_projects(@species_list, params[:project])
-        construct_observations(@species_list, sorter, created_or_updated)
+        construct_observations(@species_list, sorter)
 
         if @species_list.location.nil?
           redirect_to(controller: "location", action: "create_location",
@@ -780,7 +781,7 @@ class SpeciesListController < ApplicationController
   # Uses the member instance vars, as well as:
   #   params[:chosen_approved_names]    Names from radio boxes.
   #   params[:checklist_data]           Names from LHS check boxes.
-  def construct_observations(spl, sorter, created_or_updated)
+  def construct_observations(spl, sorter)
 
     # Put together a list of arguments to use when creating new observations.
     member_args = params[:member] || {}
