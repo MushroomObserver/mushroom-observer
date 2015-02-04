@@ -943,17 +943,32 @@ class SpeciesListController < ApplicationController
   end
 
   def init_member_vars_for_edit(spl)
-    if obs = @species_list.observations.last
+    init_member_vars_for_create()
+    if obs = spl.observations.last
+      # TODO: Not sure how to check vote efficiently...
       @member_vote = obs.namings.first.users_vote(@user).value rescue Vote.maximum_vote
-      @member_notes = obs.notes
-      @member_lat = obs.lat
-      @member_long = obs.long
-      @member_alt = obs.alt
-      @member_is_collection_location = obs.is_collection_location
-      @member_specimen = obs.specimen
-    else
-      init_member_vars_for_create()
+      if all_obs_same?(spl, obs, :notes)
+        @member_notes = obs.notes
+      end
+      if all_obs_same?(spl, obs, :lat, :long, :alt)
+        @member_lat  = obs.lat
+        @member_long = obs.long
+        @member_alt  = obs.alt
+      end
+      if all_obs_same?(spl, obs, :is_collection_location)
+        @member_is_collection_location = obs.is_collection_location
+      end
+      if all_obs_same?(spl, obs, :specimen)
+        @member_specimen = obs.specimen
+      end
     end
+  end
+
+  # Do all observations in spl have same values for the given attributes?
+  def all_obs_same?(spl, obs, *attrs)
+    cond = attrs.map {|a| "observations.#{a} != ?"}.join(" OR ")
+    vals = attrs.map {|a| obs.send(a)}
+    spl.observations.where(cond, *vals).limit(1).count == 0
   end
 
   def init_member_vars_for_reload()

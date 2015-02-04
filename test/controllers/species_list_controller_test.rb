@@ -1638,4 +1638,51 @@ class SpeciesListControllerTest < FunctionalTestCase
     )
     assert_flash_warning # already done
   end
+
+  def test_edit_species_list_member_parameters_initialization
+    login("mary")
+    spl = species_lists(:unknown_species_list)
+    obs1, obs2 = spl.observations
+
+    # If existing observations are all the same, use their values
+    # as defaults for future observations.
+    obs1.notes = obs2.notes = "test notes"
+    obs1.lat   = obs2.lat   = "12.3456"
+    obs1.long  = obs2.long  = "-76.5432"
+    obs1.alt   = obs2.alt   = "789"
+    obs1.is_collection_location = false
+    obs2.is_collection_location = false
+    obs1.specimen = true
+    obs2.specimen = true
+    obs1.save!
+    obs2.save!
+
+    get(:edit_species_list, id: spl.id)
+    assert_edit_species_list
+    assert_textarea_value(:member_notes, "test notes")
+    assert_input_value(:member_lat,   "12.3456")
+    assert_input_value(:member_long,  "-76.5432")
+    assert_input_value(:member_alt,   "789")
+    assert_checkbox_state(:member_is_collection_location, false)
+    assert_checkbox_state(:member_specimen, true)
+
+    # When existing observations have differing values, it should use
+    # standard defaults from create_observation, instead.
+    obs1.notes = "different notes"
+    obs1.lat   = "-12.3456"
+    obs1.long  = "76.5432"
+    obs1.alt   = "123"
+    obs1.is_collection_location = true
+    obs1.specimen = false
+    obs1.save!
+
+    get(:edit_species_list, id: spl.id)
+    assert_edit_species_list
+    assert_textarea_value(:member_notes, "")
+    assert_input_value(:member_lat, "")
+    assert_input_value(:member_long, "")
+    assert_input_value(:member_alt, "")
+    assert_checkbox_state(:member_is_collection_location, true)
+    assert_checkbox_state(:member_specimen, false)
+  end
 end

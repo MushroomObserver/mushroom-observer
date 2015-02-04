@@ -772,11 +772,11 @@ module ControllerExtensions
       assert_select("input##{id}", 1)
       assert_select("input##{id}[checked=checked]", 0)
       assert_select("input##{id}[disabled=disabled]", 1)
-    when :checked
+    when :checked, true
       assert_select("input##{id}", 1)
       assert_select("input##{id}[checked=checked]", 1)
       assert_select("input##{id}[disabled=disabled]", 0)
-    when :unchecked
+    when :unchecked, false
       assert_select("input##{id}", 1)
       assert_select("input##{id}[checked=checked]", 0)
       assert_select("input##{id}[disabled=disabled]", 0)
