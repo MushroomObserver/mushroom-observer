@@ -1,5 +1,5 @@
 MushroomObserver::Application.configure do
-  # Settings specified here will take precedence over those in config/application.rb
+  # Settings specified here take precedence over those in config/application.rb
 
   # ----------------------------
   #  MO configuration.
@@ -8,7 +8,8 @@ MushroomObserver::Application.configure do
   config.domain      = "mushroomobserver.org"
   config.http_domain = "http://mushroomobserver.org"
 
-  # List of alternate server domains.  We redirect from each of these to the real one.
+  # List of alternate server domains.
+  # We redirect from each of these to the real one.
   config.bad_domains = ["www.#{config.domain}"]
 
   # Date after which votes become public.
@@ -86,6 +87,12 @@ MushroomObserver::Application.configure do
   # Code is not reloaded between requests
   config.cache_classes = true
 
+  # Eager load code on boot. This eager loads most of Rails and
+  # your application in memory, allowing both thread web servers
+  # and those relying on copy on write to perform better.
+  # Rake tasks automatically ignore this option for performance.
+  config.eager_load = true
+
   # Full error reports are disabled and caching is turned on
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
@@ -99,14 +106,20 @@ MushroomObserver::Application.configure do
   # If you have no front-end server that supports something like X-Sendfile,
   # just comment this out and Rails will serve the files
 
-  # See everything in the log (default is :info)
-  # config.log_level = :debug
+  # Set to :debug to see everything in the log.
+  config.log_level = :info
 
   # Use a different logger for distributed setups
   # config.logger = SyslogLogger.new
 
   # Use a different cache store in production
   # config.cache_store = :mem_cache_store
+
+  # Enable Rack::Cache to put a simple HTTP cache in front of your application
+  # Add `rack-cache` to your Gemfile before enabling this.
+  # For large-scale production use, consider using a caching reverse proxy like
+  # nginx, varnish or squid.
+  # config.action_dispatch.rack_cache = true
 
   # Disable Rails's static asset server
   # In production, Apache or nginx will already do this
@@ -118,7 +131,9 @@ MushroomObserver::Application.configure do
   # Tells rails to let nginx serve static files.
   config.action_dispatch.x_sendfile_header = "X-Accel-Redirect"
 
-  # Disable delivery errors, bad email addresses will be ignored
+  # Ignore bad email addresses and do not raise email delivery errors.
+  # Set this to true and configure the email server for immediate delivery
+  # to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
   # Enable threaded mode
@@ -165,13 +180,15 @@ MushroomObserver::Application.configure do
     Hygrocybe.css
     grids.css
     semantic_vernacular.css
-  ) if config.assets and config.assets.precompile
+  ) if config.assets && config.assets.precompile
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
-  # What does this do?
-  config.eager_load = true
+  # Disable automatic flushing of the log to improve performance.
+  # config.autoflush_log = false
+  # Use default logging formatter so that PID and timestamp are not suppressed.
+  config.log_formatter = ::Logger::Formatter.new
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
