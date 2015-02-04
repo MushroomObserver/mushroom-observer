@@ -12,7 +12,7 @@ set -e
 ### END INIT INFO
 
 app_root=/var/web/mushroom-observer
-pid_file=$app_root/tmp/unicorn.pid
+pid_file=$app_root/tmp/pids/unicorn.pid
 conf_file=$app_root/config/unicorn.rb
 
 case "$1" in
