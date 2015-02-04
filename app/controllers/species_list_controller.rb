@@ -359,7 +359,7 @@ class SpeciesListController < ApplicationController
         init_project_vars_for_edit(@species_list)
         @checklist ||= calc_checklist
       else
-        process_species_list(:updated)
+        process_species_list(:update)
       end
     end
   end
