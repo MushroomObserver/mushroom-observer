@@ -50,9 +50,6 @@ MushroomObserver::Application.configure do
   # since you don't have to restart the webserver when you make code changes.
   config.cache_classes = false
 
-  # Log error messages when you accidentally call methods on nil.
-  # config.whiny_nils = true # Rails 3 (Rails 4 removes this setting.)
-
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
@@ -71,26 +68,30 @@ MushroomObserver::Application.configure do
   # Speed up Rails server boot time in development environment
   config.eager_load = false
 
-  # Only use best-standards-support built into browsers
-  config.action_dispatch.best_standards_support = :builtin
+  # Raise an error on page load if there are pending migrations
+  config.active_record.migration_error = :page_load
 
   # Serve assets in rails.
   config.serve_static_assets = true
 
   # Compile asset files, but don't combine, compress, or add digests to names.
   config.assets.compile = true
-  config.assets.compress = false
+
+  # Debug mode disables concatenation and preprocessing of assets.
+  # This option may cause significant delays in view rendering with a large
+  # number of complex assets.
   config.assets.debug = true
+
   config.assets.digest = false
 
   if config.active_record
-    # Raise exception on mass assignment protection for Active Record models
-    # config.active_record.mass_assignment_sanitizer = :strict
-
     # Log the query plan for queries taking more than this (works
     # with SQLite, MySQL, and PostgreSQL)
     config.active_record.auto_explain_threshold_in_seconds = 0.5
   end
+
+  # Raises error for missing translations
+  # config.action_view.raise_on_missing_translations = true
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
