@@ -19,3 +19,10 @@ ccwiki30:
   url: http://creativecommons.org/licenses/by-sa/3.0/
   deprecated: false
   form_name: ccbysa30
+
+publicdomain:
+  id: 4
+  display_name: Public Domain
+  url: http://wiki.creativecommons.org/Public_domain/
+  deprecated: false
+  form_name: publicdomain

@@ -5,3 +5,6 @@
 #
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Mayor.create(:name => 'Daley', :city => cities.first)
+# require "active_record/fixture_set/file.rb"
+require "active_record/fixtures.rb"
+ActiveRecord::Fixtures.create_fixtures("#{Rails.root}/test/fixtures", "licenses")
