@@ -1331,6 +1331,23 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
+  # Add a join condition if it doesn't already exist.  There are two forms:
+  #
+  #   # Add join from root table to the given table:
+  #   add_join(:observations) 
+  #     => join << :observations
+  #
+  #   # Add join from one table to another: (will create join from root to
+  #   # first table if it doesn't already exist)
+  #   add_join(:observations, :names)
+  #     => join << {:observations => :names}
+  #   add_join(:names, :descriptions)
+  #     => join << {:observations => {:names => :descriptions}}
+  #
+  def add_join(*args)
+    join.add_leaf(*args)
+  end
+
   ##############################################################################
   #
   #  :section: Build SQL Query

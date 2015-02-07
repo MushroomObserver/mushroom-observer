@@ -1,19 +1,31 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-# one:
-#   column: value
-#
-# two:
-#   column: value
+peltigera_is_a_lichen_triple:
+  id: 1
+  subject: ':name/40'
+  predicate: ':lichenAuthority'
+  object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
+
+petigera_is_a_lichen_triple:
+  id: 2
+  subject: ':name/41'
+  predicate: ':lichenAuthority'
+  object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
 tremella_mesenterica_is_a_lichen_triple:
-  id: 1
+  id: 3
   subject: ':name/45'
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
 
 tremella_is_a_lichen_triple:
-  id: 2
+  id: 4
   subject: ':name/46'
+  predicate: ':lichenAuthority'
+  object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
+
+tremella_justpublished_is_a_lichen_triple:
+  id: 5
+  subject: ':name/47'
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'

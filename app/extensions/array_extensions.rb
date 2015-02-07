@@ -70,4 +70,12 @@ class Array
     sep = ERB::Util.html_escape(sep)
     map { |i| ERB::Util.html_escape(i) }.join(sep).html_safe
   end
+
+  def add_leaf(*args)
+    Tree.add_leaf(self, *args)
+  end
+
+  def has_node?(*args)
+    Tree.has_node?(self, *args)
+  end
 end

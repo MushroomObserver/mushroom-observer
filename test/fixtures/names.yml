@@ -883,3 +883,21 @@ hygrocybe_russocoriacea_good_author:
   display_name: '**__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   notes: NULL
+
+lichen:
+  id: 50
+  # accepted_name_id: 50
+  created_at: 2015-02-07 11:27:00
+  updated_at: 2015-02-07 11:27:00
+  user_id: 1
+  version: 1
+  # rank: Name.ranks[:Kingdom]
+  rank: 13
+  text_name: Lichen
+  author: ''
+  display_name: '**__Lichen__**'
+  search_name: Lichen
+  sort_name: Lichen
+  citation: ''
+  notes: This is a pseudoname to apply to all unknown lichenized fungi.
+
