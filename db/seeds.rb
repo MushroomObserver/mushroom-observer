@@ -5,6 +5,9 @@
 #
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Mayor.create(:name => 'Daley', :city => cities.first)
-# require "active_record/fixture_set/file.rb"
+
+# seed License table.  Licenses, which are not user data, are required for
+# complete functioning of the MO development environment
 require "active_record/fixtures.rb"
-ActiveRecord::Fixtures.create_fixtures("#{Rails.root}/test/fixtures", "licenses")
+ActiveRecord::Fixtures.create_fixtures("#{Rails.root}/test/fixtures",
+  "licenses")
