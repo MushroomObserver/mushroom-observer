@@ -84,12 +84,6 @@ MushroomObserver::Application.configure do
 
   config.assets.digest = false
 
-  if config.active_record
-    # Log the query plan for queries taking more than this (works
-    # with SQLite, MySQL, and PostgreSQL)
-    config.active_record.auto_explain_threshold_in_seconds = 0.5
-  end
-
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 end

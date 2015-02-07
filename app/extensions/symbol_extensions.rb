@@ -45,6 +45,14 @@ class Symbol
     to_s.capitalize_first.to_sym
   end
 
+  def add_leaf(*args)
+    Tree.add_leaf(self, *args)
+  end
+
+  def has_node?(*args)
+    Tree.has_node?(self, *args)
+  end
+
   # Return a list of missing tags we've encountered.
   def self.missing_tags
     @@missing_tags

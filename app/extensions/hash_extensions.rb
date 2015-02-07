@@ -33,4 +33,12 @@ class Hash
   def remove_nils!
     delete_if {|k,v| v.nil?}
   end
+
+  def add_leaf(*args)
+    Tree.add_leaf(self, *args)
+  end
+
+  def has_node?(*args)
+    Tree.has_node?(self, *args)
+  end
 end

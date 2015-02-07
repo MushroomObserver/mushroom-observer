@@ -1156,10 +1156,8 @@ class QueryTest < UnitTestCase
   def test_image_by_user
     expect = Image.where(user_id: rolf.id).reverse
     assert_query(expect, :Image, :by_user, user: rolf)
-#    expect = where(user_id: mary.id).reverse # Rails 3
     expect = Image.where(user_id: mary.id).reverse
     assert_query(expect, :Image, :by_user, user: mary)
-#    expect = where(user_id: dick.id).reverse # Rails 3
     expect = Image.where(user_id: dick.id).reverse
     assert_query(expect, :Image, :by_user, user: dick)
   end
@@ -1251,7 +1249,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_all
-#    expect = Location.all # Rails 3
     expect = Location.all.to_a
     assert_query(expect, :Location, :all, by: :id)
   end
@@ -1344,7 +1341,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_description_all
-#    all = LocationDescription.all # Rails 3
     all = LocationDescription.all.to_a
     assert_query(all, :LocationDescription, :all, by: :id)
   end
@@ -1383,13 +1379,9 @@ class QueryTest < UnitTestCase
   def test_name_advanced
     assert_query([38], :Name, :advanced_search, name: "macrocybe*titans")
     assert_query([2], :Name, :advanced_search, location: "glendale") # where
-#    expect = Name.all(conditions: 'observations.location_id = 2', # Rails 3
-#                      include: :observations, order: 'text_name, author')
     expect = Name.where("observations.location_id" => 2).
                   includes(:observations).order(:text_name, :author).to_a
     assert_query(expect, :Name, :advanced_search, location: "burbank") # location
-#    expect = Name.all(conditions: 'observations.user_id = 1', # Rails 3
-#                      include: :observations, order: 'text_name, author')
     expect = Name.where("observations.user_id" => 1).
                   includes(:observations).order(:text_name, :author).to_a
     assert_query(expect, :Name, :advanced_search, user: "rolf")
@@ -1398,7 +1390,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_all
-#    expect = Name.all(order: "sort_name") # Rails 3
     expect = Name.all.order(:sort_name).to_a
     do_test_name_all(expect)
   rescue
@@ -1557,8 +1548,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_at_location
-    # expect = Observation.find_all_by_location_id(2, include: :name, # Rails 3
-    #   order: 'names.text_name, names.author, observations.id DESC')
     expect = Observation.where(location_id: 2).includes(:name).
                          order("names.text_name, names.author,
                            observations.id DESC").to_a
@@ -1657,7 +1646,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_rsslog_all
-#    ids = RssLog.find(:all).map {|log| log.id} # Rails 3
     ids = RssLog.all.map {|log| log.id}
     assert_query(ids, :RssLog, :all)
   end
@@ -1667,7 +1655,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_specieslist_all
-#    expect = SpeciesList.all(order: "title") # Rails 3
     expect = SpeciesList.all.order("title").to_a
     assert_query(expect, :SpeciesList, :all)
   end
@@ -1687,10 +1674,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_all
-#    expect = User.all(order: "name") # Rails 3
     expect = User.all.order("name").to_a
     assert_query(expect, :User, :all)
-#    expect = User.all(order: "login") # Rails 3
     expect = User.all.order("login").to_a
     assert_query(expect, :User, :all, by: :login)
   end
@@ -1698,6 +1683,12 @@ class QueryTest < UnitTestCase
   def test_user_in_set
     assert_query([1,2,3], :User, :in_set, ids: [3,2,1], by: :reverse_name)
   end
+
+  ##############################################################################
+  #
+  #  :section: Other stuff
+  #
+  ##############################################################################
 
   def test_whiny_nil_in_map_locations
     query = Query.lookup(:User, :in_set, ids: [1,1000,2])
@@ -1729,5 +1720,15 @@ class QueryTest < UnitTestCase
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
     assert_query([obs2, obs1], :Observation, :in_set, ids: [1, 2], by: :location)
+  end
+
+  def test_filtering_content
+    peltigera = names(:peltigera)
+    expect = Observation.where(specimen: true).order(when: :desc)
+    assert_query(expect, :Observation, :all, has_specimen: true)
+    expect = Observation.where.not(thumb_image_id: nil).order(when: :desc)
+    assert_query(expect, :Observation, :all, has_images: true)
+    # expect = Observation.where(name_id: peltigera.id).order(when: :desc)
+    # assert_query(expect, :Observation, :all, has_name_tag: ":lichenAuthority")
   end
 end

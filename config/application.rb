@@ -35,9 +35,6 @@ module MushroomObserver
     # Change this version if you want to expire all your assets at once.
     config.assets.version = "1.0"
 
-    # We want to use the asset pipeline now.
-    config.assets.enabled = true
-
     # This instructs ActionView how to mark form fields which have an error.
     # I just change the CSS class to "has_error", which gives it a red border.
     # This is superior to the default, which encapsulates the field in a div,

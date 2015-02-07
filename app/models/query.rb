@@ -186,6 +186,8 @@ class Query < AbstractQuery
       :south?           => :float,
       :east?            => :float,
       :west?            => :float,
+      :has_obs_tag?     => [:string],
+      :has_name_tag?    => [:string],
     },
     :Project => {
       :created_at?        => [:time],
@@ -309,29 +311,57 @@ class Query < AbstractQuery
       :old_by?    => :string,
     },
     :with_observations_at_location => {
-      :location => Location,
+      :location      => Location,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_at_where => {
-      :location => :string,
-      :user_where => :string,
+      :location      => :string,
+      :user_where    => :string,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_by_user => {
-      :user => User,
+      :user          => User,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_for_project => {
-      :project => Project,
+      :project       => Project,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_in_set => {
       :ids => [Observation],
-      :old_title? => :string,
-      :old_by?    => :string,
+      :old_title?    => :string,
+      :old_by?       => :string,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_in_species_list => {
-      :species_list => SpeciesList,
+      :species_list  => SpeciesList,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_of_children => {
-      :name => Name,
-      :all? => :boolean,
+      :name          => Name,
+      :all?          => :boolean,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
     :with_observations_of_name => {
       :name          => :name,
@@ -340,6 +370,10 @@ class Query < AbstractQuery
       :project?      => Project,
       :species_list? => SpeciesList,
       :user?         => User,
+      :has_specimen? => :boolean,
+      :has_images?   => :boolean,
+      :has_obs_tag?  => [:string],
+      :has_name_tag? => [:string],
     },
   }
 
@@ -863,22 +897,23 @@ class Query < AbstractQuery
 
     when 'name'
       if model_class == Image
-        self.join << {:images_observations => {:observations => :names}}
+        add_join(:images_observations, :observations)
+        add_join(:observations, :names)
         self.group = 'images.id'
         'MIN(names.sort_name) ASC, images.when DESC'
       elsif model_class == Location
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
       elsif model_class == LocationDescription
-        self.join << :locations
+        add_join(:locations)
         'locations.name ASC, location_descriptions.created_at ASC'
       elsif model_class == Name
         'names.sort_name ASC'
       elsif model_class == NameDescription
-        self.join << :names
+        add_join(:names)
         'names.sort_name ASC, name_descriptions.created_at ASC'
       elsif model_class == Observation
-        self.join << :names
+        add_join(:names)
         'names.sort_name ASC, observations.when DESC'
       elsif model_class.column_names.include?('sort_name')
         "#{table}.sort_name ASC"
@@ -895,26 +930,26 @@ class Query < AbstractQuery
 
     when 'user'
       if model_class.column_names.include?('user_id')
-        self.join << :users
+        add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
 
     when 'location'
       if model_class.column_names.include?('location_id')
-        self.join << :locations
+        add_join(:locations)
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
       end
 
     when 'rss_log'
       if model_class.column_names.include?('rss_log_id')
-        self.join << :rss_logs
+        add_join(:rss_logs)
         'rss_logs.updated_at DESC'
       end
 
     when 'confidence'
       if model_symbol == :Image
-        self.join << {:images_observations => :observations}
+        add_join(:images_observations, :observations)
         'observations.vote_cache DESC'
       elsif model_symbol == :Observation
         'observations.vote_cache DESC'
@@ -927,20 +962,20 @@ class Query < AbstractQuery
 
     when 'thumbnail_quality'
       if model_symbol == :Observation
-        self.join << :'images.thumb_image'
+        add_join(:'images.thumb_image')
         'images.vote_cache DESC, observations.vote_cache DESC'
       end
 
     when 'owners_quality'
       if model_symbol == :Image
-        self.join << :image_votes
+        add_join(:image_votes)
         self.where << 'image_votes.user_id = images.user_id'
         'image_votes.value DESC'
       end
 
     when 'owners_thumbnail_quality'
       if model_symbol == :Observation
-        self.join << { :'images.thumb_image' => :image_votes }
+        add_join(:'images.thumb_image', :image_votes)
         self.where << 'images.user_id = observations.user_id'
         self.where << 'image_votes.user_id = observations.user_id'
         'image_votes.value DESC, images.vote_cache DESC, observations.vote_cache DESC'
@@ -1002,7 +1037,7 @@ class Query < AbstractQuery
       :join => {:images_observations => {:observations => :observations_species_lists}}
     )
     if params[:has_observation]
-      self.join << :images_observations
+      add_join(:images_observations)
     end
     initialize_model_do_image_size
     initialize_model_do_image_types
@@ -1106,25 +1141,25 @@ class Query < AbstractQuery
       initialize_model_do_search(:notes_has, 'notes')
     end
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
     initialize_model_do_boolean(:has_default_desc,
       'names.description_id IS NOT NULL',
       'names.description_id IS NULL'
     )
     if params[:join_desc] == :default
-      self.join << :'name_descriptions.default'
+      add_join(:'name_descriptions.default')
     elsif (params[:join_desc] == :any) or
           !params[:desc_type].blank? or
           !params[:desc_project].blank? or
           !params[:desc_creator].blank? or
           !params[:desc_content].blank?
-      self.join << :name_descriptions
+      add_join(:name_descriptions)
     end
     initialize_model_do_type_list(:desc_type,
       'name_descriptions.source_type', Description.all_source_types
@@ -1174,10 +1209,6 @@ class Query < AbstractQuery
       'observations.is_collection_location IS TRUE',
       'observations.is_collection_location IS FALSE'
     )
-    initialize_model_do_boolean(:has_specimen,
-      'observations.specimen IS TRUE',
-      'observations.specimen IS FALSE'
-    )
     initialize_model_do_boolean(:has_location,
       'observations.location_id IS NOT NULL',
       'observations.location_id IS NULL'
@@ -1192,23 +1223,20 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(observations.notes,"")) > 0',
       'LENGTH(COALESCE(observations.notes,"")) = 0'
     )
-    initialize_model_do_boolean(:has_images,
-      'observations.thumb_image_id IS NOT NULL',
-      'observations.thumb_image_id IS NULL'
-    )
     initialize_model_do_boolean(:has_votes,
       'observations.vote_cache IS NOT NULL',
       'observations.vote_cache IS NULL'
     )
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
     initialize_model_do_bounding_box(:observation)
+    initialize_observation_filters
   end
 
   def initialize_project
@@ -1216,13 +1244,13 @@ class Query < AbstractQuery
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     if params[:has_images]
-      self.join << :images_projects
+      add_join(:images_projects)
     end
     if params[:has_observations]
-      self.join << :observations_projects
+      add_join(:observations_projects)
     end
     if params[:has_species_lists]
-      self.join << :projects_species_lists
+      add_join(:projects_species_lists)
     end
     initialize_model_do_search(:title_has, :title)
     initialize_model_do_search(:notes_has, :notes)
@@ -1231,12 +1259,12 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(species_lists.notes,"")) = 0'
     )
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
   end
 
@@ -1273,12 +1301,12 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(species_lists.notes,"")) = 0'
     )
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
   end
 
@@ -1312,6 +1340,7 @@ class Query < AbstractQuery
       self.where << "#{col} <= #{max}" if !max.blank?
       if (join = args[:join]) and
          (!min.blank? || !max.blank?)
+        # TODO: is this used? convert to piecewise add_join
         self.join << join
       end
     end
@@ -1391,6 +1420,7 @@ class Query < AbstractQuery
         objs = objs.uniq.map(&filter).flatten
       end
       if join = args[:join]
+        # TODO: is this used? convert to piecewise add_join
         self.join << join
       end
       set = clean_id_set(objs.map(&:id).uniq)
@@ -1462,6 +1492,8 @@ class Query < AbstractQuery
         )
         cond1 = cond1.join(' AND ')
         cond2 = cond2.join(' AND ')
+        # TODO: not sure how to deal with the bang notation -- indicates LEFT
+        # OUTER JOIN instead of normal INNER JOIN.
         self.join << :"locations!" unless uses_join?(:locations)
         self.where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
       end
@@ -1665,7 +1697,7 @@ class Query < AbstractQuery
   end
 
   def initialize_by_rss_log
-    self.join << :rss_logs
+    add_join(:rss_logs)
     params[:by] ||= 'rss_log'
   end
 
@@ -1701,7 +1733,7 @@ class Query < AbstractQuery
     title_args[:project] = project.title
     join_table = [model_class.table_name, 'projects'].sort.join('_')
     self.where << "#{join_table}.project_id = '#{params[:project]}'"
-    self.join << join_table
+    add_join(join_table)
   end
 
   def initialize_for_target
@@ -1719,7 +1751,7 @@ class Query < AbstractQuery
   def initialize_for_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    self.join << :observations
+    add_join(:observations)
     self.where << "observations.user_id = '#{params[:user]}'"
     params[:by] ||= 'created_at'
   end
@@ -1734,13 +1766,13 @@ class Query < AbstractQuery
     case model_symbol
     when :Name, :Location
       version_table = "#{model_class.table_name}_versions".to_sym
-      self.join << version_table
+      add_join(version_table)
       self.where << "#{version_table}.user_id = '#{params[:user]}'"
       self.where << "#{model_class.table_name}.user_id != '#{params[:user]}'"
     when :NameDescription, :LocationDescription
       glue_table = "#{model_string.underscore}s_#{flavor}s".
                       sub('_by_', '_').to_sym
-      self.join << glue_table
+      add_join(glue_table)
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
       params[:by] ||= 'name'
     else
@@ -1755,7 +1787,7 @@ class Query < AbstractQuery
   def initialize_at_location
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
-    self.join << :names
+    add_join(:names)
     self.where << "#{model_class.table_name}.location_id = '#{params[:location]}'"
     params[:by] ||= 'name'
   end
@@ -1763,7 +1795,7 @@ class Query < AbstractQuery
   def initialize_at_where
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
-    self.join << :names
+    add_join(:names)
     self.where << "#{model_class.table_name}.where LIKE '%#{pattern}%'"
     params[:by] ||= 'name'
   end
@@ -1771,8 +1803,8 @@ class Query < AbstractQuery
   def initialize_in_species_list
     species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
-    self.join << :names
-    self.join << :observations_species_lists
+    add_join(:names)
+    add_join(:observations_species_lists)
     self.where << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
     params[:by] ||= 'name'
   end
@@ -1851,12 +1883,14 @@ class Query < AbstractQuery
 
     # Different join conditions for different models.
     if model_symbol == :Observation
-      self.join += extra_joins
+      extra_joins.each {|table| add_join(table)}
     elsif model_symbol == :Location
-      self.join << {:observations => extra_joins}
+      add_join(:observations)
+      extra_joins.each {|table| add_join(:observations, table)}
       self.where << "observations.is_collection_location IS TRUE"
     elsif model_symbol == :Image
-      self.join << {:images_observations => {:observations => extra_joins}}
+      add_join(:images_observations, :observations)
+      extra_joins.each {|table| add_join(:observations, table)}
     end
   end
 
@@ -1891,11 +1925,12 @@ class Query < AbstractQuery
 
     # Add appropriate joins.
     if model_symbol == :Observation
-      self.join << :names
+      add_join(:names)
     elsif model_symbol == :Image
-      self.join << {:images_observations => {:observations => :names}}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :names)
     elsif model_symbol == :Location
-      self.join << {:observations => :names}
+      add_join(:observations, :names)
     end
   end
 
@@ -1915,67 +1950,73 @@ class Query < AbstractQuery
 
   def initialize_with_observations
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_at_location
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.location_id = '#{params[:location]}'"
     self.where << 'observations.is_collection_location IS TRUE'
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_at_where
     location = params[:location]
     title_args[:where] = location
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.where LIKE '%#{clean_pattern(location)}%'"
     self.where << 'observations.is_collection_location IS TRUE'
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_by_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.user_id = '#{params[:user]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_for_project
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
     if model_symbol == :Image
-      self.join << {:images_observations => {:observations => :observations_projects}}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :observations_projects)
     else
-      self.join << {:observations => :observations_projects}
+      add_join(:observations, :observations_projects)
     end
     self.where << "observations_projects.project_id = '#{params[:project]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_in_set
@@ -1983,39 +2024,65 @@ class Query < AbstractQuery
       :query_title_in_set.t(:type => :observation)
     set = clean_id_set(params[:ids])
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.id IN (#{set})"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_in_species_list
     species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
     if model_symbol == :Image
-      self.join << {:images_observations => {:observations => :observations_species_lists}}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :observations_species_lists)
     else
-      self.join << {:observations => :observations_species_lists}
+      add_join(:observations, :observations_species_lists)
     end
     self.where << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_of_children
     initialize_of_children
+    initialize_observation_filters
   end
 
   def initialize_with_observations_of_name
     initialize_of_name
     title_args[:tag] = title_args[:tag].to_s.sub('title', 'title_with_observations').to_sym
+    initialize_observation_filters
+  end
+
+  # Used for all observation queries, and for all observation queries which
+  # have been coerced into other models' queries.
+  def initialize_observation_filters
+    initialize_model_do_boolean(:has_specimen,
+      'observations.specimen IS TRUE',
+      'observations.specimen IS FALSE'
+    )
+    initialize_model_do_boolean(:has_images,
+      'observations.thumb_image_id IS NOT NULL',
+      'observations.thumb_image_id IS NULL'
+    )
+    if params[:has_obs_tag]
+      # TODO: no way to join on existing triples table!
+      # join.add_leaf(:observations, :triple_glue.observation)
+    end
+    if params[:has_name_tag]
+      # TODO: no way to join on existing triples table!
+      # join.add_leaf(:observations, :triple_glue.name)
+    end
   end
 
   # ---------------------------------------------------------------
@@ -2025,7 +2092,7 @@ class Query < AbstractQuery
 
   def initialize_with_descriptions
     type = model_string.underscore
-    self.join << :"#{type}_descriptions"
+    add_join(:"#{type}_descriptions")
     params[:by] ||= 'name'
   end
 
@@ -2040,7 +2107,7 @@ class Query < AbstractQuery
     glue_table = :"#{type}_descriptions_#{glue}s"
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    self.join << { desc_table => glue_table }
+    add_join(desc_table, glue_table)
     self.where << "#{glue_table}.user_id = '#{params[:user]}'"
     params[:by] ||= 'name'
   end
@@ -2050,7 +2117,7 @@ class Query < AbstractQuery
     desc_table = :"#{type}_descriptions"
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    self.join << desc_table
+    add_join(desc_table)
     self.where << "#{desc_table}.user_id = '#{params[:user]}'"
     params[:by] ||= 'name'
   end
@@ -2075,15 +2142,16 @@ class Query < AbstractQuery
         'CONCAT(herbaria.name,COALESCE(herbaria.description,""),COALESCE(herbaria.mailing_address,""))')
 
     when :Image
-      self.join << {:images_observations => {:observations =>
-        [:locations!, :names] }}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :locations!)
+      add_join(:observations, :names)
       self.where += google_conditions(search,
         'CONCAT(names.search_name,COALESCE(images.original_name,""),' +
         'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
         'IF(locations.id,locations.name,observations.where))')
 
     when :Location
-      self.join << :"location_descriptions.default!"
+      add_join(:"location_descriptions.default!")
       note_fields = LocationDescription.all_note_fields.map do |x|
         "COALESCE(location_descriptions.#{x},'')"
       end
@@ -2091,7 +2159,7 @@ class Query < AbstractQuery
           "CONCAT(locations.name,#{note_fields.join(',')})")
 
     when :Name
-      self.join << :"name_descriptions.default!"
+      add_join(:"name_descriptions.default!")
       note_fields = NameDescription.all_note_fields.map do |x|
         "COALESCE(name_descriptions.#{x},'')"
       end
@@ -2100,7 +2168,8 @@ class Query < AbstractQuery
                   "COALESCE(names.notes,''),#{note_fields.join(',')})")
 
     when :Observation
-      self.join << [:locations!, :names]
+      add_join(:locations!)
+      add_join(:names)
       self.where += google_conditions(search,
         'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
         'IF(locations.id,locations.name,observations.where))')
@@ -2110,7 +2179,7 @@ class Query < AbstractQuery
         'CONCAT(projects.title,COALESCE(projects.summary,""))')
 
     when :SpeciesList
-      self.join << :locations!
+      add_join(:locations!)
       self.where += google_conditions(search,
         'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
         'IF(locations.id,locations.name,species_lists.where))')
@@ -2180,22 +2249,22 @@ class Query < AbstractQuery
 
     case model_symbol
     when :Image
-      self.join << {:images_observations => {:observations => :users}}      if !user.blank?
-      self.join << {:images_observations => {:observations => :names}}      if !name.blank?
-      self.join << {:images_observations => {:observations => :locations!}} if !location.blank?
-      self.join << {:images_observations => :observations}                  if !content.blank?
+      add_join(:images_observations, :observations) unless [user, name, location, content].all?(&:blank?)
+      add_join(:observations, :users)      if !user.blank?
+      add_join(:observations, :names)      if !name.blank?
+      add_join(:observations, :locations!) if !location.blank?
     when :Location
-      self.join << {:observations => :users} if !user.blank?
-      self.join << {:observations => :names} if !name.blank?
-      self.join << :observations             if !content.blank?
+      add_join(:observations, :users) if !user.blank?
+      add_join(:observations, :names) if !name.blank?
+      add_join(:observations)         if !content.blank?
     when :Name
-      self.join << {:observations => :users}      if !user.blank?
-      self.join << {:observations => :locations!} if !location.blank?
-      self.join << :observations                  if !content.blank?
+      add_join(:observations, :users)      if !user.blank?
+      add_join(:observations, :locations!) if !location.blank?
+      add_join(:observations)              if !content.blank?
     when :Observation
-      self.join << :names      if !name.blank?
-      self.join << :users      if !user.blank?
-      self.join << :locations! if !location.blank?
+      add_join(:names)      if !name.blank?
+      add_join(:users)      if !user.blank?
+      add_join(:locations!) if !location.blank?
     end
 
     # Name of mushroom...
