@@ -1,45 +1,58 @@
 <%
-  @title = :rss_log_title.t.nowrap
+   @title = :rss_log_title.t.nowrap
 
-  form = form_tag(add_query_param(:action => 'index_rss_log'))
-  form += :rss_show.t + ' '
-  if @types == ['all']
-    form += :rss_all.t
-  else
-    help = :rss_all_help.t
-    form += link_with_query(:rss_all.t,
-      { :action => 'index_rss_log', :type => 'all' }, { :title => help })
-  end
-  for type in RssLog.all_types.map(&:to_s)
-    checked = @types.include?(type) || @types == ['all']
-    form += ' | '
-    form += check_box_tag("show_#{type}", '1', checked) + ' '
-    str = :rss_one.t(:type => type.to_sym)
-    if @types == [type]
-      form += str
-    else
-      help = :rss_one_help.t(:type => type.to_sym)
-      form += link_with_query(str,
-        { :action => 'index_rss_log', :type => type }, { :title => help })
-    end
-  end
-  form += indent + submit_tag(:SUBMIT.t)
-  form += '</form>'.html_safe
+   form = form_tag(add_query_param(:action => 'index_rss_log'))
+   form += :rss_show.t + ' '
+   if @types == ['all']
+     form += :rss_all.t
+   else
+     help = :rss_all_help.t
+     form += link_with_query(:rss_all.t,
+                             {:action => 'index_rss_log', :type => 'all'}, {:title => help})
+   end
+   for type in RssLog.all_types.map(&:to_s)
+     checked = @types.include?(type) || @types == ['all']
+     form += ' | '
+     form += check_box_tag("show_#{type}", '1', checked) + ' '
+     str = :rss_one.t(:type => type.to_sym)
+     if @types == [type]
+       form += str
+     else
+       help = :rss_one_help.t(:type => type.to_sym)
+       form += link_with_query(str,
+                               {:action => 'index_rss_log', :type => type}, {:title => help})
+     end
+   end
+   form += indent + submit_tag(:SUBMIT.t)
+   form += '</form>'.html_safe
 
-  custom_tab_set(form)
-  new_tab_set(@links)
+   custom_tab_set(form)
+   new_tab_set(@links)
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
-<div class="results color-block">
-<%= paginate_block(@pages) do %>
-  <% @objects.each do |rss_log| %>
-        <div class="col-sm-4 color-block-item">
-            <%= render(:partial => 'shared/matrix_box', :locals => {
-              :object => rss_log
-            }) %>
+<div class="results">
+      <div class="row">
+        <div class="col-xs-12">
+             <span class="pull-right">
+        <%= pagination_numbers(@pages) %>
+            </span>
         </div>
-  <% end %>
-<% end %>
+        <div class="col-xs-12 color-block">
+          <% @objects.each do |rss_log| %>
+              <div class="col-sm-4 color-block-item">
+                <%= render(:partial => 'shared/matrix_box', :locals => {
+                                                                  :object => rss_log
+                                                          }) %>
+              </div>
+          <% end %>
+        </div>
+        <div class="col-xs-12">
+             <span class="pull-right">
+        <%= pagination_numbers(@pages) %>
+            </span>
+        </div>
+      </div>
+
 </div>

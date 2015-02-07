@@ -1,11 +1,14 @@
+/*bootstrap overrides*/
 html, body{
     font-family: verdana,arial,helvetica,sans-serif;
     font-size: 13px;
 }
 
-a {
-    color: #205080
+.pagination {
+    margin-top: 5px;
+    margin-bottom: 10px;
 }
+/*end bootstrap overrides*/
 
 .bold {
     font-weight: 800;
@@ -92,6 +95,11 @@ a {
 
 /*Themeable options below */
 /* Banner colors */
+a {
+    color: #205080
+}
+
+
 #banner {
     padding-top: 5px;
     padding-bottom: 3px;

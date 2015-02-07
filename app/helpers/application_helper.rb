@@ -1503,7 +1503,7 @@ module ApplicationHelper
   #     <% end %>
   #   <% end %>
   #
-  def paginate_block(pages, args={}, &block)
+  def paginate_block(pages, args={}, &block)  ##TODO: Depreciate / REMOVE
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
@@ -1581,22 +1581,20 @@ module ApplicationHelper
       pstr = "« #{:PREV.t}"
       nstr = "#{:NEXT.t} »"
       result << pagination_link(pstr, this-1, arg, args) if this > 1
-      result << '|'                                      if this > 1
       result << pagination_link(1, 1, arg, args)         if from > 1
-      result << '...'                                    if from > 2
+      result << result << content_tag(:li, link_to("..."), class: "disabled")  if from > 2
       for n in from..to
         if n == this
-          result << n
+          result << content_tag(:li, link_to(n), class: "active")
         elsif n > 0 && n <= num
           result << pagination_link(n, n, arg, args)
         end
       end
-      result << '...'                                    if to < num - 1
+      result << content_tag(:li, link_to("..."), class: "disabled")      if to < num - 1
       result << pagination_link(num, num, arg, args)     if to < num
-      result << '|'                                      if this < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
 
-      result = content_tag(:div, result.safe_join(' '), class: "pagination")
+      result = content_tag(:ul, result.safe_join(' '), class: "pagination")
     end
     result
   end
@@ -1610,7 +1608,7 @@ module ApplicationHelper
       url.sub!(/#.*/, '')
       url += '#' + args[:anchor]
     end
-    link_to(label, url)
+    "<li>#{link_to(label, url)}</li>".html_safe
   end
 
   # Take URL that got us to this page and add one or more parameters to it.
