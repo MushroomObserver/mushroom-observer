@@ -1,3 +1,65 @@
+# Be sure to rake lang:update and restart your server if you modify this file
+#
+# Rails Comments ####
+# Files in the config/locales directory are used for internationalization
+# and are automatically loaded by Rails. If you want to use locales other
+# than English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t 'hello'
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t('hello') %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# To learn more, please read the Rails Internationalization guide
+# available at http://guides.rubyonrails.org/i18n.html.
+#
+################################################################################
+# MO Differences
+################################################################################
+# In MO, locales files are created and modified differently
+# One should never change the locale.yml files by hand.
+# And further, how to change the translations is different for English
+# (the "official" language) than the other languages.
+#
+# ## English ####
+# Change and check in en.txt (not en.yml!), and run "rake lang:update"
+# both locally and on the production server to pick up the changes.
+# This should be the *only* way we make changes to the English "translations".
+# Any other method will get clobbered next time someone runs "rake lang:update".
+#
+# ## Other languages ####
+# #### Option one:
+# "Export" a .txt file, e.g., es.txt ("rake lang:export:es" maybe?),
+# change the exported file, then import that on the server
+# into the live database ("rake lang:import:es" maybe?).
+# #### Option two:
+# Change the translations on the live, running site via the "Edit Translations
+# on This Page" link at the bottom of the page while viewing the page in the
+# desired language.  Any changes made here will be stored in the live database,
+# and will propogate automatically to all other currently running instances
+# immediately.
+#
+# ## rake lang:update ##
+# This command clobbers es.txt and es.yml, and recreates them fresh from the
+# strings stored in the database.  It does NOT clobber en.txt, making an
+# exception for that one case.  This is critical because we need to be able to
+# check this in to git.  The foreign translations are not checked into git,
+# they are considered "data" at present.  Instead, MO "imports" en.txt each time
+# "rake lang:update" is run, and  syncs the English translations in the database
+# with the current data in en.txt.
+# Furthermore, en.txt is special in one additional way:
+# it is used as the template for the other "export" files, es.txt, fr.txt, etc.
+# It preserves comments, order, etc. exactly like it appears in en.txt.)
+
   all_months: January February March April May June July August September October November December
   all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
 
@@ -3646,4 +3708,3 @@
   system_status_gc: GC
   system_status_textile_name_size: Textile name cache size
   system_status_title: Server Status
-

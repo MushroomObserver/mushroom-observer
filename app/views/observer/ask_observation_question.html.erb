@@ -8,10 +8,8 @@
     <tr>
       <td>
         <%= :ask_observation_question_label.tp(:user => @observation.user.legal_name) %>
-        <%= text_area('question', 'content', :cols => 80) %>
+        <%= text_area(:question, :content, cols: 80, autofocus: true) %>
       </td>
     </tr>
   </table>
-
-  <% focus_on('question_content') %>
 <% end %>

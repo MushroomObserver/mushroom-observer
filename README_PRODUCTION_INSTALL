@@ -105,7 +105,8 @@ mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
 on code not on the master branch.]
 
-mo> mkdir log log/old tmp public/images/{thumb,320,640,960,1280,orig}
+mo> mkdir log log/old tmp tmp/pids tmp/sockets
+mo> mkdir public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
 mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
@@ -254,7 +255,7 @@ root> vi /etc/logrotate.d/unicorn
     delaycompress
     sharedscripts
     postrotate
-      kill -HUP `cat /var/web/mushroom-observer/tmp/unicorn.pid`
+      kill -HUP `cat /var/web/mushroom-observer/tmp/pids/unicorn.pid`
       mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }

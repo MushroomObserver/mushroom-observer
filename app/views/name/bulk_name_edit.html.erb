@@ -11,10 +11,8 @@
   <%= render(:partial => 'shared/form_list_feedback') %>
 
   <p><label for="list_members"><%= :name_bulk_label.t %>:</label><br/>
-  <%= text_area('list', 'members', :value => @list_members, :cols => 80) %></p><br/>
+  <%= text_area('list', 'members', value: @list_members, cols: 80, autofocus: true) %></p><br/>
 
   <div class="HelpNote"><%= :name_bulk_help.tp %></div>
-
-  <% focus_on('list_members') %>
 <% end %>
 

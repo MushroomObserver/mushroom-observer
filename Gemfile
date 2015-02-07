@@ -10,7 +10,7 @@ gem "mysql2"
 # gem "sqlite3"
 
 # Use SCSS for stylesheets
-gem "sass-rails", "~> 4.0"
+gem "sass-rails"
 
 # Use jquery as the JavaScript library
 gem "jquery-rails"
@@ -20,10 +20,10 @@ gem "jquery-rails"
 gem "therubyracer", platforms: :ruby
 
 # Use CoffeeScript for .js.coffee assets and views
-gem "coffee-rails", "~> 4.0"
+gem "coffee-rails"
 
 # Use Uglifier as compressor for JavaScript assets
-gem "uglifier", ">= 1.0.3"
+gem "uglifier"
 
 # Turbolinks makes following links in your web application faster.
 # Read more: https://github.com/rails/turbolinks
@@ -81,6 +81,6 @@ gem "coveralls", require: false
 # Use rubocop for code style quality control
 gem "rubocop", require: false
 
-
-
-
+# Brakeman static analysis security scanner
+# See http://brakemanscanner.org/
+gem "brakeman", require: false

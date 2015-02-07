@@ -19,7 +19,7 @@
                           names: @names }) %>
 
   <p><label for="proposed_name"><%= :name_deprecate_preferred.t %>:</label>
-  <%= text_field('proposed', 'name', :value => @what) %></p>
+  <%= text_field('proposed', 'name', value: @what, autofocus: true) %></p>
   <div class="HelpNote">
     <%= :name_deprecate_preferred_help.tp %>
   </div>
@@ -33,6 +33,4 @@
   <div class="HelpNote">
     <%= :name_deprecate_comments_help.tp(:name => @name.display_name) %>
   </div>
-
-  <% focus_on('proposed_name') %>
 <% end %>

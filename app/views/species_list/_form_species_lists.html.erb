@@ -17,7 +17,7 @@
 
   <p>
   	<label for="list_members"><%= :form_species_lists_write_in_species.t %></label><br/>
-  	<%= text_area('list', 'members', :value => @list_members, :rows => 20, :cols => 80) %>
+  	<%= text_area('list', 'members', value: @list_members, rows: 20, cols: 80, autofocus: true) %>
     <% turn_into_name_auto_completer('list_members', :primer => Name.primer, :token => "\n") %>
   </p>
 
@@ -108,8 +108,6 @@
     <% end %>
     <br/>
   <% end %>
-
-  <% focus_on('list_members') %>
 </td>
 
 <!--[eoform:species_list]-->

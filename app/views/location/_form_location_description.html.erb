@@ -11,10 +11,8 @@
   <p>
     <label for="description_<%= f %>"><%= "form_locations_#{f}".to_sym.t %>:</label>
     <span class="HelpNote"><%= "form_locations_#{f}_help".to_sym.l %></span><br/>
-    <%= form.text_area(f, :cols => 80) %>
+    <%= form.text_area(f, cols: 80, autofocus: f == :gen_desc) %>
   </p>
 <% end %>
-
-<% focus_on('description_gen_desc') %>
 
 <!--[eoform:location_description]-->

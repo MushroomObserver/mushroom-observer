@@ -11,7 +11,7 @@ class AccountControllerTest < FunctionalTestCase
 
   def test_auth_rolf
     @request.session["return-to"] = "http://localhost/bogus/location"
-    post(:login, user_login: "rolf", user_password: "testpassword")
+    post(:login, user: { login: "rolf", password: "testpassword" })
     assert_response("http://localhost/bogus/location")
     assert_flash(:runtime_login_success.t)
     assert(@request.session[:user_id],
@@ -127,7 +127,7 @@ class AccountControllerTest < FunctionalTestCase
   end
 
   def test_invalid_login
-    post(:login, user_login: "rolf", user_password: "not_correct")
+    post(:login, user: { login: "rolf", password: "not_correct" })
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
@@ -135,17 +135,17 @@ class AccountControllerTest < FunctionalTestCase
       login: "api",
       email: "foo@bar.com",
     )
-    post(:login, user_login: "api", user_password: "")
+    post(:login, user: { login: "api", password: "" })
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.update_attribute(:verified, Time.now)
-    post(:login, user_login: "api", user_password: "")
+    post(:login, user: { login: "api", password: "" })
     assert_nil(@request.session["user_id"])
     assert_template("login")
 
     user.change_password("try_this_for_size")
-    post(:login, user_login: "api", user_password: "try_this_for_size")
+    post(:login, user: { login: "api", password: "try_this_for_size" })
     assert(@request.session["user_id"])
   end
 
@@ -156,11 +156,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     # Make sure cookie is not set if clear remember_me box in login.
-    post(:login,
-      user_login: "rolf",
-      user_password: "testpassword",
-      user: { remember_me: "" }
-    )
+    post(:login, user: { login: "rolf", password: "testpassword", remember_me: "" })
     assert(session[:user_id])
     assert(!cookies["mo_user"])
 
@@ -169,11 +165,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_response(:redirect)
 
     # Now clear session and try again with remember_me box set.
-    post(:login,
-      user_login: "rolf",
-      user_password: "testpassword",
-      user: { remember_me: "1" }
-    )
+    post(:login, user: { login: "rolf", password: "testpassword", remember_me: "1" })
     assert(session[:user_id])
     assert(cookies["mo_user"])
 
