@@ -1,63 +1,72 @@
 <%
-  @title ||= :users_by_name_title.t
-  new_tab_set(:sort_by_header.t, @sorts)
+   @title ||= :users_by_name_title.t
+   new_tab_set(:sort_by_header.t, @sorts)
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <%
-# ----------------------------
-#  Admin version.
-# ----------------------------
-if is_in_admin_mode? %>
-  <style>
-    table.permissions td { padding:3px 5px 3px 5px }
-  </style>
-  <%= paginate_block(@pages) do %>
-    <table align="center" class="table table-striped permissions" cellspacing="2">
-      <tr class="Data">
-        <th><%= :users_by_name_verified.t %></th>
-        <th><%= :users_by_name_groups.t %></th>
-        <th><%= :users_by_name_last_login.t %></th>
-        <th><%= :users_by_name_id.t %></th>
-        <th><%= :users_by_name_login.t %></th>
-        <th><%= :users_by_name_name.t %></th>
-        <th><%= :users_by_name_theme.t %></th>
-        <th><%= :users_by_name_created_at.t %> (<%= @objects.length %>)</th>
-      </tr>
-      <tbody>
-      <tr height="2"></tr>
-      <% @objects.each do |user| %>
-        <tr>
-          <td><%= user.verified %></td>
-          <td><%= user.user_groups.map { |g| h(g.name) }.safe_join(',') %></td>
-          <td><%= user.last_login.web_time rescue '--' %></td>
-          <td><%= user.id %></td>
-          <td><%= user_link(user, user.login) %></td>
-          <td><%= h(user.name) %></td>
-          <td><%= h(user.theme) %></td>
-          <td><%= user.created_at.web_time rescue '--' %></td>
-        </tr>
-          </tbody>
-      <% end %>
-    </table>
-  <% end %>
+   # ----------------------------
+   #  Admin version.
+   # ----------------------------
+   if is_in_admin_mode? %>
+    <style>
+        table.permissions td {
+            padding: 3px 5px 3px 5px
+        }
+    </style>
+    <%= paginate_block(@pages) do %>
+        <table align="center" class="table table-striped permissions" cellspacing="2">
+          <tr class="Data">
+            <th><%= :users_by_name_verified.t %></th>
+            <th><%= :users_by_name_groups.t %></th>
+            <th><%= :users_by_name_last_login.t %></th>
+            <th><%= :users_by_name_id.t %></th>
+            <th><%= :users_by_name_login.t %></th>
+            <th><%= :users_by_name_name.t %></th>
+            <th><%= :users_by_name_theme.t %></th>
+            <th><%= :users_by_name_created_at.t %> (<%= @objects.length %>)</th>
+          </tr>
+          <tbody>
+          <tr height="2"></tr>
+          <% @objects.each do |user| %>
+              <tr>
+                <td><%= user.verified %></td>
+                <td><%= user.user_groups.map { |g| h(g.name) }.safe_join(',') %></td>
+                <td><%= user.last_login.web_time rescue '--' %></td>
+                <td><%= user.id %></td>
+                <td><%= user_link(user, user.login) %></td>
+                <td><%= h(user.name) %></td>
+                <td><%= h(user.theme) %></td>
+                <td><%= user.created_at.web_time rescue '--' %></td>
+              </tr>
+              </tbody>
+          <% end %>
+          </table>
+    <% end %>
 
 <%
-# ----------------------------
-#  Normal version.
-# ----------------------------
-else %>
-    <div class="color-block">
-      <%= paginate_block(@pages) do %>
-          <% @objects.each do |user| %>
-              <div class="col-sm-4 color-block-item">
-                <%= render(:partial => '/observer/rss_log', locals: {:object => user}) %>
-              </div>
-          <% end %>
-      <% end %>
+   # ----------------------------
+   #  Normal version.
+   # ----------------------------
+   else %>
+    <div class="row">
+      <div class="col-xs-12">
+        <%= pagination_letters(@pages) %>
+        <%= pagination_numbers(@pages) %>
+      </div>
+      <div class="col-xs-12 color-block">
+        <% @objects.each do |user| %>
+            <div class="col-sm-4 color-block-item">
+              <%= render(:partial => '/shared/matrix_box', locals: {:object => user}) %>
+            </div>
+        <% end %>
+      </div>
+      <div class="col-xs-12">
+        <%= pagination_numbers(@pages) %>
+        <%= pagination_letters(@pages) %>
+      </div>
     </div>
-
 
 <% end %>
 

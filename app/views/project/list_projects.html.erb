@@ -14,13 +14,14 @@
     <div class="color-block">
       <% @objects.each do |project| %>
           <div class="row color-block-item">
-            <div class="col-xs-12 ">
+            <div class="col-xs-12 slight-pad">
               <div>
-                <%= link_with_query(
-                            content_tag(:span, project.title.t, class: "ListWhat"),
-                            :action => 'show_project', :id => project.id) %>:
+                <strong>
+                <%= link_with_query(project.title.t,
+                            :action => 'show_project', :id => project.id) %>
+                </strong>
                 <br/>
-                <span><%= project.created_at.web_time %></span>:
+                <small><%= project.created_at.web_time %></small>:
                 <span><%= user_link(project.user) %></span>
               </div>
             </div>

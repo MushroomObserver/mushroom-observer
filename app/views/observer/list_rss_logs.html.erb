@@ -32,27 +32,21 @@
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
-<div class="results">
-      <div class="row">
-        <div class="col-xs-12">
-             <span class="pull-right">
-        <%= pagination_numbers(@pages) %>
-            </span>
-        </div>
-        <div class="col-xs-12 color-block">
-          <% @objects.each do |rss_log| %>
-              <div class="col-sm-4 color-block-item">
-                <%= render(:partial => 'shared/matrix_box', :locals => {
-                                                                  :object => rss_log
-                                                          }) %>
-              </div>
-          <% end %>
-        </div>
-        <div class="col-xs-12">
-             <span class="pull-right">
-        <%= pagination_numbers(@pages) %>
-            </span>
-        </div>
-      </div>
 
+<div class="row">
+  <div class="col-xs-12">
+        <%= pagination_numbers(@pages) %>
+  </div>
+  <div class="col-xs-12 color-block">
+    <% @objects.each do |rss_log| %>
+        <div class="col-sm-4 color-block-item">
+          <%= render(:partial => 'shared/matrix_box', :locals => {
+                                                            :object => rss_log
+                                                    }) %>
+        </div>
+    <% end %>
+  </div>
+  <div class="col-xs-12">
+        <%= pagination_numbers(@pages) %>
+  </div>
 </div>

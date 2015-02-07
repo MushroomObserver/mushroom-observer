@@ -1537,10 +1537,10 @@ module ApplicationHelper
         if !pages.used_letters || pages.used_letters.include?(letter)
           pagination_link(letter, letter, pages.letter_arg, args)
         else
-          letter
+          content_tag(:li, link_to(letter), class: "disabled")
         end
       end.safe_join(' ')
-      return content_tag(:div, str, class: "pagination")
+      return content_tag(:div, str, class: "pagination pagination-sm")
     else
       return safe_empty
     end
@@ -1594,7 +1594,7 @@ module ApplicationHelper
       result << pagination_link(num, num, arg, args)     if to < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
 
-      result = content_tag(:ul, result.safe_join(' '), class: "pagination")
+      result = content_tag(:ul, result.safe_join(' '), class: "pagination pagination-sm")
     end
     result
   end

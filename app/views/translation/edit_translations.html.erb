@@ -3,7 +3,6 @@
   javascript_include('translations')
 %>
 
-<%= stylesheet_link_tag('grids.css') %>
 <% inject_javascript_at_end %(
   TranslationsModule({
     locale: "#{j @lang.locale}",

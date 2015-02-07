@@ -67,9 +67,9 @@ class MatrixBoxPresenter
   # Grabs all the information needed for view from User instance.
   def user_to_presenter(user, view)
     name = user.unique_text_name
-    self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>" +
-                  "#{:list_users_contribution.t}: #{user.contribution}<br/>" +
-                  "#{:Observations.t}: #{user.observations.count}".html_safe
+    self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>
+                   #{:list_users_contribution.t}: #{user.contribution}<br/>
+                   #{:Observations.t}: #{user.observations.count}".html_safe
     self.what  = view.link_with_query(name, action: :show_user, id: user.id)
     self.where = view.location_link(nil, user.location) if user.location
     self.thumbnail = view.thumbnail(user.image_id, link: {controller: user.show_controller,
