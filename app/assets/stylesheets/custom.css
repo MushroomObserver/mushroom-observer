@@ -116,6 +116,8 @@ html, body{
     margin: 0 !important;
 }
 
+/*Navigation*/
+
 #navigation a {
     display: block;
 }
@@ -130,17 +132,21 @@ html, body{
 }
 
 .rss-log-item{
-    display: table-cell;
-    margin: auto;
-    width: inherit;
+    padding: 5px;
     text-align: center;
-    vertical-align: middle;
     height: 350px;
 }
 
+/*don't force log items to be a certain height on mobile devices because they are stacked on top of each other*/
+@media screen and (max-width: 767px) {
+.rss-log-item{
+    height: auto;
+}
+}
+
 .rss-title, .rss-detail {
-    margin-top:10px;
-    margin-bottom:10px;
+    margin-top:5px;
+    margin-bottom:5px;
 }
 
 
