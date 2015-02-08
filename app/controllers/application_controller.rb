@@ -94,6 +94,10 @@ class ApplicationController < ActionController::Base
   require "csv"
   include LoginSystem
 
+# Prevent CSRF attacks by raising an exception.
+# For APIs, you may want to use :null_session instead.
+  protect_from_forgery with: :exception
+
   around_filter :catch_errors # if Rails.env == "test"
   before_filter :block_ip_addresses
   before_filter :kick_out_robots
@@ -143,16 +147,6 @@ class ApplicationController < ActionController::Base
     else
       block_given? ? yield(result) : result
     end
-  end
-
-  # The default CSRF handler silently resets the session.  The problem is
-  # autologin will circumvent this, so we would need to disable autologin
-  # temporarily.  Or we can just make forgeries fail, but leave valid requests
-  # alone.  This seems much more graceful... and it lets the user know why they
-  # are experiencing otherwise bewildering and incorrect behavior.
-  def handle_unverified_request
-    render(text: "Cross-site Request Forgery detected!", layout: false)
-    return false
   end
 
   # Physically eject robots unless they're looking at accepted pages.
