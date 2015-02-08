@@ -1,8 +1,64 @@
-/*bootstrap overrides*/
+/*
+ * Style tweaks
+ * --------------------------------------------------
+ */
 html, body{
     font-family: verdana,arial,helvetica,sans-serif;
     font-size: 13px;
 }
+
+/*
+ * Off Canvas
+ * --------------------------------------------------
+ */
+
+.hidden-overflow-x {
+    overflow-x:hidden !important;
+}
+@media screen and (max-width: 767px) {
+    .row-offcanvas {
+        position: relative;
+        -webkit-transition: all .25s ease-out;
+        -o-transition: all .25s ease-out;
+        transition: all .25s ease-out;
+    }
+
+    .row-offcanvas-right {
+        right: 0;
+    }
+
+    .row-offcanvas-left {
+        left: 0;
+    }
+
+    .row-offcanvas-right
+    .sidebar-offcanvas {
+        right: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left
+    .sidebar-offcanvas {
+        left: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-right.active {
+        right: 50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left.active {
+        left: 50%; /* 6 columns */
+    }
+
+    .sidebar-offcanvas {
+        position: absolute;
+        top: 0;
+        width: 50%; /* 6 columns */
+    }
+}
+
+
+/*bootstrap overrides*/
+
 
 .pagination {
     margin-top: 5px;

@@ -86,7 +86,7 @@ module PaginationHelper
       nstr = "#{:NEXT.t} »"
       result << pagination_link(pstr, this-1, arg, args) if this > 1
       result << pagination_link(1, 1, arg, args) if from > 1
-      result << result << content_tag(:li, content_tag(:span, "..."), class: "disabled") if from > 2
+      result << content_tag(:li, content_tag(:span, "..."), class: "disabled") if from > 2
       for n in from..to
         if n == this
           result << content_tag(:li, content_tag(:span, n), class: "active")
