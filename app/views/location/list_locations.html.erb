@@ -1,68 +1,71 @@
 <%
-  new_tab_set(:sort_by_header.t, @sorts)
-  new_tab_set do
-    add_tab_with_query(:list_place_names_map.t, :action => :map_locations)
-    add_tab(:list_countries.t, :action => :list_countries)
-    add_tab_with_query(:show_location_create.t, :action => 'create_location')
-    add_tabs(@links)
-  end
+   new_tab_set(:sort_by_header.t, @sorts)
+   new_tab_set do
+     add_tab_with_query(:list_place_names_map.t, :action => :map_locations)
+     add_tab(:list_countries.t, :action => :list_countries)
+     add_tab_with_query(:show_location_create.t, :action => 'create_location')
+     add_tabs(@links)
+   end
 
-  @known_pages = @pages
-  @known_data = @objects
+   @known_pages = @pages
+   @known_data = @objects
 
-  if (!@known_pages or @known_pages.empty?) and
-     (!@undef_pages or @undef_pages.empty?)
-    flash_error(@error) if @error
-  end
+   if (!@known_pages or @known_pages.empty?) and
+           (!@undef_pages or @undef_pages.empty?)
+     flash_error(@error) if @error
+   end
 %>
-
-<table cellpadding="5" cellspacing="0" width="100%">
-  <tr valign="top">
-
-    <td>
-      <% if @undef_pages && @undef_pages.num_total > 0 %>
-        <div class="SubTitle"><%= :list_place_names_known.t %>
+<div class="results">
+<div class="row">
+  <div class="col-md-7">
+    <% if @undef_pages && @undef_pages.num_total > 0 %>
+        <div class="h4 text-center"><%= :list_place_names_known.t %>
           <%= :list_place_names_known_order.t if @default_orders %></div>
-      <% end %>
-      <%= paginate_block(@known_pages) do %>
-        <table cellpadding="5" cellspacing="0" width="100%">          
-          <% odd_or_even = 0
-          for location in @known_data
-            odd_or_even = 1 - odd_or_even %>
-            <tr valign="top" class="ListLine<%= odd_or_even %>">
-              <td width="100%">
-                <%= link_with_query(location.display_name.t,
-                      :action => 'show_location', :id => location.id) %>
-              </td>
-            </tr>
-          <% end %>
-        </table>
-      <% end %>
-    </td>
-
-    <% if @undef_data && @undef_pages && @undef_pages.num_total > 0 %>
-      <td>
-        <div class="SubTitle"><%= :list_place_names_undef.t %>
-          <%= :list_place_names_undef_order.t if @default_orders %></div>
-        <%= paginate_block(@undef_pages) do %>
-          <table cellpadding="5" cellspacing="0" width="100%">          
-            <% odd_or_even = 0
-            for loc, cnt in @undef_data
-              loc = Location.reverse_name(loc) if @undef_location_format == :scientific
-              odd_or_even = 1 - odd_or_even %>
-              <tr valign="top" class="ListLine<%= odd_or_even %>">
-                <td width="100%">
-                <%= location_link(loc, nil, cnt) %>
-                <%= link_to(:list_place_names_merge.t,
-                            :action => 'list_merge_options',
-                            :where => loc) %>
-                </td>
-              </tr>
-            <% end %>
-          </table>
-        <% end %>
-      </td>
     <% end %>
-
-  </tr>
-</table>
+    <div class="row">
+      <div class="col-xs-12">
+                <%= pagination_numbers(@known_pages) %>
+      </div>
+      <div class="col-xs-12 color-block">
+        <% @known_data.each do |location| %>
+            <div class="col-xs-12 color-block-item slight-pad">
+              <%= link_with_query(location.display_name.t,
+                                  :action => 'show_location', :id => location.id) %>
+            </div>
+        <% end %>
+      </div>
+      <div class="col-xs-12">
+             <%= pagination_numbers(@known_pages) %>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="row">
+      <% if @undef_data && @undef_pages && @undef_pages.num_total > 0 %>
+          <div class="col-xs-12">
+            <div class="h4 text-center"><%= :list_place_names_undef.t %>
+              <%= :list_place_names_undef_order.t if @default_orders %></div>
+          </div>
+          <div class="col-xs-12">
+                 <%= pagination_numbers(@undef_pages) %>
+          </div>
+          <div class="col-xs-12 color-block">
+            <% @undef_data.each do |loc, cnt|
+              loc = Location.reverse_name(loc) if @undef_location_format == :scientific
+            %>
+                <div class="col-xs-12 color-block-item slight-pad">
+                  <%= location_link(loc, nil, cnt) %>
+                  <%= link_to(:list_place_names_merge.t,
+                              :action => 'list_merge_options',
+                              :where => loc) %>
+                </div>
+            <% end %>
+          </div>
+          <div class="col-xs-12">
+            <%= pagination_numbers(@undef_pages) %>
+          </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+</div>

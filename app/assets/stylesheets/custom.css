@@ -1,16 +1,74 @@
+/*
+ * Style tweaks
+ * --------------------------------------------------
+ */
 html, body{
     font-family: verdana,arial,helvetica,sans-serif;
     font-size: 13px;
 }
 
-a {
-    color: #205080
+/*
+ * Off Canvas
+ * --------------------------------------------------
+ */
+
+.hidden-overflow-x {
+    overflow-x:hidden !important;
 }
+@media screen and (max-width: 767px) {
+    .row-offcanvas {
+        position: relative;
+        -webkit-transition: all .25s ease-out;
+        -o-transition: all .25s ease-out;
+        transition: all .25s ease-out;
+    }
+
+    .row-offcanvas-right {
+        right: 0;
+    }
+
+    .row-offcanvas-left {
+        left: 0;
+    }
+
+    .row-offcanvas-right
+    .sidebar-offcanvas {
+        right: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left
+    .sidebar-offcanvas {
+        left: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-right.active {
+        right: 50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left.active {
+        left: 50%; /* 6 columns */
+    }
+
+    .sidebar-offcanvas {
+        position: absolute;
+        top: 0;
+        width: 50%; /* 6 columns */
+    }
+}
+
+
+/*bootstrap overrides*/
+
+
+.pagination {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+/*end bootstrap overrides*/
 
 .bold {
     font-weight: 800;
 }
-
 
 .border-bottom {
     border-bottom: 1px solid;
@@ -25,6 +83,10 @@ a {
 }
 .indent {
     padding-left: 1em;
+}
+
+.slight-pad {
+    padding-top: 5px; padding-bottom: 5px;
 }
 
 .pad-box {
@@ -54,6 +116,8 @@ a {
     margin: 0 !important;
 }
 
+/*Navigation*/
+
 #navigation a {
     display: block;
 }
@@ -68,17 +132,21 @@ a {
 }
 
 .rss-log-item{
-    display: table-cell;
-    margin: auto;
-    width: inherit;
+    padding: 5px;
     text-align: center;
-    vertical-align: middle;
     height: 350px;
 }
 
+/*don't force log items to be a certain height on mobile devices because they are stacked on top of each other*/
+@media screen and (max-width: 767px) {
+.rss-log-item{
+    height: auto;
+}
+}
+
 .rss-title, .rss-detail {
-    margin-top:10px;
-    margin-bottom:10px;
+    margin-top:5px;
+    margin-bottom:5px;
 }
 
 
@@ -92,6 +160,11 @@ a {
 
 /*Themeable options below */
 /* Banner colors */
+a {
+    color: #205080
+}
+
+
 #banner {
     padding-top: 5px;
     padding-bottom: 3px;

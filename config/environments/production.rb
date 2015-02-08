@@ -165,7 +165,6 @@ MushroomObserver::Application.configure do
     BlackOnWhite.css
     Cantharellaceae.css
     Hygrocybe.css
-    grids.css
     semantic_vernacular.css
   ) if config.assets && config.assets.precompile
 

@@ -15,7 +15,7 @@
     <div class="Warnings">
       <%= :list_observations_alternate_spellings.t %><br/>
       <ul type="none">
-        <% for name in names.sort_by(&:sort_name) %>
+        <% names.sort_by(&:sort_name).each do |name| %>
           <%= link_to(name.display_name.t, :controller => :name,
                       :action => :show_name, :id => name.id) %><br/>
         <% end %>
@@ -30,16 +30,15 @@
 args = @test_pagination_args || {} %>
 <%= paginate_block(@pages, args) do %>
   <% if @objects != [] %>
-    <% odd_or_even = 0 %>
     <% counts = Name.count_observations(@objects) %>
-    <table cellpadding="5" cellspacing="0" width="100%">
-      <% for name in @objects || []
-        odd_or_even = 1 - odd_or_even %>
-        <tr class="ListLine<%= odd_or_even %>">
+    <table class="table table-striped" width="100%">
+      <% @objects.each do |name|%>
+        <tr>
           <td>
             <%= link_with_query(name.display_name.html_safe.t,
                   :action => 'show_name',
-                  :id => name.id) + " [#{counts[name.id]}]" %></td>
+                  :id => name.id) + " [#{counts[name.id]}]" %>
+          </td>
           <% if @extra_data %>
             <% data = @extra_data[name.id]
             if data && !data.empty?
