@@ -77,7 +77,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_action_partials("show_location",
                            ["_location", "_show_comments",
                             "_location_description"]
-                          )
+    )
     location.reload
     assert_equal(updated_at, location.updated_at)
     assert_equal(log_updated_at, location.rss_log.updated_at)
@@ -175,6 +175,32 @@ class LocationControllerTest < FunctionalTestCase
     assert_form_action(action: :create_location_description, id: loc.id)
   end
 
+  def test_create_and_save_location_description
+    loc = locations(:nybg) # use a location that has no description
+    assert_nil(loc.description,
+               "Test should use a location that has no description.")
+    params = { description: { source_type: "public",
+                              source_name: "",
+                              project_id: "",
+                              public_write: "1",
+                              public: "1",
+                              license_id: "3",
+                              gen_desc: "nifty botanical garden",
+                              ecology: "varied",
+                              species: "all",
+                              notes: "NAMP participant",
+                              refs: "" },
+               id: loc.id }
+
+    post_requires_login(:create_location_description, params)
+
+    assert_redirected_to(controller: :location,
+                         action: :show_location_description,
+                         id: loc.descriptions.last.id)
+    refute_empty(loc.descriptions)
+    assert_equal(params[:description][:notes], loc.descriptions.last.notes)
+  end
+
   def test_unsuccessful_create_location_description
     loc = locations(:albion)
     user = login("Must Spam")
@@ -188,6 +214,33 @@ class LocationControllerTest < FunctionalTestCase
     requires_login(:edit_location_description, id: desc.id)
     assert_form_action(action: :edit_location_description, id: desc.id)
   end
+
+    def test_edit_and_save_location_description
+    loc = locations(:albion) # use a location that has no description
+    refute_nil(loc.description,
+               "Test should use a location that has a description.")
+    params = { description: { source_type: "public",
+                              source_name: "",
+                              project_id: "",
+                              public_write: "1",
+                              public: "1",
+                              license_id: "3",
+                              gen_desc: "research station",
+                              ecology: "redwood",
+                              species: "redwood zone",
+                              notes: "church camp",
+                              refs: "" },
+               id: loc.id }
+
+    post_requires_login(:edit_location_description, params)
+
+    assert_redirected_to(controller: :location,
+                         action: :show_location_description,
+                         id: loc.descriptions.last.id)
+    refute_empty(loc.descriptions)
+    assert_equal(params[:description][:notes], loc.descriptions.last.notes)
+  end
+
 
   def test_create_location
     requires_login(:create_location)
@@ -482,7 +535,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(obs.location, nil)
     where = obs.where
     params = {
-      :where    => where,
+      where:    where,
       location: albion.id
     }
     requires_login(:add_to_location, params)
@@ -606,7 +659,7 @@ class LocationControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, :pattern_search, pattern: name, :by => :name)
+    Query.lookup(:Observation, :pattern_search, pattern: name, by: :name)
   end
 
   def test_coercing_sorted_observation_query_into_location_query
