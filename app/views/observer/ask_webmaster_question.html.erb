@@ -1,13 +1,19 @@
 <% @title = :ask_webmaster_title.t %>
 
 <%= :ask_webmaster_note.tp(:todo_list => "/pivotal") %>
+<div class="row">
+  <div class="col-xs-12">
+    <%= form_tag(:action => 'ask_webmaster_question') do %>
 
-<%= form_tag(:action => 'ask_webmaster_question') do %>
-  <br/><center><%= submit_tag :SEND.l %></center>
+        <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label><br/>
+        <%= text_field(:user, :email, value: @email, size: 60, autofocus: @email.blank? || @email_error) %><br/><br/>
 
-  <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label><br/>
-  <%= text_field(:user, :email, value: @email, size: 60, autofocus: @email.blank? || @email_error) %><br/><br/>
-
-  <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
-  <%= text_area(:question, :content, value: @content, cols: 80, autofocus: !@email.blank? && !@email_error) %>
-<% end %>
+        <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
+        <%= text_area(:question, :content, value: @content, cols: 80, autofocus: !@email.blank? && !@email_error) %>
+        </div>
+        <div class="push-down text-center">
+          <%= submit_tag :SEND.l %>
+        </div>
+    <% end %>
+    </div>
+</div>

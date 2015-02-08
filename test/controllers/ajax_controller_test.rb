@@ -298,6 +298,51 @@ class AjaxControllerTest < FunctionalTestCase
     bad_ajax_request(:vote, type: :image, id: 99, value: 0)
   end
 
+  def test_image_vote_renders_partial
+    ##Arrange
+    login("dick")
+
+    #Act
+    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+
+    #Assert
+    assert_template layout: nil
+    assert_template layout: false
+    assert_template partial: 'image/_image_vote_links'
+  end
+
+  def test_image_vote_renders_correct_links
+    ##Arrange
+    login("dick")
+
+    #Act
+    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+
+    assert_tag "a", attributes: {
+                      href: "/image/show_image/1?vote=0"
+                  }
+    assert_tag "a", attributes: {
+                      href: "/image/show_image/1?vote=1"
+                  }
+    assert_tag "a", attributes: {
+                      href: "/image/show_image/1?vote=2"
+                  }
+    assert_tag "a", attributes: {
+                      href: "/image/show_image/1?vote=4"
+                  }
+  end
+
+  def test_image_vote_renders_correct_data_attributes
+    ##Arrange
+    login("dick")
+
+    #Act
+    good_ajax_request(:vote, type: :image, id: 1, value: 3)
+
+    assert_select("[data-role='image_vote']", 4)  ##should show four vote links as dick already voted
+    assert_select("[data-val]", 4)  ##should show four vote links as dick already voted
+  end
+
   def test_old_translation
     str = TranslationString::Version.find(1)
     bad_ajax_request(:old_translation, id: 0)
