@@ -220,7 +220,7 @@ class AjaxController < ApplicationController
     end
   end
 
-  def cast_image_vote(id, value)  ##TODO: Rewrite tests
+  def cast_image_vote(id, value)
     @image = Image.safe_find(id)
     if value != '0' and not Image.validate_vote(value)
       raise "Invalid value for vote/image: #{value.inspect}"
