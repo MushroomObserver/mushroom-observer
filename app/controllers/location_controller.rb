@@ -5,7 +5,7 @@ require 'geocoder'
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_filter :login_required, :except => [
+  before_filter :login_required, except: [
     :advanced_search,
     :help,
     :index_location,
@@ -32,7 +32,7 @@ class LocationController < ApplicationController
     :tweak
   ]
 
-  before_filter :disable_link_prefetching, :except => [
+  before_filter :disable_link_prefetching, except: [
     :create_location,
     :create_location_description,
     :edit_location,
@@ -43,7 +43,7 @@ class LocationController < ApplicationController
     :show_past_location_description,
   ]
 
-  before_filter :require_successful_user, :only => [
+  before_filter :require_successful_user, only: [
     :create_location_description
   ]
 
@@ -55,8 +55,8 @@ class LocationController < ApplicationController
 
   # Displays a list of selected locations, based on current Query.
   def index_location # :nologin: :norobots:
-    query = find_or_create_query(:Location, :by => params[:by])
-    show_selected_locations(query, :id => params[:id].to_s, :always_index => true)
+    query = find_or_create_query(:Location, by: params[:by])
+    show_selected_locations(query, id: params[:id].to_s, always_index: true)
   end
 
   # Displays a list of all countries with counts.
@@ -69,53 +69,53 @@ class LocationController < ApplicationController
 
   # Displays a list of all locations whose country matches the id param.
   def list_by_country # :nologin:
-    query = create_query(:Location, :regexp_search, :regexp => "#{params[:country]}*")
-    show_selected_locations(query, :link_all_sorts => true)
+    query = create_query(:Location, :regexp_search, regexp: "#{params[:country]}*")
+    show_selected_locations(query, link_all_sorts: true)
   end
 
   # Displays a list of all locations.
   def list_locations # :nologin:
-    query = create_query(:Location, :all, :by => :name)
-    show_selected_locations(query, :link_all_sorts => true)
+    query = create_query(:Location, :all, by: :name)
+    show_selected_locations(query, link_all_sorts: true)
   end
 
   # Displays a list of all locations.
   def list_dubious_locations # :nologin:
-    query = create_query(:Location, :all, :by => :name)
-    show_selected_locations(query, :link_all_sorts => true,
-      :action => :list_dubious_locations, :num_per_page => 1000)
+    query = create_query(:Location, :all, by: :name)
+    show_selected_locations(query, link_all_sorts: true,
+      action: :list_dubious_locations, num_per_page: 1000)
   end
 
   # Display list of locations that a given user is author on.
   def locations_by_user # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Location, :by_user, :user => user)
-      show_selected_locations(query, :link_all_sorts => true)
+      query = create_query(:Location, :by_user, user: user)
+      show_selected_locations(query, link_all_sorts: true)
     end
   end
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:Location, :by_editor, :user => user)
+      query = create_query(:Location, :by_editor, user: user)
       show_selected_locations(query)
     end
   end
 
   # Displays a list of locations matching a given string.
   def location_search # :nologin: :norobots:
-    query = create_query(:Location, :pattern_search, :pattern => Location.user_name(@user, params[:pattern].to_s))
-    show_selected_locations(query, :link_all_sorts => true)
+    query = create_query(:Location, :pattern_search, pattern: Location.user_name(@user, params[:pattern].to_s))
+    show_selected_locations(query, link_all_sorts: true)
   end
 
   # Displays matrix of advanced search results.
   def advanced_search # :nologin: :norobots:
     begin
       query = find_query(:Location)
-      show_selected_locations(query, :link_all_sorts => true)
+      show_selected_locations(query, link_all_sorts: true)
     rescue => err
       flash_error(err.to_s) if !err.blank?
-      redirect_to(:controller => 'observer', :action => 'advanced_search_form')
+      redirect_to(controller: 'observer', action: 'advanced_search_form')
     end
   end
 
@@ -135,7 +135,7 @@ class LocationController < ApplicationController
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:show_objects.t(:type => :observation),
+      @links << [:show_objects.t(type: :observation),
         add_query_param({controller: 'observer', action: 'index_observation'},
           query)]
     end
@@ -143,8 +143,8 @@ class LocationController < ApplicationController
     # Add "show descriptions" link if this query can be coerced into an
     # location description query.
     if query.is_coercable?(:LocationDescription)
-      @links << [:show_objects.t(:type => :description),
-        add_query_param({:action => 'index_location_description'}, query)]
+      @links << [:show_objects.t(type: :description),
+        add_query_param({action: 'index_location_description'}, query)]
     end
 
     # Restrict to subset within a geographical region (used by map
@@ -155,8 +155,8 @@ class LocationController < ApplicationController
     @undef_location_format = User.current_location_format
     if query2 = coerce_query_for_undefined_locations(query)
       select_args = {
-        :group => 'observations.where',
-        :select => 'observations.where AS w, COUNT(observations.id) AS c',
+        group: 'observations.where',
+        select: 'observations.where AS w, COUNT(observations.id) AS c',
       }
       if args[:link_all_sorts]
         select_args[:order] = 'c DESC'
@@ -189,12 +189,12 @@ class LocationController < ApplicationController
     if @query.flavor == :all
       @title = :map_locations_global_map.t
     else
-      @title = :map_locations_title.t(:locations => @query.title)
+      @title = :map_locations_title.t(locations: @query.title)
     end
     @query = restrict_query_to_box(@query)
     @timer_start = Time.now
     columns = %w(name north south east west).map {|x| "locations.#{x}"}
-    args = { :select => "DISTINCT(locations.id), #{columns.join(', ')}" }
+    args = { select: "DISTINCT(locations.id), #{columns.join(', ')}" }
     @locations = @query.select_rows(args).map do |id, name, n,s,e,w|
       MinimalMapLocation.new(id, name, n,s,e,w)
     end
@@ -286,21 +286,21 @@ class LocationController < ApplicationController
 
   # Displays a list of selected locations, based on current Query.
   def index_location_description # :nologin: :norobots:
-    query = find_or_create_query(:LocationDescription, :by => params[:by])
-    show_selected_location_descriptions(query, :id => params[:id].to_s,
-                                        :always_index => true)
+    query = find_or_create_query(:LocationDescription, by: params[:by])
+    show_selected_location_descriptions(query, id: params[:id].to_s,
+                                        always_index: true)
   end
 
   # Displays a list of all location_descriptions.
   def list_location_descriptions # :nologin:
-    query = create_query(:LocationDescription, :all, :by => :name)
+    query = create_query(:LocationDescription, :all, by: :name)
     show_selected_location_descriptions(query)
   end
 
   # Display list of location_descriptions that a given user is author on.
   def location_descriptions_by_author # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:LocationDescription, :by_author, :user => user)
+      query = create_query(:LocationDescription, :by_author, user: user)
       show_selected_location_descriptions(query)
     end
   end
@@ -308,7 +308,7 @@ class LocationController < ApplicationController
   # Display list of location_descriptions that a given user is editor on.
   def location_descriptions_by_editor # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-      query = create_query(:LocationDescription, :by_editor, :user => user)
+      query = create_query(:LocationDescription, :by_editor, user: user)
       show_selected_location_descriptions(query)
     end
   end
@@ -318,8 +318,8 @@ class LocationController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      :action => 'list_location_descriptions',
-      :num_per_page => 50,
+      action: 'list_location_descriptions',
+      num_per_page: 50,
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -333,8 +333,8 @@ class LocationController < ApplicationController
     # Add "show locations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Location)
-      @links << [:show_objects.t(:type => :location),
-        add_query_param({:action => 'index_location'}, query)]
+      @links << [:show_objects.t(type: :location),
+        add_query_param({action: 'index_location'}, query)]
     end
 
     show_index_of_objects(query, args)
@@ -366,8 +366,8 @@ class LocationController < ApplicationController
       elsif @description = LocationDescription.safe_find(desc_id)
         @description = nil if !@description.is_reader?(@user)
       else
-        flash_error(:runtime_object_not_found.t(:type => :description,
-                                                :id => desc_id))
+        flash_error(:runtime_object_not_found.t(type: :description,
+                                                id: desc_id))
       end
 
       update_view_stats(@location)
@@ -402,14 +402,14 @@ class LocationController < ApplicationController
         if @description.source_type == :project
           flash_error(:runtime_show_draft_denied.t)
           if project = @description.project
-            redirect_to(:controller => 'project', :action => 'show_project',
-                        :id => project.id)
+            redirect_to(controller: 'project', action: 'show_project',
+                        id: project.id)
           else
-            redirect_to(:action => 'show_location', :id => @description.location_id)
+            redirect_to(action: 'show_location', id: @description.location_id)
           end
         else
           flash_error(:runtime_show_description_denied.t)
-          redirect_to(:action => 'show_location', :id => @description.location_id)
+          redirect_to(action: 'show_location', id: @description.location_id)
         end
       end
     end
@@ -424,7 +424,7 @@ class LocationController < ApplicationController
         @location.revert_to(params[:version].to_i)
       else
         flash_error(:show_past_location_no_version.t)
-        redirect_to(:action => 'show_location', :id => @location.id)
+        redirect_to(action: 'show_location', id: @location.id)
       end
     end
   end
@@ -553,7 +553,7 @@ class LocationController < ApplicationController
 
         if @dubious_where_reasons.empty?
           if @location.save
-            flash_notice(:runtime_location_success.t(:id => @location.id))
+            flash_notice(:runtime_location_success.t(id: @location.id))
             done = true
           else
             # Failed to create location
@@ -572,28 +572,28 @@ class LocationController < ApplicationController
         end
         if @set_observation
           if has_unshown_notifications?(@user, :naming)
-            redirect_to(:controller => 'observer', :action => 'show_notifications')
+            redirect_to(controller: 'observer', action: 'show_notifications')
           else
-            redirect_to(:controller => 'observer', :action => 'show_observation',
-                        :id => @set_observation)
+            redirect_to(controller: 'observer', action: 'show_observation',
+                        id: @set_observation)
           end
         elsif @set_species_list
-          redirect_to(:controller => 'species_list', :action => 'show_species_list',
-                      :id => @set_species_list)
+          redirect_to(controller: 'species_list', action: 'show_species_list',
+                      id: @set_species_list)
         elsif @set_herbarium
           if herbarium = Herbarium.safe_find(@set_herbarium)
             herbarium.location = @location
             herbarium.save
-            redirect_to(:controller => 'herbarium', :action => 'show_herbarium', :id => @set_herbarium)
+            redirect_to(controller: 'herbarium', action: 'show_herbarium', id: @set_herbarium)
           end
         elsif @set_user
           if user = User.safe_find(@set_user)
             user.location = @location
             user.save
-            redirect_to(:controller => 'observer', :action => 'show_user', :id => @set_user)
+            redirect_to(controller: 'observer', action: 'show_user', id: @set_user)
           end
         else
-          redirect_to(:controller => 'location', :action => 'show_location', :id => @location.id)
+          redirect_to(controller: 'location', action: 'show_location', id: @location.id)
         end
       end
     end
@@ -629,11 +629,11 @@ class LocationController < ApplicationController
           # Non-admins just send email-request to admins.
           else
             flash_warning(:runtime_merge_locations_warning.t)
-            content = :email_location_merge.l(:user => @user.login,
-                                              :this => "##{@location.id}: " + @location.name,
-                                              :that => "##{merge.id}: " + merge.name,
-                                              :this_url => "#{MO.http_domain}/location/show_location/#{@location.id}",
-                                              :that_url => "#{MO.http_domain}/location/show_location/#{merge.id}")
+            content = :email_location_merge.l(user: @user.login,
+                                              this: "##{@location.id}: " + @location.name,
+                                              that: "##{merge.id}: " + merge.name,
+                                              this_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
+                                              that_url: "#{MO.http_domain}/location/show_location/#{merge.id}")
             WebmasterEmail.build(@user.email, content).deliver
           end
 
@@ -662,7 +662,7 @@ class LocationController < ApplicationController
             # No changes made.
             if !@location.changed?
               flash_warning(:runtime_edit_location_no_change.t)
-              redirect_to(:action => 'show_location', :id => @location.id)
+              redirect_to(action: 'show_location', id: @location.id)
 
             # There were error(s).
             elsif !@location.save
@@ -670,7 +670,7 @@ class LocationController < ApplicationController
 
             # Updated successfully.
             else
-              flash_notice(:runtime_edit_location_success.t(:id => @location.id))
+              flash_notice(:runtime_edit_location_success.t(id: @location.id))
               done = true
             end
           end
@@ -678,7 +678,7 @@ class LocationController < ApplicationController
       end
 
       if done
-        redirect_to(:action => 'show_location', :id => @location.id)
+        redirect_to(action: 'show_location', id: @location.id)
       end
     end
   end
@@ -699,7 +699,7 @@ class LocationController < ApplicationController
     else
       @description = LocationDescription.new
       @description.location = @location
-      @description.attributes = params[:description]
+      @description.attributes = whitelisted_location_description_params
 
       if @description.valid?
         initialize_description_permissions(@description)
@@ -707,13 +707,13 @@ class LocationController < ApplicationController
 
         # Log action in parent location.
         @description.location.log(:log_description_created_at,
-                 :user => @user.login, :touch => true,
-                 :name => @description.unique_partial_format_name)
+                 user: @user.login, touch: true,
+                 name: @description.unique_partial_format_name)
 
         flash_notice(:runtime_location_description_success.t(
-                     :id => @description.id))
-        redirect_to(:action => 'show_location_description',
-                    :id => @description.id)
+                     id: @description.id))
+        redirect_to(action: 'show_location_description',
+                    id: @description.id)
 
       else
         flash_object_errors @description
@@ -731,7 +731,7 @@ class LocationController < ApplicationController
       # already redirected
 
     elsif request.method == "POST"
-      @description.attributes = params[:description]
+      @description.attributes = whitelisted_location_description_params
 
       # Modify permissions based on changes to the two "public" checkboxes.
       modify_description_permissions(@description)
@@ -739,8 +739,8 @@ class LocationController < ApplicationController
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)
-        redirect_to(:action => 'show_location_description',
-                    :id => @description.id)
+        redirect_to(action: 'show_location_description',
+                    id: @description.id)
 
       # There were error(s).
       elsif !@description.save
@@ -749,12 +749,12 @@ class LocationController < ApplicationController
       # Updated successfully.
       else
         flash_notice(:runtime_edit_location_description_success.t(
-                     :id => @description.id))
+                     id: @description.id))
 
         # Log action in parent location.
         @description.location.log(:log_description_updated,
-                 :user => @user.login, :touch => true,
-                 :name => @description.unique_partial_format_name)
+                 user: @user.login, touch: true,
+                 name: @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == 'true') and
@@ -766,17 +766,17 @@ class LocationController < ApplicationController
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
-                           t(:old => old_desc.partial_format_name))
+                           t(old: old_desc.partial_format_name))
             @description.location.log(:log_object_merged_by_user,
-                     :user => @user.login, :touch => true,
-                     :from => old_desc.unique_partial_format_name,
-                     :to => @description.unique_partial_format_name)
+                     user: @user.login, touch: true,
+                     from: old_desc.unique_partial_format_name,
+                     to: @description.unique_partial_format_name)
             old_desc.destroy
           end
         end
 
-        redirect_to(:action => 'show_location_description',
-                    :id => @description.id)
+        redirect_to(action: 'show_location_description',
+                    id: @description.id)
       end
     end
   end
@@ -787,19 +787,19 @@ class LocationController < ApplicationController
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.location.log(:log_description_destroyed,
-               :user => @user.login, :touch => true,
-               :name => @description.unique_partial_format_name)
+               user: @user.login, touch: true,
+               name: @description.unique_partial_format_name)
       @description.destroy
-      redirect_with_query(:action => 'show_location',
-        :id => @description.location_id)
+      redirect_with_query(action: 'show_location',
+        id: @description.location_id)
     else
       flash_error(:runtime_destroy_description_not_admin.t)
       if @description.is_reader?(@user)
-        redirect_with_query(:action => 'show_location_description',
-          :id => @description.id)
+        redirect_with_query(action: 'show_location_description',
+          id: @description.id)
       else
-        redirect_with_query(:action => 'show_location',
-          :id => @description.location_id)
+        redirect_with_query(action: 'show_location',
+          id: @description.location_id)
       end
     end
   end
@@ -849,7 +849,7 @@ class LocationController < ApplicationController
       location.name = Location.reverse_name(location.name)
       location.save
     end
-    redirect_to(:action => 'show_location', :id => params[:id].to_s)
+    redirect_to(action: 'show_location', id: params[:id].to_s)
   end
 
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
@@ -859,10 +859,10 @@ class LocationController < ApplicationController
       where = params[:where].strip_squeeze rescue ""
       if not where.blank? and
          update_observations_by_where(location, where)
-        flash_notice(:runtime_location_merge_success.t(:this => where,
-                     :that => location.display_name))
+        flash_notice(:runtime_location_merge_success.t(this: where,
+                     that: location.display_name))
       end
-      redirect_to(:action => 'list_locations')
+      redirect_to(action: 'list_locations')
     end
   end
 
@@ -882,7 +882,7 @@ class LocationController < ApplicationController
         o.location_id = location.id
         o.where = nil
         if !o.save
-          flash_error :runtime_location_merge_failed.t(:name => o.unique_format_name)
+          flash_error :runtime_location_merge_failed.t(name: o.unique_format_name)
           success = false
         end
       end
@@ -895,8 +895,13 @@ class LocationController < ApplicationController
   private
 
   def whitelisted_location_params
-    params.required(:location).
+    params.require(:location).
       permit(:display_name, :north, :west, :east, :south, :high, :low, :notes)
   end
-end
 
+  def whitelisted_location_description_params
+    params.require(:description).
+      permit(:source_type, :source_name, :project_id, :public_write, :public,
+             :license_id, :gen_desc, :ecology, :species, :notes, :refs)
+  end
+end
