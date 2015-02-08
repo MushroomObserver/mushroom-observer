@@ -34,10 +34,12 @@
 
 
 <div class="row">
+
   <div class="col-xs-12">
         <%= pagination_numbers(@pages) %>
   </div>
   <div class="col-xs-12 color-block">
+    <div class="results">
     <% @objects.each do |rss_log| %>
         <div class="col-sm-4 color-block-item">
           <%= render(:partial => 'shared/matrix_box', :locals => {
@@ -45,6 +47,7 @@
                                                     }) %>
         </div>
     <% end %>
+    </div>
   </div>
   <div class="col-xs-12">
         <%= pagination_numbers(@pages) %>

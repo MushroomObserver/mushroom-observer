@@ -1537,7 +1537,7 @@ module ApplicationHelper
         if !pages.used_letters || pages.used_letters.include?(letter)
           pagination_link(letter, letter, pages.letter_arg, args)
         else
-          content_tag(:li, link_to(letter), class: "disabled")
+          content_tag(:li, content_tag(:span, letter), class: "disabled")
         end
       end.safe_join(' ')
       return content_tag(:div, str, class: "pagination pagination-sm")
@@ -1582,15 +1582,15 @@ module ApplicationHelper
       nstr = "#{:NEXT.t} »"
       result << pagination_link(pstr, this-1, arg, args) if this > 1
       result << pagination_link(1, 1, arg, args)         if from > 1
-      result << result << content_tag(:li, link_to("..."), class: "disabled")  if from > 2
+      result << result << content_tag(:li, content_tag(:span, "..."), class: "disabled")  if from > 2
       for n in from..to
         if n == this
-          result << content_tag(:li, link_to(n), class: "active")
+          result << content_tag(:li, content_tag(:span, n), class: "active")
         elsif n > 0 && n <= num
           result << pagination_link(n, n, arg, args)
         end
       end
-      result << content_tag(:li, link_to("..."), class: "disabled")      if to < num - 1
+      result << content_tag(:li, content_tag(:span, "..."), class: "disabled")      if to < num - 1
       result << pagination_link(num, num, arg, args)     if to < num
       result << pagination_link(nstr, this+1, arg, args) if this < num
 
