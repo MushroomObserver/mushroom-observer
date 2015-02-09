@@ -7,6 +7,20 @@ html, body{
     font-size: 13px;
 }
 
+/* Small Devices, Tablets */
+@media only screen and (max-width : 768px) {
+    .container { /*use full screen on small size screens*/
+        width: 100%;
+    }
+}
+
+/* Medium Devices, Desktops */
+@media screen and (max-width : 992px) {
+    .container {  /*use full screen on medium size screens*/
+        width: 100%;
+    }
+}
+
 /*
  * Off Canvas
  * --------------------------------------------------
@@ -56,13 +70,10 @@ html, body{
     }
 }
 
-
-/*bootstrap overrides*/
-
-
-.pagination {
-    margin-top: 5px;
-    margin-bottom: 5px;
+.no-default-appearance { /*overrides browsers default views on elements*/
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
 }
 /*end bootstrap overrides*/
 
@@ -101,7 +112,7 @@ html, body{
 }
 
 .pad-bottom {
-    padding-bottom: 1em;
+    padding-bottom: .25em;
 }
 
 .pad-top {
@@ -139,14 +150,28 @@ html, body{
 
 /*don't force log items to be a certain height on mobile devices because they are stacked on top of each other*/
 @media screen and (max-width: 767px) {
-.rss-log-item{
-    height: auto;
+.rss-box-details{
+    height: auto !important;
 }
 }
 
-.rss-title, .rss-detail {
+
+.rss-fancy-time {
+     position: absolute;
+     top: -10px;
+     right: 2px;
+     color: grey;
+ }
+
+
+.rss-detail {
     margin-top:5px;
     margin-bottom:5px;
+    text-align:center;
+}
+
+.rss-where, .rss-what {
+    text-align: center;
 }
 
 
@@ -159,11 +184,19 @@ html, body{
 
 
 /*Themeable options below */
-/* Banner colors */
+
 a {
     color: #205080
 }
 
+.btn-default {
+    background-color: rgba(224, 224, 224, 0.49);
+}
+
+span.input-group-addon
+{
+    background-color: white;
+}
 
 #banner {
     padding-top: 5px;
@@ -171,17 +204,11 @@ a {
     border-bottom: 2px solid;
     font: small-caps 25px/25px "Times New Roman", serif;
     text-align: center;
-}
-
-#banner a {
-    text-decoration: none;
-}
-
-#banner {
     background-color: #cc2616; color: #FAEBD4;
 }
 
 #banner a {
+    text-decoration: none;
     color: #FAEBD4;
 }
 
@@ -221,4 +248,118 @@ div.color-block div.row.color-block-item:nth-child(odd) > div > div {
     background-color: #205080;
     box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
     transition: width 0.6s ease 0s;
+}
+
+/*pagination*/
+.pagination {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.pagination > li:first-child > a, .pagination > li:first-child > span,
+.pagination-sm > li:first-child > a, .pagination-sm > li:first-child > span,
+.pagination-sm > li:last-child > a, .pagination-sm > li:last-child > span {
+    border-radius: 0 !important;
+}
+.pager
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+    background-color: #959595;
+    border-color: #B6B6B6;
+}
+
+/*input group select fix */
+
+.input-group-btn > select {
+    height: 34px;
+    padding-right: 15px;
+    background-color: rgba(211, 211, 211, 0.22);
+}
+
+/*icon add-on*/
+.center-block {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.input-group .icon-addon .form-control {
+    border-radius: 0;
+}
+
+.icon-addon {
+    position: relative;
+    color: #555;
+    display: block;
+}
+
+.icon-addon:after,
+.icon-addon:before {
+    display: table;
+    content: " ";
+}
+
+.icon-addon:after {
+    clear: both;
+}
+
+.icon-addon.addon-md .glyphicon,
+.icon-addon .glyphicon,
+.icon-addon.addon-md .fa,
+.icon-addon .fa {
+    position: absolute;
+    z-index: 10;
+    left: 10px;
+    font-size: 14px;
+    width: 20px;
+    margin-left: -2.5px;
+    text-align: center;
+    padding: 10px 0;
+    top: 1px;
+    color: lightgrey;
+}
+
+.icon-addon.addon-lg .form-control {
+    line-height: 1.33;
+    font-size: 18px;
+    padding: 10px 16px 10px 40px;
+}
+
+.icon-addon.addon-sm .form-control {
+    padding: 5px 10px 5px 28px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.icon-addon.addon-lg .fa,
+.icon-addon.addon-lg .glyphicon {
+    font-size: 18px;
+    margin-left: 0;
+    left: 11px;
+    top: 4px;
+}
+
+.icon-addon.addon-md .form-control,
+.icon-addon .form-control {
+    padding-left: 30px;
+    float: left;
+    font-weight: normal;
+}
+
+.icon-addon.addon-sm .fa,
+.icon-addon.addon-sm .glyphicon {
+    margin-left: 0;
+    font-size: 12px;
+    left: 5px;
+    top: 1px
+}
+
+.icon-addon .form-control:focus + .glyphicon,
+.icon-addon:hover .glyphicon,
+.icon-addon .form-control:focus + .fa,
+.icon-addon:hover .fa {
+    color: #2580db;
 }

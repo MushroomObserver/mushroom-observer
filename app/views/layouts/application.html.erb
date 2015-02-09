@@ -13,21 +13,21 @@
   <meta property="og:title" content="Mushroom Observer"/>
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
   <%=
-    css = MO.default_theme
-    if is_in_admin_mode?
-      css = 'Admin'
-    elsif browser.bot?
       css = MO.default_theme
-    elsif MO.themes.member?(controller.action_name)
-      # when looking at a theme's info page render it in that theme
-      css = controller.action_name
-    elsif @user
-      css = @user.theme
-      css = MO.themes.sample unless MO.themes.member?(css)
-    end
-    stylesheet_link_tag("bootstrap") +
-    stylesheet_link_tag("custom") #+
-    #stylesheet_link_tag(css)  ##NOTE: Disabling this for now to work with clean CSS.
+      if is_in_admin_mode?
+        css = 'Admin'
+      elsif browser.bot?
+        css = MO.default_theme
+      elsif MO.themes.member?(controller.action_name)
+        # when looking at a theme's info page render it in that theme
+        css = controller.action_name
+      elsif @user
+        css = @user.theme
+        css = MO.themes.sample unless MO.themes.member?(css)
+      end
+      stylesheet_link_tag("bootstrap") +
+              stylesheet_link_tag("custom") #+
+      #stylesheet_link_tag(css)  ##NOTE: Disabling this for now to work with clean CSS.
   %>
   <%= @header if @header %>
 </head>
@@ -35,7 +35,7 @@
 <div class="container">
   <div class="row row-offcanvas row-offcanvas-left">
     <!--NAVIGATION-->
-    <div class="col-xs-6 col-sm-2 sidebar-offcanvas color1" id="navigation">
+    <div class="col-xs-6 col-lg-2 col-sm-2 sidebar-offcanvas color1" id="navigation">
       <div id="banner">
         <%= link_to(:app_banner.t, browser.bot? ? "/sitemap/index.html" : "/") %>
       </div>
@@ -83,76 +83,76 @@
       </div>
 
       <% if @user.nil? %>
-        <div class="group">
-          <%= :app_account.t %>:
-          <div class="pad-left">
-            <%= link_to(:app_login.t, :controller => 'account', :action => 'login') %>
-            <%= link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %>
-          </div>
-        </div>
-      <% else %>
-        <div class="group">
-          <%= :app_current_user.t %>:
-          <div class="pad-left">
-            <%= h(@user.login) %>
-            <%= link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %>
-            <%= link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %>
-            <%= link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %>
-            <%= link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %>
-            <%= link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
-            <%= link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general') %>
-            <%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
-          </div>
-        </div>
-
-        <% if @user.admin %>
           <div class="group">
-            <%= :app_admin.t %>:
-            <% if is_in_admin_mode? %>
-              <div class="pad-left">
-                <%= link_to(:app_users.t, {:controller => 'observer', :action => 'users_by_name'}) %>
-                <%= link_to(:change_banner_title.t, :controller => 'observer', :action => 'change_banner') %>
-                <%= link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %>
-                <%= link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %>
-                <%= link_to(:account_manager_title.t, :controller => 'account', :action => 'manager') %>
-                <%= link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %>
-              </div>
-            <% else %>
-              <div class="pad-left">
-                <%= link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %>
-              </div>
-            <% end %>
+            <%= :app_account.t %>:
+            <div class="pad-left">
+              <%= link_to(:app_login.t, :controller => 'account', :action => 'login') %>
+              <%= link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %>
+            </div>
           </div>
-        <% end %>
+      <% else %>
+          <div class="group">
+            <%= :app_current_user.t %>:
+            <div class="pad-left">
+              <%= h(@user.login) %>
+              <%= link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %>
+              <%= link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %>
+              <%= link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %>
+              <%= link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %>
+              <%= link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
+              <%= link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general') %>
+              <%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
+            </div>
+          </div>
+
+          <% if @user.admin %>
+              <div class="group">
+                <%= :app_admin.t %>:
+                <% if is_in_admin_mode? %>
+                    <div class="pad-left">
+                      <%= link_to(:app_users.t, {:controller => 'observer', :action => 'users_by_name'}) %>
+                      <%= link_to(:change_banner_title.t, :controller => 'observer', :action => 'change_banner') %>
+                      <%= link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %>
+                      <%= link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %>
+                      <%= link_to(:account_manager_title.t, :controller => 'account', :action => 'manager') %>
+                      <%= link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %>
+                    </div>
+                <% else %>
+                    <div class="pad-left">
+                      <%= link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %>
+                    </div>
+                <% end %>
+              </div>
+          <% end %>
       <% end %>
 
       <% unless browser.bot? %>
-        <div class="group">
-          <%= :app_languages.t %>:
-          <div class="pad-left">
-            <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-              <%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-
-      <% if Rails.env == "development" || is_reviewer?
-        layouts = []
-        for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.html.erb")
-          layouts << $1 if file.match(/(app\w+)\.html\.erb/)
-        end
-        if layouts.length > 1 %>
           <div class="group">
-            Layouts:
+            <%= :app_languages.t %>:
             <div class="pad-left">
-              <% for layout in layouts.sort
-                layout2 = layout == 'application' ? 'old' : layout %>
-                <%= link_to(layout2, h(reload_with_args(:user_theme => layout))) %>
+              <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
+                  <%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %>
               <% end %>
             </div>
           </div>
-        <% end %>
+      <% end %>
+
+      <% if Rails.env == "development" || is_reviewer?
+           layouts = []
+           for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.html.erb")
+             layouts << $1 if file.match(/(app\w+)\.html\.erb/)
+           end
+           if layouts.length > 1 %>
+              <div class="group">
+                Layouts:
+                <div class="pad-left">
+                  <% for layout in layouts.sort
+                       layout2 = layout == 'application' ? 'old' : layout %>
+                      <%= link_to(layout2, h(reload_with_args(:user_theme => layout))) %>
+                  <% end %>
+                </div>
+              </div>
+          <% end %>
       <% end %>
 
       <div class="group">
@@ -170,11 +170,11 @@
         <%= :app_preferred_browser.t %>:
         <a href='http://www.mozilla.com/firefox/'>FireFox</a>
         <% if @invalid.nil? %>
-          <p>
-            <a href="http://validator.w3.org/check?uri=referer"><img
-            src="http://www.w3.org/Icons/valid-xhtml10"
-            alt="Valid XHTML 1.0 Transitional" height="31" width="88" border="0"/></a>
-          </p>
+            <p>
+              <a href="http://validator.w3.org/check?uri=referer"><img
+              src="http://www.w3.org/Icons/valid-xhtml10"
+              alt="Valid XHTML 1.0 Transitional" height="31" width="88" border="0"/></a>
+            </p>
         <% end %>
       </div>
     </div>
@@ -192,7 +192,7 @@
           </p>
         </div>
       </div>
-      <!--BANNER-->
+      <!--callout-->
       <div class="row">
         <div class="col-xs-12">
           <% if is_in_admin_mode? %>
@@ -200,124 +200,136 @@
           <% end %>
           <% banner = :app_banner_box.t
              if banner.to_s.length > 1 %>
-              <div id="message_banner" class="center-text">
+              <blockquote id="message_banner" class="center-text">
                 <%= banner %>
-              </div>
+              </blockquote>
           <% end %>
         </div>
       </div>
 
       <!--SEARCH BAR-->
       <div id="search_bar_row" class="row">
-        <div class="col-sm-12">
-          <div id="search_bar" class="pad-top">
-            <%= form_tag(:controller => 'observer', :action => 'pattern_search') do %>
-              <b><%= :app_find.t %></b>:&nbsp;
-              <%= text_field(:search, :pattern, :size => 30,
-                             :value => session[:pattern]) %>
+
+        <div class="col-lg-8">
+          <%= form_tag(:controller => 'observer', :action => 'pattern_search') do %>
+              <div class="input-group">
+                <div class="icon-addon addon-sm">
+                  <%= text_field(:search, :pattern, value: session[:pattern], class: "form-control", placeholder: :app_find.t) %>
+                  <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
+                </div>
+                 <span class="input-group-btn">
               <%= options = [
-                [:COMMENTS.l, :comment],
-                [:HERBARIA.l, :herbarium],
-                [:IMAGES.l, :image],
-                [:LOCATIONS.l, :location],
-                [:NAMES.l, :name],
-                [:OBSERVATIONS.l, :observation],
-                [:PROJECTS.l, :project],
-                [:SPECIES_LISTS.l, :species_list],
-                [:SPECIMENS.l, :specimen],
-                [:USERS.l, :user],
-                [:app_search_google.l, :google],
+                      [:COMMENTS.l, :comment],
+                      [:HERBARIA.l, :herbarium],
+                      [:IMAGES.l, :image],
+                      [:LOCATIONS.l, :location],
+                      [:NAMES.l, :name],
+                      [:OBSERVATIONS.l, :observation],
+                      [:PROJECTS.l, :project],
+                      [:SPECIES_LISTS.l, :species_list],
+                      [:SPECIMENS.l, :specimen],
+                      [:USERS.l, :user],
+                      [:app_search_google.l, :google],
               ].sort
-              select(:search, :type, options,
-                     :selected => session[:search_type] || :observation) %>
-              <%= submit_tag :app_search.l %>
-              <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer',
-                          :action => 'advanced_search_form') %>
-              <% if @timer_start %>
-                <span id="timer">
-                  <%=
-                    @timer_end ||= Time.now
-                    secs = '%.2f' % (@timer_end.to_f - @timer_start.to_f)
-                    @timer_start = nil
-                    "(#{:app_index_timer.t(:seconds => secs, :num => @num_results.to_i)})"
-                    #'(' + :app_timer.t(:seconds => secs) + ')' TODO: why was this here?
-                  %>
-                </span>
-              <% end %>
+                  select(:search, :type, options_for_select(options, session[:search_type] || :observation), {},
+                         {class: "btn btn-default"}) %>
+
+                   <%= submit_tag :app_search.l, class: "btn btn-default" %>
+                 </span>
+              </div>
+          <% end %>
+        </div>
+        <div class="col-lg-4">
+          <div>
+            <% if @timer_start %>
+                <div id="timer">
+                  <small>
+                    <%=
+                        @timer_end ||= Time.now
+                        secs = '%.2f' % (@timer_end.to_f - @timer_start.to_f)
+                        @timer_start = nil
+                        "(#{:app_index_timer.t(:seconds => secs, :num => @num_results.to_i)})"
+                    %>
+                  </small>
+                </div>
             <% end %>
+          <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer',
+                      :action => 'advanced_search_form') %>
           </div>
         </div>
-        <div class="col-xs-12">
-          <div id="flashes">
-            <% if flash_notices? %>
+
+      <div class="col-xs-12">
+
+        <div id="flashes">
+          <% if flash_notices? %>
               <%= boxify(flash_notice_level) do %>
-                <%= begin
-                  flash_get_notices # .to_s.encode('utf-8')
-                rescue
-                  flash_get_notices # .to_s.force_encoding('utf-8')
-                end %>
+                  <%= begin
+                        flash_get_notices # .to_s.encode('utf-8')
+                      rescue
+                        flash_get_notices # .to_s.force_encoding('utf-8')
+                      end %>
               <% end %>
-            <% end
-            flash_clear %>
-          </div>
+          <% end
+             flash_clear %>
         </div>
       </div>
-      <!--END SEARCH BAR-->
+    </div>
+    <!--END SEARCH BAR-->
 
-      <div id="content" class="row">
+    <div id="content" class="row">
 
-        <!--CONTENT-->
-        <div class="col-xs-12" id="Title">
-          <h3 class="text-center">
-            <%= @title %>
-          </h3>
+      <!--CONTENT-->
+      <div class="col-xs-12" id="Title">
+        <h3 class="text-center">
+          <%= @title %>
+        </h3>
+      </div>
+      <div id="right_tabs" class="col-xs-12">
+        <%= @right_tabs ? @right_tabs.safe_join(safe_br) : '' %>
+      </div>
+      <div id="left_tabs" class="col-xs-12">
+        <div class="border-bottom pad-bottom">
+          <%= render_tab_sets %>
         </div>
-        <div id="right_tabs" class="col-sm-12">
-          <%= @right_tabs ? @right_tabs.safe_join(safe_br) : '' %>
-        </div>
-        <div id="left_tabs" class="col-sm-12">
-          <div class="border-bottom margin-bottom pad-bottom">
-            <%= render_tab_sets %>
-          </div>
-        </div>
-        <div class="col-sm-12">
-            <%= yield %>
-        </div>
-        <!--END CONTENT-->
+      </div>
+      <div class="col-xs-12">
+        <%= yield %>
+      </div>
+      <!--END CONTENT-->
 
-        <!--LANGUAGE TAGS-->
-        <% lang = Language.find_by_locale(I18n.locale)
-        if lang and (!lang.official or Language.tracking_usage) %>
+      <!--LANGUAGE TAGS-->
+      <% lang = Language.find_by_locale(I18n.locale)
+         if lang and (!lang.official or Language.tracking_usage) %>
           <div id="translators_credit" class="col-xs-12">
             <% if !lang.official %>
-              <%= :app_translators_credit.t %>:
-              <%= ids_and_names = lang.top_contributors(5)
-              user_links = ids_and_names.map do |id, name|
-                user_link(id, name)
-              end.safe_join(', ')
-              if ids_and_names.length == 5
-                user_links += ', ' + :app_translators_credit_and_others.t
-              end
-              user_links %><br/>
+                <%= :app_translators_credit.t %>:
+                <%= ids_and_names = lang.top_contributors(5)
+                    user_links = ids_and_names.map do |id, name|
+                      user_link(id, name)
+                    end.safe_join(', ')
+                    if ids_and_names.length == 5
+                      user_links += ', ' + :app_translators_credit_and_others.t
+                    end
+                    user_links %><br/>
             <% end %>
             <% if Language.tracking_usage
-              file = Language.save_tags %>
-              <%= link_to(:app_edit_translations_on_page.t, :controller => :translation,
-                          :action => :edit_translations, :page => file) %> |
-              <%= link_to(:app_edit_translations.t, :controller => :translation,
-                          :action => :edit_translations) %>
+                 file = Language.save_tags %>
+                <%= link_to(:app_edit_translations_on_page.t, :controller => :translation,
+                            :action => :edit_translations, :page => file) %> |
+                <%= link_to(:app_edit_translations.t, :controller => :translation,
+                            :action => :edit_translations) %>
             <% end %>
           </div>
-        <% end %>
-        <!--END LANGUAGE TAGS-->
+      <% end %>
+      <!--END LANGUAGE TAGS-->
 
-      </div>
     </div>
   </div>
 </div>
+</div>
 
 <!--JAVASCRIPT-->
-<%= javascript_includes.map {|f| javascript_include_tag(f)}.safe_join %>
+<%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <%= javascript_tag(injected_javascripts.join(";")) %>
 <!--Navigation slide out for mobile-->
@@ -330,21 +342,21 @@
     });
 </script>
 <% if Rails.env == "production" %>
-  <script>
-    (function (i, s, o, g, r, a, m) {
-      i['GoogleAnalyticsObject'] = r;
-      i[r] = i[r] || function () {
-        (i[r].q = i[r].q || []).push(arguments)
-      }, i[r].l = 1 * new Date();
-      a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-      a.async = 1;
-      a.src = g;
-      m.parentNode.insertBefore(a, m)
-    })
-    (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-    ga('create', 'UA-1916187-1', 'auto');
-    ga('send', 'pageview');
-  </script>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })
+        (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-1916187-1', 'auto');
+        ga('send', 'pageview');
+    </script>
 
 <% end %>
 <!--END JAVASCRIPT-->
