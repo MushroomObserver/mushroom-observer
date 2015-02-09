@@ -334,4 +334,13 @@ class ProjectControllerTest < FunctionalTestCase
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
   end
+
+  def test_changing_project_name
+    login("rolf")
+    post(:edit_project, id: 1, project: {title: "New Project", summary: "New Summary"})
+    assert_flash_success
+    project = Project.find(1)
+    assert_equal("New Project", project.title)
+    assert_equal("New Summary", project.summary)
+  end
 end

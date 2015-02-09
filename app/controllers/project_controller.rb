@@ -229,9 +229,10 @@ class ProjectController < ApplicationController
         xargs[:set_summary] = @summary if @project_summary != @summary
         if @title.blank?
           flash_error(:add_project_need_title.t)
-        elsif Project.find_by_title(@title) != @project
+        elsif new_project = Project.find_by_title(@title) and
+              new_project != @project
           flash_error(:add_project_already_exists.t(:title => @title))
-        elsif !@project.update_attributes(params[:project])
+        elsif !@project.update_attributes(title: @title, summary: @summary)
           flash_object_errors(@project)
         else
           if !xargs.empty?
