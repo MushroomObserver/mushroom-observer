@@ -11,7 +11,7 @@
 %>
 
 <%= paginate_block(@pages) do %>
-  <% if @objects.length > 0 %>
+  <% if @objects && @objects.length > 0 %>
     <table cellpadding="5" cellspacing="0" width="100%">
       <% odd_or_even = 0
       for herbarium in @objects
