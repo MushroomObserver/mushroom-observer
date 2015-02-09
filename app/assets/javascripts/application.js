@@ -7,3 +7,4 @@
 //= require image_vote
 //= require image_export
 //= require validate_file_input_fields
+//= require box_resizer
