@@ -48,7 +48,7 @@ done
 ################################################################################
 
 function verbose {
-  (( $VERBOSE )) && echo "$*"
+  (( ! $VERBOSE )) || echo "$*"
 }
 
 function cache_file {
