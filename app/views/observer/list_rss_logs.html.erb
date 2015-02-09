@@ -1,55 +1,34 @@
 <%
    @title = :rss_log_title.t.nowrap
-
-   form = form_tag(add_query_param(:action => 'index_rss_log'))
-   form += :rss_show.t + ' '
-   if @types == ['all']
-     form += :rss_all.t
-   else
-     help = :rss_all_help.t
-     form += link_with_query(:rss_all.t,
-                             {:action => 'index_rss_log', :type => 'all'}, {:title => help})
-   end
-   for type in RssLog.all_types.map(&:to_s)
-     checked = @types.include?(type) || @types == ['all']
-     form += ' | '
-     form += check_box_tag("show_#{type}", '1', checked) + ' '
-     str = :rss_one.t(:type => type.to_sym)
-     if @types == [type]
-       form += str
-     else
-       help = :rss_one_help.t(:type => type.to_sym)
-       form += link_with_query(str,
-                               {:action => 'index_rss_log', :type => type}, {:title => help})
-     end
-   end
-   form += indent + submit_tag(:SUBMIT.t)
-   form += '</form>'.html_safe
-
-   custom_tab_set(form)
+   custom_tab_set(render(:partial => "rss_log_tabset"))
    new_tab_set(@links)
-
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
-
-
+<style>
+  .tab_set {  /*Todo, figure out how to make the links tabset a partial view */
+      text-align: right;
+  }
+</style>
 <div class="row">
-
   <div class="col-xs-12">
+    <div class="text-center">
         <%= pagination_numbers(@pages) %>
-  </div>
-  <div class="col-xs-12 color-block">
-    <div class="results">
-    <% @objects.each do |rss_log| %>
-        <div class="col-sm-4 color-block-item">
-          <%= render(:partial => 'shared/matrix_box', :locals => {
-                                                            :object => rss_log
-                                                    }) %>
-        </div>
-    <% end %>
     </div>
   </div>
+</div>
+<div class="row results">
+  <% @objects.each do |rss_log| %>
+      <div class="col-sm-4">
+        <%= render(:partial => 'shared/matrix_box', :locals => {
+                                                          :object => rss_log
+                                                  }) %>
+      </div>
+  <% end %>
+</div>
+<div class="row">
   <div class="col-xs-12">
+    <div class="text-center">
         <%= pagination_numbers(@pages) %>
+    </div>
   </div>
 </div>
