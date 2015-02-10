@@ -2507,6 +2507,17 @@ class ObserverControllerTest < FunctionalTestCase
     assert(4 <= obs.length)
     query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
 
+    # Add specimen to fourth obs for testing purposes.
+    login("mary")
+    fourth = obs[3]
+    assert_equal(10, fourth.id)
+    fourth.specimens << Specimen.create!(
+      herbarium: herbaria(:nybg),
+      when: Time.now,
+      user: mary,
+      herbarium_label: "Mary #1234"
+    )
+
     get(:download_observations, q: query.id.alphabetize)
     assert_no_flash
     assert_response(:success)
@@ -2530,10 +2541,10 @@ class ObserverControllerTest < FunctionalTestCase
       "Exported 1st column incorrect")
     fourth_row = rows[last_expected_index].chop
     assert_equal(
-      "10,2,mary,Mary Newbie,2010-07-22,,1,Fungi,,Kingdom,0.0,2," \
+      "10,2,mary,Mary Newbie,2010-07-22,,Mary #1234,1,Fungi,,Kingdom,0.0,2," \
         "USA,California,,Burbank," \
         "34.1622,-118.3521,,34.22,34.15,-118.29,-118.37,294,148,X,",
-      fourth_row.iconv('utf-8'), "Exported 4th row incorrect"
+      fourth_row.iconv("utf-8"), "Exported 4th row incorrect"
     )
 
     post(:download_observations, q: query.id.alphabetize, format: "raw",

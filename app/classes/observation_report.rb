@@ -60,6 +60,7 @@ module ObservationReport
     LOC_WEST = 23
     LOC_HIGH = 24
     LOC_LOW = 25
+    SPEC_LABEL = 26
 
     def rows_without_location
       query.select_rows(
@@ -134,6 +135,36 @@ module ObservationReport
 
     def all_rows
       rows_with_location + rows_without_location
+    end
+
+    def all_rows_with_herbarium_labels
+      add_herbarium_labels(all_rows)
+    end
+
+    # Do second query in specimens table to look up original herbarium label
+    # for each observation.  Joins labels together into one string if there
+    # are multiple specimens.
+    def add_herbarium_labels(rows)
+      ids = rows.map(&:first)
+      data = Specimen.connection.select_rows %(
+        SELECT os.observation_id, s.herbarium_label
+        FROM specimens s, observations_specimens os
+        WHERE os.observation_id IN (#{ids.join(',')})
+          AND os.specimen_id = s.id
+      )
+      labels = {}
+      for id, label in data
+        list = labels[id] ||= []
+        list << label
+      end
+      rows.each do |row|
+        if list = labels[row.first]
+          row[SPEC_LABEL] = list.join(", ")
+        else
+          row[SPEC_LABEL] = nil
+        end
+      end
+      return rows
     end
 
     def clean_boolean(val)
@@ -216,6 +247,7 @@ module ObservationReport
         user_name
         collection_date
         has_specimen
+        original_label
         consensus_name_id
         consensus_name
         consensus_author
@@ -242,13 +274,14 @@ module ObservationReport
     end
 
     def rows
-      return all_rows.map do |row|
+      return all_rows_with_herbarium_labels.map do |row|
         observation_id         = clean_integer(row[OBS_ID])
         user_id                = clean_integer(row[USER_ID])
         user_login             = clean_string(row[USER_LOGIN])
         user_name              = clean_string(row[USER_NAME])
         collection_date        = clean_string(row[OBS_WHEN])
         has_specimen           = clean_boolean(row[OBS_SPECIMEN])
+        original_label         = clean_string(row[SPEC_LABEL])
         consensus_name_id      = clean_integer(row[NAME_ID])
         consensus_name         = clean_string(row[NAME_TEXT_NAME])
         consensus_author       = clean_string(row[NAME_AUTHOR])
@@ -275,6 +308,7 @@ module ObservationReport
           user_name,
           collection_date,
           has_specimen,
+          original_label,
           consensus_name_id,
           consensus_name,
           consensus_author,
