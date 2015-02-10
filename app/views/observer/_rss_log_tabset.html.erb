@@ -1,6 +1,6 @@
 <%=form_tag(add_query_param(:action => 'index_rss_log'))%>
 <div class="input-group">
-  <%=content_tag(:span, :rss_show.t, class: "input-group-addon")%>
+  <%=content_tag(:span, :rss_show.t, class: "input-group-addon border-radius-none")%>
   <span class="input-group-addon">
  <%= if @types == ['all']
        :rss_all.t
@@ -22,7 +22,7 @@
           </span>
   <%end%>
 
-      <span class="input-group-btn">
+      <span class="input-group-btn border-radius-none">
         <%=submit_tag(:SUBMIT.t, class: "btn btn-default")%>
       </span>
 </div><!-- /input-group -->
