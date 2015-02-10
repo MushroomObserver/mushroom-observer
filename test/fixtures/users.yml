@@ -13,11 +13,11 @@ rolf:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 2
+  keep_filenames: 3
   image_id: 13
 
 # Mary has no images and no herbaria
@@ -33,11 +33,11 @@ mary:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # keep_filenames: User.keep_filenames[:keep_and_show]
-  keep_filenames: 0
+  keep_filenames: 1
 
 # Junk gets denied
 junk:
@@ -51,11 +51,11 @@ junk:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 2
+  keep_filenames: 3
 
 # Need third for testing votes
 dick:
@@ -70,11 +70,11 @@ dick:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 2
+  keep_filenames: 3
 
 # Need fourth for testing votes
 katrina:
@@ -89,9 +89,9 @@ katrina:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
   keep_filenames: 2
 
@@ -108,13 +108,13 @@ roy:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # location_format: User.location_formats[:scientific]
-  location_format: 1
+  location_format: 2
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 2
+  keep_filenames: 3
 
 spammer:
   id: 7
@@ -128,8 +128,8 @@ spammer:
   created_here: true
   locale: en-US
   # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 0
+  thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
-  image_size: 0
+  image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 2
+  keep_filenames: 3
