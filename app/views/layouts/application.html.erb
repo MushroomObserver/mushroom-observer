@@ -31,8 +31,21 @@
   %>
   <%= @header if @header %>
 </head>
-<body>
-<div class="container">
+<body class="container">
+  <!--callout-->
+  <div class="row hidden-xs">
+        <div class="col-xs-12">
+          <% if is_in_admin_mode? %>
+              <div class="text-danger">DANGER: You are in administrator mode. Proceed with caution.</div>
+          <% end %>
+          <% banner = :app_banner_box.t
+             if banner.to_s.length > 1 %>
+              <blockquote id="message_banner" class="center-text" style="font-size: 1em; margin-bottom: 10px;">
+                <%= banner %>
+              </blockquote>
+          <% end %>
+        </div>
+      </div>
   <div class="row row-offcanvas row-offcanvas-left">
     <!--NAVIGATION-->
     <div class="col-xs-6 col-lg-2 col-sm-2 sidebar-offcanvas color1" id="navigation">
@@ -181,7 +194,7 @@
     <!--END NAVIGATION-->
 
     <!--Toggle navigation button for mobile-->
-    <div class="col-xs-12 col-sm-10">
+    <div id="right_side" class="col-xs-12 col-sm-10">
       <div class="row visible-xs">
         <div class="col-xs-12 kill-padding">
           <p class="pull-left ">
@@ -190,25 +203,18 @@
               <span class="glyphicon glyphicon-align-justify"></span>
             </button>
           </p>
-        </div>
-      </div>
-      <!--callout-->
-      <div class="row">
-        <div class="col-xs-12">
-          <% if is_in_admin_mode? %>
-              <div class="text-danger">DANGER: You are in administrator mode. Proceed with caution.</div>
-          <% end %>
-          <% banner = :app_banner_box.t
-             if banner.to_s.length > 1 %>
-              <blockquote id="message_banner" class="center-text">
-                <%= banner %>
-              </blockquote>
-          <% end %>
+          <p class="pull-right ">
+            <button type="button" class="btn btn-lg" data-toggle="search" data-target="#search_bar_row">
+              <span class="sr-only">Toggle Search</span>
+              <span class="glyphicon glyphicon-search"></span>
+            </button>
+          </p>
         </div>
       </div>
 
+
       <!--SEARCH BAR-->
-      <div id="search_bar_row" class="row">
+      <div id="search_bar_row" class="row color1 hidden-xs">
 
         <div class="col-lg-8">
           <%= form_tag(:controller => 'observer', :action => 'pattern_search') do %>
@@ -232,7 +238,7 @@
                       [:app_search_google.l, :google],
               ].sort
                   select(:search, :type, options_for_select(options, session[:search_type] || :observation), {},
-                         {class: "btn btn-default"}) %>
+                         {class: "btn btn-default kill-padding"}) %>
 
                    <%= submit_tag :app_search.l, class: "btn btn-default" %>
                  </span>
@@ -288,7 +294,7 @@
         <%= @right_tabs ? @right_tabs.safe_join(safe_br) : '' %>
       </div>
       <div id="left_tabs" class="col-xs-12">
-        <div class="border-bottom pad-bottom">
+        <div class="pad-bottom">
           <%= render_tab_sets %>
         </div>
       </div>
@@ -326,7 +332,6 @@
     </div>
   </div>
 </div>
-</div>
 
 <!--JAVASCRIPT-->
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
@@ -338,6 +343,10 @@
         jQuery('[data-toggle="offcanvas"]').click(function () {
             jQuery('.row-offcanvas').toggleClass('active');
             jQuery('body').toggleClass('hidden-overflow-x');
+        });
+        jQuery('[data-toggle="search"]').click(function () {
+            var target = $(this).data().target;
+            jQuery(target).toggleClass('hidden-xs');
         });
     });
 </script>

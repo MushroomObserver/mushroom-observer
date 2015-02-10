@@ -1,10 +1,18 @@
 jQuery(document).ready(function () {
     var boxes = jQuery('.rss-box-details');
-    if (!boxes)
-        return;
-    for(var i = 0; i < boxes.length; i = i + 3) {
-        [jQuery(boxes[i]),jQuery(boxes[i+1]), jQuery(boxes[i+2])]
-                            .sort(function (a,b){ return b.height() -a.height() })
-                            .forEach(function(box, i, ary){box.height(ary[0].height())});
+    if (boxes) {
+
+        for (var i = 0; i < boxes.length; i = i + 3) {
+            [jQuery(boxes[i]), jQuery(boxes[i + 1]), jQuery(boxes[i + 2])]
+                .sort(function (a, b) {
+                    return b.height() - a.height()
+                })
+                .forEach(function (box, i, ary) {
+                    box.height(ary[0].height())
+                });
+        }
     }
+
+    jQuery('#navigation').height(jQuery('body').height());
+    jQuery('#right_side').height(jQuery('body').height());
 });
