@@ -37,20 +37,6 @@ class ObserverControllerTest < FunctionalTestCase
       Location.is_unknown?(params[:observation][:place_name]) ||
       params[:observation][:place_name].blank?
   end
-  ##############################################################################
-
-  def test_show_observation_noteless_image
-    obs = observations(:peltigera_rolf_observation)
-    img = images(:rolf_profile_image)
-    assert_nil(img.notes)
-    assert(obs.images.member?(img))
-    get_with_dump(:show_observation, id: obs.id)
-  end
-
-  def test_show_observation_noteful_image
-    obs = observations(:detailed_unknown)
-    get_with_dump(:show_observation, id: obs.id)
-  end
 
   # Test constructing observations in various ways (with minimal namings)
   def generic_construct_observation(params, o_num, g_num, n_num, user = rolf)
@@ -95,6 +81,19 @@ class ObserverControllerTest < FunctionalTestCase
   # ----------------------------
   #  General tests.
   # ----------------------------
+
+  def test_show_observation_noteless_image
+    obs = observations(:peltigera_rolf_observation)
+    img = images(:rolf_profile_image)
+    assert_nil(img.notes)
+    assert(obs.images.member?(img))
+    get_with_dump(:show_observation, id: obs.id)
+  end
+
+  def test_show_observation_noteful_image
+    obs = observations(:detailed_unknown)
+    get_with_dump(:show_observation, id: obs.id)
+  end
 
   def test_page_loads
     get_with_dump(:index)
@@ -1128,8 +1127,9 @@ class ObserverControllerTest < FunctionalTestCase
     QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
-    notifications = Notification.where(flavor: :name, obj_id: name.id)
-    assert_equal(2, notifications.length)
+    flavor = Notification.flavors[:name]
+    notifications = Notification.where(flavor: flavor, obj_id: name.id)
+    assert_equal(2, notifications.length, "Should be 2 name notifications for name ##{name.id}")
 
     where = "Simple, Massachusetts, USA"
     generic_construct_observation({

@@ -7,7 +7,7 @@ fungi_version_1:
   user_id: 1
   version: 1
 #  rank: Name.ranks[:Kingdom] # Why doesn't this work? (It works in names.yml.)
-  rank: 13
+  rank: 14
   text_name: Fungi
   display_name: '**__Fungi__**'
   search_name: Fungi sp.
@@ -21,7 +21,7 @@ coprinus_comatus_version_1:
   user_id: 1
   version: 1
 #  rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Coprinus comatus
   display_name: __Coprinus comatus__
   search_name: Coprinus comatus
@@ -34,7 +34,7 @@ coprinus_comatus_version_2:
   user_id: 1
   version: 2
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Coprinus comatus
   author: '(O.F. Müll.) Pers.'
   display_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
@@ -49,7 +49,7 @@ agaricus_campestris_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Agaricus campestris
   author: L.
   display_name: '**__Agaricus campestris__** L.'
@@ -64,7 +64,7 @@ conocybe_filaris_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Conocybe filaris
   author:
   display_name: '**__Conocybe filaris__**'
@@ -79,7 +79,7 @@ amanita_baccata_arora_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Amanita baccata
   author: sensu Arora
   display_name: '**__Amanita baccata__** sensu Arora'
@@ -94,7 +94,7 @@ amanita_baccata_borealis_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Amanita baccata
   author: sensu Borealis
   display_name: '**__Amanita baccata__** sensu Borealis'
@@ -109,7 +109,7 @@ lepiota_rachodes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lepiota rachodes
   author: Vittad.
   display_name: '**__Lepiota rachodes__** Vittad.'
@@ -124,7 +124,7 @@ lepiota_rhacodes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lepiota rhacodes
   author: Vittad.
   display_name: '**__Lepiota rhacodes__** Vittad.'
@@ -139,7 +139,7 @@ macrolepiota_rachodes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Macrolepiota rachodes
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
@@ -154,7 +154,7 @@ macrolepiota_rhacodes_version_1:
   user_id: 2
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Macrolepiota rhacodes
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
@@ -169,7 +169,7 @@ chlorophyllum_rachodes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Chlorophyllum rachodes
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
@@ -184,7 +184,7 @@ chlorophyllum_rhacodes_version_1:
   user_id: 2
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Chlorophyllum rhacodes
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
@@ -199,7 +199,7 @@ lactarius_alpinus_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lactarius alpinus
   author: Peck
   display_name: '**__Lactarius alpinus__** Peck'
@@ -214,7 +214,7 @@ lactarius_alpigenes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lactarius alpigenes
   author: Kühn.
   display_name: __Lactarius alpigenes__ Kühn.
@@ -230,7 +230,7 @@ lactarius_kuehneri_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lactarius kuehneri
   author: Joss.
   display_name: __Lactarius kuehneri__ Joss.
@@ -246,7 +246,7 @@ lactarius_subalpinus_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lactarius subalpinus
   author: Kühn.
   display_name: __Lactarius subalpinus__ Kühn.
@@ -262,7 +262,7 @@ psalliota_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Psalliota
   display_name: '**__Psalliota__**'
   search_name: Psalliota sp.
@@ -276,7 +276,7 @@ agaricus_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Agaricus
   display_name: '**__Agaricus__**'
   search_name: Agaricus sp.
@@ -290,7 +290,7 @@ agaricus_campestrus_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Agaricus campestrus
   author: L.
   display_name: '**__Agaricus campestrus__** L.'
@@ -305,7 +305,7 @@ agaricus_campestras_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Agaricus campestras
   author: L.
   display_name: '**__Agaricus campestras__** L.'
@@ -320,7 +320,7 @@ agaricus_campestros_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Agaricus campestros
   author: L.
   display_name: '**__Agaricus campestros__** L.'
@@ -335,7 +335,7 @@ coprinellus_micaceus_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Coprinellus micaceus
   display_name: __Coprinellus micaceus__
   search_name: Coprinellus micaceus
@@ -348,7 +348,7 @@ coprinellus_micaceus_version_2:
   user_id: 1
   version: 2
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Coprinellus micaceus
   author: '(Bull.) Vilgalys, Hopple & Jacq. Johnson'
   display_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
@@ -363,7 +363,7 @@ coprinellus_micaceus_no_author_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Coprinellus micaceus
   author: ""
   display_name: '**__Coprinellus micaceus__**'
@@ -378,7 +378,7 @@ strobilurus_diminutivus_no_author_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Strobilurus diminutivus
   display_name: '**__Strobilurus diminutivus__**'
   search_name: Strobilurus diminutivus
@@ -392,7 +392,7 @@ pluteus_petasatus_approved_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Pluteus petasatus
   author: '(Fr.) Gillet'
   display_name: '**__Pluteus petasatus__** (Fr.) Gillet'
@@ -407,7 +407,7 @@ pluteus_petasatus_deprecated_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Pluteus petasatus
   author: '(Fries) Gillet'
   display_name: __Pluteus petasatus__ (Fries) Gillet
@@ -423,7 +423,7 @@ lepiota_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Lepiota
   display_name: '**__Lepiota__**'
   search_name: Lepiota sp.
@@ -437,7 +437,7 @@ chlorophyllum_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Chlorophyllum
   display_name: '**__Chlorophyllum__**'
   search_name: Chlorophyllum sp.
@@ -451,7 +451,7 @@ bugs_bunny_one_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   author: One
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** One'
@@ -466,7 +466,7 @@ bugs_bunny_two_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   author: Two
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** Two'
@@ -481,7 +481,7 @@ russula_brevipes_no_author_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Russula brevipes
   display_name: '**__Russula brevipes__**'
   search_name: Russula brevipes
@@ -495,7 +495,7 @@ russula_brevipes_author_notes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Russula brevipes
   author: Peck
   display_name: '**__Russula brevipes__** Peck'
@@ -510,7 +510,7 @@ russula_cremoricolor_no_author_notes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Russula cremoricolor
   display_name: '**__Russula cremoricolor__**'
   search_name: Russula cremoricolor
@@ -524,7 +524,7 @@ russula_cremoricolor_author_notes_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Russula cremoricolor
   author: Earle
   display_name: '**__Russula cremoricolor__** Earle'
@@ -539,7 +539,7 @@ lentinellus_ursinus_author1_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lentinellus ursinus
   author: Kühner
   display_name: '**__Lentinellus ursinus__** Kühner'
@@ -554,7 +554,7 @@ lentinellus_ursinus_author2_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Lentinellus ursinus
   author: Kuhner
   display_name: '**__Lentinellus ursinus__** Kuhner'
@@ -569,7 +569,7 @@ macrocybe_pegler_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
@@ -584,7 +584,7 @@ macrocybe_titans_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Macrocybe
   author: Titans
   display_name: '**__Macrocybe__** Titans'
@@ -599,7 +599,7 @@ boletus_edulis_version_1:
   user_id: 4
   version: 1
   # rank: Name.ranks[:Species]
-  rank: 3
+  rank: 4
   text_name: Boletus edulis
   author: Bull.
   display_name: '**__Boletus edulis__** Bull.'
@@ -614,7 +614,7 @@ peltigera_version_1:
   user_id: 1
   version: 1
   # rank: Name.ranks[:Family]
-  rank: 9
+  rank: 10
   text_name: Petigera
   display_name: __Petigera__
   search_name: Petigera
@@ -628,7 +628,7 @@ peltigera_version_2:
   user_id: 4
   version: 2
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Peltigera
   author: '(Old) New Auth.'
   citation: Ye Auld Manual of Lichenes, 1800.
@@ -643,7 +643,7 @@ petigera_version_1:
   user_id: 4
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Petigera
   display_name: __Petigera__
   search_name: Petigera sp.
@@ -659,7 +659,7 @@ suillus_version_1:
   user_id: 4
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Suillus
   author: Gray
   display_name: '**__Suillus__** Gray'
@@ -674,7 +674,7 @@ suillus_by_white_version_1:
   user_id: 4
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Suillus
   author: E.B. White
   display_name: '**__Suillus__** E.B. White'
@@ -689,7 +689,7 @@ suilus_version_1:
   user_id: 4
   version: 1
   # rank: Name.ranks[:Genus]
-  rank: 8
+  rank: 9
   text_name: Suilus
   author: E.B. White
   display_name: '**__Suilus__** E.B. White'
@@ -698,4 +698,3 @@ suilus_version_1:
   correct_spelling_id: 43
   deprecated: true
   citation: ''
-

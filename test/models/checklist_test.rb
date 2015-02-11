@@ -73,7 +73,6 @@ class ChecklistTest < UnitTestCase
 
     assert_equal(before_num_genera+1, after_num_genera)
     assert_equal(before_num_species+1, after_num_species)
-
     Observation.create!(name: names(:lactarius_subalpinus))
     Observation.create!(name: names(:lactarius_alpinus))
     data = Checklist::ForUser.new(dick)

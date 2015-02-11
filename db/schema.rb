@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150127220000) do
+ActiveRecord::Schema.define(version: 20150210013007) do
 
   create_table "api_keys", force: true do |t|
     t.datetime "created_at"
@@ -287,7 +287,7 @@ ActiveRecord::Schema.define(version: 20150127220000) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "name_id"
-    t.integer  "review_status",               default: 0
+    t.integer  "review_status",               default: 1
     t.datetime "last_review"
     t.integer  "reviewer_id"
     t.boolean  "ok_for_export",               default: true, null: false
@@ -631,16 +631,16 @@ ActiveRecord::Schema.define(version: 20150127220000) do
     t.text     "alert"
     t.boolean  "email_locations_admin",                   default: false
     t.boolean  "email_names_admin",                       default: false
-    t.integer  "thumbnail_size",                          default: 0
-    t.integer  "image_size",                              default: 0
+    t.integer  "thumbnail_size",                          default: 1
+    t.integer  "image_size",                              default: 3
     t.string   "default_rss_type",             limit: 40, default: "all"
-    t.integer  "votes_anonymous",                         default: 0
-    t.integer  "location_format",                         default: 0
+    t.integer  "votes_anonymous",                         default: 1
+    t.integer  "location_format",                         default: 1
     t.datetime "last_activity"
-    t.integer  "hide_authors",                            default: 0,     null: false
+    t.integer  "hide_authors",                            default: 1,     null: false
     t.boolean  "thumbnail_maps",                          default: true,  null: false
     t.string   "auth_code",                    limit: 40
-    t.integer  "keep_filenames",                          default: 0,     null: false
+    t.integer  "keep_filenames",                          default: 1,     null: false
     t.text     "notes"
     t.text     "mailing_address"
   end

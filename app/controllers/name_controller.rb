@@ -1271,7 +1271,7 @@ class NameController < ApplicationController
   def eol_old # :nologin: :norobots:
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
-    eol_data(['unvetted', 'vetted'])
+    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
     render_xml(:action => "eol", :layout => false)
   end
 
@@ -1279,7 +1279,7 @@ class NameController < ApplicationController
   # Show the data getting sent to EOL
   def eol_preview # :nologin: :norobots:
     @timer_start = Time.now
-    eol_data(['unvetted', 'vetted'])
+    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
     @timer_end = Time.now
   end
 
@@ -1294,7 +1294,7 @@ class NameController < ApplicationController
 
   # Show the data not getting sent to EOL
   def eol_need_review # :norobots:
-    eol_data(['unreviewed'])
+    eol_data(NameDescription.review_statuses.values_at(unreviewed))
     @title = :eol_need_review_title.t
     render(:action => 'eol_preview')
   end
@@ -1308,7 +1308,6 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-#    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list)) # Rails 3
     descs = NameDescription.where(
                               eol_description_conditions(review_status_list))
 
@@ -1331,8 +1330,6 @@ class NameController < ApplicationController
 
     # Get corresponding names.
     name_ids = @descs.keys.map(&:to_s).join(',')
-#    @names = Name.all(:conditions => "id IN (#{name_ids})", # Rails 3
-#                      :order => 'sort_name ASC, author ASC')
     @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
@@ -1493,7 +1490,8 @@ class NameController < ApplicationController
     pass_query_params
     name_id = params[:id].to_s
     if @name = find_or_goto_index(Name, name_id)
-      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
+      flavor = Notification.flavors[:name]
+      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(flavor, name_id, @user.id)
 
       # Initialize form.
       if request.method != "POST"
