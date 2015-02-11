@@ -12,12 +12,9 @@ rolf:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 1
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
   image_id: 13
 
 # Mary has no images and no herbaria
@@ -32,12 +29,9 @@ mary:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # keep_filenames: User.keep_filenames[:keep_and_show]
-  keep_filenames: 3
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
 
 # Junk gets denied
 junk:
@@ -50,12 +44,9 @@ junk:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 1
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
 
 # Need third for testing votes
 dick:
@@ -69,12 +60,9 @@ dick:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 1
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
 
 # Need fourth for testing votes
 katrina:
@@ -88,12 +76,9 @@ katrina:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # keep_filenames: User.keep_filenames[:keep_but_hide]
-  keep_filenames: 2
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:keep_but_hide] %>
 
 # Roy is a scientific user
 roy:
@@ -107,14 +92,10 @@ roy:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # location_format: User.location_formats[:scientific]
-  location_format: 2
-  # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 1
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  location_format: <%= User.location_formats[:scientific] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
 
 spammer:
   id: 7
@@ -127,9 +108,6 @@ spammer:
   contribution: 10
   created_here: true
   locale: en-US
-  # thumbnail_size: User.thumbnail_sizes[:thumbnail]
-  thumbnail_size: 1
-  # image_size: User.image_sizes[:medium]
-  image_size: 3
-  # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 1
+  thumbnail_size: <%= User.thumbnail_sizes[:thumbnail] %>
+  image_size: <%= User.image_sizes[:medium] %>
+  keep_filenames: <%= User.keep_filenames[:toss] %>
