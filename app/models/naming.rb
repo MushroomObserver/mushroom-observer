@@ -161,8 +161,9 @@ class Naming < AbstractModel
       taxa.push(self.name)
       taxa.push(Name.find_by_text_name("Lichen")) if self.name.is_lichen?
       done_user = {}
+      flavor = Notification.flavors[:name]
       for taxon in taxa
-        for n in Notification.where(flavor: :name, obj_id: taxon.id)
+        for n in Notification.where(flavor: flavor, obj_id: taxon.id)
           if n.user.created_here   and
              (n.user != user)      and
              !done_user[n.user_id] and

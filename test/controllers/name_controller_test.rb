@@ -2995,8 +2995,9 @@ class NameControllerTest < FunctionalTestCase
   def test_email_tracking_enable_no_note
     name = names(:conocybe_filaris)
     count_before = Notification.count
+    flavor = Notification.flavors[:name]
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert_nil(notification)
     params = {
       id: name.id,
@@ -3010,7 +3011,7 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
     assert_nil(notification.calc_note(user: rolf,
@@ -3020,8 +3021,9 @@ class NameControllerTest < FunctionalTestCase
   def test_email_tracking_enable_with_note
     name = names(:conocybe_filaris)
     count_before = Notification.count
+    flavor = Notification.flavors[:name]
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert_nil(notification)
     params = {
       id: name.id,
@@ -3037,7 +3039,7 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert(notification)
     assert(notification.note_template)
     assert(notification.calc_note(user: mary,
@@ -3047,8 +3049,9 @@ class NameControllerTest < FunctionalTestCase
   def test_email_tracking_update_add_note
     name = names(:coprinus_comatus)
     count_before = Notification.count
+    flavor = Notification.flavors[:name]
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
     params = {
@@ -3065,7 +3068,7 @@ class NameControllerTest < FunctionalTestCase
     count_after = Notification.count
     assert_equal(count_before, count_after)
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert(notification)
     assert(notification.note_template)
     assert(notification.calc_note(user: rolf,
@@ -3075,8 +3078,9 @@ class NameControllerTest < FunctionalTestCase
   def test_email_tracking_disable
     name = names(:coprinus_comatus)
     count_before = Notification.count
+    flavor = Notification.flavors[:name]
     notification = Notification.
-                find_by_flavor_and_obj_id_and_user_id(:name, name.id, rolf.id)
+                find_by_flavor_and_obj_id_and_user_id(flavor, name.id, rolf.id)
     assert(notification)
     params = {
       id: name.id,
