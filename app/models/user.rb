@@ -308,9 +308,9 @@ class User < AbstractModel
            accessor: :whiny
          )
   as_enum(:keep_filenames,
-           { keep_and_show: 1,
+           { toss: 1,
              keep_but_hide: 2,
-             toss: 3
+             keep_and_show: 3
            },
            source: :keep_filenames,
            with: [],

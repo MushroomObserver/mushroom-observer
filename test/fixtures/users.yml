@@ -17,7 +17,7 @@ rolf:
   # image_size: User.image_sizes[:medium]
   image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 3
+  keep_filenames: 1
   image_id: 13
 
 # Mary has no images and no herbaria
@@ -37,7 +37,7 @@ mary:
   # image_size: User.image_sizes[:medium]
   image_size: 3
   # keep_filenames: User.keep_filenames[:keep_and_show]
-  keep_filenames: 1
+  keep_filenames: 3
 
 # Junk gets denied
 junk:
@@ -55,7 +55,7 @@ junk:
   # image_size: User.image_sizes[:medium]
   image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 3
+  keep_filenames: 1
 
 # Need third for testing votes
 dick:
@@ -74,7 +74,7 @@ dick:
   # image_size: User.image_sizes[:medium]
   image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 3
+  keep_filenames: 1
 
 # Need fourth for testing votes
 katrina:
@@ -92,7 +92,7 @@ katrina:
   thumbnail_size: 1
   # image_size: User.image_sizes[:medium]
   image_size: 3
-  # keep_filenames: User.keep_filenames[:toss]
+  # keep_filenames: User.keep_filenames[:keep_but_hide]
   keep_filenames: 2
 
 # Roy is a scientific user
@@ -114,7 +114,7 @@ roy:
   # location_format: User.location_formats[:scientific]
   location_format: 2
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 3
+  keep_filenames: 1
 
 spammer:
   id: 7
@@ -132,4 +132,4 @@ spammer:
   # image_size: User.image_sizes[:medium]
   image_size: 3
   # keep_filenames: User.keep_filenames[:toss]
-  keep_filenames: 3
+  keep_filenames: 1
