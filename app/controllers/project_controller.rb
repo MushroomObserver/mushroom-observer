@@ -219,7 +219,8 @@ class ProjectController < ApplicationController
       @summary = params[:project][:summary]
       if @title.blank?
         flash_error(:add_project_need_title.t)
-      elsif Project.find_by_title(@title) != @project
+      elsif project2 = Project.find_by_title(@title) and
+            project2 != @project
         flash_error(:add_project_already_exists.t(title: @title))
       elsif !@project.update(whitelisted_project_params)
         flash_object_errors(@project)
