@@ -336,7 +336,9 @@
 <!--JAVASCRIPT-->
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
-<%= javascript_tag(injected_javascripts.join(";")) %>
+  <% injected_javascripts.each do |script| %>
+        <%=javascript_tag(script)%>
+        <%end %>
 <!--Navigation slide out for mobile-->
 <script>
     jQuery(document).ready(function () {

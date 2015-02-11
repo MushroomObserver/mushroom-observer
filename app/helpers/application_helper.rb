@@ -209,13 +209,13 @@ module ApplicationHelper
 
   def herbarium_name_box(default_name="")
     turn_into_herbarium_auto_completer(:specimen_herbarium_name)
-    content_tag(:label, :specimen_herbarium_name.t, :for => :specimen_herbarium_name) + ': ' +
-    text_field(:specimen, :herbarium_name, :value => @herbarium_name, :size => 60)
+    label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t)
+    text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control")
   end
 
   def herbarium_id_box
-    content_tag(:label, :specimen_herbarium_id.t, :for => :specimen_herbarium_id) + ': ' +
-    text_field(:specimen, :herbarium_id, :value => @herbarium_id, :size => 20)
+    label_tag(:specimen_herbarium_id, :specimen_herbarium_id.t)
+    text_field(:specimen, :herbarium_id, value: @herbarium_id, class: "form-control")
   end
 
   def table_column_title(title)
@@ -992,6 +992,8 @@ module ApplicationHelper
   #   <% inject_javascript_at_end %(
   #     this_javascript_will_run_at_end();
   #   ) %>
+  # Important:  Do not use "//" comment lines as they will block code execution
+  #            #when script is minified
   def inject_javascript_at_end(*args)
     @javascript_codes ||= []
     @javascript_codes += args

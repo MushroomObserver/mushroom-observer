@@ -7,9 +7,6 @@
   end
 %>
 
-<table width="1">
-  <tr>
-    <td>
       <%= form_tag(add_query_param(:action => 'edit_observation',
             :id => @observation, :approved_name => @what,
             :approved_where => @place_name), { :multipart => true }) do %>
@@ -26,6 +23,3 @@
 
         <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
       <% end %>
-    </td>
-  </tr>
-</table>
