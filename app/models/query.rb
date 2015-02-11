@@ -1910,7 +1910,7 @@ class Query < AbstractQuery
 
     # If we have to rely on classification strings, just let Name do it, and
     # create a pseudo-query based on ids returned by +name.children+.
-    if all || name.above_genus?
+    if all || !name.at_or_below_genus?
       set = clean_id_set(name.children(all).map(&:id))
       self.where << "names.id IN (#{set})"
 

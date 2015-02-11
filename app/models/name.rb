@@ -134,7 +134,6 @@
 #  unknown::                 "Unknown": instance of Name.
 #  names_for_unknown::       "Unknown": accepted names in local language.
 #  all_ranks::               Ranks: all
-#  eol_ranks::               Ranks: in the order EOL wants them.
 #  ranks_above_genus::       Ranks: above :Genus.
 #  ranks_below_genus::       Ranks: below :Genus.
 #  ranks_above_species::     Ranks: above :Species.
@@ -185,11 +184,8 @@
 #  change_author::           Change author, updating formats.
 #
 #  ==== Taxonomy
-#  above_genus?::            Is ranked above genus?
 #  below_genus?::            Is ranked below genus?
 #  at_or_below_genus?::      Is ranked at or below genus?
-#  above_species?::          Is ranked above species?
-#  below_species?::          Is ranked below species?
 #  is_lichen::               Is this a lichen or lichenicolous fungus?
 #  all_parents::             Array of all parents.
 #  genus::                   Name of genus above this taxon (or nil).
@@ -362,7 +358,6 @@ class Name < AbstractModel
 
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
-#    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4") # Rails 3
     Observation.where("name_id = #{id} AND vote_cache >= 2.4").to_a
   end
 
@@ -469,7 +464,7 @@ class Name < AbstractModel
     str = self[:display_name]
     if User.current and
        User.current.hide_authors == :above_species and
-       RANKS_ABOVE_SPECIES.include?(rank)
+       Name.ranks_above_species.include?(rank)
       str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end
     return str
@@ -481,87 +476,55 @@ class Name < AbstractModel
   #
   ##############################################################################
 
-  RANKS_ABOVE_GENUS    = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
-  RANKS_INSIDE_GENUS   = [:Stirps, :Subsection, :Section, :Subgenus]
-  RANKS_BELOW_SPECIES  = [:Form, :Variety, :Subspecies]
-  RANKS_LE_SPECIES     = RANKS_BELOW_SPECIES + [:Species]
-  RANKS_ABOVE_SPECIES  = RANKS_INSIDE_GENUS + [:Genus] + RANKS_ABOVE_GENUS
-  RANKS_BELOW_GENUS    = RANKS_LE_SPECIES + RANKS_INSIDE_GENUS
-  ALL_RANKS            = RANKS_LE_SPECIES + RANKS_ABOVE_SPECIES + [:Group]
-  EOL_RANKS            = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order,
-                         :Class, :Phylum, :Kingdom] # Why not :Species?
-  EOL_RANKS_FOR_EXPORT = [:Form, :Variety, :Subspecies, :Species, :Genus]
-  EOL_MIN_IMAGE_VOTE   = 2
-  EOL_MIN_OBSERVATION_VOTE = 2.4
-  ALT_RANKS            = { Division: :Phylum }
-
-  # Returns an Array of Symbol's from :Form to :Domain, then :Group.
-  def self.all_ranks
-    ALL_RANKS
-  end
-
-  # Returns a Hash mapping alternative names to standard names (e.g.,
-  # "Division" -> "Phylum").
+  # Returns a Hash mapping alternative ranks to standard ranks (all Symbol's).
   def self.alt_ranks
-    ALT_RANKS
+    { Division: :Phylum }
   end
 
-  # Returns an Array of Symbol's from :Family to :Domain.
+  def self.all_ranks
+    [ :Form, :Variety, :Subspecies, :Species,
+      :Stirps, :Subsection, :Section, :Subgenus, :Genus,
+      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
+      :Group ]
+  end
+
   def self.ranks_above_genus
-    RANKS_ABOVE_GENUS
+    [ :Family, :Order, :Class, :Phylum, :Kingdom, :Domain ]
   end
 
-  # Returns an Array of Symbol's from :Form to :Species.
-  def self.ranks_below_genus
-    RANKS_BELOW_GENUS
-  end
-
-  # Returns an Array of Symbol's from :Genus to :Domain.
   def self.ranks_above_species
-    RANKS_ABOVE_SPECIES
+    [ :Stirps, :Subsection, :Section, :Subgenus, :Genus,
+      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain ]
   end
 
-  # Returns an Array of Symbol's from :Form to :Subspecies.
+  def self.ranks_below_genus
+    [ :Form, :Variety, :Subspecies, :Species,
+      :Stirps, :Subsection, :Section, :Subgenus ]
+  end
+
   def self.ranks_below_species
-    RANKS_BELOW_SPECIES
+    [ :Form, :Variety, :Subspecies ]
   end
 
-  # Returns an Array of Symbol's from :Form to :Kingdom.
-  def self.eol_ranks
-    EOL_RANKS
-  end
-
-  # Is this Name a family or higher?
-  def above_genus?
-    RANKS_ABOVE_GENUS.include?(rank)
-  end
-
-  # Is this Name a subgenus or lower?
   def below_genus?
-    RANKS_BELOW_GENUS.include?(rank)
+    Name.ranks_below_genus.include?(rank) ||
+      rank == :Group && text_name.include?(" ")
   end
 
-  # Is this Name a genus or lower?
   def at_or_below_genus?
-    RANKS_BELOW_GENUS.include?(rank) || rank == :Genus
+    rank == :Genus || below_genus?
   end
 
-  # Is this Name a stirps or higher?
-  def above_species?
-    RANKS_ABOVE_SPECIES.include?(rank)
-  end
-
-  # Is this Name a subspecies or lower?
-  def below_species?
-    RANKS_BELOW_SPECIES.include?(rank)
+  def self.rank_index(rank)
+    Name.all_ranks.index(rank.to_sym)
   end
 
   def rank_index(rank)
-    ALL_RANKS.index(rank.to_sym)
+    Name.all_ranks.index(rank.to_sym)
   end
 
   def self.compare_ranks(a, b)
-    ALL_RANKS.index(a.to_sym) <=> ALL_RANKS.index(b.to_sym)
+    all_ranks.index(a.to_sym) <=> all_ranks.index(b.to_sym)
   end
 
   def is_lichen?
@@ -575,18 +538,18 @@ class Name < AbstractModel
   end
 
   def has_eol_data?
-    if self.ok_for_export and not self.deprecated and EOL_RANKS_FOR_EXPORT.member?(self.rank)
-      for o in self.observations
-        if o.vote_cache and (o.vote_cache >= EOL_MIN_OBSERVATION_VOTE)
+    if ok_for_export && !deprecated && MO.eol_ranks_for_export.member?(rank)
+      for o in observations
+        if o.vote_cache && o.vote_cache >= MO.eol_min_observation_vote
           for i in o.images
-            if i.ok_for_export and i.vote_cache and (i.vote_cache >= EOL_MIN_IMAGE_VOTE)
+            if i.ok_for_export && i.vote_cache && i.vote_cache >= MO.eol_min_image_vote
               return true
             end
           end
         end
       end
       for d in self.descriptions
-        if (d.review_status == :vetted) and d.ok_for_export and d.public
+        if d.review_status == :vetted && d.ok_for_export && d.public
           return true
         end
       end
@@ -640,13 +603,12 @@ class Name < AbstractModel
   # matching genera, it chooses the first accepted one arbitrarily.  If this
   # name is at or above genus already, it returns nil.
   def genus
-    result = nil
-    if self.below_genus?
-      # genera = Name.find_all_by_text_name(self.text_name.split(' ').first)
-      genera = Name.where(text_name: self.text_name.split(' ').first)
-      result = genera.reject(&:deprecated).first || genera.first
+    if below_genus?
+      genus_name = text_name.split(" ").first
+      Name.where(text_name: genus_name).reject(&:deprecated).first
+    else
+      nil
     end
-    return result
   end
 
   # Returns an Array of all Name's in the rank above that contain this Name.
@@ -670,12 +632,12 @@ class Name < AbstractModel
 
     # Try ranks above ours one at a time until we find a parent.
     while all || results.empty?
-      next_rank = ALL_RANKS[rank_index(next_rank) + 1]
+      next_rank = Name.all_ranks[rank_index(next_rank) + 1]
       break if !next_rank || next_rank == :Group
       these = []
 
       # Once we go past genus we need to search the classification string.
-      if RANKS_ABOVE_GENUS.include?(next_rank)
+      if Name.ranks_above_genus.include?(next_rank)
 
         if !lines
           # Check this name's classification first.
@@ -766,7 +728,7 @@ class Name < AbstractModel
     our_index = rank_index(our_rank)
 
     # If we're above genus we need to rely on classification strings.
-    if RANKS_ABOVE_GENUS.include?(our_rank)
+    if Name.ranks_above_genus.include?(our_rank)
 
       # Querying every genus that refers to this ancestor could potentially get
       # expensive -- think of doing children for Eukarya!! -- but I'm not sure
@@ -787,8 +749,9 @@ class Name < AbstractModel
       # Grab all names below our rank.
       elsif all
         # Get set of ranks between ours and genus.
-        accept_ranks = RANKS_ABOVE_GENUS.
-                      reject {|x| ALL_RANKS.index(x) >= our_index}.map(&:to_s)
+        accept_ranks = Name.ranks_above_genus.
+                            reject {|x| Name.all_ranks.index(x) >= our_index}.
+                            map(&:to_s)
         # Search for names in each classification string.
         for cstr, sname in rows
           while cstr.sub!(/(\w+): _([^_]+)_\s*\Z/, '')
@@ -809,7 +772,7 @@ class Name < AbstractModel
 
       # Grab all names at next lower rank.
       else
-        next_rank = ALL_RANKS[our_index - 1]
+        next_rank = Name.all_ranks[our_index - 1]
         match_str = "#{next_rank}: _"
         for cstr, sname in rows
           if (i = cstr.index(match_str)) and
@@ -877,9 +840,9 @@ class Name < AbstractModel
     result = text
     if text
       parsed_names = {}
-      rank_index = Name.all_ranks.index(rank)
+      rank_idx = rank_index(rank)
       rank_str = "rank_#{rank}".downcase.to_sym.l
-      raise :runtime_user_bad_rank.t(:rank => rank) if rank_index.nil?
+      raise :runtime_user_bad_rank.t(:rank => rank) if rank_idx.nil?
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
       kingdom = 'Fungi'
@@ -892,9 +855,9 @@ class Name < AbstractModel
           expect_rank = :Genus # cannot guess Kingdom or Domain
         end
         line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
-        line_rank_index = Name.all_ranks.index(line_rank)
-        raise :runtime_user_bad_rank.t(:rank => line_rank_str) if line_rank_index.nil?
-        raise :runtime_invalid_rank.t(:line_rank => line_rank_str, :rank => rank_str) if line_rank_index <= rank_index
+        line_rank_idx = rank_index(line_rank)
+        raise :runtime_user_bad_rank.t(:rank => line_rank_str) if line_rank_idx.nil?
+        raise :runtime_invalid_rank.t(:line_rank => line_rank_str, :rank => rank_str) if line_rank_idx <= rank_idx
         raise :runtime_duplicate_rank.t(:rank => line_rank_str) if parsed_names[line_rank]
         raise :runtime_wrong_rank.t(:expect => line_rank_str, :actual => real_rank_str, :name => line_name) if real_rank != expect_rank and kingdom == 'Fungi'
         parsed_names[line_rank] = line_name
@@ -998,11 +961,9 @@ class Name < AbstractModel
     @synonyms ||= begin
       if @synonym_ids
         # Slightly faster since id is primary index.
-        # Name.all(:conditions => ['id IN (?)', @synonym_ids]) # Rails 3
         Name.where(id: @synonym_ids).to_a
       elsif synonym_id
         # Takes on average 0.050 seconds.
-        # Name.all(:conditions => "synonym_id = #{synonym_id}") # Rails 3
         Name.where(synonym_id: synonym_id).to_a
 
         # Involves instantiating a Synonym, something which need never happen.
@@ -1238,7 +1199,6 @@ class Name < AbstractModel
     @misspellings ||= begin
       if @misspelling_ids
         # Slightly faster since id is primary index.
-        # Name.all(:conditions => ['id IN (?)', @misspelling_ids]) # Rails 3
         Name.where(id: @misspelling_ids).to_a
       else
         Name.where(correct_spelling_id: id).to_a
@@ -1388,7 +1348,6 @@ class Name < AbstractModel
         target = synonym.text_name + ' ' + child                              # target = "Lepiota bog% var. nam%"
         conditions = ['text_name like ? AND correct_spelling_id IS NULL',
                       synonym.text_name + ' ' + child_pat]
-        # result += Name.find(:all, :conditions => conditions).select do |name| # Rails 3
         result += Name.where(conditions).select do |name|
           valid_alternate_genus?(name, synonym.text_name, child_pat)          # name = <Lepiota boga var. nama>
         end
@@ -1692,12 +1651,13 @@ class Name < AbstractModel
     if match = GENUS_OR_UP_PAT.match(str)
       name = match[1]
       author = match[2]
-      rank = guess_rank(name) unless RANKS_ABOVE_GENUS.include?(rank)
+      rank = guess_rank(name) unless Name.ranks_above_genus.include?(rank)
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
       author2 = author.blank? ? '' : ' ' + author
       text_name = name.gsub('ë', 'e')
-      parent_name = RANKS_BELOW_GENUS.include?(rank) ? name.sub(LAST_PART, '') : nil
+      parent_name = Name.ranks_below_genus.include?(rank) ?
+                      name.sub(LAST_PART, '') : nil
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
         :text_name    => text_name,
@@ -1818,8 +1778,9 @@ class Name < AbstractModel
   end
 
   def self.make_sure_ranks_ordered_right!(prev_rank, next_rank)
-    if compare_ranks(prev_rank, next_rank) <= 0 or
-       (RANKS_ABOVE_SPECIES.include?(prev_rank) and RANKS_BELOW_SPECIES.include?(next_rank))
+    if compare_ranks(prev_rank, next_rank) <= 0 ||
+       Name.ranks_above_species.include?(prev_rank) &&
+       Name.ranks_below_species.include?(next_rank)
       raise RankMessedUp.new
     end
   end
@@ -2119,7 +2080,6 @@ class Name < AbstractModel
   def self.make_name(params)
     result = nil
     search_name = params[:search_name]
-    # matches = Name.find(:all, :conditions => ['search_name = ?', search_name]) # Rails 3
     matches = Name.where(search_name: search_name)
     if matches.empty?
       result = Name.new_name(params)
