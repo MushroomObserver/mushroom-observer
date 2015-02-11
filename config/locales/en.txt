@@ -868,7 +868,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: Enjoy our new image uploader!  Many thanks to Ray Suelzer.<br>Of course, it's impossible to test it on every browser, so please <a href="http://mushroomobserver.org/observer/ask_webmaster_question">send us a note</a> if you see anything wrong.
+  app_banner_box: X
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
