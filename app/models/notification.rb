@@ -36,10 +36,10 @@ class Notification < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:flavor,
-           { name: 0,
-             observation: 1,
-             user: 2,
-             all_comments: 3
+           { name: 1,
+             observation: 2,
+             user: 3,
+             all_comments: 4
            },
            source: :flavor,
            with: [],

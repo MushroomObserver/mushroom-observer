@@ -1,4 +1,4 @@
-ee http://www.robotstxt.org for documentation.
+# See http://www.robotstxt.org for documentation.
 Sitemap: http://mushroomobserver.org/sitemap/index.xml
 User-agent: *
 Disallow: *?*
