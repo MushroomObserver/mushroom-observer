@@ -565,17 +565,13 @@ class Name < AbstractModel
   end
 
   def is_lichen?
-    # Check both this and genus, just in case I'm missing some species.
-    # result = (Triple.find(:all,
-    #                       :conditions => ["subject = ':name/#{id}' and
-    #                         predicate = ':lichenAuthority'"]) != []) # Rails 3
-    result = (Triple.where(subject: ":name/#{id}",
-                           predicate: ":lichenAuthority") != [])
-    if !result && below_genus?
-      genus = self.class.find_by_text_name(text_name.split.first)
-      result = genus.is_lichen? if genus
-    end
-    result
+    # Check both this name and genus, just in case I'm missing some species.
+    return true if Triple.where(subject: ":name/#{id}",
+                                predicate: ":lichenAuthority").count > 0
+    return false unless below_genus?
+    genus_id = Name.where(text_name: text_name.split.first).select(:id).first
+    return Triple.where(subject: ":name/#{genus_id}",
+                        predicate: ":lichenAuthority").count > 0
   end
 
   def has_eol_data?
@@ -715,12 +711,10 @@ class Name < AbstractModel
             next_rank == :Subspecies && text_name.match(/^(.* subsp\. \S+)/) ||
             next_rank == :Species    && text_name.match(/^(\S+ \S+)/)        ||
             next_rank == :Genus      && text_name.match(/^(\S+)/)
-#        these = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
-#                                         AND rank = '#{next_rank}'
-#                                         AND text_name = '#{$1}'")
-        these = Name.where("correct_spelling_id IS NULL AND
-                            rank = '#{rank_symbol_to_enum(next_rank)}' AND
-                            text_name = '#{$1}'"
+        str = $1
+        these = Name.where(correct_spelling_id: nil,
+                           rank: Name.ranks[next_rank],
+                           text_name: str
                           ).to_a
       end
 
@@ -738,10 +732,6 @@ class Name < AbstractModel
     end
 
     return results
-  end
-
-  def rank_symbol_to_enum(rank_symbol)
-    Name.ranks[rank_symbol]
   end
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
@@ -814,7 +804,6 @@ class Name < AbstractModel
             end
           end
           # (include genus, too)
-#           results += Name.where(search_name: sname) # Rails 3
           results += Name.where(search_name: sname).to_a
         end
 
@@ -839,8 +828,8 @@ class Name < AbstractModel
         results2 = []
         for name in results
           if name.rank == :Genus
-            results2 += Name.where("correct_spelling_id IS NULL AND
-                                    text_name LIKE ? ' %'", name.text_name).to_a
+            results2 += Name.where("correct_spelling_id IS NULL AND " \
+                                   "text_name LIKE ? ' %'", name.text_name).to_a
           end
         end
         results += results2
@@ -848,10 +837,8 @@ class Name < AbstractModel
 
     # Get everything below our rank.
     else
-#      results = Name.all(:conditions => "correct_spelling_id IS NULL # Rails 3
-#                                         AND text_name LIKE '#{text_name} %'")
-      results = Name.where("correct_spelling_id IS NULL AND
-                            text_name LIKE ? ' %'", text_name).to_a
+      results = Name.where("correct_spelling_id IS NULL AND " \
+                           "text_name LIKE ? ' %'", text_name).to_a
 
       # Remove subchildren if not getting all children.  This is trickier than
       # I originally expected because we want the children of G. species to
@@ -2026,7 +2013,7 @@ class Name < AbstractModel
         conditions_args[:name] = text_name
       end
       conditions << "deprecated = 0" unless ignore_deprecated
-      conditions << "rank = #{ Name.ranks[rank] }" if rank # enum integer value
+      conditions << "rank = #{Name.ranks[rank]}" if rank
 
       results = Name.where(conditions.join(" AND "), conditions_args).to_a
 

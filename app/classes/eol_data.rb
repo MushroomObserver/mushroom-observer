@@ -174,9 +174,7 @@ private
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND names.rank IN (#{Name.ranks[:Form]}, #{Name.ranks[:Variety]},
-                       #{Name.ranks[:Subspecies]}, #{Name.ranks[:Species]},
-                       #{Name.ranks[:Genus]} )
+    AND names.rank IN (#{Name.ranks.values_at(:Form, :Variety, :Subspecies, :Species, :Genus).join(',')})
   )
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)

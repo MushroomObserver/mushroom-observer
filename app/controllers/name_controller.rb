@@ -157,7 +157,7 @@ class NameController < ApplicationController
            (SELECT count(*) AS count, name_id
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
-        AND names.rank = 'Species'
+        AND names.rank = #{Name.ranks[:Species]}
         AND name_counts.count > 1
         AND name_descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
@@ -1545,8 +1545,8 @@ class NameController < ApplicationController
     minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
     minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
     rank_condition = params[:include_higher_taxa].blank? ?
-      '= "Species"' :
-      'NOT IN ("Subspecies", "Variety", "Form", "Group")'
+      "= #{Name.ranks[:Species]}" :
+      "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(',')})"
 
     data = Name.connection.select_rows(%(
       SELECT y.name, y.rank, SUM(y.number)
@@ -1581,7 +1581,7 @@ class NameController < ApplicationController
     families = {}
     for genus, classification in Name.connection.select_rows(%(
       SELECT text_name, classification FROM names
-      WHERE rank = 'Genus'
+      WHERE rank = #{Name.ranks[:Genus]}
         AND COALESCE(classification,'') != ''
         AND text_name IN ('#{genera.join("','")}')
     ))

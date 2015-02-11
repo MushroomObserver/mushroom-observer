@@ -1025,15 +1025,4 @@ protected
       end
     end
   end
-
-################################################################################
-
-private
-
-  # ensure that certain values are always symbols
-  # why is this necessary but not thumbnail_size or any of the other enums??
-  # def symbolize_values
-  #   self.location_format = self.location_format.to_sym unless
-  #     self.location_format.is_a?(Symbol)
-  # end
 end

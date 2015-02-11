@@ -1001,7 +1001,7 @@ class Query < AbstractQuery
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
-    initialize_model_do_type_list(:types, :target_type, Comment.all_types)
+    initialize_model_do_enum_set(:types, :target_type, Comment.all_types, :string)
     initialize_model_do_search(:summary_has, :summary)
     initialize_model_do_search(:content_has, :comment)
   end
@@ -1161,8 +1161,8 @@ class Query < AbstractQuery
           !params[:desc_content].blank?
       add_join(:name_descriptions)
     end
-    initialize_model_do_type_list(:desc_type,
-      'name_descriptions.source_type', Description.all_source_types
+    initialize_model_do_enum_set(:desc_type,
+      'name_descriptions.source_type', Description.all_source_types, :integer
     )
     initialize_model_do_objects_by_name(
       Project, :desc_project, 'name_descriptions.project_id'
@@ -1346,13 +1346,16 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_type_list(arg, col, vals)
+  def initialize_model_do_enum_set(arg, col, vals, type)
     if !params[arg].blank?
       col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       types = params[arg].to_s.strip_squeeze.split
-      types &= vals.map(&:to_s)
-      if types.any?
-        self.where << "#{col} IN ('#{types.join("','")}')"
+      if type == :string
+        types &= vals.map(&:to_s)
+        self.where << "#{col} IN ('#{types.join("','")}')" if types.any?
+      elsif
+        types.map! { |v| vals.index_of(v.to_sym) }.reject!(&:nil?)
+        self.where << "#{col} IN (#{types.join(",")})" if types.any?
       end
     end
   end
@@ -1508,7 +1511,7 @@ class Query < AbstractQuery
       a = all_ranks.index(min) || 0
       b = all_ranks.index(max) || (all_ranks.length - 1)
       a, b = b, a if a > b
-      ranks = all_ranks[a..b].map {|r| "'#{r}'"}
+      ranks = all_ranks[a..b].map {|r| Name.ranks[r]}
       self.where << "names.rank IN (#{ranks.join(',')})"
     end
   end
