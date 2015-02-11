@@ -13,6 +13,7 @@ jQuery(document).ready(function () {
         }
     }
 
-    jQuery('#navigation').height(jQuery('body').height());
-    jQuery('#right_side').height(jQuery('body').height());
+    var h = jQuery('body').height();
+    jQuery('#navigation').css('min-height', h + 'px');
+    jQuery('#right_side').css('min-height', h + 'px');
 });

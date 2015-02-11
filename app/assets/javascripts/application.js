@@ -1,5 +1,6 @@
 //= require jquery
 //= require jquery_extensions
+//= require bootstrap
 //= require jstz
 //= require autocomplete
 //= require confirm

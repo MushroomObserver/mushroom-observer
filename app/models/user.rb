@@ -263,54 +263,54 @@ class User < AbstractModel
   # Do not change the integer associated with a value
   # first value is the default
   as_enum(:thumbnail_size,
-           { thumbnail: 0,
-             small: 1
+           { thumbnail: 1,
+             small: 2
            },
            source: :thumbnail_size,
            with: [],
            accessor: :whiny
          )
   as_enum(:image_size,
-           { medium: 0,
-             thumbnail: 1,
+           { thumbnail: 1,
              small: 2,
-             large: 3,
-             huge: 4,
-             full_size: 5
+             medium: 3,
+             large: 4,
+             huge: 5,
+             full_size: 6
            },
            source: :image_size,
            with: [],
            accessor: :whiny
          )
   as_enum(:votes_anonymous,
-           { no: 0,
-             yes: 1,
-             old: 2
+           { no: 1,
+             yes: 2,
+             old: 3
            },
            source: :votes_anonymous,
            with: [],
            accessor: :whiny
          )
   as_enum(:location_format,
-           { postal: 0,
-             scientific: 1
+           { postal: 1,
+             scientific: 2
            },
            source: :location_format,
            with: [],
            accessor: :whiny
          )
   as_enum(:hide_authors,
-           { none: 0,
-             above_species: 1
+           { none: 1,
+             above_species: 2
            },
            source: :hide_authors,
            with: [],
            accessor: :whiny
          )
   as_enum(:keep_filenames,
-           { keep_and_show: 0,
-             keep_but_hide: 1,
-             toss: 2
+           { keep_and_show: 1,
+             keep_but_hide: 2,
+             toss: 3
            },
            source: :keep_filenames,
            with: [],

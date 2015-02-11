@@ -27,7 +27,7 @@ function MultiImageUploader(localized_text) {
         _dots = [".", "..", "..."],
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"), // container to insert images into
-        $form = jQuery(document.forms.namedItem("observation_form")),
+        $form = jQuery(document.forms.namedItem("create_observation_form")),
         $submitButtons= $form.find('input[type="submit"]'),
         $goodImages = jQuery('#good_images'),
         $removeLinks = jQuery(".remove_image_link"),
@@ -321,7 +321,7 @@ function MultiImageUploader(localized_text) {
         var _this = this;
         var fileReader = new FileReader();
         fileReader.onload = function (fileLoadedEvent) {
-            var $img = _this.dom_element.find('.img_responsive').first(); //find the actual image element
+            var $img = _this.dom_element.find('.img-responsive').first(); //find the actual image element
             $img.attr('src', fileLoadedEvent.target.result); //get the image element in the container and set the src to base64 img url
         };
         fileReader.readAsDataURL(_this.file);
@@ -450,7 +450,8 @@ function MultiImageUploader(localized_text) {
 
         xhrReq.onload = function () { //after image has been created.
             if (xhrReq.status == 200) {
-                var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
+                var image = JSON.parse(xhrReq.response);
+                        console.log(image);
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
                 if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {

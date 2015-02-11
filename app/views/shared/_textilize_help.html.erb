@@ -1,4 +1,5 @@
 <div id="textilize_note">
+  <p class="help-block">
   <%=
     link = link_to(:shared_textile_link.t,
       { :controller => "observer", :action => "textile_sandbox" },
@@ -6,4 +7,5 @@
     str = :shared_textile_help.l % link
     str.html_safe
   %>
+  </p>
 </div>
