@@ -143,4 +143,10 @@ MushroomObserver::Application.configure do
 
   # Default "secret key", see rails docs.
   config.secret_key_base = "a"*30
+
+  # EOL parameters.
+  config.eol_ranks = [ :Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom ]
+  config.eol_ranks_for_export = [ :Form, :Variety, :Subspecies, :Species, :Genus ]
+  config.eol_min_image_vote = 2
+  config.eol_min_observation_vote = 2.4
 end

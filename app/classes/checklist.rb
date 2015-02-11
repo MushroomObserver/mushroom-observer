@@ -143,7 +143,7 @@ private
   end
 
   def ranks_to_consider
-    Name.ranks.values_at(*Name::RANKS_LE_SPECIES).join(", ")
+    Name.ranks.values_at(:Species, :Subspecies, :Variety, :Form).join(", ")
   end
 
   def query(args={})

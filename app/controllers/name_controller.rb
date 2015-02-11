@@ -1495,7 +1495,7 @@ class NameController < ApplicationController
 
       # Initialize form.
       if request.method != "POST"
-        if Name.ranks_above_genus.member?(@name.rank)
+        if !@name.at_or_below_genus?
           flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
         end
         if @notification
