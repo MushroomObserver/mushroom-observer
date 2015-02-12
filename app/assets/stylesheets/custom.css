@@ -7,20 +7,6 @@ html, body{
     font-size: 13px;
 }
 
-/* Small Devices, Tablets */
-@media only screen and (max-width : 768px) {
-    .container { /*use full screen on small size screens*/
-        width: 100%;
-    }
-}
-
-/* Medium Devices, Desktops */
-@media screen and (max-width : 992px) {
-    .container {  /*use full screen on medium size screens*/
-        width: 100%;
-    }
-}
-
 /*
  * Off Canvas
  * --------------------------------------------------
@@ -75,20 +61,25 @@ html, body{
     -moz-appearance: none;
     -webkit-appearance: none;
 }
-/*end bootstrap overrides*/
+
+table.table-compact  tr  td {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+}  
+
+.form-control.form-control-sm {
+    height: 25px;
+    font-size: 12px;
+    padding: 4px 12px;
+}
 
 .bold {
     font-weight: 800;
 }
 
-.border-bottom {
-    border-bottom: 1px solid;
+.border-radius-none {
+    border-radius: 0!important;
 }
-
-.margin-bottom {
-    margin-bottom: 1em;
-}
-
 .push-down {
     margin-top: 1em;
 }
@@ -127,8 +118,6 @@ html, body{
     margin: 0 !important;
 }
 
-/*Navigation*/
-
 #navigation a {
     display: block;
 }
@@ -141,6 +130,10 @@ html, body{
     margin-left: -15px;
     margin-right:-15px;
 }
+#search_bar_row {
+    padding-top: 11px;
+    padding-bottom: 12px;
+}
 
 .rss-log-item{
     padding: 5px;
@@ -148,21 +141,12 @@ html, body{
     height: 350px;
 }
 
-/*don't force log items to be a certain height on mobile devices because they are stacked on top of each other*/
-@media screen and (max-width: 767px) {
-.rss-box-details{
-    height: auto !important;
-}
-}
-
-
 .rss-fancy-time {
      position: absolute;
      top: -10px;
      right: 2px;
      color: grey;
  }
-
 
 .rss-detail {
     margin-top:5px;
@@ -173,24 +157,32 @@ html, body{
 .rss-where, .rss-what {
     text-align: center;
 }
-
-
 .popup {
     z-index: 1000;
     border: 1px solid;
     background: white !important;
 }
 
-
-
 /*Themeable options below */
+
+body {
+    background: whitesmoke;
+}
 
 a {
     color: #205080
 }
 
+.color1 {
+    background: #E0E0E0;
+}
+
+#right_side {
+    background: white;
+}
+
 .btn-default {
-    background-color: rgba(224, 224, 224, 0.49);
+    background-color: whitesmoke; /*rgba(224, 224, 224, 0.49);*/
 }
 
 span.input-group-addon
@@ -207,25 +199,10 @@ span.input-group-addon
     background-color: #cc2616; color: #FAEBD4;
 }
 
-#banner a {
+#banner a,
+#banner a:visited {
     text-decoration: none;
     color: #FAEBD4;
-}
-
-#banner a:visited {
-    color: #FAEBD4;
-}
-
-.color1 {
-    background: #E0E0E0;
-}
-
-.color-block .color-block-item:nth-child(odd):not(.row) {
-    background-color: #F0F0F0;
-}
-
-div.color-block div.row.color-block-item:nth-child(odd) > div > div {
-    background-color: #F0F0F0;
 }
 
 .vote-meter {
@@ -362,4 +339,59 @@ div.color-block div.row.color-block-item:nth-child(odd) > div > div {
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
     color: #2580db;
+}
+
+
+/*
+ * Autocomplete
+ * --------------------------------------------------
+ */
+
+div.auto_complete {
+    position:absolute;
+    background-color:#fff;
+    color:black;
+    margin:0px;
+    border:1px solid #888;
+    padding:0px;
+    overflow-x:hidden;
+    display:none;
+    text-align:left;
+}
+div.auto_complete ul {
+    margin:0px;
+    border:0px;
+    padding:0px;
+    list-style:none;
+    overflow-x:hidden;
+}
+div.auto_complete ul li {
+    margin:0px;
+    border:0px;
+    padding:2px 4px 2px 4px;
+    white-space:nowrap;
+}
+div.auto_complete ul li.selected {
+    background-color:#ff0;
+}
+
+/*
+ * Device specific overrides
+ * --------------------------------------------------
+ */
+
+/* Small Devices, Tablets */
+@media screen and (max-width: 767px) {
+    .container { /*use full screen on small size screens*/
+        width: 100%;
+    }
+    .rss-box-details{
+        height: auto !important;
+    }
+}
+/* Medium Devices, Desktops */
+@media screen and (max-width : 992px) {
+    .container {  /*use full screen on medium size screens*/
+        width: 100%;
+    }
 }

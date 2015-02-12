@@ -145,7 +145,7 @@ private
     WHERE name_descriptions.name_id = names.id
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND name_descriptions.review_status in ('vetted', 'unvetted')
+    AND name_descriptions.review_status in (#{NameDescription.review_statuses[:vetted]}, #{NameDescription.review_statuses[:unvetted]})
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
   )
@@ -174,9 +174,7 @@ private
     AND images.ok_for_export
     AND names.ok_for_export
     AND NOT names.deprecated
-    AND names.rank IN (#{Name.ranks[:Form]}, #{Name.ranks[:Variety]},
-                       #{Name.ranks[:Subspecies]}, #{Name.ranks[:Species]},
-                       #{Name.ranks[:Genus]} )
+    AND names.rank IN (#{Name.ranks.values_at(:Form, :Variety, :Subspecies, :Species, :Genus).join(',')})
   )
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)

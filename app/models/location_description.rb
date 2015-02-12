@@ -55,11 +55,11 @@ class LocationDescription < Description
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:source_type,
-           { public: 0,
-             foreign: 1,
-             project: 2,
-             source: 3,
-             user: 4
+           { public: 1,
+             foreign: 2,
+             project: 3,
+             source: 4,
+             user: 5
            },
            source: :source_type,
            with: [],

@@ -7,12 +7,9 @@
   end
 %>
 
-<table width="1">
-  <tr>
-    <td>
-      <%= form_tag(add_query_param(:action => 'edit_observation',
-            :id => @observation, :approved_name => @what,
-            :approved_where => @place_name), { :multipart => true }) do %>
+      <%= form_tag(add_query_param(action: 'edit_observation',
+            id: @observation, approved_name: @what,
+            approved_where: @place_name), { multipart: true , name: 'observation_form'}) do %>
         <br/><center><%= submit_tag :SAVE_EDITS.l %></center><br/>
 
         <%= render(:partial => 'form_observations', :locals => {
@@ -26,6 +23,3 @@
 
         <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
       <% end %>
-    </td>
-  </tr>
-</table>

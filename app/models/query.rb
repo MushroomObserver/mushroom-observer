@@ -10,58 +10,58 @@ class Query < AbstractQuery
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
     as_enum(:flavor,
-             { advanced_search: 0,
-               all: 1,
-               at_location: 2,
-               at_where: 3,
-               by_author: 4,
-               by_editor: 5,
-               by_rss_log: 6,
-               by_user: 7,
-               for_project: 8,
-               for_target: 9,
-               for_user: 10,
-               in_set: 11,
-               in_species_list: 12,
-               inside_observation: 13,
-               of_children: 14,
-               of_name: 15,
-               of_parents: 16,
-               pattern_search: 17,
-               regexp_search: 18,
-               with_descriptions: 19,
-               with_descriptions_by_author: 20,
-               with_descriptions_by_editor: 21,
-               with_descriptions_by_user: 22,
-               with_descriptions_in_set: 23,
-               with_observations: 24,
-               with_observations_at_location: 25,
-               with_observations_at_where: 26,
-               with_observations_by_user: 27,
-               with_observations_for_project: 28,
-               with_observations_in_set: 29,
-               with_observations_in_species_list: 30,
-               with_observations_of_children: 31,
-               with_observations_of_name: 32
+             { advanced_search: 1,
+               all: 2,
+               at_location: 3,
+               at_where: 4,
+               by_author: 5,
+               by_editor: 6,
+               by_rss_log: 7,
+               by_user: 8,
+               for_project: 9,
+               for_target: 10,
+               for_user: 11,
+               in_set: 12,
+               in_species_list: 13,
+               inside_observation: 14,
+               of_children: 15,
+               of_name: 16,
+               of_parents: 17,
+               pattern_search: 18,
+               regexp_search: 19,
+               with_descriptions: 20,
+               with_descriptions_by_author: 21,
+               with_descriptions_by_editor: 22,
+               with_descriptions_by_user: 23,
+               with_descriptions_in_set: 24,
+               with_observations: 25,
+               with_observations_at_location: 26,
+               with_observations_at_where: 27,
+               with_observations_by_user: 28,
+               with_observations_for_project: 29,
+               with_observations_in_set: 30,
+               with_observations_in_species_list: 31,
+               with_observations_of_children: 32,
+               with_observations_of_name: 33
              },
              source: :flavor,
              with: [],
              accessor: :whiny
            )
     as_enum(:model,
-             { Comment: 0,
-               Herbarium: 1,
-               Image: 2,
-               Location: 3,
-               LocationDescription: 4,
-               Name: 5,
-               NameDescription: 6,
-               Observation: 7,
-               Project: 8,
-               RssLog: 9,
-               SpeciesList: 10,
-               Specimen: 11,
-               User: 12
+             { Comment: 1,
+               Herbarium: 2,
+               Image: 3,
+               Location: 4,
+               LocationDescription: 5,
+               Name: 6,
+               NameDescription: 7,
+               Observation: 8,
+               Project: 9,
+               RssLog: 10,
+               SpeciesList: 11,
+               Specimen: 12,
+               User: 13
              },
              source: :model,
              with: [],
@@ -1001,7 +1001,7 @@ class Query < AbstractQuery
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
-    initialize_model_do_type_list(:types, :target_type, Comment.all_types)
+    initialize_model_do_enum_set(:types, :target_type, Comment.all_types, :string)
     initialize_model_do_search(:summary_has, :summary)
     initialize_model_do_search(:content_has, :comment)
   end
@@ -1161,8 +1161,8 @@ class Query < AbstractQuery
           !params[:desc_content].blank?
       add_join(:name_descriptions)
     end
-    initialize_model_do_type_list(:desc_type,
-      'name_descriptions.source_type', Description.all_source_types
+    initialize_model_do_enum_set(:desc_type,
+      'name_descriptions.source_type', Description.all_source_types, :integer
     )
     initialize_model_do_objects_by_name(
       Project, :desc_project, 'name_descriptions.project_id'
@@ -1346,13 +1346,16 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_type_list(arg, col, vals)
+  def initialize_model_do_enum_set(arg, col, vals, type)
     if !params[arg].blank?
       col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       types = params[arg].to_s.strip_squeeze.split
-      types &= vals.map(&:to_s)
-      if types.any?
-        self.where << "#{col} IN ('#{types.join("','")}')"
+      if type == :string
+        types &= vals.map(&:to_s)
+        self.where << "#{col} IN ('#{types.join("','")}')" if types.any?
+      elsif
+        types.map! { |v| vals.index_of(v.to_sym) }.reject!(&:nil?)
+        self.where << "#{col} IN (#{types.join(",")})" if types.any?
       end
     end
   end
@@ -1508,7 +1511,7 @@ class Query < AbstractQuery
       a = all_ranks.index(min) || 0
       b = all_ranks.index(max) || (all_ranks.length - 1)
       a, b = b, a if a > b
-      ranks = all_ranks[a..b].map {|r| "'#{r}'"}
+      ranks = all_ranks[a..b].map {|r| Name.ranks[r]}
       self.where << "names.rank IN (#{ranks.join(',')})"
     end
   end
@@ -1907,7 +1910,7 @@ class Query < AbstractQuery
 
     # If we have to rely on classification strings, just let Name do it, and
     # create a pseudo-query based on ids returned by +name.children+.
-    if all || name.above_genus?
+    if all || !name.at_or_below_genus?
       set = clean_id_set(name.children(all).map(&:id))
       self.where << "names.id IN (#{set})"
 

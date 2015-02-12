@@ -157,7 +157,7 @@ class NameController < ApplicationController
            (SELECT count(*) AS count, name_id
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
-        AND names.rank = 'Species'
+        AND names.rank = #{Name.ranks[:Species]}
         AND name_counts.count > 1
         AND name_descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - names.updated_at > #{1.week.to_i}
@@ -1271,7 +1271,7 @@ class NameController < ApplicationController
   def eol_old # :nologin: :norobots:
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
-    eol_data(['unvetted', 'vetted'])
+    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
     render_xml(:action => "eol", :layout => false)
   end
 
@@ -1279,7 +1279,7 @@ class NameController < ApplicationController
   # Show the data getting sent to EOL
   def eol_preview # :nologin: :norobots:
     @timer_start = Time.now
-    eol_data(['unvetted', 'vetted'])
+    eol_data(NameDescription.review_statuses.values_at(:unvetted, :vetted))
     @timer_end = Time.now
   end
 
@@ -1294,7 +1294,7 @@ class NameController < ApplicationController
 
   # Show the data not getting sent to EOL
   def eol_need_review # :norobots:
-    eol_data(['unreviewed'])
+    eol_data(NameDescription.review_statuses.values_at(unreviewed))
     @title = :eol_need_review_title.t
     render(:action => 'eol_preview')
   end
@@ -1308,7 +1308,6 @@ class NameController < ApplicationController
     @licenses   = {} # license.id -> license.url
     @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
-#    descs = NameDescription.all(:conditions => eol_description_conditions(review_status_list)) # Rails 3
     descs = NameDescription.where(
                               eol_description_conditions(review_status_list))
 
@@ -1331,8 +1330,6 @@ class NameController < ApplicationController
 
     # Get corresponding names.
     name_ids = @descs.keys.map(&:to_s).join(',')
-#    @names = Name.all(:conditions => "id IN (#{name_ids})", # Rails 3
-#                      :order => 'sort_name ASC, author ASC')
     @names = Name.where(id: name_ids).order(:sort_name, :author).to_a
 
     # Get corresponding images.
@@ -1493,11 +1490,12 @@ class NameController < ApplicationController
     pass_query_params
     name_id = params[:id].to_s
     if @name = find_or_goto_index(Name, name_id)
-      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
+      flavor = Notification.flavors[:name]
+      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(flavor, name_id, @user.id)
 
       # Initialize form.
       if request.method != "POST"
-        if Name.ranks_above_genus.member?(@name.rank)
+        if !@name.at_or_below_genus?
           flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
         end
         if @notification
@@ -1547,8 +1545,8 @@ class NameController < ApplicationController
     minimum_confidence = params[:minimum_confidence].blank? ? 1.5 : params[:minimum_confidence]
     minimum_observations = params[:minimum_observations].blank? ? 5 : params[:minimum_observations]
     rank_condition = params[:include_higher_taxa].blank? ?
-      '= "Species"' :
-      'NOT IN ("Subspecies", "Variety", "Form", "Group")'
+      "= #{Name.ranks[:Species]}" :
+      "NOT IN (#{Name.ranks.values_at(:Subspecies, :Variety, :Form, :Group).join(',')})"
 
     data = Name.connection.select_rows(%(
       SELECT y.name, y.rank, SUM(y.number)
@@ -1583,7 +1581,7 @@ class NameController < ApplicationController
     families = {}
     for genus, classification in Name.connection.select_rows(%(
       SELECT text_name, classification FROM names
-      WHERE rank = 'Genus'
+      WHERE rank = #{Name.ranks[:Genus]}
         AND COALESCE(classification,'') != ''
         AND text_name IN ('#{genera.join("','")}')
     ))

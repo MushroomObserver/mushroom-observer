@@ -842,7 +842,7 @@ class ImageController < ApplicationController
           SELECT DISTINCT n1.text_name AS text_name, n2.id AS name_id
           FROM names n1
           JOIN names n2 ON IF(n1.synonym_id IS NULL, n2.id = n1.id, n2.synonym_id = n1.synonym_id)
-          WHERE n1.rank = "Species" AND n1.text_name IN (#{names})
+          WHERE n1.rank = #{Name.ranks[:Species]} AND n1.text_name IN (#{names})
         ) AS x, observations o, images i
         WHERE o.name_id = x.name_id
           AND i.id = o.thumb_image_id

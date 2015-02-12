@@ -2,23 +2,20 @@
 coprinus_comatus_notification:
   id: 1
   user_id: 1
-  # flavor: Notification.flavors[:name]
-  flavor: 0
+  flavor: <%= Notification.flavors[:name] %>
   obj_id: 2
   note_template:
 
 agaricus_campestris_notification_with_note:
   id: 2
   user_id: 2
-  # flavor: Notification.flavors[:name]
-  flavor: 0
+  flavor: <%= Notification.flavors[:name] %>
   obj_id: 3
   note_template: A note about :observation for :observer
 
 agaricus_campestris_notification_without_note:
   id: 3
   user_id: 5
-  # flavor: Notification.flavors[:name]
-  flavor: 0
+  flavor: <%= Notification.flavors[:name] %>
   obj_id: 3
   note_template:
