@@ -981,7 +981,7 @@ protected
     unless password.blank?
       write_attribute("password", self.class.sha1(password))
     end
-    write_attribute("auth_code", String.random(39))
+    write_attribute("auth_code", String.random(40))
   end
 
   validate :user_requirements
@@ -989,7 +989,7 @@ protected
   def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
-    elsif login.length < 3 or login.binary_length > 40
+    elsif login.length < 3 or login.bytesize > 40
       errors.add(:login, :validate_user_login_too_long.t)
     elsif (other = User.find_by_login(login)) && (other.id != id)
       errors.add(:login, :validate_user_login_taken.t)
@@ -997,20 +997,20 @@ protected
 
     if password.to_s.blank?
       # errors.add(:password, :validate_user_password_missing.t)
-    elsif password.length < 5 or password.binary_length > 40
+    elsif password.length < 5 or password.bytesize > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
     if email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
-    elsif email.binary_length > 80
+    elsif email.bytesize > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
 
-    if theme.to_s.binary_length > 40
+    if theme.to_s.bytesize > 40
       errors.add(:theme, :validate_user_theme_too_long.t)
     end
-    if name.to_s.binary_length > 80
+    if name.to_s.bytesize > 80
       errors.add(:name, :validate_user_name_too_long.t)
     end
   end
