@@ -20,6 +20,28 @@ jQuery(document).ready(function () {
         setCookie('hideBanner',"true", 1);
     });
 
+    jQuery('[data-toggle="theater"]').click(function (e){
+        e.preventDefault();
+        var img_src = $(this).data().image;
+        console.log(img_src);
+        $('.img-theater').show();
+        $('#img_append_target').html('<img src="{{src}}" class="center-block" style="height: {{h}}; width: auto;"><//img>'
+            .replace("{{src}}", img_src)
+            .replace("{{h}}", jQuery(window).height() - 20 + 'px'))
+        $(document).on('keyup.hideTheater', function (e){
+            if (e.keyCode == 27) {
+                $('.img-theater').hide();
+                $(document).unbind('keyup.hideTheater');
+            }
+        })
+    });
+
+    jQuery('[data-dismiss="theater"]').click(function (e){
+        e.preventDefault();
+        $('.img-theater').hide('slow');
+    });
+
+
     function setCookie(cname, cvalue, exdays) {
         var d = new Date();
         d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));

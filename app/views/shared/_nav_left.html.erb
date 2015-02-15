@@ -47,6 +47,7 @@
     <%= :app_observations_left.t %>
   </div>
   <%= link_to(:app_create_observation.t, {controller: 'observer', action: 'create_observation'}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_your_observations.t, {controller: 'observer', action: 'observations_by_user', id: @user.id}, {class: "list-group-item indent"}) if @user%>
   <%= link_to(:app_sort_by_date_obs.t, {controller: 'observer', action: 'list_observations'}, {class: "list-group-item indent"}) %>
 
   <div class="list-group-item disabled bold">

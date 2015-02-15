@@ -204,7 +204,7 @@ module ApplicationHelper
     end
 
     html = html.safe_join(safe_br)
-    html = content_tag(:p, html, class: "Date")
+    html = content_tag(:p, html, class: "small")
   end
 
   def herbarium_name_box(default_name="")

@@ -1,29 +1,32 @@
 <%
-  @title = :image_edit_title.t(:name => @image.unique_format_name)
-
-  new_tab_set do
-    add_tab_with_query(:cancel_and_show.t(:type => :image),
-      :action => 'show_image', :id => @image.id)
-  end
+   @title = :image_edit_title.t(:name => @image.unique_format_name)
+   @tabsets = {right: render(partial: '/shared/tab_set',
+                            locals: {
+                                    links: [link_with_query(:cancel_and_show.t({type: :image}),
+                                                            {action: :show_image, id: @image.id})]
+                            })
+   }
 %>
 
-<%= form_for(:image, :url => add_query_param({ :action => :edit_image, :id => @image })) do |form| %>
-  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
-
-  <table cellpadding="10">
-    <tr>
-      <td valign="top">
+<%= form_for(:image, :url => add_query_param({:action => :edit_image, :id => @image})) do |form| %>
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="text-center">
+          <%= submit_tag(:SAVE_EDITS.l, {class: "btn btn-default"}) %>
+        </div>
         <%= render(:partial => 'form_images', :locals => {
-          :form => form,
-          :width => 40,
-          :leave_out_original_file_name => false
-        }) %>
-      </td>
-      <td align="center">
-        <%= thumbnail(@image, :size => :medium, :votes => true) %>
-      </td>
-    </tr>
-  </table>
+                                                    :form => form,
+                                                    :leave_out_original_file_name => false
+                                            }) %>
+        <div class="text-center">
+          <%= submit_tag(:SAVE_EDITS.l, {class: "btn btn-default"}) %>
+          <%= link_with_query(:cancel_and_show.t({type: :image}),{
+          action: :show_image, id: @image.id}, {class: "btn btn-danger"}) %>
+        </div>
+      </div>
+      <div class="col-sm-7">
+        <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
+      </div>
+    </div>
 
-  <center><%= submit_tag :SAVE_EDITS.l %></center>
 <% end %>

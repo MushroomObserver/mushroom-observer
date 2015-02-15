@@ -132,6 +132,23 @@ table.table-compact tr td {
     background: white !important;
 }
 
+.theater-btn {
+    background: white;
+    color: black;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+}
+
+.theater-btn:hover, .theater-btn:focus {
+    background: black;
+    color: white;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+}
 /*Themeable options below */
 
 body {
@@ -140,6 +157,20 @@ body {
 
 a {
     color: #205080
+}
+
+.img-theater {
+    position: absolute;
+    top: 0px;
+    background: none repeat scroll 0% 0% rgba(48, 50, 48, 0.55);
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: none;
+}
+
+#img_append_target {
+    padding-top: 20px;
 }
 
 .list-group-item.default {
@@ -202,7 +233,7 @@ span.input-group-addon {
 }
 
 .vote-meter {
-    height: 5px;
+    height: 7px;
     margin-bottom: 4px;
     overflow: hidden;
     background-color: #F5F5F5;

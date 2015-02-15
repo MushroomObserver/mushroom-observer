@@ -14,9 +14,14 @@
              if image and votes
   url = image ? image.url(size) : Image.url(size, image_id)
 %>
-<div style="text-align: center">
+<div style="text-align: center; position: relative;">
   <div style="<%= "display: inline-block;" unless responsive%>">
-    <%= link_with_query(image_tag(url, class: responsive ? 'img-responsive' : ''), link) %>
+    <div>
+      <div style="position: absolute; right: 0;">
+    <a href="" class="glyphicon glyphicon-fullscreen theater-btn hidden-xs" data-toggle="theater" data-image="<%=Image.url(:huge, image_id) %>"></a>
+      </div>
+    <%= link_with_query(image_tag(url, class: responsive ? 'img-responsive center-block' : ''), link) %>
+    </div>
     <% if vote_pct %>
       <div class="vote-meter">
         <div id="vote_meter_bar_<%=image_id%>" class="vote-meter-bar"
