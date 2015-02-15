@@ -15,7 +15,7 @@
 
 <% if @user.api_keys.any? %>
   <%= form_tag({}, { class: "pad-bottom-2x"}) %>
-    <table class="lined-table pad-columns">
+    <table class="table table-striped slight-pad">
       <tr>
         <th></th>
         <th><%= :CREATED.t %></th>

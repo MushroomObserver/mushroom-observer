@@ -8,14 +8,15 @@
   size     ||= default_thumbnail_size
   votes    ||= image ? true : false
   original ||= false
+  responsive ||= false
 
   vote_pct = ((image.vote_cache || 0) / Image.all_votes.length * 100).floor \
              if image and votes
   url = image ? image.url(size) : Image.url(size, image_id)
 %>
 <div style="text-align: center">
-  <div style="display: inline-block;">
-    <%= link_with_query(image_tag(url), link) %>
+  <div style="<%= "display: inline-block;" unless responsive%>">
+    <%= link_with_query(image_tag(url, class: responsive ? 'img-responsive' : ''), link) %>
     <% if vote_pct %>
       <div class="vote-meter">
         <div id="vote_meter_bar_<%=image_id%>" class="vote-meter-bar"

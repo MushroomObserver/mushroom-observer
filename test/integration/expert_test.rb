@@ -264,7 +264,7 @@ class ExpertTest < IntegrationTestCase
     end
     sess.assert_flash_success
     sess.assert_template('species_list/show_species_list')
-    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select('div#title', :text => /#{spl.title}/)
     sess.assert_select("a[href*=edit_species_list/#{spl.id}]", :text => /edit/i)
 
     loc = Location.last
@@ -281,7 +281,7 @@ class ExpertTest < IntegrationTestCase
     # Try adding a comment, just for kicks.
     sess.click(:href => /add_comment/)
     sess.assert_template('comment/add_comment')
-    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select('div#title', :text => /#{spl.title}/)
     sess.assert_select("a[href*=show_species_list/#{spl.id}]", :text => /cancel/i)
     sess.open_form do |form|
       form.change('comment_summary', 'Slartibartfast')
@@ -290,7 +290,7 @@ class ExpertTest < IntegrationTestCase
     end
     sess.assert_flash_success
     sess.assert_template('species_list/show_species_list')
-    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select('div#title', :text => /#{spl.title}/)
     sess.assert_select('div.comment', :text => /Slartibartfast/)
     sess.assert_select('div.comment', :text => /Steatopygia/)
   end

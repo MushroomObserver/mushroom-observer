@@ -1,242 +1,227 @@
 <%
-  @title = :image_show_title.t(name: @image.unique_format_name)
-  commercial_inquiries_ok = @image.user.email_general_commercial
+   @title = :image_show_title.t(name: @image.unique_format_name)
+   # Put controls and info to right of image unless it is too big.
 
-  # Put controls and info to right of image unless it is too big.
-  w, h = @image.size(@size)
-  columns = w < 800 ? 2 : 1 rescue 2
 
-  for obs in @image.observations
-    new_tab_set do
-      add_tab_with_query(:show_name.t(name: obs.format_name),
-        controller: 'name', action: 'show_name',
-        id: obs.name.id)
-      eol_url = @image.eol_url
-      add_tab('EOL', eol_url) if eol_url
-      add_tab(:google_images.t,
-        'http://images.google.com/images?q=%s' % obs.text_name)
-      add_tab_with_query(:show_object.t(type: :observation),
-        controller: 'observer', action: 'show_observation',
-        id: obs.id)
-    end
-  end
+   left_links = []
+   @image.observations.each do |obs|
+     left_links.push(link_with_query(:show_name.t(name: obs.format_name),
+                                     controller: 'name', action: 'show_name',
+                                     id: obs.name.id))
+     left_links.push(link_to('EOL', @image.eol_url)) if @image.eol_url
+     left_links.push(link_to(:google_images.t, 'http://images.google.com/images?q=%s' % obs.text_name))
+     left_links.push(link_with_query(:show_object.t(type: :observation),
+                                     controller: 'observer', action: 'show_observation', id: obs.id))
+   end
 
-  new_tab_set do
-    add_tab_with_query(:image_show_original.t,
-      action: 'show_image', id: @image.id, size: 'original')
-    if commercial_inquiries_ok
-	    add_tab_with_query(:image_show_inquiry.t, controller: 'observer',
-        action: 'commercial_inquiry', id: @image.id)
-    end
-    if check_permission(@image)
-      add_tab_with_query(:image_show_rotate_left.t,
-        action: 'transform_image', op: 'rotate_left', id: @image.id,
-        size: @size)
-      add_tab_with_query(:image_show_rotate_right.t,
-        action: 'transform_image', op: 'rotate_right', id: @image.id,
-        size: @size)
-      add_tab_with_query(:image_show_mirror.t, action: 'transform_image',
-        op: 'mirror', id: @image.id, size: @size)
-      add_tab_with_query(:image_show_edit.t, action: 'edit_image',
-        id: @image.id)
-      add_tab_with_query(:image_show_destroy.t, { action: 'destroy_image',
-        id: @image.id }, { data: { confirm: :are_you_sure.l } })
-    end
-  end
-
-  draw_prev_next_tabs(@image)
+   @tabsets = {
+           left: render({partial: '/shared/tab_set',
+                         locals: {
+                                 links: left_links
+                         }})
+   }
+   draw_prev_next_tabs(@image)
 %>
 
-<% if columns > 1 %>
-  <table cellpadding="10">
-    <tr>
-      <td align="center">
-<% else %>
-  <!-- This should prevent the page from getting too wide on modern browsers at least. -->
-  <div style="max-width:1000px; overflow:visible">
-<% end %>
+<div class="row">
+  <div class="col-md-8">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="row">
+          <div class="col-xs-12">
+            <% if check_permission(@image) %>
+                <%= link_with_query(:image_show_rotate_left.t,
+                                    action: 'transform_image', op: 'rotate_left',
+                                    id: @image.id, size: @size) %> |
+                <%= link_with_query(:image_show_rotate_right.t,
+                                    action: 'transform_image', op: 'rotate_right',
+                                    id: @image.id, size: @size) %> |
+                <%= link_with_query(:image_show_mirror.t,
+                                    action: 'transform_image',
+                                    op: 'mirror', id: @image.id, size: @size) %> |
+                <%= link_with_query(:image_show_edit.t, action: 'edit_image',
+                                    id: @image.id) %> |
+                <%= link_with_query(:image_show_destroy.t,
+                                    {action: 'destroy_image', id: @image.id},
+                                    {data: {confirm: :are_you_sure.l}}) %> |
+            <% end %>
+            <%= link_with_query(:image_show_original.t, action: 'show_image', id: @image.id, size: 'original') %>
+            <div class="dropdown pull-right">
+              <%= :prefs_image_size.t %>:
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <%= @size ? :"image_show_#{@size}".t : :prefs_image_size.t %>
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" role="menu">
+                <% Image.all_sizes.select do |size| %>
+                    <li><%= link_with_query(:"image_show_#{size}".t, {action: 'show_image', id: @image.id, size: size}) if size.to_s != @size.to_s %></li>
+                    <%= content_tag(:li, :"image_show_#{size}".t, style: "padding-left: 1.5em; color: grey") unless size.to_s != @size.to_s %>
+                <% end %>
+              </ul>
+              <%= link_with_query('', {action: 'show_image', id: @image.id, size: @size, make_default: 1},
+                                  {class: "glyphicon glyphicon-floppy-disk bold", style: "color:black; padding-left: 3px", title: :image_show_make_default.t}) if @size != @default_size %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <%= thumbnail(@image,
+                      size: @size,
+                      votes: true,
+                      link: add_query_param(action: 'show_image', id: @image.id,
+                                            size: (@size == @default_size ? :full_size : @default_size)),
+                      original: true,
+                      responsive: true) %>
 
-<p align="center"><%=
-  Image.all_sizes.select do |size|
-    !@image.width || @image.has_size?(size)
-  end.map do |size|
-    w, h = @image.size(size)
-    title = "#{w} × #{h} pixels"
-    help = w ? { title: title } : {}
-    if size.to_s != @size.to_s
-      link_with_query(:"image_show_#{size}".t,
-        { action: 'show_image', id: @image.id, size: size },
-        help)
-    else
-      content_tag(:span, :"image_show_#{size}".t, help)
-    end
-  end.safe_join(' | ')
-%><br/>
-<%= if @size != @default_size
-  link_with_query(:image_show_make_default.t, action: 'show_image',
-    id: @image.id, size: @size, make_default: 1)
-end %></p>
-
-<center>
-  <%= thumbnail(@image,
-                size: @size,
-                votes: true,
-                link: add_query_param(action: 'show_image', id: @image.id,
-                                      size: (@size == @default_size ? :full_size : @default_size)),
-                original: true) %><br/>
-  <%= image_copyright(@image) %><br/>
-  <%= render(partial: "shared/form_#{@image.license.form_name}") %><br/>
-</center>
-
-<% if columns > 1 %>
-  </td><td>
-<% else %>
-
-<% end %>
-
-
-<% if check_permission(@image) %>
-  <p>
-    <%= link_with_query(:image_show_rotate_left.t,
-          action: 'transform_image', op: 'rotate_left',
-          id: @image.id, size: @size) %> |
-    <%= link_with_query(:image_show_rotate_right.t,
-          action: 'transform_image', op: 'rotate_right',
-          id: @image.id, size: @size) %> |
-    <%= link_with_query(:image_show_mirror.t,
-          action: 'transform_image',
-          op: 'mirror', id: @image.id, size: @size) %> |
-    <%= link_with_query(:image_show_edit.t, action: 'edit_image',
-          id: @image.id) %> |
-    <%= link_with_query(:image_show_destroy.t,
-          { action: 'destroy_image', id: @image.id },
-          { data: { confirm: :are_you_sure.l } }) %>
-  </p>
-<% end %>
-
-<div class="ThinBox" style="margin-bottom:1em">
-  <%= :WHEN.t %>: <span class="Data"><%= @image.when.web_date %></span><br/>
-  <%= :OWNER.t %>: <span class="Data"><%= user_link(@image.user) %></span><br/>
-  <% if @image.projects.any? %>
-    <% for proj in @image.projects %>
-      <%= :PROJECT.t %>:
-        <span class="Data"><%= project_link(proj) %></span><br/>
-    <% end %>
-  <% end %>
-  <% for obs in @image.observations %>
-    <%= :Observation.t %>: <%= link_with_query(obs.unique_format_name.t,
-      controller: 'observer', action: 'show_observation', id: obs.id)
-    %><br/>
-  <% end %>
-  <% for subject in @image.subjects %>
-    <%= :User.t %>: <%= link_with_query(subject.format_name.t,
-      controller: 'observer', action: 'show_user', id: subject.id)
-    %><br/>
-  <% end %>
-  <% for glossary_term in @image.all_glossary_terms %>
-    <%= :Glossary_Term.t %>: <%= link_with_query(glossary_term.format_name.t,
-      controller: 'glossary', action: 'show_glossary_term', id: glossary_term.id)
-    %><br/>
-  <% end %>
-  <% if @image.notes.blank? %>
-  <% elsif @image.notes.include?("\n") %>
-    <%= (:image_show_notes.l + ': ' + @image.notes.to_s.html_safe).tpl %>
-  <% else %>
-    <%= (:image_show_notes.l + ': ' + @image.notes.to_s.html_safe).tl %>
-  <% end %>
-</div>
-
-<% if is_reviewer? %>
-  <p><%= set_export_status_controls(@image) %></p>
-<% end %>
-<div id="quality_vote_container"><!--Note: used by ajax-->
-<p id="quality_vote_content" style="white-space:nowrap">
-  <%= :image_show_quality.t %>:
-  <span class="Data">
-    <%= vote = (@image.vote_cache + 0.5).to_i rescue 0
-    image_vote_as_long_string(vote).t %>
-  </span><br/>
-  <% if @user
-    current = @image.users_vote(@user).to_i %>
-    <%= :image_show_your_vote.t %>:
-    <span class="Data">
-      <%= image_vote_as_long_string(current).t %>
-    </span><br/><br/>
-    <% args = add_query_param(id: @image.id)
-    args[:size] = @size if @size != @default_size
-    for value in [0] + Image.all_votes
-      str1 = image_vote_as_short_string(value)
-      str2 = image_vote_as_help_string(value)
-      str3 = :image_show_vote_and_next.t(value: str1) %>
-      <%= link_to(str2, { vote: value }.merge(args)) %> |
-      <%= link_to(str3, { vote: value, next: true }. merge(args)) %><br/>
-    <% end %>
-  <% end %>
-</p>
-</div>
-
-<% if !@votes.empty? %>
-    <div id="show_votes_container"> <!--note this is used by ajax-->
-  <table id="show_votes_table" class="ThinBox" style="margin-top:1em; margin-bottom:1em">
-    <tr>
-      <th align="left"><%= :USER.t %></th>
-      <th align="left"><%= :VOTE.t %></th>
-    </tr>
-    <% for vote in @votes %>
-      <tr>
-        <td style="padding-right:2em"><%=
-          vote.anonymous ? :anonymous.t : user_link(vote.user)
-        %></td>
-        <td><%= :"image_vote_short_#{vote.value}".t %></td>
-      </tr>
-    <% end %>
-  </table>
+        <% chgs = @image.copyright_changes.sort_by(&:id)
+           unless chgs.empty? %>
+            <table class="table table-responsive table-striped">
+              <tr>
+                <th><%= :DATES.t %></th>
+                <th><%= :LICENSE.t %></th>
+                <th><%= :COPYRIGHT_HOLDER.t %></th>
+              </tr>
+              <% for i in (0..chgs.length-1) %>
+                  <tr>
+                    <td class="small">
+                      <%= i > 0 ? chgs[i-1].updated_at.web_date : @image.created_at.web_date %> &rarr;
+                      <%= chgs[i].updated_at.web_date %>
+                    </td>
+                    <td class="small">
+                      <%= link_to(chgs[i].license.display_name.t, chgs[i].license.url) %>
+                    </td>
+                    <td class="small">
+                      <%= chgs[i].license.copyright_text(chgs[i].year, chgs[i].name) %>
+                    </td>
+                  </tr>
+              <% end %>
+              <tr>
+                <td class="small">
+                  <%= chgs[-1].updated_at.web_date %> &rarr;
+                  <%= @image.updated_at.web_date %>
+                </td>
+                <td class="small">
+                  <%= link_to(@image.license.display_name.t, @image.license.url) %>
+                </td>
+                <td class="small">
+                  <%= image_copyright(@image, false) %>
+                </td>
+              </tr>
+            </table>
+        <% end %>
+      </div>
     </div>
-<% end %>
-
-<% chgs = @image.copyright_changes.sort_by(&:id)
-   unless chgs.empty? %>
-  <table style="margin-top:1em; margin-bottom:1em">
-    <tr>
-      <th><%= :DATES.t %></th>
-      <th><%= :LICENSE.t %></th>
-      <th><%= :COPYRIGHT_HOLDER.t %></th>
-    </tr>
-    <% for i in (0..chgs.length-1) %>
-      <tr>
-        <td style="white-space:nowrap; padding-right:10px">
-          <%= i > 0 ? chgs[i-1].updated_at.web_date : @image.created_at.web_date %> &rarr;
-          <%= chgs[i].updated_at.web_date %>
-        </td>
-        <td align="center" style="white-space:nowrap">
-          <%= link_to(chgs[i].license.display_name.t, chgs[i].license.url) %>
-        </td>
-        <td align="center" style="white-space:nowrap; padding-right:10px">
-          <%= chgs[i].license.copyright_text(chgs[i].year, chgs[i].name) %>
-        </td>
-      </tr>
-    <% end %>
-    <tr>
-      <td style="white-space:nowrap; padding-right:10px">
-        <%= chgs[-1].updated_at.web_date %> &rarr;
-        <%= @image.updated_at.web_date %>
-      </td>
-      <td align="center" style="white-space:nowrap">
-        <%= link_to(@image.license.display_name.t, @image.license.url) %>
-      </td>
-      <td align="center" style="white-space:nowrap; padding-right:10px">
-        <%= image_copyright(@image, false) %>
-      </td>
-    </tr>
-  </table>
-<% end %>
-
-<% if columns > 1 %>
-      </td>
-    </tr>
-  </table>
-<% else %>
   </div>
-<% end %>
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <%= @title %>
+      </div>
+      <div class="panel-body" style="padding-top: 5px; padding-bottom: 5px;">
+        <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
+        <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
+        <% if @image.projects.any?
+             @image.projects.each do |proj| %>
+                <div><%= :PROJECT.t %>: <%= project_link(proj) %></div>
+            <% end
+               end %>
+        <% @image.observations.each do |obs| %>
+            <div><%= :Observation.t %>: <%= link_with_query(obs.unique_format_name.t,
+                                                            controller: 'observer', action: 'show_observation', id: obs.id) %>
+            </div>
+        <% end %>
+        <% @image.subjects.each do |subject| %>
+            <div>
+              <%= :User.t %>:
+              <%= link_with_query(subject.format_name.t, controller: 'observer', action: 'show_user', id: subject.id) %>
+            </div>
+        <% end %>
+        <% @image.all_glossary_terms.each do |glossary_term| %>
+            <div>
+              <%= :Glossary_Term.t %>:
+              <%= link_with_query(glossary_term.format_name.t,
+                                  controller: 'glossary', action: 'show_glossary_term', id: glossary_term.id) %>
+            </div>
+        <% end %>
+        <% if !@image.notes.blank? and @image.notes.include?("\n") %>
+            <%= (:image_show_notes.l + ': ' + @image.notes.to_s.html_safe).tpl %>
+        <% elsif !@image.notes.blank? %>
+            <%= (:image_show_notes.l + ': ' + @image.notes.to_s.html_safe).tl %>
+        <% end %>
+        <div>
+          <%= link_with_query(:image_show_inquiry.t,
+                              controller: 'observer', action: 'commercial_inquiry', id: @image.id) if @image.user.email_general_commercial %>
+        </div>
+      </div>
+    </div>
 
-<%= show_object_footer(@image) %>
+    <% if is_reviewer? %>
+        <p><%= set_export_status_controls(@image) %></p>
+    <% end %>
+    <div id="quality_vote_container"><!--Note: used by ajax-->
+      <div class="list-group list-group-compact">
+        <div class="list-group-item default">
+    <span id="quality_vote_content">
+      <strong><%= :image_show_quality.t %>:</strong>
+      <small><%= vote = (@image.vote_cache + 0.5).to_i rescue 0
+                 image_vote_as_long_string(vote).t %></small>
+      </span>
+        </div>
+        <% if @user
+             current = @image.users_vote(@user).to_i %>
+            <div class="list-group-item text-center">
+              <%= :image_show_your_vote.t %>:
+        <span class="small">
+        <%= image_vote_as_long_string(current).t %>
+        </span>
+            </div>
+            <% args = add_query_param(id: @image.id)
+               args[:size] = @size if @size != @default_size
+               for value in [0] + Image.all_votes
+                 str1 = image_vote_as_short_string(value)
+                 str2 = image_vote_as_help_string(value)
+                 str3 = :image_show_vote_and_next.t(value: str1)
+                 css_class = "btn border-radius-none small"
+                 css_class += " active" if current == value %>
+                <div class="list-group-item list-group-item-split">
+                  <div class="btn-group" style="width:100%;">
+                    <%= link_to(value == 0 ? str2 : str1, {:vote => value}.merge(args),
+                                {style: "width: 65%; padding: 4px;", class: css_class + " btn-default", title: str2, data: {toggle: "tooltip", placement: "left"}}) %>
+                    <%= link_to(str3, {:vote => value, :next => true}.merge(args),
+                                {class: css_class + " btn-success", style: "width: 35%; padding: 4px;", title: str2, data: {toggle: "tooltip", placement: "left"}}) %>
+                  </div>
+                </div>
+            <% end %>
+        <% end %>
+      </div>
+    </div>
+    <div id="show_votes_container"> <!--note this is used by ajax-->
+      <% if !@votes.empty? %>
+          <table id="show_votes_table" class="table table-striped">
+            <tr>
+              <th><%= :USER.t %></th>
+              <th><%= :VOTE.t %></th>
+            </tr>
+            <% for vote in @votes %>
+                <tr>
+                  <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
+                  <td><%= :"image_vote_short_#{vote.value}".t %></td>
+                </tr>
+            <% end %>
+          </table>
+      <% end %>
+    </div>
+  </div>
+</div>
+<div class="row">
+<div class="col-sm-4">
+    <div class="small">
+      <%= image_copyright(@image) %>
+      <%= render(partial: "shared/form_#{@image.license.form_name}") %>
+    </div>
+  </div>
+  <div class="col-sm-8">
+    <%= show_object_footer(@image) %>
+  </div>
+</div>
+

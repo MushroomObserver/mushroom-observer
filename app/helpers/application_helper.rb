@@ -932,39 +932,6 @@ module ApplicationHelper
     end
   end
 
-  # Wrap some HTML in the cute red/yellow/green box used for +flash[:notice]+.
-  #
-  #   <%= boxify(2, flash[:notice]) %>
-  #
-  #   <% boxify(1) do %>
-  #     Render more stuff in here.  Note lack of "=" in line above.
-  #   <% end %>
-  #
-  # Notice levels are:
-  # 0:: notice (green)
-  # 1:: warning (yellow)
-  # 2:: error (red)
-  #
-  def boxify(lvl=0, msg=nil, &block)
-    type = "Notices"
-    type = "Warnings" if lvl == 1
-    type = "Errors"   if lvl == 2
-    msg = capture(&block) if block_given?
-    content_tag(:div,
-      content_tag(:table,
-        content_tag(:tr,
-          content_tag(:td, msg)),
-        class: type),
-      style: 'min-width:400px; max-width:800px')
-  end
-
-  # From javascript_helper.rb
-  # This is a list of modules that are sensitive to order.
-  JAVASCRIPT_MODULE_ORDER = %w(
-    jquery
-    jquery_extensions
-  )
-
   # Schedule javascript modules for inclusion in header.  This is much safer
   # than javascript_include_tag(), since that one is ignorant of whether the
   # given module(s) have been included yet or not, and of correct order.
@@ -1401,13 +1368,15 @@ module ApplicationHelper
   # size::      Size to show, default is thumbnail
   # original::  Show original file name?
   # votes::     Show vote buttons?
-  def thumbnail(image, args={}) ##TODO: Add size option
+  # responsive:  Force image to fit into container.
+  def thumbnail(image, args={})
     render(partial: "image/image_thumbnail",
            locals: { image:    image,
                      link:     args[:link],
                      votes:    args[:votes],
                      size:     args[:size],
-                     original: args[:original]
+                     original: args[:original],
+                     responsive: args[:responsive]
            }
     )
   end

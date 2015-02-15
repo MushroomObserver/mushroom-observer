@@ -1,14 +1,9 @@
 <%
    @title = :rss_log_title.t.nowrap
-   custom_tab_set(render(:partial => "rss_log_tabset"))
+   @full_width_tab_set = render(:partial => "rss_log_tabset")
    new_tab_set(@links)
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
-<style>
-  .tab_set {  /*Todo, figure out how to make the links tabset a partial view */
-      text-align: right;
-  }
-</style>
 <div class="row">
   <div class="col-xs-12">
     <div class="text-center">

@@ -443,7 +443,7 @@ class NameControllerTest < FunctionalTestCase
 
   def ids_from_links(links)
     links.map do |l|
-      l.url.match(/.*\/([0-9]+)/)[1].to_i
+      l.to_s.match(/.*\/([0-9]+)/)[1].to_i
     end
   end
 
@@ -460,16 +460,19 @@ class NameControllerTest < FunctionalTestCase
     get(:test_index, { num_per_page: 10 }.merge(query_params))
     # print @response.body
     assert_template(:list_names)
-    name_links = extract_links(action: "show_name")
+    name_links = css_select(".table a")
     assert_equal(10, name_links.length)
     expected = Name.all.order("text_name, author").limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
-    assert_equal(@controller.url_with_query(action: "show_name",
-      id: expected.first.id, only_path: true), name_links.first.url)
-    assert_no_link_in_html(1)
-    assert_link_in_html(2, action: :test_index, num_per_page: 10,
+    # assert_equal(@controller.url_with_query(action: "show_name",
+    #  id: expected.first.id, only_path: true), name_links.first.url)
+    url = @controller.url_with_query(action: "show_name",
+                                      id: expected.first.id, only_path: true)
+    assert_not_nil(name_links.first.to_s.index(url))
+    assert_no_tag(:a, content: "1") ##assert_no_link_in_html(1)
+    assert_link_in_html("2", action: :test_index, num_per_page: 10,
       params: query_params, page: 2)
-    assert_no_link_in_html("Z")
+    assert_no_tag(:a, content: "Z")
     assert_link_in_html("A", action: :test_index, num_per_page: 10,
       params: query_params, letter: "A")
   end
@@ -479,16 +482,18 @@ class NameControllerTest < FunctionalTestCase
     query_params = pagination_query_params
     get(:test_index, { num_per_page: 10, page: 2 }.merge(query_params))
     assert_template(:list_names)
-    name_links = extract_links(action: "show_name")
+    name_links = css_select(".table a")
     assert_equal(10, name_links.length)
     expected = Name.all.order("text_name, author").limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
-    assert_equal(@controller.url_with_query(action: "show_name",
-      id: expected.first.id, only_path: true), name_links.first.url)
-    assert_no_link_in_html(2)
-    assert_link_in_html(1, action: :test_index, num_per_page: 10,
+    url = @controller.url_with_query(action: "show_name",
+                                     id: expected.first.id, only_path: true)
+    assert_not_nil(name_links.first.to_s.index(url))
+
+    assert_no_tag(:a, content: "2")
+    assert_link_in_html("1", action: :test_index, num_per_page: 10,
       params: query_params, page: 1)
-    assert_no_link_in_html("Z")
+    assert_no_tag(:a, content: "Z")
     assert_link_in_html("A", action: :test_index, num_per_page: 10,
       params: query_params, letter: "A")
   end
@@ -502,14 +507,18 @@ class NameControllerTest < FunctionalTestCase
     get(:test_index, { num_per_page: l_names.size,
                letter: "L" }.merge(query_params))
     assert_template(:list_names)
-    name_links = extract_links(action: "show_name")
+    assert_tag(:div, attributes: {id: "content"})
+    name_links = css_select(".table a")
     assert_equal(l_names.size, name_links.length)
     # (Mysql and ruby sort "Kuhner" and "Kühner" oppositely. Just ignore them.)
     assert_equal(l_names.map(&:id)-[35,36], ids_from_links(name_links)-[35,36])
-    assert_equal(@controller.url_with_query(action: "show_name",
-      id: l_names.first.id, only_path: true), name_links.first.url)
-    assert_no_link_in_html(1)
-    assert_no_link_in_html("Z")
+
+    url = @controller.url_with_query(action: "show_name",
+                               id: l_names.first.id, only_path: true)
+    assert_not_nil(name_links.first.to_s.index(url))
+    assert_no_tag(:a, content: "1"); ##assert_no_link_in_html(1)
+    assert_no_tag(:a, content: "Z"); ##assert_no_link_in_html("Z")
+
     assert_link_in_html("A", action: :test_index,params: query_params,
       num_per_page: l_names.size, letter: "A")
   end
@@ -524,14 +533,18 @@ class NameControllerTest < FunctionalTestCase
     get(:test_index, { num_per_page: l_names.size,
         letter: "L" }.merge(query_params))
     assert_template(:list_names)
-    name_links = extract_links(action: "show_name")
+    name_links = css_select(".table a")
+
     assert_equal(l_names.size, name_links.length)
     assert_equal(l_names.map(&:id)-[35,36], ids_from_links(name_links)-[35,36])
-    assert_no_link_in_html(1)
-    assert_link_in_html(2, action: :test_index, params: query_params,
+
+    assert_no_tag(:a, content: "1")
+
+    assert_link_in_html("2", action: :test_index, params: query_params,
       num_per_page: l_names.size,
       letter: "L", page: 2)
-    assert_no_link_in_html(3)
+
+    assert_no_tag(:a, content: "3")
   end
 
   def test_pagination_letter_with_page_2
@@ -542,14 +555,14 @@ class NameControllerTest < FunctionalTestCase
     get(:test_index, { num_per_page: l_names.size, letter: "L",
         page: 2 }.merge(query_params))
     assert_template(:list_names)
-    name_links = extract_links(action: "show_name")
+    name_links =  css_select(".table a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
-    assert_no_link_in_html(2)
-    assert_link_in_html(1, action: :test_index, params: query_params,
+    assert_no_tag(:a, content: "2")
+    assert_link_in_html("1", action: :test_index, params: query_params,
       num_per_page: l_names.size,
       letter: "L", page: 1)
-    assert_no_link_in_html(3)
+    assert_no_tag(:a, content: "3")
   end
 
   def test_pagination_with_anchors
@@ -559,7 +572,7 @@ class NameControllerTest < FunctionalTestCase
       num_per_page: 10,
       test_anchor: "blah"
     }.merge(query_params))
-    assert_link_in_html(2, action: :test_index, num_per_page: 10,
+    assert_link_in_html("2", action: :test_index, num_per_page: 10,
       params: query_params, page: 2,
       test_anchor: "blah", anchor: "blah")
     assert_link_in_html("A", action: :test_index, num_per_page: 10,
@@ -3141,11 +3154,11 @@ class NameControllerTest < FunctionalTestCase
     # No interest in this name yet.
     get(:show_name, id: peltigera.id)
     assert_response(:success)
-    assert_link_in_html('<img[^>]+watch\d*.png[^>]+>',
+    assert_image_link_in_html(/watch\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Name", id: peltigera.id, state: 1
     )
-    assert_link_in_html('<img[^>]+ignore\d*.png[^>]+>',
+    assert_image_link_in_html(/ignore\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Name", id: peltigera.id, state: -1
     )
@@ -3154,11 +3167,11 @@ class NameControllerTest < FunctionalTestCase
     Interest.create(target: peltigera, user: rolf, state: true)
     get(:show_name, id: peltigera.id)
     assert_response(:success)
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
+    assert_image_link_in_html(/halfopen\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Name", id: peltigera.id, state: 0
     )
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
+    assert_image_link_in_html(/ignore\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Name", id: peltigera.id, state: -1
     )
@@ -3168,11 +3181,11 @@ class NameControllerTest < FunctionalTestCase
     Interest.create(target: peltigera, user: rolf, state: false)
     get(:show_name, id: peltigera.id)
     assert_response(:success)
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
+    assert_image_link_in_html(/halfopen\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Name", id: peltigera.id, state: 0
     )
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
+    assert_image_link_in_html(/watch\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Name", id: peltigera.id, state: 1
     )

@@ -1,0 +1,18 @@
+<% if @full_width_tab_set %>
+    <div class="col-xs-12">
+      <%= content_tag(:h3, @title, class: "text-center") %>
+    </div>
+    <div class="col-xs-12">
+    <%= @full_width_tab_set%>
+    </div>
+<% else %>
+    <div id="left_tabs" class="col-sm-4">
+      <%= @tabsets[:left] if @tabsets%>
+    </div>
+    <div class="col-sm-4" id="title">
+      <%= content_tag(:h3, @title, class: "text-center") %>
+    </div>
+    <div id="right_tabs" class="col-sm-4">
+        <%= @tabsets[:right] if @tabsets%>
+    </div>
+<% end %>

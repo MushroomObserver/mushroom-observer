@@ -981,6 +981,8 @@
   app_feature_tracker: Feature Tracker
   app_glossary: Glossary
   app_publications: Publications
+  app_more: More
+  app_other: Other
 
   # This is for the search bar at the top of every page.
   app_find: Find
