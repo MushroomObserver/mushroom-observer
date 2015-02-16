@@ -23,7 +23,7 @@ jQuery(document).ready(function () {
     jQuery('[data-toggle="theater"]').click(function (e){
         e.preventDefault();
         var img_src = $(this).data().image;
-        console.log(img_src);
+        jQuery('.img-theater').css('top', jQuery(document).scrollTop())
         $('.img-theater').show();
         $('#img_append_target').html('<img src="{{src}}" class="center-block" style="height: {{h}}; width: auto;"><//img>'
             .replace("{{src}}", img_src)

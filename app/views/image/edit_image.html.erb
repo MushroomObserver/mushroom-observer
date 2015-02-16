@@ -14,10 +14,10 @@
         <div class="text-center">
           <%= submit_tag(:SAVE_EDITS.l, {class: "btn btn-default"}) %>
         </div>
-        <%= render(:partial => 'form_images', :locals => {
-                                                    :form => form,
-                                                    :leave_out_original_file_name => false
-                                            }) %>
+        <%= render({partial: 'form_images', locals: {
+                                                    form: form,
+                                                    leave_out_original_file_name: false
+                                            }}) %>
         <div class="text-center">
           <%= submit_tag(:SAVE_EDITS.l, {class: "btn btn-default"}) %>
           <%= link_with_query(:cancel_and_show.t({type: :image}),{

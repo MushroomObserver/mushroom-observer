@@ -5,33 +5,30 @@
      comments = comments[0..limit-1]
    end
 %>
-<div>
-    <span>
-      <%= comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t %>:
-    </span>
-  <strong>
-    <%= if controls
-          link_with_query(:"show_comments_add_comment".t, :controller => 'comment',
-                          :action => 'add_comment', :id => object.id, :type => object.class.name)
-        end %>
-  </strong>
+
+
+<div class="row">
+  <div class="col-xs-8">
+      <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t) %>
+  </div>
+  <div class="col-xs-4">
+    <strong class="pull-right pad-top">
+      <%= link_with_query(:"show_comments_add_comment".t, {controller: :comment,
+                            action: :add_comment, id: object.id, type: object.class.name}) if controls
+          %>
+    </strong>
+  </div>
 </div>
 
-<div class="border-box color-block">
-  <% comments.each do |comment| %>
-      <div class="row color-block-item">
-        <div class="col-xs-12">
-          <div>
-            <%= render(:partial => 'comment/comment', :object => comment) %>
-          </div>
-        </div>
-      </div>
-  <% end %>
-</div>
+
+
+<% comments.each do |comment| %>
+    <%= render(:partial => 'comment/comment', :object => comment) %>
+<% end %>
+
 
 
 <%= if limit and (and_more > 0)
       link_to(:show_comments_and_more.t(:num => and_more),
-              :controller => 'comment', :action => 'show_comments_for_target',
-              :id => object.id, :type => object.class.name)
+              {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
     end %>

@@ -1,7 +1,10 @@
-<% links ||= [] %>
+<% ## This partial view will render links or any other ruby helpers passed to it in a list
+   links ||= []  ## Links to be rendered in the tab
+%>
 
 <small>
 <%links.each do |link|%>
     <%=link%><br/>
 <%end%>
 </small>
+

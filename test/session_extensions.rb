@@ -253,19 +253,22 @@ module SessionExtensions
         arg = 'div#navigation'
       elsif arg == :results
         arg = 'div.results'
+      elsif arg = :title
+        arg = 'div#title'
       end
       select = "#{arg} #{select}"
     end
 
     done = false
     assert_select(select, *sargs) do |links|
+
       for link in links
         match = true
 
         # Filter based on link "label" (can be an image too, for example).
         if arg = args[:label]
           if arg == :image
-            match = false if !link.to_s.match(/<img /)
+            match = false if !link.to_s.match(/img /)
           elsif arg.is_a?(Regexp)
             match = false if !link.to_s.match(arg)
           else

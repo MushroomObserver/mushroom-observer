@@ -1,28 +1,34 @@
-<div class="row comment">
-  <div class="col-sm-9">
-    <div class="pad-box">
-      <%= :CREATED.t %>:
-      <strong><%= comment.created_at.web_time %></strong><br/>
-      <%= :BY.t %>: <%= user_link(comment.user) %>
-      <% if check_permission(comment) %>
-          [<%= link_with_query(:EDIT.t, :controller => 'comment',
-                               :action => 'edit_comment', :id => comment.id) %> |
-          <%= link_with_query(:DESTROY.t, {:controller => 'comment',
-                                           :action => 'destroy_comment', :id => comment.id},
-                              {data: {confirm: :are_you_sure.l}}) %>]
-      <% end %><br/>
-      <%= :SUMMARY.t %>:
-      <strong><%= comment.summary.tl %></strong>
+<div class="list-group comment">
+  <div class="list-group-item default">
+    <div class="row">
+      <div class="col-sm-6">
+        <strong><%= comment.summary.tl %></strong><br>
+        <%= :BY.t %>: <%= user_link(comment.user) %>
+        <% if check_permission(comment) %>
+            [<%= link_with_query(:EDIT.t, :controller => 'comment',
+                                 :action => 'edit_comment', :id => comment.id) %> |
+            <%= link_with_query(:DESTROY.t, {:controller => 'comment',
+                                             :action => 'destroy_comment', :id => comment.id},
+                                {data: {confirm: :are_you_sure.l}}) %>]
+        <% end %><br/>
+      </div>
+      <div class="col-sm-6">
+        <small class="pull-right"><%= comment.created_at.web_time %></small>
+      </div>
     </div>
   </div>
-  <div class="col-sm-3">
-    <% user = comment.user
-       if user.image_id %>
-        <%= link_to(image_tag(Image.url(:thumbnail, user.image_id), class: "img-responsive pad-box"),
-                    {controller: :observer, action: :show_user, id: user.id}) %>
-    <% end %>
-  </div>
-  <div class="col-xs-12">
-    <div class="pad-box"> <%= comment.comment.tpl %> </div>
+  <div class="list-group-item">
+    <div class="row">
+      <div class="col-sm-9">
+        <div class="pad-box"> <%= comment.comment.tpl %> </div>
+      </div>
+      <div class="col-sm-3 hidden-xs">
+        <% user = comment.user
+           if user.image_id %>
+            <%= link_to(image_tag(Image.url(:thumbnail, user.image_id), class: "img-responsive"),
+                        {controller: :observer, action: :show_user, id: user.id}) %>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>

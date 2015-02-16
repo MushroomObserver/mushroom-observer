@@ -1,6 +1,15 @@
+<%
+   ## This is a stop-gap measure until I/we figure out exactly how we want to deal with tabsets moving foward. I'm not sure
+   ## that my current approach is correct, but I feel like it is a bit more transparent than the previous approach
+   ## and allows more flexibility in styling the tabs - RJS 2/15/2015
+   @tabsets = {left: render_tab_sets} if @tab_sets and not @tabsets
+%>
 <% if @full_width_tab_set %>
     <div class="col-xs-12">
-      <%= content_tag(:h3, @title, class: "text-center") %>
+      <h3 class="text-center" style="margin-top: 5px;">
+        <%= content_tag(:h3, @title, class: "text-center", style: "margin-top: 5px;") %>
+      </h3>
+      <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
     </div>
     <div class="col-xs-12">
     <%= @full_width_tab_set%>
@@ -10,7 +19,10 @@
       <%= @tabsets[:left] if @tabsets%>
     </div>
     <div class="col-sm-6" id="title">
-      <%= content_tag(:h3, @title, class: "text-center") %>
+      <%= content_tag(:h3, @title, class: "text-center", style: "margin-top: 5px;") %>
+      <div class="text-center" style="margin-top: -5px; margin-bottom: 5px;">
+      <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
+      </div>
     </div>
     <div id="right_tabs" class="col-sm-3" style="text-align: right">
         <%= @tabsets[:right] if @tabsets%>

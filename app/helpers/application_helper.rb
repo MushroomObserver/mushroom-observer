@@ -407,7 +407,8 @@ module ApplicationHelper
                                               :action => obs.show_action,
                                               :id => obs.id},
                                      :size => :thumbnail,
-                                     :votes => true}) + image_copyright(image)
+                                     :votes => true,
+                                     :responsive => false}) + image_copyright(image)
       end
     end
     result
@@ -527,66 +528,6 @@ module ApplicationHelper
       html += content_tag(:p, html2)
     end
     return html
-  end
-
-  def show_boxed_descriptions(odd_even, obj)
-    type = obj.type_tag
-
-    # Show existing drafts, with link to create new one.
-    head = "#{:show_name_descriptions.t}: ".html_safe
-    head += link_with_query(:show_name_create_description.t,
-      :controller => obj.show_controller,
-      :action => "create_#{type}_description",
-      :id => obj.id)
-    any = false
-
-    # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(obj).map {|link| indent + link}
-    any = list.any?
-    # list.unshift(head)
-    list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.safe_join(safe_br)
-    html = colored_notes_box(odd_even, html)
-    head + html
-  end
-
-  def show_boxed_projects(odd_even, obj, projects)
-    type = obj.type_tag
-
-    # Show list of projects user is a member of.
-    head = :show_name_create_draft.t + ': '
-    list = projects.map do |project|
-      item = link_with_query(project.title,
-        :action => "create_#{type}_description",
-        :id => obj.id, :project => project.id,
-        :source => 'project')
-      indent + item
-    end
-    head.html_safe + colored_notes_box(odd_even, list.safe_join(safe_br))
-  end
-
-  def edit_desc_link(desc)
-    if desc
-      link_with_query(:EDIT.t, :id => desc.id,
-        :controller => 'name',
-        :action => 'edit_name_description')
-    else
-      ''
-    end
-  end
-
-  def edit_best_brief_desc_link(desc)
-    edit_desc_link(desc)
-  end
-
-  def edit_classification_link(desc)
-    edit_desc_link(desc)
-  end
-
-  def edit_name_notes_link(name)
-    link_with_query(:EDIT.t, :id => name.id,
-      :controller => 'name',
-      :action => 'edit_name')
   end
 
   # Just shows the current version number and a link to see the previous.
@@ -1736,7 +1677,7 @@ module ApplicationHelper
       end
 
       def interest_tab(img1, img2, img3)
-        content_tag(:div, img1 + safe_br + img2 + img3)
+        content_tag(:div, img1 + safe_br + img2 + img3, style: "position: absolute; top: 0;")
       end
 
       case @user.interest_in(object)
@@ -1769,7 +1710,7 @@ module ApplicationHelper
         img2 = interest_link(img2, object, -1)
         img3 = ''
       end
-      add_right_tab(interest_tab(img1, img2, img3))
+      interest_tab(img1, img2, img3)
     end
   end
 

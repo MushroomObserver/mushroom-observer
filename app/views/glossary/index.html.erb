@@ -7,16 +7,14 @@
 
 <%= :glossary_term_index_intro.tp %>
 
-<table>
-  <% odd_or_even = 0
-    for glossary_term in @glossary_terms
-      odd_or_even = 1 - odd_or_even %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
+<table class="table table-striped">
+  <% @glossary_terms.each do |glossary_term| %>
+      <tr>
         <td>
           <%= link_to(content_tag(:b, glossary_term.name), :action => "show_glossary_term", :id => glossary_term.id) %>:
           <%= glossary_term.description.tpl %>
         </td>
-        <td align="center" valign="middle" width="160" style="padding-bottom:0px">
+        <td>
           <%= if glossary_term.thumb_image_id and glossary_term.thumb_image_id != 0
             thumbnail(glossary_term.thumb_image_id, :border => 0, :votes => true)
           end %>
