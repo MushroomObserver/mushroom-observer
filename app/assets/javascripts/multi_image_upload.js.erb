@@ -451,7 +451,6 @@ function MultiImageUploader(localized_text) {
         xhrReq.onload = function () { //after image has been created.
             if (xhrReq.status == 200) {
                 var image = JSON.parse(xhrReq.response);
-                        console.log(image);
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
                 if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {

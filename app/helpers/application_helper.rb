@@ -204,7 +204,7 @@ module ApplicationHelper
     end
 
     html = html.safe_join(safe_br)
-    html = content_tag(:p, html, class: "Date")
+    html = content_tag(:p, html, class: "small")
   end
 
   def herbarium_name_box(default_name="")
@@ -407,7 +407,8 @@ module ApplicationHelper
                                               :action => obs.show_action,
                                               :id => obs.id},
                                      :size => :thumbnail,
-                                     :votes => true}) + image_copyright(image)
+                                     :votes => true,
+                                     :responsive => false}) + image_copyright(image)
       end
     end
     result
@@ -527,66 +528,6 @@ module ApplicationHelper
       html += content_tag(:p, html2)
     end
     return html
-  end
-
-  def show_boxed_descriptions(odd_even, obj)
-    type = obj.type_tag
-
-    # Show existing drafts, with link to create new one.
-    head = "#{:show_name_descriptions.t}: ".html_safe
-    head += link_with_query(:show_name_create_description.t,
-      :controller => obj.show_controller,
-      :action => "create_#{type}_description",
-      :id => obj.id)
-    any = false
-
-    # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(obj).map {|link| indent + link}
-    any = list.any?
-    # list.unshift(head)
-    list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.safe_join(safe_br)
-    html = colored_notes_box(odd_even, html)
-    head + html
-  end
-
-  def show_boxed_projects(odd_even, obj, projects)
-    type = obj.type_tag
-
-    # Show list of projects user is a member of.
-    head = :show_name_create_draft.t + ': '
-    list = projects.map do |project|
-      item = link_with_query(project.title,
-        :action => "create_#{type}_description",
-        :id => obj.id, :project => project.id,
-        :source => 'project')
-      indent + item
-    end
-    head.html_safe + colored_notes_box(odd_even, list.safe_join(safe_br))
-  end
-
-  def edit_desc_link(desc)
-    if desc
-      link_with_query(:EDIT.t, :id => desc.id,
-        :controller => 'name',
-        :action => 'edit_name_description')
-    else
-      ''
-    end
-  end
-
-  def edit_best_brief_desc_link(desc)
-    edit_desc_link(desc)
-  end
-
-  def edit_classification_link(desc)
-    edit_desc_link(desc)
-  end
-
-  def edit_name_notes_link(name)
-    link_with_query(:EDIT.t, :id => name.id,
-      :controller => 'name',
-      :action => 'edit_name')
   end
 
   # Just shows the current version number and a link to see the previous.
@@ -931,39 +872,6 @@ module ApplicationHelper
       result
     end
   end
-
-  # Wrap some HTML in the cute red/yellow/green box used for +flash[:notice]+.
-  #
-  #   <%= boxify(2, flash[:notice]) %>
-  #
-  #   <% boxify(1) do %>
-  #     Render more stuff in here.  Note lack of "=" in line above.
-  #   <% end %>
-  #
-  # Notice levels are:
-  # 0:: notice (green)
-  # 1:: warning (yellow)
-  # 2:: error (red)
-  #
-  def boxify(lvl=0, msg=nil, &block)
-    type = "Notices"
-    type = "Warnings" if lvl == 1
-    type = "Errors"   if lvl == 2
-    msg = capture(&block) if block_given?
-    content_tag(:div,
-      content_tag(:table,
-        content_tag(:tr,
-          content_tag(:td, msg)),
-        class: type),
-      style: 'min-width:400px; max-width:800px')
-  end
-
-  # From javascript_helper.rb
-  # This is a list of modules that are sensitive to order.
-  JAVASCRIPT_MODULE_ORDER = %w(
-    jquery
-    jquery_extensions
-  )
 
   # Schedule javascript modules for inclusion in header.  This is much safer
   # than javascript_include_tag(), since that one is ignorant of whether the
@@ -1401,13 +1309,15 @@ module ApplicationHelper
   # size::      Size to show, default is thumbnail
   # original::  Show original file name?
   # votes::     Show vote buttons?
-  def thumbnail(image, args={}) ##TODO: Add size option
+  # responsive:  Force image to fit into container.
+  def thumbnail(image, args={})
     render(partial: "image/image_thumbnail",
            locals: { image:    image,
                      link:     args[:link],
                      votes:    args[:votes],
                      size:     args[:size],
-                     original: args[:original]
+                     original: args[:original],
+                     responsive: args[:responsive]
            }
     )
   end
@@ -1767,7 +1677,7 @@ module ApplicationHelper
       end
 
       def interest_tab(img1, img2, img3)
-        content_tag(:div, img1 + safe_br + img2 + img3)
+        content_tag(:div, img1 + safe_br + img2 + img3, style: "position: absolute; top: 0;")
       end
 
       case @user.interest_in(object)
@@ -1800,7 +1710,7 @@ module ApplicationHelper
         img2 = interest_link(img2, object, -1)
         img3 = ''
       end
-      add_right_tab(interest_tab(img1, img2, img3))
+      interest_tab(img1, img2, img3)
     end
   end
 

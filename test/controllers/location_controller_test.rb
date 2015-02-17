@@ -589,11 +589,11 @@ class LocationControllerTest < FunctionalTestCase
     login("rolf")
     get(:show_location, id: albion.id)
     assert_show_location
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
+    assert_image_link_in_html(/watch\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Location", id: albion.id, state: 1
     )
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
+    assert_image_link_in_html(/ignore\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Location", id: albion.id, state: -1
     )
@@ -602,11 +602,11 @@ class LocationControllerTest < FunctionalTestCase
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show_location, id: albion.id)
     assert_show_location
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
+    assert_image_link_in_html(/halfopen\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Location", id: albion.id, state: 0
     )
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
+    assert_image_link_in_html(/ignore\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Location", id: albion.id, state: -1
     )
@@ -616,11 +616,11 @@ class LocationControllerTest < FunctionalTestCase
     Interest.new(target: albion, user: rolf, state: false).save
     get(:show_location, id: albion.id)
     assert_show_location
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
+    assert_image_link_in_html(/halfopen\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Location", id: albion.id, state: 0
     )
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
+    assert_image_link_in_html(/watch\d*.png/,
       controller: "interest", action: "set_interest",
       type: "Location", id: albion.id, state: 1
     )

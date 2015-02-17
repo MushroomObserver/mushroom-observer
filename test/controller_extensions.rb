@@ -31,7 +31,7 @@
 #
 #  == HTML Assertions
 #  assert_link_in_html::        A given link exists.
-#  assert_no_link_in_html::     A given link does not exist.
+#  assert_image_link_in_html::  A given link with an image instead of text exists#
 #  assert_form_action::         A form posting to a given action exists.
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
@@ -287,110 +287,6 @@ module ControllerExtensions
     URI.unescape(@controller.url_for(args))
   end
 
-  # Extract links from the HTML response body that match any of a number of
-  # conditions, and return them as an Array of objects with these properties.
-  # url::        Full url of the link.
-  # controller:: Controller part of url (if relative).
-  # action::     Action part of url (if relative).
-  # id::         ID part of the url (if present).
-  # anchor::     Anchor part of the url (if present).
-  # label::      Text of link as displayed in browser.
-  #
-  # Conditions can be any of these properties.  Accepts a String/Symbol,
-  # Regexp, or +nil+.  All require full match, except +label+, which can be
-  # wrapped in HTML tags and/or white-space.
-  #
-  #   # Make sure a link called "Some Text" exists and has the correct url.
-  #   link = extract_links(label: /Some Text/).first
-  #   expect = url_for(action: "show_name", id: 123)
-  #   assert_equal(expect, link.url)
-  #
-  #   # Check links in list_names index.
-  #   ids = extract_links(action: "show_name").map(&:id)
-  #   assert_equal([1, 2, 3], ids)
-  #
-  #   # You can use it as an iterator, too.
-  #   links = extract_links do |link|
-  #     break if link.label =~ /Stop Here/
-  #   end
-  #
-  def extract_links(args={})
-    result = []
-    # Allow caller to specify URL condition as Hash of args as for +link_to_.
-    if args[:url].is_a?(Hash)
-      args[:url] = url_for(args[:url])
-    end
-
-    # Iterate over all links, in order.
-    html = @response.body
-    while html.match(/<a href="([^"]+)"[^<>]*>(.*?)<\/a>/m)
-      html, url, label = $', $1, $2
-      url = URI.unescape(url).html_to_ascii
-
-      # Parse URL.
-      if url.match(/^\/(\w+)\/(\w+)\/(\d+)/)
-        controller, action, id = $1, $2, $3.to_i
-      elsif url.match(/^\/(\w+)\/(\w+)/)
-        controller, action, id = $1, $2, nil
-      else
-        controller, action, id = nil, nil, nil
-      end
-      if url.match(/#(.*)$/)
-        anchor = $1
-      else
-        anchor = nil
-      end
-
-      # Make sure it matches any conditions passed in.
-      passed = true
-      for arg, val in [
-        [:url, url],
-        [:controller, controller],
-        [:action, action],
-        [:id, id],
-        [:anchor, anchor],
-      ]
-        if args.has_key?(arg) and
-           not case (val2 = args[arg])
-           when NilClass
-             val.nil?
-           when Regexp
-             val.to_s.match(val2)
-           when String, Symbol
-             val.to_s == val2.to_s
-           end
-          passed = false
-          break
-        end
-      end
-
-      # Allow label to be embedded in HTML tags, with some whitespace, but
-      # require it to be the first text inside the <a> tag.
-      if passed && args[:label] && !label.
-         match(/^(\s*<\w+[^\\<>]+>)*\s*#{args[:label]}(\s*<\/\w+[^<>]+>)*\s*$/m)
-        passed = false
-      end
-
-      # Return all the links that pass.
-      if passed
-        link = Wrapper.new(
-          label: label,
-          url: url,
-          controller: controller,
-          action: action,
-          id: id,
-          anchor: anchor
-        )
-
-        # Let caller do custom filter.
-        if !block_given? or yield(link)
-          result << link
-        end
-      end
-    end
-    return result
-  end
-
   # Extract error message and backtrace from Rails's 500 response.  This should
   # be obsolete now that all the test controllers re-raise exceptions.  But
   # just in case, here it is...
@@ -419,15 +315,6 @@ module ControllerExtensions
   #
   ##############################################################################
 
-  # Assert the LACK of existence of a given link in the response body, and
-  # check that it points to the right place.
-  def assert_no_link_in_html(label, msg=nil)
-    extract_links(label: label) do |link|
-      flunk(build_message(msg, "Expected HTML *not* to contain link called <#{label}>."))
-    end
-    pass
-  end
-
   def raise_params(opts)
     if opts.member?(:params)
       result = opts.clone
@@ -443,21 +330,14 @@ module ControllerExtensions
   def assert_link_in_html(label, url_opts, msg=nil)
     revised_opts = raise_params(url_opts)
     url = url_for(revised_opts)
-    found_it = false
-    extract_links(label: label) do |link|
-      if link.url != url
-        flunk(build_message(msg, "Expected <#{label}> link to point to <#{url}>," \
-                     "instead it points to <#{link.url}>"))
-      else
-        found_it = true
-        break
-      end
-    end
-    if found_it
-      pass
-    else
-      flunk(build_message(msg, "Expected HTML to contain link called <#{label}>."))
-    end
+    assert_tag(:a, attributes: {href: url.gsub("&", "&amp;")}, content: label)
+  end
+
+  def assert_image_link_in_html(img_src, url_opts, msg=nil)
+    revised_opts = raise_params(url_opts)
+    url = url_for(revised_opts);
+    assert_tag(:a, attributes: {href: url.gsub("&", "&amp;")}, :child => {:tag => "img",
+                                                                          :attributes => {:src => img_src}} )
   end
 
   # Assert that a form exists which posts to the given url.

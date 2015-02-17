@@ -1,4 +1,4 @@
-<%=  ##TODO: This is not really a view?
+<%  ##TODO: Whoa... This is a lot of code for a view.
   lines = []
 
   if name = observation.name
@@ -81,5 +81,8 @@
 
   lines += list_descriptions(name) if name
 
-  lines.safe_join(safe_br)
+  result = lines.safe_join(safe_br)
 %>
+<div class="small">
+  <%=result%>
+</div>

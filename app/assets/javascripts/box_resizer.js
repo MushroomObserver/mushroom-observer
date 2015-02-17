@@ -12,8 +12,4 @@ jQuery(document).ready(function () {
                 });
         }
     }
-
-    var h = jQuery('body').height();
-    jQuery('#navigation').css('min-height', h + 'px');
-    jQuery('#right_side').css('min-height', h + 'px');
 });

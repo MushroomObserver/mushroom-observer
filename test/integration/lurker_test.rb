@@ -16,12 +16,12 @@ class LurkerTest < IntegrationTestCase
 
     # Click on next (catches a bug seen in the wild).
     push_page
-    click(:label => '« Prev', :in => 'div#left_tabs')
+    click(:label => '« Prev', :in => :title)
     go_back
 
     # Click on the first image.
     push_page
-    click(:label => :image, :in => 'div.show_images')
+    click(:label => :image, :href => /show_image/)
     click(:label => :image, :href => /show_image.*full_size/)
     go_back
 
@@ -155,6 +155,7 @@ class LurkerTest < IntegrationTestCase
     assert_template('location/list_locations')
 
     # Click on the defined location.
+
     click(:label => /Burbank/)
     assert_template('location/show_location')
 
@@ -183,27 +184,29 @@ class LurkerTest < IntegrationTestCase
     click(:href => /^\/\d+\?/, :in => :results)
     save_path = @request.fullpath
     assert_equal(query_params, parse_query_params(save_path))
-    click(:label => '« Prev', :in => :tabs)
+    click(:label => '« Prev', :in => :title)
     assert_flash(/there are no more observations/i)
     assert_equal(save_path, @request.fullpath)
     assert_equal(query_params, parse_query_params(save_path))
-    click(:label => 'Next »', :in => :tabs)
+    click(:label => 'Next »', :in => :title)
     assert_flash(nil)
     assert_equal(query_params, parse_query_params(save_path))
     save_path = @request.fullpath
-    click(:label => 'Next »', :in => :tabs)
+    click(:label => 'Next »', :in => :title)
     assert_flash(nil)
     assert_equal(query_params, parse_query_params(save_path))
-    click(:label => '« Prev', :in => :tabs)
+    click(:label => '« Prev', :in => :title)
     assert_flash(nil)
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")
-    click(:label => 'Index', :href => /index/, :in => :tabs)
+    click(:label => 'Index', :href => /index/, :in => :title)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(query_params, parse_query_params(results.first))
     assert_equal(save_results, results,
                  "Went to show_obs, screwed around, then back to index. " +
                  "But the results were not the same when we returned.")
+
+
   end
 end

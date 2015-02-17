@@ -98,7 +98,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_page_loads
     get_with_dump(:index)
     assert_template(:list_rss_logs, partial: :_rss_log)
-    assert_link_in_html(:app_intro.t, action: :intro)
+    assert_link_in_html(:app_intro.t, controller: :observer, action: :intro)
     assert_link_in_html(:app_create_account.t, controller: :account,
                         action: :signup)
 
@@ -2316,13 +2316,15 @@ class ObserverControllerTest < FunctionalTestCase
     minimal_unknown = observations(:minimal_unknown)
 
     # No interest in this observation yet.
+    #
+    # <img[^>]+watch\d*.png[^>]+>[\w\s]*
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>[\w\s]*/,
+    assert_image_link_in_html(/watch\d*.png/,
       controller: :interest, action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 1
     )
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>[\w\s]*/,
+    assert_image_link_in_html(/ignore\d*.png/,
       controller: :interest, action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: -1
     )
@@ -2331,11 +2333,11 @@ class ObserverControllerTest < FunctionalTestCase
     Interest.create(target: minimal_unknown, user: rolf, state: true)
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
+    assert_image_link_in_html(/halfopen\d*.png/,
       controller: :interest, action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 0
     )
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
+    assert_image_link_in_html(/ignore\d*.png/,
       controller: :interest, action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: -1
     )
@@ -2345,11 +2347,11 @@ class ObserverControllerTest < FunctionalTestCase
     Interest.create(target: minimal_unknown, user: rolf, state: false)
     get(:show_observation, id: minimal_unknown.id)
     assert_response(:success)
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
+    assert_image_link_in_html(/halfopen\d*.png/,
       controller: :interest, action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 0
     )
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
+    assert_image_link_in_html(/watch\d*.png/,
       controller: :interest, action: :set_interest,
       type: "Observation", id: minimal_unknown.id, state: 1
     )

@@ -5,7 +5,7 @@
 <div class="row">
   <div class="col-xs-12">
       <%= form_tag({ :action => 'create_observation', :approved_name => @what,
-                  :approved_where => @place_name }, { :multipart => true , :name => 'create_observation_form'}) do %>
+                  :approved_where => @place_name }, { multipart: true , name: 'observation_form'}) do %>
         <center><%= submit_tag :CREATE.l %></center>
 
         <%= render(:partial => 'form_observations', :locals => {

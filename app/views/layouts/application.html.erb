@@ -1,13 +1,11 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action => 'rss'}, {:title => :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
-  <% if @canonical_link %>
-      <link rel="canonical" href="<%= escape_once(@canonical_link) %>"/>
-  <% end %>
+  <%= content_tag(:link,'', rel: "canonical", href: escape_once(@canonical_url)) if @canonical_url %>
   <%= csrf_meta_tag %>
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
   <meta property="og:title" content="Mushroom Observer"/>
@@ -26,351 +24,126 @@
         css = MO.themes.sample unless MO.themes.member?(css)
       end
       stylesheet_link_tag("bootstrap") +
-              stylesheet_link_tag("custom") #+
-      #stylesheet_link_tag(css)  ##NOTE: Disabling this for now to work with clean CSS.
+              stylesheet_link_tag("custom") +
+              stylesheet_link_tag("general")
   %>
   <%= @header if @header %>
 </head>
-<body class="container">
-  <!--callout-->
-  <div class="row hidden-xs">
-        <div class="col-xs-12">
-          <% if is_in_admin_mode? %>
-              <div class="text-danger">DANGER: You are in administrator mode. Proceed with caution.</div>
-          <% end %>
-          <% banner = :app_banner_box.t
-             if banner.to_s.length > 1 %>
-              <blockquote id="message_banner" class="center-text" style="font-size: 1em; margin-bottom: 10px;">
-                <%= banner %>
-              </blockquote>
-          <% end %>
+<body>
+<div class="container">
+<!--CALLOUT BANNER-->
+<div class="row hidden-xs">
+  <div class="col-xs-12">
+    <% if is_in_admin_mode? %>
+        <div class="alert alert-danger">DANGER: You are in administrator mode. Proceed with caution.</div>
+    <% end %>
+    <% banner = :app_banner_box.t
+       if banner.to_s.length > 1 %>
+        <div class="alert alert-warning alert-dismissible" id="message_banner">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+          <%= banner %>
         </div>
-      </div>
-  <div class="row row-offcanvas row-offcanvas-left">
-    <!--NAVIGATION-->
-    <div class="col-xs-6 col-lg-2 col-sm-2 sidebar-offcanvas color1" id="navigation">
-      <div id="banner">
-        <%= link_to(:app_banner.t, browser.bot? ? "/sitemap/index.html" : "/") %>
-      </div>
+    <% end %>
+  </div>
+</div>
+<!--/CALLOUT BANNER-->
+<div class="row row-offcanvas row-offcanvas-left">
+  <!--NAVIGATION-->
+  <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas" id="navigation">
+    <%= render(:partial => '/shared/nav_left') %>
+  </div>
+  <!--END NAVIGATION-->
 
-      <div class="group">
-        <%= link_to(:app_intro.t, :controller => 'observer', :action => 'intro') %>
-        <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use') %>
-        <%= link_to(:app_how_to_help.t, :controller => 'observer', :action => 'how_to_help') %>
-        <%= link_to(:app_donate.t, :controller => 'support', :action => 'donate') %>
-        <%= link_to(:app_feature_tracker.t, :controller => 'pivotal', :action => 'index') %>
-        <%= link_to(:app_send_a_comment.t, :controller => 'observer', :action => 'ask_webmaster_question') %>
-      </div>
-
-      <div class="group">
-        <%= link_to(:app_index_a_z.t, :controller => 'name', :action => 'observation_index') %>
-        <%= link_to(:app_list_locations.t, :controller => 'location', :action => 'list_locations') %>
-        <%= link_to(:app_list_projects.t, :controller => 'project', :action => 'list_projects') %>
-      </div>
-
-      <div class="group">
-        <%= :app_latest.t %>:
-        <div class="pad-left">
-          <%= link_to(:app_latest_changes.t, {:controller => 'observer', :action => 'list_rss_logs'}) %>
-          <%= link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %>
-          <%= link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %>
-          <%= link_to(:app_news.t, :controller => 'observer', :action => 'news') %>
-        </div>
-      </div>
-
-      <div class="group">
-        <%= :app_observations_left.t %>:
-        <div class="pad-left">
-          <%= link_to(:app_create_observation.t, :controller => 'observer', :action => 'create_observation') %>
-          <%= link_to(:app_sort_by_date_obs.t, :controller => 'observer', :action => 'list_observations') %>
-        </div>
-      </div>
-
-      <div class="group">
-        <%= :app_species_list.t %>:
-        <div class="pad-left">
-          <%= link_to(:app_create_list.t, :controller => 'species_list', :action => 'name_lister') %>
-          <%= link_to(:app_sort_by_date_spl.t, :controller => 'species_list', :action => 'list_species_lists') %>
-          <%= link_to(:app_sort_by_title.t, :controller => 'species_list', :action => 'species_lists_by_title') %>
-        </div>
-      </div>
-
-      <% if @user.nil? %>
-          <div class="group">
-            <%= :app_account.t %>:
-            <div class="pad-left">
-              <%= link_to(:app_login.t, :controller => 'account', :action => 'login') %>
-              <%= link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %>
-            </div>
-          </div>
-      <% else %>
-          <div class="group">
-            <%= :app_current_user.t %>:
-            <div class="pad-left">
-              <%= h(@user.login) %>
-              <%= link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %>
-              <%= link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %>
-              <%= link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %>
-              <%= link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %>
-              <%= link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
-              <%= link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general') %>
-              <%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
-            </div>
-          </div>
-
-          <% if @user.admin %>
-              <div class="group">
-                <%= :app_admin.t %>:
-                <% if is_in_admin_mode? %>
-                    <div class="pad-left">
-                      <%= link_to(:app_users.t, {:controller => 'observer', :action => 'users_by_name'}) %>
-                      <%= link_to(:change_banner_title.t, :controller => 'observer', :action => 'change_banner') %>
-                      <%= link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %>
-                      <%= link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %>
-                      <%= link_to(:account_manager_title.t, :controller => 'account', :action => 'manager') %>
-                      <%= link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %>
-                    </div>
-                <% else %>
-                    <div class="pad-left">
-                      <%= link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %>
-                    </div>
-                <% end %>
-              </div>
-          <% end %>
-      <% end %>
-
-      <% unless browser.bot? %>
-          <div class="group">
-            <%= :app_languages.t %>:
-            <div class="pad-left">
-              <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-                  <%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %>
-              <% end %>
-            </div>
-          </div>
-      <% end %>
-
-      <% if Rails.env == "development" || is_reviewer?
-           layouts = []
-           for file in Dir.glob("#{::Rails.root.to_s}/app/views/layouts/*.html.erb")
-             layouts << $1 if file.match(/(app\w+)\.html\.erb/)
-           end
-           if layouts.length > 1 %>
-              <div class="group">
-                Layouts:
-                <div class="pad-left">
-                  <% for layout in layouts.sort
-                       layout2 = layout == 'application' ? 'old' : layout %>
-                      <%= link_to(layout2, h(reload_with_args(:user_theme => layout))) %>
-                  <% end %>
-                </div>
-              </div>
-          <% end %>
-      <% end %>
-
-      <div class="group">
-        <%= link_to(:app_glossary.t, :controller => 'glossary', :action => 'index') %>
-        <%= link_to(:app_publications.t, :controller => 'publications', :action => 'index') %>
-        <%= link_to(:app_contributors.t, :controller => 'observer', :action => 'users_by_contribution') %>
-        <%= link_to(:app_site_stats.t, :controller => 'observer', :action => 'show_site_stats') %>
-        <%= link_to(:translators_note_title.t, :controller => 'observer', :action => 'translators_note') %>
-      </div>
-
-      <div class="group hidden-xs">
-        <%= link_to(:app_colors_from.t(:theme => css.to_sym.l), :controller => 'observer', :action => 'color_themes') %>
-        <%= :app_powered_by.t %>:
-        <a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a>
-        <%= :app_preferred_browser.t %>:
-        <a href='http://www.mozilla.com/firefox/'>FireFox</a>
-        <% if @invalid.nil? %>
-            <p>
-              <a href="http://validator.w3.org/check?uri=referer"><img
-              src="http://www.w3.org/Icons/valid-xhtml10"
-              alt="Valid XHTML 1.0 Transitional" height="31" width="88" border="0"/></a>
-            </p>
-        <% end %>
+  <div id="right_side" class="col-xs-12 col-sm-10">
+    <!--Toggle navigation buttons for mobile-->
+    <div class="row visible-xs">
+      <div class="col-xs-12 kill-padding">
+        <p class="pull-left">
+          <button type="button" class="btn btn-lg" style="border-radius: 0; position: fixed; z-index: 1000" data-toggle="offcanvas">
+            <span class="glyphicon glyphicon-align-justify"></span>
+          </button>
+        </p>
+        <p class="pull-right">
+          <button type="button" class="btn btn-lg" style="border-radius: 0; position: fixed; z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
+            <span class="glyphicon glyphicon-search"></span>
+          </button>
+        </p>
       </div>
     </div>
-    <!--END NAVIGATION-->
+    <!--/Toggle navigation buttons for mobile-->
 
-    <!--Toggle navigation button for mobile-->
-    <div id="right_side" class="col-xs-12 col-sm-10">
-      <div class="row visible-xs">
-        <div class="col-xs-12 kill-padding">
-          <p class="pull-left ">
-            <button type="button" class="btn btn-lg" data-toggle="offcanvas">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="glyphicon glyphicon-align-justify"></span>
-            </button>
-          </p>
-          <p class="pull-right ">
-            <button type="button" class="btn btn-lg" data-toggle="search" data-target="#search_bar_row">
-              <span class="sr-only">Toggle Search</span>
-              <span class="glyphicon glyphicon-search"></span>
-            </button>
-          </p>
-        </div>
-      </div>
+    <!--SEARCH BAR-->
+    <div id="search_bar_row" class="row hidden-xs color2">
+      <%= render(:partial => '/shared/search_bar') %>
+    </div>
+    <!--/SEARCH BAR-->
 
-
-      <!--SEARCH BAR-->
-      <div id="search_bar_row" class="row color1 hidden-xs">
-
-        <div class="col-lg-8">
-          <%= form_tag(:controller => 'observer', :action => 'pattern_search') do %>
-              <div class="input-group">
-                <div class="icon-addon addon-sm">
-                  <%= text_field(:search, :pattern, value: session[:pattern], class: "form-control", placeholder: :app_find.t) %>
-                  <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
-                </div>
-                 <span class="input-group-btn">
-              <%= options = [
-                      [:COMMENTS.l, :comment],
-                      [:HERBARIA.l, :herbarium],
-                      [:IMAGES.l, :image],
-                      [:LOCATIONS.l, :location],
-                      [:NAMES.l, :name],
-                      [:OBSERVATIONS.l, :observation],
-                      [:PROJECTS.l, :project],
-                      [:SPECIES_LISTS.l, :species_list],
-                      [:SPECIMENS.l, :specimen],
-                      [:USERS.l, :user],
-                      [:app_search_google.l, :google],
-              ].sort
-                  select(:search, :type, options_for_select(options, session[:search_type] || :observation), {},
-                         {class: "btn btn-default kill-padding"}) %>
-
-                   <%= submit_tag :app_search.l, class: "btn btn-default" %>
-                 </span>
-              </div>
-          <% end %>
-        </div>
-        <div class="col-lg-4">
-          <div>
-            <% if @timer_start %>
-                <div id="timer">
-                  <small>
-                    <%=
-                        @timer_end ||= Time.now
-                        secs = '%.2f' % (@timer_end.to_f - @timer_start.to_f)
-                        @timer_start = nil
-                        "(#{:app_index_timer.t(:seconds => secs, :num => @num_results.to_i)})"
-                    %>
-                  </small>
-                </div>
-            <% end %>
-          <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer',
-                      :action => 'advanced_search_form') %>
-          </div>
-        </div>
-
+    <div class="row">
       <div class="col-xs-12">
-
-        <div id="flashes">
           <% if flash_notices? %>
-              <%= boxify(flash_notice_level) do %>
-                  <%= begin
-                        flash_get_notices # .to_s.encode('utf-8')
-                      rescue
-                        flash_get_notices # .to_s.force_encoding('utf-8')
-                      end %>
-              <% end %>
+            <% cssClass = ''
+               cssClass = "alert-info"  if flash_notice_level == 0
+               cssClass = "alert-warning"  if flash_notice_level == 1
+               cssClass = "alert-danger"  if flash_notice_level == 2%>
+            <%= content_tag(:div,flash_get_notices, id: "flashes", class: "alert push-down #{cssClass}" ) %>
           <% end
              flash_clear %>
-        </div>
       </div>
     </div>
-    <!--END SEARCH BAR-->
 
     <div id="content" class="row">
-
-      <!--CONTENT-->
-      <div class="col-xs-12" id="Title">
-        <h3 class="text-center">
-          <%= @title %>
-        </h3>
-      </div>
-      <div id="right_tabs" class="col-xs-12">
-        <%= @right_tabs ? @right_tabs.safe_join(safe_br) : '' %>
-      </div>
-      <div id="left_tabs" class="col-xs-12">
-        <div class="pad-bottom">
-          <%= render_tab_sets %>
-        </div>
-      </div>
+      <%= render(:partial => "/shared/title_and_tab_sets") %>
+      <!--Main page content-->
       <div class="col-xs-12">
         <%= yield %>
       </div>
-      <!--END CONTENT-->
-
-      <!--LANGUAGE TAGS-->
-      <% lang = Language.find_by_locale(I18n.locale)
-         if lang and (!lang.official or Language.tracking_usage) %>
-          <div id="translators_credit" class="col-xs-12">
-            <% if !lang.official %>
-                <%= :app_translators_credit.t %>:
-                <%= ids_and_names = lang.top_contributors(5)
-                    user_links = ids_and_names.map do |id, name|
-                      user_link(id, name)
-                    end.safe_join(', ')
-                    if ids_and_names.length == 5
-                      user_links += ', ' + :app_translators_credit_and_others.t
-                    end
-                    user_links %><br/>
-            <% end %>
-            <% if Language.tracking_usage
-                 file = Language.save_tags %>
-                <%= link_to(:app_edit_translations_on_page.t, :controller => :translation,
-                            :action => :edit_translations, :page => file) %> |
-                <%= link_to(:app_edit_translations.t, :controller => :translation,
-                            :action => :edit_translations) %>
-            <% end %>
-          </div>
-      <% end %>
-      <!--END LANGUAGE TAGS-->
-
+      <!--/Main page content-->
+      <div class="col-xs-12">
+        <%= render(partial: "/shared/translator_credit") %>
+      </div>
     </div>
   </div>
 </div>
-
+</div>
+  <div class="container-fluid img-theater">
+    <div class="row">
+      <div class="col-sm-1">
+        <button type="button" class="visible-xs close" data-dismiss="theater" style="font-size: 50px; opacity: 1" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="col-sm-10">
+        <div id="img_append_target"></div>
+      </div>
+      <div class="col-sm-1">
+        <button type="button" class="hidden-xs close" data-dismiss="theater" style="font-size: 50px; opacity: 1" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+    </div>
+  </div>
 <!--JAVASCRIPT-->
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
-  <% injected_javascripts.each do |script| %>
-        <%=javascript_tag(script)%>
-        <%end %>
-<!--Navigation slide out for mobile-->
-<script>
-    jQuery(document).ready(function () {
-        jQuery('[data-toggle="offcanvas"]').click(function () {
-            jQuery('.row-offcanvas').toggleClass('active');
-            jQuery('body').toggleClass('hidden-overflow-x');
-        });
-        jQuery('[data-toggle="search"]').click(function () {
-            var target = $(this).data().target;
-            jQuery(target).toggleClass('hidden-xs');
-        });
-    });
-</script>
+<% injected_javascripts.each do |script| %>
+    <%= javascript_tag(script) %>
+<% end %>
 <% if Rails.env == "production" %>
-    <script>
-        (function (i, s, o, g, r, a, m) {
-            i['GoogleAnalyticsObject'] = r;
-            i[r] = i[r] || function () {
-                (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date();
-            a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            m.parentNode.insertBefore(a, m)
-        })
-        (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-        ga('create', 'UA-1916187-1', 'auto');
-        ga('send', 'pageview');
+    <script>(function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })
+    (window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+    ga('create', 'UA-1916187-1', 'auto');
+    ga('send', 'pageview');
     </script>
-
 <% end %>
 <!--END JAVASCRIPT-->
 
+
 </body>
+
 </html>
