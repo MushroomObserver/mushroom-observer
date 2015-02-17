@@ -1,5 +1,4 @@
 <%
-   new_tab_set(:sort_by_header.t, @sorts) if @sorts
    new_tab_set(@links) if @links
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>

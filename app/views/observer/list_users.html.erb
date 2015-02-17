@@ -1,6 +1,5 @@
 <%
    @title ||= :users_by_name_title.t
-   new_tab_set(:sort_by_header.t, @sorts)
 
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>

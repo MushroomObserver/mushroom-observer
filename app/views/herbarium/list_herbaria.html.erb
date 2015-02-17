@@ -1,7 +1,6 @@
 <%
   @title ||= :list_herbaria_title.t
 
-  new_tab_set(:sort_by_header.t, @sorts)
   new_tab_set do
     add_tab(:create_herbarium.t, :action => 'create_herbarium')
     add_tabs(@links)
