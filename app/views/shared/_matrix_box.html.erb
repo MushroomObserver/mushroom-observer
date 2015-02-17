@@ -5,18 +5,20 @@
 %>
 
 <% if presenter %>
-    <div class="list-group">
+    <div class="list-group" style="min-height: 200px;">
       <div class="list-group-item" style="min-height: 57px; height: 57px;">
         <div class="row">
           <div class="col-xs-12">
             <%= presenter.title %>
-            <br>
-            <small>
+            <small class="rss-fancy-time"><%= presenter.fancy_time %></small>
+          </div>
+          <div class="col-xs-12">
+            <small style="text-overflow: ellipsis; white-space: nowrap;">
               <% unless presenter.when.blank? %>
                   <%= presenter.when %>: <%= presenter.who %>
               <% end %>
             </small>
-            <small class="rss-fancy-time"><%= presenter.fancy_time %></small>
+
           </div>
         </div>
 
