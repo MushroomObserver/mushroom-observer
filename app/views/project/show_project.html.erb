@@ -67,7 +67,7 @@
 
       <%= :show_project_drafts.t %>: <%= @draft_data.any? ? @draft_data.length : :NONE.t %><br/>
       <% for datum in @draft_data %>
-        <%= indent + link_with_query(datum['display_name'].t,
+        <%= link_with_query(datum['display_name'].t,
               :controller => 'name',
               :action => 'show_name_description',
               :id => datum['id']) %>

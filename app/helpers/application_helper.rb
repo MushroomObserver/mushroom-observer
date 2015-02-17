@@ -704,15 +704,6 @@ module ApplicationHelper
 		h(html.to_str)
 	end
 
-  # From html_helper.rb
-  # Replace spaces with safe_nbsp.
-  #
-  #   <%= button_name.lnbsp %>
-  #
-  def lnbsp(key)
-    key.l.gsub(' ', safe_nbsp)
-  end
-
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent(w=10)
@@ -795,37 +786,6 @@ module ApplicationHelper
     end
   end
 
-  # Draw the fancy check-board matrix of objects used, e.g., in list_rss_log.
-  # Just pass in a list of objects (and make sure @layout is initialized).
-  # It yields for each object, then renders the whole thing.
-  #
-  #   <%= make_matrix(@objects) do |obj %>
-  #     <%= render(obj) %>
-  #   <% end %>
-  #
-  # *NOTE*: You *must* include a <tt><% ... %></tt> within the block somewhere!
-  # This is some arcane requirement of +capture+.
-  #
-  def make_matrix(list, table_opts={}, row_opts={}, col_opts={}, &block)
-    rows = []
-    cols = []
-    for obj in list
-      color = calc_color(rows.length, cols.length, @layout['alternate_rows'],
-                         @layout['alternate_columns'])
-      cols << content_tag(:td, {:align => 'center', :valign => 'top',
-                          :class => "ListLine#{color}"}.merge(col_opts)) do
-        capture(obj, &block)
-      end
-      if cols.length >= @layout["columns"]
-        rows << cols.safe_join
-        cols = []
-      end
-    end
-    rows << cols.safe_join if cols.any?
-    table = make_table(rows, {:cellspacing => 0, :class => "Matrix"}.merge(table_opts),
-                       row_opts, {:colspan => @layout["columns"]})
-    # concat(table)
-  end
 
   # Decide what the color should be for a list item.  Returns 0 or 1.
   # row::       row number

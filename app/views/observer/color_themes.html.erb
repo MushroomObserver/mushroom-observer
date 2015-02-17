@@ -4,6 +4,6 @@
 
 <p>
   <% for name in MO.themes %>
-    <%= indent + link_to(name.to_sym.l, :action => name) %><br/>
+    <%= link_to(name.to_sym.l, :action => name) %><br/>
   <% end %>
 </p>

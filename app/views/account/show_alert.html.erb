@@ -12,13 +12,13 @@
     ) %>
   </div>
 
-  <input type="hidden" id="back" name="back" value="<%=escape_once(@back)%>" />
+  <input type="hidden" id="back" name="back" value="<%= escape_once(@back)%>" />
 
   <br/><br/>
   <input type="submit" name="commit" value="<%= :user_alert_okay.l %>" class="primary" />
-  <%= indent + :user_alert_okay_help.t %>
+  <%= :user_alert_okay_help.t %>
 
   <br/><br/>
   <input type="submit" name="commit" value="<%= :user_alert_later.l %>" class="primary" />
-  <%= indent + :user_alert_later_help.t %>
+  <%= :user_alert_later_help.t %>
 <% end %>
