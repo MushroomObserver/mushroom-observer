@@ -4,15 +4,16 @@
 <div class="row">
   <div class="col-xs-12">
     <%= form_tag(:action => 'ask_webmaster_question') do %>
-
-        <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label><br/>
-        <%= text_field(:user, :email, value: @email, size: 60, autofocus: @email.blank? || @email_error) %><br/><br/>
-
+        <div class="form-group">
+        <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label>
+        <%= text_field(:user, :email, value: @email, size: 60, autofocus: @email.blank? || @email_error) %>
+        </div>
+        <div class="form-group">
         <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
         <%= text_area(:question, :content, value: @content, cols: 80, autofocus: !@email.blank? && !@email_error) %>
         </div>
         <div class="push-down text-center">
-          <%= submit_tag :SEND.l %>
+          <%= submit_tag :SEND.l, class:"btn btn-default" %>
         </div>
     <% end %>
     </div>

@@ -1,5 +1,9 @@
 <%
-   new_tab_set(@links) if @links
+   left_links = []
+   @links.each do |title, action|
+     left_links << link_with_query(title, action)
+   end if @links
+   @tabsets = {left: render(partial: "shared/tab_set", locals: {links: left_links})};
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
@@ -10,12 +14,12 @@
          if names.any? %>
             <div class="Warnings">
               <div><%= :list_observations_alternate_spellings.t %></div>
-                <% names.sort_by(&:sort_name).each do |name| %>
+              <% names.sort_by(&:sort_name).each do |name| %>
                   <div>
                     <%= link_to(name.display_name.t, :controller => :observer,
                                 :action => :observation_search, :pattern => name.text_name) %>
                   </div>
-                <% end %>
+              <% end %>
             </div>
         <% end %>
     <% end %>
