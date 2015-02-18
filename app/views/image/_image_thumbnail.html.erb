@@ -5,7 +5,7 @@
   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
 
   link     ||= {controller: :image, action: :show_image, id: image_id}
-  size     ||= default_thumbnail_size
+  size     ||= :small
   votes    ||= image ? true : false
   original ||= false
   responsive = responsive.nil? ? true : responsive  ##Should the image be forced to fit in its container. Default is true
@@ -18,7 +18,7 @@
   <div style="<%= "display: inline-block;" unless responsive%>">
     <div>
       <div style="position: absolute; right: 0;">
-    <a href="" class="glyphicon glyphicon-fullscreen theater-btn hidden-xs" data-toggle="theater" data-image="<%=Image.url(:huge, image_id) %>"></a>
+    <a href="" class="glyphicon glyphicon-fullscreen theater-btn hidden-xs" data-toggle="theater" data-image="<%=Image.url(:large, image_id) %>"></a>
       </div>
     <%= link_with_query(image_tag(url, class: responsive ? 'img-responsive center-block' : ''), link) %>
     </div>
