@@ -1,13 +1,13 @@
 class Image
   class Url
     SUBDIRECTORIES = {
-      :original  => 'orig',
-      :full_size => 'orig',
-      :huge      => '1280',
-      :large     => '960',
-      :medium    => '640',
-      :small     => '320',
-      :thumbnail => 'thumb'
+        original: 'orig',
+        full_size: 'orig',
+        huge: '1280',
+        large: '960',
+        medium: '640',
+        small: '320',
+        thumbnail: 'thumb'
     }
 
     SUBDIRECTORY_TO_SIZE = {

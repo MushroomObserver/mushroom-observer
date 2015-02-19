@@ -85,7 +85,7 @@ class LocationDescription < Description
   acts_as_versioned(
     :table_name => 'location_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :nullify }
+    :association_options => {dependent: :nullify}
   )
   non_versioned_columns.push(
     'created_at',

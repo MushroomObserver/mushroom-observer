@@ -9,7 +9,7 @@
 <p>
   <%= @event.registration_note %>
 </p>
-<%= form_tag({:action => 'register', :id => @event.id}) do %>
+<%= form_tag({action: 'register', id: @event.id}) do %>
   <p>
     <%= :conference_registration_name.t %>: <%= text_field('registration', 'name', :size => 100) %>
   </p>

@@ -3,7 +3,7 @@ var y = String.fromCharCode(93);
 
 var IMAGE_FORM = <%="#{
   i = @images.length - 1 rescue 0
-  str = render(:partial => 'form_image', :locals => { :index => i })
+  str = render(:partial => 'form_image', :locals => { index: i })
   str.gsub!("image_#{i}_", 'image_XXX_')
   str.gsub!("image_id_#{i}", 'image_id_XXX')
   str.gsub!("(#{i})", '(XXX)')

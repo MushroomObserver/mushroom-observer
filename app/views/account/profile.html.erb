@@ -9,7 +9,7 @@
                             })}
 %>
 
-<%= form_for(:user, :url => {:action => :profile}, :html => {multipart: true, style: "max-width: 600px"}) do |form| %>
+<%= form_for(:user, :url => {action: :profile}, :html => {multipart: true, style: "max-width: 600px"}) do |form| %>
 
     <%= submit_tag(:profile_button.l, class: "center-block btn btn-default") %>
     <div class="form-group">
@@ -41,8 +41,8 @@
           <%= text_field_tag("copyright_holder", @copyright_holder, class: "form-control") %>
         </div>
         <div class="col-sm-4">
-          <%= select_year(@copyright_year, {:field_name => "copyright_year",
-                                            :start_year => 1980, :end_year => Time.now.year}, {class: "form-control"}) %>
+          <%= select_year(@copyright_year, {field_name: "copyright_year",
+                                            start_year: 1980, end_year: Time.now.year}, {class: "form-control"}) %>
         </div>
       </div>
     </div>

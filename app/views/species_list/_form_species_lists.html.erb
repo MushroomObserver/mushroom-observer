@@ -5,7 +5,7 @@
     <%= :form_species_lists_species_to_add.t %>:<br/>
     <% i = 0
     for (name, id) in @checklist.sort_by(&:first) %>
-      <%= check_box("checklist_data", id, { :checked => @checklist_names[id] }) %>
+      <%= check_box("checklist_data", id, {checked: @checklist_names[id]}) %>
       <label for="checklist_names"><%= name.t %></label>
       <br/>
     <% end %>

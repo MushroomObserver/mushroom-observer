@@ -12,10 +12,10 @@ class PostObservationTest < IntegrationTestCase
   OBSERVATION_INDEX_PAGE = 'observer/list_observations'
 
   PASADENA_EXTENTS = {
-    :north => 34.251905,
-    :south => 34.1192,
-    :east => -118.065479,
-    :west => -118.198139,
+      north: 34.251905,
+      south: 34.1192,
+      east: -118.065479,
+      west: -118.198139,
   }
 
   def test_posting_editing_and_destroying_a_fully_detailed_observation_in_a_new_location
@@ -232,7 +232,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def assert_has_location_warning(regex)
-    assert_select('.Warnings', { :text => regex }, "Expected there to be a warning about location.")
+    assert_select('.Warnings', {text: regex}, "Expected there to be a warning about location.")
   end
 
   def assert_exists_deleted_item_log
@@ -369,19 +369,19 @@ class PostObservationTest < IntegrationTestCase
 
   def expected_values_after_create
     {
-      :user => katrina,
-      :when => Date.parse('2010-03-14'),
-      :where => 'Pasadena, California, USA',
-      :location => nil,
-      :lat => 12.5760,
-      :long => -123.7519,
-      :alt => 17,
-      :name => names(:agaricus_campestris),
-      :vote => Vote.next_best_vote,
-      :is_collection_location => false,
-      :specimen => true,
-      :notes => 'Notes for observation',
-      :image_notes => 'Notes for image',
+        user: katrina,
+        when: Date.parse('2010-03-14'),
+        where: 'Pasadena, California, USA',
+        location: nil,
+        lat: 12.5760,
+        long: -123.7519,
+        alt: 17,
+        name: names(:agaricus_campestris),
+        vote: Vote.next_best_vote,
+        is_collection_location: false,
+        specimen: true,
+        notes: 'Notes for observation',
+        image_notes: 'Notes for image',
     }
   end
 

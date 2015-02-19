@@ -8,7 +8,7 @@
 
   when 'Name'
     str = render(:partial => 'name/name', :object => object, :locals =>
-                 { :synonyms => true })
+                 {synonyms: true})
     if object.has_notes?
       str += '<p>' + :show_name_notes.t + ':</p>'
       str += colored_notes_box(true, object.notes.tpl)
@@ -17,11 +17,11 @@
 
   when 'NameDescription'
     render(:partial => 'name/name_description', :object => object,
-           :locals => { :review => false })
+           :locals => {review: false})
 
   when 'Observation'
     render(:partial => 'observer/show_observation',
-           :locals => { :observation => object })
+           :locals => {observation: object})
 
   when 'Project'
     render(:partial => 'project/project', :object => object)
@@ -35,4 +35,4 @@
 end %>
 
 <%= render(:partial => 'show_comments', :locals =>
-           { :object => object, :controls => false, :limit => 10 }) %>
+           {object: object, controls: false, limit: 10}) %>

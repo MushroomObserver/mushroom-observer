@@ -390,12 +390,12 @@ class AbstractQuery < ActiveRecord::Base
   superclass_delegating_accessor :global_params
   self.global_params = {}
   @@default_global_params = {
-    :join?   => [:string],
-    :tables? => [:string],
-    :where?  => [:string],
-    :group?  => :string,
-    :order?  => :string,
-    :by?     => :string,
+      join?: [:string],
+      tables?: [:string],
+      where?: [:string],
+      group?: :string,
+      order?: :string,
+      by?: :string,
   }
 
   # Allowed flavors for each model.  Just a hash mapping model (symbols) to

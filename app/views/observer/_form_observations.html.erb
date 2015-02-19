@@ -48,9 +48,9 @@
   <div class="col-xs-12">
     <%= if include_naming
           render(:partial => 'naming/form', :locals => {
-                                                  :action => action,
-                                                  :button_name => button_name,
-                                                  :show_reasons => false,
+                                                  action: action,
+                                                  button_name: button_name,
+                                                  show_reasons: false,
                                           })
         end %>
   </div>
@@ -175,7 +175,7 @@
             <% i = 0 %>
             <% @images.push(@new_image) %>
             <% while i < @images.length %>
-                <%= render(:partial => 'form_image', :locals => {:index => i}) %>
+                <%= render(:partial => 'form_image', :locals => {index: i}) %>
                 <% i += 1 %>
             <% end %>
           </div>
@@ -183,7 +183,7 @@
             <%= :form_observations_upload_help.tp %>
           </div>
           <% if can_do_ajax? %>
-              <%= button_tag(:form_observations_upload_another.t, {:onclick => 'image_new()', :id => 'new_image_button'}) %>
+              <%= button_tag(:form_observations_upload_another.t, {onclick: 'image_new()', id: 'new_image_button'}) %>
               <% #javascript_include("single_image_uploader") %>
           <% end %>
       <% end %>

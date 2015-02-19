@@ -1452,8 +1452,8 @@ class Name < AbstractModel
     # Move over any remaining descriptions.
     for desc in old_name.descriptions
       xargs = {
-        :id       => desc,
-        :set_name => self,
+          id: desc,
+          set_name: self,
       }
       desc.name_id = self.id
       desc.save
@@ -1568,12 +1568,12 @@ class Name < AbstractModel
     # Values required to create/modify attributes of Name instance.
     def params
       {
-        :text_name => @text_name,
-        :search_name => @search_name,
-        :sort_name => @sort_name,
-        :display_name => @display_name,
-        :author => @author,
-        :rank => @rank,
+          text_name: @text_name,
+          search_name: @search_name,
+          sort_name: @sort_name,
+          display_name: @display_name,
+          author: @author,
+          rank: @rank,
       }
     end
 
@@ -2376,7 +2376,7 @@ class Name < AbstractModel
   def save_with_log(log=nil, args={})
     return false unless changed?
     log ||= :log_name_updated
-    args = { :touch => altered? }.merge(args)
+    args = {touch: altered?}.merge(args)
     log(log, args)
     return save
   end

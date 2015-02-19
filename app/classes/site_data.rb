@@ -127,12 +127,12 @@ class SiteData
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
-    :observations_with_voucher => lambda do |obs|
-      obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0
-    end,
-    :observations_without_voucher => lambda do |obs|
-      not( obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0 )
-    end,
+      observations_with_voucher: lambda do |obs|
+        obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0
+      end,
+      observations_without_voucher: lambda do |obs|
+        not (obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0)
+      end,
   }
 
   # -----------------------------

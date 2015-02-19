@@ -40,8 +40,8 @@
   </div>
   <div class="col-xs-12">
     <%= render(:partial => 'comment/show_comments', :locals =>
-                                                          { :object => @location, :controls => true,
-                                                            :limit => 2 }) %>
+                                                          {object: @location, controls: true,
+                                                           limit: 2}) %>
   </div>
   <div class="col-xs-12">
     <% if @description && @description.has_any_notes? %>
@@ -49,8 +49,8 @@
         <%= show_embedded_description_title(@description, @location) %>
         <%= render(:partial => 'location_description', :object => @description) %>
         <%= render(:partial => 'comment/show_comments', :locals =>
-                                                              { :object => @description, :controls => true,
-                                                                :limit => 2 }) if false %>
+                                                              {object: @description, controls: true,
+                                                               limit: 2}) if false %>
         <hr/>
     <% end %>
     <%= show_object_footer(@location) %>

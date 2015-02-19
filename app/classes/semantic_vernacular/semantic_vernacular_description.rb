@@ -44,7 +44,7 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
   # Fillin any stuff that's provided in the args
 	def initialize(args)
 	  if args.class == String
-	    args = {:uri => args}
+	    args = {uri: args}
 	  end
 		@uri = args[:uri]
 		@name = args[:name]
@@ -126,11 +126,11 @@ class SemanticVernacularDescription < SemanticVernacularDataSource
 	private
 	# A hash listing the class of each attribute.
 	ATTRIBUTE_CLASS_LIST = {
-		:name => "VernacularLabel",
-		:labels => "VernacularLabel",
-		:definition => "VernacularFeatureDescription",
-		:descriptions => "VernacularFeatureDescription",
-		:scientific_names => "ScientificName"
+      name: "VernacularLabel",
+      labels: "VernacularLabel",
+      definition: "VernacularFeatureDescription",
+      descriptions: "VernacularFeatureDescription",
+      scientific_names: "ScientificName"
 	}
 
 	def self.query_svds_all

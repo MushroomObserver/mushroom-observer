@@ -29,14 +29,14 @@
             <%= :app_admin.t %>:
           </div>
           <% if is_in_admin_mode? %>
-              <%= link_to(:app_users.t, {:controller => 'observer', :action => 'users_by_name'}, {class: "list-group-item list-group-item-danger"}) %>
-              <%= link_to(:change_banner_title.t, {:controller => 'observer', :action => 'change_banner'}, {class: "list-group-item list-group-item-danger"}) %>
-              <%= link_to(:app_email_all_users.t, {:controller => 'observer', :action => 'email_features'}, {class: "list-group-item list-group-item-danger"}) %>
-              <%= link_to(:app_add_to_group.t, {:controller => 'account', :action => 'add_user_to_group'}, {class: "list-group-item list-group-item-danger"}) %>
-              <%= link_to(:account_manager_title.t, {:controller => 'account', :action => 'manager'}, {class: "list-group-item list-group-item-danger"}) %>
-              <%= link_to(:app_turn_admin_off.t, {:controller => 'account', :action => 'turn_admin_off'}, {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:app_users.t, {controller: 'observer', action: 'users_by_name'}, {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:change_banner_title.t, {controller: 'observer', action: 'change_banner'}, {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:app_email_all_users.t, {controller: 'observer', action: 'email_features'}, {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:app_add_to_group.t, {controller: 'account', action: 'add_user_to_group'}, {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:account_manager_title.t, {controller: 'account', action: 'manager'}, {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:app_turn_admin_off.t, {controller: 'account', action: 'turn_admin_off'}, {class: "list-group-item list-group-item-danger"}) %>
           <% else %>
-              <%= link_to(:app_turn_admin_on.t, {:controller => 'account', :action => 'turn_admin_on'} , {class: "list-group-item list-group-item-danger"}) %>
+              <%= link_to(:app_turn_admin_on.t, {controller: 'account', action: 'turn_admin_on'} , {class: "list-group-item list-group-item-danger"}) %>
           <% end %>
 
       <% end %>
@@ -51,7 +51,7 @@
   <div class="list-group-item disabled bold">
     <%= :app_latest.t %>
   </div>
-  <%= link_to(:app_latest_changes.t, {:controller => 'observer', :action => 'list_rss_logs'}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_latest_changes.t, {controller: 'observer', action: 'list_rss_logs'}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_newest_images.t, {controller: 'image', action: 'list_images'}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_comments.t, {controller: 'comment', action: 'list_comments'}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_news.t, {controller: 'observer', action: 'news'}, {class: "list-group-item indent"}) %>
@@ -82,7 +82,7 @@
   <%= link_to(:app_site_stats.t, {controller: 'observer', action: 'show_site_stats'}, {class: "list-group-item indent"}) %>
   <%= link_to(:translators_note_title.t, {controller: 'observer', action: 'translators_note'}, {class: "list-group-item indent"}) %>
 
-  <%= link_to(:app_publications.t, {controller => 'publications', :action => 'index'}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_publications.t, {controller => 'publications', action: 'index'}, {class: "list-group-item indent"}) %>
 
 
 <div class="list-group-item">

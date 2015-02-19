@@ -14,8 +14,8 @@
 <%= label("image_when_1i", "#{:WHEN.t}:") %>
 <div class="form-inline">
   <%= date_select(:image, :when,
-                  {:start_year => 1980, :end_year => Time.now.year,
-                   :order => [:day, :month, :year]}, {class: "form-control"}) %>
+                  {start_year: 1980, end_year: Time.now.year,
+                   order: [:day, :month, :year]}, {class: "form-control"}) %>
   <p class="help-block">
     <%= :form_images_when_help.t %>
   </p>

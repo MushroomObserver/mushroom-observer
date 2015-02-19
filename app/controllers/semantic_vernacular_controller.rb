@@ -54,11 +54,11 @@ class SemanticVernacularController < ApplicationController
     respond_to do |format|
       format.json do
         render :json => {
-          :page_uri => post_json["svd"]["uri"],
-          :status => response.class.name,
-          :message => response.message,
-          :body => response.body,
-          :value => response.value
+                   page_uri: post_json["svd"]["uri"],
+                   status: response.class.name,
+                   message: response.message,
+                   body: response.body,
+                   value: response.value
         }.to_json
       end
     end

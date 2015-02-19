@@ -69,14 +69,14 @@ class ExtensionTest < UnitTestCase
   # ----------------------------
 
   def test_flatten
-    assert_equal( {:a => 1, :b => 2, :c => 3},
-                  {:a => 1, :bb => {:b => 2, :cc => {:c => 3}}}.flatten )
+    assert_equal( {a: 1, b: 2, c: 3},
+                  {a: 1, bb: {b: 2, cc: {c: 3}}}.flatten )
   end
 
   def test_remove_nils
-    hash = { :a => 1, :b => nil, :c => 3, :d => nil }
+    hash = {a: 1, b: nil, c: 3, d: nil}
     hash.remove_nils!
-    assert_equal({ :a => 1, :c => 3 }, hash)
+    assert_equal({a: 1, c: 3}, hash)
   end
 
   # ----------------------------

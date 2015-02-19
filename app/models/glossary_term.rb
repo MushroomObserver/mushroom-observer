@@ -12,7 +12,7 @@ class GlossaryTerm < AbstractModel
   acts_as_versioned(
     :table_name => 'glossary_terms_versions',
     :if_changed => ALL_TERM_FIELDS,
-    :association_options => { :dependent => :nullify }
+    :association_options => {dependent: :nullify}
   )
   non_versioned_columns.push(
     'thumb_image_id',

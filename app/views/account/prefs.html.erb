@@ -21,7 +21,7 @@
   end
 %>
 
-<%= form_for(:user, :url => { :action => :prefs }) do |form| %>
+<%= form_for(:user, :url => {action: :prefs}) do |form| %>
   <table width="1" style="min-width:800px"><tr><td>
 
 
@@ -59,7 +59,7 @@
 
   <p><label for="user_keep_filenames"><%= :prefs_keep_image_filenames.t %></label>:
     <span class="HelpNote">(<%= link_to(:prefs_bulk_filename_purge.t,
-      { :controller => 'image', :action => 'bulk_filename_purge' },
+      {controller: 'image', action: 'bulk_filename_purge'},
       { data: { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>)</span><br/>
     <%= form.select(:keep_filenames, [
     [:prefs_keep_image_filenames_toss.l, :toss],

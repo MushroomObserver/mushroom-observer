@@ -6,7 +6,7 @@
 %>
 
 <p>
-  <%= form_for(:glossary_term, :url => { :action => :create_glossary_term }, :html => { :multipart => true }) do |form| %>
+  <%= form_for(:glossary_term, :url => {action: :create_glossary_term}, :html => {multipart: true}) do |form| %>
     <p>
       <%= :glossary_term_name.t %>: <%= form.text_field('name', :size => 150) %>
     </p>

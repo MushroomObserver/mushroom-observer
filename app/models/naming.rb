@@ -375,10 +375,10 @@ class Naming < AbstractModel
     table = {}
     for str, val in Vote.opinion_menu
       table[str] = {
-        :num   => 0,
-        :wgt   => 0.0,
-        :value => val,
-        :votes => [],
+          num: 0,
+          wgt: 0.0,
+          value: val,
+          votes: [],
       }
     end
 

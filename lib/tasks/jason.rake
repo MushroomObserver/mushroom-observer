@@ -517,7 +517,7 @@ namespace :jason do
               name = 'unknown'
             end
             $stderr.puts('Created observation: #%d (%s)' % [obs.id, name])
-            obs.log(:log_observation_created_at, { :user => user.login }, true)
+            obs.log(:log_observation_created_at, {user: user.login}, true)
             lines.clear
 
             # Create naming if "what" given.

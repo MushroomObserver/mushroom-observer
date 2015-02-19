@@ -23,15 +23,15 @@
       if (group.name == 'all users') and
          (description.source_type == :public) and
          !is_in_admin_mode?
-        r_args = ['1', true,  {:disabled => 'disabled'}]
-        w_args = ['1', true,  {:disabled => 'disabled'}]
-        a_args = ['1', false, {:disabled => 'disabled'}]
+        r_args = ['1', true,  {disabled: 'disabled'}]
+        w_args = ['1', true,  {disabled: 'disabled'}]
+        a_args = ['1', false, {disabled: 'disabled'}]
       elsif (group.name == 'reviewers') and
          (description.source_type == :public) and
          !is_in_admin_mode?
-        r_args = ['1', false, {:disabled => 'disabled'}]
-        w_args = ['1', false, {:disabled => 'disabled'}]
-        a_args = ['1', true,  {:disabled => 'disabled'}]
+        r_args = ['1', false, {disabled: 'disabled'}]
+        w_args = ['1', false, {disabled: 'disabled'}]
+        a_args = ['1', true,  {disabled: 'disabled'}]
       else
         r_args = ['1', description.reader_groups.include?(group), {}]
         w_args = ['1', description.writer_groups.include?(group), {}]

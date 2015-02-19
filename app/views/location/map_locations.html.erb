@@ -3,9 +3,9 @@
     add_tab(:all_objects.t(:type => :location),
       :controller => :location, :action => 'list_locations')
     add_tab(:show_objects.t(:type => :observation), add_query_param(
-      { :controller => :observer, :action => 'index_observation' }, @query))
+      {controller: :observer, action: 'index_observation'}, @query))
     add_tab(:show_objects.t(:type => :location), add_query_param(
-      { :controller => :location, :action => 'index_location' }, @query))
+      {controller: :location, action: 'index_location'}, @query))
   end
 %>
 

@@ -11,37 +11,37 @@ class API
 
     self.high_detail_includes = [
       :comments,
-      { :synonym => :names },
+      {synonym: :names},
     ]
 
     def query_params
       {
-        :where              => sql_id_condition,
-        :created_at         => parse_time_range(:created_at),
-        :updated_at         => parse_time_range(:updated_at),
-        :users              => parse_users(:user),
-        :names              => parse_strings(:name),
-        :synonym_names      => parse_strings(:synonyms_of),
-        :children_names     => parse_strings(:children_of),
-        :is_deprecated      => parse_boolean(:is_deprecated),
-        :misspellings       => parse_enum(:misspellings, :limit => [:no, :either, :only], :default => :no),
-        :has_synonyms       => parse_boolean(:has_synonyms),
-        :locations          => parse_strings(:location),
-        :species_lists      => parse_strings(:species_lists),
-        :rank               => parse_enum(:rank, :limit => Name.all_ranks),
-        :has_author         => parse_boolean(:has_author),
-        :has_citation       => parse_boolean(:has_citation),
-        :has_classification => parse_boolean(:has_classification),
-        :has_notes          => parse_boolean(:has_notes),
-        :has_comments       => parse_boolean(:has_comments, :limit => true),
-        :has_default_desc   => parse_boolean(:has_description),
-        :text_name_has      => parse_string(:text_name_has),
-        :author_has         => parse_string(:author_has),
-        :citation_has       => parse_string(:citation_has),
-        :classification_has => parse_string(:classification_has),
-        :notes_has          => parse_string(:notes_has),
-        :comments_has       => parse_string(:comments_has),
-        :ok_for_export      => parse_boolean(:ok_for_export),
+          where: sql_id_condition,
+          created_at: parse_time_range(:created_at),
+          updated_at: parse_time_range(:updated_at),
+          users: parse_users(:user),
+          names: parse_strings(:name),
+          synonym_names: parse_strings(:synonyms_of),
+          children_names: parse_strings(:children_of),
+          is_deprecated: parse_boolean(:is_deprecated),
+          misspellings: parse_enum(:misspellings, :limit => [:no, :either, :only], :default => :no),
+          has_synonyms: parse_boolean(:has_synonyms),
+          locations: parse_strings(:location),
+          species_lists: parse_strings(:species_lists),
+          rank: parse_enum(:rank, :limit => Name.all_ranks),
+          has_author: parse_boolean(:has_author),
+          has_citation: parse_boolean(:has_citation),
+          has_classification: parse_boolean(:has_classification),
+          has_notes: parse_boolean(:has_notes),
+          has_comments: parse_boolean(:has_comments, :limit => true),
+          has_default_desc: parse_boolean(:has_description),
+          text_name_has: parse_string(:text_name_has),
+          author_has: parse_string(:author_has),
+          citation_has: parse_string(:citation_has),
+          classification_has: parse_string(:classification_has),
+          notes_has: parse_string(:notes_has),
+          comments_has: parse_string(:comments_has),
+          ok_for_export: parse_boolean(:ok_for_export),
       }
     end
 
@@ -50,12 +50,12 @@ class API
       author   = parse_string(:author, :limit => 100)
 
       params = {
-        :rank             => parse_enum(:rank, :limit => Name.all_ranks),
-        :citation         => parse_string(:citation, :default => ''),
-        :deprecated       => parse_boolean(:deprecated, :default => false),
-        :correct_spelling => parse_object(:correct_spelling, :limit => Name, :default => nil),
-        :classification   => parse_string(:classification, :default => ''),
-        :notes            => parse_string(:notes, :default => ''),
+          rank: parse_enum(:rank, :limit => Name.all_ranks),
+          citation: parse_string(:citation, :default => ''),
+          deprecated: parse_boolean(:deprecated, :default => false),
+          correct_spelling: parse_object(:correct_spelling, :limit => Name, :default => nil),
+          classification: parse_string(:classification, :default => ''),
+          notes: parse_string(:notes, :default => ''),
       }
       done_parsing_parameters!
 
@@ -95,10 +95,10 @@ class API
 
     def update_params
       {
-        :rank           => parse_enum(:set_rank, :limit => Name.all_ranks),
-        :citation       => parse_string(:set_citation),
-        :classification => parse_string(:set_classification),
-        :notes          => parse_string(:set_notes),
+          rank: parse_enum(:set_rank, :limit => Name.all_ranks),
+          citation: parse_string(:set_citation),
+          classification: parse_string(:set_classification),
+          notes: parse_string(:set_notes),
       }
     end
 

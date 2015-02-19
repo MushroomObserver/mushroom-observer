@@ -258,15 +258,15 @@ module ApplicationHelper
   def turn_into_menu_auto_completer(id, opts={})
     raise "Missing primer for menu auto-completer!" if !opts[:primer]
     turn_into_auto_completer(id, {
-      :unordered => false
+                                   unordered: false
     }.merge(opts))
   end
 
   # Make text_field auto-complete for Name text_name.
   def turn_into_name_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :ajax_url => '/ajax/auto_complete/name/@',
-      :collapse => 1
+                                   ajax_url: '/ajax/auto_complete/name/@',
+                                   collapse: 1
     }.merge(opts))
   end
 
@@ -278,32 +278,32 @@ module ApplicationHelper
       format = ''
     end
     turn_into_auto_completer(id, {
-      :ajax_url => '/ajax/auto_complete/location/@' + format,
-      :unordered => true
+                                   ajax_url: '/ajax/auto_complete/location/@' + format,
+                                   unordered: true
     }.merge(opts))
   end
 
   # Make text_field auto-complete for Project title.
   def turn_into_project_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :ajax_url => '/ajax/auto_complete/project/@',
-      :unordered => true
+                                   ajax_url: '/ajax/auto_complete/project/@',
+                                   unordered: true
     }.merge(opts))
   end
 
   # Make text_field auto-complete for SpeciesList title.
   def turn_into_species_list_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :ajax_url => '/ajax/auto_complete/species_list/@',
-      :unordered => true
+                                   ajax_url: '/ajax/auto_complete/species_list/@',
+                                   unordered: true
     }.merge(opts))
   end
 
   # Make text_field auto-complete for User name/login.
   def turn_into_user_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
-      :ajax_url => '/ajax/auto_complete/user/@',
-      :unordered => true
+                                   ajax_url: '/ajax/auto_complete/user/@',
+                                   unordered: true
     }.merge(opts))
   end
 
@@ -311,8 +311,8 @@ module ApplicationHelper
   def turn_into_herbarium_auto_completer(id, opts={})
     if @user
       turn_into_auto_completer(id, {
-        :ajax_url => '/ajax/auto_complete/herbarium/@?user_id=' + @user.id.to_s,
-        :unordered => true
+                                     ajax_url: '/ajax/auto_complete/herbarium/@?user_id=' + @user.id.to_s,
+                                     unordered: true
       }.merge(opts))
     else
       ''
@@ -338,7 +338,7 @@ module ApplicationHelper
       end
       if admin
         add_tab_with_query(:show_description_destroy.t,
-          { :action => "destroy_#{type}_description", :id => desc.id },
+          {action: "destroy_#{type}_description", id: desc.id},
           { data: { confirm: :are_you_sure.l } })
       end
       if true
@@ -403,12 +403,12 @@ module ApplicationHelper
     if obs
       if image = obs.thumb_image
         result = thumbnail(image, {
-                                    :link => {:controller => obs.show_controller,
-                                              :action => obs.show_action,
-                                              :id => obs.id},
-                                     :size => :thumbnail,
-                                     :votes => true,
-                                     :responsive => false}) + image_copyright(image)
+                                    link: {controller: obs.show_controller,
+                                           action: obs.show_action,
+                                           id: obs.id},
+                                    size: :thumbnail,
+                                    votes: true,
+                                    responsive: false}) + image_copyright(image)
       end
     end
     result
@@ -456,8 +456,8 @@ module ApplicationHelper
           :controller => obj.show_controller,
           :action => "edit_#{type}_description") if writer
         links << link_with_query(:DESTROY.t,
-          { :id => desc.id, :action => "destroy_#{type}_description",
-            :controller => obj.show_controller },
+          {id: desc.id, action: "destroy_#{type}_description",
+           controller: obj.show_controller},
           { data: {confirm: :are_you_sure.t } }) if admin
         item += indent + "[" + links.safe_join(' | ') + "]" if links.any?
       end
@@ -778,8 +778,8 @@ module ApplicationHelper
   def make_line(row, td_opts)
     colspan = td_opts[:colspan]
     if colspan
-      content_tag(:tr, {:class => 'MatrixLine'}) do
-        content_tag(:td, tag(:hr), {:class => 'MatrixLine', :colspan => colspan})
+      content_tag(:tr, {class: 'MatrixLine'}) do
+        content_tag(:td, tag(:hr), {class: 'MatrixLine', colspan: colspan})
       end
     else
       safe_empty
@@ -1062,10 +1062,10 @@ module ApplicationHelper
 
   def mapset_box_params(set)
     {
-      :north => set.north,
-      :south => set.south,
-      :east => set.east,
-      :west => set.west,
+        north: set.north,
+        south: set.south,
+        east: set.east,
+        west: set.west,
     }
   end
 

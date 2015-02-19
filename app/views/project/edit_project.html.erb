@@ -6,7 +6,7 @@
     add_tab(:app_list_projects.t, :action => 'list_projects')
     if check_permission(@project)
       add_tab_with_query(:edit_project_destroy.t,
-        { :action => 'destroy_project', :id => @project.id },
+        {action: 'destroy_project', id: @project.id},
         { data: { confirm: :are_you_sure.l } })
     end
     add_tab_with_query(:cancel_and_show.t(:type => :project),

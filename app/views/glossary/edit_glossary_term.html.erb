@@ -9,7 +9,7 @@
 %>
 
 <p>
-  <%= form_tag({:action => 'edit_glossary_term', :id => @glossary_term.id}) do %>
+  <%= form_tag({action: 'edit_glossary_term', id: @glossary_term.id}) do %>
     <p>
       <%= :glossary_term_name.t %>: <%= text_field('glossary_term', 'name', :size => 150, :value => @glossary_term.name) %>
     </p>

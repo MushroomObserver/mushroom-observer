@@ -195,10 +195,10 @@
                  css_class += " active" if current == value %>
                 <div class="list-group-item list-group-item-split">
                   <div class="btn-group" style="width:100%;">
-                    <%= link_to(value == 0 ? str2 : str1, {:vote => value}.merge(args),
+                    <%= link_to(value == 0 ? str2 : str1, {vote: value}.merge(args),
                                 {style: "width: 65%; padding: 4px;", class: css_class + " btn-default", title: str2,
                                  data: {toggle: "tooltip", placement: "left", role: "image_vote", val: value ,id: @image.id}}) %>
-                    <%= link_to(str3, {:vote => value, :next => true}.merge(args),
+                    <%= link_to(str3, {vote: value, next: true}.merge(args),
                                 {class: css_class + " btn-success", style: "width: 35%; padding: 4px;", title: str2, data: {toggle: "tooltip", placement: "left"}}) %>
                   </div>
                 </div>

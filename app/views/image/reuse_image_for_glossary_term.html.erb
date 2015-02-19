@@ -31,9 +31,9 @@
         <div class="row">
           <% @objects.each do |image| %>
               <div class="col-sm-4 rss-box-details">
-                <%= thumbnail(image, link: add_query_param({:action => 'reuse_image_for_glossary_term',
-                                                            :glossary_term_id => id,
-                                                            :img_id => image.id}),
+                <%= thumbnail(image, link: add_query_param({action: 'reuse_image_for_glossary_term',
+                                                            glossary_term_id: id,
+                                                            img_id: image.id}),
                               original: true) %>
               </div>
           <% end %>

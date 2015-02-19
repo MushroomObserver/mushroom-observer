@@ -12,10 +12,10 @@
               <td>
                 <%= link_to(list.format_name.t, :controller => 'species_list',
                             :action => 'show_species_list', :id => list.id) %>
-                    [<%= link_to(:REMOVE.t, {:controller => 'species_list',
-                                             :action => 'remove_observation_from_species_list',
-                                             :observation => observation.id,
-                                             :species_list => list.id},
+                    [<%= link_to(:REMOVE.t, {controller: 'species_list',
+                                             action: 'remove_observation_from_species_list',
+                                             observation: observation.id,
+                                             species_list: list.id},
                                  data: {confirm: :are_you_sure.l}) if check_permission(list)%>]
               </td>
             </tr>
