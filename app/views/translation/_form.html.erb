@@ -46,7 +46,7 @@
 <div class="center-text">
       <%= submit_tag(:SAVE.l, :id => :save_button, class: "pad-left-2x") %>
       <%= button_tag(:CANCEL.l, :id => :cancel_button, class: "pad-left-2x", type: "cancel") %>
-      <%= button_tag(:RELOAD.l, :id => :reload_button, class: "pad-left-2x", type: "button", data: {:tag => tag}) %>
+      <%= button_tag(:RELOAD.l, :id => :reload_button, class: "pad-left-2x", type: "button", data: {tag: tag}) %>
       <%= select_tag(:locale, options_for_select(Language.menu_options, @lang.locale), class: "pad-left-2x", data: {tag: tag}) %>
 </div>
 
@@ -89,8 +89,8 @@
                       <%= h(str = preview_string(version.text, 80)) %>
                       <%= if str.length > 80
                             label = '[' + :edit_translations_full_text.t + ']'
-                              link_to(label, {:controller => :ajax, :action => :old_translation,
-                                      :id => version.id}, data:{ :role => "show_old_version", :id => version.id})
+                              link_to(label, {controller: :ajax, action: :old_translation,
+                                              id: version.id}, data:{role: "show_old_version", id: version.id})
                           end %>
                     </td>
                   </tr>

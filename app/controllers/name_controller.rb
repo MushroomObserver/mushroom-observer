@@ -202,7 +202,7 @@ class NameController < ApplicationController
   def test_index # :nologin: :norobots:
     query = find_query(:Name) or raise "Missing query: #{params[:q]}"
     if params[:test_anchor]
-      @test_pagination_args = {:anchor => params[:test_anchor]}
+      @test_pagination_args = {anchor: params[:test_anchor]}
     end
     show_selected_names(query, :num_per_page => params[:num_per_page].to_i)
   end
@@ -212,14 +212,14 @@ class NameController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      :action => 'list_names',
-      :letters => 'names.sort_name',
-      :num_per_page => (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50),
+        action: 'list_names',
+        letters: 'names.sort_name',
+        num_per_page: (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50),
     }.merge(args)
 
     # Tired of not having an easy link to list_names.
     if query.flavor == :with_observations
-      @links << [:all_objects.t(:type => :name), { :action => 'list_names' }]
+      @links << [:all_objects.t(:type => :name), {action: 'list_names'}]
     end
 
     # Add some alternate sorting criteria.
@@ -236,7 +236,7 @@ class NameController < ApplicationController
     if query.is_coercable?(:Observation)
       @links << [:show_objects.t(:type => :observation),
         add_query_param({
-          :controller => 'observer', :action => 'index_observation'
+                            controller: 'observer', action: 'index_observation'
           }, query)]
     end
 
@@ -244,7 +244,7 @@ class NameController < ApplicationController
     # description query.
     if query.is_coercable?(:NameDescription)
       @links << [:show_objects.t(:type => :description),
-        add_query_param({:action => 'index_name_description'},
+        add_query_param({action: 'index_name_description'},
           query)]
     end
 
@@ -304,8 +304,8 @@ class NameController < ApplicationController
     store_query_in_session(query)
     @links ||= []
     args = {
-      :action => 'list_name_descriptions',
-      :num_per_page => 50
+        action: 'list_name_descriptions',
+        num_per_page: 50
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -320,7 +320,7 @@ class NameController < ApplicationController
     # observation query.
     if query.is_coercable?(:Name)
       @links << [:show_objects.t(:type => :name),
-        add_query_param({:action => 'index_name'}, query)]
+        add_query_param({action: 'index_name'}, query)]
     end
 
     show_index_of_objects(query, args)

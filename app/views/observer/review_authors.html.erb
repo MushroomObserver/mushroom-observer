@@ -20,9 +20,9 @@
 <p>
   <%= :review_authors_authors.t %><br/>
   <% for u in @authors %>
-    <%= indent + user_link(u) %>
-    | <%= link_to(:review_authors_remove_author.t, {:action => :review_authors,
-                  :id => @object.id, :type => type, :remove => u.id},
+    <%= user_link(u) %>
+    | <%= link_to(:review_authors_remove_author.t, {action: :review_authors,
+                                                    id: @object.id, type: type, remove: u.id},
                   { data: { confirm: :are_you_sure.l } }) %>
     <br/>
   <% end %>
@@ -32,7 +32,7 @@
   <%= :review_authors_other_users.t %><br/>
   <% for u in @users
     unless @authors.member?(u) %>
-      <%= indent + user_link(u) %>
+      <%= user_link(u) %>
       | <%= link_to(:review_authors_add_author.t, :action => :review_authors,
                     :id => @object.id, :type => type, :add => u.id) %>
       <br/>

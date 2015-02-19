@@ -1,7 +1,6 @@
 <%
    @title ||= :list_projects_title.t
 
-   new_tab_set(:sort_by_header.t, @sorts)
    new_tab_set do
      add_tab_with_query(:list_projects_add_project.t, :action => 'add_project')
      add_tabs(@links)
@@ -11,22 +10,19 @@
 %>
 
 <%= paginate_block(@pages) do %>
-    <div class="color-block">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="list-group list-group-compact">
       <% @objects.each do |project| %>
-          <div class="row color-block-item">
-            <div class="col-xs-12 slight-pad">
-              <div>
+            <div class="list-group-item">
                 <strong>
                 <%= link_with_query(project.title.t,
                             :action => 'show_project', :id => project.id) %>
-                </strong>
-                <br/>
-                <small><%= project.created_at.web_time %></small>:
-                <span><%= user_link(project.user) %></span>
-              </div>
+                </strong>                <br/>
+                <small><%= project.created_at.web_time %></small>: <span><%= user_link(project.user) %></span>
             </div>
-          </div>
       <% end %>
+        </div>
+      </div>
     </div>
 <% end %>
-

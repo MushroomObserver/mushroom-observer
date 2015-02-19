@@ -46,7 +46,7 @@
                 span_class = up_to_date ? 'faint' : 'bold bright'
                 str = content_tag(:span, h(str), :class => span_class, :id => "str_#{tag}")
                 label = content_tag(:span, h(tag) + ':', :class => 'tag')
-                label = link_to(label, {:page => @page, :tag => tag}, data: {:tag => tag, :role => "show_tag"})
+                label = link_to(label, {page: @page, tag: tag}, data: {tag: tag, role: "show_tag"})
 
                 content_tag(:p, label + ' ' + str, :class => 'tag_field')
               else
@@ -58,8 +58,8 @@
   <div class="col-xs-8 border" style="height: 750px; overflow-y: scroll">
     <div id="right_translation_container">
       <%= if @js
-            form_tag({:controller => :translation, :action => :edit_translations_ajax_post},
-                     {:id => :post_form, :target => :hidden_frame})
+            form_tag({controller: :translation, action: :edit_translations_ajax_post},
+                     {id: :post_form, target: :hidden_frame})
           else
             form_tag(:action => :edit_translations, :page => @page)
           end %>

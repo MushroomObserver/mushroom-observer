@@ -7,8 +7,8 @@
         <% if check_permission(comment) %>
             [<%= link_with_query(:EDIT.t, :controller => 'comment',
                                  :action => 'edit_comment', :id => comment.id) %> |
-            <%= link_with_query(:DESTROY.t, {:controller => 'comment',
-                                             :action => 'destroy_comment', :id => comment.id},
+            <%= link_with_query(:DESTROY.t, {controller: 'comment',
+                                             action: 'destroy_comment', id: comment.id},
                                 {data: {confirm: :are_you_sure.l}}) %>]
         <% end %><br/>
       </div>

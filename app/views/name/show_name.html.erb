@@ -65,7 +65,7 @@
         <%= :show_name_nomenclature.t %>
       </div>
       <div class="list-group-item sl">
-        <%= render(:partial => 'name', :object => @name, :locals => {:synonyms => true}) %>
+        <%= render(:partial => 'name', :object => @name, :locals => {synonyms: true}) %>
       </div>
       <div class="list-group-item slight-pad default">
         <%= :show_name_classification.t %>
@@ -138,7 +138,7 @@
 <div class="row">
   <div class="col-xs-12">
     <%= render(:partial => 'comment/show_comments', :locals =>
-                                                          {:object => @name, :controls => true, :limit => nil}) %>
+                                                          {object: @name, controls: true, limit: nil}) %>
   </div>
   <div class="col-xs-12">
     <%= show_object_footer(@name) %>

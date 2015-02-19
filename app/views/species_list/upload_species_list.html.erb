@@ -1,6 +1,6 @@
 <% @title = :species_list_upload_title.t %>
 
-<%= form_tag({:action => 'upload_species_list', :id => @species_list.id}, :multipart => true) do %>
+<%= form_tag({action: 'upload_species_list', id: @species_list.id}, :multipart => true) do %>
   <br/><center><%= submit_tag :SAVE.l %></center><br/>
 
   <p><%= :species_list_upload_label.t %>:<br/>

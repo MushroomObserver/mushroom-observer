@@ -66,7 +66,7 @@ class SemanticVernacularDataSource
 	# Build a SPARQL SELECT query
   def self.query(query)
 		url = URI(QUERY_ENDPOINT)
-		params = { :query => query, :output => :json }
+		params = {query: query, output: :json}
 		url.query = URI.encode_www_form(params)
 		response = Net::HTTP.get_response(url)
 		if response.is_a?(Net::HTTPSuccess)

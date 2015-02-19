@@ -80,7 +80,7 @@
                   else
                     'p' + Pivotal::Story.label_value(label).to_s
                   end
-                link_to(h(:"pivotal_label_#{label}".l), {}, data: { :role => "click_on_label", :label => label}, :class => klass)
+                link_to(h(:"pivotal_label_#{label}".l), {}, data: {role: "click_on_label", label: label}, :class => klass)
               end
             %></td>
             <td style="white-space:nowrap"><%=
@@ -101,7 +101,7 @@
     <div class="pivotal" id="pivotal_<%= story.id %>">
       <div class="pivotal_name" id="pivotal_name_<%= story.id %>">
         <span class="pivotal_name"><%=
-          link_to(story.name.t, {}, data: {:role => "click_on_story", :story => story.id})
+          link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
         %></span><br/>
         <span style="white-space:nowrap">
           <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
@@ -116,10 +116,10 @@
             %></span>)</span>
           <span class="pivotal_labels"><%=
             labels = story.sorted_labels.map do |label |
-              link_to(h(:"pivotal_label_#{label}".l), {}, data: { :role => "click_on_label", :label => label}, :class => "p#{story.label_value(label)}")
+              link_to(h(:"pivotal_label_#{label}".l), {}, data: {role: "click_on_label", label: label}, :class => "p#{story.label_value(label)}")
             end
             if story.activity.match(/^(day|week|month)$/)
-              labels << link_to(h(:"pivotal_label_#{story.activity}".l), {}, data: { :role => "click_on_label", :label => story.activity}, :class => "pA p_#{story.activity}")
+              labels << link_to(h(:"pivotal_label_#{story.activity}".l), {}, data: {role: "click_on_label", label: story.activity}, :class => "pA p_#{story.activity}")
             end
             labels.safe_join(' ')
           %></span>

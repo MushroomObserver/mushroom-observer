@@ -12,7 +12,7 @@ module PaginationHelper
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
     content_tag(:div, class: 'results') do
-      letters + numbers + body + numbers + letters
+      letters + safe_br + numbers + body + numbers + safe_br + letters
     end
   end
 

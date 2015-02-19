@@ -10,8 +10,8 @@
 
   <% if @js %>
     <span style="margin-left:10px">&nbsp;</span>
-    <%= button_tag("#{:MORE.t} »",  { :id => "image_#{index}_more" , :onclick => "image_on(#{index})"}) %>
-    <%= button_tag("#{:LESS.t} »",  { :id => "image_#{index}_less" , :onclick => "image_off(#{index})", :style => 'display: none'}) %>
+    <%= button_tag("#{:MORE.t} »",  {id: "image_#{index}_more", onclick: "image_on(#{index})"}) %>
+    <%= button_tag("#{:LESS.t} »",  {id: "image_#{index}_less", onclick: "image_off(#{index})", style: 'display: none'}) %>
 
   <% end %><br/>
 
@@ -25,13 +25,13 @@
 
     <p><label for="image_<%= index %>_when_1i"><%= :form_images_when_taken.t %>:</label>
 
-    <%= date_select('image', 'when', { :index => index, :start_year => 1980, :end_year => Time.now.year,
-                    :order => [:day,:month,:year]},
-                    { :onchange => "CHANGED_DATES[#{index}] = true" }) %></p>
+    <%= date_select('image', 'when', {index: index, start_year: 1980, end_year: Time.now.year,
+                                      order: [:day, :month, :year]},
+                    {onchange: "CHANGED_DATES[#{index}] = true"}) %></p>
 
     <p><label for="image_<%= index %>_license_id"><%= :form_images_select_license.t %>:</label>
-    <%= select('image', :license_id, @licenses, { :value => @image.license_id },
-               { :id => "image_#{index}_license_id", :name => "image[#{index}][license_id]" }) %></p>
+    <%= select('image', :license_id, @licenses, {value: @image.license_id},
+               {id: "image_#{index}_license_id", name: "image[#{index}][license_id]"}) %></p>
   </div>
 
   <% inject_javascript_at_end %(

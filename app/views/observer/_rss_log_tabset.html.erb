@@ -6,7 +6,7 @@
        :rss_all.t
      else
        link_with_query(:rss_all.t,
-                       {:action => 'index_rss_log', :type => 'all'}, {:title =>  :rss_all_help.t})
+                       {action: 'index_rss_log', type: 'all'}, {title: :rss_all_help.t})
      end%>
         </span>
   <% RssLog.all_types.map(&:to_s).each do |type|
@@ -17,7 +17,7 @@
                 <%=content_tag(:span, :rss_one.t(:type => type.to_sym))%>
             <%else%>
                 <%=link_with_query(:rss_one.t(:type => type.to_sym),
-                                   {:action => 'index_rss_log', :type => type}, {:title => :rss_all_help.t})%>
+                                   {action: 'index_rss_log', type: type}, {title: :rss_all_help.t})%>
             <%end%>
           </span>
   <%end%>

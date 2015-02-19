@@ -37,8 +37,8 @@
           </td>
           <td valign='middle' class="ListActions">
             <% if check_permission(species_list) %>
-               <%= link_to(:REMOVE.t, { :action => 'remove_observation_from_species_list',
-                           :observation => @observation.id, :species_list => species_list.id },
+               <%= link_to(:REMOVE.t, {action: 'remove_observation_from_species_list',
+                                       observation: @observation.id, species_list: species_list.id},
                            data: { confirm: :are_you_sure.l }) %>
             <% end %>
           </td>
@@ -68,8 +68,8 @@
         </td>
         <td valign='middle' class="ListActions">
           <% if check_permission(species_list) %>
-            <%= link_to(:ADD.t, { :action => 'add_observation_to_species_list',
-                        :observation => @observation.id, :species_list => species_list.id }) %>
+            <%= link_to(:ADD.t, {action: 'add_observation_to_species_list',
+                                 observation: @observation.id, species_list: species_list.id}) %>
           <% end %>
         </td>
       </tr>

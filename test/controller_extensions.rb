@@ -336,8 +336,8 @@ module ControllerExtensions
   def assert_image_link_in_html(img_src, url_opts, msg=nil)
     revised_opts = raise_params(url_opts)
     url = url_for(revised_opts);
-    assert_tag(:a, attributes: {href: url.gsub("&", "&amp;")}, :child => {:tag => "img",
-                                                                          :attributes => {:src => img_src}} )
+    assert_tag(:a, attributes: {href: url.gsub("&", "&amp;")}, :child => {tag: "img",
+                                                                          attributes: {src: img_src}} )
   end
 
   # Assert that a form exists which posts to the given url.

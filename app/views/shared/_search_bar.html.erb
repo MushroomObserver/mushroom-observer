@@ -1,5 +1,5 @@
 <nav class="navbar navbar-default">
-  <%= form_tag({:controller => 'observer', :action => 'pattern_search'}, {class: "navbar-form navbar-left"}) do %>
+  <%= form_tag({controller: 'observer', action: 'pattern_search'}, {class: "navbar-form navbar-left"}) do %>
       <div class="form-group">
         <div class="icon-addon addon-sm  inline">
           <%= text_field(:search, :pattern, value: session[:pattern], class: "form-control", placeholder: :app_find.t) %>

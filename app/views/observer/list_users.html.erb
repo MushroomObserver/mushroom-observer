@@ -1,6 +1,5 @@
 <%
    @title ||= :users_by_name_title.t
-   new_tab_set(:sort_by_header.t, @sorts)
 
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
@@ -58,7 +57,7 @@
       <div class="col-xs-12 color-block">
         <% @objects.each do |user| %>
             <div class="col-sm-4 color-block-item">
-              <%= render(:partial => '/shared/matrix_box', locals: {:object => user}) %>
+              <%= render(:partial => '/shared/matrix_box', locals: {object: user}) %>
             </div>
         <% end %>
       </div>

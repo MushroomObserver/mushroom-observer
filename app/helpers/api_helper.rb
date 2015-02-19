@@ -147,9 +147,9 @@ module ApiHelper
       xml.target! << render(
         :partial => object.class.type_tag.to_s, 
         :locals => {
-          :tag => tag,
-          :object => object,
-          :detail => detail,
+            tag: tag,
+            object: object,
+            detail: detail,
         }
       )
     end

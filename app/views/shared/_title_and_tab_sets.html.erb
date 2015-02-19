@@ -12,19 +12,35 @@
       <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
     </div>
     <div class="col-xs-12">
-    <%= @full_width_tab_set%>
+      <%= @full_width_tab_set %>
     </div>
 <% else %>
     <div id="left_tabs" class="col-sm-3" style="text-align: left;">
-      <%= @tabsets[:left] if @tabsets%>
+      <%= @tabsets[:left] if @tabsets %>
     </div>
     <div class="col-sm-6" id="title">
       <%= content_tag(:h3, @title, class: "text-center", style: "margin-top: 5px;") %>
       <div class="text-center" style="margin-top: -5px; margin-bottom: 5px;">
-      <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
+        <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
       </div>
     </div>
     <div id="right_tabs" class="col-sm-3" style="text-align: right">
-        <%= @tabsets[:right] if @tabsets%>
+      <%= @tabsets[:right] if @tabsets %>
+    </div>
+<% end %>
+
+<% if @sorts %>
+    <div class="col-xs-12">
+      <div class="pad-top">
+      <span>
+      <%= :sort_by_header.t %>
+        </span>
+        <div class="btn-group btn-group-xs" role="group">
+          <% @sorts.each do |title, action| %>
+              <%= link_with_query(title, action, {class: "btn btn-default"}) unless action.nil?%>
+              <%= link_with_query(title, {}, {class: "btn btn-default active", disabled: true}) if action.nil?%>
+          <% end %>
+        </div>
+      </div>
     </div>
 <% end %>

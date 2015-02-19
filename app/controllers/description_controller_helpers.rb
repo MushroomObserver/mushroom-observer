@@ -290,8 +290,8 @@ module DescriptionControllerHelpers
           admin  = params[:writein_admin][n]  == '1' rescue false
           if !name.blank? and
              !update_writein(@description, name, reader, writer, admin)
-            @data << { :name => name, :reader => reader, :writer => writer,
-                       :admin => admin }
+            @data << {name: name, reader: reader, writer: writer,
+                      admin: admin}
             flash_error(:runtime_description_user_not_found.t(:name => name))
             done = false
           end

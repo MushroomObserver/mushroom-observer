@@ -127,7 +127,7 @@ class AbstractModel < ActiveRecord::Base
   #
   def self.find_by_sql_with_limit(sql, offset, limit)
     sql = sanitize_sql(sql)
-    add_limit!(sql, {:limit => limit, :offset => offset})
+    add_limit!(sql, {limit: limit, offset: offset})
     find_by_sql(sql)
   end
 
@@ -554,10 +554,10 @@ class AbstractModel < ActiveRecord::Base
     self.add_image(image)
     self.log_reuse_image(image)
     {
-      :controller => self.show_controller,
-      :action => self.show_action,
-      :id => self.id,
-      :q => query_params[:q]
+        controller: self.show_controller,
+        action: self.show_action,
+        id: self.id,
+        q: query_params[:q]
     }
   end
 

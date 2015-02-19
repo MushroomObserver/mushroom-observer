@@ -95,9 +95,9 @@
           <% end %>
           <%=
             link = link_to(feature['label'], {
-                     :controller => 'semantic_vernacular',
-                     :action => 'show_feature',
-                     :uri => feature['uri']
+                                                   controller: 'semantic_vernacular',
+                                                   action: 'show_feature',
+                                                   uri: feature['uri']
                    }, :target => '_blank')
             labels = value_labels.safe_join(' <i>or</i> '.html_safe)
             content_tag(:li, link + ': ' + labels, :id => feature['uri'],

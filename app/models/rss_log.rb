@@ -288,10 +288,10 @@ class RssLog < AbstractModel
   #
   def add_with_date(tag, args={})
     args = {
-      :user  => (User.current ? User.current.login : :UNKNOWN.l),
-      :touch => true,
-      :time  => Time.now,
-      :save  => true,
+        user: (User.current ? User.current.login : :UNKNOWN.l),
+        touch: true,
+        time: Time.now,
+        save: true,
     }.merge(args)
 
     args2 = args.dup
@@ -333,7 +333,7 @@ class RssLog < AbstractModel
     for line in notes.to_s.split("\n")
       if first && !line.match(/^\d{14}/)
         tag  = :log_orphan
-        args = { :title => self.class.unescape(line) }
+        args = {title: self.class.unescape(line)}
         time = updated_at
       elsif !line.blank?
         tag, args, time = self.class.decode(line)

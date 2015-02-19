@@ -72,613 +72,613 @@ class Query < AbstractQuery
   # Parameters allowed in every query.
   self.global_params = {
     # Allow every query to customize its title.
-    :title? => [:string],
+    title?: [:string],
   }
 
   # Parameters allowed in every query for a given model.
   self.model_params = {
-    :Comment => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?       => [User],
-      :types?       => :string,
-      :summary_has? => :string,
-      :content_has? => :string,
-    },
-    :Image => {
-      :created_at?      => [:time],
-      :updated_at?      => [:time],
-      :date?            => [:date],
-      :users?           => [User],
-      :names?           => [:string],
-      :synonym_names?   => [:string],
-      :children_names?  => [:string],
-      :locations?       => [:string],
-      :projects?        => [:string],
-      :species_lists?   => [:string],
-      :has_observation? => {:string => [:yes]},
-      :size?            => [{:string => Image.all_sizes - [:full_size]}],
-      :content_types?   => :string,
-      :has_notes?       => :boolean,
-      :notes_has?       => :string,
-      :copyright_holder_has? => :string,
-      :license?         => License,
-      :has_votes?       => :boolean,
-      :quality?         => [:integer],
-      :confidence?      => [:integer],
-      :ok_for_export?   => :boolean,
-    },
-    :Location => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?       => [User],
-      :north?       => :float,
-      :south?       => :float,
-      :east?        => :float,
-      :west?        => :float,
-    },
-    :LocationDescription => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?    => [User],
-    },
-    :Name => {
-      :created_at?          => [:time],
-      :updated_at?          => [:time],
-      :users?               => [User],
-      :names?               => [:string],
-      :synonym_names?       => [:string],
-      :children_names?      => [:string],
-      :misspellings?        => {:string => [:no, :either, :only]},
-      :deprecated?          => {:string => [:either, :no, :only]},
-      :has_synonyms?        => :boolean,
-      :locations?           => [:string],
-      :species_lists?       => [:string],
-      :rank?                => [{:string => Name.all_ranks}],
-      :is_deprecated?       => :boolean,
-      :text_name_has?       => :string,
-      :has_author?          => :boolean,
-      :author_has?          => :string,
-      :has_citation?        => :boolean,
-      :citation_has?        => :string,
-      :has_classification?  => :boolean,
-      :classification_has?  => :string,
-      :has_notes?           => :boolean,
-      :notes_has?           => :string,
-      :has_comments?        => {:string => [:yes]},
-      :comments_has?        => :string,
-      :has_default_desc?    => :boolean,
-      :join_desc?           => {:string => [:default,:any]},
-      :desc_type?           => :string,
-      :desc_project?        => [:string],
-      :desc_creator?        => [User],
-      :desc_content?        => :string,
-      :ok_for_export?       => :boolean,
-    },
-    :NameDescription => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?       => [User],
-    },
-    :Observation => {
-      :created_at?      => [:time],
-      :updated_at?      => [:time],
-      :date?            => [:date],
-      :users?           => [User],
-      :names?           => [:string],
-      :synonym_names?   => [:string],
-      :children_names?  => [:string],
-      :locations?       => [:string],
-      :projects?        => [:string],
-      :species_lists?   => [:string],
-      :confidence?      => [:float],
-      :is_col_loc?      => :boolean,
-      :has_specimen?    => :boolean,
-      :has_location?    => :boolean,
-      :has_notes?       => :boolean,
-      :has_name?        => :boolean,
-      :has_images?      => :boolean,
-      :has_votes?       => :boolean,
-      :has_comments?    => {:string => [:yes]},
-      :notes_has?       => :string,
-      :comments_has?    => :string,
-      :north?           => :float,
-      :south?           => :float,
-      :east?            => :float,
-      :west?            => :float,
-      :has_obs_tag?     => [:string],
-      :has_name_tag?    => [:string],
-    },
-    :Project => {
-      :created_at?        => [:time],
-      :updated_at?        => [:time],
-      :users?             => [User],
-      :has_images?        => {:string => [:yes]},
-      :has_observations?  => {:string => [:yes]},
-      :has_species_lists? => {:string => [:yes]},
-      :has_comments?      => {:string => [:yes]},
-      :has_notes?         => :boolean,
-      :title_has?         => :string,
-      :notes_has?         => :string,
-      :comments_has?      => :string,
-    },
-    :RssLog => {
-      :updated_at? => [:time],
-      :type?     => :string,
-    },
-    :SpeciesList => {
-      :created_at?      => [:time],
-      :updated_at?      => [:time],
-      :date?            => [:date],
-      :users?           => [User],
-      :names?           => [:string],
-      :synonym_names?   => [:string],
-      :children_names?  => [:string],
-      :locations?       => [:string],
-      :projects?        => [:string],
-      :title_has?       => :string,
-      :has_notes?       => :boolean,
-      :notes_has?       => :string,
-      :has_comments?    => {:string => [:yes]},
-      :comments_has?    => :string,
-    },
-    :User => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-    },
+      Comment: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          types?: :string,
+          summary_has?: :string,
+          content_has?: :string,
+      },
+      Image: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          locations?: [:string],
+          projects?: [:string],
+          species_lists?: [:string],
+          has_observation?: {string: [:yes]},
+          size?: [{string: Image.all_sizes - [:full_size]}],
+          content_types?: :string,
+          has_notes?: :boolean,
+          notes_has?: :string,
+          copyright_holder_has?: :string,
+          license?: License,
+          has_votes?: :boolean,
+          quality?: [:integer],
+          confidence?: [:integer],
+          ok_for_export?: :boolean,
+      },
+      Location: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          north?: :float,
+          south?: :float,
+          east?: :float,
+          west?: :float,
+      },
+      LocationDescription: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+      },
+      Name: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          misspellings?: {string: [:no, :either, :only]},
+          deprecated?: {string: [:either, :no, :only]},
+          has_synonyms?: :boolean,
+          locations?: [:string],
+          species_lists?: [:string],
+          rank?: [{string: Name.all_ranks}],
+          is_deprecated?: :boolean,
+          text_name_has?: :string,
+          has_author?: :boolean,
+          author_has?: :string,
+          has_citation?: :boolean,
+          citation_has?: :string,
+          has_classification?: :boolean,
+          classification_has?: :string,
+          has_notes?: :boolean,
+          notes_has?: :string,
+          has_comments?: {string: [:yes]},
+          comments_has?: :string,
+          has_default_desc?: :boolean,
+          join_desc?: {string: [:default, :any]},
+          desc_type?: :string,
+          desc_project?: [:string],
+          desc_creator?: [User],
+          desc_content?: :string,
+          ok_for_export?: :boolean,
+      },
+      NameDescription: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+      },
+      Observation: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          locations?: [:string],
+          projects?: [:string],
+          species_lists?: [:string],
+          confidence?: [:float],
+          is_col_loc?: :boolean,
+          has_specimen?: :boolean,
+          has_location?: :boolean,
+          has_notes?: :boolean,
+          has_name?: :boolean,
+          has_images?: :boolean,
+          has_votes?: :boolean,
+          has_comments?: {string: [:yes]},
+          notes_has?: :string,
+          comments_has?: :string,
+          north?: :float,
+          south?: :float,
+          east?: :float,
+          west?: :float,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      Project: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          has_images?: {string: [:yes]},
+          has_observations?: {string: [:yes]},
+          has_species_lists?: {string: [:yes]},
+          has_comments?: {string: [:yes]},
+          has_notes?: :boolean,
+          title_has?: :string,
+          notes_has?: :string,
+          comments_has?: :string,
+      },
+      RssLog: {
+          updated_at?: [:time],
+          type?: :string,
+      },
+      SpeciesList: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          locations?: [:string],
+          projects?: [:string],
+          title_has?: :string,
+          has_notes?: :boolean,
+          notes_has?: :string,
+          has_comments?: {string: [:yes]},
+          comments_has?: :string,
+      },
+      User: {
+          created_at?: [:time],
+          updated_at?: [:time],
+      },
   }
 
   # Parameters required for each flavor.
   self.flavor_params = {
-    :advanced_search => {
-      :name?     => :string,
-      :location? => :string,
-      :user?     => :string,
-      :content?  => :string,
-      :search_location_notes? => :boolean,
-    },
-    :all => {
-    },
-    :at_location => {
-      :location => Location,
-    },
-    :at_where => {
-      :location => :string,
-      :user_where => :string,
-    },
-    :by_author => {
-      :user => User,
-    },
-    :by_editor => {
-      :user => User,
-    },
-    :by_user => {
-      :user => User,
-    },
-    :for_project => {
-      :project => Project,
-    },
-    :for_target => {
-      :target => AbstractModel,
-      :type   => :string,
-    },
-    :for_user => {
-      :user => User,
-    },
-    :in_set => {
-      :ids => [AbstractModel],
-    },
-    :in_species_list => {
-      :species_list => SpeciesList,
-    },
-    :inside_observation => {
-      :observation => Observation,
-      :outer       => self, # Used to be Query, but that is now ambiguous
-    },
-    :of_children => {
-      :name => Name,
-      :all? => :boolean,
-    },
-    :of_name => {
-      :name          => :name,
-      :synonyms?     => {:string => [:no, :all, :exclusive]},
-      :nonconsensus? => {:string => [:no, :all, :exclusive]},
-      :project?      => Project,
-      :species_list? => SpeciesList,
-      :user?         => User,
-    },
-    :of_parents => {
-      :name => Name,
-    },
-    :pattern_search => {
-      :pattern => :string,
-    },
-    :regexp_search => {
-      :regexp => :string,
-    },
-    :with_descriptions_by_author => {
-      :user => User,
-    },
-    :with_descriptions_by_editor => {
-      :user => User,
-    },
-    :with_descriptions_by_user => {
-      :user => User,
-    },
-    :with_descriptions_in_set => {
-      :ids        => [AbstractModel],
-      :old_title? => :string,
-      :old_by?    => :string,
-    },
-    :with_observations_at_location => {
-      :location      => Location,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_at_where => {
-      :location      => :string,
-      :user_where    => :string,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_by_user => {
-      :user          => User,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_for_project => {
-      :project       => Project,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_in_set => {
-      :ids => [Observation],
-      :old_title?    => :string,
-      :old_by?       => :string,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_in_species_list => {
-      :species_list  => SpeciesList,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_of_children => {
-      :name          => Name,
-      :all?          => :boolean,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
-    :with_observations_of_name => {
-      :name          => :name,
-      :synonyms?     => {:string => [:no, :all, :exclusive]},
-      :nonconsensus? => {:string => [:no, :all, :exclusive]},
-      :project?      => Project,
-      :species_list? => SpeciesList,
-      :user?         => User,
-      :has_specimen? => :boolean,
-      :has_images?   => :boolean,
-      :has_obs_tag?  => [:string],
-      :has_name_tag? => [:string],
-    },
+      advanced_search: {
+          name?: :string,
+          location?: :string,
+          user?: :string,
+          content?: :string,
+          search_location_notes?: :boolean,
+      },
+      all: {
+      },
+      at_location: {
+          location: Location,
+      },
+      at_where: {
+          location: :string,
+          user_where: :string,
+      },
+      by_author: {
+          user: User,
+      },
+      by_editor: {
+          user: User,
+      },
+      by_user: {
+          user: User,
+      },
+      for_project: {
+          project: Project,
+      },
+      for_target: {
+          target: AbstractModel,
+          type: :string,
+      },
+      for_user: {
+          user: User,
+      },
+      in_set: {
+          ids: [AbstractModel],
+      },
+      in_species_list: {
+          species_list: SpeciesList,
+      },
+      inside_observation: {
+          observation: Observation,
+          outer: self, # Used to be Query, but that is now ambiguous
+      },
+      of_children: {
+          name: Name,
+          all?: :boolean,
+      },
+      of_name: {
+          name: :name,
+          synonyms?: {string: [:no, :all, :exclusive]},
+          nonconsensus?: {string: [:no, :all, :exclusive]},
+          project?: Project,
+          species_list?: SpeciesList,
+          user?: User,
+      },
+      of_parents: {
+          name: Name,
+      },
+      pattern_search: {
+          pattern: :string,
+      },
+      regexp_search: {
+          regexp: :string,
+      },
+      with_descriptions_by_author: {
+          user: User,
+      },
+      with_descriptions_by_editor: {
+          user: User,
+      },
+      with_descriptions_by_user: {
+          user: User,
+      },
+      with_descriptions_in_set: {
+          ids: [AbstractModel],
+          old_title?: :string,
+          old_by?: :string,
+      },
+      with_observations_at_location: {
+          location: Location,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_at_where: {
+          location: :string,
+          user_where: :string,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_by_user: {
+          user: User,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_for_project: {
+          project: Project,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_in_set: {
+          ids: [Observation],
+          old_title?: :string,
+          old_by?: :string,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_in_species_list: {
+          species_list: SpeciesList,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_of_children: {
+          name: Name,
+          all?: :boolean,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_of_name: {
+          name: :name,
+          synonyms?: {string: [:no, :all, :exclusive]},
+          nonconsensus?: {string: [:no, :all, :exclusive]},
+          project?: Project,
+          species_list?: SpeciesList,
+          user?: User,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
   }
 
   # Allowed flavors for each model.
   self.allowed_model_flavors = {
-    :Comment => [
-      :all,                   # All comments, by created.
-      :by_user,               # Comments created by user, by created.
-      :in_set,                # Comments in a given set.
-      :for_target,            # Comments on a given object, by created.
-      :for_user,              # Comments sent to user, by created.
-      :pattern_search,        # Comments matching a pattern, by created.
-    ],
-    :Herbarium => [
-      :all,
-      :pattern_search,
-    ],
-    :Image => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All images, by created.
-      :by_user,               # Images created by user, by updated.
-      :for_project,           # Images attached to a given project.
-      :in_set,                # Images in a given set.
-      :inside_observation,    # Images belonging to outer observation query.
-      :pattern_search,        # Images matching a pattern, by ???.
-      :with_observations,                 # Images with observations, alphabetically.
-      :with_observations_at_location,     # Images with observations at a defined location.
-      :with_observations_at_where,        # Images with observations at an undefined 'where'.
-      :with_observations_by_user,         # Images with observations by user.
-      :with_observations_for_project,     # Images with observations attached to given project.
-      :with_observations_in_set,          # Images with observations in a given set.
-      :with_observations_in_species_list, # Images with observations in a given species list.
-      :with_observations_of_children,     # Images with observations of children a given name.
-      :with_observations_of_name,         # Images with observations of a given name.
-    ],
-    :Location => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All locations, alphabetically.
-      :by_user,               # Locations created by a given user, alphabetically.
-      :by_editor,             # Locations updated by a given user, alphabetically.
-      :by_rss_log,            # Locations with RSS logs, in RSS order.
-      :in_set,                # Locations in a given set.
-      :pattern_search,        # Locations matching a pattern, alphabetically.
-      :regexp_search,        # Locations matching a pattern, alphabetically.
-      :with_descriptions,                 # Locations with descriptions, alphabetically.
-      :with_descriptions_by_author,       # Locations with descriptions authored by a given user, alphabetically.
-      :with_descriptions_by_editor,       # Locations with descriptions edited by a given user, alphabetically.
-      :with_descriptions_by_user,         # Locations with descriptions created by a given user, alphabetically.
-      :with_descriptions_in_set,          # Locations with descriptions in a given set, alphabetically.
-      :with_observations,                 # Locations with observations, alphabetically.
-      :with_observations_by_user,         # Locations with observations by user.
-      :with_observations_for_project,     # Locations with observations attached to given project.
-      :with_observations_in_set,          # Locations with observations in a given set.
-      :with_observations_in_species_list, # Locations with observations in a given species list.
-      :with_observations_of_children,     # Locations with observations of children of a given name.
-      :with_observations_of_name,         # Locations with observations of a given name.
-    ],
-    :LocationDescription => [
-      :all,                   # All location descriptions, alphabetically.
-      :by_author,             # Location descriptions that list given user as an author, alphabetically.
-      :by_editor,             # Location descriptions that list given user as an editor, alphabetically.
-      :by_user,               # Location descriptions created by a given user, alphabetically.
-      :in_set,                # Location descriptions in a given set.
-    ],
-    :Name => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All names, alphabetically.
-      :by_user,               # Names created by a given user, alphabetically.
-      :by_editor,             # Names updated by a given user, alphabetically.
-      :by_rss_log,            # Names with RSS logs, in RSS order.
-      :in_set,                # Names in a given set.
-      :of_children,           # Names of children of a name.
-      :of_parents,            # Names of parents of a name.
-      :pattern_search,        # Names matching a pattern, alphabetically.
-      :with_descriptions,                 # Names with descriptions, alphabetically.
-      :with_descriptions_by_author,       # Names with descriptions authored by a given user, alphabetically.
-      :with_descriptions_by_editor,       # Names with descriptions edited by a given user, alphabetically.
-      :with_descriptions_by_user,         # Names with descriptions created by a given user, alphabetically.
-      :with_descriptions_in_set,          # Names with descriptions in a given set, alphabetically.
-      :with_observations,                 # Names with observations, alphabetically.
-      :with_observations_at_location,     # Names with observations at a defined location.
-      :with_observations_at_where,        # Names with observations at an undefined 'where'.
-      :with_observations_by_user,         # Names with observations by user.
-      :with_observations_for_project,     # Names with observations attached to given project.
-      :with_observations_in_set,          # Names with observations in a given set.
-      :with_observations_in_species_list, # Names with observations in a given species list.
-    ],
-    :NameDescription => [
-      :all,                   # All name descriptions, alphabetically.
-      :by_author,             # Name descriptions that list given user as an author, alphabetically.
-      :by_editor,             # Name descriptions that list given user as an editor, alphabetically.
-      :by_user,               # Name descriptions created by a given user, alphabetically.
-      :in_set,                # Name descriptions in a given set.
-    ],
-    :Observation => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All observations, by date.
-      :at_location,           # Observations at a location, by updated_at.
-      :at_where,              # Observations at an undefined location, by updated_at.
-      :by_rss_log,            # Observations with RSS log, in RSS order.
-      :by_user,               # Observations created by user, by updated_at.
-      :for_project,           # Observations attached to a given project.
-      :in_set,                # Observations in a given set.
-      :in_species_list,       # Observations in a given species list, by updated_at.
-      :of_children,           # Observations of children of a given name.
-      :of_name,               # Observations with a given name.
-      :pattern_search,        # Observations matching a pattern, by name.
-    ],
-    :Project => [
-      :all,                   # All projects, by title.
-      :by_rss_log,            # Projects with RSS logs, in RSS order.
-      :in_set,                # Projects in a given set.
-      :pattern_search,        # Projects matching a pattern, by title.
-    ],
-    :RssLog => [
-      :all,                   # All RSS logs, most recent activity first.
-      :in_set,                # RSS logs in a given set.
-    ],
-    :SpeciesList => [
-      :all,                   # All species lists, alphabetically.
-      :at_location,           # Species lists at a location, by updated_at.
-      :at_where,              # Species lists at an undefined location, by updated_at.
-      :by_rss_log,            # Species lists with RSS log, in RSS order
-      :by_user,               # Species lists created by user, alphabetically.
-      :for_project,           # Species lists attached to a given project.
-      :in_set,                # Species lists in a given set.
-      :pattern_search,        # Species lists matching a pattern, alphabetically.
-    ],
-    :Specimen => [
-      :all,
-      :pattern_search,
-    ],
-    :User => [
-      :all,                   # All users, by name.
-      :in_set,                # Users in a given set.
-      :pattern_search,        # Users matching login/name, alphabetically.
-    ],
+      Comment: [
+          :all, # All comments, by created.
+          :by_user, # Comments created by user, by created.
+          :in_set, # Comments in a given set.
+          :for_target, # Comments on a given object, by created.
+          :for_user, # Comments sent to user, by created.
+          :pattern_search, # Comments matching a pattern, by created.
+      ],
+      Herbarium: [
+          :all,
+          :pattern_search,
+      ],
+      Image: [
+          :advanced_search, # Advanced search results.
+          :all, # All images, by created.
+          :by_user, # Images created by user, by updated.
+          :for_project, # Images attached to a given project.
+          :in_set, # Images in a given set.
+          :inside_observation, # Images belonging to outer observation query.
+          :pattern_search, # Images matching a pattern, by ???.
+          :with_observations, # Images with observations, alphabetically.
+          :with_observations_at_location, # Images with observations at a defined location.
+          :with_observations_at_where, # Images with observations at an undefined 'where'.
+          :with_observations_by_user, # Images with observations by user.
+          :with_observations_for_project, # Images with observations attached to given project.
+          :with_observations_in_set, # Images with observations in a given set.
+          :with_observations_in_species_list, # Images with observations in a given species list.
+          :with_observations_of_children, # Images with observations of children a given name.
+          :with_observations_of_name, # Images with observations of a given name.
+      ],
+      Location: [
+          :advanced_search, # Advanced search results.
+          :all, # All locations, alphabetically.
+          :by_user, # Locations created by a given user, alphabetically.
+          :by_editor, # Locations updated by a given user, alphabetically.
+          :by_rss_log, # Locations with RSS logs, in RSS order.
+          :in_set, # Locations in a given set.
+          :pattern_search, # Locations matching a pattern, alphabetically.
+          :regexp_search, # Locations matching a pattern, alphabetically.
+          :with_descriptions, # Locations with descriptions, alphabetically.
+          :with_descriptions_by_author, # Locations with descriptions authored by a given user, alphabetically.
+          :with_descriptions_by_editor, # Locations with descriptions edited by a given user, alphabetically.
+          :with_descriptions_by_user, # Locations with descriptions created by a given user, alphabetically.
+          :with_descriptions_in_set, # Locations with descriptions in a given set, alphabetically.
+          :with_observations, # Locations with observations, alphabetically.
+          :with_observations_by_user, # Locations with observations by user.
+          :with_observations_for_project, # Locations with observations attached to given project.
+          :with_observations_in_set, # Locations with observations in a given set.
+          :with_observations_in_species_list, # Locations with observations in a given species list.
+          :with_observations_of_children, # Locations with observations of children of a given name.
+          :with_observations_of_name, # Locations with observations of a given name.
+      ],
+      LocationDescription: [
+          :all, # All location descriptions, alphabetically.
+          :by_author, # Location descriptions that list given user as an author, alphabetically.
+          :by_editor, # Location descriptions that list given user as an editor, alphabetically.
+          :by_user, # Location descriptions created by a given user, alphabetically.
+          :in_set, # Location descriptions in a given set.
+      ],
+      Name: [
+          :advanced_search, # Advanced search results.
+          :all, # All names, alphabetically.
+          :by_user, # Names created by a given user, alphabetically.
+          :by_editor, # Names updated by a given user, alphabetically.
+          :by_rss_log, # Names with RSS logs, in RSS order.
+          :in_set, # Names in a given set.
+          :of_children, # Names of children of a name.
+          :of_parents, # Names of parents of a name.
+          :pattern_search, # Names matching a pattern, alphabetically.
+          :with_descriptions, # Names with descriptions, alphabetically.
+          :with_descriptions_by_author, # Names with descriptions authored by a given user, alphabetically.
+          :with_descriptions_by_editor, # Names with descriptions edited by a given user, alphabetically.
+          :with_descriptions_by_user, # Names with descriptions created by a given user, alphabetically.
+          :with_descriptions_in_set, # Names with descriptions in a given set, alphabetically.
+          :with_observations, # Names with observations, alphabetically.
+          :with_observations_at_location, # Names with observations at a defined location.
+          :with_observations_at_where, # Names with observations at an undefined 'where'.
+          :with_observations_by_user, # Names with observations by user.
+          :with_observations_for_project, # Names with observations attached to given project.
+          :with_observations_in_set, # Names with observations in a given set.
+          :with_observations_in_species_list, # Names with observations in a given species list.
+      ],
+      NameDescription: [
+          :all, # All name descriptions, alphabetically.
+          :by_author, # Name descriptions that list given user as an author, alphabetically.
+          :by_editor, # Name descriptions that list given user as an editor, alphabetically.
+          :by_user, # Name descriptions created by a given user, alphabetically.
+          :in_set, # Name descriptions in a given set.
+      ],
+      Observation: [
+          :advanced_search, # Advanced search results.
+          :all, # All observations, by date.
+          :at_location, # Observations at a location, by updated_at.
+          :at_where, # Observations at an undefined location, by updated_at.
+          :by_rss_log, # Observations with RSS log, in RSS order.
+          :by_user, # Observations created by user, by updated_at.
+          :for_project, # Observations attached to a given project.
+          :in_set, # Observations in a given set.
+          :in_species_list, # Observations in a given species list, by updated_at.
+          :of_children, # Observations of children of a given name.
+          :of_name, # Observations with a given name.
+          :pattern_search, # Observations matching a pattern, by name.
+      ],
+      Project: [
+          :all, # All projects, by title.
+          :by_rss_log, # Projects with RSS logs, in RSS order.
+          :in_set, # Projects in a given set.
+          :pattern_search, # Projects matching a pattern, by title.
+      ],
+      RssLog: [
+          :all, # All RSS logs, most recent activity first.
+          :in_set, # RSS logs in a given set.
+      ],
+      SpeciesList: [
+          :all, # All species lists, alphabetically.
+          :at_location, # Species lists at a location, by updated_at.
+          :at_where, # Species lists at an undefined location, by updated_at.
+          :by_rss_log, # Species lists with RSS log, in RSS order
+          :by_user, # Species lists created by user, alphabetically.
+          :for_project, # Species lists attached to a given project.
+          :in_set, # Species lists in a given set.
+          :pattern_search, # Species lists matching a pattern, alphabetically.
+      ],
+      Specimen: [
+          :all,
+          :pattern_search,
+      ],
+      User: [
+          :all, # All users, by name.
+          :in_set, # Users in a given set.
+          :pattern_search, # Users matching login/name, alphabetically.
+      ],
   }
 
   # Map each pair of tables to the foreign key name.
   self.join_conditions = {
-    :comments => {
-      :location_descriptions => :target,
-      :locations     => :target,
-      :name_descriptions => :target,
-      :names         => :target,
-      :observations  => :target,
-      :projects      => :target,
-      :species_lists => :target,
-      :users         => :user_id,
-    },
-    :image_votes => {
-      :images        => :image_id,
-      :users         => :user_id,
-    },
-    :images => {
-      :users         => :user_id,
-      :licenses      => :license_id,
-    },
-    :images_observations => {
-      :images        => :image_id,
-      :observations  => :observation_id,
-    },
-    :images_projects => {
-      :images        => :image_id,
-      :projects      => :project_id,
-    },
-    :interests => {
-      :locations     => :target,
-      :names         => :target,
-      :observations  => :target,
-      :users         => :user_id,
-    },
-    :location_descriptions => {
-      :locations     => :location_id,
-      :users         => :user_id,
-    },
-    :location_descriptions_admins => {
-      :location_descriptions => :location_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :location_descriptions_authors => {
-      :location_descriptions => :location_description_id,
-      :users         => :user_id,
-    },
-    :location_descriptions_editors => {
-      :location_descriptions => :location_description_id,
-      :users         => :user_id,
-    },
-    :location_descriptions_readers => {
-      :location_descriptions => :location_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :location_descriptions_versions => {
-      :location_descriptions => :location_description_id,
-    },
-    :location_descriptions_writers => {
-      :location_descriptions => :location_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :locations => {
-      :licenses      => :license_id,
-      :'location_descriptions.default' => :description_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-    },
-    :locations_versions => {
-      :locations     => :location_id,
-    },
-    :name_descriptions => {
-      :names         => :name_id,
-      :users         => :user_id,
-    },
-    :name_descriptions_admins => {
-      :name_descriptions => :name_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :name_descriptions_authors => {
-      :name_descriptions => :name_description_id,
-      :users         => :user_id,
-    },
-    :name_descriptions_editors => {
-      :name_descriptions => :name_description_id,
-      :users         => :user_id,
-    },
-    :name_descriptions_readers => {
-      :name_descriptions => :name_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :name_descriptions_versions => {
-      :name_descriptions => :name_description_id,
-    },
-    :name_descriptions_writers => {
-      :name_descriptions => :name_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :names => {
-      :licenses      => :license_id,
-      :'name_descriptions.default' => :description_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-      :'users.reviewer' => :reviewer_id,
-    },
-    :names_versions => {
-      :names         => :name_id,
-    },
-    :namings => {
-      :names         => :name_id,
-      :observations  => :observation_id,
-      :users         => :user_id,
-    },
-    :notifications => {
-      :names         => :obj,
-      :users         => :user_id,
-    },
-    :observations => {
-      :locations     => :location_id,
-      :names         => :name_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-      :'images.thumb_image' => :thumb_image_id,
-      :'image_votes.thumb_image' => [:thumb_image_id, :image_id],
-    },
-    :observations_projects => {
-      :observations  => :observation_id,
-      :projects      => :project_id,
-    },
-    :observations_species_lists => {
-      :observations  => :observation_id,
-      :species_lists => :species_list_id,
-    },
-    :projects => {
-      :users         => :user_id,
-      :user_groups   => :user_group_id,
-      :'user_groups.admin_group' => :admin_group_id,
-    },
-    :projects_species_lists => {
-      :projects      => :project_id,
-      :species_lists => :species_list_id,
-    },
-    :rss_logs => {
-      :locations     => :location_id,
-      :names         => :name_id,
-      :observations  => :observation_id,
-      :species_lists => :species_list_id,
-    },
-    :species_lists => {
-      :locations     => :location_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-    },
-    :user_groups_users => {
-      :user_groups   => :user_group_id,
-      :users         => :user_id,
-    },
-    :users => {
-      :images        => :image_id,
-      :licenses      => :license_id,
-      :locations     => :location_id,
-    },
-    :votes => {
-      :namings       => :naming_id,
-      :observations  => :observation_id,
-      :users         => :user_id,
-    },
+      comments: {
+          location_descriptions: :target,
+          locations: :target,
+          name_descriptions: :target,
+          names: :target,
+          observations: :target,
+          projects: :target,
+          species_lists: :target,
+          users: :user_id,
+      },
+      image_votes: {
+          images: :image_id,
+          users: :user_id,
+      },
+      images: {
+          users: :user_id,
+          licenses: :license_id,
+      },
+      images_observations: {
+          images: :image_id,
+          observations: :observation_id,
+      },
+      images_projects: {
+          images: :image_id,
+          projects: :project_id,
+      },
+      interests: {
+          locations: :target,
+          names: :target,
+          observations: :target,
+          users: :user_id,
+      },
+      location_descriptions: {
+          locations: :location_id,
+          users: :user_id,
+      },
+      location_descriptions_admins: {
+          location_descriptions: :location_description_id,
+          user_groups: :user_group_id,
+      },
+      location_descriptions_authors: {
+          location_descriptions: :location_description_id,
+          users: :user_id,
+      },
+      location_descriptions_editors: {
+          location_descriptions: :location_description_id,
+          users: :user_id,
+      },
+      location_descriptions_readers: {
+          location_descriptions: :location_description_id,
+          user_groups: :user_group_id,
+      },
+      location_descriptions_versions: {
+          location_descriptions: :location_description_id,
+      },
+      location_descriptions_writers: {
+          location_descriptions: :location_description_id,
+          user_groups: :user_group_id,
+      },
+      locations: {
+          licenses: :license_id,
+          :'location_descriptions.default' => :description_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+      },
+      locations_versions: {
+          locations: :location_id,
+      },
+      name_descriptions: {
+          names: :name_id,
+          users: :user_id,
+      },
+      name_descriptions_admins: {
+          name_descriptions: :name_description_id,
+          user_groups: :user_group_id,
+      },
+      name_descriptions_authors: {
+          name_descriptions: :name_description_id,
+          users: :user_id,
+      },
+      name_descriptions_editors: {
+          name_descriptions: :name_description_id,
+          users: :user_id,
+      },
+      name_descriptions_readers: {
+          name_descriptions: :name_description_id,
+          user_groups: :user_group_id,
+      },
+      name_descriptions_versions: {
+          name_descriptions: :name_description_id,
+      },
+      name_descriptions_writers: {
+          name_descriptions: :name_description_id,
+          user_groups: :user_group_id,
+      },
+      names: {
+          licenses: :license_id,
+          :'name_descriptions.default' => :description_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+          :'users.reviewer' => :reviewer_id,
+      },
+      names_versions: {
+          names: :name_id,
+      },
+      namings: {
+          names: :name_id,
+          observations: :observation_id,
+          users: :user_id,
+      },
+      notifications: {
+          names: :obj,
+          users: :user_id,
+      },
+      observations: {
+          locations: :location_id,
+          names: :name_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+          :'images.thumb_image' => :thumb_image_id,
+          :'image_votes.thumb_image' => [:thumb_image_id, :image_id],
+      },
+      observations_projects: {
+          observations: :observation_id,
+          projects: :project_id,
+      },
+      observations_species_lists: {
+          observations: :observation_id,
+          species_lists: :species_list_id,
+      },
+      projects: {
+          users: :user_id,
+          user_groups: :user_group_id,
+          :'user_groups.admin_group' => :admin_group_id,
+      },
+      projects_species_lists: {
+          projects: :project_id,
+          species_lists: :species_list_id,
+      },
+      rss_logs: {
+          locations: :location_id,
+          names: :name_id,
+          observations: :observation_id,
+          species_lists: :species_list_id,
+      },
+      species_lists: {
+          locations: :location_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+      },
+      user_groups_users: {
+          user_groups: :user_group_id,
+          users: :user_id,
+      },
+      users: {
+          images: :image_id,
+          licenses: :license_id,
+          locations: :location_id,
+      },
+      votes: {
+          namings: :naming_id,
+          observations: :observation_id,
+          users: :user_id,
+      },
   }
 
   # Return the default order for this query.
@@ -1013,20 +1013,20 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(
       Name, :names, 'observations.name_id',
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_objects_by_name(
       Name, :synonym_names, 'observations.name_id',
       :filter => :synonyms,
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_objects_by_name(
       Name, :children_names, 'observations.name_id',
       :filter => :all_children,
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_locations('observations',
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_objects_by_name(
       Project, :projects, 'images_projects.project_id',
@@ -1034,7 +1034,7 @@ class Query < AbstractQuery
     )
     initialize_model_do_objects_by_name(
       SpeciesList, :species_lists, 'observations_species_lists.species_list_id',
-      :join => {:images_observations => {:observations => :observations_species_lists}}
+      :join => {images_observations: {observations: :observations_species_lists}}
     )
     if params[:has_observation]
       add_join(:images_observations)
@@ -1054,7 +1054,7 @@ class Query < AbstractQuery
     )
     initialize_model_do_range(:quality, :vote_cache)
     initialize_model_do_range(:confidence, 'observations.vote_cache',
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_boolean(:ok_for_export,
       'images.ok_for_export IS TRUE',
@@ -1094,7 +1094,7 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_name(
       SpeciesList, :species_lists,
       'observations_species_lists.species_list_id',
-      :join => {:observations => :observations_species_lists}
+      :join => {observations: :observations_species_lists}
     )
     initialize_model_do_rank
     initialize_model_do_boolean(:is_deprecated,
@@ -1279,15 +1279,15 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(Name, :names,
       'observations.name_id',
-      :join => {:observations_species_lists => :observations}
+      :join => {observations_species_lists: :observations}
     )
     initialize_model_do_objects_by_name(Name, :synonym_names,
       'observations.name_id', :filter => :synonyms,
-      :join => {:observations_species_lists => :observations}
+      :join => {observations_species_lists: :observations}
     )
     initialize_model_do_objects_by_name(Name, :children_names,
       'observations.name_id', :filter => :all_children,
-      :join => {:observations_species_lists => :observations}
+      :join => {observations_species_lists: :observations}
     )
     initialize_model_do_locations
     initialize_model_do_objects_by_name(
@@ -2317,9 +2317,9 @@ class Query < AbstractQuery
 
         args2 = args.dup
         extend_join(args2) << case model_symbol
-        when :Image       ; {:images_observations => {:observations => :comments}}
-        when :Location    ; {:observations => :comments}
-        when :Name        ; {:observations => :comments}
+        when :Image       ; {images_observations: {observations: :comments}}
+        when :Location    ; {observations: :comments}
+        when :Name        ; {observations: :comments}
         when :Observation ; :comments
         end
         extend_where(args2)

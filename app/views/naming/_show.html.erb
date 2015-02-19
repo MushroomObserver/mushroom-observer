@@ -19,7 +19,7 @@
                     " | #{link_to(:show_observation_debug_consensus.t,
                                   controller: :observer, action: :recalc, id: observation.id)}".html_safe
                   end %>
-              <%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {:role => "save_votes"}}) : '' %>
+              <%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}}) : '' %>
             </div>
           </div>
         </div>
@@ -60,7 +60,7 @@
                     <td>
                       <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
                       <%= link_with_query(h(txt), {controller: :observer, action: :show_votes, id: naming.id},
-                                          {data: {:role => "open_popup", :id => naming.id}}) if naming.votes.any? %>
+                                          {data: {role: "open_popup", id: naming.id}}) if naming.votes.any? %>
                       <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
                     </td>
                     <td>
@@ -70,7 +70,7 @@
                              if check_permission(naming) ? (!@vote || @vote.value == 0) : true
                                menu = [Vote.no_opinion] + menu
                              end %>
-                          <%= select('vote', 'value', menu, {}, {index: naming.id, data: {:role => "change_vote", :id => naming.id}}) %>
+                          <%= select('vote', 'value', menu, {}, {index: naming.id, data: {role: "change_vote", id: naming.id}}) %>
                           <%= submit_tag(:show_namings_cast.l) if !can_do_ajax? %>
                       <% end %>
                     </td>

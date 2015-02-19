@@ -17,9 +17,9 @@ class API
 
     def query_params
       {
-        :where      => sql_id_condition,
-        :created_at => parse_time_range(:created_at),
-        :updated_at => parse_time_range(:updated_at),
+          where: sql_id_condition,
+          created_at: parse_time_range(:created_at),
+          updated_at: parse_time_range(:updated_at),
         # :login        => parse_strings(:login),
         # :name         => parse_strings(:name),
         # :locations    => parse_strings(:location),
@@ -34,20 +34,20 @@ class API
     def create_params
       @create_key = parse_string(:create_key)
       {
-        :login           => parse_string(:login, :limit => 80),
-        :name            => parse_string(:name, :limit => 80, :default => ''),
-        :email           => parse_email(:email, :limit => 80),
-        :locale          => parse_lang(:locale),
-        :notes           => parse_string(:notes, :default => ''),
-        :mailing_address => parse_string(:mailing_address, :default => ''),
-        :license         => parse_license(:license, :default => License.preferred),
-        :location        => parse_location(:location),
-        :image           => parse_image(:image),
-        :verified        => nil,
-        :admin           => false,
-        :created_here    => true,
-        :rows            => 5,
-        :columns         => 3,
+          login: parse_string(:login, :limit => 80),
+          name: parse_string(:name, :limit => 80, :default => ''),
+          email: parse_email(:email, :limit => 80),
+          locale: parse_lang(:locale),
+          notes: parse_string(:notes, :default => ''),
+          mailing_address: parse_string(:mailing_address, :default => ''),
+          license: parse_license(:license, :default => License.preferred),
+          location: parse_location(:location),
+          image: parse_image(:image),
+          verified: nil,
+          admin: false,
+          created_here: true,
+          rows: 5,
+          columns: 3,
       }
     end
 

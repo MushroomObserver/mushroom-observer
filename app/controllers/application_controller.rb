@@ -451,8 +451,8 @@ class ApplicationController < ActionController::Base
   # Create/update the auto-login cookie.
   def set_autologin_cookie(user)
     cookies["mo_user"] = {
-      :value => "#{user.id} #{user.auth_code}",
-      :expires => 1.month.from_now
+        value: "#{user.id} #{user.auth_code}",
+        expires: 1.month.from_now
     }
   end
 
@@ -890,7 +890,7 @@ class ApplicationController < ActionController::Base
       {}
     elsif query
       query.save if !query.id
-      {:q => query.id.alphabetize}
+      {q: query.id.alphabetize}
     else
       @query_params || {}
     end
@@ -1092,9 +1092,9 @@ class ApplicationController < ActionController::Base
 
       # Redirect to the show_object page appropriate for the new object.
       redirect_to(add_query_param({
-        :controller => object.show_controller,
-        :action => object.show_action,
-        :id => id
+                                      controller: object.show_controller,
+                                      action: object.show_action,
+                                      id: id
         }, query))
     end
   end
@@ -1301,9 +1301,9 @@ class ApplicationController < ActionController::Base
       if !link_all and (by.to_s == this_by)
         results << str
       else
-        results << [str, { :controller => query.model_class.show_controller,
-                           :action => query.model_class.index_action,
-                           :by => by }.merge(query_params)]
+        results << [str, {controller: query.model_class.show_controller,
+                          action: query.model_class.index_action,
+                          by: by}.merge(query_params)]
       end
     end
 
@@ -1314,9 +1314,9 @@ class ApplicationController < ActionController::Base
     else
       reverse_by = "reverse_#{this_by}"
     end
-    results << [str, { :controller => query.model_class.show_controller,
-                       :action => query.model_class.index_action,
-                       :by => reverse_by }.merge(query_params)]
+    results << [str, {controller: query.model_class.show_controller,
+                      action: query.model_class.index_action,
+                      by: reverse_by}.merge(query_params)]
 
     return results
   end

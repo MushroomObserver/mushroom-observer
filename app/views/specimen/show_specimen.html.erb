@@ -25,7 +25,7 @@
 
 <% @specimen.observations.each do |observation| %>
   <%= render(:partial => 'shared/matrix_box', :locals => {
-    :object => observation.rss_log
+                                                    object: observation.rss_log
   }) %>
 <% end %>
 

@@ -582,8 +582,8 @@ class Location < AbstractModel
     # Move over any remaining descriptions.
     for desc in old_loc.descriptions
       xargs = {
-        :id           => desc,
-        :set_location => self,
+          id: desc,
+          set_location: self,
       }
       desc.location_id = self.id
       desc.save

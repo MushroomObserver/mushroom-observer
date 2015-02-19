@@ -26,7 +26,7 @@
       add_tab_with_query(:comment_show_edit.t,
         :action => 'edit_comment', :id => @comment.id)
       add_tab_with_query(:comment_show_destroy.t,
-        { :action => 'destroy_comment', :id => @comment.id },
+        {action: 'destroy_comment', id: @comment.id},
         { data: { confirm: :are_you_sure.l } })
     end
   end
