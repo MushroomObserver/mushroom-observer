@@ -257,7 +257,7 @@ protected
 
     if self.title.to_s.blank?
       errors.add(:title, :validate_project_title_missing.t)
-    elsif self.title.binary_length > 100
+    elsif self.title.bytesize > 100
       errors.add(:title, :validate_project_title_too_long.t)
     end
   end

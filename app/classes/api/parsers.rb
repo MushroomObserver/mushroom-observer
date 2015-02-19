@@ -150,7 +150,7 @@ class API
     declare_parameter(key, :string, args)
     str = get_param(key) or return args[:default]
     if limit = args[:limit]
-      if str.binary_length > limit
+      if str.bytesize > limit
         raise StringTooLong.new(str, limit)
       end
     end

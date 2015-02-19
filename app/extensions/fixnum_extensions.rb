@@ -4,10 +4,9 @@
 #
 #  == Instance Methods
 #
-#  alphabetize::    Turn into base-62 "number" using upper and lowercase letters for digits over 9.
+#  alphabetize::    Turn into base-62 "number"
+#                   using upper and lowercase letters for digits over 9.
 #
-################################################################################
-
 class Fixnum
   # Turn into base-62 "number" using upper and lowercase letters for digits
   # over 9.  You can also pass in alternate alphabets to achieve any base.  The
@@ -25,17 +24,18 @@ class Fixnum
   #   #   42        -> 2A
   #   #   123456789 -> 75BCD15
   #
-  def alphabetize(alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-    str      = ''
+  BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+  def alphabetize(alphabet = BASE62)
+    str      = ""
     num      = self
     alphabet = alphabet.to_s
     len      = alphabet.length
     while num > 0
       x = num % len
       num = (num - x) / len
-      str = alphabet[x,1] + str
+      str = alphabet[x, 1] + str
     end
-    str = '0' if str == ''
-    return str
+    str == "" ? "0" : str
   end
 end
