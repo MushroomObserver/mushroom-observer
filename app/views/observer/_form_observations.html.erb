@@ -168,9 +168,11 @@
 
       <b><%= :form_observations_upload_images.t %>:</b>
 
-      <% if !can_do_multifile_upload? ##TODO: This needs to be redone, completely broken %>
-          <% if can_do_ajax? %>
-          <% end %>
+      <% if !can_do_multifile_upload? %>
+          <%= javascript_tag %(
+            var NEXT_IMAGE_INDEX = #{@images.length+1};
+            var CHANGED_DATES = [];
+          ) %>
           <div id="image_forms">
             <% i = 0 %>
             <% @images.push(@new_image) %>
@@ -182,10 +184,25 @@
           <div class='HelpNote'>
             <%= :form_observations_upload_help.tp %>
           </div>
-          <% if can_do_ajax? %>
-              <%= button_tag(:form_observations_upload_another.t, {onclick: 'image_new()', id: 'new_image_button'}) %>
-              <% #javascript_include("single_image_uploader") %>
-          <% end %>
+          <input id="new_image_button" onclick="image_new();" type="button" value="<%=:form_observations_upload_another.t%>" />
+          <% javascript_include("single_image_uploader") %>
+          <%= javascript_tag %(
+            var x = String.fromCharCode(60);
+            var y = String.fromCharCode(93);
+            var IMAGE_FORM = "#{
+              i = @images.length - 1 rescue 0
+              str = render(:partial => 'form_image', :locals => { index: i })
+              str.gsub!("image_#{i}_", 'image_XXX_')
+              str.gsub!("image_id_#{i}", 'image_id_XXX')
+              str.gsub!("(#{i})", '(XXX)')
+              str.gsub!("[#{i}]", '[XXX]')
+              str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+              str.sub!("checked=\"checked\" ", '')
+              str = escape_javascript(str)
+              str.gsub('<', '"+x+"')
+              str.gsub(']', '"+y+"')
+            }";
+          ) %>
       <% end %>
 
       <!--MULTIPLE IMAGE UPLOADS -->
@@ -214,7 +231,7 @@
             <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
                           :disabled => @observation.user != @user && !project.is_member?(@user)) %>
             <label for="<%= "project_id_#{project.id}"%>">
-              project_link(project)
+              <%= project_link(project) %>
             </label>
           </div>
       <% end %>
@@ -228,11 +245,11 @@
         </div>
     <% for list in @lists %>
           <div class="col-xs-12 form-inline">
-            <label for="<%= "list_id_#{list.id}"%>">
-              species_list_link(list)
-            </label>
             <%= check_box("list", "id_#{list.id}", :checked => @list_checks[list.id],
                       :disabled => !check_permission(list)) %>
+            <label for="<%= "list_id_#{list.id}"%>">
+              <%= species_list_link(list) %>
+            </label>
           </div>
     <% end %>
     </div>
