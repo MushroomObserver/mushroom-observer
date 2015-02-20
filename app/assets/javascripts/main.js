@@ -5,7 +5,7 @@ jQuery(document).ready(function () {
     if (!getCookie("hideBanner")) { //cookie to hide banner for 1 day
         jQuery('#message_banner').show();
     }
-    $('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
+    jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
 
     jQuery('[data-toggle="offcanvas"]').click(function () {
         jQuery('.row-offcanvas').toggleClass('active');
@@ -22,7 +22,7 @@ jQuery(document).ready(function () {
 
     jQuery('[data-toggle="theater"]').click(function (e){
         e.preventDefault();
-        var img_src = $(this).data().image;
+        var img_src = jQuery(this).data().image;
         jQuery('.img-theater').css('top', jQuery(document).scrollTop())
         $('.img-theater').show();
         $('#img_append_target').html('<img src="{{src}}" class="center-block" style="height: {{h}}; width: auto;"><//img>'

@@ -959,6 +959,7 @@
   app_current_user: Current User
   app_comments_for_you: Comments for You
   app_your_observations: Your Observations
+  app_your_lists: Your Lists
   app_your_interests: Your Interests
   app_your_summary: Your Summary
   app_preferences: Preferences

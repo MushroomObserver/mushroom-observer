@@ -237,6 +237,21 @@ class AmateurTest < IntegrationTestCase
     get('image/edit_image/1')
   end
 
+  # ------------------------------------------------------------------------
+  #  Tests to make sure that the proper links are rendered  on the  home page
+  #  when a user is logged in.
+  #  test_user_dropdown_avaiable:: tests for existence of dropdown bar & links
+  #
+  # ------------------------------------------------------------------------
+
+  def test_user_dropdown_avaiable
+    session = login('dick')
+    session.get('/')
+    session.assert_tag(tag: "li", attributes: {id: "user_drop_down"})
+    links = session.css_select("li#user_drop_down a")
+    assert_equal(links.length, 7)
+  end
+
   # -------------------------------------------------------------------------
   #  Need integration test to make sure session and actions are all working
   #  together correctly.

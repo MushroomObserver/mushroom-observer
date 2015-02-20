@@ -61,13 +61,14 @@
                       {class: "glyphicon glyphicon-cog", title: :app_preferences.t,
                        data: {toggle: "tooltip", placement: "left"}      }) %>
         </li>
-        <li class="dropdown">
+        <li id="user_drop_down" class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false" style="color:black">
             <%= h(@user.login) %>
             <span class="caret"></span>
           </a>
           <ul class="dropdown-menu" role="menu">
             <li><%= link_to(:app_your_observations.t, {controller: 'observer', action: 'observations_by_user', id: @user.id}, {class: ""}) %></li>
+            <li><%= link_to(:app_your_lists.t, {controller: :species_list, action: :species_lists_by_user, id: @user.id}, {class: ""} ) %></li>
             <li><%= link_to(:app_your_interests.t, {controller: 'interest', action: 'list_interests'}, {class: ""}) %></li>
             <li><%= link_to(:app_your_summary.t, {controller: 'observer', action: 'show_user', id: @user.id}, {class: ""}) %></li>
             <li><%= link_to(:app_preferences.t, {controller: 'account', action: 'prefs'}, {class: ""}) %></li>
