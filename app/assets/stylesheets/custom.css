@@ -12,6 +12,21 @@ html, body {
  * --------------------------------------------------
  */
 
+
+@media(max-width:1199px){
+    .container {
+        padding-right: 0;
+        padding-left: 0;
+        margin-right: auto;
+        margin-left: auto;
+        width: auto !important;
+    }
+    .row {
+        margin-right: 0;
+    }
+
+}
+
 .hidden-overflow-x {
     overflow-x: hidden !important;
 }
