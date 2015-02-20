@@ -1,19 +1,6 @@
-var x = String.fromCharCode(60);
-var y = String.fromCharCode(93);
-
-var IMAGE_FORM = <%="#{
-  i = @images.length - 1 rescue 0
-  str = render(:partial => 'form_image', :locals => { index: i })
-  str.gsub!("image_#{i}_", 'image_XXX_')
-  str.gsub!("image_id_#{i}", 'image_id_XXX')
-  str.gsub!("(#{i})", '(XXX)')
-  str.gsub!("[#{i}]", '[XXX]')
-  str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
-  str.sub!("checked=\"checked\" ", '')
-  str = escape_javascript(str)
-  str.gsub('<', '"+x+"')
-  str.gsub(']', '"+y+"')
-}"%>;
+function changed_date(i) {
+  CHANGED_DATES[i] = true;
+}
 
 function auto_image_new(i) {
   if (NEXT_IMAGE_INDEX == i+1) image_new();
