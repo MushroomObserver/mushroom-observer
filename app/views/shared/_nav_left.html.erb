@@ -59,9 +59,12 @@
   <div class="list-group-item disabled bold">
     <%= :app_species_list.t %>
   </div>
-  <%= link_to(:app_create_list.t, {controller: 'species_list', action: 'name_lister'}, {class: "list-group-item indent"} ) %>
-  <%= link_to(:app_sort_by_date_spl.t, {controller: 'species_list', action:'list_species_lists'}, {class: "list-group-item indent"}) %>
-  <%= link_to(:app_sort_by_title.t, {controller:'species_list', action:'species_lists_by_title'}, {class: "list-group-item indent"}) %>
+  <% unless @user.nil? %>
+      <%= link_to(:app_your_lists.t, {controller: :species_list, action: :species_lists_by_user, id: @user.id}, {class: "list-group-item indent"} ) %>
+  <% end%>
+  <%= link_to(:app_create_list.t, {controller: :species_list, action: :name_lister}, {class: "list-group-item indent"} ) %>
+  <%= link_to(:app_sort_by_date_spl.t, {controller: :species_list, action: :list_species_lists}, {class: "list-group-item indent"}) %>
+  <%= link_to(:app_sort_by_title.t, {controller: :species_list, action: :species_lists_by_title}, {class: "list-group-item indent"}) %>
 
   <div class="list-group-item disabled bold">
     <%= :app_other.t %>
