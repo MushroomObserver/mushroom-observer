@@ -30,7 +30,7 @@ class LurkerTest < IntegrationTestCase
     assert_template('name/show_name')
 
     # Take a look at the occurrence map.
-    click(:label => 'Occurrence Map', :in => :tabs)
+    click(:label => 'Occurrence Map', :in => :left_tabs)
     assert_template('name/map')
 
     # Check out a few links from left-hand panel.
@@ -151,7 +151,7 @@ class LurkerTest < IntegrationTestCase
     get('/name/map/1')
 
     # Get a list of locations shown on map. (One defined, one undefined.)
-    click(:label => 'Show Locations', :in => :tabs)
+    click(:label => 'Show Locations', :in => :left_tabs)
     assert_template('location/list_locations')
 
     # Click on the defined location.
@@ -160,25 +160,26 @@ class LurkerTest < IntegrationTestCase
     assert_template('location/show_location')
 
     # Get a list of observations from there.  (Several so goes to index.)
-    click(:label => 'Observations at this Location', :in => :tabs)
+    click(:label => 'Observations at this Location', :in => :left_tabs)
     assert_template('observer/list_observations')
     save_results = get_links('div.results a[href^=?]', /\/\d+/)
 
     # Try sorting differently.
-    click(:label => 'Date', :in => :tabs)
+    click(:label => 'User', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
-    click(:label => 'User', :in => :tabs)
+    click(:label => 'Date', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
-    click(:label => 'Reverse Order', :in => :tabs)
+    click(:label => 'Reverse Order', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
-    click(:label => 'Name', :in => :tabs)
+    click(:label => 'Name', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
     save_results = results
     query_params = parse_query_params(save_results.first)
+
 
     # Go to first observation, and try stepping back and forth.
     click(:href => /^\/\d+\?/, :in => :results)
@@ -206,6 +207,7 @@ class LurkerTest < IntegrationTestCase
     assert_equal(save_results, results,
                  "Went to show_obs, screwed around, then back to index. " +
                  "But the results were not the same when we returned.")
+
 
 
   end
