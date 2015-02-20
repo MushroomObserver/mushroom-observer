@@ -35,7 +35,7 @@
       <span>
       <%= :sort_by_header.t %>
         </span>
-        <div class="btn-group btn-group-xs" role="group">
+        <div id="sorts" class="btn-group btn-group-xs" role="group">
           <% @sorts.each do |title, action| %>
               <%= link_with_query(title, action, {class: "btn btn-default"}) unless action.nil?%>
               <%= link_with_query(title, {}, {class: "btn btn-default active", disabled: true}) if action.nil?%>

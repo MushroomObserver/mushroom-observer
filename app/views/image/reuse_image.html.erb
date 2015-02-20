@@ -1,0 +1,61 @@
+<%
+   tag_params = add_query_param({action: :reuse_image, mode: @mode})
+   
+   if @mode == :observation
+       @title = :image_reuse_title.t(:name => @observation.unique_format_name)
+       obs_id = @observation.id
+       tag_params[:obs_id] = obs_id
+       new_tab_set do
+       add_tab_with_query(:show_object.t(:type => :observation),
+                            :controller => 'observer', :action => 'show_observation',
+                            :id => obs_id)
+       add_tab_with_query(:image_reuse_edit.t, :controller => 'observer',
+                            :action => 'edit_observation', :id => obs_id)
+       end
+   elsif @mode == :glossary_term
+   @title = :image_reuse_title.t(:name => @glossary_term.unique_format_name)
+   glossary_term_id = @glossary_term.id
+   tag_params[:glossary_term_id] = glossary_term_id
+   new_tab_set do
+   add_tab_with_query(:show_object.t(:type => :glossary_term), :controller => 'glossary',
+                        :action => 'show_glossary_term', :id => glossary_term_id)
+   add_tab_with_query(:edit_glossary_term.t,
+                        :controller => 'glossary', :action => 'edit_glossary_term',
+                        :id => glossary_term_id)
+   end
+   else
+   @title = :image_reuse_title.t(:name => @user.legal_name)
+   end
+%>
+
+<%= form_tag(tag_params) do %>
+    
+    <p>
+  <label for="img_id"><%= :image_reuse_id.t %>:</label>
+  <%= text_field_tag(:img_id, "", size: 8, autofocus: true) %>&nbsp;
+  &nbsp;<%= submit_tag(:image_reuse_reuse.l) %>
+  </p>
+    <div class="HelpNote"><%= :image_reuse_id_help.tp %></div>
+    
+    <p><big>
+  <%= link_with_query(
+                @all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
+                :mode => @mode, :obs_id => obs_id, :glossary_term_id => glossary_term_id,
+                :all_users => (@all_users ? 0 : 1)) %>
+  </big></p><br/>
+    
+    <%= paginate_block(@pages) do %>
+        <div class="row">
+        <% @objects.each do |image| %>
+            <div class="col-sm-4">
+            <%= thumbnail(image, link: add_query_param({ :action => 'reuse_image',
+                                                           :mode => @mode,
+                                                           :obs_id => obs_id,
+                                                           :glossary_term_id => glossary_term_id,
+                                                           :img_id => image.id}),
+                            original: true) %>
+            </div>
+            <% end %>
+        </div>
+        <% end %>
+    <% end %>
