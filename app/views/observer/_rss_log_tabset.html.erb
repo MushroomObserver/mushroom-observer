@@ -1,7 +1,7 @@
 <%=form_tag(add_query_param(:action => 'index_rss_log'))%>
-<div class="input-group">
-  <%=content_tag(:span, :rss_show.t, class: "input-group-addon border-radius-none")%>
-  <span class="input-group-addon">
+<div class="btn-group pad-bottom">
+  <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
+  <span class="btn btn-default btn-sm <%= " active" if @types == ['all']%>">
  <%= if @types == ['all']
        :rss_all.t
      else
@@ -10,9 +10,10 @@
      end%>
         </span>
   <% RssLog.all_types.map(&:to_s).each do |type|
-    checked = @types.include?(type) || @types == ['all'] %>
-          <span class="input-group-addon">
-          <%=check_box_tag("show_#{type}", '1', checked)%>
+    checked = @types.include?(type) || @types == ['all']
+    %>
+          <span class="btn btn-default btn-sm <%=" active" if checked%>" data-toggle="checkbox">
+          <%=check_box_tag("show_#{type}", '1', checked, style: "margin:0")%>
             <% if @types == [type] %>
                 <%=content_tag(:span, :rss_one.t(:type => type.to_sym))%>
             <%else%>
@@ -21,9 +22,7 @@
             <%end%>
           </span>
   <%end%>
-
-      <span class="input-group-btn border-radius-none">
-        <%=submit_tag(:SUBMIT.t, class: "btn btn-default")%>
-      </span>
-</div><!-- /input-group -->
+    <%=submit_tag(:SUBMIT.t, class: "btn btn-default btn-sm bold")%>
+</div>
 </form>
+<% javascript_include("rss_feed_select_helper")%>
