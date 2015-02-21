@@ -32,9 +32,6 @@ module MushroomObserver
     # Tells rails not to generate controller-specific css and js stubs.
     config.generators.assets = false
 
-    # Change this version if you want to expire all your assets at once.
-    config.assets.version = "1.0"
-
     # This instructs ActionView how to mark form fields which have an error.
     # I just change the CSS class to "has_error", which gives it a red border.
     # This is superior to the default, which encapsulates the field in a div,
