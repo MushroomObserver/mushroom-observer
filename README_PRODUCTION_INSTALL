@@ -76,11 +76,12 @@ root> vi /etc/rc.local
 
 # Install most of the modules that we will need (except ruby).
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
-          libcurl4-openssl-dev libssl-dev git nginx libyaml-dev \
+          libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev
 
 # Install rvm and ruby.
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=1.9.3
+root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.1.5
 root> gpasswd -a mo rvm
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
@@ -149,6 +150,17 @@ root> update-rc.d unicorn defaults
 
 --------------------------------------------------------------------------------
 
+# If installing database locally:
+root> mysql -u root -p
+  create database mo_production;
+  create user 'mo'@'localhost' identified by '$DB_PASSWORD';
+  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
+  exit
+root> scp $SNAPSHOT_PATH/checkpoint.gz .
+root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production
+
+--------------------------------------------------------------------------------
+
 # Test basic system now.
 root> su mo
 mo> env | grep RAILS_ENV
@@ -156,6 +168,7 @@ mo> env | grep RAILS_ENV
 mo> bundle install
 mo> rake db:migrate
 mo> rake lang:update
+mo> rake assets:precompile
 mo> rails server
 # Watch for errors in any of these!!
 
