@@ -67,10 +67,15 @@ root> mysql -u root -p
   create user 'mo'@'localhost' identified by '$DB_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
   grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
+  exit
 root> scp $SNAPSHOT_PATH/checkpoint.gz .
-root> scp $SNAPSHOT_PATH/clean.sql .
 root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production
+
+# If cleaning the database.
+root> scp $SNAPSHOT_PATH/clean.sql .
 root> cat clean.sql | mysql -u mo -p'$DB_PASSWORD' mo_production
+
+# Enable remote access.
 root> vi /etc/mysql/my.cnf
   # Comment out this line to allow remote connections.
   # bind-address = 127.0.0.1

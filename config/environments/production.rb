@@ -110,7 +110,7 @@ MushroomObserver::Application.configure do
   # Compress JavaScripts and CSS
   config.assets.compress = true
   config.assets.js_compressor = :uglifier
-  # config.assets.css_compressor = :sass
+  config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
   config.assets.compile = false
@@ -151,14 +151,17 @@ MushroomObserver::Application.configure do
   # already added.
   # Precompile stuff aside from application.js, application.css, all images.
   config.assets.precompile += %w(
+
     api_key.js
     edit_location.js
     multi_image_upload.js
     name_lister.js
     pivotal.js
     semantic_venacular.js
+    single_image_uploader.js
     translations.js
     vote_popup.js
+
     Admin.css
     Agaricus.css
     Amanita.css
@@ -166,6 +169,7 @@ MushroomObserver::Application.configure do
     Cantharellaceae.css
     Hygrocybe.css
     semantic_vernacular.css
+
   ) if config.assets && config.assets.precompile
 
   # Ignore bad email addresses and do not raise email delivery errors.
