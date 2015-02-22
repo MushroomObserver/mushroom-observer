@@ -1,47 +1,43 @@
 <%
   ## TODO: Rename (RSS box?)
-  # Requires local variable :object => rss_log or image or user instance.
+  # Requires local variable object: RssLog, Observation, Image, etc. instance.
   presenter = MatrixBoxPresenter.new(object, @view)
 %>
 
 <% if presenter %>
-    <div class="list-group" style="min-height: 200px;">
-      <div class="list-group-item" style="min-height: 57px; height: 57px;">
-        <div class="row">
-          <div class="col-xs-12">
-            <%= presenter.title %>
-            <small class="rss-fancy-time"><%= presenter.fancy_time %></small>
-          </div>
-          <div class="col-xs-12">
-            <small style="text-overflow: ellipsis; white-space: nowrap;">
-              <% unless presenter.when.blank? %>
-                  <%= presenter.when %>: <%= presenter.who %>
-              <% end %>
-            </small>
-
-          </div>
+  <div class="list-group" style="min-height: 200px;">
+    <div class="list-group-item" style="min-height: 57px; height: 57px;">
+      <div class="row">
+        <div class="col-xs-12">
+          <%= presenter.title %>
+          <small class="rss-fancy-time"><%= presenter.fancy_time %></small>
         </div>
-
-
+        <div class="col-xs-12">
+          <small style="text-overflow: ellipsis; white-space: nowrap;">
+            <% unless presenter.when.blank? %>
+              <%= presenter.when %>: <%= presenter.who %>
+            <% end %>
+          </small>
+        </div>
       </div>
-      <div class="list-group-item rss-box-details">
-        <div class="row">
-          <div class="col-xs-12">
-        <div class="thumbnail-container" style="min-height: 30px">
-          <%= presenter.thumbnail %>
-        </div>
-        <div class="rss-what">
-          <%= presenter.what %>
-        </div>
-        <div class="rss-detail">
-          <%= presenter.detail %>
-        </div>
-        <div class="rss-where">
-          <small><strong><%= presenter.where %></strong></small>
-        </div>
+    </div>
+    <div class="list-group-item rss-box-details">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="thumbnail-container" style="min-height: 30px">
+            <%= presenter.thumbnail %>
+          </div>
+          <div class="rss-what">
+            <%= presenter.what %>
+          </div>
+          <div class="rss-detail">
+            <%= presenter.detail %>
+          </div>
+          <div class="rss-where">
+            <small><strong><%= presenter.where %></strong></small>
           </div>
         </div>
       </div>
     </div>
-
+  </div>
 <% end %>

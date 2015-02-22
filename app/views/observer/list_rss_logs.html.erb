@@ -1,29 +1,28 @@
 <%
-   @title = :rss_log_title.t.nowrap
-   @full_width_tab_set = render(:partial => "rss_log_tabset")
-   new_tab_set(@links)
-   flash_error(@error) if @error and (!@objects or @objects.empty?)
+  @title = :rss_log_title.t.nowrap
+  @full_width_tab_set = render(:partial => "rss_log_tabset")
+  new_tab_set(@links)
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
+
 <div class="row">
   <div class="col-xs-12">
     <div class="text-center">
-        <%= pagination_numbers(@pages) %>
+      <%= pagination_numbers(@pages) %>
     </div>
   </div>
 </div>
 <div class="row results">
   <% @objects.each do |rss_log| %>
-      <div class="col-sm-4">
-        <%= render(:partial => 'shared/matrix_box', :locals => {
-                                                          object: rss_log
-                                                  }) %>
-      </div>
+    <div class="col-sm-4">
+      <%= render(partial: "shared/matrix_box", locals: {object: rss_log}) %>
+    </div>
   <% end %>
 </div>
 <div class="row">
   <div class="col-xs-12">
     <div class="text-center">
-        <%= pagination_numbers(@pages) %>
+      <%= pagination_numbers(@pages) %>
     </div>
   </div>
 </div>
