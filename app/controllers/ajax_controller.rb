@@ -48,7 +48,7 @@ class AjaxController < ApplicationController
   end
 
   def get_session_user!
-    get_session_user or raise "Must be logged in."
+    User.current = get_session_user or raise "Must be logged in."
   end
 
   # Used by unit tests.
@@ -221,16 +221,16 @@ class AjaxController < ApplicationController
   end
 
   def cast_image_vote(id, value)
-    @image = Image.safe_find(id)
+    image = Image.safe_find(id)
     if value != '0' and not Image.validate_vote(value)
       raise "Invalid value for vote/image: #{value.inspect}"
-    elsif not @image
+    elsif not image
       raise "Invalid id for vote/image: #{id.inspect}"
     else
       value = value == '0' ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == :yes)
-      @image.change_vote(@user, value, anon)
-      render(:partial => 'image/image_vote_links')
+      image.change_vote(@user, value, anon)
+      render(partial: "image/image_vote_links", locals: {image: image})
     end
   end
 
