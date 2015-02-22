@@ -8,10 +8,10 @@
 
 
 <div class="row">
-  <div class="col-xs-8">
+  <div class="col-sm-8">
       <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t) %>
   </div>
-  <div class="col-xs-4">
+  <div class="col-sm-4">
     <strong class="pull-right pad-top">
       <%= link_with_query(:"show_comments_add_comment".t, {controller: :comment,
                             action: :add_comment, id: object.id, type: object.class.name}) if controls

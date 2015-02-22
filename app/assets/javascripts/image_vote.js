@@ -18,9 +18,9 @@ jQuery(document).ready(function () {
         alert(response.responseText);
       },
       success: function(text) {
-        var div = jQuery("#image_vote_links_" + id).parent();
+        var div = jQuery("#image_vote_links_" + id);
         div.html(text);
-        var newVotePercentage = div.find('span.data_container').data('percentage');
+        var newVotePercentage = div.parent().find('span.data_container').data('percentage');
         jQuery("#vote_meter_bar_" + id).css('width', newVotePercentage + "%")
         if ($show_votes_container && $quality_vote_container) { //updates the side bar if on actual image page.
           $show_votes_container.load(window.location + " #show_votes_table");

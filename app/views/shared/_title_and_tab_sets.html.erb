@@ -15,16 +15,13 @@
       <%= @full_width_tab_set %>
     </div>
 <% else %>
-    <div id="left_tabs" class="col-sm-3" style="text-align: left;">
-      <%= @tabsets[:left] if @tabsets %>
-    </div>
-    <div class="col-sm-6" id="title">
+    <div class="col-sm-8" id="title">
       <%= content_tag(:h3, @title, class: "text-center", style: "margin-top: 5px;") %>
       <div class="text-center" style="margin-top: -5px; margin-bottom: 5px;">
         <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
       </div>
     </div>
-    <div id="right_tabs" class="col-sm-3" style="text-align: right">
+    <div id="right_tabs" class="col-sm-4" style="text-align: right">
       <%= @tabsets[:right] if @tabsets %>
     </div>
 <% end %>

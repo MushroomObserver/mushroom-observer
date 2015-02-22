@@ -1,13 +1,17 @@
 <% @title = :intro_title.t.nowrap %>
 
-<%= :intro_purpose.tp %>
+<div class="row">
+  <div class="col-lg-7 col-md-8 col-sm-8">
+    <%= :intro_purpose.tp %>
 
-<%= :intro_image_sharing.tp %>
+    <%= :intro_image_sharing.tp %>
 
-<%= :intro_source_code.tp(
-  :repo => MO.code_repository,
-  :todo_list => "/pivotal",
-  :readme => "#{MO.code_repository}/developer-startup"
-) %>
+    <%= :intro_source_code.tp(
+                :repo => MO.code_repository,
+                :todo_list => "/pivotal",
+                :readme => "#{MO.code_repository}/developer-startup"
+        ) %>
 
-<%= :intro_note.tp %>
+    <%= :intro_note.tp %>
+  </div>
+</div>

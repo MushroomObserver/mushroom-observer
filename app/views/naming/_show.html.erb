@@ -4,30 +4,27 @@
    any_names = observation.namings && observation.namings.length > 0
 %>
 <%= form_tag(add_query_param(controller: :observer, action: :cast_votes, id: observation.id)) do %>
-
-    <!--TOP LINKS-->
-    <div class="list-group">
-      <div class="list-group-item default">
+    <div class="list-group push-down">
+      <!--TABLE OF NAMES-->
+      <div class="list-group-item">
         <div class="row">
-          <div class="col-sm-6">
-            <%= any_names ? :show_namings_proposed_names.t + ':' : :show_namings_no_names_yet.t %>
+          <div class="col-sm-8">
+            <%= content_tag(:h4, any_names ? :show_namings_proposed_names.t : :show_namings_no_names_yet.t) %>
           </div>
-          <div class="col-sm-6">
-            <div class="pull-right">
-              <%= link_with_query(:show_namings_propose_new_name.t, {controller: :naming, action: :create, id: observation.id}, {class: "bold"}) %>
+          <div class="col-sm-4">
+            <strong class="pull-right">
+              <%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}, class: "btn btn-default"}) : '' %>
               <%= if is_in_admin_mode?
                     " | #{link_to(:show_observation_debug_consensus.t,
                                   controller: :observer, action: :recalc, id: observation.id)}".html_safe
                   end %>
-              <%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}}) : '' %>
-            </div>
+            </strong>
           </div>
         </div>
       </div>
-      <!--TABLE OF NAMES-->
       <% if any_names %>
-          <div class="list-group-item kill-padding">
-            <table class="table table-responsive table-striped" style="margin-bottom: 0">
+          <div class="list-group-item kill-padding" style="border-top: none;">
+            <table class="table table-responsive" style="margin-bottom: 0">
               <tr class="small">
                 <th><%= :show_namings_proposed_name.t %></th>
                 <th><%= :show_namings_user.t %></th>
@@ -38,52 +35,9 @@
               </tr>
               <tbody>
               <% observation.namings.sort_by(&:created_at).each do |naming| %>
-
-                  <!--ONE NAME-->
-                  <tr>
-                    <td>
-                      <div>
-                        <%= link_with_query(naming.format_name.t, controller: :name, action: :show_name, id: naming.name) %>
-                      </div>
-                      <div>
-                        <% if check_permission(naming) %>
-                            (<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %>
-                            |
-                            <%= link_with_query(:DESTROY.t, {controller: :naming, action: :destroy, id: naming.id},
-                                                {data: {confirm: :are_you_sure.l}}) %>)
-                        <% end %>
-                      </div>
-                    </td>
-                    <td>
-                      <strong><%= user_link(naming.user, naming.user.login) %></strong>
-                    </td>
-                    <td>
-                      <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
-                      <%= link_with_query(h(txt), {controller: :observer, action: :show_votes, id: naming.id},
-                                          {data: {role: "open_popup", id: naming.id}}) if naming.votes.any? %>
-                      <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
-                    </td>
-                    <td>
-                      <% if logged_in %>
-                          <% @vote = @votes[naming.id]
-                             menu = Vote.confidence_menu
-                             if check_permission(naming) ? (!@vote || @vote.value == 0) : true
-                               menu = [Vote.no_opinion] + menu
-                             end %>
-                          <%= select('vote', 'value', menu, {}, {index: naming.id, data: {role: "change_vote", id: naming.id}}) %>
-                          <%= submit_tag(:show_namings_cast.l) if !can_do_ajax? %>
-                      <% end %>
-                    </td>
-                    <td>
-                      <%= image_tag("eye3.png") if observation.is_owners_favorite?(naming) %>
-                      <%= image_tag("eyes3.png") if naming == consensus %>
-                    </td>
-                  </tr>
-
-                  <!--REASON-->
                   <% Textile.register_name(naming.name) %>
                   <tr>
-                    <td colspan="7">
+                    <td colspan="7" style="border: 0">
                       <% naming.get_reasons.each do |reason| %>
                           <% if reason.used? %>
                               <div>
@@ -96,15 +50,64 @@
                       <% end %>
                     </td>
                   </tr>
+                  <!--ONE NAME-->
+                  <tr>
+                    <td style="border:0">
+                      <div>
+                        <%= link_with_query(naming.format_name.t, controller: :name, action: :show_name, id: naming.name) %>
+                      </div>
+                      <div>
+                        <% if check_permission(naming) %>
+                            (<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %>
+                            |
+                            <%= link_with_query(:DESTROY.t, {controller: :naming, action: :destroy, id: naming.id},
+                                                {data: {confirm: :are_you_sure.l}}) %>)
+                        <% end %>
+                      </div>
+                    </td>
+                    <td style="border:0">
+                      <strong><%= user_link(naming.user, naming.user.login) %></strong>
+                    </td>
+                    <td style="border:0">
+                      <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
+                      <%= link_with_query(h(txt), {controller: :observer, action: :show_votes, id: naming.id},
+                                          {data: {role: "open_popup", id: naming.id}}) if naming.votes.any? %>
+                      <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
+                    </td>
+                    <td style="border:0">
+                      <% if logged_in %>
+                          <% @vote = @votes[naming.id]
+                             menu = Vote.confidence_menu
+                             if check_permission(naming) ? (!@vote || @vote.value == 0) : true
+                               menu = [Vote.no_opinion] + menu
+                             end %>
+                          <%= select('vote', 'value', menu, {}, {index: naming.id, data: {role: "change_vote", id: naming.id}}) %>
+                          <%= submit_tag(:show_namings_cast.l) if !can_do_ajax? %>
+                      <% end %>
+                    </td>
+                    <td style="border:0">
+                      <%= image_tag("eye3.png") if observation.is_owners_favorite?(naming) %>
+                      <%= image_tag("eyes3.png") if naming == consensus %>
+                    </td>
+                  </tr>
+
+                  <!--REASON-->
+
 
               <% end %>
               </tbody>
             </table>
           </div>
-
-
-          <!--HELP TEXT AND EYES-->
+      <% end # any_names?   %>
+           <!--HELP TEXT AND EYES-->
           <div class="list-group-item">
+            <div class="row">
+              <div class="col-xs-12">
+                <strong class="pull-right">
+                  <%= link_with_query(:show_namings_propose_new_name.t, {controller: :naming, action: :create, id: observation.id}) %>
+                </strong>
+              </div>
+            </div>
             <p class="help-block">
               <% if !logged_in %>
                   <%= :show_namings_please_login.t %>
@@ -127,8 +130,8 @@
             </div>
           </div>
 
-      <% end # any_names?  %>
-<% end # form  %>
+
+<% end # form   %>
 </div>
 <!--VOTE POPUPS-->
 <div class="row">

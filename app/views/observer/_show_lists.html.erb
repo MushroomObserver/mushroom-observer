@@ -2,14 +2,17 @@
    lists = observation.species_lists
 %>
 <% if !lists.empty? %>
-    <div class="list-group-item default">
-      <%= :show_lists_header.t %>:
-    </div>
-    <div class="list-group-item">
-      <table class="table table-responsive table-striped">
+    <div class="list-group">
+      <div class="list-group-item">
+        <h4>
+          <%= :show_lists_header.t %>
+        </h4>
+      </div>
+    <div class="list-group-item kill-padding">
+      <table class="table table-responsive" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
         <% lists.each do |list| %>
             <tr>
-              <td>
+              <td style="border-top:0">
                 <%= link_to(list.format_name.t, :controller => 'species_list',
                             :action => 'show_species_list', :id => list.id) %>
                     [<%= link_to(:REMOVE.t, {controller: 'species_list',
@@ -21,6 +24,7 @@
             </tr>
         <% end %>
       </table>
+    </div>
     </div>
 <% end %>
 

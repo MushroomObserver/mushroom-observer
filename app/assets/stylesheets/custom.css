@@ -7,6 +7,11 @@ html, body {
     font-size: 13px;
 }
 
+a {
+    color: #2050E0;
+    font-weight: bold;
+}
+
 /*
  * Off Canvas
  * --------------------------------------------------
@@ -84,7 +89,8 @@ table.table-compact tr td {
 
 
 #banner {
-    padding:0;
+    padding-top:5px;
+    padding-bottom:5px;
     font: small-caps 25px/25px "Times New Roman", serif;
     text-align: center;
     background-color: #cc2616;
@@ -170,9 +176,7 @@ body {
     background: rgba(239, 239, 239, 0.34);
 }
 
-a {
-    color: #205080
-}
+
 
 .img-theater {
     position: absolute;
@@ -248,6 +252,9 @@ span.input-group-addon {
 }
 
 .vote-meter {
+    margin-left: auto;
+    margin-right: auto;
+    width: 120px;
     height: 7px;
     margin-bottom: 4px;
     overflow: hidden;

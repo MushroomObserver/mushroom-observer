@@ -26,11 +26,11 @@ class LurkerTest < IntegrationTestCase
     go_back
 
     # Go back to observation and click on "About...".
-    click(:label => 'About', :href => /show_name/)
+    click(:href => /show_name/)
     assert_template('name/show_name')
 
     # Take a look at the occurrence map.
-    click(:label => 'Occurrence Map', :in => :left_tabs)
+    click(:label => 'Occurrence Map', :in => :right_tabs)
     assert_template('name/map')
 
     # Check out a few links from left-hand panel.
@@ -151,7 +151,7 @@ class LurkerTest < IntegrationTestCase
     get('/name/map/1')
 
     # Get a list of locations shown on map. (One defined, one undefined.)
-    click(:label => 'Show Locations', :in => :left_tabs)
+    click(:label => 'Show Locations', :in => :right_tabs)
     assert_template('location/list_locations')
 
     # Click on the defined location.
@@ -160,7 +160,7 @@ class LurkerTest < IntegrationTestCase
     assert_template('location/show_location')
 
     # Get a list of observations from there.  (Several so goes to index.)
-    click(:label => 'Observations at this Location', :in => :left_tabs)
+    click(:label => 'Observations at this Location', :in => :right_tabs)
     assert_template('observer/list_observations')
     save_results = get_links('div.results a[href^=?]', /\/\d+/)
 

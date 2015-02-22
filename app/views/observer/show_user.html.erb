@@ -34,23 +34,22 @@
                               :action => 'checklist', :user_id => @show_user.id),
    }
 
-   left_links = [link_to(:show_user_contributors.t, :controller => 'observer',
+   right_links = [link_to(:show_user_contributors.t, :controller => 'observer',
                          :action => 'users_by_contribution')]
-   right_links = []
 
    if @show_user == @user
-     left_links << link_to(:show_user_your_observations.t, links[:observations])
-     left_links << link_to(:show_user_comments_for_you.t, links[:comments_for])
-     left_links << link_to(:show_user_your_notifications.t, :controller => "interest",
+     right_links << link_to(:show_user_your_observations.t, links[:observations])
+     right_links << link_to(:show_user_comments_for_you.t, links[:comments_for])
+     right_links << link_to(:show_user_your_notifications.t, :controller => "interest",
                            :action => "list_interests")
      right_links << link_to(:show_user_edit_profile.t, :controller => "account",
                             :action => "profile")
      right_links << link_to(:app_preferences.t, :controller => "account", :action => "prefs")
-     left_links << link_to(:app_life_list.t, links[:life_list])
+     right_links << link_to(:app_life_list.t, links[:life_list])
    else
-     left_links << link_to(:show_user_observations_by.t(:name => name), links[:observations])
-     left_links << link_to(:show_user_comments_for.t(:name => name), links[:comments_for])
-     left_links << link_to(:show_user_email_to.t(:name => name), :controller => "observer",
+     right_links << link_to(:show_user_observations_by.t(:name => name), links[:observations])
+     right_links << link_to(:show_user_comments_for.t(:name => name), links[:comments_for])
+     right_links << link_to(:show_user_email_to.t(:name => name), :controller => "observer",
                            :action => "ask_user_question", :id => id)
    end
 
@@ -62,7 +61,6 @@
                                                    :id => @show_user.id)]) : right_links
 
    @tabsets = {pager_for: @show_user,
-               left: render(partial: "shared/tab_set", locals: {links: left_links}),
                right: render(partial: "shared/tab_set", locals: {links: right_links})
    }
 

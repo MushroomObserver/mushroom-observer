@@ -1,7 +1,6 @@
 <%
    @title = :species_list_show_title.t(name: @species_list.unique_format_name)
    right_links = []
-   left_links = []
    if @user
      right_links << link_with_query(:species_list_show_clone_list.t,
                                     {action: 'create_species_list', clone: @species_list.id},
@@ -16,15 +15,15 @@
      right_links << draw_interest_icons(@species_list)
    end
    if check_permission(@species_list)
-     left_links << link_with_query(:species_list_show_manage_projects.t,
+     right_links << link_with_query(:species_list_show_manage_projects.t,
                                    action: 'manage_projects', id: @species_list.id)
-     left_links << link_with_query(:species_list_show_edit.t,
+     right_links << link_with_query(:species_list_show_edit.t,
                                    action: 'edit_species_list', id: @species_list.id)
-     left_links << link_with_query(:DESTROY.t,
+     right_links << link_with_query(:DESTROY.t,
                                    {action: 'destroy_species_list', id: @species_list.id},
                                    {class: "text-danger", data: {confirm: :are_you_sure.l}})
    end
-   left_links << content_tag(:div,
+   right_links << content_tag(:div,
                              "#{link_with_query(:species_list_show_save_as_txt.t, action: 'make_report',
                                                 id: @species_list.id, type: 'txt')} |
     #{link_with_query(:species_list_show_save_as_rtf.t, action: 'make_report',
@@ -33,8 +32,7 @@
                       id: @species_list.id, type: 'csv')}".html_safe)
 
    @tabsets = {pager_for: @species_list,
-               right: render(partial: "shared/tab_set", locals: {links: right_links}),
-               left: render(partial: "shared/tab_set", locals: {links: left_links})
+               right: render(partial: "shared/tab_set", locals: {links: right_links})
    }
 
 %>

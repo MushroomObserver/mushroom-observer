@@ -1,17 +1,15 @@
 <%
    @title = :name_map_title.t(:name => @name.display_name)
 
-   left_links = [link_to(:name_map_about.t(:name => @name.display_name),
-                         add_query_param({action: 'show_name', id: @name.id}, @query)),
-                 link_to(:show_objects.t(:type => :location),
-                         add_query_param({controller: 'location', action: 'index_location'},
-                                         @query)),
-                 link_to(:show_objects.t(:type => :observation),
-                         add_query_param({controller: 'observer', action: 'index_observation'},
-                                         @query))]
-
    @tabsets = {
-           left: render(partial: "shared/tab_set", locals: {links: left_links})
+           right: render(partial: "shared/tab_set", locals: {links: [link_to(:name_map_about.t(:name => @name.display_name),
+                                                                             add_query_param({action: 'show_name', id: @name.id}, @query)),
+                                                                     link_to(:show_objects.t(:type => :location),
+                                                                             add_query_param({controller: 'location', action: 'index_location'},
+                                                                                             @query)),
+                                                                     link_to(:show_objects.t(:type => :observation),
+                                                                             add_query_param({controller: 'observer', action: 'index_observation'},
+                                                                                             @query))]})
     }
 %>
 
