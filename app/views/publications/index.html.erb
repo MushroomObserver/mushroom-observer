@@ -4,13 +4,17 @@
      add_tab(:create_publication.t, new_publication_path)
    end
 %>
-
+<div class="row">
+<div class="col-md-8">
 <%= :publication_index_intro.tp %>
 <%= :publication_citation.tp %>
 <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
+</div>
+</div>
 
-
-<table class="table table-striped  push-down">
+<div class="row">
+  <div class="col-xs-12">
+<table class="table table-striped table-responsive  push-down">
   <tr>
     <th><%= "#{:publication_full.t} (#{@full_count})" %></th>
     <th><%= :publication_link.t %></th>
@@ -21,8 +25,8 @@
   <% @publications.each do |publication| %>
       <tbody>
       <tr>
-        <td width="50%"><%= link_to publication.full.t, publication %></td>
-        <td width="30%"><%= link_to content_tag(:span,
+        <td width="45%"><%= link_to publication.full.t, publication %></td>
+        <td width="25%"><%= link_to content_tag(:small,
                                                 publication.link, :style => "word-wrap:break-word"),
                                     publication.link %></td>
         <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %></td>
@@ -36,5 +40,6 @@
       </tbody>
   <% end %>
 </table>
-
+</div>
+</div>
 <%= :publication_legend.tp %>

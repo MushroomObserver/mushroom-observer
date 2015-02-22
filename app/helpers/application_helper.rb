@@ -1265,19 +1265,21 @@ module ApplicationHelper
 
   # Draw a thumbnail image.  It takes either an Image instance or an id.
   # Args:
-  # link::      a hash of { controller:, action:, id: }
-  # size::      Size to show, default is thumbnail
-  # original::  Show original file name?
-  # votes::     Show vote buttons?
-  # responsive:  Force image to fit into container.
+  # link::            a hash of { controller:, action:, id: }
+  # size::            Size to show, default is thumbnail
+  # original::        Show original file name?
+  # votes::           Show vote buttons?
+  # responsive:       Force image to fit into container.
+  # theater_on_click: Should theater mode be opened when image clicked?.
   def thumbnail(image, args={})
     render(partial: "image/image_thumbnail",
            locals: { image:    image,
-                     link:     args[:link],
-                     votes:    args[:votes],
-                     size:     args[:size],
-                     original: args[:original],
-                     responsive: args[:responsive]
+                     link:     args[:link] ||= {controller: :image, action: :show_image, id: image_id},
+                     size:     args[:size] ||= :small,
+                     votes:    args[:votes] ||= true,
+                     original: args[:original] ||= false,
+                     responsive: args[:responsive] ||= true ,
+                     theater_on_click: args[:theater_on_click] ||= false,
            }
     )
   end

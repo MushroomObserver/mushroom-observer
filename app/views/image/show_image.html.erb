@@ -34,6 +34,7 @@
         <div class="row">
           <div class="col-xs-12">
             <% if check_permission(@image) %>
+                <small>
                 <%= link_with_query(:image_show_rotate_left.t,
                                     action: 'transform_image', op: 'rotate_left',
                                     id: @image.id, size: @size) %> |
@@ -48,9 +49,9 @@
                 <%= link_with_query(:image_show_destroy.t,
                                     {action: 'destroy_image', id: @image.id},
                                     {data: {confirm: :are_you_sure.l}}) %> |
+                </small>
             <% end %>
-            <%= link_with_query(:image_show_original.t, {action: 'show_image', id: @image.id, size: 'original'},
-                                {data: {toggle: "theater", image: Image.url(@size, @image.id)}}) %>
+            <%= link_to(:image_show_original.t, Image.url(:original, @image.id)) %>
             <div class="dropdown pull-right">
               <%= :prefs_image_size.t %>:
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -73,10 +74,10 @@
         <%= thumbnail(@image,
                       size: @size,
                       votes: true,
-                      link: add_query_param(action: 'show_image', id: @image.id,
-                                            size: (@size == @default_size ? :full_size : @default_size)),
+                      link: {},
                       original: true,
-                      responsive: true) %>
+                      responsive: true,
+                      theater_on_click: true  ) %>
 
         <% chgs = @image.copyright_changes.sort_by(&:id)
            unless chgs.empty? %>
@@ -205,22 +206,23 @@
         <% end %>
         </div>
       </div>
-      <div id="show_votes_container"> <!--note this is used by ajax-->
-        <% if !@votes.empty? %>
-            <table id="show_votes_table" class="table table-striped">
-              <tr>
-                <th><%= :USER.t %></th>
-                <th><%= :VOTE.t %></th>
-              </tr>
-              <% for vote in @votes %>
-                  <tr>
-                    <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
-                    <td><%= :"image_vote_short_#{vote.value}".t %></td>
-                  </tr>
-              <% end %>
-            </table>
-        <% end %>
-      </div>
+
+    </div>
+    <div id="show_votes_container"> <!--note this is used by ajax-->
+      <% if !@votes.empty? %>
+          <table id="show_votes_table" class="table table-striped">
+            <tr>
+              <th><%= :USER.t %></th>
+              <th><%= :VOTE.t %></th>
+            </tr>
+            <% for vote in @votes %>
+                <tr>
+                  <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
+                  <td><%= :"image_vote_short_#{vote.value}".t %></td>
+                </tr>
+            <% end %>
+          </table>
+      <% end %>
     </div>
   </div>
   <div class="row">
