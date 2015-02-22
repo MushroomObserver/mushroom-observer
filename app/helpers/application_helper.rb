@@ -1272,16 +1272,21 @@ module ApplicationHelper
   # responsive:       Force image to fit into container.
   # theater_on_click: Should theater mode be opened when image clicked?.
   def thumbnail(image, args={})
+    image_id = image.is_a?(Fixnum) ? image : image.id
     render(partial: "image/image_thumbnail",
-           locals: { image:    image,
-                     link:     args[:link] ||= {controller: :image, action: :show_image, id: image_id},
-                     size:     args[:size] ||= :small,
-                     votes:    args[:votes] ||= true,
-                     original: args[:original] ||= false,
-                     responsive: args[:responsive] ||= true ,
-                     theater_on_click: args[:theater_on_click] ||= false,
-           }
-    )
+           locals: {
+             image: image,
+             link: args[:link] ||= {
+               controller: :image,
+               action: :show_image,
+               id: image_id
+             },
+             size: args[:size] ||= :small,
+             votes: args[:votes] ||= true,
+             original: args[:original] ||= false,
+             responsive: args[:responsive] ||= true ,
+             theater_on_click: args[:theater_on_click] ||= false,
+           })
   end
 
   # Provide the copyright for an image
