@@ -750,7 +750,7 @@ class SpeciesListController < ApplicationController
           @species_list.log(:log_species_list_created_at)
           flash_notice(:runtime_species_list_create_success.t(id: @species_list.id))
         else
-          @species_list.log(:log_species_list_updated)
+          @species_list.log(:log_species_list_updated_at)
           flash_notice(:runtime_species_list_edit_success.t(id: @species_list.id))
         end
 

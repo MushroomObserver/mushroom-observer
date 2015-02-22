@@ -1,7 +1,6 @@
 class MatrixBoxPresenter
   attr_accessor \
     :thumbnail, # thumbnail image tag
-    :title,     # title string
     :detail,    # string with extra details
     :when,      # when object or target was created
     :who,       # owner of object or target
@@ -83,22 +82,21 @@ class MatrixBoxPresenter
 
 private
 
-  # Figure out what the right title and detail messages should be.
+  # Figure out what the detail messages should be.
   # TODO: This should probably all live in RssLog.
   def get_rss_log_details(rss_log, target)
     target_type = target ? target.type_tag : rss_log.target_type
     tag, args, time = rss_log.parse_log.first rescue []
     if not target_type
-      self.title = :rss_destroyed.t(:type => :object)
+      self.detail = :rss_destroyed.t(:type => :object)
     elsif not target or tag.to_s.match(/^log_#{target_type.to_s}_(merged|destroyed)/)
-      self.title = :rss_destroyed.t(:type => target_type)
+      self.detail = :rss_destroyed.t(:type => target_type)
     elsif not time or time < target.created_at + 1.minute
-      self.title = :rss_created_at.t(:type => target_type)
+      self.detail = :rss_created_at.t(:type => target_type)
       unless (target_type == :observation || target_type == :species_list)
-        self.detail = :rss_by.t(:user => target.user.legal_name) rescue nil
+        self.detail += " " + :rss_by.t(:user => target.user.legal_name) rescue nil
       end
     else
-      self.title = :rss_changed.t(:type => target_type)
       if [:observation, :species_list].include?(target_type) and
          [target.user.login, target.user.name, target.user.legal_name].include?(args[:user])
         # This will remove redundant user from observation logs.

@@ -157,6 +157,7 @@ MushroomObserver::Application.configure do
     multi_image_upload.js
     name_lister.js
     pivotal.js
+    rss_feed_select_helper.js
     semantic_venacular.js
     single_image_uploader.js
     translations.js

@@ -14,23 +14,18 @@
               <div class="col-sm-7">
                 <table style="width: 100%">
                   <tr>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: middle" class="col-sm-2">
                         <strong><%= index+1 %></strong>
                     </td>
                     <td>
-                <%= user_link(user.id, user.legal_name) %>
-                <%= if @user and (user.id == @user.id)
-                      link_to("(#{user.percent_complete}%)", controller: "account", action: "profile")
-                    else
-                      "(#{user.percent_complete}%)"
-                    end %>
+                      <h4><%= user_link(user.id, user.legal_name) %></h4>
                     </td>
                   </tr>
                   <tr>
                     <td></td>
                     <td>
                         <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
-                        <%= link_to(:observations.t, action: "observations_by_user", id: user.id) %>
+                        <%= link_to(:Observations.t, action: "observations_by_user", id: user.id) %>
                     </td>
                   </tr>
                 </table>
