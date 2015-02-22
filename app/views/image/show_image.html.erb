@@ -166,7 +166,7 @@
 
 
     <div id="quality_vote_container"><!--Note: used by ajax-->
-      <div id="quality_vote_content" class="list-group list-group-compact">
+      <div id="quality_vote_content" class="list-group">
         <div class="list-group-item default">
           <strong><%= :image_show_quality.t %>:</strong>
           <small><%= vote = (@image.vote_cache + 0.5).to_i rescue 0
@@ -180,54 +180,58 @@
         <%= image_vote_as_long_string(current).t %>
         </span>
             </div>
-            <% args = add_query_param(id: @image.id)
-               args[:size] = @size if @size != @default_size
-               for value in [0] + Image.all_votes
-                 str1 = image_vote_as_short_string(value)
-                 str2 = image_vote_as_help_string(value)
-                 str3 = :image_show_vote_and_next.t(value: str1)
-                 css_class = "btn border-radius-none small"
-                 css_class += " active" if current == value %>
-                <div class="list-group-item list-group-item-split">
-                  <div class="btn-group" style="width:100%;">
-                    <%= link_to(value == 0 ? str2 : str1, {vote: value}.merge(args),
-                                {style: "width: 65%; padding: 4px;", class: css_class + " btn-default", title: str2,
-                                 data: {toggle: "tooltip", placement: "left", role: "image_vote", val: value, id: @image.id}}) %>
-                    <%= link_to(str3, {vote: value, next: true}.merge(args),
-                                {class: css_class + " btn-success", style: "width: 35%; padding: 4px;", title: str2, data: {toggle: "tooltip", placement: "left"}}) %>
+            <div class="list-group-item">
+
+              <% args = add_query_param(id: @image.id)
+                 args[:size] = @size if @size != @default_size
+                 for value in [0] + Image.all_votes
+                   str1 = image_vote_as_short_string(value)
+                   str2 = image_vote_as_help_string(value)
+                   str3 = :image_show_vote_and_next.t(value: str1)
+                   css_class = "btn btn-default btn-block"
+                   css_class += " active" if current == value %>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <%= link_to(value == 0 ? str2 : str1, {vote: value}.merge(args),
+                                  {class: css_class, title: str2,
+                                   data: {toggle: "tooltip", placement: "left", role: "image_vote", val: value, id: @image.id}}) %>
+                    </div>
+                    <div class="col-sm-6 hidden-xs">
+                      <%= link_to(str3, {vote: value, next: true}.merge(args),
+                                  {class: css_class, title: str2, data: {toggle: "tooltip"}}) %>
+                    </div>
                   </div>
-                </div>
-            <% end %>
+              <% end %>
+        <% end %>
+        </div>
+      </div>
+      <div id="show_votes_container"> <!--note this is used by ajax-->
+        <% if !@votes.empty? %>
+            <table id="show_votes_table" class="table table-striped">
+              <tr>
+                <th><%= :USER.t %></th>
+                <th><%= :VOTE.t %></th>
+              </tr>
+              <% for vote in @votes %>
+                  <tr>
+                    <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
+                    <td><%= :"image_vote_short_#{vote.value}".t %></td>
+                  </tr>
+              <% end %>
+            </table>
         <% end %>
       </div>
     </div>
-    <div id="show_votes_container"> <!--note this is used by ajax-->
-      <% if !@votes.empty? %>
-          <table id="show_votes_table" class="table table-striped">
-            <tr>
-              <th><%= :USER.t %></th>
-              <th><%= :VOTE.t %></th>
-            </tr>
-            <% for vote in @votes %>
-                <tr>
-                  <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
-                  <td><%= :"image_vote_short_#{vote.value}".t %></td>
-                </tr>
-            <% end %>
-          </table>
-      <% end %>
+  </div>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="small">
+        <%= image_copyright(@image) %>
+        <%= render(partial: "shared/form_#{@image.license.form_name}") %>
+      </div>
+    </div>
+    <div class="col-sm-8">
+      <%= show_object_footer(@image) %>
     </div>
   </div>
 </div>
-<div class="row">
-  <div class="col-sm-4">
-    <div class="small">
-      <%= image_copyright(@image) %>
-      <%= render(partial: "shared/form_#{@image.license.form_name}") %>
-    </div>
-  </div>
-  <div class="col-sm-8">
-    <%= show_object_footer(@image) %>
-  </div>
-</div>
-

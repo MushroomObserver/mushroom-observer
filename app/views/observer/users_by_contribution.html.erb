@@ -1,6 +1,6 @@
 <%
    @title = :users_by_contribution_title.t
-   @tabsets = {left: render(partial: "shared/tab_set", locals: {
+   @tabsets = {right: render(partial: "shared/tab_set", locals: {
                                                              links: [link_with_query(:app_site_stats.t, action: 'show_site_stats')]}
    )}
 %>
