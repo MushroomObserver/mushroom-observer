@@ -1723,6 +1723,7 @@
   show_name_classification: Classification
   show_name_brief_description: Brief Description
   show_name_see_more: See More
+  show_name_on_mycoportal: On MyCoPortal
 
   # observer/_show_namings
   show_namings_proposed_name: "[:NAMING]"
