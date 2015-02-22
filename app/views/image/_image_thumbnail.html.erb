@@ -3,13 +3,7 @@
    # so we only have image_id.  It's still possible to render the image with
    # nothing but the image_id.  (But not votes, original name, etc.)
    image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-
-   link ||= {controller: :image, action: :show_image, id: image_id}
-   size ||= :small
-   votes ||= image ? true : false
-   original ||= false
-   responsive = responsive.nil? ? true : responsive  ##Should the image be forced to fit in its container. Default is true
-
+     ##show the theater when the image is clicked?
    vote_pct = ((image.vote_cache || 0) / Image.all_votes.length * 100).floor \
              if image and votes
    url = image ? image.url(size) : Image.url(size, image_id)
@@ -17,9 +11,12 @@
 <div>
   <div style="position: relative">
     <div style="position: absolute; bottom: 0" class="hidden-xs">
-      <a href="#" class="glyphicon glyphicon-fullscreen theater-btn hidden-xs" data-toggle="theater" data-image="<%= Image.url(:large, image_id) %>"></a>
+      <a href="#" class="glyphicon glyphicon-fullscreen theater-btn hidden-xs" data-toggle="theater"
+         data-image="<%= Image.url(:large, image_id) %>"
+         data-original="<%=Image.url(:original, image_id)%>"></a>
     </div>
-    <%= link_with_query(image_tag(url, class: responsive ? 'img-responsive' : '', style: "padding-left: 25px;"), link) %>
+    <% html_opts = theater_on_click ? {data: {toggle: "theater", image: Image.url(:large, image_id)}, original: Image.url(:original, image_id)} : {class: "no"} %>
+    <%= link_with_query(image_tag(url, class: responsive ? 'img-responsive' : '', style: "padding-left: 25px;"), link, html_opts) %>
   </div>
   <div class="push-down">
     <% if vote_pct and votes %>

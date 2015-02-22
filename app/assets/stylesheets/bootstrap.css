@@ -1567,16 +1567,23 @@ pre code {
     margin-right: auto;
     margin-left: auto;
 }
-@media (min-width: 768px) {
-    .container {
-        width: 750px;
+
+
+/* No greater than 1159px, no less than 767px */
+@media (max-width:1159px) and (min-width:767px) {
+    #navigation {
+        padding: 0;
     }
-}
-@media (min-width: 992px) {
+}​
+
+/* No greater than 1200px, no less than 100px */
+@media (max-width:1200px) and (min-width:100px) {
     .container {
-        width: 970px;
+        width: 100%;
     }
+
 }
+​
 @media (min-width: 1200px) {
     .container {
         width: 1170px;

@@ -4,6 +4,9 @@
    ## and allows more flexibility in styling the tabs - RJS 2/15/2015
    @tabsets = {left: render_tab_sets} if @tab_sets and not @tabsets
 %>
+<div class="visible-xs visible-sm" style="margin-top: 23px"> <!--this pushes down the title on small and xs screens so buttons dont block -->
+  &nbsp;
+</div>
 <% if @full_width_tab_set %>
     <div class="col-xs-12">
       <div>
