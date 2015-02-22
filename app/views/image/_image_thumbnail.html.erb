@@ -20,16 +20,10 @@
     <% html_opts = theater_on_click ?
                    {data: {toggle: :theater, image: large_url, original: orig_url}} :
                    {class: :no} %>
-    <%= link_with_query(image_tag(size_url, class: responsive ? 'img-responsive' : '',
+    <%= link_with_query(image_tag(size_url, class: responsive ? 'img-responsive' : 'img-unresponsive',
                                   style: "padding-left: 25px;"), link, html_opts) %>
   </div>
   <div class="push-down">
-    <% if vote_pct and votes %>
-      <div class="vote-meter">
-        <div id="vote_meter_bar_<%= image_id %>" class="vote-meter-bar"
-             role="progressbar" style="width: <%=vote_pct%>%"></div>
-      </div>
-    <% end %>
     <% if User.current and votes and image %>
       <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
     <% end %>

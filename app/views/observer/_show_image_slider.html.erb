@@ -1,0 +1,43 @@
+<%
+   image_height = default_thumbnail_size == :small ? '200px' : '120px'
+   default_image = @observation.thumb_image
+%>
+
+<% if not @observation.images.nil? and @observation.images.any?%>
+<div class="col-xs-12 ">
+  <div class="carousel slide" id="carouselshowmanymoveone">
+    <div class="carousel-inner">
+      <div class="item active">
+        <% unless default_image.nil? %>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+          <div style="max-height: 250px;">
+            <img src="<%= Image.url(default_thumbnail_size, default_image.id) %>" class="img-responsive center-block" style="height: <%= image_height %>"/>
+
+            <div class="push-down">
+              <%= render(partial: "image/image_vote_links", locals: {image: default_image}) %>
+            </div>
+          </div>
+          <%end%>
+        </div>
+      </div>
+      <% @observation.images.each do|img| %>
+          <%if img != default_image %>
+          <div class="item">
+            <div class="col-xs-12 col-sm-6 col-md-3">
+              <div style="max-height: 250px;">
+                <img src="<%= Image.url(default_thumbnail_size, img.id) %>" class="img-responsive center-block" style="height: <%= image_height %>"/>
+
+                <div class="push-down">
+                  <%= render(partial: "image/image_vote_links", locals: {image: img}) %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% end %>
+      <% end %>
+    </div>
+    <a class="left carousel-control" href="#carouselshowmanymoveone" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
+    <a class="right carousel-control" href="#carouselshowmanymoveone" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
+  </div>
+</div>
+<%end%>

@@ -19,7 +19,9 @@ jQuery(document).ready(function () {
       },
       success: function(text) {
         var div = jQuery("#image_vote_links_" + id);
-        div.html(text);
+        var $updatedLinks = $updatedLinks = jQuery(text);
+        div.html($updatedLinks.find(".image_vote_links_container").first().html());
+
         var newVotePercentage = div.parent().find('span.data_container').data('percentage');
         jQuery("#vote_meter_bar_" + id).css('width', newVotePercentage + "%")
         if ($show_votes_container && $quality_vote_container) { //updates the side bar if on actual image page.
