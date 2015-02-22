@@ -256,6 +256,7 @@ div.auto_complete {
     overflow-x: hidden;
     display: none;
     text-align: left;
+    z-index: 100;
 }
 
 div.auto_complete ul {
