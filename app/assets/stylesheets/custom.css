@@ -12,6 +12,10 @@ a {
     font-weight: bold;
 }
 
+#navigation a {
+    font-weight: normal;
+}
+
 table.table-compact tr td {
     padding-top: 3px !important;
     padding-bottom: 3px !important;

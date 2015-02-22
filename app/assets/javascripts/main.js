@@ -68,4 +68,23 @@ jQuery(document).ready(function () {
         return undefined;
     }
 
+
+    var slide_item_lengths = jQuery("#carouselshowmanymoveone .item").length;
+        jQuery('#carouselshowmanymoveone .item').each(function () {
+            var next = jQuery(this).next();
+            if (!next.length) {
+                next = $(this).siblings(':first');
+            }
+                next.children(':first-child').clone().addClass("extra1").appendTo($(this));
+
+            for (var i = 0; i < slide_item_lengths - 2; i++) {
+                console.log(next);
+                next = next.next();
+                if (!next.length) {
+                    next = jQuery(this).siblings(':first');
+                }
+
+                next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
+            }
+        });
 });
