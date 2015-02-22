@@ -1,8 +1,10 @@
 <%
-  @title = :glossary_term_index_title.t
-  new_tab_set do
-    add_tab(:create_glossary_term.t, :action => 'create_glossary_term')
-  end
+   @title = :glossary_term_index_title.t
+   @tabsets = {right: render(partial: "shared/tab_set",
+                             locals: {
+                                     links: [link_to(:create_glossary_term.t, {action: :create_glossary_term}, style: "font-size: 1.2em")]
+                             }
+   )}
 %>
 
 <%= :glossary_term_index_intro.tp %>
@@ -16,8 +18,8 @@
         </td>
         <td>
           <%= if glossary_term.thumb_image_id and glossary_term.thumb_image_id != 0
-            thumbnail(glossary_term.thumb_image_id, :border => 0, :votes => true)
-          end %>
+                thumbnail(glossary_term.thumb_image_id, votes: true)
+              end %>
         </td>
       </tr>
   <% end %>

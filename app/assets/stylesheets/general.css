@@ -1,3 +1,16 @@
+@media(max-width:1199px){
+    .container {
+        padding-right: 0;
+        padding-left: 0;
+        margin-right: auto;
+        margin-left: auto;
+        width: auto !important;
+    }
+    .row.row-offcanvas {
+        margin-right: 0;
+    }
+}
+
 #message_banner {
     font-size: 1em;
     margin-bottom: 10px;
@@ -67,7 +80,6 @@
 .list-group.list-group-compact .list-group-item {
     padding: 3px;
 }
-
 
 .input-group .icon-addon .form-control {
     border-radius: 0;
@@ -145,4 +157,42 @@
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
     color: #2580db;
+}
+
+/*Image Theater CSS */
+.theater-shown {  /*appended to body when theater is shown*/
+    overflow: hidden;
+}
+
+.theater-btn {
+    background: white;
+    color: black;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+}
+
+.theater-btn:hover, .theater-btn:focus {
+    background: black;
+    color: white;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+}
+
+
+.img-theater {
+    position: absolute;
+    top: 0px;
+    background: none repeat scroll 0% 0% rgba(48, 50, 48, 0.55);
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: none;
+}
+
+#img_append_target {
+    padding-top: 20px;
 }

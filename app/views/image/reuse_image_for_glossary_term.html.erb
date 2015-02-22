@@ -2,7 +2,7 @@
    tag_params = add_query_param(:action => 'reuse_image_for_glossary_term')
    tag_params[:id] = id = @object.id
    @title = :image_reuse_title.t(:name => @object.unique_format_name)
-   @tabsets = {left: render(partial: "shared/tab_set",
+   @tabsets = {right: render(partial: "shared/tab_set",
                             locals: {
                                     links: [link_with_query(:show_object.t(:type => @object.class),
                                                             {controller: @object.show_controller,

@@ -6,23 +6,29 @@
 %>
 <% if @full_width_tab_set %>
     <div class="col-xs-12">
-      <h3 class="text-center" style="margin-top: 5px;">
-        <%= content_tag(:h3, @title, class: "text-center", style: "margin-top: 5px;") %>
-      </h3>
+      <div>
+      <%= content_tag(:h3, @title, style: "font-size: 22px; margin-top: 5px;") %>
       <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
+      </div>
     </div>
     <div class="col-xs-12">
       <%= @full_width_tab_set %>
     </div>
 <% else %>
     <div class="col-sm-8" id="title">
-      <%= content_tag(:h3, @title, class: "text-center", style: "margin-top: 5px;") %>
-      <div class="text-center" style="margin-top: -5px; margin-bottom: 5px;">
+      <div>
+      <%= content_tag(:h3, @title, style: "font-size: 22px; margin-top: 5px;") %>
+
         <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
       </div>
     </div>
     <div id="right_tabs" class="col-sm-4" style="text-align: right">
       <%= @tabsets[:right] if @tabsets %>
+      <%if @tab_sets %>
+              <small>
+                <%= render_tab_sets%>
+              </small>
+      <%end%>
     </div>
 <% end %>
 

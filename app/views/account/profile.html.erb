@@ -1,6 +1,6 @@
 <%
    @title = :profile_title.t
-   @tabsets = {left: render(partial: "shared/tab_set",
+   @tabsets = {right: render(partial: "shared/tab_set",
                             locals: {
                                     links: [link_to(:bulk_license_link.t, controller: :image, action: :license_updater),
                                             link_to(:show_user_your_notifications.t, controller: :interest, action: :list_interests),

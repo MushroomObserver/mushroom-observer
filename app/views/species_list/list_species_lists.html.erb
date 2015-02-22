@@ -17,10 +17,12 @@
       <% @objects.each do |species_list| %>
           <tr>
             <td>
+              <span style="font-size: 1.1em">
               <%= link_to(content_tag(:span, species_list.when.to_s + ": ", class: "ListWhen") +
                                   content_tag(:span, species_list.unique_text_name.t, class: "ListWhat"),
                           :action => 'show_species_list', :id => species_list.id)
               %>
+                </span>
               <br/>
               <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span>
               <span><%= user_link(species_list.user) %></span>

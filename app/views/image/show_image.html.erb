@@ -166,7 +166,7 @@
 
 
     <div id="quality_vote_container"><!--Note: used by ajax-->
-      <div id="quality_vote_content" class="list-group list-group-compact">
+      <div id="quality_vote_content" class="list-group">
         <div class="list-group-item default">
           <strong><%= :image_show_quality.t %>:</strong>
           <small><%= vote = (@image.vote_cache + 0.5).to_i rescue 0
@@ -180,23 +180,27 @@
         <%= image_vote_as_long_string(current).t %>
         </span>
             </div>
+            <div class="list-group-item">
+
             <% args = add_query_param(id: @image.id)
                args[:size] = @size if @size != @default_size
                for value in [0] + Image.all_votes
                  str1 = image_vote_as_short_string(value)
                  str2 = image_vote_as_help_string(value)
                  str3 = :image_show_vote_and_next.t(value: str1)
-                 css_class = "btn border-radius-none small"
+                 css_class = "btn btn-default btn-block"
                  css_class += " active" if current == value %>
-                <div class="list-group-item list-group-item-split">
-                  <div class="btn-group" style="width:100%;">
+                  <div class="row">
+                    <div class="col-sm-6">
                     <%= link_to(value == 0 ? str2 : str1, {vote: value}.merge(args),
-                                {style: "width: 65%; padding: 4px;", class: css_class + " btn-default", title: str2,
+                                {class: css_class, title: str2,
                                  data: {toggle: "tooltip", placement: "left", role: "image_vote", val: value, id: @image.id}}) %>
+                    </div>
+                    <div class="col-sm-6 hidden-xs">
                     <%= link_to(str3, {vote: value, next: true}.merge(args),
-                                {class: css_class + " btn-success", style: "width: 35%; padding: 4px;", title: str2, data: {toggle: "tooltip", placement: "left"}}) %>
+                                {class: css_class, title: str2, data: {toggle: "tooltip"}}) %>
+                    </div>
                   </div>
-                </div>
             <% end %>
         <% end %>
       </div>

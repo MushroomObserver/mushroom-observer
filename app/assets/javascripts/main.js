@@ -24,13 +24,14 @@ jQuery(document).ready(function () {
         e.preventDefault();
         var img_src = jQuery(this).data().image;
         jQuery('.img-theater').css('top', jQuery(document).scrollTop())
-        $('.img-theater').show();
-        $('#img_append_target').html('<img src="{{src}}" class="center-block" style="height: {{h}}; width: auto;"><//img>'
+        jQuery('.img-theater').show();
+        jQuery('body').addClass('theater-shown');
+        jQuery('#img_append_target').html('<img src="{{src}}" class="center-block" style="height: {{h}}; width: auto;"><//img>'
             .replace("{{src}}", img_src)
             .replace("{{h}}", jQuery(window).height() - 20 + 'px'))
-        $(document).on('keyup.hideTheater', function (e){
+        jQuery(document).on('keyup.hideTheater', function (e){
             if (e.keyCode == 27) {
-                $('.img-theater').hide();
+                hideTheater();
                 $(document).unbind('keyup.hideTheater');
             }
         })
@@ -38,9 +39,14 @@ jQuery(document).ready(function () {
 
     jQuery('[data-dismiss="theater"]').click(function (e){
         e.preventDefault();
-        $('.img-theater').hide('slow');
+        hideTheater();
     });
 
+
+    function hideTheater() {
+        jQuery('.img-theater').hide();
+        jQuery('body').removeClass('theater-shown');
+    }
 
     function setCookie(cname, cvalue, exdays) {
         var d = new Date();

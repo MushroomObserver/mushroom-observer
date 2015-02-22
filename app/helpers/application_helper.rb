@@ -1542,7 +1542,7 @@ module ApplicationHelper
       all_tabs = links.map do |tab|
         render_tab(*tab)
       end
-      header.to_s.html_safe + all_tabs.safe_join(' | ') + safe_br
+      header.to_s.html_safe + all_tabs.safe_join(safe_br)
     end
   end
 
