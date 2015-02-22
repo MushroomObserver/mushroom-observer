@@ -230,10 +230,10 @@ class AbstractModelTest < UnitTestCase
     rss_log.update_attribute(:updated_at, time)
     name.update_attribute(:author, 'New Author')
     # This is normally done by Name#save_with_log
-    name.log(:log_name_updated_at, :user => rolf.login, :touch => true)
+    name.log(:log_name_updated, :user => rolf.login, :touch => true)
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
-    assert_rss_log_has_tag(:log_name_updated_at, rss_log)
+    assert_rss_log_has_tag(:log_name_updated, rss_log)
     assert(rss_log.updated_at > time)
 
     rss_log.update_attribute(:updated_at, time)
@@ -278,10 +278,10 @@ class AbstractModelTest < UnitTestCase
     # rss_log.update_attribute(:updated_at, time)
     obs.update_attribute(:notes, 'New Notes')
     # This is normally done by ObserverController#edit_observation.
-    obs.log(:log_observation_updated_at, :touch => true)
+    obs.log(:log_observation_updated, :touch => true)
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
-    assert_rss_log_has_tag(:log_observation_updated_at, rss_log)
+    assert_rss_log_has_tag(:log_observation_updated, rss_log)
     # assert(rss_log.updated_at > time)
 
     # rss_log.update_attribute(:updated_at, time)

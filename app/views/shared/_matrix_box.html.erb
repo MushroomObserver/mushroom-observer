@@ -6,21 +6,6 @@
 
 <% if presenter %>
   <div class="list-group" style="min-height: 200px;">
-    <div class="list-group-item" style="min-height: 57px; height: 57px;">
-      <div class="row">
-        <div class="col-xs-12">
-          <%= presenter.title %>
-          <small class="rss-fancy-time"><%= presenter.fancy_time %></small>
-        </div>
-        <div class="col-xs-12">
-          <small style="text-overflow: ellipsis; white-space: nowrap;">
-            <% unless presenter.when.blank? %>
-              <%= presenter.when %>: <%= presenter.who %>
-            <% end %>
-          </small>
-        </div>
-      </div>
-    </div>
     <div class="list-group-item rss-box-details">
       <div class="row">
         <div class="col-xs-12">
@@ -28,14 +13,24 @@
             <%= presenter.thumbnail %>
           </div>
           <div class="rss-what">
-            <%= presenter.what %>
-          </div>
-          <div class="rss-detail">
-            <%= presenter.detail %>
+            <h5><%= presenter.what %></h5>
           </div>
           <div class="rss-where">
             <small><strong><%= presenter.where %></strong></small>
           </div>
+	  <div class="rss-what">
+            <small style="text-overflow: ellipsis; white-space: nowrap;">
+              <% unless presenter.when.blank? %>
+              <%= presenter.when %>: <%= presenter.who %>
+              <% end %>
+            </small>
+	  </div>
+          <div class="rss-detail">
+            <%= presenter.detail %>
+          </div>
+	  <div class="rss-what">
+            <small><%= presenter.fancy_time %></small>
+	  </div>
         </div>
       </div>
     </div>
