@@ -1723,6 +1723,7 @@
   show_name_classification: Classification
   show_name_brief_description: Brief Description
   show_name_see_more: See More
+  show_name_on_mycoportal: On MyCoPortal
 
   # observer/_show_namings
   show_namings_proposed_name: "[:NAMING]"
@@ -3058,12 +3059,12 @@
   # observer/how_to_help
   how_help_title: How to Help Make [:app_title] Better
   how_help_intro: This page provides a list of skills that we could really use some help with. If you're interested in helping out just "send an email":/observer/ask_webmaster_question and let us know what you want to do.
-  how_help_contributors: "h2. 1. Contributors\n\np(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by \"describing species\":/observer/how_to_use#describing_species or \"defining locations\":/observer/how_to_use#defining_locations."
-  how_help_scientists: "h2. 2. Scientists\n\np(normal).  Mention Mushroom Observer in your publications and \"add references to your publications\":/publications."
-  how_help_developers: "h2. 3. Developers\n\np(normal).  We have \"lots of ideas\":[todo_list] about how to improve the site.  The framework, Ruby on Rails, is really easy to pick up and we are more than happy to mentor anyone who wants to dive in."
-  how_help_translators: "h2. 4. Translators\n\np(normal). The site is set up to support foreign languages.  All we need is someone to do the translations."
-  how_help_donors: "h2. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
-  how_help_business_planning: "h2. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, we have begun to make it financially sustainable as the founding resource for the non-profit \"Consortium for Digital Mycology Resources\":http://digitalmycology.org, but the effort is just getting so let us know if you want to get involved or have any business related advice."
+  how_help_contributors: "h4. 1. Contributors\n\np(normal).  Beyond adding pictures and descriptions of mushrooms that you've seen, you can make a big difference to the site by \"describing species\":/observer/how_to_use#describing_species or \"defining locations\":/observer/how_to_use#defining_locations."
+  how_help_scientists: "h4. 2. Scientists\n\np(normal).  Mention Mushroom Observer in your publications and \"add references to your publications\":/publications."
+  how_help_developers: "h4. 3. Developers\n\np(normal).  We have \"lots of ideas\":[todo_list] about how to improve the site.  The framework, Ruby on Rails, is really easy to pick up and we are more than happy to mentor anyone who wants to dive in."
+  how_help_translators: "h4. 4. Translators\n\np(normal). The site is set up to support foreign languages.  All we need is someone to do the translations."
+  how_help_donors: "h4. 5. Donors\n\np(normal). Help support our server costs by \"donating\":/support/donate to the Mushroom Observer."
+  how_help_business_planning: "h4. 6. Business Planning\n\np(normal).  So far [:app_title] has been an entirely volunteer effort, we have begun to make it financially sustainable as the founding resource for the non-profit \"Consortium for Digital Mycology Resources\":http://digitalmycology.org, but the effort is just getting so let us know if you want to get involved or have any business related advice."
   ################################################################################
 
   # HOW TO USE PAGE (COMMON TASKS)

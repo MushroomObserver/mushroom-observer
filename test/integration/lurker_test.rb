@@ -22,7 +22,7 @@ class LurkerTest < IntegrationTestCase
     # Click on the first image.
     push_page
     click(:label => :image, :href => /show_image/)
-    click(:label => :image, :href => /show_image.*full_size/)
+    # click(:label => :image, :href => /show_image.*full_size/)
     go_back
 
     # Go back to observation and click on "About...".

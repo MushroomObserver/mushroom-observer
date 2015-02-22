@@ -1574,16 +1574,15 @@ pre code {
     #navigation {
         padding: 0;
     }
-}​
+}
 
 /* No greater than 1200px, no less than 100px */
 @media (max-width:1200px) and (min-width:100px) {
     .container {
         width: 100%;
     }
-
 }
-​
+
 @media (min-width: 1200px) {
     .container {
         width: 1170px;

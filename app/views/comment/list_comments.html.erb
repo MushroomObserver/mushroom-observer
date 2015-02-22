@@ -4,12 +4,7 @@
 %>
 
 <%= paginate_block(@pages) do %>
-    <% for comment in @objects
-         target = comment.target %>
-        <%= link_to(content_tag(:span, target.unique_format_name.t,
-                                :class => 'ListWhat'), :controller => target.show_controller,
-                    :action => target.show_action, :id => target.id) rescue :comment_list_deleted.t %>
-        (<span><%= target.class.name.to_sym.t rescue :runtime_object_deleted %></span>)
-        <%= render(partial: 'comment', object: comment) %>
+    <% for comment in @objects %>
+        <%= render(partial: 'comment', object: comment, locals: { show_name: true } ) %>
     <% end %>
 <% end %>
