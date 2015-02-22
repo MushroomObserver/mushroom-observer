@@ -39,8 +39,8 @@
           pager_for: @observation,
           right: render(partial: '/shared/tab_set', locals: {links: right_links << draw_interest_icons(@observation)})
   }
-
 %>
+
 <div class="row">
   <div class="col-sm-8">
     <div class="list-group">
@@ -48,14 +48,11 @@
       <%= render(partial: 'show_observation', locals: { observation: @observation }) %>
       </div>
     </div>
-      <%= render(partial: 'show_lists', locals: { observation: @observation }) %>
-
-      <%= render(partial: 'naming/show', locals: { observation: @observation }) %>
-
-      <%= render(partial: 'comment/show_comments', locals: { object: @observation,
-                 controls: true, limit: nil }) %>
-
-      <%= show_object_footer(@observation) %>
+    <%= render(partial: 'show_lists', locals: { observation: @observation }) %>
+    <%= render(partial: 'naming/show', locals: { observation: @observation }) %>
+    <%= render(partial: 'comment/show_comments', locals: { object: @observation,
+               controls: true, limit: nil }) %>
+    <%= show_object_footer(@observation) %>
   </div>
   <div class="col-sm-4">
     <div class="list-group">
@@ -63,7 +60,7 @@
       <%= render(partial: 'show_name_info', locals: { observation: @observation }) %>
       </div>
     </div>
-      <%= render(partial: 'show_thumbnail_map', locals: { observation: @observation }) unless browser.bot? %>
-      <%= render(partial: 'show_images', locals: { thumb_size_control: true }) %>
+    <%= render(partial: 'show_thumbnail_map', locals: { observation: @observation }) unless browser.bot? %>
+    <%= render(partial: 'show_images', locals: { thumb_size_control: true }) %>
   </div>
 </div>
