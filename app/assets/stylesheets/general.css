@@ -256,6 +256,7 @@ div.auto_complete {
     overflow-x: hidden;
     display: none;
     text-align: left;
+    z-index: 100;
 }
 
 div.auto_complete ul {
@@ -277,6 +278,38 @@ div.auto_complete ul li.selected {
     background-color: #ff0;
 }
 
+
+/*
+ * name_lister
+ * --------------------------------------------------
+ */
+
+table.scroller th {
+    font-size: 120%;
+    padding-bottom: 0.3em;
+}
+div.scroller {
+    color: black;
+    background: white;
+    height: 450px;
+    overflow: auto;
+    margin: 0;
+    border: 1px solid #888;
+    padding: 0;
+    font-style: italic;
+}
+div.scroller ul {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    list-style-type: none;
+}
+div.scroller li {
+    padding: 0px 5px 0px 5px;
+}
+div.scroller span.normal {
+    font-style: normal;
+}
 
 
 /*

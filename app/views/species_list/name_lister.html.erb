@@ -1,76 +1,76 @@
 <%
-  javascript_include 'name_lister'
-  javascript_include '/name_list_data.js'  # leading slash should take it out of asset pipeline
-
+  javascript_include "name_lister"
+  javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline
   @title = :name_lister_title.t
-
   new_tab_set do
-    add_tab(:name_lister_classic.t, :action => 'create_species_list')
+    add_tab(:name_lister_classic.t, action: :create_species_list)
   end
 %>
 
-<br/>
-
-<% if !@js %>
-  <%= :name_lister_no_js.tp %>
-<% elsif !can_do_ajax? %>
-  <%= :name_lister_bad_browser.tp %>
-<% else %>
-
-  <table cols="3" width="100%" class="scroller">
-    <tr>
-      <th width="20%"><%= :name_lister_genera.t %></th>
-      <th width="40%"><%= :name_lister_species.t %></th>
-      <th width="40%"><%= :name_lister_names.t %></th>
-    </tr>
-
-    <tr>
-      <td align="left">
-        <div id="genera" class="scroller" onclick="nl_focus('g')"></div>
-      </td>
-      <td align="left">
-        <div id="species" class="scroller" onclick="nl_focus('s')"></div>
-      </td>
-      <td align="left">
-        <div id="names" class="scroller" onclick="nl_focus('n')"></div>
-      </td>
-    </tr>
-
-    <tr>
-      <td colspan="3">
-        <div id="word">&nbsp;</div>
-        <%= form_tag({action: 'name_lister'}, {}) %>
-          <center>
-            <%= submit_tag(:name_lister_submit_spl.l, :disabled => !@user) %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_txt.l) %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_rtf.l) %>&nbsp;&nbsp;
-            <%= submit_tag(:name_lister_submit_csv.l) %>
-          </center>
-          <%= hidden_field_tag('results', @name_strings.join("\n")) %>
-          <% if false %>
-            <br/>
-            <label for='charset'><%= :name_lister_charset.t %>:</label>
-            <%= select_tag(:charset, options_for_select(['ISO-8859-1', 'WINDOWS-1252', 'UTF-8'], @charset)) %>
-            <span class='HelpNote'><%= :name_lister_charset_help.t %></span>
-          <% end %>
-        </form>
-      </td>
-    </tr>
-  </table><br/>
-
-<div id="log"></div>
-
-  <% inject_javascript_at_end %(
-    nl_initialize_names();
-    nl_draw('g', NL_GENERA);
-    nl_draw('n', NL_NAMES);
-    jQuery(document).keypress(nl_keypress);
-    jQuery(document).keydown(nl_keydown);
-    jQuery(document).keyup(nl_keyup);
-    jQuery(document).click(nl_unfocus);
-    nc('g', 0); // click on first genus
-  ) %>
-
-  <div class="HelpNote"><%= :name_lister_help.tp %></div>
-
+<noscript>
+  <div style="margin-top:1em">
+    <%= :name_lister_no_js.tp %>
+  </div>
+</noscript>
+<% if !can_do_ajax? %>
+  <div style="margin-top:1em">
+    <%= :name_lister_bad_browser.tp %>
+  </div>
 <% end %>
+
+<table cols="3" width="100%" class="scroller">
+  <tr>
+    <th width="20%"><%= :name_lister_genera.t %></th>
+    <th width="40%"><%= :name_lister_species.t %></th>
+    <th width="40%"><%= :name_lister_names.t %></th>
+  </tr>
+
+  <tr>
+    <td align="left">
+      <div id="genera" class="scroller" onclick="nl_focus('g')"></div>
+    </td>
+    <td align="left">
+      <div id="species" class="scroller" onclick="nl_focus('s')"></div>
+    </td>
+    <td align="left">
+      <div id="names" class="scroller" onclick="nl_focus('n')"></div>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="3">
+      <div id="word">&nbsp;</div>
+      <%= form_tag({action: :name_lister}, {}) %>
+        <center>
+          <%= submit_tag(:name_lister_submit_spl.l, disabled: !@user) %>&nbsp;&nbsp;
+          <%= submit_tag(:name_lister_submit_txt.l) %>&nbsp;&nbsp;
+          <%= submit_tag(:name_lister_submit_rtf.l) %>&nbsp;&nbsp;
+          <%= submit_tag(:name_lister_submit_csv.l) %>
+        </center>
+        <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
+        <% if false %>
+          <br/>
+          <label for="charset"><%= :name_lister_charset.t %>:</label>
+          <%= select_tag(:charset, options_for_select(["ISO-8859-1", "WINDOWS-1252", "UTF-8"], @charset)) %>
+          <span class="HelpNote"><%= :name_lister_charset_help.t %></span>
+        <% end %>
+      </form>
+    </td>
+  </tr>
+</table>
+
+<div id="log" style="margin-top:1em"></div>
+
+<% inject_javascript_at_end %(
+  nl_initialize_names();
+  nl_draw("g", NL_GENERA);
+  nl_draw("n", NL_NAMES);
+  jQuery(document).keypress(nl_keypress);
+  jQuery(document).keydown(nl_keydown);
+  jQuery(document).keyup(nl_keyup);
+  jQuery(document).click(nl_unfocus);
+  nc("g", 0); // click on first genus
+) %>
+
+<div class="HelpNote"><%= :name_lister_help.tp %></div>
+
