@@ -1279,7 +1279,7 @@ module ApplicationHelper
                      votes:    args[:votes] ||= true,
                      original: args[:original] ||= false,
                      responsive: args[:responsive] ||= true ,
-                     theater_on_click: args[:responsive] ||= false,
+                     theater_on_click: args[:theater_on_click] ||= false,
            }
     )
   end
