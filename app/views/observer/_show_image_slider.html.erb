@@ -1,11 +1,25 @@
 <%
    image_height = default_thumbnail_size == :small ? '200px' : '120px'
    default_image = @observation.thumb_image
+   slider_hider_css = "hidden"
+   if not @observation.images.nil? and @observation.images.any?
+     slider_hider_css = case @observation.images.length
+        when 1
+             "hidden"
+        when 2
+            "visible-xs"
+        when 3, 4
+            "visible-xs visible-sm visible-md"
+        else
+             ""
+   end
+ end
+
 %>
 
 <% if not @observation.images.nil? and @observation.images.any?%>
 <div class="col-xs-12 ">
-  <div class="carousel slide" id="carouselshowmanymoveone">
+  <div class="carousel slide" id="carouselshowmanymoveone" data-interval="100000">
     <div class="carousel-inner">
       <div class="item active">
         <% unless default_image.nil? %>
@@ -36,8 +50,8 @@
           <% end %>
       <% end %>
     </div>
-    <a class="left carousel-control" href="#carouselshowmanymoveone" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
-    <a class="right carousel-control" href="#carouselshowmanymoveone" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
+    <a class="left carousel-control <%=slider_hider_css%>" href="#carouselshowmanymoveone" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
+    <a class="right carousel-control <%=slider_hider_css%>" href="#carouselshowmanymoveone" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
   </div>
 </div>
 <%end%>
