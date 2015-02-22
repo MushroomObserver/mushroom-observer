@@ -48,8 +48,8 @@
     <% else ##user is logged in %>
       <% if @user.admin && !is_in_admin_mode? %>
         <li>
-          <%= link_to("A", {controller: :account, action: :turn_admin_on},
-                           {style: "font-size:120%", title: :app_turn_admin_on.t,
+          <%= link_to("", {controller: :account, action: :turn_admin_on},
+                           {class: "glyphicon glyphicon-text-background", title: :app_turn_admin_on.t,
                             data: {toggle: "tooltip", placement: "left"}}) %>
         </li>
       <% end %>
