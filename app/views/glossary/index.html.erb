@@ -7,12 +7,14 @@
    )}
 %>
 
-<%= :glossary_term_index_intro.tp %>
+<div class="col-lg-7 col-md-8 col-sm-8">
+  <%= :glossary_term_index_intro.tp %>
+</div>
 
 <table class="table table-striped">
   <% @glossary_terms.each do |glossary_term| %>
       <tr>
-        <td>
+        <td class="col-lg-7 col-md-8 col-sm-8">
           <%= link_to(content_tag(:b, glossary_term.name), :action => "show_glossary_term", :id => glossary_term.id) %>:
           <%= glossary_term.description.tpl %>
         </td>
