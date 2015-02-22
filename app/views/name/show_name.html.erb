@@ -2,16 +2,15 @@
    @title = :show_name_title.t(:name => @name.display_name)
    description_links = list_descriptions(@name) || []
    Textile.register_name(@name)
-   left_links = []
    right_links = []
    # Google Images | Distribution Map | MycoPortal | Email Tracking
-   left_links << link_with_query('EOL', eol_url) if @name.eol_url
-   left_links << link_to(:google_images.t,
+   right_links << link_with_query('EOL', eol_url) if @name.eol_url
+   right_links << link_to(:google_images.t,
                          "http://images.google.com/images?q=#{@name.real_text_name}")
-   left_links << link_to("MyCoPortal", mycoportal_url(@name))
-   left_links << link_with_query(:show_name_distribution_map.t, :action => 'map',
+   right_links << link_to("MyCoPortal", mycoportal_url(@name))
+   right_links << link_with_query(:show_name_distribution_map.t, :action => 'map',
                                  :id => @name.id) unless @data == []
-   left_links << link_with_query(:show_name_email_tracking.t,
+   right_links << link_with_query(:show_name_email_tracking.t,
                                  :action => 'email_tracking', :id => @name.id)
 
    # Edit Name | Bulk Name Edit | Add Name | Change Synonyms | Approve/Deprecate
@@ -30,8 +29,7 @@
 
    @tabsets = {
            pager_for: @name,
-           right: render(partial: "shared/tab_set", locals: {links: right_links}),
-           left: render(partial: "shared/tab_set", locals: {links: left_links})
+           right: render(partial: "shared/tab_set", locals: {links: right_links})
    }
 %>
 

@@ -1,7 +1,7 @@
 <%
    @title = :comment_add_title.t(:name => @target.unique_format_name)
    @tabsets = {
-           left: render(partial: "shared/tab_set", locals: {links: [link_with_query(
+           right: render(partial: "shared/tab_set", locals: {links: [link_with_query(
                                                                             :cancel_and_show.t(:type => @comment.target_type.underscore.upcase.to_sym),
                                                                             :controller => @target.show_controller, :action => @target.show_action,
                                                                             :id => @target.id)]})

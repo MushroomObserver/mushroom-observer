@@ -11,25 +11,36 @@
       <% @users.select { |u| u.contribution > 1 }.each_with_index do |user, index| %>
           <div class="list-group-item">
             <div class="row">
-              <div class="col-xs-1">
-                <strong><%= index+1 %></strong>
-              </div>
-              <div class="col-xs-6">
-                <div style="width: 150px; height: 100px">
-                  <%= user_link(user.id, user.legal_name) %>
-                  <%= thumbnail(user.image_id, link: {action: :show_user},
-                                user: user.id, votes: false, size: :thumbnail) if user.image_id
-                  %>
-                </div>
-              </div>
-              <div class="col-xs-5">
+              <div class="col-sm-7">
+                <table style="width: 100%">
+                  <tr>
+                    <td style="vertical-align: top">
+                        <strong><%= index+1 %></strong>
+                    </td>
+                    <td>
+                <%= user_link(user.id, user.legal_name) %>
                 <%= if @user and (user.id == @user.id)
                       link_to("(#{user.percent_complete}%)", controller: "account", action: "profile")
                     else
                       "(#{user.percent_complete}%)"
-                    end %></br>
-                <%= link_to(:observations.t, action: "observations_by_user", id: user.id) %>
-                <%= user_link(user.id, user.contribution) %>
+                    end %>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td>
+                        <%= "#{user.contribution} #{:users_by_contribution_2f.t}" %><br/>
+                        <%= link_to(:observations.t, action: "observations_by_user", id: user.id) %>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="col-xs-5">
+                <div>
+                  <%= thumbnail(user.image_id, link: {action: :show_user},
+                                user: user.id, votes: false, size: :thumbnail) if user.image_id
+                  %>
+                </div>
               </div>
             </div>
           </div>

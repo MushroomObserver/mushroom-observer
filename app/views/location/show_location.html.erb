@@ -1,7 +1,7 @@
 <%
   @title = :show_location_title.t(:name => @location.display_name)
 
-  left_links = [
+  right_links = [
           link_with_query(:show_location_observations.t,
                           controller: :observer, action: :observations_at_location, id: @location.id),
           link_to(:all_objects.t(:type => :location), :action => 'list_locations'),
@@ -9,20 +9,18 @@
           link_with_query(:show_location_edit.t, :action => 'edit_location',
                           :id => @location.id)
   ]
-  right_links = is_in_admin_mode? ? [
-          link_with_query(:show_location_destroy.t,
-                          :action => 'destroy_location', :id => @location.id),
-          link_with_query(:show_location_reverse.t,
-                          :action => 'reverse_name_order', :id => @location.id)] : []
-
+  if is_in_admin_mode?
+   right_links <<  link_with_query(:show_location_destroy.t,
+                          :action => 'destroy_location', :id => @location.id)
+   right_links << link_with_query(:show_location_reverse.t,
+                          :action => 'reverse_name_order', :id => @location.id)
+  end
   @tabsets = {
           pager_for: @location,
           right: render(partial: "shared/tab_set", locals: {links: right_links.
                                                                         push(draw_interest_icons(@location))
-                                                 }),
-          left: render(partial: "shared/tab_set", locals: {links: left_links})
+                                                 })
   }
-  draw_prev_next_tabs(@location)
 %>
 <hr>
 <div class="row">

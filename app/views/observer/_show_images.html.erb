@@ -1,7 +1,9 @@
 <div class='show_images list-group'>
-<div class="list-group-item default">
+<div class="list-group-item">
+  <div class="row">
+    <div class="col-xs-12">
+      <%= :IMAGES.t %>
   <% if @observation.images.length > 0 %>
-    <%= :IMAGES.t %>:
     <%= if thumb_size_control and not browser.bot?
       if default_thumbnail_size == :thumbnail
         link_with_query(:show_images_large_thumbs.t, :id => @observation.id,
@@ -13,19 +15,22 @@
     end %>
   <% end %>
   <% if check_permission(@observation) %>
-      <small>
+
+      <small class="pull-right">
         <%= link_with_query(:show_observation_add_images.t, :controller => 'image',
                             :action => 'add_image', :id => @observation.id) %> |
         <%= link_with_query(:show_observation_reuse_image.t,
                             :controller => 'image', :action => 'reuse_image',
-                            :obs_id => @observation.id, :mode => 'observation') %> |
+                            :obs_id => @observation.id, :mode => 'observation') %>
         <% if @observation.images.length > 0 %>
-            <%= link_with_query(:show_observation_remove_images.t,
+            | <%= link_with_query(:show_observation_remove_images.t,
                                 :controller => 'image', :action => 'remove_images',
                                 :id => @observation.id) %>
         <% end %>
       </small>
   <% end %>
+    </div>
+  </div>
 </div>
 
     <%

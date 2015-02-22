@@ -1,8 +1,9 @@
 <% @title = :ask_webmaster_title.t %>
 
-<%= :ask_webmaster_note.tp(:todo_list => "/pivotal") %>
+
 <div class="row">
-  <div class="col-xs-12">
+  <div class="col-lg-7 col-md-8 col-sm-8">
+    <%= :ask_webmaster_note.tp(:todo_list => "/pivotal") %>
     <%= form_tag(:action => 'ask_webmaster_question') do %>
         <div class="form-group">
         <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label>
@@ -10,7 +11,7 @@
         </div>
         <div class="form-group">
         <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
-        <%= text_area(:question, :content, value: @content, cols: 80, autofocus: !@email.blank? && !@email_error) %>
+        <%= text_area(:question, :content, value: @content, cols: 80, rows: 10, autofocus: !@email.blank? && !@email_error) %>
         </div>
         <div class="push-down text-center">
           <%= submit_tag :SEND.l, class:"btn btn-default" %>

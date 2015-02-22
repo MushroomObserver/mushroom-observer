@@ -1,35 +1,30 @@
 <%
    @title = :image_show_title.t(name: @image.unique_format_name)
    # Put controls and info to right of image unless it is too big.
-
-
-   left_links = []
+   right_links = []
    @image.observations.each do |obs|
-     left_links.push(link_with_query(:show_name.t(name: obs.format_name),
-                                     controller: 'name', action: 'show_name',
-                                     id: obs.name.id))
-     left_links.push(link_to('EOL', @image.eol_url)) if @image.eol_url
-     left_links.push(link_to(:google_images.t, 'http://images.google.com/images?q=%s' % obs.text_name))
-     left_links.push(link_with_query(:show_object.t(type: :observation),
-                                     controller: 'observer', action: 'show_observation', id: obs.id))
+     right_links << link_with_query(:show_name.t(name: obs.format_name),
+                                    controller: 'name', action: 'show_name',
+                                    id: obs.name.id)
+     right_links << link_to('EOL', @image.eol_url) if @image.eol_url
+     right_links << link_to(:google_images.t, 'http://images.google.com/images?q=%s' % obs.text_name)
+     right_links << link_with_query(:show_object.t(type: :observation),
+                                    controller: 'observer', action: 'show_observation', id: obs.id)
    end
 
-   right_links = !check_permission(@image) ? [] : [link_with_query(:image_show_edit.t, action: 'edit_image',id: @image.id),
-                                                   link_with_query(:image_show_destroy.t,
-                                                                   {action: 'destroy_image', id: @image.id},
-                                                                   {data: {confirm: :are_you_sure.l}})]
+   if check_permission(@image)
+     right_links << link_with_query(:image_show_edit.t, action: 'edit_image', id: @image.id)
+     right_links << link_with_query(:image_show_destroy.t, {action: 'destroy_image', id: @image.id},
+                                    {data: {confirm: :are_you_sure.l}})
+   end
 
    @tabsets = {
-           left: render({partial: '/shared/tab_set',
-                         locals: {
-                                 links: left_links
-                         }}),
-            right: render({partial: '/shared/tab_set',
-                 locals: {
-                         links: right_links
-                 }})
+           pager_for: @image,
+           right: render({partial: '/shared/tab_set',
+                          locals: {
+                                  links: right_links
+                          }})
    }
-   draw_prev_next_tabs(@image)
 %>
 
 <div class="row">
@@ -173,9 +168,9 @@
     <div id="quality_vote_container"><!--Note: used by ajax-->
       <div id="quality_vote_content" class="list-group list-group-compact">
         <div class="list-group-item default">
-      <strong><%= :image_show_quality.t %>:</strong>
-      <small><%= vote = (@image.vote_cache + 0.5).to_i rescue 0
-                 image_vote_as_long_string(vote).t %></small>
+          <strong><%= :image_show_quality.t %>:</strong>
+          <small><%= vote = (@image.vote_cache + 0.5).to_i rescue 0
+                     image_vote_as_long_string(vote).t %></small>
         </div>
         <% if @user
              current = @image.users_vote(@user).to_i %>
@@ -197,7 +192,7 @@
                   <div class="btn-group" style="width:100%;">
                     <%= link_to(value == 0 ? str2 : str1, {vote: value}.merge(args),
                                 {style: "width: 65%; padding: 4px;", class: css_class + " btn-default", title: str2,
-                                 data: {toggle: "tooltip", placement: "left", role: "image_vote", val: value ,id: @image.id}}) %>
+                                 data: {toggle: "tooltip", placement: "left", role: "image_vote", val: value, id: @image.id}}) %>
                     <%= link_to(str3, {vote: value, next: true}.merge(args),
                                 {class: css_class + " btn-success", style: "width: 35%; padding: 4px;", title: str2, data: {toggle: "tooltip", placement: "left"}}) %>
                   </div>
@@ -225,7 +220,7 @@
   </div>
 </div>
 <div class="row">
-<div class="col-sm-4">
+  <div class="col-sm-4">
     <div class="small">
       <%= image_copyright(@image) %>
       <%= render(partial: "shared/form_#{@image.license.form_name}") %>

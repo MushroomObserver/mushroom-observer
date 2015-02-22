@@ -2,19 +2,19 @@
    @title ||= :show_project_title.t(:title => @project.title)
 
    # List Projects | Edit Project
-   left_links = [link_to(:app_list_projects.t, action: :list_projects),
+   right_links = [link_to(:app_list_projects.t, action: :list_projects),
                  link_with_query(:show_project_admin_request.t, {action: :admin_request, id: @project.id})]
 
-   left_links << link_with_query(:show_project_add_members.t, {action: 'add_members', id: @project.id}) if @project.is_admin?(@user)
+   right_links << link_with_query(:show_project_add_members.t, {action: 'add_members', id: @project.id}) if @project.is_admin?(@user)
    if check_permission(@project)
-     left_links << link_with_query(:show_project_destroy.t, {action: :destroy_project, id: @project.id},
+     right_links << link_with_query(:show_project_destroy.t, {action: :destroy_project, id: @project.id},
                                    {data: {confirm: :are_you_sure.l}})
-     left_links << link_with_query(:show_project_edit.t, {action: :edit_project}, id: @project.id)
+     right_links << link_with_query(:show_project_edit.t, {action: :edit_project}, id: @project.id)
    end
+   right_links << draw_interest_icons(@project)
 
    @tabsets = {pager_for: @project,
-               left: render(partial: "shared/tab_set", locals: {links: left_links}),
-               right: draw_interest_icons(@project)
+               right: render(partial: "shared/tab_set", locals: {links: right_links})
    }
 %>
 

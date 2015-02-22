@@ -131,7 +131,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
     # (Make sure there is a tab to go back to show_observation.)
-    assert_select("div#left_tabs a[href=/#{obs.id}]")
+    assert_select("div#right_tabs a[href=/#{obs.id}]")
 
     open_form do |form|
       form.submit
@@ -359,7 +359,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
       # (Make sure there is a tab to go back to show_observation.)
-      assert_select("div#left_tabs a[href=/#{obs.id}]")
+      assert_select("div#right_tabs a[href=/#{obs.id}]")
 
       open_form do |form|
         form.assert_value("name_name", "")

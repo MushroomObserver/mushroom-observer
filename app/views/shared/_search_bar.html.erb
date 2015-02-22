@@ -1,7 +1,7 @@
 <nav class="navbar navbar-default">
   <%= form_tag({controller: 'observer', action: 'pattern_search'}, {class: "navbar-form navbar-left"}) do %>
-      <div class="form-group">
-        <div class="icon-addon addon-sm  inline">
+      <div>
+        <div class="icon-addon addon-sm" style="display: inline-block">
           <%= text_field(:search, :pattern, value: session[:pattern], class: "form-control", placeholder: :app_find.t) %>
           <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
         </div>
@@ -19,10 +19,10 @@
                 [:app_search_google.l, :google],
         ].sort
             select(:search, :type, options_for_select(options, session[:search_type] || :observation), {},
-                   {class: "form-control align-top"}) %>
+                   {class: "form-control inline align-top hidden-xs", style: "width: auto;"}) %>
         <%= submit_tag :app_search.l, class: "btn btn-default align-top" %>
 
-      </div>
+
       <div id="timer_container" class="align-top">
         <div id="timer" class="small">
           <% if @timer_start %>
@@ -35,6 +35,7 @@
           <% end %>
         </div>
         <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer', :action => 'advanced_search_form') %>
+      </div>
       </div>
   <% end %>
 

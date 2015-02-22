@@ -8,7 +8,7 @@
   </div>
 </div>
 
-<% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
+<% if @dubious_where_reasons and @dubious_where_reasons != [] %>
     <div class="row">
       <div class="col-xs-12 Warnings">
         <%= @dubious_where_reasons.safe_join(safe_br) %>
@@ -223,25 +223,27 @@
 <% if @projects.any? %>
     <div class="row">
       <div class="col-xs-12">
-        <%= :PROJECTS.t %>:
+        <label><%= :PROJECTS.t %>:</label>
         <p class="help-block">(<%= :form_observations_project_help.t %>)</p>
       </div>
       <% for project in @projects %>
-          <div class="col-xs-12 form-inline">
+          <div class="col-xs-12">
+            <div class="form-group">
             <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
                           :disabled => @observation.user != @user && !project.is_member?(@user)) %>
             <label for="<%= "project_id_#{project.id}"%>">
               <%= project_link(project) %>
             </label>
+            </div>
           </div>
       <% end %>
     </div>
 <% end %>
 
 <% if @lists.any? %>
-    <div class="row">
       <div class="col-xs-12">
-    <%= :SPECIES_LISTS.t %>: <p class="help-block">(<%= :form_observations_list_help.t %>)</p>
+        <label><%= :SPECIES_LISTS.t %>:</label>
+          <p class="help-block">(<%= :form_observations_list_help.t %>)</p>
         </div>
     <% for list in @lists %>
           <div class="col-xs-12 form-inline">
@@ -252,15 +254,12 @@
             </label>
           </div>
     <% end %>
-    </div>
 <% end %>
 
 <% if logging_optional %>
-    <div class="row">
       <div class="col-xs-12 form-inline">
         <%= label("log_change_checked", :form_observations_log_change.t) %>:
         <%= check_box('log_change', 'checked', :checked => '1') %>
       </div>
-    </div>
 <% end %>
 <!--[eoform:observation]-->
