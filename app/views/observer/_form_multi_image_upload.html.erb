@@ -37,12 +37,13 @@
 
 <% inject_javascript_at_end %(
       jQuery(document).ready(function () {
-        var uploader = MultiImageUploader({
+        var uploader = new MultiImageUploader({
           uploading_text: "#{j :form_observations_uploading_images.t}",
           image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
           creating_observation_text: "#{j :form_observations_creating_observation.t}",
           months: "#{j :all_months.t}"
         })
         uploader.init();
+        console.log(uploader);
       });
     ) %>
