@@ -27,7 +27,7 @@ jQuery(document).ready(function () {
         jQuery('.img-theater').css('top', jQuery(document).scrollTop())
         jQuery('.img-theater').show();
         jQuery('body').addClass('theater-shown');
-        jQuery('#img_append_target').html('<a href="{{orig}}"><img src="{{src}}" class="center-block" style="height: {{h}}; width: auto;"><//img><//a>'
+        jQuery('#img_append_target').html('<a href="{{orig}}"><img src="{{src}}" style="height: {{h}}; width: auto;"><//img><//a>'
             .replace("{{src}}", img_src)
             .replace("{{orig}}", img_orig)
             .replace("{{h}}", jQuery(window).height() - 20 + 'px'))
@@ -40,7 +40,6 @@ jQuery(document).ready(function () {
     });
 
     jQuery('[data-dismiss="theater"]').click(function (e){
-        e.preventDefault();
         hideTheater();
     });
 
@@ -69,7 +68,6 @@ jQuery(document).ready(function () {
     }
 
 
-    var slide_item_lengths = jQuery("#carouselshowmanymoveone .item").length;
         jQuery('#carouselshowmanymoveone .item').each(function () {
             var next = jQuery(this).next();
             if (!next.length) {
@@ -78,13 +76,12 @@ jQuery(document).ready(function () {
                 next.children(':first-child').clone().addClass("extra1").appendTo($(this));
 
             for (var i = 0; i < 2; i++) {
-                console.log(next);
                 next = next.next();
                 if (!next.length) {
                     //next = jQuery(this).siblings(':first');
                 }
-
-                next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
+                if (next)
+                    next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
             }
         });
 });

@@ -1,37 +1,38 @@
 <%
-  # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
-  # so we only have image_id.  It's still possible to render the image with
-  # nothing but the image_id.  (But not votes, original name, etc.)
-  image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-  vote_pct = ((image.vote_cache || 0) / Image.all_votes.length * 100).floor \
+   # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
+   # so we only have image_id.  It's still possible to render the image with
+   # nothing but the image_id.  (But not votes, original name, etc.)
+   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+   vote_pct = ((image.vote_cache || 0) / Image.all_votes.length * 100).floor \
              if image and votes
-  size_url  = Image.url(size, image_id)
-  large_url = Image.url(:large, image_id)
-  orig_url  = Image.url(:original, image_id)
+   size_url = Image.url(size, image_id)
+   large_url = Image.url(:large, image_id)
+   orig_url = Image.url(:original, image_id)
 %>
 
 <div>
-  <div style="position: relative">
-    <div style="position: absolute; bottom: 0" class="hidden-xs">
-      <a href="#" class="glyphicon glyphicon-fullscreen theater-btn hidden-xs"
-         data-toggle="theater" data-image="<%=large_url%>"
-         data-original="<%=orig_url%>"></a>
+  <center>
+    <div style="display:inline-block">
+      <% html_opts = theater_on_click ?
+              {data: {toggle: :theater, image: large_url, original: orig_url}} :
+              {class: :no} %>
+
+      <%= link_with_query(image_tag(size_url, class: responsive ? 'img-responsive' : 'img-unresponsive',
+                                    style: "padding-left: 25px;"), link, html_opts) %>
+          <a href="#" class="glyphicon glyphicon-fullscreen theater-btn pull-right"
+             data-toggle="theater" data-image="<%=large_url%>"
+             data-original="<%=orig_url%>"></a>
     </div>
-    <% html_opts = theater_on_click ?
-                   {data: {toggle: :theater, image: large_url, original: orig_url}} :
-                   {class: :no} %>
-    <%= link_with_query(image_tag(size_url, class: responsive ? 'img-responsive' : 'img-unresponsive',
-                                  style: "padding-left: 25px;"), link, html_opts) %>
-  </div>
-  <div class="push-down">
+  </center>
+  <div style="margin-top: -20px;">
     <% if User.current and votes and image %>
-      <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
+        <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
     <% end %>
     <% if original && image && !image.original_name.blank? &&
-          (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
-      <center>
-        <span><%= image.original_name %></span>
-      </center>
+            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+        <center>
+          <span><%= image.original_name %></span>
+        </center>
     <% end %>
   </div>
 </div>

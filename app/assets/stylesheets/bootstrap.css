@@ -1576,16 +1576,16 @@ pre code {
     }
 }
 
-/* No greater than 1200px, no less than 100px */
-@media (max-width:1200px) and (min-width:100px) {
-    .container {
-        width: 100%;
-    }
-}
 
 @media (min-width: 1200px) {
     .container {
         width: 1170px;
+    }
+}
+
+@media (min-width: 1300px) {
+    .container {
+        width: 1270px;
     }
 }
 
@@ -1607,6 +1607,15 @@ pre code {
         width: 1470px;
     }
 }
+
+
+/* No greater than 1200px, no less than 100px */
+@media (min-width:100px) and (max-width:1200px) {
+    .container {
+        width: 100% !important;
+    }
+}
+
 .container-fluid {
     padding-right: 15px;
     padding-left: 15px;

@@ -2,19 +2,24 @@
    image_height = default_thumbnail_size == :small ? '200px' : '120px'
    default_image = @observation.thumb_image
    slider_hider_css = "hidden"
+   slider_box_size_css = "col-xs-12 col-sm-6 col-md-3"
    if not @observation.images.nil? and @observation.images.any?
-     slider_hider_css = case @observation.images.length
+      case @observation.images.length
         when 1
-             "hidden"
+          slider_hider_css = "hidden"
+          slider_box_size_css = "col-xs-12"
         when 2
-            "visible-xs"
-        when 3, 4
-            "visible-xs visible-sm visible-md"
+          slider_hider_css = "visible-xs"
+          slider_box_size_css = "col-xs-12 col-sm-6"
+        when 3
+          slider_hider_css = "visible-xs visible-sm visible-md"
+          slider_box_size_css = "col-xs-12 col-sm-6 col-md-4"
+        when 4
+          slider_hider_css = "visible-xs visible-sm visible-md"
         else
-             ""
+          slider_hider_css = ""
    end
  end
-
 %>
 
 <% if not @observation.images.nil? and @observation.images.any?%>
@@ -23,10 +28,9 @@
     <div class="carousel-inner">
       <div class="item active">
         <% unless default_image.nil? %>
-        <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="<%=slider_box_size_css%>">
           <div style="max-height: 250px;">
             <img src="<%= Image.url(default_thumbnail_size, default_image.id) %>" class="img-responsive center-block" style="height: <%= image_height %>"/>
-
             <div class="push-down">
               <%= render(partial: "image/image_vote_links", locals: {image: default_image}) %>
             </div>
@@ -37,7 +41,7 @@
       <% @observation.images.each do|img| %>
           <%if img != default_image %>
           <div class="item">
-            <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="<%=slider_box_size_css%>">
               <div style="max-height: 250px;">
                 <img src="<%= Image.url(default_thumbnail_size, img.id) %>" class="img-responsive center-block" style="height: <%= image_height %>"/>
 
