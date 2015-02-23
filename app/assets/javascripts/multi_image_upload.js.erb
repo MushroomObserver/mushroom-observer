@@ -550,7 +550,7 @@ function MultiImageUploader(localized_text) {
         // Detect when a user submits observation; includes upload logic
 
         $form.submit(function (event) {
-            event.preventDefault();
+          //  event.preventDefault();
             if (blockFormSubmission) {
                 fileStore.uploadAll();
                 return false;
