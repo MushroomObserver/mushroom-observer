@@ -55,11 +55,13 @@
 }
 
 .navbar-default .navbar-nav > li > a {
-    color: black
+    color: $top_bar_link_fg;
+    background-color: $top_bar_link_bg;
 }
 
 .navbar-default .navbar-nav > li > a:hover {
-    color: #205080;
+    color: $top_bar_link_hover_fg;
+    background-color: $top_bar_link_hover_bg;
 }
 
 .navbar-default .navbar-nav > li > a.glyphicon {
@@ -130,7 +132,6 @@
 
 .icon-addon {
     position: relative;
-    color: #555;
     display: block;
 }
 
@@ -157,7 +158,7 @@
     text-align: center;
     padding: 10px 0;
     top: 1px;
-    color: lightgrey;
+    color: $search_field_icon;
 }
 
 .icon-addon.addon-lg .form-control {
@@ -199,7 +200,7 @@
 .icon-addon:hover .glyphicon,
 .icon-addon .form-control:focus + .fa,
 .icon-addon:hover .fa {
-    color: #2580db;
+    color: $search_field_icon_active;
 }
 
 /*Image Theater CSS */
@@ -250,10 +251,10 @@
 
 div.auto_complete {
     position: absolute;
-    background-color: #fff;
-    color: black;
+    color: $autocomplete_fg;
+    background-color: $autocomplete_bg;
     margin: 0px;
-    border: 1px solid #888;
+    border: 1px solid $autocomplete_border;
     padding: 0px;
     overflow-x: hidden;
     display: none;
@@ -277,7 +278,8 @@ div.auto_complete ul li {
 }
 
 div.auto_complete ul li.selected {
-    background-color: #ff0;
+    color: $autocomplete_hot_fg;
+    background-color: $autocomplete_hot_bg;
 }
 
 
@@ -291,12 +293,12 @@ table.scroller th {
     padding-bottom: 0.3em;
 }
 div.scroller {
-    color: black;
-    background: white;
+    color: $namelister_fg;
+    background-color: $namelister_bg;
     height: 450px;
     overflow: auto;
     margin: 0;
-    border: 1px solid #888;
+    border: 1px solid $namelister_border;
     padding: 0;
     font-style: italic;
 }
@@ -312,6 +314,14 @@ div.scroller li {
 div.scroller span.normal {
     font-style: normal;
 }
+div.scroller li.hot {
+    color: $namelister_hot_bg;
+    background-color: $namelister_hot_bg;
+}
+div.scroller li.warm {
+    color: $namelister_warm_bg;
+    background-color: $namelister_warm_bg;
+}
 
 
 /*
@@ -321,7 +331,6 @@ div.scroller span.normal {
 
 /* Small Devices, Tablets */
 @media screen and (max-width: 767px) {
-
     .rss-box-details {
         height: auto !important;
     }
@@ -329,25 +338,20 @@ div.scroller span.normal {
 
 /* Medium Devices, Desktops */
 @media screen and (max-width: 992px) {
-
 }
 
-
-.carousel-control
-{
+.carousel-control {
     width:  4%;
 }
 .carousel-control.left,
-.carousel-control.right
-{
-    margin-left:15px;
-    background-image:none;
+.carousel-control.right {
+    margin-left: 15px;
+    background-image: none;
 }
 
 .extra1,
 .extra2,
-.extra3
-{
+.extra3 {
     display: none;
 }
 
