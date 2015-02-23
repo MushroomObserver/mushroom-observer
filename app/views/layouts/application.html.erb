@@ -24,7 +24,8 @@
       css = @user.theme
       css = MO.themes.sample unless MO.themes.member?(css)
     end
-    stylesheet_link_tag("themes/#{css}")
+    css = "BlackOnWhite"
+    stylesheet_link_tag("bootstrap", "themes/#{css}")
   %>
   <%= @header unless @header.blank? %>
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -78,7 +79,7 @@
     <!--/Toggle navigation buttons for mobile-->
 
     <!--SEARCH BAR-->
-    <div id="search_bar_row" class="row hidden-xs color2">
+    <div id="search_bar_row" class="row hidden-xs">
       <%= render(:partial => '/shared/search_bar') %>
     </div>
     <!--/SEARCH BAR-->

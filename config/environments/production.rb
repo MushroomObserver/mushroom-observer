@@ -164,6 +164,7 @@ MushroomObserver::Application.configure do
     vote_popup.js
 
     themes
+    bootstrap.css
     semantic_vernacular.css
 
   ) if config.assets && config.assets.precompile
