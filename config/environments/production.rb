@@ -163,9 +163,9 @@ MushroomObserver::Application.configure do
     translations.js
     vote_popup.js
 
-    themes
     bootstrap.css
     semantic_vernacular.css
+    themes/BlackOnWhite.css
 
   ) if config.assets && config.assets.precompile
 
