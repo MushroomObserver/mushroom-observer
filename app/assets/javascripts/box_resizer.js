@@ -1,4 +1,4 @@
-jQuery(document).ready(function () {
+$(window).load(function () {
     var boxes = jQuery('.rss-box-details');
     if (boxes) {
 

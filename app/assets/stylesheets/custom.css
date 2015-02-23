@@ -143,7 +143,9 @@ span.input-group-addon {
 .pagination-sm > li:last-child > a, .pagination-sm > li:last-child > span {
     border: 0 !important;
     border-radius: 0 !important;
+
 }
+
 
 .pager
 .pagination > .active > a,

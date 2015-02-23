@@ -1,6 +1,7 @@
 <%
    vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
    user = User.current
+
 %>
 <% if vote_percentage %>
     <div class="vote-meter">

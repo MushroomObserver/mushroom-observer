@@ -3,6 +3,7 @@
   questions_ok = @observation.user.email_general_question
   name = @observation.name
   user_has_lists = @user && !@user.species_lists.empty?
+  images_own_row = @observation.images && @observation.images.any? && @observation.images.length > 4
   right_links = []
   javascript_include("vote_popup")
 
@@ -40,32 +41,35 @@
           right: render(partial: '/shared/tab_set', locals: {links: right_links << draw_interest_icons(@observation)})
   }
 %>
-
-<div class="row">
-  <div class="col-xs-12">
-    <%= render(partial: 'show_image_slider', locals: { thumb_size_control: true }) %>
-  </div>
-</div>
 <div class="row">
   <div class="col-sm-8">
     <div class="list-group">
       <div class="list-group-item">
-      <%= render(partial: 'show_observation', locals: { observation: @observation }) %>
+        <%= render(partial: 'show_observation', locals: {observation: @observation}) %>
       </div>
     </div>
-    <%= render(partial: 'show_lists', locals: { observation: @observation }) %>
+    <div class="row">
+      <%= render(partial: 'show_image_slider', locals: { thumb_size_control: true }) %>
+    </div>
     <%= render(partial: 'naming/show', locals: { observation: @observation }) %>
-    <%= render(partial: 'comment/show_comments', locals: { object: @observation,
-               controls: true, limit: nil }) %>
-    <%= show_object_footer(@observation) %>
   </div>
   <div class="col-sm-4">
     <div class="list-group">
       <div class="list-group-item">
-      <%= render(partial: 'show_name_info', locals: { observation: @observation }) %>
+        <%= render(partial: 'show_name_info', locals: {observation: @observation}) %>
       </div>
     </div>
     <%= render(partial: 'show_thumbnail_map', locals: { observation: @observation }) unless browser.bot? %>
+    <%= render(partial: 'show_lists', locals: { observation: @observation }) %>
     <%= render(partial: 'show_images', locals: { thumb_size_control: true }) %>
   </div>
 </div>
+<div class="row">
+  <div class="col-xs-12">
+    <%= render(partial: 'comment/show_comments', locals: { object: @observation,
+                                                           controls: true, limit: nil }) %>
+  </div>
+</div>
+<%= show_object_footer(@observation) %>
+
+
