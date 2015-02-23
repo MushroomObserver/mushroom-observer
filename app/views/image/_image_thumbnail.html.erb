@@ -12,7 +12,7 @@
            {data: {toggle: :theater, image: large_url, original: orig_url}} :
            {class: :no}
 %>
-
+<div style="position:relative">
 <div style="display: inline;">
   <div class="text-center">
     <%= link_with_query(image_tag(size_url, style: responsive ? 'max-width: 100%; height: auto;' : 'img-unresponsive'), link, html_opts) %>
@@ -31,4 +31,5 @@
       <% end %>
     </div>
   </div>
+</div>
 </div>
