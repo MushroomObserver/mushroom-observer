@@ -1,0 +1,39 @@
+$body_fg:                   black;
+$body_bg:                   white;
+$link_fg:                   black;
+$link_bg:                   transparent;
+$link_visited_fg:           black;
+$link_visited_bg:           transparent;
+$link_hover_fg:             black;
+$link_hover_bg:             transparent;
+$banner_fg:                 black;
+$banner_bg:                 black;
+$banner_hover_fg:           black;
+$banner_hover_bg:           black;
+$nav_bar_fg:                black;
+$nav_bar_bg:                black;
+$nav_bar_head_fg:           white;
+$nav_bar_head_bg:           black;
+$search_bar_fg:            black;
+$search_bar_bg:             black;
+$search_bar_link_fg:       black;
+$search_bar_link_bg:       transparent;
+$search_bar_link_hover_fg: #205080;
+$search_bar_link_hover_bg: transparent;
+$search_field_icon:        lightgray;
+$search_field_icon_active: #2580db;
+$list_fg:                   black;
+$list_bg:                   black;
+$img_border:                black;
+$img_border_hover:          black;
+$vote_meter:                black;
+$pager_fg:                  black;
+$pager_bg:                  white;
+$pager_hover_fg:            black;
+$pager_hover_bg:            black;
+$pager_active_fg:           white;
+$pager_active_bg:           black;
+
+@import "../custom.css.scss";
+
+

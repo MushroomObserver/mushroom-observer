@@ -1,0 +1,96 @@
+/* Main text and links. */
+body {
+    color:            $body_fg;
+    background-color: $body_bg;
+}
+a {
+    color:            $link_fg !important;
+    background-color: $link_bg !important;
+}
+a:visited {
+    color:            $link_visited_fg !important;
+    background-color: $link_visited_bg !important;
+}
+a:hover {
+    color:            $link_hover_fg !important;
+    background-color: $link_hover_bg !important;
+}
+
+/* Banner. */
+#banner,
+#banner a,
+#banner a:visited {
+    color:            $banner_fg !important;
+    background-color: $banner_bg !important;
+}
+#banner a:hover {
+    color:            $banner_hover_fg !important;
+}
+
+/* Navigation bar on left side. */
+#navigation a.list-group-item,
+#navigation div.list-group-item {
+    color:            $nav_bar_fg;
+    background-color: $nav_bar_bg;
+}
+#navigation .list-group-item.disabled  {
+    color:            $nav_bar_head_fg;
+    background-color: $nav_bar_head_bg;
+}
+
+/* Search bar on top. */
+.navbar {
+    color:            $search_bar_fg !important;
+    background-color: $search_bar_bg !important;
+}
+
+/* List items. */
+#content .list-group-item {
+    color:            $list_fg !important;
+    background-color: $list_bg !important;
+}
+
+/* Images. */
+img {
+    border-color: $img_border;
+}
+a img:hover {
+    border-color: $img_border_hover;
+}
+.vote-meter-bar {
+    background-color: $vote_meter;
+}
+
+/* Pagination stuff. */
+.pagination > li > a,
+.pagination > li > span,
+.pagination > li:first-child > a,
+.pagination > li:first-child > span,
+.pagination-sm > li:first-child > a,
+.pagination-sm > li:first-child > span,
+.pagination-sm > li:last-child > a,
+.pagination-sm > li:last-child > span {
+    color:            $pager_fg !important;
+    background-color: $pager_bg !important;
+}
+.pagination > li > a:hover,
+.pagination > li > span:hover,
+.pagination > li:first-child > a:hover,
+.pagination > li:first-child > span:hover,
+.pagination-sm > li:first-child > a:hover,
+.pagination-sm > li:first-child > span:hover,
+.pagination-sm > li:last-child > a:hover,
+.pagination-sm > li:last-child > span:hover {
+    color:            $pager_hover_fg !important;
+    background-color: $pager_hover_bg !important;
+}
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+    color:            $pager_active_fg !important;
+    background-color: $pager_active_bg !important;
+    border-color:     $pager_active_bg !important;
+}

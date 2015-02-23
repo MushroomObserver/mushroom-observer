@@ -1,0 +1,41 @@
+$augustus_cap:         #ECCF95;
+$brasiliensis_gills_1: #A06463;
+$brasiliensis_gills_2: #743931;
+$campestris_cap:       #F6F0F2;
+$cupreobrunneus_gills: #3B2821;
+$lilaceps_stain:       #B4725F;
+$semotus_cap:          #BC9D89;
+$xanthodermus_stain:   #D4A833;
+
+$body_fg:          black;
+$body_bg:          white;
+$link_fg:          $brasiliensis_gills_1;
+$link_bg:          transparent;
+$link_visited_fg:  $cupreobrunneus_gills;
+$link_visited_bg:  transparent;
+$link_hover_fg:    $brasiliensis_gills_2;
+$link_hover_bg:    transparent;
+$banner_fg:        $cupreobrunneus_gills;
+$banner_bg:        $semotus_cap;
+$banner_hover_fg:  $augustus_cap;
+$banner_hover_bg:  $semotus_cap;
+$nav_bar_fg:       black;
+$nav_bar_bg:       $augustus_cap;
+$nav_bar_head_fg:  white;
+$nav_bar_head_bg:  $semotus_cap;
+$search_bar_fg:    black;
+$search_bar_bg:    $campestris_cap;
+$list_fg:          $cupreobrunneus_gills;
+$list_bg:          $campestris_cap;
+$img_border:       $cupreobrunneus_gills;
+$img_border_hover: $brasiliensis_gills_2;
+$vote_meter:       $lilaceps_stain;
+$pager_fg:         $brasiliensis_gills_1;
+$pager_bg:         white;
+$pager_hover_fg:   $brasiliensis_gills_2;
+$pager_hover_bg:   $campestris_cap;
+$pager_active_fg:  white;
+$pager_active_bg:  $xanthodermus_stain;
+
+@import "../custom.css.scss";
+

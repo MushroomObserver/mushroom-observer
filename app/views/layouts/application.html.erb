@@ -11,21 +11,21 @@
   <meta property="og:title" content="Mushroom Observer"/>
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
   <%=
+    css = MO.default_theme
+    if is_in_admin_mode?
+      css = "Admin"
+    elsif browser.bot?
       css = MO.default_theme
-      if is_in_admin_mode?
-        css = 'Admin'
-      elsif browser.bot?
-        css = MO.default_theme
-      elsif MO.themes.member?(controller.action_name)
-        # when looking at a theme's info page render it in that theme
-        css = controller.action_name
-      elsif @user
-        css = @user.theme
-        css = MO.themes.sample unless MO.themes.member?(css)
-      end
+    elsif MO.themes.member?(controller.action_name)
+      # when looking at a theme's info page render it in that theme
+      css = controller.action_name
+    elsif @user
+      css = @user.theme
+      css = MO.themes.sample unless MO.themes.member?(css)
+    end
+    stylesheet_link_tag("themes/#{css}")
   %>
- <%= stylesheet_link_tag("application") %>
- <%= @header unless @header.blank? %>
+  <%= @header unless @header.blank? %>
 </head>
 <body>
 <div class="container-fluid">
