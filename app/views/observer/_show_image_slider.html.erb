@@ -1,5 +1,6 @@
 <%
-   image_height = default_thumbnail_size == :small ? '200px' : '120px'
+   default_thumbnail_size ||= :small
+   image_height = default_thumbnail_size == :small ? '200px' : '120px' rescue '120px'
    default_image = @observation.thumb_image
    slider_hider_css = "hidden"
    slider_box_size_css = "col-xs-12 col-sm-6 col-md-3"
@@ -29,8 +30,8 @@
       <div class="item active">
         <% unless default_image.nil? %>
         <div class="<%=slider_box_size_css%>">
-          <div style="max-height: 250px;">
-            <img src="<%= Image.url(default_thumbnail_size, default_image.id) %>" class="img-responsive center-block" style="height: <%= image_height %>"/>
+          <div>
+            <img src="<%= Image.url(default_thumbnail_size, default_image.id) %>" class="img-responsive center-block"/>
             <div class="push-down">
               <%= render(partial: "image/image_vote_links", locals: {image: default_image}) %>
             </div>
@@ -42,13 +43,10 @@
           <%if img != default_image %>
           <div class="item">
             <div class="<%=slider_box_size_css%>">
-              <div style="max-height: 250px;">
-                <img src="<%= Image.url(default_thumbnail_size, img.id) %>" class="img-responsive center-block" style="height: <%= image_height %>"/>
-
+                <img src="<%= Image.url(default_thumbnail_size, img.id) %>" class="img-responsive center-block"/>
                 <div class="push-down">
                   <%= render(partial: "image/image_vote_links", locals: {image: img}) %>
                 </div>
-              </div>
             </div>
           </div>
           <% end %>

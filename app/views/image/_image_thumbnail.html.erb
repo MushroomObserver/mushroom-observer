@@ -8,31 +8,27 @@
    size_url = Image.url(size, image_id)
    large_url = Image.url(:large, image_id)
    orig_url = Image.url(:original, image_id)
+   html_opts = theater_on_click ?
+           {data: {toggle: :theater, image: large_url, original: orig_url}} :
+           {class: :no}
 %>
 
-<div>
-  <center>
-    <div style="display:inline-block">
-      <% html_opts = theater_on_click ?
-              {data: {toggle: :theater, image: large_url, original: orig_url}} :
-              {class: :no} %>
-
-      <%= link_with_query(image_tag(size_url, class: responsive ? 'img-responsive' : 'img-unresponsive',
-                                    style: "padding-left: 25px;"), link, html_opts) %>
-          <a href="#" class="glyphicon glyphicon-fullscreen theater-btn pull-right"
-             data-toggle="theater" data-image="<%=large_url%>"
-             data-original="<%=orig_url%>"></a>
+<div style="display: inline;">
+  <div class="text-center">
+    <%= link_with_query(image_tag(size_url, style: responsive ? 'max-width: 100%; height: auto;' : 'img-unresponsive'), link, html_opts) %>
+    <a href="<%=orig_url%>" class="glyphicon glyphicon-fullscreen theater-btn"
+       data-toggle="theater" data-image="<%= large_url %>"
+       data-original="<%= orig_url %>"></a>
+    <div class="push-down">
+      <% if User.current and votes and image %>
+          <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
+      <% end %>
+      <% if original && image && !image.original_name.blank? &&
+              (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+          <center>
+            <span><%= image.original_name %></span>
+          </center>
+      <% end %>
     </div>
-  </center>
-  <div style="margin-top: -20px;">
-    <% if User.current and votes and image %>
-        <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
-    <% end %>
-    <% if original && image && !image.original_name.blank? &&
-            (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
-        <center>
-          <span><%= image.original_name %></span>
-        </center>
-    <% end %>
   </div>
 </div>

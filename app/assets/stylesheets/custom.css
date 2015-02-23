@@ -73,7 +73,6 @@ body {
     background: rgba(239, 239, 239, 0.34);
 }
 
-
 .list-group-item.default {
     color: #333;
     background-color: #F5F5F5;
@@ -156,10 +155,4 @@ span.input-group-addon {
 .pagination > .active > span:focus {
     background-color: #959595;
     border-color: #B6B6B6;
-}
-
-.center-block {
-    float: none;
-    margin-left: auto;
-    margin-right: auto;
 }
