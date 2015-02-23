@@ -25,7 +25,7 @@
     <%= link_to(:app_login.t, {controller: :account, action: :login}, {class: "list-group-item indent"}) %>
     <%= link_to(:app_create_account.t, {controller: :account, action: :signup}, {class: "list-group-item indent"}) %>
   <% else %>
-    <div class="list-group-item color1 visible-xs">
+    <div class="list-group-item visible-xs">
       <i class="glyphicon glyphicon-user"> </i>
       <span> <%= h(@user.login) %></span>
       <span class="pull-right"><%= link_to(:app_logout.t, {controller: :account, action: :logout_user}) %></span>
@@ -36,6 +36,7 @@
     <%= link_to(:app_your_summary.t, {controller: :observer, action: :show_user, id: @user.id}, {class: "list-group-item visible-xs"}) %>
     <%= link_to(:app_preferences.t, {controller: :account, action: :prefs}, {class: "list-group-item visible-xs"}) %>
     <%= link_to(:app_join_mailing_list.t, 'https://groups.google.com/forum/?fromgroups=#!forum/mo-general', class: "list-group-item visible-xs") %>
+    <%= link_to(:app_turn_admin_on.t, {controller: :account, action: :turn_admin_on}, {class: "list-group-item visible-xs"}) if @user.admin && !is_in_admin_mode? %>
   <% end %>
 
   <div class="list-group-item disabled bold">
@@ -93,7 +94,7 @@
         </a>
         <ul class="dropdown-menu" role="menu">
           <% for lang in Language.all.reject(&:beta).sort_by(&:order) %>
-              <li><%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %></li>
+            <li><%= link_to(h(lang.name), reload_with_args(:user_locale => lang.locale)) %></li>
           <% end %>
         </ul>
       </div>

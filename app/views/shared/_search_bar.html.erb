@@ -1,7 +1,7 @@
 <nav class="navbar navbar-default">
   <%= form_tag({controller: :observer, action: :pattern_search}, {class: "navbar-form navbar-left"}) do %>
     <div>
-      <div class="icon-addon addon-sm" style="display: inline-block">
+      <div class="icon-addon addon-sm" style="display:inline-block; vertical-align:top">
         <%= text_field(:search, :pattern, value: session[:pattern], class: "form-control", placeholder: :app_find.t) %>
         <label for="search_pattern" class="glyphicon glyphicon-search" title="search"> </label>
       </div>
@@ -22,18 +22,21 @@
         select(:search, :type, options_for_select(options, session[:search_type] || :observation), {},
                {class: "form-control inline align-top hidden-xs", style: "width: auto;"})
       %>
-      <%= submit_tag :app_search.l, class: "btn btn-default align-top" %>
+      <%= submit_tag :app_search.l, class: "btn btn-default align-top", style: "margin-right:0.5em" %>
 
-      <div id="timer_container" class="align-top">
-        <div id="timer" class="small">
-          <%= if @timer_start
-            @timer_end ||= Time.now
-            secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
-            @timer_start = nil
-            "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
-          end %>
-          &nbsp;
-        </div>
+      <div style="display: inline-block">
+        <% if @timer_start %>
+          <span id="timer" class="small">
+            <%=
+              @timer_end ||= Time.now
+              secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
+              @timer_start = nil
+              "(#{:app_index_timer.t(seconds: secs, num: @num_results.to_i)})"
+            %>
+          </span><br/>
+        <% else %>
+          <div style="height:0.6em"></div>
+        <% end %>
         <%= link_to(:app_advanced_search.l.nowrap, controller: :observer, action: :advanced_search_form) %>
       </div>
     </div>

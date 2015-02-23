@@ -223,8 +223,7 @@ mo> vi .muttrc
   set from="no-reply@mushroomobserver.org"
   set use_from=yes
   set envelope_from=yes
-mo> vi .forward
-  root
+mo> echo root > .forward
 mo> echo "This is another test." | mutt -s test $YOUR_EMAIL
 mo> exit
 
