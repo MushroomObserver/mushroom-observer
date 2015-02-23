@@ -85,10 +85,11 @@ class LurkerTest < IntegrationTestCase
 
     # And lastly there are some images.
     go_back
+
     assert_select('a[href^=/image/show_image]', :minimum => 2)
     click(:label => :image, :href => /show_image/)
     # (Make sure observation #2 is shown somewhere.)
-    assert_select('a[href^=/2?]')
+    assert_select('a[href^=/2]')
   end
 
   def test_search

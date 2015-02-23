@@ -20,7 +20,8 @@ jQuery(document).ready(function () {
         setCookie('hideBanner',"true", 1);
     });
 
-    jQuery('[data-toggle="theater"]').click(function (e){
+    jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
+        console.log('click');
         e.preventDefault();
         var img_src = jQuery(this).data().image;
         var img_orig = jQuery(this).data().original;

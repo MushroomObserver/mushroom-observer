@@ -27,7 +27,7 @@ function MultiImageUploader(localized_text) {
         _dots = [".", "..", "..."],
         blockFormSubmission = true,
         $addedImagesContainer = jQuery("#added_images_container"), // container to insert images into
-        $form = jQuery(document.forms.namedItem("create_observation_form")),
+        $form = jQuery(document.forms.namedItem("observation_form")),
         $submitButtons= $form.find('input[type="submit"]'),
         $goodImages = jQuery('#good_images'),
         $removeLinks = jQuery(".remove_image_link"),
@@ -59,7 +59,7 @@ function MultiImageUploader(localized_text) {
     SimpleDate.prototype.asDateString = function() {
         var _months = localized_text.months.split(' ');
         return this.day + "-" + _months[this.month-1] + "-" + this.year;
-    }
+    };
 
     /*********************/
     /*    DateUpdater    */
@@ -548,7 +548,9 @@ function MultiImageUploader(localized_text) {
         });
 
         // Detect when a user submits observation; includes upload logic
-        $form.submit(function () {
+
+        $form.submit(function (event) {
+          //  event.preventDefault();
             if (blockFormSubmission) {
                 fileStore.uploadAll();
                 return false;
