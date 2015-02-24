@@ -4,6 +4,7 @@
         -webkit-transition: all .25s ease-out;
         -o-transition: all .25s ease-out;
         transition: all .25s ease-out;
+        -webkit-transform: translate3d(0,0,0);
     }
 
     .row-offcanvas-right {
