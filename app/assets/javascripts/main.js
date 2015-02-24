@@ -78,19 +78,13 @@ jQuery(document).ready(function () {
         return undefined;
     }
 
-
-        jQuery('#carouselshowmanymoveone .item').each(function () {
+        jQuery('#carousel .item').each(function () {
             var next = jQuery(this).next();
-            if (!next.length) {
-                next = $(this).siblings(':first');
-            }
+            if (next)
                 next.children(':first-child').clone().addClass("extra1").appendTo($(this));
 
             for (var i = 0; i < 2; i++) {
                 next = next.next();
-                if (!next.length) {
-                    //next = jQuery(this).siblings(':first');
-                }
                 if (next)
                     next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
             }

@@ -24,7 +24,7 @@
 <% if not @observation.images.nil? and @observation.images.any? %>
     <div class="row">
       <div class="col-xs-12">
-        <div class="carousel slide" id="carouselshowmanymoveone" data-interval="100000">
+        <div class="carousel slide" id="carousel" data-interval="100000" data-wrap="false">
           <div class="carousel-inner">
             <div class="item active">
               <% unless default_image.nil? %>
@@ -45,8 +45,8 @@
                 <% end %>
             <% end %>
           </div>
-          <a class="left carousel-control <%= slider_hider_css %>" href="#carouselshowmanymoveone" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
-          <a class="right carousel-control <%= slider_hider_css %>" href="#carouselshowmanymoveone" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
+          <a class="left carousel-control <%= slider_hider_css %>" href="#carousel" data-slide="prev"><i class="glyphicon glyphicon-chevron-left"></i></a>
+          <a class="right carousel-control <%= slider_hider_css %>" href="#carousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
         </div>
       </div>
     </div>
