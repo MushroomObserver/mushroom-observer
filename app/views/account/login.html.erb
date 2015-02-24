@@ -3,15 +3,15 @@
 <%= form_tag(:action => "login") do %>
 
   <label for="user_login"><%= :login_user.t %>:</label><br/>
-  <%= text_field(:user, :login, size: 30, value: @login, autofocus: @login.blank?) %><br/><br/>
+  <%= text_field(:user, :login, value: @login, autofocus: @login.blank?, class: "input-md") %><br/><br/>
 
   <label for="user_password"><%= :login_password.t %>:</label><br/>
-  <%= password_field(:user, :password, size: 30, value: "", autofocus: !@login.blank?) %><br/><br/>
+  <%= password_field(:user, :password, value: "", autofocus: !@login.blank?, class: "input-md") %><br/><br/>
 
   <%= check_box(:user, :remember_me, checked: @remember) %>
   <label for="user_remember_me"><%= :login_remember_me.t %></label><br/><br/>
 
-  <input type="submit" name="login" value="<%= :login_login.l %>" class="primary" />
+  <input type="submit" name="login" value="<%= :login_login.l %>" class="btn btn-defaul" />
   <br/><br/>
 
   <%= :login_forgot_password.tp %>

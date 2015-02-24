@@ -14,7 +14,7 @@
 %>
 <div style="position:relative">
   <div style="display: inline;">
-    <div class="text-center">
+    <div data-toggle="expand-icon" class="text-center">
       <%= link_with_query(image_tag(size_url, style: responsive ? 'max-width: 100%; height: auto;' : 'img-unresponsive'), link, html_opts) %>
       <a href="<%=orig_url%>" class="glyphicon glyphicon-fullscreen theater-btn"
          data-toggle="theater" data-image="<%= large_url %>"

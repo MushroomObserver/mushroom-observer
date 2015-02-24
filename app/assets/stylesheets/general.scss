@@ -210,13 +210,13 @@
 
 .theater-btn {
     position: absolute;
-    margin-left: -25px;
     background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.59);
     color: black;
     padding: 5px;
     top: 0px;
     border: 1px solid;
     text-decoration: none;
+    display: none;
 }
 
 .theater-btn:hover, .theater-btn:focus {
