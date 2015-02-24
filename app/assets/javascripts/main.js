@@ -8,10 +8,14 @@ jQuery(document).ready(function () {
     jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
 
     jQuery('[data-toggle="offcanvas"]').click(function () {
+        jQuery(document).scrollTop(0);
         jQuery('.row-offcanvas').toggleClass('active');
-        jQuery('body').toggleClass('hidden-overflow-x');
+        //jQuery('body').toggleClass('hidden-overflow-x');
+        jQuery('#main_container').toggleClass('hidden-overflow-x');
+
     });
     jQuery('[data-toggle="search"]').click(function () {
+        jQuery(document).scrollTop(0);
         var target = $(this).data().target;
         jQuery(target).css('margin-top', '32px');
         jQuery(target).toggleClass('hidden-xs');
