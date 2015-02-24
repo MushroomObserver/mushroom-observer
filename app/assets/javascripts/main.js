@@ -20,6 +20,16 @@ jQuery(document).ready(function () {
         setCookie('hideBanner',"true", 1);
     });
 
+    jQuery('body').delegate('[data-toggle="expand-icon"]', "mouseenter mouseleave", function (e){
+        var btn = jQuery(this).find('.theater-btn');
+        if(e.type == "mouseleave") {
+            return btn.hide();
+        }
+        var img = jQuery(this).find('img');
+        btn.css('right', img.position().left);
+        btn.show();
+    });
+
     jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
         console.log('click');
         e.preventDefault();
