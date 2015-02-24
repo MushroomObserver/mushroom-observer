@@ -26,7 +26,7 @@
 
       <div style="display: inline-block">
         <% if @timer_start %>
-          <span id="timer" class="small">
+          <span id="timer" class="small hidden-xs">
             <%=
               @timer_end ||= Time.now
               secs = "%.2f" % (@timer_end.to_f - @timer_start.to_f)
