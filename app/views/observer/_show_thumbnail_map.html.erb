@@ -13,14 +13,17 @@
   %>
   <% if gmap %>
     <% finish_map(gmap) %>
-    <div class="list-group">
-      <div class="list-group-item">
-        <%= :MAP.t %>
-        <span class="pull-right">
+        <div class="row">
+          <div class="col-xs-12">
+             <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
+            <span class="pull-right inline">
           <%= link_with_query(:show_observation_hide_map.t, action: :hide_thumbnail_map, id: @observation.id) %>
-        </span>
-      </div>
-      <%= gmap.div(width: "100%", height: "200px").html_safe %>
+            </span>
+          </div>
+        </div>
+
+     <div class="list-group">
+      <%= gmap.div(width: "100%", height: "230px").html_safe %>
     </div>
   <% end %>
 <% end %>

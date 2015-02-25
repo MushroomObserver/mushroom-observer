@@ -10,7 +10,6 @@ jQuery(document).ready(function () {
     jQuery('[data-toggle="offcanvas"]').click(function () {
         jQuery(document).scrollTop(0);
         jQuery('.row-offcanvas').toggleClass('active');
-        //jQuery('body').toggleClass('hidden-overflow-x');
         jQuery('#main_container').toggleClass('hidden-overflow-x');
 
     });
@@ -92,5 +91,6 @@ jQuery(document).ready(function () {
                 if (next)
                     next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
             }
+            jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
         });
 });

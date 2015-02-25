@@ -2,12 +2,10 @@
    lists = observation.species_lists
 %>
 <% if !lists.empty? %>
+    <h4>
+      <%= :show_lists_header.t %>
+    </h4>
     <div class="list-group">
-      <div class="list-group-item">
-        <h4>
-          <%= :show_lists_header.t %>
-        </h4>
-      </div>
     <div class="list-group-item kill-padding">
       <table class="table table-responsive" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
         <% lists.each do |list| %>

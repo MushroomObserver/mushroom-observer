@@ -786,28 +786,6 @@ module ApplicationHelper
     end
   end
 
-
-  # Decide what the color should be for a list item.  Returns 0 or 1.
-  # row::       row number
-  # col::       column number
-  # alt_rows::  from layout_params['alternate_rows']
-  # alt_cols::  from layout_params['alternate_columns']
-  #
-  # (See also ApplicationController#calc_layout_params.)
-  #
-  def calc_color(row, col, alt_rows, alt_cols)
-    color = 0
-    if alt_rows
-      color = row % 2
-    end
-    if alt_cols
-      if (col % 2) == 1
-        color = 1 - color
-      end
-    end
-    color
-  end
-
   # Create a div for notes in Description subclasses.
   #
   #   <%= colored_box(even_or_odd, html) %>
@@ -870,12 +848,6 @@ module ApplicationHelper
   # Return javascript snippets scheduled for inclusion at the end of the page.
   def injected_javascripts
     @javascript_codes || []
-  end
-
-  # Hide an element right away, don't wait to inject at end, because it makes
-  # the browser window jump around erratically as it's loading.
-  def hide_element(id)
-    javascript_tag("document.getElementById('#{id}').style.display = 'none'");
   end
 
   # From map_helper.rb
@@ -1281,6 +1253,8 @@ module ApplicationHelper
       original:   args[:original] || false,
       responsive: args[:responsive] || true,
       theater_on_click: args[:theater_on_click] || false,
+      html_options: args[:html_options],
+      notes: args[:notes] || ""
     }
     render(partial: "image/image_thumbnail", locals: locals)
   end
