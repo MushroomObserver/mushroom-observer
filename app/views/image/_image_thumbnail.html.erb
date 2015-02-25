@@ -3,19 +3,17 @@
    # so we only have image_id.  It's still possible to render the image with
    # nothing but the image_id.  (But not votes, original name, etc.)
    image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-   vote_pct = ((image.vote_cache || 0) / Image.all_votes.length * 100).floor \
-             if image and votes
    size_url  = Image.url(size, image_id)
    large_url = Image.url(:large, image_id)
    orig_url  = Image.url(:original, image_id)
-   html_opts = theater_on_click ?
-           {data: {toggle: :theater, image: large_url, original: orig_url}} :
-           {class: :no}
+   html_options =  {data: {toggle: :theater, image: large_url, original: orig_url}} if theater_on_click
+   html_options = {} if html_options.nil?
 %>
 <div style="position:relative">
   <div style="display: inline;">
     <div data-toggle="expand-icon" class="text-center">
-      <%= link_with_query(image_tag(size_url, style: responsive ? 'max-width: 100%; height: auto;' : 'img-unresponsive'), link, html_opts) %>
+      <% img_tag = image_tag(size_url, title: notes, style: responsive ? 'max-width: 100%; height: auto;' : 'img-unresponsive', data: {toggle: "tooltip", placement: "bottom"}) %>
+      <%= link_with_query(img_tag, link, html_options) %>
       <a href="<%=orig_url%>" class="glyphicon glyphicon-fullscreen theater-btn"
          data-toggle="theater" data-image="<%= large_url %>"
          data-original="<%= orig_url %>"></a>

@@ -30,16 +30,28 @@
               <% unless default_image.nil? %>
                   <div class="<%= slider_box_size_css %>">
                     <div>
-                      <%= thumbnail(default_image) %>
+                      <%
+                         notes = !default_image.notes || default_image.notes.blank? ? "" : default_image.notes
+                         notes += "\n#{default_image.original_name}" if !default_image.original_name.blank? && \
+                           (check_permission(default_image) || default_image.user && default_image.user.keep_filenames == :keep_and_show)
+
+                      %>
+                      <%= thumbnail(default_image, notes: notes) %>
                     </div>
               <% end %>
               </div>
             </div>
             <% @observation.images.each do |img| %>
+                <%
+                   notes = !img.notes || img.notes.blank? ? "" : img.notes
+                   notes +=  "\n#{img.original_name}" if !img.original_name.blank? && \
+                           (check_permission(img) || img.user && img.user.keep_filenames == :keep_and_show)
+
+                 %>
                 <% if img != default_image %>
                     <div class="item">
                       <div class="<%= slider_box_size_css %>">
-                        <%= thumbnail(img) %>
+                        <%= thumbnail(img, notes: notes) %>
                       </div>
                     </div>
                 <% end %>

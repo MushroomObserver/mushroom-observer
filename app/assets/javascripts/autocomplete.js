@@ -1013,7 +1013,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     if (sel.start > 0)
       start = val.lastIndexOf(this.token, sel.start - 1);
     else
-      start = 0
+      start = 0;
     if (start < 0)
       start = 0;
     else

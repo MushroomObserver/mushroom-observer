@@ -1281,6 +1281,8 @@ module ApplicationHelper
       original:   args[:original] || false,
       responsive: args[:responsive] || true,
       theater_on_click: args[:theater_on_click] || false,
+      html_options: args[:html_options],
+      notes: args[:notes] || ""
     }
     render(partial: "image/image_thumbnail", locals: locals)
   end
