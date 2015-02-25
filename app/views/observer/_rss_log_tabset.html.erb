@@ -1,5 +1,5 @@
 <%=form_tag(add_query_param(:action => 'index_rss_log'))%>
-<div class="btn-group pad-bottom">
+<div class="btn-group pad-bottom hidden-xs">
   <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
   <span class="btn btn-default btn-sm <%= " active" if @types == ['all']%>">
  <%= if @types == ['all']
