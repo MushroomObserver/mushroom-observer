@@ -8,15 +8,11 @@
 
 
 <div class="row">
-  <div class="col-sm-8">
-      <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t) %>
-  </div>
-  <div class="col-sm-4">
-    <strong class="pull-right pad-top">
-      <%= link_with_query(:"show_comments_add_comment".t, {controller: :comment,
-                            action: :add_comment, id: object.id, type: object.class.name}) if controls
-          %>
-    </strong>
+  <div class="col-sm-12">
+    <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t, style: "display: inline-block") %>
+    <%= link_with_query(:"show_comments_add_comment".t,
+                        {controller: :comment, action: :add_comment, id: object.id, type: object.class.name},
+                        style: "margin-left: 10px;") if controls     %>
   </div>
 </div>
 
