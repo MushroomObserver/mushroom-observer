@@ -786,28 +786,6 @@ module ApplicationHelper
     end
   end
 
-
-  # Decide what the color should be for a list item.  Returns 0 or 1.
-  # row::       row number
-  # col::       column number
-  # alt_rows::  from layout_params['alternate_rows']
-  # alt_cols::  from layout_params['alternate_columns']
-  #
-  # (See also ApplicationController#calc_layout_params.)
-  #
-  def calc_color(row, col, alt_rows, alt_cols)
-    color = 0
-    if alt_rows
-      color = row % 2
-    end
-    if alt_cols
-      if (col % 2) == 1
-        color = 1 - color
-      end
-    end
-    color
-  end
-
   # Create a div for notes in Description subclasses.
   #
   #   <%= colored_box(even_or_odd, html) %>
