@@ -1,47 +1,48 @@
 <% @title = :sandbox_title.t %>
-
-<table width="1">
-  <tr>
-    <td>
-      <div class="HelpNote"><%= :sandbox_header.tp %></div>
-
-      <% if !@code.nil? %>
-        <b><%= :sandbox_look_like.t %>:</b><br/>
+<div class="row">
+  <div class="col-xs-12 col-sm-8 col-lg-6">
+    <p class="help-block"><%= :sandbox_header.tp %></p>
+    <% if !@code.nil? %>
+        <strong><%= :sandbox_look_like.t %>:</strong>
         <div class="sandbox">
-					<% if @submit == :sandbox_test.l %>
-						<%= @code.tpl %>
-					<% else %>
-						<%= escape_html(@code.tpl) %>
-					<% end %>
-        </div><br/>
-      <% end %>
+          <% if @submit == :sandbox_test.l %>
+              <%= @code.tpl %>
+          <% else %>
+              <code>
+              <%= escape_html(@code.tpl) %>
+              </code>
+          <% end %>
+        </div>
+    <% end %>
 
-      <%= form_tag(:action => "textile_sandbox") %>
-        <% if !@code.nil? %>
-          <div class="sandbox-up-ptr">
-            <%= image_tag("up_arrow.png") %>
-            <%= submit_tag :sandbox_test.l %>
-            <%= submit_tag :sandbox_test_codes.l %>
-            <%= image_tag("up_arrow.png") %>
-          </div><br/>
-        <% end %>
-        <b><%= :sandbox_enter.t %>:</b><br/>
-        <%= text_area_tag("code", @code, :size => "80x10") %><br/>
-        <% if @code.nil? %>
-          <br/>
-          <center><%= submit_tag :sandbox_test.l %></center>
-        <% end %>
-      </form><br/>
+    <%= form_tag(:action => "textile_sandbox") %>
+    <% if !@code.nil? %>
+        <div class="sandbox-up-ptr">
+          <%= image_tag("up_arrow.png") %>
+          <%= submit_tag :sandbox_test.l %>
+          <%= submit_tag :sandbox_test_codes.l %>
+          <%= image_tag("up_arrow.png") %>
+        </div>
+    <% end %>
+    <strong><%= :sandbox_enter.t %>:</strong>
+    <%= text_area_tag("code", @code, class: "form-control", rows: "8") %>
+    <% if @code.nil? %>
+        <div class="push-down">
+          <%= submit_tag :sandbox_test.l, class: "btn btn-default center-block" %>
+        </div>
+    <% end %>
+    </form>
 
-      <p><b><%= :sandbox_quick_ref.t %>:</b></p>
-      <pre><%= :sandbox_sample.l %></pre><br/>
+    <p><strong><%= :sandbox_quick_ref.t %>:</strong></p>
+    <pre><%= :sandbox_sample.l %></pre>
 
-      <b><%= :sandbox_web_refs.t %>:</b><br/>
-      <div style="margin-left:20px">
-        <%= link_to(:sandbox_link4.t, "http://redcloth.org/textile") %><br/>
-        <%= link_to(:sandbox_link5.t, "http://redcloth.org/hobix.com/textile/") %><br/>
-        <%= link_to(:sandbox_link6.t, "http://warpedvisions.org/projects/textile-cheat-sheet.md") %><br/>
-      </div>
-    </td>
-  </tr>
-</table>
+
+    <strong><%= :sandbox_web_refs.t %>:</strong>
+    <div class="indent">
+      <%= link_to(:sandbox_link4.t, "http://redcloth.org/textile") %><br/>
+      <%= link_to(:sandbox_link5.t, "http://redcloth.org/hobix.com/textile/") %><br/>
+      <%= link_to(:sandbox_link6.t, "http://warpedvisions.org/projects/textile-cheat-sheet.md") %><br/>
+    </div>
+
+  </div>
+</div>
