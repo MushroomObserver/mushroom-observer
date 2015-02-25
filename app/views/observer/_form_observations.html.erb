@@ -3,7 +3,7 @@
   <div class="col-xs-12 form-inline">
     <div class="form-group">
       <%= label("observation_when_li", :WHEN.t) %>:
-      <%= date_select("observation", "when", {order: [:day, :month, :year], start_year: 1980, end_year: Time.now.year}, {class: "form-control"}) %>
+      <%= date_select("observation", "when", {order: [:day, :month, :year], start_year: 1980, end_year: Time.now.year}, {class: "form-control", style: "margin-bottom: 5px;"}) %>
     </div>
   </div>
 </div>
@@ -23,7 +23,7 @@
     <div class="form-group push-down">
       <%= label_tag("observation_place_name", "#{:WHERE.t}: (#{:required.t})") %>
       <%= text_field(:observation, :place_name, class: "form-control", size: 60) %>
-      <%= content_tag(:p, :form_observations_where_help.t, class: "help-block", style:"max-width:500px") %>
+      <%= content_tag(:p, :form_observations_where_help.t, class: "help-block", style: "max-width:500px") %>
       <% turn_into_location_auto_completer('observation_place_name', :primer => Location.primer) %>
     </div>
   </div>
@@ -85,7 +85,7 @@
   <div class="col-xs-12">
     <%= label_tag("observation_notes", "#{:NOTES.t}:", style: "margin-bottom: 0") %>
     <%= content_tag(:p, :form_observations_notes_help.t, class: "help-block", style: "padding-top: 0px; margin-top: 0") %>
-    <%= text_area('observation', 'notes', class: "form-control", style: "width: 500px") %>
+    <%= text_area('observation', 'notes', class: "form-control", style: "max-width: 500px") %>
     <%= render(:partial => 'shared/textilize_help') %>
   </div>
 
@@ -94,15 +94,15 @@
 
 <center><%= submit_tag(button_name) %></center><br/>
 
-<% ############################### Image Forms ##############################   %>
+<% ############################### Image Forms ##############################    %>
 
 <div class="row">
-<% if include_images %>
+  <% if include_images %>
       <% @observation.thumb_image_id ||= 0 %>
       <% if @good_images != [] %>
-              <div class="col-xs-12">
-                <b>Images:</b>
-              </div>
+          <div class="col-xs-12">
+            <b>Images:</b>
+          </div>
           <% for image in @good_images %>
               <div class="col-xs-12">
                 <div class="row form_image">
@@ -163,7 +163,7 @@
                 </div>
           <% end %>
       <% end %>
-        </div>
+      </div>
       <%= hidden_field_tag("good_images", @good_images.map { |o| o.id }.join(" ")) %>
 
       <b><%= :form_observations_upload_images.t %>:</b>
@@ -184,56 +184,57 @@
           <div class='HelpNote'>
             <%= :form_observations_upload_help.tp %>
           </div>
-          <input id="new_image_button" onclick="image_new();" type="button" value="<%=:form_observations_upload_another.t%>" />
+          <input id="new_image_button" onclick="image_new();" type="button" value="<%= :form_observations_upload_another.t %>"/>
           <% javascript_include("single_image_uploader") %>
           <%= javascript_tag %(
             var x = String.fromCharCode(60);
             var y = String.fromCharCode(93);
             var IMAGE_FORM = "#{
-              i = @images.length - 1 rescue 0
-              str = render(:partial => 'form_image', :locals => { index: i })
-              str.gsub!("image_#{i}_", 'image_XXX_')
-              str.gsub!("image_id_#{i}", 'image_id_XXX')
-              str.gsub!("(#{i})", '(XXX)')
-              str.gsub!("[#{i}]", '[XXX]')
-              str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
-              str.sub!("checked=\"checked\" ", '')
-              str = escape_javascript(str)
-              str.gsub('<', '"+x+"')
-              str.gsub(']', '"+y+"')
-            }";
+                             i = @images.length - 1 rescue 0
+                             str = render(:partial => 'form_image', :locals => {index: i})
+                             str.gsub!("image_#{i}_", 'image_XXX_')
+                             str.gsub!("image_id_#{i}", 'image_id_XXX')
+                             str.gsub!("(#{i})", '(XXX)')
+                             str.gsub!("[#{i}]", '[XXX]')
+                             str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+                             str.sub!("checked=\"checked\" ", '')
+                             str = escape_javascript(str)
+                             str.gsub('<', '"+x+"')
+                             str.gsub(']', '"+y+"')
+                             }";
           ) %>
       <% end %>
 
       <!--MULTIPLE IMAGE UPLOADS -->
       <%= render(partial: 'form_multi_image_upload') if can_do_multifile_upload? %>
       <!--END MULTIPLE IMAGE UPLOADS-->
-<% end # include_images?   %>
+  <% end # include_images?    %>
 </div>
-<% ##########################################################################   %>
+<% ##########################################################################    %>
 
-<div class="row">
-  <div class="col-xs-12 text-center">
-<% if @projects.any? or @lists.any? %>
-    <%= submit_tag(button_name) %>
-<% end %>
-  </div>
+
+<div class="col-xs-12 text-center">
+  <% if @projects.any? or @lists.any? %>
+      <%= submit_tag(button_name) %>
+  <% end %>
 </div>
+
 
 <% if @projects.any? %>
     <div class="row">
       <div class="col-xs-12">
         <label><%= :PROJECTS.t %>:</label>
+
         <p class="help-block">(<%= :form_observations_project_help.t %>)</p>
       </div>
       <% for project in @projects %>
           <div class="col-xs-12">
             <div class="form-group">
-            <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
-                          :disabled => @observation.user != @user && !project.is_member?(@user)) %>
-            <label for="<%= "project_id_#{project.id}"%>">
-              <%= project_link(project) %>
-            </label>
+              <%= check_box('project', "id_#{project.id}", :checked => @project_checks[project.id],
+                            :disabled => @observation.user != @user && !project.is_member?(@user)) %>
+              <label for="<%= "project_id_#{project.id}" %>">
+                <%= project_link(project) %>
+              </label>
             </div>
           </div>
       <% end %>
@@ -241,25 +242,26 @@
 <% end %>
 
 <% if @lists.any? %>
-      <div class="col-xs-12">
-        <label><%= :SPECIES_LISTS.t %>:</label>
-          <p class="help-block">(<%= :form_observations_list_help.t %>)</p>
-        </div>
+    <div class="col-xs-12">
+      <label><%= :SPECIES_LISTS.t %>:</label>
+
+      <p class="help-block">(<%= :form_observations_list_help.t %>)</p>
+    </div>
     <% for list in @lists %>
-          <div class="col-xs-12 form-inline">
-            <%= check_box("list", "id_#{list.id}", :checked => @list_checks[list.id],
-                      :disabled => !check_permission(list)) %>
-            <label for="<%= "list_id_#{list.id}"%>">
-              <%= species_list_link(list) %>
-            </label>
-          </div>
+        <div class="col-xs-12 form-inline">
+          <%= check_box("list", "id_#{list.id}", :checked => @list_checks[list.id],
+                        :disabled => !check_permission(list)) %>
+          <label for="<%= "list_id_#{list.id}" %>">
+            <%= species_list_link(list) %>
+          </label>
+        </div>
     <% end %>
 <% end %>
 
 <% if logging_optional %>
-      <div class="col-xs-12 form-inline">
-        <%= label("log_change_checked", :form_observations_log_change.t) %>:
-        <%= check_box('log_change', 'checked', :checked => '1') %>
-      </div>
+    <div class="col-xs-12 form-inline">
+      <%= label("log_change_checked", :form_observations_log_change.t) %>:
+      <%= check_box('log_change', 'checked', :checked => '1') %>
+    </div>
 <% end %>
 <!--[eoform:observation]-->

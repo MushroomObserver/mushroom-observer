@@ -6,8 +6,6 @@
    @tabsets = {right: render(partial: "shared/tab_set", locals: {links: right_links})};
    flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
-
-<div class="row">
   <div class="col-xs-12">
     <% if @suggest_alternate_spellings and @objects.empty?
          names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
@@ -41,4 +39,3 @@
         <%= pagination_numbers(@pages) %>
       </div>
   <% end %>
-</div>
