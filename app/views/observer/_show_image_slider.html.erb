@@ -2,6 +2,8 @@
    default_image = @observation.thumb_image
    slider_hider_css = "hidden"
    slider_box_size_css = "col-xs-12 col-sm-6 col-md-3"
+   has_images = !@observation.images.nil? && @observation.images.any?
+
    if not @observation.images.nil? and @observation.images.any?
      case @observation.images.length
        when 1
@@ -21,8 +23,40 @@
    end
 %>
 
-<% if not @observation.images.nil? and @observation.images.any? %>
-    <div class="row">
+
+
+<div class="row">
+  <div class="col-sm-4">
+    <%=content_tag(:h4, :IMAGES.t, style: "margin-top: 0")%>
+  </div>
+  <div class="col-sm-8">
+    <div class="pull-right">
+      <%= if has_images and thumb_size_control and not browser.bot?
+            if default_thumbnail_size == :thumbnail
+              link_with_query(:show_images_large_thumbs.t, :id => @observation.id,
+                              :set_thumbnail_size => 'small')
+            else
+              link_with_query(:show_images_small_thumbs.t, :id => @observation.id,
+                              :set_thumbnail_size => 'thumbnail')
+            end
+          end %>
+      <% if check_permission(@observation) %>
+          <small>
+            <%= link_with_query(:show_observation_add_images.t, :controller => 'image',
+                                :action => 'add_image', :id => @observation.id) %> |
+            <%= link_with_query(:show_observation_reuse_image.t,
+                                :controller => 'image', :action => 'reuse_image',
+                                :obs_id => @observation.id, :mode => 'observation') %>
+            <% if @observation.images.length > 0 %>
+                | <%= link_with_query(:show_observation_remove_images.t,
+                                      :controller => 'image', :action => 'remove_images',
+                                      :id => @observation.id) %>
+            <% end %>
+          </small>
+      <% end %>
+    </div>
+  </div>
+  <% if has_images %>
       <div class="col-xs-12">
         <div class="carousel slide" id="carousel" data-interval="100000" data-wrap="false">
           <div class="carousel-inner">
@@ -44,10 +78,10 @@
             <% @observation.images.each do |img| %>
                 <%
                    notes = !img.notes || img.notes.blank? ? "" : img.notes
-                   notes +=  "\n#{img.original_name}" if !img.original_name.blank? && \
+                   notes += "\n#{img.original_name}" if !img.original_name.blank? && \
                            (check_permission(img) || img.user && img.user.keep_filenames == :keep_and_show)
 
-                 %>
+                %>
                 <% if img != default_image %>
                     <div class="item">
                       <div class="<%= slider_box_size_css %>">
@@ -61,5 +95,5 @@
           <a class="right carousel-control <%= slider_hider_css %>" href="#carousel" data-slide="next"><i class="glyphicon glyphicon-chevron-right"></i></a>
         </div>
       </div>
-    </div>
-<% end %>
+  <% end %>
+</div>

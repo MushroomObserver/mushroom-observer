@@ -4,15 +4,14 @@
    any_names = observation.namings && observation.namings.length > 0
 %>
 <%= form_tag(add_query_param(controller: :observer, action: :cast_votes, id: observation.id)) do %>
-    <div class="list-group push-down">
+
       <!--TABLE OF NAMES-->
-      <div class="list-group-item">
-        <div class="row">
-          <div class="col-sm-8">
+        <div class="row push-down">
+          <div class="col-sm-8 push-down">
             <%= content_tag(:h4, any_names ? :show_namings_proposed_names.t : :show_namings_no_names_yet.t) %>
           </div>
-          <div class="col-sm-4">
-            <strong class="pull-right">
+          <div class="col-sm-4 push-down">
+            <strong class="pull-right ">
               <%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}, class: "btn btn-default"}) : '' %>
               <%= if is_in_admin_mode?
                     " | #{link_to(:show_observation_debug_consensus.t,
@@ -21,7 +20,7 @@
             </strong>
           </div>
         </div>
-      </div>
+    <div class="list-group push-down">
       <% if any_names %>
           <div class="list-group-item kill-padding" style="border-top: none;">
             <table class="table table-responsive" style="margin-bottom: 0">
