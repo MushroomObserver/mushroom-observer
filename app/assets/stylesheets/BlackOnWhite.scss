@@ -1,0 +1,93 @@
+$NORMAL_FG_COLOR:                #000000;
+$NORMAL_BG_COLOR:                #FFFFFF;
+$PRIMARY_FG_COLOR:               #337AB7;
+$PRIMARY_BG_COLOR:               #99BDDB;
+$INFO_FG_COLOR:                  #00C0E0;
+$INFO_BG_COLOR:                  #80E0FF;
+$SUCCESS_FG_COLOR:               #00A000;
+$SUCCESS_BG_COLOR:               #80FF80;
+$WARNING_FG_COLOR:               #F0D000;
+$WARNING_BG_COLOR:               #FFE880;
+$DANGER_FG_COLOR:                #F00000;
+$DANGER_BG_COLOR:                #FF8080;
+
+$BODY_FG_COLOR:                  #000000;
+$BODY_BG_COLOR:                  #FFFFFF;
+
+$LINK_FG_COLOR:                  #2050E0;
+$LINK_BG_COLOR:                  transparent;
+$LINK_VISITED_FG_COLOR:          #2050E0;
+$LINK_VISITED_BG_COLOR:          transparent;
+$LINK_HOVER_FG_COLOR:            #23527C;
+$LINK_HOVER_BG_COLOR:            transparent;
+
+$BUTTON_FG_COLOR:                #000000;
+$BUTTON_BG_COLOR:                #F5F5F5;
+$BUTTON_BORDER_COLOR:            #DDDDDD;
+$BUTTON_PRIMARY_FG_COLOR:        #FFFFFF;
+$BUTTON_PRIMARY_BG_COLOR:        #337AB7;
+$BUTTON_PRIMARY_BORDER_COLOR:    #2E6DA4;
+
+$INPUT_BORDER_COLOR:             #888888;
+$INPUT_FG_COLOR:                 #000000;
+$INPUT_BG_COLOR:                 #FFFFFF;
+
+$BANNER_BORDER_COLOR:            none;
+$BANNER_FG_COLOR:                #FAEBD4;
+$BANNER_BG_COLOR:                #CC2616;
+$BANNER_HOVER_FG_COLOR:          #FAEB44;
+$BANNER_HOVER_BG_COLOR:          #CC2616;
+
+$LEFT_BAR_BORDER_COLOR:          #DDDDDD;
+$LEFT_BAR_HEADER_FG_COLOR:       #777777;
+$LEFT_BAR_HEADER_BG_COLOR:       #EEEEEE;
+$LEFT_BAR_FG_COLOR:              #555555;
+$LEFT_BAR_BG_COLOR:              #FFFFFF;
+$LEFT_BAR_HOVER_FG_COLOR:        #23529C;
+$LEFT_BAR_HOVER_BG_COLOR:        #EEEEEE;
+$LEFT_BAR_ADMIN_FG_COLOR:        #A94442;
+$LEFT_BAR_ADMIN_BG_COLOR:        #F2DEDE;
+$LEFT_BAR_ADMIN_HOVER_FG_COLOR:  #A94442;
+$LEFT_BAR_ADMIN_HOVER_BG_COLOR:  #EBCCCC;
+
+$TOP_BAR_BORDER_COLOR:           #DDDDDD;
+$TOP_BAR_FG_COLOR:               #000000;
+$TOP_BAR_BG_COLOR:               #F2F2F2;
+$TOP_BAR_LINK_FG_COLOR:          #000000;
+$TOP_BAR_LINK_BG_COLOR:          transparent;
+$TOP_BAR_LINK_HOVER_FG_COLOR:    #205080;
+$TOP_BAR_LINK_HOVER_BG_COLOR:    transparent;
+
+$LIST_BORDER_COLOR:              #DDDDDD;
+$LIST_HEADER_FG_COLOR:           #777777;
+$LIST_HEADER_BG_COLOR:           #EEEEEE;
+$LIST_FG_COLOR:                  #333333;
+$LIST_BG_COLOR:                  #F5F5F5;
+
+$VOTE_METER_BORDER_COLOR:        none;
+$VOTE_METER_FG_COLOR:            #205080;
+$VOTE_METER_BG_COLOR:            #F5F5F5;
+
+$PROGRESS_BG_COLOR:              #EEEEEE;
+$PROGRESS_FG_COLOR:              #000000;
+$PROGRESS_BAR_COLOR:             #99BDDB;
+
+$PAGER_FG_COLOR:                 #337AB7;
+$PAGER_BG_COLOR:                 transparent;
+$PAGER_BORDER_COLOR:             none;
+$PAGER_HOVER_FG_COLOR:           #23527C;
+$PAGER_HOVER_BG_COLOR:           #EEEEEE;
+$PAGER_HOVER_BORDER_COLOR:       none;
+$PAGER_ACTIVE_FG_COLOR:          #FFFFFF;
+$PAGER_ACTIVE_BG_COLOR:          #959595;
+$PAGER_ACTIVE_BORDER_COLOR:      none;
+
+$MENU_BORDER_COLOR:              #888888;
+$MENU_FG_COLOR:                  #000000;
+$MENU_BG_COLOR:                  #FFFFFF;
+$MENU_HOT_FG_COLOR:              #000000;
+$MENU_HOT_BG_COLOR:              #FFFF88;
+$MENU_WARM_FG_COLOR:             #000000;
+$MENU_WARM_BG_COLOR:             #FF8888;
+
+@import "mushroom_observer";

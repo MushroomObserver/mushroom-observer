@@ -25,7 +25,7 @@
       css = MO.themes.sample unless MO.themes.member?(css)
     end
     css = "BlackOnWhite"
-    stylesheet_link_tag("bootstrap", "themes/#{css}")
+    stylesheet_link_tag(css)
   %>
   <%= @header unless @header.blank? %>
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
