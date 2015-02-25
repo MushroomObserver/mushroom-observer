@@ -850,12 +850,6 @@ module ApplicationHelper
     @javascript_codes || []
   end
 
-  # Hide an element right away, don't wait to inject at end, because it makes
-  # the browser window jump around erratically as it's loading.
-  def hide_element(id)
-    javascript_tag("document.getElementById('#{id}').style.display = 'none'");
-  end
-
   # From map_helper.rb
   def make_map(objects, args={})
     args = provide_defaults(args,
