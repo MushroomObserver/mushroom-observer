@@ -214,6 +214,10 @@ a {
     padding: 4px 8px 3px 8px;
 }
 
+.tooltip-inner {
+    word-wrap: break-word;
+}
+
 //
 // message banner at top
 // --------------------------------------------------
@@ -826,7 +830,7 @@ table.table-compact tr td {
 }
 
 .list-group.list-group-compact .list-group-item {
-    padding: 3px;
+    padding: 5px;
 }
 
 .input-group .icon-addon .form-control {
