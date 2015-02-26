@@ -2,8 +2,6 @@
 // set bootstrap parameters first
 // --------------------------------------------------
 
-$gray-base: $NORMAL_FG_COLOR;
-$brand-primary: $PRIMARY_FG_COLOR;
 $brand-success: $SUCCESS_FG_COLOR;
 $brand-info: $INFO_FG_COLOR;
 $brand-warning: $WARNING_FG_COLOR;
@@ -98,7 +96,7 @@ $pagination-hover-bg: $PAGER_HOVER_BG_COLOR;
 $pagination-hover-border: $PAGER_HOVER_BORDER_COLOR;
 $pagination-active-color: $PAGER_ACTIVE_FG_COLOR;
 $pagination-active-bg: $PAGER_ACTIVE_BG_COLOR;
-$pagination-active-border: $PAGER_ACTIVE_BORDER_COLOR;          
+$pagination-active-border: $PAGER_ACTIVE_BORDER_COLOR;
 $pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR);
 $pagination-disabled-bg: $PAGER_BG_COLOR;
 $pagination-disabled-border: $PAGER_BORDER_COLOR;
@@ -116,9 +114,10 @@ $state-danger-text: $DANGER_FG_COLOR;
 $state-danger-bg: $DANGER_BG_COLOR;
 $state-danger-border: mix($DANGER_FG_COLOR, $DANGER_BG_COLOR);
 
+$tooltip-opacity: 100%;
 $tooltip-max-width: 400px;
-$tooltip-color: $MENU_FG_COLOR;
-$tooltip-bg: $MENU_BG_COLOR;
+$tooltip-color: $TOOLTIP_FG_COLOR;
+$tooltip-bg: $TOOLTIP_BG_COLOR;
 
 $alert-success-bg: $SUCCESS_BG_COLOR;
 $alert-success-text: $SUCCESS_FG_COLOR;
@@ -176,27 +175,56 @@ a:visited {
 }
 
 a {
-    font-weight: normal
+    font-weight: $LINK_WEIGHT;
 }
 #navigation a {
     font-weight: normal;
 }
 
-.btn-default {
-    border: $BUTTON_BORDER_COLOR;
-    color: $BUTTON_FG_COLOR;
-    background-color: $BUTTON_BG_COLOR;
+.btn, .btn-default {
+    color: $BUTTON_FG_COLOR !important;
+    background-color: $BUTTON_BG_COLOR !important;
+    border-color: $BUTTON_BORDER_COLOR;
+    border-width: $BUTTON_BORDER_WIDTH;
+    border-style: $BUTTON_BORDER_STYLE;
+    border-radius: $BUTTON_BORDER_RADIUS;
+    padding: 4px 8px;
+}
+
+.btn:hover, .btn-default:hover {
+    background-color: mix($BUTTON_BG_COLOR, black, 90%) !important;
+    border-color: mix($BUTTON_BORDER_COLOR, black, 90%) !important;
+}
+
+.btn-primary {
+    color: $BUTTON_PRIMARY_FG_COLOR !important;
+    background-color: $BUTTON_PRIMARY_BG_COLOR !important;
+    border-color: $BUTTON_PRIMARY_BORDER_COLOR !important;
+}
+
+.btn-primary:hover {
+    background-color: mix($BUTTON_PRIMARY_BG_COLOR, black, 90%) !important;
+    border-color: mix($BUTTON_PRIMARY_BORDER_COLOR, black, 90%) !important;
+}
+
+.form-control {
+    border-width: $INPUT_BORDER_WIDTH;
+    border-style: $INPUT_BORDER_STYLE;
+    border-radius: $INPUT_BORDER_RADIUS;
+    padding: 4px 8px 3px 8px;
 }
 
 //
 // message banner at top
 // --------------------------------------------------
 
-#message_banner {
-    font-size: 1em;
-    margin-bottom: 10px;
-    display: none;
-    position: relative;
+.alert.message-banner {
+    margin: 0.5em 1.0em;
+    border-width: $BANNER_BORDER_WIDTH;
+    border-style: $BANNER_BORDER_STYLE;
+    border-radius: $BANNER_BORDER_RADIUS;
+    padding: 0.5em 1.0em;
+    text-align: center;
 }
 
 //
@@ -205,40 +233,37 @@ a {
 
 #navigation {
     #banner {
-        background-color: $BANNER_BG_COLOR;
-        border-width: $BANNER_BORDER_WIDTH;
-        border-color: $BANNER_BORDER_COLOR;
-        border-style: $BANNER_BORDER_STYLE;
-        border-radius: 0;
+        background-color: $LOGO_BG_COLOR;
+        border-width: $LOGO_BORDER_WIDTH;
+        border-color: $LOGO_BORDER_COLOR;
+        border-style: $LOGO_BORDER_STYLE;
+        border-radius: $LOGO_BORDER_RADIUS $LOGO_BORDER_RADIUS 0 0;
         margin-bottom: 0px;
         padding-top: 5px;
         padding-bottom: 5px;
         font: small-caps 25px/25px "Times New Roman", serif;
         text-align: center;
+        white-space: nowrap;
+        text-overflow: clip;
+        overflow: hidden;
     }
 
     #banner a,
     #banner a:visited {
-        color: $BANNER_FG_COLOR;
-        background-color: $BANNER_BG_COLOR;
+        color: $LOGO_FG_COLOR;
+        background-color: $LOGO_BG_COLOR;
         text-decoration: none;
     }
 
     #banner:hover,
     #banner a:hover {
-        color: $BANNER_HOVER_FG_COLOR;
-        background-color: $BANNER_HOVER_BG_COLOR;
+        color: $LOGO_HOVER_FG_COLOR;
+        background-color: $LOGO_HOVER_BG_COLOR;
         text-decoration: none;
     }
 
-    @if $BANNER_BORDER_STYLE == inset {
-        #banner:hover {
-            border-style: outset;
-        }
-    }
-
-    @if $BANNER_BORDER_STYLE == outset {
-        #banner:hover {
+    @if $LOGO_BORDER_STYLE == outset {
+        #banner:active {
             border-style: inset;
         }
     }
@@ -262,28 +287,32 @@ a {
         color: $LEFT_BAR_FG_COLOR;
         background-color: $LEFT_BAR_BG_COLOR;
         border-color: $LEFT_BAR_BORDER_COLOR;
+        border-width: 0px;
         @if $LEFT_BAR_ITEM_BORDER_WIDTH > 0 {
-          border-width: $LEFT_BAR_ITEM_BORDER_WIDTH;
-        } @else if $LEFT_BAR_DIV_BORDER_WIDTH > 0 {
-          border-width: 0px $LEFT_BAR_DIV_BORDER_WIDTH;
-        } @else {
-          border-width: 0px;
+          border-right-width: $LEFT_BAR_ITEM_BORDER_WIDTH;
+          border-bottom-width: $LEFT_BAR_ITEM_BORDER_WIDTH;
+        } @else if $LEFT_BAR_BORDER_WIDTH > 0 {
+          border-right-width: $LEFT_BAR_BORDER_WIDTH;
         }
-        border-style: solid;
+        border-style: $LEFT_BAR_BORDER_STYLE;
+        border-radius: 0px;
         margin-top: 0px;
         padding-left: 0.4em;
         padding-right: 0.4em;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .list-group-item.indent {
         padding-left: 0.8em;
     }
 
-    @if $LEFT_BAR_DIV_BORDER_WIDTH > 0 {
-        .list-group-item:last-child {
-            border-bottom-width: $LEFT_BAR_DIV_BORDER_WIDTH;
+    .list-group-item:last-child {
+        @if $LEFT_BAR_BORDER_WIDTH > 0 {
+            border-bottom-width: $LEFT_BAR_BORDER_WIDTH;
         }
+        border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
     }
 
     .list-group-item:hover,
@@ -308,30 +337,75 @@ a {
 // top nav bar
 // --------------------------------------------------
 
-// #search_bar_row {
-//     color: $TOP_BAR_FG_COLOR;
-//     background-color: $TOP_BAR_BG_COLOR;
-// }
+.navbar-default {
+    color: $TOP_BAR_FG_COLOR;
+    background-color: $TOP_BAR_BG_COLOR;
+    margin-left: 10px;
+    border-color: $TOP_BAR_BORDER_COLOR;
+    border-width: $TOP_BAR_BORDER_WIDTH;
+    border-style: $TOP_BAR_BORDER_STYLE;
+    border-radius: $TOP_BAR_BORDER_RADIUS;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-right-width: 0px;
+    padding: 0px;
 
-.navbar {
-    border-radius: 0;
-    min-height: 57px;
-    margin-bottom: 0
+    a, a:visited {
+        color: $TOP_BAR_LINK_FG_COLOR;
+        background-color: $TOP_BAR_LINK_BG_COLOR;
+    }
+
+    a:hover {
+        color: $TOP_BAR_LINK_HOVER_FG_COLOR;
+        background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
+    }
+
+    .navbar-nav {
+        margin-top: 10px;
+    }
+
+    .navbar-nav > li > a,
+    .navbar-nav > li > a.dropdown-toggle {
+        color: $TOP_BAR_FG_COLOR !important;
+        background-color: $TOP_BAR_BG_COLOR !important;
+        margin: 0px 8px;
+        border: 0px;
+        padding: 0px;
+    }
+
+    .navbar-nav > li > a:hover,
+    .navbar-nav > li > a.dropdown-toggle:hover {
+        color: $TOP_BAR_LINK_HOVER_FG_COLOR !important;
+        background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
+    }
 }
 
-// .navbar-default .navbar-nav > li > a {
-//     color: $TOP_BAR_LINK_FG_COLOR;
-//     background-color: $TOP_BAR_LINK_BG_COLOR;
-// }
-// 
-// .navbar-default .navbar-nav > li > a:hover {
-//     color: $TOP_BAR_LINK_HOVER_FG_COLOR;
-//     background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
-// }
+//
+// content
+// --------------------------------------------------
 
-.navbar-default .navbar-nav > li > a.glyphicon {
-    padding-left: 10px;
-    padding-right: 10px;
+#content {
+    margin-left: 2em;
+    padding-bottom: 5em;
+}
+
+//
+// alerts
+// --------------------------------------------------
+
+.alert {
+    margin: 0.5em 1.0em;
+    border-width: $ALERT_BORDER_WIDTH;
+    border-style: $ALERT_BORDER_STYLE;
+    border-radius: $ALERT_BORDER_RADIUS;
+    padding: 0.5em 1.0em;
+    text-align: left;
+
+    a { font-weight: bold }
+    .alert-info    a { color: $INFO_LINK_COLOR    }
+    .alert-success a { color: $SUCCESS_LINK_COLOR }
+    .alert-warning a { color: $WARNING_LINK_COLOR }
+    .alert-danger  a { color: $DANGER_LINK_COLOR  }
 }
 
 //
@@ -394,7 +468,7 @@ a {
 //     color: $pager_fg;
 //     background-color: $pager_bg;
 // }
-// 
+//
 // .pagination > li > a:hover,
 // .pagination > li > span:hover,
 // .pagination > li > a:focus,
@@ -402,7 +476,7 @@ a {
 //     color: $pager_hover_fg;
 //     background-color: $pager_hover_bg;
 // }
-// 
+//
 // .pagination > .active > a,
 // .pagination > .active > span,
 // .pagination > .active > a:hover,
@@ -530,26 +604,26 @@ div.auto_complete {
     display: none;
     text-align: left;
     z-index: 100;
-}
 
-div.auto_complete ul {
-    margin: 0px;
-    border: 0px;
-    padding: 0px;
-    list-style: none;
-    overflow-x: hidden;
-}
+    ul {
+        margin: 0px;
+        border: 0px;
+        padding: 0px;
+        list-style: none;
+        overflow-x: hidden;
 
-div.auto_complete ul li {
-    margin: 0px;
-    border: 0px;
-    padding: 2px 4px 2px 4px;
-    white-space: nowrap;
-}
+        li {
+            margin: 0px;
+            border: 0px;
+            padding: 2px 4px 2px 4px;
+            white-space: nowrap;
+        }
 
-div.auto_complete ul li.selected {
-    color: $MENU_HOT_FG_COLOR;
-    background-color: $MENU_HOT_BG_COLOR;
+        li.selected {
+            color: $MENU_HOT_FG_COLOR;
+            background-color: $MENU_HOT_BG_COLOR;
+        }
+    }
 }
 
 //
@@ -571,6 +645,7 @@ table.scroller th {
     font-size: 120%;
     padding-bottom: 0.3em;
 }
+
 div.scroller {
     color: $MENU_FG_COLOR;
     background-color: $MENU_BG_COLOR;
@@ -580,26 +655,31 @@ div.scroller {
     border: 1px solid $MENU_BORDER_COLOR;
     padding: 0;
     font-style: italic;
-}
-div.scroller ul {
-    margin: 0;
-    border: 0;
-    padding: 0;
-    list-style-type: none;
-}
-div.scroller li {
-    padding: 0px 5px 0px 5px;
-}
-div.scroller span.normal {
-    font-style: normal;
-}
-div.scroller li.hot {
-    color: $MENU_HOT_FG_COLOR;
-    background-color: $MENU_HOT_BG_COLOR;
-}
-div.scroller li.warm {
-    color: $MENU_WARM_FG_COLOR;
-    background-color: $MENU_WARM_BG_COLOR;
+
+    ul {
+        margin: 0;
+        border: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
+    li {
+        padding: 0px 5px 0px 5px;
+    }
+
+    span.normal {
+        font-style: normal;
+    }
+
+    li.hot {
+        color: $MENU_HOT_FG_COLOR;
+        background-color: $MENU_HOT_BG_COLOR;
+    }
+
+    li.warm {
+        color: $MENU_WARM_FG_COLOR;
+        background-color: $MENU_WARM_BG_COLOR;
+    }
 }
 
 //
