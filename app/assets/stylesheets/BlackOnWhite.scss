@@ -32,13 +32,17 @@ $INPUT_BORDER_COLOR:             #888888;
 $INPUT_FG_COLOR:                 #000000;
 $INPUT_BG_COLOR:                 #FFFFFF;
 
-$BANNER_BORDER_COLOR:            none;
+$BANNER_BORDER_COLOR:            #DDDDDD;
+$BANNER_BORDER_WIDTH:            1px;
+$BANNER_BORDER_STYLE:            solid;
 $BANNER_FG_COLOR:                #FAEBD4;
 $BANNER_BG_COLOR:                #CC2616;
 $BANNER_HOVER_FG_COLOR:          #FAEB44;
 $BANNER_HOVER_BG_COLOR:          #CC2616;
 
 $LEFT_BAR_BORDER_COLOR:          #DDDDDD;
+$LEFT_BAR_DIV_BORDER_WIDTH:      1px;
+$LEFT_BAR_ITEM_BORDER_WIDTH:     0px;
 $LEFT_BAR_HEADER_FG_COLOR:       #777777;
 $LEFT_BAR_HEADER_BG_COLOR:       #EEEEEE;
 $LEFT_BAR_FG_COLOR:              #555555;
