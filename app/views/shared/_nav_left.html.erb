@@ -1,7 +1,10 @@
 <div class="list-group list-group-compact">
-  <div class="list-group-item" id="banner">
-    <%= link_to(:app_banner.t, browser.bot? ? "/sitemap/index.html" : "/") %>
-  </div>
+  <a id="logo" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+    <div class="list-group-item">
+      <span id="logo-text"><%= :app_banner.t %></span>
+    </div>
+  </a>
+
   <%= link_to(:app_intro.t, {controller: :observer, action: :intro}, {class: "list-group-item"}) %>
   <%= link_to(:app_how_to_use.t, {controller: :observer, action: :how_to_use}, {class: "list-group-item"}) %>
  
@@ -84,8 +87,8 @@
   <%= link_to(:translators_note_title.t, {controller: :observer, action: :translators_note}, {class: "list-group-item indent"}) %>
   <%= link_to(:app_publications.t, {controller: :publications, action: :index}, {class: "list-group-item indent"}) %>
  
-  <div class="list-group-item indent">
-    <% unless browser.bot?%>
+  <% unless browser.bot?%>
+    <div class="list-group-item indent">
       <div class="dropdown">
         <%= content_tag(:span, "#{:app_languages.t}:") %>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -98,6 +101,6 @@
           <% end %>
         </ul>
       </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
 </div>
