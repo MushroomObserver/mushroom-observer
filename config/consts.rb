@@ -140,4 +140,15 @@ MushroomObserver::Application.configure do
 
   # List of IP addresses to blacklist.
   config.blocked_ip_addresses = []
+
+  # Configuration of S3 image store on dreamhost.  Example:
+  #   config.s3_credentials = {
+  #     cdmr: {
+  #       server:            "https://objects.dreamhost.com",
+  #       bucket:            "mo-images",
+  #       access_key_id:     "xxxxxxxxxxxxxxxxxxxx",
+  #       secret_access_key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  #     }
+  #   }
+  config.s3_credentials = {}
 end
