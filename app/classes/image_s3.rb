@@ -60,7 +60,7 @@ class ImageS3
       key: key,
       acl: "public-read",
       body: io
-    ))
+    )).data
   rescue Aws::S3::Errors::Http503Error
     raise "#{@server} temporarily unavailable"
   rescue => e
@@ -76,7 +76,7 @@ class ImageS3
     client.head_object(
       bucket: @bucket,
       key: key
-    )
+    ).data
   rescue Aws::S3::Errors::NotFound
   rescue Aws::S3::Errors::NoSuchKey
     return nil
