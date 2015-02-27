@@ -17,6 +17,7 @@ class ImageS3
     @bucket            = opts[:bucket]
     @access_key_id     = opts[:access_key_id]
     @secret_access_key = opts[:secret_access_key]
+    @stub              = !!opts[:stub]
   end
 
   # Returns object you can call "each" on to iterate over all files in store:
@@ -27,6 +28,8 @@ class ImageS3
   #
   def list
     Results.new(client.list_objects(bucket: @bucket))
+  rescue Aws::S3::Errors::Http503Error
+    raise "#{@server} temporarily unavailable"
   rescue => e
     raise "Unable to get directory of S3 bucket #{@bucket} at #{@server}: #{e}"
   end
@@ -38,6 +41,8 @@ class ImageS3
       @pager.each do |response|
         response.contents.each(&block)
       end
+    rescue Aws::S3::Errors::Http503Error
+      raise "#{@server} temporarily unavailable"
     end
   end
 
@@ -56,6 +61,8 @@ class ImageS3
       acl: "public-read",
       body: io
     ))
+  rescue Aws::S3::Errors::Http503Error
+    raise "#{@server} temporarily unavailable"
   rescue => e
     raise "Unable to upload image #{key} to S3 bucket #{@bucket} at #{@server}: #{e}"
   end
@@ -73,6 +80,8 @@ class ImageS3
   rescue Aws::S3::Errors::NotFound
   rescue Aws::S3::Errors::NoSuchKey
     return nil
+  rescue Aws::S3::Errors::Http503Error
+    raise "#{@server} temporarily unavailable"
   rescue => e
     raise "Unable to get info on #{key} from S3 bucket #{@bucket} at #{@server}: #{e.class.name}: #{e}"
   end
@@ -86,6 +95,8 @@ class ImageS3
       bucket: @bucket,
       key: key
     )
+  rescue Aws::S3::Errors::Http503Error
+    raise "#{@server} temporarily unavailable"
   rescue => e
     raise "Unable to delete image #{key} from S3 bucket #{@bucket} at #{@server}: #{e}"
   end
@@ -96,7 +107,8 @@ private
     @s3 ||= Aws::S3::Client.new(
       endpoint: @server,
       credentials: Aws::Credentials.new(@access_key_id, @secret_access_key),
-      region: "us-east-1"
+      region: "us-east-1",
+      stub_responses: @stub
     )
   rescue => e
     raise "couldn't establish connection: #{e}"
