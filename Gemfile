@@ -87,3 +87,6 @@ gem "rubocop", require: false
 # Brakeman static analysis security scanner
 # See http://brakemanscanner.org/
 gem "brakeman", require: false
+
+# Amazon S3 SDK, for access to images on dreamhost S3
+gem "aws-sdk", "~> 2"
