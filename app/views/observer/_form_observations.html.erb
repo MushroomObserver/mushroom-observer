@@ -212,16 +212,16 @@
 </div>
 <% ##########################################################################   %>
 
-<div class="row">
+
   <div class="col-xs-12 text-center">
 <% if @projects.any? or @lists.any? %>
     <%= submit_tag(button_name) %>
 <% end %>
   </div>
-</div>
+
 
 <% if @projects.any? %>
-    <div class="row">
+
       <div class="col-xs-12">
         <label><%= :PROJECTS.t %>:</label>
         <p class="help-block">(<%= :form_observations_project_help.t %>)</p>
@@ -237,7 +237,7 @@
             </div>
           </div>
       <% end %>
-    </div>
+
 <% end %>
 
 <% if @lists.any? %>
