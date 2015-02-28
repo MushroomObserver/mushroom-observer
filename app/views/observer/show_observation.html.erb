@@ -48,7 +48,6 @@
       </div>
     </div>
     <%= render(partial: 'show_image_slider', locals: {thumb_size_control: true}) %>
-    <%= render(partial: 'naming/show', locals: {observation: @observation}) %>
   </div>
   <div class="col-sm-4">
     <div class="list-group">
@@ -62,6 +61,7 @@
 </div>
 <div class="row">
   <div class="col-xs-12">
+    <%= render(partial: 'naming/show', locals: {observation: @observation}) %>
     <%= render(partial: 'comment/show_comments', locals: {object: @observation,
                                                           controls: true, limit: nil}) %>
   </div>
