@@ -1509,7 +1509,7 @@ class ApplicationController < ActionController::Base
   #   opts["vertical_layout"]   # Stick text below thumbnail?
   #   opts["count"]             # Total number of items = rows * columns.
   #
-  def calc_layout_params
+  def calc_layout_params  ##TODO: Depreciate
     result = {}
     result["rows"]              = 5
     result["columns"]           = 3
