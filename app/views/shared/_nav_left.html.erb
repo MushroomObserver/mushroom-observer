@@ -1,9 +1,8 @@
 <div class="list-group list-group-compact">
-    <div id="logo" class="list-group-item">
-      <a href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>">
+  <a id="logo" href="<%= browser.bot? ? "/sitemap/index.html" : "/" %>" class="list-group-item">
       <span id="logo-text"><%= :app_banner.t %></span>
-      </a>
-    </div>
+  </a>
+
   <%= link_to(:app_intro.t, {controller: :observer, action: :intro}, {class: "list-group-item"}) %>
   <%= link_to(:app_how_to_use.t, {controller: :observer, action: :how_to_use}, {class: "list-group-item"}) %>
  
