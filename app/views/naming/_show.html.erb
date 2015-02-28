@@ -102,11 +102,21 @@
               <div class="pad-box">
                 <%= image_tag("eyes3.png") %> = <%= :show_namings_eyes_help.t %>
               </div>
+<<<<<<< HEAD
             </div>
           </div>
         </div>
 <% end # form     %>
 </div>
+=======
+
+
+      <% end      %>
+      </div>
+      </div>
+    </div>
+<% end %>
+>>>>>>> bootstrap
 <!--VOTE POPUPS-->
 <div class="row">
   <% observation.namings.select { |naming| naming.votes.length > 0 }.each do |naming|
@@ -121,4 +131,3 @@
 <% inject_javascript_at_end %(
   VotePopupModule('#{j :show_namings_lose_changes.l.gsub("\n", ' ')}')
 ) %>
-

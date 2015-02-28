@@ -1,30 +1,25 @@
 <%
-   comments = object.comments.sort_by(&:created_at).reverse
-   if limit
-     and_more = comments.length - limit
-     comments = comments[0..limit-1]
-   end
+  comments = object.comments.sort_by(&:created_at).reverse
+  if limit
+    and_more = comments.length - limit
+    comments = comments[0..limit-1]
+  end
 %>
 
-
 <div class="row">
-  <div class="col-sm-12">
+  <div class="col-sm-12 col-lg-8">
     <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t, style: "display: inline-block") %>
     <%= link_with_query(:"show_comments_add_comment".t,
                         {controller: :comment, action: :add_comment, id: object.id, type: object.class.name},
-                        style: "margin-left: 10px;") if controls     %>
+                        class: "pull-right") if controls     %>
   </div>
 </div>
 
-
-
 <% comments.each do |comment| %>
-    <%= render(:partial => 'comment/comment', :object => comment) %>
+  <%= render(:partial => 'comment/comment', :object => comment) %>
 <% end %>
 
-
-
 <%= if limit and (and_more > 0)
-      link_to(:show_comments_and_more.t(:num => and_more),
-              {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
-    end %>
+  link_to(:show_comments_and_more.t(:num => and_more),
+          {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
+end %>

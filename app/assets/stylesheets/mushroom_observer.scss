@@ -1,0 +1,980 @@
+//
+// set bootstrap parameters first
+// --------------------------------------------------
+
+$brand-success: $SUCCESS_FG_COLOR;
+$brand-info: $INFO_FG_COLOR;
+$brand-warning: $WARNING_FG_COLOR;
+$brand-danger: $DANGER_FG_COLOR;
+
+$font-family-sans-serif: Verdana, Arial, Helvetica, sans-serif;
+$font-family-base: $font-family-sans-serif;
+$font-size-base: 13px;
+
+$text-color: $BODY_FG_COLOR;
+$body-bg: $BODY_BG_COLOR;
+
+$link-color: $LINK_FG_COLOR;
+$link-hover-color: $LINK_HOVER_FG_COLOR;
+
+$padding-base-vertical: 5px;
+$padding-base-horizontal: 10px;
+$padding-large-vertical: 8px;
+$padding-large-horizontal: 13px;
+$padding-small-vertical: 4px;
+$padding-small-horizontal: 8px;
+$padding-xs-vertical: 1px;
+$padding-xs-horizontal: 4px;
+
+$component-active-color: $MENU_HOT_FG_COLOR;
+$component-active-bg: $MENU_HOT_BG_COLOR;
+
+$table-cell-padding: 6px;
+$table-condensed-cell-padding: 4px;
+$table-bg: transparent;
+$table-bg-accent: $LIST_BG_COLOR;
+$table-bg-hover: $MENU_WARM_BG_COLOR;
+$table-bg-active: $MENU_WARM_BG_COLOR;
+$table-border-color: $MENU_BORDER_COLOR;
+
+$btn-font-weight: bold;
+$btn-default-color: $BUTTON_FG_COLOR;
+$btn-default-bg: $BUTTON_BG_COLOR;
+$btn-default-border: $BUTTON_BORDER_COLOR;
+$btn-primary-color: $BUTTON_PRIMARY_FG_COLOR;
+$btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR;
+$btn-primary-border: $BUTTON_PRIMARY_BORDER_COLOR;
+$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR);
+
+$input-bg: $INPUT_BG_COLOR;
+$input-bg-disabled: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
+$input-color: $INPUT_FG_COLOR;
+$input-border: $INPUT_BORDER_COLOR;
+$input-color-placeholder: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
+$legend-color: $BODY_FG_COLOR;
+$legend-border-color: $INPUT_BORDER_COLOR;
+$input-group-addon-bg: $INPUT_BG_COLOR;
+$input-group-addon-border-color: $INPUT_BORDER_COLOR;
+$cursor-disabled: not-allowed;
+
+$dropdown-bg: $MENU_BG_COLOR;
+$dropdown-border: $MENU_BORDER_COLOR;
+$dropdown-fallback-border: $MENU_BORDER_COLOR;
+$dropdown-divider-bg: $MENU_BG_COLOR;
+$dropdown-link-color: $MENU_FG_COLOR;
+$dropdown-link-hover-color: $MENU_HOT_FG_COLOR;
+$dropdown-link-hover-bg: $MENU_HOT_BG_COLOR;
+$dropdown-link-active-color: $MENU_WARM_FG_COLOR;
+$dropdown-link-active-bg: $MENU_WARM_BG_COLOR;
+$dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR);
+$dropdown-header-color: $MENU_FG_COLOR;
+$dropdown-caret-color: $BODY_FG_COLOR;
+
+$grid-gutter-width: 30px;
+$navbar-height: 40px;
+$navbar-margin-bottom: 13px;
+$navbar-border-radius: 0;
+$navbar-padding-horizontal: 13px;
+$navbar-padding-vertical: 10px;
+
+$navbar-default-color: $TOP_BAR_FG_COLOR;
+$navbar-default-bg: $TOP_BAR_BG_COLOR;
+$navbar-default-border: $TOP_BAR_BORDER_COLOR;
+$navbar-default-link-color: $TOP_BAR_LINK_FG_COLOR;
+$navbar-default-link-hover-color: $TOP_BAR_LINK_HOVER_FG_COLOR;
+$navbar-default-link-hover-bg: $TOP_BAR_LINK_HOVER_BG_COLOR;
+$navbar-default-link-active-color: $TOP_BAR_LINK_FG_COLOR;
+$navbar-default-link-active-bg: $TOP_BAR_LINK_BG_COLOR;
+$navbar-default-link-disabled-color: mix($TOP_BAR_LINK_FG_COLOR, $TOP_BAR_LINK_BG_COLOR);
+$navbar-default-link-disabled-bg: $TOP_BAR_LINK_BG_COLOR;
+
+$pagination-color: $PAGER_FG_COLOR;
+$pagination-bg: $PAGER_BG_COLOR;
+$pagination-border: $PAGER_BORDER_COLOR;
+$pagination-hover-color: $PAGER_HOVER_FG_COLOR;
+$pagination-hover-bg: $PAGER_HOVER_BG_COLOR;
+$pagination-hover-border: $PAGER_HOVER_BORDER_COLOR;
+$pagination-active-color: $PAGER_ACTIVE_FG_COLOR;
+$pagination-active-bg: $PAGER_ACTIVE_BG_COLOR;
+$pagination-active-border: $PAGER_ACTIVE_BORDER_COLOR;
+$pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR);
+$pagination-disabled-bg: $PAGER_BG_COLOR;
+$pagination-disabled-border: $PAGER_BORDER_COLOR;
+
+$state-success-text: $SUCCESS_FG_COLOR;
+$state-success-bg: $SUCCESS_BG_COLOR;
+$state-success-border: mix($SUCCESS_FG_COLOR, $SUCCESS_BG_COLOR);
+$state-info-text: $INFO_FG_COLOR;
+$state-info-bg: $INFO_BG_COLOR;
+$state-info-border: mix($INFO_FG_COLOR, $INFO_BG_COLOR);
+$state-warning-text: $WARNING_FG_COLOR;
+$state-warning-bg: $WARNING_BG_COLOR;
+$state-warning-border: mix($WARNING_FG_COLOR, $WARNING_BG_COLOR);
+$state-danger-text: $DANGER_FG_COLOR;
+$state-danger-bg: $DANGER_BG_COLOR;
+$state-danger-border: mix($DANGER_FG_COLOR, $DANGER_BG_COLOR);
+
+$tooltip-opacity: 100%;
+$tooltip-max-width: 400px;
+$tooltip-color: $TOOLTIP_FG_COLOR;
+$tooltip-bg: $TOOLTIP_BG_COLOR;
+
+$alert-success-bg: $SUCCESS_BG_COLOR;
+$alert-success-text: $SUCCESS_FG_COLOR;
+$alert-success-border: $SUCCESS_BORDER_COLOR;
+$alert-info-bg: $INFO_BG_COLOR;
+$alert-info-text: $INFO_FG_COLOR;
+$alert-info-border: $INFO_BORDER_COLOR;
+$alert-warning-bg: $WARNING_BG_COLOR;
+$alert-warning-text: $WARNING_FG_COLOR;
+$alert-warning-border: $WARNING_BORDER_COLOR;
+$alert-danger-bg: $DANGER_BG_COLOR;
+$alert-danger-text: $DANGER_FG_COLOR;
+$alert-danger-border: $DANGER_BORDER_COLOR;
+
+$progress-bg: $PROGRESS_BG_COLOR;
+$progress-bar-color: $PROGRESS_FG_COLOR;
+$progress-bar-bg: $PROGRESS_BAR_COLOR;
+
+$list-group-bg: $LIST_BG_COLOR;
+$list-group-border: $LIST_BORDER_COLOR;
+$list-group-hover-bg: $LIST_BG_COLOR;
+$list-group-disabled-color: $LIST_HEADER_FG_COLOR;
+$list-group-disabled-bg: $LIST_HEADER_BG_COLOR;
+$list-group-disabled-text-color: $LIST_HEADER_FG_COLOR;
+$list-group-link-color: $LINK_FG_COLOR;
+$list-group-link-hover-color: $LINK_HOVER_FG_COLOR;
+
+$panel-bg: $LIST_BG_COLOR;
+$panel-body-padding: 12px;
+$panel-heading-padding: 8px 12px;
+$panel-inner-border: $LIST_BORDER_COLOR;
+$panel-footer-bg: $LIST_BG_COLOR;
+$panel-default-text: $LIST_FG_COLOR;
+$panel-default-border: $LIST_BORDER_COLOR;
+$panel-default-heading-bg: $LIST_HEADER_BG_COLOR;
+
+$help-block-max-width: 600px;
+
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+//
+// overall page style
+// --------------------------------------------------
+
+a {
+    background-color: $LINK_BG_COLOR;
+}
+
+a:hover {
+    background-color: $LINK_HOVER_BG_COLOR;
+}
+
+a:visited {
+    color: $LINK_VISITED_FG_COLOR;
+    background-color: $LINK_VISITED_BG_COLOR;
+}
+
+a {
+    font-weight: $LINK_WEIGHT;
+}
+#navigation a {
+    font-weight: normal;
+}
+
+.btn, .btn-default {
+    color: $BUTTON_FG_COLOR !important;
+    background-color: $BUTTON_BG_COLOR !important;
+    border-color: $BUTTON_BORDER_COLOR;
+    border-width: $BUTTON_BORDER_WIDTH;
+    border-style: $BUTTON_BORDER_STYLE;
+    border-radius: $BUTTON_BORDER_RADIUS;
+    padding: 4px 8px;
+}
+
+.btn:hover, .btn-default:hover {
+    background-color: mix($BUTTON_BG_COLOR, black, 90%) !important;
+    border-color: mix($BUTTON_BORDER_COLOR, black, 90%) !important;
+}
+
+.btn-primary {
+    color: $BUTTON_PRIMARY_FG_COLOR !important;
+    background-color: $BUTTON_PRIMARY_BG_COLOR !important;
+    border-color: $BUTTON_PRIMARY_BORDER_COLOR !important;
+}
+
+.btn-primary:hover {
+    background-color: mix($BUTTON_PRIMARY_BG_COLOR, black, 90%) !important;
+    border-color: mix($BUTTON_PRIMARY_BORDER_COLOR, black, 90%) !important;
+}
+
+.form-control {
+    border-width: $INPUT_BORDER_WIDTH;
+    border-style: $INPUT_BORDER_STYLE;
+    border-radius: $INPUT_BORDER_RADIUS;
+    padding: 4px 8px 3px 8px;
+}
+
+.help-block {
+  max-width: $help-block-max-width
+}
+.tooltip-inner {
+    word-wrap: break-word;
+}
+
+//
+// message banner at top
+// --------------------------------------------------
+
+.alert.message-banner {
+    margin: 0.5em 1.0em;
+    border-width: $BANNER_BORDER_WIDTH;
+    border-style: $BANNER_BORDER_STYLE;
+    border-radius: $BANNER_BORDER_RADIUS;
+    padding: 0.5em 1.0em;
+    text-align: center;
+}
+
+//
+// Mushroom Observer logo
+// --------------------------------------------------
+
+#navigation {
+    #logo {
+        background-color: $LOGO_BG_COLOR;
+        border-width: 0px;
+        border-bottom-width: $LOGO_BORDER_WIDTH;
+        border-color: $LOGO_BORDER_COLOR;
+        border-style: $LOGO_BORDER_STYLE;
+        border-radius: 0px;
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+          /*  margin-bottom: 5px;*/
+        }
+
+        padding-top: 5px;
+        padding-bottom: 5px;
+        font: small-caps 25px/25px "Times New Roman", serif;
+        text-align: center;
+        white-space: nowrap;
+        text-overflow: clip;
+        overflow: hidden;
+    }
+
+    #logo #logo-text,
+    #logo:visited #logo-text {
+        color: $LOGO_FG_COLOR;
+        background-color: transparent;
+        text-decoration: none;
+    }
+
+    #logo:hover,
+    #logo:hover div,
+    #logo:hover #logo-text {
+        color: $LOGO_HOVER_FG_COLOR;
+        background-color: $LOGO_HOVER_BG_COLOR;
+        text-decoration: none;
+    }
+
+    @if $LOGO_BORDER_STYLE == outset {
+        #logo:active div {
+            border-style: inset;
+        }
+    }
+}
+
+//
+// left nav bar
+// --------------------------------------------------
+
+#navigation {
+    background-color: $LEFT_BAR_BG_COLOR;
+    /*border-color: $LEFT_BAR_BORDER_COLOR;*/
+    /*border-width: $LEFT_BAR_BORDER_WIDTH;*/
+    /*border-left-width: 0px;*/
+    /*border-style: $LEFT_BAR_BORDER_STYLE;*/
+    border-radius: 0px;
+
+    /*border-top-right-radius: $LOGO_BORDER_RADIUS;*/
+    /*border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;*/
+
+    .list-group {
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+            margin-bottom: 15px;
+        } @else {
+            margin-bottom: 2px;
+        }
+    }
+
+    .list-group-item.disabled,
+    .list-group-item.disabled:hover,
+    .list-group-item.disabled:focus {
+        color: $LEFT_BAR_HEADER_FG_COLOR;
+        background-color: $LEFT_BAR_HEADER_BG_COLOR;
+        cursor: default;
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+            margin-top: 10px;
+        }
+        padding-left: 5px;
+    }
+
+    .list-group-item {
+        color: $LEFT_BAR_FG_COLOR;
+        background-color: $LEFT_BAR_BG_COLOR;
+        margin-top: 0px;
+        border-color: $LEFT_BAR_BORDER_COLOR;
+        border-width: $LEFT_BAR_ITEM_BORDER_WIDTH 0px;
+        border-style: $LEFT_BAR_BORDER_STYLE;
+        border-radius: 0px;
+        //padding: 1px 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .list-group-item:last-child {
+        border-bottom-width: 0px;
+    }
+
+    .list-group-item.indent {
+        padding-left: 10px;
+    }
+
+    .list-group-item:hover,
+    .list-group-item:focus {
+        color: $LEFT_BAR_HOVER_FG_COLOR;
+        background-color: $LEFT_BAR_HOVER_BG_COLOR;
+    }
+
+    .list-group-item-danger {
+        color: $LEFT_BAR_ADMIN_FG_COLOR;
+        background-color: $LEFT_BAR_ADMIN_BG_COLOR;
+    }
+
+    .list-group-item-danger:hover,
+    .list-group-item-danger:focus {
+        color: $LEFT_BAR_ADMIN_HOVER_FG_COLOR;
+        background-color: $LEFT_BAR_ADMIN_HOVER_BG_COLOR;
+    }
+}
+
+//
+// top nav bar
+// --------------------------------------------------
+
+.navbar-default {
+    color: $TOP_BAR_FG_COLOR;
+    background-color: $TOP_BAR_BG_COLOR;
+    margin-left: 10px;
+    border-color: $TOP_BAR_BORDER_COLOR;
+    border-width: $TOP_BAR_BORDER_WIDTH;
+    border-style: $TOP_BAR_BORDER_STYLE;
+    border-radius: $TOP_BAR_BORDER_RADIUS;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-right-width: 0px;
+    padding: 0px;
+
+    a, a:visited {
+        color: $TOP_BAR_LINK_FG_COLOR;
+        background-color: $TOP_BAR_LINK_BG_COLOR;
+    }
+
+    a:hover {
+        color: $TOP_BAR_LINK_HOVER_FG_COLOR;
+        background-color: $TOP_BAR_LINK_HOVER_BG_COLOR;
+    }
+
+    .navbar-nav {
+        margin-top: 10px;
+    }
+
+    .navbar-nav > li > a,
+    .navbar-nav > li > a.dropdown-toggle {
+        color: $TOP_BAR_FG_COLOR !important;
+        background-color: $TOP_BAR_BG_COLOR !important;
+        margin: 0px 8px;
+        border: 0px;
+        padding: 0px;
+    }
+
+    .navbar-nav > li > a:hover,
+    .navbar-nav > li > a.dropdown-toggle:hover {
+        color: $TOP_BAR_LINK_HOVER_FG_COLOR !important;
+        background-color: $TOP_BAR_LINK_HOVER_BG_COLOR !important;
+    }
+}
+
+//
+// content
+// --------------------------------------------------
+
+#content {
+    //margin-left: 2em; //NO! This pushes content off screen
+    padding-bottom: 5em;
+}
+
+//
+// alerts
+// --------------------------------------------------
+
+.alert {
+    margin: 0.5em 1.0em;
+    border-width: $ALERT_BORDER_WIDTH;
+    border-style: $ALERT_BORDER_STYLE;
+    border-radius: $ALERT_BORDER_RADIUS;
+    padding: 0.5em 1.0em;
+    text-align: left;
+
+    a { font-weight: bold }
+    .alert-info    a { color: $INFO_LINK_COLOR    }
+    .alert-success a { color: $SUCCESS_LINK_COLOR }
+    .alert-warning a { color: $WARNING_LINK_COLOR }
+    .alert-danger  a { color: $DANGER_LINK_COLOR  }
+}
+
+//
+// lists
+// --------------------------------------------------
+
+// .list-group-item.default {
+//     color: $list_fg;
+//     background-color: $list_bg;
+//     border-color: $list_border;
+// }
+
+//
+// rss log items
+// --------------------------------------------------
+
+.rss-log-item {
+    padding: 5px;
+    text-align: center;
+    height: 350px;
+}
+.rss-fancy-time {
+    position: absolute;
+    top: -10px;
+    right: 2px;
+    color: mix($LIST_FG_COLOR, $LIST_BG_COLOR);
+}
+.rss-detail {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+.rss-where, .rss-what {
+    text-align: center;
+}
+
+//
+// pagination links
+// --------------------------------------------------
+
+.pagination {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.pagination > li > a,
+.pagination > li > span,
+.pagination > li:first-child > a,
+.pagination > li:first-child > span,
+.pagination-sm > li:first-child > a,
+.pagination-sm > li:first-child > span,
+.pagination-sm > li:last-child > a,
+.pagination-sm > li:last-child > span {
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+// .pagination > li > a,
+// .pagination > li > span {
+//     color: $pager_fg;
+//     background-color: $pager_bg;
+// }
+//
+// .pagination > li > a:hover,
+// .pagination > li > span:hover,
+// .pagination > li > a:focus,
+// .pagination > li > span:focus {
+//     color: $pager_hover_fg;
+//     background-color: $pager_hover_bg;
+// }
+//
+// .pagination > .active > a,
+// .pagination > .active > span,
+// .pagination > .active > a:hover,
+// .pagination > .active > span:hover,
+// .pagination > .active > a:focus,
+// .pagination > .active > span:focus {
+//     color: $pager_active_fg;
+//     background-color: $pager_active_bg;
+// }
+
+.pagination > .disabled > span,
+.pagination > .disabled > span:hover,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > a,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > a:focus {
+    // color: $body_light;
+    cursor: default;
+    // background-color: transparent;
+}
+
+//
+// theater view
+// --------------------------------------------------
+
+.theater-shown {
+    overflow: hidden;
+}
+
+.theater-btn {
+    position: absolute;
+    background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.59);
+    color: black;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+    display: none;
+}
+
+.theater-btn:hover, .theater-btn:focus {
+    background: black;
+    color: white;
+    padding: 5px;
+    top: 0px;
+    border: 1px solid;
+    text-decoration: none;
+}
+
+.img-theater {
+    position: absolute;
+    top: 0px;
+    background: none repeat scroll 0% 0% rgba(48, 50, 48, 0.55);
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: none;
+}
+
+#img_append_target {
+    padding-top: 20px;
+}
+
+//
+// image carousel on show_observation page
+// --------------------------------------------------
+
+.carousel-control {
+    width:  4%;
+}
+.carousel-control.left,
+.carousel-control.right {
+    margin-left: 15px;
+    background-image: none;
+}
+
+.extra1,
+.extra2,
+.extra3 {
+    display: none;
+}
+
+//
+// image vote meter bar
+// --------------------------------------------------
+
+.vote-meter {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 200px;
+    height: 7px;
+    margin-bottom: 4px;
+    overflow: hidden;
+    background-color: $VOTE_METER_BG_COLOR;
+    border-radius: 0px;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1) inset;
+    border: $VOTE_METER_BORDER_COLOR;
+}
+
+.vote-meter-bar {
+    float: left;
+    width: 0px;
+    height: 100%;
+    font-size: 12px;
+    line-height: 5px;
+    color: #FFF;
+    text-align: center;
+    background-color: $VOTE_METER_FG_COLOR;
+    box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
+    transition: width 0.6s ease 0s;
+}
+
+//
+// autocompletion
+// --------------------------------------------------
+
+div.auto_complete {
+    position: absolute;
+    color: $MENU_FG_COLOR;
+    background-color: $MENU_BG_COLOR;
+    margin: 0px;
+    border: 1px solid $MENU_BORDER_COLOR;
+    padding: 0px;
+    overflow-x: hidden;
+    display: none;
+    text-align: left;
+    z-index: 100;
+
+    ul {
+        margin: 0px;
+        border: 0px;
+        padding: 0px;
+        list-style: none;
+        overflow-x: hidden;
+
+        li {
+            margin: 0px;
+            border: 0px;
+            padding: 2px 4px 2px 4px;
+            white-space: nowrap;
+        }
+
+        li.selected {
+            color: $MENU_HOT_FG_COLOR;
+            background-color: $MENU_HOT_BG_COLOR;
+        }
+    }
+}
+
+//
+// naming vote popup
+// --------------------------------------------------
+
+.popup {
+    z-index: 1000;
+    border: 1px solid $MENU_BORDER_COLOR;
+    color: $MENU_FG_COLOR !important;
+    background-color: $MENU_BG_COLOR !important;
+}
+
+//
+// name_lister
+// --------------------------------------------------
+
+table.scroller th {
+    font-size: 120%;
+    padding-bottom: 5px;
+}
+
+div.scroller {
+    color: $MENU_FG_COLOR;
+    background-color: $MENU_BG_COLOR;
+    height: 450px;
+    overflow: auto;
+    margin: 0;
+    border: 1px solid $MENU_BORDER_COLOR;
+    padding: 0;
+    font-style: italic;
+
+    ul {
+        margin: 0;
+        border: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
+    li {
+        padding: 0px 5px 0px 5px;
+    }
+
+    span.normal {
+        font-style: normal;
+    }
+
+    li.hot {
+        color: $MENU_HOT_FG_COLOR;
+        background-color: $MENU_HOT_BG_COLOR;
+    }
+
+    li.warm {
+        color: $MENU_WARM_FG_COLOR;
+        background-color: $MENU_WARM_BG_COLOR;
+    }
+}
+
+//
+// icons
+// --------------------------------------------------
+
+.icon-addon {
+    position: relative;
+    display: block;
+}
+
+.icon-addon:after,
+.icon-addon:before {
+    display: table;
+    content: " ";
+}
+
+.icon-addon:after {
+    clear: both;
+}
+
+.icon-addon.addon-md .glyphicon,
+.icon-addon .glyphicon,
+.icon-addon.addon-md .fa,
+.icon-addon .fa {
+    position: absolute;
+    z-index: 10;
+    left: 10px;
+    font-size: 14px;
+    width: 20px;
+    margin-left: -2.5px;
+    text-align: center;
+    padding: 10px 0;
+    top: 1px;
+    color: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
+}
+
+.icon-addon.addon-lg .form-control {
+    line-height: 1.33;
+    font-size: 18px;
+    padding: 10px 16px 10px 40px;
+}
+
+.icon-addon.addon-sm .form-control {
+    padding: 5px 10px 5px 28px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.icon-addon.addon-lg .fa,
+.icon-addon.addon-lg .glyphicon {
+    font-size: 18px;
+    margin-left: 0;
+    left: 11px;
+    top: 4px;
+}
+
+.icon-addon.addon-md .form-control,
+.icon-addon .form-control {
+    padding-left: 30px;
+    float: left;
+    font-weight: normal;
+}
+
+.icon-addon.addon-sm .fa,
+.icon-addon.addon-sm .glyphicon {
+    margin-left: 0;
+    font-size: 12px;
+    left: 5px;
+    top: 1px
+}
+
+.icon-addon .form-control:focus + .glyphicon,
+.icon-addon:hover .glyphicon,
+.icon-addon .form-control:focus + .fa,
+.icon-addon:hover .fa {
+    color: $INPUT_FG_COLOR;
+}
+
+//
+// generally useful classes
+// --------------------------------------------------
+
+.inline {
+    display: inline-block;
+}
+
+.indent {
+    padding-left: 10px !important;
+}
+
+.align-top {
+    vertical-align: top !important;
+}
+
+.align-bottom {
+    vertical-align: bottom !important;
+}
+
+.bold {
+    font-weight: 800;
+}
+
+.border-none {
+    border: none;
+}
+
+.border-radius-none {
+    border-radius: 0 !important;
+}
+
+.push-down {
+    margin-top: 1em;
+}
+
+.slight-pad {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.pad-box {
+    padding: 5px;
+}
+
+.border-box {
+    border: 1px solid;
+}
+
+.pad-bottom {
+    padding-bottom: .25em;
+}
+
+.pad-top {
+    padding-top: 1em;
+}
+
+.kill-padding {
+    padding: 0 !important;
+}
+
+//
+// style tweaks
+// --------------------------------------------------
+
+table.table-compact tr td {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+}
+
+.list-group.list-group-compact .list-group-item {
+    padding: 4px;
+}
+
+.input-group .icon-addon .form-control {
+    border-radius: 0;
+}
+
+//
+// small devices, tablets
+// --------------------------------------------------
+
+@media screen and (max-width: 767px) {
+    .rss-box-details {
+        height: auto !important;
+    }
+
+    .row-offcanvas {
+        position: relative;
+        -webkit-transition: all .25s ease-out;
+        -o-transition: all .25s ease-out;
+        transition: all .25s ease-out;
+        -webkit-transform: translate3d(0,0,0);
+    }
+
+    .row-offcanvas-right {
+        right: 0;
+    }
+
+    .row-offcanvas-left {
+        left: 0;
+    }
+
+    .row-offcanvas-right
+    .sidebar-offcanvas {
+        right: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left
+    .sidebar-offcanvas {
+        left: -50%; /* 6 columns */
+    }
+
+    .row-offcanvas-right.active {
+        right: 50%; /* 6 columns */
+    }
+
+    .row-offcanvas-left.active {
+        left: 50%; /* 6 columns */
+    }
+
+    .sidebar-offcanvas {
+        position: absolute;
+        top: 0;
+        width: 50%; /* 6 columns */
+    }
+    .hidden-overflow-x {
+        overflow-x: hidden !important;
+    }
+}
+
+//
+// medium devices, desktops
+// --------------------------------------------------
+
+@media screen and (max-width: 992px) {
+}
+
+//
+// large devices?
+// --------------------------------------------------
+
+@media only screen and (min-width: 768px) {
+    @media all and (transform-3d), (-webkit-transform-3d) {
+        .carousel-inner > .item.active.left,
+        .carousel-inner > .item.prev
+        {
+            transform: translate3d(-50%, 0, 0);
+            left: 0;
+        }
+
+        .carousel-inner > .item.active.right,
+        .carousel-inner > .item.next
+        {
+            transform: translate3d(50%, 0, 0);
+            left: 0;
+        }
+    }
+    .carousel-inner > .active.left  { left: -50%; }
+    .carousel-inner > .active.right { left:  50%; }
+    .carousel-inner > .next         { left:  50%; }
+    .carousel-inner > .prev         { left: -50%; }
+    .extra1 { display: block; }
+}
+
+//
+// huge devices?
+// --------------------------------------------------
+
+@media only screen and (min-width: 992px) {
+    @media all and (transform-3d), (-webkit-transform-3d) {
+        .carousel-inner > .item.active.left,
+        .carousel-inner > .item.prev
+        {
+            transform: translate3d(-25%, 0, 0);
+            left: 0;
+        }
+
+        .carousel-inner > .item.active.right,
+        .carousel-inner > .item.next
+        {
+            transform: translate3d(25%, 0, 0);
+            left: 0;
+        }
+    }
+
+    .carousel-inner > .active.left  { left: -25%; }
+    .carousel-inner > .active.right { left:  25%; }
+    .carousel-inner > .next        	{ left:  25%; }
+    .carousel-inner > .prev		 	    { left: -25%; }
+    .extra2,
+    .extra3 { display: block; }
+}
