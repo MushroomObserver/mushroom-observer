@@ -70,7 +70,7 @@ $dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR);
 $dropdown-header-color: $MENU_FG_COLOR;
 $dropdown-caret-color: $BODY_FG_COLOR;
 
-$grid-gutter-width: 0px;
+$grid-gutter-width: 30px;
 $navbar-height: 40px;
 $navbar-margin-bottom: 13px;
 $navbar-border-radius: 0;
@@ -154,6 +154,8 @@ $panel-default-text: $LIST_FG_COLOR;
 $panel-default-border: $LIST_BORDER_COLOR;
 $panel-default-heading-bg: $LIST_HEADER_BG_COLOR;
 
+$help-block-max-width: 600px;
+
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
@@ -214,6 +216,9 @@ a {
     padding: 4px 8px 3px 8px;
 }
 
+.help-block {
+  max-width: $help-block-max-width
+}
 .tooltip-inner {
     word-wrap: break-word;
 }
@@ -236,7 +241,7 @@ a {
 // --------------------------------------------------
 
 #navigation {
-    #logo div {
+    #logo {
         background-color: $LOGO_BG_COLOR;
         border-width: 0px;
         border-bottom-width: $LOGO_BORDER_WIDTH;
@@ -244,8 +249,9 @@ a {
         border-style: $LOGO_BORDER_STYLE;
         border-radius: 0px;
         @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
-            margin-bottom: 5px;
+          /*  margin-bottom: 5px;*/
         }
+
         padding-top: 5px;
         padding-bottom: 5px;
         font: small-caps 25px/25px "Times New Roman", serif;
@@ -283,13 +289,14 @@ a {
 
 #navigation {
     background-color: $LEFT_BAR_BG_COLOR;
-    border-color: $LEFT_BAR_BORDER_COLOR;
-    border-width: $LEFT_BAR_BORDER_WIDTH;
-    border-left-width: 0px;
-    border-style: $LEFT_BAR_BORDER_STYLE;
+    /*border-color: $LEFT_BAR_BORDER_COLOR;*/
+    /*border-width: $LEFT_BAR_BORDER_WIDTH;*/
+    /*border-left-width: 0px;*/
+    /*border-style: $LEFT_BAR_BORDER_STYLE;*/
     border-radius: 0px;
-    border-top-right-radius: $LOGO_BORDER_RADIUS;
-    border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
+
+    /*border-top-right-radius: $LOGO_BORDER_RADIUS;*/
+    /*border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;*/
 
     .list-group {
         @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
@@ -319,7 +326,7 @@ a {
         border-width: $LEFT_BAR_ITEM_BORDER_WIDTH 0px;
         border-style: $LEFT_BAR_BORDER_STYLE;
         border-radius: 0px;
-        padding: 1px 5px;
+        //padding: 1px 5px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -403,7 +410,7 @@ a {
 // --------------------------------------------------
 
 #content {
-    margin-left: 2em;
+    //margin-left: 2em; //NO! This pushes content off screen
     padding-bottom: 5em;
 }
 
@@ -585,6 +592,7 @@ a {
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+    max-width: 200px;
     height: 7px;
     margin-bottom: 4px;
     overflow: hidden;
@@ -844,7 +852,7 @@ table.table-compact tr td {
 }
 
 .list-group.list-group-compact .list-group-item {
-    padding: 5px;
+    padding: 4px;
 }
 
 .input-group .icon-addon .form-control {
