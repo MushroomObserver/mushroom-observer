@@ -32,3 +32,6 @@ gem "rtf"
 gem "enum_column3"
 gem "cure_acts_as_versioned"
 gem "coveralls", require: false
+
+# Amazon S3 SDK, for access to images on dreamhost S3
+gem "aws-sdk", "~> 2"
