@@ -84,9 +84,9 @@ $LEFT_BAR_BORDER_RADIUS:         0px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:     0px;
 $LEFT_BAR_HEADER_FG_COLOR:       $muscaria_background;
 $LEFT_BAR_HEADER_BG_COLOR:       $velosa_background;
-$LEFT_BAR_FG_COLOR:              $velosa_light_veil:
+$LEFT_BAR_FG_COLOR:              $velosa_light_veil;
 $LEFT_BAR_BG_COLOR:              $velosa_background;
-$LEFT_BAR_HOVER_FG_COLOR:        $velosa_light_veil:
+$LEFT_BAR_HOVER_FG_COLOR:        $velosa_light_veil;
 $LEFT_BAR_HOVER_BG_COLOR:        $muscaria_background;
 
 $TOP_BAR_BORDER_COLOR:           $velosa_background;
@@ -119,7 +119,7 @@ $VOTE_METER_BG_COLOR:            $pachycolea_background;
 
 $PROGRESS_BG_COLOR:              $pachycolea_background;
 $PROGRESS_FG_COLOR:              $pachycolea_foreground;
-$PROGRESS_BAR_COLOR:             $phalloides_dark_cap:
+$PROGRESS_BAR_COLOR:             $phalloides_dark_cap;
 
 $PAGER_FG_COLOR:                 $pachycolea_foreground;
 $PAGER_BG_COLOR:                 transparent;
@@ -131,13 +131,13 @@ $PAGER_ACTIVE_FG_COLOR:          $pachycolea_background;
 $PAGER_ACTIVE_BG_COLOR:          $pachycolea_foreground;
 $PAGER_ACTIVE_BORDER_COLOR:      none;
 
-$MENU_BORDER_COLOR:              $pachycolea_foreground;
-$MENU_FG_COLOR:                  $pachycolea_foreground;
-$MENU_BG_COLOR:                  $pachycolea_background;
-$MENU_HOT_FG_COLOR:              $pachycolea_foreground;
-$MENU_HOT_BG_COLOR:              $velosa_background;
-$MENU_WARM_FG_COLOR:             $pachycolea_foreground;
-$MENU_WARM_BG_COLOR:             $novinupta_background;
+$MENU_BORDER_COLOR:              $pachycolea_background;
+$MENU_FG_COLOR:                  black;
+$MENU_BG_COLOR:                  white;
+$MENU_HOT_FG_COLOR:              black;
+$MENU_HOT_BG_COLOR:              $muscaria_background;
+$MENU_WARM_FG_COLOR:             black;
+$MENU_WARM_BG_COLOR:             $velosa_background;
 
 @import "mushroom_observer";
 

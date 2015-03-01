@@ -241,7 +241,6 @@ a {
 // --------------------------------------------------
 
 #navigation {
-    padding-left: 0;
     #logo {
         background-color: $LOGO_BG_COLOR;
         border-width: 0px;
@@ -290,14 +289,15 @@ a {
 
 #navigation {
     background-color: $LEFT_BAR_BG_COLOR;
-    /*border-color: $LEFT_BAR_BORDER_COLOR;*/
-    /*border-width: $LEFT_BAR_BORDER_WIDTH;*/
-    /*border-left-width: 0px;*/
-    /*border-style: $LEFT_BAR_BORDER_STYLE;*/
-    border-radius: 0px;
-
-    /*border-top-right-radius: $LOGO_BORDER_RADIUS;*/
-    /*border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;*/
+    border-color: $LEFT_BAR_BORDER_COLOR;
+    border-width: $LEFT_BAR_BORDER_WIDTH;
+    border-style: $LEFT_BAR_BORDER_STYLE;
+    border-top-left-radius: $LOGO_BORDER_RADIUS;
+    border-top-right-radius: $LOGO_BORDER_RADIUS;
+    border-bottom-left-radius: $LEFT_BAR_BORDER_RADIUS;
+    border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
+    padding-left: 0px;
+    padding-right: 0px;
 
     .list-group {
         @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
@@ -327,7 +327,9 @@ a {
         border-width: $LEFT_BAR_ITEM_BORDER_WIDTH 0px;
         border-style: $LEFT_BAR_BORDER_STYLE;
         border-radius: 0px;
-        //padding: 1px 5px;
+        @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
+            padding: 1px 5px;
+        }
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -699,13 +701,13 @@ div.scroller {
     }
 
     li.hot {
-        color: $MENU_HOT_FG_COLOR;
-        background-color: $MENU_HOT_BG_COLOR;
+        color: $MENU_WARM_FG_COLOR;
+        background-color: $MENU_WARM_BG_COLOR;
     }
 
     li.warm {
-        color: $MENU_WARM_FG_COLOR;
-        background-color: $MENU_WARM_BG_COLOR;
+        color: $MENU_HOT_FG_COLOR;
+        background-color: $MENU_HOT_BG_COLOR;
     }
 }
 
@@ -871,6 +873,7 @@ table.table-compact tr td {
 @media screen and (max-width: 767px) {
     #navigation {
       padding-left: 15px;
+      padding-right: 15px;
     }
 
     .rss-box-details {
