@@ -163,12 +163,12 @@ MushroomObserver::Application.configure do
     translations.js
     vote_popup.js
 
-    # Admin.css      
+    Admin.css      
     Agaricus.css   
-    # Amanita.css    
+    Amanita.css    
     BlackOnWhite.css      
-    # Cantharellaceae.css   
-    # Hygrocybe.css         
+    Cantharellaceae.css   
+    Hygrocybe.css         
     semantic_vernacular.css
 
   ) if config.assets && config.assets.precompile
