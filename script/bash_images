@@ -106,8 +106,7 @@ function copy_file_to_server {
   "s3")
     cmd=$app_root/script/s3cp.rb
     wait_for $cmd
-    $cmd $image_root/$file $server $file --cache || \
-      die "Failed to transfer $file to $path."
+    $cmd $image_root/$file $server $file || die "Failed to transfer $file to $path."
     ;;
   *)
     url=${image_server_data[$server,url]}
