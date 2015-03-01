@@ -1,5 +1,5 @@
 $BODY_FG_COLOR:                  #000000;
-$BODY_BG_COLOR:                  #FFFFFF;
+$BODY_BG_COLOR:                  #DD00DD;
 
 $INFO_FG_COLOR:                  #0080C0;
 $INFO_BG_COLOR:                  #E0F8FF;
@@ -47,33 +47,33 @@ $BANNER_BORDER_WIDTH:            2px;
 $BANNER_BORDER_STYLE:            solid;
 $BANNER_BORDER_RADIUS:           5px;
 
-$LOGO_BORDER_COLOR:              #DDDDDD;
-$LOGO_BORDER_WIDTH:              1px;
+$LOGO_BORDER_COLOR:              black;
+$LOGO_BORDER_WIDTH:              2px;
 $LOGO_BORDER_STYLE:              solid;
 $LOGO_BORDER_RADIUS:             0px;
-$LOGO_FG_COLOR:                  #FAEBD4;
-$LOGO_BG_COLOR:                  #CC2616;
-$LOGO_HOVER_FG_COLOR:            #FAEB44;
-$LOGO_HOVER_BG_COLOR:            #CC2616;
+$LOGO_FG_COLOR:                  black;
+$LOGO_BG_COLOR:                  yellow;
+$LOGO_HOVER_FG_COLOR:            purple;
+$LOGO_HOVER_BG_COLOR:            yellow;
 
-$LEFT_BAR_BORDER_COLOR:          #DDDDDD;
+$LEFT_BAR_BORDER_COLOR:          gray;
 $LEFT_BAR_BORDER_WIDTH:          1px;
 $LEFT_BAR_BORDER_STYLE:          solid;
-$LEFT_BAR_BORDER_RADIUS:         5px;
+$LEFT_BAR_BORDER_RADIUS:         0px;
 $LEFT_BAR_ITEM_BORDER_WIDTH:     1px;
-$LEFT_BAR_HEADER_FG_COLOR:       #777777;
-$LEFT_BAR_HEADER_BG_COLOR:       #EEEEEE;
-$LEFT_BAR_FG_COLOR:              #555555;
-$LEFT_BAR_BG_COLOR:              #FFFFFF;
-$LEFT_BAR_HOVER_FG_COLOR:        #23529C;
-$LEFT_BAR_HOVER_BG_COLOR:        #EEEEEE;
+$LEFT_BAR_HEADER_FG_COLOR:       black;
+$LEFT_BAR_HEADER_BG_COLOR:       yellow;
+$LEFT_BAR_FG_COLOR:              #2050E0;
+$LEFT_BAR_BG_COLOR:              transparent;
+$LEFT_BAR_HOVER_FG_COLOR:        #23527C;
+$LEFT_BAR_HOVER_BG_COLOR:        transparent;
 
-$TOP_BAR_BORDER_COLOR:           #DDDDDD;
-$TOP_BAR_BORDER_WIDTH:           1px;
+$TOP_BAR_BORDER_COLOR:           yellow;
+$TOP_BAR_BORDER_WIDTH:           0px;
 $TOP_BAR_BORDER_STYLE:           solid;
 $TOP_BAR_BORDER_RADIUS:          0px;
-$TOP_BAR_FG_COLOR:               #000000;
-$TOP_BAR_BG_COLOR:               #F2F2F2;
+$TOP_BAR_FG_COLOR:               black;
+$TOP_BAR_BG_COLOR:               #DD00DD;
 $TOP_BAR_LINK_FG_COLOR:          #2050E0;
 $TOP_BAR_LINK_BG_COLOR:          transparent;
 $TOP_BAR_LINK_HOVER_FG_COLOR:    #23527C;
@@ -83,17 +83,17 @@ $ALERT_BORDER_WIDTH:             2px;
 $ALERT_BORDER_STYLE:             solid;
 $ALERT_BORDER_RADIUS:            5px;
 
-$LIST_BORDER_COLOR:              #DDDDDD;
-$LIST_HEADER_FG_COLOR:           #777777;
-$LIST_HEADER_BG_COLOR:           #EEEEEE;
-$LIST_FG_COLOR:                  #333333;
-$LIST_BG_COLOR:                  #F5F5F5;
+  $LIST_BORDER_COLOR:              #DDDDDD;
+  $LIST_HEADER_FG_COLOR:           #777777;
+  $LIST_HEADER_BG_COLOR:           #EEEEEE;
+  $LIST_FG_COLOR:                  #333333;
+  $LIST_BG_COLOR:                  #F5F5F5;
 
 $TOOLTIP_FG_COLOR:               white;
 $TOOLTIP_BG_COLOR:               black;
 
 $VOTE_METER_BORDER_COLOR:        none;
-$VOTE_METER_FG_COLOR:            #205080;
+$VOTE_METER_FG_COLOR:            #000000;
 $VOTE_METER_BG_COLOR:            #F5F5F5;
 
 $PROGRESS_BG_COLOR:              #EEEEEE;
@@ -119,3 +119,12 @@ $MENU_WARM_FG_COLOR:             #000000;
 $MENU_WARM_BG_COLOR:             #FF8888;
 
 @import "mushroom_observer";
+
+.Admin {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
