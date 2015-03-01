@@ -20,7 +20,7 @@ jQuery(document).ready(function () {
         jQuery(target).toggleClass('hidden-xs');
     });
     jQuery('[data-dismiss="alert"]').click(function() {
-        setCookie('hideBanner',"true", 1);
+        setCookie('hideBanner',bannermd5, 30);
     });
 
     jQuery('body').delegate('[data-toggle="expand-icon"]', "mouseenter mouseleave", function (e){

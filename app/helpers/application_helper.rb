@@ -19,11 +19,17 @@
 ################################################################################
 
 # From map_helper.rb
+require 'digest/md5'
 require_dependency 'map_collapsible'
 require_dependency 'map_set'
 require_dependency 'gmaps'
 
 module ApplicationHelper
+
+  # Returns an MD5 sum of a string.
+  def md5_of_string(input_string)
+    digest = Digest::MD5.hexdigest(input_string)
+  end
 
   # For now, just use Browser gem's "modern?" criteria.
   # Webkit,
