@@ -249,7 +249,7 @@ a {
         border-style: $LOGO_BORDER_STYLE;
         border-radius: 0px;
         @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
-          /*  margin-bottom: 5px;*/
+            margin-bottom: 5px;
         }
 
         padding-top: 5px;
