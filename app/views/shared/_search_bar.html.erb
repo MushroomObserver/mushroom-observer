@@ -53,9 +53,9 @@
         <%= link_to(:app_create_account.t, {controller: :account, action: :signup}, {class: "btn btn-primary align-bottom"}) %>
       </div>
     <% else ##user is logged in %>
-      <% if @user.admin && !is_in_admin_mode? %>
+      <% if @user.admin %>
         <li>
-          <%= link_to("", {controller: :account, action: :turn_admin_on},
+          <%= link_to("", {controller: :account, action: is_in_admin_mode? ? :turn_admin_mode_off : :turn_admin_on},
                            {class: "glyphicon glyphicon-text-background", title: :app_turn_admin_on.t,
                             data: {toggle: "tooltip", placement: "left"}}) %>
         </li>
