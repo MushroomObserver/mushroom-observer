@@ -106,7 +106,7 @@ function copy_file_to_server {
   "s3")
     cmd=$app_root/script/s3cp.rb
     wait_for $cmd
-    $cmd $image_root/$file $server $file --update-cache || \
+    $cmd $image_root/$file $server $file --cache || \
       die "Failed to transfer $file to $path."
     ;;
   *)
@@ -135,7 +135,7 @@ function read_server_directory {
     ;;
   "s3")
     # Listing an S3 bucket takes forever, rely on cached listing instead.
-    grep ^$subdir $image_root/$server.files | sed 's/[^\/]*\///'
+    grep ^$subdir $image_root/$server.files | sed 's/[^\/]*\///' | $app_root/script/s3uniq.rb
     ;;
   *)
     url=${image_server_data[$server,url]}
