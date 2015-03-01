@@ -24,8 +24,6 @@
       css = @user.theme
       css = MO.themes.sample unless MO.themes.member?(css)
     end
-    css = "BlackOnWhite"
-    css = "Agaricus"
     stylesheet_link_tag(css)
   %>
   <%= @header unless @header.blank? %>
