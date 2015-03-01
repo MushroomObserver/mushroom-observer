@@ -96,9 +96,9 @@
   </tr>
 </table>
 
-<div id="pivotal_stories">
+<div id="pivotal_stories" class="list-group">
   <% for story in @stories %>
-    <div class="pivotal" id="pivotal_<%= story.id %>">
+    <div class="list-group-item pivotal" id="pivotal_<%= story.id %>">
       <div class="pivotal_name" id="pivotal_name_<%= story.id %>">
         <span class="pivotal_name"><%=
           link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
