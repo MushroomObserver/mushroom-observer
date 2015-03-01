@@ -347,14 +347,14 @@ a {
     }
 
     .list-group-item-danger {
-        color: $LEFT_BAR_ADMIN_FG_COLOR;
-        background-color: $LEFT_BAR_ADMIN_BG_COLOR;
+        color: $LEFT_BAR_FG_COLOR;
+        background-color: $LEFT_BAR_BG_COLOR;
     }
 
     .list-group-item-danger:hover,
     .list-group-item-danger:focus {
-        color: $LEFT_BAR_ADMIN_HOVER_FG_COLOR;
-        background-color: $LEFT_BAR_ADMIN_HOVER_BG_COLOR;
+        color: $LEFT_BAR_HOVER_FG_COLOR;
+        background-color: $LEFT_BAR_HOVER_BG_COLOR;
     }
 }
 
