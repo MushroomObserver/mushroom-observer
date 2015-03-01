@@ -11,6 +11,8 @@
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
   <meta property="og:title" content="Mushroom Observer"/>
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
+  <%   banner = :app_banner_box.t  ##banner message variables
+       banner_md5 = md5_of_string(:app_banner_box.t).html_safe %>
   <%=
     css = MO.default_theme
     if is_in_admin_mode?
@@ -45,8 +47,8 @@
           DANGER: You are in administrator mode. Proceed with caution.
         </div>
       <% end
-      banner = :app_banner_box.t
-      if banner.to_s.length > 1 && !cookies["hideBanner"] %>
+
+      if banner.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
         <div class="alert alert-info message-banner" id="message_banner">
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
@@ -125,6 +127,7 @@
 </div>
 
 <!--JAVASCRIPT-->
+<%= javascript_tag("var bannermd5 = '#{banner_md5}'")%>
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <% injected_javascripts.each do |script| %>

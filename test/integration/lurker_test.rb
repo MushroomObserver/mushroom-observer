@@ -30,7 +30,7 @@ class LurkerTest < IntegrationTestCase
     assert_template('name/show_name')
 
     # Take a look at the occurrence map.
-    click(:label => 'Occurrence Map', :in => :right_tabs)
+    click(:label => 'Occurrence Map')
     assert_template('name/map')
 
     # Check out a few links from left-hand panel.
