@@ -8,32 +8,35 @@ abort(<<"EOB") if ARGV.any? {|arg| arg == "-h" || arg == "--help" }
 
   USAGE::
 
-    script/s3cp.rb file server key [--cache]
-    script/s3cp.rb --delete server key [--cache]
+    script/s3cp.rb file server key [--force]
+    script/s3cp.rb --delete server key
 
   DESCRIPTION::
 
     The first form uploads a single local file to an S3 server.
     The second form deletes a single key from an S3 server.
 
+    By default it will check the cached listing of what's on the server first
+    to make sure the file hasn't already been uploaded.  It will add/remove the
+    appropriate cache entry after successfully uploading/removing the file.
+
   PARAMETERS::
 
     file       Source file.
     server     Primary key in MO.s3_credentials configuration hash.
     key        Key to store file under on S3 server.
-    --cache    Check cache to see if the file has already been uploaded.
-               Update cached listing for this server if upload is successful.
+    --force    Upload file even if it's already been uploaded.
     --verbose  Print what's happening to stdout.
     --help     Print this message.
 
 EOB
 
 delete  = true if ARGV.any? {|arg| arg == "-d" || arg == "--delete"  }
-cache   = true if ARGV.any? {|arg| arg == "-c" || arg == "--cache"   }
+force   = true if ARGV.any? {|arg| arg == "-f" || arg == "--force"   }
 verbose = true if ARGV.any? {|arg| arg == "-v" || arg == "--verbose" }
 copy = !delete
 flags = ARGV.select {|arg| arg.match(/^-/)}.
-             reject {|arg| arg.match(/^(-c|-d|-v|--cache|--delete|--verbose)$/)}
+             reject {|arg| arg.match(/^(-d|-f|-v|--delete|--force|--verbose)$/)}
 words = ARGV.reject {|arg| arg.match(/^-/)}
 abort("Bad flag(s): #{flags.inspect}") if flags.length > 0
 if copy
@@ -61,7 +64,7 @@ if copy
   type = `file --mime-type #{file}`.split.last
 
   # Trust cached listing: no need to resend a file if we've already logged it.
-  if cache
+  if !force
     old_size, old_md5 = `grep ^#{key} #{cache_file} | tail -1`.split[1,2]
     if old_size == size.to_s && old_md5 == md5
       log("Already uploaded #{server}/#{key}\n") if verbose
@@ -102,23 +105,20 @@ if copy
     abort("Upload failed on #{server}/#{key}: #{e}")
   end
   log("Uploaded #{server}/#{key}\n") if verbose
-  if cache
-    File.open(cache_file, "a") do |fh|
-      fh.puts [key, size, md5].join("\t")
-    end
+  File.open(cache_file, "a") do |fh|
+    fh.puts [key, size, md5].join("\t")
   end
 end
 
 if delete
-  log( "Deleting...  \r") if verbose
+  log("Deleting...  \r") if verbose
   s3.delete(key)
   log("Deleted #{server}/#{key}\n") if verbose
-  if cache
-    FileUtils.mv(cache_file, temp_file)
-    FileUtils.touch(cache_file)
-    system("grep -v ^#{key} #{temp_file} >> #{cache_file}")
-    FileUtils.rm(temp_file)
-  end
+  FileUtils.touch(cache_file)
+  FileUtils.mv(cache_file, temp_file)
+  FileUtils.touch(cache_file)
+  system("grep -v ^#{key} #{temp_file} >> #{cache_file}")
+  FileUtils.rm(temp_file)
 end
 
 exit 0
