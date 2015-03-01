@@ -241,6 +241,7 @@ a {
 // --------------------------------------------------
 
 #navigation {
+    padding-left: 0;
     #logo {
         background-color: $LOGO_BG_COLOR;
         border-width: 0px;
@@ -868,6 +869,10 @@ table.table-compact tr td {
 // --------------------------------------------------
 
 @media screen and (max-width: 767px) {
+    #navigation {
+      padding-left: 15px;
+    }
+
     .rss-box-details {
         height: auto !important;
     }
