@@ -64,9 +64,9 @@ $LEFT_BAR_ITEM_BORDER_WIDTH:     1px;
 $LEFT_BAR_HEADER_FG_COLOR:       black;
 $LEFT_BAR_HEADER_BG_COLOR:       yellow;
 $LEFT_BAR_FG_COLOR:              #2050E0;
-$LEFT_BAR_BG_COLOR:              transparent;
-$LEFT_BAR_HOVER_FG_COLOR:        #23527C;
-$LEFT_BAR_HOVER_BG_COLOR:        transparent;
+$LEFT_BAR_BG_COLOR:              yellow;
+$LEFT_BAR_HOVER_FG_COLOR:        yellow;
+$LEFT_BAR_HOVER_BG_COLOR:        #2050E0;
 
 $TOP_BAR_BORDER_COLOR:           yellow;
 $TOP_BAR_BORDER_WIDTH:           0px;
@@ -125,6 +125,4 @@ $MENU_WARM_BG_COLOR:             #FF8888;
   font-weight: bold;
   text-align: center;
   padding: 7px;
-  padding-bottom: 12px;
-  margin-bottom: 20px;
 }
