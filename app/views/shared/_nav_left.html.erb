@@ -86,7 +86,7 @@
   <%= link_to(:app_publications.t, {controller: :publications, action: :index}, {class: "list-group-item indent"}) %>
  
   <% unless browser.bot?%>
-    <div class="list-group-item indent">
+    <div class="list-group-item indent" style="overflow:visible">
       <div class="dropdown">
         <%= content_tag(:span, "#{:app_languages.t}:") %>
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
