@@ -11,7 +11,7 @@
     <%= text_field_tag('email', '', :size => 40) %><br/>
 
   <br/>
-  <input type="submit" value="<%= :SUBMIT.l %>" /><br/>
+  <input type="submit" value="<%= :SUBMIT.l %>" class="btn" /><br/>
   <br/>
 
   <% if !@users.empty? %>
@@ -63,7 +63,7 @@
     </table>
 
     <br/>
-    <input type="submit" value="<%= :SUBMIT.l %>" /><br/>
+    <input type="submit" value="<%= :SUBMIT.l %>" class="btn" /><br/>
     <br/>
   <% end %>
 <% end %>

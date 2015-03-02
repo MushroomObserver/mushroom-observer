@@ -21,6 +21,6 @@
   <label for="new_user_name"><%= :signup_preferred_theme.t %>:</label><br/>
   <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + MO.themes) %><br/><br/>
 
-  <input type="submit" value="<%= :signup_button.l %>" class="primary" />
+  <input type="submit" value="<%= :signup_button.l %>" class="btn" />
 
 <% end %>

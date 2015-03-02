@@ -6,7 +6,7 @@
   <div class="col-xs-12">
       <%= form_tag({action: 'create_observation', approved_name: @what,
                     approved_where: @place_name}, { multipart: true , name: 'observation_form'}) do %>
-        <center><%= submit_tag :CREATE.l %></center>
+        <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 
         <%= render(:partial => 'form_observations', :locals => {
                                                           action: 'create_observation',
@@ -17,7 +17,7 @@
                                                           has_specimens: false
         }) %>
 
-        <br/><center><%= submit_tag :CREATE.l %></center>
+        <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
       <% end %>
   </div>
 </div>

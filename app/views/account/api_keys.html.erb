@@ -63,7 +63,7 @@
         </tr>
       <% end %>
     </table>
-    <%= submit_tag(:account_api_keys_remove_button.l, :id => 'remove_button') %>
+    <%= submit_tag(:account_api_keys_remove_button.l, id: "remove_button", class: "btn") %>
   </form>
 <% end %>
 
@@ -75,7 +75,7 @@
     <%= form.text_field(:notes, :size => 80) %>
   </div>
   <div>
-    <%= submit_tag(:account_api_keys_create_button.l, :id => 'create_button') %>
+    <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn") %>
   </div>
 <% end %>
 <br/>

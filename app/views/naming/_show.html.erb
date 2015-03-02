@@ -15,7 +15,7 @@
         <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= :show_namings_user.t %></div>
         <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= :show_namings_consensus.t %></div>
         <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= logged_in ? :show_namings_your_vote.t : "" %></div>
-        <div class="col-sm-2"><%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}, class: "btn btn-default"}) : "" %></div>
+        <div class="col-sm-2"><%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}, class: "btn"}) : "" %></div>
       </div>
     </div>
 
@@ -55,7 +55,7 @@
                   menu = [Vote.no_opinion] + menu
                 end %>
                 <%= select(:vote, :value, menu, {}, {index: naming.id, data: {role: "change_vote", id: naming.id}}) %>
-                <%= submit_tag(:show_namings_cast.l) if !can_do_ajax? %>
+                <%= submit_tag(:show_namings_cast.l, class: "btn") if !can_do_ajax? %>
               <% end %>
             </div>
             <div class="col-sm-2 col-xs-6">

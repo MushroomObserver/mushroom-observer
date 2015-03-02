@@ -14,7 +14,7 @@
 
 <%= form_for(:image, :url => add_query_param({action: :add_image, id: @observation.id}),
       :html => {multipart: true}) do |form| %>
-  <br/><center><%= submit_tag(:image_add_upload.l) %></center><br/>
+  <br/><center><%= submit_tag(:image_add_upload.l, class: "btn") %></center><br/>
 
   <%= hidden_field("observation", "id") %>
 
@@ -31,5 +31,5 @@
                                               leave_out_original_file_name: true
   }) %>
 
-  <center><%= submit_tag(:image_add_upload.l) %></center>
+  <center><%= submit_tag(:image_add_upload.l, class: "btn") %></center>
 <% end %>

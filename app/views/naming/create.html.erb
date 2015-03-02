@@ -14,7 +14,7 @@
                              approved_name: @params.what)) do %>
     <div class="row">
       <div class="col-sm-8">
-        <center><%= submit_tag :CREATE.l, {class: "btn btn-default"} %></center>
+        <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
         <%= render(partial: "observer/show_observation",
                    locals: { observation: @observation }) %><br/><br/>
         <%= render(partial: "form",
@@ -23,7 +23,7 @@
                              button_name: :CREATE.l,
                              show_reasons: true,
                            }) %>
-        <center><%= submit_tag :CREATE.l, {class: "btn btn-default"} %></center>
+        <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
       </div>
       <div class="col-sm-4">
         <%= render(partial: 'observer/show_images',

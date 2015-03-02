@@ -8,7 +8,7 @@ through this page are not saved and no database changes are made.<br/><br/>
 <% end %>
 
 <%= form_tag({action: 'test_upload_image', log_id: @log_entry.id}, :multipart => true) do %>
-  <center><%= submit_tag("Upload") %></center>
+  <center><%= submit_tag(:UPLOAD.l, class: "btn") %></center>
 
   <p>
     Image 1: <%= file_field("upload", "image1") %><br/>

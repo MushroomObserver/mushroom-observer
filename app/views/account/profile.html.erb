@@ -11,7 +11,7 @@
 
 <%= form_for(:user, :url => {action: :profile}, :html => {multipart: true, style: "max-width: 600px"}) do |form| %>
 
-    <%= submit_tag(:profile_button.l, class: "center-block btn btn-default") %>
+    <%= submit_tag(:profile_button.l, class: "center-block btn") %>
     <div class="form-group">
       <label for="user_name"><%= :profile_name.t %>:</label>
       <%= form.text_field("name", class: "form-control") %>
@@ -54,5 +54,5 @@
       <label for="user_mailing_address"><%= :profile_mailing_address.t %></label>
       <%= form.text_area("mailing_address", rows: 5, class: "form-control") %>
     </div>
-    <%= submit_tag(:profile_button.l, class: "center-block btn btn-default") %>
+    <%= submit_tag(:profile_button.l, class: "center-block btn") %>
 <% end %>

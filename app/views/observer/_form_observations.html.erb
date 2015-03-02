@@ -92,7 +92,7 @@
   </div>
 </div>
 
-<center><%= submit_tag(button_name) %></center><br/>
+<center><%= submit_tag(button_name, class: "btn") %></center><br/>
 
 <% ############################### Image Forms ############################## %>
 
@@ -217,7 +217,7 @@
 
 <div class="col-xs-12 text-center">
   <% if @projects.any? or @lists.any? %>
-    <%= submit_tag(button_name) %>
+    <%= submit_tag(button_name, class: "btn") %>
   <% end %>
 </div>
 

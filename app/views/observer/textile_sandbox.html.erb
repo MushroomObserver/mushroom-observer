@@ -19,8 +19,8 @@
     <% if !@code.nil? %>
         <div class="sandbox-up-ptr">
           <%= image_tag("up_arrow.png") %>
-          <%= submit_tag :sandbox_test.l %>
-          <%= submit_tag :sandbox_test_codes.l %>
+          <%= submit_tag(:sandbox_test.l, class: "btn") %>
+          <%= submit_tag(:sandbox_test_codes.l, class: "btn") %>
           <%= image_tag("up_arrow.png") %>
         </div>
     <% end %>
@@ -28,7 +28,7 @@
     <%= text_area_tag("code", @code, class: "form-control", rows: "8") %>
     <% if @code.nil? %>
         <div class="push-down">
-          <%= submit_tag :sandbox_test.l, class: "btn btn-default center-block" %>
+          <%= submit_tag(:sandbox_test.l, class: "btn center-block") %>
         </div>
     <% end %>
     </form>

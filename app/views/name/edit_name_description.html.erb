@@ -16,12 +16,12 @@
 
 <%= form_for(:description, :url => add_query_param(
       :action => :edit_name_description, :id => @description.id)) do |form| %>
-  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
 
   <%= render(:partial => 'form_name_description', :locals =>
              {form: form}) %>
 
-  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
   <% if @merge %>
     <%= hidden_field_tag('old_desc_id', @old_desc_id) %>
     <%= hidden_field_tag('delete_after', @delete_after) %>

@@ -8,7 +8,7 @@
 %>
 
 <%= form_tag(add_query_param(:action => 'edit_comment', :id => @comment.id)) do %>
-  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
   <%= render(:partial => 'form_comments') %>
   <br/><hr align="center" width="90%" />
   <%= render(:partial => 'object', :object => @comment.target) %>

@@ -22,6 +22,6 @@
   <p>
     <%= :conference_registration_notes.t %>:<br/><%= text_area('registration', 'notes', :cols => 100) %>
   </p>
-  <center><%= submit_tag :register_save.t %><br/></center>
+  <center><%= submit_tag(:register_save.t, class: "btn") %><br/></center>
 <% end %>
 </p>
