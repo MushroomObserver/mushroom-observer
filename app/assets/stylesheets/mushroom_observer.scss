@@ -331,7 +331,8 @@ a {
             padding: 1px 5px;
         }
         white-space: nowrap;
-        overflow: visible;
+        overflow-x: hidden;
+        overflow-y: visible;
         text-overflow: ellipsis;
     }
 
