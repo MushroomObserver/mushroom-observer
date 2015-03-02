@@ -24,6 +24,6 @@
     <p><%= select("upload", "license_id", @licenses, :selected => @upload_license_id) %><br/>
     <span id="help_note">(<%= :glossary_term_copyright_warning.t %>)</span></p>
     
-    <center><%= submit_tag :create_glossary_term_add.t %><br/></center>
+    <center><%= submit_tag(:create_glossary_term_add.t, class: "btn") %><br/></center>
   <% end %>
 </p>

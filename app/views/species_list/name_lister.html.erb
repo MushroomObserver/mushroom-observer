@@ -42,10 +42,10 @@
       <div id="word">&nbsp;</div>
       <%= form_tag({action: :name_lister}, {}) %>
         <center>
-          <%= submit_tag(:name_lister_submit_spl.l, disabled: !@user) %>&nbsp;&nbsp;
-          <%= submit_tag(:name_lister_submit_txt.l) %>&nbsp;&nbsp;
-          <%= submit_tag(:name_lister_submit_rtf.l) %>&nbsp;&nbsp;
-          <%= submit_tag(:name_lister_submit_csv.l) %>
+          <%= submit_tag(:name_lister_submit_spl.l, class: "btn", disabled: !@user) %>&nbsp;&nbsp;
+          <%= submit_tag(:name_lister_submit_txt.l, class: "btn") %>&nbsp;&nbsp;
+          <%= submit_tag(:name_lister_submit_rtf.l, class: "btn") %>&nbsp;&nbsp;
+          <%= submit_tag(:name_lister_submit_csv.l, class: "btn") %>
         </center>
         <%= hidden_field_tag(:results, @name_strings.join("\n")) %>
         <% if false %>

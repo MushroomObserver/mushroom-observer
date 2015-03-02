@@ -12,16 +12,17 @@
     <div class="row">
       <div class="col-sm-5">
         <div class="text-center">
-          <%= submit_tag(:SAVE_EDITS.l, {class: "btn btn-default"}) %>
+          <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
         </div>
         <%= render({partial: 'form_images', locals: {
                                                     form: form,
                                                     leave_out_original_file_name: false
                                             }}) %>
         <div class="text-center">
-          <%= submit_tag(:SAVE_EDITS.l, {class: "btn btn-default"}) %>
-          <%= link_with_query(:cancel_and_show.t({type: :image}),{
-          action: :show_image, id: @image.id}, {class: "btn btn-danger"}) %>
+          <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
+          <%= link_with_query(:cancel_and_show.t({type: :image}),
+                              {action: :show_image, id: @image.id},
+                              {class: "btn btn-danger"}) %>
         </div>
       </div>
       <div class="col-sm-7">

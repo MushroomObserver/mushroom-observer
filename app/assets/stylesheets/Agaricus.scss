@@ -1,3 +1,4 @@
+@import "old_theme";
 
 $augustus_cap:         #ECCF95;
 $brasiliensis_gills_1: #A06463;
@@ -8,125 +9,56 @@ $lilaceps_stain:       #B4725F;
 $semotus_cap:          #BC9D89;
 $xanthodermus_stain:   #D4A833;
 
-$BODY_FG_COLOR:                  $cupreobrunneus_gills;
-$BODY_BG_COLOR:                  $campestris_cap;
+$BODY_FG_COLOR:               $cupreobrunneus_gills;
+$BODY_BG_COLOR:               $campestris_cap;
+                             
+$LINK_FG_COLOR:               $brasiliensis_gills_1;
+$LINK_VISITED_FG_COLOR:       $cupreobrunneus_gills;
+$LINK_HOVER_FG_COLOR:         $brasiliensis_gills_2;
+$LINK_HOVER_BG_COLOR:         $campestris_cap;
+                             
+$LOGO_BORDER_COLOR:           $cupreobrunneus_gills;
+$LOGO_FG_COLOR:               $cupreobrunneus_gills;
+$LOGO_BG_COLOR:               $semotus_cap;
+$LOGO_HOVER_FG_COLOR:         $brasiliensis_gills_2;
+$LOGO_HOVER_BG_COLOR:         $campestris_cap;
+                             
+$LEFT_BAR_BORDER_COLOR:       $augustus_cap;
+$LEFT_BAR_HEADER_FG_COLOR:    $cupreobrunneus_gills;
+$LEFT_BAR_HEADER_BG_COLOR:    $augustus_cap;
+$LEFT_BAR_FG_COLOR:           $brasiliensis_gills_1;
+$LEFT_BAR_BG_COLOR:           $augustus_cap;
+$LEFT_BAR_HOVER_FG_COLOR:     $brasiliensis_gills_2;
+$LEFT_BAR_HOVER_BG_COLOR:     $campestris_cap;
 
-$INFO_FG_COLOR:                  #000000;
-$INFO_BG_COLOR:                  transparent;
-$INFO_LINK_COLOR:                #0000E0;
-$INFO_BORDER_COLOR:              #0000FF;
-$SUCCESS_FG_COLOR:               #000000;
-$SUCCESS_BG_COLOR:               transparent;
-$SUCCESS_LINK_COLOR:             #008000;
-$SUCCESS_BORDER_COLOR:           #00C000;
-$WARNING_FG_COLOR:               #000000;
-$WARNING_BG_COLOR:               transparent;
-$WARNING_LINK_COLOR:             #C0C000;
-$WARNING_BORDER_COLOR:           #FFFF00;
-$DANGER_FG_COLOR:                #000000;
-$DANGER_BG_COLOR:                transparent;
-$DANGER_LINK_COLOR:              #E00000;
-$DANGER_BORDER_COLOR:            #FF0000;
+$TOP_BAR_FG_COLOR:            $cupreobrunneus_gills;
+$TOP_BAR_BG_COLOR:            $campestris_cap;
+$TOP_BAR_LINK_FG_COLOR:       $brasiliensis_gills_1;
+$TOP_BAR_LINK_HOVER_FG_COLOR: $brasiliensis_gills_2;
+$TOP_BAR_LINK_HOVER_BG_COLOR: $campestris_cap;
 
-$LINK_WEIGHT:                    normal;
-$LINK_FG_COLOR:                  $brasiliensis_gills_1;
-$LINK_BG_COLOR:                  transparent;
-$LINK_VISITED_FG_COLOR:          $cupreobrunneus_gills;
-$LINK_VISITED_BG_COLOR:          transparent;
-$LINK_HOVER_FG_COLOR:            $brasiliensis_gills_2;
-$LINK_HOVER_BG_COLOR:            $campestris_cap;
+$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_HEADER_FG_COLOR:        #777777;
+$LIST_HEADER_BG_COLOR:        #EEEEEE;
+$LIST_FG_COLOR:               $cupreobrunneus_gills;
+$LIST_BG_COLOR:               mix($campestris_cap, white, 50%);
 
-$BUTTON_FG_COLOR:                #000000;
-$BUTTON_BG_COLOR:                #EEEEEE;
-$BUTTON_BORDER_COLOR:            #888888;
-$BUTTON_PRIMARY_FG_COLOR:        #000000;
-$BUTTON_PRIMARY_BG_COLOR:        #EEEEEE;
-$BUTTON_PRIMARY_BORDER_COLOR:    #888888;
-$BUTTON_BORDER_WIDTH:            1px;
-$BUTTON_BORDER_STYLE:            outset;
-$BUTTON_BORDER_RADIUS:           5px;
-
-$INPUT_FG_COLOR:                 #000000;
-$INPUT_BG_COLOR:                 #FFFFFF;
-$INPUT_BORDER_COLOR:             #888888;
-$INPUT_BORDER_WIDTH:             1px;
-$INPUT_BORDER_STYLE:             inset;
-$INPUT_BORDER_RADIUS:            5px;
-
-$BANNER_BORDER_WIDTH:            2px;
-$BANNER_BORDER_STYLE:            solid;
-$BANNER_BORDER_RADIUS:           0px;
-
-$LOGO_BORDER_COLOR:              $cupreobrunneus_gills;
-$LOGO_BORDER_WIDTH:              2px;
-$LOGO_BORDER_STYLE:              solid;
-$LOGO_BORDER_RADIUS:             0px;
-$LOGO_FG_COLOR:                  $cupreobrunneus_gills;
-$LOGO_BG_COLOR:                  $semotus_cap;
-$LOGO_HOVER_FG_COLOR:            $brasiliensis_gills_2;
-$LOGO_HOVER_BG_COLOR:            $campestris_cap;
-
-$LEFT_BAR_BORDER_COLOR:          $augustus_cap;
-$LEFT_BAR_BORDER_WIDTH:          2px;
-$LEFT_BAR_BORDER_STYLE:          solid;
-$LEFT_BAR_BORDER_RADIUS:         0px;
-$LEFT_BAR_ITEM_BORDER_WIDTH:     0px;
-$LEFT_BAR_HEADER_FG_COLOR:       $cupreobrunneus_gills;
-$LEFT_BAR_HEADER_BG_COLOR:       $augustus_cap;
-$LEFT_BAR_FG_COLOR:              $brasiliensis_gills_1;
-$LEFT_BAR_BG_COLOR:              $augustus_cap;
-$LEFT_BAR_HOVER_FG_COLOR:        $brasiliensis_gills_2;
-$LEFT_BAR_HOVER_BG_COLOR:        $campestris_cap;
-
-$TOP_BAR_BORDER_COLOR:           $cupreobrunneus_gills;
-$TOP_BAR_BORDER_WIDTH:           0px;
-$TOP_BAR_BORDER_STYLE:           solid;
-$TOP_BAR_BORDER_RADIUS:          0px;
-$TOP_BAR_FG_COLOR:               $cupreobrunneus_gills;
-$TOP_BAR_BG_COLOR:               transparent;
-$TOP_BAR_LINK_FG_COLOR:          $brasiliensis_gills_1;
-$TOP_BAR_LINK_BG_COLOR:          transparent;
-$TOP_BAR_LINK_HOVER_FG_COLOR:    $brasiliensis_gills_2;
-$TOP_BAR_LINK_HOVER_BG_COLOR:    $campestris_cap;
-
-$ALERT_BORDER_WIDTH:             2px;
-$ALERT_BORDER_STYLE:             solid;
-$ALERT_BORDER_RADIUS:            0px;
-
-  $LIST_BORDER_COLOR:              #DDDDDD;
-  $LIST_HEADER_FG_COLOR:           #777777;
-  $LIST_HEADER_BG_COLOR:           #EEEEEE;
-  $LIST_FG_COLOR:                  #333333;
-  $LIST_BG_COLOR:                  #F5F5F5;
-
-$TOOLTIP_FG_COLOR:               $campestris_cap;
-$TOOLTIP_BG_COLOR:               $cupreobrunneus_gills;
-
-$VOTE_METER_BORDER_COLOR:        none;
-$VOTE_METER_FG_COLOR:            #205080;
-$VOTE_METER_BG_COLOR:            #F5F5F5;
-
-$PROGRESS_BG_COLOR:              #EEEEEE;
-$PROGRESS_FG_COLOR:              #000000;
-$PROGRESS_BAR_COLOR:             #99BDDB;
-
-$PAGER_FG_COLOR:                 $cupreobrunneus_gills;
-$PAGER_BG_COLOR:                 transparent;
-$PAGER_BORDER_COLOR:             none;
-$PAGER_HOVER_FG_COLOR:           $brasiliensis_gills_2;
-$PAGER_HOVER_BG_COLOR:           $campestris_cap;
-$PAGER_HOVER_BORDER_COLOR:       none;
-$PAGER_ACTIVE_FG_COLOR:          $campestris_cap;
-$PAGER_ACTIVE_BG_COLOR:          $brasiliensis_gills_2;
-$PAGER_ACTIVE_BORDER_COLOR:      none;
-
-$MENU_BORDER_COLOR:              $brasiliensis_gills_2;
-$MENU_FG_COLOR:                  black;
-$MENU_BG_COLOR:                  white;
-$MENU_HOT_FG_COLOR:              black;
-$MENU_HOT_BG_COLOR:              $xanthodermus_stain;
-$MENU_WARM_FG_COLOR:             black;
-$MENU_WARM_BG_COLOR:             $lilaceps_stain;
+$TOOLTIP_FG_COLOR:            $campestris_cap;
+$TOOLTIP_BG_COLOR:            $cupreobrunneus_gills;
+                             
+$PAGER_FG_COLOR:              $cupreobrunneus_gills;
+$PAGER_HOVER_FG_COLOR:        $brasiliensis_gills_2;
+$PAGER_HOVER_BG_COLOR:        $campestris_cap;
+$PAGER_ACTIVE_FG_COLOR:       $campestris_cap;
+$PAGER_ACTIVE_BG_COLOR:       $brasiliensis_gills_2;
+                             
+$MENU_BORDER_COLOR:           $brasiliensis_gills_2;
+$MENU_FG_COLOR:               black;
+$MENU_BG_COLOR:               white;
+$MENU_HOT_FG_COLOR:           black;
+$MENU_HOT_BG_COLOR:           $xanthodermus_stain;
+$MENU_WARM_FG_COLOR:          black;
+$MENU_WARM_BG_COLOR:          $lilaceps_stain;
 
 @import "mushroom_observer";
 

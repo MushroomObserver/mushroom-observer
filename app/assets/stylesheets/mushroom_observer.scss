@@ -2,10 +2,10 @@
 // set bootstrap parameters first
 // --------------------------------------------------
 
-$brand-success: $SUCCESS_FG_COLOR;
-$brand-info: $INFO_FG_COLOR;
-$brand-warning: $WARNING_FG_COLOR;
-$brand-danger: $DANGER_FG_COLOR;
+$brand-success: $SUCCESS_BORDER_COLOR;
+$brand-info: $INFO_BORDER_COLOR;
+$brand-warning: $WARNING_BORDER_COLOR;
+$brand-danger: $DANGER_BORDER_COLOR;
 
 $font-family-sans-serif: Verdana, Arial, Helvetica, sans-serif;
 $font-family-base: $font-family-sans-serif;
@@ -39,12 +39,12 @@ $table-border-color: $MENU_BORDER_COLOR;
 
 $btn-font-weight: bold;
 $btn-default-color: $BUTTON_FG_COLOR;
-$btn-default-bg: $BUTTON_BG_COLOR;
+$btn-default-bg: $BUTTON_BG_COLOR2;
 $btn-default-border: $BUTTON_BORDER_COLOR;
 $btn-primary-color: $BUTTON_PRIMARY_FG_COLOR;
-$btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR;
+$btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR2;
 $btn-primary-border: $BUTTON_PRIMARY_BORDER_COLOR;
-$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR);
+$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR2);
 
 $input-bg: $INPUT_BG_COLOR;
 $input-bg-disabled: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
@@ -101,18 +101,18 @@ $pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR);
 $pagination-disabled-bg: $PAGER_BG_COLOR;
 $pagination-disabled-border: $PAGER_BORDER_COLOR;
 
-$state-success-text: $SUCCESS_FG_COLOR;
+$state-success-text: $SUCCESS_BORDER_COLOR;
 $state-success-bg: $SUCCESS_BG_COLOR;
-$state-success-border: mix($SUCCESS_FG_COLOR, $SUCCESS_BG_COLOR);
-$state-info-text: $INFO_FG_COLOR;
+$state-success-border: mix($SUCCESS_BORDER_COLOR, $SUCCESS_BG_COLOR);
+$state-info-text: $INFO_BORDER_COLOR;
 $state-info-bg: $INFO_BG_COLOR;
-$state-info-border: mix($INFO_FG_COLOR, $INFO_BG_COLOR);
-$state-warning-text: $WARNING_FG_COLOR;
+$state-info-border: mix($INFO_BORDER_COLOR, $INFO_BG_COLOR);
+$state-warning-text: $WARNING_BORDER_COLOR;
 $state-warning-bg: $WARNING_BG_COLOR;
-$state-warning-border: mix($WARNING_FG_COLOR, $WARNING_BG_COLOR);
-$state-danger-text: $DANGER_FG_COLOR;
+$state-warning-border: mix($WARNING_BORDER_COLOR, $WARNING_BG_COLOR);
+$state-danger-text: $DANGER_BORDER_COLOR;
 $state-danger-bg: $DANGER_BG_COLOR;
-$state-danger-border: mix($DANGER_FG_COLOR, $DANGER_BG_COLOR);
+$state-danger-border: mix($DANGER_BORDER_COLOR, $DANGER_BG_COLOR);
 
 $tooltip-opacity: 100%;
 $tooltip-max-width: 400px;
@@ -120,16 +120,16 @@ $tooltip-color: $TOOLTIP_FG_COLOR;
 $tooltip-bg: $TOOLTIP_BG_COLOR;
 
 $alert-success-bg: $SUCCESS_BG_COLOR;
-$alert-success-text: $SUCCESS_FG_COLOR;
+$alert-success-text: $BODY_FG_COLOR;
 $alert-success-border: $SUCCESS_BORDER_COLOR;
 $alert-info-bg: $INFO_BG_COLOR;
-$alert-info-text: $INFO_FG_COLOR;
+$alert-info-text: $BODY_FG_COLOR;
 $alert-info-border: $INFO_BORDER_COLOR;
 $alert-warning-bg: $WARNING_BG_COLOR;
-$alert-warning-text: $WARNING_FG_COLOR;
+$alert-warning-text: $BODY_FG_COLOR;
 $alert-warning-border: $WARNING_BORDER_COLOR;
 $alert-danger-bg: $DANGER_BG_COLOR;
-$alert-danger-text: $DANGER_FG_COLOR;
+$alert-danger-text: $BODY_FG_COLOR;
 $alert-danger-border: $DANGER_BORDER_COLOR;
 
 $progress-bg: $PROGRESS_BG_COLOR;
@@ -165,10 +165,7 @@ $help-block-max-width: 600px;
 
 a {
     background-color: $LINK_BG_COLOR;
-}
-
-a:hover {
-    background-color: $LINK_HOVER_BG_COLOR;
+    font-weight: $LINK_WEIGHT;
 }
 
 a:visited {
@@ -176,16 +173,18 @@ a:visited {
     background-color: $LINK_VISITED_BG_COLOR;
 }
 
-a {
-    font-weight: $LINK_WEIGHT;
-}
-#navigation a {
-    font-weight: normal;
+a:hover {
+    color: $LINK_HOVER_FG_COLOR;
+    background-color: $LINK_HOVER_BG_COLOR;
 }
 
 .btn, .btn-default {
-    color: $BUTTON_FG_COLOR !important;
-    background-color: $BUTTON_BG_COLOR !important;
+    color: $BUTTON_FG_COLOR;
+    @if $BUTTON_BG_COLOR1 == $BUTTON_BG_COLOR2 {
+        background-color: $BUTTON_BG_COLOR1;
+    } @else {
+        @include gradient-vertical($BUTTON_BG_COLOR1, $BUTTON_BG_COLOR2);
+    }
     border-color: $BUTTON_BORDER_COLOR;
     border-width: $BUTTON_BORDER_WIDTH;
     border-style: $BUTTON_BORDER_STYLE;
@@ -194,19 +193,33 @@ a {
 }
 
 .btn:hover, .btn-default:hover {
-    background-color: mix($BUTTON_BG_COLOR, black, 90%) !important;
-    border-color: mix($BUTTON_BORDER_COLOR, black, 90%) !important;
+    color: $BUTTON_HOVER_FG_COLOR;
+    @if $BUTTON_HOVER_BG_COLOR1 == $BUTTON_HOVER_BG_COLOR2 {
+        background-color: $BUTTON_HOVER_BG_COLOR1;
+    } @else {
+        @include gradient-vertical($BUTTON_HOVER_BG_COLOR1, $BUTTON_HOVER_BG_COLOR2);
+    }
+    border-color: $BUTTON_HOVER_BORDER_COLOR;
 }
 
 .btn-primary {
     color: $BUTTON_PRIMARY_FG_COLOR !important;
-    background-color: $BUTTON_PRIMARY_BG_COLOR !important;
-    border-color: $BUTTON_PRIMARY_BORDER_COLOR !important;
+    @if $BUTTON_PRIMARY_BG_COLOR1 == $BUTTON_PRIMARY_BG_COLOR2 {
+        background-color: $BUTTON_PRIMARY_BG_COLOR1;
+    } @else {
+        @include gradient-vertical($BUTTON_PRIMARY_BG_COLOR1, $BUTTON_PRIMARY_BG_COLOR2);
+    }
+    border-color: $BUTTON_PRIMARY_BORDER_COLOR;
 }
 
 .btn-primary:hover {
-    background-color: mix($BUTTON_PRIMARY_BG_COLOR, black, 90%) !important;
-    border-color: mix($BUTTON_PRIMARY_BORDER_COLOR, black, 90%) !important;
+    color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
+    @if $BUTTON_PRIMARY_HOVER_BG_COLOR1 == $BUTTON_PRIMARY_HOVER_BG_COLOR2 {
+        background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1;
+    } @else {
+        @include gradient-vertical($BUTTON_PRIMARY_HOVER_BG_COLOR1, $BUTTON_PRIMARY_HOVER_BG_COLOR2);
+    }
+    border-color: $BUTTON_PRIMARY_HOVER_BORDER_COLOR;
 }
 
 .form-control {
@@ -300,6 +313,10 @@ a {
     padding-right: 0px;
     margin-bottom: 10em;
 
+    a {
+        font-weight: normal;
+    }
+
     .list-group {
         @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
             margin-bottom: 15px;
@@ -321,8 +338,6 @@ a {
     }
 
     .list-group-item {
-        color: $LEFT_BAR_FG_COLOR;
-        background-color: $LEFT_BAR_BG_COLOR;
         margin-top: 0px;
         border-color: $LEFT_BAR_BORDER_COLOR;
         border-width: $LEFT_BAR_ITEM_BORDER_WIDTH 0px;
@@ -344,19 +359,17 @@ a {
         padding-left: 10px;
     }
 
-    .list-group-item:hover,
-    .list-group-item:focus {
-        color: $LEFT_BAR_HOVER_FG_COLOR;
-        background-color: $LEFT_BAR_HOVER_BG_COLOR;
-    }
-
-    .list-group-item-danger {
+    .list-group-item,
+    a.dropdown-toggle {
         color: $LEFT_BAR_FG_COLOR;
         background-color: $LEFT_BAR_BG_COLOR;
     }
 
-    .list-group-item-danger:hover,
-    .list-group-item-danger:focus {
+    .list-group-item:hover,
+    .list-group-item:focus,
+    .list-group-item:hover a.dropdown-toggle,
+    .list-group-item:focus a.dropdown-toggle,
+    a.dropdown-toggle:hover {
         color: $LEFT_BAR_HOVER_FG_COLOR;
         background-color: $LEFT_BAR_HOVER_BG_COLOR;
     }
@@ -390,16 +403,17 @@ a {
     }
 
     .navbar-nav {
-        margin-top: 10px;
+        margin-top: 8px;
+        margin-right: 2px;
     }
 
     .navbar-nav > li > a,
     .navbar-nav > li > a.dropdown-toggle {
         color: $TOP_BAR_FG_COLOR !important;
         background-color: $TOP_BAR_BG_COLOR !important;
-        margin: 0px 8px;
+        margin: 0px 4px;
         border: 0px;
-        padding: 0px;
+        padding: 2px 4px;
     }
 
     .navbar-nav > li > a:hover,
@@ -414,7 +428,7 @@ a {
 // --------------------------------------------------
 
 #content {
-    //margin-left: 2em; //NO! This pushes content off screen
+    // margin-left: 2em; // NO! This pushes content off screen
     padding-bottom: 5em;
 }
 
@@ -429,13 +443,12 @@ a {
     border-radius: $ALERT_BORDER_RADIUS;
     padding: 0.5em 1.0em;
     text-align: left;
-
-    a { font-weight: bold }
-    .alert-info    a { color: $INFO_LINK_COLOR    }
-    .alert-success a { color: $SUCCESS_LINK_COLOR }
-    .alert-warning a { color: $WARNING_LINK_COLOR }
-    .alert-danger  a { color: $DANGER_LINK_COLOR  }
 }
+
+// .alert.alert-info    a { color: $INFO_LINK_COLOR    }
+// .alert.alert-success a { color: $SUCCESS_LINK_COLOR }
+// .alert.alert-warning a { color: $WARNING_LINK_COLOR }
+// .alert.alert-danger  a { color: $DANGER_LINK_COLOR  }
 
 //
 // lists

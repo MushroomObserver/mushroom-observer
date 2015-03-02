@@ -16,7 +16,7 @@
        :set_user => @set_user,
 			 :set_herbarium => @set_herbarium
     )) do |form| %>
-  <center><%= submit_tag(:CREATE.l) %></center>
+  <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 
   <%= render(:partial => 'form_location', :locals =>
              {where: @display_name, form: form}) %>

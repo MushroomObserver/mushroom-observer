@@ -6,7 +6,7 @@
 %>
 
 <%= form_tag(:action => 'create_herbarium') do %>
-	<center><%= submit_tag :create_herbarium_add.t %><br/></center>
+	<center><%= submit_tag(:create_herbarium_add.t, class: "btn") %><br/></center>
   <p>
     <%= :herbarium_name.t %>: <%= text_field('herbarium', 'name', :value => @herbarium_name, :size => 150) %>
     <%= :create_herbarium_code.t %>: <%= text_field('herbarium', 'code', :size => 8) %>
@@ -28,5 +28,5 @@
     <%= :create_herbarium_mailing_address.t %>:<br/>
 		<%= text_area('herbarium', 'mailing_address', :cols => 50, :rows => 10) %>
   </p>
-  <center><%= submit_tag :create_herbarium_add.t %><br/></center>
+  <center><%= submit_tag(:create_herbarium_add.t, class: "btn") %><br/></center>
 <% end %>

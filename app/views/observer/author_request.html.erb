@@ -2,7 +2,7 @@
 
 <%= form_tag(add_query_param(:action => 'author_request', :id => @object.id,
       :type => @object.type_tag)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center><br/>
+  <br/><center><%= submit_tag(:SEND.l, class: "btn") %></center><br/>
 
   <label for="email_subject"><%= :request_subject.t %></label>:<br/>
   <%= text_field(:email, :subject, size: 70, autofocus: true) %><br/><br/>

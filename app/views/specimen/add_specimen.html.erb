@@ -12,7 +12,7 @@
   <div class="col-sm-7">
       <%= form_tag(:action => 'add_specimen', :id => @observation.id) do %>
         <%= hidden_field_tag('id', @observation.id) %>
-      	<%= submit_tag :add_specimen_add.t, class: "btn btn-default center-block bottom" %>
+      	<%= submit_tag(:add_specimen_add.t, class: "btn center-block bottom") %>
 
         <div class="form-group push-down">
 					<%= herbarium_name_box %>
@@ -34,7 +34,7 @@
       		<%= text_area('specimen', 'notes', {class: "form-control", rows: 6}) %>
         </div>
 
-        <%= submit_tag :add_specimen_add.t, class: "btn btn-default center-block bottom" %>
+        <%= submit_tag(:add_specimen_add.t, class: "btn center-block bottom") %>
       <% end %>
   </div>
   <div class="col-sm-5">

@@ -8,7 +8,7 @@
 %>
 
 <%= form_tag(:action => 'approve_name', :id => @name.id) do %>
-  <br/><center><%= submit_tag :APPROVE.l %></center>
+  <br/><center><%= submit_tag(:APPROVE.l, class: "btn") %></center>
 
   <% if @approved_names %>
     <p><%= check_box('deprecate', 'others', :checked => 'checked') %>
@@ -25,6 +25,6 @@
     <%= :name_approve_comments_help.tp(:name => @name.display_name) %>
   </div>
 
-  <br/><center><%= submit_tag :APPROVE.l %></center>
+  <br/><center><%= submit_tag(:APPROVE.l, class: "btn") %></center>
 <% end %>
 

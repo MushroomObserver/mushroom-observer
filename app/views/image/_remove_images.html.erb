@@ -12,7 +12,7 @@
 %>
 
 <%= form_tag(add_query_param(:action => form_action, :id => @object.id)) do %>
-  <br/><center><%= submit_tag(:image_remove_remove.l) %></center><br/>
+  <br/><center><%= submit_tag(:image_remove_remove.l, class: "btn") %></center><br/>
 
   <table>
     <% for image in @object.images %>

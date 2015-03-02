@@ -5,6 +5,6 @@
       :id => @observation.id)) do %>
         <%= :ask_observation_question_label.tp(:user => @observation.user.legal_name) %>
         <%= text_area(:question, :content, rows: 6, autofocus: true, class: "form-control") %>
-        <%= submit_tag :SEND.l, class: "btn btn-default center-block pad-top" %>
+        <%= submit_tag(:SEND.l, class: "btn center-block pad-top") %>
 <% end %>
 </div>

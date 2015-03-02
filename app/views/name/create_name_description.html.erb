@@ -11,10 +11,10 @@
 <%= form_for(:description, :url => add_query_param(
        :action => :create_name_description,
        :id => @description.name_id)) do |form| %>
-  <br/><center><%= submit_tag(:CREATE.l) %></center>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 
   <%= render(:partial => 'form_name_description', :locals =>
              {form: form}) %>
 
-  <br/><center><%= submit_tag(:CREATE.l) %></center>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 <% end %>

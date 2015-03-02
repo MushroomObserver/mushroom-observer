@@ -16,6 +16,6 @@
     <p>
       <%= :glossary_term_description.t %>:<br/><%= text_area('glossary_term', 'description', cols: 80, rows: 15, value: @glossary_term.description) %>
     </p>
-    <center><%= submit_tag :edit_glossary_term_save.t %><br/></center>
+    <center><%= submit_tag(:edit_glossary_term_save.t, class: "btn") %><br/></center>
   <% end %>
 </p>

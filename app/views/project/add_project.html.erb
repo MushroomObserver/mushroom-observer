@@ -7,6 +7,6 @@
 %>
 
 <%= form_tag(add_query_param(:action => 'add_project')) do %>
-  <br/><center><%= submit_tag :CREATE.l %></center><br/>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center><br/>
   <%= render(:partial => 'form_projects') %>
 <% end %>

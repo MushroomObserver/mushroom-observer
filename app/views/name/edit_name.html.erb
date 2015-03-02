@@ -10,10 +10,10 @@
 
 <%= form_for(:name, :url => add_query_param(:action => :edit_name,
       :id => @name.id)) do |form| %>
-  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
 
   <%= render(:partial => 'form_name', :locals =>
              {form: form}) %>
 
-  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
 <% end %>
