@@ -298,6 +298,7 @@ a {
     border-bottom-right-radius: $LEFT_BAR_BORDER_RADIUS;
     padding-left: 0px;
     padding-right: 0px;
+    margin-bottom: 10em;
 
     .list-group {
         @if $LEFT_BAR_ITEM_BORDER_WIDTH == 0 {
