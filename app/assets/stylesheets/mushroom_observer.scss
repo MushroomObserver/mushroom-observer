@@ -205,7 +205,7 @@ a:hover {
 .btn-primary {
     color: $BUTTON_PRIMARY_FG_COLOR !important;
     @if $BUTTON_PRIMARY_BG_COLOR1 == $BUTTON_PRIMARY_BG_COLOR2 {
-        background-color: $BUTTON_PRIMARY_BG_COLOR1;
+        background-color: $BUTTON_PRIMARY_BG_COLOR1 !important;
     } @else {
         @include gradient-vertical($BUTTON_PRIMARY_BG_COLOR1, $BUTTON_PRIMARY_BG_COLOR2);
     }
@@ -215,7 +215,7 @@ a:hover {
 .btn-primary:hover {
     color: $BUTTON_PRIMARY_HOVER_FG_COLOR;
     @if $BUTTON_PRIMARY_HOVER_BG_COLOR1 == $BUTTON_PRIMARY_HOVER_BG_COLOR2 {
-        background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1;
+        background-color: $BUTTON_PRIMARY_HOVER_BG_COLOR1 !important;
     } @else {
         @include gradient-vertical($BUTTON_PRIMARY_HOVER_BG_COLOR1, $BUTTON_PRIMARY_HOVER_BG_COLOR2);
     }
