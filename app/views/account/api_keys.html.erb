@@ -49,8 +49,8 @@
             <div class="edit_key_notes_container hidden" data-target-key="<%= key.id %>">
                 <%=text_field_tag("key_notes_#{key.id}", key.notes, data:{role: "key_notes_input", id: key.id}) %>
                 <br/>
-                <%=button_tag(:SAVE.l, :type => "button", data: {role: "key_notes_save", id: key.id}) %>
-                <%=button_tag(:CANCEL.l, :type => "button", data: {role: "key_notes_cancel", id: key.id}) %>
+                <%=button_tag(:SAVE.l, type: "button", class: "btn", data: {role: "key_notes_save", id: key.id}) %>
+                <%=button_tag(:CANCEL.l, type: "button", class: "btn", data: {role: "key_notes_cancel", id: key.id}) %>
             </div>
             <div class="view_key_notes_container" data-target-key="<%= key.id%>">
              <span class="current_notes">

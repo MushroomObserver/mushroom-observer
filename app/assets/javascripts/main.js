@@ -2,9 +2,6 @@
  * This should be included on every page.
  */
 jQuery(document).ready(function () {
-    if (!getCookie("hideBanner")) { //cookie to hide banner for 1 day
-        jQuery('#message_banner').show();
-    }
     jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
 
     jQuery('[data-toggle="offcanvas"]').click(function () {
@@ -13,14 +10,16 @@ jQuery(document).ready(function () {
         jQuery('#main_container').toggleClass('hidden-overflow-x');
 
     });
+
     jQuery('[data-toggle="search"]').click(function () {
         jQuery(document).scrollTop(0);
         var target = $(this).data().target;
         jQuery(target).css('margin-top', '32px');
         jQuery(target).toggleClass('hidden-xs');
     });
+
     jQuery('[data-dismiss="alert"]').click(function() {
-        setCookie('hideBanner',bannermd5, 30);
+        setCookie('hideBanner', banner_md5, 30);
     });
 
     jQuery('body').delegate('[data-toggle="expand-icon"]', "mouseenter mouseleave", function (e){
@@ -57,7 +56,6 @@ jQuery(document).ready(function () {
         hideTheater();
     });
 
-
     function hideTheater() {
         jQuery('.img-theater').hide();
         jQuery('body').removeClass('theater-shown');
@@ -81,16 +79,16 @@ jQuery(document).ready(function () {
         return undefined;
     }
 
-        jQuery('#carousel .item').each(function () {
-            var next = jQuery(this).next();
-            if (next)
-                next.children(':first-child').clone().addClass("extra1").appendTo($(this));
+    jQuery('#carousel .item').each(function () {
+        var next = jQuery(this).next();
+        if (next)
+            next.children(':first-child').clone().addClass("extra1").appendTo($(this));
 
-            for (var i = 0; i < 2; i++) {
-                next = next.next();
-                if (next)
-                    next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
-            }
-            jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
-        });
+        for (var i = 0; i < 2; i++) {
+            next = next.next();
+            if (next)
+                next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
+        }
+        jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
+    });
 });
