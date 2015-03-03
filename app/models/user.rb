@@ -461,6 +461,10 @@ class User < AbstractModel
     "#<User #{id}: #{unique_text_name.inspect}>"
   end
 
+  def lang
+    Language.lang_from_locale(locale)
+  end
+
   ##############################################################################
   #
   #  :section: Names
