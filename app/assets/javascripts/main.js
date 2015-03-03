@@ -2,6 +2,10 @@
  * This should be included on every page.
  */
 jQuery(document).ready(function () {
+    // this works better than straing autofocus attribute in firefox
+    // normal autofocus causes it to scroll window hiding title etc.
+    jQuery('[data-autofocus=true]').first().focus();
+
     jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
 
     jQuery('[data-toggle="offcanvas"]').click(function () {
