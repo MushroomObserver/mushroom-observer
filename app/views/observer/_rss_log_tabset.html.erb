@@ -1,28 +1,23 @@
-<%=form_tag(add_query_param(:action => 'index_rss_log'))%>
-<div class="btn-group pad-bottom hidden-xs">
-  <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
-  <span class="btn btn-default btn-sm <%= " active" if @types == ['all']%>">
- <%= if @types == ['all']
-       :rss_all.t
-     else
-       link_with_query(:rss_all.t,
-                       {action: 'index_rss_log', type: 'all'}, {title: :rss_all_help.t})
-     end%>
-        </span>
-  <% RssLog.all_types.map(&:to_s).each do |type|
-    checked = @types.include?(type) || @types == ['all']
-    %>
-          <span class="btn btn-default btn-sm <%=" active" if checked%>" data-toggle="checkbox">
-          <%=check_box_tag("show_#{type}", '1', checked, style: "margin:0")%>
-            <% if @types == [type] %>
-                <%=content_tag(:span, :rss_one.t(:type => type.to_sym))%>
-            <%else%>
-                <%=link_with_query(:rss_one.t(:type => type.to_sym),
-                                   {action: 'index_rss_log', type: type}, {title: :rss_all_help.t})%>
-            <%end%>
-          </span>
-  <%end%>
-    <%= submit_tag(:SUBMIT.t, class: "btn btn-sm bold") %>
-</div>
+<%= form_tag(add_query_param(action: :index_rss_log)) %>
+  <div class="btn-group pad-bottom hidden-xs" style="white-space:nowrap">
+    <%= content_tag(:span, :rss_show.t, class: "btn btn-xs disabled") %>
+    <span class="btn btn-xs <%= "active" if @types == ['all'] %>">
+      <%= label = :rss_all.t
+      link = {action: :index_rss_log, type: :all}
+      help = {title: :rss_all_help.t}
+      @types == ['all'] ? label : link_with_query(label, link, help) %>
+    </span>
+    <% RssLog.all_types.map(&:to_s).each do |type|
+      checked = @types.include?(type) || @types == ['all'] %>
+      <span class="btn btn-xs <%= "active" if @types == [type] %>" data-toggle="checkbox" class="rss_log_tab">
+        <%= check_box_tag("show_#{type}", "1", checked, class: "rss_log_tab") %>
+        <%= label = :rss_one.t(type: type.to_sym)
+        link = {action: :index_rss_log, type: type}
+        help = {title: :rss_one_help.t(type: type.to_sym)}
+        @types == [type] ? label : link_with_query(label, link, help) %>
+      </span>
+    <% end %>
+    <%= submit_tag(:SUBMIT.t, class: "btn btn-xs") %>
+  </div>
 </form>
 <% javascript_include("rss_feed_select_helper")%>

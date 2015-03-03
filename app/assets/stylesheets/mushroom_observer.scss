@@ -445,23 +445,8 @@ a:hover {
     text-align: left;
 }
 
-// .alert.alert-info    a { color: $INFO_LINK_COLOR    }
-// .alert.alert-success a { color: $SUCCESS_LINK_COLOR }
-// .alert.alert-warning a { color: $WARNING_LINK_COLOR }
-// .alert.alert-danger  a { color: $DANGER_LINK_COLOR  }
-
 //
-// lists
-// --------------------------------------------------
-
-// .list-group-item.default {
-//     color: $list_fg;
-//     background-color: $list_bg;
-//     border-color: $list_border;
-// }
-
-//
-// rss log items
+// rss log
 // --------------------------------------------------
 
 .rss-log-item {
@@ -469,19 +454,26 @@ a:hover {
     text-align: center;
     height: 350px;
 }
+
 .rss-fancy-time {
     position: absolute;
     top: -10px;
     right: 2px;
     color: mix($LIST_FG_COLOR, $LIST_BG_COLOR);
 }
+
 .rss-detail {
     margin-top: 5px;
     margin-bottom: 5px;
     text-align: center;
 }
+
 .rss-where, .rss-what {
     text-align: center;
+}
+
+.rss_log_tab {
+    margin-top: -5px !important;
 }
 
 //
@@ -504,30 +496,6 @@ a:hover {
     border: 0 !important;
     border-radius: 0 !important;
 }
-
-// .pagination > li > a,
-// .pagination > li > span {
-//     color: $pager_fg;
-//     background-color: $pager_bg;
-// }
-//
-// .pagination > li > a:hover,
-// .pagination > li > span:hover,
-// .pagination > li > a:focus,
-// .pagination > li > span:focus {
-//     color: $pager_hover_fg;
-//     background-color: $pager_hover_bg;
-// }
-//
-// .pagination > .active > a,
-// .pagination > .active > span,
-// .pagination > .active > a:hover,
-// .pagination > .active > span:hover,
-// .pagination > .active > a:focus,
-// .pagination > .active > span:focus {
-//     color: $pager_active_fg;
-//     background-color: $pager_active_bg;
-// }
 
 .pagination > .disabled > span,
 .pagination > .disabled > span:hover,
