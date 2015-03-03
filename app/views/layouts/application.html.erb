@@ -11,8 +11,6 @@
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
   <meta property="og:title" content="Mushroom Observer"/>
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
-  <%   banner = :app_banner_box.t  ##banner message variables
-       banner_md5 = md5_of_string(:app_banner_box.t).html_safe %>
   <%=
     css = MO.default_theme
     if is_in_admin_mode?
@@ -48,12 +46,15 @@
         </div>
       <% end
 
-      if banner.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
+      banner_txt = :app_banner_box.t
+      banner_md5 = md5_of_string(banner_txt).html_safe
+      if banner_txt.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
         <div class="alert alert-info message-banner" id="message_banner">
+          <%= javascript_tag("var banner_md5 = '#{banner_md5}'") %>
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-          <%= banner %>
+          <%= banner_txt %>
         </div>
       <% end %>
     </div>
@@ -100,7 +101,7 @@
                cssClass = "alert-success" if flash_notice_level == 0
                cssClass = "alert-warning" if flash_notice_level == 1
                cssClass = "alert-danger"  if flash_notice_level == 2 %>
-            <%= content_tag(:div,flash_get_notices, id: "flashes", class: "alert push-down #{cssClass}" ) %>
+            <%= content_tag(:div, flash_get_notices, id: "flashes", class: "alert push-down #{cssClass}" ) %>
           <% end
           flash_clear %>
         </div>
@@ -127,7 +128,6 @@
 </div>
 
 <!--JAVASCRIPT-->
-<%= javascript_tag("var bannermd5 = '#{banner_md5}'")%>
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <% injected_javascripts.each do |script| %>

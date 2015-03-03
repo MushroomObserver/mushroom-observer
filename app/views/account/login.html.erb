@@ -1,20 +1,42 @@
 <% @title = :login_please_login.t %>
 
-<%= form_tag(:action => "login") do %>
+<%= form_tag(action: "login") do %>
+  <div class="row">
 
-  <label for="user_login"><%= :login_user.t %>:</label><br/>
-  <%= text_field(:user, :login, value: @login, autofocus: @login.blank?, class: "input-md") %><br/><br/>
+    <div class="col-xs-12 form-inline">
+      <div class="form-group push-down">
+        <label for="user_login"><%= :login_user.t %>:</label><br/>
+        <%= text_field(:user, :login, value: @login, autofocus: @login.blank?, class: "form-control", size: 40) %>
+      </div>
+    </div>
 
-  <label for="user_password"><%= :login_password.t %>:</label><br/>
-  <%= password_field(:user, :password, value: "", autofocus: !@login.blank?, class: "input-md") %><br/><br/>
+    <div class="col-xs-12 form-inline">
+      <div class="form-group push-down">
+        <label for="user_password"><%= :login_password.t %>:</label><br/>
+        <%= password_field(:user, :password, value: "", autofocus: !@login.blank?, class: "form-control", size: 40) %>
+      </div>
+    </div>
 
-  <%= check_box(:user, :remember_me, checked: @remember) %>
-  <label for="user_remember_me"><%= :login_remember_me.t %></label><br/><br/>
+    <div class="col-xs-12 form-inline">
+      <div class="form-group push-down">
+        <%= check_box(:user, :remember_me, checked: @remember) %>
+        <label for="user_remember_me"><%= :login_remember_me.t %></label>
+      </div>
+    </div>
 
-  <input type="submit" name="login" value="<%= :login_login.l %>" class="btn" />
-  <br/><br/>
+    <div class="col-xs-12 form-inline">
+      <div class="form-group push-down">
+        <input type="submit" name="login" value="<%= :login_login.l %>" class="btn" />
+      </div>
+    </div>
 
-  <%= :login_forgot_password.tp %>
-  <%= :login_no_account.tp %>
-  <%= :login_having_problems.tp %>
+    <div class="col-xs-12 form-inline">
+      <div class="form-group push-down">
+        <%= :login_forgot_password.tp %>
+        <%= :login_no_account.tp %>
+        <%= :login_having_problems.tp %>
+      </div>
+    </div>
+
+  </div>
 <% end %>

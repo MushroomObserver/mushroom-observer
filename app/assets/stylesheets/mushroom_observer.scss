@@ -445,23 +445,8 @@ a:hover {
     text-align: left;
 }
 
-// .alert.alert-info    a { color: $INFO_LINK_COLOR    }
-// .alert.alert-success a { color: $SUCCESS_LINK_COLOR }
-// .alert.alert-warning a { color: $WARNING_LINK_COLOR }
-// .alert.alert-danger  a { color: $DANGER_LINK_COLOR  }
-
 //
-// lists
-// --------------------------------------------------
-
-// .list-group-item.default {
-//     color: $list_fg;
-//     background-color: $list_bg;
-//     border-color: $list_border;
-// }
-
-//
-// rss log items
+// rss log
 // --------------------------------------------------
 
 .rss-log-item {
@@ -469,19 +454,26 @@ a:hover {
     text-align: center;
     height: 350px;
 }
+
 .rss-fancy-time {
     position: absolute;
     top: -10px;
     right: 2px;
     color: mix($LIST_FG_COLOR, $LIST_BG_COLOR);
 }
+
 .rss-detail {
     margin-top: 5px;
     margin-bottom: 5px;
     text-align: center;
 }
+
 .rss-where, .rss-what {
     text-align: center;
+}
+
+.rss_log_tab {
+    margin-top: -5px !important;
 }
 
 //
@@ -504,30 +496,6 @@ a:hover {
     border: 0 !important;
     border-radius: 0 !important;
 }
-
-// .pagination > li > a,
-// .pagination > li > span {
-//     color: $pager_fg;
-//     background-color: $pager_bg;
-// }
-//
-// .pagination > li > a:hover,
-// .pagination > li > span:hover,
-// .pagination > li > a:focus,
-// .pagination > li > span:focus {
-//     color: $pager_hover_fg;
-//     background-color: $pager_hover_bg;
-// }
-//
-// .pagination > .active > a,
-// .pagination > .active > span,
-// .pagination > .active > a:hover,
-// .pagination > .active > span:hover,
-// .pagination > .active > a:focus,
-// .pagination > .active > span:focus {
-//     color: $pager_active_fg;
-//     background-color: $pager_active_bg;
-// }
 
 .pagination > .disabled > span,
 .pagination > .disabled > span:hover,
@@ -727,6 +695,36 @@ div.scroller {
 }
 
 //
+// pivotal tracker
+// --------------------------------------------------
+
+span.pivotal_name a, span.pivotal_name a:visited { color: #3b2821 }
+span.pivotal_name a:hover { color: #743931 }
+span.pivotal_unscheduled, a.pivotal_unscheduled, a.pivotal_unscheduled:visited { color: #777 }
+span.pivotal_unstarted, a.pivotal_unstarted, a.pivotal_unstarted:visited { color: #222 }
+span.pivotal_started, a.pivotal_started, a.pivotal_started:visited { color: #000 }
+a.pivotal_unscheduled:hover, a.pivotal_unstarted:hover, a.pivotal_started:hover { color: #777; background: #000 }
+a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started { border: 1px solid #7f7471 }
+a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 { border: 1px solid #7f7471 }
+a.pA:hover, a.pA:visited:hover { color: #AF8; background: #000 }
+a.pX:hover, a.pX:visited:hover { color: #FFF; background: #000 }
+a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
+a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
+a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
+a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
+a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
+a.p_day, a.p_day:visited { color: #3b2821; background: #AAFF88 }
+a.p_week, a.p_week:visited { color: #3b2821; background: #8ED672 }
+a.p_month, a.p_month:visited { color: #3b2821; background: #78B460 }
+a.p_none, a.p_none:visited { color: #3b2821; background: #669951 }
+a.pX, a.pX:visited { color: #3b2821; background: #FFF }
+a.p0, a.p0:visited { color: #3b2821; background: #AAF }
+a.p1, a.p1:visited { color: #3b2821; background: #F55 }
+a.p2, a.p2:visited { color: #3b2821; background: #F83 }
+a.p3, a.p3:visited { color: #3b2821; background: #FF0 }
+a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
+
+//
 // icons
 // --------------------------------------------------
 
@@ -862,6 +860,10 @@ div.scroller {
 
 .kill-padding {
     padding: 0 !important;
+}
+
+.nowrap {
+    white-space: nowrap;
 }
 
 //
@@ -1001,29 +1003,3 @@ table.table-compact tr td {
     .extra2,
     .extra3 { display: block; }
 }
-
-span.pivotal_name a, span.pivotal_name a:visited { color: #3b2821 }
-span.pivotal_name a:hover { color: #743931 }
-span.pivotal_unscheduled, a.pivotal_unscheduled, a.pivotal_unscheduled:visited { color: #777 }
-span.pivotal_unstarted, a.pivotal_unstarted, a.pivotal_unstarted:visited { color: #222 }
-span.pivotal_started, a.pivotal_started, a.pivotal_started:visited { color: #000 }
-a.pivotal_unscheduled:hover, a.pivotal_unstarted:hover, a.pivotal_started:hover { color: #777; background: #000 }
-a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started { border: 1px solid #7f7471 }
-a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 { border: 1px solid #7f7471 }
-a.pA:hover, a.pA:visited:hover { color: #AF8; background: #000 }
-a.pX:hover, a.pX:visited:hover { color: #FFF; background: #000 }
-a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
-a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
-a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
-a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
-a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
-a.p_day, a.p_day:visited { color: #3b2821; background: #AAFF88 }
-a.p_week, a.p_week:visited { color: #3b2821; background: #8ED672 }
-a.p_month, a.p_month:visited { color: #3b2821; background: #78B460 }
-a.p_none, a.p_none:visited { color: #3b2821; background: #669951 }
-a.pX, a.pX:visited { color: #3b2821; background: #FFF }
-a.p0, a.p0:visited { color: #3b2821; background: #AAF }
-a.p1, a.p1:visited { color: #3b2821; background: #F55 }
-a.p2, a.p2:visited { color: #3b2821; background: #F83 }
-a.p3, a.p3:visited { color: #3b2821; background: #FF0 }
-a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
