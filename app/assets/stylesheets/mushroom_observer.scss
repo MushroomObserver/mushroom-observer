@@ -44,7 +44,7 @@ $btn-default-border: $BUTTON_BORDER_COLOR;
 $btn-primary-color: $BUTTON_PRIMARY_FG_COLOR;
 $btn-primary-bg: $BUTTON_PRIMARY_BG_COLOR2;
 $btn-primary-border: $BUTTON_PRIMARY_BORDER_COLOR;
-$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR2);
+$btn-link-disabled-color: mix($BUTTON_FG_COLOR, $BUTTON_BG_COLOR2, 75%);
 
 $input-bg: $INPUT_BG_COLOR;
 $input-bg-disabled: mix($INPUT_FG_COLOR, $INPUT_BG_COLOR);
@@ -66,7 +66,7 @@ $dropdown-link-hover-color: $MENU_HOT_FG_COLOR;
 $dropdown-link-hover-bg: $MENU_HOT_BG_COLOR;
 $dropdown-link-active-color: $MENU_WARM_FG_COLOR;
 $dropdown-link-active-bg: $MENU_WARM_BG_COLOR;
-$dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR);
+$dropdown-link-disabled-color: mix($MENU_FG_COLOR, $MENU_BG_COLOR, 75%);
 $dropdown-header-color: $MENU_FG_COLOR;
 $dropdown-caret-color: $BODY_FG_COLOR;
 
@@ -85,7 +85,7 @@ $navbar-default-link-hover-color: $TOP_BAR_LINK_HOVER_FG_COLOR;
 $navbar-default-link-hover-bg: $TOP_BAR_LINK_HOVER_BG_COLOR;
 $navbar-default-link-active-color: $TOP_BAR_LINK_FG_COLOR;
 $navbar-default-link-active-bg: $TOP_BAR_LINK_BG_COLOR;
-$navbar-default-link-disabled-color: mix($TOP_BAR_LINK_FG_COLOR, $TOP_BAR_LINK_BG_COLOR);
+$navbar-default-link-disabled-color: mix($TOP_BAR_LINK_FG_COLOR, $TOP_BAR_LINK_BG_COLOR, 75%);
 $navbar-default-link-disabled-bg: $TOP_BAR_LINK_BG_COLOR;
 
 $pagination-color: $PAGER_FG_COLOR;
@@ -97,7 +97,7 @@ $pagination-hover-border: $PAGER_HOVER_BORDER_COLOR;
 $pagination-active-color: $PAGER_ACTIVE_FG_COLOR;
 $pagination-active-bg: $PAGER_ACTIVE_BG_COLOR;
 $pagination-active-border: $PAGER_ACTIVE_BORDER_COLOR;
-$pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR);
+$pagination-disabled-color: mix($PAGER_FG_COLOR, $PAGER_BG_COLOR, 75%);
 $pagination-disabled-bg: $PAGER_BG_COLOR;
 $pagination-disabled-border: $PAGER_BORDER_COLOR;
 
@@ -503,9 +503,7 @@ a:hover {
 .pagination > .disabled > a,
 .pagination > .disabled > a:hover,
 .pagination > .disabled > a:focus {
-    // color: $body_light;
     cursor: default;
-    // background-color: transparent;
 }
 
 //
@@ -866,6 +864,10 @@ a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
     white-space: nowrap;
 }
 
+.max-text-width {
+    max-width: 600px;
+}
+
 //
 // style tweaks
 // --------------------------------------------------
@@ -881,6 +883,12 @@ table.table-compact tr td {
 
 .input-group .icon-addon .form-control {
     border-radius: 0;
+}
+
+input[type=checkbox] {
+    // fixes alignment issue in firefox; bootstrap applies this only to IE9:
+    // margin-top: 1px \9;
+    margin-top: 1px;
 }
 
 //

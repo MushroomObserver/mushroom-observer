@@ -2,38 +2,46 @@
   @title = :account_api_keys_title.t
 
   new_tab_set do
-    add_tab(:prefs_link.t,
-            :controller => 'account', :action => 'prefs')
-    add_tab(:profile_link.t,
-            :controller => 'account', :action => 'profile')
+    add_tab(:prefs_link.t,   controller: :account, action: :prefs)
+    add_tab(:profile_link.t, controller: :account, action: :profile)
   end
 %>
 
-<%= :account_api_keys_help.tp %>
-<br/>
+<div class="row">
+  <div class="col-xs-12 max-text-width">
+    <%= :account_api_keys_help.tp %>
 
-<%= form_for(:key, :url => {id: @key.id}) do |form| %>
-  <table><tr><td>
-    <table>
-      <tr><td><%= :CREATED.t %>: </td>
-        <td><%= @key.created_at.web_date %></td></tr>
-      <tr><td><%= :account_api_keys_last_used_column_label.t %>: </td>
-        <td><%= @key.last_used ? @key.last_used.web_date : '--' %></td></tr>
-      <tr><td><%= :account_api_keys_num_uses_column_label.t %>: </td>
-        <td><%= @key.num_uses > 0 ? @key.num_uses : '--' %></td></tr>
-      <tr><td><%= :API_KEY.t %>: </td>
-        <td><%= h(@key.key) %></td></tr>
-    </table>
-    <br/>
+    <%= form_for(:key, url: {id: @key.id}) do |form| %>
+      <table>
+        <tr>
+          <td><%= :CREATED.t %>:&nbsp;</td>
+          <td><%= @key.created_at.web_date %></td>
+        </tr>
+        <tr>
+          <td><%= :account_api_keys_last_used_column_label.t %>:&nbsp;</td>
+          <td><%= @key.last_used ? @key.last_used.web_date : '--' %></td>
+        </tr>
+        <tr>
+          <td><%= :account_api_keys_num_uses_column_label.t %>:&nbsp;</td>
+          <td><%= @key.num_uses > 0 ? @key.num_uses : '--' %></td>
+        </tr>
+        <tr>
+          <td><%= :API_KEY.t %>:&nbsp;</td>
+          <td><%= h(@key.key) %></td>
+        </tr>
+      </table>
 
-    <label for="notes"><%= :NOTES.t %>:</label><br/>
-      <%= form.text_field(:notes, :size => 80) %><br/>
-    <br/>
+      <div class="form-group push-down">
+        <%= label_tag(:notes, :NOTES.t) %>:
+        <%= form.text_field(:notes, class: "form-control") %>
+      </div>
 
-    <center>
-      <%= submit_tag(:UPDATE.l, class: "btn") %>
-      <span style="margin-left:5em"></span>
-      <%= submit_tag(:CANCEL.l, class: "btn") %>
-    </center>
-  </td></tr></table>
-<% end %>
+      <center class="push-down">
+        <%= submit_tag(:UPDATE.l, class: "btn") %>
+        <span style="margin-left:5em"></span>
+        <%= submit_tag(:CANCEL.l, class: "btn") %>
+      </center>
+
+    <% end %>
+  </div>
+</div>
