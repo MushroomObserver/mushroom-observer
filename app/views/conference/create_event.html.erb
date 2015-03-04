@@ -1,32 +1,14 @@
 <%
   @title = :create_event_title.l
   new_tab_set do
-    add_tab(:event_index.t, :action => 'index')
+    add_tab(:event_index.t, action: :index)
   end
 %>
 
-<p>
-<%= form_tag(:action => 'create_event') do %>
-  <p>
-    <%= :conference_event_name.t %>: <%= text_field('event', 'name', :size => 150) %>
-  </p>
-  <p>
-    <%= :conference_event_location.t %>: <%= text_field('event', 'location', :size => 150) %>
-  </p>
-  <p>
-    <%= :conference_event_start.t %>: <%= date_select('event', 'start', :start_year => Time.now.year, 
-      :end_year => Time.now.year + 10, :order => [:day,:month,:year]) %><br/><br/>
-  </p>
-  <p>
-    <%= :conference_event_end.t %>: <%= date_select('event', 'end', :start_year => Time.now.year, 
-      :end_year => Time.now.year + 10, :order => [:day,:month,:year]) %><br/><br/>
-  </p>
-  <p>
-    <%= :conference_event_description.t %>:<br/><%= text_area('event', 'description', :cols => 100) %>
-  </p>
-  <p>
-    <%= :conference_event_registration_note.t %>:<br/><%= text_area('event', 'registration_note', :cols => 100) %>
-  </p>
-  <center><%= submit_tag(:create_event_add.t, class: "btn") %><br/></center>
-<% end %>
-</p>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag(action: :create_event) do %>
+      <%= render(partial: "form", locals: {button: :create_event_add}) %>
+    <% end %>
+  </div>
+</div>
