@@ -1,28 +1,36 @@
 <%
-   @title = :glossary_term_index_title.t
-   @tabsets = {right: render(partial: "shared/tab_set",
-                             locals: {
-                                     links: [link_to(:create_glossary_term.t, {action: :create_glossary_term}, style: "font-size: 1.2em")]
-                             }
-   )}
+  @title = :glossary_term_index_title.t
+  @tabsets = {
+    right: render(partial: "shared/tab_set", locals: {
+      links: [
+        link_to(:create_glossary_term.t, {action: :create_glossary_term}, {style: "font-size: 1.2em"})
+      ]
+    })
+  }
 %>
 
-<div class="col-lg-7 col-md-8 col-sm-8">
-  <%= :glossary_term_index_intro.tp %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= :glossary_term_index_intro.tp %>
+  </div>
 </div>
 
-<table class="table table-striped">
-  <% @glossary_terms.each do |glossary_term| %>
-      <tr>
-        <td class="col-lg-7 col-md-8 col-sm-8">
-          <%= link_to(content_tag(:b, glossary_term.name), :action => "show_glossary_term", :id => glossary_term.id) %>:
-          <%= glossary_term.description.tpl %>
-        </td>
-        <td>
-          <%= if glossary_term.thumb_image_id and glossary_term.thumb_image_id != 0
-                thumbnail(glossary_term.thumb_image, votes: true)
-              end %>
-        </td>
-      </tr>
-  <% end %>
-</table>
+<div class="row">
+  <div class="col-xs-12">
+    <table class="table table-striped">
+      <% @glossary_terms.each do |glossary_term| %>
+        <tr>
+          <td class="max-width-text">
+            <h4><%= link_to(glossary_term.name, action: :show_glossary_term, id: glossary_term.id) %>:</h4>
+            <%= glossary_term.description.tpl %>
+          </td>
+          <td>
+            <%= if glossary_term.thumb_image_id and glossary_term.thumb_image_id != 0
+              thumbnail(glossary_term.thumb_image, votes: true)
+            end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
