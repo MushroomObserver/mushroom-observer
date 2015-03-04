@@ -6,7 +6,11 @@ jQuery(document).ready(function () {
     // normal autofocus causes it to scroll window hiding title etc.
     jQuery('[data-autofocus=true]').first().focus();
 
-    jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
+    jQuery('[data-role=link]').on('click', function() {
+      window.location = jQuery(this).attr('data-url');
+    });
+
+    jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'});
 
     jQuery('[data-toggle="offcanvas"]').click(function () {
         jQuery(document).scrollTop(0);
@@ -17,7 +21,7 @@ jQuery(document).ready(function () {
 
     jQuery('[data-toggle="search"]').click(function () {
         jQuery(document).scrollTop(0);
-        var target = $(this).data().target;
+        var target = jQuery(this).data().target;
         jQuery(target).css('margin-top', '32px');
         jQuery(target).toggleClass('hidden-xs');
     });
@@ -51,7 +55,7 @@ jQuery(document).ready(function () {
         jQuery(document).on('keyup.hideTheater', function (e){
             if (e.keyCode == 27) {
                 hideTheater();
-                $(document).unbind('keyup.hideTheater');
+                jQuery(document).unbind('keyup.hideTheater');
             }
         })
     });
@@ -86,12 +90,12 @@ jQuery(document).ready(function () {
     jQuery('#carousel .item').each(function () {
         var next = jQuery(this).next();
         if (next)
-            next.children(':first-child').clone().addClass("extra1").appendTo($(this));
+            next.children(':first-child').clone().addClass("extra1").appendTo(jQuery(this));
 
         for (var i = 0; i < 2; i++) {
             next = next.next();
             if (next)
-                next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo($(this));
+                next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo(jQuery(this));
         }
         jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
     });

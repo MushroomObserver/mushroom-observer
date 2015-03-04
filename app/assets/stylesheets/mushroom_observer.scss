@@ -864,8 +864,12 @@ a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
     white-space: nowrap;
 }
 
-.max-text-width {
+.max-width-text {
     max-width: 600px;
+}
+
+.max-width-text-plus-image {
+    max-width: 850px; // 600px text column + 160pm max thumbnail
 }
 
 //
@@ -889,6 +893,10 @@ input[type=checkbox] {
     // fixes alignment issue in firefox; bootstrap applies this only to IE9:
     // margin-top: 1px \9;
     margin-top: 1px;
+}
+
+[data-role=link]:hover {
+    cursor: pointer;
 }
 
 //

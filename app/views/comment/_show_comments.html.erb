@@ -7,19 +7,20 @@
 %>
 
 <div class="row">
-  <div class="col-sm-12 col-lg-8">
-    <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t, style: "display: inline-block") %>
-    <%= link_with_query(:"show_comments_add_comment".t,
+  <div class="col-xs-12 max-width-text-plus-image">
+    <%= content_tag(:h4, comments.empty? ? :"show_comments_no_comments_yet".t : :COMMENTS.t,
+                    class: "push-down", style: "display:inline-block") %>
+    <%= link_with_query(:show_comments_add_comment.t,
                         {controller: :comment, action: :add_comment, id: object.id, type: object.class.name},
-                        class: "pull-right") if controls     %>
+                        class: "pull-right") if controls %>
+
+    <% comments.each do |comment| %>
+      <%= render(partial: "comment/comment", object: comment) %>
+    <% end %>
+
+    <%= if limit && and_more > 0
+      link_to(:show_comments_and_more.t(num: and_more),
+              {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
+    end %>
   </div>
 </div>
-
-<% comments.each do |comment| %>
-  <%= render(:partial => 'comment/comment', :object => comment) %>
-<% end %>
-
-<%= if limit and (and_more > 0)
-  link_to(:show_comments_and_more.t(:num => and_more),
-          {controller: :comment, action: :show_comments_for_target, id: object.id, type: object.class.name})
-end %>
