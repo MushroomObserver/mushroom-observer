@@ -1,20 +1,24 @@
 <%
-   @title = :comment_add_title.t(:name => @target.unique_format_name)
-   @tabsets = {
-           right: render(partial: "shared/tab_set", locals: {links: [link_with_query(
-                                                                            :cancel_and_show.t(:type => @comment.target_type.underscore.upcase.to_sym),
-                                                                            :controller => @target.show_controller, :action => @target.show_action,
-                                                                            :id => @target.id)]})
-   }
+  @title = :comment_add_title.t(:name => @target.unique_format_name)
+  @tabsets = {
+    right: render(partial: "shared/tab_set", locals: {
+      links: [
+        link_with_query(:cancel_and_show.t(type: @comment.target_type.underscore.upcase.to_sym),
+                        controller: @target.show_controller, action: @target.show_action, id: @target.id)
+      ]
+    })
+  }
 %>
 
-<div class="col-md-6">
-<%= form_tag(add_query_param(:action => 'add_comment', :id => @comment.target_id,
-                             :type => @comment.target_type)) do %>
-    <center><%= submit_tag(:comment_add_create.l, class: "btn") %></center>
-    <%= render(:partial => 'form_comments') %>
-    <center><%= submit_tag(:comment_add_create.l, class: "btn") %></center>
-    <hr/>
-    <%= render(:partial => 'object', :object => @target) %>
-<% end %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag(add_query_param(action: :add_comment, id: @comment.target_id, type: @comment.target_type)) do %>
+      <%= submit_tag(:comment_add_create.l, class: "btn center-block push-down") %>
+      <%= render(partial: "form_comments") %>
+      <%= submit_tag(:comment_add_create.l, class: "btn center-block push-down") %>
+      <hr align="center" width="90%" />
+    <% end %>
+  </div>
 </div>
+
+<%= render(partial: "object", object: @target) %>

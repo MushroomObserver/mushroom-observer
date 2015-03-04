@@ -1,7 +1,7 @@
 <% @title = :user_alert_show_title.t(user: @user.legal_name) %>
 
 <div class="row">
-  <div class="col-xs-12 max-text-width">
+  <div class="col-xs-12 max-width-text">
     <%= form_tag(action: :show_alert) do %>
       <input type="hidden" id="back" name="back" value="<%= escape_once(@back)%>" />
 
