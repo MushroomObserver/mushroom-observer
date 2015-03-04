@@ -2,22 +2,24 @@
   @title = :event_index_title.t
   if is_in_admin_mode?
     new_tab_set do
-      add_tab(:create_event.t, :action => 'create_event')
+      add_tab(:create_event.t, action: :create_event)
     end
   end
 %>
 
-<table>
-<% for event in @events %>
-  <tr>
-    <td>
-      <%= link_to(event.name, :action => "show_event", :id => event.id) %>
-    </td>
-    <% if is_in_admin_mode? %>
-      <td>
-        <%= link_to(:edit_event.t, :action => "edit_event", :id => event.id) %>
-      </td>
-    <% end %>
-  </tr>
-<% end %>
-</table>
+<div class="row push-down">
+  <div class="col-xs-12">
+    <table class="table table-striped slight-pad">
+      <% for event in @events %>
+        <tr>
+          <td>
+            <%= link_to(event.name, action: :show_event, id: event.id) %>
+            <% if is_in_admin_mode? %>
+              [<%= link_to(:edit_event.t, action: :edit_event, id: event.id) %>]
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
