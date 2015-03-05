@@ -1,62 +1,72 @@
 <%
   @title = @herbarium.name.t
-	@title += " (#{@herbarium.code.t})".html_safe if @herbarium.code != ""
+  @title += " (#{@herbarium.code.t})".html_safe if !@herbarium.code.blank?
+  map = @herbarium.location ? true : false
   new_tab_set do
-    add_tab(:edit_herbarium.t, :action => 'edit_herbarium', :id => @herbarium.id) if is_in_admin_mode? or @herbarium.is_curator?(@user)
-    add_tab(:create_herbarium.t, :action => 'create_herbarium')
-    add_tab(:herbarium_index.t, :action => 'index')
+    add_tab(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id) if @herbarium.is_curator?(@user) || is_in_admin_mode?
+    add_tab(:create_herbarium.t, action: :create_herbarium)
+    add_tab(:herbarium_index.t, action: :index)
   end
 %>
 
-<table width="100%">
-	<tr>
-		<td>
-			<p>
-			  <%= link_to(:show_herbarium_specimen_count.t(:count => @herbarium.specimens.count),
-			 							:controller => "specimen", :action => "herbarium_index", :id => @herbarium.id) %>
-			</p>
-			<p>
-				<%= curator_table(:herbarium_curator.t, @herbarium, @herbarium.can_delete_curator?(@user)) %>
-			  <% if @herbarium.is_curator?(@user) %>
-					<%= form_tag(:action => 'show_herbarium', :id => @herbarium) do %>
-						<%= text_field('curator', 'name', :size => 50) %>
-						<label for="curator_name"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
-					  <% turn_into_user_auto_completer("curator_name") %>
-					<% end
-				end %>
-			</p>
+<div class="row">
+  <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
 
-			<% if @herbarium.description and !@herbarium.description.empty? %>
-			  <p>
-			    <%= :herbarium_description.t %>:<br/><%= @herbarium.description.tpl %>
-			  </p>
-			<% end %>
+    <div class="push-down">
+      <%= link_to(:show_herbarium_specimen_count.t(count: @herbarium.specimens.count),
+                  controller: :specimen, action: :herbarium_index, id: @herbarium.id) %>
+    </div>
 
-			<% if @herbarium.mailing_address and !@herbarium.mailing_address.empty? %>
-			  <p>
-			    <%= :herbarium_mailing_address.t %>:<br/><%= @herbarium.mailing_address.tp %>
-			  </p>
-			<% end %>
-		</td>
-		<% if @herbarium.location %>
-			<td>
-			<%=
-			  gmap = make_map([@herbarium.location])
-			  finish_map(gmap)
-			  gmap.div(:width => 480, :height => 480).html_safe
-			%>
-			</td>
-		<% end %>
-	</tr>
-</table>
+    <div class="push-down">
+      <%= render(partial: "curator_table", locals: {herbarium: @herbarium}) %>
+      <% if @herbarium.is_curator?(@user) || is_in_admin_mode? %>
+        <%= form_tag(action: :show_herbarium, id: @herbarium) do %>
+          <div class="form-inline push-down">
+            <%= text_field(:curator, :name, class: "form-control") %>
+            <label for="curator_name"><%= submit_tag(:show_herbarium_add_curator.t, class: "btn") %></label>
+            <% turn_into_user_auto_completer(:curator_name) %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
 
-<center>
-	<p>
-		<% if @herbarium.created_at %>
-		  <%= :herbarium_created_at.t + ': ' +  @herbarium.created_at.web_date %><br/>
-		<% end %>
-		<% if @herbarium.updated_at %>
-		  <%= :herbarium_updated_at.t + ': ' +  @herbarium.updated_at.web_date %><br/>
-		<% end %>
-	</p>
-</center>
+    <% if !@herbarium.description.blank? %>
+      <div class="push-down">
+        <div class="bold"><%= :herbarium_description.t %>:</div>
+        <%= @herbarium.description.tpl %>
+      </div>
+    <% end %>
+
+    <% if @herbarium.mailing_address and !@herbarium.mailing_address.empty? %>
+      <div class="push-down">
+        <div class="bold"><%= :herbarium_mailing_address.t %>:</div>
+        <%= @herbarium.mailing_address.tp %>
+      </div>
+    <% end %>
+
+  </div>
+
+  <% if map %>
+    <div class="col-xs-12 col-sm-4 push-down" style="max-width:320px">
+      <%=
+        gmap = make_map([@herbarium.location])
+        finish_map(gmap)
+        gmap.div(width: "100%", height: "230px").html_safe
+      %>
+    </div>
+  <% end %>
+
+  <div class="col-xs-12 push-down" style="max-width:<%= map ? 930 : 600 %>px">
+    <center>
+      <% if @herbarium.created_at %>
+        <%= :herbarium_created_at.t %>:
+        <%= @herbarium.created_at.web_date %><br/>
+      <% end %>
+      <% if @herbarium.updated_at %>
+        <%= :herbarium_updated_at.t %>:
+        <%=  @herbarium.updated_at.web_date %><br/>
+      <% end %>
+    </center>
+  </div>
+
+</div>
