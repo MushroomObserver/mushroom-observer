@@ -1,33 +1,15 @@
 <%
   @title = :edit_herbarium_title.l
   new_tab_set do
-    add_tab(:cancel_and_show.t(:TYPE => 'Herbarium'), :action => 'show_herbarium', :id => @herbarium.id)
-    add_tab(:herbarium_index.t, :action => 'index')
+    add_tab(:cancel_and_show.t(type: :herbarium), action: :show_herbarium, id: @herbarium.id)
+    add_tab(:herbarium_index.t, action: :index)
   end
 %>
 
-<%= form_tag({action: 'edit_herbarium', id: @herbarium}) do %>
-	<center><%= submit_tag(:edit_herbarium_save.t, class: "btn") %><br/></center>
-  <p>
-		<%= :herbarium_name.t %>: <%= text_field('herbarium', 'name', :size => 150, :value => @herbarium.name) %>
-    <%= :create_herbarium_code.t %>: <%= text_field('herbarium', 'code', :size => 8, :value => @herbarium.code) %>
-  </p>
-  <p>
-    <%= :create_herbarium_email.t %>: <%= text_field('herbarium', 'email', :size => 150, :value => @herbarium.email) %>
-  </p>
-
-  <p>
-    <%= :create_herbarium_description.t %>:<br/>
-		<%= text_area('herbarium', 'description', :cols => 100, :rows => 10, :value => @herbarium.description) %>
-  </p>
-  <p>
-	  <p><label for="herbarium_place_name"><%= :create_herbarium_location.t %></label>:
-	  <%= text_field('herbarium', 'place_name', :size => 60, :value => @herbarium.location ? @herbarium.location.display_name : "") %></p>
-	  <% turn_into_location_auto_completer("herbarium_place_name") %>
-  </p>
-  <p>
-    <%= :create_herbarium_mailing_address.t %>:<br/>
-		<%= text_area('herbarium', 'mailing_address', :cols => 50, :rows => 10, :value => @herbarium.mailing_address) %>
-  </p>
-	<center><%= submit_tag(:edit_herbarium_save.t, class: "btn") %><br/></center>
-<% end %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag(action: :edit_herbarium, id: @herbarium) do %>
+      <%= render(partial: "form", locals: {button: :edit_herbarium_save}) %>
+    <% end %>
+  </div>
+</div>

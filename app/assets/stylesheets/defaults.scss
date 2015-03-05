@@ -32,7 +32,7 @@ $BUTTON_BORDER_RADIUS:              5px;
 
 $INPUT_FG_COLOR:                    #000000;
 $INPUT_BG_COLOR:                    #FFFFFF;
-  // $INPUT_BG_COLOR:                    #FFFF00;
+ // $INPUT_BG_COLOR:                    #FFFF00;
 $INPUT_BORDER_COLOR:                #CCCCCC;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
@@ -88,10 +88,13 @@ $TOP_BAR_LINK_HOVER_FG_COLOR:       $LINK_HOVER_FG_COLOR;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       $LINK_HOVER_BG_COLOR;
 
   $LIST_BORDER_COLOR:                 #DDDDDD;
-  $LIST_HEADER_FG_COLOR:              #777777;
-  $LIST_HEADER_BG_COLOR:              #EEEEEE;
+  $LIST_HEADER_FG_COLOR:              #000000;
+  $LIST_HEADER_BG_COLOR:              #F0F0F0;
 $LIST_FG_COLOR:                     #333333;
 $LIST_BG_COLOR:                     #FFFFFF;
+  $LIST_EVEN_BG_COLOR:                #F6F6F6;
+  $LIST_ODD_BG_COLOR:                 #FFFFFF;
+  $LIST_HOVER_BG_COLOR:               #F6F6F6;
 
   $TOOLTIP_FG_COLOR:                  white;
   $TOOLTIP_BG_COLOR:                  black;

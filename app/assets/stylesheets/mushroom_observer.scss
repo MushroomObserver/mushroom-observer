@@ -31,9 +31,9 @@ $component-active-bg: $MENU_HOT_BG_COLOR;
 
 $table-cell-padding: 6px;
 $table-condensed-cell-padding: 4px;
-$table-bg: transparent;
-$table-bg-accent: $LIST_BG_COLOR;
-$table-bg-hover: $MENU_WARM_BG_COLOR;
+$table-bg: $LIST_BG_COLOR;
+$table-bg-accent: $LIST_ODD_BG_COLOR;
+$table-bg-hover: $LIST_HOVER_BG_COLOR;
 $table-bg-active: $MENU_WARM_BG_COLOR;
 $table-border-color: $MENU_BORDER_COLOR;
 
@@ -723,6 +723,43 @@ a.p1, a.p1:visited { color: #3b2821; background: #F55 }
 a.p2, a.p2:visited { color: #3b2821; background: #F83 }
 a.p3, a.p3:visited { color: #3b2821; background: #FF0 }
 a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
+
+//
+// tables
+// --------------------------------------------------
+
+thead tr {
+    color: $LIST_HEADER_FG_COLOR;
+    background-color: $LIST_HEADER_BG_COLOR;
+}
+
+.table-striped {
+    tbody tr:nth-child(even) {
+        background-color: $LIST_EVEN_BG_COLOR;
+    }
+}
+
+.table-herbarium {
+    th, td {
+        padding-left: 0.5em;
+        padding-right: 0.5em;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 10em;
+    }
+}
+
+.table-curators {
+    th, td {
+        padding-left: 0.5em;
+        padding-right: 0.5em;
+    }
+}
 
 //
 // icons
