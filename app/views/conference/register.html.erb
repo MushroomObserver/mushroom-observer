@@ -15,22 +15,22 @@
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:registration_name, :conference_registration_name.t) %>:
+        <%= label(:registration, :name, :conference_registration_name.t) %>:
         <%= text_field(:registration, :name, class: "form-control") %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:registration_email, :conference_registration_email.t) %>:
+        <%= label(:registration, :email, :conference_registration_email.t) %>:
         <%= text_field(:registration, :email, class: "form-control") %>
       </div>
 
       <div class="form-group push-down form-inline">
-        <%= label_tag(:registration_how_many, :conference_registration_how_many.t) %>
+        <%= label(:registration, :how_many, :conference_registration_how_many.t) %>
         <%= text_field(:registration, :how_many, size: 7, value: 1, class: "form-control") %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:registration_notes, :conference_registration_notes.t) %>:
+        <%= label(:registration, :notes, :conference_registration_notes.t) %>:
         <%= text_area(:registration, :notes, class: "form-control") %>
       </div>
 

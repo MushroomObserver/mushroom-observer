@@ -575,7 +575,6 @@ class ImageController < ApplicationController
     pass_query_params
     @mode = params[:mode].to_sym
     @observation = Observation.safe_find(params[:obs_id]) if @mode == :observation
-    @glossary_term = GlossaryTerm.safe_find(params[:glossary_term_id])
     done = false
 
     # Make sure user owns the observation.
@@ -600,13 +599,6 @@ class ImageController < ApplicationController
           action: "show_observation", id: @observation.id)
         done = true
 
-      elsif @mode == :glossary_term
-        # Add image to glossary_term
-        @glossary_term.add_image(image)
-        @glossary_term.log_reuse_image(image)
-        redirect_with_query(controller: :glossary, action: :show_glossary_term,
-          id: @glossary_term.id)
-        done = true
       else
         # Change user's profile image.
         if @user.image == image

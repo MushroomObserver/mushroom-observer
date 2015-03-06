@@ -6,23 +6,23 @@
 
       <% if @user2.alert_created_at %>
         <div class="form-group push-down">
-          <%= label_tag(:user2_created_at, :user_alert_created_at.t) %>:
+          <%= label(:user2, :created_at, :user_alert_created_at.t) %>:
           <%= @user2.alert_created_at.web_time %><br/>
-          <%= label_tag(:user2_next_showing, :user_alert_next_showing.t) %>:
+          <%= label(:user2, :next_showing, :user_alert_next_showing.t) %>:
           <%= @user2.alert_next_showing.web_time %><br/>
-          <%= label_tag(:user2_user, :user_alert_user.t) %>:
+          <%= label(:user2, :user, :user_alert_user.t) %>:
           <%= @user2.alert_user.login %><br/>
         </div>
       <% end %>
 
       <div class="form-group push-down">
-        <%= label_tag(:user2_alert_type, :user_alert_type.t) %>:
+        <%= label(:user2, :alert_type, :user_alert_type.t) %>:
         <%= select(:user2, :alert_type, [['','']] + User.all_alert_types.map \
           {|x| ["user_alert_type_#{x}".to_sym.l, x.to_s]}, class: "form-control") %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:user2_alert_notes, :user_alert_notes.t) %>:
+        <%= label(:user2, :alert_notes, :user_alert_notes.t) %>:
         <%= text_area(:user2, :alert_notes, rows: 8, class: "form-control") %>
       </div>
 

@@ -99,4 +99,12 @@ jQuery(document).ready(function () {
         }
         jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
     });
+
+    jQuery('.file-field :file').on('change', function() {
+        var val = $(this).val().replace(/.*[\/\\]/, ''),
+            next = $(this).parent().next();
+        // If file field immediately followed by span, show selection there.
+        if (next.is('span')) next.html(val);
+    });
+
 });

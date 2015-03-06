@@ -1,52 +1,60 @@
 <%
-   ## This is a stop-gap measure until I/we figure out exactly how we want to deal with tabsets moving foward. I'm not sure
-   ## that my current approach is correct, but I feel like it is a bit more transparent than the previous approach
-   ## and allows more flexibility in styling the tabs - RJS 2/15/2015
-   @tabsets = {left: render_tab_sets} if @tab_sets and not @tabsets
+  # This is a stop-gap measure until I/we figure out exactly how we want to
+  # deal with tabsets moving foward.  I'm not sure that my current approach is
+  # correct, but I feel like it is a bit more transparent than the previous
+  # approach and allows more flexibility in styling the tabs - RJS 2/15/2015 
+  @tabsets ||= {}
 %>
-<div class="visible-xs visible-sm" style="margin-top: 23px"> <!--this pushes down the title on small and xs screens so buttons dont block -->
+
+<!-- This pushes down the title on small and xs screens so buttons dont block. -->
+<div class="visible-xs visible-sm" style="margin-top: 23px">
   &nbsp;
 </div>
-<% if @full_width_tab_set %>
-    <div class="col-xs-12">
-      <div>
-      <%= content_tag(:h3, @title, style: "font-size: 22px; margin-top: 5px;") %>
-      <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
-      </div>
-    </div>
-    <div class="col-xs-12">
-      <%= @full_width_tab_set %>
-    </div>
-<% else %>
-    <div class="col-sm-8" id="title">
-      <div>
-      <%= content_tag(:h3, @title, style: "font-size: 22px; margin-top: 5px;") %>
 
-        <%= render(partial: '/shared/prev_next_pager', locals: {object: @tabsets[:pager_for]}) if @tabsets && @tabsets[:pager_for] %>
-      </div>
+<% if @full_width_tab_set %>
+  <div class="col-xs-12">
+    <div>
+      <%= content_tag(:h3, @title, style: "font-size: 170%; margin-top: 5px;") %>
+      <% if @tabsets[:pager_for] %>
+        <%= render(partial: "/shared/prev_next_pager", locals: {object: @tabsets[:pager_for]}) %>
+      <% end %>
     </div>
-    <div id="right_tabs" class="col-sm-4" style="text-align: right">
-      <%= @tabsets[:right] if @tabsets %>
-      <%if @tab_sets %>
-              <small>
-                <%= render_tab_sets%>
-              </small>
-      <%end%>
+  </div>
+  <div class="col-xs-12">
+    <%= @full_width_tab_set %>
+  </div>
+<% else %>
+  <div class="col-sm-8" id="title">
+    <div>
+      <%= content_tag(:h3, @title, style: "font-size: 22px; margin-top: 5px;") %>
+      <% if @tabsets[:pager_for] %>
+        <%= render(partial: "/shared/prev_next_pager", locals: {object: @tabsets[:pager_for]}) %>
+      <% end %>
     </div>
+  </div>
+  <div id="right_tabs" class="col-sm-4 push-up" style="text-align: right">
+    <%= @tabsets[:right] %>
+    <% if @tab_sets %>
+      <small><%= render_tab_sets %></small>
+    <% end %>
+  </div>
 <% end %>
 
 <% if @sorts %>
-    <div class="col-xs-12">
-      <div class="pad-top">
+  <div class="col-xs-12">
+    <div class="pad-top">
       <span>
-      <%= :sort_by_header.t %>
-        </span>
-        <div id="sorts" class="btn-group btn-group-xs" role="group">
-          <% @sorts.each do |title, action| %>
-              <%= link_with_query(title, action, {class: "btn btn-default"}) unless action.nil?%>
-              <%= link_with_query(title, {}, {class: "btn btn-default active", disabled: true}) if action.nil?%>
-          <% end %>
-        </div>
+        <%= :sort_by_header.t %>
+      </span>
+      <div id="sorts" class="btn-group btn-group-xs" role="group">
+        <% @sorts.each do |title, action| %>
+          <%= if action.nil?
+            link_with_query(title, {}, class: "btn btn-default active", disabled: true)
+          else
+            link_with_query(title, action, class: "btn btn-default")
+          end %>
+        <% end %>
       </div>
     </div>
+  </div>
 <% end %>

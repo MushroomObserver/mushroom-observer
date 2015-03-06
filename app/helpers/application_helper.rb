@@ -1252,16 +1252,16 @@ module ApplicationHelper
   def thumbnail(image, args={})
     image_id = image.is_a?(Fixnum) ? image : image.id
     locals = {
-      image:      image,
-      link:       args[:link] || { controller: :image, action: :show_image, id: image_id },
-      size:       args[:size] || :small,
-      votes:      args[:votes] || true,
-      original:   args[:original] || false,
-      responsive: args[:responsive] || true,
-      theater_on_click: args[:theater_on_click] || false,
-      html_options: args[:html_options],
-      notes: args[:notes] || ""
-    }
+      image:            image,
+      link:             Image.show_link_args(image_id),
+      size:             :small,
+      votes:            true,
+      original:         false,
+      responsive:       true,
+      theater_on_click: false,
+      html_options:     {},
+      notes:            ""
+    }.merge(args)
     render(partial: "image/image_thumbnail", locals: locals)
   end
 
@@ -1315,7 +1315,7 @@ module ApplicationHelper
         link_with_query(:review_ok_for_export.t, controller: 'observer',
           action: 'set_export_status', type: obj.type_tag,
           id: obj.id, value: '1')
-      end + safe_br +
+      end + " | " +
       if obj.ok_for_export
         link_with_query(:review_no_export.t, controller: 'observer',
           action: 'set_export_status', type: obj.type_tag,
@@ -1686,24 +1686,41 @@ module ApplicationHelper
     Textile.textilize(str, do_object_links)
   end
 
-  # Create a file input fields with client-side size validation.
+  # Create stylable file input field with client-side size validation.
   def image_file_field(obj, attr, opts={})
-    validated_file_field(obj, attr, opts.merge(
-      max_upload_msg: :validate_image_file_too_big.l(max: (MO.image_upload_max_size.to_f/1024/1024).round),
-      max_upload_size: MO.image_upload_max_size
+    max_size = MO.image_upload_max_size
+    max_size_in_mb = (max_size.to_f/1024/1024).round
+    file_field = file_field(obj, attr, opts.merge(
+      max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
+      max_upload_size: max_size
     ))
+    content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
+    content_tag(:span, :no_file_selected.t)
   end
 
-  def validated_file_field(obj, attr, opts)
-    file_field(obj, attr, opts)
+  # From description_helper.rb
+  def name_section_link(title, data, query)
+    if data and data != 0
+      link_to(title,
+       add_query_param({controller: 'observer',
+         action: 'index_observation'}, query)) + safe_br
+    end
   end
-end
 
-# From description_helper.rb
-def name_section_link(title, data, query)
-  if data and data != 0
-    link_to(title,
-     add_query_param({controller: 'observer',
-       action: 'index_observation'}, query)) + safe_br
+  def make_matrix(objects, &block)
+    raise ArgumentError, "Missing block" unless block_given?
+    content_tag(:div, class: "row color-block") do
+      idx = 0
+      output = "".html_safe
+      for object in objects
+        body = capture(object, &block).to_s
+        output += content_tag(:div, "", class: "hidden visible-xs-block", style: "clear:left") if idx % 2 == 0
+        output += content_tag(:div, "", class: "hidden visible-sm-block visible-md-block", style: "clear:left") if idx % 3 == 0
+        output += content_tag(:div, "", class: "hidden visible-lg-block", style: "clear:left") if idx % 4 == 0
+        output += content_tag(:div, body, class: "col-xs-6 col-sm-4 col-lg-3")
+        idx += 1
+      end
+      output
+    end
   end
 end

@@ -19,23 +19,23 @@
       <%= submit_tag(:profile_button.l, class: "btn center-block push-down") %>
 
       <div class="form-group push-down">
-        <%= label_tag(:user_name, :profile_name.t) %>:
+        <%= form.label(:name, :profile_name.t) %>:
         <%= form.text_field(:name, class: "form-control") %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:user_place_name, :profile_location.t) %>: (33%)
+        <%= form.label(:place_name, :profile_location.t) %>: (33%)
         <%= text_field(:user, :place_name, value: @place_name, class: "form-control") %>
         <% turn_into_location_auto_completer("user_place_name") %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:user_notes, :profile_notes.t) %>: (33%)
+        <%= form.label(:notes, :profile_notes.t) %>: (33%)
         <%= form.text_area(:notes, rows: 10, class: "form-control") %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:user_upload_image, @user.image_id ? :profile_image_change.t : :profile_image_create.t) %>: (33%)
+        <%= form.label(:upload_image, @user.image_id ? :profile_image_change.t : :profile_image_create.t) %>: (33%)
         <%= link_to(:profile_image_reuse.t, controller: :image, action: :reuse_image, mode: :profile) %>
         <%= link_to(:profile_image_remove.t, {action: :remove_image},
                     {data: {confirm: :are_you_sure.l}}) if @user.image %>
@@ -61,7 +61,7 @@
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:user_mailing_address, :profile_mailing_address.t) %>:
+        <%= form.label(:mailing_address, :profile_mailing_address.t) %>:
         <%= form.text_area(:mailing_address, rows: 5, class: "form-control") %>
       </div>
 

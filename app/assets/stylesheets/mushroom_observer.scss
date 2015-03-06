@@ -180,7 +180,8 @@ a:hover {
     background-color: $LINK_HOVER_BG_COLOR;
 }
 
-.btn, .btn-default {
+.btn, .btn:visited,
+.btn-default, .btn-default:visited {
     color: $BUTTON_FG_COLOR;
     @if $BUTTON_BG_COLOR1 == $BUTTON_BG_COLOR2 {
         background-color: $BUTTON_BG_COLOR1;
@@ -734,30 +735,31 @@ thead tr {
 }
 
 .table-striped {
-    tbody tr:nth-child(even) {
+    tbody > tr:nth-child(odd) {
+        background-color: $LIST_ODD_BG_COLOR;
+    }
+    tbody > tr:nth-child(even) {
         background-color: $LIST_EVEN_BG_COLOR;
     }
 }
 
-.table-herbarium {
+.table-herbarium,
+.table-curators,
+.table-license-updater,
+.table-upload-report {
     th, td {
         padding-left: 0.5em;
         padding-right: 0.5em;
     }
+}
 
+.table-herbarium {
     th:nth-child(2),
     td:nth-child(2) {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 10em;
-    }
-}
-
-.table-curators {
-    th, td {
-        padding-left: 0.5em;
-        padding-right: 0.5em;
     }
 }
 
@@ -874,6 +876,10 @@ thead tr {
     margin-top: 1em;
 }
 
+.push-up {
+    margin-bottom: 1em;
+}
+
 .slight-pad {
     padding-top: 5px;
     padding-bottom: 5px;
@@ -901,6 +907,12 @@ thead tr {
 
 .nowrap {
     white-space: nowrap;
+}
+
+.nowrap-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .max-width-text {
@@ -936,6 +948,30 @@ input[type=checkbox] {
 
 [data-role=link]:hover {
     cursor: pointer;
+}
+
+// got this trick from:
+// http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+.file-field {
+    position: relative;
+    overflow: hidden;
+    input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        background: red;
+        cursor: inherit;
+        display: block;
+    }
+    + span {
+        margin-left: 0.5em;
+    }
 }
 
 //
