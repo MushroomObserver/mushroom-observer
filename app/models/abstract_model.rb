@@ -23,6 +23,7 @@
 #  show_controller::    These two return the controller and action of the main.
 #  show_action::        Page used to display this object.
 #  show_url::           "Official" URL for this database object.
+#  show_link_args::     "Official" link_to args for this database object.
 #  index_action::       Page used to display index of these objects.
 #
 #  ==== Callbacks
@@ -328,79 +329,71 @@ class AbstractModel < ActiveRecord::Base
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
   #
-  #   User.show_controller => 'observer'
-  #   Name.show_controller => 'name'
+  #   Name.show_controller => "name"
+  #   name.show_controller => "name"
   #
-  # TODO: Make this a model method!  Also it's not clear why the default
+  # TODO: Make this a model method!  Also it"s not clear why the default
   # is an error rather than name.underscore.
   def self.show_controller; name.underscore; end
-
-  # Return the name of the controller (as a simple lowercase string)
-  # that handles the "show_<object>" action for this object.
-  #
-  #   user.show_controller => 'observer'
-  #   name.show_controller => 'name'
-  #
   def show_controller; self.class.show_controller; end
 
   # Return the name of the "index_<object>" action (as a simple
   # lowercase string) that displays search index for this object.
   #
-  #   User.index_action => 'index_user'
-  #   Name.index_action => 'index_name'
+  #   Name.index_action => "index_name"
+  #   name.index_action => "index_name"
   #
-  def self.index_action; 'index_' + name.underscore; end
-
-  # Return the name of the "index_<object>" action (as a simple
-  # lowercase string) that displays this object.
-  #
-  #   user.index_action => 'index_user'
-  #   name.index_action => 'index_name'
-  #
+  def self.index_action; "index_" + name.underscore; end
   def index_action; self.class.index_action; end
 
   # Return the name of the "show_<object>" action (as a simple
   # lowercase string) that displays this object.
   #
-  #   User.show_action => 'show_user'
-  #   Name.show_action => 'show_name'
+  #   Name.show_action => "show_name"
+  #   name.show_action => "show_name"
   #
-  def self.show_action; 'show_' + name.underscore; end
-
-  # Return the name of the "show_<object>" action (as a simple
-  # lowercase string) that displays this object.
-  #
-  #   user.show_action => 'show_user'
-  #   name.show_action => 'show_name'
-  #
+  def self.show_action; "show_" + name.underscore; end
   def show_action; self.class.show_action; end
 
-  def self.edit_action; 'edit_' + name.underscore; end
+  # Return the name of the "edit_<object>" action (as a simple
+  # lowercase string) that displays this object.
+  #
+  #   Name.edit_action => "edit_name"
+  #   name.edit_action => "edit_name"
+  #
+  def self.edit_action; "edit_" + name.underscore; end
   def edit_action; self.class.edit_action; end
 
   # Return the URL of the "show_<object>" action
   #
-  #   User.show_action(12): 'http://mushroomobserver.org/observer/show_user/12'
-  #   Name.show_action(123): 'http://mushroomobserver.org/name/show_name/123'
+  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
+  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
   #
   def self.show_url(id)
     "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
   end
-
-  # Return the URL of the "show_<object>" action
-  #
-  #   user.show_action => 'http://mushroomobserver.org/observer/show_user/123'
-  #   name.show_action => 'http://mushroomobserver.org/name/show_name/123'
-  #
   def show_url; self.class.show_url(id); end
 
-  def self.eol_predicate; ":eol#{name}"; end
-  def eol_predicate; self.class.eol_predicate; end
+  # Return the link_to args of the "show_<object>" action
+  #
+  #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
+  #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
+  #
+  def self.show_link_args(id)
+    {controller: show_controller, action: show_action, id: id}
+  end
+  def show_link_args; self.class.show_link_args(id); end
 
+  # Return the URL for the EOL resource corresponding to this object.
+  #
+  #   name.eol_url => "http://eol.org/blah/blah/blah"
+  #
   def eol_url
     triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
     triple.object if triple
   end
+  def self.eol_predicate; ":eol#{name}"; end
+  def eol_predicate; self.class.eol_predicate; end
 
   ##############################################################################
   #

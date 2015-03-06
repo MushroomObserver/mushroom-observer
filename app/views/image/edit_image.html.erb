@@ -1,33 +1,32 @@
 <%
-   @title = :image_edit_title.t(:name => @image.unique_format_name)
-   @tabsets = {right: render(partial: '/shared/tab_set',
-                            locals: {
-                                    links: [link_with_query(:cancel_and_show.t({type: :image}),
-                                                            {action: :show_image, id: @image.id})]
-                            })
+   @title = :image_edit_title.t(name: @image.unique_format_name)
+   @tabsets = {
+     right: render(partial: "/shared/tab_set", locals: {
+       links: [
+         link_with_query(:cancel_and_show.t(type: :image),
+                         {action: :show_image, id: @image.id})
+       ]
+     })
    }
 %>
 
-<%= form_for(:image, :url => add_query_param({action: :edit_image, id: @image})) do |form| %>
-    <div class="row">
-      <div class="col-sm-5">
-        <div class="text-center">
-          <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
-        </div>
-        <%= render({partial: 'form_images', locals: {
-                                                    form: form,
-                                                    leave_out_original_file_name: false
-                                            }}) %>
-        <div class="text-center">
-          <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
-          <%= link_with_query(:cancel_and_show.t({type: :image}),
-                              {action: :show_image, id: @image.id},
-                              {class: "btn btn-danger"}) %>
-        </div>
-      </div>
-      <div class="col-sm-7">
-        <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
+<%= form_for(:image, url: add_query_param({action: :edit_image, id: @image})) do |form| %>
+  <div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 max-width-text">
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+
+      <%= render(partial: "form_images",
+                 locals: {form: form, leave_out_original_file_name: false}) %>
+
+      <div class="text-center push-down" style="margin-bottom:2em">
+        <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
+        <%= link_with_query(:cancel_and_show.t(type: :image),
+                            {action: :show_image, id: @image.id},
+                            {class: "btn"}) %>
       </div>
     </div>
-
+    <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
+      <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
+    </div>
+  </div>
 <% end %>

@@ -1,30 +1,33 @@
 <%
-  @title = :image_remove_title.t(:name => @object.unique_format_name)
-
+  @title = :image_remove_title.t(name: @object.unique_format_name)
   new_tab_set do
-    add_tab_with_query(:show_object.t(:type => target_class),
-      :controller => target_class.show_controller, :action => target_class.show_action,
-      :id => @object.id)
-    add_tab_with_query(:edit_object.t(:type => target_class),
-      :controller => target_class.show_controller, :action => target_class.edit_action,
-      :id => @object.id)
+    add_tab_with_query(:show_object.t(type: target_class),
+      controller: target_class.show_controller, action: target_class.show_action, id: @object.id)
+    add_tab_with_query(:edit_object.t(type: target_class),
+      controller: target_class.show_controller, action: target_class.edit_action, id: @object.id)
   end
 %>
 
-<%= form_tag(add_query_param(:action => form_action, :id => @object.id)) do %>
-  <br/><center><%= submit_tag(:image_remove_remove.l, class: "btn") %></center><br/>
+<%= form_tag(add_query_param(action: form_action, id: @object.id)) do %>
+  <div class="row">
+    <div class="col-xs-12">
+      <%= submit_tag(:image_remove_remove.l, class: "btn center-block push-down push-up") %>
+    </div>
+  </div>
 
-  <table>
-    <% for image in @object.images %>
-      <tr>
-        <td valign="middle">
-          <%= check_box("selected", image.id, {}, "yes", "no") %>
-        </td>
-        <td align="center">
-          <%= thumbnail(image, :votes => true, :original => true) %>
-          <p> <%="#{:image.t} ##{image.id}".html_safe%></p>
-        </td>
-      </tr>
+  <%= make_matrix(@object.images) do |image| %>
+    <div class="push-down push-up">
+      <%= thumbnail(image, votes: true, original: true) %>
+      <center>
+        <%= check_box(:selected, image.id, {}, "yes", "no") %>
+        <label for="selected_#{image.id}"><%= :image.t %> #<%= image.id %></label>
+      </center>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <%= submit_tag(:image_remove_remove.l, class: "btn center-block push-down") %>
     <% end %>
-  </table>
-<% end %>
+  </div>
+</div>

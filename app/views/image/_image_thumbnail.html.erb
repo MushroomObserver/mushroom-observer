@@ -1,18 +1,22 @@
 <%
-   # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
-   # so we only have image_id.  It's still possible to render the image with
-   # nothing but the image_id.  (But not votes, original name, etc.)
-   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
-   size_url  = Image.url(size, image_id)
-   large_url = Image.url(:large, image_id)
-   orig_url  = Image.url(:original, image_id)
-   html_options =  {data: {toggle: :theater, image: large_url, original: orig_url}} if theater_on_click
-   html_options = {} if html_options.nil?
+  # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
+  # so we only have image_id.  It's still possible to render the image with
+  # nothing but the image_id.  (But not votes, original name, etc.)
+  image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+  size_url  = Image.url(size, image_id)
+  large_url = Image.url(:large, image_id)
+  orig_url  = Image.url(:original, image_id)
+  html_options = {data: {toggle: :theater, image: large_url, original: orig_url}} if theater_on_click
+  html_options = {} if html_options.nil?
 %>
+
 <div style="position:relative">
-  <div style="display: inline;">
+  <div style="display:inline">
     <div data-toggle="expand-icon" class="text-center">
-      <% img_tag = image_tag(size_url, title: notes, style: responsive ? 'max-width: 100%; height: auto;' : 'img-unresponsive', data: {toggle: "tooltip", placement: "bottom"}) %>
+      <% style = "max-width: 100%; height: auto" if responsive
+      img_class = "img-unresponsive #{img_class}" if !responsive
+      img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
+                          data: {toggle: "tooltip", placement: "bottom"}) %>
       <%= link_with_query(img_tag, link, html_options) %>
       <a href="<%=orig_url%>" class="glyphicon glyphicon-fullscreen theater-btn"
          data-toggle="theater" data-image="<%= large_url %>"

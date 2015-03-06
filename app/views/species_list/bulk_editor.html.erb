@@ -42,7 +42,7 @@
           imgs += obs.images
           for img in imgs.uniq %>
             <td valign="middle">
-              <%= thumbnail(img, :size => :thumbnail, :obs => obs.id, :class => 'tiny', :target => '_blank') %>
+              <%= thumbnail(img, :size => :thumbnail, :obs => obs.id, :img_class => 'tiny', :target => '_blank') %>
             </td>
           <% end %>
         </tr>

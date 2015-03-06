@@ -1,7 +1,8 @@
 <%
-   vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
-   user = User.current
+  vote_percentage = image.vote_cache ? ((image.vote_cache / Image.all_votes.length) * 100).floor : 0
+  user = User.current
 %>
+
 <% if vote_percentage %>
   <div class="vote-meter">
     <div id="vote_meter_bar_<%= image.id %>" class="vote-meter-bar"
@@ -9,17 +10,19 @@
     </div>
   </div>
 <% end %>
+
 <div id="vote_buttons">
-  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>" style="margin-top: -5px">
+  <div class="image_vote_links_container" id="image_vote_links_<%= image.id %>" style="margin-top:-5px">
     <center>
       <% if user && !image.users_vote(user).blank? %>
-          <%= image_vote_link(image, 0) %>
+        <%= image_vote_link(image, 0) %>
       <% end %>
       <% Image.all_votes.each do |vote| %>
-          <small><%= image_vote_link(image, vote) %></small>
+        <%= "|" if vote != 1 %>
+        <small><%= image_vote_link(image, vote) %></small>
       <% end %>
     </center>
-  <span class="hidden data_container" data-id="<%= image.id %>"
-        data-percentage="<%= vote_percentage %>" data-role="image_vote_percentage"></span>
+    <span class="hidden data_container" data-id="<%= image.id %>"
+          data-percentage="<%= vote_percentage %>" data-role="image_vote_percentage"></span>
   </div>
 </div>

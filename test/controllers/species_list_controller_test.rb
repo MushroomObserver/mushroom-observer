@@ -51,6 +51,38 @@ class SpeciesListControllerTest < FunctionalTestCase
     end
   end
 
+  def assigns_exist
+    assigns(:all_lists).length > 0
+    rescue nil
+  end
+
+  def init_for_project_checkbox_tests
+    @proj1 = projects(:eol_project)
+    @proj2 = projects(:bolete_project)
+    @spl1 = species_lists(:first_species_list)
+    @spl2 = species_lists(:unknown_species_list)
+    assert_users_equal(rolf, @spl1.user)
+    assert_users_equal(mary, @spl2.user)
+    assert_obj_list_equal([],      @spl1.projects)
+    assert_obj_list_equal([@proj2], @spl2.projects)
+    assert_obj_list_equal([rolf, mary, katrina], @proj1.user_group.users)
+    assert_obj_list_equal([dick], @proj2.user_group.users)
+  end
+
+  def obs_params(obs, vote)
+    {
+      when_str:   obs.when_str,
+      place_name: obs.place_name,
+      notes:      obs.notes,
+      lat:        obs.lat,
+      long:       obs.long,
+      alt:        obs.alt,
+      is_collection_location: obs.is_collection_location ? "1" : "0",
+      specimen:   obs.specimen ? "1" : "0",
+      value:      vote,
+    }
+  end
+
 ################################################################################
 
   def test_index_species_list_by_past_bys
@@ -168,11 +200,6 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = { id: obs.id.to_s }
     requires_login(:manage_species_lists, params)
     assert(assigns_exist, "Missing species lists!")
-  end
-
-  def assigns_exist
-    assigns(:all_lists).length > 0
-    rescue nil
   end
 
   def test_add_observation_to_species_list
@@ -1345,20 +1372,6 @@ class SpeciesListControllerTest < FunctionalTestCase
     assert_equal(vote, obs.owners_votes.first.value)
   end
 
-  def obs_params(obs, vote)
-    {
-      when_str:   obs.when_str,
-      place_name: obs.place_name,
-      notes:      obs.notes,
-      lat:        obs.lat,
-      long:       obs.long,
-      alt:        obs.alt,
-      is_collection_location: obs.is_collection_location ? "1" : "0",
-      specimen:   obs.specimen ? "1" : "0",
-      value:      vote,
-    }
-  end
-
   def test_project_checkboxes_in_create_species_list_form
     init_for_project_checkbox_tests
 
@@ -1419,19 +1432,6 @@ class SpeciesListControllerTest < FunctionalTestCase
     get(:edit_species_list, id: @spl2.id)
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
-  end
-
-  def init_for_project_checkbox_tests
-    @proj1 = projects(:eol_project)
-    @proj2 = projects(:bolete_project)
-    @spl1 = species_lists(:first_species_list)
-    @spl2 = species_lists(:unknown_species_list)
-    assert_users_equal(rolf, @spl1.user)
-    assert_users_equal(mary, @spl2.user)
-    assert_obj_list_equal([],      @spl1.projects)
-    assert_obj_list_equal([@proj2], @spl2.projects)
-    assert_obj_list_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_list_equal([dick], @proj2.user_group.users)
   end
 
   # ----------------------------

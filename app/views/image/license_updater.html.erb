@@ -1,52 +1,64 @@
-<% @title = :image_updater_title.t(:user => @user.login) %>
+<% @title = :image_updater_title.t(user: @user.login) %>
 
-<%= form_tag(:action => 'license_updater') do %>
-  <%= :image_updater_help.tp %>
+<%= form_tag(action: :license_updater) do %>
+  <div class="row">
+    <div class="col-xs-12 max-width-text">
+      <%= :image_updater_help.tp %>
+    </div>
 
-  <table cellpadding="5" cellspacing="5" border="1">
-    <tr class="Data">
-      <td>
-        <%= :image_updater_count.t %>
-      </td>
-      <td>
-        <%= :image_updater_holder.t %>
-      </td>
-      <td>
-        <%= :image_updater_license.t %>
-      </td>
-    </tr>
+    <div class="col-xs-12">
+      <table class="table-striped table-license-updater">
+        <thead>
+          <tr>
+            <th>
+              <%= :image_updater_count.t %>
+            </th>
+            <th>
+              <%= :image_updater_holder.t %>
+            </th>
+            <th>
+              <%= :image_updater_license.t %>
+            </th>
+          </tr>
+        </thead>
 
-    <% row = 0
-    for datum in @data
-      row += 1
-      licenses = datum['licenses']
-      license_id = datum['license_id'].to_i
-      copyright_holder = datum['copyright_holder'].to_s
-      %>
-      <tr>
-        <td>
-          <%= datum['license_count'].to_s %>
-        </td>
-        <td>
-          <%=
-            text_field_tag("updates_#{row}_new_holder", copyright_holder,
-              :name => "updates[#{row}][new_holder]") +
-            hidden_field_tag("updates_#{row}_old_holder", copyright_holder,
-              :name => "updates[#{row}][old_holder]")
-          %>
-        </td>
-        <td>
-          <%=
-            select_tag("updates_#{row}_new_id",
-              options_for_select(licenses, license_id),
-              :name => "updates[#{row}][new_id]") +
-            hidden_field_tag("updates_#{row}_old_id", license_id,
-              :name => "updates[#{row}][old_id]")
-          %>
-        </td>
-      </tr>
+        <tbody>
+          <% row = 0
+          for datum in @data
+            row += 1
+            licenses = datum["licenses"]
+            license_id = datum["license_id"].to_i
+            copyright_holder = datum["copyright_holder"].to_s
+            %>
+            <tr>
+              <td>
+                <%= datum["license_count"].to_s %>
+              </td>
+              <td>
+                <%=
+                  text_field_tag("updates_#{row}_new_holder", copyright_holder,
+                    name: "updates[#{row}][new_holder]") +
+                  hidden_field_tag("updates_#{row}_old_holder", copyright_holder,
+                    name: "updates[#{row}][old_holder]")
+                %>
+              </td>
+              <td>
+                <%=
+                  select_tag("updates_#{row}_new_id",
+                    options_for_select(licenses, license_id),
+                    name: "updates[#{row}][new_id]") +
+                  hidden_field_tag("updates_#{row}_old_id", license_id,
+                    name: "updates[#{row}][old_id]")
+                %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-xs-12 max-width-text">
+      <%= submit_tag(:image_updater_update.l, class: "btn center-block push-down") %>
     <% end %>
-  </table>
-
-  <br/><%= submit_tag(:image_updater_update.l, class: "btn") %><br/>
-<% end %></center>
+  </div>
+</div>
