@@ -1714,10 +1714,18 @@ module ApplicationHelper
       output = "".html_safe
       for object in objects
         body = capture(object, &block).to_s
-        output += content_tag(:div, "", class: "hidden visible-xs-block", style: "clear:left") if idx % 2 == 0
-        output += content_tag(:div, "", class: "hidden visible-sm-block visible-md-block", style: "clear:left") if idx % 3 == 0
-        output += content_tag(:div, "", class: "hidden visible-lg-block", style: "clear:left") if idx % 4 == 0
-        output += content_tag(:div, body, class: "col-xs-6 col-sm-4 col-lg-3")
+        if false ## Maybe give users who want small thumbnails this option?
+          output += content_tag(:div, "", class: "hidden visible-xs-block", style: "clear:left") if idx % 2 == 0
+          output += content_tag(:div, "", class: "hidden visible-sm-block", style: "clear:left") if idx % 3 == 0
+          output += content_tag(:div, "", class: "hidden visible-md-block", style: "clear:left") if idx % 4 == 0
+          output += content_tag(:div, "", class: "hidden visible-lg-block", style: "clear:left") if idx % 6 == 0
+          output += content_tag(:div, body, class: "col-xs-6 col-sm-4 col-md-3 col-lg-2")
+        else
+          output += content_tag(:div, "", class: "hidden visible-sm-block", style: "clear:left") if idx % 2 == 0
+          output += content_tag(:div, "", class: "hidden visible-md-block", style: "clear:left") if idx % 3 == 0
+          output += content_tag(:div, "", class: "hidden visible-lg-block", style: "clear:left") if idx % 4 == 0
+          output += content_tag(:div, body, class: "col-xs-12 col-sm-6 col-md-4 col-lg-3")
+        end
         idx += 1
       end
       output

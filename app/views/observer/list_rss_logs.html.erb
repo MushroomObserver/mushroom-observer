@@ -1,34 +1,12 @@
 <%
   @title = :rss_log_title.t.nowrap
   @full_width_tab_set = render(partial: "rss_log_tabset")
-  new_tab_set(@links)
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  new_tab_set(@links) if @links && @links.any?
+  flash_error(@error) if @error && (!@objects || @objects.empty?)
 %>
 
-<div class="row">
-  <div class="col-xs-12">
-    <%= pagination_numbers(@pages) %>
-  </div>
-</div>
-<div class="results">
-  <% open_at = 0
-  close_at = 2
-  @objects.each_with_index do |rss_log, index|
-    if index == open_at %>
-      <div class="row">
-    <% end %>
-    <div class="col-sm-4">
-      <%= render(partial: "shared/matrix_box", locals: {object: rss_log}) %>
-    </div>
-    <% if index == close_at || index == @objects.length + 1
-      open_at = close_at + 1
-      close_at = close_at + 3 %>
-      </div>
-    <% end %>
+<%= paginate_block(@pages) do %>
+  <%= make_matrix(@objects) do |rss_log| %>
+    <%= render(partial: "shared/matrix_box", locals: {object: rss_log}) %>
   <% end %>
-</div>
-<div class="row">
-  <div class="col-xs-12">
-    <%= pagination_numbers(@pages) %>
-  </div>
-</div>
+<% end %>

@@ -53,15 +53,31 @@
         </div>
       </div>
       <div class="panel-body">
+
         <div class="hidden-lg" style="max-width:640px; max-height:640px; margin:auto">
           <%= thumbnail(@image, size: :medium, link: {}, votes: false,
                         style: "max-width:100%; max-height:100%",
                         responsive: true, theater_on_click: true) %>
         </div>
         <div class="visible-lg" style="max-width:1280px; max-height:1280px; margin:auto">
-          <%= thumbnail(@image, size: :huge, link: {}, votes: false,
+          <%= thumbnail(@image, size: :medium, link: {}, votes: false, img_class: "huge-image",
                         responsive: true, theater_on_click: true) %>
         </div>
+
+        <% # Insert huge-size image via js only when necessary to prevent
+        # some browsers from eager-loading it even when invisible.
+        inject_javascript_at_end %(
+          var huge_loaded = false;
+          function load_huge() {
+            if (!huge_loaded && jQuery(window).width() >= 1200) {
+              huge_loaded = true;
+              jQuery("img.huge-image").attr("src", "#{j Image.url(:huge, @image.id)}");
+            }
+          }
+          jQuery(window).resize(load_huge);
+          jQuery(document).ready(load_huge);
+        ) %>
+
         <div class="push-down text-center">
           <% if User.current %>
             <%= render(partial: "image/image_vote_links", locals: {image: @image}) %>
@@ -71,6 +87,7 @@
             <%= @image.original_name %>
           <% end %>
         </div>
+
       </div>
     </div>
     <!-- /IMAGE_PANEL -->
@@ -250,9 +267,11 @@
 <!-- LICENSE_AND_FOOTER -->
 <div class="row">
   <div class="col-sm-6 max-width-text">
-    <div class="small">
+    <div class="small text-center">
       <%= image_copyright(@image) %>
-      <%= render(partial: "shared/form_#{@image.license.form_name}") %>
+      <div class="slight-pad push-up">
+        <%= render(partial: "shared/form_#{@image.license.form_name}") %>
+      </div>
     </div>
   </div>
   <div class="col-sm-6">

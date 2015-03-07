@@ -3,18 +3,10 @@
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
-<div class="row">
-  <div class="col-xs-12">
-    <%= pagination_numbers(@pages) %>
-  </div>
-  <div class="col-xs-12 color-block">
-    <% @objects.each do |image| %>
-      <div class="col-sm-4 color-block-item">
-        <%= render(partial: "shared/matrix_box", locals: {object: image}) %>
-      </div>
-    <% end %>
-  </div>
-  <div class="col-xs-12">
-    <%= pagination_numbers(@pages) %>
-  </div>
-</div>
+<%= paginate_block(@pages) do %>
+  <%= make_matrix(@objects) do |image| %>
+    <div class="push-down push-up">
+      <%= render(partial: "shared/matrix_box", locals: {object: image}) %>
+    </div>
+  <% end %>
+<% end %>
