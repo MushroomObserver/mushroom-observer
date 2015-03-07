@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <%= make_matrix(@object.images) do |image| %>
+  <%= render(layout: "shared/matrix_table", locals: {objects: @object.images}) do |image| %>
     <div class="push-down push-up">
       <%= thumbnail(image, votes: true, original: true) %>
       <center>
