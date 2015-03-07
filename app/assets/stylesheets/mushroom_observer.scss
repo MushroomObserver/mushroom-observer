@@ -158,6 +158,8 @@ $help-block-max-width: 600px;
 
 $hr-border: $LIST_BORDER_COLOR;
 
+$sidebar-max-width: 15em;
+
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
@@ -304,7 +306,7 @@ a:hover {
 // --------------------------------------------------
 
 .sidebar-offcanvas {
-    max-width: 15em;
+    max-width: $sidebar-max-width;
 }
 
 #navigation {
@@ -1003,10 +1005,10 @@ input[type=checkbox] {
 // --------------------------------------------------
 
 @media screen and (max-width: 767px) {
-    #navigation {
-      padding-left: 15px;
-      padding-right: 15px;
-    }
+    // #navigation {
+    //   padding-left: 15px;
+    //   padding-right: 15px;
+    // }
 
     .rss-box-details {
         height: auto !important;
@@ -1030,29 +1032,39 @@ input[type=checkbox] {
 
     .row-offcanvas-right
     .sidebar-offcanvas {
-        right: -50%; /* 6 columns */
+        right: -$sidebar-max-width;
     }
 
     .row-offcanvas-left
     .sidebar-offcanvas {
-        left: -50%; /* 6 columns */
+        left: -$sidebar-max-width;
     }
 
     .row-offcanvas-right.active {
-        right: 50%; /* 6 columns */
+        right: $sidebar-max-width;
     }
 
     .row-offcanvas-left.active {
-        left: 50%; /* 6 columns */
+        left: $sidebar-max-width;
     }
 
     .sidebar-offcanvas {
         position: absolute;
         top: 0;
-        width: 50%; /* 6 columns */
+        width: $sidebar-max-width;
     }
+
     .hidden-overflow-x {
         overflow-x: hidden !important;
+    }
+
+    .navbar-default {
+        margin: 0;
+    }
+
+    .navbar-form {
+        margin: 0;
+        border: 0;
     }
 }
 
