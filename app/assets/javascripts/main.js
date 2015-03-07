@@ -41,21 +41,25 @@ jQuery(document).ready(function () {
     });
 
     jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
-        console.log('click');
         e.preventDefault();
-        var img_src = jQuery(this).data().image;
-        var img_orig = jQuery(this).data().original;
-        jQuery('.img-theater').css('top', jQuery(document).scrollTop())
-        jQuery('.img-theater').show();
         jQuery('body').addClass('theater-shown');
-        jQuery('#img_append_target').html('<a href="{{orig}}"><img src="{{src}}" style="height: {{h}}; width: auto;"><//img><//a>'
-            .replace("{{src}}", img_src)
-            .replace("{{orig}}", img_orig)
-            .replace("{{h}}", jQuery(window).height() - 20 + 'px'))
-        jQuery(document).on('keyup.hideTheater', function (e){
+        var win = jQuery(window),
+            doc = jQuery(document),
+            div = jQuery('.img-theater-div'),
+            w = win.width(),
+            h = win.height(),
+            img_orig = jQuery(this).data().orig,
+            img_src = w-40 > 1280 || h-40 > 1280 ? jQuery(this).data().full :
+                      w-40 > 960  || h-40 > 960  ? jQuery(this).data().huge :
+                                                   jQuery(this).data().large;
+        div.html('<img><//img>');
+        div.find('img').attr('src', img_src)
+                       .click(function() { window.location = img_orig });
+        jQuery('.img-theater').css('top', doc.scrollTop()).show();
+        doc.on('keyup.hideTheater', function (e) {
             if (e.keyCode == 27) {
                 hideTheater();
-                jQuery(document).unbind('keyup.hideTheater');
+                doc.unbind('keyup.hideTheater');
             }
         })
     });

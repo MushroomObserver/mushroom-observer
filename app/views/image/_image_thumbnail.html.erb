@@ -5,9 +5,14 @@
   image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
   size_url  = Image.url(size, image_id)
   large_url = Image.url(:large, image_id)
+  huge_url  = Image.url(:huge, image_id)
+  full_url  = Image.url(:full_size, image_id)
   orig_url  = Image.url(:original, image_id)
-  html_options = {data: {toggle: :theater, image: large_url, original: orig_url}} if theater_on_click
-  html_options = {} if html_options.nil?
+  if theater_on_click
+    html_options[:data] ||= {}
+    html_options[:data] = {toggle: :theater, large: large_url, huge: huge_url,
+                           full: full_url, orig: orig_url}.merge(html_options[:data])
+  end
 %>
 
 <div style="position:relative">
@@ -19,8 +24,9 @@
                           data: {toggle: "tooltip", placement: "bottom"}) %>
       <%= link_with_query(img_tag, link, html_options) %>
       <a href="<%=orig_url%>" class="glyphicon glyphicon-fullscreen theater-btn"
-         data-toggle="theater" data-image="<%= large_url %>"
-         data-original="<%= orig_url %>"></a>
+         data-toggle="theater" data-large="<%= h large_url %>"
+         data-huge="<%= h huge_url %>" data-full="<%= h full_url %>"
+         data-orig="<%= h orig_url %>"></a>
       <div class="push-down">
         <% if User.current and votes and image %>
           <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
