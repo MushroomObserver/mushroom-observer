@@ -5,8 +5,8 @@ jQuery(document).ready(function () {
         if( e.type == "mouseleave")
             return btn.hide();
         var img = jQuery(this).find('img');
-        btn.css('right', img.position().left);
-        btn.show();
+        btn.css('right', img.position().left).show();
+        jQuery('.hamburger').addClass('hidden');
     });
 
     jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
@@ -65,7 +65,7 @@ jQuery(document).ready(function () {
             try_size("huge",   960,  1280) ||
             try_size("large",  640,  960 ) ||
             try_size("medium", 0,    640 );
-            console.log("win: "+w+","+h+" img: "+data.width+","+data.height+" -> "+img_w+","+img_h+ ", " + img_src);
+            // console.log("win: "+w+","+h+" img: "+data.width+","+data.height+" -> "+img_w+","+img_h+ ", " + img_src);
         }
 
         // If we don't know image size at first, just guess what size will
@@ -113,6 +113,7 @@ jQuery(document).ready(function () {
         jQuery('body').removeClass('theater-shown');
         jQuery(document).unbind('keyup.hideTheater');
         jQuery(window).unbind('resize.theater');
+        jQuery('.hamburger').removeClass('hidden');
     }
 
     jQuery('[data-dismiss="theater"]').click(hideTheater);
