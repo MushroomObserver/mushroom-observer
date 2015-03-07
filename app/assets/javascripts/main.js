@@ -52,16 +52,38 @@ jQuery(document).ready(function () {
             img_src = w-40 > 1280 || h-40 > 1280 ? jQuery(this).data().full :
                       w-40 > 960  || h-40 > 960  ? jQuery(this).data().huge :
                                                    jQuery(this).data().large;
-        div.html('<img><//img>');
-        div.find('img').attr('src', img_src)
-                       .click(function() { window.location = img_orig });
+        var img, img_w, img_h;
+        var reposition_image = function() {
+            var win_w = jQuery(window).width(),
+                win_h = jQuery(window).height();
+            if (img_w < win_w - 40 && img_h < win_h - 40) {
+                // image fits unscaled
+                pad = Math.round((win_h - img_h) / 2);
+            } else if ((win_h - 40) * img_w / img_h > win_w - 40) {
+                // scale up so takes up full width
+                pad = Math.round((win_h - (win_w - 40) * img_h / img_w) / 2);
+            } else {
+                // scale up so takes up full height
+                pad = 20;
+            }
+            // console.log("img: "+img_w+","+img_h + " win: "+win_w+","+win_h + " -> pad: " + pad);
+            div.css('padding', pad + 'px 20px');
+        };
+        img = new Image();
+        img.onload = function() {
+            img_w = this.width;
+            img_h = this.height;
+            reposition_image();
+            win.on('resize.theater', reposition_image);
+        };
+        img.src = img_src;
+        div.css('padding', '20px').html(img);
+        div.find('img').click(function() { window.location = img_orig });
         jQuery('.img-theater').css('top', doc.scrollTop()).show();
         doc.on('keyup.hideTheater', function (e) {
-            if (e.keyCode == 27) {
+            if (e.keyCode == 27)
                 hideTheater();
-                doc.unbind('keyup.hideTheater');
-            }
-        })
+        });
     });
 
     jQuery('[data-dismiss="theater"]').click(function (e){
@@ -71,6 +93,8 @@ jQuery(document).ready(function () {
     function hideTheater() {
         jQuery('.img-theater').hide();
         jQuery('body').removeClass('theater-shown');
+        jQuery(document).unbind('keyup.hideTheater');
+        jQuery(window).unbind('resize.theater');
     }
 
     function setCookie(cname, cvalue, exdays) {
