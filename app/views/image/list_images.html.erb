@@ -4,7 +4,7 @@
 %>
 
 <%= paginate_block(@pages) do %>
-  <%= make_matrix(@objects) do |image| %>
+  <%= render(layout: "shared/matrix_table", locals: {objects: @objects}) do |image| %>
     <div class="push-down push-up">
       <%= render(partial: "shared/matrix_box", locals: {object: image}) %>
     </div>

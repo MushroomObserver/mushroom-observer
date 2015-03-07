@@ -20,7 +20,7 @@
   </div>
 
   <%= paginate_block(@pages) do %>
-    <%= make_matrix(@objects) do |image| %>
+    <%= render(layout: "shared/matrix_table", locals: {objects: @objects}) do |image| %>
       <div class="push-down push-up">
         <%= thumbnail(image, link: url_args.merge(img_id: image.id), original: true) %>
       </div>
