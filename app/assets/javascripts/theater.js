@@ -6,11 +6,12 @@ jQuery(document).ready(function () {
             return btn.hide();
         var img = jQuery(this).find('img');
         btn.css('right', img.position().left).show();
-        jQuery('.hamburger').addClass('hidden');
+        //
     });
 
     jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
-        e.preventDefault();
+        e.preventDefault()
+        jQuery('.hamburger').addClass('hidden');
         jQuery('body').addClass('theater-shown');
 
         var win = jQuery(window),
@@ -24,7 +25,8 @@ jQuery(document).ready(function () {
 
         var reposition_image = function() {
             var win_w = jQuery(window).width(),
-                win_h = jQuery(window).height();
+                win_h = jQuery(window).height(),
+                pad;
             if (img_w < win_w - 40 && img_h < win_h - 40) {
                 // image fits unscaled
                 pad = Math.round((win_h - img_h) / 2);
