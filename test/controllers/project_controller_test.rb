@@ -71,7 +71,22 @@ class ProjectControllerTest < FunctionalTestCase
   def test_show_project
     get_with_dump(:show_project, id: 1)
     assert_template("show_project")
+    assert_select("a[href*=admin_request/1]")
+    assert_select("a[href*=edit_project/1]", count: 0)
+    assert_select("a[href*=add_members/1]", count: 0)
+    assert_select("a[href*=destroy_project/1]", count: 0)
   end
+
+  def test_show_project_logged_in
+    requires_login(:add_project)
+    get_with_dump(:show_project, id: 1)
+    assert_template("show_project")
+    assert_select("a[href*=admin_request/1]")
+    assert_select("a[href*=edit_project/1]")
+    assert_select("a[href*=add_members/1]")
+    assert_select("a[href*=destroy_project/1]")
+  end
+
 
   def test_list_projects
     get_with_dump(:list_projects)
