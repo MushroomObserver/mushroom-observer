@@ -1,15 +1,20 @@
 <%
-  @title = :comment_edit_title.t(:name => @target.unique_format_name)
-
+  @title = :comment_edit_title.t(name: @target.unique_format_name)
   new_tab_set do
-    add_tab_with_query(:cancel_and_show.t(:type => :comment),
-      :action => 'show_comment', :id => @comment.id)
+    add_tab_with_query(:cancel_and_show.t(type: :comment),
+      controller: :comment, action: :show_comment, id: @comment.id)
   end
 %>
 
-<%= form_tag(add_query_param(:action => 'edit_comment', :id => @comment.id)) do %>
-  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
-  <%= render(:partial => 'form_comments') %>
-  <br/><hr align="center" width="90%" />
-  <%= render(:partial => 'object', :object => @comment.target) %>
-<% end %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag(add_query_param(action: :edit_comment, id: @comment.id)) do %>
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+      <%= render(partial: "form_comments") %>
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+      <hr align="center" width="90%" />
+    <% end %>
+  </div>
+</div>
+    
+<%= render(partial: "object", object: @target) %>

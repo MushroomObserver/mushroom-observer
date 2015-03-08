@@ -14,7 +14,7 @@
         <%= text_area(:question, :content, value: @content, cols: 80, rows: 10, autofocus: !@email.blank? && !@email_error) %>
         </div>
         <div class="push-down text-center">
-          <%= submit_tag :SEND.l, class:"btn btn-default" %>
+          <%= submit_tag(:SEND.l, class: "btn") %>
         </div>
     <% end %>
     </div>

@@ -1,5 +1,7 @@
-<% @title = :email_welcome.t(:user => @user.legal_name) %>
+<% @title = :email_welcome.t(user: @user.legal_name) %>
 
-<div class="memo">
-  <%= :verify_note.tp(:domain => MO.http_domain) %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= :verify_note.tp(domain: MO.http_domain) %>
+  </div>
 </div>

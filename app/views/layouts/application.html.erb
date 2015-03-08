@@ -3,16 +3,14 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <%= auto_discovery_link_tag(:rss, {controller: 'observer', action: 'rss'}, {title: :app_rss.l}) %>
+  <%= auto_discovery_link_tag(:rss, {controller: :observer, action: :rss}, {title: :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= @title.nil? ? controller.action_name : @title.strip_html.html_safe %></title>
   <link rel="SHORTCUT ICON" href="http://mushroomobserver.org/favicon.ico"/>
-  <%= content_tag(:link,'', rel: "canonical", href: escape_once(@canonical_url)) if @canonical_url %>
+  <%= content_tag(:link, "", rel: "canonical", href: escape_once(@canonical_url)) if @canonical_url %>
   <%= csrf_meta_tag %>
   <meta property="og:image" content="http://mushroomobserver.org/images/facebook_icon.png"/>
   <meta property="og:title" content="Mushroom Observer"/>
   <meta property="og:description" content="Mushroom Observer is a forum where amateur and professional mycologists can come together and celebrate their common passion for mushrooms by discussing and sharing photos of mushroom sightings from around the world."/>
-  <%   banner = :app_banner_box.t  ##banner message variables
-       banner_md5 = md5_of_string(:app_banner_box.t).html_safe %>
   <%=
     css = MO.default_theme
     if is_in_admin_mode?
@@ -48,12 +46,15 @@
         </div>
       <% end
 
-      if banner.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
+      banner_txt = :app_banner_box.t
+      banner_md5 = md5_of_string(banner_txt).html_safe
+      if banner_txt.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
         <div class="alert alert-info message-banner" id="message_banner">
+          <%= javascript_tag("var banner_md5 = '#{banner_md5}'") %>
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-          <%= banner %>
+          <%= banner_txt %>
         </div>
       <% end %>
     </div>
@@ -64,7 +65,7 @@
 
     <!--NAVIGATION-->
     <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas" id="navigation">
-      <%= render(:partial => '/shared/nav_left') %>
+      <%= render(partial: "/shared/nav_left") %>
     </div>
     <!--END NAVIGATION-->
 
@@ -74,12 +75,12 @@
       <div class="row visible-xs">
         <div class="col-xs-12 kill-padding">
           <p class="pull-left">
-            <button type="button" class="btn btn-lg" style="border-radius: 0; position: fixed; z-index: 1000" data-toggle="offcanvas">
+            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1000" data-toggle="offcanvas">
               <span class="glyphicon glyphicon-align-justify"></span>
             </button>
           </p>
           <p class="pull-right">
-            <button type="button" class="btn btn-lg" style="border-radius: 0; position: fixed; z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
+            <button type="button" class="btn btn-lg hamburger" style="border-radius: 0; position: fixed; z-index: 1001; top: 0; right:0;" data-toggle="search" data-target="#search_bar_row">
               <span class="glyphicon glyphicon-search"></span>
             </button>
           </p>
@@ -89,7 +90,7 @@
 
       <!--SEARCH BAR-->
       <div id="search_bar_row" class="row hidden-xs">
-        <%= render(:partial => '/shared/search_bar') %>
+        <%= render(partial: "/shared/search_bar") %>
       </div>
       <!--/SEARCH BAR-->
 
@@ -100,14 +101,14 @@
                cssClass = "alert-success" if flash_notice_level == 0
                cssClass = "alert-warning" if flash_notice_level == 1
                cssClass = "alert-danger"  if flash_notice_level == 2 %>
-            <%= content_tag(:div,flash_get_notices, id: "flashes", class: "alert push-down #{cssClass}" ) %>
+            <%= content_tag(:div, flash_get_notices, id: "flashes", class: "alert push-down #{cssClass}" ) %>
           <% end
           flash_clear %>
         </div>
       </div>
 
       <div id="content" class="row">
-        <%= render(:partial => "/shared/title_and_tab_sets") %>
+        <%= render(partial: "/shared/title_and_tab_sets") %>
         <!--Main page content-->
         <div class="col-xs-12">
           <%= yield %>
@@ -122,12 +123,11 @@
   </div>
 </div>
 
-<div class="container-fluid img-theater" data-dismiss="theater">
+<div class="img-theater" data-dismiss="theater">
  <%= render(partial: "/image/theater") %>
 </div>
 
 <!--JAVASCRIPT-->
-<%= javascript_tag("var bannermd5 = '#{banner_md5}'")%>
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
 <% injected_javascripts.each do |script| %>

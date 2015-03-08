@@ -2,7 +2,7 @@
 
 <%= form_tag(add_query_param(:action => 'commercial_inquiry',
       :id => @image.id)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center>
+  <br/><center><%= submit_tag(:SEND.l, class: "btn") %></center>
   <table cellpadding="10" width="1">
     <tr>
       <td valign="top">

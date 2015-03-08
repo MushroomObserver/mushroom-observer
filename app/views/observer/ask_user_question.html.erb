@@ -8,5 +8,5 @@
 
   <label for="email_content"><%= :ask_user_question_message.t %>:</label><br/>
   <%= text_area('email', 'content', :cols => 80) %>
-    <br/><center><%= submit_tag :SEND.l %></center>
+    <br/><center><%= submit_tag(:SEND.l, class: "btn") %></center>
 <% end %>

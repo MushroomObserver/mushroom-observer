@@ -12,9 +12,9 @@
 <%= form_tag(:action => 'email_tracking', :id => @name.id) do %>
   <br/><center>
     <%= if @notification
-      submit_tag(:UPDATE.t) + ' ' + submit_tag(:DISABLE.t)
+      submit_tag(:UPDATE.t, class: "btn") + ' ' + submit_tag(:DISABLE.t, class: "btn")
     else
-      submit_tag(:ENABLE.t)
+      submit_tag(:ENABLE.t, class: "btn")
     end %>
   </center>
 

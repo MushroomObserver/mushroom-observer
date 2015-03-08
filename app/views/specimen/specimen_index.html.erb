@@ -21,7 +21,7 @@
 	    <td>
 	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
 					form_tag({action: 'edit_specimen', id: specimen.id}) do %>
-						<%= submit_tag :herbarium_edit_specimen.t %>
+						<%= submit_tag(:herbarium_edit_specimen.t, class: "btn") %>
 					<% end
 				end %>
 	    </td>
@@ -37,8 +37,8 @@
 	    <td>
 	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
 					form_tag({action: 'delete_specimen', id: specimen.id}) do %>
-						<%= submit_tag :herbarium_delete_specimen.t,
-                           data: { confirm: :are_you_sure.t } %>
+						<%= submit_tag(:herbarium_delete_specimen.t, class: "btn",
+                           data: { confirm: :are_you_sure.t }) %>
 					<% end
 				end %>
 	    </td>

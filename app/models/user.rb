@@ -461,6 +461,10 @@ class User < AbstractModel
     "#<User #{id}: #{unique_text_name.inspect}>"
   end
 
+  def lang
+    Language.lang_from_locale(locale)
+  end
+
   ##############################################################################
   #
   #  :section: Names
@@ -736,16 +740,11 @@ class User < AbstractModel
     [:bounced_email, :other]
   end
 
-  def lang
-    Language.lang_from_locale(locale)
-  end
-
-  protected
   # Get alert structure, initializing it with an empty hash if necessary.
   def get_alert # :nodoc:
     self.alert ||= {}
   end
-  public
+  protected :get_alert
 
   # When the alert was created.
   def alert_created_at

@@ -18,12 +18,12 @@
        :action => :edit_location_description,
        :id => @description.id,
     )) do |form| %>
-  <br/><center><%= submit_tag(:UPDATE.l) %></center>
+  <br/><center><%= submit_tag(:UPDATE.l, class: "btn") %></center>
 
   <%= render(:partial => 'form_location_description', :locals =>
              {form: form}) %>
 
-  <br/><center><%= submit_tag(:UPDATE.l) %></center>
+  <br/><center><%= submit_tag(:UPDATE.l, class: "btn") %></center>
   <% if @merge %>
     <%= hidden_field_tag('old_desc_id', @old_desc_id) %>
     <%= hidden_field_tag('delete_after', @delete_after) %>

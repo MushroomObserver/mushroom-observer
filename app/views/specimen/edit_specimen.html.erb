@@ -7,7 +7,7 @@
 %>
 
 <%= form_tag(:action => 'edit_specimen', :id => @specimen) do %>
-	<center><%= submit_tag :edit_specimen_save.t %><br/></center>
+	<center><%= submit_tag(:edit_specimen_save.t, class: "btn") %><br/></center>
 
   <p>
 		<%= herbarium_link(@specimen.herbarium) %>
@@ -30,5 +30,5 @@
 		<%= text_area('specimen', 'notes', :value => @specimen.notes, :cols => 80, :rows => 10) %>
   </p>
 
-  <center><%= submit_tag :edit_specimen_save.t %><br/></center>
+  <center><%= submit_tag(:edit_specimen_save.t, class: "btn") %><br/></center>
 <% end %>

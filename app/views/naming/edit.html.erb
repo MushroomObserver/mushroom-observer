@@ -18,14 +18,14 @@
     <div class="list-group-item">
     <%= form_tag(add_query_param(action: 'edit', id: @params.naming.id,
                                  approved_name: @params.what)) do %>
-        <center><%= submit_tag :SAVE_EDITS.l, class: "btn btn-default" %></center>
+        <center><%= submit_tag(:SAVE_EDITS.l, class: "btn") %></center>
         <div class="push-down">
         <%= render(partial: 'form',
                    locals: {action: 'edit',
                             button_name: :SAVE_EDITS.l,
                             show_reasons: true}) %>
         </div>
-        <center><%= submit_tag :SAVE_EDITS.l, class:"btn btn-default push-down"%></center>
+        <center><%= submit_tag(:SAVE_EDITS.l, class: "btn push-down") %></center>
     <% end %>
     </div>
     </div>

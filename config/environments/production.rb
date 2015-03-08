@@ -189,7 +189,7 @@ MushroomObserver::Application.configure do
   # config.autoflush_log = false
 
   # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
+  config.log_formatter = ::Logger::Formatter.new if defined?(::Logger)
 
   # Combine files using the "require" directives at the top of included files
   # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off

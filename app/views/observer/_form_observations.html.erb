@@ -92,7 +92,7 @@
   </div>
 </div>
 
-<center><%= submit_tag(button_name) %></center><br/>
+<center><%= submit_tag(button_name, class: "btn") %></center><br/>
 
 <% ############################### Image Forms ############################## %>
 
@@ -185,7 +185,7 @@
       <div class="HelpNote">
         <%= :form_observations_upload_help.tp %>
       </div>
-      <input id="new_image_button" onclick="image_new();" type="button" value="<%= :form_observations_upload_another.t %>"/>
+      <input id="new_image_button" onclick="image_new();" type="button" value="<%= :form_observations_upload_another.t %>" class="btn" />
       <% javascript_include("single_image_uploader") %>
       <%= javascript_tag %(
         var x = String.fromCharCode(60);
@@ -217,7 +217,7 @@
 
 <div class="col-xs-12 text-center">
   <% if @projects.any? or @lists.any? %>
-    <%= submit_tag(button_name) %>
+    <%= submit_tag(button_name, class: "btn") %>
   <% end %>
 </div>
 

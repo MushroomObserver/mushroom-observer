@@ -18,13 +18,13 @@
            type="hidden" value="<%= val %>"/>
   <% end %>
 
-  <br/><center><%= submit_tag :CREATE.l %></center>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 
   <table cellpadding="10">
 	<tr>
-	  <%= render(:partial => 'form_species_lists', :locals => {button_name: :CREATE.l}) %>
+	  <%= render(partial: "form_species_lists", locals: {button_name: :CREATE.l}) %>
 	</tr>
   </table>
 
-  <br/><center><%= submit_tag :CREATE.l %></center>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 <% end %>

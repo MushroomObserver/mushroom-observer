@@ -664,7 +664,7 @@ class AccountController < ApplicationController
               @user2.errors.add(:alert_type)
               redirect = false
             else
-              @user2.alert_created      = now = Time.now
+              @user2.alert_created_at   = now = Time.now
               @user2.alert_next_showing = now
               @user2.alert_user_id      = @user.id
               @user2.save

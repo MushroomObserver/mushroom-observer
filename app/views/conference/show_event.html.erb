@@ -1,33 +1,56 @@
 <%
-  @title = :show_event_title.t(:name => @event.name)
+  @title = :show_event_title.t(name: @event.name)
   new_tab_set do
-    add_tab(:event_index.t, :action => 'index')
-    add_tab(:register_event.t, :action => 'register', :id => @event.id)
+    add_tab(:event_index.t, action: :index)
+    add_tab(:register_event.t, action: :register, id: @event.id)
     if is_in_admin_mode?
-      add_tab(:list_registrations.t, :action => 'list_registrations', :id => @event.id)
-      add_tab(:edit_event.t, :action => 'edit_event', :id => @event.id)
-      add_tab(:create_event.t, :action => 'create_event')
+      add_tab(:list_registrations.t, action: :list_registrations, id: @event.id)
+      add_tab(:edit_event.t, action: :edit_event, id: @event.id)
+      add_tab(:create_event.t, action: :create_event)
     end
   end
 %>
 
-<%= :show_event_how_many.t(:how_many => @registration_count) %><br/><br/>
-<%= :conference_event_name.t + ': ' + @event.name %><br/>
-<%= :conference_event_location.t + ': ' +  @event.location %><br/>
-<% if @event.start %>
-  <%= :conference_event_start.t + ': ' +  @event.start.web_date %><br/>
-<% end %>
-<% if @event.end %>
-  <%= :conference_event_end.t + ': ' +  @event.end.web_date %><br/>
-<% end %>
-<br/>
-<%= :conference_event_description.t + ': ' +  @event.description %><br/>
-<br/>
-<%= link_to(:register_event.t, :action => 'register', :id => @event.id) %><br/>
-<br/>
-<% if @event.created_at %>
-  <%= :conference_event_created_at.t + ': ' +  @event.created_at.web_date %><br/>
-<% end %>
-<% if @event.updated_at %>
-  <%= :conference_event_updated_at.t + ': ' +  @event.updated_at.web_date %><br/>
-<% end %>
+<div class="row">
+  <div class="col-xs-12">
+
+    <div>
+      <b><%= :show_event_how_many.t(how_many: @registration_count) %></b>
+    </div>
+
+    <div class="push-down">
+      <b><%= :conference_event_name.t %>:</b> <%= @event.name %><br/>
+      <b><%= :conference_event_location.t %>:</b> <%= location_link(@event.location, nil) %><br/>
+      <% if @event.start %>
+        <b><%= :conference_event_start.t %>:</b> <%= @event.start.web_date %><br/>
+      <% end %>
+      <% if @event.end %>
+        <b><%= :conference_event_end.t %>:</b> <%= @event.end.web_date %><br/>
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+
+    <div class="push-down">
+      <%= ("*" + :conference_event_description.l + "*: " + @event.description).tp %>
+    </div>
+
+    <div class="push-down" style="text-align:center">
+      <%= link_to(:register_event.t, {action: :register, id: @event.id}, {class: "btn"}) %>
+    </div>
+
+    <div class="push-down">
+      <% if @event.created_at %>
+        <b><%= :conference_event_created_at.t %>:</b> <%= @event.created_at.web_date %><br/>
+      <% end %>
+      <% if @event.updated_at %>
+        <b><%= :conference_event_updated_at.t %>:</b> <%= @event.updated_at.web_date %><br/>
+      <% end %>
+    </div>
+
+  </div>
+</div>

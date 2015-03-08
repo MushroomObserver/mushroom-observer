@@ -1,7 +1,7 @@
 <%= form_for(:description, :url => add_query_param(
       :action => 'adjust_permissions', :id => description.id)) do |form| %>
   <br/><br/>
-  <center><%= submit_tag(:SUBMIT.l) %></center>
+  <center><%= submit_tag(:SUBMIT.l, class: "btn") %></center>
   <br/><br/>
 
   <style>
@@ -144,6 +144,6 @@
   </table>
 
   <br/><br/>
-  <center><%= submit_tag(:SUBMIT.l) %></center>
+  <center><%= submit_tag(:SUBMIT.l, class: "btn") %></center>
   <br/><br/>
 <% end %>

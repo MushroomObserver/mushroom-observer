@@ -1,21 +1,28 @@
 <%
   @title = :edit_glossary_term_title.t(name: @glossary_term.name)
-  
-  str = :cancel_and_show.t(TYPE: 'GlossaryTerm')
   new_tab_set do
-    add_tab(:cancel_and_show.t(TYPE: 'GlossaryTerm'), action: 'show_glossary_term', id:  @glossary_term.id)
-    add_tab(:glossary_term_index.t, action: 'index')
+    add_tab(:cancel_and_show.t(type: :glossary_term), action: :show_glossary_term, id:  @glossary_term.id)
+    add_tab(:glossary_term_index.t, action: :index)
   end
 %>
 
-<p>
-  <%= form_tag({action: 'edit_glossary_term', id: @glossary_term.id}) do %>
-    <p>
-      <%= :glossary_term_name.t %>: <%= text_field('glossary_term', 'name', size: 80, value: @glossary_term.name) %>
-    </p>
-    <p>
-      <%= :glossary_term_description.t %>:<br/><%= text_area('glossary_term', 'description', cols: 80, rows: 15, value: @glossary_term.description) %>
-    </p>
-    <center><%= submit_tag :edit_glossary_term_save.t %><br/></center>
-  <% end %>
-</p>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_for(:glossary_term, url: {action: :edit_glossary_term,
+                 id: @glossary_term.id}) do |form| %>
+
+      <div class="form-group push-down">
+        <%= form.label(:name, :glossary_term_name.t) %>:
+        <%= form.text_field(:name, class: "form-control") %>
+      </div>
+
+      <div class="form-group push-down">
+        <%= form.label(:description, :glossary_term_description.t) %>:
+        <%= form.text_area(:description, rows: 15, class: "form-control") %>
+      </div>
+
+      <%= submit_tag(:edit_glossary_term_save.t, class: "btn center-block push-down") %>
+
+    <% end %>
+  </div>
+</div>

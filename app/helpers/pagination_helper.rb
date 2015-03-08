@@ -1,12 +1,12 @@
 module PaginationHelper
-# Wrap a block in pagination links.  Includes letters if appropriate.
-#
-#   <%= paginate_block(@pages) do %>
-#     <% for object in @objects %>
-#       <% object_link(object) %><br/>
-#     <% end %>
-#   <% end %>
-#
+  # Wrap a block in pagination links.  Includes letters if appropriate.
+  #
+  #   <%= paginate_block(@pages) do %>
+  #     <% for object in @objects %>
+  #       <% object_link(object) %><br/>
+  #     <% end %>
+  #   <% end %>
+  #
   def paginate_block(pages, args={}, &block) ##TODO: Depreciate / REMOVE
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
@@ -16,19 +16,19 @@ module PaginationHelper
     end
   end
 
-# Insert letter pagination links.
-#
-#   # In controller:
-#   def action
-#     query = create_query(:Name)
-#     @pages = paginate_letters(:letter, :page, 50)
-#     @names = query.paginate(@pages, letter_field: 'names.sort_name')
-#   end
-#
-#   # In view:
-#   <%= pagination_letters(@pages) %>
-#   <%= pagination_numbers(@pages) %>
-#
+  # Insert letter pagination links.
+  #
+  #   # In controller:
+  #   def action
+  #     query = create_query(:Name)
+  #     @pages = paginate_letters(:letter, :page, 50)
+  #     @names = query.paginate(@pages, letter_field: 'names.sort_name')
+  #   end
+  #
+  #   # In view:
+  #   <%= pagination_letters(@pages) %>
+  #   <%= pagination_numbers(@pages) %>
+  #
   def pagination_letters(pages, args={})
     if pages and
         pages.letter_arg and
@@ -50,20 +50,20 @@ module PaginationHelper
     end
   end
 
-# Insert numbered pagination links.  I've thrown out the Rails plugin
-# pagination_letters because it is no longer giving us enough to be worth it.
-# (See also pagination_letters above.)
-#
-#   # In controller:
-#   def action
-#     query = create_query(:Name)
-#     @pages = paginate_numbers(:page, 50)
-#     @names = query.paginate(@pages)
-#   end
-#
-#   # In view: (it is wrapped in 'pagination' div already)
-#   <%= pagination_numbers(@pages) %>
-#
+  # Insert numbered pagination links.  I've thrown out the Rails plugin
+  # pagination_letters because it is no longer giving us enough to be worth it.
+  # (See also pagination_letters above.)
+  #
+  #   # In controller:
+  #   def action
+  #     query = create_query(:Name)
+  #     @pages = paginate_numbers(:page, 50)
+  #     @names = query.paginate(@pages)
+  #   end
+  #
+  #   # In view: (it is wrapped in 'pagination' div already)
+  #   <%= pagination_numbers(@pages) %>
+  #
   def pagination_numbers(pages, args={})
     result = safe_empty
     if pages && pages.num_pages > 1
@@ -103,7 +103,7 @@ module PaginationHelper
     result
   end
 
-# Render a single pagination link for paginate_numbers above.
+  # Render a single pagination link for paginate_numbers above.
   def pagination_link(label, page, arg, args)
     params = args[:params] || {}
     params[arg] = page

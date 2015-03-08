@@ -1,34 +1,38 @@
 <%
-   @observation = @params.observation
-   @reason = @params.reason
-   @title = :create_naming_title.t(id: @observation.id)
-   @tabsets = {right: render(partial: "shared/tab_set", locals: {links: [link_with_query(:cancel_and_show.t(type: :observation),
-                                                                                        controller: :observer,
-                                                                                        action: :show_observation,
-                                                                                        id: @observation.id)]})}
-
+  @observation = @params.observation
+  @reason = @params.reason
+  @title = :create_naming_title.t(id: @observation.id)
+  @tabsets = {
+    right: render(partial: "shared/tab_set", locals: {
+      links: [
+        link_with_query(:cancel_and_show.t(type: :observation),
+                        controller: :observer, action: :show_observation,
+                        id: @observation.id)
+      ]
+    })
+  }
 %>
 
-<%= form_tag(add_query_param(action: :create,
-                             id: @observation.id,
+<%= form_tag(add_query_param(action: :create, id: @observation.id,
                              approved_name: @params.what)) do %>
-    <div class="row">
-      <div class="col-sm-8">
-        <center><%= submit_tag :CREATE.l, {class: "btn btn-default"} %></center>
-        <%= render(partial: "observer/show_observation",
-                   locals: { observation: @observation }) %><br/><br/>
-        <%= render(partial: "form",
-	           locals: {
-                             action: :create,
-                             button_name: :CREATE.l,
-                             show_reasons: true,
-                           }) %>
-        <center><%= submit_tag :CREATE.l, {class: "btn btn-default"} %></center>
-      </div>
-      <div class="col-sm-4">
-        <%= render(partial: 'observer/show_images',
-                   locals: { thumb_size_control: false }) %>
+  <div class="row">
 
-      </div>
+    <div class="col-sm-8">
+      <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
+      <%= render(partial: "observer/show_observation",
+                 locals: { observation: @observation }) %><br/><br/>
+      <%= render(partial: "form", locals: {
+                   action: :create,
+                   button_name: :CREATE.l,
+                   show_reasons: true,
+                 }) %>
+      <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
     </div>
+
+    <div class="col-sm-4">
+      <%= render(partial: "observer/show_images",
+                 locals: { thumb_size_control: false }) %>
+    </div>
+
+  </div>
 <% end %>

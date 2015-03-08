@@ -1,46 +1,16 @@
 <%
-   tag_params = add_query_param(:action => 'reuse_image_for_glossary_term')
-   tag_params[:id] = id = @object.id
-   @title = :image_reuse_title.t(:name => @object.unique_format_name)
-   @tabsets = {right: render(partial: "shared/tab_set",
-                            locals: {
-                                    links: [link_with_query(:show_object.t(:type => @object.class),
-                                                            {controller: @object.show_controller,
-                                                             action: @object.show_action, id: @object.id}),
-                                            link_with_query(:edit_object.t(:type => @object.class),
-                                                            {controller: @object.show_controller,
-                                                             action: @object.edit_action, id: id})]
-                            })}
+  @title = :image_reuse_title.t(name: @object.unique_format_name)
+  @tabsets = {
+    right: render(partial: "shared/tab_set", locals: {
+      links: [
+        link_with_query(:show_object.t(type: @object.class),
+                        controller: @object.show_controller, action: @object.show_action, id: @object.id),
+        link_with_query(:edit_object.t(type: @object.class),
+                        controller: @object.show_controller, action: @object.edit_action, id: @object.id)
+      ]
+    })
+  }
+  url_args = {action: :reuse_image_for_glossary_term, id: @object.id}
 %>
-<div class="row">
-  <%= form_tag(tag_params) do %>
-      <div class="col-xs-12">
-        <%= label(:img_id, "", "#{:image_reuse_id.t}:") %>
-        <%= text_field_tag(:img_id, "", size: 8, autofocus: true, class: "input-sm") %>
-        <%= submit_tag(:image_reuse_reuse.l, class: "btn btn-default") %>
-        <p class="help-block"><%= :image_reuse_id_help.tp %></p>
-        <strong>
-          <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
-                              :glossary_term_id => id, :all_users => (@all_users ? 0 : 1)) %>
-        </strong>
-      </div>
-      <div class="col-xs-12">
-        <%= pagination_numbers(@pages) %>
-      </div>
-      <div class="col-xs-12">
-        <div class="row">
-          <% @objects.each do |image| %>
-              <div class="col-sm-4 rss-box-details">
-                <%= thumbnail(image, link: add_query_param({action: 'reuse_image_for_glossary_term',
-                                                            glossary_term_id: id,
-                                                            img_id: image.id}),
-                              original: true) %>
-              </div>
-          <% end %>
-        </div>
-      </div>
-      <div class="col-xs-12">
-        <%= pagination_numbers(@pages) %>
-      </div>
-  <% end %>
-</div>
+
+<%= render(partial: "reuse_image", locals: {url_args: url_args}) %>

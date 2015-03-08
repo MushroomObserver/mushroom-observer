@@ -1,11 +1,13 @@
-<div class="pad-bottom">
-<%="#{:glossary_term_name.t}: #{@glossary_term.name}".html_safe%>
-</div>
-<div class="pad-bottom">
-  <%="#{:glossary_term_description.t}: #{@glossary_term.description.tpl}".html_safe%>
-</div>
-<div class="pad-bottom">
-  <%= if @glossary_term.thumb_image_id and @glossary_term.thumb_image_id != 0
-        thumbnail(@glossary_term.thumb_image_id, :votes => false)
-    end %>
-</div>
+<p class="push-down">
+  <b><%= :glossary_term_name.t %>:</b> <%= @glossary_term.name.t %>
+</p>
+
+<p class="push-down">
+  <%= "*#{:glossary_term_description.t}:* #{@glossary_term.description}".tpl %>
+</p>
+
+<% if @glossary_term.thumb_image_id and @glossary_term.thumb_image_id != 0 %>
+  <p class="push-down">
+    <%= thumbnail(@glossary_term.thumb_image_id, votes: false) %>
+  </p>
+<% end %>

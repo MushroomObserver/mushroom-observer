@@ -10,8 +10,8 @@
 
   <% if @js %>
     <span style="margin-left:10px">&nbsp;</span>
-    <input id="image_<%=index%>_more" onclick="image_on(<%=index%>);" type="button" value="<%=:MORE.t%> »" />
-    <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);" type="button" value="« <%=:LESS.t%>" style="display:none" />
+    <input id="image_<%=index%>_more" onclick="image_on(<%=index%>);" type="button" class="btn" value="<%=:MORE.t%> »" />
+    <input id="image_<%=index%>_less" onclick="image_off(<%=index%>);" type="button" class="btn" value="« <%=:LESS.t%>" style="display:none" />
   <% end %><br/>
 
   <label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>

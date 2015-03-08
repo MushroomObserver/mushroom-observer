@@ -1,27 +1,41 @@
 <%
-  @title = :register_event_title.t + ' ' + @event.name
+  @title = :register_event_title.t + " " + @event.name
   new_tab_set do
-    add_tab(:cancel_and_show.t(:TYPE => 'Conference Event'), :action => 'show_event', :id => @event.id)
-    add_tab(:event_index.t, :action => 'index')
+    add_tab(:cancel_and_show.t(type: "Conference Event"), action: :show_event, id: @event.id)
+    add_tab(:event_index.t, action: :index)
   end
 %>
 
-<p>
-  <%= @event.registration_note %>
-</p>
-<%= form_tag({action: 'register', id: @event.id}) do %>
-  <p>
-    <%= :conference_registration_name.t %>: <%= text_field('registration', 'name', :size => 100) %>
-  </p>
-  <p>
-    <%= :conference_registration_email.t %>: <%= text_field('registration', 'email', :size => 100) %>
-  </p>
-  <p>
-    <%= :conference_registration_how_many.t %>: <%= text_field('registration', 'how_many', :size => 7, :value => 1) %>
-  </p>
-  <p>
-    <%= :conference_registration_notes.t %>:<br/><%= text_area('registration', 'notes', :cols => 100) %>
-  </p>
-  <center><%= submit_tag :register_save.t %><br/></center>
-<% end %>
-</p>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_tag({action: :register, id: @event.id}) do %>
+
+      <div class="form-group push-down">
+        <%= @event.registration_note.tp %>
+      </div>
+
+      <div class="form-group push-down">
+        <%= label(:registration, :name, :conference_registration_name.t) %>:
+        <%= text_field(:registration, :name, class: "form-control") %>
+      </div>
+
+      <div class="form-group push-down">
+        <%= label(:registration, :email, :conference_registration_email.t) %>:
+        <%= text_field(:registration, :email, class: "form-control") %>
+      </div>
+
+      <div class="form-group push-down form-inline">
+        <%= label(:registration, :how_many, :conference_registration_how_many.t) %>
+        <%= text_field(:registration, :how_many, size: 7, value: 1, class: "form-control") %>
+      </div>
+
+      <div class="form-group push-down">
+        <%= label(:registration, :notes, :conference_registration_notes.t) %>:
+        <%= text_area(:registration, :notes, class: "form-control") %>
+      </div>
+
+      <%= submit_tag(:register_save.t, class: "btn center-block push-down") %>
+
+    <% end %>
+  </div>
+</div>
