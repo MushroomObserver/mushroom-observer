@@ -127,6 +127,17 @@
  <%= render(partial: "/image/theater") %>
 </div>
 
+<%
+   ## below divs are used by jquery to make helpers to determine current bootstrap
+   ## size.  For example:  jQuery("[data-bootstrap-size]:visible").data('bootstrap-size')
+%>
+<div id="media_query_tests">
+  <div data-bootstrap-size="xs" class="visible-xs"></div>
+  <div data-bootstrap-size="sm" class="visible-sm"></div>
+  <div data-bootstrap-size="md" class="visible-md"></div>
+  <div data-bootstrap-size="lg" class="visible-lg"></div>
+</div>
+
 <!--JAVASCRIPT-->
 <%= javascript_includes.map { |f| javascript_include_tag(f) }.safe_join %>
 <%= javascript_tag('try { document.cookie = "tz=" + jstz.determine().name() } catch(err) {}') %>
