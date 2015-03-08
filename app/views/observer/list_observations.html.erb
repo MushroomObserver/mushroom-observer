@@ -27,13 +27,7 @@
         <%= pagination_numbers(@pages) %>
       </div>
       <div class="row results">
-        <% @objects.each do |rss_log| %>
-            <div class="col-sm-4">
-              <%= render(:partial => 'shared/matrix_box', :locals => {
-                                                                object: rss_log
-                                                        }) %>
-            </div>
-        <% end %>
+        <%= render(partial: "shared/matrix_box", collection: @objects, as: :object)  %>
       </div>
       <div class="col-xs-12">
         <%= pagination_numbers(@pages) %>
