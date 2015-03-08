@@ -51,21 +51,18 @@
    else %>
     <div class="row">
       <div class="col-xs-12">
-        <%= pagination_letters(@pages) %>
+        <%= pagination_letters(@pages) %><br/>
         <%= pagination_numbers(@pages) %>
       </div>
-      <div class="col-xs-12 color-block">
-        <% @objects.each do |user| %>
-            <div class="col-sm-4 color-block-item">
-              <%= render(:partial => '/shared/matrix_box', locals: {object: user}) %>
-            </div>
-        <% end %>
-      </div>
+    </div>
+    <div class="row">
+      <%= render(partial: "shared/matrix_box", collection: @objects, as: :object) %>
+    </div>
+    <div class="row">
       <div class="col-xs-12">
-        <%= pagination_numbers(@pages) %>
+        <%= pagination_numbers(@pages) %><br/>
         <%= pagination_letters(@pages) %>
       </div>
     </div>
-
 <% end %>
 

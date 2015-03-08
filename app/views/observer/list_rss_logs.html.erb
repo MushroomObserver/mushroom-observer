@@ -6,7 +6,6 @@
 %>
 
 <%= paginate_block(@pages) do %>
-  <%= render(layout: "shared/matrix_table", locals: {objects: @objects}) do |rss_log| %>
-    <%= render(partial: "shared/matrix_box", locals: {object: rss_log}) %>
-  <% end %>
+  <%= render(partial: "shared/matrix_box", collection: @objects, as: :object)  %>
 <% end %>
+<div style="clear:left"></div>

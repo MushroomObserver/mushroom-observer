@@ -3,10 +3,8 @@
   flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
-<%= paginate_block(@pages) do %>
-  <%= render(layout: "shared/matrix_table", locals: {objects: @objects}) do |image| %>
-    <div class="push-down push-up">
-      <%= render(partial: "shared/matrix_box", locals: {object: image}) %>
-    </div>
-  <% end %>
-<% end %>
+<div class="push-down push-up">
+      <%= paginate_block(@pages) do %>
+          <%= render(partial: "shared/matrix_box", collection: @objects, as: :object)  %>
+      <% end %>
+</div>

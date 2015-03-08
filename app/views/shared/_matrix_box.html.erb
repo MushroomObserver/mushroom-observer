@@ -1,38 +1,51 @@
 <%
-  ## TODO: Rename (RSS box?)
-  # Requires local variable object: RssLog, Observation, Image, etc. instance.
-  presenter = MatrixBoxPresenter.new(object, @view)
+   ## TODO: Rename (RSS box?)
+   # Requires local variable object: RssLog, Observation, Image, etc. instance.
+   presenter = MatrixBoxPresenter.new(object, @view)
+   if local_assigns.has_key? :object_counter
+     css_classes = "col-xs-12 col-sm-6 col-md-4 col-lg-3"
+   else
+     css_classes = "col-xs-12"
+   end
 %>
 
 <% if presenter %>
-  <div class="list-group" style="min-height: 200px;">
-    <div class="list-group-item rss-box-details">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="thumbnail-container" style="min-height: 30px">
-            <%= presenter.thumbnail %>
+
+    <% if local_assigns.has_key? :object_counter %>
+        <%= content_tag(:div, "", class: "hidden visible-sm-block", style: "clear:left") if object_counter % 2 == 0 %>
+        <%= content_tag(:div, "", class: "hidden visible-md-block", style: "clear:left") if object_counter % 3 == 0 %>
+        <%= content_tag(:div, "", class: "hidden visible-lg-block", style: "clear:left") if object_counter % 4 == 0 %>
+    <% end %>
+    <div class="<%= css_classes %>">
+      <div class="list-group" style="min-height: 200px;">
+        <div class="list-group-item rss-box-details">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="thumbnail-container" style="min-height: 30px">
+                <%= presenter.thumbnail %>
+              </div>
+              <div class="rss-what">
+                <h5><%= presenter.what %></h5>
+              </div>
+              <div class="rss-where">
+                <small><strong><%= presenter.where %></strong></small>
+              </div>
+              <div class="rss-what">
+                <small style="text-overflow: ellipsis; white-space: nowrap;">
+                  <% unless presenter.when.blank? %>
+                      <%= presenter.when %>: <%= presenter.who %>
+                  <% end %>
+                </small>
+              </div>
+              <div class="rss-detail">
+                <%= presenter.detail %>
+              </div>
+              <div class="rss-what">
+                <small><%= presenter.fancy_time %></small>
+              </div>
+            </div>
           </div>
-          <div class="rss-what">
-            <h5><%= presenter.what %></h5>
-          </div>
-          <div class="rss-where">
-            <small><strong><%= presenter.where %></strong></small>
-          </div>
-	  <div class="rss-what">
-            <small style="text-overflow: ellipsis; white-space: nowrap;">
-              <% unless presenter.when.blank? %>
-              <%= presenter.when %>: <%= presenter.who %>
-              <% end %>
-            </small>
-	  </div>
-          <div class="rss-detail">
-            <%= presenter.detail %>
-          </div>
-	  <div class="rss-what">
-            <small><%= presenter.fancy_time %></small>
-	  </div>
         </div>
       </div>
     </div>
-  </div>
 <% end %>
