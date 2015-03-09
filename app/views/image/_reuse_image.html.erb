@@ -1,4 +1,4 @@
-<%= url_args = add_query_param(url_args) %>
+<% url_args = add_query_param(url_args) %>
 <%= form_tag(url_args) do %>
   <div class="row">
     <div class="col-xs-12 max-width-text">
@@ -9,7 +9,7 @@
         <%= submit_tag(:image_reuse_reuse.l, class: "btn", style: "margin-left: 1em") %>
       </div>
 
-      <div class="HelpNote"><%= :image_reuse_id_help.tp %></div>
+      <p class="help-block"><%= :image_reuse_id_help.tp %></p>
 
       <div class="form-group push-down">
         <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,

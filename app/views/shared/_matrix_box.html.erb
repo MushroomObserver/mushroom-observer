@@ -2,21 +2,9 @@
    ## TODO: Rename (RSS box?)
    # Requires local variable object: RssLog, Observation, Image, etc. instance.
    presenter = MatrixBoxPresenter.new(object, @view)
-   if local_assigns.has_key? :object_counter
-     css_classes = "col-xs-12 col-sm-6 col-md-4 col-lg-3"
-   else
-     css_classes = "col-xs-12"
-   end
 %>
 
 <% if presenter %>
-
-    <% if local_assigns.has_key? :object_counter %>
-        <%= content_tag(:div, "", class: "hidden visible-sm-block", style: "clear:left") if object_counter % 2 == 0 %>
-        <%= content_tag(:div, "", class: "hidden visible-md-block", style: "clear:left") if object_counter % 3 == 0 %>
-        <%= content_tag(:div, "", class: "hidden visible-lg-block", style: "clear:left") if object_counter % 4 == 0 %>
-    <% end %>
-    <div class="<%= css_classes %>">
       <div class="list-group" style="min-height: 200px;">
         <div class="list-group-item rss-box-details">
           <div class="row">
@@ -47,5 +35,4 @@
           </div>
         </div>
       </div>
-    </div>
 <% end %>
