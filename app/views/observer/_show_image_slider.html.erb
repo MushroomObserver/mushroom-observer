@@ -10,15 +10,6 @@
   </div>
   <div class="col-sm-8">
     <div class="pull-right">
-      <%= if has_images and thumb_size_control and not browser.bot?
-            if default_thumbnail_size == :thumbnail
-              link_with_query(:show_images_large_thumbs.t, :id => @observation.id,
-                              :set_thumbnail_size => 'small')
-            else
-              link_with_query(:show_images_small_thumbs.t, :id => @observation.id,
-                              :set_thumbnail_size => 'thumbnail')
-            end
-          end %>
       <% if check_permission(@observation) %>
           <small>
             <%= link_with_query(:show_observation_add_images.t, :controller => 'image',

@@ -3,19 +3,7 @@
   <div class="row">
     <div class="col-xs-12">
       <%= :IMAGES.t %>
-  <% if @observation.images.length > 0 %>
-    <%= if thumb_size_control and not browser.bot?
-      if default_thumbnail_size == :thumbnail
-        link_with_query(:show_images_large_thumbs.t, :id => @observation.id,
-          :set_thumbnail_size => 'small')
-      else
-        link_with_query(:show_images_small_thumbs.t, :id => @observation.id,
-          :set_thumbnail_size => 'thumbnail')
-      end + safe_br
-    end %>
-  <% end %>
-  <% if check_permission(@observation) %>
-
+    <% if check_permission(@observation) %>
       <small class="pull-right">
         <%= link_with_query(:show_observation_add_images.t, :controller => 'image',
                             :action => 'add_image', :id => @observation.id) %> |
