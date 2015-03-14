@@ -483,6 +483,11 @@ a:hover {
     text-align: center;
 }
 
+.rss-what {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .rss_log_tab {
     margin-top: -5px !important;
 }
@@ -580,24 +585,6 @@ a:hover {
     }
 }
 
-//
-// image carousel on show_observation page
-// --------------------------------------------------
-
-.carousel-control {
-    width:  4%;
-}
-.carousel-control.left,
-.carousel-control.right {
-    margin-left: 15px;
-    background-image: none;
-}
-
-.extra1,
-.extra2,
-.extra3 {
-    display: none;
-}
 
 //
 // image vote meter bar
