@@ -27,7 +27,7 @@
 <div style="position:relative">
   <div style="display:inline">
     <div data-toggle="expand-icon" class="text-center">
-      <% style = "max-width: 100%; height: auto" if responsive
+      <% style = "max-width: 100%; height: auto; margin: auto;" if responsive
       img_class = "img-unresponsive #{img_class}" if !responsive
       img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
                           data: {toggle: "tooltip", placement: "bottom"}) %>

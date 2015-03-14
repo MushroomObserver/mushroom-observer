@@ -163,6 +163,7 @@ $sidebar-max-width: 15em;
 @import "bootstrap-sprockets";
 @import "bootstrap";
 @import "slick";
+@import 'slick-theme';
 
 //
 // overall page style
@@ -1070,64 +1071,20 @@ input[type=checkbox] {
 }
 
 //
-// medium devices, desktops
+// jquery.slick style tweak
 // --------------------------------------------------
-
-@media screen and (max-width: 992px) {
+.slick-slide {
+  padding-left: 5px;
+  padding-right: 5px;
 }
-
-//
-// large devices?
-// --------------------------------------------------
-
-@media only screen and (min-width: 768px) {
-    @media all and (transform-3d), (-webkit-transform-3d) {
-        .carousel-inner > .item.active.left,
-        .carousel-inner > .item.prev
-        {
-            transform: translate3d(-50%, 0, 0);
-            left: 0;
-        }
-
-        .carousel-inner > .item.active.right,
-        .carousel-inner > .item.next
-        {
-            transform: translate3d(50%, 0, 0);
-            left: 0;
-        }
-    }
-    .carousel-inner > .active.left  { left: -50%; }
-    .carousel-inner > .active.right { left:  50%; }
-    .carousel-inner > .next         { left:  50%; }
-    .carousel-inner > .prev         { left: -50%; }
-    .extra1 { display: block; }
+.slick-center {
+  padding-left: 15px;
+  padding-right: 15px;
 }
-
-//
-// huge devices?
-// --------------------------------------------------
-
-@media only screen and (min-width: 992px) {
-    @media all and (transform-3d), (-webkit-transform-3d) {
-        .carousel-inner > .item.active.left,
-        .carousel-inner > .item.prev
-        {
-            transform: translate3d(-25%, 0, 0);
-            left: 0;
-        }
-
-        .carousel-inner > .item.active.right,
-        .carousel-inner > .item.next
-        {
-            transform: translate3d(25%, 0, 0);
-            left: 0;
-        }
-    }
-
-    .carousel-inner > .active.left  { left: -25%; }
-    .carousel-inner > .active.right { left:  25%; }
-    .carousel-inner > .next        	{ left:  25%; }
-    .carousel-inner > .prev		 	    { left: -25%; }
-    .extra2,
-    .extra3 { display: block; }
+.slick-prev:before, .slick-next:before {
+  font-family: "slick";
+  font-size: 30px;
+  line-height: 1;
+  opacity: 0.75;
+  color: black;
 }
