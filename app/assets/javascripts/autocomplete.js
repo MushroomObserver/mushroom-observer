@@ -185,9 +185,6 @@ jQuery.extend(MOAutocompleter.prototype, {
         if (this.current_row >= 0)
           this.select_row(this.current_row - this.scroll_offset);
         break;
-      case EVENT_KEY_ESC:
-        this.lose_focus();
-        break;
       case EVENT_KEY_HOME:
         this.go_home();
         break;
