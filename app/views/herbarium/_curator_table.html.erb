@@ -13,7 +13,7 @@
       <tr>
         <% if can_delete %>
           <td>
-            <%= link_to("X", {action: :delete_curator, id: herbarium.id, user: user.id},
+            <%= link_to("X ", {action: :delete_curator, id: herbarium.id, user: user.id},
                              {data: {confirm: :are_you_sure.t}}) %>
           </td>
         <% end %>
