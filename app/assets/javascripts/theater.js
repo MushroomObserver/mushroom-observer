@@ -6,11 +6,10 @@ jQuery(document).ready(function () {
             return btn.hide();
         var img = jQuery(this).find('img');
         btn.css('right', img.position().left).show();
-        //
     });
 
     jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
-        e.preventDefault()
+        e.preventDefault();
         jQuery('.hamburger').addClass('hidden');
         jQuery('body').addClass('theater-shown');
 
