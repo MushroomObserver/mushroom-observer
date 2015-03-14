@@ -605,7 +605,6 @@ jQuery.extend(MOAutocompleter.prototype, {
       if (matches.length > 1 || this.input_elem.val() != matches[0]) {
         this.clear_hide();
         menu.show();
-        menu.ensureVisible();
         this.menu_up = true;
       } else {
         menu.hide();
@@ -652,7 +651,6 @@ jQuery.extend(MOAutocompleter.prototype, {
     if (navigator.appVersion.toLowerCase().indexOf('msie') > 0)
       this.pulldown_elem.css("width", w1 + 'px');
     this.list_elem.css("minWidth", w2 + 'px');
-    this.pulldown_elem.ensureVisible();
   },
 
 // ------------------------------ Datalist ------------------------------
