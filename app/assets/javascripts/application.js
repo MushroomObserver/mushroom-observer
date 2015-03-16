@@ -11,3 +11,4 @@
 //= require theater
 //= require validate_file_input_fields
 //= require main
+//= require jquery.slick

@@ -185,9 +185,6 @@ jQuery.extend(MOAutocompleter.prototype, {
         if (this.current_row >= 0)
           this.select_row(this.current_row - this.scroll_offset);
         break;
-      case EVENT_KEY_ESC:
-        this.lose_focus();
-        break;
       case EVENT_KEY_HOME:
         this.go_home();
         break;
@@ -608,7 +605,6 @@ jQuery.extend(MOAutocompleter.prototype, {
       if (matches.length > 1 || this.input_elem.val() != matches[0]) {
         this.clear_hide();
         menu.show();
-        menu.ensureVisible();
         this.menu_up = true;
       } else {
         menu.hide();
@@ -655,7 +651,6 @@ jQuery.extend(MOAutocompleter.prototype, {
     if (navigator.appVersion.toLowerCase().indexOf('msie') > 0)
       this.pulldown_elem.css("width", w1 + 'px');
     this.list_elem.css("minWidth", w2 + 'px');
-    this.pulldown_elem.ensureVisible();
   },
 
 // ------------------------------ Datalist ------------------------------

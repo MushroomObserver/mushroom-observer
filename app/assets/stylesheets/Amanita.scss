@@ -84,3 +84,7 @@ $MENU_WARM_BG_COLOR:          $velosa_background;
 #navigation {
     border-left-width: $LEFT_BAR_BORDER_WIDTH;
 }
+
+.btn.active {
+  color: $muscaria_background;
+}

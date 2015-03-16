@@ -90,3 +90,8 @@ gem "brakeman", require: false
 
 # Amazon S3 SDK, for access to images on dreamhost S3
 gem "aws-sdk", "~> 2"
+
+#Slick Slider for Image Carousel
+# See https://github.com/kenwheeler/slick/
+#     https://github.com/bodrovis/jquery-slick-rails
+gem "jquery-slick-rails"

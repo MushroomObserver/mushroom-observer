@@ -38,30 +38,6 @@ jQuery(document).ready(function () {
         document.cookie = cname + "=" + cvalue + "; " + expires;
     }
 
-    function getCookie(cname) {
-        var name = cname + "=";
-        var ca = document.cookie.split(';');
-        for(var i=0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1);
-            if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-        }
-        return undefined;
-    }
-
-    jQuery('#carousel .item').each(function () {
-        var next = jQuery(this).next();
-        if (next)
-            next.children(':first-child').clone().addClass("extra1").appendTo(jQuery(this));
-
-        for (var i = 0; i < 2; i++) {
-            next = next.next();
-            if (next)
-                next.children(':first-child').clone().addClass("extra" + (i + 2)).appendTo(jQuery(this));
-        }
-        jQuery('[data-toggle="tooltip"]').tooltip({container: 'body'}); //enable tooltips
-    });
-
     jQuery('.file-field :file').on('change', function() {
         var val = $(this).val().replace(/.*[\/\\]/, ''),
             next = $(this).parent().next();
