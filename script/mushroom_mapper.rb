@@ -1,0 +1,164 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/mushroom_mapper.rb
+#
+#  DESCRIPTION::
+#
+#  Creates JSON data file for Mushroom Mapper app.  It writes output to:
+#
+#    RAILS_ROOT/public/mushroom_mapper.json
+#    RAILS_ROOT/public/taxonomy.csv
+#
+#  Structure format:
+#
+#    version      = data["version"]
+#    family_data  = data["families"][n]
+#    family_name  = family_data["name"]
+#    genus_data   = family_data["genera"][n]
+#    genus_name   = genus_data["name"]
+#    species_data = genus_data["species"][n]
+#    species_name = species_data["name"]
+#
+#    # Name of kth species in jth genus in ith family:
+#    name = data["families"][i]["genera"][j]["species"][k]["name"]
+#
+################################################################################
+
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
+
+require "json"
+
+JSON_FILE = "#{Rails.root}/public/mushroom_mapper.json"
+RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
+
+# synonyms:         map from synonym_id to at least one accepted name_id
+# aliases:          map from name_id to accepted name_id
+# names:            map name_id to [ text_name, rank, deprecated ]
+# observations:     map from genus name to number of observations in that genus
+# classifications:  map from genus name to one or more classification(s)
+# genus_to_family:  map from genus name to one or more family name(s)
+# family_to_genus:  map from family name to list of genera in that family
+# genus_to_species: map from genus name to list of species in that genus
+
+# Build tables of synonyms and name data.
+synonyms = {}
+aliases  = {}
+names    = {}
+name_data = Name.connection.select_rows %(
+  SELECT id, text_name, rank, deprecated, synonym_id, correct_spelling_id
+  FROM names
+)
+for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_data do
+  synonyms[synonym_id] = id if synonym_id && !deprecated
+end
+for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_data do
+  real_id = id
+  real_id = correct_spelling_id if correct_spelling_id
+  real_id = synonyms[synonym_id] if synonym_id
+  if real_id
+    aliases[id] = real_id
+  end
+  names[id] = [ text_name, rank, deprecated ]
+end
+
+# Build table of number of observations per genus.
+observations = {}
+for id in Name.connection.select_values %(
+  SELECT name_id
+  FROM observations
+) do
+  next unless real_id = aliases[id]
+  text_name, rank, deprecated = names[real_id]
+  next if rank > Name.ranks[:Genus]
+  genus = text_name.sub(/ .*/, "")
+  next if text_name == genus && deprecated
+  observations[genus] = observations[genus].to_i + 1
+end
+
+# Build mapping from genus to famil(ies).
+genus_to_family = {}
+classifications = {}
+for id, genus, classification in Name.connection.select_rows %(
+  SELECT id as i, text_name as n, classification as c
+  FROM names
+  WHERE rank = #{Name.ranks[:Genus]}
+    AND !deprecated
+    AND correct_spelling_id IS NULL
+) do
+  kingdom = classification.to_s.match(/Kingdom: _([^_]+)_/) ? $1 : nil
+  klass   = classification.to_s.match(/Class: _([^_]+)_/)   ? $1 : nil
+  order   = classification.to_s.match(/Order: _([^_]+)_/)   ? $1 : nil
+  family  = classification.to_s.match(/Family: _([^_]+)_/)  ? $1 : nil
+  num_obs = observations[genus].to_i
+  list = classifications[genus] ||= []
+  list << [id, kingdom, klass, order, family, genus, num_obs]
+  if ["Amoebozoa", "Fungi", "Protozoa"].include?(kingdom)
+    family2 = family || "Unknown Family in #{order || klass || kingdom}"
+    hash = genus_to_family[genus] ||= {}
+    hash[family2] = hash[family2].to_i + num_obs
+  end
+end
+
+# Build mapping from family to genus, complaining about ambiguous genera.
+family_to_genus = {}
+for genus in genus_to_family.keys.sort do
+  hash = genus_to_family[genus]
+  if hash.keys.length > 1
+    $stderr.puts("Multiple families for #{genus}: #{hash.inspect}")
+  end
+  family = hash.keys.sort_by {|k| -hash[k]}.first
+  list_of_genera = family_to_genus[family] ||= []
+  list_of_genera << genus
+end
+
+# Build table of species in each genus.
+genus_to_species = {}
+for species in Name.connection.select_values %(
+  SELECT text_name as n
+  FROM names
+  WHERE rank = #{ Name.ranks[:Species] }
+    AND !deprecated
+    AND correct_spelling_id IS NULL
+  ORDER BY sort_name
+) do
+  genus = species.sub(/ .*/, "")
+  list_of_species = genus_to_species[genus] ||= []
+  list_of_species << species
+end
+
+# Write official JSON file.
+data = {}
+data["version"] = 1
+data["families"] = []
+for family in family_to_genus.keys.sort do
+  family_data = {}
+  family_data["name"] = family
+  family_data["genera"] = []
+  for genus in family_to_genus[family].sort do
+    genus_data = {}
+    genus_data["name"] = genus
+    genus_data["species"] = []
+    next if !genus_to_species[genus]
+    for species in genus_to_species[genus].sort do
+      genus_data["species"] << {"name" => species}
+    end
+    family_data["genera"] << genus_data
+  end
+  data["families"] << family_data
+end
+File.open(JSON_FILE, "w") do |fh|
+  fh.write JSON.generate(data)
+end
+
+# Write raw data file.
+File.open(RAW_FILE, "w") do |fh|
+  fh.puts(["id", "kingdom", "class", "order", "family", "genus", "num_obs"].join("\t"))
+  for genus in classifications.keys.sort do
+    fh.puts(classifications[genus].join("\t"))
+  end
+end
+
+exit 0

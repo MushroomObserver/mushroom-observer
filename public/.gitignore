@@ -1,11 +1,13 @@
 assets
 eol.xml
 local_images
+mushroom_mapper.json
+name_list_data.js
 name_list_data.js
 pdf
 pivotal
-name_list_data.js
 robots.txt
+taxonomy.csv
 test.html
 test_images
 test_server1
