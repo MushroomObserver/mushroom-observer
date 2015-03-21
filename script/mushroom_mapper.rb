@@ -113,6 +113,7 @@ for id, genus, classification in Name.connection.select_rows %(
     family2 = family || "Unknown Family in #{order || klass || kingdom}"
     hash = genus_to_family[genus] ||= {}
     hash[family2] = hash[family2].to_i + num_obs
+    observations[family2] = observations[family2].to_i + num_obs
   end
 end
 
@@ -148,6 +149,7 @@ data = {}
 data["version"] = 1
 data["families"] = []
 for family in family_to_genus.keys.sort do
+  next if !observations[family]
   family2 = family.sub(/^Unknown Family in /, "")
   $stderr.puts("Missing family: #{family2}.") if !ids[family2]
   family_data = {}
@@ -155,6 +157,7 @@ for family in family_to_genus.keys.sort do
   family_data["id"]   = ids[family2]
   family_data["genera"] = []
   for genus in family_to_genus[family].sort do
+    next if !observations[genus]
     $stderr.puts("Missing genus: #{genus}.") if !ids[genus]
     genus_data = {}
     genus_data["name"] = genus
@@ -162,6 +165,7 @@ for family in family_to_genus.keys.sort do
     genus_data["species"] = []
     next if !genus_to_species[genus]
     for species in genus_to_species[genus].sort do
+      next if !observations[species]
       $stderr.puts("Missing species: #{species}.") if !ids[species]
       genus_data["species"] << {
         "name" => species,
