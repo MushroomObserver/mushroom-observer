@@ -16,10 +16,13 @@
 #    version      = data["version"]
 #    family_data  = data["families"][n]
 #    family_name  = family_data["name"]
+#    family_id    = family_data["id"]
 #    genus_data   = family_data["genera"][n]
 #    genus_name   = genus_data["name"]
+#    genus_id     = genus_data["id"]
 #    species_data = genus_data["species"][n]
 #    species_name = species_data["name"]
+#    species_id   = species_data["id"]
 #
 #    # Name of kth species in jth genus in ith family:
 #    name = data["families"][i]["genera"][j]["species"][k]["name"]
@@ -37,6 +40,7 @@ RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
 # synonyms:         map from synonym_id to at least one accepted name_id
 # aliases:          map from name_id to accepted name_id
 # names:            map name_id to [ text_name, rank, deprecated ]
+# ids:              map from text_name to id of "best" matching name
 # observations:     map from genus name to number of observations in that genus
 # classifications:  map from genus name to one or more classification(s)
 # genus_to_family:  map from genus name to one or more family name(s)
@@ -47,6 +51,7 @@ RAW_FILE  = "#{Rails.root}/public/taxonomy.csv"
 synonyms = {}
 aliases  = {}
 names    = {}
+ids      = {}
 name_data = Name.connection.select_rows %(
   SELECT id, text_name, rank, deprecated, synonym_id, correct_spelling_id
   FROM names
@@ -58,10 +63,19 @@ for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_dat
   real_id = id
   real_id = correct_spelling_id if correct_spelling_id
   real_id = synonyms[synonym_id] if synonym_id
-  if real_id
-    aliases[id] = real_id
-  end
+  aliases[id] = real_id if real_id
   names[id] = [ text_name, rank, deprecated ]
+  if ids[text_name]
+    id2 = ids[text_name]
+    text_name2, rank2, deprecated2 = names[id2]
+    if !deprecated && !deprecated2
+      $stderr.puts("Multiple accepted names match #{text_name}: #{id2}, #{id}")
+    elsif !deprecated && deprecated2
+      ids[text_name] = id
+    end
+  else
+    ids[text_name] = id
+  end
 end
 
 # Build table of number of observations per genus.
@@ -134,16 +148,25 @@ data = {}
 data["version"] = 1
 data["families"] = []
 for family in family_to_genus.keys.sort do
+  family2 = family.sub(/^Unknown Family in /, "")
+  $stderr.puts("Missing family: #{family2}.") if !ids[family2]
   family_data = {}
   family_data["name"] = family
+  family_data["id"]   = ids[family2]
   family_data["genera"] = []
   for genus in family_to_genus[family].sort do
+    $stderr.puts("Missing genus: #{genus}.") if !ids[genus]
     genus_data = {}
     genus_data["name"] = genus
+    genus_data["id"]   = ids[genus]
     genus_data["species"] = []
     next if !genus_to_species[genus]
     for species in genus_to_species[genus].sort do
-      genus_data["species"] << {"name" => species}
+      $stderr.puts("Missing species: #{species}.") if !ids[species]
+      genus_data["species"] << {
+        "name" => species,
+        "id"   => ids[species]
+      }
     end
     family_data["genera"] << genus_data
   end
