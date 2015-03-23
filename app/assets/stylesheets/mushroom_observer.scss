@@ -1075,3 +1075,7 @@ input[type=checkbox] {
   opacity: 0.75;
   color: black;
 }
+
+.slick-prev:hover:before, .slick-prev:focus:before, .slick-next:hover:before, .slick-next:focus:before {
+   opacity: .75;
+}
