@@ -31,10 +31,8 @@
           <th>
             (<%= @mo_count %>)
           </th>
-          <% if is_in_admin_mode? || publication.can_edit?(@user) %>
-            <th></th>
-            <th></th>
-          <% end %>
+          <th>
+          </th>
         </tr>
       </thead>
 
@@ -45,8 +43,10 @@
               <%= link_to(publication.full.t.strip_links.html_safe, publication) %>
             </td>
             <td>
-              <%= str = publication.link.sub(/^(.*:\/\/)?(web\.|www\.)?/, "").truncate(30)
-              link_to(str, publication.link, title: publication.link, data: {toggle: "tooltip"}) %>
+              <%= if publication.link
+                str = publication.link.sub(/^.*:\/\/+/, "").sub(/(\/|\?).*/, "")
+                link_to(str, publication.link, title: publication.link, data: {toggle: "tooltip"})
+              end %>
             </td>
             <td>
               <%= "P" if publication.peer_reviewed %>
@@ -54,15 +54,13 @@
             <td>
               <%= "M" if publication.mo_mentioned %>
             </td>
-            <% if is_in_admin_mode? || publication.can_edit?(@user) %>
-              <td>
+            <td>
+              <% if is_in_admin_mode? || publication.can_edit?(@user) %>
                 <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
-              </td>
-              <td>
                 <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
                             {data: {confirm: :are_you_sure.t}}) %>
-              </td>
-            <% end %>
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>

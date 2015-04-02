@@ -850,12 +850,17 @@ thead tr {
         padding-right: 1em;
     }
     td:nth-child(2) {
+        width: 20em;
         font-size: 85%;
+        word-break: break-all;
     }
     td:nth-child(3),
     td:nth-child(4) {
         text-align: center;
         font-weight: bold;
+    }
+    td:last-child {
+        text-align: center;
     }
 }
 
