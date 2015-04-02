@@ -1,24 +1,29 @@
 <%
   @title = :donors_title.l
   new_tab_set do
-    add_tab(:donate_tab.t, :action => 'donate')
+    add_tab(:donate_tab.t, action: :donate)
     if is_in_admin_mode?
-	    add_tab(:create_donation_tab.t, :action => 'create_donation')
-	    add_tab(:review_donations_tab.t, :action => 'review_donations')
+	    add_tab(:create_donation_tab.t, action: :create_donation)
+	    add_tab(:review_donations_tab.t, action: :review_donations)
     end
   end
 %>
 
-<center>
-<table class="Donors">
-  <% for donor in @donor_list %>
-    <tr align="center">
-      <td class="Donors"><%= donor['who'] %></td>
-    </tr>
-  <% end %>
-</table>
-</center>
-<br/>
-<p>
-  <%= :donors_order.l %>
-</p>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+
+    <center class="push-down push-up">
+      <table class="table-striped table-donors">
+        <% for donor in @donor_list %>
+          <tr>
+            <td>
+              <%= donor["who"] %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </center>
+
+    <%= :donors_order.tp %>
+  </div>
+</div>

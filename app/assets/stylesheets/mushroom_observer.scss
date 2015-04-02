@@ -802,6 +802,7 @@ thead tr {
 .table-herbarium,
 .table-curators,
 .table-license-updater,
+.table-review-donations,
 .table-upload-report {
     th, td {
         padding-left: 0.5em;
@@ -816,6 +817,45 @@ thead tr {
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 10em;
+    }
+}
+
+.table-donors {
+    text-align: center;
+    td {
+        padding: 0.1em 1em;
+    }
+}
+
+.table-review-donations {
+    th, td {
+        border-right: 1px solid $LIST_BORDER_COLOR;
+    }
+    th:last-child, td:last-child {
+        border: 0;
+    }
+}
+
+.table-publications {
+    th, td {
+        padding: 0.5em 0.5em;
+    }
+    td {
+        border-top: 1px solid $LIST_BORDER_COLOR;
+    }
+    th:first-child, td:first-child {
+        padding-left: 1em;
+    }
+    th:last-child, td:last-child {
+        padding-right: 1em;
+    }
+    td:nth-child(2) {
+        font-size: 85%;
+    }
+    td:nth-child(3),
+    td:nth-child(4) {
+        text-align: center;
+        font-weight: bold;
     }
 }
 
