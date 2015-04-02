@@ -4,42 +4,75 @@
      add_tab(:create_publication.t, new_publication_path)
    end
 %>
+
 <div class="row">
-<div class="col-md-8">
-<%= :publication_index_intro.tp %>
-<%= :publication_citation.tp %>
-<%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
-</div>
+  <div class="col-xs-12 max-width-text">
+    <%= :publication_index_intro.tp %>
+    <%= :publication_citation.tp %>
+    <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
+  </div>
 </div>
 
 <div class="row">
   <div class="col-xs-12">
-<table class="table table-striped table-responsive  push-down">
-  <tr>
-    <th><%= "#{:publication_full.t} (#{@full_count})" %></th>
-    <th><%= :publication_link.t %></th>
-    <td align="center"><%= "(#{@peer_count})" %></td>
-    <td align="center"><%= "(#{@mo_count})" %></td>
-  </tr>
+    <table class="table-striped table-publications push-up push-down">
 
-  <% @publications.each do |publication| %>
+      <thead>
+        <tr>
+          <th>
+            <%= :publication_full.t %> (<%= @full_count %>)
+          </th>
+          <th>
+            <%= :publication_link.t %>
+          </th>
+          <th>
+            (<%= @peer_count %>)
+          </th>
+          <th>
+            (<%= @mo_count %>)
+          </th>
+          <% if is_in_admin_mode? || publication.can_edit?(@user) %>
+            <th></th>
+            <th></th>
+          <% end %>
+        </tr>
+      </thead>
+
       <tbody>
-      <tr>
-        <td width="45%"><%= link_to publication.full.t, publication %></td>
-        <td width="25%"><%= link_to content_tag(:small,
-                                                publication.link, :style => "word-wrap:break-word"),
-                                    publication.link %></td>
-        <td align="center"><%= publication.peer_reviewed ? content_tag(:b, "P") : "" %></td>
-        <td align="center"><%= publication.mo_mentioned ? content_tag(:b, "M") : "" %></td>
-        <% if is_in_admin_mode? || publication.can_edit?(@user) %>
-            <td><%= link_to :EDIT.t, edit_publication_path(publication) %></td>
-            <td><%= link_to :DESTROY.t, {action: :destroy, id: publication.id},
-                            {data: {confirm: :are_you_sure.t}} %></td>
+        <% for publication in @publications %>
+          <tr>
+            <td>
+              <%= link_to(publication.full.t.strip_links.html_safe, publication) %>
+            </td>
+            <td>
+              <%= str = publication.link.sub(/^(.*:\/\/)?(web\.|www\.)?/, "").truncate(30)
+              link_to(str, publication.link, title: publication.link, data: {toggle: "tooltip"}) %>
+            </td>
+            <td>
+              <%= "P" if publication.peer_reviewed %>
+            </td>
+            <td>
+              <%= "M" if publication.mo_mentioned %>
+            </td>
+            <% if is_in_admin_mode? || publication.can_edit?(@user) %>
+              <td>
+                <%= link_to(:EDIT.t, edit_publication_path(publication)) %>
+              </td>
+              <td>
+                <%= link_to(:DESTROY.t, {action: :destroy, id: publication.id},
+                            {data: {confirm: :are_you_sure.t}}) %>
+              </td>
+            <% end %>
+          </tr>
         <% end %>
-      </tr>
       </tbody>
-  <% end %>
-</table>
+
+    </table>
+  </div>
 </div>
+
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= :publication_legend.tp %>
+  </div>
 </div>
-<%= :publication_legend.tp %>

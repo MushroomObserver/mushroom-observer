@@ -434,6 +434,11 @@ class String
     gsub(HTML_TAG_PATTERN, "")
   end
 
+  # Remove hyperlinks from an HTML string.
+  def strip_links
+    gsub(/<\/?a.*?>/, "")
+  end
+
   # Truncate an HTML string, being careful to close off any open formatting
   # tags.  If greater than +max+, truncates to <tt>max - 1</tt> and adds "..."
   # to the end (inside any formatting tags open at that point).  Assumes the

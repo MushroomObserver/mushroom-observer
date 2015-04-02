@@ -1,27 +1,38 @@
 <%
   @title = :create_donation_title.l
   new_tab_set do
-    add_tab(:donors_tab.t, :action => 'donors')
-    add_tab(:donate_tab.t, :action => 'donate')
-    if is_in_admin_mode?
-	    add_tab(:review_donations_tab.t, :action => 'review_donations')
-    end
+    add_tab(:donors_tab.t, action: :donors)
+    add_tab(:donate_tab.t, action: :donate)
+	  add_tab(:review_donations_tab.t, action: :review_donations)
   end
 %>
 
-<p>
-<%= form_tag(:action => 'create_donation') do %>
-  <p>
-    Amount: $<%= text_field('donation', 'amount', :size => 7) %>
-  </p>
-  <p>
-    Who: <%= text_field('donation', 'who', :size => 50) %>
-    <%= check_box('donation', 'anonymous') %>
-    <label for="donation_anonymous"><%= :donate_anonymous.t %></label><br/>
-  </p>
-  <p>
-    Email: <%= text_field('donation', 'email', :size => 50) %><br/>
-  </p>
-  <center><%= submit_tag(:create_donation_add.l, class: "btn") %><br/></center>
-<% end %>
-</p>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= form_for(:donation, url: {action: :create_donation}) do |form| %>
+
+      <div class="form-group form-inline">
+        <%= form.label(:amount, :confirm_amount.t) %>:
+        $<%= form.text_field(:amount, size: 7, class: "form-control") %>
+      </div>
+
+      <div class="form-group form-inline">
+        <%= form.label(:who, :WHO.t) %>:
+        <%= form.text_field(:who, size: 50, class: "form-control") %>
+      </div>
+
+      <div class="form-group form-inline">
+        <%= form.check_box(:anonymous, class: "form-control") %>
+        <%= form.label(:anonymous, :donate_anonymous.t) %>
+      </div>
+
+      <div class="form-group form-inline">
+        <%= form.label(:email, :EMAIL.t) %>:
+        <%= form.text_field(:email, size: 50, class: "form-control") %>
+      </div>
+
+      <%= submit_tag(:create_donation_add.l, class: "btn center-block") %>
+
+    <% end %>
+  </div>
+</div>
