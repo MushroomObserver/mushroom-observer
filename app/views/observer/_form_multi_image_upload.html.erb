@@ -1,12 +1,11 @@
 <% javascript_include('multi_image_upload') %>
 
-<%= hidden_field('observation', 'thumb_image_id') %>
-<p class="help-block">
-  <%= :form_observations_upload_help_multi_select.t %>
-</p>
-
-<input type="file" multiple id="multiple_images_button" accept="image/*"/>
-
+<div class="row">
+  <div class="col-xs-12">
+    <%= hidden_field('observation', 'thumb_image_id') %>
+    <input type="file" multiple id="multiple_images_button" accept="image/*"/>
+  </div>
+</div>
 <!-- Container to show messages relating to the selected images -->
 <div class="row image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
   <div class="col-sm-7">
