@@ -68,6 +68,19 @@ $MENU_HOT_BG_COLOR:           $psittacina_cap_middle;
 $MENU_WARM_FG_COLOR:          black;
 $MENU_WARM_BG_COLOR:          $psittacina_cap_middle;
 
+$INFO_BG_COLOR:                     #E0F8FF;
+$INFO_BORDER_COLOR:                  #E0FFE0;
+$INFO_FG_COLOR:                     $BODY_FG_COLOR;
+$SUCCESS_BG_COLOR:                  #E0FFE0;
+$SUCCESS_BORDER_COLOR:              #70C070;
+$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
+$WARNING_BG_COLOR:                  #FFF8E0;
+$WARNING_BORDER_COLOR:              #F8CC70;
+$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
+$DANGER_BG_COLOR:                   #FFE0E0;
+$DANGER_BORDER_COLOR:               #F07070;
+$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+
 @import "mushroom_observer";
 
 #navigation {
