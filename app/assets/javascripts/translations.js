@@ -6,11 +6,11 @@ function TranslationsModule(localizedText) {
       SAVING_STRING = localizedText.saving_string,
       LOADED = false,
       CHANGED = false,
-      $whirly = jQuery("#whirly"),
-      $save_button = jQuery("#save_button"),
-      $cancel_button = jQuery("#cancel_button"),
-      $form_div = jQuery("#form_div"),
-      $post_form = jQuery("#post_form"),
+      $whirly = jQuery('#whirly'),
+      $save_button = jQuery('#save_button'),
+      $cancel_button = jQuery('#cancel_button'),
+      $form_div = jQuery('#form_div'),
+      $post_form = jQuery('#post_form'),
       $tag_links = jQuery('[data-role="show_tag"]')
 
     // EVENT LISTENERS (note the delegates!)
@@ -19,8 +19,9 @@ function TranslationsModule(localizedText) {
         return CONFIRM_STRING;
     };
 
-    var iframe = document.getElementById('hidden_frame'); // annoying, cannot attach to window.hidden_frame in FF!
-    iframe.addEventListener("load", iframe_load);
+    // annoying, cannot attach to window.hidden_frame in FF!
+    var iframe = document.getElementById('hidden_frame');
+    iframe.addEventListener('load', iframe_load);
 
     $tag_links.click(function (event) {
       event.preventDefault();
@@ -28,6 +29,12 @@ function TranslationsModule(localizedText) {
         confirm
       var data = $(this).data();
       show_tag(LOCALE, data.tag);
+    });
+
+    // Override non-javascripty submit target.
+    $post_form.attr({
+      action: 'edit_translations_ajax_post',
+      target: 'hidden_frame'
     });
 
     // Attach listeners as delegates since they are injected into the dom.
@@ -49,7 +56,7 @@ function TranslationsModule(localizedText) {
       show_tag($(this).val(), data.tag);
     });
 
-    $post_form.delegate('[data-role="show_old_version', 'click', function(event) {
+    $post_form.delegate('[data-role="show_old_version"]', 'click', function(event) {
       event.preventDefault()
       var data = $(this).data();
       show_old_version(data.id);
@@ -68,7 +75,7 @@ function TranslationsModule(localizedText) {
       if (tag != undefined) {
         // Make tag in left column gray because it's now been translated.
         // Want only untranslated tags to be bold black to stand out better.  
-        jQuery("#str_" + tag).html(str).addClass("translated faint");
+        jQuery('#str_' + tag).html(str).addClass('translated faint');
       } else if (LOADED) {
         CHANGED = true;
         setDisabledOnButtons(false);
@@ -85,7 +92,7 @@ function TranslationsModule(localizedText) {
       LOCALE = locale;
       if (!CHANGED || confirm(CONFIRM_STRING)) {
         show_whirly(LOADING_STRING);
-        jQuery.ajax("/translation/edit_translations_ajax_get", {
+        jQuery.ajax('/translation/edit_translations_ajax_get', {
           data: {locale: locale, tag: tag, authenticity_token: csrf_token()},
           dataType: 'text',
           async: true,
@@ -111,7 +118,7 @@ function TranslationsModule(localizedText) {
 
     function show_old_version(id) {
       show_whirly(LOADING_STRING);
-      jQuery.ajax("/ajax/old_translation/" + id, {
+      jQuery.ajax('/ajax/old_translation/' + id, {
         data: {authenticity_token: csrf_token()},
         dataType: 'text',
         async: true,
@@ -123,12 +130,12 @@ function TranslationsModule(localizedText) {
     }
 
     function setDisabledOnButtons(disabled) {
-      $save_button.prop("disabled", disabled);
-      $cancel_button.prop("disabled", !disabled);
+      $save_button.prop('disabled', disabled);
+      $cancel_button.prop('disabled', !disabled);
     }
 
     function show_whirly(text) {
-      jQuery("#whirly_text").html(text);
+      jQuery('#whirly_text').html(text);
       $whirly.center().show();
     }
 
