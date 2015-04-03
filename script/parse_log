@@ -19,6 +19,7 @@ old_errors=$app_root/log/errors.old
 new_errors=$app_root/log/errors.new
 
 grep '^[A-Za-z:]*Error \|ENOMEM' $rails_log |
+grep -v 'Can.t figure out how to sort' |
 grep -v 'ActionController::RoutingError' |
 grep -v 'ActiveRecord::RecordNotFound' > $new_errors || true
 
