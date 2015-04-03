@@ -94,4 +94,4 @@ gem "aws-sdk", "~> 2"
 #Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
-gem "jquery-slick-rails"
+gem "jquery-slick-rails",  "~> 1.5.0.1"
