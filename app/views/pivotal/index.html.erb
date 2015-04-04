@@ -1,6 +1,6 @@
 <%
   @title = :pivotal_index_title.l
-  javascript_include('pivotal')
+  javascript_include("pivotal")
 
   label_map = {}
   for story in @stories
@@ -16,20 +16,20 @@
     (label_map[story.state] ||= []) << story.id
 
     # Gather stories by how recent last comment was.
-    if story.activity == 'day'
-      (label_map['day']   ||= []) << story.id
-      (label_map['week']  ||= []) << story.id
-      (label_map['month'] ||= []) << story.id
-    elsif story.activity == 'week'
-      (label_map['week']  ||= []) << story.id
-      (label_map['month'] ||= []) << story.id
-    elsif story.activity == 'month'
-      (label_map['month'] ||= []) << story.id
+    if story.activity == "day"
+      (label_map["day"]   ||= []) << story.id
+      (label_map["week"]  ||= []) << story.id
+      (label_map["month"] ||= []) << story.id
+    elsif story.activity == "week"
+      (label_map["week"]  ||= []) << story.id
+      (label_map["month"] ||= []) << story.id
+    elsif story.activity == "month"
+      (label_map["month"] ||= []) << story.id
     else
-      (label_map['none']  ||= []) << story.id
+      (label_map["none"]  ||= []) << story.id
     end
   end
-  label_map['all'] = @stories.map(&:id)
+  label_map["all"] = @stories.map(&:id)
 
   data = []
   for label in label_map.keys
@@ -46,92 +46,100 @@
   )
 %>
 
-<%= :pivotal_index_header.tp %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= :pivotal_index_header.tp %>
+  </div>
+</div>
 
-<table style="margin-bottom:1em">
-  <tr>
-    <td valign="top">
-      <table>
-        <% for label in %w( 
-          open -
-          critical bottleneck -
-          started unstarted unscheduled -
-          day week month none -
-          all
-          names lists locations projects search taxonomy voting interface
-          design email api eol i18n other admin code server
-        ) %>
-          <tr>
-            <td align="right" style="font-size:120%; white-space:nowrap"><%=
-              if label == '-'
-                safe_nbsp
-              else
-                klass =
-                  if label == 'all'
-                    'pX'
-                  elsif label.match(/^(day|week|month|none)$/)
-                    'pA p_' + label
-                  elsif label == 'unscheduled'
-                    'pivotal_unscheduled pivotal_state'
-                  elsif label == 'unstarted'
-                    'pivotal_unstarted pivotal_state'
-                  elsif label == 'started'
-                    'pivotal_started pivotal_state'
-                  else
-                    'p' + Pivotal::Story.label_value(label).to_s
-                  end
-                link_to(h(:"pivotal_label_#{label}".l), {}, data: {role: "click_on_label", label: label}, :class => klass)
-              end
-            %></td>
-            <td style="white-space:nowrap"><%=
-              label == '-' ? '' : '&#8211; '.html_safe + :"pivotal_head_#{label}".t
-            %></td>
-          </tr>
-          <% if label == 'all' %>
-            </table></td><td valign="top"><table>
+<div id="pivotal_index">
+  <table id="pivotal_labels" style="margin-bottom:1em">
+    <tr>
+      <td>
+        <table>
+          <% for label in %w( 
+            open -
+            critical bottleneck -
+            started unstarted unscheduled -
+            day week month none -
+            all
+            names lists locations projects search taxonomy voting interface
+            design email api eol i18n other admin code server
+          ) %>
+            <tr>
+              <td align="right" style="font-size:120%; white-space:nowrap"><%=
+                if label == "-"
+                  safe_nbsp
+                else
+                  klass =
+                    if label == "all"
+                      "pX"
+                    elsif label.match(/^(day|week|month|none)$/)
+                      "pA p_" + label
+                    elsif label == "unscheduled"
+                      "pivotal_unscheduled pivotal_state"
+                    elsif label == "unstarted"
+                      "pivotal_unstarted pivotal_state"
+                    elsif label == "started"
+                      "pivotal_started pivotal_state"
+                    else
+                      "p" + Pivotal::Story.label_value(label).to_s
+                    end
+                  link_to(h(:"pivotal_label_#{label}".l), {}, data: {role: "click_on_label", label: label}, class: klass)
+                end
+              %></td>
+              <td><%=
+                label == "-" ? "" : "&#8211; ".html_safe + :"pivotal_head_#{label}".t
+              %></td>
+            </tr>
+            <% if label == "all" %>
+              </table></td><td><table>
+            <% end %>
           <% end %>
-        <% end %>
-      </table>
-    </td>
-  </tr>
-</table>
+        </table>
+      </td>
+    </tr>
+  </table>
 
-<div id="pivotal_stories" class="list-group">
-  <% for story in @stories %>
-    <div class="list-group-item pivotal" id="pivotal_<%= story.id %>">
-      <div class="pivotal_name" id="pivotal_name_<%= story.id %>">
-        <span class="pivotal_name"><%=
-          link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
-        %></span><br/>
-        <span style="white-space:nowrap">
-          <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
-            pivotal_vote_controls(story)
-          %></span>
-          <span class="pivotal_state pivotal_<%= story.state %>"><%=
-            :"pivotal_state_#{story.state}".l
-          %></span>
-          <span class="pivotal_num_comments">(<%= :comments.l %>: 
-            <span id="pivotal_num_comments_<%= story.id %>"><%=
-              story.comments.length.to_s
-            %></span>)</span>
-          <span class="pivotal_labels"><%=
-            labels = story.sorted_labels.map do |label |
-              link_to(h(:"pivotal_label_#{label}".l), {}, data: {role: "click_on_label", label: label}, :class => "p#{story.label_value(label)}")
-            end
-            if story.activity.match(/^(day|week|month)$/)
-              labels << link_to(h(:"pivotal_label_#{story.activity}".l), {}, data: {role: "click_on_label", label: story.activity}, :class => "pA p_#{story.activity}")
-            end
-            labels.safe_join(' ')
-          %></span>
-        </span>
+  <div id="pivotal_stories" class="list-group">
+    <% for story in @stories %>
+      <div class="list-group-item pivotal" id="pivotal_<%= story.id %>">
+        <div class="pivotal_name" id="pivotal_name_<%= story.id %>">
+          <span class="pivotal_name"><%=
+            link_to(story.name.t, {}, data: {role: "click_on_story", story: story.id})
+          %></span><br/>
+          <span style="white-space:nowrap">
+            <span class="pivotal_votes" id="pivotal_votes_<%= story.id %>"><%=
+              pivotal_vote_controls(story)
+            %></span>
+            <span class="pivotal_state pivotal_<%= story.state %>"><%=
+              :"pivotal_state_#{story.state}".l
+            %></span>
+            <span class="pivotal_num_comments">(<%= :comments.l %>: 
+              <span id="pivotal_num_comments_<%= story.id %>"><%=
+                story.comments.length.to_s
+              %></span>)</span>
+            <span class="pivotal_labels"><%=
+              labels = story.sorted_labels.map do |label |
+                str = :"pivotal_label_#{label}".l
+                str = label if str.match(/^\[/)
+                link_to(h(str), {}, data: {role: "click_on_label", label: label}, class: "p#{story.label_value(label)}")
+              end
+              if story.activity.match(/^(day|week|month)$/)
+                labels << link_to(h(:"pivotal_label_#{story.activity}".l), {}, data: {role: "click_on_label", label: story.activity}, class: "pA p_#{story.activity}")
+              end
+              labels.safe_join(" ")
+            %></span>
+          </span>
+        </div>
+        <div class="pivotal_body max-width-text" id="pivotal_body_<%= story.id %>" style="display:none">
+        </div>
       </div>
-      <div class="pivotal_body" id="pivotal_body_<%= story.id %>" style="display:none">
-      </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </div>
 
 <div class="pivotal_popup" id="pivotal_popup" style="display:none">
   <%= :pivotal_posting_comment.t %>
-  <%= image_tag('indicator.gif') %>
+  <%= image_tag("indicator.gif") %>
 </div>

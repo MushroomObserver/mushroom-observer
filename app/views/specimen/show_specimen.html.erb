@@ -1,30 +1,30 @@
 <%
-  @title = "Specimen '#{@specimen.herbarium_label}'"
+  @title = "Specimen '#{specimen.herbarium_label}'"
+  herbarium = @specimen.herbarium
+
   new_tab_set do
-    add_tab(:edit_specimen.t, :action => 'edit_specimen', :id => @specimen.id) if is_in_admin_mode? or @specimen.can_edit?(@user)
-    add_tab(:herbarium_delete_specimen.t,
-            :action => 'delete_specimen', :id => @specimen.id,
-            data: { confirm: :are_you_sure.t })
-    add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
+    if is_in_admin_mode? || @specimen.can_edit?(@user)
+      add_tab(:edit_specimen.t, action: :edit_specimen, id: @specimen.id)
+    end
+    add_tab(:herbarium_delete_specimen.t, action: :delete_specimen,
+            id: @specimen.id, data: {confirm: :are_you_sure.t})
+    add_tab(:herbarium_index.t, controller: :herbarium, action: :index)
   end
 %>
 
 <p>
-  <%= herbarium_link(@specimen.herbarium) %><br/>
-  <%= :specimen_herbarium_label.t %>: <%= @specimen.herbarium_label %><br/>
+  <%= :HERBARIUM.t %>: <%= link_to(herbarium.name, herbarium.show_link_args) %><br/>
+  <%= :specimen_herbarium_label.t %>: <%= herbarium_label %><br/>
   <%= :specimen_user.t %>: <%= @specimen.user.legal_name %><br/>
   <%= :specimen_when.t %>: <%= @specimen.when.web_date %>
 </p>
 
-<% if @specimen.notes and !@specimen.notes.empty? %>
-  <p>
-    <%= :specimen_notes.t %>:<br/>
-    <%= @specimen.notes.tpl %>
-  </p>
+<% if @specimen.notes && @specimen.notes.any? %>
+  <%= ( :specimen_notes.l + ":\n\n" + @specimen.notes ).tpl %>
 <% end %>
 
 <div class="row">
-<%= render(partial: "shared/matrix_box", collection: @specimen.observations, as: :object)  %>
+  <%= render(partial: "shared/matrix_box", collection: @specimen.observations, as: :object) %>
 </div>
 
 <center>

@@ -1,47 +1,60 @@
 <%
-  @title = :specimen_index_title.t(:subject => @subject)
+  @title = :specimen_index_title.t(subject: @subject)
+
   new_tab_set do
-    add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
+    add_tab(:herbarium_index.t, controller: :herbarium, action: :index)
   end
 %>
 
-<table width="100%">
-	<tr>
-		<td></td>
-		<%= [:specimen_herbarium, :specimen_herbarium_label, :OBSERVATIONS].map {|title| table_column_title(title.t) }.safe_join %>
-		<td></td>
-	</tr>
-	<%
-	odd_or_even = 1
-	for specimen in @specimens
-    odd_or_even = 1 - odd_or_even
- 		herbarium = specimen.herbarium
-		observation = specimen.observations %>
-    <tr class="ListLine<%= odd_or_even %>">
-	    <td>
-	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
-					form_tag({action: 'edit_specimen', id: specimen.id}) do %>
-						<%= submit_tag(:herbarium_edit_specimen.t, class: "btn") %>
-					<% end
-				end %>
-	    </td>
-			<td>
-				<%= link_to(herbarium.name.t, :controller => 'herbarium', :action => 'show_herbarium', :id => herbarium.id) %>
-			</td>
-			<td>
-	      <%= link_to(specimen.herbarium_label, :action => "show_specimen", :id => specimen.id) %>
-	    </td>
-			<td>
-				<%= observation_links(specimen) %>
-			</td>
-	    <td>
-	    	<% if is_in_admin_mode? or specimen.can_edit?(@user)
-					form_tag({action: 'delete_specimen', id: specimen.id}) do %>
-						<%= submit_tag(:herbarium_delete_specimen.t, class: "btn",
-                           data: { confirm: :are_you_sure.t }) %>
-					<% end
-				end %>
-	    </td>
-	  </tr>
-	<% end %>
+<table class="table table-striped" width="100%">
+  <thead>
+    <tr>
+      <th>
+      </th>
+      <th>
+        <%= :specimen_herbarium.t %>
+      </th>
+      <th>
+        <%= :specimen_herbarium_label.t %>
+      </th>
+      <th>
+        <%= :OBSERVATIONS.t %>
+      </th>
+      <th>
+      </th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% for specimen in @specimens %>
+      herbarium = specimen.herbarium
+      observation = specimen.observations %>
+      <tr>
+        <td>
+          <%= if is_in_admin_mode? || specimen.can_edit?(@user)
+            link_to(:herbarium_edit_specimen.t, {action: :edit_specimen,
+                    id: specimen.id}, class: "btn")
+          end %>
+        </td>
+        <td>
+          <%= link_to(herbarium.name.t, herbarium.show_link_args) %>
+        </td>
+        <td>
+          <%= link_to(specimen.herbarium_label.t, specimen.show_link_args) %>
+        </td>
+        <td>
+          <%= specimen.observations.map do |obs|
+            link_to(obs.unique_format_name.t, obs.show_link_args)
+          end.safe_join(", ") %>
+        </td>
+        <td>
+          <%= if is_in_admin_mode? || specimen.can_edit?(@user)
+            link_to(:herbarium_delete_specimen.t, {action: :delete_specimen,
+                    id: specimen.id}, data: { confirm: :are_you_sure.t },
+                    class: "btn")
+          end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>
