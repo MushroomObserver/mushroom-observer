@@ -1995,7 +1995,8 @@
   add_specimen: Add Specimen
   add_specimen_title: Add Specimen
   add_specimen_add: Add
-  add_specimen_herbarium_label: Original Herbarium Label (initial determination and unique herbarium id)
+  add_specimen_herbarium_label: Original Herbarium Label
+  add_specimen_herbarium_label_help: "(initial determination and unique herbarium id)"
   add_specimen_notes: Specimen Notes
   add_specimen_cancel: Cancel (Show Observation)
   add_specimen_already_exists: A specimen with the label '[label]' already exists for herbarium '[name]'

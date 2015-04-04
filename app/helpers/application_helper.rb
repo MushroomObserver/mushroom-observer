@@ -213,21 +213,6 @@ module ApplicationHelper
     html = content_tag(:p, html, class: "small")
   end
 
-  def herbarium_name_box(default_name="")
-    turn_into_herbarium_auto_completer(:specimen_herbarium_name)
-    label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t)
-    text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control")
-  end
-
-  def herbarium_id_box
-    label_tag(:specimen_herbarium_id, :specimen_herbarium_id.t)
-    text_field(:specimen, :herbarium_id, value: @herbarium_id, class: "form-control")
-  end
-
-  def table_column_title(title)
-    content_tag(:td, title, :align => :center, :class => :TableColumn)
-  end
-
   ### From auto_complete_helper.rb
 
   # Add another input field onto an existing auto-completer.
