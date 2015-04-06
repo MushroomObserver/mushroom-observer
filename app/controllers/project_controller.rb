@@ -81,8 +81,8 @@ class ProjectController < ApplicationController
   def show_selected_projects(query, args={})
     args = {
       action: :list_projects,
-      letters: 'projects.title',
-      num_per_page: 10,
+      letters: "projects.title",
+      num_per_page: 50,
     }.merge(args)
 
     @links ||= []
@@ -294,7 +294,7 @@ class ProjectController < ApplicationController
   def add_members # :norobots:
     pass_query_params
     if @project = find_or_goto_index(Project, params[:id].to_s)
-      @users = User.all.order("login, name").to_a
+      @users = User.where.not(verified: nil).order("login, name").to_a
       if !@project.is_admin?(@user)
         redirect_with_query(action: "show_project", id: @project.id)
       elsif !params[:candidate].blank?
