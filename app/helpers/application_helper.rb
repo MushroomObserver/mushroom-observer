@@ -1672,7 +1672,7 @@ module ApplicationHelper
   end
 
   # Create stylable file input field with client-side size validation.
-  def image_file_field(obj, attr, opts={})
+  def custom_file_field(obj, attr, opts={})
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f/1024/1024).round
     file_field = file_field(obj, attr, opts.merge(

@@ -2,29 +2,10 @@
   @title = :species_list_create_title.t
 
   new_tab_set do
-    add_tab(:name_lister_title.t, :action => 'name_lister')
+    add_tab(:name_lister_title.t, action: :name_lister)
   end
 %>
 
-<%= form_tag(:action => 'create_species_list', :approved_where => @place_name) do %>
-  <% if !@new_names.blank?
-    val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>
-    <input id="approved_names" name="approved_names" type="hidden"
-           value="<%= val %>"/>
-  <% end %>
-  <% if !@deprecated_names.blank?
-    val = @deprecated_names.map(&:id).join(' ') %>
-    <input id="approved_deprecated_names" name="approved_deprecated_names"
-           type="hidden" value="<%= val %>"/>
-  <% end %>
-
-  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
-
-  <table cellpadding="10">
-	<tr>
-	  <%= render(partial: "form_species_lists", locals: {button_name: :CREATE.l}) %>
-	</tr>
-  </table>
-
-  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
+<%= form_tag(action: :create_species_list, approved_where: @place_name) do %>
+  <%= render(partial: "form_species_lists", locals: {button: :CREATE}) %>
 <% end %>

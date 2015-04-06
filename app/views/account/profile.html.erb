@@ -39,7 +39,7 @@
         <%= link_to(:profile_image_reuse.t, controller: :image, action: :reuse_image, mode: :profile) %>
         <%= link_to(:profile_image_remove.t, {action: :remove_image},
                     {data: {confirm: :are_you_sure.l}}) if @user.image %>
-        <%= image_file_field(:user, :upload_image) %>
+        <%= custom_file_field(:user, :upload_image) %>
       </div>
 
       <div class="form-group push-down">

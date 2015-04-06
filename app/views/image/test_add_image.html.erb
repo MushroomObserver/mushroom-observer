@@ -11,10 +11,10 @@
 
     <%= form_tag({action: :test_upload_image, log_id: @log_entry.id}, {multipart: true}) do %>
       <div class="form-group form-inline">
-        <% label(:upload, :image1, "Image 1") %>: <%= image_file_field(:upload, :image1) %><br/>
-        <% label(:upload, :image2, "Image 2") %>: <%= image_file_field(:upload, :image2) %><br/>
-        <% label(:upload, :image3, "Image 3") %>: <%= image_file_field(:upload, :image3) %><br/>
-        <% label(:upload, :image4, "Image 4") %>: <%= image_file_field(:upload, :image4) %><br/>
+        <% label(:upload, :image1, "Image 1") %>: <%= custom_file_field(:upload, :image1) %><br/>
+        <% label(:upload, :image2, "Image 2") %>: <%= custom_file_field(:upload, :image2) %><br/>
+        <% label(:upload, :image3, "Image 3") %>: <%= custom_file_field(:upload, :image3) %><br/>
+        <% label(:upload, :image4, "Image 4") %>: <%= custom_file_field(:upload, :image4) %><br/>
       </div>
 
       <%= submit_tag(:UPLOAD.l, class: "btn center-block push-down") %>
