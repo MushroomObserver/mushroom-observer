@@ -27,11 +27,11 @@
 
   <div class="col-xs-12 col-md-6 col-lg-4 max-width-text">
     <%= if !@new_names.blank?
-      hidden_field_tag(:approved_names, value: @new_names.join("\n"))
+      hidden_field_tag(:approved_names, @new_names.join("\n"))
     end %>
 
     <%= if !@deprecated_names.blank?
-      hidden_field_tag(:approved_deprecated_names, value: @deprecated_names.map(&:id).join(" "))
+      hidden_field_tag(:approved_deprecated_names, @deprecated_names.map(&:id).join(" "))
     end %>
 
     <div class="form-group push-down">
