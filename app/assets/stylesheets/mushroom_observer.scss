@@ -711,6 +711,61 @@ div.scroller {
 }
 
 //
+// species list bulk editor
+// --------------------------------------------------
+
+.table-bulk-editor {
+    td {
+        padding: 4px 6px;
+    }
+    tr {
+        white-space: nowrap;
+    }
+    tr:nth-child(odd) {
+        border: 1px solid $LIST_ODD_BG_COLOR;
+    }
+    tr:nth-child(even) {
+        border: 1px solid $LIST_EVEN_BG_COLOR;
+    }
+    tr.hot {
+        border: 1px solid $LIST_BORDER_COLOR;
+    }
+    tr.hot a, div.row_controls a {
+        background: none;
+    }
+    tr.hot a:hover, div.row_controls a:hover {
+        background: none;
+    }
+    img.tiny {
+        max-height: 50px !important;
+        padding: 2px;
+    }
+    div.id_and_name {
+        float: left;
+        padding: 1px 0.5em 0 0.5em;
+    }
+    div.auto_complete {
+        z-index: 3;
+    }
+    input, select, option {
+        height: 2.0em;
+    }
+}
+
+div.row_controls {
+    display: none;
+    position: absolute;
+    text-align: left;
+    padding: 2px 5px 2px 5px;
+    border: 1px solid $LIST_BORDER_COLOR;
+    border-top: none;
+    color: $LIST_FG_COLOR;
+    background: $LIST_ODD_BG_COLOR;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+//
 // edit translations
 // --------------------------------------------------
 
@@ -851,6 +906,7 @@ thead tr {
 .table-herbarium,
 .table-curators,
 .table-license-updater,
+.table-manage-species-lists,
 .table-project-members,
 .table-review-donations,
 .table-upload-report {
@@ -877,12 +933,15 @@ thead tr {
     }
 }
 
-.table-review-donations {
-    th, td {
-        border-right: 1px solid $LIST_BORDER_COLOR;
+.table-manage-species-lists {
+    td {
+        padding: 0.2em 1em;
     }
-    th:last-child, td:last-child {
-        border: 0;
+    tr {
+        border-top: 1px solid $LIST_BORDER_COLOR;
+    }
+    tr:first-child {
+        border-top: none;
     }
 }
 
@@ -911,6 +970,15 @@ thead tr {
     }
     td:last-child {
         text-align: center;
+    }
+}
+
+.table-review-donations {
+    th, td {
+        border-right: 1px solid $LIST_BORDER_COLOR;
+    }
+    th:last-child, td:last-child {
+        border: 0;
     }
 }
 
@@ -1068,6 +1136,10 @@ thead tr {
 
 .max-width-text {
     max-width: 600px;
+}
+
+.max-width-text-plus-padding {
+    max-width: 650px;
 }
 
 .max-width-text-plus-image {

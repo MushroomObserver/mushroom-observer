@@ -6,7 +6,7 @@
 
   <p style="white-space:nowrap">
   <%= radio_button(:observation, :thumb_image_id, -index) %>
-  <%= image_file_field(:image, :image, index: index, onchange: "auto_image_new(#{index})") %>
+  <%= custom_file_field(:image, :image, index: index, onchange: "auto_image_new(#{index})") %>
 
   <% if @js %>
     <span style="margin-left:10px">&nbsp;</span>
