@@ -4,7 +4,8 @@
   any_names = observation.namings && observation.namings.length > 0
 %>
 
-<%= form_tag(add_query_param(controller: :observer, action: :cast_votes, id: observation.id)) do %>
+<%= form_tag(add_query_param(controller: :observer, action: :cast_votes,
+             id: observation.id)) do %>
 
   <!--TABLE OF NAMES-->
   <div class="list-group push-down">
@@ -31,8 +32,7 @@
               </div>
               <div>
                 <% if check_permission(naming) %>
-                  (<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %>
-                  |
+                  (<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %> |
                   <%= link_with_query(:DESTROY.t, {controller: :naming, action: :destroy, id: naming.id},
                                       {data: {confirm: :are_you_sure.l}}) %>)
                 <% end %>
