@@ -1,9 +1,11 @@
 <%
   @title = :account_api_keys_title.t
-  new_tab_set do
-    add_tab(:prefs_link.t,   controller: :account, action: :prefs)
-    add_tab(:profile_link.t, controller: :account, action: :profile)
-  end
+
+  tabs = [
+    link_to(:prefs_link.t,   action: :prefs),
+    link_to(:profile_link.t, action: :profile)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 
   javascript_include("api_key")
   inject_javascript_at_end("ApiKeyModule()")

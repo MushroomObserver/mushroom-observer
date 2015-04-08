@@ -1,8 +1,10 @@
 <%
   @title = "Test Add Image Report"
-  new_tab_set do
-    add_tab("Test Again", action: :test_add_image)
-  end
+
+  tabs = [
+    link_to("Test Again", action: :test_add_image)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

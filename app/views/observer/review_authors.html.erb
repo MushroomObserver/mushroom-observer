@@ -4,15 +4,15 @@
   type = @object.type_tag
   parent_type = parent.type_tag
 
-  # Show Object | Show Object Description
-  new_tab_set do
-    add_tab(:show_object.t(:type => parent_type),
+  tabs = [
+    link_to(:show_object.t(:type => parent_type),
             :controller => parent.show_controller,
-            :action => parent.show_action, :id => parent.id)
-    add_tab(:show_object.t(:type => type),
+            :action => parent.show_action, :id => parent.id),
+    link_to(:show_object.t(:type => type),
             :controller => @object.show_controller,
             :action => @object.show_action, :id => @object.id)
-  end
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= :review_authors_note.tp if type == :name_description %>

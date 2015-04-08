@@ -3,9 +3,12 @@
     :num  => @description.version,
     :name => description_title(@description)
   )
-  new_tab_set do
-    add_tab(:show_name_description.t(:description => description_title(@description)), :action => 'show_name_description', :id => @description.id)
-  end
+
+  tabs = [
+    link_to(:show_name_description.t(:description => description_title(@description)), :action => 'show_name_description', :id => @description.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
   Textile.register_name(@name)
 %>
 

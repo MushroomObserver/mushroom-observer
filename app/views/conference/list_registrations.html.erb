@@ -1,14 +1,18 @@
 <%
   @title = :list_registrations_title.t(name: @event.name)
-  new_tab_set do
-    add_tab(:show_event.t, action: :show_event, id: @event.id)
-    add_tab(:event_index.t, action: :index)
-    add_tab(:register_event.t, action: :register, id: @event.id)
-    if is_in_admin_mode?
-      add_tab(:edit_event.t, action: :edit_event, id: @event.id)
-      add_tab(:create_event.t, action: :create_event)
-    end
+
+  tabs = [
+    link_to(:show_event.t, action: :show_event, id: @event.id),
+    link_to(:event_index.t, action: :index),
+    link_to(:register_event.t, action: :register, id: @event.id)
+  ]
+  if is_in_admin_mode?
+    tabs += [
+      link_to(:edit_event.t, action: :edit_event, id: @event.id),
+      link_to(:create_event.t, action: :create_event)
+    ]
   end
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row push-down">

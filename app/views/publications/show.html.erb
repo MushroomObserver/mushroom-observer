@@ -1,14 +1,18 @@
 <%
   @title = :show_publication_title.l
-  new_tab_set do
-    add_tab(:create_publication.t, new_publication_path)
-    add_tab(:publication_index.t, publications_path)
-    if is_in_admin_mode? || @publication.can_edit?(@user)
-      add_tab(:EDIT.t, edit_publication_path(@publication))
-      add_tab(:DESTROY.t, {action: :destroy, id: @publication.id},
+
+  tabs = [
+    link_to(:create_publication.t, new_publication_path),
+    link_to(:publication_index.t, publications_path)
+  ]
+  if is_in_admin_mode? || @publication.can_edit?(@user)
+    tabs += [
+      link_to(:EDIT.t, edit_publication_path(@publication)),
+      link_to(:DESTROY.t, {action: :destroy, id: @publication.id},
                           {data: {confirm: :are_you_sure.t}})
-    end
+    ]
   end
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

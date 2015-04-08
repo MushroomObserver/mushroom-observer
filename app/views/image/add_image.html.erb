@@ -1,11 +1,13 @@
 <%
   @title = :image_add_title.t(name: @observation.unique_format_name)
-  new_tab_set do
-    add_tab_with_query(:cancel_and_show.t(type: :observation),
-                       controller: :observer, action: :show_observation, id: @observation.id)
-    add_tab_with_query(:image_add_edit.t,
-                       controller: :observer, action: :edit_observation, id: @observation.id)
-  end
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args),
+    link_with_query(:image_add_edit.t, controller: :observer,
+                    action: :edit_observation, id: @observation.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

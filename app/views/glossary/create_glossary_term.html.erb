@@ -1,8 +1,10 @@
 <%
   @title = :create_glossary_term_title.l
-  new_tab_set do
-    add_tab(:glossary_term_index.t, action: :index)
-  end
+
+  tabs = [
+    link_to(:glossary_term_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

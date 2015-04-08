@@ -1,8 +1,9 @@
 <%
   @title ||= :list_specimens_title.t
 
-  new_tab_set do
-    add_tabs(@links) if @links && @links.any?
+  if @links && @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
   end
 
   flash_error(@error) if @error && (!@objects || @objects.empty?)

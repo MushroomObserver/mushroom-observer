@@ -2,33 +2,36 @@
   @title = :image_show_title.t(name: @image.unique_format_name)
 
   # Put controls and info to right of image unless it is too big.
-  right_links = []
+  tabs = []
   if @image.observations.length == 1
     obs = @image.observations.first
-    right_links << link_with_query(:show_object.t(type: :observation),
-                                   controller: :observer, action: :show_observation, id: obs.id)
-    right_links << link_with_query(:show_object.t(type: :name),
-                                   controller: :name, action: :show_name, id: obs.name.id)
-    right_links << link_to(:google_images.t, "http://images.google.com/images?q=%s" % obs.text_name)
+    tabs += [
+      link_with_query(:show_object.t(type: :observation),
+                      controller: :observer, action: :show_observation, id: obs.id),
+      link_with_query(:show_object.t(type: :name),
+                      controller: :name, action: :show_name, id: obs.name.id),
+      link_to(:google_images.t, "http://images.google.com/images?q=%s" % obs.text_name)
+    ]
   end
   if eol_url = @image.eol_url
-    right_links << link_to("EOL", eol_url)
+    tabs << link_to("EOL", eol_url)
   end
   if check_permission(@image)
-    right_links << link_with_query(:edit_object.t(type: :image),
-                                   {action: :edit_image, id: @image.id})
-    right_links << link_with_query(:destroy_object.t(type: :image),
-                                   {action: :destroy_image, id: @image.id},
-                                   {data: {confirm: :are_you_sure.l}})
+    tabs += [
+      link_with_query(:edit_object.t(type: :image),
+                      action: :edit_image, id: @image.id),
+      link_with_query(:destroy_object.t(type: :image),
+                      {action: :destroy_image, id: @image.id},
+                      data: {confirm: :are_you_sure.l})
+    ]
   end
   if @image.user.email_general_commercial
-    right_links << link_with_query(:image_show_inquiry.t,
-                                   controller: :observer, action: :commercial_inquiry, id: @image.id)
+    tabs << link_with_query(:image_show_inquiry.t, controller: :observer,
+                            action: :commercial_inquiry, id: @image.id)
   end
-
   @tabsets = {
     pager_for: @image,
-    right: render({partial: "/shared/tab_set", locals: {links: right_links}})
+    right: draw_tab_set(tabs)
   }
 %>
 
@@ -129,7 +132,7 @@
                   <%= link_to(@image.license.display_name.t, @image.license.url) %>
                 </td>
                 <td>
-                  <%= image_copyright(@image, false) %>
+                  <%= image_copyright(@image) %>
                 </td>
               </tr>
             </tbody>
@@ -268,7 +271,9 @@
 <div class="row">
   <div class="col-sm-6 max-width-text">
     <div class="small text-center">
-      <%= image_copyright(@image) %>
+      <div>
+        <%= image_copyright(@image) %>
+      </div>
       <div class="slight-pad push-up">
         <%= render(partial: "shared/form_#{@image.license.form_name}") %>
       </div>

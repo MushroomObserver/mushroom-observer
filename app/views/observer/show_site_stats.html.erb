@@ -1,10 +1,11 @@
 <%
   @title = :show_site_stats_title.t
 
-  new_tab_set do
-    add_tab(:app_contributors.t, action: :users_by_contribution)
-    add_tab(:site_stats_observed_taxa.t, action: :checklist)
-  end
+  tabs = [
+    link_to(:app_contributors.t, action: :users_by_contribution),
+    link_to(:site_stats_observed_taxa.t, action: :checklist)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row push-down">

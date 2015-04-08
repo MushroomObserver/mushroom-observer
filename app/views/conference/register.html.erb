@@ -1,9 +1,12 @@
 <%
   @title = :register_event_title.t + " " + @event.name
-  new_tab_set do
-    add_tab(:cancel_and_show.t(type: "Conference Event"), action: :show_event, id: @event.id)
-    add_tab(:event_index.t, action: :index)
-  end
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :conference_event), action: :show_event,
+            id: @event.id),
+    link_to(:event_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

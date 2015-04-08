@@ -1,13 +1,14 @@
 <%
-   @title = :prefs_title.t
+  @title = :prefs_title.t
 
-   new_tab_set do
-     add_tab(:bulk_license_link.t, controller: :image, action: :license_updater)
-     add_tab(:prefs_change_image_vote_anonymity.t, controller: :image, action: :bulk_vote_anonymity_updater)
-     add_tab(:profile_link.t, controller: :account, action: :profile)
-     add_tab(:show_user_your_notifications.t, controller: :interest, action: :list_interests)
-     add_tab(:account_api_keys_link.t, controller: :account, action: :api_keys)
-   end
+  tabs = [
+    link_to(:bulk_license_link.t, controller: :image, action: :license_updater),
+    link_to(:prefs_change_image_vote_anonymity.t, controller: :image, action: :bulk_vote_anonymity_updater),
+    link_to(:profile_link.t, action: :profile),
+    link_to(:show_user_your_notifications.t, controller: :interest, action: :list_interests),
+    link_to(:account_api_keys_link.t, action: :api_keys)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

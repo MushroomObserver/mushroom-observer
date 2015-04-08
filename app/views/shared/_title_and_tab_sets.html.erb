@@ -32,12 +32,11 @@
       <% end %>
     </div>
   </div>
-  <div id="right_tabs" class="col-sm-4 push-up" style="text-align: right">
-    <%= @tabsets[:right] %>
-    <% if @tab_sets %>
-      <small><%= render_tab_sets %></small>
-    <% end %>
-  </div>
+  <% if @tabsets[:right] %>
+    <div id="right_tabs" class="col-sm-4 push-up" style="text-align: right">
+      <%= @tabsets[:right] %>
+    </div>
+  <% end %>
 <% end %>
 
 <% if @sorts %>

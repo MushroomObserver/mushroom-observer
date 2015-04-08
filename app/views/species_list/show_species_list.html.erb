@@ -1,41 +1,44 @@
 <%
   @title = :species_list_show_title.t(name: @species_list.unique_format_name)
 
-  right_links = []
+  tabs = []
   if @user
-    right_links << link_with_query(:species_list_show_clone_list.t,
-                                   {action: :create_species_list, clone: @species_list.id},
-                                   {help: :species_list_show_clone_list_help.l})
-    right_links << link_with_query(:species_list_show_set_source.t,
-                                   {action: :show_species_list, id: @species_list.id,
-                                   set_source: 1},
-                                   {help: :species_list_show_set_source_help.l})
-    right_links << link_with_query(:species_list_show_bulk_edit.t,
-                                   {action: :bulk_editor, id: @species_list.id},
-                                   {help: :species_list_show_bulk_edit_help.l})
+    tabs += [
+      link_with_query(:species_list_show_clone_list.t,
+                      {action: :create_species_list, clone: @species_list.id},
+                      {help: :species_list_show_clone_list_help.l}),
+      link_with_query(:species_list_show_set_source.t,
+                      {action: :show_species_list, id: @species_list.id,
+                      set_source: 1},
+                      {help: :species_list_show_set_source_help.l}),
+      link_with_query(:species_list_show_bulk_edit.t,
+                      {action: :bulk_editor, id: @species_list.id},
+                      {help: :species_list_show_bulk_edit_help.l})
+    ]
   end
-
   if check_permission(@species_list)
-    right_links << link_with_query(:species_list_show_manage_projects.t,
-                                   action: :manage_projects, id: @species_list.id)
-    right_links << link_with_query(:species_list_show_edit.t,
-                                   action: :edit_species_list, id: @species_list.id)
-    right_links << link_with_query(:DESTROY.t,
-                                   {action: :destroy_species_list, id: @species_list.id},
-                                   {class: "text-danger", data: {confirm: :are_you_sure.l}})
+    tabs += [
+      link_with_query(:species_list_show_manage_projects.t,
+                      action: :manage_projects, id: @species_list.id),
+      link_with_query(:species_list_show_edit.t,
+                      action: :edit_species_list, id: @species_list.id),
+      link_with_query(:DESTROY.t,
+                      {action: :destroy_species_list, id: @species_list.id},
+                      {class: "text-danger", data: {confirm: :are_you_sure.l}})
+    ]
   end
-
-  right_links << link_with_query(:species_list_show_save_as_txt.t,
-                                 action: :make_report, id: @species_list.id, type: "txt")
-  right_links << link_with_query(:species_list_show_save_as_rtf.t,
-                                 action: :make_report, id: @species_list.id, type: "rtf")
-  right_links << link_with_query(:species_list_show_save_as_csv.t,
-                                 action: :make_report, id: @species_list.id, type: "csv")
-  right_links << draw_interest_icons(@species_list) if @user
-
+  tabs += [
+    link_with_query(:species_list_show_save_as_txt.t,
+                    action: :make_report, id: @species_list.id, type: "txt"),
+    link_with_query(:species_list_show_save_as_rtf.t,
+                    action: :make_report, id: @species_list.id, type: "rtf"),
+    link_with_query(:species_list_show_save_as_csv.t,
+                    action: :make_report, id: @species_list.id, type: "csv")
+  ]
+  tabs << draw_interest_icons(@species_list) if @user
   @tabsets = {
     pager_for: @species_list,
-    right: render(partial: "shared/tab_set", locals: {links: right_links})
+    right: draw_tab_set(tabs)
   }
 %>
 

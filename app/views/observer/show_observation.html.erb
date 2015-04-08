@@ -1,45 +1,47 @@
 <%
-   @title = :show_observation_title.t(:name => @observation.unique_format_name)
-   questions_ok = @observation.user.email_general_question
-   name = @observation.name
-   user_has_lists = @user && !@user.species_lists.empty?
-   right_links = []
-   javascript_include("vote_popup")
+  @title = :show_observation_title.t(:name => @observation.unique_format_name)
 
-   if name && !name.unknown?
-     right_links << link_to(:google_images.t, 'http://images.google.com/images?q=%s' % name.real_text_name)
-     right_links << link_with_query(:show_name_distribution_map.t, {controller: 'name',
-                                                                    action: 'map', id: name.id})
-   end
-   if questions_ok && @user != @observation.user
-     right_links << link_with_query(:show_observation_send_question.t,
-                                    :controller => 'observer', :action => 'ask_observation_question',
-                                    :id => @observation.id)
-   end
-   if @user && @user.has_unshown_naming_notifications?(@observation)
-     right_links << link_with_query(:show_observation_view_notifications.t,
-                                    controller: 'observation', action: 'show_notifications', id: @observation.id)
-   end
-   if user_has_lists
-     right_links << link_with_query(:show_observation_manage_species_lists.t,
-                                    {controller: 'species_list', action: 'manage_species_lists',
-                                     id: @observation.id})
-   end
-   if @mappable
-     right_links << link_with_query(:MAP.t, controller: 'location', action: 'map_locations')
-   end
-   if check_permission(@observation)
-     right_links << link_with_query(:show_observation_edit_observation.t,
-                                    {controller: 'observer', action: 'edit_observation', id: @observation.id})
-     right_links << link_with_query(:DESTROY.t, {controller: 'observer', action: 'destroy_observation', id: @observation.id},
-                                    {class: "text-danger", data: {confirm: :are_you_sure.l}})
-   end
+  questions_ok = @observation.user.email_general_question
+  name = @observation.name
+  user_has_lists = @user && !@user.species_lists.empty?
+  javascript_include("vote_popup")
 
-   @tabsets = {
-           pager_for: @observation,
-           right: render(partial: '/shared/tab_set', locals: {links: right_links << draw_interest_icons(@observation)})
-   }
+  tabs = []
+  if name && !name.unknown?
+    tabs << link_to(:google_images.t, 'http://images.google.com/images?q=%s' % name.real_text_name)
+    tabs << link_with_query(:show_name_distribution_map.t, {controller: 'name',
+                            action: 'map', id: name.id})
+  end
+  if questions_ok && @user != @observation.user
+    tabs << link_with_query(:show_observation_send_question.t,
+                            :controller => 'observer', :action => 'ask_observation_question',
+                            :id => @observation.id)
+  end
+  if @user && @user.has_unshown_naming_notifications?(@observation)
+    tabs << link_with_query(:show_observation_view_notifications.t,
+                            controller: 'observation', action: 'show_notifications', id: @observation.id)
+  end
+  if user_has_lists
+    tabs << link_with_query(:show_observation_manage_species_lists.t,
+                            {controller: 'species_list', action: 'manage_species_lists',
+                            id: @observation.id})
+  end
+  if @mappable
+    tabs << link_with_query(:MAP.t, controller: 'location', action: 'map_locations')
+  end
+  if check_permission(@observation)
+    tabs << link_with_query(:show_observation_edit_observation.t,
+                            {controller: 'observer', action: 'edit_observation', id: @observation.id})
+    tabs << link_with_query(:DESTROY.t, {controller: 'observer', action: 'destroy_observation', id: @observation.id},
+                            {class: "text-danger", data: {confirm: :are_you_sure.l}})
+  end
+  tabs << draw_interest_icons(@observation)
+  @tabsets = {
+    pager_for: @observation,
+    right: draw_tab_set(tabs)
+  }
 %>
+
 <div class="row">
   <div class="col-sm-8">
     <div class="list-group">

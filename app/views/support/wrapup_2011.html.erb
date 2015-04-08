@@ -1,9 +1,11 @@
 <%
   @title = :wrapup_2011_title.l
-  new_tab_set do
-    add_tab(:donate_tab.t, action: :donate)
-    add_tab(:donors_tab.t, action: :donors)
-  end
+
+  tabs = [
+    link_to(:donate_tab.t, action: :donate),
+    link_to(:donors_tab.t, action: :donors)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

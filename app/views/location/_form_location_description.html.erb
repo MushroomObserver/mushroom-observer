@@ -1,10 +1,7 @@
-<!--[form:location_description]-->
-
-<%= render(:partial => 'shared/form_description',
-           :locals => {form: form}) %>
+<%= render(partial: "shared/form_description", locals: {form: form}) %>
 
 <label><%= :DESCRIPTION.t %>:</label><br/>
-<%= render(:partial => 'shared/textilize_help') %>
+<%= render(partial: "shared/textilize_help") %>
 <br/>
 
 <% for f in LocationDescription.all_note_fields %>
@@ -14,5 +11,3 @@
     <%= form.text_area(f, cols: 80, autofocus: f == :gen_desc) %>
   </p>
 <% end %>
-
-<!--[eoform:location_description]-->

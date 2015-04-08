@@ -1,9 +1,12 @@
 <%
   @title = :edit_glossary_term_title.t(name: @glossary_term.name)
-  new_tab_set do
-    add_tab(:cancel_and_show.t(type: :glossary_term), action: :show_glossary_term, id:  @glossary_term.id)
-    add_tab(:glossary_term_index.t, action: :index)
-  end
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :glossary_term),
+            action: :show_glossary_term, id: @glossary_term.id),
+    link_to(:glossary_term_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
