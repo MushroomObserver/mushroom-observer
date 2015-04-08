@@ -1,12 +1,18 @@
 <%
   @title = @herbarium.name.t
   @title += " (#{@herbarium.code.t})".html_safe if !@herbarium.code.blank?
+
   map = @herbarium.location ? true : false
-  new_tab_set do
-    add_tab(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id) if @herbarium.is_curator?(@user) || is_in_admin_mode?
-    add_tab(:create_herbarium.t, action: :create_herbarium)
-    add_tab(:herbarium_index.t, action: :index)
+
+  tabs = []
+  if @herbarium.is_curator?(@user) || is_in_admin_mode?
+    tabs << link_to(:edit_herbarium.t, action: :edit_herbarium, id: @herbarium.id)
   end
+  tabs += [
+    link_to(:create_herbarium.t, action: :create_herbarium),
+    link_to(:herbarium_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

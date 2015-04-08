@@ -1,13 +1,11 @@
 <%
   @title = :add_specimen_title.l
 
-  right_links = [
+  tabs = [
     link_with_query(:add_specimen_cancel.t, @observation.show_link_args),
     link_with_query(:herbarium_index.t, controller: :herbarium, action: :index)
   ]
-  @tabsets = {
-    right: render(partial: "/shared/tab_set", locals:{ links: right_links })
-  }
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

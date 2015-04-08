@@ -1,9 +1,10 @@
 <%
   @title ||= :add_project_title.t
 
-  new_tab_set do
-    add_tab(:app_list_projects.t, action: :list_projects)
-  end
+  tabs = [
+    link_to(:app_list_projects.t, action: :list_projects)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

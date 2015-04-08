@@ -28,12 +28,15 @@
 #  truncate_bytesize!:: Truncate so that *binary* length ia within given limit
 #  is_ascii_character?:: Does string start with ASCII character?
 #  is_nonascii_character?:: Does string start with non-ASCII character?
-#  percent_match::       Measure how closely this String matches another String.
-#  unindent::            Remove indentation (e.g., from here docs).
+#  percent_match::      Measure how closely this String matches another String.
+#  unindent::           Remove indentation (e.g., from here docs).
+#  md5sum::             Calculate MD5 sum.
 #
 ################################################################################
-#
+
 class String
+  require "digest/md5"
+
   # :stopdoc:
   unless defined? UTF_TO_ASCII
     # This should cover most everything we'll see, at least all the European
@@ -649,5 +652,10 @@ class String
   # Find amount first line is indented and remove that from all lines.
   def unindent
     gsub /^#{self[/\A\s*/]}/, ""
+  end
+
+  # Returns the MD5 sum.
+  def md5sum
+    Digest::MD5.hexdigest(self)
   end
 end

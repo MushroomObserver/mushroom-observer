@@ -1,9 +1,12 @@
 <%
   @title ||= :list_herbaria_title.t
-  new_tab_set do
-    add_tab(:create_herbarium.t, action: :create_herbarium)
-    add_tabs(@links)
-  end
+
+  tabs = [
+    link_to(:create_herbarium.t, action: :create_herbarium)
+  ]
+  tabs += @links.map {|str,url| link_to(str,url)} if @links
+  @tabsets = { right: draw_tab_set(tabs) }
+
   flash_error(@error) if @error && (!@objects || @objects.empty?)
 %>
 

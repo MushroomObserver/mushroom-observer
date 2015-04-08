@@ -1,9 +1,10 @@
 <%
   @title = :specimen_index_title.t(subject: @subject)
 
-  new_tab_set do
-    add_tab(:herbarium_index.t, controller: :herbarium, action: :index)
-  end
+  tabs = [
+    link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <table class="table table-striped" width="100%">

@@ -1,15 +1,20 @@
 <%
   @title = "Specimen '#{@specimen.herbarium_label}'"
-  herbarium = @specimen.herbarium
 
-  new_tab_set do
-    if is_in_admin_mode? || @specimen.can_edit?(@user)
-      add_tab(:edit_specimen.t, action: :edit_specimen, id: @specimen.id)
-    end
-    add_tab(:herbarium_delete_specimen.t, action: :delete_specimen,
-            id: @specimen.id, data: {confirm: :are_you_sure.t})
-    add_tab(:herbarium_index.t, controller: :herbarium, action: :index)
+  tabs = []
+  if is_in_admin_mode? || @specimen.can_edit?(@user)
+    tabs += [
+      link_to(:edit_specimen.t, action: :edit_specimen, id: @specimen.id)
+    ]
   end
+  tabs += [
+    link_to(:herbarium_delete_specimen.t, action: :delete_specimen,
+            id: @specimen.id, data: {confirm: :are_you_sure.t}),
+    link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  herbarium = @specimen.herbarium
 %>
 
 <div class="row">

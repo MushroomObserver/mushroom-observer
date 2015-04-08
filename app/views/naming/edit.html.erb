@@ -3,13 +3,11 @@
   @reason = @params.reason
   @title = :edit_naming_title.t(id: @observation.id)
 
-  right_tabs = [
-    link_with_query(:cancel_and_show.t(type: :observation), @observation.show_link_args)
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args)
   ]
-
-  @tabsets = {
-    right: render(partial: "shared/tab_set", locals: { links: right_tabs })
-  }
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= form_tag(add_query_param(action: :edit, id: @params.naming.id,

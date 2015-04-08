@@ -1,9 +1,14 @@
 <%
-  @title = :show_past_glossary_term_title.t(num: @glossary_term.version, name: @glossary_term.name)
-  new_tab_set do
-    add_tab(:show_glossary_term.t(glossary_term: @glossary_term.name),
+  @title = :show_past_glossary_term_title.t(
+    num: @glossary_term.version,
+    name: @glossary_term.name
+  )
+
+  tabs = [
+    link_to(:show_glossary_term.t(glossary_term: @glossary_term.name),
             action: :show_glossary_term, id: @glossary_term.id)
-  end
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

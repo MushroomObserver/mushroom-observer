@@ -1,9 +1,10 @@
 <%
   @title = :name_lister_title.t
 
-  new_tab_set do
-    add_tab(:name_lister_classic.t, action: :create_species_list)
-  end
+  tabs = [
+    link_to(:name_lister_classic.t, action: :create_species_list)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 
   javascript_include "name_lister"
   javascript_include "/name_list_data.js"  # leading slash should take it out of asset pipeline

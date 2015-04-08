@@ -4,12 +4,15 @@
     title: @project.title
   )
 
-  new_tab_set do
-    add_tab(:app_list_projects.t, action: :list_projects)
-    add_tab_with_query(:change_member_status_edit.t, action: :edit_project,
-                       id: @project.id) if check_permission(@project)
-    add_tab_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+  tabs = [
+    link_to(:app_list_projects.t, action: :list_projects),
+    link_with_query(:cancel_and_show.t(type: :project), @project.show_link_args)
+  ]
+  if check_permission(@project)
+    tabs << link_with_query(:change_member_status_edit.t, action: :edit_project,
+                            id: @project.id)
   end
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

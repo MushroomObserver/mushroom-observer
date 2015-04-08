@@ -1652,7 +1652,7 @@ class ObserverController < ApplicationController
   # SpeciesList or the entire site.
   def checklist # :nologin: :norobots:
     store_location
-    user_id = params[:user_id]
+    user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]
     if !user_id.blank?

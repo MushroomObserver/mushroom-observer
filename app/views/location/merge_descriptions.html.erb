@@ -1,13 +1,18 @@
 <%
-  @title ||= :merge_descriptions_title.t(:object => @description.format_name)
+  @title ||= :merge_descriptions_title.t(object: @description.format_name)
 
-  new_tab_set do
-    add_tab_with_query(:show_object.t(:type => :location),
-      :action => 'show_location', :id => @description.parent_id)
-    add_tab_with_query(:show_object.t(:type => :location_description),
-      :action => 'show_location_description', :id => @description.id)
-  end
+  tabs = [
+    link_with_query(:show_object.t(type: :location),
+                    @description.location.show_link_args),
+    link_with_query(:show_object.t(type: :location_description),
+                    @description.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= render(:partial => 'shared/merge_descriptions', :locals =>
-           {description: @description}) %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= render(partial: "shared/merge_descriptions",
+               locals: {description: @description}) %>
+  </div>
+</div>

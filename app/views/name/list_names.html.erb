@@ -1,17 +1,12 @@
 <%
-   right_links = [
-           link_to(:name_index_add_name.t, {action: :create_name}, {style: "font-size: 1.2em"}),
-           link_to(:name_index_bulk_edit.t, :action => 'bulk_name_edit')]
+  tabs = [
+    link_to(:name_index_add_name.t, action: :create_name),
+    link_to(:name_index_bulk_edit.t, action: :bulk_name_edit)
+  ]
+  tabs += @links.map {|str,url| link_to(str, url)} if @links
+  @tabsets = { right: draw_tab_set(tabs) }
 
-   if @links
-     @links.each do |name, link|
-       right_links << link_to(name, link)
-     end
-   end
-
-   @tabsets = {right: render(partial: "shared/tab_set", locals: {links: right_links})}
-
-   flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && (!@objects || @objects.empty?)
 %>
 
 <% if @suggest_alternate_spellings and @objects.empty?

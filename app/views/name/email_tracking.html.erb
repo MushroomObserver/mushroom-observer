@@ -1,10 +1,11 @@
 <%
   @title = :email_tracking_title.t(:name => @name.display_name)
 
-  new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :name),
+  tabs = [
+    link_to(:cancel_and_show.t(:type => :name),
             :action => 'show_name', :id => @name.id)
-  end
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= :email_tracking_help.tp %>

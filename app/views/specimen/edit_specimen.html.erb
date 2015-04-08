@@ -1,11 +1,13 @@
 <%
   @title = :edit_specimen_title.l(herbarium_label: @specimen.herbarium_label)
-  herbarium = @specimen.herbarium
 
-  new_tab_set do
-    add_tab(:cancel_and_show.t(type: :specimen), @specimen.show_link_args)
-    add_tab(:herbarium_index.t, controller: :herbarium, action: :index)
-  end
+  tabs = [
+    link_to(:cancel_and_show.t(type: :specimen), @specimen.show_link_args),
+    link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  herbarium = @specimen.herbarium
 %>
 
 <div class="row">

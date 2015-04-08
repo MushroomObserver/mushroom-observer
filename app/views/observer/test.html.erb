@@ -4,42 +4,41 @@
   <input type="submit" value="submit" class="btn"/>
 </form>
 
-
 <% if false %>
-<%
-  @title = "This is a test page, let's give it a much longer title just to see what happens when we do something like this"
+  <%
+    @title = "This is a test page, let's give it a much longer title just to see what happens when we do something like this"
 
-  new_tab_set do
-    add_tab("Action One", "/")
-    add_tab("Action Two", "/")
-    add_tab("Action Three", "/")
-  end
+    tabs = [
+      link_to("Action One", "/")
+      link_to("Action Two", "/")
+      link_to("Action Three", "/")
+    ]
+    tabs << draw_interest_icons(Observation.first)
+    @tabsets = { right: draw_tab_set(tabs) }
+  %>
 
-  draw_interest_icons(Observation.first)
-%>
+  <% left_content do %>
+  <p>This is left-hand content.</p>
 
-<% left_content do %>
-<p>This is left-hand content.</p>
+  <p>Actually I did think hard about Pertusaria and became pretty sure about this being Loxosporopsis. I have not been able to look at Brodo and Henssen (1995). McCune’s “Key to the Lichen Genera of the Pacific Northwest” has the isidia of L. corallifera less than 0.2mm diameter (this specimen’s are 0.125) and Pertusaria greater than 0.2mm diameter. However, now I see in Nash, T.H., Ryan, B.D., Gries, C., Bugartz, F., (eds.) 2001. Lichen Flora of the Greater Sonoran Desert Region. Vol 1. the isidia of P. pseudocorallina 0.12 – 0.24mm diameter. Nowhere do find its substrate listed as other than rock though. Certainly the isidia of this specimen are mostly very short for L. corallifera. On Tuesday I’ll try UV which should be positive for L. corallifera and negative for P. pseudocorallina. There was quite a lot of this on the Doug Fir trunk, so next time I’m up that way I’ll look at the rest of it.</p>
 
-<p>Actually I did think hard about Pertusaria and became pretty sure about this being Loxosporopsis. I have not been able to look at Brodo and Henssen (1995). McCune’s “Key to the Lichen Genera of the Pacific Northwest” has the isidia of L. corallifera less than 0.2mm diameter (this specimen’s are 0.125) and Pertusaria greater than 0.2mm diameter. However, now I see in Nash, T.H., Ryan, B.D., Gries, C., Bugartz, F., (eds.) 2001. Lichen Flora of the Greater Sonoran Desert Region. Vol 1. the isidia of P. pseudocorallina 0.12 – 0.24mm diameter. Nowhere do find its substrate listed as other than rock though. Certainly the isidia of this specimen are mostly very short for L. corallifera. On Tuesday I’ll try UV which should be positive for L. corallifera and negative for P. pseudocorallina. There was quite a lot of this on the Doug Fir trunk, so next time I’m up that way I’ll look at the rest of it.</p>
+  <p>(I do have a typical specimen and slides of L. corallifera with long isidia from Tahuya State Forest, Washington, lost somewhere in the swamp.)</p>
 
-<p>(I do have a typical specimen and slides of L. corallifera with long isidia from Tahuya State Forest, Washington, lost somewhere in the swamp.)</p>
+  <p>(I’m reminded of the Pertusaria corallifera in Iceland for which I will create an observation.</p>
 
-<p>(I’m reminded of the Pertusaria corallifera in Iceland for which I will create an observation.</p>
+  <p>Its a monotypic genus in the Pertusariaceae.I entered this observation as Loxosporopsis corallifera, but for some reason it came up as L. sp., and for some reason I was not and have not been able to edit it (including adding to word isidia to ca. 0.125 diameter).</p>
 
-<p>Its a monotypic genus in the Pertusariaceae.I entered this observation as Loxosporopsis corallifera, but for some reason it came up as L. sp., and for some reason I was not and have not been able to edit it (including adding to word isidia to ca. 0.125 diameter).</p>
+  <% end %>
 
-<% end %>
+  <% right_content do %>
+  <p>This is right-hand content.</p>
 
-<% right_content do %>
-<p>This is right-hand content.</p>
-
-<img src="/design_test/208981.jpg"/><br/>
-<img src="/design_test/208982.jpg"/><br/>
-<img src="/design_test/208983.jpg"/><br/>
-<img src="/design_test/208984.jpg"/><br/>
-<img src="/design_test/208985.jpg"/><br/>
-<img src="/design_test/208986.jpg"/><br/>
-<% end %>
+  <img src="/design_test/208981.jpg"/><br/>
+  <img src="/design_test/208982.jpg"/><br/>
+  <img src="/design_test/208983.jpg"/><br/>
+  <img src="/design_test/208984.jpg"/><br/>
+  <img src="/design_test/208985.jpg"/><br/>
+  <img src="/design_test/208986.jpg"/><br/>
+  <% end %>
 <% end %>
 
