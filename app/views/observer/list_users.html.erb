@@ -1,7 +1,7 @@
 <%
    @title ||= :users_by_name_title.t
 
-   flash_error(@error) if @error and (!@objects or @objects.empty?)
+   flash_error(@error) if @error && @objects.empty?
 %>
 
 <%
@@ -49,20 +49,10 @@
    #  Normal version.
    # ----------------------------
    else %>
-    <div class="row">
-      <div class="col-xs-12">
-        <%= pagination_letters(@pages) %><br/>
-        <%= pagination_numbers(@pages) %>
+    <%= paginate_block(@pages) do %>
+      <div class="row">
+        <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>
       </div>
-    </div>
-    <div class="row">
-      <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>
-    </div>
-    <div class="row">
-      <div class="col-xs-12">
-        <%= pagination_numbers(@pages) %><br/>
-        <%= pagination_letters(@pages) %>
-      </div>
-    </div>
+    <% end %>
 <% end %>
 

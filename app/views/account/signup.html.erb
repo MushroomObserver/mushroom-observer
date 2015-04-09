@@ -1,42 +1,40 @@
-<% @title = :signup_title.t %>
+<%
+  @title = :signup_title.t
+%>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_tag(action: :signup) do %>
-      
-      <div class="form-group push-down">
-        <%= label(:new_user, :login, :signup_login.t) %>:
-        <%= text_field(:new_user, :login, data: {autofocus: true}, class: "form-control") %>
-      </div>
+<div class="max-width-text">
+  <%= form_tag(action: :signup) do %>
+    <div class="form-group push-down">
+      <%= label_tag(:new_user_login, :signup_login.t + ":") %>
+      <%= text_field(:new_user, :login, data: {autofocus: true}, class: "form-control") %>
+    </div>
 
-      <div class="form-group push-down">
-        <%= label(:new_user, :password, :signup_choose_password.t) %>:
-        <%= password_field(:new_user, :password, value: @new_user.password, class: "form-control") %>
-      </div>
+    <div class="form-group push-down">
+      <%= label_tag(:new_user_password, :signup_choose_password.t + ":") %>
+      <%= password_field(:new_user, :password, value: @new_user.password, class: "form-control") %>
+    </div>
 
-      <div class="form-group push-down">
-        <%= label(:new_user, :password_confirmation, :signup_confirm_password.t) %>:
-        <%= password_field(:new_user, :password_confirmation, class: "form-control") %>
-      </div>
+    <div class="form-group push-down">
+      <%= label_tag(:new_user_password_confirmation, :signup_confirm_password.t + ":") %>
+      <%= password_field(:new_user, :password_confirmation, class: "form-control") %>
+    </div>
 
-      <div class="form-group push-down">
-        <%= label(:new_user, :email, :signup_email_address.t) %>:
-        <%= text_field(:new_user, :email, class: "form-control") %>
-        <div class="HelpNote"><%= :signup_email_help.tp %></div>
-      </div>
+    <div class="form-group push-down">
+      <%= label_tag(:new_user_email, :signup_email_address.t + ":") %>
+      <%= text_field(:new_user, :email, class: "form-control") %>
+      <div class="HelpNote"><%= :signup_email_help.tp %></div>
+    </div>
 
-      <div class="form-group push-down">
-        <%= label(:new_user, :name, :signup_name.t) %>:
-        <%= text_field(:new_user, :name, class: "form-control") %>
-      </div>
+    <div class="form-group push-down">
+      <%= label_tag(:new_user_name, :signup_name.t + ":") %>
+      <%= text_field(:new_user, :name, class: "form-control") %>
+    </div>
 
-      <div class="form-group push-down">
-        <%= label(:new_user, :theme, :signup_preferred_theme.t) %>:
-        <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + MO.themes, class: "form-control") %>
-      </div>
+    <div class="form-group push-down">
+      <%= label_tag(:new_user_theme, :signup_preferred_theme.t + ":") %>
+      <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + MO.themes, class: "form-control") %>
+    </div>
 
-      <%= submit_tag(:signup_button.l, class: "btn center-block push-down") %>
-
-    <% end %>
-  </div>
+    <%= submit_tag(:signup_button.l, class: "btn center-block push-down") %>
+  <% end %>
 </div>

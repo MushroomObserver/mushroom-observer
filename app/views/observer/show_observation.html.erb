@@ -3,7 +3,7 @@
 
   questions_ok = @observation.user.email_general_question
   name = @observation.name
-  user_has_lists = @user && !@user.species_lists.empty?
+  user_has_lists = @user && @user.species_lists.any?
   javascript_include("vote_popup")
 
   tabs = []

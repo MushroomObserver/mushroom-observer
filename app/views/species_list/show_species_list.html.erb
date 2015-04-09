@@ -63,7 +63,7 @@
   </div>
 </div>
 
-<% if @pages && @pages.any? && @objects && @objects.any?
+<% if @pages.any?
   set_query_params(@query) %>
 
   <div class="row">
@@ -89,29 +89,31 @@
             <% end %>
           </div>
 
-          <% @objects.each do |observation| %>
-            <div class="list-group-item">
-              <div class="row">
-                <div class="col-sm-4 col-md-3 col-lg-2">
-                  <%= if observation.thumb_image_id
-                    thumbnail(observation.thumb_image,
-                              link: observation.show_link_args,
-                              votes: true)
-                  end %>
-                </div>
-                <div class="col-sm-8 col-md-9 col-lg-10">
-                  <div class="bold">
-                    <%= link_with_query(observation.unique_format_name.t,
-                                        observation.show_link_args) %>
+          <% if @objects.any? %>
+            <% for observation in @objects %>
+              <div class="list-group-item">
+                <div class="row">
+                  <div class="col-sm-4 col-md-3 col-lg-2">
+                    <%= if observation.thumb_image_id
+                      thumbnail(observation.thumb_image,
+                                link: observation.show_link_args,
+                                votes: true)
+                    end %>
                   </div>
-                  <div>
-                    <b><%= location_link(observation.place_name, observation.location) %></b><br/>
-                    <span><%= user_link(observation.user) %></span>:
-                    <span><%= observation.when.web_date %></span>
+                  <div class="col-sm-8 col-md-9 col-lg-10">
+                    <div class="bold">
+                      <%= link_with_query(observation.unique_format_name.t,
+                                          observation.show_link_args) %>
+                    </div>
+                    <div>
+                      <b><%= location_link(observation.place_name, observation.location) %></b><br/>
+                      <span><%= user_link(observation.user) %></span>:
+                      <span><%= observation.when.web_date %></span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            <% end %>
           <% end %>
 
         </div>

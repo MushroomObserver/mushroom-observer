@@ -8,10 +8,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_tag(action: :edit_herbarium, id: @herbarium) do %>
-      <%= render(partial: "form", locals: {button: :edit_herbarium_save}) %>
-    <% end %>
-  </div>
+<div class="max-width-text">
+  <%= form_tag(action: :edit_herbarium, id: @herbarium) do %>
+    <%= render(partial: "form", locals: {button: :edit_herbarium_save}) %>
+  <% end %>
 </div>

@@ -13,21 +13,17 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-
-    <center class="push-down push-up">
-      <table class="table-striped table-donors">
-        <% for donor in @donor_list %>
-          <tr>
-            <td>
-              <%= donor["who"] %>
-            </td>
-          </tr>
-        <% end %>
-      </table>
-    </center>
-
-    <%= :donors_order.tp %>
-  </div>
+<div class="max-width-text">
+  <center>
+    <table class="table-striped table-donors push-down push-up">
+      <% for donor in @donor_list %>
+        <tr>
+          <td>
+            <%= donor["who"] %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </center>
+  <%= :donors_order.tp %>
 </div>

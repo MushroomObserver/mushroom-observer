@@ -7,10 +7,8 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_tag(action: :create_herbarium) do %>
-      <%= render(partial: "form", locals: {button: :create_herbarium_add}) %>
-    <% end %>
-  </div>
+<div class="max-width-text">
+  <%= form_tag(action: :create_herbarium) do %>
+    <%= render(partial: "form", locals: {button: :create_herbarium_add}) %>
+  <% end %>
 </div>

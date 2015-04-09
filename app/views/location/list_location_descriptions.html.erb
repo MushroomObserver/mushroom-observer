@@ -6,23 +6,17 @@
   tabs += @links.map {|str,url| link_to(str, url)} if @links
   @tabsets = { right: draw_tab_set(tabs) }
 
-  flash_error(@error) if @error && (!@objects || @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="row">
-  <div class="col-xs-12">
-    <% if @pages && @pages.any? && @objects && @objects.any? %>
-      <%= paginate_block(@pages) do %>
-
-        <div class="list-group">
-          <% for desc in @objects %>
-            <div class="list-group-item">
-              <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
-            </div>
-          <% end %>
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <div class="list-group">
+      <% for desc in @objects %>
+        <div class="list-group-item">
+          <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
         </div>
-
       <% end %>
-    <% end %>
-  </div>
-</div>
+    </div>
+  <% end %>
+<% end %>

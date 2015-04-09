@@ -9,50 +9,33 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row"
-  <div class="col-xs-12">
-    <%= form_tag do %>
-      <%= submit_tag(:review_donations_update.l, class: "btn center-block") %>
+<%= form_tag do %>
+  <%= submit_tag(:review_donations_update.l, class: "btn center-block") %>
 
-      <center>
-        <table class="table-striped table-review-donations push-up push-down">
-          <thead>
-            <tr>
-              <% for label in [:review_reviewed, :review_id, :review_who, :review_anon, :review_amount, :review_email] %>
-                <th>
-                  <%= label.t %>
-                </td>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-            <% for d in @donations %>
-              <tr>
-                <td>
-                  <%= check_box(:reviewed, d.id, checked: d.reviewed, class: "form-control") %>
-                </td>
-                <td>
-                  <%= d.id %>
-                </td>
-                <td>
-                  <%= d.who %>
-                </td>
-                <td>
-                  <%= d.anonymous %>
-                </td>
-                <td>
-                  <%= d.amount %>
-                </td>
-                <td>
-                  <%= d.email %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </center>
+  <center>
+    <table class="table-striped table-review-donations push-up push-down">
+      <thead>
+        <tr>
+          <% for label in [:review_reviewed, :review_id, :review_who, :review_anon, :review_amount, :review_email] %>
+            <th><%= label.t %></td>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% for d in @donations %>
+          <tr>
+            <td><%= check_box(:reviewed, d.id, checked: d.reviewed,
+                              class: "form-control") %></td>
+            <td><%= d.id %></td>
+            <td><%= d.who %></td>
+            <td><%= d.anonymous %></td>
+            <td><%= d.amount %></td>
+            <td><%= d.email %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </center>
 
-      <%= submit_tag(:review_donations_update.l, class: "btn center-block") %>
-    <% end %>
-  </div>
-</div>
+  <%= submit_tag(:review_donations_update.l, class: "btn center-block") %>
+<% end %>

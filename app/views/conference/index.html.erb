@@ -9,19 +9,15 @@
   end
 %>
 
-<div class="row push-down">
-  <div class="col-xs-12">
-    <table class="table table-striped slight-pad">
-      <% for event in @events %>
-        <tr>
-          <td>
-            <%= link_to(event.name, action: :show_event, id: event.id) %>
-            <% if is_in_admin_mode? %>
-              [<%= link_to(:edit_event.t, action: :edit_event, id: event.id) %>]
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-  </div>
-</div>
+<table class="table table-striped slight-pad">
+  <% for event in @events %>
+    <tr>
+      <td>
+        <%= link_to(event.name, action: :show_event, id: event.id) %>
+        <% if is_in_admin_mode? %>
+          [<%= link_to(:edit_event.t, action: :edit_event, id: event.id) %>]
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+</table>

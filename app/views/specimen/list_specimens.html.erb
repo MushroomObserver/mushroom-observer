@@ -1,17 +1,17 @@
 <%
   @title ||= :list_specimens_title.t
 
-  if @links && @links.any?
+  if @links.any?
     tabs = @links.map {|str,url| link_to(str, url)}
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
-  flash_error(@error) if @error && (!@objects || @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
-  <% if @objects.length > 0 %>
-    <table class="table table-striped" width="100%">
+  <% if @objects.any? %>
+    <table class="table table-striped">
       <% for specimen in @objects
 				herbarium = specimen.herbarium %>
         <tr>

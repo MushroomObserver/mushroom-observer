@@ -903,8 +903,9 @@ thead tr {
     }
 }
 
-.table-herbarium,
 .table-curators,
+.table-description-permissions,
+.table-herbarium,
 .table-license-updater,
 .table-manage-species-lists,
 .table-project-members,
@@ -916,13 +917,15 @@ thead tr {
     }
 }
 
-.table-herbarium {
-    th:nth-child(2),
-    td:nth-child(2) {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 10em;
+.table-description-permissions {
+    th, td {
+        padding: 0.1em 0;
+        text-align: center;
+    }
+    th:first-child,
+    td:first-child {
+        padding: 0.1em 0.5em;
+        text-align: left;
     }
 }
 
@@ -930,6 +933,16 @@ thead tr {
     text-align: center;
     td {
         padding: 0.1em 1em;
+    }
+}
+
+.table-herbarium {
+    th:nth-child(2),
+    td:nth-child(2) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 10em;
     }
 }
 
@@ -1144,6 +1157,11 @@ thead tr {
 
 .max-width-text-plus-image {
     max-width: 850px; // 600px text column + 160pm max thumbnail
+}
+
+.vcenter {
+    display: flex;
+    align-items: center;
 }
 
 //

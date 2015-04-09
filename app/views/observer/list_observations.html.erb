@@ -1,16 +1,16 @@
 <%
-  if @links && @links.any?
+  if @links.any?
     tabs = @links.map {|str,url| link_to(str, url)}
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
   <div class="col-xs-12">
-    <% if @suggest_alternate_spellings and @objects.empty?
+    <% if @suggest_alternate_spellings && @objects.empty?
          names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
          if names.any? %>
-            <div class="Warnings">
+            <div class="alert-warning">
               <div><%= :list_observations_alternate_spellings.t %></div>
               <% names.sort_by(&:sort_name).each do |name| %>
                   <div>
@@ -22,15 +22,9 @@
         <% end %>
     <% end %>
   </div>
-  <% if @pages %>
-      <div class="col-xs-12">
-        <%= pagination_numbers(@pages) %>
-      </div>
+  <%= paginate_block(@pages) do %>
       <div class="row results push-down">
         <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object)  %>
         <div style="clear: left"></div>
-      </div>
-      <div class="col-xs-12">
-        <%= pagination_numbers(@pages) %>
       </div>
   <% end %>

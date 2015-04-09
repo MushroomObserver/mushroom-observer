@@ -4,7 +4,7 @@
     <div class="col-xs-12 max-width-text">
 
       <div class="form-group form-inline">
-        <%= label_tag(:img_id, :image_reuse_id.t) %>:
+        <%= label_tag(:img_id, :image_reuse_id.t + ":") %>
         <%= text_field_tag(:img_id, "", size: 8, data: {autofocus: true}, class: "form-control") %>
         <%= submit_tag(:image_reuse_reuse.l, class: "btn", style: "margin-left: 1em") %>
       </div>

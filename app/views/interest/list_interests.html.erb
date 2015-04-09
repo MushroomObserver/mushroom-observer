@@ -1,11 +1,10 @@
 <%
-  @targets ||= []
   flash_error(@error) if @error && !@targets.any?(&:target)
 %>
 
-<% if @targets.any?(&:target) %>
-  <%= paginate_block(@pages) do %>
-    <table class="table table-striped" width="100%">
+<%= paginate_block(@pages) do %>
+  <% if @targets.any?(&:target) %>
+    <table class="table table-striped">
       <% @targets.select(&:target).each do |item|
         obj = item.target %>
         <tr>

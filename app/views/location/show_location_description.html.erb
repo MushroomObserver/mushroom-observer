@@ -13,7 +13,6 @@
     <%= render(partial: "shared/show_description",
                locals: {description: @description}) %>
   </div>
-
   <div class="col-md-6 max-width-text">
     <%= show_alt_descriptions(@location, @projects) %>
   </div>
@@ -22,10 +21,8 @@
 <div class="row">
   <div class="col-xs-12 max-width-text-plus-padding">
     <%= render(partial: "location_description", object: @description) %>
-
     <%= render(partial: "comment/show_comments",
                locals: {object: @description, controls: true, limit: 10}) %>
-
     <div class="push-down">
       <%= show_object_footer(@description) %>
     </div>

@@ -1,11 +1,15 @@
-<% @title = :image_updater_title.t(user: @user.login) %>
+<%
+  @title = :image_updater_title.t(user: @user.login)
+%>
 
 <%= form_tag(action: :license_updater) do %>
   <div class="row">
     <div class="col-xs-12 max-width-text">
       <%= :image_updater_help.tp %>
     </div>
+  </div>
 
+  <div class="row">
     <div class="col-xs-12">
       <table class="table-striped table-license-updater">
         <thead>
@@ -56,7 +60,9 @@
         </tbody>
       </table>
     </div>
+  </div>
 
+  <div class="row">
     <div class="col-xs-12 max-width-text">
       <%= submit_tag(:image_updater_update.l, class: "btn center-block push-down") %>
     <% end %>

@@ -15,27 +15,25 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_tag(add_query_param(action: :change_member_status, id: @project.id,
-                                 candidate: @candidate.id)) do %>
+<div class="max-width-text">
+  <%= form_tag(add_query_param(action: :change_member_status, id: @project.id,
+                               candidate: @candidate.id)) do %>
 
-      <div class="form-group push-down">
-        <%= submit_tag(:change_member_status_make_member.l, class: "btn center-block push-up") %>
-        <%= :change_member_status_make_member_help.t %>
-      </div>
+    <div class="form-group push-down">
+      <%= submit_tag(:change_member_status_make_member.l, class: "btn center-block push-up") %>
+      <%= :change_member_status_make_member_help.t %>
+    </div>
 
-      <div class="form-group push-down">
-        <%= submit_tag(:change_member_status_remove_member.l, class: "btn center-block push-up") %>
-        <%= :change_member_status_remove_member_help.t %>
-      </div>
+    <div class="form-group push-down">
+      <%= submit_tag(:change_member_status_remove_member.l, class: "btn center-block push-up") %>
+      <%= :change_member_status_remove_member_help.t %>
+    </div>
 
-      <div class="form-group push-down">
-        <%= submit_tag(:change_member_status_make_admin.l, class: "btn center-block push-up") %>
-        <%= :change_member_status_make_admin_help.t %>
-      </div>
-    <% end %>
+    <div class="form-group push-down">
+      <%= submit_tag(:change_member_status_make_admin.l, class: "btn center-block push-up") %>
+      <%= :change_member_status_make_admin_help.t %>
+    </div>
+  <% end %>
 
-    <%= render(partial: "show_groups", locals: {project: @project}) %>
-  </div>
+  <%= render(partial: "show_groups", locals: {project: @project}) %>
 </div>

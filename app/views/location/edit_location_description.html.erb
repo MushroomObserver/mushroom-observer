@@ -14,23 +14,17 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_for(:description, url: add_query_param(
-           action: :edit_location_description,
-           id: @description.id,
-        )) do |form| %>
-      <%= submit_tag(:UPDATE.l, class: "btn center-block push-down") %>
+<div class="max-width-text">
+  <%= form_for(:description, url: add_query_param(
+         action: :edit_location_description,
+         id: @description.id,
+      )) do |form| %>
+    <%= render(partial: "form_location_description",
+               locals: { form: form, button: :UPDATE }) %>
 
-      <%= render(partial: "form_location_description",
-                 locals: { form: form }) %>
-
-      <%= submit_tag(:UPDATE.l, class: "btn center-block push-down") %>
-
-      <% if @merge %>
-        <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
-        <%= hidden_field_tag(:delete_after, @delete_after) %>
-      <% end %>
+    <% if @merge %>
+      <%= hidden_field_tag(:old_desc_id, @old_desc_id) %>
+      <%= hidden_field_tag(:delete_after, @delete_after) %>
     <% end %>
-  </div>
+  <% end %>
 </div>

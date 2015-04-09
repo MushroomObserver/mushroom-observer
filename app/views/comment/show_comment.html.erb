@@ -37,11 +37,9 @@
   }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>
-    <p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
-    <p><%= :comment_show_summary.t %>: <%= (@comment.summary).tl %></p>
-    <%= (:comment_show_comment.l + ": " + @comment.comment.to_s.html_safe).tpl %>
-  </div>
+<div class="max-width-text">
+  <p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>
+  <p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
+  <p><%= :comment_show_summary.t %>: <%= (@comment.summary).tl %></p>
+  <%= (:comment_show_comment.l + ": " + @comment.comment.to_s.html_safe).tpl %>
 </div>
