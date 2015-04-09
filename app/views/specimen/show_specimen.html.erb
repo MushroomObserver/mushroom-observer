@@ -3,9 +3,7 @@
 
   tabs = []
   if is_in_admin_mode? || @specimen.can_edit?(@user)
-    tabs += [
-      link_to(:edit_specimen.t, action: :edit_specimen, id: @specimen.id)
-    ]
+    tabs << link_to(:edit_specimen.t, action: :edit_specimen, id: @specimen.id)
   end
   tabs += [
     link_to(:herbarium_delete_specimen.t, action: :delete_specimen,
@@ -17,30 +15,28 @@
   herbarium = @specimen.herbarium
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
+<div class="max-width-text">
+  <p>
+    <%= :HERBARIUM.t %>: <%= link_to(herbarium.name, herbarium.show_link_args) %><br/>
+    <%= :specimen_herbarium_label.t %>: <%= @specimen.herbarium_label %><br/>
+    <%= :specimen_user.t %>: <%= @specimen.user.legal_name %><br/>
+    <%= :specimen_when.t %>: <%= @specimen.when.web_date %>
+  </p>
+
+  <% if !@specimen.notes.blank? %>
+    <%= ( :specimen_notes.l + ":\n\n" + @specimen.notes ).tpl %>
+  <% end %>
+
+  <%= render(partial: "shared/matrix_box", collection: @specimen.observations, as: :object) %>
+
+  <center>
     <p>
-      <%= :HERBARIUM.t %>: <%= link_to(herbarium.name, herbarium.show_link_args) %><br/>
-      <%= :specimen_herbarium_label.t %>: <%= @specimen.herbarium_label %><br/>
-      <%= :specimen_user.t %>: <%= @specimen.user.legal_name %><br/>
-      <%= :specimen_when.t %>: <%= @specimen.when.web_date %>
+      <% if @specimen.created_at %>
+        <%= :specimen_created_at.t %>: <%= @specimen.created_at.web_date %><br/>
+      <% end %>
+      <% if @specimen.updated_at %>
+        <%= :specimen_updated_at.t %>: <%= @specimen.updated_at.web_date %><br/>
+      <% end %>
     </p>
-
-    <% if @specimen.notes && !@specimen.notes.empty? %>
-      <%= ( :specimen_notes.l + ":\n\n" + @specimen.notes ).tpl %>
-    <% end %>
-
-    <%= render(partial: "shared/matrix_box", collection: @specimen.observations, as: :object) %>
-
-    <center>
-      <p>
-        <% if @specimen.created_at %>
-          <%= :specimen_created_at.t %>: <%= @specimen.created_at.web_date %><br/>
-        <% end %>
-        <% if @specimen.updated_at %>
-          <%= :specimen_updated_at.t %>: <%= @specimen.updated_at.web_date %><br/>
-        <% end %>
-      </p>
-    </center>
-  </div>
+  </center>
 </div>

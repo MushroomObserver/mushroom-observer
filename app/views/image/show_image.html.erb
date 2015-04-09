@@ -238,7 +238,7 @@
 
           <!-- VOTE_TABLE -->
           <div id="show_votes_container">
-            <% if !@votes.empty? %>
+            <% if @votes.any? %>
               <table id="show_votes_table" class="table table-striped push-down" style="margin-bottom:0">
                 <thead>
                   <tr>

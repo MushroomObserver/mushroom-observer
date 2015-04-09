@@ -10,16 +10,14 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text-plus-image">
-    <center>
-      <%= if @locations.any?
-        gmap = make_map(@locations)
-        finish_map(gmap)
-        gmap.div(width: 800, height: 550).html_safe
-      else
-        :runtime_map_nothing_to_map.t
-      end %>
-    </center>
-  </div>
+<div class="max-width-text-plus-image">
+  <center>
+    <%= if @locations.any?
+      gmap = make_map(@locations)
+      finish_map(gmap)
+      gmap.div(width: 800, height: 550).html_safe
+    else
+      :runtime_map_nothing_to_map.t
+    end %>
+  </center>
 </div>

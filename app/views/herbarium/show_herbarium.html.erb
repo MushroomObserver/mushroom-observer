@@ -17,7 +17,6 @@
 
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %> max-width-text">
-
     <div class="push-down">
       <%= link_to(:show_herbarium_specimen_count.t(count: @herbarium.specimens.count),
                   controller: :specimen, action: :herbarium_index, id: @herbarium.id) %>
@@ -43,13 +42,12 @@
       </div>
     <% end %>
 
-    <% if @herbarium.mailing_address and !@herbarium.mailing_address.empty? %>
+    <% if @herbarium.mailing_address && !@herbarium.mailing_address.empty? %>
       <div class="push-down">
         <div class="bold"><%= :herbarium_mailing_address.t %>:</div>
         <%= @herbarium.mailing_address.tp %>
       </div>
     <% end %>
-
   </div>
 
   <% if map %>
@@ -61,7 +59,9 @@
       %>
     </div>
   <% end %>
+</div>
 
+<div class="row">
   <div class="col-xs-12 push-down" style="max-width:<%= map ? 930 : 600 %>px">
     <center>
       <% if @herbarium.created_at %>
@@ -74,5 +74,4 @@
       <% end %>
     </center>
   </div>
-
 </div>

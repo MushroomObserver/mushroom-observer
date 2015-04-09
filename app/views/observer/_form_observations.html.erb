@@ -1,7 +1,7 @@
 <!--[form:observation]-->
 <div class="row">
   <div class="col-xs-12">
-    <%= label("observation_when_li", :WHEN.t) %>:
+    <%= label_tag(:observation_when_li, :WHEN.t + ":") %>
   </div>
   <div class="col-xs-12">
     <div class="form-group form-inline">
@@ -15,7 +15,7 @@
 
 <% if @dubious_where_reasons and @dubious_where_reasons != [] %>
     <div class="row">
-      <div class="col-xs-12 Warnings">
+      <div class="col-xs-12 alert-warning">
         <%= @dubious_where_reasons.safe_join(safe_br) %>
         <p class="help-block" style="max-width: 500px">
           <%= :form_observations_dubious_help.t(button: button_name) %>
@@ -104,7 +104,7 @@
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group">
-              <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t) %>:
+              <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t + ":") %>
               <%= text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control") %>
               <% turn_into_herbarium_auto_completer(:specimen_herbarium_name) %>
             </div>
@@ -327,7 +327,7 @@
 
   <% if logging_optional %>
       <div class="col-xs-12 form-inline">
-        <%= label("log_change_checked", :form_observations_log_change.t) %>:
+        <%= label_tag(:log_change_checked, :form_observations_log_change.t + ":") %>
         <%= check_box(:log_change, :checked, checked: "1") %>
       </div>
   <% end %>

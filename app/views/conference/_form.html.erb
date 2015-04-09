@@ -1,34 +1,34 @@
 <div class="form-group push-down">
-  <%= label(:event, :name, :conference_event_name.t) %>:
+  <%= label_tag(:event_name, :conference_event_name.t + ":") %>
   <%= text_field(:event, :name, class: "form-control") %>
 </div>
 
 <div class="form-group push-down">
-  <%= label(:event, :location, :conference_event_location.t) %>:
+  <%= label_tag(:event_location, :conference_event_location.t + ":") %>
   <%= text_field(:event, :location, class: "form-control") %>
 </div>
 
 <div class="form-group form-inline push-down">
-  <%= label(:event, :start, :conference_event_start.t) %>:
+  <%= label_tag(:event_start, :conference_event_start.t + ":") %>
   <%= date_select(:event, :start,
                   {start_year: Time.now.year, end_year: Time.now.year + 10, order: [:day,:month,:year]},
                   {class: "form-control"}) %>
 </div>
 
 <div class="form-group form-inline">
-  <%= label(:event, :end, :conference_event_end.t) %>:
+  <%= label_tag(:event_end, :conference_event_end.t + ":") %>
   <%= date_select(:event, :end,
                   {start_year: Time.now.year, end_year: Time.now.year + 10, order: [:day,:month,:year]},
                   {class: "form-control"}) %>
 </div>
 
 <div class="form-group push-down">
-  <%= label(:event, :description, :conference_event_description.t) %>:
+  <%= label_tag(:event_description, :conference_event_description.t + ":") %>
   <%= text_area(:event, :description, rows: 10, class: "form-control") %>
 </div>
 
 <div class="form-group push-down">
-  <%= label(:event, :registration_note, :conference_event_registration_note.t) %>:
+  <%= label_tag(:event_registration_note, :conference_event_registration_note.t + ":") %>
   <%= text_area(:event, :registration_note, rows: 10, class: "form-control") %>
 </div>
 

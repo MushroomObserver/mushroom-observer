@@ -7,15 +7,13 @@
   tabs += @links.map {|str,url| link_to(str, url)} if @links
   @tabsets = { right: draw_tab_set(tabs) }
 
-  @known_pages = @pages || []
-  @known_data  = @objects || []
-  @undef_pages ||= []
-  @undef_data  ||= []
+  @known_pages = @pages
+  @known_data  = @objects
 
   flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
-<div class="row">
+<div class="row push-down">
   <div class="col-md-7">
     <% if @known_pages.any? && @known_data.any? %>
       <div class="h4">

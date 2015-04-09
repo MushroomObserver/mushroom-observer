@@ -11,14 +11,10 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text-plus-padding">
-    <%= show_past_versions(@location) %>
-
-    <%= render(partial: "location", object: @location) %>
-
-    <div class="push-down">
-      <%= show_object_footer(@location) %>
-    </div>
+<div class="max-width-text-plus-padding">
+  <%= show_past_versions(@location) %>
+  <%= render(partial: "location", object: @location) %>
+  <div class="push-down">
+    <%= show_object_footer(@location) %>
   </div>
 </div>

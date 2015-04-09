@@ -7,28 +7,26 @@
   tabs += @links.map {|str,url| link_to(str,url)} if @links
   @tabsets = { right: draw_tab_set(tabs) }
 
-  flash_error(@error) if @error && (!@objects || @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
-<% if @objects %>
-  <div class="row">
-    <div class="col-xs-12">
-      <table class="table table-striped">
-
-        <%= paginate_block(@pages) do %>
-          <% @objects.each do |herbarium| %>
-            <tr>
-              <td>
-                <%= str = herbarium.name.t
-                str += " (#{herbarium.code.t})".html_safe if !herbarium.code.blank?
-                link_with_query(str, action: :show_herbarium, id: herbarium.id) %>:<br/>
-                <small><%= herbarium.created_at.web_time %></small>
-              </td>
-            </tr>
-          <% end %>
-        <% end %>
-
-      </table>
-    </div>
-  </div>
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <table class="table table-striped">
+      <% @objects.each do |herbarium| %>
+        <tr>
+          <td>
+            <%=
+              str = herbarium.name.t
+              str += " (#{herbarium.code.t})".html_safe if !herbarium.code.blank?
+              link_with_query(str, action: :show_herbarium, id: herbarium.id)
+            %>:<br/>
+            <small>
+              <%= herbarium.created_at.web_time %>
+            </small>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
 <% end %>

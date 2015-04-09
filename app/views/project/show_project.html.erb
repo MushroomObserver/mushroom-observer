@@ -28,7 +28,6 @@
 %>
 
 <div class="row">
-
   <div class="col-md-6">
     <div class="list-group">
       <div class="list-group-item">
@@ -95,12 +94,16 @@
       </div>
     </div>
   </div>
+</div>
 
+<div class="row">
   <div class="col-xs-12">
     <%= render(partial: "comment/show_comments",
                locals: {object: @project, controls: true, limit: nil}) %>
   </div>
+</div>
 
+<div class="row">
   <div class="col-xs-12 push-down">
     <%= show_object_footer(@project) %>
   </div>

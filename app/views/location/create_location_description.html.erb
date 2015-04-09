@@ -8,18 +8,12 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_for(:description, url: add_query_param(
-          action: :create_location_description,
-          id:     @description.location_id,
-        )) do |form| %>
-      <%= submit_tag(:CREATE.l, class: "btn center-block push-down") %>
-
-      <%= render(partial: "form_location_description",
-                 locals: { form: form }) %>
-
-      <%= submit_tag(:CREATE.l, class: "btn center-block push-down") %>
-    <% end %>
-  </div>
+<div class="max-width-text">
+  <%= form_for(:description, url: add_query_param(
+        action: :create_location_description,
+        id:     @description.location_id
+      )) do |form| %>
+    <%= render(partial: "form_location_description",
+               locals: { form: form, button: :CREATE }) %>
+  <% end %>
 </div>

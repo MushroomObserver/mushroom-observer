@@ -13,19 +13,11 @@
   }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text-plus-image">
-    <%= form_for(:location, url: add_query_param(
-          action: :edit_location,
-          id: @location.id,
-          approved_where: @display_name
-        )) do |form| %>
-      <%= submit_tag(:UPDATE.l, class: "btn center-block push-down") %>
-
-      <%= render(partial: "form_location",
-                 locals: { where: @display_name, form: form }) %>
-
-      <%= submit_tag(:UPDATE.l, class: "btn center-block push-down") %>
-    <% end %>
-  </div>
-</div>
+<%= form_for(:location, url: add_query_param(
+      action: :edit_location,
+      id: @location.id,
+      approved_where: @display_name
+    )) do |form| %>
+  <%= render(partial: "form_location",
+             locals: { form: form, button: :UPDATE }) %>
+<% end %>

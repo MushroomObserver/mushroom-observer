@@ -15,44 +15,40 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
+<div class="max-width-text">
+  <p>
+    <b><%= :publication_full.t %>:</b><br/>
+    <%= @publication.full.t.strip_links.html_safe %>
+  </p>
 
-    <p>
-      <b><%= :publication_full.t %>:</b><br/>
-      <%= @publication.full.t.strip_links.html_safe %>
+  <% unless @publication.link.blank? %>
+    <p style="word-break:break-all">
+      <b><%= :publication_link.t %>:</b><br/>
+      <%= link_to(@publication.link, @publication.link) %>
     </p>
+  <% end %>
 
-    <% unless @publication.link.blank? %>
-      <p style="word-break:break-all">
-        <b><%= :publication_link.t %>:</b><br/>
-        <%= link_to(@publication.link, @publication.link) %>
-      </p>
+  <p>
+    <% if @publication.peer_reviewed %>
+      <b><%= :publication_peer_reviewed.t %></b><br/>
     <% end %>
 
-    <p>
-      <% if @publication.peer_reviewed %>
-        <b><%= :publication_peer_reviewed.t %></b><br/>
-      <% end %>
+    <% if @publication.mo_mentioned %>
+      <b><%= :publication_mo_mentioned.t %></b>
+    <% end %>
+  </p>
 
-      <% if @publication.mo_mentioned %>
-        <b><%= :publication_mo_mentioned.t %></b>
-      <% end %>
-    </p>
+  <p>
+    <b><%= :publication_how_helped.t %></b><br/>
+    <%= @publication.how_helped.t %>
+  </p>
 
-    <p>
-      <b><%= :publication_how_helped.t %></b><br/>
-      <%= @publication.how_helped.t %>
-    </p>
-
-    <p>
-      <b><%= :show_publication_added_by.t %></b>: 
-      <%= user_link(@publication.user) %>
-      <%= @publication.created_at.web_date %><br/>
-      <%= if @publication.created_at.web_date != @publication.updated_at.web_date
-        :footer_last_updated_at.t(date: @publication.updated_at.web_date)
-      end %>
-    </p>
-
-  </div>
+  <p>
+    <b><%= :show_publication_added_by.t %></b>: 
+    <%= user_link(@publication.user) %>
+    <%= @publication.created_at.web_date %><br/>
+    <%= if @publication.created_at.web_date != @publication.updated_at.web_date
+      :footer_last_updated_at.t(date: @publication.updated_at.web_date)
+    end %>
+  </p>
 </div>

@@ -17,7 +17,6 @@
 
 <div class="row">
   <div class="col-xs-12">
-
     <div>
       <b><%= :show_event_how_many.t(how_many: @registration_count) %></b>
     </div>
@@ -32,13 +31,11 @@
         <b><%= :conference_event_end.t %>:</b> <%= @event.end.web_date %><br/>
       <% end %>
     </div>
-
   </div>
 </div>
 
 <div class="row">
   <div class="col-xs-12 max-width-text">
-
     <div class="push-down">
       <%= ("*" + :conference_event_description.l + "*: " + @event.description).tp %>
     </div>
@@ -55,6 +52,5 @@
         <b><%= :conference_event_updated_at.t %>:</b> <%= @event.updated_at.web_date %><br/>
       <% end %>
     </div>
-
   </div>
 </div>

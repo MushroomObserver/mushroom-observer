@@ -15,25 +15,25 @@
     	<%= submit_tag(:add_specimen_add.t, class: "btn center-block push-down") %>
 
       <div class="form-group push-down">
-        <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t) %>:
+        <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t + ":") %>
         <%= text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control") %>
         <% turn_into_herbarium_auto_completer(:specimen_herbarium_name) %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:specimen_herbarium_label, :add_specimen_herbarium_label.t) %>:
+        <%= label_tag(:specimen_herbarium_label, :add_specimen_herbarium_label.t + ":") %>
         <span class="HelpNote"><%= :add_specimen_herbarium_label_help.t %></span>
         <%= text_field(:specimen, :herbarium_label, value: @herbarium_label, class:"form-control") %>
       </div>
 
       <div class="form-group form-inline push-down">
-        <%= label_tag(:specimen_when_1i, :WHEN.t) %>:
+        <%= label_tag(:specimen_when_1i, :WHEN.t + ":") %>
         <%= date_select(:specimen, :when, {start_year: 1980, end_year: Time.now.year,
                         order: [:day,:month,:year]}, {class: "form-control"}) %>
       </div>
 
       <div class="form-group push-down">
-        <%= label_tag(:specimen_notes, :add_specimen_notes.t) %>:
+        <%= label_tag(:specimen_notes, :add_specimen_notes.t + ":") %>
     		<%= text_area(:specimen, :notes, class: "form-control", rows: 6) %>
       </div>
 

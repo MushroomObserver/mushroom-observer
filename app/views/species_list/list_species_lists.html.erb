@@ -1,30 +1,28 @@
 <%
-  if @links && @links.any?
+  if @links.any?
     tabs = @links.map {|str,url| link_to(str, url)}
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
-  flash_error(@error) if @error && (!@objects || @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="row">
-  <div class="col-xs-12">
-    <%= paginate_block(@pages) do %>
-      <div class="list-group">
-        <% @objects.each do |species_list| %>
-          <div class="list-group-item">
-            <big>
-              <%=
-                when_span = content_tag(:span, species_list.when.to_s, class: "ListWhen")
-                what_span = content_tag(:span, species_list.unique_text_name.t, class: "ListWhat")
-                link_to(when_span + ": " + what_span, species_list.show_link_args)
-              %>
-            </big><br/>
-            <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
-            <span><%= user_link(species_list.user) %></span>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-  </div>
-</div>
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <div class="list-group">
+      <% for species_list in @objects.each %>
+        <div class="list-group-item">
+          <big>
+            <%=
+              when_span = content_tag(:span, species_list.when.to_s, class: "ListWhen")
+              what_span = content_tag(:span, species_list.unique_text_name.t, class: "ListWhat")
+              link_to(when_span + ": " + what_span, species_list.show_link_args)
+            %>
+          </big><br/>
+          <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
+          <span><%= user_link(species_list.user) %></span>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

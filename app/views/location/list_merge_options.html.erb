@@ -3,7 +3,7 @@
 %>
 
 <div class="row">
-  <% if @matches && @matches.any? %>
+  <% if @matches.any? %>
     <div class="col-md-6">
       <div class="h4">
         <%= :list_merge_options_near_matches.t %>
@@ -22,7 +22,7 @@
     </div>
   <% end %>
 
-  <% if @others && @others.any? %>
+  <% if @others.any? %>
     <div class="col-md-6">
       <div class="h4">
         <%= :list_merge_options_others.t %>

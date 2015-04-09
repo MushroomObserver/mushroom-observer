@@ -17,65 +17,59 @@
   end
 %>
 
-<div class="row">
-  <div class="col-xs-12">
+<% if obs_lists.any? %>
+  <p><%= :species_list_manage_belongs_to.t %>:</p>
+  <table class="table-striped table-manage-species-lists">
+    <% for species_list in obs_lists %>
+      <tr>
 
-    <% if obs_lists.any? %>
-      <p><%= :species_list_manage_belongs_to.t %>:</p>
-      <table class="table-striped table-manage-species-lists">
-        <% for species_list in obs_lists %>
-          <tr>
+        <td>
+          <%=
+            when_span = content_tag(:span, species_list.when, class: :ListWhen)
+            what_span = content_tag(:span, species_list.unique_text_name, class: :ListWhat)
+            link_to(when_span + ": " + what_span, species_list.show_link_args)
+          %><br/>
+          <span class="ListWhere"><%= species_list.place_name.t %></span> |
+          <span class="ListWho"><%= user_link(species_list.user) %></span>
+        </td>
 
-            <td>
-              <%=
-                when_span = content_tag(:span, species_list.when, class: :ListWhen)
-                what_span = content_tag(:span, species_list.unique_text_name, class: :ListWhat)
-                link_to(when_span + ": " + what_span, species_list.show_link_args)
-              %><br/>
-              <span class="ListWhere"><%= species_list.place_name.t %></span> |
-              <span class="ListWho"><%= user_link(species_list.user) %></span>
-            </td>
+        <td>
+          <%= if check_permission(species_list)
+            link_to(:REMOVE.t, { action: :remove_observation_from_species_list,
+                    observation: @observation.id, species_list: species_list.id},
+                    data: { confirm: :are_you_sure.l })
+          end %>
+        </td>
 
-            <td>
-              <%= if check_permission(species_list)
-                link_to(:REMOVE.t, { action: :remove_observation_from_species_list,
-                        observation: @observation.id, species_list: species_list.id},
-                        data: { confirm: :are_you_sure.l })
-              end %>
-            </td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
 
-          </tr>
-        <% end # for each %>
-      </table>
-    <% end # if any? %>
+<% if other_lists.any? %>
+  <p class="push-down"><%= :species_list_manage_doesnt_contain.t %>:</p>
+  <table class="table-striped table-manage-species-lists">
+    <% for species_list in other_lists %>
+      <tr>
 
-    <% if other_lists.any? %>
-      <p class="push-down"><%= :species_list_manage_doesnt_contain.t %>:</p>
-      <table class="table-striped table-manage-species-lists">
-        <% for species_list in other_lists %>
-          <tr>
+        <td>
+          <%=
+            when_span = content_tag(:span, species_list.when, class: :ListWhen)
+            what_span = content_tag(:span, species_list.unique_text_name, class: :ListWhat)
+            link_to(when_span + ": " + what_span, species_list.show_link_args)
+          %><br/>
+          <span class="ListWhere"><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
+          <span class="ListWho"><%= user_link(species_list.user) %></span>
+        </td>
 
-            <td>
-              <%=
-                when_span = content_tag(:span, species_list.when, class: :ListWhen)
-                what_span = content_tag(:span, species_list.unique_text_name, class: :ListWhat)
-                link_to(when_span + ": " + what_span, species_list.show_link_args)
-              %><br/>
-              <span class="ListWhere"><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
-              <span class="ListWho"><%= user_link(species_list.user) %></span>
-            </td>
+        <td>
+          <%= if check_permission(species_list)
+            link_to(:ADD.t, {action: :add_observation_to_species_list,
+                    observation: @observation.id, species_list: species_list.id})
+          end %>
+        </td>
 
-            <td>
-              <%= if check_permission(species_list)
-                link_to(:ADD.t, {action: :add_observation_to_species_list,
-                        observation: @observation.id, species_list: species_list.id})
-              end %>
-            </td>
-
-          </tr>
-        <% end # for each %>
-      </table>
-    <% end # if any? %>
-
-  </div>
-</div>
+      </tr>
+    <% end %>
+  </table>
+<% end %>

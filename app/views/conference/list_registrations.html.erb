@@ -15,32 +15,30 @@
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row push-down">
-  <div class="col-xs-12">
-    <table class="table table-striped slight-pad">
-
-      <tr>
-        <% for label in [
-          :conference_registration_id,
-          :conference_registration_name,
-          :conference_registration_email,
-          :conference_registration_how_many,
-          :conference_registration_notes
-        ] %>
-          <th class="nowrap"><%= label.t %></th>
-        <% end %>
-      </tr>
-
-      <% for r in @event.conference_registrations %>
-        <tr>
-          <td><%= r.id %></td>
-          <td class="nowrap"><%= r.name %></td>
-          <td><%= r.email %></td>
-          <td><%= r.how_many %></td>
-          <td><%= r.notes %></td>
-        </tr>
+<table class="table table-striped slight-pad push-down">
+  <thead>
+    <tr>
+      <% for label in [
+        :conference_registration_id,
+        :conference_registration_name,
+        :conference_registration_email,
+        :conference_registration_how_many,
+        :conference_registration_notes
+      ] %>
+        <th class="nowrap"><%= label.t %></th>
       <% end %>
+    </tr>
+  </thead>
 
-    </table>
-  </div>
-</div>
+  <tbody>
+    <% for r in @event.conference_registrations %>
+      <tr>
+        <td><%= r.id %></td>
+        <td class="nowrap"><%= r.name %></td>
+        <td><%= r.email %></td>
+        <td><%= r.how_many %></td>
+        <td><%= r.notes %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

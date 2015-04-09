@@ -7,7 +7,7 @@
   tabs += @links.map {|str,url| link_to(str, url)} if @links
   @tabsets = { right: draw_tab_set(tabs) }
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @notifications.length > 0 %>
