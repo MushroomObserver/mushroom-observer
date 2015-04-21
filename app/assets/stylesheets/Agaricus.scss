@@ -8,6 +8,8 @@ $cupreobrunneus_gills: #3B2821;
 $lilaceps_stain:       #B4725F;
 $semotus_cap:          #BC9D89;
 $xanthodermus_stain:   #D4A833;
+$polyozellus_light:    #a5bffa;
+$polyozellus_dark:     #5167b2;
 
 $BODY_FG_COLOR:               $cupreobrunneus_gills;
 $BODY_BG_COLOR:               $campestris_cap;
@@ -60,8 +62,8 @@ $MENU_HOT_BG_COLOR:           $xanthodermus_stain;
 $MENU_WARM_FG_COLOR:          black;
 $MENU_WARM_BG_COLOR:          $lilaceps_stain;
 
-$INFO_BG_COLOR:                     #E0F8FF;
-$INFO_BORDER_COLOR:                  #E0FFE0;
+$INFO_BG_COLOR:                     $polyozellus_light;
+$INFO_BORDER_COLOR:                 $polyozellus_dark;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
 $SUCCESS_BG_COLOR:                  #E0FFE0;
 $SUCCESS_BORDER_COLOR:              #70C070;

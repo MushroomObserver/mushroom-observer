@@ -17,6 +17,8 @@ $punicea_cap_dark:      #bb2900;
 $punicea_cap_light:     #cc382a;
 $punicea_dark_stipe:    #e7bc3c;
 $punicea_light_stipe:   #e9e3af;
+$polyozellus_light:     #a5bffa;
+$polyozellus_dark:      #5167b2;
 
 $BODY_FG_COLOR:               $conica_stain;
 $BODY_BG_COLOR:               $punicea_light_stipe;
@@ -68,8 +70,8 @@ $MENU_HOT_BG_COLOR:           $psittacina_cap_middle;
 $MENU_WARM_FG_COLOR:          black;
 $MENU_WARM_BG_COLOR:          $psittacina_cap_middle;
 
-$INFO_BG_COLOR:                     #E0F8FF;
-$INFO_BORDER_COLOR:                  #E0FFE0;
+$INFO_BG_COLOR:                     $polyozellus_light;
+$INFO_BORDER_COLOR:                 $polyozellus_dark;
 $INFO_FG_COLOR:                     $BODY_FG_COLOR;
 $SUCCESS_BG_COLOR:                  #E0FFE0;
 $SUCCESS_BORDER_COLOR:              #70C070;
