@@ -191,8 +191,8 @@
   AUTHORS: Authors
   authors: authors
   # ("Authority" is authority on a scientific name.)
-  ALTITUDE: Altitude
-  altitude: altitude
+  ALTITUDE: Elevation
+  altitude: elevation
   AUTHORITY: Author
   authority: author
   AUTHORITYS: Authors
@@ -1201,7 +1201,7 @@
   form_observations_upload_another: Upload Another...
   form_observations_edit_image: Edit Image
   form_observations_remove_image: Remove Image
-  form_observations_lat_long_help: "Optional GPS location. Latitude is expected to be between -90.0 and 90.0 and longitude between -180.0 and 180.0. Altitude will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_lat_long_help: "Optional GPS location. Latitude is expected to be between -90.0 and 90.0 and longitude between -180.0 and 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
@@ -1609,8 +1609,8 @@
   show_location_edit: "[:edit_object(type=:location)]"
   show_location_destroy: "[:destroy_object(type=:location)]"
   show_location_observations: Observations at this Location
-  show_location_highest: Highest Altitude
-  show_location_lowest: Lowest Altitude
+  show_location_highest: Highest Elevation
+  show_location_lowest: Lowest Elevation
   show_location_no_descriptions: There are no descriptions for this location yet.
   show_location_create_description: "[:CREATE]"
   show_location_creator: User who defined this location
@@ -2762,7 +2762,7 @@
   species_list_bulk_editor_success: Successfully updated [n] observation(s).
   species_list_bulk_editor_you_own_no_observations: You don't own any observations in this species list.
   species_list_bulk_editor_ambiguous_namings: "The proposed names are confusing for observation [id]: [name]. Please \"go to that observation\":/[id] and make your changes there."
-  species_list_bulk_editor_help: "Hold your mouse over any of the fields in the table below to see what the field is supposed to be.  The text fields are, in order: notes (top right), date, location, latitude, longitude, altitude (second row).  Check boxes indicate, respectively, if location is where collected, and specimen.  All links open in new tabs."
+  species_list_bulk_editor_help: "Hold your mouse over any of the fields in the table below to see what the field is supposed to be.  The text fields are, in order: notes (top right), date, location, latitude, longitude, elevation (second row).  Check boxes indicate, respectively, if location is where collected, and specimen.  All links open in new tabs."
 
 
 
@@ -3374,7 +3374,7 @@
   runtime_destroyed_name: Successfully destroyed [type] '[value]'.
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 N\n123 27.402 N\n123 24 24.12 N\n123° 24’ 24.12” N\n123deg 24min 24.12sec N"
-  runtime_altitude_error: "Altitude must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:\n1234\n1234m\n4049'\n4049 ft."
+  runtime_altitude_error: "Elevation must be real number in feet or meters.  Feet will be converted to meters (default).  Examples:\n1234\n1234m\n4049'\n4049 ft."
   runtime_merge_success: Successfully merged [type] [this] into [that].
   runtime_missing: Missing [field].
   runtime_no_changes: No changes made.
@@ -3619,7 +3619,7 @@
   api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
   api_bad_latitude_parameter_value: "Invalid latitude, \"[val]\", examples: \"-45.6789\", \"45.6789°S\", \"45°40.73'S\", \"45°40'44\"S\"."
   api_bad_longitude_parameter_value: "Invalid longitude, \"[val]\", examples: \"-45.6789\", \"45.6789°W\", \"45°40.73'W\", \"45°40'44\"W\"."
-  api_bad_altitude_parameter_value: "Invalid altitude, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
+  api_bad_altitude_parameter_value: "Invalid elevation, \"[val]\", examples: \"1234\", \"1234m\", \"4048'\", \"4048ft\"."
   api_bad_herbarium_parameter_value: Invalid or unknown herbarium, "[val]", accept numerical id, code or name.
   api_bad_image_parameter_value: Invalid or unknown image, "[val]", accept only numerical id.
   api_bad_license_parameter_value: Invalid or unknown license, "[val]", accept only numerical id.
