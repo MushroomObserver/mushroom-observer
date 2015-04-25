@@ -1344,6 +1344,7 @@
   # location/list_countries
   list_countries: Country List
   list_countries_known: Known Countries
+  list_countries_title: Countries with Observations
   list_countries_unknown: Unknown Countries
   list_countries_missing: Missing Countries
 

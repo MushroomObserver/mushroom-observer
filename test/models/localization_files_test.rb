@@ -138,7 +138,7 @@ class LocalizationFilesTest < UnitTestCase
   def source_files(*paths, &block)
     for path in paths
       for file in Dir.glob("#{path}/*")
-        if file.match(/\.(rb|rhtml|rxml)$/)
+        if file.match(/\.(rb|rhtml|rxml|erb)$/)
           block.call(file)
         elsif File.directory?(file) and
           file.match(/\/\w+$/)
