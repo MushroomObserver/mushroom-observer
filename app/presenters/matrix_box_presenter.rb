@@ -94,7 +94,7 @@ private
     elsif not time or time < target.created_at + 1.minute
       self.detail = :rss_created_at.t(:type => target_type)
       unless (target_type == :observation || target_type == :species_list)
-        self.detail += " " + :rss_by.t(:user => target.user.legal_name) rescue nil
+        self.detail += " ".html_safe + :rss_by.t(:user => target.user.legal_name) rescue nil
       end
     else
       if [:observation, :species_list].include?(target_type) and
