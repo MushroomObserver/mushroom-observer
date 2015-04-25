@@ -1,8 +1,10 @@
 <%
-   @title = :publication_index_title.l
-   new_tab_set do
-     add_tab(:create_publication.t, new_publication_path)
-   end
+  @title = :publication_index_title.l
+
+  tabs = [
+    link_to(:create_publication.t, new_publication_path)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

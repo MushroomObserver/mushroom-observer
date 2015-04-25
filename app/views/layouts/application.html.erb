@@ -37,7 +37,7 @@
 
 <div id="main_container" class="container-fluid">
 
-  <!--CALLOUT BANNER-->
+  <!--CALLOUT_BANNER-->
   <div class="row hidden-xs">
     <div class="col-xs-12">
       <% if is_in_admin_mode? %>
@@ -47,7 +47,7 @@
       <% end
 
       banner_txt = :app_banner_box.t
-      banner_md5 = md5_of_string(banner_txt).html_safe
+      banner_md5 = banner_txt.to_s.md5sum.html_safe
       if banner_txt.to_s.length > 1 && cookies["hideBanner"] != banner_md5 %>
         <div class="alert alert-info message-banner" id="message_banner">
           <%= javascript_tag("var banner_md5 = '#{banner_md5}'") %>
@@ -59,7 +59,7 @@
       <% end %>
     </div>
   </div>
-  <!--/CALLOUT BANNER-->
+  <!--/CALLOUT_BANNER-->
 
   <div class="row row-offcanvas row-offcanvas-left">
 
@@ -67,11 +67,11 @@
     <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas" id="navigation">
       <%= render(partial: "/shared/nav_left") %>
     </div>
-    <!--END NAVIGATION-->
+    <!--/NAVIGATION-->
 
     <div id="right_side" class="col-xs-12 col-sm-10">
 
-      <!--Toggle navigation buttons for mobile-->
+      <!--HAMBURGER_BUTTONS-->
       <div class="row visible-xs">
         <div class="col-xs-12 kill-padding">
           <p class="pull-left">
@@ -86,34 +86,40 @@
           </p>
         </div>
       </div>
-      <!--/Toggle navigation buttons for mobile-->
+      <!--/HAMBURGER_BUTTONS-->
 
-      <!--SEARCH BAR-->
+      <!--SEARCH_BAR-->
       <div id="search_bar_row" class="row hidden-xs">
         <%= render(partial: "/shared/search_bar") %>
       </div>
-      <!--/SEARCH BAR-->
+      <!--/SEARCH_BAR-->
 
-      <div class="row">
-        <div class="col-xs-12">
-          <% if flash_notices? %>
-            <% cssClass = ""
-               cssClass = "alert-success" if flash_notice_level == 0
-               cssClass = "alert-warning" if flash_notice_level == 1
-               cssClass = "alert-danger"  if flash_notice_level == 2 %>
-            <%= content_tag(:div, flash_get_notices, id: "flashes", class: "alert push-down #{cssClass}" ) %>
-          <% end
-          flash_clear %>
+      <% if flash_notices? %>
+        <div class="row">
+          <div class="col-xs-12 max-width-text">
+            <%=
+              klass = case flash_notice_level
+                when 0; "alert-success"
+                when 1; "alert-warning"
+                when 2; "alert-danger" 
+              end
+              content_tag(:div, flash_get_notices,
+                          class: "alert push-down #{klass}")
+            %>
+          </div>
         </div>
-      </div>
+      <% end %>
+      <% flash_clear %>
 
       <div id="content" class="row">
         <%= render(partial: "/shared/title_and_tab_sets") %>
-        <!--Main page content-->
+
+        <!--MAIN_PAGE_CONTENT-->
         <div class="col-xs-12">
           <%= yield %>
         </div>
-        <!--/Main page content-->
+        <!--/MAIN_PAGE_CONTENT-->
+
         <div class="col-xs-12">
           <%= render(partial: "/shared/translator_credit") %>
         </div>
@@ -128,8 +134,9 @@
 </div>
 
 <%
-   ## below divs are used by jquery to make helpers to determine current bootstrap
-   ## size.  For example:  jQuery("[data-bootstrap-size]:visible").data('bootstrap-size')
+  # The divs below are used by jquery to make helpers to determine current
+  # bootstrap size.  For example:
+  #   jQuery('[data-bootstrap-size]:visible').data('bootstrap-size')
 %>
 <div id="media_query_tests">
   <div data-bootstrap-size="xs" class="visible-xs"></div>
@@ -160,7 +167,7 @@
   ga('send', 'pageview');
   </script>
 <% end %>
-<!--END JAVASCRIPT-->
+<!--/JAVASCRIPT-->
 
 </body>
 </html>

@@ -1,40 +1,28 @@
 <%
-   #new_tab_set(:sort_by_header.t, @sorts)
-   new_tab_set(@links)
+  if @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
+  end
 
-   flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="row">
-  <div class="col-xs-12" style="margin-top: -5px;">
-    <%= pagination_letters(@pages) %>
-  </div>
-  <div class="col-xs-12" style="margin-top: -15px;">
-    <%= pagination_numbers(@pages) %>
-  </div>
-  <div class="col-xs-12">
-    <table class="table table-striped">
-      <% @objects.each do |species_list| %>
-          <tr>
-            <td>
-              <span style="font-size: 1.1em">
-              <%= link_to(content_tag(:span, species_list.when.to_s + ": ", class: "ListWhen") +
-                                  content_tag(:span, species_list.unique_text_name.t, class: "ListWhat"),
-                          :action => 'show_species_list', :id => species_list.id)
-              %>
-                </span>
-              <br/>
-              <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span>
-              <span><%= user_link(species_list.user) %></span>
-            </td>
-          </tr>
+<%= paginate_block(@pages) do %>
+  <% if @objects.any? %>
+    <div class="list-group">
+      <% for species_list in @objects.each %>
+        <div class="list-group-item">
+          <big>
+            <%=
+              when_span = content_tag(:span, species_list.when.to_s, class: "ListWhen")
+              what_span = content_tag(:span, species_list.unique_text_name.t, class: "ListWhat")
+              link_to(when_span + ": " + what_span, species_list.show_link_args)
+            %>
+          </big><br/>
+          <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
+          <span><%= user_link(species_list.user) %></span>
+        </div>
       <% end %>
-    </table>
-  </div>
-  <div class="col-xs-12" style="margin-top: -5px;">
-    <%= pagination_letters(@pages) %>
-  </div>
-  <div class="col-xs-12" style="margin-top: -15px;">
-    <%= pagination_numbers(@pages) %>
-  </div>
-</div>
+    </div>
+  <% end %>
+<% end %>

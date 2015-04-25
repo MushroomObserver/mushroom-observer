@@ -4,27 +4,20 @@
 #
 #  This class counts how many observations are from each country
 #
-#  == Methods
-#
-#  num_genera::      Number of genera seen.
-#  num_species::     Number of species seen.
-#  genera::          List of genera (text_name) seen.
-#  species::         List of species (text_name) seen.
-#
-#  == Usage
-#
-#    data = Checklist::ForUser.new(user)
-#    puts "Life List: #{data.num_species} species in #{data.num_genera} genera."
-#
 ################################################################################
 
 class CountryCounter
+  attr_accessor :known_by_count
+  attr_accessor :unknown_by_count
+  attr_accessor :missing
 
   def initialize
     @counts = {}
     @known_by_count, @unknown_by_count = partition_with_count
     @missing = (UNDERSTOOD_COUNTRIES - Set.new(@counts.keys)).sort
   end
+
+private
 
   def partition_with_count
     countries_by_count.partition {|p| UNDERSTOOD_COUNTRIES.member?(p[0])}
@@ -43,12 +36,12 @@ class CountryCounter
     location_lookup("SELECT `where` location FROM observations WHERE `where` IS NOT NULL")
   end
 
-  def location_lookup(sql)
-    Location.connection.select_all(sql).to_a.map {|h| h['location']}
-  end
-
   def location_names
     location_lookup("SELECT l.name location FROM observations o, locations l WHERE o.location_id = l.id AND o.`where` IS NULL")
+  end
+
+  def location_lookup(sql)
+    Location.connection.select_values(sql).to_a
   end
 
   def self.load_param_hash(file)
@@ -59,14 +52,7 @@ class CountryCounter
 
   UNDERSTOOD_COUNTRIES = Set.new(load_param_hash(MO.location_countries_file))
 
-  def known_by_count; @known_by_count; end
-  def unknown_by_count; @unknown_by_count; end
-  def missing; @missing; end
-
-  private
-
   def count(country)
     @counts[country] = @counts[country] ? @counts[country]+1 : 1
   end
-
 end

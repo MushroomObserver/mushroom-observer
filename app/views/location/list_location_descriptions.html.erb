@@ -1,23 +1,22 @@
 <%
-  new_tab_set do
-    add_tab_with_query(:list_place_names_map.t, :action => :map_locations)
-    add_tab(:all_objects.t(:type => :location), :action => :list_locations)
-    add_tabs(@links)
-  end
+  tabs = [
+    link_with_query(:list_place_names_map.t, action: :map_locations),
+    link_to(:all_objects.t(type: :location), action: :list_locations)
+  ]
+  tabs += @links.map {|str,url| link_to(str, url)} if @links
+  @tabsets = { right: draw_tab_set(tabs) }
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
-  <% if @objects != [] %>
-    <table class="table table-striped" width="100%">
-      <% for desc in @objects || [] %>
-        <tr>
-          <td><%= link_with_query(desc.format_name.t,
-                    :action => 'show_location_description',
-                    :id => desc.id) %><td>
-        </tr>
+  <% if @objects.any? %>
+    <div class="list-group">
+      <% for desc in @objects %>
+        <div class="list-group-item">
+          <%= link_with_query(desc.format_name.t, desc.show_link_args) %>
+        </div>
       <% end %>
-    </table>
+    </div>
   <% end %>
 <% end %>

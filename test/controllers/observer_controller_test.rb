@@ -421,7 +421,7 @@ class ObserverControllerTest < FunctionalTestCase
     get(:observation_search, pattern: 'coprinis comatis')
     assert_template(:list_observations)
     assert_equal('coprinis comatis', assigns(:suggest_alternate_spellings))
-    assert_select('div.Warnings', 1)
+    assert_select('div.alert-warning', 1)
     assert_select('a[href*=observation_search?pattern=Coprinus+comatus]',
                   text: names(:coprinus_comatus).search_name)
 

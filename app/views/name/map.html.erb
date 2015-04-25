@@ -1,16 +1,15 @@
 <%
-   @title = :name_map_title.t(:name => @name.display_name)
+  @title = :name_map_title.t(name: @name.display_name)
 
-   @tabsets = {
-           right: render(partial: "shared/tab_set", locals: {links: [link_to(:name_map_about.t(:name => @name.display_name),
-                                                                             add_query_param({action: 'show_name', id: @name.id}, @query)),
-                                                                     link_to(:show_objects.t(:type => :location),
-                                                                             add_query_param({controller: 'location', action: 'index_location'},
-                                                                                             @query)),
-                                                                     link_to(:show_objects.t(:type => :observation),
-                                                                             add_query_param({controller: 'observer', action: 'index_observation'},
-                                                                                             @query))]})
-   }
+  tabs = [
+    link_with_query(:name_map_about.t(name: @name.display_name),
+                    @name.show_link_args),
+    link_with_query(:show_objects.t(type: :location),
+                    controller: :location, action: :index_location),
+    link_with_query(:show_objects.t(type: :observation),
+                    controller: :observer, action: :index_observation)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 

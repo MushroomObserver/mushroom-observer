@@ -1,25 +1,23 @@
 <%
   @title ||= :list_specimens_title.t
 
-  new_tab_set do
-    add_tabs(@links)
+  if @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
   end
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
-  <% if @objects.length > 0 %>
-    <table class="table table-striped" width="100%">
-      <% @objects.each do |specimen|
+  <% if @objects.any? %>
+    <table class="table table-striped">
+      <% for specimen in @objects
 				herbarium = specimen.herbarium %>
         <tr>
-            <td>
-            <%= link_with_query(specimen.herbarium_label,
-                  :action => "show_specimen", :id => specimen.id) %>
-						(<%= link_with_query(herbarium.name.t, :controller => 'herbarium',
-                   :action => 'show_herbarium', :id => herbarium.id) %>)
-            <br/>
+          <td>
+            <%= link_with_query(specimen.herbarium_label, specimen.show_link_args) %>
+            (<%= link_with_query(herbarium.name.t, herbarium.show_link_args) %>)<br/>
             <small><%= specimen.created_at.web_time %></small>
           </td>
         </tr>

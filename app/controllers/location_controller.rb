@@ -61,10 +61,7 @@ class LocationController < ApplicationController
 
   # Displays a list of all countries with counts.
   def list_countries # :nologin:
-    cc = CountryCounter.new
-    @known_by_count = cc.known_by_count
-    @unknown_by_count = cc.unknown_by_count
-    @known_missing = cc.missing
+    @cc = CountryCounter.new
   end
 
   # Displays a list of all locations whose country matches the id param.

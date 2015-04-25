@@ -1,8 +1,13 @@
 <%
   @title = :rss_log_title.t.nowrap
+
+  if @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
+  end
+
   @full_width_tab_set = render(partial: "rss_log_tabset")
-  new_tab_set(@links) if @links && @links.any?
-  flash_error(@error) if @error && (!@objects || @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>

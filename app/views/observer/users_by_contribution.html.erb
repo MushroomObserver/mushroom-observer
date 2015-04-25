@@ -1,8 +1,10 @@
 <%
-   @title = :users_by_contribution_title.t
-   @tabsets = {right: render(partial: "shared/tab_set", locals: {
-                                                             links: [link_with_query(:app_site_stats.t, action: 'show_site_stats')]}
-   )}
+  @title = :users_by_contribution_title.t
+
+  tabs = [
+    link_with_query(:app_site_stats.t, action: 'show_site_stats')
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">

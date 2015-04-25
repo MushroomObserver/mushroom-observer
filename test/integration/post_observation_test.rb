@@ -232,7 +232,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def assert_has_location_warning(regex)
-    assert_select('.Warnings', {text: regex}, "Expected there to be a warning about location.")
+    assert_select('.alert-warning', {text: regex}, "Expected there to be a warning about location.")
   end
 
   def assert_exists_deleted_item_log

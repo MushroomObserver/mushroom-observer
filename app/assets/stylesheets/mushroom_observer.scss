@@ -711,6 +711,61 @@ div.scroller {
 }
 
 //
+// species list bulk editor
+// --------------------------------------------------
+
+.table-bulk-editor {
+    td {
+        padding: 4px 6px;
+    }
+    tr {
+        white-space: nowrap;
+    }
+    tr:nth-child(odd) {
+        border: 1px solid $LIST_ODD_BG_COLOR;
+    }
+    tr:nth-child(even) {
+        border: 1px solid $LIST_EVEN_BG_COLOR;
+    }
+    tr.hot {
+        border: 1px solid $LIST_BORDER_COLOR;
+    }
+    tr.hot a, div.row_controls a {
+        background: none;
+    }
+    tr.hot a:hover, div.row_controls a:hover {
+        background: none;
+    }
+    img.tiny {
+        max-height: 50px !important;
+        padding: 2px;
+    }
+    div.id_and_name {
+        float: left;
+        padding: 1px 0.5em 0 0.5em;
+    }
+    div.auto_complete {
+        z-index: 3;
+    }
+    input, select, option {
+        height: 2.0em;
+    }
+}
+
+div.row_controls {
+    display: none;
+    position: absolute;
+    text-align: left;
+    padding: 2px 5px 2px 5px;
+    border: 1px solid $LIST_BORDER_COLOR;
+    border-top: none;
+    color: $LIST_FG_COLOR;
+    background: $LIST_ODD_BG_COLOR;
+    z-index: 2;
+    white-space: nowrap;
+}
+
+//
 // edit translations
 // --------------------------------------------------
 
@@ -755,31 +810,80 @@ div.scroller {
 // pivotal tracker
 // --------------------------------------------------
 
-span.pivotal_name a, span.pivotal_name a:visited { color: #3b2821 }
-span.pivotal_name a:hover { color: #743931 }
-span.pivotal_unscheduled, a.pivotal_unscheduled, a.pivotal_unscheduled:visited { color: #777 }
-span.pivotal_unstarted, a.pivotal_unstarted, a.pivotal_unstarted:visited { color: #222 }
-span.pivotal_started, a.pivotal_started, a.pivotal_started:visited { color: #000 }
-a.pivotal_unscheduled:hover, a.pivotal_unstarted:hover, a.pivotal_started:hover { color: #777; background: #000 }
-a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started { border: 1px solid #7f7471 }
-a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 { border: 1px solid #7f7471 }
-a.pA:hover, a.pA:visited:hover { color: #AF8; background: #000 }
-a.pX:hover, a.pX:visited:hover { color: #FFF; background: #000 }
-a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
-a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
-a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
-a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
-a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
-a.p_day, a.p_day:visited { color: #3b2821; background: #AAFF88 }
-a.p_week, a.p_week:visited { color: #3b2821; background: #8ED672 }
-a.p_month, a.p_month:visited { color: #3b2821; background: #78B460 }
-a.p_none, a.p_none:visited { color: #3b2821; background: #669951 }
-a.pX, a.pX:visited { color: #3b2821; background: #FFF }
-a.p0, a.p0:visited { color: #3b2821; background: #AAF }
-a.p1, a.p1:visited { color: #3b2821; background: #F55 }
-a.p2, a.p2:visited { color: #3b2821; background: #F83 }
-a.p3, a.p3:visited { color: #3b2821; background: #FF0 }
-a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
+#pivotal_index {
+    #pivotal_labels {
+        background: none;
+        margin: 5px 1em;
+        td {
+            vertical-align: top;
+        }
+        table {
+            background: none;
+            td:first-child {
+                a {
+                    margin-right: 0.5em;
+                    padding: 0 5px;
+                    font-size: 80%;
+                    font-weight: bold;
+                    white-space: nowrap;
+                }
+            }
+            td:last-child {
+                white-space: nowrap;
+            }
+        }
+    }
+
+    .pivotal_name {
+        span.pivotal_votes,
+        span.pivotal_state,
+        span.pivotal_num_comments,
+        span.pivotal_labels {
+            margin: 0 5px;
+        }
+        span.pivotal_votes span:nth-child(2) {
+            margin: 0px 5px;
+        }
+        a {
+            padding: 0 5px;
+            font-weight: bold;
+        }
+    }
+
+    .pivotal_body {
+        padding-top: 5px;
+    }
+
+    a:hover {
+        text-decoration: none !important;
+    }
+
+    span.pivotal_name a, span.pivotal_name a:visited { color: #3b2821 }
+    span.pivotal_name a:hover { color: #743931 }
+    span.pivotal_unscheduled, a.pivotal_unscheduled, a.pivotal_unscheduled:visited { color: #777 }
+    span.pivotal_unstarted, a.pivotal_unstarted, a.pivotal_unstarted:visited { color: #222 }
+    span.pivotal_started, a.pivotal_started, a.pivotal_started:visited { color: #000 }
+    a.pivotal_unscheduled:hover, a.pivotal_unstarted:hover, a.pivotal_started:hover { color: #777; background: #000 }
+    a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started { border: 1px solid #7f7471 }
+    a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 { border: 1px solid #7f7471 }
+    a.pA:hover, a.pA:visited:hover { color: #AF8; background: #000 }
+    a.pX:hover, a.pX:visited:hover { color: #FFF; background: #000 }
+    a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
+    a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
+    a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
+    a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
+    a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
+    a.p_day, a.p_day:visited { color: #3b2821; background: #AAFF88 }
+    a.p_week, a.p_week:visited { color: #3b2821; background: #8ED672 }
+    a.p_month, a.p_month:visited { color: #3b2821; background: #78B460 }
+    a.p_none, a.p_none:visited { color: #3b2821; background: #669951 }
+    a.pX, a.pX:visited { color: #3b2821; background: #FFF }
+    a.p0, a.p0:visited { color: #3b2821; background: #AAF }
+    a.p1, a.p1:visited { color: #3b2821; background: #F55 }
+    a.p2, a.p2:visited { color: #3b2821; background: #F83 }
+    a.p3, a.p3:visited { color: #3b2821; background: #FF0 }
+    a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
+}
 
 //
 // tables
@@ -799,14 +903,36 @@ thead tr {
     }
 }
 
-.table-herbarium,
 .table-curators,
+.table-description-permissions,
+.table-herbarium,
 .table-license-updater,
+.table-manage-species-lists,
+.table-project-members,
 .table-review-donations,
 .table-upload-report {
     th, td {
         padding-left: 0.5em;
         padding-right: 0.5em;
+    }
+}
+
+.table-description-permissions {
+    th, td {
+        padding: 0.1em 0;
+        text-align: center;
+    }
+    th:first-child,
+    td:first-child {
+        padding: 0.1em 0.5em;
+        text-align: left;
+    }
+}
+
+.table-donors {
+    text-align: center;
+    td {
+        padding: 0.1em 1em;
     }
 }
 
@@ -820,19 +946,15 @@ thead tr {
     }
 }
 
-.table-donors {
-    text-align: center;
+.table-manage-species-lists {
     td {
-        padding: 0.1em 1em;
+        padding: 0.2em 1em;
     }
-}
-
-.table-review-donations {
-    th, td {
-        border-right: 1px solid $LIST_BORDER_COLOR;
+    tr {
+        border-top: 1px solid $LIST_BORDER_COLOR;
     }
-    th:last-child, td:last-child {
-        border: 0;
+    tr:first-child {
+        border-top: none;
     }
 }
 
@@ -861,6 +983,15 @@ thead tr {
     }
     td:last-child {
         text-align: center;
+    }
+}
+
+.table-review-donations {
+    th, td {
+        border-right: 1px solid $LIST_BORDER_COLOR;
+    }
+    th:last-child, td:last-child {
+        border: 0;
     }
 }
 
@@ -1020,8 +1151,17 @@ thead tr {
     max-width: 600px;
 }
 
+.max-width-text-plus-padding {
+    max-width: 650px;
+}
+
 .max-width-text-plus-image {
     max-width: 850px; // 600px text column + 160pm max thumbnail
+}
+
+.vcenter {
+    display: flex;
+    align-items: center;
 }
 
 //

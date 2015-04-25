@@ -1,11 +1,16 @@
 <%
-  new_tab_set(@links) if @links && @links.any?
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  if @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
+  end
+
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <div class="push-down push-up">
-      <%= paginate_block(@pages) do %>
-        <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object)  %>
-        <div style="clear:left"></div>
-      <% end %>
+  <%= paginate_block(@pages) do %>
+    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
+               collection: @objects, as: :object)  %>
+    <div style="clear:left"></div>
+  <% end %>
 </div>

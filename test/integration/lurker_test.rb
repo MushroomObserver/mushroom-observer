@@ -181,7 +181,6 @@ class LurkerTest < IntegrationTestCase
     save_results = results
     query_params = parse_query_params(save_results.first)
 
-
     # Go to first observation, and try stepping back and forth.
     click(:href => /^\/\d+\?/, :in => :results)
     save_path = @request.fullpath
@@ -208,8 +207,5 @@ class LurkerTest < IntegrationTestCase
     assert_equal(save_results, results,
                  "Went to show_obs, screwed around, then back to index. " +
                  "But the results were not the same when we returned.")
-
-
-
   end
 end

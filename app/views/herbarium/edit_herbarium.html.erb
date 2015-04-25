@@ -1,15 +1,15 @@
 <%
   @title = :edit_herbarium_title.l
-  new_tab_set do
-    add_tab(:cancel_and_show.t(type: :herbarium), action: :show_herbarium, id: @herbarium.id)
-    add_tab(:herbarium_index.t, action: :index)
-  end
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :herbarium), @herbarium.show_link_args),
+    link_to(:herbarium_index.t, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div class="row">
-  <div class="col-xs-12 max-width-text">
-    <%= form_tag(action: :edit_herbarium, id: @herbarium) do %>
-      <%= render(partial: "form", locals: {button: :edit_herbarium_save}) %>
-    <% end %>
-  </div>
+<div class="max-width-text">
+  <%= form_tag(action: :edit_herbarium, id: @herbarium) do %>
+    <%= render(partial: "form", locals: {button: :edit_herbarium_save}) %>
+  <% end %>
 </div>

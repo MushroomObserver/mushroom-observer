@@ -1,12 +1,16 @@
-<% ## A very simple partial view that accepts an object and renders prev/next/index buttons
-   type = object.type_tag rescue nil
-   %>
-<% if type %>
-    <div class="bold">
-      <%= link_with_query("« #{:BACK.t}",  controller: object.show_controller,id: object.id, action: "prev_#{type}") %>
-      |
-      <%=link_with_query(:INDEX.t, controller: object.show_controller, id: object.id, action: "index_#{type}") %>
-      |
-      <%= link_with_query("#{:FORWARD.t} »", acontroller: object.show_controller, id: object.id, action: "next_#{type}") %>
-    </div>
+<% # Accepts an object and renders prev/next/index buttons. %>
+<% if object %>
+  <% type = object.type_tag %>
+  <div>
+    <%= link_with_query("« #{:BACK.t}", controller: object.show_controller,
+                        action: "prev_#{type}", id: object.id) %> |
+    <%= link_with_query(:INDEX.t, controller: object.show_controller,
+                        action: "index_#{type}", id: object_id) %> |
+    <% if @mappable %>
+      <%= link_with_query(:MAP.t, controller: :location,
+                          action: :map_locations) %> |
+    <% end %>
+    <%= link_with_query("#{:FORWARD.t} »", controller: object.show_controller,
+                        action: "next_#{type}", id: object.id) %>
+  </div>
 <% end %>

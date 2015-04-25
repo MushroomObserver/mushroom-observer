@@ -36,7 +36,7 @@
                       :responsive => true) %>
         <% notes = []
           if image.copyright_holder != @observation.user.legal_name
-            notes << image_copyright(image, false)
+            notes << image_copyright(image)
           end
           if !image.notes.blank?
             notes << image.notes.tl.truncate_html(300)

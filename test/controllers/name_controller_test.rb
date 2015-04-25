@@ -341,14 +341,14 @@ class NameControllerTest < FunctionalTestCase
   def test_name_search_with_spelling_correction
     get_with_dump(:name_search, pattern: 'agaricis campestrus')
     assert_template(:list_names)
-    assert_select('div.Warnings', 1)
+    assert_select('div.alert-warning', 1)
     assert_select('a[href*=show_name/19]', text: Name.find(19).search_name)
     assert_select('a[href*=show_name/20]', text: Name.find(20).search_name)
     assert_select('a[href*=show_name/21]', text: Name.find(21).search_name)
 
     get(:name_search, pattern: "Agaricus")
     assert_template(:list_names)
-    assert_select('div.Warnings', 0)
+    assert_select('div.alert-warning', 0)
   end
 
   def test_advanced_search

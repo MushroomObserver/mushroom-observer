@@ -1,29 +1,37 @@
 <%
-  new_tab_set do
-    add_tab(:all_objects.t(:type => :location), :action => :list_locations)
-    add_tabs(@links)
-  end
+  @title = :list_countries_title.t
+
+  tabs = [
+    link_to(:all_objects.t(type: :location), action: :list_locations)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<table>
-  <tr>
-    <td valign="top" width="33%">
-      <h3>
-        <%= :list_countries_known.t + " (#{@known_by_count.length})" %>
-      </h3>
-      <%= @known_by_count.map {|country, count| country_link(country, count)}.safe_join(safe_br) %>
-    </td>
-    <td valign="top" width="33%">
-      <h3>
-        <%= :list_countries_missing.t + " (#{@known_missing.length})" %>
-      </h3>
-      <%= @known_missing.map {|country, count| country}.safe_join(safe_br) %>
-    </td>
-    <td valign="top" width="33%">
-      <h3>
-        <%= :list_countries_unknown.t + " (#{@unknown_by_count.length})" %>
-      </h3>
-      <%= @unknown_by_count.map {|country, count| country_link(country, count)}.safe_join(safe_br) %>
-    </td>
-  </tr>
-</table>
+<div class="row">
+  <div class="col-xs-4">
+    <h3>
+      <%= :list_countries_known.t %> (<%= @cc.known_by_count.length %>)
+    </h3>
+    <% for country, count in @cc.known_by_count %>
+      <%= country_link(country, count) %><br/>
+    <% end %>
+  </div>
+
+  <div class="col-xs-4">
+    <h3>
+      <%= :list_countries_missing.t %> (<%= @cc.missing.length %>)
+    </h3>
+    <% for country, count in @cc.missing %>
+      <%= country %><br/>
+    <% end %>
+  </div>
+
+  <div class="col-xs-4">
+    <h3>
+      <%= :list_countries_unknown.t %> (<%= @cc.unknown_by_count.length %>)
+    </h3>
+    <% for country, count in @cc.unknown_by_count %>
+      <%= country_link(country, count) %><br/>
+    <% end %>
+  </div>
+</div>

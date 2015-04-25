@@ -1,34 +1,41 @@
 <%
-  @title = :edit_specimen_title.l(:herbarium_label => @specimen.herbarium_label)
-  new_tab_set do
-    add_tab(:cancel_and_show.t(:TYPE => 'specimen'), :action => 'show_specimen', :id => @specimen.id)
-    add_tab(:herbarium_index.t, :controller => 'herbarium', :action => 'index')
-  end
+  @title = :edit_specimen_title.l(herbarium_label: @specimen.herbarium_label)
+
+  tabs = [
+    link_to(:cancel_and_show.t(type: :specimen), @specimen.show_link_args),
+    link_to(:herbarium_index.t, controller: :herbarium, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  herbarium = @specimen.herbarium
 %>
 
-<%= form_tag(:action => 'edit_specimen', :id => @specimen) do %>
-	<center><%= submit_tag(:edit_specimen_save.t, class: "btn") %><br/></center>
+<div class="max-width-text">
+  <%= form_tag(action: :edit_specimen, id: @specimen.id) do %>
+    <%= submit_tag(:edit_specimen_save.t, class: "btn center-block push-down") %>
 
-  <p>
-		<%= herbarium_link(@specimen.herbarium) %>
-	</p>
+    <div class="form-group push-down">
+      <%= :HERBARIUM.t %>: <%= link_to(herbarium.name, herbarium.show_link_args) %>
+    </div>
 
-  <p>
-    <%= :add_specimen_herbarium_label.t %>:
-    <%= text_field('specimen', 'herbarium_label', :value => @specimen.herbarium_label, :size => 100) %>
-  </p>
+    <div class="form-group push-down">
+      <%= label_tag(:specimen_herbarium_label, :add_specimen_herbarium_label.t + ":") %>
+      <span class="HelpNote"><%= :add_specimen_herbarium_label_help.t %></span>
+      <%= text_field(:specimen, :herbarium_label, value: @specimen.herbarium_label, class: "form-control") %>
+    </div>
 
-  <p>
-    <label for="specimen_when_1i"><%= :WHEN.t %>:</label>
-    <%= date_select('specimen', 'when', :start_year => 1980,
-                    :end_year => Time.now.year, :value => @specimen.when,
-                    :order => [:day,:month,:year]) %>
-  </p>
+    <div class="form-group form-inline push-down">
+      <%= label_tag(:specimen_when_1i, :WHEN.t + ":") %>
+      <%= date_select(:specimen, :when, {start_year: 1980, end_year: Time.now.year,
+                      value: @specimen.when, order: [:day, :month, :year]},
+                      {class: "form-control"}) %>
+    </div>
 
-  <p>
-    <%= :add_specimen_notes.t %>:<br/>
-		<%= text_area('specimen', 'notes', :value => @specimen.notes, :cols => 80, :rows => 10) %>
-  </p>
+    <div class="form-group push-down">
+      <%= label_tag(:specimen_notes, :add_specimen_notes.t + ":") %>
+      <%= text_area(:specimen, :notes, value: @specimen.notes, rows: 10, class: "form-control") %>
+    </div>
 
-  <center><%= submit_tag(:edit_specimen_save.t, class: "btn") %><br/></center>
-<% end %>
+    <%= submit_tag(:edit_specimen_save.t, class: "btn center-block push-down") %>
+  <% end %>
+</div>

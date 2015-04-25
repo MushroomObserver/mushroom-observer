@@ -51,7 +51,7 @@
   %>
 
   <div class="form-group">
-    <%= label_tag("tag_#{tag}", h(tag)) %>
+    <%= label_tag("tag_#{tag}", tag) %>
     <span><%= "(" + notes.safe_join(", ") + ")" if notes.any? %></span><br/>
     <%= text_area_tag("tag_#{tag}", str, rows: rows, class: "form-control pad-bottom-2x") %>
   </div>

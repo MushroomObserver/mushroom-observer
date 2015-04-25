@@ -20,6 +20,8 @@ $pachycolea_background:           #383138;
 $pachycolea_foreground:           #bfc0bb;
 $pachycolea_light_stipe:          #aa9a83;
 $pachycolea_dark_brown:           #60412d;
+$polyozellus_light:               #a5bffa;
+$polyozellus_dark:                #5167b2;
 
 $BODY_FG_COLOR:               $pachycolea_foreground;
 $BODY_BG_COLOR:               $pachycolea_background;
@@ -79,9 +81,9 @@ $MENU_HOT_BG_COLOR:           $muscaria_background;
 $MENU_WARM_FG_COLOR:          black;
 $MENU_WARM_BG_COLOR:          $velosa_background;
 
-$INFO_BG_COLOR:                     #E0F8FF;
-$INFO_BORDER_COLOR:                 #70BCE0;
-$INFO_FG_COLOR:                     black;
+$INFO_BG_COLOR:                     $polyozellus_dark;
+$INFO_BORDER_COLOR:                 $polyozellus_light;
+$INFO_FG_COLOR:                     $pachycolea_foreground;
 $SUCCESS_BG_COLOR:                  #E0FFE0;
 $SUCCESS_BORDER_COLOR:              #70C070;
 $SUCCESS_FG_COLOR:                  black;

@@ -1,25 +1,22 @@
 <%
   @title ||= :create_location_title.t
 
-  new_tab_set do
-    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
-    add_location_search_tabs(@location.name)
-  end
+  tabs = [
+    link_to(:all_objects.t(type: :location), action: :list_locations)
+  ]
+  tabs += location_search_links(@location.name)
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(:location, :url => add_query_param(
-       :action => :create_location,
-       :where => @original_name,
-       :approved_where => @display_name,
-       :set_observation => @set_observation,
-       :set_species_list => @set_species_list,
-       :set_user => @set_user,
-			 :set_herbarium => @set_herbarium
+<%= form_for(:location, url: add_query_param(
+       action: :create_location,
+       where: @original_name,
+       approved_where: @display_name,
+       set_observation: @set_observation,
+       set_species_list: @set_species_list,
+       set_user: @set_user,
+       set_herbarium: @set_herbarium
     )) do |form| %>
-  <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
-
-  <%= render(:partial => 'form_location', :locals =>
-             {where: @display_name, form: form}) %>
-
-  <center><%= submit_tag(:CREATE.l) %></center>
+  <%= render(partial: "form_location",
+             locals: { form: form, button: :CREATE }) %>
 <% end %>

@@ -1,9 +1,11 @@
 <%
   @title = :account_api_keys_title.t
-  new_tab_set do
-    add_tab(:prefs_link.t,   controller: :account, action: :prefs)
-    add_tab(:profile_link.t, controller: :account, action: :profile)
-  end
+
+  tabs = [
+    link_to(:prefs_link.t,   action: :prefs),
+    link_to(:profile_link.t, action: :profile)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 
   javascript_include("api_key")
   inject_javascript_at_end("ApiKeyModule()")
@@ -71,7 +73,7 @@
   <div class="col-xs-12 max-width-text">
     <%= form_for(:key) do |form| %>
       <div class="form-group push-down">
-        <%= form.label(:notes, :account_api_keys_notes_label.t) %>
+        <%= label_tag(:user_notes, :account_api_keys_notes_label.t) %>
         <%= form.text_field(:notes, class: "form-control") %>
       </div>
       <%= submit_tag(:account_api_keys_create_button.l, id: "create_button", class: "btn center-block push-down") %>

@@ -1,9 +1,11 @@
 <%
   @title = :comment_edit_title.t(name: @target.unique_format_name)
-  new_tab_set do
-    add_tab_with_query(:cancel_and_show.t(type: :comment),
-      controller: :comment, action: :show_comment, id: @comment.id)
-  end
+
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :comment),
+                    @comment.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <div class="row">
