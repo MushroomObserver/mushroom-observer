@@ -1305,3 +1305,35 @@ input[type=checkbox] {
 .slick-prev:hover:before, .slick-prev:focus:before, .slick-next:hover:before, .slick-next:focus:before {
    opacity: .75;
 }
+
+//
+// Help tips on create observation page
+// ------------------------------------------
+.arrow-up {
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid rgba(203, 203, 203, 0.9);
+  position: absolute;
+  left: 25px;
+  top: 25px;
+  margin-left: 1px;
+}
+
+.arrow-left {
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 15px solid rgba(203, 203, 203, 0.9);
+  position: absolute;
+  left: 0;
+  top: 25px;
+  margin-left: 1px;
+}
+
+.spacer {
+  height: 30px;
+  width: 1px;
+}
