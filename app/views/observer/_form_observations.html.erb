@@ -1,28 +1,6 @@
 <!--[form:observation]-->
 <style>
-    .arrow-up {
-        width: 0;
-        height: 0;
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-bottom: 12px solid rgba(203, 203, 203, 0.9);
-        position: absolute;
-        left: 25px;
-        top: 25px;
-        margin-left: 1px;
-    }
 
-    .arrow-left {
-        width: 0;
-        height: 0;
-        border-top: 15px solid transparent;
-        border-bottom: 15px solid transparent;
-        border-right: 15px solid rgba(203, 203, 203, 0.9);
-        position: absolute;
-        left: 0;
-        top: 25px;
-        margin-left: 1px;
-    }
 </style>
 <div class="row">
   <div class="col-md-9 col-lg-8"> <!--max width for >=md screen is 8/12-->
@@ -87,11 +65,8 @@
       </div>
     </div>
     <!--</Is collection location>-->
-    <div class="row">
-      <div class="col-xs-12">
-        <hr>
-      </div>
-    </div>
+    <div class="spacer"></div>
+
 
     <div class="row"> <!--LatLngElevation row-->
       <div class="col-sm-2">
@@ -120,25 +95,17 @@
       </div>
     </div>
     <!--/ LatLngElevation row-->
-    <div class="row">
-      <div class="col-xs-12">
-        <hr>
-      </div>
-    </div>
+    <div class="spacer"></div>
 
 
-    <%= render(partial: "naming/form_new", locals: {
+    <%= render(partial: "naming/form", locals: {
                                                  action: action,
                                                  button_name: button_name,
                                                  show_reasons: false,
                                          }) if include_naming %>
 
 
-    <div class="row">
-      <div class="col-xs-12">
-        <hr>
-      </div>
-    </div>
+    <div class="spacer"></div>
 
 
     <div class="row"> <!--<HerbariumRow>-->
@@ -188,12 +155,8 @@
           </div> <!--</HerbariumRow>-->
       <% end %>
 
+      <div class="spacer"></div>
 
-      <div class="row">
-        <div class="col-xs-12">
-          <hr>
-        </div>
-      </div>
 
       <div class="row">
         <div class="col-sm-6">
@@ -210,20 +173,9 @@
       </div>
 
 
-      <div class="row">
-        <div class="col-xs-12">
-          <hr>
-        </div>
-      </div>
+      <div class="spacer"></div>
 
-
-
-
-
-
-      <% ############################### Image Forms ##############################    %>
-
-
+      <% ############################### Image Forms ##############################     %>
       <% if include_images %>
           <div class="row">
             <% @observation.thumb_image_id ||= 0 %>
@@ -288,8 +240,8 @@
                         <!--/Image info area-->
                       </div>
                     </div>
-                <% end # for image    %>
-            <% end # if @good_images    %>
+                <% end # for image     %>
+            <% end # if @good_images     %>
             <%= hidden_field_tag("good_images", @good_images.map { |o| o.id }.join(" ")) %>
           </div>
 
@@ -347,100 +299,97 @@
                                      }";
       ) %>
               <% end %>
-      <% end # if include_images     %>
+      <% end # if include_images      %>
       </div> <!--/Image upload container col-->
       </div>  <!--/Image upload container row-->
 
 
 
 
-<% ##########################################################################    %>
+      <% ##########################################################################     %>
 
-<div class="row">
-  <div class="col-xs-12 text-center">
-    <% if @projects.any? or @lists.any? %>
-        <%= submit_tag(button_name, class: "btn") %>
-    <% end %>
-  </div>
-</div>
-
-<% if @projects.any? %>
-    <div class="row">
-      <div class="col-xs-12">
-        <hr/>
+      <div class="row">
+        <div class="col-xs-12 text-center">
+          <% if @projects.any? or @lists.any? %>
+              <%= submit_tag(button_name, class: "btn") %>
+          <% end %>
+        </div>
       </div>
 
-      <div class="col-sm-6">
-        <label><%= :PROJECTS.t %>:</label>
-        <div class="row">
-        <% for project in @projects %>
-            <div class="col-xs-12">
-              <div class="form-group">
-                <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
-                              disabled: @observation.user != @user && !project.is_member?(@user)) %>
-                <label for="<%= "project_id_#{project.id}" %>">
-                  <%= project_link(project) %>
-                </label>
+      <% if @projects.any? %>
+          <div class="spacer"></div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <label><%= :PROJECTS.t %>:</label>
+
+              <div class="row">
+                <% for project in @projects %>
+                    <div class="col-xs-12">
+                      <div class="form-group">
+                        <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
+                                      disabled: @observation.user != @user && !project.is_member?(@user)) %>
+                        <label for="<%= "project_id_#{project.id}" %>">
+                          <%= project_link(project) %>
+                        </label>
+                      </div>
+                    </div>
+                <% end %>
               </div>
             </div>
-        <% end %>
-          </div>
-      </div>
-      <div class="col-sm-6">
-        <div class="well well-sm">
-            <div class="arrow-left hidden-xs"></div>
-            <p class="help-block"><%= :form_observations_project_help.t %></p>
-        </div>
-      </div>
-    </div>
-<% end %>
-
-
-<% if @lists.any? %>
-    <div class="row">
-
-      <div class="col-xs-12">
-        <hr/>
-      </div>
-
-          <div class="col-sm-6">
-            <label><%= :SPECIES_LISTS.t %>:</label>
-            <% for list in @lists %>
-                <div class="row">
-                  <div class="col-xs-12 form-inline">
-                    <%= check_box("list", "id_#{list.id}", checked: @list_checks[list.id],
-                                  disabled: !check_permission(list)) %>
-                    <label for="<%= "list_id_#{list.id}" %>">
-                      <%= species_list_link(list) %>
-                    </label>
-                  </div>
-                </div>
-            <% end %>
-          </div>
-
-          <div class="col-sm-6">
-            <div class="well well-sm">
-              <div class="arrow-left hidden-xs" style="top: 10px"></div>
-              <p class="help-block"><%= :form_observations_list_help.t %></p>
+            <div class="col-sm-6">
+              <div class="well well-sm">
+                <div class="arrow-left hidden-xs"></div>
+                <p class="help-block"><%= :form_observations_project_help.t %></p>
+              </div>
             </div>
           </div>
-        </div>
-<% end %>
+      <% end %>
 
 
-<% if logging_optional %>
-    <div class="col-xs-12 form-inline">
-      <%= label_tag(:log_change_checked, :form_observations_log_change.t + ":") %>
-      <%= check_box(:log_change, :checked, checked: "1") %>
-    </div>
-<% end %>
+      <% if @lists.any? %>
+          <div class="spacer"></div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <label><%= :SPECIES_LISTS.t %>:</label>
+              <% for list in @lists %>
+                  <div class="row">
+                    <div class="col-xs-12 form-inline">
+                      <%= check_box("list", "id_#{list.id}", checked: @list_checks[list.id],
+                                    disabled: !check_permission(list)) %>
+                      <label for="<%= "list_id_#{list.id}" %>">
+                        <%= species_list_link(list) %>
+                      </label>
+                    </div>
+                  </div>
+              <% end %>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="well well-sm">
+                <div class="arrow-left hidden-xs" style="top: 10px"></div>
+                <p class="help-block"><%= :form_observations_list_help.t %></p>
+              </div>
+            </div>
+          </div>
+      <% end %>
 
 
-</div><!--Main column container (sets form width)-->
+      <% if logging_optional %>
+          <div class="col-xs-12 form-inline">
+            <%= label_tag(:log_change_checked, :form_observations_log_change.t + ":") %>
+            <%= check_box(:log_change, :checked, checked: "1") %>
+          </div>
+      <% end %>
+
+
+      </div>
+  <!--Main column container (sets form width)-->
 </div><!--Page row-->
 
 
-<% #Toggle herbarium visibility  %>
+<% #Toggle herbarium visibility   %>
 <% inject_javascript_at_end %(
 
   jQuery(document).ready(function() {
