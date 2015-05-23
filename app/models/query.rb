@@ -104,8 +104,8 @@ class Query < AbstractQuery
           copyright_holder_has?: :string,
           license?: License,
           has_votes?: :boolean,
-          quality?: [:integer],
-          confidence?: [:integer],
+          quality?: [:float],
+          confidence?: [:float],
           ok_for_export?: :boolean,
       },
       Location: {
