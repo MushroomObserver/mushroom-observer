@@ -68,6 +68,63 @@
 #  appears in en.txt.)
 #
 ################################################################################
+#
+#  How to Create and Import a New Language:
+#
+#  First create the language in the database:
+#
+#    INSERT INTO languages (`locale`, `region`, `name`, `order`, `beta`)
+#      VALUES (
+#        "jp",          # locale, e.g. "pt" for Portuguese
+#        "JP",          # region, e.g. "BR" for Brazil
+#        "日本語",      # name of the language *in that language*
+#        "Nihongo",     # transliteration of the above (so it sorts right)
+#        1              # beta=1 means it won't appear in site's language menu
+#      );
+#
+#  Create stub language files:
+#
+#    mo$ rake lang:update
+#
+#  Should now have an import/export file called config/locales/jp.txt.
+#  Once you're done editing this file -- remembering to remove the extra space
+#  between "tag:" and "value"!! -- test if it's valid:
+#
+#    mo$ ruby -e "require 'yaml'; YAML.load_file('config/locales/jp.txt')"
+#
+#  Sorry, it doesn't always tell you where the syntax errors are. Look for
+#  things like "tag: [..." or "tag: blah: ..."  That should be the cause of
+#  most of the grief.  Just protect those strings in quotes, remembering to
+#  backslash-protect embedded quotes when you do so.
+#
+#  Now you should be ready to import the file.  Note that this can be redone
+#  as many times as necessary if you see problems when you test it.  This is
+#  why it's good to keep new languages beta!!
+#
+#    mo$ cp config/locales/jp.txt config/locales/jp.txt.bak
+#    mo$ rake user_id=1234 lang:import:jp
+#    mo$ rake lang:update
+#
+#  You need to supply user_id to lang:import because it needs to know who
+#  created each translation_string.  You can give "user_name=xxx" instead.
+#  If that works, then you should be able to test it on the server.  If you
+#  need to re-import, I think it's safest to purge the old strings first:
+#
+#    DELETE FROM translation_strings WHERE language_id = xxx;
+#
+#  Note that it's important to backup the original import file, because
+#  rake lang:update will clobber it.  Looking at the new jp.txt can help
+#  identify problems with the import file, too.  You may even be able to
+#  diff the two, depending how the translator does their work.
+#
+#  Once you're satisfied, repeat all this on the live server, and clear the
+#  beta flag in the languages table.
+#
+#    UPDATE languages SET beta=0 WHERE language_id=xxx;
+#
+#  -Jason 20150509
+#
+################################################################################
 
   all_months: January February March April May June July August September October November December
   all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec

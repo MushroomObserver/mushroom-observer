@@ -5,7 +5,7 @@
 def all_locales
   locales = []
   for file in Dir.glob("#{::Rails.root.to_s}/config/locales/*.yml")
-    if file.match(/(\w+-\w+).yml$/)
+    if file.match(/(\w+).yml$/)
       locales << $1
     end
   end
