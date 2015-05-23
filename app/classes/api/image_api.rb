@@ -36,9 +36,9 @@ class API
         license:              parse_license(:license),
         has_votes:            parse_boolean(:has_votes),
         quality:              parse_float_range(:quality,
-                                limit: [Image.minimum_vote..Image.maximum_vote]),
+                                limit: Range.new(Image.minimum_vote, Image.maximum_vote)),
         confidence:           parse_float_range(:confidence,
-                                limit:  [Vote.minimum_vote..Vote.maximum_vote]),
+                                limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
         ok_for_export:        parse_boolean(:ok_for_export),
       }
     end
