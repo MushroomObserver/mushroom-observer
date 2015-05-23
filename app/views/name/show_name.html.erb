@@ -45,8 +45,17 @@
           <% end %>
         </div>
     <% end %>
-    <%= show_previous_version(@name) %>
-    <%= set_export_status_controls(@name) %>
+    <div>
+      <%= show_previous_version(@name) %>
+      <%= set_export_status_controls(@name) %>
+      <br/>
+      <br/>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item">
+	<%= show_authors_and_editors(@name) %>
+      </div>
+    </div>
   </div>
   <div class="col-sm-7">
     <div class="list-group">
@@ -75,8 +84,9 @@
         <%= render(:partial => 'name', :object => @name, :locals => {synonyms: true}) %>
       </div>
     </div>
+
+    <strong><%= :show_name_classification.t %>:</strong>
     <div>
-      <strong><%= :show_name_classification.t %>:</strong>
       <%= link_with_query(:EDIT.t, {id: @name.description.id,
                                     controller: 'name', action: 'edit_name_description'},
                           {class: "pull-right"}) if @name.description %>
@@ -100,8 +110,8 @@
     </div>
 
     <% if !@best_description.blank? %>
+        <strong><%= :show_name_brief_description.t %>:</strong>
         <div>
-          <strong><%= :show_name_brief_description.t %>:</strong>
           <span class="pull-right">
           <%= link_with_query(:show_name_see_more.t, :id => @name.description.id,
                               :controller => 'name',
@@ -116,10 +126,14 @@
           </div>
         </div>
     <% end %>
+    <strong><%= :show_name_descriptions.t %>:</strong>
     <div>
-      <strong><%= :show_name_descriptions.t %></strong>
       <%= link_with_query(:show_name_create_description.t,
-                          {controller: :name, action: :create_name_description, id: @name.id}, {class: "pull-right"}) %>
+                          {
+	                    controller: :name,
+	                    action: :create_name_description,
+	                    id: @name.id
+                          }, {class: "pull-right"}) %>
     </div>
     <div class="list-group">
       <div class="list-group-item">
@@ -128,21 +142,23 @@
         <% end %>
         <%= :show_name_no_descriptions.t if description_links.empty? %>
       </div>
-      <% if @projects && @projects.length > 0 %>
-          <div class="list-group-item slight-pad default">
-            <%= :show_name_create_draft.t %>
-          </div>
-          <div class="list-group-item">
-            <% @projects.each do |project| %>
-                <%= link_with_query(project.title,
-                                    :action => :create_name_description,
-                                    :id => @name.id, :project => project.id,
-                                    :source => 'project') %><br>
-                </div>
-            <% end %>
+    </div>
+    <% if @projects && @projects.length > 0 %>
+    <div>
+      <strong><%= :show_name_create_draft.t %>:</strong>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item">
+        <% @projects.each do |project| %>
+          <%= link_with_query(project.title,
+                              action: :create_name_description,
+                              id: @name.id,
+                              project: project.id,
+                              source: 'project') %><br>
+	<% end %>
+      </div>
       <% end %>
     </div>
-    <%= show_authors_and_editors(@name) %>
   </div>
 </div>
 
@@ -151,12 +167,9 @@
    #  Show comments
    # ----------------------------------------
 %>
-<div class="row">
-  <div class="col-xs-12">
-    <%= render(:partial => 'comment/show_comments', :locals =>
-                                                          {object: @name, controls: true, limit: nil}) %>
-  </div>
-  <div class="col-xs-12">
-    <%= show_object_footer(@name) %>
-  </div>
+<%= render(:partial => 'comment/show_comments', :locals =>
+{object: @name, controls: true, limit: nil}) %>
+<div class="col-xs-12">
+  <%= show_object_footer(@name) %>
+</div>
 </div>
