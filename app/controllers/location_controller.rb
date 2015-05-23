@@ -69,7 +69,7 @@ class LocationController < ApplicationController
 
   # Displays a list of all locations whose country matches the id param.
   def list_by_country # :nologin:
-    query = create_query(:Location, :regexp_search, :regexp => "#{params[:country]}*")
+    query = create_query(:Location, :regexp_search, :regexp => "#{params[:country]}$")
     show_selected_locations(query, :link_all_sorts => true)
   end
 

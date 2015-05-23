@@ -113,6 +113,45 @@ class LocationControllerTest < FunctionalTestCase
     assert_template(:list_locations)
   end
 
+  def test_list_by_country_regexp_ok
+    login('mary')
+    
+    get(:list_by_country, country: "USA")
+    usa_loc_array =  @controller.instance_variable_get("@objects")
+    loc_usa = Location.create!(name: "Santa Fe, New Mexico, USA", 
+        north: 34.1865,
+        west: -116.924,
+        east: -116.88,
+        south: 34.1571,
+        notes: "Santa Fe",
+	user: @mary
+    )
+    get(:list_by_country, country: "USA")
+    assert_obj_list_equal(usa_loc_array << loc_usa, @controller.instance_variable_get("@objects"))
+    
+    get(:list_by_country, country: "Mexico")
+    assert_obj_list_equal([], @controller.instance_variable_get("@objects"))
+    
+    loc_mex1 = Location.create!(name: "Somewhere, Chihuahua, Mexico",
+        north: 28.7729082,
+        west: -106.1671059,
+        east: -105.9612896,
+        south: 28.5586774,
+        notes: "somewhere Mexico",
+        user: @mary
+    )
+    loc_mex2 = Location.create!(name: "Oaxaca, Oaxaca, Mexico",
+        north: 17.1332939,
+        west: -96.7806765,
+        east: -96.6907866,
+        south: 17.0293023,
+	notes: "somewhere else in Mexico or this test will not work",
+        user: @mary
+    )
+    get(:list_by_country, country: "Mexico")
+    assert_obj_list_equal([loc_mex1,loc_mex2], @controller.instance_variable_get("@objects"))
+  end
+
   def test_locations_by_user
     get_with_dump(:locations_by_user, :id => 1)
     assert_template(action: 'list_locations')
