@@ -39,7 +39,7 @@ class API
         # :specimen_ids   => parse_strings(:specimen_ids),
         :projects       => parse_strings(:projects),
         :species_lists  => parse_strings(:species_lists),
-        :confidence     => parse_float_range(:confidence, :limit => [Vote.minimum_vote..Vote.maximum_vote]),
+        :confidence     => parse_float_range(:confidence, :limit => Range.new(Vote.minimum_vote, Vote.maximum_vote)),
         :is_col_loc     => parse_boolean(:is_collection_location),
         :has_specimen   => parse_boolean(:has_specimen),
         :has_location   => parse_boolean(:has_location),
