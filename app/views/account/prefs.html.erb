@@ -118,11 +118,8 @@
         <%= form.check_box(:thumbnail_maps, class: "form-control") %>
         <%= label_tag(:user_thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
 
-        <%= label_tag(:user_layout, :prefs_layout_title.t + ":") %><br/>
-        <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50], class: "form-control") %>
-        <%= label_tag(:user_rows, :prefs_rows_by.t) %>
-        <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], class: "form-control") %>
-        <%= label_tag(:user_columns, :prefs_columns.t) %><br/>
+        <%= label_tag(:layout_count, :prefs_layout_title.t + ":") %><br/>
+        <%= form.number_field(:layout_count, class: "form-control") %>
         <% if false %>
             <%= form.check_box(:alternate_rows, class: "form-control") %>
             <%= label_tag(:user_alternate_rows, :prefs_alt_row_colors.t) %><br/>

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150210013007) do
+ActiveRecord::Schema.define(version: 20150601014738) do
 
   create_table "api_keys", force: true do |t|
     t.datetime "created_at"
@@ -597,11 +597,6 @@ ActiveRecord::Schema.define(version: 20150210013007) do
     t.datetime "created_at"
     t.datetime "last_login"
     t.datetime "verified"
-    t.integer  "rows"
-    t.integer  "columns"
-    t.boolean  "alternate_rows",                          default: true,  null: false
-    t.boolean  "alternate_columns",                       default: true,  null: false
-    t.boolean  "vertical_layout",                         default: true,  null: false
     t.integer  "license_id",                              default: 3,     null: false
     t.integer  "contribution",                            default: 0
     t.integer  "location_id"
@@ -643,6 +638,7 @@ ActiveRecord::Schema.define(version: 20150210013007) do
     t.integer  "keep_filenames",                          default: 1,     null: false
     t.text     "notes"
     t.text     "mailing_address"
+    t.integer  "layout_count"
   end
 
   create_table "votes", force: true do |t|

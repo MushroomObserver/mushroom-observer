@@ -160,4 +160,7 @@ MushroomObserver::Application.configure do
   #     }
   #   }
   config.s3_credentials = {}
+
+  # Default number of items for an RSS page
+  config.default_layout_count = 18
 end

@@ -1497,34 +1497,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Get User's list layout preferences, providing defaults as necessary.
-  # Returns a hash of options.  (Uses the current user from +@user+.)
-  #
-  #   opts = calc_layout_params
-  #
-  #   opts["rows"]              # Number of rows to display.
-  #   opts["columns"]           # Number of columns to display.
-  #   opts["alternate_rows"]    # Alternate colors for rows.
-  #   opts["alternate_columns"] # Alternate colors for columns.
-  #   opts["vertical_layout"]   # Stick text below thumbnail?
-  #   opts["count"]             # Total number of items = rows * columns.
-  #
-  def calc_layout_params  ##TODO: Depreciate
-    result = {}
-    result["rows"]              = 5
-    result["columns"]           = 3
-    result["alternate_rows"]    = true
-    result["alternate_columns"] = true
-    result["vertical_layout"]   = true
-    if @user
-      result["rows"]              = @user.rows    if @user.rows
-      result["columns"]           = @user.columns if @user.columns
-      result["alternate_rows"]    = @user.alternate_rows
-      result["alternate_columns"] = @user.alternate_columns
-      result["vertical_layout"]   = @user.vertical_layout
-    end
-    result["count"] = result["rows"] * result["columns"]
-    result
+  def calc_layout_params
+    count = (@user && @user.layout_count) || MO.default_layout_count
+    { "count" => count }
   end
 
   def has_permission?(obj, error_message)

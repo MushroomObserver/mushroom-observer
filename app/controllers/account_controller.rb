@@ -89,15 +89,14 @@ class AccountController < ApplicationController
                            permit(:email, :login, :name, :password,
                                   :password_confirmation, :theme)
         @new_user = User.new(permitted)
-        @new_user.created_at      = now = Time.now
-        @new_user.updated_at      = now
-        @new_user.last_login      = now
-        @new_user.admin           = false
-        @new_user.created_here    = true
-        @new_user.rows            = 5
-        @new_user.columns         = 3
+        @new_user.created_at = now = Time.now
+        @new_user.updated_at = now
+        @new_user.last_login = now
+        @new_user.admin = false
+        @new_user.created_here = true
+        @new_user.layout_count = 15
         @new_user.mailing_address = ""
-        @new_user.notes           = ""
+        @new_user.notes = ""
         if @new_user.password.blank?
           @new_user.errors.add(:password, :validate_user_password_missing.t)
         end
@@ -336,11 +335,7 @@ class AccountController < ApplicationController
       [ :enum,  :thumbnail_size ],
       [ :enum,  :image_size ],
       [ :str,  :theme ],
-      [ :int,  :rows ],
-      [ :int,  :columns ],
-      [ :bool, :alternate_rows ],
-      [ :bool, :alternate_columns ],
-      [ :bool, :vertical_layout ],
+      [ :int,  :layout_count ],
       [ :bool, :email_comments_owner ],
       [ :bool, :email_comments_response ],
       [ :bool, :email_comments_all ],

@@ -114,11 +114,7 @@
 #  ==== Preferences
 #  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
-#  rows::               Number of rows of thumbnails to show in index.
-#  columns::            Number of columns of thumbnails to show in index.
-#  alternate_rows::     Should the row colors alternate?
-#  alternate_columns::  Should the column colors alternate?
-#  vertical_layout::    Show text below thumbnails in index?
+#  layout_count::       Number of thumbnails to show in index.
 #
 #  ==== Email options
 #  Send notifications if...

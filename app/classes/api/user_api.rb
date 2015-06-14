@@ -46,8 +46,7 @@ class API
           verified: nil,
           admin: false,
           created_here: true,
-          rows: 5,
-          columns: 3,
+          layout_count: 15,
       }
     end
 

@@ -265,9 +265,6 @@ class AccountControllerTest < FunctionalTestCase
     # Now change everything.
     params = {
       user: {
-        alternate_columns:            "",
-        alternate_rows:               "",
-        columns:                      "10",
         email:                        "new_email",
         email_comments_all:           "",
         email_comments_owner:         "1",
@@ -292,14 +289,13 @@ class AccountControllerTest < FunctionalTestCase
         image_size:                   :small,
         keep_filenames:               :keep_but_hide,
         license_id:                   "1",
+        layout_count:                 "100",
         locale:                       "el-GR",
         location_format:              :scientific,
         login:                        "new_login",
-        rows:                         "10",
         theme:                        "Agaricus",
         thumbnail_maps:               "",
         thumbnail_size:               :small,
-        vertical_layout:              "",
         votes_anonymous:              :yes
       }
     }
@@ -308,9 +304,6 @@ class AccountControllerTest < FunctionalTestCase
 
     # Make sure changes were made.
     user = rolf.reload
-    assert_equal(false, user.alternate_columns)
-    assert_equal(false, user.alternate_rows)
-    assert_equal(10, user.columns)
     assert_equal("new_email", user.email)
     assert_equal(false, user.email_comments_all)
     assert_equal(true, user.email_comments_owner)
@@ -334,15 +327,14 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(:above_species, user.hide_authors)
     assert_equal(:small, user.image_size)
     assert_equal(:keep_but_hide, user.keep_filenames)
+    assert_equal(100, user.layout_count)
     assert_equal(licenses(:ccnc25), user.license)
     assert_equal("el-GR", user.locale)
     assert_equal(:scientific, user.location_format)
     assert_equal("new_login", user.login)
-    assert_equal(10, user.rows)
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(:small, user.thumbnail_size)
-    assert_equal(false, user.vertical_layout)
     assert_equal(:yes, user.votes_anonymous)
   end
 
