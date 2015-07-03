@@ -347,6 +347,9 @@ class NameController < ApplicationController
 
       update_view_stats(@name)
 
+      # Tell robots the proper URL to use to index this content.
+      @canonical_url = "#{MO.domain}/name/show_name/#{@name.id}"
+
       # Get a list of projects the user can create drafts for.
       @projects = @user && @user.projects_member.select do |project|
         !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
@@ -402,6 +405,9 @@ class NameController < ApplicationController
     store_location
     pass_query_params
     if @description = find_or_goto_index(NameDescription, params[:id].to_s)
+      @canonical_url = "#{MO.domain}/name/show_name_description/#{@description.id}"
+
+      # Tell robots the proper URL to use to index this content.
       @canonical_url = "#{MO.domain}/name/show_name_description/#{@description.id}"
 
       # Public or user has permission.

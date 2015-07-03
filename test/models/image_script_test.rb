@@ -208,6 +208,21 @@ class ScriptTest < UnitTestCase
     errors = File.read(tempfile)
     assert status, "Something went wrong with #{script}:\n#{errors}"
     assert_equal(<<-END.unindent, errors)
+      Listing local 1280
+      Listing local 320
+      Listing local 640
+      Listing local 960
+      Listing local orig
+      Listing local thumb
+      Listing remote1 1280
+      Listing remote1 320
+      Listing remote1 640
+      Listing remote1 960
+      Listing remote1 orig
+      Listing remote1 thumb
+      Listing remote2 320
+      Listing remote2 640
+      Listing remote2 thumb
       Uploading 320/4.jpg to remote1
       Uploading 320/3.jpg to remote2
       Uploading 320/4.jpg to remote2
