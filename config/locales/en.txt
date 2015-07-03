@@ -997,7 +997,7 @@
   app_banner: Mushroom<br/>Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: Enjoy our new image uploader!  Many thanks to Ray Suelzer.<br>Of course, it's impossible to test it on every browser, so please <a href="http://mushroomobserver.org/observer/ask_webmaster_question">send us a note</a> if you see anything wrong.
+  app_banner_box: Enjoy our new user interface!  Many thanks to <a href="http://mushroomobserver.org/observer/show_user/6261">Ray Suelzer</a> and <a href="http://mushroomobserver.org/observer/show_user/4468">Joe Cohen</a> for most of the work.<br>See the <a href="http://mushroomobserver.org/observer/news">Release Notes</a> for details.  Of course, <a href="http://mushroomobserver.org/observer/ask_webmaster_question">send us a note</a> if you see anything wrong.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
