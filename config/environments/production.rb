@@ -25,9 +25,6 @@ MushroomObserver::Application.configure do
   # Enable queued email.
   config.queue_email = true
 
-  # Nathan wants a copy of everything.
-  config.extra_bcc_email_addresses = "mo@collectivesource.com"
-
   # # Use gmail to send email.
   # config.action_mailer.smtp_settings = {
   #   :address => "smtp.gmail.com",

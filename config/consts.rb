@@ -69,7 +69,6 @@ MushroomObserver::Application.configure do
   config.error_email_address       = "webmaster@mushroomobserver.org"
   config.webmaster_email_address   = "webmaster@mushroomobserver.org"
   config.exception_recipients      = "webmaster@mushroomobserver.org"
-  config.extra_bcc_email_addresses = ""
 
   # File where the list of most commonly used names lives.
   config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"

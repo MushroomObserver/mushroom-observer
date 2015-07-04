@@ -17,7 +17,6 @@ class AccountMailer < ActionMailer::Base
     mail(subject: "[MO] #{title.to_ascii}",
          to: to,
          from: from,
-         bcc: MO.extra_bcc_email_addresses,
          reply_to: reply_to,
          content_type: "text/#{content_style}")
   end
