@@ -154,11 +154,11 @@ MushroomObserver::Application.configure do
 
     api_key.js
     edit_location.js
+    image_slider.js
     multi_image_upload.js
     name_lister.js
     pivotal.js
     rss_feed_select_helper.js
-    semantic_venacular.js
     single_image_uploader.js
     translations.js
     vote_popup.js
@@ -169,7 +169,6 @@ MushroomObserver::Application.configure do
     BlackOnWhite.css      
     Cantharellaceae.css   
     Hygrocybe.css         
-    semantic_vernacular.css
 
   ) if config.assets && config.assets.precompile
 
