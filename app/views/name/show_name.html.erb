@@ -69,7 +69,7 @@
             <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
           </div>
           <div class="col-sm-6">
-            <%= content_tag(:div, link_with_query('EOL', eol_url)) if @name.eol_url %>
+            <%= content_tag(:div, link_with_query('EOL', @name.eol_url)) if @name.eol_url %>
             <%= content_tag(:div, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
             <%= content_tag(:div, link_to("MyCoPortal", mycoportal_url(@name))) %>
             <%= content_tag(:div, link_with_query(:show_name_distribution_map.t, :action => 'map', :id => @name.id)) %>
