@@ -10,7 +10,6 @@
 #  == Attributes
 #
 #  id::               (-) Locally unique numerical id, starting at 1.
-#  sync_id::          (-) Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::       (-) Date/time it was first created.
 #  updated_at::       (V) Date/time it was last updated.
 #  user::             (V) User that created it.
@@ -67,6 +66,30 @@
 class NameDescription < Description
   require 'acts_as_versioned'
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:review_status,
+           { unreviewed: 1,
+             unvetted: 2,
+             vetted: 3,
+             inaccurate: 4
+           },
+           source: :review_status,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:source_type,
+           { public: 1,
+             foreign: 2,
+             project: 3,
+             source: 4,
+             user: 5
+           },
+           source: :source_type,
+           with: [],
+           accessor: :whiny
+         )
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -88,10 +111,9 @@ class NameDescription < Description
   acts_as_versioned(
     :table_name => 'name_descriptions_versions',
     :if_changed => ALL_NOTE_FIELDS,
-    :association_options => { :dependent => :nullify }
+    :association_options => {dependent: :nullify}
   )
   non_versioned_columns.push(
-    'sync_id',
     'created_at',
     'updated_at',
     'name_id',
@@ -236,11 +258,11 @@ class NameDescription < Description
       # Tell reviewer of the change.
       reviewer = self.reviewer || @old_reviewer
       if reviewer && reviewer.email_names_reviewer
-        recipients.push(reviewer) 
+        recipients.push(reviewer)
       end
 
       # Tell masochists who want to know about all name changes.
-      for user in User.find_all_by_email_names_all(true)
+      for user in User.where(email_names_all: true)
         recipients.push(user)
       end
 

@@ -1,42 +1,17 @@
 <%
   @title = :rss_log_title.t.nowrap
 
-  form = form_tag(add_query_param(:action => 'index_rss_log'))
-  form += :rss_show.t + ' '
-  if @types == ['all']
-    form += :rss_all.t
-  else
-    help = :rss_all_help.t
-    form += link_with_query(:rss_all.t,
-      { :action => 'index_rss_log', :type => 'all' }, { :title => help })
+  if @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
   end
-  for type in RssLog.all_types.map(&:to_s)
-    checked = @types.include?(type) || @types == ['all']
-    form += ' | '
-    form += check_box_tag("show_#{type}", '1', checked) + ' '
-    str = :rss_one.t(:type => type.to_sym)
-    if @types == [type]
-      form += str
-    else
-      help = :rss_one_help.t(:type => type.to_sym)
-      form += link_with_query(str,
-        { :action => 'index_rss_log', :type => type }, { :title => help })
-    end
-  end
-  form += indent + submit_tag(:SUBMIT.t)
-  form += '</form>'.html_safe
 
-  custom_tab_set(form)
-  new_tab_set(@links)
-
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  @full_width_tab_set = render(partial: "rss_log_tabset")
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
-  <%= make_matrix(@objects, :width => '100%') do |rss_log| %>
-    <%= render(:partial => 'rss_log', :locals => {
-      :rss_log => rss_log,
-      :target => rss_log.target,
-    }) %>
-  <% end %>
+      <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object)  %>
+      <div style="clear:left"></div>
 <% end %>
+

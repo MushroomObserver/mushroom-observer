@@ -23,7 +23,6 @@
 #  == Attributes
 #
 #  id::             Locally unique numerical id, starting at 1.
-#  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
 #  target::         Object in question.
@@ -31,7 +30,8 @@
 #
 #  == Class methods
 #
-#  find_all_by_target::   Find all Interests for a given object.
+#  # find_all_by_target::   Find all Interests for a given object.
+#  where_target::   Find all Interests for a given object.
 #
 #  == Instance methods
 #
@@ -65,10 +65,12 @@ class Interest < AbstractModel
   # Find all Interests associated with a given object.  This should really be
   # created magically like all the other find_all_by_xxx methods, but the
   # polymorphism messes it up.
-  def self.find_all_by_target(obj)
+  # def self.find_all_by_target(obj)
+  def self.where_target(obj)
     if obj.is_a?(ActiveRecord::Base) && obj.id
-      find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
-    end
+      # find_all_by_target_type_and_target_id(obj.class.to_s, obj.id)
+      where(target_type: obj.class.to_s, target_id: obj.id)
+   end
   end
 
   # To be compatible with Notification need to have summary string:
@@ -85,7 +87,7 @@ class Interest < AbstractModel
 
 ################################################################################
 
-  protected 
+  protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
@@ -93,7 +95,7 @@ class Interest < AbstractModel
       errors.add(:user, :validate_interest_user_missing.t)
     end
 
-    if self.target_type.to_s.binary_length > 30
+    if self.target_type.to_s.bytesize > 30
       errors.add(:target_type, :validate_interest_object_type_too_long.t)
     end
   end

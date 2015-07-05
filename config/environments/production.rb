@@ -1,5 +1,5 @@
 MushroomObserver::Application.configure do
-  # Settings specified here will take precedence over those in config/application.rb
+  # Settings specified here take precedence over those in config/application.rb
 
   # ----------------------------
   #  MO configuration.
@@ -8,7 +8,8 @@ MushroomObserver::Application.configure do
   config.domain      = "mushroomobserver.org"
   config.http_domain = "http://mushroomobserver.org"
 
-  # List of alternate server domains.  We redirect from each of these to the real one.
+  # List of alternate server domains.
+  # We redirect from each of these to the real one.
   config.bad_domains = ["www.#{config.domain}"]
 
   # Date after which votes become public.
@@ -23,9 +24,6 @@ MushroomObserver::Application.configure do
 
   # Enable queued email.
   config.queue_email = true
-
-  # Nathan wants a copy of everything.
-  config.extra_bcc_email_addresses = "mo@collectivesource.com"
 
   # # Use gmail to send email.
   # config.action_mailer.smtp_settings = {
@@ -50,16 +48,16 @@ MushroomObserver::Application.configure do
   # Serve new images locally until transferred to image server
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {
-    :local => {
-      :test => "file://#{config.local_image_files}",
-      :read => "/local_images",
-    },
-    :cdmr => {
-      :test => :transferred_flag,
-      :read  => "/images",
-      # Safer to keep this disabled until truly going live.
-      # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
-    }
+      local: {
+          test: "file://#{config.local_image_files}",
+          read: "/local_images",
+      },
+      cdmr: {
+          test: :transferred_flag,
+          read: "/images",
+          # Safer to keep this disabled until truly going live.
+          # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
+      }
     # For use when testing live server in parallel with production server.
     # :mo = {
     #   :test  => "http://mushroomobserver.org/local_images",
@@ -69,7 +67,7 @@ MushroomObserver::Application.configure do
     # }
   }
   config.image_precedence = {
-    :default   => [:cdmr, :local]
+      default: [:cdmr, :local]
     # For use when testing live server in parallel with production server.
     # :default   => [:cdmr, :local, :mo]
   }
@@ -80,49 +78,101 @@ MushroomObserver::Application.configure do
 
   # ----------------------------
   #  Rails configuration.
+  #  The production environment is meant for finished, "live" apps.
   # ----------------------------
 
-  # The production environment is meant for finished, "live" apps.
   # Code is not reloaded between requests
   config.cache_classes = true
+
+  # Eager load code on boot. This eager loads most of Rails and
+  # your application in memory, allowing both thread web servers
+  # and those relying on copy on write to perform better.
+  # Rake tasks automatically ignore this option for performance.
+  config.eager_load = true
 
   # Full error reports are disabled and caching is turned on
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
-  # Specifies the header that your server uses for sending files
-  # config.action_dispatch.x_sendfile_header = "X-Sendfile"
-
-  # For nginx:
-  config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect'
-
-  # If you have no front-end server that supports something like X-Sendfile,
-  # just comment this out and Rails will serve the files
-
-  # See everything in the log (default is :info)
-  # config.log_level = :debug
-
-  # Use a different logger for distributed setups
-  # config.logger = SyslogLogger.new
-
-  # Use a different cache store in production
-  # config.cache_store = :mem_cache_store
+  # Enable Rack::Cache to put a simple HTTP cache in front of your application
+  # Add `rack-cache` to your Gemfile before enabling this.
+  # For large-scale production use, consider using a caching reverse proxy like
+  # nginx, varnish or squid.
+  # config.action_dispatch.rack_cache = true
 
   # Disable Rails's static asset server
   # In production, Apache or nginx will already do this
   config.serve_static_assets = false
 
+  # Compress JavaScripts and CSS
+  config.assets.compress = true
+  config.assets.js_compressor = :uglifier
+  config.assets.css_compressor = :sass
+
+  # Do not fallback to assets pipeline if a precompiled asset is missed.
+  config.assets.compile = false
+
+  # Generate digests for assets URLs
+  config.assets.digest = true
+
+  # Version of your assets, change this if you want to expire all your assets.
+  config.assets.version = "1.0"
+
+  # Specifies the header that your server uses for sending files
+  # config.action_dispatch.x_sendfile_header = "X-Sendfile" # for apache
+  config.action_dispatch.x_sendfile_header = "X-Accel-Redirect" # For nginx
+  # If you have no front-end server that supports something like X-Sendfile,
+  # just comment this out and Rails will serve the files
+
+  # Force all access to the app over SSL, use Strict-Transport-Security,
+  # and use secure cookies.
+  # config.force_ssl = true
+
+  # Set to :debug to see everything in the log.
+  config.log_level = :info
+
+  # Prepend all log lines with the following tags.
+  # config.log_tags = [ :subdomain, :uuid ]
+
+  # Use a different logger for distributed setups.
+  # config.logger = ActiveSupport::TaggedLogging.new(SyslogLogger.new)
+
+  # Use a different cache store in production
+  # config.cache_store = :mem_cache_store
+
   # Enable serving of images, stylesheets, and javascripts from an asset server
   # config.action_controller.asset_host = "http://assets.example.com"
 
-  # Tells rails to let nginx serve static files.
-  config.action_dispatch.x_sendfile_header = "X-Accel-Redirect"
+  # Precompile additional assets.
+  # application.js, application.css, and all non-JS/CSS in app/assets folder are
+  # already added.
+  # Precompile stuff aside from application.js, application.css, all images.
+  config.assets.precompile += %w(
 
-  # Disable delivery errors, bad email addresses will be ignored
+    api_key.js
+    edit_location.js
+    image_slider.js
+    multi_image_upload.js
+    name_lister.js
+    pivotal.js
+    rss_feed_select_helper.js
+    single_image_uploader.js
+    translations.js
+    vote_popup.js
+
+    Admin.css      
+    Agaricus.css   
+    Amanita.css    
+    BlackOnWhite.css      
+    Cantharellaceae.css   
+    Hygrocybe.css         
+
+  ) if config.assets && config.assets.precompile
+
+  # Ignore bad email addresses and do not raise email delivery errors.
+  # Set this to true and configure the email server for immediate delivery
+  # to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
-
-  # Enable threaded mode
-  # config.threadsafe!
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation can not be found)
@@ -131,44 +181,15 @@ MushroomObserver::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  # Compress JavaScripts and CSS
-  config.assets.compress = true
-  config.assets.js_compressor = :uglifier
+  # Disable automatic flushing of the log to improve performance.
+  # config.autoflush_log = false
 
-  # Don't fallback to assets pipeline if a precompiled asset is missed
-  config.assets.compile = false
+  # Use default logging formatter so that PID and timestamp are not suppressed.
+  config.log_formatter = ::Logger::Formatter.new if defined?(::Logger)
 
   # Combine files using the "require" directives at the top of included files
+  # See http://guides.rubyonrails.org/asset_pipeline.html#turning-debugging-off
   config.assets.debug = false
-
-  # Generate digests for assets URLs
-  config.assets.digest = true
-
-  # Defaults to Rails.root.join("public/assets")
-  # config.assets.manifest = YOUR_PATH
-
-  # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  config.assets.precompile += %w(
-    api_key.js
-    edit_location.js
-    multi_image_upload.js
-    name_lister.js
-    pivotal.js
-    semantic_venacular.js
-    translations.js
-    vote_popup.js
-    Admin.css
-    Agaricus.css
-    Amanita.css
-    BlackOnWhite.css
-    Cantharellaceae.css
-    Hygrocybe.css
-    grids.css
-    semantic_vernacular.css
-  ) if config.assets and config.assets.precompile
-
-  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

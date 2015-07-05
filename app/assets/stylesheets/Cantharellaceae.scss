@@ -1,0 +1,97 @@
+@import "old_theme";
+
+$californicus_cap:              #f6ae4a; // image 557
+$californicus_stipe:            #fae8b8;
+$cinnabarinus_dark_cap:         #c12900; // image 551
+$cinnabarinus_light_cap:        #ff6524;
+$cinnabarinus_dark_stem:        #6d1900;
+$tubaeformis_dark_cap:          #603b29; // image 462
+$tubaeformis_light_cap:         #925c20;
+$tubaeformis_hymenium:          #c2914c;
+$tubaeformis_bright_stipe:      #ffb230;
+$tubaeformis_dark_stipe:        #4b2e0c;
+$tubaeformis_light_stipe:       #e5bb67;
+$cornucopioides_dark_hymenium:  #10110b; // image 465
+$cornucopioides_light_hymenium: #9b9690;
+$cornucopioides_dark_cap:       #4f4337;
+$cornucopioides_light_cap:      #826c57;
+$cornucopioides_bright_margin:  #e6c987;
+$polyozellus_light:             #a5bffa;
+$polyozellus_dark:              #5167b2;
+
+$BODY_FG_COLOR:               $cornucopioides_dark_hymenium;
+$BODY_BG_COLOR:               $californicus_stipe;
+                             
+$LINK_FG_COLOR:               $cinnabarinus_light_cap;
+$LINK_VISITED_FG_COLOR:       $cinnabarinus_dark_cap;
+$LINK_HOVER_FG_COLOR:         $cinnabarinus_light_cap;
+$LINK_HOVER_BG_COLOR:         $californicus_cap;
+                             
+$LOGO_BORDER_COLOR:           $cornucopioides_dark_hymenium;
+$LOGO_FG_COLOR:               $cornucopioides_dark_hymenium;
+$LOGO_BG_COLOR:               $californicus_cap;
+$LOGO_HOVER_FG_COLOR:         $cornucopioides_dark_hymenium;
+$LOGO_HOVER_BG_COLOR:         $californicus_stipe;
+                             
+$LEFT_BAR_BORDER_COLOR:       $californicus_cap;
+$LEFT_BAR_HEADER_FG_COLOR:    $cornucopioides_dark_hymenium;
+$LEFT_BAR_HEADER_BG_COLOR:    $californicus_cap;
+$LEFT_BAR_FG_COLOR:           $cinnabarinus_dark_cap;
+$LEFT_BAR_BG_COLOR:           $californicus_cap;
+$LEFT_BAR_HOVER_FG_COLOR:     $cinnabarinus_dark_cap;
+$LEFT_BAR_HOVER_BG_COLOR:     $californicus_stipe;
+
+$TOP_BAR_FG_COLOR:            $cornucopioides_dark_hymenium;
+$TOP_BAR_BG_COLOR:            $californicus_stipe;
+$TOP_BAR_LINK_FG_COLOR:       $cinnabarinus_light_cap;
+$TOP_BAR_LINK_HOVER_FG_COLOR: $cinnabarinus_light_cap;
+$TOP_BAR_LINK_HOVER_BG_COLOR: $californicus_cap;
+
+$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_HEADER_FG_COLOR:        #777777;
+$LIST_HEADER_BG_COLOR:        #EEEEEE;
+$LIST_FG_COLOR:               $cornucopioides_dark_hymenium;
+$LIST_BG_COLOR:               mix($californicus_stipe, white, 50%);
+
+$TOOLTIP_FG_COLOR:            $californicus_stipe;
+$TOOLTIP_BG_COLOR:            $cornucopioides_dark_hymenium;
+                             
+$VOTE_METER_FG_COLOR:         $cornucopioides_dark_hymenium;
+$VOTE_METER_BG_COLOR:         $californicus_cap;
+                             
+$PROGRESS_BG_COLOR:           $californicus_stipe;
+$PROGRESS_FG_COLOR:           $cornucopioides_dark_hymenium;
+$PROGRESS_BAR_COLOR:          $cinnabarinus_light_cap;
+                             
+$PAGER_FG_COLOR:              $cornucopioides_dark_hymenium;
+$PAGER_HOVER_FG_COLOR:        $cornucopioides_dark_hymenium;
+$PAGER_HOVER_BG_COLOR:        $californicus_cap;
+$PAGER_ACTIVE_FG_COLOR:       $californicus_stipe;
+$PAGER_ACTIVE_BG_COLOR:       $cornucopioides_dark_hymenium;
+                             
+$MENU_BORDER_COLOR:           $cornucopioides_dark_hymenium;
+$MENU_FG_COLOR:               black;
+$MENU_BG_COLOR:               white;
+$MENU_HOT_FG_COLOR:           black;
+$MENU_HOT_BG_COLOR:           $cinnabarinus_light_cap;
+$MENU_WARM_FG_COLOR:          black;
+$MENU_WARM_BG_COLOR:          $californicus_cap;
+
+$INFO_BG_COLOR:                     $polyozellus_light;
+$INFO_BORDER_COLOR:                 $polyozellus_dark;
+$INFO_FG_COLOR:                     $BODY_FG_COLOR;
+$SUCCESS_BG_COLOR:                  #E0FFE0;
+$SUCCESS_BORDER_COLOR:              #70C070;
+$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
+$WARNING_BG_COLOR:                  #FFF8E0;
+$WARNING_BORDER_COLOR:              #F8CC70;
+$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
+$DANGER_BG_COLOR:                   #FFE0E0;
+$DANGER_BORDER_COLOR:               #F07070;
+$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+
+@import "mushroom_observer";
+
+#navigation {
+    border-left-width: $LEFT_BAR_BORDER_WIDTH;
+}

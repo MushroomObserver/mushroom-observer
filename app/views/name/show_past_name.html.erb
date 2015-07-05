@@ -3,9 +3,11 @@
     :num  => @name.version,
     :name => @name.display_name
   )
-  new_tab_set do
-    add_tab(:show_name.t(:name => @name.display_name), :action => 'show_name', :id => @name.id)
-  end
+
+  tabs = [
+    link_to(:show_name.t(:name => @name.display_name), :action => 'show_name', :id => @name.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <table cellpadding="10">
@@ -13,7 +15,7 @@
     <td valign="top">
       <p>
         <%= render(:partial => 'name', :object => @name, :locals =>
-                   { :synonyms => false }) %>
+                   {synonyms: false}) %>
       </p>
     </td>
 

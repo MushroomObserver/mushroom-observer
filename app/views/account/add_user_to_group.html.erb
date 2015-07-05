@@ -1,13 +1,19 @@
-<% @title = :add_user_to_group_title.t %>
+<%
+  @title = :add_user_to_group_title.t
+%>
 
-<%= form_tag(:action => "add_user_to_group") do %>
+<div class="max-width-text">
+  <%= form_tag(action: :add_user_to_group) do %>
+    <div class="form-group push-down">
+      <%= label_tag(:user_name, :add_user_to_group_user.t + ":") %>
+      <%= text_field_tag(:user_name, "", class: "form-control") %>
+    </div>
 
-  <label for="user_name"><%= :add_user_to_group_user.t %>:</label><br/>
-  <input type="text" name="user_name" id="user_name" size="30"/><br/><br/>
+    <div class="form-group push-down">
+      <%= label_tag(:group_name, :add_user_to_group_group.t + ":") %>
+      <%= text_field_tag(:group_name, "", class: "form-control") %>
+    </div>
 
-  <label for="group_name"><%= :add_user_to_group_group.t %>:</label><br/>
-  <input type="text" name="group_name" id="group_name" size="30"/><br/><br/>
-
-  <input type="submit" name="save" value="<%= :ADD.t %>" class="primary" />
-
-<% end %>
+    <%= submit_tag(:ADD.t, class: "btn push-down center-block") %>
+  <% end %>
+</div>

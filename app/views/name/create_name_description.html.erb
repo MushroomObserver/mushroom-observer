@@ -2,19 +2,20 @@
   @title ||= :create_name_description_title.
                t(:name => @name.display_name)
 
-  new_tab_set do
-    add_tab_with_query(:cancel_and_show.t(:type => :name),
+  tabs = [
+    link_with_query(:cancel_and_show.t(:type => :name),
       :action => 'show_name', :id => @description.name_id)
-  end
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= form_for(:description, :url => add_query_param(
        :action => :create_name_description,
        :id => @description.name_id)) do |form| %>
-  <br/><center><%= submit_tag(:CREATE.l) %></center>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 
   <%= render(:partial => 'form_name_description', :locals =>
-             { :form => form }) %>
+             {form: form}) %>
 
-  <br/><center><%= submit_tag(:CREATE.l) %></center>
+  <br/><center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 <% end %>

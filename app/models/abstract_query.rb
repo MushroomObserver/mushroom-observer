@@ -33,16 +33,16 @@
 #
 #  Get observations created by @user.
 #
-#    query = Query.lookup(:Observation, :by_user, :user => @user)
+#    query = Query.lookup(:Observation, :by_user, user: @user)
 #
 #  Get observations in the three sections of show_name:
 #  1) observations whose consensus is @name
 #  2) observations whose consensus is synonym of @name
 #  3) observations with non-consensus naming that is a synonym of @name
 #
-#    query = Query.lookup(:Observation, :of_name, :name => @name)
-#    query = Query.lookup(:Observation, :of_name, :name => @name, :synonyms => :exclusive)
-#    query = Query.lookup(:Observation, :of_name, :name => @name, :synonyms => :all, :nonconsensus => :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name)
+#    query = Query.lookup(:Observation, :of_name, name: @name, synonyms: :exclusive)
+#    query = Query.lookup(:Observation, :of_name, name: @name, synonyms: :all, nonconsensus: :exclusive)
 #
 #  You may further tweak a query after it's been created:
 #
@@ -59,14 +59,14 @@
 #
 #  You also have access to lower-level operations:
 #
-#    ids   = query.select_values(:where => 'names.display_name LIKE "A%"')
-#    ids   = query.select_values(:order => 'names.sort_name ASC')
-#    names = query.select_values(:select => 'names.display_name')
+#    ids   = query.select_values(where: 'names.display_name LIKE "A%"')
+#    ids   = query.select_values(order: 'names.sort_name ASC')
+#    names = query.select_values(select: 'names.display_name')
 #
 #    # This is the most efficient way to make Query work with ActiveRecord --
 #    # This lets you customize the query, then automatically tells it to select
 #    # all the fields ActiveRecord::Base#find_by_sql needs.
-#    names = query.find_by_sql(:where => ...)
+#    names = query.find_by_sql(where: ...)
 #
 #  Sequence operators let you use the query as a pseudo-iterator:  (Note, these
 #  are somewhat more subtle than shown here, as nested queries may require the
@@ -154,22 +154,22 @@
 #
 #    # The setup all happens in show_observation:
 #    outer = find_or_create_query(:Observation)
-#    inner = create_query(:Image, :inside_observation, :outer => outer,
-#                         :observation => @observation)
+#    inner = create_query(:Image, :inside_observation, outer: outer,
+#                         observation: @observation)
 #    for image in inner.results
-#      link_to(image, add_query_param({:action => 'show_image', :id => image.id}, inner))
+#      link_to(image, add_query_param({action: "show_image", id: image.id}, inner))
 #    end
 #
 #    # Now show_image can be oblivous:
 #    query = find_or_create_query(:Image)
-#    link_to('Prev', add_query_param({:action => 'prev_image', :id => image.id}, query))
-#    link_to('Next', add_query_param({:action => 'next_image', :id => image.id}, query))
-#    link_to('Back', add_query_param({:action => 'show_observation', :id => image.id, query))
+#    link_to("Prev", add_query_param({action: "prev_image", id: image.id}, query))
+#    link_to("Next", add_query_param({action: "next_image", id: image.id}, query))
+#    link_to("Back", add_query_param({action: "show_observation", id: image.id, query))
 #
 #    # And this is how prev and next work:
-#    query = find_or_create_query(:Image, :current => params[:id].to_s)
+#    query = find_or_create_query(:Image, current: params[:id].to_s)
 #    if new_query = query.next
-#      redirect_to(add_query_param({:action => 'show_image', :id => new_query.current_id}, new_query))
+#      redirect_to(add_query_param({action: "show_image", id: new_query.current_id}, new_query))
 #    else
 #      flash_error 'No more images!'
 #    end
@@ -324,8 +324,8 @@ class AbstractQuery < ActiveRecord::Base
   # none be found in this hash, is :all.
   #
   #   self.default_flavors = {
-  #     :User     => :active,
-  #     :Location => :defined,
+  #     User:     :active,
+  #     Location: :defined,
   #   }
   #
   superclass_delegating_accessor :default_flavors
@@ -335,10 +335,10 @@ class AbstractQuery < ActiveRecord::Base
   # values are the "declaration".  An example explains it pretty well:
   #
   #   self.flavor_params = {
-  #     :by_user   => {:user => User}
-  #     :with_name => {:name => Name, :optional_flag? => :boolean}
-  #     :in_set    => {:ids => [:id]}
-  #     :search    => {:pattern => :string, :mode? => {:string => [:simple, :complex]}}
+  #     by_user:   {user: User}
+  #     with_name: {name: Name, :optional_flag? => :boolean}
+  #     in_set:    {ids: [:id]}
+  #     search:    {pattern: :string, :mode? => {string: [:simple, :complex]}}
   #   }
   #
   # The question marks mean "optional" -- they are not actually part of the
@@ -366,14 +366,14 @@ class AbstractQuery < ActiveRecord::Base
   superclass_delegating_accessor :flavor_params
   self.flavor_params = {}
   @@default_flavor_params = {
-    :ids => [:id],
+    ids: [:id],
   }
 
   # Add these to the list of required parameters for a given model (Symbol).
   #
   #   self.model_params = {
-  #     :Name => { :misspellings => :boolean },
-  #     :User => ...,
+  #     Name: { misspellings: :boolean },
+  #     User: ...,
   #   }
   #
   superclass_delegating_accessor :model_params
@@ -390,20 +390,20 @@ class AbstractQuery < ActiveRecord::Base
   superclass_delegating_accessor :global_params
   self.global_params = {}
   @@default_global_params = {
-    :join?   => [:string],
-    :tables? => [:string],
-    :where?  => [:string],
-    :group?  => :string,
-    :order?  => :string,
-    :by?     => :string,
+      join?: [:string],
+      tables?: [:string],
+      where?: [:string],
+      group?: :string,
+      order?: :string,
+      by?: :string,
   }
 
   # Allowed flavors for each model.  Just a hash mapping model (symbols) to
   # arrays of allowed flavors (also symbols).
   #
   #   self.allowed_model_flavors = {
-  #     :User => [ :all, :active, :with_photo ],
-  #     :Image => [ :all, :recent, :reviewed ],
+  #     User: [ :all, :active, :with_photo ],
+  #     Image: [ :all, :recent, :reviewed ],
   #   }
   #
   superclass_delegating_accessor :allowed_model_flavors
@@ -443,41 +443,41 @@ class AbstractQuery < ActiveRecord::Base
   def initialize_global; end
 
   # Returns the default sort order for the query.  This should be recognized
-  # by the <tt>:by => :order</tt> parameter, as handled by +initialize_order+
-  # "callback".  The "default" default is 'id'.  (It should always return a
+  # by the <tt>by: :order</tt> parameter, as handled by +initialize_order+
+  # "callback".  The "default" default is "id".  (It should always return a
   # String, not a Symbol!)
   #
   #   def default_order
   #     case flavor
   #     when :contribution
-  #       'user_login'
+  #       "user_login"
   #     else
-  #       'updated_at'
+  #       "updated_at"
   #     end
   #   end
   #
-  def default_order; 'id'; end
+  def default_order; "id"; end
 
-  # This is where you define what the various <tt>:by => :order</tt> sort
+  # This is where you define what the various <tt>by: :order</tt> sort
   # orders mean.  Several trivial orders are defined by default, but can be
   # overridden in this method:
   #
-  # * 'updated_at', 'created_at', 'date' -- sorts by the column of the same name,
+  # * "updated_at", "created_at", "date" -- sorts by the column of the same name,
   #   in descending order.
   #
-  # * 'name', 'title', 'login' -- sorts by the column of the same name, in
+  # * "name", "title", "login" -- sorts by the column of the same name, in
   #   ascending order.
   #
-  # * 'id' -- sorts by object id, in ascending order.
+  # * "id" -- sorts by object id, in ascending order.
   #
   # *NOTE*: The <tt>params[:order]</tt> value is a String, not a Symbol!
   #
   # Example:
   #
   #   def initialize_order(by)
-  #     table = model.table_name
+  #     table = model_class.table_name
   #     case by
-  #     when 'user_login'
+  #     when "user_login"
   #       self.join << :user
   #       "users.login ASC'
   #     end
@@ -552,17 +552,17 @@ class AbstractQuery < ActiveRecord::Base
   #
   #   query.model = User
   #   query.model = :User
-  #   query.model = 'User'
+  #   query.model = "User"
   #
   def model=(x)
     x = x.to_s.constantize if !x.is_a?(Class)
-    @model_class = x
-    write_attribute('model', x.to_s.to_sym)
+    @model = x
+    write_attribute(:model, Query.models[x.to_s.to_sym])
   end
 
   # Returns model attribute as Class.
-  def model
-    @model_class ||= read_attribute('model').to_s.constantize rescue nil
+  def model_class
+    @model_class ||= model.to_s.constantize rescue nil
   end
 
   # Returns model attribute as String.
@@ -572,7 +572,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Returns model attribute as Symbol.
   def model_symbol
-    model.to_s.to_sym
+    model.to_sym
   end
 
   # Models that we define queries for (Array of Symbols).  This is used to
@@ -587,7 +587,7 @@ class AbstractQuery < ActiveRecord::Base
     allowed_model_flavors.values.flatten.uniq.sort_by(&:to_s)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Parameters
   #
@@ -597,11 +597,11 @@ class AbstractQuery < ActiveRecord::Base
   #  This much-simplified serialization handles the standard scalars (String,
   #  Symbol, Fixnum, Float, true, false, nil) as well as nested Array's thereof.
   #
-  ################################################################################
+  ##############################################################################
 
   # Deserialize params hash and cache it.
   def params
-    @params ||= params_parse_hash(@attributes['params'])
+    @params ||= params_parse_hash(@attributes["params"])
   end
 
   # Replace parameters Hash with a new Hash.
@@ -644,15 +644,15 @@ class AbstractQuery < ActiveRecord::Base
 
   # Parse a single value from a String.
   def params_parse_val(val)
-    val.sub!(/^(.)/,'')
+    val.sub!(/^(.)/,"")
     case $1
     when '[' ; val.split.map {|v| params_parse_val(v)}
     when '"' ; val.gsub('%s',' ').gsub('%h','%').gsub('\\n',"\n")
     when ':' ; val.gsub('%s',' ').gsub('%h','%').gsub('\\n',"\n").to_sym
     when '#' ; val.to_i
     when '.' ; val.to_f
-    when '1' ; true
-    when '0' ; false
+    when "1" ; true
+    when "0" ; false
     when '-' ; nil
     else raise "Invalid value in params: '#{$1}#{val}'"
     end
@@ -666,8 +666,8 @@ class AbstractQuery < ActiveRecord::Base
     when Symbol     ; ':' + val.to_s.gsub('%','%h').gsub(' ','%s').gsub("\n",'\\n')
     when Fixnum     ; '#' + val.to_s
     when Float      ; '.' + val.to_s
-    when TrueClass  ; '1'
-    when FalseClass ; '0'
+    when TrueClass  ; "1"
+    when FalseClass ; "0"
     when NilClass   ; '-'
     else raise "Invalid value in params: '#{val.class.name}:#{val.to_s}'"
     end
@@ -695,14 +695,17 @@ class AbstractQuery < ActiveRecord::Base
     query
   end
 
-  # Instantiate new query for a given model and flavor.
+  # Instantiate new query for a given model and flavor
+  # Inputs:
+  #   model:  Class
+  #   flavor: Symbol
   def self.lookup(model, flavor=:default, params={})
     query = new()
 
     # Periodically clean out old queries.
-    if !defined?(@@last_cleanup) or
+    if !defined?(@@last_cleanup) ||
        (@@last_cleanup < Time.now - 5.minutes)
-      if ::Rails.env != 'test'
+      if ::Rails.env != "test"
         self.cleanup
         @@last_cleanup = Time.now
       end
@@ -710,15 +713,17 @@ class AbstractQuery < ActiveRecord::Base
 
     # Provide default flavor.
     if flavor == :default || flavor.blank?
-      flavor = default_flavors[model.to_s.to_sym] || :all
+      flavor = default_flavors[model] || :all
+    else
+      flavor = flavor.to_sym
     end
 
     # Make sure this is a recognized query type.
-    model = model.to_s.to_sym
-    if !allowed_model_flavors.has_key?(model)
-      raise("Invalid model: '#{model}'")
-    elsif !allowed_model_flavors[model].include?(flavor)
-      raise("Invalid query for #{model} model: '#{flavor}'")
+    model_symbol = model.to_s.to_sym
+    if !allowed_model_flavors.has_key?(model_symbol)
+      raise("Invalid model: '#{model_symbol}'")
+    elsif !allowed_model_flavors[model_symbol].include?(flavor)
+      raise("Invalid query for #{model_symbol} model: '#{flavor}'")
     end
 
     # Let caller combine lookup and current= in one call.
@@ -729,52 +734,50 @@ class AbstractQuery < ActiveRecord::Base
     end
 
     # Initialize attributes, but don't create query or do anything yet.
-    query.attributes = {
-      :model        => model,
-      :flavor       => flavor,
-      :updated_at   => Time.now,
-      :access_count => 0,
-    }
+    query.attributes = { model:        model_symbol,
+                         flavor:       flavor,
+                         updated_at:   Time.now,
+                         access_count: 0
+                       }
     query.replace_params(params)
 
-    # Make sure all required params exist and are valid; also make sure there
-    # aren't any unexpected arguments.
+    # Make sure all required params exist and are valid;
+    # Also make sure there are no unexpected arguments.
     query.validate_params
 
-    # See if such a query already exists and use it instead.
-    str = query.params_write_hash(query.params)
-    if other = find_by_model_and_flavor_and_params(model, flavor, str)
-      query = other
-    end
+    # Search (using enum integers for model and flavor values)
+    # for preexisting identical query.  Use it instead of creating new query.
+    existing_query = find_by_model_and_flavor_and_params(
+      query.class.models[model_symbol],
+      query.class.flavors[flavor],
+      query.params_write_hash(query.params))
+    query = existing_query if existing_query
 
-    # Okay to set "current" now.
-    if set_current
-      query.current = set_current
-    end
+    query.current = set_current if set_current # Okay to set "current" now.
 
-    return query
+    query
   end
 
   # Instantiate (unsaved!) a dummy lookup without any parameters.
   def self.template(model, flavor)
-    model  = model.to_s.to_sym
+    model_symbol  = model.to_s.to_sym
     flavor = flavor.to_s.to_sym
 
     # Make sure this is a recognized query type.
-    if !allowed_model_flavors.has_key?(model)
-      raise("Invalid model: '#{model}'")
-    elsif !allowed_model_flavors[model].include?(flavor)
-      raise("Invalid query for #{model} model: '#{flavor}'")
+    if !allowed_model_flavors.has_key?(model_symbol)
+      raise("Invalid model: '#{model_symbol}'")
+    elsif !allowed_model_flavors[model_symbol].include?(flavor)
+      raise("Invalid query for #{model_symbol} model: '#{flavor}'")
     end
 
     # Create minimal instance.
     query = new(
-      :model  => model,
-      :flavor => flavor
+      model:  model_symbol,
+      flavor: flavor
     )
     query.replace_params({})
 
-    return query
+    query
   end
 
   # Only keep unused states around for an hour, and used states for a day.
@@ -832,7 +835,7 @@ class AbstractQuery < ActiveRecord::Base
     for arg, arg_type in reqs
       # Allow some parameters to be optional (not used yet).
       arg = arg.to_s
-      question = !!arg.sub!(/\?$/,'')
+      question = !!arg.sub!(/\?$/,"")
 
       # Allow parameter names to be either symbols or strings.
       arg_sym = arg.to_sym
@@ -881,7 +884,7 @@ class AbstractQuery < ActiveRecord::Base
   # Merge the given "default" requirements into the list we have.
   def self.merge_requirements(reqs, extras)
     for key, val in extras || {}
-      key1 = key.to_s.sub(/\?$/,'').to_sym
+      key1 = key.to_s.sub(/\?$/,"").to_sym
       key2 = "#{key1}?".to_sym
       if !reqs.has_key?(key1) &&
          !reqs.has_key?(key2)
@@ -985,9 +988,9 @@ class AbstractQuery < ActiveRecord::Base
   # Make sure value is a boolean.
   def validate_boolean(arg, val)
     case val
-    when :true, :yes, :on, 'true', 'yes', 'on', '1', 1, true
+    when :true, :yes, :on, "true", "yes", "on", "1", 1, true
       true
-    when :false, :no, :off, 'false', 'no', 'off', '0', 0, false, nil
+    when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
       false
     else
       raise("Value for :#{arg} should be boolean, got: #{val.inspect}")
@@ -1043,7 +1046,7 @@ class AbstractQuery < ActiveRecord::Base
     elsif val.is_a?(Fixnum) or
           val.is_a?(String) && val.match(/^[1-9]\d*$/) or
           # (blasted admin user has id = 0!)
-          val.is_a?(String) && (val == '0') && (arg == :user)
+          val.is_a?(String) && (val == "0") && (arg == :user)
       val.to_i
     else
       raise("Value for :#{arg} should be id or an #{type} instance, got: #{val.inspect}")
@@ -1077,14 +1080,14 @@ class AbstractQuery < ActiveRecord::Base
   # that require it, e.g. +query+, +results+, +select_values+.)
   def initialize_query
     @initialized = true
-    table = model.table_name
+    table = model_class.table_name
 
     # By default, no conditions, ordering, etc.
     self.join     = []
     self.tables   = []
     self.where    = []
-    self.group    = ''
-    self.order    = ''
+    self.group    = ""
+    self.order    = ""
     self.executor = nil
 
     # Setup query for the given flavor.
@@ -1095,16 +1098,16 @@ class AbstractQuery < ActiveRecord::Base
       send("initialize_#{model_string.underscore}")
     end
 
-    # Give all queries the ability to order via simple :by => :name mechanism.
+    # Give all queries the ability to order via simple by: :name mechanism.
     superclass_initialize_order
 
     # Perform final global initialization.
     superclass_initialize_global
   end
 
-  # Do mechanics of the :by => :type sorting mechanism.
+  # Do mechanics of the by: :type sorting mechanism.
   def superclass_initialize_order
-    table = model.table_name
+    table = model_class.table_name
 
     by = params[:by]
     if by || order.blank?
@@ -1112,22 +1115,22 @@ class AbstractQuery < ActiveRecord::Base
 
       # Allow any of these to be reversed.
       by = by.dup
-      reverse = !!by.sub!(/^reverse_/, '')
+      reverse = !!by.sub!(/^reverse_/, "")
 
       # Let subclass decide how to order things.
       result = initialize_order(by)
 
       # Then provide some simple defaults.
       result ||= case by
-      when 'date', 'created_at', 'updated_at'
-        if model.column_names.include?(by)
+      when "date", "created_at", "updated_at"
+        if model_class.column_names.include?(by)
           "#{table}.#{by} DESC"
         end
-      when 'name', 'title', 'login', 'herbarium_label'
-        if model.column_names.include?(by)
+      when "name", "title", "login", "herbarium_label"
+        if model_class.column_names.include?(by)
           "#{table}.#{by} ASC"
         end
-      when 'id' # (for testing)
+      when "id" # (for testing)
         "#{table}.id ASC"
       end
 
@@ -1156,8 +1159,8 @@ class AbstractQuery < ActiveRecord::Base
   # evals the string, so the syntax is almost identical to what you're used to:
   #
   #   ":table, :table"
-  #   ":table => :table"
-  #   ":table => [:table, {:table => :table}]"
+  #   "table: :table"
+  #   "table: [:table, {table: :table}]"
   #
   def initialize_join(val)
     self.join += val.map do |str|
@@ -1170,7 +1173,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Create fake query given the results.
   def initialize_in_set(ids=params[:ids])
-    table = model.table_name
+    table = model_class.table_name
     set = clean_id_set(ids)
     self.where << "#{table}.id IN (#{set})"
     self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
@@ -1275,30 +1278,30 @@ class AbstractQuery < ActiveRecord::Base
   def self.google_parse(str)
     goods = []
     bads  = []
-    if (str = str.to_s.strip_squeeze) != ''
+    if (str = str.to_s.strip_squeeze) != ""
       str.gsub!(/\s+/, ' ')
       # Pull off "and" clauses one at a time from the beginning of the string.
       while true
-        if str.sub!(/^-"([^""]+)"( |$)/, '') or
-           str.sub!(/^-(\S+)( |$)/, '')
+        if str.sub!(/^-"([^""]+)"( |$)/, "") or
+           str.sub!(/^-(\S+)( |$)/, "")
           bads << $1
-        elsif str.sub!(/^(("[^""]+"|\S+)( OR ("[^""]+"|\S+))*)( |$)/, '')
+        elsif str.sub!(/^(("[^""]+"|\S+)( OR ("[^""]+"|\S+))*)( |$)/, "")
           str2 = $1
           or_strs = []
-          while str2.sub!(/^"([^""]+)"( OR |$)/, '') or
-                str2.sub!(/^(\S+)( OR |$)/, '')
+          while str2.sub!(/^"([^""]+)"( OR |$)/, "") or
+                str2.sub!(/^(\S+)( OR |$)/, "")
             or_strs << $1
           end
           goods << or_strs
         else
-          raise("Invalid search string syntax at: '#{str}'") if str != ''
+          raise("Invalid search string syntax at: '#{str}'") if str != ""
           break
         end
       end
     end
     GoogleSearch.new(
-      :goods => goods,
-      :bads  => bads
+      goods: goods,
+      bads:  bads
     )
   end
   def google_parse(str); self.class.google_parse(str); end
@@ -1328,6 +1331,23 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
+  # Add a join condition if it doesn't already exist.  There are two forms:
+  #
+  #   # Add join from root table to the given table:
+  #   add_join(:observations) 
+  #     => join << :observations
+  #
+  #   # Add join from one table to another: (will create join from root to
+  #   # first table if it doesn't already exist)
+  #   add_join(:observations, :names)
+  #     => join << {:observations => :names}
+  #   add_join(:names, :descriptions)
+  #     => join << {:observations => {:names => :descriptions}}
+  #
+  def add_join(*args)
+    join.add_leaf(*args)
+  end
+
   ##############################################################################
   #
   #  :section: Build SQL Query
@@ -1337,7 +1357,7 @@ class AbstractQuery < ActiveRecord::Base
   # Build query for <tt>model.find_by_sql</tt> -- i.e. one that returns all
   # fields from the table in question, instead just the id.
   def query_all(args={})
-    query(args.merge(:select => "DISTINCT #{model.table_name}.*"))
+    query(args.merge(select: "DISTINCT #{model_class.table_name}.*"))
   end
 
   # Build query, allowing the caller to override/augment the standard
@@ -1345,7 +1365,7 @@ class AbstractQuery < ActiveRecord::Base
   def query(args={})
     initialize_query if !initialized?
 
-    our_select  = args[:select] || "DISTINCT #{model.table_name}.id"
+    our_select  = args[:select] || "DISTINCT #{model_class.table_name}.id"
     our_join    = self.join.dup
     our_join   += args[:join] if args[:join].is_a?(Array)
     our_join   << args[:join] if args[:join].is_a?(Hash)
@@ -1367,7 +1387,7 @@ class AbstractQuery < ActiveRecord::Base
     # (I despise programs that render random results!)
     if !our_order.blank? and
        !our_order.match(/.id( |$)/)
-      our_order += ", #{model.table_name}.id DESC"
+      our_order += ", #{model_class.table_name}.id DESC"
     end
 
     sql = %(
@@ -1398,20 +1418,20 @@ class AbstractQuery < ActiveRecord::Base
 
   # Extract and format list of tables names from join tree for FROM clause.
   def calc_from_clause(our_join=join, our_tables=tables)
-    implicits = [model.table_name] + our_tables
+    implicits = [model_class.table_name] + our_tables
     result = implicits.uniq.map {|x| "`#{x}`"}.join(', ')
     if our_join
       result += ' '
-      result += calc_join_conditions(model.table_name, our_join).join(' ')
+      result += calc_join_conditions(model_class.table_name, our_join).join(' ')
     end
     return result
   end
 
   # Extract a complete list of tables being used by this query.  (Combines
-  # this table (+model.table_name+) with tables from +join+ with custom-joined
+  # this table (+model_class.table_name+) with tables from +join+ with custom-joined
   # tables from +tables+.)
   def table_list(our_join=join, our_tables=tables)
-    flatten_joins([model.table_name] + our_join + our_tables, false).uniq
+    flatten_joins([model_class.table_name] + our_join + our_tables, false).uniq
   end
 
   # Flatten join "tree" into a simple Array of Strings.  Set +keep_qualifiers+
@@ -1421,14 +1441,14 @@ class AbstractQuery < ActiveRecord::Base
     result = []
     if arg.is_a?(Hash)
       for key, val in arg
-        key = key.to_s.sub(/\..*/, '') if !keep_qualifiers
+        key = key.to_s.sub(/\..*/, "") if !keep_qualifiers
         result << key.to_s
         result += flatten_joins(val)
       end
     elsif arg.is_a?(Array)
       result += arg.map {|x| flatten_joins(x)}.flatten
     else
-      arg = arg.to_s.sub(/\..*/, '') if !keep_qualifiers
+      arg = arg.to_s.sub(/\..*/, "") if !keep_qualifiers
       result << arg.to_s
     end
     return result
@@ -1456,9 +1476,9 @@ class AbstractQuery < ActiveRecord::Base
   # Create SQL 'JOIN ON' clause to join two tables.  Tack on an exclamation to
   # make it an outer join.  Tack on '.field' to specify alternate association.
   def calc_join_condition(from, to, done)
-    from = from.sub(/\..*/, '')
+    from = from.sub(/\..*/, "")
     to = to.dup
-    do_outer = to.sub!(/!$/, '')
+    do_outer = to.sub!(/!$/, "")
 
     result = []
     if !done.include?(to)
@@ -1468,20 +1488,20 @@ class AbstractQuery < ActiveRecord::Base
       # rss_logs, use "observations.rss_log_id = rss_logs.id", because that will
       # take advantage of the primary key on rss_logs.id.
       if col = (join_conditions[from.to_sym] && join_conditions[from.to_sym][to.to_sym])
-        to.sub!(/\..*/, '')
+        to.sub!(/\..*/, "")
         target_table = to
 
       # Now look for "reverse" join.  (In the above example, and this was how it
       # used to be, it would be "observations.id = rss_logs.observation_id".)
       elsif col = (join_conditions[to.to_sym] && join_conditions[to.to_sym][from.to_sym])
-        to.sub!(/\..*/, '')
+        to.sub!(/\..*/, "")
         target_table = to
         from, to = to, from
       else
         raise("Don't know how to join from #{from} to #{to}.")
       end
 
-      # By default source table column is just 'id'; enter both target and source
+      # By default source table column is just "id"; enter both target and source
       # columns explcitly by making join table value an Array.
       if col.is_a?(Array)
         col1, col2 = *col
@@ -1510,7 +1530,7 @@ class AbstractQuery < ActiveRecord::Base
   # Reverse order of an ORDER BY clause.
   def reverse_order(order)
     order.gsub(/(\s)(ASC|DESC)(,|\Z)/) do
-      $1 + ($2 == 'ASC' ? 'DESC' : 'ASC') + $3
+      $1 + ($2 == "ASC" ? "DESC" : "ASC") + $3
     end
   end
 
@@ -1529,9 +1549,9 @@ class AbstractQuery < ActiveRecord::Base
     if executor
       executor.call(args).length
     else
-      select = args[:select] || "DISTINCT #{model.table_name}.id"
-      args = args.merge(:select => "COUNT(#{select})")
-      model.connection.select_value(query(args)).to_i
+      select = args[:select] || "DISTINCT #{model_class.table_name}.id"
+      args = args.merge(select: "COUNT(#{select})")
+      model_class.connection.select_value(query(args)).to_i
     end
   end
 
@@ -1541,7 +1561,7 @@ class AbstractQuery < ActiveRecord::Base
     if executor
       executor.call(args).first.first
     else
-      model.connection.select_value(query(args))
+      model_class.connection.select_value(query(args))
     end
   end
 
@@ -1551,7 +1571,7 @@ class AbstractQuery < ActiveRecord::Base
     if executor
       executor.call(args).map(&:first)
     else
-      model.connection.select_values(query(args))
+      model_class.connection.select_values(query(args))
     end
   end
 
@@ -1561,7 +1581,7 @@ class AbstractQuery < ActiveRecord::Base
     if executor
       executor.call(args)
     else
-      model.connection.select_rows(query(args))
+      model_class.connection.select_rows(query(args))
     end
   end
 
@@ -1571,7 +1591,7 @@ class AbstractQuery < ActiveRecord::Base
     if executor
       executor.call(args).first
     else
-      model.connection.select_one(query(args))
+      model_class.connection.select_one(query(args))
     end
   end
 
@@ -1579,14 +1599,14 @@ class AbstractQuery < ActiveRecord::Base
   def select_all(args={})
     initialize_query
     raise "This query doesn't support low-level access!" if executor
-    model.connection.select_all(query(args))
+    model_class.connection.select_all(query(args)).to_a
   end
 
   # Call model.find_by_sql.
   def find_by_sql(args={})
     initialize_query
     raise "This query doesn't support low-level access!" if executor
-    model.find_by_sql(query_all(args))
+    model_class.find_by_sql(query_all(args))
   end
 
   ##############################################################################
@@ -1675,8 +1695,8 @@ class AbstractQuery < ActiveRecord::Base
       # typically no avoiding it.  This optimizes away an extra query or two.
       self.letters = map = {}
       ids = []
-      select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
-      for id, letter in select_rows(args.merge(:select => select))
+      select = "DISTINCT #{model_class.table_name}.id, LEFT(#{need_letters},4)"
+      for id, letter in select_rows(args.merge(select: select))
         letter = letter[0,1]
         if letter.match(/[a-zA-Z]/)
           map[id.to_i] = letter.upcase
@@ -1724,7 +1744,7 @@ class AbstractQuery < ActiveRecord::Base
   # Make sure we requery if we change the letter field.
   def need_letters=(x)
     if !x.is_a?(String)
-      raise "You need to pass in a SQL expression to 'need_letters'."
+      raise "You must pass a SQL expression to 'need_letters'."
     elsif @need_letters != x
       @result_ids = nil
       @result_count = nil
@@ -1777,15 +1797,17 @@ class AbstractQuery < ActiveRecord::Base
     @results ||= {}
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
-    if !needed.empty?
+    if needed.any?
       set = clean_id_set(needed)
-      args2 = {}
       # Note that "set" will be truncated to MAX_ARRAY if too large.
       # This could result in some results not being returned. (See
       # the reject(&:nil?) clause below.)
-      args2[:conditions] = "#{model.table_name}.id IN (#{set})"
-      args2[:include] = args[:include] if args[:include]
-      model.all(args2).each do |obj|
+      conditions = "#{model_class.table_name}.id IN (#{set})"
+      includes   = args[:include] || []
+      model_class.
+        where(conditions).
+        includes(includes).
+        to_a.each do |obj|
         @results[obj.id] = obj
       end
     end
@@ -1830,7 +1852,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Set current place in results; takes instance or id (String or Fixnum).
   def current=(arg)
-    if arg.is_a?(model)
+    if arg.is_a?(model_class)
       @results ||= {}
       @results[arg.id] = arg
       self.current_id = arg.id
@@ -1844,7 +1866,7 @@ class AbstractQuery < ActiveRecord::Base
   def first(skip_outer=false)
     new_self = self
     new_self = outer_first if !skip_outer && has_outer?
-    id = new_self.select_value(:limit => '1').to_i
+    id = new_self.select_value(limit: "1").to_i
     if id > 0
       if new_self == self
         @current_id = id
@@ -1913,7 +1935,7 @@ class AbstractQuery < ActiveRecord::Base
   def last(skip_outer=false)
     new_self = self
     new_self = outer_last if !skip_outer && has_outer?
-    id = new_self.select_value(:order => :reverse, :limit => '1').to_i
+    id = new_self.select_value(order: :reverse, limit: "1").to_i
     if id > 0
       if new_self == self
         @current_id = id
@@ -1960,19 +1982,19 @@ class AbstractQuery < ActiveRecord::Base
     if outer_current_id
       outer_current_id.call(self)
     else
-      params[outer.model.type_tag]
+      params[outer.model_class.type_tag]
     end
   end
 
   # Create a new copy of this query corresponding to the new outer query.
   def new_inner(new_outer)
-    new_params = params.merge(:outer => new_outer.id)
+    new_params = params.merge(outer: new_outer.id)
     if setup_new_inner_query
       setup_new_inner_query.call(new_params, new_outer)
     else
-      new_params[new_outer.model.type_tag] = new_outer.current_id
+      new_params[new_outer.model_class.type_tag] = new_outer.current_id
     end
-    self.class.lookup_and_save(model, flavor, new_params)
+    self.class.lookup_and_save(model_symbol, flavor, new_params)
   end
 
   # Create a new copy of this query if the outer query changed, otherwise

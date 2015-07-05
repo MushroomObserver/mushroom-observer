@@ -1,29 +1,28 @@
 <%
-  lists = observation.species_lists
+   lists = observation.species_lists
 %>
-
 <% if !lists.empty? %>
-  <div style="margin-top:1em; margin-bottom:0.5em">
-    <%= :show_lists_header.t %>:
-  </div>
-
-  <% if !lists.empty? %>
-    <table cellpadding="5" cellspacing="0" width="100%">
-      <% odd_or_even = 0
-      for list in lists
-        odd_or_even = 1 - odd_or_even %>
-        <tr valign="top" class="ListLine<%= odd_or_even %>"><td>
-          <%= link_to(list.format_name.t, :controller => 'species_list',
-                      :action => 'show_species_list', :id => list.id) %>
-          <% if check_permission(list) %>
-            [<%= link_to(:REMOVE.t, { :controller => 'species_list',
-                            :action => 'remove_observation_from_species_list',
-                            :observation => @observation.id,
-                            :species_list => list.id },
-                            :confirm => :are_you_sure.l) %>]
-          <% end %>
-        </td></tr>
-      <% end %>
-    </table>
-  <% end %>
+    <h4>
+      <%= :show_lists_header.t %>
+    </h4>
+    <div class="list-group">
+    <div class="list-group-item kill-padding">
+      <table class="table table-responsive" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
+        <% lists.each do |list| %>
+            <tr>
+              <td style="border-top:0">
+                <%= link_to(list.format_name.t, :controller => 'species_list',
+                            :action => 'show_species_list', :id => list.id) %>
+                    [<%= link_to(:REMOVE.t, {controller: 'species_list',
+                                             action: 'remove_observation_from_species_list',
+                                             observation: observation.id,
+                                             species_list: list.id},
+                                 data: {confirm: :are_you_sure.l}) if check_permission(list)%>]
+              </td>
+            </tr>
+        <% end %>
+      </table>
+    </div>
+    </div>
 <% end %>
+

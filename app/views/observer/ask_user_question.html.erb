@@ -2,13 +2,11 @@
 
 <%= form_tag(add_query_param(:action => 'ask_user_question',
       :id => @target.id)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center>
 
   <label for="email_subject"><%= :ask_user_question_subject.t %>:</label><br/>
-  <%= text_field('email', 'subject', :size => 70) %><br/><br/>
+  <%= text_field(:email, :subject, size: 70, autofocus: true) %><br/><br/>
 
   <label for="email_content"><%= :ask_user_question_message.t %>:</label><br/>
   <%= text_area('email', 'content', :cols => 80) %>
-
-  <%= focus_on('email_subject') %>
+    <br/><center><%= submit_tag(:SEND.l, class: "btn") %></center>
 <% end %>

@@ -1,20 +1,23 @@
 <%
-  new_tab_set do
-    add_tab(:all_objects.t(:type => :location),
-      :controller => :location, :action => 'list_locations')
-    add_tab(:show_objects.t(:type => :observation), add_query_param(
-      { :controller => :observer, :action => 'index_observation' }, @query))
-    add_tab(:show_objects.t(:type => :location), add_query_param(
-      { :controller => :location, :action => 'index_location' }, @query))
-  end
+  tabs = [
+    link_to(:all_objects.t(type: :location),
+            controller: :location, action: :list_locations),
+    link_with_query(:show_objects.t(type: :observation),
+                    controller: :observer, action: :index_observation),
+    link_with_query(:show_objects.t(type: :location),
+                    controller: :location, action: :index_location)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<center>
-  <%= if @locations.any?
-    gmap = make_map(@locations)
-    finish_map(gmap)
-    gmap.div(:width => 800, :height => 550).html_safe
-  else
-    :runtime_map_nothing_to_map.t
-  end %>
-</center>
+<div class="max-width-text-plus-image">
+  <center>
+    <%= if @locations.any?
+      gmap = make_map(@locations)
+      finish_map(gmap)
+      gmap.div(width: 800, height: 550).html_safe
+    else
+      :runtime_map_nothing_to_map.t
+    end %>
+  </center>
+</div>

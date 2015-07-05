@@ -14,7 +14,7 @@ class API
       :images,
       :location,
       :name,
-      { :namings => :name },
+      {namings: :name},
       :user,
     ]
 
@@ -26,34 +26,35 @@ class API
 
     def query_params
       {
-        :where          => sql_id_condition,
-        :created_at     => parse_time_range(:created_at),
-        :updated_at     => parse_time_range(:updated_at),
-        :date           => parse_date_range(:date),
-        :users          => parse_users(:user),
-        :names          => parse_strings(:name),
-        :synonym_names  => parse_strings(:synonyms_of),
-        :children_names => parse_strings(:children_of),
-        :locations      => parse_strings(:locations),
-        # :herbaria       => parse_strings(:herbaria),
-        # :specimen_ids   => parse_strings(:specimen_ids),
-        :projects       => parse_strings(:projects),
-        :species_lists  => parse_strings(:species_lists),
-        :confidence     => parse_float_range(:confidence, :limit => Range.new(Vote.minimum_vote, Vote.maximum_vote)),
-        :is_col_loc     => parse_boolean(:is_collection_location),
-        :has_specimen   => parse_boolean(:has_specimen),
-        :has_location   => parse_boolean(:has_location),
-        :has_notes      => parse_boolean(:has_notes),
-        :has_name       => parse_boolean(:has_name),
-        :has_images     => parse_boolean(:has_images),
-        :has_votes      => parse_boolean(:has_votes),
-        :has_comments   => parse_boolean(:has_comments, :limit => true),
-        :notes_has      => parse_string(:notes_has),
-        :comments_has   => parse_string(:comments_has),
-        :north          => parse_latitude(:north),
-        :south          => parse_latitude(:south),
-        :east           => parse_longitude(:east),
-        :west           => parse_longitude(:west),
+        where:          sql_id_condition,
+        created_at:     parse_time_range(:created_at),
+        updated_at:     parse_time_range(:updated_at),
+        date:           parse_date_range(:date),
+        users:          parse_users(:user),
+        names:          parse_strings(:name),
+        synonym_names:  parse_strings(:synonyms_of),
+        children_names: parse_strings(:children_of),
+        locations:      parse_strings(:locations),
+        # herbaria:     parse_strings(:herbaria),
+        # specimen_ids: parse_strings(:specimen_ids),
+        projects:       parse_strings(:projects),
+        species_lists:  parse_strings(:species_lists),
+        confidence:     parse_float_range(:confidence,
+                          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
+        is_col_loc:     parse_boolean(:is_collection_location),
+        has_specimen:   parse_boolean(:has_specimen),
+        has_location:   parse_boolean(:has_location),
+        has_notes:      parse_boolean(:has_notes),
+        has_name:       parse_boolean(:has_name),
+        has_images:     parse_boolean(:has_images),
+        has_votes:      parse_boolean(:has_votes),
+        has_comments:   parse_boolean(:has_comments, limit: true),
+        notes_has:      parse_string(:notes_has),
+        comments_has:   parse_string(:comments_has),
+        north:          parse_latitude(:north),
+        south:          parse_latitude(:south),
+        east:           parse_longitude(:east),
+        west:           parse_longitude(:west),
       }
     end
 
@@ -94,19 +95,19 @@ class API
       images.unshift(thumbnail) if thumbnail and not images.include?(thumbnail)
 
       {
-        :when          => parse_date(:date, :default => Date.today),
-        :notes         => parse_string(:notes, :default => ''),
-        :place_name    => loc,
-        :lat           => lat,
-        :long          => long,
-        :alt           => alt,
-        :specimen      => has_specimen,
-        :is_collection_location => parse_boolean(:is_collection_location, :default => true),
-        :thumb_image   => thumbnail,
-        :images        => images,
-        :projects      => parse_projects(:projects, :default => [], :must_be_member => true),
-        :species_lists => parse_species_lists(:species_lists, :default => [], :must_have_edit_permission => true),
-        :name          => @name,
+          when: parse_date(:date, :default => Date.today),
+          notes: parse_string(:notes, :default => ''),
+          place_name: loc,
+          lat: lat,
+          long: long,
+          alt: alt,
+          specimen: has_specimen,
+          is_collection_location: parse_boolean(:is_collection_location, :default => true),
+          thumb_image: thumbnail,
+          images: images,
+          projects: parse_projects(:projects, :default => [], :must_be_member => true),
+          species_lists: parse_species_lists(:species_lists, :default => [], :must_have_edit_permission => true),
+          name: @name,
       }
     end
 
@@ -156,15 +157,15 @@ class API
       remove_species_lists = parse_species_lists(:remove_species_lists) || []
 
       params = {
-        :when        => parse_date(:set_date),
-        :notes       => parse_string(:set_notes),
-        :place_name  => parse_place_name(:set_location, :limit => 1024),
-        :lat         => lat,
-        :long        => long,
-        :alt         => alt,
-        :specimen    => parse_boolean(:set_has_specimen),
-        :is_collection_location => parse_boolean(:set_is_collection_location),
-        :thumb_image => thumbnail,
+          when: parse_date(:set_date),
+          notes: parse_string(:set_notes),
+          place_name: parse_place_name(:set_location, :limit => 1024),
+          lat: lat,
+          long: long,
+          alt: alt,
+          specimen: parse_boolean(:set_has_specimen),
+          is_collection_location: parse_boolean(:set_is_collection_location),
+          thumb_image: thumbnail,
       }
       params.remove_nils!
 
@@ -180,7 +181,7 @@ class API
 
       lambda do |obj|
         must_have_edit_permission!(obj)
-        obj.update_attributes!(params)
+        obj.update!(params)
         obj.images.push(*add_images) if add_images.any?
         obj.images.delete(*remove_images) if remove_images.any?
         obj.projects.push(*add_projects) if add_projects.any?

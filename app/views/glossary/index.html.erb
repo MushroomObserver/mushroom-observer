@@ -1,26 +1,31 @@
 <%
   @title = :glossary_term_index_title.t
-  new_tab_set do
-    add_tab(:create_glossary_term.t, :action => 'create_glossary_term')
-  end
+
+  tabs = [
+    link_to(:create_glossary_term.t, action: :create_glossary_term)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= :glossary_term_index_intro.tp %>
+<div class="row">
+  <div class="col-xs-12 max-width-text">
+    <%= :glossary_term_index_intro.tp %>
+  </div>
+</div>
 
-<table>
-  <% odd_or_even = 0
-    for glossary_term in @glossary_terms
-      odd_or_even = 1 - odd_or_even %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
-        <td>
-          <%= link_to(content_tag(:b, glossary_term.name), :action => "show_glossary_term", :id => glossary_term.id) %>:
-          <%= glossary_term.description.tpl %>
-        </td>
-        <td align="center" valign="middle" width="160" style="padding-bottom:0px">
-          <%= if glossary_term.thumb_image_id
-            thumbnail(glossary_term.thumb_image_id, :border => 0, :votes => true)
-          end %>
-        </td>
-      </tr>
+<table class="table table-striped">
+  <% @glossary_terms.each do |glossary_term| %>
+    <tr>
+      <td class="max-width-text">
+        <h4><%= link_to(glossary_term.name, action: :show_glossary_term,
+                        id: glossary_term.id) %>:</h4>
+        <%= glossary_term.description.tpl %>
+      </td>
+      <td>
+        <%= if glossary_term.thumb_image_id && glossary_term.thumb_image_id != 0
+          thumbnail(glossary_term.thumb_image, votes: true)
+        end %>
+      </td>
+    </tr>
   <% end %>
 </table>

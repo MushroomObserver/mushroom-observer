@@ -3,7 +3,7 @@
 <p>Sending to <%= @users.length %> users.</p>
 
 <%= form_tag(:action => 'email_features') do %>
-  <center><%= submit_tag("Send") %></center><br/>
+  <center><%= submit_tag(:SEND.l, class: "btn") %></center><br/>
 
   <label for="feature_email_content">Feature Email</label><br/>
   <%= text_area('feature_email', 'content', :cols => 80) %><br/><br/>

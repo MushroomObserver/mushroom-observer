@@ -69,7 +69,6 @@ MushroomObserver::Application.configure do
   config.error_email_address       = "webmaster@mushroomobserver.org"
   config.webmaster_email_address   = "webmaster@mushroomobserver.org"
   config.exception_recipients      = "webmaster@mushroomobserver.org"
-  config.extra_bcc_email_addresses = ""
 
   # File where the list of most commonly used names lives.
   config.name_primer_cache_file = "#{config.root}/tmp/name_primer.#{config.env}"
@@ -141,6 +140,15 @@ MushroomObserver::Application.configure do
   # List of IP addresses to blacklist.
   config.blocked_ip_addresses = []
 
+  # Default "secret key", see rails docs.
+  config.secret_key_base = "a"*30
+
+  # EOL parameters.
+  config.eol_ranks = [ :Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom ]
+  config.eol_ranks_for_export = [ :Form, :Variety, :Subspecies, :Species, :Genus ]
+  config.eol_min_image_vote = 2
+  config.eol_min_observation_vote = 2.4
+
   # Configuration of S3 image store on dreamhost.  Example:
   #   config.s3_credentials = {
   #     cdmr: {
@@ -151,4 +159,7 @@ MushroomObserver::Application.configure do
   #     }
   #   }
   config.s3_credentials = {}
+
+  # Default number of items for an RSS page
+  config.default_layout_count = 18
 end

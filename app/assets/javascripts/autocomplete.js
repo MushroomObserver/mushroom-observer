@@ -185,9 +185,6 @@ jQuery.extend(MOAutocompleter.prototype, {
         if (this.current_row >= 0)
           this.select_row(this.current_row - this.scroll_offset);
         break;
-      case EVENT_KEY_ESC:
-        this.lose_focus();
-        break;
       case EVENT_KEY_HOME:
         this.go_home();
         break;
@@ -608,7 +605,6 @@ jQuery.extend(MOAutocompleter.prototype, {
       if (matches.length > 1 || this.input_elem.val() != matches[0]) {
         this.clear_hide();
         menu.show();
-        menu.ensureVisible();
         this.menu_up = true;
       } else {
         menu.hide();
@@ -655,7 +651,6 @@ jQuery.extend(MOAutocompleter.prototype, {
     if (navigator.appVersion.toLowerCase().indexOf('msie') > 0)
       this.pulldown_elem.css("width", w1 + 'px');
     this.list_elem.css("minWidth", w2 + 'px');
-    this.pulldown_elem.ensureVisible();
   },
 
 // ------------------------------ Datalist ------------------------------
@@ -901,7 +896,7 @@ jQuery.extend(MOAutocompleter.prototype, {
       this.ajax_request.abort();
 
     this.ajax_request = jQuery.ajax(url, {
-      data: { authenticity_token: CSRF_TOKEN },
+      data: { authenticity_token: csrf_token() },
       dataType: "text",
       async: true,
       error: (function (response) {
@@ -1013,7 +1008,7 @@ jQuery.extend(MOAutocompleter.prototype, {
     if (sel.start > 0)
       start = val.lastIndexOf(this.token, sel.start - 1);
     else
-      start = 0
+      start = 0;
     if (start < 0)
       start = 0;
     else

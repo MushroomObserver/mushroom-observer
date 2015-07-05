@@ -6,7 +6,7 @@
 #  SpeciesListController) to help parse lists of names, such as in
 #  bulk_name_edit, create/edit_species_list, and change_synonyms.  It uses
 #  NameParse to parse individual lines, then gathers unrecognized names,
-#  deprecated names, accepted names, etc. 
+#  deprecated names, accepted names, etc.
 #
 #  This is extraordinarily complicated-looking, but once you've worked out the
 #  execution flow and what the method and attribute names mean, you'll see that
@@ -156,11 +156,15 @@ class NameSorter
     end
   end
 
+  # append the input to the list of approved deprecated names
+  # input:  array of string ids, e.g., ["4", "27", ...]
+  #      or a string of name ids, each on its own line, e.g. "16\r\n14"
   def add_approved_deprecated_names(new_names)
-    if new_names
-      for n in new_names
-        @approved_deprecated_names += n.split
-      end
+    return unless new_names
+    if new_names.class == String
+      new_names.split("\n").each { |n| @approved_deprecated_names += n.split }
+    elsif new_names.class == Array
+      @approved_deprecated_names += new_names
     end
   end
 
@@ -267,7 +271,7 @@ class NameSorter
     for parse, names in @synonym_data
       if names.length == 1
         # Merging earlier in this loop may have affected this name implicitly;
-        # reload to pick up potential changes. 
+        # reload to pick up potential changes.
         name = names.first.reload
         synonym_names = parse.find_synonym_names
         for s in synonym_names
@@ -285,7 +289,7 @@ class NameSorter
 
   # Get a (mostly) full list of all the synonyms of the listed names, including
   # the names themselves... except for the names that have no synonyms.
-  # Returns a list of name strings (display_name in particular), not objects. 
+  # Returns a list of name strings (display_name in particular), not objects.
   def synonym_name_strs
     result = []
     for name in @all_names
@@ -299,7 +303,7 @@ class NameSorter
   # This gathers a full list of all the names in the list passed in and all
   # their synonyms.  This is thus the set of all possible synonyms.  It adds to
   # this the synonyms from the previous pass, just in case.  It returns a list
-  # of Name ids (not objects).  (*NOTE*: This is a superset of +all_names+.) 
+  # of Name ids (not objects).  (*NOTE*: This is a superset of +all_names+.)
   def all_synonyms
     result = @approved_synonyms.dup
     for name in @all_names
@@ -336,7 +340,7 @@ class NameSorter
   # by newlines or an Array of String's.  Each String must contain a single
   # name
   def sort_names(name_list)
-    for n in name_list
+    for n in name_list.split("\n")
       if n.match(/\S/)
         add_name(n)
       end

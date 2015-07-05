@@ -394,4 +394,3 @@ end
 update_sitemap_files
 update_robots_file
 exit 0
-

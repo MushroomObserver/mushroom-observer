@@ -1,22 +1,30 @@
-<% @title = :login_please_login.t %>
+<%
+  @title = :login_please_login.t
+%>
 
-<%= form_tag(:action => "login") do %>
+<div class="max-width-text">
+  <%= form_tag(action: :login) do %>
+    <div class="form-group push-down">
+      <%= label_tag(:user_login, :login_user.t + ":") %>
+      <%= text_field(:user, :login, value: @login, data: {autofocus: @login.blank?}, class: "form-control") %>
+    </div>
 
-  <label for="user_login"><%= :login_user.t %>:</label><br/>
-  <input type="text" name="user_login" id="user_login" size="30" value="<%= @login %>"/><br/><br/>
+    <div class="form-group push-down">
+      <%= label_tag(:user_password, :login_password.t + ":") %>
+      <%= password_field(:user, :password, value: "", data: {autofocus: !@login.blank?}, class: "form-control") %>
+    </div>
 
-  <label for="user_password"><%= :login_password.t %>:</label><br/>
-  <input type="password" name="user_password" id="user_password" size="30"/><br/><br/>
+    <div class="form-group push-down form-inline">
+      <%= check_box(:user, :remember_me, checked: @remember, class: "form-control") %>
+      <%= label_tag(:user_remember_me, :login_remember_me.t) %>
+    </div>
 
-  <%= check_box('user', 'remember_me', :checked => @remember) %>
-  <label for="user_remember_me"><%= :login_remember_me.t %></label><br/><br/>
+    <%= submit_tag(:login_login.l, class: "btn center-block push-down") %>
 
-  <input type="submit" name="login" value="<%= :login_login.l %>" class="primary" />
-  <br/><br/>
-
-  <%= :login_forgot_password.tp %>
-  <%= :login_no_account.tp %>
-  <%= :login_having_problems.tp %>
-
-  <%= focus_on(!@login.blank? ? 'user_password' : 'user_login') %>
-<% end %>
+    <div class="form-group push-down">
+      <%= :login_forgot_password.tp %>
+      <%= :login_no_account.tp %>
+      <%= :login_having_problems.tp %>
+    </div>
+  <% end %>
+</div>

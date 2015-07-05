@@ -1,24 +1,29 @@
 <%
   @title = :donors_title.l
-  new_tab_set do
-    add_tab(:donate_tab.t, :action => 'donate')
-    if is_in_admin_mode?
-	    add_tab(:create_donation_tab.t, :action => 'create_donation')
-	    add_tab(:review_donations_tab.t, :action => 'review_donations')
-    end
+
+  tabs = [
+    link_to(:donate_tab.t, action: :donate)
+  ]
+  if is_in_admin_mode?
+    tabs += [
+	    link_to(:create_donation_tab.t, action: :create_donation),
+	    link_to(:review_donations_tab.t, action: :review_donations)
+    ]
   end
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<center>
-<table class="Donors">
-  <% for donor in @donor_list %>
-    <tr align="center">
-      <td class="Donors"><%= donor['who'] %></td>
-    </tr>
-  <% end %>
-</table>
-</center>
-<br/>
-<p>
-  <%= :donors_order.l %>
-</p>
+<div class="max-width-text">
+  <center>
+    <table class="table-striped table-donors push-down push-up">
+      <% for donor in @donor_list %>
+        <tr>
+          <td>
+            <%= donor["who"] %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </center>
+  <%= :donors_order.tp %>
+</div>

@@ -1,0 +1,43 @@
+@import "defaults";
+
+$LINK_WEIGHT:                       normal;
+
+$BUTTON_FG_COLOR:                   #000000;
+$BUTTON_BG_COLOR1:                  #FFFFFF;
+$BUTTON_BG_COLOR2:                  #C0C0C0;
+$BUTTON_BORDER_COLOR:               #DDDDDD;
+$BUTTON_HOVER_FG_COLOR:             #000000;
+$BUTTON_HOVER_BG_COLOR1:            #FFFFFF;
+$BUTTON_HOVER_BG_COLOR2:            #C0C0C0;
+$BUTTON_HOVER_BORDER_COLOR:         #000000;
+$BUTTON_PRIMARY_FG_COLOR:           #FFFFFF;
+$BUTTON_PRIMARY_BG_COLOR1:          #3F98E4;
+$BUTTON_PRIMARY_BG_COLOR2:          #337AB7;
+$BUTTON_PRIMARY_BORDER_COLOR:       #286192;
+$BUTTON_PRIMARY_HOVER_FG_COLOR:     #FFFFFF;
+$BUTTON_PRIMARY_HOVER_BG_COLOR1:    #3F98E4;
+$BUTTON_PRIMARY_HOVER_BG_COLOR2:    #337AB7;
+$BUTTON_PRIMARY_HOVER_BORDER_COLOR: #FFFFFF;
+$BUTTON_BORDER_WIDTH:               1px;
+$BUTTON_BORDER_STYLE:               outset;
+$BUTTON_BORDER_RADIUS:              5px;
+
+$INPUT_BORDER_STYLE:                inset;
+
+$INFO_BG_COLOR:                     transparent;
+$INFO_BORDER_COLOR:                 #0000FF;
+$SUCCESS_BG_COLOR:                  transparent;
+$SUCCESS_BORDER_COLOR:              #00C000;
+$WARNING_BG_COLOR:                  transparent;
+$WARNING_BORDER_COLOR:              #FFFF00;
+$DANGER_BG_COLOR:                   transparent;
+$DANGER_BORDER_COLOR:               #FF0000;
+
+$BANNER_BORDER_RADIUS:              0px;
+$ALERT_BORDER_RADIUS:               0px;
+
+$LOGO_BORDER_WIDTH:                 2px;
+$LEFT_BAR_BORDER_WIDTH:             2px;
+$LEFT_BAR_BORDER_RADIUS:            0px;
+$LEFT_BAR_ITEM_BORDER_WIDTH:        0px;
+$TOP_BAR_BORDER_WIDTH:              0px;

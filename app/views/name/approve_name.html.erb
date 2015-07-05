@@ -1,14 +1,15 @@
 <%
   @title = :name_approve_title.t(:name => @name.display_name)
 
-  new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :name),
+  tabs = [
+    link_to(:cancel_and_show.t(:type => :name),
             :action => 'show_name', :id => @name.id)
-  end
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= form_tag(:action => 'approve_name', :id => @name.id) do %>
-  <br/><center><%= submit_tag :APPROVE.l %></center>
+  <br/><center><%= submit_tag(:APPROVE.l, class: "btn") %></center>
 
   <% if @approved_names %>
     <p><%= check_box('deprecate', 'others', :checked => 'checked') %>
@@ -20,13 +21,11 @@
   <div class="HelpNote"><%= :name_approve_deprecate_help.tp %></div>
 
   <p><label for="comment_comment"><%= :name_approve_comments.t %>:</label><br/>
-  <%= text_area("comment", "comment", :cols => 80, :rows => 5) %></p>
+  <%= text_area(:comment, :comment, cols: 80, rows: 5, autofocus: true) %></p>
   <div class="HelpNote">
     <%= :name_approve_comments_help.tp(:name => @name.display_name) %>
   </div>
 
-  <br/><center><%= submit_tag :APPROVE.l %></center>
-
-  <%= focus_on('comment_comment') %>
+  <br/><center><%= submit_tag(:APPROVE.l, class: "btn") %></center>
 <% end %>
 

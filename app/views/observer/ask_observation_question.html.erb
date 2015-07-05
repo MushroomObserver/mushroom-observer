@@ -1,17 +1,10 @@
 <% @title = :ask_observation_question_title.t(:name => @observation.unique_format_name) %>
 
+<div class="col-xs-12 col-sm-12 col-md-8">
 <%= form_tag(add_query_param(:action => 'ask_observation_question',
       :id => @observation.id)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center><br/>
-
-  <table width="1">
-    <tr>
-      <td>
         <%= :ask_observation_question_label.tp(:user => @observation.user.legal_name) %>
-        <%= text_area('question', 'content', :cols => 80) %>
-      </td>
-    </tr>
-  </table>
-
-  <%= focus_on('question_content') %>
+        <%= text_area(:question, :content, rows: 6, autofocus: true, class: "form-control") %>
+        <%= submit_tag(:SEND.l, class: "btn center-block pad-top") %>
 <% end %>
+</div>

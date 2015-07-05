@@ -1,0 +1,50 @@
+<%
+  # IMPORTANT: Sometimes it's prohibitive to do the extra join to images table,
+  # so we only have image_id.  It's still possible to render the image with
+  # nothing but the image_id.  (But not votes, original name, etc.)
+  image, image_id = image.is_a?(Image) ? [image, image.id] : [nil, image]
+  size_url   = Image.url(size, image_id)
+  medium_url = Image.url(:medium, image_id)
+  large_url  = Image.url(:large, image_id)
+  huge_url   = Image.url(:huge, image_id)
+  full_url   = Image.url(:full_size, image_id)
+  orig_url   = Image.url(:original, image_id)
+  theater_data = {
+    toggle: "theater",
+    width:  image ? image.width : "",
+    height: image ? image.height : "",
+    medium: medium_url,
+    large:  large_url,
+    huge:   huge_url,
+    full:   full_url,
+    orig:   orig_url
+  }
+  if theater_on_click
+    html_options[:data] = theater_data.merge(html_options[:data] || {})
+  end
+%>
+
+<div style="position:relative">
+  <div style="display:inline">
+    <div data-toggle="expand-icon" class="text-center">
+      <% style = "max-width: 100%; height: auto; margin: auto;" if responsive
+      img_class = "img-unresponsive #{img_class}" if !responsive
+      img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
+                          data: {toggle: "tooltip", placement: "bottom"}) %>
+      <%= link_with_query(img_tag, link, html_options) %>
+      <%= link_to("", orig_url, class: "glyphicon glyphicon-fullscreen theater-btn",
+                  data: theater_data) %>
+      <div class="push-down">
+        <% if User.current and votes and image %>
+          <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
+        <% end %>
+        <% if original && image && !image.original_name.blank? &&
+              (check_permission(image) || image.user && image.user.keep_filenames == :keep_and_show) %>
+          <center>
+            <span><%= image.original_name %></span>
+          </center>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

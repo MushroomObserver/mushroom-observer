@@ -38,13 +38,15 @@
 #  list_notifications::
 
 # TODO: Determine where this really goes
+#  JPH: --> SearchController along with pattern_search? I foresee future
+#       additions to out search capabilities, like an actually-usable refine
+#       search page, and a way to store and share and edit searches.
 #  advanced_search::
 
 # TODO: Create SearchController with:
 #  ==== Searches
 #  pattern_search::
 #  advanced_search_form::
-#  refine_search::
 
 # TODO: Create MarkupController with:
 #  lookup_comment::
@@ -119,9 +121,7 @@ class ObserverController < ApplicationController
   require "set"
 
   require_dependency "observation_report"
-  require_dependency "refine_search"
   require_dependency "pattern_search"
-  include RefineSearch
 
   before_filter :login_required, except: MO.themes + [
     :advanced_search,
@@ -165,7 +165,6 @@ class ObserverController < ApplicationController
     :observations_at_location,
     :pattern_search,
     :prev_observation,
-    :refine_search,
     :rss,
     :show_obs,
     :show_observation,
@@ -357,8 +356,8 @@ class ObserverController < ApplicationController
       @val = "X" if @val.blank?
       time = Time.now
       Language.all.each do |lang|
-        if (str = lang.translation_strings.find_all_by_tag("app_banner_box")[0])
-          str.update_attributes!(
+        if (str = lang.translation_strings.where(tag: "app_banner_box")[0])
+          str.update!(
             text: @val,
             updated_at: (str.language.official ? time : time - 1.minute)
           )
@@ -428,6 +427,7 @@ class ObserverController < ApplicationController
   # _object_ link to these lookup_object methods, and defer lookup until the
   # user actually clicks on one.  These redirect to the appropriate
   # controller/action after looking up the object.
+  # inputs: model Class, true/false
   def lookup_general(model, accepted = false)
     matches = []
     suggestions = []
@@ -442,9 +442,9 @@ class ObserverController < ApplicationController
         case model.to_s
         when "Name"
           if (parse = Name.parse_name(id))
-            matches = Name.find_all_by_search_name(parse.search_name)
+            matches = Name.where(search_name: parse.search_name)
             if matches.empty?
-              matches = Name.find_all_by_text_name(parse.text_name)
+              matches = Name.where(text_name: parse.text_name)
             end
             matches = fix_name_matches(matches, accepted)
           end
@@ -456,22 +456,25 @@ class ObserverController < ApplicationController
           pattern = "%#{id}%"
           conditions = ["name LIKE ? OR scientific_name LIKE ?",
                         pattern, pattern]
-          matches = Location.find(:all,
-                                  limit: 100,
-                                  conditions: conditions)
+          # matches = Location.find(:all, # Rails 3
+          #                        limit: 100,
+          #                        conditions: conditions)
+          matches = Location.limit(100).where(conditions)
         when "Project"
           pattern = "%#{id}%"
-          matches = Project.find(:all,
-                                 limit: 100,
-                                 conditions: ["title LIKE ?", pattern])
+          # matches = Project.find(:all, # Rails 3
+          #                        limit: 100,
+          #                        conditions: ["title LIKE ?", pattern])
+          matches = Project.limit(100).where("title LIKE ?", pattern)
         when "SpeciesList"
           pattern = "%#{id}%"
-          matches = SpeciesList.find(:all,
-                                     limit: 100,
-                                     conditions: ["title LIKE ?", pattern])
+          # matches = SpeciesList.find(:all, # Rails 3
+          #                            limit: 100,
+          #                            conditions: ["title LIKE ?", pattern])
+          matches = SpeciesList.limit(100).where("title LIKE ?", pattern)
         when "User"
-          matches = User.find_all_by_login(id)
-          matches = User.find_all_by_name(id) if matches.empty?
+          matches = User.where(login: id)
+          matches = User.where(name: id) if matches.empty?
         end
       end
     rescue => e
@@ -600,85 +603,6 @@ class ObserverController < ApplicationController
                                 }, query))
   end
 
-  # Allow users to refine an existing query.
-  def refine_search # :nologin:
-    # Create a bogus object with all the parameters used in the form.
-    @values = Wrapper.new(params[:values] || {})
-    @first_time = params[:values].blank?
-    @goto_index = true if params[:commit] == :refine_search_goto_index.l
-    @errors = []
-
-    # Query has expired!
-    if (@query = find_query)
-      # Need to know about change to basic flavor immediately.
-      if @first_time || @values.model_flavor.blank?
-        query2 = @query
-      else
-        model2, flavor2 = @values.model_flavor.to_s.split(" ", 2)
-        # The following line was:
-        #
-        # query2 = Query.template(model2.camelize, flavor2) rescue @query
-        #
-        # However, I can't find any definition of Query.template and
-        # the tests don't exercise this path so I can't tell if this
-        # real or if it just always returns @query.
-        query2 = @query
-      end
-      model2  = query2.model_symbol
-      flavor2 = query2.flavor
-
-      # Get Array of parameters we can play with.
-      @fields = refine_search_get_fields(query2)
-
-      # Modify the query on POST, test it out, and redirect or re-serve form.
-      unless @first_time || (request.method != "POST") || browser.bot?
-        params2 = refine_search_clone_params(query2, @query.params)
-        @errors = refine_search_change_params(@fields, @values, params2)
-
-        if @errors.any?
-          # Already flashed errors.
-        elsif (model2  == @query.model_symbol) &&
-              (flavor2 == @query.flavor) &&
-              (params2 == @query.params)
-          # No changes.  This may not be apparent due to vagaries of parsing.
-          # This will change all the form values to be what's currently in the
-          # query.  The user will then know exactly why we say "no changes".
-          flash_notice(:runtime_no_changes.t) unless @goto_index
-        else
-          begin
-            # Create and initialize the new query to test it out.
-            query2 = Query.lookup(model2, flavor2, params2)
-            query2.initialize_query
-            query2.save
-            @query = query2
-            unless @goto_index
-              flash_notice(:refine_search_success.t(num: @query.num_results))
-            end
-          rescue => e
-            flash_error(e)
-            # flash_error(e.backtrace.join("<br>"))
-          end
-        end
-      end
-    else
-      flash_error(:runtime_search_has_expired.t)
-      redirect_back_or_default(action: "list_rss_logs")
-    end
-
-    # Redisplay the index if user presses "Index".
-    if @goto_index
-      redirect_to(add_query_param({
-                                    controller: @query.model.show_controller,
-                                    action: @query.model.index_action
-                                  }, @query))
-    else
-      # flash_notice(@query.query)
-      @flavor_field = refine_search_flavor_field
-      @values.model_flavor = "#{model2.to_s.underscore} #{flavor2}"
-      refine_search_initialize_values(@fields, @values, @query)
-    end
-  end
-
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation # :nologin: :norobots:
     query = find_or_create_query(:Observation, by: params[:by])
@@ -717,14 +641,10 @@ class ObserverController < ApplicationController
   end
 
   # Displays matrix of User's Observation's, by date.
-  def observations_by_user # :nologin: :norobots:
-    user = params[:id] ? find_or_goto_index(User, params[:id].to_s) : @user
-    if user
-      query = create_query(:Observation, :by_user, user: user)
-      show_selected_observations(query)
-    else
-      flash_error(:runtime_missing.t(field: "id"))
-    end
+  def observations_by_user  # :nologin: :norobots:
+    return unless user = find_or_goto_index(User, params[:id].to_s)
+    query = create_query(:Observation, :by_user, user: user)
+    show_selected_observations(query)
   end
 
   # Displays matrix of Observation's at a Location, by date.
@@ -799,7 +719,7 @@ class ObserverController < ApplicationController
     args = {
       action: "list_observations",
       matrix: true,
-      include: [:name, :location, :user, :rss_log]
+      include: [:name, :location, :user, :rss_log, { thumb_image: :image_votes }]
     }.merge(args)
 
     # Add some extra links to the index user is sent to if they click on an
@@ -1004,50 +924,23 @@ class ObserverController < ApplicationController
       set_default_thumbnail_size(params[:set_thumbnail_size])
     end
 
-    @observation = find_or_goto_index(Observation, params[:id].to_s,
-                                      include: [{ comments: :user },
-                                                { images: :image_votes },
-                                                :location,
-                                                :name,
-                                                { namings: [:name, :user,
-                                                            { votes: :user }] },
-                                                :projects,
-                                                { species_lists: :location },
-                                                :user])
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
     update_view_stats(@observation)
-
-    # Tell robots the proper URL to use to index this content.
     @canonical_url = "#{MO.domain}/observer/show_observation/#{@observation.id}"
 
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)
     @mappable = query && query.is_coercable?(:Location)
 
-    return unless @user
-    # This happens when user clicks on "Update Votes".
-    if request.method == "POST"
-      if params[:vote]
-        flashed = false
-        @observation.namings.each do |naming|
-          value = param_lookup([:vote, naming.id.to_s, :value]) do |p|
-            p.to_i
-          end
-          next unless value &&
-            @observation.change_vote(naming, value) &&
-            !flashed
-          flash_notice(:runtime_show_observation_success.t)
-          flashed = true
-        end
-      end
-    end
-
     # Provide a list of user's votes to view.
-    @votes = {}
-    @observation.namings.each do |naming|
-      vote = naming.votes.select { |x| x.user_id == @user.id }.first
-      vote ||= Vote.new(value: 0)
-      @votes[naming.id] = vote
+    if @user
+      @votes = {}
+      @observation.namings.each do |naming|
+        vote = naming.votes.select { |x| x.user_id == @user.id }.first
+        vote ||= Vote.new(value: 0)
+        @votes[naming.id] = vote
+      end
     end
   end
 
@@ -1173,7 +1066,7 @@ class ObserverController < ApplicationController
       herbarium_name = params[:specimen][:herbarium_name]
       if herbarium_name
         herbarium_name = herbarium_name.strip_html
-        herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
+        herbarium = Herbarium.where(name: herbarium_name)[0]
         if herbarium
           herbarium_label = herbarium_label_from_params(params)
           success = herbarium.label_free?(herbarium_label)
@@ -1198,7 +1091,7 @@ class ObserverController < ApplicationController
   def save_everything_else(reason)
     if @name
       @naming.create_reasons(reason, params[:was_js_on] == "yes")
-      save_with_transaction(@naming)
+      save_with_log(@naming)
       @observation.reload
       @observation.change_vote(@naming, @vote.value)
     end
@@ -1216,7 +1109,7 @@ class ObserverController < ApplicationController
       params[:specimen][:herbarium_id] = obs.id.to_s
     end
     herbarium_label = herbarium_label_from_params(params)
-    herbarium = Herbarium.find_all_by_name(herbarium_name)[0]
+    herbarium = Herbarium.where(name: herbarium_name)[0]
     if herbarium.nil?
       herbarium = Herbarium.new(name: herbarium_name, email: @user.email)
       if herbarium_name == @user.personal_herbarium_name
@@ -1274,8 +1167,8 @@ class ObserverController < ApplicationController
   def defaults_from_last_observation_created
     # Grab defaults for date and location from last observation the user
     # edited if it was less than an hour ago.
-    last_observation = Observation.find_by_user_id(@user.id,
-                                                   order: "created_at DESC")
+    last_observation = Observation.where(user_id: @user.id).
+                                   order(:created_at).last
     return unless last_observation && last_observation.created_at > 1.hour.ago
     @observation.when     = last_observation.when
     @observation.where    = last_observation.where
@@ -1312,10 +1205,8 @@ class ObserverController < ApplicationController
   #
   def edit_observation # :prefetch: :norobots:
     pass_query_params
-
     includes = [:name, :images, :location]
-    @observation = find_or_goto_index(Observation, params[:id].to_s,
-                                      include: includes)
+    @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(@observation.when)
@@ -1336,9 +1227,9 @@ class ObserverController < ApplicationController
       any_errors = false
 
       # Update observation attributes
-      @observation.attributes = params[:observation]
+      @observation.attributes = whitelisted_observation_params
 
-      # Validate place name.
+      # Validate place name
       @place_name = @observation.place_name
       @dubious_where_reasons = []
       if @place_name != params[:approved_where] && @observation.location.nil?
@@ -1416,7 +1307,6 @@ class ObserverController < ApplicationController
       redirect_to(add_query_param({ action: "show_observation", id: obs_id },
                                   this_state))
     else
-      Transaction.delete_observation(id: @observation)
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       if next_state
         redirect_to(add_query_param({ action: "show_observation",
@@ -1468,14 +1358,34 @@ class ObserverController < ApplicationController
     redirect_with_query(action: "show_observation", id: observation.id)
   end
 
+  # This is the new POST method for show_observation.
+  def cast_votes # :norobots:
+    pass_query_params
+    observation = find_or_goto_index(Observation, params[:id].to_s)
+    return unless observation
+    if params[:vote]
+      flashed = false
+      observation.namings.each do |naming|
+        value = param_lookup([:vote, naming.id.to_s, :value]) do |p|
+          p.to_i
+        end
+        next unless value &&
+          observation.change_vote(naming, value) &&
+          !flashed
+        flash_notice(:runtime_show_observation_success.t)
+        flashed = true
+      end
+    end
+    redirect_with_query(action: "show_observation", id: observation.id)
+  end
+
   # Show breakdown of votes for a given naming.
   # Linked from: show_observation
   # Inputs: params[:id] (naming)
   # Outputs: @naming
   def show_votes # :nologin: :prefetch:
     pass_query_params
-    @naming = find_or_goto_index(Naming, params[:id].to_s,
-                                 include: [:name, :votes])
+    @naming = find_or_goto_index(Naming, params[:id].to_s)
   end
 
   # Refresh vote cache for all observations in the database.
@@ -1527,7 +1437,7 @@ class ObserverController < ApplicationController
     @authors = @object.authors
     parent = @object.parent
     if @authors.member?(@user) || @user.in_group?("reviewers")
-      @users = User.all(order: "login, name")
+      @users = User.all.order("login, name").to_a
       new_author = params[:add] ?  User.find(params[:add]) : nil
       if new_author && !@authors.member?(new_author)
         @object.add_author(new_author)
@@ -1554,19 +1464,19 @@ class ObserverController < ApplicationController
     id    = params[:id].to_s
     type  = params[:type].to_s
     value = params[:value].to_s
-    model = type.camelize.safe_constantize
+    model_class = type.camelize.safe_constantize
     if !is_reviewer?
       flash_error(:runtime_admin_only.t)
       redirect_back_or_default("/")
-    elsif !model ||
-          !model.respond_to?(:column_names) ||
-          !model.column_names.include?("ok_for_export")
+    elsif !model_class ||
+          !model_class.respond_to?(:column_names) ||
+          !model_class.column_names.include?("ok_for_export")
       flash_error(:runtime_invalid.t(type: '"type"', value: type))
       redirect_back_or_default("/")
     elsif !value.match(/^[01]$/)
       flash_error(:runtime_invalid.t(type: '"value"', value: value))
       redirect_back_or_default("/")
-    elsif (obj = find_or_goto_index(model, id))
+    elsif (obj = find_or_goto_index(model_class, id))
       obj.ok_for_export = (value == "1")
       obj.save_without_our_callbacks
       if params[:return]
@@ -1609,8 +1519,7 @@ class ObserverController < ApplicationController
   end
 
   def name_tracking_emails(user_id)
-    QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking",
-                                                  user_id)
+    QueuedEmail.where(flavor: "QueuedEmail::NameTracking", to_user_id: user_id)
   end
 
   # Lists notifications that the given user has created.
@@ -1618,7 +1527,8 @@ class ObserverController < ApplicationController
   # Outputs:
   #   @notifications
   def list_notifications # :norobots:
-    @notifications = Notification.find_all_by_user_id(@user.id, order: :flavor)
+    # @notifications = Notification.find_all_by_user_id(@user.id, order: :flavor)
+    @notifications = Notification.where(user_id: @user.id).order(:flavor)
   end
 
   ##############################################################################
@@ -1708,14 +1618,14 @@ class ObserverController < ApplicationController
   # users_by_contribution.rhtml
   def users_by_contribution # :nologin: :norobots:
     SiteData.new
-    @users = User.all(order: "contribution desc, name, login")
+    @users = User.order("contribution desc, name, login")
   end
 
   # show_user.rhtml
   def show_user # :nologin: :prefetch:
     store_location
     id = params[:id].to_s
-    @show_user = find_or_goto_index(User, id, include: :location)
+    @show_user = find_or_goto_index(User, id)
     return unless @show_user
     @user_data = SiteData.new.get_user_data(id)
     @life_list = Checklist::ForUser.new(@show_user)
@@ -1742,7 +1652,7 @@ class ObserverController < ApplicationController
   # SpeciesList or the entire site.
   def checklist # :nologin: :norobots:
     store_location
-    user_id = params[:user_id]
+    user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]
     if !user_id.blank?
@@ -1808,11 +1718,6 @@ class ObserverController < ApplicationController
           @user2.bonuses      = bonuses
           @user2.contribution = contrib
           @user2.save
-          Transaction.put_user(
-                               id: @user2,
-                               set_bonuses: bonuses,
-                               set_contribution: contrib
-                               )
           redirect_to(action: "show_user", id: @user2.id)
         end
       end
@@ -1878,8 +1783,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def email_features # :root: :norobots:
     if is_in_admin_mode?
-      c = "email_general_feature=1 && verified is not null"
-      @users = User.all(conditions: c)
+      @users = User.where("email_general_feature=1 && verified is not null")
       if request.method == "POST"
         @users.each do |user|
           QueuedEmail::Feature.create_email(user,
@@ -2003,8 +1907,7 @@ class ObserverController < ApplicationController
       include: {
         location: :user,
         name: :user,
-        observation: [:location, :name,
-                      { thumb_image: :image_votes }, :user],
+        observation: [:location, :name, { thumb_image: :image_votes }, :user],
         project: :user,
         species_list: [:location, :user]
       }
@@ -2046,12 +1949,11 @@ class ObserverController < ApplicationController
 
   # this is the site's rss feed.
   def rss # :nologin:
-    @logs = RssLog.all(conditions: "datediff(now(), updated_at) <= 31",
-                       order: "updated_at desc", limit: 100,
-                       include: [:name,
-                                 :species_list,
-                                 { observation: :name }
-                                ])
+    @logs = RssLog.includes(:name, :species_list, { observation: :name }).
+                   where("datediff(now(), updated_at) <= 31").
+                   order(updated_at: :desc).
+                   limit(100)
+
     render_xml(layout: false)
   end
 
@@ -2078,11 +1980,15 @@ class ObserverController < ApplicationController
   # OUTPUT: new observation
   def create_observation_object(args)
     now = Time.now
-    observation = Observation.new(args)
+    if args
+      observation = Observation.new(args.permit(whitelisted_observation_args))
+    else
+      observation = Observation.new()
+    end
     observation.created_at = now
     observation.updated_at = now
-    observation.user     = @user
-    observation.name     = Name.unknown
+    observation.user = @user
+    observation.name = Name.unknown
     if Location.is_unknown?(observation.place_name) ||
        (observation.lat && observation.long && observation.place_name.blank?)
       observation.location = Location.unknown
@@ -2196,56 +2102,16 @@ class ObserverController < ApplicationController
 
   # Save observation now that everything is created successfully.
   def save_observation(observation)
-    success = true
-    args = {}
-    if observation.new_record?
-      args[:method] = "post"
-      args[:action] = "observation"
-      args[:date]   = observation.when
-      if observation.location_id
-        args[:location] = observation.location
-      else
-        args[:location] = observation.where
-      end
-      args[:notes]     = observation.notes.to_s
-      args[:specimen] = observation.specimen ? true : false
-      args[:thumbnail] = observation.thumb_image_id.to_i
-      args[:is_collection_location] = observation.is_collection_location
-    else
-      args[:method]   = "put"
-      args[:action]   = "observation"
-      args[:set_date] = observation.when if observation.when_changed?
-      if observation.where_changed? || observation.location_id_changed?
-        if observation.location_id
-          args[:set_location] = observation.location
-        else
-          args[:set_location] = observation.where
-        end
-      end
-      args[:set_notes] = observation.notes if observation.notes_changed?
-      if observation.specimen_changed?
-        args[:set_specimen] = observation.specimen
-      end
-      if observation.thumb_image_id_changed?
-        args[:set_thumbnail] = observation.thumb_image_id.to_i
-      end
-      args[:set_is_collection_location] = observation.is_collection_location
-    end
-    if observation.save
-      args[:id] = observation
-      Transaction.create(args)
-    else
-      flash_error(:runtime_no_save_observation.t)
-      flash_object_errors(observation)
-      success = false
-    end
-    success
+    return true if observation.save
+    flash_error(:runtime_no_save_observation.t)
+    flash_object_errors(observation)
+    return false
   end
 
   # Update observation, check if valid.
   def update_observation_object(observation, args)
     success = true
-    unless observation.update_attributes(args)
+    unless observation.update(args.permit(observation_whitelisted_args))
       flash_object_errors(observation)
       success = false
     end
@@ -2270,7 +2136,9 @@ class ObserverController < ApplicationController
           if upload.respond_to?(:original_filename)
             name = upload.original_filename.force_encoding("utf-8")
           end
-          image = Image.new(args2)
+          # image = Image.new(args2) # Rails 3.2
+          image = Image.new(args2.permit(whitelisted_image_args))
+          # image = Image.new(args2.permit(:all))
           image.created_at = Time.now
           image.updated_at = image.created_at
           # If image.when is 1950 it means user never saw the form
@@ -2287,13 +2155,6 @@ class ObserverController < ApplicationController
             bad_images.push(image)
             flash_object_errors(image)
           else
-            Transaction.post_image(
-              id: image,
-              date: image.when,
-              notes: image.notes.to_s,
-              copyright_holder: image.copyright_holder.to_s,
-              license: image.license || 0
-            )
             name = image.original_name
             name = "##{image.id}" if name.empty?
             flash_notice(:runtime_image_uploaded.t(name: name))
@@ -2327,25 +2188,14 @@ class ObserverController < ApplicationController
       next unless check_permission(image)
       args = param_lookup([:good_image, image.id.to_s])
       next unless args
-      image.attributes = args
+      image.attributes = args.permit(whitelisted_image_args)
       next unless image.when_changed? ||
         image.notes_changed? ||
         image.copyright_holder_changed? ||
         image.license_id_changed? ||
         image.original_name_changed?
       image.updated_at = Time.now
-      args = { id: image }
-      args[:set_date] = image.when if image.when_changed?
-      args[:set_notes] = image.notes if image.notes_changed?
-      if image.copyright_holder_changed?
-        args[:set_copyright_holder] = image.copyright_holder
-      end
-      args[:set_license] = image.license if image.license_id_changed?
-      if image.original_name_changed?
-        args[:set_original_name] = image.original_name
-      end
       if image.save
-        Transaction.put_image(args)
         flash_notice(:runtime_image_updated_notes.t(id: image.id))
       else
         flash_object_errors(image)
@@ -2462,4 +2312,18 @@ class ObserverController < ApplicationController
   action_has_moved "species_list", "show_species_list"
   action_has_moved "species_list", "species_lists_by_title"
   action_has_moved "species_list", "upload_species_list"
+
+  ##############################################################################
+
+  private
+
+  def whitelisted_observation_args
+    [:place_name, :where, :lat, :long, :alt, :when, "when(1i)", "when(2i)",
+      "when(3i)", :notes, :specimen, :thumb_image_id, :is_collection_location]
+  end
+
+  def whitelisted_observation_params
+    return nil unless params[:observation]
+    params[:observation].permit(whitelisted_observation_args)
+  end
 end

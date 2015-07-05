@@ -1,13 +1,19 @@
-<% @title = :admin_request_title.t(:title => @project.title) %>
+<%
+  @title = :admin_request_title.t(title: @project.title)
+%>
 
-<%= form_tag(add_query_param(:action => 'admin_request',
-      :id => @project.id)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center><br/>
+<div class="max-width-text">
+  <%= form_tag(add_query_param(action: :admin_request, id: @project.id)) do %>
+    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
 
-  <label for="email_subject"><%= :request_subject.t %></label>:<br/>
-  <%= text_field('email', 'subject', :size => 70) %><br/><br/>
-  <label for="email_content"><%= :request_message.t %></label>:<br/>
-  <%= text_area('email', 'content', :cols => 80) %>
+    <div class="form-group push-down">
+      <%= label_tag(:email_subject, :request_subject.t + ":") %>
+      <%= text_field(:email, :subject, class: "form-control", data: {autofocus: true}) %>
+    </div>
 
-  <%= focus_on('email_subject') %>
-<% end %>
+    <div class="form-group push-down">
+      <%= label_tag(:email_content, :request_message.t + ":") %>
+      <%= text_area(:email, :content, rows: 5, class: "form-control") %>
+    </div>
+  <% end %>
+</div>

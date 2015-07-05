@@ -65,7 +65,7 @@ jQuery(document).ready(function () {
         var span = jQuery("#pivotal_vote_num_" + story);
         var old_score = span.html();
         jQuery.ajax("/ajax/pivotal/vote/" + story, {
-            data: {value: value, authenticity_token: CSRF_TOKEN},
+            data: {value: value, authenticity_token: csrf_token()},
             dataType: "text",
             async: true,
             complete: function (request) {
@@ -91,7 +91,7 @@ jQuery(document).ready(function () {
         }
         CUR_STORY = story;
         jQuery.ajax("/ajax/pivotal/story/" + story, {
-            data: {authenticity_token: CSRF_TOKEN},
+            data: {authenticity_token: csrf_token()},
             dataType: "text",
             async: true,
             complete: function (request) {
@@ -119,7 +119,7 @@ jQuery(document).ready(function () {
         var popup = jQuery("#pivotal_popup");
         var num;
         jQuery.ajax("/ajax/pivotal/comment/" + story, {
-            data: {value: value, authenticity_token: CSRF_TOKEN},
+            data: {value: value, authenticity_token: csrf_token()},
             dataType: "text",
             async: true,
             complete: function (request) {

@@ -97,6 +97,7 @@ class MOPaginator
 
   def blank?; num_total == 0; end
   def empty?; num_total == 0; end
+  def any?; num_total > 0; end
 
   # Create and initialize new instance.
   def initialize(args={})

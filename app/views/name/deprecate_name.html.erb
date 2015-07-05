@@ -1,14 +1,15 @@
 <%
   @title = :name_deprecate_title.t(:name => @name.display_name)
 
-  new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :name),
+  tabs = [
+    link_to(:cancel_and_show.t(:type => :name),
             :action => 'show_name', :id => @name.id)
-  end
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
 <%= form_tag(:action => 'deprecate_name', :id => @name.id, :approved_name => @what) do %>
-  <br/><center><%= submit_tag :name_deprecate_submit.l %></center><br/>
+  <br/><center><%= submit_tag(:name_deprecate_submit.l, class: "btn") %></center><br/>
 
   <%= render(:partial => 'shared/form_name_feedback',
              :locals => { button_name: :name_deprecate_submit.l,
@@ -19,11 +20,11 @@
                           names: @names }) %>
 
   <p><label for="proposed_name"><%= :name_deprecate_preferred.t %>:</label>
-  <%= text_field('proposed', 'name', :value => @what) %></p>
+  <%= text_field('proposed', 'name', value: @what, autofocus: true) %></p>
   <div class="HelpNote">
     <%= :name_deprecate_preferred_help.tp %>
   </div>
-  <%= turn_into_name_auto_completer('proposed_name', :primer => Name.primer) %>
+  <% turn_into_name_auto_completer('proposed_name', :primer => Name.primer) %>
 
   <p><%= check_box('is', 'misspelling', :checked => @misspelling) %>
   <label for="misspelling"><%= :form_names_misspelling.t %></label></p>
@@ -33,6 +34,4 @@
   <div class="HelpNote">
     <%= :name_deprecate_comments_help.tp(:name => @name.display_name) %>
   </div>
-
-  <%= focus_on('proposed_name') %>
 <% end %>

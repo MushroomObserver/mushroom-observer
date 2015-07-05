@@ -10,7 +10,6 @@
 #  == Attributes
 #
 #  id::             Locally unique numerical id, starting at 1.
-#  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::     Date/time it was first created.
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
@@ -24,7 +23,8 @@
 #  is_member?::     Is a given User a member of this Project?
 #  is_admin?::      Is a given User an admin for this Project?
 #  text_name::      Alias for +title+ for debugging.
-#  Proj.has_edit_permission?:: Check if User has permission to edit an Observation/Image/etc.
+#  Proj.has_edit_permission?:: Check if User has permission to edit an
+#                              Observation/Image/etc.
 #
 #  ==== Logging
 #  log_create::        Log creation.
@@ -41,13 +41,13 @@
 ################################################################################
 
 class Project < AbstractModel
-  belongs_to :admin_group, :class_name => "UserGroup", :foreign_key => "admin_group_id"
+  belongs_to :admin_group, class_name: "UserGroup", foreign_key: "admin_group_id"
   belongs_to :rss_log
   belongs_to :user
   belongs_to :user_group
 
-  has_many :comments,  :as => :target, :dependent => :destroy
-  has_many :interests, :as => :target, :dependent => :destroy
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
 
   has_and_belongs_to_many :images
   has_and_belongs_to_many :observations
@@ -128,10 +128,6 @@ class Project < AbstractModel
   def add_image(img)
     unless images.include?(img)
       images.push(img)
-      Transaction.put_project(
-        :id => self,
-        :add_image => img
-      )
     end
   end
 
@@ -140,14 +136,11 @@ class Project < AbstractModel
     if images.include?(img)
       images.delete(img)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_project(
-        :id => self,
-        :del_image => img
-      )
     end
   end
 
-  # Add observation (and its images) to this project if not already done so.  Saves it.
+  # Add observation (and its images) to this project if not already done so.
+  # Saves it.
   def add_observation(obs)
     unless observations.include?(obs)
       imgs = obs.images.select {|img| img.user_id == obs.user_id}
@@ -155,11 +148,6 @@ class Project < AbstractModel
       for img in imgs
         images.push(img)
       end
-      Transaction.put_project(
-        :id => self,
-        :add_observation => obs,
-        :add_images => imgs
-      )
     end
   end
 
@@ -169,7 +157,8 @@ class Project < AbstractModel
       imgs = obs.images.select {|img| img.user_id == obs.user_id}
       if imgs.any?
         img_ids = imgs.map(&:id).map(&:to_s).join(',')
-        # Leave images which are attached to other observations still attached to this project.
+        # Leave images which are attached to other observations
+        # still attached to this project.
         leave_these_img_ids = Image.connection.select_values(%(
           SELECT io.image_id FROM images_observations io, observations_projects op
           WHERE io.image_id IN (#{img_ids})
@@ -184,11 +173,6 @@ class Project < AbstractModel
         images.delete(img)
       end
       update_attribute(:updated_at, Time.now)
-      Transaction.put_project(
-        :id => self,
-        :del_observation => obs,
-        :del_images => imgs
-      )
     end
   end
 
@@ -196,10 +180,6 @@ class Project < AbstractModel
   def add_species_list(spl)
     unless species_lists.include?(spl)
       species_lists.push(spl)
-      Transaction.put_project(
-        :id => self,
-        :add_species_list => spl
-      )
     end
   end
 
@@ -208,10 +188,6 @@ class Project < AbstractModel
     if species_lists.include?(spl)
       species_lists.delete(spl)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_project(
-        :id => self,
-        :del_species_list => spl
-      )
     end
   end
 
@@ -252,7 +228,8 @@ class Project < AbstractModel
     title       = self.title
     user_group  = self.user_group
     admin_group = self.admin_group
-    for d in NameDescription.find_all_by_source_type_and_project_id(:project, self.id)
+    for d in NameDescription.where(source_type: NameDescription.source_types[:project], project_id: self.id) +
+             LocationDescription.where(source_type: LocationDescription.source_types[:project], project_id: self.id)
       d.source_type = :source
       d.admin_groups.delete(admin_group)
       d.writer_groups.delete(admin_group)
@@ -280,7 +257,7 @@ protected
 
     if self.title.to_s.blank?
       errors.add(:title, :validate_project_title_missing.t)
-    elsif self.title.binary_length > 100
+    elsif self.title.bytesize > 100
       errors.add(:title, :validate_project_title_too_long.t)
     end
   end

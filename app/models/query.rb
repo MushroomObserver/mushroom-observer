@@ -7,582 +7,678 @@
 class Query < AbstractQuery
   belongs_to :user
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+    as_enum(:flavor,
+             { advanced_search: 1,
+               all: 2,
+               at_location: 3,
+               at_where: 4,
+               by_author: 5,
+               by_editor: 6,
+               by_rss_log: 7,
+               by_user: 8,
+               for_project: 9,
+               for_target: 10,
+               for_user: 11,
+               in_set: 12,
+               in_species_list: 13,
+               inside_observation: 14,
+               of_children: 15,
+               of_name: 16,
+               of_parents: 17,
+               pattern_search: 18,
+               regexp_search: 19,
+               with_descriptions: 20,
+               with_descriptions_by_author: 21,
+               with_descriptions_by_editor: 22,
+               with_descriptions_by_user: 23,
+               with_descriptions_in_set: 24,
+               with_observations: 25,
+               with_observations_at_location: 26,
+               with_observations_at_where: 27,
+               with_observations_by_user: 28,
+               with_observations_for_project: 29,
+               with_observations_in_set: 30,
+               with_observations_in_species_list: 31,
+               with_observations_of_children: 32,
+               with_observations_of_name: 33
+             },
+             source: :flavor,
+             with: [],
+             accessor: :whiny
+           )
+    as_enum(:model,
+             { Comment: 1,
+               Herbarium: 2,
+               Image: 3,
+               Location: 4,
+               LocationDescription: 5,
+               Name: 6,
+               NameDescription: 7,
+               Observation: 8,
+               Project: 9,
+               RssLog: 10,
+               SpeciesList: 11,
+               Specimen: 12,
+               User: 13
+             },
+             source: :model,
+             with: [],
+             accessor: :whiny
+           )
+
+
   # Parameters allowed in every query.
   self.global_params = {
     # Allow every query to customize its title.
-    :title? => [:string],
+    title?: [:string],
   }
 
   # Parameters allowed in every query for a given model.
   self.model_params = {
-    :Comment => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?       => [User],
-      :types?       => :string,
-      :summary_has? => :string,
-      :content_has? => :string,
-    },
-    :Image => {
-      :created_at?      => [:time],
-      :updated_at?      => [:time],
-      :date?            => [:date],
-      :users?           => [User],
-      :names?           => [:string],
-      :synonym_names?   => [:string],
-      :children_names?  => [:string],
-      :locations?       => [:string],
-      :projects?        => [:string],
-      :species_lists?   => [:string],
-      :has_observation? => {:string => [:yes]},
-      :size?            => [{:string => Image.all_sizes - [:full_size]}],
-      :content_types?   => :string,
-      :has_notes?       => :boolean,
-      :notes_has?       => :string,
-      :copyright_holder_has? => :string,
-      :license?         => License,
-      :has_votes?       => :boolean,
-      :quality?         => [:float],
-      :confidence?      => [:float],
-      :ok_for_export?   => :boolean,
-    },
-    :Location => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?       => [User],
-      :north?       => :float,
-      :south?       => :float,
-      :east?        => :float,
-      :west?        => :float,
-    },
-    :LocationDescription => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?    => [User],
-    },
-    :Name => {
-      :created_at?          => [:time],
-      :updated_at?          => [:time],
-      :users?               => [User],
-      :names?               => [:string],
-      :synonym_names?       => [:string],
-      :children_names?      => [:string],
-      :misspellings?        => {:string => [:no, :either, :only]},
-      :deprecated?          => {:string => [:either, :no, :only]},
-      :has_synonyms?        => :boolean,
-      :locations?           => [:string],
-      :species_lists?       => [:string],
-      :rank?                => [{:string => Name.all_ranks}],
-      :is_deprecated?       => :boolean,
-      :text_name_has?       => :string,
-      :has_author?          => :boolean,
-      :author_has?          => :string,
-      :has_citation?        => :boolean,
-      :citation_has?        => :string,
-      :has_classification?  => :boolean,
-      :classification_has?  => :string,
-      :has_notes?           => :boolean,
-      :notes_has?           => :string,
-      :has_comments?        => {:string => [:yes]},
-      :comments_has?        => :string,
-      :has_default_desc?    => :boolean,
-      :join_desc?           => {:string => [:default,:any]},
-      :desc_type?           => :string,
-      :desc_project?        => [:string],
-      :desc_creator?        => [User],
-      :desc_content?        => :string,
-      :ok_for_export?       => :boolean,
-    },
-    :NameDescription => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-      :users?       => [User],
-    },
-    :Observation => {
-      :created_at?      => [:time],
-      :updated_at?      => [:time],
-      :date?            => [:date],
-      :users?           => [User],
-      :names?           => [:string],
-      :synonym_names?   => [:string],
-      :children_names?  => [:string],
-      :locations?       => [:string],
-      :projects?        => [:string],
-      :species_lists?   => [:string],
-      :confidence?      => [:float],
-      :is_col_loc?      => :boolean,
-      :has_specimen?    => :boolean,
-      :has_location?    => :boolean,
-      :has_notes?       => :boolean,
-      :has_name?        => :boolean,
-      :has_images?      => :boolean,
-      :has_votes?       => :boolean,
-      :has_comments?    => {:string => [:yes]},
-      :notes_has?       => :string,
-      :comments_has?    => :string,
-      :north?           => :float,
-      :south?           => :float,
-      :east?            => :float,
-      :west?            => :float,
-    },
-    :Project => {
-      :created_at?        => [:time],
-      :updated_at?        => [:time],
-      :users?             => [User],
-      :has_images?        => {:string => [:yes]},
-      :has_observations?  => {:string => [:yes]},
-      :has_species_lists? => {:string => [:yes]},
-      :has_comments?      => {:string => [:yes]},
-      :has_notes?         => :boolean,
-      :title_has?         => :string,
-      :notes_has?         => :string,
-      :comments_has?      => :string,
-    },
-    :RssLog => {
-      :updated_at? => [:time],
-      :type?     => :string,
-    },
-    :SpeciesList => {
-      :created_at?      => [:time],
-      :updated_at?      => [:time],
-      :date?            => [:date],
-      :users?           => [User],
-      :names?           => [:string],
-      :synonym_names?   => [:string],
-      :children_names?  => [:string],
-      :locations?       => [:string],
-      :projects?        => [:string],
-      :title_has?       => :string,
-      :has_notes?       => :boolean,
-      :notes_has?       => :string,
-      :has_comments?    => {:string => [:yes]},
-      :comments_has?    => :string,
-    },
-    :User => {
-      :created_at?  => [:time],
-      :updated_at?  => [:time],
-    },
+      Comment: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          types?: :string,
+          summary_has?: :string,
+          content_has?: :string,
+      },
+      Image: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          locations?: [:string],
+          projects?: [:string],
+          species_lists?: [:string],
+          has_observation?: {string: [:yes]},
+          size?: [{string: Image.all_sizes - [:full_size]}],
+          content_types?: :string,
+          has_notes?: :boolean,
+          notes_has?: :string,
+          copyright_holder_has?: :string,
+          license?: License,
+          has_votes?: :boolean,
+          quality?: [:float],
+          confidence?: [:float],
+          ok_for_export?: :boolean,
+      },
+      Location: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          north?: :float,
+          south?: :float,
+          east?: :float,
+          west?: :float,
+      },
+      LocationDescription: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+      },
+      Name: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          misspellings?: {string: [:no, :either, :only]},
+          deprecated?: {string: [:either, :no, :only]},
+          has_synonyms?: :boolean,
+          locations?: [:string],
+          species_lists?: [:string],
+          rank?: [{string: Name.all_ranks}],
+          is_deprecated?: :boolean,
+          text_name_has?: :string,
+          has_author?: :boolean,
+          author_has?: :string,
+          has_citation?: :boolean,
+          citation_has?: :string,
+          has_classification?: :boolean,
+          classification_has?: :string,
+          has_notes?: :boolean,
+          notes_has?: :string,
+          has_comments?: {string: [:yes]},
+          comments_has?: :string,
+          has_default_desc?: :boolean,
+          join_desc?: {string: [:default, :any]},
+          desc_type?: :string,
+          desc_project?: [:string],
+          desc_creator?: [User],
+          desc_content?: :string,
+          ok_for_export?: :boolean,
+      },
+      NameDescription: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+      },
+      Observation: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          locations?: [:string],
+          projects?: [:string],
+          species_lists?: [:string],
+          confidence?: [:float],
+          is_col_loc?: :boolean,
+          has_specimen?: :boolean,
+          has_location?: :boolean,
+          has_notes?: :boolean,
+          has_name?: :boolean,
+          has_images?: :boolean,
+          has_votes?: :boolean,
+          has_comments?: {string: [:yes]},
+          notes_has?: :string,
+          comments_has?: :string,
+          north?: :float,
+          south?: :float,
+          east?: :float,
+          west?: :float,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      Project: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          users?: [User],
+          has_images?: {string: [:yes]},
+          has_observations?: {string: [:yes]},
+          has_species_lists?: {string: [:yes]},
+          has_comments?: {string: [:yes]},
+          has_notes?: :boolean,
+          title_has?: :string,
+          notes_has?: :string,
+          comments_has?: :string,
+      },
+      RssLog: {
+          updated_at?: [:time],
+          type?: :string,
+      },
+      SpeciesList: {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          users?: [User],
+          names?: [:string],
+          synonym_names?: [:string],
+          children_names?: [:string],
+          locations?: [:string],
+          projects?: [:string],
+          title_has?: :string,
+          has_notes?: :boolean,
+          notes_has?: :string,
+          has_comments?: {string: [:yes]},
+          comments_has?: :string,
+      },
+      User: {
+          created_at?: [:time],
+          updated_at?: [:time],
+      },
   }
 
   # Parameters required for each flavor.
   self.flavor_params = {
-    :advanced_search => {
-      :name?     => :string,
-      :location? => :string,
-      :user?     => :string,
-      :content?  => :string,
-      :search_location_notes? => :boolean,
-    },
-    :all => {
-    },
-    :at_location => {
-      :location => Location,
-    },
-    :at_where => {
-      :location => :string,
-      :user_where => :string,
-    },
-    :by_author => {
-      :user => User,
-    },
-    :by_editor => {
-      :user => User,
-    },
-    :by_user => {
-      :user => User,
-    },
-    :for_project => {
-      :project => Project,
-    },
-    :for_target => {
-      :target => AbstractModel,
-      :type   => :string,
-    },
-    :for_user => {
-      :user => User,
-    },
-    :in_set => {
-      :ids => [AbstractModel],
-    },
-    :in_species_list => {
-      :species_list => SpeciesList,
-    },
-    :inside_observation => {
-      :observation => Observation,
-      :outer       => self, # Used to be Query, but that is now ambiguous
-    },
-    :of_children => {
-      :name => Name,
-      :all? => :boolean,
-    },
-    :of_name => {
-      :name          => :name,
-      :synonyms?     => {:string => [:no, :all, :exclusive]},
-      :nonconsensus? => {:string => [:no, :all, :exclusive]},
-      :project?      => Project,
-      :species_list? => SpeciesList,
-      :user?         => User,
-    },
-    :of_parents => {
-      :name => Name,
-    },
-    :pattern_search => {
-      :pattern => :string,
-    },
-    :regexp_search => {
-      :regexp => :string,
-    },
-    :with_descriptions_by_author => {
-      :user => User,
-    },
-    :with_descriptions_by_editor => {
-      :user => User,
-    },
-    :with_descriptions_by_user => {
-      :user => User,
-    },
-    :with_descriptions_in_set => {
-      :ids        => [AbstractModel],
-      :old_title? => :string,
-      :old_by?    => :string,
-    },
-    :with_observations_at_location => {
-      :location => Location,
-    },
-    :with_observations_at_where => {
-      :location => :string,
-      :user_where => :string,
-    },
-    :with_observations_by_user => {
-      :user => User,
-    },
-    :with_observations_for_project => {
-      :project => Project,
-    },
-    :with_observations_in_set => {
-      :ids => [Observation],
-      :old_title? => :string,
-      :old_by?    => :string,
-    },
-    :with_observations_in_species_list => {
-      :species_list => SpeciesList,
-    },
-    :with_observations_of_children => {
-      :name => Name,
-      :all? => :boolean,
-    },
-    :with_observations_of_name => {
-      :name          => :name,
-      :synonyms?     => {:string => [:no, :all, :exclusive]},
-      :nonconsensus? => {:string => [:no, :all, :exclusive]},
-      :project?      => Project,
-      :species_list? => SpeciesList,
-      :user?         => User,
-    },
+      advanced_search: {
+          name?: :string,
+          location?: :string,
+          user?: :string,
+          content?: :string,
+          search_location_notes?: :boolean,
+      },
+      all: {
+      },
+      at_location: {
+          location: Location,
+      },
+      at_where: {
+          location: :string,
+          user_where: :string,
+      },
+      by_author: {
+          user: User,
+      },
+      by_editor: {
+          user: User,
+      },
+      by_user: {
+          user: User,
+      },
+      for_project: {
+          project: Project,
+      },
+      for_target: {
+          target: AbstractModel,
+          type: :string,
+      },
+      for_user: {
+          user: User,
+      },
+      in_set: {
+          ids: [AbstractModel],
+      },
+      in_species_list: {
+          species_list: SpeciesList,
+      },
+      inside_observation: {
+          observation: Observation,
+          outer: self, # Used to be Query, but that is now ambiguous
+      },
+      of_children: {
+          name: Name,
+          all?: :boolean,
+      },
+      of_name: {
+          name: :name,
+          synonyms?: {string: [:no, :all, :exclusive]},
+          nonconsensus?: {string: [:no, :all, :exclusive]},
+          project?: Project,
+          species_list?: SpeciesList,
+          user?: User,
+      },
+      of_parents: {
+          name: Name,
+      },
+      pattern_search: {
+          pattern: :string,
+      },
+      regexp_search: {
+          regexp: :string,
+      },
+      with_descriptions_by_author: {
+          user: User,
+      },
+      with_descriptions_by_editor: {
+          user: User,
+      },
+      with_descriptions_by_user: {
+          user: User,
+      },
+      with_descriptions_in_set: {
+          ids: [AbstractModel],
+          old_title?: :string,
+          old_by?: :string,
+      },
+      with_observations_at_location: {
+          location: Location,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_at_where: {
+          location: :string,
+          user_where: :string,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_by_user: {
+          user: User,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_for_project: {
+          project: Project,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_in_set: {
+          ids: [Observation],
+          old_title?: :string,
+          old_by?: :string,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_in_species_list: {
+          species_list: SpeciesList,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_of_children: {
+          name: Name,
+          all?: :boolean,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
+      with_observations_of_name: {
+          name: :name,
+          synonyms?: {string: [:no, :all, :exclusive]},
+          nonconsensus?: {string: [:no, :all, :exclusive]},
+          project?: Project,
+          species_list?: SpeciesList,
+          user?: User,
+          has_specimen?: :boolean,
+          has_images?: :boolean,
+          has_obs_tag?: [:string],
+          has_name_tag?: [:string],
+      },
   }
 
   # Allowed flavors for each model.
   self.allowed_model_flavors = {
-    :Comment => [
-      :all,                   # All comments, by created.
-      :by_user,               # Comments created by user, by created.
-      :in_set,                # Comments in a given set.
-      :for_target,            # Comments on a given object, by created.
-      :for_user,              # Comments sent to user, by created.
-      :pattern_search,        # Comments matching a pattern, by created.
-    ],
-    :Herbarium => [
-      :all,
-      :pattern_search,
-    ],
-    :Image => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All images, by created.
-      :by_user,               # Images created by user, by updated.
-      :for_project,           # Images attached to a given project.
-      :in_set,                # Images in a given set.
-      :inside_observation,    # Images belonging to outer observation query.
-      :pattern_search,        # Images matching a pattern, by ???.
-      :with_observations,                 # Images with observations, alphabetically.
-      :with_observations_at_location,     # Images with observations at a defined location.
-      :with_observations_at_where,        # Images with observations at an undefined 'where'.
-      :with_observations_by_user,         # Images with observations by user.
-      :with_observations_for_project,     # Images with observations attached to given project.
-      :with_observations_in_set,          # Images with observations in a given set.
-      :with_observations_in_species_list, # Images with observations in a given species list.
-      :with_observations_of_children,     # Images with observations of children a given name.
-      :with_observations_of_name,         # Images with observations of a given name.
-    ],
-    :Location => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All locations, alphabetically.
-      :by_user,               # Locations created by a given user, alphabetically.
-      :by_editor,             # Locations updated by a given user, alphabetically.
-      :by_rss_log,            # Locations with RSS logs, in RSS order.
-      :in_set,                # Locations in a given set.
-      :pattern_search,        # Locations matching a pattern, alphabetically.
-      :regexp_search,        # Locations matching a pattern, alphabetically.
-      :with_descriptions,                 # Locations with descriptions, alphabetically.
-      :with_descriptions_by_author,       # Locations with descriptions authored by a given user, alphabetically.
-      :with_descriptions_by_editor,       # Locations with descriptions edited by a given user, alphabetically.
-      :with_descriptions_by_user,         # Locations with descriptions created by a given user, alphabetically.
-      :with_descriptions_in_set,          # Locations with descriptions in a given set, alphabetically.
-      :with_observations,                 # Locations with observations, alphabetically.
-      :with_observations_by_user,         # Locations with observations by user.
-      :with_observations_for_project,     # Locations with observations attached to given project.
-      :with_observations_in_set,          # Locations with observations in a given set.
-      :with_observations_in_species_list, # Locations with observations in a given species list.
-      :with_observations_of_children,     # Locations with observations of children of a given name.
-      :with_observations_of_name,         # Locations with observations of a given name.
-    ],
-    :LocationDescription => [
-      :all,                   # All location descriptions, alphabetically.
-      :by_author,             # Location descriptions that list given user as an author, alphabetically.
-      :by_editor,             # Location descriptions that list given user as an editor, alphabetically.
-      :by_user,               # Location descriptions created by a given user, alphabetically.
-      :in_set,                # Location descriptions in a given set.
-    ],
-    :Name => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All names, alphabetically.
-      :by_user,               # Names created by a given user, alphabetically.
-      :by_editor,             # Names updated by a given user, alphabetically.
-      :by_rss_log,            # Names with RSS logs, in RSS order.
-      :in_set,                # Names in a given set.
-      :of_children,           # Names of children of a name.
-      :of_parents,            # Names of parents of a name.
-      :pattern_search,        # Names matching a pattern, alphabetically.
-      :with_descriptions,                 # Names with descriptions, alphabetically.
-      :with_descriptions_by_author,       # Names with descriptions authored by a given user, alphabetically.
-      :with_descriptions_by_editor,       # Names with descriptions edited by a given user, alphabetically.
-      :with_descriptions_by_user,         # Names with descriptions created by a given user, alphabetically.
-      :with_descriptions_in_set,          # Names with descriptions in a given set, alphabetically.
-      :with_observations,                 # Names with observations, alphabetically.
-      :with_observations_at_location,     # Names with observations at a defined location.
-      :with_observations_at_where,        # Names with observations at an undefined 'where'.
-      :with_observations_by_user,         # Names with observations by user.
-      :with_observations_for_project,     # Names with observations attached to given project.
-      :with_observations_in_set,          # Names with observations in a given set.
-      :with_observations_in_species_list, # Names with observations in a given species list.
-    ],
-    :NameDescription => [
-      :all,                   # All name descriptions, alphabetically.
-      :by_author,             # Name descriptions that list given user as an author, alphabetically.
-      :by_editor,             # Name descriptions that list given user as an editor, alphabetically.
-      :by_user,               # Name descriptions created by a given user, alphabetically.
-      :in_set,                # Name descriptions in a given set.
-    ],
-    :Observation => [
-      :advanced_search,       # Advanced search results.
-      :all,                   # All observations, by date.
-      :at_location,           # Observations at a location, by updated_at.
-      :at_where,              # Observations at an undefined location, by updated_at.
-      :by_rss_log,            # Observations with RSS log, in RSS order.
-      :by_user,               # Observations created by user, by updated_at.
-      :for_project,           # Observations attached to a given project.
-      :in_set,                # Observations in a given set.
-      :in_species_list,       # Observations in a given species list, by updated_at.
-      :of_children,           # Observations of children of a given name.
-      :of_name,               # Observations with a given name.
-      :pattern_search,        # Observations matching a pattern, by name.
-    ],
-    :Project => [
-      :all,                   # All projects, by title.
-      :by_rss_log,            # Projects with RSS logs, in RSS order.
-      :in_set,                # Projects in a given set.
-      :pattern_search,        # Projects matching a pattern, by title.
-    ],
-    :RssLog => [
-      :all,                   # All RSS logs, most recent activity first.
-      :in_set,                # RSS logs in a given set.
-    ],
-    :SpeciesList => [
-      :all,                   # All species lists, alphabetically.
-      :at_location,           # Species lists at a location, by updated_at.
-      :at_where,              # Species lists at an undefined location, by updated_at.
-      :by_rss_log,            # Species lists with RSS log, in RSS order
-      :by_user,               # Species lists created by user, alphabetically.
-      :for_project,           # Species lists attached to a given project.
-      :in_set,                # Species lists in a given set.
-      :pattern_search,        # Species lists matching a pattern, alphabetically.
-    ],
-    :Specimen => [
-      :all,
-      :pattern_search,
-    ],
-    :User => [
-      :all,                   # All users, by name.
-      :in_set,                # Users in a given set.
-      :pattern_search,        # Users matching login/name, alphabetically.
-    ],
+      Comment: [
+          :all, # All comments, by created.
+          :by_user, # Comments created by user, by created.
+          :in_set, # Comments in a given set.
+          :for_target, # Comments on a given object, by created.
+          :for_user, # Comments sent to user, by created.
+          :pattern_search, # Comments matching a pattern, by created.
+      ],
+      Herbarium: [
+          :all,
+          :pattern_search,
+      ],
+      Image: [
+          :advanced_search, # Advanced search results.
+          :all, # All images, by created.
+          :by_user, # Images created by user, by updated.
+          :for_project, # Images attached to a given project.
+          :in_set, # Images in a given set.
+          :inside_observation, # Images belonging to outer observation query.
+          :pattern_search, # Images matching a pattern, by ???.
+          :with_observations, # Images with observations, alphabetically.
+          :with_observations_at_location, # Images with observations at a defined location.
+          :with_observations_at_where, # Images with observations at an undefined 'where'.
+          :with_observations_by_user, # Images with observations by user.
+          :with_observations_for_project, # Images with observations attached to given project.
+          :with_observations_in_set, # Images with observations in a given set.
+          :with_observations_in_species_list, # Images with observations in a given species list.
+          :with_observations_of_children, # Images with observations of children a given name.
+          :with_observations_of_name, # Images with observations of a given name.
+      ],
+      Location: [
+          :advanced_search, # Advanced search results.
+          :all, # All locations, alphabetically.
+          :by_user, # Locations created by a given user, alphabetically.
+          :by_editor, # Locations updated by a given user, alphabetically.
+          :by_rss_log, # Locations with RSS logs, in RSS order.
+          :in_set, # Locations in a given set.
+          :pattern_search, # Locations matching a pattern, alphabetically.
+          :regexp_search, # Locations matching a pattern, alphabetically.
+          :with_descriptions, # Locations with descriptions, alphabetically.
+          :with_descriptions_by_author, # Locations with descriptions authored by a given user, alphabetically.
+          :with_descriptions_by_editor, # Locations with descriptions edited by a given user, alphabetically.
+          :with_descriptions_by_user, # Locations with descriptions created by a given user, alphabetically.
+          :with_descriptions_in_set, # Locations with descriptions in a given set, alphabetically.
+          :with_observations, # Locations with observations, alphabetically.
+          :with_observations_by_user, # Locations with observations by user.
+          :with_observations_for_project, # Locations with observations attached to given project.
+          :with_observations_in_set, # Locations with observations in a given set.
+          :with_observations_in_species_list, # Locations with observations in a given species list.
+          :with_observations_of_children, # Locations with observations of children of a given name.
+          :with_observations_of_name, # Locations with observations of a given name.
+      ],
+      LocationDescription: [
+          :all, # All location descriptions, alphabetically.
+          :by_author, # Location descriptions that list given user as an author, alphabetically.
+          :by_editor, # Location descriptions that list given user as an editor, alphabetically.
+          :by_user, # Location descriptions created by a given user, alphabetically.
+          :in_set, # Location descriptions in a given set.
+      ],
+      Name: [
+          :advanced_search, # Advanced search results.
+          :all, # All names, alphabetically.
+          :by_user, # Names created by a given user, alphabetically.
+          :by_editor, # Names updated by a given user, alphabetically.
+          :by_rss_log, # Names with RSS logs, in RSS order.
+          :in_set, # Names in a given set.
+          :of_children, # Names of children of a name.
+          :of_parents, # Names of parents of a name.
+          :pattern_search, # Names matching a pattern, alphabetically.
+          :with_descriptions, # Names with descriptions, alphabetically.
+          :with_descriptions_by_author, # Names with descriptions authored by a given user, alphabetically.
+          :with_descriptions_by_editor, # Names with descriptions edited by a given user, alphabetically.
+          :with_descriptions_by_user, # Names with descriptions created by a given user, alphabetically.
+          :with_descriptions_in_set, # Names with descriptions in a given set, alphabetically.
+          :with_observations, # Names with observations, alphabetically.
+          :with_observations_at_location, # Names with observations at a defined location.
+          :with_observations_at_where, # Names with observations at an undefined 'where'.
+          :with_observations_by_user, # Names with observations by user.
+          :with_observations_for_project, # Names with observations attached to given project.
+          :with_observations_in_set, # Names with observations in a given set.
+          :with_observations_in_species_list, # Names with observations in a given species list.
+      ],
+      NameDescription: [
+          :all, # All name descriptions, alphabetically.
+          :by_author, # Name descriptions that list given user as an author, alphabetically.
+          :by_editor, # Name descriptions that list given user as an editor, alphabetically.
+          :by_user, # Name descriptions created by a given user, alphabetically.
+          :in_set, # Name descriptions in a given set.
+      ],
+      Observation: [
+          :advanced_search, # Advanced search results.
+          :all, # All observations, by date.
+          :at_location, # Observations at a location, by updated_at.
+          :at_where, # Observations at an undefined location, by updated_at.
+          :by_rss_log, # Observations with RSS log, in RSS order.
+          :by_user, # Observations created by user, by updated_at.
+          :for_project, # Observations attached to a given project.
+          :in_set, # Observations in a given set.
+          :in_species_list, # Observations in a given species list, by updated_at.
+          :of_children, # Observations of children of a given name.
+          :of_name, # Observations with a given name.
+          :pattern_search, # Observations matching a pattern, by name.
+      ],
+      Project: [
+          :all, # All projects, by title.
+          :by_rss_log, # Projects with RSS logs, in RSS order.
+          :in_set, # Projects in a given set.
+          :pattern_search, # Projects matching a pattern, by title.
+      ],
+      RssLog: [
+          :all, # All RSS logs, most recent activity first.
+          :in_set, # RSS logs in a given set.
+      ],
+      SpeciesList: [
+          :all, # All species lists, alphabetically.
+          :at_location, # Species lists at a location, by updated_at.
+          :at_where, # Species lists at an undefined location, by updated_at.
+          :by_rss_log, # Species lists with RSS log, in RSS order
+          :by_user, # Species lists created by user, alphabetically.
+          :for_project, # Species lists attached to a given project.
+          :in_set, # Species lists in a given set.
+          :pattern_search, # Species lists matching a pattern, alphabetically.
+      ],
+      Specimen: [
+          :all,
+          :pattern_search,
+      ],
+      User: [
+          :all, # All users, by name.
+          :in_set, # Users in a given set.
+          :pattern_search, # Users matching login/name, alphabetically.
+      ],
   }
 
   # Map each pair of tables to the foreign key name.
   self.join_conditions = {
-    :comments => {
-      :location_descriptions => :target,
-      :locations     => :target,
-      :name_descriptions => :target,
-      :names         => :target,
-      :observations  => :target,
-      :projects      => :target,
-      :species_lists => :target,
-      :users         => :user_id,
-    },
-    :image_votes => {
-      :images        => :image_id,
-      :users         => :user_id,
-    },
-    :images => {
-      :users         => :user_id,
-      :licenses      => :license_id,
-    },
-    :images_observations => {
-      :images        => :image_id,
-      :observations  => :observation_id,
-    },
-    :images_projects => {
-      :images        => :image_id,
-      :projects      => :project_id,
-    },
-    :interests => {
-      :locations     => :target,
-      :names         => :target,
-      :observations  => :target,
-      :users         => :user_id,
-    },
-    :location_descriptions => {
-      :locations     => :location_id,
-      :users         => :user_id,
-    },
-    :location_descriptions_admins => {
-      :location_descriptions => :location_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :location_descriptions_authors => {
-      :location_descriptions => :location_description_id,
-      :users         => :user_id,
-    },
-    :location_descriptions_editors => {
-      :location_descriptions => :location_description_id,
-      :users         => :user_id,
-    },
-    :location_descriptions_readers => {
-      :location_descriptions => :location_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :location_descriptions_versions => {
-      :location_descriptions => :location_description_id,
-    },
-    :location_descriptions_writers => {
-      :location_descriptions => :location_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :locations => {
-      :licenses      => :license_id,
-      :'location_descriptions.default' => :description_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-    },
-    :locations_versions => {
-      :locations     => :location_id,
-    },
-    :name_descriptions => {
-      :names         => :name_id,
-      :users         => :user_id,
-    },
-    :name_descriptions_admins => {
-      :name_descriptions => :name_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :name_descriptions_authors => {
-      :name_descriptions => :name_description_id,
-      :users         => :user_id,
-    },
-    :name_descriptions_editors => {
-      :name_descriptions => :name_description_id,
-      :users         => :user_id,
-    },
-    :name_descriptions_readers => {
-      :name_descriptions => :name_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :name_descriptions_versions => {
-      :name_descriptions => :name_description_id,
-    },
-    :name_descriptions_writers => {
-      :name_descriptions => :name_description_id,
-      :user_groups   => :user_group_id,
-    },
-    :names => {
-      :licenses      => :license_id,
-      :'name_descriptions.default' => :description_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-      :'users.reviewer' => :reviewer_id,
-    },
-    :names_versions => {
-      :names         => :name_id,
-    },
-    :namings => {
-      :names         => :name_id,
-      :observations  => :observation_id,
-      :users         => :user_id,
-    },
-    :notifications => {
-      :names         => :obj,
-      :users         => :user_id,
-    },
-    :observations => {
-      :locations     => :location_id,
-      :names         => :name_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-      :'images.thumb_image' => :thumb_image_id,
-      :'image_votes.thumb_image' => [:thumb_image_id, :image_id],
-    },
-    :observations_projects => {
-      :observations  => :observation_id,
-      :projects      => :project_id,
-    },
-    :observations_species_lists => {
-      :observations  => :observation_id,
-      :species_lists => :species_list_id,
-    },
-    :projects => {
-      :users         => :user_id,
-      :user_groups   => :user_group_id,
-      :'user_groups.admin_group' => :admin_group_id,
-    },
-    :projects_species_lists => {
-      :projects      => :project_id,
-      :species_lists => :species_list_id,
-    },
-    :rss_logs => {
-      :locations     => :location_id,
-      :names         => :name_id,
-      :observations  => :observation_id,
-      :species_lists => :species_list_id,
-    },
-    :species_lists => {
-      :locations     => :location_id,
-      :rss_logs      => :rss_log_id,
-      :users         => :user_id,
-    },
-    :user_groups_users => {
-      :user_groups   => :user_group_id,
-      :users         => :user_id,
-    },
-    :users => {
-      :images        => :image_id,
-      :licenses      => :license_id,
-      :locations     => :location_id,
-    },
-    :votes => {
-      :namings       => :naming_id,
-      :observations  => :observation_id,
-      :users         => :user_id,
-    },
+      comments: {
+          location_descriptions: :target,
+          locations: :target,
+          name_descriptions: :target,
+          names: :target,
+          observations: :target,
+          projects: :target,
+          species_lists: :target,
+          users: :user_id,
+      },
+      image_votes: {
+          images: :image_id,
+          users: :user_id,
+      },
+      images: {
+          users: :user_id,
+          licenses: :license_id,
+      },
+      images_observations: {
+          images: :image_id,
+          observations: :observation_id,
+      },
+      images_projects: {
+          images: :image_id,
+          projects: :project_id,
+      },
+      interests: {
+          locations: :target,
+          names: :target,
+          observations: :target,
+          users: :user_id,
+      },
+      location_descriptions: {
+          locations: :location_id,
+          users: :user_id,
+      },
+      location_descriptions_admins: {
+          location_descriptions: :location_description_id,
+          user_groups: :user_group_id,
+      },
+      location_descriptions_authors: {
+          location_descriptions: :location_description_id,
+          users: :user_id,
+      },
+      location_descriptions_editors: {
+          location_descriptions: :location_description_id,
+          users: :user_id,
+      },
+      location_descriptions_readers: {
+          location_descriptions: :location_description_id,
+          user_groups: :user_group_id,
+      },
+      location_descriptions_versions: {
+          location_descriptions: :location_description_id,
+      },
+      location_descriptions_writers: {
+          location_descriptions: :location_description_id,
+          user_groups: :user_group_id,
+      },
+      locations: {
+          licenses: :license_id,
+          :'location_descriptions.default' => :description_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+      },
+      locations_versions: {
+          locations: :location_id,
+      },
+      name_descriptions: {
+          names: :name_id,
+          users: :user_id,
+      },
+      name_descriptions_admins: {
+          name_descriptions: :name_description_id,
+          user_groups: :user_group_id,
+      },
+      name_descriptions_authors: {
+          name_descriptions: :name_description_id,
+          users: :user_id,
+      },
+      name_descriptions_editors: {
+          name_descriptions: :name_description_id,
+          users: :user_id,
+      },
+      name_descriptions_readers: {
+          name_descriptions: :name_description_id,
+          user_groups: :user_group_id,
+      },
+      name_descriptions_versions: {
+          name_descriptions: :name_description_id,
+      },
+      name_descriptions_writers: {
+          name_descriptions: :name_description_id,
+          user_groups: :user_group_id,
+      },
+      names: {
+          licenses: :license_id,
+          :'name_descriptions.default' => :description_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+          :'users.reviewer' => :reviewer_id,
+      },
+      names_versions: {
+          names: :name_id,
+      },
+      namings: {
+          names: :name_id,
+          observations: :observation_id,
+          users: :user_id,
+      },
+      notifications: {
+          names: :obj,
+          users: :user_id,
+      },
+      observations: {
+          locations: :location_id,
+          names: :name_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+          :'images.thumb_image' => :thumb_image_id,
+          :'image_votes.thumb_image' => [:thumb_image_id, :image_id],
+      },
+      observations_projects: {
+          observations: :observation_id,
+          projects: :project_id,
+      },
+      observations_species_lists: {
+          observations: :observation_id,
+          species_lists: :species_list_id,
+      },
+      projects: {
+          users: :user_id,
+          user_groups: :user_group_id,
+          :'user_groups.admin_group' => :admin_group_id,
+      },
+      projects_species_lists: {
+          projects: :project_id,
+          species_lists: :species_list_id,
+      },
+      rss_logs: {
+          locations: :location_id,
+          names: :name_id,
+          observations: :observation_id,
+          species_lists: :species_list_id,
+      },
+      species_lists: {
+          locations: :location_id,
+          rss_logs: :rss_log_id,
+          users: :user_id,
+      },
+      user_groups_users: {
+          user_groups: :user_group_id,
+          users: :user_id,
+      },
+      users: {
+          images: :image_id,
+          licenses: :license_id,
+          locations: :location_id,
+      },
+      votes: {
+          namings: :naming_id,
+          observations: :observation_id,
+          users: :user_id,
+      },
   }
 
   # Return the default order for this query.
@@ -782,77 +878,78 @@ class Query < AbstractQuery
 
   # Tell SQL how to sort results using the <tt>:by => :blah</tt> mechanism.
   def initialize_order(by)
-    table = model.table_name
+    table = model_class.table_name
     case by
 
     when 'updated_at', 'created_at', 'last_login', 'num_views'
-      if model.column_names.include?(by)
+      if model_class.column_names.include?(by)
         "#{table}.#{by} DESC"
       end
 
     when 'date'
-      if model.column_names.include?('date')
+      if model_class.column_names.include?('date')
         "#{table}.date DESC"
-      elsif model.column_names.include?('when')
+      elsif model_class.column_names.include?('when')
         "#{table}.when DESC"
-      elsif model.column_names.include?('created_at')
+      elsif model_class.column_names.include?('created_at')
         "#{table}.created_at DESC"
       end
 
     when 'name'
-      if model == Image
-        self.join << {:images_observations => {:observations => :names}}
+      if model_class == Image
+        add_join(:images_observations, :observations)
+        add_join(:observations, :names)
         self.group = 'images.id'
         'MIN(names.sort_name) ASC, images.when DESC'
-      elsif model == Location
+      elsif model_class == Location
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
-      elsif model == LocationDescription
-        self.join << :locations
+      elsif model_class == LocationDescription
+        add_join(:locations)
         'locations.name ASC, location_descriptions.created_at ASC'
-      elsif model == Name
+      elsif model_class == Name
         'names.sort_name ASC'
-      elsif model == NameDescription
-        self.join << :names
+      elsif model_class == NameDescription
+        add_join(:names)
         'names.sort_name ASC, name_descriptions.created_at ASC'
-      elsif model == Observation
-        self.join << :names
+      elsif model_class == Observation
+        add_join(:names)
         'names.sort_name ASC, observations.when DESC'
-      elsif model.column_names.include?('sort_name')
+      elsif model_class.column_names.include?('sort_name')
         "#{table}.sort_name ASC"
-      elsif model.column_names.include?('name')
+      elsif model_class.column_names.include?('name')
         "#{table}.name ASC"
-      elsif model.column_names.include?('title')
+      elsif model_class.column_names.include?('title')
         "#{table}.title ASC"
       end
 
     when 'title', 'login', 'summary', 'copyright_holder', 'where'
-      if model.column_names.include?(by)
+      if model_class.column_names.include?(by)
         "#{table}.#{by} ASC"
       end
 
     when 'user'
-      if model.column_names.include?('user_id')
-        self.join << :users
+      if model_class.column_names.include?('user_id')
+        add_join(:users)
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
 
     when 'location'
-      if model.column_names.include?('location_id')
-        self.join << :locations
+      if model_class.column_names.include?('location_id')
+        add_join(:locations)
         User.current_location_format == :scientific ?
           'locations.scientific_name ASC' : 'locations.name ASC'
       end
 
     when 'rss_log'
-      if model.column_names.include?('rss_log_id')
-        self.join << :rss_logs
+      if model_class.column_names.include?('rss_log_id')
+        add_join(:rss_logs)
         'rss_logs.updated_at DESC'
       end
 
     when 'confidence'
       if model_symbol == :Image
-        self.join << {:images_observations => :observations}
+        add_join(:images_observations, :observations)
         'observations.vote_cache DESC'
       elsif model_symbol == :Observation
         'observations.vote_cache DESC'
@@ -865,20 +962,20 @@ class Query < AbstractQuery
 
     when 'thumbnail_quality'
       if model_symbol == :Observation
-        self.join << :'images.thumb_image'
+        add_join(:'images.thumb_image')
         'images.vote_cache DESC, observations.vote_cache DESC'
       end
 
     when 'owners_quality'
       if model_symbol == :Image
-        self.join << :image_votes
+        add_join(:image_votes)
         self.where << 'image_votes.user_id = images.user_id'
         'image_votes.value DESC'
       end
 
     when 'owners_thumbnail_quality'
       if model_symbol == :Observation
-        self.join << { :'images.thumb_image' => :image_votes }
+        add_join(:'images.thumb_image', :image_votes)
         self.where << 'images.user_id = observations.user_id'
         self.where << 'image_votes.user_id = observations.user_id'
         'image_votes.value DESC, images.vote_cache DESC, observations.vote_cache DESC'
@@ -904,7 +1001,7 @@ class Query < AbstractQuery
     initialize_model_do_time(:created_at)
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
-    initialize_model_do_type_list(:types, :target_type, Comment.all_types)
+    initialize_model_do_enum_set(:types, :target_type, Comment.all_types, :string)
     initialize_model_do_search(:summary_has, :summary)
     initialize_model_do_search(:content_has, :comment)
   end
@@ -916,20 +1013,20 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(
       Name, :names, 'observations.name_id',
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_objects_by_name(
       Name, :synonym_names, 'observations.name_id',
       :filter => :synonyms,
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_objects_by_name(
       Name, :children_names, 'observations.name_id',
       :filter => :all_children,
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_locations('observations',
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_objects_by_name(
       Project, :projects, 'images_projects.project_id',
@@ -937,10 +1034,10 @@ class Query < AbstractQuery
     )
     initialize_model_do_objects_by_name(
       SpeciesList, :species_lists, 'observations_species_lists.species_list_id',
-      :join => {:images_observations => {:observations => :observations_species_lists}}
+      :join => {images_observations: {observations: :observations_species_lists}}
     )
     if params[:has_observation]
-      self.join << :images_observations
+      add_join(:images_observations)
     end
     initialize_model_do_image_size
     initialize_model_do_image_types
@@ -957,7 +1054,7 @@ class Query < AbstractQuery
     )
     initialize_model_do_range(:quality, :vote_cache)
     initialize_model_do_range(:confidence, 'observations.vote_cache',
-      :join => {:images_observations => :observations}
+      :join => {images_observations: :observations}
     )
     initialize_model_do_boolean(:ok_for_export,
       'images.ok_for_export IS TRUE',
@@ -997,7 +1094,7 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_name(
       SpeciesList, :species_lists,
       'observations_species_lists.species_list_id',
-      :join => {:observations => :observations_species_lists}
+      :join => {observations: :observations_species_lists}
     )
     initialize_model_do_rank
     initialize_model_do_boolean(:is_deprecated,
@@ -1044,28 +1141,28 @@ class Query < AbstractQuery
       initialize_model_do_search(:notes_has, 'notes')
     end
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
     initialize_model_do_boolean(:has_default_desc,
       'names.description_id IS NOT NULL',
       'names.description_id IS NULL'
     )
     if params[:join_desc] == :default
-      self.join << :'name_descriptions.default'
+      add_join(:'name_descriptions.default')
     elsif (params[:join_desc] == :any) or
           !params[:desc_type].blank? or
           !params[:desc_project].blank? or
           !params[:desc_creator].blank? or
           !params[:desc_content].blank?
-      self.join << :name_descriptions
+      add_join(:name_descriptions)
     end
-    initialize_model_do_type_list(:desc_type,
-      'name_descriptions.source_type', Description.all_source_types
+    initialize_model_do_enum_set(:desc_type,
+      'name_descriptions.source_type', Description.all_source_types, :integer
     )
     initialize_model_do_objects_by_name(
       Project, :desc_project, 'name_descriptions.project_id'
@@ -1112,10 +1209,6 @@ class Query < AbstractQuery
       'observations.is_collection_location IS TRUE',
       'observations.is_collection_location IS FALSE'
     )
-    initialize_model_do_boolean(:has_specimen,
-      'observations.specimen IS TRUE',
-      'observations.specimen IS FALSE'
-    )
     initialize_model_do_boolean(:has_location,
       'observations.location_id IS NOT NULL',
       'observations.location_id IS NULL'
@@ -1130,23 +1223,20 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(observations.notes,"")) > 0',
       'LENGTH(COALESCE(observations.notes,"")) = 0'
     )
-    initialize_model_do_boolean(:has_images,
-      'observations.thumb_image_id IS NOT NULL',
-      'observations.thumb_image_id IS NULL'
-    )
     initialize_model_do_boolean(:has_votes,
       'observations.vote_cache IS NOT NULL',
       'observations.vote_cache IS NULL'
     )
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
     initialize_model_do_bounding_box(:observation)
+    initialize_observation_filters
   end
 
   def initialize_project
@@ -1154,13 +1244,13 @@ class Query < AbstractQuery
     initialize_model_do_time(:updated_at)
     initialize_model_do_objects_by_id(:users)
     if params[:has_images]
-      self.join << :images_projects
+      add_join(:images_projects)
     end
     if params[:has_observations]
-      self.join << :observations_projects
+      add_join(:observations_projects)
     end
     if params[:has_species_lists]
-      self.join << :projects_species_lists
+      add_join(:projects_species_lists)
     end
     initialize_model_do_search(:title_has, :title)
     initialize_model_do_search(:notes_has, :notes)
@@ -1169,12 +1259,12 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(species_lists.notes,"")) = 0'
     )
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
   end
 
@@ -1189,15 +1279,15 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(Name, :names,
       'observations.name_id',
-      :join => {:observations_species_lists => :observations}
+      :join => {observations_species_lists: :observations}
     )
     initialize_model_do_objects_by_name(Name, :synonym_names,
       'observations.name_id', :filter => :synonyms,
-      :join => {:observations_species_lists => :observations}
+      :join => {observations_species_lists: :observations}
     )
     initialize_model_do_objects_by_name(Name, :children_names,
       'observations.name_id', :filter => :all_children,
-      :join => {:observations_species_lists => :observations}
+      :join => {observations_species_lists: :observations}
     )
     initialize_model_do_locations
     initialize_model_do_objects_by_name(
@@ -1211,12 +1301,12 @@ class Query < AbstractQuery
       'LENGTH(COALESCE(species_lists.notes,"")) = 0'
     )
     if params[:has_comments]
-      self.join << :comments
+      add_join(:comments)
     end
     if !params[:comments_has].blank?
       initialize_model_do_search(:comments_has,
         'CONCAT(comments.summary,comments.notes)')
-      self.join << :comments
+      add_join(:comments)
     end
   end
 
@@ -1237,7 +1327,7 @@ class Query < AbstractQuery
 
   def initialize_model_do_search(arg, col=nil)
     if !params[arg].blank?
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       search = google_parse(params[arg])
       self.where += google_conditions(search, col)
     end
@@ -1250,18 +1340,22 @@ class Query < AbstractQuery
       self.where << "#{col} <= #{max}" if !max.blank?
       if (join = args[:join]) and
          (!min.blank? || !max.blank?)
+        # TODO: is this used? convert to piecewise add_join
         self.join << join
       end
     end
   end
 
-  def initialize_model_do_type_list(arg, col, vals)
+  def initialize_model_do_enum_set(arg, col, vals, type)
     if !params[arg].blank?
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       types = params[arg].to_s.strip_squeeze.split
-      types &= vals.map(&:to_s)
-      if types.any?
-        self.where << "#{col} IN ('#{types.join("','")}')"
+      if type == :string
+        types &= vals.map(&:to_s)
+        self.where << "#{col} IN ('#{types.join("','")}')" if types.any?
+      elsif
+        types.map! { |v| vals.index_of(v.to_sym) }.reject!(&:nil?)
+        self.where << "#{col} IN (#{types.join(",")})" if types.any?
       end
     end
   end
@@ -1283,7 +1377,7 @@ class Query < AbstractQuery
   def initialize_model_do_objects_by_id(arg, col=nil)
     if ids = params[arg]
       col ||= "#{arg.to_s.sub(/s$/,'')}_id"
-      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       set = clean_id_set(ids)
       self.where << "#{col} IN (#{set})"
     end
@@ -1293,7 +1387,7 @@ class Query < AbstractQuery
     names = params[arg]
     if names && names.any?
       col ||= arg.to_s.sub(/s?$/, '_id')
-      col = "#{self.model.table_name}.#{col}" if !col.to_s.match(/\./)
+      col = "#{self.model_class.table_name}.#{col}" if !col.to_s.match(/\./)
       objs = []
       for name in names
         if name.to_s.match(/^\d+$/)
@@ -1303,21 +1397,22 @@ class Query < AbstractQuery
           case model.name
           when 'Location'
             pattern = clean_pattern(Location.clean_name(name))
-            objs += model.all(:conditions => "name LIKE '%#{pattern}%'")
+#            objs += model.all(:conditions => "name LIKE '%#{pattern}%'") # Rails 3
+            objs += model.where("name LIKE ?", "%#{pattern}%")
           when 'Name'
             if parse = Name.parse_name(name)
               name2 = parse.search_name
             else
               name2 = Name.clean_incoming_string(name)
             end
-            matches = model.find_all_by_search_name(name2)
-            matches = model.find_all_by_text_name(name2) if matches.empty?
+            matches = model.where(search_name: name2)
+            matches = model.where(text_name: name2) if matches.empty?
             objs += matches
           when 'Project', 'SpeciesList'
-            objs += model.find_all_by_title(name)
+            objs += model.where(title: name)
           when 'User'
             name.sub(/ *<.*>/, '')
-            objs += model.find_all_by_login(name)
+            objs += model.where(login: name)
           else
             raise("Forgot to tell initialize_model_do_objects_by_name how " +
                   "to find instances of #{model.name}!")
@@ -1328,6 +1423,7 @@ class Query < AbstractQuery
         objs = objs.uniq.map(&filter).flatten
       end
       if join = args[:join]
+        # TODO: is this used? convert to piecewise add_join
         self.join << join
       end
       set = clean_id_set(objs.map(&:id).uniq)
@@ -1335,7 +1431,7 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_locations(table=model.table_name, args={})
+  def initialize_model_do_locations(table=model_class.table_name, args={})
     locs = params[:locations]
     if locs && locs.any?
       loc_col = "#{table}.location_id"
@@ -1399,6 +1495,8 @@ class Query < AbstractQuery
         )
         cond1 = cond1.join(' AND ')
         cond2 = cond2.join(' AND ')
+        # TODO: not sure how to deal with the bang notation -- indicates LEFT
+        # OUTER JOIN instead of normal INNER JOIN.
         self.join << :"locations!" unless uses_join?(:locations)
         self.where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
       end
@@ -1413,7 +1511,7 @@ class Query < AbstractQuery
       a = all_ranks.index(min) || 0
       b = all_ranks.index(max) || (all_ranks.length - 1)
       a, b = b, a if a > b
-      ranks = all_ranks[a..b].map {|r| "'#{r}'"}
+      ranks = all_ranks[a..b].map {|r| Name.ranks[r]}
       self.where << "names.rank IN (#{ranks.join(',')})"
     end
   end
@@ -1459,7 +1557,7 @@ class Query < AbstractQuery
   def initialize_model_do_license
     if !params[:license].blank?
       license = find_cached_parameter_instance(License, :license)
-      self.where << "#{model.table_name}.license_id = #{license.id}"
+      self.where << "#{model_class.table_name}.license_id = #{license.id}"
     end
   end
 
@@ -1468,7 +1566,7 @@ class Query < AbstractQuery
   # ----------------------------
 
   def initialize_model_do_date(arg=:date, col=arg)
-    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
       # Ugh, special case for search by month/day where range of months wraps around from December to January.
       if vals[0].to_s.match(/^\d\d-\d\d$/) and
@@ -1505,7 +1603,7 @@ class Query < AbstractQuery
   end
 
   def initialize_model_do_time(arg=:time, col=arg)
-    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    col = "#{model_class.table_name}.#{col}" if !col.to_s.match(/\./)
     if vals = params[arg]
       initialize_model_do_time_half(true, vals[0], col)
       initialize_model_do_time_half(false, vals[1], col)
@@ -1602,7 +1700,7 @@ class Query < AbstractQuery
   end
 
   def initialize_by_rss_log
-    self.join << :rss_logs
+    add_join(:rss_logs)
     params[:by] ||= 'rss_log'
   end
 
@@ -1613,8 +1711,8 @@ class Query < AbstractQuery
   def initialize_by_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    table = model.table_name
-    if model.column_names.include?('user_id')
+    table = model_class.table_name
+    if model_class.column_names.include?('user_id')
       self.where << "#{table}.user_id = '#{params[:user]}'"
     else
       raise "Can't figure out how to select #{model_string} by user_id!"
@@ -1636,9 +1734,9 @@ class Query < AbstractQuery
   def initialize_for_project
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
-    join_table = [model.table_name, 'projects'].sort.join('_')
+    join_table = [model_class.table_name, 'projects'].sort.join('_')
     self.where << "#{join_table}.project_id = '#{params[:project]}'"
-    self.join << join_table
+    add_join(join_table)
   end
 
   def initialize_for_target
@@ -1656,7 +1754,7 @@ class Query < AbstractQuery
   def initialize_for_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    self.join << :observations
+    add_join(:observations)
     self.where << "observations.user_id = '#{params[:user]}'"
     params[:by] ||= 'created_at'
   end
@@ -1670,14 +1768,14 @@ class Query < AbstractQuery
     title_args[:user] = user.legal_name
     case model_symbol
     when :Name, :Location
-      version_table = "#{model.table_name}_versions".to_sym
-      self.join << version_table
+      version_table = "#{model_class.table_name}_versions".to_sym
+      add_join(version_table)
       self.where << "#{version_table}.user_id = '#{params[:user]}'"
-      self.where << "#{model.table_name}.user_id != '#{params[:user]}'"
+      self.where << "#{model_class.table_name}.user_id != '#{params[:user]}'"
     when :NameDescription, :LocationDescription
-      glue_table = "#{model.name.underscore}s_#{flavor}s".
+      glue_table = "#{model_string.underscore}s_#{flavor}s".
                       sub('_by_', '_').to_sym
-      self.join << glue_table
+      add_join(glue_table)
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
       params[:by] ||= 'name'
     else
@@ -1692,24 +1790,24 @@ class Query < AbstractQuery
   def initialize_at_location
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
-    self.join << :names
-    self.where << "#{model.table_name}.location_id = '#{params[:location]}'"
+    add_join(:names)
+    self.where << "#{model_class.table_name}.location_id = '#{params[:location]}'"
     params[:by] ||= 'name'
   end
 
   def initialize_at_where
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
-    self.join << :names
-    self.where << "#{model.table_name}.where LIKE '%#{pattern}%'"
+    add_join(:names)
+    self.where << "#{model_class.table_name}.where LIKE '%#{pattern}%'"
     params[:by] ||= 'name'
   end
 
   def initialize_in_species_list
     species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
-    self.join << :names
-    self.join << :observations_species_lists
+    add_join(:names)
+    add_join(:observations_species_lists)
     self.where << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
     params[:by] ||= 'name'
   end
@@ -1728,8 +1826,8 @@ class Query < AbstractQuery
       if name.is_a?(Fixnum) or name.match(/^\d+$/)
         names = [Name.find(name.to_i)]
       else
-        names = Name.find_all_by_search_name(name)
-        names = Name.find_all_by_text_name(name) if names.empty?
+        names = Name.where(search_name: name)
+        names = Name.where(text_name: name) if names.empty?
       end
     end
 
@@ -1788,12 +1886,14 @@ class Query < AbstractQuery
 
     # Different join conditions for different models.
     if model_symbol == :Observation
-      self.join += extra_joins
+      extra_joins.each {|table| add_join(table)}
     elsif model_symbol == :Location
-      self.join << {:observations => extra_joins}
+      add_join(:observations)
+      extra_joins.each {|table| add_join(:observations, table)}
       self.where << "observations.is_collection_location IS TRUE"
     elsif model_symbol == :Image
-      self.join << {:images_observations => {:observations => extra_joins}}
+      add_join(:images_observations, :observations)
+      extra_joins.each {|table| add_join(:observations, table)}
     end
   end
 
@@ -1810,7 +1910,7 @@ class Query < AbstractQuery
 
     # If we have to rely on classification strings, just let Name do it, and
     # create a pseudo-query based on ids returned by +name.children+.
-    if all || name.above_genus?
+    if all || !name.at_or_below_genus?
       set = clean_id_set(name.children(all).map(&:id))
       self.where << "names.id IN (#{set})"
 
@@ -1828,11 +1928,12 @@ class Query < AbstractQuery
 
     # Add appropriate joins.
     if model_symbol == :Observation
-      self.join << :names
+      add_join(:names)
     elsif model_symbol == :Image
-      self.join << {:images_observations => {:observations => :names}}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :names)
     elsif model_symbol == :Location
-      self.join << {:observations => :names}
+      add_join(:observations, :names)
     end
   end
 
@@ -1852,67 +1953,73 @@ class Query < AbstractQuery
 
   def initialize_with_observations
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_at_location
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.location_id = '#{params[:location]}'"
     self.where << 'observations.is_collection_location IS TRUE'
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_at_where
     location = params[:location]
     title_args[:where] = location
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.where LIKE '%#{clean_pattern(location)}%'"
     self.where << 'observations.is_collection_location IS TRUE'
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_by_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.user_id = '#{params[:user]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_for_project
     project = find_cached_parameter_instance(Project, :project)
     title_args[:project] = project.title
     if model_symbol == :Image
-      self.join << {:images_observations => {:observations => :observations_projects}}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :observations_projects)
     else
-      self.join << {:observations => :observations_projects}
+      add_join(:observations, :observations_projects)
     end
     self.where << "observations_projects.project_id = '#{params[:project]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_in_set
@@ -1920,39 +2027,65 @@ class Query < AbstractQuery
       :query_title_in_set.t(:type => :observation)
     set = clean_id_set(params[:ids])
     if model_symbol == :Image
-      self.join << {:images_observations => :observations}
+      add_join(:images_observations, :observations)
     else
-      self.join << :observations
+      add_join(:observations)
     end
     self.where << "observations.id IN (#{set})"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_in_species_list
     species_list = find_cached_parameter_instance(SpeciesList, :species_list)
     title_args[:species_list] = species_list.format_name
     if model_symbol == :Image
-      self.join << {:images_observations => {:observations => :observations_species_lists}}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :observations_species_lists)
     else
-      self.join << {:observations => :observations_species_lists}
+      add_join(:observations, :observations_species_lists)
     end
     self.where << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
     if model_symbol == :Location
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+    initialize_observation_filters
   end
 
   def initialize_with_observations_of_children
     initialize_of_children
+    initialize_observation_filters
   end
 
   def initialize_with_observations_of_name
     initialize_of_name
     title_args[:tag] = title_args[:tag].to_s.sub('title', 'title_with_observations').to_sym
+    initialize_observation_filters
+  end
+
+  # Used for all observation queries, and for all observation queries which
+  # have been coerced into other models' queries.
+  def initialize_observation_filters
+    initialize_model_do_boolean(:has_specimen,
+      'observations.specimen IS TRUE',
+      'observations.specimen IS FALSE'
+    )
+    initialize_model_do_boolean(:has_images,
+      'observations.thumb_image_id IS NOT NULL',
+      'observations.thumb_image_id IS NULL'
+    )
+    if params[:has_obs_tag]
+      # TODO: no way to join on existing triples table!
+      # join.add_leaf(:observations, :triple_glue.observation)
+    end
+    if params[:has_name_tag]
+      # TODO: no way to join on existing triples table!
+      # join.add_leaf(:observations, :triple_glue.name)
+    end
   end
 
   # ---------------------------------------------------------------
@@ -1961,8 +2094,8 @@ class Query < AbstractQuery
   # ---------------------------------------------------------------
 
   def initialize_with_descriptions
-    type = model.name.underscore
-    self.join << :"#{type}_descriptions"
+    type = model_string.underscore
+    add_join(:"#{type}_descriptions")
     params[:by] ||= 'name'
   end
 
@@ -1971,23 +2104,23 @@ class Query < AbstractQuery
   end
 
   def initialize_with_descriptions_by_editor
-    type = model.name.underscore
+    type = model_string.underscore
     glue = flavor.to_s.sub(/^.*_by_/, '')
     desc_table = :"#{type}_descriptions"
     glue_table = :"#{type}_descriptions_#{glue}s"
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    self.join << { desc_table => glue_table }
+    add_join(desc_table, glue_table)
     self.where << "#{glue_table}.user_id = '#{params[:user]}'"
     params[:by] ||= 'name'
   end
 
   def initialize_with_descriptions_by_user
-    type = model.name.underscore
+    type = model_string.underscore
     desc_table = :"#{type}_descriptions"
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
-    self.join << desc_table
+    add_join(desc_table)
     self.where << "#{desc_table}.user_id = '#{params[:user]}'"
     params[:by] ||= 'name'
   end
@@ -2012,15 +2145,16 @@ class Query < AbstractQuery
         'CONCAT(herbaria.name,COALESCE(herbaria.description,""),COALESCE(herbaria.mailing_address,""))')
 
     when :Image
-      self.join << {:images_observations => {:observations =>
-        [:locations!, :names] }}
+      add_join(:images_observations, :observations)
+      add_join(:observations, :locations!)
+      add_join(:observations, :names)
       self.where += google_conditions(search,
         'CONCAT(names.search_name,COALESCE(images.original_name,""),' +
         'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
         'IF(locations.id,locations.name,observations.where))')
 
     when :Location
-      self.join << :"location_descriptions.default!"
+      add_join(:"location_descriptions.default!")
       note_fields = LocationDescription.all_note_fields.map do |x|
         "COALESCE(location_descriptions.#{x},'')"
       end
@@ -2028,7 +2162,7 @@ class Query < AbstractQuery
           "CONCAT(locations.name,#{note_fields.join(',')})")
 
     when :Name
-      self.join << :"name_descriptions.default!"
+      add_join(:"name_descriptions.default!")
       note_fields = NameDescription.all_note_fields.map do |x|
         "COALESCE(name_descriptions.#{x},'')"
       end
@@ -2037,7 +2171,8 @@ class Query < AbstractQuery
                   "COALESCE(names.notes,''),#{note_fields.join(',')})")
 
     when :Observation
-      self.join << [:locations!, :names]
+      add_join(:locations!)
+      add_join(:names)
       self.where += google_conditions(search,
         'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
         'IF(locations.id,locations.name,observations.where))')
@@ -2047,7 +2182,7 @@ class Query < AbstractQuery
         'CONCAT(projects.title,COALESCE(projects.summary,""))')
 
     when :SpeciesList
-      self.join << :locations!
+      add_join(:locations!)
       self.where += google_conditions(search,
         'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
         'IF(locations.id,locations.name,species_lists.where))')
@@ -2110,29 +2245,29 @@ class Query < AbstractQuery
         args2 = args.dup
         extend_join(args2)  << :images_observations
         extend_where(args2) << "images_observations.observation_id IN (#{ids})"
-        model.connection.select_rows(query(args2))
+        model_class.connection.select_rows(query(args2))
       end
       return
     end
 
     case model_symbol
     when :Image
-      self.join << {:images_observations => {:observations => :users}}      if !user.blank?
-      self.join << {:images_observations => {:observations => :names}}      if !name.blank?
-      self.join << {:images_observations => {:observations => :locations!}} if !location.blank?
-      self.join << {:images_observations => :observations}                  if !content.blank?
+      add_join(:images_observations, :observations) unless [user, name, location, content].all?(&:blank?)
+      add_join(:observations, :users)      if !user.blank?
+      add_join(:observations, :names)      if !name.blank?
+      add_join(:observations, :locations!) if !location.blank?
     when :Location
-      self.join << {:observations => :users} if !user.blank?
-      self.join << {:observations => :names} if !name.blank?
-      self.join << :observations             if !content.blank?
+      add_join(:observations, :users) if !user.blank?
+      add_join(:observations, :names) if !name.blank?
+      add_join(:observations)         if !content.blank?
     when :Name
-      self.join << {:observations => :users}      if !user.blank?
-      self.join << {:observations => :locations!} if !location.blank?
-      self.join << :observations                  if !content.blank?
+      add_join(:observations, :users)      if !user.blank?
+      add_join(:observations, :locations!) if !location.blank?
+      add_join(:observations)              if !content.blank?
     when :Observation
-      self.join << :names      if !name.blank?
-      self.join << :users      if !user.blank?
-      self.join << :locations! if !location.blank?
+      add_join(:names)      if !name.blank?
+      add_join(:users)      if !user.blank?
+      add_join(:locations!) if !location.blank?
     end
 
     # Name of mushroom...
@@ -2178,19 +2313,19 @@ class Query < AbstractQuery
         args2 = args.dup
         extend_where(args2)
         args2[:where] += google_conditions(content, 'observations.notes')
-        results = model.connection.select_rows(query(args2))
+        results = model_class.connection.select_rows(query(args2))
 
         args2 = args.dup
         extend_join(args2) << case model_symbol
-        when :Image       ; {:images_observations => {:observations => :comments}}
-        when :Location    ; {:observations => :comments}
-        when :Name        ; {:observations => :comments}
+        when :Image       ; {images_observations: {observations: :comments}}
+        when :Location    ; {observations: :comments}
+        when :Name        ; {observations: :comments}
         when :Observation ; :comments
         end
         extend_where(args2)
         args2[:where] += google_conditions(content,
           'CONCAT(observations.notes,comments.summary,comments.comment)')
-        results |= model.connection.select_rows(query(args2))
+        results |= model_class.connection.select_rows(query(args2))
       end
     end
   end

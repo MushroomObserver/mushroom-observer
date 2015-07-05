@@ -70,14 +70,14 @@
         <td colspan="9" align="center">
           <%= if @user.votes_anonymous == :yes
                 link_with_query(:show_votes_go_public.t,
-                                { :action => 'show_observation',
-                                  :id => @naming.observation.id,
-                                  :go_public => '1' },
-                                { :confirm => :show_votes_go_public_confirm.l })
+                                {action: 'show_observation',
+                                 id: @naming.observation.id,
+                                 go_public: '1'},
+                        { data: { confirm: :show_votes_go_public_confirm.l }})
               else
-                link_to(:show_votes_go_private.t, { :action => 'show_observation',
-                                                    :id => @naming.observation.id, :go_private => '1' },
-                        { :confirm => :show_votes_go_private_confirm.l })
+                link_to(:show_votes_go_private.t, {action: 'show_observation',
+                                                   id: @naming.observation.id, go_private: '1'},
+                        { data: { confirm: :show_votes_go_private_confirm.l }})
               end %>
         </td>
       </tr>
@@ -87,6 +87,6 @@
 
 <% if do_cancel %>
     <div class="center-text">
-      <%= button_tag(:CLOSE.t, {:type => "button", :class => "close_votes_popup", data: {:role => "close_popup"}}) %>
+      <%= button_tag(:CLOSE.t, {type: "button", class: "btn close_votes_popup", data: {role: "close_popup"}}) %>
     </div>
 <% end %>

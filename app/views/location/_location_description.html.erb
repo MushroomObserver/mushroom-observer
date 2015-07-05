@@ -7,7 +7,7 @@ any = false
 desc = location_description
 for f in LocationDescription.all_note_fields
   value = desc.send(f).to_s
-  if value != ''
+  if value != ""
     even = !even
     any = true %>
     <%= "form_locations_#{f}".to_sym.t %>:
@@ -20,6 +20,6 @@ for f in LocationDescription.all_note_fields
 <center>
   <%= show_authors_and_editors(desc) %>
   <% if desc.license %>
-    <%= render(:partial => "shared/form_#{desc.license.form_name}") %>
+    <%= render(partial: "shared/form_#{desc.license.form_name}") %>
   <% end %>
 </center>

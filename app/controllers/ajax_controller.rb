@@ -48,7 +48,7 @@ class AjaxController < ApplicationController
   end
 
   def get_session_user!
-    get_session_user or raise "Must be logged in."
+    User.current = get_session_user or raise "Must be logged in."
   end
 
   # Used by unit tests.
@@ -216,24 +216,21 @@ class AjaxController < ApplicationController
       raise "Invalid id for vote/naming: #{id.inspect}"
     else
       @naming.change_vote(value, @user)
-      Transaction.put_naming(:id => @naming, :user => @user, :set_vote => value)
       render(:text => '')
     end
   end
 
   def cast_image_vote(id, value)
-    @image = Image.safe_find(id)
+    image = Image.safe_find(id)
     if value != '0' and not Image.validate_vote(value)
       raise "Invalid value for vote/image: #{value.inspect}"
-    elsif not @image
+    elsif not image
       raise "Invalid id for vote/image: #{id.inspect}"
     else
       value = value == '0' ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == :yes)
-      @image.change_vote(@user, value, anon)
-      Transaction.put_image(:id => @image, :user => @user,
-                            :set_vote => value, :set_anonymous => anon)
-      render(:inline => '<%= image_vote_tabs(@image) %>')
+      image.change_vote(@user, value, anon)
+      render(partial: "image/image_vote_links", locals: {image: image})
     end
   end
 
@@ -242,10 +239,7 @@ class AjaxController < ApplicationController
   def get_multi_image_template
     @user = get_session_user!
     @licenses = License.current_names_and_ids(@user.license) #Needed to render licenses drop down
-    @image = Image.new(
-      :user => @user,
-      :when => Time.now
-    );
+    @image = Image.new(:user => @user, :when => Time.now)
     render(:partial => '/observer/form_multi_image_template')
   end
 
@@ -258,18 +252,19 @@ class AjaxController < ApplicationController
     original_name = @image[:original_name].to_s
     original_name = "" if user && user.keep_filenames == :toss
 
-    img_when = Date.new(@image[:when][('1i')].to_i, @image[:when][('2i')].to_i, @image[:when][('3i')].to_i);
+    img_when = Date.new(@image[:when][("1i")].to_i, @image[:when][("2i")].to_i,
+                        @image[:when][("3i")].to_i)
     ##TODO: handle invalid date
     image = Image.new(
-      :created_at => Time.now,
-      :user       => user,
-      :when       => img_when,
-      :license_id    => @image[:license].to_i,
-      :notes      => @image[:notes],
-      :copyright_holder => @image[:copyright_holder],
-      :original_name => original_name
+      created_at: Time.now,
+      user: user,
+      when: img_when,
+      license_id: @image[:license].to_i,
+      notes: @image[:notes],
+      copyright_holder: @image[:copyright_holder],
+      original_name: original_name,
+      image: @image[:upload]
     )
-    image.image = @image[:upload]
 
     if !image.save || !image.process_image
       msg = :runtime_no_upload_image.t(:name => (original_name ? "'#{original_name}'" : "##{image.id}"))
@@ -277,14 +272,6 @@ class AjaxController < ApplicationController
       logger.error("UPLOAD_FAILED: #{errors.inspect}")
       render(text: errors.join("\n").strip_html, status: 500, layout: false)
     else
-      Transaction.post_image(
-        :id               => image,
-        :date             => image.when,
-        :notes            => image.notes.to_s,
-        :copyright_holder => image.copyright_holder,
-        :original_name    => original_name,
-        :license          => image.license || 0
-      )
       name = original_name
       name = "##{image.id}" if name.empty?
       flash_notice(:runtime_image_uploaded.t(:name => name))

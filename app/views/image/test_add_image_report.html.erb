@@ -1,61 +1,38 @@
 <%
-  @title = 'Test Add Image Report'
+  @title = "Test Add Image Report"
 
-  new_tab_set do
-    add_tab('Test Again', :action => 'test_add_image')
-  end
+  tabs = [
+    link_to("Test Again", action: :test_add_image)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<table cellpadding="5" cellspacing="5" border=1>
-  <tr class="Data">
-    <td>
-      Id
-    </td>
-    <td>
-      User
-    </td>
-    <td>
-      Start
-    </td>
-    <td>
-      End
-    </td>
-    <td>
-      Elapsed
-    </td>
-    <td>
-      Count
-    </td>
-    <td>
-      Bytes
-    </td>
-  </tr>
-
-  <% for entry in @log_entries %>
+<table class="table-striped table-upload-report">
+  <thead>
     <tr>
-      <td>
-        <%= entry.id %>
-      </td>
-      <td>
-        <%= entry.user ? entry.user.login : '' %>
-      </td>
-      <td>
-        <%= entry.created_at.web_time %>
-      </td>
-      <td>
-        <%= entry.upload_end.web_time %>
-      </td>
-      <td>
-        <% if entry.created_at and entry.upload_end %>
-          <%= entry.upload_end - entry.created_at %>
-        <% end %>
-      </td>
-      <td>
-        <%= entry.image_count %>
-      </td>
-      <td>
-        <%= entry.image_bytes %>
-      </td>
+      <th>Id</th>
+      <th>User</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Elapsed</th>
+      <th>Count</th>
+      <th>Bytes</th>
     </tr>
-  <% end %>
+  </thead>
+
+  <tbody>
+    <% for entry in @log_entries %>
+      <tr>
+        <td><%= entry.id %></td>
+        <td><%= entry.user ? entry.user.login : "" %></td>
+        <td><%= entry.created_at.web_time %></td>
+        <td><%= entry.upload_end.web_time %></td>
+        <td><%= if entry.created_at && entry.upload_end
+          entry.upload_end - entry.created_at
+        end %></td>
+        <td><%= entry.image_count %></td>
+        <td><%= entry.image_bytes %></td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>

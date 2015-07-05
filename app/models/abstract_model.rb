@@ -5,21 +5,25 @@
 #  == Methods
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
+#  enum_default_value   Default value (as a Symbol) of an enum attribute
+#                       Ex: User.enum_default_value(:image_size) => :medium
 #
 #  ==== Extensions to "find"
-#  find::               Extend <tt>find(id)</tt> to look up by id _or_ sync_id.
-#  safe_find::          Same as <tt>find(id)</tt> except returns nil if not found.
+#  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
 #                       Add limit to a SQL query, then pass it to find_by_sql.
 #  count_by_sql_wrapping_select_query::
-#                       Wrap a normal SQL query in a count query, then pass it to count_by_sql.
-#  revert_clone::       Clone and revert to old version (or return nil if version not found).
+#                       Wrap a normal SQL query in a count query,
+#                       then pass it to count_by_sql.
+#  revert_clone::       Clone and revert to old version
+#                       (or return nil if version not found).
 #
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
 #  show_action::        Page used to display this object.
 #  show_url::           "Official" URL for this database object.
+#  show_link_args::     "Official" link_to args for this database object.
 #  index_action::       Page used to display index of these objects.
 #
 #  ==== Callbacks
@@ -28,12 +32,12 @@
 #  before_update::      Do several things before commiting changes.
 #  before_destroy::     Do some cleanup just before destroying an object.
 #  id_was::             Returns what the id was from before destroy.
-#  set_sync_id::        Fills in +sync_id+ after id is established.
 #  update_view_stats::  Updates the +num_views+ and +last_view+ fields.
 #  update_user_before_save_version::
 #                       Callback to update 'user' when versioned record changes.
 #  save_without_our_callbacks::
-#                       Post changes _without_ doing the +before_update+ callback above.
+#                       Post changes _without_ doing
+#                       the +before_update+ callback above.
 #
 #  ==== Error handling
 #  dump_errors::        Returns errors in one big printable string.
@@ -73,6 +77,16 @@ class AbstractModel < ActiveRecord::Base
     self.class.name.underscore.to_sym
   end
 
+  # Default value (as a symbol) for an enum attribute
+  def self.enum_default_value(attr)
+    send(attr.to_s.pluralize).hash.key(default_cardinal(attr)).to_sym
+  end
+
+  # number (or nil) that is the default value for attr
+  def self.default_cardinal(attr)
+    self.column_defaults[attr.to_s]
+  end
+
   ##############################################################################
   #
   #  :section: "Find" Extensions
@@ -85,33 +99,13 @@ class AbstractModel < ActiveRecord::Base
     return self if self.version == version
     result = self.class.find(id)
     result = nil if not result.revert_to(version)
-    return result
-  end
-
-  # Extend AR.find(id) to accept either local id (integer or all-numeric
-  # string) or global sync_id (alphanumeric string).  All else gets delegated
-  # to the usual ActiveRecord::Base#find.
-  #
-  #   name = Name.find(1234)        # local id is 1234
-  #   name = Name.find('1234us1')   # gloabl id is '1234us1'
-  #
-  def self.find(*args)
-    if args.length == 1 &&
-       (id = args.first) &&
-       id.is_a?(String) &&
-       id.match(/^\d+[a-z]+\d+$/) &&
-       respond_to?(:find_by_sync_id)
-      find_by_sync_id(id) or raise ActiveRecord::RecordNotFound,
-                                   "Couldn't find #{name} with sync_id=#{id}"
-    else
-      super
-    end
+    result
   end
 
   # Look up record with given ID, returning nil if it no longer exists.
-  def self.safe_find(id, *args)
+  def self.safe_find(id)
     begin
-      self.find(id, *args)
+      self.find(id)
     rescue ActiveRecord::RecordNotFound
       nil
     end
@@ -134,7 +128,7 @@ class AbstractModel < ActiveRecord::Base
   #
   def self.find_by_sql_with_limit(sql, offset, limit)
     sql = sanitize_sql(sql)
-    add_limit!(sql, {:limit => limit, :offset => offset})
+    add_limit!(sql, {limit: limit, offset: offset})
     find_by_sql(sql)
   end
 
@@ -189,19 +183,16 @@ class AbstractModel < ActiveRecord::Base
     # self.created_at ||= Time.now        if respond_to?('created_at=')
     # self.updated_at ||= Time.now        if respond_to?('updated_at=')
     self.user_id  ||= User.current_id if respond_to?('user_id=')
-    autolog_created_at                   if has_rss_log?
+    autolog_created_at                if has_rss_log?
   end
 
   # This is called just after an object is created.
   # 1) It passes off to SiteData, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
-  # 2) It also assigns sync_ids to new records.  (I can't see how to avoid
-  #    causing each record to get saved twice.)
-  # 3) Lastly, it finishes attaching the new RssLog if one exists.
+  # 2) It finishes attaching the new RssLog if one exists.
   after_create :update_contribution
   def update_contribution
     SiteData.update_contribution(:add, self)
-    set_sync_id    if respond_to?('sync_id=') && !sync_id
     attach_rss_log if has_rss_log?
   end
 
@@ -218,7 +209,7 @@ class AbstractModel < ActiveRecord::Base
     # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
     if !@save_without_our_callbacks
-      autolog_updated_at          if has_rss_log?
+      autolog_updated_at if has_rss_log?
     end
   end
 
@@ -260,17 +251,6 @@ class AbstractModel < ActiveRecord::Base
   # Return id from before destroy.
   def id_was; @id_was; end
 
-  # Set the sync id after an id is established.  Use low-level call to void
-  # any possible confusion and/or overhead dealing with callbacks.  It would
-  # be super-cool if mysql gave us a way to make this the default value...
-  def set_sync_id
-    self.sync_id = sync_id = "#{id}#{MO.server_code}"
-    self.class.connection.update %(
-      UPDATE #{self.class.table_name} SET sync_id = '#{sync_id}'
-      WHERE id = #{id}
-    )
-  end
-
   # Handy callback a model may choose to use that updates 'user_id' whenever a
   # versioned record changes non-trivially.
   #
@@ -294,8 +274,7 @@ class AbstractModel < ActiveRecord::Base
   # any RssLog, because it uses +save_without_our_callbacks+.
   #
   def update_view_stats
-    if respond_to?('num_views=') ||
-       respond_to?('last_view=')
+    if respond_to?('num_views=') || respond_to?('last_view=')
       self.class.record_timestamps = false
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
@@ -338,7 +317,7 @@ class AbstractModel < ActiveRecord::Base
         out << "#{obj} #{name} #{msg}."
       end
     end
-    return out
+    out
   end
 
   ##############################################################################
@@ -350,76 +329,71 @@ class AbstractModel < ActiveRecord::Base
   # Return the name of the controller (as a simple lowercase string)
   # that handles the "show_<object>" action for this object.
   #
-  #   User.show_controller => 'observer'
-  #   Name.show_controller => 'name'
+  #   Name.show_controller => "name"
+  #   name.show_controller => "name"
   #
-  # TODO: Make this a model method!  Also it's not clear why the default is an error rather than name.underscore.
+  # TODO: Make this a model method!  Also it"s not clear why the default
+  # is an error rather than name.underscore.
   def self.show_controller; name.underscore; end
-
-  # Return the name of the controller (as a simple lowercase string)
-  # that handles the "show_<object>" action for this object.
-  #
-  #   user.show_controller => 'observer'
-  #   name.show_controller => 'name'
-  #
   def show_controller; self.class.show_controller; end
 
   # Return the name of the "index_<object>" action (as a simple
   # lowercase string) that displays search index for this object.
   #
-  #   User.index_action => 'index_user'
-  #   Name.index_action => 'index_name'
+  #   Name.index_action => "index_name"
+  #   name.index_action => "index_name"
   #
-  def self.index_action; 'index_' + name.underscore; end
-
-  # Return the name of the "index_<object>" action (as a simple
-  # lowercase string) that displays this object.
-  #
-  #   user.index_action => 'index_user'
-  #   name.index_action => 'index_name'
-  #
+  def self.index_action; "index_" + name.underscore; end
   def index_action; self.class.index_action; end
 
   # Return the name of the "show_<object>" action (as a simple
   # lowercase string) that displays this object.
   #
-  #   User.show_action => 'show_user'
-  #   Name.show_action => 'show_name'
+  #   Name.show_action => "show_name"
+  #   name.show_action => "show_name"
   #
-  def self.show_action; 'show_' + name.underscore; end
-
-  # Return the name of the "show_<object>" action (as a simple
-  # lowercase string) that displays this object.
-  #
-  #   user.show_action => 'show_user'
-  #   name.show_action => 'show_name'
-  #
+  def self.show_action; "show_" + name.underscore; end
   def show_action; self.class.show_action; end
 
-  def self.edit_action; 'edit_' + name.underscore; end
+  # Return the name of the "edit_<object>" action (as a simple
+  # lowercase string) that displays this object.
+  #
+  #   Name.edit_action => "edit_name"
+  #   name.edit_action => "edit_name"
+  #
+  def self.edit_action; "edit_" + name.underscore; end
   def edit_action; self.class.edit_action; end
 
   # Return the URL of the "show_<object>" action
   #
-  #   User.show_action(123) => 'http://mushroomobserver.org/observer/show_user/123'
-  #   Name.show_action(123) => 'http://mushroomobserver.org/name/show_name/123'
+  #   Name.show_url(12) => "http://mushroomobserver.org/name/show_name/12"
+  #   name.show_url     => "http://mushroomobserver.org/name/show_name/12"
   #
-  def self.show_url(id); "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"; end
-
-  # Return the URL of the "show_<object>" action
-  #
-  #   user.show_action => 'http://mushroomobserver.org/observer/show_user/123'
-  #   name.show_action => 'http://mushroomobserver.org/name/show_name/123'
-  #
+  def self.show_url(id)
+    "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
+  end
   def show_url; self.class.show_url(id); end
 
-  def self.eol_predicate; ":eol#{name}"; end
-  def eol_predicate; self.class.eol_predicate; end
+  # Return the link_to args of the "show_<object>" action
+  #
+  #   Name.show_link_args(12) => {controller: :name, action: :show_name, id: 12}
+  #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
+  #
+  def self.show_link_args(id)
+    {controller: show_controller, action: show_action, id: id}
+  end
+  def show_link_args; self.class.show_link_args(id); end
 
+  # Return the URL for the EOL resource corresponding to this object.
+  #
+  #   name.eol_url => "http://eol.org/blah/blah/blah"
+  #
   def eol_url
     triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
     triple.object if triple
   end
+  def self.eol_predicate; ":eol#{name}"; end
+  def eol_predicate; self.class.eol_predicate; end
 
   ##############################################################################
   #
@@ -548,13 +522,12 @@ class AbstractModel < ActiveRecord::Base
     end
     # We need to return it in case we created an orphaned log, otherwise
     # the caller won't have access to it!
-    return result
+    result
   end
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log
-    if rss_log and
-       rss_log.send("#{self.type_tag}_id") != id
+    if rss_log && (rss_log.send("#{self.type_tag}_id") != id)
       rss_log.send("#{self.type_tag}_id=", id)
       rss_log.save
     end
@@ -574,10 +547,10 @@ class AbstractModel < ActiveRecord::Base
     self.add_image(image)
     self.log_reuse_image(image)
     {
-      :controller => self.show_controller,
-      :action => self.show_action,
-      :id => self.id,
-      :q => query_params[:q]
+        controller: self.show_controller,
+        action: self.show_action,
+        id: self.id,
+        q: query_params[:q]
     }
   end
 
@@ -591,5 +564,4 @@ private
     name = "#{:Image.t} ##{image.id || image.was || '??'}"
     log(tag, :name => name, :touch => touch)
   end
-
 end

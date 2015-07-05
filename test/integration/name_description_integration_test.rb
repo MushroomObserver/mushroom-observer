@@ -11,18 +11,18 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by_text_name('Strobilurus diminutivus')
     assert_equal([], @name.descriptions)
     @description_data = {
-      :source_type => :public,
-      :source_name => nil,
-      :readable => true,
-      :writable => true,
-      :notes => 'I like this mushroom.'
+        source_type: :public,
+        source_name: nil,
+        readable: true,
+        writable: true,
+        notes: 'I like this mushroom.'
     }
     @group_expectations = {
-      :admins  => [UserGroup.reviewers],
-      :writers => [UserGroup.all_users],
-      :readers => [UserGroup.all_users],
-      :authors => [],
-      :editors => [mary]
+        admins: [UserGroup.reviewers],
+        writers: [UserGroup.all_users],
+        readers: [UserGroup.all_users],
+        authors: [],
+        editors: [mary]
     }
 
     admin = open_admin_session(dick)
@@ -58,20 +58,20 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     @name = Name.find_by_text_name('Peltigera')
     assert_equal(4, @name.descriptions.length)
     @description_data = {
-      :source_type => :user,
-      :source_name => "Mary's Corner",
-      :readable => true,
-      :writable => false,
-      :gen_desc => 'Leafy felt lichens.',
-      :diag_desc => 'Usually with veins and tomentum below.',
-      :look_alikes => '_Solorina_ maybe, but not much else.'
+        source_type: :user,
+        source_name: "Mary's Corner",
+        readable: true,
+        writable: false,
+        gen_desc: 'Leafy felt lichens.',
+        diag_desc: 'Usually with veins and tomentum below.',
+        look_alikes: '_Solorina_ maybe, but not much else.'
     }
     @group_expectations = {
-      :admins  => [UserGroup.one_user(mary)],
-      :writers => [UserGroup.one_user(mary)],
-      :readers => [UserGroup.all_users],
-      :authors => [mary],
-      :editors => []
+        admins: [UserGroup.one_user(mary)],
+        writers: [UserGroup.one_user(mary)],
+        readers: [UserGroup.all_users],
+        authors: [mary],
+        editors: []
     }
 
     admin = open_admin_session(dick)

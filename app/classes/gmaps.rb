@@ -182,14 +182,20 @@ module GM
       width = height = nil
       for key, val in args
         if key == :width
-          width = val.to_i
+          width = val
         elsif key == :height
-          height = val.to_i
+          height = val
         else
           raise "Unexpected option \"#{key}\" for GMap#div."
         end
       end
-      "<div id='#{name}' style='width:#{width}px;height:#{height}px'></div>"
+      if (height.is_a?(Fixnum))
+          height = height.to_s + "px";
+      end
+      if (width.is_a?(Fixnum))
+        width = width.to_s + "px";
+      end
+      "<div id='#{name}' style='width:#{width};height:#{height}'></div>"
     end
 
     def to_html(args)

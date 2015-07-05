@@ -2,12 +2,10 @@
 
 <%= form_tag(add_query_param(:action => 'author_request', :id => @object.id,
       :type => @object.type_tag)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center><br/>
+  <br/><center><%= submit_tag(:SEND.l, class: "btn") %></center><br/>
 
   <label for="email_subject"><%= :request_subject.t %></label>:<br/>
-  <%= text_field('email', 'subject', :size => 70) %><br/><br/>
+  <%= text_field(:email, :subject, size: 70, autofocus: true) %><br/><br/>
   <label for="email_content"><%= :request_message.t %></label>:<br/>
   <%= text_area('email', 'content', :cols => 80) %>
-
-  <%= focus_on('email_subject') %>
 <% end %>

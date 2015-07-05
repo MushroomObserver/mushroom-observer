@@ -1,52 +1,53 @@
-<div class='show_images'>
-  <% if @observation.images.length > 0 %>
-    <%= :IMAGES.t %>:
-    <%= if thumb_size_control and not browser.bot?
-      if default_thumbnail_size == :thumbnail
-        link_with_query(:show_images_large_thumbs.t, :id => @observation.id,
-          :set_thumbnail_size => 'small')
-      else
-        link_with_query(:show_images_small_thumbs.t, :id => @observation.id,
-          :set_thumbnail_size => 'thumbnail')
-      end + safe_br
-    end %>
+<div class='show_images list-group'>
+<div class="list-group-item">
+  <div class="row">
+    <div class="col-xs-12">
+      <%= :IMAGES.t %>
+    <% if check_permission(@observation) %>
+      <small class="pull-right">
+        <%= link_with_query(:show_observation_add_images.t, :controller => 'image',
+                            :action => 'add_image', :id => @observation.id) %> |
+        <%= link_with_query(:show_observation_reuse_image.t,
+                            :controller => 'image', :action => 'reuse_image',
+                            :obs_id => @observation.id, :mode => 'observation') %>
+        <% if @observation.images.length > 0 %>
+            | <%= link_with_query(:show_observation_remove_images.t,
+                                :controller => 'image', :action => 'remove_images',
+                                :id => @observation.id) %>
+        <% end %>
+      </small>
   <% end %>
+    </div>
+  </div>
+</div>
 
-  <% if check_permission(@observation) %>
-    <%= link_with_query(:show_observation_add_images.t, :controller => 'image',
-          :action => 'add_image', :id => @observation.id) %><br/>
-    <%= link_with_query(:show_observation_reuse_image.t,
-          :controller => 'image', :action => 'reuse_image',
-          :obs_id => @observation.id, :mode => 'observation') %><br/>
-    <% if @observation.images.length > 0 %>
-      <%= link_with_query(:show_observation_remove_images.t,
-            :controller => 'image', :action => 'remove_images',
-            :id => @observation.id) %><br/>
-    <% end %>
-  <% end %>
-
-  <center>
     <%
     # This sort puts the thumbnail first.  We can't use thumb_image, because we
     # haven't eager-loaded it; we *have* eager-loaded all the other images.
     for image in @observation.images.
              sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
-      <p>
-        <%= thumbnail(image, :border => 0, :obs => @observation.id, :votes => true, :original => true) %>
+      <div class="list-group-item">
+        <%= thumbnail(image, :link => {controller: image.show_controller,
+                                       action: image.show_action,
+                                       id: image.id,
+                                       obs: @observation.id},
+                      :votes => true,
+                      :original => true,
+                      :responsive => true) %>
         <% notes = []
           if image.copyright_holder != @observation.user.legal_name
-            notes << image_copyright(image, false)
+            notes << image_copyright(image)
           end
           if !image.notes.blank?
             notes << image.notes.tl.truncate_html(300)
           end
           notes = notes.safe_join(safe_br)
           if !notes.blank? %>
-          <small>
+
             <%= content_tag(:span, notes, :title => notes.html_to_ascii) %>
-          </small>
+
         <% end %>
-      </p>
+      </div>
     <% end %>
-  </center>
+
 </div>

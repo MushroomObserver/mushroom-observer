@@ -40,13 +40,13 @@ var NL_SPECIES_CUR = [];
 // Mouse moves over an item.
 function na(s, i) {
   if (NL_CURSOR[s] != i)
-    jQuery("#" + s + i).css("background", "#FF8");
+    jQuery("#" + s + i).addClass("hot");
 }
 
 // Mouse moves off of an item.
 function nb(s, i) {
   if (NL_CURSOR[s] != i)
-    jQuery("#" + s + i).css("background", "#FFF");
+    jQuery("#" + s + i).removeClass("hot warm");
 }
 
 // Click on item.
@@ -272,7 +272,7 @@ function nl_move_cursor(s, new_pos) {
   var old_pos = NL_CURSOR[s];
   NL_CURSOR[s] = new_pos;
   if (old_pos != null)
-    jQuery("#" + s + old_pos).css("background", "#FFF");
+    jQuery("#" + s + old_pos).removeClass("hot warm");
   nl_draw_cursors();
   nl_warp(s);
 }
@@ -293,7 +293,7 @@ function nl_draw_cursor(s, list) {
   if (list.length > 0 && i != null) {
     if (i < 0)            NL_CURSOR[s] = i = 0;
     if (i >= list.length) NL_CURSOR[s] = i = list.length - 1;
-    jQuery("#" + s + i).css("background", (NL_FOCUS == s) ? "#F88" : "#FF8");
+    jQuery("#" + s + i).removeClass("hot warm").addClass(NL_FOCUS == s ? "warm" : "hot");
   } else {
     NL_CURSOR[s] = null;
   }

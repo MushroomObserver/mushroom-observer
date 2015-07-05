@@ -73,11 +73,11 @@ def extract_actions(file)
         name  = $1
         notes = $2
         action = {
-          :controller => controller,
-          :section => section,
-          :name    => name,
-          :comment => comment,
-          :notes   => (hash = {}),
+            controller: controller,
+            section: section,
+            name: name,
+            comment: comment,
+            notes: (hash = {}),
         }
         for pragma in globals
           hash[pragma.to_sym] = true

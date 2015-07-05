@@ -161,8 +161,8 @@ class Description < AbstractModel
     tag = :"description_#{full_or_part}_title_#{source_type}"
     user_name = user.legal_name rescue '?'
     args = {
-      :text => source_name,
-      :user => user_name,
+        text: source_name,
+        user: user_name,
     }
     if full_or_part == :full
       args[:object] = parent.format_name

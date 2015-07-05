@@ -1,68 +1,57 @@
 <%
-  new_tab_set(:sort_by_header.t, @sorts)
-  new_tab_set do
-    add_tab_with_query(:list_place_names_map.t, :action => :map_locations)
-    add_tab(:list_countries.t, :action => :list_countries)
-    add_tab_with_query(:show_location_create.t, :action => 'create_location')
-    add_tabs(@links)
-  end
+  tabs = [
+    link_with_query(:show_location_create.t, action: :create_location),
+    link_with_query(:list_place_names_map.t, action: :map_locations),
+    link_to(:list_countries.t, action: :list_countries)
+  ]
+  tabs += @links.map {|str,url| link_to(str, url)} if @links
+  @tabsets = { right: draw_tab_set(tabs) }
 
   @known_pages = @pages
-  @known_data = @objects
+  @known_data  = @objects
 
-  if (!@known_pages or @known_pages.empty?) and
-     (!@undef_pages or @undef_pages.empty?)
-    flash_error(@error) if @error
-  end
+  flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
-<table cellpadding="5" cellspacing="0" width="100%">
-  <tr valign="top">
-
-    <td>
-      <% if @undef_pages && @undef_pages.num_total > 0 %>
-        <div class="SubTitle"><%= :list_place_names_known.t %>
-          <%= :list_place_names_known_order.t if @default_orders %></div>
-      <% end %>
+<div class="row push-down">
+  <div class="col-md-7">
+    <% if @known_pages.any? && @known_data.any? %>
+      <div class="h4">
+        <%= :list_place_names_known.t %>
+        <%= :list_place_names_known_order.t if @default_orders %>
+      </div>
       <%= paginate_block(@known_pages) do %>
-        <table cellpadding="5" cellspacing="0" width="100%">          
-          <% odd_or_even = 0
-          for location in @known_data
-            odd_or_even = 1 - odd_or_even %>
-            <tr valign="top" class="ListLine<%= odd_or_even %>">
-              <td width="100%">
-                <%= link_with_query(location.display_name.t,
-                      :action => 'show_location', :id => location.id) %>
-              </td>
-            </tr>
+        <div class="list-group">
+          <% for location in @known_data %>
+            <div class="list-group-item">
+              <%= link_with_query(location.display_name.t, location.show_link_args) %>
+            </div>
           <% end %>
-        </table>
+        </div>
       <% end %>
-    </td>
-
-    <% if @undef_data && @undef_pages && @undef_pages.num_total > 0 %>
-      <td>
-        <div class="SubTitle"><%= :list_place_names_undef.t %>
-          <%= :list_place_names_undef_order.t if @default_orders %></div>
-        <%= paginate_block(@undef_pages) do %>
-          <table cellpadding="5" cellspacing="0" width="100%">          
-            <% odd_or_even = 0
-            for loc, cnt in @undef_data
-              loc = Location.reverse_name(loc) if @undef_location_format == :scientific
-              odd_or_even = 1 - odd_or_even %>
-              <tr valign="top" class="ListLine<%= odd_or_even %>">
-                <td width="100%">
-                <%= location_link(loc, nil, cnt) %>
-                <%= link_to(:list_place_names_merge.t,
-                            :action => 'list_merge_options',
-                            :where => loc) %>
-                </td>
-              </tr>
-            <% end %>
-          </table>
-        <% end %>
-      </td>
     <% end %>
+  </div>
 
-  </tr>
-</table>
+  <div class="col-md-5">
+    <% if @undef_pages.any? && @undef_data.any? %>
+      <div class="h4">
+        <%= :list_place_names_undef.t %>
+        <%= :list_place_names_undef_order.t if @default_orders %>
+      </div>
+      <%= paginate_block(@undef_pages) do %>
+        <div class="list-group">
+          <% for location, count in @undef_data
+            if @undef_location_format == :scientific
+              location = Location.reverse_name(location)
+            end %>
+            <div class="list-group-item">
+              <%= location_link(location, nil, count) %>
+              <%= link_to(:list_place_names_merge.t,
+                          action: :list_merge_options, where: location) %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -47,7 +47,7 @@ class SiteData
   #  authored, etc.  These categories are described by a set of constants:
   #
   #  ALL_FIELDS::       List of category names, in order.
-  #  FIELD_WEIGHTS::    Weight of each category, i.e. number of points for each record.
+  #  FIELD_WEIGHTS::    Weight of each category: number of points per record.
   #  FIELD_TABLES::     Table to query.
   #  FIELD_CONDITIONS:: Additional conditions.
   #
@@ -90,49 +90,49 @@ class SiteData
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
-    :comments                      => 1,
-    :images                        => 10,
-    :location_descriptions_authors => 50,
-    :location_descriptions_editors => 5,
-    :locations                     => 10,
-    :locations_versions            => 5,
-    :name_descriptions_authors     => 100,
-    :name_descriptions_editors     => 10,
-    :names                         => 10,
-    :names_versions                => 10,
-    :namings                       => 1,
-    :observations                  => 1,
-#     :observations_with_voucher     => 10,
-#     :observations_without_voucher  => 1,
-    :species_list_entries          => 1,
-    :species_lists                 => 5,
-    :users                         => 0,
-    :votes                         => 1,
+    comments:                      1,
+    images:                        10,
+    location_descriptions_authors: 50,
+    location_descriptions_editors: 5,
+    locations:                     10,
+    locations_versions:            5,
+    name_descriptions_authors:     100,
+    name_descriptions_editors:     10,
+    names:                         10,
+    names_versions:                10,
+    namings:                       1,
+    observations:                  1,
+#     observations_with_voucher:     10,
+#     observations_without_voucher:  1,
+    species_list_entries:          1,
+    species_lists:                 5,
+    users:                         0,
+    votes:                         1
   }
 
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
   FIELD_TABLES = {
-    :observations_with_voucher => 'observations',
-    :observations_without_voucher => 'observations',
-    :species_list_entries => 'observations_species_lists',
+    observations_with_voucher: 'observations',
+    observations_without_voucher: 'observations',
+    species_list_entries: 'observations_species_lists'
   }
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    :observations_with_voucher => 'specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL',
-    :observations_without_voucher => 'NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )',
-    :users => '`verified` IS NOT NULL',
+    observations_with_voucher: 'specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL',
+    observations_without_voucher: 'NOT( specimen IS TRUE AND LENGTH(notes) >= 10 AND thumb_image_id IS NOT NULL )',
+    users: '`verified` IS NOT NULL',
   }
 
   # Call these procs to determine if a given object qualifies for a given field.
   FIELD_STATE_PROCS = {
-    :observations_with_voucher => lambda do |obs|
-      obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0
-    end,
-    :observations_without_voucher => lambda do |obs|
-      not( obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0 )
-    end,
+      observations_with_voucher: lambda do |obs|
+        obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0
+      end,
+      observations_without_voucher: lambda do |obs|
+        not (obs.specimen and obs.notes.to_s.length >= 10 and obs.thumb_image_id.to_i > 0)
+      end,
   }
 
   # -----------------------------
@@ -171,25 +171,6 @@ class SiteData
           WHERE id = #{user_id}
         )
       end
-    end
-
-    # Debugging information: show transaction log of all objects created and
-    # destroyed, plus all editors/authors added and removed.
-    if false
-      desc = field.inspect
-      if obj.is_a?(ActiveRecord::Base)
-        desc += " #{obj.type_tag}"
-        desc += " (new)"              if obj.new_record?
-        desc += " ##{obj.id}"         if obj.id
-        desc += " (#{obj.text_name})" if obj.respond_to?(:text_name)
-      end
-      action = ''
-      if weight && weight > 0 && user_id
-        user = User.safe_find(user_id)
-        action += " --> #{user.login} = #{user.contribution}"
-      end
-      puts ">>>> #{mode} #{weight.inspect} #{desc} #{action}"
-      puts obj.args.inspect if obj.is_a?(Transaction)
     end
   end
 
@@ -270,10 +251,10 @@ private
   # Calculate score for a set of results:
   #
   #   score = calc_metric(
-  #     :images        => 10,
-  #     :observations  => 10,
-  #     :comments      => 23,
-  #     :species_lists => 1,
+  #     images:        10,
+  #     observations:  10,
+  #     comments:      23,
+  #     species_lists: 1,
   #     ...
   #   )
   #
@@ -405,9 +386,9 @@ private
     @user_data = {}
     for user in users
       @user_data[user.id] = {
-        :id      => user.id,
-        :name    => user.unique_text_name,
-        :bonuses => user.sum_bonuses,
+        id:      user.id,
+        name:    user.unique_text_name,
+        bonuses: user.sum_bonuses,
       }
       add_language_contributions(user)
     end

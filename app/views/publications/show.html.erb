@@ -1,43 +1,54 @@
 <%
   @title = :show_publication_title.l
-  new_tab_set do
-    add_tab(:create_publication.t, new_publication_path)
-    add_tab(:publication_index.t, publications_path)
-    if is_in_admin_mode? || @publication.can_edit?(@user)
-      add_tab(:EDIT.t, edit_publication_path(@publication))
-      add_tab(:DESTROY.t, { :action => :destroy, :id => @publication.id },
-                          { :confirm => "aren't we cool?" + :are_you_sure.t })
-    end
+
+  tabs = [
+    link_to(:create_publication.t, new_publication_path),
+    link_to(:publication_index.t, publications_path)
+  ]
+  if is_in_admin_mode? || @publication.can_edit?(@user)
+    tabs += [
+      link_to(:EDIT.t, edit_publication_path(@publication)),
+      link_to(:DESTROY.t, {action: :destroy, id: @publication.id},
+                          {data: {confirm: :are_you_sure.t}})
+    ]
   end
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<p>
-  <b><%= :publication_full.t %>:</b><br />
-  <%= @publication.full.t %>
-</p>
-
-<% unless @publication.link.blank? %>
+<div class="max-width-text">
   <p>
-    <b><%= :publication_link.t %>:</b>
-    <%= link_to @publication.link, @publication.link %>
+    <b><%= :publication_full.t %>:</b><br/>
+    <%= @publication.full.t.strip_links.html_safe %>
   </p>
-<% end %>
 
-<p>
-  <% if @publication.peer_reviewed %>
-    <%= :publication_peer_reviewed.t %><br />
+  <% unless @publication.link.blank? %>
+    <p style="word-break:break-all">
+      <b><%= :publication_link.t %>:</b><br/>
+      <%= link_to(@publication.link, @publication.link) %>
+    </p>
   <% end %>
 
-  <% if @publication.mo_mentioned %>
-    <%= :publication_mo_mentioned.t %>
-  <% end %>
-</p>
+  <p>
+    <% if @publication.peer_reviewed %>
+      <b><%= :publication_peer_reviewed.t %></b><br/>
+    <% end %>
 
-<p>
-  <b><%= :publication_how_helped.t %></b><br />
-  <%= @publication.how_helped.t %>
-</p>
+    <% if @publication.mo_mentioned %>
+      <b><%= :publication_mo_mentioned.t %></b>
+    <% end %>
+  </p>
 
-<p>
-  <%= :show_publication_added_by.t + ' ' + user_link(@publication.user) %>
-</p>
+  <p>
+    <b><%= :publication_how_helped.t %></b><br/>
+    <%= @publication.how_helped.t %>
+  </p>
+
+  <p>
+    <b><%= :show_publication_added_by.t %></b>: 
+    <%= user_link(@publication.user) %>
+    <%= @publication.created_at.web_date %><br/>
+    <%= if @publication.created_at.web_date != @publication.updated_at.web_date
+      :footer_last_updated_at.t(date: @publication.updated_at.web_date)
+    end %>
+  </p>
+</div>

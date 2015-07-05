@@ -74,7 +74,7 @@ module SessionExtensions
         msg = "Got unknown 500 error from outside our application?!\n" +
               "This usually means that a file failed to parse.\n"
       end
-      assert_block(msg) { false }
+      flunk msg
     end
     assert_equal([], Symbol.missing_tags, "Language tag(s) are missing. #{url}: #{method}")
     save_page
@@ -247,25 +247,32 @@ module SessionExtensions
 
     # Filter links by parent element types.
     if arg = args[:in]
-      if arg == :tabs
+      if arg == :left_tabs
         arg = 'div#left_tabs'
+      elsif arg == :right_tabs
+          arg = 'div#right_tabs'
+      elsif arg == :sort_tabs
+            arg = 'div#sorts'
       elsif arg == :left_panel
-        arg = 'table.LeftSide'
+        arg = 'div#navigation'
       elsif arg == :results
         arg = 'div.results'
+      elsif arg = :title
+        arg = 'div#title'
       end
       select = "#{arg} #{select}"
     end
 
     done = false
     assert_select(select, *sargs) do |links|
+
       for link in links
         match = true
 
         # Filter based on link "label" (can be an image too, for example).
         if arg = args[:label]
           if arg == :image
-            match = false if !link.to_s.match(/<img /)
+            match = false if !link.to_s.match(/img /)
           elsif arg.is_a?(Regexp)
             match = false if !link.to_s.match(arg)
           else
@@ -283,7 +290,7 @@ module SessionExtensions
       end
     end
 
-    assert_block("Expected a link matching: #{args.inspect}") { done }
+    assert done, "Expected a link matching: #{args.inspect}"
   end
 
   ################################################################################

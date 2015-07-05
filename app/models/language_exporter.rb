@@ -237,7 +237,7 @@ private
     # verbose("    was #{old_val.inspect}")
     # verbose("    now #{new_val.inspect}")
     unless safe_mode
-      str.update_attributes(
+      str.update(
         :text => new_val
       )
     end

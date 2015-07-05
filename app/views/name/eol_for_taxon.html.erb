@@ -20,19 +20,19 @@
 <% if @images.length > 0 %>
   <div class="SubTitle"><%= :eol_for_taxon_images.t %></div>
   <div>
-    <%= make_matrix(@images, :width => '100%') do |img| %>
-      <%= image_exporter(img.id, true) %>
-      <%= thumbnail(img, :votes => true, :nodiv => false, :class => "floatthumb") %>
-    <% end %>
+    <%= #make_matrix(@images, :width => '100%') do |img|# %>
+      <%= #image_exporter(img.id, true)# %>
+      <%= #thumbnail(img, :votes => true, :nodiv => false, :class => "floatthumb")# %>
+    <% #end# %>
   </div>
 <% end %>
 
 <% if @voteless_images.length > 0 %>
   <div class="SubTitle"><%= :eol_for_taxon_voteless_images.t %></div>
   <div>
-    <%= make_matrix(@voteless_images) do |img| %>
-      <%= image_exporter(img.id, true) %>
-      <%= thumbnail(img, :votes => true, :original => false, :nodiv => false, :class => "floatthumb") %>
-    <% end %>
+    <%= #make_matrix(@voteless_images) do |img|# %>
+      <%= #image_exporter(img.id, true)# %>
+      <%= #thumbnail(img, :votes => true, :original => false, :nodiv => false, :class => "floatthumb")# %>
+    <% #end# %>
   </div>
 <% end %>

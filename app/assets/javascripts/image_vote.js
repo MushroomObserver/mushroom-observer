@@ -11,17 +11,20 @@ jQuery(document).ready(function () {
 
   function image_vote(id, value) {
     jQuery.ajax("/ajax/vote/image/" + id, {
-      data: { value: value, authenticity_token: CSRF_TOKEN },
+      data: { value: value, authenticity_token: csrf_token() },
       dataType: 'text',
       async: true,
       error: function (response) {
         alert(response.responseText);
       },
       success: function(text) {
-        var div = jQuery("#image_votes_" + id);
-        div.html(text);
-        // updates the side bar if on actual image page.
-        if ($show_votes_container && $quality_vote_container) {
+        var div = jQuery("#image_vote_links_" + id);
+        var $updatedLinks = $updatedLinks = jQuery(text);
+        div.html($updatedLinks.find(".image_vote_links_container").first().html());
+
+        var newVotePercentage = div.parent().find('span.data_container').data('percentage');
+        jQuery("#vote_meter_bar_" + id).css('width', newVotePercentage + "%")
+        if ($show_votes_container && $quality_vote_container) { //updates the side bar if on actual image page.
           $show_votes_container.load(window.location + " #show_votes_table");
           $quality_vote_container.load(window.location + " #quality_vote_content");
         }
@@ -29,4 +32,3 @@ jQuery(document).ready(function () {
     });
   }
 });
-

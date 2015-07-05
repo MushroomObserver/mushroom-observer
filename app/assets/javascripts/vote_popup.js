@@ -1,6 +1,7 @@
 function VotePopupModule(showNamingsLostChangesText) {
   jQuery(document).ready(function () {
-    // elements to be binded
+
+    // elements to be bound
     var $save_votes_button = jQuery("[data-role='save_votes']"),
         $close_popup_buttons = jQuery("[data-role='close_popup']"),
         $open_popup_buttons = jQuery("[data-role='open_popup']"),
@@ -20,9 +21,12 @@ function VotePopupModule(showNamingsLostChangesText) {
 
     $open_popup_buttons.click(function (event) {
       event.preventDefault();
+      console.log(event);
       var namingId = jQuery(this).data('id');
-      $vote_popups.hide(); // hide any other popups that might be open
-      jQuery('#show_votes_' + namingId).center().show();
+      $vote_popups.hide(); //hide any other popups that might be open
+      jQuery('#show_votes_' + namingId).show()
+        .css('position','absolute')
+        .offset({top: event.screenY}, {left:event.screenX})
     });
 
     $change_vote_selects.change(function (event) {

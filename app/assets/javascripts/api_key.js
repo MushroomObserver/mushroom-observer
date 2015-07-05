@@ -3,13 +3,15 @@ function ApiKeyModule() {
 
     // bindings
     jQuery('[data-role="edit_api_key"]').click(function(event){
+      var keyId = $(this).data().id;
       event.preventDefault();
-      shouldShowEditFields($(this).data().id, true);
+      shouldShowEditFields(keyId, true);
     });
 
     jQuery('[data-role="activate_api_key"]').click(function(event){
+      var keyId = $(this).data().id;
       event.preventDefault();
-      activateKey($(this).data().id);
+      activateKey(keyId);
     });
 
     jQuery('[data-role="key_notes_input"]').keypress(function (e) {
@@ -35,14 +37,15 @@ function ApiKeyModule() {
 
     // functions
     function shouldShowEditFields(keyId, showEdit, newNoteText) {
-      var $editFormContainer = jQuery('.edit_key_notes_container[data-target-key=' + keyId +']'),
-          $currentNotesContainer = jQuery('.view_key_notes_container[data-target-key=' + keyId +']')
+      var $editFormContainer     = jQuery('.edit_key_notes_container[data-target-key=' + keyId + ']'),
+          $currentNotesContainer = jQuery('.view_key_notes_container[data-target-key=' + keyId + ']');
 
       if (showEdit) {
         jQuery("#remove_button, #create_button").attr('disabled', true);
         allowFormSubmit(false);
         $currentNotesContainer.hide();
         $editFormContainer.show();
+        $editFormContainer.children('input').first().focus();
       }
 
       else {
@@ -71,7 +74,7 @@ function ApiKeyModule() {
     function saveKey(id) {
       var notes = jQuery('[data-role="key_notes_input"][data-id=' + id + ']').val();
       jQuery.ajax("/ajax/api_key/edit/" + id, {
-        data: {value: notes, authenticity_token: CSRF_TOKEN},
+        data: {value: notes, authenticity_token: csrf_token()},
         dataType: "text",
         async: true,
         error: function (response) {
@@ -86,7 +89,7 @@ function ApiKeyModule() {
 
     function activateKey(id) {
       jQuery.ajax("/ajax/api_key/activate/" + id, {
-        data: {authenticity_token: CSRF_TOKEN},
+        data: {authenticity_token: csrf_token()},
         dataType: "text",
         async: true,
         error: function (response) {

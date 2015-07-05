@@ -1,36 +1,35 @@
 <%
-   @observation = @params.observation
-   @reason = @params.reason
-   @title = :edit_naming_title.t(id: @observation.id)
+  @observation = @params.observation
+  @reason = @params.reason
+  @title = :edit_naming_title.t(id: @observation.id)
 
-   new_tab_set do
-     add_tab_with_query(:cancel_and_show.t(type: :observation),
-                        controller: :observer,
-                        action: :show_observation,
-                        id: @observation.id)
-   end
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :observation),
+                    @observation.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_tag(add_query_param(action: 'edit', id: @params.naming.id,
-      approved_name: @params.what)) do %>
-  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
-
-  <table width="100%" cellpadding="10">
-    <tr>
-      <td width="75%" valign="top">
-        <%= render(partial: 'observer/show_observation',
+<%= form_tag(add_query_param(action: :edit, id: @params.naming.id,
+                             approved_name: @params.what)) do %>
+  <div class="row">
+    <div class="col-xs-12 col-sm-8 max-width-text">
+      <div class="push-down">
+        <%= render(partial: "observer/show_observation",
                    locals: { observation: @observation }) %>
-        <%= render(partial: 'form',
-                   locals: { action: 'edit',
-                             button_name: :SAVE_EDITS.l,
-                             show_reasons: true}) %>
-      </td>
-      <td width="25%" valign="top">
-        <%= render(partial: 'observer/show_images',
-                   locals: { thumb_size_control: false }) %>
-      </td>
-    </tr>
-  </table>
-  
-  <center><%= submit_tag :SAVE_EDITS.l %></center>
+      </div>
+
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block", style: "margin-top:2em") %>
+
+      <div class="push-down">
+        <%= render(partial: "form", locals: { action: :edit,
+                   button_name: :SAVE_EDITS.l, show_reasons: true }) %>
+      </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-4">
+      <%= render(partial: "observer/show_images",
+                 locals: { thumb_size_control: false }) %>
+    </div>
+  </div>
 <% end %>

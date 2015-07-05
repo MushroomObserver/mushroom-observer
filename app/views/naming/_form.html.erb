@@ -1,83 +1,95 @@
-<!--[form:naming]-->
 <%
-# Prefer NamingParams, but use raw params if no params
-if @params
-   what = @params.what
-   valid_names = @params.valid_names
-   suggest_corrections = @params.suggest_corrections
-   parent_deprecated = @params.parent_deprecated
-   reason = @params.reason
-   names = @params.names
-   vote = @params.vote
-else
-   what = @what
-   valid_names = @valid_names
-   suggest_corrections = @suggest_corrections
-   parent_deprecated = @parent_deprecated
-   reason = @reason
-   names = @names
-   vote = @vote
-end
+   # Changing naming form html in _form_new.erb in case we want to role back
+
+
+   # Prefer NamingParams, but use raw params if no params.
+   what = @params.what rescue @what
+   valid_names = @params.valid_names rescue @valid_name
+   suggest_corrections = @params.suggest_corrections rescue @suggested_corrections
+   parent_deprecated = @params.parent_deprecated rescue @parent_deprecated
+   reason = @params.reason rescue @reason
+   names = @params.names rescue @names
+   @vote = vote = @params.vote rescue @vote
 %>
 
-<%# -------------------- Name Autocompleter -------------------- %>
-<%= render(partial: 'shared/form_name_feedback',
-           locals: { button_name: button_name,
-                     what: what,
-                     valid_names: valid_names,
-                     suggest_corrections: suggest_corrections,
-                     parent_deprecated: parent_deprecated,
-                     names: names }) %>
-<div style="white-space:nowrap">
-  <label for="name_name"><%= :WHAT.t %>:</label>
-  <%= text_field('name', 'name', value: what) %>
-  <span style="margin-left:20px">&nbsp;</span>
-  <label for="vote_value"><%= :form_naming_confidence.t %>:</label>
-  <% @vote = vote %>
-  <%= select('vote', 'value', Vote.confidence_menu,
-             { include_blank: action == 'edit' ? false : true }) %>
-</div><br/>
-<% if !show_reasons %>
-  <span class="HelpNote"><%= :form_naming_name_help_create.t %></span>
-<% end %>
-<span class="HelpNote"><%= :form_naming_name_help.t %></span><br/>
-<%= turn_into_name_auto_completer('name_name', primer: Name.primer,
-  on_change: %( function(v) { v && v != '' ? jQuery('#reasons_div').show() : jQuery('#reasons_div').hide() } )) %>
- 
-<%# -------------------- Naming Reasons -------------------- %>
-<%=
-  html = safe_br
-  for r in reason.values.sort_by(&:order)
-    num      = r.num
-    label    = r.label.t
-    check    = r.used?
-    notes    = r.notes.to_s
-    default  = r.default?
-    onclick  = "jQuery('#reason_#{num}_div').toggle(); setTimeout(function() " +
-               "{ if (jQuery('#reason_#{num}_check').is(':checked')) jQuery('#reason_#{num}_notes').focus() }, 0.25)"
-    checkbox = check_box('reason', 'check', { index: num, checked: check,
-                         onclick: (can_do_ajax? ? onclick : 1)}, '1')
-    label    = content_tag(:label, label + (default ? ' (default)' : ' '), for: "reason_#{num}_check") + safe_br
-    textarea = text_area('reason', 'notes', { index: num, cols: 80, rows: 1, value: notes })
-    textarea += safe_br
-    if can_do_ajax?
-      textarea = content_tag(:div, textarea, id: "reason_#{num}_div")
-      if !check
-        textarea += javascript_tag("jQuery('#reason_#{num}_div').hide()")
-      end
-    end
-    html += checkbox + label + textarea
-  end
-  if can_do_ajax? && !show_reasons && @params && what.blank?
-    html = content_tag(:div, html, id: 'reasons_div')
-    # html += javascript_tag("jQuery('#reasons_div').hide()");
-  end
-  html
-%>
+<%= render(partial: "shared/form_name_feedback", locals: {
+                                                       button_name: button_name,
+                                                       what: what,
+                                                       valid_names: valid_names,
+                                                       suggest_corrections: suggest_corrections,
+                                                       parent_deprecated: parent_deprecated,
+                                                       names: names
+                                               }) %>
 
-<%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
-<%= focus_on('name_name') %>
+<div class="row">
+  <div class="col-sm-6">
 
-<!--[eoform:naming]-->
+    <div class="form-group">
+      <%= label_tag(:name_name, :WHAT.t + ":") %>
+      <%= text_field(:name, :name, value: what, data: {autofocus: true},
+                     size: 40, class: "form-control") %>
+      <% turn_into_name_auto_completer(:name_name, primer: Name.primer) %>
+    </div>
 
-<div id="log"></div>
+    <div class="form-group">
+      <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
+      <%= select(:vote, :value, Vote.confidence_menu,
+                 {include_blank: action == :create}, class: "form-control") %>
+    </div>
+
+    <% reason.values.sort_by(&:order).each do |r| %>
+        <div class="form-group form-inline" style="margin:0">
+          <label>
+            <%= check_box(:reason, :check, {index: r.num, checked: r.used?,
+                                            data: {role: "collapser", target: "#reason_#{r.num}_notes"},
+                                            class: ""}, "1") %>
+            <%= r.label.t %>
+          </label>
+        </div>
+        <div class="form-group" style="margin-bottom:1em">
+          <%= text_area(:reason, :notes, index: r.num, rows: 1, value: r.notes,
+                        class: "form-control") %>
+        </div>
+    <% end %>
+
+  </div>
+
+  <div class="col-sm-6">
+    <div class="well well-sm">
+      <div class="arrow-left hidden-xs"></div>
+      <% if !show_reasons %>
+          <p class="help-block">
+            <%= :form_naming_name_help_create.t %>
+          </p>
+
+      <% end %>
+      <p class="help-block">
+        <%= :form_naming_name_help.t %>
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<%= hidden_field_tag(:was_js_on, "yes") if can_do_ajax? %>
+<% inject_javascript_at_end %(
+  jQuery(document).ready(function() {
+    function collapse_reason() {
+      var this2 = jQuery(this);
+      var target = jQuery(this2.attr("data-target")).parent();
+      var old_state = target.hasClass("collapse");
+      var new_state = !this2.is(':checked');
+      if (old_state && !new_state) {
+        target.removeClass("collapse");
+      } else if (!old_state && new_state) {
+        target.addClass("collapse");
+      }
+    }
+    jQuery('[data-role="collapser"]').each(collapse_reason)
+                                     .change(collapse_reason);
+    jQuery('.collapse').on('shown.bs.collapse', function () {
+      $(this).focus();
+    });
+  });
+) %>
+

@@ -1,0 +1,109 @@
+@import "old_theme";
+
+$phalloides_foreground:           #e6edd5;
+$phalloides_light_cap:            #dfe4bc;
+$phalloides_middle_cap:           #beb977;
+$phalloides_dark_cap:             #787133;
+$calyptroderma_spring_background: #ebcc79;
+$calyptroderma_spring_foreground: #f9f2e0;
+$calyptroderma_fall_dark_cap:     #954c23;
+$calyptroderma_volva:             #ebe4de;
+$calyptroderma_light_cap:         #f5bd5e;
+$calyptroderma_middle_cap:        #c18346;
+$muscaria_background:             #cc2616;
+$muscaria_foreground:             #fff8c6;
+$velosa_background:               #dd9d5f;
+$velosa_light_veil:               #faebd4;
+$velosa_dark_veil:                #f4d5a6;
+$novinupta_background:            #d1afa5;
+$pachycolea_background:           #383138;
+$pachycolea_foreground:           #bfc0bb;
+$pachycolea_light_stipe:          #aa9a83;
+$pachycolea_dark_brown:           #60412d;
+$polyozellus_light:               #a5bffa;
+$polyozellus_dark:                #5167b2;
+
+$BODY_FG_COLOR:               $pachycolea_foreground;
+$BODY_BG_COLOR:               $pachycolea_background;
+                             
+$LINK_FG_COLOR:               $pachycolea_light_stipe;
+$LINK_VISITED_FG_COLOR:       $muscaria_foreground;
+$LINK_HOVER_FG_COLOR:         $pachycolea_light_stipe;
+$LINK_HOVER_BG_COLOR:         $muscaria_background;
+                             
+$LOGO_BORDER_COLOR:           $velosa_light_veil;
+$LOGO_FG_COLOR:               $muscaria_foreground;
+$LOGO_BG_COLOR:               $muscaria_background;
+$LOGO_HOVER_FG_COLOR:         $muscaria_foreground;
+$LOGO_HOVER_BG_COLOR:         $muscaria_background;
+                             
+$LEFT_BAR_BORDER_COLOR:       $velosa_background;
+$LEFT_BAR_HEADER_FG_COLOR:    $muscaria_background;
+$LEFT_BAR_HEADER_BG_COLOR:    $velosa_background;
+$LEFT_BAR_FG_COLOR:           $velosa_light_veil;
+$LEFT_BAR_BG_COLOR:           $velosa_background;
+$LEFT_BAR_HOVER_FG_COLOR:     $velosa_light_veil;
+$LEFT_BAR_HOVER_BG_COLOR:     $muscaria_background;
+
+$TOP_BAR_FG_COLOR:            $pachycolea_foreground;
+$TOP_BAR_BG_COLOR:            $pachycolea_background;
+$TOP_BAR_LINK_FG_COLOR:       $pachycolea_light_stipe;
+$TOP_BAR_LINK_HOVER_FG_COLOR: $pachycolea_light_stipe;
+$TOP_BAR_LINK_HOVER_BG_COLOR: $muscaria_background;
+
+$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_HEADER_FG_COLOR:        #777777;
+$LIST_HEADER_BG_COLOR:        #EEEEEE;
+$LIST_FG_COLOR:               $pachycolea_foreground;
+$LIST_BG_COLOR:               mix($pachycolea_background, black, 75%);
+
+$TOOLTIP_FG_COLOR:            $pachycolea_background;
+$TOOLTIP_BG_COLOR:            $pachycolea_foreground;
+                             
+$VOTE_METER_FG_COLOR:         $pachycolea_foreground;
+$VOTE_METER_BG_COLOR:         $pachycolea_background;
+                             
+$PROGRESS_BG_COLOR:           $pachycolea_background;
+$PROGRESS_FG_COLOR:           $pachycolea_foreground;
+$PROGRESS_BAR_COLOR:          $phalloides_dark_cap;
+                             
+$PAGER_FG_COLOR:              $pachycolea_foreground;
+$PAGER_HOVER_FG_COLOR:        $pachycolea_foreground;
+$PAGER_HOVER_BG_COLOR:        $muscaria_background;
+$PAGER_ACTIVE_FG_COLOR:       $pachycolea_background;
+$PAGER_ACTIVE_BG_COLOR:       $pachycolea_foreground;
+                             
+$MENU_BORDER_COLOR:           $pachycolea_background;
+$MENU_FG_COLOR:               black;
+$MENU_BG_COLOR:               white;
+$MENU_HOT_FG_COLOR:           black;
+$MENU_HOT_BG_COLOR:           $muscaria_background;
+$MENU_WARM_FG_COLOR:          black;
+$MENU_WARM_BG_COLOR:          $velosa_background;
+
+$INFO_BG_COLOR:                     $polyozellus_dark;
+$INFO_BORDER_COLOR:                 $polyozellus_light;
+$INFO_FG_COLOR:                     $pachycolea_foreground;
+$SUCCESS_BG_COLOR:                  #E0FFE0;
+$SUCCESS_BORDER_COLOR:              #70C070;
+$SUCCESS_FG_COLOR:                  black;
+$WARNING_BG_COLOR:                  #FFF8E0;
+$WARNING_BORDER_COLOR:              #F8CC70;
+$WARNING_FG_COLOR:                  black;
+$DANGER_BG_COLOR:                   #FFE0E0;
+$DANGER_BORDER_COLOR:               #F07070;
+$DANGER_FG_COLOR:                   black;
+
+@import "mushroom_observer";
+
+#navigation {
+    border-left-width: $LEFT_BAR_BORDER_WIDTH;
+}
+
+.btn.active {
+  color: $muscaria_background;
+}
+
+.well {
+  background:  $pachycolea_light_stipe;
+}

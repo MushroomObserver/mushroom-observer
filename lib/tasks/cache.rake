@@ -14,18 +14,20 @@ namespace :cache do
   desc "Recalculate vote caches for observations and namings"
   task(:refresh_votes => :environment) do
     print "Refreshing naming.vote_cache...\n"
-    for n in Naming.find(:all)
+    # for n in Naming.find(:all) # Rails 3
+    for n in Naming.all
       print "##{n.id}\r"
       n.calc_vote_table
     end
     print "Refreshing observation.vote_cache...\n"
-    for o in Observation.find(:all)
+    # for o in Observation.find(:all) # Rails 3
+    for o in Observation.all
       print "##{o.id}\r"
       o.calc_consensus
     end
     print "Done.    \n"
   end
-  
+
   desc "Reset the queued_emails flavor enum"
   task(:refresh_queued_emails => :environment) do
     print "Refreshing flavor enum for queued_emails...\n"
@@ -36,7 +38,7 @@ namespace :cache do
     QueuedEmail.connection.update("update queued_emails set flavor=flavor_tmp")
     ActiveRecord::Migration.remove_column :queued_emails, :flavor_tmp
   end
-  
+
   desc "Reset the ranks"
   task(:refresh_ranks => :environment) do
     print "Refreshing the list of ranks...\n"
@@ -47,7 +49,7 @@ namespace :cache do
     Name.connection.update("update names set rank=rank_tmp")
     ActiveRecord::Migration.remove_column :names, :rank_tmp
   end
-  
+
   desc "Reset the search_states query_type enum"
   task(:refresh_search_states => :environment) do
     print "Refreshing query_type enum for search_states...\n"
@@ -58,7 +60,7 @@ namespace :cache do
     SearchState.connection.update("update search_states set query_type=query_type_tmp")
     ActiveRecord::Migration.remove_column :search_states, :query_type_tmp
   end
-  
+
   desc "Reset the name review_status enum"
   task(:refresh_name_review_status => :environment) do
     print "Refreshing review_status enum for names and past_names...\n"
@@ -75,7 +77,7 @@ namespace :cache do
     ActiveRecord::Migration.remove_column :names, :review_status_tmp
     ActiveRecord::Migration.remove_column :past_names, :review_status_tmp
   end
-  
+
   desc "Add reviewers"
   task(:add_reviewers => :environment) do
     group = UserGroup.find_by_name('reviewers')
@@ -90,7 +92,7 @@ namespace :cache do
       end
     end
   end
-  
+
   desc "Update authors and editors"
   task(:update_authors => :environment) do
     Name.connection.update %(
@@ -106,7 +108,8 @@ namespace :cache do
     )
 
     users = {}
-    for n in Name.find(:all)
+    # for n in Name.find(:all) # Rails 3
+    for n in Name.all
       user_ids = []
       author_id = nil
       last_version = 0
@@ -142,5 +145,5 @@ namespace :cache do
       n.save
     end
   end
-  
+
 end

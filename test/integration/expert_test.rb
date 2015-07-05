@@ -66,17 +66,17 @@ class ExpertTest < IntegrationTestCase
 
     assert_not_nil(Name.find_by_text_name('Caloplaca'))
 
-    names = Name.find_all_by_text_name(name1)
+    names = Name.where(text_name: name1)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author1, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name2.sub(/ssp/, 'subsp'))
+    names = Name.where(text_name: name2.sub(/ssp/, 'subsp'))
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author2, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name2.sub(/ssp/, 'subsp'))
+    names = Name.where(text_name: name2.sub(/ssp/, 'subsp'))
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author2, names.first.author)
     assert_equal(false, names.first.deprecated)
@@ -84,23 +84,23 @@ class ExpertTest < IntegrationTestCase
     assert_not_nil(Name.find_by_text_name('Acarospora'))
     assert_not_nil(Name.find_by_text_name('Acarospora nodulosa'))
 
-    names = Name.find_all_by_text_name(name3)
+    names = Name.where(text_name: name3)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(author3, names.first.author)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name4)
+    names = Name.where(text_name: name4)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(false, names.first.deprecated)
 
-    names = Name.find_all_by_text_name(name5)
+    names = Name.where(text_name: name5)
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal('', names.first.author)
     assert_equal(true, names.first.deprecated)
 
     # I guess this is left alone, even though you would probably
     # expect it to be deprecated.
-    names = Name.find_all_by_text_name('Lactarius alpinus')
+    names = Name.where(text_name: "Lactarius alpinus")
     assert_equal(1, names.length, names.map(&:search_name).inspect)
     assert_equal(false, names.first.deprecated)
   end
@@ -119,8 +119,8 @@ class ExpertTest < IntegrationTestCase
     ]
     list = names.join("\r\n")
 
-    amanita = Name.find_all_by_text_name('Amanita baccata')
-    suillus = Name.find_all_by_text_name('Suillus')
+    amanita = Name.where(text_name: "Amanita baccata")
+    suillus = Name.where(text_name: "Suillus")
 
     albion = locations(:albion)
     albion_name = albion.name
@@ -264,7 +264,7 @@ class ExpertTest < IntegrationTestCase
     end
     sess.assert_flash_success
     sess.assert_template('species_list/show_species_list')
-    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select('div#title', :text => /#{spl.title}/)
     sess.assert_select("a[href*=edit_species_list/#{spl.id}]", :text => /edit/i)
 
     loc = Location.last
@@ -281,7 +281,7 @@ class ExpertTest < IntegrationTestCase
     # Try adding a comment, just for kicks.
     sess.click(:href => /add_comment/)
     sess.assert_template('comment/add_comment')
-    sess.assert_select('div#Title', :text => /#{spl.title}/)
+    sess.assert_select('div#title', :text => /#{spl.title}/)
     sess.assert_select("a[href*=show_species_list/#{spl.id}]", :text => /cancel/i)
     sess.open_form do |form|
       form.change('comment_summary', 'Slartibartfast')
@@ -290,8 +290,8 @@ class ExpertTest < IntegrationTestCase
     end
     sess.assert_flash_success
     sess.assert_template('species_list/show_species_list')
-    sess.assert_select('div#Title', :text => /#{spl.title}/)
-    sess.assert_select('p', :text => /Slartibartfast/)
-    sess.assert_select('p', :text => /Steatopygia/)
+    sess.assert_select('div#title', :text => /#{spl.title}/)
+    sess.assert_select('div.comment', :text => /Slartibartfast/)
+    sess.assert_select('div.comment', :text => /Steatopygia/)
   end
 end

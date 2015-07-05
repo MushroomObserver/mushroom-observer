@@ -2,27 +2,26 @@
   @title = :create_observation_title.t
 %>
 
-<div class="textile">
-<table>
-  <tr>
-    <td>
-      <%= form_tag({ :action => 'create_observation', :approved_name => @what,
-                  :approved_where => @place_name }, { :multipart => true,
-                  :name => 'observation_form'}) do %>
-        <br/><center><%= submit_tag :CREATE.l %></center><br/>
+<div class="row">
+  <div class="col-xs-12">
+      <%= form_tag({action: 'create_observation', approved_name: @what,
+                    approved_where: @place_name}, { multipart: true , name: 'observation_form'}) do %>
+        <center><%= submit_tag(:CREATE.l, class: "btn") %></center>
 
         <%= render(:partial => 'form_observations', :locals => {
-          :action           => 'create_observation',
-          :logging_optional => false,
-          :include_naming   => true,
-          :include_images   => true,
-          :button_name      => :CREATE.l,
-          :has_specimens    => false
+                                                          action: 'create_observation',
+                                                          logging_optional: false,
+                                                          include_naming: true,
+                                                          include_images: true,
+                                                          button_name: :CREATE.l,
+                                                          has_specimens: false
         }) %>
 
-        <br/><center><%= submit_tag :CREATE.l %></center>
+        <div class="row">
+          <div class="col-md-8">
+            <center><%= submit_tag(:CREATE.l, class: "btn btn-lg") %></center>
+          </div>
+        </div>
       <% end %>
-    </td>
-  </tr>
-</table>
+  </div>
 </div>

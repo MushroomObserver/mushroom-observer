@@ -1,8 +1,8 @@
-<div id="textilize_note">
+<div id="textilize_note" class="help-block">
   <%=
     link = link_to(:shared_textile_link.t,
-      { :controller => "observer", :action => "textile_sandbox" },
-      { :target => "_new" })
+      {controller: :observer, action: :textile_sandbox},
+      {target: "_new"})
     str = :shared_textile_help.l % link
     str.html_safe
   %>

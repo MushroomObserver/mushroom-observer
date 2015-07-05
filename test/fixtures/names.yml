@@ -1,14 +1,13 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+# See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 fungi:
   id: 1
   # accepted_name_id: 1
-  sync_id: 1xx1
   created_at: 2007-02-26 17:20:00
   updated_at: 2007-02-26 17:20:00
   user_id: 1
   version: 1
-  rank: Kingdom
+  rank: <%= Name.ranks[:Kingdom] %>
   text_name: Fungi
   author: ''
   display_name: '**__Fungi__**'
@@ -22,12 +21,11 @@ coprinus_comatus:
   id: 2
   # accepted_name_id: 2
   description_id: 15
-  sync_id: 2xx1
   created_at: 2007-02-27 20:47:00
   updated_at: 2007-02-27 20:48:00
   user_id: 1
   version: 2
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Coprinus comatus
   author: '(O.F. Müll.) Pers.'
   display_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
@@ -39,12 +37,11 @@ coprinus_comatus:
 agaricus_campestris:
   id: 3
   # accepted_name_id: 3
-  sync_id: 3xx1
   created_at: 2007-03-19 17:20:00
   updated_at: 2007-03-19 17:20:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestris
   author: L.
   display_name: '**__Agaricus campestris__** L.'
@@ -56,12 +53,11 @@ agaricus_campestris:
 conocybe_filaris:
   id: 4
   # accepted_name_id: 4
-  sync_id: 4xx1
   created_at: 2007-03-28 15:50:00
   updated_at: 2007-03-19 15:51:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Conocybe filaris
   author: ''
   display_name: '**__Conocybe filaris__**'
@@ -73,12 +69,11 @@ conocybe_filaris:
 amanita_baccata_arora:
   id: 5
   # accepted_name_id: 5
-  sync_id: 5xx1
   created_at: 2007-04-08 08:53:20
   updated_at: 2007-04-09 08:53:30
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Amanita baccata
   author: sensu Arora
   display_name: '**__Amanita baccata__** sensu Arora'
@@ -90,12 +85,11 @@ amanita_baccata_arora:
 amanita_baccata_borealis:
   id: 6
   # accepted_name_id: 6
-  sync_id: 6xx1
   created_at: 2007-04-08 08:54:20
   updated_at: 2007-04-09 08:54:30
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Amanita baccata
   author: sensu Borealis
   display_name: '**__Amanita baccata__** sensu Borealis'
@@ -108,12 +102,11 @@ amanita_baccata_borealis:
 lepiota_rachodes:
   id: 7
   # accepted_name_id: 7
-  sync_id: 7xx1
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lepiota rachodes
   author: Vittad.
   display_name: '**__Lepiota rachodes__** Vittad.'
@@ -126,12 +119,11 @@ lepiota_rachodes:
 lepiota_rhacodes:
   id: 8
   # accepted_name_id: 8
-  sync_id: 8xx1
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lepiota rhacodes
   author: Vittad.
   display_name: '**__Lepiota rhacodes__** Vittad.'
@@ -144,12 +136,11 @@ lepiota_rhacodes:
 macrolepiota_rachodes:
   id: 9
   # accepted_name_id: 9
-  sync_id: 9xx1
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Macrolepiota rachodes
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
@@ -163,12 +154,11 @@ macrolepiota_rachodes:
 macrolepiota_rhacodes:
   id: 10
   # accepted_name_id: 9
-  sync_id: 10xx1
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
   user_id: 2
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Macrolepiota rhacodes
   author: '(Vittad.) Singer'
   display_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
@@ -182,12 +172,11 @@ macrolepiota_rhacodes:
 chlorophyllum_rachodes:
   id: 11
   # accepted_name_id: 11
-  sync_id: 11xx1
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Chlorophyllum rachodes
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
@@ -201,12 +190,11 @@ chlorophyllum_rachodes:
 chlorophyllum_rhacodes:
   id: 12
   # accepted_name_id: 11
-  sync_id: 12xx1
   created_at: 2007-04-30 21:34:00
   updated_at: 2007-04-30 21:34:00
   user_id: 2
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Chlorophyllum rhacodes
   author: '(Vittad.) Vellinga'
   display_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
@@ -220,12 +208,11 @@ chlorophyllum_rhacodes:
 lactarius_alpinus:
   id: 13
   # accepted_name_id: 13
-  sync_id: 13xx1
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius alpinus
   author: Peck
   display_name: '**__Lactarius alpinus__** Peck'
@@ -239,12 +226,11 @@ lactarius_alpinus:
 lactarius_alpigenes:
   id: 14
   # accepted_name_id: 13
-  sync_id: 14xx1
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius alpigenes
   author: Kühn.
   display_name: __Lactarius alpigenes__ Kühn.
@@ -259,12 +245,11 @@ lactarius_alpigenes:
 lactarius_kuehneri:
   id: 15
   # accepted_name_id: 13
-  sync_id: 15xx1
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius kuehneri
   author: Joss.
   display_name: __Lactarius kuehneri__ Joss.
@@ -279,12 +264,11 @@ lactarius_kuehneri:
 lactarius_subalpinus:
   id: 16
   # accepted_name_id: 13
-  sync_id: 16xx1
   created_at: 2007-05-28 15:14:00
   updated_at: 2007-04-30 15:14:10
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lactarius subalpinus
   author: Kühn.
   display_name: __Lactarius subalpinus__ Kühn.
@@ -299,12 +283,11 @@ lactarius_subalpinus:
 psalliota:
   id: 17
   # accepted_name_id: 17
-  sync_id: 17xx1
   created_at: 2007-06-09 08:06:28
   updated_at: 2007-06-09 08:06:40
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Psalliota
   author: ''
   display_name: '**__Psalliota__**'
@@ -317,12 +300,11 @@ psalliota:
 agaricus:
   id: 18
   # accepted_name_id: 18
-  sync_id: 18xx1
   created_at: 2007-06-09 08:06:28
   updated_at: 2007-06-09 08:06:40
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Agaricus
   author: ''
   display_name: '**__Agaricus__**'
@@ -335,12 +317,11 @@ agaricus:
 agaricus_campestrus:
   id: 19
   # accepted_name_id: 19
-  sync_id: 19xx1
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestrus
   author: L.
   display_name: '**__Agaricus campestrus__** L.'
@@ -354,12 +335,11 @@ agaricus_campestras:
   id: 20
   # accepted_name_id: 20
   description_id: 1
-  sync_id: 20xx1
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestras
   author: L.
   display_name: '**__Agaricus campestras__** L.'
@@ -373,12 +353,11 @@ agaricus_campestros:
   id: 21
   # accepted_name_id: 21
   description_id: 2
-  sync_id: 21xx1
   created_at: 2007-06-23 20:04:00
   updated_at: 2007-06-23 20:04:00
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Agaricus campestros
   author: L.
   display_name: '**__Agaricus campestros__** L.'
@@ -391,12 +370,11 @@ agaricus_campestros:
 coprinellus_micaceus:
   id: 22
   # accepted_name_id: 22
-  sync_id: 22xx1
   created_at: 2007-06-24 12:45:55
   updated_at: 2007-06-24 12:45:55
   user_id: 1
   version: 2
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Coprinellus micaceus
   author: '(Bull.) Vilgalys, Hopple & Jacq. Johnson'
   display_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
@@ -409,12 +387,11 @@ coprinellus_micaceus:
 coprinellus_micaceus_no_author:
   id: 23
   # accepted_name_id: 23
-  sync_id: 23xx1
   created_at: 2007-06-24 12:45:55
   updated_at: 2007-06-24 12:45:55
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Coprinellus micaceus
   author: ""
   display_name: '**__Coprinellus micaceus__**'
@@ -427,12 +404,11 @@ coprinellus_micaceus_no_author:
 strobilurus_diminutivus_no_author:
   id: 24
   # accepted_name_id: 24
-  sync_id: 24xx1
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Strobilurus diminutivus
   author: ''
   display_name: '**__Strobilurus diminutivus__**'
@@ -445,12 +421,11 @@ strobilurus_diminutivus_no_author:
 pluteus_petasatus_approved:
   id: 25
   # accepted_name_id: 25
-  sync_id: 25xx1
   created_at: 2007-07-20 20:54:45
   updated_at: 2007-07-20 20:54:45
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Pluteus petasatus
   author: '(Fr.) Gillet'
   display_name: '**__Pluteus petasatus__** (Fr.) Gillet'
@@ -463,12 +438,11 @@ pluteus_petasatus_approved:
 pluteus_petasatus_deprecated:
   id: 26
   # accepted_name_id: 26
-  sync_id: 26xx1
   created_at: 2007-07-20 21:12:45
   updated_at: 2007-07-20 21:12:45
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Pluteus petasatus
   author: '(Fries) Gillet'
   display_name: __Pluteus petasatus__ (Fries) Gillet
@@ -482,12 +456,11 @@ pluteus_petasatus_deprecated:
 lepiota:
   id: 27
   # accepted_name_id: 27
-  sync_id: 27xx1
   created_at: 2007-07-30 08:06:28
   updated_at: 2007-07-30 08:06:40
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Lepiota
   author: ''
   display_name: '**__Lepiota__**'
@@ -500,12 +473,11 @@ lepiota:
 chlorophyllum:
   id: 28
   # accepted_name_id: 28
-  sync_id: 28xx1
   created_at: 2007-07-30 22:06:28
   updated_at: 2007-07-30 22:06:40
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Chlorophyllum
   author: ''
   display_name: '**__Chlorophyllum__**'
@@ -518,12 +490,11 @@ chlorophyllum:
 bugs_bunny_one:
   id: 29
   # accepted_name_id: 29
-  sync_id: 29xx1
   created_at: 2008-01-31 01:01:01
   updated_at: 2008-01-31 01:01:01
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   author: One
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** One'
@@ -535,12 +506,11 @@ bugs_bunny_one:
 bugs_bunny_two:
   id: 30
   # accepted_name_id: 30
-  sync_id: 30xx1
   created_at: 2008-01-31 01:01:01
   updated_at: 2008-01-31 01:01:01
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   author: Two
   text_name: Warnerbros bugs-bunny
   display_name: '**__Warnerbros bugs-bunny__** Two'
@@ -552,12 +522,11 @@ bugs_bunny_two:
 russula_brevipes_no_author:
   id: 31
   # accepted_name_id: 31
-  sync_id: 31xx1
   created_at: 2008-03-10 22:31:25
   updated_at: 2008-03-10 22:31:27
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Russula brevipes
   author: ''
   display_name: '**__Russula brevipes__**'
@@ -570,12 +539,11 @@ russula_brevipes_author_notes:
   id: 32
   # accepted_name_id: 32
   description_id: 3
-  sync_id: 32xx1
   created_at: 2008-03-10 22:33:00
   updated_at: 2008-03-10 22:33:05
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Russula brevipes
   author: Peck
   display_name: '**__Russula brevipes__** Peck'
@@ -588,12 +556,11 @@ russula_cremoricolor_no_author_notes:
   id: 33
   # accepted_name_id: 33
   description_id: 4
-  sync_id: 33xx1
   created_at: 2008-03-12 20:53:08
   updated_at: 2008-03-12 20:53:18
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Russula cremoricolor
   author: ''
   display_name: '**__Russula cremoricolor__**'
@@ -606,12 +573,11 @@ russula_cremoricolor_author_notes:
   id: 34
   # accepted_name_id: 34
   description_id: 5
-  sync_id: 34xx1
   created_at: 2008-03-12 20:53:36
   updated_at: 2008-03-12 20:53:40
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Russula cremoricolor
   author: Earle
   display_name: '**__Russula cremoricolor__** Earle'
@@ -623,12 +589,11 @@ russula_cremoricolor_author_notes:
 lentinellus_ursinus_author1:
   id: 35
   # accepted_name_id: 35
-  sync_id: 35xx1
   created_at: 2008-03-19 08:35:30
   updated_at: 2008-03-19 08:35:37
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lentinellus ursinus
   author: Kühner
   display_name: '**__Lentinellus ursinus__** Kühner'
@@ -640,12 +605,11 @@ lentinellus_ursinus_author1:
 lentinellus_ursinus_author2:
   id: 36
   # accepted_name_id: 36
-  sync_id: 36xx1
   created_at: 2008-03-19 08:35:30
   updated_at: 2008-03-19 08:35:37
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Lentinellus ursinus
   author: Kuhner
   display_name: '**__Lentinellus ursinus__** Kuhner'
@@ -658,12 +622,11 @@ lentinellus_ursinus_author2:
 macrocybe_pegler:
   id: 37
   # accepted_name_id: 37
-  sync_id: 37xx1
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
@@ -676,12 +639,11 @@ macrocybe_pegler:
 macrocybe_titans:
   id: 38
   # accepted_name_id: 38
-  sync_id: 38xx1
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Macrocybe
   author: Titans
   display_name: '**__Macrocybe__** Titans'
@@ -693,12 +655,11 @@ macrocybe_titans:
 boletus_edulis:
   id: 39
   # accepted_name_id: 39
-  sync_id: 39xx1
   created_at: 2008-10-05 16:16:50
   updated_at: 2008-10-05 16:17:08
   user_id: 4
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Boletus edulis
   author: Bull.
   display_name: '**__Boletus edulis__** Bull.'
@@ -711,12 +672,11 @@ peltigera:
   id: 40
   # accepted_name_id: 40
   description_id: 6
-  sync_id: 40xx1
   created_at: 2009-01-01 01:01:01
   updated_at: 2009-01-02 01:01:01
   user_id: 1
   version: 2
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Peltigera
   author: '(Old) New Auth.'
   citation: Ye Auld Manual of Lichenes, 1800.
@@ -730,12 +690,11 @@ peltigera:
 petigera:
   id: 41
   # accepted_name_id: 40
-  sync_id: 41xx1
   created_at: 2009-01-01 01:01:01
   updated_at: 2009-01-02 01:01:01
   user_id: 4
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Petigera
   author: ''
   display_name: __Petigera__
@@ -751,12 +710,11 @@ suillus:
   id: 42
   # accepted_name_id: 42
   description_id: 7
-  sync_id: 42xx1
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
   user_id: 4
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Suillus
   author: Gray
   display_name: '**__Suillus__** Gray'
@@ -768,12 +726,11 @@ suillus:
 suillus_by_white:
   id: 43
   # accepted_name_id: 43
-  sync_id: 43xx1
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
   user_id: 4
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Suillus
   author: E.B. White
   display_name: '**__Suillus__** E.B. White'
@@ -785,12 +742,11 @@ suillus_by_white:
 suilus:
   id: 44
   # accepted_name_id: 44
-  sync_id: 44xx1
   created_at: 2009-10-12 21:30:01
   updated_at: 2009-10-12 21:30:01
   user_id: 4
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Suilus
   author: E.B. White
   display_name: '**__Suilus__** E.B. White'
@@ -804,12 +760,11 @@ suilus:
 tremella_mesenterica:
   id: 45
   # accepted_name_id: 45
-  sync_id: 45x1
   created_at: 2011-11-06 18:07:20
   updated_at: 2011-11-06 18:07:20
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Tremella mesenterica
   author: Retz.
   display_name: '**__Tremella mesenterica__** Retz.'
@@ -817,16 +772,15 @@ tremella_mesenterica:
   sort_name: Tremella mesenterica  Retz.
   citation: ''
   notes: ''
-  
+
 tremella:
   id: 46
   # accepted_name_id: 46
-  sync_id: 46x1
   created_at: 2011-11-06 18:09:20
   updated_at: 2011-11-06 18:09:20
   user_id: 1
   version: 1
-  rank: Genus
+  rank: <%= Name.ranks[:Genus] %>
   text_name: Tremella
   author: Pers.
   display_name: '**__Tremella__** Pers.'
@@ -838,12 +792,11 @@ tremella:
 tremella_justpublished:
   id: 47
   # accepted_name_id: 47
-  sync_id: 47x1
   created_at: 2011-11-06 18:07:20
   updated_at: 2011-11-06 18:07:20
   user_id: 1
   version: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Tremella justpublished
   author: Retz.
   display_name: '**__Tremella justpublished__** Retz.'
@@ -855,12 +808,11 @@ tremella_justpublished:
 hygrocybe_russocoriacea_bad_author:
   id: 48
   # accepted_name_id: 48
-  sync_id: 48x1
   version: 1
   created_at: 2007-01-10 05:06:08
   updated_at: 2011-12-15 18:35:28
   user_id: 1
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & T.K. Mill.) P.D. Orton & Watling
   sort_name: Hygrocybe russocoriacea  (Berk. & T.K. Mill.) P.D. Orton & Watling
@@ -871,15 +823,31 @@ hygrocybe_russocoriacea_bad_author:
 hygrocybe_russocoriacea_good_author:
   id: 49
   # accepted_name_id: 49
-  sync_id: 49x1
   version: 1
   created_at: 2011-12-10 03:50:48
   updated_at: 2011-12-10 03:50:48
   user_id: 4
-  rank: Species
+  rank: <%= Name.ranks[:Species] %>
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
   sort_name: Hygrocybe russocoriacea  (Berk. & Jos.K. Mill.) P.D. Orton & Watling
   display_name: '**__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   notes: NULL
+
+lichen:
+  id: 50
+  # accepted_name_id: 50
+  created_at: 2015-02-07 11:27:00
+  updated_at: 2015-02-07 11:27:00
+  user_id: 1
+  version: 1
+  rank: <%= Name.ranks[:Kingdom] %>
+  text_name: Lichen
+  author: ''
+  display_name: '**__Lichen__**'
+  search_name: Lichen
+  sort_name: Lichen
+  citation: ''
+  notes: This is a pseudoname to apply to all unknown lichenized fungi.
+

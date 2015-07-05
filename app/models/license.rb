@@ -14,7 +14,6 @@
 #  == Attributes
 #
 #  id::           Locally unique numerical id, starting at 1.
-#  sync_id::      Globally unique alphanumeric id, used to sync with remote servers.
 #  updated_at::   Date/time it was last updated.
 #  deprecated::   Has this been deprecated?
 #  display_name:: Name, e.g., "Creative Commons Non-commercial v2.5"
@@ -66,8 +65,7 @@ class License < AbstractModel
   #   end
   #
   def self.current_names_and_ids(current_license=nil)
-    result = License.find(:all, :conditions => "deprecated = 0").
-                     map {|l| [l.display_name, l.id]}
+    result = License.where(deprecated: 0).map {|l| [l.display_name, l.id]}
     if current_license
       if current_license.deprecated
         result.push([current_license.display_name, current_license.id])
@@ -75,7 +73,7 @@ class License < AbstractModel
     end
     result
   end
-  
+
   def copyright_text(year, name)
     if self.form_name == 'publicdomain'
       "".html_safe + :image_show_public_domain.t + " " + name

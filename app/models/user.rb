@@ -88,7 +88,6 @@
 #  == Attributes
 #
 #  id::                 Locally unique numerical id, starting at 1.
-#  sync_id::            Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::         Date/time it was first created.
 #  updated_at::         Date/time it was last updated.
 #  verified::           Date/time the account was verified.
@@ -115,11 +114,7 @@
 #  ==== Preferences
 #  locale::             Language, e.g.: "en" or "pt"
 #  theme::              CSS theme, e.g.: "Amanita" or +nil+ for random
-#  rows::               Number of rows of thumbnails to show in index.
-#  columns::            Number of columns of thumbnails to show in index.
-#  alternate_rows::     Should the row colors alternate?
-#  alternate_columns::  Should the column colors alternate?
-#  vertical_layout::    Show text below thumbnails in index?
+#  layout_count::       Number of thumbnails to show in index.
 #
 #  ==== Email options
 #  Send notifications if...
@@ -196,9 +191,12 @@
 #  edited_locations::   Location's they've edited.
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
-#  preferred_herbarium:: User's preferred herbarium (defaults to personal_herbarium).
-#  personal_herbarium:: User's private herbarium: "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own or that are attached to projects they're on.
+#  preferred_herbarium:: User's preferred herbarium
+#                       (defaults to personal_herbarium).
+#  personal_herbarium:: User's private herbarium:
+#                       "Name (login): Personal Herbarium".
+#  all_editable_species_lists:: Species Lists they own
+#                       or that are attached to projects they're on.
 #
 #  ==== Alerts
 #  all_alert_types::    List of accepted alert types.
@@ -246,7 +244,6 @@
 #
 #    Attribute      Local Server    Remote Server
 #    id             1502            1513
-#    sync_id        1502us1         1502us1
 #    login          fred            fred (us1)
 #    password       xxxxxxxx        nil
 #    admin          true            false
@@ -258,7 +255,65 @@
 class User < AbstractModel
   require 'digest/sha1'
 
-  has_many :api_keys, :dependent => :destroy
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  # first value is the default
+  as_enum(:thumbnail_size,
+           { thumbnail: 1,
+             small: 2
+           },
+           source: :thumbnail_size,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:image_size,
+           { thumbnail: 1,
+             small: 2,
+             medium: 3,
+             large: 4,
+             huge: 5,
+             full_size: 6
+           },
+           source: :image_size,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:votes_anonymous,
+           { no: 1,
+             yes: 2,
+             old: 3
+           },
+           source: :votes_anonymous,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:location_format,
+           { postal: 1,
+             scientific: 2
+           },
+           source: :location_format,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:hide_authors,
+           { none: 1,
+             above_species: 2
+           },
+           source: :hide_authors,
+           with: [],
+           accessor: :whiny
+         )
+  as_enum(:keep_filenames,
+           { toss: 1,
+             keep_but_hide: 2,
+             keep_and_show: 3
+           },
+           source: :keep_filenames,
+           with: [],
+           accessor: :whiny
+         )
+
+  has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
   has_many :images
@@ -270,7 +325,7 @@ class User < AbstractModel
   has_many :namings
   has_many :notifications
   has_many :observations
-  has_many :projects_created, :class_name => 'Project'
+  has_many :projects_created, class_name: "Project"
   has_many :publications
   has_many :queued_emails
   has_many :species_lists
@@ -278,24 +333,51 @@ class User < AbstractModel
   has_many :test_add_image_logs
   has_many :votes
 
-  has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
-  has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"
-  has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
+  has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id"
+  has_many :reviewed_name_descriptions, class_name: "NameDescription",
+             foreign_key: "reviewer_id"
+  has_many :to_emails, class_name: "QueuedEmail", foreign_key: "to_user_id"
 
-  has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup',            :join_table => 'user_groups_users'
-  has_and_belongs_to_many :authored_names,     :class_name => 'NameDescription',      :join_table => 'name_descriptions_authors'
-  has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
-  has_and_belongs_to_many :authored_locations, :class_name => 'LocationDescription',  :join_table => 'location_descriptions_authors'
-  has_and_belongs_to_many :edited_locations,   :class_name => 'LocationDescription',  :join_table => 'location_descriptions_editors'
-  has_and_belongs_to_many :curated_herbaria,   :class_name => 'Herbarium',            :join_table => 'herbaria_curators'
+  has_and_belongs_to_many :user_groups,
+    class_name: "UserGroup",
+    join_table: "user_groups_users"
+  has_and_belongs_to_many :authored_names,
+    class_name: "NameDescription",
+    join_table: "name_descriptions_authors"
+  has_and_belongs_to_many :edited_names,
+    class_name: "NameDescription",
+    join_table: "name_descriptions_editors"
+  has_and_belongs_to_many :authored_locations,
+    class_name: "LocationDescription",
+    join_table: "location_descriptions_authors"
+  has_and_belongs_to_many :edited_locations,
+    class_name: "LocationDescription",
+    join_table: "location_descriptions_editors"
+  has_and_belongs_to_many :curated_herbaria,
+    class_name: "Herbarium",
+    join_table: "herbaria_curators"
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
+  ##############################################################################
+  #
+  #  :section: Callbacks and Other Basic Stuff
+  #
+  ##############################################################################
+
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
+
+  # Ensure that certain default values are symbols (rather than strings)
+  # might only be an issue for test environment?
+  # Probably better to instead use after_create and after_update,
+  # as after_initialize will get called every time a User is instantiated.
+  # I don't understand why this is needed at all.  Smells like something
+  # else is wrong if we have to do this hack...
+  # after_initialize :symbolize_values
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
@@ -311,7 +393,7 @@ class User < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    'observer'
+    "observer"
   end
 
   # Find admin's record.
@@ -373,6 +455,10 @@ class User < AbstractModel
   # Improve debug and error message readability.
   def inspect
     "#<User #{id}: #{unique_text_name.inspect}>"
+  end
+
+  def lang
+    Language.lang_from_locale(locale)
   end
 
   ##############################################################################
@@ -447,9 +533,9 @@ class User < AbstractModel
   #   user = User.authenticate('fred99@aol.com', 'password')
   #
   def self.authenticate(login, pass)
-    find(:first, :conditions =>
-      [ "(login = ? OR name = ? OR email = ?) AND password = ? and password != ''",
-        login, login, login, sha1(pass) ])
+    where("(login = ? OR name = ? OR email = ?) AND password = ? AND
+           password != '' ",
+           login, login, login, sha1(pass) ).first
   end
 
   # Change password: pass in unecrypted password, sets 'password' attribute
@@ -470,10 +556,6 @@ class User < AbstractModel
     self.last_login = now
     self.last_activity = now
     self.save
-    Transaction.put_user(
-      :id         => self,
-      :set_verify => now
-    )
   end
 
   ##############################################################################
@@ -517,7 +599,8 @@ class User < AbstractModel
     preferred_herbarium.name rescue personal_herbarium_name
   end
 
-  # Return the name of this user's "favorite" herbarium (meaning the one they have used the most).
+  # Return the name of this user's "favorite" herbarium
+  # (meaning the one they have used the most).
   # TODO: Make this a user preference.
   def preferred_herbarium
     herbarium_id = Herbarium.connection.select_value(%(
@@ -534,7 +617,8 @@ class User < AbstractModel
   end
 
   def personal_herbarium
-    Herbarium.find_all_by_personal_user_id(self.id).first
+  # Herbarium.find_all_by_personal_user_id(self.id).first # Rails 3
+    Herbarium.where(personal_user_id: self.id).first
   end
 
   # Return an Array of SpeciesList's that User owns or that are attached to a
@@ -555,11 +639,11 @@ class User < AbstractModel
     end
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Interests
   #
-  ################################################################################
+  ##############################################################################
 
   # Has this user expressed positive or negative interest in a given object?
   # Returns +:watching+ or +:ignoring+ if so, else +nil+.  Caches result.
@@ -652,16 +736,11 @@ class User < AbstractModel
     [:bounced_email, :other]
   end
 
-  def lang
-    Language.lang_from_locale(locale)
-  end
-
-  protected
   # Get alert structure, initializing it with an empty hash if necessary.
   def get_alert # :nodoc:
     self.alert ||= {}
   end
-  public
+  protected :get_alert
 
   # When the alert was created.
   def alert_created_at
@@ -854,7 +933,9 @@ class User < AbstractModel
   # complicated set of pages. -JPH)
   def has_unshown_naming_notifications?(observation=nil)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
+    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
+    for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
+                               user_id: self.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
         notification = Notification.find(notification_id)
@@ -895,7 +976,7 @@ protected
     unless password.blank?
       write_attribute("password", self.class.sha1(password))
     end
-    write_attribute("auth_code", String.random(39))
+    write_attribute("auth_code", String.random(40))
   end
 
   validate :user_requirements
@@ -903,7 +984,7 @@ protected
   def user_requirements # :nodoc:
     if login.to_s.blank?
       errors.add(:login, :validate_user_login_missing.t)
-    elsif login.length < 3 or login.binary_length > 40
+    elsif login.length < 3 or login.bytesize > 40
       errors.add(:login, :validate_user_login_too_long.t)
     elsif (other = User.find_by_login(login)) && (other.id != id)
       errors.add(:login, :validate_user_login_taken.t)
@@ -911,20 +992,20 @@ protected
 
     if password.to_s.blank?
       # errors.add(:password, :validate_user_password_missing.t)
-    elsif password.length < 5 or password.binary_length > 40
+    elsif password.length < 5 or password.bytesize > 40
       errors.add(:password, :validate_user_password_too_long.t)
     end
 
     if email.to_s.blank?
       errors.add(:email, :validate_user_email_missing.t)
-    elsif email.binary_length > 80
+    elsif email.bytesize > 80
       errors.add(:email, :validate_user_email_too_long.t)
     end
 
-    if theme.to_s.binary_length > 40
+    if theme.to_s.bytesize > 40
       errors.add(:theme, :validate_user_theme_too_long.t)
     end
-    if name.to_s.binary_length > 80
+    if name.to_s.bytesize > 80
       errors.add(:name, :validate_user_name_too_long.t)
     end
   end
