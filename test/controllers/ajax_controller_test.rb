@@ -150,10 +150,11 @@ class AjaxControllerTest < FunctionalTestCase
   def test_auto_complete_name
     expect = Name.all.reject(&:correct_spelling).
                   map(&:text_name).uniq.select {|n| n[0] == "A"}.sort
-    expect.unshift("A")
+    expect_genera = expect.reject {|n| n.include?(" ")}
+    expect_species = expect.select {|n| n.include?(" ")}
+    expect = ["A"] + expect_genera + expect_species
     good_ajax_request(:auto_complete, type: :name, id: "Agaricus")
-    # TODO: The sort in this comparison shouldn't be needed
-    assert_equal(expect, @response.body.split("\n").sort)
+    assert_equal(expect, @response.body.split("\n"))
 
     good_ajax_request(:auto_complete, type: :name, id: "Xystus")
     assert_equal(["X"], @response.body.split("\n"))
