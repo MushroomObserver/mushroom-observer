@@ -1,6 +1,4 @@
-[mysql]
-silent
-quick
+[client]
 database=mo_development
 user=mo
 password=mo

@@ -1,5 +1,5 @@
 #
-#  Installation of a web server. [JPH 20140904]
+#  Installation of a web server. [JPH 20150704]
 #
 #  $IP_ADDR            ip address of new server
 #  $USER               jason
@@ -21,14 +21,29 @@ root> visudo
   %mo ALL = NOPASSWD: /bin/su - mo
 
 # Create user accounts.
-root> useradd -m -s /bin/bash -G mo,sudo $USER
+root> useradd -m -s /bin/bash -G mo,sudo jason
+root> useradd -m -s /bin/bash -G mo,sudo nathan
+root> useradd -m -s /bin/bash -G mo,sudo alan
+root> mkdir /home/jason/.ssh
+root> mkdir /home/nathan/.ssh
+root> mkdir /home/alan/.ssh
+root> vi /home/jason/.ssh/authorized_keys
+  # copy over from old server
+root> vi /home/nathan/.ssh/authorized_keys
+  # copy over from old server
+root> vi /home/alan/.ssh/authorized_keys
+  # copy over from old server
+root> chmod 600 /home/jason/.ssh/authorized_keys
+root> chmod 600 /home/nathan/.ssh/authorized_keys
+root> chmod 600 /home/alan/.ssh/authorized_keys
+root> chmod 700 /home/jason/.ssh
+root> chmod 700 /home/nathan/.ssh
+root> chmod 700 /home/alan/.ssh
+root> chown -R jason:jason /home/jason/.ssh
+root> chown -R nathan:nathan /home/nathan/.ssh
+root> chown -R alan:alan /home/alan/.ssh
 root> passwd $USER
-root> mkdir /home/$USER/.ssh
-root> vi /home/$USER/.ssh/authorized_keys
-  # paste in your local ~/.ssh/id_rsa.pub
-root> chmod 600 /home/$USER/.ssh/authorized_keys
-root> chmod 700 /home/$USER/.ssh
-root> chown -R $USER:$USER /home/$USER/.ssh
+  # set your password now just to be safe, in case keyless login fails
 root> logout
 
 # Set up your account.
@@ -50,8 +65,9 @@ root> vi /etc/ssh/sshd_config
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade -y
-root> apt-get install -y build-essential man telnet wget curl vim emacs \
-                         iptables mlocate lynx ntp
+root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
+# root> apt-get install -y build-essential man telnet wget curl vim emacs \
+#                          iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables -F
@@ -61,6 +77,7 @@ root> iptables -P FORWARD ACCEPT
 root> iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 root> iptables -A INPUT -i lo -j ACCEPT
 root> iptables -A INPUT -p icmp -j ACCEPT
+root> iptables -A INPUT -s 5.255.253.206/32 -j DROP
 root> iptables -A INPUT -m state --state NEW -p tcp --dport 22   -j ACCEPT
 root> iptables -A INPUT -m state --state NEW -p tcp --dport 80   -j ACCEPT
 root> iptables -A INPUT -m state --state NEW -p tcp --dport 25   -j ACCEPT
@@ -111,26 +128,14 @@ mo> mkdir public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
 mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
-  MushroomObserver::Application.configure do
-    config.action_mailer.smtp_settings[:password] = "xxx"
-    config.pivotal_enabled = true
-    config.pivotal_token = "xxx"
-    config.image_sources[:cdmr].delete(:write)
-  end
+  # grab this from old server
 mo> vi config/database.yml
-  # Replace with this:
-  production:
-    adapter:  mysql2
-    database: mo_production
-    host:     db.mushroomobserver.org
-    username: mo
-    password: xxx
-    socket:   /var/run/mysqld/mysqld.sock
-    encoding: utf8
+  # grab this from old server
 # Ping the database to make sure everything's working right.
 mo> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
 
 # Install gems.
+mo> gem install bundle
 mo> bundle install
 
 # Configure nginx.

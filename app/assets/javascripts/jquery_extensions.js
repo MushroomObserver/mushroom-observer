@@ -30,16 +30,14 @@ String.prototype.escapeHTML = function() {
 // Center an element within the viewport.
 jQuery.fn.center = function() {
   var win = jQuery(window);
-  var sx = win.scrollLeft();
-  var sy = win.scrollTop();
   var sw = win.width();
   var sh = win.height();
   var ow = this.outerWidth();
   var oh = this.outerHeight();
-  var x = Math.round(Math.max(0, (sw - ow) / 2 + sx));
-  var y = Math.round(Math.max(0, (sh - oh) / 2 + sy));
+  var x = Math.round(Math.max(0, (sw - ow) / 2));
+  var y = Math.round(Math.max(0, (sh - oh) / 2));
   this.css({
-    position: "absolute",
+    position: "fixed",
     left: x + "px",
     top: y + "px"
   });

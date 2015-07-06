@@ -84,7 +84,8 @@ function log_cmd {
 
 # Run the given mysql command without logging or anything else.
 function run_mysql {
-  mysql --defaults-extra-file=$app_root/config/my.cnf -e "$*"  
+  config_file="$app_root/config/mysql-$RAILS_ENV.cnf"
+  mysql -q -s --defaults-extra-file=$config_file -e "$*"  
 }
 
 # Run the given mysql command, logging the command and any errors. Example:
