@@ -1413,8 +1413,8 @@ class QueryTest < UnitTestCase
   def test_name_by_user
     assert_query([10,12], :Name, :by_user, user: mary, by: :id)
     assert_query([39,42,43,49], :Name, :by_user, user: dick, by: :id)
-    assert_query(Name.all.map(&:id) - [10,12,39,41,42,43,44,49],
-                          :Name, :by_user, user: rolf, by: :id)
+    assert_query([1,2,3,4,5,6,7,8,9,11,13],
+                 :Name, :by_user, user: rolf, by: :id)
     assert_query([], :Name, :by_user, user: junk)
   end
 
