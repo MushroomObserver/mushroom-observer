@@ -1,6 +1,0 @@
-[mysql]
-silent
-quick
-database=mo_development
-user=mo
-password=mo

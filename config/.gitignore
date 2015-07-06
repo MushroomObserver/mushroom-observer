@@ -1,5 +1,4 @@
 database.yml
 consts-site.rb
 test_locales
-production.cnf
-my.cnf
+mysql-production.cnf
