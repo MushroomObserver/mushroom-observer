@@ -1,0 +1,6 @@
+[mysql]
+silent
+quick
+database=mo_test
+user=mo
+password=mo
