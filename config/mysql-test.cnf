@@ -1,4 +1,6 @@
 [client]
-database=mo_test
 user=mo
 password=mo
+
+[mysql]
+database=mo_test

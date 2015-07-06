@@ -257,7 +257,7 @@ module SessionExtensions
         arg = 'div#navigation'
       elsif arg == :results
         arg = 'div.results'
-      elsif arg = :title
+      elsif arg == :title
         arg = 'div#title'
       end
       select = "#{arg} #{select}"

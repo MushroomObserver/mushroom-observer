@@ -1,7 +1,8 @@
 #!/bin/bash
 
-ls /var/web/mushroom-observer/public/images/thumb | sort -n | tail -1
-config_file="/var/web/mushroom-observer/config/mysql-$RAILS_ENV.cnf"
-mysqldump --defaults-extra-file=$config_file mo_production | gzip -c - > checkpoint.gz
-ls /var/web/mushroom-observer/public/images/thumb | sort -n | tail -1
+app_root="$( cd "$(dirname "$0")"; pwd -P | sed 's/\/db*//' )"
+ls $app_root/public/images/thumb | sort -n | tail -1
+config_file=$app_root/config/mysql-$RAILS_ENV.cnf
+mysqldump --defaults-extra-file=$config_file mo_$RAILS_ENV | gzip -c - > checkpoint.gz
+ls $app_root/public/images/thumb | sort -n | tail -1
 chmod 640 checkpoint.gz
