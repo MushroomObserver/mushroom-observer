@@ -29,3 +29,9 @@ tremella_justpublished_is_a_lichen_triple:
   subject: ':name/47'
   predicate: ':lichenAuthority'
   object: '"http://www.ndsu.edu/pubweb/~esslinge/chcklst/chcklst7.htm"^^xsd:anyURI'
+
+aboritporus_biennis_eol_triple:
+  id: 6
+  subject: 'http://mushroomobserver.org/name/show_name/51'
+  predicate: ':eolName'
+  object: 'http://eol.org/search?q=Abortiporus+biennis&type%5B%5D=TaxonConcept'

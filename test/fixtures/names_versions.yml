@@ -651,3 +651,16 @@ suilus_version_1:
   correct_spelling_id: 43
   deprecated: true
   citation: ''
+
+abortiporus_biennis_1:
+  id: 48
+  name_id: 51
+  version: 1
+  updated_at: 2015-07-05 21:41:10
+  user_id: 4
+  rank: <%= Name.ranks[:Species] %>
+  text_name: Abortiporus biennis
+  search_name: Abortiporus biennis (Bull.) Singer
+  sort_name: Abortiporus biennis (Bull.) Singer
+  display_name: '**__Abortiporus biennis__** (Bull.) Singer'
+  author: '(Bull.) Singer'

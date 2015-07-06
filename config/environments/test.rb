@@ -96,6 +96,9 @@ MushroomObserver::Application.configure do
   config.assets.compress = false
   config.assets.debug = false
   config.assets.digest = false
+
+  # To control the debugger turing testing
+  config.activate_debugger = false
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

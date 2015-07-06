@@ -249,6 +249,11 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
+  def test_show_name_with_eol_link
+    get(:show_name, id: 51)
+    assert_template(:show_name, partial: "_name")
+  end
+
   # TODO: Show a name that has a parent to trigger
 
   def test_show_past_name
