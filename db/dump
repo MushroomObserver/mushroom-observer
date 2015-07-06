@@ -2,6 +2,6 @@
 
 ls /var/web/mushroom-observer/public/images/thumb | sort -n | tail -1
 config_file="/var/web/mushroom-observer/config/mysql-$RAILS_ENV.cnf"
-mysqldump --defaults-extra-file=$config_file | gzip -c - > checkpoint.gz
+mysqldump --defaults-extra-file=$config_file mo_production | gzip -c - > checkpoint.gz
 ls /var/web/mushroom-observer/public/images/thumb | sort -n | tail -1
 chmod 640 checkpoint.gz
