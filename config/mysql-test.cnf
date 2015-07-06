@@ -1,4 +1,4 @@
 [client]
-database=mo_development
+database=mo_test
 user=mo
 password=mo
