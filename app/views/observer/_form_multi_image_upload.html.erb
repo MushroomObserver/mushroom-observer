@@ -1,11 +1,9 @@
-<% javascript_include('multi_image_upload') %>
+<% javascript_include("multi_image_upload") %>
 
-<div class="row">
-  <div class="col-xs-12">
-    <%= hidden_field('observation', 'thumb_image_id') %>
-    <input type="file" multiple id="multiple_images_button" accept="image/*"/>
-  </div>
-</div>
+<%= hidden_field(:observation, :thumb_image_id) %>
+
+<input type="file" multiple id="multiple_images_button" accept="image/*" class="push-down"/>
+
 <!-- Container to show messages relating to the selected images -->
 <div class="row image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
   <div class="col-sm-7">
@@ -35,14 +33,14 @@
 </div>
 
 <% inject_javascript_at_end %(
-      jQuery(document).ready(function () {
-        var uploader = new MultiImageUploader({
-          uploading_text: "#{j :form_observations_uploading_images.t}",
-          image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
-          creating_observation_text: "#{j :form_observations_creating_observation.t}",
-          months: "#{j :all_months.t}"
-        })
-        uploader.init();
-        console.log(uploader);
-      });
-    ) %>
+     jQuery(document).ready(function () {
+       var uploader = new MultiImageUploader({
+         uploading_text: "#{j :form_observations_uploading_images.t}",
+         image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
+         creating_observation_text: "#{j :form_observations_creating_observation.t}",
+         months: "#{j :all_months.t}"
+       })
+       uploader.init();
+       console.log(uploader);
+     });
+   ) %>

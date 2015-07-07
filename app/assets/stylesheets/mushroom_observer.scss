@@ -996,6 +996,17 @@ thead tr {
     }
 }
 
+.table-observation-form {
+    background: none;
+    width: 100%;
+    td:first-child {
+        padding-right: 10px;
+    }
+    td {
+        padding-bottom: 5px;
+    }
+}
+
 //
 // icons
 // --------------------------------------------------
@@ -1160,6 +1171,10 @@ thead tr {
     max-width: 850px; // 600px text column + 160pm max thumbnail
 }
 
+.max-width-text-times-two {
+    max-width: 1200px;
+}
+
 .vcenter {
     display: flex;
     align-items: center;
@@ -1168,6 +1183,11 @@ thead tr {
 //
 // style tweaks
 // --------------------------------------------------
+
+.well p {
+  margin: 0;
+  padding: 0;
+}
 
 table.table-compact tr td {
     padding-top: 3px !important;
