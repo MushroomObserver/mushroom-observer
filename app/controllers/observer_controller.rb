@@ -98,10 +98,6 @@
 
 # TODO: Figure out where this stuff goes
 #  ==== Global Callbacks
-#  no_ajax::
-#  no_browser::
-#  no_javascript::
-#  no_session::
 #  turn_javascript_on::
 #  turn_javascript_off::
 #  recalc::
@@ -152,10 +148,6 @@ class ObserverController < ApplicationController
     :map_observations,
     :news,
     :next_observation,
-    :no_ajax,
-    :no_browser,
-    :no_javascript,
-    :no_session,
     :observation_search,
     :observations_by_name,
     :observations_of_name,
@@ -277,22 +269,6 @@ class ObserverController < ApplicationController
 
   # Info on color themes.
   def color_themes # :nologin:
-  end
-
-  # Explanation of why not having AJAX is bad.
-  def no_ajax # :nologin: :norobots:
-  end
-
-  # Explanation of why it's important that we recognize the user's browser.
-  def no_browser # :nologin: :norobots:
-  end
-
-  # Explanation of why having javascript disabled is bad.
-  def no_javascript # :nologin: :norobots:
-  end
-
-  # Explanation of why having cookies disabled is bad.
-  def no_session # :nologin: :norobots:
   end
 
   # Simple form letting us test our implementation of Textile.

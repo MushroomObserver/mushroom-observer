@@ -1,11 +1,19 @@
-<% @title = :author_request_title.t(:title => @object.format_name) %>
+<% @title = :author_request_title.t(title: @object.format_name) %>
 
-<%= form_tag(add_query_param(:action => 'author_request', :id => @object.id,
-      :type => @object.type_tag)) do %>
-  <br/><center><%= submit_tag(:SEND.l, class: "btn") %></center><br/>
+<div class="max-width-text">
+  <%= form_tag(add_query_param(action: :author_request, id: @object.id,
+                               type: @object.type_tag)) do %>
 
-  <label for="email_subject"><%= :request_subject.t %></label>:<br/>
-  <%= text_field(:email, :subject, size: 70, autofocus: true) %><br/><br/>
-  <label for="email_content"><%= :request_message.t %></label>:<br/>
-  <%= text_area('email', 'content', :cols => 80) %>
-<% end %>
+    <div class="form-group push-down">
+      <%= label_tag(:email_subject, :request_subject.t + ":") %>
+      <%= text_field(:email, :subject, data: {autofocus: true}, class: "form-control") %>
+    </div>
+
+    <div class="form-group push-down">
+      <%= label_tag(:email_content, :request_message.t + ":") %>
+      <%= text_area(:email, :content, rows: 10, class: "form-control") %>
+    </div>
+
+    <%= submit_tag(:SEND.l, class: "btn") %></center><br/>
+  <% end %>
+</div>

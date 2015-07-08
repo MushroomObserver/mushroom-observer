@@ -1,49 +1,48 @@
 <% @title = :how_title.t %>
 
+<div class="max-width-text">
+  <%= :how_intro.tp %>
 
-<div class="col-lg-7 col-md-8 col-sm-8">
-<%= :how_intro.tp %>
+  <h4><%= :how_common_tasks.t %>:</h4>
 
-<h4><%= :how_common_tasks.t %>:</h4>
+  <ol>
+    <li id="keeping_up"            ><%= :how_keeping_up.tp          %></li>
+    <li id="searching"             ><%= :how_searching.tp           %></li>
+    <li id="unknown_help"          ><%= :how_unknown_help.tp        %></li>
+    <li id="adding_observations"   ><%= :how_adding_observations.tp %></li>
+    <li id="proposing_names"       ><%= :how_proposing_names.tp     %></li>    
+    <li id="voting"                ><%= :how_voting.tp(
+      min_pos_vote: @min_pos_vote,
+      min_neg_vote: @min_neg_vote,
+      max_vote:     @maximum_vote,
+      no_opinion:   :vote_no_opinion.l
+    ) %></li>
+    <li id="adding_comments"       ><%= :how_adding_comments.tp     %></li>
+    <li id="tracking_species"      ><%= :how_tracking_species.tp    %></li>
+    <li id="describing_species"    ><%= :how_describing_species.tp  %></li>
+    <li id="projects"              ><%= :how_projects.tp            %></li>
+    <li id="maps"                  ><%= :how_maps.tp                %></li>
+    <li id="defining_locations"    ><%= :how_defining_locations.tp  %></li>
+    <li id="creating_species_lists"><%= :how_creating_species_lists.tp %></li>
+  </ol>
 
-<ol>
-  <li id="keeping_up"            ><%= :how_keeping_up.tp          %></li>
-  <li id="searching"             ><%= :how_searching.tp           %></li>
-  <li id="unknown_help"          ><%= :how_unknown_help.tp        %></li>
-  <li id="adding_observations"   ><%= :how_adding_observations.tp %></li>
-  <li id="proposing_names"       ><%= :how_proposing_names.tp     %></li>    
-  <li id="voting"                ><%= :how_voting.tp(
-    :min_pos_vote => @min_pos_vote,
-    :min_neg_vote => @min_neg_vote,
-    :max_vote     => @maximum_vote,
-    :no_opinion   => :vote_no_opinion.l
-  ) %></li>
-  <li id="adding_comments"       ><%= :how_adding_comments.tp     %></li>
-  <li id="tracking_species"      ><%= :how_tracking_species.tp    %></li>
-  <li id="describing_species"    ><%= :how_describing_species.tp  %></li>
-  <li id="projects"              ><%= :how_projects.tp            %></li>
-  <li id="maps"                  ><%= :how_maps.tp                %></li>
-  <li id="defining_locations"    ><%= :how_defining_locations.tp  %></li>
-  <li id="creating_species_lists"><%= :how_creating_species_lists.tp %></li>
-</ol>
+  <h4><%= :how_glossary.t %>:</h4>
 
-<h4><%= :how_glossary.t %>:</h4>
-
-<ol>
-  <li id="comment"      ><%= :how_comment.tp       %></li>
-  <li id="image"        ><%= :how_image.tp         %></li>
-  <li id="license"      ><%= :how_license.tp       %></li>
-  <li id="location"     ><%= :how_location.tp      %></li>
-  <li id="name"         ><%= :how_name.tp          %></li>
-  <li id="observation"  ><%= :how_observation.tp   %></li>
-  <li id="proposed_name"><%= :how_proposed_name.tp %></li>
-  <li id="species_list" ><%= :how_species_list.tp  %></li>
-  <li id="user"         ><%= :how_user.tp          %></li>
-  <li id="vote"         ><%= :how_vote.tp(
-    :min_pos_vote => @min_pos_vote,
-    :min_neg_vote => @min_neg_vote,
-    :max_vote     => @maximum_vote,
-    :no_opinion   => :vote_no_opinion.l
-  ) %></li>
-</ol>
+  <ol>
+    <li id="comment"      ><%= :how_comment.tp       %></li>
+    <li id="image"        ><%= :how_image.tp         %></li>
+    <li id="license"      ><%= :how_license.tp       %></li>
+    <li id="location"     ><%= :how_location.tp      %></li>
+    <li id="name"         ><%= :how_name.tp          %></li>
+    <li id="observation"  ><%= :how_observation.tp   %></li>
+    <li id="proposed_name"><%= :how_proposed_name.tp %></li>
+    <li id="species_list" ><%= :how_species_list.tp  %></li>
+    <li id="user"         ><%= :how_user.tp          %></li>
+    <li id="vote"         ><%= :how_vote.tp(
+      min_pos_vote: @min_pos_vote,
+      min_neg_vote: @min_neg_vote,
+      max_vote:     @maximum_vote,
+      no_opinion:   :vote_no_opinion.l
+    ) %></li>
+  </ol>
 </div>

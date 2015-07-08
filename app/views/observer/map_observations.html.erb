@@ -1,21 +1,19 @@
 <%
   tabs = [
-    link_with_query(:show_objects.t(:type => :observation),
-                    controller: :observer, action: 'index_observation'),
-    link_with_query(:show_objects.t(:type => :location),
-                    controller: :location, action: 'index_location')
+    link_with_query(:show_objects.t(type: :observation),
+                    controller: :observer, action: :index_observation),
+    link_with_query(:show_objects.t(type: :location),
+                    controller: :location, action: :index_location)
   ]
   @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-
-  <%= if @observations.any?
-    objects = @observations
-    objects += @locations if @locations.any?
-    gmap = make_map(objects, query_params: query_params(@query), zoom: 2)
-    finish_map(gmap)
-    gmap.div(width: "100%", height: 550).html_safe
-  else
-    :runtime_map_nothing_to_map.t
-  end %>
-
+<%= if @observations.any?
+  objects = @observations
+  objects += @locations if @locations.any?
+  gmap = make_map(objects, query_params: query_params(@query), zoom: 2)
+  finish_map(gmap)
+  gmap.div(width: "100%", height: 550).html_safe
+else
+  :runtime_map_nothing_to_map.t
+end %>

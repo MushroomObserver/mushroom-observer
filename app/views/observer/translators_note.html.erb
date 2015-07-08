@@ -1,11 +1,14 @@
 <% @title = :translators_note_title.t %>
 
-<div class="col-lg-7 col-md-8 col-sm-8">
+<div class="max-width-text">
   <%= :translators_note.tpl(repo: "#{MO.code_repository}/mushroom-observer/blob/master/config/locales/en.txt") %>
 
-  <% Language.all.sort_by(&:order).each do |lang| %>
-    <%= link_to(h(lang.name), reload_with_args(user_locale: lang.locale)) %>
-    <%= content_tag(:span, "beta") if lang.beta %>
-    <br/>
-  <% end %>
+  <ul>
+    <% Language.all.sort_by(&:order).each do |lang| %>
+      <li>
+        <%= link_to(h(lang.name), reload_with_args(user_locale: lang.locale)) %>
+        <%= content_tag(:span, "(beta)") if lang.beta %>
+      </li>
+    <% end %>
+  </ul>
 </div>

@@ -887,6 +887,18 @@ div.row_controls {
 }
 
 //
+// textile sandbox
+// --------------------------------------------------
+
+.sandbox {
+    border-width: $INPUT_BORDER_WIDTH;
+    border-style: $INPUT_BORDER_STYLE;
+    border-radius: $INPUT_BORDER_RADIUS;
+    border-color: $INPUT_BORDER_COLOR;
+    padding: 2px 5px 0px 5px;
+}
+
+//
 // tables
 // --------------------------------------------------
 
@@ -1159,25 +1171,31 @@ thead tr {
     text-overflow: ellipsis;
 }
 
-.max-width-text {
-    max-width: 600px;
-}
-
-.max-width-text-plus-padding {
-    max-width: 650px;
-}
-
-.max-width-text-plus-image {
-    max-width: 850px; // 600px text column + 160pm max thumbnail
-}
-
-.max-width-text-times-two {
-    max-width: 1200px;
-}
-
 .vcenter {
     display: flex;
     align-items: center;
+}
+
+// Most browsers allow you to zoom in or out: let the user decide what
+// an optimal width for a line of text should be.  There's no way for us
+// to decide for them intelligently, since browsers differ so much in how
+// they deal with print views.
+@media screen {
+    .max-width-text {
+        max-width: 600px;
+    }
+
+    .max-width-text-plus-padding {
+        max-width: 650px;
+    }
+
+    .max-width-text-plus-image {
+        max-width: 850px; // 600px text column + 160pm max thumbnail
+    }
+
+    .max-width-text-times-two {
+        max-width: 1200px;
+    }
 }
 
 //
@@ -1301,6 +1319,16 @@ input[type=checkbox] {
     .navbar-form {
         margin: 0;
         border: 0;
+    }
+}
+
+//
+// specialized stuff for print view
+// --------------------------------------------------
+
+@media print {
+    #right_side {
+        width: 100% !important;
     }
 }
 

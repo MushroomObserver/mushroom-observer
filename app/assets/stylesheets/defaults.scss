@@ -1,5 +1,4 @@
 $BODY_FG_COLOR:                     #000000;
- //$BODY_BG_COLOR:                     #FFFFFF;
 $BODY_BG_COLOR:                     #F6F6F6;
 
 $LINK_WEIGHT:                       bold;
@@ -29,11 +28,10 @@ $BUTTON_PRIMARY_HOVER_BORDER_COLOR: #286192;
 $BUTTON_BORDER_WIDTH:               1px;
 $BUTTON_BORDER_STYLE:               solid;
 $BUTTON_BORDER_RADIUS:              5px;
- // not doing disabled right
+// not doing disabled right
 
 $INPUT_FG_COLOR:                    #000000;
 $INPUT_BG_COLOR:                    #FFFFFF;
- // $INPUT_BG_COLOR:                    #FFFF00;
 $INPUT_BORDER_COLOR:                #CCCCCC;
 $INPUT_BORDER_WIDTH:                1px;
 $INPUT_BORDER_STYLE:                solid;
@@ -92,6 +90,7 @@ $TOP_BAR_LINK_BG_COLOR:             $LINK_BG_COLOR;
 $TOP_BAR_LINK_HOVER_FG_COLOR:       $LINK_HOVER_FG_COLOR;
 $TOP_BAR_LINK_HOVER_BG_COLOR:       $LINK_HOVER_BG_COLOR;
 
+  // The indented ones have not been tested thoroughly.
   $LIST_BORDER_COLOR:                 #DDDDDD;
   $LIST_HEADER_FG_COLOR:              #000000;
   $LIST_HEADER_BG_COLOR:              #F0F0F0;

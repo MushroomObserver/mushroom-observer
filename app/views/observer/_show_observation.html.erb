@@ -1,38 +1,37 @@
 <div class="row">
   <div class="col-xs-12">
-      <div id="observation_when">
-        <%= :WHEN.t %>:
-        <strong><%= observation.when.web_date %></strong>
-      </div>
-      <div id="observation_where">
-        <%= observation.is_collection_location ? :show_observation_collection_location.t : :show_observation_seen_at.t %>
-        :
-        <strong><%= location_link(observation.place_name, observation.location, nil, true) %></strong>
-      </div>
-      <div id="observation_lat_lng">
-        <% if observation.lat or observation.alt %>
-        <span>(<%= observation.lat ? "#{observation.lat}° #{observation.long}° " : '' %>
-          <%= observation.alt ? "#{observation.alt}m" : '' %>)</span>
-        <% end %>
-      </div>
-      <div id="observation_who">
-        <%= :WHO.t %>: <strong><%= user_link(observation.user) %></strong>
-      </div>
-      <div id="observation_projects">
-        <% for project in observation.projects %>
-            <div><%= :PROJECT.t %>: <strong><%= project_link(project) %></strong></div>
-        <% end %>
-      </div>
-      <div id="observation_specimen_info">
-        <%= content_tag(:strong, observation_specimen_link(observation)) + create_specimen_link(observation) %>
-      </div>
-      <%= if !observation.notes.blank?
-            Textile.clear_textile_cache
-            Textile.register_name(*observation.namings.map(&:name))
-            Textile.register_name(observation.name)
-            content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').tpl,
-                        style: "margin-top:1em; margin-bottom:-1em")
-          end %>
+    <div id="observation_when">
+      <%= :WHEN.t %>:
+      <strong><%= observation.when.web_date %></strong>
     </div>
+    <div id="observation_where">
+      <%= observation.is_collection_location ? :show_observation_collection_location.t : :show_observation_seen_at.t %>:
+      <strong><%= location_link(observation.place_name, observation.location, nil, true) %></strong>
+    </div>
+    <div id="observation_lat_lng">
+      <% if observation.lat or observation.alt %>
+      <span>(<%= observation.lat ? "#{observation.lat}° #{observation.long}° " : '' %>
+        <%= observation.alt ? "#{observation.alt}m" : '' %>)</span>
+      <% end %>
+    </div>
+    <div id="observation_who">
+      <%= :WHO.t %>: <strong><%= user_link(observation.user) %></strong>
+    </div>
+    <div id="observation_projects">
+      <% for project in observation.projects %>
+          <div><%= :PROJECT.t %>: <strong><%= project_link(project) %></strong></div>
+      <% end %>
+    </div>
+    <div id="observation_specimen_info">
+      <%= content_tag(:strong, observation_specimen_link(observation)) + create_specimen_link(observation) %>
+    </div>
+    <%= if !observation.notes.blank?
+      Textile.clear_textile_cache
+      Textile.register_name(*observation.namings.map(&:name))
+      Textile.register_name(observation.name)
+      content_tag(:div, observation.notes.to_s.sub(/^\A/, :NOTES.l + ': ').tpl,
+                  style: "margin-top:1em; margin-bottom:-1em")
+    end %>
+  </div>
 </div>
 

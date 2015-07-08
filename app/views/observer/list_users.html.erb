@@ -5,17 +5,18 @@
 %>
 
 <%
-   # ----------------------------
-   #  Admin version.
-   # ----------------------------
-   if is_in_admin_mode? %>
+  # ----------------------------
+  #  Admin version.
+  # ----------------------------
+  if is_in_admin_mode? %>
     <style>
-        table.permissions td {
-            padding: 3px 5px 3px 5px
-        }
+      table.permissions td {
+        padding: 3px 5px 3px 5px
+      }
     </style>
     <%= paginate_block(@pages) do %>
-        <table align="center" class="table table-striped permissions" cellspacing="2">
+      <table align="center" class="table table-striped permissions" cellspacing="2">
+        <thead>
           <tr class="Data">
             <th><%= :users_by_name_verified.t %></th>
             <th><%= :users_by_name_groups.t %></th>
@@ -26,29 +27,30 @@
             <th><%= :users_by_name_theme.t %></th>
             <th><%= :users_by_name_created_at.t %> (<%= @objects.length %>)</th>
           </tr>
-          <tbody>
+        </thead>
+        <tbody>
           <tr height="2"></tr>
           <% @objects.each do |user| %>
-              <tr>
-                <td><%= user.verified %></td>
-                <td><%= user.user_groups.map { |g| h(g.name) }.safe_join(',') %></td>
-                <td><%= user.last_login.web_time rescue '--' %></td>
-                <td><%= user.id %></td>
-                <td><%= user_link(user, user.login) %></td>
-                <td><%= h(user.name) %></td>
-                <td><%= h(user.theme) %></td>
-                <td><%= user.created_at.web_time rescue '--' %></td>
-              </tr>
-              </tbody>
+            <tr>
+              <td><%= user.verified %></td>
+              <td><%= user.user_groups.map { |g| h(g.name) }.safe_join(',') %></td>
+              <td><%= user.last_login.web_time rescue '--' %></td>
+              <td><%= user.id %></td>
+              <td><%= user_link(user, user.login) %></td>
+              <td><%= h(user.name) %></td>
+              <td><%= h(user.theme) %></td>
+              <td><%= user.created_at.web_time rescue '--' %></td>
+            </tr>
           <% end %>
-          </table>
+        </tbody>
+      </table>
     <% end %>
 
 <%
-   # ----------------------------
-   #  Normal version.
-   # ----------------------------
-   else %>
+  # ----------------------------
+  #  Normal version.
+  # ----------------------------
+  else %>
     <%= paginate_block(@pages) do %>
       <div class="row">
         <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>

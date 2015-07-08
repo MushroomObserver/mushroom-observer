@@ -24,36 +24,36 @@
   end
 
   tabs = [
-    link_to(:show_user_contributors.t, :controller => 'observer',
-            :action => 'users_by_contribution')
+    link_to(:show_user_contributors.t, controller: :observer,
+            action: :users_by_contribution)
   ]
   if @show_user == @user
     tabs += [
       link_to(:show_user_your_observations.t, links[:observations]),
       link_to(:show_user_comments_for_you.t, links[:comments_for]),
-      link_to(:show_user_your_notifications.t, :controller => "interest",
-                    :action => "list_interests"),
-      link_to(:show_user_edit_profile.t, :controller => "account",
-                     :action => "profile"),
-      link_to(:app_preferences.t, :controller => "account", :action => "prefs"),
+      link_to(:show_user_your_notifications.t, controller: :interest,
+                    action: :list_interests),
+      link_to(:show_user_edit_profile.t, controller: :account,
+                     action: :profile),
+      link_to(:app_preferences.t, controller: :account, action: :prefs),
       link_to(:app_life_list.t, links[:life_list])
     ]
   else
     tabs += [
-      link_to(:show_user_observations_by.t(:name => name), links[:observations]),
-      link_to(:show_user_comments_for.t(:name => name), links[:comments_for]),
-      link_to(:show_user_email_to.t(:name => name), :controller => "observer",
-                          :action => "ask_user_question", :id => id)
+      link_to(:show_user_observations_by.t(name: name), links[:observations]),
+      link_to(:show_user_comments_for.t(name: name), links[:comments_for]),
+      link_to(:show_user_email_to.t(name: name), controller: :observer,
+                          action: :ask_user_question, id: id)
     ]
   end
   if is_in_admin_mode?
     tabs += [
-      link_to(:change_user_bonuses.t, :controller => "observer",
-              :action => "change_user_bonuses", :id => @show_user.id),
-      link_to(:user_alert_create_alert.t, :controller => "account",
-              :action => "create_alert", :id => @show_user.id),
-      link_to(:DESTROY.t, :controller => "account", :action => "destroy_user",
-              :id => @show_user.id)
+      link_to(:change_user_bonuses.t, controller: :observer,
+              action: :change_user_bonuses, id: @show_user.id),
+      link_to(:user_alert_create_alert.t, controller: :account,
+              action: :create_alert, id: @show_user.id),
+      link_to(:DESTROY.t, controller: :account, action: :destroy_user,
+              id: @show_user.id)
     ]
   end
   @tabsets = {
@@ -77,7 +77,7 @@
   if @user_data[:languages_itemized]
     for lang, score in @user_data[:languages_itemized]
       rows << {
-        label: :show_user_language_contribution.t(:name => lang.name),
+        label: :show_user_language_contribution.t(name: lang.name),
         points: score.to_i
       }
     end
@@ -99,99 +99,101 @@
 <div class="row">
   <div class="col-xs-7">
     <% if @show_user.location %>
-        <p>
-          <strong><%= :show_user_primary_location.t %>:</strong> <%= location_link(nil, @show_user.location) %>
-        </p>
+      <p>
+        <strong><%= :show_user_primary_location.t %>:</strong> <%= location_link(nil, @show_user.location) %>
+      </p>
     <% end %>
     <% if !@show_user.mailing_address.blank? %>
-        <strong><%= :show_user_mailing_address.t %>:</strong>
-        <%= @show_user.mailing_address %><br/>
+      <strong><%= :show_user_mailing_address.t %>:</strong>
+      <%= @show_user.mailing_address %><br/>
     <% end %>
     <% if !@show_user.notes.blank? %>
-        <table>
-          <tr>
-            <td>
-              <%= @show_user.notes.tpl %>
-            </td>
-          </tr>
-        </table>
+      <table>
+        <tr>
+          <td>
+            <%= @show_user.notes.tpl %>
+          </td>
+        </tr>
+      </table>
     <% end %>
   </div>
+
   <div class="col-xs-5">
     <p class="push-down">
       <%= thumbnail(@show_user.image_id, {votes: false}) if @show_user.image_id %>
-      <strong><%= :show_user_joined.t %>:</strong>  <%= @show_user.verified %>
+      <strong><%= :show_user_joined.t %>:</strong> <%= @show_user.verified %>
     </p>
   </div>
+
   <div class="col-xs-12">
-    <div>
+    <div class="row">
+
       <div class="col-sm-3">
         <% if @observations %>
-            <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
-                <%= thumbnail(obs.thumb_image,
-                              :link => {controller: obs.show_controller, action: obs.show_action, id: obs.id},
-                              :votes => true) %>
-            <% end %>
+          <% for obs in @observations.values_at(0, 2, 4).reject(&:nil?) %>
+            <%= thumbnail(obs.thumb_image,
+                          link: {controller: obs.show_controller, action: obs.show_action, id: obs.id},
+                          votes: true) %>
+          <% end %>
         <% end %>
       </div>
+
       <div class="col-sm-6">
         <center>
-        <table class="table">
-        <%
-           # Do we want to sort by points?
-           # rows = rows.sort_by {|row| row[:points]}.reverse
-           rows.each do |row|
-             field = row[:field]
-             label = row[:label]
-             count = row[:count]
-             weight = row[:weight]
-             points = row[:points]
-             url = links[field]
-             link = url ? link_to(label, url) : label
-             total += points
-             if !count %>
+          <table class="table">
+            <% rows.each do |row|
+              field = row[:field]
+              label = row[:label]
+              count = row[:count]
+              weight = row[:weight]
+              points = row[:points]
+              url = links[field]
+              link = url ? link_to(label, url) : label
+              total += points
+              if !count %>
                 <tr>
                   <td colspan="2"><%= label %></td>
                   <td>=</td>
                   <td align="right"><%= points %></td>
                 </tr>
-            <% elsif !label.blank? %>
+              <% elsif !label.blank? %>
                 <tr>
                   <td><%= link %></td>
                   <td><%= count %> * <%= weight %></td>
                   <td>=</td>
                   <td align="right"><%= points %></td>
                 </tr>
-            <% end
-               end
-               if total > 0 %>
-            <tr>
-              <td colspan="4">
-                <hr/>
-              </td>
-            </tr>
-            <tr>
-              <td><%= :show_user_total.t %></td>
-              <td></td>
-              <td>=</td>
-              <td align="right"><%= total %></td>
-            </tr>
-        <% end %>
-        </table>
-        <%= :show_user_life_list.t(:genera => @life_list.num_genera,
-                                       :species => @life_list.num_species, :url => links[:life_list]) if @life_list.num_species > 0 %>
-
+              <% end %>
+            <% end %>
+            <% if total > 0 %>
+              <tr>
+                <td colspan="4">
+                  <hr/>
+                </td>
+              </tr>
+              <tr>
+                <td><%= :show_user_total.t %></td>
+                <td></td>
+                <td>=</td>
+                <td align="right"><%= total %></td>
+              </tr>
+            <% end %>
+          </table>
+          <%= if @life_list.num_species > 0
+            :show_user_life_list.t(genera: @life_list.num_genera,
+                                   species: @life_list.num_species, url: links[:life_list])
+          end %>
         </center>
       </div>
+
       <div class="col-sm-3">
         <% if @observations %>
-            <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
-                <%= thumbnail(obs.thumb_image,
-                              :link => {controller: obs.show_controller, action: obs.show_action, id: obs.id},
-                              :votes => true) %>
-            <% end %>
+          <% for obs in @observations.values_at(1, 3, 5).reject(&:nil?) %>
+            <%= thumbnail(obs.thumb_image,
+                          link: {controller: obs.show_controller, action: obs.show_action, id: obs.id},
+                          votes: true) %>
+          <% end %>
         <% end %>
-
       </div>
     </div>
   </div>

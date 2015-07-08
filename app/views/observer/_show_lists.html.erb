@@ -1,28 +1,28 @@
-<%
-   lists = observation.species_lists
-%>
-<% if !lists.empty? %>
-    <h4>
-      <%= :show_lists_header.t %>
-    </h4>
-    <div class="list-group">
+<% if observation.species_lists.any? %>
+  <h4>
+    <%= :show_lists_header.t %>
+  </h4>
+  <div class="list-group">
     <div class="list-group-item kill-padding">
       <table class="table table-responsive" style="margin-left: 0; margin-right: 0; margin-bottom: 0;">
-        <% lists.each do |list| %>
-            <tr>
-              <td style="border-top:0">
-                <%= link_to(list.format_name.t, :controller => 'species_list',
-                            :action => 'show_species_list', :id => list.id) %>
-                    [<%= link_to(:REMOVE.t, {controller: 'species_list',
-                                             action: 'remove_observation_from_species_list',
-                                             observation: observation.id,
-                                             species_list: list.id},
-                                 data: {confirm: :are_you_sure.l}) if check_permission(list)%>]
-              </td>
-            </tr>
+        <% observation.species_lists.each do |list| %>
+          <tr>
+            <td style="border-top:0">
+              <%= link_to(list.format_name.t, controller: :species_list,
+                          action: :show_species_list, id: list.id) %>
+              <%= if check_permission(list)
+                url = {
+                  controller: :species_list,
+                  action: :remove_observation_from_species_list,
+                  observation: observation.id,
+                  species_list: list.id
+                }
+                "[".html_safe + link_to(:REMOVE.t, url, data: {confirm: :are_you_sure.l}) + "]"
+              end %>
+            </td>
+          </tr>
         <% end %>
       </table>
     </div>
-    </div>
+  </div>
 <% end %>
-

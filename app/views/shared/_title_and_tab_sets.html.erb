@@ -6,13 +6,17 @@
   @tabsets ||= {}
 %>
 
-<!-- This pushes down the title on small and xs screens so buttons dont block. -->
-<div class="visible-xs visible-sm" style="margin-top: 23px">
-  &nbsp;
+<div class="visible-print">
+  <%= content_tag(:h3, @title, style: "font-size: 170%; margin-top: 5px;") %>
 </div>
 
-<% if @full_width_tab_set %>
-  <div class="col-xs-12">
+<div class="hidden-print">
+  <!-- This pushes down the title on small and xs screens so buttons dont block. -->
+  <div class="visible-xs visible-sm" style="margin-top: 23px">
+    &nbsp;
+  </div>
+
+  <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
     <div>
       <%= content_tag(:h3, @title, style: "font-size: 170%; margin-top: 5px;") %>
       <% if @tabsets[:pager_for] %>
@@ -20,40 +24,35 @@
       <% end %>
     </div>
   </div>
-  <div class="col-xs-12">
-    <%= @full_width_tab_set %>
-  </div>
-<% else %>
-  <div class="col-sm-8" id="title">
-    <div>
-      <%= content_tag(:h3, @title, style: "font-size: 22px; margin-top: 5px;") %>
-      <% if @tabsets[:pager_for] %>
-        <%= render(partial: "/shared/prev_next_pager", locals: {object: @tabsets[:pager_for]}) %>
-      <% end %>
-    </div>
-  </div>
+
   <% if @tabsets[:right] %>
     <div id="right_tabs" class="col-sm-4 push-up" style="text-align: right">
       <%= @tabsets[:right] %>
     </div>
   <% end %>
-<% end %>
 
-<% if @sorts %>
-  <div class="col-xs-12">
-    <div class="pad-top">
-      <span>
-        <%= :sort_by_header.t %>
-      </span>
-      <div id="sorts" class="btn-group btn-group-xs" role="group">
-        <% @sorts.each do |title, action| %>
-          <%= if action.nil?
-            link_with_query(title, {}, class: "btn btn-default active", disabled: true)
-          else
-            link_with_query(title, action, class: "btn btn-default")
-          end %>
-        <% end %>
+  <% if @full_width_tab_set %>
+    <div class="col-xs-12">
+      <%= @full_width_tab_set %>
+    </div>
+  <% end %>
+
+  <% if @sorts %>
+    <div class="col-xs-12">
+      <div class="pad-top">
+        <span>
+          <%= :sort_by_header.t %>
+        </span>
+        <div id="sorts" class="btn-group btn-group-xs" role="group">
+          <% @sorts.each do |title, action| %>
+            <%= if action.nil?
+              link_with_query(title, {}, class: "btn btn-default active", disabled: true)
+            else
+              link_with_query(title, action, class: "btn btn-default")
+            end %>
+          <% end %>
+        </div>
       </div>
     </div>
-  </div>
-<% end %>
+  <% end %>
+</div>

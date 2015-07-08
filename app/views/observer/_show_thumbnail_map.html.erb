@@ -1,4 +1,4 @@
-<% if @user ? @user.thumbnail_maps : (!browser.bot? and !session[:hide_thumbnail_maps]) %>
+<% if (@user && @user.thumbnail_maps) || (!browser.bot? && !session[:hide_thumbnail_maps]) %>
   <%
     gmap = nil
     if observation.lat and observation.long
@@ -13,16 +13,15 @@
   %>
   <% if gmap %>
     <% finish_map(gmap) %>
-        <div class="row">
-          <div class="col-xs-12">
-             <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
-            <span class="pull-right inline">
+    <div class="row">
+      <div class="col-xs-12">
+        <h4 class="inline" style="margin-top: 0"><%= :MAP.t %></h4>
+        <span class="pull-right inline">
           <%= link_with_query(:show_observation_hide_map.t, action: :hide_thumbnail_map, id: @observation.id) %>
-            </span>
-          </div>
-        </div>
-
-     <div class="list-group">
+        </span>
+      </div>
+    </div>
+    <div class="list-group">
       <%= gmap.div(width: "100%", height: "230px").html_safe %>
     </div>
   <% end %>

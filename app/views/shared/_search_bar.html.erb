@@ -62,7 +62,8 @@
       <% if @user.admin %>
         <li>
           <%= link_to("", {controller: :account, action: is_in_admin_mode? ? :turn_admin_off : :turn_admin_on},
-                           {class: "glyphicon glyphicon-text-background", title: :app_turn_admin_on.t,
+                           {class: "glyphicon glyphicon-text-background",
+                            title: is_in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t,
                             data: {toggle: "tooltip", placement: "left"}}) %>
         </li>
       <% end %>

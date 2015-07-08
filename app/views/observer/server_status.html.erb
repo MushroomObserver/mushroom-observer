@@ -1,6 +1,6 @@
 <% @title = :system_status_title.t %>
 
-<%= form_tag(:controller => 'observer', :action => 'server_status') do %>
+<%= form_tag(controller: :observer, action: :server_status) do %>
   <%= submit_tag(:system_status_gc.l, class: "btn") %>
   <%= submit_tag(:system_status_clear_caches.l, class: "btn") %>
 <% end %>

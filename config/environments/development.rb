@@ -31,7 +31,7 @@ MushroomObserver::Application.configure do
     },
     cdmr: {
       test: :transferred_flag,
-      read: "http://images.mushroomobserver.org/cdmr"
+      read: "http://images.mushroomobserver.org"
     },
     cdmr_s3: {
       test: :transferred_flag,
