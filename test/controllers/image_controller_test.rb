@@ -735,4 +735,13 @@ class ImageControllerTest < FunctionalTestCase
       assert_checkbox_state("project_id_#{id}", state)
     end
   end
+
+  def test_show_user_profile_image
+    assert(rolf.image_id)
+    get(:show_image, id: rolf.image_id)
+
+    conic = glossary_terms(:conic_glossary_term)
+    assert(conic.thumb_image_id)
+    get(:show_image, id: conic.thumb_image_id)
+  end
 end
