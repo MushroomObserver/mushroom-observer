@@ -69,6 +69,10 @@ class LocationControllerTest < FunctionalTestCase
 
 ################################################################################
 
+  def test_location_help
+    get_with_dump(:help)
+  end
+
   def test_show_location
     location = locations(:albion)
     updated_at = location.updated_at
