@@ -10,14 +10,10 @@
   <div class="col-xs-12 max-width-text-plus-image">
     <%= content_tag(:h4, :COMMENTS.t,
                     class: "push-down", style: "display:inline-block") %>
-      <%= link_with_query(:show_comments_add_comment.t,
-                          {
-	                    controller: :comment,
-	                    action: :add_comment,
-	                    id: object.id,
-	                    type: object.class.name
-                          },
-                          class: "push-down pull-right") if controls %>
+      <%= link_with_query(:show_comments_add_comment.t, {controller: :comment,
+	                        action: :add_comment, id: object.id, type: object.class.name},
+                          class: "btn push-down pull-right") if controls %>
+
     <% if comments.empty? %>
       <div class="list-group comment">
         <div class="list-group-item default">

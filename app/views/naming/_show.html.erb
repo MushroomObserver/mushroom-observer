@@ -7,20 +7,16 @@
 <%= form_tag(add_query_param(controller: :observer, action: :cast_votes,
              id: observation.id)) do %>
 
+  <div class="row" style="margin: 0; padding-top: 0; padding-bottom: 0">
+    <div class="col-sm-4 col-xs-12"><%= content_tag(:h4, any_names ? :show_namings_proposed_names.t : :show_namings_no_names_yet.t) %></div>
+    <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= :show_namings_user.t %></div>
+    <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= :show_namings_consensus.t %></div>
+    <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= logged_in ? :show_namings_your_vote.t : "" %></div>
+  </div>
+
   <!--TABLE OF NAMES-->
-  <div class="list-group push-down">
-
-    <div class="list-group-item border-none" style="padding-bottom: 0"> <!--TODO: SCSS -->
-      <div class="row">
-        <div class="col-sm-4 col-xs-12"><%= content_tag(:h4, any_names ? :show_namings_proposed_names.t : :show_namings_no_names_yet.t) %></div>
-        <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= :show_namings_user.t %></div>
-        <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= :show_namings_consensus.t %></div>
-        <div class="col-sm-2 hidden-xs" style="padding-top: 15px;"><%= logged_in ? :show_namings_your_vote.t : "" %></div>
-        <div class="col-sm-2"><%= (logged_in && any_names && can_do_ajax?) ? submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"}, class: "btn"}) : "" %></div>
-      </div>
-    </div>
-
-    <% if any_names %>
+  <% if any_names %>
+    <div class="list-group push-down" style="margin: 0">
       <% observation.namings.sort_by(&:created_at).each do |naming| %>
         <div class="list-group-item">
           <% Textile.register_name(naming.name) %>
@@ -81,15 +77,17 @@
         </div>
       <% end # each_name %>
     <% end # any_names? %>
+  </div>
+  <!--/TABLE OF NAMES-->
 
-    <!--HELP TEXT AND EYES-->
-    <div class="list-group-item">
-      <div class="row">
-        <div class="col-xs-12">
-          <strong class="pull-right">
-            <%= link_with_query(:show_namings_propose_new_name.t, {controller: :naming, action: :create, id: observation.id}) %>
-          </strong>
-        </div>
+  <!--HELP TEXT AND EYES-->
+  <div class="row" style="margin: 0; padding-top: 0; padding-bottom: 0">
+    <div class="col-xs-12">
+      <div class="pull-right push-down">
+        <%= link_with_query(:show_namings_propose_new_name.t, {controller: :naming,
+                            action: :create, id: observation.id}, class: "btn") %>
+        <%= submit_tag(:show_namings_update_votes.l, {data: {role: "save_votes"},
+                       class: "btn"}) if logged_in && any_names %>
       </div>
       <p class="help-block">
         <% if !logged_in %>
@@ -111,10 +109,9 @@
         </div>
       </div>
     </div>
-    <!--/HELP TEXT AND EYES-->
-
   </div>
-  <!--/TABLE OF NAMES-->
+  <!--/HELP TEXT AND EYES-->
+
 <% end # form %>
 
 <!--VOTE POPUPS-->

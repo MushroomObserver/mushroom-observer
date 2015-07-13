@@ -6,6 +6,10 @@
   user_has_lists = @user && @user.species_lists.any?
   javascript_include("vote_popup")
 
+  show_map    = @user ? @user.thumbnail_maps : !browser.bot? && !session[:hide_thumbnail_maps]
+  show_lists  = @observation.species_lists.any?
+  wide_images = !show_map || @observation.images.count > 2
+
   tabs = []
   if name && !name.unknown?
     tabs << link_to(:google_images.t, 'http://images.google.com/images?q=%s' % name.real_text_name)
@@ -49,7 +53,8 @@
         <%= render(partial: 'show_observation', locals: {observation: @observation}) %>
       </div>
     </div>
-    <%= render(partial: 'show_image_slider', locals: {thumb_size_control: true}) %>
+    <%= render(partial: 'show_lists', locals: {observation: @observation}) if show_lists && wide_images && show_map %>
+    <%= render(partial: 'show_image_slider', locals: {thumb_size_control: true}) if !wide_images %>
   </div>
   <div class="col-sm-4">
     <div class="list-group">
@@ -57,12 +62,13 @@
         <%= render(partial: 'show_name_info', locals: {observation: @observation}) %>
       </div>
     </div>
-    <%= render(partial: 'show_thumbnail_map', locals: {observation: @observation}) unless browser.bot? %>
-    <%= render(partial: 'show_lists', locals: {observation: @observation}) %>
+    <%= render(partial: 'show_lists', locals: {observation: @observation}) if show_lists && (!wide_images || !show_map) %>
+    <%= render(partial: 'show_thumbnail_map', locals: {observation: @observation}) if show_map %>
   </div>
 </div>
 <div class="row">
   <div class="col-xs-12">
+    <%= render(partial: 'show_image_slider', locals: {thumb_size_control: true}) if wide_images %>
     <%= render(partial: 'naming/show', locals: {observation: @observation}) %>
     <%= render(partial: 'comment/show_comments', locals: {object: @observation,
                                                           controls: true, limit: nil}) %>
