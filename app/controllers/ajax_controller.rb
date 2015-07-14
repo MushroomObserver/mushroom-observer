@@ -238,9 +238,9 @@ class AjaxController < ApplicationController
   # when uploading multiple images on create observation
   def get_multi_image_template
     @user = get_session_user!
-    @licenses = License.current_names_and_ids(@user.license) #Needed to render licenses drop down
-    @image = Image.new(:user => @user, :when => Time.now)
-    render(:partial => '/observer/form_multi_image_template')
+    @licenses = License.current_names_and_ids(@user.license) # for license menu
+    @image = Image.new(user: @user, when: Time.now)
+    render(partial: "/observer/form_multi_image_template")
   end
 
   # Uploads an image object without an observation.
