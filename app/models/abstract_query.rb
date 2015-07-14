@@ -1680,7 +1680,8 @@ class AbstractQuery < ActiveRecord::Base
       if @result_ids
         @result_ids.count
       else
-        rows = select_rows(args.merge(:select => "count(*)"))[0][0]
+        rows = select_rows(args.merge(select: "count(*)"))
+        rows[0][0].to_i rescue 0
       end
   end
 
