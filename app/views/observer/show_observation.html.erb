@@ -8,7 +8,7 @@
 
   show_map    = @user ? @user.thumbnail_maps : !browser.bot? && !session[:hide_thumbnail_maps]
   show_lists  = @observation.species_lists.any?
-  wide_images = !show_map || @observation.images.count > 2
+  wide_images = !show_map
 
   tabs = []
   if name && !name.unknown?
