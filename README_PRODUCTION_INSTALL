@@ -299,11 +299,14 @@ root> iptables-save
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
 root> ps -ef | grep unicorn
-root> ps -ef | grep mysqld
+root> ps -ef | grep mysqld   # <--- make sure mysqld is NOT running!!!
 root> ps -ef | grep postfix
 
 # If any are missing, do this on ubuntu/debian:
 root> update-rc.d $SERVICE defaults
+
+# If you want to turn one off:
+root> update-rc.d -f $SERVICE remove
 
 # Make sure date and time and timezone are correct!
 root> date
