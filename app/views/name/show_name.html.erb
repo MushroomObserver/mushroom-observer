@@ -34,10 +34,8 @@
 <div class="row">
   <div class="col-sm-5">
     <% if @first_four and @first_four.length > 0 %>
+        <strong><%= :show_name_most_confident.t %>:</strong>
         <div class="list-group">
-          <div class="list-group-item">
-            <%= :show_name_most_confident.t %>
-          </div>
           <% @first_four.each do |obs| %>
               <div class="list-group-item">
                 <%= show_best_image(obs) %>
@@ -96,18 +94,16 @@
         <%= classification_section(@classification, @parents, @first_child, @children_query) %>
       </div>
     </div>
-    <div class="list-group">
-      <% if @name.has_notes? %>
-          <div class="list-group-item">
-            <%= :show_name_notes.t %>:
-            <%= link_with_query(:EDIT.t, {controller: 'name', action: 'edit_name', id: @name.id},
-                                {class: "pull-right"}) %>
-          </div>
+
+    <% if @name.has_notes? %>
+      <strong><%= :show_name_notes.t %>:</strong>
+        [<%= link_with_query(:EDIT.t, controller: :name, action: :edit_name, id: @name.id) %>]
+      <div class="list-group">
           <div class="list-group-item">
             <%= @name.notes.tpl %>
           </div>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
 
     <% if !@best_description.blank? %>
         <strong><%= :show_name_brief_description.t %>:</strong>
