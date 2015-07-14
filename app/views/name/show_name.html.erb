@@ -127,14 +127,8 @@
         </div>
     <% end %>
     <strong><%= :show_name_descriptions.t %>:</strong>
-    <div>
-      <%= link_with_query(:show_name_create_description.t,
-                          {
-	                    controller: :name,
-	                    action: :create_name_description,
-	                    id: @name.id
-                          }, {class: "pull-right"}) %>
-    </div>
+      [<%= link_with_query(:show_name_create_description.t, controller: :name,
+	                        action: :create_name_description, id: @name.id) %>]
     <div class="list-group">
       <div class="list-group-item">
         <% description_links.each do |desc| %>
