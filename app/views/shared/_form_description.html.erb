@@ -13,33 +13,33 @@
   <div class="form-group">
     <%= label_tag(:description_source, :form_description_source.t + ":") %>
 
-    <%= need_help = false
-    if root
-      form.select(:source_type, [
+    <% need_help = false
+    if root %>
+      <%= form.select(:source_type, [
         [:form_description_source_public.l,  :public],
         [:form_description_source_foreign.l, :foreign],
         [:form_description_source_project.l, :project],
         [:form_description_source_source.l,  :source],
         [:form_description_source_user.l,    :user],
-      ], class: "form-control")
-    elsif new_record && [:public, :source, :user].include?(type)
-      need_help = true
-      form.select(:source_type, [
+      ], class: "form-control") %>
+    <% elsif new_record && [:public, :source, :user].include?(type) %>
+      <% need_help = true %>
+      <%= form.select(:source_type, [
         [:form_description_source_public.l, :public],
         [:form_description_source_source.l, :source],
         [:form_description_source_user.l,   :user],
-      ], class: "form-control")
-    else
-      form.hidden_field(:source_type, value: type) +
-      "form_description_source_#{type}".to_sym.l
-    end %>
+      ], class: "form-control") %>
+    <% else %>
+      <%= form.hidden_field(:source_type, value: type) %>
+      <%= :"form_description_source_#{type}".l %>
+    <% end %>
 
-    <%= if !root && [:foreign, :project].include?(type)
-      form.hidden_field(:source_name) +
-      @description.source_name.t
-    else
-      form.text_field(:source_name, class: "form-control")
-    end %>
+    <% if !root && [:foreign, :project].include?(type) %>
+      <%= form.hidden_field(:source_name) %>
+      <%= @description.source_name.t %>
+    <% else %>
+      <%= form.text_field(:source_name, class: "form-control") %>
+    <% end %>
     <%= form.hidden_field(:project_id) %>
 
     <% if need_help %>
@@ -66,6 +66,7 @@
   <div class="form-group">
     <%= label_tag(:description_license_id, :License.t + ":") %>
     <%= form.select(:license_id, @licenses, class: "form-control") %>
-    <p class="help-block"><%= :form_description_license_help.t %></p
+    <p class="help-block"><%= :form_description_license_help.t %></p>
   </div>
+
 <% end %>
