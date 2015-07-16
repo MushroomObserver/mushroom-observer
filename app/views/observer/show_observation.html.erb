@@ -60,7 +60,11 @@
       </div>
     </div>
     <%= render(partial: "show_lists", locals: {observation: @observation}) if show_lists %>
-    <%= render(partial: "show_thumbnail_map", locals: {observation: @observation}) if show_map %>
+    <% if show_map %>
+      <div class="hidden-xs">
+        <%= render(partial: "show_thumbnail_map", locals: {observation: @observation}) %>
+      </div>
+    <% end %>
     <%= render(partial: "show_images", locals: {observation: @observation}) %>
   </div>
   <div class="col-sm-8 pull-left-sm">
