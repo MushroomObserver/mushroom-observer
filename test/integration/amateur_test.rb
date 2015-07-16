@@ -321,7 +321,7 @@ class AmateurTest < IntegrationTestCase
   module VoterDsl
     def vote_on_name(obs, naming)
       get("/#{obs.id}")
-      open_form("form[action*=cast_votes]") do |form|
+      open_form("form[id=cast_votes_1]") do |form|
         form.assert_value("vote_#{naming.id}_value", /no opinion/i)
         form.select("vote_#{naming.id}_value", /call it that/i)
         form.submit
@@ -333,7 +333,7 @@ class AmateurTest < IntegrationTestCase
     def change_mind(obs, naming)
       # "change_mind response.body".print_thing(response.body)
       get("/#{obs.id}")
-      open_form("form[action*=cast_votes]") do |form|
+      open_form("form[id=cast_votes_1]") do |form|
         form.select("vote_#{naming.id}_value", /as if!/i)
         form.submit
       end
@@ -414,8 +414,9 @@ class AmateurTest < IntegrationTestCase
       # (Make sure naming shows up somewhere.)
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
-      assert_select("a[href*=naming/edit/#{naming.id}]", 1)
-      assert_select("a[href*=naming/destroy/#{naming.id}]", 1)
+      # (Now two: one for wide-screen, one for mobile.)
+      assert_select("a[href*=naming/edit/#{naming.id}]", 2)
+      assert_select("a[href*=naming/destroy/#{naming.id}]", 2)
 
       # Try changing it.
       author = '(Pers.) Grev.'
