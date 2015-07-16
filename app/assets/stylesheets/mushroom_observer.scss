@@ -1027,6 +1027,7 @@ table.table-namings {
         border-radius: $INPUT_BORDER_RADIUS !important;
     }
     th {
+        color: $BODY_FG_COLOR;
         background: $BODY_BG_COLOR;
         font-weight: normal;
         vertical-align: bottom;
