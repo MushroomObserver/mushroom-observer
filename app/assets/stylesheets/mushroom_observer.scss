@@ -1020,6 +1020,31 @@ thead tr {
     }
 }
 
+table.table-namings {
+    width: 100%;
+    tbody {
+        border: 1px solid $LIST_BORDER_COLOR;
+        border-radius: $INPUT_BORDER_RADIUS !important;
+    }
+    th {
+        background: $BODY_BG_COLOR;
+        font-weight: normal;
+        vertical-align: bottom;
+    }
+    th, td {
+        padding: 5px;
+    }
+    th:first-child {
+        padding-left: 0;
+    }
+    td:first-child {
+        padding-left: 1em;
+    }
+    td:last-child {
+        padding-right: 1em;
+    }
+}
+
 //
 // icons
 // --------------------------------------------------
@@ -1320,6 +1345,22 @@ input[type=checkbox] {
     .navbar-form {
         margin: 0;
         border: 0;
+    }
+}
+
+//
+// larger devices
+// --------------------------------------------------
+
+@media screen and (min-width: 767px) {
+    .pull-left-sm {
+        float: left;
+    }
+    .pull-right-sm {
+        float: right;
+    }
+    .push-down-sm {
+        margin-top: 1em;
     }
 }
 
