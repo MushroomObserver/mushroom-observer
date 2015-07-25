@@ -48,7 +48,7 @@ done
 ################################################################################
 
 function verbose {
-  (( $VERBOSE )) && echo "$*"
+  (( ! $VERBOSE )) || echo "$*"
 }
 
 function cache_file {
@@ -63,6 +63,7 @@ function refresh_cache {
   touch $file
   for subdir in ${image_subdirs[@]}; do
     if image_server_has_subdir $server $subdir; then
+      verbose "Listing $server $subdir"
       read_server_directory $server $subdir | \
         sort | sed "s/^/$subdir\//" >> $file
     fi

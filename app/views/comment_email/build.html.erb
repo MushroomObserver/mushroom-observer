@@ -21,7 +21,10 @@
   # Interest confuses the whole issue, of course, since it overrides these
   # two prefs.
   is_owner = (@user == @comment.target.user)
-  recipients_comments = Comment.find_all_by_target_type_and_target_id_and_user_id(@comment.target_type, @comment.target_id, @user.id)
+  # recipients_comments = Comment.find_all_by_target_type_and_target_id_and_user_id(@comment.target_type, @comment.target_id, @user.id)
+  recipients_comments = Comment.where(target_type: @comment.target_type,
+                                      target_id: @comment.target_id,
+                                      user_id: @user.id)
   comments_before_this_comment = recipients_comments.select {|c| c.created_at < @comment.created_at}
   is_response = (!is_owner && comments_before_this_comment.length > 0)
   # print "is_owner = #{is_owner}\n"

@@ -1,34 +1,44 @@
 <%
-  @title = :species_list_projects_title.t(:list => @list.title)
+  @title = :species_list_projects_title.t(list: @list.title)
 
-  new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :species_list), :controller => :species_list,
-            :action => :show_species_list, :id => @list.id)
-  end
+  tabs = [
+    link_to(:cancel_and_show.t(type: :species_list), @list.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<div style="max-width:800px">
-  <div class="HelpNote"><%= :species_list_projects_help.tp %></div>
-  <br/>
+<div class="max-width-text">
+  <div class="help-block push-down">
+    <%= :species_list_projects_help.tp %>
+  </div>
 
-  <%= form_tag(:id => @list.id) %>
-    <big><%= :species_list_projects_which_objects.t %></big><br/>
-    <%= check_box_tag(:objects_list, 1, @object_states[:list]) %><%= :species_list_projects_this_list.t %><br/>
-    <%= check_box_tag(:objects_obs, 1, @object_states[:obs]) %><%= :species_list_projects_observations.t %><br/>
-    <%= check_box_tag(:objects_img, 1, @object_states[:img]) %><%= :species_list_projects_images.t %><br/>
-    <br/>
+  <%= form_tag(id: @list.id) %>
+    <div class="form-group form-inline push-down">
+      <b><%= :species_list_projects_which_objects.t %></b><br/>
+      <%= check_box_tag(:objects_list, 1, @object_states[:list],
+                        class: "form-control") %>
+      <%= :species_list_projects_this_list.t %><br/>
+      <%= check_box_tag(:objects_obs, 1, @object_states[:obs],
+                        class: "form-control") %>
+      <%= :species_list_projects_observations.t %><br/>
+      <%= check_box_tag(:objects_img, 1, @object_states[:img],
+                        class: "form-control") %>
+      <%= :species_list_projects_images.t %><br/>
+    </div>
 
-    <big><%= :species_list_projects_which_projects.t %></big><br/>
-    <% for proj in @projects.sort_by(&:text_name) %>
-      <%= check_box_tag("projects_#{proj.id}", 1, @project_states[proj.id]) %><%= proj.title.t %><br/>
-    <% end %>
-    <br/>
+    <div class="form-group form-inline push-down">
+      <b><%= :species_list_projects_which_projects.t %></b><br/>
+      <% for proj in @projects.sort_by(&:text_name) %>
+        <%= check_box_tag("projects_#{proj.id}", 1, @project_states[proj.id], 
+                          class: "form-control") %>
+        <%= proj.title.t %><br/>
+      <% end %>
+    </div>
 
-    <center>
-      <%= submit_tag(:ATTACH.l) %>
+    <center class="push-down">
+      <%= submit_tag(:ATTACH.l, class: "btn") %>
       &nbsp;
-      <%= submit_tag(:REMOVE.l) %>
+      <%= submit_tag(:REMOVE.l, class: "btn") %>
     </center>
   </form>
 </div>
-

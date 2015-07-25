@@ -1,0 +1,46 @@
+<% javascript_include("multi_image_upload") %>
+
+<%= hidden_field(:observation, :thumb_image_id) %>
+
+<input type="file" multiple id="multiple_images_button" accept="image/*" class="push-down"/>
+
+<!-- Container to show messages relating to the selected images -->
+<div class="row image_messages" style="background: rgba(211, 211, 211, 0.22); display: none;">
+  <div class="col-sm-7">
+    <div class="inconsistent_date_options">
+      <div class="col-sm-12">
+        <div><strong><%= :form_observations_set_observation_date_to.t %>:</strong></div>
+        <div id="image_date_radio_container"></div>
+        <div><strong><%= :form_observations_set_image_dates_to.t %>:</strong></div>
+        <div id="observation_date_radio_container"></div>
+      </div>
+      <div class="col-sm-12" style="margin-top: 15px;">
+        <button id="fix_dates" type="button" class="btn"><%= :form_observations_use_date.t %></button>
+        <button id="ignore_dates" type="button" class="btn"><%= :IGNORE.t %></button>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <span><%= :form_observations_date_warning.t %></span>
+  </div>
+</div>
+
+<!--Container for appending images-->
+<div class="images_container margin-top">
+  <div id="added_images_container">
+    <!--Target for insertion-->
+  </div>
+</div>
+
+<% inject_javascript_at_end %(
+     jQuery(document).ready(function () {
+       var uploader = new MultiImageUploader({
+         uploading_text: "#{j :form_observations_uploading_images.t}",
+         image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
+         creating_observation_text: "#{j :form_observations_creating_observation.t}",
+         months: "#{j :all_months.t}"
+       })
+       uploader.init();
+       console.log(uploader);
+     });
+   ) %>

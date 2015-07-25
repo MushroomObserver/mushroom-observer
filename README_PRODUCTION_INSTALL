@@ -1,5 +1,5 @@
 #
-#  Installation of a web server. [JPH 20140904]
+#  Installation of a web server. [JPH 20150704]
 #
 #  $IP_ADDR            ip address of new server
 #  $USER               jason
@@ -21,14 +21,29 @@ root> visudo
   %mo ALL = NOPASSWD: /bin/su - mo
 
 # Create user accounts.
-root> useradd -m -s /bin/bash -G mo,sudo $USER
+root> useradd -m -s /bin/bash -G mo,sudo jason
+root> useradd -m -s /bin/bash -G mo,sudo nathan
+root> useradd -m -s /bin/bash -G mo,sudo alan
+root> mkdir /home/jason/.ssh
+root> mkdir /home/nathan/.ssh
+root> mkdir /home/alan/.ssh
+root> vi /home/jason/.ssh/authorized_keys
+  # copy over from old server
+root> vi /home/nathan/.ssh/authorized_keys
+  # copy over from old server
+root> vi /home/alan/.ssh/authorized_keys
+  # copy over from old server
+root> chmod 600 /home/jason/.ssh/authorized_keys
+root> chmod 600 /home/nathan/.ssh/authorized_keys
+root> chmod 600 /home/alan/.ssh/authorized_keys
+root> chmod 700 /home/jason/.ssh
+root> chmod 700 /home/nathan/.ssh
+root> chmod 700 /home/alan/.ssh
+root> chown -R jason:jason /home/jason/.ssh
+root> chown -R nathan:nathan /home/nathan/.ssh
+root> chown -R alan:alan /home/alan/.ssh
 root> passwd $USER
-root> mkdir /home/$USER/.ssh
-root> vi /home/$USER/.ssh/authorized_keys
-  # paste in your local ~/.ssh/id_rsa.pub
-root> chmod 600 /home/$USER/.ssh/authorized_keys
-root> chmod 700 /home/$USER/.ssh
-root> chown -R $USER:$USER /home/$USER/.ssh
+  # set your password now just to be safe, in case keyless login fails
 root> logout
 
 # Set up your account.
@@ -50,8 +65,9 @@ root> vi /etc/ssh/sshd_config
 # Install core packages.
 root> apt-get update
 root> apt-get upgrade -y
-root> apt-get install -y build-essential man telnet wget curl vim emacs \
-                         iptables mlocate lynx ntp
+root> apt-get install -y telnet wget curl vim iptables mlocate lynx ntp
+# root> apt-get install -y build-essential man telnet wget curl vim emacs \
+#                          iptables mlocate lynx ntp
 
 # Configure firewall. (22=ssh, 80=http, 25=smtp, 3306=mysql, 53=dns)
 root> iptables -F
@@ -61,6 +77,7 @@ root> iptables -P FORWARD ACCEPT
 root> iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 root> iptables -A INPUT -i lo -j ACCEPT
 root> iptables -A INPUT -p icmp -j ACCEPT
+root> iptables -A INPUT -s 5.255.253.206/32 -j DROP
 root> iptables -A INPUT -m state --state NEW -p tcp --dport 22   -j ACCEPT
 root> iptables -A INPUT -m state --state NEW -p tcp --dport 80   -j ACCEPT
 root> iptables -A INPUT -m state --state NEW -p tcp --dport 25   -j ACCEPT
@@ -76,11 +93,12 @@ root> vi /etc/rc.local
 
 # Install most of the modules that we will need (except ruby).
 root> apt-get install -y mysql-server mysql-client libmysqlclient-dev \
-          libcurl4-openssl-dev libssl-dev git nginx libyaml-dev \
+          libcurl4-openssl-dev libssl-dev git nginx-extras libyaml-dev \
           imagemagick libmagickcore-dev libmagickwand-dev libjpeg-dev
 
 # Install rvm and ruby.
-root> curl -sSL https://get.rvm.io | bash -s stable --ruby=1.9.3
+root> curl -sSL https://rvm.io/mpapis.asc | sudo gpg --import -
+root> curl -sSL https://get.rvm.io | bash -s stable --ruby=2.1.5
 root> gpasswd -a mo rvm
 root> echo "gem: --no-document" > /etc/gemrc
 root> echo "gem: --no-document" > /root/.gemrc
@@ -105,30 +123,19 @@ mo> git clone https://github.com/MushroomObserver/mushroom-observer .
 [NJW: Remember to switch to another branch if you are testing this process
 on code not on the master branch.]
 
-mo> mkdir log log/old tmp public/images/{thumb,320,640,960,1280,orig}
+mo> mkdir log log/old tmp tmp/pids tmp/sockets
+mo> mkdir public/images/{thumb,320,640,960,1280,orig}
 mo> ln -s images public/local_images
 mo> cp config/etc/bash_aliases.sh ~/.bash_aliases
 mo> vi config/consts-site.rb
-  MushroomObserver::Application.configure do
-    config.action_mailer.smtp_settings[:password] = "xxx"
-    config.pivotal_enabled = true
-    config.pivotal_token = "xxx"
-    config.image_sources[:cdmr].delete(:write)
-  end
+  # grab this from old server
 mo> vi config/database.yml
-  # Replace with this:
-  production:
-    adapter:  mysql2
-    database: mo_production
-    host:     db.mushroomobserver.org
-    username: mo
-    password: xxx
-    socket:   /var/run/mysqld/mysqld.sock
-    encoding: utf8
+  # grab this from old server
 # Ping the database to make sure everything's working right.
 mo> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=db.mushroomobserver.org ping
 
 # Install gems.
+mo> gem install bundle
 mo> bundle install
 
 # Configure nginx.
@@ -148,6 +155,17 @@ root> update-rc.d unicorn defaults
 
 --------------------------------------------------------------------------------
 
+# If installing database locally:
+root> mysql -u root -p
+  create database mo_production;
+  create user 'mo'@'localhost' identified by '$DB_PASSWORD';
+  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
+  exit
+root> scp $SNAPSHOT_PATH/checkpoint.gz .
+root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production
+
+--------------------------------------------------------------------------------
+
 # Test basic system now.
 root> su mo
 mo> env | grep RAILS_ENV
@@ -155,6 +173,7 @@ mo> env | grep RAILS_ENV
 mo> bundle install
 mo> rake db:migrate
 mo> rake lang:update
+mo> rake assets:precompile
 mo> rails server
 # Watch for errors in any of these!!
 
@@ -209,8 +228,7 @@ mo> vi .muttrc
   set from="no-reply@mushroomobserver.org"
   set use_from=yes
   set envelope_from=yes
-mo> vi .forward
-  root
+mo> echo root > .forward
 mo> echo "This is another test." | mutt -s test $YOUR_EMAIL
 mo> exit
 
@@ -254,7 +272,7 @@ root> vi /etc/logrotate.d/unicorn
     delaycompress
     sharedscripts
     postrotate
-      kill -HUP `cat /var/web/mushroom-observer/tmp/unicorn.pid`
+      kill -HUP `cat /var/web/mushroom-observer/tmp/pids/unicorn.pid`
       mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }
@@ -281,11 +299,14 @@ root> iptables-save
 root> ps -ef | grep sshd
 root> ps -ef | grep nginx
 root> ps -ef | grep unicorn
-root> ps -ef | grep mysqld
+root> ps -ef | grep mysqld   # <--- make sure mysqld is NOT running!!!
 root> ps -ef | grep postfix
 
 # If any are missing, do this on ubuntu/debian:
 root> update-rc.d $SERVICE defaults
+
+# If you want to turn one off:
+root> update-rc.d -f $SERVICE remove
 
 # Make sure date and time and timezone are correct!
 root> date

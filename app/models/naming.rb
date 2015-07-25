@@ -9,7 +9,6 @@
 #  == Attributes
 #
 #  id::                     Locally unique numerical id, starting at 1.
-#  sync_id::                Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::             Date/time it was created.
 #  updated_at::             Date/time it was last updated.
 #  user::                   User that created it.
@@ -66,7 +65,7 @@ class Naming < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    'observer'
+    "observer"
   end
 
   def self.construct(args, observation)
@@ -88,32 +87,12 @@ class Naming < AbstractModel
     end
   end
 
-  def save_with_transaction
-    args = transaction_args
-    if save
-      args[:id] = self
-      Transaction.create(args)
-      true
-    else
-      false
-    end
-  end
-
   # Update naming and log changes.
   def update_object(new_name, log)
     self.name = new_name
     save
     observation.log(:log_naming_updated,
                     name: format_name, touch: log)
-
-    # Always tell Transaction to change reasons, even if no changes.
-    args = { id: self }
-    args[:set_name] = name
-    get_reasons.select(&:used?).each do |reason|
-      args["set_reason_#{reason.num}".to_sym] = reason.notes
-    end
-    Transaction.put_naming(args)
-
     true
   end
 
@@ -180,10 +159,11 @@ class Naming < AbstractModel
       @initial_name_id = self.name_id
       taxa = self.name.all_parents
       taxa.push(self.name)
-      taxa.push(Name.find_by_text_name('Lichen')) if self.name.is_lichen?
+      taxa.push(Name.find_by_text_name("Lichen")) if self.name.is_lichen?
       done_user = {}
+      flavor = Notification.flavors[:name]
       for taxon in taxa
-        for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
+        for n in Notification.where(flavor: flavor, obj_id: taxon.id)
           if n.user.created_here   and
              (n.user != user)      and
              !done_user[n.user_id] and
@@ -214,7 +194,8 @@ class Naming < AbstractModel
         end
 
         # Also send to people who have registered positive interest in this name.
-        # (Don't want *disinterest* in name overriding interest in the observation, say.)
+        # (Don't want *disinterest* in name overriding
+        # interest in the observation, say.)
         for taxon in taxa
           for interest in taxon.interests
             if interest.state
@@ -273,8 +254,7 @@ class Naming < AbstractModel
   end
 
   def first_vote
-    Vote.find(:first, conditions: ["naming_id = ? AND user_id = ?",
-                                   id, user_id])
+    Vote.where(naming_id: id, user_id: user_id).first
   end
 
   ##############################################################################
@@ -395,10 +375,10 @@ class Naming < AbstractModel
     table = {}
     for str, val in Vote.opinion_menu
       table[str] = {
-        :num   => 0,
-        :wgt   => 0.0,
-        :value => val,
-        :votes => [],
+          num: 0,
+          wgt: 0.0,
+          value: val,
+          votes: [],
       }
     end
 
@@ -579,18 +559,5 @@ class Naming < AbstractModel
     if !self.user && !User.current
       errors.add(:user, :validate_naming_user_missing.t)
     end
-  end
-
-  private
-
-  def transaction_args
-    args = { action: "naming" }
-    if new_record?
-      args.merge(method: "post", name: name, observation: observation)
-    else
-      args[:set_name] = name if name_id_changed?
-      args[:set_observation] = observation if observation_id_changed?
-      args.merge(method: "put")
-     end
   end
 end

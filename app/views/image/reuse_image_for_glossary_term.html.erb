@@ -1,42 +1,16 @@
 <%
-  tag_params = add_query_param(:action => 'reuse_image_for_glossary_term')
+  @title = :image_reuse_title.t(name: @object.unique_format_name)
 
-  @title = :image_reuse_title.t(:name => @object.unique_format_name)
-  id = @object.id
-  tag_params[:id] = id
-  new_tab_set do
-    add_tab_with_query(:show_object.t(:type => @object.class),
-      :controller => @object.show_controller,
-      :action => @object.show_action, :id => @object.id)
-    add_tab_with_query(:edit_object.t(:type => @object.class),
-      :controller => @object.show_controller,
-      :action => @object.edit_action, :id => id)
-  end
+  tabs = [
+    link_with_query(:show_object.t(type: @object.type_tag),
+                    @object.show_link_args),
+    link_with_query(:edit_object.t(type: @object.type_tag),
+                    controller: @object.show_controller,
+                    action: @object.edit_action, id: @object.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
+
+  url_args = {action: :reuse_image_for_glossary_term, id: @object.id}
 %>
 
-<%= form_tag(tag_params) do %>
-
-  <p>
-    <label for="img_id"><%= :image_reuse_id.t %>:</label>
-    <%= text_field_tag("img_id", "", :size => 8) %>&nbsp;
-    &nbsp;<%= submit_tag(:image_reuse_reuse.l) %>
-  </p>
-  <div class="HelpNote"><%= :image_reuse_id_help.tp %></div>
-
-  <p><big>
-    <%= link_with_query(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
-          :glossary_term_id => id,
-          :all_users => (@all_users ? 0 : 1)) %>
-  </big></p><br/>
-
-  <%= paginate_block(@pages) do %>
-    <%= make_matrix(@objects) do |image| %>
-      <%= render(:partial => 'image_reuse', :object => image, :locals => {
-            :link_args => add_query_param(:action => 'reuse_image_for_glossary_term',
-              :glossary_term_id => id, :img_id => image.id)
-          }) %>
-    <% end %>
-  <% end %>
-
-  <%= focus_on('img_id') %>
-<% end %>
+<%= render(partial: "reuse_image", locals: {url_args: url_args}) %>

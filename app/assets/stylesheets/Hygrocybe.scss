@@ -1,0 +1,90 @@
+@import "old_theme";
+
+$conica_stain:          #37372f;
+$conica_cap_red:        #a31404;
+$conica_cap_orange:     #dd6226;
+$conica_cap_yellow:     #ffbf01;
+$conica_gill_margin:    #ffda84;
+$miniata_gill_margin:   #ebc97f;
+$miniata_cap_red:       #a10200;
+$miniata_cap_orange:    #c83e00;
+$miniata_cap_yellow:    #f19c05;
+$psittacina_cap_green:  #405536;
+$psittacina_cap_orange: #eb9020;
+$psittacina_cap_middle: #a38a3f;
+$psittacina_gill_color: #f2d686;
+$punicea_cap_dark:      #bb2900;
+$punicea_cap_light:     #cc382a;
+$punicea_dark_stipe:    #e7bc3c;
+$punicea_light_stipe:   #e9e3af;
+$polyozellus_light:     #a5bffa;
+$polyozellus_dark:      #5167b2;
+
+$BODY_FG_COLOR:               $conica_stain;
+$BODY_BG_COLOR:               $punicea_light_stipe;
+                             
+$LINK_FG_COLOR:               $psittacina_cap_green;
+$LINK_VISITED_FG_COLOR:       $psittacina_cap_orange;
+$LINK_HOVER_FG_COLOR:         $psittacina_cap_green;
+$LINK_HOVER_BG_COLOR:         $psittacina_gill_color;
+                             
+$LOGO_BORDER_COLOR:           $conica_stain;
+$LOGO_FG_COLOR:               $conica_stain;
+$LOGO_BG_COLOR:               $punicea_cap_light;
+$LOGO_HOVER_FG_COLOR:         $conica_stain;
+$LOGO_HOVER_BG_COLOR:         $punicea_cap_light;
+                             
+$LEFT_BAR_BORDER_COLOR:       $miniata_cap_yellow;
+$LEFT_BAR_HEADER_FG_COLOR:    $psittacina_cap_green;
+$LEFT_BAR_HEADER_BG_COLOR:    $miniata_cap_yellow;
+$LEFT_BAR_FG_COLOR:           $miniata_cap_red;
+$LEFT_BAR_BG_COLOR:           $miniata_cap_yellow;
+$LEFT_BAR_HOVER_FG_COLOR:     $miniata_cap_red;
+$LEFT_BAR_HOVER_BG_COLOR:     $psittacina_gill_color;
+
+$TOP_BAR_FG_COLOR:            $conica_stain;
+$TOP_BAR_BG_COLOR:            $punicea_light_stipe;
+$TOP_BAR_LINK_FG_COLOR:       $psittacina_cap_green;
+$TOP_BAR_LINK_HOVER_FG_COLOR: $psittacina_cap_green;
+$TOP_BAR_LINK_HOVER_BG_COLOR: $psittacina_gill_color;
+
+$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_HEADER_FG_COLOR:        #777777;
+$LIST_HEADER_BG_COLOR:        #EEEEEE;
+$LIST_FG_COLOR:               $conica_stain;
+$LIST_BG_COLOR:               mix($punicea_light_stipe, white, 50%);
+
+$TOOLTIP_BG_COLOR:            $punicea_cap_light;
+                             
+$PAGER_FG_COLOR:              $punicea_cap_dark;
+$PAGER_HOVER_FG_COLOR:        $punicea_light_stipe;
+$PAGER_HOVER_BG_COLOR:        $punicea_cap_light;
+$PAGER_ACTIVE_FG_COLOR:       $punicea_light_stipe;
+$PAGER_ACTIVE_BG_COLOR:       $punicea_cap_dark;
+                             
+$MENU_BORDER_COLOR:           $miniata_gill_margin;
+$MENU_FG_COLOR:               black;
+$MENU_BG_COLOR:               white;
+$MENU_HOT_FG_COLOR:           black;
+$MENU_HOT_BG_COLOR:           $psittacina_cap_middle;
+$MENU_WARM_FG_COLOR:          black;
+$MENU_WARM_BG_COLOR:          $psittacina_cap_middle;
+
+$INFO_BG_COLOR:                     $polyozellus_light;
+$INFO_BORDER_COLOR:                 $polyozellus_dark;
+$INFO_FG_COLOR:                     $BODY_FG_COLOR;
+$SUCCESS_BG_COLOR:                  #E0FFE0;
+$SUCCESS_BORDER_COLOR:              #70C070;
+$SUCCESS_FG_COLOR:                  $BODY_FG_COLOR;
+$WARNING_BG_COLOR:                  #FFF8E0;
+$WARNING_BORDER_COLOR:              #F8CC70;
+$WARNING_FG_COLOR:                  $BODY_FG_COLOR;
+$DANGER_BG_COLOR:                   #FFE0E0;
+$DANGER_BORDER_COLOR:               #F07070;
+$DANGER_FG_COLOR:                   $BODY_FG_COLOR;
+
+@import "mushroom_observer";
+
+#navigation {
+    border-left-width: $LEFT_BAR_BORDER_WIDTH;
+}

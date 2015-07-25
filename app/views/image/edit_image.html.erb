@@ -1,29 +1,27 @@
 <%
-  @title = :image_edit_title.t(:name => @image.unique_format_name)
+  @title = :image_edit_title.t(name: @image.unique_format_name)
 
-  new_tab_set do
-    add_tab_with_query(:cancel_and_show.t(:type => :image),
-      :action => 'show_image', :id => @image.id)
-  end
+  tabs = [
+    link_with_query(:cancel_and_show.t(type: :image), @image.show_link_args)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= form_for(:image, :url => add_query_param({ :action => :edit_image, :id => @image })) do |form| %>
-  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
+<%= form_for(:image, url: add_query_param(action: :edit_image, id: @image)) do |form| %>
+  <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 max-width-text">
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
 
-  <table cellpadding="10">
-    <tr>
-      <td valign="top">
-        <%= render(:partial => 'form_images', :locals => {
-          :form => form,
-          :width => 40,
-          :leave_out_original_file_name => false
-        }) %>
-      </td>
-      <td align="center">
-        <%= thumbnail(@image, :size => :medium, :border => 0, :votes => true) %>
-      </td>
-    </tr>
-  </table>
+    <%= render(partial: "form_images",
+               locals: {form: form, leave_out_original_file_name: false}) %>
 
-  <center><%= submit_tag :SAVE_EDITS.l %></center>
+    <div class="text-center push-down" style="margin-bottom:2em">
+      <%= submit_tag(:SAVE_EDITS.l, class: "btn") %>
+      <%= link_with_query(:cancel_and_show.t(type: :image),
+                          {action: :show_image, id: @image.id},
+                          {class: "btn"}) %>
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
+    <%= thumbnail(@image, {size: :medium, votes: true, responsive: true}) %>
+  </div>
 <% end %>

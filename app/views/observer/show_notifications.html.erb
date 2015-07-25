@@ -1,12 +1,13 @@
 <%
-  @title = :show_notifications_title.t(:user => @user.legal_name)
+  @title = :show_notifications_title.t(user: @user.legal_name)
 
   if @observation
-    new_tab_set do
-      add_tab(:show_object.t(:type => :observation),
-              :controller => 'observer', :action => 'show_observation',
-              :id => @observation.id)
-    end
+    tabs = [
+      link_to(:show_object.t(type: :observation),
+              controller: :observer, action: :show_observation,
+              id: @observation.id)
+    ]
+    @tabsets = { right: draw_tab_set(tabs) }
   end
 %>
 
@@ -14,8 +15,8 @@
 for notification, naming in @data
   odd_or_even = 1 - odd_or_even %>
   <p>
-    <div class="ListLine<%= odd_or_even %>" style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-      <%= notification.calc_note(:user => @user, :naming => naming).tp %>
+    <div class="ListLine<%= odd_or_even %>" style="margin:0px 20px; padding:10px 20px; border:1px dotted;">
+      <%= notification.calc_note(user: @user, naming: naming).tp %>
     </div>
   </p>
 <% end %>

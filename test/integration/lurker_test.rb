@@ -16,21 +16,21 @@ class LurkerTest < IntegrationTestCase
 
     # Click on next (catches a bug seen in the wild).
     push_page
-    click(:label => '« Prev', :in => 'div#left_tabs')
+    click(:label => '« Prev', :in => :title)
     go_back
 
     # Click on the first image.
     push_page
-    click(:label => :image, :in => 'div.show_images')
-    click(:label => :image, :href => /show_image.*full_size/)
+    click(:label => :image, :href => /show_image/)
+    # click(:label => :image, :href => /show_image.*full_size/)
     go_back
 
     # Go back to observation and click on "About...".
-    click(:label => 'About', :href => /show_name/)
+    click(:href => /show_name/)
     assert_template('name/show_name')
 
     # Take a look at the occurrence map.
-    click(:label => 'Occurrence Map', :in => :tabs)
+    click(:label => 'Occurrence Map')
     assert_template('name/map')
 
     # Check out a few links from left-hand panel.
@@ -85,10 +85,11 @@ class LurkerTest < IntegrationTestCase
 
     # And lastly there are some images.
     go_back
+
     assert_select('a[href^=/image/show_image]', :minimum => 2)
     click(:label => :image, :href => /show_image/)
     # (Make sure observation #2 is shown somewhere.)
-    assert_select('a[href^=/2?]')
+    assert_select('a[href^=/2]')
   end
 
   def test_search
@@ -151,29 +152,30 @@ class LurkerTest < IntegrationTestCase
     get('/name/map/1')
 
     # Get a list of locations shown on map. (One defined, one undefined.)
-    click(:label => 'Show Locations', :in => :tabs)
+    click(:label => 'Show Locations', :in => :right_tabs)
     assert_template('location/list_locations')
 
     # Click on the defined location.
+
     click(:label => /Burbank/)
     assert_template('location/show_location')
 
     # Get a list of observations from there.  (Several so goes to index.)
-    click(:label => 'Observations at this Location', :in => :tabs)
+    click(:label => 'Observations at this Location', :in => :right_tabs)
     assert_template('observer/list_observations')
     save_results = get_links('div.results a[href^=?]', /\/\d+/)
 
     # Try sorting differently.
-    click(:label => 'Date', :in => :tabs)
+    click(:label => 'User', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
-    click(:label => 'User', :in => :tabs)
+    click(:label => 'Date', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
-    click(:label => 'Reverse Order', :in => :tabs)
+    click(:label => 'Reverse Order', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
-    click(:label => 'Name', :in => :tabs)
+    click(:label => 'Name', :in => :sort_tabs)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(save_results.length, results.length)
     save_results = results
@@ -183,23 +185,23 @@ class LurkerTest < IntegrationTestCase
     click(:href => /^\/\d+\?/, :in => :results)
     save_path = @request.fullpath
     assert_equal(query_params, parse_query_params(save_path))
-    click(:label => '« Prev', :in => :tabs)
+    click(:label => '« Prev', :in => :title)
     assert_flash(/there are no more observations/i)
     assert_equal(save_path, @request.fullpath)
     assert_equal(query_params, parse_query_params(save_path))
-    click(:label => 'Next »', :in => :tabs)
+    click(:label => 'Next »', :in => :title)
     assert_flash(nil)
     assert_equal(query_params, parse_query_params(save_path))
     save_path = @request.fullpath
-    click(:label => 'Next »', :in => :tabs)
+    click(:label => 'Next »', :in => :title)
     assert_flash(nil)
     assert_equal(query_params, parse_query_params(save_path))
-    click(:label => '« Prev', :in => :tabs)
+    click(:label => '« Prev', :in => :title)
     assert_flash(nil)
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")
-    click(:label => 'Index', :href => /index/, :in => :tabs)
+    click(:label => 'Index', :href => /index/, :in => :title)
     results = get_links('div.results a[href^=?]', /\/\d+/)
     assert_equal(query_params, parse_query_params(results.first))
     assert_equal(save_results, results,

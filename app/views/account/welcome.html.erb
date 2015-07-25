@@ -1,9 +1,12 @@
-<% @title = @user ? :email_welcome.t(:user => @user.legal_name) : :welcome_no_user_title.t %>
+<%
+  @title = @user ? :email_welcome.t(user: @user.legal_name) :
+                   :welcome_no_user_title.t
+%>
 
-<div class="memo">
+<div class="max-width-text">
   <% if @user %>
     <%= :welcome_note.tp %>
-    <%= link_to(:welcome_logout_link.t, :action => "logout_user") %>
+    <%= link_to(:welcome_logout_link.t, action: :logout_user) %>
   <% else %>
     <%= :welcome_no_user_note.tp %>
   <% end %>

@@ -1,11 +1,12 @@
 function VotePopupModule(showNamingsLostChangesText) {
   jQuery(document).ready(function () {
-    // elements to be binded
+
+    // elements to be bound
     var $save_votes_button = jQuery("[data-role='save_votes']"),
         $close_popup_buttons = jQuery("[data-role='close_popup']"),
         $open_popup_buttons = jQuery("[data-role='open_popup']"),
         $change_vote_selects = $("[data-role='change_vote']"),
-        $vote_popups = jQuery('[data-role="popup"]'),
+        $vote_popups = jQuery("[data-role='popup']"),
         _haveVotesChanged = false,
         _haveVotesBeenSaved = false;
 
@@ -15,14 +16,16 @@ function VotePopupModule(showNamingsLostChangesText) {
     });
 
     $close_popup_buttons.click(function () {
-      jQuery(this).parents('.popup').first().hide();
+      jQuery(this).parents(".popup").first().hide();
     });
 
     $open_popup_buttons.click(function (event) {
       event.preventDefault();
-      var namingId = jQuery(this).data('id');
-      $vote_popups.hide(); // hide any other popups that might be open
-      jQuery('#show_votes_' + namingId).center().show();
+      console.log(event);
+      var namingId = jQuery(this).data("id");
+      $vote_popups.hide(); //hide any other popups that might be open
+      jQuery("#show_votes_" + namingId)
+        .center().show();
     });
 
     $change_vote_selects.change(function (event) {
@@ -46,7 +49,7 @@ function VotePopupModule(showNamingsLostChangesText) {
         return showNamingsLostChangesText;
     }
 
-    // Blinks some bold test on the update votes button to alert the user they
+    // Blinks some bold text on the update votes button to alert the user they
     // need to update the votes.
     function getUserAttention(timesFlashed) {
       var _timesToFlash = 3;
@@ -54,7 +57,7 @@ function VotePopupModule(showNamingsLostChangesText) {
         timesFlashed = 0;
       setTimeout(function () {
         if (_timesToFlash > timesFlashed) {
-          $save_votes_button.toggleClass('bold');
+          $save_votes_button.toggleClass("bold");
           getUserAttention(timesFlashed + 1);
         }
       }, 300);

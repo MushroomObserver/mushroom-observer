@@ -5,7 +5,7 @@ class VerifyAPIKeyEmail < AccountMailer
     @title = :email_subject_verify_api_key.l
     @other_user = other_user
     @api_key = api_key
-    debug_log(:verify, nil, user, "email=#{user.email}")
+    debug_log(:verify, nil, user, email: user.email)
     mo_mail(@title,
             to: user,
             from: MO.accounts_email_address,

@@ -142,7 +142,6 @@ module DescriptionControllerHelpers
       end
       src.parent = dest
       src.save
-      Transaction.send("put_#{src.type_tag}", :parent => dest)
       src.parent.log(:log_object_moved_by_user, :user => @user.login,
                      :from => src_name, :to => dest.unique_format_name,
                      :touch => true)
@@ -194,16 +193,6 @@ module DescriptionControllerHelpers
       if !desc.save
         flash_object_errors(desc)
       else
-        Transaction.send("post_#{src.type_tag}", {
-          :id          => desc,
-          :parent      => desc,
-          :source_type => desc.source_type,
-          :source_name => desc.source_name,
-          :project     => desc.project,
-          :locale      => desc.locale,
-          :public      => desc.public,
-          :license     => desc.license,
-        }.merge(desc.all_notes))
         dest.log(:log_description_created_at, :user => @user.login,
                  :name => desc.unique_partial_format_name, :touch => true)
         flash_notice(:runtime_description_copy_success.
@@ -254,15 +243,6 @@ module DescriptionControllerHelpers
                    :name => draft.unique_partial_format_name, :touch => true)
         parent.description = draft
         parent.save
-        Transaction.send("put_#{type}_description",
-          :id              => draft,
-          :set_source_type => draft.source_type,
-          :set_source_name => draft.source_name,
-          :set_project     => draft.project,
-          :set_admins      => draft.admin_groups,
-          :set_writers     => draft.writer_groups,
-          :set_readers     => draft.reader_groups
-        )
         redirect_with_query(:action => parent.show_action, :id => parent.id)
       end
     end
@@ -310,8 +290,8 @@ module DescriptionControllerHelpers
           admin  = params[:writein_admin][n]  == '1' rescue false
           if !name.blank? and
              !update_writein(@description, name, reader, writer, admin)
-            @data << { :name => name, :reader => reader, :writer => writer,
-                       :admin => admin }
+            @data << {name: name, reader: reader, writer: writer,
+                      admin: admin}
             flash_error(:runtime_description_user_not_found.t(:name => name))
             done = false
           end
@@ -336,14 +316,6 @@ module DescriptionControllerHelpers
             @description.public = public
             @description.save
           end
-
-          # Log change with Transaction.
-          Transaction.send("put_#{@description.type_tag}",
-            :id          => @description,
-            :set_readers => @description.reader_groups,
-            :set_writers => @description.writer_groups,
-            :set_admins  => @description.admin_groups
-          )
 
           @description.parent.log(:log_changed_permissions,
                               :user => @user.login, :touch => false,
@@ -543,10 +515,9 @@ module DescriptionControllerHelpers
 
   # Modify permissions on an existing Description based on two over-simplified
   # "public readable" and "public writable" checkboxes.  Makes changes to the
-  # UserGroup's and modifies the Transaction +args+ in place.
+  # UserGroup's.
   # desc::      Description object, with +public+ and +public_write+ updated.
-  # args::      Hash of args that will be used to create Transaction.
-  def modify_description_permissions(desc, args)
+  def modify_description_permissions(desc)
     old_read = desc.public_was
     new_read = desc.public
     old_write = desc.public_write_was
@@ -597,14 +568,6 @@ module DescriptionControllerHelpers
         # Add project admins to writers.
         new_writers << project.admin_group
       end
-    end
-
-    # Make changes official.
-    if new_readers.any?
-      args[:set_reader_groups] = desc.reader_groups = new_readers
-    end
-    if new_writers.any?
-      args[:set_writer_groups] = desc.writer_groups = new_writers
     end
   end
 
@@ -693,21 +656,17 @@ module DescriptionControllerHelpers
       result = true
 
       # Copy over all non-blank descriptive fields.
-      xargs = {}
       for f, val in src_notes
         if !val.blank?
           dest.send("#{f}=", val)
-          xargs[:"set_#{f}"] = val
         end
       end
 
       # Store where merge came from in new version of destination.
       dest.merge_source_id = src.versions.latest.id rescue nil
-      xargs[:set_merge_source] = src
 
       # Save changes to destination.
       dest.save
-      Transaction.send("put_#{dest.type_tag}", xargs)
 
       # Copy over authors and editors.
       src.authors.each {|user| dest.add_author(user)}
@@ -719,7 +678,6 @@ module DescriptionControllerHelpers
           flash_warning(:runtime_description_merge_delete_denied.t)
         else
           src_was_default = (src.parent.description_id == src.id)
-          Transaction.send("delete_#{src.type_tag}", :id => src)
           flash_notice(:runtime_description_merge_deleted.
                          t(:old => src.unique_partial_format_name))
           src.destroy

@@ -1,41 +1,43 @@
 <%
-  @title ||= :review_authors_title.t(:name => @object.format_name)
+  @title ||= :review_authors_title.t(name: @object.format_name)
   parent = @object.parent
   type = @object.type_tag
   parent_type = parent.type_tag
 
-  # Show Object | Show Object Description
-  new_tab_set do
-    add_tab(:show_object.t(:type => parent_type),
-            :controller => parent.show_controller,
-            :action => parent.show_action, :id => parent.id)
-    add_tab(:show_object.t(:type => type),
-            :controller => @object.show_controller,
-            :action => @object.show_action, :id => @object.id)
-  end
+  tabs = [
+    link_to(:show_object.t(type: parent_type),
+            controller: parent.show_controller,
+            action: parent.show_action, id: parent.id),
+    link_to(:show_object.t(type: type),
+            controller: @object.show_controller,
+            action: @object.show_action, id: @object.id)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<%= :review_authors_note.tp if type == :name_description %>
+<div class="max-width-text">
+  <%= :review_authors_note.tp if type == :name_description %>
 
-<p>
-  <%= :review_authors_authors.t %><br/>
-  <% for u in @authors %>
-    <%= indent + user_link(u) %>
-    | <%= link_to(:review_authors_remove_author.t, {:action => :review_authors,
-                  :id => @object.id, :type => type, :remove => u.id},
-                  {:confirm => :are_you_sure.l}) %>
-    <br/>
-  <% end %>
-</p>
-
-<p>
-  <%= :review_authors_other_users.t %><br/>
-  <% for u in @users
-    unless @authors.member?(u) %>
-      <%= indent + user_link(u) %>
-      | <%= link_to(:review_authors_add_author.t, :action => :review_authors,
-                    :id => @object.id, :type => type, :add => u.id) %>
+  <p>
+    <%= :review_authors_authors.t %><br/>
+    <% for u in @authors %>
+      <%= user_link(u) %>
+      | <%= link_to(:review_authors_remove_author.t, {action: :review_authors,
+                                                      id: @object.id, type: type, remove: u.id},
+                    { data: { confirm: :are_you_sure.l } }) %>
       <br/>
     <% end %>
-  <% end %>
-</p>
+  </p>
+
+  <p>
+    <%= :review_authors_other_users.t %><br/>
+    <% for u in @users
+      unless @authors.member?(u) %>
+        <%= user_link(u) %>
+        | <%= link_to(:review_authors_add_author.t, action: :review_authors,
+                      id: @object.id, type: type, add: u.id) %>
+        <br/>
+      <% end %>
+    <% end %>
+  </p>
+</div>

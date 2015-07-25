@@ -1,6 +1,6 @@
 function image_export(id, value) {
   jQuery.ajax("/ajax/export/image/" + id, {
-    data: { value: value, authenticity_token: CSRF_TOKEN },
+    data: { value: value, authenticity_token: csrf_token() },
     dataType: "text",
     async: true,
     error: function (response) {

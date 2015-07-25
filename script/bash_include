@@ -58,13 +58,6 @@ function rails_constant {
   $app_root/script/config.rb $*
 }
 
-# Get mysql login information.
-file=$app_root/config/database.yml
-db_database=$( grep -A 20 $RAILS_ENV: $file | grep database: | head -1 | sed "s/.*: *//" )
-db_hostname=$( grep -A 20 $RAILS_ENV: $file | grep host:     | head -1 | sed "s/.*: *//" )
-db_username=$( grep -A 20 $RAILS_ENV: $file | grep username: | head -1 | sed "s/.*: *//" )
-db_password=$( grep -A 20 $RAILS_ENV: $file | grep password: | head -1 | sed "s/.*: *//" )
-
 function time_stamp {
   date "+%Y%m%d %H:%M:%S %Z"
 }
@@ -91,7 +84,8 @@ function log_cmd {
 
 # Run the given mysql command without logging or anything else.
 function run_mysql {
-  mysql -s -q -u "$db_username" -p"$db_password" -h "$db_hostname" "$db_database" -e "$*"
+  config_file=$app_root/config/mysql-$RAILS_ENV.cnf
+  mysql --defaults-extra-file=$config_file -q -s -e "$*"  
 }
 
 # Run the given mysql command, logging the command and any errors. Example:

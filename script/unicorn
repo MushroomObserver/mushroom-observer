@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 
 ### BEGIN INIT INFO
@@ -12,19 +13,21 @@ set -e
 ### END INIT INFO
 
 app_root=/var/web/mushroom-observer
-pid_file=$app_root/tmp/unicorn.pid
+pid_file=$app_root/tmp/pids/unicorn.pid
 conf_file=$app_root/config/unicorn.rb
 
-case "$1" in
+function die {
+  echo $1
+  exit 1
+}
 
 # ----------------------------------------------
 #  Start server as user mo in production mode.
 # ----------------------------------------------
 
-start)
+function start_unicorn {
   if [ -s $pid_file ]; then
-    echo "Unicorn already running."
-    exit 1
+    die "Unicorn already running."
   else
     echo "Starting unicorn..."
     cd $app_root
@@ -33,101 +36,90 @@ start)
     start_cmd="source $rvm_env && bundle exec unicorn_rails -c $conf_file -D"
     case `whoami` in
     mo)
-      RAILS_ENV=production bash -c "$start_cmd" && exit 0
-      echo "FAILED!"
-      exit 1
+      RAILS_ENV=production bash -c "$start_cmd" || die "FAILED!"
       ;;
     root)
-      sudo RAILS_ENV=production -u mo bash -c "$start_cmd" && exit 0
-      echo "FAILED!"
-      exit 1
+      sudo RAILS_ENV=production -u mo bash -c "$start_cmd" || die "FAILED!"
       ;;
     *)
-      echo "Must be root or mo to start unicorn!"
-      exit 1
+      die "Must be root or mo to start unicorn!"
     esac
+    echo "Unicorn now running as `cat $pid_file`."
   fi
-  ;;
+}
 
 # ----------------------------
 #  Stop server.
 # ----------------------------
 
-stop)
+function stop_unicorn {
   if [ ! -s $pid_file ]; then
-    echo "Unicorn not running."
-    exit 1
+    die "Unicorn not running."
   else
     echo "Stopping unicorn..."
-    kill -QUIT `cat $pid_file` && exit 0
-    echo "FAILED!"
-    exit 1
-  fi
-  ;;
-
-# ----------------------------
-#  Restart server. (??)
-# ----------------------------
-
-restart)
-  if [ ! -s $pid_file ]; then
-    echo "Unicorn not running."
-    exit 1
-  else
-    echo "Restarting unicorn..."
     old_pid=`cat $pid_file`
     rm $pid_file
-    kill -s USR2 $old_pid
-    sleep 5
-    # wait up to a minute for new unicorn to start
-    for x in 1 2 3 4 5 6 7 8 9 10 11 12; do
-      test -s $pid_file || sleep 5
+    kill -QUIT $old_pid
+    sleep 1
+    # wait up to half a minute for process to die
+    for x in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+      ps -p $old_pid > /dev/null 2>&1 && sleep 2
     done
-    if [ ! -s $pid_file ]; then
-      echo "FAILED! Old pid was $old_pid."
-      echo $old_pid > $pid_file
-      exit 1
-    else
-      kill -9 $old_pid
-      exit 0
-    fi
+    ps -p $old_pid > /dev/null 2>&1 && die "FAILED! Old pid was $old_pid."
+    echo "Unicorn successfully stopped."
   fi
-  ;;
+}
 
 # ----------------------------
 #  Reload workers.
 # ----------------------------
 
-reload)
+function reload_workers {
   if [ ! -s $pid_file ]; then
-    echo "Unicorn not running."
-    exit 1
+    die "Unicorn not running."
   else
     echo "Reloading unicorn workers..."
-    kill -HUP `cat $pid_file` && exit 0
-    echo "FAILED!"
-    exit 1
+    kill -HUP `cat $pid_file` || die "FAILED!"
   fi
-  ;;
+}
 
 # ----------------------------
 #  Show status of server.
 # ----------------------------
 
-status)
+function show_status {
   if [ ! -s $pid_file ]; then
-    echo "Unicorn not running."
-    exit 1
+    die "Unicorn not running."
   else
     pid=`cat $pid_file`
     echo "Unicorn running as $pid."
-    exit 0
   fi
-  ;;
+}
 
+# ----------------------------
+#  Command line switch.
+# ----------------------------
+
+case "$1" in
+start)
+  start_unicorn
+  ;;
+stop)
+  stop_unicorn
+  ;;
+restart)
+  stop_unicorn
+  start_unicorn
+  ;;
+reload)
+  reload_workers
+  ;;
+status)
+  show_status
+  ;;
 *)
-  echo "Usage: $0 {start|stop|restart|reload|status}"
-  exit 1
+  die "Usage: $0 {start|stop|restart|reload|status}"
   ;;
-
 esac
+
+exit 0

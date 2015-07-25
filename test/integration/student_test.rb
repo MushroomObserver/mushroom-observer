@@ -31,14 +31,14 @@ class StudentTest < IntegrationTestCase
   end
 
   private
-  
+
   module AdminDsl
     def check_admin(url, gen_desc, project)
       get(url)
       assert_select('a[href*=show_name_description]', 1) do |links|
         assert_match(:restricted.l, links.first.to_s)
       end
-      assert_not_match(/#{gen_desc}/, response.body)
+      refute_match(/#{gen_desc}/, response.body)
       assert_select('a[href*=create_name_description]', 1)
       click(:href => /show_name_description/)
       assert_template('name/show_name_description')
@@ -59,7 +59,7 @@ class StudentTest < IntegrationTestCase
       end
     end
   end
-  
+
   module CreatorDsl
     # Navigate to show name (no descriptions) and create draft.
     def create_draft(name, gen_desc, project)
@@ -73,8 +73,9 @@ class StudentTest < IntegrationTestCase
 
       # Check that initial form is correct.
       open_form do |form|
-        form.assert_value('source_type', 'project')
+        form.assert_value('source_type', :project)
         form.assert_value('source_name', project.title)
+        form.assert_value('project_id', project.id)
         form.assert_value('public_write', false)
         form.assert_value('public', false)
         form.assert_hidden('source_type')
@@ -95,7 +96,7 @@ class StudentTest < IntegrationTestCase
       # displayed (content, that is) on main show_name page.
       click(:href => /edit_name_description/)
       open_form do |form|
-        form.assert_value('source_type', 'project')
+        form.assert_value('source_type', :project)
         form.assert_value('source_name', project.title)
         form.assert_value('public_write', false)
         form.assert_value('public', false)
@@ -111,7 +112,7 @@ class StudentTest < IntegrationTestCase
       url
     end
   end
-  
+
   module StudentDsl
     # Can view but not edit.
     def check_another_student(url)
@@ -122,7 +123,7 @@ class StudentTest < IntegrationTestCase
       assert_select('a[href*=destroy_name_description]', 0)
     end
   end
-  
+
   module UserDsl
     # Knows it exists but can't even view it.
     def check_another_user(url)

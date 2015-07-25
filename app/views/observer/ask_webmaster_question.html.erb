@@ -1,15 +1,21 @@
 <% @title = :ask_webmaster_title.t %>
 
-<%= :ask_webmaster_note.tp(:todo_list => "/pivotal") %>
+<div class="max-width-text">
+  <%= :ask_webmaster_note.tp(todo_list: "/pivotal") %>
+  <%= form_tag(action: :ask_webmaster_question) do %>
 
-<%= form_tag(:action => 'ask_webmaster_question') do %>
-  <br/><center><%= submit_tag :SEND.l %></center>
+    <div class="form-group push-down">
+      <%= label_tag(:user_email, :ask_webmaster_your_email.t + ":") %>
+      <%= text_field(:user, :email, value: @email, size: 60, class: "form-control",
+                     data: {autofocus: @email.blank? || @email_error}) %>
+    </div>
 
-  <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label><br/>
-  <%= text_field("user", "email", :value => @email, :size => 60) %><br/><br/>
+    <div class="form-group push-down">
+      <%= label_tag(:question_content, :ask_webmaster_question.t + ":") %>
+      <%= text_area(:question, :content, value: @content, rows: 10, class: "form-control",
+                    data: {autofocus: !@email.blank? && !@email_error}) %>
+    </div>
 
-  <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
-  <%= text_area('question', 'content', :value => @content, :cols => 80) %>
-
-  <%= focus_on(!@email.blank? && !@email_error ? 'question_content' : 'user_email') %>
-<% end %>
+    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+  <% end %>
+</div>

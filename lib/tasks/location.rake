@@ -3917,7 +3917,7 @@ namespace :location do
 
   LOCATION_FIXES = {
   }
-  
+
   def report_on_name(name)
     result = false
     if not APPROVED_LOCATIONS.member?(name)
@@ -3966,13 +3966,14 @@ namespace :location do
     }
     w
   end
-  
+
   desc "List new locations"
   task(:list => :environment) do
     RunLevel.silent()
     new_locs = Set.new
-    for l in Location.find(:all)
-      w = fix_funny_chars(l.name)
+    # for l in Location.find(:all) # Rails 3
+    for l in Location.all
+     w = fix_funny_chars(l.name)
       if not (APPROVED_LOCATIONS.member?(w) or LOCATION_FIXES.member?(w))
         new_locs.add(w.gsub("\"", "\\\""))
       end
@@ -3998,7 +3999,7 @@ namespace :location do
       object.add_note("[admin - #{Time.now}]: Changed location name from '#{from_name}' to '#{to_name}'")
     end
   end
-  
+
   def check_save(o)
     if not o.save
       print("Save failed for #{o.class}, #{o.id}\n")
@@ -4007,14 +4008,14 @@ namespace :location do
       end
     end
   end
-  
+
   def fix_location(target_name, current_name, current_location)
     if target_name
       current_sql_safe = current_name.gsub(/[']/, '\\\\\'')
       target_sql_safe = target_name.gsub(/[']/, '\\\\\'')
       target_location = Location.find_by_name(target_name)
       if target_location
-        obs = Observation.find_all_by_where(current_name)
+        obs = Observation.where(where: current_name)
         if obs.size > 0
           for o in obs
             o.location = target_location
@@ -4026,7 +4027,7 @@ namespace :location do
           print("Moved #{obs.size} observations from non-location: #{current_name} to location: #{target_name}\n")
         end
         if current_location and (current_location != target_location)
-          obs = Observation.find_all_by_location_id(current_location.id)
+          obs = Observation.where(location_id: current_location.id)
           if obs.size > 0
             for o in obs
               o.location = target_location
@@ -4063,7 +4064,7 @@ namespace :location do
           add_comment(current_location, current_name, target_name)
           print("Renamed location: #{current_name} to: #{target_name}\n")
         else
-          obs = Observation.find_all_by_where(current_name)
+          obs = Observation.where(where: current_name)
           for o in obs
             o.where = target_name
             check_save(o)
@@ -4079,7 +4080,8 @@ namespace :location do
   task(:fix => :environment) do
     RunLevel.silent()
     User.current = User.find(1) # nathan
-    for l in Location.find(:all)
+    # for l in Location.find(:all) # Rails 3
+    for l in Location.all
       fix_location(LOCATION_FIXES[l.name], l.name, l)
     end
     wheres = Observation.connection.select_values %(
@@ -4102,7 +4104,7 @@ namespace :location do
         @map[k + @pat] = map[k]
       end
     end
-    
+
     def fix(str)
       if str.index(@pat)
         result = str.clone
@@ -4111,11 +4113,11 @@ namespace :location do
       else
         str
       end
-    end          
+    end
   end
-  
+
   FIXERS = [AccentFixer.new([204, 128], {"e" => "è", "E" => "È"}), AccentFixer.new([204, 129], {"e" => "é", "E" => "É"})]
-  
+
   def accent_fix(w)
     for f in FIXERS
       w = f.fix(w)
@@ -4130,7 +4132,8 @@ namespace :location do
   task(:accents => :environment) do
     RunLevel.silent()
     User.current = User.find(1) # nathan
-    for l in Location.find(:all)
+    # for l in Location.find(:all) # Rails 3
+    for l in Location.all
       fix = accent_fix(l.name)
       if fix != l.name
         print("Replacing: \"#{l.name}\" with \"#{fix}\"")
@@ -4164,11 +4167,11 @@ namespace :location do
       print("#{k}: #{candidates[k]}\n")
     end
   end
-  
+
   def escapeString (s)
     "\"#{s.gsub("\"", "\\\"")}\""
   end
-  
+
   desc "List the fixes"
   task(:new => :environment) do
     print("    " + (LOCATION_FIXES.values.sort.map {|l| escapeString(l)}.join(",\n    ")) + "\n")

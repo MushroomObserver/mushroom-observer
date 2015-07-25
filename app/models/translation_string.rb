@@ -48,7 +48,7 @@ class TranslationString < AbstractModel
           latest.updated_at < updated_at - 1.day))
         result = true
       elsif latest.text != text or latest.updated_at.to_s != updated_at.to_s
-        latest.update_attributes(
+        latest.update(
           :text => text,
           :updated_at => updated_at
         )

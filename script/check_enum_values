@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
+
+LocationDescription.all.each {|x| puts "LocationDescription #{x.id} #{x.source_type.inspect}"}
+NameDescription.all.each {|x| puts "NameDescription #{x.id} #{x.review_status.inspect}"}
+NameDescription.all.each {|x| puts "NameDescription #{x.id} #{x.source_type.inspect}"}
+Name.all.each {|x| puts "Name #{x.id} #{x.rank.inspect}"}
+Name::Version.all.each {|x| puts "Name::Version #{x.id} #{x.rank.inspect}"}
+Notification.all.each {|x| puts "Notification #{x.id} #{x.flavor.inspect}"}
+Query.all.each {|x| puts "Query #{x.id} #{x.flavor.inspect}"}
+Query.all.each {|x| puts "Query #{x.id} #{x.model_symbol.inspect}"}
+User.all.each {|x| puts "User #{x.id} #{x.thumbnail_size.inspect}"}
+User.all.each {|x| puts "User #{x.id} #{x.image_size.inspect}"}
+User.all.each {|x| puts "User #{x.id} #{x.votes_anonymous.inspect}"}
+User.all.each {|x| puts "User #{x.id} #{x.location_format.inspect}"}
+User.all.each {|x| puts "User #{x.id} #{x.hide_authors.inspect}"}
+User.all.each {|x| puts "User #{x.id} #{x.keep_filenames.inspect}"}

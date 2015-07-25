@@ -5,7 +5,6 @@
 #  == Attributes
 #
 #  id::             Locally unique numerical id, starting at 1.
-#  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
 #  flavor::         Type of Notification.
@@ -34,6 +33,19 @@
 class Notification < AbstractModel
   belongs_to :user
 
+  # enum definitions for use by simple_enum gem
+  # Do not change the integer associated with a value
+  as_enum(:flavor,
+           { name: 1,
+             observation: 2,
+             user: 3,
+             all_comments: 4
+           },
+           source: :flavor,
+           with: [],
+           accessor: :whiny
+         )
+
   # List of all available flavors (Symbol's).
   def self.all_flavors
     [:name]
@@ -48,7 +60,8 @@ class Notification < AbstractModel
   #
   def calc_note(args)
     if template = self.note_template
-      case self.flavor
+#     case self.flavor # Rails 3
+      case self.flavor.to_sym
       when :name
         user   = args[:user]
         naming = args[:naming]

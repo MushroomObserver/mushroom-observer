@@ -1,7 +1,6 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 in_situ:
   id: 1
-  sync_id: 1xx1
   created_at: 2006-05-12 17:20:00
   updated_at: 2006-05-12 17:21:00
   content_type: image/jpeg
@@ -16,7 +15,6 @@ in_situ:
 
 turned_over:
   id: 2
-  sync_id: 2xx1
   created_at: 2006-05-22 21:20:00
   updated_at: 2006-05-22 21:21:00
   content_type: image/jpeg
@@ -29,7 +27,6 @@ turned_over:
 
 commercial_inquiry_image:
   id: 3
-  sync_id: 3xx1
   created_at: 2007-02-25 20:13:00
   updated_at: 2007-02-25 20:14:00
   content_type: image/jpeg
@@ -42,7 +39,6 @@ commercial_inquiry_image:
 
 disconnected_coprinus_comatus_image:
   id: 4
-  sync_id: 4xx1
   created_at: 2007-03-07 20:13:00
   updated_at: 2007-03-07 20:14:00
   content_type: image/jpeg
@@ -55,7 +51,6 @@ disconnected_coprinus_comatus_image:
 
 connected_coprinus_comatus_image:
   id: 5
-  sync_id: 5xx1
   created_at: 2007-03-08 20:13:00
   updated_at: 2007-03-08 20:14:00
   content_type: image/jpeg
@@ -68,7 +63,6 @@ connected_coprinus_comatus_image:
 
 agaricus_campestris_image:
   id: 6
-  sync_id: 6xx1
   created_at: 2007-03-19 20:13:00
   updated_at: 2007-03-19 20:14:00
   content_type: image/jpeg
@@ -81,7 +75,6 @@ agaricus_campestris_image:
 
 amateur_image:
   id: 7
-  sync_id: 7xx1
   created_at: 2010-12-31 06:46:00
   updated_at: 2010-12-31 06:46:00
   content_type: image/jpeg
@@ -93,7 +86,6 @@ amateur_image:
 
 peltigera_image:
   id: 8
-  sync_id: 8xx1
   created_at: 2012-06-07 16:28:20
   updated_at: 2012-06-07 16:28:20
   content_type: image/jpeg
@@ -106,7 +98,6 @@ peltigera_image:
 
 conic_image:
   id: 9
-  sync_id: 9xx1
   created_at: 2014-08-04 07:49:12
   updated_at: 2014-08-04 07:49:12
   content_type: image/jpeg
@@ -119,7 +110,6 @@ conic_image:
 
 convex_image:
   id: 10
-  sync_id: 10xx1
   created_at: 2013-08-13 17:19:55
   updated_at: 2013-08-13 17:19:55
   content_type: image/jpeg
@@ -131,7 +121,6 @@ convex_image:
 
 plane_image_thumb:
   id: 11
-  sync_id: 11xx1
   created_at: 2013-09-08 17:31:25
   updated_at: 2013-09-08 17:31:25
   content_type: image/jpeg
@@ -144,7 +133,6 @@ plane_image_thumb:
 
 plane_image_example:
   id: 12
-  sync_id: 12xx1
   created_at: 2013-09-08 17:31:25
   updated_at: 2013-09-08 17:31:25
   content_type: image/jpeg
@@ -157,7 +145,6 @@ plane_image_example:
 
 rolf_profile_image:
   id: 13
-  sync_id: 13xx1
   created_at: 2013-09-08 18:21:15
   updated_at: 2013-09-08 18:21:15
   content_type: image/jpeg

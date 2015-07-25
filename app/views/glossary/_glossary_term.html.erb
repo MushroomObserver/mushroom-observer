@@ -1,3 +1,13 @@
-<%= name_layout(@glossary_term.name) %>
-<%= description_layout(@glossary_term.description )%>
-<%= thumbnail_layout(@glossary_term.thumb_image_id )%>
+<p class="push-down">
+  <b><%= :glossary_term_name.t %>:</b> <%= @glossary_term.name.t %>
+</p>
+
+<p class="push-down">
+  <%= "*#{:glossary_term_description.t}:* #{@glossary_term.description}".tpl %>
+</p>
+
+<% if @glossary_term.thumb_image_id and @glossary_term.thumb_image_id != 0 %>
+  <p class="push-down">
+    <%= thumbnail(@glossary_term.thumb_image_id, votes: false) %>
+  </p>
+<% end %>

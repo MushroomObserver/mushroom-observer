@@ -12,7 +12,7 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
         xml.dc(:identifier, "#{MO.http_domain}/name/show_name/#{taxon.id}")
         xml.dc(:source, "#{MO.http_domain}/name/show_name/#{taxon.id}")
         for (rank, name) in Name.parse_classification(taxon.classification)
-          if Name.eol_ranks.member?(rank)
+          if MO.eol_ranks.member?(rank)
             xml.dwc(rank, name)
           end
         end

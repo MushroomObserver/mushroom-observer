@@ -1,20 +1,22 @@
-<!--[form:location_description]-->
+<%= submit_tag(button.l, class: "btn center-block push-down push-up") %>
 
-<%= render(:partial => 'shared/form_description',
-           :locals => { :form => form }) %>
+<%= render(partial: "shared/form_description", locals: {form: form}) %>
 
-<label><%= :DESCRIPTION.t %>:</lable><br/>
-<%= render(:partial => 'shared/textilize_help') %>
-<br/>
+<%= submit_tag(button.l, class: "btn center-block push-down") %>
+
+<hr/>
 
 <% for f in LocationDescription.all_note_fields %>
-  <p>
-    <label for="description_<%= f %>"><%= "form_locations_#{f}".to_sym.t %>:</label>
-    <span class="HelpNote"><%= "form_locations_#{f}_help".to_sym.l %></span><br/>
-    <%= form.text_area(f, :cols => 80) %>
-  </p>
+  <div class="form-group">
+    <%= label_tag("description_#{f}", "form_locations_#{f}".to_sym.t + ":",
+                  style: "margin-bottom:0") %>
+    <div class="help-block" style="margin-top:0">
+      <%= "form_locations_#{f}_help".to_sym.l %>
+    </div>
+    <%= form.text_area(f, rows: 10, class: "form-control") %>
+  </div>
 <% end %>
 
-<%= focus_on('description_gen_desc') %>
+<%= render(partial: "shared/textilize_help") %>
 
-<!--[eoform:location_description]-->
+<%= submit_tag(button.l, class: "btn center-block push-down") %>

@@ -14,7 +14,6 @@
 #  == Attributes
 #
 #  id::         Locally unique numerical id, starting at 1.
-#  sync_id::    Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at:: Date/time it was first created.
 #  updated_at:: Date/time it was last updated.
 #  name::       Name of the group, must be unique.
@@ -73,6 +72,12 @@ class UserGroup < AbstractModel
   # Return the meta-group that contains all users.
   def self.reviewers
     @@reviewers ||= get_or_construct_user('reviewers')
+  end
+
+  # Need to clear these at end of each test or some changes can persist from
+  # one unit test to the next, causing very bizarre and frustrating behavior(!)
+  def self.clear_cache_for_unit_tests
+    @@all_users = @@one_users = @@reviewers = nil
   end
 
   # Callback that fires when a new User is created.

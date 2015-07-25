@@ -73,7 +73,7 @@ esac
 size=$( $app_root/script/jpegsize $orig_file )
 w=$( echo $size | sed "s/ .*//" )
 h=$( echo $size | sed "s/.* //" )
-run_mysql "UPDATE images SET transferred=TRUE, width=$w, height=$h WHERE id=$id" || warn "Failed to update database: $id should be $w x $h."
+run_mysql "UPDATE images SET transferred=FALSE, width=$w, height=$h WHERE id=$id" || warn "Failed to update database: $id should be $w x $h."
 
 # Transfer control to process_image.
 exec $app_root/script/process_image $id jpg 0

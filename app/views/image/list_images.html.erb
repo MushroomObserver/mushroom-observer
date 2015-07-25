@@ -1,12 +1,16 @@
 <%
-  new_tab_set(:sort_by_header.t, @sorts)
-  new_tab_set(@links)
+  if @links.any?
+    tabs = @links.map {|str,url| link_to(str, url)}
+    @tabsets = { right: draw_tab_set(tabs) }
+  end
 
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
-  <%= make_matrix(@objects, :width => '100%') do |image| %>
-    <%= render(:partial => 'image', :object => image) %>
+<div class="push-down push-up">
+  <%= paginate_block(@pages) do %>
+    <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table",
+               collection: @objects, as: :object)  %>
+    <div style="clear:left"></div>
   <% end %>
-<% end %>
+</div>

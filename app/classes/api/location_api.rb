@@ -15,27 +15,27 @@ class API
 
     def query_params
       {
-        :where      => sql_id_condition,
-        :created_at => parse_time_range(:created_at),
-        :updated_at => parse_time_range(:updated_at),
-        :users      => parse_users(:user),
-        :north      => parse_latitude(:north),
-        :south      => parse_latitude(:south),
-        :east       => parse_longitude(:east),
-        :west       => parse_longitude(:west),
+          where: sql_id_condition,
+          created_at: parse_time_range(:created_at),
+          updated_at: parse_time_range(:updated_at),
+          users: parse_users(:user),
+          north: parse_latitude(:north),
+          south: parse_latitude(:south),
+          east: parse_longitude(:east),
+          west: parse_longitude(:west),
       }
     end
 
     def create_params
       {
-        :display_name => parse_string(:name, :limit => 1024),
-        :north => parse_latitude(:north),
-        :south => parse_longitude(:south),
-        :east  => parse_longitude(:east),
-        :west  => parse_longitude(:west),
-        :high  => parse_altitude(:high, :default => nil),
-        :low   => parse_altitude(:low, :default => nil),
-        :notes => parse_string(:notes, :default => ''),
+          display_name: parse_string(:name, :limit => 1024),
+          north: parse_latitude(:north),
+          south: parse_longitude(:south),
+          east: parse_longitude(:east),
+          west: parse_longitude(:west),
+          high: parse_altitude(:high, :default => nil),
+          low: parse_altitude(:low, :default => nil),
+          notes: parse_string(:notes, :default => ''),
       }
     end
 
@@ -62,14 +62,14 @@ class API
       end
 
       {
-        :display_name => name,
-        :north => parse_latitude(:set_north),
-        :south => parse_longitude(:set_south),
-        :east  => parse_longitude(:set_east),
-        :west  => parse_longitude(:set_west),
-        :high  => parse_altitude(:set_high),
-        :low   => parse_altitude(:set_low),
-        :notes => parse_string(:set_notes),
+          display_name: name,
+          north: parse_latitude(:set_north),
+          south: parse_longitude(:set_south),
+          east: parse_longitude(:set_east),
+          west: parse_longitude(:set_west),
+          high: parse_altitude(:set_high),
+          low: parse_altitude(:set_low),
+          notes: parse_string(:set_notes),
       }
     end
 

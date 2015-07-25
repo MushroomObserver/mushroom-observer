@@ -30,7 +30,6 @@
 #  == Attributes
 #
 #  id::                    Locally unique numerical id, starting at 1.
-#  sync_id::               Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::            Date/time it was first created.
 #  updated_at::            Date/time it was last updated.
 #  user::                  User that created it.
@@ -42,7 +41,8 @@
 #  ==== "Fake" attributes
 #  file::                  Upload text file into +data+.
 #  data::                  Internal temporary data field.
-#  place_name::            Wrapper on top of +where+ and +location+.  Handles location_format.
+#  place_name::            Wrapper on top of +where+ and +location+.
+#                          Handles location_format.
 #
 #  == Class methods
 #
@@ -212,8 +212,6 @@ class SpeciesList < AbstractModel
       UPDATE species_lists SET `where` = NULL, location_id = #{location.id}
       WHERE `where` = "#{old_name.gsub('"', '\\"')}"
     ))
-    # (no transactions necessary: creating location on foreign server
-    # should initiate identical action)
   end
 
   # Add observation to list (if not already) and set updated_at.  Saves it.
@@ -221,10 +219,6 @@ class SpeciesList < AbstractModel
     unless observations.include?(obs)
       observations.push(obs)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_species_list(
-        :id              => self,
-        :add_observation => obs
-      )
     end
   end
 
@@ -233,10 +227,6 @@ class SpeciesList < AbstractModel
     if observations.include?(obs)
       observations.delete(obs)
       update_attribute(:updated_at, Time.now)
-      Transaction.put_species_list(
-        :id              => self,
-        :del_observation => obs
-      )
     end
   end
 
@@ -391,27 +381,6 @@ class SpeciesList < AbstractModel
     end
 
     self.observations << obs
-
-    Transaction.post_observation(
-      :id           => obs,
-      :date         => args[:when],
-      :location     => obs.location || obs.where,
-      :name         => name,
-      :notes        => args[:notes],
-      :lat          => args[:lat],
-      :long         => args[:long],
-      :alt          => args[:alt],
-      :is_collection_location => args[:is_collection_location],
-      :specimen     => args[:specimen],
-      :projects     => args[:projects],
-      :species_list => self
-    )
-
-    Transaction.post_naming(
-      :observation => obs,
-      :name        => name,
-      :vote        => args[:vote]
-    )
   end
 
   ################################################################################
@@ -440,13 +409,13 @@ class SpeciesList < AbstractModel
 
     if self.title.to_s.blank?
       errors.add(:title, :validate_species_list_title_missing.t)
-    elsif self.title.binary_length > 100
+    elsif self.title.bytesize > 100
       errors.add(:title, :validate_species_list_title_too_long.t)
     end
 
     if self.place_name.to_s.blank? and !self.location
       errors.add(:place_name, :validate_species_list_where_missing.t)
-    elsif self.where.to_s.binary_length > 1024
+    elsif self.where.to_s.bytesize > 1024
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 

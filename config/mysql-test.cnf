@@ -1,0 +1,6 @@
+[client]
+user=mo
+password=mo
+
+[mysql]
+database=mo_test

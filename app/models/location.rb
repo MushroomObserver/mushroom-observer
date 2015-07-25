@@ -13,7 +13,6 @@
 #  == Attributes
 #
 #  id::           (-) Locally unique numerical id, starting at 1.
-#  sync_id::      (-) Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::   (-) Date/time it was first created.
 #  updated_at::   (V) Date/time it was last updated.
 #  user::         (V) User that created it.
@@ -80,7 +79,8 @@ class Location < AbstractModel
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :descriptions, :class_name => 'LocationDescription', :order => 'num_views DESC'
+  has_many :descriptions, -> { order "num_views DESC" },
+           class_name: "LocationDescription"
   has_many :comments,  :as => :target, :dependent => :destroy
   has_many :interests, :as => :target, :dependent => :destroy
   has_many :observations
@@ -100,7 +100,6 @@ class Location < AbstractModel
     ]
   )
   non_versioned_columns.push(
-    'sync_id',
     'created_at',
     'updated_at',
     'num_views',
@@ -213,7 +212,8 @@ class Location < AbstractModel
     @@names_for_unknown ||= begin
       # yikes! need to make sure we always include the English words for "unknown",
       # even when viewing the site in another language
-      Language.official.translation_strings.find_by_tag('unknown_locations').text.split(/, */)
+      Language.official.translation_strings.find_by_tag("unknown_locations").
+               text.split(/, */)
     rescue
       []
     end
@@ -223,7 +223,8 @@ class Location < AbstractModel
   # Get an instance of the Name that means "unknown".
   def self.unknown
     for name in names_for_unknown
-      location = Location.find(:first, :conditions => ['name like ?', name])
+      # location = Location.find(:first, :conditions => ['name like ?', name])
+      location = Location.where("name LIKE ?", name).first
       return location if location
     end
     raise "There is no \"unknown\" location!"
@@ -541,33 +542,22 @@ class Location < AbstractModel
     for obs in old_loc.observations
       obs.location = self
       obs.save
-      Transaction.put_observation(
-        :id           => obs,
-        :set_location => self
-      )
     end
 
     # Move species lists over.
-    for spl in SpeciesList.find_all_by_location_id(old_loc.id)
+    for spl in SpeciesList.where(location_id: old_loc.id)
       spl.update_attribute(:location, self)
-      Transaction.put_species_list(
-        :id           => spl,
-        :set_location => self
-      )
     end
 
     # Update any users who call this location their primary location.
-    for user in User.find_all_by_location_id(old_loc.id)
+    for user in User.where(location_id: old_loc.id)
       user.update_attribute(:location, self)
-      Transaction.put_user(
-        :id           => user,
-        :set_location => self
-      )
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_target_type_and_target_id('Location',
-                                                              old_loc.id)
+    # for int in Interest.find_all_by_target_type_and_target_id('Location',
+    #                                                         old_loc.id)
+    for int in Interest.where(target_type: "Location", target_id: old_loc.id)
       int.target = self
       int.save
     end
@@ -592,12 +582,11 @@ class Location < AbstractModel
     # Move over any remaining descriptions.
     for desc in old_loc.descriptions
       xargs = {
-        :id           => desc,
-        :set_location => self,
+          id: desc,
+          set_location: self,
       }
       desc.location_id = self.id
       desc.save
-      Transaction.put_location_description(xargs)
     end
 
     # Log the action.
@@ -619,7 +608,6 @@ class Location < AbstractModel
 
     # Finally destroy the location.
     old_loc.destroy
-    Transaction.delete_location(:id => old_loc)
   end
 
   ##############################################################################
@@ -657,8 +645,9 @@ class Location < AbstractModel
       end
 
       # Tell masochists who want to know about all location changes.
-      for user in User.find_all_by_email_locations_all(true)
-        recipients.push(user)
+      # for user in User.find_all_by_email_locations_all(true)
+      for user in User.where(email_locations_all: true)
+       recipients.push(user)
       end
 
       # Send to people who have registered interest.
@@ -711,7 +700,7 @@ class Location < AbstractModel
       errors.add(:user, :validate_location_user_missing.t)
     end
 
-    if self.name.to_s.binary_length > 1024
+    if self.name.to_s.bytesize > 1024
       errors.add(:name, :validate_location_name_too_long.t)
     elsif self.name.empty?
       errors.add(:name, :validate_missing.t(:field => :name))

@@ -17,25 +17,30 @@ MushroomObserver::Application.configure do
   # Turn off email.
   config.queue_email = false
   config.action_mailer.smtp_settings = {
-    :address => "localhost",
-    :port    => 25,
-    :domain  => "localhost"
+    address: "localhost",
+    port:    25,
+    domain:  "localhost"
   }
 
   # Serve new images locally, pre-existing images from real image server.
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {
-    :local => {
-      :test => "file://#{config.local_image_files}",
-      :read => "/images",
+    local: {
+      test: "file://#{config.local_image_files}",
+      read: "/images"
     },
-    :cdmr => {
-      :test => :transferred_flag,
-      :read => "http://images.digitalmycology.com",
+    cdmr: {
+      test: :transferred_flag,
+      read: "http://images.mushroomobserver.org"
+    },
+    cdmr_s3: {
+      test: :transferred_flag,
+      read: "http://mo-images.digitalmycology.com"
     }
   }
   config.image_precedence = {
-    :default => [:local, :cdmr]
+    default:   [:local, :cdmr],
+    full_size: [:local, :cdmr_s3]
   }
   config.image_fallback_source = :cdmr
 
@@ -49,9 +54,6 @@ MushroomObserver::Application.configure do
   # every request.  This slows down response time but is perfect for development
   # since you don't have to restart the webserver when you make code changes.
   config.cache_classes = false
-
-  # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
 
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
@@ -68,26 +70,28 @@ MushroomObserver::Application.configure do
   # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
 
-  # Only use best-standards-support built into browsers
-  config.action_dispatch.best_standards_support = :builtin
+  # Speed up Rails server boot time in development environment
+  config.eager_load = false
+
+  # Raise an error on page load if there are pending migrations
+  config.active_record.migration_error = :page_load
 
   # Serve assets in rails.
   config.serve_static_assets = true
 
   # Compile asset files, but don't combine, compress, or add digests to names.
   config.assets.compile = true
-  config.assets.compress = false
-  config.assets.debug = true
+
+  # Debug mode disables concatenation and preprocessing of assets.
+  # This option may cause significant delays in view rendering with a large
+  # number of complex assets.
+  config.assets.debug = false
+  config.assets.logger = false
+
   config.assets.digest = false
 
-  if config.active_record
-    # Raise exception on mass assignment protection for Active Record models
-    config.active_record.mass_assignment_sanitizer = :strict \
-   
-    # Log the query plan for queries taking more than this (works
-    # with SQLite, MySQL, and PostgreSQL)
-    config.active_record.auto_explain_threshold_in_seconds = 0.5
-  end
+  # Raises error for missing translations
+  # config.action_view.raise_on_missing_translations = true
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

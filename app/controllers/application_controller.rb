@@ -91,11 +91,17 @@
 class ApplicationController < ActionController::Base
   require 'extensions'
   require 'login_system'
+  require "csv"
   include LoginSystem
+
+# Prevent CSRF attacks by raising an exception.
+# For APIs, you may want to use :null_session instead.
+  protect_from_forgery with: :exception
 
   around_filter :catch_errors # if Rails.env == "test"
   before_filter :block_ip_addresses
   before_filter :kick_out_robots
+  before_filter :create_view_instance_variable
   before_filter :verify_authenticity_token
   before_filter :fix_bad_domains
   before_filter :autologin
@@ -124,6 +130,11 @@ class ApplicationController < ActionController::Base
     before_filter { User.current = nil }
   end
 
+  ## @view can be used by classes to access some view specific features like render
+  def create_view_instance_variable
+    @view = view_context
+  end
+
   # Utility for extracting nested params where any level might be nil
   def param_lookup(path, default = nil)
     result = params
@@ -138,16 +149,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # The default CSRF handler silently resets the session.  The problem is
-  # autologin will circumvent this, so we would need to disable autologin
-  # temporarily.  Or we can just make forgeries fail, but leave valid requests
-  # alone.  This seems much more graceful... and it lets the user know why they
-  # are experiencing otherwise bewildering and incorrect behavior.
-  def handle_unverified_request
-    render(:text => "Cross-site Request Forgery detected!", :layout => false)
-    return false
-  end
-
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
     return true unless browser.bot?
@@ -157,26 +158,25 @@ class ApplicationController < ActionController::Base
       ua:         browser.ua,
       ip:         request.remote_ip
     )
-    render(:text => "Robots are not allowed on this page.", :status => 403, :layout => false)
+    render(text: "Robots are not allowed on this page.", status: 403, layout: false)
     return false
   end
 
   # Filter to run before anything else to protect against denial-of-service attacks.
   def block_ip_addresses
     return true unless MO.blocked_ip_addresses.include?(request.remote_ip.to_s)
-    render(:text => "You have been blocked from this site. Please contact the webmaster for more information.", :status => 403, :layout => false)
+    render(text: "You have been blocked from this site. Please contact the webmaster for more information.", status: 403, layout: false)
     return false
   end
 
+  # Make sure user is logged in and has posted something -- i.e., not a spammer.
   def require_successful_user
-    if @user and @user.is_successful_contributor?
-      true
-    else
-      flash_warning(:unsuccessful_contributor_warning.t)
-      redirect_back_or_default(:controller => :observer, :action => :index)
-    end
+    return true if @user and @user.is_successful_contributor?
+    flash_warning(:unsuccessful_contributor_warning.t)
+    redirect_back_or_default(controller: :observer, action: :index)
+    return false
   end
-  
+
   # Enable this to test other layouts...
   layout :choose_layout
   def choose_layout
@@ -242,7 +242,7 @@ class ApplicationController < ActionController::Base
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this ever
   # were to break we'd get into an infinite loop too easily that way.  I think
-  # this is a lot safer.  MO.bad_domains would be something like: 
+  # this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
   #     'www.mushroomobserver.org',
@@ -307,7 +307,7 @@ class ApplicationController < ActionController::Base
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies["mo_user"])  &&
           (split = cookie.split(" ")) &&
-          (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
+          (user = User.where(id: split[0]).first) &&
           (split[1] == user.auth_code) &&
           (user.verified)
       @user = set_session_user(user)
@@ -327,7 +327,7 @@ class ApplicationController < ActionController::Base
 
     # Make currently logged-in user available to everyone.
     User.current = @user
-    logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'} controller=#{params[:controller]} action=#{params[:action]}")
+    logger.warn("user=#{@user ? @user.id : '0'} robot=#{browser.bot? ? 'Y' : 'N'}")
 
     # Keep track of last time user requested a page, but only update at most once an hour.
     if @user and (
@@ -417,10 +417,10 @@ class ApplicationController < ActionController::Base
   # This only applies to emails that are associated with Notification's for
   # which there is a note_template.  (Only one type now: Notification's with
   # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
-  #
   def has_unshown_notifications?(user, flavor=:naming)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+  # for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+    for q in QueuedEmail.where(flavor: flavor, to_user_id: user.id)
       ints = q.get_integers(["shown", "notification"], true)
       unless ints["shown"]
         notification = Notification.safe_find(ints["notification"].to_i)
@@ -451,8 +451,8 @@ class ApplicationController < ActionController::Base
   # Create/update the auto-login cookie.
   def set_autologin_cookie(user)
     cookies["mo_user"] = {
-      :value => "#{user.id} #{user.auth_code}",
-      :expires => 1.month.from_now
+        value: "#{user.id} #{user.auth_code}",
+        expires: 1.month.from_now
     }
   end
 
@@ -524,8 +524,7 @@ class ApplicationController < ActionController::Base
 
     # Update user preference.
     if @user && @user.locale.to_s != I18n.locale.to_s
-      @user.update_attributes(:locale => I18n.locale.to_s)
-      Transaction.put_user(:id => @user, :set_locale => I18n.locale.to_s)
+      @user.update(:locale => I18n.locale.to_s)
     end
 
     logger.debug "[I18n] Locale set to #{I18n.locale}"
@@ -544,7 +543,7 @@ class ApplicationController < ActionController::Base
     else
       begin
         Time.zone = tz
-      rescue 
+      rescue
         logger.warn "TimezoneError: #{tz.inspect}"
       end
       @js = true
@@ -702,20 +701,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def save_with_transaction(obj)
+  def save_with_log(obj)
     type_sym = obj.class.to_s.underscore.to_sym
-    if (result = obj.save_with_transaction)
+    if obj.save
       flash_notice(:runtime_created_at.t(type: type_sym))
+      return true
     else
       flash_error(:runtime_no_save.t(type: type_sym))
       flash_object_errors(obj)
+      return false
     end
-    result
-  end
-
-  def object_flashes(obj)
-    flash_object_warnings(obj)
-    flash_object_errors(obj)
   end
 
   def validate_object(obj)
@@ -756,7 +751,7 @@ class ApplicationController < ActionController::Base
       if approved_names.is_a?(String)
         approved_names = approved_names.split(/\r?\n/)
       end
-      for ns in name_list
+      for ns in name_list.split("\n")
         if !ns.blank?
           name_parse = NameParse.new(ns)
           construct_approved_name(name_parse, approved_names, deprecate)
@@ -841,7 +836,7 @@ class ApplicationController < ActionController::Base
 
         # Deprecate and save.
         synonym.change_deprecated(true)
-        synonym.save_with_transaction(:log_deprecated_by, :touch => true)
+        synonym.save_with_log(:log_deprecated_by, :touch => true)
         Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
       end
     end
@@ -895,7 +890,7 @@ class ApplicationController < ActionController::Base
       {}
     elsif query
       query.save if !query.id
-      {:q => query.id.alphabetize}
+      {q: query.id.alphabetize}
     else
       @query_params || {}
     end
@@ -914,7 +909,7 @@ class ApplicationController < ActionController::Base
     params
   end
   helper_method :add_query_param
-  
+
   def redirect_with_query(args)
     redirect_to(add_query_param(args))
   end
@@ -929,7 +924,7 @@ class ApplicationController < ActionController::Base
     @query_params[:q] = params[:q] if !params[:q].blank?
     @query_params
   end
-  
+
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
@@ -947,9 +942,9 @@ class ApplicationController < ActionController::Base
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
   # correct.  (Useful for specifying sort conditions, for example.)
-  def find_or_create_query(model, args={})
+  def find_or_create_query(model_symbol, args={})
     map_past_bys(args)
-    model = model.to_s
+    model = model_symbol.to_s
     if result = find_query(model, false)
 
       # Check if the existing query needs to be updated.
@@ -983,7 +978,7 @@ class ApplicationController < ActionController::Base
     "modified" => :updated_at,
     "created" => :created_at
   }
-  
+
   def map_past_bys(args)
     if args.member?(:by)
       args[:by] = (BY_MAP[args[:by].to_s] or args[:by])
@@ -1021,8 +1016,8 @@ class ApplicationController < ActionController::Base
   # Create a new Query of the given flavor for the given model.  Pass it
   # in all the args you would to Query#new. *NOTE*: Not all flavors are
   # capable of supplying defaults for every argument.
-  def create_query(model, flavor=:default, args={})
-    Query.lookup(model, flavor, args)
+  def create_query(model_symbol, flavor=:default, args={})
+    Query.lookup(model_symbol, flavor, args)
   end
 
   # Create a new query by adding a bounding box to the given one.
@@ -1046,7 +1041,7 @@ class ApplicationController < ActionController::Base
   def tweak_down(v, amount, min)
     [min, v.to_f-amount].max
   end
-  
+
   # This is the common code for all the 'prev/next_object' actions.  Pass in
   # the current object and direction (:prev or :next), and it looks up the
   # query, grabs the next object, and redirects to the appropriate
@@ -1097,9 +1092,9 @@ class ApplicationController < ActionController::Base
 
       # Redirect to the show_object page appropriate for the new object.
       redirect_to(add_query_param({
-        :controller => object.show_controller,
-        :action => object.show_action,
-        :id => id
+                                      controller: object.show_controller,
+                                      action: object.show_action,
+                                      id: id
         }, query))
     end
   end
@@ -1128,9 +1123,9 @@ class ApplicationController < ActionController::Base
   #
   # Side-effects: (sets/uses the following instance variables for the view)
   # @title::        Provides default title.
-  # @links::        
-  # @sorts::        
-  # @layout::       
+  # @links::
+  # @sorts::
+  # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.
   # @extra_data::   Results of block yielded on every object if block given.
@@ -1145,7 +1140,7 @@ class ApplicationController < ActionController::Base
     number_arg   = args[:number_arg]   || :page
     num_per_page = args[:num_per_page] || 50
     include      = args[:include]      || nil
-    type = query.model.type_tag
+    type = query.model_class.type_tag
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1230,7 +1225,7 @@ class ApplicationController < ActionController::Base
       @sorts = nil
     end
     # "@sorts".print_thing(@sorts)
-    
+
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1242,20 +1237,16 @@ class ApplicationController < ActionController::Base
       query.need_letters = args[:letters]
     end
 
-    # Time query -- this caches the ids (and first letters if needed).
-    logger.warn("QUERY starting: #{query.query.inspect}")
+    # Get number of results first so we know how to paginate.
     @timer_start = Time.now
     @num_results = query.num_results
     @timer_end = Time.now
-    logger.warn("QUERY finished: model=#{query.model_string}, " +
-                "flavor=#{query.flavor}, params=#{query.params.inspect}, " +
-                "time=#{(@timer_end-@timer_start).to_f}")
 
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) and
        !args[:always_index]
-      redirect_with_query(:controller => query.model.show_controller,
-        :action => query.model.show_action,
+      redirect_with_query(:controller => query.model_class.show_controller,
+        :action => query.model_class.show_action,
         :id => query.result_ids.first)
 
     # Otherwise paginate results.  (Everything we need should be cached now.)
@@ -1274,7 +1265,13 @@ class ApplicationController < ActionController::Base
       end
 
       # Instantiate correct subset.
+      logger.warn("QUERY starting: #{query.query.inspect}")
+      @timer_start = Time.now
       @objects = query.paginate(@pages, :include => include)
+      @timer_end = Time.now
+      logger.warn("QUERY finished: model=#{query.model_string}, " +
+                  "flavor=#{query.flavor}, params=#{query.params.inspect}, " +
+                  "time=#{(@timer_end-@timer_start).to_f}")
 
       # Give the caller the opportunity to add extra columns.
       if block_given?
@@ -1304,9 +1301,9 @@ class ApplicationController < ActionController::Base
       if !link_all and (by.to_s == this_by)
         results << str
       else
-        results << [str, { :controller => query.model.show_controller,
-                           :action => query.model.index_action,
-                           :by => by }.merge(query_params)]
+        results << [str, {controller: query.model_class.show_controller,
+                          action: query.model_class.index_action,
+                          by: by}.merge(query_params)]
       end
     end
 
@@ -1317,22 +1314,22 @@ class ApplicationController < ActionController::Base
     else
       reverse_by = "reverse_#{this_by}"
     end
-    results << [str, { :controller => query.model.show_controller,
-                       :action => query.model.index_action,
-                       :by => reverse_by }.merge(query_params)]
+    results << [str, {controller: query.model_class.show_controller,
+                      action: query.model_class.index_action,
+                      by: reverse_by}.merge(query_params)]
 
     return results
   end
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
-  def find_or_goto_index(model, id, *args)
-    result = model.safe_find(id, *args)
+  def find_or_goto_index(model, id)
+    result = model.safe_find(id)
     if !result
-      flash_error(:runtime_object_not_found.t(:id => id || '0',
-                                              :type => model.type_tag))
-      redirect_with_query(:controller => model.show_controller,
-        :action => model.index_action)
+      flash_error(:runtime_object_not_found.t(id: id || "0",
+                                              type: model.type_tag))
+      redirect_with_query(controller: model.show_controller,
+                          action: model.index_action)
     end
     return result
   end
@@ -1477,13 +1474,13 @@ class ApplicationController < ActionController::Base
 
   # Default image size to use for thumbnails: either :thumbnail or :small.
   # Looks at both the user's pref (if logged in) or the session (if not logged
-  # in), else reverts to small. *NOTE*: This method is available to views. 
+  # in), else reverts to small. *NOTE*: This method is available to views.
   def default_thumbnail_size
     if @user
       @user.thumbnail_size
     else
-      session[:thumbnail_size] || :thumbnail
-    end
+      session[:thumbnail_size]
+    end || :thumbnail
   end
   helper_method :default_thumbnail_size
 
@@ -1500,36 +1497,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Get User's list layout preferences, providing defaults as necessary.
-  # Returns a hash of options.  (Uses the current user from +@user+.)
-  #
-  #   opts = calc_layout_params
-  #
-  #   opts["rows"]              # Number of rows to display.
-  #   opts["columns"]           # Number of columns to display.
-  #   opts["alternate_rows"]    # Alternate colors for rows.
-  #   opts["alternate_columns"] # Alternate colors for columns.
-  #   opts["vertical_layout"]   # Stick text below thumbnail?
-  #   opts["count"]             # Total number of items = rows * columns.
-  #
   def calc_layout_params
-    result = {}
-    result["rows"]              = 5
-    result["columns"]           = 3
-    result["alternate_rows"]    = true
-    result["alternate_columns"] = true
-    result["vertical_layout"]   = true
-    if @user
-      result["rows"]              = @user.rows    if @user.rows
-      result["columns"]           = @user.columns if @user.columns
-      result["alternate_rows"]    = @user.alternate_rows
-      result["alternate_columns"] = @user.alternate_columns
-      result["vertical_layout"]   = @user.vertical_layout
-    end
-    result["count"] = result["rows"] * result["columns"]
-    result
+    count = (@user && @user.layout_count) || MO.default_layout_count
+    { "count" => count }
   end
-  
+
   def has_permission?(obj, error_message)
     result = (is_in_admin_mode? or obj.can_edit?(@user))
     flash_error(error_message) if not result
@@ -1539,7 +1511,7 @@ class ApplicationController < ActionController::Base
   def can_delete?(obj)
     has_permission?(obj, :runtime_no_destroy.l(:type => obj.type_tag))
   end
-  
+
   def can_edit?(obj)
     has_permission?(obj, :runtime_no_update.l(:type => obj.type_tag))
   end
@@ -1550,4 +1522,13 @@ class ApplicationController < ActionController::Base
       format.xml { render args }
     end
   end
+  ##############################################################################
+
+  private
+
+  # defined here because used by both image_controller and observer_controller
+  def whitelisted_image_args
+    [:copyright_holder, :image, :license_id, :notes, :original_name, :when]
+  end
+
 end

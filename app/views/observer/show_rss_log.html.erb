@@ -1,25 +1,26 @@
 <%
-  @title = :show_rss_log_title.t(:title => @rss_log.unique_format_name)
-
-  draw_prev_next_tabs(@rss_log)
+  @title = :show_rss_log_title.t(title: @rss_log.unique_format_name)
+  @tabsets = {pager_for: @rss_log}
 %>
 
-<% if @rss_log.notes %>
-  <table>
-    <% for key, args, time in @rss_log.parse_log
-      if key != :log_orphan %>
-        <tr>
-          <td style="white-space:nowrap"><%= time.web_time %></td>
-          <td width="10"></td>
-          <td><%= key.t(args) %></td>
-        </tr>
-      <% end
-    end %>
-  </table>
-<% end %>
+<div class="max-width-text">
+  <% if @rss_log.notes %>
+    <table>
+      <% for key, args, time in @rss_log.parse_log
+        if key != :log_orphan %>
+          <tr>
+            <td style="white-space:nowrap"><%= time.web_time %></td>
+            <td width="10"></td>
+            <td><%= key.t(args) %></td>
+          </tr>
+        <% end
+      end %>
+    </table>
+  <% end %>
 
-<%= if target = @rss_log.target
-  link_with_query(:show_object.t(:type => target.type_tag),
-    :controller => target.show_controller,
-    :action => target.show_action, :id => target.id)
-end %>
+  <%= if target = @rss_log.target
+    link_with_query(:show_object.t(type: target.type_tag),
+                    controller: target.show_controller,
+                    action: target.show_action, id: target.id)
+  end %>
+</div>

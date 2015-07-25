@@ -3,7 +3,7 @@
 function MultiImageUploader(localized_text) {
     var defaults = {
         uploading_text: "Uploading",
-        image_too_big_text: "This image is too large. Images must be less than 20Mb in file size.",
+        image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
         creating_observation_text: "Creating Observation...",
         months: "January, February, March, April, May, June, July, August, September, October, November, December"
     };
@@ -59,7 +59,7 @@ function MultiImageUploader(localized_text) {
     SimpleDate.prototype.asDateString = function() {
         var _months = localized_text.months.split(' ');
         return this.day + "-" + _months[this.month-1] + "-" + this.year;
-    }
+    };
 
     /*********************/
     /*    DateUpdater    */
@@ -321,7 +321,7 @@ function MultiImageUploader(localized_text) {
         var _this = this;
         var fileReader = new FileReader();
         fileReader.onload = function (fileLoadedEvent) {
-            var $img = _this.dom_element.find('.img_responsive').first(); //find the actual image element
+            var $img = _this.dom_element.find('.img-responsive').first(); //find the actual image element
             $img.attr('src', fileLoadedEvent.target.result); //get the image element in the container and set the src to base64 img url
         };
         fileReader.readAsDataURL(_this.file);
@@ -385,8 +385,8 @@ function MultiImageUploader(localized_text) {
             month: jQuery(this.dom_element.find('select')[1]).val(),
             year: jQuery(this.dom_element.find('select')[2]).val(),
             license: jQuery(this.dom_element.find('select')[3]).val(),
-            notes: jQuery(this.dom_element.find('input')[1]).val(),
-            copyright_holder: jQuery(this.dom_element.find('input')[2]).val()
+            notes: jQuery(this.dom_element.find('textarea')[0]).val(),
+            copyright_holder: jQuery(this.dom_element.find('input')[1]).val()
         };
     };
 
@@ -450,7 +450,7 @@ function MultiImageUploader(localized_text) {
 
         xhrReq.onload = function () { //after image has been created.
             if (xhrReq.status == 200) {
-                var image = JSON.parse(xhrReq.response).image,  //Rails returning this as a string???
+                var image = JSON.parse(xhrReq.response);
                     goodImageVals = $goodImages.val();
                 $goodImages.val(goodImageVals.length == 0 ? image.id : goodImageVals + ' ' + image.id); //add id to the good images form field.
                 if (_this.dom_element.find('input[name="observation[thumb_image_id]"]')[0].checked) {
@@ -548,7 +548,9 @@ function MultiImageUploader(localized_text) {
         });
 
         // Detect when a user submits observation; includes upload logic
-        $form.submit(function () {
+
+        $form.submit(function (event) {
+          //  event.preventDefault();
             if (blockFormSubmission) {
                 fileStore.uploadAll();
                 return false;

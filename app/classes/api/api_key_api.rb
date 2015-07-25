@@ -28,9 +28,9 @@ class API
     def create_params
       @for_user = parse_user(:for_user, :default => @user)
       {
-        :notes    => parse_string(:app),
-        :user     => @for_user,
-        :verified => (@for_user == @user ? Time.now : nil),
+          notes: parse_string(:app),
+          user: @for_user,
+          verified: (@for_user == @user ? Time.now : nil),
       }
     end
 
@@ -46,7 +46,7 @@ class API
 
     def update_params
       {
-        :notes => parse_string(:set_notes),
+          notes: parse_string(:set_notes),
       }
     end
   end

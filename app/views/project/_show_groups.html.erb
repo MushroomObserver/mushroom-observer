@@ -1,24 +1,28 @@
-<p>
-  <%= :change_member_status_members.t %><br/>
+<p style="margin-bottom:0">
+  <b><%= :change_member_status_members.t %>:</b>
+</p>
+<p style="margin-left:1em">
   <% for u in project.user_group.users %>
-    <%= indent + user_link(u) %>
-    <% if @project.is_admin?(user) %>
+    <%= user_link(u) %>
+    <% if @project.is_admin?(@user) %>
       | <%= link_with_query(:change_member_status_change_status.t,
-              :action => :change_member_status, :id => project.id,
-              :candidate => u.id) %>
+                            action: :change_member_status, id: project.id,
+                            candidate: u.id) %>
     <% end %>
     <br/>
   <% end %>
 </p>
 
-<p>
-  <%= :change_member_status_admins.t %><br/>
+<p style="margin-bottom:0">
+  <b><%= :change_member_status_admins.t %>:</b>
+</p>
+<p style="margin-left:1em">
   <% for u in project.admin_group.users %>
-    <%= indent + user_link(u) %>
-    <% if @project.is_member?(user) %>
-     | <%= link_with_query(:change_member_status_change_status.t,
-             :action => :change_member_status, :id => project.id,
-             :candidate => u.id) %>
+    <%= user_link(u) %>
+    <% if @project.is_member?(@user) %>
+      | <%= link_with_query(:change_member_status_change_status.t,
+                            action: :change_member_status, id: project.id,
+                            candidate: u.id) %>
     <% end %>
     <br/>
   <% end %>

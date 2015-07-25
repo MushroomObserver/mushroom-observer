@@ -11,7 +11,7 @@
 #  tpl::      Localize, textilize with paragraphs and obj links.
 #
 ################################################################################
-
+#
 class Symbol
   @raise_errors = false
 
@@ -23,26 +23,18 @@ class Symbol
     @raise_errors
   end
 
-  # Converts Symbol directly to lowercase, without making you go through String.
-  def downcase
-    to_s.downcase.to_sym
-  end
-
-  # Converts Symbol directly to uppercase, without making you go through String.
-  def upcase
-    to_s.upcase.to_sym
-  end
-
-  # Capitalizes first letter of Symbol directly, without making you go through
-  # String.
-  def capitalize
-    to_s.capitalize.to_sym
-  end
-
-  # Capitalizes just the first letter of Symbol directly, without making you go
-  # through String.  (+capitalize+ does <tt>downcase.capitalize_first</tt>)
+  # Capitalizes just the first letter of Symbol, leaving remainder alone
+  # (Symbol#capitalize capitalizes first letter, downcases the rest)
   def capitalize_first
     to_s.capitalize_first.to_sym
+  end
+
+  def add_leaf(*args)
+    Tree.add_leaf(self, *args)
+  end
+
+  def has_node?(*args)
+    Tree.has_node?(self, *args)
   end
 
   # Return a list of missing tags we've encountered.
@@ -57,8 +49,10 @@ class Symbol
 
   # Does this tag have a translation?
   def has_translation?
-    (I18n.t("#{MO.locale_namespace}.#{self}", default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT') or
-    (I18n.t("#{MO.locale_namespace}.#{downcase}", default: 'BOGUS_DEFAULT') != 'BOGUS_DEFAULT')
+    (I18n.t("#{MO.locale_namespace}.#{self}", default: "BOGUS_DEFAULT") !=
+      "BOGUS_DEFAULT") ||
+    (I18n.t("#{MO.locale_namespace}.#{downcase}", default: "BOGUS_DEFAULT") !=
+      "BOGUS_DEFAULT")
   end
 
   # Wrapper on the old +localize+ method that:
@@ -69,13 +63,14 @@ class Symbol
   #
   # There are several related wrappers on localize:
   # t::   Textilize: no paragraphs or links or anything fancy.
-  # tl::  Do 't' and check for links.
-  # tp::  Wrap 't' in a <p> block.
-  # tpl:: Wrap 't' in a <p> block AND do links.
+  # tl::  Do "t" and check for links.
+  # tp::  Wrap "t" in a <p> block.
+  # tpl:: Wrap "t" in a <p> block AND do links.
   #
-  # Note that these are guaranteed to be "sanitary".  The strings in the translation
-  # files are assumed to be same, even if they contain HTML.  Strings passed in via
-  # the '[arg]' syntax have any HTML stripped from them.
+  # Note that these are guaranteed to be "sanitary".
+  # The strings in the translation
+  # files are assumed to be same, even if they contain HTML.
+  # Strings passed in via the '[arg]' syntax have any HTML stripped from them.
   #
   # ==== Argument expansion
   #
@@ -123,7 +118,7 @@ class Symbol
   #   [:tag(type=:name)]                 ==  :tag.l(:type => :name)
   #   [:tag(type=parent_arg)]            ==  :tag.l(:type => args[:parent_arg])
   #   [:tag(type='Literal Value')]       ==  :tag.l(:type => "Literal Value")
-  #   [:tag(type=''Quote's Are Kept'')]  ==  :tag.l(:type => "'Quote's Are Kept'")
+  #   [:tag(type=""Quote's Are Kept"")]  ==  :tag.l(:type => ""Quote"s Are Kept'")
   #
   # *NOTE*: Square brackets are NOT allowed in the literals, even if quoted!
   # That would make the parsing non-trivial and potentially slow.
@@ -131,9 +126,9 @@ class Symbol
   def localize(args={}, level=[])
     result = nil
     Language.note_usage_of_tag(self)
-    if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: '')) != ''
+    if (val = I18n.t("#{MO.locale_namespace}.#{self}", default: "")) != ""
       result = localize_postprocessing(val, args, level)
-    elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}", default: '')) != ''
+    elsif (val = I18n.t("#{MO.locale_namespace}.#{downcase}", default: "")) != ""
       result = localize_postprocessing(val, args, level, :captialize)
     else
       @@missing_tags << self if defined?(@@missing_tags)
@@ -144,7 +139,7 @@ class Symbol
         end
         args_str = "(#{pairs.join(',')})"
       else
-        args_str = ''
+        args_str = ""
       end
       result = "[:#{self}#{args_str}]"
     end
@@ -194,7 +189,7 @@ class Symbol
           val.to_s.strip_html
 
       # Want :types, given :type.
-      elsif (y = x.sub(/s$/i,'')) and
+      elsif (y = x.sub(/s$/i,"")) and
             args.has_key?(arg = y.to_sym)
         val = args[arg]
         val.is_a?(Symbol) ?
@@ -279,8 +274,12 @@ class Symbol
   alias l localize
 
   def t(*args); localize(*args).t(false); end
+
   def tl(*args); localize(*args).tl(false); end
+
   def tp(*args); localize(*args).tp(false); end
+
   def tpl(*args); localize(*args).tpl(false); end
+
   def strip_html(*args); localize(*args).strip_html; end
 end

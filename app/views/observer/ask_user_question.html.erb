@@ -1,14 +1,19 @@
-<% @title = :ask_user_question_title.t(:user => @target.legal_name) %>
+<% @title = :ask_user_question_title.t(user: @target.legal_name) %>
 
-<%= form_tag(add_query_param(:action => 'ask_user_question',
-      :id => @target.id)) do %>
-  <br/><center><%= submit_tag :SEND.l %></center>
+<div class="max-width-text">
+  <%= form_tag(add_query_param(action: :ask_user_question, id: @target.id)) do %>
 
-  <label for="email_subject"><%= :ask_user_question_subject.t %>:</label><br/>
-  <%= text_field('email', 'subject', :size => 70) %><br/><br/>
+    <div class="form-group">
+      <%= label_tag(:email_subject, :ask_user_question_subject.t + ":") %>
+      <%= text_field(:email, :subject, size: 70, data: {autofocus: true},
+                     class: "form-control") %>
+    </div>
 
-  <label for="email_content"><%= :ask_user_question_message.t %>:</label><br/>
-  <%= text_area('email', 'content', :cols => 80) %>
+    <div class="form-group">
+      <%= label_tag(:email_content, :ask_user_question_message.t + ":") %>
+      <%= text_area(:email, :content, rows: 10, class: "form-control") %>
+    </div>
 
-  <%= focus_on('email_subject') %>
-<% end %>
+    <%= submit_tag(:SEND.l, class: "btn center-block push-down") %>
+  <% end %>
+</div>

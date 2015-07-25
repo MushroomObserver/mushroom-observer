@@ -31,7 +31,8 @@ class Herbarium < AbstractModel
   end
 
   def label_free?(new_label)
-    Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
+    # Specimen.find_all_by_herbarium_id_and_herbarium_label(self.id, new_label).count == 0
+    Specimen.where(herbarium_id: self.id, herbarium_label: new_label).count == 0
   end
 
   def self.default_specimen_label(name, id)

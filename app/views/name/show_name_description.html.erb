@@ -7,7 +7,7 @@
   <tr>
     <td valign="top" width="50%">
       <%= render(:partial => 'shared/show_description',
-                 :locals => { :description => @description }) %>
+                 :locals => {description: @description}) %>
     </td>
 
     <td valign="top" width="50%">
@@ -17,8 +17,8 @@
 </table>
 
 <%= render(:partial => 'name_description', :object => @description,
-           :locals => { :review => true }) %>
+           :locals => {review: true}) %>
 <%= render(:partial => 'comment/show_comments', :locals =>
-           { :object => @description, :controls => true, :limit => 10 }) if false%>
+           {object: @description, controls: true, limit: 10}) if false%>
 <br/>
 <%= show_object_footer(@description) %>

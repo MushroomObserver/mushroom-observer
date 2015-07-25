@@ -1,49 +1,47 @@
 <%
   @title = :add_specimen_title.l
-  new_tab_set do
-    # Return to observation
-    add_tab_with_query(:add_specimen_cancel.t, :controller => 'observer',
-      :action => 'show_observation', :id => @observation.id)
-    add_tab_with_query(:herbarium_index.t, :controller => 'herbarium',
-      :action => 'index')
-  end
+
+  tabs = [
+    link_with_query(:add_specimen_cancel.t, @observation.show_link_args),
+    link_with_query(:herbarium_index.t, controller: :herbarium, action: :index)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<table>
-  <tr>
-    <td>
-      <%= form_tag(:action => 'add_specimen', :id => @observation.id) do %>
-        <%= hidden_field_tag('id', @observation.id) %>
-      	<center><%= submit_tag :add_specimen_add.t %><br/></center>
+<div class="row">
+  <div class="col-xs-12 col-sm-7 max-width-text">
+    <%= form_tag(action: :add_specimen, id: @observation.id) do %>
+      <%= hidden_field_tag(:id, @observation.id) %>
+    	<%= submit_tag(:add_specimen_add.t, class: "btn center-block push-down") %>
 
-        <p>
-					<%= herbarium_name_box %>
-        </p>
+      <div class="form-group push-down">
+        <%= label_tag(:specimen_herbarium_name, :specimen_herbarium_name.t + ":") %>
+        <%= text_field(:specimen, :herbarium_name, value: @herbarium_name, class: "form-control") %>
+        <% turn_into_herbarium_auto_completer(:specimen_herbarium_name) %>
+      </div>
 
-        <p>
-          <%= :add_specimen_herbarium_label.t %>: <%= text_field('specimen', 'herbarium_label', :value => @herbarium_label, :size => 100) %>
-        </p>
+      <div class="form-group push-down">
+        <%= label_tag(:specimen_herbarium_label, :add_specimen_herbarium_label.t + ":") %>
+        <span class="HelpNote"><%= :add_specimen_herbarium_label_help.t %></span>
+        <%= text_field(:specimen, :herbarium_label, value: @herbarium_label, class:"form-control") %>
+      </div>
 
-        <p>
-          <label for="specimen_when_1i"><%= :WHEN.t %>:</label>
-          <%= date_select('specimen', 'when', :start_year => 1980,
-                          :end_year => Time.now.year,
-                          :order => [:day,:month,:year]) %>
-        </p>
+      <div class="form-group form-inline push-down">
+        <%= label_tag(:specimen_when_1i, :WHEN.t + ":") %>
+        <%= date_select(:specimen, :when, {start_year: 1980, end_year: Time.now.year,
+                        order: [:day,:month,:year]}, {class: "form-control"}) %>
+      </div>
 
-        <p>
-          <%= :add_specimen_notes.t %>:<br/>
-      		<%= text_area('specimen', 'notes', :cols => 80, :rows => 10) %>
-        </p>
+      <div class="form-group push-down">
+        <%= label_tag(:specimen_notes, :add_specimen_notes.t + ":") %>
+    		<%= text_area(:specimen, :notes, class: "form-control", rows: 6) %>
+      </div>
 
-        <center><%= submit_tag :add_specimen_add.t %><br/></center>
-      <% end %>
-    </td>
-    <td>
-      <%= render(:partial => 'observer/rss_log', :locals => {
-        :rss_log => @observation.rss_log,
-        :target => @observation,
-      }) %>
-    </td>
-  </tr>
-</table>
+      <%= submit_tag(:add_specimen_add.t, class: "btn center-block push-down") %>
+    <% end %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5 max-width-text">
+    <%= render(partial: "shared/matrix_box", locals: { object: @observation.rss_log }) %>
+  </div>
+</div>

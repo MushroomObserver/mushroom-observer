@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'csv'
+require "csv"
 
 module ObservationReport
   class Base
@@ -30,7 +30,7 @@ module ObservationReport
         when 'ASCII'
           render.to_ascii
         else
-          render.iconv(encoding) # This was causing problems with the UTF-16 encoding.
+          render.iconv(encoding) # This caused problems with  UTF-16 encoding.
       end
     end
 
@@ -60,6 +60,7 @@ module ObservationReport
     LOC_WEST = 23
     LOC_HIGH = 24
     LOC_LOW = 25
+    SPEC_LABEL = 26
 
     def rows_without_location
       query.select_rows(
@@ -99,7 +100,7 @@ module ObservationReport
 
     def rows_with_location
       query.select_rows(
-        :select => [
+        select: [
             'observations.id',
             'observations.when',
             'observations.lat',
@@ -127,13 +128,43 @@ module ObservationReport
             'locations.high',
             'locations.low',
           ].join(','),
-        :join => [:users, :locations, :names],
-        :order => 'observations.id ASC'
+        join: [:users, :locations, :names],
+        order: 'observations.id ASC'
       )
     end
 
     def all_rows
       rows_with_location + rows_without_location
+    end
+
+    def all_rows_with_herbarium_labels
+      add_herbarium_labels(all_rows)
+    end
+
+    # Do second query in specimens table to look up original herbarium label
+    # for each observation.  Joins labels together into one string if there
+    # are multiple specimens.
+    def add_herbarium_labels(rows)
+      ids = rows.map(&:first)
+      data = Specimen.connection.select_rows %(
+        SELECT os.observation_id, s.herbarium_label
+        FROM specimens s, observations_specimens os
+        WHERE os.observation_id IN (#{ids.join(',')})
+          AND os.specimen_id = s.id
+      )
+      labels = {}
+      for id, label in data
+        list = labels[id] ||= []
+        list << label
+      end
+      rows.each do |row|
+        if list = labels[row.first]
+          row[SPEC_LABEL] = list.join(", ")
+        else
+          row[SPEC_LABEL] = nil
+        end
+      end
+      return rows
     end
 
     def clean_boolean(val)
@@ -153,7 +184,7 @@ module ObservationReport
     end
 
     def clean_rank(val)
-      val.blank? ? nil : val.downcase   # :"rank_#{val.downcase}".l
+      val.blank? ? nil : Name.ranks.key(val).to_s
     end
 
     def split_location(val)
@@ -172,16 +203,16 @@ module ObservationReport
     def split_name(name, author, rank)
       gen = cf = sp = ssp = var = f = sp_author = ssp_author = var_author = f_author = nil
       cf = 'cf.' if name.sub!(/ cf\. /, ' ')
-      if %[Genus Species Subspecies Variety Form].include?(rank)
+      if Name.ranks.values_at(:Genus, :Species, :Subspecies, :Variety, :Form).include?(rank)
         f   = $2 if name.sub!(/ f. (\S+)$/, '')
         var = $2 if name.sub!(/ var. (\S+)$/, '')
         ssp = $2 if name.sub!(/ ssp. (\S+)$/, '')
         sp  = $1 if name.sub!(/ (\S+)$/, '')
         gen = name
-        f_author   = author if rank == 'Form'
-        var_author = author if rank == 'Variety'
-        ssp_author = author if rank == 'Subspecies'
-        sp_author  = author if rank == 'Species'
+        f_author   = author if rank == Name.ranks[:Form]
+        var_author = author if rank == Name.ranks[:Variety]
+        ssp_author = author if rank == Name.ranks[:Subspecies]
+        sp_author  = author if rank == Name.ranks[:Species]
       else
         gen = name.sub(/ .*/, '')
       end
@@ -190,10 +221,10 @@ module ObservationReport
   end
 
   class CSV < Base
-    self.default_encoding = 'UTF-8'
-    self.mime_type = 'text/csv'
-    self.extension = 'csv'
-    self.header = { :header => 'present' }
+    self.default_encoding = "UTF-8"
+    self.mime_type = "text/csv"
+    self.extension = "csv"
+    self.header = { header: :present }
 
     def render
       ::CSV.generate do |csv|
@@ -201,7 +232,7 @@ module ObservationReport
         rows.each do |row|
           csv << row
         end
-      end.force_encoding('UTF-8')
+      end.force_encoding("UTF-8")
     end
   end
 
@@ -216,6 +247,7 @@ module ObservationReport
         user_name
         collection_date
         has_specimen
+        original_label
         consensus_name_id
         consensus_name
         consensus_author
@@ -242,13 +274,14 @@ module ObservationReport
     end
 
     def rows
-      return all_rows.map do |row|
+      return all_rows_with_herbarium_labels.map do |row|
         observation_id         = clean_integer(row[OBS_ID])
         user_id                = clean_integer(row[USER_ID])
         user_login             = clean_string(row[USER_LOGIN])
         user_name              = clean_string(row[USER_NAME])
         collection_date        = clean_string(row[OBS_WHEN])
         has_specimen           = clean_boolean(row[OBS_SPECIMEN])
+        original_label         = clean_string(row[SPEC_LABEL])
         consensus_name_id      = clean_integer(row[NAME_ID])
         consensus_name         = clean_string(row[NAME_TEXT_NAME])
         consensus_author       = clean_string(row[NAME_AUTHOR])
@@ -275,6 +308,7 @@ module ObservationReport
           user_name,
           collection_date,
           has_specimen,
+          original_label,
           consensus_name_id,
           consensus_name,
           consensus_author,

@@ -1,76 +1,74 @@
 <%
   @title = :show_site_stats_title.t
 
-  new_tab_set do
-    add_tab(:app_contributors.t, :action => :users_by_contribution)
-    add_tab(:site_stats_observed_taxa.t, :action => :checklist)
-  end
+  tabs = [
+    link_to(:app_contributors.t, action: :users_by_contribution),
+    link_to(:site_stats_observed_taxa.t, action: :checklist)
+  ]
+  @tabsets = { right: draw_tab_set(tabs) }
 %>
 
-<center>
-  <table border="0">
-    <tr align="center">
-      <% obs_length = 0
-      if @observations
-        obs_length = @observations.length
-      end
+<div class="row push-down">
+  <div class="hidden-xs col-md-3">
+    <% obs_length = @observations ? @observations.length : 0
+    if obs_length > 0 %>
+      <div class="row">
+        <% @observations[0,3].each do |obs| %>
+          <div class="col-xs-12 pad-bottom">
+            <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+                          votes: true) %><br/><br/>
 
-      if obs_length > 0 %>
-        <td>
-          <% for obs in @observations[0,3] %>
-            <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id,
-                          :votes => true) %><br/>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="col-md-6">
+    <center>
+      <table class="table">
+        <% fields = [
+          :images,
+          :observations,
+          :observations_with_voucher,
+          :observations_without_voucher,
+          :listed_taxa,
+          :observed_taxa,
+          :name_descriptions_authors,
+          :locations,
+          :location_descriptions_authors,
+          :species_lists,
+          :species_list_entries,
+          :namings,
+          :comments,
+          :votes,
+          :users,
+        ]
+
+        fields.each do |field|
+          label = "site_stats_#{field}".to_sym.t
+          count = @site_data[field]
+          if count and !label.blank? %>
+            <tr>
+              <td><%= "site_stats_#{field}".to_sym.t %></td>
+              <td align="right"><%= count %></td>
+            </tr>
           <% end %>
-        </td>
-      <% end %>
+        <% end %>
+      </table>
+    </center>
+  </div>
 
-      <td valign="top" width="50%">
-        <table cellpadding="5" cellspacing="5" border="0">
-          <% fields = [
-            :images,
-            :observations,
-            :observations_with_voucher,
-            :observations_without_voucher,
-            :listed_taxa,
-            :observed_taxa,
-            :name_descriptions_authors,
-            :locations,
-            :location_descriptions_authors,
-            :species_lists,
-            :species_list_entries,
-            :namings,
-            :comments,
-            :votes,
-            :users,
-          ]
-
-          # Do we want to sort the list in order of decreasing size?
-          # fields = fields.sort_by {|f| @site_data[f].to_i}.reverse
-
-          for field in fields
-            label = "site_stats_#{field}".to_sym.t
-            count = @site_data[field]
-            if count and !label.blank? %>
-              <tr>
-                <td><%= "site_stats_#{field}".to_sym.t %></td>
-                <td><%= count %></td>
-              </tr>
-            <% end %>
+  <div class="hidden-xs col-md-3">
+    <% if obs_length > 3 %>
+      <div class="row">
+        <div class="col-xs-12">
+          <% @observations[3,3].each do |obs| %>
+            <%= thumbnail(obs.thumb_image, link: { action: :show_observation, id: obs.id},
+                          votes: true) %><br/><br/>
           <% end %>
-        </table>
-      </td>
-
-      <% if obs_length > 3 %>
-        <td>
-          <% for obs in @observations[3,3] %>
-            <%= thumbnail(obs.thumb_image, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id,
-                          :votes => true) %><br/>
-          <% end %>
-        </td>
-      <% end %>
-
-    </tr>
-  </table>
-</center>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

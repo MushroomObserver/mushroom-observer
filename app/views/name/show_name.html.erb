@@ -1,126 +1,165 @@
 <%
   @title = :show_name_title.t(:name => @name.display_name)
+
+  description_links = list_descriptions(@name) || []
   Textile.register_name(@name)
 
-  # Google Images | Distribution Map | Email Tracking
-  new_tab_set do
-    eol_url = @name.eol_url
-    add_tab('EOL', eol_url) if eol_url
-    add_tab(:google_images.t,
-            "http://images.google.com/images?q=#{@name.real_text_name}")
-    add_tab('MyCoPortal', mycoportal_url(@name))
-    if @data != []
-      add_tab_with_query(:show_name_distribution_map.t, :action => 'map',
-        :id => @name.id)
-    end
-    add_tab_with_query(:show_name_email_tracking.t,
-      :action => 'email_tracking', :id => @name.id)
+  tabs = [
+    link_with_query(:show_name_edit_name.t, :action => 'edit_name',
+                    :id => @name.id),
+    link_with_query(:show_name_bulk_name_edit.t,
+                    :action => 'bulk_name_edit'),
+    link_with_query(:show_name_add_name.t, :action => 'create_name'),
+    link_with_query(:show_name_change_synonyms.t,
+                    :action => 'change_synonyms', :id => @name.id)
+  ]
+  if @name.deprecated
+    tabs << link_with_query(:APPROVE.t, :action => 'approve_name',
+                            :id => @name.id)
+  else
+    tabs << link_with_query(:DEPRECATE.t, :action => 'deprecate_name',
+                            :id => @name.id)
   end
-
-  # Edit Name | Bulk Name Edit | Add Name | Change Synonyms | Approve/Deprecate
-  new_tab_set do
-    add_tab_with_query(:show_name_edit_name.t, :action => 'edit_name',
-      :id => @name.id)
-    add_tab_with_query(:show_name_bulk_name_edit.t,
-      :action => 'bulk_name_edit')
-    add_tab_with_query(:show_name_add_name.t, :action => 'create_name')
-    add_tab_with_query(:show_name_change_synonyms.t,
-      :action => 'change_synonyms', :id => @name.id)
-    if @name.deprecated
-      add_tab_with_query(:APPROVE.t, :action => 'approve_name',
-        :id => @name.id)
-    else
-      add_tab_with_query(:DEPRECATE.t, :action => 'deprecate_name',
-        :id => @name.id)
-    end
-  end
-
-  draw_prev_next_tabs(@name)
-  draw_interest_icons(@name)
+  tabs += [
+    link_with_query(:show_name_email_tracking.t, :action => 'email_tracking',
+                    :id => @name.id),
+    draw_interest_icons(@name)
+  ]
+  @tabsets = {
+    pager_for: @name,
+    right: draw_tab_set(tabs)
+  }
 %>
 
-<table cellpadding="5" width="100%">
-	<tr>
-	    <td valign="top" align="center" valign="middle">
-		  <% if @first_four and @first_four.length > 0 %>
-			  <p>
-			    <%= :show_name_most_confident.t %>
-			  </p>
-			  <% for obs in @first_four %>
-		      	<%= show_best_image(obs) %><br/>
-			  <% end %>
-		      <br/>
-		  <% end %>
-	      <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
-	      <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
-	      <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
-	      <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
-	      <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
-	    </td>
+<div class="row">
+  <div class="col-sm-5">
+    <% if @first_four and @first_four.length > 0 %>
+        <strong><%= :show_name_most_confident.t %>:</strong>
+        <div class="list-group">
+          <% @first_four.each do |obs| %>
+              <div class="list-group-item">
+                <%= show_best_image(obs) %>
+              </div>
+          <% end %>
+        </div>
+    <% end %>
+    <div>
+      <%= show_previous_version(@name) %>
+      <%= set_export_status_controls(@name) %>
+      <br/>
+      <br/>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item">
+	<%= show_authors_and_editors(@name) %>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-7">
+    <div class="list-group">
+      <div class="list-group-item">
+        <div class="row">
+          <div class="col-sm-6">
+            <%= name_section_link(:show_name_observations.t, @first_consensus, @consensus_query) %>
+            <%= name_section_link(:show_name_all_observations.t, @has_consensus2, @consensus2_query) %>
+            <%= name_section_link(:show_name_synonym_observations.t, @has_synonym, @synonym_query) %>
+            <%= name_section_link(:show_name_other_observations.t, @has_other, @other_query) %>
+            <%= name_section_link(:show_name_subtaxa_observations.t, @has_subtaxa, @subtaxa_query) %>
+          </div>
+          <div class="col-sm-6">
+            <%= content_tag(:div, link_to('EOL', @name.eol_url)) if @name.eol_url %>
+            <%= content_tag(:div, link_to(:google_images.t, "http://images.google.com/images?q=#{@name.real_text_name}")) %>
+            <%= content_tag(:div, link_to("MyCoPortal", mycoportal_url(@name))) %>
+            <%= content_tag(:div, link_with_query(:show_name_distribution_map.t, :action => 'map', :id => @name.id)) %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <strong><%= :show_name_nomenclature.t %>:</strong>
 
-    	<td valign="top">
-			<% odd_even = true %>
-			<%= :show_name_nomenclature.t %>:
-			<%= colored_notes_box(odd_even, render(:partial => 'name', :object => @name, :locals =>
-		                                   			{ :synonyms => true } )) %>
-		
-			<br/>
-			<% odd_even = not(odd_even) %>
-			<%= :show_name_classification.t %>: <%= edit_classification_link(@name.description) %>
-			<%= colored_notes_box(odd_even, classification_section(@classification, @parents, @first_child, @children_query)) %>
+    <div class="list-group">
+      <div class="list-group-item">
+        <%= render(:partial => 'name', :object => @name, :locals => {synonyms: true}) %>
+      </div>
+    </div>
 
-			<% if @name.has_notes? %>
-				<br/>
-				<% odd_even = not(odd_even) %>
-				<%= :show_name_notes.t %>: <%= edit_name_notes_link(@name) %>
-				<%= colored_notes_box(odd_even, @name.notes.tpl) %>
-			<% end %>
+    <strong><%= :show_name_classification.t %>:</strong>
+    <div>
+      <%= link_with_query(:EDIT.t, {id: @name.description.id,
+                                    controller: 'name', action: 'edit_name_description'},
+                          {class: "pull-right"}) if @name.description %>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item">
+        <%= classification_section(@classification, @parents, @first_child, @children_query) %>
+      </div>
+    </div>
 
-			<% if @best_description and @best_description != "" %>
-				<br/>
-				<% odd_even = not(odd_even) %>
-				<%= :show_name_brief_description.t %>:
-				<%= link_with_query(:show_name_see_more.t, :id => @name.description.id,
-              :controller => 'name',
-		          :action => 'show_name_description') %> |
-				<%= edit_best_brief_desc_link(@name.description) %>
-				<%= colored_notes_box(odd_even, @best_description.tpl) %>
-			<% end %>
-			
-			<br/>
-			<% odd_even = not(odd_even) %>
-			<%= show_boxed_descriptions(odd_even, @name) %>
-			
-			<% if @projects && @projects.length > 0 %>
-				<br/>
-				<% odd_even = not(odd_even) %>
-				<%= show_boxed_projects(odd_even, @name, @projects) %>
-			<% end %>
-			
-			<br/>
-			<p>
-				<%= show_previous_version(@name) %>
-			</p>
-			<p>
-				<%= set_export_status_controls(@name) %>
-			</p>
-		</td>
-  </tr>
-</table>
+    <% if @name.has_notes? %>
+      <strong><%= :show_name_notes.t %>:</strong>
+        [<%= link_with_query(:EDIT.t, controller: :name, action: :edit_name, id: @name.id) %>]
+      <div class="list-group">
+          <div class="list-group-item">
+            <%= @name.notes.tpl %>
+          </div>
+      </div>
+    <% end %>
 
+    <% if !@best_description.blank? %>
+        <strong><%= :show_name_brief_description.t %>:</strong>
+        <div>
+          <span class="pull-right">
+          <%= link_with_query(:show_name_see_more.t, :id => @name.description.id,
+                              :controller => 'name',
+                              :action => 'show_name_description') %> |
+            <%= link_with_query(:EDIT.t, {id: @name.description.id,
+                                          controller: 'name', action: 'edit_name_description'}) %>
+                </span>
+        </div>
+        <div class="list-group">
+          <div class="list-group-item">
+            <%= @best_description.tpl %>
+          </div>
+        </div>
+    <% end %>
+    <strong><%= :show_name_descriptions.t %>:</strong>
+      [<%= link_with_query(:show_name_create_description.t, controller: :name,
+	                        action: :create_name_description, id: @name.id) %>]
+    <div class="list-group">
+      <div class="list-group-item">
+        <% description_links.each do |desc| %>
+            <div><%= desc %></div>
+        <% end %>
+        <%= :show_name_no_descriptions.t if description_links.empty? %>
+      </div>
+    </div>
+    <% if @projects && @projects.length > 0 %>
+    <div>
+      <strong><%= :show_name_create_draft.t %>:</strong>
+    </div>
+    <div class="list-group">
+      <div class="list-group-item">
+        <% @projects.each do |project| %>
+          <%= link_with_query(project.title,
+                              action: :create_name_description,
+                              id: @name.id,
+                              project: project.id,
+                              source: 'project') %><br>
+	<% end %>
+      </div>
+      <% end %>
+    </div>
+  </div>
+</div>
 
 <%
-# ----------------------------------------
-#  Show comments
-# ----------------------------------------
+   # ----------------------------------------
+   #  Show comments
+   # ----------------------------------------
 %>
-<center>
-  <%= show_authors_and_editors(@name) %>
-</center>
-
 <%= render(:partial => 'comment/show_comments', :locals =>
-           { :object => @name, :controls => true, :limit => nil }) %>
-
-<hr/><br/>
-
-<%= show_object_footer(@name) %>
+{object: @name, controls: true, limit: nil}) %>
+<div class="col-xs-12">
+  <%= show_object_footer(@name) %>
+</div>
+</div>

@@ -1,13 +1,12 @@
 class Image
   class Url
     SUBDIRECTORIES = {
-      :original  => 'orig',
-      :full_size => 'orig',
-      :huge      => '1280',
-      :large     => '960',
-      :medium    => '640',
-      :small     => '320',
-      :thumbnail => 'thumb'
+        full_size: 'orig',
+        huge: '1280',
+        large: '960',
+        medium: '640',
+        small: '320',
+        thumbnail: 'thumb'
     }
 
     SUBDIRECTORY_TO_SIZE = {
@@ -24,6 +23,7 @@ class Image
     def initialize(args)
       size = args[:size]
       size = SUBDIRECTORY_TO_SIZE[size] if !size.is_a?(Symbol)
+      size = :full_size if size == :original
       self.size        = size
       self.id          = args[:id]
       self.transferred = args[:transferred]

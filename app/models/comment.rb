@@ -49,7 +49,6 @@
 #  == Attributes
 #
 #  id::           Locally unique numerical id, starting at 1.
-#  sync_id::      Globally unique alphanumeric id, used to sync with remote servers.
 #  created_at::   Date/time it was first created.
 #  updated_at::   Date/time it was last updated.
 #  user::         User that created it.
@@ -178,20 +177,28 @@ class Comment < AbstractModel
       end
 
       # Send to masochists who want to see all comments.
-      for user in User.find_all_by_email_comments_all(true)
+      for user in User.where(email_comments_all: true)
         recipients.push(user)
       end
 
       # Send to other people who have commented on this same object if they want.
-      for other_comment in Comment.find(:all, :conditions =>
-          ['comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE',
-          target.class.to_s, target.id], :include => 'user')
+#     for other_comment in Comment.find(:all, :conditions => # Rails 3
+#       ['comments.target_type = ? AND comments.target_id = ? AND
+#        users.email_comments_response = TRUE',
+#       target.class.to_s, target.id], :include => 'user')
+
+      for other_comment in Comment.
+                             includes(:user).
+                             where("comments.target_type" => target.class.to_s,
+                                   "comments.target_id" => target.id,
+                                   "users.email_comments_response" => TRUE)
         recipients.push(other_comment.user)
       end
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in Interest.find_all_by_target(target)
+      # for interest in Interest.find_all_by_target(target)
+      for interest in Interest.where_target(target)
         if interest.state
           recipients.push(interest.user)
         else
@@ -241,11 +248,11 @@ class Comment < AbstractModel
 
     if self.summary.to_s.blank?
       errors.add(:summary, :validate_comment_summary_missing.t)
-    elsif self.summary.binary_length > 100
+    elsif self.summary.bytesize > 100
       errors.add(:summary, :validate_comment_summary_too_long.t)
     end
 
-    if self.target_type.to_s.binary_length > 30
+    if self.target_type.to_s.bytesize > 30
       errors.add(:target_type, :validate_comment_object_type_too_long.t)
     end
   end

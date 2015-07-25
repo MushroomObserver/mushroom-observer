@@ -13,7 +13,7 @@
 
 class ApiController < ApplicationController
   require 'xmlrpc/client'
-  # require_dependency 'classes/api'
+  require_dependency 'api'
 
   disable_filters
 

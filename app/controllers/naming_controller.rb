@@ -14,7 +14,9 @@ class NamingController < ApplicationController
     naming = @params.naming = Naming.from_params(params)
     @params.observation = naming.observation
     return default_redirect(naming.observation) unless check_permission!(naming)
-    @params.vote = naming.first_vote # TODO: Can this get moved into NamingParams#naming=
+
+    # TODO: Can this get moved into NamingParams#naming=
+    @params.vote = naming.first_vote
     request.method == "POST" ? edit_post : @params.edit_init
   end
 
@@ -30,7 +32,6 @@ class NamingController < ApplicationController
     pass_query_params
     naming = Naming.find(params[:id].to_s)
     if can_destroy?(naming)
-      Transaction.delete_naming(id: naming)
       flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
     end
     default_redirect(naming.observation)
@@ -55,6 +56,7 @@ class NamingController < ApplicationController
       save_changes
       check_for_notifications
     else # If anything failed reload the form.
+      flash_object_errors(@params.naming) if @params.name_missing?
       @params.add_reason(params[:reason])
     end
   end
@@ -114,7 +116,7 @@ class NamingController < ApplicationController
     naming = @params.naming
     return unless validate_object(naming) && validate_object(@params.vote)
     naming.create_reasons(params[:reason], params[:was_js_on] == "yes")
-    save_with_transaction(naming)
+    save_with_log(naming)
     @params.logged_change_vote
     flash_warning :create_new_naming_warn.l
   end
@@ -128,7 +130,7 @@ class NamingController < ApplicationController
 
   def save_changes
     @params.update_naming(params[:reason], params[:was_js_on] == "yes")
-    save_with_transaction(@params.naming)
+    save_with_log(@params.naming)
     @params.save_vote
   end
 

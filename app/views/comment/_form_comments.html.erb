@@ -1,12 +1,14 @@
 <!--[form:comment]-->
 
-<label for="comment_summary"><%= :form_comments_summary.t %></label>:<br/>
-<%= text_field("comment", "summary", :size => 80) %><br/><br/>
+<div class="form-group push-down">
+  <%= label_tag(:comment_summary, :form_comments_summary.t + ":") %>
+  <%= text_field(:comment, :summary, size: 80, data: {autofocus: true}, class: "form-control") %>
+</div>
 
-<label for="comment_comment"><%= :form_comments_comment.t %></label>:<br/>
-<%= text_area("comment", "comment", :cols => 80, :rows => 10) %><br/>
-<%= render(:partial => 'shared/textilize_help') %>
-
-<%= focus_on('comment_summary') %>
+<div class="form-group push-down">
+  <%= label_tag(:comment_comment, :form_comments_comment.t + ":") %>
+  <%= text_area(:comment, :comment, rows: 10, class: "form-control") %>
+  <%= render(partial: "shared/textilize_help") %>
+</div>
 
 <!--[eoform:comment]-->
