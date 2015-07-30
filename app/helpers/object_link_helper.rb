@@ -49,6 +49,11 @@ module ObjectLinkHelper
       name.text_name.gsub(" ", "+")
   end
 
+  # Create link for name to search in MycoBank
+  def mycobank_url(name)
+    "http://www.mycobank.org/name/" + name.text_name.gsub(" ", "%20")
+  end
+
   # Wrap user name in link to show_user.
   #
   #   Owner:   <%= user_link(name.user) %>

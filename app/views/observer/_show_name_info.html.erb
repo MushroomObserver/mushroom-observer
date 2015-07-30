@@ -5,7 +5,8 @@
     lines << link_to(:show_name.t(name: name.display_name), controller: :name,
                      action: :show_name, id: name.id)
     lines << link_to(name.display_name.t + " " + :show_name_on_mycoportal.t, mycoportal_url(name))
-  end
+    lines << link_to(name.text_name.t + " " + :show_name_on_mycobank.t, mycobank_url(name))
+ end
 
   if name && !name.unknown? && !browser.bot?
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
