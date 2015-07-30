@@ -545,6 +545,15 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, Query.count)
   end
 
+  def test_observation_external_links_exist
+    obs_id = observations(:coprinus_comatus_obs).id
+    get_with_dump(:show_observation, id: obs_id)
+
+    assert_select("a[href *= 'images.google.com']")
+    assert_select("a[href *= 'mycoportal.org']")
+    assert_select("a[href *= 'mycobank.org']")
+  end
+
   def test_show_observation_edit_links
     obs = observations(:detailed_unknown)
     proj = projects(:bolete_project)
