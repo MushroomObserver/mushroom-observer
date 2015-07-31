@@ -262,6 +262,16 @@ class NameControllerTest < FunctionalTestCase
     assert_select("a[href *= 'mycobank.org']")
   end
 
+  def test_mycobank_url
+    get(:show_name, id: 2)
+
+    # Mycobank link ends with "/Coprinus%20comatus"
+    assert_select("a[href *= 'mycobank.org']") do
+      assert_select("a[href $= '/Coprinus%20comatus']")
+    end
+	 end
+
+
   # TODO: Show a name that has a parent to trigger
 
   def test_show_past_name
