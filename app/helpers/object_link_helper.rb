@@ -51,7 +51,38 @@ module ObjectLinkHelper
 
   # Create link for name to search in MycoBank
   def mycobank_url(name)
-    "http://www.mycobank.org/name/" + name.text_name.gsub(" ", "%20")
+    mycobank_path + mycobank_taxon(name) + mycobank_language_suffix(locale).to_s
+  end
+
+  def mycobank_path()
+    "http://www.mycobank.org/name/"
+  end
+
+  def mycobank_taxon(name)
+    name.text_name.gsub(" ", "%20")
+  end
+
+  # language suffix for MycoBank link
+  # input is I18n language abbreviation
+  # return suffix of official Mycobank translation, if such translation exists
+  # else return nil
+  def mycobank_language_suffix(lang)
+    suffix = i18n_to_mycobank_language.fetch(lang, nil)
+    "&Lang=" + suffix if suffix
+  end
+
+  # array of i18n languages => Mycobank official translation languages
+  # key is i18n abbreviation
+  # value is MycoBank abbreviation
+  # MO languages which lack official MycoBank translations can either be omitted
+  # from array, or included with a value of nil
+  # There is no English Mycobank "translation"; MycoBank defaults to English
+  # Marginally more efficient for languages which do not yet exist in MO to be
+  # at end of the array.
+  # Those languages are included now in case MO adds them in the future.
+  def i18n_to_mycobank_language
+    { en: nil, de: "Deu", es: "Spa", fr: "Fra", pt: "Por",
+      ar: "Ara", fa: "Far", nl: "Nld", th: "Tha", zh: "Zho" }
   end
 
   # Wrap user name in link to show_user.
