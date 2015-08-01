@@ -1147,6 +1147,38 @@ class NameTest < UnitTestCase
     do_validate_classification_test(:Genus, "Kingdom: _Animalia_\nOrder: _Insecta_", "Kingdom: _Animalia_\r\nOrder: _Insecta_")
   end
 
+  def test_rank_matchers
+    name = Name.find(1)   # Fungi
+    refute(name.at_or_below_genus?)
+    refute(name.below_genus?)
+    refute(name.between_genus_and_species?)
+    refute(name.at_or_below_species?)
+
+    name = Name.find(18)  # Agaricus
+    assert(name.at_or_below_genus?)
+    refute(name.below_genus?)
+    refute(name.between_genus_and_species?)
+    refute(name.at_or_below_species?)
+
+    name = Name.find(52)  # Amanita subgenus Lepidella
+    assert(name.at_or_below_genus?)
+    assert(name.below_genus?)
+    assert(name.between_genus_and_species?)
+    refute(name.at_or_below_species?)
+
+    name = Name.find(2)  # Coprinus comatus
+    assert(name.at_or_below_genus?)
+    assert(name.below_genus?)
+    refute(name.between_genus_and_species?)
+    assert(name.at_or_below_species?)
+
+    name = Name.find(53)  # Amanita boudieri var. beillei
+    assert(name.at_or_below_genus?)
+    assert(name.below_genus?)
+    refute(name.between_genus_and_species?)
+    assert(name.at_or_below_species?)
+  end
+
   # def dump_list_of_names(list)
   #   for n in list do
   #     print "id=#{n.id}, text_name='#{n.text_name}', author='#{n.author}'\n"
