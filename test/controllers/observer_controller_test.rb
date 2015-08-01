@@ -551,7 +551,13 @@ class ObserverControllerTest < FunctionalTestCase
 
     assert_select("a[href *= 'images.google.com']")
     assert_select("a[href *= 'mycoportal.org']")
-    assert_select("a[href *= 'mycobank.org']")
+
+    # There is a MycoBank link which includes taxon name and MycoBank language
+    assert_select("a[href *= 'mycobank.org']") do
+      assert_select("a[href *= '/Coprinus%20comatus']")
+      assert_select("a[href *= 'Lang=Eng']")
+    end
+
   end
 
   def test_show_observation_edit_links

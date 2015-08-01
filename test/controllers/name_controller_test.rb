@@ -265,9 +265,10 @@ class NameControllerTest < FunctionalTestCase
   def test_mycobank_url
     get(:show_name, id: 2)
 
-    # Mycobank link ends with "/Coprinus%20comatus"
+    # There is a MycoBank link which includes taxon name and MycoBank language
     assert_select("a[href *= 'mycobank.org']") do
-      assert_select("a[href $= '/Coprinus%20comatus']")
+      assert_select("a[href *= '/Coprinus%20comatus']")
+      assert_select("a[href *= 'Lang=Eng']")
     end
 	 end
 
