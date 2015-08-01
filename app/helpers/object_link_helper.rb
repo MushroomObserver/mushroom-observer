@@ -59,29 +59,30 @@ module ObjectLinkHelper
   end
 
   def mycobank_taxon(name)
-    name.text_name.gsub(" ", "%20")
+    return name.text_name.gsub(" ", "%20") if !name.between_genus_and_species?
+    genus_only(name)
   end
 
-  # language suffix for MycoBank link
+  def genus_only(name)
+    name.text_name.match(/([^\s]+)/).to_s
+  end
+
+  # language parameter for MycoBank link
   # input is I18n language abbreviation
-  # return suffix of official Mycobank translation, if such translation exists
-  # else return nil
+  # return html parameter of official Mycobank translation,
+  # if such translation exists
+  # else return pseudo-English
+  # Although MycoBank doesn't recognize &Lang=Eng, this (or another language
+  # parameter else which MycoBank does not recognize) must be be included when
+  # switching to the default MycoBank language (English); otherwise MycoBank
+  # keeps using the last language it did recognize.
   def mycobank_language_suffix(lang)
-    suffix = i18n_to_mycobank_language.fetch(lang, nil)
-    "&Lang=" + suffix if suffix
+    "&Lang=" + i18n_to_mycobank_language.fetch(lang, "Eng")
   end
 
-  # array of i18n languages => Mycobank official translation languages
-  # key is i18n abbreviation
-  # value is MycoBank abbreviation
-  # MO languages which lack official MycoBank translations can either be omitted
-  # from array, or included with a value of nil
-  # There is no English Mycobank "translation"; MycoBank defaults to English
-  # Marginally more efficient for languages which do not yet exist in MO to be
-  # at end of the array.
-  # Those languages are included now in case MO adds them in the future.
+  # hash of i18n languages => Mycobank official translation languages
   def i18n_to_mycobank_language
-    { en: nil, de: "Deu", es: "Spa", fr: "Fra", pt: "Por",
+    { de: "Deu", es: "Spa", fr: "Fra", pt: "Por",
       ar: "Ara", fa: "Far", nl: "Nld", th: "Tha", zh: "Zho" }
   end
 
@@ -153,7 +154,7 @@ module ObjectLinkHelper
     if !result.match("(#{:private.t})$")
       result = link_with_query(result, desc.show_link_args)
     end
-    return result
+    result
   end
 
   def location_search_links(name)

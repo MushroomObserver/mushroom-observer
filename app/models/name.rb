@@ -489,7 +489,7 @@ class Name < AbstractModel
   end
 
   def self.ranks_above_genus
-    [ :Family, :Order, :Class, :Phylum, :Kingdom, :Domain ]
+    [ :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group ]
   end
 
   def self.ranks_above_species
@@ -506,13 +506,21 @@ class Name < AbstractModel
     [ :Form, :Variety, :Subspecies ]
   end
 
+  def at_or_below_genus?
+    rank == :Genus || below_genus?
+  end
+
   def below_genus?
     Name.ranks_below_genus.include?(rank) ||
       rank == :Group && text_name.include?(" ")
   end
 
-  def at_or_below_genus?
-    rank == :Genus || below_genus?
+  def between_genus_and_species?
+    below_genus? && !at_or_below_species?
+  end
+
+  def at_or_below_species?
+    (rank == :Species) || Name.ranks_below_species.include?(rank)
   end
 
   def self.rank_index(rank)
