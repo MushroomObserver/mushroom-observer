@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/dealphabetize <q-param>
+#
+#  DESCRIPTION::
+#
+#  Convert query q parameter to an id in the queries table.
+#
+################################################################################
+
+# require File.expand_path('../../config/boot.rb', __FILE__)
+# require File.expand_path('../../config/environment.rb', __FILE__)
+# require "string_extensions"
+
+require File.expand_path('../../app/extensions/string_extensions.rb', __FILE__)
+
+q = ARGV[0]
+id = q.dealphabetize
+puts id
+exit 0

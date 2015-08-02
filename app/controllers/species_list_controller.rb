@@ -159,7 +159,7 @@ class SpeciesListController < ApplicationController
     clear_query_in_session
     pass_query_params
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
-      @canonical_url = "#{MO.domain}/species_list/show_species_list/#{@species_list.id}"
+      @canonical_url = "#{MO.http_domain}/species_list/show_species_list/#{@species_list.id}"
       @query = create_query(:Observation, :in_species_list, by: :name,
                             species_list: @species_list)
       store_query_in_session(@query) if !params[:set_source].blank?

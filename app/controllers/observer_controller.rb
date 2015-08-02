@@ -903,7 +903,7 @@ class ObserverController < ApplicationController
     @observation = find_or_goto_index(Observation, params[:id].to_s)
     return unless @observation
     update_view_stats(@observation)
-    @canonical_url = "#{MO.domain}/observer/show_observation/#{@observation.id}"
+    @canonical_url = "#{MO.http_domain}/observer/show_observation/#{@observation.id}"
 
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)

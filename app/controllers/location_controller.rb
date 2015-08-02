@@ -354,7 +354,7 @@ class LocationController < ApplicationController
     loc_id = params[:id].to_s
     desc_id = params[:desc]
     if @location = find_or_goto_index(Location, loc_id)
-      @canonical_url = "#{MO.domain}/location/show_location/#{@location.id}"
+      @canonical_url = "#{MO.http_domain}/location/show_location/#{@location.id}"
 
       # Load default description if user didn't request one explicitly.
       desc_id = @location.description_id if desc_id.blank?
@@ -382,7 +382,7 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     if @description = find_or_goto_index(LocationDescription, params[:id].to_s)
-      @canonical_url = "#{MO.domain}/location/show_location_description/#{@description.id}"
+      @canonical_url = "#{MO.http_domain}/location/show_location_description/#{@description.id}"
 
       # Public or user has permission.
       if @description.is_reader?(@user)
