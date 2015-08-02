@@ -1,0 +1,8 @@
+# RuboCop configuration for use on /test files
+
+# dafault rules
+inherit_from: ../.rubocop.yml
+
+# with following modifications
+Metrics/MethodLength:
+  Enabled: false
