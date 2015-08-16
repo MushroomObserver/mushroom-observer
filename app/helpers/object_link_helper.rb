@@ -51,8 +51,7 @@ module ObjectLinkHelper
 
   # Create link for name to search in MycoBank
   def mycobank_url(name)
-    mycobank_path + mycobank_taxon(name) +
-      mycobank_language_suffix(locale).to_s + mycobank_entries_per_page
+    mycobank_path + mycobank_taxon(name) + mycobank_language_suffix(locale).to_s
   end
 
   def mycobank_path
@@ -72,10 +71,9 @@ module ObjectLinkHelper
   # language parameter for MycoBank link
   # input is I18n language abbreviation
   # return html parameter of official Mycobank translation,
-  # if such translation exists
-  # else return pseudo-English parameter
+  # if such translation exists, else return pseudo-English parameter
   # Although MycoBank doesn't recognize &Lang=Eng, this (or another language
-  # parameter which MycoBank does not recognize) must be be included when
+  # parameter else which MycoBank does not recognize) must be be included when
   # switching to the default MycoBank language (English); otherwise MycoBank
   # keeps using the last language it did recognize.
   def mycobank_language_suffix(lang)
@@ -86,14 +84,6 @@ module ObjectLinkHelper
   def i18n_to_mycobank_language
     { de: "Deu", es: "Spa", fr: "Fra", pt: "Por",
       ar: "Ara", fa: "Far", nl: "Nld", th: "Tha", zh: "Zho" }
-  end
-
-  # page size parameter for MycoBank query
-  # This is a sometimes ineffective, and hopefully temporary work-around to a
-  # MycoBank bug: page forward and back buttons are broken for our searches.
-  # If MycoBank fixes this, this method and call(s) to it should be deleted.
-  def mycobank_entries_per_page
-    "&Page=1000"
   end
 
   # Wrap user name in link to show_user.
