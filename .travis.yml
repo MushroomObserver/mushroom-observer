@@ -2,6 +2,9 @@ language: ruby
 rvm:
   - "2.1.5"
 
+# make Travis use its legacy infrastructure
+sudo: true
+
 # uncomment this line if your project needs to run something other than `rake`:
 # script: bundle exec rake lang:update
 
