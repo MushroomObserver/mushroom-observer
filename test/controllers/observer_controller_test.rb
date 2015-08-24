@@ -545,6 +545,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, Query.count)
   end
 
+  def test_observation_external_links_exist
+    obs_id = observations(:coprinus_comatus_obs).id
+    get_with_dump(:show_observation, id: obs_id)
+
+    assert_select("a[href *= 'images.google.com']")
+    assert_select("a[href *= 'mycoportal.org']")
+
+    # There is a MycoBank link which includes taxon name and MycoBank language
+    assert_select("a[href *= 'mycobank.org']") do
+      assert_select("a[href *= '/Coprinus%20comatus']")
+      assert_select("a[href *= 'Lang=Eng']")
+    end
+
+  end
+
   def test_show_observation_edit_links
     obs = observations(:detailed_unknown)
     proj = projects(:bolete_project)
