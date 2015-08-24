@@ -95,3 +95,9 @@ gem "aws-sdk", "~> 2"
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
 gem "jquery-slick-rails",  "~> 1.5.0.1"
+
+#allows for test results to be reported back to test runner IDE's
+group :test do
+  gem "minitest"
+  gem 'minitest-reporters', '>= 0.5.0'
+end
