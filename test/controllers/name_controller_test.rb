@@ -254,6 +254,25 @@ class NameControllerTest < FunctionalTestCase
     assert_template(:show_name, partial: "_name")
   end
 
+  def test_name_external_links_exist
+    get(:show_name, id: 2)
+
+    assert_select("a[href *= 'images.google.com']")
+    assert_select("a[href *= 'mycoportal.org']")
+    assert_select("a[href *= 'mycobank.org']")
+  end
+
+  def test_mycobank_url
+    get(:show_name, id: 2)
+
+    # There is a MycoBank link which includes taxon name and MycoBank language
+    assert_select("a[href *= 'mycobank.org']") do
+      assert_select("a[href *= '/Coprinus%20comatus']")
+      assert_select("a[href *= 'Lang=Eng']")
+    end
+	 end
+
+
   # TODO: Show a name that has a parent to trigger
 
   def test_show_past_name

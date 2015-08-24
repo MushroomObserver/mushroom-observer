@@ -25,18 +25,18 @@ $polyozellus_dark:                #5167b2;
 
 $BODY_FG_COLOR:               $pachycolea_foreground;
 $BODY_BG_COLOR:               $pachycolea_background;
-                             
+
 $LINK_FG_COLOR:               $pachycolea_light_stipe;
 $LINK_VISITED_FG_COLOR:       $muscaria_foreground;
 $LINK_HOVER_FG_COLOR:         $pachycolea_light_stipe;
 $LINK_HOVER_BG_COLOR:         $muscaria_background;
-                             
+
 $LOGO_BORDER_COLOR:           $velosa_light_veil;
 $LOGO_FG_COLOR:               $muscaria_foreground;
 $LOGO_BG_COLOR:               $muscaria_background;
 $LOGO_HOVER_FG_COLOR:         $muscaria_foreground;
 $LOGO_HOVER_BG_COLOR:         $muscaria_background;
-                             
+
 $LEFT_BAR_BORDER_COLOR:       $velosa_background;
 $LEFT_BAR_HEADER_FG_COLOR:    $muscaria_background;
 $LEFT_BAR_HEADER_BG_COLOR:    $velosa_background;
@@ -56,23 +56,25 @@ $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $pachycolea_foreground;
 $LIST_BG_COLOR:               mix($pachycolea_background, black, 75%);
+$LIST_EVEN_BG_COLOR:          $LIST_BG_COLOR;
+$LIST_ODD_BG_COLOR:           mix($LIST_EVEN_BG_COLOR, black, 25%);
 
 $TOOLTIP_FG_COLOR:            $pachycolea_background;
 $TOOLTIP_BG_COLOR:            $pachycolea_foreground;
-                             
+
 $VOTE_METER_FG_COLOR:         $pachycolea_foreground;
 $VOTE_METER_BG_COLOR:         $pachycolea_background;
-                             
+
 $PROGRESS_BG_COLOR:           $pachycolea_background;
 $PROGRESS_FG_COLOR:           $pachycolea_foreground;
 $PROGRESS_BAR_COLOR:          $phalloides_dark_cap;
-                             
+
 $PAGER_FG_COLOR:              $pachycolea_foreground;
 $PAGER_HOVER_FG_COLOR:        $pachycolea_foreground;
 $PAGER_HOVER_BG_COLOR:        $muscaria_background;
 $PAGER_ACTIVE_FG_COLOR:       $pachycolea_background;
 $PAGER_ACTIVE_BG_COLOR:       $pachycolea_foreground;
-                             
+
 $MENU_BORDER_COLOR:           $pachycolea_background;
 $MENU_FG_COLOR:               black;
 $MENU_BG_COLOR:               white;
