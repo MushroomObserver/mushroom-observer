@@ -10,6 +10,11 @@
 #
 ################################################################################
 
+# Allows test results to be reported back to runner IDEs
+require 'minitest/reporters'
+MiniTest::Reporters.use!
+
+
 # Coveralls.wear! must occur before any of your application code is required
 require 'coveralls'
 Coveralls.wear!('rails')
