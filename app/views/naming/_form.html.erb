@@ -33,7 +33,7 @@
 
     <div class="form-group">
       <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
-      <%= select(:vote, :value, Vote.confidence_menu,
+      <%= select(:vote, :value, options_for_select(Vote.confidence_menu, "1.0"),
                  {include_blank: action == :create}, class: "form-control") %>
     </div>
 
