@@ -141,12 +141,17 @@
 </div>
 <% inject_javascript_at_end %(
   jQuery(document).ready(function() {
+//hide initially if has specimine box isn't checked
+  if (!jQuery("#observation_specimen").is(":checked"))
+    jQuery("#herb_info_fields").hide();
+
     jQuery("#observation_specimen").change(
-     if (jQuery("#observation_specimen").is(":checked"))
+    function () {
+         if (jQuery("#observation_specimen").is(":checked"))
        jQuery("#herb_info_fields").show();
      else
        jQuery("#herb_info_fields").hide();
-    );
+    });
   });
 ) %>
 <!-- /HERBARIUM_FIELDS -->
