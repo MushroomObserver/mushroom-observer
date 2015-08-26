@@ -9,7 +9,7 @@
    parent_deprecated = @params.parent_deprecated rescue @parent_deprecated
    reason = @params.reason rescue @reason
    names = @params.names rescue @names
-   @vote = vote = @params.vote rescue @vote
+   vote = @params.vote rescue @vote
 %>
 
 <%= render(partial: "shared/form_name_feedback", locals: {
@@ -33,8 +33,8 @@
 
     <div class="form-group">
       <%= label_tag(:vote_value, :form_naming_confidence.t + ":") %><br>
-      <%= select(:vote, :value, options_for_select(Vote.confidence_menu, "1.0"),
-                 {include_blank: action == :create}, class: "form-control") %>
+      <%= select(:vote, :value, options_for_select(Vote.confidence_menu, vote.value),
+                 {include_blank: (action == :create || action == :create_observation)}, class: "form-control") %>
     </div>
 
     <% reason.values.sort_by(&:order).each do |r| %>
