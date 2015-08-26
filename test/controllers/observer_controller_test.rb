@@ -1615,7 +1615,13 @@ class ObserverControllerTest < FunctionalTestCase
     params = { id: obs.id.to_s }
     requires_user(:edit_observation, [controller: :observer,
                   action: :show_observation], params)
+
     assert_form_action(action: :edit_observation, id: obs.id.to_s)
+
+    # image notes field must be textarea -- not just text -- because text
+    # is inline and will drops any newlines in the image notes
+    assert_select("textarea#?", "good_image_#{obs.images.first.id}_notes",
+                  count: 1)
   end
 
   def test_edit_observation
