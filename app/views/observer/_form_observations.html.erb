@@ -40,7 +40,7 @@
     </div>
   </div>
 </div>
-<!-- /WHERE %>
+<!-- /WHERE -->
 
 <!-- IS_COLLECTION_LOCATION -->
 <div class="row">
@@ -198,13 +198,13 @@
                         <%= label_tag("image_#{image.id}_notes", :NOTES.t + ":") %>
                       </td>
                       <td>
-                        <%= text_field(:good_image, :notes, value: image.notes, index: image.id,
-                                       size: 40, class: "form-control form-control-sm") %>
+                        <%= text_area(:good_image, :notes, value: image.notes, index: image.id,
+                                       rows: 1, class: "form-control form-control-sm") %>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <%= label_tag("image_#{image.id}_orgiginal_name", :form_observations_original_name.t + ":") %>
+                        <%= label_tag("image_#{image.id}_original_name", :form_observations_original_name.t + ":") %>
                       </td>
                       <td>
                         <%= text_field(:good_image, :original_name, value: image.original_name, index: image.id,
