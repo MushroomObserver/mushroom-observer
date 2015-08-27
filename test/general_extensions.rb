@@ -409,8 +409,21 @@ module GeneralExtensions
     result
   end
 
-  # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
+  # At the moment at least Redcloth produces slightly different output on
+  # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a
+  # common form so that we don't need to continue to tweak two separate copies
+  # of every email response.  But I'm failing...
+  def fix_mac_vs_pc!(email)
+    email.gsub!(/<br \/>\n/, '<br/>')
+    email.gsub!(/&#38;/, '&amp;')
+    email.gsub!(/ &#8212;/, '&#8212;')
+    email.gsub!(/^\s+/, '')
+    email.gsub!(/[\n\r]+/, "\n")
+  end
+    # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
   def template_match(str, template)
+     fix_mac_vs_pc!(template)
+     fix_mac_vs_pc!(str)
     (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
   end
 end
