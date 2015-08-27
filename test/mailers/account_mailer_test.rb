@@ -23,7 +23,7 @@ class AccountMailerTest < UnitTestCase
     email.gsub!(/&#38;/, '&amp;')
     email.gsub!(/ &#8212;/, '&#8212;')
     email.gsub!(/^\s+/, '')
-    email.gsub!(/[\n\r]+/, "\n")
+    email.gsub! /\r\n?/, "\n"
   end
 
   # Run off an email in both HTML and text form.

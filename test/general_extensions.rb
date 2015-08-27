@@ -411,6 +411,9 @@ module GeneralExtensions
 
   # Ensure that all the lines in template are in str.  Allows additional headers like 'Date' to get added and to vary
   def template_match(str, template)
+    template = template.gsub /\r\n?/, "\n"
+    str = str.gsub /\r\n?/, "\n"
+
     (Set.new(template.split("\n")) - Set.new(str.split("\n"))).length == 0
   end
 end
