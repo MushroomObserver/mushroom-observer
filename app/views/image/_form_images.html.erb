@@ -15,36 +15,29 @@
 <div class="form-group form-inline">
   <%= label_tag(:image_when_1i, :WHEN.t + ":") %>
   <%= date_select(:image, :when,
-                  {start_year: 1980, end_year: Time.now.year, order: [:day, :month, :year]},
-                  {class: "form-control"}) %>
-  <p class="help-block">
-    <%= :form_images_when_help.t %>
-  </p>
+                  { start_year: 1980, end_year: Time.now.year,
+                    order: [:day, :month, :year] },
+                  { class: "form-control" }) %>
+  <%= content_tag(:p, class: "help-block") { :form_images_when_help.t } %>
 </div>
 
 <div class="form-group">
   <%= label_tag(:image_license_id, :LICENSE.t + ":") %>
   <%= form.select(:license_id, @licenses, {}, {class: "form-control"}) %>
-  <p class="help-block">
-    <%= :form_images_license_help.t %>
-  </p>
+  <%= content_tag(:p, class: "help-block") { :form_images_license_help.t } %>
 </div>
 
 <div class="form-group">
   <%= label_tag(:image_notes, :NOTES.t + ":") %>
   <%= form.text_area(:notes, data: {autofocus: true}, class: "form-control") %>
-  <p class="help-block">
-    <%= :form_images_notes_help.t %>
-  </p>
+  <%= content_tag(:p, class: "help-block") { :form_images_notes_help.t } %>
   <%= render(partial: "shared/textilize_help") %>
 </div>
 
 <% if @projects.any? %>
   <div class="form-group form-inline">
     <p class="bold"><%= :PROJECTS.t %>:</p>
-    <p class="help-block">
-      <%= :form_images_project_help.t %>
-    </p>
+    <%= content_tag(:p, class: "help-block") { :form_images_project_help.t } %>
     <% for project in @projects %>
       <div class="nowrap">
         <label for="project_id_<%=project.id%>"><%= link_to_object(project) %></label>
