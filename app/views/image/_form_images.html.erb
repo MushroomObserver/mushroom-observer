@@ -1,5 +1,4 @@
 <!--[form:image]-->
-
 <div class="form-group">
   <%= label_tag(:image_copyright_holder, :form_images_copyright_holder.t + ":") %>
   <%= form.text_field(:copyright_holder, class: "form-control") %>
@@ -36,17 +35,9 @@
 
 <% if @projects.any? %>
   <div class="form-group form-inline">
-    <p class="bold"><%= :PROJECTS.t %>:</p>
+    <%= content_tag(:p, class: "bold") { :PROJECTS.t + ":" } %>
     <%= content_tag(:p, class: "help-block") { :form_images_project_help.t } %>
-    <% for project in @projects %>
-      <div class="nowrap">
-        <label for="project_id_<%=project.id%>"><%= link_to_object(project) %></label>
-        <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
-                      disabled: @image.user != @user && !project.is_member?(@user),
-                      class: "form-control") %>
-      </div
-    <% end %>
+    <%= render(partial: "project", collection: @projects) %>
   </div>
 <% end %>
-
 <!--[eoform:image]-->

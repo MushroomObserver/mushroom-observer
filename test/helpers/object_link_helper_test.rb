@@ -52,9 +52,9 @@ class ObjectLinkHelperTest < ActionView::TestCase
                  link_to_object(SpeciesList.find(1))
                 )
     # link to non-existent object, name not supplied
-    assert_nil(link_to_object(nil), "Non-existent object shouldlack link.")
+    assert_nil(link_to_object(nil), "Non-existent object should lack link.")
     # link to non-existent object, name supplied
     assert_nil(link_to_object(nil, "Nada"),
-                "Non-existent object shouldlack link.")
+                "Non-existent object should lack link.")
   end
 end

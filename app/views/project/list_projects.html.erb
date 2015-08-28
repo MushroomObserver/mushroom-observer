@@ -10,19 +10,11 @@
   flash_error(@error) if @error && @objects.empty?
 %>
 
+<!-- list the projects -->
 <%= paginate_block(@pages) do %>
-  <% if @objects.any? %>
-    <div class="list-group">
-      <% for project in @objects %>
-        <div class="list-group-item">
-          <big>
-            <%= link_with_query(project.title.t, project.show_link_args) %>
-          </big><br/>
-          <small>
-            <%= project.created_at.web_time %>: <%= user_link(project.user) %>
-          </small>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+  <div class="list-group")>
+    <%= render(partial: "object", collection: @objects) %>
+  </div>
 <% end %>
+
+
