@@ -330,7 +330,7 @@
           <%= check_box(:project, "id_#{project.id}", checked: @project_checks[project.id],
                         disabled: @observation.user != @user && !project.is_member?(@user),
                         class: "form-control-xxx") %>
-          <%= project_link(project) %>
+          <%= link_to_object(project) %>
         </div>
       <% end %>
     </div>
@@ -351,7 +351,7 @@
         <div class="form-inline max-width-text">
           <%= check_box(:list, "id_#{list.id}", checked: @list_checks[list.id],
                         disabled: !check_permission(list), class: "form-control-xxx") %>
-          <%= species_list_link(list) %>
+          <%= link_to_object(list) %>
         </div>
       <% end %>
     </div>

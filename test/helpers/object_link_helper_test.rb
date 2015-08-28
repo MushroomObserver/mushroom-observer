@@ -37,4 +37,24 @@ class ObjectLinkHelperTest < ActionView::TestCase
     name = Name.find(53)  # Amanita boudieri var. beillei
     assert_equal("Amanita%20boudieri%20var.%20beillei", mycobank_taxon(name))
   end
+
+  def test_link_if_object
+    # link to project, name not supplied
+    assert_equal('<a href="/project/show_project/2">Bolete Project</a>',
+                 link_to_object(Project.find(2))
+                )
+    # link to project, name supplied
+    assert_equal('<a href="/project/show_project/2">BP</a>',
+                 link_to_object(Project.find(2), "BP")
+                )
+    # link to species list
+    assert_equal('<a href="/species_list/show_species_list/1">A Species List</a>',
+                 link_to_object(SpeciesList.find(1))
+                )
+    # link to non-existent object, name not supplied
+    assert_nil(link_to_object(nil), "Non-existent object shouldlack link.")
+    # link to non-existent object, name supplied
+    assert_nil(link_to_object(nil, "Nada"),
+                "Non-existent object shouldlack link.")
+  end
 end

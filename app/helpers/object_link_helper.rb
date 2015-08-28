@@ -120,24 +120,12 @@ module ObjectLinkHelper
     title + ": " + links.safe_join(", ")
   end
 
-  # Wrap project name in link to show_project.
-  #
+ # Wrap object's name in link to the object, return nil if no object
   #   Project: <%= project_link(draft_name.project) %>
-  #
-  def project_link(project, name = nil)
-    return nil unless project
-    name ||= project.title.t
-    link_to(name, project.show_link_args)
-  end
-
-  # Wrap species_list name in link to show_species_list.
-  #
   #   Species List: <%= species_list_link(observation.species_lists.first) %>
-  #
-  def species_list_link(species_list, name = nil)
-    return nil unless species_list
-    name ||= species_list.title.t
-    link_to(name, species_list.show_link_args)
+  def link_to_object(object, name = nil)
+    return nil unless object
+    link_to(name || object.title.t, object.show_link_args)
   end
 
   # Wrap description title in link to show_description.
