@@ -46,7 +46,7 @@ module ObjectLinkHelper
   # Create link for name to MyCoPortal website.
   def mycoportal_url(name)
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" +
-      name.text_name.gsub(" ", "+")
+      name.text_name.tr(" ", "+")
   end
 
   # Create link for name to search in MycoBank
@@ -120,7 +120,7 @@ module ObjectLinkHelper
     title + ": " + links.safe_join(", ")
   end
 
- # Wrap object's name in link to the object, return nil if no object
+  # Wrap object's name in link to the object, return nil if no object
   #   Project: <%= project_link(draft_name.project) %>
   #   Species List: <%= species_list_link(observation.species_lists.first) %>
   def link_to_object(object, name = nil)
@@ -140,7 +140,7 @@ module ObjectLinkHelper
 
   def location_search_links(name)
     search_string = name.gsub(" Co.", " County").gsub(", USA", "").
-                    gsub(" ", "+").gsub(",", "%2C")
+                    tr(" ", "+").gsub(",", "%2C")
     [
       link_to("Google Maps", "http://maps.google.com/maps?q=" + search_string),
       link_to("Yahoo Maps", "http://maps.yahoo.com/#mvt=m&q1=" + search_string),
