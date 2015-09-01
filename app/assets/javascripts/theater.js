@@ -9,6 +9,7 @@ jQuery(document).ready(function () {
     });
 
     jQuery('body').delegate('[data-toggle="theater"]', 'click', function (e) {
+        return;
         e.preventDefault();
         jQuery('.hamburger').addClass('hidden');
         jQuery('body').addClass('theater-shown');
