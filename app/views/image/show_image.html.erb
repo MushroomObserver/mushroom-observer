@@ -154,7 +154,7 @@
         <div><%= :WHEN.t %>: <%= @image.when.web_date %></div>
         <div><%= :OWNER.t %>: <%= user_link(@image.user) %></div>
         <% @image.projects.each do |proj| %>
-          <div><%= :PROJECT.t %>: <%= project_link(proj) %></div>
+          <div><%= :PROJECT.t %>: <%= link_to_object(proj) %></div>
         <% end %>
         <% @image.observations.each do |obs| %>
           <div>
