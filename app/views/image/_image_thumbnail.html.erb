@@ -34,7 +34,8 @@
                           data: {toggle: "tooltip", placement: "bottom"}) %>
       <%= link_with_query(img_tag, link, html_options) %>
       <%= link_to("", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
-                  data: {lightbox: is_set ? "observation-set" : SecureRandom.uuid, title: "<a href='#{orig_url}' target='_blank' class='lightbox_link'>Download Original</a>"}) %>
+                  data: {lightbox: is_set ? "observation-set" : SecureRandom.uuid,
+                         title: "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>"}) %>
       <div class="push-down">
         <% if User.current and votes and image %>
           <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
