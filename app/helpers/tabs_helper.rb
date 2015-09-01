@@ -67,7 +67,8 @@ module TabsHelper
       end
 
       def interest_tab(img1, img2, img3)
-        content_tag(:div, img1 + safe_br + img2 + img3, style: "position: absolute; top: 0;")
+        content_tag(:div, img1 + safe_br + img2 + img3, class: "interest-eyes")
+        # content_tag(:div, img1 + safe_br + img2 + img3, style: "position: absolute; top: 0;")
       end
 
       case @user.interest_in(object)
