@@ -33,7 +33,7 @@
       img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
                           data: {toggle: "tooltip", placement: "bottom"}) %>
       <%= link_with_query(img_tag, link, html_options) %>
-      <%= link_to("", orig_url, class: "glyphicon glyphicon-fullscreen theater-btn",
+      <%= link_to("", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
                   data: {lightbox: is_set ? "observation-set" : SecureRandom.uuid, title: "<a href='#{orig_url}' target='_blank' class='lightbox_link'>Download Original</a>"}) %>
       <div class="push-down">
         <% if User.current and votes and image %>
