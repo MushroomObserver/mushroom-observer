@@ -443,6 +443,33 @@ a:hover {
     padding-bottom: 5em;
 }
 
+
+//
+// interest eyes
+// --------------------------------------------------
+
+@media (min-width: $screen-sm-min) {
+  .interest-eyes {
+    position: absolute;
+    top: 0;
+  }
+}
+
+@media (min-width: $screen-md-min) {
+  .interest-eyes {
+    position: absolute;
+    top: 0;
+  }
+}
+
+@media (min-width: $screen-lg-min) {
+  .interest-eyes {
+    position: absolute;
+    top: 0;
+  }
+}
+
+
 //
 // alerts
 // --------------------------------------------------
@@ -521,6 +548,7 @@ a:hover {
 .pagination > .disabled > a:focus {
     cursor: default;
 }
+
 
 //
 // theater view

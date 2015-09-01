@@ -215,7 +215,7 @@ module DescriptionHelper
   # Create a descriptive title for a Description.  Indicates the source and
   # very rough permissions (e.g. "public", "restricted", or "private").
   def description_title(desc)
-    result = desc.partial_format_name.t
+    result = desc.partial_format_name
 
     # Indicate rough permissions.
     permit = if desc.parent.description_id == desc.id
@@ -231,7 +231,7 @@ module DescriptionHelper
       result += " (#{permit})"
     end
 
-    return result
+    return t(result)
   end
 
   def name_section_link(title, data, query)

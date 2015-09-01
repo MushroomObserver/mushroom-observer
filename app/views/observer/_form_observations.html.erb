@@ -58,8 +58,8 @@
 <!-- /IS_COLLECTION_LOCATION -->
 
 <!-- LAT_LONG_ALT -->
-<div class="row push-down">
-  <div class="col-xs-12 col-sm-6 max-width-text">
+<div class="row push-down max-width-text-times-two">
+  <div class="col-xs-12 col-sm-6">
     <div class="row">
       <div class="col-xs-12 col-sm-4">
         <div class="form-group">
@@ -81,19 +81,21 @@
       </div>
     </div>
   </div>
-  <div class="col-xs-12 col-sm-6">
-    <div class="well well-sm max-width-text">
+  <div class="col-xs-12 col-sm-6 ">
+    <div class="well well-sm ">
       <div class="arrow-left hidden-xs"></div>
       <%= content_tag(:p, :form_observations_lat_long_help.t, class: "help-block") %>
     </div>
   </div>
 </div>
 <!-- /LAT_LONG_ALT -->
-
+<div class="row">
+  <div class="col-xs-12 max-width-text-times-two">
 <%= render(partial: "naming/form", locals: {
             action: action, button_name: button_name, show_reasons: false
           }) if include_naming %>
-
+  </div>
+</div>
 <!-- HAS_SPECIMENS -->
 <% if has_specimens %>
   <div class="well well-sm push-down max-width-text">
@@ -141,12 +143,17 @@
 </div>
 <% inject_javascript_at_end %(
   jQuery(document).ready(function() {
+//hide initially if has specimine box isn't checked
+  if (!jQuery("#observation_specimen").is(":checked"))
+    jQuery("#herb_info_fields").hide();
+
     jQuery("#observation_specimen").change(
-     if (jQuery("#observation_specimen").is(":checked"))
+    function () {
+         if (jQuery("#observation_specimen").is(":checked"))
        jQuery("#herb_info_fields").show();
      else
        jQuery("#herb_info_fields").hide();
-    );
+    });
   });
 ) %>
 <!-- /HERBARIUM_FIELDS -->
@@ -160,19 +167,43 @@
     </div>
   </div>
   <div class="col-xs-12 col-sm-6 max-width-text">
-    <div class="well well-sm">
+    <div class="well well-sm" id="notes_help">
       <div class="arrow-left hidden-xs"></div>
       <%= content_tag(:p, :form_observations_notes_help.t, class: "help-block", style: "padding-top: 0px; margin-top: 0") %>
       <%= render(partial: "shared/textilize_help") %>
     </div>
   </div>
 </div>
+
+<% inject_javascript_at_end %(
+jQuery(document).ready(function() {
+    //hides the help field when the notes textarea is expanded
+
+    var $notesText = jQuery('#observation_notes');
+
+    $notesText.data('x', $notesText.outerWidth());
+    $notesText.data('y', $notesText.outerHeight());
+
+    $notesText.mouseup(function () {
+
+        var $this = jQuery(this);
+
+        if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
+            jQuery('#notes_help').hide();
+        }
+        else {
+           jQuery('#notes_help').show();
+        }
+
+    });
+});
+) %>
 <!-- /NOTES -->
 
 <% ########################### Image Forms ############################## %>
 
 <% if include_images %>
-  <div class="row">
+  <div class="row max-width-text-times-two">
     <% # @observation.thumb_image_id ||= 0 %>
 
     <% if @good_images.any? %>
@@ -253,16 +284,10 @@
     <%= hidden_field_tag(:good_images, @good_images.map { |o| o.id }.join(" ")) %>
   </div>
 
-  <div class="row push-down">
-    <div class="col-xs-12 max-width-text-times-two">
-      <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text">
-          <div class="arrow-left hidden-xs"></div>
-          <p class="help-block">
-            <%= can_do_multifile_upload? ? :form_observations_upload_help_multi_select.t : :form_observations_upload_help.tp %>
-          </p>
-        </div>
-      </div>
+  <div class="row push-down max-width-text-times-two">
+    <div class="col-sm-12">
+
+
       <strong><%= :form_observations_upload_images.t %>:</strong>
 
       <!-- MULTIFILE_UPLOAD_FORM -->
@@ -366,5 +391,8 @@
     <%= label_tag(:log_change_checked, :form_observations_log_change.t) %>
   </div>
 <% end %>
+
+
+
 
 <!--[/form:observation]-->

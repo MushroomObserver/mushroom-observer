@@ -428,6 +428,7 @@ class AmateurTest < IntegrationTestCase
         form.change('name', "#{text_name} #{author}")
         form.change('reason_2_check', true)
         form.change('reason_2_notes', reason)
+        form.select('vote_value', /call it that/i)
         form.submit
       end
       assert_template('observer/show_observation')

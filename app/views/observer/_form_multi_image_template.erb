@@ -16,14 +16,15 @@
       <div class="added_image_image_container col-xs-4">
         <div class="row">
           <div class="col-xs-12">
-            <input type="radio" name="observation[thumb_image_id]" value="true">
-            <label><%= :image_add_default.t %></label>
+            <a href="#" data-role="set_as_default_thumbnail"><%= :image_set_default.t %></a>
+            <label class="hidden is_default_thumbnail"><%= :image_add_default.t %></label>
+            <input type="radio" name="observation[thumb_image_id]" value="true" style="display: none;">
           </div>
           <div class="col-xs-12">
             <img class="img-responsive" src="">
           </div>
-          <div class="col-xs-12">
-            <span>{{img_file_name}}</span>
+          <div class="col-xs-12" style="overflow-wrap: break-word;">
+            <span class="small">{{img_file_name}}</span><br/>
             <span>{{img_file_size}}</span>
           </div>
         </div>
