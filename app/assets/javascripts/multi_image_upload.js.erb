@@ -541,10 +541,38 @@ function MultiImageUploader(localized_text) {
             fileStore.addFiles(files);
         });
 
-        // IMPORTANT:  This allows the user to updat the thumbnail on the edit
+        // IMPORTANT:  This allows the user to update the thumbnail on the edit
         // observation view.
         jQuery('input[type="radio"][name="observation[thumb_image_id]"]').change(function() {
             jQuery('#observation_thumb_image_id').val($(this).val());
+        });
+
+        // Logic for setting the default thumbnail
+        jQuery('body').on('click', '[data-role="set_as_default_thumbnail"]', function (event) {
+            var $this = jQuery(this); //the link clicked to make default image
+
+            event.preventDefault();
+
+            //reset selections
+
+            //remove hidden from the links
+            jQuery('[data-role="set_as_default_thumbnail"]').removeClass('hidden');
+            //add hidden to the default thumbnail text
+            jQuery('.is_default_thumbnail').addClass('hidden');
+            //reset teh chcked default thumbnail
+            jQuery('input[type="radio"][name="observation[thumb_image_id]"]').prop('checked', false);
+
+
+            //set selections
+
+            //add hidden to the link clicked
+            $this.addClass('hidden');
+            //show that the image is default
+            $this.siblings('.is_default_thumbnail').removeClass('hidden');
+            //adjust hidden radio button to select default thumbnail
+            $this.siblings('input[type="radio"][name="observation[thumb_image_id]"]').prop('checked', true);
+
+
         });
 
         // Detect when a user submits observation; includes upload logic

@@ -16,8 +16,9 @@
       <div class="added_image_image_container col-xs-4">
         <div class="row">
           <div class="col-xs-12">
-            <input type="radio" name="observation[thumb_image_id]" value="true">
-            <label><%= :image_add_default.t %></label>
+            <a href="#" data-role="set_as_default_thumbnail"><%= :image_set_default.t %></a>
+            <label class="hidden is_default_thumbnail"><%= :image_add_default.t %></label>
+            <input type="radio" name="observation[thumb_image_id]" value="true" style="display: none;">
           </div>
           <div class="col-xs-12">
             <img class="img-responsive" src="">

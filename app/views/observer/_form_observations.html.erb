@@ -58,8 +58,8 @@
 <!-- /IS_COLLECTION_LOCATION -->
 
 <!-- LAT_LONG_ALT -->
-<div class="row push-down">
-  <div class="col-xs-12 col-sm-6 max-width-text">
+<div class="row push-down max-width-text-times-two">
+  <div class="col-xs-12 col-sm-6">
     <div class="row">
       <div class="col-xs-12 col-sm-4">
         <div class="form-group">
@@ -81,19 +81,21 @@
       </div>
     </div>
   </div>
-  <div class="col-xs-12 col-sm-6">
-    <div class="well well-sm max-width-text">
+  <div class="col-xs-12 col-sm-6 ">
+    <div class="well well-sm ">
       <div class="arrow-left hidden-xs"></div>
       <%= content_tag(:p, :form_observations_lat_long_help.t, class: "help-block") %>
     </div>
   </div>
 </div>
 <!-- /LAT_LONG_ALT -->
-
+<div class="row">
+  <div class="col-xs-12 max-width-text-times-two">
 <%= render(partial: "naming/form", locals: {
             action: action, button_name: button_name, show_reasons: false
           }) if include_naming %>
-
+  </div>
+</div>
 <!-- HAS_SPECIMENS -->
 <% if has_specimens %>
   <div class="well well-sm push-down max-width-text">
@@ -201,7 +203,7 @@ jQuery(document).ready(function() {
 <% ########################### Image Forms ############################## %>
 
 <% if include_images %>
-  <div class="row">
+  <div class="row max-width-text-times-two">
     <% # @observation.thumb_image_id ||= 0 %>
 
     <% if @good_images.any? %>
@@ -282,16 +284,10 @@ jQuery(document).ready(function() {
     <%= hidden_field_tag(:good_images, @good_images.map { |o| o.id }.join(" ")) %>
   </div>
 
-  <div class="row push-down">
-    <div class="col-xs-12 max-width-text-times-two">
-      <div class="col-xs-12 col-sm-6 pull-right">
-        <div class="well well-sm max-width-text">
-          <div class="arrow-left hidden-xs"></div>
-          <p class="help-block">
-            <%= can_do_multifile_upload? ? :form_observations_upload_help_multi_select.t : :form_observations_upload_help.tp %>
-          </p>
-        </div>
-      </div>
+  <div class="row push-down max-width-text-times-two">
+    <div class="col-sm-12">
+
+
       <strong><%= :form_observations_upload_images.t %>:</strong>
 
       <!-- MULTIFILE_UPLOAD_FORM -->
