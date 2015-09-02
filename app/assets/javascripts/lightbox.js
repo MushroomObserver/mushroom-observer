@@ -307,7 +307,7 @@
     // Display the image and its details and begin preload neighboring images.
     Lightbox.prototype.showImage = function() {
         this.$lightbox.find('.lb-loader').stop(true).hide();
-        this.$lightbox.find('.lb-image').fadeIn('slow');
+        this.$lightbox.find('.lb-image').show();
 
         this.updateNav();
         this.updateDetails();
