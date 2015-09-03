@@ -9,20 +9,9 @@
   huge_url   = Image.url(:huge, image_id)
   full_url   = Image.url(:full_size, image_id)
   orig_url   = Image.url(:original, image_id)
+   #If the image is part of an image set.
   is_set = is_set || false
-  theater_data = {
-    toggle: "theater",
-    width:  image ? image.width : "",
-    height: image ? image.height : "",
-    medium: medium_url,
-    large:  large_url,
-    huge:   huge_url,
-    full:   full_url,
-    orig:   orig_url
-  }
-  if theater_on_click
-    html_options[:data] = theater_data.merge(html_options[:data] || {})
-  end
+
 %>
 
 <div style="position:relative">
