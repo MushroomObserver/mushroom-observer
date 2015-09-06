@@ -79,7 +79,6 @@ class ApiController < ApplicationController
     if @api.errors.any?(&:fatal)
       render_xml(:layout => 'api', :text => '')
     else
-      render json: @api.as_json
       render_xml(:layout => 'api', :template => '/api/results')
     end
   rescue => e
