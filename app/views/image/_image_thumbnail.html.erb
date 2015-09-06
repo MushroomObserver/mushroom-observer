@@ -9,19 +9,9 @@
   huge_url   = Image.url(:huge, image_id)
   full_url   = Image.url(:full_size, image_id)
   orig_url   = Image.url(:original, image_id)
-  theater_data = {
-    toggle: "theater",
-    width:  image ? image.width : "",
-    height: image ? image.height : "",
-    medium: medium_url,
-    large:  large_url,
-    huge:   huge_url,
-    full:   full_url,
-    orig:   orig_url
-  }
-  if theater_on_click
-    html_options[:data] = theater_data.merge(html_options[:data] || {})
-  end
+   #If the image is part of an image set.
+  is_set = is_set || false
+
 %>
 
 <div style="position:relative">
@@ -32,8 +22,9 @@
       img_tag = image_tag(size_url, title: notes, style: style, class: img_class,
                           data: {toggle: "tooltip", placement: "bottom"}) %>
       <%= link_with_query(img_tag, link, html_options) %>
-      <%= link_to("", orig_url, class: "glyphicon glyphicon-fullscreen theater-btn",
-                  data: theater_data) %>
+      <%= link_to("", huge_url, class: "glyphicon glyphicon-fullscreen theater-btn",
+                  data: {lightbox: is_set ? "observation-set" : SecureRandom.uuid,
+                         title: "<a href='#{orig_url}' target='_blank' class='lightbox_link'>#{:image_show_original.t}</a>".html_safe}) %>
       <div class="push-down">
         <% if User.current and votes and image %>
           <%= render(partial: "image/image_vote_links", locals: {image: image}) %>
