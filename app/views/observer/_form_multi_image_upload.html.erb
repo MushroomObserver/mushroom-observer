@@ -37,22 +37,43 @@
   </div>
 </div>
 
+<div class="row geocode_messages" style="background: rgba(211, 211, 211, 0.22); margin-top: 10px; display: none;">
+  <div class="col-sm-7">
+      <div class="col-sm-12">
+        <div><strong>Set observation Latitude/Longitude to:</strong></div>
+        <div id="geocode_radio_container">
+
+        </div>
+      </div>
+      <div class="col-sm-12" style="margin-top: 15px;">
+        <button id="set_geocode" type="button" class="btn"><%= :UPDATE.t %></button>
+        <button id="ignore_geocode" type="button" class="btn"><%= :IGNORE.t %></button>
+      </div>
+  </div>
+  <div class="col-sm-4">
+    <span><%= :form_observations_gps_info.t %></span>
+    <div id="geocode_map">
+
+    </div>
+  </div>
+</div>
+
 <!--Container for appending images-->
 <div class="images_container margin-top">
   <div id="added_images_container">
     <!--Target for insertion-->
   </div>
 </div>
-
+<script type='text/javascript' src='https://maps.googleapis.com/maps/api/js?key=AIzaSyDVptnc17hcXKwsxrk4k8W3qY_1oHujr1g&sensor=false'></script>
 <% inject_javascript_at_end %(
      jQuery(document).ready(function () {
        var uploader = new MultiImageUploader({
          uploading_text: "#{j :form_observations_uploading_images.t}",
          image_too_big_text:  "#{j :form_observations_image_too_big.t(:max => (MO.image_upload_max_size.to_f/1024/1024).round)}",
          creating_observation_text: "#{j :form_observations_creating_observation.t}",
-         months: "#{j :all_months.t}"
+         months: "#{j :all_months.t}",
+         show_on_map: "#{j :show_on_map.t}"
        })
        uploader.init();
-       console.log(uploader);
      });
    ) %>
