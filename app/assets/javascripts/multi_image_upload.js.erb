@@ -45,7 +45,8 @@ function MultiImageUploader(localized_text) {
         $geocodeRadioContainer = jQuery('#geocode_radio_container'),
         $setGeocodeBtn = jQuery('#set_geocode'),
         $ignoreGeocodeBtn = jQuery('#ignore_geocode'),
-        $geocodeMessages = jQuery('.geocode_messages');
+        $geocodeMessages = jQuery('.geocode_messages'),
+        $content = jQuery('#content');
 
 
 
@@ -639,6 +640,22 @@ function MultiImageUploader(localized_text) {
         $obsYear.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
+
+
+
+        //Drag and Drop bindings on the window
+
+        $content.bind('dragover dragenter', function (e){
+            if (e.preventDefault) { e.preventDefault(); }
+            return false;
+        });
+
+        $content.bind('drop', function (e) {
+            if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
+            var dataTransfer = e.originalEvent.dataTransfer;
+            console.log(e);
+            fileStore.addFiles(dataTransfer.files)
+        });s
 
         // Detect when files are added from browser
         $selectFilesButton.change(function () {
