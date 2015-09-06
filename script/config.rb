@@ -50,6 +50,7 @@ MO.action_controller = Configuration.new
 MO.action_dispatch   = Configuration.new
 MO.action_mailer     = Configuration.new
 MO.active_support    = Configuration.new
+MO.active_record     = Configuration.new
 MO.assets            = Configuration.new
 MO.i18n              = Configuration.new
 

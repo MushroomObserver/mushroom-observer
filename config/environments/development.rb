@@ -32,15 +32,10 @@ MushroomObserver::Application.configure do
     cdmr: {
       test: :transferred_flag,
       read: "http://images.mushroomobserver.org"
-    },
-    cdmr_s3: {
-      test: :transferred_flag,
-      read: "http://mo-images.digitalmycology.com"
     }
   }
   config.image_precedence = {
-    default:   [:local, :cdmr],
-    full_size: [:local, :cdmr_s3]
+    default: [:local, :cdmr]
   }
   config.image_fallback_source = :cdmr
 
