@@ -19,7 +19,7 @@
     </div>
     <div id="observation_projects">
       <% for project in observation.projects %>
-          <div><%= :PROJECT.t %>: <strong><%= project_link(project) %></strong></div>
+          <div><%= :PROJECT.t %>: <strong><%= link_to_object(project) %></strong></div>
       <% end %>
     </div>
     <div id="observation_specimen_info">

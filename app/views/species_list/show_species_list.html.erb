@@ -54,7 +54,7 @@
         <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
         <% if @species_list.projects.any? %>
           <div><b><%= :PROJECTS.t %>:</b>
-            <%= @species_list.projects.map { |p| project_link(p) }.safe_join(" | ") %>
+            <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
           </div>
         <% end %>
         <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
