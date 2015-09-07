@@ -4,7 +4,7 @@
 %>
 
 <% if vote_percentage %>
-  <div class="vote-meter">
+  <div class="vote-meter"  title="<%="#{image.num_votes} #{:Votes.t}" %>">
     <div id="vote_meter_bar_<%= image.id %>" class="vote-meter-bar"
          role="progressbar" style="width: <%=vote_percentage%>%">
     </div>
