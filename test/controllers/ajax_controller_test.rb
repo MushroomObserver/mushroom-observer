@@ -147,6 +147,12 @@ class AjaxControllerTest < FunctionalTestCase
     assert_equal(["X"], @response.body.split("\n"))
   end
 
+  def test_get_index_rss_log
+    good_ajax_request(:index_rss_log, page: 1)
+    results_block_html = '<div id="results_block">'.to_str
+    assert(@response.body.include?(results_block_html), "Response did not contain #{results_block_html}")
+  end
+
   def test_auto_complete_name
     expect = Name.all.reject(&:correct_spelling).
                   map(&:text_name).uniq.select {|n| n[0] == "A"}.sort
