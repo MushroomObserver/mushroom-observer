@@ -59,7 +59,7 @@ class AjaxController < ApplicationController
 
   #Used by infite scroll
   def index_rss_log
-    @user = get_session_user
+    User.current = get_session_user
     if !params[:type].blank?
       types = params[:type].split & (["all"] + RssLog.all_types)
       query = find_or_create_query(:RssLog, type: types.join(" "))
@@ -87,6 +87,7 @@ class AjaxController < ApplicationController
         }
     }.merge(args)
 
+    @user = get_session_user
     @types = query.params[:type].to_s.split.sort
     @links = []
 
