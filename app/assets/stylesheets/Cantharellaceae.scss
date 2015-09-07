@@ -47,7 +47,8 @@ $TOP_BAR_LINK_FG_COLOR:       $cinnabarinus_light_cap;
 $TOP_BAR_LINK_HOVER_FG_COLOR: $cinnabarinus_light_cap;
 $TOP_BAR_LINK_HOVER_BG_COLOR: $californicus_cap;
 
-$LIST_BORDER_COLOR:           #DDDDDD;
+//$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $cornucopioides_dark_hymenium;
@@ -95,3 +96,19 @@ $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 #navigation {
     border-left-width: $LEFT_BAR_BORDER_WIDTH;
 }
+
+
+.btn.active {
+  background-color: $californicus_cap
+}
+
+.btn-group {
+  .btn {
+    border-style: solid;
+
+   a:hover {
+     background-color: transparent;
+   }
+  }
+}
+
