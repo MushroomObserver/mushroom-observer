@@ -1,4 +1,5 @@
-$(window).load(function () {
+function box_resizer() {
+
     var boxes = jQuery('.rss-box-details');
 
     //if there are matrix boxes
@@ -30,8 +31,7 @@ $(window).load(function () {
     function adjustHeightForEveryNth(array, nth) {
         var splicedAndSorted = array.splice(0, nth)//splices changes array in place, returns spliced items
             .sort(function (a, b) {
-                return b.height() - a.height(
-                    )
+                return b.height() - a.height()
             });
 
         if (splicedAndSorted.length <= 1) //we don't have enough boxes to compare...
@@ -41,4 +41,8 @@ $(window).load(function () {
         });
         adjustHeightForEveryNth(array, nth); //recursion through elements, passing back in the modified array
     }
+
+}
+$(window).load(function () {
+    box_resizer();
 });

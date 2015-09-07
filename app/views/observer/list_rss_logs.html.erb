@@ -11,7 +11,9 @@
 %>
 
 <%= paginate_block(@pages) do %>
+  <div id="results_block">
   <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>
+  </div>
   <div style="clear:left"></div>
 <% end %>
 

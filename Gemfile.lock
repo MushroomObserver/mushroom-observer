@@ -151,6 +151,8 @@ GEM
       sexp_processor (~> 4.0)
     ruby_parser (3.7.1)
       sexp_processor (~> 4.1)
+    rxjs-rails (3.1.0)
+      railties (>= 3.0, < 5.0)
     sass (3.4.18)
     sass-rails (5.0.3)
       railties (>= 4.0.0, < 5.0)
@@ -218,6 +220,7 @@ DEPENDENCIES
   rails (~> 4.0.0)
   rtf
   rubocop
+  rxjs-rails (= 3.1.0)
   sass-rails
   simple_enum
   therubyracer

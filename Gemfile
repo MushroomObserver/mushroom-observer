@@ -96,6 +96,10 @@ gem "aws-sdk", "~> 2"
 #     https://github.com/bodrovis/jquery-slick-rails
 gem "jquery-slick-rails",  "~> 1.5.0.1"
 
+
+#RxJS for event handling, observables.
+gem "rxjs-rails", "3.1.0"
+
 #allows for test results to be reported back to test runner IDE's
 group :test do
   gem "minitest"
