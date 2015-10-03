@@ -1403,6 +1403,14 @@ input[type=checkbox] {
     }
 }
 
+//
+// don't bold the labels on image date and geotag helper boxes
+// on create observation page
+
+.image_messages label,
+.geocode_messages label {
+  font-weight: normal;
+}
 
 //
 // Help tips on create observation page

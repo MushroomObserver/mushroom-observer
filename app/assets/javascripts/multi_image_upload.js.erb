@@ -5,7 +5,8 @@ function MultiImageUploader(localized_text) {
         uploading_text: "Uploading",
         image_too_big_text: "This image is too large. Image files must be less than 20Mb.",
         creating_observation_text: "Creating Observation...",
-        months: "January, February, March, April, May, June, July, August, September, October, November, December"
+        months: "January, February, March, April, May, June, July, August, September, October, November, December",
+        show_on_map: "Show on map"
     };
 
     if (localized_text == undefined) {
@@ -15,6 +16,7 @@ function MultiImageUploader(localized_text) {
         localized_text.uploading_text = !localized_text.uploading_text ? defaults.uploading_text : localized_text.uploading_text;
         localized_text.creating_observation_text = !localized_text.creating_observation_text ? defaults.creating_observation_text : localized_text.creating_observation_text;
         localized_text.months = !localized_text.months ? defaults.months : localized_text.months;
+        localized_text.show_on_map = !localized_text.show_on_map ? defaults.show_on_map : localized_text.show_on_map;
     }
 
     // Internal Variable Definitions.
@@ -39,7 +41,15 @@ function MultiImageUploader(localized_text) {
         $obsRadioContainer = jQuery('#observation_date_radio_container'),
         $fixDateSubmit = jQuery('#fix_dates'),
         $ignoreDateSubmit = jQuery('#ignore_dates'),
-        $imgMessages = jQuery(".image_messages");
+        $imgMessages = jQuery(".image_messages"),
+        $geocodeRadioContainer = jQuery('#geocode_radio_container'),
+        $setGeocodeBtn = jQuery('#set_geocode'),
+        $ignoreGeocodeBtn = jQuery('#ignore_geocode'),
+        $geocodeMessages = jQuery('.geocode_messages'),
+        $content = jQuery('#content');
+
+
+
 
     /*********************/
     /* Simple Date Class */
@@ -311,7 +321,7 @@ function MultiImageUploader(localized_text) {
 
         _this.dom_element.find('select').change(function() {
             dateUpdater.refreshBox();
-        })
+        });
 
         _this.getExifData();  //extract the EXIF data (async) and then load it
         _this.loadImageAsFileUrl(); //load image as base64 async
@@ -336,14 +346,47 @@ function MultiImageUploader(localized_text) {
     };
 
     FileStoreItem.prototype.applyExifData = function () {  //applys exif data to the DOM element, DOM element must already be attached
-        var _exif_date_taken;
-        var _this = this;
+        var _exif_date_taken,
+            _this = this,
+            _exif = this.exif_data;
 
         if (this.dom_element == null) {
             console.warn("Error: Dom element for this file has not been created, so cannot update it with exif data!");
             return;
         }
 
+
+       //Geocode Logic
+
+        if (_exif.GPSLatitude && _exif.GPSLongitude) { //check if there is geodata on the image
+
+            var latLngObject = getLatitudeLongitudeFromEXIF(_exif),
+                radioBtnToInsert = makeGeocodeRadioBtn(latLngObject);
+
+            if ($geocodeRadioContainer.find('input[type="radio"]').length === 0) {
+                $geocodeMessages.show('medium');
+                $geocodeRadioContainer.append(radioBtnToInsert);
+            }
+
+            else {
+                var shouldAddGeocode = true; //don't add geocodes that are only slightly different
+                $geocodeRadioContainer.find('input[type="radio"]').each(function (index, element) {
+                    var existingGeocode = jQuery(element).data().geocode;
+                    var latDif = Math.abs(latLngObject.latitude) - Math.abs(existingGeocode.latitude);
+                    var longDif = Math.abs(latLngObject.longitude) - Math.abs(existingGeocode.longitude);
+
+                    if ( (Math.abs(latDif) < 0.0002) || Math.abs(longDif) < 0.0002)
+                        shouldAddGeocode = false;
+                });
+
+                if (shouldAddGeocode)
+                    $geocodeRadioContainer.append(radioBtnToInsert);
+            }
+        }
+
+
+
+        //Image Date Logic
         _exif_date_taken = _this.exif_data.DateTimeOriginal;
         if (_exif_date_taken) {
             //we found the date taken, let's parse it down.
@@ -513,12 +556,75 @@ function MultiImageUploader(localized_text) {
         });
     }
 
+    /**Geocode Helpers**/
+
+    function makeGeocodeRadioBtn(latLngObjct){
+        var html = "<div><label><input type='radio' data-geocode='{{geocode}}' name='fix_geocode'/>{{geoCodeStr}}</label> " +
+                "<a href='#geocode_map' data-role='show_on_map' data-geocode='{{geocodeForMap}}'>" + localized_text.show_on_map + "</a></div>";
+        html = html.replace('{{geocode}}', JSON.stringify(latLngObjct));
+        html = html.replace('{{geocodeForMap}}', JSON.stringify(latLngObjct));
+        html = html.replace('{{geoCodeStr}}', latLngObjct.latitude.toFixed(5) + ", " + latLngObjct.longitude.toFixed(5));
+        return html;
+    }
+
+    function getLatitudeLongitudeFromEXIF(exifObject) {
+
+        var lat = exifObject.GPSLatitude[0] + (exifObject.GPSLatitude[1] / 60.0) + (exifObject.GPSLatitude[2] / 3600.0);
+        var long = exifObject.GPSLongitude[0] + (exifObject.GPSLongitude[1] / 60.0) + (exifObject.GPSLongitude[2] / 3600.0);
+        var alt = exifObject.GPSAltitude ? (exifObject.GPSAltitude.numerator / exifObject.GPSAltitude.denominator).toFixed(0) + " m" : ""
+        //make sure you don't end up on the wrong side of the world
+        long = exifObject.GPSLongitudeRef == "W" ? long * -1  : long;
+        lat = exifObject.GPSLatitudeRef == "S" ? lat * -1  : lat;
+
+
+        return {
+            latitude: lat,
+            longitude: long,
+            altitude: alt
+        }
+    }
+
+    function showGeocodeonMap(latLngObj) {
+            // Create a map object and specify the DOM element for display.
+            var obsLatLongFormat = {lat: latLngObj.latitude, lng: latLngObj.longitude}
+            jQuery('#geocode_map').width('100%');
+            jQuery('#geocode_map').height('250');
+            var map = new google.maps.Map(document.getElementById('geocode_map'), {
+                center: obsLatLongFormat,
+                zoom: 12
+            });
+
+             var marker = new google.maps.Marker({
+                 map: map,
+                position: obsLatLongFormat
+            });
+    }
     /*********************/
     /*     Bindings      */
     /*********************/
 
     function init() {
         $submitButtons.prop('disabled', false);//make sure submit buttons are enabled when the dom is loaded!
+
+        $setGeocodeBtn.bind('click.setGeoCodeBind', function () {
+            var _selectedItemData = jQuery('input[name=fix_geocode]:checked').data();
+            if (_selectedItemData) {
+                jQuery('#observation_lat').val(_selectedItemData.geocode.latitude);
+                jQuery('#observation_long').val(_selectedItemData.geocode.longitude);
+                jQuery('#observation_alt').val(_selectedItemData.geocode.altitude);
+                $geocodeMessages.hide('slow');
+            }
+        });
+
+        $ignoreGeocodeBtn.bind('click', function () {
+            $geocodeMessages.hide('slow');
+        });
+
+
+        jQuery('body').on('click', '[data-role="show_on_map"]',function () {
+            showGeocodeonMap((jQuery(this).data().geocode));
+        });
+
 
         $fixDateSubmit.bind('click.fixDateBind', function () {
             var _selectedItemData = jQuery('input[name=fix_date]:checked').data();
@@ -534,6 +640,22 @@ function MultiImageUploader(localized_text) {
         $obsYear.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
+
+
+
+        //Drag and Drop bindings on the window
+
+        $content.bind('dragover dragenter', function (e){
+            if (e.preventDefault) { e.preventDefault(); }
+            return false;
+        });
+
+        $content.bind('drop', function (e) {
+            if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
+            var dataTransfer = e.originalEvent.dataTransfer;
+            console.log(e);
+            fileStore.addFiles(dataTransfer.files)
+        });s
 
         // Detect when files are added from browser
         $selectFilesButton.change(function () {
