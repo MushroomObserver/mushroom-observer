@@ -51,7 +51,7 @@ $TOP_BAR_LINK_FG_COLOR:       $pachycolea_light_stipe;
 $TOP_BAR_LINK_HOVER_FG_COLOR: $pachycolea_light_stipe;
 $TOP_BAR_LINK_HOVER_BG_COLOR: $muscaria_background;
 
-$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $pachycolea_foreground;
@@ -108,4 +108,24 @@ $DANGER_FG_COLOR:                   black;
 
 .well {
   background:  $pachycolea_light_stipe;
+}
+
+//
+// panels
+// note: it doesn't look like there is a variable to set the border width
+//       via the bootstrap sass
+// --------------------------------------------------
+
+.panel {
+  border: 0px !important;
+}
+
+//
+// list-groups
+// note: it doesn't look like there is a variable to set the border width
+//       via the bootstrap sass
+// --------------------------------------------------
+
+.list-group-item {
+  border: 0px !important;
 }

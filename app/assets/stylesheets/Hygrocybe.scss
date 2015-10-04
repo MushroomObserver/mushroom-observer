@@ -48,7 +48,7 @@ $TOP_BAR_LINK_FG_COLOR:       $psittacina_cap_green;
 $TOP_BAR_LINK_HOVER_FG_COLOR: $psittacina_cap_green;
 $TOP_BAR_LINK_HOVER_BG_COLOR: $psittacina_gill_color;
 
-$LIST_BORDER_COLOR:           #DDDDDD;
+$LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $conica_stain;
@@ -87,4 +87,22 @@ $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
 #navigation {
     border-left-width: $LEFT_BAR_BORDER_WIDTH;
+}
+.form-control, .btn {
+  border-style: solid;
+}
+
+.btn.active {
+  background-color:$miniata_cap_yellow
+}
+
+//The button group at the top of the page
+.btn-group {
+  .btn {
+    border-style: solid;
+
+    a:hover {
+      background-color: transparent;
+    }
+  }
 }
