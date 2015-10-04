@@ -11,3 +11,9 @@
 //= require theater
 //= require validate_file_input_fields
 //= require main
+//= require lightbox
+
+lightbox.option({
+    'fadeDuration': 0,
+    'resizeDuration': 0
+});
