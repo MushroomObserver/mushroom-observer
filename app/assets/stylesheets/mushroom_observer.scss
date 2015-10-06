@@ -441,6 +441,10 @@ a:hover {
     padding-bottom: 5em;
 }
 
+#title-caption {
+    font-size: 170%;
+    margin-top: 5px;
+}
 
 //
 // interest eyes
@@ -1354,6 +1358,10 @@ table.table-namings {
     vertical-align: bottom !important;
 }
 
+.align-right {
+    text-align: right;
+}
+
 .bold {
     font-weight: 800;
 }
@@ -1368,6 +1376,10 @@ table.table-namings {
 
 .push-down {
     margin-top: 1em;
+}
+
+.push-below-buttons {
+    margin-top: 23px;
 }
 
 .push-up {

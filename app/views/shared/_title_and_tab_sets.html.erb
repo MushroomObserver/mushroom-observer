@@ -2,57 +2,51 @@
   # This is a stop-gap measure until I/we figure out exactly how we want to
   # deal with tabsets moving foward.  I'm not sure that my current approach is
   # correct, but I feel like it is a bit more transparent than the previous
-  # approach and allows more flexibility in styling the tabs - RJS 2/15/2015 
+  # approach and allows more flexibility in styling the tabs - RJS 2/15/2015
   @tabsets ||= {}
 %>
 
-<div class="visible-print">
-  <%= content_tag(:h3, @title, style: "font-size: 170%; margin-top: 5px;") %>
-</div>
-
-<div class="hidden-print">
-  <!-- This pushes down the title on small and xs screens so buttons dont block. -->
-  <div class="visible-xs visible-sm" style="margin-top: 23px">
-    &nbsp;
-  </div>
+  <!-- Push down pager, title on small, xs screens so buttons do not block -->
+  <%= content_tag(:div, safe_nbsp, class: "hidden-print visible-xs visible-sm
+                                           push-below-buttons") %>
 
   <div class="col-xs-<%= @tabsets[:right] ? 8 : 12 %>" id="title">
-    <div>
-      <%= content_tag(:h3, @title, style: "font-size: 170%; margin-top: 5px;") %>
-      <% if @tabsets[:pager_for] %>
-        <%= render(partial: "/shared/prev_next_pager", locals: {object: @tabsets[:pager_for]}) %>
-      <% end %>
-    </div>
+    <!-- Pager -->
+    <%= content_tag(:div, class: "hidden-print") do
+          if @tabsets[:pager_for]
+            render(partial: "/shared/prev_next_pager",
+              locals: { object: @tabsets[:pager_for] })
+          end
+        end %>
+
+    <!-- Title Caption -->
+    <!-- e.g. "Observation 5"; Can be several lines -->
+    <%= content_tag(:div, @title, id: "title-caption") %>
   </div>
 
-  <% if @tabsets[:right] %>
-    <div id="right_tabs" class="col-sm-4 push-up" style="text-align: right">
-      <%= @tabsets[:right] %>
-    </div>
-  <% end %>
+  <!-- Tabsets -->
+  <%= content_tag_if(@tabsets[:right], :div, @tabsets[:right],
+                     id: "right_tabs",
+                     class: "hidden-print align-right col-sm-4 push-up") %>
 
-  <% if @full_width_tab_set %>
-    <div class="col-xs-12">
-      <%= @full_width_tab_set %>
-    </div>
-  <% end %>
+  <%= content_tag_if(@full_width_tab_set, :div, @full_width_tab_set,
+                     class: "hidden-print col-xs-12") %>
 
+  <!-- Sorter -->
   <% if @sorts %>
-    <div class="col-xs-12">
+    <div class="hidden-print col-xs-12">
       <div class="pad-top">
-        <span>
-          <%= :sort_by_header.t %>
-        </span>
+        <%= content_tag(:span, :sort_by_header.t) %>
         <div id="sorts" class="btn-group btn-group-xs" role="group">
           <% @sorts.each do |title, action| %>
             <%= if action.nil?
-              link_with_query(title, {}, class: "btn btn-default active", disabled: true)
-            else
-              link_with_query(title, action, class: "btn btn-default")
-            end %>
+                  link_with_query(title, {}, class: "btn btn-default active",
+                                             disabled: true)
+                else
+                 link_with_query(title, action, class: "btn btn-default")
+                end %>
           <% end %>
         </div>
       </div>
     </div>
   <% end %>
-</div>

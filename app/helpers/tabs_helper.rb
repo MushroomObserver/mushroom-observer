@@ -3,7 +3,59 @@ module TabsHelper
 
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "/shared/tab_set", locals: {links: links})
+    render(partial: "/shared/tab_set", locals: { links: links })
+  end
+
+  # assemble HTML for tabset for show_observation
+  def show_observation_tabset
+    tabs = []
+    name = @observation.name
+
+    if name && !name.unknown?
+      tabs << link_to(:google_images.t,
+                      "http://images.google.com/images?q=%s" % name.real_text_name)
+      tabs << link_with_query(:show_name_distribution_map.t,
+                              { controller: :name,
+                                action: :map, id: name.id })
+    end
+    if @observation.user.email_general_question && @user != @observation.user
+      tabs << link_with_query(:show_observation_send_question.t,
+                              controller: :observer,
+                              action: :ask_observation_question,
+                              id: @observation.id)
+    end
+    if @user && @user.has_unshown_naming_notifications?(@observation)
+      tabs << link_with_query(:show_observation_view_notifications.t,
+                              controller: :observation,
+                              action: :show_notifications, id: @observation.id)
+    end
+    if @user && @user.species_lists.any?
+      tabs << link_with_query(:show_observation_manage_species_lists.t,
+                              { controller: :species_list,
+                                action: :manage_species_lists,
+                                id: @observation.id })
+    end
+    if @mappable
+      tabs << link_with_query(:MAP.t, controller: :location,
+                                      action: :map_locations)
+    end
+    if check_permission(@observation)
+      tabs << link_with_query(:show_observation_edit_observation.t,
+                              { controller: :observer,
+                                action: :edit_observation,
+                                id: @observation.id })
+      tabs << link_with_query(:DESTROY.t,
+                              { controller: :observer,
+                                action: :destroy_observation,
+                                id: @observation.id },
+                              { class: "text-danger",
+                                data: { confirm: :are_you_sure.l }
+                              })
+    end
+
+    tabs << draw_interest_icons(@observation)
+
+    { pager_for: @observation, right: draw_tab_set(tabs) }
   end
 
   # Draw the cutesy eye icons in the upper right side of screen.  It does it

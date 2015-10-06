@@ -24,11 +24,17 @@
           <tr>
             <% Textile.register_name(naming.name) %>
             <td>
-              <%= link_with_query(naming.format_name.t, controller: :name, action: :show_name, id: naming.name) %>
+              <%= link_with_query(naming.format_name.t,
+                                  controller: :name, action: :show_name,
+                                  id: naming.name) %>
               <% if check_permission(naming) %>
-                [<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %> |
-                <%= link_with_query(:DESTROY.t, {controller: :naming, action: :destroy, id: naming.id},
-                                    data: {confirm: :are_you_sure.l}) %>]
+                [<%= link_with_query(:EDIT.t,
+                                     { controller: :naming, action: :edit,
+                                       id: naming }) %> |
+                <%= link_with_query(:DESTROY.t,
+                                    { controller: :naming, action: :destroy,
+                                      id: naming.id },
+                                    data: {confirm: :are_you_sure.l }) %>]
               <% end %>
             </td>
             <td>
@@ -36,19 +42,27 @@
             </td>
             <td>
               <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
-              <%= link_with_query(h(txt), {controller: :observer, action: :show_votes, id: naming.id},
-                                  {data: {role: "open_popup", id: naming.id}}) if naming.votes.any? %>
+              <%= link_with_query(h(txt), { controller: :observer,
+                                            action: :show_votes,
+                                            id: naming.id },
+                                  { data: { role: "open_popup",
+                                            id: naming.id } }
+                  ) if naming.votes.any? %>
               <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
             </td>
             <td>
               <% if logged_in %>
                 <% @vote = @votes[naming.id]
-                menu = Vote.confidence_menu
-                if check_permission(naming) ? (!@vote || @vote.value == 0) : true
-                  menu = [Vote.no_opinion] + menu
+                   menu = Vote.confidence_menu
+                   if check_permission(naming) ? (!@vote || @vote.value == 0) : true
+                   menu = [Vote.no_opinion] + menu
                 end %>
-                <%= select(:vote, :value, menu, {}, {index: naming.id, data: {role: "change_vote", id: naming.id}}) %>
-                <%= submit_tag(:show_namings_cast.l, class: "btn") if !can_do_ajax? %>
+                <%= select(:vote, :value, menu, {},
+                           { index: naming.id,
+                             data: { role: "change_vote", id: naming.id } }
+                    ) %>
+                <%= submit_tag(:show_namings_cast.l,
+                               class: "btn") if !can_do_ajax? %>
               <% end %>
             </td>
             <td>
@@ -124,13 +138,20 @@
               <div class="list-group-item">
                 <div class="row">
                   <div class="col-xs-12">
-                    <%= link_with_query(naming.format_name.t, controller: :name, action: :show_name, id: naming.name) %>
+                    <%= link_with_query(naming.format_name.t,
+                                        controller: :name, action: :show_name,
+                                        id: naming.name) %>
                   </div>
                   <% if check_permission(naming) %>
                     <div class="col-xs-12">
-                      [<%= link_with_query(:EDIT.t, {controller: :naming, action: :edit, id: naming}) %> |
-                      <%= link_with_query(:DESTROY.t, {controller: :naming, action: :destroy, id: naming.id},
-                                          data: {confirm: :are_you_sure.l}) %>]
+                      [<%= link_with_query(:EDIT.t, { controller: :naming,
+                                                      action: :edit,
+                                                      id: naming }) %> |
+                       <%= link_with_query(:DESTROY.t, { controller: :naming,
+                                                         action: :destroy,
+                                                         id: naming.id},
+                                           data: {confirm: :are_you_sure.l}
+                           ) %>]
                     </div>
                   <% end %>
                   <div class="col-xs-6">
@@ -138,8 +159,11 @@
                   </div>
                   <div class="col-xs-6">
                     <% txt = naming.vote_percent.round.to_s.html_safe + "%" %>
-                    <%= link_with_query(h(txt), {controller: :observer, action: :show_votes, id: naming.id},
-                                        {data: {role: "open_popup", id: naming.id}}) if naming.votes.any? %>
+                    <%= link_with_query(h(txt), { controller: :observer,
+                                                  action: :show_votes,
+                                                  id: naming.id },
+                                                { data: { role: "open_popup",
+                                                          id: naming.id } }) if naming.votes.any? %>
                     <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
                   </div>
                   <div class="col-xs-6">
@@ -149,8 +173,14 @@
                       if check_permission(naming) ? (!@vote || @vote.value == 0) : true
                         menu = [Vote.no_opinion] + menu
                       end %>
-                      <%= select(:vote, :value, menu, {}, {index: naming.id, data: {role: "change_vote", id: naming.id}}) %>
-                      <%= submit_tag(:show_namings_cast.l, class: "btn") if !can_do_ajax? %>
+                      <%= select(:vote,
+                                 :value,
+                                 menu, {},
+                                 { index: naming.id,
+                                   data: { role: "change_vote",
+                                           id: naming.id } }) %>
+                      <%= submit_tag(:show_namings_cast.l,
+                                     class: "btn") if !can_do_ajax? %>
                     <% end %>
                   </div>
                   <div class="col-xs-6">
@@ -177,9 +207,12 @@
     <div class="row" style="margin: 0; padding-top: 0; padding-bottom: 0">
       <div class="col-xs-12">
         <div class="pull-right-sm push-down-sm">
-          <%= link_with_query(:show_namings_propose_new_name.t, {controller: :naming,
-                              action: :create, id: observation.id}, class: "btn") %>
-          <%= submit_tag(:show_namings_update_votes.l, data: {role: "save_votes"},
+          <%= link_with_query(:show_namings_propose_new_name.t,
+                              { controller: :naming,
+                                action: :create, id: observation.id },
+                              class: "btn") %>
+          <%= submit_tag(:show_namings_update_votes.l,
+                         data: {role: "save_votes"},
                          class: "btn") if logged_in && any_names %>
         </div>
         <p class="help-block max-width-text">
@@ -214,7 +247,8 @@
     @naming = naming %>
     <div class="popup" id="show_votes_<%= naming.id %>" data-role="popup">
       <div class="popup-frame" id="show_votes_<%= naming.id %>_frame">
-        <%= render(partial: "observer/show_votes", locals: {do_cancel: true, naming: @naming}) %>
+        <%= render(partial: "observer/show_votes",
+                   locals: { do_cancel: true, naming: @naming }) %>
       </div>
     </div>
   <% end %>
