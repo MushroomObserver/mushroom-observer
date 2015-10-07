@@ -1,4 +1,4 @@
- <!-- Privacy Settings for Account Preferences Form -->
+ <!-- Privacy Settings of Account Preferences Form -->
 <div class="form-group push-down bold">
   <%= :prefs_privacy.t %>
 </div>
@@ -46,7 +46,6 @@
 <div class="form-group push-down">
   <%= label_tag(:user_license_id, :License.t + ":") %>
   <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
-  <% byebug %>
   <%= form.select(:license_id, @licenses, class: "form-control") %>
   <span class="HelpNote">
     <%= link_to(:bulk_license_link.t, controller: :image,

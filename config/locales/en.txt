@@ -1506,6 +1506,7 @@
   prefs_image_large: "[:image_show_large] (960 x 960)"
   prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
   prefs_image_full_size: "[:image_show_full_size]"
+  prefs_layout_count: List page items
   prefs_layout_title: List page layout
   prefs_rows_by: rows ×
   prefs_columns: columns
