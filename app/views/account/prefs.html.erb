@@ -1,214 +1,219 @@
 <%
   @title = :prefs_title.t
-
-  tabs = [
-    link_to(:bulk_license_link.t, controller: :image, action: :license_updater),
-    link_to(:prefs_change_image_vote_anonymity.t, controller: :image, action: :bulk_vote_anonymity_updater),
-    link_to(:profile_link.t, action: :profile),
-    link_to(:show_user_your_notifications.t, controller: :interest, action: :list_interests),
-    link_to(:account_api_keys_link.t, action: :api_keys)
-  ]
-  @tabsets = { right: draw_tab_set(tabs) }
+  @tabsets = prefs_tabset
 %>
 
 <div class="max-width-text">
   <%= form_for(:user, url: {action: :prefs}) do |form| %>
 
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
-      <!-- ---------------------------------------------------------------- -->
+    <%= render partial: "prefs_login", locals: { form: form } %>
+ <!-- Privacy Settings for Account Preferences Form -->
+<div class="form-group push-down bold">
+  <%= :prefs_privacy.t %>
+</div>
 
-      <div class="form-group push-down">
-        <%= label_tag(:user_login, :prefs_login.t + ":") %>
-        <%= form.text_field(:login, class: "form-control") %>
+<div class="form-group push-down">
+  <%= label_tag(:user_votes_anonymous,
+                :prefs_votes_anonymous.t + ":") %><br/>
+  <%= values = [
+          [:prefs_votes_anonymous_no.l, :no],
+          [:prefs_votes_anonymous_yes.l, :yes],
+  ]
+      # Let old users grandfather old anonymous votes,
+      # but choose to go public from here forward.
+      if @user.created_at && @user.created_at < Time.parse(MO.vote_cutoff)
+        values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
+      end
+      form.select(:votes_anonymous, values, class: "form-control") %>
+  <span class="HelpNote">
+    <%= link_to(:prefs_change_image_vote_anonymity.t,
+                controller: :image,
+                action: :bulk_vote_anonymity_updater) %>
+  </span>
+
+</div>
+
+<div class="form-group push-down">
+  <%= label_tag(:user_keep_filenames,
+                :prefs_keep_image_filenames.t + ":") %><br/>
+  <%= form.select(:keep_filenames,
+                   [[:prefs_keep_image_filenames_toss.l, :toss],
+                    [:prefs_keep_image_filenames_keep_but_hide.l,
+                     :keep_but_hide],
+                    [:prefs_keep_image_filenames_keep_and_show.l,
+                     :keep_and_show]],
+                  class: "form-control") %>
+  <span class="HelpNote">
+    <%= link_to(:prefs_bulk_filename_purge.t,
+                 { controller: :image,
+                   action: :bulk_filename_purge },
+                 { data:
+                  { confirm: :prefs_bulk_filename_purge_confirm.l } }) %>
+  </span>
+</div>
+
+<div class="form-group push-down">
+  <%= label_tag(:user_license_id, :License.t + ":") %>
+  <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
+  <%= form.select(:license_id, @licenses, class: "form-control") %>
+  <span class="HelpNote">
+    <%= link_to(:bulk_license_link.t, controller: :image,
+                                      action: :license_updater) %>
+  </span>
+</div>
+
+<%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+
+    <!-- Appearance -->
+    <div class="form-group push-down bold">
+      <%= :prefs_appearance.t %>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= label_tag(:user_hide_authors, :prefs_hide_authors.t + ":") %>
+      <%= form.select(:hide_authors,
+                      [[:prefs_hide_authors_none.l, :none],
+                       [:prefs_hide_authors_above_species.l,
+                        :above_species]],
+                      class: "form-control") %><br/>
+
+      <%= label_tag(:user_location_format, :prefs_location_format.t + ":") %>
+      <%= form.select(:location_format,
+                      [[:prefs_location_format_postal.l, :postal],
+                       [:prefs_location_format_scientific.l, :scientific]],
+                      class: "form-control") %><br/>
+
+      <%= label_tag(:user_theme, :prefs_theme.t + ":") %>
+      <%= form.select(:theme,
+                      [
+                       [:theme_random.l, "NULL"]
+                      ] + MO.themes.map { |t| [t.to_sym.l, t] },
+                      class: "form-control") %><br/>
+
+      <%= label_tag(:user_locale, :prefs_locale.t + ":") %>
+      <%= locales = Language.all.map do |lang|
+                      name = lang.name
+                      name += " (beta)" if lang.beta
+                      [name, lang.locale]
+                    end
+          form.select(:locale, locales, class: "form-control") %><br/>
+
+
+      <%= form.check_box(:thumbnail_maps, class: "form-control") %>
+      <%= label_tag(:user_thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
+
+      <%= label_tag(:layout_count, :prefs_layout_title.t + ":") %><br/>
+      <%= form.number_field(:layout_count, class: "form-control") %>
+      <% if false %>
+          <%= form.check_box(:alternate_rows, class: "form-control") %>
+          <%= label_tag(:user_alternate_rows,
+                        :prefs_alt_row_colors.t) %><br/>
+          <%= form.check_box(:vertical_layout, class: "form-control") %>
+          <%= label_tag(:user_vertical_layout,
+                        :prefs_text_below_images.t) %><br/>
+      <% end %>
+    </div>
+
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+    <!-- ---------------------------------------------------------------- -->
+
+    <!-- Email -->
+    <div class="form-group push-down bold">
+      <%= :prefs_email_prefs.t %>
+    </div>
+
+    <div class="form-group form-inline">
+      <%= form.check_box(:email_html, class: "form-control") %>
+      <%= label_tag(:user_email_html, :prefs_email_html.t) %>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= :prefs_email_comments.t %>:
+      <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
+      <%= form.check_box(:email_comments_owner, class: "form-control") %>
+      <%= label_tag(:user_email_comments_owner,
+                    :prefs_email_comments_owner.t) %><br/>
+      <%= form.check_box(:email_comments_response,
+                         class: "form-control") %>
+      <%= label_tag(:user_email_comments_response,
+                    :prefs_email_comments_response.t) %><br/>
+      <%= form.check_box(:email_comments_all, class: "form-control") %>
+      <%= label_tag(:user_email_comments_all,
+                    :prefs_email_comments_all.t) %><br/>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= :prefs_email_observations.t %>:
+      <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
+      <%= form.check_box(:email_observations_consensus,
+          class: "form-control") %>
+      <%= label_tag(:user_email_observations_consensus,
+                    :prefs_email_observations_consensus.t) %><br/>
+      <%= form.check_box(:email_observations_naming, class: "form-control") %>
+      <%= label_tag(:user_email_observations_naming,
+                    :prefs_email_observations_naming.t) %><br/>
+      <%= form.check_box(:email_observations_all, class: "form-control") %>
+      <%= label_tag(:user_email_observations_all,
+                    :prefs_email_observations_all.t) %><br/>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= :prefs_email_names.t %>:
+      <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
+      <%= form.check_box(:email_names_admin, class: "form-control") %>
+      <%= label_tag(:user_email_names_admin, :prefs_email_names_admin.t) %><br/>
+      <%= form.check_box(:email_names_author, class: "form-control") %>
+      <%= label_tag(:user_email_names_author,
+                    :prefs_email_names_author.t) %><br/>
+      <%= form.check_box(:email_names_editor, class: "form-control") %>
+      <%= label_tag(:user_email_names_editor,
+                    :prefs_email_names_editor.t) %><br/>
+      <%= form.check_box(:email_names_reviewer, class: "form-control") %>
+      <%= label_tag(:user_email_names_reviewer,
+                    :prefs_email_names_reviewer.t) %><br/>
+      <%= form.check_box(:email_names_all, class: "form-control") %>
+      <%= label_tag(:user_email_names_all, :prefs_email_names_all.t) %><br/>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= :prefs_email_locations.t %>:
+      <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
+      <%= form.check_box(:email_locations_admin, class: "form-control") %>
+      <%= label_tag(:user_email_locations_admin,
+                    :prefs_email_locations_admin.t) %><br/>
+      <%= form.check_box(:email_locations_author, class: "form-control") %>
+      <%= label_tag(:user_email_locations_author,
+                    :prefs_email_locations_author.t) %><br/>
+      <%= form.check_box(:email_locations_editor, class: "form-control") %>
+      <%= label_tag(:user_email_locations_editor,
+                    :prefs_email_locations_editor.t) %><br/>
+      <%= form.check_box(:email_locations_all, class: "form-control") %>
+      <%= label_tag(:user_email_locations_all,
+                    :prefs_email_locations_all.t) %><br/>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <%= :prefs_email_general.t %>:
+      <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
+      <%= form.check_box(:email_general_feature, class: "form-control") %>
+      <%= label_tag(:user_email_general_feature,
+                    :prefs_email_general_features.t) %><br/>
+      <%= form.check_box(:email_general_commercial, class: "form-control") %>
+      <%= label_tag(:user_email_general_commercial,
+                    :prefs_email_general_commercial.t) %><br/>
+      <%= form.check_box(:email_general_question, class: "form-control") %>
+      <%= label_tag(:user_email_general_question,
+                    :prefs_email_general_questions.t) %><br/>
+    </div>
+
+    <div class="form-group push-down form-inline">
+      <div class="help-block">
+        <%= :prefs_email_note.tp %>
       </div>
+    </div>
 
-      <div class="form-group push-down">
-        <%= label_tag(:user_email, :prefs_email.t + ":") %>
-        <%= form.text_field(:email, class: "form-control") %>
-      </div>
-
-      <div class="form-group push-down">
-        <%= label_tag(:user_password, :prefs_password_new.t + ":") %>
-        <%= form.password_field(:password, value: "", class: "form-control") %>
-      </div>
-
-      <div class="form-group push-down">
-        <%= label_tag(:user_password_confirmation, :prefs_password_confirm.t + ":") %>
-        <%= form.password_field(:password_confirmation, value: "", class: "form-control") %></p>
-      </div>
-
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
-      <!-- ---------------------------------------------------------------- -->
-
-      <div class="form-group push-down bold">
-        <%= :prefs_privacy.t %>
-      </div>
-
-      <div class="form-group push-down">
-        <%= label_tag(:user_votes_anonymous, :prefs_votes_anonymous.t + ":") %><br/>
-        <%= values = [
-                [:prefs_votes_anonymous_no.l, :no],
-                [:prefs_votes_anonymous_yes.l, :yes],
-        ]
-            # Allow old users to granfather in old anonymous votes, but choose to go public from here forward.
-            if @user.created_at && @user.created_at < Time.parse(MO.vote_cutoff)
-              values << [:prefs_votes_anonymous_old.l(cutoff: MO.vote_cutoff), :old]
-            end
-            form.select(:votes_anonymous, values, class: "form-control") %>
-        <span class="HelpNote">(<%= link_to(:prefs_change_image_vote_anonymity.t,
-                                            controller: :image, action: :bulk_vote_anonymity_updater) %>)</span>
-
-      </div>
-      <div class="form-group push-down">
-        <%= label_tag(:user_keep_filenames, :prefs_keep_image_filenames.t + ":") %><br/>
-        <%= form.select(:keep_filenames, [
-                                               [:prefs_keep_image_filenames_toss.l, :toss],
-                                               [:prefs_keep_image_filenames_keep_but_hide.l, :keep_but_hide],
-                                               [:prefs_keep_image_filenames_keep_and_show.l, :keep_and_show]
-                                       ], class: "form-control") %>
-        <span class="HelpNote">(<%= link_to(:prefs_bulk_filename_purge.t,
-                                            {controller: :image, action: :bulk_filename_purge},
-                                            {data: {confirm: :prefs_bulk_filename_purge_confirm.l}}) %>)</span>
-
-      </div>
-
-      <div class="form-group push-down">
-        <%= label_tag(:user_license_id, :License.t + ":") %>
-        <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
-        <%= form.select(:license_id, @licenses, class: "form-control") %>
-        <span class="HelpNote">(<%= link_to(:bulk_license_link.t,
-                                            controller: :image, action: :license_updater) %>)</span>
-
-      </div>
-
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
-      <!-- ---------------------------------------------------------------- -->
-
-      <div class="form-group push-down bold">
-        <%= :prefs_appearance.t %>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <%= label_tag(:user_hide_authors, :prefs_hide_authors.t + ":") %>
-        <%= form.select(:hide_authors, [
-                                             [:prefs_hide_authors_none.l, :none],
-                                             [:prefs_hide_authors_above_species.l, :above_species]
-                                     ], class: "form-control") %><br/>
-
-        <%= label_tag(:user_location_format, :prefs_location_format.t + ":") %>
-        <%= form.select(:location_format, [
-                                                [:prefs_location_format_postal.l, :postal],
-                                                [:prefs_location_format_scientific.l, :scientific]
-                                        ], class: "form-control") %><br/>
-
-        <%= label_tag(:user_theme, :prefs_theme.t + ":") %>
-        <%= form.select(:theme, [
-                                      [:theme_random.l, "NULL"]
-                              ] + MO.themes.map { |t| [t.to_sym.l, t] }, class: "form-control") %><br/>
-
-        <%= label_tag(:user_locale, :prefs_locale.t + ":") %>
-        <%= locales = Language.all.map do |lang|
-          name = lang.name
-          name += " (beta)" if lang.beta
-          [name, lang.locale]
-        end
-            form.select(:locale, locales, class: "form-control") %><br/>
-
-
-        <%= form.check_box(:thumbnail_maps, class: "form-control") %>
-        <%= label_tag(:user_thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
-
-        <%= label_tag(:layout_count, :prefs_layout_title.t + ":") %><br/>
-        <%= form.number_field(:layout_count, class: "form-control") %>
-        <% if false %>
-            <%= form.check_box(:alternate_rows, class: "form-control") %>
-            <%= label_tag(:user_alternate_rows, :prefs_alt_row_colors.t) %><br/>
-            <%= form.check_box(:vertical_layout, class: "form-control") %>
-            <%= label_tag(:user_vertical_layout, :prefs_text_below_images.t) %><br/>
-        <% end %>
-      </div>
-
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
-      <!-- ---------------------------------------------------------------- -->
-
-      <div class="form-group push-down bold">
-        <%= :prefs_email_prefs.t %>
-      </div>
-
-      <div class="form-group form-inline">
-        <%= form.check_box(:email_html, class: "form-control") %>
-        <%= label_tag(:user_email_html, :prefs_email_html.t) %>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <%= :prefs_email_comments.t %>:
-        <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
-        <%= form.check_box(:email_comments_owner, class: "form-control") %>
-        <%= label_tag(:user_email_comments_owner, :prefs_email_comments_owner.t) %><br/>
-        <%= form.check_box(:email_comments_response, class: "form-control") %>
-        <%= label_tag(:user_email_comments_response, :prefs_email_comments_response.t) %><br/>
-        <%= form.check_box(:email_comments_all, class: "form-control") %>
-        <%= label_tag(:user_email_comments_all, :prefs_email_comments_all.t) %><br/>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <%= :prefs_email_observations.t %>:
-        <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
-        <%= form.check_box(:email_observations_consensus, class: "form-control") %>
-        <%= label_tag(:user_email_observations_consensus, :prefs_email_observations_consensus.t) %><br/>
-        <%= form.check_box(:email_observations_naming, class: "form-control") %>
-        <%= label_tag(:user_email_observations_naming, :prefs_email_observations_naming.t) %><br/>
-        <%= form.check_box(:email_observations_all, class: "form-control") %>
-        <%= label_tag(:user_email_observations_all, :prefs_email_observations_all.t) %><br/>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <%= :prefs_email_names.t %>:
-        <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
-        <%= form.check_box(:email_names_admin, class: "form-control") %>
-        <%= label_tag(:user_email_names_admin, :prefs_email_names_admin.t) %><br/>
-        <%= form.check_box(:email_names_author, class: "form-control") %>
-        <%= label_tag(:user_email_names_author, :prefs_email_names_author.t) %><br/>
-        <%= form.check_box(:email_names_editor, class: "form-control") %>
-        <%= label_tag(:user_email_names_editor, :prefs_email_names_editor.t) %><br/>
-        <%= form.check_box(:email_names_reviewer, class: "form-control") %>
-        <%= label_tag(:user_email_names_reviewer, :prefs_email_names_reviewer.t) %><br/>
-        <%= form.check_box(:email_names_all, class: "form-control") %>
-        <%= label_tag(:user_email_names_all, :prefs_email_names_all.t) %><br/>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <%= :prefs_email_locations.t %>:
-        <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
-        <%= form.check_box(:email_locations_admin, class: "form-control") %>
-        <%= label_tag(:user_email_locations_admin, :prefs_email_locations_admin.t) %><br/>
-        <%= form.check_box(:email_locations_author, class: "form-control") %>
-        <%= label_tag(:user_email_locations_author, :prefs_email_locations_author.t) %><br/>
-        <%= form.check_box(:email_locations_editor, class: "form-control") %>
-        <%= label_tag(:user_email_locations_editor, :prefs_email_locations_editor.t) %><br/>
-        <%= form.check_box(:email_locations_all, class: "form-control") %>
-        <%= label_tag(:user_email_locations_all, :prefs_email_locations_all.t) %><br/>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <%= :prefs_email_general.t %>:
-        <span class="HelpNote">(<%= :prefs_email_please_notify.t %>)</span><br/>
-        <%= form.check_box(:email_general_feature, class: "form-control") %>
-        <%= label_tag(:user_email_general_feature, :prefs_email_general_features.t) %><br/>
-        <%= form.check_box(:email_general_commercial, class: "form-control") %>
-        <%= label_tag(:user_email_general_commercial, :prefs_email_general_commercial.t) %><br/>
-        <%= form.check_box(:email_general_question, class: "form-control") %>
-        <%= label_tag(:user_email_general_question, :prefs_email_general_questions.t) %><br/>
-      </div>
-
-      <div class="form-group push-down form-inline">
-        <div class="help-block">
-          <%= :prefs_email_note.tp %>
-        </div>
-      </div>
-
-      <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
-      <!-- ---------------------------------------------------------------- -->
+    <%= submit_tag(:SAVE_EDITS.l, class: "btn center-block push-down") %>
+    <!-- ---------------------------------------------------------------- -->
 
   <% end %>
 </div>

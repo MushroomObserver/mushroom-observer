@@ -58,6 +58,19 @@ module TabsHelper
     { pager_for: @observation, right: draw_tab_set(tabs) }
   end
 
+  def prefs_tabset
+    tabs = [link_to(:bulk_license_link.t, controller: :image,
+                                          action: :license_updater),
+            link_to(:prefs_change_image_vote_anonymity.t,
+                    controller: :image, action: :bulk_vote_anonymity_updater),
+            link_to(:profile_link.t, action: :profile),
+            link_to(:show_user_your_notifications.t,
+                    controller: :interest, action: :list_interests),
+            link_to(:account_api_keys_link.t, action: :api_keys)]
+
+   { right: draw_tab_set(tabs) }
+  end
+
   # Draw the cutesy eye icons in the upper right side of screen.  It does it
   # by creating a "right" tab set.  Thus this must be called in the header of
   # the view and must not actually be rendered.  Typical usage would be:
