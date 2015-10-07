@@ -258,9 +258,7 @@ class AccountControllerTest < FunctionalTestCase
     requires_login(:prefs)
 
     # Make sure "beta" languages are present.
-    for lang in Language.all
-      assert_select("option[value=#{lang.locale}]")
-    end
+    Language.all.each {|lang| assert_select("option[value=#{lang.locale}]")}
 
     # Now change everything.
     params = {
@@ -296,6 +294,7 @@ class AccountControllerTest < FunctionalTestCase
         theme:                        "Agaricus",
         thumbnail_maps:               "",
         thumbnail_size:               :small,
+        view_observer_id:             "",
         votes_anonymous:              :yes
       }
     }
@@ -335,6 +334,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(:small, user.thumbnail_size)
+    assert_equal(false, user.view_observer_id)
     assert_equal(:yes, user.votes_anonymous)
   end
 

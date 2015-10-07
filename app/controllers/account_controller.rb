@@ -332,8 +332,8 @@ class AccountController < ApplicationController
       [ :enum, :location_format ],
       [ :enum, :hide_authors ],
       [ :enum, :votes_anonymous, true ],
-      [ :enum,  :thumbnail_size ],
-      [ :enum,  :image_size ],
+      [ :enum, :thumbnail_size ],
+      [ :enum, :image_size ],
       [ :str,  :theme ],
       [ :int,  :layout_count ],
       [ :bool, :email_comments_owner ],
@@ -355,7 +355,8 @@ class AccountController < ApplicationController
       [ :bool, :email_general_commercial ],
       [ :bool, :email_general_question ],
       # [ :str,  :email_digest ],
-      [ :bool, :thumbnail_maps ]
+      [ :bool, :thumbnail_maps ],
+      [ :bool, :view_observer_id]
     ]
       val = params[:user][arg]
       val = case type
@@ -381,7 +382,6 @@ class AccountController < ApplicationController
       flash_notice(:runtime_prefs_success.t)
     end
   end
-
 
   def profile # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)

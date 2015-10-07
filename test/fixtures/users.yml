@@ -16,6 +16,7 @@ rolf:
   image_size: <%= User.image_sizes[:medium] %>
   keep_filenames: <%= User.keep_filenames[:toss] %>
   image_id: 13
+  view_observer_id: true
 
 # Mary has no images and no herbaria
 mary:
