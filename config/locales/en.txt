@@ -1486,7 +1486,8 @@
   prefs_email: Email address
   prefs_password_new: New password
   prefs_password_confirm: Confirm new password
-  prefs_appearance: Appearance
+
+  prefs_appearance: Appearance Settings
   prefs_theme: Preferred theme
   prefs_locale: Language
   prefs_location_format: Location Format
@@ -1498,7 +1499,7 @@
   prefs_thumbnail_size: Thumbnail size
   prefs_thumbnail_small: "[:image_show_small]"
   prefs_thumbnail_large: "[:image_show_large]"
-  prefs_thumbnail_maps: Show thumbnail map on observation page?
+  prefs_thumbnail_maps: View thumbnail map on Observation page?
   prefs_image_size: Image size
   prefs_image_size_help: Size shown when you click on an image.
   prefs_image_small: "[:image_show_small] (320 x 320)"
@@ -1513,7 +1514,9 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_privacy: Privacy settings
+  prefs_view_observer_id: View Observer identification of Observations?
+
+  prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
   prefs_votes_anonymous_no: Always public
   prefs_votes_anonymous_yes: Always anonymous
@@ -1527,6 +1530,7 @@
   prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
   prefs_change_image_vote_anonymity: Change Image Vote Anonymity
   prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
+
   prefs_email_please_notify: Please notify me when...
   prefs_email_general: General Email
   prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
