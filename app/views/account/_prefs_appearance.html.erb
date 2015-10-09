@@ -35,8 +35,8 @@
   <%= form.check_box(:thumbnail_maps, class: "form-control") %>
   <%= label_tag(:user_thumbnail_maps, :prefs_thumbnail_maps.t) %><br/>
 
-  <%= form.check_box(:view_observer_id, class: "form-control") %>
-  <%= label_tag(:user_view_observer_id, :prefs_view_observer_id.t) %><br/>
+  <%= form.check_box(:view_owner_id, class: "form-control") %>
+  <%= label_tag(:user_view_owner_id, :prefs_view_owner_id.t) %><br/>
 
   <%= label_tag(:layout_count, :prefs_layout_count.t + ":") %>
   <%= form.number_field(:layout_count, class: "form-control", min: 1) %>

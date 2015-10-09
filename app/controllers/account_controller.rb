@@ -356,7 +356,7 @@ class AccountController < ApplicationController
       [ :bool, :email_general_question ],
       # [ :str,  :email_digest ],
       [ :bool, :thumbnail_maps ],
-      [ :bool, :view_observer_id]
+      [ :bool, :view_owner_id]
     ]
       val = params[:user][arg]
       val = case type

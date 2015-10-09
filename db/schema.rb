@@ -639,7 +639,7 @@ ActiveRecord::Schema.define(version: 20151007003058) do
     t.text     "notes"
     t.text     "mailing_address"
     t.integer  "layout_count"
-    t.boolean  "view_observer_id",                        default: false, null: false
+    t.boolean  "view_owner_id",                           default: false, null: false
   end
 
   create_table "votes", force: true do |t|

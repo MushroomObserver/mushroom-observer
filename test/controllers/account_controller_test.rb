@@ -264,8 +264,8 @@ class AccountControllerTest < FunctionalTestCase
     end
     assert_select("input[id = 'user_thumbnail_maps']", { count: 1 },
                   "Missing input: :prefs_thumbnail_maps.t")
-    assert_select("input[id = 'user_view_observer_id']", { count: 1 },
-                  "Missing input: #{:prefs_view_observer_id.t}")
+    assert_select("input[id = 'user_view_owner_id']", { count: 1 },
+                  "Missing input: #{:prefs_view_owner_id.t}")
   end
 
   def test_edit_prefs
@@ -306,7 +306,7 @@ class AccountControllerTest < FunctionalTestCase
         theme:                        "Agaricus",
         thumbnail_maps:               "",
         thumbnail_size:               :small,
-        view_observer_id:             "",
+        view_owner_id:                "",
         votes_anonymous:              :yes
       }
     }
@@ -346,7 +346,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(:small, user.thumbnail_size)
-    assert_equal(false, user.view_observer_id)
+    assert_equal(false, user.view_owner_id)
     assert_equal(:yes, user.votes_anonymous)
   end
 

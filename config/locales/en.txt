@@ -1514,7 +1514,7 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_observer_id: View Observer identification of Observations?
+  prefs_view_owner_id: View Observer identification of Observations?
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
