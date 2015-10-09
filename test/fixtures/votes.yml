@@ -64,3 +64,63 @@ amateur_vote:
   value: 2
   favorite: true
   observation_id: 11
+
+owner_unique_favorite_eq_fungi:
+  id: 7
+  created_at: 2015-10-08 15:18:00
+  updated_at: 2015-10-08 15:18:00
+  user_id: 4                      # dick
+  naming_id: 2                    # Fungi
+  value: MAXIMUM_VOTE
+  favorite: true
+  observation_id: 16              # Boletus edulis
+
+owner_unique_favorite_eq_consensus:
+  id: 8
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4                      # dick
+  naming_id: 10                   # Boletus edulis
+  value: MAXIMUM_VOTE
+  favorite: true
+  observation_id: 17              # Boletus edulis
+
+owner_unique_favorite_ne_consensus:
+  id: 9
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4                      # dick
+  naming_id: 12                   # Tremella mesenterica
+  value: MAXIMUM_VOTE
+  favorite: true
+  observation_id: 18              # Tremella
+
+owner_multiple_favorites_first_vote:
+  id: 10
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4                      # dick
+  naming_id: 13                   # Tremella
+  value: MAXIMUM_VOTE
+  favorite: true
+  observation_id: 19              # Boletus edulis
+
+owner_multiple_favorites_second_vote:
+  id: 11
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4                      # dick
+  naming_id: 14                   # Tremella mesenterica
+  value: MAXIMUM_VOTE
+  favorite: true
+  observation_id: 19              # Boletus edulis
+
+owner_uncertain_favorite__vote:
+  id: 12
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  user_id: 4                      # dick
+  naming_id: 15                   # Tremella mesenterica
+  value: MIN_POS_VOTE
+  favorite: true
+  observation_id: 20              # Boletus edulis

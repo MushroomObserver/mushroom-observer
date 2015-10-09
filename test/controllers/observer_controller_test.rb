@@ -545,6 +545,54 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, Query.count)
   end
 
+  def test_show_observer_id_in_observation
+    # observer_id on, observation with 1 owner favorite != consensus
+    login("rolf") # rolf has show_observer_id == true
+    get_with_dump(:show_observation,
+                  id: observations(:owner_unique_favorite_ne_consensus).id)
+
+    assert_select("div[class *= 'observer-id']",
+                  { text: /Fungi/, count: 1 },
+                  "Observation should show Observer ID")
+
+    # observer_id on, observation with 1 owner favorite == consensus
+    get_with_dump(:show_observation,
+                  id: observations(:owner_unique_favorite_eq_consensus).id)
+    assert_select("div[class *= 'observer-id']", { count: 0 },
+                  "Do not show Observer ID when same as consensus")
+
+    # observer_id on, observation with >1 owner "favorite" != consensus
+    get_with_dump(:show_observation,
+                  id: observations(:owner_multiple_favorites).id)
+    assert_select("div[class *= 'observer-id']", { count: 0 },
+                  "Do not show Observer ID when Observer has >1 'favorite'")
+
+    # observer_id on, observation with 1 owner "favorite" which is uncertain
+    get_with_dump(:show_observation,
+                  id: observations(:owner_uncertain_favorite).id)
+    assert_select("div[class *= 'observer-id']", { count: 0 },
+                  "Do not show Observer ID when Observer favorite is uncertain")
+
+    # observer_id on, observation with 1 owner "favorite", "Fungi"
+    get_with_dump(:show_observation,
+                  id: observations(:owner_unique_favorite_eq_fungi).id)
+    assert_select("div[class *= 'observer-id']", { count: 0 },
+                  "Do not show Observer ID when Observer favorite is 'Fungi'")
+
+    # observer_id off, observation with owner vote != consensus
+    login("dick") # dick has show_observer_id == false
+    get_with_dump(:show_observation,
+                  id: observations(:owner_unique_favorite_ne_consensus).id)
+    assert_select("div[class *= 'observer-id']", { count: 0 },
+                  "Do not show Observer ID when user has not opted for it")
+
+    logout
+    get_with_dump(:show_observation,
+                  id: observations(:owner_unique_favorite_ne_consensus).id)
+    assert_select("div[class *= 'observer-id']", { count: 0 },
+                  "Do not show Observer ID when nobody logged in")
+  end
+
   def test_observation_external_links_exist
     obs_id = observations(:coprinus_comatus_obs).id
     get_with_dump(:show_observation, id: obs_id)
@@ -557,7 +605,6 @@ class ObserverControllerTest < FunctionalTestCase
       assert_select("a[href *= '/Coprinus%20comatus']")
       assert_select("a[href *= 'Lang=Eng']")
     end
-
   end
 
   def test_show_observation_edit_links

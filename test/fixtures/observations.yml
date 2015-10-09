@@ -176,3 +176,53 @@ bolete_observation:
   specimen: 0
   notes: 'A tasty bolete!'
   vote_cache: 3
+
+owner_unique_favorite_eq_fungi:
+  id: 16
+  created_at: 2015-10-08 15:18:00
+  updated_at: 2015-10-08 15:18:00
+  when: 2015-10-08
+  user_id: 4                      # dick
+  location_id: 2
+  name_id: 39                     # Boletus edulis
+  notes: ''
+
+owner_unique_favorite_eq_consensus:
+  id: 17
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  when: 2015-10-08
+  user_id: 4                      # dick
+  location_id: 2
+  name_id: 39                     # Boletus edulis
+  notes: ''
+
+owner_unique_favorite_ne_consensus:
+  id: 18
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  when: 2015-10-08
+  user_id: 4                      # dick
+  location_id: 2
+  name_id: 46                     # Tremella
+  notes: ''
+
+owner_multiple_favorites:
+  id: 19
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  when: 2015-10-08
+  user_id: 4                      # dick
+  location_id: 2
+  name_id: 39                     # Boletus edulis
+  notes: ''
+
+owner_uncertain_favorite:
+  id: 20
+  created_at: 2015-10-08 15:41:00
+  updated_at: 2015-10-08 15:41:00
+  when: 2015-10-08
+  user_id: 4                      # dick
+  location_id: 2
+  name_id: 39                     # Boletus edulis
+  notes: ''
