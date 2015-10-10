@@ -545,21 +545,21 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(4, Query.count)
   end
 
-  def test_view_owner_id_in_observation
-    skip("Temporarily skip to get passing commit")
-
+  def test_show_owner_id
     # observer_id on, observation with 1 owner favorite != consensus
     login("rolf") # rolf has view_owner_id == true
-    get_with_dump(:show_observation,
-                  id: observations(:owner_unique_favorite_ne_consensus).id)
 
+    obs = observations(:owner_only_favorite_ne_consensus)
+    get_with_dump(:show_observation,
+                  id: obs.id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /Fungi/, count: 1 },
+                  { text: /#{obs.owners_only_favorite_name.text_name}/,
+                    count: 1 },
                   "Observation should show Observer ID")
 
     # observer_id on, observation with 1 owner favorite == consensus
     get_with_dump(:show_observation,
-                  id: observations(:owner_unique_favorite_eq_consensus).id)
+                  id: observations(:owner_only_favorite_eq_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when same as consensus")
 
@@ -567,30 +567,30 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_observation,
                   id: observations(:owner_multiple_favorites).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
-                  "Do not show Observer ID when Observer has >1 'favorite'")
+                  "Do not show Observer ID when observer has >1 'favorite'")
 
     # observer_id on, observation with 1 owner "favorite" which is uncertain
     get_with_dump(:show_observation,
                   id: observations(:owner_uncertain_favorite).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
-                  "Do not show Observer ID when Observer favorite is uncertain")
+                  "Do not show Observer ID when observer not sure enough of id")
 
     # observer_id on, observation with 1 owner "favorite", "Fungi"
     get_with_dump(:show_observation,
-                  id: observations(:owner_unique_favorite_eq_fungi).id)
+                  id: observations(:owner_only_favorite_eq_fungi).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
-                  "Do not show Observer ID when Observer favorite is 'Fungi'")
+                  "Do not show Observer ID when observer favorite is 'Fungi'")
 
     # observer_id off, observation with owner vote != consensus
     login("dick") # dick has view_owner_id == false
     get_with_dump(:show_observation,
-                  id: observations(:owner_unique_favorite_ne_consensus).id)
+                  id: observations(:owner_only_favorite_ne_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when user has not opted for it")
 
     logout
     get_with_dump(:show_observation,
-                  id: observations(:owner_unique_favorite_ne_consensus).id)
+                  id: observations(:owner_only_favorite_ne_consensus).id)
     assert_select("div[class *= 'owner-id']", { count: 0 },
                   "Do not show Observer ID when nobody logged in")
   end
@@ -1062,7 +1062,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(herbarium.is_curator?(rolf))
   end
 
-  def test_create_simple_observation_with_approved_unique_name
+  def test_create_simple_observation_with_approved_only_name
     where = "Simple, Massachusetts, USA"
     generic_construct_observation({
       observation: { place_name: where, thumb_image_id: "0" },

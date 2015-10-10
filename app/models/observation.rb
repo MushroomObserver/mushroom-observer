@@ -345,12 +345,59 @@ class Observation < AbstractModel
   # Get a list of this User's Votes for this Observation.
   def users_votes(user)
     result = []
-    for n in namings
+    namings.each do |n|
       if v = n.users_vote(user)
         result << v
       end
     end
-    return result
+    result
+  end
+
+  # list of Owners's "favorite" votes for this Observation
+  def owner_favorite_votes
+    votes.where(user_id: user_id, favorite: true)
+  end
+
+  def owner_favorite_vote
+    owner_favorite_votes[0]
+  end
+
+  # Name of owner's favorite if owner has exactly 1 favorite, else nil
+  def owners_only_favorite_name
+    favs = owner_favorite_votes
+    favs[0].naming.name if favs.count == 1
+  end
+
+  # show Observer ID? (observer's identification of Observeration)
+  # (in code, Observer ID is "owner_id")
+  def show_owner_id?
+    view_owner_id_on? && showable_owner_id?
+  end
+
+  # Did current user opt to view owner_id's?
+  def view_owner_id_on?
+    User.try(:current).try(:view_owner_id)
+  end
+
+  # Is there a unique owner favorite meeting conditions for display?
+  def showable_owner_id?
+    owner_id_differs? && owner_sure_enough? && owner_id_known?
+  end
+
+  # Is owner_id different from site_id (consensus)
+  def owner_id_differs?
+    name != self.try(:owners_only_favorite_name)
+  end
+
+  # Is owner confident enough of his identification?
+  def owner_sure_enough?
+    return unless owner_favorite_vote
+    owner_favorite_vote.value >= Vote.owner_id_min_confidence
+  end
+
+  # Is owner's identification known, i.e., something other than "Fungi"
+  def owner_id_known?
+    owners_only_favorite_name.try(:known?)
   end
 
   # Convert cached Vote score to percentage.
@@ -361,7 +408,7 @@ class Observation < AbstractModel
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
-  def change_vote(naming, value, user=User.current)
+  def change_vote(naming, value, user = User.current)
     result = false
     naming = lookup_naming(naming)
     vote  = naming.users_vote(user)
@@ -801,7 +848,7 @@ return result if debug
     return status
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Images
   #

@@ -1,5 +1,6 @@
 <%
-  @title = :show_observation_title.t(name: @observation.unique_format_name)
+  @owner_id = owner_id_line(@observation) # must go before show_obs_title
+  @title = show_obs_title(@observation)
   @tabsets = show_observation_tabset
 
   javascript_include("vote_popup")

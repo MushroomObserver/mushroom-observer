@@ -1,7 +1,6 @@
 # encoding: utf-8
-
-require 'test_helper'
-
+require "test_helper"
+# test Observation model
 class ObservationTest < UnitTestCase
 
   def create_new_objects
@@ -86,6 +85,37 @@ class ObservationTest < UnitTestCase
     assert(observations(:coprinus_comatus_obs).name_been_proposed?(names(:coprinus_comatus)))
     assert(observations(:coprinus_comatus_obs).name_been_proposed?(names(:agaricus_campestris)))
     assert(!observations(:coprinus_comatus_obs).name_been_proposed?(names(:conocybe_filaris)))
+  end
+
+  def test_vote_counts
+    obs = observations(:owner_only_favorite_eq_consensus)
+    assert_equal(0, obs.users_votes(users(:rolf)).count)
+    assert_equal(1, obs.users_votes(users(:dick)).count)
+    assert_equal(1, obs.owner_favorite_votes.count)
+
+    obs = observations(:owner_multiple_favorites)
+    assert_equal(0, obs.users_votes(users(:rolf)).count)
+    assert_equal(2, obs.users_votes(users(:dick)).count)
+    assert_equal(2, obs.owner_favorite_votes.count)
+  end
+
+  def test_owner_id
+    obs = observations(:owner_only_favorite_eq_consensus)
+    assert_equal(obs.name, obs.owners_only_favorite_name)
+    refute(obs.showable_owner_id?)
+
+    obs = observations(:owner_only_favorite_ne_consensus)
+    refute_nil(obs.owners_only_favorite_name)
+    refute_equal(obs.name, obs.owners_only_favorite_name)
+    assert(obs.showable_owner_id?)
+
+    obs = observations(:owner_multiple_favorites)
+    assert_nil(obs.owners_only_favorite_name)
+    refute(obs.showable_owner_id?)
+
+    obs = observations(:owner_only_favorite_eq_fungi)
+    refute(obs.owners_only_favorite_name.known?)
+    refute(obs.showable_owner_id?)
   end
 
   def test_specimens

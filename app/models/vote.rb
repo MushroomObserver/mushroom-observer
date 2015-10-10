@@ -125,6 +125,11 @@ class Vote < AbstractModel
     MAXIMUM_VOTE
   end
 
+  # minimum owner's vote needed to display owner_id
+  def self.owner_id_min_confidence
+    min_pos_vote
+  end
+
   # Convert a given Vote value to a percentage.
   def self.percent(v)
     return 0.0 if v.blank?
