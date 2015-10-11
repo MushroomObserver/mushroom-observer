@@ -48,28 +48,28 @@ class API
       ["(#{MONTH})(#{DAY})", "(#{MONTH})-(#{DAY})", "(#{MONTH})\\/(#{DAY})"]
     end
 
+    def self.matcher(str, patterns, pattern_finalizer)
+      patterns.each do |pat|
+        match = str.match(Regexp.new(send(pattern_finalizer, pat)))
+        return match if match
+      end
+      false
+    end
+
+    def self.list_matcher(str, patterns)
+      matcher(str, patterns, :single_pattern)
+    end
+
     def self.single_pattern(pattern)
       "^(#{pattern})$"
     end
 
-    def self.list_matcher(str, patterns)
-      patterns.each do |pat|
-        match = str.match(Regexp.new(single_pattern(pat)))
-        return match if match
-      end
-      false
+    def self.range_matcher(str, patterns)
+      matcher(str, patterns, :range_pattern)
     end
 
     def self.range_pattern(pattern)
       "^(#{pattern})#{SEPARATOR}(#{pattern})$"
-    end
-
-    def self.range_matcher(str, patterns)
-      patterns.each do |pat|
-        match = str.match(Regexp.new(range_pattern(pat)))
-        return match if match
-      end
-      false
     end
 
     def self.ordered_range(cls, match, from_index, to_index)
