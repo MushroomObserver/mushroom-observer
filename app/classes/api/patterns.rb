@@ -6,40 +6,47 @@ class API
     TWO = '\d\d?'
     DAY = TWO
     MONTH = TWO
+    def self.month_pattern
+      MONTH
+    end
     YEAR = '\d{4}'
+    def self.year_pattern
+      YEAR
+    end
     SEPARATOR = '\s*-\s*'
-    NUM_DATE = '\d{8}()'
+    HOURS_TIME = "#{TWO}"
+    MINUTES_TIME = "#{TWO}:#{TWO}"
+    SECONDS_TIME = "#{TWO}:#{TWO}:#{TWO}"
+
+    def self.month_patterns
+      ['\d{6}()', "#{YEAR}(-)#{MONTH}", "#{YEAR}(\\/)#{MONTH}"]
+    end
+
     DASH_DATE = "#{YEAR}(-)#{MONTH}-#{DAY}"
     SLASH_DATE = "#{YEAR}(\\/)#{MONTH}\\/#{DAY}"
-    DATE_PATTERNS = [NUM_DATE, DASH_DATE, SLASH_DATE]
+    def self.date_patterns
+      ['\d{8}()', DASH_DATE, SLASH_DATE]
+    end
 
-    NUM_MONTH = '\d{6}()'
-    DASH_MONTH = "#{YEAR}(-)#{MONTH}"
-    SLASH_MONTH = "#{YEAR}(\\/)#{MONTH}"
-    MONTH_PATTERNS = [NUM_MONTH, DASH_MONTH, SLASH_MONTH]
+    def self.hour_patterns
+      ['\d{10}()', "#{DASH_DATE} #{HOURS_TIME}", "#{SLASH_DATE} #{HOURS_TIME}"]
+    end
 
-    NUM_SECONDS = '\d{14}()'
-    SECONDS_TIME = "#{TWO}:#{TWO}:#{TWO}"
-    DASH_SECONDS = "#{DASH_DATE} #{SECONDS_TIME}"
-    SLASH_SECONDS = "#{SLASH_DATE} #{SECONDS_TIME}"
-    SECOND_PATTERNS = [NUM_SECONDS, DASH_SECONDS, SLASH_SECONDS]
+    def self.minute_patterns
+      ['\d{12}()',
+       "#{DASH_DATE} #{MINUTES_TIME}",
+       "#{SLASH_DATE} #{MINUTES_TIME}"]
+    end
 
-    NUM_MINUTES = '\d{12}()'
-    MINUTES_TIME = "#{TWO}:#{TWO}"
-    DASH_MINUTES = "#{DASH_DATE} #{MINUTES_TIME}"
-    SLASH_MINUTES = "#{SLASH_DATE} #{MINUTES_TIME}"
-    MINUTE_PATTERNS = [NUM_MINUTES, DASH_MINUTES, SLASH_MINUTES]
+    def self.second_patterns
+      ['\d{14}()',
+       "#{DASH_DATE} #{SECONDS_TIME}",
+       "#{SLASH_DATE} #{SECONDS_TIME}"]
+    end
 
-    NUM_HOURS = '\d{10}()'
-    HOURS_TIME = "#{TWO}"
-    DASH_HOURS = "#{DASH_DATE} #{HOURS_TIME}"
-    SLASH_HOURS = "#{SLASH_DATE} #{HOURS_TIME}"
-    HOUR_PATTERNS = [NUM_HOURS, DASH_HOURS, SLASH_HOURS]
-
-    NUM_MONTH_DAY = "(#{MONTH})(#{DAY})"
-    DASH_MONTH_DAY = "(#{MONTH})-(#{DAY})"
-    SLASH_MONTH_DAY = "(#{MONTH})\\/(#{DAY})"
-    MONTH_DAY_PATTERNS = [NUM_MONTH_DAY, DASH_MONTH_DAY, SLASH_MONTH_DAY]
+    def self.month_day_patterns
+      ["(#{MONTH})(#{DAY})", "(#{MONTH})-(#{DAY})", "(#{MONTH})\\/(#{DAY})"]
+    end
 
     def self.single_pattern(pattern)
       "^(#{pattern})$"
@@ -65,68 +72,10 @@ class API
       false
     end
 
-    def self.date(str)
-      list_matcher(str, DATE_PATTERNS)
-    end
-
-    def self.date_range(str)
-      range_matcher(str, DATE_PATTERNS)
-    end
-
-    def self.month(str)
-      list_matcher(str, MONTH_PATTERNS)
-    end
-
-    def self.month_range(str)
-      range_matcher(str, MONTH_PATTERNS)
-    end
-
-    def self.seconds(str)
-      list_matcher(str, SECOND_PATTERNS)
-    end
-
-    def self.second_range(str)
-      range_matcher(str, SECOND_PATTERNS)
-    end
-
-    def self.minutes(str)
-      list_matcher(str, MINUTE_PATTERNS)
-    end
-
-    def self.minute_range(str)
-      range_matcher(str, MINUTE_PATTERNS)
-    end
-
-    def self.hours(str)
-      list_matcher(str, HOUR_PATTERNS)
-    end
-
-    def self.hour_range(str)
-      range_matcher(str, HOUR_PATTERNS)
-    end
-
-    def self.year(str)
-      list_matcher(str, [YEAR])
-    end
-
-    def self.year_range(str)
-      range_matcher(str, [YEAR])
-    end
-
-    def self.just_month(str)
-      list_matcher(str, [MONTH])
-    end
-
-    def self.just_month_range(str)
-      range_matcher(str, [MONTH])
-    end
-
-    def self.month_day(str)
-      list_matcher(str, MONTH_DAY_PATTERNS)
-    end
-
-    def self.month_day_range(str)
-      range_matcher(str, MONTH_DAY_PATTERNS)
+    def self.ordered_range(cls, match, from_index, to_index)
+      return unless match
+      OrderedRange.new(cls.parse(match[from_index]),
+                       cls.parse(match[to_index]))
     end
   end
 end

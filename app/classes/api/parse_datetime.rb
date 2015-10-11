@@ -6,7 +6,7 @@ class API
     declare_parameter(key, :date, args)
     str = get_param(key)
     return args[:default] unless str
-    if Patterns.date(str)
+    if Patterns.list_matcher(str, Patterns.date_patterns)
       return Date.parse(str)
     else
       fail BadParameterValue.new(str, :date)
@@ -19,7 +19,7 @@ class API
     declare_parameter(key, :time, args)
     str = get_param(key)
     return args[:default] unless str
-    if Patterns.seconds(str)
+    if Patterns.list_matcher(str, Patterns.second_patterns)
       return DateTime.parse(str)
     else
       fail BadParameterValue.new(str, :time)

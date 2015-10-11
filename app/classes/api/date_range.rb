@@ -19,13 +19,12 @@ class API
     end
 
     def self.date_range(str)
-      match = Patterns.date_range(str)
-      return unless match
-      OrderedRange.new(Date.parse(match[1]), Date.parse(match[3]))
+      match = Patterns.range_matcher(str, Patterns.date_patterns)
+      Patterns.ordered_range(Date, match, 1, 3)
     end
 
     def self.month_range(str)
-      match = Patterns.month_range(str)
+      match = Patterns.range_matcher(str, Patterns.month_patterns)
       return unless match
       from, to = [match[1], match[3]].sort
       suffix = match[2] + "01"
@@ -34,19 +33,17 @@ class API
     end
 
     def self.year_range(str)
-      match = Patterns.year_range(str)
+      match = Patterns.range_matcher(str, [Patterns.year_pattern])
       return unless match
-      from = match[1]
-      to = match[2]
+      from, to = [match[1], match[2]].sort
       if from > "1500" && to > "1500"
-        from, to = to, from if from > to
         return OrderedRange.new(Date.parse(from + "0101"),
                                 Date.parse(to + "0101").next_year.prev_day)
       end
     end
 
     def self.month_day_range(str)
-      match = Patterns.month_day_range(str)
+      match = Patterns.range_matcher(str, Patterns.month_day_patterns)
       return unless match
       day1 = calc_monthday(match[2].to_i, match[3].to_i)
       day2 = calc_monthday(match[5].to_i, match[6].to_i)
@@ -68,7 +65,7 @@ class API
     end
 
     def self.just_month_range(str)
-      match = Patterns.just_month_range(str)
+      match = Patterns.range_matcher(str, [Patterns.month_pattern])
       return unless match
       from = match[1].to_i
       to = match[2].to_i
@@ -79,31 +76,33 @@ class API
     end
 
     def self.date(str)
-      return Date.parse(str) if Patterns.date(str)
+      return Date.parse(str) if Patterns.list_matcher(str,
+                                                      Patterns.date_patterns)
     end
 
     def self.month(str)
-      match = Patterns.month(str)
+      match = Patterns.list_matcher(str, Patterns.month_patterns)
       return unless match
       start = Date.parse(str + match[2] + "01")
       OrderedRange.new(start, start.next_month.prev_day)
     end
 
     def self.year(str)
-      return unless Patterns.year(str) && str > "1500"
+      return unless Patterns.list_matcher(str, [Patterns.year_pattern]) &&
+                    str > "1500"
       start = Date.parse(str + "0101")
       OrderedRange.new(start, start.next_year.prev_day)
     end
 
     def self.month_day(str)
-      match = Patterns.month_day(str)
+      match = Patterns.list_matcher(str, Patterns.month_day_patterns)
       return unless match
       day = calc_monthday(match[1].to_i, match[3].to_i)
       OrderedRange.new(day, day)
     end
 
     def self.just_month(str)
-      return unless Patterns.just_month(str)
+      return unless Patterns.list_matcher(str, [Patterns.month_pattern])
       val = str.to_i
       fail BadParameterValue.new(str, :date_range) if bad_month(val)
       OrderedRange.new(val, val)

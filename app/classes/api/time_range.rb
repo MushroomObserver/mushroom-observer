@@ -17,10 +17,10 @@ class API
     end
 
     def self.second_range(str)
-      match = Patterns.second_range(str)
-      return unless match
-      OrderedRange.new(DateTime.parse(match[1]),
-                       DateTime.parse(match[3]))
+      Patterns.ordered_range(DateTime,
+                             Patterns.range_matcher(str,
+                                                    Patterns.second_patterns),
+                             1, 3)
     end
 
     FIRST_TIMEUNIT = "01"
@@ -32,7 +32,7 @@ class API
     end
 
     def self.minute_range(str)
-      match = Patterns.minute_range(str)
+      match = Patterns.range_matcher(str, Patterns.minute_patterns)
       return unless match
       from, to = [match[1], match[3]].sort
       OrderedRange.new(padded_datetime(from, [FIRST_TIMEUNIT]),
@@ -40,7 +40,7 @@ class API
     end
 
     def self.hour_range(str)
-      match = Patterns.hour_range(str)
+      match = Patterns.range_matcher(str, Patterns.hour_patterns)
       return unless match
       from, to = [match[1], match[3]].sort
       OrderedRange.new(padded_datetime(from, [FIRST_TIMEUNIT, FIRST_TIMEUNIT]),
@@ -48,17 +48,18 @@ class API
     end
 
     def self.seconds(str)
-      DateTime.parse(str) if Patterns.seconds(str)
+      DateTime.parse(str) if Patterns.list_matcher(str,
+                                                   Patterns.second_patterns)
     end
 
     def self.minutes(str)
-      return unless Patterns.minutes(str)
+      return unless Patterns.list_matcher(str, Patterns.minute_patterns)
       OrderedRange.new(padded_datetime(str, [FIRST_TIMEUNIT]),
                        padded_datetime(str, [LAST_TIMEUNIT]))
     end
 
     def self.hours(str)
-      return unless Patterns.hours(str)
+      return unless Patterns.list_matcher(str, Patterns.hour_patterns)
       OrderedRange.new(padded_datetime(str, [FIRST_TIMEUNIT, FIRST_TIMEUNIT]),
                        padded_datetime(str, [LAST_TIMEUNIT, LAST_TIMEUNIT]))
     end
