@@ -1,7 +1,7 @@
 <%
   @owner_id = owner_id_line(@observation) # must go before show_obs_title
   @title = show_obs_title(@observation)
-  @tabsets = show_observation_tabset
+  @tabsets = show_observation_tabset(@observation, @user)
 
   javascript_include("vote_popup")
 

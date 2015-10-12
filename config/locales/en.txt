@@ -1724,7 +1724,7 @@
   show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer ID
-  view_owner_id_help: When checked, will display observer's choice of name for Observations, if different from consensus and observer is sufficiently confident.
+  view_owner_id_help: When checked, causes Observations to display Observer ID (the observer's choice of name for the taxon), if it is different from consensus and if observer is sufficiently confident of his/her identification.
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus

@@ -395,7 +395,7 @@ class Observation < AbstractModel
     owner_favorite_vote.value >= Vote.owner_id_min_confidence
   end
 
-  # Is owner's identification known, i.e., something other than "Fungi"
+  # Is owners identification known, i.e., something other than "Fungi"
   def owner_id_known?
     owners_only_favorite_name.try(:known?)
   end
@@ -852,7 +852,7 @@ return result if debug
   #
   #  :section: Images
   #
-  ################################################################################
+  ##############################################################################
 
   # Add Image to this Observation, making it the thumbnail if none set already.
   # Saves changes.  Returns Image.
@@ -887,21 +887,31 @@ return result if debug
     return img
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Projects
   #
-  ################################################################################
+  ##############################################################################
+
+  def observer_takes_email_questions_from?(viewer)
+    user.email_general_question && user != viewer
+  end
+
+  ##############################################################################
+  #
+  #  :section: Projects
+  #
+  ##############################################################################
 
   def has_edit_permission?(user=User.current)
     Project.has_edit_permission?(self, user)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Callbacks
   #
-  ################################################################################
+  ##############################################################################
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.

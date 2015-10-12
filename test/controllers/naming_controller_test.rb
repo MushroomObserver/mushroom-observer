@@ -500,7 +500,6 @@ class NamingControllerTest < FunctionalTestCase
     assert_equal('Foo "bar" Author', name.search_name)
   end
 
-
   # Rolf can destroy his naming if Mary deletes her vote on it.
   def test_rolf_destroy_rolfs_naming
     obs  = observations(:coprinus_comatus_obs)

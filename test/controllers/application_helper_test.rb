@@ -21,4 +21,39 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal("/blah\x80",
                  add_args_to_url("/blah\x80", x: "foo\xA0"))
   end
+
+  def test_textile_markup_should_be_escaped
+  	textile = "**Bold**"
+  	escaped = "&lt;div class=&quot;textile&quot;&gt;&lt;p&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/p&gt;&lt;/div&gt;"
+		assert_equal escaped, escape_html(textile.tpl)
+  end
+
+  def test_conditional_content_tags
+    assert_nil(content_tag_if(nil, :p, "Hello world!"))
+
+    # use examples from Rails documentation
+    assert_equal("<p>Hello world!</p>",
+                 content_tag_if(true, :p, "Hello world!"))
+    assert_equal('<div class="strong"><p>Hello world!</p></div>',
+                 content_tag_if(true, :div,
+                                content_tag(:p, "Hello world!"),
+                                            class: "strong"))
+    assert_equal('<div class="strong highlight">Hello world!</div>',
+                 content_tag_if(true, :div, "Hello world!",
+                                class: ["strong", "highlight"]))
+
+    options =  "...options..."
+    assert_equal('<select multiple="multiple">...options...</select>',
+                 content_tag_if(true, "select", options, multiple: true))
+
+    assert_equal('<div class="strong">Hello world!</div>',
+                 content_tag_if(true, :div, class: "strong") do
+                    "Hello world!"
+                 end)
+
+    assert_nil(content_tag_unless(true, :p, "Hello world!"))
+    assert_equal("<p>Hello world!</p>",
+                 content_tag_unless(false, :p, "Hello world!"))
+
+  end
 end

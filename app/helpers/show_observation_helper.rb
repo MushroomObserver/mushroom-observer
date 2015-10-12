@@ -1,4 +1,5 @@
 # encoding: utf-8
+# helpers for show Observation view
 module ShowObservationHelper
   def show_obs_title(obs)
     @owner_id ? show_obs_title_site_id(obs) : show_obs_title_num_after_name(obs)
@@ -8,7 +9,7 @@ module ShowObservationHelper
   def show_obs_title_num_after_name(obs)
     capture do
       concat(:show_observation_header.t)
-      concat(" #{obs.id || '?'}: ")
+      concat(" #{obs.id || "?"}: ")
       concat(obs.name.format_name.t)
     end
   end
@@ -17,7 +18,7 @@ module ShowObservationHelper
   def show_obs_title_site_id(obs)
     capture do
       concat(:show_observation_header.t)
-      concat(" #{obs.id || '?'}: ")
+      concat(" #{obs.id || "?"}: ")
       concat(obs.name.format_name.t)
     end
   end

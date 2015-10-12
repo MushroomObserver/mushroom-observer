@@ -931,9 +931,10 @@ class User < AbstractModel
   # Does user have any unshown naming notifications?
   # (I'm thoroughly confused about what role the observation plays in this
   # complicated set of pages. -JPH)
+  # 2015-10-12 - JDC as currently written, observation appears to be lint
+  # Perhaps we are trying to ask if user has unshown notifications for this obs
   def has_unshown_naming_notifications?(observation=nil)
     result = false
-    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
     for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
                                user_id: self.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])

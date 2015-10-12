@@ -125,10 +125,23 @@ class ObservationTest < UnitTestCase
     assert(observations(:detailed_unknown).specimens.length > 0)
   end
 
+  def test_observer_takes_general_email_questions_from_viewer
+    user_a = users(:rolf) # rolf takes general email questions
+    user_a_obs = observations(:coprinus_comatus_obs)
+    user_b = users(:dick)
+    user_b_obs = observations(:bolete_observation)
+
+    assert(user_a_obs.observer_takes_email_questions_from?(user_b),
+           "User with email_general_question should take questions from others")
+    refute(user_a_obs.observer_takes_email_questions_from?(user_a),
+           "User should not take questions from self")
+    refute(user_b_obs.observer_takes_email_questions_from?(user_a),
+           "User with email_general_question off should not take questions")
+  end
+
   # --------------------------------------
   #  Test email notification heuristics.
   # --------------------------------------
-
   def test_email_notification_1
     Notification.all.map(&:destroy)
     QueuedEmail.queue_emails(true)
