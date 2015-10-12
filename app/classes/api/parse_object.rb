@@ -29,4 +29,26 @@ class API
     end
     fail BadLimitedParameterValue.new(str, limit.map(&:type_tag))
   end
+
+  def object_by_id(key, param_name, cls, args, edit)
+    declare_parameter(key, param_name, args)
+    str = get_param(key)
+    return args[:default] unless str
+    val = try_parsing_id(str, cls)
+    fail BadParameterValue.new(str, param_name) unless val
+    check_edit_permission!(val, args) if edit
+    val
+  end
+
+  def parse_observation(key, args = {})
+    object_by_id(key, :observation, Observation, args, true)
+  end
+
+  def parse_image(key, args = {})
+    object_by_id(key, :image, Image, args, true)
+  end
+
+  def parse_license(key, args = {})
+    object_by_id(key, :license, License, args, false)
+  end
 end
