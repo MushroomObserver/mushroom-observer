@@ -2,30 +2,25 @@
 
 # Manages the Mushroom Observer Application Programming Interface
 class API
-  def parse_date(key, args = {})
-    declare_parameter(key, :date, args)
+  def class_parse(key, method, cls, patterns, args)
+    declare_parameter(key, method, args)
     str = get_param(key)
     return args[:default] unless str
-    if Patterns.list_matcher(str, Patterns.date_patterns)
-      return Date.parse(str)
+    if Patterns.list_matcher(str, patterns)
+      return cls.parse(str)
     else
-      fail BadParameterValue.new(str, :date)
+      fail BadParameterValue.new(str, method)
     end
   rescue ArgumentError
-    raise BadParameterValue.new(str, :date)
+    raise BadParameterValue.new(str, method)
+  end
+
+  def parse_date(key, args = {})
+    class_parse(key, :date, Date, Patterns.date_patterns, args)
   end
 
   def parse_time(key, args = {})
-    declare_parameter(key, :time, args)
-    str = get_param(key)
-    return args[:default] unless str
-    if Patterns.list_matcher(str, Patterns.second_patterns)
-      return DateTime.parse(str)
-    else
-      fail BadParameterValue.new(str, :time)
-    end
-  rescue ArgumentError
-    raise BadParameterValue.new(str, :time)
+    class_parse(key, :time, DateTime, Patterns.second_patterns, args)
   end
 
   def parse_date_range(key, args = {})
