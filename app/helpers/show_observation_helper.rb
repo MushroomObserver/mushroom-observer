@@ -20,6 +20,7 @@ module ShowObservationHelper
       concat(:show_observation_header.t)
       concat(" #{obs.id || "?"}: ")
       concat(obs.name.format_name.t)
+      concat(" (#{:show_observation_site_id.t})")
     end
   end
 
