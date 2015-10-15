@@ -41,15 +41,12 @@ module ApplicationHelper
     "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
   end
 
-  # Wrap content in tag if condition is true, else nil
-  # 1st arg is condition, which wraps content_tag
   def content_tag_if(condition, name, content_or_options_with_block = nil,
                      options = nil, escape = true, &block)
     return unless condition
     content_tag(name, content_or_options_with_block, options, escape, &block)
   end
 
-  # Wrap content in tag unless condition is true, else nil
   def content_tag_unless(condition, name, content_or_options_with_block = nil,
                          options = nil, escape = true, &block)
     content_tag_if(!condition, name, content_or_options_with_block,
