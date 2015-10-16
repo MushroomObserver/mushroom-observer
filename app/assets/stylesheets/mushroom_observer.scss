@@ -450,6 +450,16 @@ a:hover {
 // interest eyes
 // --------------------------------------------------
 
+.interest_big {
+    height: 50px;
+    width: 50px;
+}
+
+.interest_small {
+    height: 23px;
+    width: 23px;
+}
+
 @media (min-width: $screen-sm-min) {
   .interest-eyes {
     position: absolute;
