@@ -9,29 +9,37 @@ module TabsHelper
   # assemble HTML for "tabset" for show_observation
   # actually a list of links and the interest icons
   def show_observation_tabset(obs, user)
-    tabs = []
+    tabs = [show_obs_google_links_for(obs.name),
+            general_questions_link(obs, user),
+            notifications_link(obs, user),
+            manage_lists_link(obs, user),
+            map_link,
+            obs_change_links(obs),
+            draw_interest_icons(obs)].reject(&:empty?)
 
-    tabs << google_images_and_dist_map_links(obs)
-    tabs << general_questions_link(obs, user)
-    tabs << notifications_link(obs, user)
-    tabs << manage_lists_link(obs, user)
-    tabs << map_link
-    tabs << obs_change_links(obs)
-
-    tabs << draw_interest_icons(obs)
-
-    { pager_for: obs, right: draw_tab_set(tabs.reject(&:empty?)) }
+    { pager_for: obs, right: draw_tab_set(tabs) }
   end
 
-  def google_images_and_dist_map_links(obs)
-    return unless obs.try(:name).known?
+  def show_obs_google_links_for(obs_name)
+    return unless obs_name.known?
     capture do
-      concat link_to(:google_images.t,
-                     format("http://images.google.com/images?q=%s",
-                            obs.name.real_text_name)) + safe_br
-      concat link_with_query(:show_name_distribution_map.t,
-                             controller: :name, action: :map, id: obs.name.id)
+      concat google_images_for(obs_name)
+      concat safe_br
+      concat google_distribution_map_for(obs_name)
     end
+  end
+
+  def google_images_for(obs_name)
+    link_to(:google_images.t, google_images_link(obs_name))
+  end
+
+  def google_images_link(obs_name)
+    format("http://images.google.com/images?q=%s", obs_name.real_text_name)
+  end
+
+  def google_distribution_map_for(obs_name)
+    link_with_query(:show_name_distribution_map.t,
+                    controller: :name, action: :map, id: obs_name.id)
   end
 
   def general_questions_link(obs, user)
