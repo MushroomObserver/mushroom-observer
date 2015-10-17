@@ -87,18 +87,6 @@ class ObservationTest < UnitTestCase
     assert(!observations(:coprinus_comatus_obs).name_been_proposed?(names(:conocybe_filaris)))
   end
 
-  def test_vote_counts
-    obs = observations(:owner_only_favorite_eq_consensus)
-    assert_equal(0, obs.users_votes(users(:rolf)).count)
-    assert_equal(1, obs.users_votes(users(:dick)).count)
-    assert_equal(1, obs.owner_favorite_votes.count)
-
-    obs = observations(:owner_multiple_favorites)
-    assert_equal(0, obs.users_votes(users(:rolf)).count)
-    assert_equal(2, obs.users_votes(users(:dick)).count)
-    assert_equal(2, obs.owner_favorite_votes.count)
-  end
-
   def test_owner_id
     obs = observations(:owner_only_favorite_eq_consensus)
     assert_equal(obs.name, obs.owners_only_favorite_name)
@@ -125,18 +113,24 @@ class ObservationTest < UnitTestCase
     assert(observations(:detailed_unknown).specimens.length > 0)
   end
 
-  def test_observer_takes_general_email_questions_from_viewer
-    user_a = users(:rolf) # rolf takes general email questions
-    user_a_obs = observations(:coprinus_comatus_obs)
-    user_b = users(:dick)
-    user_b_obs = observations(:bolete_observation)
-
-    assert(user_a_obs.observer_takes_email_questions_from?(user_b),
+  def test_observer_accepts_general_email_questions
+    obs_by_user_taking_questions = observations(:coprinus_comatus_obs)
+    assert(obs_by_user_taking_questions.
+             observer_takes_email_questions_from?(users(:dick)),
            "User with email_general_question should take questions from others")
-    refute(user_a_obs.observer_takes_email_questions_from?(user_a),
-           "User should not take questions from self")
-    refute(user_b_obs.observer_takes_email_questions_from?(user_a),
+  end
+
+  def test_observer_refuses_general_email_questions
+    obs_by_user_refusing_questions = observations(:bolete_observation)
+    refute(obs_by_user_refusing_questions.
+             observer_takes_email_questions_from?(users(:rolf)),
            "User with email_general_question off should not take questions")
+  end
+
+  def test_observer_general_email_questions_from_self
+    obs = observations(:coprinus_comatus_obs)
+    refute(obs.observer_takes_email_questions_from?(obs.user),
+           "User with email_general_question should take questions from others")
   end
 
   # --------------------------------------
