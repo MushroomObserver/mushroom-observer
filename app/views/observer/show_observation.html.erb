@@ -26,8 +26,7 @@
       </div>
     </div>
     <% if show_lists %>
-    <%= render(partial: "show_lists",
-               locals: {observation: @observation}) %>
+      <%= render(partial: "show_lists", locals: {observation: @observation}) %>
     <% end %>
     <% if show_map %>
       <div class="hidden-xs">
@@ -44,4 +43,3 @@
   </div>
 </div>
 <%= show_object_footer(@observation) %>
-
