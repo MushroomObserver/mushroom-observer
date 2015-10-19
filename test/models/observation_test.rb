@@ -114,21 +114,19 @@ class ObservationTest < UnitTestCase
   end
 
   def test_observer_accepts_general_email_questions
-    obs_by_user_taking_questions = observations(:coprinus_comatus_obs)
-    assert(obs_by_user_taking_questions.
-             observer_takes_email_questions_from?(users(:dick)),
+    obs = observations(:owner_accepts_general_questions)
+    assert(obs.observer_takes_email_questions_from?(users(:dick)),
            "User with email_general_question should take questions from others")
   end
 
   def test_observer_refuses_general_email_questions
-    obs_by_user_refusing_questions = observations(:bolete_observation)
-    refute(obs_by_user_refusing_questions.
-             observer_takes_email_questions_from?(users(:rolf)),
+    obs = observations(:owner_refuses_general_questions)
+    refute(obs.observer_takes_email_questions_from?(users(:rolf)),
            "User with email_general_question off should not take questions")
   end
 
   def test_observer_general_email_questions_from_self
-    obs = observations(:coprinus_comatus_obs)
+    obs = observations(:owner_accepts_general_questions)
     refute(obs.observer_takes_email_questions_from?(obs.user),
            "User with email_general_question should take questions from others")
   end
