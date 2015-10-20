@@ -8,6 +8,7 @@ module PaginationHelper
   #   <% end %>
   #
   def paginate_block(pages, args={}, &block) ##TODO: Depreciate / REMOVE
+    puts args
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s

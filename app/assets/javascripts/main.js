@@ -31,6 +31,8 @@ jQuery(document).ready(function () {
         setCookie('hideBanner', banner_md5, 30);
     });
 
+
+
     function setCookie(cname, cvalue, exdays) {
         var d = new Date();
         d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
@@ -44,4 +46,10 @@ jQuery(document).ready(function () {
         // If file field immediately followed by span, show selection there.
         if (next.is('span')) next.html(val);
     });
+
+
+
+    //Infinite scroll on main page
+
+
 });

@@ -6,12 +6,14 @@
     @tabsets = { right: draw_tab_set(tabs) }
   end
 
-  @full_width_tab_set = render(partial: "rss_log_tabset")
+  @full_width_tab_set = render(partial: "observer/rss_log_tabset")
   flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= paginate_block(@pages) do %>
+  <div id="results_block">
   <%= render(partial: "shared/matrix_box", layout: "shared/matrix_table", collection: @objects, as: :object) %>
+  </div>
   <div style="clear:left"></div>
 <% end %>
 

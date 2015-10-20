@@ -56,6 +56,45 @@ class AjaxController < ApplicationController
     render(:text => 'test')
   end
 
+
+  #Used by infite scroll
+  def index_rss_log
+    User.current = get_session_user
+    if !params[:type].blank?
+      types = params[:type].split & (["all"] + RssLog.all_types)
+      query = find_or_create_query(:RssLog, type: types.join(" "))
+    else
+      query = find_query(:RssLog)
+      query ||= create_query(:RssLog, :all,
+                             type: @user ? @user.default_rss_type : "all")
+    end
+
+    show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
+  end
+
+  #used by infinite scroll
+  def show_selected_rss_logs(query, args = {})
+    #store_query_in_session(query)
+    set_query_params(query)
+    args = {
+        matrix: true,
+        include: {
+            location: :user,
+            name: :user,
+            observation: [:location, :name, { thumb_image: :image_votes }, :user],
+            project: :user,
+            species_list: [:location, :user]
+        }
+    }.merge(args)
+
+    @user = get_session_user
+    @types = query.params[:type].to_s.split.sort
+    @links = []
+
+    show_index_of_objects(query, args)
+    render(template: "/observer/list_rss_logs", layout: nil)
+  end
+
   # Auto-complete string as user types. Renders list of strings in plain text.
   # First line is the actual (minimal) string used to match results.  If it
   # had to truncate the list of results, the last string is "...".

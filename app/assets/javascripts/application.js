@@ -1,9 +1,11 @@
 //= require jquery
 //= require jquery_extensions
 //= require bootstrap
+//= require rx.lite
 //= require jstz
 //= require autocomplete
 //= require box_resizer
+//= require infinite_scroll
 //= require confirm
 //= require csrf_token
 //= require image_vote
