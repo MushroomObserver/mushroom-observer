@@ -41,6 +41,18 @@ module ApplicationHelper
     "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
   end
 
+  def content_tag_if(condition, name, content_or_options_with_block = nil,
+                     options = nil, escape = true, &block)
+    return unless condition
+    content_tag(name, content_or_options_with_block, options, escape, &block)
+  end
+
+  def content_tag_unless(condition, name, content_or_options_with_block = nil,
+                         options = nil, escape = true, &block)
+    content_tag_if(!condition, name, content_or_options_with_block,
+                   options, escape, &block)
+  end
+
   # Wrap an html object in '<span title="blah">' tag.  This has the effect of
   # giving it context help (mouse-over popup) in most modern browsers.
   #

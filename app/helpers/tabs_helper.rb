@@ -1,107 +1,96 @@
 # encoding: utf-8
+# html used in tabsets
 module TabsHelper
-
   # Short-hand to render shared tab_set partial for a given set of links.
   def draw_tab_set(links)
-    render(partial: "/shared/tab_set", locals: {links: links})
+    render(partial: "/shared/tab_set", locals: { links: links })
   end
 
-  # Draw the cutesy eye icons in the upper right side of screen.  It does it
-  # by creating a "right" tab set.  Thus this must be called in the header of
-  # the view and must not actually be rendered.  Typical usage would be:
-  #
-  #   # At top of view:
-  #   <%
-  #     # Specify the page's title.
-  #     @title = "Page Title"
-  #
-  #     # Define set of linked text tabs for top-left.
-  #     new_tab_set do
-  #       add_tab("Tab Label One", link: args, ...)
-  #       add_tab("Tab Label Two", link: args, ...)
-  #       ...
-  #     end
-  #
-  #     # Draw interest icons in the top-right.
-  #     draw_interest_icons(@object)
-  #   %>
-  #
-  # This will cause the set of three icons to be rendered floating in the
-  # top-right corner of the content portion of the page.
-  #
-  def draw_interest_icons(object)
-    if @user
-      type = object.type_tag
+  # assemble HTML for "tabset" for show_observation
+  # actually a list of links and the interest icons
+  def show_observation_tabset(obs, user)
+    tabs = [show_obs_google_links_for(obs.name),
+            general_questions_link(obs, user),
+            notifications_link(obs, user),
+            manage_lists_link(obs, user),
+            map_link,
+            obs_change_links(obs),
+            draw_interest_icons(obs)].reject(&:empty?)
 
-      # Create link to change interest state.
-      def interest_link(label, object, state) # :nodoc:
-        link_with_query(label,
-          controller: :interest,
-          action: :set_interest,
-          id: object.id,
-          type: object.class.name,
-          state: state
-        )
-      end
+    { pager_for: obs, right: draw_tab_set(tabs) }
+  end
 
-      # Create large icon image.
-      def interest_icon_big(type, alt) # :nodoc:
-        image_tag("#{type}2.png",
-          alt: alt,
-          width: "50px",
-          height: "50px",
-          class: "interest_big",
-          title: alt
-        )
-      end
-
-      # Create small icon image.
-      def interest_icon_small(type, alt) # :nodoc:
-        image_tag("#{type}3.png",
-          alt: alt,
-          width: "23px",
-          height: "23px",
-          class: "interest_small",
-          title: alt
-        )
-      end
-
-      def interest_tab(img1, img2, img3)
-        content_tag(:div, img1 + safe_br + img2 + img3, class: "interest-eyes")
-        # content_tag(:div, img1 + safe_br + img2 + img3, style: "position: absolute; top: 0;")
-      end
-
-      case @user.interest_in(object)
-      when :watching
-        alt1 = :interest_watching.l(object: type.l)
-        alt2 = :interest_default_help.l(object: type.l)
-        alt3 = :interest_ignore_help.l(object: type.l)
-        img1 = interest_icon_big("watch", alt1)
-        img2 = interest_icon_small("halfopen", alt2)
-        img3 = interest_icon_small("ignore", alt3)
-        img2 = interest_link(img2, object, 0)
-        img3 = interest_link(img3, object, -1)
-
-      when :ignoring
-        alt1 = :interest_ignoring.l(object: type.l)
-        alt2 = :interest_watch_help.l(object: type.l)
-        alt3 = :interest_default_help.l(object: type.l)
-        img1 = interest_icon_big("ignore", alt1)
-        img2 = interest_icon_small("watch", alt2)
-        img3 = interest_icon_small("halfopen", alt3)
-        img2 = interest_link(img2, object, 1)
-        img3 = interest_link(img3, object, 0)
-
-      else
-        alt1 = :interest_watch_help.l(object: type.l)
-        alt2 = :interest_ignore_help.l(object: type.l)
-        img1 = interest_icon_small("watch", alt1)
-        img2 = interest_icon_small("ignore", alt2)
-        img1 = interest_link(img1, object, 1)
-        img2 = interest_link(img2, object, -1)
-        img3 = ""
-      end
-      interest_tab(img1, img2, img3)
+  def show_obs_google_links_for(obs_name)
+    return unless obs_name.known?
+    capture do
+      concat google_images_for(obs_name)
+      concat safe_br
+      concat google_distribution_map_for(obs_name)
     end
+  end
+
+  def google_images_for(obs_name)
+    link_to(:google_images.t, google_images_link(obs_name))
+  end
+
+  def google_images_link(obs_name)
+    format("http://images.google.com/images?q=%s", obs_name.real_text_name)
+  end
+
+  def google_distribution_map_for(obs_name)
+    link_with_query(:show_name_distribution_map.t,
+                    controller: :name, action: :map, id: obs_name.id)
+  end
+
+  def general_questions_link(obs, user)
+    return unless obs.observer_takes_email_questions_from?(user)
+    link_with_query(:show_observation_send_question.t,
+                    controller: :observer, action: :ask_observation_question,
+                    id: obs.id)
+  end
+
+  def notifications_link(obs, user)
+    return unless user && user.has_unshown_naming_notifications?(obs)
+    link_with_query(:show_observation_view_notifications.t,
+                    controller: :observation, action: :show_notifications,
+                    id: obs.id)
+  end
+
+  def manage_lists_link(obs, user)
+    return unless user && user.species_lists.any?
+    link_with_query(:show_observation_manage_species_lists.t,
+                    controller: :species_list, action: :manage_species_lists,
+                    id: obs.id)
+  end
+
+  def map_link
+    return unless @mappable
+    link_with_query(:MAP.t, controller: :location, action: :map_locations)
+  end
+
+  def obs_change_links(obs)
+    return unless check_permission(obs)
+    capture do
+      concat link_with_query(
+        :show_observation_edit_observation.t,
+        controller: :observer, action: :edit_observation, id: obs.id) + safe_br
+      concat link_with_query(
+        :DESTROY.t,
+        { controller: :observer, action: :destroy_observation, id: obs.id },
+        class: "text-danger", data: { confirm: :are_you_sure.l })
+    end
+  end
+
+  def prefs_tabset
+    tabs = [link_to(:bulk_license_link.t,
+                    controller: :image, action: :license_updater),
+            link_to(:prefs_change_image_vote_anonymity.t,
+                    controller: :image, action: :bulk_vote_anonymity_updater),
+            link_to(:profile_link.t, action: :profile),
+            link_to(:show_user_your_notifications.t,
+                    controller: :interest, action: :list_interests),
+            link_to(:account_api_keys_link.t, action: :api_keys)]
+
+    { right: draw_tab_set(tabs) }
   end
 end

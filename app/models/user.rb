@@ -438,6 +438,11 @@ class User < AbstractModel
     @@user = x
   end
 
+  # Did current user opt to view owner_id's?
+  def self.view_owner_id_on?
+    try(:current).try(:view_owner_id)
+  end
+
   # Clear cached data structures when reload.
   def reload
     @projects_admin = nil
@@ -933,7 +938,6 @@ class User < AbstractModel
   # complicated set of pages. -JPH)
   def has_unshown_naming_notifications?(observation=nil)
     result = false
-    # for q in QueuedEmail.find_all_by_flavor_and_to_user_id("QueuedEmail::NameTracking", self.id)
     for q in QueuedEmail.where(flavor: "QueuedEmail::NameTracking",
                                user_id: self.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])

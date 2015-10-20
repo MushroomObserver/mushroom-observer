@@ -460,6 +460,10 @@ class Name < AbstractModel
     self.text_name == 'Fungi'
   end
 
+  def known?
+    !unknown?
+  end
+
   def display_name
     str = self[:display_name]
     if User.current and

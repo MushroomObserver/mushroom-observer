@@ -1,7 +1,6 @@
 # encoding: utf-8
-
-require 'test_helper'
-
+require "test_helper"
+# test Observation model
 class ObservationTest < UnitTestCase
 
   def create_new_objects
@@ -88,6 +87,25 @@ class ObservationTest < UnitTestCase
     assert(!observations(:coprinus_comatus_obs).name_been_proposed?(names(:conocybe_filaris)))
   end
 
+  def test_owner_id
+    obs = observations(:owner_only_favorite_eq_consensus)
+    assert_equal(obs.name, obs.owners_only_favorite_name)
+    refute(obs.showable_owner_id?)
+
+    obs = observations(:owner_only_favorite_ne_consensus)
+    refute_nil(obs.owners_only_favorite_name)
+    refute_equal(obs.name, obs.owners_only_favorite_name)
+    assert(obs.showable_owner_id?)
+
+    obs = observations(:owner_multiple_favorites)
+    assert_nil(obs.owners_only_favorite_name)
+    refute(obs.showable_owner_id?)
+
+    obs = observations(:owner_only_favorite_eq_fungi)
+    refute(obs.owners_only_favorite_name.known?)
+    refute(obs.showable_owner_id?)
+  end
+
   def test_specimens
     assert(!observations(:strobilurus_diminutivus_obs).specimen)
     assert_equal(0, observations(:strobilurus_diminutivus_obs).specimens.length)
@@ -95,10 +113,27 @@ class ObservationTest < UnitTestCase
     assert(observations(:detailed_unknown).specimens.length > 0)
   end
 
+  def test_observer_accepts_general_email_questions
+    obs = observations(:owner_accepts_general_questions)
+    assert(obs.observer_takes_email_questions_from?(users(:dick)),
+           "User with email_general_question should take questions from others")
+  end
+
+  def test_observer_refuses_general_email_questions
+    obs = observations(:owner_refuses_general_questions)
+    refute(obs.observer_takes_email_questions_from?(users(:rolf)),
+           "User with email_general_question off should not take questions")
+  end
+
+  def test_observer_general_email_questions_from_self
+    obs = observations(:owner_accepts_general_questions)
+    refute(obs.observer_takes_email_questions_from?(obs.user),
+           "User with email_general_question should take questions from others")
+  end
+
   # --------------------------------------
   #  Test email notification heuristics.
   # --------------------------------------
-
   def test_email_notification_1
     Notification.all.map(&:destroy)
     QueuedEmail.queue_emails(true)

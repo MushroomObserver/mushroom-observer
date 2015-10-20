@@ -337,20 +337,54 @@ class Observation < AbstractModel
     lookup_naming(naming).is_users_favorite?(user)
   end
 
-  # Get a list of the owner's Votes for this Observation.
   def owners_votes
     users_votes(user)
   end
 
-  # Get a list of this User's Votes for this Observation.
   def users_votes(user)
     result = []
-    for n in namings
+    namings.each do |n|
       if v = n.users_vote(user)
         result << v
       end
     end
-    return result
+    result
+  end
+
+  def owner_favorite_votes
+    votes.where(user_id: user_id, favorite: true)
+  end
+
+  def owner_favorite_vote
+    owner_favorite_votes.first
+  end
+
+  def owners_only_favorite_name
+    favs = owner_favorite_votes
+    favs[0].naming.name if favs.count == 1
+  end
+
+  # show Observer ID? (observer's identification of Observation)
+  # (in code, Observer ID is "owner_id")
+  def show_owner_id?
+    User.view_owner_id_on? && showable_owner_id?
+  end
+
+  def showable_owner_id?
+    owner_id_differs? && owner_sure_enough? && owner_id_known?
+  end
+
+  def owner_id_differs?
+    name != self.try(:owners_only_favorite_name)
+  end
+
+  def owner_sure_enough?
+    return unless owner_favorite_vote
+    owner_favorite_vote.value >= Vote.owner_id_min_confidence
+  end
+
+  def owner_id_known?
+    owners_only_favorite_name.try(:known?)
   end
 
   # Convert cached Vote score to percentage.
@@ -361,7 +395,7 @@ class Observation < AbstractModel
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
-  def change_vote(naming, value, user=User.current)
+  def change_vote(naming, value, user = User.current)
     result = false
     naming = lookup_naming(naming)
     vote  = naming.users_vote(user)
@@ -801,11 +835,11 @@ return result if debug
     return status
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Images
   #
-  ################################################################################
+  ##############################################################################
 
   # Add Image to this Observation, making it the thumbnail if none set already.
   # Saves changes.  Returns Image.
@@ -840,21 +874,31 @@ return result if debug
     return img
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Projects
   #
-  ################################################################################
+  ##############################################################################
+
+  def observer_takes_email_questions_from?(viewer)
+    user.email_general_question && user != viewer
+  end
+
+  ##############################################################################
+  #
+  #  :section: Projects
+  #
+  ##############################################################################
 
   def has_edit_permission?(user=User.current)
     Project.has_edit_permission?(self, user)
   end
 
-  ################################################################################
+  ##############################################################################
   #
   #  :section: Callbacks
   #
-  ################################################################################
+  ##############################################################################
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.

@@ -1486,7 +1486,8 @@
   prefs_email: Email address
   prefs_password_new: New password
   prefs_password_confirm: Confirm new password
-  prefs_appearance: Appearance
+
+  prefs_appearance: Appearance Settings
   prefs_theme: Preferred theme
   prefs_locale: Language
   prefs_location_format: Location Format
@@ -1498,7 +1499,7 @@
   prefs_thumbnail_size: Thumbnail size
   prefs_thumbnail_small: "[:image_show_small]"
   prefs_thumbnail_large: "[:image_show_large]"
-  prefs_thumbnail_maps: Show thumbnail map on observation page?
+  prefs_thumbnail_maps: View thumbnail map on Observation page?
   prefs_image_size: Image size
   prefs_image_size_help: Size shown when you click on an image.
   prefs_image_small: "[:image_show_small] (320 x 320)"
@@ -1506,13 +1507,16 @@
   prefs_image_large: "[:image_show_large] (960 x 960)"
   prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
   prefs_image_full_size: "[:image_show_full_size]"
+  prefs_layout_count: List page items
   prefs_layout_title: List page layout
   prefs_rows_by: rows ×
   prefs_columns: columns
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_privacy: Privacy settings
+  prefs_view_owner_id: View Observer identification of Observations?
+
+  prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
   prefs_votes_anonymous_no: Always public
   prefs_votes_anonymous_yes: Always anonymous
@@ -1526,6 +1530,7 @@
   prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
   prefs_change_image_vote_anonymity: Change Image Vote Anonymity
   prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
+
   prefs_email_please_notify: Please notify me when...
   prefs_email_general: General Email
   prefs_email_general_commercial: someone is interested in using an image of mine for commercial purposes.
@@ -1717,6 +1722,9 @@
   # observer/show_observation
   show_observation_title: "[:OBSERVATION]: [name]"
   show_observation_header: "[:OBSERVATION]"
+  show_observation_site_id: Site ID
+  show_observation_owner_id: Observer ID
+  view_owner_id_help: When checked, causes Observations to display Observer ID (the observer's choice of name for the taxon), if it is different from consensus and if observer is sufficiently confident of his/her identification.
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus

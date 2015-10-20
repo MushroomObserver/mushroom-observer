@@ -441,10 +441,24 @@ a:hover {
     padding-bottom: 5em;
 }
 
+#title-caption, .owner-id {
+    font-size: 170%;
+    margin-top: 5px;
+}
 
 //
 // interest eyes
 // --------------------------------------------------
+
+.interest_big {
+    height: 50px;
+    width: 50px;
+}
+
+.interest_small {
+    height: 23px;
+    width: 23px;
+}
 
 @media (min-width: $screen-sm-min) {
   .interest-eyes {
@@ -1354,6 +1368,10 @@ table.table-namings {
     vertical-align: bottom !important;
 }
 
+.align-right {
+    text-align: right;
+}
+
 .bold {
     font-weight: 800;
 }
@@ -1368,6 +1386,10 @@ table.table-namings {
 
 .push-down {
     margin-top: 1em;
+}
+
+.push-below-buttons {
+    margin-top: 23px;
 }
 
 .push-up {

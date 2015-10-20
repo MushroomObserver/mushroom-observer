@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150601014738) do
+ActiveRecord::Schema.define(version: 20151007003058) do
 
   create_table "api_keys", force: true do |t|
     t.datetime "created_at"
@@ -639,6 +639,7 @@ ActiveRecord::Schema.define(version: 20150601014738) do
     t.text     "notes"
     t.text     "mailing_address"
     t.integer  "layout_count"
+    t.boolean  "view_owner_id",                           default: false, null: false
   end
 
   create_table "votes", force: true do |t|

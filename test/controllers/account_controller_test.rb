@@ -253,14 +253,24 @@ class AccountControllerTest < FunctionalTestCase
     assert(!@request.session[:user_id])
   end
 
+  def test_preferences_form
+    # First make sure it can serve the form
+    requires_login(:prefs)
+
+    # check existence of miscellaneous parts of form
+    Language.all.each do |lang|
+      assert_select("option[value=#{lang.locale}]", { count: 1 },
+                    "#{lang.locale} language option missing")
+    end
+    assert_select("input[id = 'user_thumbnail_maps']", { count: 1 },
+                  "Missing input: :prefs_thumbnail_maps.t")
+    assert_select("input[id = 'user_view_owner_id']", { count: 1 },
+                  "Missing input: #{:prefs_view_owner_id.t}")
+  end
+
   def test_edit_prefs
     # First make sure it can serve the form to start with.
     requires_login(:prefs)
-
-    # Make sure "beta" languages are present.
-    for lang in Language.all
-      assert_select("option[value=#{lang.locale}]")
-    end
 
     # Now change everything.
     params = {
@@ -296,6 +306,7 @@ class AccountControllerTest < FunctionalTestCase
         theme:                        "Agaricus",
         thumbnail_maps:               "",
         thumbnail_size:               :small,
+        view_owner_id:                "",
         votes_anonymous:              :yes
       }
     }
@@ -335,6 +346,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("Agaricus", user.theme)
     assert_equal(false, user.thumbnail_maps)
     assert_equal(:small, user.thumbnail_size)
+    assert_equal(false, user.view_owner_id)
     assert_equal(:yes, user.votes_anonymous)
   end
 
