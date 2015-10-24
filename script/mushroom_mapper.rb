@@ -64,7 +64,7 @@ for id, text_name, rank, deprecated, synonym_id, correct_spelling_id in name_dat
   real_id = correct_spelling_id if correct_spelling_id
   real_id = synonyms[synonym_id] if synonym_id
   aliases[id] = real_id if real_id
-  names[id] = [ text_name, rank, deprecated ]
+  names[id] = [text_name, rank, deprecated]
   if ids[text_name]
     id2 = ids[text_name]
     text_name2, rank2, deprecated2 = names[id2]
@@ -102,14 +102,14 @@ for id, genus, classification in Name.connection.select_rows %(
     AND !deprecated
     AND correct_spelling_id IS NULL
 ) do
-  kingdom = classification.to_s.match(/Kingdom: _([^_]+)_/) ? $1 : nil
-  klass   = classification.to_s.match(/Class: _([^_]+)_/)   ? $1 : nil
-  order   = classification.to_s.match(/Order: _([^_]+)_/)   ? $1 : nil
-  family  = classification.to_s.match(/Family: _([^_]+)_/)  ? $1 : nil
+  kingdom = classification.to_s.match(/Kingdom: _([^_]+)_/) ? Regexp.last_match(1) : nil
+  klass   = classification.to_s.match(/Class: _([^_]+)_/) ? Regexp.last_match(1) : nil
+  order   = classification.to_s.match(/Order: _([^_]+)_/) ? Regexp.last_match(1) : nil
+  family  = classification.to_s.match(/Family: _([^_]+)_/) ? Regexp.last_match(1) : nil
   num_obs = observations[genus].to_i
   list = classifications[genus] ||= []
   list << [id, kingdom, klass, order, family, genus, num_obs]
-  if ["Amoebozoa", "Fungi", "Protozoa"].include?(kingdom)
+  if %w(Amoebozoa Fungi Protozoa).include?(kingdom)
     family2 = family || "Unknown Family in #{order || klass || kingdom}"
     hash = genus_to_family[genus] ||= {}
     hash[family2] = hash[family2].to_i + num_obs
@@ -124,7 +124,7 @@ for genus in genus_to_family.keys.sort do
   if hash.keys.length > 1
     $stderr.puts("Multiple families for #{genus}: #{hash.inspect}")
   end
-  family = hash.keys.sort_by {|k| -hash[k]}.first
+  family = hash.keys.sort_by { |k| -hash[k] }.first
   list_of_genera = family_to_genus[family] ||= []
   list_of_genera << genus
 end
@@ -134,7 +134,7 @@ genus_to_species = {}
 for species in Name.connection.select_values %(
   SELECT text_name as n
   FROM names
-  WHERE rank = #{ Name.ranks[:Species] }
+  WHERE rank = #{Name.ranks[:Species]}
     AND !deprecated
     AND correct_spelling_id IS NULL
   ORDER BY sort_name
@@ -149,24 +149,24 @@ data = {}
 data["version"] = 1
 data["families"] = []
 for family in family_to_genus.keys.sort do
-  next if !observations[family]
+  next unless observations[family]
   family2 = family.sub(/^Unknown Family in /, "")
-  $stderr.puts("Missing family: #{family2}.") if !ids[family2]
+  $stderr.puts("Missing family: #{family2}.") unless ids[family2]
   family_data = {}
   family_data["name"] = family
   family_data["id"]   = ids[family2]
   family_data["genera"] = []
   for genus in family_to_genus[family].sort do
-    next if !observations[genus]
-    $stderr.puts("Missing genus: #{genus}.") if !ids[genus]
+    next unless observations[genus]
+    $stderr.puts("Missing genus: #{genus}.") unless ids[genus]
     genus_data = {}
     genus_data["name"] = genus
     genus_data["id"]   = ids[genus]
     genus_data["species"] = []
-    next if !genus_to_species[genus]
+    next unless genus_to_species[genus]
     for species in genus_to_species[genus].sort do
-      next if !observations[species]
-      $stderr.puts("Missing species: #{species}.") if !ids[species]
+      next unless observations[species]
+      $stderr.puts("Missing species: #{species}.") unless ids[species]
       genus_data["species"] << {
         "name" => species,
         "id"   => ids[species]
@@ -182,7 +182,7 @@ end
 
 # Write raw data file.
 File.open(RAW_FILE, "w") do |fh|
-  fh.puts(["id", "kingdom", "class", "order", "family", "genus", "num_obs"].join("\t"))
+  fh.puts(%w(id kingdom class order family genus num_obs).join("\t"))
   for genus in classifications.keys.sort do
     fh.puts(classifications[genus].join("\t"))
   end

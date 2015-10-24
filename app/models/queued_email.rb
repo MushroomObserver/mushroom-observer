@@ -102,7 +102,7 @@
 #  "queued_emails".  The class is determined by the flavor.
 #  QueuedEmail::CommentAdd's flavor is "QueuedEmail::CommentAdd", and so on.
 #  When a QueuedEmail record is instantiated, it automatically is cast as the
-#  correct class: 
+#  correct class:
 #
 #    # This returns an instance of QueuedEmail::CommentAdd.
 #    email = QueuedEmail.find_by_flavor('QueuedEmail::CommentAdd')
@@ -116,16 +116,16 @@
 
 # Stores an email and details about it to get delivered later
 class QueuedEmail < AbstractModel
-  has_many :queued_email_integers, :dependent => :destroy
-  has_many :queued_email_strings,  :dependent => :destroy
-  has_one  :queued_email_note,     :dependent => :destroy
+  has_many :queued_email_integers, dependent: :destroy
+  has_many :queued_email_strings,  dependent: :destroy
+  has_one :queued_email_note, dependent: :destroy
   belongs_to :user
-  belongs_to :to_user, :class_name => "User", :foreign_key => "to_user_id"
+  belongs_to :to_user, class_name: "User", foreign_key: "to_user_id"
 
   # This tells ActiveRecord to instantiate new records into the class referred
   # to in the 'flavor' column, e.g., QueuedEmail::NameChange.  The configuration is
   # important to convince it not to strip the "QueuedEmail::" off the front.
-  self.inheritance_column = 'flavor'
+  self.inheritance_column = "flavor"
   self.store_full_sti_class = true
 
   # Ensure that all the subclasses get loaded.  Problem is some subclasses have
@@ -133,11 +133,9 @@ class QueuedEmail < AbstractModel
   # constant QueuedEmail::Comment will already be "defined" if Comment is
   # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
   # soon as QueuedEmail is defined, we know that all subclasses are also
-  # properly defined, and we no longer have to rely on autoloading. 
-  Dir["#{::Rails.root.to_s}/app/models/queued_email/*.rb"].each do |file|
-    if file.match(/(\w+)\.rb$/)
-      require "queued_email/#{$1}"
-    end
+  # properly defined, and we no longer have to rely on autoloading.
+  Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
+    require "queued_email/#{Regexp.last_match(1)}" if file.match(/(\w+)\.rb$/)
   end
 
   # ----------------------------
@@ -151,15 +149,13 @@ class QueuedEmail < AbstractModel
   #   # Validate flavor.
   #   raise unless QueuedEmail.all_flavors.include? 'QueuedEmail::CommentAdd'
   def self.all_flavors
-    if !defined? @@all_flavors
+    unless defined? @@all_flavors
       @@all_flavors = []
-      Dir["#{::Rails.root.to_s}/app/models/queued_email/*.rb"].each do |file|
-        if file.match(/(\w+).rb/)
-          @@all_flavors << "QueuedEmail::#{$1.camelize}"
-        end
+      Dir["#{::Rails.root}/app/models/queued_email/*.rb"].each do |file|
+        @@all_flavors << "QueuedEmail::#{Regexp.last_match(1).camelize}" if file.match(/(\w+).rb/)
       end
     end
-    return @@all_flavors
+    @@all_flavors
   end
 
   @@queue = false
@@ -200,9 +196,9 @@ class QueuedEmail < AbstractModel
   def self.create(sender, receiver)
     # Let ActiveRecord::Base create the record for us.
     super(
-      :user    => sender,
-      :to_user => receiver,
-      :queued  => Time.now
+      user: sender,
+      to_user: receiver,
+      queued: Time.now
     )
   end
 
@@ -210,33 +206,49 @@ class QueuedEmail < AbstractModel
   # production mode this does nothing.  In testing mode it "delivers" the email
   # immediately (via deliver_email) and then removes it from the queue.
   def finish
-    self.class.debug_log("SAVE #{self.flavor} " +
-         "from=#{user.login rescue 'nil'} " +
-         "to=#{to_user.login rescue 'nil'} " +
-         queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
-         queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' '))
+    self.class.debug_log("SAVE #{flavor} " \
+         "from=#{begin
+                   user.login
+                 rescue
+                   "nil"
+                 end} " \
+         "to=#{begin
+                 to_user.login
+               rescue
+                 "nil"
+               end} " +
+         queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
+         queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.join(" "))
     current_locale = I18n.locale
     unless MO.queue_email || @@queue
-      self.deliver_email if RunLevel.is_normal?
-      self.destroy
+      deliver_email if RunLevel.is_normal?
+      destroy
     end
     I18n.locale = current_locale
   end
 
   # This is called by <tt>rake email:send</tt>.  It just checks that sender !=
-  # receiver, then passes it off to the subclass (via deliver_email). 
+  # receiver, then passes it off to the subclass (via deliver_email).
   def send_email
-    return true if not RunLevel.is_normal?
-    log_msg = "SEND #{self.flavor} " +
-      "from=#{user.login rescue 'nil'} " +
-      "to=#{to_user.login rescue 'nil'} " +
-      queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
-      queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' ')
+    return true unless RunLevel.is_normal?
+    log_msg = "SEND #{flavor} " \
+      "from=#{begin
+                user.login
+              rescue
+                "nil"
+              end} " \
+      "to=#{begin
+              to_user.login
+            rescue
+              "nil"
+            end} " +
+              queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.join(" ") +
+              queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.join(" ")
     self.class.debug_log(log_msg)
     current_locale = I18n.locale
     result = false
     if user == to_user
-      raise("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
+      fail("Skipping email with same sender and recipient: #{user.email}\n") if Rails.env != "test"
     else
       result = deliver_email
     end
@@ -244,7 +256,7 @@ class QueuedEmail < AbstractModel
     return result
   rescue => e
     raise e if Rails.env == "test"
-    $stderr.puts('ERROR CREATING EMAIL')
+    $stderr.puts("ERROR CREATING EMAIL")
     $stderr.puts(log_msg)
     $stderr.puts(e.to_s)
     $stderr.puts(e.backtrace)
@@ -259,37 +271,35 @@ class QueuedEmail < AbstractModel
     if Rails.env == "production"
       $stderr.puts(error)
     else
-      raise error
+      fail error
     end
   end
 
   # Returns "flavor from to" for debugging.
   def text_name
-    "#{flavor.sub('QueuedEmail::','')} #{user ? user.login : 'no one'} -> #{to_user ? to_user.login : 'no one'}"
+    "#{flavor.sub("QueuedEmail::", "")} #{user ? user.login : "no one"} -> #{to_user ? to_user.login : "no one"}"
   end
 
   # Dump out all the info about a QueuedEmail record to a string.
   def dump
-    result = ''
-    result += "#{self.id}: from => #{self.user and self.user.login}, "
-    result += "to => #{self.to_user.login}, flavor => #{self.flavor}, "
-    result += "queued => #{self.queued}\n"
-    for i in self.queued_email_integers
-      result += "\t#{i.key.to_s} => #{i.value}\n"
+    result = ""
+    result += "#{id}: from => #{user && user.login}, "
+    result += "to => #{to_user.login}, flavor => #{flavor}, "
+    result += "queued => #{queued}\n"
+    for i in queued_email_integers
+      result += "\t#{i.key} => #{i.value}\n"
     end
-    for i in self.queued_email_strings
-      result += "\t#{i.key.to_s} => #{i.value}\n"
+    for i in queued_email_strings
+      result += "\t#{i.key} => #{i.value}\n"
     end
-    if self.queued_email_note
-      result += "\tNote: #{self.queued_email_note.value}\n"
-    end
+    result += "\tNote: #{queued_email_note.value}\n" if queued_email_note
     result
   end
 
   # Add line to log to help keep track of what/when/why emails are being queued
   # and when they are actually sent.
   def self.debug_log(msg)
-    File.open("#{::Rails.root.to_s}/log/email-debug.log", 'a:utf-8') do |fh|
+    File.open("#{::Rails.root}/log/email-debug.log", "a:utf-8") do |fh|
       fh.puts("#{Time.now} #{msg}")
     end
   end
@@ -305,13 +315,13 @@ class QueuedEmail < AbstractModel
   #
   def get_integer(key)
     @integers ||= {}
-    if @integers.has_key?(key)
+    if @integers.key?(key)
       result = @integers[key]
     else
-      int = QueuedEmailInteger.find_by_queued_email_id_and_key(self.id, key.to_s)
+      int = QueuedEmailInteger.find_by_queued_email_id_and_key(id, key.to_s)
       result = @integers[key] = int ? int.value.to_i : nil
     end
-    return result
+    result
   end
 
   # Look-up an object corresponding to a given integer (id).
@@ -321,9 +331,9 @@ class QueuedEmail < AbstractModel
   #
   #   comment = email.get_object('comment', Comment, :nil_okay)
   #
-  def get_object(key, model, allow_nil=false)
+  def get_object(key, model, allow_nil = false)
     @objects ||= {}
-    if @objects.has_key?(key)
+    if @objects.key?(key)
       result = @objects[key]
     else
       id = get_integer(key)
@@ -339,13 +349,13 @@ class QueuedEmail < AbstractModel
   #
   def get_string(key)
     @strings ||= {}
-    if @strings.has_key?(key)
+    if @strings.key?(key)
       result = @strings[key]
     else
-      str = QueuedEmailString.find_by_queued_email_id_and_key(self.id, key.to_s)
+      str = QueuedEmailString.find_by_queued_email_id_and_key(id, key.to_s)
       result = @strings[key] = str ? str.value.to_s : nil
     end
-    return result
+    result
   end
 
   # Get note.  Returns nil if no note saved.  *NOTE*: this can be used to
@@ -355,17 +365,17 @@ class QueuedEmail < AbstractModel
   #
   def get_note
     note = queued_email_note
-    return note ? note.value.to_s : nil
+    note ? note.value.to_s : nil
   end
 
   # Get note, split on comma.  Useful if you are storing a list of words, e.g.,
   # list of the fields that have changed in an object.
-  # 
+  #
   #   changed_fields = email.get_note_list
   #
   def get_note_list
     note = queued_email_note
-    return note ? note.value.to_s.split(',') : nil
+    note ? note.value.to_s.split(",") : nil
   end
 
   # Get integers for an Array of keys.  Returns either an Array of results in
@@ -382,9 +392,9 @@ class QueuedEmail < AbstractModel
   #   puts "nam_id = #{dict['naming']}"
   #   puts "vot_id = #{dict['vote']}"
   #
-  def get_integers(keys, return_dict=false)
+  def get_integers(keys, return_dict = false)
     @integers = {}
-    for qi in self.queued_email_integers
+    for qi in queued_email_integers
       @integers[qi.key.to_s] = qi.value.to_i
     end
     if return_dict
@@ -410,9 +420,9 @@ class QueuedEmail < AbstractModel
   #   strs "login = #{dict['login']}"
   #   strs "name  = #{dict['name']}"
   #
-  def get_strings(keys, return_dict=false)
+  def get_strings(keys, return_dict = false)
     @strings = {}
-    for qs in self.queued_email_strings
+    for qs in queued_email_strings
       @strings[qs.key.to_s] = qs.value.to_s
     end
     if return_dict
@@ -435,15 +445,15 @@ class QueuedEmail < AbstractModel
   #   email.add_integer('observation_id', obs.id)
   #
   def add_integer(key, value)
-    int = QueuedEmailInteger.find_by_queued_email_id_and_key(self.id, key.to_s)
-    if !int
-      int = QueuedEmailInteger.new()
-      int.queued_email_id = self.id
+    int = QueuedEmailInteger.find_by_queued_email_id_and_key(id, key.to_s)
+    unless int
+      int = QueuedEmailInteger.new
+      int.queued_email_id = id
       int.key = key.to_s
     end
     int.value = value.to_i
     int.save
-    return int
+    int
   end
 
   # Attach a string to this email.  (*NOTE*: max length is 100 chars.)
@@ -451,15 +461,15 @@ class QueuedEmail < AbstractModel
   #   email.add_string('login', user.login)
   #
   def add_string(key, value)
-    str = QueuedEmailString.find_by_queued_email_id_and_key(self.id, key.to_s)
-    if !str
-      str = QueuedEmailString.new()
-      str.queued_email_id = self.id
+    str = QueuedEmailString.find_by_queued_email_id_and_key(id, key.to_s)
+    unless str
+      str = QueuedEmailString.new
+      str.queued_email_id = id
       str.key = key.to_s
     end
     str.value = value.to_s
     str.save
-    return str
+    str
   end
 
   # Attach a note to this email.  This has no maximum length.  *NOTE*: this can
@@ -476,10 +486,10 @@ class QueuedEmail < AbstractModel
   #   email.add_note(obs.changed.map(&:to_s).join(','))
   #
   def set_note(value)
-    note = self.queued_email_note
-    if !note
-      note = QueuedEmailNote.new()
-      note.queued_email_id = self.id
+    note = queued_email_note
+    unless note
+      note = QueuedEmailNote.new
+      note.queued_email_id = id
     end
     note.value = value
     note.save
@@ -489,20 +499,20 @@ class QueuedEmail < AbstractModel
   # Add an Array of words to the note.  Note does not have to be initialized
   # before using this.  It ensures that there are no duplicates.  It converts
   # all values to strings before adding them. *NOTE*: words must not contain
-  # commas! 
+  # commas!
   #
   #   # Save a list of changed attribute names.
   #   email.add_to_note_list(obs.changed)
   #
   def add_to_note_list(values)
-    note = self.queued_email_note
-    if !note
-      note = QueuedEmailNote.new()
-      note.queued_email_id = self.id
+    note = queued_email_note
+    unless note
+      note = QueuedEmailNote.new
+      note.queued_email_id = id
     end
     old_val = note.value.to_s
-    list = old_val.split(',') + values.map(&:to_s)
-    new_val = list.uniq.join(',')
+    list = old_val.split(",") + values.map(&:to_s)
+    new_val = list.uniq.join(",")
     if note.new_record? || old_val != new_val
       note.value = new_val
       note.save
@@ -516,4 +526,3 @@ end
 # Tell rdoc not to document Email class.  (But do allow subclasses!)
 class Email # :nodoc:
 end
-

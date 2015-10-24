@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
-require File.expand_path('../../config/boot.rb', __FILE__)
-require File.expand_path('../../config/environment.rb', __FILE__)
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
 
 def get_contributions
   result = {}
@@ -10,7 +10,7 @@ def get_contributions
   )
     result["#{id} #{login}"] = score
   end
-  return result
+  result
 end
 
 old_users = get_contributions
@@ -21,7 +21,5 @@ puts "# Differences:"
 puts "# id login\told\tnew"
 for id, new_val in new_users
   old_val = old_users[id]
-  if old_val != new_val
-    puts [id, old_val, new_val].join("\t")
-  end
+  puts [id, old_val, new_val].join("\t") if old_val != new_val
 end

@@ -38,7 +38,7 @@ module MushroomObserver
     # because that throws the layout off.  Just changing the border, while less
     # conspicuous, has no effect on the layout.  This is not a hack, this is
     # just a standard configuration many rails apps take advantage of.
-    config.action_view.field_error_proc = Proc.new { |html_tag, instance|
+    config.action_view.field_error_proc = proc { |html_tag, _instance|
       html_tag.sub(/(<\w+)/, '\1 class="has_error"').html_safe
     }
   end

@@ -2,7 +2,6 @@
 require_dependency "user"
 
 module LoginSystem
-
   protected
 
   # overwrite this if you want to restrict access to only a few actions
@@ -13,8 +12,8 @@ module LoginSystem
   #  def authorize?(user)
   #    user.login != "bob"
   #  end
-  def authorize?(user)
-     true
+  def authorize?(_user)
+    true
   end
 
   # overwrite this method if you only want to protect certain actions of the controller
@@ -28,7 +27,7 @@ module LoginSystem
   #       return true
   #    end
   #  end
-  def protect?(action)
+  def protect?(_action)
     true
   end
 
@@ -42,15 +41,10 @@ module LoginSystem
   #   def authorize?(user)
   #
   def login_required
-
-    if not protect?(action_name)
-      return true
-    end
+    return true unless protect?(action_name)
 
     user = get_session_user
-    if user and authorize?(user)
-      return true
-    end
+    return true if user && authorize?(user)
 
     # store current location so that we can
     # come back after the user logged in
@@ -58,7 +52,7 @@ module LoginSystem
 
     # call overwriteable reaction to unauthorized access
     access_denied
-    return false
+    false
   end
 
   # overwrite if you want to have special behavior in case the user is not authorized
@@ -67,23 +61,22 @@ module LoginSystem
   # example use :
   # a popup window might just close itself for instance
   def access_denied
-    redirect_to :controller=>"account", :action =>"login"
+    redirect_to controller: "account", action: "login"
   end
 
   # store current uri in  the session.
   # we can return to this location by calling return_location
   def store_location
-    session['return-to'] = request.fullpath
+    session["return-to"] = request.fullpath
   end
 
   # move to the last store_location call or to the passed default one
   def redirect_back_or_default(default)
-    if session['return-to'].nil?
+    if session["return-to"].nil?
       redirect_to default
     else
-      redirect_to session['return-to']
-      session['return-to'] = nil
+      redirect_to session["return-to"]
+      session["return-to"] = nil
     end
   end
-
 end

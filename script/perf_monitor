@@ -13,9 +13,9 @@
 
 require "fileutils"
 
-IMAGES       = [*1..41000/500].map {|n| n*500}
-NAMES        = [*1..16000/500].map {|n| n*500}
-OBSERVATIONS = [*1..19500/500].map {|n| n*500}
+IMAGES       = [*1..41_000 / 500].map { |n| n * 500 }
+NAMES        = [*1..16_000 / 500].map { |n| n * 500 }
+OBSERVATIONS = [*1..19_500 / 500].map { |n| n * 500 }
 
 SITE       = ARGV[0]
 IMAGE_FILE = ARGV[1]
@@ -38,7 +38,7 @@ curl = Class.new do
     at_exit { @log_file.close }
   end
 
-  def run(page, args={})
+  def run(page, args = {})
     id, image_file = args.values_at(:id, :image_file)
     @log_file.write("#{page}:#{get_time}: ")
     cmd = "curl"
@@ -65,7 +65,7 @@ curl = Class.new do
 end.new
 
 count = 0
-NUMBER.times do 
+NUMBER.times do
   curl.run("observer/list_rss_logs")
   curl.run("image/show_image", id: IMAGES.sample)
   curl.run("name/show_name", id: NAMES.sample)
@@ -75,5 +75,5 @@ NUMBER.times do
   end
   count += 1
 end
-  
+
 exit 0

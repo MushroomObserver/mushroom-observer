@@ -2,7 +2,6 @@
 require "test_helper"
 
 class ChecklistTest < UnitTestCase
-
   def katrinas_species
     ["Conocybe filaris"]
   end
@@ -14,7 +13,7 @@ class ChecklistTest < UnitTestCase
       "Agaricus campestros",
       "Agaricus campestrus",
       "Coprinus comatus",
-      "Strobilurus diminutivus",
+      "Strobilurus diminutivus"
     ]
   end
 
@@ -25,7 +24,7 @@ class ChecklistTest < UnitTestCase
   end
 
   def genera(species)
-    species.map {|name| name.split(" ", 2).first}.uniq
+    species.map { |name| name.split(" ", 2).first }.uniq
   end
 
   def test_checklist_for_site
@@ -71,8 +70,8 @@ class ChecklistTest < UnitTestCase
     after_num_genera = data.num_genera
     after_num_species = data.num_species
 
-    assert_equal(before_num_genera+1, after_num_genera)
-    assert_equal(before_num_species+1, after_num_species)
+    assert_equal(before_num_genera + 1, after_num_genera)
+    assert_equal(before_num_species + 1, after_num_species)
     Observation.create!(name: names(:lactarius_subalpinus))
     Observation.create!(name: names(:lactarius_alpinus))
     data = Checklist::ForUser.new(dick)

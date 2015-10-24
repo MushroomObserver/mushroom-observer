@@ -1,21 +1,20 @@
 # encoding: utf-8
 
-require 'test_helper'
+require "test_helper"
 
 class PostObservationTest < IntegrationTestCase
-
-  LOGIN_PAGE = 'account/login'
-  SHOW_OBSERVATION_PAGE = 'observer/show_observation'
-  CREATE_OBSERVATION_PAGE = 'observer/create_observation'
-  EDIT_OBSERVATION_PAGE = 'observer/edit_observation'
-  CREATE_LOCATION_PAGE = 'location/create_location'
-  OBSERVATION_INDEX_PAGE = 'observer/list_observations'
+  LOGIN_PAGE = "account/login"
+  SHOW_OBSERVATION_PAGE = "observer/show_observation"
+  CREATE_OBSERVATION_PAGE = "observer/create_observation"
+  EDIT_OBSERVATION_PAGE = "observer/edit_observation"
+  CREATE_LOCATION_PAGE = "location/create_location"
+  OBSERVATION_INDEX_PAGE = "observer/list_observations"
 
   PASADENA_EXTENTS = {
-      north: 34.251905,
-      south: 34.1192,
-      east: -118.065479,
-      west: -118.198139,
+    north: 34.251905,
+    south: 34.1192,
+    east: -118.065479,
+    west: -118.198139
   }
 
   def test_posting_editing_and_destroying_a_fully_detailed_observation_in_a_new_location
@@ -74,7 +73,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def open_edit_observation_form
-    click(:label => /edit/i, :href => /edit_observation/)
+    click(label: /edit/i, href: /edit_observation/)
     assert_template(EDIT_OBSERVATION_PAGE)
     assert_form_has_correct_values(edit_observation_form_initial_values)
   end
@@ -106,21 +105,21 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def destroy_observation
-    click(:label => /destroy/i, :href => /destroy_observation/)
+    click(label: /destroy/i, href: /destroy_observation/)
     assert_flash_for_destroy_observation
     assert_template(OBSERVATION_INDEX_PAGE)
   end
 
   def make_sure_observation_is_in_main_index(obs)
     open_session do
-      get('/')
+      get("/")
       assert_link_exists_beginning_with("/#{obs.id}?")
     end
   end
 
   def make_sure_observation_is_not_in_main_index(obs)
     open_session do
-      get('/')
+      get("/")
       assert_no_link_exists_beginning_with("/#{obs.id}?")
       assert_exists_deleted_item_log
     end
@@ -187,7 +186,7 @@ class PostObservationTest < IntegrationTestCase
     new_loc = Location.last
     new_img = Image.last
     assert_match(new_obs.when.web_date, response.body)
-    for token in new_loc.name.split(', ') # USA ends up as <span class="caps">USA</span>,
+    for token in new_loc.name.split(", ") # USA ends up as <span class="caps">USA</span>,
       assert_match(token, response.body)  # so just search for each component
     end
     if new_obs.is_collection_location
@@ -202,7 +201,7 @@ class PostObservationTest < IntegrationTestCase
     end
     assert_match(new_obs.notes, response.body)
     assert_match(new_img.notes, response.body)
-    assert_no_link_exists_containing('observations_at_where')
+    assert_no_link_exists_containing("observations_at_where")
     assert_link_exists_containing("show_location/#{new_loc.id}")
     assert_link_exists_containing("show_image/#{new_img.id}")
   end
@@ -215,7 +214,7 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_flash_for_create_observation
     review_flash([/success/i, /created observation/i,
-      /created proposed name/i, /uploaded/i])
+                  /created proposed name/i, /uploaded/i])
   end
 
   def assert_flash_for_create_location
@@ -224,7 +223,7 @@ class PostObservationTest < IntegrationTestCase
 
   def assert_flash_for_edit_observation
     review_flash([/success/i, /updated observation/i,
-      /updated notes on image/i])
+                  /updated notes on image/i])
   end
 
   def assert_flash_for_destroy_observation
@@ -232,13 +231,13 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def assert_has_location_warning(regex)
-    assert_select('.alert-warning', {text: regex}, "Expected there to be a warning about location.")
+    assert_select(".alert-warning", { text: regex }, "Expected there to be a warning about location.")
   end
 
   def assert_exists_deleted_item_log
     found = false
     assert_select("a[href*=show_rss_log]") do |elems|
-      found = true if elems.any? {|e| e.to_s.match(/Agaricus campestris/mi)}
+      found = true if elems.any? { |e| e.to_s.match(/Agaricus campestris/mi) }
     end
     assert(found, 'Expected to find a "destroyed" rss log somewhere on the page.')
   end
@@ -254,161 +253,161 @@ class PostObservationTest < IntegrationTestCase
   def create_observation_form_defaults
     local_now = Time.now.in_time_zone
     {
-      'observation_when_1i' => local_now.year,
-      'observation_when_2i' => local_now.month,
-      'observation_when_3i' => local_now.day,
-      'observation_place_name' => '',
-      'observation_lat' => '',
-      'observation_long' => '',
-      'observation_alt' => '',
-      'name_name' => '',
-      'is_collection_location' => true,
-      'specimen' => false,
-      'observation_notes' => ''
+      "observation_when_1i" => local_now.year,
+      "observation_when_2i" => local_now.month,
+      "observation_when_3i" => local_now.day,
+      "observation_place_name" => "",
+      "observation_lat" => "",
+      "observation_long" => "",
+      "observation_alt" => "",
+      "name_name" => "",
+      "is_collection_location" => true,
+      "specimen" => false,
+      "observation_notes" => ""
     }
   end
 
   def create_observation_form_first_changes
     {
-      'observation_when_1i' => '2010',
-      'observation_when_2i' => '3',
-      'observation_when_3i' => '14',
-      'observation_place_name' => 'USA, California, Pasadena', # wrong order
-      'is_collection_location' => false,
-      'specimen' => true,
-      'observation_notes' => 'Notes for observation',
+      "observation_when_1i" => "2010",
+      "observation_when_2i" => "3",
+      "observation_when_3i" => "14",
+      "observation_place_name" => "USA, California, Pasadena", # wrong order
+      "is_collection_location" => false,
+      "specimen" => true,
+      "observation_notes" => "Notes for observation"
     }
   end
 
   def create_observation_form_second_changes
     {
-      'observation_place_name' => 'Pasadena, California, USA',
-      'observation_lat' => ' 12deg 34.56min N ',
-      'observation_long' => ' 123 45 6.78 W ',
-      'observation_alt' => ' 56 ft. ',
-      'name_name' => ' Agaricus  campestris ',
-      'vote_value' => Vote.next_best_vote,
-      'image_0_image' => JpegUpload.new("#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"),
-      'image_0_when_1i' => '2010',
-      'image_0_when_2i' => '3',
-      'image_0_when_3i' => '14',
-      'image_0_copyright_holder' => katrina.legal_name,
-      'image_0_notes' => 'Notes for image',
+      "observation_place_name" => "Pasadena, California, USA",
+      "observation_lat" => " 12deg 34.56min N ",
+      "observation_long" => " 123 45 6.78 W ",
+      "observation_alt" => " 56 ft. ",
+      "name_name" => " Agaricus  campestris ",
+      "vote_value" => Vote.next_best_vote,
+      "image_0_image" => JpegUpload.new("#{::Rails.root}/test/images/Coprinus_comatus.jpg"),
+      "image_0_when_1i" => "2010",
+      "image_0_when_2i" => "3",
+      "image_0_when_3i" => "14",
+      "image_0_copyright_holder" => katrina.legal_name,
+      "image_0_notes" => "Notes for image"
     }
   end
 
   def create_location_form_defaults
     {
-      'location_display_name' => 'Pasadena, California, USA',
-      'location_high' => '',
-      'location_low' => '',
-      'location_notes' => '',
-      'location_north' => PASADENA_EXTENTS[:north],
-      'location_south' => PASADENA_EXTENTS[:south],
-      'location_east' => PASADENA_EXTENTS[:east],
-      'location_west' => PASADENA_EXTENTS[:west],
+      "location_display_name" => "Pasadena, California, USA",
+      "location_high" => "",
+      "location_low" => "",
+      "location_notes" => "",
+      "location_north" => PASADENA_EXTENTS[:north],
+      "location_south" => PASADENA_EXTENTS[:south],
+      "location_east" => PASADENA_EXTENTS[:east],
+      "location_west" => PASADENA_EXTENTS[:west]
     }
   end
 
   def create_location_form_first_changes
     {
-      'location_display_name' => 'Pasadena, Some Co., California, USA',
-      'location_high' => 8765,
-      'location_low' => 4321,
-      'location_notes' => 'oops',
+      "location_display_name" => "Pasadena, Some Co., California, USA",
+      "location_high" => 8765,
+      "location_low" => 4321,
+      "location_notes" => "oops"
     }
   end
 
   def create_location_form_second_changes
     {
-      'location_high' => 5678,
-      'location_low' => 1234,
-      'location_notes' => 'Notes for location',
+      "location_high" => 5678,
+      "location_low" => 1234,
+      "location_notes" => "Notes for location"
     }
   end
 
   def edit_observation_form_initial_values
     img_id = Image.last.id
     {
-      'observation_when_1i' => '2010',
-      'observation_when_2i' => '3',
-      'observation_when_3i' => '14',
-      'observation_place_name' => 'Pasadena, Some Co., California, USA',
-      'observation_lat' => '12.576',
-      'observation_long' => '-123.7519',
-      'observation_alt' => '17',
-      'is_collection_location' => false,
+      "observation_when_1i" => "2010",
+      "observation_when_2i" => "3",
+      "observation_when_3i" => "14",
+      "observation_place_name" => "Pasadena, Some Co., California, USA",
+      "observation_lat" => "12.576",
+      "observation_long" => "-123.7519",
+      "observation_alt" => "17",
+      "is_collection_location" => false,
       # 'specimen' => true,
-      'observation_notes' => 'Notes for observation',
-      "good_image_#{img_id}_when_1i" => '2010',
-      "good_image_#{img_id}_when_2i" => '3',
-      "good_image_#{img_id}_when_3i" => '14',
+      "observation_notes" => "Notes for observation",
+      "good_image_#{img_id}_when_1i" => "2010",
+      "good_image_#{img_id}_when_2i" => "3",
+      "good_image_#{img_id}_when_3i" => "14",
       "good_image_#{img_id}_copyright_holder" => katrina.legal_name,
-      "good_image_#{img_id}_notes" => 'Notes for image',
+      "good_image_#{img_id}_notes" => "Notes for image"
     }
   end
 
   def edit_observation_form_changes
     img_id = Image.last.id
     {
-      'observation_when_1i' => '2011',
-      'observation_when_2i' => '4',
-      'observation_when_3i' => '15',
-      'observation_lat' => '23.4567',
-      'observation_long' => '-123.4567',
-      'observation_alt' => '987m',
-      'is_collection_location' => true,
+      "observation_when_1i" => "2011",
+      "observation_when_2i" => "4",
+      "observation_when_3i" => "15",
+      "observation_lat" => "23.4567",
+      "observation_long" => "-123.4567",
+      "observation_alt" => "987m",
+      "is_collection_location" => true,
       # 'specimen' => false,
-      'observation_notes' => 'New notes for observation',
-      "good_image_#{img_id}_when_1i" => '2011',
-      "good_image_#{img_id}_when_2i" => '4',
-      "good_image_#{img_id}_when_3i" => '15',
-      "good_image_#{img_id}_notes" => 'New notes for image',
+      "observation_notes" => "New notes for observation",
+      "good_image_#{img_id}_when_1i" => "2011",
+      "good_image_#{img_id}_when_2i" => "4",
+      "good_image_#{img_id}_when_3i" => "15",
+      "good_image_#{img_id}_notes" => "New notes for image"
     }
   end
 
   def expected_values_after_create
     {
-        user: katrina,
-        when: Date.parse('2010-03-14'),
-        where: 'Pasadena, California, USA',
-        location: nil,
-        lat: 12.5760,
-        long: -123.7519,
-        alt: 17,
-        name: names(:agaricus_campestris),
-        vote: Vote.next_best_vote,
-        is_collection_location: false,
-        specimen: true,
-        notes: 'Notes for observation',
-        image_notes: 'Notes for image',
+      user: katrina,
+      when: Date.parse("2010-03-14"),
+      where: "Pasadena, California, USA",
+      location: nil,
+      lat: 12.5760,
+      long: -123.7519,
+      alt: 17,
+      name: names(:agaricus_campestris),
+      vote: Vote.next_best_vote,
+      is_collection_location: false,
+      specimen: true,
+      notes: "Notes for observation",
+      image_notes: "Notes for image"
     }
   end
 
   def expected_values_after_location
     expected_values_after_create.merge(
-      :where => nil,
-      :location => 'Pasadena, Some Co., California, USA',
-      :north => PASADENA_EXTENTS[:north],
-      :south => PASADENA_EXTENTS[:south],
-      :east => PASADENA_EXTENTS[:east],
-      :west => PASADENA_EXTENTS[:west],
-      :high => 5678,
-      :low => 1234,
-      :location_notes => 'Notes for location'
+      where: nil,
+      location: "Pasadena, Some Co., California, USA",
+      north: PASADENA_EXTENTS[:north],
+      south: PASADENA_EXTENTS[:south],
+      east: PASADENA_EXTENTS[:east],
+      west: PASADENA_EXTENTS[:west],
+      high: 5678,
+      low: 1234,
+      location_notes: "Notes for location"
     )
   end
 
   def expected_values_after_edit
     expected_values_after_location.merge(
-      :when => Date.parse('2011-04-15'),
-      :lat => 23.4567,
-      :long => -123.4567,
-      :alt => 987,
-      :is_collection_location => true,
-      :specimen => false,
-      :notes => 'New notes for observation',
-      :image_notes => 'New notes for image'
+      when: Date.parse("2011-04-15"),
+      lat: 23.4567,
+      long: -123.4567,
+      alt: 987,
+      is_collection_location: true,
+      specimen: false,
+      notes: "New notes for observation",
+      image_notes: "New notes for image"
     )
   end
 end

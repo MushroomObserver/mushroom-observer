@@ -14,14 +14,14 @@ class API
       :images,
       :location,
       :name,
-      {namings: :name},
-      :user,
+      { namings: :name },
+      :user
     ]
 
     self.low_detail_includes = [
       :location,
       :name,
-      :user,
+      :user
     ]
 
     def query_params
@@ -40,7 +40,7 @@ class API
         projects:       parse_strings(:projects),
         species_lists:  parse_strings(:species_lists),
         confidence:     parse_float_range(:confidence,
-                          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
+                                          limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
         is_col_loc:     parse_boolean(:is_collection_location),
         has_specimen:   parse_boolean(:has_specimen),
         has_location:   parse_boolean(:has_location),
@@ -54,20 +54,20 @@ class API
         north:          parse_latitude(:north),
         south:          parse_latitude(:south),
         east:           parse_longitude(:east),
-        west:           parse_longitude(:west),
+        west:           parse_longitude(:west)
       }
     end
 
     def create_params
-      @name = parse_name(:name, :default => Name.unknown)
-      @vote = parse_float(:vote, :default => Vote.maximum_vote)
-      @log  = parse_boolean(:log, :default => true)
+      @name = parse_name(:name, default: Name.unknown)
+      @vote = parse_float(:vote, default: Vote.maximum_vote)
+      @log  = parse_boolean(:log, default: true)
 
-      @herbarium = parse_herbarium(:herbarium, :default => nil)
-      @specimen_id = parse_string(:specimen_id, :default => nil)
-      @herbarium_label = parse_string(:herbarium_label, :default => nil)
+      @herbarium = parse_herbarium(:herbarium, default: nil)
+      @specimen_id = parse_string(:specimen_id, default: nil)
+      @herbarium_label = parse_string(:herbarium_label, default: nil)
       has_specimen = parse_boolean(:has_specimen,
-        :default => @herbarium || @specimen_id || @herbarium_label || false)
+                                   default: @herbarium || @specimen_id || @herbarium_label || false)
       unless has_specimen
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:herbarium) if @herbarium
         errors << CanOnlyUseThisFieldIfHasSpecimen.new(:specimen_id) if @specimen_id
@@ -76,7 +76,7 @@ class API
       errors << CanOnlyUseOneOfTheseFields.new(:specimen_id, :herbarium_label) \
         if @specimen_id && @herbarium_label
 
-      loc = parse_place_name(:location, :limit => 1024)
+      loc = parse_place_name(:location, limit: 1024)
       loc = Location.unknown.name if Location.is_unknown?(loc)
       lat = parse_latitude(:latitude)
       long = parse_longitude(:longitude)
@@ -85,52 +85,50 @@ class API
         errors << LatLongMustBothBeSet.new
         lat = long = nil
       end
-      if !lat && !loc
-        errors << MustSupplyLocationOrGPS.new
-      end
+      errors << MustSupplyLocationOrGPS.new if !lat && !loc
       loc ||= :UNKNOWN.l
 
-      images = parse_images(:images, :default => [])
-      thumbnail = parse_image(:thumbnail, :default => images.first)
-      images.unshift(thumbnail) if thumbnail and not images.include?(thumbnail)
+      images = parse_images(:images, default: [])
+      thumbnail = parse_image(:thumbnail, default: images.first)
+      images.unshift(thumbnail) if thumbnail && !images.include?(thumbnail)
 
       {
-          when: parse_date(:date, :default => Date.today),
-          notes: parse_string(:notes, :default => ''),
-          place_name: loc,
-          lat: lat,
-          long: long,
-          alt: alt,
-          specimen: has_specimen,
-          is_collection_location: parse_boolean(:is_collection_location, :default => true),
-          thumb_image: thumbnail,
-          images: images,
-          projects: parse_projects(:projects, :default => [], :must_be_member => true),
-          species_lists: parse_species_lists(:species_lists, :default => [], :must_have_edit_permission => true),
-          name: @name,
+        when: parse_date(:date, default: Date.today),
+        notes: parse_string(:notes, default: ""),
+        place_name: loc,
+        lat: lat,
+        long: long,
+        alt: alt,
+        specimen: has_specimen,
+        is_collection_location: parse_boolean(:is_collection_location, default: true),
+        thumb_image: thumbnail,
+        images: images,
+        projects: parse_projects(:projects, default: [], must_be_member: true),
+        species_lists: parse_species_lists(:species_lists, default: [], must_have_edit_permission: true),
+        name: @name
       }
     end
 
-    def validate_create_params!(params)
+    def validate_create_params!(_params)
     end
 
     def after_create(obs)
       create_specimen(obs) if obs.specimen
-      naming = obs.namings.create(:name => @name)
+      naming = obs.namings.create(name: @name)
       obs.change_vote(naming, @vote, user)
       obs.log(:log_observation_created_at) if @log
     end
 
     def create_specimen(obs)
       @herbarium ||= user.personal_herbarium || Herbarium.create!(
-        :name => user.personal_herbarium_name,
-        :personal_user => user
+        name: user.personal_herbarium_name,
+        personal_user: user
       )
       obs.specimens << Specimen.create!(
-        :herbarium => @herbarium,
-        :when => Time.now,
-        :user => user,
-        :herbarium_label => @herbarium_label || Herbarium.default_specimen_label(@name.text_name, @specimen_id || obs.id)
+        herbarium: @herbarium,
+        when: Time.now,
+        user: user,
+        herbarium_label: @herbarium_label || Herbarium.default_specimen_label(@name.text_name, @specimen_id || obs.id)
       )
     end
 
@@ -146,7 +144,7 @@ class API
       thumbnail = parse_image(:set_thumbnail)
       add_images = parse_images(:add_images) || []
       remove_images = parse_images(:remove_images) || []
-      if thumbnail and !add_images.include?(thumbnail)
+      if thumbnail && !add_images.include?(thumbnail)
         add_images.unshift(thumbnail)
       end
 
@@ -157,26 +155,26 @@ class API
       remove_species_lists = parse_species_lists(:remove_species_lists) || []
 
       params = {
-          when: parse_date(:set_date),
-          notes: parse_string(:set_notes),
-          place_name: parse_place_name(:set_location, :limit => 1024),
-          lat: lat,
-          long: long,
-          alt: alt,
-          specimen: parse_boolean(:set_has_specimen),
-          is_collection_location: parse_boolean(:set_is_collection_location),
-          thumb_image: thumbnail,
+        when: parse_date(:set_date),
+        notes: parse_string(:set_notes),
+        place_name: parse_place_name(:set_location, limit: 1024),
+        lat: lat,
+        long: long,
+        alt: alt,
+        specimen: parse_boolean(:set_has_specimen),
+        is_collection_location: parse_boolean(:set_is_collection_location),
+        thumb_image: thumbnail
       }
       params.remove_nils!
 
-      if params.empty? and
-         add_images.empty? and
-         remove_images.empty? and
-         add_projects.empty? and
-         remove_projects.empty? and
-         add_species_lists.empty? and
+      if params.empty? &&
+         add_images.empty? &&
+         remove_images.empty? &&
+         add_projects.empty? &&
+         remove_projects.empty? &&
+         add_species_lists.empty? &&
          remove_species_lists.empty?
-        raise MissingSetParameters.new
+        fail MissingSetParameters.new
       end
 
       lambda do |obj|

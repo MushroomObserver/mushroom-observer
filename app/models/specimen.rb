@@ -48,7 +48,7 @@ class Specimen < AbstractModel
   end
 
   def add_observation(obs)
-    self.observations.push(obs)
+    observations.push(obs)
     obs.specimen = true # Hmm, this feels a little odd
     obs.log(:log_specimen_added, name: herbarium_label, touch: true)
     obs.save
@@ -56,14 +56,14 @@ class Specimen < AbstractModel
 
   def clear_observations
     observations.clear
-    self.save
+    save
   end
 
   # Send email notifications when specimen created by non-curator.
   def notify_curators
     sender = User.current
     recipients = herbarium.curators # Should people with interest in related
-                                    # observations get notified?
+    # observations get notified?
     return if recipients.member?(sender) # Only worry about non-curators
 
     for recipient in recipients

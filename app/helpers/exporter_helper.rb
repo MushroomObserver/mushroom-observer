@@ -1,6 +1,5 @@
 # encoding: utf-8
 module ExporterHelper
-
   # Create button? to export an Image.
   def image_exporter(image_id, exported)
     link = export_link(image_id, exported)
@@ -24,16 +23,16 @@ module ExporterHelper
         content_tag(:b, :review_ok_for_export.t, class: "nowrap")
       else
         link_with_query(:review_ok_for_export.t, { controller: :observer,
-          action: :set_export_status, type: obj.type_tag,
-          id: obj.id, value: 1}, class: "nowrap")
+                                                   action: :set_export_status, type: obj.type_tag,
+                                                   id: obj.id, value: 1 }, class: "nowrap")
       end + " | " +
-      if obj.ok_for_export
-        link_with_query(:review_no_export.t, {controller: :observer,
-          action: :set_export_status, type: obj.type_tag,
-          id: obj.id, value: 0}, class: "nowrap")
-      else
-        content_tag(:b, :review_no_export.t)
-      end
+        if obj.ok_for_export
+          link_with_query(:review_no_export.t, { controller: :observer,
+                                                 action: :set_export_status, type: obj.type_tag,
+                                                 id: obj.id, value: 0 }, class: "nowrap")
+        else
+          content_tag(:b, :review_no_export.t)
+        end
     end
   end
 end

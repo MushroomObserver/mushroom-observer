@@ -1,6 +1,5 @@
 # encoding: utf-8
 module AutocompleteHelper
-
   # Add another input field onto an existing auto-completer.
   def reuse_auto_completer(first_id, new_id)
     inject_javascript_at_end("AUTOCOMPLETERS['#{first_id}'].reuse('#{new_id}')")
@@ -9,7 +8,7 @@ module AutocompleteHelper
   # Turn a text_field into an auto-completer.
   # id::   id of text_field
   # opts:: arguments (see autocomplete.js)
-  def turn_into_auto_completer(id, opts={})
+  def turn_into_auto_completer(id, opts = {})
     if can_do_ajax?
       js_args = []
       opts[:input_id]   = id
@@ -32,15 +31,15 @@ module AutocompleteHelper
   end
 
   # Make text_field auto-complete for fixed set of strings.
-  def turn_into_menu_auto_completer(id, opts={})
-    raise "Missing primer for menu auto-completer!" if !opts[:primer]
+  def turn_into_menu_auto_completer(id, opts = {})
+    fail "Missing primer for menu auto-completer!" unless opts[:primer]
     turn_into_auto_completer(id, {
       unordered: false
     }.merge(opts))
   end
 
   # Make text_field auto-complete for Name text_name.
-  def turn_into_name_auto_completer(id, opts={})
+  def turn_into_name_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
       ajax_url: "/ajax/auto_complete/name/@",
       collapse: 1
@@ -48,8 +47,8 @@ module AutocompleteHelper
   end
 
   # Make text_field auto-complete for Location display name.
-  def turn_into_location_auto_completer(id, opts={})
-    if @user and @user.location_format == :scientific
+  def turn_into_location_auto_completer(id, opts = {})
+    if @user && @user.location_format == :scientific
       format = "?format=scientific"
     else
       format = ""
@@ -61,7 +60,7 @@ module AutocompleteHelper
   end
 
   # Make text_field auto-complete for Project title.
-  def turn_into_project_auto_completer(id, opts={})
+  def turn_into_project_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
       ajax_url: "/ajax/auto_complete/project/@",
       unordered: true
@@ -69,7 +68,7 @@ module AutocompleteHelper
   end
 
   # Make text_field auto-complete for SpeciesList title.
-  def turn_into_species_list_auto_completer(id, opts={})
+  def turn_into_species_list_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
       ajax_url: "/ajax/auto_complete/species_list/@",
       unordered: true
@@ -77,7 +76,7 @@ module AutocompleteHelper
   end
 
   # Make text_field auto-complete for User name/login.
-  def turn_into_user_auto_completer(id, opts={})
+  def turn_into_user_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
       ajax_url: "/ajax/auto_complete/user/@",
       unordered: true
@@ -85,7 +84,7 @@ module AutocompleteHelper
   end
 
   # Make text_field auto-complete for Herbarium name.
-  def turn_into_herbarium_auto_completer(id, opts={})
+  def turn_into_herbarium_auto_completer(id, opts = {})
     turn_into_auto_completer(id, {
       ajax_url: "/ajax/auto_complete/herbarium/@?user_id=" + @user.id.to_s,
       unordered: true

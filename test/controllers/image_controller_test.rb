@@ -2,7 +2,6 @@
 require "test_helper"
 
 class ImageControllerTest < FunctionalTestCase
-
   def test_list_images
     get_with_dump(:list_images)
     assert_template("list_images", partial: "_image")
@@ -29,9 +28,9 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_next_image_ss
-    outer = Query.lookup_and_save(:Observation, :in_set, ids: [2,1,4,3])
+    outer = Query.lookup_and_save(:Observation, :in_set, ids: [2, 1, 4, 3])
     inner = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                  observation: 2, by: :id)
+                                                               observation: 2, by: :id)
 
     # Make sure the outer query is working right first.
     outer.current_id = 2
@@ -66,11 +65,11 @@ class ImageControllerTest < FunctionalTestCase
 
     params = {
       id: 2,
-      params: @controller.query_params(inner),
+      params: @controller.query_params(inner)
     }.flatten
     get(:next_image, params)
     assert_redirected_to(action: "show_image", id: 6,
-                    params: @controller.query_params(save_query))
+                         params: @controller.query_params(save_query))
   end
 
   # Test next_image in the context of a search
@@ -84,7 +83,7 @@ class ImageControllerTest < FunctionalTestCase
     assert(ids.length > 3)
     rolfs_index = ids.index(rolfs_favorite_image_id)
     assert(rolfs_index)
-    expected_next = ids[rolfs_index+1]
+    expected_next = ids[rolfs_index + 1]
     assert(expected_next)
 
     # See what should happen if we look up an Image search and go to next.
@@ -96,11 +95,11 @@ class ImageControllerTest < FunctionalTestCase
     # Now do it for real.
     params = {
       id: rolfs_favorite_image_id,
-      params: @controller.query_params(query),
+      params: @controller.query_params(query)
     }.flatten
     get(:next_image, params)
     assert_redirected_to(action: "show_image", id: expected_next,
-                    params: @controller.query_params(query))
+                         params: @controller.query_params(query))
   end
 
   def test_prev_image
@@ -110,9 +109,9 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_prev_image_ss
-    outer = Query.lookup_and_save(:Observation, :in_set, ids: [2,1,4,3])
+    outer = Query.lookup_and_save(:Observation, :in_set, ids: [2, 1, 4, 3])
     inner = Query.lookup_and_save(:Image, :inside_observation, outer: outer,
-                                  observation: 4, by: :id)
+                                                               observation: 4, by: :id)
 
     # Make sure the outer query is working right first.
     outer.current_id = 4
@@ -142,7 +141,7 @@ class ImageControllerTest < FunctionalTestCase
 
     params = {
       id: 6,
-      params: @controller.query_params(inner),
+      params: @controller.query_params(inner)
     }.flatten
     get(:prev_image, params)
     assert_redirected_to(action: "show_image", id: 2,
@@ -172,13 +171,13 @@ class ImageControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, img.user_id) # owned by mary
     assert(img.projects.include?(proj)) # owned by bolete project
-      # dick is only member of project
+    # dick is only member of project
     assert_equal([dick.id], proj.user_group.users.map(&:id))
 
     login("rolf")
     get(:show_image, id: img.id)
-    assert_select('a[href*=edit_image]', count: 0)
-    assert_select('a[href*=destroy_image]', count: 0)
+    assert_select("a[href*=edit_image]", count: 0)
+    assert_select("a[href*=destroy_image]", count: 0)
     get(:edit_image, id: img.id)
     assert_response(:redirect)
     get(:destroy_image, id: img.id)
@@ -186,15 +185,15 @@ class ImageControllerTest < FunctionalTestCase
 
     login("mary")
     get(:show_image, id: img.id)
-    assert_select('a[href*=edit_image]', minimum: 1)
-    assert_select('a[href*=destroy_image]', minimum: 1)
+    assert_select("a[href*=edit_image]", minimum: 1)
+    assert_select("a[href*=destroy_image]", minimum: 1)
     get(:edit_image, id: img.id)
     assert_response(:success)
 
     login("dick")
     get(:show_image, id: img.id)
-    assert_select('a[href*=edit_image]', minimum: 1)
-    assert_select('a[href*=destroy_image]', minimum: 1)
+    assert_select("a[href*=edit_image]", minimum: 1)
+    assert_select("a[href*=destroy_image]", minimum: 1)
     get(:edit_image, id: img.id)
     assert_response(:success)
     get(:destroy_image, id: img.id)
@@ -205,13 +204,13 @@ class ImageControllerTest < FunctionalTestCase
     get_with_dump(:image_search, pattern: "Notes")
     assert_template("list_images", partial: "_image")
     assert_equal(:query_title_pattern_search.t(types: "Images",
-                   pattern: "Notes"),
-                 @controller.instance_variable_get('@title'))
+                                               pattern: "Notes"),
+                 @controller.instance_variable_get("@title"))
     get_with_dump(:image_search, pattern: "Notes", page: 2)
     assert_template("list_images")
     assert_equal(:query_title_pattern_search.t(types: "Images",
-                   pattern: "Notes"),
-                 @controller.instance_variable_get('@title'))
+                                               pattern: "Notes"),
+                 @controller.instance_variable_get("@title"))
   end
 
   def test_image_search_next
@@ -226,11 +225,11 @@ class ImageControllerTest < FunctionalTestCase
 
   def test_advanced_search
     query = Query.lookup_and_save(:Image, :advanced_search,
-      name: "Don't know",
-      user: "myself",
-      content: "Long pink stem and small pink cap",
-      location: "Eastern Oklahoma"
-    )
+                                  name: "Don't know",
+                                  user: "myself",
+                                  content: "Long pink stem and small pink cap",
+                                  location: "Eastern Oklahoma"
+                                 )
     get(:advanced_search, @controller.query_params(query))
     assert_template("list_images")
   end
@@ -250,7 +249,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:disconnected_coprinus_comatus_image)
     assert(!obs.images.member?(image))
     requires_login(:reuse_image, mode: "observation", obs_id: obs.id,
-                   img_id: image.id)
+                                 img_id: image.id)
     assert_redirected_to(controller: :observer, action: :show_observation,
                          id: obs.id)
     assert(obs.reload.images.member?(image))
@@ -390,7 +389,7 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:connected_coprinus_comatus_image)
     params = { "id" => image.id.to_s }
     assert("rolf" == image.user.login)
-    requires_user(:edit_image, ["image", "show_image"], params)
+    requires_user(:edit_image, %w(image show_image), params)
     assert_form_action(action: "edit_image", id: image.id.to_s)
   end
 
@@ -399,7 +398,7 @@ class ImageControllerTest < FunctionalTestCase
     obs = image.observations.first
     assert(obs)
     assert(obs.rss_log.nil?)
-    new_name = 'new nāme.jpg'
+    new_name = "new nāme.jpg"
 
     params = {
       "id" => image.id,
@@ -408,7 +407,7 @@ class ImageControllerTest < FunctionalTestCase
         "when(2i)" => "5",
         "when(3i)" => "12",
         "copyright_holder" => "Rolf Singer",
-        "notes"    => "",
+        "notes" => "",
         "original_name" => new_name
       }
     }
@@ -428,8 +427,8 @@ class ImageControllerTest < FunctionalTestCase
     params = { id: obs.id }
     assert_equal("rolf", obs.user.login)
     requires_user(:remove_images,
-      { controller: :observer, action: :show_observation, id: obs.id },
-      params)
+                  { controller: :observer, action: :show_observation, id: obs.id },
+                  params)
     assert_form_action(action: "remove_images", id: obs.id)
   end
 
@@ -438,7 +437,7 @@ class ImageControllerTest < FunctionalTestCase
     params = { id: glossary_term.id }
     requires_login(:remove_images_for_glossary_term, params)
     assert_form_action(action: "remove_images_for_glossary_term",
-      id: glossary_term.id)
+                       id: glossary_term.id)
   end
 
   def test_reuse_image_for_observation
@@ -460,7 +459,7 @@ class ImageControllerTest < FunctionalTestCase
     send(:get_with_dump, :reuse_image, params)
     assert_response(:success)
     assert_form_action(action: :reuse_image, mode: "observation",
-      obs_id: obs.id)
+                       obs_id: obs.id)
   end
 
   def test_reuse_image_for_glossary_term
@@ -478,7 +477,7 @@ class ImageControllerTest < FunctionalTestCase
     params = {
       mode: "observation",
       obs_id: obs.id.to_s,
-      img_id: "3",
+      img_id: "3"
     }
     owner = obs.user.login
     assert_not_equal("mary", owner)
@@ -503,12 +502,12 @@ class ImageControllerTest < FunctionalTestCase
     assert(!glossary_term.images.member?(image))
     params = {
       id: glossary_term.id.to_s,
-      img_id: "3",
+      img_id: "3"
     }
     login("mary")
     get_with_dump(:reuse_image_for_glossary_term, params)
     assert_redirected_to(controller: :glossary, action: :show_glossary_term,
-      id: glossary_term.id)
+                         id: glossary_term.id)
     assert(glossary_term.reload.images.member?(image))
   end
 
@@ -526,8 +525,8 @@ class ImageControllerTest < FunctionalTestCase
       id: obs.id,
       image: {
         "when(1i)" => "2007",
-        "when(2i)"=>"3",
-        "when(3i)"=>"29",
+        "when(2i)" => "3",
+        "when(3i)" => "29",
         copyright_holder: "Douglas Smith",
         notes: "Some notes."
       },
@@ -545,7 +544,7 @@ class ImageControllerTest < FunctionalTestCase
       }
     }
     post_requires_user(:add_image,
-      { controller: :observer, action: :show_observation, id: obs.id }, params)
+                       { controller: :observer, action: :show_observation, id: obs.id }, params)
     assert_equal(20, rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
     assert(updated_at != obs.updated_at)
@@ -640,7 +639,7 @@ class ImageControllerTest < FunctionalTestCase
     rolf.keep_filenames = :keep_but_hide
     rolf.save
     get(:show_image, id: 6)
-    assert_false(@response.body.include?('áč€εиts'))
+    assert_false(@response.body.include?("áč€εиts"))
 
     rolf.keep_filenames = :keep_and_show
     rolf.save

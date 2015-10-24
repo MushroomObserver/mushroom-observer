@@ -6,20 +6,35 @@ class Pivotal
     attr_accessor :user
     attr_accessor :text
     attr_accessor :json
-    
+
     def initialize(json)
       @json = json
     end
 
-    def id;   parse; @id;   end
-    def time; parse; @time; end
-    def user; parse; @user; end
-    def text; parse; @text; end
+    def id
+      parse
+      @id
+    end
+
+    def time
+      parse
+      @time
+    end
+
+    def user
+      parse
+      @user
+    end
+
+    def text
+      parse
+      @text
+    end
 
     # Delay parsing of JSON until actually need the comment.
     # In most cases we probably won't ever need it.
     def parse
-      if !@id
+      unless @id
         data = @json.is_a?(String) ? JSON.parse(@json) : @json
         @id = data["id"]
         @time = data["created_at"]
@@ -37,7 +52,7 @@ class Pivotal
         else
           true
         end
-      end.join("\n").sub(/\A\s+/, '').sub(/\s+\Z/, "\n")
+      end.join("\n").sub(/\A\s+/, "").sub(/\s+\Z/, "\n")
     end
   end
 end

@@ -4,7 +4,7 @@ app_root = File.expand_path("../..", __FILE__)
 require "#{app_root}/app/classes/image_s3.rb"
 require "fileutils"
 
-abort(<<"EOB") if ARGV.any? {|arg| arg == "-h" || arg == "--help" }
+abort(<<"EOB") if ARGV.any? { |arg| arg == "-h" || arg == "--help" }
 
   USAGE::
 
@@ -31,18 +31,18 @@ abort(<<"EOB") if ARGV.any? {|arg| arg == "-h" || arg == "--help" }
 
 EOB
 
-delete  = true if ARGV.any? {|arg| arg == "-d" || arg == "--delete"  }
-force   = true if ARGV.any? {|arg| arg == "-f" || arg == "--force"   }
-verbose = true if ARGV.any? {|arg| arg == "-v" || arg == "--verbose" }
+delete  = true if ARGV.any? { |arg| arg == "-d" || arg == "--delete"  }
+force   = true if ARGV.any? { |arg| arg == "-f" || arg == "--force"   }
+verbose = true if ARGV.any? { |arg| arg == "-v" || arg == "--verbose" }
 copy = !delete
-flags = ARGV.select {|arg| arg.match(/^-/)}.
-             reject {|arg| arg.match(/^(-d|-f|-v|--delete|--force|--verbose)$/)}
-words = ARGV.reject {|arg| arg.match(/^-/)}
+flags = ARGV.select { |arg| arg.match(/^-/) }.
+        reject { |arg| arg.match(/^(-d|-f|-v|--delete|--force|--verbose)$/) }
+words = ARGV.reject { |arg| arg.match(/^-/) }
 abort("Bad flag(s): #{flags.inspect}") if flags.length > 0
 if copy
   abort("Missing file!") if words.length == 0
   file = words.shift
-  abort("File doesn't exist: #{file.inspect}") if !File.exists?(file)
+  abort("File doesn't exist: #{file.inspect}") unless File.exist?(file)
 end
 abort("Missing server!") if words.length == 0
 server = words.shift
@@ -64,8 +64,8 @@ if copy
   type = `file --mime-type #{file}`.split.last
 
   # Trust cached listing: no need to resend a file if we've already logged it.
-  if !force
-    old_size, old_md5 = `grep ^#{key} #{cache_file} | tail -1`.split[1,2]
+  unless force
+    old_size, old_md5 = `grep ^#{key} #{cache_file} | tail -1`.split[1, 2]
     if old_size == size.to_s && old_md5 == md5
       log("Already uploaded #{server}/#{key}\n") if verbose
       exit 0
@@ -79,7 +79,7 @@ url               = `#{cmd} MO.s3_credentials[:#{server}][:server]`
 bucket            = `#{cmd} MO.s3_credentials[:#{server}][:bucket]`
 access_key_id     = `#{cmd} MO.s3_credentials[:#{server}][:access_key_id]`
 secret_access_key = `#{cmd} MO.s3_credentials[:#{server}][:secret_access_key]`
-abort("Bad server: #{server.inspect}") if !url
+abort("Bad server: #{server.inspect}") unless url
 
 begin
   log("Connecting...\r") if verbose
@@ -90,7 +90,7 @@ begin
     secret_access_key: secret_access_key
   )
 rescue => e
-  abort("Upload failed on #{server}/#{key}: couldn't connect: #{e}");
+  abort("Upload failed on #{server}/#{key}: couldn't connect: #{e}")
 end
 
 if copy
@@ -98,7 +98,11 @@ if copy
     log("Uploading... \r") if verbose
     result = s3.upload(key, file, content_type: type)
     if result.etag != "\"#{md5}\""
-      s3.delete(key) rescue nil
+      begin
+        s3.delete(key)
+      rescue
+        nil
+      end
       abort("Upload failed on #{server}/#{key}: md5sum didn't match")
     end
   rescue => e

@@ -22,7 +22,7 @@ class AutoComplete
     raise "Invalid auto-complete type: #{type.inspect}"
   end
 
-  def initialize(string, params={})
+  def initialize(string, _params = {})
     self.string = string.to_s.strip_squeeze
   end
 
@@ -34,17 +34,18 @@ class AutoComplete
     [minimal_string] + matches
   end
 
-private
+  private
+
   def truncate_matches
     if matches.length > limit
       matches.slice!(limit..-1)
-      matches.push('...')
+      matches.push("...")
     end
   end
 
   def clean_matches
     matches.map! do |str|
-      str.sub(/\s*[\r\n]\s*.*/m,'').sub(/\A\s+/,'').sub(/\s+\Z/,'')
+      str.sub(/\s*[\r\n]\s*.*/m, "").sub(/\A\s+/, "").sub(/\s+\Z/, "")
     end
     matches.uniq!
   end
@@ -62,19 +63,18 @@ class AutoCompleteByString < AutoComplete
   # Returns the final (minimal) string actually used, and changes matches in
   # place.  The array 'matches' is guaranteed to be <= limit.
   def refine_matches
-
     # Get rid of trivial case immediately.
     return string[0] if matches.length <= limit
 
     # Apply characters in order until matches fits within limit.
-    used = ''
-    for letter in string.split('')
+    used = ""
+    for letter in string.split("")
       used += letter
-      regex = /(^|#{PUNCTUATION})#{used}/i;
+      regex = /(^|#{PUNCTUATION})#{used}/i
       matches.select! { |m| m.match(regex) }
       break if matches.length <= limit
     end
-    return used
+    used
   end
 end
 
@@ -82,26 +82,25 @@ class AutoCompleteByWord < AutoComplete
   # Same as AutoCompleteByString#refine_matches, except words are allowed
   # to be out of order.
   def refine_matches
-
     # Get rid of trivial case immediately.
     return string[0] if matches.length <= limit
 
     # Apply words in order, requiring full word-match on all but last.
     words = string.split
-    used  = ''
+    used  = ""
     n     = 0
     for word in words
       n += 1
-      part = ''
-      for letter in word.split('')
+      part = ""
+      for letter in word.split("")
         part += letter
-        regex = /(^|#{PUNCTUATION})#{part}/i;
+        regex = /(^|#{PUNCTUATION})#{part}/i
         matches.select! { |m| m.match(regex) }
         return used + part if matches.length <= limit
       end
       if n < words.length
-        used += word + ' '
-        regex = /(^|#{PUNCTUATION})#{word}(#{PUNCTUATION}|$)/i;
+        used += word + " "
+        regex = /(^|#{PUNCTUATION})#{word}(#{PUNCTUATION}|$)/i
         matches.select! { |m| m.match(regex) }
         return used if matches.length <= limit
       else
@@ -117,7 +116,7 @@ class AutoCompleteLocation < AutoCompleteByWord
 
   def initialize(string, params)
     super(string, params)
-    self.reverse = (params[:format] == 'scientific')
+    self.reverse = (params[:format] == "scientific")
   end
 
   def rough_matches(letter)
@@ -130,20 +129,18 @@ class AutoCompleteLocation < AutoCompleteByWord
       WHERE `name` LIKE '#{letter}%' OR
             `name` LIKE '% #{letter}%'
     ))
-    if reverse
-      matches.map! {|m| Location.reverse_name(m)}
-    end
-    return matches.sort.uniq
+    matches.map! { |m| Location.reverse_name(m) } if reverse
+    matches.sort.uniq
   end
 end
 
 class AutoCompleteName < AutoCompleteByString
   def rough_matches(letter)
-    return Name.connection.select_values(%(
+    Name.connection.select_values(%(
       SELECT DISTINCT text_name FROM names
       WHERE text_name LIKE '#{letter}%'
       AND correct_spelling_id IS NULL
-    )).sort_by {|x| (x.match(' ') ? 'b' : 'a') + x}.uniq
+    )).sort_by { |x| (x.match(" ") ? "b" : "a") + x }.uniq
     # (this sort puts genera and higher on top, everything else
     # on bottom, and sorts alphabetically within each group)
   end
@@ -185,7 +182,6 @@ class AutoCompleteUser < AutoCompleteByString
 end
 
 class AutoCompleteCuratedHerbarium < AutoCompleteByWord
-  
   # In case we decide it doesn't make sense to let users add to any herbarium?
   # attr_accessor :user_id
 

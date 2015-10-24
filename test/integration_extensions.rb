@@ -11,15 +11,15 @@
 
 module IntegrationExtensions
   # Login the given user and return the resulting session.
-  def login(login, password='testpassword', remember_me=true)
+  def login(login, password = "testpassword", remember_me = true)
     login = login.login if login.is_a?(User)
     open_session do |sess|
-      sess.get('/account/login')
+      sess.get("/account/login")
       sess.open_form do |form|
-        form.change('login', login)
-        form.change('password', password)
-        form.change('remember_me', remember_me)
-        form.submit('Login')
+        form.change("login", login)
+        form.change("password", password)
+        form.change("remember_me", remember_me)
+        form.submit("Login")
       end
       sess
     end

@@ -1,6 +1,5 @@
 # encoding: utf-8
 class Synchronization < ActiveRecord::Migration
-
   #=================================================
   #  Migrate up.
   #=================================================
@@ -26,9 +25,9 @@ class Synchronization < ActiveRecord::Migration
       :users,
       :votes,
       :locations,
-      :names,
+      :names
     ]
-      add_column table, :sync_id, :string, :limit => 16
+      add_column table, :sync_id, :string, limit: 16
       User.connection.update("UPDATE #{table} SET sync_id = CONCAT(id,'us1')")
     end
 
@@ -51,10 +50,10 @@ class Synchronization < ActiveRecord::Migration
     add_column :user_groups,      :modified, :datetime
     add_column :draft_names,      :modified, :datetime
     add_column :past_draft_names, :modified, :datetime
-    User.connection.update('UPDATE projects         SET modified = updated_at, created = created_at')
-    User.connection.update('UPDATE user_groups      SET modified = updated_at, created = created_at')
-    User.connection.update('UPDATE draft_names      SET modified = updated_at, created = created_at')
-    User.connection.update('UPDATE past_draft_names SET modified = updated_at')
+    User.connection.update("UPDATE projects         SET modified = updated_at, created = created_at")
+    User.connection.update("UPDATE user_groups      SET modified = updated_at, created = created_at")
+    User.connection.update("UPDATE draft_names      SET modified = updated_at, created = created_at")
+    User.connection.update("UPDATE past_draft_names SET modified = updated_at")
     remove_column :projects,         :updated_at
     remove_column :user_groups,      :updated_at
     remove_column :draft_names,      :updated_at
@@ -84,29 +83,28 @@ class Synchronization < ActiveRecord::Migration
     #  Create a transaction log.
     #-----------------------------
 
-    create_table 'transactions', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
-      t.column 'modified', :datetime
-      t.column 'query',    :text
+    create_table "transactions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
+      t.column "modified", :datetime
+      t.column "query",    :text
     end
 
     #---------------------------------------
     #  Fix flavors in queued_emails table.
     #---------------------------------------
 
-    add_column :queued_emails, :flavor2, :string, :limit => 40
+    add_column :queued_emails, :flavor2, :string, limit: 40
 
-    for flavor in [
-      'comment',
-      'consensus_change',
-      'feature',
-      'location_change',
-      'name_change',
-      'name_proposal',
-      'naming',
-      'observation_change',
-      'publish'
-    ]
-      flavor2 = 'QueuedEmail::' + flavor.camelize
+    for flavor in %w(
+      comment
+      consensus_change
+      feature
+      location_change
+      name_change
+      name_proposal
+      naming
+      observation_change
+      publish)
+      flavor2 = "QueuedEmail::" + flavor.camelize
       User.connection.update %(
         UPDATE `queued_emails` SET `flavor2` = '#{flavor2}'
         WHERE `flavor` = '#{flavor}'
@@ -115,7 +113,7 @@ class Synchronization < ActiveRecord::Migration
 
     remove_column :queued_emails, :flavor
 
-    add_column :queued_emails, :flavor, :string, :limit => 40
+    add_column :queued_emails, :flavor, :string, limit: 40
     User.connection.update("UPDATE `queued_emails` SET `flavor` = `flavor2`")
     remove_column :queued_emails, :flavor2
 
@@ -137,13 +135,13 @@ class Synchronization < ActiveRecord::Migration
     #  Convert SearchState and SequenceState into Query.
     #-----------------------------------------------------
 
-    create_table 'queries', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
-      t.column 'modified',     :datetime
-      t.column 'access_count', :integer
-      t.column 'model',        :enum, :limit => Query.all_models
-      t.column 'flavor',       :enum, :limit => Query.all_flavors
-      t.column 'params',       :text
-      t.column 'outer_id',     :integer
+    create_table "queries", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: true do |t|
+      t.column "modified",     :datetime
+      t.column "access_count", :integer
+      t.column "model",        :enum, limit: Query.all_models
+      t.column "flavor",       :enum, limit: Query.all_flavors
+      t.column "params",       :text
+      t.column "outer_id",     :integer
     end
 
     drop_table :search_states
@@ -164,7 +162,7 @@ class Synchronization < ActiveRecord::Migration
     end
 
     for id, hash in reasons
-      data = YAML::dump(hash).gsub(/[\\"]/) {|x| '\\'+x}
+      data = YAML.dump(hash).gsub(/[\\"]/) { |x| '\\' + x }
       Name.connection.update %(
         UPDATE namings SET reasons="#{data}" WHERE id = #{id}
       )
@@ -196,7 +194,7 @@ class Synchronization < ActiveRecord::Migration
     for row in data
       created, modified, naming_id, user_id, observation_id, sync_id, value = *row
       max = maxes["#{naming_id} #{user_id}"]
-      row << (value.to_f > 0 && value.to_f == max.to_f ? '1' : '0')
+      row << (value.to_f > 0 && value.to_f == max.to_f ? "1" : "0")
     end
 
     # Clear table, we'll recreate it from scratch later.  I tried to do a fancy
@@ -216,12 +214,12 @@ class Synchronization < ActiveRecord::Migration
     for row in data
       Vote.connection.insert %(
         INSERT INTO votes (created, modified, naming_id, user_id, observation_id, sync_id, value, favorite)
-        VALUES (#{row.map {|val| "'#{val}'"}.join(',')})
+        VALUES (#{row.map { |val| "'#{val}'" }.join(",")})
       )
     end
 
     # --------------------------------------------------------
-    #  Add rss_log_id to observations, names, species_lists. 
+    #  Add rss_log_id to observations, names, species_lists.
     #  Also give locations an rss log.
     # --------------------------------------------------------
 
@@ -231,7 +229,7 @@ class Synchronization < ActiveRecord::Migration
     add_column :species_lists, :rss_log_id,  :integer
     add_column :rss_logs,      :location_id, :integer
 
-    for type in ['name', 'observation', 'species_list']
+    for type in %w(name observation species_list)
       for rss_log_id, id in Name.connection.select_rows %(
         SELECT id, #{type}_id FROM rss_logs WHERE #{type}_id IS NOT NULL
       )

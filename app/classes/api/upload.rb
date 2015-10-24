@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 class API
-  class Upload 
+  class Upload
     attr_accessor :data, :length, :content_type, :checksum
     def initialize(args)
       @data = args[:data]
@@ -14,18 +14,18 @@ class API
   def prepare_upload
     result = nil
     if url = parse_string(:upload_url)
-      raise TooManyUploads.new if result
+      fail TooManyUploads.new if result
       result = UploadFromURL.new(url)
     end
     if file = parse_string(:upload_file)
-      raise TooManyUploads.new if result
+      fail TooManyUploads.new if result
       result = UploadFromFile.new(file)
     end
     if upload = parse_upload
-      raise TooManyUploads.new if result
+      fail TooManyUploads.new if result
       result = UploadFromHTTPRequest.new(upload)
     end
-    return result
+    result
   end
 
   class Upload
@@ -37,16 +37,16 @@ class API
     def initialize(url)
       @temp_file = Tempfile.new("api_upload")
       uri = URI.parse(url)
-      File.open(@temp_file, 'w:utf-8') do |fh|
+      File.open(@temp_file, "w:utf-8") do |fh|
         Net::HTTP.new(uri.host, uri.port).start do |http|
           http.request_get(uri.path) do |response|
             response.read_body do |chunk|
-              fh.write(chunk.force_encoding('utf-8'))
+              fh.write(chunk.force_encoding("utf-8"))
             end
             self.content        = @temp_file
-            self.content_length = response['Content-Length'].to_i
-            self.content_type   = response['Content-Type'].to_s
-            self.content_md5    = response['Content-MD5'].to_s
+            self.content_length = response["Content-Length"].to_i
+            self.content_type   = response["Content-Type"].to_s
+            self.content_md5    = response["Content-MD5"].to_s
           end
         end
       end
@@ -61,10 +61,10 @@ class API
 
   class UploadFromFile < Upload
     def initialize(file)
-      raise FileMissing.new(file) unless File.exists?(file)
-      self.content = File.open(file, 'rb')
+      fail FileMissing.new(file) unless File.exist?(file)
+      self.content = File.open(file, "rb")
       self.content_length = File.size(file)
-      self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, '')
+      self.content_type = `file --mime -b #{file}`.sub(/[;\s].*/, "")
     end
   end
 

@@ -9,8 +9,8 @@
 #
 ################################################################################
 
-require File.expand_path('../../config/boot.rb', __FILE__)
-require File.expand_path('../../config/environment.rb', __FILE__)
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
 
 file = ARGV[0]
 puts "Getting corrections from #{file}..."
@@ -22,7 +22,7 @@ File.open(file) do |fh|
     if line.blank?
       groups << [] if groups.last != []
     elsif line.match(/^(\*)?(\d+)\t(.*)/)
-      groups.last << [$2, $3, $1 == '*']
+      groups.last << [Regexp.last_match(2), Regexp.last_match(3), Regexp.last_match(1) == "*"]
     end
   end
 end
@@ -44,4 +44,3 @@ for group in groups
     end
   end
 end
-

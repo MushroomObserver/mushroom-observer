@@ -52,13 +52,13 @@ class ImageController < ApplicationController
     :prev_image,
     :show_image,
     :show_original,
-    :test_upload_speed,
+    :test_upload_speed
   ]
 
   before_filter :disable_link_prefetching, except: [
     :add_image,
     :edit_image,
-    :show_image,
+    :show_image
   ]
 
   ##############################################################################
@@ -91,14 +91,14 @@ class ImageController < ApplicationController
   def images_for_project
     if project = find_or_goto_index(Project, params[:id].to_s)
       query = create_query(:Image, :for_project, project: project)
-      show_selected_images(query, {always_index: 1})
+      show_selected_images(query, always_index: 1)
     end
   end
 
   # Display matrix of images whose notes, names, etc. match a string pattern.
   def image_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (image = Image.safe_find(pattern))
       redirect_to(action: "show_image", id: image.id)
     else
@@ -109,19 +109,17 @@ class ImageController < ApplicationController
 
   # Displays matrix of advanced search results.
   def advanced_search # :nologin: :norobots:
-    begin
-      query = find_query(:Image)
-      show_selected_images(query)
-    rescue => err
-      flash_error(err.to_s) if !err.blank?
-      redirect_to(controller: "observer", action: "advanced_search")
-    end
+    query = find_query(:Image)
+    show_selected_images(query)
+  rescue => err
+    flash_error(err.to_s) unless err.blank?
+    redirect_to(controller: "observer", action: "advanced_search")
   end
 
   # Show selected search results as a matrix with "list_images" template.
-  def show_selected_images(query, args={})
+  def show_selected_images(query, args = {})
     store_query_in_session(query)
-    @view = view_context  ## Needed for matrix view helepr
+    @view = view_context ## Needed for matrix view helepr
     @links ||= []
 
     # I can't figure out why ActiveRecord is not eager-loading all the names.
@@ -131,7 +129,7 @@ class ImageController < ApplicationController
     args = {
       action: "list_images",
       matrix: true,
-      include: [:user, {observations: :name}],
+      include: [:user, { observations: :name }]
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -145,29 +143,29 @@ class ImageController < ApplicationController
       ["updated_at",    :sort_by_updated_at.t],
       ["confidence",    :sort_by_confidence.t],
       ["image_quality", :sort_by_image_quality.t],
-      ["num_views",     :sort_by_num_views.t],
+      ["num_views",     :sort_by_num_views.t]
     ]
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
       @links << [:show_objects.t(type: :observation),
-        add_query_param({
-          controller: "observer", action: "index_observation"
-        }, query)]
+                 add_query_param({
+                                   controller: "observer", action: "index_observation"
+                                 }, query)]
     end
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") or
+    if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")
-      args[:letters] = 'users.login'
+      args[:letters] = "users.login"
     # Paginate by letter if sorting by copyright holder.
-    elsif (query.params[:by] == "copyright_holder") or
+    elsif (query.params[:by] == "copyright_holder") ||
           (query.params[:by] == "reverse_copyright_holder")
-      args[:letters] = 'images.copyright_holder'
+      args[:letters] = "images.copyright_holder"
     # Paginate by letter if names are included in query.
     elsif query.uses_table?(:names)
-      args[:letters] = 'names.sort_name'
+      args[:letters] = "names.sort_name"
     end
 
     show_index_of_objects(query, args)
@@ -218,9 +216,9 @@ class ImageController < ApplicationController
     end
 
     # Cast user's vote if passed in "vote" parameter.
-    if @user and
-       (val = params[:vote]) and
-       (val == "0" or (val = Image.validate_vote(val)))
+    if @user &&
+       (val = params[:vote]) &&
+       (val == "0" || (val = Image.validate_vote(val)))
       val = nil if val == "0"
       cur = @image.users_vote
       if cur != val
@@ -238,7 +236,11 @@ class ImageController < ApplicationController
 
     # Grab list of votes.
     @votes = @image.image_votes(include: :user).sort_by do |v|
-      (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase rescue "?"
+      begin
+        (v.anonymous ? :anonymous.l : v.user.unique_text_name).downcase
+      rescue
+        "?"
+      end
     end
 
     # Update view stats on image we're actually showing.
@@ -295,7 +297,7 @@ class ImageController < ApplicationController
     if @observation = find_or_goto_index(Observation, params[:id].to_s)
       if !check_permission!(@observation)
         redirect_with_query(controller: "observer",
-          action: "show_observation", id: @observation.id)
+                            action: "show_observation", id: @observation.id)
       elsif request.method != "POST"
         @image = Image.new
         @image.license = @user.license
@@ -309,22 +311,22 @@ class ImageController < ApplicationController
       elsif params[:upload].blank?
         flash_warning(:runtime_no_changes.t)
         redirect_with_query(controller: "observer",
-          action: "show_observation", id: @observation.id)
+                            action: "show_observation", id: @observation.id)
       else
         args = params[:image]
         i = 1
-        while i < 5 or !params[:upload]["image#{i}"].blank?
+        while i < 5 || !params[:upload]["image#{i}"].blank?
           process_image(args, params[:upload]["image#{i}"])
           i += 1
         end
         redirect_with_query(controller: "observer",
-          action: "show_observation", id: @observation.id)
+                            action: "show_observation", id: @observation.id)
       end
     end
   end
 
   def process_image(args, upload)
-    if !upload.blank?
+    unless upload.blank?
       @image = Image.new(args.permit(whitelisted_image_args))
       @image.created_at = Time.now
       @image.updated_at = @image.created_at
@@ -341,7 +343,7 @@ class ImageController < ApplicationController
       if !@image.process_image
         logger.error("Unable to upload image")
         name = @image.original_name
-        name = '???' if name.empty?
+        name = "???" if name.empty?
         flash_error(:runtime_image_invalid_image.t(name: name))
         flash_object_errors(@image)
       else
@@ -421,7 +423,11 @@ class ImageController < ApplicationController
       @projects << proj unless @projects.include?(proj)
     end
     for proj in @projects
-      @project_checks[proj.id] = params[:project]["id_#{proj.id}"] == "1" rescue false
+      @project_checks[proj.id] = begin
+                                   params[:project]["id_#{proj.id}"] == "1"
+                                 rescue
+                                   false
+                                 end
     end
   end
 
@@ -458,17 +464,17 @@ class ImageController < ApplicationController
           if after
             project.add_image(img)
             flash_notice(:attached_to_project.t(object: :image,
-              project: project.title))
+                                                project: project.title))
           else
             project.remove_image(img)
             flash_notice(:removed_from_project.t(object: :image,
-              project: project.title))
+                                                 project: project.title))
           end
           any_changes = true
         end
       end
     end
-    return any_changes
+    any_changes
   end
 
   # Callback to destroy an image.
@@ -518,7 +524,7 @@ class ImageController < ApplicationController
         flash_notice(:runtime_image_remove_success.t(id: @image.id))
       end
       redirect_with_query(controller: "observer",
-        action: "show_observation", id: @observation.id)
+                          action: "show_observation", id: @observation.id)
     end
   end
 
@@ -532,14 +538,14 @@ class ImageController < ApplicationController
     @layout = calc_layout_params
     @pages = paginate_numbers(:page, @layout["count"])
     @objects = query.paginate(@pages,
-                              include: [:user, {observations: :name}])
+                              include: [:user, { observations: :name }])
   end
 
   def look_for_image(method, params)
     result = nil
-    if (method == "POST") or !params[:img_id].blank?
+    if (method == "POST") || !params[:img_id].blank?
       result = Image.safe_find(params[:img_id])
-      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id])) if !result
+      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id])) unless result
     end
     result
   end
@@ -578,14 +584,14 @@ class ImageController < ApplicationController
     done = false
 
     # Make sure user owns the observation.
-    if (@mode == :observation) and
+    if (@mode == :observation) &&
        !check_permission!(@observation)
       redirect_with_query(controller: "observer",
-        action: "show_observation", id: @observation.id)
+                          action: "show_observation", id: @observation.id)
       done = true
 
     # User entered an image id by hand or clicked on an image.
-    elsif (request.method == "POST") or
+    elsif (request.method == "POST") ||
           !params[:img_id].blank?
       image = Image.safe_find(params[:img_id])
       if !image
@@ -596,7 +602,7 @@ class ImageController < ApplicationController
         @observation.add_image(image)
         @observation.log_reuse_image(image)
         redirect_with_query(controller: "observer",
-          action: "show_observation", id: @observation.id)
+                            action: "show_observation", id: @observation.id)
         done = true
 
       else
@@ -614,7 +620,7 @@ class ImageController < ApplicationController
     end
 
     # Serve form.
-    if !done
+    unless done
       if params[:all_users] == "1"
         @all_users = true
         query = create_query(:Image, :all, by: :updated_at)
@@ -624,7 +630,7 @@ class ImageController < ApplicationController
       @layout = calc_layout_params
       @pages = paginate_numbers(:page, @layout["count"])
       @objects = query.paginate(@pages,
-                                include: [:user, {observations: :name}])
+                                include: [:user, { observations: :name }])
     end
   end
 
@@ -643,7 +649,7 @@ class ImageController < ApplicationController
     pass_query_params
     @object = find_or_goto_index(target_class, params[:id].to_s)
     if check_permission!(@object)
-      if request.method == "POST" and (images = params[:selected])
+      if request.method == "POST" && (images = params[:selected])
         images.each do |image_id, do_it|
           if do_it == "yes"
             if image = Image.safe_find(image_id)
@@ -654,11 +660,11 @@ class ImageController < ApplicationController
           end
         end
         redirect_with_query(controller: target_class.show_controller,
-          action: target_class.show_action, id: @object.id)
+                            action: target_class.show_action, id: @object.id)
       end
     else
       redirect_with_query(controller: target_class.show_controller,
-        action: target_class.show_action, id: @object.id)
+                          action: target_class.show_action, id: @object.id)
     end
   end
 
@@ -684,12 +690,12 @@ class ImageController < ApplicationController
           flash_error("Invalid operation #{params[:op].inspect}")
         end
       end
-      if params[:size].blank? or
+      if params[:size].blank? ||
          params[:size].to_sym == (@user ? @user.image_size : :medium)
         redirect_with_query(action: "show_image", id: image)
       else
         redirect_with_query(action: "show_image", id: image,
-          size: params[:size])
+                            size: params[:size])
       end
     end
   end
@@ -711,7 +717,6 @@ class ImageController < ApplicationController
   #   @data[n]["license_name"]      Name of current license.
   #   @data[n]["licenses"]          Options for select menu.
   def license_updater # :norobots:
-
     # Process any changes.
     if request.method == "POST"
       data = params[:updates]
@@ -720,10 +725,10 @@ class ImageController < ApplicationController
         new_id = row[:new_id].to_i
         old_holder = row[:old_holder].to_s
         new_holder = row[:new_holder].to_s
-        if old_id != new_id or
+        if old_id != new_id ||
            old_holder != new_holder
-          old_holder = Image.connection.quote(old_holder);
-          new_holder = Image.connection.quote(new_holder);
+          old_holder = Image.connection.quote(old_holder)
+          new_holder = Image.connection.quote(new_holder)
           data = Image.connection.select_rows(%(
             SELECT id, YEAR(`when`) FROM images
             WHERE user_id = #{@user.id}
@@ -734,7 +739,7 @@ class ImageController < ApplicationController
             INSERT INTO copyright_changes
               (user_id, updated_at, target_type, target_id, year, name, license_id)
             VALUES
-              #{data.map {|id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})"}.join(",\n") }
+              #{data.map { |id, year| "(#{@user.id},NOW(),'Image',#{id},#{year},#{old_holder},#{old_id})" }.join(",\n")}
           ))
           Image.connection.update(%(
             UPDATE images
@@ -821,10 +826,10 @@ class ImageController < ApplicationController
 
     # Last term in ORDER BY spec below penalizes images of the wrong aspect ratio.
     # If we wanted 600x400 it will penalize 400x400 images by "ratio_penalty".
-    ratio_penalty = ratio_penalty.to_f / Math.log10(600.0/400)
+    ratio_penalty = ratio_penalty.to_f / Math.log10(600.0 / 400)
 
     names = get_list_of_names(params[:names])
-    names = names.map {|n| "'" + n.gsub(/'/, '\\\'') + "'"}.join(',')
+    names = names.map { |n| "'" + n.gsub(/'/, '\\\'') + "'" }.join(",")
 
     data = Name.connection.select_rows(%(
       SELECT y.name, y.id, y.width, y.height
@@ -844,7 +849,7 @@ class ImageController < ApplicationController
         ORDER BY
           o.vote_cache * #{confidence_reward} +
           i.vote_cache * #{quality_reward} -
-          ABS(LOG(width/height) - #{Math.log10(target_width.to_f/target_height)}) * #{ratio_penalty} DESC
+          ABS(LOG(width/height) - #{Math.log10(target_width.to_f / target_height)}) * #{ratio_penalty} DESC
       ) AS y
       GROUP BY y.name
     ))
@@ -867,45 +872,45 @@ class ImageController < ApplicationController
 
   def render_image_csv_file(data)
     report = CSV.generate(col_sep: "\t") do |csv|
-      csv << ["name", 'image id', 'image width', 'image height']
+      csv << ["name", "image id", "image width", "image height"]
       data.each do |name, id, width, height|
         csv << [name, id.to_s, width.to_s, height.to_s]
       end
     end
     send_data(report,
-      type: 'text/csv',
-      charset: 'UTF-8',
-      header: "present",
-      disposition: "attachment",
-      filename: "#{action_name}.csv"
-    )
+              type: "text/csv",
+              charset: "UTF-8",
+              header: "present",
+              disposition: "attachment",
+              filename: "#{action_name}.csv"
+             )
   end
 
   def get_list_of_names(file)
     results = []
-    if file.respond_to?(:read) and
+    if file.respond_to?(:read) &&
        file.respond_to?(:content_type)
       get_list_of_names_from_file(file)
     elsif file.is_a?(String)
       get_list_of_names_from_string(file)
     elsif !file.blank?
-      raise "Names file came in as an unexpected class:" \
+      fail "Names file came in as an unexpected class:" \
         "#{file.class.name.inspect}"
     else
-      raise "Missing names file!"
+      fail "Missing names file!"
     end
   end
 
   def get_list_of_names_from_file(file)
     case file.content_type.chomp
-    when 'text/plain',
-         'application/text',
-         'application/octet-stream'
+    when "text/plain",
+         "application/text",
+         "application/octet-stream"
       get_list_of_names_from_plain_text_file(file)
-    when 'text/csv'
+    when "text/csv"
       get_list_of_names_from_csv_file(file)
     else
-      raise "Names file has unrecognized content_type: #{content_type.inspect}"
+      fail "Names file has unrecognized content_type: #{content_type.inspect}"
     end
   end
 
@@ -914,12 +919,12 @@ class ImageController < ApplicationController
     headings = results.shift.map(&:to_s).map(&:downcase)
     name_column = headings.index_of("name")
     rank_column = headings.index_of("rank")
-    if !name_column
-      raise 'Expected names file to have a \"name\" column, ' \
+    unless name_column
+      fail 'Expected names file to have a \"name\" column, ' \
         "with column label in the first row."
     end
     if rank_column
-      results.reject! {|row| row[rank_column].to_s.downcase != "species"}
+      results.reject! { |row| row[rank_column].to_s.downcase != "species" }
     end
     results.map do |row|
       row[name_column].to_s.strip_squeeze

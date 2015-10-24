@@ -15,7 +15,6 @@
 ################################################################################
 
 module FlashExtensions
-
   # Get the errors rendered in the last request, or current set of errors if
   # redirected.
   def get_last_flash
@@ -23,29 +22,29 @@ module FlashExtensions
   end
 
   # Assert that there was no notice, warning or error.
-  def assert_no_flash(msg="")
+  def assert_no_flash(msg = "")
     assert_flash(nil, msg)
   end
 
   # Assert that there was a notice but no warning or error.
-  def assert_flash_success(msg="Should be flash success (level 0).")
+  def assert_flash_success(msg = "Should be flash success (level 0).")
     assert_flash(0, msg)
   end
 
   # Assert that there was warning but no error.
-  def assert_flash_warning(msg="Should be a flash warning but no error (level 1)")
+  def assert_flash_warning(msg = "Should be a flash warning but no error (level 1)")
     assert_flash(1, msg)
   end
 
   # Assert that there was a error.
-  def assert_flash_error(msg="Should be a flash error (level 2).")
+  def assert_flash_error(msg = "Should be a flash error (level 2).")
     assert_flash(2, msg)
   end
 
   # Assert that an error was rendered or is pending.
-  def assert_flash(expect, msg="")
+  def assert_flash(expect, msg = "")
     if got = get_last_flash
-      lvl = got[0,1].to_i
+      lvl = got[0, 1].to_i
       got = got[1..-1].gsub(/(\n|<br.?>)+/, "\n")
     end
     msg.sub(/\n*$/, "\n") if msg
@@ -56,7 +55,7 @@ module FlashExtensions
       assert(expect.nil?, "#{msg} Expected a flash error.  Got nothing.")
     elsif expect.is_a?(Fixnum)
       assert(expect == lvl,
-        "#{msg} Wrong flash error level.  Message: level #{lvl}, #{got.inspect}.")
+             "#{msg} Wrong flash error level.  Message: level #{lvl}, #{got.inspect}.")
     elsif expect.is_a?(Regexp)
       assert(got.match(expect),
              "#{msg} Got the wrong flash error(s). " \

@@ -7,11 +7,11 @@ module PaginationHelper
   #     <% end %>
   #   <% end %>
   #
-  def paginate_block(pages, args={}, &block) ##TODO: Depreciate / REMOVE
+  def paginate_block(pages, args = {}, &block) # #TODO: Depreciate / REMOVE
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
-    content_tag(:div, class: 'results') do
+    content_tag(:div, class: "results") do
       letters + safe_br + numbers + body + numbers + safe_br + letters
     end
   end
@@ -29,11 +29,11 @@ module PaginationHelper
   #   <%= pagination_letters(@pages) %>
   #   <%= pagination_numbers(@pages) %>
   #
-  def pagination_letters(pages, args={})
-    if pages and
-        pages.letter_arg and
-        (pages.letter || pages.num_total > pages.num_per_page) and
-        (!pages.used_letters or pages.used_letters.length > 1)
+  def pagination_letters(pages, args = {})
+    if pages &&
+       pages.letter_arg &&
+       (pages.letter || pages.num_total > pages.num_per_page) &&
+       (!pages.used_letters || pages.used_letters.length > 1)
       args = args.dup
       args[:params] = (args[:params] || {}).dup
       args[:params][pages.number_arg] = nil
@@ -43,7 +43,7 @@ module PaginationHelper
         else
           content_tag(:li, content_tag(:span, letter), class: "disabled")
         end
-      end.safe_join(' ')
+      end.safe_join(" ")
       return content_tag(:div, str, class: "pagination pagination-sm")
     else
       return safe_empty
@@ -64,7 +64,7 @@ module PaginationHelper
   #   # In view: (it is wrapped in 'pagination' div already)
   #   <%= pagination_numbers(@pages) %>
   #
-  def pagination_numbers(pages, args={})
+  def pagination_numbers(pages, args = {})
     result = safe_empty
     if pages && pages.num_pages > 1
       params = args[:params] ||= {}
@@ -84,7 +84,7 @@ module PaginationHelper
       result = []
       pstr = "« #{:PREV.t}"
       nstr = "#{:NEXT.t} »"
-      result << pagination_link(pstr, this-1, arg, args) if this > 1
+      result << pagination_link(pstr, this - 1, arg, args) if this > 1
       result << pagination_link(1, 1, arg, args) if from > 1
       result << content_tag(:li, content_tag(:span, "..."), class: "disabled") if from > 2
       for n in from..to
@@ -96,9 +96,9 @@ module PaginationHelper
       end
       result << content_tag(:li, content_tag(:span, "..."), class: "disabled") if to < num - 1
       result << pagination_link(num, num, arg, args) if to < num
-      result << pagination_link(nstr, this+1, arg, args) if this < num
+      result << pagination_link(nstr, this + 1, arg, args) if this < num
 
-      result = content_tag(:ul, result.safe_join(' '), class: "pagination pagination-sm")
+      result = content_tag(:ul, result.safe_join(" "), class: "pagination pagination-sm")
     end
     result
   end
@@ -109,7 +109,7 @@ module PaginationHelper
     params[arg] = page
     url = reload_with_args(params)
     if args[:anchor]
-      url.sub!(/#.*/, '')
+      url.sub!(/#.*/, "")
       url += '#' + args[:anchor]
     end
     "<li>#{link_to(label, url)}</li>".html_safe

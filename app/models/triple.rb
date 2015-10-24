@@ -8,9 +8,9 @@ class Triple < ActiveRecord::Base
       )
     end
   end
-  
+
   private
-  
+
   def self.valid_predicate(predicate)
     predicate.match(/^:\w+$/)
   end

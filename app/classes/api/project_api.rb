@@ -11,59 +11,59 @@ class API
 
     self.high_detail_includes = [
       :comments,
-      :user,
+      :user
     ]
 
     def query_params
       {
-          where: sql_id_condition,
-          created_at: parse_time_range(:created_at),
-          updated_at: parse_time_range(:updated_at),
-          users: parse_users(:user),
-          has_images: parse_boolean(:has_images, :limit => true),
-          has_observations: parse_boolean(:has_observations, :limit => true),
-          has_species_lists: parse_boolean(:has_species_lists, :limit => true),
-          has_comments: parse_boolean(:has_comments, :limit => true),
-          has_notes: parse_boolean(:has_notes),
-          title_has: parse_string(:title_has),
-          notes_has: parse_string(:notes_has),
-          comments_has: parse_string(:comments_has),
+        where: sql_id_condition,
+        created_at: parse_time_range(:created_at),
+        updated_at: parse_time_range(:updated_at),
+        users: parse_users(:user),
+        has_images: parse_boolean(:has_images, limit: true),
+        has_observations: parse_boolean(:has_observations, limit: true),
+        has_species_lists: parse_boolean(:has_species_lists, limit: true),
+        has_comments: parse_boolean(:has_comments, limit: true),
+        has_notes: parse_boolean(:has_notes),
+        title_has: parse_string(:title_has),
+        notes_has: parse_string(:notes_has),
+        comments_has: parse_string(:comments_has)
       }
     end
 
     def build_object
-      admins  = parse_users(:admins, :default => [user])
-      members = parse_users(:members, :default => [user])
+      admins  = parse_users(:admins, default: [user])
+      members = parse_users(:members, default: [user])
       params = {
-          title: parse_string(:title, :limit => 100),
-          summary: parse_string(:summary),
+        title: parse_string(:title, limit: 100),
+        summary: parse_string(:summary)
       }
       done_parsing_parameters!
 
       title = params[:title].to_s
-      admin_title = title + '.admin'
-      raise MissingParameter.new(:title) if title.blank?
-      raise ProjectTaken.new(title) if Project.find_by_title(title)
-      raise UserGroupTaken.new(title) if UserGroup.find_by_name(title)
-      raise UserGroupTaken.new(admin_title) if UserGroup.find_by_name(admin_title)
+      admin_title = title + ".admin"
+      fail MissingParameter.new(:title) if title.blank?
+      fail ProjectTaken.new(title) if Project.find_by_title(title)
+      fail UserGroupTaken.new(title) if UserGroup.find_by_name(title)
+      fail UserGroupTaken.new(admin_title) if UserGroup.find_by_name(admin_title)
 
       admin_group = UserGroup.new(
-        :name  => title,
-        :users => admins
+        name: title,
+        users: admins
       )
-      admin_group.save or raise CreateFailed.new(admin_group)
+      admin_group.save || fail(CreateFailed.new(admin_group))
 
       member_group = UserGroup.new(
-        :name  => title,
-        :users => members
+        name: title,
+        users: members
       )
-      member_group.save or raise CreateFailed.new(member_group)
+      member_group.save || fail(CreateFailed.new(member_group))
 
       params[:admin_group] = admin_group
       params[:user_group] = member_group
       proj = Project.new(params)
-      proj.save or raise CreateFailed.new(proj)
-      return proj
+      proj.save || fail(CreateFailed.new(proj))
+      proj
     end
 
     def build_setter
@@ -78,27 +78,27 @@ class API
       add_species_lists = parse_projects(:add_species_lists) || []
       remove_species_lists = parse_projects(:remove_species_lists) || []
       params = {
-          title: parse_string(:set_title, :limit => 100),
-          summary: parse_string(:set_summary),
+        title: parse_string(:set_title, limit: 100),
+        summary: parse_string(:set_summary)
       }
       params.remove_nils!
 
-      if params.empty? and
-         add_admins.empty? and
-         remove_admins.empty? and
-         add_members.empty? and
-         remove_members.empty? and
-         add_images.empty? and
-         remove_images.empty? and
-         add_observations.empty? and
-         remove_observations.empty? and
-         add_species_lists.empty? and
+      if params.empty? &&
+         add_admins.empty? &&
+         remove_admins.empty? &&
+         add_members.empty? &&
+         remove_members.empty? &&
+         add_images.empty? &&
+         remove_images.empty? &&
+         add_observations.empty? &&
+         remove_observations.empty? &&
+         add_species_lists.empty? &&
          remove_species_lists.empty?
-        raise MissingSetParameters.new
+        fail MissingSetParameters.new
       end
 
       lambda do |proj|
-        raise MustBeAdmin.new(proj) unless proj.is_admin?(user)
+        fail MustBeAdmin.new(proj) unless proj.is_admin?(user)
         proj.update!(params)
         proj.admin_group.users.push(add_admins) if add_admins.any?
         proj.admin_group.users.delete(remove_admins) if remove_admins.any?
@@ -114,7 +114,7 @@ class API
     end
 
     def delete
-      raise NoMethodForAction("DELETE", action)
+      fail NoMethodForAction("DELETE", action)
     end
   end
 end

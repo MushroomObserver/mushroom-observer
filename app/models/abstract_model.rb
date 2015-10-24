@@ -64,12 +64,17 @@
 class AbstractModel < ActiveRecord::Base
   self.abstract_class = true
 
-  def self.acts_like_model?; true; end
-  def acts_like_model?; true; end
+  def self.acts_like_model?
+    true
+  end
+
+  def acts_like_model?
+    true
+  end
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def self.type_tag
-    self.name.underscore.to_sym
+    name.underscore.to_sym
   end
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
@@ -84,7 +89,7 @@ class AbstractModel < ActiveRecord::Base
 
   # number (or nil) that is the default value for attr
   def self.default_cardinal(attr)
-    self.column_defaults[attr.to_s]
+    column_defaults[attr.to_s]
   end
 
   ##############################################################################
@@ -98,17 +103,15 @@ class AbstractModel < ActiveRecord::Base
   def revert_clone(version)
     return self if self.version == version
     result = self.class.find(id)
-    result = nil if not result.revert_to(version)
+    result = nil unless result.revert_to(version)
     result
   end
 
   # Look up record with given ID, returning nil if it no longer exists.
   def self.safe_find(id)
-    begin
-      self.find(id)
-    rescue ActiveRecord::RecordNotFound
-      nil
-    end
+    find(id)
+  rescue ActiveRecord::RecordNotFound
+    nil
   end
 
   # Look up an object given type and id.
@@ -128,7 +131,7 @@ class AbstractModel < ActiveRecord::Base
   #
   def self.find_by_sql_with_limit(sql, offset, limit)
     sql = sanitize_sql(sql)
-    add_limit!(sql, {limit: limit, offset: offset})
+    add_limit!(sql, limit: limit, offset: offset)
     find_by_sql(sql)
   end
 
@@ -156,13 +159,13 @@ class AbstractModel < ActiveRecord::Base
   #
   def find_version(idx)
     if idx < 0
-      limit = "DESC LIMIT 1, #{-idx-1}"
+      limit = "DESC LIMIT 1, #{-idx - 1}"
     else
       limit = "ASC LIMIT 1, #{idx}"
     end
     num = self.class.connection.select_value %(
       SELECT version FROM #{versioned_table_name}
-      WHERE #{self.type_tag}_id = #{id}
+      WHERE #{type_tag}_id = #{id}
       ORDER BY version #{limit}
     )
     num ? num.to_i : nil
@@ -182,8 +185,8 @@ class AbstractModel < ActiveRecord::Base
   def set_user_and_autolog
     # self.created_at ||= Time.now        if respond_to?('created_at=')
     # self.updated_at ||= Time.now        if respond_to?('updated_at=')
-    self.user_id  ||= User.current_id if respond_to?('user_id=')
-    autolog_created_at                if has_rss_log?
+    self.user_id ||= User.current_id if respond_to?("user_id=")
+    autolog_created_at if has_rss_log?
   end
 
   # This is called just after an object is created.
@@ -208,9 +211,7 @@ class AbstractModel < ActiveRecord::Base
   def do_log_update
     # raise "do_log_update"
     SiteData.update_contribution(:chg, self)
-    if !@save_without_our_callbacks
-      autolog_updated_at if has_rss_log?
-    end
+    autolog_updated_at if has_rss_log? unless @save_without_our_callbacks
   end
 
   # This would be called just after an object's changes are saved, but we have
@@ -227,7 +228,7 @@ class AbstractModel < ActiveRecord::Base
   def do_log_destroy
     SiteData.update_contribution(:del, self)
     autolog_destroyed if has_rss_log?
-    @id_was = self.id
+    @id_was = id
   end
 
   # This would be called just after an object is destroyed, but we have no need
@@ -249,7 +250,7 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Return id from before destroy.
-  def id_was; @id_was; end
+  attr_reader :id_was
 
   # Handy callback a model may choose to use that updates 'user_id' whenever a
   # versioned record changes non-trivially.
@@ -274,11 +275,11 @@ class AbstractModel < ActiveRecord::Base
   # any RssLog, because it uses +save_without_our_callbacks+.
   #
   def update_view_stats
-    if respond_to?('num_views=') || respond_to?('last_view=')
+    if respond_to?("num_views=") || respond_to?("last_view=")
       self.class.record_timestamps = false
-      self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
-      self.last_view = Time.now             if respond_to?('last_view=')
-      self.save_without_our_callbacks
+      self.num_views = (num_views || 0) + 1 if respond_to?("num_views=")
+      self.last_view = Time.now             if respond_to?("last_view=")
+      save_without_our_callbacks
       self.class.record_timestamps = true
     end
   end
@@ -295,7 +296,7 @@ class AbstractModel < ActiveRecord::Base
   #   puts user.dump_errors if Rails.env == "test"
   #
   def dump_errors
-    self.formatted_errors.join("; ")
+    formatted_errors.join("; ")
   end
 
   # This collects all the error messages for a given instance, and returns
@@ -308,12 +309,12 @@ class AbstractModel < ActiveRecord::Base
   #   obj.errors.add(:attr, "message").
   def formatted_errors
     out = []
-    self.errors.each do |attr, msg|
+    errors.each do |attr, msg|
       if msg.match(/^[A-Z]/)
         out << msg
       else
         name = attr.to_s.to_sym.l
-        obj = self.type_tag.to_s.capitalize_first.to_sym.l
+        obj = type_tag.to_s.capitalize_first.to_sym.l
         out << "#{obj} #{name} #{msg}."
       end
     end
@@ -334,8 +335,13 @@ class AbstractModel < ActiveRecord::Base
   #
   # TODO: Make this a model method!  Also it"s not clear why the default
   # is an error rather than name.underscore.
-  def self.show_controller; name.underscore; end
-  def show_controller; self.class.show_controller; end
+  def self.show_controller
+    name.underscore
+  end
+
+  def show_controller
+    self.class.show_controller
+  end
 
   # Return the name of the "index_<object>" action (as a simple
   # lowercase string) that displays search index for this object.
@@ -343,8 +349,13 @@ class AbstractModel < ActiveRecord::Base
   #   Name.index_action => "index_name"
   #   name.index_action => "index_name"
   #
-  def self.index_action; "index_" + name.underscore; end
-  def index_action; self.class.index_action; end
+  def self.index_action
+    "index_" + name.underscore
+  end
+
+  def index_action
+    self.class.index_action
+  end
 
   # Return the name of the "show_<object>" action (as a simple
   # lowercase string) that displays this object.
@@ -352,8 +363,13 @@ class AbstractModel < ActiveRecord::Base
   #   Name.show_action => "show_name"
   #   name.show_action => "show_name"
   #
-  def self.show_action; "show_" + name.underscore; end
-  def show_action; self.class.show_action; end
+  def self.show_action
+    "show_" + name.underscore
+  end
+
+  def show_action
+    self.class.show_action
+  end
 
   # Return the name of the "edit_<object>" action (as a simple
   # lowercase string) that displays this object.
@@ -361,8 +377,13 @@ class AbstractModel < ActiveRecord::Base
   #   Name.edit_action => "edit_name"
   #   name.edit_action => "edit_name"
   #
-  def self.edit_action; "edit_" + name.underscore; end
-  def edit_action; self.class.edit_action; end
+  def self.edit_action
+    "edit_" + name.underscore
+  end
+
+  def edit_action
+    self.class.edit_action
+  end
 
   # Return the URL of the "show_<object>" action
   #
@@ -372,7 +393,10 @@ class AbstractModel < ActiveRecord::Base
   def self.show_url(id)
     "#{MO.http_domain}/#{show_controller}/#{show_action}/#{id}"
   end
-  def show_url; self.class.show_url(id); end
+
+  def show_url
+    self.class.show_url(id)
+  end
 
   # Return the link_to args of the "show_<object>" action
   #
@@ -380,9 +404,12 @@ class AbstractModel < ActiveRecord::Base
   #   name.show_link_args     => {controller: :name, action: :show_name, id: 12}
   #
   def self.show_link_args(id)
-    {controller: show_controller, action: show_action, id: id}
+    { controller: show_controller, action: show_action, id: id }
   end
-  def show_link_args; self.class.show_link_args(id); end
+
+  def show_link_args
+    self.class.show_link_args(id)
+  end
 
   # Return the URL for the EOL resource corresponding to this object.
   #
@@ -392,8 +419,14 @@ class AbstractModel < ActiveRecord::Base
     triple = Triple.find_by_subject_and_predicate(show_url, eol_predicate)
     triple.object if triple
   end
-  def self.eol_predicate; ":eol#{name}"; end
-  def eol_predicate; self.class.eol_predicate; end
+
+  def self.eol_predicate
+    ":eol#{name}"
+  end
+
+  def eol_predicate
+    self.class.eol_predicate
+  end
 
   ##############################################################################
   #
@@ -429,7 +462,7 @@ class AbstractModel < ActiveRecord::Base
   #    obj.log(:log_observation_updated)
   #
   def log(*args)
-    init_rss_log if !rss_log
+    init_rss_log unless rss_log
     rss_log.add_with_date(*args)
   end
 
@@ -445,19 +478,29 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Logs addition of new Image.
-  def log_create_image(image); log_image(:log_image_created_at, image, true); end
+  def log_create_image(image)
+    log_image(:log_image_created_at, image, true)
+  end
 
   # Logs addition of existing Image.
-  def log_reuse_image(image); log_image(:log_image_reused, image, true); end
+  def log_reuse_image(image)
+    log_image(:log_image_reused, image, true)
+  end
 
   # Logs update of Image.
-  def log_update_image(image); log_image(:log_image_updated, image, false); end
+  def log_update_image(image)
+    log_image(:log_image_updated, image, false)
+  end
 
   # Logs removal of Image.
-  def log_remove_image(image); log_image(:log_image_removed, image, false); end
+  def log_remove_image(image)
+    log_image(:log_image_removed, image, false)
+  end
 
   # Logs destruction of Image.
-  def log_destroy_image(image); log_image(:log_image_destroyed, image, false); end
+  def log_destroy_image(image)
+    log_image(:log_image_destroyed, image, false)
+  end
 
   # Callback that logs creation.
   def autolog_created_at
@@ -475,7 +518,7 @@ class AbstractModel < ActiveRecord::Base
   end
 
   # Do we log this event? and how?
-  def autolog_event(event, orphan=nil)
+  def autolog_event(event, orphan = nil)
     if RunLevel.is_normal?
       if autolog_events.include?(event)
         touch = false
@@ -484,13 +527,13 @@ class AbstractModel < ActiveRecord::Base
       else
         touch = nil
       end
-      if touch != nil
-        type = self.type_tag
+      unless touch.nil?
+        type = type_tag
         msg = "log_#{type}_#{event}".to_sym
         if orphan
-          orphan_log(msg, :touch => touch)
+          orphan_log(msg, touch: touch)
         else
-          log(msg, :touch => touch)
+          log(msg, touch: touch)
         end
       end
     end
@@ -499,21 +542,21 @@ class AbstractModel < ActiveRecord::Base
   # Create RssLog and attach it if we don't already have one.  This is
   # primarily for the benefit of old objects that don't have RssLog's already.
   # All new objects automatically get one.
-  def init_rss_log(orphan=false)
+  def init_rss_log(orphan = false)
     result = nil
-    if self.rss_log
-      result = self.rss_log
+    if rss_log
+      result = rss_log
     else
       rss_log = RssLog.new
       # Don't attach to object if about to destroy.
       if !orphan
-        rss_log.send("#{self.type_tag}_id=", id) if id
+        rss_log.send("#{type_tag}_id=", id) if id
         rss_log.save
         # Save it now unless we are sure it will be saved later.
         need_to_save = !new_record? && !changed?
         self.rss_log_id = rss_log.id
         self.rss_log    = rss_log
-        self.save if need_to_save
+        save if need_to_save
       else
         # Always save the rss_log.
         rss_log.save
@@ -527,15 +570,15 @@ class AbstractModel < ActiveRecord::Base
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log
-    if rss_log && (rss_log.send("#{self.type_tag}_id") != id)
-      rss_log.send("#{self.type_tag}_id=", id)
+    if rss_log && (rss_log.send("#{type_tag}_id") != id)
+      rss_log.send("#{type_tag}_id=", id)
       rss_log.save
     end
   end
 
   # Add a note
   def add_note(note)
-    if self.notes
+    if notes
       self.notes += "\n\n" + note
     else
       self.notes = note
@@ -544,24 +587,24 @@ class AbstractModel < ActiveRecord::Base
   end
 
   def process_image_reuse(image, query_params)
-    self.add_image(image)
-    self.log_reuse_image(image)
+    add_image(image)
+    log_reuse_image(image)
     {
-        controller: self.show_controller,
-        action: self.show_action,
-        id: self.id,
-        q: query_params[:q]
+      controller: show_controller,
+      action: show_action,
+      id: id,
+      q: query_params[:q]
     }
   end
 
   def can_edit?(user)
-    not respond_to?('user') or (user and (self.user == user))
+    !respond_to?("user") || (user && (self.user == user))
   end
 
-private
+  private
 
   def log_image(tag, image, touch) # :nodoc:
-    name = "#{:Image.t} ##{image.id || image.was || '??'}"
-    log(tag, :name => name, :touch => touch)
+    name = "#{:Image.t} ##{image.id || image.was || "??"}"
+    log(tag, name: name, touch: touch)
   end
 end

@@ -26,9 +26,9 @@ class API
   attr_accessor :page_length
   attr_accessor :page_number
 
-  self.initializers << lambda do
-    self.detail = parse_enum(:detail, :limit => [:none, :low, :high], :default => :none)
-    self.page_number = parse_integer(:page, :default => 1)
+  initializers << lambda do
+    self.detail = parse_enum(:detail, limit: [:none, :low, :high], default: :none)
+    self.page_number = parse_integer(:page, default: 1)
   end
 
   def includes
@@ -62,7 +62,7 @@ class API
   end
 
   def results
-    @results ||= query.paginate(paginator, :include => includes)
+    @results ||= query.paginate(paginator, include: includes)
   end
 
   def result_ids
@@ -75,8 +75,8 @@ class API
 
   def paginator
     @paginator ||= MOPaginator.new(
-      :number => page_number,
-      :num_per_page => page_length
+      number: page_number,
+      num_per_page: page_length
     )
   end
 end

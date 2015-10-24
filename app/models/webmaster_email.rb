@@ -1,6 +1,6 @@
 # User asking webmaster a question.
 class WebmasterEmail < AccountMailer
-  def build(sender, question, subject=nil)
+  def build(sender, question, subject = nil)
     I18n.locale = MO.default_locale
     @title = subject || :email_subject_webmaster_question.l(user: sender)
     @question = question

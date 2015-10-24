@@ -27,7 +27,7 @@ class TermToGlossaryTerm < ActiveRecord::Migration
     edit_term: :edit_glossary_term,
     edit_term_title: :edit_glossary_term_title,
     edit_term_save: :edit_glossary_term_save,
-    edit_term_not_allowed: :edit_glossary_term_not_allowed,
+    edit_term_not_allowed: :edit_glossary_term_not_allowed
   }
 
   def update_translation_strings(current, desired)

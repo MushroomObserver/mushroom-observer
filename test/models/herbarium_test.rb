@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'test_helper'
+require "test_helper"
 
 class HerbariumTest < UnitTestCase
   def test_specimens
@@ -26,7 +26,7 @@ class HerbariumTest < UnitTestCase
     assert(herbaria(:nybg).curators.length > 1)
     assert_equal(1, herbaria(:rolf).curators.length)
   end
-  
+
   def test_fields
     assert(herbaria(:nybg).name)
     assert(herbaria(:nybg).description)

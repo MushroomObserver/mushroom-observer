@@ -10,4 +10,4 @@
 # complete functioning of the MO development environment
 require "active_record/fixtures.rb"
 ActiveRecord::Fixtures.create_fixtures("#{Rails.root}/test/fixtures",
-  "licenses")
+                                       "licenses")

@@ -2,7 +2,7 @@ class FixCurators < ActiveRecord::Migration
   def self.up
     # for h in Herbarium.find(:all) # Rails 3
     for h in Herbarium.all
-     if h.curators == []
+      if h.curators == []
         user = User.where(email: h.email)[0]
         if user
           h.curators.push(user)
@@ -10,7 +10,7 @@ class FixCurators < ActiveRecord::Migration
         else
           print "Unable to find a user with the email address #{h.email}\n"
         end
-      end
+       end
     end
   end
 

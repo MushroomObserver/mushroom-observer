@@ -8,4 +8,3 @@ class ConvertObservationsAltToInteger < ActiveRecord::Migration
   def self.down
   end
 end
-

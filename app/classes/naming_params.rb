@@ -70,7 +70,7 @@ class NamingParams
   end
 
   def change_vote(new_val)
-    if (new_val && (!@vote || @vote.value != new_val))
+    if new_val && (!@vote || @vote.value != new_val)
       @observation.change_vote(@naming, new_val)
     else
       @observation.reload

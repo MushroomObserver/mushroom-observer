@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
-require File.expand_path('../../config/boot.rb', __FILE__)
-require File.expand_path('../../config/environment.rb', __FILE__)
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
 
 $stderr.puts("Getting our names...")
 names = Name.connection.select_rows %(
@@ -23,17 +23,17 @@ names = Name.connection.select_rows %(
 # ]
 
 $stderr.puts("Building lookup for our names...")
-lookup = Hash.new
-used = Hash.new
+lookup = {}
+used = {}
 for id, name in names
   lookup[id] = name
   used[name] = [id]
 end
 
 $stderr.puts("Getting index fungorum's names...")
-index = Hash.new
+index = {}
 # Expect: "Genus species\tblah blah blah"
-File.open('index_fungorum.txt') do |fh|
+File.open("index_fungorum.txt") do |fh|
   fh.each_line do |line|
     name = line.split("\t", 2).first
     index[name] = true
@@ -42,7 +42,7 @@ end
 
 $stderr.puts("Getting Esslinger's names...")
 # Expect: "Genus species"
-File.open('esslinger.txt') do |fh|
+File.open("esslinger.txt") do |fh|
   fh.each_line do |line|
     name = line.chomp
     index[name] = true
@@ -62,8 +62,8 @@ for id, name in names
 
     # Do one letter at a time.
     name2 = name.dup
-    name2[i-1,1] = ''
-    used2[name2] ||= Array.new
+    name2[i - 1, 1] = ""
+    used2[name2] ||= []
     used2[name2] << id
 
     # Do two letters at a time.
@@ -87,20 +87,16 @@ end
 # puts "used=#{used.inspect}"
 # puts "used2=#{used2.inspect}"
 
-syns = @syns = Hash.new
+syns = @syns = {}
 @syn_id = 0
 
 def synonymize(ids)
-  sids = ids.map {|id| @syns[id]}.reject {|x| x.nil?}.uniq
+  sids = ids.map { |id| @syns[id] }.reject(&:nil?).uniq
   sid = sids.first
-  if !sid
-    sid = (@syn_id += 1)
-  end
+  sid = (@syn_id += 1) unless sid
   for sid2 in sids - [sid]
     for key, val in @syns
-      if val == sid2
-        @syns[key] = sid
-      end
+      @syns[key] = sid if val == sid2
     end
   end
   for id in ids
@@ -111,9 +107,7 @@ end
 $stderr.puts("Grouping misspellings...")
 for name, ids in used2
   ids = ids.uniq
-  if ids.length > 1
-    synonymize(ids)
-  end
+  synonymize(ids) if ids.length > 1
 end
 
 $stderr.puts("Sorting into good and bad...")
@@ -139,13 +133,13 @@ end
 
 $stderr.puts("Dumping good ones...")
 for list in goods
-  for id, name, legit in list.sort(&lambda do |a,b|
-    x = (a[2]?0:1) <=> (b[2]?0:1)
+  for id, name, legit in list.sort(&lambda do |a, b|
+    x = (a[2] ? 0 : 1) <=> (b[2] ? 0 : 1)
     x = a[1] <=> b[1] if x == 0
     x = a[0] <=> b[0] if x == 0
     x
   end)
-    star = legit ? '*' : ''
+    star = legit ? "*" : ""
     puts "#{star}#{id}\t#{name}"
   end
   puts
@@ -156,15 +150,14 @@ puts
 
 $stderr.puts("Dumping bad ones...")
 for list in bads
-  for id, name, legit in list.sort(&lambda do |a,b|
-    x = (a[2]?0:1) <=> (b[2]?0:1)
+  for id, name, legit in list.sort(&lambda do |a, b|
+    x = (a[2] ? 0 : 1) <=> (b[2] ? 0 : 1)
     x = a[1] <=> b[1] if x == 0
     x = a[0] <=> b[0] if x == 0
     x
   end)
-    star = legit ? '*' : ''
+    star = legit ? "*" : ""
     puts "#{star}#{id}\t#{name}"
   end
   puts
 end
-

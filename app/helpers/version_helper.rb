@@ -1,6 +1,5 @@
 # encoding: utf-8
 module VersionHelper
-
   # Just shows the current version number and a link to see the previous.
   #
   #   <%= show_previous_version(name) %>
@@ -21,14 +20,14 @@ module VersionHelper
     if previous_version = latest_version.previous
       str = :show_name_previous_version.t + " " + previous_version.version.to_i
       html += link_with_query(str, action: "show_past_#{type}", id: obj.id,
-        version: previous_version.version)
+                                   version: previous_version.version)
       if previous_version.respond_to?(:merge_source_id) &&
          previous_version.merge_source_id
         html += indent(1) + get_version_merge_link(obj, previous_version)
       end
       html += safe_br
     end
-    return html
+    html
   end
 
   # Show list of past versions for show_past_object pages.
@@ -44,7 +43,7 @@ module VersionHelper
   #       1: Original Name<br/>
   #   </p>
   #
-  def show_past_versions(obj, args={})
+  def show_past_versions(obj, args = {})
     type = obj.type_tag
 
     if !@merge_source_id
@@ -59,9 +58,12 @@ module VersionHelper
     end
 
     table = versions.map do |ver|
-
       # Date change was made.
-      date = ver.updated_at.web_date rescue :unknown.t
+      date = begin
+               ver.updated_at.web_date
+             rescue
+               :unknown.t
+             end
 
       # User making the change.
       if user = User.safe_find(ver.user_id)
@@ -72,27 +74,23 @@ module VersionHelper
 
       # Version number (and name if available).
       link = "#{:VERSION.t} #{ver.version}"
-      if ver.respond_to?(:format_name)
-        link += " " + ver.format_name.t
-      end
+      link += " " + ver.format_name.t if ver.respond_to?(:format_name)
       if ver.version != obj.version
         if @merge_source_id
           link = link_with_query(link, controller: obj.show_controller,
-            action: "show_past_#{type}", id: obj.id,
-            merge_source_id: @merge_source_id,
-            version: version)
+                                       action: "show_past_#{type}", id: obj.id,
+                                       merge_source_id: @merge_source_id,
+                                       version: version)
         elsif ver == obj.versions.last
           link = link_with_query(link, controller: obj.show_controller,
-            action: "show_#{type}", id: obj.id)
+                                       action: "show_#{type}", id: obj.id)
         else
           link = link_with_query(link, controller: obj.show_controller,
-            action: "show_past_#{type}", id: obj.id,
-            version: ver.version)
+                                       action: "show_past_#{type}", id: obj.id,
+                                       version: ver.version)
         end
       end
-      if args[:bold] and args[:bold].call(ver)
-        link = content_tag(:b, link)
-      end
+      link = content_tag(:b, link) if args[:bold] && args[:bold].call(ver)
 
       # Was this the result of a merge?
       if ver.respond_to?(:merge_source_id)
@@ -102,7 +100,7 @@ module VersionHelper
       end
 
       i = indent(1)
-      [ date, i, user, i, link, i, merge ]
+      [date, i, user, i, link, i, merge]
     end
 
     table = make_table(table, style: "margin-left:20px")
@@ -114,11 +112,15 @@ module VersionHelper
   def get_version_merge_link(obj, ver)
     type = obj.type_tag
     if ver.merge_source_id &&
-       (other_ver = ver.class.find(ver.merge_source_id) rescue nil)
+       (other_ver = begin
+                      ver.class.find(ver.merge_source_id)
+                    rescue
+                      nil
+                    end)
       parent_id = other_ver.send("#{type}_id")
       link_with_query(:show_past_version_merged_with.t(id: parent_id),
-        controller: obj.show_controller, action: "show_past_#{type}",
-        id: obj.id, merge_source_id: ver.merge_source_id)
+                      controller: obj.show_controller, action: "show_past_#{type}",
+                      id: obj.id, merge_source_id: ver.merge_source_id)
     end
   end
 end

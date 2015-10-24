@@ -7,7 +7,7 @@ class MinimalMapObservation
     @id = id
     @lat = lat
     @long = long
-    if location_or_id.is_a?(Fixnum) or
+    if location_or_id.is_a?(Fixnum) ||
        location_or_id.is_a?(String)
       @location_id = location_or_id.to_i
     elsif location
@@ -35,6 +35,6 @@ class MinimalMapObservation
   end
 
   def lat_long_dubious?
-    lat and location and not location.lat_long_close?(lat, long)
+    lat && location && !location.lat_long_close?(lat, long)
   end
 end

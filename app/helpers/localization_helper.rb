@@ -1,6 +1,5 @@
 # encoding: utf-8
 module LocalizationHelper
-
   # Translate Name rank (singular).
   #
   #   rank_as_string(:genus)  -->  "Genus"

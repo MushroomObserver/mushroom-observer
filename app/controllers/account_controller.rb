@@ -54,14 +54,14 @@ class AccountController < ApplicationController
     :signup,
     :test_flash,
     :verify,
-    :welcome,
+    :welcome
   ]
 
   before_filter :disable_link_prefetching, except: [
     :login,
     :signup,
     :prefs,
-    :profile,
+    :profile
   ]
 
   ##############################################################################
@@ -77,8 +77,8 @@ class AccountController < ApplicationController
       theme = params["new_user"]["theme"]
       login = params["new_user"]["login"]
       valid_themes = MO.themes + ["NULL"]
-      if !valid_themes.member?(theme) or (login == "test_denied")
-        if !theme.blank?
+      if !valid_themes.member?(theme) || (login == "test_denied")
+        unless theme.blank?
           # I'm guessing this has something to do with spammer/hacker trying
           # to automate creation of accounts?
           DeniedEmail.build(params["new_user"]).deliver
@@ -86,8 +86,8 @@ class AccountController < ApplicationController
         redirect_back_or_default(action: :welcome)
       else
         permitted = params.require(:new_user).
-                           permit(:email, :login, :name, :password,
-                                  :password_confirmation, :theme)
+                    permit(:email, :login, :name, :password,
+                           :password_confirmation, :theme)
         @new_user = User.new(permitted)
         @new_user.created_at = now = Time.now
         @new_user.updated_at = now
@@ -100,8 +100,8 @@ class AccountController < ApplicationController
         if @new_user.password.blank?
           @new_user.errors.add(:password, :validate_user_password_missing.t)
         end
-        if @new_user.errors.any? or
-           not @new_user.save
+        if @new_user.errors.any? ||
+           !@new_user.save
           flash_object_errors(@new_user)
         else
           group = UserGroup.create_user(@new_user)
@@ -147,14 +147,22 @@ class AccountController < ApplicationController
           flash_warning(:account_choose_password_warning.t)
           render(action: :choose_password)
         else
-          password = params[:user][:password] rescue nil
-          confirmation = params[:user][:password_confirmation] rescue nil
+          password = begin
+                       params[:user][:password]
+                     rescue
+                       nil
+                     end
+          confirmation = begin
+                           params[:user][:password_confirmation]
+                         rescue
+                           nil
+                         end
           if password.blank?
             @user.errors.add(:password, :validate_user_password_missing.t)
           elsif password != confirmation
             @user.errors.add(:password_confirmation,
                              :validate_user_password_no_match.t)
-          elsif password.length < 5 or password.bytesize > 40
+          elsif password.length < 5 || password.bytesize > 40
             @user.errors.add(:password, :validate_user_password_too_long.t)
           else
             User.current = @user
@@ -179,10 +187,10 @@ class AccountController < ApplicationController
         # These are typically spammers.
         if @user.login == @user.name && @user.name.match(/^[a-z]+$/)
           subject = "Suspicious user: #{@user.login.inspect}"
-          content = "Suspicious user:\n" +
-                    "  login=#{@user.login.inspect}\n" +
-                    "  name=#{@user.name.inspect}\n" +
-                    "  email=#{@user.email.inspect}\n" +
+          content = "Suspicious user:\n" \
+                    "  login=#{@user.login.inspect}\n" \
+                    "  name=#{@user.name.inspect}\n" \
+                    "  email=#{@user.email.inspect}\n" \
                     "  http://mushroomobserver.org/observer/show_user?id=#{@user.id}"
           WebmasterEmail.build(@user.email, content, subject).deliver
         end
@@ -192,7 +200,7 @@ class AccountController < ApplicationController
 
   # This action is never actually used.  Its template is rendered by verify.
   def reverify # :nologin:
-    raise "This action should never occur!"
+    fail "This action should never occur!"
   end
 
   # This is used by the "reverify" page to re-send the verification email.
@@ -219,9 +227,21 @@ class AccountController < ApplicationController
       @login = ""
       @remember = true
     else
-      @login    = params[:user][:login].to_s rescue ""
-      @password = params[:user][:password].to_s rescue ""
-      @remember = params[:user][:remember_me] == "1" rescue false
+      @login    = begin
+                    params[:user][:login].to_s
+                  rescue
+                    ""
+                  end
+      @password = begin
+                    params[:user][:password].to_s
+                  rescue
+                    ""
+                  end
+      @remember = begin
+                    params[:user][:remember_me] == "1"
+                  rescue
+                    false
+                  end
       user = User.authenticate(@login, @password)
       user ||= User.authenticate(@login, @password.strip)
       if !user
@@ -285,7 +305,7 @@ class AccountController < ApplicationController
       flash_warning :user_alert_missing.t
       redirect_back_or_default(action: :welcome)
     elsif request.method == "GET"
-      @back = session['return-to']
+      @back = session["return-to"]
       # render alert
     elsif request.method == "POST"
       if params[:commit] == :user_alert_okay.l
@@ -298,7 +318,7 @@ class AccountController < ApplicationController
       if !params[:back].blank?
         redirect_to(params[:back])
       else
-        redirect_to('/')
+        redirect_to("/")
       end
     end
   end
@@ -323,51 +343,49 @@ class AccountController < ApplicationController
     end
 
     for type, arg, post in [
-      [ :str,  :login,           true ],
-      [ :str,  :email,           true ],
-      [ :str,  :locale,          true ],
-      [ :int,  :license_id,      true ],
-      [ :bool, :email_html,      true ],
-      [ :enum, :keep_filenames ],
-      [ :enum, :location_format ],
-      [ :enum, :hide_authors ],
-      [ :enum, :votes_anonymous, true ],
-      [ :enum, :thumbnail_size ],
-      [ :enum, :image_size ],
-      [ :str,  :theme ],
-      [ :int,  :layout_count ],
-      [ :bool, :email_comments_owner ],
-      [ :bool, :email_comments_response ],
-      [ :bool, :email_comments_all ],
-      [ :bool, :email_observations_consensus ],
-      [ :bool, :email_observations_naming ],
-      [ :bool, :email_observations_all ],
-      [ :bool, :email_names_admin ],
-      [ :bool, :email_names_author ],
-      [ :bool, :email_names_editor ],
-      [ :bool, :email_names_reviewer ],
-      [ :bool, :email_names_all ],
-      [ :bool, :email_locations_admin ],
-      [ :bool, :email_locations_author ],
-      [ :bool, :email_locations_editor ],
-      [ :bool, :email_locations_all ],
-      [ :bool, :email_general_feature ],
-      [ :bool, :email_general_commercial ],
-      [ :bool, :email_general_question ],
+      [:str,  :login,           true],
+      [:str,  :email,           true],
+      [:str,  :locale,          true],
+      [:int,  :license_id,      true],
+      [:bool, :email_html,      true],
+      [:enum, :keep_filenames],
+      [:enum, :location_format],
+      [:enum, :hide_authors],
+      [:enum, :votes_anonymous, true],
+      [:enum, :thumbnail_size],
+      [:enum, :image_size],
+      [:str,  :theme],
+      [:int,  :layout_count],
+      [:bool, :email_comments_owner],
+      [:bool, :email_comments_response],
+      [:bool, :email_comments_all],
+      [:bool, :email_observations_consensus],
+      [:bool, :email_observations_naming],
+      [:bool, :email_observations_all],
+      [:bool, :email_names_admin],
+      [:bool, :email_names_author],
+      [:bool, :email_names_editor],
+      [:bool, :email_names_reviewer],
+      [:bool, :email_names_all],
+      [:bool, :email_locations_admin],
+      [:bool, :email_locations_author],
+      [:bool, :email_locations_editor],
+      [:bool, :email_locations_all],
+      [:bool, :email_general_feature],
+      [:bool, :email_general_commercial],
+      [:bool, :email_general_question],
       # [ :str,  :email_digest ],
-      [ :bool, :thumbnail_maps ],
-      [ :bool, :view_owner_id]
+      [:bool, :thumbnail_maps],
+      [:bool, :view_owner_id]
     ]
       val = params[:user][arg]
       val = case type
-        when :str  then val.to_s
-        when :int  then val.to_i
-        when :bool then val == "1"
-        when :enum then val ||= User.enum_default_value(arg)
+            when :str  then val.to_s
+            when :int  then val.to_i
+            when :bool then val == "1"
+            when :enum then val ||= User.enum_default_value(arg)
       end
-      if @user.send(arg) != val
-        @user.send("#{arg}=", val)
-      end
+      @user.send("#{arg}=", val) if @user.send(arg) != val
     end
 
     legal_name_change = @user.legal_name_change
@@ -394,9 +412,7 @@ class AccountController < ApplicationController
     else
       for arg in [:name, :notes, :mailing_address]
         val = params[:user][arg].to_s
-        if @user.send(arg) != val
-          @user.send("#{arg}=", val)
-        end
+        @user.send("#{arg}=", val) if @user.send(arg) != val
       end
 
       # Make sure the given location exists before accepting it.
@@ -415,9 +431,9 @@ class AccountController < ApplicationController
 
       # Check if we need to upload an image.
       upload = params["user"]["upload_image"]
-      if !upload.blank?
+      unless upload.blank?
         if upload.respond_to?(:original_filename)
-          name = upload.original_filename.force_encoding('utf-8')
+          name = upload.original_filename.force_encoding("utf-8")
         else
           name = nil
         end
@@ -434,9 +450,9 @@ class AccountController < ApplicationController
         if !image.save
           flash_object_errors(image)
         elsif !image.process_image
-          logger.error('Unable to upload image')
+          logger.error("Unable to upload image")
           name = image.original_name
-          name = '???' if name.empty?
+          name = "???" if name.empty?
           flash_error(:runtime_profile_invalid_image.t(name: name))
           flash_object_errors(image)
         else
@@ -477,24 +493,77 @@ class AccountController < ApplicationController
     redirect_to(controller: "observer", action: "show_user", id: @user.id)
   end
 
-  def no_email_comments_owner;         no_email("comments_owner");         end
-  def no_email_comments_response;      no_email("comments_response");      end
-  def no_email_comments_all;           no_email("comments_all");           end
-  def no_email_observations_consensus; no_email("observations_consensus"); end
-  def no_email_observations_naming;    no_email("observations_naming");    end
-  def no_email_observations_all;       no_email("observations_all");       end
-  def no_email_names_admin;            no_email("names_admin");            end
-  def no_email_names_author;           no_email("names_author");           end
-  def no_email_names_editor;           no_email("names_editor");           end
-  def no_email_names_reviewer;         no_email("names_reviewer");         end
-  def no_email_names_all;              no_email("names_all");              end
-  def no_email_locations_admin;        no_email("locations_admin");        end
-  def no_email_locations_author;       no_email("locations_author");       end
-  def no_email_locations_editor;       no_email("locations_editor");       end
-  def no_email_locations_all;          no_email("locations_all");          end
-  def no_email_general_feature;        no_email("general_feature");        end
-  def no_email_general_commercial;     no_email("general_commercial");     end
-  def no_email_general_question;       no_email("general_question");       end
+  def no_email_comments_owner
+    no_email("comments_owner")
+  end
+
+  def no_email_comments_response
+    no_email("comments_response")
+  end
+
+  def no_email_comments_all
+    no_email("comments_all")
+  end
+
+  def no_email_observations_consensus
+    no_email("observations_consensus")
+  end
+
+  def no_email_observations_naming
+    no_email("observations_naming")
+  end
+
+  def no_email_observations_all
+    no_email("observations_all")
+  end
+
+  def no_email_names_admin
+    no_email("names_admin")
+  end
+
+  def no_email_names_author
+    no_email("names_author")
+  end
+
+  def no_email_names_editor
+    no_email("names_editor")
+  end
+
+  def no_email_names_reviewer
+    no_email("names_reviewer")
+  end
+
+  def no_email_names_all
+    no_email("names_all")
+  end
+
+  def no_email_locations_admin
+    no_email("locations_admin")
+  end
+
+  def no_email_locations_author
+    no_email("locations_author")
+  end
+
+  def no_email_locations_editor
+    no_email("locations_editor")
+  end
+
+  def no_email_locations_all
+    no_email("locations_all")
+  end
+
+  def no_email_general_feature
+    no_email("general_feature")
+  end
+
+  def no_email_general_commercial
+    no_email("general_commercial")
+  end
+
+  def no_email_general_question
+    no_email("general_question")
+  end
 
   # These are the old email flags, renamed in favor of more consistent ones.
   alias_method :no_comment_email,          :no_email_comments_owner
@@ -531,14 +600,14 @@ class AccountController < ApplicationController
     @key = ApiKey.new
     if request.method == "POST"
       if params[:commit] == :account_api_keys_create_button.l
-        create_api_key()
+        create_api_key
       else
-        remove_api_keys()
+        remove_api_keys
       end
     end
   end
 
-  def create_api_key()
+  def create_api_key
     @key = ApiKey.new(params[:key].permit!)
     @key.verified = Time.now
     @key.save!
@@ -548,7 +617,7 @@ class AccountController < ApplicationController
     flash_error(:account_api_keys_create_failed.t(msg: e.to_s))
   end
 
-  def remove_api_keys()
+  def remove_api_keys
     num_destroyed = 0
     for key in @user.api_keys
       if params["key_#{key.id}"] == "1"
@@ -600,9 +669,7 @@ class AccountController < ApplicationController
   ##############################################################################
 
   def turn_admin_on # :root:
-    if @user && @user.admin && !is_in_admin_mode?
-      session[:admin] = true
-    end
+    session[:admin] = true if @user && @user.admin && !is_in_admin_mode?
     redirect_back_or_default(controller: :observer, action: :index)
   end
 
@@ -619,8 +686,8 @@ class AccountController < ApplicationController
         group_name = params["group_name"].to_s
         user       = User.find_by_login(user_name)
         group      = UserGroup.find_by_name(group_name)
-        flash_error :add_user_to_group_no_user.t(user: user_name)    if !user
-        flash_error :add_user_to_group_no_group.t(group: group_name) if !group
+        flash_error :add_user_to_group_no_user.t(user: user_name)    unless user
+        flash_error :add_user_to_group_no_group.t(group: group_name) unless group
         if user && group
           if user.user_groups.member?(group)
             flash_warning :add_user_to_group_already. \
@@ -672,9 +739,7 @@ class AccountController < ApplicationController
           end
         end
       end
-      if redirect
-        redirect_to(controller: :observer, action: :show_user, id: id)
-      end
+      redirect_to(controller: :observer, action: :show_user, id: id) if redirect
     end
   end
 
@@ -683,14 +748,12 @@ class AccountController < ApplicationController
   def destroy_user # :root:
     if is_in_admin_mode?
       id = params["id"]
-      if !id.blank?
+      unless id.blank?
         user = User.safe_find(id)
-        if user
-          User.erase_user(id)
-        end
+        User.erase_user(id) if user
       end
     end
-    redirect_back_or_default('/')
+    redirect_back_or_default("/")
   end
 
   ##############################################################################
@@ -719,6 +782,5 @@ class AccountController < ApplicationController
     end
   end
 
-################################################################################
-
+  ################################################################################
 end

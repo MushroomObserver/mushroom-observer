@@ -1,8 +1,7 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class TranslationControllerTest < FunctionalTestCase
-
   def mock_template
     [
       "---\n",
@@ -38,7 +37,7 @@ class TranslationControllerTest < FunctionalTestCase
       "\n",
       "# account/prefs\n",
       "prefs_title: Your Account\n",
-      "\n",
+      "\n"
     ].join
   end
 
@@ -47,7 +46,7 @@ class TranslationControllerTest < FunctionalTestCase
     for arg in args
       hash[arg] = true
     end
-    return hash
+    hash
   end
 
   def assert_major_header(str, item)
@@ -70,107 +69,107 @@ class TranslationControllerTest < FunctionalTestCase
     assert_equal(tag, item.tag)
   end
 
-################################################################################
+  ################################################################################
 
   def test_edit_translations_with_page
     Language.track_usage
     :name.l
-    assert_equal(['name'], Language.tags_used)
+    assert_equal(["name"], Language.tags_used)
     page = Language.save_tags
-    get(:edit_translations, :page => page)
+    get(:edit_translations, page: page)
   end
 
   def test_primary_tag
     lang = languages(:english)
     strings = lang.localization_strings
     assert(strings.length >= 8)
-    assert_equal('one', @controller.primary_tag('one', strings))
-    assert_equal('two', @controller.primary_tag('two', strings))
-    assert_equal('two', @controller.primary_tag('Two', strings))
-    assert_equal('two', @controller.primary_tag('TWOS', strings))
-    assert_equal('two', @controller.primary_tag('tWoS', strings))
-    assert_equal('four', @controller.primary_tag('FoUr', strings))
+    assert_equal("one", @controller.primary_tag("one", strings))
+    assert_equal("two", @controller.primary_tag("two", strings))
+    assert_equal("two", @controller.primary_tag("Two", strings))
+    assert_equal("two", @controller.primary_tag("TWOS", strings))
+    assert_equal("two", @controller.primary_tag("tWoS", strings))
+    assert_equal("four", @controller.primary_tag("FoUr", strings))
   end
 
   def test_build_form
     lang = languages(:english)
     file = mock_template
 
-    form = @controller.build_form(lang, hashify(), file)
+    form = @controller.build_form(lang, hashify, file)
     assert_equal([], form)
 
-    form = @controller.build_form(lang, hashify('name'), file)
-    assert_major_header('IMPORTANT STUFF', form.shift)
-    assert_minor_header('Main Objects:', form.shift)
-    assert_tag_field('name', form.shift)
+    form = @controller.build_form(lang, hashify("name"), file)
+    assert_major_header("IMPORTANT STUFF", form.shift)
+    assert_minor_header("Main Objects:", form.shift)
+    assert_tag_field("name", form.shift)
     assert(form.empty?)
 
-    form = @controller.build_form(lang, hashify('index', 'index_help'), file)
-    assert_major_header('IMPORTANT STUFF', form.shift)
-    assert_minor_header('Actions:', form.shift)
-    assert_tag_field('index', form.shift)
-    assert_major_header('MAIN PAGES', form.shift)
-    assert_minor_header('observer/index', form.shift)
-    assert_tag_field('index_title', form.shift)
+    form = @controller.build_form(lang, hashify("index", "index_help"), file)
+    assert_major_header("IMPORTANT STUFF", form.shift)
+    assert_minor_header("Actions:", form.shift)
+    assert_tag_field("index", form.shift)
+    assert_major_header("MAIN PAGES", form.shift)
+    assert_minor_header("observer/index", form.shift)
+    assert_tag_field("index_title", form.shift)
     assert_comment('you don\'t see this every day', form.shift)
-    assert_tag_field('index_error', form.shift)
-    assert_tag_field('index_help', form.shift)
-    assert_tag_field('index_prefs', form.shift)
+    assert_tag_field("index_error", form.shift)
+    assert_tag_field("index_help", form.shift)
+    assert_tag_field("index_prefs", form.shift)
     assert(form.empty?)
   end
 
   def test_authorization_no_login_en
-    get(:edit_translations, :locale => 'en-US')
+    get(:edit_translations, locale: "en-US")
     assert_flash_error
     assert_response(:redirect)
   end
-  
+
   def test_authorization_no_login_el
-    get(:edit_translations, :locale => 'el-GR')
+    get(:edit_translations, locale: "el-GR")
     assert_flash_error
     assert_response(:redirect)
   end
 
   def test_authorization_user_en
-    login('mary')
-    get(:edit_translations, :locale => 'en-US')
+    login("mary")
+    get(:edit_translations, locale: "en-US")
     assert_flash_error
     assert_response(:redirect)
   end
-  
+
   def test_authorization_user_el
-    login('mary')
-    get(:edit_translations, :locale => 'el-GR')
+    login("mary")
+    get(:edit_translations, locale: "el-GR")
     assert_no_flash
     assert_response(:success)
   end
-  
+
   def test_authorization_admin_en
-    login('rolf')
-    get(:edit_translations, :locale => 'en-US')
+    login("rolf")
+    get(:edit_translations, locale: "en-US")
     assert_no_flash
     assert_response(:success)
   end
 
   def test_edit_translation_form_get
-    login('rolf')
+    login("rolf")
     get(:edit_translations)
     assert_no_flash
-    assert_response(:success, :locale => 'en-US')
+    assert_response(:success, locale: "en-US")
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
   end
 
   def test_edit_translation_form_get_tag
-    login('rolf')
-    get(:edit_translations, :locale => 'en-US', :tag => 'xxx')
+    login("rolf")
+    get(:edit_translations, locale: "en-US", tag: "xxx")
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
     assert_select("textarea[name=tag_xxx]", 1)
-    assert_textarea_value(:tag_xxx, '')
+    assert_textarea_value(:tag_xxx, "")
   end
 
   def test_edit_translation_form_get_tag_two
-    login('rolf')
-    get_with_dump(:edit_translations, :locale => 'en-US', :tag => 'two')
+    login("rolf")
+    get_with_dump(:edit_translations, locale: "en-US", tag: "two")
     assert_no_flash
     assert_response(:success)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
@@ -178,82 +177,82 @@ class TranslationControllerTest < FunctionalTestCase
     assert_select("textarea[name=tag_twos]", 1)
     assert_select("textarea[name=tag_TWO]", 1)
     assert_select("textarea[name=tag_TWOS]", 1)
-    assert_textarea_value(:tag_two, 'two')
-    assert_textarea_value(:tag_twos, 'twos')
-    assert_textarea_value(:tag_TWO, 'Two')
-    assert_textarea_value(:tag_TWOS, 'Twos')
+    assert_textarea_value(:tag_two, "two")
+    assert_textarea_value(:tag_twos, "twos")
+    assert_textarea_value(:tag_TWO, "Two")
+    assert_textarea_value(:tag_TWOS, "Twos")
   end
 
   def test_edit_translation_form_post_save
-    use_test_locales {
-      login('rolf')
+    use_test_locales do
+      login("rolf")
       post(:edit_translations,
-           :locale => 'en-US',
-           :tag => 'one',
-           :tag_one => 'uno',
-           :commit => :SAVE.l
-           )
+           locale: "en-US",
+           tag: "one",
+           tag_one: "uno",
+           commit: :SAVE.l
+          )
       assert_flash_success
-      assert_equal('uno', :one.l)
+      assert_equal("uno", :one.l)
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
       assert_select("textarea[name=tag_one]", 1)
-      assert_textarea_value(:tag_one, 'uno')
-    }
+      assert_textarea_value(:tag_one, "uno")
+    end
   end
 
   def test_edit_translation_form_post_cancel
-    login('rolf')
+    login("rolf")
     old_one = :one.l
     post(:edit_translations,
-         :locale => 'en-US',
-         :tag => 'one',
-         :tag_one => 'ichi',
-         :commit => :CANCEL.l
-         )
+         locale: "en-US",
+         tag: "one",
+         tag_one: "ichi",
+         commit: :CANCEL.l
+        )
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 0)
   end
 
   def test_edit_translation_form_post_reload_greek
-    login('rolf')
+    login("rolf")
     old_one = :one.l
     post(:edit_translations,
-         :locale => 'el-GR',
-         :tag => 'one',
-         :tag_one => 'ichi',
-         :commit => :RELOAD.l
-         )
+         locale: "el-GR",
+         tag: "one",
+         tag_one: "ichi",
+         commit: :RELOAD.l
+        )
     assert_no_flash
     assert_equal(old_one, :one.l)
     assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-    assert_textarea_value(:tag_one, 'ένα')
+    assert_textarea_value(:tag_one, "ένα")
   end
 
   def test_edit_translation_form_post_save_greek
-    use_test_locales {
-      login('rolf')
+    use_test_locales do
+      login("rolf")
       post(:edit_translations,
-           :locale => 'el-GR',
-           :tag => 'one',
-           :tag_one => 'ichi',
-           :commit => :SAVE.l
-           )
+           locale: "el-GR",
+           tag: "one",
+           tag_one: "ichi",
+           commit: :SAVE.l
+          )
       assert_flash_success
-      assert_equal('uno', :one.l)
+      assert_equal("uno", :one.l)
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-      assert_textarea_value(:tag_one, 'ichi')
-      I18n.locale = 'el'
-      assert_equal('ichi', :one.l)
-    }
+      assert_textarea_value(:tag_one, "ichi")
+      I18n.locale = "el"
+      assert_equal("ichi", :one.l)
+    end
   end
 
   def test_edit_translation_ajax_form
-    use_test_locales {
+    use_test_locales do
       old_one = :one.l
 
-      login('rolf')
-      get(:edit_translations_ajax_get, :locale => 'en-US', :tag => 'two')
+      login("rolf")
+      get(:edit_translations_ajax_get, locale: "en-US", tag: "two")
       assert_no_flash
       assert_response(:success)
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
@@ -261,54 +260,54 @@ class TranslationControllerTest < FunctionalTestCase
       assert_select("textarea[name=tag_twos]", 1)
       assert_select("textarea[name=tag_TWO]", 1)
       assert_select("textarea[name=tag_TWOS]", 1)
-      assert_textarea_value(:tag_two, 'two')
-      assert_textarea_value(:tag_twos, 'twos')
-      assert_textarea_value(:tag_TWO, 'Two')
-      assert_textarea_value(:tag_TWOS, 'Twos')
+      assert_textarea_value(:tag_two, "two")
+      assert_textarea_value(:tag_twos, "twos")
+      assert_textarea_value(:tag_TWO, "Two")
+      assert_textarea_value(:tag_TWOS, "Twos")
 
       assert_equal(old_one, :one.l)
       post(:edit_translations_ajax_post,
-           :locale => 'en-US',
-           :tag => 'one',
-           :tag_one => 'uno',
-           :commit => :SAVE.l
-           )
+           locale: "en-US",
+           tag: "one",
+           tag_one: "uno",
+           commit: :SAVE.l
+          )
       assert_no_flash
       assert_match(/locale = "en"/, @response.body)
       assert_match(/tag = "one"/, @response.body)
       assert_match(/str = "uno"/, @response.body)
-      assert_equal('uno', :one.l)
+      assert_equal("uno", :one.l)
 
-      get(:edit_translations_ajax_get, :locale => 'en-US', :tag => 'one')
+      get(:edit_translations_ajax_get, locale: "en-US", tag: "one")
       assert_no_flash
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
       assert_select("textarea[name=tag_one]", 1)
-      assert_textarea_value(:tag_one, 'uno')
+      assert_textarea_value(:tag_one, "uno")
 
       post(:edit_translations_ajax_post,
-           :locale => 'el-GR',
-           :tag => 'one',
-           :tag_one => 'ichi',
-           :commit => :SAVE.l
-           )
+           locale: "el-GR",
+           tag: "one",
+           tag_one: "ichi",
+           commit: :SAVE.l
+          )
       assert_no_flash
       assert_match(/locale = "el"/, @response.body)
       assert_match(/tag = "one"/, @response.body)
       assert_match(/str = "ichi"/, @response.body)
-      assert_equal('uno', :one.l)
+      assert_equal("uno", :one.l)
 
-      get(:edit_translations_ajax_get, :locale => 'el-GR', :tag => 'one')
+      get(:edit_translations_ajax_get, locale: "el-GR", tag: "one")
       assert_no_flash
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
-      assert_textarea_value(:tag_one, 'ichi')
+      assert_textarea_value(:tag_one, "ichi")
 
-      I18n.locale = 'el'
-      assert_equal('ichi', :one.l)
-    }
+      I18n.locale = "el"
+      assert_equal("ichi", :one.l)
+    end
   end
 
   def test_page_expired
-    login('rolf')
+    login("rolf")
     make_admin
 
     Language.track_usage
@@ -317,12 +316,12 @@ class TranslationControllerTest < FunctionalTestCase
     page = Language.save_tags
 
     # Page is good, should only display the two tags used above.
-    get(:edit_translations, :locale => 'en-US', :page => page)
+    get(:edit_translations, locale: "en-US", page: page)
     assert_no_flash
     assert_equal(2, assigns(:show_tags).length)
 
     # Simulate page expiration: result is it will display all tags, not just the two used above.
-    get(:edit_translations, :locale => 'en-US', :page => 'xxx')
+    get(:edit_translations, locale: "en-US", page: "xxx")
     assert_flash_error
     assert(assigns(:show_tags).length > 2)
   end

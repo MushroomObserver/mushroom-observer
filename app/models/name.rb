@@ -244,72 +244,71 @@
 ################################################################################
 
 class Name < AbstractModel
-  require 'acts_as_versioned'
+  require "acts_as_versioned"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:rank,
-           { Form: 1,
-             Variety: 2,
-             Subspecies: 3,
-             Species: 4,
-             Stirps: 5,
-             Subsection: 6,
-             Section: 7,
-             Subgenus: 8,
-             Genus: 9,
-             Family: 10,
-             Order: 11,
-             Class: 12,
-             Phylum: 13,
-             Kingdom: 14,
-             Domain: 15,
-             Group: 16
-           },
-           source: :rank,
-           with: [],
-           accessor: :whiny
+          { Form: 1,
+            Variety: 2,
+            Subspecies: 3,
+            Species: 4,
+            Stirps: 5,
+            Subsection: 6,
+            Section: 7,
+            Subgenus: 8,
+            Genus: 9,
+            Family: 10,
+            Order: 11,
+            Class: 12,
+            Phylum: 13,
+            Kingdom: 14,
+            Domain: 15,
+            Group: 16
+          },
+          source: :rank,
+          with: [],
+          accessor: :whiny
          )
 
-  belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
-  belongs_to :description, :class_name => 'NameDescription' # (main one)
+  belongs_to :correct_spelling, class_name: "Name", foreign_key: "correct_spelling_id"
+  belongs_to :description, class_name: "NameDescription" # (main one)
   belongs_to :rss_log
   belongs_to :synonym
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
            class_name: "NameDescription"
-  has_many :comments,  :as => :target, :dependent => :destroy
-  has_many :interests, :as => :target, :dependent => :destroy
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
   has_many :namings
   has_many :observations
 
   acts_as_versioned(
-    :table_name => 'names_versions',
-    :if_changed => [
-      'rank',
-      'text_name',
-      'search_name',
-      'sort_name',
-      'display_name',
-      'author',
-      'citation',
-      'deprecated',
-      'correct_spelling',
-      'notes'
-    ]
+    table_name: "names_versions",
+    if_changed: %w(
+      rank
+      text_name
+      search_name
+      sort_name
+      display_name
+      author
+      citation
+      deprecated
+      correct_spelling
+      notes)
   )
   non_versioned_columns.push(
-    'created_at',
-    'updated_at',
-    'num_views',
-    'last_view',
-    'ok_for_export',
-    'rss_log_id',
+    "created_at",
+    "updated_at",
+    "num_views",
+    "last_view",
+    "ok_for_export",
+    "rss_log_id",
     # 'accepted_name_id',
-    'synonym_id',
-    'description_id',
-    'classification'   # (versioned in the default desc)
+    "synonym_id",
+    "description_id",
+    "classification" # (versioned in the default desc)
   )
 
   after_update :notify_users
@@ -331,29 +330,31 @@ class Name < AbstractModel
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id || 0
-    if (ver.version != 1) and
+    if (ver.version != 1) &&
        Name.connection.select_value(%(
          SELECT COUNT(*) FROM names_versions
          WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
-       )).to_s == '0'
+       )).to_s == "0"
       SiteData.update_contribution(:add, :names_versions)
     end
   end
 
-  def <=>(x); self.sort_name <=> x.sort_name; end
+  def <=>(x)
+    sort_name <=> x.sort_name
+  end
 
   def best_brief_description
-    if self.description
-      if self.description.gen_desc.blank?
-        self.description.diag_desc
+    if description
+      if description.gen_desc.blank?
+        description.diag_desc
       else
-        self.description.gen_desc
+        description.gen_desc
       end
     end
   end
 
   def best_classification
-    self.description.classification if self.description
+    description.classification if description
   end
 
   # Get an Array of Observation's for this Name that have > 80% confidence.
@@ -370,12 +371,12 @@ class Name < AbstractModel
   #
   def self.primer
     result = []
-    if !File.exists?(MO.name_primer_cache_file) ||
+    if !File.exist?(MO.name_primer_cache_file) ||
        File.mtime(MO.name_primer_cache_file) < Time.now - 1.day
 
       # Get list of names sorted by how many times they've been used, then
       # re-sort by name.
-      result = self.connection.select_values(%(
+      result = connection.select_values(%(
         SELECT names.text_name, COUNT(*) AS n
         FROM namings
         LEFT OUTER JOIN names ON names.id = namings.name_id
@@ -385,15 +386,15 @@ class Name < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
-      file = File.open(MO.name_primer_cache_file, 'w:utf-8')
+      file = File.open(MO.name_primer_cache_file, "w:utf-8")
       file.write(result.join("\n") + "\n")
-      file.close()
+      file.close
     else
       file = File.open(MO.name_primer_cache_file, "r:UTF-8")
       result = file.readlines.map(&:chomp)
-      file.close()
+      file.close
     end
-    return result
+    result
   end
 
   ################################################################################
@@ -409,12 +410,12 @@ class Name < AbstractModel
 
   # Tack id on to end of +text_name+.
   def unique_text_name
-    real_text_name + " (#{id || '?'})"
+    real_text_name + " (#{id || "?"})"
   end
 
   # Tack id on to end of +format_name+.
   def unique_format_name
-    display_name + " (#{id || '?'})"
+    display_name + " (#{id || "?"})"
   end
 
   # (This gives us the ability to format names slightly differently when
@@ -433,9 +434,9 @@ class Name < AbstractModel
   end
 
   def self.display_to_real_text(name)
-    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, '').
-                      gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
-                      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, ' ') # (this part should be unnecessary)
+    name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_\*]*$ /x, "").
+      gsub(/__\*?\*? [^_\*]* \s (#{ANY_NAME_ABBR}) \s \*?\*?__/x, ' \1 ').
+      gsub(/__\*?\*? [^_\*]* \*?\*?__/x, " ") # (this part should be unnecessary)
   end
 
   def self.display_to_real_search(name)
@@ -447,17 +448,17 @@ class Name < AbstractModel
   #   "unknown", ""
   #
   def self.names_for_unknown
-    ['unknown', :unknown.l, '']
+    ["unknown", :unknown.l, ""]
   end
 
   # Get an instance of the Name that means "unknown".
   def self.unknown
-    Name.find_by_text_name('Fungi')
+    Name.find_by_text_name("Fungi")
   end
 
   # Is this the "unknown" name?
   def unknown?
-    self.text_name == 'Fungi'
+    text_name == "Fungi"
   end
 
   def known?
@@ -466,12 +467,12 @@ class Name < AbstractModel
 
   def display_name
     str = self[:display_name]
-    if User.current and
-       User.current.hide_authors == :above_species and
+    if User.current &&
+       User.current.hide_authors == :above_species &&
        Name.ranks_above_species.include?(rank)
       str = str.sub(/^(\**__.*__\**).*/, '\\1')
     end
-    return str
+    str
   end
 
   ##############################################################################
@@ -486,28 +487,28 @@ class Name < AbstractModel
   end
 
   def self.all_ranks
-    [ :Form, :Variety, :Subspecies, :Species,
-      :Stirps, :Subsection, :Section, :Subgenus, :Genus,
-      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
-      :Group ]
+    [:Form, :Variety, :Subspecies, :Species,
+     :Stirps, :Subsection, :Section, :Subgenus, :Genus,
+     :Family, :Order, :Class, :Phylum, :Kingdom, :Domain,
+     :Group]
   end
 
   def self.ranks_above_genus
-    [ :Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group ]
+    [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain, :Group]
   end
 
   def self.ranks_above_species
-    [ :Stirps, :Subsection, :Section, :Subgenus, :Genus,
-      :Family, :Order, :Class, :Phylum, :Kingdom, :Domain ]
+    [:Stirps, :Subsection, :Section, :Subgenus, :Genus,
+     :Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
   end
 
   def self.ranks_below_genus
-    [ :Form, :Variety, :Subspecies, :Species,
-      :Stirps, :Subsection, :Section, :Subgenus ]
+    [:Form, :Variety, :Subspecies, :Species,
+     :Stirps, :Subsection, :Section, :Subgenus]
   end
 
   def self.ranks_below_species
-    [ :Form, :Variety, :Subspecies ]
+    [:Form, :Variety, :Subspecies]
   end
 
   def at_or_below_genus?
@@ -545,8 +546,8 @@ class Name < AbstractModel
                                 predicate: ":lichenAuthority").count > 0
     return false unless below_genus?
     genus_id = Name.where(text_name: text_name.split.first).select(:id).first
-    return Triple.where(subject: ":name/#{genus_id}",
-                        predicate: ":lichenAuthority").count > 0
+    Triple.where(subject: ":name/#{genus_id}",
+                 predicate: ":lichenAuthority").count > 0
   end
 
   def has_eol_data?
@@ -560,13 +561,11 @@ class Name < AbstractModel
           end
         end
       end
-      for d in self.descriptions
-        if d.review_status == :vetted && d.ok_for_export && d.public
-          return true
-        end
+      for d in descriptions
+        return true if d.review_status == :vetted && d.ok_for_export && d.public
       end
     end
-    return false
+    false
   end
 
   # Returns an Array of all of this Name's ancestors, starting with its
@@ -618,8 +617,6 @@ class Name < AbstractModel
     if below_genus?
       genus_name = text_name.split(" ").first
       Name.where(text_name: genus_name).reject(&:deprecated).first
-    else
-      nil
     end
   end
 
@@ -637,7 +634,7 @@ class Name < AbstractModel
   #    Letharia (First) Author
   #    Letharia (Another) One
   #
-  def parents(all=false)
+  def parents(all = false)
     results   = []
     lines     = nil
     next_rank = rank
@@ -651,7 +648,7 @@ class Name < AbstractModel
       # Once we go past genus we need to search the classification string.
       if Name.ranks_above_genus.include?(next_rank)
 
-        if !lines
+        unless lines
           # Check this name's classification first.
           str = classification
           if str.blank? && results.last
@@ -667,25 +664,25 @@ class Name < AbstractModel
               LIMIT 1
             )
           end
-          lines = parse_classification(str) rescue []
+          lines = begin
+                    parse_classification(str)
+                  rescue
+                    []
+                  end
           break if lines.empty?
         end
 
         # Grab name for 'next_rank' from classification string.
         for line_rank, line_name in lines
-          if line_rank == next_rank
-            these += Name.where(text_name: line_name)
-          end
+          these += Name.where(text_name: line_name) if line_rank == next_rank
         end
 
       # At and below genus, we do a database query on part of our name, e.g.,
       # if our name is "Xxx yyy var. zzz", we search first for species named
       # "Xxx yyy", then genera named "Xxx".)
-      elsif next_rank == :Variety    && text_name.match(/^(.* var\. \S+)/)   ||
-            next_rank == :Subspecies && text_name.match(/^(.* subsp\. \S+)/) ||
-            next_rank == :Species    && text_name.match(/^(\S+ \S+)/)        ||
-            next_rank == :Genus      && text_name.match(/^(\S+)/)
-        str = $1
+      elsif next_rank == :Variety && text_name.match(/^(.* var\. \S+)/) || next_rank == :Subspecies && text_name.match(/^(.* subsp\. \S+)/) ||
+            next_rank == :Species && text_name.match(/^(\S+ \S+)/) || next_rank == :Genus && text_name.match(/^(\S+)/)
+        str = Regexp.last_match(1)
         these = Name.where(correct_spelling_id: nil,
                            rank: Name.ranks[next_rank],
                            text_name: str
@@ -693,8 +690,8 @@ class Name < AbstractModel
       end
 
       # Get rid of deprecated names unless all the results are deprecated.
-      if !these.empty?
-        unless these.select(&:deprecated).length == these.length
+      unless these.empty?
+        unless these.count(&:deprecated) == these.length
           these = these.reject(&:deprecated)
         end
         if all
@@ -705,7 +702,7 @@ class Name < AbstractModel
       end
     end
 
-    return results
+    results
   end
 
   # Returns an Array of Name's directly under this one.  Ignores misspellings,
@@ -734,7 +731,7 @@ class Name < AbstractModel
   #   # BUT NOT THIS!!
   #   'Letharia vulpina var. bogus f. foobar'
   #
-  def children(all=false)
+  def children(all = false)
     results = []
     our_rank = rank
     our_index = rank_index(our_rank)
@@ -762,17 +759,18 @@ class Name < AbstractModel
       elsif all
         # Get set of ranks between ours and genus.
         accept_ranks = Name.ranks_above_genus.
-                            reject {|x| Name.all_ranks.index(x) >= our_index}.
-                            map(&:to_s)
+                       reject { |x| Name.all_ranks.index(x) >= our_index }.
+                       map(&:to_s)
         # Search for names in each classification string.
         for cstr, sname in rows
-          while cstr.sub!(/(\w+): _([^_]+)_\s*\Z/, '')
-            line_rank, line_name = $1, $2
+          while cstr.sub!(/(\w+): _([^_]+)_\s*\Z/, "")
+            line_rank = Regexp.last_match(1)
+            line_name = Regexp.last_match(2)
             # Grab names from end, one line at a time, until reach our rank
             # or a name we've already seen (assume all the higher names are
             # the same as what we saw before).
             if accept_ranks.include?(line_rank) &&
-              !names.include?(line_name)
+               !names.include?(line_name)
               names << line_name
             else
               break
@@ -787,9 +785,9 @@ class Name < AbstractModel
         next_rank = Name.all_ranks[our_index - 1]
         match_str = "#{next_rank}: _"
         for cstr, sname in rows
-          if (i = cstr.index(match_str)) and
+          if (i = cstr.index(match_str)) &&
              cstr[i..-1].match(/_([^_]+)_/)
-            names << $1
+            names << Regexp.last_match(1)
           end
         end
       end
@@ -821,7 +819,7 @@ class Name < AbstractModel
       #   G. species var. variety            YES!!
       #   G. species f. form                 YES!!
       #   G. species var. variety f. form    NO!!
-      if !all
+      unless all
         x = text_name.length
         results.reject! do |name|
           name.text_name[x..-1].match(/ .* .* /)
@@ -854,10 +852,10 @@ class Name < AbstractModel
       parsed_names = {}
       rank_idx = rank_index(rank)
       rank_str = "rank_#{rank}".downcase.to_sym.l
-      raise :runtime_user_bad_rank.t(:rank => rank) if rank_idx.nil?
+      fail :runtime_user_bad_rank.t(rank: rank) if rank_idx.nil?
 
       # Check parsed output to make sure ranks are correct, names exist, etc.
-      kingdom = 'Fungi'
+      kingdom = "Fungi"
       for line_rank, line_name in parse_classification(text)
         real_rank = Name.guess_rank(line_name)
         real_rank_str = "rank_#{real_rank}".downcase.to_sym.l
@@ -868,17 +866,17 @@ class Name < AbstractModel
         end
         line_rank_str = "rank_#{line_rank}".downcase.to_sym.l
         line_rank_idx = rank_index(line_rank)
-        raise :runtime_user_bad_rank.t(:rank => line_rank_str) if line_rank_idx.nil?
-        raise :runtime_invalid_rank.t(:line_rank => line_rank_str, :rank => rank_str) if line_rank_idx <= rank_idx
-        raise :runtime_duplicate_rank.t(:rank => line_rank_str) if parsed_names[line_rank]
-        raise :runtime_wrong_rank.t(:expect => line_rank_str, :actual => real_rank_str, :name => line_name) if real_rank != expect_rank and kingdom == 'Fungi'
+        fail :runtime_user_bad_rank.t(rank: line_rank_str) if line_rank_idx.nil?
+        fail :runtime_invalid_rank.t(line_rank: line_rank_str, rank: rank_str) if line_rank_idx <= rank_idx
+        fail :runtime_duplicate_rank.t(rank: line_rank_str) if parsed_names[line_rank]
+        fail :runtime_wrong_rank.t(expect: line_rank_str, actual: real_rank_str, name: line_name) if real_rank != expect_rank && kingdom == "Fungi"
         parsed_names[line_rank] = line_name
         kingdom = line_name if line_rank == :Kingdom
       end
 
       # Reformat output, writing out lines in correct order.
       if parsed_names != {}
-        result = ''
+        result = ""
         for rank in Name.all_ranks.reverse
           if name = parsed_names[rank]
             result += "#{rank}: _#{name}_\r\n"
@@ -920,26 +918,26 @@ class Name < AbstractModel
           line_name = match[2]
           results.push([line_rank, line_name])
         elsif !line.blank?
-          raise :runtime_invalid_classification.t(:text => line)
+          fail :runtime_invalid_classification.t(text: line)
         end
       end
     end
-    return results
+    results
   end
 
   # Pass off to class method of the same name.
-  def validate_classification(str=nil)
+  def validate_classification(str = nil)
     self.class.validate_classification(str || classification)
   end
 
   # Pass off to class method of the same name.
-  def parse_classification(str=nil)
+  def parse_classification(str = nil)
     self.class.parse_classification(str || classification)
   end
 
   # Does this Name have notes (presumably discussing taxonomy).
   def has_notes?
-    notes and notes.match(/\S/)
+    notes && notes.match(/\S/)
   end
 
   ##############################################################################
@@ -1001,7 +999,7 @@ class Name < AbstractModel
     all = synonyms - [self]
     accepted_synonyms   = all.reject(&:deprecated)
     deprecated_synonyms = all.select(&:deprecated)
-  	[accepted_synonyms, deprecated_synonyms]
+    [accepted_synonyms, deprecated_synonyms]
   end
 
   # Same as +other_authors+, but returns ids.
@@ -1065,7 +1063,7 @@ class Name < AbstractModel
         old_synonym = synonym
         self.synonym_id = nil
         # self.accepted_name = self
-        self.save
+        save
         # old_synonym.choose_accepted_name
       end
     end
@@ -1088,20 +1086,19 @@ class Name < AbstractModel
   #   after 2:  1, 2, 3
   #
   def merge_synonyms(name)
-
     # Other name has no synonyms, just transfer it over.
     if !name.synonym_id
-      self.transfer_synonym(name)
+      transfer_synonym(name)
 
     # *This* name has no synonyms, transfer us over to it.
-    elsif !self.synonym_id
+    elsif !synonym_id
       name.transfer_synonym(self)
 
     # Both have synonyms -- merge them.
     # (Make sure they aren't already synonymized!)
-    elsif self.synonym_id != name.synonym_id
+    elsif synonym_id != name.synonym_id
       for n in name.synonyms
-        self.transfer_synonym(n)
+        transfer_synonym(n)
       end
     end
 
@@ -1119,16 +1116,16 @@ class Name < AbstractModel
     other_synonym = nil
 
     # Make sure this name is attached to a synonym, creating one if necessary.
-    if !self.synonym_id
+    unless synonym_id
       self.synonym = Synonym.create
-      self.save
+      save
     end
 
     # Only transfer it over if it's not already a synonym!
-    if self.synonym_id != name.synonym_id
+    if synonym_id != name.synonym_id
 
       # Destroy old synonym if only one name left in it.
-      if name.synonym and
+      if name.synonym &&
          (name.synonyms.length <= 2)
         name.synonym.destroy
         other_synonym = (name.synonyms - [name]).first
@@ -1137,7 +1134,7 @@ class Name < AbstractModel
       end
 
       # Attach name to our synonym.
-      name.synonym_id = self.synonym_id
+      name.synonym_id = synonym_id
       name.save
     end
 
@@ -1156,22 +1153,22 @@ class Name < AbstractModel
   # end
 
   def observation_count
-    return observations.length
+    observations.length
   end
 
   # Returns either self or name, whichever has more observations or was last used.
   def more_popular(name)
     result = self
-    if not name.deprecated
-      if self.deprecated
+    unless name.deprecated
+      if deprecated
         result = name
-      elsif self.observation_count < name.observation_count
+      elsif observation_count < name.observation_count
         result = name
-      elsif self.time_of_last_naming < name.time_of_last_naming
+      elsif time_of_last_naming < name.time_of_last_naming
         result = name
       end
     end
-    return result
+    result
   end
 
   # (if no namings, returns created_at)
@@ -1225,22 +1222,22 @@ class Name < AbstractModel
 
     # Do some really basic pre-parsing, stripping off author and spuh.
     str = clean_incoming_string(str).
-                gsub('ë', 'e').
-                sub(/ sp\.?$/, '').
-                gsub('_', ' ').strip_squeeze.capitalize_first
+          tr("ë", "e").
+          sub(/ sp\.?$/, "").
+          tr("_", " ").strip_squeeze.capitalize_first
     str = parse_author(str).first # (strip author off)
 
     # Guess genus first, then species, and so on.
-    if not str.blank?
+    unless str.blank?
       words = str.split
       num = words.length
-      results = guess_word('', words.first)
+      results = guess_word("", words.first)
       for i in 2..num
         if results.any?
           if (i & 1) == 0
             prefixes = results.map(&:text_name).uniq
             results = []
-            word = (i == 2) ? words[i-1] : "#{words[i-2]} #{words[i-1]}"
+            word = (i == 2) ? words[i - 1] : "#{words[i - 2]} #{words[i - 1]}"
             for prefix in prefixes
               results |= guess_word(prefix, word)
             end
@@ -1284,19 +1281,19 @@ class Name < AbstractModel
     b = name.length + 2
 
     # Create a bunch of SQL "like" patterns.
-    name = name.gsub(/ \w+\. /, ' % ')
+    name = name.gsub(/ \w+\. /, " % ")
     words = name.split
-    for i in 0..(words.length-1)
+    for i in 0..(words.length - 1)
       word = words[i]
-      if word != '%'
+      if word != "%"
         if word.length < n
-          patterns << guess_pattern(words, i, '%')
+          patterns << guess_pattern(words, i, "%")
         else
-          for j in 0..(word.length-n)
-            sub = ''
-            sub += word[0..(j-1)] if j > 0
-            sub += '%'
-            sub += word[(j+n)..(-1)] if j + n < word.length
+          for j in 0..(word.length - n)
+            sub = ""
+            sub += word[0..(j - 1)] if j > 0
+            sub += "%"
+            sub += word[(j + n)..(-1)] if j + n < word.length
             patterns << guess_pattern(words, i, sub)
           end
         end
@@ -1306,13 +1303,13 @@ class Name < AbstractModel
     # Create SQL query out of these patterns.
     conds = patterns.map do |pat|
       "text_name LIKE #{Name.connection.quote(pat)}"
-    end.join(' OR ')
+    end.join(" OR ")
     conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
     names = where(conds).limit(10).to_a
 
     # Screen out ones way too different.
     names = names.reject do |x|
-      (x.text_name.length < a) or
+      (x.text_name.length < a) ||
       (x.text_name.length > b)
     end
 
@@ -1322,10 +1319,10 @@ class Name < AbstractModel
   # String words together replacing the one at index +i+ with +sub+.
   def self.guess_pattern(words, i, sub) # :nodoc:
     result = []
-    for j in 0..(words.length-1)
+    for j in 0..(words.length - 1)
       result << (i == j ? sub : words[j])
     end
-    return result.join(' ')
+    result.join(" ")
   end
 
   public
@@ -1338,52 +1335,48 @@ class Name < AbstractModel
   def self.parent_if_parent_deprecated(str)
     result = nil
     names = find_or_create_name_and_parents(str)
-    if names.any? and names.last and names.last.deprecated
+    if names.any? && names.last && names.last.deprecated
       for name in names.reverse
         return name if name.id
       end
     end
-    return result
+    result
   end
 
   # Checks if the deprecated parent has synonyms, and if so, checks if there
   # is a corresponding child under on of the synonymous parents.  Returns an
   # Array of candidates (Name's).
-  def self.names_from_synonymous_genera(str, parent=nil)    # str = "Agaricus bogus var. namus"
-    parent ||= parent_if_parent_deprecated(str)                               # parent = <Agaricus>
+  def self.names_from_synonymous_genera(str, parent = nil) # str = "Agaricus bogus var. namus"
+    parent ||= parent_if_parent_deprecated(str) # parent = <Agaricus>
     parse = parse_name(str)
     result = []
-    if parent and parse
-      child = parse.real_text_name.sub(/^#{parent.real_text_name}/,'').strip  # child = "bogus var. namus"
+    if parent && parse
+      child = parse.real_text_name.sub(/^#{parent.real_text_name}/, "").strip # child = "bogus var. namus"
       child_pat = child.gsub(/(a|um|us)( |$)/, '%\2')                         # child_pat = "bog% var. nam%"
       for synonym in parent.synonyms                                          # synonym = <Lepiota>
-        target = synonym.text_name + ' ' + child                              # target = "Lepiota bog% var. nam%"
-        conditions = ['text_name like ? AND correct_spelling_id IS NULL',
-                      synonym.text_name + ' ' + child_pat]
+        target = synonym.text_name + " " + child                              # target = "Lepiota bog% var. nam%"
+        conditions = ["text_name like ? AND correct_spelling_id IS NULL",
+                      synonym.text_name + " " + child_pat]
         result += Name.where(conditions).select do |name|
           valid_alternate_genus?(name, synonym.text_name, child_pat)          # name = <Lepiota boga var. nama>
         end
       end
       # Return only valid candidates if any are valid.
-      if result.any? {|n| not n.deprecated?}
-        result.reject!(&:deprecated)
-      end
+      result.reject!(&:deprecated) if result.any? { |n| !n.deprecated? }
     end
-    return result
+    result
   end
 
   # The SQL pattern, e.g., "Lepiota test%", is too permissive.  Verify that the
   # results really are of the form /^Lepiota test(a|us|um)$/.
   def self.valid_alternate_genus?(name, parent, child_pat)
-    unless match = name.text_name.match(/^#{parent} #{child_pat.gsub('%','(.*)')}$/)
+    unless match = name.text_name.match(/^#{parent} #{child_pat.gsub('%', '(.*)')}$/)
       return false
     end
-    for i in 1..child_pat.count('%')
-      unless match[i].match(/^(a|us|um)$/)
-        return false
-      end
+    for i in 1..child_pat.count("%")
+      return false unless match[i].match(/^(a|us|um)$/)
     end
-    return true
+    true
   end
 
   ################################################################################
@@ -1438,42 +1431,42 @@ class Name < AbstractModel
     # Move over any notifications on the old name.
     # for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
     for note in Notification.where(flavor: "name", obj_id: old_name.id)
-      note.obj_id = self.id
+      note.obj_id = id
       note.save
     end
 
-#     # Merge the two "main" descriptions if it can.
-#     if self.description and old_name.description and
-#        (self.description.source_type == :public) and
-#        (old_name.description.source_type == :public)
-#       self.description.merge(old_name.description, true)
-#     end
+    #     # Merge the two "main" descriptions if it can.
+    #     if self.description and old_name.description and
+    #        (self.description.source_type == :public) and
+    #        (old_name.description.source_type == :public)
+    #       self.description.merge(old_name.description, true)
+    #     end
 
     # If this one doesn't have a primary description and the other does,
     # then make it this one's.
-    if !self.description && old_name.description
+    if !description && old_name.description
       self.description = old_name.description
     end
 
     # Update the classification cache if that changed in the process.
-    if self.description &&
-       (self.classification != self.description.classification)
-      self.classification = self.description.classification
+    if description &&
+       (classification != description.classification)
+      self.classification = description.classification
     end
 
     # Move over any remaining descriptions.
     for desc in old_name.descriptions
       xargs = {
-          id: desc,
-          set_name: self,
+        id: desc,
+        set_name: self
       }
-      desc.name_id = self.id
+      desc.name_id = id
       desc.save
     end
 
     # Log the action.
     old_name.rss_log.orphan(old_name.display_name, :log_name_merged,
-      :this => old_name.display_name, :that => self.display_name) if old_name.rss_log
+                            this: old_name.display_name, that: display_name) if old_name.rss_log
 
     # Destroy past versions.
     editors = []
@@ -1489,20 +1482,20 @@ class Name < AbstractModel
     end
 
     # Fill in citation if new name is missing one.
-    if citation.blank? and not old_name.citation.blank?
+    if citation.blank? && !old_name.citation.blank?
       self.citation = old_name.citation.strip_squeeze
     end
 
     # Save any notes the old name had.
-    if old_name.has_notes? and (old_name.notes != self.notes)
+    if old_name.has_notes? && (old_name.notes != notes)
       if has_notes?
         self.notes += "\n\nThese notes come from #{old_name.format_name} when it was merged with this name:\n\n" +
-          old_name.notes
+                      old_name.notes
       else
         self.notes = old_name.notes
       end
-      log(:log_name_updated, :touch => true)
-      self.save
+      log(:log_name_updated, touch: true)
+      save
     end
 
     # Finally destroy the name.
@@ -1580,53 +1573,45 @@ class Name < AbstractModel
     # Values required to create/modify attributes of Name instance.
     def params
       {
-          text_name: @text_name,
-          search_name: @search_name,
-          sort_name: @sort_name,
-          display_name: @display_name,
-          author: @author,
-          rank: @rank,
+        text_name: @text_name,
+        search_name: @search_name,
+        sort_name: @sort_name,
+        display_name: @display_name,
+        author: @author,
+        rank: @rank
       }
     end
 
     def inspect
-      params.merge(:parent_name => @parent_name).inspect
+      params.merge(parent_name: @parent_name).inspect
     end
   end
 
   # Parse a name given no additional information.  Returns a ParsedName instance.
-  def self.parse_name(str, rank=:Genus, deprecated=false)
+  def self.parse_name(str, rank = :Genus, deprecated = false)
     str = clean_incoming_string(str)
-    parse_group(str, deprecated)       ||
-    parse_subgenus(str, deprecated)    ||
-    parse_section(str, deprecated)     ||
-    parse_subsection(str, deprecated)  ||
-    parse_stirps(str, deprecated)      ||
-    parse_subspecies(str, deprecated)  ||
-    parse_variety(str, deprecated)     ||
-    parse_form(str, deprecated)        ||
-    parse_species(str, deprecated)     ||
-    parse_genus_or_up(str, deprecated, rank)
+    parse_group(str, deprecated) ||
+      parse_subgenus(str, deprecated) ||
+      parse_section(str, deprecated) || parse_subsection(str, deprecated) || parse_stirps(str, deprecated) || parse_subspecies(str, deprecated) || parse_variety(str, deprecated) || parse_form(str, deprecated) || parse_species(str, deprecated) || parse_genus_or_up(str, deprecated, rank)
   end
 
   # Guess rank of +text_name+.
   def self.guess_rank(text_name)
-    text_name.match(/ group$/)        ? :Group      :
-    text_name.include?(' f. ')        ? :Form       :
-    text_name.include?(' var. ')      ? :Variety    :
-    text_name.include?(' subsp. ')    ? :Subspecies :
-    text_name.include?(' stirps ')    ? :Stirps     :
-    text_name.include?(' subsect. ')  ? :Subsection :
-    text_name.include?(' sect. ')     ? :Section    :
-    text_name.include?(' subgenus ')  ? :Subgenus   :
-    text_name.include?(' ')           ? :Species    :
-    text_name.match(/^\w+aceae$/)     ? :Family     :
-    text_name.match(/^\w+ineae$/)     ? :Family     : # :Suborder
-    text_name.match(/^\w+ales$/)      ? :Order      :
-    text_name.match(/^\w+mycetidae$/) ? :Order      : # :Subclass
-    text_name.match(/^\w+mycetes$/)   ? :Class      :
-    text_name.match(/^\w+mycotina$/)  ? :Class      : # :Subphylum
-    text_name.match(/^\w+mycota$/)    ? :Phylum     :
+    text_name.match(/ group$/) ? :Group :
+    text_name.include?(" f. ") ? :Form :
+    text_name.include?(" var. ") ? :Variety :
+    text_name.include?(" subsp. ") ? :Subspecies :
+    text_name.include?(" stirps ") ? :Stirps : text_name.include?(" subsect. ") ? :Subsection :
+    text_name.include?(" sect. ") ? :Section :
+    text_name.include?(" subgenus ") ? :Subgenus :
+    text_name.include?(" ") ? :Species :
+    text_name.match(/^\w+aceae$/) ? :Family :
+    text_name.match(/^\w+ineae$/) ? :Family : # :Suborder
+    text_name.match(/^\w+ales$/) ? :Order :
+    text_name.match(/^\w+mycetidae$/) ? :Order : # :Subclass
+    text_name.match(/^\w+mycetes$/) ? :Class :
+    text_name.match(/^\w+mycotina$/) ? :Class : # :Subphylum
+    text_name.match(/^\w+mycota$/) ? :Phylum :
                                         :Genus
   end
 
@@ -1639,26 +1624,26 @@ class Name < AbstractModel
     results
   end
 
-  def self.parse_group(str, deprecated=false)
+  def self.parse_group(str, deprecated = false)
     results = nil
     if match = GROUP_PAT.match(str)
       name = match[1]
-      text_name = name.gsub('ë', 'e')
-      parent_name = name.sub(LAST_PART, '')
+      text_name = name.tr("ë", "e")
+      parent_name = name.sub(LAST_PART, "")
       results = ParsedName.new(
-        :text_name    => text_name + ' group',
-        :search_name  => text_name + ' group',
-        :sort_name    => format_sort_name(text_name, 'group'),
-        :display_name => format_name(name, deprecated) + ' group',
-        :parent_name  => parent_name,
-        :rank         => :Group,
-        :author       => ''
+        text_name: text_name + " group",
+        search_name: text_name + " group",
+        sort_name: format_sort_name(text_name, "group"),
+        display_name: format_name(name, deprecated) + " group",
+        parent_name: parent_name,
+        rank: :Group,
+        author: ""
       )
     end
     results
   end
 
-  def self.parse_genus_or_up(str, deprecated=false, rank=:Genus)
+  def self.parse_genus_or_up(str, deprecated = false, rank = :Genus)
     results = nil
     if match = GENUS_OR_UP_PAT.match(str)
       name = match[1]
@@ -1666,19 +1651,19 @@ class Name < AbstractModel
       rank = guess_rank(name) unless Name.ranks_above_genus.include?(rank)
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
-      author2 = author.blank? ? '' : ' ' + author
-      text_name = name.gsub('ë', 'e')
+      author2 = author.blank? ? "" : " " + author
+      text_name = name.tr("ë", "e")
       parent_name = Name.ranks_below_genus.include?(rank) ?
-                      name.sub(LAST_PART, '') : nil
+                      name.sub(LAST_PART, "") : nil
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
-        :text_name    => text_name,
-        :search_name  => text_name + author2,
-        :sort_name    => format_sort_name(text_name, author),
-        :display_name => display_name,
-        :parent_name  => parent_name,
-        :rank         => rank,
-        :author       => author
+        text_name: text_name,
+        search_name: text_name + author2,
+        sort_name: format_sort_name(text_name, author),
+        display_name: display_name,
+        parent_name: parent_name,
+        rank: rank,
+        author: author
       )
     end
     results
@@ -1689,23 +1674,24 @@ class Name < AbstractModel
   def self.parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if match = pattern.match(str)
-      name, author = match[1], match[2].to_s
+      name = match[1]
+      author = match[2].to_s
       name = standardize_sp_nov_variants(name) if rank == :Species
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
       author = standardize_author(author)
-      author2 = author.blank? ? '' : ' ' + author
-      text_name = name.gsub('ë', 'e')
-      parent_name = name.sub(LAST_PART, '')
+      author2 = author.blank? ? "" : " " + author
+      text_name = name.tr("ë", "e")
+      parent_name = name.sub(LAST_PART, "")
       display_name = format_autonym(name, author, rank, deprecated)
       results = ParsedName.new(
-        :text_name    => text_name,
-        :search_name  => text_name + author2,
-        :sort_name    => format_sort_name(text_name, author),
-        :display_name => display_name,
-        :parent_name  => parent_name,
-        :rank         => rank,
-        :author       => author
+        text_name: text_name,
+        search_name: text_name + author2,
+        sort_name: format_sort_name(text_name, author),
+        display_name: display_name,
+        parent_name: parent_name,
+        rank: rank,
+        author: author
       )
     end
     results
@@ -1713,69 +1699,68 @@ class Name < AbstractModel
     return nil
   end
 
-  def self.parse_subgenus(str, deprecated=false)
+  def self.parse_subgenus(str, deprecated = false)
     parse_below_genus(str, deprecated, :Subgenus, SUBGENUS_PAT)
   end
 
-  def self.parse_section(str, deprecated=false)
+  def self.parse_section(str, deprecated = false)
     parse_below_genus(str, deprecated, :Section, SECTION_PAT)
   end
 
-  def self.parse_subsection(str, deprecated=false)
+  def self.parse_subsection(str, deprecated = false)
     parse_below_genus(str, deprecated, :Subsection, SUBSECTION_PAT)
   end
 
-  def self.parse_stirps(str, deprecated=false)
+  def self.parse_stirps(str, deprecated = false)
     parse_below_genus(str, deprecated, :Stirps, STIRPS_PAT)
   end
 
-  def self.parse_species(str, deprecated=false)
+  def self.parse_species(str, deprecated = false)
     parse_below_genus(str, deprecated, :Species, SPECIES_PAT)
   end
 
-  def self.parse_subspecies(str, deprecated=false)
+  def self.parse_subspecies(str, deprecated = false)
     parse_below_genus(str, deprecated, :Subspecies, SUBSPECIES_PAT)
   end
 
-  def self.parse_variety(str, deprecated=false)
+  def self.parse_variety(str, deprecated = false)
     parse_below_genus(str, deprecated, :Variety, VARIETY_PAT)
   end
 
-  def self.parse_form(str, deprecated=false)
+  def self.parse_form(str, deprecated = false)
     parse_below_genus(str, deprecated, :Form, FORM_PAT)
   end
 
   def self.parse_rank_abbreviation(str)
-    str.match(SUBG_ABBR)    ? :Subgenus   :
-    str.match(SECT_ABBR)    ? :Section    :
+    str.match(SUBG_ABBR) ? :Subgenus : str.match(SECT_ABBR) ? :Section :
     str.match(SUBSECT_ABBR) ? :Subsection :
-    str.match(STIRPS_ABBR)  ? :Stirps     :
-    str.match(SSP_ABBR)     ? :Subspecies :
-    str.match(VAR_ABBR)     ? :Variety    :
-    str.match(F_ABBR)       ? :Form       : nil
+    str.match(STIRPS_ABBR) ? :Stirps :
+    str.match(SSP_ABBR) ? :Subspecies :
+    str.match(VAR_ABBR) ? :Variety : str.match(F_ABBR) ? :Form : nil
   end
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
   def self.standardize_sp_nov_variants(name)
-    words = name.split(' ')
+    words = name.split(" ")
     if words.length > 2
-      genus, epithet = words[0], words[2]
+      genus = words[0]
+      epithet = words[2]
       epithet.sub!(/^"(.*)"$/, '\1')
       name = "#{genus} \"sp-#{epithet}\""
     else
       name.sub!(/ "sp\./i, ' "sp-')
     end
-    return name
+    name
   end
 
   # Fix common error: Amanita vaginatae Author var. vaginatae
   # Convert to: Amanita vaginatae var. vaginatae Author
   def self.fix_autonym(name, author, rank)
-    last_word = name.split(' ').last.gsub(/[()]/,'')
+    last_word = name.split(" ").last.gsub(/[()]/, "")
     if match = author.to_s.match(/^(.*?)(( (#{ANY_SUBG_ABBR}|#{ANY_SSP_ABBR}) #{last_word})+)$/)
       name = "#{name}#{match[2]}"
       author = match[1].strip
-      words = match[2].split(' ')
+      words = match[2].split(" ")
       while words.any?
         next_rank = parse_rank_abbreviation(words.shift)
         words.shift
@@ -1783,7 +1768,7 @@ class Name < AbstractModel
         rank = next_rank
       end
     end
-    return name, author, rank
+    [name, author, rank]
   end
 
   class RankMessedUp < Exception
@@ -1793,82 +1778,82 @@ class Name < AbstractModel
     if compare_ranks(prev_rank, next_rank) <= 0 ||
        Name.ranks_above_species.include?(prev_rank) &&
        Name.ranks_below_species.include?(next_rank)
-      raise RankMessedUp.new
+      fail RankMessedUp.new
     end
   end
 
   # Format a name ranked below genus, moving the author to before the var.
   # in natural varieties such as "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
-  def self.format_autonym(name, author, rank, deprecated)
-    words = name.split(' ')
+  def self.format_autonym(name, author, _rank, deprecated)
+    words = name.split(" ")
     if author.blank?
       format_name(name, deprecated)
     elsif words[-7] == words[-1]
       [
-        format_name(words[0..-7].join(' '), deprecated),
+        format_name(words[0..-7].join(" "), deprecated),
         author,
         words[-6],
         format_name(words[-5], deprecated),
         words[-4],
         format_name(words[-3], deprecated),
         words[-2],
-        format_name(words[-1], deprecated),
-      ].join(' ')
+        format_name(words[-1], deprecated)
+      ].join(" ")
     elsif words[-5] == words[-1]
       [
-        format_name(words[0..-5].join(' '), deprecated),
+        format_name(words[0..-5].join(" "), deprecated),
         author,
         words[-4],
         format_name(words[-3], deprecated),
         words[-2],
-        format_name(words[-1], deprecated),
-      ].join(' ')
+        format_name(words[-1], deprecated)
+      ].join(" ")
     elsif words[-3] == words[-1]
       [
-        format_name(words[0..-3].join(' '), deprecated),
+        format_name(words[0..-3].join(" "), deprecated),
         author,
         words[-2],
-        format_name(words[-1], deprecated),
-      ].join(' ')
+        format_name(words[-1], deprecated)
+      ].join(" ")
     else
-      format_name(name, deprecated) + ' ' + author
+      format_name(name, deprecated) + " " + author
     end
   end
 
   def self.standardize_name(str)
     # remove old-style "(sect. Vaginatae)"
     str = str.sub(/ \((.*)\)$/, ' \\1')
-    words = str.split(' ')
+    words = str.split(" ")
     # every other word, starting next-from-last, is an abbreviation
     i = words.length - 2
     while i > 0
       if words[i].match(/^f/i)
-        words[i] = 'f.'
+        words[i] = "f."
       elsif words[i].match(/^v/i)
-        words[i] = 'var.'
+        words[i] = "var."
       elsif words[i].match(/^sect/i)
-        words[i] = 'sect.'
+        words[i] = "sect."
       elsif words[i].match(/^stirps/i)
-        words[i] = 'stirps'
+        words[i] = "stirps"
       elsif words[i].match(/^subg/i)
-        words[i] = 'subgenus'
+        words[i] = "subgenus"
       elsif words[i].match(/^subsect/i)
-        words[i] = 'subsect.'
+        words[i] = "subsect."
       else
-        words[i] = 'subsp.'
+        words[i] = "subsp."
       end
       i -= 2
     end
-    return words.join(' ')
+    words.join(" ")
   end
 
   def self.standardize_author(str)
     str = str.to_s.
-      sub(/^#{AUCT_ABBR}/, 'auct. ').
-      sub(/^#{INED_ABBR}/, 'ined. ').
-      sub(/^#{NOM_ABBR}/, 'nom. ').
-      sub(/^#{SENSU_ABBR}/, 'sensu ').
-      strip_squeeze
+          sub(/^#{AUCT_ABBR}/, "auct. ").
+          sub(/^#{INED_ABBR}/, "ined. ").
+          sub(/^#{NOM_ABBR}/, "nom. ").
+          sub(/^#{SENSU_ABBR}/, "sensu ").
+          strip_squeeze
     squeeze_author(str)
   end
 
@@ -1878,62 +1863,62 @@ class Name < AbstractModel
   end
 
   # Add itallics and boldface to a standardized name (without author).
-  def self.format_name(str, deprecated=false)
-    boldness = deprecated ? '' : '**'
-    words = str.split(' ')
+  def self.format_name(str, deprecated = false)
+    boldness = deprecated ? "" : "**"
+    words = str.split(" ")
     if (words.length & 1) == 0
       genus = words.shift
-      words[0] = genus + ' ' + words[0]
+      words[0] = genus + " " + words[0]
     end
     i = words.length - 1
     while i >= 0
       words[i] = "#{boldness}__#{words[i]}__#{boldness}"
       i -= 2
     end
-    return words.join(' ')
+    words.join(" ")
   end
 
   def self.clean_incoming_string(str)
     str.to_s.
-        gsub(/“|”/,'"').   # let RedCloth format quotes
-        gsub(/‘|’/,"'").
-        gsub(/\u2028/,''). # line separator that we see occasionally
-        strip_squeeze
+      gsub(/“|”/, '"'). # let RedCloth format quotes
+      gsub(/‘|’/, "'").
+      gsub(/\u2028/, ""). # line separator that we see occasionally
+      strip_squeeze
   end
 
   # Adjust +search_name+ string to collate correctly.  Pass in +search_name+.
   def self.format_sort_name(name, author)
     str = format_name(name, :deprecated).
-      sub(/^_+/, '').
-      gsub(/_+/, ' ').             # put genus at the top
-      sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
-      gsub(/"([^"]*")/, '\1').     # collate "baccata" with baccata
-      sub(' subgenus ', ' {1subgenus ').
-      sub(' sect. ',    ' {2sect. ').
-      sub(' subsect. ', ' {3subsect. ').
-      sub(' stirps ',   ' {4stirps ').
-      sub(' subsp. ',   ' {5subsp. ').
-      sub(' var. ',     ' {6var. ').
-      sub(' f. ',       ' {7f. ').
-      strip.
-      sub(/(^\w+)aceae$/,        '\1!7').
-      sub(/(^\w+)ineae$/,        '\1!6').
-      sub(/(^\w+)ales$/,         '\1!5').
-      sub(/(^\w+?)o?mycetidae$/, '\1!4').
-      sub(/(^\w+?)o?mycetes$/,   '\1!3').
-      sub(/(^\w+?)o?mycotina$/,  '\1!2').
-      sub(/(^\w+?)o?mycota$/,    '\1!1')
+          sub(/^_+/, "").
+          gsub(/_+/, " "). # put genus at the top
+          sub(/ "(sp[\-\.])/, ' {\1'). # put "sp-1" at end
+          gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+          sub(" subgenus ", " {1subgenus ").
+          sub(" sect. ",    " {2sect. ").
+          sub(" subsect. ", " {3subsect. ").
+          sub(" stirps ",   " {4stirps ").
+          sub(" subsp. ",   " {5subsp. ").
+          sub(" var. ",     " {6var. ").
+          sub(" f. ", " {7f. ").
+          strip.
+          sub(/(^\w+)aceae$/, '\1!7').
+          sub(/(^\w+)ineae$/,        '\1!6').
+          sub(/(^\w+)ales$/,         '\1!5').
+          sub(/(^\w+?)o?mycetidae$/, '\1!4').
+          sub(/(^\w+?)o?mycetes$/,   '\1!3').
+          sub(/(^\w+?)o?mycotina$/, '\1!2').
+          sub(/(^\w+?)o?mycota$/, '\1!1')
     1 while str.sub!(/(^| )([A-Za-z\-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4') # put autonyms at the top
 
-    if not author.blank?
-      str += '  ' + author.
-        gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-        gsub(/[Đđ]/, 'd').       # mysql isn't collating these right
-        gsub(/[Øø]/, 'O').
-        strip.
-        sub(/^group$/, ' group')
+    unless author.blank?
+      str += "  " + author.
+                    gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+                    gsub(/[Đđ]/, "d"). # mysql isn't collating these right
+                    gsub(/[Øø]/, "O").
+                    strip.
+                    sub(/^group$/, " group")
     end
-    return str
+    str
   end
 
   ##############################################################################
@@ -1943,8 +1928,8 @@ class Name < AbstractModel
   ##############################################################################
 
   # Short-hand for calling Name.find_names with +fill_in_authors+ set to +true+.
-  def self.find_names_filling_in_authors(in_str, rank=nil,
-                                         ignore_deprecated=false)
+  def self.find_names_filling_in_authors(in_str, rank = nil,
+                                         ignore_deprecated = false)
     find_names(in_str, rank, ignore_deprecated, :fill_in_authors)
   end
 
@@ -1962,17 +1947,15 @@ class Name < AbstractModel
   #
   #  names = Name.find_names('Letharia vulpina')
   #
-  def self.find_names(in_str, rank=nil, ignore_deprecated=false,
-                      fill_in_authors=false)
+  def self.find_names(in_str, rank = nil, ignore_deprecated = false,
+                      fill_in_authors = false)
 
     return [] unless parse = parse_name(in_str)
 
     text_name = parse.text_name
     search_name = parse.search_name
     author = parse.author
-    if names_for_unknown.member?(name.downcase)
-      name = "Fungi"
-    end
+    name = "Fungi" if names_for_unknown.member?(name.downcase)
     results = []
 
     while results.empty?
@@ -1995,7 +1978,7 @@ class Name < AbstractModel
         conditions_args[:name] = text_name
         results = Name.where(conditions.join(" AND "), conditions_args).to_a
         # (this should never return more than one result)
-        if fill_in_authors and results.length == 1
+        if fill_in_authors && results.length == 1
           results.first.change_author(author)
           results.first.save
         end
@@ -2027,7 +2010,7 @@ class Name < AbstractModel
     if parsed_name = parse_name(in_str)
       result = find_or_create_parsed_name_and_parents(parsed_name)
     end
-    return result
+    result
   end
 
   def self.find_or_create_parsed_name_and_parents(parsed_name)
@@ -2041,10 +2024,10 @@ class Name < AbstractModel
       deprecate = result.any? && result.last && result.last.deprecated
       result << find_or_create_parsed_name(parsed_name, deprecate)
     end
-    return result
+    result
   end
 
-  def self.find_or_create_parsed_name(parsed_name, deprecate=false)
+  def self.find_or_create_parsed_name(parsed_name, deprecate = false)
     result = nil
     matches = find_matching_names(parsed_name)
     if matches.empty?
@@ -2053,17 +2036,15 @@ class Name < AbstractModel
     elsif matches.length == 1
       result = matches.first
       # Fill in author automatically if we can.
-      if result.author.blank? and not parsed_name.author.blank?
+      if result.author.blank? && !parsed_name.author.blank?
         result.change_author(parsed_name.author)
       end
     else
       # Try to resolve ambiguity by taking the one with author.
-      matches.reject! {|name| name.author.blank?}
-      if matches.length == 1
-        result = matches.first
-      end
+      matches.reject! { |name| name.author.blank? }
+      result = matches.first if matches.length == 1
     end
-    return result
+    result
   end
 
   def self.find_matching_names(parsed_name)
@@ -2076,7 +2057,7 @@ class Name < AbstractModel
         result = Name.where(text_name: parsed_name.text_name, author: "")
       end
     end
-    return result.to_a
+    result.to_a
   end
 
   # Look up a Name, creating it as necessary.  Requires +rank+ and +text_name+,
@@ -2108,7 +2089,7 @@ class Name < AbstractModel
     result = Name.new(params)
     result.created_at = now = Time.now
     result.updated_at = now
-    return result
+    result
   end
 
   ################################################################################
@@ -2123,20 +2104,20 @@ class Name < AbstractModel
   # *NOTE*: It does not save the changes to itself, but if it has to create or
   # update any parents (and caller has requested it), _those_ do get saved.
   #
-  def change_text_name(in_text_name, in_author, in_rank, save_parents=false)
+  def change_text_name(in_text_name, in_author, in_rank, save_parents = false)
     in_str = Name.clean_incoming_string("#{in_text_name} #{in_author}")
     parse = Name.parse_name(in_str, in_rank, deprecated)
-    if not parse or parse.rank != in_rank
-      raise :runtime_invalid_for_rank.t(:rank => :"rank_#{in_rank.to_s.downcase}", :name => in_str)
+    if !parse || parse.rank != in_rank
+      fail :runtime_invalid_for_rank.t(rank: :"rank_#{in_rank.to_s.downcase}", name: in_str)
     end
-    if parse.parent_name and
-       not Name.find_by_text_name(parse.parent_name)
+    if parse.parent_name &&
+       !Name.find_by_text_name(parse.parent_name)
       parents = Name.find_or_create_name_and_parents(parse.parent_name)
       if parents.last.nil?
-        raise :runtime_unable_to_create_name.t(:name => parse.parent_name)
+        fail :runtime_unable_to_create_name.t(name: parse.parent_name)
       elsif save_parents
         for n in parents
-          n.save if n and n.new_record?
+          n.save if n && n.new_record?
         end
       end
     end
@@ -2150,8 +2131,8 @@ class Name < AbstractModel
   #
   def change_author(new_author)
     if rank != :Group
-      old_author = self.author
-      new_author2 = new_author.blank? ? '' : ' ' + new_author
+      old_author = author
+      new_author2 = new_author.blank? ? "" : " " + new_author
       self.author = new_author.to_s
       self.search_name  = text_name + new_author2
       self.sort_name    = Name.format_sort_name(text_name, new_author)
@@ -2167,7 +2148,7 @@ class Name < AbstractModel
   def change_deprecated(deprecated)
     # remove existing boldness
     name = display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
-    if not deprecated
+    unless deprecated
       # add new boldness
       name.gsub!(/(__[^_]+__)/, '**\1**')
       self.correct_spelling = nil
@@ -2274,8 +2255,8 @@ class Name < AbstractModel
     parent_deprecated = nil
     suggest_corrections = false
 
-    what2 = what.to_s.gsub("_", " ").strip_squeeze
-    approved_name2 = approved_name.to_s.gsub("_", " ").strip_squeeze
+    what2 = what.to_s.tr("_", " ").strip_squeeze
+    approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
 
     unless what2.blank? || names_for_unknown.member?(what2.downcase)
       success = false
@@ -2319,7 +2300,7 @@ class Name < AbstractModel
         target_name = names.first
         # Single matching name.  Check if it's deprecated.
         if target_name.deprecated &&
-            (ignore_approved_name || (approved_name != what))
+           (ignore_approved_name || (approved_name != what))
           # User has not explicitly approved the deprecated name: get list of
           # valid synonyms.  Will display them for user to choose among.
           valid_names = target_name.approved_synonyms
@@ -2385,38 +2366,36 @@ class Name < AbstractModel
     end
   end
 
-  def save_with_log(log=nil, args={})
+  def save_with_log(log = nil, args = {})
     return false unless changed?
     log ||= :log_name_updated
-    args = {touch: altered?}.merge(args)
+    args = { touch: altered? }.merge(args)
     log(log, args)
-    return save
+    save
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.user && !User.current
-      errors.add(:user, :validate_name_user_missing.t)
-    end
+    errors.add(:user, :validate_name_user_missing.t) if !user && !User.current
 
-    if self.text_name.to_s.bytesize > 100
+    if text_name.to_s.bytesize > 100
       errors.add(:text_name, :validate_name_text_name_too_long.t)
     end
-    if self.search_name.to_s.bytesize > 200
+    if search_name.to_s.bytesize > 200
       errors.add(:search_name, :validate_name_search_name_too_long.t)
     end
-    if self.sort_name.to_s.bytesize > 200
+    if sort_name.to_s.bytesize > 200
       errors.add(:sort_name, :validate_name_sort_name_too_long.t)
     end
-    if self.display_name.to_s.bytesize > 200
+    if display_name.to_s.bytesize > 200
       errors.add(:display_name, :validate_name_display_name_too_long.t)
     end
 
-    if self.author.to_s.bytesize > 100
+    if author.to_s.bytesize > 100
       errors.add(:author, :validate_name_author_too_long.t)
     end
   end

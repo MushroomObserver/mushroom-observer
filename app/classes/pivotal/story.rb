@@ -13,44 +13,44 @@ class Pivotal
     attr_accessor :votes
 
     ACTIVE_STATES = {
-      'unscheduled' => true,
-      'unstarted'   => true,
-      'started'     => true,
-      'finished'    => false,
-      'accepted'    => false,
+      "unscheduled" => true,
+      "unstarted"   => true,
+      "started"     => true,
+      "finished"    => false,
+      "accepted"    => false
     }
 
     LABEL_VALUE = {
-      'critical'        => 4,
-      'bottleneck'      => 3,
-      'api'             => 2,
-      'design'          => 2,
-      'documentation'   => 2,
-      'email'           => 2,
-      'eol'             => 2,
-      'github'          => 2,
-      'glossary'        => 2,
-      'herbarium'       => 2,
-      'i18n'            => 2,
-      'images'          => 2,
-      'interface'       => 2,
-      'lists'           => 2,
-      'locations'       => 2,
-      'names'           => 2,
-      'observations'    => 2,
-      'pivotal_tracker' => 2,
-      'projects'        => 2,
-      'publications'    => 2,
-      'search'          => 2,
-      'taxonomy'        => 2,
-      'upgrade'         => 2,
-      'vagrant'         => 2,
-      'voting'          => 2,
-      'other'           => 2,
-      'admin'           => 1,
-      'code'            => 1,
-      'server'          => 1,
-      'open'            => 0,
+      "critical"        => 4,
+      "bottleneck"      => 3,
+      "api"             => 2,
+      "design"          => 2,
+      "documentation"   => 2,
+      "email"           => 2,
+      "eol"             => 2,
+      "github"          => 2,
+      "glossary"        => 2,
+      "herbarium"       => 2,
+      "i18n"            => 2,
+      "images"          => 2,
+      "interface"       => 2,
+      "lists"           => 2,
+      "locations"       => 2,
+      "names"           => 2,
+      "observations"    => 2,
+      "pivotal_tracker" => 2,
+      "projects"        => 2,
+      "publications"    => 2,
+      "search"          => 2,
+      "taxonomy"        => 2,
+      "upgrade"         => 2,
+      "vagrant"         => 2,
+      "voting"          => 2,
+      "other"           => 2,
+      "admin"           => 1,
+      "code"            => 1,
+      "server"          => 1,
+      "open"            => 0
     }
 
     def initialize(json)
@@ -64,9 +64,9 @@ class Pivotal
       @votes = []
       @description = parse_description(data["description"])
       @labels = data["labels"] == [] ? ["other"] :
-                data["labels"].map {|l| l["name"]}
+                data["labels"].map { |l| l["name"] }
       @comments = !data["comments"] ? [] :
-                  data["comments"].map {|c| Pivotal::Comment.new(c)}
+                  data["comments"].map { |c| Pivotal::Comment.new(c) }
     end
 
     def to_json
@@ -82,8 +82,8 @@ class Pivotal
         end,
         "comments" => @comments.map do |c|
           { "id" => c.id,
-          "created_at" => c.time,
-          "text" => Pivotal.prepare_text(c.text, c.user) }
+            "created_at" => c.time,
+            "text" => Pivotal.prepare_text(c.text, c.user) }
         end
       )
     end
@@ -129,7 +129,7 @@ class Pivotal
     end
 
     def story_order
-      max = labels.map {|l| LABEL_VALUE[l].to_i}.max.to_i
+      max = labels.map { |l| LABEL_VALUE[l].to_i }.max.to_i
       @view_order ||= -((max * 1000 + score) * 100) + comments.length
     end
 
@@ -142,6 +142,7 @@ class Pivotal
     def self.label_value(label)
       LABEL_VALUE[label].to_i
     end
+
     def label_value(label)
       LABEL_VALUE[label].to_i
     end
@@ -161,7 +162,7 @@ class Pivotal
           return vote.value if vote.id == user_id
         end
       end
-      return 0
+      0
     end
 
     def change_vote(user, value)
@@ -172,7 +173,7 @@ class Pivotal
           found = true
         end
       end
-      votes << Pivotal::Vote.new(user.id, value) if !found
+      votes << Pivotal::Vote.new(user.id, value) unless found
     end
   end
 end

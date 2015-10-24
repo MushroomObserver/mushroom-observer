@@ -21,7 +21,7 @@ MushroomObserver::Application.configure do
   config.image_sources = {
     local: {
       test: "file://#{config.local_image_files}",
-      read: "/local_images",
+      read: "/local_images"
     },
     remote1: {
       test: :transferred_flag,
@@ -32,14 +32,14 @@ MushroomObserver::Application.configure do
       write: "file://#{config.root}/public/test_server2",
       # Having trouble getting this to work on vagrant machine...
       # write: "ssh://vagrant@localhost:#{config.root}/public/test_server2",
-      sizes: [ :thumbnail, :small, :medium ]
+      sizes: [:thumbnail, :small, :medium]
     }
   }
   config.image_precedence = {
-    default: [:local, :remote1 ]
+    default: [:local, :remote1]
   }
   config.image_fallback_source = :remote1
-  config.keep_these_image_sizes_local = [ :thumbnail, :small ]
+  config.keep_these_image_sizes_local = [:thumbnail, :small]
 
   config.robots_dot_text_file = "#{config.root}/test/fixtures/robots.txt"
 
@@ -103,4 +103,3 @@ end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
 require file if File.exist?(file)
-

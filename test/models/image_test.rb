@@ -1,8 +1,7 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class ImageTest < UnitTestCase
-
   def test_votes
     img = images(:in_situ)
     assert(img.image_votes.empty?)
@@ -41,30 +40,30 @@ class ImageTest < UnitTestCase
 
     license_one = License.find(1)
     license_two = License.find(3)
-    name_one = 'Bobby Singer'
-    name_two = 'Robert H. Singer'
-    date_one = Date.parse('2007-12-31')
-    date_two = Date.parse('2008-01-01')
+    name_one = "Bobby Singer"
+    name_two = "Robert H. Singer"
+    date_one = Date.parse("2007-12-31")
+    date_two = Date.parse("2008-01-01")
 
     # Got rid of date stamp messing around due to switch from 'modified' to 'updated_at'
-    
+
     img = Image.create(
-      :user             => mary,
-      :when             => date_one,
-      :license          => license_one,
-      :copyright_holder => name_one
+      user: mary,
+      when: date_one,
+      license: license_one,
+      copyright_holder: name_one
     )
     assert_equal(date_one.year, img.when.year)
     assert_equal(license_one, img.license)
     assert_equal(name_one, img.copyright_holder)
     assert_equal(0, img.copyright_changes.length)
 
-    img.original_name = 'blah blah'
+    img.original_name = "blah blah"
     img.save
     img.reload
     assert_equal(0, img.copyright_changes.length)
 
-    img.when     = date_two
+    img.when = date_two
     img.save
     img.reload
     assert_equal(date_two.year, img.when.year)
@@ -72,7 +71,7 @@ class ImageTest < UnitTestCase
     assert_equal(1, img.copyright_changes.length)
 
     img.copyright_holder = name_two
-    img.license  = license_two
+    img.license = license_two
     img.save
     img.reload
     assert_equal(name_two, img.copyright_holder)
@@ -113,11 +112,11 @@ class ImageTest < UnitTestCase
   end
 
   def do_truncate_test(img, var, len)
-    exes = 'x' * (len - 1)
+    exes = "x" * (len - 1)
     assert_truncated_right(img, var, exes, exes)
-    assert_truncated_right(img, var, exes+'a', exes+'a')
-    assert_truncated_right(img, var, exes+'å', exes)
-    assert_truncated_right(img, var, exes+'aå', exes+'a')
+    assert_truncated_right(img, var, exes + "a", exes + "a")
+    assert_truncated_right(img, var, exes + "å", exes)
+    assert_truncated_right(img, var, exes + "aå", exes + "a")
   end
 
   def assert_truncated_right(img, var, set, get)
@@ -127,9 +126,9 @@ class ImageTest < UnitTestCase
   end
 
   def test_presence_of_critical_external_scripts
-    assert(!File.exist?("#{::Rails.root.to_s}/script/bogus_script"), "script/bogus_script should not exist!")
-    assert(File.exist?("#{::Rails.root.to_s}/script/process_image"), "Missing script/process_image!")
-    assert(File.exist?("#{::Rails.root.to_s}/script/rotate_image"), "Missing script/rotate_image!")
-    assert(File.exist?("#{::Rails.root.to_s}/script/retransfer_images"), "Missing script/retransfer_images!")
+    assert(!File.exist?("#{::Rails.root}/script/bogus_script"), "script/bogus_script should not exist!")
+    assert(File.exist?("#{::Rails.root}/script/process_image"), "Missing script/process_image!")
+    assert(File.exist?("#{::Rails.root}/script/rotate_image"), "Missing script/rotate_image!")
+    assert(File.exist?("#{::Rails.root}/script/retransfer_images"), "Missing script/retransfer_images!")
   end
 end

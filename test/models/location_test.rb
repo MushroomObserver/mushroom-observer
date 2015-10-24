@@ -1,9 +1,8 @@
 # encoding: utf-8
 
-require 'test_helper'
+require "test_helper"
 
 class LocationTest < UnitTestCase
-
   def bad_location(str)
     assert(Location.dubious_name?(str, true) != [])
   end
@@ -56,25 +55,25 @@ class LocationTest < UnitTestCase
   end
 
   def test_understood_country
-    assert(Location.understood_country?('USA'))
-    assert(Location.understood_country?('Afghanistan'))
-    assert(!Location.understood_country?('Moon'))
+    assert(Location.understood_country?("USA"))
+    assert(Location.understood_country?("Afghanistan"))
+    assert(!Location.understood_country?("Moon"))
   end
-  
+
   def test_versioning
     User.current = mary
     loc = Location.create!(
-      :name => 'Anywhere',
-      :north        => 60,
-      :south        => 50,
-      :east         => 40,
-      :west         => 30
+      name: "Anywhere",
+      north: 60,
+      south: 50,
+      east: 40,
+      west: 30
     )
     assert_equal(mary.id, loc.user_id)
     assert_equal(mary.id, loc.versions.last.user_id)
 
     User.current = rolf
-    loc.display_name = 'Anywhere, USA'
+    loc.display_name = "Anywhere, USA"
     loc.save
     assert_equal(mary.id, loc.user_id)
     assert_equal(rolf.id, loc.versions.last.user_id)
@@ -82,8 +81,8 @@ class LocationTest < UnitTestCase
 
     User.current = dick
     desc = LocationDescription.create!(
-      :location => loc,
-      :notes    => 'Something.'
+      location: loc,
+      notes: "Something."
     )
     assert_equal(dick.id, desc.user_id)
     assert_equal(dick.id, desc.versions.last.user_id)
@@ -92,7 +91,7 @@ class LocationTest < UnitTestCase
     assert_equal(mary.id, loc.versions.first.user_id)
 
     User.current = rolf
-    desc.notes = 'Something else.'
+    desc.notes = "Something else."
     desc.save
     assert_equal(dick.id, desc.user_id)
     assert_equal(rolf.id, desc.versions.last.user_id)
@@ -145,7 +144,7 @@ class LocationTest < UnitTestCase
     # Rolf changes notes: notify Dick (all); Rolf becomes editor.
     User.current = rolf
     desc.reload
-    desc.notes = ''
+    desc.notes = ""
     desc.save
     assert_equal(description_version + 1, desc.version)
     assert_equal(0, desc.authors.length)
@@ -153,16 +152,16 @@ class LocationTest < UnitTestCase
     assert_equal(rolf, desc.editors.first)
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
-      :flavor      => 'QueuedEmail::LocationChange',
-      :from        => rolf,
-      :to          => dick,
-      :location    => loc.id,
-      :description => desc.id,
-      :old_location_version => loc.version,
-      :new_location_version => loc.version,
-      :old_description_version => desc.version-1,
-      :new_description_version => desc.version
-    )
+                 flavor: "QueuedEmail::LocationChange",
+                 from: rolf,
+                 to: dick,
+                 location: loc.id,
+                 description: desc.id,
+                 old_location_version: loc.version,
+                 new_location_version: loc.version,
+                 old_description_version: desc.version - 1,
+                 new_description_version: desc.version
+                )
 
     # Dick wisely reconsiders getting emails for every location change.
     # Have Mary opt in for all temporarily just to make sure she doesn't
@@ -210,16 +209,16 @@ class LocationTest < UnitTestCase
     assert_equal(description_version + 3, desc.version)
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
-      :flavor      => 'QueuedEmail::LocationChange',
-      :from        => rolf,
-      :to          => mary,
-      :location    => loc.id,
-      :description => desc.id,
-      :old_location_version => loc.version,
-      :new_location_version => loc.version,
-      :old_description_version => desc.version-1,
-      :new_description_version => desc.version
-    )
+                 flavor: "QueuedEmail::LocationChange",
+                 from: rolf,
+                 to: mary,
+                 location: loc.id,
+                 description: desc.id,
+                 old_location_version: loc.version,
+                 new_location_version: loc.version,
+                 old_description_version: desc.version - 1,
+                 new_description_version: desc.version
+                )
 
     # Have Mary opt out of author-notifications to make sure that's why she
     # got the last email.
@@ -270,22 +269,22 @@ class LocationTest < UnitTestCase
     assert_user_list_equal([rolf, dick], desc.editors)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
-      :flavor      => 'QueuedEmail::LocationChange',
-      :from        => dick,
-      :to          => rolf,
-      :location    => loc.id,
-      :description => desc.id,
-      :old_location_version => loc.version,
-      :new_location_version => loc.version,
-      :old_description_version => desc.version-1,
-      :new_description_version => desc.version
-    )
+                 flavor: "QueuedEmail::LocationChange",
+                 from: dick,
+                 to: rolf,
+                 location: loc.id,
+                 description: desc.id,
+                 old_location_version: loc.version,
+                 new_location_version: loc.version,
+                 old_description_version: desc.version - 1,
+                 new_description_version: desc.version
+                )
 
     # Have Mary and Dick express interest, Rolf express disinterest,
     # then have Dick change it again.  Mary should get an email.
-    Interest.create(:target => loc, :user => rolf, :state => false)
-    Interest.create(:target => loc, :user => mary, :state => true)
-    Interest.create(:target => loc, :user => dick, :state => true)
+    Interest.create(target: loc, user: rolf, state: false)
+    Interest.create(target: loc, user: mary, state: true)
+    Interest.create(target: loc, user: dick, state: true)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       x       .       no
@@ -303,77 +302,77 @@ class LocationTest < UnitTestCase
     assert_equal(mary, desc.authors.first)
     assert_user_list_equal([rolf, dick], desc.editors)
     assert_email(3,
-      :flavor        => 'QueuedEmail::LocationChange',
-      :from          => dick,
-      :to            => mary,
-      :location      => loc.id,
-      :description   => desc.id,
-      :old_location_version => loc.version-1,
-      :new_location_version => loc.version,
-      :old_description_version => desc.version,
-      :new_description_version => desc.version
-    )
+                 flavor: "QueuedEmail::LocationChange",
+                 from: dick,
+                 to: mary,
+                 location: loc.id,
+                 description: desc.id,
+                 old_location_version: loc.version - 1,
+                 new_location_version: loc.version,
+                 old_description_version: desc.version,
+                 new_description_version: desc.version
+                )
     assert_equal(4, QueuedEmail.count)
   end
 
   def test_parse_latitude
-    assert_equal(     nil, Location.parse_latitude(''))
-    assert_equal( 12.3456, Location.parse_latitude('12.3456'))
-    assert_equal(-12.3456, Location.parse_latitude(' -12.3456 '))
-    assert_equal(     nil, Location.parse_latitude('123.456'))
-    assert_equal( 12.3456, Location.parse_latitude('12.3456N'))
-    assert_equal(     nil, Location.parse_latitude('12.3456E'))
-    assert_equal( 12.5824, Location.parse_latitude('12°34\'56.789"N'))
-    assert_equal( 12.5760, Location.parse_latitude('12 34.56'))
-    assert_equal(-12.5760, Location.parse_latitude('-12 34 33.6'))
-    assert_equal(-12.5822, Location.parse_latitude(' 12 deg 34 min 56 sec S '))
+    assert_equal(nil, Location.parse_latitude(""))
+    assert_equal(12.3456, Location.parse_latitude("12.3456"))
+    assert_equal(-12.3456, Location.parse_latitude(" -12.3456 "))
+    assert_equal(nil, Location.parse_latitude("123.456"))
+    assert_equal(12.3456, Location.parse_latitude("12.3456N"))
+    assert_equal(nil, Location.parse_latitude("12.3456E"))
+    assert_equal(12.5824, Location.parse_latitude('12°34\'56.789"N'))
+    assert_equal(12.5760, Location.parse_latitude("12 34.56"))
+    assert_equal(-12.5760, Location.parse_latitude("-12 34 33.6"))
+    assert_equal(-12.5822, Location.parse_latitude(" 12 deg 34 min 56 sec S "))
   end
 
   def test_parse_longitude
-    assert_equal(     nil, Location.parse_longitude(''))
-    assert_equal( 12.3456, Location.parse_longitude('12.3456'))
-    assert_equal(-12.3456, Location.parse_longitude(' -12.3456 '))
-    assert_equal(     nil, Location.parse_longitude('190.456'))
-    assert_equal(170.4560, Location.parse_longitude('170.456'))
-    assert_equal( 12.3456, Location.parse_longitude('12.3456E'))
-    assert_equal(     nil, Location.parse_longitude('12.3456S'))
-    assert_equal( 12.5824, Location.parse_longitude('12°34\'56.789"E'))
-    assert_equal( 12.5760, Location.parse_longitude('12 34.56'))
-    assert_equal(-12.5760, Location.parse_longitude('-12 34 33.6'))
-    assert_equal(-12.5822, Location.parse_longitude(' 12deg 34min 56sec W '))
+    assert_equal(nil, Location.parse_longitude(""))
+    assert_equal(12.3456, Location.parse_longitude("12.3456"))
+    assert_equal(-12.3456, Location.parse_longitude(" -12.3456 "))
+    assert_equal(nil, Location.parse_longitude("190.456"))
+    assert_equal(170.4560, Location.parse_longitude("170.456"))
+    assert_equal(12.3456, Location.parse_longitude("12.3456E"))
+    assert_equal(nil, Location.parse_longitude("12.3456S"))
+    assert_equal(12.5824, Location.parse_longitude('12°34\'56.789"E'))
+    assert_equal(12.5760, Location.parse_longitude("12 34.56"))
+    assert_equal(-12.5760, Location.parse_longitude("-12 34 33.6"))
+    assert_equal(-12.5822, Location.parse_longitude(" 12deg 34min 56sec W "))
   end
 
   def test_convert_altitude
-    assert_equal( nil, Location.parse_altitude(''))
-    assert_equal( nil, Location.parse_altitude('blah'))
-    assert_equal( 123, Location.parse_altitude('123'))
-    assert_equal(-123, Location.parse_altitude('-123.456'))
-    assert_equal(-124, Location.parse_altitude('-123.567'))
-    assert_equal( 123, Location.parse_altitude('123m'))
-    assert_equal( 123, Location.parse_altitude(' 123 m. '))
-    assert_equal(  37, Location.parse_altitude('123ft'))
-    assert_equal(  38, Location.parse_altitude('124\''))
+    assert_equal(nil, Location.parse_altitude(""))
+    assert_equal(nil, Location.parse_altitude("blah"))
+    assert_equal(123, Location.parse_altitude("123"))
+    assert_equal(-123, Location.parse_altitude("-123.456"))
+    assert_equal(-124, Location.parse_altitude("-123.567"))
+    assert_equal(123, Location.parse_altitude("123m"))
+    assert_equal(123, Location.parse_altitude(" 123 m. "))
+    assert_equal(37, Location.parse_altitude("123ft"))
+    assert_equal(38, Location.parse_altitude('124\''))
   end
 
   def test_unknown
     loc = locations(:unknown_location)
     assert_objs_equal(loc, Location.unknown)
-    assert(Location.names_for_unknown.include?('Unknown'))
-    assert(Location.names_for_unknown.include?('Earth'))
-    assert_true(Location.is_unknown?('Unknown'))
-    assert_true(Location.is_unknown?('Earth'))
-    assert_true(Location.is_unknown?('World'))
-    assert_true(Location.is_unknown?('Anywhere'))
+    assert(Location.names_for_unknown.include?("Unknown"))
+    assert(Location.names_for_unknown.include?("Earth"))
+    assert_true(Location.is_unknown?("Unknown"))
+    assert_true(Location.is_unknown?("Earth"))
+    assert_true(Location.is_unknown?("World"))
+    assert_true(Location.is_unknown?("Anywhere"))
   end
 
   def test_unknown2
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown
     assert_objs_equal(loc1, loc2)
-    I18n.locale = 'es'
+    I18n.locale = "es"
     loc3 = Location.unknown
     assert_objs_equal(loc1, loc3)
-    TranslationString.translations(:es)[:unknown_locations] = 'Desconocido'
+    TranslationString.translations(:es)[:unknown_locations] = "Desconocido"
     loc4 = Location.unknown
     assert_objs_equal(loc1, loc4)
   end
@@ -406,14 +405,14 @@ class LocationTest < UnitTestCase
 
     User.current = rolf
     assert_equal(:postal, User.current_location_format)
-    loc.update_attribute(:display_name, 'One, Two, Three')
-    assert_equal('One, Two, Three', loc.name)
-    assert_equal('Three, Two, One', loc.scientific_name)
+    loc.update_attribute(:display_name, "One, Two, Three")
+    assert_equal("One, Two, Three", loc.name)
+    assert_equal("Three, Two, One", loc.scientific_name)
 
     User.current = roy
     assert_equal(:scientific, User.current_location_format)
-    loc.update_attribute(:display_name, 'Un, Deux, Trois')
-    assert_equal('Trois, Deux, Un', loc.name)
-    assert_equal('Un, Deux, Trois', loc.scientific_name)
+    loc.update_attribute(:display_name, "Un, Deux, Trois")
+    assert_equal("Trois, Deux, Un", loc.name)
+    assert_equal("Un, Deux, Trois", loc.scientific_name)
   end
 end

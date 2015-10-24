@@ -3,7 +3,7 @@ class ConferenceController < ApplicationController
     :show_event,
     :index,
     :register,
-    :verify,
+    :verify
   ]
 
   # TODO:
@@ -64,7 +64,7 @@ class ConferenceController < ApplicationController
       registration = find_previous_registration(params)
       if registration.nil?
         registration = ConferenceRegistration.
-          new(whitelisted_registration_params)
+                       new(whitelisted_registration_params)
         registration.conference_event = event
         registration.save
         flash_notice(:register_success.l(name: event.name,
@@ -104,7 +104,7 @@ class ConferenceController < ApplicationController
 
   def verify # :nologin: :norobots:
     registration = ConferenceRegistration.find(params[:id].to_s)
-    if registration.verified == nil
+    if registration.verified.nil?
       registration.verified = Time.now
       registration.save
       event = registration.conference_event
@@ -117,14 +117,15 @@ class ConferenceController < ApplicationController
       redirect_to(action: :index)
     end
   end
-################################################################################
+  ################################################################################
+
   private
 
   def whitelisted_event_params
     params.require(:event).
-           permit(:name, :location, :description, :registration_note,
-                  "start(1i)", "start(2i)", "start(3i)",
-                  "end(1i)", "end(2i)", "end(3i)")
+      permit(:name, :location, :description, :registration_note,
+             "start(1i)", "start(2i)", "start(3i)",
+             "end(1i)", "end(2i)", "end(3i)")
   end
 
   def whitelisted_registration_params

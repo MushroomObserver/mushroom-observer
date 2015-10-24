@@ -40,11 +40,12 @@ class Language
   end
 
   def init_check_export_line(pass, in_tag)
-    @pass, @in_tag, @line_number = pass, in_tag, 0
+    @pass = pass
+    @in_tag = in_tag
+    @line_number = 0
   end
 
   def get_check_export_line_status
-    return @pass, @in_tag
+    [@pass, @in_tag]
   end
 end
-

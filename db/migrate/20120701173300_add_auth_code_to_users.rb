@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'user'
+require "user"
 class User
   def self.get_old_auth_code(password)
     old_auth_code(password)
@@ -9,7 +9,11 @@ end
 
 class AddAuthCodeToUsers < ActiveRecord::Migration
   def self.up
-    add_column(:users, :auth_code, :string, :limit => 40) rescue nil
+    begin
+      add_column(:users, :auth_code, :string, limit: 40)
+    rescue
+      nil
+    end
     fill_in_auth_codes
   end
 
@@ -24,7 +28,7 @@ class AddAuthCodeToUsers < ActiveRecord::Migration
     )
       data[id.to_i] = User.get_old_auth_code(password)
     end
-    vals = data.map {|v| User.connection.quote(v.to_s)}.join(',')
+    vals = data.map { |v| User.connection.quote(v.to_s) }.join(",")
     User.connection.update %(
       UPDATE users SET auth_code = ELT(id+1, #{vals})
     )

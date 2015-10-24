@@ -3,7 +3,7 @@ class VoteAnonymity < ActiveRecord::Migration
   def self.up
     # Make default "no" (always public), except grandfather in existing users
     # as "old" (public going forward).
-    add_column :users, :votes_anonymous, :enum, :limit => [:no, :yes, :old], :default => :no
+    add_column :users, :votes_anonymous, :enum, limit: [:no, :yes, :old], default: :no
     User.connection.update "UPDATE users SET votes_anonymous = 'old'"
   end
 

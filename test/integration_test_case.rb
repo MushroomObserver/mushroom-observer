@@ -53,6 +53,11 @@ class IntegrationTestCase < ActionDispatch::IntegrationTest
 
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
-  def setup;    ApplicationController.allow_forgery_protection = true;  end
-  def teardown; ApplicationController.allow_forgery_protection = false; end
+  def setup
+    ApplicationController.allow_forgery_protection = true
+  end
+
+  def teardown
+    ApplicationController.allow_forgery_protection = false
+  end
 end

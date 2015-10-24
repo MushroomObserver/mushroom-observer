@@ -24,12 +24,12 @@ class Tree
         return true if has_node?(val, look_for)
       end
     end
-    return false
+    false
   end
 
   # Extends the screwy ActiveRecord join- and include-style "trees" by adding
   # a single table to hang off a given table.  Can only add a single table,
-  # but can build more complicated trees with multiple calls: 
+  # but can build more complicated trees with multiple calls:
   #
   #   BAD:
   #     tree = tree.add_leaf(:a, {:b => :c})
@@ -65,11 +65,11 @@ class Tree
   # parent), then this does nothing.  Thus it is safe to add the same leaf
   # multiple times.
   #
-  def self.add_leaf(tree, look_for, add_this=nil)
+  def self.add_leaf(tree, look_for, add_this = nil)
     case tree
     when Symbol
       if tree == look_for
-        return tree if !add_this
+        return tree unless add_this
         return { look_for => add_this }
       elsif add_this
         return [tree, { look_for => add_this }]
@@ -92,7 +92,7 @@ class Tree
       end
       return tree
     when Hash
-      raise "Can't use one-table form of Tree.add_leaf if tree is a Hash!" if !add_this
+      fail "Can't use one-table form of Tree.add_leaf if tree is a Hash!" unless add_this
       tree.each_pair do |key, val|
         if key == look_for
           case val
@@ -101,7 +101,7 @@ class Tree
           when Array
             val << add_this unless val.include?(add_this)
           when Hash
-            tree[key] = [val, add_this] unless val.has_key?(add_this)
+            tree[key] = [val, add_this] unless val.key?(add_this)
           end
           return tree
         elsif has_node?(val, look_for)

@@ -70,13 +70,12 @@ class Vote < AbstractModel
   #  :section: Values
   # ----------------------------
 
-  DELETE_VOTE    =  0
+  DELETE_VOTE    = 0
   MINIMUM_VOTE   = -3
   MIN_NEG_VOTE   = -1
   MIN_POS_VOTE   =  1
   NEXT_BEST_VOTE =  2
   MAXIMUM_VOTE   =  3
-
 
   def self.construct(args, naming)
     now = Time.now
@@ -92,7 +91,7 @@ class Vote < AbstractModel
 
   # Override the default show_controller
   def self.show_controller
-    'observer'
+    "observer"
   end
 
   # This is used to mean "delete my vote".
@@ -154,12 +153,12 @@ class Vote < AbstractModel
   # ----------------------------
 
   CONFIDENCE_VALS = [
-    [ :vote_confidence_100,  3.0 ],
-    [ :vote_confidence_80,   2.0 ],
-    [ :vote_confidence_60,   1.0 ],
-    [ :vote_confidence_40,  -1.0 ],
-    [ :vote_confidence_20,  -2.0 ],
-    [ :vote_confidence_0,   -3.0 ]
+    [:vote_confidence_100,  3.0],
+    [:vote_confidence_80,   2.0],
+    [:vote_confidence_60,   1.0],
+    [:vote_confidence_40,  -1.0],
+    [:vote_confidence_20,  -2.0],
+    [:vote_confidence_0,   -3.0]
   ]
 
   NO_OPINION_VAL = [:vote_no_opinion, 0]
@@ -214,18 +213,18 @@ class Vote < AbstractModel
     contrib = user ? user.contribution : 0
     contrib = contrib < 1 ? 0 : Math.log(contrib) / LOG10
     contrib += 1 if observation && user == observation.user
-    return contrib
+    contrib
   end
 
   # I want to turn this silly logic into an explicit boolean in the table.
   # This is the first step: abstracting it as a method on Vote instance.
   # Now we are free to change the implementation later.
   def anonymous?
-    (user.votes_anonymous == :no) or
-    (user.votes_anonymous == :old and updated_at > Time.parse(MO.vote_cutoff))
+    (user.votes_anonymous == :no) ||
+      (user.votes_anonymous == :old && updated_at > Time.parse(MO.vote_cutoff))
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
@@ -240,23 +239,19 @@ class Vote < AbstractModel
         last_pair = pair
       end
     end
-    return last_pair[0]
+    last_pair[0]
   end
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.naming
-      errors.add(:naming, :validate_vote_naming_missing.t)
-    end
-    if !self.user && !User.current
-      errors.add(:user, :validate_vote_user_missing.t)
-    end
+    errors.add(:naming, :validate_vote_naming_missing.t) unless naming
+    errors.add(:user, :validate_vote_user_missing.t) if !user && !User.current
 
-    if self.value.nil?
+    if value.nil?
       errors.add(:value, :validate_vote_value_missing.t)
-    elsif self.value_before_type_cast.to_s !~ /^[+-]?\d+(\.\d+)?$/
+    elsif value_before_type_cast.to_s !~ /^[+-]?\d+(\.\d+)?$/
       errors.add(:value, :validate_vote_value_not_integer.t)
-    elsif self.value < MINIMUM_VOTE || self.value > MAXIMUM_VOTE
+    elsif value < MINIMUM_VOTE || value > MAXIMUM_VOTE
       errors.add(:value, :validate_vote_value_out_of_bounds.t)
     end
   end
@@ -265,10 +260,9 @@ class Vote < AbstractModel
 
   def self.translate_menu(menu)
     result = []
-    for k,v in menu
-      result << [ (k.is_a?(Symbol) ? k.l : k.to_s), v ]
+    for k, v in menu
+      result << [(k.is_a?(Symbol) ? k.l : k.to_s), v]
     end
-    return result
+    result
   end
-
 end

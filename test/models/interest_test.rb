@@ -1,25 +1,24 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class InterestTest < UnitTestCase
-
   def test_setting_and_getting
     Interest.new(
-      :user => rolf,
-      :target => observations(:minimal_unknown),
-      :state => true
+      user: rolf,
+      target: observations(:minimal_unknown),
+      state: true
     ).save
 
     Interest.new(
-      :user => mary,
-      :target => observations(:minimal_unknown),
-      :state => false
+      user: mary,
+      target: observations(:minimal_unknown),
+      state: false
     ).save
 
     Interest.new(
-      :user => dick,
-      :target => names(:agaricus_campestris),
-      :state => true
+      user: dick,
+      target: names(:agaricus_campestris),
+      state: true
     ).save
     # assert_equal(2, Interest.find_all_by_target(observations(:minimal_unknown)).length)
     assert_equal(2,

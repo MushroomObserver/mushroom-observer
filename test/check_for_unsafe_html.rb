@@ -23,7 +23,7 @@ module CheckForUnsafeHtml
           "Here's the appropriate part of the HTML page:\n #{msg} \n")
   end
 
-  def disable_unsafe_html_filter(value=true)
+  def disable_unsafe_html_filter(value = true)
     @unsafe_html_filter_disabled = value
   end
 end

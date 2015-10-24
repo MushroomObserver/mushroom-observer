@@ -17,11 +17,9 @@ class SimplifyLayout < ActiveRecord::Migration
 
   def factors(value)
     for count in [3, 4, 5, 2, 7]
-      if value % count == 0
-        return [value / count, count]
-      end
+      return [value / count, count] if value % count == 0
     end
-    return [value, 1]
+    [value, 1]
   end
 
   def down
@@ -30,7 +28,7 @@ class SimplifyLayout < ActiveRecord::Migration
     add_column :users, :alternate_columns, :boolean, default: true
     add_column :users, :columns, :integer
     add_column :users, :rows, :integer
-    for u in User.all()
+    for u in User.all
       u.rows, u.columns = factors(u.layout_count)
       u.save
     end

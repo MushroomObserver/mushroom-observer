@@ -72,7 +72,7 @@ MushroomObserver::Application.routes.draw do
   # Standard routes.
   get ":controller/:action"
   match ":controller(/:action(/:id))", constraints: { id: /\d+/ },
-    via: [:get, :post]
+                                       via: [:get, :post]
 
   # Accept non-numeric ids for the lookup_xxx actions.
   get ":controller/:action/:id", action: /lookup_\w+/

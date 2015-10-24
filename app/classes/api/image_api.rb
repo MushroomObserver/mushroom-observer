@@ -10,7 +10,7 @@ class API
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
-      :user,
+      :user
     ]
 
     def query_params
@@ -28,7 +28,7 @@ class API
         species_lists:        parse_strings(:species_lists),
         has_observation:      parse_boolean(:has_observation, limit: true),
         size:                 parse_enum_range(:has_size,
-                                limit: Image.all_sizes - [:full_size]),
+                                               limit: Image.all_sizes - [:full_size]),
         content_types:        parse_string(:content_type),
         has_notes:            parse_boolean(:has_notes),
         notes_has:            parse_string(:notes_has),
@@ -36,16 +36,16 @@ class API
         license:              parse_license(:license),
         has_votes:            parse_boolean(:has_votes),
         quality:              parse_float_range(:quality,
-                                limit: Range.new(Image.minimum_vote, Image.maximum_vote)),
+                                                limit: Range.new(Image.minimum_vote, Image.maximum_vote)),
         confidence:           parse_float_range(:confidence,
-                                limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
-        ok_for_export:        parse_boolean(:ok_for_export),
+                                                limit: Range.new(Vote.minimum_vote, Vote.maximum_vote)),
+        ok_for_export:        parse_boolean(:ok_for_export)
       }
     end
 
     def build_object
       observations = parse_observations(:observations,
-                       default: [], must_have_edit_permission: true)
+                                        default: [], must_have_edit_permission: true)
       default_date = observations.any? ? observations.first.when : Date.today
       vote = parse_enum(:vote, limit:  Image.all_votes)
 
@@ -53,13 +53,13 @@ class API
         when:             parse_date(:date, default: default_date),
         notes:            parse_string(:notes, default: ""),
         copyright_holder: parse_string(:copyright_holder, limit: 100,
-                            default: user.legal_name),
+                                                          default: user.legal_name),
         license:          parse_license(:license, default: user.license),
         original_name:    parse_string(:original_name, limit: 120,
-                                                      default:  nil),
+                                                       default:  nil),
         projects:         parse_projects(:projects, default: [],
                                                     must_be_member: true),
-        observations:     observations,
+        observations:     observations
       }
       if upload = prepare_upload
         params.merge!(
@@ -70,11 +70,11 @@ class API
         )
       end
       done_parsing_parameters!
-      raise MissingUpload.new if !upload
+      fail MissingUpload.new unless upload
 
       img = model.new(params)
-      img.save or raise CreateFailed.new(img)
-      img.process_image or raise ImageUploadFailed.new(img)
+      img.save || fail(CreateFailed.new(img))
+      img.process_image || fail(ImageUploadFailed.new(img))
 
       if observations.any?
         for obs in observations
@@ -83,9 +83,7 @@ class API
         end
       end
 
-      if vote
-        img.change_vote(@user, vote, (@user.votes_anonymous == :yes))
-      end
+      img.change_vote(@user, vote, (@user.votes_anonymous == :yes)) if vote
 
       return img
     ensure
@@ -98,9 +96,8 @@ class API
         notes:            parse_string(:set_notes),
         copyright_holder: parse_string(:set_copyright_holder, limit: 100),
         license:          parse_license(:set_license),
-        original_name:    parse_string(:set_original, limit: 120),
+        original_name:    parse_string(:set_original, limit: 120)
       }
     end
   end
 end
-

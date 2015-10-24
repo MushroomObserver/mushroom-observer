@@ -1,19 +1,18 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class LocalizationFilesTest < UnitTestCase
-
   def assert_no_missing_translations(tags, type)
     missing = tags.uniq.reject(&:has_translation?)
     msg = "Missing #{type} translations:\n" + missing.map(&:inspect).sort.join("\n") + "\n"
     assert_empty missing, msg
   end
 
-################################################################################
+  ################################################################################
 
   def test_localization_files_exist
     for lang in Language.all
-      assert File.exists?(lang.localization_file)
+      assert File.exist?(lang.localization_file)
     end
   end
 
@@ -24,15 +23,15 @@ class LocalizationFilesTest < UnitTestCase
     lang.check_export_syntax
     errors += Language.verbose_messages
     assert_empty errors, "Bad syntax in language export files:\n" +
-                         errors.join("\n")
+      errors.join("\n")
   end
 
   # Make sure all "[:tag]" refs inside the translations exist.
   def test_embedded_refs
     errors = []
     for lang in Language.all
-      data = File.open(lang.localization_file, 'r:utf-8') do |fh|
-        YAML::load(fh)
+      data = File.open(lang.localization_file, "r:utf-8") do |fh|
+        YAML.load(fh)
       end
       tags = {}
       for tag in data.keys
@@ -41,29 +40,29 @@ class LocalizationFilesTest < UnitTestCase
       for tag, str in data
         if str.is_a?(String)
           str.gsub(/[\[\=]:(\w+)/) do
-            unless tags.has_key?($1.downcase)
-              errors << "#{lang.locale} :#{tag} [:#{$1}]\n"
+            unless tags.key?(Regexp.last_match(1).downcase)
+              errors << "#{lang.locale} :#{tag} [:#{Regexp.last_match(1)}]\n"
             end
           end
         end
       end
     end
-    assert_true(errors.empty?, "Found #{errors.length} undefined tag " +
-      "reference(s) in language files:\n" + errors.join(''))
+    assert_true(errors.empty?, "Found #{errors.length} undefined tag " \
+      "reference(s) in language files:\n" + errors.join(""))
   end
 
   def test_find_missing_tags_and_duplicate_method_defs
     tags = known_tags
     missing_tags = []
     duplicate_function_defs = []
-    source_files("#{::Rails.root.to_s}/app", "#{::Rails.root.to_s}/test") do |file|
+    source_files("#{::Rails.root}/app", "#{::Rails.root}/test") do |file|
       missing_tags += missing_tags_in_file(file, tags)
       duplicate_function_defs += duplicate_function_defs_in_file(file)
     end
-    assert_true(missing_tags.empty?, "Found #{missing_tags.length} undefined tag " +
-      "reference(s) in source files:\n" + missing_tags.join(''))
-    assert_true(duplicate_function_defs.empty?, "Found #{duplicate_function_defs.length} duplicate method " +
-      "definition(s) in source files:\n" + duplicate_function_defs.join(''))
+    assert_true(missing_tags.empty?, "Found #{missing_tags.length} undefined tag " \
+      "reference(s) in source files:\n" + missing_tags.join(""))
+    assert_true(duplicate_function_defs.empty?, "Found #{duplicate_function_defs.length} duplicate method " \
+      "definition(s) in source files:\n" + duplicate_function_defs.join(""))
   end
 
   def i18n_keys
@@ -75,12 +74,12 @@ class LocalizationFilesTest < UnitTestCase
   def known_tags
     tags = {}
     for tag in i18n_keys +
-        # these are tags only used in unit tests
-        [ :one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y,
-          :_unit_test_z ]
+               # these are tags only used in unit tests
+               [:one, :two, :_unit_test_a, :_unit_test_x, :_unit_test_y,
+                :_unit_test_z]
       tags[tag.to_s.downcase] = true
     end
-    return tags
+    tags
   end
 
   # Get Array of error messages for tags in +file+ that we don't have translations for.
@@ -89,14 +88,12 @@ class LocalizationFilesTest < UnitTestCase
     n = 0
     for line in File.readlines(file)
       n += 1
-      line.sub!(/(^#| # ).*/, '')
+      line.sub!(/(^#| # ).*/, "")
       line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
-        if !tags.has_key?($1.downcase)
-          errors << "#{file} line #{n} [:#{$1}]\n"
-        end
+        errors << "#{file} line #{n} [:#{Regexp.last_match(1)}]\n" unless tags.key?(Regexp.last_match(1).downcase)
       end
     end
-    return errors
+    errors
   end
 
   # Get Array of error messages for methods in +file+ that are defined more
@@ -112,26 +109,24 @@ class LocalizationFilesTest < UnitTestCase
     for line in File.readlines(file)
       n += 1
       if line.match(/^(\s*)(class|module)\s/)
-        space = $1
+        space = Regexp.last_match(1)
         stack << [{}, space]
         defs = {}
-      elsif line.match(/^(\s*)end(\W|$)/) and stack.any?
-        space = $1
-        if space == stack[-1][1]
-          defs = stack.pop[0]
-        end
+      elsif line.match(/^(\s*)end(\W|$)/) && stack.any?
+        space = Regexp.last_match(1)
+        defs = stack.pop[0] if space == stack[-1][1]
       elsif line.match(/^\s*def ([^\s()#]+)/)
-        if defs[$1]
-          errors << "#{file} line #{n} #{$1.inspect}\n"
+        if defs[Regexp.last_match(1)]
+          errors << "#{file} line #{n} #{Regexp.last_match(1).inspect}\n"
         else
-          defs[$1] = true
+          defs[Regexp.last_match(1)] = true
         end
       end
     end
     if stack.any?
       errors << "#{file} line #{n} [file didn't parse right, might be due to tabs?]\n"
     end
-    return errors
+    errors
   end
 
   # Traverse a directory structure looking for source files.
@@ -140,8 +135,8 @@ class LocalizationFilesTest < UnitTestCase
       for file in Dir.glob("#{path}/*")
         if file.match(/\.(rb|rhtml|rxml|erb)$/)
           block.call(file)
-        elsif File.directory?(file) and
-          file.match(/\/\w+$/)
+        elsif File.directory?(file) &&
+              file.match(/\/\w+$/)
           source_files(file, &block)
         end
       end
@@ -150,34 +145,34 @@ class LocalizationFilesTest < UnitTestCase
 
   def test_api_error_translations
     tags = []
-    file = "#{::Rails.root.to_s}/app/classes/api/errors.rb"
-    File.open(file, 'r:utf-8') do |fh|
+    file = "#{::Rails.root}/app/classes/api/errors.rb"
+    File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
-        if line.match(/^\s*class (\w+) < /) and
-           not ['Error', 'ObjectError', 'BadParameterValue'].include?($1)
-          tags << "api_#{$1.underscore.gsub('/','_')}".to_sym
+        if line.match(/^\s*class (\w+) < /) &&
+           !%w(Error ObjectError BadParameterValue).include?(Regexp.last_match(1))
+          tags << "api_#{Regexp.last_match(1).underscore.tr("/", "_")}".to_sym
         end
       end
     end
-    file = "#{::Rails.root.to_s}/app/classes/api/parsers.rb"
-    File.open(file, 'r:utf-8') do |fh|
+    file = "#{::Rails.root}/app/classes/api/parsers.rb"
+    File.open(file, "r:utf-8") do |fh|
       fh.each_line do |line|
         if line.match(/BadParameterValue.new\([^()]*, :(\w+)\)/)
-          tags << "api_bad_#{$1}_parameter_value".to_sym
+          tags << "api_bad_#{Regexp.last_match(1)}_parameter_value".to_sym
         end
       end
     end
-    assert_no_missing_translations(tags, 'API error')
+    assert_no_missing_translations(tags, "API error")
   end
 
   def test_name_rank_translations
     tags = Name.all_ranks.map do |rank|
       [
         "rank_#{rank.to_s.downcase}".to_sym,
-        "rank_plural_#{rank.to_s.downcase}".to_sym,
+        "rank_plural_#{rank.to_s.downcase}".to_sym
       ]
     end.flatten
-    assert_no_missing_translations(tags, 'name rank')
+    assert_no_missing_translations(tags, "name rank")
   end
 
   def test_image_vote_translations
@@ -185,43 +180,43 @@ class LocalizationFilesTest < UnitTestCase
       [
         "image_vote_long_#{val}".to_sym,
         "image_vote_short_#{val}".to_sym,
-        "image_vote_help_#{val}".to_sym,
+        "image_vote_help_#{val}".to_sym
       ]
     end.flatten
-    assert_no_missing_translations(tags, 'image vote')
+    assert_no_missing_translations(tags, "image vote")
   end
 
   def test_review_status_translations
     tags = NameDescription.all_review_statuses.map do |status|
       "review_#{status}".to_sym
     end
-    assert_no_missing_translations(tags, 'review status')
+    assert_no_missing_translations(tags, "review status")
   end
 
   def test_naming_reason_translations
     tags = Naming::Reason.all_reasons.map do |reason|
       "naming_reason_label_#{reason}".to_sym
     end
-    assert_no_missing_translations(tags, 'naming reason')
+    assert_no_missing_translations(tags, "naming reason")
   end
 
   def test_description_source_translations
     tags = [:public, :foreign, :project, :source, :user].map do |source|
       [
         "description_full_title_#{source}".to_sym,
-        "description_part_title_#{source}_with_text".to_sym,
+        "description_part_title_#{source}_with_text".to_sym
       ]
     end.flatten
-    assert_no_missing_translations(tags, 'description source title')
+    assert_no_missing_translations(tags, "description source title")
   end
 
   def test_site_data_translations
     tags = SiteData::ALL_FIELDS.map do |field|
       [
         "user_stats_#{field}".to_sym,
-        "site_stats_#{field}".to_sym,
+        "site_stats_#{field}".to_sym
       ]
     end.flatten - [:user_stats_users] # not picking this up for some reason...
-    assert_no_missing_translations(tags, 'site data field')
+    assert_no_missing_translations(tags, "site data field")
   end
 end

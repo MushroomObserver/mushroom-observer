@@ -9,7 +9,7 @@ class ApplicationHelperTest < ActionView::TestCase
 
   def test_add_args_to_url_arg_replaces_url_parameter
     assert_equal("/abcdef?foo=bar&this=that",
-                 add_args_to_url('/abcdef?foo=wrong', foo: "bar", this: "that"))
+                 add_args_to_url("/abcdef?foo=wrong", foo: "bar", this: "that"))
   end
 
   def test_add_args_to_url_append_args_to_url
@@ -28,7 +28,6 @@ class ApplicationHelperTest < ActionView::TestCase
                  add_args_to_url("/blah/blah/5", arg: "new", id: 4))
   end
 
-
   def test_add_args_to_url_valid_utf_8_address_and_arg
     assert_equal("/voilà?arg=a%C4%8D%E2%82%AC%CE%B5nt",
                  add_args_to_url("/voilà", arg: "ač€εnt"))
@@ -40,10 +39,10 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   def test_escape_textiled_string
-  	textile = "**Bold**"
-  	escaped = "&lt;div class=&quot;textile&quot;&gt;&lt;p&gt;&lt;b&gt;Bold" \
-  	          "&lt;/b&gt;&lt;/p&gt;&lt;/div&gt;"
-		assert_equal(escaped, escape_html(textile.tpl))
+    textile = "**Bold**"
+    escaped = "&lt;div class=&quot;textile&quot;&gt;&lt;p&gt;&lt;b&gt;Bold" \
+              "&lt;/b&gt;&lt;/p&gt;&lt;/div&gt;"
+    assert_equal(escaped, escape_html(textile.tpl))
   end
 
   # test convience conditional content tags
@@ -61,17 +60,17 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal('<div class="strong"><p>Hello world!</p></div>',
                  content_tag_if(true, :div,
                                 content_tag(:p, "Hello world!"),
-                                            class: "strong"))
+                                class: "strong"))
   end
 
   def test_content_tag_if_with_content_block_with_options
     assert_equal('<div class="strong highlight">Hello world!</div>',
                  content_tag_if(true, :div, "Hello world!",
-                                class: ["strong", "highlight"]))
+                                class: %w(strong highlight)))
   end
 
   def test_content_tag_if_with_attribute_with_no_value
-    options =  "...options..."
+    options = "...options..."
     assert_equal('<select multiple="multiple">...options...</select>',
                  content_tag_if(true, "select", options, multiple: true))
   end
@@ -79,7 +78,7 @@ class ApplicationHelperTest < ActionView::TestCase
   def test_content_tag_if_with_content_as_trailing_block
     assert_equal('<div class="strong">Hello world!</div>',
                  content_tag_if(true, :div, class: "strong") do
-                    "Hello world!"
+                   "Hello world!"
                  end)
   end
 
@@ -90,6 +89,5 @@ class ApplicationHelperTest < ActionView::TestCase
   def test_content_tag_unless_condition_false
     assert_equal("<p>Hello world!</p>",
                  content_tag_unless(false, :p, "Hello world!"))
-
   end
 end

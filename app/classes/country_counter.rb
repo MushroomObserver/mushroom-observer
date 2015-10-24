@@ -17,19 +17,19 @@ class CountryCounter
     @missing = (UNDERSTOOD_COUNTRIES - Set.new(@counts.keys)).sort
   end
 
-private
+  private
 
   def partition_with_count
-    countries_by_count.partition {|p| UNDERSTOOD_COUNTRIES.member?(p[0])}
+    countries_by_count.partition { |p| UNDERSTOOD_COUNTRIES.member?(p[0]) }
   end
 
   def countries_by_count
-    countries.each {|c| count(c)}
-    @counts.sort_by {|k,v| [-v,k]}
+    countries.each { |c| count(c) }
+    @counts.sort_by { |k, v| [-v, k] }
   end
 
   def countries
-    (wheres+location_names).map {|l| l.split(', ')[-1]}
+    (wheres + location_names).map { |l| l.split(", ")[-1] }
   end
 
   def wheres
@@ -45,14 +45,14 @@ private
   end
 
   def self.load_param_hash(file)
-    File.open(file, 'r:utf-8') do |fh|
-      YAML::load(fh)
+    File.open(file, "r:utf-8") do |fh|
+      YAML.load(fh)
     end
   end
 
   UNDERSTOOD_COUNTRIES = Set.new(load_param_hash(MO.location_countries_file))
 
   def count(country)
-    @counts[country] = @counts[country] ? @counts[country]+1 : 1
+    @counts[country] = @counts[country] ? @counts[country] + 1 : 1
   end
 end
