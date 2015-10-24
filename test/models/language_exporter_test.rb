@@ -395,7 +395,7 @@ class LanguageExporterTest < UnitTestCase
       assert_true(@official.strip, "Should have been three strip changes.")
       assert_equal(final_hash, @official.localization_strings) # Deletes should be gone
 
-      assert_equal(3, @official.translation_strings.count { |str| str.user == dick })
+      assert_equal(3, @official.translation_strings.select { |str| str.user == dick }.count)
     end
   end
 

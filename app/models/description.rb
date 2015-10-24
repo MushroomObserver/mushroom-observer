@@ -83,25 +83,25 @@ class Description < AbstractModel
   self.abstract_class = true
 
   # Aliases for location / name.
-  def parent        
-    send(parent_type)             
+  def parent
+    send(parent_type)
   end
 
-  def parent_id     
-    send("#{parent_type}_id")     
+  def parent_id
+    send("#{parent_type}_id")
   end
 
-  def parent=(x)    
-    send("#{parent_type}=", x)    
+  def parent=(x)
+    send("#{parent_type}=", x)
   end
 
-  def parent_id=(x) 
-    send("#{parent_type}_id=", x) 
+  def parent_id=(x)
+    send("#{parent_type}_id=", x)
   end
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
   def parent_type
-    type_tag.to_s.sub('_description', '')
+    type_tag.to_s.sub("_description", "")
   end
 
   # Is this group writable by the general public?
@@ -110,9 +110,7 @@ class Description < AbstractModel
   end
 
   # Change state of +public_write+.
-  def public_write=(x)
-    @public_write = x
-  end
+  attr_writer :public_write
 
   # Get the initial state of +public_write+ before modification by form.
   def public_write_was
@@ -132,7 +130,7 @@ class Description < AbstractModel
 
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
-    text_name + " (#{id || '?'})"
+    string_with_id(text_name)
   end
 
   # Descriptive title including parent name, in Textile-formatted text.
@@ -142,7 +140,7 @@ class Description < AbstractModel
 
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
-    format_name + " (#{id || '?'})"
+    string_with_id(format_name)
   end
 
   # Descriptive title without parent name, in plain text.
@@ -152,7 +150,7 @@ class Description < AbstractModel
 
   # Same as +partial_text_name+ but with id tacked on.
   def unique_partial_text_name
-    partial_text_name + " (#{id || '?'})"
+    string_with_id(partial_text_name)
   end
 
   # Descriptive title without parent name, in Textile-formatted text.
@@ -162,7 +160,7 @@ class Description < AbstractModel
 
   # Same as +partial_format_name+ but with id tacked on.
   def unique_partial_format_name
-    partial_format_name + " (#{id || '?'})"
+    string_with_id(partial_format_name)
   end
 
   # Descriptive subtitle for this description (when it is not necessary to
@@ -173,11 +171,11 @@ class Description < AbstractModel
     user_name = begin
                   user.legal_name
                 rescue
-                  '?'
+                  "?"
                 end
     args = {
       text: source_name,
-      user: user_name,
+      user: user_name
     }
     if full_or_part == :full
       args[:object] = parent.format_name
@@ -268,9 +266,9 @@ class Description < AbstractModel
   def source_object
     case source_type
     # (this may eventually be replaced with source_id)
-    when :project; project
-    when :source; nil # (haven't created "Source" model yet)
-    when :user; user
+    when :project then project
+    when :source then nil # (haven't created "Source" model yet)
+    when :user then user
     end
   end
 
@@ -287,108 +285,108 @@ class Description < AbstractModel
   ##############################################################################
 
   # Name of the join table used to keep admin groups.
-  def self.admins_join_table 
-    "#{table_name}_admins".to_sym 
+  def self.admins_join_table
+    "#{table_name}_admins".to_sym
   end
 
   # Name of the join table used to keep admin groups.
-  def admins_join_table 
-    "#{self.class.table_name}_admins".to_sym 
+  def admins_join_table
+    "#{self.class.table_name}_admins".to_sym
   end
 
   # Name of the join table used to keep writer groups.
-  def self.writers_join_table 
-    "#{table_name}_writers".to_sym 
+  def self.writers_join_table
+    "#{table_name}_writers".to_sym
   end
 
   # Name of the join table used to keep writer groups.
-  def writers_join_table 
-    "#{self.class.table_name}_writers".to_sym 
+  def writers_join_table
+    "#{self.class.table_name}_writers".to_sym
   end
 
   # Name of the join table used to keep reader groups.
-  def self.readers_join_table 
-    "#{table_name}_readers".to_sym 
+  def self.readers_join_table
+    "#{table_name}_readers".to_sym
   end
 
   # Name of the join table used to keep reader groups.
-  def readers_join_table 
-    "#{self.class.table_name}_readers".to_sym 
+  def readers_join_table
+    "#{self.class.table_name}_readers".to_sym
   end
 
   # List of all the admins for this description, as ids.
-  def admins 
-    group_users(admins_join_table) 
+  def admins
+    group_users(admins_join_table)
   end
 
   # List of all the writers for this description, as ids.
-  def writers 
-    group_users(writers_join_table) 
+  def writers
+    group_users(writers_join_table)
   end
 
   # List of all the readers for this description, as ids.
-  def readers 
-    group_users(readers_join_table) 
+  def readers
+    group_users(readers_join_table)
   end
 
   # List of all the admins for this description, as ids.
-  def admin_ids 
-    group_user_ids(admins_join_table) 
+  def admin_ids
+    group_user_ids(admins_join_table)
   end
 
   # List of all the writers for this description, as ids.
-  def writer_ids 
-    group_user_ids(writers_join_table) 
+  def writer_ids
+    group_user_ids(writers_join_table)
   end
 
   # List of all the readers for this description, as ids.
-  def reader_ids 
-    group_user_ids(readers_join_table) 
+  def reader_ids
+    group_user_ids(readers_join_table)
   end
 
   # Is a given user an admin for this description?
-  def is_admin?(user) 
-    has_permission?(admins_join_table, user) 
+  def is_admin?(user)
+    has_permission?(admins_join_table, user)
   end
 
   # Is a given user an writer for this description?
-  def is_writer?(user) 
-    has_permission?(writers_join_table, user) 
+  def is_writer?(user)
+    has_permission?(writers_join_table, user)
   end
 
   # Is a given user an reader for this description?
-  def is_reader?(user) 
-    has_permission?(readers_join_table, user) 
+  def is_reader?(user)
+    has_permission?(readers_join_table, user)
   end
 
   # Give a User or UserGroup admin privileges.
-  def add_admin(arg) 
-    chg_permission(admins, arg, :add) 
+  def add_admin(arg)
+    chg_permission(admins, arg, :add)
   end
 
   # Give a User or UserGroup writer privileges.
-  def add_writer(arg) 
-    chg_permission(writers, arg, :add) 
+  def add_writer(arg)
+    chg_permission(writers, arg, :add)
   end
 
   # Give a User or UserGroup reader privileges.
-  def add_reader(arg) 
-    chg_permission(readers, arg, :add) 
+  def add_reader(arg)
+    chg_permission(readers, arg, :add)
   end
 
   # Revoke a User's or UserGroup's admin privileges.
-  def remove_admin(arg) 
-    chg_permission(admins, arg, :remove) 
+  def remove_admin(arg)
+    chg_permission(admins, arg, :remove)
   end
 
   # Revoke a User's or UserGroup's writer privileges.
-  def remove_writer(arg) 
-    chg_permission(writers, arg, :remove) 
+  def remove_writer(arg)
+    chg_permission(writers, arg, :remove)
   end
 
   # Revoke a User's or UserGroup's reader privileges.
-  def remove_reader(arg) 
-    chg_permission(readers, arg, :remove) 
+  def remove_reader(arg)
+    chg_permission(readers, arg, :remove)
   end
 
   # Change a given User's or UserGroup's privileges.
@@ -420,11 +418,13 @@ class Description < AbstractModel
   # Array of User instances.  Caches result.
   def group_users(table)
     @group_users ||= {}
-    @group_users[table] ||= User.find_by_sql %(
+    return @group_users[table] if @group_users[table]
+    ids = group_user_ids(table)
+    ids = ["-1"] if ids.empty?
+    id_list = ids.map(&:to_s).join(",")
+    @group_users[table] = User.find_by_sql %(
       SELECT * FROM users
-      WHERE id IN (#{
-        ids = group_user_ids(table)ids = ['-1'] if ids.empty? ids.map(&:to_s).join(',')})
-    )
+      WHERE id IN (#{id_list}))
   end
 
   # Do minimal query to enumerate the users in a list of groups.  Return as an
@@ -457,23 +457,23 @@ class Description < AbstractModel
   ##############################################################################
 
   # Name of the join table used to keep authors.
-  def self.authors_join_table 
-    "#{table_name}_authors".to_sym 
+  def self.authors_join_table
+    "#{table_name}_authors".to_sym
   end
 
   # Name of the join table used to keep authors.
-  def authors_join_table 
-    "#{self.class.table_name}_authors".to_sym 
+  def authors_join_table
+    "#{self.class.table_name}_authors".to_sym
   end
 
   # Name of the join table used to keep editors.
-  def self.editors_join_table 
-    "#{table_name}_editors".to_sym 
+  def self.editors_join_table
+    "#{table_name}_editors".to_sym
   end
 
   # Name of the join table used to keep editors.
-  def editors_join_table 
-    "#{self.class.table_name}_editors".to_sym 
+  def editors_join_table
+    "#{self.class.table_name}_editors".to_sym
   end
 
   # Is the given User and author?

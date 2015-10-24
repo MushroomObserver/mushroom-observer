@@ -1955,7 +1955,6 @@ class Name < AbstractModel
     text_name = parse.text_name
     search_name = parse.search_name
     author = parse.author
-    name = "Fungi" if names_for_unknown.member?(name.downcase)
     results = []
 
     while results.empty?

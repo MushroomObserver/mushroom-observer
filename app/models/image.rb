@@ -715,7 +715,7 @@ class Image < AbstractModel
   # Count number of votes at a given level.  Returns all votes if no +value+.
   def num_votes(value = nil)
     if value
-      vote_hash.values.count { |v| v == value.to_i }
+      vote_hash.values.select { |v| v == value.to_i }.count
     else
       vote_hash.values.length
     end

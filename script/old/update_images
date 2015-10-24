@@ -109,7 +109,7 @@ def get_cached_listings(_cronjob = false)
   file_lists["local"] = list = get_cached_file_list("local")
   for size in ALL_SIZES
     verbose("  %-5s: %d\n" % [
-      size, list.keys.count { |f| f[0, size.length] == size }
+      size, list.keys.select { |f| f[0, size.length] == size }.count
     ])
   end
 
@@ -118,7 +118,7 @@ def get_cached_listings(_cronjob = false)
     list = get_cached_file_list(server)
     for size in ALL_SIZES
       verbose("  %-5s: %d\n" % [
-        size, list.keys.count { |f| f[0, size.length] == size }
+        size, list.keys.select { |f| f[0, size.length] == size }.count
       ])
     end
     file_lists[server] = list

@@ -1659,7 +1659,7 @@ class NameTest < UnitTestCase
 
   def test_has_eol_data
     assert(names(:peltigera).has_eol_data?)
-    assert(notnames(:lactarius_alpigenes).has_eol_data?)
+    assert_not(names(:lactarius_alpigenes).has_eol_data?)
   end
 
   def test_hiding_authors

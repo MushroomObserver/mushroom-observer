@@ -273,7 +273,7 @@ class Observation < AbstractModel
 
   # Name in plain text with id to make it unique, never nil.
   def unique_text_name
-    name.real_search_name + " (#{id || "?"})"
+    string_with_id(name.real_search_name)
   end
 
   # Textile-marked-up name, never nil.
@@ -283,7 +283,7 @@ class Observation < AbstractModel
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
-    name.observation_name + " (#{id || "?"})"
+    string_with_id(name.observation_name)
   rescue
     ""
   end
@@ -313,7 +313,7 @@ class Observation < AbstractModel
 
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
-    namings.count { |n| n.name == name } > 0
+    namings.select { |n| n.name == name }.count > 0
   end
 
   # Has the owner voted on a given Naming?

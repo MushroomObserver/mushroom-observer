@@ -476,7 +476,7 @@ class QueryTest < UnitTestCase
                map(&:to_s)
     assert_equal(num_agaricus, agaricus.uniq.length)
     assert_equal(num_agaricus,
-                 agaricus.count { |x| x[0, 8] == "Agaricus" })
+                 agaricus.select { |x| x[0, 8] == "Agaricus" }.count)
 
     if RUBY_VERSION < "1.9"
       assert_equal((1..num).map { |x| [x.to_s] }, query.select_rows)
