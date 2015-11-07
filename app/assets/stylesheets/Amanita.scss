@@ -55,7 +55,7 @@ $LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $pachycolea_foreground;
-$LIST_BG_COLOR:               mix($pachycolea_background, black, 75%);
+$LIST_BG_COLOR:               mix($pachycolea_background, white, 80%);
 $LIST_EVEN_BG_COLOR:          $LIST_BG_COLOR;
 $LIST_ODD_BG_COLOR:           mix($LIST_EVEN_BG_COLOR, black, 25%);
 
