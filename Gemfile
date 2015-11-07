@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-gem "rails", "~> 4.0.0"
+gem "rails", "~> 4.1.0"
 
 # Use mysql2 as db connector
 # See https://github.com/brianmario/mysql2
