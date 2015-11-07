@@ -124,7 +124,7 @@ class NameSorter
   end
 
   def only_single_names
-    (@new_name_strs == []) and (@multiple_line_strs == [])
+    (@new_name_strs == []) && (@multiple_line_strs == [])
   end
 
   def push_synonym(arg)
@@ -133,27 +133,23 @@ class NameSorter
     elsif arg.is_a?(ActiveRecord::Base)
       @approved_synonyms.push(arg)
     else
-      raise TypeError.new("NameSorter synonyms must be Fixnum or ActiveRecord::Base, not #{arg.clasS}.")
+      fail TypeError.new("NameSorter synonyms must be Fixnum or ActiveRecord::Base, not #{arg.clasS}.")
     end
   end
 
   def append_approved_synonyms(synonyms)
     if synonyms # Allow for nil
-      if synonyms.class == String
-        synonyms = synonyms.split("/")
-      end
+      synonyms = synonyms.split("/") if synonyms.class == String
       if synonyms.class == Array
-        synonyms.each {|id| push_synonym(id.to_i)}
+        synonyms.each { |id| push_synonym(id.to_i) }
       else
-        raise TypeError.new("Only Arrays can be appended to a NameSorter synonym list not %s" % synonyms.class)
+        fail TypeError.new("Only Arrays can be appended to a NameSorter synonym list not %s" % synonyms.class)
       end
     end
   end
 
   def add_chosen_names(new_names)
-    if new_names
-      @chosen_names.merge!(new_names)
-    end
+    @chosen_names.merge!(new_names) if new_names
   end
 
   # append the input to the list of approved deprecated names
@@ -168,12 +164,12 @@ class NameSorter
     end
   end
 
-  def check_for_deprecated_name(name, name_str=nil)
+  def check_for_deprecated_name(name, name_str = nil)
     if name.deprecated
       str = name_str || name.real_search_name
       @deprecated_name_strs.push(str)
       @deprecated_names.push(name)
-      if @approved_deprecated_names.nil? or
+      if @approved_deprecated_names.nil? ||
          !@approved_deprecated_names.member?(str) and
          !@approved_deprecated_names.member?(name.id.to_s)
         @has_unapproved_deprecated_names = true
@@ -181,7 +177,7 @@ class NameSorter
     end
   end
 
-  def check_for_deprecated_names(names, name_str=nil)
+  def check_for_deprecated_names(names, name_str = nil)
     for n in names
       check_for_deprecated_name(n, name_str)
     end
@@ -190,9 +186,7 @@ class NameSorter
   def check_for_deprecated_checklist(checklist)
     if checklist
       for key, value in checklist
-        if value == '1'
-          check_for_deprecated_name(Name.find(key.to_i))
-        end
+        check_for_deprecated_name(Name.find(key.to_i)) if value == "1"
       end
     end
   end
@@ -200,7 +194,7 @@ class NameSorter
   # Add a single name to the list.  It calculates "stats" as it goes, such as
   # whether the name has multiple synonyms, whether it is deprecated, whether
   # it is unrecognized, etc.
-  def add_name(spl_line, timestamp=nil)
+  def add_name(spl_line, timestamp = nil)
     # Need to store all this data
     name_parse = NameParse.new(spl_line)
     line_str = name_parse.line_str
@@ -208,7 +202,11 @@ class NameSorter
     chosen = false
 
     # Did user enter a date/timestamp via comment?
-    if x = Time.parse(name_parse.comment) rescue nil
+    if x = begin
+             Time.parse(name_parse.comment)
+           rescue
+             nil
+           end
       timestamp = x
     end
 
@@ -238,7 +236,7 @@ class NameSorter
     #   1) new names -- no matches
     #   2) good names -- exactly one match
     #   3) ambiguous names -- multiple matches
-    if not chosen
+    unless chosen
       @all_names += names
       len = names.length
       if len == 0
@@ -282,7 +280,7 @@ class NameSorter
         name.change_deprecated(false)
         name.save
       else
-        raise TypeError.new("Unexpected ambiguity: #{names.map(&:real_search_name).join(', ')}")
+        fail TypeError.new("Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}")
       end
     end
   end
@@ -293,9 +291,7 @@ class NameSorter
   def synonym_name_strs
     result = []
     for name in @all_names
-      if name.synonym_id
-        result += name.synonyms.map(&:display_name)
-      end
+      result += name.synonyms.map(&:display_name) if name.synonym_id
     end
     result
   end
@@ -326,7 +322,7 @@ class NameSorter
     # "all_synonyms: [%s]\n" % self.all_synonyms.map(&:id).join(', ')
     for name in all_synonyms
       # error_string += "%s\n" % name.id
-      if not ok_name_ids.member?(name.id)
+      unless ok_name_ids.member?(name.id)
         # raise TypeError.new("member? failed")
         result = false
         break
@@ -341,9 +337,7 @@ class NameSorter
   # name
   def sort_names(name_list)
     for n in name_list.split("\n")
-      if n.match(/\S/)
-        add_name(n)
-      end
+      add_name(n) if n.match(/\S/)
     end
   end
 end

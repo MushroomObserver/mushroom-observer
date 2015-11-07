@@ -36,14 +36,14 @@ class CollapsibleCollectionOfMappableObjects
     [extents.north_west, extents.center, extents.south_east]
   end
 
-private
+  private
 
   # Algorithm, such as it is, works by rounding to fewer and fewer places, each
   # time combining points and boxes which are the same.  In the end, it rounds
   # to nearest 90°, so it is guaranteed(?) to reach the target minimum number
-  # of objects. 
+  # of objects.
   PRECISION = [
-    10000,
+    10_000,
     5000,
     2000,
     1000,
@@ -75,27 +75,27 @@ private
   end
 
   def init_sets(objects)
-    objects = [objects] if !objects.is_a?(Array)
-    raise "Tried to create empty map!" if objects.empty?
+    objects = [objects] unless objects.is_a?(Array)
+    fail "Tried to create empty map!" if objects.empty?
     @sets = {}
     for obj in objects
       if obj.is_location?
         add_box_set(obj, [obj], MAX_PRECISION)
       elsif obj.is_observation?
-        if obj.lat and !obj.lat_long_dubious?
+        if obj.lat && !obj.lat_long_dubious?
           add_point_set(obj, [obj], MAX_PRECISION)
         elsif loc = obj.location
           add_box_set(loc, [obj], MAX_PRECISION)
         end
       else
-        raise "Tried to map #{obj.class}!"
+        fail "Tried to map #{obj.class}!"
       end
     end
   end
 
   def group_objects_into_sets
     prec = next_precision(MAX_PRECISION)
-    while @sets.length > max_objects and prec >= MIN_PRECISION
+    while @sets.length > max_objects && prec >= MIN_PRECISION
       old_sets = @sets.values
       @sets = {}
       for set in old_sets
@@ -134,7 +134,7 @@ private
       y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0
       x = loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)
     end
-    return x, y
+    [x, y]
   end
 
   def calc_extents
@@ -142,6 +142,6 @@ private
     for mapset in mapsets
       result.update_extents_with_box(mapset)
     end
-    return result
+    result
   end
 end

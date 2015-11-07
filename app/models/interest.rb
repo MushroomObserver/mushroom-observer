@@ -49,17 +49,17 @@
 ################################################################################
 
 class Interest < AbstractModel
-  belongs_to :target, :polymorphic => true
+  belongs_to :target, polymorphic: true
   belongs_to :user
 
   # Returns Array of all models (Classes) which take interests.
   def self.all_types
-    [ Location, Name, Observation, Project, SpeciesList ]
+    [Location, Name, Observation, Project, SpeciesList]
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_type_tags
-    [ :location, :name, :observation, :project, :species_list ]
+    [:location, :name, :observation, :project, :species_list]
   end
 
   # Find all Interests associated with a given object.  This should really be
@@ -79,23 +79,23 @@ class Interest < AbstractModel
   #   "Ignoring Location: Albion, California, USA"
   #
   def summary
-    (self.state ? :WATCHING.l : :IGNORING.l) + ' ' +
-    self.target_type.underscore.to_sym.l + ': ' +
-    (self.target ? self.target.unique_format_name : '--')
+    (state ? :WATCHING.l : :IGNORING.l) + " " +
+      target_type.underscore.to_sym.l + ": " +
+      (target ? target.unique_format_name : "--")
   end
   alias_method :text_name, :summary
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_interest_user_missing.t)
     end
 
-    if self.target_type.to_s.bytesize > 30
+    if target_type.to_s.bytesize > 30
       errors.add(:target_type, :validate_interest_object_type_too_long.t)
     end
   end

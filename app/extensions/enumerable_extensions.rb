@@ -8,10 +8,9 @@
 ################################################################################
 
 module Enumerable
-
   # Pick a random value from among the allowed values.
   def select_rand
-    tmp = self.to_a
+    tmp = to_a
     tmp[Kernel.rand(tmp.size)]
   end
 end

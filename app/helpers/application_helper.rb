@@ -19,16 +19,24 @@ module ApplicationHelper
   include ThumbnailHelper
   include VersionHelper
 
-  def safe_empty; "".html_safe; end
-  def safe_br; "<br/>".html_safe; end
-  def safe_nbsp; "&nbsp;".html_safe; end
+  def safe_empty
+    "".html_safe
+  end
+
+  def safe_br
+    "<br/>".html_safe
+  end
+
+  def safe_nbsp
+    "&nbsp;".html_safe
+  end
 
   # Return escaped HTML.
   #
   #   "<i>X</i>"  -->  "&lt;i&gt;X&lt;/i&gt;"
   def escape_html(html)
-		h(html.to_str)
-	end
+    h(html.to_str)
+  end
 
   # Call link_to with query params added.
   def link_with_query(name = nil, options = nil, html_options = nil)
@@ -37,7 +45,7 @@ module ApplicationHelper
 
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
-  def indent(w=10)
+  def indent(w = 10)
     "<span style='margin-left:#{w}px'>&nbsp;</span>".html_safe
   end
 
@@ -59,7 +67,7 @@ module ApplicationHelper
   #   <%= add_context_help(link, "Click here to do something.") %>
   #
   def add_context_help(object, help)
-    content_tag(:span, object, title: help, data: {toggle: "tooltip"})
+    content_tag(:span, object, title: help, data: { toggle: "tooltip" })
   end
 
   # Add something to the header from within view.  This can be called as many
@@ -94,7 +102,7 @@ module ApplicationHelper
   #     </tr>
   #   </table>
   #
-  def make_table(rows, table_opts={}, tr_opts={}, td_opts={})
+  def make_table(rows, table_opts = {}, tr_opts = {}, td_opts = {})
     content_tag(:table, table_opts) do
       rows.map do |row|
         make_row(row, tr_opts, td_opts) + make_line(row, td_opts)
@@ -102,7 +110,7 @@ module ApplicationHelper
     end
   end
 
-  def make_row(row, tr_opts={}, td_opts={})
+  def make_row(row, tr_opts = {}, td_opts = {})
     content_tag(:tr, tr_opts) do
       if !row.is_a?(Array)
         row
@@ -114,15 +122,15 @@ module ApplicationHelper
     end
   end
 
-  def make_cell(cell, td_opts={})
+  def make_cell(cell, td_opts = {})
     content_tag(:td, cell.to_s, td_opts)
   end
 
-  def make_line(row, td_opts)
+  def make_line(_row, td_opts)
     colspan = td_opts[:colspan]
     if colspan
-      content_tag(:tr, {class: "MatrixLine"}) do
-        content_tag(:td, tag(:hr), {class: "MatrixLine", colspan: colspan})
+      content_tag(:tr, class: "MatrixLine") do
+        content_tag(:td, tag(:hr), class: "MatrixLine", colspan: colspan)
       end
     else
       safe_empty
@@ -152,7 +160,7 @@ module ApplicationHelper
     args = {}
 
     # Garbage in, garbage out...
-    return url if !url.valid_encoding?
+    return url unless url.valid_encoding?
 
     # Parse parameters off of current URL.
     addr, parms = url.split("?")
@@ -161,7 +169,7 @@ module ApplicationHelper
       if var && var != ""
         var = CGI.unescape(var)
         # See note below about precedence in case of redundancy.
-        args[var] = val if !args.has_key?(var)
+        args[var] = val unless args.key?(var)
       end
     end
 
@@ -188,32 +196,32 @@ module ApplicationHelper
 
     # Put it back together.
     return addr if args.keys.empty?
-    return addr + "?" + args.keys.sort.map do |k|
+    addr + "?" + args.keys.sort.map do |k|
       CGI.escape(k) + "=" + (args[k] || "")
     end.join("&")
   end
 
   # Override Rails method of the same name.  Just calls our
   # Textile#textilize_without_paragraph method on the given string.
-  def textilize_without_paragraph(str, do_object_links=false)
+  def textilize_without_paragraph(str, do_object_links = false)
     Textile.textilize_without_paragraph(str, do_object_links)
   end
 
   # Override Rails method of the same name.  Just calls our Textile#textilize
   # method on the given string.
-  def textilize(str, do_object_links=false)
+  def textilize(str, do_object_links = false)
     Textile.textilize(str, do_object_links)
   end
 
   # Create stylable file input field with client-side size validation.
-  def custom_file_field(obj, attr, opts={})
+  def custom_file_field(obj, attr, opts = {})
     max_size = MO.image_upload_max_size
-    max_size_in_mb = (max_size.to_f/1024/1024).round
+    max_size_in_mb = (max_size.to_f / 1024 / 1024).round
     file_field = file_field(obj, attr, opts.merge(
-      max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-      max_upload_size: max_size
+                                         max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
+                                         max_upload_size: max_size
     ))
     content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
-    content_tag(:span, :no_file_selected.t)
+      content_tag(:span, :no_file_selected.t)
   end
 end

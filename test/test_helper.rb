@@ -11,13 +11,12 @@
 ################################################################################
 
 # Allows test results to be reported back to runner IDEs
-require 'minitest/reporters'
+require "minitest/reporters"
 MiniTest::Reporters.use!
 
-
 # Coveralls.wear! must occur before any of your application code is required
-require 'coveralls'
-Coveralls.wear!('rails')
+require "coveralls"
+Coveralls.wear!("rails")
 
 ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
@@ -88,7 +87,7 @@ class ActiveSupport::TestCase
   # Standard setup to run before every test.  Sets the locale, timezone,
   # and makes sure User doesn't think a user is logged in.
   def setup
-    I18n.locale = :'en' if I18n.locale != :'en'
+    I18n.locale = :en if I18n.locale != :en
     Time.zone = "America/New_York"
     User.current = nil
   end

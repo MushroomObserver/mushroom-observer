@@ -46,11 +46,11 @@ class ApiControllerTest < FunctionalTestCase
     Digest::MD5.hexdigest(string)
   end
 
-################################################################################
+  ################################################################################
 
   def test_basic_get_requests
     for model_class in [Comment, Image, Location, Name, Observation, Project,
-                  SpeciesList, User]
+                        SpeciesList, User]
       for detail in [:none, :low, :high]
         assert_no_api_errors
         get(model_class.table_name.to_sym, detail: detail)
@@ -62,9 +62,9 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_minimal_observation
     post(:observations,
-      :api_key  => api_keys(:rolfs_api_key).key,
-      location: "Unknown",
-    )
+         api_key: api_keys(:rolfs_api_key).key,
+         location: "Unknown"
+        )
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
@@ -88,26 +88,26 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_maximal_observation
     post(:observations,
-      :api_key       => api_keys(:rolfs_api_key).key,
-      :date          => '2012-06-26',
-      :location      => 'Burbank, California, USA',
-      :name          => 'Coprinus comatus',
-      :vote          => "2",
-      :latitude      => '34.5678N',
-      :longitude     => '123.4567W',
-      :altitude      => '1234 ft',
-      :has_specimen  => "yes",
-      is_collection_location: "yes",
-      :notes         => "These are notes.\nThey look like this.\n",
-      :images        => '1,2',
-      :thumbnail     => "2",
-      :projects      => 'EOL Project',
-      species_lists: 'Another Species List'
-    )
+         api_key: api_keys(:rolfs_api_key).key,
+         date: "2012-06-26",
+         location: "Burbank, California, USA",
+         name: "Coprinus comatus",
+         vote: "2",
+         latitude: "34.5678N",
+         longitude: "123.4567W",
+         altitude: "1234 ft",
+         has_specimen: "yes",
+         is_collection_location: "yes",
+         notes: "These are notes.\nThey look like this.\n",
+         images: "1,2",
+         thumbnail: "2",
+         projects: "EOL Project",
+         species_lists: "Another Species List"
+        )
     assert_no_api_errors
     obs = Observation.last
     assert_users_equal(rolf, obs.user)
-    assert_equal('2012-06-26', obs.when.web_date)
+    assert_equal("2012-06-26", obs.when.web_date)
     assert_objs_equal(locations(:burbank), obs.location)
     assert_nil(obs.where)
     assert_names_equal(names(:coprinus_comatus), obs.name)
@@ -131,11 +131,11 @@ class ApiControllerTest < FunctionalTestCase
     setup_image_dirs
     count = Image.count
     file = "#{::Rails.root}/test/images/sticky.jpg"
-    post_and_send_file(:images, file, 'image/jpeg',
-      api_key: api_keys(:rolfs_api_key).key
-    )
+    post_and_send_file(:images, file, "image/jpeg",
+                       api_key: api_keys(:rolfs_api_key).key
+                      )
     assert_no_api_errors
-    assert_equal(count+1, Image.count)
+    assert_equal(count + 1, Image.count)
     img = Image.last
     assert_users_equal(rolf, img.user)
     assert_equal(Date.today.web_date, img.when.web_date)
@@ -143,7 +143,7 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(rolf.legal_name, img.copyright_holder)
     assert_objs_equal(rolf.license, img.license)
     assert_nil(img.original_name)
-    assert_equal('image/jpeg', img.content_type)
+    assert_equal("image/jpeg", img.content_type)
     assert_equal(407, img.width)
     assert_equal(500, img.height)
     assert_obj_list_equal([], img.projects)
@@ -152,27 +152,27 @@ class ApiControllerTest < FunctionalTestCase
 
   def test_post_maximal_image
     setup_image_dirs
-    file = "#{::Rails.root.to_s}/test/images/Coprinus_comatus.jpg"
-    post_and_send_file(:images, file, 'image/jpeg',
-      :api_key       => api_keys(:rolfs_api_key).key,
-      :vote          => "3",
-      :date          => "20120626",
-      :notes         => ' Here are some notes. ',
-      copyright_holder: 'My Friend',
-      :license       => "2",
-      original_name: 'Coprinus_comatus.jpg',
-      :projects      => (proj = rolf.projects_member.first).id,
-      :observations  => (obs = rolf.observations.first).id
-    )
+    file = "#{::Rails.root}/test/images/Coprinus_comatus.jpg"
+    post_and_send_file(:images, file, "image/jpeg",
+                       api_key: api_keys(:rolfs_api_key).key,
+                       vote: "3",
+                       date: "20120626",
+                       notes: " Here are some notes. ",
+                       copyright_holder: "My Friend",
+                       license: "2",
+                       original_name: "Coprinus_comatus.jpg",
+                       projects: (proj = rolf.projects_member.first).id,
+                       observations: (obs = rolf.observations.first).id
+                      )
     assert_no_api_errors
     img = Image.last
     assert_users_equal(rolf, img.user)
-    assert_equal('2012-06-26', img.when.web_date)
-    assert_equal('Here are some notes.', img.notes)
-    assert_equal('My Friend', img.copyright_holder)
+    assert_equal("2012-06-26", img.when.web_date)
+    assert_equal("Here are some notes.", img.notes)
+    assert_equal("My Friend", img.copyright_holder)
     assert_objs_equal(License.find(2), img.license)
-    assert_equal('Coprinus_comatus.jpg', img.original_name)
-    assert_equal('image/jpeg', img.content_type)
+    assert_equal("Coprinus_comatus.jpg", img.original_name)
+    assert_equal("image/jpeg", img.content_type)
     assert_equal(2288, img.width)
     assert_equal(2168, img.height)
     assert_obj_list_equal([proj], img.projects)
@@ -182,23 +182,35 @@ class ApiControllerTest < FunctionalTestCase
   def test_post_user
     rolfs_key = api_keys(:rolfs_api_key)
     post(:users,
-      api_key: rolfs_key.key,
-      login: "miles",
-      email: "miles@davis.com",
-      create_key: "New API Key",
-      detail: :high
-    )
+         api_key: rolfs_key.key,
+         login: "miles",
+         email: "miles@davis.com",
+         create_key: "New API Key",
+         detail: :high
+        )
     assert_no_api_errors
     user = User.last
     assert_equal("miles", user.login)
     assert_false(user.verified)
     assert_equal(1, user.api_keys.length)
     doc = REXML::Document.new(@response.body)
-    keys = doc.root.elements['results/result/api_keys']
-    num = keys.attribute("number").value rescue nil
+    keys = doc.root.elements["results/result/api_keys"]
+    num = begin
+            keys.attribute("number").value
+          rescue
+            nil
+          end
     assert_equal("1", num.to_s)
-    key = keys.elements['api_key/key'].get_text rescue nil
-    notes = keys.elements['api_key/notes'].get_text rescue nil
+    key = begin
+            keys.elements["api_key/key"].get_text
+          rescue
+            nil
+          end
+    notes = begin
+              keys.elements["api_key/notes"].get_text
+            rescue
+              nil
+            end
     assert_not_equal("", key.to_s)
     assert_equal("New API Key", notes.to_s)
   end
@@ -208,9 +220,9 @@ class ApiControllerTest < FunctionalTestCase
 
     rolfs_key = api_keys(:rolfs_api_key)
     post(:api_keys,
-      api_key: rolfs_key.key,
-      app: "Mushroom Mapper"
-    )
+         api_key: rolfs_key.key,
+         app: "Mushroom Mapper"
+        )
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)
@@ -219,10 +231,10 @@ class ApiControllerTest < FunctionalTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
 
     post(:api_keys,
-      api_key: rolfs_key.key,
-      app: "Mushroom Mapper",
-      for_user: mary.id
-    )
+         api_key: rolfs_key.key,
+         app: "Mushroom Mapper",
+         for_user: mary.id
+        )
     assert_no_api_errors
     api_key = ApiKey.last
     assert_equal("Mushroom Mapper", api_key.notes)

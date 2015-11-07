@@ -30,7 +30,7 @@ class Language < AbstractModel
     include LanguageTracking
   end
 
-  has_many :translation_strings, :dependent => :destroy
+  has_many :translation_strings, dependent: :destroy
 
   # Average characters per line; used to score contributions.
   CHARACTERS_PER_LINE = 80
@@ -49,13 +49,13 @@ class Language < AbstractModel
   # Useful for building pulldown menus using <tt>select_tag</tt> helper.
   def self.menu_options
     all.sort_by(&:order).map do |lang|
-      [ lang.name, lang.locale ]
+      [lang.name, lang.locale]
     end
   end
 
   # Get a list of the top N contributors to a language's translations.
   # This is used by the app layout, so must cause mimimal database load.
-  def top_contributors(num=10)
+  def top_contributors(num = 10)
     user_ids = self.class.connection.select_rows %(
       SELECT user_id
       FROM translation_strings
@@ -68,11 +68,11 @@ class Language < AbstractModel
       user_ids = self.class.connection.select_rows %(
         SELECT id, login
         FROM users
-        WHERE id IN (#{user_ids.join(',')})
-        ORDER BY FIND_IN_SET(id, '#{user_ids.join(',')}')
+        WHERE id IN (#{user_ids.join(",")})
+        ORDER BY FIND_IN_SET(id, '#{user_ids.join(",")}')
       )
     end
-    return user_ids
+    user_ids
   end
 
   # Count the number of lines the user has translated.  Include edits, as well.
@@ -87,7 +87,7 @@ class Language < AbstractModel
     )
       lines += score_lines(text)
     end
-    return lines
+    lines
   end
 
   def calculate_users_contribution(user)
@@ -102,7 +102,7 @@ class Language < AbstractModel
     )
       lines += Language.score_lines(text)
     end
-    return lines
+    lines
   end
 
   def self.score_lines(text)
@@ -114,7 +114,7 @@ class Language < AbstractModel
     for key in hash.keys
       score += (key.length.to_f / CHARACTERS_PER_LINE).truncate + 1
     end
-    return score
+    score
   end
 
   # Be generous to ensure that we don't accidentally miss anything that is
@@ -136,7 +136,7 @@ class Language < AbstractModel
   end
 
   def self.lang_from_locale(locale)
-    locale.to_s.split('-')[0]
+    locale.to_s.split("-")[0]
   end
 
   def self.from_locale(locale)

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require File.expand_path('../../config/boot.rb', __FILE__)
-require File.expand_path('../../config/environment.rb', __FILE__)
+require File.expand_path("../../config/boot.rb", __FILE__)
+require File.expand_path("../../config/environment.rb", __FILE__)
 
 status = 0
 done_anything = false
@@ -13,7 +13,7 @@ end
 
 for arg in ARGV
   case arg.to_s
-  when '-h', '--help'
+  when "-h", "--help"
     puts <<-EOH
 
 SYNOPSIS
@@ -29,17 +29,17 @@ TABLES
 
     EOH
 
-  when 'query', 'queries'
-    ActiveRecord::Migration.change_column(:queries, :model, :enum, :limit => Query.all_models)
-    ActiveRecord::Migration.change_column(:queries, :flavor, :enum, :limit => Query.all_flavors)
+  when "query", "queries"
+    ActiveRecord::Migration.change_column(:queries, :model, :enum, limit: Query.all_models)
+    ActiveRecord::Migration.change_column(:queries, :flavor, :enum, limit: Query.all_flavors)
     done_anything = true
 
-  when 'email', 'emails', 'queued_email', 'queued_emails'
-    ActiveRecord::Migration.change_column(:queued_emails, :flavor, :enum, :limit => QueuedEmail.all_flavors)
+  when "email", "emails", "queued_email", "queued_emails"
+    ActiveRecord::Migration.change_column(:queued_emails, :flavor, :enum, limit: QueuedEmail.all_flavors)
     done_anything = true
 
-  when 'jason'
-    raise "nothing to do"
+  when "jason"
+    fail "nothing to do"
     done_anything = true
 
   else
@@ -49,8 +49,8 @@ TABLES
 end
 
 if done_anything
-  require 'active_record/schema_dumper'
-  File.open("#{::Rails.root.to_s}/db/schema.rb", "w") do |file|
+  require "active_record/schema_dumper"
+  File.open("#{::Rails.root}/db/schema.rb", "w") do |file|
     ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
   end
 end

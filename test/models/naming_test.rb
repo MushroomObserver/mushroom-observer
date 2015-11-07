@@ -1,18 +1,17 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class NamingTest < UnitTestCase
-
   # Propose a naming for an observation.
   def test_create
     assert_kind_of Observation, observations(:coprinus_comatus_obs)
     now = Time.now
     naming = Naming.new(
-        :created_at     => now,
-        :updated_at     => now,
-        :observation_id => observations(:coprinus_comatus_obs).id,
-        :name_id        => names(:agaricus_campestris).id,
-        :user_id        => mary.id
+      created_at: now,
+      updated_at: now,
+      observation_id: observations(:coprinus_comatus_obs).id,
+      name_id: names(:agaricus_campestris).id,
+      user_id: mary.id
     )
     assert naming.save, naming.errors.full_messages.join("; ")
   end
@@ -113,7 +112,7 @@ class NamingTest < UnitTestCase
     naming = namings(:coprinus_comatus_other_naming)
     hash = {
       2 => nil,
-      4 => "Well, how about \"this\"!!",
+      4 => "Well, how about \"this\"!!"
     }
     naming.set_reasons(hash)
 
@@ -122,7 +121,7 @@ class NamingTest < UnitTestCase
 
     nrs = naming.get_reasons
     assert_nil(nrs[0].notes)
-    assert_equal('', nrs[1].notes)
+    assert_equal("", nrs[1].notes)
     assert_nil(nrs[2].notes)
     assert_equal("Well, how about \"this\"!!", nrs[3].notes)
 
@@ -136,7 +135,7 @@ class NamingTest < UnitTestCase
     naming.save!
 
     naming.reload
-    assert_equal({1=>''}, naming.reasons)
+    assert_equal({ 1 => "" }, naming.reasons)
   end
 
   def test_reason_order
@@ -162,14 +161,14 @@ class NamingTest < UnitTestCase
     assert(!nrs[3].used?)
     assert(!nrs[4].used?)
 
-    assert_equal('', nrs[1].notes)
+    assert_equal("", nrs[1].notes)
     assert_equal("I asked *Uncle Herb*", nrs[2].notes)
     assert_equal(nil, nrs[3].notes)
     assert_equal(nil, nrs[4].notes)
 
-    nrs[3].notes = 'test'
+    nrs[3].notes = "test"
     nrs[2].notes = nil
     nrs[1].delete
-    assert_equal({2=>'', 3=>'test'}, naming.reasons)
+    assert_equal({ 2 => "", 3 => "test" }, naming.reasons)
   end
 end

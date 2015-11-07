@@ -11,34 +11,34 @@ class API
 
     self.high_detail_includes = [
       :target,
-      :user,
+      :user
     ]
 
     def query_params
       {
-          where: sql_id_condition,
-          created_at: parse_time_range(:created_at),
-          updated_at: parse_time_range(:updated_at),
-          users: parse_users(:user),
-          types: parse_enum(:type, :limit => Comment.all_type_tags),
-          summary_has: parse_string(:summary_has),
-          content_has: parse_string(:content_has),
+        where: sql_id_condition,
+        created_at: parse_time_range(:created_at),
+        updated_at: parse_time_range(:updated_at),
+        users: parse_users(:user),
+        types: parse_enum(:type, limit: Comment.all_type_tags),
+        summary_has: parse_string(:summary_has),
+        content_has: parse_string(:content_has),
         # :targets     => parse_objects(:target, :limit => Comment.all_types),
       }
     end
 
     def create_params
       {
-          summary: parse_string(:summary, :limit => 100),
-          comment: parse_string(:content),
-          target: parse_object(:target, :limit => Comment.all_types),
+        summary: parse_string(:summary, limit: 100),
+        comment: parse_string(:content),
+        target: parse_object(:target, limit: Comment.all_types)
       }
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:summary) if params[:summary].blank?
-      raise MissingParameter.new(:content) if params[:comment].blank?
-      raise MissingParameter.new(:target)  if params[:target].blank?
+      fail MissingParameter.new(:summary) if params[:summary].blank?
+      fail MissingParameter.new(:content) if params[:comment].blank?
+      fail MissingParameter.new(:target)  if params[:target].blank?
       must_have_view_permission!(params[:target])
     end
 
@@ -48,8 +48,8 @@ class API
 
     def update_params
       {
-          summary: parse_string(:set_summary, :limit => 100),
-          comment: parse_string(:set_content),
+        summary: parse_string(:set_summary, limit: 100),
+        comment: parse_string(:set_content)
       }
     end
   end

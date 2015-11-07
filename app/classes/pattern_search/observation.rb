@@ -17,7 +17,7 @@ module PatternSearch
         elsif term.var == :specimen
           args[:has_specimen] = term.parse_boolean
         else
-          raise BadObservationTermError.new(:term => term)
+          fail BadObservationTermError.new(term: term)
         end
       end
     end

@@ -1,6 +1,5 @@
 # encoding: utf-8
 MushroomObserver::Application.configure do
-
   # Ensure that these are defined in case we're executing this script on its own
   # (e.g., to provide access to configs for bash sripts).
   config.root = File.expand_path("../..", __FILE__)
@@ -33,7 +32,7 @@ MushroomObserver::Application.configure do
   # in exactly the same format we gave them to it.  (NOTE: only the first line
   # should be necessary, but for whatever reason, Rails is failing to do the
   # other configs on some platforms.)
-  config.time_zone = 'America/New_York'
+  config.time_zone = "America/New_York"
 
   # Date/time formats for website UI.
   config.web_date_format = "%Y-%m-%d"
@@ -85,7 +84,7 @@ MushroomObserver::Application.configure do
   config.pivotal_token    = "xxx"
   config.pivotal_max_vote = 1
   config.pivotal_min_vote = -1
-  config.pivotal_test_id  = 77165602
+  config.pivotal_test_id  = 77_165_602
 
   # Configuration files for location validator.
   config.location_countries_file = "#{config.root}/config/location/countries.yml"
@@ -127,7 +126,7 @@ MushroomObserver::Application.configure do
   config.process_image_command = "#{config.root}/script/process_image <id> <ext> <set> &"
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
-  config.image_upload_max_size = 20971520  # 20*1024*1024 = 20 Mb
+  config.image_upload_max_size = 20_971_520 # 20*1024*1024 = 20 Mb
 
   # Flag intended for controller when the debugger gets invoked.
   # Use with lines like: debugger if MO.debugger_flag
@@ -141,11 +140,11 @@ MushroomObserver::Application.configure do
   config.blocked_ip_addresses = []
 
   # Default "secret key", see rails docs.
-  config.secret_key_base = "a"*30
+  config.secret_key_base = "a" * 30
 
   # EOL parameters.
-  config.eol_ranks = [ :Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom ]
-  config.eol_ranks_for_export = [ :Form, :Variety, :Subspecies, :Species, :Genus ]
+  config.eol_ranks = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
+  config.eol_ranks_for_export = [:Form, :Variety, :Subspecies, :Species, :Genus]
   config.eol_min_image_vote = 2
   config.eol_min_observation_vote = 2.4
 

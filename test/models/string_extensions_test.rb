@@ -33,7 +33,7 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(42, "2A".dealphabetize("0123456789ABCDEF"))
     assert_equal(123_456_789, "75BCD15".dealphabetize("0123456789ABCDEF"))
 
-    assert_raises(RuntimeError) {"Z".dealphabetize("ABC")}
+    assert_raises(RuntimeError) { "Z".dealphabetize("ABC") }
   end
 
   def test_random_no_seed_string

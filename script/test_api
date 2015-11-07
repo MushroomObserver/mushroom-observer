@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 
-require 'digest/md5'
-require 'net/http'
-require 'uri'
+require "digest/md5"
+require "net/http"
+require "uri"
 
 # HOST = 'mushroomobserver.org'
 # PORT = 80
-HOST = 'localhost'
+HOST = "localhost"
 PORT = 3000
-KEY = 'xxx'
+KEY = "xxx"
 
 ################################################################################
 
@@ -20,11 +20,11 @@ KEY = 'xxx'
 
 # Create observation.
 http = Net::HTTP.new(HOST, PORT)
-path = '/api/observations?' + [
-  'api_key=' + KEY,
-  'help=1',
-].join('&')
-response = http.post(path, '')
+path = "/api/observations?" + [
+  "api_key=" + KEY,
+  "help=1"
+].join("&")
+response = http.post(path, "")
 puts response.body
 exit
 
@@ -68,4 +68,3 @@ exit
 # ].join('&')
 # response = http.post(path, nil)
 # puts response.body
-

@@ -4,7 +4,7 @@ app_root = File.expand_path("../..", __FILE__)
 require "#{app_root}/app/classes/image_s3.rb"
 require "fileutils"
 
-abort(<<"EOB") if ARGV.any? {|arg| arg == "-h" || arg == "--help" }
+abort(<<"EOB") if ARGV.any? { |arg| arg == "-h" || arg == "--help" }
 
   USAGE::
 
@@ -27,11 +27,11 @@ abort(<<"EOB") if ARGV.any? {|arg| arg == "-h" || arg == "--help" }
 
 EOB
 
-verbose = true if ARGV.any? {|arg| arg == "-v" || arg == "--verbose" }
-replace = true if ARGV.any? {|arg| arg == "-r" || arg == "--replace" }
-flags = ARGV.select {|arg| arg.match(/^-/)}.
-             reject {|arg| arg.match(/^(-v|-r|--verbose|--replace)$/)}
-words = ARGV.reject {|arg| arg.match(/^-/)}
+verbose = true if ARGV.any? { |arg| arg == "-v" || arg == "--verbose" }
+replace = true if ARGV.any? { |arg| arg == "-r" || arg == "--replace" }
+flags = ARGV.select { |arg| arg.match(/^-/) }.
+        reject { |arg| arg.match(/^(-v|-r|--verbose|--replace)$/) }
+words = ARGV.reject { |arg| arg.match(/^-/) }
 abort("Bad flag(s): #{flags.inspect}") if flags.length > 0
 abort("Missing server!") if words.length == 0
 server = words.shift
@@ -47,7 +47,7 @@ url               = `#{cmd} MO.s3_credentials[:#{server}][:server]`
 bucket            = `#{cmd} MO.s3_credentials[:#{server}][:bucket]`
 access_key_id     = `#{cmd} MO.s3_credentials[:#{server}][:access_key_id]`
 secret_access_key = `#{cmd} MO.s3_credentials[:#{server}][:secret_access_key]`
-abort("Bad server: #{server.inspect}") if !url
+abort("Bad server: #{server.inspect}") unless url
 
 def log(msg)
   $stdout.write(msg)

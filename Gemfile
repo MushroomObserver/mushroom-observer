@@ -92,13 +92,13 @@ gem "brakeman", require: false
 # Amazon S3 SDK, for access to images on dreamhost S3
 gem "aws-sdk", "~> 2"
 
-#Slick Slider for Image Carousel
+# Slick Slider for Image Carousel
 # See https://github.com/kenwheeler/slick/
 #     https://github.com/bodrovis/jquery-slick-rails
-gem "jquery-slick-rails",  "~> 1.5.0.1"
+gem "jquery-slick-rails", "~> 1.5.0.1"
 
-#allows for test results to be reported back to test runner IDE's
+# allows for test results to be reported back to test runner IDE's
 group :test do
   gem "minitest"
-  gem 'minitest-reporters', '>= 0.5.0'
+  gem "minitest-reporters", ">= 0.5.0"
 end

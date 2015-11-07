@@ -16,7 +16,7 @@ class GlossaryControllerTest < FunctionalTestCase
   end
 
   def create_glossary_term_params
-    return {
+    {
       glossary_term: { name: "Convex", description: "Boring old convex" },
       copyright_holder: "Insil Choi",
       date: { copyright_year: "2013" },
@@ -40,7 +40,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
 
   def test_show_past_glossary_term
     get_with_dump(:show_past_glossary_term, id: conic.id,
-                  version: conic.version - 1)
+                                            version: conic.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 
@@ -178,10 +178,10 @@ class GlossaryControllerEditTest < GlossaryControllerTest
     glossary_term.update(description: "Are we flying yet?")
     glossary_term.reload
 
-    assert_equal(old_count+1, glossary_term.versions.length)
+    assert_equal(old_count + 1, glossary_term.versions.length)
 
     get_with_dump(:show_past_glossary_term, id: glossary_term.id,
-                  version: glossary_term.version - 1)
+                                            version: glossary_term.version - 1)
     assert_template(:show_past_glossary_term, partial: "_glossary_term")
   end
 end

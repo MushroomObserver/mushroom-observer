@@ -21,7 +21,7 @@
 class MapSet
   attr_reader :objects, :north, :south, :east, :west
 
-  def initialize(objects=[])
+  def initialize(objects = [])
     @objects = objects.is_a?(Array) ? objects : [objects]
     @north = @south = @east = @west = nil
     init_objects
@@ -32,13 +32,13 @@ class MapSet
       if obj.is_location?
         update_extents_with_box(obj)
       elsif obj.is_observation?
-        if obj.lat and !obj.lat_long_dubious?
+        if obj.lat && !obj.lat_long_dubious?
           update_extents_with_point(obj)
         elsif loc = obj.location
           update_extents_with_box(loc)
         end
       else
-        raise "Tried to map #{obj.class}!"
+        fail "Tried to map #{obj.class}!"
       end
     end
   end
@@ -60,11 +60,9 @@ class MapSet
     @objects.map do |obj|
       if obj.is_location?
         obj
-      elsif obj.is_observation? and obj.location
+      elsif obj.is_observation? && obj.location
         obj.location
-      else
-        nil
-      end
+            end
     end.reject(&:nil?).uniq
   end
 
@@ -76,10 +74,21 @@ class MapSet
     (north - south) >= 0.0001
   end
 
-  def north_west; [north, west]; end
-  def north_east; [north, east]; end
-  def south_west; [south, west]; end
-  def south_east; [south, east]; end
+  def north_west
+    [north, west]
+  end
+
+  def north_east
+    [north, east]
+  end
+
+  def south_west
+    [south, west]
+  end
+
+  def south_east
+    [south, east]
+  end
 
   def lat
     ((north + south) / 2.0).round(4)
@@ -88,7 +97,7 @@ class MapSet
   def long
     long = ((east + west) / 2.0).round(4)
     long += 180 if @west > @east
-    return long
+    long
   end
 
   def center
@@ -117,7 +126,7 @@ class MapSet
       @north = lat if lat > @north
       @south = lat if lat < @south
       # point not contained within existing extents
-      if (@east >= @west) ? (long > @east or long < @west) : (long > @east and long < @west)
+      if (@east >= @west) ? (long > @east || long < @west) : (long > @east && long < @west)
         east_dist = long > @east ? long - @east : long - @east + 360
         west_dist = long < @west ? @west - long : @west - long + 360
         if east_dist <= west_dist
@@ -143,20 +152,20 @@ class MapSet
       @north = n if n > @north
       @south = s if s < @south
       # new box not completely contained within old box
-      if (@east >= @west) ? (e < w or w < @west or e > @east) : (e >= w or w < @west or e > @east)
+      if (@east >= @west) ? (e < w || w < @west || e > @east) : (e >= w || w < @west || e > @east)
         # overlap, neither or both straddle dateline
-        if (@east >= @west and e >= w and w <= @east and e >= @west) or
-           (@east < @west and e < w)
+        if (@east >= @west && e >= w && w <= @east && e >= @west) ||
+           (@east < @west && e < w)
           @east = e if e > @east
           @west = w if w < @west
         # overlap, old straddles dateline
-        elsif @east < @west and e >= w and (w <= @east or e >= @west)
-          @east = e if e > @east and w < @east
-          @west = w if w < @west and e > @west
+        elsif @east < @west && e >= w && (w <= @east || e >= @west)
+          @east = e if e > @east && w < @east
+          @west = w if w < @west && e > @west
         # overlap, new straddles dateline
-        elsif @east >= @west and e < w and (w <= @east or e >= @west)
-          @east = e if e > @east or w < @east
-          @west = w if w < @west or e > @west
+        elsif @east >= @west && e < w && (w <= @east || e >= @west)
+          @east = e if e > @east || w < @east
+          @west = w if w < @west || e > @west
         # no overlap
         else
           east_dist = w > @east ? w - @east : w - @east + 360

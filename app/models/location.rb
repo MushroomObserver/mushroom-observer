@@ -73,40 +73,39 @@
 ################################################################################
 
 class Location < AbstractModel
-  require 'acts_as_versioned'
+  require "acts_as_versioned"
 
-  belongs_to :description, :class_name => 'LocationDescription' # (main one)
+  belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
   belongs_to :user
 
   has_many :descriptions, -> { order "num_views DESC" },
            class_name: "LocationDescription"
-  has_many :comments,  :as => :target, :dependent => :destroy
-  has_many :interests, :as => :target, :dependent => :destroy
+  has_many :comments,  as: :target, dependent: :destroy
+  has_many :interests, as: :target, dependent: :destroy
   has_many :observations
   has_many :herbaria # Well technically it has at most one, but we want the relationship just in the herbarium table
 
   acts_as_versioned(
-    :table_name => 'locations_versions',
-    :if_changed => [
-      'name',
-      'north',
-      'south',
-      'west',
-      'east',
-      'high',
-      'low',
-      'notes'
-    ]
+    table_name: "locations_versions",
+    if_changed: %w(
+      name
+      north
+      south
+      west
+      east
+      high
+      low
+      notes)
   )
   non_versioned_columns.push(
-    'created_at',
-    'updated_at',
-    'num_views',
-    'last_view',
-    'ok_for_export',
-    'rss_log_id',
-    'description_id'
+    "created_at",
+    "updated_at",
+    "num_views",
+    "last_view",
+    "ok_for_export",
+    "rss_log_id",
+    "description_id"
   )
 
   after_update :notify_users
@@ -117,11 +116,11 @@ class Location < AbstractModel
   # Callback whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id
-    if (ver.version != 1) and
+    if (ver.version != 1) &&
        Location.connection.select_value(%(
          SELECT COUNT(*) FROM locations_versions
          WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )).to_s == '0'
+       )).to_s == "0"
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -149,30 +148,28 @@ class Location < AbstractModel
   def self.parse_lxxxitude(value, direction1, direction2, max_degrees)
     result = nil
     match = value.to_s.match(LXXXITUDE_REGEX)
-    if match and (match[4].blank? or [direction1, direction2].member?(match[4]))
+    if match && (match[4].blank? || [direction1, direction2].member?(match[4]))
       if match[1].to_f > 0
-        val = match[1].to_f + match[2].to_f/60 + match[3].to_f/3600
+        val = match[1].to_f + match[2].to_f / 60 + match[3].to_f / 3600
       else
-        val = match[1].to_f - match[2].to_f/60 - match[3].to_f/3600
+        val = match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
       end
       val = -val if match[4] == direction2
-      if val >= -max_degrees and val <= max_degrees
-        result = val.round(4)
-      end
+      result = val.round(4) if val >= -max_degrees && val <= max_degrees
     end
-    return result
+    result
   end
 
   # Convert latitude string to standard decimal form with 4 places of precision.
   # Returns nil if invalid.
   def self.parse_latitude(lat)
-    return parse_lxxxitude(lat, 'N', 'S', 90)
+    parse_lxxxitude(lat, "N", "S", 90)
   end
 
   # Convert longitude string to standard decimal form with 4 places of precision.
   # Returns nil if invalid.
   def self.parse_longitude(long)
-    return parse_lxxxitude(long, 'E', 'W', 180)
+    parse_lxxxitude(long, "E", "W", 180)
   end
 
   # Check if a string contains a valid altitude, parse it, and convert it
@@ -181,12 +178,12 @@ class Location < AbstractModel
   def self.parse_altitude(alt)
     result = nil
     match = alt.to_s.match(ALTITUDE_REGEX)
-    if match and alt.to_s.match(/ft|'/)
+    if match && alt.to_s.match(/ft|'/)
       result = (match[1].to_f * 0.3048).round
     elsif match
       result = (match[1].to_f).round
     end
-    return result
+    result
   end
 
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
@@ -195,7 +192,10 @@ class Location < AbstractModel
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
     self.west = Location.parse_longitude(west) || -90
-    self.north, self.south = south, north if north < south
+    if north < south
+      self.north = south
+      self.south = north
+    end
   end
 
   ##############################################################################
@@ -213,7 +213,7 @@ class Location < AbstractModel
       # yikes! need to make sure we always include the English words for "unknown",
       # even when viewing the site in another language
       Language.official.translation_strings.find_by_tag("unknown_locations").
-               text.split(/, */)
+      text.split(/, */)
     rescue
       []
     end
@@ -227,7 +227,7 @@ class Location < AbstractModel
       location = Location.where("name LIKE ?", name).first
       return location if location
     end
-    raise "There is no \"unknown\" location!"
+    fail "There is no \"unknown\" location!"
   end
 
   # Is this one of the names we recognize for the "unknown" location?
@@ -236,14 +236,14 @@ class Location < AbstractModel
     for unknown_name in names_for_unknown
       return true if name == unknown_name.downcase
     end
-    return false
+    false
   end
 
-  def display_name()
+  def display_name
     if User.current_location_format == :scientific
-      self.scientific_name
+      scientific_name
     else
-      self.name
+      name
     end
   end
 
@@ -259,22 +259,22 @@ class Location < AbstractModel
 
   # Plain text version of +display_name+.
   def text_name
-    self.display_name.t.html_to_ascii
+    display_name.t.html_to_ascii
   end
 
   # Alias for +display_name+ for compatibility with Name and other models.
   def format_name
-    self.display_name
+    display_name
   end
 
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
-    text_name + " (#{id || '?'})"
+    text_name + " (#{id || "?"})"
   end
 
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
-    format_name + " (#{id || '?'})"
+    format_name + " (#{id || "?"})"
   end
 
   # Strip out special characters, punctuation, and small words from a name.
@@ -286,16 +286,16 @@ class Location < AbstractModel
   #     :conditions => ['name LIKE "%?%"', pattern]
   #   )
   #
-  def self.clean_name(str, leave_stars=false)
+  def self.clean_name(str, leave_stars = false)
     str = str.to_ascii
     if leave_stars
-      str.gsub!(/[^\w\*]+/, ' ')
-      str.gsub!(/ +\*/, '*')
-      str.gsub!(/\* +/, '*')
+      str.gsub!(/[^\w\*]+/, " ")
+      str.gsub!(/ +\*/, "*")
+      str.gsub!(/\* +/, "*")
     else
-      str.gsub!(/\W+/, ' ')
+      str.gsub!(/\W+/, " ")
     end
-    return str.strip_squeeze.downcase
+    str.strip_squeeze.downcase
   end
 
   # Look at the most recent Observation's the current User has posted.  Return
@@ -304,11 +304,9 @@ class Location < AbstractModel
   # auto-completers.
   #
   def self.primer
-    where = ''
-    if User.current
-      where = "WHERE observations.user_id = #{User.current_id}"
-    end
-    result = self.connection.select_values(%(
+    where = ""
+    where = "WHERE observations.user_id = #{User.current_id}" if User.current
+    result = connection.select_values(%(
       SELECT DISTINCT IF(observations.location_id > 0, locations.name, observations.where) AS x
       FROM observations
       LEFT OUTER JOIN locations ON locations.id = observations.location_id
@@ -317,7 +315,7 @@ class Location < AbstractModel
       LIMIT 100
     )).sort
     if User.current_location_format == :scientific
-      result.map! {|n| Location.reverse_name(n)}
+      result.map! { |n| Location.reverse_name(n) }
     end
     result
   end
@@ -326,17 +324,17 @@ class Location < AbstractModel
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
-    name.split(/,\s*/).reverse.join(', ') if name
+    name.split(/,\s*/).reverse.join(", ") if name
   end
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
     find_by_name(name) ||
-    find_by_scientific_name(name)
+      find_by_scientific_name(name)
   end
 
   def self.user_name(user, name)
-    if user and (user.location_format == :scientific)
+    if user && (user.location_format == :scientific)
       Location.reverse_name(name)
     else
       name
@@ -344,8 +342,8 @@ class Location < AbstractModel
   end
 
   def self.load_param_hash(file)
-    File.open(file, 'r:utf-8') do |fh|
-      YAML::load(fh)
+    File.open(file, "r:utf-8") do |fh|
+      YAML.load(fh)
     end
   end
 
@@ -369,10 +367,8 @@ class Location < AbstractModel
         if OK_PREFIXES.member?(s)
           count += 1
         else
-          trimmed = tokens[count..-1].join(' ')
-          if understood_places.member?(trimmed)
-            result = trimmed
-          end
+          trimmed = tokens[count..-1].join(" ")
+          result = trimmed if understood_places.member?(trimmed)
           break
         end
       end
@@ -407,11 +403,11 @@ class Location < AbstractModel
           Location.connection.select_values(%(
             SELECT name FROM locations
           )) +
-	        Location.connection.select_values(%(
+          Location.connection.select_values(%(
             SELECT `where` FROM `observations`
             WHERE `where` is not NULL
           )) +
-	        Location.connection.select_values(%(
+          Location.connection.select_values(%(
             SELECT `where` FROM `species_lists`
             WHERE `where` is not NULL
           ))
@@ -424,82 +420,82 @@ class Location < AbstractModel
   end
 
   def self.comma_test(name)
-    tokens = name.split(',').map { |x| x.strip() }
+    tokens = name.split(",").map(&:strip)
     tokens.delete("")
-    return name != tokens.join(', ')
+    name != tokens.join(", ")
   end
 
   # Decide if the given name is dubious for any reason
-  def self.dubious_name?(name, provide_reasons=false, check_db=true)
+  def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
-    if not (check_db and location_exists(name))
-      if name == ''
-        return true if !provide_reasons
+    unless check_db && location_exists(name)
+      if name == ""
+        return true unless provide_reasons
         return [:location_dubious_empty.l]
       end
       if Location.comma_test(name)
-        return true if !provide_reasons
-	      reasons.push(:location_dubious_commas.l)
+        return true unless provide_reasons
+        reasons.push(:location_dubious_commas.l)
       end
-      if name.index('Forest,').nil? and name.index('Park,').nil? and name.index('near ').nil? and has_dubious_county?(name)
-        return true if !provide_reasons
+      if name.index("Forest,").nil? && name.index("Park,").nil? && name.index("near ").nil? && has_dubious_county?(name)
+        return true unless provide_reasons
         reasons.push(:location_dubious_redundant_county.l)
       end
       a_country = understood_country?(country(name))
       if a_country.nil?
-        return true if !provide_reasons
-        reasons.push(:location_dubious_unknown_country.t(:country => country(name)))
+        return true unless provide_reasons
+        reasons.push(:location_dubious_unknown_country.t(country: country(name)))
       end
       if has_known_states?(a_country)
         if understood_state?(country(name), a_country) # "Western Australia" for example
-          return true if !provide_reasons
-          reasons.push(:location_dubious_ambiguous_country.t(:country => a_country))
+          return true unless provide_reasons
+          reasons.push(:location_dubious_ambiguous_country.t(country: a_country))
         end
         a_state = state(name)
-        if a_state and understood_state?(a_state, a_country).nil?
-	        return true if !provide_reasons
-          reasons.push(:location_dubious_unknown_state.t(:country => a_country, :state => a_state))
+        if a_state && understood_state?(a_state, a_country).nil?
+          return true unless provide_reasons
+          reasons.push(:location_dubious_unknown_state.t(country: a_country, state: a_state))
         end
       else
         a_state = state(name)
-        if a_state and understood_country?(a_state)
-          return true if !provide_reasons
-          reasons.push(:location_dubious_redundant_state.t(:country => a_country, :state => a_state))
+        if a_state && understood_country?(a_state)
+          return true unless provide_reasons
+          reasons.push(:location_dubious_redundant_state.t(country: a_country, state: a_state))
         end
       end
-      for key in BAD_TERMS.keys()
+      for key in BAD_TERMS.keys
         if name.index(key)
-          return true if !provide_reasons
-          reasons.push(:location_dubious_bad_term.t(:bad => key, :good => BAD_TERMS[key]))
+          return true unless provide_reasons
+          reasons.push(:location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key]))
         end
       end
       count = 0
       while (c = BAD_CHARS[count]) # For some reason BAD_CHARS.chars.each doesn't work
         if name.index(c)
-          return true if !provide_reasons
-          reasons.push(:location_dubious_bad_char.t(:char => c))
+          return true unless provide_reasons
+          reasons.push(:location_dubious_bad_char.t(char: c))
         end
         count += 1
       end
     end
-    return false if !provide_reasons
+    return false unless provide_reasons
     reasons
   end
 
   def self.country(name)
-    result = name.split(',')[-1]
-    result = result.strip() if result
+    result = name.split(",")[-1]
+    result = result.strip if result
     result
   end
 
   def self.state(name)
-    result = name.split(',')[-2]
-    result = result.strip() if result
+    result = name.split(",")[-2]
+    result = result.strip if result
     result
   end
 
   def self.dubious_country?(name)
-    not understood_country?(country(name))
+    !understood_country?(country(name))
   end
 
   def self.has_dubious_county?(name)
@@ -519,7 +515,7 @@ class Location < AbstractModel
   def self.fix_country(name)
     c = country(name)
     new_country =
-    name[0..(name.rindex(c)-1)] + COUNTRY_FIXES[c]
+    name[0..(name.rindex(c) - 1)] + COUNTRY_FIXES[c]
   end
 
   ##############################################################################
@@ -537,7 +533,7 @@ class Location < AbstractModel
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.
-  def merge(old_loc, log = true)
+  def merge(old_loc, _log = true)
     # Move observations over first.
     for obs in old_loc.observations
       obs.location = self
@@ -567,31 +563,31 @@ class Location < AbstractModel
     add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: North: #{old_loc.north}, South: #{old_loc.south}, West: #{old_loc.west}, East: #{old_loc.east}")
 
     # Merge the two "main" descriptions if it can.
-    if self.description and old_loc.description and
-       (self.description.source_type == :public) and
+    if description && old_loc.description &&
+       (description.source_type == :public) &&
        (old_loc.description.source_type == :public)
-      self.description.merge(old_loc.description)
+      description.merge(old_loc.description)
     end
 
     # If this one doesn't have a primary description and the other does,
     # then make it this one's.
-    if !self.description && old_loc.description
+    if !description && old_loc.description
       self.description = old_loc.description
     end
 
     # Move over any remaining descriptions.
     for desc in old_loc.descriptions
       xargs = {
-          id: desc,
-          set_location: self,
+        id: desc,
+        set_location: self
       }
-      desc.location_id = self.id
+      desc.location_id = id
       desc.save
     end
 
     # Log the action.
     old_loc.rss_log.orphan(old_loc.name, :log_location_merged,
-      :this => old_loc.name, :that => self.name) if old_loc.rss_log
+                           this: old_loc.name, that: name) if old_loc.rss_log
 
     # Destroy past versions.
     editors = []
@@ -647,7 +643,7 @@ class Location < AbstractModel
       # Tell masochists who want to know about all location changes.
       # for user in User.find_all_by_email_locations_all(true)
       for user in User.where(email_locations_all: true)
-       recipients.push(user)
+        recipients.push(user)
       end
 
       # Send to people who have registered interest.
@@ -669,41 +665,41 @@ class Location < AbstractModel
     end
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.north || (self.north > 90)
+    if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end
-    if !self.south || (self.south < -90)
+    if !south || (south < -90)
       errors.add(:south, :validate_location_south_too_low.t)
     end
-    if self.north && self.south && (self.north < self.south)
+    if north && south && (north < south)
       errors.add(:north, :validate_location_north_less_than_south.t)
     end
 
-    if !self.east || (self.east < -180) || (180 < self.east)
+    if !east || (east < -180) || (180 < east)
       errors.add(:east, :validate_location_east_out_of_bounds.t)
     end
-    if !self.west || (self.west < -180) || (180 < self.west)
+    if !west || (west < -180) || (180 < west)
       errors.add(:west, :validate_location_west_out_of_bounds.t)
     end
 
-    if self.high && self.low && (self.high < self.low)
+    if high && low && (high < low)
       errors.add(:high, :validate_location_high_less_than_low.t)
     end
 
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_location_user_missing.t)
     end
 
-    if self.name.to_s.bytesize > 1024
+    if name.to_s.bytesize > 1024
       errors.add(:name, :validate_location_name_too_long.t)
-    elsif self.name.empty?
-      errors.add(:name, :validate_missing.t(:field => :name))
+    elsif name.empty?
+      errors.add(:name, :validate_missing.t(field: :name))
     end
   end
 end

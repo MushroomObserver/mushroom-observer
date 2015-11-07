@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class MOPaginatorTest < UnitTestCase
   def test_basic
@@ -17,46 +17,46 @@ class MOPaginatorTest < UnitTestCase
     assert_equal(nil, pages.used_letters)
 
     pages.letter_arg = nil;          assert_equal(nil, pages.letter_arg)
-    pages.letter_arg = 'l';          assert_equal('l', pages.letter_arg)
+    pages.letter_arg = "l";          assert_equal("l", pages.letter_arg)
     pages.letter_arg = :letter;      assert_equal(:letter, pages.letter_arg)
-    pages.letter_arg = ['anything']; assert_equal(['anything'], pages.letter_arg)
+    pages.letter_arg = ["anything"]; assert_equal(["anything"], pages.letter_arg)
 
     pages.number_arg = nil;          assert_equal(nil, pages.number_arg)
-    pages.number_arg = 'l';          assert_equal('l', pages.number_arg)
+    pages.number_arg = "l";          assert_equal("l", pages.number_arg)
     pages.number_arg = :number;      assert_equal(:number, pages.number_arg)
-    pages.number_arg = ['anything']; assert_equal(['anything'], pages.number_arg)
+    pages.number_arg = ["anything"]; assert_equal(["anything"], pages.number_arg)
 
     pages.letter = nil; assert_equal(nil, pages.letter)
     pages.letter = 32;  assert_equal(nil, pages.letter)
-    pages.letter = ' '; assert_equal(nil, pages.letter)
-    pages.letter = 'Q'; assert_equal('Q', pages.letter)
-    pages.letter = 'z'; assert_equal('Z', pages.letter)
-    pages.letter = :x;  assert_equal('X', pages.letter)
+    pages.letter = " "; assert_equal(nil, pages.letter)
+    pages.letter = "Q"; assert_equal("Q", pages.letter)
+    pages.letter = "z"; assert_equal("Z", pages.letter)
+    pages.letter = :x;  assert_equal("X", pages.letter)
 
     pages.page = nil;      assert_equal(1, pages.page)
     pages.page = -1;       assert_equal(1, pages.page)
     pages.page = 0;        assert_equal(1, pages.page)
     pages.page = 3;        assert_equal(3, pages.page)
-    pages.page = '3';      assert_equal(3, pages.page)
-    pages.page = 'letter'; assert_equal(1, pages.page)
+    pages.page = "3";      assert_equal(3, pages.page)
+    pages.page = "letter"; assert_equal(1, pages.page)
 
     pages.num_total = 0;     assert_equal(0, pages.num_total)
     pages.num_total = -1;    assert_equal(0, pages.num_total)
     pages.num_total = 10;    assert_equal(10, pages.num_total)
     pages.num_total = nil;   assert_equal(0, pages.num_total)
-    pages.num_total = 'str'; assert_equal(0, pages.num_total)
+    pages.num_total = "str"; assert_equal(0, pages.num_total)
 
     pages.num_per_page = 10; assert_equal(10, pages.num_per_page)
-    assert_raises(RuntimeError) {pages.num_per_page = nil}
-    assert_raises(RuntimeError) {pages.num_per_page = -1}
-    assert_raises(RuntimeError) {pages.num_per_page = 0}
-    assert_raises(RuntimeError) {pages.num_per_page = 'str'}
+    assert_raises(RuntimeError) { pages.num_per_page = nil }
+    assert_raises(RuntimeError) { pages.num_per_page = -1 }
+    assert_raises(RuntimeError) { pages.num_per_page = 0 }
+    assert_raises(RuntimeError) { pages.num_per_page = "str" }
 
     pages.used_letters = nil;             assert_equal(nil, pages.used_letters)
     pages.used_letters = [];              assert_equal([], pages.used_letters)
-    pages.used_letters = [1,2,3];         assert_equal([], pages.used_letters)
-    pages.used_letters = ['a',:b,:C,'D']; assert_equal(['A','B','C','D'], pages.used_letters)
-    pages.used_letters = [:b,:a,:b,:a,1]; assert_equal(['A','B'], pages.used_letters)
+    pages.used_letters = [1, 2, 3]; assert_equal([], pages.used_letters)
+    pages.used_letters = ["a", :b, :C, "D"]; assert_equal(%w(A B C D), pages.used_letters)
+    pages.used_letters = [:b, :a, :b, :a, 1]; assert_equal(%w(A B), pages.used_letters)
   end
 
   def test_from_and_to
@@ -70,7 +70,7 @@ class MOPaginatorTest < UnitTestCase
     pages.num_total = 0; assert_equal(0, pages.num_pages)
     pages.num_total = 1; assert_equal(1, pages.num_pages)
 
-    pages.num_total = 100;
+    pages.num_total = 100
     pages.page = 1; assert_equal(0..19, pages.from..pages.to)
     pages.page = 1; assert_equal(0..19, pages.from_to)
     pages.page = 2; assert_equal(20..39, pages.from..pages.to)

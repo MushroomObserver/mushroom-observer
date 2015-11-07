@@ -42,7 +42,7 @@
 class UserGroup < AbstractModel
   has_and_belongs_to_many :users
   has_one :project
-  has_one :admin_project, :class_name => "Project", :foreign_key => "admin_group_id"
+  has_one :admin_project, class_name: "Project", foreign_key: "admin_group_id"
 
   # Returns +name+ for debugging.
   def text_name
@@ -51,15 +51,13 @@ class UserGroup < AbstractModel
 
   def self.get_or_construct_user(name)
     user = find_by_name(name)
-    if user.nil?
-      user = UserGroup.new(:name => name, :meta => 1)
-    end
+    user = UserGroup.new(name: name, meta: 1) if user.nil?
     user
   end
-  
+
   # Return the meta-group that contains all users.
   def self.all_users
-    @@all_users ||= get_or_construct_user('all users')
+    @@all_users ||= get_or_construct_user("all users")
   end
 
   # Return the meta-group that contains just the given users.  Takes id or User.
@@ -71,7 +69,7 @@ class UserGroup < AbstractModel
 
   # Return the meta-group that contains all users.
   def self.reviewers
-    @@reviewers ||= get_or_construct_user('reviewers')
+    @@reviewers ||= get_or_construct_user("reviewers")
   end
 
   # Need to clear these at end of each test or some changes can persist from
@@ -86,8 +84,8 @@ class UserGroup < AbstractModel
   def self.create_user(user)
     all_users.users << user
     one_user = create!(
-      :name => "user #{user.id}",
-      :meta => true
+      name: "user #{user.id}",
+      meta: true
     )
     one_user.users << user
   end

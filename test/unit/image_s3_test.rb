@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class ImageS3Test < UnitTestCase
   def test_basic_stuff
@@ -11,7 +11,7 @@ class ImageS3Test < UnitTestCase
       stub: true # (makes Aws::S3 return empty responses for everything)
     )
     s3.status("key")
-    s3.list.each do |obj|
+    s3.list.each do |_obj|
       break
     end
     file = "#{Rails.root}/test/fixtures/robots.txt"

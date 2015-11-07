@@ -215,21 +215,25 @@ class Image < AbstractModel
   has_and_belongs_to_many :observations
   has_and_belongs_to_many :projects
   has_and_belongs_to_many :glossary_terms
-  has_many :thumb_clients, :class_name => 'Observation', :foreign_key => 'thumb_image_id'
+  has_many :thumb_clients, class_name: "Observation", foreign_key: "thumb_image_id"
   has_many :image_votes
   belongs_to :user
   belongs_to :license
-  belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
-  has_many :subjects, :class_name => 'User', :foreign_key => 'image_id'
-  has_many :best_glossary_terms, :class_name => 'GlossaryTerm', :foreign_key => 'thumb_image_id'
-  has_many :copyright_changes, :as => :target, :dependent => :destroy
+  belongs_to :reviewer, class_name: "User", foreign_key: "reviewer_id"
+  has_many :subjects, class_name: "User", foreign_key: "image_id"
+  has_many :best_glossary_terms, class_name: "GlossaryTerm", foreign_key: "thumb_image_id"
+  has_many :copyright_changes, as: :target, dependent: :destroy
 
   before_destroy :update_thumbnails
   after_update :track_copyright_changes
 
-  def all_glossary_terms; best_glossary_terms + glossary_terms; end
+  def all_glossary_terms
+    best_glossary_terms + glossary_terms
+  end
 
-  def get_subjects; observations + subjects + best_glossary_terms + glossary_terms; end
+  def get_subjects
+    observations + subjects + best_glossary_terms + glossary_terms
+  end
 
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
@@ -239,11 +243,11 @@ class Image < AbstractModel
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    title = get_subjects.map(&:text_name).uniq.sort.join(' & ')
+    title = get_subjects.map(&:text_name).uniq.sort.join(" & ")
     if title.blank?
-      :image.l + " ##{id || '?'}"
+      :image.l + " ##{id || "?"}"
     else
-      title + " (#{id || '?'})"
+      title + " (#{id || "?"})"
     end
   end
 
@@ -255,11 +259,11 @@ class Image < AbstractModel
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = get_subjects.map(&:format_name).uniq.sort.join(' & ')
+    title = get_subjects.map(&:format_name).uniq.sort.join(" & ")
     if title.blank?
-      :image.l + " ##{id || '?'}"
+      :image.l + " ##{id || "?"}"
     else
-      title + " (#{id || '?'})"
+      title + " (#{id || "?"})"
     end
   end
 
@@ -282,7 +286,7 @@ class Image < AbstractModel
   # Return an Array of all the extensions of all the image types we explicitly
   # support.
   def self.all_extensions
-    ['jpg', 'gif', 'png', 'tiff', 'bmp', 'raw']
+    %w(jpg gif png tiff bmp raw)
   end
 
   # Return an Array of all the extensions of all the image content types we
@@ -291,24 +295,24 @@ class Image < AbstractModel
   # referred to as +nil+ here, however the actual content type should be stored
   # in the image.  It's just that we haven't seen any other types yet.)
   def self.all_content_types
-    ['image/jpeg', 'image/gif', 'image/png', 'image/tiff', 'image/x-ms-bmp', nil]
+    ["image/jpeg", "image/gif", "image/png", "image/tiff", "image/x-ms-bmp", nil]
   end
 
   def image_url(size)
     Image::Url.new(
-      :size => size,
-      :id => id,
-      :transferred => transferred,
-      :extension => extension(size)
+      size: size,
+      id: id,
+      transferred: transferred,
+      extension: extension(size)
     )
   end
 
-  def self.image_url(size, id, args={})
+  def self.image_url(size, id, args = {})
     Image::Url.new(
-      :size => size,
-      :id => id,
-      :transferred => args.fetch(:transferred, true),
-      :extension => args.fetch(:extension, 'jpg')
+      size: size,
+      id: id,
+      transferred: args.fetch(:transferred, true),
+      extension: args.fetch(:extension, "jpg")
     )
   end
 
@@ -316,7 +320,7 @@ class Image < AbstractModel
     image_url(size).url
   end
 
-  def self.url(size, id, args={})
+  def self.url(size, id, args = {})
     image_url(size, id, args).url
   end
 
@@ -324,40 +328,60 @@ class Image < AbstractModel
     image_url(size).file_name(MO.local_image_files)
   end
 
-  def original_url;  url(:original);  end
-  def full_size_url; url(:full_size); end
-  def huge_url;      url(:huge);      end
-  def large_url;     url(:large);     end
-  def medium_url;    url(:medium);    end
-  def small_url;     url(:small);     end
-  def thumbnail_url; url(:thumbnail); end
+  def original_url
+    url(:original)
+  end
+
+  def full_size_url
+    url(:full_size)
+  end
+
+  def huge_url
+    url(:huge)
+  end
+
+  def large_url
+    url(:large)
+  end
+
+  def medium_url
+    url(:medium)
+  end
+
+  def small_url
+    url(:small)
+  end
+
+  def thumbnail_url
+    url(:thumbnail)
+  end
 
   def original_extension
     case content_type
-    when 'image/jpeg'     ; 'jpg'
-    when 'image/gif'      ; 'gif'
-    when 'image/png'      ; 'png'
-    when 'image/tiff'     ; 'tiff'
-    when 'image/x-ms-bmp' ; 'bmp'
-    else                  ; 'raw'
+    when "image/jpeg" then "jpg"
+    when "image/gif" then "gif"
+    when "image/png" then "png"
+    when "image/tiff" then "tiff"
+    when "image/x-ms-bmp" then "bmp"
+    else; "raw"
     end
   end
 
   def extension(size)
-    size == :original ? original_extension : 'jpg'
+    size == :original ? original_extension : "jpg"
   end
 
   def has_size?(size)
     max = width.to_i > height.to_i ? width.to_i : height.to_i
     case size.to_s
-    when 'thumbnail' ; true
-    when 'small'     ; max > 160
-    when 'medium'    ; max > 320
-    when 'large'     ; max > 640
-    when 'huge'      ; max > 960
-    when 'full_size' ; max > 1280
-    when 'original'  ; true
-    else             ; false
+    when "thumbnail" then true
+    when "small" then max > 160
+    when "medium" then max > 320
+    when "large" then max > 640
+    when "huge" then max > 960
+    when "full_size" then max > 1280
+    when "original" then true
+    else; false
     end
   end
 
@@ -368,19 +392,19 @@ class Image < AbstractModel
     if width && height
       d = w > h ? w : h
       max = case size.to_s
-      when 'thumbnail' ; 160
-      when 'small'     ; 320
-      when 'medium'    ; 640
-      when 'large'     ; 960
-      when 'huge'      ; 1280
-      else             ; 1e10
+            when "thumbnail" then 160
+            when "small" then 320
+            when "medium" then 640
+            when "large" then 960
+            when "huge" then 1280
+            else; 1e10
       end
       if max < d
         w = w * max / d
         h = h * max / d
       end
     end
-    return [w, h]
+    [w, h]
   end
 
   ##############################################################################
@@ -422,7 +446,7 @@ class Image < AbstractModel
 
   # MD5 sum (if available).
   attr_accessor :upload_md5sum
-    
+
   # Initialize the upload process.  Pass in the value of the file upload filed
   # from the CGI +params+ struct, or any other I/O stream.  You will have the
   # opportunity to provide extra information, such as the original file name,
@@ -440,21 +464,21 @@ class Image < AbstractModel
       self.upload_length = file.size
       self.upload_type   = file.content_type if file.respond_to?(:content_type)
       self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
-      self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
+      self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
         if file.respond_to?(:original_filename)
 
     # Image is given as an input stream.  We need to save it to a temp file
     # before we can do anything useful with it.
     elsif file.is_a?(IO) ||
-       file.is_a?(StringIO) ||
-       defined?(Unicorn) && file.is_a?(Unicorn::TeeInput)
+          file.is_a?(StringIO) ||
+          defined?(Unicorn) && file.is_a?(Unicorn::TeeInput)
       @file = nil
       self.upload_temp_file = nil
       self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
       self.upload_length = file.size           if file.respond_to?(:size)
       self.upload_type   = file.content_type   if file.respond_to?(:content_type)
       self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
-      self.upload_original_name = file.original_filename.to_s.force_encoding('utf-8') \
+      self.upload_original_name = file.original_filename.to_s.force_encoding("utf-8") \
         if file.respond_to?(:original_filename)
     end
   end
@@ -474,14 +498,14 @@ class Image < AbstractModel
   def validate_image_length
     if upload_length || save_to_temp_file
       if upload_length > MO.image_upload_max_size
-        errors.add(:image, :validate_image_file_too_big.t(:size => upload_length,
-                   :max => MO.image_upload_max_size.to_s.sub(/\d{6}$/, 'Mb')))
+        errors.add(:image, :validate_image_file_too_big.t(size: upload_length,
+                                                          max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb")))
         result = false
       else
         result = true
       end
     end
-    return result
+    result
   end
 
   # Check image type to make sure we were given a valid image.  Returns true
@@ -491,27 +515,27 @@ class Image < AbstractModel
       # Override whatever user gave us with result of "file --mime".
       type = File.read("| /usr/bin/file --mime #{upload_temp_file}").chomp.split[1]
       if type
-        type.sub!(/;$/, '')
+        type.sub!(/;$/, "")
         self.upload_type = type
       end
       if upload_type.match(/^image\//)
         result = true
       else
         file = upload_original_name.to_s
-        file = '?' if file.blank?
-        errors.add(:image, :validate_image_wrong_type.t(:type => upload_type, :file => file))
+        file = "?" if file.blank?
+        errors.add(:image, :validate_image_wrong_type.t(type: upload_type, file: file))
         result = false
       end
     end
     self.content_type = upload_type
-    return result
+    result
   end
 
   # Check to make sure the MD5 sum is correct (if available).  Returns true
   # unless the test fails, in which case it adds an error to the :image field.
   def validate_image_md5sum
     result = true
-    if !upload_md5sum.blank? and save_to_temp_file
+    if !upload_md5sum.blank? && save_to_temp_file
       sum = File.open(upload_temp_file) do |f|
         Digest::MD5.hexdigest(f.read)
       end
@@ -519,23 +543,23 @@ class Image < AbstractModel
         result = true
       else
         errors.add(:image, :validate_image_md5_mismatch.
-          t(:actual => sum.split.first, :expect => upload_md5sum))
+          t(actual: sum.split.first, expect: upload_md5sum))
         result = false
       end
     end
-    return result
+    result
   end
 
   # Check if we received the name of the original file on the users's computer.
   # Strip out any directories, or drive letters (just in case, don't think this
   # ever actually happens).  Provide default name if not provided.
   def validate_image_name
-    name = self.upload_original_name.to_s
-    name.sub!(/^[a-zA-Z]:/, '')
-    name.sub!(/^.*[\/\\]/, '')
+    name = upload_original_name.to_s
+    name.sub!(/^[a-zA-Z]:/, "")
+    name.sub!(/^.*[\/\\]/, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name.truncate_bytesize!(120) if name.bytesize > 120
-    if not name.blank? and User.current && User.current.keep_filenames != :toss
+    if !name.blank? and User.current && User.current.keep_filenames != :toss
       self.original_name = name
     end
   end
@@ -544,19 +568,19 @@ class Image < AbstractModel
   # to the :image field.  Returns true if the file is successfully saved.
   def save_to_temp_file
     result = true
-    if !upload_temp_file
+    unless upload_temp_file
 
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as
       # the body of a request.
-      if upload_handle.is_a?(IO) or
-         upload_handle.is_a?(StringIO) or
+      if upload_handle.is_a?(IO) ||
+         upload_handle.is_a?(StringIO) ||
          defined?(Unicorn) && upload_handle.is_a?(Unicorn::TeeInput)
         begin
-          @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
+          @file = Tempfile.new("image_upload") # Using an instance variable so the temp file last as long as the reference to the path.
           File.open(@file, "wb") do |write_handle|
             loop do
-              str = upload_handle.read(16384)
+              str = upload_handle.read(16_384)
               break if str.to_s.length == 0
               write_handle.write(str)
             end
@@ -567,19 +591,19 @@ class Image < AbstractModel
           self.upload_length = @file.size
           result = true
         rescue => e
-          errors.add(:image, "Unexpected error while copying attached file to temp file. Error class #{e.class.to_s}: #{e.to_s}")
+          errors.add(:image, "Unexpected error while copying attached file to temp file. Error class #{e.class}: #{e}")
           result = false
         end
 
       # It should never reach here.
       else
-        errors.add(:image, "Unexpected error: did not receive a valid upload " +
-                           "stream from the webserver (we got an instance of " +
+        errors.add(:image, "Unexpected error: did not receive a valid upload " \
+                           "stream from the webserver (we got an instance of " \
                            "#{upload_handle.class.name}).  Please try again.")
         result = false
       end
     end
-    return result
+    result
   end
 
   # Process image now that we're sure everything is okay.  This should only
@@ -593,64 +617,64 @@ class Image < AbstractModel
       result = false
     elsif save_to_temp_file
       ext = original_extension
-      set_image_size(upload_temp_file) if ext == 'jpg'
-      set = width.nil? ? '1' : '0'
+      set_image_size(upload_temp_file) if ext == "jpg"
+      set = width.nil? ? "1" : "0"
       if !move_original
         result = false
       else
         cmd = MO.process_image_command.
-                 gsub('<id>', id.to_s).
-                 gsub('<ext>', ext).
-                 gsub('<set>', set)
+              gsub("<id>", id.to_s).
+              gsub("<ext>", ext).
+              gsub("<set>", set)
         if Rails.env != "test" && !system(cmd)
-          errors.add(:image, :runtime_image_process_failed.t(:id => id))
+          errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
         end
       end
     end
-    return result
+    result
   end
 
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
   def move_original
     original_image = local_file_name(:original)
-    raise(SystemCallError, "Don't move my test images!!") if Rails.env == "test"
-    if !File.rename(upload_temp_file, original_image)
-      raise(SystemCallError, "Try again.")
+    fail(SystemCallError, "Don't move my test images!!") if Rails.env == "test"
+    unless File.rename(upload_temp_file, original_image)
+      fail(SystemCallError, "Try again.")
     end
     FileUtils.chmod(0644, original_image)
     return true
   rescue SystemCallError
-    if !system('cp', upload_temp_file, original_image)
-      raise(:runtime_image_move_failed.t(:id => id))
+    unless system("cp", upload_temp_file, original_image)
+      raise(:runtime_image_move_failed.t(id: id))
     end
     return true
   rescue SystemCallError
-    errors.add(:image, :runtime_image_move_failed.t(:id => id))
+    errors.add(:image, :runtime_image_move_failed.t(id: id))
     return false
   end
 
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
-  def set_image_size(file=local_file_name(:full_size))
-    script = "#{::Rails.root.to_s}/script/jpegsize"
+  def set_image_size(file = local_file_name(:full_size))
+    script = "#{::Rails.root}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
       self.width  = w.to_i
       self.height = h.to_i
-      self.save_without_our_callbacks
+      save_without_our_callbacks
     end
   end
 
   # Rotate or flip image.
   def transform(op)
     case op
-    when :rotate_left  ; op = '-90'
-    when :rotate_right ; op = '+90'
-    when :mirror       ; op = '-h'
+    when :rotate_left then op = "-90"
+    when :rotate_right then op = "+90"
+    when :mirror then op = "-h"
     else
-      raise("Invalid transform op: #{op.inspect}")
+      fail("Invalid transform op: #{op.inspect}")
     end
     system("script/rotate_image #{id} #{op}&") if Rails.env != "test"
   end
@@ -679,15 +703,19 @@ class Image < AbstractModel
   # Validate a vote value.  Returns type-cast vote (Fixnum from 1 to 4) if
   # valid, or nil if not.
   def self.validate_vote(value)
-    value = value.to_i rescue 0
-    value = nil if value < 1 or value > 4
-    return value
+    value = begin
+              value.to_i
+            rescue
+              0
+            end
+    value = nil if value < 1 || value > 4
+    value
   end
 
   # Count number of votes at a given level.  Returns all votes if no +value+.
-  def num_votes(value=nil)
+  def num_votes(value = nil)
     if value
-      vote_hash.values.select {|v| v == value.to_i}.length
+      vote_hash.values.select { |v| v == value.to_i }.count
     else
       vote_hash.values.length
     end
@@ -695,7 +723,7 @@ class Image < AbstractModel
 
   # Retrieve the given User's vote for this Image.  Returns a Fixnum from
   # 1 to 4, or nil if the User hasn't voted.
-  def users_vote(user=User.current)
+  def users_vote(user = User.current)
     user_id = user.is_a?(User) ? user.id : user.to_i
     vote_hash[user_id]
   end
@@ -703,7 +731,7 @@ class Image < AbstractModel
   # Change a user's vote to the given value.  Pass in either the numerical vote
   # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
   # integers.  Returns value of new vote.
-  def change_vote(user, value=nil, anon=false)
+  def change_vote(user, value = nil, anon = false)
     user_id = user.is_a?(User) ? user.id : user.to_i
     save_changes = !self.changed?
 
@@ -716,9 +744,9 @@ class Image < AbstractModel
         vote.save
       else
         image_votes.create(
-          :user_id   => user_id,
-          :value     => value,
-          :anonymous => !!anon
+          user_id: user_id,
+          value: value,
+          anonymous: !!anon
         )
       end
     elsif vote
@@ -733,11 +761,9 @@ class Image < AbstractModel
     # we don't need to do it twice).  No need to update +updated_at+ or do any
     # of the other callbacks, either, since this doesn't result in emails,
     # contribution changes, or rss log entries.
-    if save_changes
-      save_without_our_callbacks
-    end
+    save_without_our_callbacks if save_changes
 
-    return value
+    value
   end
 
   # Calculate the average vote given the raw vote data.
@@ -757,11 +783,11 @@ class Image < AbstractModel
   def vote_hash # :nodoc:
     unless @vote_hash
       @vote_hash = {}
-      for vote in self.image_votes
+      for vote in image_votes
         @vote_hash[vote.user_id.to_i] = vote.value.to_i
       end
     end
-    return @vote_hash
+    @vote_hash
   end
 
   def reload(*args)
@@ -775,7 +801,7 @@ class Image < AbstractModel
   #
   ################################################################################
 
-  def has_edit_permission?(user=User.current)
+  def has_edit_permission?(user = User.current)
     Project.has_edit_permission?(self, user)
   end
 
@@ -808,19 +834,31 @@ class Image < AbstractModel
 
   # Create CopyrightChange entry whenever year, name or license changes.
   def track_copyright_changes
-    if when_changed? and when_change[0].year != when_change[1].year or
-       license_id_changed? or
+    if when_changed? && when_change[0].year != when_change[1].year ||
+       license_id_changed? ||
        copyright_holder_changed?
-      old_year       = when_change[0].year        rescue self.when.year
-      old_name       = copyright_holder_change[0] rescue self.copyright_holder
-      old_license_id = license_id_change[0]       rescue self.license_id
+      old_year       = begin
+                         when_change[0].year
+                       rescue
+                         self.when.year
+                       end
+      old_name       = begin
+                         copyright_holder_change[0]
+                       rescue
+                         copyright_holder
+                       end
+      old_license_id = begin
+                         license_id_change[0]
+                       rescue
+                         license_id
+                       end
       CopyrightChange.create!(
-        :user       => User.current,
-        :updated_at   => self.updated_at,
-        :target     => self,
-        :year       => old_year,
-        :name       => old_name,
-        :license_id => old_license_id
+        user: User.current,
+        updated_at: updated_at,
+        target: self,
+        year: old_year,
+        name: old_name,
+        license_id: old_license_id
       )
     end
   end
@@ -839,7 +877,7 @@ class Image < AbstractModel
         INSERT INTO copyright_changes
           (user_id, updated_at, target_type, target_id, year, name, license_id)
         VALUES
-          #{data.map {|id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})"}.join(",\n") }
+          #{data.map { |id, year, lic| "(#{user.id},NOW(),'Image',#{id},#{year},#{old_name},#{lic})" }.join(",\n")}
       ))
       Image.connection.update(%(
         UPDATE images SET copyright_holder = #{new_name}
@@ -848,22 +886,20 @@ class Image < AbstractModel
     end
   end
 
-  def year; self.when.year; end
+  def year
+    self.when.year
+  end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if upload_handle and new_record?
-      validate_upload
-    end
+    validate_upload if upload_handle && new_record?
 
     # I guess this is kind of serious -- uploading with no one logged in??!
-    if !user && !User.current
-      errors.add(:user, :validate_image_user_missing.t)
-    end
+    errors.add(:user, :validate_image_user_missing.t) if !user && !User.current
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.

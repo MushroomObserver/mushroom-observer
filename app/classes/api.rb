@@ -116,33 +116,33 @@
 ################################################################################
 
 class API
-  require_dependency 'api/errors'
-  require_dependency 'api/base'
-  require_dependency 'api/parsers'
-  require_dependency 'api/parse_boolean'
-  require_dependency 'api/parse_datetime'
-  require_dependency 'api/parse_enum'
-  require_dependency 'api/parse_herbarium'
-  require_dependency 'api/parse_image'
-  require_dependency 'api/parse_lang'
-  require_dependency 'api/parse_license'
-  require_dependency 'api/parse_location'
-  require_dependency 'api/parse_name'
-  require_dependency 'api/parse_number'
-  require_dependency 'api/parse_object'
-  require_dependency 'api/parse_observation'
-  require_dependency 'api/parse_project'
-  require_dependency 'api/parse_species_list'
-  require_dependency 'api/parse_string'
-  require_dependency 'api/parse_user'
-  require_dependency 'api/results'
-  require_dependency 'api/upload'
-  require_dependency 'api/model_api'
+  require_dependency "api/errors"
+  require_dependency "api/base"
+  require_dependency "api/parsers"
+  require_dependency "api/parse_boolean"
+  require_dependency "api/parse_datetime"
+  require_dependency "api/parse_enum"
+  require_dependency "api/parse_herbarium"
+  require_dependency "api/parse_image"
+  require_dependency "api/parse_lang"
+  require_dependency "api/parse_license"
+  require_dependency "api/parse_location"
+  require_dependency "api/parse_name"
+  require_dependency "api/parse_number"
+  require_dependency "api/parse_object"
+  require_dependency "api/parse_observation"
+  require_dependency "api/parse_project"
+  require_dependency "api/parse_species_list"
+  require_dependency "api/parse_string"
+  require_dependency "api/parse_user"
+  require_dependency "api/results"
+  require_dependency "api/upload"
+  require_dependency "api/model_api"
 
   # (subclasses should be auto-loaded if named right? no, but why?)
-  for file in Dir.glob("#{::Rails.root.to_s}/app/classes/api/*_api.rb")
-    if file.match(/(api\/\w+_api)\.rb$/) and $1 != 'api/model_api'
-      require_dependency $1
+  for file in Dir.glob("#{::Rails.root}/app/classes/api/*_api.rb")
+    if file.match(/(api\/\w+_api)\.rb$/) && Regexp.last_match(1) != "api/model_api"
+      require_dependency Regexp.last_match(1)
     end
   end
 end

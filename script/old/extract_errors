@@ -15,9 +15,7 @@ def process_section(lines)
     elsif line.match(/\((500 Internal Server Error|404 Not Found)\)/)
       show = true
     end
-    if error && !error2 && line.match(/^ *(\/|app)(?!usr)/)
-      error2 = line
-    end
+    error2 = line if error && !error2 && line.match(/^ *(\/|app)(?!usr)/)
   end
   if show
     error = "#{error}\n#{error2}" if error && error2
@@ -33,7 +31,7 @@ File.open(file) do |fh|
   fh.each_line do |line|
     line.chomp!
     if line.match(/^Processing/)
-      section = section.select {|x| x.to_s.match(/\S/)}
+      section = section.select { |x| x.to_s.match(/\S/) }
       process_section(section) if section.any?
       section = [line]
     else
@@ -42,9 +40,9 @@ File.open(file) do |fh|
   end
 end
 
-for error in @show.keys.sort_by {|x| -@show[x][0]}
+for error in @show.keys.sort_by { |x| -@show[x][0] }
   num, lines = @show[error]
-  puts num.to_s + (error.to_s.match(/\S/) ? ": #{error}" : '')
+  puts num.to_s + (error.to_s.match(/\S/) ? ": #{error}" : "")
   puts lines.join("\n")
   puts
 end

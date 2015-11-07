@@ -1,8 +1,8 @@
 class StripRegionCodes < ActiveRecord::Migration
   def self.up
-    add_column :languages, :region, :string, :limit => 4
+    add_column :languages, :region, :string, limit: 4
     for l in Language.all
-      l.locale, l.region = l.locale.split('-')
+      l.locale, l.region = l.locale.split("-")
       l.save
     end
   end

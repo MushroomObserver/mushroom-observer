@@ -23,9 +23,15 @@ class ParsedUrl
     @m = url.match(/^http:\/\/([\w\.]+)(:[0-9]+)*(.*)$/)
   end
 
-  def url; @url; end
-  def local_url; @m[3]; end
-  def host; @m[1]; end
+  attr_reader :url
+
+  def local_url
+    @m[3]
+  end
+
+  def host
+    @m[1]
+  end
 
   def port
     p = @m[2]
@@ -45,7 +51,7 @@ end
 def test_host(host, port)
   result = false
   begin
-    Net::HTTP.start(host, port) do |http|
+    Net::HTTP.start(host, port) do |_http|
       result = true
     end
   rescue Exception => err
@@ -59,7 +65,7 @@ def get_content(filename, url)
 end
 
 def get_size(filename)
-  File.exists?(filename) ? File::Stat.new(filename).size : 0
+  File.exist?(filename) ? File::Stat.new(filename).size : 0
 end
 
 def testing
@@ -96,7 +102,7 @@ old_size = get_size(dest_filename)
 if !new_size
   print "Unable to create the new EOL dump as #{temp_filename}.\n"
   exit 1
-elsif new_size < old_size*0.9
+elsif new_size < old_size * 0.9
   print "Size of new EOL dump, #{new_size}, was less than 90% of the old dump, #{old_size}.\n"
   print "Left the old file in place.\n"
   exit 1

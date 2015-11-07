@@ -2,8 +2,8 @@
 require "test_helper"
 
 class ScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML::load(IO.
-    read("#{::Rails.root}/config/database.yml"))['test']
+  DATABASE_CONFIG = YAML.load(IO.
+    read("#{::Rails.root}/config/database.yml"))["test"]
 
   def script_file(cmd)
     "#{::Rails.root}/script/#{cmd}"
@@ -32,9 +32,9 @@ class ScriptTest < UnitTestCase
     # Need to reset any possible changes to database scripts might make because
     # they are external to the ActiveRecord test transanction which normally
     # rolls back any changes which occur inside a given test.
-    user = DATABASE_CONFIG['username']
-    pass = DATABASE_CONFIG['password']
-    db   = DATABASE_CONFIG['database']
+    user = DATABASE_CONFIG["username"]
+    pass = DATABASE_CONFIG["password"]
+    db   = DATABASE_CONFIG["database"]
     cmd = "UPDATE images SET width=1000, height=1000, transferred=false WHERE id=1"
     system("mysql -u #{user} -p#{pass} #{db} -e '#{cmd}'")
     FileUtils.rm_rf(local_root)
@@ -42,7 +42,7 @@ class ScriptTest < UnitTestCase
     FileUtils.rm_rf("#{remote_root}2")
   end
 
-################################################################################
+  ################################################################################
 
   test "process_image" do
     script = script_file("process_image")
@@ -62,8 +62,8 @@ class ScriptTest < UnitTestCase
       file.puts "#{local_root}/320/1.jpg"
       file.puts "#{local_root}/thumb/1.jpg"
     end
-    sizes = File.readlines("| #{script_file('jpegsize')} -f #{tempfile}").map do |line|
-      line[local_root.length+1..-1].chomp
+    sizes = File.readlines("| #{script_file("jpegsize")} -f #{tempfile}").map do |line|
+      line[local_root.length + 1..-1].chomp
     end
     assert_equal("orig/1.jpg: 2560 1920", sizes[0], "full-size image is wrong size")
     assert_equal("1280/1.jpg: 1280 960", sizes[1], "huge-size image is wrong size")
@@ -75,20 +75,20 @@ class ScriptTest < UnitTestCase
     assert_equal(2560, img.width)
     assert_equal(1920, img.height)
     assert_equal(true, img.transferred)
-    for file in [ "thumb/1.jpg", "320/1.jpg", "640/1.jpg", "960/1.jpg",
-                  "1280/1.jpg", "orig/1.jpg", "orig/1.tiff" ]
+    for file in ["thumb/1.jpg", "320/1.jpg", "640/1.jpg", "960/1.jpg",
+                 "1280/1.jpg", "orig/1.jpg", "orig/1.tiff"]
       file1 = "#{local_root}/#{file}"
       file2 = "#{remote_root}1/#{file}"
       assert_equal(File.size(file1), File.size(file2),
                    "Failed to transfer #{file} to server 1, size is wrong.")
     end
-    for file in [ "thumb/1.jpg", "320/1.jpg", "640/1.jpg" ]
+    for file in ["thumb/1.jpg", "320/1.jpg", "640/1.jpg"]
       file1 = "#{local_root}/#{file}"
       file2 = "#{remote_root}2/#{file}"
       assert_equal(File.size(file1), File.size(file2),
                    "Failed to transfer #{file} to server 2, size is wrong.")
     end
-    for file in [ "960/1.jpg", "1280/1.jpg", "orig/1.jpg", "orig/1.tiff" ]
+    for file in ["960/1.jpg", "1280/1.jpg", "orig/1.jpg", "orig/1.tiff"]
       file2 = "#{remote_root}2/#{file}"
       assert(!File.exist?(file2), "Shouldn't have transferred #{file} to server 2.")
     end

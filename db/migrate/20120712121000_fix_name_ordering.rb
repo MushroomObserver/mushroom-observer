@@ -13,13 +13,13 @@ class FixNameOrdering < ActiveRecord::Migration
     for id, rank, text_name, author, sort_name in Name.connection.select_rows %(
       SELECT id, rank, text_name, author, sort_name FROM names
     )
-      data[id.to_i] = if rank == 'Group'
-        Name.format_sort_name(text_name.sub(/ group$/,''), 'group')
-      else
-        Name.format_sort_name(text_name, author)
+      data[id.to_i] = if rank == "Group"
+                        Name.format_sort_name(text_name.sub(/ group$/, ""), "group")
+                      else
+                        Name.format_sort_name(text_name, author)
       end
     end
-    vals = data.map {|v| Name.connection.quote(v.to_s)}.join(',')
+    vals = data.map { |v| Name.connection.quote(v.to_s) }.join(",")
     Name.connection.update %(
       UPDATE names SET sort_name = ELT(id+1, #{vals})
     )

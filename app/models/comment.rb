@@ -90,7 +90,7 @@
 ################################################################################
 
 class Comment < AbstractModel
-  belongs_to :target, :polymorphic => true
+  belongs_to :target, polymorphic: true
   belongs_to :user
 
   after_create :notify_users
@@ -98,12 +98,12 @@ class Comment < AbstractModel
 
   # Returns Array of all models (Classes) which take comments.
   def self.all_types
-    [ Location, Name, Observation, Project, SpeciesList ]
+    [Location, Name, Observation, Project, SpeciesList]
   end
 
   # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_type_tags
-    [ :location, :name, :observation, :project, :species_list ]
+    [:location, :name, :observation, :project, :species_list]
   end
 
   # Returns +summary+ for debugging.
@@ -117,7 +117,9 @@ class Comment < AbstractModel
   #   comment.target_type.downcase.to_sym.l
   #
   def target_type_localized
-    self.target_type.downcase.to_sym.l rescue ''
+    target_type.downcase.to_sym.l
+  rescue
+    ""
   end
 
   ##############################################################################
@@ -127,23 +129,23 @@ class Comment < AbstractModel
   ##############################################################################
 
   # Log creation of comment on object's RSS log if it can.
-  def log_create(target=self.target)
+  def log_create(target = self.target)
     if target && target.respond_to?(:log)
-      target.log(:log_comment_added, :summary => summary, :touch => true)
+      target.log(:log_comment_added, summary: summary, touch: true)
     end
   end
 
   # Log update of comment on object's RSS log if it can.
-  def log_update(target=self.target)
+  def log_update(target = self.target)
     if target && target.respond_to?(:log)
-      target.log(:log_comment_updated, :summary => summary, :touch => false)
+      target.log(:log_comment_updated, summary: summary, touch: false)
     end
   end
 
   # Log destruction of comment on object's RSS log if it can.
-  def log_destroy(target=self.target)
+  def log_destroy(target = self.target)
     if target && target.respond_to?(:log)
-      target.log(:log_comment_destroyed, :summary => summary, :touch => false)
+      target.log(:log_comment_destroyed, summary: summary, touch: false)
     end
   end
 
@@ -163,7 +165,7 @@ class Comment < AbstractModel
   #
   def notify_users
     if target = self.target
-      sender = self.user
+      sender = user
       recipients = []
 
       # Send to owner/authors if they want.
@@ -182,16 +184,16 @@ class Comment < AbstractModel
       end
 
       # Send to other people who have commented on this same object if they want.
-#     for other_comment in Comment.find(:all, :conditions => # Rails 3
-#       ['comments.target_type = ? AND comments.target_id = ? AND
-#        users.email_comments_response = TRUE',
-#       target.class.to_s, target.id], :include => 'user')
+      #     for other_comment in Comment.find(:all, :conditions => # Rails 3
+      #       ['comments.target_type = ? AND comments.target_id = ? AND
+      #        users.email_comments_response = TRUE',
+      #       target.class.to_s, target.id], :include => 'user')
 
       for other_comment in Comment.
-                             includes(:user).
-                             where("comments.target_type" => target.class.to_s,
-                                   "comments.target_id" => target.id,
-                                   "users.email_comments_response" => TRUE)
+                           includes(:user).
+                           where("comments.target_type" => target.class.to_s,
+                                 "comments.target_id" => target.id,
+                                 "users.email_comments_response" => TRUE)
         recipients.push(other_comment.user)
       end
 
@@ -221,38 +223,46 @@ class Comment < AbstractModel
   # the same comment.
   def oil_and_water
     user_ids = Comment.where(target_id: target_id, target_type: target_type).
-                       map {|c| c.user_id.to_i}.uniq.sort
+               map { |c| c.user_id.to_i }.uniq.sort
     water = (user_ids & MO.water_users).any?
     oil   = (user_ids & MO.oil_users).any?
     if water && oil
-      target   = target_type.camelize.constantize.safe_find(target_id) rescue nil
-      show_url = target.show_url rescue "(can't find object?!)"
+      target   = begin
+                   target_type.camelize.constantize.safe_find(target_id)
+                 rescue
+                   nil
+                 end
+      show_url = begin
+                   target.show_url
+                 rescue
+                   "(can't find object?!)"
+                 end
       logins   = User.where(id: user_ids).map(&:login)
       subject  = "Oil and water on #{target_type} ##{target_id}"
-      content  = "#{show_url}\n" +
-                 "All users: #{logins.join(", ")}\n\n" +
+      content  = "#{show_url}\n" \
+                 "All users: #{logins.join(", ")}\n\n" \
                  "User: #{user.login}\nSummary: #{summary}\n\n#{comment}"
       WebmasterEmail.build(MO.noreply_email_address, content, subject).deliver
     end
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_comment_user_missing.t)
     end
 
-    if self.summary.to_s.blank?
+    if summary.to_s.blank?
       errors.add(:summary, :validate_comment_summary_missing.t)
-    elsif self.summary.bytesize > 100
+    elsif summary.bytesize > 100
       errors.add(:summary, :validate_comment_summary_too_long.t)
     end
 
-    if self.target_type.to_s.bytesize > 30
+    if target_type.to_s.bytesize > 30
       errors.add(:target_type, :validate_comment_object_type_too_long.t)
     end
   end

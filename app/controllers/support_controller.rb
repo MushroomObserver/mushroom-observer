@@ -15,35 +15,31 @@ class SupportController < ApplicationController
     if is_in_admin_mode?
       @donation = Donation.new
       if request.method == "POST"
-        @donation.amount = params['donation']['amount']
-        @donation.who = params['donation']['who']
-        @donation.anonymous = params['donation']['anonymous']
-        @donation.email = params['donation']['email']
+        @donation.amount = params["donation"]["amount"]
+        @donation.who = params["donation"]["who"]
+        @donation.anonymous = params["donation"]["anonymous"]
+        @donation.email = params["donation"]["email"]
         users = User.where(email: @donation.email)
-        if users.length == 1
-          @donation.user = users[0]
-        end
+        @donation.user = users[0] if users.length == 1
         @donation.reviewed = true
         @donation.save
       end
     else
       flash_error(:create_donation_not_allowed.l)
-      redirect_to(:action => 'donate')
+      redirect_to(action: "donate")
     end
   end
 
   def confirm
     @donation = Donation.new
     if request.method == "POST"
-      amount = params['donation']['amount']
-      if amount == "other"
-        amount = params['donation']['other_amount']
-      end
+      amount = params["donation"]["amount"]
+      amount = params["donation"]["other_amount"] if amount == "other"
       @donation.user = @user
       @donation.amount = amount
-      @donation.who = params['donation']['who']
-      @donation.anonymous = params['donation']['anonymous']
-      @donation.email = params['donation']['email']
+      @donation.who = params["donation"]["who"]
+      @donation.anonymous = params["donation"]["anonymous"]
+      @donation.email = params["donation"]["email"]
       @donation.reviewed = false
       @donation.save
     end
@@ -52,11 +48,11 @@ class SupportController < ApplicationController
   def review_donations
     if is_in_admin_mode?
       if request.method == "POST"
-        params[:reviewed].each { |x,y|
+        params[:reviewed].each do |x, y|
           d = Donation.find(x)
           d.reviewed = y
           d.save
-        }
+        end
       end
       # @donations = Donation.find(:all, :order => "created_at DESC") # Rails 3
       @donations = Donation.all.order("created_at DESC")

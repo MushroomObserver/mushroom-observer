@@ -4,14 +4,13 @@ class SpecimenController < ApplicationController
     :list_specimens,
     :show_specimen,
     :herbarium_index,
-    :observation_index,
+    :observation_index
   ]
-
 
   # Display list of Specimens whose text matches a string pattern.
   def specimen_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (specimen = Specimen.safe_find(pattern))
       redirect_to(action: :show_specimen, id: specimen.id)
     else
@@ -21,11 +20,11 @@ class SpecimenController < ApplicationController
   end
 
   # Show selected list of specimens.
-  def show_selected_specimens(query, args={})
+  def show_selected_specimens(query, args = {})
     args = {
       action: :list_specimens,
-      letters: 'specimens.name',
-      num_per_page: 10,
+      letters: "specimens.name",
+      num_per_page: 10
     }.merge(args)
 
     @links ||= []
@@ -34,7 +33,7 @@ class SpecimenController < ApplicationController
     args[:sorting_links] = [
       ["name",        :sort_by_title.t],
       ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
+      ["updated_at",  :sort_by_updated_at.t]
     ]
 
     args[:letters] = "herbarium_label"
@@ -58,7 +57,7 @@ class SpecimenController < ApplicationController
     herbarium = Herbarium.find(params[:id].to_s)
     @specimens = herbarium ? herbarium.specimens : []
     @subject = herbarium.name
-    if !calc_specimen_index_redirect(@specimens)
+    unless calc_specimen_index_redirect(@specimens)
       flash_warning(:herbarium_index_no_specimens.t)
       redirect_to(controller: :herbarium, action: :show_herbarium,
                   id: params[:id].to_s)
@@ -81,7 +80,7 @@ class SpecimenController < ApplicationController
     observation = Observation.find(params[:id].to_s)
     @specimens = observation ? observation.specimens : []
     @subject = observation.format_name
-    if !calc_specimen_index_redirect(@specimens)
+    unless calc_specimen_index_redirect(@specimens)
       flash_warning(:observation_index_no_specimens.t)
       redirect_to(controller: :observer, action: :show_observation,
                   id: params[:id].to_s)
@@ -125,7 +124,7 @@ class SpecimenController < ApplicationController
     for s in Specimen.where(herbarium_label: herbarium_label)
       if s.herbarium.name == herbarium_name
         flash_error(:add_specimen_already_exists.strip_html(
-          name: herbarium_name, label: herbarium_label))
+                      name: herbarium_name, label: herbarium_label))
         return true
       end
     end
@@ -149,7 +148,7 @@ class SpecimenController < ApplicationController
     if result
       herbarium = Herbarium.new(herbarium_params(params))
       herbarium.personal_user = @user if herbarium.name ==
-        @user.personal_herbarium_name
+                                         @user.personal_herbarium_name
       herbarium.curators.push(@user)
       herbarium.save
     end
@@ -214,11 +213,11 @@ class SpecimenController < ApplicationController
   def label_free?(herbarium, new_label)
     result = herbarium.label_free?(new_label)
     flash_error(:edit_herbarium_duplicate_label.l(herbarium_label: new_label,
-      herbarium_name: herbarium.name)) if !result
+                                                  herbarium_name: herbarium.name)) unless result
     result
   end
 
-  def update_specimen(specimen, params)
+  def update_specimen(specimen, _params)
     specimen.attributes = whitelisted_specimen_params
     specimen.save
     redirect_to(action: :show_specimen, id: specimen.id)

@@ -1,16 +1,15 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class GeocoderTest < UnitTestCase
-
   def test_unknown_place_name
-    obj = Geocoder.new('Somewhere Out There')
+    obj = Geocoder.new("Somewhere Out There")
     assert(!obj.valid)
     assert_nil(obj.north)
   end
 
   def test_falmouth
-    obj = Geocoder.new('North Falmouth, Massachusetts, USA')
+    obj = Geocoder.new("North Falmouth, Massachusetts, USA")
     assert(obj.valid)
     assert(obj.north)
     assert(obj.south)

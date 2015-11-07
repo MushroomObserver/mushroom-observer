@@ -9,4 +9,4 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-MushroomObserver::Application.config.secret_token = '2ecb029922cf9addf58e0768eeb6813cc5abac3f875d3005d4a6b3e4d37c68692644b8cf16d4d0d70a4f0aba9e19c27265ac6a632d90cf885d045b6757c416bd'
+MushroomObserver::Application.config.secret_token = "2ecb029922cf9addf58e0768eeb6813cc5abac3f875d3005d4a6b3e4d37c68692644b8cf16d4d0d70a4f0aba9e19c27265ac6a632d90cf885d045b6757c416bd"

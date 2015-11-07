@@ -1,3 +1,3 @@
 #!/usr/local/bin/ruby
-require 'yaml'
+require "yaml"
 YAML.load_file(ARGV[0])

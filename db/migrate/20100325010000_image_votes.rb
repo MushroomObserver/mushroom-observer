@@ -16,7 +16,7 @@ class ImageVotes < ActiveRecord::Migration
   def self.down
     remove_column :images, :votes
     remove_column :images, :vote_cache
-    add_column :images, :quality, :enum, :limit => [:unreviewed, :low, :medium, :high], :default => :unreviewed, :null => false
+    add_column :images, :quality, :enum, limit: [:unreviewed, :low, :medium, :high], default: :unreviewed, null: false
     add_column :images, :reviewer_id, :integer
   end
 end

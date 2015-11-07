@@ -24,9 +24,10 @@ class Configuration
   def initialize
     @hash = {}
   end
+
   def method_missing(var, *vals)
     if var.to_s.match(/^(.*)=$/)
-      @hash[var.to_s.sub(/=$/,"")] = vals.first
+      @hash[var.to_s.sub(/=$/, "")] = vals.first
     else
       @hash[var.to_s]
     end
@@ -38,6 +39,7 @@ module MushroomObserver
     def self.config
       @@config ||= Configuration.new
     end
+
     def self.configure(&block)
       class_eval(&block)
     end
@@ -68,7 +70,7 @@ def image_servers
     if specs[:write]
       url = specs[:write]
       sizes = specs[:sizes] || map.keys
-      subdirs = sizes.map {|s| map[s]}.join(",")
+      subdirs = sizes.map { |s| map[s] }.join(",")
       results << [server.to_s, url, subdirs].join(";")
     end
   end
@@ -87,7 +89,7 @@ env = "development" if env.to_s == ""
 end
 
 # If run from command line, evaluate arguments and print results.
-if File.basename($0) == "config.rb"
-  print ARGV.map {|arg| eval(arg).to_s }.join("\n")
+if File.basename($PROGRAM_NAME) == "config.rb"
+  print ARGV.map { |arg| eval(arg).to_s }.join("\n")
   exit 0
 end

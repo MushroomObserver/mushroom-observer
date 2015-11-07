@@ -35,12 +35,10 @@ class Publication < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !user
+    unless user
       errors.add(:user, "missing user") # sign of internal error,
-                                        # should never happen
+      # should never happen
     end
-    if full.blank?
-      errors.add(:full, :validate_publication_ref_missing.t)
-    end
+    errors.add(:full, :validate_publication_ref_missing.t) if full.blank?
   end
 end

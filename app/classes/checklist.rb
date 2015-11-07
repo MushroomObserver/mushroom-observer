@@ -20,7 +20,6 @@
 ################################################################################
 
 class Checklist
-
   # Build list of species observed by entire site.
   class ForSite < Checklist
   end
@@ -29,12 +28,12 @@ class Checklist
   class ForUser < Checklist
     def initialize(user)
       @user = user
-      raise "Expected User instance, got #{user.inspect}." unless user.is_a?(User)
+      fail "Expected User instance, got #{user.inspect}." unless user.is_a?(User)
     end
 
     def query
       super(
-        conditions: [ "o.user_id = #{@user.id}" ]
+        conditions: ["o.user_id = #{@user.id}"]
       )
     end
   end
@@ -43,13 +42,13 @@ class Checklist
   class ForProject < Checklist
     def initialize(project)
       @project = project
-      raise "Expected Project instance, got #{project.inspect}." unless project.is_a?(Project)
+      fail "Expected Project instance, got #{project.inspect}." unless project.is_a?(Project)
     end
 
     def query
       super(
-        tables: [ 'observations_projects op' ],
-        conditions: [ 'op.observation_id = o.id', "op.project_id = #{@project.id}" ]
+        tables: ["observations_projects op"],
+        conditions: ["op.observation_id = o.id", "op.project_id = #{@project.id}"]
       )
     end
   end
@@ -58,45 +57,45 @@ class Checklist
   class ForSpeciesList < Checklist
     def initialize(list)
       @list = list
-      raise "Expected SpeciesList instance, got #{list.inspect}." unless list.is_a?(SpeciesList)
+      fail "Expected SpeciesList instance, got #{list.inspect}." unless list.is_a?(SpeciesList)
     end
 
     def query
       super(
-        tables: [ 'observations_species_lists os' ],
-        conditions: [ 'os.observation_id = o.id',
-                         "os.species_list_id = #{@list.id}" ]
+        tables: ["observations_species_lists os"],
+        conditions: ["os.observation_id = o.id",
+                     "os.species_list_id = #{@list.id}"]
       )
     end
   end
 
-################################################################################
+  ################################################################################
 
   def initialize
     @genera = @species = nil
   end
 
   def num_genera
-    calc_checklist if not @genera
-    return @genera.length
+    calc_checklist unless @genera
+    @genera.length
   end
 
   def num_species
-    calc_checklist if not @species
-    return @species.length
+    calc_checklist unless @species
+    @species.length
   end
 
   def genera
-    calc_checklist if not @genera
-    return @genera.values.sort
+    calc_checklist unless @genera
+    @genera.values.sort
   end
 
   def species
-    calc_checklist if not @species
-    return @species.values.sort
+    calc_checklist unless @species
+    @species.values.sort
   end
 
-private
+  private
 
   def calc_checklist
     @genera = {}
@@ -108,7 +107,7 @@ private
   def count_nonsynonyms_and_gather_synonyms
     synonyms = {}
     for text_name, syn_id, deprecated in Name.connection.select_rows(query)
-      if syn_id and deprecated == 1
+      if syn_id && deprecated == 1
         # wait until we find an accepted synonym
         text_name = synonyms[syn_id] ||= nil
       elsif syn_id
@@ -119,7 +118,7 @@ private
         count_species(text_name)
       end
     end
-    return synonyms
+    synonyms
   end
 
   def count_synonyms(synonyms)
@@ -136,7 +135,7 @@ private
 
   def count_species(text_name)
     unless text_name.blank?
-      g, s = text_name.split(' ', 3)
+      g, s = text_name.split(" ", 3)
       @genera[g] = g
       @species[[g, s]] = "#{g} #{s}"
     end
@@ -146,21 +145,21 @@ private
     Name.ranks.values_at(:Species, :Subspecies, :Variety, :Form).join(", ")
   end
 
-  def query(args={})
+  def query(args = {})
     tables = [
-      'names n',
-      'observations o',
+      "names n",
+      "observations o"
     ]
     conditions = [
-      'n.id = o.name_id',
-      "n.rank IN (#{ranks_to_consider})",
+      "n.id = o.name_id",
+      "n.rank IN (#{ranks_to_consider})"
     ]
     tables += args[:tables] || []
     conditions += args[:conditions] || []
-    return %(
+    %(
       SELECT n.text_name, n.synonym_id, n.deprecated
-      FROM #{tables.join(', ')}
-      WHERE (#{conditions.join(') AND (')})
+      FROM #{tables.join(", ")}
+      WHERE (#{conditions.join(") AND (")})
     )
   end
 end

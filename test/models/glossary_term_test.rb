@@ -1,21 +1,21 @@
-require 'test_helper'
+require "test_helper"
 
 class GlossaryTermTest < UnitTestCase
   def test_glossary_term_load
     glossary_term = glossary_terms(:conic_glossary_term)
     assert(glossary_term)
   end
-  
+
   def test_text_name
     glossary_term = glossary_terms(:conic_glossary_term)
     assert_equal(glossary_term.text_name, glossary_term.name)
   end
-  
+
   def test_format_name
     glossary_term = glossary_terms(:conic_glossary_term)
     assert_equal(glossary_term.format_name, glossary_term.name)
   end
-  
+
   def test_add_image_nil
     glossary_term = glossary_terms(:conic_glossary_term)
     image = glossary_term.thumb_image
@@ -26,7 +26,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(image, glossary_term.thumb_image)
     assert_equal(images, glossary_term.images)
   end
-  
+
   def test_add_image_additional
     glossary_term = glossary_terms(:conic_glossary_term)
     image = glossary_term.thumb_image
@@ -39,7 +39,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(1, glossary_term.images.length - images_length)
     assert(glossary_term.images.member?(additional_image))
   end
-  
+
   def test_add_image_first
     glossary_term = glossary_terms(:convex_glossary_term)
     assert_nil(glossary_term.thumb_image)
@@ -50,7 +50,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(first_image, glossary_term.thumb_image)
     assert_equal(0, glossary_term.images.length)
   end
-  
+
   def test_add_image_second
     glossary_term = glossary_terms(:conic_glossary_term)
     thumb = glossary_term.thumb_image
@@ -69,7 +69,7 @@ class GlossaryTermTest < UnitTestCase
     glossary_term = glossary_terms(:convex_glossary_term)
     assert(glossary_term.has_rss_log?)
   end
-  
+
   def test_remove_image_thumb
     glossary_term = glossary_terms(:plane_glossary_term)
     thumb = glossary_term.thumb_image
@@ -83,7 +83,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(next_thumb, glossary_term.thumb_image)
     assert_equal(images_length - 1, glossary_term.images.length)
   end
-  
+
   def test_remove_image_non_thumb
     glossary_term = glossary_terms(:plane_glossary_term)
     thumb = glossary_term.thumb_image
@@ -96,7 +96,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(thumb, glossary_term.thumb_image)
     assert_equal(images_length - 1, glossary_term.images.length)
   end
-  
+
   def test_remove_image_nil
     glossary_term = glossary_terms(:plane_glossary_term)
     thumb = glossary_term.thumb_image
@@ -107,7 +107,7 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(thumb, glossary_term.thumb_image)
     assert_equal(images_length, glossary_term.images.length)
   end
-  
+
   def test_remove_image_other
     glossary_term = glossary_terms(:plane_glossary_term)
     thumb = glossary_term.thumb_image
@@ -118,8 +118,8 @@ class GlossaryTermTest < UnitTestCase
     assert_equal(thumb, glossary_term.thumb_image)
     assert_equal(images_length, glossary_term.images.length)
   end
-  
-    # Remove an image from images
-    # Remove nil
-    # Remove an image that is not associated with this glossary_term
+
+  # Remove an image from images
+  # Remove nil
+  # Remove an image that is not associated with this glossary_term
 end

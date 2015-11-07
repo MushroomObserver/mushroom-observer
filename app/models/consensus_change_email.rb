@@ -16,9 +16,9 @@ class ConsensusChangeEmail < AccountMailer
 
   def consensus_change_title(observation, old_name, new_name)
     :email_subject_consensus_change.l(
-       id: observation.id,
-       old: (old_name ? old_name.real_search_name : "none"),
-       new: (new_name ? new_name.real_search_name : "none")
+      id: observation.id,
+      old: (old_name ? old_name.real_search_name : "none"),
+      new: (new_name ? new_name.real_search_name : "none")
     )
   end
 end

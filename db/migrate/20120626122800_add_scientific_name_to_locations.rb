@@ -2,10 +2,10 @@
 
 class AddScientificNameToLocations < ActiveRecord::Migration
   def self.up
-    add_column(:locations, :scientific_name, :string, :limit => 1024)
-    add_column(:locations_versions, :scientific_name, :string, :limit => 1024)
-    fill_in_scientific_names('locations')
-    fill_in_scientific_names('locations_versions')
+    add_column(:locations, :scientific_name, :string, limit: 1024)
+    add_column(:locations_versions, :scientific_name, :string, limit: 1024)
+    fill_in_scientific_names("locations")
+    fill_in_scientific_names("locations_versions")
   end
 
   def self.down
@@ -18,9 +18,9 @@ class AddScientificNameToLocations < ActiveRecord::Migration
     for id, name in Location.connection.select_rows %(
       SELECT id, name FROM #{table}
     )
-      data[id.to_i-1] = Location.reverse_name(name)
+      data[id.to_i - 1] = Location.reverse_name(name)
     end
-    vals = data.map {|v| Location.connection.quote(v.to_s)}.join(',')
+    vals = data.map { |v| Location.connection.quote(v.to_s) }.join(",")
     Name.connection.update %(
       UPDATE #{table} SET scientific_name = ELT(id, #{vals})
     )

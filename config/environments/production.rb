@@ -48,16 +48,16 @@ MushroomObserver::Application.configure do
   # Serve new images locally until transferred to image server
   config.local_image_files = "#{config.root}/public/images"
   config.image_sources = {
-      local: {
-          test: "file://#{config.local_image_files}",
-          read: "/local_images",
-      },
-      cdmr: {
-          test: :transferred_flag,
-          read: "/images",
-          # Safer to keep this disabled until truly going live.
-          # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
-      }
+    local: {
+      test: "file://#{config.local_image_files}",
+      read: "/local_images"
+    },
+    cdmr: {
+      test: :transferred_flag,
+      read: "/images",
+      # Safer to keep this disabled until truly going live.
+      # :write => "ssh://cdmr@digitalmycology.com:images.digitalmycology.com"
+    }
     # For use when testing live server in parallel with production server.
     # :mo = {
     #   :test  => "http://mushroomobserver.org/local_images",
@@ -67,12 +67,12 @@ MushroomObserver::Application.configure do
     # }
   }
   config.image_precedence = {
-      default: [:cdmr, :local]
+    default: [:cdmr, :local]
     # For use when testing live server in parallel with production server.
     # :default   => [:cdmr, :local, :mo]
   }
   config.image_fallback_source = :cdmr
-  config.keep_these_image_sizes_local = [ :thumbnail, :small ]
+  config.keep_these_image_sizes_local = [:thumbnail, :small]
 
   config.robots_dot_text_file = "#{config.root}/public/robots.txt"
 
@@ -160,12 +160,12 @@ MushroomObserver::Application.configure do
     translations.js
     vote_popup.js
 
-    Admin.css      
-    Agaricus.css   
-    Amanita.css    
-    BlackOnWhite.css      
-    Cantharellaceae.css   
-    Hygrocybe.css         
+    Admin.css
+    Agaricus.css
+    Amanita.css
+    BlackOnWhite.css
+    Cantharellaceae.css
+    Hygrocybe.css
 
   ) if config.assets && config.assets.precompile
 

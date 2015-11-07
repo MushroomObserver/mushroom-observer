@@ -5,7 +5,7 @@
 #  This model is used to group Names that have been synonymized.  All it does
 #  is own two or more Names.  That's it.  Couldn't be easier.  Actually it's a
 #  real mess, but all the complexity of merging synonyms, etc. is dealt with in
-#  Name. 
+#  Name.
 #
 #  *NOTE*: I have tweaked the code so that this class should _never_ be
 #  instantiated.  Ever.  At all.  Really.  Well okay, except when creating it.

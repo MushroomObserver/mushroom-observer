@@ -1,7 +1,7 @@
 <%
   logged_in = !@user.nil? && @user.verified
   consensus = observation.consensus_naming
-  any_names = observation.namings && observation.namings.length > 0
+  any_names = observation.namings && observation.namings.count > 0
 %>
 
 <!--TABLE OF NAMES FOR WIDE SCREEN-->
@@ -48,7 +48,7 @@
                                   { data: { role: "open_popup",
                                             id: naming.id } }
                   ) if naming.votes.any? %>
-              <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
+              <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.count})" %>
             </td>
             <td>
               <% if logged_in %>
@@ -164,7 +164,7 @@
                                                   id: naming.id },
                                                 { data: { role: "open_popup",
                                                           id: naming.id } }) if naming.votes.any? %>
-                    <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.length})" %>
+                    <%= "(#{naming.votes.any? == 0 ? :show_namings_no_votes.t : naming.votes.count})" %>
                   </div>
                   <div class="col-xs-6">
                     <% if logged_in %>
@@ -243,7 +243,7 @@
 
 <!--VOTE POPUPS-->
 <div class="row">
-  <% observation.namings.select { |naming| naming.votes.length > 0 }.each do |naming|
+  <% observation.namings.select { |naming| naming.votes.count > 0 }.each do |naming|
     @naming = naming %>
     <div class="popup" id="show_votes_<%= naming.id %>" data-role="popup">
       <div class="popup-frame" id="show_votes_<%= naming.id %>_frame">

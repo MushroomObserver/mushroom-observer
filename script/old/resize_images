@@ -13,43 +13,43 @@
 #  and reads this back in each time it runs so it knows where it left off.  It
 #  processes the images in completely random order until they are all done, in
 #  which case it does nothing.  Look at the log to get a list of images that
-#  failed -- they are marked with leading "#" marks. 
+#  failed -- they are marked with leading "#" marks.
 #
 ################################################################################
 
-ORIG = File.expand_path('../../public/images/orig', __FILE__)
-DONE = File.expand_path('../../log/resize_image.log', __FILE__)
+ORIG = File.expand_path("../../public/images/orig", __FILE__)
+DONE = File.expand_path("../../log/resize_image.log", __FILE__)
 
 limit = ARGV[0].to_i
 limit = 5 if limit == 0
 
-if !File.exists?(DONE)
-  File.open(DONE, "w") do |file|
+unless File.exist?(DONE)
+  File.open(DONE, "w") do |_file|
   end
 end
 
 done = {}
 File.open(DONE) do |file|
   file.each_line do |line|
-    done[line.strip.sub(/^#/, '')] = true
+    done[line.strip.sub(/^#/, "")] = true
   end
 end
 
 num = 0
 Dir.foreach(ORIG) do |file|
-  if file.match(/(\d+)\.jpg/) && !done[id = $1]
+  if file.match(/(\d+)\.jpg/) && !done[id = Regexp.last_match(1)]
     file = "#{ORIG}/#{file}"
-    file2 = file.sub('orig', '640')
-    file3 = file.sub('orig', 'thumb')
+    file2 = file.sub("orig", "640")
+    file3 = file.sub("orig", "thumb")
     # if system("convert -thumbnail '640x640>' -quality 70 #{file} #{file2}") and
     #    system("convert -thumbnail '160x160>' -quality 90 #{file} #{file3}")
     if system("jpegresize 640x640 -q 70 --max-size #{file} #{file2}") and
        system("jpegresize 160x160 -q 90 --max-size #{file} #{file3}")
-      File.open(DONE, 'a') do |log|
+      File.open(DONE, "a") do |log|
         log.puts id
       end
     else
-      File.open(DONE, 'a') do |log|
+      File.open(DONE, "a") do |log|
         log.puts '#' + id.to_s
       end
     end

@@ -38,7 +38,7 @@ class SpecimenControllerTest < FunctionalTestCase
 
   def test_observation_index
     get_with_dump(:observation_index,
-      id: observations(:coprinus_comatus_obs).id)
+                  id: observations(:coprinus_comatus_obs).id)
     assert_specimen_index
   end
 
@@ -66,14 +66,14 @@ class SpecimenControllerTest < FunctionalTestCase
   end
 
   def add_specimen_params
-    return {
+    {
       id: observations(:strobilurus_diminutivus_obs).id,
       specimen: {
         herbarium_name: rolf.preferred_herbarium_name,
         herbarium_label: "Strobilurus diminutivus det. Rolf Singer - NYBG 1234567",
-        'when(1i)'      => "2012",
-        'when(2i)'      => "11",
-        'when(3i)'      => "26",
+        "when(1i)"      => "2012",
+        "when(2i)"      => "11",
+        "when(3i)"      => "26",
         notes: "Some notes about this specimen"
       }
     }
@@ -91,9 +91,9 @@ class SpecimenControllerTest < FunctionalTestCase
     specimen = Specimen.all.order("created_at DESC")[0]
     assert_equal(params[:specimen][:herbarium_name], specimen.herbarium.name)
     assert_equal(params[:specimen][:herbarium_label], specimen.herbarium_label)
-    assert_equal(params[:specimen]['when(1i)'].to_i, specimen.when.year)
-    assert_equal(params[:specimen]['when(2i)'].to_i, specimen.when.month)
-    assert_equal(params[:specimen]['when(3i)'].to_i, specimen.when.day)
+    assert_equal(params[:specimen]["when(1i)"].to_i, specimen.when.year)
+    assert_equal(params[:specimen]["when(2i)"].to_i, specimen.when.month)
+    assert_equal(params[:specimen]["when(3i)"].to_i, specimen.when.day)
     assert_equal(rolf, specimen.user)
     obs = Observation.find(params[:id])
     assert(obs.specimen)
@@ -108,7 +108,7 @@ class SpecimenControllerTest < FunctionalTestCase
     params[:specimen][:herbarium_name] = mary.preferred_herbarium_name
     post(:add_specimen, params)
     mary = User.find(mary.id) # Reload user
-    assert_equal(herbarium_count+1, mary.curated_herbaria.count)
+    assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
     # herbarium = Herbarium.find(:all, order: "created_at DESC")[0] # Rails 3
     herbarium = Herbarium.all.order("created_at DESC")[0]
     assert(herbarium.curators.member?(mary))
@@ -178,9 +178,9 @@ class SpecimenControllerTest < FunctionalTestCase
     assert_equal(herbarium, specimen.herbarium)
     assert_equal(user, specimen.user)
     assert_equal(params[:specimen][:herbarium_label], specimen.herbarium_label)
-    assert_equal(params[:specimen]['when(1i)'].to_i, specimen.when.year)
-    assert_equal(params[:specimen]['when(2i)'].to_i, specimen.when.month)
-    assert_equal(params[:specimen]['when(3i)'].to_i, specimen.when.day)
+    assert_equal(params[:specimen]["when(1i)"].to_i, specimen.when.year)
+    assert_equal(params[:specimen]["when(2i)"].to_i, specimen.when.month)
+    assert_equal(params[:specimen]["when(3i)"].to_i, specimen.when.day)
     assert_equal(params[:specimen][:notes], specimen.notes)
     assert_equal(nybg.user, specimen.user)
     assert_response(:redirect)
@@ -199,11 +199,11 @@ class SpecimenControllerTest < FunctionalTestCase
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
     observations = specimen.observations
-    obs_spec_count = observations.map {|o| o.specimens.count }.reduce {|a,b| a+b}
+    obs_spec_count = observations.map { |o| o.specimens.count }.reduce { |a, b| a + b }
     post(:delete_specimen, params)
-    assert_equal(specimen_count-1, Specimen.count)
-    observations.map {|o| o.reload }
-    assert_true(obs_spec_count > observations.map {|o| o.specimens.count }.reduce {|a,b| a+b})
+    assert_equal(specimen_count - 1, Specimen.count)
+    observations.map(&:reload)
+    assert_true(obs_spec_count > observations.map { |o| o.specimens.count }.reduce { |a, b| a + b })
     assert_response(:redirect)
   end
 
@@ -213,7 +213,7 @@ class SpecimenControllerTest < FunctionalTestCase
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
     observations = specimen.observations
-    obs_spec_count = observations.map {|o| o.specimens.count }.reduce {|a,b| a+b}
+    obs_spec_count = observations.map { |o| o.specimens.count }.reduce { |a, b| a + b }
     post(:delete_specimen, params)
     assert_equal(specimen_count, Specimen.count)
     assert_response(:redirect)
@@ -225,9 +225,9 @@ class SpecimenControllerTest < FunctionalTestCase
     specimen_count = Specimen.count
     specimen = Specimen.find(params[:id])
     observations = specimen.observations
-    obs_spec_count = observations.map {|o| o.specimens.count }.reduce {|a,b| a+b}
+    obs_spec_count = observations.map { |o| o.specimens.count }.reduce { |a, b| a + b }
     post(:delete_specimen, params)
-    assert_equal(specimen_count-1, Specimen.count)
+    assert_equal(specimen_count - 1, Specimen.count)
     assert_response(:redirect)
   end
 

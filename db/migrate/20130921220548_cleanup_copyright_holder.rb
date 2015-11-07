@@ -10,8 +10,8 @@ class CleanupCopyrightHolder < ActiveRecord::Migration
     )
       fix_copyright_holder(current, preferred)
     end
-    fix_copyright_holder('debbie viess', 'Debbie Viess')
-    fix_copyright_holder('Johann Harnisch', 'Johannes Harnisch')
+    fix_copyright_holder("debbie viess", "Debbie Viess")
+    fix_copyright_holder("Johann Harnisch", "Johannes Harnisch")
   end
 
   def self.fix_copyright_holder(current, preferred)

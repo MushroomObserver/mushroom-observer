@@ -15,7 +15,7 @@ class API
     end
 
     def put
-      raise NoMethodForAction.new(:put, model_tag)
+      fail NoMethodForAction.new(:put, model_tag)
       # must_authenticate!
       # self.query = build_query
       # setter = build_setter
@@ -31,7 +31,7 @@ class API
     end
 
     def delete
-      raise NoMethodForAction.new(:delete, model_tag)
+      fail NoMethodForAction.new(:delete, model_tag)
       # must_authenticate!
       # self.query = build_query
       # deleter = build_deleter
@@ -49,7 +49,7 @@ class API
     def build_query
       params = query_params
       params.remove_nils!
-      params.merge!(:by => :id)
+      params.merge!(by: :id)
       Query.lookup(model.name.to_sym, :all, params)
     rescue RuntimeError => e
       raise QueryError.new(e)
@@ -60,15 +60,15 @@ class API
       validate_create_params!(params)
       done_parsing_parameters!
       obj = model.new(params)
-      obj.save or raise CreateFailed.new(obj)
+      obj.save || fail(CreateFailed.new(obj))
       after_create(obj) if respond_to? :after_create
-      return obj
+      obj
     end
 
     def build_setter
       params = update_params
       params.remove_nils!
-      raise MissingSetParameters.new if params.empty?
+      fail MissingSetParameters.new if params.empty?
       lambda do |obj|
         must_have_edit_permission!(obj)
         obj.update!(params)
@@ -78,24 +78,24 @@ class API
     def build_deleter
       lambda do |obj|
         must_have_edit_permission!(obj)
-        obj.destroy or raise DestroyFailed.new(obj)
+        obj.destroy || fail(DestroyFailed.new(obj))
       end
     end
 
     def must_have_read_permission!(obj)
-      if obj.respond_to?(:is_reader?) and
+      if obj.respond_to?(:is_reader?) &&
          !obj.is_reader?(user)
-        raise MustHaveViewPermission.new(obj)
+        fail MustHaveViewPermission.new(obj)
       end
     end
 
     def must_have_edit_permission!(obj)
-      if obj.respond_to?(:user_id) and
+      if obj.respond_to?(:user_id) &&
          user.id == obj.user_id
-      elsif obj.respond_to?(:has_edit_permission?) and
+      elsif obj.respond_to?(:has_edit_permission?) &&
             obj.has_edit_permission?(user)
       else
-        raise MustHaveEditPermission.new(obj)
+        fail MustHaveEditPermission.new(obj)
       end
     end
 
@@ -110,14 +110,14 @@ class API
       if ids = parse_integer_ranges(:id)
         result = ids.map do |term|
           if term.is_a?(Range)
-            "#{model.table_name}.id >= #{term.begin} AND " +
+            "#{model.table_name}.id >= #{term.begin} AND " \
             "#{model.table_name}.id <= #{term.end}"
           else
             "#{model.table_name}.id = #{term}"
           end
         end.join(" OR ")
       end
-      return result
+      result
     end
   end
 end

@@ -49,14 +49,14 @@ class SpeciesListController < ApplicationController
     :species_list_search,
     :species_lists_by_title,
     :species_lists_by_user,
-    :species_lists_for_project,
+    :species_lists_for_project
   ]
 
   before_filter :disable_link_prefetching, except: [
     :create_species_list,
     :edit_species_list,
     :manage_species_lists,
-    :show_species_list,
+    :show_species_list
   ]
 
   before_filter :require_successful_user, only: [
@@ -73,7 +73,7 @@ class SpeciesListController < ApplicationController
   def index_species_list # :nologin: :norobots:
     query = find_or_create_query(:SpeciesList, by: params[:by])
     show_selected_species_lists(query, id: params[:id].to_s,
-                                always_index: true)
+                                       always_index: true)
   end
 
   # Display list of all species_lists, sorted by date.  (Linked from left panel.)
@@ -94,7 +94,7 @@ class SpeciesListController < ApplicationController
   def species_lists_for_project
     if project = find_or_goto_index(Project, params[:id].to_s)
       query = create_query(:SpeciesList, :for_project, project: project)
-      show_selected_species_lists(query, {always_index: 1})
+      show_selected_species_lists(query, always_index: 1)
     end
   end
 
@@ -107,7 +107,7 @@ class SpeciesListController < ApplicationController
   # Display list of SpeciesList's whose title, notes, etc. matches a string pattern.
   def species_list_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) and
+    if pattern.match(/^\d+$/) &&
        (spl = SpeciesList.safe_find(pattern))
       redirect_to(action: "show_species_list", id: spl.id)
     else
@@ -117,13 +117,13 @@ class SpeciesListController < ApplicationController
   end
 
   # Show selected list of species_lists.
-  def show_selected_species_lists(query, args={})
+  def show_selected_species_lists(query, args = {})
     @links ||= []
     args = {
       action: :list_species_lists,
       num_per_page: 20,
       include: [:location, :user],
-      letters: 'species_lists.title'
+      letters: "species_lists.title"
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -133,16 +133,16 @@ class SpeciesListController < ApplicationController
       ["user",        :sort_by_user.t],
       ["created_at",  :sort_by_created_at.t],
       [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-                      :sort_by_updated_at.t],
+       :sort_by_updated_at.t]
     ]
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") or
+    if (query.params[:by] == "user") ||
        (query.params[:by] == "reverse_user")
-      args[:letters] = 'users.login'
+      args[:letters] = "users.login"
     # Can always paginate by title letter.
     else
-      args[:letters] = 'species_lists.title'
+      args[:letters] = "species_lists.title"
     end
 
     show_index_of_objects(query, args)
@@ -161,11 +161,11 @@ class SpeciesListController < ApplicationController
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       @canonical_url = "#{MO.http_domain}/species_list/show_species_list/#{@species_list.id}"
       @query = create_query(:Observation, :in_species_list, by: :name,
-                            species_list: @species_list)
-      store_query_in_session(@query) if !params[:set_source].blank?
-      @query.need_letters = 'names.sort_name'
+                                                            species_list: @species_list)
+      store_query_in_session(@query) unless params[:set_source].blank?
+      @query.need_letters = "names.sort_name"
       @pages = paginate_letters(:letter, :page, 100)
-      @objects = @query.paginate(@pages, include: [:user, :name, :location, {thumb_image: :image_votes}])
+      @objects = @query.paginate(@pages, include: [:user, :name, :location, { thumb_image: :image_votes }])
     end
   end
 
@@ -206,53 +206,53 @@ class SpeciesListController < ApplicationController
     end
   end
 
-  def render_name_list_as_txt(names, charset=nil)
-    charset ||= 'UTF-8'
+  def render_name_list_as_txt(names, charset = nil)
+    charset ||= "UTF-8"
     charset = charset.upcase
-    if !["ASCII", 'ISO-8859-1', 'UTF-8'].include?(charset)
-      raise "Unsupported text report charset: #{charset}"
+    unless ["ASCII", "ISO-8859-1", "UTF-8"].include?(charset)
+      fail "Unsupported text report charset: #{charset}"
     end
     str = names.map(&:real_search_name).join("\r\n")
     str = case charset
-      when "ASCII"; str.to_ascii
-      when 'UTF-8'; "\xEF\xBB\xBF" + str
-      else str.iconv(charset)
+          when "ASCII" then str.to_ascii
+          when "UTF-8" then "\xEF\xBB\xBF" + str
+          else str.iconv(charset)
     end
     send_data(str,
-      type: 'text/plain',
-      charset: charset,
-      disposition: "attachment",
-      filename: 'report.txt'
-    )
+              type: "text/plain",
+              charset: charset,
+              disposition: "attachment",
+              filename: "report.txt"
+             )
   end
 
-  def render_name_list_as_csv(names, charset=nil)
+  def render_name_list_as_csv(names, charset = nil)
     charset ||= "ISO-8859-1"
     charset = charset.upcase
-    if !["ASCII", "ISO-8859-1"].include?(charset)
-      raise "Unsupported CSV report charset: #{charset}"
+    unless ["ASCII", "ISO-8859-1"].include?(charset)
+      fail "Unsupported CSV report charset: #{charset}"
     end
     str = CSV.generate do |csv|
       csv << %w(scientific_name authority citation accepted)
       names.each do |name|
         csv << [name.real_text_name, name.author, name.citation,
-                  name.deprecated ? "" : "1"].map {|v| v.blank? ? nil : v}
+                name.deprecated ? "" : "1"].map { |v| v.blank? ? nil : v }
       end
     end
     str = case charset
-      when "UTF-8"; str
-      when "ASCII"; str.to_ascii
-      else
-        str.force_encoding("UTF-8")
-        str.iconv(charset)
+          when "UTF-8" then str
+          when "ASCII" then str.to_ascii
+          else
+            str.force_encoding("UTF-8")
+            str.iconv(charset)
     end
     send_data(str,
-      type: "text/csv",
-      charset: charset,
-      header: "present",
-      disposition: "attachment",
-      filename: "report.csv"
-    )
+              type: "text/csv",
+              charset: charset,
+              header: "present",
+              disposition: "attachment",
+              filename: "report.csv"
+             )
   end
 
   def render_name_list_as_rtf(names)
@@ -270,15 +270,15 @@ class SpeciesListController < ApplicationController
         node = node.italic
       end
       node << text_name
-      doc << " " + author if !author.blank?
+      doc << " " + author unless author.blank?
       doc.line_break
     end
     send_data(doc.to_rtf,
-      type: 'text/rtf',
-      charset: 'ISO-8859-1',
-      disposition: "attachment",
-      filename: 'report.rtf'
-    )
+              type: "text/rtf",
+              charset: "ISO-8859-1",
+              disposition: "attachment",
+              filename: "report.rtf"
+             )
   end
 
   ################################################################################
@@ -291,29 +291,29 @@ class SpeciesListController < ApplicationController
   # Links into create_species_list.
   def name_lister # :nologin: :norobots:
     # Names are passed in as string, one name per line.
-    @name_strings = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
+    @name_strings = (params[:results] || "").chomp.split("\n").map { |n| n.to_s.chomp }
     if request.method == "POST"
       # (make this an instance var to give unit test access)
       @names = @name_strings.map do |str|
         str.sub!(/\*$/, "")
-        name, author = str.split('|')
-        name.gsub!("ë", "e")
+        name, author = str.split("|")
+        name.tr!("ë", "e")
         if author
           Name.find_by_text_name_and_author(name, author)
         else
           Name.find_by_text_name(name)
         end
-      end.select {|n| !n.nil?}
+      end.select { |n| !n.nil? }
       case params[:commit]
       when :name_lister_submit_spl.l
         if @user
           @species_list = SpeciesList.new
           clear_query_in_session
-          init_name_vars_for_create()
-          init_member_vars_for_create()
-          init_project_vars_for_create()
+          init_name_vars_for_create
+          init_member_vars_for_create
+          init_project_vars_for_create
           @checklist ||= []
-          @list_members = params[:results].gsub('|',' ').gsub('*',"")
+          @list_members = params[:results].tr("|", " ").delete("*")
           render(action: "create_species_list")
         end
       when :name_lister_submit_txt.l
@@ -331,12 +331,10 @@ class SpeciesListController < ApplicationController
   def create_species_list # :prefetch: :norobots:
     @species_list = SpeciesList.new
     if request.method != "POST"
-      init_name_vars_for_create()
-      init_member_vars_for_create()
-      init_project_vars_for_create()
-      if !params[:clone].blank?
-        init_name_vars_for_clone(params[:clone])
-      end
+      init_name_vars_for_create
+      init_member_vars_for_create
+      init_project_vars_for_create
+      init_name_vars_for_clone(params[:clone]) unless params[:clone].blank?
       @checklist ||= calc_checklist
     else
       process_species_list(:create)
@@ -365,7 +363,7 @@ class SpeciesListController < ApplicationController
         redirect_to(action: "show_species_list", id: @species_list)
       elsif request.method != "POST"
         query = create_query(:Observation, :in_species_list, by: :name,
-                             species_list: @species_list)
+                                                             species_list: @species_list)
         @observation_list = query.results
       else
         sorter = NameSorter.new
@@ -405,7 +403,7 @@ class SpeciesListController < ApplicationController
         if check_permission!(species_list)
           species_list.remove_observation(observation)
           flash_notice(:runtime_species_list_remove_observation_success.t(
-            name: species_list.unique_format_name, id: observation.id))
+                         name: species_list.unique_format_name, id: observation.id))
           redirect_to(action: "manage_species_lists", id: observation.id)
         else
           redirect_to(action: "show_species_list", id: species_list.id)
@@ -421,7 +419,7 @@ class SpeciesListController < ApplicationController
         if check_permission!(species_list)
           species_list.add_observation(observation)
           flash_notice(:runtime_species_list_add_observation_success.t(
-            name: species_list.unique_format_name, id: observation.id))
+                         name: species_list.unique_format_name, id: observation.id))
           redirect_to(action: "manage_species_lists", id: observation.id)
         end
       end
@@ -432,14 +430,18 @@ class SpeciesListController < ApplicationController
   def bulk_editor # :norobots:
     if @species_list = find_or_goto_index(SpeciesList, params[:id].to_s)
       @query = create_query(:Observation, :in_species_list, by: :id, species_list: @species_list,
-                            where: "observations.user_id = #{@user.id}")
+                                                            where: "observations.user_id = #{@user.id}")
       @pages = paginate_numbers(:page, 100)
       @observations = @query.paginate(@pages, include: [:comments, :images, :location, namings: :votes])
       @observation = {}
       @votes = {}
       for obs in @observations
         @observation[obs.id] = obs
-        vote = obs.consensus_naming.users_vote(@user) rescue nil
+        vote = begin
+                 obs.consensus_naming.users_vote(@user)
+               rescue
+                 nil
+               end
         @votes[obs.id] = vote || Vote.new
       end
       @no_vote = Vote.new
@@ -451,10 +453,18 @@ class SpeciesListController < ApplicationController
         updates = 0
         stay_on_page = false
         for obs in @observations
-          args = params[:observation][obs.id.to_s] || {} rescue {}
+          args = begin
+                   params[:observation][obs.id.to_s] || {}
+                 rescue
+                   {}
+                 end
           any_changes = false
-          old_vote = @votes[obs.id].value rescue 0
-          if !args[:value].nil? and args[:value].to_s != old_vote.to_s
+          old_vote = begin
+                       @votes[obs.id].value
+                     rescue
+                       0
+                     end
+          if !args[:value].nil? && args[:value].to_s != old_vote.to_s
             if obs.namings.empty?
               obs.namings.create!(user: @user, name_id: obs.name_id)
             end
@@ -468,7 +478,7 @@ class SpeciesListController < ApplicationController
           end
           for method in [:when_str, :place_name, :notes, :lat, :long, :alt,
                          :is_collection_location, :specimen]
-            if !args[method].nil?
+            unless args[method].nil?
               old_val = obs.send(method)
               old_val = old_val.to_s if [:lat, :long, :alt].member?(method)
               new_val = args[method]
@@ -490,7 +500,7 @@ class SpeciesListController < ApplicationController
             end
           end
         end
-        if !stay_on_page
+        unless stay_on_page
           if updates == 0
             flash_warning(:runtime_no_changes.t)
           else
@@ -508,7 +518,7 @@ class SpeciesListController < ApplicationController
 
   def manage_projects # :norobots:
     if @list = find_or_goto_index(SpeciesList, params[:id].to_s)
-      if not check_permission!(@list)
+      if !check_permission!(@list)
         redirect_to(action: "show_species_list", id: @list.id)
       else
         @projects = projects_to_manage
@@ -541,14 +551,14 @@ class SpeciesListController < ApplicationController
       projects += @list.projects
       projects.uniq!
     end
-    return projects
+    projects
   end
 
   def manage_object_states
     {
       list: !params[:objects_list].blank?,
       obs:  !params[:objects_obs].blank?,
-      img:  !params[:objects_img].blank?,
+      img:  !params[:objects_img].blank?
     }
   end
 
@@ -557,14 +567,14 @@ class SpeciesListController < ApplicationController
     for proj in @projects
       states[proj.id] = !params["projects_#{proj.id}"].blank?
     end
-    return states
+    states
   end
 
   def attach_objects_to_projects
     @any_changes = false
     for proj in @projects
       if @project_states[proj.id]
-        if not @user.projects_member.include?(proj)
+        if !@user.projects_member.include?(proj)
           flash_error(:species_list_projects_no_add_to_project.t(proj: proj.title))
         else
           attach_species_list_to_project(proj) if @object_states[:list]
@@ -573,7 +583,7 @@ class SpeciesListController < ApplicationController
         end
       end
     end
-    return @any_changes
+    @any_changes
   end
 
   def remove_objects_from_projects
@@ -585,11 +595,11 @@ class SpeciesListController < ApplicationController
         remove_images_from_project(proj)       if @object_states[:img]
       end
     end
-    return @any_changes
+    @any_changes
   end
 
   def attach_species_list_to_project(proj)
-    if not @list.projects.include?(proj)
+    unless @list.projects.include?(proj)
       proj.add_species_list(@list)
       flash_notice(:attached_to_project.t(object: :species_list, project: proj.title))
       @any_changes = true
@@ -605,51 +615,51 @@ class SpeciesListController < ApplicationController
   end
 
   def attach_observations_to_project(proj)
-    obs = @list.observations.select {|o| check_permission(o)}
+    obs = @list.observations.select { |o| check_permission(o) }
     obs -= proj.observations
     if obs.any?
       proj.add_observations(obs)
       flash_notice(:attached_to_project.t(object: "#{obs.length} #{:observations.l}",
-                                         project: proj.title))
+                                          project: proj.title))
       @any_changes = true
     end
   end
 
   def remove_observations_from_project(proj)
-    obs = @list.observations.select {|o| check_permission(o)}
-    if not @user.projects_member.include?(proj)
-      obs.select! {|o| o.user == @user}
+    obs = @list.observations.select { |o| check_permission(o) }
+    unless @user.projects_member.include?(proj)
+      obs.select! { |o| o.user == @user }
     end
     obs &= proj.observations
     if obs.any?
       proj.remove_observations(obs)
       flash_notice(:removed_from_project.t(object: "#{obs.length} #{:observations.l}",
-                                          project: proj.title))
+                                           project: proj.title))
       @any_changes = true
     end
   end
 
   def attach_images_to_project(proj)
-    imgs = @list.observations.map(&:images).flatten.uniq.select {|i| check_permission(i)}
+    imgs = @list.observations.map(&:images).flatten.uniq.select { |i| check_permission(i) }
     imgs -= proj.images
     if imgs.any?
       proj.add_images(imgs)
       flash_notice(:attached_to_project.t(object: "#{imgs.length} #{:images.l}",
-                                         project: proj.title))
+                                          project: proj.title))
       @any_changes = true
     end
   end
 
   def remove_images_from_project(proj)
-    imgs = @list.observations.map(&:images).flatten.uniq.select {|i| check_permission(i)}
-    if not @user.projects_member.include?(proj)
-      imgs.select! {|i| i.user == @user}
+    imgs = @list.observations.map(&:images).flatten.uniq.select { |i| check_permission(i) }
+    unless @user.projects_member.include?(proj)
+      imgs.select! { |i| i.user == @user }
     end
     imgs &= proj.observations
     if imgs.any?
       proj.remove_images(imgs)
       flash_notice(:removed_from_project.t(object: "#{imgs.length} #{:images.l}",
-                                          project: proj.title))
+                                           project: proj.title))
       @any_changes = true
     end
   end
@@ -683,7 +693,7 @@ class SpeciesListController < ApplicationController
     @species_list.user = @user
     @species_list.attributes = args.permit(whitelisted_species_list_args) if args
     @species_list.title = @species_list.title.to_s.strip_squeeze
-    if Location.is_unknown?(@species_list.place_name) or
+    if Location.is_unknown?(@species_list.place_name) ||
        @species_list.place_name.blank?
       @species_list.location = Location.unknown
       @species_list.where = nil
@@ -692,13 +702,17 @@ class SpeciesListController < ApplicationController
     # Validate place name.
     @place_name = @species_list.place_name
     @dubious_where_reasons = []
-    if @place_name != params[:approved_where] and @species_list.location.nil?
+    if @place_name != params[:approved_where] && @species_list.location.nil?
       db_name = Location.user_name(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
     end
 
     # Make sure all the names (that have been approved) exist.
-    list = params[:list][:members].gsub("_", ' ').strip_squeeze rescue ""
+    list = begin
+             params[:list][:members].tr("_", " ").strip_squeeze
+           rescue
+             ""
+           end
     construct_approved_names(list, params[:approved_names])
 
     # Initialize NameSorter and give it all the information.
@@ -727,14 +741,14 @@ class SpeciesListController < ApplicationController
     end
 
     # Are there any ambiguous names?
-    if !sorter.only_single_names
+    unless sorter.only_single_names
       flash_error "Ambiguous names given: '#{sorter.multiple_line_strs.map(&:to_s).join("', '")}'" if Rails.env == "test"
       failed = true
     end
 
     # Are there any deprecated names which haven't been approved?
     if sorter.has_unapproved_deprecated_names
-      flash_error("Found deprecated names: #{sorter.deprecated_names.map(&:display_name).join(', ').t}") if Rails.env == "test"
+      flash_error("Found deprecated names: #{sorter.deprecated_names.map(&:display_name).join(", ").t}") if Rails.env == "test"
       failed = true
     end
 
@@ -742,7 +756,7 @@ class SpeciesListController < ApplicationController
     # Save the OTHER changes to the species list, then let this other method
     # (construct_observations) create the observations.  This always succeeds,
     # so we can redirect to show_species_list (or chain to create_location).
-    if !failed and @dubious_where_reasons == []
+    if !failed && @dubious_where_reasons == []
       if !@species_list.save
         flash_object_errors(@species_list)
       else
@@ -770,9 +784,9 @@ class SpeciesListController < ApplicationController
     end
 
     # Failed to create due to synonyms, unrecognized names, etc.
-    if !redirected
+    unless redirected
       init_name_vars_from_sorter(@species_list, sorter)
-      init_member_vars_for_reload()
+      init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
     end
   end
@@ -782,7 +796,6 @@ class SpeciesListController < ApplicationController
   #   params[:chosen_approved_names]    Names from radio boxes.
   #   params[:checklist_data]           Names from LHS check boxes.
   def construct_observations(spl, sorter)
-
     # Put together a list of arguments to use when creating new observations.
     member_args = params[:member] || {}
     sp_args = {
@@ -798,7 +811,7 @@ class SpeciesListController < ApplicationController
       long:     member_args[:long].to_s,
       alt:      member_args[:alt].to_s,
       is_collection_location: (member_args[:is_collection_location] == "1"),
-      specimen: (member_args[:specimen] == "1"),
+      specimen: (member_args[:specimen] == "1")
     }
 
     # This updates certain observation namings already in the list.  It looks
@@ -840,7 +853,7 @@ class SpeciesListController < ApplicationController
   end
 
   def find_chosen_name(id, alternatives)
-    if alternatives and
+    if alternatives &&
        (alt_id = alternatives[id.to_s])
       Name.find(alt_id)
     else
@@ -854,48 +867,48 @@ class SpeciesListController < ApplicationController
   # "save" another species list "for later" for this purpose).  The result is
   # an Array of names where the values are [display_name, name_id].  This
   # is destined for the instance variable @checklist.
-  def calc_checklist(query=nil)
+  def calc_checklist(query = nil)
     results = []
-    if query or (query = get_query_from_session)
+    if query || (query = get_query_from_session)
       case query.model_symbol
       when :Name
         results = query.select_rows(
-          select: 'DISTINCT names.display_name, names.id',
+          select: "DISTINCT names.display_name, names.id",
           limit:  1000
         )
       when :Observation
         results = query.select_rows(
-          select: 'DISTINCT names.display_name, names.id',
+          select: "DISTINCT names.display_name, names.id",
           join:   :names,
           limit:  1000
         )
       when :Image
         results = query.select_rows(
-          select: 'DISTINCT names.display_name, names.id',
-          join:   {images_observations: {observations: :names}},
+          select: "DISTINCT names.display_name, names.id",
+          join:   { images_observations: { observations: :names } },
           limit:  1000
         )
       when :Location
         results = query.select_rows(
-          select: 'DISTINCT names.display_name, names.id',
-          join:   {observations: :names},
+          select: "DISTINCT names.display_name, names.id",
+          join:   { observations: :names },
           limit:  1000
         )
       when :RssLog
         results = query.select_rows(
-          select: 'DISTINCT names.display_name, names.id',
-          join:   {observations: :names},
-          where:  'rss_logs.observation_id > 0',
+          select: "DISTINCT names.display_name, names.id",
+          join:   { observations: :names },
+          where:  "rss_logs.observation_id > 0",
           limit:  1000
         )
       else
         results = []
       end
     end
-    return results
+    results
   end
 
-  def init_name_vars_for_create()
+  def init_name_vars_for_create
     @checklist_names = {}
     @new_names = []
     @multiple_names = []
@@ -906,7 +919,7 @@ class SpeciesListController < ApplicationController
   end
 
   def init_name_vars_for_edit(spl)
-    init_name_vars_for_create()
+    init_name_vars_for_create
     @deprecated_names = spl.names.select(&:deprecated)
     @place_name = spl.place_name
   end
@@ -923,7 +936,7 @@ class SpeciesListController < ApplicationController
   end
 
   def init_name_vars_from_sorter(spl, sorter)
-    @checklist_names  = params[:checklist_data] || {}
+    @checklist_names = params[:checklist_data] || {}
     @new_names = sorter.new_name_strs.uniq.sort
     @multiple_names = sorter.multiple_names.uniq.sort_by(&:search_name)
     @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
@@ -932,7 +945,7 @@ class SpeciesListController < ApplicationController
     @place_name = spl.place_name
   end
 
-  def init_member_vars_for_create()
+  def init_member_vars_for_create
     @member_vote = Vote.maximum_vote
     @member_notes = nil
     @member_lat = nil
@@ -943,13 +956,15 @@ class SpeciesListController < ApplicationController
   end
 
   def init_member_vars_for_edit(spl)
-    init_member_vars_for_create()
+    init_member_vars_for_create
     if obs = spl.observations.last
       # TODO: Not sure how to check vote efficiently...
-      @member_vote = obs.namings.first.users_vote(@user).value rescue Vote.maximum_vote
-      if all_obs_same?(spl, obs, :notes)
-        @member_notes = obs.notes
-      end
+      @member_vote = begin
+                       obs.namings.first.users_vote(@user).value
+                     rescue
+                       Vote.maximum_vote
+                     end
+      @member_notes = obs.notes if all_obs_same?(spl, obs, :notes)
       if all_obs_same?(spl, obs, :lat, :long, :alt)
         @member_lat  = obs.lat
         @member_long = obs.long
@@ -958,27 +973,53 @@ class SpeciesListController < ApplicationController
       if all_obs_same?(spl, obs, :is_collection_location)
         @member_is_collection_location = obs.is_collection_location
       end
-      if all_obs_same?(spl, obs, :specimen)
-        @member_specimen = obs.specimen
-      end
+      @member_specimen = obs.specimen if all_obs_same?(spl, obs, :specimen)
     end
   end
 
   # Do all observations in spl have same values for the given attributes?
   def all_obs_same?(spl, obs, *attrs)
-    cond = attrs.map {|a| "observations.#{a} != ?"}.join(" OR ")
-    vals = attrs.map {|a| obs.send(a)}
+    cond = attrs.map { |a| "observations.#{a} != ?" }.join(" OR ")
+    vals = attrs.map { |a| obs.send(a) }
     spl.observations.where(cond, *vals).limit(1).count == 0
   end
 
-  def init_member_vars_for_reload()
-    @member_vote = params[:member][:vote].to_s rescue ""
-    @member_notes = params[:member][:notes].to_s rescue ""
-    @member_lat = params[:member][:lat].to_s rescue ""
-    @member_long = params[:member][:long].to_s rescue ""
-    @member_alt = params[:member][:alt].to_s rescue ""
-    @member_is_collection_location = params[:member][:is_collection_location] == "1" rescue true
-    @member_specimen = params[:member][:specimen] == "1" rescue false
+  def init_member_vars_for_reload
+    @member_vote = begin
+                     params[:member][:vote].to_s
+                   rescue
+                     ""
+                   end
+    @member_notes = begin
+                      params[:member][:notes].to_s
+                    rescue
+                      ""
+                    end
+    @member_lat = begin
+                    params[:member][:lat].to_s
+                  rescue
+                    ""
+                  end
+    @member_long = begin
+                     params[:member][:long].to_s
+                   rescue
+                     ""
+                   end
+    @member_alt = begin
+                    params[:member][:alt].to_s
+                  rescue
+                    ""
+                  end
+    @member_is_collection_location = begin
+                                       params[:member][:is_collection_location] == "1"
+                                     rescue
+                                       true
+                                     end
+    @member_specimen = begin
+                         params[:member][:specimen] == "1"
+                       rescue
+                         false
+                       end
   end
 
   def init_project_vars
@@ -989,7 +1030,7 @@ class SpeciesListController < ApplicationController
   def init_project_vars_for_create
     init_project_vars
     last_obs = Observation.where(user_id: User.current_id).
-                           order(:created_at).last
+               order(:created_at).last
     if last_obs && last_obs.created_at > 1.hour.ago
       for proj in last_obs.projects
         @project_checks[proj.id] = true
@@ -1011,7 +1052,11 @@ class SpeciesListController < ApplicationController
       @projects << proj unless @projects.include?(proj)
     end
     for proj in @projects
-      @project_checks[proj.id] = params[:project]["id_#{proj.id}"] == "1" rescue false
+      @project_checks[proj.id] = begin
+                                   params[:project]["id_#{proj.id}"] == "1"
+                                 rescue
+                                   false
+                                 end
     end
   end
 
@@ -1030,14 +1075,12 @@ class SpeciesListController < ApplicationController
           else
             project.remove_species_list(spl)
             flash_notice(:removed_from_project.t(object: :species_list,
-                                                project: project.title))
+                                                 project: project.title))
             any_changes = true
           end
         end
       end
-      if any_changes
-        flash_notice(:species_list_show_manage_observations_too.t)
-      end
+      flash_notice(:species_list_show_manage_observations_too.t) if any_changes
     end
   end
   ##############################################################################

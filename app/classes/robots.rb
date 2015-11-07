@@ -3,10 +3,10 @@
 class Robots
   class << self
     def allowed?(args)
-      populate_allowed_robot_actions if !defined?(@@allowed_robot_actions)
+      populate_allowed_robot_actions unless defined?(@@allowed_robot_actions)
       return true  if args[:controller] == "api"
       return false if args[:ua].downcase.include?("yandex")
-      return @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
+      @@allowed_robot_actions["#{args[:controller]}/#{args[:action]}"]
     end
 
     def populate_allowed_robot_actions
@@ -27,7 +27,7 @@ class Robots
           end
         end
       end
-      return results
+      results
     end
   end
 end

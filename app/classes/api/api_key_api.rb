@@ -10,11 +10,11 @@ class API
     self.delete_page_length      = 1000
 
     self.high_detail_includes = [
-      :user,
+      :user
     ]
 
     def query_params
-      raise NoMethodForAction.new("GET", :api_keys)
+      fail NoMethodForAction.new("GET", :api_keys)
       # {
       #   :created_at   => parse_time_ranges(:created_at),
       #   :verified     => parse_time_ranges(:verified),
@@ -26,16 +26,16 @@ class API
     end
 
     def create_params
-      @for_user = parse_user(:for_user, :default => @user)
+      @for_user = parse_user(:for_user, default: @user)
       {
-          notes: parse_string(:app),
-          user: @for_user,
-          verified: (@for_user == @user ? Time.now : nil),
+        notes: parse_string(:app),
+        user: @for_user,
+        verified: (@for_user == @user ? Time.now : nil)
       }
     end
 
     def validate_create_params!(params)
-      raise MissingParameter.new(:app) if params[:notes].blank?
+      fail MissingParameter.new(:app) if params[:notes].blank?
     end
 
     def after_create(api_key)
@@ -46,7 +46,7 @@ class API
 
     def update_params
       {
-          notes: parse_string(:set_notes),
+        notes: parse_string(:set_notes)
       }
     end
   end

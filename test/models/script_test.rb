@@ -1,12 +1,12 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class ScriptTest < UnitTestCase
   def script_file(cmd)
     "#{::Rails.root}/script/#{cmd}"
   end
 
-################################################################################
+  ################################################################################
 
   test "autoreply" do
     sender = "test@email.com"
@@ -35,9 +35,9 @@ class ScriptTest < UnitTestCase
   test "jpegsize" do
     script = script_file("jpegsize")
     [
-      [ "Coprinus_comatus.jpg", 2288, 2168 ],
-      [ "perf.jpg", 4288, 2848 ],
-      [ "sticky.jpg", 407, 500 ]
+      ["Coprinus_comatus.jpg", 2288, 2168],
+      ["perf.jpg", 4288, 2848],
+      ["sticky.jpg", 407, 500]
     ].each do |file, width, height|
       result = `#{script} #{::Rails.root}/test/images/#{file}`.chomp
       assert_equal("#{width} #{height}", result)
@@ -49,9 +49,9 @@ class ScriptTest < UnitTestCase
     tempfile = Tempfile.new("test").path
     cmd = "#{script} dick > #{tempfile}"
     assert system(cmd)
-    expect = "id login name email verified last_use\n" +
+    expect = "id login name email verified last_use\n" \
              "4 dick Tricky Dick dick@collectivesource.com 2006-03-02 21:14:00 NULL\n"
-    actual = File.read(tempfile).gsub(/ +/, ' ')
+    actual = File.read(tempfile).gsub(/ +/, " ")
     assert_equal(expect, actual)
   end
 
@@ -81,7 +81,11 @@ class ScriptTest < UnitTestCase
     script = script_file("monitor_top")
     tempfile = Tempfile.new("test").path
     logfile = "#{::Rails.root}/log/top.log"
-    old_size = File.size(logfile) rescue 0
+    old_size = begin
+                 File.size(logfile)
+               rescue
+                 0
+               end
     cmd = "#{script} 2>&1 > #{tempfile}"
     status = system(cmd)
     errors = File.read(tempfile)

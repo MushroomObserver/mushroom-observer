@@ -14,9 +14,9 @@ module ObservationReport
 
     def initialize(args)
       self.query    = args[:query]
-      self.encoding = args[:encoding] || self.default_encoding
-      raise "ObservationReport initialized without query!"    if !query
-      raise "ObservationReport initialized without encoding!" if !encoding
+      self.encoding = args[:encoding] || default_encoding
+      fail "ObservationReport initialized without query!"    unless query
+      fail "ObservationReport initialized without encoding!" unless encoding
     end
 
     def filename
@@ -25,12 +25,12 @@ module ObservationReport
 
     def body
       case encoding
-        when 'UTF-8'
-          render
-        when 'ASCII'
-          render.to_ascii
-        else
-          render.iconv(encoding) # This caused problems with  UTF-16 encoding.
+      when "UTF-8"
+        render
+      when "ASCII"
+        render.to_ascii
+      else
+        render.iconv(encoding) # This caused problems with  UTF-16 encoding.
       end
     end
 
@@ -64,72 +64,72 @@ module ObservationReport
 
     def rows_without_location
       query.select_rows(
-        :select => [
-            'observations.id',
-            'observations.when',
-            'observations.lat',
-            'observations.long',
-            'observations.alt',
-            'observations.specimen',
-            'observations.is_collection_location',
-            'observations.vote_cache',
-            'observations.thumb_image_id',
-            'observations.notes',
-            'observations.updated_at',
-            'users.id',
-            'users.login',
-            'users.name',
-            'names.id',
-            'names.text_name',
-            'names.author',
-            'names.rank',
-            '""',
-            'observations.where',
-            '""',
-            '""',
-            '""',
-            '""',
-            '""',
-            '""',
-          ].join(','),
-        :join => [:users, :names],
-        :where => 'observations.location_id IS NULL',
-        :order => 'observations.id ASC'
+        select: [
+          "observations.id",
+          "observations.when",
+          "observations.lat",
+          "observations.long",
+          "observations.alt",
+          "observations.specimen",
+          "observations.is_collection_location",
+          "observations.vote_cache",
+          "observations.thumb_image_id",
+          "observations.notes",
+          "observations.updated_at",
+          "users.id",
+          "users.login",
+          "users.name",
+          "names.id",
+          "names.text_name",
+          "names.author",
+          "names.rank",
+          '""',
+          "observations.where",
+          '""',
+          '""',
+          '""',
+          '""',
+          '""',
+          '""'
+        ].join(","),
+        join: [:users, :names],
+        where: "observations.location_id IS NULL",
+        order: "observations.id ASC"
       )
     end
 
     def rows_with_location
       query.select_rows(
         select: [
-            'observations.id',
-            'observations.when',
-            'observations.lat',
-            'observations.long',
-            'observations.alt',
-            'observations.specimen',
-            'observations.is_collection_location',
-            'observations.vote_cache',
-            'observations.thumb_image_id',
-            'observations.notes',
-            'observations.updated_at',
-            'users.id',
-            'users.login',
-            'users.name',
-            'names.id',
-            'names.text_name',
-            'names.author',
-            'names.rank',
-            'locations.id',
-            'locations.name',
-            'locations.north',
-            'locations.south',
-            'locations.east',
-            'locations.west',
-            'locations.high',
-            'locations.low',
-          ].join(','),
+          "observations.id",
+          "observations.when",
+          "observations.lat",
+          "observations.long",
+          "observations.alt",
+          "observations.specimen",
+          "observations.is_collection_location",
+          "observations.vote_cache",
+          "observations.thumb_image_id",
+          "observations.notes",
+          "observations.updated_at",
+          "users.id",
+          "users.login",
+          "users.name",
+          "names.id",
+          "names.text_name",
+          "names.author",
+          "names.rank",
+          "locations.id",
+          "locations.name",
+          "locations.north",
+          "locations.south",
+          "locations.east",
+          "locations.west",
+          "locations.high",
+          "locations.low"
+        ].join(","),
         join: [:users, :locations, :names],
-        order: 'observations.id ASC'
+        order: "observations.id ASC"
       )
     end
 
@@ -149,7 +149,7 @@ module ObservationReport
       data = Specimen.connection.select_rows %(
         SELECT os.observation_id, s.herbarium_label
         FROM specimens s, observations_specimens os
-        WHERE os.observation_id IN (#{ids.join(',')})
+        WHERE os.observation_id IN (#{ids.join(",")})
           AND os.specimen_id = s.id
       )
       labels = {}
@@ -164,18 +164,18 @@ module ObservationReport
           row[SPEC_LABEL] = nil
         end
       end
-      return rows
+      rows
     end
 
     def clean_boolean(val)
-      val == 1 ? 'X' : nil
+      val == 1 ? "X" : nil
     end
 
     def clean_integer(val)
       val.blank? ? nil : val.to_f.round
     end
 
-    def clean_float(val, places, multiplier=1.0)
+    def clean_float(val, places, multiplier = 1.0)
       val.blank? ? nil : (val.to_f * multiplier).round(places)
     end
 
@@ -191,9 +191,9 @@ module ObservationReport
       if val.blank?
         return nil
       else
-        country, state, county, location = Location.reverse_name(val).split(', ', 4)
-        if !county || !county.sub!(/ Co\.$/, '')
-          country, state, location = Location.reverse_name(val).split(', ', 3)
+        country, state, county, location = Location.reverse_name(val).split(", ", 4)
+        if !county || !county.sub!(/ Co\.$/, "")
+          country, state, location = Location.reverse_name(val).split(", ", 3)
           county = nil
         end
         return [country, state, county, location]
@@ -202,21 +202,21 @@ module ObservationReport
 
     def split_name(name, author, rank)
       gen = cf = sp = ssp = var = f = sp_author = ssp_author = var_author = f_author = nil
-      cf = 'cf.' if name.sub!(/ cf\. /, ' ')
+      cf = "cf." if name.sub!(/ cf\. /, " ")
       if Name.ranks.values_at(:Genus, :Species, :Subspecies, :Variety, :Form).include?(rank)
-        f   = $2 if name.sub!(/ f. (\S+)$/, '')
-        var = $2 if name.sub!(/ var. (\S+)$/, '')
-        ssp = $2 if name.sub!(/ ssp. (\S+)$/, '')
-        sp  = $1 if name.sub!(/ (\S+)$/, '')
+        f   = Regexp.last_match(2) if name.sub!(/ f. (\S+)$/, "")
+        var = Regexp.last_match(2) if name.sub!(/ var. (\S+)$/, "")
+        ssp = Regexp.last_match(2) if name.sub!(/ ssp. (\S+)$/, "")
+        sp  = Regexp.last_match(1) if name.sub!(/ (\S+)$/, "")
         gen = name
         f_author   = author if rank == Name.ranks[:Form]
         var_author = author if rank == Name.ranks[:Variety]
         ssp_author = author if rank == Name.ranks[:Subspecies]
         sp_author  = author if rank == Name.ranks[:Species]
       else
-        gen = name.sub(/ .*/, '')
+        gen = name.sub(/ .*/, "")
       end
-      return [ gen, sp, ssp, var, f, sp_author, ssp_author, var_author, f_author, cf ]
+      [gen, sp, ssp, var, f, sp_author, ssp_author, var_author, f_author, cf]
     end
   end
 
@@ -236,11 +236,11 @@ module ObservationReport
     end
   end
 
-################################################################################
+  ################################################################################
 
   class Raw < CSV
     def labels
-      %w[
+      %w(
         observation_id
         user_id
         user_login
@@ -270,11 +270,11 @@ module ObservationReport
         is_collection_location
         thumbnail_image_id
         notes
-      ]
+      )
     end
 
     def rows
-      return all_rows_with_herbarium_labels.map do |row|
+      all_rows_with_herbarium_labels.map do |row|
         observation_id         = clean_integer(row[OBS_ID])
         user_id                = clean_integer(row[USER_ID])
         user_login             = clean_string(row[USER_LOGIN])
@@ -332,14 +332,14 @@ module ObservationReport
           thumbnail_image_id,
           notes
         ]
-      end.sort_by {|row| row[0].to_i}
+      end.sort_by { |row| row[0].to_i }
     end
   end
 
-################################################################################
+  ################################################################################
 
   class Adolf < CSV
-    self.mime_type = 'application/vnd.ms-excel'
+    self.mime_type = "application/vnd.ms-excel"
 
     def labels
       [
@@ -387,13 +387,13 @@ module ObservationReport
     end
 
     def rows
-      return all_rows.sort_by do |row|
+      all_rows.sort_by do |row|
         row[NAME_TEXT_NAME]
       end.map do |row|
         genus, sp, ssp, var, f, sp_author, ssp_author, var_author, f_author, cf =
           split_name(row[NAME_TEXT_NAME], row[NAME_AUTHOR], row[NAME_RANK])
         country, state, county, location = split_location(row[LOC_NAME])
-        location = "#{county} Co., #{location}".sub(/, $/, '') if county
+        location = "#{county} Co., #{location}".sub(/, $/, "") if county
         start_lat  = clean_float(row[OBS_LAT], 4)
         start_long = clean_float(row[OBS_LONG], 4)
         if !start_lat || !start_long
@@ -406,8 +406,8 @@ module ObservationReport
         date       = clean_string(row[OBS_WHEN])
         collector  = clean_string(row[USER_NAME]) || clean_string(row[USER_LOGIN])
         notes      = clean_string(row[OBS_NOTES])
-        if notes && notes.sub!(/original herbarium label: *(\S[^\n\r]*\S)/i, '')
-          original = $1.gsub(/_(.*?)_/, '\\1')
+        if notes && notes.sub!(/original herbarium label: *(\S[^\n\r]*\S)/i, "")
+          original = Regexp.last_match(1).gsub(/_(.*?)_/, '\\1')
         end
         notes = notes.strip if notes
         id         = clean_integer(row[OBS_ID])
@@ -435,11 +435,11 @@ module ObservationReport
     end
   end
 
-################################################################################
+  ################################################################################
 
   class Darwin < CSV
     def labels
-      %w[
+      %w(
         DateLastModified
         InstitutionCode
         CollectionCode
@@ -464,11 +464,11 @@ module ObservationReport
         MinimumElevation
         MaximumElevation
         Notes
-      ]
+      )
     end
 
     def rows
-      return all_rows.map do |row|
+      all_rows.map do |row|
         updated_at = clean_string(row[OBS_UPDATED_AT])
         id = clean_integer(row[OBS_ID])
         name = clean_string(row[NAME_TEXT_NAME])
@@ -478,9 +478,9 @@ module ObservationReport
           split_name(row[NAME_TEXT_NAME], row[NAME_AUTHOR], row[NAME_RANK])
         collector = clean_string(row[USER_NAME]) || clean_string(row[USER_LOGIN])
         date = clean_string(row[OBS_WHEN])
-        year, month, day = date.to_s.split('-')
-        month.sub!(/^0/, '')
-        day.sub!(/^0/, '')
+        year, month, day = date.to_s.split("-")
+        month.sub!(/^0/, "")
+        day.sub!(/^0/, "")
         notes = clean_string(row[OBS_NOTES])
         country, state, county, location = split_location(row[LOC_NAME])
         lat   = clean_float(row[OBS_LAT], 4)
@@ -492,26 +492,26 @@ module ObservationReport
         west  = clean_float(row[LOC_WEST], 4)
         high  = clean_integer(row[LOC_HIGH])
         low   = clean_integer(row[LOC_LOW])
-        lat  ||= ((north + south) / 2).round(4) if north and south
-        long ||= ((east + west) / 2).round(4) if east and west
+        lat ||= ((north + south) / 2).round(4) if north && south
+        long ||= ((east + west) / 2).round(4) if east && west
         low = high = alt if alt
         [
-          updated_at, 'MushroomObserver', nil, id,
+          updated_at, "MushroomObserver", nil, id,
           name, author, rank, genus, sp, f || var || ssp,
           collector, date, year, month, day,
           country, state, county, location,
           lat, long, low, high,
           notes
         ]
-      end.sort_by {|row| row[3].to_i}
+      end.sort_by { |row| row[3].to_i }
     end
   end
 
-################################################################################
+  ################################################################################
 
   class Symbiota < CSV
     def labels
-      %w[
+      %w(
         scientificName
         scientificNameAuthorship
         taxonRank
@@ -534,11 +534,11 @@ module ObservationReport
         maximumElevationInMeters
         updated_at
         fieldNotes
-      ]
+      )
     end
 
     def rows
-      return all_rows.map do |row|
+      all_rows.map do |row|
         updated_at = clean_string(row[OBS_UPDATED_AT])
         id = clean_integer(row[OBS_ID])
         name = clean_string(row[NAME_TEXT_NAME])
@@ -548,9 +548,9 @@ module ObservationReport
           split_name(row[NAME_TEXT_NAME], row[NAME_AUTHOR], row[NAME_RANK])
         collector = clean_string(row[USER_NAME]) || clean_string(row[USER_LOGIN])
         date = clean_string(row[OBS_WHEN])
-        year, month, day = date.to_s.split('-')
-        month.sub!(/^0/, '')
-        day.sub!(/^0/, '')
+        year, month, day = date.to_s.split("-")
+        month.sub!(/^0/, "")
+        day.sub!(/^0/, "")
         notes = clean_string(row[OBS_NOTES])
         country, state, county, location = split_location(row[LOC_NAME])
         lat   = clean_float(row[OBS_LAT], 4)
@@ -562,8 +562,8 @@ module ObservationReport
         west  = clean_float(row[LOC_WEST], 4)
         high  = clean_integer(row[LOC_HIGH])
         low   = clean_integer(row[LOC_LOW])
-        lat  ||= ((north + south) / 2).round(4) if north and south
-        long ||= ((east + west) / 2).round(4) if east and west
+        lat ||= ((north + south) / 2).round(4) if north && south
+        long ||= ((east + west) / 2).round(4) if east && west
         low = high = alt if alt
         [
           name, author, rank, genus, sp, f || var || ssp,
@@ -572,7 +572,7 @@ module ObservationReport
           lat, long, low, high,
           updated_at, notes
         ]
-      end.sort_by {|row| row[7].to_i}
+      end.sort_by { |row| row[7].to_i }
     end
   end
 end

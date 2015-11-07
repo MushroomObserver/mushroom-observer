@@ -63,21 +63,21 @@ class Project < AbstractModel
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    text_name + " (#{id || '?'})"
+    text_name + " (#{id || "?"})"
   end
 
   # Need these to be compatible with Comment.
-  alias format_name text_name
-  alias unique_format_name unique_text_name
+  alias_method :format_name, :text_name
+  alias_method :unique_format_name, :unique_text_name
 
   # Is +user+ a member of this Project?
   def is_member?(user)
-    user and (self.user_group.users.member?(user) or user.admin)
+    user && (user_group.users.member?(user) || user.admin)
   end
 
   # Is +user+ an admin for this Project?
   def is_admin?(user)
-    user and (self.admin_group.users.member?(user) or user.admin)
+    user && (admin_group.users.member?(user) || user.admin)
   end
 
   # Check if user has permission to edit a given object.
@@ -97,38 +97,36 @@ class Project < AbstractModel
         end
       end
     end
-    return result
+    result
   end
 
   def add_images(imgs)
-    imgs.each {|x| add_image(x)}
+    imgs.each { |x| add_image(x) }
   end
 
   def remove_images(imgs)
-    imgs.each {|x| remove_image(x)}
+    imgs.each { |x| remove_image(x) }
   end
 
   def add_observations(imgs)
-    imgs.each {|x| add_observation(x)}
+    imgs.each { |x| add_observation(x) }
   end
 
   def remove_observations(imgs)
-    imgs.each {|x| remove_observation(x)}
+    imgs.each { |x| remove_observation(x) }
   end
 
   def add_species_lists(imgs)
-    imgs.each {|x| add_species_list(x)}
+    imgs.each { |x| add_species_list(x) }
   end
 
   def remove_species_lists(imgs)
-    imgs.each {|x| remove_species_list(x)}
+    imgs.each { |x| remove_species_list(x) }
   end
 
   # Add image this project if not already done so.  Saves it.
   def add_image(img)
-    unless images.include?(img)
-      images.push(img)
-    end
+    images.push(img) unless images.include?(img)
   end
 
   # Remove image this project. Saves it.
@@ -143,7 +141,7 @@ class Project < AbstractModel
   # Saves it.
   def add_observation(obs)
     unless observations.include?(obs)
-      imgs = obs.images.select {|img| img.user_id == obs.user_id}
+      imgs = obs.images.select { |img| img.user_id == obs.user_id }
       observations.push(obs)
       for img in imgs
         images.push(img)
@@ -154,9 +152,9 @@ class Project < AbstractModel
   # Remove observation (and its images) from this project. Saves it.
   def remove_observation(obs)
     if observations.include?(obs)
-      imgs = obs.images.select {|img| img.user_id == obs.user_id}
+      imgs = obs.images.select { |img| img.user_id == obs.user_id }
       if imgs.any?
-        img_ids = imgs.map(&:id).map(&:to_s).join(',')
+        img_ids = imgs.map(&:id).map(&:to_s).join(",")
         # Leave images which are attached to other observations
         # still attached to this project.
         leave_these_img_ids = Image.connection.select_values(%(
@@ -166,7 +164,7 @@ class Project < AbstractModel
             AND io.observation_id = op.observation_id
             AND op.project_id = #{id}
         )).map(&:to_i)
-        imgs.reject! {|img| leave_these_img_ids.include?(img.id)}
+        imgs.reject! { |img| leave_these_img_ids.include?(img.id) }
       end
       observations.delete(obs)
       for img in imgs
@@ -178,9 +176,7 @@ class Project < AbstractModel
 
   # Add species_list to this project if not already done so.  Saves it.
   def add_species_list(spl)
-    unless species_lists.include?(spl)
-      species_lists.push(spl)
-    end
+    species_lists.push(spl) unless species_lists.include?(spl)
   end
 
   # Remove species_list from this project. Saves it.
@@ -197,15 +193,35 @@ class Project < AbstractModel
   #
   ##############################################################################
 
-  def log_create; do_log(:log_project_created_at, true); end
-  def log_update; do_log(:log_project_updated_at, true); end
-  def log_destroy; do_log(:log_project_destroyed, true); end
-  def log_add_member(user); do_log(:log_project_added_member, true, user); end
-  def log_remove_member(user); do_log(:log_project_removed_member, false, user); end
-  def log_add_admin(user); do_log(:log_project_added_admin, false, user); end
-  def log_remove_admin(user); do_log(:log_project_removed_admin, false, user); end
+  def log_create
+    do_log(:log_project_created_at, true)
+  end
 
-  def do_log(tag, touch, user=nil)
+  def log_update
+    do_log(:log_project_updated_at, true)
+  end
+
+  def log_destroy
+    do_log(:log_project_destroyed, true)
+  end
+
+  def log_add_member(user)
+    do_log(:log_project_added_member, true, user)
+  end
+
+  def log_remove_member(user)
+    do_log(:log_project_removed_member, false, user)
+  end
+
+  def log_add_admin(user)
+    do_log(:log_project_added_admin, false, user)
+  end
+
+  def log_remove_admin(user)
+    do_log(:log_project_removed_admin, false, user)
+  end
+
+  def do_log(tag, touch, user = nil)
     args = {}
     args[:name]  = user.login if user
     args[:touch] = touch
@@ -228,8 +244,8 @@ class Project < AbstractModel
     title       = self.title
     user_group  = self.user_group
     admin_group = self.admin_group
-    for d in NameDescription.where(source_type: NameDescription.source_types[:project], project_id: self.id) +
-             LocationDescription.where(source_type: LocationDescription.source_types[:project], project_id: self.id)
+    for d in NameDescription.where(source_type: NameDescription.source_types[:project], project_id: id) +
+             LocationDescription.where(source_type: LocationDescription.source_types[:project], project_id: id)
       d.source_type = :source
       d.admin_groups.delete(admin_group)
       d.writer_groups.delete(admin_group)
@@ -240,24 +256,24 @@ class Project < AbstractModel
     admin_group.destroy if admin_group
   end
 
-################################################################################
+  ################################################################################
 
-protected
+  protected
 
   def validation # :nodoc:
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_project_user_missing.t)
     end
-    if !self.admin_group
+    unless admin_group
       errors.add(:admin_group, :validate_project_admin_group_missing.t)
     end
-    if !self.user_group
+    unless user_group
       errors.add(:user_group, :validate_project_user_group_missing.t)
     end
 
-    if self.title.to_s.blank?
+    if title.to_s.blank?
       errors.add(:title, :validate_project_title_missing.t)
-    elsif self.title.bytesize > 100
+    elsif title.bytesize > 100
       errors.add(:title, :validate_project_title_too_long.t)
     end
   end

@@ -50,8 +50,8 @@ class ModifiedToUpdatedAt < ActiveRecord::Migration
     rename_column :licenses, :updated_at, :modified
     rename_column :location_descriptions, :updated_at, :modified
     rename_column :location_descriptions_versions, :updated_at, :modified
-    rename_column :locations, :updated_at,  :modified
-    rename_column :locations_versions, :updated_at,  :modified
+    rename_column :locations, :updated_at, :modified
+    rename_column :locations_versions, :updated_at, :modified
     rename_column :name_descriptions, :updated_at, :modified
     rename_column :name_descriptions_versions, :updated_at, :modified
     rename_column :names, :updated_at, :modified

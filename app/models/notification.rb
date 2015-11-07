@@ -36,14 +36,14 @@ class Notification < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   as_enum(:flavor,
-           { name: 1,
-             observation: 2,
-             user: 3,
-             all_comments: 4
-           },
-           source: :flavor,
-           with: [],
-           accessor: :whiny
+          { name: 1,
+            observation: 2,
+            user: 3,
+            all_comments: 4
+          },
+          source: :flavor,
+          with: [],
+          accessor: :whiny
          )
 
   # List of all available flavors (Symbol's).
@@ -59,19 +59,19 @@ class Notification < AbstractModel
   #   naming::    Naming that triggered this email.
   #
   def calc_note(args)
-    if template = self.note_template
-#     case self.flavor # Rails 3
-      case self.flavor.to_sym
+    if template = note_template
+      #     case self.flavor # Rails 3
+      case flavor.to_sym
       when :name
         user   = args[:user]
         naming = args[:naming]
-        raise "Missing 'user' argument for #{self.flavor} notification."   if !user
-        raise "Missing 'naming' argument for #{self.flavor} notification." if !naming
-        template.gsub(':observer', user.login).
-                 gsub(':observation', "#{MO.http_domain}/#{naming.observation_id}").
-                 gsub(':mailing_address', user.mailing_address || '').
-                 gsub(':location', naming.observation.place_name).
-                 gsub(':name', naming.format_name)
+        fail "Missing 'user' argument for #{flavor} notification."   unless user
+        fail "Missing 'naming' argument for #{flavor} notification." unless naming
+        template.gsub(":observer", user.login).
+          gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
+          gsub(":mailing_address", user.mailing_address || "").
+          gsub(":location", naming.observation.place_name).
+          gsub(":name", naming.format_name)
       end
     end
   end
@@ -86,9 +86,9 @@ class Notification < AbstractModel
     if @target
       result = @target
     else
-      case self.flavor
+      case flavor
       when :name
-        result = Name.find(self.obj_id)
+        result = Name.find(obj_id)
       end
       @target = result
     end
@@ -98,9 +98,9 @@ class Notification < AbstractModel
   # Return a string summarizing what this Notification is about.
   def summary
     result = "Unrecognized notification flavor"
-    case self.flavor
+    case flavor
     when :name
-      result = "#{:TRACKING.l} #{:name.l}: #{self.target ? self.target.display_name : '?'}"
+      result = "#{:TRACKING.l} #{:name.l}: #{target ? target.display_name : "?"}"
     end
     result
   end
@@ -112,22 +112,22 @@ class Notification < AbstractModel
   #
   def link_params
     result = {}
-    case self.flavor
+    case flavor
     when :name
       result[:controller] = :name
       result[:action] = :email_tracking
-      result[:id] = self.obj_id
+      result[:id] = obj_id
     end
     result
   end
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.user && !User.current
+    if !user && !User.current
       errors.add(:user, :validate_notification_user_missing.t)
     end
   end

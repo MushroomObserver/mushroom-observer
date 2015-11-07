@@ -1,28 +1,26 @@
 # encoding: utf-8
 
-require 'test_helper'
+require "test_helper"
 
 class NameDescriptionIntegrationTest < IntegrationTestCase
-
   def test_creating_public_description
-
     # We want to create an empty, default public description for a name that
     # doesn't have any descriptions yet -- simplest possible case.
-    @name = Name.find_by_text_name('Strobilurus diminutivus')
+    @name = Name.find_by_text_name("Strobilurus diminutivus")
     assert_equal([], @name.descriptions)
     @description_data = {
-        source_type: :public,
-        source_name: nil,
-        readable: true,
-        writable: true,
-        notes: 'I like this mushroom.'
+      source_type: :public,
+      source_name: nil,
+      readable: true,
+      writable: true,
+      notes: "I like this mushroom."
     }
     @group_expectations = {
-        admins: [UserGroup.reviewers],
-        writers: [UserGroup.all_users],
-        readers: [UserGroup.all_users],
-        authors: [],
-        editors: [mary]
+      admins: [UserGroup.reviewers],
+      writers: [UserGroup.all_users],
+      readers: [UserGroup.all_users],
+      authors: [],
+      editors: [mary]
     }
 
     admin = open_admin_session(dick)
@@ -52,26 +50,25 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
   end
 
   def test_creating_user_description
-
     # We want to create an empty, default public description for a name that
     # doesn't have any descriptions yet -- simplest possible case.
-    @name = Name.find_by_text_name('Peltigera')
+    @name = Name.find_by_text_name("Peltigera")
     assert_equal(4, @name.descriptions.length)
     @description_data = {
-        source_type: :user,
-        source_name: "Mary's Corner",
-        readable: true,
-        writable: false,
-        gen_desc: 'Leafy felt lichens.',
-        diag_desc: 'Usually with veins and tomentum below.',
-        look_alikes: '_Solorina_ maybe, but not much else.'
+      source_type: :user,
+      source_name: "Mary's Corner",
+      readable: true,
+      writable: false,
+      gen_desc: "Leafy felt lichens.",
+      diag_desc: "Usually with veins and tomentum below.",
+      look_alikes: "_Solorina_ maybe, but not much else."
     }
     @group_expectations = {
-        admins: [UserGroup.one_user(mary)],
-        writers: [UserGroup.one_user(mary)],
-        readers: [UserGroup.all_users],
-        authors: [mary],
-        editors: []
+      admins: [UserGroup.one_user(mary)],
+      writers: [UserGroup.one_user(mary)],
+      readers: [UserGroup.all_users],
+      authors: [mary],
+      editors: []
     }
 
     admin = open_admin_session(dick)
@@ -104,24 +101,24 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     user.admin = true
     user.save
     sess = login!(user)
-    sess.click(:href => /turn_admin_on/)
+    sess.click(href: /turn_admin_on/)
     teach_about_name_descriptions(sess)
     sess.user = user
-    return sess
+    sess
   end
 
   def open_normal_session(user)
     sess = login!(user)
     teach_about_name_descriptions(sess)
     sess.user = user
-    return sess
+    sess
   end
 
   def open_lurker_session
     sess = open_session
     teach_about_name_descriptions(sess)
     sess.user = nil
-    return sess
+    sess
   end
 
   def teach_about_name_descriptions(sess)
@@ -132,7 +129,7 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     sess.group_expectations = @group_expectations
   end
 
-################################################################################
+  ################################################################################
 
   module NameDescriptionDsl
     attr_accessor :user
@@ -281,41 +278,41 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def create_name_description
       get(show_name_uri)
-      click(:href => /create_name_description/)
-      assert_template('name/create_name_description')
+      click(href: /create_name_description/)
+      assert_template("name/create_name_description")
       open_form do |form|
         check_name_description_form_defaults(form)
         fill_in_name_description_form(form)
         form.submit
       end
       assert_flash_success
-      assert_template('name/show_name_description')
+      assert_template("name/show_name_description")
     end
 
     def check_name_description_form_defaults(form)
-      form.assert_value('source_type', 'public')
-      form.assert_value('source_name', '')
-      form.assert_value('public_write', true)
-      form.assert_value('public', true)
-      form.assert_value('notes', '')
-      form.assert_enabled('source_type')
-      form.assert_enabled('source_name')
+      form.assert_value("source_type", "public")
+      form.assert_value("source_name", "")
+      form.assert_value("public_write", true)
+      form.assert_value("public", true)
+      form.assert_value("notes", "")
+      form.assert_enabled("source_type")
+      form.assert_enabled("source_name")
       # (have to be enabled because user could switch to :source or :user,
       # instead must use javascript to disable these when :public)
-      form.assert_enabled('public_write')
-      form.assert_enabled('public')
+      form.assert_enabled("public_write")
+      form.assert_enabled("public")
     end
 
     def fill_in_name_description_form(form)
       data = name_description_data
-      form.change('source_type', data[:source_type])
-      form.change('source_name', data[:source_name])
-      form.change('public_write', data[:writable])
-      form.change('public', data[:readable])
-      form.change('gen_desc', data[:gen_desc])
-      form.change('diag_desc', data[:diag_desc])
-      form.change('look_alikes', data[:look_alikes])
-      form.change('notes', data[:notes])
+      form.change("source_type", data[:source_type])
+      form.change("source_name", data[:source_name])
+      form.change("public_write", data[:writable])
+      form.change("public", data[:readable])
+      form.change("gen_desc", data[:gen_desc])
+      form.change("diag_desc", data[:diag_desc])
+      form.change("look_alikes", data[:look_alikes])
+      form.change("notes", data[:notes])
     end
 
     def check_name_description
@@ -357,21 +354,21 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     end
 
     def check_edit_description_link_behavior
-      click(:href => edit_name_description_uri)
+      click(href: edit_name_description_uri)
       if edit_description_requires_login?
-        assert_template('account/login')
+        assert_template("account/login")
       else
-        assert_template('name/edit_name_description')
+        assert_template("name/edit_name_description")
         check_name_description_fields
       end
     end
 
     def check_name_description_fields
       open_form do |form|
-        form.send("assert_#{source_name_field_state}", 'source_type')
-        form.send("assert_#{source_type_field_state}", 'source_name')
-        form.send("assert_#{permission_fields_state}", 'public_write')
-        form.send("assert_#{permission_fields_state}", 'public')
+        form.send("assert_#{source_name_field_state}", "source_type")
+        form.send("assert_#{source_type_field_state}", "source_name")
+        form.send("assert_#{permission_fields_state}", "public_write")
+        form.send("assert_#{permission_fields_state}", "public")
       end
     end
 

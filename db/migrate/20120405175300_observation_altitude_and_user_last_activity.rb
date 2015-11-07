@@ -9,4 +9,3 @@ class ObservationAltitudeAndUserLastActivity < ActiveRecord::Migration
     remove_column :users, :last_activity
   end
 end
-

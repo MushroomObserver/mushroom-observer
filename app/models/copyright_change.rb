@@ -25,26 +25,18 @@
 
 class CopyrightChange < AbstractModel
   belongs_to :user
-  belongs_to :target, :polymorphic => true
+  belongs_to :target, polymorphic: true
   belongs_to :license
 
-################################################################################
+  ################################################################################
 
   protected
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !self.user
-      errors.add(:user, 'missing user')
-    end
-    if !self.target
-      errors.add(:user, 'missing target')
-    end
-    if !self.updated_at
-      errors.add(:user, 'missing modification time')
-    end
-    if !self.license
-      errors.add(:user, 'missing license')
-    end
-  end 
+    errors.add(:user, "missing user") unless user
+    errors.add(:user, "missing target") unless target
+    errors.add(:user, "missing modification time") unless updated_at
+    errors.add(:user, "missing license") unless license
+  end
 end

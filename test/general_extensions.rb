@@ -40,7 +40,6 @@
 ################################################################################
 
 module GeneralExtensions
-
   ##############################################################################
   #
   #  :section: Test unit helpers
@@ -48,12 +47,29 @@ module GeneralExtensions
   ##############################################################################
 
   # These used to be automatically instantiated fixtures, e.g., @dick, etc.
-  def rolf; users(:rolf); end
-  def mary; users(:mary); end
-  def junk; users(:junk); end
-  def dick; users(:dick); end
-  def katrina; users(:katrina); end
-  def roy; users(:roy); end
+  def rolf
+    users(:rolf)
+  end
+
+  def mary
+    users(:mary)
+  end
+
+  def junk
+    users(:junk)
+  end
+
+  def dick
+    users(:dick)
+  end
+
+  def katrina
+    users(:katrina)
+  end
+
+  def roy
+    users(:roy)
+  end
 
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
@@ -61,8 +77,8 @@ module GeneralExtensions
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    if not FileTest.exist?(MO.local_image_files)
-      setup_images = MO.local_image_files.gsub(/test_images$/, 'setup_images')
+    unless FileTest.exist?(MO.local_image_files)
+      setup_images = MO.local_image_files.gsub(/test_images$/, "setup_images")
       FileUtils.cp_r(setup_images, MO.local_image_files)
     end
   end
@@ -79,39 +95,39 @@ module GeneralExtensions
   ##############################################################################
 
   # Assert that an assertion fails.
-  def assert_fail(msg=nil, &block)
-    msg ||= 'Expected assertion to fail.'
+  def assert_fail(msg = nil, &block)
+    msg ||= "Expected assertion to fail."
     assert_raises(MiniTest::Assertion, msg, &block)
   end
 
   # Assert that something is true.
-  def assert_true(value, msg=nil)
+  def assert_true(value, msg = nil)
     msg ||= "Expected #{value.inspect} to be true."
     assert(value, msg)
   end
 
   # Assert that something is false.
-  def assert_false(value, msg=nil)
+  def assert_false(value, msg = nil)
     msg ||= "Expected #{value.inspect} to be false."
     refute(value, msg)
   end
 
   # Assert that something is blank.
-  def assert_blank(value, msg=nil)
+  def assert_blank(value, msg = nil)
     msg ||= "Expected #{value.inspect} to be blank."
     assert(value.blank?, msg)
   end
 
   # Assert that something is not blank.
-  def assert_not_blank(value, msg=nil)
+  def assert_not_blank(value, msg = nil)
     msg ||= "Expected #{value.inspect} not to be blank."
     refute(value.blank?, msg)
   end
 
   # Compare two Date/Time/DateTime/TimeWithZone instances.
-  def assert_dates_equal(expect, actual, msg=nil)
-    expect = expect.strftime('%Y%m%d')
-    actual = actual.strftime('%Y%m%d')
+  def assert_dates_equal(expect, actual, msg = nil)
+    expect = expect.strftime("%Y%m%d")
+    actual = actual.strftime("%Y%m%d")
     msg = build_message(msg, "Expected <#{expect}> to be <#{actual}>.")
     assert(expect == actual, msg)
   end
@@ -148,7 +164,7 @@ module GeneralExtensions
   #
   #   assert_list_equal([rolf,mary], name.authors, &:login)
   #
-  def assert_list_equal(expect, got, msg=nil, &block)
+  def assert_list_equal(expect, got, msg = nil, &block)
     block ||= :to_s.to_proc
     assert_equal(expect.map(&block).sort, got.map(&block).sort, msg)
   end
@@ -157,15 +173,15 @@ module GeneralExtensions
   #
   #   assert_obj_list_equal([img1,img2], obs.images)
   #
-  def assert_obj_list_equal(expect, got, msg=nil)
-    assert_list_equal(expect, got, msg) {|o| o.nil? ? nil : "#{o.class.name} ##{o.id}"}
+  def assert_obj_list_equal(expect, got, msg = nil)
+    assert_list_equal(expect, got, msg) { |o| o.nil? ? nil : "#{o.class.name} ##{o.id}" }
   end
 
   # Compare two lists of User's by comparing their logins.
   #
   #   assert_user_list_equal([rolf,mary], name.authors)
   #
-  def assert_user_list_equal(expect, got, msg=nil)
+  def assert_user_list_equal(expect, got, msg = nil)
     assert_list_equal(expect, got, msg, &:login)
   end
 
@@ -173,7 +189,7 @@ module GeneralExtensions
   #
   #   assert_name_list_equal([old_name,new_name], old_name.synonym.names)
   #
-  def assert_name_list_equal(expect, got, msg=nil)
+  def assert_name_list_equal(expect, got, msg = nil)
     assert_list_equal(expect, got, msg, &:search_name)
   end
 
@@ -217,7 +233,7 @@ module GeneralExtensions
   end
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.
-  def assert_save(obj, msg=nil)
+  def assert_save(obj, msg = nil)
     return pass if obj.save
 
     msg2 = obj.errors.full_messages.join("; ")
@@ -239,7 +255,7 @@ module GeneralExtensions
   #
   def get_xml_element(key)
     assert(@doc, "XML response is nil!")
-    key.sub(/^\//,'').split('/').inject(@doc) do |elem, key|
+    key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[key.match(/^\d+$/) ? key.to_i : key]
       assert(elem, "XML response missing element \"#{key}\".")
       elem
@@ -250,11 +266,11 @@ module GeneralExtensions
   #
   #   assert_xml_exists('/response', @response.body)
   #
-  def assert_xml_exists(key, msg=nil)
+  def assert_xml_exists(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(/^\//,'').split('/').inject(@doc) do |elem, key|
+    result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[key.match(/^\d+$/) ? key.to_i : key]
-      assert(nil, msg || "XML response should have \"#{key}\".") if !elem
+      assert(nil, msg || "XML response should have \"#{key}\".") unless elem
       elem
     end
   end
@@ -263,11 +279,11 @@ module GeneralExtensions
   #
   #   assert_xml_none('/response/errors')
   #
-  def assert_xml_none(key, msg=nil)
+  def assert_xml_none(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(/^\//,'').split('/').inject(@doc) do |elem, key|
+    result = key.sub(/^\//, "").split("/").inject(@doc) do |elem, key|
       elem = elem.elements[key.match(/^\d+$/) ? key.to_i : key]
-      return if !elem
+      return unless elem
       elem
     end
     assert_nil(result, msg || "XML response shouldn't have \"#{key}\".")
@@ -277,7 +293,7 @@ module GeneralExtensions
   #
   #   assert_xml_name('comment', '/response/results/1')
   #
-  def assert_xml_name(val, key, msg=nil)
+  def assert_xml_name(val, key, msg = nil)
     _assert_xml(val, get_xml_element(key).name,
                 msg || "XML element \"#{key}\" should be a <#{val}>.")
   end
@@ -286,9 +302,10 @@ module GeneralExtensions
   #
   #   assert_xml_attr(1234, '/response/results/1/id')
   #
-  def assert_xml_attr(val, key, msg=nil)
+  def assert_xml_attr(val, key, msg = nil)
     key.match(/^(.*)\/(.*)/)
-    key, attr = $1, $2
+    key = Regexp.last_match(1)
+    attr = Regexp.last_match(2)
     _assert_xml(val, get_xml_element(key).attributes[attr],
                 msg || "XML element \"#{key}\" should have attribute \"#{val}\".")
   end
@@ -297,7 +314,7 @@ module GeneralExtensions
   #
   #   assert_xml_text('rolf', '/response/results/1/login')
   #
-  def assert_xml_text(val, key, msg=nil)
+  def assert_xml_text(val, key, msg = nil)
     _assert_xml(val, get_xml_element(key).text,
                 msg || "XML element \"#{key}\" should be \"#{val}\".")
   end
@@ -308,34 +325,34 @@ module GeneralExtensions
   #   _assert_xml('rolf', @doc.elements['/response/user/login'].text)
   #   _assert_xml(/\d\d-\d\d-\d\d/, @doc.elements['/response/script_date'].text)
   #
-  def _assert_xml(val, str, msg=nil)
+  def _assert_xml(val, str, msg = nil)
     if val.is_a?(Regexp)
-      assert(str.to_s.gsub(/^\s+|\s+$/,'').gsub(/\s+/,' ').match(val), msg)
+      assert(str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ").match(val), msg)
     else
-      assert_equal(val.to_s.gsub(/^\s+|\s+$/,'').gsub(/\s+/,' '),
-                   str.to_s.gsub(/^\s+|\s+$/,'').gsub(/\s+/,' '), msg)
+      assert_equal(val.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "),
+                   str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), msg)
     end
   end
 
   # Dump out XML tree.
-  def dump_xml(e, indent='')
+  def dump_xml(e, indent = "")
     print "#{indent}#{e.name}"
     if e.has_attributes?
       attrs = []
-      e.attributes.each do |a,v|
+      e.attributes.each do |a, v|
         attrs << "#{a}=#{v}"
       end
-      print "(#{attrs.join(' ')})"
+      print "(#{attrs.join(" ")})"
     end
     if e.has_text? && e.text =~ /\S/
-      txt = e.text.gsub(/^\s+|\s+$/, '').gsub(/\s+/, ' ')
-      txt = "\"#{txt}\"" if txt.match(' ')
+      txt = e.text.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ")
+      txt = "\"#{txt}\"" if txt.match(" ")
       print " = #{txt}"
     end
     print "\n"
     if e.has_elements?
       e.elements.each do |child|
-        dump_xml(child, indent + '  ')
+        dump_xml(child, indent + "  ")
       end
     end
   end
@@ -377,11 +394,11 @@ module GeneralExtensions
         break
       elsif !msg
         # Write out expected (old) and received (new) files for debugging purposes.
-        File.open(filename + '.old', "w:#{encoding}") {|fh| fh.write(template)}
-        File.open(filename + '.new', "w:#{encoding}") {|fh| fh.write(processed_str)}
+        File.open(filename + ".old", "w:#{encoding}") { |fh| fh.write(template) }
+        File.open(filename + ".new", "w:#{encoding}") { |fh| fh.write(processed_str) }
         msg = "File #{filename} wrong:\n" +
-          `diff #{filename}.old #{filename}.new`
-        File.delete(filename + '.old') if File.exists?(filename + '.old')
+              `diff #{filename}.old #{filename}.new`
+        File.delete(filename + ".old") if File.exist?(filename + ".old")
       end
     end
 
@@ -390,21 +407,17 @@ module GeneralExtensions
     # Clean out old files from previous failure(s).
     for file in files
       filename = Array(file).first
-      new_filename = filename + '.new'
-      File.delete(new_filename) if File.exists?(new_filename)
+      new_filename = filename + ".new"
+      File.delete(new_filename) if File.exist?(new_filename)
     end
     pass
   end
 
   def enforce_encoding(encoding, file, str)
     result = str
-    if str.encoding != encoding
-      result = str.encode(encoding)
-    end
-    if file.is_a?(Array) and file[1] == 'ISO-8859-1'
-      if file[1] == str.encoding
-        print "Re-encoding no longer needed\n"
-      end
+    result = str.encode(encoding) if str.encoding != encoding
+    if file.is_a?(Array) && file[1] == "ISO-8859-1"
+      print "Re-encoding no longer needed\n" if file[1] == str.encoding
     end
     result
   end

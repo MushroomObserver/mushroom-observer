@@ -23,7 +23,7 @@ class SupportControllerTest < FunctionalTestCase
         other_amount: other_amount,
         who: rolf.name,
         email: rolf.email,
-        anonymous: anon,
+        anonymous: anon
       }
     }
     post(:confirm, params)
@@ -63,7 +63,7 @@ class SupportControllerTest < FunctionalTestCase
         amount: amount,
         who: rolf.name,
         email: rolf.email,
-        anonymous: anon,
+        anonymous: anon
       }
     }
     post(:create_donation, params)
@@ -100,7 +100,7 @@ class SupportControllerTest < FunctionalTestCase
     assert_equal(false, unreviewed.reviewed)
     params = {
       reviewed: {
-        unreviewed.id => true,
+        unreviewed.id => true
       }
     }
     post(:review_donations, params)
