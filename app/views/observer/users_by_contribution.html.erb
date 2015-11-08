@@ -56,7 +56,7 @@
         <% SiteData::ALL_FIELDS.select { |f| SiteData::FIELD_WEIGHTS[f] > 0}.each do |field| %>
           <div class="row">
             <div class="col-xs-8 col-xs-push-1"><%= "user_stats_#{field}".to_sym.t %> </div>
-            <div class=col-xs-2"><%= SiteData::FIELD_WEIGHTS[field] %></div>
+            <div class="col-xs-2"><%= SiteData::FIELD_WEIGHTS[field] %></div>
           </div>
         <% end %>
         <p class="pad-top"><%= :users_by_contribution_2.t %></p>

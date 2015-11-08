@@ -201,8 +201,6 @@ class NameControllerTest < FunctionalTestCase
     @@emails = []
   end
 
-  ################################################################################
-
   def test_name_index
     get_with_dump(:list_names)
     assert_template(:list_names)
@@ -3181,7 +3179,7 @@ class NameControllerTest < FunctionalTestCase
     login("rolf")
 
     # No interest in this name yet.
-    get(:show_name, id: peltigera.id)
+    get_with_dump(:show_name, id: peltigera.id)
     assert_response(:success)
     assert_image_link_in_html(/watch\d*.png/,
                               controller: "interest", action: "set_interest",
@@ -3194,7 +3192,7 @@ class NameControllerTest < FunctionalTestCase
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: peltigera, user: rolf, state: true)
-    get(:show_name, id: peltigera.id)
+    get_with_dump(:show_name, id: peltigera.id)
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: "interest", action: "set_interest",
@@ -3208,7 +3206,7 @@ class NameControllerTest < FunctionalTestCase
     # Destroy that interest, create new one with interest off.
     Interest.where(user_id: rolf.id).last.destroy
     Interest.create(target: peltigera, user: rolf, state: false)
-    get(:show_name, id: peltigera.id)
+    get_with_dump(:show_name, id: peltigera.id)
     assert_response(:success)
     assert_image_link_in_html(/halfopen\d*.png/,
                               controller: "interest", action: "set_interest",
