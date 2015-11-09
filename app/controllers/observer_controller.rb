@@ -1257,8 +1257,7 @@ class ObserverController < ApplicationController
   end
 
   def update_whitelisted_observation_attributes
-    return unless whitelisted_observation_params
-    @observation.attributes = whitelisted_observation_params
+    @observation.attributes = whitelisted_observation_params || {}
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
