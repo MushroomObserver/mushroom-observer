@@ -1199,8 +1199,7 @@ class ObserverController < ApplicationController
     else
       any_errors = false
 
-      # Update observation attributes
-      @observation.attributes = whitelisted_observation_params
+      update_whitelisted_observation_attributes
 
       # Validate place name
       @place_name = @observation.place_name
@@ -1255,6 +1254,11 @@ class ObserverController < ApplicationController
                             id: @observation.id)
       end
     end
+  end
+
+  def update_whitelisted_observation_attributes
+    return unless whitelisted_observation_params
+    @observation.attributes = whitelisted_observation_params
   end
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
@@ -2294,7 +2298,7 @@ class ObserverController < ApplicationController
   end
 
   def whitelisted_observation_params
-    return nil unless params[:observation]
+    return unless params[:observation]
     params[:observation].permit(whitelisted_observation_args)
   end
 end
