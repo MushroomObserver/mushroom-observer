@@ -12,6 +12,7 @@ class QueryTest < UnitTestCase
   end
 
   def assert_query(expect, *args)
+    expect = expect.to_a unless expect.respond_to?(:map!)
     expect.map!(&:id) if expect.first.is_a?(AbstractModel)
     query = Query.lookup(*args)
     assert((Set.new(expect) - Set.new(query.result_ids)).empty?,
@@ -26,7 +27,7 @@ class QueryTest < UnitTestCase
     str.gsub(/\s+/, " ").strip
   end
 
-  ################################################################################
+  ##############################################################################
 
   def test_basic
     assert(Query.all_models.include?(:Observation))
