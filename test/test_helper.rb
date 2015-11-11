@@ -20,7 +20,7 @@ Coveralls.wear!("rails")
 
 ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
-require "rails/test_help"
+require "Rails/test_help"
 
 for file in %w(
   general_extensions
@@ -44,8 +44,6 @@ end
 I18n.enforce_available_locales = true
 
 class ActiveSupport::TestCase
-  ActiveRecord::Migration.check_pending! # throw error if migration pending
-
   ############################################################################
   #  Transactional fixtures
   ############################################################################
