@@ -20,7 +20,7 @@ Coveralls.wear!("rails")
 
 ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
-require "Rails/test_help"
+require "rails/test_help"
 
 for file in %w(
   general_extensions
