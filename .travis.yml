@@ -14,5 +14,7 @@ before_script:
   - rake db:schema:load
   - rake db:fixtures:load
   - rake lang:update
+  - pwd
   - ls config/locales
+  - ls -l config/test_locales
   - grep validate_observation_user_missing config/locales/*
