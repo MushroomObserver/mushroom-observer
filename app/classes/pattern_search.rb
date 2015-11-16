@@ -30,7 +30,7 @@
 #
 ################################################################################
 
-class API
+module PatternSearch
   require_dependency "pattern_search/base"
   require_dependency "pattern_search/parser"
   require_dependency "pattern_search/term"

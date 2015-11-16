@@ -44,8 +44,6 @@ end
 I18n.enforce_available_locales = true
 
 class ActiveSupport::TestCase
-  ActiveRecord::Migration.check_pending! # throw error if migration pending
-
   ############################################################################
   #  Transactional fixtures
   ############################################################################
