@@ -245,6 +245,7 @@
 
 class Name < AbstractModel
   require "acts_as_versioned"
+  require "fileutils"
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
@@ -386,6 +387,7 @@ class Name < AbstractModel
         LIMIT 1000
       )).uniq.sort
 
+      FileUtils.mkdir_p(File.dirname(MO.name_primer_cache_file))
       file = File.open(MO.name_primer_cache_file, "w:utf-8")
       file.write(result.join("\n") + "\n")
       file.close
