@@ -1,0 +1,2 @@
+This directory is for unit tests other than model or helper tests.
+The tests in this directory are run by: rake, rake test:units

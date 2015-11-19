@@ -1,0 +1,2 @@
+This directory is for functional tests other than controller or mailer tests.
+The tests in this directory are run by: rake, rake test:functionals
