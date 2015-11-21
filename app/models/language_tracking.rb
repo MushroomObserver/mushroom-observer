@@ -93,7 +93,7 @@ module LanguageTracking
 
   def tag_file(name)
     path = "#{::Rails.root}/tmp/language_tracking"
-    Dir.mkdir(path) unless File.exist?(path)
+    FileUtils.mkpath(path) unless File.exist?(path)
     "#{path}/#{name}.txt"
   end
 
