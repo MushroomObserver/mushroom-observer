@@ -2,10 +2,14 @@
 require "test_helper"
 
 class LanguageExporterTest < UnitTestCase
+  attr_accessor :tmp_dir
+
   def setup
     @official = Language.official
     Language.clear_verbose_messages
     Language.override_input_files
+    self.tmp_dir = "#{::Rails.root}/tmp"
+    FileUtils.mkdir_p(self.tmp_dir)
     super
   end
 
@@ -20,7 +24,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_yaml
-    temp_file = "#{::Rails.root}/tmp/yaml_test"
+    temp_file = "#{tmp_dir}/yaml_test"
     YAML::ENGINE.yamler = "psych" # (fails)
     File.open(temp_file, "w:utf-8") do |fh|
       fh.puts "---"
@@ -48,7 +52,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_yaml_dump_breakage
-    temp_file = "#{::Rails.root}/tmp/yaml_test"
+    temp_file = "#{tmp_dir}/yaml_test"
     File.open(temp_file, "w:utf-8") do |fh|
       begin
         YAML.dump({ "one" => "ενα" }, fh)
