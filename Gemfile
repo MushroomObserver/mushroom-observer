@@ -102,3 +102,5 @@ group :test do
   gem "minitest"
   gem "minitest-reporters", ">= 0.5.0"
 end
+
+gem "web-console", "~> 2.0", group: :development
