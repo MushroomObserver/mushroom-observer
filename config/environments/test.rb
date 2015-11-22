@@ -99,6 +99,8 @@ MushroomObserver::Application.configure do
 
   # To control the debugger turing testing
   config.activate_debugger = false
+
+  config.active_support.test_order = :random
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)
