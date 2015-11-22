@@ -14,6 +14,7 @@ end
 class ApiTest < UnitTestCase
   def setup
     @api_key = api_keys(:rolfs_api_key)
+    super
   end
 
   def assert_no_errors(api, msg = "API errors")

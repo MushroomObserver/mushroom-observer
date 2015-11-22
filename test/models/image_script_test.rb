@@ -26,6 +26,7 @@ class ScriptTest < UnitTestCase
       FileUtils.mkpath("#{remote_root}1/#{subdir}")
       FileUtils.mkpath("#{remote_root}2/#{subdir}")
     end
+    super
   end
 
   def teardown
@@ -40,6 +41,7 @@ class ScriptTest < UnitTestCase
     FileUtils.rm_rf(local_root)
     FileUtils.rm_rf("#{remote_root}1")
     FileUtils.rm_rf("#{remote_root}2")
+    super
   end
 
   ################################################################################

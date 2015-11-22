@@ -29,6 +29,7 @@ end
 class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
   def setup
     @controller = GlossaryController.new
+    super
   end
 
   # ***** show *****

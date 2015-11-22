@@ -12,6 +12,7 @@ class AccountMailerTest < UnitTestCase
     ActionMailer::Base.deliveries = []
     @expected = Mail.new
     @expected.mime_version = "1.0"
+    super
   end
 
   # At the moment at least Redcloth produces slightly different output on

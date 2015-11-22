@@ -7,6 +7,7 @@ class LocationControllerTest < FunctionalTestCase
     @chg_pts  = 5
     @auth_pts = 50
     @edit_pts = 5
+    super
   end
 
   # Init params based on existing location.

@@ -4,6 +4,7 @@ require "test_helper"
 class AccountControllerTest < FunctionalTestCase
   def setup
     @request.host = "localhost"
+    super
   end
 
   ################################################################################

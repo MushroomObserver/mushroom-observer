@@ -13,6 +13,7 @@ class NameControllerTest < FunctionalTestCase
     @auth_pts = 100
     @edit_pts = 10
     @@emails = []
+    super
   end
 
   def empty_notes
