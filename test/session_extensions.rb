@@ -173,7 +173,7 @@ module SessionExtensions
     form = nil
     if args == []
       action = path.sub(/\?.*/, "")
-      args << "form[action^=#{action}]"
+      args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
       assert_equal(1, elems.length,
