@@ -328,7 +328,7 @@ class AbstractQuery < ActiveRecord::Base
   #     Location: :defined,
   #   }
   #
-  superclass_delegating_accessor :default_flavors
+  class_attribute :default_flavors
   self.default_flavors = {}
 
   # Parameters required for each flavor.  The keys are the parameter names, the
@@ -363,7 +363,7 @@ class AbstractQuery < ActiveRecord::Base
   # Additional types: You may define additional types in your subclass.  Just
   # define methods called <tt>validate_<type>(arg, val)</tt>.
   #
-  superclass_delegating_accessor :flavor_params
+  class_attribute :flavor_params
   self.flavor_params = {}
   @@default_flavor_params = {
     ids: [:id]
@@ -376,7 +376,7 @@ class AbstractQuery < ActiveRecord::Base
   #     User: ...,
   #   }
   #
-  superclass_delegating_accessor :model_params
+  class_attribute :model_params
   self.model_params = {}
   @@default_model_params = {}
 
@@ -387,7 +387,7 @@ class AbstractQuery < ActiveRecord::Base
   #     ...
   #   }
   #
-  superclass_delegating_accessor :global_params
+  class_attribute :global_params
   self.global_params = {}
   @@default_global_params = {
     join?: [:string],
@@ -406,7 +406,7 @@ class AbstractQuery < ActiveRecord::Base
   #     Image: [ :all, :recent, :reviewed ],
   #   }
   #
-  superclass_delegating_accessor :allowed_model_flavors
+  class_attribute :allowed_model_flavors
   self.allowed_model_flavors = {}
 
   # This table maps each pair of tables to the foreign key name:
@@ -426,7 +426,7 @@ class AbstractQuery < ActiveRecord::Base
   #   # Means: 'comments.target_id = images.id AND
   #             comments.target_type = "Image"'
   #
-  superclass_delegating_accessor :join_conditions
+  class_attribute :join_conditions
   self.join_conditions = {}
 
   # This gives the subclass opportunity to make extra global initializations
