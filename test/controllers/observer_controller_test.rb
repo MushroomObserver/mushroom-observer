@@ -421,7 +421,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_template(:list_observations)
     assert_equal("coprinis comatis", assigns(:suggest_alternate_spellings))
     assert_select("div.alert-warning", 1)
-    assert_select("a[href*=observation_search?pattern=Coprinus+comatus]",
+    assert_select("a[href *= 'observation_search?pattern=Coprinus+comatus']",
                   text: names(:coprinus_comatus).search_name)
 
     get(:observation_search, pattern: "Coprinus comatus")
@@ -1695,8 +1695,8 @@ class ObserverControllerTest < FunctionalTestCase
     assert_form_action(action: :edit_observation, id: obs.id.to_s)
 
     # image notes field must be textarea -- not just text -- because text
-    # is inline and will drops any newlines in the image notes
-    assert_select("textarea#?", "good_image_#{obs.images.first.id}_notes",
+    # is inline and would drops any newlines in the image notes
+    assert_select("textarea[id = 'good_image_#{obs.images.first.id}_notes']",
                   count: 1)
   end
 

@@ -260,14 +260,14 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     login("dick")
     get(:manage_species_lists, id: obs1.id)
-    assert_select("a[href*=species_list=#{spl1.id}]", text: :REMOVE.t, count: 1)
-    assert_select("a[href*=species_list=#{spl2.id}]", text: :ADD.t, count: 1)
-    assert_select("a[href*=species_list=#{spl3.id}]", count: 0)
+    assert_select("a[href*='species_list=#{spl1.id}']", text: :REMOVE.t, count: 1)
+    assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
+    assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
 
     get(:manage_species_lists, id: obs2.id)
-    assert_select("a[href*=species_list=#{spl1.id}]", text: :ADD.t, count: 1)
-    assert_select("a[href*=species_list=#{spl2.id}]", text: :ADD.t, count: 1)
-    assert_select("a[href*=species_list=#{spl3.id}]", count: 0)
+    assert_select("a[href*='species_list=#{spl1.id}']", text: :ADD.t, count: 1)
+    assert_select("a[href*='species_list=#{spl2.id}']", text: :ADD.t, count: 1)
+    assert_select("a[href*='species_list=#{spl3.id}']", count: 0)
 
     params = { species_list: spl1.id, observation: obs2.id }
     post(:add_observation_to_species_list, observation: obs2.id,

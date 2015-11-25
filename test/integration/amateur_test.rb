@@ -130,7 +130,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
     # (Make sure there is a tab to go back to show_observation.)
-    assert_select("div#right_tabs a[href=/#{obs.id}]")
+    assert_select("div#right_tabs a[href='/#{obs.id}']")
 
     open_form(&:submit)
     assert_template("comment/add_comment")
@@ -153,8 +153,8 @@ class AmateurTest < IntegrationTestCase
     assert_match(summary, response.body)
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_select("a[href*=edit_comment/#{com.id}]", 1)
-    assert_select("a[href*=destroy_comment/#{com.id}]", 1)
+    assert_select("a[href*='edit_comment/#{com.id}']", 1)
+    assert_select("a[href*='destroy_comment/#{com.id}']", 1)
 
     # Try changing it.
     click(label: /edit/i, href: /edit_comment/)
@@ -340,7 +340,7 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_select("a[href*=naming/edit], a[href*=naming/destroy]", false)
+      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
       click(label: /propose.*name/i)
       assert_template("account/login")
       open_form do |form|
@@ -356,7 +356,7 @@ class AmateurTest < IntegrationTestCase
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
       # (Make sure there is a tab to go back to show_observation.)
-      assert_select("div#right_tabs a[href=/#{obs.id}]")
+      assert_select("div#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
         form.assert_value("name_name", "")
@@ -409,8 +409,8 @@ class AmateurTest < IntegrationTestCase
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*=naming/edit/#{naming.id}]", 2)
-      assert_select("a[href*=naming/destroy/#{naming.id}]", 2)
+      assert_select("a[href*='naming/edit/#{naming.id}']", 2)
+      assert_select("a[href*='naming/destroy/#{naming.id}']", 2)
 
       # Try changing it.
       author = "(Pers.) Grev."
