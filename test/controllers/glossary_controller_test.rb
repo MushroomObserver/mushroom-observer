@@ -54,7 +54,7 @@ class GlossaryControllerShowAndIndexTest < GlossaryControllerTest
     prior_version_target = "/glossary/show_past_glossary_term/" \
                           "#{square.id}?version=#{square.version - 1}"
     get(:show_glossary_term, id: square.id)
-    assert_select "a[href=?]", prior_version_target
+    assert_select "a[href='#{prior_version_target}']"
   end
 
   # ***** index *****

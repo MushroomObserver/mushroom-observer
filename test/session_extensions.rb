@@ -229,11 +229,7 @@ module SessionExtensions
     # Filter links based on URL.
     if arg = args[:href]
       if arg.is_a?(Regexp)
-        if arg.to_s.match(/^..-mix:\^/)
-          select = "a[href^=?]"
-        else
-          select = "a[href*=?]"
-        end
+        select = "a:match('href',?)"
         sargs << arg
       else
         select = "a[href^=#{arg}]"
