@@ -13,16 +13,6 @@ class BigDecimal
   end
 end
 
-class TestCollapsible < CollapsibleCollectionOfMappableObjects
-  class << self
-    attr_accessor :max_objects
-  end
-
-  def max_objects
-    self.class.max_objects
-  end
-end
-
 class CollapsibleMapTest < UnitTestCase
   def assert_mapset_is_point(mapset, lat, long)
     assert_true(mapset.is_point?)
@@ -36,15 +26,19 @@ class CollapsibleMapTest < UnitTestCase
     assert_false(mapset.is_point?)
     assert_true(mapset.is_box?)
     if east >= west
-      assert_mapset(mapset, lat, long, north, south, east, west, north - south, east - west)
+      assert_mapset(mapset, lat, long,
+                    north, south, east, west, north - south, east - west)
     else
-      assert_mapset(mapset, lat, long + 180, north, south, east, west, north - south, east - west + 360)
+      assert_mapset(mapset, lat, long + 180,
+                    north, south, east, west, north - south, east - west + 360)
     end
   end
 
-  def assert_mapset(mapset, lat, long, north, south, east, west, north_south, east_west)
+  def assert_mapset(mapset, lat, long,
+                    north, south, east, west, north_south, east_west)
     assert_extents(mapset, north, south, east, west)
-    assert_in_delta(lat, mapset.lat, 0.0001, "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
+    assert_in_delta(lat, mapset.lat, 0.0001,
+                    "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
     assert_in_delta(long, mapset.long, 0.0001)
     assert_in_delta(lat, mapset.center[0], 0.0001)
     assert_in_delta(long, mapset.center[1], 0.0001)
@@ -412,42 +406,33 @@ class CollapsibleMapTest < UnitTestCase
       Observation.new(lat: lat, long: long)
     end
 
-    TestCollapsible.max_objects = 10
-    assert_equal(10, observations.length)
-    coll = TestCollapsible.new(observations)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations,
+                                                      observations.length)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 9
-    coll = TestCollapsible.new(observations)
     data[0] = [10.1, 10.0, 10.1, 10.0]
     data[1] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 9)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 8
-    coll = TestCollapsible.new(observations)
     data[3] = [22, 20, 22, 20]
     data[6] = [-10, -12, 12, 10]
     data[4] = data[7] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 8)
+    assert_list_of_mapsets(coll, data)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 7)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 7
-    coll = TestCollapsible.new(observations)
-    assert_list_of_mapsets(coll, data)
-
-    TestCollapsible.max_objects = 6
-    coll = TestCollapsible.new(observations)
     data[0] = [22, 10, 22, 10]
     data[2] = data[3] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 6)
+    assert_list_of_mapsets(coll, data)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 5)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 5
-    coll = TestCollapsible.new(observations)
-    assert_list_of_mapsets(coll, data)
-
-    TestCollapsible.max_objects = 4
-    coll = TestCollapsible.new(observations)
     data[0] = [22, -12, 22, 0]
     data[5] = data[6] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 4)
     assert_list_of_mapsets(coll, data)
   end
 
@@ -469,45 +454,37 @@ class CollapsibleMapTest < UnitTestCase
       Observation.new(lat: lat, long: long)
     end
 
-    TestCollapsible.max_objects = 10
-    assert_equal(10, observations.length)
-    coll = TestCollapsible.new(observations)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations,
+                                                      observations.length)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 9
-    coll = TestCollapsible.new(observations)
     data[0] = [10.1, 10.0, -175.0, -175.1]
     data[1] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 9)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 8
-    coll = TestCollapsible.new(observations)
     data[3] = [-10, -12, -175, -177]
     data[5] = [22, 20, -165, -167]
     data[4] = data[6] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 8)
+    assert_list_of_mapsets(coll, data)
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 7)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 7
-    coll = TestCollapsible.new(observations)
-    assert_list_of_mapsets(coll, data)
-
-    TestCollapsible.max_objects = 6
-    coll = TestCollapsible.new(observations)
     data[0] = [20, 10, -175, -175.1]
     data[2] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 6)
     assert_list_of_mapsets(coll, data)
 
-    TestCollapsible.max_objects = 5
-    coll = TestCollapsible.new(observations)
     data[0] = [20, -12, -175, -177]
     data[3] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 5)
     assert_list_of_mapsets(coll, data)
 
     # This is the tricky one: will it combine 175°E with 175°W?
-    TestCollapsible.max_objects = 4
-    coll = TestCollapsible.new(observations)
     data[0] = [22, -12, -165, 175]
     data[5] = data[7] = nil
+    coll = CollapsibleCollectionOfMappableObjects.new(observations, 4)
     assert_list_of_mapsets(coll, data)
   end
 end

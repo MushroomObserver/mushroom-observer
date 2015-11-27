@@ -2,11 +2,13 @@
 #
 #  = Collapsible Map Collection Class
 #
-#  This class takes a bunch of mappable objects and collapses them into a more
-#  manageable number of points and boxes.  Resulting points and boxes each may
-#  contain one or more Observation's and Location's.
+#  This class takes a bunch of mappable objects and collapses them
+#  into a more manageable number of points and boxes.  Resulting
+#  points and boxes each may contain one or more Observation's and
+#  Location's.
 #
-#  Note: Uses the global +MO.max_map_objects+ to limit the number of objects.
+#  Note: Uses the global +MO.max_map_objects+ to limit the number of
+#  objects.
 #
 #  == Typical Usage
 #
@@ -16,10 +18,11 @@
 #      draw_mapset(gmap, mapset)
 #    end
 #
-################################################################################
+###############################################################################
 
 class CollapsibleCollectionOfMappableObjects
-  def initialize(objects)
+  def initialize(objects, max_objects=MO.max_map_objects)
+    @max_objects = max_objects
     init_sets(objects)
     group_objects_into_sets
   end
@@ -95,7 +98,7 @@ class CollapsibleCollectionOfMappableObjects
 
   def group_objects_into_sets
     prec = next_precision(MAX_PRECISION)
-    while @sets.length > max_objects && prec >= MIN_PRECISION
+    while @sets.length > @max_objects && prec >= MIN_PRECISION
       old_sets = @sets.values
       @sets = {}
       for set in old_sets
@@ -103,11 +106,6 @@ class CollapsibleCollectionOfMappableObjects
       end
       prec = next_precision(prec)
     end
-  end
-
-  # Need to be able to override this in test suite.
-  def max_objects
-    MO.max_map_objects
   end
 
   def add_point_set(loc, objs, prec)
@@ -128,13 +126,10 @@ class CollapsibleCollectionOfMappableObjects
 
   def round_lat_long_to_precision(loc, prec)
     if prec > MIN_PRECISION
-      y = round_number(loc.lat, prec)
-      x = round_number(loc.long, prec)
-    else
-      y = loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0
-      x = loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)
+      return [round_number(loc.lat, prec), round_number(loc.long, prec)]
     end
-    [x, y]
+    [loc.lat >= 45 ? 90 : loc.lat <= -45 ? -90 : 0,
+     loc.long >= 150 || loc.long <= -150 ? 180 : round_number(loc.long, prec)]
   end
 
   def calc_extents
