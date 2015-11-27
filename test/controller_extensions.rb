@@ -334,12 +334,9 @@ module ControllerExtensions
   def assert_image_link_in_html(img_src, url_opts, _msg = nil)
     revised_opts = raise_params(url_opts)
     url = url_for(revised_opts)
-    assert_select("a[href='#{url}']>img")
-    assert_select("a>img:match('src', ?)", /watch\d*.png/)
-    # Can't get the folowing combined case to work.  It claims
-    # that it is an invalid CSS selector.  I think it's because the
-    # URL has a question mark in it.
-    # assert_select("a[href='#{url}']>img:match('src', ?)", /watch\d*.png/)
+    assert_select("a[href = '#{url}']>img") do
+      assert_select(":match('src', ?)", img_src)
+    end
   end
 
   # Assert that a form exists which posts to the given url.

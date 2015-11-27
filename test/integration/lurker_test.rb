@@ -59,7 +59,7 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select("a[href^=/observer/show_user/2]", minimum: 3)
+    assert_select("a[href^='/observer/show_user/2']", minimum: 3)
     click(label: "Mary Newbie")
     assert_template("observer/show_user")
 
@@ -73,23 +73,23 @@ class LurkerTest < IntegrationTestCase
     click(label: "List of mysteries")
     assert_template("species_list/show_species_list")
     # (Make sure observation #2 is shown somewhere.)
-    assert_select("a[href^=/2?]")
+    assert_select("a[href^='/2?']")
 
     # Click on name.
     go_back
     # (Should be at least two links to show the name Fungi.)
-    assert_select("a[href^=/name/show_name/1]", minimum: 2)
+    assert_select("a[href^='/name/show_name/1']", minimum: 2)
     click(label: /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
-    assert_select("a[href^=/name/create_name_description/1]")
+    assert_select("a[href^='/name/create_name_description/1']")
 
     # And lastly there are some images.
     go_back
 
-    assert_select("a[href^=/image/show_image]", minimum: 2)
+    assert_select("a[href^='/image/show_image']", minimum: 2)
     click(label: :image, href: /show_image/)
     # (Make sure observation #2 is shown somewhere.)
-    assert_select("a[href^=/2]")
+    assert_select("a[href^='/2']")
   end
 
   def test_search
@@ -142,7 +142,7 @@ class LurkerTest < IntegrationTestCase
     form.change("pattern", "Fungi")
     form.select("type", "Observations")
     form.submit("Search")
-    assert_select("a[href^=/2]") do |links|
+    assert_select("a[href^='/2']") do |links|
       assert(links.all? { |l| l.to_s.match(/2\?q=/) })
     end
   end
