@@ -16,6 +16,6 @@ class QueuedEmail::Publish < QueuedEmail
   end
 
   def deliver_email
-    PublishNameEmail.build(user, to_user, name).deliver
+    PublishNameEmail.build(user, to_user, name).deliver_now
   end
 end

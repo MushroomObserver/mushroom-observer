@@ -70,6 +70,6 @@ class QueuedEmail::NameChange < QueuedEmail
 
   def deliver_email
     # Make sure name wasn't deleted or merged since email was queued.
-    NameChangeEmail.build(self).deliver if name
+    NameChangeEmail.build(self).deliver_now if name
   end
 end

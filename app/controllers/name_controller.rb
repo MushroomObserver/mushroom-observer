@@ -624,7 +624,7 @@ class NameController < ApplicationController
         namings: @name.namings.length,
         url: "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      WebmasterEmail.build(@user.email, content).deliver
+      WebmasterEmail.build(@user.email, content).deliver_now
       NameControllerTest.report_email(content) if Rails.env == "test"
     end
   end
@@ -732,7 +732,7 @@ class NameController < ApplicationController
       this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
       that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
     )
-    WebmasterEmail.build(@user.email, content).deliver
+    WebmasterEmail.build(@user.email, content).deliver_now
     NameControllerTest.report_email(content) if Rails.env == "test"
   end
 

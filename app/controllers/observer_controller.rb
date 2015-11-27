@@ -1386,7 +1386,7 @@ class ObserverController < ApplicationController
     subject = param_lookup([:email, :subject], "")
     content = param_lookup([:email, :content], "")
     (@object.authors + UserGroup.reviewers.users).uniq.each do |receiver|
-      AuthorEmail.build(@user, receiver, @object, subject, content).deliver
+      AuthorEmail.build(@user, receiver, @object, subject, content).deliver_now
     end
     flash_notice(:request_success.t)
     redirect_with_query(controller: @object.show_controller,
@@ -1786,7 +1786,7 @@ class ObserverController < ApplicationController
     elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
     else
-      WebmasterEmail.build(@email, @content).deliver
+      WebmasterEmail.build(@email, @content).deliver_now
       flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to(action: "list_rss_logs")
     end
@@ -1798,7 +1798,7 @@ class ObserverController < ApplicationController
                   request.method == "POST"
     subject = params[:email][:subject]
     content = params[:email][:content]
-    UserEmail.build(@user, @target, subject, content).deliver
+    UserEmail.build(@user, @target, subject, content).deliver_now
     flash_notice(:runtime_ask_user_question_success.t)
     redirect_to(action: "show_user", id: @target.id)
   end
@@ -1809,7 +1809,7 @@ class ObserverController < ApplicationController
                   email_question(@observation) &&
                   request.method == "POST"
     question = params[:question][:content]
-    ObservationEmail.build(@user, @observation, question).deliver
+    ObservationEmail.build(@user, @observation, question).deliver_now
     flash_notice(:runtime_ask_observation_question_success.t)
     redirect_with_query(action: "show_observation", id: @observation.id)
   end
@@ -1819,7 +1819,7 @@ class ObserverController < ApplicationController
                   email_question(@image, :email_general_commercial) &&
                   request.method == "POST"
     commercial_inquiry = params[:commercial_inquiry][:content]
-    CommercialEmail.build(@user, @image, commercial_inquiry).deliver
+    CommercialEmail.build(@user, @image, commercial_inquiry).deliver_now
     flash_notice(:runtime_commercial_inquiry_success.t)
     redirect_with_query(controller: "image", action: "show_image",
                         id: @image.id)

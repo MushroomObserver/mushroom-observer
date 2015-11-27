@@ -242,7 +242,7 @@ class Comment < AbstractModel
       content  = "#{show_url}\n" \
                  "All users: #{logins.join(", ")}\n\n" \
                  "User: #{user.login}\nSummary: #{summary}\n\n#{comment}"
-      WebmasterEmail.build(MO.noreply_email_address, content, subject).deliver
+      WebmasterEmail.build(MO.noreply_email_address, content, subject).deliver_now
     end
   end
 

@@ -38,7 +38,7 @@ class QueuedEmail::CommentAdd < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     if comment
-      CommentEmail.build(user, to_user, comment.target, comment).deliver
+      CommentEmail.build(user, to_user, comment.target, comment).deliver_now
     end
   end
 end

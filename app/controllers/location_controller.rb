@@ -635,7 +635,7 @@ class LocationController < ApplicationController
                                               that: "##{merge.id}: " + merge.name,
                                               this_url: "#{MO.http_domain}/location/show_location/#{@location.id}",
                                               that_url: "#{MO.http_domain}/location/show_location/#{merge.id}")
-            WebmasterEmail.build(@user.email, content).deliver
+            WebmasterEmail.build(@user.email, content).deliver_now
           end
 
         # Otherwise it is safe to change the name.

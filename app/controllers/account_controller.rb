@@ -81,7 +81,7 @@ class AccountController < ApplicationController
         unless theme.blank?
           # I'm guessing this has something to do with spammer/hacker trying
           # to automate creation of accounts?
-          DeniedEmail.build(params["new_user"]).deliver
+          DeniedEmail.build(params["new_user"]).deliver_now
         end
         redirect_back_or_default(action: :welcome)
       else
@@ -106,7 +106,7 @@ class AccountController < ApplicationController
         else
           group = UserGroup.create_user(@new_user)
           flash_notice :runtime_signup_success.t
-          VerifyEmail.build(@new_user).deliver
+          VerifyEmail.build(@new_user).deliver_now
           redirect_back_or_default(action: :welcome)
         end
       end
@@ -192,7 +192,7 @@ class AccountController < ApplicationController
                     "  name=#{@user.name.inspect}\n" \
                     "  email=#{@user.email.inspect}\n" \
                     "  http://mushroomobserver.org/observer/show_user?id=#{@user.id}"
-          WebmasterEmail.build(@user.email, content, subject).deliver
+          WebmasterEmail.build(@user.email, content, subject).deliver_now
         end
       end
     end
@@ -206,7 +206,7 @@ class AccountController < ApplicationController
   # This is used by the "reverify" page to re-send the verification email.
   def send_verify # :nologin:
     if user = find_or_goto_index(User, params[:id].to_s)
-      VerifyEmail.build(user).deliver
+      VerifyEmail.build(user).deliver_now
       flash_notice :runtime_reverify_sent.t
       redirect_back_or_default(action: :welcome)
     end
@@ -282,7 +282,7 @@ class AccountController < ApplicationController
         @new_user.change_password(password)
         if @new_user.save
           flash_notice :runtime_email_new_password_success.t
-          PasswordEmail.build(@new_user, password).deliver
+          PasswordEmail.build(@new_user, password).deliver_now
           render(action: "login")
         else
           flash_object_errors(@new_user)

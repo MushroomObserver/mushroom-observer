@@ -15,6 +15,6 @@ class QueuedEmail::Registered < QueuedEmail
   end
 
   def deliver_email
-    RegistrationEmail.build(to_user, registration).deliver
+    RegistrationEmail.build(to_user, registration).deliver_now
   end
 end
