@@ -111,17 +111,22 @@ module SessionExtensions
       fill_in_initial_values!
     end
 
+    def find_value(elem, attr)
+      result = CGI.unescapeHTML(elem.attributes[attr] || "")
+      result.is_a?(Nokogiri::XML::Attr) ? result.value : result
+    end
+
     # Parse the default or initial values from the HTML and populate the
     # +inputs+ and +submits+ Arrays with the results.  Called automatically
     # by the constructor.
     def fill_in_initial_values!
       context.assert_select(form, "input, textarea, select") do |elems|
         for elem in elems
-          id   = CGI.unescapeHTML(elem.attributes["id"] || "")
-          name = CGI.unescapeHTML(elem.attributes["name"] || "")
-          val  = CGI.unescapeHTML(elem.attributes["value"] || "")
-          type = (elem.name == "input") ? elem.attributes["type"] : elem.name
-          disabled = elem.attributes["disabled"] == "disabled"
+          id   = find_value(elem, "id")
+          name = find_value(elem, "name")
+          val  = find_value(elem, "value")
+          type = (elem.name == "input") ? find_value(elem, "type") : elem.name
+          disabled = find_value(elem, "disabled") == "disabled"
 
           field = Field.new(
             node: elem,
