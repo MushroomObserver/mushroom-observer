@@ -354,7 +354,7 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_observation_with_gps
     obs = observations(:amateur_observation)
     assert(obs.lat && obs.long && !obs.location)
-    coll = TestCollapsible.new(obs)
+    coll = CollapsibleCollectionOfMappableObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_point(mapset, obs.lat, obs.long)
@@ -367,7 +367,7 @@ class CollapsibleMapTest < UnitTestCase
   def test_mapping_one_observation_with_location
     obs = observations(:minimal_unknown)
     assert(!obs.lat && !obs.long && obs.location)
-    coll = TestCollapsible.new(obs)
+    coll = CollapsibleCollectionOfMappableObjects.new(obs)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *obs.location.edges)
@@ -379,7 +379,7 @@ class CollapsibleMapTest < UnitTestCase
 
   def test_mapping_one_location
     loc = locations(:albion)
-    coll = TestCollapsible.new(loc)
+    coll = CollapsibleCollectionOfMappableObjects.new(loc)
     assert_equal(1, coll.mapsets.length)
     mapset = coll.mapsets.first
     assert_mapset_is_box(mapset, *loc.edges)
