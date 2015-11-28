@@ -56,18 +56,18 @@ jQuery(document).ready(function () {
                 return (jQuery('body').height() - window.innerHeight - scrollPos) < 300;
             })
             .flatMapLatest(function () {
-                var nextUrl = getUrlToFetch();
-                return Rx.Observable.just(nextUrl);
+                return Rx.Observable.just(getUrlToFetch());
             })
             .distinctUntilChanged()
             .flatMapLatest(function () {
-                return nextPageData;
+                return nextPageData; //prewarmed promise
             })
             .flatMapLatest(function (data) {
                 return Rx.Observable.just(
                     {
                         results: jQuery(jQuery(data).find('#results_block')),
-                        pager: jQuery(jQuery(data).find('.pagination')[0])
+                        pager: jQuery(jQuery(data).find('.pagination')[0]),
+                        currentPage: nextPage
                     }
                 );
             });
@@ -75,12 +75,13 @@ jQuery(document).ready(function () {
 
         var scrollSubscription = scrollObservable
             .subscribe(function (htmls) {
+                setTimeout(box_resizer, 1000);
                 currentPage = nextPage;
                 nextPage++;
                 jQuery('#results_block').append(htmls.results.html());
                 jQuery('.pagination').html(htmls.pager.html());
                 nextPageData = getNextPageData(getUrlToFetch()); //preload next page
-                setTimeout(box_resizer, 1000); //give it a second before trying to resize the boxes
+                 //give it a second before trying to resize the boxes
             },
             function (e) {
                 console.log('error', e);
@@ -91,8 +92,16 @@ jQuery(document).ready(function () {
     }
 
     //init if we are on a scrollable page
-    if (jQuery('#results_block').length > 0)
+    if (jQuery('#results_block').length > 0) {
+        var $translatorsCredit  = jQuery('#translators_credit');
+
+        if ($translatorsCredit.length > 0) {
+            // move the translators credit to the top of the page if it is currently visible
+            // otherwise it will not ever be reached
+            $translatorsCredit.prependTo('.results');
+        }
         infiniteScroll()
+    }
 
 
 });
