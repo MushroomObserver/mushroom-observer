@@ -73,7 +73,8 @@ jQuery(document).ready(function () {
             });
 
 
-        var scrollSubscription = scrollObservable
+        //Subscribe to the scroll observable.
+        scrollObservable
             .subscribe(function (htmls) {
                 setTimeout(box_resizer, 1000);
                 currentPage = nextPage;
@@ -93,15 +94,6 @@ jQuery(document).ready(function () {
 
     //init if we are on a scrollable page
     if (jQuery('#results_block').length > 0) {
-        var $translatorsCredit  = jQuery('#translators_credit');
-
-        if ($translatorsCredit.length > 0) {
-            // move the translators credit to the top of the page if it is currently visible
-            // otherwise it will not ever be reached
-            $translatorsCredit.prependTo('.results');
-        }
         infiniteScroll()
     }
-
-
 });

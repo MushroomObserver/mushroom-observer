@@ -1067,6 +1067,9 @@
   app_translators_credit_and_others: and others
   app_edit_translations: Edit All Translations
   app_edit_translations_on_page: Edit Translations on this Page
+  app_edit_translations_header: Edit Translations
+  app_edit_translations_all_pages: All pages
+  app_edit_translations_this_page: This page
 
   # These are general alerts that appear near the top of the page.
   app_no_ajax: Your Browser Is Out of Date

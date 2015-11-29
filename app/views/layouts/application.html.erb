@@ -67,6 +67,11 @@
     <!--NAVIGATION-->
     <div class="col-xs-8 col-lg-2 col-sm-2 sidebar-offcanvas hidden-print" id="navigation">
       <%= render(partial: "/shared/nav_left") %>
+      <div class="row">
+          <div class="col-xs-12 hidden-print">
+            <%= render(partial: "/shared/translator_credit") %>
+          </div>
+      </div>
     </div>
     <!--/NAVIGATION-->
 
@@ -121,9 +126,7 @@
         </div>
         <!--/MAIN_PAGE_CONTENT-->
 
-        <div class="col-xs-12 hidden-print">
-          <%= render(partial: "/shared/translator_credit") %>
-        </div>
+
       </div>
 
     </div>
