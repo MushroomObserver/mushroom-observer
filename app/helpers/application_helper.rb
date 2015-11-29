@@ -123,12 +123,12 @@ module ApplicationHelper
   #   link_to("Next Page", reload_with_args(page: 2))
   #
   def reload_with_args(new_args)
-    uri = request.url.sub(/^\w+:\/+[^\/]+/, "")
-
     # In the infnite scroll javascript, we want to make sure that the pagination html
     # which is returned does not lead to the ajax controller.
     if request.url.include? "ajax"
       uri = request.url.sub(/ajax/, "observer")
+    else
+      uri = request.url.sub(/^\w+:\/+[^\/]+/, "")
     end
 
     add_args_to_url(uri, new_args)
