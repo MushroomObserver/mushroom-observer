@@ -25,7 +25,6 @@ class LanguageExporterTest < UnitTestCase
 
   def test_yaml
     temp_file = "#{tmp_dir}/yaml_test"
-    YAML::ENGINE.yamler = "psych" # (fails)
     File.open(temp_file, "w:utf-8") do |fh|
       fh.puts "---"
       fh.puts "one: ενα"
