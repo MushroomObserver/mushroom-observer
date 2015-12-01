@@ -609,7 +609,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Deserialize params hash and cache it.
   def params
-    @params ||= params_parse_hash(@attributes["params"])
+    @params ||= params_parse_hash(@attributes["params"].value)
   end
 
   # Replace parameters Hash with a new Hash.
