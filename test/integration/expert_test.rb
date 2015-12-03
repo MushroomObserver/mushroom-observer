@@ -40,7 +40,7 @@ class ExpertTest < IntegrationTestCase
       "#{name4} = #{name5}"
 
     sess = login!(dick)
-    sess.get("name/bulk_name_edit")
+    sess.get("/name/bulk_name_edit")
     sess.open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
@@ -137,7 +137,7 @@ class ExpertTest < IntegrationTestCase
 
     # First attempt at creating a list.
     sess = login!(dick)
-    sess.get("species_list/create_species_list")
+    sess.get("/species_list/create_species_list")
     sess.open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)

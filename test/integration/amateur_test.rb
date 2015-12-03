@@ -9,7 +9,7 @@ class AmateurTest < IntegrationTestCase
   #  Test basic login heuristics.
   # -------------------------------
 
-  def ignore_test_login
+  def test_login
     # Start at index.
     get("/")
     save_path = path
@@ -69,7 +69,7 @@ class AmateurTest < IntegrationTestCase
   #  Test autologin cookies.
   # ----------------------------
 
-  def ignore_test_autologin
+  def test_autologin
     rolf_cookies = get_cookies(rolf, :true)
     mary_cookies = get_cookies(mary, true)
     dick_cookies = get_cookies(dick, false)
@@ -107,7 +107,7 @@ class AmateurTest < IntegrationTestCase
   #  Test everything about comments.
   # ----------------------------------
 
-  def ignore_test_post_comment
+  def test_post_comment
     obs = observations(:detailed_unknown)
     # (Make sure Katrina doesn't own any comments on this observation yet.)
     assert_false(obs.comments.any? { |c| c.user == katrina })
@@ -178,7 +178,8 @@ class AmateurTest < IntegrationTestCase
     # (There should be a link in there to look up Xylaria polymorpha.)
     assert_select("a[href*=lookup_name]", 1) do |links|
       url = links.first.attributes["href"]
-      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha", url)
+      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha",
+                   url.value)
     end
 
     # I grow weary of this comment.
@@ -194,7 +195,7 @@ class AmateurTest < IntegrationTestCase
   #  Test proposing and voting on names.
   # --------------------------------------
 
-  def ignore_test_proposing_names
+  def test_proposing_names
     namer_session = open_session.extend(NamerDsl)
     namer = katrina
 
@@ -217,7 +218,7 @@ class AmateurTest < IntegrationTestCase
     namer_session.successful_delete(obs, naming, text_name, orignal_name)
   end
 
-  def ignore_test_sessions
+  def test_sessions
     rolf_session = login!(rolf).extend(NamerDsl)
     mary_session = login!(mary).extend(VoterDsl)
     assert_not_equal(mary_session.session[:session_id], rolf_session.session[:session_id])
@@ -229,9 +230,9 @@ class AmateurTest < IntegrationTestCase
   #  partials, but not integration tests.)
   # ------------------------------------------------------------------------
 
-  def ignore_test_edit_image
+  def test_edit_image
     login("mary")
-    get("image/edit_image/1")
+    get("/image/edit_image/1")
   end
 
   # ------------------------------------------------------------------------
@@ -254,7 +255,7 @@ class AmateurTest < IntegrationTestCase
   #  together correctly.
   # -------------------------------------------------------------------------
 
-  def ignore_test_thumbnail_maps
+  def test_thumbnail_maps
     get("/1")
     assert_template("observer/show_observation")
     assert_select('div#map_div', 1)
@@ -281,7 +282,7 @@ class AmateurTest < IntegrationTestCase
   #  through redirects correctly.
   # -----------------------------------------------------------------------
 
-  def ignore_test_language_tracking
+  def test_language_tracking
     session = login(mary).extend(UserDsl)
     mary.locale = "el-GR"
     I18n.locale = mary.lang

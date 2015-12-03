@@ -34,7 +34,7 @@ class PostObservationTest < IntegrationTestCase
   end
 
   def open_create_observation_form
-    get(CREATE_OBSERVATION_PAGE)
+    get("/" + CREATE_OBSERVATION_PAGE)
     assert_template(LOGIN_PAGE)
     login!(katrina)
     assert_template(CREATE_OBSERVATION_PAGE)

@@ -60,17 +60,12 @@ module SessionExtensions
     end
   end
 
-  def clean_url(url)
-    return "/" + url unless url[0] == "/"
-    url
-  end
-
   # Call get/post_via_redirect, checking for 500 errors and missing language
   # tags.  Saves body of all successful responses for debugging, too.
   def process_with_error_checking(method, url, *args)
     @doing_with_error_checking = true
     Symbol.missing_tags = []
-    send("#{method.downcase}_via_redirect", clean_url(url), *args)
+    send("#{method.downcase}_via_redirect", url, *args)
     if status == 500
       if error = controller.instance_variable_get("@error")
         msg = "#{error}\n#{error.backtrace.join("\n")}"

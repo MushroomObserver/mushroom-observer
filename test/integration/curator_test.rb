@@ -18,7 +18,7 @@ class CuratorTest < IntegrationTestCase
 
   def test_herbarium_index_from_add_specimen
     sess = login!("mary", "testpassword", true)
-    sess.get("specimen/add_specimen/1")
+    sess.get("/specimen/add_specimen/1")
     sess.click(label: :herbarium_index.t)
     sess.assert_template("herbarium/index")
   end
@@ -62,7 +62,7 @@ class CuratorTest < IntegrationTestCase
     assert_not_equal(new_code, herbarium.code)
     curator = herbarium.curators[0]
     sess = login!(curator.login, "testpassword", true)
-    sess.get("herbarium/edit_herbarium?id=#{herbarium.id}")
+    sess.get("/herbarium/edit_herbarium?id=#{herbarium.id}")
     sess.open_form do |form|
       form.assert_value("code", herbarium.code)
       form.change("code", new_code)
@@ -77,7 +77,7 @@ class CuratorTest < IntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     sess = login!(user.login, "testpassword", true)
-    sess.get("herbarium/create_herbarium")
+    sess.get("/herbarium/create_herbarium")
     sess.open_form do |form|
       form.assert_value("herbarium_name", user.personal_herbarium_name)
       form.assert_value("code", "")
