@@ -41,7 +41,7 @@
 ################################################################################
 
 class ImageController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :advanced_search,
     :image_search,
     :images_by_user,
@@ -55,7 +55,7 @@ class ImageController < ApplicationController
     :test_upload_speed
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :add_image,
     :edit_image,
     :show_image

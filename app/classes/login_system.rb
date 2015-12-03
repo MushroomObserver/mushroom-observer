@@ -33,7 +33,7 @@ module LoginSystem
 
   # login_required filter. add
   #
-  #   before_filter :login_required
+  #   before_action :login_required
   #
   # if the controller should be under any rights management.
   # for finer access control you can overwrite

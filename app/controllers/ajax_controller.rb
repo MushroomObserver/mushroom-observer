@@ -31,7 +31,7 @@ require_dependency "geocoder"
 
 class AjaxController < ApplicationController
   disable_filters
-  around_filter :catch_ajax_errors
+  around_action :catch_ajax_errors
   layout false
 
   def catch_ajax_errors

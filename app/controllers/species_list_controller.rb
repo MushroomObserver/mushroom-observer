@@ -38,7 +38,7 @@
 class SpeciesListController < ApplicationController
   # require "rtf"
 
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :index_species_list,
     :list_species_lists,
     :make_report,
@@ -52,14 +52,14 @@ class SpeciesListController < ApplicationController
     :species_lists_for_project
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :create_species_list,
     :edit_species_list,
     :manage_species_lists,
     :show_species_list
   ]
 
-  before_filter :require_successful_user, only: [
+  before_action :require_successful_user, only: [
     :create_species_list, :name_lister
   ]
   ##############################################################################

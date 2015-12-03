@@ -56,7 +56,7 @@
 class NameController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :advanced_search,
     :authored_names,
     :eol,
@@ -84,7 +84,7 @@ class NameController < ApplicationController
     :test_index
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :approve_name,
     :bulk_name_edit,
     :change_synonyms,

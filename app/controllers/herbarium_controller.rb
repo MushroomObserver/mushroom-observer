@@ -1,6 +1,6 @@
 # virtual herbaria
 class HerbariumController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :herbarium_search,
     :list_herbariums,
     :show_herbarium,
