@@ -43,7 +43,7 @@ class LurkerTest < IntegrationTestCase
     click(label: "Site Stats",    in: :left_panel)
   end
 
-  def ignore_test_show_observation
+  def test_show_observation
     # Start with Observation #2 since it has everything.
     login("mary")
     get("/2")
@@ -92,7 +92,7 @@ class LurkerTest < IntegrationTestCase
     assert_select("a[href^='/2']")
   end
 
-  def ignore_test_search
+  def test_search
     get("/")
 
     # Search for a name.  (Only one.)
@@ -134,7 +134,7 @@ class LurkerTest < IntegrationTestCase
     end
   end
 
-  def ignore_test_search_next
+  def test_search_next
     get("/")
 
     # Search for a name.  (More than one.)
@@ -147,7 +147,7 @@ class LurkerTest < IntegrationTestCase
     end
   end
 
-  def ignore_test_obs_at_location
+  def test_obs_at_location
     # Start at distribution map for Fungi.
     get("/name/map/1")
 
