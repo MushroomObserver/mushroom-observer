@@ -119,7 +119,7 @@ class ObserverController < ApplicationController
   require_dependency "observation_report"
   require_dependency "pattern_search"
 
-  before_filter :login_required, except: MO.themes + [
+  before_action :login_required, except: MO.themes + [
     :advanced_search,
     :advanced_search_form,
     :ask_webmaster_question,
@@ -179,7 +179,7 @@ class ObserverController < ApplicationController
     :wrapup_2011
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :create_observation,
     :edit_observation,
     :show_obs,
@@ -200,7 +200,7 @@ class ObserverController < ApplicationController
     list_rss_logs
   end
 
-  # Provided just as a way to verify the before_filter.
+  # Provided just as a way to verify the before_action.
   # This page should always require the user to be logged in.
   # def login # :norobots:
   #   list_rss_logs

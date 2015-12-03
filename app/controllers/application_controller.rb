@@ -98,36 +98,36 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  around_filter :catch_errors # if Rails.env == "test"
-  before_filter :block_ip_addresses
-  before_filter :kick_out_robots
-  before_filter :create_view_instance_variable
-  before_filter :verify_authenticity_token
-  before_filter :fix_bad_domains
-  before_filter :autologin
-  before_filter :set_locale
-  before_filter :set_timezone
-  before_filter :refresh_translations
-  before_filter :track_translations
-  before_filter :check_user_alert
-  # before_filter :extra_gc
-  # after_filter  :extra_gc
-  # after_filter  :log_memory_usage
+  around_action :catch_errors # if Rails.env == "test"
+  before_action :block_ip_addresses
+  before_action :kick_out_robots
+  before_action :create_view_instance_variable
+  before_action :verify_authenticity_token
+  before_action :fix_bad_domains
+  before_action :autologin
+  before_action :set_locale
+  before_action :set_timezone
+  before_action :refresh_translations
+  before_action :track_translations
+  before_action :check_user_alert
+  # before_action :extra_gc
+  # after_action  :extra_gc
+  # after_action  :log_memory_usage
 
   # Disable all filters except set_locale and block_ip_addresses.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
-    skip_filter :verify_authenticity_token
-    skip_filter :fix_bad_domains
-    skip_filter :autologin
-    skip_filter :set_timezone
-    skip_filter :refresh_translations
-    skip_filter :track_translations
-    skip_filter :check_user_alert
-    # skip_filter   :extra_gc
-    # skip_filter   :log_memory_usage
-    before_filter :disable_link_prefetching
-    before_filter { User.current = nil }
+    skip_action_callback :verify_authenticity_token
+    skip_action_callback :fix_bad_domains
+    skip_action_callback :autologin
+    skip_action_callback :set_timezone
+    skip_action_callback :refresh_translations
+    skip_action_callback :track_translations
+    skip_action_callback :check_user_alert
+    # skip_action_callback   :extra_gc
+    # skip_action_callback   :log_memory_usage
+    before_action :disable_link_prefetching
+    before_action { User.current = nil }
   end
 
   ## @view can be used by classes to access some view specific features like render

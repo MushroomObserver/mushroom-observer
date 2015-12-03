@@ -1,6 +1,6 @@
 # create and edit Glossary terms
 class GlossaryController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :index,
     :show_past_glossary_term,
     :show_glossary_term

@@ -1,10 +1,10 @@
 class PublicationsController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :index,
     :show
   ]
 
-  before_filter :require_successful_user, only: [
+  before_action :require_successful_user, only: [
     :create
   ]
 
