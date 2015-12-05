@@ -44,7 +44,7 @@
 ################################################################################
 
 class AccountController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :email_new_password,
     :login,
     :logout_user,
@@ -57,7 +57,7 @@ class AccountController < ApplicationController
     :welcome
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :login,
     :signup,
     :prefs,

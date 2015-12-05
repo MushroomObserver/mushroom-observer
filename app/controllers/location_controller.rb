@@ -5,7 +5,7 @@ require "geocoder"
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :advanced_search,
     :help,
     :index_location,
@@ -32,7 +32,7 @@ class LocationController < ApplicationController
     :tweak
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :create_location,
     :create_location_description,
     :edit_location,
@@ -43,7 +43,7 @@ class LocationController < ApplicationController
     :show_past_location_description
   ]
 
-  before_filter :require_successful_user, only: [
+  before_action :require_successful_user, only: [
     :create_location_description
   ]
 

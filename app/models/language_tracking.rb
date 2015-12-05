@@ -3,13 +3,13 @@
 #  = Tracking Usage of Translations
 #
 #  Simple global mechanism for tracking which localization strings get used on
-#  a given page.  You would enable it in a +before_filter+ in your controller,
+#  a given page.  You would enable it in a +before_action+ in your controller,
 #  then Symbol#localize will have it make note of each tag that gets used
 #  throughout the process of rendering that page.  You can save this list of
 #  tags to a temporary file, and load it again later for use in a form, for
 #  example.  It will periodically clean up old temp files.
 #
-#    before_filter { Language.track_usage }
+#    before_action { Language.track_usage }
 #
 #    <%= if Language.tracking_usage
 #      handle = Language.save_tags

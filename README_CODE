@@ -206,7 +206,7 @@ templates.  Example:
   class ExampleController << ActionController
 
     # This causes autologin() to be run before every action.
-    before_filter :autologin
+    before_action :autologin
 
     def my_action
       case params[:mode]
