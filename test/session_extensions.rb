@@ -232,7 +232,7 @@ module SessionExtensions
         select = "a:match('href',?)"
         sargs << arg
       else
-        select = "a[href^=#{arg}]"
+        select = "a[href^='#{arg}']"
       end
     end
 

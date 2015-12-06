@@ -292,8 +292,8 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
     def check_name_description_form_defaults(form)
       form.assert_value("source_type", "public")
       form.assert_value("source_name", "")
-      form.assert_value("public_write", true)
-      form.assert_value("public", true)
+      form.assert_checked("public_write")
+      form.assert_checked("public")
       form.assert_value("notes", "")
       form.assert_enabled("source_type")
       form.assert_enabled("source_name")
@@ -374,9 +374,9 @@ class NameDescriptionIntegrationTest < IntegrationTestCase
 
     def assert_link_exists(name, val)
       if val
-        assert_select("a[href=#{name}]")
+        assert_select("a[href='#{name}']")
       else
-        assert_select("a[href=#{name}]", 0)
+        assert_select("a[href='#{name}']", 0)
       end
     end
   end

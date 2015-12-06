@@ -250,6 +250,18 @@ module SessionExtensions
       end
     end
 
+    def assert_checked(id, checked=true, msg = nil)
+      field = get_field!(id)
+      val = field.node["checked"]
+      if checked
+        msg ||= "Expected value of form checkbox #{id.inspect} to be checked."
+        context.assert_equal("checked", val, msg)
+      else
+        msg ||= "Expected value of form checkbox #{id.inspect} to be unchecked."
+        context.assert_nil(val, msg)
+      end
+    end
+
     # Make sure a given field is enabled for editing.
     def assert_enabled(id, msg = nil)
       field = get_field!(id)
