@@ -1,7 +1,14 @@
 require "test_helper"
 
+# temporarily use these extensions until webdriver is installed
+require "web_driver_extensions"
+
 # Test typical sessions of user who never creates an account or contributes.
 class LurkerTest < IntegrationTestCase
+  # temporarily use these extensions until webdriver is installed
+  # include here to avoid name conflict with MO extensions
+  include WebDriverExtensions
+
   def test_poke_around
     # Start at index.
     # Test page content rather than template because:
@@ -70,21 +77,4 @@ class LurkerTest < IntegrationTestCase
   def first_obs_in(capybara_result)
     capybara_result.select{ |r| r[:href] =~ %r{^/\d+} }.first
   end
-
-  # Save current page on the page stack
-  # Stop-gap until webkit or selenium is installed and working with Capybara
-  #   Then this method and calls to it should be removed.
-  def push_page
-    @page_stack ? @page_stack.push(current_path) : @page_stack = [current_path]
-  end
-
-  # Fakes clicking browser "Back" link
-  # Stop-gap until webkit or selenium is installed and working with Capybara
-  #   Then this method should be removed, and calls to it should instead use
-  #   appropriate Capybara method like Capybara::Webkit::Driver#go_back
-  #   which will better simulate clicking that link
-  def go_back
-    visit(@page_stack.pop)
-  end
-
 end
