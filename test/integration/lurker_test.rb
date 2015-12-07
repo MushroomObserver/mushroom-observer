@@ -6,6 +6,7 @@ require "test_helper"
 
 class LurkerTest < IntegrationTestCase
   def test_poke_around
+    skip("Re-written in Capybarish")
     # Start at index.
     get("/")
     assert_template("observer/list_rss_logs")
