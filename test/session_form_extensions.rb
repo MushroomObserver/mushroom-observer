@@ -216,15 +216,20 @@ module SessionExtensions
       get_field(id, :strict)
     end
 
+    def string_value(field)
+      return field unless field.respond_to?(:value)
+      string_value(field.value)
+    end
+
     # Find the field whose ID ends in the given String or matches the given
     # Regexp.  Returns its value as a String if found, else +nil+.
     def get_value(id)
-      get_field(id).value.strip
+      string_value(get_field(id)).strip
     end
 
     # Call get_value and flunk an assertion if field not found.
     def get_value!(id)
-      get_field(id, :strict).value.strip
+      string_value(get_field(id, :strict)).strip
     end
 
     # Make sure the form does _not_ have a given field.

@@ -14,18 +14,15 @@ class LurkerTest < IntegrationTestCase
     click(href: /^\/\d+\?/, in: :results)
     assert_template("observer/show_observation")
 
-    # Click on next (catches a bug seen in the wild).
-    push_page
+    # Click on prev/next
     click(label: "« Prev", in: :title)
-    go_back
+    click(label: "Next »", in: :title)
 
     # Click on the first image.
-    push_page
     click(label: :image, href: /show_image/)
-    # click(:label => :image, :href => /show_image.*full_size/)
-    go_back
 
     # Go back to observation and click on "About...".
+    click(label: "Show Observation")
     click(href: /show_name/)
     assert_template("name/show_name")
 
@@ -47,7 +44,6 @@ class LurkerTest < IntegrationTestCase
     # Start with Observation #2 since it has everything.
     login("mary")
     get("/2")
-    push_page
     # (make sure we're displaying original names of images)
     assert_match(/DSCN8835.JPG/u, response.body)
 
@@ -64,19 +60,19 @@ class LurkerTest < IntegrationTestCase
     assert_template("observer/show_user")
 
     # Check out location.
-    go_back
+    get("/2")
     click(label: "Burbank, California") # Don't include USA due to <span>
     assert_template("location/show_location")
 
     # Check out species list.
-    go_back
+    get("/2")
     click(label: "List of mysteries")
     assert_template("species_list/show_species_list")
     # (Make sure observation #2 is shown somewhere.)
     assert_select("a[href^='/2?']")
 
     # Click on name.
-    go_back
+    get("/2")
     # (Should be at least two links to show the name Fungi.)
     assert_select("a[href^='/name/show_name/1']", minimum: 2)
     click(label: /About.*Fungi/)
@@ -84,8 +80,7 @@ class LurkerTest < IntegrationTestCase
     assert_select("a[href^='/name/create_name_description/1']")
 
     # And lastly there are some images.
-    go_back
-
+    get("/2")
     assert_select("a[href^='/image/show_image']", minimum: 2)
     click(label: :image, href: /show_image/)
     # (Make sure observation #2 is shown somewhere.)
