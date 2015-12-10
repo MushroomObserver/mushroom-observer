@@ -11,35 +11,35 @@ class LurkerTest < IntegrationTestCase
 
   def test_poke_around
     # Start at index.
-    # Test page content rather than template because:
-    # (1) assert_template unavailable to Capybara
-    # (2) assert_template will be deprecated in Rails 5 (but available as a gem)
-    #     because (per DHH) testing content is a better practice
     visit(root_path)
-    # following gives more informative error message than
-    #   assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
+
+    # Test page content rather than template because:
+    #   assert_template unavailable to Capybara
+    #   assert_template will be deprecated in Rails 5 (but available as a gem)
+    #     because (per DHH) testing content is a better practice
+    # Following gives more informative error message than
+    # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal("#{:app_title.l }: Activity Log", page.title, "Wrong page")
 
     # Click on first observation in feed results
-    results_links = all(".results .rss-what a")
-    first_obs_in(results_links).click
+    first(:xpath, rss_observation_created_links_xpath).click
     assert_match(%r{#{:app_title.l }: Observation}, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
     # push_page is a stop-gap until a js-enabled driver is installed and working
-    push_page
-    click_link("« Prev")
-    go_back
+    go_back_after do
+      click_link("« Prev")
+    end
     assert_match(%r{#{:app_title.l }: Observation}, page.title, "Wrong page")
 
     # Click on the first image.
-    push_page
-    first(".show_images a[href^='/image/show_image']").click
-    assert_match(%r{#{:app_title.l }: Image}, page.title, "Wrong page")
+    go_back_after do
+      first(".show_images a[href^='/image/show_image']").click
+      assert_match(%r{#{:app_title.l }: Image}, page.title, "Wrong page")
+    end
 
     # Go back to observation and click on "About...".
-    go_back
     assert_match(%r{#{:app_title.l }: Observation}, page.title, "Wrong page")
     click_link("About ")
     assert_match(%r{#{:app_title.l }: Name}, page.title, "Wrong page")
@@ -73,8 +73,92 @@ class LurkerTest < IntegrationTestCase
     assert_equal("#{:app_title.l }: Site Statistics", page.title, "Wrong page")
   end
 
-  # css selectors cannot match a regex, so must use Ruby to match
-  def first_obs_in(capybara_result)
-    capybara_result.select{ |r| r[:href] =~ %r{^/\d+} }.first
+  # Xpath for 1st link in each feed item,
+  #   which items display "Observation Created"
+  def rss_observation_created_links_xpath
+    "(//div[contains(@class, 'rss-box-details')]"\
+      "[descendant::div[contains(@class, 'rss-detail') and"\
+        "normalize-space(text()) = 'Observation Created']]"\
+      "//a[1])"
+  end
+
+  def test_show_observation
+    # Use detailed_unknown since it has everything.
+    obs = observations(:detailed_unknown)
+    owner = obs.user
+    name = obs.name
+
+    # First login its observer
+    visit(root_path)
+    first(:link, "Login").click
+    assert_equal("#{:app_title.l }: Please login", page.title, "Wrong page")
+    fill_in("User name or Email address:", with: owner.login)
+    fill_in("Password:", with: "testpassword")
+    click_button("Login")
+    assert_equal("#{:app_title.l }: Activity Log", page.title, "Login failed")
+
+    visit("/#{obs.id}")
+    assert_match(%r{#{:app_title.l }: Observation #{obs.id}}, page.title,
+                 "Wrong page")
+
+    # Make sure we're displaying original names of images
+    img = Image.where(observation = obs.id).first
+    assert(page.has_content?(img.original_name),
+                             "Original filename of image not displayed")
+
+    save_path = current_path
+    click_link("Show Log")
+    click_link("Show Observation")
+    assert_equal(save_path, current_path,
+                   "Went to RSS log and returned, expected to be the same.")
+
+    # Check out User links and profile
+    go_back_after do
+      # Owner has done several things to it: (observation itself, naming, comment)
+      # plus a link to her is also in table of names for mobile).
+      assert(
+        assert_selector("#content a[href^='/observer/show_user/#{owner.id}']",
+                        minimum: 4))
+
+      first(:link, owner.name).click
+      assert_match(%r{Contribution Summary}, page.title, "Wrong page")
+    end
+
+    # Check out location.
+    go_back_after do
+      click_link(obs.location.name)
+      assert_match(%r{^#{:app_title.l }: Location}, page.title, "Login failed")
+    end
+
+    # Check out species list.
+    go_back_after do
+      list = SpeciesList.joins(:observations).
+                         where("observation_id = ?", obs.id).first
+      click_link(list.title)
+      assert_match(%r{^#{:app_title.l }: Species List: #{list.title}}, page.title,
+                   "Wrong page")
+
+      # (Make sure observation is shown somewhere.)
+      assert(has_selector?("a[href^='/#{obs.id}']"),
+                           "Missing a link to Observation")
+    end
+
+    # Check out Name
+    go_back_after do
+      # (Should be at least two links to show the name Fungi.)
+      assert(assert_selector("#content a[href^='/name/show_name/#{name.id}']",
+                      minimum: 2))
+
+      click_link("About #{name.text_name}")
+      # (Make sure the page contains create_name_description.)
+      assert(assert_selector(
+              "#content a[href^='/name/create_name_description/#{name.id}']"))
+    end
+
+    # Check out images
+    # There are some images
+    assert(assert_selector("#content img"))
+    # There are links to images
+    assert(assert_selector("#content a[href^='/image/show_image']", minimum: 2))
   end
 end

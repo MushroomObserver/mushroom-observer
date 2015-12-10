@@ -10,9 +10,11 @@
 #
 ################################################################################
 
+require 'simplecov'
+SimpleCov.start
 # Coveralls.wear! must occur before any of your application code is required
-require "coveralls"
-Coveralls.wear!("rails")
+# require "coveralls"
+# Coveralls.wear!("rails")
 
 # Allows test results to be reported back to runner IDEs
 require "minitest/reporters"
