@@ -224,4 +224,8 @@ module ApplicationHelper
     content_tag(:span, :select_file.t + file_field, class: "file-field btn") +
       content_tag(:span, :no_file_selected.t)
   end
+
+  def long_ago
+    Time.new(Time.now.year - 20)
+  end
 end

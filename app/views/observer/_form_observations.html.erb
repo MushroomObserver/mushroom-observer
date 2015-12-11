@@ -7,7 +7,12 @@
   <div class="col-xs-12 max-width-text">
     <%= label_tag(:observation_when_li, :WHEN.t + ":") %>
     <div class="form-group form-inline">
-      <%= date_select("observation", "when", {order: [:day, :month, :year], start_year: 1980, end_year: Time.now.year}, {class: "form-control", style: "margin-bottom: 5px;"}) %>
+      <%= date_select("observation",
+	  "when",
+	  {order: [:day, :month, :year],
+	  start_year: long_ago.year,
+	  end_year: Time.now.year},
+	  {class: "form-control", style: "margin-bottom: 5px;"}) %>
     </div>
   </div>
 </div>
@@ -257,7 +262,7 @@ jQuery(document).ready(function() {
                       <td>
                         <div class="form-inline">
                           <%= date_select(:good_image, :when, {object: image, index: image.id,
-                                          start_year: 1980, end_year: Time.now.year,
+                                          start_year: long_ago.year, end_year: Time.now.year,
                                           order: [:day, :month, :year]}, {class: "form-control form-control-sm",
                                           onchange: "CHANGED_DATES[#{image.id}] = true"}) %>
                         </div>

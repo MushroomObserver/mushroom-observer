@@ -22,7 +22,7 @@ class AmateurTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("login", "")
       form.assert_value("password", "")
-      form.assert_value("remember_me", true)
+      form.assert_checked("remember_me")
       form.change("login", "rolf")
       form.submit("Login")
     end
@@ -33,7 +33,7 @@ class AmateurTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("login", "rolf")
       form.assert_value("password", "")
-      form.assert_value("remember_me", true)
+      form.assert_checked("remember_me", false)
       form.change("password", "boguspassword")
       form.submit("Login")
     end
@@ -44,7 +44,7 @@ class AmateurTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("login", "rolf")
       form.assert_value("password", "")
-      form.assert_value("remember_me", true)
+      form.assert_checked("remember_me", false)
       form.change("password", "testpassword")
       form.submit("Login")
     end
@@ -362,10 +362,10 @@ class AmateurTest < IntegrationTestCase
       open_form do |form|
         form.assert_value("name_name", "")
         form.assert_value("vote_value", "")
-        form.assert_value("reason_1_check", false)
-        form.assert_value("reason_2_check", false)
-        form.assert_value("reason_3_check", false)
-        form.assert_value("reason_4_check", false)
+        form.assert_checked("reason_1_check", false)
+        form.assert_checked("reason_2_check", false)
+        form.assert_checked("reason_3_check", false)
+        form.assert_checked("reason_4_check", false)
         form.submit
       end
       assert_template("naming/create")
@@ -388,10 +388,10 @@ class AmateurTest < IntegrationTestCase
 
       open_form do |form|
         form.assert_value("name", text_name)
-        form.assert_value("reason_1_check", false)
-        form.assert_value("reason_2_check", false)
-        form.assert_value("reason_3_check", false)
-        form.assert_value("reason_4_check", false)
+        form.assert_checked("reason_1_check", false)
+        form.assert_checked("reason_2_check", false)
+        form.assert_checked("reason_3_check", false)
+        form.assert_checked("reason_4_check", false)
         form.select(/vote/, /call it that/i)
         form.submit
       end
@@ -445,11 +445,11 @@ class AmateurTest < IntegrationTestCase
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
-        form.assert_value("reason_1_check", true)
+        form.assert_checked("reason_1_check", false)
         form.assert_value("reason_1_notes", "")
-        form.assert_value("reason_2_check", true)
+        form.assert_checked("reason_2_check")
         form.assert_value("reason_2_notes", reason)
-        form.assert_value("reason_3_check", false)
+        form.assert_checked("reason_3_check", false)
         form.assert_value("reason_3_notes", "")
       end
       click(label: /cancel.*show/i)

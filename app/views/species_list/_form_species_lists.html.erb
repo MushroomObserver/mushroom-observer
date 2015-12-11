@@ -55,7 +55,7 @@
   <div class="col-xs-12 col-md-6 col-lg-4 max-width-text">
     <div class="form-group form-inline">
       <%= label_tag(:species_list_when, :WHEN.t + ":") %>
-      <%= date_select(:species_list, :when, {start_year: 1980, end_year: Time.now.year,
+      <%= date_select(:species_list, :when, {start_year: long_ago.year, end_year: Time.now.year,
                       order: [:day,:month,:year]}, {class: "form-control"}) %>
     </div>
 

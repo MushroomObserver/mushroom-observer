@@ -151,7 +151,13 @@ module SessionExtensions
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
       for key, value in expected_values
-        form.assert_value(key, value)
+        if value == true
+          form.assert_checked(key)
+        elsif value == false
+          form.assert_checked(key, false)
+        else
+          form.assert_value(key, value)
+        end
       end
     end
   end
@@ -232,7 +238,7 @@ module SessionExtensions
         select = "a:match('href',?)"
         sargs << arg
       else
-        select = "a[href^=#{arg}]"
+        select = "a[href^='#{arg}']"
       end
     end
 
