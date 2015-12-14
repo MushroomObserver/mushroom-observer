@@ -791,6 +791,7 @@ class ObserverControllerTest < FunctionalTestCase
     requires_login(:show_notifications,
                    id: observations(:coprinus_comatus_obs).id)
     assert_template(:show_notifications)
+    QueuedEmail.queue_emails(false)
   end
 
   def test_author_request
@@ -1220,6 +1221,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_equal(name.id, nam.name_id) # Make sure it's the right name
     assert_not_nil(obs.rss_log)
     assert_equal(count_before + 2, QueuedEmail.count)
+    QueuedEmail.queue_emails(false)
   end
 
   def test_create_observation_with_decimal_geolocation_and_unknown_name
