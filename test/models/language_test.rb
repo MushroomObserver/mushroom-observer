@@ -35,6 +35,7 @@ class LanguageTest < UnitTestCase
     # lang file.
     use_test_locales do
       str = translation_strings(:english_one)
+      orig_text = str.text
       en_text = "shazam"
       assert_not_equal(str.text, en_text)
       str.update!(text: en_text)
@@ -46,6 +47,10 @@ class LanguageTest < UnitTestCase
       fr_str.language.update_localization_file
       assert_not_equal(en_text, read_from_yaml(fr_str.language, fr_str.tag))
       assert_equal(en_text, read_from_yaml(str.language, fr_str.tag))
+
+      str.update!(text: orig_text)
+      str.update_localization
+      str.language.update_localization_file
     end
   end
 

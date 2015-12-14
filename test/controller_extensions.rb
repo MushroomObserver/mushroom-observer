@@ -328,14 +328,15 @@ module ControllerExtensions
   def assert_link_in_html(label, url_opts, _msg = nil)
     revised_opts = raise_params(url_opts)
     url = url_for(revised_opts)
-    assert_tag(:a, attributes: { href: url.gsub("&", "&amp;") }, content: label)
+    assert_select("a[href='#{url}']", text: label)
   end
 
   def assert_image_link_in_html(img_src, url_opts, _msg = nil)
     revised_opts = raise_params(url_opts)
     url = url_for(revised_opts)
-    assert_tag(:a, attributes: { href: url.gsub("&", "&amp;") }, child: { tag: "img",
-                                                                          attributes: { src: img_src } })
+    assert_select("a[href = '#{url}']>img") do
+      assert_select(":match('src', ?)", img_src)
+    end
   end
 
   # Assert that a form exists which posts to the given url.

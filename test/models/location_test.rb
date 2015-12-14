@@ -313,6 +313,7 @@ class LocationTest < UnitTestCase
                  new_description_version: desc.version
                 )
     assert_equal(4, QueuedEmail.count)
+    QueuedEmail.queue_emails(false)
   end
 
   def test_parse_latitude

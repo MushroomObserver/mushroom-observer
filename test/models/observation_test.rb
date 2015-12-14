@@ -206,6 +206,7 @@ class ObservationTest < UnitTestCase
     obs.change_vote(new_naming, 3)
     assert_equal(names(:peltigera), obs.reload.name)
     assert_equal(0, QueuedEmail.count)
+    QueuedEmail.queue_emails(false)
   end
 
   def test_email_notification_2
@@ -292,6 +293,7 @@ class ObservationTest < UnitTestCase
                  to: mary,
                  comment: new_comment.id
                 )
+    QueuedEmail.queue_emails(false)
   end
 
   def test_email_notification_3
@@ -403,6 +405,7 @@ class ObservationTest < UnitTestCase
                  observation: observations(:coprinus_comatus_obs).id,
                  note: "notes,location,added_image,removed_image"
                 )
+    QueuedEmail.queue_emails(false)
   end
 
   def test_email_notification_4
@@ -479,6 +482,7 @@ class ObservationTest < UnitTestCase
                  observation: 0,
                  note: "**__Coprinus comatus__** (O.F. Müll.) Pers. (3)"
                 )
+    QueuedEmail.queue_emails(false)
   end
 
   # Why is this disabled???? -JPH 20120413

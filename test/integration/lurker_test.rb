@@ -14,18 +14,15 @@ class LurkerTest < IntegrationTestCase
     click(href: /^\/\d+\?/, in: :results)
     assert_template("observer/show_observation")
 
-    # Click on next (catches a bug seen in the wild).
-    push_page
+    # Click on prev/next
     click(label: "« Prev", in: :title)
-    go_back
+    click(label: "Next »", in: :title)
 
     # Click on the first image.
-    push_page
     click(label: :image, href: /show_image/)
-    # click(:label => :image, :href => /show_image.*full_size/)
-    go_back
 
     # Go back to observation and click on "About...".
+    click(label: "Show Observation")
     click(href: /show_name/)
     assert_template("name/show_name")
 
@@ -47,7 +44,6 @@ class LurkerTest < IntegrationTestCase
     # Start with Observation #2 since it has everything.
     login("mary")
     get("/2")
-    push_page
     # (make sure we're displaying original names of images)
     assert_match(/DSCN8835.JPG/u, response.body)
 
@@ -59,37 +55,36 @@ class LurkerTest < IntegrationTestCase
                  "Went to RSS log and returned, expected to be the same.")
 
     # Mary has done several things to it (observation itself, naming, comment).
-    assert_select("a[href^=/observer/show_user/2]", minimum: 3)
+    assert_select("a[href^='/observer/show_user/2']", minimum: 3)
     click(label: "Mary Newbie")
     assert_template("observer/show_user")
 
     # Check out location.
-    go_back
+    get("/2")
     click(label: "Burbank, California") # Don't include USA due to <span>
     assert_template("location/show_location")
 
     # Check out species list.
-    go_back
+    get("/2")
     click(label: "List of mysteries")
     assert_template("species_list/show_species_list")
     # (Make sure observation #2 is shown somewhere.)
-    assert_select("a[href^=/2?]")
+    assert_select("a[href^='/2?']")
 
     # Click on name.
-    go_back
+    get("/2")
     # (Should be at least two links to show the name Fungi.)
-    assert_select("a[href^=/name/show_name/1]", minimum: 2)
+    assert_select("a[href^='/name/show_name/1']", minimum: 2)
     click(label: /About.*Fungi/)
     # (Make sure the page contains create_name_description.)
-    assert_select("a[href^=/name/create_name_description/1]")
+    assert_select("a[href^='/name/create_name_description/1']")
 
     # And lastly there are some images.
-    go_back
-
-    assert_select("a[href^=/image/show_image]", minimum: 2)
+    get("/2")
+    assert_select("a[href^='/image/show_image']", minimum: 2)
     click(label: :image, href: /show_image/)
     # (Make sure observation #2 is shown somewhere.)
-    assert_select("a[href^=/2]")
+    assert_select("a[href^='/2']")
   end
 
   def test_search
@@ -142,7 +137,7 @@ class LurkerTest < IntegrationTestCase
     form.change("pattern", "Fungi")
     form.select("type", "Observations")
     form.submit("Search")
-    assert_select("a[href^=/2]") do |links|
+    assert_select("a[href^='/2']") do |links|
       assert(links.all? { |l| l.to_s.match(/2\?q=/) })
     end
   end
@@ -163,23 +158,23 @@ class LurkerTest < IntegrationTestCase
     # Get a list of observations from there.  (Several so goes to index.)
     click(label: "Observations at this Location", in: :right_tabs)
     assert_template("observer/list_observations")
-    save_results = get_links("div.results a[href^=?]", /\/\d+/)
+    save_results = get_links("div.results a:match('href',?)", %r{^/\d+})
 
     # Try sorting differently.
     click(label: "User", in: :sort_tabs)
-    results = get_links("div.results a[href^=?]", /\/\d+/)
+    results = get_links("div.results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
     click(label: "Date", in: :sort_tabs)
-    results = get_links("div.results a[href^=?]", /\/\d+/)
+    results = get_links("div.results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
     click(label: "Reverse Order", in: :sort_tabs)
-    results = get_links("div.results a[href^=?]", /\/\d+/)
+    results = get_links("div.results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
     click(label: "Name", in: :sort_tabs)
-    results = get_links("div.results a[href^=?]", /\/\d+/)
+    results = get_links("div.results a:match('href',?)", %r{^/\d+})
     assert_equal(save_results.length, results.length)
     save_results = results
-    query_params = parse_query_params(save_results.first)
+    query_params = parse_query_params(save_results.first.value)
 
     # Go to first observation, and try stepping back and forth.
     click(href: /^\/\d+\?/, in: :results)
@@ -202,9 +197,10 @@ class LurkerTest < IntegrationTestCase
     assert_equal(save_path, @request.fullpath,
                  "Went next then prev, should be back where we started.")
     click(label: "Index", href: /index/, in: :title)
-    results = get_links("div.results a[href^=?]", /\/\d+/)
-    assert_equal(query_params, parse_query_params(results.first))
-    assert_equal(save_results, results,
+    results = get_links("div.results a:match('href',?)", %r{^/\d+})
+    assert_equal(query_params, parse_query_params(results.first.value))
+    assert_equal(save_results.map {|r| r.value},
+                 results.map {|r| r.value},
                  "Went to show_obs, screwed around, then back to index. " \
                  "But the results were not the same when we returned.")
   end

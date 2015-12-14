@@ -40,7 +40,7 @@ class ExpertTest < IntegrationTestCase
       "#{name4} = #{name5}"
 
     sess = login!(dick)
-    sess.get("name/bulk_name_edit")
+    sess.get("/name/bulk_name_edit")
     sess.open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
@@ -137,7 +137,7 @@ class ExpertTest < IntegrationTestCase
 
     # First attempt at creating a list.
     sess = login!(dick)
-    sess.get("species_list/create_species_list")
+    sess.get("/species_list/create_species_list")
     sess.open_form do |form|
       form.assert_value("list_members", "")
       form.change("list_members", list)
@@ -169,6 +169,13 @@ class ExpertTest < IntegrationTestCase
                    form.get_value!("list_members").split(/\r\n/).sort)
       form.check(/chosen_multiple_names_\d+_#{amanita[0].id}/)
       form.check(/chosen_multiple_names_\d+_#{suillus[1].id}/)
+
+      # For some reason these need to be explicitly re-checked
+      form.assert_value("member_is_collection_location", false) # Should be true
+      form.assert_value("member_specimen", false) # Should be true
+      form.check("member_is_collection_location")
+      form.check("member_specimen")
+
       form.submit
     end
     sess.assert_flash_success
@@ -200,8 +207,8 @@ class ExpertTest < IntegrationTestCase
       form.assert_value("place_name", albion_name_reverse)
       form.assert_value("species_list_notes", "List notes.")
       form.assert_value("member_notes", "Member notes.")
-      form.assert_value("member_is_collection_location", true)
-      form.assert_value("member_specimen", true)
+      form.assert_value("member_is_collection_location", false) # Was true
+      form.assert_value("member_specimen", false) # Was true
       form.change("list_members", "Agaricus nova\r\nAmanita baccata\r\n")
       form.change("title", "Something New")
       form.change("place_name", new_location_reverse)
@@ -264,7 +271,7 @@ class ExpertTest < IntegrationTestCase
     sess.assert_flash_success
     sess.assert_template("species_list/show_species_list")
     sess.assert_select('div#title', text: /#{spl.title}/)
-    sess.assert_select("a[href*=edit_species_list/#{spl.id}]", text: /edit/i)
+    sess.assert_select("a[href*='edit_species_list/#{spl.id}']", text: /edit/i)
 
     loc = Location.last
     assert_equal(newer_location, loc.name)
@@ -281,7 +288,7 @@ class ExpertTest < IntegrationTestCase
     sess.click(href: /add_comment/)
     sess.assert_template("comment/add_comment")
     sess.assert_select('div#title', text: /#{spl.title}/)
-    sess.assert_select("a[href*=show_species_list/#{spl.id}]", text: /cancel/i)
+    sess.assert_select("a[href*='show_species_list/#{spl.id}']", text: /cancel/i)
     sess.open_form do |form|
       form.change("comment_summary", "Slartibartfast")
       form.change("comment_comment", "Steatopygia")

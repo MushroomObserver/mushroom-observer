@@ -1,6 +1,6 @@
 language: ruby
 rvm:
-  - "2.1.5"
+  - "2.2.3"
 
 # make Travis use its legacy infrastructure
 sudo: true

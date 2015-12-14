@@ -27,6 +27,6 @@ class QueuedEmail::ConsensusChange < QueuedEmail
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
     return unless observation && old_name && new_name
-    ConsensusChangeEmail.build(self).deliver
+    ConsensusChangeEmail.build(self).deliver_now
   end
 end

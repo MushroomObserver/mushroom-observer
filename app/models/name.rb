@@ -1253,13 +1253,13 @@ class Name < AbstractModel
 
   def self.count_observations(names)
     ids = names.map(&:id)
-    counts_and_ids = Name.connection.select(%(
+    counts_and_ids = Name.connection.select_rows(%(
         SELECT count(*) c, names.id i FROM observations, names
         WHERE observations.name_id = names.id
         AND names.id IN (#{ids.join(", ")}) group by names.id
     ))
     result = {}
-    counts_and_ids.each { |row| result[row["i"]] = row["c"] }
+    counts_and_ids.each { |row| result[row[1]] = row[0] }
     result
   end
 

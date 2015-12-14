@@ -56,7 +56,7 @@
 class NameController < ApplicationController
   include DescriptionControllerHelpers
 
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :advanced_search,
     :authored_names,
     :eol,
@@ -84,7 +84,7 @@ class NameController < ApplicationController
     :test_index
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :approve_name,
     :bulk_name_edit,
     :change_synonyms,
@@ -624,7 +624,7 @@ class NameController < ApplicationController
         namings: @name.namings.length,
         url: "#{MO.http_domain}/name/show_name/#{@name.id}"
       )
-      WebmasterEmail.build(@user.email, content).deliver
+      WebmasterEmail.build(@user.email, content).deliver_now
       NameControllerTest.report_email(content) if Rails.env == "test"
     end
   end
@@ -732,7 +732,7 @@ class NameController < ApplicationController
       this_url: "#{MO.http_domain}/name/show_name/#{@name.id}",
       that_url: "#{MO.http_domain}/name/show_name/#{new_name.id}"
     )
-    WebmasterEmail.build(@user.email, content).deliver
+    WebmasterEmail.build(@user.email, content).deliver_now
     NameControllerTest.report_email(content) if Rails.env == "test"
   end
 

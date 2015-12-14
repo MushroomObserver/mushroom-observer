@@ -16,6 +16,6 @@ class QueuedEmail::AddSpecimenNotCurator < QueuedEmail
 
   def deliver_email
     # Make sure it hasn't been deleted since email was queued.
-    AddSpecimenEmail.build(user, to_user, specimen).deliver if specimen
+    AddSpecimenEmail.build(user, to_user, specimen).deliver_now if specimen
   end
 end

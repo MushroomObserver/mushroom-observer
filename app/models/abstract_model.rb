@@ -442,7 +442,7 @@ class AbstractModel < ActiveRecord::Base
   # * :updated_at! -- automatically log updates and raise to top of RSS feed
   # * :destroyed -- automatically log destruction
   # * :destroyed! -- automatically log destruction and raise to top of RSS feed
-  superclass_delegating_accessor :autolog_events
+  class_attribute :autolog_events
   self.autolog_events = []
 
   # Is this model capable of attaching an RssLog?

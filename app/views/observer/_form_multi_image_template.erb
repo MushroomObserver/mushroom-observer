@@ -58,7 +58,7 @@
             </div>
             <div class="col-sm-8 form-inline">
               <%= date_select(:temp_image, :when,
-                              {start_year: 1980, end_year: Time.now.year,
+                              {start_year: long_ago.year, end_year: Time.now.year,
                               order: [:day, :month, :year]},
                               class: "form-control form-control-sm") %>
               <div>

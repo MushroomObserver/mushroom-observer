@@ -29,7 +29,7 @@
 ################################################################################
 
 class CommentController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :comment_search,
     :index_comment,
     :list_comments,
@@ -41,7 +41,7 @@ class CommentController < ApplicationController
     :show_comments_for_user
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :add_comment,
     :edit_comment,
     :show_comment

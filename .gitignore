@@ -16,6 +16,7 @@ Icon?
 ehthumbs.db
 Thumbs.db
 *~
+.byebug_history
 
 # Ignore all logfiles and tempfiles.
 tmp/

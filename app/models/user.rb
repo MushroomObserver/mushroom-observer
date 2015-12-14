@@ -5,11 +5,11 @@
 #  Model describing a User.
 #
 #  Login is handled by lib/login_system.rb, a third-party package that we've
-#  updated slightly.  It is enforced by adding <tt>before_filter
+#  updated slightly.  It is enforced by adding <tt>before_action
 #  :login_required</tt> filters to the controllers.
 #
 #  We now support autologin or "remember me" login via a simple cookie and the
-#  application-wide <tt>before_filter :autologin</tt> filter in
+#  application-wide <tt>before_action :autologin</tt> filter in
 #  ApplicationController.
 #
 #  == Signup / Login Process

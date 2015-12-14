@@ -20,6 +20,6 @@ class QueuedEmail::UpdateRegistration < QueuedEmail
   end
 
   def deliver_email
-    UpdateRegistrationEmail.build(to_user, registration, before).deliver
+    UpdateRegistrationEmail.build(to_user, registration, before).deliver_now
   end
 end

@@ -2,9 +2,9 @@
 
 # Controller for handling the naming of observations
 class NamingController < ApplicationController
-  before_filter :login_required
+  before_action :login_required
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
     :create,
     :edit]
 

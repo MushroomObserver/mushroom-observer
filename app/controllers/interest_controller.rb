@@ -14,10 +14,10 @@
 ################################################################################
 
 class InterestController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
   ]
 
-  before_filter :disable_link_prefetching, except: [
+  before_action :disable_link_prefetching, except: [
   ]
 
   # Show list of objects user has expressed interest in.

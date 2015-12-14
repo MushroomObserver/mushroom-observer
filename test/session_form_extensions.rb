@@ -111,17 +111,22 @@ module SessionExtensions
       fill_in_initial_values!
     end
 
+    def find_value(elem, attr)
+      result = CGI.unescapeHTML(elem.attributes[attr] || "")
+      result.is_a?(Nokogiri::XML::Attr) ? result.value : result
+    end
+
     # Parse the default or initial values from the HTML and populate the
     # +inputs+ and +submits+ Arrays with the results.  Called automatically
     # by the constructor.
     def fill_in_initial_values!
       context.assert_select(form, "input, textarea, select") do |elems|
         for elem in elems
-          id   = CGI.unescapeHTML(elem.attributes["id"] || "")
-          name = CGI.unescapeHTML(elem.attributes["name"] || "")
-          val  = CGI.unescapeHTML(elem.attributes["value"] || "")
-          type = (elem.name == "input") ? elem.attributes["type"] : elem.name
-          disabled = elem.attributes["disabled"] == "disabled"
+          id   = find_value(elem, "id")
+          name = find_value(elem, "name")
+          val  = find_value(elem, "value")
+          type = (elem.name == "input") ? find_value(elem, "type") : elem.name
+          disabled = find_value(elem, "disabled") == "disabled"
 
           field = Field.new(
             node: elem,
@@ -211,15 +216,20 @@ module SessionExtensions
       get_field(id, :strict)
     end
 
+    def string_value(field)
+      return field unless field.respond_to?(:value)
+      string_value(field.value)
+    end
+
     # Find the field whose ID ends in the given String or matches the given
     # Regexp.  Returns its value as a String if found, else +nil+.
     def get_value(id)
-      get_field(id).value.strip
+      string_value(get_field(id)).strip
     end
 
     # Call get_value and flunk an assertion if field not found.
     def get_value!(id)
-      get_field(id, :strict).value.strip
+      string_value(get_field(id, :strict)).strip
     end
 
     # Make sure the form does _not_ have a given field.
@@ -229,6 +239,20 @@ module SessionExtensions
       context.assert(!field || (field.type == :hidden), msg)
     end
 
+    def selected_value(field)
+      selected = field.node.children.select {|x| x["selected"]}
+      return "" if selected == []
+      selected[0]["value"]
+    end
+
+    def field_value(field)
+      if field.type == :select
+        value = selected_value(field)
+        return value if value != ""
+      end
+      field.value.to_s.strip
+    end
+
     # Assert the value of a given input field.  Change the value of the given
     # input field.  Matches field whose ID _ends_ in the given String.
     # Converts everything to String since +nil+ isn't distinguished from
@@ -236,12 +260,24 @@ module SessionExtensions
     # expected value.
     def assert_value(id, val, msg = nil)
       field = get_field!(id)
-      val2 = field.value.to_s.strip
+      val2 = field_value(field)
       msg ||= "Expected value of form field #{id.inspect} to be #{val.inspect}."
       if val.is_a?(Regexp)
         context.assert_match(val, val2.to_s, msg)
       else
         context.assert_equal(val.to_s, val2.to_s, msg)
+      end
+    end
+
+    def assert_checked(id, checked=true, msg = nil)
+      field = get_field!(id)
+      val = field.node["checked"]
+      if checked
+        msg ||= "Expected value of form checkbox #{id.inspect} to be checked."
+        context.assert_equal("checked", val, msg)
+      else
+        msg ||= "Expected value of form checkbox #{id.inspect} to be unchecked."
+        context.assert_nil(val, msg)
       end
     end
 

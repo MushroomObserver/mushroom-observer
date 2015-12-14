@@ -317,18 +317,10 @@ class AjaxControllerTest < FunctionalTestCase
     # Act
     good_ajax_request(:vote, type: :image, id: 1, value: 3)
 
-    assert_tag "a", attributes: {
-      href: "/image/show_image/1?vote=0"
-    }
-    assert_tag "a", attributes: {
-      href: "/image/show_image/1?vote=1"
-    }
-    assert_tag "a", attributes: {
-      href: "/image/show_image/1?vote=2"
-    }
-    assert_tag "a", attributes: {
-      href: "/image/show_image/1?vote=4"
-    }
+    assert_select("a[href='/image/show_image/1?vote=0']")
+    assert_select("a[href='/image/show_image/1?vote=1']")
+    assert_select("a[href='/image/show_image/1?vote=2']")
+    assert_select("a[href='/image/show_image/1?vote=4']")
   end
 
   def test_image_vote_renders_correct_data_attributes

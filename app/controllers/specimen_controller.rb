@@ -1,5 +1,5 @@
 class SpecimenController < ApplicationController
-  before_filter :login_required, except: [
+  before_action :login_required, except: [
     :specimen_search,
     :list_specimens,
     :show_specimen,

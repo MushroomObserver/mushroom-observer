@@ -1623,6 +1623,7 @@ class NameTest < UnitTestCase
                  new_description_version: 0,
                  review_status: "no_change"
                 )
+    QueuedEmail.queue_emails(false)
   end
 
   def test_misspelling

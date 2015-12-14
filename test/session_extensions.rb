@@ -151,7 +151,13 @@ module SessionExtensions
   def assert_form_has_correct_values(expected_values)
     open_form do |form|
       for key, value in expected_values
-        form.assert_value(key, value)
+        if value == true
+          form.assert_checked(key)
+        elsif value == false
+          form.assert_checked(key, false)
+        else
+          form.assert_value(key, value)
+        end
       end
     end
   end
@@ -173,7 +179,7 @@ module SessionExtensions
     form = nil
     if args == []
       action = path.sub(/\?.*/, "")
-      args << "form[action^=#{action}]"
+      args << "form[action^='#{action}']"
     end
     assert_select(*args) do |elems|
       assert_equal(1, elems.length,
@@ -229,14 +235,10 @@ module SessionExtensions
     # Filter links based on URL.
     if arg = args[:href]
       if arg.is_a?(Regexp)
-        if arg.to_s.match(/^..-mix:\^/)
-          select = "a[href^=?]"
-        else
-          select = "a[href*=?]"
-        end
+        select = "a:match('href',?)"
         sargs << arg
       else
-        select = "a[href^=#{arg}]"
+        select = "a[href^='#{arg}']"
       end
     end
 
@@ -318,10 +320,10 @@ module SessionExtensions
   end
 
   def assert_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}=#{url}]", { minimum: 1 }, "Expected to find link to #{url}")
+    assert_select("a[href#{mod}='#{url}']", { minimum: 1 }, "Expected to find link to #{url}")
   end
 
   def assert_no_link_exists_general_case(url, mod)
-    assert_select("a[href#{mod}=#{url}]", { count: 0 }, "Shouldn't be any links to #{url}")
+    assert_select("a[href#{mod}='#{url}']", { count: 0 }, "Shouldn't be any links to #{url}")
   end
 end

@@ -22,7 +22,7 @@ class AmateurTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("login", "")
       form.assert_value("password", "")
-      form.assert_value("remember_me", true)
+      form.assert_checked("remember_me")
       form.change("login", "rolf")
       form.submit("Login")
     end
@@ -33,7 +33,7 @@ class AmateurTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("login", "rolf")
       form.assert_value("password", "")
-      form.assert_value("remember_me", true)
+      form.assert_checked("remember_me", false)
       form.change("password", "boguspassword")
       form.submit("Login")
     end
@@ -44,7 +44,7 @@ class AmateurTest < IntegrationTestCase
     open_form do |form|
       form.assert_value("login", "rolf")
       form.assert_value("password", "")
-      form.assert_value("remember_me", true)
+      form.assert_checked("remember_me", false)
       form.change("password", "testpassword")
       form.submit("Login")
     end
@@ -130,7 +130,7 @@ class AmateurTest < IntegrationTestCase
     # (Make sure the form is for the correct object!)
     assert_objs_equal(obs, assigns(:target))
     # (Make sure there is a tab to go back to show_observation.)
-    assert_select("div#right_tabs a[href=/#{obs.id}]")
+    assert_select("div#right_tabs a[href='/#{obs.id}']")
 
     open_form(&:submit)
     assert_template("comment/add_comment")
@@ -153,8 +153,8 @@ class AmateurTest < IntegrationTestCase
     assert_match(summary, response.body)
     assert_match(message, response.body)
     # (Make sure there is an edit and destroy control for the new comment.)
-    assert_select("a[href*=edit_comment/#{com.id}]", 1)
-    assert_select("a[href*=destroy_comment/#{com.id}]", 1)
+    assert_select("a[href*='edit_comment/#{com.id}']", 1)
+    assert_select("a[href*='destroy_comment/#{com.id}']", 1)
 
     # Try changing it.
     click(label: /edit/i, href: /edit_comment/)
@@ -178,7 +178,8 @@ class AmateurTest < IntegrationTestCase
     # (There should be a link in there to look up Xylaria polymorpha.)
     assert_select("a[href*=lookup_name]", 1) do |links|
       url = links.first.attributes["href"]
-      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha", url)
+      assert_equal("#{MO.http_domain}/observer/lookup_name/Xylaria+polymorpha",
+                   url.value)
     end
 
     # I grow weary of this comment.
@@ -231,7 +232,7 @@ class AmateurTest < IntegrationTestCase
 
   def test_edit_image
     login("mary")
-    get("image/edit_image/1")
+    get("/image/edit_image/1")
   end
 
   # ------------------------------------------------------------------------
@@ -244,7 +245,7 @@ class AmateurTest < IntegrationTestCase
   def test_user_dropdown_avaiable
     session = login("dick")
     session.get("/")
-    session.assert_tag(tag: "li", attributes: { id: "user_drop_down" })
+    session.assert_select("li#user_drop_down")
     links = session.css_select("li#user_drop_down a")
     assert_equal(links.length, 7)
   end
@@ -340,7 +341,7 @@ class AmateurTest < IntegrationTestCase
   module NamerDsl
     def propose_then_login(namer, obs)
       get("/#{obs.id}")
-      assert_select("a[href*=naming/edit], a[href*=naming/destroy]", false)
+      assert_select("a[href*='naming/edit'], a[href*='naming/destroy']", false)
       click(label: /propose.*name/i)
       assert_template("account/login")
       open_form do |form|
@@ -356,15 +357,15 @@ class AmateurTest < IntegrationTestCase
       # (Make sure the form is for the correct object!)
       assert_objs_equal(obs, assigns(:params).observation)
       # (Make sure there is a tab to go back to show_observation.)
-      assert_select("div#right_tabs a[href=/#{obs.id}]")
+      assert_select("div#right_tabs a[href='/#{obs.id}']")
 
       open_form do |form|
         form.assert_value("name_name", "")
         form.assert_value("vote_value", "")
-        form.assert_value("reason_1_check", false)
-        form.assert_value("reason_2_check", false)
-        form.assert_value("reason_3_check", false)
-        form.assert_value("reason_4_check", false)
+        form.assert_checked("reason_1_check", false)
+        form.assert_checked("reason_2_check", false)
+        form.assert_checked("reason_3_check", false)
+        form.assert_checked("reason_4_check", false)
         form.submit
       end
       assert_template("naming/create")
@@ -387,10 +388,10 @@ class AmateurTest < IntegrationTestCase
 
       open_form do |form|
         form.assert_value("name", text_name)
-        form.assert_value("reason_1_check", false)
-        form.assert_value("reason_2_check", false)
-        form.assert_value("reason_3_check", false)
-        form.assert_value("reason_4_check", false)
+        form.assert_checked("reason_1_check", false)
+        form.assert_checked("reason_2_check", false)
+        form.assert_checked("reason_3_check", false)
+        form.assert_checked("reason_4_check", false)
         form.select(/vote/, /call it that/i)
         form.submit
       end
@@ -409,8 +410,8 @@ class AmateurTest < IntegrationTestCase
       assert_match(text_name, response.body)
       # (Make sure there is an edit and destroy control for the new naming.)
       # (Now two: one for wide-screen, one for mobile.)
-      assert_select("a[href*=naming/edit/#{naming.id}]", 2)
-      assert_select("a[href*=naming/destroy/#{naming.id}]", 2)
+      assert_select("a[href*='naming/edit/#{naming.id}']", 2)
+      assert_select("a[href*='naming/destroy/#{naming.id}']", 2)
 
       # Try changing it.
       author = "(Pers.) Grev."
@@ -444,11 +445,11 @@ class AmateurTest < IntegrationTestCase
       assert_template("naming/edit")
       open_form do |form|
         form.assert_value("name", "#{text_name} #{author}")
-        form.assert_value("reason_1_check", true)
+        form.assert_checked("reason_1_check", false)
         form.assert_value("reason_1_notes", "")
-        form.assert_value("reason_2_check", true)
+        form.assert_checked("reason_2_check")
         form.assert_value("reason_2_notes", reason)
-        form.assert_value("reason_3_check", false)
+        form.assert_checked("reason_3_check", false)
         form.assert_value("reason_3_notes", "")
       end
       click(label: /cancel.*show/i)
