@@ -238,15 +238,12 @@ class TranslationControllerTest < FunctionalTestCase
   def test_edit_translation_form_post_save_greek
     use_test_locales do
       initial_locale = I18n.locale
-      print "\ninitial one: #{:one.l}, local: #{I18n.locale}\n"
       I18n.locale = "el"
       greek_one = :one.l
-      print "\ngreek one: #{:one.l}, local: #{I18n.locale}\n"
       I18n.locale = initial_locale
       login("rolf")
       translation_for_one(:edit_translations, "el-GR", "ichi")
       assert_flash_success
-      print "\nfailing one: #{:one.l}, local: #{I18n.locale}\n"
       assert_equal("one", :one.l)
       assert_select("input[type=submit][value=#{:SAVE.l}]", 1)
       assert_textarea_value(:tag_one, "ichi")
