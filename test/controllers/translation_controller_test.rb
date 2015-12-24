@@ -189,7 +189,7 @@ class TranslationControllerTest < FunctionalTestCase
          tag: "one",
          tag_one: value,
          commit: :SAVE.l
-         )
+        )
   end
 
   def test_edit_translation_form_post_save_z
@@ -253,6 +253,7 @@ class TranslationControllerTest < FunctionalTestCase
       I18n.locale = "el"
       assert_equal("ichi", :one.l)
       translation_for_one(:edit_translations, "el-GR", greek_one)
+      I18n.locale = initial_locale
     end
   end
 
@@ -308,7 +309,8 @@ class TranslationControllerTest < FunctionalTestCase
 
       I18n.locale = "el"
       assert_equal("ichi", :one.l)
-      translation_for_one(:edit_translations_ajax_post, "en-US", greek_one)
+      translation_for_one(:edit_translations_ajax_post, "el-GR", greek_one)
+      I18n.locale = "en"
     end
   end
 
