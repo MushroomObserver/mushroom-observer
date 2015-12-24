@@ -10,13 +10,16 @@
 #
 ################################################################################
 
+# Coveralls.wear! must occur before any of your application code is required
+require "coveralls"
+Coveralls.wear!("rails")
+
 # Allows test results to be reported back to runner IDEs
 require "minitest/reporters"
 MiniTest::Reporters.use!
 
-# Coveralls.wear! must occur before any of your application code is required
-require "coveralls"
-Coveralls.wear!("rails")
+# Allow simuluation of user-browser interaction with capybara
+require "capybara/rails"
 
 ENV["RAILS_ENV"] ||= "test"
 require File.expand_path("../../config/environment", __FILE__)
@@ -96,4 +99,9 @@ class ActiveSupport::TestCase
     FileUtils.rm_rf(MO.local_image_files)
     UserGroup.clear_cache_for_unit_tests
   end
+end
+
+# Make the Capybara DSL available in all integration tests
+class ActionDispatch::IntegrationTest
+  include Capybara::DSL
 end
