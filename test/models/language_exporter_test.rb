@@ -206,9 +206,12 @@ class LanguageExporterTest < UnitTestCase
       data = File.open(file, "r:utf-8") do |fh|
         YAML.load(fh)
       end
+      print "\nFile read failed for #{file}\n" if data == false
       for tag, str in data
-        assert(tag.is_a?(String), "#{file} #{tag}: tag is a #{tag.class} not a String!")
-        assert(str.is_a?(String), "#{file} #{tag}: value is a #{str.class} not a String!")
+        assert(tag.is_a?(String),
+               "#{file} #{tag}: tag is a #{tag.class} not a String!")
+        assert(str.is_a?(String),
+               "#{file} #{tag}: value is a #{str.class} not a String!")
       end
       lines = @official.send_private(:format_export_file, data, data)
       new_data = YAML.load(lines.join)

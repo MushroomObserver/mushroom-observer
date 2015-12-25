@@ -93,6 +93,7 @@ class ConferenceControllerTest < FunctionalTestCase
   end
 
   def test_register_post
+    QueuedEmail.queue_emails(false)
     registrations = ConferenceRegistration.count
     params = create_registration_params
     post(:register, params)
@@ -106,6 +107,7 @@ class ConferenceControllerTest < FunctionalTestCase
   end
 
   def test_reregister_post
+    QueuedEmail.queue_emails(false)
     registrations = ConferenceRegistration.count
     previous_registration = conference_registrations(:njw_at_msa)
     params = create_registration_params

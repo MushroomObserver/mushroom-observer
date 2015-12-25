@@ -144,8 +144,9 @@ MushroomObserver::Application.configure do
   # config.action_controller.asset_host = "http://assets.example.com"
 
   # Precompile additional assets.
-  # application.js, application.css, and all non-JS/CSS in app/assets folder are
-  # already added.
+  # application.js, application.css, and all non-JS/CSS in app/assets
+  # folder are already added.
+
   # Precompile stuff aside from application.js, application.css, all images.
   config.assets.precompile += %w(
 
