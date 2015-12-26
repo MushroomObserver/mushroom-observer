@@ -105,7 +105,7 @@ class AccountController < ApplicationController
           flash_object_errors(@new_user)
         else
           group = UserGroup.create_user(@new_user)
-          flash_notice :runtime_signup_success.t
+          flash_notice (:runtime_signup_success.tp + :email_spam_notice.t)
           VerifyEmail.build(@new_user).deliver_now
           redirect_back_or_default(action: :welcome)
         end
@@ -207,7 +207,7 @@ class AccountController < ApplicationController
   def send_verify # :nologin:
     if user = find_or_goto_index(User, params[:id].to_s)
       VerifyEmail.build(user).deliver_now
-      flash_notice :runtime_reverify_sent.t
+      flash_notice (:runtime_reverify_sent.tp + :email_spam_notice.t)
       redirect_back_or_default(action: :welcome)
     end
   end
@@ -281,7 +281,8 @@ class AccountController < ApplicationController
         password = String.random(10)
         @new_user.change_password(password)
         if @new_user.save
-          flash_notice :runtime_email_new_password_success.t
+          flash_notice (:runtime_email_new_password_success.tp +
+                        :email_spam_notice.t)
           PasswordEmail.build(@new_user, password).deliver_now
           render(action: "login")
         else
