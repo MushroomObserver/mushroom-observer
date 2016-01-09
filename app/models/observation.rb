@@ -364,12 +364,12 @@ class Observation < AbstractModel
     result
   end
 
-  def owner_favorite_votes
-    votes.where(user_id: user_id, favorite: true)
-  end
-
-  def owner_favorite_vote
-    owner_favorite_votes.first
+  def owner_favorite_or_explanation
+    if showable_owner_id?
+      owners_only_favorite_name.format_name
+    else
+      :show_observation_no_clear_preference
+    end
   end
 
   def owners_only_favorite_name
@@ -377,18 +377,22 @@ class Observation < AbstractModel
     favs[0].naming.name if favs.count == 1
   end
 
+  def owner_favorite_vote
+    owner_favorite_votes.first
+  end
+
+  def owner_favorite_votes
+    votes.where(user_id: user_id, favorite: true)
+  end
+
   # show Observer ID? (observer's identification of Observation)
   # (in code, Observer ID is "owner_id")
   def show_owner_id?
-    User.view_owner_id_on? && showable_owner_id?
+    User.view_owner_id_on?
   end
 
   def showable_owner_id?
-    owner_id_differs? && owner_sure_enough? && owner_id_known?
-  end
-
-  def owner_id_differs?
-    name != try(:owners_only_favorite_name)
+    owner_sure_enough? && owner_id_known?
   end
 
   def owner_sure_enough?
