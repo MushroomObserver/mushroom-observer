@@ -568,7 +568,7 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_observation,
                   id: observations(:owner_multiple_favorites).id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_unique_owner_id.t}/,
+                  { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
                   "Observation should show lack of Observer preference")
   end
@@ -578,7 +578,7 @@ class ObserverControllerTest < FunctionalTestCase
     get_with_dump(:show_observation,
                   id: observations(:owner_uncertain_favorite).id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_unique_owner_id.t}/,
+                  { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
                   "Observation should show lack of Observer preference")
   end
@@ -588,7 +588,7 @@ class ObserverControllerTest < FunctionalTestCase
     obs = observations(:owner_only_favorite_eq_fungi)
     get_with_dump(:show_observation, id: obs.id)
     assert_select("div[class *= 'owner-id']",
-                  { text: /#{:show_observation_no_unique_owner_id.t}/,
+                  { text: /#{:show_observation_no_clear_preference.t}/,
                     count: 1 },
                   "Observation should show lack of Observer preference")
   end
