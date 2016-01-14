@@ -136,8 +136,8 @@ MushroomObserver::Application.configure do
   config.water_users = []
   config.oil_users   = []
 
-  # List of IP addresses to blacklist.
-  config.blocked_ip_addresses = []
+  # List of IP addresses to blacklist no longer in Rails
+  # Instead will be handled in Iptables
 
   # Default "secret key", see rails docs.
   config.secret_key_base = "a" * 30
