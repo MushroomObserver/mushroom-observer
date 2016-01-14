@@ -75,6 +75,9 @@ gem "byebug", group: [:development, :test]
 # Fake web responses in test mode
 gem "fakeweb", "~> 1.3", group: :test
 
+# Use capybara to simulate user-browser interaction
+gem "capybara"
+
 # Performance tests for Rails >= 4.0
 # See https://github.com/rails/rails-perftest
 # gem "rails-perftest", group: :test
