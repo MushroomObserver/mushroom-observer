@@ -1,8 +1,7 @@
 <%
   @title = :email_welcome.t(user: @unverified_user.legal_name)
 %>
-
 <div class="max-width-text">
-  <%= :reverify_note.tp(user: @unverified_user.login) %>
+  <%= :reverify_note.tp(user: @unverified_user.login) + :email_spam_notice.tp %>
   <%= link_to(:reverify_link.t, action: :send_verify, id: @unverified_user.id) %>
 </div>
