@@ -1514,7 +1514,9 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_owner_id: View Observer identification of Observations?
+  prefs_view_owner_id: View Observer's Preferred ID?
+  prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
+
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -1723,8 +1725,8 @@
   show_observation_title: "[:OBSERVATION]: [name]"
   show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
-  show_observation_owner_id: Observer ID
-  view_owner_id_help: When checked, causes Observations to display Observer ID (the observer's choice of name for the taxon), if it is different from consensus and if observer is sufficiently confident of his/her identification.
+  show_observation_owner_id: Observer Preference
+  show_observation_no_clear_preference: no clear preference
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
