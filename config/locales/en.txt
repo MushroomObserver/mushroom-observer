@@ -1248,7 +1248,7 @@
   form_names_author_help: "The author citation using the standard ICBN format.\nE.g., \"(Singer) Jenkins\"."
   form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
-  form_names_citation_textilize_note: Citations can be formatted using the Textile markup system.
+  form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank.  Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/> Genus: _Agaricus_<br/>"
   form_names_gen_desc_help: Describe the general appearance of this taxon.
