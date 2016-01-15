@@ -668,6 +668,7 @@
   are_you_sure: Are you sure?
   click_for_map: Click for map
   google_images: Google Images
+  show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
   permission_denied: Permission denied.
@@ -1300,6 +1301,7 @@
   form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
   form_observations_use_date: Use this date
   form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
+  form_observations_gps_info: "We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation."
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
