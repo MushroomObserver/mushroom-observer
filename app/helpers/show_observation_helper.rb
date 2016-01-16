@@ -28,7 +28,7 @@ module ShowObservationHelper
     return unless obs.show_owner_id?
     capture do
       concat(:show_observation_owner_id.t + ": ")
-      concat(obs.owners_only_favorite_name.format_name.t)
+      concat(obs.owner_favorite_or_explanation.t)
     end
   end
 end

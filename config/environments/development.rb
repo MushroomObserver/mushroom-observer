@@ -109,6 +109,9 @@ MushroomObserver::Application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  # Enable web console for MushroomObserver VM
+  config.web_console.whitelisted_ips = "10.0.2.2"
 end
 
 file = File.expand_path("../../consts-site.rb", __FILE__)

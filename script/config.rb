@@ -55,6 +55,7 @@ MO.active_support    = Configuration.new
 MO.active_record     = Configuration.new
 MO.assets            = Configuration.new
 MO.i18n              = Configuration.new
+MO.web_console       = Configuration.new
 
 def image_servers
   map = {

@@ -668,6 +668,7 @@
   are_you_sure: Are you sure?
   click_for_map: Click for map
   google_images: Google Images
+  show_on_map: Show on map
   many_times: "[num] times"
   one_time: once
   permission_denied: Permission denied.
@@ -1248,7 +1249,7 @@
   form_names_author_help: "The author citation using the standard ICBN format.\nE.g., \"(Singer) Jenkins\"."
   form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
   form_names_citation_help: Citation for the publication of this name.
-  form_names_citation_textilize_note: Citations can be formatted using the Textile markup system.
+  form_names_citation_textilize_note: Citations can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank.  Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/> Genus: _Agaricus_<br/>"
   form_names_gen_desc_help: Describe the general appearance of this taxon.
@@ -1300,6 +1301,7 @@
   form_observations_delete_specimens_help: This observation has one or more specimen records. If a specimen has been destroyed, please delete the specimen record by returning to the observation, clicking the specimen link and deleting from there.
   form_observations_use_date: Use this date
   form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
+  form_observations_gps_info: "We were able to detect GPS coordinates in the image(s) you attached. Select one of the coordinates then click 'update' to apply the coordinates to your observation."
   form_observations_set_observation_date_to: Set observation date to
   form_observations_set_image_dates_to: Set image dates to
   form_observations_image_too_big: This image is too large. Images must be less than [:max]Mb in file size.
@@ -1431,6 +1433,8 @@
   login_forgot_password: I forgot my password.  "Email me a new one.":/account/email_new_password
   login_no_account: I don't have an account.  "Create a new account.":/account/signup
   login_having_problems: If you are having problems logging into your account, send "email to the webmaster":/observer/ask_webmaster_question.
+  email_new_password_help: When you complete this page and click "Send", we will send you an email with verification information.
+  email_spam_notice: If you do not see the email in your inbox, check your spam folder. If it's in your spam folder, please (1) notify your email provider that it's  not spam and (2) whitelist "mushroomobserver.org". This may prevent future MO emails from ending up in your -- or other users' -- spam folders.
 
   # account/logout
   logout_title: Logout
@@ -1514,7 +1518,9 @@
   prefs_alt_col_colors: Alternate column colors.
   prefs_alt_row_colors: Alternate row colors.
   prefs_text_below_images: Put text below images.
-  prefs_view_owner_id: View Observer identification of Observations?
+  prefs_view_owner_id: View Observer's Preferred ID?
+  prefs_view_owner_id_help: View Observer's preferred ID for Observation (in addition to consensus ID)
+
 
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -1580,7 +1586,7 @@
   # account/reverify
   reverify_welcome: Reverify Account
   reverify_link: Reverify
-  reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the mail resent."
+  reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
   # observer/rss
   rss_description: List of changes to [:app_title] as they happen.
@@ -1723,8 +1729,8 @@
   show_observation_title: "[:OBSERVATION]: [name]"
   show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
-  show_observation_owner_id: Observer ID
-  view_owner_id_help: When checked, causes Observations to display Observer ID (the observer's choice of name for the taxon), if it is different from consensus and if observer is sufficiently confident of his/her identification.
+  show_observation_owner_id: Observer Preference
+  show_observation_no_clear_preference: no clear preference
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
@@ -1816,7 +1822,7 @@
   signup_preferred_theme: Preferred Theme (optional)
   signup_random: Random
   signup_button: Signup
-  signup_email_help: A working email address is required to verify your account.  This helps us keep the spammers out.  Once you have verified your account, you can change it or remove it entirely by going to the Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences.
+  signup_email_help: A working email address is required to verify your account.  This helps us keep the spammers out. \n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access.  We will never sell your email address.  We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email).  By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site.  You can opt out of these uses by changing your Preferences. \n\nWhen you complete this page and click "Signup", we will send you an email with account verification information.
 
   # species_list/create_species_list
   species_list_create_title: "[:create_object(type=:species_list)]"
@@ -3289,10 +3295,10 @@
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) no longer exists.  Someone has either deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
   runtime_reverify_already_verified: Your account is already verified!  Please log in.
-  runtime_reverify_sent: Another verification email was sent to your email account.
+  runtime_reverify_sent: Another verification email was sent.
   runtime_show_description_denied: You have not been given permission to see this description.
   runtime_show_draft_denied: "Permission denied: only project members can view drafts in progress."
-  runtime_signup_success: Signup successful.  Verification sent to your email account.
+  runtime_signup_success: Signup successful.  Verification email sent.
   runtime_species_list_need_to_use_bulk: Synonyms can only be created from the [:name_bulk_title] page.
 
   ################################################################################
