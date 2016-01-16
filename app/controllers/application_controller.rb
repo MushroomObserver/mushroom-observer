@@ -99,7 +99,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   around_action :catch_errors # if Rails.env == "test"
-  before_action :block_ip_addresses
   before_action :kick_out_robots
   before_action :create_view_instance_variable
   before_action :verify_authenticity_token
@@ -114,7 +113,7 @@ class ApplicationController < ActionController::Base
   # after_action  :extra_gc
   # after_action  :log_memory_usage
 
-  # Disable all filters except set_locale and block_ip_addresses.
+  # Disable all filters except set_locale.
   # (Used to streamline API and Ajax controllers.)
   def self.disable_filters
     skip_action_callback :verify_authenticity_token
@@ -159,13 +158,6 @@ class ApplicationController < ActionController::Base
       ip:         request.remote_ip
     )
     render(text: "Robots are not allowed on this page.", status: 403, layout: false)
-    false
-  end
-
-  # Filter to run before anything else to protect against denial-of-service attacks.
-  def block_ip_addresses
-    return true unless MO.blocked_ip_addresses.include?(request.remote_ip.to_s)
-    render(text: "You have been blocked from this site. Please contact the webmaster for more information.", status: 403, layout: false)
     false
   end
 

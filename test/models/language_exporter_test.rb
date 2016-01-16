@@ -206,7 +206,8 @@ class LanguageExporterTest < UnitTestCase
       data = File.open(file, "r:utf-8") do |fh|
         YAML.load(fh)
       end
-      print "\nFile read failed for #{file}\n" if data == false
+      assert(data, "File read failed for #{file}")
+
       for tag, str in data
         assert(tag.is_a?(String),
                "#{file} #{tag}: tag is a #{tag.class} not a String!")
