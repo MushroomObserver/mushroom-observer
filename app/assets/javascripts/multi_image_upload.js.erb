@@ -96,12 +96,11 @@ function MultiImageUploader(localized_text) {
     //builds and refreshes the fix date box;
     DateUpdater.prototype.refreshBox = function () {
         var _this = this,
-            _distinctImgDates = fileStore.getDistinctImageDates();
+            _distinctImgDates = fileStore.getDistinctImageDates(),
+            obsDate = _this.observationDate();
 
         $imgRadioContainer.html('');
-        $obsRadioContainer.html('');
-
-        var obsDate = _this.observationDate();
+        $obsRadioContainer.html('');       
         _this.makeObservationDateRadio(obsDate);
 
         _distinctImgDates.forEach(function (simpleDate){
@@ -111,9 +110,7 @@ function MultiImageUploader(localized_text) {
 
         if (_this.areDatesInconsistent()) {
             $imgMessages.show('slow');
-        }
-
-        if (!this.areDatesInconsistent()) {
+        } else {
             $imgMessages.hide('slow')
         }
 
@@ -641,19 +638,23 @@ function MultiImageUploader(localized_text) {
         $obsMonth.change(function (){dateUpdater.updateObservationDateRadio()});
         $obsDay.change(function (){dateUpdater.updateObservationDateRadio()});
 
-
-
+        
+               
         //Drag and Drop bindings on the window
-
+        
         $content.bind('dragover dragenter', function (e){
             if (e.preventDefault) { e.preventDefault(); }
+            jQuery('#right_side').addClass('dashed-border');
             return false;
         });
 
+        $content.bind('dragend dragleave dragexit', function (e){            
+            jQuery('#right_side').removeClass('dashed-border');            
+        });
         $content.bind('drop', function (e) {
             if (e.preventDefault) { e.preventDefault(); }  // stops the browser from leaving page
-            var dataTransfer = e.originalEvent.dataTransfer;
-            console.log(e);
+            jQuery('#right_side').removeClass('dashed-border');
+            var dataTransfer = e.originalEvent.dataTransfer;            
             fileStore.addFiles(dataTransfer.files)
         });
 
