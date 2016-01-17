@@ -71,13 +71,15 @@
       <td colspan="9" align="center">
         <%= if @user.votes_anonymous == :yes
           link_with_query(:show_votes_go_public.t,
-                          {action: 'show_observation',
+                          {controller: :observer,
+                           action: :show_observation,
                            id: @naming.observation.id,
                            go_public: '1'},
                   { data: { confirm: :show_votes_go_public_confirm.l }})
         else
-          link_to(:show_votes_go_private.t, {action: 'show_observation',
-                                             id: @naming.observation.id, go_private: '1'},
+          link_to(:show_votes_go_private.t, {controller: :observer,
+                                                  action: :show_observation,
+                                                  id: @naming.observation.id, go_private: '1'},
                   { data: { confirm: :show_votes_go_private_confirm.l }})
         end %>
       </td>
